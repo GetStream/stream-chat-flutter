@@ -950,6 +950,13 @@ class _AccessibilityTranslationsEn extends AccessibilityTranslations {
   String attachmentPositionLabel({required int index, required int total}) => '$index of $total';
 
   @override
+  String repliedToOwnMessageLabel({required String replierName}) => '$replierName replied to your message';
+
+  @override
+  String repliedToMessageLabel({required String replierName, required String authorName}) =>
+      "$replierName replied to $authorName's message";
+
+  @override
   String get voiceRecordingPlayTooltip => 'Play';
 
   @override

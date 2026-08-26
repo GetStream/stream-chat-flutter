@@ -201,6 +201,7 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                       if (widget.message.quotedMessage case final quotedMessage?)
                         StreamQuotedMessage(
                           quotedMessage: quotedMessage,
+                          replyMessage: widget.message,
                           onTap: switch (widget.onQuotedMessageTap) {
                             final onTap? => () => onTap(quotedMessage),
                             _ => null,

@@ -119,6 +119,26 @@ abstract class AccessibilityTranslations {
   /// `title` when set.
   String imageAttachmentLabel({String? title});
 
+  /// The screen-reader label for a quoted-message preview whose quoted
+  /// message the current user wrote, e.g. `"Han Solo replied to your
+  /// message"`.
+  ///
+  /// [replierName] is the author of the message doing the quoting, already
+  /// resolved to the word for "you" when that is the current user. Combined
+  /// with the quoted body as `"Han Solo replied to your message, see you
+  /// tomorrow"`.
+  String repliedToOwnMessageLabel({required String replierName});
+
+  /// The screen-reader label for a quoted-message preview whose quoted
+  /// message [authorName] wrote, e.g. `"You replied to Leia's message"`.
+  ///
+  /// See [repliedToOwnMessageLabel] for [replierName]. Both names are part of
+  /// the string so every locale can form the possessive itself.
+  String repliedToMessageLabel({
+    required String replierName,
+    required String authorName,
+  });
+
   /// The screen-reader position of one attachment within a gallery, e.g.
   /// `"2 of 5"`.
   ///
@@ -461,6 +481,19 @@ class DefaultAccessibilityTranslations extends AccessibilityTranslations {
   String imageAttachmentLabel({String? title}) {
     if (title == null || title.isEmpty) return 'Photo';
     return 'Photo, $title';
+  }
+
+  @override
+  String repliedToOwnMessageLabel({required String replierName}) {
+    return '$replierName replied to your message';
+  }
+
+  @override
+  String repliedToMessageLabel({
+    required String replierName,
+    required String authorName,
+  }) {
+    return "$replierName replied to $authorName's message";
   }
 
   @override
