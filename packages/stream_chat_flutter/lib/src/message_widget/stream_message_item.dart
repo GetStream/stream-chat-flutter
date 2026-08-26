@@ -489,7 +489,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
     final defaults = _StreamMessageItemDefaults(
       context,
       isPinned: message.pinned,
-      isEdited: message.messageTextUpdatedAt != null,
+      isEdited: message.messageTextUpdatedAt != null && !message.isDeleted,
       isBouncedWithError: message.isBouncedWithError,
       state: message.state,
     );
@@ -681,7 +681,8 @@ class DefaultStreamMessageItem extends StatelessWidget {
     final parts = [
       _senderAwareBody(context, message, currentUser),
       translations.accessibility.formatRecentDateTime(message.createdAt.toLocal()),
-      if (message.messageTextUpdatedAt != null) translations.editedMessageLabel,
+      // Mirrors the footer, which drops the marker on a deleted message.
+      if (message.messageTextUpdatedAt != null && !message.isDeleted) translations.editedMessageLabel,
     ];
 
     return parts.where((it) => it.isNotEmpty).join(', ');
@@ -953,7 +954,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
     final defaults = _StreamMessageItemDefaults(
       context,
       isPinned: message.pinned,
-      isEdited: message.messageTextUpdatedAt != null,
+      isEdited: message.messageTextUpdatedAt != null && !message.isDeleted,
       state: message.state,
     );
 

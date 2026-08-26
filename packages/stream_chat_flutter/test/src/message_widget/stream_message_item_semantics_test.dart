@@ -229,6 +229,30 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('a deleted message shows and announces no edited marker', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        buildScene(
+          message(
+            user: currentUser,
+            type: MessageType.deleted,
+            state: MessageState.softDeleted,
+            messageTextUpdatedAt: DateTime(2026, 8, 26, 16),
+          ),
+          alignment: StreamMessageAlignment.end,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // There is no text left to have been edited, so the marker would
+      // describe history the reader can no longer see.
+      expect(find.text('EDITED'), findsNothing);
+      expect(labelsOf(tester), isNot(contains(contains('EDITED'))));
+
+      handle.dispose();
+    });
+
     testWidgets('announces mentions by display name, not by id', (tester) async {
       final handle = tester.ensureSemantics();
 

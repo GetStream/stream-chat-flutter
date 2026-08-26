@@ -112,7 +112,9 @@ class DefaultStreamMessageFooter extends StatelessWidget {
     }
 
     Widget? editedWidget;
-    if (message.messageTextUpdatedAt != null) {
+    // A deleted message has no text left to have been edited, so the marker
+    // would describe history the reader can no longer see.
+    if (message.messageTextUpdatedAt != null && !message.isDeleted) {
       editedWidget = ExcludeSemantics(
         child: Text(context.translations.editedMessageLabel),
       );
