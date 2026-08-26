@@ -4,6 +4,10 @@
 
 - Raised minimum Dart SDK to `^3.12.0`.
 
+🐞 Fixed
+
+- Fixed every failed websocket connect leaving an unhandled error in the root zone, which crash reporters listening on `PlatformDispatcher.onError` report as a fatal crash. [#2921](https://github.com/GetStream/stream-chat-flutter/issues/2921)
+
 ## 10.3.0
 
 ✅ Added
