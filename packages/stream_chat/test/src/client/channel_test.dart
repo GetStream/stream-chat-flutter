@@ -4975,6 +4975,80 @@ void main() {
       ).thenAnswer((_) async {});
     });
 
+    group('Typing events', () {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      late Channel channel;
+
+      setUp(() {
+        final channelState = _generateChannelState(channelId, channelType);
+        channel = Channel.fromState(client, channelState);
+      });
+
+      tearDown(() {
+        channel.dispose();
+      });
+
+      test('${EventType.typingStart} from another user is added to typingEvents', () async {
+        final otherUser = User(id: 'other-user');
+
+        client.addEvent(
+          Event(cid: channel.cid, type: EventType.typingStart, user: otherUser),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.typingEvents.keys.map((u) => u.id), ['other-user']);
+        expect(channel.state!.typingEvents[otherUser]?.type, EventType.typingStart);
+      });
+
+      test('${EventType.typingStop} removes only the stopping user', () async {
+        final user1 = User(id: 'other-user-1');
+        final user2 = User(id: 'other-user-2');
+
+        client.addEvent(Event(cid: channel.cid, type: EventType.typingStart, user: user1));
+        client.addEvent(Event(cid: channel.cid, type: EventType.typingStart, user: user2));
+        await Future.delayed(Duration.zero);
+        expect(channel.state!.typingEvents, hasLength(2));
+
+        client.addEvent(Event(cid: channel.cid, type: EventType.typingStop, user: user1));
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.typingEvents.keys.map((u) => u.id), ['other-user-2']);
+      });
+
+      test('${EventType.typingStart} from the current user is ignored', () async {
+        final currentUser = User(id: client.state.currentUser!.id);
+
+        client.addEvent(Event(cid: channel.cid, type: EventType.typingStart, user: currentUser));
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.typingEvents, isEmpty);
+      });
+
+      test('${EventType.typingStart} without a user is ignored', () async {
+        client.addEvent(Event(cid: channel.cid, type: EventType.typingStart));
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.typingEvents, isEmpty);
+      });
+
+      test('${EventType.typingStop} from the current user is ignored', () async {
+        final currentUser = User(id: client.state.currentUser!.id);
+
+        client.addEvent(Event(cid: channel.cid, type: EventType.typingStop, user: currentUser));
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.typingEvents, isEmpty);
+      });
+
+      test('${EventType.typingStop} without a user is ignored', () async {
+        client.addEvent(Event(cid: channel.cid, type: EventType.typingStop));
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.typingEvents, isEmpty);
+      });
+    });
+
     group(
       '${EventType.messageNew} or ${EventType.notificationMessageNew}',
       () {
@@ -5473,6 +5547,76 @@ void main() {
             expect(channel.state!.messages, hasLength(2));
           },
         );
+
+        test(
+          '${EventType.notificationMessageNew} adds the message and counts unread',
+          () async {
+            final message = Message(
+              id: 'notified-message-id',
+              user: User(id: 'other-user'),
+              createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+            );
+
+            client.addEvent(
+              Event(
+                cid: channel.cid,
+                type: EventType.notificationMessageNew,
+                message: message,
+              ),
+            );
+            await Future.delayed(Duration.zero);
+
+            expect(channel.state!.messages.map((m) => m.id), ['notified-message-id']);
+            expect(channel.state!.unreadCount, 1);
+          },
+        );
+
+        test(
+          'a channel message is not appended while the channel is not up to date',
+          () async {
+            channel.state!.isUpToDate = false;
+
+            final message = Message(
+              id: 'below-window-message-id',
+              user: User(id: 'other-user'),
+              createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+            );
+
+            client.addEvent(createNewMessageEvent(message));
+            await Future.delayed(Duration.zero);
+
+            expect(channel.state!.messages, isEmpty);
+            expect(channel.state!.unreadCount, 1);
+          },
+        );
+
+        test(
+          'a thread-only reply is stored even while the channel is not up to date',
+          () async {
+            channel.state!.isUpToDate = false;
+
+            final reply = Message(
+              id: 'thread-reply-id',
+              parentId: 'parent-message-id',
+              user: User(id: 'other-user'),
+              createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+            );
+
+            client.addEvent(createNewMessageEvent(reply));
+            await Future.delayed(Duration.zero);
+
+            expect(channel.state!.messages, isEmpty);
+            expect(channel.state!.threads['parent-message-id']?.map((m) => m.id), ['thread-reply-id']);
+          },
+        );
+
+        test('an event without a message is ignored', () async {
+          client.addEvent(Event(cid: channel.cid, type: EventType.messageNew));
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.messages, isEmpty);
+          expect(channel.lastMessageAt, initialLastMessageAt);
+        });
       },
     );
 
@@ -5998,6 +6142,476 @@ void main() {
       },
     );
 
+    group('Reaction events', () {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      const messageId = 'reaction-message-id';
+      final createdAt = DateTime.now();
+      late Channel channel;
+
+      setUp(() {
+        final channelState = _generateChannelState(channelId, channelType);
+        channel = Channel.fromState(client, channelState);
+      });
+
+      tearDown(() {
+        channel.dispose();
+      });
+
+      Message seedMessage({String? parentId, List<Reaction> ownReactions = const []}) {
+        final message = Message(
+          id: messageId,
+          parentId: parentId,
+          user: User(id: 'other-user'),
+          text: 'react to me',
+          createdAt: createdAt,
+          ownReactions: ownReactions,
+        );
+        channel.state!.updateMessage(message);
+        return message;
+      }
+
+      test('${EventType.reactionNew} from the current user is added to ownReactions', () async {
+        seedMessage();
+
+        final reaction = Reaction(
+          type: 'like',
+          messageId: messageId,
+          user: client.state.currentUser,
+        );
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.reactionNew,
+            reaction: reaction,
+            message: Message(
+              id: messageId,
+              user: User(id: 'other-user'),
+              createdAt: createdAt,
+              latestReactions: [reaction],
+            ),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        final stored = channel.state!.messages.firstWhere((it) => it.id == messageId);
+        expect(stored.ownReactions?.map((r) => r.type), ['like']);
+      });
+
+      test('${EventType.reactionNew} updates a thread message', () async {
+        const parentId = 'reaction-parent-id';
+        seedMessage(parentId: parentId);
+
+        final reaction = Reaction(
+          type: 'like',
+          messageId: messageId,
+          user: client.state.currentUser,
+        );
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.reactionNew,
+            reaction: reaction,
+            message: Message(
+              id: messageId,
+              parentId: parentId,
+              user: User(id: 'other-user'),
+              createdAt: createdAt,
+            ),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        final stored = channel.state!.threads[parentId]!.firstWhere((it) => it.id == messageId);
+        expect(stored.ownReactions?.map((r) => r.type), ['like']);
+      });
+
+      test('${EventType.reactionUpdated} from the current user replaces ownReactions', () async {
+        final existing = Reaction(
+          type: 'love',
+          messageId: messageId,
+          user: client.state.currentUser,
+        );
+        seedMessage(ownReactions: [existing]);
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.reactionUpdated,
+            reaction: Reaction(
+              type: 'like',
+              messageId: messageId,
+              user: client.state.currentUser,
+            ),
+            message: Message(
+              id: messageId,
+              user: User(id: 'other-user'),
+              createdAt: createdAt,
+            ),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        final stored = channel.state!.messages.firstWhere((it) => it.id == messageId);
+        expect(stored.ownReactions?.map((r) => r.type), ['like']);
+      });
+
+      test('${EventType.reactionDeleted} updates a thread message', () async {
+        const parentId = 'reaction-parent-id';
+        final removed = Reaction(
+          type: 'love',
+          messageId: messageId,
+          user: client.state.currentUser,
+        );
+        seedMessage(parentId: parentId, ownReactions: [removed]);
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.reactionDeleted,
+            reaction: removed,
+            message: Message(
+              id: messageId,
+              parentId: parentId,
+              user: User(id: 'other-user'),
+              createdAt: createdAt,
+            ),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        final stored = channel.state!.threads[parentId]!.firstWhere((it) => it.id == messageId);
+        expect(stored.ownReactions, isEmpty);
+      });
+    });
+
+    group('Poll events', () {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      const pollMessageId = 'poll-message-id';
+      const pollId = 'poll-id';
+      final createdAt = DateTime.now();
+      late Channel channel;
+
+      setUp(() {
+        final channelState = _generateChannelState(channelId, channelType);
+        channel = Channel.fromState(client, channelState);
+      });
+
+      tearDown(() {
+        channel.dispose();
+      });
+
+      Poll createPoll({
+        String name = 'Favorite color?',
+        List<PollVote> latestAnswers = const [],
+        List<PollVote> ownVotesAndAnswers = const [],
+      }) {
+        return Poll(
+          id: pollId,
+          name: name,
+          options: const [
+            PollOption(id: 'option-a', text: 'A'),
+            PollOption(id: 'option-b', text: 'B'),
+          ],
+          latestAnswers: latestAnswers,
+          ownVotesAndAnswers: ownVotesAndAnswers,
+        );
+      }
+
+      Message seedPollMessage({
+        String? parentId,
+        List<PollVote> latestAnswers = const [],
+        List<PollVote> ownVotesAndAnswers = const [],
+      }) {
+        final message = Message(
+          id: pollMessageId,
+          parentId: parentId,
+          user: User(id: 'other-user'),
+          createdAt: createdAt,
+          poll: createPoll(
+            latestAnswers: latestAnswers,
+            ownVotesAndAnswers: ownVotesAndAnswers,
+          ),
+        );
+        channel.state!.updateMessage(message);
+        return message;
+      }
+
+      Message storedPollMessage() {
+        return channel.state!.messages.firstWhere((it) => it.id == pollMessageId);
+      }
+
+      test('${EventType.pollCreated} adds the poll message', () async {
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.pollCreated,
+            message: Message(
+              id: pollMessageId,
+              user: User(id: 'other-user'),
+              createdAt: createdAt,
+              poll: createPoll(),
+            ),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(storedPollMessage().poll?.id, pollId);
+      });
+
+      test('${EventType.pollCreated} without a poll is ignored', () async {
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.pollCreated,
+            message: Message(
+              id: pollMessageId,
+              user: User(id: 'other-user'),
+              createdAt: createdAt,
+            ),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.messages, isEmpty);
+      });
+
+      test('${EventType.pollUpdated} updates the poll but preserves own votes', () async {
+        final ownVote = PollVote(
+          id: 'own-vote-id',
+          optionId: 'option-a',
+          userId: client.state.currentUser!.id,
+        );
+        seedPollMessage(ownVotesAndAnswers: [ownVote]);
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.pollUpdated,
+            poll: createPoll(name: 'Renamed'),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        final stored = storedPollMessage();
+        expect(stored.poll?.name, 'Renamed');
+        expect(stored.poll?.ownVotesAndAnswers.map((v) => v.id), ['own-vote-id']);
+      });
+
+      test('${EventType.pollUpdated} for an unknown poll is ignored', () async {
+        seedPollMessage();
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.pollUpdated,
+            poll: Poll(
+              id: 'unknown-poll-id',
+              name: 'Renamed',
+              options: const [PollOption(text: 'A')],
+            ),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(storedPollMessage().poll?.name, 'Favorite color?');
+      });
+
+      test('${EventType.pollUpdated} without a poll is ignored', () async {
+        seedPollMessage();
+
+        client.addEvent(Event(cid: channel.cid, type: EventType.pollUpdated));
+        await Future.delayed(Duration.zero);
+
+        expect(storedPollMessage().poll?.name, 'Favorite color?');
+      });
+
+      test('${EventType.pollUpdated} updates a poll on a thread message', () async {
+        const parentId = 'poll-parent-id';
+        seedPollMessage(parentId: parentId);
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.pollUpdated,
+            poll: createPoll(name: 'Renamed'),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        final stored = channel.state!.threads[parentId]!.firstWhere((it) => it.id == pollMessageId);
+        expect(stored.poll?.name, 'Renamed');
+      });
+
+      test('${EventType.pollClosed} closes the poll and keeps the cached data', () async {
+        seedPollMessage();
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.pollClosed,
+            poll: createPoll(name: 'Renamed'),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        final stored = storedPollMessage();
+        expect(stored.poll?.isClosed, isTrue);
+        expect(stored.poll?.name, 'Favorite color?');
+      });
+
+      test('${EventType.pollAnswerCasted} adds own answers only for the current user', () async {
+        seedPollMessage();
+
+        final ownAnswer = PollVote(
+          id: 'own-answer-id',
+          answerText: 'my answer',
+          userId: client.state.currentUser!.id,
+        );
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.pollAnswerCasted,
+            poll: createPoll(),
+            pollVote: ownAnswer,
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        var stored = storedPollMessage();
+        expect(stored.poll?.latestAnswers.map((v) => v.id), ['own-answer-id']);
+        expect(stored.poll?.ownVotesAndAnswers.map((v) => v.id), ['own-answer-id']);
+
+        final otherAnswer = PollVote(
+          id: 'other-answer-id',
+          answerText: 'their answer',
+          userId: 'other-user',
+        );
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.pollAnswerCasted,
+            poll: createPoll(),
+            pollVote: otherAnswer,
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        stored = storedPollMessage();
+        expect(stored.poll?.latestAnswers.map((v) => v.id), contains('other-answer-id'));
+        expect(stored.poll?.ownVotesAndAnswers.map((v) => v.id), ['own-answer-id']);
+      });
+
+      test('${EventType.pollVoteCasted} adds own votes only for the current user', () async {
+        seedPollMessage();
+
+        final ownVote = PollVote(
+          id: 'own-vote-id',
+          optionId: 'option-a',
+          userId: client.state.currentUser!.id,
+        );
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.pollVoteCasted,
+            poll: createPoll(),
+            pollVote: ownVote,
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        var stored = storedPollMessage();
+        expect(stored.poll?.ownVotesAndAnswers.map((v) => v.id), ['own-vote-id']);
+
+        final otherVote = PollVote(
+          id: 'other-vote-id',
+          optionId: 'option-b',
+          userId: 'other-user',
+        );
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.pollVoteCasted,
+            poll: createPoll(),
+            pollVote: otherVote,
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        stored = storedPollMessage();
+        expect(stored.poll?.ownVotesAndAnswers.map((v) => v.id), ['own-vote-id']);
+      });
+
+      test('${EventType.pollVoteChanged} upserts the current user vote', () async {
+        seedPollMessage();
+
+        final changedVote = PollVote(
+          id: 'changed-vote-id',
+          optionId: 'option-b',
+          userId: client.state.currentUser!.id,
+        );
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.pollVoteChanged,
+            poll: createPoll(),
+            pollVote: changedVote,
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(
+          storedPollMessage().poll?.ownVotesAndAnswers.map((v) => v.id),
+          contains('changed-vote-id'),
+        );
+      });
+
+      test('${EventType.pollAnswerRemoved} removes the answer from both lists', () async {
+        final answer = PollVote(
+          id: 'answer-id',
+          answerText: 'my answer',
+          userId: client.state.currentUser!.id,
+        );
+        seedPollMessage(latestAnswers: [answer], ownVotesAndAnswers: [answer]);
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.pollAnswerRemoved,
+            poll: createPoll(),
+            pollVote: answer,
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        final stored = storedPollMessage();
+        expect(stored.poll?.latestAnswers, isEmpty);
+        expect(stored.poll?.ownVotesAndAnswers, isEmpty);
+      });
+
+      test('${EventType.pollVoteRemoved} removes the vote from own votes', () async {
+        final vote = PollVote(
+          id: 'vote-id',
+          optionId: 'option-a',
+          userId: client.state.currentUser!.id,
+        );
+        seedPollMessage(ownVotesAndAnswers: [vote]);
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.pollVoteRemoved,
+            poll: createPoll(),
+            pollVote: vote,
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(storedPollMessage().poll?.ownVotesAndAnswers, isEmpty);
+      });
+    });
+
     // A `message.deleted` event for a message outside the loaded window
     // must not upsert a "deleted" record into the sorted list — that would
     // create a phantom entry with a gap. Pinned + live-location
@@ -6177,8 +6791,183 @@ void main() {
             },
           );
         });
+
+        test('an in-window hard delete removes the message', () async {
+          final message = Message(
+            id: 'doomed-message-id',
+            user: User(id: 'other-user'),
+            createdAt: DateTime.now(),
+          );
+          channel.state!.updateMessage(message);
+          expect(channel.state!.messages, hasLength(1));
+
+          client.addEvent(createDeleteMessageEvent(message, hardDelete: true));
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.messages, isEmpty);
+        });
+
+        test('deletedForMe is propagated to the stored message', () async {
+          final message = Message(
+            id: 'deleted-for-me-message-id',
+            user: User(id: 'other-user'),
+            createdAt: DateTime.now(),
+          );
+          channel.state!.updateMessage(message);
+
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.messageDeleted,
+              deletedForMe: true,
+              message: message.copyWith(
+                type: MessageType.deleted,
+                deletedAt: DateTime.timestamp(),
+              ),
+            ),
+          );
+          await Future.delayed(Duration.zero);
+
+          final stored = channel.state!.messages.single;
+          expect(stored.deletedForMe, isTrue);
+          expect(stored.type, MessageType.deleted);
+        });
       },
     );
+
+    group('Channel updated events', () {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      late Channel channel;
+
+      setUp(() {
+        final channelState = _generateChannelState(channelId, channelType);
+        channel = Channel.fromState(client, channelState);
+      });
+
+      tearDown(() {
+        channel.dispose();
+      });
+
+      test('merges the event channel into the current channel model', () async {
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelUpdated,
+            channel: ChannelModel(
+              id: channelId,
+              type: channelType,
+              memberCount: 42,
+              extraData: const {'name': 'updated-name'},
+            ),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.memberCount, 42);
+        expect(channel.extraData['name'], 'updated-name');
+      });
+
+      test('replaces the member list with the event members', () async {
+        channel.state!.updateChannelState(
+          channel.state!.channelState.copyWith(
+            members: [
+              Member(userId: 'member-1'),
+              Member(userId: 'member-2'),
+            ],
+          ),
+        );
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelUpdated,
+            channel: ChannelModel(
+              id: channelId,
+              type: channelType,
+              members: [Member(userId: 'member-3')],
+            ),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.channelState.members?.map((m) => m.userId), ['member-3']);
+      });
+    });
+
+    group('Channel truncated events', () {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      late Channel channel;
+      late MockPersistenceClient persistenceClient;
+
+      setUp(() {
+        persistenceClient = MockPersistenceClient();
+        when(() => client.chatPersistenceClient).thenReturn(persistenceClient);
+        when(() => persistenceClient.deleteMessageByCid(any())).thenAnswer((_) async {});
+        when(() => persistenceClient.getChannelThreads(any())).thenAnswer((_) async => {});
+
+        final channelState = _generateChannelState(channelId, channelType);
+        channel = Channel.fromState(client, channelState);
+      });
+
+      tearDown(() {
+        channel.dispose();
+        // Reset so the remaining groups run without a persistence layer.
+        when(() => client.chatPersistenceClient).thenReturn(null);
+      });
+
+      Message seedMessage(String id) {
+        final message = Message(
+          id: id,
+          user: User(id: 'other-user'),
+          text: 'to be truncated',
+          createdAt: DateTime.now(),
+        );
+        channel.state!.updateMessage(message);
+        return message;
+      }
+
+      test('${EventType.channelTruncated} clears messages and wipes persistence', () async {
+        seedMessage('truncated-message-1');
+        seedMessage('truncated-message-2');
+        expect(channel.state!.messages, hasLength(2));
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelTruncated,
+            channel: ChannelModel(id: channelId, type: channelType),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.messages, isEmpty);
+        verify(() => persistenceClient.deleteMessageByCid(channel.cid!)).called(1);
+      });
+
+      test('${EventType.notificationChannelTruncated} keeps the event system message', () async {
+        seedMessage('truncated-message-1');
+
+        final systemMessage = Message(
+          id: 'system-message-id',
+          type: MessageType.system,
+          text: 'Channel truncated',
+          createdAt: DateTime.now(),
+        );
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.notificationChannelTruncated,
+            channel: ChannelModel(id: channelId, type: channelType),
+            message: systemMessage,
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.messages.map((m) => m.id), ['system-message-id']);
+      });
+    });
 
     group('Member Events', () {
       const channelId = 'test-channel-id';
@@ -6289,6 +7078,166 @@ void main() {
           expect(channel.membership?.user?.role, equals(updatedUser?.role));
         },
       );
+
+      test('${EventType.memberAdded} appends the member', () async {
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.memberAdded,
+            member: Member(userId: 'new-member'),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.channelState.members?.map((m) => m.userId), ['new-member']);
+      });
+
+      test('${EventType.memberRemoved} removes the member', () async {
+        channel.state!.updateChannelState(
+          channel.state!.channelState.copyWith(
+            members: [
+              Member(userId: 'member-1'),
+              Member(userId: 'member-2'),
+            ],
+          ),
+        );
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.memberRemoved,
+            user: User(id: 'member-1'),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.channelState.members?.map((m) => m.userId), ['member-2']);
+      });
+
+      test('${EventType.memberUpdated} replaces the member entry', () async {
+        channel.state!.updateChannelState(
+          channel.state!.channelState.copyWith(
+            members: [Member(userId: 'member-1', channelRole: 'channel_member')],
+          ),
+        );
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.memberUpdated,
+            member: Member(userId: 'member-1', channelRole: 'channel_moderator'),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.channelState.members?.single.channelRole, 'channel_moderator');
+      });
+
+      test('an event user that is not a member is ignored', () async {
+        channel.state!.updateChannelState(
+          channel.state!.channelState.copyWith(
+            members: [
+              Member(
+                userId: 'member-1',
+                user: User(id: 'member-1', name: 'old-name'),
+              ),
+            ],
+          ),
+        );
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.userUpdated,
+            user: User(id: 'stranger', name: 'new-name'),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.channelState.members?.single.user?.name, 'old-name');
+      });
+
+      group('user banned/unbanned events', () {
+        setUp(() {
+          clearInteractions(client);
+
+          channel.state!.updateChannelState(
+            channel.state!.channelState.copyWith(
+              members: [
+                Member(
+                  userId: 'bad-user',
+                  user: User(id: 'bad-user'),
+                  channelRole: 'channel_member',
+                ),
+              ],
+            ),
+          );
+
+          when(
+            () => client.queryMembers(
+              channelType,
+              channelId: channelId,
+              filter: Filter.equal('id', 'bad-user'),
+              members: any(named: 'members'),
+              sort: any(named: 'sort'),
+              pagination: any(named: 'pagination'),
+            ),
+          ).thenAnswer(
+            (_) async => QueryMembersResponse()..members = [Member(userId: 'bad-user', channelRole: 'channel_banned')],
+          );
+        });
+
+        test('${EventType.userBanned} refreshes the member from the server', () async {
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.userBanned,
+              user: User(id: 'bad-user'),
+            ),
+          );
+          await Future.delayed(Duration.zero);
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.channelState.members?.single.channelRole, 'channel_banned');
+        });
+
+        test('${EventType.userUnbanned} refreshes the member from the server', () async {
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.userUnbanned,
+              user: User(id: 'bad-user'),
+            ),
+          );
+          await Future.delayed(Duration.zero);
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.channelState.members?.single.channelRole, 'channel_banned');
+        });
+
+        test('an app-level ban without a cid is ignored', () async {
+          client.addEvent(
+            Event(
+              type: EventType.userBanned,
+              user: User(id: 'bad-user'),
+            ),
+          );
+          await Future.delayed(Duration.zero);
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.channelState.members?.single.channelRole, 'channel_member');
+          verifyNever(
+            () => client.queryMembers(
+              any(),
+              channelId: any(named: 'channelId'),
+              filter: any(named: 'filter'),
+              members: any(named: 'members'),
+              sort: any(named: 'sort'),
+              pagination: any(named: 'pagination'),
+            ),
+          );
+        });
+      });
     });
 
     group('Watching Events', () {
@@ -6481,6 +7430,31 @@ void main() {
           expect(channel.state!.watcherCount, 5);
         },
       );
+
+      test('${EventType.userWatchingStop} without a watcher count preserves the count', () async {
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.userWatchingStart,
+            user: User(id: 'watcher-1'),
+            watcherCount: 5,
+          ),
+        );
+        await Future.delayed(Duration.zero);
+        expect(channel.state!.watcherCount, 5);
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.userWatchingStop,
+            user: User(id: 'watcher-1'),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.channelState.watchers, isEmpty);
+        expect(channel.state!.watcherCount, 5);
+      });
     });
 
     group('Read Events', () {
@@ -7420,6 +8394,13 @@ void main() {
           expect(threadDraft?.message.text, 'updated thread reply');
         },
       );
+
+      test('an event without a draft is ignored', () async {
+        client.addEvent(Event(cid: channel.cid, type: EventType.draftUpdated));
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state?.draft, isNull);
+      });
     });
 
     group('Reminder events', () {
@@ -7755,6 +8736,23 @@ void main() {
           (m) => m.id == messageId,
         );
         expect(updatedMessage?.reminder, isNull);
+      });
+
+      test('an event without a reminder is ignored', () async {
+        const messageId = 'test-message-id';
+
+        final message = Message(
+          id: messageId,
+          user: client.state.currentUser,
+          text: 'Test message',
+        );
+        channel.state?.updateMessage(message);
+
+        client.addEvent(Event(cid: channel.cid, type: EventType.reminderCreated));
+        await Future.delayed(Duration.zero);
+
+        final storedMessage = channel.state?.messages.firstWhere((m) => m.id == messageId);
+        expect(storedMessage?.reminder, isNull);
       });
     });
 
@@ -8328,6 +9326,13 @@ void main() {
           updatedPreferences?.disabledUntil,
           updatedPushPreference.disabledUntil,
         );
+      });
+
+      test('an event without a push preference is ignored', () async {
+        client.addEvent(Event(cid: channel.cid, type: EventType.channelPushPreferenceUpdated));
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state?.channelState.pushPreferences, isNull);
       });
     });
 
