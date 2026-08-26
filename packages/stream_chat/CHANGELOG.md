@@ -7,6 +7,7 @@
 
 🐞 Fixed
 
+- Fixed reconnect state recovery surfacing an uncatchable error when the connection dropped again mid-recovery; it is now logged, and `connection.recovered` still fires. [#2910](https://github.com/GetStream/stream-chat-flutter/issues/2910)
 - Fixed every failed websocket connect leaving an unhandled error in the root zone, which crash reporters listening on `PlatformDispatcher.onError` report as a fatal crash. [#2921](https://github.com/GetStream/stream-chat-flutter/issues/2921)
 
 ⚠️ Deprecated
