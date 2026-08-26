@@ -166,6 +166,7 @@ class StreamChatConfigurationData {
     StreamReactionsType? reactionType,
     StreamReactionsPosition? reactionPosition,
     StreamMessageListViewConfiguration messageListViewConfiguration = const StreamMessageListViewConfiguration(),
+    StreamMessageTranslationConfiguration messageTranslation = const StreamMessageTranslationConfiguration(),
   }) {
     return StreamChatConfigurationData._(
       reactionIconResolver: reactionIconResolver ?? const DefaultReactionIconResolver(),
@@ -177,6 +178,7 @@ class StreamChatConfigurationData {
       reactionType: reactionType,
       reactionPosition: reactionPosition,
       messageListViewConfiguration: messageListViewConfiguration,
+      messageTranslation: messageTranslation,
     );
   }
 
@@ -188,6 +190,7 @@ class StreamChatConfigurationData {
     required this.imageCDN,
     required this.attachmentBuilders,
     required this.messageListViewConfiguration,
+    required this.messageTranslation,
     this.reactionType,
     this.reactionPosition,
   });
@@ -204,6 +207,7 @@ class StreamChatConfigurationData {
     StreamReactionsType? reactionType,
     StreamReactionsPosition? reactionPosition,
     StreamMessageListViewConfiguration? messageListViewConfiguration,
+    StreamMessageTranslationConfiguration? messageTranslation,
   }) {
     return StreamChatConfigurationData(
       reactionIconResolver: reactionIconResolver ?? this.reactionIconResolver,
@@ -215,6 +219,7 @@ class StreamChatConfigurationData {
       reactionType: reactionType ?? this.reactionType,
       reactionPosition: reactionPosition ?? this.reactionPosition,
       messageListViewConfiguration: messageListViewConfiguration ?? this.messageListViewConfiguration,
+      messageTranslation: messageTranslation ?? this.messageTranslation,
     );
   }
 
@@ -271,4 +276,10 @@ class StreamChatConfigurationData {
   /// Defaults to a [StreamMessageListViewConfiguration] with all fields at their
   /// defaults.
   final StreamMessageListViewConfiguration messageListViewConfiguration;
+
+  /// How messages that carry a translation in [Message.i18n] are displayed.
+  ///
+  /// Defaults to [StreamMessageTranslationConfiguration]'s own defaults:
+  /// translations are displayed automatically, without an annotation.
+  final StreamMessageTranslationConfiguration messageTranslation;
 }

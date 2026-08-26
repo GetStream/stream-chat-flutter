@@ -4175,10 +4175,11 @@ void main() {
       const language = 'hi'; // Hindi
       const translatedMessageText = 'नमस्ते';
 
-      final translatedMessage = Message(
-        i18n: const {
-          language: translatedMessageText,
-        },
+      final message = Message(id: messageId, text: 'Hello');
+      channel.state!.updateMessage(message);
+
+      final translatedMessage = message.copyWith(
+        i18n: {'language': 'en', '${language}_text': translatedMessageText},
       );
 
       when(() => client.translateMessage(messageId, language)).thenAnswer(
@@ -4189,6 +4190,11 @@ void main() {
 
       expect(res, isNotNull);
       expect(res.message.i18n, translatedMessage.i18n);
+
+      // The translation is merged into the channel state, so callers don't
+      // have to apply the response themselves.
+      final stateMessage = channel.state!.messages.firstWhere((it) => it.id == messageId);
+      expect(stateMessage.i18n, translatedMessage.i18n);
 
       verify(() => client.translateMessage(messageId, language)).called(1);
     });

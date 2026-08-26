@@ -2091,13 +2091,18 @@ class Channel {
   }
 
   /// Translate a message by given [messageId] and [language].
+  ///
+  /// The translated message is merged into the channel state, so its
+  /// translations are available to everything listening to it without the
+  /// caller having to apply the response itself.
   Future<TranslateMessageResponse> translateMessage(
     String messageId,
     String language,
-  ) => _client.translateMessage(
-    messageId,
-    language,
-  );
+  ) async {
+    final response = await _client.translateMessage(messageId, language);
+    state?.updateMessage(response.message);
+    return response;
+  }
 
   /// Creates a new channel.
   Future<ChannelState> create() => query(state: false);

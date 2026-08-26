@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
+import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
 import 'package:stream_chat_flutter/src/utils/device_segmentation.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -14,7 +15,9 @@ import 'package:stream_core_flutter/chat.dart' as core;
 ///
 /// The message text is translated into the current user's language, mention
 /// syntax is replaced with display names, and the result is rendered as
-/// markdown.
+/// markdown. Pass `showTranslatedText: false` to display the original text
+/// even when a translation is available. Automatic translation can be
+/// turned off SDK-wide via [StreamMessageTranslationConfiguration.enabled].
 ///
 /// The widget rebuilds automatically when the current user's language
 /// changes, ensuring the displayed text stays in sync.
@@ -32,11 +35,18 @@ class StreamMessageText extends StatelessWidget {
     this.onLinkTap,
     this.onMentionTap,
     this.onAnyMentionTap,
+    this.showTranslatedText = true,
     this.onSelectionChanged,
   });
 
   /// The message whose text to display.
   final Message message;
+
+  /// Whether to display the translation of [message] when [Message.i18n] has
+  /// one for the current user's language.
+  ///
+  /// Set to `false` to display the original text instead. Defaults to `true`.
+  final bool showTranslatedText;
 
   /// Called when a link in the rendered markdown is tapped.
   ///
@@ -68,12 +78,17 @@ class StreamMessageText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final streamChat = StreamChat.of(context);
+    final translationConfig = StreamChatConfiguration.of(context).messageTranslation;
 
+    // An unset language arrives from the API as `''` anyway, and `translate`
+    // treats it the same as null, so it stands in for "no language" here —
+    // `BetterStreamBuilder`'s type parameter can't be nullable.
     return BetterStreamBuilder<String>(
-      initialData: streamChat.currentUser?.language ?? 'en',
-      stream: streamChat.currentUserStream.map((it) => it?.language ?? 'en'),
+      initialData: streamChat.currentUser?.language ?? '',
+      stream: streamChat.currentUserStream.map((it) => it?.language ?? ''),
       builder: (context, language) {
-        final messageText = message.translate(language).replaceMentions().text?.replaceAll('\n', '\n\n').trim();
+        final translated = (showTranslatedText && translationConfig.enabled) ? message.translate(language) : message;
+        final messageText = translated.replaceMentions().text?.replaceAll('\n', '\n\n').trim();
 
         if (messageText == null || messageText.trim().isEmpty) return const Empty();
 

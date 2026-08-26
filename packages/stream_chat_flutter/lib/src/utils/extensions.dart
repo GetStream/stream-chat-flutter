@@ -459,8 +459,41 @@ extension MessageX on Message {
     return messageTextLength * (fontSize ?? 1) * multiplier;
   }
 
-  /// It returns the message with the translated text if available locally
-  Message translate(String language) => copyWith(text: i18n?['${language}_text'] ?? text);
+  /// The language this message was written in, as reported by Stream's
+  /// auto-translation API, or `null` when it is unknown.
+  ///
+  /// An ISO 639-1 code, optionally with a regional suffix (e.g. `zh-TW`).
+  String? get originalLanguage => switch (i18n?['language']) {
+    null || '' => null,
+    final language => language,
+  };
+
+  /// It returns the translation of this message into [language], or `null`
+  /// when there is none available locally.
+  ///
+  /// Returns `null` when [language] is the message's [originalLanguage]:
+  /// Stream echoes a self-referential entry for the language a message was
+  /// written in (e.g. `es_text` on a Spanish message), so an entry existing
+  /// on its own doesn't mean there is anything to translate. The comparison
+  /// is case-insensitive, as [User.language] is set by the app.
+  ///
+  /// Returns `null` when [language] is `null` or empty — Stream's API
+  /// defaults [User.language] to `''` rather than omitting it, so both are
+  /// treated as "no language to translate to".
+  String? translatedText(String? language) {
+    if (language == null || language.isEmpty) return null;
+    if (language.toLowerCase() == originalLanguage?.toLowerCase()) return null;
+    return i18n?['${language}_text'];
+  }
+
+  /// It returns the message with the translated text if available locally.
+  ///
+  /// Returns the message unchanged when [translatedText] has no translation
+  /// into [language].
+  Message translate(String? language) => switch (translatedText(language)) {
+    null => this,
+    final translatedText => copyWith(text: translatedText),
+  };
 
   /// It returns the message replacing the mentioned user names with
   ///  the respective user ids
