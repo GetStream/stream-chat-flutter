@@ -1334,14 +1334,30 @@ class _MessageRowSemantics extends StatelessWidget {
     );
   }
 
-  // Mirrors the icon [StreamSendingIndicator] picks for the same state, so the
-  // announcement and the visible check marks never disagree.
+  // Mirrors what [StreamMessageSendingStatus] renders for the same state, so
+  // the announcement and the visible footer never disagree.
   String? _statusLabel(
     BuildContext context, {
     required bool isMessageRead,
     required bool isMessageDelivered,
   }) {
-    final a11y = context.translations.accessibility;
+    final translations = context.translations;
+
+    // While attachments upload the footer shows how many are done instead of a
+    // tick. Mirror that rather than flattening it to "Sending", so the
+    // announcement carries the same progress the reader can see.
+    final attachments = message.attachments;
+    if (message.state.isOutgoing && attachments.any((it) => it.type != AttachmentType.urlPreview)) {
+      final uploaded = attachments.where((it) => it.uploadState.isSuccess).length;
+      if (uploaded < attachments.length) {
+        return translations.attachmentsUploadProgressText(
+          completed: uploaded,
+          total: attachments.length,
+        );
+      }
+    }
+
+    final a11y = translations.accessibility;
 
     if (isMessageRead) return a11y.messageReadStatusLabel;
     if (isMessageDelivered) return a11y.messageDeliveredStatusLabel;

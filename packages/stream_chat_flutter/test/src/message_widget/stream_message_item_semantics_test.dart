@@ -44,6 +44,9 @@ class _FakeLocalizations implements StreamChatLocalizations {
   @override
   String photosAttachmentCountText(int count) => DefaultTranslations.instance.photosAttachmentCountText(count);
 
+  @override
+  String attachmentsUploadProgressText({required int completed, required int total}) => 'UP:$completed/$total';
+
   // Anything else throws instead of resolving to null, so an unstubbed lookup
   // fails the test loudly rather than rendering an empty label.
   @override
@@ -393,6 +396,36 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(labelsOf(tester), contains('plural:3'));
+
+      handle.dispose();
+    });
+
+    testWidgets('announces upload progress while attachments are sending', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        buildScene(
+          message(
+            user: currentUser,
+            state: MessageState.sending,
+            attachments: [
+              Attachment(type: AttachmentType.image, imageUrl: 'https://x/1.png'),
+              Attachment(
+                type: AttachmentType.image,
+                imageUrl: 'https://x/2.png',
+                uploadState: const UploadState.success(),
+              ),
+            ],
+          ),
+          alignment: StreamMessageAlignment.end,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // The footer shows the progress count rather than a tick, so the phrase
+      // carries it too instead of flattening to "Sending".
+      expect(labelsOf(tester).first, endsWith(', UP:1/2'));
+      expect(labelsOf(tester).first, isNot(contains('Sending')));
 
       handle.dispose();
     });
