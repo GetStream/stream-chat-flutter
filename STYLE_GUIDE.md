@@ -1095,6 +1095,11 @@ Include an issue link when the deferred work is tracked; if the constraint is
 self-explanatory ("wait for backend enrichment", "wait for next major"), a link isn't
 required.
 
+A workaround that only exists because an upstream Flutter fix has not shipped yet uses the
+`// TODO(flutter):` tag and gets an entry in
+[`FLUTTER_BLOCKED.md`](FLUTTER_BLOCKED.md), which the floor raise reads. Both matter: the
+entry holds what does not fit in a comment, the tag survives the file drifting.
+
 ### Bare ignore directives are fine
 
 `// ignore: rule_name` directives do not require an explanatory comment in this repo.

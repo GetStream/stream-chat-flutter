@@ -68,6 +68,21 @@ void main() {
     expect(find.byType(SelectionArea), findsOneWidget);
   });
 
+  testWidgets('StreamMessageText keys the selection area to the browser context menu state', (tester) async {
+    final user = OwnUser(id: 'test-user', language: 'en');
+    when(() => clientState.currentUser).thenReturn(user);
+    when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(user));
+
+    CurrentPlatform.debugCurrentPlatformOverride = PlatformType.macOS;
+
+    await tester.pumpWidget(wrap(StreamMessageText(message: Message(text: 'Hello world'))));
+    await tester.pump();
+
+    final selectionArea = tester.widget<SelectionArea>(find.byType(SelectionArea));
+    // The browser context menu is always enabled off web, so the key stays true.
+    expect(selectionArea.key, const ValueKey(true));
+  });
+
   testWidgets('StreamMessageText is not selectable on mobile', (tester) async {
     final user = OwnUser(id: 'test-user', language: 'en');
     when(() => clientState.currentUser).thenReturn(user);
