@@ -741,11 +741,20 @@ class DefaultStreamMessageItem extends StatelessWidget {
   String _bodySemanticsLabel(BuildContext context, Message message, User? currentUser) {
     final formatter = StreamChatConfiguration.of(context).messagePreviewFormatter;
 
-    // Mirror what the bubble renders — the translated text with mentions
-    // resolved to display names — so the announcement matches the visible text
-    // instead of raw `@id` tokens.
+    // Mirror what the bubble renders — mentions resolved to display names, and
+    // the translation only when one is actually shown — so the announcement
+    // matches the visible text instead of raw `@id` tokens or a translation the
+    // reader has toggled away. Mirrors [StreamMessageText].
+    final translationEnabled = StreamChatConfiguration.of(context).messageTranslation.enabled;
+    final showsOriginalText = StreamMessageTranslations.isShowingOriginalTextOf(context, message.id);
+
     final language = currentUser?.language ?? 'en';
-    final announced = message.translate(language).replaceMentions(linkify: false);
+    final shown = switch (translationEnabled && !showsOriginalText) {
+      true => message.translate(language),
+      false => message,
+    };
+
+    final announced = shown.replaceMentions(linkify: false);
 
     return switch (formatter) {
       final AccessibleMessagePreviewFormatter it => it.formatMessageSemanticsLabel(

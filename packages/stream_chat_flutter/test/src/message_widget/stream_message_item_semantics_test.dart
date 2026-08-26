@@ -256,6 +256,36 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('announces the translation the bubble shows, and the original when toggled', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      final translated = Message(
+        id: 'translated-message',
+        text: 'hallo',
+        createdAt: DateTime(2026, 8, 26, 15),
+        user: otherUser,
+        state: MessageState.sent,
+        i18n: const {'en_text': 'hello', 'language': 'de'},
+      );
+
+      await tester.pumpWidget(buildScene(translated));
+      await tester.pumpAndSettle();
+
+      expect(labelsOf(tester), contains('IN:Han Solo:hello, AT-TIME'));
+
+      // Toggling back to the original has to move the announcement with it,
+      // or the phrase describes text that is no longer on screen.
+      StreamMessageTranslations.toggleOriginalText(
+        tester.element(find.byType(DefaultStreamMessageItem)),
+        translated.id,
+      );
+      await tester.pumpAndSettle();
+
+      expect(labelsOf(tester), contains('IN:Han Solo:hallo, AT-TIME'));
+
+      handle.dispose();
+    });
+
     testWidgets('announces mentions by display name, not by id', (tester) async {
       final handle = tester.ensureSemantics();
 
