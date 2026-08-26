@@ -3,7 +3,7 @@ import 'dart:collection';
 
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_chat/src/core/util/extension.dart';
+import 'extension.dart';
 
 /// A map that throws `UnsupportedError` on any mutating operation.
 typedef ImmutableMap<K, V> = UnmodifiableMapView<K, V>;

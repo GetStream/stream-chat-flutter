@@ -2,9 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/src/utils/network_error_text.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../stream_chat_flutter.dart';
+import 'misc/empty_widget.dart';
+import 'utils/network_error_text.dart';
 
 /// Provides chat state and configuration to the descendant widget tree.
 ///

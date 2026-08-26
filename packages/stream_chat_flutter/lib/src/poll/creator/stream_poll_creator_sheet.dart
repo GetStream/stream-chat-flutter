@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import '../../../stream_chat_flutter.dart';
 
 /// {@template showStreamPollCreatorSheet}
 /// Displays an interactive bottom sheet that lets the user create a poll.

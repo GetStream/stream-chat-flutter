@@ -13,7 +13,6 @@ linter:
     # these rules are documented on and in the same order as
     # the Dart Lint rules page to make maintenance easier
     # https://github.com/dart-lang/linter/blob/master/example/all.yaml
-    - always_use_package_imports
     - avoid_empty_else
     - avoid_relative_lib_imports
     - avoid_slow_async_io
@@ -100,6 +99,7 @@ linter:
     - prefer_is_not_empty
     - prefer_is_not_operator
     - prefer_null_aware_operators
+    - prefer_relative_imports
     - prefer_single_quotes
     - prefer_spread_collections
     - prefer_typing_uninitialized_variables

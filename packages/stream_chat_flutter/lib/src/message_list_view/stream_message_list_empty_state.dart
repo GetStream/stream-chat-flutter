@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import '../../stream_chat_flutter.dart';
 
 /// A widget that is used to display the empty state of the message list.
 class StreamMessageListEmptyState extends StatelessWidget {

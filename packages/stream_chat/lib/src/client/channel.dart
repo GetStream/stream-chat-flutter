@@ -5,10 +5,11 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_chat/src/client/retry_queue.dart';
-import 'package:stream_chat/src/core/util/utils.dart';
-import 'package:stream_chat/stream_chat.dart';
 import 'package:synchronized/synchronized.dart';
+
+import '../../stream_chat.dart';
+import '../core/util/utils.dart';
+import 'retry_queue.dart';
 
 /// The maximum time the incoming [Event.typingStart] event is valid before a
 /// [Event.typingStop] event is emitted automatically.

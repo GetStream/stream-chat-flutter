@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/api/sort_order.dart';
-import 'package:stream_chat/src/core/models/channel_state.dart';
-import 'package:stream_chat/src/core/models/filter.dart';
+import '../api/sort_order.dart';
+import 'channel_state.dart';
+import 'filter.dart';
 
 part 'predefined_filter.g.dart';
 

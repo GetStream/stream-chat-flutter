@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/components/avatar/stream_user_avatar.dart';
-import 'package:stream_chat_flutter/src/message_action/message_action.dart';
-import 'package:stream_chat_flutter/src/scroll_view/reaction_scroll_view/stream_reaction_list_view.dart';
-import 'package:stream_chat_flutter/src/stream_chat.dart';
-import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
+
+import '../../components/avatar/stream_user_avatar.dart';
+import '../../message_action/message_action.dart';
+import '../../scroll_view/reaction_scroll_view/stream_reaction_list_view.dart';
+import '../../stream_chat.dart';
+import '../../stream_chat_configuration.dart';
+import '../../utils/extensions.dart';
 
 /// A bottom sheet that displays detailed reaction information for a message.
 ///

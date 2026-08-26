@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import '../../stream_chat_flutter.dart';
 
 /// {@template streamMessageListBuilders}
 /// Holds all custom slot builders for [StreamMessageListView].

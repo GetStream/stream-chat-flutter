@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sample_app/auth/auth_controller.dart';
-import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/utils/app_config.dart';
-import 'package:sample_app/widgets/stream_version.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../auth/auth_controller.dart';
+import '../routes/routes.dart';
+import '../utils/app_config.dart';
+import '../widgets/stream_version.dart';
 
 class AdvancedOptionsPage extends StatefulWidget {
   const AdvancedOptionsPage({super.key});

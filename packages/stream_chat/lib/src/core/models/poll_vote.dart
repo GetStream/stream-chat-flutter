@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/models/comparable_field.dart';
-import 'package:stream_chat/src/core/models/user.dart';
+import 'comparable_field.dart';
+import 'user.dart';
 
 part 'poll_vote.g.dart';
 

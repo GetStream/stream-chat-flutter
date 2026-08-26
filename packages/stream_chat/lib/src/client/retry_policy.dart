@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:stream_chat/src/client/client.dart';
-import 'package:stream_chat/src/core/error/error.dart';
+import '../core/error/error.dart';
+import 'client.dart';
 
 /// The retry policy associated to a client.
 ///

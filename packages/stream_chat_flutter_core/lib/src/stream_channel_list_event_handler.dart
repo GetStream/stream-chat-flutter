@@ -1,5 +1,5 @@
 import 'package:stream_chat/stream_chat.dart' show Event, Member;
-import 'package:stream_chat_flutter_core/src/stream_channel_list_controller.dart';
+import 'stream_channel_list_controller.dart';
 
 /// Contains handlers that are called from [StreamChannelListController] for
 /// certain [Event]s.

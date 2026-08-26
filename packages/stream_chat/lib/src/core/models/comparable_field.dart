@@ -1,4 +1,4 @@
-import 'package:stream_chat/src/core/util/string_sort_normalizer.dart';
+import '../util/string_sort_normalizer.dart';
 
 /// A wrapper class for values that implements [Comparable].
 ///

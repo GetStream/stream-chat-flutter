@@ -1,6 +1,6 @@
-import 'package:stream_chat/src/core/api/responses.dart';
-import 'package:stream_chat/src/core/http/stream_http_client.dart';
-import 'package:stream_chat/src/core/models/user.dart';
+import '../http/stream_http_client.dart';
+import '../models/user.dart';
+import 'responses.dart';
 
 /// Defines the api dedicated to guest users operations
 class GuestApi {

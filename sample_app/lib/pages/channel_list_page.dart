@@ -4,18 +4,19 @@ import 'dart:math' as math;
 import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sample_app/auth/auth_controller.dart';
-import 'package:sample_app/config/sample_app_config.dart';
-import 'package:sample_app/config/sample_app_config_screen.dart';
-import 'package:sample_app/pages/draft_list_page.dart';
-import 'package:sample_app/pages/reminders_page.dart';
-import 'package:sample_app/pages/thread_list_page.dart';
-import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/utils/location_provider.dart';
-import 'package:sample_app/utils/platform_support.dart';
-import 'package:sample_app/utils/shared_location_service.dart';
-import 'package:sample_app/widgets/channel_list.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../auth/auth_controller.dart';
+import '../config/sample_app_config.dart';
+import '../config/sample_app_config_screen.dart';
+import '../routes/routes.dart';
+import '../utils/location_provider.dart';
+import '../utils/platform_support.dart';
+import '../utils/shared_location_service.dart';
+import '../widgets/channel_list.dart';
+import 'draft_list_page.dart';
+import 'reminders_page.dart';
+import 'thread_list_page.dart';
 
 class ChannelListPage extends StatefulWidget {
   const ChannelListPage({

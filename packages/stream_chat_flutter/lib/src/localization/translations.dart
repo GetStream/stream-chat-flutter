@@ -1,10 +1,11 @@
 // ignore_for_file: lines_longer_than_80_chars
 
 import 'package:jiffy/jiffy.dart';
-import 'package:stream_chat_flutter/src/localization/accessibility_translations.dart';
-import 'package:stream_chat_flutter/src/message_list_view/message_list_view.dart';
-import 'package:stream_chat_flutter/src/misc/connection_status_builder.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+
+import '../message_list_view/message_list_view.dart';
+import '../misc/connection_status_builder.dart';
+import 'accessibility_translations.dart';
 
 /// Translation strings for the stream chat widgets
 abstract class Translations {

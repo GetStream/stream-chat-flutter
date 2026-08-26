@@ -9,9 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_size_getter/file_input.dart'; // For compatibility with flutter web.
 import 'package:image_size_getter/image_size_getter.dart' hide Size;
-import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
-import 'package:stream_chat_flutter/src/localization/translations.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../stream_chat_flutter.dart';
+import '../audio/audio_playlist_state.dart';
+import '../localization/translations.dart';
 
 int _byteUnitConversionFactor = 1024;
 

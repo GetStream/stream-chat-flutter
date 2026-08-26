@@ -1,10 +1,11 @@
 import 'package:logging/logging.dart';
 import 'package:rate_limiter/rate_limiter.dart';
-import 'package:stream_chat/src/client/channel.dart';
-import 'package:stream_chat/src/core/models/message.dart';
-import 'package:stream_chat/src/core/models/message_delivery.dart';
-import 'package:stream_chat/src/core/util/message_rules.dart';
 import 'package:synchronized/synchronized.dart';
+
+import '../core/models/message.dart';
+import '../core/models/message_delivery.dart';
+import '../core/util/message_rules.dart';
+import 'channel.dart';
 
 /// A callback that sends delivery receipts for multiple channels.
 ///

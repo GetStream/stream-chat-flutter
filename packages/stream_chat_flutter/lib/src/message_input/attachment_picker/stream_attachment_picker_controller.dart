@@ -2,10 +2,11 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:stream_chat_flutter/src/attachment/handler/stream_attachment_handler.dart';
-import 'package:stream_chat_flutter/src/message_input/attachment_picker/stream_attachment_picker_result.dart';
-import 'package:stream_chat_flutter/src/message_input/stream_attachment_validator.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+
+import '../../attachment/handler/stream_attachment_handler.dart';
+import '../stream_attachment_validator.dart';
+import 'stream_attachment_picker_result.dart';
 
 export 'package:stream_chat_flutter/src/message_input/stream_attachment_validator.dart';
 
