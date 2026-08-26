@@ -610,16 +610,19 @@ class StreamChatClient {
       // connection recovered
       final cids = [...state.channels.keys.toSet()];
       if (cids.isNotEmpty) {
-        // Sync the persistence client if available
-        if (persistenceEnabled) await sync(cids: cids);
+        // Best-effort: this runs outside any future the caller can await, and
+        // the connection can drop again while it is in flight.
+        try {
+          if (persistenceEnabled) await sync(cids: cids);
 
-        // Recover the channels that were active before the connection was lost,
-        // only if the client is configured to do so.
-        if (_recoverStateOnReconnect) {
-          await queryChannelsOnline(
-            filter: Filter.in_('cid', cids),
-            paginationParams: const PaginationParams(limit: 30),
-          );
+          if (_recoverStateOnReconnect) {
+            await queryChannelsOnline(
+              filter: Filter.in_('cid', cids),
+              paginationParams: const PaginationParams(limit: 30),
+            );
+          }
+        } catch (e, stk) {
+          logger.warning('Error recovering state on reconnect', e, stk);
         }
       }
 

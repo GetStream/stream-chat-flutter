@@ -4,6 +4,10 @@
 
 - Raised minimum Dart SDK to `^3.12.0`.
 
+🐞 Fixed
+
+- Fixed reconnect state recovery surfacing an uncatchable error when the connection dropped again mid-recovery; it is now logged, and `connection.recovered` still fires. [#2910](https://github.com/GetStream/stream-chat-flutter/issues/2910)
+
 ## 10.3.0
 
 ✅ Added

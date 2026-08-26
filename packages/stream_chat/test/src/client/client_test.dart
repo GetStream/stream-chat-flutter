@@ -5358,6 +5358,41 @@ void main() {
       expect(recoveredEvents, hasLength(1));
     });
 
+    // Recovery runs inside the client's own connection-status listener, so a
+    // failure there has no future for the app to catch. It must be swallowed,
+    // and must not stop `connectionRecovered` from firing.
+    test('should not surface an error when the re-query fails', () async {
+      when(
+        () => api.channel.queryChannels(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          memberLimit: any(named: 'memberLimit'),
+          messageLimit: any(named: 'messageLimit'),
+          paginationParams: any(named: 'paginationParams'),
+        ),
+      ).thenThrow(const StreamChatError('You cannot use queryChannels without an active connection.'));
+
+      client = StreamChatClient(apiKey, chatApi: api, ws: ws);
+      await client.connectUser(user, token);
+      await delay(300);
+
+      final channel = Channel.fromState(client, ChannelState(channel: ChannelModel(cid: 'messaging:c1')));
+      client.state.addChannels({'messaging:c1': channel});
+
+      // Subscribe AFTER the initial connect so the captured event is the
+      // one fired by the manual reconnect.
+      final recoveredEvents = <Event>[];
+      final sub = client.on(EventType.connectionRecovered).listen(recoveredEvents.add);
+
+      await simulateReconnect();
+      await sub.cancel();
+
+      expect(recoveredEvents, hasLength(1));
+    });
+
     test('should skip the re-query when no active channels are tracked', () async {
       client = StreamChatClient(apiKey, chatApi: api, ws: ws);
       await client.connectUser(user, token);
