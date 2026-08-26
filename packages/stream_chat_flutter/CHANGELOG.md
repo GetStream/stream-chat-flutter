@@ -3,7 +3,6 @@
 ✅ Added
 
 - Added `onReactionLongPress` to `StreamMessageItem` and `StreamMessageListView`, reporting the long-pressed message's `BuildContext` and a `ReactionLongPressDetails` with the `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction).
-- Added `semanticsLabel` to `StreamMessageItem` and `StreamMessageItemProps`, replacing the screen-reader announcement composed for a message row.
 
 ⚠️ Changed
 
@@ -16,11 +15,7 @@
 
 🐞 Fixed
 
-- Fixed messages announcing only their content: a screen reader now reads each message row as one phrase naming the sender and the direction — "You said, …" for your own messages, "<name> said, …" for everyone else's — followed by the message body, the time it was sent, and the edited marker, while the attachments, reaction chips, quoted message, and replies row stay individually reachable one level deeper. The delivery status is announced as part of that phrase rather than costing a focus stop of its own. A deleted message announces who deleted it in the same way, without the "said" — "You, Message deleted" / "<name>, Message deleted". A custom `messageBuilder` or `StreamMessageItem` component builder replaces the default layout and is responsible for its own label.
-- Fixed a deleted message dropping its metadata: the placeholder was rendered on its own, without the timestamp and delivery status the design shows below it. Both are back, and a screen reader announces them as part of the message phrase. The edited marker is dropped for a deleted message, though — there is no text left to have been edited.
-- Fixed the quoted-message preview announcing only the quoted author's name, which said nothing about the reply relationship. It now announces who replied to whom — "Han Solo replied to your message" / "You replied to Leia's message" — followed by the quoted body. Pass `replyMessage` when building `StreamQuotedMessage` directly to get the same phrasing.
-- Fixed image, video, GIF and gallery attachments in the message list announcing nothing: the tiles were focusable — they open a preview on tap — but carried no label at all. Each now announces its type and, within a gallery, its position ("Photo, 2 of 5"), and the "+N" overflow badge no longer adds a stop of its own.
-- Fixed `StreamDateDivider` announcing a clock time it never displays — a divider reading "Yesterday" announced "Yesterday at 1:06 PM". It now announces the date exactly as shown, never uppercased (some screen readers spell all-caps words out letter by letter), and is exposed as a header so a screen reader can jump from day to day instead of swiping through every message in between.
+- Improved the screen-reader experience in the message list. Each message is announced as a single phrase naming the sender and the direction ("You said, …" / "<name> said, …") together with the body, the time, the edited marker and the delivery status, while the attachments, reaction chips, quoted message and replies row stay reachable one level deeper. Quoted messages say who replied to whom, attachment tiles announce their type and position in a gallery, date dividers announce the date they show — as a header — instead of a time they never showed, and a deleted message names who deleted it and keeps its timestamp and delivery status. `StreamMessageItem.semanticsLabel` and `StreamQuotedMessage.replyMessage` are new and let you adjust the composed announcements; a custom `messageBuilder` replaces the default layout and is responsible for its own label.
 - Fixed a crash on web when the message list rebuilt while messages were selectable, for example after opening the attachment picker.
 - Fixed the browser's native context menu reappearing over the message context menu on web after scrolling messages out of view or deleting one.
 - Fixed the SDK re-enabling the browser's native context menu on web in apps that had disabled it themselves.
