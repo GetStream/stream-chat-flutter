@@ -183,6 +183,8 @@ void main() {
     expect(translations.replyToMessageLabel, isNotNull);
     expect(translations.unreadCountIndicatorLabel(unreadCount: 2), isNotNull);
     expect(translations.unreadMessagesSeparatorText(), isNotNull);
+    expect(translations.unreadMessagesSeparatorLabel(count: 1), '1 unread message');
+    expect(translations.unreadMessagesSeparatorLabel(count: 2), '2 unread messages');
     expect(translations.markUnreadError, isNotNull);
     expect(translations.markAsUnreadLabel, isNotNull);
     expect(translations.toggleBlockUnblockUserText(isBlocked: false), isNotNull);

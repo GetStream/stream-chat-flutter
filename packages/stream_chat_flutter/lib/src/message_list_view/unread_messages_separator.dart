@@ -6,8 +6,8 @@ import 'package:stream_core_flutter/chat.dart' as core;
 /// A full-width banner that marks the boundary between read and unread
 /// messages in a [StreamMessageListView].
 ///
-/// [UnreadMessagesSeparator] displays a localised "Unread Messages" label
-/// inside a subtle container with top and bottom borders.
+/// [UnreadMessagesSeparator] displays a localised "{count} unread messages"
+/// label inside a subtle container with top and bottom borders.
 ///
 /// {@tool snippet}
 ///
@@ -106,7 +106,7 @@ class UnreadMessagesSeparator extends StatelessWidget {
         child: Padding(
           padding: effectiveContentPadding,
           child: Text(
-            context.translations.unreadMessagesSeparatorText(),
+            context.translations.unreadMessagesSeparatorLabel(count: unreadCount),
             textAlign: TextAlign.center,
             style: effectiveTextStyle,
           ),

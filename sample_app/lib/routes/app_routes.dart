@@ -40,6 +40,7 @@ final appRoutes = [
           return StreamChannel(
             channel: channel,
             initialMessageId: messageId,
+            openAtFirstUnread: false,
             child: Builder(
               builder: (context) {
                 return (parentMessage != null)

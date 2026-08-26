@@ -1,5 +1,6 @@
 // ignore_for_file: lines_longer_than_80_chars
 
+import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/localization/accessibility_translations.dart';
 import 'package:stream_chat_flutter/src/message_list_view/message_list_view.dart';
@@ -100,7 +101,26 @@ abstract class Translations {
 
   /// The text for showing the unread messages count
   /// in the [StreamMessageListView]
+  @Deprecated('Use unreadMessagesSeparatorLabel instead. Will be removed in the next major version.')
   String unreadMessagesSeparatorText();
+
+  /// The label for the unread messages separator in the
+  /// [StreamMessageListView], e.g. "5 unread messages".
+  ///
+  /// Falls back to the count-less `unreadMessagesSeparatorText`, so an
+  /// implementation written before this method existed — including one that
+  /// customises only that older string — keeps rendering its own text
+  /// rather than silently reverting to the built-in copy. Override this to
+  /// show the count.
+  ///
+  /// Note that the fallback only helps classes that `extends` (or mix in)
+  /// [Translations]: Dart does not inherit method bodies through
+  /// `implements`, so a class implementing this interface directly has to
+  /// add this member. See the CHANGELOG for the migration.
+  String unreadMessagesSeparatorLabel({required int count}) {
+    // ignore: deprecated_member_use_from_same_package
+    return unreadMessagesSeparatorText();
+  }
 
   /// The label for "connected" in [StreamConnectionStatusBuilder]
   String get connectedLabel;
@@ -1289,6 +1309,16 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String unreadMessagesSeparatorText() => 'New messages';
+
+  @override
+  String unreadMessagesSeparatorLabel({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count unread message',
+      other: '$count unread messages',
+      locale: 'en',
+    );
+  }
 
   @override
   String get enableFileAccessMessage =>

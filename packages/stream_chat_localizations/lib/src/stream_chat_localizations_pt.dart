@@ -498,6 +498,16 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   String unreadMessagesSeparatorText() => 'Novas mensagens';
 
   @override
+  String unreadMessagesSeparatorLabel({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count mensagem não lida',
+      other: '$count mensagens não lidas',
+      locale: localeName,
+    );
+  }
+
+  @override
   String get enableFileAccessMessage => 'Ative o acesso aos arquivos para poder compartilhá-los com amigos.';
 
   @override
