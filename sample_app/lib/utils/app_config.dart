@@ -1,6 +1,37 @@
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-const kDefaultStreamApiKey = 'kv7mcsxr24p8';
+/// The Stream app the sample app connects to.
+///
+/// Defaults to Stream's public demo app. Point the sample app at another
+/// Stream app — a staging environment, or your own — at launch:
+/// `--dart-define=STREAM_API_KEY=<key>`.
+///
+/// [defaultUsers] are signed for the demo app only, so a different key also
+/// needs a user supplied through the "Advanced Options" login screen.
+const kDefaultStreamApiKey = String.fromEnvironment(
+  'STREAM_API_KEY',
+  defaultValue: 'kv7mcsxr24p8',
+);
+
+/// Default base URL for the Stream API:
+/// `--dart-define=STREAM_BASE_URL=https://chat-edge-us-east1-ce1.gcp.stream-io-api.com`.
+///
+/// Empty — the default — uses the SDK's own endpoint. The WebSocket URL is
+/// derived from this, so only the HTTP base URL needs to be supplied.
+///
+/// This is only the starting value: the "Advanced Options" login screen can
+/// set it at runtime, which is what already-built deployments (the web demo)
+/// have to use.
+const kStreamBaseUrl = String.fromEnvironment('STREAM_BASE_URL');
+
+/// Name of the server-side predefined filter backing the channel list.
+///
+/// Predefined filters are saved queries that live on the Stream app, so this
+/// one exists only on the demo app. It is skipped automatically whenever a
+/// custom API key or base URL is in use — see
+/// [AuthController.usingCustomBackend] — falling back to a plain "channels I
+/// am a member of" filter.
+const kChannelListPredefinedFilter = 'stream_chat_flutter_sample_app';
 
 /// The demo accounts, keyed by their (pre-generated) user token.
 ///

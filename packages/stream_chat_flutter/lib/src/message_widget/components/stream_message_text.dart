@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
@@ -100,7 +101,14 @@ class StreamMessageText extends StatelessWidget {
         );
 
         if (isDesktopDeviceOrWeb) {
-          return SelectionArea(onSelectionChanged: onSelectionChanged, child: streamMessageText);
+          return SelectionArea(
+            // Rebuilding a live selection area after the browser context menu
+            // toggles throws on web; the key replaces it instead.
+            // TODO(flutter): Remove once the minimum Flutter has flutter/flutter#186459.
+            key: ValueKey(BrowserContextMenu.enabled),
+            onSelectionChanged: onSelectionChanged,
+            child: streamMessageText,
+          );
         }
 
         return streamMessageText;
