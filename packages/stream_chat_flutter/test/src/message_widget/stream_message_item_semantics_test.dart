@@ -89,12 +89,15 @@ class _FixedSizeAttachmentBuilder extends StreamAttachmentWidgetBuilder {
 
 void main() {
   group('StreamMessageItem sender and direction announcement', () {
-    final currentUser = OwnUser(id: 'current-user', name: 'Luke Skywalker');
+    // A language is what makes a translated message resolve to the reader's
+    // own language, in the bubble and in the announcement alike.
+    final currentUser = OwnUser(id: 'current-user', name: 'Luke Skywalker', language: 'en');
     final otherUser = User(id: 'other-user', name: 'Han Solo');
 
     Widget buildScene(
       Message message, {
       String? semanticsLabel,
+      OwnUser? reader,
       StreamMessageAlignment alignment = StreamMessageAlignment.start,
       // Set to false to resolve the shipped English strings instead of the
       // sentinels, pinning what a user actually hears.
@@ -106,8 +109,9 @@ void main() {
       final channelState = MockChannelState();
 
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.currentUser).thenReturn(currentUser);
-      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
+      final effectiveReader = reader ?? currentUser;
+      when(() => clientState.currentUser).thenReturn(effectiveReader);
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(effectiveReader));
       when(() => channel.client).thenReturn(client);
       when(() => channel.state).thenReturn(channelState);
       when(() => channelState.readStream).thenAnswer((_) => Stream.value(const []));
@@ -278,6 +282,24 @@ void main() {
       StreamMessageTranslations.toggleOriginalText(
         tester.element(find.byType(DefaultStreamMessageItem)),
         translated.id,
+      );
+      await tester.pumpAndSettle();
+
+      expect(labelsOf(tester), contains('IN:Han Solo:hallo, AT-TIME'));
+
+      handle.dispose();
+    });
+
+    testWidgets('announces the original text to a reader with no language set', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      // The bubble does not translate for a reader with no language, so the
+      // announcement must not either.
+      await tester.pumpWidget(
+        buildScene(
+          message(text: 'hallo').copyWith(i18n: const {'en_text': 'hello', 'language': 'de'}),
+          reader: OwnUser(id: 'current-user', name: 'Luke Skywalker'),
+        ),
       );
       await tester.pumpAndSettle();
 

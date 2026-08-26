@@ -753,9 +753,10 @@ class DefaultStreamMessageItem extends StatelessWidget {
     final translationEnabled = StreamChatConfiguration.of(context).messageTranslation.enabled;
     final showsOriginalText = StreamMessageTranslations.isShowingOriginalTextOf(context, message.id);
 
-    final language = currentUser?.language ?? 'en';
+    // No default language: `translate` returns the message unchanged when the
+    // reader has none set, which is what should be announced.
     final shown = switch (translationEnabled && !showsOriginalText) {
-      true => message.translate(language),
+      true => message.translate(currentUser?.language),
       false => message,
     };
 
