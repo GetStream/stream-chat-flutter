@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/auth/auth_controller.dart';
 import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/utils/app_config.dart';
 import 'package:sample_app/widgets/stream_version.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -15,7 +16,9 @@ class AdvancedOptionsPage extends StatefulWidget {
 class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _apiKeyController = TextEditingController();
+  // Prefilled with the configured app so pointing the sample app at another
+  // backend only needs a user id and token typed in.
+  final TextEditingController _apiKeyController = TextEditingController(text: kDefaultStreamApiKey);
   String? _apiKeyError;
 
   final TextEditingController _userIdController = TextEditingController();
@@ -26,6 +29,10 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
 
   final TextEditingController _usernameController = TextEditingController();
 
+  // Lets an already-built deployment (the web demo) be pointed at another
+  // environment without recompiling.
+  final TextEditingController _baseUrlController = TextEditingController(text: kStreamBaseUrl);
+
   bool loading = false;
 
   @override
@@ -34,6 +41,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
     _userIdController.dispose();
     _userTokenController.dispose();
     _usernameController.dispose();
+    _baseUrlController.dispose();
     super.dispose();
   }
 
@@ -46,6 +54,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
       final userId = _userIdController.text;
       final userToken = _userTokenController.text;
       final username = _usernameController.text;
+      final baseUrl = _baseUrlController.text.trim();
 
       loading = true;
       showDialog(
@@ -79,6 +88,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
             },
           ),
           token: userToken,
+          baseUrl: baseUrl.isEmpty ? null : baseUrl,
         );
       } catch (e) {
         debugPrint(e.toString());
@@ -259,6 +269,36 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       fillColor: context.streamColorScheme.backgroundSurface,
                       filled: true,
                       labelText: 'Username (optional)',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _baseUrlController,
+                    textInputAction: TextInputAction.done,
+                    keyboardType: TextInputType.url,
+                    autocorrect: false,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: context.streamColorScheme.textPrimary,
+                    ),
+                    decoration: InputDecoration(
+                      labelStyle: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: context.streamColorScheme.textSecondary,
+                      ),
+                      border: UnderlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide.none,
+                      ),
+                      fillColor: context.streamColorScheme.backgroundSurface,
+                      filled: true,
+                      labelText: 'Base URL (optional)',
+                      hintText: 'https://chat.stream-io-api.com',
+                      hintStyle: TextStyle(
+                        fontSize: 14,
+                        color: context.streamColorScheme.textTertiary,
+                      ),
                     ),
                   ),
                   const Spacer(),
