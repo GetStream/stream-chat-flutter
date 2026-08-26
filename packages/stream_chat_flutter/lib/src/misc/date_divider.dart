@@ -119,39 +119,56 @@ class StreamDateDivider extends StatelessWidget {
     final effectiveBackgroundColor = backgroundColor ?? colorScheme.backgroundSurfaceSubtle;
     final effectiveBorderRadius = borderRadius ?? BorderRadius.all(radius.max);
 
-    return Center(
-      child: Container(
-        margin: effectiveMargin,
-        decoration: BoxDecoration(
-          color: effectiveBackgroundColor,
-          borderRadius: effectiveBorderRadius,
-        ),
-        child: Padding(
-          padding: effectiveContentPadding,
-          child: StreamTimestamp(
-            date: dateTime.toLocal(),
-            style: effectiveTextStyle,
-            formatter: (context, date) {
-              if (formatter case final formatter?) {
-                final timestamp = formatter.call(context, date);
-                if (uppercase) return timestamp.toUpperCase();
-                return timestamp;
-              }
+    final localDate = dateTime.toLocal();
 
-              final timestamp = switch (date) {
-                _ when date.isToday => context.translations.todayLabel,
-                _ when date.isYesterday => context.translations.yesterdayLabel,
-                _ when date.isWithinLastWeek => Jiffy.parseFromDateTime(date).EEEE,
-                _ when date.isInSameYear => Jiffy.parseFromDateTime(date).MMMd,
-                _ => Jiffy.parseFromDateTime(date).yMMMd,
-              };
-
-              if (uppercase) return timestamp.toUpperCase();
-              return timestamp;
-            },
+    return MergeSemantics(
+      // A date divider separates the list by day, so it doubles as a landmark:
+      // marking it a header lets a screen reader jump from day to day instead
+      // of swiping through every message in between.
+      child: Semantics(
+        header: true,
+        child: Center(
+          child: Container(
+            margin: effectiveMargin,
+            decoration: BoxDecoration(
+              color: effectiveBackgroundColor,
+              borderRadius: effectiveBorderRadius,
+            ),
+            child: Padding(
+              padding: effectiveContentPadding,
+              child: StreamTimestamp(
+                date: localDate,
+                style: effectiveTextStyle,
+                // The divider shows a date, never a clock time. Left to its
+                // default, [StreamTimestamp] would announce
+                // `formatRecentDateTime`'s "Yesterday at 1:06 PM" and invent a
+                // time that is nowhere on screen. Announce the date as shown —
+                // but never uppercased, which some screen readers spell out.
+                semanticsLabel: _formatDate(context, localDate),
+                formatter: (context, date) {
+                  final timestamp = _formatDate(context, date);
+                  if (uppercase) return timestamp.toUpperCase();
+                  return timestamp;
+                },
+              ),
+            ),
           ),
         ),
       ),
     );
+  }
+
+  // The visible date label: the caller's [formatter] when given, otherwise a
+  // relative-day phrasing that degrades to an absolute date.
+  String _formatDate(BuildContext context, DateTime date) {
+    if (formatter case final formatter?) return formatter.call(context, date);
+
+    return switch (date) {
+      _ when date.isToday => context.translations.todayLabel,
+      _ when date.isYesterday => context.translations.yesterdayLabel,
+      _ when date.isWithinLastWeek => Jiffy.parseFromDateTime(date).EEEE,
+      _ when date.isInSameYear => Jiffy.parseFromDateTime(date).MMMd,
+      _ => Jiffy.parseFromDateTime(date).yMMMd,
+    };
   }
 }

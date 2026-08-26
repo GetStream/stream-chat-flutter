@@ -66,12 +66,11 @@ class StreamMessageFooterProps {
 ///  * **Timestamp** — always shown, formatted as a short time string.
 ///  * **Edited label** — when the message text has been updated.
 ///
-/// The username, timestamp, and edited label are excluded from the semantics
-/// tree: [DefaultStreamMessageItem] speaks them as part of its composed row
-/// label, so announcing them here as well would add three extra focus stops
-/// per message. Only the sending status contributes a node of its own, because
-/// it tracks the channel read state live. A custom message layout that uses
-/// this footer without a row-level label should re-expose them.
+/// None of the four contributes to the semantics tree:
+/// [DefaultStreamMessageItem] speaks them all as part of its composed row
+/// label, so announcing them here as well would cost four extra focus stops
+/// per message that repeat what the row already said. A custom message layout
+/// that uses this footer without a row-level label should re-expose them.
 class DefaultStreamMessageFooter extends StatelessWidget {
   /// Creates a default message footer with the given [props].
   const DefaultStreamMessageFooter({super.key, required this.props});
@@ -94,7 +93,12 @@ class DefaultStreamMessageFooter extends StatelessWidget {
 
     Widget? statusWidget;
     if (message.user case final user? when user.id == currentUser?.id) {
-      statusWidget = StreamMessageSendingStatus(message: message);
+      // [DefaultStreamMessageItem] appends the delivery status to its composed
+      // row label, so the icon here would otherwise cost a second focus stop
+      // that announces nothing the row has not already said.
+      statusWidget = ExcludeSemantics(
+        child: StreamMessageSendingStatus(message: message),
+      );
     }
 
     final Widget timestampWidget;

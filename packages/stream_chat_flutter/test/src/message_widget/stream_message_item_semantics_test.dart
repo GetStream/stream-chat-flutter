@@ -174,7 +174,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(labelsOf(tester), contains('OUT:Are we still meeting tomorrow, AT-TIME'));
+      expect(labelsOf(tester), contains('OUT:Are we still meeting tomorrow, AT-TIME, Sent'));
 
       handle.dispose();
     });
@@ -277,7 +277,9 @@ void main() {
       await tester.pumpAndSettle();
 
       final labels = labelsOf(tester);
-      expect(labels, contains('OUT-DEL:Message deleted, AT-TIME'));
+      // No timestamp: a deleted message renders no footer, so announcing one
+      // would describe something that is not on screen.
+      expect(labels, contains('OUT-DEL:Message deleted'));
       // The placeholder inside the bubble would otherwise repeat it.
       expect(labels.where((it) => it.contains('Message deleted')), hasLength(1));
       // A deleted message is not something the sender said.
@@ -297,7 +299,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final labels = labelsOf(tester);
-      expect(labels, contains('IN-DEL:Han Solo:Message deleted, AT-TIME'));
+      expect(labels, contains('IN-DEL:Han Solo:Message deleted'));
       expect(labels.where((it) => it.startsWith('IN:')), isEmpty);
 
       handle.dispose();
@@ -352,7 +354,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final announced = labelsOf(tester).singleWhere((it) => it.contains('Message deleted'));
-      expect(announced, startsWith('You, Message deleted, '));
+      expect(announced, 'You, Message deleted');
 
       handle.dispose();
     });
@@ -371,7 +373,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('keeps the sending status of an own message as its own stop', (tester) async {
+    testWidgets('folds the sending status into the row label', (tester) async {
       final handle = tester.ensureSemantics();
 
       await tester.pumpWidget(
@@ -382,10 +384,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(
-        labelsOf(tester),
-        contains(DefaultTranslations.instance.accessibility.messageSentStatusLabel),
-      );
+      final status = DefaultTranslations.instance.accessibility.messageSentStatusLabel;
+      final labels = labelsOf(tester);
+
+      // The status rides on the row phrase rather than costing a focus stop of
+      // its own — an own text message is a single stop.
+      expect(labels.single, endsWith(', $status'));
 
       handle.dispose();
     });

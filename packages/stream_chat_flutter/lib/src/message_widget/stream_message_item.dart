@@ -631,19 +631,9 @@ class DefaultStreamMessageItem extends StatelessWidget {
             child: MouseRegion(child: child),
           );
         },
-        child: Semantics(
+        child: _MessageRowSemantics(
+          message: message,
           label: effectiveSemanticsLabel,
-          // `container` stays false so the label merges into the row's own
-          // tappable node instead of adding a second, wordless stop on top of
-          // it. Where nothing inside the row contributes a node — desktop and
-          // web, or a row whose tap and long-press callbacks are both null —
-          // this annotation forms that single node itself.
-          //
-          // `explicitChildNodes` keeps the parts a screen reader must still
-          // reach on their own — the attachments, the reaction chips, the
-          // quoted message, the replies row, the sending status — as separate
-          // nodes instead of folding them into the row phrase.
-          explicitChildNodes: true,
           child: Align(
             alignment: StreamMessageLayout.alignmentDirectionalOf(context),
             child: Padding(
@@ -687,6 +677,11 @@ class DefaultStreamMessageItem extends StatelessWidget {
   String _defaultSemanticsLabel(BuildContext context, Message message) {
     final translations = context.translations;
     final currentUser = StreamChat.maybeOf(context)?.currentUser;
+
+    // A deleted message drops the footer altogether, so there is no timestamp
+    // and no edited marker on screen to announce. Inventing them here would
+    // make the announcement disagree with what is rendered.
+    if (message.isDeleted) return _senderAwareBody(context, message, currentUser);
 
     final parts = [
       _senderAwareBody(context, message, currentUser),
@@ -1281,6 +1276,86 @@ class _StreamMessageItemDefaults extends core.StreamMessageItemThemeData {
       .channel => .visible,
     },
   );
+}
+
+/// Annotates a message row with its composed screen-reader label.
+///
+/// The label is applied with `container: false` so it merges into the row's own
+/// tappable node instead of adding a second, wordless stop on top of it. Where
+/// nothing inside the row contributes a node — desktop and web, or a row whose
+/// tap and long-press callbacks are both null — this annotation forms that
+/// single node itself.
+///
+/// `explicitChildNodes` keeps the parts a screen reader must still be able to
+/// reach on their own — the attachments, the reaction chips, the quoted
+/// message, the replies row — as separate nodes rather than folding them into
+/// the row phrase.
+///
+/// For the current user's own messages the delivery status is appended to the
+/// label, tracking [ChannelClientState.readStream] so it stays in step with
+/// the icon in the footer. The icon itself is excluded from the semantics tree
+/// (see [DefaultStreamMessageFooter]), so the status is announced as part of
+/// the row instead of costing a focus stop of its own.
+class _MessageRowSemantics extends StatelessWidget {
+  const _MessageRowSemantics({
+    required this.message,
+    required this.label,
+    required this.child,
+  });
+
+  final Message message;
+  final String? label;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final currentUser = StreamChat.maybeOf(context)?.currentUser;
+    final isOwnMessage = message.user?.id == currentUser?.id;
+
+    // Only the sender sees a delivery status, and a row with no label of its
+    // own has nothing to append it to.
+    if (!isOwnMessage || label == null) {
+      return Semantics(label: label, explicitChildNodes: true, child: child);
+    }
+
+    final channel = StreamChannel.maybeOf(context)?.channel;
+
+    return BetterStreamBuilder<List<Read>>(
+      stream: channel?.state?.readStream,
+      initialData: channel?.state?.read,
+      builder: (context, data) => Semantics(
+        label: [
+          label,
+          ?_statusLabel(
+            context,
+            isMessageRead: data.readsOf(message: message).isNotEmpty,
+            isMessageDelivered: data.deliveriesOf(message: message).isNotEmpty,
+          ),
+        ].join(', '),
+        explicitChildNodes: true,
+        child: child,
+      ),
+    );
+  }
+
+  // Mirrors the icon [StreamSendingIndicator] picks for the same state, so the
+  // announcement and the visible check marks never disagree.
+  String? _statusLabel(
+    BuildContext context, {
+    required bool isMessageRead,
+    required bool isMessageDelivered,
+  }) {
+    // A deleted message shows no footer, so it has no delivery status either.
+    if (message.isDeleted) return null;
+
+    final a11y = context.translations.accessibility;
+
+    if (isMessageRead) return a11y.messageReadStatusLabel;
+    if (isMessageDelivered) return a11y.messageDeliveredStatusLabel;
+    if (message.state.isCompleted) return a11y.messageSentStatusLabel;
+    if (message.state.isOutgoing) return a11y.messageSendingStatusLabel;
+    return null;
+  }
 }
 
 StreamMention? _buildMention(Message message, core.StreamMentionType type, String id) {
