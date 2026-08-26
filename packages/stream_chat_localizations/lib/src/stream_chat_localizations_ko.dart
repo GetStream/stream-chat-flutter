@@ -1017,6 +1017,9 @@ class _AccessibilityTranslationsKo extends AccessibilityTranslations {
   String get messageReadStatusLabel => '읽음';
 
   @override
+  String get messageFailedStatusLabel => '메시지를 보내지 못했습니다';
+
+  @override
   String unreadMessagesLabel({required int count}) {
     return Intl.plural(
       count,

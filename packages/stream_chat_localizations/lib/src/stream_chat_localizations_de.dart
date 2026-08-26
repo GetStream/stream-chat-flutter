@@ -1035,6 +1035,9 @@ class _AccessibilityTranslationsDe extends AccessibilityTranslations {
   String get messageReadStatusLabel => 'Gelesen';
 
   @override
+  String get messageFailedStatusLabel => 'Nachricht konnte nicht gesendet werden';
+
+  @override
   String unreadMessagesLabel({required int count}) {
     return Intl.plural(
       count,

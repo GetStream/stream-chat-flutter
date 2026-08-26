@@ -1020,6 +1020,9 @@ class _AccessibilityTranslationsNo extends AccessibilityTranslations {
   String get messageReadStatusLabel => 'Lest';
 
   @override
+  String get messageFailedStatusLabel => 'Meldingen ble ikke sendt';
+
+  @override
   String unreadMessagesLabel({required int count}) {
     return Intl.plural(
       count,

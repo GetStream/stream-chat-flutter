@@ -1334,8 +1334,9 @@ class _MessageRowSemantics extends StatelessWidget {
     );
   }
 
-  // Mirrors what [StreamMessageSendingStatus] renders for the same state, so
-  // the announcement and the visible footer never disagree.
+  // Mirrors what the message shows for the same state — the footer's
+  // [StreamMessageSendingStatus], or the error badge on the bubble — so the
+  // announcement and the visible state never disagree.
   String? _statusLabel(
     BuildContext context, {
     required bool isMessageRead,
@@ -1358,6 +1359,13 @@ class _MessageRowSemantics extends StatelessWidget {
     }
 
     final a11y = translations.accessibility;
+
+    // A failed send is shown as a badge on the bubble rather than a footer
+    // tick, and the badge is a bare icon with no text of its own, so without
+    // this the row announces nothing about the failure.
+    if (message.state.isFailed || message.isBouncedWithError) {
+      return a11y.messageFailedStatusLabel;
+    }
 
     if (isMessageRead) return a11y.messageReadStatusLabel;
     if (isMessageDelivered) return a11y.messageDeliveredStatusLabel;

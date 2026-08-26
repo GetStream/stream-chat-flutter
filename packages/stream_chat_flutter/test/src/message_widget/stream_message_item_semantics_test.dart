@@ -430,6 +430,25 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('announces a message that failed to send', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        buildScene(
+          message(user: currentUser, state: MessageState.sendingFailed(skipPush: false, skipEnrichUrl: false)),
+          alignment: StreamMessageAlignment.end,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // The failure is shown as a badge on the bubble, which is a bare icon
+      // with no text, so the row phrase is the only place it can be heard.
+      final failed = DefaultTranslations.instance.accessibility.messageFailedStatusLabel;
+      expect(labelsOf(tester).first, endsWith(', $failed'));
+
+      handle.dispose();
+    });
+
     testWidgets('folds the sending status into the row label', (tester) async {
       final handle = tester.ensureSemantics();
 

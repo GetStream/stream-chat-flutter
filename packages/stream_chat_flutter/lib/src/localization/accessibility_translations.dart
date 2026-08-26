@@ -261,6 +261,14 @@ abstract class AccessibilityTranslations {
   /// message has been read by the recipient, e.g. `"Read"`.
   String get messageReadStatusLabel;
 
+  /// The screen-reader label for a message that could not be sent, e.g.
+  /// `"Message failed to send"`.
+  ///
+  /// Announced in place of a delivery status. The failure is shown as a badge
+  /// on the bubble, which carries no text of its own, so this is the only way
+  /// a screen reader learns the message did not go out.
+  String get messageFailedStatusLabel;
+
   /// The screen-reader phrasing for a batch of unread messages, e.g.
   /// `"9 unread messages"` / `"1 unread message"`.
   ///
@@ -582,6 +590,9 @@ class DefaultAccessibilityTranslations extends AccessibilityTranslations {
 
   @override
   String get messageReadStatusLabel => 'Read';
+
+  @override
+  String get messageFailedStatusLabel => 'Message failed to send';
 
   @override
   String unreadMessagesLabel({required int count}) {

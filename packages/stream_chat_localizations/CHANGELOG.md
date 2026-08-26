@@ -2,7 +2,7 @@
 
 ✅ Added
 
-- Added the message-list a11y strings behind the new screen-reader announcements: `outgoingMessageLabel` / `incomingMessageLabel`, `outgoingDeletedMessageLabel` / `incomingDeletedMessageLabel`, `repliedToOwnMessageLabel` / `repliedToMessageLabel`, and `attachmentPositionLabel`. Every supported locale ships a native-language implementation.
+- Added the message-list a11y strings behind the new screen-reader announcements: `outgoingMessageLabel` / `incomingMessageLabel`, `outgoingDeletedMessageLabel` / `incomingDeletedMessageLabel`, `repliedToOwnMessageLabel` / `repliedToMessageLabel`, `attachmentPositionLabel`, and `messageFailedStatusLabel`. Every supported locale ships a native-language implementation.
 
 🔄 Changed
 
