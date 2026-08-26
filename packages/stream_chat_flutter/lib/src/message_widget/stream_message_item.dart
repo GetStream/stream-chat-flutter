@@ -723,8 +723,13 @@ class DefaultStreamMessageItem extends StatelessWidget {
     }
 
     // Announce the full sender name — screen readers are not width-bound like
-    // the visual footer, and a surname disambiguates when several members
-    // share a first name. Without a name there is nothing to announce.
+    // the visual footer, and a surname disambiguates when several members share
+    // a first name.
+    //
+    // With no name there is nothing to attribute, so the body stands alone —
+    // the message text, or "Message deleted" for a deleted message, which is
+    // already what the formatter returns for one. [User.name] falls back to
+    // the user id, so this is close to unreachable.
     final senderName = sender.name.trim();
     if (senderName.isEmpty) return body;
 
