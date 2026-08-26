@@ -5,6 +5,10 @@
 - `Channel.translateMessage` now merges the translated message into the channel state, so the translation reaches anything watching the channel without the caller applying the response itself.
 - Raised minimum Dart SDK to `^3.12.0`.
 
+🐞 Fixed
+
+- Fixed every failed websocket connect leaving an unhandled error in the root zone, which crash reporters listening on `PlatformDispatcher.onError` report as a fatal crash. [#2921](https://github.com/GetStream/stream-chat-flutter/issues/2921)
+
 ⚠️ Deprecated
 
 - Deprecated `StreamChatClient.unflagMessage` and `StreamChatClient.unflagUser`. The `/moderation/unflag` endpoint is no longer supported by the server and the calls have no effect; both methods will be removed in a future major release.
