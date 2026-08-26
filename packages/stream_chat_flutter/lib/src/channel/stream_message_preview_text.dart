@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A widget that renders a preview of the message text.
+///
+/// The preview is translated into the current user's language when
+/// [Message.i18n] has one, unless disabled SDK-wide via
+/// [StreamMessageTranslationConfiguration.enabled] — matching the same
+/// opt-out [StreamMessageText] respects for the full message bubble.
 class StreamMessagePreviewText extends StatelessWidget {
   /// Creates a new instance of [StreamMessagePreviewText].
   const StreamMessagePreviewText({
@@ -20,6 +25,8 @@ class StreamMessagePreviewText extends StatelessWidget {
   final ChannelModel? channel;
 
   /// The language to use for translations.
+  ///
+  /// Defaults to the current user's [User.language].
   final String? language;
 
   /// The style to use for the text.
@@ -34,11 +41,12 @@ class StreamMessagePreviewText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = StreamChat.maybeOf(context)?.currentUser;
-    final translationLanguage = language ?? currentUser?.language ?? 'en';
-    final translatedMessage = message.translate(translationLanguage);
+    final config = StreamChatConfiguration.of(context);
+    final translationConfig = config.messageTranslation;
+    final translationLanguage = language ?? currentUser?.language;
+    final translatedMessage = translationConfig.enabled ? message.translate(translationLanguage) : message;
     final previewMessage = translatedMessage.replaceMentions(linkify: false);
 
-    final config = StreamChatConfiguration.of(context);
     final formatter = config.messagePreviewFormatter;
 
     final previewTextSpan = formatter.formatMessage(

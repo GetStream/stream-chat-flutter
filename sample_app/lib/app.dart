@@ -209,7 +209,13 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                           builder: (context, cachedChild) {
                             final wrapped = Directionality(
                               textDirection: config.forceRtl ? .rtl : .ltr,
-                              child: cachedChild ?? const SizedBox.shrink(),
+                              // Above the router so any screen — and the
+                              // dialogs it pushes — can fire snackbars via
+                              // `StreamSnackbarMessenger.of(context)`. Inside
+                              // the Directionality, which its Stack needs.
+                              child: StreamSnackbarScope(
+                                child: cachedChild ?? const SizedBox.shrink(),
+                              ),
                             );
 
                             // StreamChat stays mounted as long as a client
@@ -312,6 +318,10 @@ extension on SampleAppConfigData {
       enforceUniqueReactions: enforceUniqueReactions,
       reactionType: reactionType,
       reactionPosition: reactionPosition,
+      messageTranslation: StreamMessageTranslationConfiguration(
+        enabled: enableMessageTranslation,
+        annotationEnabled: enableMessageTranslation,
+      ),
       attachmentBuilders: [
         if (enableLocationSharing)
           LocationAttachmentBuilder(

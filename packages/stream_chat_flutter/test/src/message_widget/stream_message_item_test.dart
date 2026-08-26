@@ -220,4 +220,78 @@ void main() {
     expect(DefaultTranslations.instance.threadReplyCountText(1), '1 reply');
     expect(DefaultTranslations.instance.threadReplyCountText(3), '3 replies');
   });
+
+  group('StreamMessageItem translation toggle', () {
+    final currentUser = OwnUser(id: 'current-user', language: 'en');
+    final otherUser = User(id: 'other-user');
+
+    final translated = Message(
+      id: 'translated',
+      text: 'Hola, mundo!',
+      createdAt: DateTime(2026),
+      user: otherUser,
+      state: MessageState.sent,
+      i18n: const {
+        'language': 'es',
+        'es_text': 'Hola, mundo!',
+        'en_text': 'Hello, world!',
+      },
+    );
+
+    Widget buildScene(StreamMessageTranslationStore store) {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel();
+      final channelState = MockChannelState();
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(currentUser);
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
+      when(() => channel.client).thenReturn(client);
+      when(() => channel.state).thenReturn(channelState);
+
+      return MaterialApp(
+        home: StreamChat(
+          client: client,
+          connectivityStream: Stream.value(const [ConnectivityResult.mobile]),
+          configData: StreamChatConfigurationData(
+            messageTranslation: const StreamMessageTranslationConfiguration(annotationEnabled: true),
+          ),
+          child: StreamChannel(
+            channel: channel,
+            child: Scaffold(
+              body: StreamMessageTranslations(
+                store: store,
+                child: StreamMessageItem(message: translated),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('tapping the annotation swaps the translation for the original text', (tester) async {
+      final store = StreamMessageTranslationStore();
+      addTearDown(store.dispose);
+
+      await tester.pumpWidget(buildScene(store));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Hello, world!'), findsOneWidget);
+      expect(find.text('Show original'), findsOneWidget);
+
+      await tester.tap(find.text('Show original'));
+      await tester.pumpAndSettle();
+
+      expect(store.isShowingOriginalText(translated.id), isTrue);
+      expect(find.text('Hola, mundo!'), findsOneWidget);
+      expect(find.text('Show translation'), findsOneWidget);
+
+      await tester.tap(find.text('Show translation'));
+      await tester.pumpAndSettle();
+
+      expect(store.isShowingOriginalText(translated.id), isFalse);
+      expect(find.text('Hello, world!'), findsOneWidget);
+    });
+  });
 }

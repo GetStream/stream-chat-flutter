@@ -610,16 +610,23 @@ class StreamChatClient {
       // connection recovered
       final cids = [...state.channels.keys.toSet()];
       if (cids.isNotEmpty) {
-        // Sync the persistence client if available
-        if (persistenceEnabled) await sync(cids: cids);
+        // Recovery is best-effort: the connection can drop again while it is
+        // in flight. Nothing awaits this method, so an error here would
+        // surface as an unhandled crash instead of reaching the app.
+        try {
+          // Sync the persistence client if available
+          if (persistenceEnabled) await sync(cids: cids);
 
-        // Recover the channels that were active before the connection was lost,
-        // only if the client is configured to do so.
-        if (_recoverStateOnReconnect) {
-          await queryChannelsOnline(
-            filter: Filter.in_('cid', cids),
-            paginationParams: const PaginationParams(limit: 30),
-          );
+          // Recover the channels that were active before the connection was lost,
+          // only if the client is configured to do so.
+          if (_recoverStateOnReconnect) {
+            await queryChannelsOnline(
+              filter: Filter.in_('cid', cids),
+              paginationParams: const PaginationParams(limit: 30),
+            );
+          }
+        } catch (e, stk) {
+          logger.warning('Error recovering state on reconnect', e, stk);
         }
       }
 
@@ -1898,13 +1905,29 @@ class StreamChatClient {
   /// Flag a message
   Future<EmptyResponse> flagMessage(String messageId) => _chatApi.moderation.flagMessage(messageId);
 
-  /// Unflag a message
+  /// Unflag a message.
+  ///
+  /// The `/moderation/unflag` endpoint is no longer processed by the server:
+  /// the request is validated and an empty response is returned, but no flag
+  /// is removed.
+  @Deprecated(
+    'The /moderation/unflag endpoint is no longer supported by the server. '
+    'This will be removed in a future major release',
+  )
   Future<EmptyResponse> unflagMessage(String messageId) => _chatApi.moderation.unflagMessage(messageId);
 
   /// Flag a user
   Future<EmptyResponse> flagUser(String userId) => _chatApi.moderation.flagUser(userId);
 
-  /// Unflag a message
+  /// Unflag a user.
+  ///
+  /// The `/moderation/unflag` endpoint is no longer processed by the server:
+  /// the request is validated and an empty response is returned, but no flag
+  /// is removed.
+  @Deprecated(
+    'The /moderation/unflag endpoint is no longer supported by the server. '
+    'This will be removed in a future major release',
+  )
   Future<EmptyResponse> unflagUser(String userId) => _chatApi.moderation.unflagUser(userId);
 
   /// Mark all channels for this user as read
