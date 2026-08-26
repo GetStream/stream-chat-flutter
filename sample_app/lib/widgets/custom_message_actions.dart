@@ -14,21 +14,24 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///   → _ReminderActions    (remind me, save for later, edit/remove reminder)
 ///   → _DeleteForMeAction  (delete message for current user only)
 ///   → _MessageInfoAction  (show message delivery info sheet)
+///   → _TranslateMessageAction (translate message on request)
 /// ```
 Widget customMessageItemBuilder(
   BuildContext context,
   StreamMessageItemProps props,
 ) {
+  final message = props.message;
+
   return DefaultStreamMessageItem(
     props: props.copyWith(
       actionsBuilder: (context, defaultActions) {
-        final message = props.message;
         return StreamContextMenuAction.partitioned(
           items: [
             ...defaultActions,
             ..._ReminderActions.build(context, message),
             ..._DeleteForMeAction.build(context, message),
             ..._MessageInfoAction.build(context, message),
+            ..._TranslateMessageAction.build(context, message),
           ],
         );
       },
@@ -199,5 +202,78 @@ abstract final class _MessageInfoAction {
         onTap: () => MessageInfoSheet.show(context: context, message: message),
       ),
     ];
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Translate action
+// ---------------------------------------------------------------------------
+
+/// Requests an on-request translation for a message.
+///
+/// `Channel.translateMessage` merges the result into the channel's local
+/// state, so the message's `i18n` map carries the translation and the SDK's
+/// own message rendering (`StreamMessageText`,
+/// `DefaultStreamMessageHeader`) picks it up automatically — this sample app
+/// only needs to ask for it.
+///
+/// Only shown for messages from other users — translating your own message
+/// isn't a useful action — and always translates directly to the current
+/// user's [User.language], with no language picker. Hidden entirely when
+/// that isn't set, rather than guessing a target language.
+abstract final class _TranslateMessageAction {
+  static List<StreamContextMenuAction> build(
+    BuildContext context,
+    Message message,
+  ) {
+    if (!context.sampleAppConfig.enableMessageTranslation) return const [];
+    if (message.deletedAt != null) return const [];
+    if (message.text == null || message.text!.isEmpty) return const [];
+
+    final currentUser = StreamChat.of(context).currentUser;
+    final isSentByCurrentUser = message.user?.id == currentUser?.id;
+    if (isSentByCurrentUser) return const [];
+
+    // The SDK renders translations for the user's own language, so that is
+    // what we ask the backend for. Set at login by `AuthController.connect`.
+    final language = currentUser?.language;
+    if (language == null || language.isEmpty) return const [];
+
+    // Already covers the message's own language: the server includes a
+    // self-referential entry keyed by its source language, so this is also
+    // `true` when the original text is already in the display language —
+    // either way, there's nothing left to translate.
+    final alreadyTranslated = message.i18n?['${language}_text'] != null;
+
+    final icons = context.streamIcons;
+    return [
+      StreamContextMenuAction(
+        label: const Text('Translate Message'),
+        leading: Icon(icons.translate),
+        enabled: !alreadyTranslated,
+        onTap: () => _translateMessage(context, message, language),
+      ),
+    ];
+  }
+
+  static Future<void> _translateMessage(
+    BuildContext context,
+    Message message,
+    String language,
+  ) async {
+    final channel = StreamChannel.of(context).channel;
+    try {
+      // The SDK merges the translation into the channel state itself, which
+      // is all the message widgets need to pick it up.
+      await channel.translateMessage(message.id, language);
+    } catch (e) {
+      if (!context.mounted) return;
+      StreamSnackbarMessenger.of(context).show(
+        StreamSnackbar(
+          message: Text('Failed to translate message: $e'),
+          variant: .error,
+        ),
+      );
+    }
   }
 }

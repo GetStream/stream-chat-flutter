@@ -134,9 +134,9 @@ class WebSocket with TimerHelper {
       _closeWebSocketChannel();
     }
     _webSocketChannel = webSocketChannelProvider?.call(uri) ?? WebSocketChannel.connect(uri);
-    // Connection failures (e.g. DNS errors during background) are delivered
-    // via the stream's onError below; ignore the duplicate signal on sink.done
-    // so it doesn't surface as an unhandled future error.
+    // Connect failures reach onError below; ignore the ready and sink.done
+    // duplicates so they aren't reported as unhandled errors.
+    _webSocketChannel?.ready.ignore();
     _webSocketChannel?.sink.done.ignore();
     _subscribeToWebSocketChannel();
   }
