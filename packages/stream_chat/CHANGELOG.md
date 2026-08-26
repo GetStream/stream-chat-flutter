@@ -4,6 +4,10 @@
 
 - Raised minimum Dart SDK to `^3.12.0`.
 
+⚠️ Deprecated
+
+- Deprecated `StreamChatClient.unflagMessage` and `StreamChatClient.unflagUser`. The `/moderation/unflag` endpoint is no longer supported by the server and the calls have no effect; both methods will be removed in a future major release.
+
 ## 10.3.0
 
 ✅ Added
