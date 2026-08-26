@@ -678,11 +678,6 @@ class DefaultStreamMessageItem extends StatelessWidget {
     final translations = context.translations;
     final currentUser = StreamChat.maybeOf(context)?.currentUser;
 
-    // A deleted message drops the footer altogether, so there is no timestamp
-    // and no edited marker on screen to announce. Inventing them here would
-    // make the announcement disagree with what is rendered.
-    if (message.isDeleted) return _senderAwareBody(context, message, currentUser);
-
     final parts = [
       _senderAwareBody(context, message, currentUser),
       translations.accessibility.formatRecentDateTime(message.createdAt.toLocal()),
@@ -1345,9 +1340,6 @@ class _MessageRowSemantics extends StatelessWidget {
     required bool isMessageRead,
     required bool isMessageDelivered,
   }) {
-    // A deleted message shows no footer, so it has no delivery status either.
-    if (message.isDeleted) return null;
-
     final a11y = context.translations.accessibility;
 
     if (isMessageRead) return a11y.messageReadStatusLabel;

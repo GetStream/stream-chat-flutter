@@ -165,9 +165,17 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
     final spacing = context.streamSpacing;
     final crossAxisAlignment = core.StreamMessageLayout.crossAxisAlignmentOf(context);
 
-    // [DefaultStreamMessageItem]'s composed row label already speaks the
-    // deleted placeholder; excluding it here keeps the row a single stop.
-    if (widget.message.isDeleted) return const ExcludeSemantics(child: StreamMessageDeleted());
+    // A deleted message keeps its metadata: the design shows the timestamp and
+    // the delivery status below the placeholder, same as any other message.
+    if (widget.message.isDeleted) {
+      return core.StreamMessageContent(
+        header: widget.header,
+        footer: widget.footer,
+        // The composed row label already speaks the placeholder, so announcing
+        // it here as well would repeat it.
+        child: const ExcludeSemantics(child: StreamMessageDeleted()),
+      );
+    }
 
     return core.StreamMessageContent(
       header: widget.header,

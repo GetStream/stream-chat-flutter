@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_content.dart';
+import 'package:stream_chat_flutter/src/message_widget/components/stream_message_deleted.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 // A deterministic attachment renderer so the post-frame width measurement
@@ -62,6 +63,8 @@ Future<void> pumpContent(
   WidgetTester tester, {
   required Message message,
   required Key layoutKey,
+  Widget? header,
+  Widget? footer,
 }) {
   return tester.pumpWidget(
     MaterialApp(
@@ -77,7 +80,11 @@ Future<void> pumpContent(
               body: Center(
                 child: SizedBox(
                   width: 300,
-                  child: StreamMessageContent(message: message),
+                  child: StreamMessageContent(
+                    message: message,
+                    header: header,
+                    footer: footer,
+                  ),
                 ),
               ),
             ),
@@ -171,4 +178,29 @@ void main() {
       );
     },
   );
+
+  // The design shows a deleted message with its timestamp and delivery status
+  // below the placeholder, same as any other message. The deleted branch used
+  // to return the bare bubble and drop both slots.
+  testWidgets('keeps the header and footer slots for a deleted message', (tester) async {
+    final message = Message(
+      id: 'deleted-message',
+      type: MessageType.deleted,
+      state: MessageState.softDeleted,
+      user: User(id: 'u1', name: 'Alice'),
+    );
+
+    await pumpContent(
+      tester,
+      message: message,
+      layoutKey: GlobalKey<_LayoutHolderState>(),
+      header: const Text('HEADER'),
+      footer: const Text('FOOTER'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(StreamMessageDeleted), findsOneWidget);
+    expect(find.text('FOOTER'), findsOneWidget);
+    expect(find.text('HEADER'), findsOneWidget);
+  });
 }

@@ -277,9 +277,9 @@ void main() {
       await tester.pumpAndSettle();
 
       final labels = labelsOf(tester);
-      // No timestamp: a deleted message renders no footer, so announcing one
-      // would describe something that is not on screen.
-      expect(labels, contains('OUT-DEL:Message deleted'));
+      // A deleted message keeps its footer, so the time and the delivery
+      // status are on screen and belong in the announcement.
+      expect(labels, contains('OUT-DEL:Message deleted, AT-TIME, Sent'));
       // The placeholder inside the bubble would otherwise repeat it.
       expect(labels.where((it) => it.contains('Message deleted')), hasLength(1));
       // A deleted message is not something the sender said.
@@ -299,7 +299,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final labels = labelsOf(tester);
-      expect(labels, contains('IN-DEL:Han Solo:Message deleted'));
+      expect(labels, contains('IN-DEL:Han Solo:Message deleted, AT-TIME'));
       expect(labels.where((it) => it.startsWith('IN:')), isEmpty);
 
       handle.dispose();
@@ -354,7 +354,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final announced = labelsOf(tester).singleWhere((it) => it.contains('Message deleted'));
-      expect(announced, 'You, Message deleted');
+      expect(announced, startsWith('You, Message deleted, '));
 
       handle.dispose();
     });
