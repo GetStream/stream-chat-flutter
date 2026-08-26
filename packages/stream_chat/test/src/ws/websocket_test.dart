@@ -35,6 +35,7 @@ void main() {
 
     webSocketSink = MockWebSocketSink();
     when(() => webSocketChannel.sink).thenReturn(webSocketSink);
+    when(() => webSocketChannel.ready).thenAnswer((_) async {});
 
     var webSocketController = StreamController<String>.broadcast();
     when(() => webSocketChannel.stream).thenAnswer(
@@ -91,6 +92,36 @@ void main() {
     expect(event.connectionId, connectionId);
     expect(event.me, isNotNull);
     expect(event.me!.id, user.id);
+
+    addTearDown(timer.cancel);
+  });
+
+  test('`connect` does not orphan the channel `ready` error', () async {
+    // A failed connect completes `ready` with an error on top of the error it
+    // delivers on the stream. Left unlistened, that duplicate is reported to
+    // the zone as an unhandled error. https://github.com/GetStream/stream-chat-flutter/issues/2921
+    when(() => webSocketChannel.ready).thenAnswer(
+      (_) => Future<void>.error(WebSocketChannelException('connect failed')),
+    );
+
+    final user = OwnUser(id: 'test-user');
+    const connectionId = 'test-connection-id';
+    // Sends connect event to web-socket stream
+    final timer = Timer(const Duration(milliseconds: 300), () {
+      final event = Event(
+        type: EventType.healthCheck,
+        connectionId: connectionId,
+        me: user,
+      );
+      webSocketSink.add(json.encode(event));
+    });
+
+    await webSocket.connect(user);
+
+    verify(() => webSocketChannel.ready).called(1);
+    // Guards against `ready` being read but its error dropped: the orphan would
+    // surface here and fail the test.
+    await pumpEventQueue();
 
     addTearDown(timer.cancel);
   });

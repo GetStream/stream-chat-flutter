@@ -2,6 +2,7 @@
 
 ✅ Added
 
+- Added message-translation strings for all supported locales: `translatedLabel`, `originalLabel`, `showOriginalLabel`, `showTranslationLabel`, and `translatedFromLanguageText(String languageCode)`, which names the source language of a translated message in the current locale.
 - Added the message-list a11y strings behind the new screen-reader announcements: `outgoingMessageLabel` / `incomingMessageLabel`, `outgoingDeletedMessageLabel` / `incomingDeletedMessageLabel`, `repliedToOwnMessageLabel` / `repliedToMessageLabel`, `attachmentPositionLabel`, and `messageFailedStatusLabel`. Every supported locale ships a native-language implementation.
 
 🔄 Changed

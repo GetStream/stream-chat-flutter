@@ -794,6 +794,21 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String reminderAtText(String time) => 'Heute um $time';
 
   @override
+  String get translatedLabel => 'Übersetzt';
+
+  @override
+  String get originalLabel => 'Original';
+
+  @override
+  String get showOriginalLabel => 'Original anzeigen';
+
+  @override
+  String get showTranslationLabel => 'Übersetzung anzeigen';
+
+  @override
+  String translatedFromLanguageText(String languageCode) => 'Übersetzt aus ${_languageNameDe(languageCode)}';
+
+  @override
   String get createPollPromptLabel => 'Erstelle eine Umfrage und lass alle abstimmen!';
 
   @override
@@ -1178,3 +1193,68 @@ class _AccessibilityTranslationsDe extends AccessibilityTranslations {
     return parts.join(', ');
   }
 }
+
+// Display name for each language code Stream Chat's translation API
+// supports (`Message.i18n['language']`). Falls back to the uppercased code
+// itself for anything unrecognized.
+String _languageNameDe(String code) => _languageNamesDe[code] ?? code.toUpperCase();
+
+const _languageNamesDe = <String, String>{
+  'af': 'Afrikaans',
+  'sq': 'Albanisch',
+  'am': 'Amharisch',
+  'ar': 'Arabisch',
+  'az': 'Aserbaidschanisch',
+  'bn': 'Bengalisch',
+  'bs': 'Bosnisch',
+  'bg': 'Bulgarisch',
+  'zh': 'Chinesisch (vereinfacht)',
+  'zh-TW': 'Chinesisch (traditionell)',
+  'hr': 'Kroatisch',
+  'cs': 'Tschechisch',
+  'da': 'Dänisch',
+  'fa-AF': 'Dari',
+  'nl': 'Niederländisch',
+  'en': 'Englisch',
+  'et': 'Estnisch',
+  'fi': 'Finnisch',
+  'fr': 'Französisch',
+  'fr-CA': 'Französisch (Kanada)',
+  'ka': 'Georgisch',
+  'de': 'Deutsch',
+  'el': 'Griechisch',
+  'ht': 'Haitianisches Kreol',
+  'ha': 'Haussa',
+  'he': 'Hebräisch',
+  'hi': 'Hindi',
+  'hu': 'Ungarisch',
+  'id': 'Indonesisch',
+  'it': 'Italienisch',
+  'ja': 'Japanisch',
+  'ko': 'Koreanisch',
+  'lv': 'Lettisch',
+  'lt': 'Litauisch',
+  'ms': 'Malaiisch',
+  'no': 'Norwegisch',
+  'fa': 'Persisch',
+  'ps': 'Paschtu',
+  'pl': 'Polnisch',
+  'pt': 'Portugiesisch',
+  'ro': 'Rumänisch',
+  'ru': 'Russisch',
+  'sr': 'Serbisch',
+  'sk': 'Slowakisch',
+  'sl': 'Slowenisch',
+  'so': 'Somali',
+  'es': 'Spanisch',
+  'es-MX': 'Spanisch (Mexiko)',
+  'sw': 'Swahili',
+  'sv': 'Schwedisch',
+  'tl': 'Tagalog',
+  'ta': 'Tamil',
+  'th': 'Thailändisch',
+  'tr': 'Türkisch',
+  'uk': 'Ukrainisch',
+  'ur': 'Urdu',
+  'vi': 'Vietnamesisch',
+};

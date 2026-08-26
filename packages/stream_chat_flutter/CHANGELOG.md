@@ -47,6 +47,9 @@
 - Added `onReactionTap` to `StreamMessageItem` and `StreamMessageListView`, reporting the tapped message's `BuildContext` and a `ReactionTapDetails` with the tapped `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction).
 - Exported `StreamEphemeralMessage`, the row `StreamMessageListView` builds for ephemeral messages, matching its already-exported `StreamSystemMessage` and `StreamModeratedMessage` siblings.
 - Added an `unreadIndicator` parameter to `StreamBackButton` that overlays a widget (typically a `StreamUnreadIndicator`) on the button's top-end corner. Pass `StreamUnreadIndicator(excludeCid: cid)` to show the total unread count of other channels, or `StreamUnreadIndicator.channels(cid: cid)` for a single channel's count.
+- Exported this package's `StreamMessageContent`, which was previously unreachable from `package:stream_chat_flutter/stream_chat_flutter.dart`.
+- Added `StreamChatConfigurationData.messageTranslation`, a `StreamMessageTranslationConfiguration` with `enabled` (default `true`) to display translations from `Message.i18n` and `annotationEnabled` (default `false`) to opt into a "Translated"/"Original" annotation with a toggle link.
+- Added `StreamMessageTranslationStore`, tracking which messages show their original text instead of their translation. `StreamChat` owns one and provides it through a `StreamMessageTranslations` scope, so every message list agrees on which text a message shows. Also drivable per widget via `showTranslatedText` and `onToggleTranslatedText`.
 
 ⚠️ Deprecated
 
@@ -57,6 +60,7 @@
 
 🐞 Fixed
 
+- Fixed message text and previews translating to English for users with no `User.language` set; they now show the original text.
 - Fixed a failed send surfacing as an unhandled async error when `StreamMessageComposer` has no `onError`; it is now reported through `FlutterError.reportError`.
 - Fixed the default `StreamChannel` loading and error states not being themed or localized; `StreamChat` now installs themed, connection-aware defaults, overridable per `StreamChannel` or via `DefaultStreamChannelBuilders`.
 - Fixed the default list/scroll-view error states (channel, message, member, user, thread, poll-vote, reaction, search, and photo) showing raw or fixed errors; they are now connection-aware (no internet / slow connection), falling back to each view's specific error text.

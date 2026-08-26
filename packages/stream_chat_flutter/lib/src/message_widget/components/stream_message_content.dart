@@ -44,6 +44,7 @@ class StreamMessageContent extends StatefulWidget {
     this.onReactionLongPress,
     this.onQuotedMessageTap,
     this.reactionSorting,
+    this.showTranslatedText = true,
   });
 
   /// The message to display.
@@ -127,6 +128,12 @@ class StreamMessageContent extends StatefulWidget {
   ///
   /// Passed through to [StreamMessageReactions.sorting].
   final Comparator<ReactionGroup>? reactionSorting;
+
+  /// Whether [message] should display its translation when [Message.i18n]
+  /// has one for the current user's language.
+  ///
+  /// Passed through to [StreamMessageText.showTranslatedText].
+  final bool showTranslatedText;
 
   @override
   State<StreamMessageContent> createState() => _StreamMessageContentState();
@@ -222,6 +229,7 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                             onLinkTap: widget.onLinkTap,
                             onMentionTap: widget.onMentionTap,
                             onAnyMentionTap: widget.onAnyMentionTap,
+                            showTranslatedText: widget.showTranslatedText,
                           ),
                         ),
                     ],

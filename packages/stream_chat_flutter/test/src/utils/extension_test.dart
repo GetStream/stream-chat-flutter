@@ -152,6 +152,110 @@ void main() {
   });
 
   group('Message Extension Tests', () {
+    const original = 'Hello, world!';
+    final message = Message(
+      text: original,
+      i18n: const {
+        'language': 'en',
+        'en_text': original,
+        'fr_text': 'Bonjour, monde!',
+      },
+    );
+
+    group('originalLanguage', () {
+      test('returns the language the message was written in', () {
+        expect(message.originalLanguage, 'en');
+      });
+
+      test('returns null when the message has no translations', () {
+        expect(Message(text: original).originalLanguage, isNull);
+      });
+
+      test('returns null when the language is unknown', () {
+        // The server omits the `language` key for messages it did not
+        // detect a language for.
+        final unknown = message.copyWith(i18n: const {'fr_text': 'Bonjour, monde!'});
+        expect(unknown.originalLanguage, isNull);
+
+        final empty = message.copyWith(i18n: const {'language': '', 'fr_text': 'Bonjour, monde!'});
+        expect(empty.originalLanguage, isNull);
+      });
+    });
+
+    group('translatedText', () {
+      test('returns the translation for the given language', () {
+        expect(message.translatedText('fr'), 'Bonjour, monde!');
+      });
+
+      test('returns null when the language has no translation', () {
+        expect(message.translatedText('de'), isNull);
+      });
+
+      test('returns null for a null or empty language', () {
+        expect(message.translatedText(null), isNull);
+        expect(message.translatedText(''), isNull);
+      });
+
+      test('returns null for the language the message was written in', () {
+        // The server echoes a self-referential `en_text` entry, which is not
+        // a translation of anything.
+        expect(message.translatedText('en'), isNull);
+      });
+
+      test('compares the original language case-insensitively', () {
+        expect(message.translatedText('EN'), isNull);
+
+        final uppercased = message.copyWith(
+          i18n: const {'language': 'EN', 'en_text': original, 'fr_text': 'Bonjour, monde!'},
+        );
+        expect(uppercased.translatedText('en'), isNull);
+      });
+
+      test('returns the translation when the original language is unknown', () {
+        final unknown = message.copyWith(i18n: const {'fr_text': 'Bonjour, monde!'});
+        expect(unknown.translatedText('fr'), 'Bonjour, monde!');
+      });
+    });
+
+    group('translate', () {
+      test('returns the translation for the given language', () {
+        expect(message.translate('fr').text, 'Bonjour, monde!');
+      });
+
+      test('returns the original text when the language has no translation', () {
+        expect(message.translate('de').text, original);
+      });
+
+      test('returns the original text for a null language', () {
+        expect(message.translate(null).text, original);
+      });
+
+      test('returns the original text for an empty language', () {
+        // Stream's API reports an unset `User.language` as `''` rather than
+        // omitting it, so an empty string must not be looked up as `_text`.
+        expect(message.translate('').text, original);
+      });
+
+      test('returns the same instance when there is nothing to translate', () {
+        expect(message.translate(null), same(message));
+        expect(message.translate(''), same(message));
+        expect(message.translate('de'), same(message));
+        expect(message.translate('en'), same(message));
+      });
+
+      test('returns the original text when the message has no translations', () {
+        final untranslated = Message(text: original);
+        expect(untranslated.translate('fr').text, original);
+      });
+
+      test('leaves the rest of the message untouched', () {
+        final translated = message.translate('fr');
+
+        expect(translated.id, message.id);
+        expect(translated.i18n, message.i18n);
+      });
+    });
+
     test('replaceMentions should replace user mentions with names and IDs', () {
       final user1 = User(id: 'user1', name: 'Alice');
       final user2 = User(id: 'user2', name: 'Bob');
