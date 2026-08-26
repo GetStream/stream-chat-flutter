@@ -116,9 +116,7 @@ extension IterableExtension<T> on Iterable<T> {
 extension PlatformFileX on PlatformFile {
   /// Converts the [PlatformFile] into [AttachmentFile]
   ///
-  /// Asynchronous since file_picker 12: `PlatformFile` no longer exposes the
-  /// eagerly-loaded `bytes`/`size` getters, the content is read on demand.
-  /// Mirrors [XFileX.toAttachmentFile] below.
+  /// Reads the file content on demand, so the result is asynchronous.
   Future<AttachmentFile> get toAttachmentFile async {
     final bytes = await readAsBytes();
     return AttachmentFile(

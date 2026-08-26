@@ -25,14 +25,6 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
     bool withReadStream = false,
     bool lockParentWindow = true,
   }) async {
-    // pickFile (singular) since file_picker 12: it returns the `PlatformFile?`
-    // this method already wanted, instead of a result wrapper we immediately
-    // took `.files.first` from — which threw on an empty selection.
-    //
-    // `withData` / `withReadStream` are no longer forwarded: file_picker 12
-    // deprecated them in favour of reading through PlatformFile.readAsBytes()
-    // / readAsByteStream(), which is what toAttachmentFile now does. They stay
-    // in this method's signature so this is not a breaking change for callers.
     final result = await FilePicker.pickFile(
       dialogTitle: dialogTitle,
       initialDirectory: initialDirectory,
@@ -40,6 +32,8 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
       allowedExtensions: allowedExtensions,
       onFileLoading: onFileLoading,
       compressionQuality: compressionQuality,
+      windowsOptions: WindowsOptions(lockParentWindow: lockParentWindow),
+      linuxOptions: LinuxOptions(lockParentWindow: lockParentWindow),
     );
 
     return await result?.toAttachment(type: type.toAttachmentType());
