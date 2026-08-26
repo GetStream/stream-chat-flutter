@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sample_app/auth/auth_controller.dart';
 import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/utils/app_config.dart';
 import 'package:sample_app/widgets/channel_detail_sheet.dart';
 import 'package:sample_app/widgets/search_text_field.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -55,10 +57,16 @@ class _ChannelList extends State<ChannelList> {
       ],
     );
     if (searchQuery.isNotEmpty) _messageSearchListController.search(searchQuery);
+    // The predefined filter is a saved query living on the demo Stream app, so
+    // it 404s against any other backend. Anyone who pointed the app elsewhere
+    // gets the equivalent client-side filter instead.
+    final userId = _streamChat.currentUser!.id;
+    final predefinedFilter = authController.usingCustomBackend ? null : kChannelListPredefinedFilter;
     _channelListController = StreamChannelListController(
       client: _streamChat.client,
-      predefinedFilter: 'stream_chat_flutter_sample_app',
-      filterValues: {'user_id': _streamChat.currentUser!.id},
+      filter: predefinedFilter == null ? Filter.in_('members', [userId]) : null,
+      predefinedFilter: predefinedFilter,
+      filterValues: predefinedFilter == null ? null : {'user_id': userId},
       limit: 30,
     );
   }
