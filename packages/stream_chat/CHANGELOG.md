@@ -1,3 +1,9 @@
+## Upcoming
+
+⚠️ Deprecated
+
+- Deprecated `StreamChatClient.unflagMessage` and `StreamChatClient.unflagUser`. The `/moderation/unflag` endpoint is no longer supported by the server and the calls have no effect; both methods will be removed in a future major release.
+
 ## 9.28.0
 
 ✅ Added

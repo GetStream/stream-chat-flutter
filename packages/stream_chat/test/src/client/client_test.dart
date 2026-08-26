@@ -1,4 +1,5 @@
 // ignore_for_file: avoid_redundant_argument_values
+// ignore_for_file: deprecated_member_use_from_same_package
 
 import 'dart:async';
 
