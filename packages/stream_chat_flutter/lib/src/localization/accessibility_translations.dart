@@ -171,6 +171,40 @@ abstract class AccessibilityTranslations {
   /// when [senderName] is null.
   String incomingMessagePreviewLabel({String? senderName});
 
+  /// The screen-reader announcement for a message in the message list that the
+  /// current user sent, e.g. `"You said, are we still meeting tomorrow"`.
+  ///
+  /// [body] is the already-composed message body — the message text, or a type
+  /// label such as `"2 Photos"` for an attachment-only message. The sender and
+  /// the body form a single translation unit so every locale can order and
+  /// inflect the whole clause; some phrase it as "my message" rather than
+  /// "you said".
+  String outgoingMessageLabel({required String body});
+
+  /// The screen-reader announcement for a message in the message list received
+  /// from [senderName], e.g. `"Han Solo said, are we still meeting tomorrow"`.
+  ///
+  /// [senderName] is the sender's resolved, non-empty display name — callers
+  /// omit the announcement entirely when there is no name to announce, so
+  /// implementations can interpolate it directly. See [outgoingMessageLabel]
+  /// for [body].
+  String incomingMessageLabel({required String senderName, required String body});
+
+  /// The screen-reader announcement for a message the current user deleted,
+  /// e.g. `"You, Message deleted"`.
+  ///
+  /// [body] is the composed deleted-message placeholder. Phrased without
+  /// "said" — the sender did not author the placeholder, they deleted what
+  /// they had authored. See [outgoingMessageLabel] for why the body is part
+  /// of the string.
+  String outgoingDeletedMessageLabel({required String body});
+
+  /// The screen-reader announcement for a message [senderName] deleted, e.g.
+  /// `"Han Solo, Message deleted"`.
+  ///
+  /// See [outgoingDeletedMessageLabel] for [body] and the phrasing.
+  String incomingDeletedMessageLabel({required String senderName, required String body});
+
   /// The screen-reader type label for a poll last-message preview, e.g.
   /// `"Poll"`.
   ///
@@ -467,6 +501,22 @@ class DefaultAccessibilityTranslations extends AccessibilityTranslations {
   @override
   String incomingMessagePreviewLabel({String? senderName}) {
     return senderName ?? 'Message';
+  }
+
+  @override
+  String outgoingMessageLabel({required String body}) => 'You said, $body';
+
+  @override
+  String incomingMessageLabel({required String senderName, required String body}) {
+    return '$senderName said, $body';
+  }
+
+  @override
+  String outgoingDeletedMessageLabel({required String body}) => 'You, $body';
+
+  @override
+  String incomingDeletedMessageLabel({required String senderName, required String body}) {
+    return '$senderName, $body';
   }
 
   @override

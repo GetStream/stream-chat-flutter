@@ -165,7 +165,9 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
     final spacing = context.streamSpacing;
     final crossAxisAlignment = core.StreamMessageLayout.crossAxisAlignmentOf(context);
 
-    if (widget.message.isDeleted) return const StreamMessageDeleted();
+    // [DefaultStreamMessageItem]'s composed row label already speaks the
+    // deleted placeholder; excluding it here keeps the row a single stop.
+    if (widget.message.isDeleted) return const ExcludeSemantics(child: StreamMessageDeleted());
 
     return core.StreamMessageContent(
       header: widget.header,
@@ -202,11 +204,16 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                         attachmentBuilders: widget.attachmentBuilders,
                       ),
                       if (widget.message.text case final text? when text.isNotEmpty)
-                        StreamMessageText(
-                          message: widget.message,
-                          onLinkTap: widget.onLinkTap,
-                          onMentionTap: widget.onMentionTap,
-                          onAnyMentionTap: widget.onAnyMentionTap,
+                        // The composed row label speaks the message text, so
+                        // the rendered markdown stays out of the semantics tree
+                        // and the row is announced as one phrase.
+                        ExcludeSemantics(
+                          child: StreamMessageText(
+                            message: widget.message,
+                            onLinkTap: widget.onLinkTap,
+                            onMentionTap: widget.onMentionTap,
+                            onAnyMentionTap: widget.onAnyMentionTap,
+                          ),
                         ),
                     ],
                   ),

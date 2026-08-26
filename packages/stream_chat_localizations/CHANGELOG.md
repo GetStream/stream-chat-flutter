@@ -1,5 +1,9 @@
 ## Upcoming
 
+✅ Added
+
+- Added the message-list a11y strings `outgoingMessageLabel` ("You said, …") and `incomingMessageLabel` ("<name> said, …"), used to announce a message's sender and direction, along with `outgoingDeletedMessageLabel` ("You, …") and `incomingDeletedMessageLabel` ("<name>, …") for the deleted-message placeholder. Every supported locale ships a native-language implementation.
+
 🔄 Changed
 
 - Raised minimum Flutter to `>=3.44.0` and Dart SDK to `^3.12.0`.

@@ -977,6 +977,18 @@ class _AccessibilityTranslationsKo extends AccessibilityTranslations {
   }
 
   @override
+  String outgoingMessageLabel({required String body}) => '내 메시지, $body';
+
+  @override
+  String incomingMessageLabel({required String senderName, required String body}) => '$senderName님의 메시지, $body';
+
+  @override
+  String outgoingDeletedMessageLabel({required String body}) => '나, $body';
+
+  @override
+  String incomingDeletedMessageLabel({required String senderName, required String body}) => '$senderName님, $body';
+
+  @override
   String get pollPreviewLabel => '투표';
 
   @override

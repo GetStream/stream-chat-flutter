@@ -995,6 +995,18 @@ class _AccessibilityTranslationsEn extends AccessibilityTranslations {
   }
 
   @override
+  String outgoingMessageLabel({required String body}) => 'You said, $body';
+
+  @override
+  String incomingMessageLabel({required String senderName, required String body}) => '$senderName said, $body';
+
+  @override
+  String outgoingDeletedMessageLabel({required String body}) => 'You, $body';
+
+  @override
+  String incomingDeletedMessageLabel({required String senderName, required String body}) => '$senderName, $body';
+
+  @override
   String get pollPreviewLabel => 'Poll';
 
   @override

@@ -65,6 +65,13 @@ class StreamMessageFooterProps {
 ///  * **Sending status** — for the current user's own messages.
 ///  * **Timestamp** — always shown, formatted as a short time string.
 ///  * **Edited label** — when the message text has been updated.
+///
+/// The username, timestamp, and edited label are excluded from the semantics
+/// tree: [DefaultStreamMessageItem] speaks them as part of its composed row
+/// label, so announcing them here as well would add three extra focus stops
+/// per message. Only the sending status contributes a node of its own, because
+/// it tracks the channel read state live. A custom message layout that uses
+/// this footer without a row-level label should re-expose them.
 class DefaultStreamMessageFooter extends StatelessWidget {
   /// Creates a default message footer with the given [props].
   const DefaultStreamMessageFooter({super.key, required this.props});
@@ -80,7 +87,9 @@ class DefaultStreamMessageFooter extends StatelessWidget {
 
     Widget? usernameWidget;
     if (message.user case final user? when channelKind == .group && user.id != currentUser?.id) {
-      usernameWidget = Text(user.name, maxLines: 1, overflow: .ellipsis);
+      usernameWidget = ExcludeSemantics(
+        child: Text(user.name, maxLines: 1, overflow: .ellipsis),
+      );
     }
 
     Widget? statusWidget;
@@ -90,15 +99,19 @@ class DefaultStreamMessageFooter extends StatelessWidget {
 
     final Widget timestampWidget;
     if (message.createdAt case final createdAt) {
-      timestampWidget = StreamTimestamp(
-        date: createdAt.toLocal(),
-        formatter: (context, date) => Jiffy.parseFromDateTime(date).jm,
+      timestampWidget = ExcludeSemantics(
+        child: StreamTimestamp(
+          date: createdAt.toLocal(),
+          formatter: (context, date) => Jiffy.parseFromDateTime(date).jm,
+        ),
       );
     }
 
     Widget? editedWidget;
     if (message.messageTextUpdatedAt != null) {
-      editedWidget = Text(context.translations.editedMessageLabel);
+      editedWidget = ExcludeSemantics(
+        child: Text(context.translations.editedMessageLabel),
+      );
     }
 
     return core.StreamMessageMetadata(

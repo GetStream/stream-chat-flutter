@@ -3,6 +3,7 @@
 ✅ Added
 
 - Added `onReactionLongPress` to `StreamMessageItem` and `StreamMessageListView`, reporting the long-pressed message's `BuildContext` and a `ReactionLongPressDetails` with the `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction).
+- Added `semanticsLabel` to `StreamMessageItem` and `StreamMessageItemProps`, replacing the screen-reader announcement composed for a message row.
 
 ⚠️ Changed
 
@@ -15,6 +16,7 @@
 
 🐞 Fixed
 
+- Fixed messages announcing only their content: a screen reader now reads each message row as one phrase naming the sender and the direction — "You said, …" for your own messages, "<name> said, …" for everyone else's — followed by the message body, the time it was sent, and the edited marker, while the attachments, reaction chips, quoted message, replies row, and sending status stay individually reachable. A deleted message announces who deleted it in the same way, without the "said" — "You, Message deleted" / "<name>, Message deleted". A custom `messageBuilder` or `StreamMessageItem` component builder replaces the default layout and is responsible for its own label.
 - Fixed a crash on web when the message list rebuilt while messages were selectable, for example after opening the attachment picker.
 - Fixed the browser's native context menu reappearing over the message context menu on web after scrolling messages out of view or deleting one.
 - Fixed the SDK re-enabling the browser's native context menu on web in apps that had disabled it themselves.

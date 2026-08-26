@@ -94,7 +94,17 @@ class DefaultStreamMessageLeading extends core.NullableStatelessWidget {
     final theme = core.StreamMessageItemTheme.of(context);
     final avatarSize = theme.avatarSize ?? StreamAvatarSize.md;
 
-    Widget avatar = StreamUserAvatar(user: user, showOnlineIndicator: false);
+    Widget avatar = StreamUserAvatar(
+      user: user,
+      showOnlineIndicator: false,
+      // A tappable avatar is its own focus stop and needs words; an untappable
+      // one stays silent, because the composed row label already names the
+      // sender.
+      semanticsLabel: switch (props.onTap) {
+        null => null,
+        _ => user.name,
+      },
+    );
     if (props.onTap case final onTap?) {
       avatar = GestureDetector(behavior: .opaque, onTap: onTap, child: avatar);
     }

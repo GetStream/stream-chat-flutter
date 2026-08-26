@@ -493,6 +493,13 @@ void main() {
       expect(a11y.outgoingMessagePreviewLabel, isNotNull);
       expect(a11y.incomingMessagePreviewLabel(), isNotNull);
       expect(a11y.incomingMessagePreviewLabel(senderName: 'Alice'), isNotNull);
+      expect(a11y.outgoingMessageLabel(body: 'Hello'), isNotNull);
+      expect(a11y.incomingMessageLabel(senderName: 'Alice', body: 'Hello'), isNotNull);
+      expect(a11y.outgoingDeletedMessageLabel(body: 'Message deleted'), isNotNull);
+      expect(
+        a11y.incomingDeletedMessageLabel(senderName: 'Alice', body: 'Message deleted'),
+        isNotNull,
+      );
       expect(a11y.pollPreviewLabel, isNotNull);
       expect(a11y.draftPreviewLabel, isNotNull);
       expect(a11y.systemMessagePreviewLabel, isNotNull);
