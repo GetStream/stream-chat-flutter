@@ -119,6 +119,14 @@ abstract class AccessibilityTranslations {
   /// `title` when set.
   String imageAttachmentLabel({String? title});
 
+  /// The screen-reader position of one attachment within a gallery, e.g.
+  /// `"2 of 5"`.
+  ///
+  /// Combined with the type label as `"Photo, 2 of 5"`. [index] is 1-based.
+  /// Only announced for galleries, where otherwise identical tiles need
+  /// telling apart.
+  String attachmentPositionLabel({required int index, required int total});
+
   /// The tooltip for the play button on a sent voice-recording
   /// attachment.
   String get voiceRecordingPlayTooltip;
@@ -453,6 +461,11 @@ class DefaultAccessibilityTranslations extends AccessibilityTranslations {
   String imageAttachmentLabel({String? title}) {
     if (title == null || title.isEmpty) return 'Photo';
     return 'Photo, $title';
+  }
+
+  @override
+  String attachmentPositionLabel({required int index, required int total}) {
+    return '$index of $total';
   }
 
   @override

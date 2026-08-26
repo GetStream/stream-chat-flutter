@@ -493,6 +493,7 @@ void main() {
       expect(a11y.outgoingMessagePreviewLabel, isNotNull);
       expect(a11y.incomingMessagePreviewLabel(), isNotNull);
       expect(a11y.incomingMessagePreviewLabel(senderName: 'Alice'), isNotNull);
+      expect(a11y.attachmentPositionLabel(index: 2, total: 5), isNotNull);
       expect(a11y.outgoingMessageLabel(body: 'Hello'), isNotNull);
       expect(a11y.incomingMessageLabel(senderName: 'Alice', body: 'Hello'), isNotNull);
       expect(a11y.outgoingDeletedMessageLabel(body: 'Message deleted'), isNotNull);

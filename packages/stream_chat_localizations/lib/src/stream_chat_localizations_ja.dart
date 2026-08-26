@@ -926,6 +926,9 @@ class _AccessibilityTranslationsJa extends AccessibilityTranslations {
   }
 
   @override
+  String attachmentPositionLabel({required int index, required int total}) => '$total件中$index件目';
+
+  @override
   String get voiceRecordingPlayTooltip => '再生';
 
   @override

@@ -947,6 +947,9 @@ class _AccessibilityTranslationsEn extends AccessibilityTranslations {
   }
 
   @override
+  String attachmentPositionLabel({required int index, required int total}) => '$index of $total';
+
+  @override
   String get voiceRecordingPlayTooltip => 'Play';
 
   @override

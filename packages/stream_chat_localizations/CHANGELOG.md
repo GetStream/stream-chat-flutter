@@ -2,7 +2,7 @@
 
 ✅ Added
 
-- Added the message-list a11y strings `outgoingMessageLabel` ("You said, …") and `incomingMessageLabel` ("<name> said, …"), used to announce a message's sender and direction, along with `outgoingDeletedMessageLabel` ("You, …") and `incomingDeletedMessageLabel` ("<name>, …") for the deleted-message placeholder. Every supported locale ships a native-language implementation.
+- Added the message-list a11y strings `outgoingMessageLabel` ("You said, …") and `incomingMessageLabel` ("<name> said, …"), used to announce a message's sender and direction, along with `outgoingDeletedMessageLabel` ("You, …") and `incomingDeletedMessageLabel` ("<name>, …") for the deleted-message placeholder. Added `attachmentPositionLabel` ("2 of 5"), announced on gallery attachment tiles. Every supported locale ships a native-language implementation.
 
 🔄 Changed
 

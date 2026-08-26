@@ -929,6 +929,9 @@ class _AccessibilityTranslationsKo extends AccessibilityTranslations {
   }
 
   @override
+  String attachmentPositionLabel({required int index, required int total}) => '$total개 중 $index번째';
+
+  @override
   String get voiceRecordingPlayTooltip => '재생';
 
   @override
