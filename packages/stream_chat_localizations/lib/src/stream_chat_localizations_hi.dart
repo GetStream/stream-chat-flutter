@@ -796,6 +796,21 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String reminderAtText(String time) => 'आज $time पर';
 
   @override
+  String get translatedLabel => 'अनुवादित';
+
+  @override
+  String get originalLabel => 'मूल';
+
+  @override
+  String get showOriginalLabel => 'मूल देखें';
+
+  @override
+  String get showTranslationLabel => 'अनुवाद देखें';
+
+  @override
+  String translatedFromLanguageText(String languageCode) => '${_languageNameHi(languageCode)} से अनुवादित';
+
+  @override
   String get createPollPromptLabel => 'पोल बनाएं और सबको वोट करने दें!';
 
   @override
@@ -1153,3 +1168,68 @@ class _AccessibilityTranslationsHi extends AccessibilityTranslations {
     return parts.join(', ');
   }
 }
+
+// Display name for each language code Stream Chat's translation API
+// supports (`Message.i18n['language']`). Falls back to the uppercased code
+// itself for anything unrecognized.
+String _languageNameHi(String code) => _languageNamesHi[code] ?? code.toUpperCase();
+
+const _languageNamesHi = <String, String>{
+  'af': 'अफ़्रीकी',
+  'sq': 'अल्बानियाई',
+  'am': 'अम्हारी',
+  'ar': 'अरबी',
+  'az': 'अज़रबैजानी',
+  'bn': 'बंगाली',
+  'bs': 'बोस्नियाई',
+  'bg': 'बुल्गारियाई',
+  'zh': 'चीनी (सरलीकृत)',
+  'zh-TW': 'चीनी (पारंपरिक)',
+  'hr': 'क्रोएशियाई',
+  'cs': 'चेक',
+  'da': 'डैनिश',
+  'fa-AF': 'दारी',
+  'nl': 'डच',
+  'en': 'अंग्रेज़ी',
+  'et': 'एस्टोनियाई',
+  'fi': 'फ़िनिश',
+  'fr': 'फ़्रेंच',
+  'fr-CA': 'फ़्रेंच (कनाडा)',
+  'ka': 'जॉर्जियाई',
+  'de': 'जर्मन',
+  'el': 'यूनानी',
+  'ht': 'हाईटियन क्रियोल',
+  'ha': 'हौसा',
+  'he': 'हिब्रू',
+  'hi': 'हिन्दी',
+  'hu': 'हंगेरियाई',
+  'id': 'इंडोनेशियाई',
+  'it': 'इटालियन',
+  'ja': 'जापानी',
+  'ko': 'कोरियाई',
+  'lv': 'लातवियाई',
+  'lt': 'लिथुआनियाई',
+  'ms': 'मलय',
+  'no': 'नॉर्वेजियन',
+  'fa': 'फ़ारसी',
+  'ps': 'पश्तो',
+  'pl': 'पोलिश',
+  'pt': 'पॉर्चुगीज़',
+  'ro': 'रोमानियाई',
+  'ru': 'रूसी',
+  'sr': 'सर्बियाई',
+  'sk': 'स्लोवाक',
+  'sl': 'स्लोवेनियाई',
+  'so': 'सोमाली',
+  'es': 'स्पेनिश',
+  'es-MX': 'स्पेनिश (मेक्सिको)',
+  'sw': 'स्वाहिली',
+  'sv': 'स्वीडिश',
+  'tl': 'तागालोग',
+  'ta': 'तमिल',
+  'th': 'थाई',
+  'tr': 'तुर्की',
+  'uk': 'यूक्रेनियाई',
+  'ur': 'उर्दू',
+  'vi': 'वियतनामी',
+};

@@ -2,6 +2,7 @@
 
 🔄 Changed
 
+- `Channel.translateMessage` now merges the translated message into the channel state, so the translation reaches anything watching the channel without the caller applying the response itself.
 - Raised minimum Dart SDK to `^3.12.0`.
 
 ⚠️ Deprecated
