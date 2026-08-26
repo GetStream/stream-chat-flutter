@@ -610,11 +610,15 @@ class StreamChatClient {
       // connection recovered
       final cids = [...state.channels.keys.toSet()];
       if (cids.isNotEmpty) {
-        // Best-effort: this runs outside any future the caller can await, and
-        // the connection can drop again while it is in flight.
+        // Recovery is best-effort: the connection can drop again while it is
+        // in flight. Nothing awaits this method, so an error here would
+        // surface as an unhandled crash instead of reaching the app.
         try {
+          // Sync the persistence client if available
           if (persistenceEnabled) await sync(cids: cids);
 
+          // Recover the channels that were active before the connection was lost,
+          // only if the client is configured to do so.
           if (_recoverStateOnReconnect) {
             await queryChannelsOnline(
               filter: Filter.in_('cid', cids),
