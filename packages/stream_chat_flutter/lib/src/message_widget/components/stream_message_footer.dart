@@ -101,15 +101,12 @@ class DefaultStreamMessageFooter extends StatelessWidget {
       );
     }
 
-    final Widget timestampWidget;
-    if (message.createdAt case final createdAt) {
-      timestampWidget = ExcludeSemantics(
-        child: StreamTimestamp(
-          date: createdAt.toLocal(),
-          formatter: (context, date) => Jiffy.parseFromDateTime(date).jm,
-        ),
-      );
-    }
+    final timestampWidget = ExcludeSemantics(
+      child: StreamTimestamp(
+        date: message.createdAt.toLocal(),
+        formatter: (context, date) => Jiffy.parseFromDateTime(date).jm,
+      ),
+    );
 
     Widget? editedWidget;
     // A deleted message has no text left to have been edited, so the marker

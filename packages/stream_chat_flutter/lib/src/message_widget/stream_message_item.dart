@@ -1328,12 +1328,15 @@ class _MessageRowSemantics extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final label = this.label;
     final currentUser = StreamChat.maybeOf(context)?.currentUser;
     final isOwnMessage = message.user?.id == currentUser?.id;
 
     // Only the sender sees a delivery status, and a row with no label of its
-    // own has nothing to append it to.
-    if (!isOwnMessage || label == null) {
+    // own has nothing to append it to. An empty label is the documented way to
+    // leave a row unlabeled, so it counts as having none — otherwise the row
+    // would announce a bare ", Sent".
+    if (!isOwnMessage || label == null || label.isEmpty) {
       return Semantics(label: label, explicitChildNodes: true, child: child);
     }
 

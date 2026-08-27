@@ -954,7 +954,7 @@ class _AccessibilityTranslationsNo extends AccessibilityTranslations {
 
   @override
   String repliedToMessageLabel({required String replierName, required String authorName}) =>
-      '$replierName svarte på meldingen til $authorName';
+      '$replierName svarte på meldingen fra $authorName';
 
   @override
   String get voiceRecordingPlayTooltip => 'Spill av';

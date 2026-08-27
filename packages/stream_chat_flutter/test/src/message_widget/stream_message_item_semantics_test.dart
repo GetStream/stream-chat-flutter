@@ -438,6 +438,26 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('an empty semanticsLabel leaves the row unlabeled', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        buildScene(
+          message(user: currentUser),
+          semanticsLabel: '',
+          alignment: StreamMessageAlignment.end,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // An own message would otherwise have its delivery status appended to
+      // nothing, announcing a bare ", Sent".
+      expect(labelsOf(tester), isNot(contains(startsWith(','))));
+      expect(labelsOf(tester).where((it) => it.contains('Sent')), isEmpty);
+
+      handle.dispose();
+    });
+
     // Non-regression guards: these pass with and without the row label, and
     // exist to prove the label did not swallow the stops a screen-reader user
     // still needs to reach.

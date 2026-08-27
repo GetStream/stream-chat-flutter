@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -120,6 +121,10 @@ void main() {
   );
 
   group('semantics', () {
+    // Pinned, and away from midnight: `isToday` compares the date against
+    // `clock.now()`, so a live clock could reclassify "Today" mid-test.
+    final now = DateTime(2026, 8, 26, 15);
+
     Widget buildDivider({required DateTime date, bool uppercase = false}) {
       final client = MockClient();
       final clientState = MockClientState();
@@ -140,8 +145,10 @@ void main() {
     testWidgets('announces the date it shows, without a time', (tester) async {
       final handle = tester.ensureSemantics();
 
-      await tester.pumpWidget(buildDivider(date: DateTime.now()));
-      await tester.pumpAndSettle();
+      await withClock(Clock.fixed(now), () async {
+        await tester.pumpWidget(buildDivider(date: now));
+        await tester.pumpAndSettle();
+      });
 
       final node = tester.semantics.find(find.byType(StreamDateDivider));
       expect(node.label, 'Today');
@@ -156,8 +163,10 @@ void main() {
     testWidgets('is exposed as a header so days can be jumped between', (tester) async {
       final handle = tester.ensureSemantics();
 
-      await tester.pumpWidget(buildDivider(date: DateTime.now()));
-      await tester.pumpAndSettle();
+      await withClock(Clock.fixed(now), () async {
+        await tester.pumpWidget(buildDivider(date: now));
+        await tester.pumpAndSettle();
+      });
 
       expect(
         tester.semantics.find(find.byType(StreamDateDivider)),
@@ -170,8 +179,10 @@ void main() {
     testWidgets('announces the date unshouted when displayed uppercase', (tester) async {
       final handle = tester.ensureSemantics();
 
-      await tester.pumpWidget(buildDivider(date: DateTime.now(), uppercase: true));
-      await tester.pumpAndSettle();
+      await withClock(Clock.fixed(now), () async {
+        await tester.pumpWidget(buildDivider(date: now, uppercase: true));
+        await tester.pumpAndSettle();
+      });
 
       expect(find.text('TODAY'), findsOneWidget);
       // Some screen readers spell out all-caps words letter by letter.
