@@ -1377,34 +1377,12 @@ class _MessageRowSemantics extends StatelessWidget {
   }) {
     final translations = context.translations;
 
-    // While attachments upload the footer shows how many are done instead of a
-    // tick. Mirror that rather than flattening it to "Sending", so the
-    // announcement carries the same progress the reader can see.
-    final attachments = message.attachments;
-    if (message.state.isOutgoing && attachments.any((it) => it.type != AttachmentType.urlPreview)) {
-      final uploaded = attachments.where((it) => it.uploadState.isSuccess).length;
-      if (uploaded < attachments.length) {
-        return translations.attachmentsUploadProgressText(
-          completed: uploaded,
-          total: attachments.length,
+    return translations.attachmentUploadProgressLabel(message) ??
+        translations.messageDeliveryStatusLabel(
+          message,
+          isMessageRead: isMessageRead,
+          isMessageDelivered: isMessageDelivered,
         );
-      }
-    }
-
-    final a11y = translations.accessibility;
-
-    // A failed send is shown as a badge on the bubble rather than a footer
-    // tick, and the badge is a bare icon with no text of its own, so without
-    // this the row announces nothing about the failure.
-    if (message.state.isFailed || message.isBouncedWithError) {
-      return a11y.messageFailedStatusLabel;
-    }
-
-    if (isMessageRead) return a11y.messageReadStatusLabel;
-    if (isMessageDelivered) return a11y.messageDeliveredStatusLabel;
-    if (message.state.isCompleted) return a11y.messageSentStatusLabel;
-    if (message.state.isOutgoing) return a11y.messageSendingStatusLabel;
-    return null;
   }
 }
 
