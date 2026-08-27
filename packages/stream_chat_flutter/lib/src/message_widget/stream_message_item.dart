@@ -1330,7 +1330,13 @@ class _MessageRowSemantics extends StatelessWidget {
   Widget build(BuildContext context) {
     final label = this.label;
     final currentUser = StreamChat.maybeOf(context)?.currentUser;
-    final isOwnMessage = message.user?.id == currentUser?.id;
+
+    // Compared as nullables, an authorless message read by nobody signed in
+    // would match on `null == null` and claim a delivery status it never had.
+    final isOwnMessage = switch ((message.user, currentUser)) {
+      (final sender?, final reader?) => sender.id == reader.id,
+      _ => false,
+    };
 
     // Only the sender sees a delivery status, and a row with no label of its
     // own has nothing to append it to. An empty label is the documented way to

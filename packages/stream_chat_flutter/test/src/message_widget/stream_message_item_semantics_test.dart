@@ -98,6 +98,7 @@ void main() {
       Message message, {
       String? semanticsLabel,
       OwnUser? reader,
+      bool signedIn = true,
       StreamMessageAlignment alignment = StreamMessageAlignment.start,
       // Set to false to resolve the shipped English strings instead of the
       // sentinels, pinning what a user actually hears.
@@ -109,7 +110,10 @@ void main() {
       final channelState = MockChannelState();
 
       when(() => client.state).thenReturn(clientState);
-      final effectiveReader = reader ?? currentUser;
+      final effectiveReader = switch (signedIn) {
+        true => reader ?? currentUser,
+        false => null,
+      };
       when(() => clientState.currentUser).thenReturn(effectiveReader);
       when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(effectiveReader));
       when(() => channel.client).thenReturn(client);
@@ -454,6 +458,29 @@ void main() {
       // nothing, announcing a bare ", Sent".
       expect(labelsOf(tester), isNot(contains(startsWith(','))));
       expect(labelsOf(tester).where((it) => it.contains('Sent')), isEmpty);
+
+      handle.dispose();
+    });
+
+    testWidgets("does not take an authorless message for the reader's own", (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        buildScene(
+          Message(
+            id: 'authorless-message',
+            text: 'no one sent this',
+            createdAt: DateTime(2026, 8, 26, 15),
+            state: MessageState.sent,
+          ),
+          signedIn: false,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // A null author and a null reader used to compare equal, so the row
+      // claimed a delivery status for a message nobody sent.
+      expect(labelsOf(tester).first, 'no one sent this, AT-TIME');
 
       handle.dispose();
     });
