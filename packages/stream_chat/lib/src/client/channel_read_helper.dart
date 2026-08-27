@@ -10,7 +10,7 @@ extension ChannelReadHelper on ChannelClientState {
     return readStream.map((read) => read.userReadOf(userId: userId));
   }
 
-  /// Returns the list of [Read]s that have marked the given [msg] as read.
+  /// Returns the list of [Read]s that have marked the given [message] as read.
   ///
   /// The [Read] is considered to have read the message if:
   /// - The read user is not the sender of the message.
@@ -19,7 +19,7 @@ extension ChannelReadHelper on ChannelClientState {
     return read.readsOf(message: message);
   }
 
-  /// Stream of list of [Read]s that have marked the given [msg] as read.
+  /// Stream of list of [Read]s that have marked the given [message] as read.
   ///
   /// The [Read] is considered to have read the message if:
   /// - The read user is not the sender of the message.
