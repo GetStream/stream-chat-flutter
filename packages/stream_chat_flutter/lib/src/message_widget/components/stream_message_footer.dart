@@ -67,11 +67,13 @@ class StreamMessageFooterProps {
 ///  * **Timestamp** — always shown, formatted as a short time string.
 ///  * **Edited label** — when the message text has been updated.
 ///
-/// None of the four contributes to the semantics tree:
-/// [DefaultStreamMessageItem] speaks them all as part of its composed row
-/// label, so announcing them here as well would cost four extra focus stops
-/// per message that repeat what the row already said. A custom message layout
-/// that uses this footer without a row-level label should re-expose them.
+/// Inside a [StreamMessageRowLabelScope] none of the four contributes to the
+/// semantics tree: [DefaultStreamMessageItem] speaks them all as part of its
+/// composed row label, so announcing them here as well would cost four extra
+/// focus stops per message that repeat what the row already said. Outside one
+/// — [StreamGiphyEphemeralMessage], or a custom layout that uses this footer
+/// without a row-level label — they announce themselves, since nothing else
+/// would.
 class DefaultStreamMessageFooter extends StatelessWidget {
   /// Creates a default message footer with the given [props].
   const DefaultStreamMessageFooter({super.key, required this.props});
@@ -85,25 +87,31 @@ class DefaultStreamMessageFooter extends StatelessWidget {
     final currentUser = StreamChat.of(context).currentUser;
     final channelKind = core.StreamMessageLayout.channelKindOf(context);
 
+    // Inside a row that already speaks this metadata every part here would be
+    // a focus stop repeating what the row just said; outside one, dropping
+    // them would leave the metadata unannounced altogether.
+    final announcedByRow = StreamMessageRowLabelScope.isAnnouncedIn(context);
+    Widget hideFromRow(Widget child) {
+      if (!announcedByRow) return child;
+      return ExcludeSemantics(child: child);
+    }
+
     Widget? usernameWidget;
     if (message.user case final user? when channelKind == .group && user.id != currentUser?.id) {
-      usernameWidget = ExcludeSemantics(
-        child: Text(user.name, maxLines: 1, overflow: .ellipsis),
+      usernameWidget = hideFromRow(
+        Text(user.name, maxLines: 1, overflow: .ellipsis),
       );
     }
 
     Widget? statusWidget;
     if (message.user case final user? when user.id == currentUser?.id) {
-      // [DefaultStreamMessageItem] appends the delivery status to its composed
-      // row label, so the icon here would otherwise cost a second focus stop
-      // that announces nothing the row has not already said.
-      statusWidget = ExcludeSemantics(
-        child: StreamMessageSendingStatus(message: message),
+      statusWidget = hideFromRow(
+        StreamMessageSendingStatus(message: message),
       );
     }
 
-    final timestampWidget = ExcludeSemantics(
-      child: StreamTimestamp(
+    final timestampWidget = hideFromRow(
+      StreamTimestamp(
         date: message.createdAt.toLocal(),
         formatter: (context, date) => Jiffy.parseFromDateTime(date).jm,
       ),
@@ -113,8 +121,8 @@ class DefaultStreamMessageFooter extends StatelessWidget {
     // A deleted message has no text left to have been edited, so the marker
     // would describe history the reader can no longer see.
     if (message.messageTextUpdatedAt != null && !message.isDeleted) {
-      editedWidget = ExcludeSemantics(
-        child: Text(context.translations.editedMessageLabel),
+      editedWidget = hideFromRow(
+        Text(context.translations.editedMessageLabel),
       );
     }
 

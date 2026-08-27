@@ -457,7 +457,28 @@ void main() {
       // An own message would otherwise have its delivery status appended to
       // nothing, announcing a bare ", Sent".
       expect(labelsOf(tester), isNot(contains(startsWith(','))));
-      expect(labelsOf(tester).where((it) => it.contains('Sent')), isEmpty);
+
+      // The row makes no claim to speak for the message, so the footer keeps
+      // announcing its own parts rather than the message going silent.
+      expect(labelsOf(tester).where((it) => it == 'Sent'), hasLength(1));
+
+      handle.dispose();
+    });
+
+    testWidgets('an empty semanticsLabel leaves the message text audible', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        buildScene(
+          message(user: currentUser),
+          semanticsLabel: '',
+          alignment: StreamMessageAlignment.end,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Nothing composes a row label to speak the text, so the bubble has to.
+      expect(find.bySemanticsLabel('Are we still meeting tomorrow'), findsOneWidget);
 
       handle.dispose();
     });

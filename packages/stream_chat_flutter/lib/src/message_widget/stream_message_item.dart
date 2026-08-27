@@ -1344,7 +1344,7 @@ class _MessageRowSemantics extends StatelessWidget {
     // leave a row unlabeled, so it counts as having none — otherwise the row
     // would announce a bare ", Sent".
     if (!isOwnMessage || label == null || label.isEmpty) {
-      return Semantics(label: label, explicitChildNodes: true, child: child);
+      return _annotate(label, child);
     }
 
     final channel = StreamChannel.maybeOf(context)?.channel;
@@ -1352,8 +1352,8 @@ class _MessageRowSemantics extends StatelessWidget {
     return BetterStreamBuilder<List<Read>>(
       stream: channel?.state?.readStream,
       initialData: channel?.state?.read,
-      builder: (context, data) => Semantics(
-        label: [
+      builder: (context, data) => _annotate(
+        [
           label,
           ?_statusLabel(
             context,
@@ -1361,10 +1361,18 @@ class _MessageRowSemantics extends StatelessWidget {
             isMessageDelivered: data.deliveriesOf(message: message).isNotEmpty,
           ),
         ].join(', '),
-        explicitChildNodes: true,
-        child: child,
+        child,
       ),
     );
+  }
+
+  // Applies [label] to the row, and tells the fragments below that the row
+  // speaks for them. A row with no label of its own makes no such claim, so
+  // its fragments keep announcing themselves.
+  Widget _annotate(String? label, Widget child) {
+    final annotated = Semantics(label: label, explicitChildNodes: true, child: child);
+    if (label == null || label.isEmpty) return annotated;
+    return StreamMessageRowLabelScope(child: annotated);
   }
 
   // Mirrors what the message shows for the same state — the footer's
@@ -1384,6 +1392,33 @@ class _MessageRowSemantics extends StatelessWidget {
           isMessageDelivered: isMessageDelivered,
         );
   }
+}
+
+/// Marks a subtree whose metadata is already spoken by a composed row label.
+///
+/// [StreamMessageItem] announces the whole message row as a single phrase —
+/// sender, body, timestamp, edited marker and delivery status. The widgets
+/// that render those fragments consult this scope to decide whether to stay in
+/// the semantics tree: inside a row that already speaks them they step out, so
+/// the row is announced once instead of once per fragment, and outside one —
+/// [StreamGiphyEphemeralMessage], or any custom layout that reuses these
+/// components — they keep announcing themselves.
+///
+/// See also:
+///
+///  * [DefaultStreamMessageFooter], which excludes its metadata inside this
+///    scope and exposes it outside one.
+class StreamMessageRowLabelScope extends InheritedWidget {
+  /// Marks [child] as announced by an enclosing composed row label.
+  const StreamMessageRowLabelScope({super.key, required super.child});
+
+  /// Whether [context] sits inside a row that speaks its own composed label.
+  static bool isAnnouncedIn(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<StreamMessageRowLabelScope>() != null;
+  }
+
+  @override
+  bool updateShouldNotify(StreamMessageRowLabelScope oldWidget) => false;
 }
 
 StreamMention? _buildMention(Message message, core.StreamMentionType type, String id) {

@@ -3,11 +3,13 @@
 ✅ Added
 
 - Added `onReactionLongPress` to `StreamMessageItem` and `StreamMessageListView`, reporting the long-pressed message's `BuildContext` and a `ReactionLongPressDetails` with the `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction).
+- Added `StreamMessageRowLabelScope`, which marks a subtree whose metadata is already spoken by a composed row label. `StreamMessageFooter` and the message bubble stay out of the semantics tree inside one and announce themselves outside one.
 
 ⚠️ Changed
 
 - Long-pressing a reaction chip no longer opens the message actions modal; the chips always claim the long press. Left unset, `onReactionLongPress` defaults to opening the `ReactionDetailSheet`.
 - Tapping or long-pressing a reaction chip now opens the `ReactionDetailSheet` pre-filtered to that reaction; it previously opened unfiltered. Clustered and overflow chips map to no single reaction, so they still open unfiltered.
+- A deleted message now renders the timestamp and delivery status below the placeholder, matching the design, and no longer shows the "Edited" marker — there is no text left to have been edited.
 
 🔄 Changed
 

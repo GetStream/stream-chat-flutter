@@ -5,6 +5,7 @@ import 'package:stream_core_flutter/chat.dart' as core;
 
 import '../../attachment/builder/attachment_widget_builder.dart';
 import '../stream_message_attachments.dart';
+import '../stream_message_item.dart';
 import '../stream_quoted_message.dart';
 import 'stream_message_deleted.dart';
 import 'stream_message_reactions.dart';
@@ -173,6 +174,14 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
     final spacing = context.streamSpacing;
     final crossAxisAlignment = core.StreamMessageLayout.crossAxisAlignmentOf(context);
 
+    // Only a row that speaks its own composed label has already said what the
+    // bubble contains; without one the bubble is all a reader has.
+    final announcedByRow = StreamMessageRowLabelScope.isAnnouncedIn(context);
+    Widget hideFromRow(Widget child) {
+      if (!announcedByRow) return child;
+      return ExcludeSemantics(child: child);
+    }
+
     // A deleted message keeps its metadata: the design shows the timestamp and
     // the delivery status below the placeholder, same as any other message.
     if (widget.message.isDeleted) {
@@ -181,7 +190,7 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
         footer: widget.footer,
         // The composed row label already speaks the placeholder, so announcing
         // it here as well would repeat it.
-        child: const ExcludeSemantics(child: StreamMessageDeleted()),
+        child: hideFromRow(const StreamMessageDeleted()),
       );
     }
 
@@ -224,8 +233,20 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                         // The composed row label speaks the message text, so
                         // the rendered markdown stays out of the semantics tree
                         // and the row is announced as one phrase.
-                        ExcludeSemantics(
-                          child: StreamMessageText(
+                        //
+                        // This deliberately costs the inline link and mention
+                        // spans their own semantics nodes, so a screen reader
+                        // can read a link but not focus or activate it. The
+                        // alternative — a focus stop per span, each repeating
+                        // text the row just spoke — makes every message far
+                        // more tedious to move through than it makes the rare
+                        // link easier to reach. The SwiftUI and React Native
+                        // SDKs collapse plain text the same way, and reserve
+                        // per-child focus for polls, quotes and attachments,
+                        // which is what `explicitChildNodes` keeps reachable
+                        // here too.
+                        hideFromRow(
+                          StreamMessageText(
                             message: widget.message,
                             onLinkTap: widget.onLinkTap,
                             onMentionTap: widget.onMentionTap,
