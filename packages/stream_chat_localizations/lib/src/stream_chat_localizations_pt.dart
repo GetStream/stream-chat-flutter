@@ -968,10 +968,16 @@ class _AccessibilityTranslationsPt extends AccessibilityTranslations {
   String attachmentPositionLabel({required int index, required int total}) => '$index de $total';
 
   @override
-  String repliedToOwnMessageLabel({required String replierName}) => '$replierName respondeu à sua mensagem';
+  String outgoingReplyToOwnMessageLabel() => 'Você respondeu à sua própria mensagem';
 
   @override
-  String repliedToMessageLabel({required String replierName, required String authorName}) =>
+  String outgoingReplyToMessageLabel({required String authorName}) => 'Você respondeu à mensagem de $authorName';
+
+  @override
+  String incomingReplyToOwnMessageLabel({required String replierName}) => '$replierName respondeu à sua mensagem';
+
+  @override
+  String incomingReplyToMessageLabel({required String replierName, required String authorName}) =>
       '$replierName respondeu à mensagem de $authorName';
 
   @override

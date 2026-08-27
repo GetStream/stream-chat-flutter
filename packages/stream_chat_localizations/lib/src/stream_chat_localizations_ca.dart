@@ -967,10 +967,16 @@ class _AccessibilityTranslationsCa extends AccessibilityTranslations {
   String attachmentPositionLabel({required int index, required int total}) => '$index de $total';
 
   @override
-  String repliedToOwnMessageLabel({required String replierName}) => '$replierName ha respost al teu missatge';
+  String outgoingReplyToOwnMessageLabel() => 'Has respost al teu propi missatge';
 
   @override
-  String repliedToMessageLabel({required String replierName, required String authorName}) =>
+  String outgoingReplyToMessageLabel({required String authorName}) => 'Has respost al missatge de $authorName';
+
+  @override
+  String incomingReplyToOwnMessageLabel({required String replierName}) => '$replierName ha respost al teu missatge';
+
+  @override
+  String incomingReplyToMessageLabel({required String replierName, required String authorName}) =>
       '$replierName ha respost al missatge de $authorName';
 
   @override

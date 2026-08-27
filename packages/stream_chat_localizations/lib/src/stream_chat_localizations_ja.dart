@@ -944,10 +944,16 @@ class _AccessibilityTranslationsJa extends AccessibilityTranslations {
   String attachmentPositionLabel({required int index, required int total}) => '$total件中$index件目';
 
   @override
-  String repliedToOwnMessageLabel({required String replierName}) => '$replierNameがあなたのメッセージに返信しました';
+  String outgoingReplyToOwnMessageLabel() => '自分のメッセージに返信しました';
 
   @override
-  String repliedToMessageLabel({required String replierName, required String authorName}) =>
+  String outgoingReplyToMessageLabel({required String authorName}) => '$authorNameのメッセージに返信しました';
+
+  @override
+  String incomingReplyToOwnMessageLabel({required String replierName}) => '$replierNameがあなたのメッセージに返信しました';
+
+  @override
+  String incomingReplyToMessageLabel({required String replierName, required String authorName}) =>
       '$replierNameが$authorNameのメッセージに返信しました';
 
   @override

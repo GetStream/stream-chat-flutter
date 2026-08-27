@@ -966,10 +966,16 @@ class _AccessibilityTranslationsHi extends AccessibilityTranslations {
   String attachmentPositionLabel({required int index, required int total}) => '$total में से $index';
 
   @override
-  String repliedToOwnMessageLabel({required String replierName}) => '$replierName ने आपके संदेश का उत्तर दिया';
+  String outgoingReplyToOwnMessageLabel() => 'आपने अपने संदेश का उत्तर दिया';
 
   @override
-  String repliedToMessageLabel({required String replierName, required String authorName}) =>
+  String outgoingReplyToMessageLabel({required String authorName}) => 'आपने $authorName के संदेश का उत्तर दिया';
+
+  @override
+  String incomingReplyToOwnMessageLabel({required String replierName}) => '$replierName ने आपके संदेश का उत्तर दिया';
+
+  @override
+  String incomingReplyToMessageLabel({required String replierName, required String authorName}) =>
       '$replierName ने $authorName के संदेश का उत्तर दिया';
 
   @override

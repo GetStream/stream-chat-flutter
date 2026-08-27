@@ -969,10 +969,16 @@ class _AccessibilityTranslationsEs extends AccessibilityTranslations {
   String attachmentPositionLabel({required int index, required int total}) => '$index de $total';
 
   @override
-  String repliedToOwnMessageLabel({required String replierName}) => '$replierName respondió a tu mensaje';
+  String outgoingReplyToOwnMessageLabel() => 'Respondiste a tu propio mensaje';
 
   @override
-  String repliedToMessageLabel({required String replierName, required String authorName}) =>
+  String outgoingReplyToMessageLabel({required String authorName}) => 'Respondiste al mensaje de $authorName';
+
+  @override
+  String incomingReplyToOwnMessageLabel({required String replierName}) => '$replierName respondió a tu mensaje';
+
+  @override
+  String incomingReplyToMessageLabel({required String replierName, required String authorName}) =>
       '$replierName respondió al mensaje de $authorName';
 
   @override

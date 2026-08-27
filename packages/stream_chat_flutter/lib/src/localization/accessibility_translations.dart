@@ -120,22 +120,42 @@ abstract class AccessibilityTranslations {
   /// `title` when set.
   String imageAttachmentLabel({String? title});
 
-  /// The screen-reader label for a quoted-message preview whose quoted
-  /// message the current user wrote, e.g. `"Han Solo replied to your
+  /// The screen-reader label for a quoted-message preview where the current
+  /// user replied to their own message, e.g. `"You replied to your message"`.
+  ///
+  /// Combined with the quoted body as `"You replied to your message, see you
+  /// tomorrow"`.
+  ///
+  /// The four reply labels are split by who replied rather than composed from
+  /// a word for "you", because a locale that inflects its verb for person
+  /// cannot conjugate a name it is handed at runtime: German needs "Du hast
+  /// geantwortet" against "Han Solo hat geantwortet", and substituting "Du"
+  /// into the third-person form yields "Du hat geantwortet".
+  String outgoingReplyToOwnMessageLabel();
+
+  /// The screen-reader label for a quoted-message preview where the current
+  /// user replied to [authorName]'s message, e.g. `"You replied to Leia's
   /// message"`.
   ///
-  /// [replierName] is the author of the message doing the quoting, already
-  /// resolved to the word for "you" when that is the current user. Combined
-  /// with the quoted body as `"Han Solo replied to your message, see you
-  /// tomorrow"`.
-  String repliedToOwnMessageLabel({required String replierName});
+  /// See [outgoingReplyToOwnMessageLabel] for why the direction is part of the
+  /// method rather than a substituted name. [authorName] is part of the string
+  /// so every locale can form the possessive itself.
+  String outgoingReplyToMessageLabel({required String authorName});
 
-  /// The screen-reader label for a quoted-message preview whose quoted
-  /// message [authorName] wrote, e.g. `"You replied to Leia's message"`.
+  /// The screen-reader label for a quoted-message preview where [replierName]
+  /// replied to the current user's message, e.g. `"Han Solo replied to your
+  /// message"`.
   ///
-  /// See [repliedToOwnMessageLabel] for [replierName]. Both names are part of
-  /// the string so every locale can form the possessive itself.
-  String repliedToMessageLabel({
+  /// [replierName] is the author of the message doing the quoting.
+  String incomingReplyToOwnMessageLabel({required String replierName});
+
+  /// The screen-reader label for a quoted-message preview where [replierName]
+  /// replied to [authorName]'s message, e.g. `"Han Solo replied to Leia's
+  /// message"`.
+  ///
+  /// Both names are part of the string so every locale can form the possessive
+  /// itself.
+  String incomingReplyToMessageLabel({
     required String replierName,
     required String authorName,
   });
@@ -493,12 +513,22 @@ class DefaultAccessibilityTranslations extends AccessibilityTranslations {
   }
 
   @override
-  String repliedToOwnMessageLabel({required String replierName}) {
+  String outgoingReplyToOwnMessageLabel() {
+    return 'You replied to your message';
+  }
+
+  @override
+  String outgoingReplyToMessageLabel({required String authorName}) {
+    return "You replied to $authorName's message";
+  }
+
+  @override
+  String incomingReplyToOwnMessageLabel({required String replierName}) {
     return '$replierName replied to your message';
   }
 
   @override
-  String repliedToMessageLabel({
+  String incomingReplyToMessageLabel({
     required String replierName,
     required String authorName,
   }) {

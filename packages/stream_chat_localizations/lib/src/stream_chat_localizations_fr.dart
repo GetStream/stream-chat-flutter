@@ -971,10 +971,16 @@ class _AccessibilityTranslationsFr extends AccessibilityTranslations {
   String attachmentPositionLabel({required int index, required int total}) => '$index sur $total';
 
   @override
-  String repliedToOwnMessageLabel({required String replierName}) => '$replierName a répondu à votre message';
+  String outgoingReplyToOwnMessageLabel() => 'Vous avez répondu à votre propre message';
 
   @override
-  String repliedToMessageLabel({required String replierName, required String authorName}) =>
+  String outgoingReplyToMessageLabel({required String authorName}) => 'Vous avez répondu au message de $authorName';
+
+  @override
+  String incomingReplyToOwnMessageLabel({required String replierName}) => '$replierName a répondu à votre message';
+
+  @override
+  String incomingReplyToMessageLabel({required String replierName, required String authorName}) =>
       '$replierName a répondu au message de $authorName';
 
   @override

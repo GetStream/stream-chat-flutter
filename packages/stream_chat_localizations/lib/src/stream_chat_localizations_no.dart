@@ -950,10 +950,16 @@ class _AccessibilityTranslationsNo extends AccessibilityTranslations {
   String attachmentPositionLabel({required int index, required int total}) => '$index av $total';
 
   @override
-  String repliedToOwnMessageLabel({required String replierName}) => '$replierName svarte på meldingen din';
+  String outgoingReplyToOwnMessageLabel() => 'Du svarte på din egen melding';
 
   @override
-  String repliedToMessageLabel({required String replierName, required String authorName}) =>
+  String outgoingReplyToMessageLabel({required String authorName}) => 'Du svarte på meldingen fra $authorName';
+
+  @override
+  String incomingReplyToOwnMessageLabel({required String replierName}) => '$replierName svarte på meldingen din';
+
+  @override
+  String incomingReplyToMessageLabel({required String replierName, required String authorName}) =>
       '$replierName svarte på meldingen fra $authorName';
 
   @override

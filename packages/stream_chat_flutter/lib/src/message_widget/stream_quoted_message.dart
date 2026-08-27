@@ -131,33 +131,54 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
   // Describes the reply relationship the preview stands for: who replied, and
   // whose message they replied to. Returns null when there is no replying
   // message to attribute, leaving the author's name to be announced as shown.
+  //
+  // The current user replying is a separate label rather than their name
+  // swapped for the word "you", so a locale can conjugate the verb for the
+  // person doing the replying.
   String? _semanticsLabel(BuildContext context) {
     final replyMessage = props.replyMessage;
     if (replyMessage == null) return null;
 
-    final translations = context.translations;
-    final a11y = translations.accessibility;
-    final currentUser = StreamChat.maybeOf(context)?.currentUser;
-
-    final replier = switch (replyMessage.user) {
-      final user? when user.id == currentUser?.id => translations.youText,
-      final user? when user.name.trim().isNotEmpty => user.name.trim(),
-      _ => null,
-    };
-
+    final replier = replyMessage.user;
     if (replier == null) return null;
 
     final quotedAuthor = props.quotedMessage.user;
     if (quotedAuthor == null) return null;
 
-    if (quotedAuthor.id == currentUser?.id) {
-      return a11y.repliedToOwnMessageLabel(replierName: replier);
+    final a11y = context.translations.accessibility;
+    final currentUser = StreamChat.maybeOf(context)?.currentUser;
+
+    // Compared as nullables, an authorless message read by nobody signed in
+    // would match on `null == null` and be announced as the reader's own.
+    bool isCurrentUser(User user) => switch (currentUser) {
+      final reader? => user.id == reader.id,
+      _ => false,
+    };
+
+    final repliedToOwnMessage = isCurrentUser(quotedAuthor);
+
+    if (isCurrentUser(replier)) {
+      if (repliedToOwnMessage) return a11y.outgoingReplyToOwnMessageLabel();
+
+      final authorName = quotedAuthor.name.trim();
+      if (authorName.isEmpty) return null;
+
+      return a11y.outgoingReplyToMessageLabel(authorName: authorName);
+    }
+
+    // With no name there is nothing to attribute the reply to, so the preview
+    // falls back to announcing the author's name as shown.
+    final replierName = replier.name.trim();
+    if (replierName.isEmpty) return null;
+
+    if (repliedToOwnMessage) {
+      return a11y.incomingReplyToOwnMessageLabel(replierName: replierName);
     }
 
     final authorName = quotedAuthor.name.trim();
     if (authorName.isEmpty) return null;
 
-    return a11y.repliedToMessageLabel(replierName: replier, authorName: authorName);
+    return a11y.incomingReplyToMessageLabel(replierName: replierName, authorName: authorName);
   }
 
   @override
