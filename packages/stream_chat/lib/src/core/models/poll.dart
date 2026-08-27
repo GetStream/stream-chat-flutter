@@ -1,12 +1,13 @@
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/models/comparable_field.dart';
-import 'package:stream_chat/src/core/models/poll_option.dart';
-import 'package:stream_chat/src/core/models/poll_vote.dart';
-import 'package:stream_chat/src/core/models/user.dart';
-import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:uuid/uuid.dart';
+
+import '../util/serializer.dart';
+import 'comparable_field.dart';
+import 'poll_option.dart';
+import 'poll_vote.dart';
+import 'user.dart';
 
 part 'poll.g.dart';
 

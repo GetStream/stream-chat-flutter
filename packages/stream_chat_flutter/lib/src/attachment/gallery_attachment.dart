@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/misc/flex_grid.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../stream_chat_flutter.dart';
+import '../misc/flex_grid.dart';
 
 /// A responsive grid layout for multiple media attachments.
 ///

@@ -4,12 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sample_app/auth/auth_controller.dart';
-import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/utils/app_config.dart';
-import 'package:sample_app/widgets/channel_detail_sheet.dart';
-import 'package:sample_app/widgets/search_text_field.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../auth/auth_controller.dart';
+import '../routes/routes.dart';
+import '../utils/app_config.dart';
+import 'channel_detail_sheet.dart';
+import 'search_text_field.dart';
 
 class ChannelList extends StatefulWidget {
   const ChannelList({super.key});

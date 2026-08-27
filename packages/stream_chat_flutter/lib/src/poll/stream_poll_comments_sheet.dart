@@ -1,17 +1,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/components/avatar/stream_user_avatar.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/src/misc/timestamp.dart';
-import 'package:stream_chat_flutter/src/poll/interactor/poll_add_comment_dialog.dart';
-import 'package:stream_chat_flutter/src/scroll_view/poll_vote_scroll_view/stream_poll_vote_list_view.dart';
-import 'package:stream_chat_flutter/src/theme/poll_card_style.dart';
-import 'package:stream_chat_flutter/src/theme/poll_comments_sheet_theme.dart';
-import 'package:stream_chat_flutter/src/theme/poll_option_votes_style.dart';
-import 'package:stream_chat_flutter/src/utils/date_formatter.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
+
+import '../components/avatar/stream_user_avatar.dart';
+import '../misc/empty_widget.dart';
+import '../misc/timestamp.dart';
+import '../scroll_view/poll_vote_scroll_view/stream_poll_vote_list_view.dart';
+import '../theme/poll_card_style.dart';
+import '../theme/poll_comments_sheet_theme.dart';
+import '../theme/poll_option_votes_style.dart';
+import '../utils/date_formatter.dart';
+import '../utils/extensions.dart';
+import 'interactor/poll_add_comment_dialog.dart';
 
 /// {@template showStreamPollCommentsSheet}
 /// Displays an interactive bottom sheet to show all the comments for a poll.

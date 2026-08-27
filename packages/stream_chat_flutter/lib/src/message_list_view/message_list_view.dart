@@ -5,17 +5,18 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:stream_chat_flutter/src/message_list_view/floating_date_divider.dart';
-import 'package:stream_chat_flutter/src/message_list_view/loading_indicator.dart';
-import 'package:stream_chat_flutter/src/message_list_view/mlv_utils.dart';
-import 'package:stream_chat_flutter/src/message_list_view/stream_message_list_empty_state.dart';
-import 'package:stream_chat_flutter/src/message_list_view/stream_message_list_skeleton_loading.dart';
-import 'package:stream_chat_flutter/src/message_list_view/thread_separator.dart';
-import 'package:stream_chat_flutter/src/message_list_view/unread_messages_separator.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/src/utils/network_error_text.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../scrollable_positioned_list/scrollable_positioned_list.dart';
+import '../../stream_chat_flutter.dart';
+import '../misc/empty_widget.dart';
+import '../utils/network_error_text.dart';
+import 'floating_date_divider.dart';
+import 'loading_indicator.dart';
+import 'mlv_utils.dart';
+import 'stream_message_list_empty_state.dart';
+import 'stream_message_list_skeleton_loading.dart';
+import 'thread_separator.dart';
+import 'unread_messages_separator.dart';
 
 /// Spacing Types (These are properties of a message to help inform the decision
 /// of how much space / which widget to build after it)

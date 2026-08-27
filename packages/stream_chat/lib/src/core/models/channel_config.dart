@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/models/chat_preferences.dart';
-import 'package:stream_chat/src/core/models/command.dart';
-import 'package:stream_chat/src/core/models/push_level.dart';
+import 'chat_preferences.dart';
+import 'command.dart';
+import 'push_level.dart';
 
 part 'channel_config.g.dart';
 

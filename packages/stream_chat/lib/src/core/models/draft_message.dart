@@ -1,11 +1,12 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/models/attachment.dart';
-import 'package:stream_chat/src/core/models/message.dart';
-import 'package:stream_chat/src/core/models/poll.dart';
-import 'package:stream_chat/src/core/models/user.dart';
-import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:uuid/uuid.dart';
+
+import '../util/serializer.dart';
+import 'attachment.dart';
+import 'message.dart';
+import 'poll.dart';
+import 'user.dart';
 
 part 'draft_message.g.dart';
 

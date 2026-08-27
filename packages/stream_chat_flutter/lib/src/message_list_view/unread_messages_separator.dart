@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
+
+import '../../stream_chat_flutter.dart';
 
 /// {@template unreadMessagesSeparator}
 /// A full-width banner that marks the boundary between read and unread

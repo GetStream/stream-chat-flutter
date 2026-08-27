@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import 'package:stream_chat_flutter_example/debug/error_dialog.dart';
+import '../error_dialog.dart';
 
 class DebugUnmuteUser extends StatelessWidget {
   const DebugUnmuteUser({

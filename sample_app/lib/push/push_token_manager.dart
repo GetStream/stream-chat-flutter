@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart' show debugPrint;
-import 'package:sample_app/push/push_provider.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide PushProvider;
+
+import 'push_provider.dart';
 
 /// Mirrors push tokens to [client] for the current platform.
 ///

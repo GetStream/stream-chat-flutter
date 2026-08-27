@@ -1,7 +1,7 @@
 // ignore_for_file: avoid_positional_boolean_parameters
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:stream_chat/src/core/models/message_delete_scope.dart';
+import 'message_delete_scope.dart';
 
 part 'message_state.freezed.dart';
 part 'message_state.g.dart';

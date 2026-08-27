@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
-import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
+import 'paged_value_notifier.dart';
 
 /// The default reaction list page limit to load.
 const defaultReactionPagedLimit = 25;

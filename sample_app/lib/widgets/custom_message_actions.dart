@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:sample_app/config/sample_app_config.dart';
-import 'package:sample_app/widgets/message_info_sheet.dart';
-import 'package:sample_app/widgets/reminder_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../config/sample_app_config.dart';
+import 'message_info_sheet.dart';
+import 'reminder_dialog.dart';
 
 /// Custom [StreamComponentBuilder] for [StreamMessageItemProps] that
 /// composes app-specific message action customizations via a delegation

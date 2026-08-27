@@ -1,13 +1,13 @@
 import 'dart:convert';
 
-import 'package:stream_chat/src/core/api/requests.dart';
-import 'package:stream_chat/src/core/api/responses.dart';
-import 'package:stream_chat/src/core/api/sort_order.dart';
-import 'package:stream_chat/src/core/http/stream_http_client.dart';
-import 'package:stream_chat/src/core/models/filter.dart';
-import 'package:stream_chat/src/core/models/poll.dart';
-import 'package:stream_chat/src/core/models/poll_option.dart';
-import 'package:stream_chat/src/core/models/poll_vote.dart';
+import '../http/stream_http_client.dart';
+import '../models/filter.dart';
+import '../models/poll.dart';
+import '../models/poll_option.dart';
+import '../models/poll_vote.dart';
+import 'requests.dart';
+import 'responses.dart';
+import 'sort_order.dart';
 
 /// Defines the api dedicated to polls operations
 class PollsApi {

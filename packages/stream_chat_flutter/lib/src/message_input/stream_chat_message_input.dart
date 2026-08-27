@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_leading.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_trailing.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../stream_chat_flutter.dart';
+import '../components/message_composer/message_composer_input.dart';
+import '../components/message_composer/message_composer_leading.dart';
+import '../components/message_composer/message_composer_trailing.dart';
 
 /// A widget that shows the message composer.
 /// Uses the factory to show custom components or the default implementation.

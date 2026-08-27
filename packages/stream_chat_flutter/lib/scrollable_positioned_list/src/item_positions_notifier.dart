@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:stream_chat_flutter/scrollable_positioned_list/src/item_positions_listener.dart';
+import 'item_positions_listener.dart';
 
 /// Internal implementation of [ItemPositionsListener].
 class ItemPositionsNotifier implements ItemPositionsListener {

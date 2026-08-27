@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/poll/creator/poll_config_option.dart';
-import 'package:stream_chat_flutter/src/poll/creator/poll_option_reorderable_list_view.dart';
-import 'package:stream_chat_flutter/src/poll/creator/poll_question_text_field.dart';
-import 'package:stream_chat_flutter/src/theme/poll_creator_theme.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
+
+import '../../theme/poll_creator_theme.dart';
+import '../../utils/extensions.dart';
+import 'poll_config_option.dart';
+import 'poll_option_reorderable_list_view.dart';
+import 'poll_question_text_field.dart';
 
 /// {@template streamPollCreator}
 /// A widget that allows users to create a poll.

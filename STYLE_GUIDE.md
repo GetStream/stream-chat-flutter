@@ -62,7 +62,7 @@ document; the section link is provided.
 
 - Line width: **120 characters** (configured in `analysis_options.yaml`). Comments and
   docs follow the same limit.
-- Single quotes, package imports (never relative), trailing commas preserved, `const`
+- Single quotes, relative imports within a package's own `lib/`, trailing commas preserved, `const`
   wherever possible, `final` for locals that aren't reassigned. These are enforced by
   the linter — do not disable them.
 - Prefer named parameters for booleans (`avoid_positional_boolean_parameters`). A

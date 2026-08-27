@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sample_app/utils/client_extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../utils/client_extensions.dart';
 
 /// {@template channelDetailAction}
 /// A sealed class that represents the actions a user can pick from a
