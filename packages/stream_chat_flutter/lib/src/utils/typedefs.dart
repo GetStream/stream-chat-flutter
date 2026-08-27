@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_input/command_button.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../stream_chat_flutter.dart';
+import '../message_input/command_button.dart';
 
 /// {@template inProgressBuilder}
 /// A widget builder for representing in-progress attachment uploads.

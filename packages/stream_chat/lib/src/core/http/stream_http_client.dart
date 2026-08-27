@@ -3,15 +3,15 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
-import 'package:stream_chat/src/core/error/error.dart';
-import 'package:stream_chat/src/core/http/connection_id_manager.dart';
-import 'package:stream_chat/src/core/http/interceptor/additional_headers_interceptor.dart';
-import 'package:stream_chat/src/core/http/interceptor/auth_interceptor.dart';
-import 'package:stream_chat/src/core/http/interceptor/connection_id_interceptor.dart';
-import 'package:stream_chat/src/core/http/interceptor/logging_interceptor.dart';
-import 'package:stream_chat/src/core/http/stream_chat_dio_error.dart';
-import 'package:stream_chat/src/core/http/system_environment_manager.dart';
-import 'package:stream_chat/src/core/http/token_manager.dart';
+import '../error/error.dart';
+import 'connection_id_manager.dart';
+import 'interceptor/additional_headers_interceptor.dart';
+import 'interceptor/auth_interceptor.dart';
+import 'interceptor/connection_id_interceptor.dart';
+import 'interceptor/logging_interceptor.dart';
+import 'stream_chat_dio_error.dart';
+import 'system_environment_manager.dart';
+import 'token_manager.dart';
 
 part 'stream_http_client_options.dart';
 

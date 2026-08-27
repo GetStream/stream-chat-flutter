@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/src/stream_chat.dart';
-import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
-import 'package:stream_chat_flutter/src/utils/device_segmentation.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
+
+import '../../misc/empty_widget.dart';
+import '../../stream_chat.dart';
+import '../../stream_chat_configuration.dart';
+import '../../utils/device_segmentation.dart';
+import '../../utils/extensions.dart';
 
 /// Displays the translated markdown message text, reacting to the current
 /// user's language preference.

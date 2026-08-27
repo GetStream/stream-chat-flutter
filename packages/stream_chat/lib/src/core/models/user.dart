@@ -1,8 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/models/comparable_field.dart';
-import 'package:stream_chat/src/core/util/extension.dart';
-import 'package:stream_chat/src/core/util/serializer.dart';
+
+import '../util/extension.dart';
+import '../util/serializer.dart';
+import 'comparable_field.dart';
 
 part 'user.g.dart';
 

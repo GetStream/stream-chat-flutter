@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/components/avatar/stream_user_avatar.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
+
+import 'stream_user_avatar.dart';
 
 /// A widget that displays a stack of user avatars with overlap.
 ///

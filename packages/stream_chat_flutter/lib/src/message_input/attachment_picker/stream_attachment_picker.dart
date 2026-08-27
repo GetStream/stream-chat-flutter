@@ -4,9 +4,10 @@ import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart' show FileType;
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
-import 'package:stream_chat_flutter/src/message_input/attachment_picker/options/options.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../../stream_chat_flutter.dart';
+import '../../misc/empty_widget.dart';
+import 'options/options.dart';
 
 /// {@template streamAttachmentPickerOptionsBuilder}
 /// Signature for a function that creates a list of [AttachmentPickerOption]s

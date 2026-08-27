@@ -1,8 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/audio/audio_playlist_controller.dart';
 
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import '../../stream_chat_flutter.dart';
+import '../audio/audio_playlist_controller.dart';
 
 /// Signature for decorating each voice recording item in a playlist.
 ///

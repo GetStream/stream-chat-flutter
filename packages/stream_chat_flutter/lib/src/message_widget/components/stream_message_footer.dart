@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_sending_status.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
+
+import '../../../stream_chat_flutter.dart';
+import 'stream_message_sending_status.dart';
 
 /// Displays the row below the message bubble containing the author name,
 /// sending status, creation timestamp, and an edited indicator.

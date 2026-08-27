@@ -1,6 +1,6 @@
-import 'package:stream_chat/src/client/channel.dart';
-import 'package:stream_chat/src/core/models/message.dart';
-import 'package:stream_chat/src/core/models/own_user.dart';
+import '../../client/channel.dart';
+import '../models/message.dart';
+import '../models/own_user.dart';
 
 /// Provides validation rules for message operations.
 ///

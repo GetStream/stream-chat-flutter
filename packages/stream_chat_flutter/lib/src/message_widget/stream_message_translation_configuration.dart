@@ -1,4 +1,4 @@
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import '../../stream_chat_flutter.dart';
 
 /// {@template streamMessageTranslationConfiguration}
 /// Configures how messages that carry a translation in [Message.i18n] are

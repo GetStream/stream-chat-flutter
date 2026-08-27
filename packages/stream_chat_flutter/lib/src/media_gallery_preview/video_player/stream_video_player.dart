@@ -2,8 +2,9 @@ import 'dart:io';
 
 import 'package:chewie/chewie.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
+
+import '../../../stream_chat_flutter.dart';
 
 /// Plays a chat video attachment inside a [StreamMediaGalleryPreview].
 ///

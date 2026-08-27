@@ -5,10 +5,11 @@ import 'package:file_selector/file_selector.dart';
 import 'package:gal/gal.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:stream_chat_flutter/src/attachment/handler/common.dart';
-import 'package:stream_chat_flutter/src/attachment/handler/stream_attachment_handler_base.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
+
+import '../../../stream_chat_flutter.dart';
+import 'common.dart';
+import 'stream_attachment_handler_base.dart';
 
 /// StreamAttachmentHandler implementation for desktop.
 class StreamAttachmentHandlerDesktop extends StreamAttachmentHandler {

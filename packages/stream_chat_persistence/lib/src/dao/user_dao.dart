@@ -1,8 +1,8 @@
 import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
-import 'package:stream_chat_persistence/src/entity/users.dart';
-import 'package:stream_chat_persistence/src/mapper/user_mapper.dart';
+import '../db/drift_chat_database.dart';
+import '../entity/users.dart';
+import '../mapper/user_mapper.dart';
 
 part 'user_dao.g.dart';
 

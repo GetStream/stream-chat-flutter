@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/audio/audio_playlist_controller.dart';
-import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
-import 'package:stream_chat_flutter/src/audio/audio_sampling.dart' as sampling;
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../../stream_chat_flutter.dart';
+import '../../audio/audio_playlist_controller.dart';
+import '../../audio/audio_playlist_state.dart';
+import '../../audio/audio_sampling.dart' as sampling;
 
 const _kDefaultWaveformHeight = 20.0;
 const _kDefaultWaveformLimit = 35;

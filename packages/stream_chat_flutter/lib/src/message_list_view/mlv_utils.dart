@@ -1,8 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
+
+import '../../scrollable_positioned_list/scrollable_positioned_list.dart';
+import '../../stream_chat_flutter.dart';
 
 /// Determines at which point in the [MessageListView] the initial index should
 /// be.

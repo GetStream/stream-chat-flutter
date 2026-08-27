@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_action/message_action.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
+
+import '../utils/extensions.dart';
+import 'message_action.dart';
 
 /// {@template streamMessageActionsBuilder}
 /// A utility class that provides a builder for message actions

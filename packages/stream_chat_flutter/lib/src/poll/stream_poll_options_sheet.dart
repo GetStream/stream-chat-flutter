@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/src/poll/interactor/poll_options_list_view.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../stream_chat_flutter.dart';
+import '../misc/empty_widget.dart';
+import 'interactor/poll_options_list_view.dart';
 
 /// {@template showStreamPollOptionsSheet}
 /// Displays an interactive bottom sheet to show all the available options for

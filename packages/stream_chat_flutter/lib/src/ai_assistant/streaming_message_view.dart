@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:stream_chat_flutter/src/ai_assistant/stream_typewriter_builder.dart';
-import 'package:stream_chat_flutter/src/utils/device_segmentation.dart';
-import 'package:stream_chat_flutter/src/utils/helpers.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
+
+import '../utils/device_segmentation.dart';
+import '../utils/helpers.dart';
+import 'stream_typewriter_builder.dart';
 
 /// {@template streamingMessageView}
 /// A widget that displays a message in a streaming fashion. The message is

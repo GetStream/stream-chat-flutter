@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_base.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
+
+import '../../src/misc/empty_widget.dart';
+import 'platform_widget_base.dart';
 
 /// A widget that will only be built for the specific Platforms:
 ///

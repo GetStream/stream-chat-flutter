@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/message_list_view/auto_scroll_policy.dart';
+import 'auto_scroll_policy.dart';
 
 /// {@template streamMessageListConfiguration}
 /// Holds all behavior flags and non-theme, non-builder configuration for

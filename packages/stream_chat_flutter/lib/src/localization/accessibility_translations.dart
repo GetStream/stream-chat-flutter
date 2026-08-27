@@ -3,8 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
-import 'package:stream_chat_flutter/src/localization/translations.dart';
-import 'package:stream_chat_flutter/src/utils/date_formatter.dart';
+
+import '../utils/date_formatter.dart';
+import 'translations.dart';
 
 /// Defines the accessibility (a11y) resource values used by the Stream Chat
 /// widgets.
