@@ -343,7 +343,10 @@ void main() {
           ],
         );
 
-        return Channel.fromState(client, channelState);
+        final channel = Channel.fromState(client, channelState);
+        addTearDown(channel.dispose);
+
+        return channel;
       }
 
       test('is false when disabled and read receipts are unavailable', () {
