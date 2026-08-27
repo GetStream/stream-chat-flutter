@@ -762,7 +762,15 @@ class DefaultStreamMessageItem extends StatelessWidget {
       false => message,
     };
 
-    final announced = shown.replaceMentions(linkify: false);
+    final withMentions = shown.replaceMentions(linkify: false);
+
+    // The bubble renders the text as markdown. Announcing the source would
+    // spell out the bracket and paren syntax and read whole URLs aloud, so it
+    // is resolved to the text that is actually on screen.
+    final announced = switch (withMentions.text) {
+      final text? when text.isNotEmpty => withMentions.copyWith(text: text.markdownToPlainText),
+      _ => withMentions,
+    };
 
     return switch (formatter) {
       final AccessibleMessagePreviewFormatter it => it.formatMessageSemanticsLabel(

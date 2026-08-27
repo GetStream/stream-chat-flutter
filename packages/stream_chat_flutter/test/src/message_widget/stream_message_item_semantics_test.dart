@@ -502,6 +502,34 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('announces the rendered text rather than its markdown source', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        buildScene(message(text: 'check [our docs](https://getstream.io) now')),
+      );
+      await tester.pumpAndSettle();
+
+      // The bubble renders "check our docs now"; announcing the source would
+      // spell out the brackets and read the whole URL aloud.
+      expect(labelsOf(tester), contains('IN:Han Solo:check our docs now, AT-TIME'));
+
+      handle.dispose();
+    });
+
+    testWidgets('announces emphasised text without its markers', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        buildScene(message(text: 'that is **really** important')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(labelsOf(tester), contains('IN:Han Solo:that is really important, AT-TIME'));
+
+      handle.dispose();
+    });
+
     testWidgets('an empty semanticsLabel leaves the row unlabeled', (tester) async {
       final handle = tester.ensureSemantics();
 
