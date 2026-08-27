@@ -100,6 +100,7 @@ void main() {
       OwnUser? reader,
       bool signedIn = true,
       StreamMessageAlignment alignment = StreamMessageAlignment.start,
+      StreamMessageStackPosition stackPosition = StreamMessageStackPosition.single,
       // Set to true to render a channel that has not been watched yet, whose
       // read state is therefore unavailable.
       bool unwatchedChannel = false,
@@ -136,7 +137,7 @@ void main() {
             showLoading: false,
             child: Scaffold(
               body: StreamMessageLayout(
-                data: StreamMessageLayoutData(alignment: alignment),
+                data: StreamMessageLayoutData(alignment: alignment, stackPosition: stackPosition),
                 child: StreamMessageItem(
                   message: message,
                   semanticsLabel: semanticsLabel,
@@ -477,6 +478,26 @@ void main() {
       // No read state means no status to mirror, so the row announces what it
       // does know rather than a status it cannot verify.
       expect(labelsOf(tester), contains('OUT:Are we still meeting tomorrow, AT-TIME'));
+
+      handle.dispose();
+    });
+
+    testWidgets('omits the delivery status when the message does not show one', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      // A stacked message hides its metadata, so there is no status on screen
+      // for the announcement to mirror.
+      await tester.pumpWidget(
+        buildScene(
+          message(user: currentUser),
+          alignment: StreamMessageAlignment.end,
+          stackPosition: StreamMessageStackPosition.middle,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(labelsOf(tester), contains('OUT:Are we still meeting tomorrow, AT-TIME'));
+      expect(labelsOf(tester).where((it) => it.contains('Sent')), isEmpty);
 
       handle.dispose();
     });

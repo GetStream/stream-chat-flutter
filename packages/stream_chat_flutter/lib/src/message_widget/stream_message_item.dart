@@ -641,6 +641,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
         child: _MessageRowSemantics(
           message: message,
           label: effectiveSemanticsLabel,
+          showsMetadata: footerWidget != null,
           child: Align(
             alignment: StreamMessageLayout.alignmentDirectionalOf(context),
             child: Padding(
@@ -1320,11 +1321,17 @@ class _MessageRowSemantics extends StatelessWidget {
   const _MessageRowSemantics({
     required this.message,
     required this.label,
+    required this.showsMetadata,
     required this.child,
   });
 
   final Message message;
   final String? label;
+
+  // Whether the row renders its metadata footer. A stacked message hides it,
+  // and so has no delivery status on screen to announce.
+  final bool showsMetadata;
+
   final Widget child;
 
   @override
@@ -1339,11 +1346,12 @@ class _MessageRowSemantics extends StatelessWidget {
       _ => false,
     };
 
-    // Only the sender sees a delivery status, and a row with no label of its
-    // own has nothing to append it to. An empty label is the documented way to
-    // leave a row unlabeled, so it counts as having none — otherwise the row
-    // would announce a bare ", Sent".
-    if (!isOwnMessage || label == null || label.isEmpty) {
+    // Only the sender sees a delivery status, only a row that renders the
+    // footer shows one, and a row with no label of its own has nothing to
+    // append it to. An empty label is the documented way to leave a row
+    // unlabeled, so it counts as having none — otherwise the row would
+    // announce a bare ", Sent".
+    if (!isOwnMessage || !showsMetadata || label == null || label.isEmpty) {
       return _annotate(label, child);
     }
 
