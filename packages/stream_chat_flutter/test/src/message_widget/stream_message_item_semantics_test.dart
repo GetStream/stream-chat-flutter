@@ -100,6 +100,9 @@ void main() {
       OwnUser? reader,
       bool signedIn = true,
       StreamMessageAlignment alignment = StreamMessageAlignment.start,
+      // Set to true to render a channel that has not been watched yet, whose
+      // read state is therefore unavailable.
+      bool unwatchedChannel = false,
       // Set to false to resolve the shipped English strings instead of the
       // sentinels, pinning what a user actually hears.
       bool fakeTranslations = true,
@@ -117,7 +120,7 @@ void main() {
       when(() => clientState.currentUser).thenReturn(effectiveReader);
       when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(effectiveReader));
       when(() => channel.client).thenReturn(client);
-      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.state).thenReturn(unwatchedChannel ? null : channelState);
       when(() => channelState.readStream).thenAnswer((_) => Stream.value(const []));
 
       return MaterialApp(
@@ -130,6 +133,7 @@ void main() {
           connectivityStream: Stream.value(const [ConnectivityResult.mobile]),
           child: StreamChannel(
             channel: channel,
+            showLoading: false,
             child: Scaffold(
               body: StreamMessageLayout(
                 data: StreamMessageLayoutData(alignment: alignment),
@@ -438,6 +442,41 @@ void main() {
 
       final announced = labelsOf(tester).singleWhere((it) => it.contains('Message deleted'));
       expect(announced, startsWith('You, Message deleted, '));
+
+      handle.dispose();
+    });
+
+    testWidgets('renders an own message before the channel has been watched', (tester) async {
+      // The row label tracks the read state to announce a delivery status, and
+      // that state is null until the channel is watched. Reading it must not
+      // cost the row the message it was wrapping.
+      await tester.pumpWidget(
+        buildScene(
+          message(user: currentUser),
+          alignment: StreamMessageAlignment.end,
+          unwatchedChannel: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Are we still meeting tomorrow'), findsOneWidget);
+    });
+
+    testWidgets('announces an own message without a status before the channel has been watched', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        buildScene(
+          message(user: currentUser),
+          alignment: StreamMessageAlignment.end,
+          unwatchedChannel: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // No read state means no status to mirror, so the row announces what it
+      // does know rather than a status it cannot verify.
+      expect(labelsOf(tester), contains('OUT:Are we still meeting tomorrow, AT-TIME'));
 
       handle.dispose();
     });

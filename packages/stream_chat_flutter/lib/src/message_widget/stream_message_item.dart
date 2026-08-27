@@ -1352,6 +1352,10 @@ class _MessageRowSemantics extends StatelessWidget {
     return BetterStreamBuilder<List<Read>>(
       stream: channel?.state?.readStream,
       initialData: channel?.state?.read,
+      // Read state is null until the channel is watched, and a channel can be
+      // rendered before then. Without this the row itself — not just the
+      // status it would have carried — would drop out of the tree.
+      noDataBuilder: (_) => _annotate(label, child),
       builder: (context, data) => _annotate(
         [
           label,
