@@ -3,6 +3,8 @@
 ✅ Added
 
 - Added `onReactionLongPress` to `StreamMessageItem` and `StreamMessageListView`, reporting the long-pressed message's `BuildContext` and a `ReactionLongPressDetails` with the `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction).
+- Added `StreamMessageItem.semanticsLabel`, which replaces the announcement composed for a message row. Pass an empty string to leave the row unlabeled, in which case the bubble and footer announce their own parts.
+- Added `StreamQuotedMessage.replyMessage`, the message doing the quoting, which lets a quoted preview announce who replied to whom.
 - Added `StreamMessageRowLabelScope`, which marks a subtree whose metadata is already spoken by a composed row label. `StreamMessageFooter` and the message bubble stay out of the semantics tree inside one and announce themselves outside one.
 
 ⚠️ Changed
@@ -17,7 +19,7 @@
 
 🐞 Fixed
 
-- Improved the screen-reader experience in the message list. Each message is announced as a single phrase naming the sender and the direction ("You said, …" / "<name> said, …") together with the body, the time, the edited marker and the delivery status — including upload progress and a failure to send — while the attachments, reaction chips, quoted message and replies row stay reachable one level deeper. The body is announced as the text the bubble renders, so markdown link and emphasis syntax is no longer read aloud. Quoted messages say who replied to whom, attachment tiles announce their type and position in a gallery, date dividers announce the date they show — as a header — instead of a time they never showed, and a deleted message names who deleted it and keeps its timestamp and delivery status. `StreamMessageItem.semanticsLabel` and `StreamQuotedMessage.replyMessage` are new and let you adjust the composed announcements; a custom `messageBuilder` replaces the default layout and is responsible for its own label.
+- Improved the screen-reader experience in the message list. Each message is announced as a single phrase naming the sender and the direction ("You said, …" / "<name> said, …") together with the body, the time, the edited marker and the delivery status — including upload progress and a failure to send — while the attachments, reaction chips, quoted message and replies row stay reachable one level deeper. The body is announced as the text the bubble renders, so markdown link and emphasis syntax is no longer read aloud. Quoted messages say who replied to whom, attachment tiles announce their type and position in a gallery, date dividers announce the date they show — as a header — instead of a time they never showed, and a deleted message names who deleted it and keeps its timestamp and delivery status. A custom `messageBuilder` replaces the default layout and is responsible for its own label.
 - Fixed a crash on web when the message list rebuilt while messages were selectable, for example after opening the attachment picker.
 - Fixed the browser's native context menu reappearing over the message context menu on web after scrolling messages out of view or deleting one.
 - Fixed the SDK re-enabling the browser's native context menu on web in apps that had disabled it themselves.
