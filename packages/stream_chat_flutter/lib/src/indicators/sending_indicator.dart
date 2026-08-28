@@ -109,8 +109,8 @@ extension StreamMessageStatusLabels on Translations {
 
     // A url preview is generated rather than uploaded, so counting it would
     // report progress against an attachment the sender never picked.
-    final attachments = message.attachments;
-    if (!attachments.any((it) => it.type != AttachmentType.urlPreview)) return null;
+    final attachments = message.attachments.where((it) => it.type != AttachmentType.urlPreview).toList();
+    if (attachments.isEmpty) return null;
 
     final uploaded = attachments.where((it) => it.uploadState.isSuccess).length;
     if (uploaded >= attachments.length) return null;
