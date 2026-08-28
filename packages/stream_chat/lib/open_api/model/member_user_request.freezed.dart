@@ -25,11 +25,10 @@ mixin _$MemberUserRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $MemberUserRequestCopyWith<MemberUserRequest> get copyWith =>
-      _$MemberUserRequestCopyWithImpl<MemberUserRequest>(
-        this as MemberUserRequest,
-        _$identity,
-      );
+  $MemberUserRequestCopyWith<MemberUserRequest> get copyWith => _$MemberUserRequestCopyWithImpl<MemberUserRequest>(
+    this as MemberUserRequest,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -39,13 +38,10 @@ mixin _$MemberUserRequest {
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.image, image) || other.image == image) &&
-            (identical(other.invisible, invisible) ||
-                other.invisible == invisible) &&
-            (identical(other.language, language) ||
-                other.language == language) &&
+            (identical(other.invisible, invisible) || other.invisible == invisible) &&
+            (identical(other.language, language) || other.language == language) &&
             (identical(other.name, name) || other.name == name) &&
-            (identical(other.privacySettings, privacySettings) ||
-                other.privacySettings == privacySettings));
+            (identical(other.privacySettings, privacySettings) || other.privacySettings == privacySettings));
   }
 
   @override
@@ -85,8 +81,7 @@ abstract mixin class $MemberUserRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MemberUserRequestCopyWithImpl<$Res>
-    implements $MemberUserRequestCopyWith<$Res> {
+class _$MemberUserRequestCopyWithImpl<$Res> implements $MemberUserRequestCopyWith<$Res> {
   _$MemberUserRequestCopyWithImpl(this._self, this._then);
 
   final MemberUserRequest _self;

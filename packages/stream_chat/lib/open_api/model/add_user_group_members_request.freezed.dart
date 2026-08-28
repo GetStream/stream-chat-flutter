@@ -21,8 +21,7 @@ mixin _$AddUserGroupMembersRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $AddUserGroupMembersRequestCopyWith<AddUserGroupMembersRequest>
-  get copyWith =>
+  $AddUserGroupMembersRequestCopyWith<AddUserGroupMembersRequest> get copyWith =>
       _$AddUserGroupMembersRequestCopyWithImpl<AddUserGroupMembersRequest>(
         this as AddUserGroupMembersRequest,
         _$identity,
@@ -63,8 +62,7 @@ abstract mixin class $AddUserGroupMembersRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$AddUserGroupMembersRequestCopyWithImpl<$Res>
-    implements $AddUserGroupMembersRequestCopyWith<$Res> {
+class _$AddUserGroupMembersRequestCopyWithImpl<$Res> implements $AddUserGroupMembersRequestCopyWith<$Res> {
   _$AddUserGroupMembersRequestCopyWithImpl(this._self, this._then);
 
   final AddUserGroupMembersRequest _self;

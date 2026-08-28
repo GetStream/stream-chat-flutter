@@ -22,11 +22,11 @@ mixin _$QueryModerationConfigsResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $QueryModerationConfigsResponseCopyWith<QueryModerationConfigsResponse>
-  get copyWith =>
-      _$QueryModerationConfigsResponseCopyWithImpl<
-        QueryModerationConfigsResponse
-      >(this as QueryModerationConfigsResponse, _$identity);
+  $QueryModerationConfigsResponseCopyWith<QueryModerationConfigsResponse> get copyWith =>
+      _$QueryModerationConfigsResponseCopyWithImpl<QueryModerationConfigsResponse>(
+        this as QueryModerationConfigsResponse,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -34,8 +34,7 @@ mixin _$QueryModerationConfigsResponse {
         (other.runtimeType == runtimeType &&
             other is QueryModerationConfigsResponse &&
             const DeepCollectionEquality().equals(other.configs, configs) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.next, next) || other.next == next) &&
             (identical(other.prev, prev) || other.prev == prev));
   }
@@ -71,8 +70,7 @@ abstract mixin class $QueryModerationConfigsResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryModerationConfigsResponseCopyWithImpl<$Res>
-    implements $QueryModerationConfigsResponseCopyWith<$Res> {
+class _$QueryModerationConfigsResponseCopyWithImpl<$Res> implements $QueryModerationConfigsResponseCopyWith<$Res> {
   _$QueryModerationConfigsResponseCopyWithImpl(this._self, this._then);
 
   final QueryModerationConfigsResponse _self;

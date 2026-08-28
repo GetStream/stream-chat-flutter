@@ -6,54 +6,45 @@ part of 'thread_state_response.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ThreadStateResponse _$ThreadStateResponseFromJson(Map<String, dynamic> json) =>
-    ThreadStateResponse(
-      activeParticipantCount: (json['active_participant_count'] as num).toInt(),
-      channel: json['channel'] == null
-          ? null
-          : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
-      channelCid: json['channel_cid'] as String,
-      createdAt: const StreamDateTimeConverter().fromJson(
-        json['created_at'] as Object,
-      ),
-      createdBy: json['created_by'] == null
-          ? null
-          : UserResponse.fromJson(json['created_by'] as Map<String, dynamic>),
-      createdByUserId: json['created_by_user_id'] as String,
-      custom: json['custom'] as Map<String, dynamic>,
-      deletedAt: _$JsonConverterFromJson<Object, DateTime>(
-        json['deleted_at'],
-        const StreamDateTimeConverter().fromJson,
-      ),
-      draft: json['draft'] == null
-          ? null
-          : DraftResponse.fromJson(json['draft'] as Map<String, dynamic>),
-      lastMessageAt: _$JsonConverterFromJson<Object, DateTime>(
-        json['last_message_at'],
-        const StreamDateTimeConverter().fromJson,
-      ),
-      latestReplies: (json['latest_replies'] as List<dynamic>)
-          .map((e) => MessageResponse.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      parentMessage: json['parent_message'] == null
-          ? null
-          : MessageResponse.fromJson(
-              json['parent_message'] as Map<String, dynamic>,
-            ),
-      parentMessageId: json['parent_message_id'] as String,
-      participantCount: (json['participant_count'] as num).toInt(),
-      read: (json['read'] as List<dynamic>?)
-          ?.map((e) => ReadStateResponse.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      replyCount: (json['reply_count'] as num).toInt(),
-      threadParticipants: (json['thread_participants'] as List<dynamic>?)
-          ?.map((e) => ThreadParticipant.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      title: json['title'] as String,
-      updatedAt: const StreamDateTimeConverter().fromJson(
-        json['updated_at'] as Object,
-      ),
-    );
+ThreadStateResponse _$ThreadStateResponseFromJson(Map<String, dynamic> json) => ThreadStateResponse(
+  activeParticipantCount: (json['active_participant_count'] as num).toInt(),
+  channel: json['channel'] == null ? null : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
+  channelCid: json['channel_cid'] as String,
+  createdAt: const StreamDateTimeConverter().fromJson(
+    json['created_at'] as Object,
+  ),
+  createdBy: json['created_by'] == null ? null : UserResponse.fromJson(json['created_by'] as Map<String, dynamic>),
+  createdByUserId: json['created_by_user_id'] as String,
+  custom: json['custom'] as Map<String, dynamic>,
+  deletedAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['deleted_at'],
+    const StreamDateTimeConverter().fromJson,
+  ),
+  draft: json['draft'] == null ? null : DraftResponse.fromJson(json['draft'] as Map<String, dynamic>),
+  lastMessageAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['last_message_at'],
+    const StreamDateTimeConverter().fromJson,
+  ),
+  latestReplies: (json['latest_replies'] as List<dynamic>)
+      .map((e) => MessageResponse.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  parentMessage: json['parent_message'] == null
+      ? null
+      : MessageResponse.fromJson(
+          json['parent_message'] as Map<String, dynamic>,
+        ),
+  parentMessageId: json['parent_message_id'] as String,
+  participantCount: (json['participant_count'] as num).toInt(),
+  read: (json['read'] as List<dynamic>?)?.map((e) => ReadStateResponse.fromJson(e as Map<String, dynamic>)).toList(),
+  replyCount: (json['reply_count'] as num).toInt(),
+  threadParticipants: (json['thread_participants'] as List<dynamic>?)
+      ?.map((e) => ThreadParticipant.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  title: json['title'] as String,
+  updatedAt: const StreamDateTimeConverter().fromJson(
+    json['updated_at'] as Object,
+  ),
+);
 
 Map<String, dynamic> _$ThreadStateResponseToJson(
   ThreadStateResponse instance,
@@ -80,9 +71,7 @@ Map<String, dynamic> _$ThreadStateResponseToJson(
   'participant_count': instance.participantCount,
   'read': instance.read?.map((e) => e.toJson()).toList(),
   'reply_count': instance.replyCount,
-  'thread_participants': instance.threadParticipants
-      ?.map((e) => e.toJson())
-      .toList(),
+  'thread_participants': instance.threadParticipants?.map((e) => e.toJson()).toList(),
   'title': instance.title,
   'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
 };

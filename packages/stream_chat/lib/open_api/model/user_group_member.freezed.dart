@@ -23,11 +23,10 @@ mixin _$UserGroupMember {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UserGroupMemberCopyWith<UserGroupMember> get copyWith =>
-      _$UserGroupMemberCopyWithImpl<UserGroupMember>(
-        this as UserGroupMember,
-        _$identity,
-      );
+  $UserGroupMemberCopyWith<UserGroupMember> get copyWith => _$UserGroupMemberCopyWithImpl<UserGroupMember>(
+    this as UserGroupMember,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -35,16 +34,14 @@ mixin _$UserGroupMember {
         (other.runtimeType == runtimeType &&
             other is UserGroupMember &&
             (identical(other.appPk, appPk) || other.appPk == appPk) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             (identical(other.groupId, groupId) || other.groupId == groupId) &&
             (identical(other.isAdmin, isAdmin) || other.isAdmin == isAdmin) &&
             (identical(other.userId, userId) || other.userId == userId));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, appPk, createdAt, groupId, isAdmin, userId);
+  int get hashCode => Object.hash(runtimeType, appPk, createdAt, groupId, isAdmin, userId);
 
   @override
   String toString() {
@@ -69,8 +66,7 @@ abstract mixin class $UserGroupMemberCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UserGroupMemberCopyWithImpl<$Res>
-    implements $UserGroupMemberCopyWith<$Res> {
+class _$UserGroupMemberCopyWithImpl<$Res> implements $UserGroupMemberCopyWith<$Res> {
   _$UserGroupMemberCopyWithImpl(this._self, this._then);
 
   final UserGroupMember _self;

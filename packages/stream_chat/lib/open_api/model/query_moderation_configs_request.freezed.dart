@@ -23,11 +23,11 @@ mixin _$QueryModerationConfigsRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $QueryModerationConfigsRequestCopyWith<QueryModerationConfigsRequest>
-  get copyWith =>
-      _$QueryModerationConfigsRequestCopyWithImpl<
-        QueryModerationConfigsRequest
-      >(this as QueryModerationConfigsRequest, _$identity);
+  $QueryModerationConfigsRequestCopyWith<QueryModerationConfigsRequest> get copyWith =>
+      _$QueryModerationConfigsRequestCopyWithImpl<QueryModerationConfigsRequest>(
+        this as QueryModerationConfigsRequest,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -74,8 +74,7 @@ abstract mixin class $QueryModerationConfigsRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryModerationConfigsRequestCopyWithImpl<$Res>
-    implements $QueryModerationConfigsRequestCopyWith<$Res> {
+class _$QueryModerationConfigsRequestCopyWithImpl<$Res> implements $QueryModerationConfigsRequestCopyWith<$Res> {
   _$QueryModerationConfigsRequestCopyWithImpl(this._self, this._then);
 
   final QueryModerationConfigsRequest _self;

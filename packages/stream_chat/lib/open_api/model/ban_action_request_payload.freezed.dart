@@ -40,17 +40,13 @@ mixin _$BanActionRequestPayload {
             other is BanActionRequestPayload &&
             (identical(other.banFromFutureChannels, banFromFutureChannels) ||
                 other.banFromFutureChannels == banFromFutureChannels) &&
-            (identical(other.channelBanOnly, channelBanOnly) ||
-                other.channelBanOnly == channelBanOnly) &&
-            (identical(other.channelCid, channelCid) ||
-                other.channelCid == channelCid) &&
-            (identical(other.deleteMessages, deleteMessages) ||
-                other.deleteMessages == deleteMessages) &&
+            (identical(other.channelBanOnly, channelBanOnly) || other.channelBanOnly == channelBanOnly) &&
+            (identical(other.channelCid, channelCid) || other.channelCid == channelCid) &&
+            (identical(other.deleteMessages, deleteMessages) || other.deleteMessages == deleteMessages) &&
             (identical(other.ipBan, ipBan) || other.ipBan == ipBan) &&
             (identical(other.reason, reason) || other.reason == reason) &&
             (identical(other.shadow, shadow) || other.shadow == shadow) &&
-            (identical(other.targetUserId, targetUserId) ||
-                other.targetUserId == targetUserId) &&
+            (identical(other.targetUserId, targetUserId) || other.targetUserId == targetUserId) &&
             (identical(other.timeout, timeout) || other.timeout == timeout));
   }
 
@@ -95,8 +91,7 @@ abstract mixin class $BanActionRequestPayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$BanActionRequestPayloadCopyWithImpl<$Res>
-    implements $BanActionRequestPayloadCopyWith<$Res> {
+class _$BanActionRequestPayloadCopyWithImpl<$Res> implements $BanActionRequestPayloadCopyWith<$Res> {
   _$BanActionRequestPayloadCopyWithImpl(this._self, this._then);
 
   final BanActionRequestPayload _self;

@@ -36,8 +36,7 @@ mixin _$GroupedChannelsBucket {
             const DeepCollectionEquality().equals(other.channels, channels) &&
             (identical(other.next, next) || other.next == next) &&
             (identical(other.prev, prev) || other.prev == prev) &&
-            (identical(other.unreadChannels, unreadChannels) ||
-                other.unreadChannels == unreadChannels));
+            (identical(other.unreadChannels, unreadChannels) || other.unreadChannels == unreadChannels));
   }
 
   @override
@@ -71,8 +70,7 @@ abstract mixin class $GroupedChannelsBucketCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$GroupedChannelsBucketCopyWithImpl<$Res>
-    implements $GroupedChannelsBucketCopyWith<$Res> {
+class _$GroupedChannelsBucketCopyWithImpl<$Res> implements $GroupedChannelsBucketCopyWith<$Res> {
   _$GroupedChannelsBucketCopyWithImpl(this._self, this._then);
 
   final GroupedChannelsBucket _self;

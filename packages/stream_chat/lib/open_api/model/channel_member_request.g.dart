@@ -11,9 +11,7 @@ ChannelMemberRequest _$ChannelMemberRequestFromJson(
 ) => ChannelMemberRequest(
   channelRole: json['channel_role'] as String?,
   custom: json['custom'] as Map<String, dynamic>?,
-  user: json['user'] == null
-      ? null
-      : MemberUserRequest.fromJson(json['user'] as Map<String, dynamic>),
+  user: json['user'] == null ? null : MemberUserRequest.fromJson(json['user'] as Map<String, dynamic>),
   userId: json['user_id'] as String?,
 );
 

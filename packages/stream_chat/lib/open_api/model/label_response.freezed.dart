@@ -21,11 +21,10 @@ mixin _$LabelResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $LabelResponseCopyWith<LabelResponse> get copyWith =>
-      _$LabelResponseCopyWithImpl<LabelResponse>(
-        this as LabelResponse,
-        _$identity,
-      );
+  $LabelResponseCopyWith<LabelResponse> get copyWith => _$LabelResponseCopyWithImpl<LabelResponse>(
+    this as LabelResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -68,8 +67,7 @@ abstract mixin class $LabelResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$LabelResponseCopyWithImpl<$Res>
-    implements $LabelResponseCopyWith<$Res> {
+class _$LabelResponseCopyWithImpl<$Res> implements $LabelResponseCopyWith<$Res> {
   _$LabelResponseCopyWithImpl(this._self, this._then);
 
   final LabelResponse _self;

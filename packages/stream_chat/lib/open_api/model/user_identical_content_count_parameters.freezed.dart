@@ -20,23 +20,19 @@ mixin _$UserIdenticalContentCountParameters {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UserIdenticalContentCountParametersCopyWith<
-    UserIdenticalContentCountParameters
-  >
-  get copyWith =>
-      _$UserIdenticalContentCountParametersCopyWithImpl<
-        UserIdenticalContentCountParameters
-      >(this as UserIdenticalContentCountParameters, _$identity);
+  $UserIdenticalContentCountParametersCopyWith<UserIdenticalContentCountParameters> get copyWith =>
+      _$UserIdenticalContentCountParametersCopyWithImpl<UserIdenticalContentCountParameters>(
+        this as UserIdenticalContentCountParameters,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UserIdenticalContentCountParameters &&
-            (identical(other.threshold, threshold) ||
-                other.threshold == threshold) &&
-            (identical(other.timeWindow, timeWindow) ||
-                other.timeWindow == timeWindow));
+            (identical(other.threshold, threshold) || other.threshold == threshold) &&
+            (identical(other.timeWindow, timeWindow) || other.timeWindow == timeWindow));
   }
 
   @override

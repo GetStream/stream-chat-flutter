@@ -19,11 +19,10 @@ mixin _$UnmuteRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UnmuteRequestCopyWith<UnmuteRequest> get copyWith =>
-      _$UnmuteRequestCopyWithImpl<UnmuteRequest>(
-        this as UnmuteRequest,
-        _$identity,
-      );
+  $UnmuteRequestCopyWith<UnmuteRequest> get copyWith => _$UnmuteRequestCopyWithImpl<UnmuteRequest>(
+    this as UnmuteRequest,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -34,8 +33,7 @@ mixin _$UnmuteRequest {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(targetIds));
+  int get hashCode => Object.hash(runtimeType, const DeepCollectionEquality().hash(targetIds));
 
   @override
   String toString() {
@@ -54,8 +52,7 @@ abstract mixin class $UnmuteRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UnmuteRequestCopyWithImpl<$Res>
-    implements $UnmuteRequestCopyWith<$Res> {
+class _$UnmuteRequestCopyWithImpl<$Res> implements $UnmuteRequestCopyWith<$Res> {
   _$UnmuteRequestCopyWithImpl(this._self, this._then);
 
   final UnmuteRequest _self;

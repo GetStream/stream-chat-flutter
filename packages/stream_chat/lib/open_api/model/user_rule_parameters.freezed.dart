@@ -19,11 +19,10 @@ mixin _$UserRuleParameters {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UserRuleParametersCopyWith<UserRuleParameters> get copyWith =>
-      _$UserRuleParametersCopyWithImpl<UserRuleParameters>(
-        this as UserRuleParameters,
-        _$identity,
-      );
+  $UserRuleParametersCopyWith<UserRuleParameters> get copyWith => _$UserRuleParametersCopyWithImpl<UserRuleParameters>(
+    this as UserRuleParameters,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -53,8 +52,7 @@ abstract mixin class $UserRuleParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UserRuleParametersCopyWithImpl<$Res>
-    implements $UserRuleParametersCopyWith<$Res> {
+class _$UserRuleParametersCopyWithImpl<$Res> implements $UserRuleParametersCopyWith<$Res> {
   _$UserRuleParametersCopyWithImpl(this._self, this._then);
 
   final UserRuleParameters _self;

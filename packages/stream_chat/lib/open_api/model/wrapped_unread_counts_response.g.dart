@@ -20,10 +20,9 @@ WrappedUnreadCountsResponse _$WrappedUnreadCountsResponseFromJson(
       .map((e) => UnreadCountsThread.fromJson(e as Map<String, dynamic>))
       .toList(),
   totalUnreadCount: (json['total_unread_count'] as num).toInt(),
-  totalUnreadCountByTeam:
-      (json['total_unread_count_by_team'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, (e as num).toInt()),
-      ),
+  totalUnreadCountByTeam: (json['total_unread_count_by_team'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, (e as num).toInt()),
+  ),
   totalUnreadThreadsCount: (json['total_unread_threads_count'] as num).toInt(),
 );
 

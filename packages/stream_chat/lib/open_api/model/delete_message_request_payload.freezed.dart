@@ -22,8 +22,7 @@ mixin _$DeleteMessageRequestPayload {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $DeleteMessageRequestPayloadCopyWith<DeleteMessageRequestPayload>
-  get copyWith =>
+  $DeleteMessageRequestPayloadCopyWith<DeleteMessageRequestPayload> get copyWith =>
       _$DeleteMessageRequestPayloadCopyWithImpl<DeleteMessageRequestPayload>(
         this as DeleteMessageRequestPayload,
         _$identity,
@@ -34,18 +33,14 @@ mixin _$DeleteMessageRequestPayload {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is DeleteMessageRequestPayload &&
-            (identical(other.entityId, entityId) ||
-                other.entityId == entityId) &&
-            (identical(other.entityType, entityType) ||
-                other.entityType == entityType) &&
-            (identical(other.hardDelete, hardDelete) ||
-                other.hardDelete == hardDelete) &&
+            (identical(other.entityId, entityId) || other.entityId == entityId) &&
+            (identical(other.entityType, entityType) || other.entityType == entityType) &&
+            (identical(other.hardDelete, hardDelete) || other.hardDelete == hardDelete) &&
             (identical(other.reason, reason) || other.reason == reason));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, entityId, entityType, hardDelete, reason);
+  int get hashCode => Object.hash(runtimeType, entityId, entityType, hardDelete, reason);
 
   @override
   String toString() {
@@ -69,8 +64,7 @@ abstract mixin class $DeleteMessageRequestPayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$DeleteMessageRequestPayloadCopyWithImpl<$Res>
-    implements $DeleteMessageRequestPayloadCopyWith<$Res> {
+class _$DeleteMessageRequestPayloadCopyWithImpl<$Res> implements $DeleteMessageRequestPayloadCopyWith<$Res> {
   _$DeleteMessageRequestPayloadCopyWithImpl(this._self, this._then);
 
   final DeleteMessageRequestPayload _self;

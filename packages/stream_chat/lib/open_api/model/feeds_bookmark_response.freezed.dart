@@ -36,17 +36,12 @@ mixin _$FeedsBookmarkResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is FeedsBookmarkResponse &&
-            (identical(other.activityId, activityId) ||
-                other.activityId == activityId) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.activityId, activityId) || other.activityId == activityId) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.objectId, objectId) ||
-                other.objectId == objectId) &&
-            (identical(other.objectType, objectType) ||
-                other.objectType == objectType) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
+            (identical(other.objectId, objectId) || other.objectId == objectId) &&
+            (identical(other.objectType, objectType) || other.objectType == objectType) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
             (identical(other.user, user) || other.user == user));
   }
 
@@ -87,8 +82,7 @@ abstract mixin class $FeedsBookmarkResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FeedsBookmarkResponseCopyWithImpl<$Res>
-    implements $FeedsBookmarkResponseCopyWith<$Res> {
+class _$FeedsBookmarkResponseCopyWithImpl<$Res> implements $FeedsBookmarkResponseCopyWith<$Res> {
   _$FeedsBookmarkResponseCopyWithImpl(this._self, this._then);
 
   final FeedsBookmarkResponse _self;

@@ -23,11 +23,11 @@ mixin _$QueryFutureChannelBansPayload {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $QueryFutureChannelBansPayloadCopyWith<QueryFutureChannelBansPayload>
-  get copyWith =>
-      _$QueryFutureChannelBansPayloadCopyWithImpl<
-        QueryFutureChannelBansPayload
-      >(this as QueryFutureChannelBansPayload, _$identity);
+  $QueryFutureChannelBansPayloadCopyWith<QueryFutureChannelBansPayload> get copyWith =>
+      _$QueryFutureChannelBansPayloadCopyWithImpl<QueryFutureChannelBansPayload>(
+        this as QueryFutureChannelBansPayload,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -36,12 +36,10 @@ mixin _$QueryFutureChannelBansPayload {
             other is QueryFutureChannelBansPayload &&
             (identical(other.excludeExpiredBans, excludeExpiredBans) ||
                 other.excludeExpiredBans == excludeExpiredBans) &&
-            (identical(other.includeTotal, includeTotal) ||
-                other.includeTotal == includeTotal) &&
+            (identical(other.includeTotal, includeTotal) || other.includeTotal == includeTotal) &&
             (identical(other.limit, limit) || other.limit == limit) &&
             (identical(other.offset, offset) || other.offset == offset) &&
-            (identical(other.targetUserId, targetUserId) ||
-                other.targetUserId == targetUserId));
+            (identical(other.targetUserId, targetUserId) || other.targetUserId == targetUserId));
   }
 
   @override
@@ -77,8 +75,7 @@ abstract mixin class $QueryFutureChannelBansPayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryFutureChannelBansPayloadCopyWithImpl<$Res>
-    implements $QueryFutureChannelBansPayloadCopyWith<$Res> {
+class _$QueryFutureChannelBansPayloadCopyWithImpl<$Res> implements $QueryFutureChannelBansPayloadCopyWith<$Res> {
   _$QueryFutureChannelBansPayloadCopyWithImpl(this._self, this._then);
 
   final QueryFutureChannelBansPayload _self;

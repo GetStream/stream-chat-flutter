@@ -30,9 +30,7 @@ MessageUpdatedEvent _$MessageUpdatedEventFromJson(
   ),
   team: json['team'] as String?,
   type: json['type'] as String,
-  user: json['user'] == null
-      ? null
-      : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
+  user: json['user'] == null ? null : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$MessageUpdatedEventToJson(

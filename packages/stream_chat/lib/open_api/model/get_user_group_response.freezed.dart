@@ -31,10 +31,8 @@ mixin _$GetUserGroupResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is GetUserGroupResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
-            (identical(other.userGroup, userGroup) ||
-                other.userGroup == userGroup));
+            (identical(other.duration, duration) || other.duration == duration) &&
+            (identical(other.userGroup, userGroup) || other.userGroup == userGroup));
   }
 
   @override
@@ -57,8 +55,7 @@ abstract mixin class $GetUserGroupResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$GetUserGroupResponseCopyWithImpl<$Res>
-    implements $GetUserGroupResponseCopyWith<$Res> {
+class _$GetUserGroupResponseCopyWithImpl<$Res> implements $GetUserGroupResponseCopyWith<$Res> {
   _$GetUserGroupResponseCopyWithImpl(this._self, this._then);
 
   final GetUserGroupResponse _self;

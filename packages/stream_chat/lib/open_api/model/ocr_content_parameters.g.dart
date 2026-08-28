@@ -9,9 +9,7 @@ part of 'ocr_content_parameters.dart';
 OCRContentParameters _$OCRContentParametersFromJson(
   Map<String, dynamic> json,
 ) => OCRContentParameters(
-  harmLabels: (json['harm_labels'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  harmLabels: (json['harm_labels'] as List<dynamic>?)?.map((e) => e as String).toList(),
   labelOperator: json['label_operator'] as String?,
   severity: json['severity'] as String?,
 );

@@ -26,29 +26,24 @@ mixin _$UserGroupResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UserGroupResponseCopyWith<UserGroupResponse> get copyWith =>
-      _$UserGroupResponseCopyWithImpl<UserGroupResponse>(
-        this as UserGroupResponse,
-        _$identity,
-      );
+  $UserGroupResponseCopyWith<UserGroupResponse> get copyWith => _$UserGroupResponseCopyWithImpl<UserGroupResponse>(
+    this as UserGroupResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UserGroupResponse &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.createdBy, createdBy) ||
-                other.createdBy == createdBy) &&
-            (identical(other.description, description) ||
-                other.description == description) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.createdBy, createdBy) || other.createdBy == createdBy) &&
+            (identical(other.description, description) || other.description == description) &&
             (identical(other.id, id) || other.id == id) &&
             const DeepCollectionEquality().equals(other.members, members) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.teamId, teamId) || other.teamId == teamId) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
   }
 
   @override
@@ -90,8 +85,7 @@ abstract mixin class $UserGroupResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UserGroupResponseCopyWithImpl<$Res>
-    implements $UserGroupResponseCopyWith<$Res> {
+class _$UserGroupResponseCopyWithImpl<$Res> implements $UserGroupResponseCopyWith<$Res> {
   _$UserGroupResponseCopyWithImpl(this._self, this._then);
 
   final UserGroupResponse _self;

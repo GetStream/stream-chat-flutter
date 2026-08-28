@@ -21,28 +21,24 @@ mixin _$ChannelPushPreferencesResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ChannelPushPreferencesResponseCopyWith<ChannelPushPreferencesResponse>
-  get copyWith =>
-      _$ChannelPushPreferencesResponseCopyWithImpl<
-        ChannelPushPreferencesResponse
-      >(this as ChannelPushPreferencesResponse, _$identity);
+  $ChannelPushPreferencesResponseCopyWith<ChannelPushPreferencesResponse> get copyWith =>
+      _$ChannelPushPreferencesResponseCopyWithImpl<ChannelPushPreferencesResponse>(
+        this as ChannelPushPreferencesResponse,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ChannelPushPreferencesResponse &&
-            (identical(other.chatLevel, chatLevel) ||
-                other.chatLevel == chatLevel) &&
-            (identical(other.chatPreferences, chatPreferences) ||
-                other.chatPreferences == chatPreferences) &&
-            (identical(other.disabledUntil, disabledUntil) ||
-                other.disabledUntil == disabledUntil));
+            (identical(other.chatLevel, chatLevel) || other.chatLevel == chatLevel) &&
+            (identical(other.chatPreferences, chatPreferences) || other.chatPreferences == chatPreferences) &&
+            (identical(other.disabledUntil, disabledUntil) || other.disabledUntil == disabledUntil));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, chatLevel, chatPreferences, disabledUntil);
+  int get hashCode => Object.hash(runtimeType, chatLevel, chatPreferences, disabledUntil);
 
   @override
   String toString() {
@@ -65,8 +61,7 @@ abstract mixin class $ChannelPushPreferencesResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChannelPushPreferencesResponseCopyWithImpl<$Res>
-    implements $ChannelPushPreferencesResponseCopyWith<$Res> {
+class _$ChannelPushPreferencesResponseCopyWithImpl<$Res> implements $ChannelPushPreferencesResponseCopyWith<$Res> {
   _$ChannelPushPreferencesResponseCopyWithImpl(this._self, this._then);
 
   final ChannelPushPreferencesResponse _self;

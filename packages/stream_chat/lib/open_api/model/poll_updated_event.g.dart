@@ -6,37 +6,35 @@ part of 'poll_updated_event.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-PollUpdatedEvent _$PollUpdatedEventFromJson(Map<String, dynamic> json) =>
-    PollUpdatedEvent(
-      activityId: json['activity_id'] as String?,
-      cid: json['cid'] as String?,
-      createdAt: const StreamDateTimeConverter().fromJson(
-        json['created_at'] as Object,
-      ),
-      custom: json['custom'] as Map<String, dynamic>,
-      messageId: json['message_id'] as String?,
-      poll: PollResponseData.fromJson(json['poll'] as Map<String, dynamic>),
-      receivedAt: _$JsonConverterFromJson<Object, DateTime>(
-        json['received_at'],
-        const StreamDateTimeConverter().fromJson,
-      ),
-      type: json['type'] as String,
-    );
+PollUpdatedEvent _$PollUpdatedEventFromJson(Map<String, dynamic> json) => PollUpdatedEvent(
+  activityId: json['activity_id'] as String?,
+  cid: json['cid'] as String?,
+  createdAt: const StreamDateTimeConverter().fromJson(
+    json['created_at'] as Object,
+  ),
+  custom: json['custom'] as Map<String, dynamic>,
+  messageId: json['message_id'] as String?,
+  poll: PollResponseData.fromJson(json['poll'] as Map<String, dynamic>),
+  receivedAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['received_at'],
+    const StreamDateTimeConverter().fromJson,
+  ),
+  type: json['type'] as String,
+);
 
-Map<String, dynamic> _$PollUpdatedEventToJson(PollUpdatedEvent instance) =>
-    <String, dynamic>{
-      'activity_id': instance.activityId,
-      'cid': instance.cid,
-      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
-      'custom': instance.custom,
-      'message_id': instance.messageId,
-      'poll': instance.poll.toJson(),
-      'received_at': _$JsonConverterToJson<Object, DateTime>(
-        instance.receivedAt,
-        const StreamDateTimeConverter().toJson,
-      ),
-      'type': instance.type,
-    };
+Map<String, dynamic> _$PollUpdatedEventToJson(PollUpdatedEvent instance) => <String, dynamic>{
+  'activity_id': instance.activityId,
+  'cid': instance.cid,
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
+  'custom': instance.custom,
+  'message_id': instance.messageId,
+  'poll': instance.poll.toJson(),
+  'received_at': _$JsonConverterToJson<Object, DateTime>(
+    instance.receivedAt,
+    const StreamDateTimeConverter().toJson,
+  ),
+  'type': instance.type,
+};
 
 Value? _$JsonConverterFromJson<Json, Value>(
   Object? json,

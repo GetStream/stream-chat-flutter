@@ -32,11 +32,10 @@ mixin _$ChannelHiddenEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ChannelHiddenEventCopyWith<ChannelHiddenEvent> get copyWith =>
-      _$ChannelHiddenEventCopyWithImpl<ChannelHiddenEvent>(
-        this as ChannelHiddenEvent,
-        _$identity,
-      );
+  $ChannelHiddenEventCopyWith<ChannelHiddenEvent> get copyWith => _$ChannelHiddenEventCopyWithImpl<ChannelHiddenEvent>(
+    this as ChannelHiddenEvent,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -48,22 +47,17 @@ mixin _$ChannelHiddenEvent {
               other.channelCustom,
               channelCustom,
             ) &&
-            (identical(other.channelId, channelId) ||
-                other.channelId == channelId) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
             (identical(other.channelMemberCount, channelMemberCount) ||
                 other.channelMemberCount == channelMemberCount) &&
             (identical(other.channelMessageCount, channelMessageCount) ||
                 other.channelMessageCount == channelMessageCount) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.clearHistory, clearHistory) ||
-                other.clearHistory == clearHistory) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.clearHistory, clearHistory) || other.clearHistory == clearHistory) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.team, team) || other.team == team) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(other.user, user) || other.user == user));
@@ -120,8 +114,7 @@ abstract mixin class $ChannelHiddenEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChannelHiddenEventCopyWithImpl<$Res>
-    implements $ChannelHiddenEventCopyWith<$Res> {
+class _$ChannelHiddenEventCopyWithImpl<$Res> implements $ChannelHiddenEventCopyWith<$Res> {
   _$ChannelHiddenEventCopyWithImpl(this._self, this._then);
 
   final ChannelHiddenEvent _self;

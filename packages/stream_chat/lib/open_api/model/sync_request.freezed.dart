@@ -32,8 +32,7 @@ mixin _$SyncRequest {
               other.channelCids,
               channelCids,
             ) &&
-            (identical(other.lastSyncAt, lastSyncAt) ||
-                other.lastSyncAt == lastSyncAt));
+            (identical(other.lastSyncAt, lastSyncAt) || other.lastSyncAt == lastSyncAt));
   }
 
   @override

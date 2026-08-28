@@ -51,14 +51,12 @@ mixin _$ChannelStateResponse {
             ) &&
             (identical(other.channel, channel) || other.channel == channel) &&
             (identical(other.draft, draft) || other.draft == draft) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.hidden, hidden) || other.hidden == hidden) &&
             (identical(other.hideMessagesBefore, hideMessagesBefore) ||
                 other.hideMessagesBefore == hideMessagesBefore) &&
             const DeepCollectionEquality().equals(other.members, members) &&
-            (identical(other.membership, membership) ||
-                other.membership == membership) &&
+            (identical(other.membership, membership) || other.membership == membership) &&
             const DeepCollectionEquality().equals(other.messages, messages) &&
             const DeepCollectionEquality().equals(
               other.pendingMessages,
@@ -68,12 +66,10 @@ mixin _$ChannelStateResponse {
               other.pinnedMessages,
               pinnedMessages,
             ) &&
-            (identical(other.pushPreferences, pushPreferences) ||
-                other.pushPreferences == pushPreferences) &&
+            (identical(other.pushPreferences, pushPreferences) || other.pushPreferences == pushPreferences) &&
             const DeepCollectionEquality().equals(other.read, read) &&
             const DeepCollectionEquality().equals(other.threads, threads) &&
-            (identical(other.watcherCount, watcherCount) ||
-                other.watcherCount == watcherCount) &&
+            (identical(other.watcherCount, watcherCount) || other.watcherCount == watcherCount) &&
             const DeepCollectionEquality().equals(other.watchers, watchers));
   }
 
@@ -132,8 +128,7 @@ abstract mixin class $ChannelStateResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChannelStateResponseCopyWithImpl<$Res>
-    implements $ChannelStateResponseCopyWith<$Res> {
+class _$ChannelStateResponseCopyWithImpl<$Res> implements $ChannelStateResponseCopyWith<$Res> {
   _$ChannelStateResponseCopyWithImpl(this._self, this._then);
 
   final ChannelStateResponse _self;

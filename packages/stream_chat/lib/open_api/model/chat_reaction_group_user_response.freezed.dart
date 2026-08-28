@@ -21,19 +21,18 @@ mixin _$ChatReactionGroupUserResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ChatReactionGroupUserResponseCopyWith<ChatReactionGroupUserResponse>
-  get copyWith =>
-      _$ChatReactionGroupUserResponseCopyWithImpl<
-        ChatReactionGroupUserResponse
-      >(this as ChatReactionGroupUserResponse, _$identity);
+  $ChatReactionGroupUserResponseCopyWith<ChatReactionGroupUserResponse> get copyWith =>
+      _$ChatReactionGroupUserResponseCopyWithImpl<ChatReactionGroupUserResponse>(
+        this as ChatReactionGroupUserResponse,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ChatReactionGroupUserResponse &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             (identical(other.user, user) || other.user == user) &&
             (identical(other.userId, userId) || other.userId == userId));
   }
@@ -58,8 +57,7 @@ abstract mixin class $ChatReactionGroupUserResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChatReactionGroupUserResponseCopyWithImpl<$Res>
-    implements $ChatReactionGroupUserResponseCopyWith<$Res> {
+class _$ChatReactionGroupUserResponseCopyWithImpl<$Res> implements $ChatReactionGroupUserResponseCopyWith<$Res> {
   _$ChatReactionGroupUserResponseCopyWithImpl(this._self, this._then);
 
   final ChatReactionGroupUserResponse _self;

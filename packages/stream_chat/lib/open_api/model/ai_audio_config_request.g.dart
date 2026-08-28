@@ -10,9 +10,7 @@ AIAudioConfigRequest _$AIAudioConfigRequestFromJson(
   Map<String, dynamic> json,
 ) => AIAudioConfigRequest(
   profile: json['profile'] as String?,
-  rules: (json['rules'] as List<dynamic>?)
-      ?.map((e) => BodyguardRule.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  rules: (json['rules'] as List<dynamic>?)?.map((e) => BodyguardRule.fromJson(e as Map<String, dynamic>)).toList(),
 );
 
 Map<String, dynamic> _$AIAudioConfigRequestToJson(

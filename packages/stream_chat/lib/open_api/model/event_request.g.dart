@@ -12,9 +12,8 @@ EventRequest _$EventRequestFromJson(Map<String, dynamic> json) => EventRequest(
   type: json['type'] as String,
 );
 
-Map<String, dynamic> _$EventRequestToJson(EventRequest instance) =>
-    <String, dynamic>{
-      'custom': instance.custom,
-      'parent_id': instance.parentId,
-      'type': instance.type,
-    };
+Map<String, dynamic> _$EventRequestToJson(EventRequest instance) => <String, dynamic>{
+  'custom': instance.custom,
+  'parent_id': instance.parentId,
+  'type': instance.type,
+};

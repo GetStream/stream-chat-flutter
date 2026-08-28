@@ -32,8 +32,7 @@ mixin _$ReactionGroupUserResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ReactionGroupUserResponse &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             (identical(other.user, user) || other.user == user) &&
             (identical(other.userId, userId) || other.userId == userId));
   }
@@ -58,8 +57,7 @@ abstract mixin class $ReactionGroupUserResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ReactionGroupUserResponseCopyWithImpl<$Res>
-    implements $ReactionGroupUserResponseCopyWith<$Res> {
+class _$ReactionGroupUserResponseCopyWithImpl<$Res> implements $ReactionGroupUserResponseCopyWith<$Res> {
   _$ReactionGroupUserResponseCopyWithImpl(this._self, this._then);
 
   final ReactionGroupUserResponse _self;

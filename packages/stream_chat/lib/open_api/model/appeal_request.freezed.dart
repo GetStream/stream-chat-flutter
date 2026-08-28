@@ -23,29 +23,24 @@ mixin _$AppealRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $AppealRequestCopyWith<AppealRequest> get copyWith =>
-      _$AppealRequestCopyWithImpl<AppealRequest>(
-        this as AppealRequest,
-        _$identity,
-      );
+  $AppealRequestCopyWith<AppealRequest> get copyWith => _$AppealRequestCopyWithImpl<AppealRequest>(
+    this as AppealRequest,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is AppealRequest &&
-            (identical(other.appealReason, appealReason) ||
-                other.appealReason == appealReason) &&
+            (identical(other.appealReason, appealReason) || other.appealReason == appealReason) &&
             const DeepCollectionEquality().equals(
               other.attachments,
               attachments,
             ) &&
-            (identical(other.entityId, entityId) ||
-                other.entityId == entityId) &&
-            (identical(other.entityType, entityType) ||
-                other.entityType == entityType) &&
-            (identical(other.reviewQueueItemId, reviewQueueItemId) ||
-                other.reviewQueueItemId == reviewQueueItemId));
+            (identical(other.entityId, entityId) || other.entityId == entityId) &&
+            (identical(other.entityType, entityType) || other.entityType == entityType) &&
+            (identical(other.reviewQueueItemId, reviewQueueItemId) || other.reviewQueueItemId == reviewQueueItemId));
   }
 
   @override
@@ -81,8 +76,7 @@ abstract mixin class $AppealRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$AppealRequestCopyWithImpl<$Res>
-    implements $AppealRequestCopyWith<$Res> {
+class _$AppealRequestCopyWithImpl<$Res> implements $AppealRequestCopyWith<$Res> {
   _$AppealRequestCopyWithImpl(this._self, this._then);
 
   final AppealRequest _self;

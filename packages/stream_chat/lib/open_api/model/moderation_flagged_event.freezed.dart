@@ -35,15 +35,11 @@ mixin _$ModerationFlaggedEvent {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ModerationFlaggedEvent &&
-            (identical(other.contentType, contentType) ||
-                other.contentType == contentType) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.contentType, contentType) || other.contentType == contentType) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.objectId, objectId) ||
-                other.objectId == objectId) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.objectId, objectId) || other.objectId == objectId) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.type, type) || other.type == type));
   }
 
@@ -82,8 +78,7 @@ abstract mixin class $ModerationFlaggedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ModerationFlaggedEventCopyWithImpl<$Res>
-    implements $ModerationFlaggedEventCopyWith<$Res> {
+class _$ModerationFlaggedEventCopyWithImpl<$Res> implements $ModerationFlaggedEventCopyWith<$Res> {
   _$ModerationFlaggedEventCopyWithImpl(this._self, this._then);
 
   final ModerationFlaggedEvent _self;

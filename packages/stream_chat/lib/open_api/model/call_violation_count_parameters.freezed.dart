@@ -20,8 +20,7 @@ mixin _$CallViolationCountParameters {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $CallViolationCountParametersCopyWith<CallViolationCountParameters>
-  get copyWith =>
+  $CallViolationCountParametersCopyWith<CallViolationCountParameters> get copyWith =>
       _$CallViolationCountParametersCopyWithImpl<CallViolationCountParameters>(
         this as CallViolationCountParameters,
         _$identity,
@@ -32,10 +31,8 @@ mixin _$CallViolationCountParameters {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is CallViolationCountParameters &&
-            (identical(other.threshold, threshold) ||
-                other.threshold == threshold) &&
-            (identical(other.timeWindow, timeWindow) ||
-                other.timeWindow == timeWindow));
+            (identical(other.threshold, threshold) || other.threshold == threshold) &&
+            (identical(other.timeWindow, timeWindow) || other.timeWindow == timeWindow));
   }
 
   @override
@@ -58,8 +55,7 @@ abstract mixin class $CallViolationCountParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$CallViolationCountParametersCopyWithImpl<$Res>
-    implements $CallViolationCountParametersCopyWith<$Res> {
+class _$CallViolationCountParametersCopyWithImpl<$Res> implements $CallViolationCountParametersCopyWith<$Res> {
   _$CallViolationCountParametersCopyWithImpl(this._self, this._then);
 
   final CallViolationCountParameters _self;

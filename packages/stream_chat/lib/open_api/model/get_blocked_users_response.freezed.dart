@@ -32,8 +32,7 @@ mixin _$GetBlockedUsersResponse {
         (other.runtimeType == runtimeType &&
             other is GetBlockedUsersResponse &&
             const DeepCollectionEquality().equals(other.blocks, blocks) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -60,8 +59,7 @@ abstract mixin class $GetBlockedUsersResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$GetBlockedUsersResponseCopyWithImpl<$Res>
-    implements $GetBlockedUsersResponseCopyWith<$Res> {
+class _$GetBlockedUsersResponseCopyWithImpl<$Res> implements $GetBlockedUsersResponseCopyWith<$Res> {
   _$GetBlockedUsersResponseCopyWithImpl(this._self, this._then);
 
   final GetBlockedUsersResponse _self;

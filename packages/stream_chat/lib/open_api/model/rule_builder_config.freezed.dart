@@ -20,11 +20,10 @@ mixin _$RuleBuilderConfig {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $RuleBuilderConfigCopyWith<RuleBuilderConfig> get copyWith =>
-      _$RuleBuilderConfigCopyWithImpl<RuleBuilderConfig>(
-        this as RuleBuilderConfig,
-        _$identity,
-      );
+  $RuleBuilderConfigCopyWith<RuleBuilderConfig> get copyWith => _$RuleBuilderConfigCopyWithImpl<RuleBuilderConfig>(
+    this as RuleBuilderConfig,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -59,8 +58,7 @@ abstract mixin class $RuleBuilderConfigCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$RuleBuilderConfigCopyWithImpl<$Res>
-    implements $RuleBuilderConfigCopyWith<$Res> {
+class _$RuleBuilderConfigCopyWithImpl<$Res> implements $RuleBuilderConfigCopyWith<$Res> {
   _$RuleBuilderConfigCopyWithImpl(this._self, this._then);
 
   final RuleBuilderConfig _self;

@@ -25,25 +25,23 @@ mixin _$FeedsEnrichedCollectionResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $FeedsEnrichedCollectionResponseCopyWith<FeedsEnrichedCollectionResponse>
-  get copyWith =>
-      _$FeedsEnrichedCollectionResponseCopyWithImpl<
-        FeedsEnrichedCollectionResponse
-      >(this as FeedsEnrichedCollectionResponse, _$identity);
+  $FeedsEnrichedCollectionResponseCopyWith<FeedsEnrichedCollectionResponse> get copyWith =>
+      _$FeedsEnrichedCollectionResponseCopyWithImpl<FeedsEnrichedCollectionResponse>(
+        this as FeedsEnrichedCollectionResponse,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is FeedsEnrichedCollectionResponse &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.status, status) || other.status == status) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
             (identical(other.userId, userId) || other.userId == userId));
   }
 
@@ -84,8 +82,7 @@ abstract mixin class $FeedsEnrichedCollectionResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FeedsEnrichedCollectionResponseCopyWithImpl<$Res>
-    implements $FeedsEnrichedCollectionResponseCopyWith<$Res> {
+class _$FeedsEnrichedCollectionResponseCopyWithImpl<$Res> implements $FeedsEnrichedCollectionResponseCopyWith<$Res> {
   _$FeedsEnrichedCollectionResponseCopyWithImpl(this._self, this._then);
 
   final FeedsEnrichedCollectionResponse _self;

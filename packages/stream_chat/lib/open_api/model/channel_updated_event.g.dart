@@ -20,9 +20,7 @@ ChannelUpdatedEvent _$ChannelUpdatedEventFromJson(
     json['created_at'] as Object,
   ),
   custom: json['custom'] as Map<String, dynamic>,
-  message: json['message'] == null
-      ? null
-      : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
+  message: json['message'] == null ? null : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
   messageId: json['message_id'] as String?,
   receivedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['received_at'],
@@ -30,9 +28,7 @@ ChannelUpdatedEvent _$ChannelUpdatedEventFromJson(
   ),
   team: json['team'] as String?,
   type: json['type'] as String,
-  user: json['user'] == null
-      ? null
-      : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
+  user: json['user'] == null ? null : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$ChannelUpdatedEventToJson(

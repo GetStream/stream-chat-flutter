@@ -19,19 +19,18 @@ mixin _$DeleteModerationConfigResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $DeleteModerationConfigResponseCopyWith<DeleteModerationConfigResponse>
-  get copyWith =>
-      _$DeleteModerationConfigResponseCopyWithImpl<
-        DeleteModerationConfigResponse
-      >(this as DeleteModerationConfigResponse, _$identity);
+  $DeleteModerationConfigResponseCopyWith<DeleteModerationConfigResponse> get copyWith =>
+      _$DeleteModerationConfigResponseCopyWithImpl<DeleteModerationConfigResponse>(
+        this as DeleteModerationConfigResponse,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is DeleteModerationConfigResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -54,8 +53,7 @@ abstract mixin class $DeleteModerationConfigResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$DeleteModerationConfigResponseCopyWithImpl<$Res>
-    implements $DeleteModerationConfigResponseCopyWith<$Res> {
+class _$DeleteModerationConfigResponseCopyWithImpl<$Res> implements $DeleteModerationConfigResponseCopyWith<$Res> {
   _$DeleteModerationConfigResponseCopyWithImpl(this._self, this._then);
 
   final DeleteModerationConfigResponse _self;

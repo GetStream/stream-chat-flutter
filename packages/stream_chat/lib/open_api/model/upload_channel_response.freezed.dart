@@ -34,13 +34,10 @@ mixin _$UploadChannelResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UploadChannelResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.file, file) || other.file == file) &&
-            (identical(other.moderationAction, moderationAction) ||
-                other.moderationAction == moderationAction) &&
-            (identical(other.thumbUrl, thumbUrl) ||
-                other.thumbUrl == thumbUrl) &&
+            (identical(other.moderationAction, moderationAction) || other.moderationAction == moderationAction) &&
+            (identical(other.thumbUrl, thumbUrl) || other.thumbUrl == thumbUrl) &&
             const DeepCollectionEquality().equals(
               other.uploadSizes,
               uploadSizes,
@@ -80,8 +77,7 @@ abstract mixin class $UploadChannelResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UploadChannelResponseCopyWithImpl<$Res>
-    implements $UploadChannelResponseCopyWith<$Res> {
+class _$UploadChannelResponseCopyWithImpl<$Res> implements $UploadChannelResponseCopyWith<$Res> {
   _$UploadChannelResponseCopyWithImpl(this._self, this._then);
 
   final UploadChannelResponse _self;

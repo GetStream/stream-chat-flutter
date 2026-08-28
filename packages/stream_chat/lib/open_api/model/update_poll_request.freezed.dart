@@ -29,38 +29,31 @@ mixin _$UpdatePollRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UpdatePollRequestCopyWith<UpdatePollRequest> get copyWith =>
-      _$UpdatePollRequestCopyWithImpl<UpdatePollRequest>(
-        this as UpdatePollRequest,
-        _$identity,
-      );
+  $UpdatePollRequestCopyWith<UpdatePollRequest> get copyWith => _$UpdatePollRequestCopyWithImpl<UpdatePollRequest>(
+    this as UpdatePollRequest,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UpdatePollRequest &&
-            (identical(other.allowAnswers, allowAnswers) ||
-                other.allowAnswers == allowAnswers) &&
+            (identical(other.allowAnswers, allowAnswers) || other.allowAnswers == allowAnswers) &&
             (identical(
                   other.allowUserSuggestedOptions,
                   allowUserSuggestedOptions,
                 ) ||
                 other.allowUserSuggestedOptions == allowUserSuggestedOptions) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.description, description) ||
-                other.description == description) &&
-            (identical(other.enforceUniqueVote, enforceUniqueVote) ||
-                other.enforceUniqueVote == enforceUniqueVote) &&
+            (identical(other.description, description) || other.description == description) &&
+            (identical(other.enforceUniqueVote, enforceUniqueVote) || other.enforceUniqueVote == enforceUniqueVote) &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.isClosed, isClosed) ||
-                other.isClosed == isClosed) &&
-            (identical(other.maxVotesAllowed, maxVotesAllowed) ||
-                other.maxVotesAllowed == maxVotesAllowed) &&
+            (identical(other.isClosed, isClosed) || other.isClosed == isClosed) &&
+            (identical(other.maxVotesAllowed, maxVotesAllowed) || other.maxVotesAllowed == maxVotesAllowed) &&
             (identical(other.name, name) || other.name == name) &&
             const DeepCollectionEquality().equals(other.options, options) &&
-            (identical(other.votingVisibility, votingVisibility) ||
-                other.votingVisibility == votingVisibility));
+            (identical(other.votingVisibility, votingVisibility) || other.votingVisibility == votingVisibility));
   }
 
   @override
@@ -108,8 +101,7 @@ abstract mixin class $UpdatePollRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpdatePollRequestCopyWithImpl<$Res>
-    implements $UpdatePollRequestCopyWith<$Res> {
+class _$UpdatePollRequestCopyWithImpl<$Res> implements $UpdatePollRequestCopyWith<$Res> {
   _$UpdatePollRequestCopyWithImpl(this._self, this._then);
 
   final UpdatePollRequest _self;

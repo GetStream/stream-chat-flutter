@@ -22,11 +22,10 @@ mixin _$AWSRekognitionRule {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $AWSRekognitionRuleCopyWith<AWSRekognitionRule> get copyWith =>
-      _$AWSRekognitionRuleCopyWithImpl<AWSRekognitionRule>(
-        this as AWSRekognitionRule,
-        _$identity,
-      );
+  $AWSRekognitionRuleCopyWith<AWSRekognitionRule> get copyWith => _$AWSRekognitionRuleCopyWithImpl<AWSRekognitionRule>(
+    this as AWSRekognitionRule,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -35,8 +34,7 @@ mixin _$AWSRekognitionRule {
             other is AWSRekognitionRule &&
             (identical(other.action, action) || other.action == action) &&
             (identical(other.label, label) || other.label == label) &&
-            (identical(other.minConfidence, minConfidence) ||
-                other.minConfidence == minConfidence) &&
+            (identical(other.minConfidence, minConfidence) || other.minConfidence == minConfidence) &&
             const DeepCollectionEquality().equals(
               other.subclassifications,
               subclassifications,
@@ -74,8 +72,7 @@ abstract mixin class $AWSRekognitionRuleCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$AWSRekognitionRuleCopyWithImpl<$Res>
-    implements $AWSRekognitionRuleCopyWith<$Res> {
+class _$AWSRekognitionRuleCopyWithImpl<$Res> implements $AWSRekognitionRuleCopyWith<$Res> {
   _$AWSRekognitionRuleCopyWithImpl(this._self, this._then);
 
   final AWSRekognitionRule _self;

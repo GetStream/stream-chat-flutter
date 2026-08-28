@@ -20,8 +20,7 @@ mixin _$GroupedQueryChannelsResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $GroupedQueryChannelsResponseCopyWith<GroupedQueryChannelsResponse>
-  get copyWith =>
+  $GroupedQueryChannelsResponseCopyWith<GroupedQueryChannelsResponse> get copyWith =>
       _$GroupedQueryChannelsResponseCopyWithImpl<GroupedQueryChannelsResponse>(
         this as GroupedQueryChannelsResponse,
         _$identity,
@@ -32,8 +31,7 @@ mixin _$GroupedQueryChannelsResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is GroupedQueryChannelsResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             const DeepCollectionEquality().equals(other.groups, groups));
   }
 
@@ -61,8 +59,7 @@ abstract mixin class $GroupedQueryChannelsResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$GroupedQueryChannelsResponseCopyWithImpl<$Res>
-    implements $GroupedQueryChannelsResponseCopyWith<$Res> {
+class _$GroupedQueryChannelsResponseCopyWithImpl<$Res> implements $GroupedQueryChannelsResponseCopyWith<$Res> {
   _$GroupedQueryChannelsResponseCopyWithImpl(this._self, this._then);
 
   final GroupedQueryChannelsResponse _self;

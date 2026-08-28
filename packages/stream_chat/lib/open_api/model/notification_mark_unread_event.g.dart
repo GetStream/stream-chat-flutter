@@ -9,9 +9,7 @@ part of 'notification_mark_unread_event.dart';
 NotificationMarkUnreadEvent _$NotificationMarkUnreadEventFromJson(
   Map<String, dynamic> json,
 ) => NotificationMarkUnreadEvent(
-  channel: json['channel'] == null
-      ? null
-      : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
+  channel: json['channel'] == null ? null : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
   channelCustom: json['channel_custom'] as Map<String, dynamic>?,
   channelId: json['channel_id'] as String?,
   channelMemberCount: (json['channel_member_count'] as num?)?.toInt(),
@@ -23,10 +21,9 @@ NotificationMarkUnreadEvent _$NotificationMarkUnreadEventFromJson(
   ),
   custom: json['custom'] as Map<String, dynamic>,
   firstUnreadMessageId: json['first_unread_message_id'] as String?,
-  groupedUnreadChannels:
-      (json['grouped_unread_channels'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, (e as num).toInt()),
-      ),
+  groupedUnreadChannels: (json['grouped_unread_channels'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, (e as num).toInt()),
+  ),
   lastReadAt: _$JsonConverterFromJson<Object, DateTime>(
     json['last_read_at'],
     const StreamDateTimeConverter().fromJson,
@@ -45,9 +42,7 @@ NotificationMarkUnreadEvent _$NotificationMarkUnreadEventFromJson(
   unreadMessages: (json['unread_messages'] as num?)?.toInt(),
   unreadThreadMessages: (json['unread_thread_messages'] as num?)?.toInt(),
   unreadThreads: (json['unread_threads'] as num?)?.toInt(),
-  user: json['user'] == null
-      ? null
-      : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
+  user: json['user'] == null ? null : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$NotificationMarkUnreadEventToJson(

@@ -34,8 +34,7 @@ mixin _$MessageActionRequest {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(formData));
+  int get hashCode => Object.hash(runtimeType, const DeepCollectionEquality().hash(formData));
 
   @override
   String toString() {
@@ -54,8 +53,7 @@ abstract mixin class $MessageActionRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MessageActionRequestCopyWithImpl<$Res>
-    implements $MessageActionRequestCopyWith<$Res> {
+class _$MessageActionRequestCopyWithImpl<$Res> implements $MessageActionRequestCopyWith<$Res> {
   _$MessageActionRequestCopyWithImpl(this._self, this._then);
 
   final MessageActionRequest _self;

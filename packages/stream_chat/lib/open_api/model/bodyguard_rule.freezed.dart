@@ -21,11 +21,10 @@ mixin _$BodyguardRule {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $BodyguardRuleCopyWith<BodyguardRule> get copyWith =>
-      _$BodyguardRuleCopyWithImpl<BodyguardRule>(
-        this as BodyguardRule,
-        _$identity,
-      );
+  $BodyguardRuleCopyWith<BodyguardRule> get copyWith => _$BodyguardRuleCopyWithImpl<BodyguardRule>(
+    this as BodyguardRule,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -69,8 +68,7 @@ abstract mixin class $BodyguardRuleCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$BodyguardRuleCopyWithImpl<$Res>
-    implements $BodyguardRuleCopyWith<$Res> {
+class _$BodyguardRuleCopyWithImpl<$Res> implements $BodyguardRuleCopyWith<$Res> {
   _$BodyguardRuleCopyWithImpl(this._self, this._then);
 
   final BodyguardRule _self;

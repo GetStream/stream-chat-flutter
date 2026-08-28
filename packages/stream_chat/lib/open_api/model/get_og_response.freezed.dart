@@ -41,11 +41,10 @@ mixin _$GetOGResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $GetOGResponseCopyWith<GetOGResponse> get copyWith =>
-      _$GetOGResponseCopyWithImpl<GetOGResponse>(
-        this as GetOGResponse,
-        _$identity,
-      );
+  $GetOGResponseCopyWith<GetOGResponse> get copyWith => _$GetOGResponseCopyWithImpl<GetOGResponse>(
+    this as GetOGResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -53,40 +52,27 @@ mixin _$GetOGResponse {
         (other.runtimeType == runtimeType &&
             other is GetOGResponse &&
             const DeepCollectionEquality().equals(other.actions, actions) &&
-            (identical(other.assetUrl, assetUrl) ||
-                other.assetUrl == assetUrl) &&
-            (identical(other.authorIcon, authorIcon) ||
-                other.authorIcon == authorIcon) &&
-            (identical(other.authorLink, authorLink) ||
-                other.authorLink == authorLink) &&
-            (identical(other.authorName, authorName) ||
-                other.authorName == authorName) &&
+            (identical(other.assetUrl, assetUrl) || other.assetUrl == assetUrl) &&
+            (identical(other.authorIcon, authorIcon) || other.authorIcon == authorIcon) &&
+            (identical(other.authorLink, authorLink) || other.authorLink == authorLink) &&
+            (identical(other.authorName, authorName) || other.authorName == authorName) &&
             (identical(other.color, color) || other.color == color) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
-            (identical(other.fallback, fallback) ||
-                other.fallback == fallback) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
+            (identical(other.fallback, fallback) || other.fallback == fallback) &&
             const DeepCollectionEquality().equals(other.fields, fields) &&
             (identical(other.footer, footer) || other.footer == footer) &&
-            (identical(other.footerIcon, footerIcon) ||
-                other.footerIcon == footerIcon) &&
+            (identical(other.footerIcon, footerIcon) || other.footerIcon == footerIcon) &&
             (identical(other.giphy, giphy) || other.giphy == giphy) &&
-            (identical(other.imageUrl, imageUrl) ||
-                other.imageUrl == imageUrl) &&
-            (identical(other.ogScrapeUrl, ogScrapeUrl) ||
-                other.ogScrapeUrl == ogScrapeUrl) &&
-            (identical(other.originalHeight, originalHeight) ||
-                other.originalHeight == originalHeight) &&
-            (identical(other.originalWidth, originalWidth) ||
-                other.originalWidth == originalWidth) &&
+            (identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl) &&
+            (identical(other.ogScrapeUrl, ogScrapeUrl) || other.ogScrapeUrl == ogScrapeUrl) &&
+            (identical(other.originalHeight, originalHeight) || other.originalHeight == originalHeight) &&
+            (identical(other.originalWidth, originalWidth) || other.originalWidth == originalWidth) &&
             (identical(other.pretext, pretext) || other.pretext == pretext) &&
             (identical(other.text, text) || other.text == text) &&
-            (identical(other.thumbUrl, thumbUrl) ||
-                other.thumbUrl == thumbUrl) &&
+            (identical(other.thumbUrl, thumbUrl) || other.thumbUrl == thumbUrl) &&
             (identical(other.title, title) || other.title == title) &&
-            (identical(other.titleLink, titleLink) ||
-                other.titleLink == titleLink) &&
+            (identical(other.titleLink, titleLink) || other.titleLink == titleLink) &&
             (identical(other.type, type) || other.type == type));
   }
 
@@ -159,8 +145,7 @@ abstract mixin class $GetOGResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$GetOGResponseCopyWithImpl<$Res>
-    implements $GetOGResponseCopyWith<$Res> {
+class _$GetOGResponseCopyWithImpl<$Res> implements $GetOGResponseCopyWith<$Res> {
   _$GetOGResponseCopyWithImpl(this._self, this._then);
 
   final GetOGResponse _self;

@@ -103,8 +103,7 @@ abstract mixin class $ModerationPayloadResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ModerationPayloadResponseCopyWithImpl<$Res>
-    implements $ModerationPayloadResponseCopyWith<$Res> {
+class _$ModerationPayloadResponseCopyWithImpl<$Res> implements $ModerationPayloadResponseCopyWith<$Res> {
   _$ModerationPayloadResponseCopyWithImpl(this._self, this._then);
 
   final ModerationPayloadResponse _self;

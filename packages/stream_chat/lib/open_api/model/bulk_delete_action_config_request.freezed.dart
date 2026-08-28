@@ -19,11 +19,11 @@ mixin _$BulkDeleteActionConfigRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $BulkDeleteActionConfigRequestCopyWith<BulkDeleteActionConfigRequest>
-  get copyWith =>
-      _$BulkDeleteActionConfigRequestCopyWithImpl<
-        BulkDeleteActionConfigRequest
-      >(this as BulkDeleteActionConfigRequest, _$identity);
+  $BulkDeleteActionConfigRequestCopyWith<BulkDeleteActionConfigRequest> get copyWith =>
+      _$BulkDeleteActionConfigRequestCopyWithImpl<BulkDeleteActionConfigRequest>(
+        this as BulkDeleteActionConfigRequest,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -34,8 +34,7 @@ mixin _$BulkDeleteActionConfigRequest {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(ids));
+  int get hashCode => Object.hash(runtimeType, const DeepCollectionEquality().hash(ids));
 
   @override
   String toString() {
@@ -54,8 +53,7 @@ abstract mixin class $BulkDeleteActionConfigRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$BulkDeleteActionConfigRequestCopyWithImpl<$Res>
-    implements $BulkDeleteActionConfigRequestCopyWith<$Res> {
+class _$BulkDeleteActionConfigRequestCopyWithImpl<$Res> implements $BulkDeleteActionConfigRequestCopyWith<$Res> {
   _$BulkDeleteActionConfigRequestCopyWithImpl(this._self, this._then);
 
   final BulkDeleteActionConfigRequest _self;

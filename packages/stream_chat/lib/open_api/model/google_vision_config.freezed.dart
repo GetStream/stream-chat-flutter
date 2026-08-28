@@ -19,11 +19,10 @@ mixin _$GoogleVisionConfig {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $GoogleVisionConfigCopyWith<GoogleVisionConfig> get copyWith =>
-      _$GoogleVisionConfigCopyWithImpl<GoogleVisionConfig>(
-        this as GoogleVisionConfig,
-        _$identity,
-      );
+  $GoogleVisionConfigCopyWith<GoogleVisionConfig> get copyWith => _$GoogleVisionConfigCopyWithImpl<GoogleVisionConfig>(
+    this as GoogleVisionConfig,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -53,8 +52,7 @@ abstract mixin class $GoogleVisionConfigCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$GoogleVisionConfigCopyWithImpl<$Res>
-    implements $GoogleVisionConfigCopyWith<$Res> {
+class _$GoogleVisionConfigCopyWithImpl<$Res> implements $GoogleVisionConfigCopyWith<$Res> {
   _$GoogleVisionConfigCopyWithImpl(this._self, this._then);
 
   final GoogleVisionConfig _self;

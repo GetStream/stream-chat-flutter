@@ -36,16 +36,12 @@ mixin _$VelocityFilterConfig {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is VelocityFilterConfig &&
-            (identical(other.advancedFilters, advancedFilters) ||
-                other.advancedFilters == advancedFilters) &&
+            (identical(other.advancedFilters, advancedFilters) || other.advancedFilters == advancedFilters) &&
             (identical(other.async, async) || other.async == async) &&
-            (identical(other.cascadingActions, cascadingActions) ||
-                other.cascadingActions == cascadingActions) &&
-            (identical(other.cidsPerUser, cidsPerUser) ||
-                other.cidsPerUser == cidsPerUser) &&
+            (identical(other.cascadingActions, cascadingActions) || other.cascadingActions == cascadingActions) &&
+            (identical(other.cidsPerUser, cidsPerUser) || other.cidsPerUser == cidsPerUser) &&
             (identical(other.enabled, enabled) || other.enabled == enabled) &&
-            (identical(other.firstMessageOnly, firstMessageOnly) ||
-                other.firstMessageOnly == firstMessageOnly) &&
+            (identical(other.firstMessageOnly, firstMessageOnly) || other.firstMessageOnly == firstMessageOnly) &&
             const DeepCollectionEquality().equals(other.rules, rules));
   }
 
@@ -86,8 +82,7 @@ abstract mixin class $VelocityFilterConfigCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$VelocityFilterConfigCopyWithImpl<$Res>
-    implements $VelocityFilterConfigCopyWith<$Res> {
+class _$VelocityFilterConfigCopyWithImpl<$Res> implements $VelocityFilterConfigCopyWith<$Res> {
   _$VelocityFilterConfigCopyWithImpl(this._self, this._then);
 
   final VelocityFilterConfig _self;

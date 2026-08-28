@@ -19,11 +19,10 @@ mixin _$SearchResult {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $SearchResultCopyWith<SearchResult> get copyWith =>
-      _$SearchResultCopyWithImpl<SearchResult>(
-        this as SearchResult,
-        _$identity,
-      );
+  $SearchResultCopyWith<SearchResult> get copyWith => _$SearchResultCopyWithImpl<SearchResult>(
+    this as SearchResult,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {

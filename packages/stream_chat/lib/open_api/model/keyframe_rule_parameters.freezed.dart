@@ -37,12 +37,9 @@ mixin _$KeyframeRuleParameters {
               other.harmLabels,
               harmLabels,
             ) &&
-            (identical(other.minConfidence, minConfidence) ||
-                other.minConfidence == minConfidence) &&
-            (identical(other.threshold, threshold) ||
-                other.threshold == threshold) &&
-            (identical(other.timeWindow, timeWindow) ||
-                other.timeWindow == timeWindow));
+            (identical(other.minConfidence, minConfidence) || other.minConfidence == minConfidence) &&
+            (identical(other.threshold, threshold) || other.threshold == threshold) &&
+            (identical(other.timeWindow, timeWindow) || other.timeWindow == timeWindow));
   }
 
   @override
@@ -76,8 +73,7 @@ abstract mixin class $KeyframeRuleParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$KeyframeRuleParametersCopyWithImpl<$Res>
-    implements $KeyframeRuleParametersCopyWith<$Res> {
+class _$KeyframeRuleParametersCopyWithImpl<$Res> implements $KeyframeRuleParametersCopyWith<$Res> {
   _$KeyframeRuleParametersCopyWithImpl(this._self, this._then);
 
   final KeyframeRuleParameters _self;

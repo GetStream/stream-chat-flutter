@@ -23,11 +23,10 @@ mixin _$QueryDraftsRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $QueryDraftsRequestCopyWith<QueryDraftsRequest> get copyWith =>
-      _$QueryDraftsRequestCopyWithImpl<QueryDraftsRequest>(
-        this as QueryDraftsRequest,
-        _$identity,
-      );
+  $QueryDraftsRequestCopyWith<QueryDraftsRequest> get copyWith => _$QueryDraftsRequestCopyWithImpl<QueryDraftsRequest>(
+    this as QueryDraftsRequest,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -74,8 +73,7 @@ abstract mixin class $QueryDraftsRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryDraftsRequestCopyWithImpl<$Res>
-    implements $QueryDraftsRequestCopyWith<$Res> {
+class _$QueryDraftsRequestCopyWithImpl<$Res> implements $QueryDraftsRequestCopyWith<$Res> {
   _$QueryDraftsRequestCopyWithImpl(this._self, this._then);
 
   final QueryDraftsRequest _self;

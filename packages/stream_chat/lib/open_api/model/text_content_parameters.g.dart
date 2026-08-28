@@ -9,13 +9,9 @@ part of 'text_content_parameters.dart';
 TextContentParameters _$TextContentParametersFromJson(
   Map<String, dynamic> json,
 ) => TextContentParameters(
-  blocklistMatch: (json['blocklist_match'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  blocklistMatch: (json['blocklist_match'] as List<dynamic>?)?.map((e) => e as String).toList(),
   containsUrl: json['contains_url'] as bool?,
-  harmLabels: (json['harm_labels'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  harmLabels: (json['harm_labels'] as List<dynamic>?)?.map((e) => e as String).toList(),
   labelOperator: json['label_operator'] as String?,
   llmHarmLabels: (json['llm_harm_labels'] as Map<String, dynamic>?)?.map(
     (k, e) => MapEntry(k, e as String),

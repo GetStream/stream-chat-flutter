@@ -10,12 +10,8 @@ TruncateChannelRequest _$TruncateChannelRequestFromJson(
   Map<String, dynamic> json,
 ) => TruncateChannelRequest(
   hardDelete: json['hard_delete'] as bool?,
-  memberIds: (json['member_ids'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
-  message: json['message'] == null
-      ? null
-      : MessageRequest.fromJson(json['message'] as Map<String, dynamic>),
+  memberIds: (json['member_ids'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  message: json['message'] == null ? null : MessageRequest.fromJson(json['message'] as Map<String, dynamic>),
   skipPush: json['skip_push'] as bool?,
   truncatedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['truncated_at'],

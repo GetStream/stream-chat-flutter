@@ -23,23 +23,21 @@ mixin _$NotificationMutesUpdatedEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $NotificationMutesUpdatedEventCopyWith<NotificationMutesUpdatedEvent>
-  get copyWith =>
-      _$NotificationMutesUpdatedEventCopyWithImpl<
-        NotificationMutesUpdatedEvent
-      >(this as NotificationMutesUpdatedEvent, _$identity);
+  $NotificationMutesUpdatedEventCopyWith<NotificationMutesUpdatedEvent> get copyWith =>
+      _$NotificationMutesUpdatedEventCopyWithImpl<NotificationMutesUpdatedEvent>(
+        this as NotificationMutesUpdatedEvent,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is NotificationMutesUpdatedEvent &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.me, me) || other.me == me) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.type, type) || other.type == type));
   }
 
@@ -76,8 +74,7 @@ abstract mixin class $NotificationMutesUpdatedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$NotificationMutesUpdatedEventCopyWithImpl<$Res>
-    implements $NotificationMutesUpdatedEventCopyWith<$Res> {
+class _$NotificationMutesUpdatedEventCopyWithImpl<$Res> implements $NotificationMutesUpdatedEventCopyWith<$Res> {
   _$NotificationMutesUpdatedEventCopyWithImpl(this._self, this._then);
 
   final NotificationMutesUpdatedEvent _self;

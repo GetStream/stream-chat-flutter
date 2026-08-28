@@ -25,8 +25,7 @@ mixin _$WrappedUnreadCountsResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $WrappedUnreadCountsResponseCopyWith<WrappedUnreadCountsResponse>
-  get copyWith =>
+  $WrappedUnreadCountsResponseCopyWith<WrappedUnreadCountsResponse> get copyWith =>
       _$WrappedUnreadCountsResponseCopyWithImpl<WrappedUnreadCountsResponse>(
         this as WrappedUnreadCountsResponse,
         _$identity,
@@ -42,11 +41,9 @@ mixin _$WrappedUnreadCountsResponse {
               channelType,
             ) &&
             const DeepCollectionEquality().equals(other.channels, channels) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             const DeepCollectionEquality().equals(other.threads, threads) &&
-            (identical(other.totalUnreadCount, totalUnreadCount) ||
-                other.totalUnreadCount == totalUnreadCount) &&
+            (identical(other.totalUnreadCount, totalUnreadCount) || other.totalUnreadCount == totalUnreadCount) &&
             const DeepCollectionEquality().equals(
               other.totalUnreadCountByTeam,
               totalUnreadCountByTeam,
@@ -95,8 +92,7 @@ abstract mixin class $WrappedUnreadCountsResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$WrappedUnreadCountsResponseCopyWithImpl<$Res>
-    implements $WrappedUnreadCountsResponseCopyWith<$Res> {
+class _$WrappedUnreadCountsResponseCopyWithImpl<$Res> implements $WrappedUnreadCountsResponseCopyWith<$Res> {
   _$WrappedUnreadCountsResponseCopyWithImpl(this._self, this._then);
 
   final WrappedUnreadCountsResponse _self;

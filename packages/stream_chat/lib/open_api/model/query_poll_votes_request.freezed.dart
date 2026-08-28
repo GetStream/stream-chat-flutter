@@ -74,8 +74,7 @@ abstract mixin class $QueryPollVotesRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryPollVotesRequestCopyWithImpl<$Res>
-    implements $QueryPollVotesRequestCopyWith<$Res> {
+class _$QueryPollVotesRequestCopyWithImpl<$Res> implements $QueryPollVotesRequestCopyWith<$Res> {
   _$QueryPollVotesRequestCopyWithImpl(this._self, this._then);
 
   final QueryPollVotesRequest _self;

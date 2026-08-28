@@ -59,8 +59,7 @@ abstract mixin class $MarkDeliveredRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MarkDeliveredRequestCopyWithImpl<$Res>
-    implements $MarkDeliveredRequestCopyWith<$Res> {
+class _$MarkDeliveredRequestCopyWithImpl<$Res> implements $MarkDeliveredRequestCopyWith<$Res> {
   _$MarkDeliveredRequestCopyWithImpl(this._self, this._then);
 
   final MarkDeliveredRequest _self;

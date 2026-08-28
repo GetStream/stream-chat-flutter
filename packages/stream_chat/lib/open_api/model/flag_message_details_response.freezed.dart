@@ -22,8 +22,7 @@ mixin _$FlagMessageDetailsResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $FlagMessageDetailsResponseCopyWith<FlagMessageDetailsResponse>
-  get copyWith =>
+  $FlagMessageDetailsResponseCopyWith<FlagMessageDetailsResponse> get copyWith =>
       _$FlagMessageDetailsResponseCopyWithImpl<FlagMessageDetailsResponse>(
         this as FlagMessageDetailsResponse,
         _$identity,
@@ -34,19 +33,14 @@ mixin _$FlagMessageDetailsResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is FlagMessageDetailsResponse &&
-            (identical(other.pinChanged, pinChanged) ||
-                other.pinChanged == pinChanged) &&
-            (identical(other.shouldEnrich, shouldEnrich) ||
-                other.shouldEnrich == shouldEnrich) &&
-            (identical(other.skipPush, skipPush) ||
-                other.skipPush == skipPush) &&
-            (identical(other.updatedById, updatedById) ||
-                other.updatedById == updatedById));
+            (identical(other.pinChanged, pinChanged) || other.pinChanged == pinChanged) &&
+            (identical(other.shouldEnrich, shouldEnrich) || other.shouldEnrich == shouldEnrich) &&
+            (identical(other.skipPush, skipPush) || other.skipPush == skipPush) &&
+            (identical(other.updatedById, updatedById) || other.updatedById == updatedById));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, pinChanged, shouldEnrich, skipPush, updatedById);
+  int get hashCode => Object.hash(runtimeType, pinChanged, shouldEnrich, skipPush, updatedById);
 
   @override
   String toString() {
@@ -70,8 +64,7 @@ abstract mixin class $FlagMessageDetailsResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FlagMessageDetailsResponseCopyWithImpl<$Res>
-    implements $FlagMessageDetailsResponseCopyWith<$Res> {
+class _$FlagMessageDetailsResponseCopyWithImpl<$Res> implements $FlagMessageDetailsResponseCopyWith<$Res> {
   _$FlagMessageDetailsResponseCopyWithImpl(this._self, this._then);
 
   final FlagMessageDetailsResponse _self;

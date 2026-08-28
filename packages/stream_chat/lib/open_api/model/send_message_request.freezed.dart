@@ -24,11 +24,10 @@ mixin _$SendMessageRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $SendMessageRequestCopyWith<SendMessageRequest> get copyWith =>
-      _$SendMessageRequestCopyWithImpl<SendMessageRequest>(
-        this as SendMessageRequest,
-        _$identity,
-      );
+  $SendMessageRequestCopyWith<SendMessageRequest> get copyWith => _$SendMessageRequestCopyWithImpl<SendMessageRequest>(
+    this as SendMessageRequest,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -42,13 +41,10 @@ mixin _$SendMessageRequest {
                   includeMentionedMembers,
                 ) ||
                 other.includeMentionedMembers == includeMentionedMembers) &&
-            (identical(other.keepChannelHidden, keepChannelHidden) ||
-                other.keepChannelHidden == keepChannelHidden) &&
+            (identical(other.keepChannelHidden, keepChannelHidden) || other.keepChannelHidden == keepChannelHidden) &&
             (identical(other.message, message) || other.message == message) &&
-            (identical(other.skipEnrichUrl, skipEnrichUrl) ||
-                other.skipEnrichUrl == skipEnrichUrl) &&
-            (identical(other.skipPush, skipPush) ||
-                other.skipPush == skipPush));
+            (identical(other.skipEnrichUrl, skipEnrichUrl) || other.skipEnrichUrl == skipEnrichUrl) &&
+            (identical(other.skipPush, skipPush) || other.skipPush == skipPush));
   }
 
   @override
@@ -86,8 +82,7 @@ abstract mixin class $SendMessageRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$SendMessageRequestCopyWithImpl<$Res>
-    implements $SendMessageRequestCopyWith<$Res> {
+class _$SendMessageRequestCopyWithImpl<$Res> implements $SendMessageRequestCopyWith<$Res> {
   _$SendMessageRequestCopyWithImpl(this._self, this._then);
 
   final SendMessageRequest _self;

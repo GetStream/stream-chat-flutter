@@ -19,8 +19,7 @@ mixin _$RestoreActionRequestPayload {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $RestoreActionRequestPayloadCopyWith<RestoreActionRequestPayload>
-  get copyWith =>
+  $RestoreActionRequestPayloadCopyWith<RestoreActionRequestPayload> get copyWith =>
       _$RestoreActionRequestPayloadCopyWithImpl<RestoreActionRequestPayload>(
         this as RestoreActionRequestPayload,
         _$identity,
@@ -31,8 +30,7 @@ mixin _$RestoreActionRequestPayload {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is RestoreActionRequestPayload &&
-            (identical(other.decisionReason, decisionReason) ||
-                other.decisionReason == decisionReason));
+            (identical(other.decisionReason, decisionReason) || other.decisionReason == decisionReason));
   }
 
   @override
@@ -55,8 +53,7 @@ abstract mixin class $RestoreActionRequestPayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$RestoreActionRequestPayloadCopyWithImpl<$Res>
-    implements $RestoreActionRequestPayloadCopyWith<$Res> {
+class _$RestoreActionRequestPayloadCopyWithImpl<$Res> implements $RestoreActionRequestPayloadCopyWith<$Res> {
   _$RestoreActionRequestPayloadCopyWithImpl(this._self, this._then);
 
   final RestoreActionRequestPayload _self;

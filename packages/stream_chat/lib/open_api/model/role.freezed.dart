@@ -23,21 +23,18 @@ mixin _$Role {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $RoleCopyWith<Role> get copyWith =>
-      _$RoleCopyWithImpl<Role>(this as Role, _$identity);
+  $RoleCopyWith<Role> get copyWith => _$RoleCopyWithImpl<Role>(this as Role, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is Role &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             (identical(other.custom, custom) || other.custom == custom) &&
             (identical(other.name, name) || other.name == name) &&
             const DeepCollectionEquality().equals(other.scopes, scopes) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
   }
 
   @override
@@ -58,8 +55,7 @@ mixin _$Role {
 
 /// @nodoc
 abstract mixin class $RoleCopyWith<$Res> {
-  factory $RoleCopyWith(Role value, $Res Function(Role) _then) =
-      _$RoleCopyWithImpl;
+  factory $RoleCopyWith(Role value, $Res Function(Role) _then) = _$RoleCopyWithImpl;
   @useResult
   $Res call({
     DateTime createdAt,

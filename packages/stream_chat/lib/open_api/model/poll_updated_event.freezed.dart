@@ -26,28 +26,23 @@ mixin _$PollUpdatedEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $PollUpdatedEventCopyWith<PollUpdatedEvent> get copyWith =>
-      _$PollUpdatedEventCopyWithImpl<PollUpdatedEvent>(
-        this as PollUpdatedEvent,
-        _$identity,
-      );
+  $PollUpdatedEventCopyWith<PollUpdatedEvent> get copyWith => _$PollUpdatedEventCopyWithImpl<PollUpdatedEvent>(
+    this as PollUpdatedEvent,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is PollUpdatedEvent &&
-            (identical(other.activityId, activityId) ||
-                other.activityId == activityId) &&
+            (identical(other.activityId, activityId) || other.activityId == activityId) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.messageId, messageId) ||
-                other.messageId == messageId) &&
+            (identical(other.messageId, messageId) || other.messageId == messageId) &&
             (identical(other.poll, poll) || other.poll == poll) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.type, type) || other.type == type));
   }
 
@@ -90,8 +85,7 @@ abstract mixin class $PollUpdatedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$PollUpdatedEventCopyWithImpl<$Res>
-    implements $PollUpdatedEventCopyWith<$Res> {
+class _$PollUpdatedEventCopyWithImpl<$Res> implements $PollUpdatedEventCopyWith<$Res> {
   _$PollUpdatedEventCopyWithImpl(this._self, this._then);
 
   final PollUpdatedEvent _self;

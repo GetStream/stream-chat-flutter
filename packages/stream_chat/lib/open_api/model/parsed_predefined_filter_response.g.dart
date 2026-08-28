@@ -11,9 +11,7 @@ ParsedPredefinedFilterResponse _$ParsedPredefinedFilterResponseFromJson(
 ) => ParsedPredefinedFilterResponse(
   filter: json['filter'] as Map<String, dynamic>,
   name: json['name'] as String,
-  sort: (json['sort'] as List<dynamic>?)
-      ?.map((e) => SortParamRequest.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  sort: (json['sort'] as List<dynamic>?)?.map((e) => SortParamRequest.fromJson(e as Map<String, dynamic>)).toList(),
 );
 
 Map<String, dynamic> _$ParsedPredefinedFilterResponseToJson(

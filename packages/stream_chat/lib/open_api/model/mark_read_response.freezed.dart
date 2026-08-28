@@ -20,19 +20,17 @@ mixin _$MarkReadResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $MarkReadResponseCopyWith<MarkReadResponse> get copyWith =>
-      _$MarkReadResponseCopyWithImpl<MarkReadResponse>(
-        this as MarkReadResponse,
-        _$identity,
-      );
+  $MarkReadResponseCopyWith<MarkReadResponse> get copyWith => _$MarkReadResponseCopyWithImpl<MarkReadResponse>(
+    this as MarkReadResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is MarkReadResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.event, event) || other.event == event));
   }
 
@@ -56,8 +54,7 @@ abstract mixin class $MarkReadResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MarkReadResponseCopyWithImpl<$Res>
-    implements $MarkReadResponseCopyWith<$Res> {
+class _$MarkReadResponseCopyWithImpl<$Res> implements $MarkReadResponseCopyWith<$Res> {
   _$MarkReadResponseCopyWithImpl(this._self, this._then);
 
   final MarkReadResponse _self;

@@ -32,8 +32,7 @@ mixin _$ListDevicesResponse {
         (other.runtimeType == runtimeType &&
             other is ListDevicesResponse &&
             const DeepCollectionEquality().equals(other.devices, devices) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -60,8 +59,7 @@ abstract mixin class $ListDevicesResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ListDevicesResponseCopyWithImpl<$Res>
-    implements $ListDevicesResponseCopyWith<$Res> {
+class _$ListDevicesResponseCopyWithImpl<$Res> implements $ListDevicesResponseCopyWith<$Res> {
   _$ListDevicesResponseCopyWithImpl(this._self, this._then);
 
   final ListDevicesResponse _self;

@@ -32,11 +32,10 @@ mixin _$UserUnbannedEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UserUnbannedEventCopyWith<UserUnbannedEvent> get copyWith =>
-      _$UserUnbannedEventCopyWithImpl<UserUnbannedEvent>(
-        this as UserUnbannedEvent,
-        _$identity,
-      );
+  $UserUnbannedEventCopyWith<UserUnbannedEvent> get copyWith => _$UserUnbannedEventCopyWithImpl<UserUnbannedEvent>(
+    this as UserUnbannedEvent,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -47,22 +46,17 @@ mixin _$UserUnbannedEvent {
               other.channelCustom,
               channelCustom,
             ) &&
-            (identical(other.channelId, channelId) ||
-                other.channelId == channelId) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
             (identical(other.channelMemberCount, channelMemberCount) ||
                 other.channelMemberCount == channelMemberCount) &&
             (identical(other.channelMessageCount, channelMessageCount) ||
                 other.channelMessageCount == channelMessageCount) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.createdBy, createdBy) ||
-                other.createdBy == createdBy) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.createdBy, createdBy) || other.createdBy == createdBy) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.shadow, shadow) || other.shadow == shadow) &&
             (identical(other.team, team) || other.team == team) &&
             (identical(other.type, type) || other.type == type) &&
@@ -120,8 +114,7 @@ abstract mixin class $UserUnbannedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UserUnbannedEventCopyWithImpl<$Res>
-    implements $UserUnbannedEventCopyWith<$Res> {
+class _$UserUnbannedEventCopyWithImpl<$Res> implements $UserUnbannedEventCopyWith<$Res> {
   _$UserUnbannedEventCopyWithImpl(this._self, this._then);
 
   final UserUnbannedEvent _self;

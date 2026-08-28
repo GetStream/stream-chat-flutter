@@ -20,8 +20,7 @@ mixin _$UpdateThreadPartialResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UpdateThreadPartialResponseCopyWith<UpdateThreadPartialResponse>
-  get copyWith =>
+  $UpdateThreadPartialResponseCopyWith<UpdateThreadPartialResponse> get copyWith =>
       _$UpdateThreadPartialResponseCopyWithImpl<UpdateThreadPartialResponse>(
         this as UpdateThreadPartialResponse,
         _$identity,
@@ -32,8 +31,7 @@ mixin _$UpdateThreadPartialResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UpdateThreadPartialResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.thread, thread) || other.thread == thread));
   }
 
@@ -57,8 +55,7 @@ abstract mixin class $UpdateThreadPartialResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpdateThreadPartialResponseCopyWithImpl<$Res>
-    implements $UpdateThreadPartialResponseCopyWith<$Res> {
+class _$UpdateThreadPartialResponseCopyWithImpl<$Res> implements $UpdateThreadPartialResponseCopyWith<$Res> {
   _$UpdateThreadPartialResponseCopyWithImpl(this._self, this._then);
 
   final UpdateThreadPartialResponse _self;

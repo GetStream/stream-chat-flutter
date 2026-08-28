@@ -6,8 +6,7 @@ part of 'notification_removed_from_channel_event.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-NotificationRemovedFromChannelEvent
-_$NotificationRemovedFromChannelEventFromJson(
+NotificationRemovedFromChannelEvent _$NotificationRemovedFromChannelEventFromJson(
   Map<String, dynamic> json,
 ) => NotificationRemovedFromChannelEvent(
   channel: ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
@@ -30,9 +29,7 @@ _$NotificationRemovedFromChannelEventFromJson(
   ),
   team: json['team'] as String?,
   type: json['type'] as String,
-  user: json['user'] == null
-      ? null
-      : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
+  user: json['user'] == null ? null : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$NotificationRemovedFromChannelEventToJson(

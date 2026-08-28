@@ -21,11 +21,10 @@ mixin _$EscalationMetadata {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $EscalationMetadataCopyWith<EscalationMetadata> get copyWith =>
-      _$EscalationMetadataCopyWithImpl<EscalationMetadata>(
-        this as EscalationMetadata,
-        _$identity,
-      );
+  $EscalationMetadataCopyWith<EscalationMetadata> get copyWith => _$EscalationMetadataCopyWithImpl<EscalationMetadata>(
+    this as EscalationMetadata,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -33,8 +32,7 @@ mixin _$EscalationMetadata {
         (other.runtimeType == runtimeType &&
             other is EscalationMetadata &&
             (identical(other.notes, notes) || other.notes == notes) &&
-            (identical(other.priority, priority) ||
-                other.priority == priority) &&
+            (identical(other.priority, priority) || other.priority == priority) &&
             (identical(other.reason, reason) || other.reason == reason));
   }
 
@@ -58,8 +56,7 @@ abstract mixin class $EscalationMetadataCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$EscalationMetadataCopyWithImpl<$Res>
-    implements $EscalationMetadataCopyWith<$Res> {
+class _$EscalationMetadataCopyWithImpl<$Res> implements $EscalationMetadataCopyWith<$Res> {
   _$EscalationMetadataCopyWithImpl(this._self, this._then);
 
   final EscalationMetadata _self;

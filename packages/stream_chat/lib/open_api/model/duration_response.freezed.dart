@@ -19,19 +19,17 @@ mixin _$DurationResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $DurationResponseCopyWith<DurationResponse> get copyWith =>
-      _$DurationResponseCopyWithImpl<DurationResponse>(
-        this as DurationResponse,
-        _$identity,
-      );
+  $DurationResponseCopyWith<DurationResponse> get copyWith => _$DurationResponseCopyWithImpl<DurationResponse>(
+    this as DurationResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is DurationResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -54,8 +52,7 @@ abstract mixin class $DurationResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$DurationResponseCopyWithImpl<$Res>
-    implements $DurationResponseCopyWith<$Res> {
+class _$DurationResponseCopyWithImpl<$Res> implements $DurationResponseCopyWith<$Res> {
   _$DurationResponseCopyWithImpl(this._self, this._then);
 
   final DurationResponse _self;

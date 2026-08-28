@@ -21,19 +21,17 @@ mixin _$SyncResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $SyncResponseCopyWith<SyncResponse> get copyWith =>
-      _$SyncResponseCopyWithImpl<SyncResponse>(
-        this as SyncResponse,
-        _$identity,
-      );
+  $SyncResponseCopyWith<SyncResponse> get copyWith => _$SyncResponseCopyWithImpl<SyncResponse>(
+    this as SyncResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is SyncResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             const DeepCollectionEquality().equals(other.events, events) &&
             const DeepCollectionEquality().equals(
               other.inaccessibleCids,

@@ -84,15 +84,11 @@ mixin _$ChatMessageResponse {
             ) &&
             (identical(other.cid, cid) || other.cid == cid) &&
             (identical(other.command, command) || other.command == command) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.deletedAt, deletedAt) ||
-                other.deletedAt == deletedAt) &&
-            (identical(other.deletedForMe, deletedForMe) ||
-                other.deletedForMe == deletedForMe) &&
-            (identical(other.deletedReplyCount, deletedReplyCount) ||
-                other.deletedReplyCount == deletedReplyCount) &&
+            (identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt) &&
+            (identical(other.deletedForMe, deletedForMe) || other.deletedForMe == deletedForMe) &&
+            (identical(other.deletedReplyCount, deletedReplyCount) || other.deletedReplyCount == deletedReplyCount) &&
             (identical(other.draft, draft) || other.draft == draft) &&
             (identical(other.html, html) || other.html == html) &&
             const DeepCollectionEquality().equals(other.i18n, i18n) &&
@@ -106,8 +102,7 @@ mixin _$ChatMessageResponse {
               latestReactions,
             ) &&
             (identical(other.member, member) || other.member == member) &&
-            (identical(other.mentionedChannel, mentionedChannel) ||
-                other.mentionedChannel == mentionedChannel) &&
+            (identical(other.mentionedChannel, mentionedChannel) || other.mentionedChannel == mentionedChannel) &&
             const DeepCollectionEquality().equals(
               other.mentionedGroupIds,
               mentionedGroupIds,
@@ -116,8 +111,7 @@ mixin _$ChatMessageResponse {
               other.mentionedGroups,
               mentionedGroups,
             ) &&
-            (identical(other.mentionedHere, mentionedHere) ||
-                other.mentionedHere == mentionedHere) &&
+            (identical(other.mentionedHere, mentionedHere) || other.mentionedHere == mentionedHere) &&
             const DeepCollectionEquality().equals(
               other.mentionedRoles,
               mentionedRoles,
@@ -129,27 +123,20 @@ mixin _$ChatMessageResponse {
             (identical(other.messageTextUpdatedAt, messageTextUpdatedAt) ||
                 other.messageTextUpdatedAt == messageTextUpdatedAt) &&
             (identical(other.mml, mml) || other.mml == mml) &&
-            (identical(other.moderation, moderation) ||
-                other.moderation == moderation) &&
+            (identical(other.moderation, moderation) || other.moderation == moderation) &&
             const DeepCollectionEquality().equals(
               other.ownReactions,
               ownReactions,
             ) &&
-            (identical(other.parentId, parentId) ||
-                other.parentId == parentId) &&
-            (identical(other.pinExpires, pinExpires) ||
-                other.pinExpires == pinExpires) &&
+            (identical(other.parentId, parentId) || other.parentId == parentId) &&
+            (identical(other.pinExpires, pinExpires) || other.pinExpires == pinExpires) &&
             (identical(other.pinned, pinned) || other.pinned == pinned) &&
-            (identical(other.pinnedAt, pinnedAt) ||
-                other.pinnedAt == pinnedAt) &&
-            (identical(other.pinnedBy, pinnedBy) ||
-                other.pinnedBy == pinnedBy) &&
+            (identical(other.pinnedAt, pinnedAt) || other.pinnedAt == pinnedAt) &&
+            (identical(other.pinnedBy, pinnedBy) || other.pinnedBy == pinnedBy) &&
             (identical(other.poll, poll) || other.poll == poll) &&
             (identical(other.pollId, pollId) || other.pollId == pollId) &&
-            (identical(other.quotedMessage, quotedMessage) ||
-                other.quotedMessage == quotedMessage) &&
-            (identical(other.quotedMessageId, quotedMessageId) ||
-                other.quotedMessageId == quotedMessageId) &&
+            (identical(other.quotedMessage, quotedMessage) || other.quotedMessage == quotedMessage) &&
+            (identical(other.quotedMessageId, quotedMessageId) || other.quotedMessageId == quotedMessageId) &&
             const DeepCollectionEquality().equals(
               other.reactionCounts,
               reactionCounts,
@@ -162,20 +149,15 @@ mixin _$ChatMessageResponse {
               other.reactionScores,
               reactionScores,
             ) &&
-            (identical(other.reminder, reminder) ||
-                other.reminder == reminder) &&
-            (identical(other.replyCount, replyCount) ||
-                other.replyCount == replyCount) &&
+            (identical(other.reminder, reminder) || other.reminder == reminder) &&
+            (identical(other.replyCount, replyCount) || other.replyCount == replyCount) &&
             const DeepCollectionEquality().equals(
               other.restrictedVisibility,
               restrictedVisibility,
             ) &&
-            (identical(other.shadowed, shadowed) ||
-                other.shadowed == shadowed) &&
-            (identical(other.sharedLocation, sharedLocation) ||
-                other.sharedLocation == sharedLocation) &&
-            (identical(other.showInChannel, showInChannel) ||
-                other.showInChannel == showInChannel) &&
+            (identical(other.shadowed, shadowed) || other.shadowed == shadowed) &&
+            (identical(other.sharedLocation, sharedLocation) || other.sharedLocation == sharedLocation) &&
+            (identical(other.showInChannel, showInChannel) || other.showInChannel == showInChannel) &&
             (identical(other.silent, silent) || other.silent == silent) &&
             (identical(other.text, text) || other.text == text) &&
             const DeepCollectionEquality().equals(
@@ -183,8 +165,7 @@ mixin _$ChatMessageResponse {
               threadParticipants,
             ) &&
             (identical(other.type, type) || other.type == type) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
             (identical(other.user, user) || other.user == user));
   }
 
@@ -309,8 +290,7 @@ abstract mixin class $ChatMessageResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChatMessageResponseCopyWithImpl<$Res>
-    implements $ChatMessageResponseCopyWith<$Res> {
+class _$ChatMessageResponseCopyWithImpl<$Res> implements $ChatMessageResponseCopyWith<$Res> {
   _$ChatMessageResponseCopyWithImpl(this._self, this._then);
 
   final ChatMessageResponse _self;

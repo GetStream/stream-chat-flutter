@@ -18,16 +18,15 @@ CustomEvent _$CustomEventFromJson(Map<String, dynamic> json) => CustomEvent(
   type: json['type'] as String,
 );
 
-Map<String, dynamic> _$CustomEventToJson(CustomEvent instance) =>
-    <String, dynamic>{
-      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
-      'custom': instance.custom,
-      'received_at': _$JsonConverterToJson<Object, DateTime>(
-        instance.receivedAt,
-        const StreamDateTimeConverter().toJson,
-      ),
-      'type': instance.type,
-    };
+Map<String, dynamic> _$CustomEventToJson(CustomEvent instance) => <String, dynamic>{
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
+  'custom': instance.custom,
+  'received_at': _$JsonConverterToJson<Object, DateTime>(
+    instance.receivedAt,
+    const StreamDateTimeConverter().toJson,
+  ),
+  'type': instance.type,
+};
 
 Value? _$JsonConverterFromJson<Json, Value>(
   Object? json,

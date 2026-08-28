@@ -37,15 +37,12 @@ mixin _$ChatReactionResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ChatReactionResponse &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.messageId, messageId) ||
-                other.messageId == messageId) &&
+            (identical(other.messageId, messageId) || other.messageId == messageId) &&
             (identical(other.score, score) || other.score == score) &&
             (identical(other.type, type) || other.type == type) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
             (identical(other.user, user) || other.user == user) &&
             (identical(other.userId, userId) || other.userId == userId));
   }
@@ -89,8 +86,7 @@ abstract mixin class $ChatReactionResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChatReactionResponseCopyWithImpl<$Res>
-    implements $ChatReactionResponseCopyWith<$Res> {
+class _$ChatReactionResponseCopyWithImpl<$Res> implements $ChatReactionResponseCopyWith<$Res> {
   _$ChatReactionResponseCopyWithImpl(this._self, this._then);
 
   final ChatReactionResponse _self;

@@ -14,19 +14,13 @@ ModerationPayloadResponse _$ModerationPayloadResponseFromJson(
   imageIds: (json['image_ids'] as Map<String, dynamic>?)?.map(
     (k, e) => MapEntry(k, e as String),
   ),
-  imageOrderedKeys: (json['image_ordered_keys'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  imageOrderedKeys: (json['image_ordered_keys'] as List<dynamic>?)?.map((e) => e as String).toList(),
   images: (json['images'] as List<dynamic>?)?.map((e) => e as String).toList(),
-  otherMedia: (json['other_media'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  otherMedia: (json['other_media'] as List<dynamic>?)?.map((e) => e as String).toList(),
   textIds: (json['text_ids'] as Map<String, dynamic>?)?.map(
     (k, e) => MapEntry(k, e as String),
   ),
-  textOrderedKeys: (json['text_ordered_keys'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  textOrderedKeys: (json['text_ordered_keys'] as List<dynamic>?)?.map((e) => e as String).toList(),
   texts: (json['texts'] as List<dynamic>?)?.map((e) => e as String).toList(),
   videos: (json['videos'] as List<dynamic>?)?.map((e) => e as String).toList(),
 );

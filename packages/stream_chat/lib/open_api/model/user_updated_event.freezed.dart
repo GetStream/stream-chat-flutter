@@ -23,22 +23,19 @@ mixin _$UserUpdatedEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UserUpdatedEventCopyWith<UserUpdatedEvent> get copyWith =>
-      _$UserUpdatedEventCopyWithImpl<UserUpdatedEvent>(
-        this as UserUpdatedEvent,
-        _$identity,
-      );
+  $UserUpdatedEventCopyWith<UserUpdatedEvent> get copyWith => _$UserUpdatedEventCopyWithImpl<UserUpdatedEvent>(
+    this as UserUpdatedEvent,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UserUpdatedEvent &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(other.user, user) || other.user == user));
   }
@@ -76,8 +73,7 @@ abstract mixin class $UserUpdatedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UserUpdatedEventCopyWithImpl<$Res>
-    implements $UserUpdatedEventCopyWith<$Res> {
+class _$UserUpdatedEventCopyWithImpl<$Res> implements $UserUpdatedEventCopyWith<$Res> {
   _$UserUpdatedEventCopyWithImpl(this._self, this._then);
 
   final UserUpdatedEvent _self;

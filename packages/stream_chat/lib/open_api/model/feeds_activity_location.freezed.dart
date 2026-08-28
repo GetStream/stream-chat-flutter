@@ -55,8 +55,7 @@ abstract mixin class $FeedsActivityLocationCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FeedsActivityLocationCopyWithImpl<$Res>
-    implements $FeedsActivityLocationCopyWith<$Res> {
+class _$FeedsActivityLocationCopyWithImpl<$Res> implements $FeedsActivityLocationCopyWith<$Res> {
   _$FeedsActivityLocationCopyWithImpl(this._self, this._then);
 
   final FeedsActivityLocation _self;

@@ -36,50 +36,37 @@ mixin _$FeedsFeedResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $FeedsFeedResponseCopyWith<FeedsFeedResponse> get copyWith =>
-      _$FeedsFeedResponseCopyWithImpl<FeedsFeedResponse>(
-        this as FeedsFeedResponse,
-        _$identity,
-      );
+  $FeedsFeedResponseCopyWith<FeedsFeedResponse> get copyWith => _$FeedsFeedResponseCopyWithImpl<FeedsFeedResponse>(
+    this as FeedsFeedResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is FeedsFeedResponse &&
-            (identical(other.activityCount, activityCount) ||
-                other.activityCount == activityCount) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.createdBy, createdBy) ||
-                other.createdBy == createdBy) &&
+            (identical(other.activityCount, activityCount) || other.activityCount == activityCount) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.createdBy, createdBy) || other.createdBy == createdBy) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.deletedAt, deletedAt) ||
-                other.deletedAt == deletedAt) &&
-            (identical(other.description, description) ||
-                other.description == description) &&
+            (identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt) &&
+            (identical(other.description, description) || other.description == description) &&
             (identical(other.feed, feed) || other.feed == feed) &&
             const DeepCollectionEquality().equals(
               other.filterTags,
               filterTags,
             ) &&
-            (identical(other.followerCount, followerCount) ||
-                other.followerCount == followerCount) &&
-            (identical(other.followingCount, followingCount) ||
-                other.followingCount == followingCount) &&
+            (identical(other.followerCount, followerCount) || other.followerCount == followerCount) &&
+            (identical(other.followingCount, followingCount) || other.followingCount == followingCount) &&
             (identical(other.groupId, groupId) || other.groupId == groupId) &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.location, location) ||
-                other.location == location) &&
-            (identical(other.memberCount, memberCount) ||
-                other.memberCount == memberCount) &&
+            (identical(other.location, location) || other.location == location) &&
+            (identical(other.memberCount, memberCount) || other.memberCount == memberCount) &&
             (identical(other.name, name) || other.name == name) &&
-            (identical(other.pinCount, pinCount) ||
-                other.pinCount == pinCount) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
-            (identical(other.visibility, visibility) ||
-                other.visibility == visibility));
+            (identical(other.pinCount, pinCount) || other.pinCount == pinCount) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
+            (identical(other.visibility, visibility) || other.visibility == visibility));
   }
 
   @override
@@ -141,8 +128,7 @@ abstract mixin class $FeedsFeedResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FeedsFeedResponseCopyWithImpl<$Res>
-    implements $FeedsFeedResponseCopyWith<$Res> {
+class _$FeedsFeedResponseCopyWithImpl<$Res> implements $FeedsFeedResponseCopyWith<$Res> {
   _$FeedsFeedResponseCopyWithImpl(this._self, this._then);
 
   final FeedsFeedResponse _self;

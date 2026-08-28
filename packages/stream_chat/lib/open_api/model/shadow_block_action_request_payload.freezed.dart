@@ -19,11 +19,11 @@ mixin _$ShadowBlockActionRequestPayload {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ShadowBlockActionRequestPayloadCopyWith<ShadowBlockActionRequestPayload>
-  get copyWith =>
-      _$ShadowBlockActionRequestPayloadCopyWithImpl<
-        ShadowBlockActionRequestPayload
-      >(this as ShadowBlockActionRequestPayload, _$identity);
+  $ShadowBlockActionRequestPayloadCopyWith<ShadowBlockActionRequestPayload> get copyWith =>
+      _$ShadowBlockActionRequestPayloadCopyWithImpl<ShadowBlockActionRequestPayload>(
+        this as ShadowBlockActionRequestPayload,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -53,8 +53,7 @@ abstract mixin class $ShadowBlockActionRequestPayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ShadowBlockActionRequestPayloadCopyWithImpl<$Res>
-    implements $ShadowBlockActionRequestPayloadCopyWith<$Res> {
+class _$ShadowBlockActionRequestPayloadCopyWithImpl<$Res> implements $ShadowBlockActionRequestPayloadCopyWith<$Res> {
   _$ShadowBlockActionRequestPayloadCopyWithImpl(this._self, this._then);
 
   final ShadowBlockActionRequestPayload _self;

@@ -6,31 +6,24 @@ part of 'pending_message_event.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-PendingMessageEvent _$PendingMessageEventFromJson(Map<String, dynamic> json) =>
-    PendingMessageEvent(
-      channel: json['channel'] == null
-          ? null
-          : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
-      createdAt: const StreamDateTimeConverter().fromJson(
-        json['created_at'] as Object,
-      ),
-      custom: json['custom'] as Map<String, dynamic>,
-      message: json['message'] == null
-          ? null
-          : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
-      metadata: (json['metadata'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, e as String),
-      ),
-      method: json['method'] as String,
-      receivedAt: _$JsonConverterFromJson<Object, DateTime>(
-        json['received_at'],
-        const StreamDateTimeConverter().fromJson,
-      ),
-      type: json['type'] as String,
-      user: json['user'] == null
-          ? null
-          : UserResponse.fromJson(json['user'] as Map<String, dynamic>),
-    );
+PendingMessageEvent _$PendingMessageEventFromJson(Map<String, dynamic> json) => PendingMessageEvent(
+  channel: json['channel'] == null ? null : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
+  createdAt: const StreamDateTimeConverter().fromJson(
+    json['created_at'] as Object,
+  ),
+  custom: json['custom'] as Map<String, dynamic>,
+  message: json['message'] == null ? null : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
+  metadata: (json['metadata'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, e as String),
+  ),
+  method: json['method'] as String,
+  receivedAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['received_at'],
+    const StreamDateTimeConverter().fromJson,
+  ),
+  type: json['type'] as String,
+  user: json['user'] == null ? null : UserResponse.fromJson(json['user'] as Map<String, dynamic>),
+);
 
 Map<String, dynamic> _$PendingMessageEventToJson(
   PendingMessageEvent instance,

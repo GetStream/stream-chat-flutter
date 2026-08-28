@@ -9,9 +9,7 @@ part of 'unmute_channel_request.dart';
 UnmuteChannelRequest _$UnmuteChannelRequestFromJson(
   Map<String, dynamic> json,
 ) => UnmuteChannelRequest(
-  channelCids: (json['channel_cids'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  channelCids: (json['channel_cids'] as List<dynamic>?)?.map((e) => e as String).toList(),
   expiration: (json['expiration'] as num?)?.toInt(),
 );
 

@@ -23,8 +23,7 @@ mixin _$ClosedCaptionRuleParameters {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ClosedCaptionRuleParametersCopyWith<ClosedCaptionRuleParameters>
-  get copyWith =>
+  $ClosedCaptionRuleParametersCopyWith<ClosedCaptionRuleParameters> get copyWith =>
       _$ClosedCaptionRuleParametersCopyWithImpl<ClosedCaptionRuleParameters>(
         this as ClosedCaptionRuleParameters,
         _$identity,
@@ -43,12 +42,9 @@ mixin _$ClosedCaptionRuleParameters {
               other.llmHarmLabels,
               llmHarmLabels,
             ) &&
-            (identical(other.severity, severity) ||
-                other.severity == severity) &&
-            (identical(other.threshold, threshold) ||
-                other.threshold == threshold) &&
-            (identical(other.timeWindow, timeWindow) ||
-                other.timeWindow == timeWindow));
+            (identical(other.severity, severity) || other.severity == severity) &&
+            (identical(other.threshold, threshold) || other.threshold == threshold) &&
+            (identical(other.timeWindow, timeWindow) || other.timeWindow == timeWindow));
   }
 
   @override
@@ -84,8 +80,7 @@ abstract mixin class $ClosedCaptionRuleParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ClosedCaptionRuleParametersCopyWithImpl<$Res>
-    implements $ClosedCaptionRuleParametersCopyWith<$Res> {
+class _$ClosedCaptionRuleParametersCopyWithImpl<$Res> implements $ClosedCaptionRuleParametersCopyWith<$Res> {
   _$ClosedCaptionRuleParametersCopyWithImpl(this._self, this._then);
 
   final ClosedCaptionRuleParameters _self;

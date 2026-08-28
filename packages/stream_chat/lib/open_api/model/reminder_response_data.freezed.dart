@@ -39,17 +39,12 @@ mixin _$ReminderResponseData {
         (other.runtimeType == runtimeType &&
             other is ReminderResponseData &&
             (identical(other.channel, channel) || other.channel == channel) &&
-            (identical(other.channelCid, channelCid) ||
-                other.channelCid == channelCid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.channelCid, channelCid) || other.channelCid == channelCid) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             (identical(other.message, message) || other.message == message) &&
-            (identical(other.messageId, messageId) ||
-                other.messageId == messageId) &&
-            (identical(other.remindAt, remindAt) ||
-                other.remindAt == remindAt) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
+            (identical(other.messageId, messageId) || other.messageId == messageId) &&
+            (identical(other.remindAt, remindAt) || other.remindAt == remindAt) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
             (identical(other.user, user) || other.user == user) &&
             (identical(other.userId, userId) || other.userId == userId));
   }
@@ -95,8 +90,7 @@ abstract mixin class $ReminderResponseDataCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ReminderResponseDataCopyWithImpl<$Res>
-    implements $ReminderResponseDataCopyWith<$Res> {
+class _$ReminderResponseDataCopyWithImpl<$Res> implements $ReminderResponseDataCopyWith<$Res> {
   _$ReminderResponseDataCopyWithImpl(this._self, this._then);
 
   final ReminderResponseData _self;

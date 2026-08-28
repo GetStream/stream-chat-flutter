@@ -35,8 +35,7 @@ mixin _$VideoContentParameters {
               other.harmLabels,
               harmLabels,
             ) &&
-            (identical(other.labelOperator, labelOperator) ||
-                other.labelOperator == labelOperator));
+            (identical(other.labelOperator, labelOperator) || other.labelOperator == labelOperator));
   }
 
   @override
@@ -63,8 +62,7 @@ abstract mixin class $VideoContentParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$VideoContentParametersCopyWithImpl<$Res>
-    implements $VideoContentParametersCopyWith<$Res> {
+class _$VideoContentParametersCopyWithImpl<$Res> implements $VideoContentParametersCopyWith<$Res> {
   _$VideoContentParametersCopyWithImpl(this._self, this._then);
 
   final VideoContentParameters _self;

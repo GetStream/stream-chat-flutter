@@ -34,14 +34,11 @@ mixin _$TruncateChannelRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is TruncateChannelRequest &&
-            (identical(other.hardDelete, hardDelete) ||
-                other.hardDelete == hardDelete) &&
+            (identical(other.hardDelete, hardDelete) || other.hardDelete == hardDelete) &&
             const DeepCollectionEquality().equals(other.memberIds, memberIds) &&
             (identical(other.message, message) || other.message == message) &&
-            (identical(other.skipPush, skipPush) ||
-                other.skipPush == skipPush) &&
-            (identical(other.truncatedAt, truncatedAt) ||
-                other.truncatedAt == truncatedAt));
+            (identical(other.skipPush, skipPush) || other.skipPush == skipPush) &&
+            (identical(other.truncatedAt, truncatedAt) || other.truncatedAt == truncatedAt));
   }
 
   @override
@@ -77,8 +74,7 @@ abstract mixin class $TruncateChannelRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$TruncateChannelRequestCopyWithImpl<$Res>
-    implements $TruncateChannelRequestCopyWith<$Res> {
+class _$TruncateChannelRequestCopyWithImpl<$Res> implements $TruncateChannelRequestCopyWith<$Res> {
   _$TruncateChannelRequestCopyWithImpl(this._self, this._then);
 
   final TruncateChannelRequest _self;

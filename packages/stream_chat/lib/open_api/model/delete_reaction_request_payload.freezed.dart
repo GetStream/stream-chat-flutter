@@ -22,8 +22,7 @@ mixin _$DeleteReactionRequestPayload {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $DeleteReactionRequestPayloadCopyWith<DeleteReactionRequestPayload>
-  get copyWith =>
+  $DeleteReactionRequestPayloadCopyWith<DeleteReactionRequestPayload> get copyWith =>
       _$DeleteReactionRequestPayloadCopyWithImpl<DeleteReactionRequestPayload>(
         this as DeleteReactionRequestPayload,
         _$identity,
@@ -34,18 +33,14 @@ mixin _$DeleteReactionRequestPayload {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is DeleteReactionRequestPayload &&
-            (identical(other.entityId, entityId) ||
-                other.entityId == entityId) &&
-            (identical(other.entityType, entityType) ||
-                other.entityType == entityType) &&
-            (identical(other.hardDelete, hardDelete) ||
-                other.hardDelete == hardDelete) &&
+            (identical(other.entityId, entityId) || other.entityId == entityId) &&
+            (identical(other.entityType, entityType) || other.entityType == entityType) &&
+            (identical(other.hardDelete, hardDelete) || other.hardDelete == hardDelete) &&
             (identical(other.reason, reason) || other.reason == reason));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, entityId, entityType, hardDelete, reason);
+  int get hashCode => Object.hash(runtimeType, entityId, entityType, hardDelete, reason);
 
   @override
   String toString() {
@@ -69,8 +64,7 @@ abstract mixin class $DeleteReactionRequestPayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$DeleteReactionRequestPayloadCopyWithImpl<$Res>
-    implements $DeleteReactionRequestPayloadCopyWith<$Res> {
+class _$DeleteReactionRequestPayloadCopyWithImpl<$Res> implements $DeleteReactionRequestPayloadCopyWith<$Res> {
   _$DeleteReactionRequestPayloadCopyWithImpl(this._self, this._then);
 
   final DeleteReactionRequestPayload _self;

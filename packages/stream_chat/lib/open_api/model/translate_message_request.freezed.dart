@@ -30,8 +30,7 @@ mixin _$TranslateMessageRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is TranslateMessageRequest &&
-            (identical(other.language, language) ||
-                other.language == language));
+            (identical(other.language, language) || other.language == language));
   }
 
   @override
@@ -54,8 +53,7 @@ abstract mixin class $TranslateMessageRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$TranslateMessageRequestCopyWithImpl<$Res>
-    implements $TranslateMessageRequestCopyWith<$Res> {
+class _$TranslateMessageRequestCopyWithImpl<$Res> implements $TranslateMessageRequestCopyWith<$Res> {
   _$TranslateMessageRequestCopyWithImpl(this._self, this._then);
 
   final TranslateMessageRequest _self;

@@ -39,15 +39,12 @@ mixin _$UpsertActionConfigRequest {
             other is UpsertActionConfigRequest &&
             (identical(other.action, action) || other.action == action) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.description, description) ||
-                other.description == description) &&
-            (identical(other.entityType, entityType) ||
-                other.entityType == entityType) &&
+            (identical(other.description, description) || other.description == description) &&
+            (identical(other.entityType, entityType) || other.entityType == entityType) &&
             (identical(other.icon, icon) || other.icon == icon) &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.order, order) || other.order == order) &&
-            (identical(other.queueType, queueType) ||
-                other.queueType == queueType));
+            (identical(other.queueType, queueType) || other.queueType == queueType));
   }
 
   @override
@@ -89,8 +86,7 @@ abstract mixin class $UpsertActionConfigRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpsertActionConfigRequestCopyWithImpl<$Res>
-    implements $UpsertActionConfigRequestCopyWith<$Res> {
+class _$UpsertActionConfigRequestCopyWithImpl<$Res> implements $UpsertActionConfigRequestCopyWith<$Res> {
   _$UpsertActionConfigRequestCopyWithImpl(this._self, this._then);
 
   final UpsertActionConfigRequest _self;

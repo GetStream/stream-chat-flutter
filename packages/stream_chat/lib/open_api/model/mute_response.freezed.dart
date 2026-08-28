@@ -22,19 +22,17 @@ mixin _$MuteResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $MuteResponseCopyWith<MuteResponse> get copyWith =>
-      _$MuteResponseCopyWithImpl<MuteResponse>(
-        this as MuteResponse,
-        _$identity,
-      );
+  $MuteResponseCopyWith<MuteResponse> get copyWith => _$MuteResponseCopyWithImpl<MuteResponse>(
+    this as MuteResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is MuteResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             const DeepCollectionEquality().equals(other.mutes, mutes) &&
             const DeepCollectionEquality().equals(
               other.nonExistingUsers,

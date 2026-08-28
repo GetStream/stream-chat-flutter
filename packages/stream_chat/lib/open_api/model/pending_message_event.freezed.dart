@@ -39,14 +39,12 @@ mixin _$PendingMessageEvent {
         (other.runtimeType == runtimeType &&
             other is PendingMessageEvent &&
             (identical(other.channel, channel) || other.channel == channel) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.message, message) || other.message == message) &&
             const DeepCollectionEquality().equals(other.metadata, metadata) &&
             (identical(other.method, method) || other.method == method) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(other.user, user) || other.user == user));
   }
@@ -92,8 +90,7 @@ abstract mixin class $PendingMessageEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$PendingMessageEventCopyWithImpl<$Res>
-    implements $PendingMessageEventCopyWith<$Res> {
+class _$PendingMessageEventCopyWithImpl<$Res> implements $PendingMessageEventCopyWith<$Res> {
   _$PendingMessageEventCopyWithImpl(this._self, this._then);
 
   final PendingMessageEvent _self;

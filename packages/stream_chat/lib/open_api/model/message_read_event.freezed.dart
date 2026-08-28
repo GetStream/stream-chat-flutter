@@ -33,11 +33,10 @@ mixin _$MessageReadEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $MessageReadEventCopyWith<MessageReadEvent> get copyWith =>
-      _$MessageReadEventCopyWithImpl<MessageReadEvent>(
-        this as MessageReadEvent,
-        _$identity,
-      );
+  $MessageReadEventCopyWith<MessageReadEvent> get copyWith => _$MessageReadEventCopyWithImpl<MessageReadEvent>(
+    this as MessageReadEvent,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -49,22 +48,17 @@ mixin _$MessageReadEvent {
               other.channelCustom,
               channelCustom,
             ) &&
-            (identical(other.channelId, channelId) ||
-                other.channelId == channelId) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
             (identical(other.channelMemberCount, channelMemberCount) ||
                 other.channelMemberCount == channelMemberCount) &&
             (identical(other.channelMessageCount, channelMessageCount) ||
                 other.channelMessageCount == channelMessageCount) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.lastReadMessageId, lastReadMessageId) ||
-                other.lastReadMessageId == lastReadMessageId) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.lastReadMessageId, lastReadMessageId) || other.lastReadMessageId == lastReadMessageId) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.team, team) || other.team == team) &&
             (identical(other.thread, thread) || other.thread == thread) &&
             (identical(other.type, type) || other.type == type) &&
@@ -124,8 +118,7 @@ abstract mixin class $MessageReadEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MessageReadEventCopyWithImpl<$Res>
-    implements $MessageReadEventCopyWith<$Res> {
+class _$MessageReadEventCopyWithImpl<$Res> implements $MessageReadEventCopyWith<$Res> {
   _$MessageReadEventCopyWithImpl(this._self, this._then);
 
   final MessageReadEvent _self;

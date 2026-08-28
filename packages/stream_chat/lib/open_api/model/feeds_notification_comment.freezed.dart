@@ -73,8 +73,7 @@ abstract mixin class $FeedsNotificationCommentCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FeedsNotificationCommentCopyWithImpl<$Res>
-    implements $FeedsNotificationCommentCopyWith<$Res> {
+class _$FeedsNotificationCommentCopyWithImpl<$Res> implements $FeedsNotificationCommentCopyWith<$Res> {
   _$FeedsNotificationCommentCopyWithImpl(this._self, this._then);
 
   final FeedsNotificationComment _self;

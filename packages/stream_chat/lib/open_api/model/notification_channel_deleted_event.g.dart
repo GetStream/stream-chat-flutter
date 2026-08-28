@@ -20,10 +20,9 @@ NotificationChannelDeletedEvent _$NotificationChannelDeletedEventFromJson(
     json['created_at'] as Object,
   ),
   custom: json['custom'] as Map<String, dynamic>,
-  groupedUnreadChannels:
-      (json['grouped_unread_channels'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, (e as num).toInt()),
-      ),
+  groupedUnreadChannels: (json['grouped_unread_channels'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, (e as num).toInt()),
+  ),
   receivedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['received_at'],
     const StreamDateTimeConverter().fromJson,

@@ -72,73 +72,49 @@ mixin _$ChannelConfigWithInfo {
               allowedFlagReasons,
             ) &&
             (identical(other.automod, automod) || other.automod == automod) &&
-            (identical(other.automodBehavior, automodBehavior) ||
-                other.automodBehavior == automodBehavior) &&
-            (identical(other.automodThresholds, automodThresholds) ||
-                other.automodThresholds == automodThresholds) &&
-            (identical(other.blocklist, blocklist) ||
-                other.blocklist == blocklist) &&
-            (identical(other.blocklistBehavior, blocklistBehavior) ||
-                other.blocklistBehavior == blocklistBehavior) &&
+            (identical(other.automodBehavior, automodBehavior) || other.automodBehavior == automodBehavior) &&
+            (identical(other.automodThresholds, automodThresholds) || other.automodThresholds == automodThresholds) &&
+            (identical(other.blocklist, blocklist) || other.blocklist == blocklist) &&
+            (identical(other.blocklistBehavior, blocklistBehavior) || other.blocklistBehavior == blocklistBehavior) &&
             const DeepCollectionEquality().equals(
               other.blocklists,
               blocklists,
             ) &&
-            (identical(other.chatPreferences, chatPreferences) ||
-                other.chatPreferences == chatPreferences) &&
+            (identical(other.chatPreferences, chatPreferences) || other.chatPreferences == chatPreferences) &&
             const DeepCollectionEquality().equals(other.commands, commands) &&
-            (identical(other.connectEvents, connectEvents) ||
-                other.connectEvents == connectEvents) &&
-            (identical(other.countMessages, countMessages) ||
-                other.countMessages == countMessages) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.customEvents, customEvents) ||
-                other.customEvents == customEvents) &&
-            (identical(other.deliveryEvents, deliveryEvents) ||
-                other.deliveryEvents == deliveryEvents) &&
+            (identical(other.connectEvents, connectEvents) || other.connectEvents == connectEvents) &&
+            (identical(other.countMessages, countMessages) || other.countMessages == countMessages) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.customEvents, customEvents) || other.customEvents == customEvents) &&
+            (identical(other.deliveryEvents, deliveryEvents) || other.deliveryEvents == deliveryEvents) &&
             const DeepCollectionEquality().equals(other.grants, grants) &&
             (identical(other.markMessagesPending, markMessagesPending) ||
                 other.markMessagesPending == markMessagesPending) &&
-            (identical(other.maxMessageLength, maxMessageLength) ||
-                other.maxMessageLength == maxMessageLength) &&
-            (identical(other.messageRetention, messageRetention) ||
-                other.messageRetention == messageRetention) &&
+            (identical(other.maxMessageLength, maxMessageLength) || other.maxMessageLength == maxMessageLength) &&
+            (identical(other.messageRetention, messageRetention) || other.messageRetention == messageRetention) &&
             (identical(other.mutes, mutes) || other.mutes == mutes) &&
             (identical(other.name, name) || other.name == name) &&
-            (identical(other.partitionSize, partitionSize) ||
-                other.partitionSize == partitionSize) &&
-            (identical(other.partitionTtl, partitionTtl) ||
-                other.partitionTtl == partitionTtl) &&
+            (identical(other.partitionSize, partitionSize) || other.partitionSize == partitionSize) &&
+            (identical(other.partitionTtl, partitionTtl) || other.partitionTtl == partitionTtl) &&
             (identical(other.polls, polls) || other.polls == polls) &&
-            (identical(other.pushLevel, pushLevel) ||
-                other.pushLevel == pushLevel) &&
-            (identical(other.pushNotifications, pushNotifications) ||
-                other.pushNotifications == pushNotifications) &&
+            (identical(other.pushLevel, pushLevel) || other.pushLevel == pushLevel) &&
+            (identical(other.pushNotifications, pushNotifications) || other.pushNotifications == pushNotifications) &&
             (identical(other.quotes, quotes) || other.quotes == quotes) &&
-            (identical(other.reactions, reactions) ||
-                other.reactions == reactions) &&
-            (identical(other.readEvents, readEvents) ||
-                other.readEvents == readEvents) &&
-            (identical(other.reminders, reminders) ||
-                other.reminders == reminders) &&
+            (identical(other.reactions, reactions) || other.reactions == reactions) &&
+            (identical(other.readEvents, readEvents) || other.readEvents == readEvents) &&
+            (identical(other.reminders, reminders) || other.reminders == reminders) &&
             (identical(other.replies, replies) || other.replies == replies) &&
             (identical(other.search, search) || other.search == search) &&
-            (identical(other.sharedLocations, sharedLocations) ||
-                other.sharedLocations == sharedLocations) &&
+            (identical(other.sharedLocations, sharedLocations) || other.sharedLocations == sharedLocations) &&
             (identical(
                   other.skipLastMsgUpdateForSystemMsgs,
                   skipLastMsgUpdateForSystemMsgs,
                 ) ||
-                other.skipLastMsgUpdateForSystemMsgs ==
-                    skipLastMsgUpdateForSystemMsgs) &&
-            (identical(other.typingEvents, typingEvents) ||
-                other.typingEvents == typingEvents) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
+                other.skipLastMsgUpdateForSystemMsgs == skipLastMsgUpdateForSystemMsgs) &&
+            (identical(other.typingEvents, typingEvents) || other.typingEvents == typingEvents) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
             (identical(other.uploads, uploads) || other.uploads == uploads) &&
-            (identical(other.urlEnrichment, urlEnrichment) ||
-                other.urlEnrichment == urlEnrichment) &&
+            (identical(other.urlEnrichment, urlEnrichment) || other.urlEnrichment == urlEnrichment) &&
             (identical(other.userMessageReminders, userMessageReminders) ||
                 other.userMessageReminders == userMessageReminders));
   }
@@ -242,8 +218,7 @@ abstract mixin class $ChannelConfigWithInfoCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChannelConfigWithInfoCopyWithImpl<$Res>
-    implements $ChannelConfigWithInfoCopyWith<$Res> {
+class _$ChannelConfigWithInfoCopyWithImpl<$Res> implements $ChannelConfigWithInfoCopyWith<$Res> {
   _$ChannelConfigWithInfoCopyWithImpl(this._self, this._then);
 
   final ChannelConfigWithInfo _self;

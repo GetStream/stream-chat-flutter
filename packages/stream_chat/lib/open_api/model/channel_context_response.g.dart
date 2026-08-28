@@ -10,9 +10,7 @@ ChannelContextResponse _$ChannelContextResponseFromJson(
   Map<String, dynamic> json,
 ) => ChannelContextResponse(
   cid: json['cid'] as String,
-  createdBy: json['created_by'] == null
-      ? null
-      : UserResponse.fromJson(json['created_by'] as Map<String, dynamic>),
+  createdBy: json['created_by'] == null ? null : UserResponse.fromJson(json['created_by'] as Map<String, dynamic>),
   id: json['id'] as String,
   type: json['type'] as String,
 );

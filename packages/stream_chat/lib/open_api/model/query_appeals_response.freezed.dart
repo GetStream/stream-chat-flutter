@@ -33,8 +33,7 @@ mixin _$QueryAppealsResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is QueryAppealsResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             const DeepCollectionEquality().equals(other.items, items) &&
             (identical(other.next, next) || other.next == next) &&
             (identical(other.prev, prev) || other.prev == prev));
@@ -71,8 +70,7 @@ abstract mixin class $QueryAppealsResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryAppealsResponseCopyWithImpl<$Res>
-    implements $QueryAppealsResponseCopyWith<$Res> {
+class _$QueryAppealsResponseCopyWithImpl<$Res> implements $QueryAppealsResponseCopyWith<$Res> {
   _$QueryAppealsResponseCopyWithImpl(this._self, this._then);
 
   final QueryAppealsResponse _self;

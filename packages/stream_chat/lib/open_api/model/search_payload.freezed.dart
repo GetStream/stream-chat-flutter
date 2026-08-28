@@ -28,11 +28,10 @@ mixin _$SearchPayload {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $SearchPayloadCopyWith<SearchPayload> get copyWith =>
-      _$SearchPayloadCopyWithImpl<SearchPayload>(
-        this as SearchPayload,
-        _$identity,
-      );
+  $SearchPayloadCopyWith<SearchPayload> get copyWith => _$SearchPayloadCopyWithImpl<SearchPayload>(
+    this as SearchPayload,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -45,15 +44,13 @@ mixin _$SearchPayload {
             ) &&
             (identical(other.forceDefaultSearch, forceDefaultSearch) ||
                 other.forceDefaultSearch == forceDefaultSearch) &&
-            (identical(other.forceSqlV2Backend, forceSqlV2Backend) ||
-                other.forceSqlV2Backend == forceSqlV2Backend) &&
+            (identical(other.forceSqlV2Backend, forceSqlV2Backend) || other.forceSqlV2Backend == forceSqlV2Backend) &&
             (identical(other.limit, limit) || other.limit == limit) &&
             const DeepCollectionEquality().equals(
               other.messageFilterConditions,
               messageFilterConditions,
             ) &&
-            (identical(other.messageOptions, messageOptions) ||
-                other.messageOptions == messageOptions) &&
+            (identical(other.messageOptions, messageOptions) || other.messageOptions == messageOptions) &&
             (identical(other.next, next) || other.next == next) &&
             (identical(other.offset, offset) || other.offset == offset) &&
             (identical(other.query, query) || other.query == query) &&
@@ -103,8 +100,7 @@ abstract mixin class $SearchPayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$SearchPayloadCopyWithImpl<$Res>
-    implements $SearchPayloadCopyWith<$Res> {
+class _$SearchPayloadCopyWithImpl<$Res> implements $SearchPayloadCopyWith<$Res> {
   _$SearchPayloadCopyWithImpl(this._self, this._then);
 
   final SearchPayload _self;

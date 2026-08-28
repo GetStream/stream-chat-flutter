@@ -33,14 +33,10 @@ mixin _$FlagRequest {
         (other.runtimeType == runtimeType &&
             other is FlagRequest &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.entityCreatorId, entityCreatorId) ||
-                other.entityCreatorId == entityCreatorId) &&
-            (identical(other.entityId, entityId) ||
-                other.entityId == entityId) &&
-            (identical(other.entityType, entityType) ||
-                other.entityType == entityType) &&
-            (identical(other.moderationPayload, moderationPayload) ||
-                other.moderationPayload == moderationPayload) &&
+            (identical(other.entityCreatorId, entityCreatorId) || other.entityCreatorId == entityCreatorId) &&
+            (identical(other.entityId, entityId) || other.entityId == entityId) &&
+            (identical(other.entityType, entityType) || other.entityType == entityType) &&
+            (identical(other.moderationPayload, moderationPayload) || other.moderationPayload == moderationPayload) &&
             (identical(other.reason, reason) || other.reason == reason));
   }
 

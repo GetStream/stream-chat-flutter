@@ -38,20 +38,15 @@ mixin _$UserWatchingStopEvent {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UserWatchingStopEvent &&
-            (identical(other.channelId, channelId) ||
-                other.channelId == channelId) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(other.user, user) || other.user == user) &&
-            (identical(other.watcherCount, watcherCount) ||
-                other.watcherCount == watcherCount));
+            (identical(other.watcherCount, watcherCount) || other.watcherCount == watcherCount));
   }
 
   @override
@@ -95,8 +90,7 @@ abstract mixin class $UserWatchingStopEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UserWatchingStopEventCopyWithImpl<$Res>
-    implements $UserWatchingStopEventCopyWith<$Res> {
+class _$UserWatchingStopEventCopyWithImpl<$Res> implements $UserWatchingStopEventCopyWith<$Res> {
   _$UserWatchingStopEventCopyWithImpl(this._self, this._then);
 
   final UserWatchingStopEvent _self;

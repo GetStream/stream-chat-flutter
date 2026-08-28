@@ -21,19 +21,17 @@ mixin _$SortParamRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $SortParamRequestCopyWith<SortParamRequest> get copyWith =>
-      _$SortParamRequestCopyWithImpl<SortParamRequest>(
-        this as SortParamRequest,
-        _$identity,
-      );
+  $SortParamRequestCopyWith<SortParamRequest> get copyWith => _$SortParamRequestCopyWithImpl<SortParamRequest>(
+    this as SortParamRequest,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is SortParamRequest &&
-            (identical(other.direction, direction) ||
-                other.direction == direction) &&
+            (identical(other.direction, direction) || other.direction == direction) &&
             (identical(other.field, field) || other.field == field) &&
             (identical(other.type, type) || other.type == type));
   }
@@ -58,8 +56,7 @@ abstract mixin class $SortParamRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$SortParamRequestCopyWithImpl<$Res>
-    implements $SortParamRequestCopyWith<$Res> {
+class _$SortParamRequestCopyWithImpl<$Res> implements $SortParamRequestCopyWith<$Res> {
   _$SortParamRequestCopyWithImpl(this._self, this._then);
 
   final SortParamRequest _self;

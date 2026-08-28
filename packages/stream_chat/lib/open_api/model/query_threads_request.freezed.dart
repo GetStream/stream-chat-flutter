@@ -40,14 +40,11 @@ mixin _$QueryThreadsRequest {
             other is QueryThreadsRequest &&
             const DeepCollectionEquality().equals(other.filter, filter) &&
             (identical(other.limit, limit) || other.limit == limit) &&
-            (identical(other.memberLimit, memberLimit) ||
-                other.memberLimit == memberLimit) &&
+            (identical(other.memberLimit, memberLimit) || other.memberLimit == memberLimit) &&
             (identical(other.next, next) || other.next == next) &&
-            (identical(other.participantLimit, participantLimit) ||
-                other.participantLimit == participantLimit) &&
+            (identical(other.participantLimit, participantLimit) || other.participantLimit == participantLimit) &&
             (identical(other.prev, prev) || other.prev == prev) &&
-            (identical(other.replyLimit, replyLimit) ||
-                other.replyLimit == replyLimit) &&
+            (identical(other.replyLimit, replyLimit) || other.replyLimit == replyLimit) &&
             const DeepCollectionEquality().equals(other.sort, sort) &&
             (identical(other.watch, watch) || other.watch == watch));
   }
@@ -93,8 +90,7 @@ abstract mixin class $QueryThreadsRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryThreadsRequestCopyWithImpl<$Res>
-    implements $QueryThreadsRequestCopyWith<$Res> {
+class _$QueryThreadsRequestCopyWithImpl<$Res> implements $QueryThreadsRequestCopyWith<$Res> {
   _$QueryThreadsRequestCopyWithImpl(this._self, this._then);
 
   final QueryThreadsRequest _self;

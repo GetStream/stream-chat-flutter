@@ -13,9 +13,7 @@ ChatReminderResponseData _$ChatReminderResponseDataFromJson(
   createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  message: json['message'] == null
-      ? null
-      : ChatMessageResponse.fromJson(json['message'] as Map<String, dynamic>),
+  message: json['message'] == null ? null : ChatMessageResponse.fromJson(json['message'] as Map<String, dynamic>),
   messageId: json['message_id'] as String,
   remindAt: _$JsonConverterFromJson<Object, DateTime>(
     json['remind_at'],
@@ -24,9 +22,7 @@ ChatReminderResponseData _$ChatReminderResponseDataFromJson(
   updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,
   ),
-  user: json['user'] == null
-      ? null
-      : UserResponse.fromJson(json['user'] as Map<String, dynamic>),
+  user: json['user'] == null ? null : UserResponse.fromJson(json['user'] as Map<String, dynamic>),
   userId: json['user_id'] as String,
 );
 

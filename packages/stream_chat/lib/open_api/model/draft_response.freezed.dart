@@ -25,11 +25,10 @@ mixin _$DraftResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $DraftResponseCopyWith<DraftResponse> get copyWith =>
-      _$DraftResponseCopyWithImpl<DraftResponse>(
-        this as DraftResponse,
-        _$identity,
-      );
+  $DraftResponseCopyWith<DraftResponse> get copyWith => _$DraftResponseCopyWithImpl<DraftResponse>(
+    this as DraftResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -37,17 +36,12 @@ mixin _$DraftResponse {
         (other.runtimeType == runtimeType &&
             other is DraftResponse &&
             (identical(other.channel, channel) || other.channel == channel) &&
-            (identical(other.channelCid, channelCid) ||
-                other.channelCid == channelCid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.channelCid, channelCid) || other.channelCid == channelCid) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             (identical(other.message, message) || other.message == message) &&
-            (identical(other.parentId, parentId) ||
-                other.parentId == parentId) &&
-            (identical(other.parentMessage, parentMessage) ||
-                other.parentMessage == parentMessage) &&
-            (identical(other.quotedMessage, quotedMessage) ||
-                other.quotedMessage == quotedMessage));
+            (identical(other.parentId, parentId) || other.parentId == parentId) &&
+            (identical(other.parentMessage, parentMessage) || other.parentMessage == parentMessage) &&
+            (identical(other.quotedMessage, quotedMessage) || other.quotedMessage == quotedMessage));
   }
 
   @override
@@ -87,8 +81,7 @@ abstract mixin class $DraftResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$DraftResponseCopyWithImpl<$Res>
-    implements $DraftResponseCopyWith<$Res> {
+class _$DraftResponseCopyWithImpl<$Res> implements $DraftResponseCopyWith<$Res> {
   _$DraftResponseCopyWithImpl(this._self, this._then);
 
   final DraftResponse _self;

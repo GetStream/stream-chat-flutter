@@ -19,11 +19,10 @@ mixin _$SendEventRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $SendEventRequestCopyWith<SendEventRequest> get copyWith =>
-      _$SendEventRequestCopyWithImpl<SendEventRequest>(
-        this as SendEventRequest,
-        _$identity,
-      );
+  $SendEventRequestCopyWith<SendEventRequest> get copyWith => _$SendEventRequestCopyWithImpl<SendEventRequest>(
+    this as SendEventRequest,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -53,8 +52,7 @@ abstract mixin class $SendEventRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$SendEventRequestCopyWithImpl<$Res>
-    implements $SendEventRequestCopyWith<$Res> {
+class _$SendEventRequestCopyWithImpl<$Res> implements $SendEventRequestCopyWith<$Res> {
   _$SendEventRequestCopyWithImpl(this._self, this._then);
 
   final SendEventRequest _self;

@@ -11,18 +11,12 @@ ModerationV2Response _$ModerationV2ResponseFromJson(
 ) => ModerationV2Response(
   action: json['action'] as String,
   blocklistMatched: json['blocklist_matched'] as String?,
-  blocklistsMatched: (json['blocklists_matched'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
-  imageHarms: (json['image_harms'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  blocklistsMatched: (json['blocklists_matched'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  imageHarms: (json['image_harms'] as List<dynamic>?)?.map((e) => e as String).toList(),
   originalText: json['original_text'] as String,
   platformCircumvented: json['platform_circumvented'] as bool?,
   semanticFilterMatched: json['semantic_filter_matched'] as String?,
-  textHarms: (json['text_harms'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  textHarms: (json['text_harms'] as List<dynamic>?)?.map((e) => e as String).toList(),
 );
 
 Map<String, dynamic> _$ModerationV2ResponseToJson(

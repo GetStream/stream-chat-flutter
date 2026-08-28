@@ -19,19 +19,17 @@ mixin _$BlockUsersRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $BlockUsersRequestCopyWith<BlockUsersRequest> get copyWith =>
-      _$BlockUsersRequestCopyWithImpl<BlockUsersRequest>(
-        this as BlockUsersRequest,
-        _$identity,
-      );
+  $BlockUsersRequestCopyWith<BlockUsersRequest> get copyWith => _$BlockUsersRequestCopyWithImpl<BlockUsersRequest>(
+    this as BlockUsersRequest,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is BlockUsersRequest &&
-            (identical(other.blockedUserId, blockedUserId) ||
-                other.blockedUserId == blockedUserId));
+            (identical(other.blockedUserId, blockedUserId) || other.blockedUserId == blockedUserId));
   }
 
   @override
@@ -54,8 +52,7 @@ abstract mixin class $BlockUsersRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$BlockUsersRequestCopyWithImpl<$Res>
-    implements $BlockUsersRequestCopyWith<$Res> {
+class _$BlockUsersRequestCopyWithImpl<$Res> implements $BlockUsersRequestCopyWith<$Res> {
   _$BlockUsersRequestCopyWithImpl(this._self, this._then);
 
   final BlockUsersRequest _self;

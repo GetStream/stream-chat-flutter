@@ -20,8 +20,7 @@ mixin _$DeleteChannelsResultResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $DeleteChannelsResultResponseCopyWith<DeleteChannelsResultResponse>
-  get copyWith =>
+  $DeleteChannelsResultResponseCopyWith<DeleteChannelsResultResponse> get copyWith =>
       _$DeleteChannelsResultResponseCopyWithImpl<DeleteChannelsResultResponse>(
         this as DeleteChannelsResultResponse,
         _$identity,
@@ -56,8 +55,7 @@ abstract mixin class $DeleteChannelsResultResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$DeleteChannelsResultResponseCopyWithImpl<$Res>
-    implements $DeleteChannelsResultResponseCopyWith<$Res> {
+class _$DeleteChannelsResultResponseCopyWithImpl<$Res> implements $DeleteChannelsResultResponseCopyWith<$Res> {
   _$DeleteChannelsResultResponseCopyWithImpl(this._self, this._then);
 
   final DeleteChannelsResultResponse _self;

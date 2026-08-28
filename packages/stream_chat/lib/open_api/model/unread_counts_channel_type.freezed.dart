@@ -32,17 +32,13 @@ mixin _$UnreadCountsChannelType {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UnreadCountsChannelType &&
-            (identical(other.channelCount, channelCount) ||
-                other.channelCount == channelCount) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
-            (identical(other.unreadCount, unreadCount) ||
-                other.unreadCount == unreadCount));
+            (identical(other.channelCount, channelCount) || other.channelCount == channelCount) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
+            (identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, channelCount, channelType, unreadCount);
+  int get hashCode => Object.hash(runtimeType, channelCount, channelType, unreadCount);
 
   @override
   String toString() {
@@ -61,8 +57,7 @@ abstract mixin class $UnreadCountsChannelTypeCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UnreadCountsChannelTypeCopyWithImpl<$Res>
-    implements $UnreadCountsChannelTypeCopyWith<$Res> {
+class _$UnreadCountsChannelTypeCopyWithImpl<$Res> implements $UnreadCountsChannelTypeCopyWith<$Res> {
   _$UnreadCountsChannelTypeCopyWithImpl(this._self, this._then);
 
   final UnreadCountsChannelType _self;

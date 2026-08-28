@@ -20,13 +20,12 @@ UserRequest _$UserRequestFromJson(Map<String, dynamic> json) => UserRequest(
         ),
 );
 
-Map<String, dynamic> _$UserRequestToJson(UserRequest instance) =>
-    <String, dynamic>{
-      'custom': instance.custom,
-      'id': instance.id,
-      'image': instance.image,
-      'invisible': instance.invisible,
-      'language': instance.language,
-      'name': instance.name,
-      'privacy_settings': instance.privacySettings?.toJson(),
-    };
+Map<String, dynamic> _$UserRequestToJson(UserRequest instance) => <String, dynamic>{
+  'custom': instance.custom,
+  'id': instance.id,
+  'image': instance.image,
+  'invisible': instance.invisible,
+  'language': instance.language,
+  'name': instance.name,
+  'privacy_settings': instance.privacySettings?.toJson(),
+};

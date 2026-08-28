@@ -21,8 +21,7 @@ mixin _$MarkReviewedRequestPayload {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $MarkReviewedRequestPayloadCopyWith<MarkReviewedRequestPayload>
-  get copyWith =>
+  $MarkReviewedRequestPayloadCopyWith<MarkReviewedRequestPayload> get copyWith =>
       _$MarkReviewedRequestPayloadCopyWithImpl<MarkReviewedRequestPayload>(
         this as MarkReviewedRequestPayload,
         _$identity,
@@ -37,16 +36,13 @@ mixin _$MarkReviewedRequestPayload {
                   other.contentToMarkAsReviewedLimit,
                   contentToMarkAsReviewedLimit,
                 ) ||
-                other.contentToMarkAsReviewedLimit ==
-                    contentToMarkAsReviewedLimit) &&
-            (identical(other.decisionReason, decisionReason) ||
-                other.decisionReason == decisionReason) &&
+                other.contentToMarkAsReviewedLimit == contentToMarkAsReviewedLimit) &&
+            (identical(other.decisionReason, decisionReason) || other.decisionReason == decisionReason) &&
             (identical(
                   other.disableMarkingContentAsReviewed,
                   disableMarkingContentAsReviewed,
                 ) ||
-                other.disableMarkingContentAsReviewed ==
-                    disableMarkingContentAsReviewed));
+                other.disableMarkingContentAsReviewed == disableMarkingContentAsReviewed));
   }
 
   @override
@@ -78,8 +74,7 @@ abstract mixin class $MarkReviewedRequestPayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MarkReviewedRequestPayloadCopyWithImpl<$Res>
-    implements $MarkReviewedRequestPayloadCopyWith<$Res> {
+class _$MarkReviewedRequestPayloadCopyWithImpl<$Res> implements $MarkReviewedRequestPayloadCopyWith<$Res> {
   _$MarkReviewedRequestPayloadCopyWithImpl(this._self, this._then);
 
   final MarkReviewedRequestPayload _self;
@@ -104,8 +99,7 @@ class _$MarkReviewedRequestPayloadCopyWithImpl<$Res>
             ? _self.decisionReason
             : decisionReason // ignore: cast_nullable_to_non_nullable
                   as String?,
-        disableMarkingContentAsReviewed:
-            freezed == disableMarkingContentAsReviewed
+        disableMarkingContentAsReviewed: freezed == disableMarkingContentAsReviewed
             ? _self.disableMarkingContentAsReviewed
             : disableMarkingContentAsReviewed // ignore: cast_nullable_to_non_nullable
                   as bool?,

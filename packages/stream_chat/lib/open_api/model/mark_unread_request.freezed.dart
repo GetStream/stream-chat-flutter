@@ -21,28 +21,23 @@ mixin _$MarkUnreadRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $MarkUnreadRequestCopyWith<MarkUnreadRequest> get copyWith =>
-      _$MarkUnreadRequestCopyWithImpl<MarkUnreadRequest>(
-        this as MarkUnreadRequest,
-        _$identity,
-      );
+  $MarkUnreadRequestCopyWith<MarkUnreadRequest> get copyWith => _$MarkUnreadRequestCopyWithImpl<MarkUnreadRequest>(
+    this as MarkUnreadRequest,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is MarkUnreadRequest &&
-            (identical(other.messageId, messageId) ||
-                other.messageId == messageId) &&
-            (identical(other.messageTimestamp, messageTimestamp) ||
-                other.messageTimestamp == messageTimestamp) &&
-            (identical(other.threadId, threadId) ||
-                other.threadId == threadId));
+            (identical(other.messageId, messageId) || other.messageId == messageId) &&
+            (identical(other.messageTimestamp, messageTimestamp) || other.messageTimestamp == messageTimestamp) &&
+            (identical(other.threadId, threadId) || other.threadId == threadId));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, messageId, messageTimestamp, threadId);
+  int get hashCode => Object.hash(runtimeType, messageId, messageTimestamp, threadId);
 
   @override
   String toString() {
@@ -61,8 +56,7 @@ abstract mixin class $MarkUnreadRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MarkUnreadRequestCopyWithImpl<$Res>
-    implements $MarkUnreadRequestCopyWith<$Res> {
+class _$MarkUnreadRequestCopyWithImpl<$Res> implements $MarkUnreadRequestCopyWith<$Res> {
   _$MarkUnreadRequestCopyWithImpl(this._self, this._then);
 
   final MarkUnreadRequest _self;

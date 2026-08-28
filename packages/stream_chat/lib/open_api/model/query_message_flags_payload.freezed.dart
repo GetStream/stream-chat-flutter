@@ -78,8 +78,7 @@ abstract mixin class $QueryMessageFlagsPayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryMessageFlagsPayloadCopyWithImpl<$Res>
-    implements $QueryMessageFlagsPayloadCopyWith<$Res> {
+class _$QueryMessageFlagsPayloadCopyWithImpl<$Res> implements $QueryMessageFlagsPayloadCopyWith<$Res> {
   _$QueryMessageFlagsPayloadCopyWithImpl(this._self, this._then);
 
   final QueryMessageFlagsPayload _self;

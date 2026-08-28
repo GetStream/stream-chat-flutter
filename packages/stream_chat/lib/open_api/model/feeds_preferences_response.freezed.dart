@@ -38,20 +38,16 @@ mixin _$FeedsPreferencesResponse {
         (other.runtimeType == runtimeType &&
             other is FeedsPreferencesResponse &&
             (identical(other.comment, comment) || other.comment == comment) &&
-            (identical(other.commentMention, commentMention) ||
-                other.commentMention == commentMention) &&
-            (identical(other.commentReaction, commentReaction) ||
-                other.commentReaction == commentReaction) &&
-            (identical(other.commentReply, commentReply) ||
-                other.commentReply == commentReply) &&
+            (identical(other.commentMention, commentMention) || other.commentMention == commentMention) &&
+            (identical(other.commentReaction, commentReaction) || other.commentReaction == commentReaction) &&
+            (identical(other.commentReply, commentReply) || other.commentReply == commentReply) &&
             const DeepCollectionEquality().equals(
               other.customActivityTypes,
               customActivityTypes,
             ) &&
             (identical(other.follow, follow) || other.follow == follow) &&
             (identical(other.mention, mention) || other.mention == mention) &&
-            (identical(other.reaction, reaction) ||
-                other.reaction == reaction));
+            (identical(other.reaction, reaction) || other.reaction == reaction));
   }
 
   @override
@@ -93,8 +89,7 @@ abstract mixin class $FeedsPreferencesResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FeedsPreferencesResponseCopyWithImpl<$Res>
-    implements $FeedsPreferencesResponseCopyWith<$Res> {
+class _$FeedsPreferencesResponseCopyWithImpl<$Res> implements $FeedsPreferencesResponseCopyWith<$Res> {
   _$FeedsPreferencesResponseCopyWithImpl(this._self, this._then);
 
   final FeedsPreferencesResponse _self;

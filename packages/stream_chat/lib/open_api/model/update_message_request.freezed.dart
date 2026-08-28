@@ -33,15 +33,12 @@ mixin _$UpdateMessageRequest {
         (other.runtimeType == runtimeType &&
             other is UpdateMessageRequest &&
             (identical(other.message, message) || other.message == message) &&
-            (identical(other.skipEnrichUrl, skipEnrichUrl) ||
-                other.skipEnrichUrl == skipEnrichUrl) &&
-            (identical(other.skipPush, skipPush) ||
-                other.skipPush == skipPush));
+            (identical(other.skipEnrichUrl, skipEnrichUrl) || other.skipEnrichUrl == skipEnrichUrl) &&
+            (identical(other.skipPush, skipPush) || other.skipPush == skipPush));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, message, skipEnrichUrl, skipPush);
+  int get hashCode => Object.hash(runtimeType, message, skipEnrichUrl, skipPush);
 
   @override
   String toString() {
@@ -60,8 +57,7 @@ abstract mixin class $UpdateMessageRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpdateMessageRequestCopyWithImpl<$Res>
-    implements $UpdateMessageRequestCopyWith<$Res> {
+class _$UpdateMessageRequestCopyWithImpl<$Res> implements $UpdateMessageRequestCopyWith<$Res> {
   _$UpdateMessageRequestCopyWithImpl(this._self, this._then);
 
   final UpdateMessageRequest _self;

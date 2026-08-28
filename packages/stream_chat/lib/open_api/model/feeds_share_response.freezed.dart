@@ -21,21 +21,18 @@ mixin _$FeedsShareResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $FeedsShareResponseCopyWith<FeedsShareResponse> get copyWith =>
-      _$FeedsShareResponseCopyWithImpl<FeedsShareResponse>(
-        this as FeedsShareResponse,
-        _$identity,
-      );
+  $FeedsShareResponseCopyWith<FeedsShareResponse> get copyWith => _$FeedsShareResponseCopyWithImpl<FeedsShareResponse>(
+    this as FeedsShareResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is FeedsShareResponse &&
-            (identical(other.activityId, activityId) ||
-                other.activityId == activityId) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.activityId, activityId) || other.activityId == activityId) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             (identical(other.user, user) || other.user == user));
   }
 
@@ -59,8 +56,7 @@ abstract mixin class $FeedsShareResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FeedsShareResponseCopyWithImpl<$Res>
-    implements $FeedsShareResponseCopyWith<$Res> {
+class _$FeedsShareResponseCopyWithImpl<$Res> implements $FeedsShareResponseCopyWith<$Res> {
   _$FeedsShareResponseCopyWithImpl(this._self, this._then);
 
   final FeedsShareResponse _self;

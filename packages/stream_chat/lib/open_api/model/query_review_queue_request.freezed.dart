@@ -43,21 +43,16 @@ mixin _$QueryReviewQueueRequest {
                   other.excludeDefaultActionConfig,
                   excludeDefaultActionConfig,
                 ) ||
-                other.excludeDefaultActionConfig ==
-                    excludeDefaultActionConfig) &&
+                other.excludeDefaultActionConfig == excludeDefaultActionConfig) &&
             const DeepCollectionEquality().equals(other.filter, filter) &&
             (identical(other.limit, limit) || other.limit == limit) &&
-            (identical(other.lockCount, lockCount) ||
-                other.lockCount == lockCount) &&
-            (identical(other.lockDuration, lockDuration) ||
-                other.lockDuration == lockDuration) &&
-            (identical(other.lockItems, lockItems) ||
-                other.lockItems == lockItems) &&
+            (identical(other.lockCount, lockCount) || other.lockCount == lockCount) &&
+            (identical(other.lockDuration, lockDuration) || other.lockDuration == lockDuration) &&
+            (identical(other.lockItems, lockItems) || other.lockItems == lockItems) &&
             (identical(other.next, next) || other.next == next) &&
             (identical(other.prev, prev) || other.prev == prev) &&
             const DeepCollectionEquality().equals(other.sort, sort) &&
-            (identical(other.statsOnly, statsOnly) ||
-                other.statsOnly == statsOnly));
+            (identical(other.statsOnly, statsOnly) || other.statsOnly == statsOnly));
   }
 
   @override
@@ -103,8 +98,7 @@ abstract mixin class $QueryReviewQueueRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryReviewQueueRequestCopyWithImpl<$Res>
-    implements $QueryReviewQueueRequestCopyWith<$Res> {
+class _$QueryReviewQueueRequestCopyWithImpl<$Res> implements $QueryReviewQueueRequestCopyWith<$Res> {
   _$QueryReviewQueueRequestCopyWithImpl(this._self, this._then);
 
   final QueryReviewQueueRequest _self;

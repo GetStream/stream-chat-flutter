@@ -54,13 +54,10 @@ mixin _$DraftPayloadResponse {
               mentionedUsers,
             ) &&
             (identical(other.mml, mml) || other.mml == mml) &&
-            (identical(other.parentId, parentId) ||
-                other.parentId == parentId) &&
+            (identical(other.parentId, parentId) || other.parentId == parentId) &&
             (identical(other.pollId, pollId) || other.pollId == pollId) &&
-            (identical(other.quotedMessageId, quotedMessageId) ||
-                other.quotedMessageId == quotedMessageId) &&
-            (identical(other.showInChannel, showInChannel) ||
-                other.showInChannel == showInChannel) &&
+            (identical(other.quotedMessageId, quotedMessageId) || other.quotedMessageId == quotedMessageId) &&
+            (identical(other.showInChannel, showInChannel) || other.showInChannel == showInChannel) &&
             (identical(other.silent, silent) || other.silent == silent) &&
             (identical(other.text, text) || other.text == text) &&
             (identical(other.type, type) || other.type == type));
@@ -115,8 +112,7 @@ abstract mixin class $DraftPayloadResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$DraftPayloadResponseCopyWithImpl<$Res>
-    implements $DraftPayloadResponseCopyWith<$Res> {
+class _$DraftPayloadResponseCopyWithImpl<$Res> implements $DraftPayloadResponseCopyWith<$Res> {
   _$DraftPayloadResponseCopyWithImpl(this._self, this._then);
 
   final DraftPayloadResponse _self;

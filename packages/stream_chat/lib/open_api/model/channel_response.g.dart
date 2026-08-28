@@ -13,25 +13,19 @@ ChannelResponse _$ChannelResponseFromJson(
   autoTranslationLanguage: json['auto_translation_language'] as String?,
   blocked: json['blocked'] as bool?,
   cid: json['cid'] as String,
-  config: json['config'] == null
-      ? null
-      : ChannelConfigWithInfo.fromJson(json['config'] as Map<String, dynamic>),
+  config: json['config'] == null ? null : ChannelConfigWithInfo.fromJson(json['config'] as Map<String, dynamic>),
   cooldown: (json['cooldown'] as num?)?.toInt(),
   createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  createdBy: json['created_by'] == null
-      ? null
-      : UserResponse.fromJson(json['created_by'] as Map<String, dynamic>),
+  createdBy: json['created_by'] == null ? null : UserResponse.fromJson(json['created_by'] as Map<String, dynamic>),
   custom: json['custom'] as Map<String, dynamic>,
   deletedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['deleted_at'],
     const StreamDateTimeConverter().fromJson,
   ),
   disabled: json['disabled'] as bool,
-  filterTags: (json['filter_tags'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  filterTags: (json['filter_tags'] as List<dynamic>?)?.map((e) => e as String).toList(),
   frozen: json['frozen'] as bool,
   hidden: json['hidden'] as bool?,
   hideMessagesBefore: _$JsonConverterFromJson<Object, DateTime>(

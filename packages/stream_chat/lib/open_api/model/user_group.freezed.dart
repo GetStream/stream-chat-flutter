@@ -27,8 +27,7 @@ mixin _$UserGroup {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UserGroupCopyWith<UserGroup> get copyWith =>
-      _$UserGroupCopyWithImpl<UserGroup>(this as UserGroup, _$identity);
+  $UserGroupCopyWith<UserGroup> get copyWith => _$UserGroupCopyWithImpl<UserGroup>(this as UserGroup, _$identity);
 
   @override
   bool operator ==(Object other) {
@@ -36,18 +35,14 @@ mixin _$UserGroup {
         (other.runtimeType == runtimeType &&
             other is UserGroup &&
             (identical(other.appPk, appPk) || other.appPk == appPk) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.createdBy, createdBy) ||
-                other.createdBy == createdBy) &&
-            (identical(other.description, description) ||
-                other.description == description) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.createdBy, createdBy) || other.createdBy == createdBy) &&
+            (identical(other.description, description) || other.description == description) &&
             (identical(other.id, id) || other.id == id) &&
             const DeepCollectionEquality().equals(other.members, members) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.teamId, teamId) || other.teamId == teamId) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
   }
 
   @override
@@ -72,8 +67,7 @@ mixin _$UserGroup {
 
 /// @nodoc
 abstract mixin class $UserGroupCopyWith<$Res> {
-  factory $UserGroupCopyWith(UserGroup value, $Res Function(UserGroup) _then) =
-      _$UserGroupCopyWithImpl;
+  factory $UserGroupCopyWith(UserGroup value, $Res Function(UserGroup) _then) = _$UserGroupCopyWithImpl;
   @useResult
   $Res call({
     int appPk,

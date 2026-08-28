@@ -32,8 +32,7 @@ mixin _$BulkActionAppealsResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is BulkActionAppealsResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             const DeepCollectionEquality().equals(other.errors, errors) &&
             const DeepCollectionEquality().equals(other.results, results));
   }
@@ -67,8 +66,7 @@ abstract mixin class $BulkActionAppealsResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$BulkActionAppealsResponseCopyWithImpl<$Res>
-    implements $BulkActionAppealsResponseCopyWith<$Res> {
+class _$BulkActionAppealsResponseCopyWithImpl<$Res> implements $BulkActionAppealsResponseCopyWith<$Res> {
   _$BulkActionAppealsResponseCopyWithImpl(this._self, this._then);
 
   final BulkActionAppealsResponse _self;

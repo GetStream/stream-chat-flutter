@@ -62,8 +62,7 @@ abstract mixin class $RuleBuilderConditionGroupCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$RuleBuilderConditionGroupCopyWithImpl<$Res>
-    implements $RuleBuilderConditionGroupCopyWith<$Res> {
+class _$RuleBuilderConditionGroupCopyWithImpl<$Res> implements $RuleBuilderConditionGroupCopyWith<$Res> {
   _$RuleBuilderConditionGroupCopyWithImpl(this._self, this._then);
 
   final RuleBuilderConditionGroup _self;

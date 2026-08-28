@@ -20,8 +20,7 @@ mixin _$AddUserGroupMembersResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $AddUserGroupMembersResponseCopyWith<AddUserGroupMembersResponse>
-  get copyWith =>
+  $AddUserGroupMembersResponseCopyWith<AddUserGroupMembersResponse> get copyWith =>
       _$AddUserGroupMembersResponseCopyWithImpl<AddUserGroupMembersResponse>(
         this as AddUserGroupMembersResponse,
         _$identity,
@@ -32,10 +31,8 @@ mixin _$AddUserGroupMembersResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is AddUserGroupMembersResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
-            (identical(other.userGroup, userGroup) ||
-                other.userGroup == userGroup));
+            (identical(other.duration, duration) || other.duration == duration) &&
+            (identical(other.userGroup, userGroup) || other.userGroup == userGroup));
   }
 
   @override
@@ -58,8 +55,7 @@ abstract mixin class $AddUserGroupMembersResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$AddUserGroupMembersResponseCopyWithImpl<$Res>
-    implements $AddUserGroupMembersResponseCopyWith<$Res> {
+class _$AddUserGroupMembersResponseCopyWithImpl<$Res> implements $AddUserGroupMembersResponseCopyWith<$Res> {
   _$AddUserGroupMembersResponseCopyWithImpl(this._self, this._then);
 
   final AddUserGroupMembersResponse _self;

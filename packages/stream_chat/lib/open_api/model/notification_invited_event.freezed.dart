@@ -48,21 +48,17 @@ mixin _$NotificationInvitedEvent {
               other.channelCustom,
               channelCustom,
             ) &&
-            (identical(other.channelId, channelId) ||
-                other.channelId == channelId) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
             (identical(other.channelMemberCount, channelMemberCount) ||
                 other.channelMemberCount == channelMemberCount) &&
             (identical(other.channelMessageCount, channelMessageCount) ||
                 other.channelMessageCount == channelMessageCount) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.member, member) || other.member == member) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.team, team) || other.team == team) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(other.user, user) || other.user == user));
@@ -119,8 +115,7 @@ abstract mixin class $NotificationInvitedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$NotificationInvitedEventCopyWithImpl<$Res>
-    implements $NotificationInvitedEventCopyWith<$Res> {
+class _$NotificationInvitedEventCopyWithImpl<$Res> implements $NotificationInvitedEventCopyWith<$Res> {
   _$NotificationInvitedEventCopyWithImpl(this._self, this._then);
 
   final NotificationInvitedEvent _self;

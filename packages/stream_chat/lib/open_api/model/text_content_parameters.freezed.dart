@@ -41,22 +41,18 @@ mixin _$TextContentParameters {
               other.blocklistMatch,
               blocklistMatch,
             ) &&
-            (identical(other.containsUrl, containsUrl) ||
-                other.containsUrl == containsUrl) &&
+            (identical(other.containsUrl, containsUrl) || other.containsUrl == containsUrl) &&
             const DeepCollectionEquality().equals(
               other.harmLabels,
               harmLabels,
             ) &&
-            (identical(other.labelOperator, labelOperator) ||
-                other.labelOperator == labelOperator) &&
+            (identical(other.labelOperator, labelOperator) || other.labelOperator == labelOperator) &&
             const DeepCollectionEquality().equals(
               other.llmHarmLabels,
               llmHarmLabels,
             ) &&
-            (identical(other.severity, severity) ||
-                other.severity == severity) &&
-            (identical(other.textLength, textLength) ||
-                other.textLength == textLength) &&
+            (identical(other.severity, severity) || other.severity == severity) &&
+            (identical(other.textLength, textLength) || other.textLength == textLength) &&
             (identical(other.textLengthOperator, textLengthOperator) ||
                 other.textLengthOperator == textLengthOperator));
   }
@@ -100,8 +96,7 @@ abstract mixin class $TextContentParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$TextContentParametersCopyWithImpl<$Res>
-    implements $TextContentParametersCopyWith<$Res> {
+class _$TextContentParametersCopyWithImpl<$Res> implements $TextContentParametersCopyWith<$Res> {
   _$TextContentParametersCopyWithImpl(this._self, this._then);
 
   final TextContentParameters _self;

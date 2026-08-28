@@ -26,11 +26,10 @@ mixin _$RuleBuilderRule {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $RuleBuilderRuleCopyWith<RuleBuilderRule> get copyWith =>
-      _$RuleBuilderRuleCopyWithImpl<RuleBuilderRule>(
-        this as RuleBuilderRule,
-        _$identity,
-      );
+  $RuleBuilderRuleCopyWith<RuleBuilderRule> get copyWith => _$RuleBuilderRuleCopyWithImpl<RuleBuilderRule>(
+    this as RuleBuilderRule,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -46,13 +45,11 @@ mixin _$RuleBuilderRule {
               other.conditions,
               conditions,
             ) &&
-            (identical(other.cooldownPeriod, cooldownPeriod) ||
-                other.cooldownPeriod == cooldownPeriod) &&
+            (identical(other.cooldownPeriod, cooldownPeriod) || other.cooldownPeriod == cooldownPeriod) &&
             const DeepCollectionEquality().equals(other.groups, groups) &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.logic, logic) || other.logic == logic) &&
-            (identical(other.ruleType, ruleType) ||
-                other.ruleType == ruleType));
+            (identical(other.ruleType, ruleType) || other.ruleType == ruleType));
   }
 
   @override
@@ -94,8 +91,7 @@ abstract mixin class $RuleBuilderRuleCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$RuleBuilderRuleCopyWithImpl<$Res>
-    implements $RuleBuilderRuleCopyWith<$Res> {
+class _$RuleBuilderRuleCopyWithImpl<$Res> implements $RuleBuilderRuleCopyWith<$Res> {
   _$RuleBuilderRuleCopyWithImpl(this._self, this._then);
 
   final RuleBuilderRule _self;

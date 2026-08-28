@@ -21,8 +21,7 @@ mixin _$AutomodSemanticFiltersConfig {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $AutomodSemanticFiltersConfigCopyWith<AutomodSemanticFiltersConfig>
-  get copyWith =>
+  $AutomodSemanticFiltersConfigCopyWith<AutomodSemanticFiltersConfig> get copyWith =>
       _$AutomodSemanticFiltersConfigCopyWithImpl<AutomodSemanticFiltersConfig>(
         this as AutomodSemanticFiltersConfig,
         _$identity,
@@ -67,8 +66,7 @@ abstract mixin class $AutomodSemanticFiltersConfigCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$AutomodSemanticFiltersConfigCopyWithImpl<$Res>
-    implements $AutomodSemanticFiltersConfigCopyWith<$Res> {
+class _$AutomodSemanticFiltersConfigCopyWithImpl<$Res> implements $AutomodSemanticFiltersConfigCopyWith<$Res> {
   _$AutomodSemanticFiltersConfigCopyWithImpl(this._self, this._then);
 
   final AutomodSemanticFiltersConfig _self;

@@ -30,8 +30,7 @@ mixin _$HideChannelResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is HideChannelResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -54,8 +53,7 @@ abstract mixin class $HideChannelResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$HideChannelResponseCopyWithImpl<$Res>
-    implements $HideChannelResponseCopyWith<$Res> {
+class _$HideChannelResponseCopyWithImpl<$Res> implements $HideChannelResponseCopyWith<$Res> {
   _$HideChannelResponseCopyWithImpl(this._self, this._then);
 
   final HideChannelResponse _self;

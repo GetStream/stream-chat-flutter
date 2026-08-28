@@ -21,8 +21,7 @@ mixin _$FloodIdenticalRuleParameters {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $FloodIdenticalRuleParametersCopyWith<FloodIdenticalRuleParameters>
-  get copyWith =>
+  $FloodIdenticalRuleParametersCopyWith<FloodIdenticalRuleParameters> get copyWith =>
       _$FloodIdenticalRuleParametersCopyWithImpl<FloodIdenticalRuleParameters>(
         this as FloodIdenticalRuleParameters,
         _$identity,
@@ -34,10 +33,8 @@ mixin _$FloodIdenticalRuleParameters {
         (other.runtimeType == runtimeType &&
             other is FloodIdenticalRuleParameters &&
             const DeepCollectionEquality().equals(other.allowlist, allowlist) &&
-            (identical(other.threshold, threshold) ||
-                other.threshold == threshold) &&
-            (identical(other.timeWindow, timeWindow) ||
-                other.timeWindow == timeWindow));
+            (identical(other.threshold, threshold) || other.threshold == threshold) &&
+            (identical(other.timeWindow, timeWindow) || other.timeWindow == timeWindow));
   }
 
   @override
@@ -65,8 +62,7 @@ abstract mixin class $FloodIdenticalRuleParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FloodIdenticalRuleParametersCopyWithImpl<$Res>
-    implements $FloodIdenticalRuleParametersCopyWith<$Res> {
+class _$FloodIdenticalRuleParametersCopyWithImpl<$Res> implements $FloodIdenticalRuleParametersCopyWith<$Res> {
   _$FloodIdenticalRuleParametersCopyWithImpl(this._self, this._then);
 
   final FloodIdenticalRuleParameters _self;

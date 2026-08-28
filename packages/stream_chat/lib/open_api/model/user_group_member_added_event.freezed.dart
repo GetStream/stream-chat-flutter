@@ -36,16 +36,13 @@ mixin _$UserGroupMemberAddedEvent {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UserGroupMemberAddedEvent &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             const DeepCollectionEquality().equals(other.members, members) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(other.user, user) || other.user == user) &&
-            (identical(other.userGroup, userGroup) ||
-                other.userGroup == userGroup));
+            (identical(other.userGroup, userGroup) || other.userGroup == userGroup));
   }
 
   @override
@@ -85,8 +82,7 @@ abstract mixin class $UserGroupMemberAddedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UserGroupMemberAddedEventCopyWithImpl<$Res>
-    implements $UserGroupMemberAddedEventCopyWith<$Res> {
+class _$UserGroupMemberAddedEventCopyWithImpl<$Res> implements $UserGroupMemberAddedEventCopyWith<$Res> {
   _$UserGroupMemberAddedEventCopyWithImpl(this._self, this._then);
 
   final UserGroupMemberAddedEvent _self;

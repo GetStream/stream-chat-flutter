@@ -20,21 +20,19 @@ mixin _$ChannelMessageCountRuleParameters {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ChannelMessageCountRuleParametersCopyWith<ChannelMessageCountRuleParameters>
-  get copyWith =>
-      _$ChannelMessageCountRuleParametersCopyWithImpl<
-        ChannelMessageCountRuleParameters
-      >(this as ChannelMessageCountRuleParameters, _$identity);
+  $ChannelMessageCountRuleParametersCopyWith<ChannelMessageCountRuleParameters> get copyWith =>
+      _$ChannelMessageCountRuleParametersCopyWithImpl<ChannelMessageCountRuleParameters>(
+        this as ChannelMessageCountRuleParameters,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ChannelMessageCountRuleParameters &&
-            (identical(other.operator, operator) ||
-                other.operator == operator) &&
-            (identical(other.threshold, threshold) ||
-                other.threshold == threshold));
+            (identical(other.operator, operator) || other.operator == operator) &&
+            (identical(other.threshold, threshold) || other.threshold == threshold));
   }
 
   @override

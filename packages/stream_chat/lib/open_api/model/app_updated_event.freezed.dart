@@ -23,11 +23,10 @@ mixin _$AppUpdatedEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $AppUpdatedEventCopyWith<AppUpdatedEvent> get copyWith =>
-      _$AppUpdatedEventCopyWithImpl<AppUpdatedEvent>(
-        this as AppUpdatedEvent,
-        _$identity,
-      );
+  $AppUpdatedEventCopyWith<AppUpdatedEvent> get copyWith => _$AppUpdatedEventCopyWithImpl<AppUpdatedEvent>(
+    this as AppUpdatedEvent,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -35,11 +34,9 @@ mixin _$AppUpdatedEvent {
         (other.runtimeType == runtimeType &&
             other is AppUpdatedEvent &&
             (identical(other.app, app) || other.app == app) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.type, type) || other.type == type));
   }
 
@@ -76,8 +73,7 @@ abstract mixin class $AppUpdatedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$AppUpdatedEventCopyWithImpl<$Res>
-    implements $AppUpdatedEventCopyWith<$Res> {
+class _$AppUpdatedEventCopyWithImpl<$Res> implements $AppUpdatedEventCopyWith<$Res> {
   _$AppUpdatedEventCopyWithImpl(this._self, this._then);
 
   final AppUpdatedEvent _self;

@@ -20,19 +20,17 @@ mixin _$MembersResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $MembersResponseCopyWith<MembersResponse> get copyWith =>
-      _$MembersResponseCopyWithImpl<MembersResponse>(
-        this as MembersResponse,
-        _$identity,
-      );
+  $MembersResponseCopyWith<MembersResponse> get copyWith => _$MembersResponseCopyWithImpl<MembersResponse>(
+    this as MembersResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is MembersResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             const DeepCollectionEquality().equals(other.members, members));
   }
 
@@ -60,8 +58,7 @@ abstract mixin class $MembersResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MembersResponseCopyWithImpl<$Res>
-    implements $MembersResponseCopyWith<$Res> {
+class _$MembersResponseCopyWithImpl<$Res> implements $MembersResponseCopyWith<$Res> {
   _$MembersResponseCopyWithImpl(this._self, this._then);
 
   final MembersResponse _self;

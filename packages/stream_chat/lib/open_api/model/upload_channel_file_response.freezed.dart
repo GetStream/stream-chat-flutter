@@ -33,18 +33,14 @@ mixin _$UploadChannelFileResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UploadChannelFileResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.file, file) || other.file == file) &&
-            (identical(other.moderationAction, moderationAction) ||
-                other.moderationAction == moderationAction) &&
-            (identical(other.thumbUrl, thumbUrl) ||
-                other.thumbUrl == thumbUrl));
+            (identical(other.moderationAction, moderationAction) || other.moderationAction == moderationAction) &&
+            (identical(other.thumbUrl, thumbUrl) || other.thumbUrl == thumbUrl));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, duration, file, moderationAction, thumbUrl);
+  int get hashCode => Object.hash(runtimeType, duration, file, moderationAction, thumbUrl);
 
   @override
   String toString() {
@@ -68,8 +64,7 @@ abstract mixin class $UploadChannelFileResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UploadChannelFileResponseCopyWithImpl<$Res>
-    implements $UploadChannelFileResponseCopyWith<$Res> {
+class _$UploadChannelFileResponseCopyWithImpl<$Res> implements $UploadChannelFileResponseCopyWith<$Res> {
   _$UploadChannelFileResponseCopyWithImpl(this._self, this._then);
 
   final UploadChannelFileResponse _self;

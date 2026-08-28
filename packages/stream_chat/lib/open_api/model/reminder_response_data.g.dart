@@ -9,16 +9,12 @@ part of 'reminder_response_data.dart';
 ReminderResponseData _$ReminderResponseDataFromJson(
   Map<String, dynamic> json,
 ) => ReminderResponseData(
-  channel: json['channel'] == null
-      ? null
-      : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
+  channel: json['channel'] == null ? null : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
   channelCid: json['channel_cid'] as String,
   createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  message: json['message'] == null
-      ? null
-      : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
+  message: json['message'] == null ? null : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
   messageId: json['message_id'] as String,
   remindAt: _$JsonConverterFromJson<Object, DateTime>(
     json['remind_at'],
@@ -27,9 +23,7 @@ ReminderResponseData _$ReminderResponseDataFromJson(
   updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,
   ),
-  user: json['user'] == null
-      ? null
-      : UserResponse.fromJson(json['user'] as Map<String, dynamic>),
+  user: json['user'] == null ? null : UserResponse.fromJson(json['user'] as Map<String, dynamic>),
   userId: json['user_id'] as String,
 );
 

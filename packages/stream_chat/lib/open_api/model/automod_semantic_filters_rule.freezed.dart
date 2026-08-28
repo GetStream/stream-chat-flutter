@@ -21,8 +21,7 @@ mixin _$AutomodSemanticFiltersRule {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $AutomodSemanticFiltersRuleCopyWith<AutomodSemanticFiltersRule>
-  get copyWith =>
+  $AutomodSemanticFiltersRuleCopyWith<AutomodSemanticFiltersRule> get copyWith =>
       _$AutomodSemanticFiltersRuleCopyWithImpl<AutomodSemanticFiltersRule>(
         this as AutomodSemanticFiltersRule,
         _$identity,
@@ -35,8 +34,7 @@ mixin _$AutomodSemanticFiltersRule {
             other is AutomodSemanticFiltersRule &&
             (identical(other.action, action) || other.action == action) &&
             (identical(other.name, name) || other.name == name) &&
-            (identical(other.threshold, threshold) ||
-                other.threshold == threshold));
+            (identical(other.threshold, threshold) || other.threshold == threshold));
   }
 
   @override
@@ -63,8 +61,7 @@ abstract mixin class $AutomodSemanticFiltersRuleCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$AutomodSemanticFiltersRuleCopyWithImpl<$Res>
-    implements $AutomodSemanticFiltersRuleCopyWith<$Res> {
+class _$AutomodSemanticFiltersRuleCopyWithImpl<$Res> implements $AutomodSemanticFiltersRuleCopyWith<$Res> {
   _$AutomodSemanticFiltersRuleCopyWithImpl(this._self, this._then);
 
   final AutomodSemanticFiltersRule _self;

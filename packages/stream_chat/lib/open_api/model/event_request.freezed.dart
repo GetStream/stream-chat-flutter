@@ -21,11 +21,10 @@ mixin _$EventRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $EventRequestCopyWith<EventRequest> get copyWith =>
-      _$EventRequestCopyWithImpl<EventRequest>(
-        this as EventRequest,
-        _$identity,
-      );
+  $EventRequestCopyWith<EventRequest> get copyWith => _$EventRequestCopyWithImpl<EventRequest>(
+    this as EventRequest,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -33,8 +32,7 @@ mixin _$EventRequest {
         (other.runtimeType == runtimeType &&
             other is EventRequest &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.parentId, parentId) ||
-                other.parentId == parentId) &&
+            (identical(other.parentId, parentId) || other.parentId == parentId) &&
             (identical(other.type, type) || other.type == type));
   }
 

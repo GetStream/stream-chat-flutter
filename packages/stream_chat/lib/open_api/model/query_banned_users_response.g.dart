@@ -9,9 +9,7 @@ part of 'query_banned_users_response.dart';
 QueryBannedUsersResponse _$QueryBannedUsersResponseFromJson(
   Map<String, dynamic> json,
 ) => QueryBannedUsersResponse(
-  bans: (json['bans'] as List<dynamic>)
-      .map((e) => BanResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  bans: (json['bans'] as List<dynamic>).map((e) => BanResponse.fromJson(e as Map<String, dynamic>)).toList(),
   duration: json['duration'] as String,
 );
 

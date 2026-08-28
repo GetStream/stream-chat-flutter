@@ -24,28 +24,22 @@ mixin _$ChatDraftResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ChatDraftResponseCopyWith<ChatDraftResponse> get copyWith =>
-      _$ChatDraftResponseCopyWithImpl<ChatDraftResponse>(
-        this as ChatDraftResponse,
-        _$identity,
-      );
+  $ChatDraftResponseCopyWith<ChatDraftResponse> get copyWith => _$ChatDraftResponseCopyWithImpl<ChatDraftResponse>(
+    this as ChatDraftResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ChatDraftResponse &&
-            (identical(other.channelCid, channelCid) ||
-                other.channelCid == channelCid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.channelCid, channelCid) || other.channelCid == channelCid) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             (identical(other.message, message) || other.message == message) &&
-            (identical(other.parentId, parentId) ||
-                other.parentId == parentId) &&
-            (identical(other.parentMessage, parentMessage) ||
-                other.parentMessage == parentMessage) &&
-            (identical(other.quotedMessage, quotedMessage) ||
-                other.quotedMessage == quotedMessage));
+            (identical(other.parentId, parentId) || other.parentId == parentId) &&
+            (identical(other.parentMessage, parentMessage) || other.parentMessage == parentMessage) &&
+            (identical(other.quotedMessage, quotedMessage) || other.quotedMessage == quotedMessage));
   }
 
   @override
@@ -83,8 +77,7 @@ abstract mixin class $ChatDraftResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChatDraftResponseCopyWithImpl<$Res>
-    implements $ChatDraftResponseCopyWith<$Res> {
+class _$ChatDraftResponseCopyWithImpl<$Res> implements $ChatDraftResponseCopyWith<$Res> {
   _$ChatDraftResponseCopyWithImpl(this._self, this._then);
 
   final ChatDraftResponse _self;

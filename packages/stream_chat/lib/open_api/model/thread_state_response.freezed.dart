@@ -51,40 +51,29 @@ mixin _$ThreadStateResponse {
             (identical(other.activeParticipantCount, activeParticipantCount) ||
                 other.activeParticipantCount == activeParticipantCount) &&
             (identical(other.channel, channel) || other.channel == channel) &&
-            (identical(other.channelCid, channelCid) ||
-                other.channelCid == channelCid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.createdBy, createdBy) ||
-                other.createdBy == createdBy) &&
-            (identical(other.createdByUserId, createdByUserId) ||
-                other.createdByUserId == createdByUserId) &&
+            (identical(other.channelCid, channelCid) || other.channelCid == channelCid) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.createdBy, createdBy) || other.createdBy == createdBy) &&
+            (identical(other.createdByUserId, createdByUserId) || other.createdByUserId == createdByUserId) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.deletedAt, deletedAt) ||
-                other.deletedAt == deletedAt) &&
+            (identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt) &&
             (identical(other.draft, draft) || other.draft == draft) &&
-            (identical(other.lastMessageAt, lastMessageAt) ||
-                other.lastMessageAt == lastMessageAt) &&
+            (identical(other.lastMessageAt, lastMessageAt) || other.lastMessageAt == lastMessageAt) &&
             const DeepCollectionEquality().equals(
               other.latestReplies,
               latestReplies,
             ) &&
-            (identical(other.parentMessage, parentMessage) ||
-                other.parentMessage == parentMessage) &&
-            (identical(other.parentMessageId, parentMessageId) ||
-                other.parentMessageId == parentMessageId) &&
-            (identical(other.participantCount, participantCount) ||
-                other.participantCount == participantCount) &&
+            (identical(other.parentMessage, parentMessage) || other.parentMessage == parentMessage) &&
+            (identical(other.parentMessageId, parentMessageId) || other.parentMessageId == parentMessageId) &&
+            (identical(other.participantCount, participantCount) || other.participantCount == participantCount) &&
             const DeepCollectionEquality().equals(other.read, read) &&
-            (identical(other.replyCount, replyCount) ||
-                other.replyCount == replyCount) &&
+            (identical(other.replyCount, replyCount) || other.replyCount == replyCount) &&
             const DeepCollectionEquality().equals(
               other.threadParticipants,
               threadParticipants,
             ) &&
             (identical(other.title, title) || other.title == title) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
   }
 
   @override
@@ -148,8 +137,7 @@ abstract mixin class $ThreadStateResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ThreadStateResponseCopyWithImpl<$Res>
-    implements $ThreadStateResponseCopyWith<$Res> {
+class _$ThreadStateResponseCopyWithImpl<$Res> implements $ThreadStateResponseCopyWith<$Res> {
   _$ThreadStateResponseCopyWithImpl(this._self, this._then);
 
   final ThreadStateResponse _self;

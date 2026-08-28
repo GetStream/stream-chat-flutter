@@ -10,9 +10,7 @@ UploadChannelFileRequest _$UploadChannelFileRequestFromJson(
   Map<String, dynamic> json,
 ) => UploadChannelFileRequest(
   file: json['file'] as String?,
-  user: json['user'] == null
-      ? null
-      : OnlyUserID.fromJson(json['user'] as Map<String, dynamic>),
+  user: json['user'] == null ? null : OnlyUserID.fromJson(json['user'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$UploadChannelFileRequestToJson(

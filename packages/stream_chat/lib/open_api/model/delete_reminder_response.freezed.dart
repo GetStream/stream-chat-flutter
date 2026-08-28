@@ -30,8 +30,7 @@ mixin _$DeleteReminderResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is DeleteReminderResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -54,8 +53,7 @@ abstract mixin class $DeleteReminderResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$DeleteReminderResponseCopyWithImpl<$Res>
-    implements $DeleteReminderResponseCopyWith<$Res> {
+class _$DeleteReminderResponseCopyWithImpl<$Res> implements $DeleteReminderResponseCopyWith<$Res> {
   _$DeleteReminderResponseCopyWithImpl(this._self, this._then);
 
   final DeleteReminderResponse _self;

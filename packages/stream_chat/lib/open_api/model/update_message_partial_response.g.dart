@@ -10,9 +10,7 @@ UpdateMessagePartialResponse _$UpdateMessagePartialResponseFromJson(
   Map<String, dynamic> json,
 ) => UpdateMessagePartialResponse(
   duration: json['duration'] as String,
-  message: json['message'] == null
-      ? null
-      : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
+  message: json['message'] == null ? null : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$UpdateMessagePartialResponseToJson(

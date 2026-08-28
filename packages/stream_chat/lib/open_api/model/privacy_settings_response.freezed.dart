@@ -32,12 +32,9 @@ mixin _$PrivacySettingsResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is PrivacySettingsResponse &&
-            (identical(other.deliveryReceipts, deliveryReceipts) ||
-                other.deliveryReceipts == deliveryReceipts) &&
-            (identical(other.readReceipts, readReceipts) ||
-                other.readReceipts == readReceipts) &&
-            (identical(other.typingIndicators, typingIndicators) ||
-                other.typingIndicators == typingIndicators));
+            (identical(other.deliveryReceipts, deliveryReceipts) || other.deliveryReceipts == deliveryReceipts) &&
+            (identical(other.readReceipts, readReceipts) || other.readReceipts == readReceipts) &&
+            (identical(other.typingIndicators, typingIndicators) || other.typingIndicators == typingIndicators));
   }
 
   @override
@@ -69,8 +66,7 @@ abstract mixin class $PrivacySettingsResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$PrivacySettingsResponseCopyWithImpl<$Res>
-    implements $PrivacySettingsResponseCopyWith<$Res> {
+class _$PrivacySettingsResponseCopyWithImpl<$Res> implements $PrivacySettingsResponseCopyWith<$Res> {
   _$PrivacySettingsResponseCopyWithImpl(this._self, this._then);
 
   final PrivacySettingsResponse _self;

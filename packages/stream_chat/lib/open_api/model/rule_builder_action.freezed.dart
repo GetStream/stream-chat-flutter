@@ -24,26 +24,21 @@ mixin _$RuleBuilderAction {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $RuleBuilderActionCopyWith<RuleBuilderAction> get copyWith =>
-      _$RuleBuilderActionCopyWithImpl<RuleBuilderAction>(
-        this as RuleBuilderAction,
-        _$identity,
-      );
+  $RuleBuilderActionCopyWith<RuleBuilderAction> get copyWith => _$RuleBuilderActionCopyWithImpl<RuleBuilderAction>(
+    this as RuleBuilderAction,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is RuleBuilderAction &&
-            (identical(other.banOptions, banOptions) ||
-                other.banOptions == banOptions) &&
-            (identical(other.callOptions, callOptions) ||
-                other.callOptions == callOptions) &&
-            (identical(other.flagUserOptions, flagUserOptions) ||
-                other.flagUserOptions == flagUserOptions) &&
+            (identical(other.banOptions, banOptions) || other.banOptions == banOptions) &&
+            (identical(other.callOptions, callOptions) || other.callOptions == callOptions) &&
+            (identical(other.flagUserOptions, flagUserOptions) || other.flagUserOptions == flagUserOptions) &&
             (identical(other.reason, reason) || other.reason == reason) &&
-            (identical(other.skipInbox, skipInbox) ||
-                other.skipInbox == skipInbox) &&
+            (identical(other.skipInbox, skipInbox) || other.skipInbox == skipInbox) &&
             (identical(other.type, type) || other.type == type));
   }
 
@@ -82,8 +77,7 @@ abstract mixin class $RuleBuilderActionCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$RuleBuilderActionCopyWithImpl<$Res>
-    implements $RuleBuilderActionCopyWith<$Res> {
+class _$RuleBuilderActionCopyWithImpl<$Res> implements $RuleBuilderActionCopyWith<$Res> {
   _$RuleBuilderActionCopyWithImpl(this._self, this._then);
 
   final RuleBuilderAction _self;

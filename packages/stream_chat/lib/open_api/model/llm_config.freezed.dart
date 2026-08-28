@@ -23,16 +23,14 @@ mixin _$LLMConfig {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $LLMConfigCopyWith<LLMConfig> get copyWith =>
-      _$LLMConfigCopyWithImpl<LLMConfig>(this as LLMConfig, _$identity);
+  $LLMConfigCopyWith<LLMConfig> get copyWith => _$LLMConfigCopyWithImpl<LLMConfig>(this as LLMConfig, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is LLMConfig &&
-            (identical(other.appContext, appContext) ||
-                other.appContext == appContext) &&
+            (identical(other.appContext, appContext) || other.appContext == appContext) &&
             (identical(other.async, async) || other.async == async) &&
             (identical(other.enabled, enabled) || other.enabled == enabled) &&
             const DeepCollectionEquality().equals(other.rules, rules) &&
@@ -60,8 +58,7 @@ mixin _$LLMConfig {
 
 /// @nodoc
 abstract mixin class $LLMConfigCopyWith<$Res> {
-  factory $LLMConfigCopyWith(LLMConfig value, $Res Function(LLMConfig) _then) =
-      _$LLMConfigCopyWithImpl;
+  factory $LLMConfigCopyWith(LLMConfig value, $Res Function(LLMConfig) _then) = _$LLMConfigCopyWithImpl;
   @useResult
   $Res call({
     String? appContext,

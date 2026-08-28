@@ -7,9 +7,7 @@ part of 'ban_request.dart';
 // **************************************************************************
 
 BanRequest _$BanRequestFromJson(Map<String, dynamic> json) => BanRequest(
-  bannedBy: json['banned_by'] == null
-      ? null
-      : UserRequest.fromJson(json['banned_by'] as Map<String, dynamic>),
+  bannedBy: json['banned_by'] == null ? null : UserRequest.fromJson(json['banned_by'] as Map<String, dynamic>),
   bannedById: json['banned_by_id'] as String?,
   channelCid: json['channel_cid'] as String?,
   deleteMessages: json['delete_messages'] == null
@@ -22,15 +20,14 @@ BanRequest _$BanRequestFromJson(Map<String, dynamic> json) => BanRequest(
   timeout: (json['timeout'] as num?)?.toInt(),
 );
 
-Map<String, dynamic> _$BanRequestToJson(BanRequest instance) =>
-    <String, dynamic>{
-      'banned_by': instance.bannedBy?.toJson(),
-      'banned_by_id': instance.bannedById,
-      'channel_cid': instance.channelCid,
-      'delete_messages': instance.deleteMessages?.toJson(),
-      'ip_ban': instance.ipBan,
-      'reason': instance.reason,
-      'shadow': instance.shadow,
-      'target_user_id': instance.targetUserId,
-      'timeout': instance.timeout,
-    };
+Map<String, dynamic> _$BanRequestToJson(BanRequest instance) => <String, dynamic>{
+  'banned_by': instance.bannedBy?.toJson(),
+  'banned_by_id': instance.bannedById,
+  'channel_cid': instance.channelCid,
+  'delete_messages': instance.deleteMessages?.toJson(),
+  'ip_ban': instance.ipBan,
+  'reason': instance.reason,
+  'shadow': instance.shadow,
+  'target_user_id': instance.targetUserId,
+  'timeout': instance.timeout,
+};

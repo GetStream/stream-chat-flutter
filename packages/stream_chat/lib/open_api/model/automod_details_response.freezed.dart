@@ -39,8 +39,7 @@ mixin _$AutomodDetailsResponse {
               other.imageLabels,
               imageLabels,
             ) &&
-            (identical(other.messageDetails, messageDetails) ||
-                other.messageDetails == messageDetails) &&
+            (identical(other.messageDetails, messageDetails) || other.messageDetails == messageDetails) &&
             (identical(other.originalMessageType, originalMessageType) ||
                 other.originalMessageType == originalMessageType) &&
             (identical(other.result, result) || other.result == result));
@@ -79,8 +78,7 @@ abstract mixin class $AutomodDetailsResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$AutomodDetailsResponseCopyWithImpl<$Res>
-    implements $AutomodDetailsResponseCopyWith<$Res> {
+class _$AutomodDetailsResponseCopyWithImpl<$Res> implements $AutomodDetailsResponseCopyWith<$Res> {
   _$AutomodDetailsResponseCopyWithImpl(this._self, this._then);
 
   final AutomodDetailsResponse _self;

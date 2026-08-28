@@ -9,9 +9,7 @@ part of 'video_content_parameters.dart';
 VideoContentParameters _$VideoContentParametersFromJson(
   Map<String, dynamic> json,
 ) => VideoContentParameters(
-  harmLabels: (json['harm_labels'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  harmLabels: (json['harm_labels'] as List<dynamic>?)?.map((e) => e as String).toList(),
   labelOperator: json['label_operator'] as String?,
 );
 

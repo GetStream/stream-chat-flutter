@@ -31,8 +31,7 @@ mixin _$GetPinnedMessagesResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is GetPinnedMessagesResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             const DeepCollectionEquality().equals(other.messages, messages));
   }
 
@@ -60,8 +59,7 @@ abstract mixin class $GetPinnedMessagesResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$GetPinnedMessagesResponseCopyWithImpl<$Res>
-    implements $GetPinnedMessagesResponseCopyWith<$Res> {
+class _$GetPinnedMessagesResponseCopyWithImpl<$Res> implements $GetPinnedMessagesResponseCopyWith<$Res> {
   _$GetPinnedMessagesResponseCopyWithImpl(this._self, this._then);
 
   final GetPinnedMessagesResponse _self;

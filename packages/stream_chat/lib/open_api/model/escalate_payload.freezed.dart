@@ -21,11 +21,10 @@ mixin _$EscalatePayload {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $EscalatePayloadCopyWith<EscalatePayload> get copyWith =>
-      _$EscalatePayloadCopyWithImpl<EscalatePayload>(
-        this as EscalatePayload,
-        _$identity,
-      );
+  $EscalatePayloadCopyWith<EscalatePayload> get copyWith => _$EscalatePayloadCopyWithImpl<EscalatePayload>(
+    this as EscalatePayload,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -33,8 +32,7 @@ mixin _$EscalatePayload {
         (other.runtimeType == runtimeType &&
             other is EscalatePayload &&
             (identical(other.notes, notes) || other.notes == notes) &&
-            (identical(other.priority, priority) ||
-                other.priority == priority) &&
+            (identical(other.priority, priority) || other.priority == priority) &&
             (identical(other.reason, reason) || other.reason == reason));
   }
 
@@ -58,8 +56,7 @@ abstract mixin class $EscalatePayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$EscalatePayloadCopyWithImpl<$Res>
-    implements $EscalatePayloadCopyWith<$Res> {
+class _$EscalatePayloadCopyWithImpl<$Res> implements $EscalatePayloadCopyWith<$Res> {
   _$EscalatePayloadCopyWithImpl(this._self, this._then);
 
   final EscalatePayload _self;

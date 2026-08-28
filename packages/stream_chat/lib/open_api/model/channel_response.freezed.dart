@@ -46,11 +46,10 @@ mixin _$ChannelResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ChannelResponseCopyWith<ChannelResponse> get copyWith =>
-      _$ChannelResponseCopyWithImpl<ChannelResponse>(
-        this as ChannelResponse,
-        _$identity,
-      );
+  $ChannelResponseCopyWith<ChannelResponse> get copyWith => _$ChannelResponseCopyWithImpl<ChannelResponse>(
+    this as ChannelResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -67,17 +66,12 @@ mixin _$ChannelResponse {
             (identical(other.blocked, blocked) || other.blocked == blocked) &&
             (identical(other.cid, cid) || other.cid == cid) &&
             (identical(other.config, config) || other.config == config) &&
-            (identical(other.cooldown, cooldown) ||
-                other.cooldown == cooldown) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.createdBy, createdBy) ||
-                other.createdBy == createdBy) &&
+            (identical(other.cooldown, cooldown) || other.cooldown == cooldown) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.createdBy, createdBy) || other.createdBy == createdBy) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.deletedAt, deletedAt) ||
-                other.deletedAt == deletedAt) &&
-            (identical(other.disabled, disabled) ||
-                other.disabled == disabled) &&
+            (identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt) &&
+            (identical(other.disabled, disabled) || other.disabled == disabled) &&
             const DeepCollectionEquality().equals(
               other.filterTags,
               filterTags,
@@ -87,28 +81,21 @@ mixin _$ChannelResponse {
             (identical(other.hideMessagesBefore, hideMessagesBefore) ||
                 other.hideMessagesBefore == hideMessagesBefore) &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.lastMessageAt, lastMessageAt) ||
-                other.lastMessageAt == lastMessageAt) &&
-            (identical(other.memberCount, memberCount) ||
-                other.memberCount == memberCount) &&
+            (identical(other.lastMessageAt, lastMessageAt) || other.lastMessageAt == lastMessageAt) &&
+            (identical(other.memberCount, memberCount) || other.memberCount == memberCount) &&
             const DeepCollectionEquality().equals(other.members, members) &&
-            (identical(other.messageCount, messageCount) ||
-                other.messageCount == messageCount) &&
-            (identical(other.muteExpiresAt, muteExpiresAt) ||
-                other.muteExpiresAt == muteExpiresAt) &&
+            (identical(other.messageCount, messageCount) || other.messageCount == messageCount) &&
+            (identical(other.muteExpiresAt, muteExpiresAt) || other.muteExpiresAt == muteExpiresAt) &&
             (identical(other.muted, muted) || other.muted == muted) &&
             const DeepCollectionEquality().equals(
               other.ownCapabilities,
               ownCapabilities,
             ) &&
             (identical(other.team, team) || other.team == team) &&
-            (identical(other.truncatedAt, truncatedAt) ||
-                other.truncatedAt == truncatedAt) &&
-            (identical(other.truncatedBy, truncatedBy) ||
-                other.truncatedBy == truncatedBy) &&
+            (identical(other.truncatedAt, truncatedAt) || other.truncatedAt == truncatedAt) &&
+            (identical(other.truncatedBy, truncatedBy) || other.truncatedBy == truncatedBy) &&
             (identical(other.type, type) || other.type == type) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
   }
 
   @override
@@ -190,8 +177,7 @@ abstract mixin class $ChannelResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChannelResponseCopyWithImpl<$Res>
-    implements $ChannelResponseCopyWith<$Res> {
+class _$ChannelResponseCopyWithImpl<$Res> implements $ChannelResponseCopyWith<$Res> {
   _$ChannelResponseCopyWithImpl(this._self, this._then);
 
   final ChannelResponse _self;

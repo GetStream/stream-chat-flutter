@@ -36,10 +36,8 @@ mixin _$VideoRuleParameters {
               other.harmLabels,
               harmLabels,
             ) &&
-            (identical(other.threshold, threshold) ||
-                other.threshold == threshold) &&
-            (identical(other.timeWindow, timeWindow) ||
-                other.timeWindow == timeWindow));
+            (identical(other.threshold, threshold) || other.threshold == threshold) &&
+            (identical(other.timeWindow, timeWindow) || other.timeWindow == timeWindow));
   }
 
   @override
@@ -67,8 +65,7 @@ abstract mixin class $VideoRuleParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$VideoRuleParametersCopyWithImpl<$Res>
-    implements $VideoRuleParametersCopyWith<$Res> {
+class _$VideoRuleParametersCopyWithImpl<$Res> implements $VideoRuleParametersCopyWith<$Res> {
   _$VideoRuleParametersCopyWithImpl(this._self, this._then);
 
   final VideoRuleParameters _self;

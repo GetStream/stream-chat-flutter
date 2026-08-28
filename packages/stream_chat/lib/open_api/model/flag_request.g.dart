@@ -19,12 +19,11 @@ FlagRequest _$FlagRequestFromJson(Map<String, dynamic> json) => FlagRequest(
   reason: json['reason'] as String?,
 );
 
-Map<String, dynamic> _$FlagRequestToJson(FlagRequest instance) =>
-    <String, dynamic>{
-      'custom': instance.custom,
-      'entity_creator_id': instance.entityCreatorId,
-      'entity_id': instance.entityId,
-      'entity_type': instance.entityType,
-      'moderation_payload': instance.moderationPayload?.toJson(),
-      'reason': instance.reason,
-    };
+Map<String, dynamic> _$FlagRequestToJson(FlagRequest instance) => <String, dynamic>{
+  'custom': instance.custom,
+  'entity_creator_id': instance.entityCreatorId,
+  'entity_id': instance.entityId,
+  'entity_type': instance.entityType,
+  'moderation_payload': instance.moderationPayload?.toJson(),
+  'reason': instance.reason,
+};

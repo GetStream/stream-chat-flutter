@@ -24,8 +24,7 @@ UpsertConfigRequest _$UpsertConfigRequestFromJson(
       ? null
       : AIVideoConfig.fromJson(json['ai_video_config'] as Map<String, dynamic>),
   async: json['async'] as bool?,
-  automodPlatformCircumventionConfig:
-      json['automod_platform_circumvention_config'] == null
+  automodPlatformCircumventionConfig: json['automod_platform_circumvention_config'] == null
       ? null
       : AutomodPlatformCircumventionConfig.fromJson(
           json['automod_platform_circumvention_config'] as Map<String, dynamic>,
@@ -53,18 +52,14 @@ UpsertConfigRequest _$UpsertConfigRequestFromJson(
   bodyguardConfig: json['bodyguard_config'] == null
       ? null
       : AITextConfig.fromJson(json['bodyguard_config'] as Map<String, dynamic>),
-  floodConfig: json['flood_config'] == null
-      ? null
-      : FloodConfig.fromJson(json['flood_config'] as Map<String, dynamic>),
+  floodConfig: json['flood_config'] == null ? null : FloodConfig.fromJson(json['flood_config'] as Map<String, dynamic>),
   googleVisionConfig: json['google_vision_config'] == null
       ? null
       : GoogleVisionConfig.fromJson(
           json['google_vision_config'] as Map<String, dynamic>,
         ),
   key: json['key'] as String,
-  llmConfig: json['llm_config'] == null
-      ? null
-      : LLMConfig.fromJson(json['llm_config'] as Map<String, dynamic>),
+  llmConfig: json['llm_config'] == null ? null : LLMConfig.fromJson(json['llm_config'] as Map<String, dynamic>),
   ruleBuilderConfig: json['rule_builder_config'] == null
       ? null
       : RuleBuilderConfig.fromJson(
@@ -91,11 +86,8 @@ Map<String, dynamic> _$UpsertConfigRequestToJson(
   'ai_text_config': instance.aiTextConfig?.toJson(),
   'ai_video_config': instance.aiVideoConfig?.toJson(),
   'async': instance.async,
-  'automod_platform_circumvention_config': instance
-      .automodPlatformCircumventionConfig
-      ?.toJson(),
-  'automod_semantic_filters_config': instance.automodSemanticFiltersConfig
-      ?.toJson(),
+  'automod_platform_circumvention_config': instance.automodPlatformCircumventionConfig?.toJson(),
+  'automod_semantic_filters_config': instance.automodSemanticFiltersConfig?.toJson(),
   'automod_toxicity_config': instance.automodToxicityConfig?.toJson(),
   'aws_rekognition_config': instance.awsRekognitionConfig?.toJson(),
   'block_list_config': instance.blockListConfig?.toJson(),

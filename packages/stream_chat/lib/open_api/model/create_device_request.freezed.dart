@@ -34,15 +34,11 @@ mixin _$CreateDeviceRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is CreateDeviceRequest &&
-            (identical(other.hardwareId, hardwareId) ||
-                other.hardwareId == hardwareId) &&
+            (identical(other.hardwareId, hardwareId) || other.hardwareId == hardwareId) &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.pushProvider, pushProvider) ||
-                other.pushProvider == pushProvider) &&
-            (identical(other.pushProviderName, pushProviderName) ||
-                other.pushProviderName == pushProviderName) &&
-            (identical(other.voipToken, voipToken) ||
-                other.voipToken == voipToken));
+            (identical(other.pushProvider, pushProvider) || other.pushProvider == pushProvider) &&
+            (identical(other.pushProviderName, pushProviderName) || other.pushProviderName == pushProviderName) &&
+            (identical(other.voipToken, voipToken) || other.voipToken == voipToken));
   }
 
   @override
@@ -78,8 +74,7 @@ abstract mixin class $CreateDeviceRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$CreateDeviceRequestCopyWithImpl<$Res>
-    implements $CreateDeviceRequestCopyWith<$Res> {
+class _$CreateDeviceRequestCopyWithImpl<$Res> implements $CreateDeviceRequestCopyWith<$Res> {
   _$CreateDeviceRequestCopyWithImpl(this._self, this._then);
 
   final CreateDeviceRequest _self;

@@ -32,8 +32,7 @@ mixin _$UpsertConfigResponse {
         (other.runtimeType == runtimeType &&
             other is UpsertConfigResponse &&
             (identical(other.config, config) || other.config == config) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -56,8 +55,7 @@ abstract mixin class $UpsertConfigResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpsertConfigResponseCopyWithImpl<$Res>
-    implements $UpsertConfigResponseCopyWith<$Res> {
+class _$UpsertConfigResponseCopyWithImpl<$Res> implements $UpsertConfigResponseCopyWith<$Res> {
   _$UpsertConfigResponseCopyWithImpl(this._self, this._then);
 
   final UpsertConfigResponse _self;

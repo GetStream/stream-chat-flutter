@@ -45,10 +45,8 @@ mixin _$QueryReviewQueueResponse {
               other.defaultActionConfig,
               defaultActionConfig,
             ) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
-            (identical(other.filterConfig, filterConfig) ||
-                other.filterConfig == filterConfig) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
+            (identical(other.filterConfig, filterConfig) || other.filterConfig == filterConfig) &&
             const DeepCollectionEquality().equals(other.items, items) &&
             (identical(other.next, next) || other.next == next) &&
             (identical(other.prev, prev) || other.prev == prev) &&
@@ -94,8 +92,7 @@ abstract mixin class $QueryReviewQueueResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryReviewQueueResponseCopyWithImpl<$Res>
-    implements $QueryReviewQueueResponseCopyWith<$Res> {
+class _$QueryReviewQueueResponseCopyWithImpl<$Res> implements $QueryReviewQueueResponseCopyWith<$Res> {
   _$QueryReviewQueueResponseCopyWithImpl(this._self, this._then);
 
   final QueryReviewQueueResponse _self;

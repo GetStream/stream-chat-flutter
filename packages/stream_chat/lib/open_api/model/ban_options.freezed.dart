@@ -23,22 +23,18 @@ mixin _$BanOptions {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $BanOptionsCopyWith<BanOptions> get copyWith =>
-      _$BanOptionsCopyWithImpl<BanOptions>(this as BanOptions, _$identity);
+  $BanOptionsCopyWith<BanOptions> get copyWith => _$BanOptionsCopyWithImpl<BanOptions>(this as BanOptions, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is BanOptions &&
-            (identical(other.deleteMessages, deleteMessages) ||
-                other.deleteMessages == deleteMessages) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.deleteMessages, deleteMessages) || other.deleteMessages == deleteMessages) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.ipBan, ipBan) || other.ipBan == ipBan) &&
             (identical(other.reason, reason) || other.reason == reason) &&
-            (identical(other.shadowBan, shadowBan) ||
-                other.shadowBan == shadowBan));
+            (identical(other.shadowBan, shadowBan) || other.shadowBan == shadowBan));
   }
 
   @override

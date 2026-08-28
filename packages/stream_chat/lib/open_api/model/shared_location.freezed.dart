@@ -22,29 +22,24 @@ mixin _$SharedLocation {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $SharedLocationCopyWith<SharedLocation> get copyWith =>
-      _$SharedLocationCopyWithImpl<SharedLocation>(
-        this as SharedLocation,
-        _$identity,
-      );
+  $SharedLocationCopyWith<SharedLocation> get copyWith => _$SharedLocationCopyWithImpl<SharedLocation>(
+    this as SharedLocation,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is SharedLocation &&
-            (identical(other.createdByDeviceId, createdByDeviceId) ||
-                other.createdByDeviceId == createdByDeviceId) &&
+            (identical(other.createdByDeviceId, createdByDeviceId) || other.createdByDeviceId == createdByDeviceId) &&
             (identical(other.endAt, endAt) || other.endAt == endAt) &&
-            (identical(other.latitude, latitude) ||
-                other.latitude == latitude) &&
-            (identical(other.longitude, longitude) ||
-                other.longitude == longitude));
+            (identical(other.latitude, latitude) || other.latitude == latitude) &&
+            (identical(other.longitude, longitude) || other.longitude == longitude));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, createdByDeviceId, endAt, latitude, longitude);
+  int get hashCode => Object.hash(runtimeType, createdByDeviceId, endAt, latitude, longitude);
 
   @override
   String toString() {
@@ -68,8 +63,7 @@ abstract mixin class $SharedLocationCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$SharedLocationCopyWithImpl<$Res>
-    implements $SharedLocationCopyWith<$Res> {
+class _$SharedLocationCopyWithImpl<$Res> implements $SharedLocationCopyWith<$Res> {
   _$SharedLocationCopyWithImpl(this._self, this._then);
 
   final SharedLocation _self;

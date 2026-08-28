@@ -53,8 +53,7 @@ abstract mixin class $DeliveryReceiptsResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$DeliveryReceiptsResponseCopyWithImpl<$Res>
-    implements $DeliveryReceiptsResponseCopyWith<$Res> {
+class _$DeliveryReceiptsResponseCopyWithImpl<$Res> implements $DeliveryReceiptsResponseCopyWith<$Res> {
   _$DeliveryReceiptsResponseCopyWithImpl(this._self, this._then);
 
   final DeliveryReceiptsResponse _self;

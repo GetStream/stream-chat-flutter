@@ -22,33 +22,24 @@ Reaction _$ReactionFromJson(Map<String, dynamic> json) => Reaction(
   latestChildren: (json['latest_children'] as Map<String, dynamic>?)?.map(
     (k, e) => MapEntry(
       k,
-      (e as List<dynamic>)
-          .map((e) => Reaction.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      (e as List<dynamic>).map((e) => Reaction.fromJson(e as Map<String, dynamic>)).toList(),
     ),
   ),
   moderation: json['moderation'] as Map<String, dynamic>?,
   ownChildren: (json['own_children'] as Map<String, dynamic>?)?.map(
     (k, e) => MapEntry(
       k,
-      (e as List<dynamic>)
-          .map((e) => Reaction.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      (e as List<dynamic>).map((e) => Reaction.fromJson(e as Map<String, dynamic>)).toList(),
     ),
   ),
   parent: json['parent'] as String?,
   score: (json['score'] as num?)?.toDouble(),
-  targetFeeds: (json['target_feeds'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
-  targetFeedsExtraData:
-      json['target_feeds_extra_data'] as Map<String, dynamic>?,
+  targetFeeds: (json['target_feeds'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  targetFeedsExtraData: json['target_feeds_extra_data'] as Map<String, dynamic>?,
   updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,
   ),
-  user: json['user'] == null
-      ? null
-      : User.fromJson(json['user'] as Map<String, dynamic>),
+  user: json['user'] == null ? null : User.fromJson(json['user'] as Map<String, dynamic>),
   userId: json['user_id'] as String,
 );
 

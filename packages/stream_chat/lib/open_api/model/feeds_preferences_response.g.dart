@@ -13,8 +13,9 @@ FeedsPreferencesResponse _$FeedsPreferencesResponseFromJson(
   commentMention: json['comment_mention'] as String?,
   commentReaction: json['comment_reaction'] as String?,
   commentReply: json['comment_reply'] as String?,
-  customActivityTypes: (json['custom_activity_types'] as Map<String, dynamic>?)
-      ?.map((k, e) => MapEntry(k, e as String)),
+  customActivityTypes: (json['custom_activity_types'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, e as String),
+  ),
   follow: json['follow'] as String?,
   mention: json['mention'] as String?,
   reaction: json['reaction'] as String?,

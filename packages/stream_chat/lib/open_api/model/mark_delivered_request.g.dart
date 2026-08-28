@@ -17,7 +17,5 @@ MarkDeliveredRequest _$MarkDeliveredRequestFromJson(
 Map<String, dynamic> _$MarkDeliveredRequestToJson(
   MarkDeliveredRequest instance,
 ) => <String, dynamic>{
-  'latest_delivered_messages': instance.latestDeliveredMessages
-      ?.map((e) => e.toJson())
-      .toList(),
+  'latest_delivered_messages': instance.latestDeliveredMessages?.map((e) => e.toJson()).toList(),
 };

@@ -28,33 +28,26 @@ mixin _$ChatSharedLocationResponseData {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ChatSharedLocationResponseDataCopyWith<ChatSharedLocationResponseData>
-  get copyWith =>
-      _$ChatSharedLocationResponseDataCopyWithImpl<
-        ChatSharedLocationResponseData
-      >(this as ChatSharedLocationResponseData, _$identity);
+  $ChatSharedLocationResponseDataCopyWith<ChatSharedLocationResponseData> get copyWith =>
+      _$ChatSharedLocationResponseDataCopyWithImpl<ChatSharedLocationResponseData>(
+        this as ChatSharedLocationResponseData,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ChatSharedLocationResponseData &&
-            (identical(other.channelCid, channelCid) ||
-                other.channelCid == channelCid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.createdByDeviceId, createdByDeviceId) ||
-                other.createdByDeviceId == createdByDeviceId) &&
+            (identical(other.channelCid, channelCid) || other.channelCid == channelCid) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.createdByDeviceId, createdByDeviceId) || other.createdByDeviceId == createdByDeviceId) &&
             (identical(other.endAt, endAt) || other.endAt == endAt) &&
-            (identical(other.latitude, latitude) ||
-                other.latitude == latitude) &&
-            (identical(other.longitude, longitude) ||
-                other.longitude == longitude) &&
+            (identical(other.latitude, latitude) || other.latitude == latitude) &&
+            (identical(other.longitude, longitude) || other.longitude == longitude) &&
             (identical(other.message, message) || other.message == message) &&
-            (identical(other.messageId, messageId) ||
-                other.messageId == messageId) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
+            (identical(other.messageId, messageId) || other.messageId == messageId) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
             (identical(other.userId, userId) || other.userId == userId));
   }
 
@@ -101,8 +94,7 @@ abstract mixin class $ChatSharedLocationResponseDataCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChatSharedLocationResponseDataCopyWithImpl<$Res>
-    implements $ChatSharedLocationResponseDataCopyWith<$Res> {
+class _$ChatSharedLocationResponseDataCopyWithImpl<$Res> implements $ChatSharedLocationResponseDataCopyWith<$Res> {
   _$ChatSharedLocationResponseDataCopyWithImpl(this._self, this._then);
 
   final ChatSharedLocationResponseData _self;

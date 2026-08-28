@@ -44,27 +44,19 @@ mixin _$ModerationFlagResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ModerationFlagResponse &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.entityCreatorId, entityCreatorId) ||
-                other.entityCreatorId == entityCreatorId) &&
-            (identical(other.entityId, entityId) ||
-                other.entityId == entityId) &&
-            (identical(other.entityType, entityType) ||
-                other.entityType == entityType) &&
+            (identical(other.entityCreatorId, entityCreatorId) || other.entityCreatorId == entityCreatorId) &&
+            (identical(other.entityId, entityId) || other.entityId == entityId) &&
+            (identical(other.entityType, entityType) || other.entityType == entityType) &&
             const DeepCollectionEquality().equals(other.labels, labels) &&
-            (identical(other.moderationPayload, moderationPayload) ||
-                other.moderationPayload == moderationPayload) &&
+            (identical(other.moderationPayload, moderationPayload) || other.moderationPayload == moderationPayload) &&
             (identical(other.reason, reason) || other.reason == reason) &&
             const DeepCollectionEquality().equals(other.result, result) &&
-            (identical(other.reviewQueueItem, reviewQueueItem) ||
-                other.reviewQueueItem == reviewQueueItem) &&
-            (identical(other.reviewQueueItemId, reviewQueueItemId) ||
-                other.reviewQueueItemId == reviewQueueItemId) &&
+            (identical(other.reviewQueueItem, reviewQueueItem) || other.reviewQueueItem == reviewQueueItem) &&
+            (identical(other.reviewQueueItemId, reviewQueueItemId) || other.reviewQueueItemId == reviewQueueItemId) &&
             (identical(other.type, type) || other.type == type) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
             (identical(other.user, user) || other.user == user) &&
             (identical(other.userId, userId) || other.userId == userId));
   }
@@ -122,8 +114,7 @@ abstract mixin class $ModerationFlagResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ModerationFlagResponseCopyWithImpl<$Res>
-    implements $ModerationFlagResponseCopyWith<$Res> {
+class _$ModerationFlagResponseCopyWithImpl<$Res> implements $ModerationFlagResponseCopyWith<$Res> {
   _$ModerationFlagResponseCopyWithImpl(this._self, this._then);
 
   final ModerationFlagResponse _self;

@@ -20,18 +20,13 @@ ConfigOverridesRequest _$ConfigOverridesRequestFromJson(
       : ChatPreferences.fromJson(
           json['chat_preferences'] as Map<String, dynamic>,
         ),
-  commands: (json['commands'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  commands: (json['commands'] as List<dynamic>?)?.map((e) => e as String).toList(),
   countMessages: json['count_messages'] as bool?,
   grants: (json['grants'] as Map<String, dynamic>?)?.map(
-    (k, e) =>
-        MapEntry(k, (e as List<dynamic>).map((e) => e as String).toList()),
+    (k, e) => MapEntry(k, (e as List<dynamic>).map((e) => e as String).toList()),
   ),
   maxMessageLength: (json['max_message_length'] as num?)?.toInt(),
-  pushLevel: json['push_level'] == null
-      ? null
-      : ConfigOverridesRequestPushLevel.fromJson(json['push_level'] as String),
+  pushLevel: json['push_level'] == null ? null : ConfigOverridesRequestPushLevel.fromJson(json['push_level'] as String),
   quotes: json['quotes'] as bool?,
   reactions: json['reactions'] as bool?,
   replies: json['replies'] as bool?,

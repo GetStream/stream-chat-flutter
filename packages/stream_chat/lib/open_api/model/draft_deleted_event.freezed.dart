@@ -25,11 +25,10 @@ mixin _$DraftDeletedEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $DraftDeletedEventCopyWith<DraftDeletedEvent> get copyWith =>
-      _$DraftDeletedEventCopyWithImpl<DraftDeletedEvent>(
-        this as DraftDeletedEvent,
-        _$identity,
-      );
+  $DraftDeletedEventCopyWith<DraftDeletedEvent> get copyWith => _$DraftDeletedEventCopyWithImpl<DraftDeletedEvent>(
+    this as DraftDeletedEvent,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -37,14 +36,11 @@ mixin _$DraftDeletedEvent {
         (other.runtimeType == runtimeType &&
             other is DraftDeletedEvent &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.draft, draft) || other.draft == draft) &&
-            (identical(other.parentId, parentId) ||
-                other.parentId == parentId) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.parentId, parentId) || other.parentId == parentId) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.type, type) || other.type == type));
   }
 
@@ -85,8 +81,7 @@ abstract mixin class $DraftDeletedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$DraftDeletedEventCopyWithImpl<$Res>
-    implements $DraftDeletedEventCopyWith<$Res> {
+class _$DraftDeletedEventCopyWithImpl<$Res> implements $DraftDeletedEventCopyWith<$Res> {
   _$DraftDeletedEventCopyWithImpl(this._self, this._then);
 
   final DraftDeletedEvent _self;

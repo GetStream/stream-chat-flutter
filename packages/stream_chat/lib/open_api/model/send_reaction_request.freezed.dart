@@ -32,17 +32,13 @@ mixin _$SendReactionRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is SendReactionRequest &&
-            (identical(other.enforceUnique, enforceUnique) ||
-                other.enforceUnique == enforceUnique) &&
-            (identical(other.reaction, reaction) ||
-                other.reaction == reaction) &&
-            (identical(other.skipPush, skipPush) ||
-                other.skipPush == skipPush));
+            (identical(other.enforceUnique, enforceUnique) || other.enforceUnique == enforceUnique) &&
+            (identical(other.reaction, reaction) || other.reaction == reaction) &&
+            (identical(other.skipPush, skipPush) || other.skipPush == skipPush));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, enforceUnique, reaction, skipPush);
+  int get hashCode => Object.hash(runtimeType, enforceUnique, reaction, skipPush);
 
   @override
   String toString() {
@@ -61,8 +57,7 @@ abstract mixin class $SendReactionRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$SendReactionRequestCopyWithImpl<$Res>
-    implements $SendReactionRequestCopyWith<$Res> {
+class _$SendReactionRequestCopyWithImpl<$Res> implements $SendReactionRequestCopyWith<$Res> {
   _$SendReactionRequestCopyWithImpl(this._self, this._then);
 
   final SendReactionRequest _self;

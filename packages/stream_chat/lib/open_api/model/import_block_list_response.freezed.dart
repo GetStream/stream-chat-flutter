@@ -31,8 +31,7 @@ mixin _$ImportBlockListResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ImportBlockListResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.taskId, taskId) || other.taskId == taskId));
   }
 
@@ -56,8 +55,7 @@ abstract mixin class $ImportBlockListResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ImportBlockListResponseCopyWithImpl<$Res>
-    implements $ImportBlockListResponseCopyWith<$Res> {
+class _$ImportBlockListResponseCopyWithImpl<$Res> implements $ImportBlockListResponseCopyWith<$Res> {
   _$ImportBlockListResponseCopyWithImpl(this._self, this._then);
 
   final ImportBlockListResponse _self;

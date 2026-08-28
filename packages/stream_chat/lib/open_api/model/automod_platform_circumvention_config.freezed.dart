@@ -21,13 +21,11 @@ mixin _$AutomodPlatformCircumventionConfig {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $AutomodPlatformCircumventionConfigCopyWith<
-    AutomodPlatformCircumventionConfig
-  >
-  get copyWith =>
-      _$AutomodPlatformCircumventionConfigCopyWithImpl<
-        AutomodPlatformCircumventionConfig
-      >(this as AutomodPlatformCircumventionConfig, _$identity);
+  $AutomodPlatformCircumventionConfigCopyWith<AutomodPlatformCircumventionConfig> get copyWith =>
+      _$AutomodPlatformCircumventionConfigCopyWithImpl<AutomodPlatformCircumventionConfig>(
+        this as AutomodPlatformCircumventionConfig,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {

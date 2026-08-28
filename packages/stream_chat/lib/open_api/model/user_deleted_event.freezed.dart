@@ -29,19 +29,17 @@ mixin _$UserDeletedEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UserDeletedEventCopyWith<UserDeletedEvent> get copyWith =>
-      _$UserDeletedEventCopyWithImpl<UserDeletedEvent>(
-        this as UserDeletedEvent,
-        _$identity,
-      );
+  $UserDeletedEventCopyWith<UserDeletedEvent> get copyWith => _$UserDeletedEventCopyWithImpl<UserDeletedEvent>(
+    this as UserDeletedEvent,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UserDeletedEvent &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.deleteConversation, deleteConversation) ||
                 other.deleteConversation == deleteConversation) &&
@@ -49,18 +47,13 @@ mixin _$UserDeletedEvent {
                   other.deleteConversationChannels,
                   deleteConversationChannels,
                 ) ||
-                other.deleteConversationChannels ==
-                    deleteConversationChannels) &&
-            (identical(other.deleteMessages, deleteMessages) ||
-                other.deleteMessages == deleteMessages) &&
-            (identical(other.deleteUser, deleteUser) ||
-                other.deleteUser == deleteUser) &&
-            (identical(other.hardDelete, hardDelete) ||
-                other.hardDelete == hardDelete) &&
+                other.deleteConversationChannels == deleteConversationChannels) &&
+            (identical(other.deleteMessages, deleteMessages) || other.deleteMessages == deleteMessages) &&
+            (identical(other.deleteUser, deleteUser) || other.deleteUser == deleteUser) &&
+            (identical(other.hardDelete, hardDelete) || other.hardDelete == hardDelete) &&
             (identical(other.markMessagesDeleted, markMessagesDeleted) ||
                 other.markMessagesDeleted == markMessagesDeleted) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(other.user, user) || other.user == user));
   }
@@ -110,8 +103,7 @@ abstract mixin class $UserDeletedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UserDeletedEventCopyWithImpl<$Res>
-    implements $UserDeletedEventCopyWith<$Res> {
+class _$UserDeletedEventCopyWithImpl<$Res> implements $UserDeletedEventCopyWith<$Res> {
   _$UserDeletedEventCopyWithImpl(this._self, this._then);
 
   final UserDeletedEvent _self;

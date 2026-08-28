@@ -42,8 +42,7 @@ mixin _$NotificationMarkUnreadEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $NotificationMarkUnreadEventCopyWith<NotificationMarkUnreadEvent>
-  get copyWith =>
+  $NotificationMarkUnreadEventCopyWith<NotificationMarkUnreadEvent> get copyWith =>
       _$NotificationMarkUnreadEventCopyWithImpl<NotificationMarkUnreadEvent>(
         this as NotificationMarkUnreadEvent,
         _$identity,
@@ -59,17 +58,14 @@ mixin _$NotificationMarkUnreadEvent {
               other.channelCustom,
               channelCustom,
             ) &&
-            (identical(other.channelId, channelId) ||
-                other.channelId == channelId) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
             (identical(other.channelMemberCount, channelMemberCount) ||
                 other.channelMemberCount == channelMemberCount) &&
             (identical(other.channelMessageCount, channelMessageCount) ||
                 other.channelMessageCount == channelMessageCount) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.firstUnreadMessageId, firstUnreadMessageId) ||
                 other.firstUnreadMessageId == firstUnreadMessageId) &&
@@ -77,28 +73,19 @@ mixin _$NotificationMarkUnreadEvent {
               other.groupedUnreadChannels,
               groupedUnreadChannels,
             ) &&
-            (identical(other.lastReadAt, lastReadAt) ||
-                other.lastReadAt == lastReadAt) &&
-            (identical(other.lastReadMessageId, lastReadMessageId) ||
-                other.lastReadMessageId == lastReadMessageId) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.lastReadAt, lastReadAt) || other.lastReadAt == lastReadAt) &&
+            (identical(other.lastReadMessageId, lastReadMessageId) || other.lastReadMessageId == lastReadMessageId) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.team, team) || other.team == team) &&
-            (identical(other.threadId, threadId) ||
-                other.threadId == threadId) &&
-            (identical(other.totalUnreadCount, totalUnreadCount) ||
-                other.totalUnreadCount == totalUnreadCount) &&
+            (identical(other.threadId, threadId) || other.threadId == threadId) &&
+            (identical(other.totalUnreadCount, totalUnreadCount) || other.totalUnreadCount == totalUnreadCount) &&
             (identical(other.type, type) || other.type == type) &&
-            (identical(other.unreadChannels, unreadChannels) ||
-                other.unreadChannels == unreadChannels) &&
-            (identical(other.unreadCount, unreadCount) ||
-                other.unreadCount == unreadCount) &&
-            (identical(other.unreadMessages, unreadMessages) ||
-                other.unreadMessages == unreadMessages) &&
+            (identical(other.unreadChannels, unreadChannels) || other.unreadChannels == unreadChannels) &&
+            (identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount) &&
+            (identical(other.unreadMessages, unreadMessages) || other.unreadMessages == unreadMessages) &&
             (identical(other.unreadThreadMessages, unreadThreadMessages) ||
                 other.unreadThreadMessages == unreadThreadMessages) &&
-            (identical(other.unreadThreads, unreadThreads) ||
-                other.unreadThreads == unreadThreads) &&
+            (identical(other.unreadThreads, unreadThreads) || other.unreadThreads == unreadThreads) &&
             (identical(other.user, user) || other.user == user));
   }
 
@@ -173,8 +160,7 @@ abstract mixin class $NotificationMarkUnreadEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$NotificationMarkUnreadEventCopyWithImpl<$Res>
-    implements $NotificationMarkUnreadEventCopyWith<$Res> {
+class _$NotificationMarkUnreadEventCopyWithImpl<$Res> implements $NotificationMarkUnreadEventCopyWith<$Res> {
   _$NotificationMarkUnreadEventCopyWithImpl(this._self, this._then);
 
   final NotificationMarkUnreadEvent _self;

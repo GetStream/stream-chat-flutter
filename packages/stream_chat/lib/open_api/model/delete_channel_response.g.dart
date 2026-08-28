@@ -9,9 +9,7 @@ part of 'delete_channel_response.dart';
 DeleteChannelResponse _$DeleteChannelResponseFromJson(
   Map<String, dynamic> json,
 ) => DeleteChannelResponse(
-  channel: json['channel'] == null
-      ? null
-      : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
+  channel: json['channel'] == null ? null : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
   duration: json['duration'] as String,
 );
 

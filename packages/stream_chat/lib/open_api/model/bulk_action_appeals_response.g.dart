@@ -10,12 +10,8 @@ BulkActionAppealsResponse _$BulkActionAppealsResponseFromJson(
   Map<String, dynamic> json,
 ) => BulkActionAppealsResponse(
   duration: json['duration'] as String,
-  errors: (json['errors'] as List<dynamic>)
-      .map((e) => BulkAppealError.fromJson(e as Map<String, dynamic>))
-      .toList(),
-  results: (json['results'] as List<dynamic>)
-      .map((e) => BulkAppealResult.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  errors: (json['errors'] as List<dynamic>).map((e) => BulkAppealError.fromJson(e as Map<String, dynamic>)).toList(),
+  results: (json['results'] as List<dynamic>).map((e) => BulkAppealResult.fromJson(e as Map<String, dynamic>)).toList(),
 );
 
 Map<String, dynamic> _$BulkActionAppealsResponseToJson(

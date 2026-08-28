@@ -36,10 +36,8 @@ mixin _$OCRContentParameters {
               other.harmLabels,
               harmLabels,
             ) &&
-            (identical(other.labelOperator, labelOperator) ||
-                other.labelOperator == labelOperator) &&
-            (identical(other.severity, severity) ||
-                other.severity == severity));
+            (identical(other.labelOperator, labelOperator) || other.labelOperator == labelOperator) &&
+            (identical(other.severity, severity) || other.severity == severity));
   }
 
   @override
@@ -71,8 +69,7 @@ abstract mixin class $OCRContentParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$OCRContentParametersCopyWithImpl<$Res>
-    implements $OCRContentParametersCopyWith<$Res> {
+class _$OCRContentParametersCopyWithImpl<$Res> implements $OCRContentParametersCopyWith<$Res> {
   _$OCRContentParametersCopyWithImpl(this._self, this._then);
 
   final OCRContentParameters _self;

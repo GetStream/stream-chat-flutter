@@ -85,8 +85,7 @@ abstract mixin class $QueryMembersPayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryMembersPayloadCopyWithImpl<$Res>
-    implements $QueryMembersPayloadCopyWith<$Res> {
+class _$QueryMembersPayloadCopyWithImpl<$Res> implements $QueryMembersPayloadCopyWith<$Res> {
   _$QueryMembersPayloadCopyWithImpl(this._self, this._then);
 
   final QueryMembersPayload _self;

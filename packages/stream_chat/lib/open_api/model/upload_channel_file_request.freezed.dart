@@ -55,8 +55,7 @@ abstract mixin class $UploadChannelFileRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UploadChannelFileRequestCopyWithImpl<$Res>
-    implements $UploadChannelFileRequestCopyWith<$Res> {
+class _$UploadChannelFileRequestCopyWithImpl<$Res> implements $UploadChannelFileRequestCopyWith<$Res> {
   _$UploadChannelFileRequestCopyWithImpl(this._self, this._then);
 
   final UploadChannelFileRequest _self;

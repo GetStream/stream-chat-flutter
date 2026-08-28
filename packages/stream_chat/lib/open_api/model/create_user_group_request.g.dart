@@ -11,9 +11,7 @@ CreateUserGroupRequest _$CreateUserGroupRequestFromJson(
 ) => CreateUserGroupRequest(
   description: json['description'] as String?,
   id: json['id'] as String?,
-  memberIds: (json['member_ids'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  memberIds: (json['member_ids'] as List<dynamic>?)?.map((e) => e as String).toList(),
   name: json['name'] as String,
   teamId: json['team_id'] as String?,
 );

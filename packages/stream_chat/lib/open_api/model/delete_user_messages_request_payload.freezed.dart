@@ -24,27 +24,22 @@ mixin _$DeleteUserMessagesRequestPayload {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $DeleteUserMessagesRequestPayloadCopyWith<DeleteUserMessagesRequestPayload>
-  get copyWith =>
-      _$DeleteUserMessagesRequestPayloadCopyWithImpl<
-        DeleteUserMessagesRequestPayload
-      >(this as DeleteUserMessagesRequestPayload, _$identity);
+  $DeleteUserMessagesRequestPayloadCopyWith<DeleteUserMessagesRequestPayload> get copyWith =>
+      _$DeleteUserMessagesRequestPayloadCopyWithImpl<DeleteUserMessagesRequestPayload>(
+        this as DeleteUserMessagesRequestPayload,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is DeleteUserMessagesRequestPayload &&
-            (identical(other.channelCid, channelCid) ||
-                other.channelCid == channelCid) &&
-            (identical(other.deleteMessages, deleteMessages) ||
-                other.deleteMessages == deleteMessages) &&
-            (identical(other.deleteReactions, deleteReactions) ||
-                other.deleteReactions == deleteReactions) &&
-            (identical(other.entityId, entityId) ||
-                other.entityId == entityId) &&
-            (identical(other.entityType, entityType) ||
-                other.entityType == entityType) &&
+            (identical(other.channelCid, channelCid) || other.channelCid == channelCid) &&
+            (identical(other.deleteMessages, deleteMessages) || other.deleteMessages == deleteMessages) &&
+            (identical(other.deleteReactions, deleteReactions) || other.deleteReactions == deleteReactions) &&
+            (identical(other.entityId, entityId) || other.entityId == entityId) &&
+            (identical(other.entityType, entityType) || other.entityType == entityType) &&
             (identical(other.reason, reason) || other.reason == reason));
   }
 
@@ -83,8 +78,7 @@ abstract mixin class $DeleteUserMessagesRequestPayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$DeleteUserMessagesRequestPayloadCopyWithImpl<$Res>
-    implements $DeleteUserMessagesRequestPayloadCopyWith<$Res> {
+class _$DeleteUserMessagesRequestPayloadCopyWithImpl<$Res> implements $DeleteUserMessagesRequestPayloadCopyWith<$Res> {
   _$DeleteUserMessagesRequestPayloadCopyWithImpl(this._self, this._then);
 
   final DeleteUserMessagesRequestPayload _self;

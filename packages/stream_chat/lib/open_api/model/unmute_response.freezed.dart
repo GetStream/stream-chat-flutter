@@ -20,19 +20,17 @@ mixin _$UnmuteResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UnmuteResponseCopyWith<UnmuteResponse> get copyWith =>
-      _$UnmuteResponseCopyWithImpl<UnmuteResponse>(
-        this as UnmuteResponse,
-        _$identity,
-      );
+  $UnmuteResponseCopyWith<UnmuteResponse> get copyWith => _$UnmuteResponseCopyWithImpl<UnmuteResponse>(
+    this as UnmuteResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UnmuteResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             const DeepCollectionEquality().equals(
               other.nonExistingUsers,
               nonExistingUsers,
@@ -63,8 +61,7 @@ abstract mixin class $UnmuteResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UnmuteResponseCopyWithImpl<$Res>
-    implements $UnmuteResponseCopyWith<$Res> {
+class _$UnmuteResponseCopyWithImpl<$Res> implements $UnmuteResponseCopyWith<$Res> {
   _$UnmuteResponseCopyWithImpl(this._self, this._then);
 
   final UnmuteResponse _self;

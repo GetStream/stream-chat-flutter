@@ -33,8 +33,7 @@ mixin _$TruncateChannelResponse {
         (other.runtimeType == runtimeType &&
             other is TruncateChannelResponse &&
             (identical(other.channel, channel) || other.channel == channel) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.message, message) || other.message == message));
   }
 
@@ -62,8 +61,7 @@ abstract mixin class $TruncateChannelResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$TruncateChannelResponseCopyWithImpl<$Res>
-    implements $TruncateChannelResponseCopyWith<$Res> {
+class _$TruncateChannelResponseCopyWithImpl<$Res> implements $TruncateChannelResponseCopyWith<$Res> {
   _$TruncateChannelResponseCopyWithImpl(this._self, this._then);
 
   final TruncateChannelResponse _self;

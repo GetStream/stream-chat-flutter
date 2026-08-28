@@ -21,11 +21,11 @@ mixin _$QueryFutureChannelBansResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $QueryFutureChannelBansResponseCopyWith<QueryFutureChannelBansResponse>
-  get copyWith =>
-      _$QueryFutureChannelBansResponseCopyWithImpl<
-        QueryFutureChannelBansResponse
-      >(this as QueryFutureChannelBansResponse, _$identity);
+  $QueryFutureChannelBansResponseCopyWith<QueryFutureChannelBansResponse> get copyWith =>
+      _$QueryFutureChannelBansResponseCopyWithImpl<QueryFutureChannelBansResponse>(
+        this as QueryFutureChannelBansResponse,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -33,8 +33,7 @@ mixin _$QueryFutureChannelBansResponse {
         (other.runtimeType == runtimeType &&
             other is QueryFutureChannelBansResponse &&
             const DeepCollectionEquality().equals(other.bans, bans) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.total, total) || other.total == total));
   }
 
@@ -63,8 +62,7 @@ abstract mixin class $QueryFutureChannelBansResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryFutureChannelBansResponseCopyWithImpl<$Res>
-    implements $QueryFutureChannelBansResponseCopyWith<$Res> {
+class _$QueryFutureChannelBansResponseCopyWithImpl<$Res> implements $QueryFutureChannelBansResponseCopyWith<$Res> {
   _$QueryFutureChannelBansResponseCopyWithImpl(this._self, this._then);
 
   final QueryFutureChannelBansResponse _self;

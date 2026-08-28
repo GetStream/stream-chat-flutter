@@ -55,15 +55,11 @@ mixin _$QueryChannelsRequest {
               other.memberCustomInclude,
               memberCustomInclude,
             ) &&
-            (identical(other.memberLimit, memberLimit) ||
-                other.memberLimit == memberLimit) &&
-            (identical(other.messageLimit, messageLimit) ||
-                other.messageLimit == messageLimit) &&
+            (identical(other.memberLimit, memberLimit) || other.memberLimit == memberLimit) &&
+            (identical(other.messageLimit, messageLimit) || other.messageLimit == messageLimit) &&
             (identical(other.offset, offset) || other.offset == offset) &&
-            (identical(other.predefinedFilter, predefinedFilter) ||
-                other.predefinedFilter == predefinedFilter) &&
-            (identical(other.presence, presence) ||
-                other.presence == presence) &&
+            (identical(other.predefinedFilter, predefinedFilter) || other.predefinedFilter == predefinedFilter) &&
+            (identical(other.presence, presence) || other.presence == presence) &&
             const DeepCollectionEquality().equals(other.sort, sort) &&
             const DeepCollectionEquality().equals(
               other.sortValues,
@@ -122,8 +118,7 @@ abstract mixin class $QueryChannelsRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryChannelsRequestCopyWithImpl<$Res>
-    implements $QueryChannelsRequestCopyWith<$Res> {
+class _$QueryChannelsRequestCopyWithImpl<$Res> implements $QueryChannelsRequestCopyWith<$Res> {
   _$QueryChannelsRequestCopyWithImpl(this._self, this._then);
 
   final QueryChannelsRequest _self;

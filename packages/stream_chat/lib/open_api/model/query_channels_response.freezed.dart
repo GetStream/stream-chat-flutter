@@ -33,10 +33,8 @@ mixin _$QueryChannelsResponse {
         (other.runtimeType == runtimeType &&
             other is QueryChannelsResponse &&
             const DeepCollectionEquality().equals(other.channels, channels) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
-            (identical(other.predefinedFilter, predefinedFilter) ||
-                other.predefinedFilter == predefinedFilter));
+            (identical(other.duration, duration) || other.duration == duration) &&
+            (identical(other.predefinedFilter, predefinedFilter) || other.predefinedFilter == predefinedFilter));
   }
 
   @override
@@ -68,8 +66,7 @@ abstract mixin class $QueryChannelsResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryChannelsResponseCopyWithImpl<$Res>
-    implements $QueryChannelsResponseCopyWith<$Res> {
+class _$QueryChannelsResponseCopyWithImpl<$Res> implements $QueryChannelsResponseCopyWith<$Res> {
   _$QueryChannelsResponseCopyWithImpl(this._self, this._then);
 
   final QueryChannelsResponse _self;

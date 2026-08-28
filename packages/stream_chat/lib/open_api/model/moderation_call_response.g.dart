@@ -10,18 +10,14 @@ ModerationCallResponse _$ModerationCallResponseFromJson(
   Map<String, dynamic> json,
 ) => ModerationCallResponse(
   backstage: json['backstage'] as bool,
-  blockedUserIds: (json['blocked_user_ids'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  blockedUserIds: (json['blocked_user_ids'] as List<dynamic>).map((e) => e as String).toList(),
   captioning: json['captioning'] as bool,
   channelCid: json['channel_cid'] as String?,
   cid: json['cid'] as String,
   createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  createdBy: json['created_by'] == null
-      ? null
-      : UserResponse.fromJson(json['created_by'] as Map<String, dynamic>),
+  createdBy: json['created_by'] == null ? null : UserResponse.fromJson(json['created_by'] as Map<String, dynamic>),
   currentSessionId: json['current_session_id'] as String,
   custom: json['custom'] as Map<String, dynamic>,
   endedAt: _$JsonConverterFromJson<Object, DateTime>(

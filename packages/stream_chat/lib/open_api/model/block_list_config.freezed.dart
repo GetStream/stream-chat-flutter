@@ -22,11 +22,10 @@ mixin _$BlockListConfig {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $BlockListConfigCopyWith<BlockListConfig> get copyWith =>
-      _$BlockListConfigCopyWithImpl<BlockListConfig>(
-        this as BlockListConfig,
-        _$identity,
-      );
+  $BlockListConfigCopyWith<BlockListConfig> get copyWith => _$BlockListConfigCopyWithImpl<BlockListConfig>(
+    this as BlockListConfig,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -35,8 +34,7 @@ mixin _$BlockListConfig {
             other is BlockListConfig &&
             (identical(other.async, async) || other.async == async) &&
             (identical(other.enabled, enabled) || other.enabled == enabled) &&
-            (identical(other.matchSubstring, matchSubstring) ||
-                other.matchSubstring == matchSubstring) &&
+            (identical(other.matchSubstring, matchSubstring) || other.matchSubstring == matchSubstring) &&
             const DeepCollectionEquality().equals(other.rules, rules));
   }
 
@@ -71,8 +69,7 @@ abstract mixin class $BlockListConfigCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$BlockListConfigCopyWithImpl<$Res>
-    implements $BlockListConfigCopyWith<$Res> {
+class _$BlockListConfigCopyWithImpl<$Res> implements $BlockListConfigCopyWith<$Res> {
   _$BlockListConfigCopyWithImpl(this._self, this._then);
 
   final BlockListConfig _self;

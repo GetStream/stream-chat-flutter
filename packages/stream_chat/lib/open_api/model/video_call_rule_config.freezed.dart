@@ -32,8 +32,7 @@ mixin _$VideoCallRuleConfig {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is VideoCallRuleConfig &&
-            (identical(other.flagAllLabels, flagAllLabels) ||
-                other.flagAllLabels == flagAllLabels) &&
+            (identical(other.flagAllLabels, flagAllLabels) || other.flagAllLabels == flagAllLabels) &&
             const DeepCollectionEquality().equals(
               other.flaggedLabels,
               flaggedLabels,
@@ -70,8 +69,7 @@ abstract mixin class $VideoCallRuleConfigCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$VideoCallRuleConfigCopyWithImpl<$Res>
-    implements $VideoCallRuleConfigCopyWith<$Res> {
+class _$VideoCallRuleConfigCopyWithImpl<$Res> implements $VideoCallRuleConfigCopyWith<$Res> {
   _$VideoCallRuleConfigCopyWithImpl(this._self, this._then);
 
   final VideoCallRuleConfig _self;

@@ -11,8 +11,7 @@ GroupedQueryChannelsResponse _$GroupedQueryChannelsResponseFromJson(
 ) => GroupedQueryChannelsResponse(
   duration: json['duration'] as String,
   groups: (json['groups'] as Map<String, dynamic>).map(
-    (k, e) =>
-        MapEntry(k, GroupedChannelsBucket.fromJson(e as Map<String, dynamic>)),
+    (k, e) => MapEntry(k, GroupedChannelsBucket.fromJson(e as Map<String, dynamic>)),
   ),
 );
 

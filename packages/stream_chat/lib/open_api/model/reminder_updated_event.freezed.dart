@@ -39,17 +39,12 @@ mixin _$ReminderUpdatedEvent {
         (other.runtimeType == runtimeType &&
             other is ReminderUpdatedEvent &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.messageId, messageId) ||
-                other.messageId == messageId) &&
-            (identical(other.parentId, parentId) ||
-                other.parentId == parentId) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
-            (identical(other.reminder, reminder) ||
-                other.reminder == reminder) &&
+            (identical(other.messageId, messageId) || other.messageId == messageId) &&
+            (identical(other.parentId, parentId) || other.parentId == parentId) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
+            (identical(other.reminder, reminder) || other.reminder == reminder) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(other.userId, userId) || other.userId == userId));
   }
@@ -95,8 +90,7 @@ abstract mixin class $ReminderUpdatedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ReminderUpdatedEventCopyWithImpl<$Res>
-    implements $ReminderUpdatedEventCopyWith<$Res> {
+class _$ReminderUpdatedEventCopyWithImpl<$Res> implements $ReminderUpdatedEventCopyWith<$Res> {
   _$ReminderUpdatedEventCopyWithImpl(this._self, this._then);
 
   final ReminderUpdatedEvent _self;

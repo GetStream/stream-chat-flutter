@@ -39,11 +39,10 @@ mixin _$MessageRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $MessageRequestCopyWith<MessageRequest> get copyWith =>
-      _$MessageRequestCopyWithImpl<MessageRequest>(
-        this as MessageRequest,
-        _$identity,
-      );
+  $MessageRequestCopyWith<MessageRequest> get copyWith => _$MessageRequestCopyWithImpl<MessageRequest>(
+    this as MessageRequest,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -56,14 +55,12 @@ mixin _$MessageRequest {
             ) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.mentionedChannel, mentionedChannel) ||
-                other.mentionedChannel == mentionedChannel) &&
+            (identical(other.mentionedChannel, mentionedChannel) || other.mentionedChannel == mentionedChannel) &&
             const DeepCollectionEquality().equals(
               other.mentionedGroupIds,
               mentionedGroupIds,
             ) &&
-            (identical(other.mentionedHere, mentionedHere) ||
-                other.mentionedHere == mentionedHere) &&
+            (identical(other.mentionedHere, mentionedHere) || other.mentionedHere == mentionedHere) &&
             const DeepCollectionEquality().equals(
               other.mentionedRoles,
               mentionedRoles,
@@ -73,24 +70,18 @@ mixin _$MessageRequest {
               mentionedUsers,
             ) &&
             (identical(other.mml, mml) || other.mml == mml) &&
-            (identical(other.parentId, parentId) ||
-                other.parentId == parentId) &&
-            (identical(other.pinExpires, pinExpires) ||
-                other.pinExpires == pinExpires) &&
+            (identical(other.parentId, parentId) || other.parentId == parentId) &&
+            (identical(other.pinExpires, pinExpires) || other.pinExpires == pinExpires) &&
             (identical(other.pinned, pinned) || other.pinned == pinned) &&
-            (identical(other.pinnedAt, pinnedAt) ||
-                other.pinnedAt == pinnedAt) &&
+            (identical(other.pinnedAt, pinnedAt) || other.pinnedAt == pinnedAt) &&
             (identical(other.pollId, pollId) || other.pollId == pollId) &&
-            (identical(other.quotedMessageId, quotedMessageId) ||
-                other.quotedMessageId == quotedMessageId) &&
+            (identical(other.quotedMessageId, quotedMessageId) || other.quotedMessageId == quotedMessageId) &&
             const DeepCollectionEquality().equals(
               other.restrictedVisibility,
               restrictedVisibility,
             ) &&
-            (identical(other.sharedLocation, sharedLocation) ||
-                other.sharedLocation == sharedLocation) &&
-            (identical(other.showInChannel, showInChannel) ||
-                other.showInChannel == showInChannel) &&
+            (identical(other.sharedLocation, sharedLocation) || other.sharedLocation == sharedLocation) &&
+            (identical(other.showInChannel, showInChannel) || other.showInChannel == showInChannel) &&
             (identical(other.silent, silent) || other.silent == silent) &&
             (identical(other.text, text) || other.text == text) &&
             (identical(other.type, type) || other.type == type));
@@ -161,8 +152,7 @@ abstract mixin class $MessageRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MessageRequestCopyWithImpl<$Res>
-    implements $MessageRequestCopyWith<$Res> {
+class _$MessageRequestCopyWithImpl<$Res> implements $MessageRequestCopyWith<$Res> {
   _$MessageRequestCopyWithImpl(this._self, this._then);
 
   final MessageRequest _self;

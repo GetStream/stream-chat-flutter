@@ -44,29 +44,21 @@ mixin _$VelocityFilterConfigRule {
         (other.runtimeType == runtimeType &&
             other is VelocityFilterConfigRule &&
             (identical(other.action, action) || other.action == action) &&
-            (identical(other.banDuration, banDuration) ||
-                other.banDuration == banDuration) &&
-            (identical(other.cascadingAction, cascadingAction) ||
-                other.cascadingAction == cascadingAction) &&
+            (identical(other.banDuration, banDuration) || other.banDuration == banDuration) &&
+            (identical(other.cascadingAction, cascadingAction) || other.cascadingAction == cascadingAction) &&
             (identical(other.cascadingThreshold, cascadingThreshold) ||
                 other.cascadingThreshold == cascadingThreshold) &&
             (identical(other.checkMessageContext, checkMessageContext) ||
                 other.checkMessageContext == checkMessageContext) &&
-            (identical(other.fastSpamThreshold, fastSpamThreshold) ||
-                other.fastSpamThreshold == fastSpamThreshold) &&
-            (identical(other.fastSpamTtl, fastSpamTtl) ||
-                other.fastSpamTtl == fastSpamTtl) &&
+            (identical(other.fastSpamThreshold, fastSpamThreshold) || other.fastSpamThreshold == fastSpamThreshold) &&
+            (identical(other.fastSpamTtl, fastSpamTtl) || other.fastSpamTtl == fastSpamTtl) &&
             (identical(other.ipBan, ipBan) || other.ipBan == ipBan) &&
-            (identical(other.probationPeriod, probationPeriod) ||
-                other.probationPeriod == probationPeriod) &&
-            (identical(other.shadowBan, shadowBan) ||
-                other.shadowBan == shadowBan) &&
+            (identical(other.probationPeriod, probationPeriod) || other.probationPeriod == probationPeriod) &&
+            (identical(other.shadowBan, shadowBan) || other.shadowBan == shadowBan) &&
             (identical(other.slowSpamBanDuration, slowSpamBanDuration) ||
                 other.slowSpamBanDuration == slowSpamBanDuration) &&
-            (identical(other.slowSpamThreshold, slowSpamThreshold) ||
-                other.slowSpamThreshold == slowSpamThreshold) &&
-            (identical(other.slowSpamTtl, slowSpamTtl) ||
-                other.slowSpamTtl == slowSpamTtl) &&
+            (identical(other.slowSpamThreshold, slowSpamThreshold) || other.slowSpamThreshold == slowSpamThreshold) &&
+            (identical(other.slowSpamTtl, slowSpamTtl) || other.slowSpamTtl == slowSpamTtl) &&
             (identical(other.urlOnly, urlOnly) || other.urlOnly == urlOnly));
   }
 
@@ -121,8 +113,7 @@ abstract mixin class $VelocityFilterConfigRuleCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$VelocityFilterConfigRuleCopyWithImpl<$Res>
-    implements $VelocityFilterConfigRuleCopyWith<$Res> {
+class _$VelocityFilterConfigRuleCopyWithImpl<$Res> implements $VelocityFilterConfigRuleCopyWith<$Res> {
   _$VelocityFilterConfigRuleCopyWithImpl(this._self, this._then);
 
   final VelocityFilterConfigRule _self;

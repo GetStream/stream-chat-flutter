@@ -34,11 +34,9 @@ mixin _$UserPresenceChangedEvent {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UserPresenceChangedEvent &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(other.user, user) || other.user == user));
   }
@@ -76,8 +74,7 @@ abstract mixin class $UserPresenceChangedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UserPresenceChangedEventCopyWithImpl<$Res>
-    implements $UserPresenceChangedEventCopyWith<$Res> {
+class _$UserPresenceChangedEventCopyWithImpl<$Res> implements $UserPresenceChangedEventCopyWith<$Res> {
   _$UserPresenceChangedEventCopyWithImpl(this._self, this._then);
 
   final UserPresenceChangedEvent _self;

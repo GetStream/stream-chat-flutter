@@ -36,10 +36,8 @@ mixin _$KeyframeOCRRuleParameters {
               other.harmLabels,
               harmLabels,
             ) &&
-            (identical(other.threshold, threshold) ||
-                other.threshold == threshold) &&
-            (identical(other.timeWindow, timeWindow) ||
-                other.timeWindow == timeWindow));
+            (identical(other.threshold, threshold) || other.threshold == threshold) &&
+            (identical(other.timeWindow, timeWindow) || other.timeWindow == timeWindow));
   }
 
   @override
@@ -67,8 +65,7 @@ abstract mixin class $KeyframeOCRRuleParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$KeyframeOCRRuleParametersCopyWithImpl<$Res>
-    implements $KeyframeOCRRuleParametersCopyWith<$Res> {
+class _$KeyframeOCRRuleParametersCopyWithImpl<$Res> implements $KeyframeOCRRuleParametersCopyWith<$Res> {
   _$KeyframeOCRRuleParametersCopyWithImpl(this._self, this._then);
 
   final KeyframeOCRRuleParameters _self;

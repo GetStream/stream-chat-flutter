@@ -19,12 +19,8 @@ UserGroupMemberAddedEvent _$UserGroupMemberAddedEventFromJson(
     const StreamDateTimeConverter().fromJson,
   ),
   type: json['type'] as String,
-  user: json['user'] == null
-      ? null
-      : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
-  userGroup: json['user_group'] == null
-      ? null
-      : UserGroup.fromJson(json['user_group'] as Map<String, dynamic>),
+  user: json['user'] == null ? null : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
+  userGroup: json['user_group'] == null ? null : UserGroup.fromJson(json['user_group'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$UserGroupMemberAddedEventToJson(

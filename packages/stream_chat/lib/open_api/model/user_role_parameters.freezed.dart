@@ -20,19 +20,17 @@ mixin _$UserRoleParameters {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UserRoleParametersCopyWith<UserRoleParameters> get copyWith =>
-      _$UserRoleParametersCopyWithImpl<UserRoleParameters>(
-        this as UserRoleParameters,
-        _$identity,
-      );
+  $UserRoleParametersCopyWith<UserRoleParameters> get copyWith => _$UserRoleParametersCopyWithImpl<UserRoleParameters>(
+    this as UserRoleParameters,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UserRoleParameters &&
-            (identical(other.operator, operator) ||
-                other.operator == operator) &&
+            (identical(other.operator, operator) || other.operator == operator) &&
             (identical(other.role, role) || other.role == role));
   }
 
@@ -56,8 +54,7 @@ abstract mixin class $UserRoleParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UserRoleParametersCopyWithImpl<$Res>
-    implements $UserRoleParametersCopyWith<$Res> {
+class _$UserRoleParametersCopyWithImpl<$Res> implements $UserRoleParametersCopyWith<$Res> {
   _$UserRoleParametersCopyWithImpl(this._self, this._then);
 
   final UserRoleParameters _self;

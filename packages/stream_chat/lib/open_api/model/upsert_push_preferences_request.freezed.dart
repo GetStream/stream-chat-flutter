@@ -19,8 +19,7 @@ mixin _$UpsertPushPreferencesRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UpsertPushPreferencesRequestCopyWith<UpsertPushPreferencesRequest>
-  get copyWith =>
+  $UpsertPushPreferencesRequestCopyWith<UpsertPushPreferencesRequest> get copyWith =>
       _$UpsertPushPreferencesRequestCopyWithImpl<UpsertPushPreferencesRequest>(
         this as UpsertPushPreferencesRequest,
         _$identity,
@@ -60,8 +59,7 @@ abstract mixin class $UpsertPushPreferencesRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpsertPushPreferencesRequestCopyWithImpl<$Res>
-    implements $UpsertPushPreferencesRequestCopyWith<$Res> {
+class _$UpsertPushPreferencesRequestCopyWithImpl<$Res> implements $UpsertPushPreferencesRequestCopyWith<$Res> {
   _$UpsertPushPreferencesRequestCopyWithImpl(this._self, this._then);
 
   final UpsertPushPreferencesRequest _self;

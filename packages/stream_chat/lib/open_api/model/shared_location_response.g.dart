@@ -9,9 +9,7 @@ part of 'shared_location_response.dart';
 SharedLocationResponse _$SharedLocationResponseFromJson(
   Map<String, dynamic> json,
 ) => SharedLocationResponse(
-  channel: json['channel'] == null
-      ? null
-      : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
+  channel: json['channel'] == null ? null : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
   channelCid: json['channel_cid'] as String,
   createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
@@ -24,9 +22,7 @@ SharedLocationResponse _$SharedLocationResponseFromJson(
   ),
   latitude: (json['latitude'] as num).toDouble(),
   longitude: (json['longitude'] as num).toDouble(),
-  message: json['message'] == null
-      ? null
-      : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
+  message: json['message'] == null ? null : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
   messageId: json['message_id'] as String,
   updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,

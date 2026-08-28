@@ -21,8 +21,7 @@ mixin _$GroupedChannelsGroupRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $GroupedChannelsGroupRequestCopyWith<GroupedChannelsGroupRequest>
-  get copyWith =>
+  $GroupedChannelsGroupRequestCopyWith<GroupedChannelsGroupRequest> get copyWith =>
       _$GroupedChannelsGroupRequestCopyWithImpl<GroupedChannelsGroupRequest>(
         this as GroupedChannelsGroupRequest,
         _$identity,
@@ -58,8 +57,7 @@ abstract mixin class $GroupedChannelsGroupRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$GroupedChannelsGroupRequestCopyWithImpl<$Res>
-    implements $GroupedChannelsGroupRequestCopyWith<$Res> {
+class _$GroupedChannelsGroupRequestCopyWithImpl<$Res> implements $GroupedChannelsGroupRequestCopyWith<$Res> {
   _$GroupedChannelsGroupRequestCopyWithImpl(this._self, this._then);
 
   final GroupedChannelsGroupRequest _self;

@@ -40,8 +40,7 @@ mixin _$Attachment {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $AttachmentCopyWith<Attachment> get copyWith =>
-      _$AttachmentCopyWithImpl<Attachment>(this as Attachment, _$identity);
+  $AttachmentCopyWith<Attachment> get copyWith => _$AttachmentCopyWithImpl<Attachment>(this as Attachment, _$identity);
 
   @override
   bool operator ==(Object other) {
@@ -49,38 +48,26 @@ mixin _$Attachment {
         (other.runtimeType == runtimeType &&
             other is Attachment &&
             const DeepCollectionEquality().equals(other.actions, actions) &&
-            (identical(other.assetUrl, assetUrl) ||
-                other.assetUrl == assetUrl) &&
-            (identical(other.authorIcon, authorIcon) ||
-                other.authorIcon == authorIcon) &&
-            (identical(other.authorLink, authorLink) ||
-                other.authorLink == authorLink) &&
-            (identical(other.authorName, authorName) ||
-                other.authorName == authorName) &&
+            (identical(other.assetUrl, assetUrl) || other.assetUrl == assetUrl) &&
+            (identical(other.authorIcon, authorIcon) || other.authorIcon == authorIcon) &&
+            (identical(other.authorLink, authorLink) || other.authorLink == authorLink) &&
+            (identical(other.authorName, authorName) || other.authorName == authorName) &&
             (identical(other.color, color) || other.color == color) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.fallback, fallback) ||
-                other.fallback == fallback) &&
+            (identical(other.fallback, fallback) || other.fallback == fallback) &&
             const DeepCollectionEquality().equals(other.fields, fields) &&
             (identical(other.footer, footer) || other.footer == footer) &&
-            (identical(other.footerIcon, footerIcon) ||
-                other.footerIcon == footerIcon) &&
+            (identical(other.footerIcon, footerIcon) || other.footerIcon == footerIcon) &&
             (identical(other.giphy, giphy) || other.giphy == giphy) &&
-            (identical(other.imageUrl, imageUrl) ||
-                other.imageUrl == imageUrl) &&
-            (identical(other.ogScrapeUrl, ogScrapeUrl) ||
-                other.ogScrapeUrl == ogScrapeUrl) &&
-            (identical(other.originalHeight, originalHeight) ||
-                other.originalHeight == originalHeight) &&
-            (identical(other.originalWidth, originalWidth) ||
-                other.originalWidth == originalWidth) &&
+            (identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl) &&
+            (identical(other.ogScrapeUrl, ogScrapeUrl) || other.ogScrapeUrl == ogScrapeUrl) &&
+            (identical(other.originalHeight, originalHeight) || other.originalHeight == originalHeight) &&
+            (identical(other.originalWidth, originalWidth) || other.originalWidth == originalWidth) &&
             (identical(other.pretext, pretext) || other.pretext == pretext) &&
             (identical(other.text, text) || other.text == text) &&
-            (identical(other.thumbUrl, thumbUrl) ||
-                other.thumbUrl == thumbUrl) &&
+            (identical(other.thumbUrl, thumbUrl) || other.thumbUrl == thumbUrl) &&
             (identical(other.title, title) || other.title == title) &&
-            (identical(other.titleLink, titleLink) ||
-                other.titleLink == titleLink) &&
+            (identical(other.titleLink, titleLink) || other.titleLink == titleLink) &&
             (identical(other.type, type) || other.type == type));
   }
 

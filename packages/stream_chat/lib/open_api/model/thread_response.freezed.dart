@@ -34,11 +34,10 @@ mixin _$ThreadResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ThreadResponseCopyWith<ThreadResponse> get copyWith =>
-      _$ThreadResponseCopyWithImpl<ThreadResponse>(
-        this as ThreadResponse,
-        _$identity,
-      );
+  $ThreadResponseCopyWith<ThreadResponse> get copyWith => _$ThreadResponseCopyWithImpl<ThreadResponse>(
+    this as ThreadResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -48,34 +47,23 @@ mixin _$ThreadResponse {
             (identical(other.activeParticipantCount, activeParticipantCount) ||
                 other.activeParticipantCount == activeParticipantCount) &&
             (identical(other.channel, channel) || other.channel == channel) &&
-            (identical(other.channelCid, channelCid) ||
-                other.channelCid == channelCid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.createdBy, createdBy) ||
-                other.createdBy == createdBy) &&
-            (identical(other.createdByUserId, createdByUserId) ||
-                other.createdByUserId == createdByUserId) &&
+            (identical(other.channelCid, channelCid) || other.channelCid == channelCid) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.createdBy, createdBy) || other.createdBy == createdBy) &&
+            (identical(other.createdByUserId, createdByUserId) || other.createdByUserId == createdByUserId) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.deletedAt, deletedAt) ||
-                other.deletedAt == deletedAt) &&
-            (identical(other.lastMessageAt, lastMessageAt) ||
-                other.lastMessageAt == lastMessageAt) &&
-            (identical(other.parentMessage, parentMessage) ||
-                other.parentMessage == parentMessage) &&
-            (identical(other.parentMessageId, parentMessageId) ||
-                other.parentMessageId == parentMessageId) &&
-            (identical(other.participantCount, participantCount) ||
-                other.participantCount == participantCount) &&
-            (identical(other.replyCount, replyCount) ||
-                other.replyCount == replyCount) &&
+            (identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt) &&
+            (identical(other.lastMessageAt, lastMessageAt) || other.lastMessageAt == lastMessageAt) &&
+            (identical(other.parentMessage, parentMessage) || other.parentMessage == parentMessage) &&
+            (identical(other.parentMessageId, parentMessageId) || other.parentMessageId == parentMessageId) &&
+            (identical(other.participantCount, participantCount) || other.participantCount == participantCount) &&
+            (identical(other.replyCount, replyCount) || other.replyCount == replyCount) &&
             const DeepCollectionEquality().equals(
               other.threadParticipants,
               threadParticipants,
             ) &&
             (identical(other.title, title) || other.title == title) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
   }
 
   @override
@@ -133,8 +121,7 @@ abstract mixin class $ThreadResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ThreadResponseCopyWithImpl<$Res>
-    implements $ThreadResponseCopyWith<$Res> {
+class _$ThreadResponseCopyWithImpl<$Res> implements $ThreadResponseCopyWith<$Res> {
   _$ThreadResponseCopyWithImpl(this._self, this._then);
 
   final ThreadResponse _self;

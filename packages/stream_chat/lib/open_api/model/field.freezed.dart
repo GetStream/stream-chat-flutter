@@ -21,8 +21,7 @@ mixin _$Field {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $FieldCopyWith<Field> get copyWith =>
-      _$FieldCopyWithImpl<Field>(this as Field, _$identity);
+  $FieldCopyWith<Field> get copyWith => _$FieldCopyWithImpl<Field>(this as Field, _$identity);
 
   @override
   bool operator ==(Object other) {
@@ -45,8 +44,7 @@ mixin _$Field {
 
 /// @nodoc
 abstract mixin class $FieldCopyWith<$Res> {
-  factory $FieldCopyWith(Field value, $Res Function(Field) _then) =
-      _$FieldCopyWithImpl;
+  factory $FieldCopyWith(Field value, $Res Function(Field) _then) = _$FieldCopyWithImpl;
   @useResult
   $Res call({bool short, String title, String value});
 }

@@ -6,8 +6,7 @@ part of 'notification_channel_mutes_updated_event.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-NotificationChannelMutesUpdatedEvent
-_$NotificationChannelMutesUpdatedEventFromJson(Map<String, dynamic> json) =>
+NotificationChannelMutesUpdatedEvent _$NotificationChannelMutesUpdatedEventFromJson(Map<String, dynamic> json) =>
     NotificationChannelMutesUpdatedEvent(
       createdAt: const StreamDateTimeConverter().fromJson(
         json['created_at'] as Object,

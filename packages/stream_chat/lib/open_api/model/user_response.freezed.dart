@@ -36,37 +36,30 @@ mixin _$UserResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UserResponseCopyWith<UserResponse> get copyWith =>
-      _$UserResponseCopyWithImpl<UserResponse>(
-        this as UserResponse,
-        _$identity,
-      );
+  $UserResponseCopyWith<UserResponse> get copyWith => _$UserResponseCopyWithImpl<UserResponse>(
+    this as UserResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UserResponse &&
-            (identical(other.avgResponseTime, avgResponseTime) ||
-                other.avgResponseTime == avgResponseTime) &&
+            (identical(other.avgResponseTime, avgResponseTime) || other.avgResponseTime == avgResponseTime) &&
             (identical(other.banned, banned) || other.banned == banned) &&
             const DeepCollectionEquality().equals(
               other.blockedUserIds,
               blockedUserIds,
             ) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.deactivatedAt, deactivatedAt) ||
-                other.deactivatedAt == deactivatedAt) &&
-            (identical(other.deletedAt, deletedAt) ||
-                other.deletedAt == deletedAt) &&
+            (identical(other.deactivatedAt, deactivatedAt) || other.deactivatedAt == deactivatedAt) &&
+            (identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt) &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.image, image) || other.image == image) &&
-            (identical(other.language, language) ||
-                other.language == language) &&
-            (identical(other.lastActive, lastActive) ||
-                other.lastActive == lastActive) &&
+            (identical(other.language, language) || other.language == language) &&
+            (identical(other.lastActive, lastActive) || other.lastActive == lastActive) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.online, online) || other.online == online) &&
             (identical(
@@ -77,8 +70,7 @@ mixin _$UserResponse {
             (identical(other.role, role) || other.role == role) &&
             const DeepCollectionEquality().equals(other.teams, teams) &&
             const DeepCollectionEquality().equals(other.teamsRole, teamsRole) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
   }
 
   @override

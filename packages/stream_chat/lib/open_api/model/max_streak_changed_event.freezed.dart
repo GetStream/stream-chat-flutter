@@ -33,11 +33,9 @@ mixin _$MaxStreakChangedEvent {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is MaxStreakChangedEvent &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.type, type) || other.type == type));
   }
 
@@ -72,8 +70,7 @@ abstract mixin class $MaxStreakChangedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MaxStreakChangedEventCopyWithImpl<$Res>
-    implements $MaxStreakChangedEventCopyWith<$Res> {
+class _$MaxStreakChangedEventCopyWithImpl<$Res> implements $MaxStreakChangedEventCopyWith<$Res> {
   _$MaxStreakChangedEventCopyWithImpl(this._self, this._then);
 
   final MaxStreakChangedEvent _self;

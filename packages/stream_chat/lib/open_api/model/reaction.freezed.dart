@@ -35,25 +35,21 @@ mixin _$Reaction {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ReactionCopyWith<Reaction> get copyWith =>
-      _$ReactionCopyWithImpl<Reaction>(this as Reaction, _$identity);
+  $ReactionCopyWith<Reaction> get copyWith => _$ReactionCopyWithImpl<Reaction>(this as Reaction, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is Reaction &&
-            (identical(other.activityId, activityId) ||
-                other.activityId == activityId) &&
+            (identical(other.activityId, activityId) || other.activityId == activityId) &&
             const DeepCollectionEquality().equals(
               other.childrenCounts,
               childrenCounts,
             ) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.data, data) &&
-            (identical(other.deletedAt, deletedAt) ||
-                other.deletedAt == deletedAt) &&
+            (identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt) &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.kind, kind) || other.kind == kind) &&
             const DeepCollectionEquality().equals(
@@ -78,8 +74,7 @@ mixin _$Reaction {
               other.targetFeedsExtraData,
               targetFeedsExtraData,
             ) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
             (identical(other.user, user) || other.user == user) &&
             (identical(other.userId, userId) || other.userId == userId));
   }
@@ -114,8 +109,7 @@ mixin _$Reaction {
 
 /// @nodoc
 abstract mixin class $ReactionCopyWith<$Res> {
-  factory $ReactionCopyWith(Reaction value, $Res Function(Reaction) _then) =
-      _$ReactionCopyWithImpl;
+  factory $ReactionCopyWith(Reaction value, $Res Function(Reaction) _then) = _$ReactionCopyWithImpl;
   @useResult
   $Res call({
     String activityId,

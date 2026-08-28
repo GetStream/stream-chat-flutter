@@ -31,8 +31,7 @@ mixin _$ImportBlockListRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ImportBlockListRequest &&
-            (identical(other.chunkSize, chunkSize) ||
-                other.chunkSize == chunkSize) &&
+            (identical(other.chunkSize, chunkSize) || other.chunkSize == chunkSize) &&
             const DeepCollectionEquality().equals(other.items, items));
   }
 
@@ -60,8 +59,7 @@ abstract mixin class $ImportBlockListRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ImportBlockListRequestCopyWithImpl<$Res>
-    implements $ImportBlockListRequestCopyWith<$Res> {
+class _$ImportBlockListRequestCopyWithImpl<$Res> implements $ImportBlockListRequestCopyWith<$Res> {
   _$ImportBlockListRequestCopyWithImpl(this._self, this._then);
 
   final ImportBlockListRequest _self;

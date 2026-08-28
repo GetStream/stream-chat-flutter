@@ -20,18 +20,15 @@ mixin _$VoteData {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $VoteDataCopyWith<VoteData> get copyWith =>
-      _$VoteDataCopyWithImpl<VoteData>(this as VoteData, _$identity);
+  $VoteDataCopyWith<VoteData> get copyWith => _$VoteDataCopyWithImpl<VoteData>(this as VoteData, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is VoteData &&
-            (identical(other.answerText, answerText) ||
-                other.answerText == answerText) &&
-            (identical(other.optionId, optionId) ||
-                other.optionId == optionId));
+            (identical(other.answerText, answerText) || other.answerText == answerText) &&
+            (identical(other.optionId, optionId) || other.optionId == optionId));
   }
 
   @override
@@ -45,8 +42,7 @@ mixin _$VoteData {
 
 /// @nodoc
 abstract mixin class $VoteDataCopyWith<$Res> {
-  factory $VoteDataCopyWith(VoteData value, $Res Function(VoteData) _then) =
-      _$VoteDataCopyWithImpl;
+  factory $VoteDataCopyWith(VoteData value, $Res Function(VoteData) _then) = _$VoteDataCopyWithImpl;
   @useResult
   $Res call({String? answerText, String? optionId});
 }

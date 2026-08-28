@@ -11,8 +11,7 @@ BulkUpsertActionConfigResponse _$BulkUpsertActionConfigResponseFromJson(
 ) => BulkUpsertActionConfigResponse(
   actionConfigs: (json['action_configs'] as List<dynamic>)
       .map(
-        (e) =>
-            ModerationActionConfigResponse.fromJson(e as Map<String, dynamic>),
+        (e) => ModerationActionConfigResponse.fromJson(e as Map<String, dynamic>),
       )
       .toList(),
   duration: json['duration'] as String,

@@ -16,9 +16,7 @@ SubmitActionResponse _$SubmitActionResponseFromJson(
         ),
   autoRestoreWarning: json['auto_restore_warning'] as String?,
   duration: json['duration'] as String,
-  item: json['item'] == null
-      ? null
-      : ReviewQueueItemResponse.fromJson(json['item'] as Map<String, dynamic>),
+  item: json['item'] == null ? null : ReviewQueueItemResponse.fromJson(json['item'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$SubmitActionResponseToJson(

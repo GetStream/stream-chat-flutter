@@ -21,22 +21,19 @@ mixin _$FileUploadResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $FileUploadResponseCopyWith<FileUploadResponse> get copyWith =>
-      _$FileUploadResponseCopyWithImpl<FileUploadResponse>(
-        this as FileUploadResponse,
-        _$identity,
-      );
+  $FileUploadResponseCopyWith<FileUploadResponse> get copyWith => _$FileUploadResponseCopyWithImpl<FileUploadResponse>(
+    this as FileUploadResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is FileUploadResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.file, file) || other.file == file) &&
-            (identical(other.thumbUrl, thumbUrl) ||
-                other.thumbUrl == thumbUrl));
+            (identical(other.thumbUrl, thumbUrl) || other.thumbUrl == thumbUrl));
   }
 
   @override
@@ -59,8 +56,7 @@ abstract mixin class $FileUploadResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FileUploadResponseCopyWithImpl<$Res>
-    implements $FileUploadResponseCopyWith<$Res> {
+class _$FileUploadResponseCopyWithImpl<$Res> implements $FileUploadResponseCopyWith<$Res> {
   _$FileUploadResponseCopyWithImpl(this._self, this._then);
 
   final FileUploadResponse _self;

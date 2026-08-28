@@ -62,8 +62,7 @@ abstract mixin class $AutomodToxicityConfigCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$AutomodToxicityConfigCopyWithImpl<$Res>
-    implements $AutomodToxicityConfigCopyWith<$Res> {
+class _$AutomodToxicityConfigCopyWithImpl<$Res> implements $AutomodToxicityConfigCopyWith<$Res> {
   _$AutomodToxicityConfigCopyWithImpl(this._self, this._then);
 
   final AutomodToxicityConfig _self;

@@ -21,11 +21,10 @@ mixin _$AIVideoConfig {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $AIVideoConfigCopyWith<AIVideoConfig> get copyWith =>
-      _$AIVideoConfigCopyWithImpl<AIVideoConfig>(
-        this as AIVideoConfig,
-        _$identity,
-      );
+  $AIVideoConfigCopyWith<AIVideoConfig> get copyWith => _$AIVideoConfigCopyWithImpl<AIVideoConfig>(
+    this as AIVideoConfig,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -62,8 +61,7 @@ abstract mixin class $AIVideoConfigCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$AIVideoConfigCopyWithImpl<$Res>
-    implements $AIVideoConfigCopyWith<$Res> {
+class _$AIVideoConfigCopyWithImpl<$Res> implements $AIVideoConfigCopyWith<$Res> {
   _$AIVideoConfigCopyWithImpl(this._self, this._then);
 
   final AIVideoConfig _self;

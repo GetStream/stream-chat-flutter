@@ -22,8 +22,7 @@ mixin _$ImageSize {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ImageSizeCopyWith<ImageSize> get copyWith =>
-      _$ImageSizeCopyWithImpl<ImageSize>(this as ImageSize, _$identity);
+  $ImageSizeCopyWith<ImageSize> get copyWith => _$ImageSizeCopyWithImpl<ImageSize>(this as ImageSize, _$identity);
 
   @override
   bool operator ==(Object other) {
@@ -47,8 +46,7 @@ mixin _$ImageSize {
 
 /// @nodoc
 abstract mixin class $ImageSizeCopyWith<$Res> {
-  factory $ImageSizeCopyWith(ImageSize value, $Res Function(ImageSize) _then) =
-      _$ImageSizeCopyWithImpl;
+  factory $ImageSizeCopyWith(ImageSize value, $Res Function(ImageSize) _then) = _$ImageSizeCopyWithImpl;
   @useResult
   $Res call({String? crop, int? height, String? resize, int? width});
 }

@@ -6,25 +6,24 @@ part of 'poll_vote_casted_event.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-PollVoteCastedEvent _$PollVoteCastedEventFromJson(Map<String, dynamic> json) =>
-    PollVoteCastedEvent(
-      activityId: json['activity_id'] as String?,
-      cid: json['cid'] as String?,
-      createdAt: const StreamDateTimeConverter().fromJson(
-        json['created_at'] as Object,
-      ),
-      custom: json['custom'] as Map<String, dynamic>,
-      messageId: json['message_id'] as String?,
-      poll: PollResponseData.fromJson(json['poll'] as Map<String, dynamic>),
-      pollVote: PollVoteResponseData.fromJson(
-        json['poll_vote'] as Map<String, dynamic>,
-      ),
-      receivedAt: _$JsonConverterFromJson<Object, DateTime>(
-        json['received_at'],
-        const StreamDateTimeConverter().fromJson,
-      ),
-      type: json['type'] as String,
-    );
+PollVoteCastedEvent _$PollVoteCastedEventFromJson(Map<String, dynamic> json) => PollVoteCastedEvent(
+  activityId: json['activity_id'] as String?,
+  cid: json['cid'] as String?,
+  createdAt: const StreamDateTimeConverter().fromJson(
+    json['created_at'] as Object,
+  ),
+  custom: json['custom'] as Map<String, dynamic>,
+  messageId: json['message_id'] as String?,
+  poll: PollResponseData.fromJson(json['poll'] as Map<String, dynamic>),
+  pollVote: PollVoteResponseData.fromJson(
+    json['poll_vote'] as Map<String, dynamic>,
+  ),
+  receivedAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['received_at'],
+    const StreamDateTimeConverter().fromJson,
+  ),
+  type: json['type'] as String,
+);
 
 Map<String, dynamic> _$PollVoteCastedEventToJson(
   PollVoteCastedEvent instance,

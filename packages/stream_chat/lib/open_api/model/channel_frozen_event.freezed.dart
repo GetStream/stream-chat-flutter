@@ -25,27 +25,22 @@ mixin _$ChannelFrozenEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ChannelFrozenEventCopyWith<ChannelFrozenEvent> get copyWith =>
-      _$ChannelFrozenEventCopyWithImpl<ChannelFrozenEvent>(
-        this as ChannelFrozenEvent,
-        _$identity,
-      );
+  $ChannelFrozenEventCopyWith<ChannelFrozenEvent> get copyWith => _$ChannelFrozenEventCopyWithImpl<ChannelFrozenEvent>(
+    this as ChannelFrozenEvent,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ChannelFrozenEvent &&
-            (identical(other.channelId, channelId) ||
-                other.channelId == channelId) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.type, type) || other.type == type));
   }
 
@@ -86,8 +81,7 @@ abstract mixin class $ChannelFrozenEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChannelFrozenEventCopyWithImpl<$Res>
-    implements $ChannelFrozenEventCopyWith<$Res> {
+class _$ChannelFrozenEventCopyWithImpl<$Res> implements $ChannelFrozenEventCopyWith<$Res> {
   _$ChannelFrozenEventCopyWithImpl(this._self, this._then);
 
   final ChannelFrozenEvent _self;

@@ -27,27 +27,21 @@ mixin _$BanRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $BanRequestCopyWith<BanRequest> get copyWith =>
-      _$BanRequestCopyWithImpl<BanRequest>(this as BanRequest, _$identity);
+  $BanRequestCopyWith<BanRequest> get copyWith => _$BanRequestCopyWithImpl<BanRequest>(this as BanRequest, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is BanRequest &&
-            (identical(other.bannedBy, bannedBy) ||
-                other.bannedBy == bannedBy) &&
-            (identical(other.bannedById, bannedById) ||
-                other.bannedById == bannedById) &&
-            (identical(other.channelCid, channelCid) ||
-                other.channelCid == channelCid) &&
-            (identical(other.deleteMessages, deleteMessages) ||
-                other.deleteMessages == deleteMessages) &&
+            (identical(other.bannedBy, bannedBy) || other.bannedBy == bannedBy) &&
+            (identical(other.bannedById, bannedById) || other.bannedById == bannedById) &&
+            (identical(other.channelCid, channelCid) || other.channelCid == channelCid) &&
+            (identical(other.deleteMessages, deleteMessages) || other.deleteMessages == deleteMessages) &&
             (identical(other.ipBan, ipBan) || other.ipBan == ipBan) &&
             (identical(other.reason, reason) || other.reason == reason) &&
             (identical(other.shadow, shadow) || other.shadow == shadow) &&
-            (identical(other.targetUserId, targetUserId) ||
-                other.targetUserId == targetUserId) &&
+            (identical(other.targetUserId, targetUserId) || other.targetUserId == targetUserId) &&
             (identical(other.timeout, timeout) || other.timeout == timeout));
   }
 

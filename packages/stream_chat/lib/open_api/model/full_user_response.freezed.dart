@@ -48,21 +48,18 @@ mixin _$FullUserResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $FullUserResponseCopyWith<FullUserResponse> get copyWith =>
-      _$FullUserResponseCopyWithImpl<FullUserResponse>(
-        this as FullUserResponse,
-        _$identity,
-      );
+  $FullUserResponseCopyWith<FullUserResponse> get copyWith => _$FullUserResponseCopyWithImpl<FullUserResponse>(
+    this as FullUserResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is FullUserResponse &&
-            (identical(other.avgResponseTime, avgResponseTime) ||
-                other.avgResponseTime == avgResponseTime) &&
-            (identical(other.banExpires, banExpires) ||
-                other.banExpires == banExpires) &&
+            (identical(other.avgResponseTime, avgResponseTime) || other.avgResponseTime == avgResponseTime) &&
+            (identical(other.banExpires, banExpires) || other.banExpires == banExpires) &&
             (identical(other.banned, banned) || other.banned == banned) &&
             const DeepCollectionEquality().equals(
               other.blockedUserIds,
@@ -72,22 +69,16 @@ mixin _$FullUserResponse {
               other.channelMutes,
               channelMutes,
             ) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.deactivatedAt, deactivatedAt) ||
-                other.deactivatedAt == deactivatedAt) &&
-            (identical(other.deletedAt, deletedAt) ||
-                other.deletedAt == deletedAt) &&
+            (identical(other.deactivatedAt, deactivatedAt) || other.deactivatedAt == deactivatedAt) &&
+            (identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt) &&
             const DeepCollectionEquality().equals(other.devices, devices) &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.image, image) || other.image == image) &&
-            (identical(other.invisible, invisible) ||
-                other.invisible == invisible) &&
-            (identical(other.language, language) ||
-                other.language == language) &&
-            (identical(other.lastActive, lastActive) ||
-                other.lastActive == lastActive) &&
+            (identical(other.invisible, invisible) || other.invisible == invisible) &&
+            (identical(other.language, language) || other.language == language) &&
+            (identical(other.lastActive, lastActive) || other.lastActive == lastActive) &&
             const DeepCollectionEquality().equals(
               other.latestHiddenChannels,
               latestHiddenChannels,
@@ -95,28 +86,21 @@ mixin _$FullUserResponse {
             const DeepCollectionEquality().equals(other.mutes, mutes) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.online, online) || other.online == online) &&
-            (identical(other.privacySettings, privacySettings) ||
-                other.privacySettings == privacySettings) &&
+            (identical(other.privacySettings, privacySettings) || other.privacySettings == privacySettings) &&
             (identical(
                   other.revokeTokensIssuedBefore,
                   revokeTokensIssuedBefore,
                 ) ||
                 other.revokeTokensIssuedBefore == revokeTokensIssuedBefore) &&
             (identical(other.role, role) || other.role == role) &&
-            (identical(other.shadowBanned, shadowBanned) ||
-                other.shadowBanned == shadowBanned) &&
+            (identical(other.shadowBanned, shadowBanned) || other.shadowBanned == shadowBanned) &&
             const DeepCollectionEquality().equals(other.teams, teams) &&
             const DeepCollectionEquality().equals(other.teamsRole, teamsRole) &&
-            (identical(other.totalUnreadCount, totalUnreadCount) ||
-                other.totalUnreadCount == totalUnreadCount) &&
-            (identical(other.unreadChannels, unreadChannels) ||
-                other.unreadChannels == unreadChannels) &&
-            (identical(other.unreadCount, unreadCount) ||
-                other.unreadCount == unreadCount) &&
-            (identical(other.unreadThreads, unreadThreads) ||
-                other.unreadThreads == unreadThreads) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+            (identical(other.totalUnreadCount, totalUnreadCount) || other.totalUnreadCount == totalUnreadCount) &&
+            (identical(other.unreadChannels, unreadChannels) || other.unreadChannels == unreadChannels) &&
+            (identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount) &&
+            (identical(other.unreadThreads, unreadThreads) || other.unreadThreads == unreadThreads) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
   }
 
   @override
@@ -202,8 +186,7 @@ abstract mixin class $FullUserResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FullUserResponseCopyWithImpl<$Res>
-    implements $FullUserResponseCopyWith<$Res> {
+class _$FullUserResponseCopyWithImpl<$Res> implements $FullUserResponseCopyWith<$Res> {
   _$FullUserResponseCopyWithImpl(this._self, this._then);
 
   final FullUserResponse _self;

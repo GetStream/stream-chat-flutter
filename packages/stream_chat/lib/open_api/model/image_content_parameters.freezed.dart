@@ -36,10 +36,8 @@ mixin _$ImageContentParameters {
               other.harmLabels,
               harmLabels,
             ) &&
-            (identical(other.labelOperator, labelOperator) ||
-                other.labelOperator == labelOperator) &&
-            (identical(other.minConfidence, minConfidence) ||
-                other.minConfidence == minConfidence));
+            (identical(other.labelOperator, labelOperator) || other.labelOperator == labelOperator) &&
+            (identical(other.minConfidence, minConfidence) || other.minConfidence == minConfidence));
   }
 
   @override
@@ -71,8 +69,7 @@ abstract mixin class $ImageContentParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ImageContentParametersCopyWithImpl<$Res>
-    implements $ImageContentParametersCopyWith<$Res> {
+class _$ImageContentParametersCopyWithImpl<$Res> implements $ImageContentParametersCopyWith<$Res> {
   _$ImageContentParametersCopyWithImpl(this._self, this._then);
 
   final ImageContentParameters _self;

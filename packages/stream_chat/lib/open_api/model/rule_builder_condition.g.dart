@@ -24,8 +24,7 @@ RuleBuilderCondition _$RuleBuilderConditionFromJson(
       : CallViolationCountParameters.fromJson(
           json['call_violation_count_params'] as Map<String, dynamic>,
         ),
-  channelMessageCountRuleParams:
-      json['channel_message_count_rule_params'] == null
+  channelMessageCountRuleParams: json['channel_message_count_rule_params'] == null
       ? null
       : ChannelMessageCountRuleParameters.fromJson(
           json['channel_message_count_rule_params'] as Map<String, dynamic>,
@@ -41,8 +40,7 @@ RuleBuilderCondition _$RuleBuilderConditionFromJson(
       : ContentCountRuleParameters.fromJson(
           json['content_count_rule_params'] as Map<String, dynamic>,
         ),
-  contentCustomPropertyCountParams:
-      json['content_custom_property_count_params'] == null
+  contentCustomPropertyCountParams: json['content_custom_property_count_params'] == null
       ? null
       : ContentCustomPropertyCountParameters.fromJson(
           json['content_custom_property_count_params'] as Map<String, dynamic>,
@@ -128,8 +126,7 @@ RuleBuilderCondition _$RuleBuilderConditionFromJson(
       : FlagCountRuleParameters.fromJson(
           json['user_flag_count_rule_params'] as Map<String, dynamic>,
         ),
-  userIdenticalContentCountParams:
-      json['user_identical_content_count_params'] == null
+  userIdenticalContentCountParams: json['user_identical_content_count_params'] == null
       ? null
       : UserIdenticalContentCountParameters.fromJson(
           json['user_identical_content_count_params'] as Map<String, dynamic>,
@@ -162,18 +159,13 @@ Map<String, dynamic> _$RuleBuilderConditionToJson(
   'call_custom_property_params': instance.callCustomPropertyParams?.toJson(),
   'call_type_rule_params': instance.callTypeRuleParams?.toJson(),
   'call_violation_count_params': instance.callViolationCountParams?.toJson(),
-  'channel_message_count_rule_params': instance.channelMessageCountRuleParams
-      ?.toJson(),
+  'channel_message_count_rule_params': instance.channelMessageCountRuleParams?.toJson(),
   'closed_caption_rule_params': instance.closedCaptionRuleParams?.toJson(),
   'confidence': instance.confidence,
   'content_count_rule_params': instance.contentCountRuleParams?.toJson(),
-  'content_custom_property_count_params': instance
-      .contentCustomPropertyCountParams
-      ?.toJson(),
-  'content_custom_property_params': instance.contentCustomPropertyParams
-      ?.toJson(),
-  'content_flag_count_rule_params': instance.contentFlagCountRuleParams
-      ?.toJson(),
+  'content_custom_property_count_params': instance.contentCustomPropertyCountParams?.toJson(),
+  'content_custom_property_params': instance.contentCustomPropertyParams?.toJson(),
+  'content_flag_count_rule_params': instance.contentFlagCountRuleParams?.toJson(),
   'flood_identical_params': instance.floodIdenticalParams?.toJson(),
   'flood_similar_params': instance.floodSimilarParams?.toJson(),
   'image_content_params': instance.imageContentParams?.toJson(),
@@ -189,9 +181,7 @@ Map<String, dynamic> _$RuleBuilderConditionToJson(
   'user_created_within_params': instance.userCreatedWithinParams?.toJson(),
   'user_custom_property_params': instance.userCustomPropertyParams?.toJson(),
   'user_flag_count_rule_params': instance.userFlagCountRuleParams?.toJson(),
-  'user_identical_content_count_params': instance
-      .userIdenticalContentCountParams
-      ?.toJson(),
+  'user_identical_content_count_params': instance.userIdenticalContentCountParams?.toJson(),
   'user_role_params': instance.userRoleParams?.toJson(),
   'user_rule_params': instance.userRuleParams?.toJson(),
   'video_content_params': instance.videoContentParams?.toJson(),

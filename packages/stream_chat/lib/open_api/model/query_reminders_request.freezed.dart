@@ -74,8 +74,7 @@ abstract mixin class $QueryRemindersRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryRemindersRequestCopyWithImpl<$Res>
-    implements $QueryRemindersRequestCopyWith<$Res> {
+class _$QueryRemindersRequestCopyWithImpl<$Res> implements $QueryRemindersRequestCopyWith<$Res> {
   _$QueryRemindersRequestCopyWithImpl(this._self, this._then);
 
   final QueryRemindersRequest _self;

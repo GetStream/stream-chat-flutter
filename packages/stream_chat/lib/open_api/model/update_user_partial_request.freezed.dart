@@ -62,8 +62,7 @@ abstract mixin class $UpdateUserPartialRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpdateUserPartialRequestCopyWithImpl<$Res>
-    implements $UpdateUserPartialRequestCopyWith<$Res> {
+class _$UpdateUserPartialRequestCopyWithImpl<$Res> implements $UpdateUserPartialRequestCopyWith<$Res> {
   _$UpdateUserPartialRequestCopyWithImpl(this._self, this._then);
 
   final UpdateUserPartialRequest _self;

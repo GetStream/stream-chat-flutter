@@ -10,9 +10,7 @@ GetUserGroupResponse _$GetUserGroupResponseFromJson(
   Map<String, dynamic> json,
 ) => GetUserGroupResponse(
   duration: json['duration'] as String,
-  userGroup: json['user_group'] == null
-      ? null
-      : UserGroupResponse.fromJson(json['user_group'] as Map<String, dynamic>),
+  userGroup: json['user_group'] == null ? null : UserGroupResponse.fromJson(json['user_group'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$GetUserGroupResponseToJson(

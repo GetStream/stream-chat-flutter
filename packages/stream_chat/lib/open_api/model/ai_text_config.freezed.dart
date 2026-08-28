@@ -23,11 +23,10 @@ mixin _$AITextConfig {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $AITextConfigCopyWith<AITextConfig> get copyWith =>
-      _$AITextConfigCopyWithImpl<AITextConfig>(
-        this as AITextConfig,
-        _$identity,
-      );
+  $AITextConfigCopyWith<AITextConfig> get copyWith => _$AITextConfigCopyWithImpl<AITextConfig>(
+    this as AITextConfig,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {

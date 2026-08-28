@@ -37,12 +37,9 @@ mixin _$ImageRuleParameters {
               other.harmLabels,
               harmLabels,
             ) &&
-            (identical(other.minConfidence, minConfidence) ||
-                other.minConfidence == minConfidence) &&
-            (identical(other.threshold, threshold) ||
-                other.threshold == threshold) &&
-            (identical(other.timeWindow, timeWindow) ||
-                other.timeWindow == timeWindow));
+            (identical(other.minConfidence, minConfidence) || other.minConfidence == minConfidence) &&
+            (identical(other.threshold, threshold) || other.threshold == threshold) &&
+            (identical(other.timeWindow, timeWindow) || other.timeWindow == timeWindow));
   }
 
   @override
@@ -76,8 +73,7 @@ abstract mixin class $ImageRuleParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ImageRuleParametersCopyWithImpl<$Res>
-    implements $ImageRuleParametersCopyWith<$Res> {
+class _$ImageRuleParametersCopyWithImpl<$Res> implements $ImageRuleParametersCopyWith<$Res> {
   _$ImageRuleParametersCopyWithImpl(this._self, this._then);
 
   final ImageRuleParameters _self;

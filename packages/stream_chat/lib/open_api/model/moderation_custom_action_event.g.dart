@@ -15,9 +15,7 @@ ModerationCustomActionEvent _$ModerationCustomActionEventFromJson(
     json['created_at'] as Object,
   ),
   custom: json['custom'] as Map<String, dynamic>,
-  message: json['message'] == null
-      ? null
-      : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
+  message: json['message'] == null ? null : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
   receivedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['received_at'],
     const StreamDateTimeConverter().fromJson,

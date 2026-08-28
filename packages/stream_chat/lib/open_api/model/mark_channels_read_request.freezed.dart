@@ -59,8 +59,7 @@ abstract mixin class $MarkChannelsReadRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MarkChannelsReadRequestCopyWithImpl<$Res>
-    implements $MarkChannelsReadRequestCopyWith<$Res> {
+class _$MarkChannelsReadRequestCopyWithImpl<$Res> implements $MarkChannelsReadRequestCopyWith<$Res> {
   _$MarkChannelsReadRequestCopyWithImpl(this._self, this._then);
 
   final MarkChannelsReadRequest _self;

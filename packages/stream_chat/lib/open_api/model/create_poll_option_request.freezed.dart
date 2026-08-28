@@ -59,8 +59,7 @@ abstract mixin class $CreatePollOptionRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$CreatePollOptionRequestCopyWithImpl<$Res>
-    implements $CreatePollOptionRequestCopyWith<$Res> {
+class _$CreatePollOptionRequestCopyWithImpl<$Res> implements $CreatePollOptionRequestCopyWith<$Res> {
   _$CreatePollOptionRequestCopyWithImpl(this._self, this._then);
 
   final CreatePollOptionRequest _self;

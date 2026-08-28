@@ -59,8 +59,7 @@ abstract mixin class $AIAudioConfigRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$AIAudioConfigRequestCopyWithImpl<$Res>
-    implements $AIAudioConfigRequestCopyWith<$Res> {
+class _$AIAudioConfigRequestCopyWithImpl<$Res> implements $AIAudioConfigRequestCopyWith<$Res> {
   _$AIAudioConfigRequestCopyWithImpl(this._self, this._then);
 
   final AIAudioConfigRequest _self;

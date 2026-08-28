@@ -22,11 +22,10 @@ mixin _$ModerationResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ModerationResponseCopyWith<ModerationResponse> get copyWith =>
-      _$ModerationResponseCopyWithImpl<ModerationResponse>(
-        this as ModerationResponse,
-        _$identity,
-      );
+  $ModerationResponseCopyWith<ModerationResponse> get copyWith => _$ModerationResponseCopyWithImpl<ModerationResponse>(
+    this as ModerationResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -34,8 +33,7 @@ mixin _$ModerationResponse {
         (other.runtimeType == runtimeType &&
             other is ModerationResponse &&
             (identical(other.action, action) || other.action == action) &&
-            (identical(other.explicit, explicit) ||
-                other.explicit == explicit) &&
+            (identical(other.explicit, explicit) || other.explicit == explicit) &&
             (identical(other.spam, spam) || other.spam == spam) &&
             (identical(other.toxic, toxic) || other.toxic == toxic));
   }
@@ -60,8 +58,7 @@ abstract mixin class $ModerationResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ModerationResponseCopyWithImpl<$Res>
-    implements $ModerationResponseCopyWith<$Res> {
+class _$ModerationResponseCopyWithImpl<$Res> implements $ModerationResponseCopyWith<$Res> {
   _$ModerationResponseCopyWithImpl(this._self, this._then);
 
   final ModerationResponse _self;

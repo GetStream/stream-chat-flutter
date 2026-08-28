@@ -34,8 +34,7 @@ mixin _$UpdateUsersPartialRequest {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(users));
+  int get hashCode => Object.hash(runtimeType, const DeepCollectionEquality().hash(users));
 
   @override
   String toString() {
@@ -54,8 +53,7 @@ abstract mixin class $UpdateUsersPartialRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpdateUsersPartialRequestCopyWithImpl<$Res>
-    implements $UpdateUsersPartialRequestCopyWith<$Res> {
+class _$UpdateUsersPartialRequestCopyWithImpl<$Res> implements $UpdateUsersPartialRequestCopyWith<$Res> {
   _$UpdateUsersPartialRequestCopyWithImpl(this._self, this._then);
 
   final UpdateUsersPartialRequest _self;

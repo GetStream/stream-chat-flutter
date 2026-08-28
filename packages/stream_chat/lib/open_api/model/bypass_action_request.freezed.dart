@@ -53,8 +53,7 @@ abstract mixin class $BypassActionRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$BypassActionRequestCopyWithImpl<$Res>
-    implements $BypassActionRequestCopyWith<$Res> {
+class _$BypassActionRequestCopyWithImpl<$Res> implements $BypassActionRequestCopyWith<$Res> {
   _$BypassActionRequestCopyWithImpl(this._self, this._then);
 
   final BypassActionRequest _self;

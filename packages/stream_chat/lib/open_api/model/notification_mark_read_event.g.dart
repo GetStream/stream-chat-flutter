@@ -9,9 +9,7 @@ part of 'notification_mark_read_event.dart';
 NotificationMarkReadEvent _$NotificationMarkReadEventFromJson(
   Map<String, dynamic> json,
 ) => NotificationMarkReadEvent(
-  channel: json['channel'] == null
-      ? null
-      : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
+  channel: json['channel'] == null ? null : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
   channelCustom: json['channel_custom'] as Map<String, dynamic>?,
   channelId: json['channel_id'] as String?,
   channelMemberCount: (json['channel_member_count'] as num?)?.toInt(),
@@ -22,19 +20,16 @@ NotificationMarkReadEvent _$NotificationMarkReadEventFromJson(
     json['created_at'] as Object,
   ),
   custom: json['custom'] as Map<String, dynamic>,
-  groupedUnreadChannels:
-      (json['grouped_unread_channels'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, (e as num).toInt()),
-      ),
+  groupedUnreadChannels: (json['grouped_unread_channels'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, (e as num).toInt()),
+  ),
   lastReadMessageId: json['last_read_message_id'] as String?,
   receivedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['received_at'],
     const StreamDateTimeConverter().fromJson,
   ),
   team: json['team'] as String?,
-  thread: json['thread'] == null
-      ? null
-      : ThreadResponse.fromJson(json['thread'] as Map<String, dynamic>),
+  thread: json['thread'] == null ? null : ThreadResponse.fromJson(json['thread'] as Map<String, dynamic>),
   threadId: json['thread_id'] as String?,
   totalUnreadCount: (json['total_unread_count'] as num).toInt(),
   type: json['type'] as String,
@@ -42,9 +37,7 @@ NotificationMarkReadEvent _$NotificationMarkReadEventFromJson(
   unreadCount: (json['unread_count'] as num).toInt(),
   unreadThreadMessages: (json['unread_thread_messages'] as num?)?.toInt(),
   unreadThreads: (json['unread_threads'] as num?)?.toInt(),
-  user: json['user'] == null
-      ? null
-      : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
+  user: json['user'] == null ? null : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$NotificationMarkReadEventToJson(

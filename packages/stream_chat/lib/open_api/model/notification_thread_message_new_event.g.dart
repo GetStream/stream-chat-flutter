@@ -59,9 +59,7 @@ Map<String, dynamic> _$NotificationThreadMessageNewEventToJson(
   ),
   'team': instance.team,
   'thread_id': instance.threadId,
-  'thread_participants': instance.threadParticipants
-      ?.map((e) => e.toJson())
-      .toList(),
+  'thread_participants': instance.threadParticipants?.map((e) => e.toJson()).toList(),
   'type': instance.type,
   'unread_thread_messages': instance.unreadThreadMessages,
   'unread_threads': instance.unreadThreads,

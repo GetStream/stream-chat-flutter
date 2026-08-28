@@ -25,28 +25,22 @@ mixin _$Images {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ImagesCopyWith<Images> get copyWith =>
-      _$ImagesCopyWithImpl<Images>(this as Images, _$identity);
+  $ImagesCopyWith<Images> get copyWith => _$ImagesCopyWithImpl<Images>(this as Images, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is Images &&
-            (identical(other.fixedHeight, fixedHeight) ||
-                other.fixedHeight == fixedHeight) &&
+            (identical(other.fixedHeight, fixedHeight) || other.fixedHeight == fixedHeight) &&
             (identical(other.fixedHeightDownsampled, fixedHeightDownsampled) ||
                 other.fixedHeightDownsampled == fixedHeightDownsampled) &&
-            (identical(other.fixedHeightStill, fixedHeightStill) ||
-                other.fixedHeightStill == fixedHeightStill) &&
-            (identical(other.fixedWidth, fixedWidth) ||
-                other.fixedWidth == fixedWidth) &&
+            (identical(other.fixedHeightStill, fixedHeightStill) || other.fixedHeightStill == fixedHeightStill) &&
+            (identical(other.fixedWidth, fixedWidth) || other.fixedWidth == fixedWidth) &&
             (identical(other.fixedWidthDownsampled, fixedWidthDownsampled) ||
                 other.fixedWidthDownsampled == fixedWidthDownsampled) &&
-            (identical(other.fixedWidthStill, fixedWidthStill) ||
-                other.fixedWidthStill == fixedWidthStill) &&
-            (identical(other.original, original) ||
-                other.original == original));
+            (identical(other.fixedWidthStill, fixedWidthStill) || other.fixedWidthStill == fixedWidthStill) &&
+            (identical(other.original, original) || other.original == original));
   }
 
   @override
@@ -69,8 +63,7 @@ mixin _$Images {
 
 /// @nodoc
 abstract mixin class $ImagesCopyWith<$Res> {
-  factory $ImagesCopyWith(Images value, $Res Function(Images) _then) =
-      _$ImagesCopyWithImpl;
+  factory $ImagesCopyWith(Images value, $Res Function(Images) _then) = _$ImagesCopyWithImpl;
   @useResult
   $Res call({
     ImageData fixedHeight,

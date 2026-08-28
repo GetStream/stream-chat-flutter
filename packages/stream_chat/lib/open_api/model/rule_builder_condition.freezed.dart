@@ -75,43 +75,37 @@ mixin _$RuleBuilderCondition {
                   other.channelMessageCountRuleParams,
                   channelMessageCountRuleParams,
                 ) ||
-                other.channelMessageCountRuleParams ==
-                    channelMessageCountRuleParams) &&
+                other.channelMessageCountRuleParams == channelMessageCountRuleParams) &&
             (identical(
                   other.closedCaptionRuleParams,
                   closedCaptionRuleParams,
                 ) ||
                 other.closedCaptionRuleParams == closedCaptionRuleParams) &&
-            (identical(other.confidence, confidence) ||
-                other.confidence == confidence) &&
+            (identical(other.confidence, confidence) || other.confidence == confidence) &&
             (identical(other.contentCountRuleParams, contentCountRuleParams) ||
                 other.contentCountRuleParams == contentCountRuleParams) &&
             (identical(
                   other.contentCustomPropertyCountParams,
                   contentCustomPropertyCountParams,
                 ) ||
-                other.contentCustomPropertyCountParams ==
-                    contentCustomPropertyCountParams) &&
+                other.contentCustomPropertyCountParams == contentCustomPropertyCountParams) &&
             (identical(
                   other.contentCustomPropertyParams,
                   contentCustomPropertyParams,
                 ) ||
-                other.contentCustomPropertyParams ==
-                    contentCustomPropertyParams) &&
+                other.contentCustomPropertyParams == contentCustomPropertyParams) &&
             (identical(
                   other.contentFlagCountRuleParams,
                   contentFlagCountRuleParams,
                 ) ||
-                other.contentFlagCountRuleParams ==
-                    contentFlagCountRuleParams) &&
+                other.contentFlagCountRuleParams == contentFlagCountRuleParams) &&
             (identical(other.floodIdenticalParams, floodIdenticalParams) ||
                 other.floodIdenticalParams == floodIdenticalParams) &&
             (identical(other.floodSimilarParams, floodSimilarParams) ||
                 other.floodSimilarParams == floodSimilarParams) &&
             (identical(other.imageContentParams, imageContentParams) ||
                 other.imageContentParams == imageContentParams) &&
-            (identical(other.imageRuleParams, imageRuleParams) ||
-                other.imageRuleParams == imageRuleParams) &&
+            (identical(other.imageRuleParams, imageRuleParams) || other.imageRuleParams == imageRuleParams) &&
             (identical(
                   other.ipContentCountRuleParams,
                   ipContentCountRuleParams,
@@ -123,12 +117,9 @@ mixin _$RuleBuilderCondition {
                 other.keyframeOcrRuleParams == keyframeOcrRuleParams) &&
             (identical(other.keyframeRuleParams, keyframeRuleParams) ||
                 other.keyframeRuleParams == keyframeRuleParams) &&
-            (identical(other.ocrContentParams, ocrContentParams) ||
-                other.ocrContentParams == ocrContentParams) &&
-            (identical(other.textContentParams, textContentParams) ||
-                other.textContentParams == textContentParams) &&
-            (identical(other.textRuleParams, textRuleParams) ||
-                other.textRuleParams == textRuleParams) &&
+            (identical(other.ocrContentParams, ocrContentParams) || other.ocrContentParams == ocrContentParams) &&
+            (identical(other.textContentParams, textContentParams) || other.textContentParams == textContentParams) &&
+            (identical(other.textRuleParams, textRuleParams) || other.textRuleParams == textRuleParams) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(
                   other.userCreatedWithinParams,
@@ -149,16 +140,12 @@ mixin _$RuleBuilderCondition {
                   other.userIdenticalContentCountParams,
                   userIdenticalContentCountParams,
                 ) ||
-                other.userIdenticalContentCountParams ==
-                    userIdenticalContentCountParams) &&
-            (identical(other.userRoleParams, userRoleParams) ||
-                other.userRoleParams == userRoleParams) &&
-            (identical(other.userRuleParams, userRuleParams) ||
-                other.userRuleParams == userRuleParams) &&
+                other.userIdenticalContentCountParams == userIdenticalContentCountParams) &&
+            (identical(other.userRoleParams, userRoleParams) || other.userRoleParams == userRoleParams) &&
+            (identical(other.userRuleParams, userRuleParams) || other.userRuleParams == userRuleParams) &&
             (identical(other.videoContentParams, videoContentParams) ||
                 other.videoContentParams == videoContentParams) &&
-            (identical(other.videoRuleParams, videoRuleParams) ||
-                other.videoRuleParams == videoRuleParams));
+            (identical(other.videoRuleParams, videoRuleParams) || other.videoRuleParams == videoRuleParams));
   }
 
   @override
@@ -244,8 +231,7 @@ abstract mixin class $RuleBuilderConditionCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$RuleBuilderConditionCopyWithImpl<$Res>
-    implements $RuleBuilderConditionCopyWith<$Res> {
+class _$RuleBuilderConditionCopyWithImpl<$Res> implements $RuleBuilderConditionCopyWith<$Res> {
   _$RuleBuilderConditionCopyWithImpl(this._self, this._then);
 
   final RuleBuilderCondition _self;
@@ -317,8 +303,7 @@ class _$RuleBuilderConditionCopyWithImpl<$Res>
             ? _self.contentCountRuleParams
             : contentCountRuleParams // ignore: cast_nullable_to_non_nullable
                   as ContentCountRuleParameters?,
-        contentCustomPropertyCountParams:
-            freezed == contentCustomPropertyCountParams
+        contentCustomPropertyCountParams: freezed == contentCustomPropertyCountParams
             ? _self.contentCustomPropertyCountParams
             : contentCustomPropertyCountParams // ignore: cast_nullable_to_non_nullable
                   as ContentCustomPropertyCountParameters?,
@@ -390,8 +375,7 @@ class _$RuleBuilderConditionCopyWithImpl<$Res>
             ? _self.userFlagCountRuleParams
             : userFlagCountRuleParams // ignore: cast_nullable_to_non_nullable
                   as FlagCountRuleParameters?,
-        userIdenticalContentCountParams:
-            freezed == userIdenticalContentCountParams
+        userIdenticalContentCountParams: freezed == userIdenticalContentCountParams
             ? _self.userIdenticalContentCountParams
             : userIdenticalContentCountParams // ignore: cast_nullable_to_non_nullable
                   as UserIdenticalContentCountParameters?,

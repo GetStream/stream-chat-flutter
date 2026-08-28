@@ -41,8 +41,7 @@ mixin _$CreateBlockListRequest {
                   other.isConfusableFoldingEnabled,
                   isConfusableFoldingEnabled,
                 ) ||
-                other.isConfusableFoldingEnabled ==
-                    isConfusableFoldingEnabled) &&
+                other.isConfusableFoldingEnabled == isConfusableFoldingEnabled) &&
             (identical(other.isLeetCheckEnabled, isLeetCheckEnabled) ||
                 other.isLeetCheckEnabled == isLeetCheckEnabled) &&
             (identical(other.isPluralCheckEnabled, isPluralCheckEnabled) ||
@@ -51,8 +50,7 @@ mixin _$CreateBlockListRequest {
                   other.isSubstringMatchingEnabled,
                   isSubstringMatchingEnabled,
                 ) ||
-                other.isSubstringMatchingEnabled ==
-                    isSubstringMatchingEnabled) &&
+                other.isSubstringMatchingEnabled == isSubstringMatchingEnabled) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.team, team) || other.team == team) &&
             (identical(other.type, type) || other.type == type) &&
@@ -98,8 +96,7 @@ abstract mixin class $CreateBlockListRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$CreateBlockListRequestCopyWithImpl<$Res>
-    implements $CreateBlockListRequestCopyWith<$Res> {
+class _$CreateBlockListRequestCopyWithImpl<$Res> implements $CreateBlockListRequestCopyWith<$Res> {
   _$CreateBlockListRequestCopyWithImpl(this._self, this._then);
 
   final CreateBlockListRequest _self;

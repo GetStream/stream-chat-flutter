@@ -25,30 +25,23 @@ mixin _$CallActionOptions {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $CallActionOptionsCopyWith<CallActionOptions> get copyWith =>
-      _$CallActionOptionsCopyWithImpl<CallActionOptions>(
-        this as CallActionOptions,
-        _$identity,
-      );
+  $CallActionOptionsCopyWith<CallActionOptions> get copyWith => _$CallActionOptionsCopyWithImpl<CallActionOptions>(
+    this as CallActionOptions,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is CallActionOptions &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
-            (identical(other.flagReason, flagReason) ||
-                other.flagReason == flagReason) &&
-            (identical(other.kickReason, kickReason) ||
-                other.kickReason == kickReason) &&
-            (identical(other.muteAudio, muteAudio) ||
-                other.muteAudio == muteAudio) &&
-            (identical(other.muteVideo, muteVideo) ||
-                other.muteVideo == muteVideo) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
+            (identical(other.flagReason, flagReason) || other.flagReason == flagReason) &&
+            (identical(other.kickReason, kickReason) || other.kickReason == kickReason) &&
+            (identical(other.muteAudio, muteAudio) || other.muteAudio == muteAudio) &&
+            (identical(other.muteVideo, muteVideo) || other.muteVideo == muteVideo) &&
             (identical(other.reason, reason) || other.reason == reason) &&
-            (identical(other.warningText, warningText) ||
-                other.warningText == warningText));
+            (identical(other.warningText, warningText) || other.warningText == warningText));
   }
 
   @override
@@ -88,8 +81,7 @@ abstract mixin class $CallActionOptionsCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$CallActionOptionsCopyWithImpl<$Res>
-    implements $CallActionOptionsCopyWith<$Res> {
+class _$CallActionOptionsCopyWithImpl<$Res> implements $CallActionOptionsCopyWith<$Res> {
   _$CallActionOptionsCopyWithImpl(this._self, this._then);
 
   final CallActionOptions _self;

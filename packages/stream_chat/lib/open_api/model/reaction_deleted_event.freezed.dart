@@ -51,25 +51,19 @@ mixin _$ReactionDeletedEvent {
               other.channelCustom,
               channelCustom,
             ) &&
-            (identical(other.channelId, channelId) ||
-                other.channelId == channelId) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
             (identical(other.channelMemberCount, channelMemberCount) ||
                 other.channelMemberCount == channelMemberCount) &&
             (identical(other.channelMessageCount, channelMessageCount) ||
                 other.channelMessageCount == channelMessageCount) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.message, message) || other.message == message) &&
-            (identical(other.messageId, messageId) ||
-                other.messageId == messageId) &&
-            (identical(other.reaction, reaction) ||
-                other.reaction == reaction) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.messageId, messageId) || other.messageId == messageId) &&
+            (identical(other.reaction, reaction) || other.reaction == reaction) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.team, team) || other.team == team) &&
             const DeepCollectionEquality().equals(
               other.threadParticipants,
@@ -136,8 +130,7 @@ abstract mixin class $ReactionDeletedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ReactionDeletedEventCopyWithImpl<$Res>
-    implements $ReactionDeletedEventCopyWith<$Res> {
+class _$ReactionDeletedEventCopyWithImpl<$Res> implements $ReactionDeletedEventCopyWith<$Res> {
   _$ReactionDeletedEventCopyWithImpl(this._self, this._then);
 
   final ReactionDeletedEvent _self;

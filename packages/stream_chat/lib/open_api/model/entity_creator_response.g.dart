@@ -12,9 +12,7 @@ EntityCreatorResponse _$EntityCreatorResponseFromJson(
   avgResponseTime: (json['avg_response_time'] as num?)?.toInt(),
   banCount: (json['ban_count'] as num).toInt(),
   banned: json['banned'] as bool,
-  blockedUserIds: (json['blocked_user_ids'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  blockedUserIds: (json['blocked_user_ids'] as List<dynamic>).map((e) => e as String).toList(),
   createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),

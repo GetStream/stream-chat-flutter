@@ -20,8 +20,7 @@ mixin _$CallCustomPropertyParameters {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $CallCustomPropertyParametersCopyWith<CallCustomPropertyParameters>
-  get copyWith =>
+  $CallCustomPropertyParametersCopyWith<CallCustomPropertyParameters> get copyWith =>
       _$CallCustomPropertyParametersCopyWithImpl<CallCustomPropertyParameters>(
         this as CallCustomPropertyParameters,
         _$identity,
@@ -32,10 +31,8 @@ mixin _$CallCustomPropertyParameters {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is CallCustomPropertyParameters &&
-            (identical(other.operator, operator) ||
-                other.operator == operator) &&
-            (identical(other.propertyKey, propertyKey) ||
-                other.propertyKey == propertyKey));
+            (identical(other.operator, operator) || other.operator == operator) &&
+            (identical(other.propertyKey, propertyKey) || other.propertyKey == propertyKey));
   }
 
   @override
@@ -58,8 +55,7 @@ abstract mixin class $CallCustomPropertyParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$CallCustomPropertyParametersCopyWithImpl<$Res>
-    implements $CallCustomPropertyParametersCopyWith<$Res> {
+class _$CallCustomPropertyParametersCopyWithImpl<$Res> implements $CallCustomPropertyParametersCopyWith<$Res> {
   _$CallCustomPropertyParametersCopyWithImpl(this._self, this._then);
 
   final CallCustomPropertyParameters _self;

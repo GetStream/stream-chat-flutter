@@ -20,21 +20,18 @@ mixin _$BulkAppealResult {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $BulkAppealResultCopyWith<BulkAppealResult> get copyWith =>
-      _$BulkAppealResultCopyWithImpl<BulkAppealResult>(
-        this as BulkAppealResult,
-        _$identity,
-      );
+  $BulkAppealResultCopyWith<BulkAppealResult> get copyWith => _$BulkAppealResultCopyWithImpl<BulkAppealResult>(
+    this as BulkAppealResult,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is BulkAppealResult &&
-            (identical(other.appealId, appealId) ||
-                other.appealId == appealId) &&
-            (identical(other.appealItem, appealItem) ||
-                other.appealItem == appealItem));
+            (identical(other.appealId, appealId) || other.appealId == appealId) &&
+            (identical(other.appealItem, appealItem) || other.appealItem == appealItem));
   }
 
   @override
@@ -57,8 +54,7 @@ abstract mixin class $BulkAppealResultCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$BulkAppealResultCopyWithImpl<$Res>
-    implements $BulkAppealResultCopyWith<$Res> {
+class _$BulkAppealResultCopyWithImpl<$Res> implements $BulkAppealResultCopyWith<$Res> {
   _$BulkAppealResultCopyWithImpl(this._self, this._then);
 
   final BulkAppealResult _self;

@@ -20,19 +20,17 @@ mixin _$GetThreadResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $GetThreadResponseCopyWith<GetThreadResponse> get copyWith =>
-      _$GetThreadResponseCopyWithImpl<GetThreadResponse>(
-        this as GetThreadResponse,
-        _$identity,
-      );
+  $GetThreadResponseCopyWith<GetThreadResponse> get copyWith => _$GetThreadResponseCopyWithImpl<GetThreadResponse>(
+    this as GetThreadResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is GetThreadResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.thread, thread) || other.thread == thread));
   }
 
@@ -56,8 +54,7 @@ abstract mixin class $GetThreadResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$GetThreadResponseCopyWithImpl<$Res>
-    implements $GetThreadResponseCopyWith<$Res> {
+class _$GetThreadResponseCopyWithImpl<$Res> implements $GetThreadResponseCopyWith<$Res> {
   _$GetThreadResponseCopyWithImpl(this._self, this._then);
 
   final GetThreadResponse _self;

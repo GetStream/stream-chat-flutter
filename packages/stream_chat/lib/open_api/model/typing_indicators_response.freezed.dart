@@ -53,8 +53,7 @@ abstract mixin class $TypingIndicatorsResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$TypingIndicatorsResponseCopyWithImpl<$Res>
-    implements $TypingIndicatorsResponseCopyWith<$Res> {
+class _$TypingIndicatorsResponseCopyWithImpl<$Res> implements $TypingIndicatorsResponseCopyWith<$Res> {
   _$TypingIndicatorsResponseCopyWithImpl(this._self, this._then);
 
   final TypingIndicatorsResponse _self;

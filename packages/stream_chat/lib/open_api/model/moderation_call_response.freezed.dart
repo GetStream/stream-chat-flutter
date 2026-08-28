@@ -49,42 +49,30 @@ mixin _$ModerationCallResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ModerationCallResponse &&
-            (identical(other.backstage, backstage) ||
-                other.backstage == backstage) &&
+            (identical(other.backstage, backstage) || other.backstage == backstage) &&
             const DeepCollectionEquality().equals(
               other.blockedUserIds,
               blockedUserIds,
             ) &&
-            (identical(other.captioning, captioning) ||
-                other.captioning == captioning) &&
-            (identical(other.channelCid, channelCid) ||
-                other.channelCid == channelCid) &&
+            (identical(other.captioning, captioning) || other.captioning == captioning) &&
+            (identical(other.channelCid, channelCid) || other.channelCid == channelCid) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.createdBy, createdBy) ||
-                other.createdBy == createdBy) &&
-            (identical(other.currentSessionId, currentSessionId) ||
-                other.currentSessionId == currentSessionId) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.createdBy, createdBy) || other.createdBy == createdBy) &&
+            (identical(other.currentSessionId, currentSessionId) || other.currentSessionId == currentSessionId) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.endedAt, endedAt) || other.endedAt == endedAt) &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.joinAheadTimeSeconds, joinAheadTimeSeconds) ||
                 other.joinAheadTimeSeconds == joinAheadTimeSeconds) &&
-            (identical(other.recording, recording) ||
-                other.recording == recording) &&
-            (identical(other.routingNumber, routingNumber) ||
-                other.routingNumber == routingNumber) &&
-            (identical(other.startsAt, startsAt) ||
-                other.startsAt == startsAt) &&
+            (identical(other.recording, recording) || other.recording == recording) &&
+            (identical(other.routingNumber, routingNumber) || other.routingNumber == routingNumber) &&
+            (identical(other.startsAt, startsAt) || other.startsAt == startsAt) &&
             (identical(other.team, team) || other.team == team) &&
-            (identical(other.transcribing, transcribing) ||
-                other.transcribing == transcribing) &&
-            (identical(other.translating, translating) ||
-                other.translating == translating) &&
+            (identical(other.transcribing, transcribing) || other.transcribing == transcribing) &&
+            (identical(other.translating, translating) || other.translating == translating) &&
             (identical(other.type, type) || other.type == type) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
   }
 
   @override
@@ -150,8 +138,7 @@ abstract mixin class $ModerationCallResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ModerationCallResponseCopyWithImpl<$Res>
-    implements $ModerationCallResponseCopyWith<$Res> {
+class _$ModerationCallResponseCopyWithImpl<$Res> implements $ModerationCallResponseCopyWith<$Res> {
   _$ModerationCallResponseCopyWithImpl(this._self, this._then);
 
   final ModerationCallResponse _self;

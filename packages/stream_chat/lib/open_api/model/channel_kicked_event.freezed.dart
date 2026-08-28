@@ -29,11 +29,10 @@ mixin _$ChannelKickedEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ChannelKickedEventCopyWith<ChannelKickedEvent> get copyWith =>
-      _$ChannelKickedEventCopyWithImpl<ChannelKickedEvent>(
-        this as ChannelKickedEvent,
-        _$identity,
-      );
+  $ChannelKickedEventCopyWith<ChannelKickedEvent> get copyWith => _$ChannelKickedEventCopyWithImpl<ChannelKickedEvent>(
+    this as ChannelKickedEvent,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -44,20 +43,16 @@ mixin _$ChannelKickedEvent {
               other.channelCustom,
               channelCustom,
             ) &&
-            (identical(other.channelId, channelId) ||
-                other.channelId == channelId) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
             (identical(other.channelMemberCount, channelMemberCount) ||
                 other.channelMemberCount == channelMemberCount) &&
             (identical(other.channelMessageCount, channelMessageCount) ||
                 other.channelMessageCount == channelMessageCount) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.team, team) || other.team == team) &&
             (identical(other.type, type) || other.type == type));
   }
@@ -107,8 +102,7 @@ abstract mixin class $ChannelKickedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChannelKickedEventCopyWithImpl<$Res>
-    implements $ChannelKickedEventCopyWith<$Res> {
+class _$ChannelKickedEventCopyWithImpl<$Res> implements $ChannelKickedEventCopyWith<$Res> {
   _$ChannelKickedEventCopyWithImpl(this._self, this._then);
 
   final ChannelKickedEvent _self;

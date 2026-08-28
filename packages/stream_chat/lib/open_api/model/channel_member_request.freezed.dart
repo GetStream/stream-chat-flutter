@@ -33,8 +33,7 @@ mixin _$ChannelMemberRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ChannelMemberRequest &&
-            (identical(other.channelRole, channelRole) ||
-                other.channelRole == channelRole) &&
+            (identical(other.channelRole, channelRole) || other.channelRole == channelRole) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.user, user) || other.user == user) &&
             (identical(other.userId, userId) || other.userId == userId));
@@ -71,8 +70,7 @@ abstract mixin class $ChannelMemberRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChannelMemberRequestCopyWithImpl<$Res>
-    implements $ChannelMemberRequestCopyWith<$Res> {
+class _$ChannelMemberRequestCopyWithImpl<$Res> implements $ChannelMemberRequestCopyWith<$Res> {
   _$ChannelMemberRequestCopyWithImpl(this._self, this._then);
 
   final ChannelMemberRequest _self;

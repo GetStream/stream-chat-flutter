@@ -9,9 +9,7 @@ part of 'channel_config_with_info.dart';
 ChannelConfigWithInfo _$ChannelConfigWithInfoFromJson(
   Map<String, dynamic> json,
 ) => ChannelConfigWithInfo(
-  allowedFlagReasons: (json['allowed_flag_reasons'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  allowedFlagReasons: (json['allowed_flag_reasons'] as List<dynamic>?)?.map((e) => e as String).toList(),
   automod: ChannelConfigWithInfoAutomod.fromJson(json['automod'] as String),
   automodBehavior: ChannelConfigWithInfoAutomodBehavior.fromJson(
     json['automod_behavior'] as String,
@@ -33,9 +31,7 @@ ChannelConfigWithInfo _$ChannelConfigWithInfoFromJson(
       : ChatPreferences.fromJson(
           json['chat_preferences'] as Map<String, dynamic>,
         ),
-  commands: (json['commands'] as List<dynamic>)
-      .map((e) => Command.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  commands: (json['commands'] as List<dynamic>).map((e) => Command.fromJson(e as Map<String, dynamic>)).toList(),
   connectEvents: json['connect_events'] as bool,
   countMessages: json['count_messages'] as bool,
   createdAt: const StreamDateTimeConverter().fromJson(
@@ -44,8 +40,7 @@ ChannelConfigWithInfo _$ChannelConfigWithInfoFromJson(
   customEvents: json['custom_events'] as bool,
   deliveryEvents: json['delivery_events'] as bool,
   grants: (json['grants'] as Map<String, dynamic>?)?.map(
-    (k, e) =>
-        MapEntry(k, (e as List<dynamic>).map((e) => e as String).toList()),
+    (k, e) => MapEntry(k, (e as List<dynamic>).map((e) => e as String).toList()),
   ),
   markMessagesPending: json['mark_messages_pending'] as bool,
   maxMessageLength: (json['max_message_length'] as num).toInt(),
@@ -55,9 +50,7 @@ ChannelConfigWithInfo _$ChannelConfigWithInfoFromJson(
   partitionSize: (json['partition_size'] as num?)?.toInt(),
   partitionTtl: json['partition_ttl'] as String?,
   polls: json['polls'] as bool,
-  pushLevel: json['push_level'] == null
-      ? null
-      : ChannelConfigWithInfoPushLevel.fromJson(json['push_level'] as String),
+  pushLevel: json['push_level'] == null ? null : ChannelConfigWithInfoPushLevel.fromJson(json['push_level'] as String),
   pushNotifications: json['push_notifications'] as bool,
   quotes: json['quotes'] as bool,
   reactions: json['reactions'] as bool,
@@ -66,8 +59,7 @@ ChannelConfigWithInfo _$ChannelConfigWithInfoFromJson(
   replies: json['replies'] as bool,
   search: json['search'] as bool,
   sharedLocations: json['shared_locations'] as bool,
-  skipLastMsgUpdateForSystemMsgs:
-      json['skip_last_msg_update_for_system_msgs'] as bool,
+  skipLastMsgUpdateForSystemMsgs: json['skip_last_msg_update_for_system_msgs'] as bool,
   typingEvents: json['typing_events'] as bool,
   updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,
@@ -112,8 +104,7 @@ Map<String, dynamic> _$ChannelConfigWithInfoToJson(
   'replies': instance.replies,
   'search': instance.search,
   'shared_locations': instance.sharedLocations,
-  'skip_last_msg_update_for_system_msgs':
-      instance.skipLastMsgUpdateForSystemMsgs,
+  'skip_last_msg_update_for_system_msgs': instance.skipLastMsgUpdateForSystemMsgs,
   'typing_events': instance.typingEvents,
   'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
   'uploads': instance.uploads,

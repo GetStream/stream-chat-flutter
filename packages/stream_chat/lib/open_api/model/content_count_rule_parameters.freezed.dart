@@ -20,8 +20,7 @@ mixin _$ContentCountRuleParameters {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ContentCountRuleParametersCopyWith<ContentCountRuleParameters>
-  get copyWith =>
+  $ContentCountRuleParametersCopyWith<ContentCountRuleParameters> get copyWith =>
       _$ContentCountRuleParametersCopyWithImpl<ContentCountRuleParameters>(
         this as ContentCountRuleParameters,
         _$identity,
@@ -32,10 +31,8 @@ mixin _$ContentCountRuleParameters {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ContentCountRuleParameters &&
-            (identical(other.threshold, threshold) ||
-                other.threshold == threshold) &&
-            (identical(other.timeWindow, timeWindow) ||
-                other.timeWindow == timeWindow));
+            (identical(other.threshold, threshold) || other.threshold == threshold) &&
+            (identical(other.timeWindow, timeWindow) || other.timeWindow == timeWindow));
   }
 
   @override
@@ -58,8 +55,7 @@ abstract mixin class $ContentCountRuleParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ContentCountRuleParametersCopyWithImpl<$Res>
-    implements $ContentCountRuleParametersCopyWith<$Res> {
+class _$ContentCountRuleParametersCopyWithImpl<$Res> implements $ContentCountRuleParametersCopyWith<$Res> {
   _$ContentCountRuleParametersCopyWithImpl(this._self, this._then);
 
   final ContentCountRuleParameters _self;

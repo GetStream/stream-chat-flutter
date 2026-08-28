@@ -26,8 +26,7 @@ mixin _$ModerationCustomActionEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ModerationCustomActionEventCopyWith<ModerationCustomActionEvent>
-  get copyWith =>
+  $ModerationCustomActionEventCopyWith<ModerationCustomActionEvent> get copyWith =>
       _$ModerationCustomActionEventCopyWithImpl<ModerationCustomActionEvent>(
         this as ModerationCustomActionEvent,
         _$identity,
@@ -38,20 +37,16 @@ mixin _$ModerationCustomActionEvent {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ModerationCustomActionEvent &&
-            (identical(other.actionId, actionId) ||
-                other.actionId == actionId) &&
+            (identical(other.actionId, actionId) || other.actionId == actionId) &&
             const DeepCollectionEquality().equals(
               other.actionOptions,
               actionOptions,
             ) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.message, message) || other.message == message) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
-            (identical(other.reviewQueueItem, reviewQueueItem) ||
-                other.reviewQueueItem == reviewQueueItem) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
+            (identical(other.reviewQueueItem, reviewQueueItem) || other.reviewQueueItem == reviewQueueItem) &&
             (identical(other.type, type) || other.type == type));
   }
 
@@ -94,8 +89,7 @@ abstract mixin class $ModerationCustomActionEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ModerationCustomActionEventCopyWithImpl<$Res>
-    implements $ModerationCustomActionEventCopyWith<$Res> {
+class _$ModerationCustomActionEventCopyWithImpl<$Res> implements $ModerationCustomActionEventCopyWith<$Res> {
   _$ModerationCustomActionEventCopyWithImpl(this._self, this._then);
 
   final ModerationCustomActionEvent _self;

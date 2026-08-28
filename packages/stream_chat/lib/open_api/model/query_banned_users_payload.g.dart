@@ -13,9 +13,7 @@ QueryBannedUsersPayload _$QueryBannedUsersPayloadFromJson(
   filterConditions: json['filter_conditions'] as Map<String, dynamic>,
   limit: (json['limit'] as num?)?.toInt(),
   offset: (json['offset'] as num?)?.toInt(),
-  sort: (json['sort'] as List<dynamic>?)
-      ?.map((e) => SortParamRequest.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  sort: (json['sort'] as List<dynamic>?)?.map((e) => SortParamRequest.fromJson(e as Map<String, dynamic>)).toList(),
 );
 
 Map<String, dynamic> _$QueryBannedUsersPayloadToJson(

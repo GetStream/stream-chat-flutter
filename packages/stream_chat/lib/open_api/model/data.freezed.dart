@@ -19,15 +19,12 @@ mixin _$Data {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $DataCopyWith<Data> get copyWith =>
-      _$DataCopyWithImpl<Data>(this as Data, _$identity);
+  $DataCopyWith<Data> get copyWith => _$DataCopyWithImpl<Data>(this as Data, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is Data &&
-            (identical(other.id, id) || other.id == id));
+        (other.runtimeType == runtimeType && other is Data && (identical(other.id, id) || other.id == id));
   }
 
   @override
@@ -41,8 +38,7 @@ mixin _$Data {
 
 /// @nodoc
 abstract mixin class $DataCopyWith<$Res> {
-  factory $DataCopyWith(Data value, $Res Function(Data) _then) =
-      _$DataCopyWithImpl;
+  factory $DataCopyWith(Data value, $Res Function(Data) _then) = _$DataCopyWithImpl;
   @useResult
   $Res call({String id});
 }

@@ -32,17 +32,14 @@ mixin _$ChannelMute {
         (other.runtimeType == runtimeType &&
             other is ChannelMute &&
             (identical(other.channel, channel) || other.channel == channel) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             (identical(other.expires, expires) || other.expires == expires) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
             (identical(other.user, user) || other.user == user));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, channel, createdAt, expires, updatedAt, user);
+  int get hashCode => Object.hash(runtimeType, channel, createdAt, expires, updatedAt, user);
 
   @override
   String toString() {

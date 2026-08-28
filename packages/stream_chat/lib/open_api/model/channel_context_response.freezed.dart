@@ -34,8 +34,7 @@ mixin _$ChannelContextResponse {
         (other.runtimeType == runtimeType &&
             other is ChannelContextResponse &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdBy, createdBy) ||
-                other.createdBy == createdBy) &&
+            (identical(other.createdBy, createdBy) || other.createdBy == createdBy) &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.type, type) || other.type == type));
   }
@@ -60,8 +59,7 @@ abstract mixin class $ChannelContextResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChannelContextResponseCopyWithImpl<$Res>
-    implements $ChannelContextResponseCopyWith<$Res> {
+class _$ChannelContextResponseCopyWithImpl<$Res> implements $ChannelContextResponseCopyWith<$Res> {
   _$ChannelContextResponseCopyWithImpl(this._self, this._then);
 
   final ChannelContextResponse _self;

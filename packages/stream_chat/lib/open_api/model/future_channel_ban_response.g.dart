@@ -9,9 +9,7 @@ part of 'future_channel_ban_response.dart';
 FutureChannelBanResponse _$FutureChannelBanResponseFromJson(
   Map<String, dynamic> json,
 ) => FutureChannelBanResponse(
-  bannedBy: json['banned_by'] == null
-      ? null
-      : UserResponse.fromJson(json['banned_by'] as Map<String, dynamic>),
+  bannedBy: json['banned_by'] == null ? null : UserResponse.fromJson(json['banned_by'] as Map<String, dynamic>),
   createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
@@ -21,9 +19,7 @@ FutureChannelBanResponse _$FutureChannelBanResponseFromJson(
   ),
   reason: json['reason'] as String?,
   shadow: json['shadow'] as bool?,
-  user: json['user'] == null
-      ? null
-      : UserResponse.fromJson(json['user'] as Map<String, dynamic>),
+  user: json['user'] == null ? null : UserResponse.fromJson(json['user'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$FutureChannelBanResponseToJson(

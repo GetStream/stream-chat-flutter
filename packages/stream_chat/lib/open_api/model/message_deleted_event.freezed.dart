@@ -49,27 +49,20 @@ mixin _$MessageDeletedEvent {
               other.channelCustom,
               channelCustom,
             ) &&
-            (identical(other.channelId, channelId) ||
-                other.channelId == channelId) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
             (identical(other.channelMemberCount, channelMemberCount) ||
                 other.channelMemberCount == channelMemberCount) &&
             (identical(other.channelMessageCount, channelMessageCount) ||
                 other.channelMessageCount == channelMessageCount) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.deletedForMe, deletedForMe) ||
-                other.deletedForMe == deletedForMe) &&
-            (identical(other.hardDelete, hardDelete) ||
-                other.hardDelete == hardDelete) &&
+            (identical(other.deletedForMe, deletedForMe) || other.deletedForMe == deletedForMe) &&
+            (identical(other.hardDelete, hardDelete) || other.hardDelete == hardDelete) &&
             (identical(other.message, message) || other.message == message) &&
-            (identical(other.messageId, messageId) ||
-                other.messageId == messageId) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.messageId, messageId) || other.messageId == messageId) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.team, team) || other.team == team) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(other.user, user) || other.user == user));
@@ -130,8 +123,7 @@ abstract mixin class $MessageDeletedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MessageDeletedEventCopyWithImpl<$Res>
-    implements $MessageDeletedEventCopyWith<$Res> {
+class _$MessageDeletedEventCopyWithImpl<$Res> implements $MessageDeletedEventCopyWith<$Res> {
   _$MessageDeletedEventCopyWithImpl(this._self, this._then);
 
   final MessageDeletedEvent _self;

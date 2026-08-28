@@ -16,11 +16,10 @@ BanOptions _$BanOptionsFromJson(Map<String, dynamic> json) => BanOptions(
   shadowBan: json['shadow_ban'] as bool?,
 );
 
-Map<String, dynamic> _$BanOptionsToJson(BanOptions instance) =>
-    <String, dynamic>{
-      'delete_messages': instance.deleteMessages?.toJson(),
-      'duration': instance.duration,
-      'ip_ban': instance.ipBan,
-      'reason': instance.reason,
-      'shadow_ban': instance.shadowBan,
-    };
+Map<String, dynamic> _$BanOptionsToJson(BanOptions instance) => <String, dynamic>{
+  'delete_messages': instance.deleteMessages?.toJson(),
+  'duration': instance.duration,
+  'ip_ban': instance.ipBan,
+  'reason': instance.reason,
+  'shadow_ban': instance.shadowBan,
+};

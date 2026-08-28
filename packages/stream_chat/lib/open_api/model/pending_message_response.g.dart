@@ -9,15 +9,9 @@ part of 'pending_message_response.dart';
 PendingMessageResponse _$PendingMessageResponseFromJson(
   Map<String, dynamic> json,
 ) => PendingMessageResponse(
-  channel: json['channel'] == null
-      ? null
-      : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
-  message: json['message'] == null
-      ? null
-      : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
-  user: json['user'] == null
-      ? null
-      : UserResponse.fromJson(json['user'] as Map<String, dynamic>),
+  channel: json['channel'] == null ? null : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
+  message: json['message'] == null ? null : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
+  user: json['user'] == null ? null : UserResponse.fromJson(json['user'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$PendingMessageResponseToJson(

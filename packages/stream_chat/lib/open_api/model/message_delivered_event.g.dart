@@ -9,9 +9,7 @@ part of 'message_delivered_event.dart';
 MessageDeliveredEvent _$MessageDeliveredEventFromJson(
   Map<String, dynamic> json,
 ) => MessageDeliveredEvent(
-  channel: json['channel'] == null
-      ? null
-      : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
+  channel: json['channel'] == null ? null : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
   channelCustom: json['channel_custom'] as Map<String, dynamic>?,
   channelId: json['channel_id'] as String?,
   channelMemberCount: (json['channel_member_count'] as num?)?.toInt(),
@@ -30,9 +28,7 @@ MessageDeliveredEvent _$MessageDeliveredEventFromJson(
   ),
   team: json['team'] as String?,
   type: json['type'] as String,
-  user: json['user'] == null
-      ? null
-      : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
+  user: json['user'] == null ? null : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$MessageDeliveredEventToJson(

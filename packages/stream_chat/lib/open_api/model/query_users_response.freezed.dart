@@ -20,19 +20,17 @@ mixin _$QueryUsersResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $QueryUsersResponseCopyWith<QueryUsersResponse> get copyWith =>
-      _$QueryUsersResponseCopyWithImpl<QueryUsersResponse>(
-        this as QueryUsersResponse,
-        _$identity,
-      );
+  $QueryUsersResponseCopyWith<QueryUsersResponse> get copyWith => _$QueryUsersResponseCopyWithImpl<QueryUsersResponse>(
+    this as QueryUsersResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is QueryUsersResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             const DeepCollectionEquality().equals(other.users, users));
   }
 
@@ -60,8 +58,7 @@ abstract mixin class $QueryUsersResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryUsersResponseCopyWithImpl<$Res>
-    implements $QueryUsersResponseCopyWith<$Res> {
+class _$QueryUsersResponseCopyWithImpl<$Res> implements $QueryUsersResponseCopyWith<$Res> {
   _$QueryUsersResponseCopyWithImpl(this._self, this._then);
 
   final QueryUsersResponse _self;

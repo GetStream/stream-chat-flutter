@@ -9,9 +9,7 @@ part of 'call_rule_action_sequence.dart';
 CallRuleActionSequence _$CallRuleActionSequenceFromJson(
   Map<String, dynamic> json,
 ) => CallRuleActionSequence(
-  actions: (json['actions'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  actions: (json['actions'] as List<dynamic>?)?.map((e) => e as String).toList(),
   callOptions: json['call_options'] == null
       ? null
       : CallActionOptions.fromJson(

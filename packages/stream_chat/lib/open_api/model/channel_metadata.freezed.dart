@@ -27,11 +27,10 @@ mixin _$ChannelMetadata {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ChannelMetadataCopyWith<ChannelMetadata> get copyWith =>
-      _$ChannelMetadataCopyWithImpl<ChannelMetadata>(
-        this as ChannelMetadata,
-        _$identity,
-      );
+  $ChannelMetadataCopyWith<ChannelMetadata> get copyWith => _$ChannelMetadataCopyWithImpl<ChannelMetadata>(
+    this as ChannelMetadata,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -41,14 +40,10 @@ mixin _$ChannelMetadata {
             (identical(other.cid, cid) || other.cid == cid) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.lastMessageAt, lastMessageAt) ||
-                other.lastMessageAt == lastMessageAt) &&
-            (identical(other.memberCount, memberCount) ||
-                other.memberCount == memberCount) &&
-            (identical(other.messageCount, messageCount) ||
-                other.messageCount == messageCount) &&
-            (identical(other.pushLevel, pushLevel) ||
-                other.pushLevel == pushLevel) &&
+            (identical(other.lastMessageAt, lastMessageAt) || other.lastMessageAt == lastMessageAt) &&
+            (identical(other.memberCount, memberCount) || other.memberCount == memberCount) &&
+            (identical(other.messageCount, messageCount) || other.messageCount == messageCount) &&
+            (identical(other.pushLevel, pushLevel) || other.pushLevel == pushLevel) &&
             (identical(other.team, team) || other.team == team) &&
             (identical(other.type, type) || other.type == type));
   }
@@ -94,8 +89,7 @@ abstract mixin class $ChannelMetadataCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChannelMetadataCopyWithImpl<$Res>
-    implements $ChannelMetadataCopyWith<$Res> {
+class _$ChannelMetadataCopyWithImpl<$Res> implements $ChannelMetadataCopyWith<$Res> {
   _$ChannelMetadataCopyWithImpl(this._self, this._then);
 
   final ChannelMetadata _self;

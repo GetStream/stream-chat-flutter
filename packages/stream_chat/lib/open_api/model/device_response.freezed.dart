@@ -27,30 +27,23 @@ mixin _$DeviceResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $DeviceResponseCopyWith<DeviceResponse> get copyWith =>
-      _$DeviceResponseCopyWithImpl<DeviceResponse>(
-        this as DeviceResponse,
-        _$identity,
-      );
+  $DeviceResponseCopyWith<DeviceResponse> get copyWith => _$DeviceResponseCopyWithImpl<DeviceResponse>(
+    this as DeviceResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is DeviceResponse &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.disabled, disabled) ||
-                other.disabled == disabled) &&
-            (identical(other.disabledReason, disabledReason) ||
-                other.disabledReason == disabledReason) &&
-            (identical(other.hardwareId, hardwareId) ||
-                other.hardwareId == hardwareId) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.disabled, disabled) || other.disabled == disabled) &&
+            (identical(other.disabledReason, disabledReason) || other.disabledReason == disabledReason) &&
+            (identical(other.hardwareId, hardwareId) || other.hardwareId == hardwareId) &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.pushProvider, pushProvider) ||
-                other.pushProvider == pushProvider) &&
-            (identical(other.pushProviderName, pushProviderName) ||
-                other.pushProviderName == pushProviderName) &&
+            (identical(other.pushProvider, pushProvider) || other.pushProvider == pushProvider) &&
+            (identical(other.pushProviderName, pushProviderName) || other.pushProviderName == pushProviderName) &&
             (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.voip, voip) || other.voip == voip));
   }
@@ -96,8 +89,7 @@ abstract mixin class $DeviceResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$DeviceResponseCopyWithImpl<$Res>
-    implements $DeviceResponseCopyWith<$Res> {
+class _$DeviceResponseCopyWithImpl<$Res> implements $DeviceResponseCopyWith<$Res> {
   _$DeviceResponseCopyWithImpl(this._self, this._then);
 
   final DeviceResponse _self;

@@ -20,21 +20,18 @@ mixin _$BlockListOptions {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $BlockListOptionsCopyWith<BlockListOptions> get copyWith =>
-      _$BlockListOptionsCopyWithImpl<BlockListOptions>(
-        this as BlockListOptions,
-        _$identity,
-      );
+  $BlockListOptionsCopyWith<BlockListOptions> get copyWith => _$BlockListOptionsCopyWithImpl<BlockListOptions>(
+    this as BlockListOptions,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is BlockListOptions &&
-            (identical(other.behavior, behavior) ||
-                other.behavior == behavior) &&
-            (identical(other.blocklist, blocklist) ||
-                other.blocklist == blocklist));
+            (identical(other.behavior, behavior) || other.behavior == behavior) &&
+            (identical(other.blocklist, blocklist) || other.blocklist == blocklist));
   }
 
   @override
@@ -57,8 +54,7 @@ abstract mixin class $BlockListOptionsCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$BlockListOptionsCopyWithImpl<$Res>
-    implements $BlockListOptionsCopyWith<$Res> {
+class _$BlockListOptionsCopyWithImpl<$Res> implements $BlockListOptionsCopyWith<$Res> {
   _$BlockListOptionsCopyWithImpl(this._self, this._then);
 
   final BlockListOptions _self;

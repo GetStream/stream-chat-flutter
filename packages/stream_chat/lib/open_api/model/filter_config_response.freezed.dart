@@ -93,8 +93,7 @@ abstract mixin class $FilterConfigResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FilterConfigResponseCopyWithImpl<$Res>
-    implements $FilterConfigResponseCopyWith<$Res> {
+class _$FilterConfigResponseCopyWithImpl<$Res> implements $FilterConfigResponseCopyWith<$Res> {
   _$FilterConfigResponseCopyWithImpl(this._self, this._then);
 
   final FilterConfigResponse _self;

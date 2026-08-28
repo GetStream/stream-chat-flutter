@@ -22,11 +22,10 @@ mixin _$SearchWarning {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $SearchWarningCopyWith<SearchWarning> get copyWith =>
-      _$SearchWarningCopyWithImpl<SearchWarning>(
-        this as SearchWarning,
-        _$identity,
-      );
+  $SearchWarningCopyWith<SearchWarning> get copyWith => _$SearchWarningCopyWithImpl<SearchWarning>(
+    this as SearchWarning,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -39,8 +38,7 @@ mixin _$SearchWarning {
             ) &&
             (identical(other.channelSearchCount, channelSearchCount) ||
                 other.channelSearchCount == channelSearchCount) &&
-            (identical(other.warningCode, warningCode) ||
-                other.warningCode == warningCode) &&
+            (identical(other.warningCode, warningCode) || other.warningCode == warningCode) &&
             (identical(other.warningDescription, warningDescription) ||
                 other.warningDescription == warningDescription));
   }
@@ -76,8 +74,7 @@ abstract mixin class $SearchWarningCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$SearchWarningCopyWithImpl<$Res>
-    implements $SearchWarningCopyWith<$Res> {
+class _$SearchWarningCopyWithImpl<$Res> implements $SearchWarningCopyWith<$Res> {
   _$SearchWarningCopyWithImpl(this._self, this._then);
 
   final SearchWarning _self;

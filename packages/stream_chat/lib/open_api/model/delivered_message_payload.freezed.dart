@@ -55,8 +55,7 @@ abstract mixin class $DeliveredMessagePayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$DeliveredMessagePayloadCopyWithImpl<$Res>
-    implements $DeliveredMessagePayloadCopyWith<$Res> {
+class _$DeliveredMessagePayloadCopyWithImpl<$Res> implements $DeliveredMessagePayloadCopyWith<$Res> {
   _$DeliveredMessagePayloadCopyWithImpl(this._self, this._then);
 
   final DeliveredMessagePayload _self;

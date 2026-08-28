@@ -7,9 +7,7 @@ part of 'sync_request.dart';
 // **************************************************************************
 
 SyncRequest _$SyncRequestFromJson(Map<String, dynamic> json) => SyncRequest(
-  channelCids: (json['channel_cids'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  channelCids: (json['channel_cids'] as List<dynamic>).map((e) => e as String).toList(),
   lastSyncAt: const StreamDateTimeConverter().fromJson(
     json['last_sync_at'] as Object,
   ),

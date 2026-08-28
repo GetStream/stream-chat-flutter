@@ -43,24 +43,16 @@ mixin _$MessageModerationResult {
             (identical(other.action, action) || other.action == action) &&
             (identical(other.aiModerationResponse, aiModerationResponse) ||
                 other.aiModerationResponse == aiModerationResponse) &&
-            (identical(other.blockedWord, blockedWord) ||
-                other.blockedWord == blockedWord) &&
-            (identical(other.blocklistName, blocklistName) ||
-                other.blocklistName == blocklistName) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.messageId, messageId) ||
-                other.messageId == messageId) &&
-            (identical(other.moderatedBy, moderatedBy) ||
-                other.moderatedBy == moderatedBy) &&
+            (identical(other.blockedWord, blockedWord) || other.blockedWord == blockedWord) &&
+            (identical(other.blocklistName, blocklistName) || other.blocklistName == blocklistName) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.messageId, messageId) || other.messageId == messageId) &&
+            (identical(other.moderatedBy, moderatedBy) || other.moderatedBy == moderatedBy) &&
             (identical(other.moderationThresholds, moderationThresholds) ||
                 other.moderationThresholds == moderationThresholds) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
-            (identical(other.userBadKarma, userBadKarma) ||
-                other.userBadKarma == userBadKarma) &&
-            (identical(other.userKarma, userKarma) ||
-                other.userKarma == userKarma));
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
+            (identical(other.userBadKarma, userBadKarma) || other.userBadKarma == userBadKarma) &&
+            (identical(other.userKarma, userKarma) || other.userKarma == userKarma));
   }
 
   @override
@@ -108,8 +100,7 @@ abstract mixin class $MessageModerationResultCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MessageModerationResultCopyWithImpl<$Res>
-    implements $MessageModerationResultCopyWith<$Res> {
+class _$MessageModerationResultCopyWithImpl<$Res> implements $MessageModerationResultCopyWith<$Res> {
   _$MessageModerationResultCopyWithImpl(this._self, this._then);
 
   final MessageModerationResult _self;

@@ -74,8 +74,7 @@ abstract mixin class $QueryAppealsRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryAppealsRequestCopyWithImpl<$Res>
-    implements $QueryAppealsRequestCopyWith<$Res> {
+class _$QueryAppealsRequestCopyWithImpl<$Res> implements $QueryAppealsRequestCopyWith<$Res> {
   _$QueryAppealsRequestCopyWithImpl(this._self, this._then);
 
   final QueryAppealsRequest _self;

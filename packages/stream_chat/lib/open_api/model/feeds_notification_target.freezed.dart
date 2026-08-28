@@ -46,8 +46,7 @@ mixin _$FeedsNotificationTarget {
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
-            (identical(other.parentActivity, parentActivity) ||
-                other.parentActivity == parentActivity) &&
+            (identical(other.parentActivity, parentActivity) || other.parentActivity == parentActivity) &&
             (identical(other.text, text) || other.text == text) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(other.userId, userId) || other.userId == userId));
@@ -94,8 +93,7 @@ abstract mixin class $FeedsNotificationTargetCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FeedsNotificationTargetCopyWithImpl<$Res>
-    implements $FeedsNotificationTargetCopyWith<$Res> {
+class _$FeedsNotificationTargetCopyWithImpl<$Res> implements $FeedsNotificationTargetCopyWith<$Res> {
   _$FeedsNotificationTargetCopyWithImpl(this._self, this._then);
 
   final FeedsNotificationTarget _self;

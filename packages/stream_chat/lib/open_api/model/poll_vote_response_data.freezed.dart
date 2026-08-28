@@ -38,18 +38,13 @@ mixin _$PollVoteResponseData {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is PollVoteResponseData &&
-            (identical(other.answerText, answerText) ||
-                other.answerText == answerText) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.answerText, answerText) || other.answerText == answerText) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.isAnswer, isAnswer) ||
-                other.isAnswer == isAnswer) &&
-            (identical(other.optionId, optionId) ||
-                other.optionId == optionId) &&
+            (identical(other.isAnswer, isAnswer) || other.isAnswer == isAnswer) &&
+            (identical(other.optionId, optionId) || other.optionId == optionId) &&
             (identical(other.pollId, pollId) || other.pollId == pollId) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
             (identical(other.user, user) || other.user == user) &&
             (identical(other.userId, userId) || other.userId == userId));
   }
@@ -95,8 +90,7 @@ abstract mixin class $PollVoteResponseDataCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$PollVoteResponseDataCopyWithImpl<$Res>
-    implements $PollVoteResponseDataCopyWith<$Res> {
+class _$PollVoteResponseDataCopyWithImpl<$Res> implements $PollVoteResponseDataCopyWith<$Res> {
   _$PollVoteResponseDataCopyWithImpl(this._self, this._then);
 
   final PollVoteResponseData _self;

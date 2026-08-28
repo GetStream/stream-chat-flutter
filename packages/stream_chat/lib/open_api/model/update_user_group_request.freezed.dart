@@ -32,8 +32,7 @@ mixin _$UpdateUserGroupRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UpdateUserGroupRequest &&
-            (identical(other.description, description) ||
-                other.description == description) &&
+            (identical(other.description, description) || other.description == description) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.teamId, teamId) || other.teamId == teamId));
   }
@@ -58,8 +57,7 @@ abstract mixin class $UpdateUserGroupRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpdateUserGroupRequestCopyWithImpl<$Res>
-    implements $UpdateUserGroupRequestCopyWith<$Res> {
+class _$UpdateUserGroupRequestCopyWithImpl<$Res> implements $UpdateUserGroupRequestCopyWith<$Res> {
   _$UpdateUserGroupRequestCopyWithImpl(this._self, this._then);
 
   final UpdateUserGroupRequest _self;

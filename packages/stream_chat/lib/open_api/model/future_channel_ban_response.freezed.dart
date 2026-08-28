@@ -35,10 +35,8 @@ mixin _$FutureChannelBanResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is FutureChannelBanResponse &&
-            (identical(other.bannedBy, bannedBy) ||
-                other.bannedBy == bannedBy) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.bannedBy, bannedBy) || other.bannedBy == bannedBy) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             (identical(other.expires, expires) || other.expires == expires) &&
             (identical(other.reason, reason) || other.reason == reason) &&
             (identical(other.shadow, shadow) || other.shadow == shadow) &&
@@ -80,8 +78,7 @@ abstract mixin class $FutureChannelBanResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FutureChannelBanResponseCopyWithImpl<$Res>
-    implements $FutureChannelBanResponseCopyWith<$Res> {
+class _$FutureChannelBanResponseCopyWithImpl<$Res> implements $FutureChannelBanResponseCopyWith<$Res> {
   _$FutureChannelBanResponseCopyWithImpl(this._self, this._then);
 
   final FutureChannelBanResponse _self;

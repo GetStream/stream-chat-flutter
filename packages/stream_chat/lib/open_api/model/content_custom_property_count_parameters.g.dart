@@ -6,8 +6,7 @@ part of 'content_custom_property_count_parameters.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ContentCustomPropertyCountParameters
-_$ContentCustomPropertyCountParametersFromJson(Map<String, dynamic> json) =>
+ContentCustomPropertyCountParameters _$ContentCustomPropertyCountParametersFromJson(Map<String, dynamic> json) =>
     ContentCustomPropertyCountParameters(
       operator: json['operator'] as String?,
       propertyKey: json['property_key'] as String?,

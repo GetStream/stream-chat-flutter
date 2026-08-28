@@ -9,9 +9,7 @@ part of 'update_channel_partial_response.dart';
 UpdateChannelPartialResponse _$UpdateChannelPartialResponseFromJson(
   Map<String, dynamic> json,
 ) => UpdateChannelPartialResponse(
-  channel: json['channel'] == null
-      ? null
-      : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
+  channel: json['channel'] == null ? null : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
   duration: json['duration'] as String,
   members: (json['members'] as List<dynamic>)
       .map((e) => ChannelMemberResponse.fromJson(e as Map<String, dynamic>))

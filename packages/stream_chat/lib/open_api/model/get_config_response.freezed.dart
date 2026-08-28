@@ -20,11 +20,10 @@ mixin _$GetConfigResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $GetConfigResponseCopyWith<GetConfigResponse> get copyWith =>
-      _$GetConfigResponseCopyWithImpl<GetConfigResponse>(
-        this as GetConfigResponse,
-        _$identity,
-      );
+  $GetConfigResponseCopyWith<GetConfigResponse> get copyWith => _$GetConfigResponseCopyWithImpl<GetConfigResponse>(
+    this as GetConfigResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -32,8 +31,7 @@ mixin _$GetConfigResponse {
         (other.runtimeType == runtimeType &&
             other is GetConfigResponse &&
             (identical(other.config, config) || other.config == config) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -56,8 +54,7 @@ abstract mixin class $GetConfigResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$GetConfigResponseCopyWithImpl<$Res>
-    implements $GetConfigResponseCopyWith<$Res> {
+class _$GetConfigResponseCopyWithImpl<$Res> implements $GetConfigResponseCopyWith<$Res> {
   _$GetConfigResponseCopyWithImpl(this._self, this._then);
 
   final GetConfigResponse _self;

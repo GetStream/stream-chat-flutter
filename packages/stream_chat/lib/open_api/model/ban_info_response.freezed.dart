@@ -26,11 +26,10 @@ mixin _$BanInfoResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $BanInfoResponseCopyWith<BanInfoResponse> get copyWith =>
-      _$BanInfoResponseCopyWithImpl<BanInfoResponse>(
-        this as BanInfoResponse,
-        _$identity,
-      );
+  $BanInfoResponseCopyWith<BanInfoResponse> get copyWith => _$BanInfoResponseCopyWithImpl<BanInfoResponse>(
+    this as BanInfoResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -38,12 +37,9 @@ mixin _$BanInfoResponse {
         (other.runtimeType == runtimeType &&
             other is BanInfoResponse &&
             (identical(other.channel, channel) || other.channel == channel) &&
-            (identical(other.channelCid, channelCid) ||
-                other.channelCid == channelCid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.createdBy, createdBy) ||
-                other.createdBy == createdBy) &&
+            (identical(other.channelCid, channelCid) || other.channelCid == channelCid) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.createdBy, createdBy) || other.createdBy == createdBy) &&
             (identical(other.expires, expires) || other.expires == expires) &&
             (identical(other.reason, reason) || other.reason == reason) &&
             (identical(other.shadow, shadow) || other.shadow == shadow) &&
@@ -89,8 +85,7 @@ abstract mixin class $BanInfoResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$BanInfoResponseCopyWithImpl<$Res>
-    implements $BanInfoResponseCopyWith<$Res> {
+class _$BanInfoResponseCopyWithImpl<$Res> implements $BanInfoResponseCopyWith<$Res> {
   _$BanInfoResponseCopyWithImpl(this._self, this._then);
 
   final BanInfoResponse _self;

@@ -27,11 +27,10 @@ mixin _$TextRuleParameters {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $TextRuleParametersCopyWith<TextRuleParameters> get copyWith =>
-      _$TextRuleParametersCopyWithImpl<TextRuleParameters>(
-        this as TextRuleParameters,
-        _$identity,
-      );
+  $TextRuleParametersCopyWith<TextRuleParameters> get copyWith => _$TextRuleParametersCopyWithImpl<TextRuleParameters>(
+    this as TextRuleParameters,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -42,8 +41,7 @@ mixin _$TextRuleParameters {
               other.blocklistMatch,
               blocklistMatch,
             ) &&
-            (identical(other.containsUrl, containsUrl) ||
-                other.containsUrl == containsUrl) &&
+            (identical(other.containsUrl, containsUrl) || other.containsUrl == containsUrl) &&
             const DeepCollectionEquality().equals(
               other.harmLabels,
               harmLabels,
@@ -56,18 +54,14 @@ mixin _$TextRuleParameters {
                   other.semanticFilterMinThreshold,
                   semanticFilterMinThreshold,
                 ) ||
-                other.semanticFilterMinThreshold ==
-                    semanticFilterMinThreshold) &&
+                other.semanticFilterMinThreshold == semanticFilterMinThreshold) &&
             const DeepCollectionEquality().equals(
               other.semanticFilterNames,
               semanticFilterNames,
             ) &&
-            (identical(other.severity, severity) ||
-                other.severity == severity) &&
-            (identical(other.threshold, threshold) ||
-                other.threshold == threshold) &&
-            (identical(other.timeWindow, timeWindow) ||
-                other.timeWindow == timeWindow));
+            (identical(other.severity, severity) || other.severity == severity) &&
+            (identical(other.threshold, threshold) || other.threshold == threshold) &&
+            (identical(other.timeWindow, timeWindow) || other.timeWindow == timeWindow));
   }
 
   @override
@@ -111,8 +105,7 @@ abstract mixin class $TextRuleParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$TextRuleParametersCopyWithImpl<$Res>
-    implements $TextRuleParametersCopyWith<$Res> {
+class _$TextRuleParametersCopyWithImpl<$Res> implements $TextRuleParametersCopyWith<$Res> {
   _$TextRuleParametersCopyWithImpl(this._self, this._then);
 
   final TextRuleParameters _self;

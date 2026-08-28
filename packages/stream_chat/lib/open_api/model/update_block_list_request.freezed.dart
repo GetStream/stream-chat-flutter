@@ -39,8 +39,7 @@ mixin _$UpdateBlockListRequest {
                   other.isConfusableFoldingEnabled,
                   isConfusableFoldingEnabled,
                 ) ||
-                other.isConfusableFoldingEnabled ==
-                    isConfusableFoldingEnabled) &&
+                other.isConfusableFoldingEnabled == isConfusableFoldingEnabled) &&
             (identical(other.isLeetCheckEnabled, isLeetCheckEnabled) ||
                 other.isLeetCheckEnabled == isLeetCheckEnabled) &&
             (identical(other.isPluralCheckEnabled, isPluralCheckEnabled) ||
@@ -49,8 +48,7 @@ mixin _$UpdateBlockListRequest {
                   other.isSubstringMatchingEnabled,
                   isSubstringMatchingEnabled,
                 ) ||
-                other.isSubstringMatchingEnabled ==
-                    isSubstringMatchingEnabled) &&
+                other.isSubstringMatchingEnabled == isSubstringMatchingEnabled) &&
             (identical(other.team, team) || other.team == team) &&
             const DeepCollectionEquality().equals(other.words, words));
   }
@@ -90,8 +88,7 @@ abstract mixin class $UpdateBlockListRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpdateBlockListRequestCopyWithImpl<$Res>
-    implements $UpdateBlockListRequestCopyWith<$Res> {
+class _$UpdateBlockListRequestCopyWithImpl<$Res> implements $UpdateBlockListRequestCopyWith<$Res> {
   _$UpdateBlockListRequestCopyWithImpl(this._self, this._then);
 
   final UpdateBlockListRequest _self;

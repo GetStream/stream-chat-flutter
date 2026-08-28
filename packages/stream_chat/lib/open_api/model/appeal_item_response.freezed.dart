@@ -41,11 +41,10 @@ mixin _$AppealItemResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $AppealItemResponseCopyWith<AppealItemResponse> get copyWith =>
-      _$AppealItemResponseCopyWithImpl<AppealItemResponse>(
-        this as AppealItemResponse,
-        _$identity,
-      );
+  $AppealItemResponseCopyWith<AppealItemResponse> get copyWith => _$AppealItemResponseCopyWithImpl<AppealItemResponse>(
+    this as AppealItemResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -53,28 +52,19 @@ mixin _$AppealItemResponse {
         (other.runtimeType == runtimeType &&
             other is AppealItemResponse &&
             const DeepCollectionEquality().equals(other.actions, actions) &&
-            (identical(other.aiTextSeverity, aiTextSeverity) ||
-                other.aiTextSeverity == aiTextSeverity) &&
-            (identical(other.appealReason, appealReason) ||
-                other.appealReason == appealReason) &&
+            (identical(other.aiTextSeverity, aiTextSeverity) || other.aiTextSeverity == aiTextSeverity) &&
+            (identical(other.appealReason, appealReason) || other.appealReason == appealReason) &&
             const DeepCollectionEquality().equals(
               other.attachments,
               attachments,
             ) &&
-            (identical(other.channelCid, channelCid) ||
-                other.channelCid == channelCid) &&
-            (identical(other.configKey, configKey) ||
-                other.configKey == configKey) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.decisionReason, decisionReason) ||
-                other.decisionReason == decisionReason) &&
-            (identical(other.entityContent, entityContent) ||
-                other.entityContent == entityContent) &&
-            (identical(other.entityId, entityId) ||
-                other.entityId == entityId) &&
-            (identical(other.entityType, entityType) ||
-                other.entityType == entityType) &&
+            (identical(other.channelCid, channelCid) || other.channelCid == channelCid) &&
+            (identical(other.configKey, configKey) || other.configKey == configKey) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.decisionReason, decisionReason) || other.decisionReason == decisionReason) &&
+            (identical(other.entityContent, entityContent) || other.entityContent == entityContent) &&
+            (identical(other.entityId, entityId) || other.entityId == entityId) &&
+            (identical(other.entityType, entityType) || other.entityType == entityType) &&
             const DeepCollectionEquality().equals(
               other.flagLabels,
               flagLabels,
@@ -82,22 +72,17 @@ mixin _$AppealItemResponse {
             const DeepCollectionEquality().equals(other.flagTypes, flagTypes) &&
             const DeepCollectionEquality().equals(other.flags, flags) &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.moderationAction, moderationAction) ||
-                other.moderationAction == moderationAction) &&
+            (identical(other.moderationAction, moderationAction) || other.moderationAction == moderationAction) &&
             (identical(
                   other.originalModerationAction,
                   originalModerationAction,
                 ) ||
                 other.originalModerationAction == originalModerationAction) &&
-            (identical(other.recommendedAction, recommendedAction) ||
-                other.recommendedAction == recommendedAction) &&
-            (identical(other.reviewQueueItemId, reviewQueueItemId) ||
-                other.reviewQueueItemId == reviewQueueItemId) &&
-            (identical(other.severity, severity) ||
-                other.severity == severity) &&
+            (identical(other.recommendedAction, recommendedAction) || other.recommendedAction == recommendedAction) &&
+            (identical(other.reviewQueueItemId, reviewQueueItemId) || other.reviewQueueItemId == reviewQueueItemId) &&
+            (identical(other.severity, severity) || other.severity == severity) &&
             (identical(other.status, status) || other.status == status) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
             (identical(other.user, user) || other.user == user));
   }
 
@@ -170,8 +155,7 @@ abstract mixin class $AppealItemResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$AppealItemResponseCopyWithImpl<$Res>
-    implements $AppealItemResponseCopyWith<$Res> {
+class _$AppealItemResponseCopyWithImpl<$Res> implements $AppealItemResponseCopyWith<$Res> {
   _$AppealItemResponseCopyWithImpl(this._self, this._then);
 
   final AppealItemResponse _self;

@@ -15,9 +15,7 @@ CreateBlockListRequest _$CreateBlockListRequestFromJson(
   isSubstringMatchingEnabled: json['is_substring_matching_enabled'] as bool?,
   name: json['name'] as String,
   team: json['team'] as String?,
-  type: json['type'] == null
-      ? null
-      : CreateBlockListRequestType.fromJson(json['type'] as String),
+  type: json['type'] == null ? null : CreateBlockListRequestType.fromJson(json['type'] as String),
   words: (json['words'] as List<dynamic>).map((e) => e as String).toList(),
 );
 

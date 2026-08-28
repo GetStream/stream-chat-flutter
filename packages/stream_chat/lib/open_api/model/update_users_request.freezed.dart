@@ -19,11 +19,10 @@ mixin _$UpdateUsersRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UpdateUsersRequestCopyWith<UpdateUsersRequest> get copyWith =>
-      _$UpdateUsersRequestCopyWithImpl<UpdateUsersRequest>(
-        this as UpdateUsersRequest,
-        _$identity,
-      );
+  $UpdateUsersRequestCopyWith<UpdateUsersRequest> get copyWith => _$UpdateUsersRequestCopyWithImpl<UpdateUsersRequest>(
+    this as UpdateUsersRequest,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -34,8 +33,7 @@ mixin _$UpdateUsersRequest {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(users));
+  int get hashCode => Object.hash(runtimeType, const DeepCollectionEquality().hash(users));
 
   @override
   String toString() {
@@ -54,8 +52,7 @@ abstract mixin class $UpdateUsersRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpdateUsersRequestCopyWithImpl<$Res>
-    implements $UpdateUsersRequestCopyWith<$Res> {
+class _$UpdateUsersRequestCopyWithImpl<$Res> implements $UpdateUsersRequestCopyWith<$Res> {
   _$UpdateUsersRequestCopyWithImpl(this._self, this._then);
 
   final UpdateUsersRequest _self;

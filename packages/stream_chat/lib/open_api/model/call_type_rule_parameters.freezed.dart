@@ -30,8 +30,7 @@ mixin _$CallTypeRuleParameters {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is CallTypeRuleParameters &&
-            (identical(other.callType, callType) ||
-                other.callType == callType));
+            (identical(other.callType, callType) || other.callType == callType));
   }
 
   @override
@@ -54,8 +53,7 @@ abstract mixin class $CallTypeRuleParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$CallTypeRuleParametersCopyWithImpl<$Res>
-    implements $CallTypeRuleParametersCopyWith<$Res> {
+class _$CallTypeRuleParametersCopyWithImpl<$Res> implements $CallTypeRuleParametersCopyWith<$Res> {
   _$CallTypeRuleParametersCopyWithImpl(this._self, this._then);
 
   final CallTypeRuleParameters _self;

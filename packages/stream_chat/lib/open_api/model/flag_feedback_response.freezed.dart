@@ -32,11 +32,9 @@ mixin _$FlagFeedbackResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is FlagFeedbackResponse &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.labels, labels) &&
-            (identical(other.messageId, messageId) ||
-                other.messageId == messageId));
+            (identical(other.messageId, messageId) || other.messageId == messageId));
   }
 
   @override
@@ -64,8 +62,7 @@ abstract mixin class $FlagFeedbackResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FlagFeedbackResponseCopyWithImpl<$Res>
-    implements $FlagFeedbackResponseCopyWith<$Res> {
+class _$FlagFeedbackResponseCopyWithImpl<$Res> implements $FlagFeedbackResponseCopyWith<$Res> {
   _$FlagFeedbackResponseCopyWithImpl(this._self, this._then);
 
   final FlagFeedbackResponse _self;

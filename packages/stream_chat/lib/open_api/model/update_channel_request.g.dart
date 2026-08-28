@@ -10,16 +10,12 @@ UpdateChannelRequest _$UpdateChannelRequestFromJson(
   Map<String, dynamic> json,
 ) => UpdateChannelRequest(
   acceptInvite: json['accept_invite'] as bool?,
-  addFilterTags: (json['add_filter_tags'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  addFilterTags: (json['add_filter_tags'] as List<dynamic>?)?.map((e) => e as String).toList(),
   addMembers: (json['add_members'] as List<dynamic>?)
       ?.map((e) => ChannelMemberRequest.fromJson(e as Map<String, dynamic>))
       .toList(),
   cooldown: (json['cooldown'] as num?)?.toInt(),
-  data: json['data'] == null
-      ? null
-      : ChannelInputRequest.fromJson(json['data'] as Map<String, dynamic>),
+  data: json['data'] == null ? null : ChannelInputRequest.fromJson(json['data'] as Map<String, dynamic>),
   hideHistory: json['hide_history'] as bool?,
   hideHistoryBefore: _$JsonConverterFromJson<Object, DateTime>(
     json['hide_history_before'],
@@ -28,16 +24,10 @@ UpdateChannelRequest _$UpdateChannelRequestFromJson(
   invites: (json['invites'] as List<dynamic>?)
       ?.map((e) => ChannelMemberRequest.fromJson(e as Map<String, dynamic>))
       .toList(),
-  message: json['message'] == null
-      ? null
-      : MessageRequest.fromJson(json['message'] as Map<String, dynamic>),
+  message: json['message'] == null ? null : MessageRequest.fromJson(json['message'] as Map<String, dynamic>),
   rejectInvite: json['reject_invite'] as bool?,
-  removeFilterTags: (json['remove_filter_tags'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
-  removeMembers: (json['remove_members'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  removeFilterTags: (json['remove_filter_tags'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  removeMembers: (json['remove_members'] as List<dynamic>?)?.map((e) => e as String).toList(),
   skipPush: json['skip_push'] as bool?,
 );
 

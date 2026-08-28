@@ -48,19 +48,17 @@ mixin _$OwnUserResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $OwnUserResponseCopyWith<OwnUserResponse> get copyWith =>
-      _$OwnUserResponseCopyWithImpl<OwnUserResponse>(
-        this as OwnUserResponse,
-        _$identity,
-      );
+  $OwnUserResponseCopyWith<OwnUserResponse> get copyWith => _$OwnUserResponseCopyWithImpl<OwnUserResponse>(
+    this as OwnUserResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is OwnUserResponse &&
-            (identical(other.avgResponseTime, avgResponseTime) ||
-                other.avgResponseTime == avgResponseTime) &&
+            (identical(other.avgResponseTime, avgResponseTime) || other.avgResponseTime == avgResponseTime) &&
             (identical(other.banned, banned) || other.banned == banned) &&
             const DeepCollectionEquality().equals(
               other.blockedUserIds,
@@ -70,22 +68,16 @@ mixin _$OwnUserResponse {
               other.channelMutes,
               channelMutes,
             ) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.deactivatedAt, deactivatedAt) ||
-                other.deactivatedAt == deactivatedAt) &&
-            (identical(other.deletedAt, deletedAt) ||
-                other.deletedAt == deletedAt) &&
+            (identical(other.deactivatedAt, deactivatedAt) || other.deactivatedAt == deactivatedAt) &&
+            (identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt) &&
             const DeepCollectionEquality().equals(other.devices, devices) &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.image, image) || other.image == image) &&
-            (identical(other.invisible, invisible) ||
-                other.invisible == invisible) &&
-            (identical(other.language, language) ||
-                other.language == language) &&
-            (identical(other.lastActive, lastActive) ||
-                other.lastActive == lastActive) &&
+            (identical(other.invisible, invisible) || other.invisible == invisible) &&
+            (identical(other.language, language) || other.language == language) &&
+            (identical(other.lastActive, lastActive) || other.lastActive == lastActive) &&
             const DeepCollectionEquality().equals(
               other.latestHiddenChannels,
               latestHiddenChannels,
@@ -93,10 +85,8 @@ mixin _$OwnUserResponse {
             const DeepCollectionEquality().equals(other.mutes, mutes) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.online, online) || other.online == online) &&
-            (identical(other.privacySettings, privacySettings) ||
-                other.privacySettings == privacySettings) &&
-            (identical(other.pushPreferences, pushPreferences) ||
-                other.pushPreferences == pushPreferences) &&
+            (identical(other.privacySettings, privacySettings) || other.privacySettings == privacySettings) &&
+            (identical(other.pushPreferences, pushPreferences) || other.pushPreferences == pushPreferences) &&
             (identical(
                   other.revokeTokensIssuedBefore,
                   revokeTokensIssuedBefore,
@@ -105,20 +95,15 @@ mixin _$OwnUserResponse {
             (identical(other.role, role) || other.role == role) &&
             const DeepCollectionEquality().equals(other.teams, teams) &&
             const DeepCollectionEquality().equals(other.teamsRole, teamsRole) &&
-            (identical(other.totalUnreadCount, totalUnreadCount) ||
-                other.totalUnreadCount == totalUnreadCount) &&
+            (identical(other.totalUnreadCount, totalUnreadCount) || other.totalUnreadCount == totalUnreadCount) &&
             const DeepCollectionEquality().equals(
               other.totalUnreadCountByTeam,
               totalUnreadCountByTeam,
             ) &&
-            (identical(other.unreadChannels, unreadChannels) ||
-                other.unreadChannels == unreadChannels) &&
-            (identical(other.unreadCount, unreadCount) ||
-                other.unreadCount == unreadCount) &&
-            (identical(other.unreadThreads, unreadThreads) ||
-                other.unreadThreads == unreadThreads) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+            (identical(other.unreadChannels, unreadChannels) || other.unreadChannels == unreadChannels) &&
+            (identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount) &&
+            (identical(other.unreadThreads, unreadThreads) || other.unreadThreads == unreadThreads) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
   }
 
   @override
@@ -204,8 +189,7 @@ abstract mixin class $OwnUserResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$OwnUserResponseCopyWithImpl<$Res>
-    implements $OwnUserResponseCopyWith<$Res> {
+class _$OwnUserResponseCopyWithImpl<$Res> implements $OwnUserResponseCopyWith<$Res> {
   _$OwnUserResponseCopyWithImpl(this._self, this._then);
 
   final OwnUserResponse _self;

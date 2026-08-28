@@ -13,17 +13,13 @@ SubmitActionRequest _$SubmitActionRequestFromJson(
     json['action_type'] as String,
   ),
   appealId: json['appeal_id'] as String?,
-  ban: json['ban'] == null
-      ? null
-      : BanActionRequestPayload.fromJson(json['ban'] as Map<String, dynamic>),
+  ban: json['ban'] == null ? null : BanActionRequestPayload.fromJson(json['ban'] as Map<String, dynamic>),
   block: json['block'] == null
       ? null
       : BlockActionRequestPayload.fromJson(
           json['block'] as Map<String, dynamic>,
         ),
-  bypass: json['bypass'] == null
-      ? null
-      : BypassActionRequest.fromJson(json['bypass'] as Map<String, dynamic>),
+  bypass: json['bypass'] == null ? null : BypassActionRequest.fromJson(json['bypass'] as Map<String, dynamic>),
   custom: json['custom'] == null
       ? null
       : CustomActionRequestPayload.fromJson(
@@ -59,12 +55,8 @@ SubmitActionRequest _$SubmitActionRequestFromJson(
       : DeleteUserMessagesRequestPayload.fromJson(
           json['delete_user_messages'] as Map<String, dynamic>,
         ),
-  escalate: json['escalate'] == null
-      ? null
-      : EscalatePayload.fromJson(json['escalate'] as Map<String, dynamic>),
-  flag: json['flag'] == null
-      ? null
-      : FlagRequest.fromJson(json['flag'] as Map<String, dynamic>),
+  escalate: json['escalate'] == null ? null : EscalatePayload.fromJson(json['escalate'] as Map<String, dynamic>),
+  flag: json['flag'] == null ? null : FlagRequest.fromJson(json['flag'] as Map<String, dynamic>),
   itemId: json['item_id'] as String?,
   markReviewed: json['mark_reviewed'] == null
       ? null

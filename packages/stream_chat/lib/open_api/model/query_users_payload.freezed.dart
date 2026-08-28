@@ -24,11 +24,10 @@ mixin _$QueryUsersPayload {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $QueryUsersPayloadCopyWith<QueryUsersPayload> get copyWith =>
-      _$QueryUsersPayloadCopyWithImpl<QueryUsersPayload>(
-        this as QueryUsersPayload,
-        _$identity,
-      );
+  $QueryUsersPayloadCopyWith<QueryUsersPayload> get copyWith => _$QueryUsersPayloadCopyWithImpl<QueryUsersPayload>(
+    this as QueryUsersPayload,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -46,8 +45,7 @@ mixin _$QueryUsersPayload {
                 other.includeDeactivatedUsers == includeDeactivatedUsers) &&
             (identical(other.limit, limit) || other.limit == limit) &&
             (identical(other.offset, offset) || other.offset == offset) &&
-            (identical(other.presence, presence) ||
-                other.presence == presence) &&
+            (identical(other.presence, presence) || other.presence == presence) &&
             const DeepCollectionEquality().equals(other.sort, sort));
   }
 
@@ -86,8 +84,7 @@ abstract mixin class $QueryUsersPayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryUsersPayloadCopyWithImpl<$Res>
-    implements $QueryUsersPayloadCopyWith<$Res> {
+class _$QueryUsersPayloadCopyWithImpl<$Res> implements $QueryUsersPayloadCopyWith<$Res> {
   _$QueryUsersPayloadCopyWithImpl(this._self, this._then);
 
   final QueryUsersPayload _self;

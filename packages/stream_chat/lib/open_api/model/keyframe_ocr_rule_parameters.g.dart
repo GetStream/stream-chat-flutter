@@ -9,9 +9,7 @@ part of 'keyframe_ocr_rule_parameters.dart';
 KeyframeOCRRuleParameters _$KeyframeOCRRuleParametersFromJson(
   Map<String, dynamic> json,
 ) => KeyframeOCRRuleParameters(
-  harmLabels: (json['harm_labels'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  harmLabels: (json['harm_labels'] as List<dynamic>?)?.map((e) => e as String).toList(),
   threshold: (json['threshold'] as num?)?.toInt(),
   timeWindow: json['time_window'] as String?,
 );

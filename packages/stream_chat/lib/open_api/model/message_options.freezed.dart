@@ -20,11 +20,10 @@ mixin _$MessageOptions {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $MessageOptionsCopyWith<MessageOptions> get copyWith =>
-      _$MessageOptionsCopyWithImpl<MessageOptions>(
-        this as MessageOptions,
-        _$identity,
-      );
+  $MessageOptionsCopyWith<MessageOptions> get copyWith => _$MessageOptionsCopyWithImpl<MessageOptions>(
+    this as MessageOptions,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -69,8 +68,7 @@ abstract mixin class $MessageOptionsCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MessageOptionsCopyWithImpl<$Res>
-    implements $MessageOptionsCopyWith<$Res> {
+class _$MessageOptionsCopyWithImpl<$Res> implements $MessageOptionsCopyWith<$Res> {
   _$MessageOptionsCopyWithImpl(this._self, this._then);
 
   final MessageOptions _self;

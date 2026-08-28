@@ -23,19 +23,17 @@ mixin _$CreateQueueRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $CreateQueueRequestCopyWith<CreateQueueRequest> get copyWith =>
-      _$CreateQueueRequestCopyWithImpl<CreateQueueRequest>(
-        this as CreateQueueRequest,
-        _$identity,
-      );
+  $CreateQueueRequestCopyWith<CreateQueueRequest> get copyWith => _$CreateQueueRequestCopyWithImpl<CreateQueueRequest>(
+    this as CreateQueueRequest,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is CreateQueueRequest &&
-            (identical(other.description, description) ||
-                other.description == description) &&
+            (identical(other.description, description) || other.description == description) &&
             const DeepCollectionEquality().equals(other.filters, filters) &&
             (identical(other.name, name) || other.name == name) &&
             const DeepCollectionEquality().equals(other.sort, sort) &&
@@ -75,8 +73,7 @@ abstract mixin class $CreateQueueRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$CreateQueueRequestCopyWithImpl<$Res>
-    implements $CreateQueueRequestCopyWith<$Res> {
+class _$CreateQueueRequestCopyWithImpl<$Res> implements $CreateQueueRequestCopyWith<$Res> {
   _$CreateQueueRequestCopyWithImpl(this._self, this._then);
 
   final CreateQueueRequest _self;

@@ -12,22 +12,12 @@ ReviewQueueItemResponse _$ReviewQueueItemResponseFromJson(
   actions: (json['actions'] as List<dynamic>)
       .map((e) => ActionLogResponse.fromJson(e as Map<String, dynamic>))
       .toList(),
-  activity: json['activity'] == null
-      ? null
-      : EnrichedActivity.fromJson(json['activity'] as Map<String, dynamic>),
+  activity: json['activity'] == null ? null : EnrichedActivity.fromJson(json['activity'] as Map<String, dynamic>),
   aiTextSeverity: json['ai_text_severity'] as String,
-  appeal: json['appeal'] == null
-      ? null
-      : AppealItemResponse.fromJson(json['appeal'] as Map<String, dynamic>),
-  assignedTo: json['assigned_to'] == null
-      ? null
-      : UserResponse.fromJson(json['assigned_to'] as Map<String, dynamic>),
-  bans: (json['bans'] as List<dynamic>)
-      .map((e) => BanInfoResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
-  call: json['call'] == null
-      ? null
-      : ModerationCallResponse.fromJson(json['call'] as Map<String, dynamic>),
+  appeal: json['appeal'] == null ? null : AppealItemResponse.fromJson(json['appeal'] as Map<String, dynamic>),
+  assignedTo: json['assigned_to'] == null ? null : UserResponse.fromJson(json['assigned_to'] as Map<String, dynamic>),
+  bans: (json['bans'] as List<dynamic>).map((e) => BanInfoResponse.fromJson(e as Map<String, dynamic>)).toList(),
+  call: json['call'] == null ? null : ModerationCallResponse.fromJson(json['call'] as Map<String, dynamic>),
   completedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['completed_at'],
     const StreamDateTimeConverter().fromJson,
@@ -78,21 +68,15 @@ ReviewQueueItemResponse _$ReviewQueueItemResponseFromJson(
       .toList(),
   flagsCount: (json['flags_count'] as num).toInt(),
   id: json['id'] as String,
-  languages: (json['languages'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  languages: (json['languages'] as List<dynamic>).map((e) => e as String).toList(),
   latestModeratorAction: json['latest_moderator_action'] as String,
-  message: json['message'] == null
-      ? null
-      : ChatMessageResponse.fromJson(json['message'] as Map<String, dynamic>),
+  message: json['message'] == null ? null : ChatMessageResponse.fromJson(json['message'] as Map<String, dynamic>),
   moderationPayload: json['moderation_payload'] == null
       ? null
       : ModerationPayloadResponse.fromJson(
           json['moderation_payload'] as Map<String, dynamic>,
         ),
-  reaction: json['reaction'] == null
-      ? null
-      : Reaction.fromJson(json['reaction'] as Map<String, dynamic>),
+  reaction: json['reaction'] == null ? null : Reaction.fromJson(json['reaction'] as Map<String, dynamic>),
   recommendedAction: json['recommended_action'] as String,
   reviewedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['reviewed_at'],

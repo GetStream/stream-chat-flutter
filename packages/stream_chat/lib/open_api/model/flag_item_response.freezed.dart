@@ -20,19 +20,17 @@ mixin _$FlagItemResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $FlagItemResponseCopyWith<FlagItemResponse> get copyWith =>
-      _$FlagItemResponseCopyWithImpl<FlagItemResponse>(
-        this as FlagItemResponse,
-        _$identity,
-      );
+  $FlagItemResponseCopyWith<FlagItemResponse> get copyWith => _$FlagItemResponseCopyWithImpl<FlagItemResponse>(
+    this as FlagItemResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is FlagItemResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.itemId, itemId) || other.itemId == itemId));
   }
 
@@ -56,8 +54,7 @@ abstract mixin class $FlagItemResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FlagItemResponseCopyWithImpl<$Res>
-    implements $FlagItemResponseCopyWith<$Res> {
+class _$FlagItemResponseCopyWithImpl<$Res> implements $FlagItemResponseCopyWith<$Res> {
   _$FlagItemResponseCopyWithImpl(this._self, this._then);
 
   final FlagItemResponse _self;

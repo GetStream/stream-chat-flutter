@@ -32,8 +32,7 @@ mixin _$DeleteChannelResponse {
         (other.runtimeType == runtimeType &&
             other is DeleteChannelResponse &&
             (identical(other.channel, channel) || other.channel == channel) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -56,8 +55,7 @@ abstract mixin class $DeleteChannelResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$DeleteChannelResponseCopyWithImpl<$Res>
-    implements $DeleteChannelResponseCopyWith<$Res> {
+class _$DeleteChannelResponseCopyWithImpl<$Res> implements $DeleteChannelResponseCopyWith<$Res> {
   _$DeleteChannelResponseCopyWithImpl(this._self, this._then);
 
   final DeleteChannelResponse _self;

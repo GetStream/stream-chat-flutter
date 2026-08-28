@@ -18,9 +18,7 @@ ModerationQueueResponse _$ModerationQueueResponseFromJson(
   id: json['id'] as String,
   itemCount: (json['item_count'] as num).toInt(),
   name: json['name'] as String,
-  sort: (json['sort'] as List<dynamic>)
-      .map((e) => e as Map<String, dynamic>)
-      .toList(),
+  sort: (json['sort'] as List<dynamic>).map((e) => e as Map<String, dynamic>).toList(),
   type: json['type'] as String,
   updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,

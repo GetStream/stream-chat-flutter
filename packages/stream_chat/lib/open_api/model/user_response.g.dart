@@ -9,9 +9,7 @@ part of 'user_response.dart';
 UserResponse _$UserResponseFromJson(Map<String, dynamic> json) => UserResponse(
   avgResponseTime: (json['avg_response_time'] as num?)?.toInt(),
   banned: json['banned'] as bool,
-  blockedUserIds: (json['blocked_user_ids'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  blockedUserIds: (json['blocked_user_ids'] as List<dynamic>).map((e) => e as String).toList(),
   createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
@@ -47,39 +45,38 @@ UserResponse _$UserResponseFromJson(Map<String, dynamic> json) => UserResponse(
   ),
 );
 
-Map<String, dynamic> _$UserResponseToJson(UserResponse instance) =>
-    <String, dynamic>{
-      'avg_response_time': instance.avgResponseTime,
-      'banned': instance.banned,
-      'blocked_user_ids': instance.blockedUserIds,
-      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
-      'custom': instance.custom,
-      'deactivated_at': _$JsonConverterToJson<Object, DateTime>(
-        instance.deactivatedAt,
-        const StreamDateTimeConverter().toJson,
-      ),
-      'deleted_at': _$JsonConverterToJson<Object, DateTime>(
-        instance.deletedAt,
-        const StreamDateTimeConverter().toJson,
-      ),
-      'id': instance.id,
-      'image': instance.image,
-      'language': instance.language,
-      'last_active': _$JsonConverterToJson<Object, DateTime>(
-        instance.lastActive,
-        const StreamDateTimeConverter().toJson,
-      ),
-      'name': instance.name,
-      'online': instance.online,
-      'revoke_tokens_issued_before': _$JsonConverterToJson<Object, DateTime>(
-        instance.revokeTokensIssuedBefore,
-        const StreamDateTimeConverter().toJson,
-      ),
-      'role': instance.role,
-      'teams': instance.teams,
-      'teams_role': instance.teamsRole,
-      'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
-    };
+Map<String, dynamic> _$UserResponseToJson(UserResponse instance) => <String, dynamic>{
+  'avg_response_time': instance.avgResponseTime,
+  'banned': instance.banned,
+  'blocked_user_ids': instance.blockedUserIds,
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
+  'custom': instance.custom,
+  'deactivated_at': _$JsonConverterToJson<Object, DateTime>(
+    instance.deactivatedAt,
+    const StreamDateTimeConverter().toJson,
+  ),
+  'deleted_at': _$JsonConverterToJson<Object, DateTime>(
+    instance.deletedAt,
+    const StreamDateTimeConverter().toJson,
+  ),
+  'id': instance.id,
+  'image': instance.image,
+  'language': instance.language,
+  'last_active': _$JsonConverterToJson<Object, DateTime>(
+    instance.lastActive,
+    const StreamDateTimeConverter().toJson,
+  ),
+  'name': instance.name,
+  'online': instance.online,
+  'revoke_tokens_issued_before': _$JsonConverterToJson<Object, DateTime>(
+    instance.revokeTokensIssuedBefore,
+    const StreamDateTimeConverter().toJson,
+  ),
+  'role': instance.role,
+  'teams': instance.teams,
+  'teams_role': instance.teamsRole,
+  'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
+};
 
 Value? _$JsonConverterFromJson<Json, Value>(
   Object? json,

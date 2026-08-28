@@ -35,8 +35,7 @@ mixin _$SharedLocationsResponse {
               other.activeLiveLocations,
               activeLiveLocations,
             ) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -66,8 +65,7 @@ abstract mixin class $SharedLocationsResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$SharedLocationsResponseCopyWithImpl<$Res>
-    implements $SharedLocationsResponseCopyWith<$Res> {
+class _$SharedLocationsResponseCopyWithImpl<$Res> implements $SharedLocationsResponseCopyWith<$Res> {
   _$SharedLocationsResponseCopyWithImpl(this._self, this._then);
 
   final SharedLocationsResponse _self;

@@ -13,9 +13,7 @@ QueryMessageFlagsPayload _$QueryMessageFlagsPayloadFromJson(
   limit: (json['limit'] as num?)?.toInt(),
   offset: (json['offset'] as num?)?.toInt(),
   showDeletedMessages: json['show_deleted_messages'] as bool?,
-  sort: (json['sort'] as List<dynamic>?)
-      ?.map((e) => SortParamRequest.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  sort: (json['sort'] as List<dynamic>?)?.map((e) => SortParamRequest.fromJson(e as Map<String, dynamic>)).toList(),
 );
 
 Map<String, dynamic> _$QueryMessageFlagsPayloadToJson(

@@ -31,8 +31,7 @@ mixin _$SearchUserGroupsResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is SearchUserGroupsResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             const DeepCollectionEquality().equals(
               other.userGroups,
               userGroups,
@@ -63,8 +62,7 @@ abstract mixin class $SearchUserGroupsResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$SearchUserGroupsResponseCopyWithImpl<$Res>
-    implements $SearchUserGroupsResponseCopyWith<$Res> {
+class _$SearchUserGroupsResponseCopyWithImpl<$Res> implements $SearchUserGroupsResponseCopyWith<$Res> {
   _$SearchUserGroupsResponseCopyWithImpl(this._self, this._then);
 
   final SearchUserGroupsResponse _self;

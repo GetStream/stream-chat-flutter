@@ -19,19 +19,17 @@ mixin _$HideChannelRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $HideChannelRequestCopyWith<HideChannelRequest> get copyWith =>
-      _$HideChannelRequestCopyWithImpl<HideChannelRequest>(
-        this as HideChannelRequest,
-        _$identity,
-      );
+  $HideChannelRequestCopyWith<HideChannelRequest> get copyWith => _$HideChannelRequestCopyWithImpl<HideChannelRequest>(
+    this as HideChannelRequest,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is HideChannelRequest &&
-            (identical(other.clearHistory, clearHistory) ||
-                other.clearHistory == clearHistory));
+            (identical(other.clearHistory, clearHistory) || other.clearHistory == clearHistory));
   }
 
   @override
@@ -54,8 +52,7 @@ abstract mixin class $HideChannelRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$HideChannelRequestCopyWithImpl<$Res>
-    implements $HideChannelRequestCopyWith<$Res> {
+class _$HideChannelRequestCopyWithImpl<$Res> implements $HideChannelRequestCopyWith<$Res> {
   _$HideChannelRequestCopyWithImpl(this._self, this._then);
 
   final HideChannelRequest _self;

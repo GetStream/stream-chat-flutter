@@ -49,23 +49,18 @@ mixin _$ChannelUpdatedEvent {
               other.channelCustom,
               channelCustom,
             ) &&
-            (identical(other.channelId, channelId) ||
-                other.channelId == channelId) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
             (identical(other.channelMemberCount, channelMemberCount) ||
                 other.channelMemberCount == channelMemberCount) &&
             (identical(other.channelMessageCount, channelMessageCount) ||
                 other.channelMessageCount == channelMessageCount) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.message, message) || other.message == message) &&
-            (identical(other.messageId, messageId) ||
-                other.messageId == messageId) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.messageId, messageId) || other.messageId == messageId) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.team, team) || other.team == team) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(other.user, user) || other.user == user));
@@ -124,8 +119,7 @@ abstract mixin class $ChannelUpdatedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChannelUpdatedEventCopyWithImpl<$Res>
-    implements $ChannelUpdatedEventCopyWith<$Res> {
+class _$ChannelUpdatedEventCopyWithImpl<$Res> implements $ChannelUpdatedEventCopyWith<$Res> {
   _$ChannelUpdatedEventCopyWithImpl(this._self, this._then);
 
   final ChannelUpdatedEvent _self;

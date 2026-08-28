@@ -35,11 +35,10 @@ mixin _$ReactionNewEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ReactionNewEventCopyWith<ReactionNewEvent> get copyWith =>
-      _$ReactionNewEventCopyWithImpl<ReactionNewEvent>(
-        this as ReactionNewEvent,
-        _$identity,
-      );
+  $ReactionNewEventCopyWith<ReactionNewEvent> get copyWith => _$ReactionNewEventCopyWithImpl<ReactionNewEvent>(
+    this as ReactionNewEvent,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -51,25 +50,19 @@ mixin _$ReactionNewEvent {
               other.channelCustom,
               channelCustom,
             ) &&
-            (identical(other.channelId, channelId) ||
-                other.channelId == channelId) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
             (identical(other.channelMemberCount, channelMemberCount) ||
                 other.channelMemberCount == channelMemberCount) &&
             (identical(other.channelMessageCount, channelMessageCount) ||
                 other.channelMessageCount == channelMessageCount) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.message, message) || other.message == message) &&
-            (identical(other.messageId, messageId) ||
-                other.messageId == messageId) &&
-            (identical(other.reaction, reaction) ||
-                other.reaction == reaction) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.messageId, messageId) || other.messageId == messageId) &&
+            (identical(other.reaction, reaction) || other.reaction == reaction) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.team, team) || other.team == team) &&
             const DeepCollectionEquality().equals(
               other.threadParticipants,
@@ -136,8 +129,7 @@ abstract mixin class $ReactionNewEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ReactionNewEventCopyWithImpl<$Res>
-    implements $ReactionNewEventCopyWith<$Res> {
+class _$ReactionNewEventCopyWithImpl<$Res> implements $ReactionNewEventCopyWith<$Res> {
   _$ReactionNewEventCopyWithImpl(this._self, this._then);
 
   final ReactionNewEvent _self;

@@ -22,32 +22,25 @@ mixin _$ContentCustomPropertyCountParameters {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ContentCustomPropertyCountParametersCopyWith<
-    ContentCustomPropertyCountParameters
-  >
-  get copyWith =>
-      _$ContentCustomPropertyCountParametersCopyWithImpl<
-        ContentCustomPropertyCountParameters
-      >(this as ContentCustomPropertyCountParameters, _$identity);
+  $ContentCustomPropertyCountParametersCopyWith<ContentCustomPropertyCountParameters> get copyWith =>
+      _$ContentCustomPropertyCountParametersCopyWithImpl<ContentCustomPropertyCountParameters>(
+        this as ContentCustomPropertyCountParameters,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ContentCustomPropertyCountParameters &&
-            (identical(other.operator, operator) ||
-                other.operator == operator) &&
-            (identical(other.propertyKey, propertyKey) ||
-                other.propertyKey == propertyKey) &&
-            (identical(other.threshold, threshold) ||
-                other.threshold == threshold) &&
-            (identical(other.timeWindow, timeWindow) ||
-                other.timeWindow == timeWindow));
+            (identical(other.operator, operator) || other.operator == operator) &&
+            (identical(other.propertyKey, propertyKey) || other.propertyKey == propertyKey) &&
+            (identical(other.threshold, threshold) || other.threshold == threshold) &&
+            (identical(other.timeWindow, timeWindow) || other.timeWindow == timeWindow));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, operator, propertyKey, threshold, timeWindow);
+  int get hashCode => Object.hash(runtimeType, operator, propertyKey, threshold, timeWindow);
 
   @override
   String toString() {

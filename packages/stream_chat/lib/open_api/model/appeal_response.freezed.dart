@@ -20,21 +20,18 @@ mixin _$AppealResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $AppealResponseCopyWith<AppealResponse> get copyWith =>
-      _$AppealResponseCopyWithImpl<AppealResponse>(
-        this as AppealResponse,
-        _$identity,
-      );
+  $AppealResponseCopyWith<AppealResponse> get copyWith => _$AppealResponseCopyWithImpl<AppealResponse>(
+    this as AppealResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is AppealResponse &&
-            (identical(other.appealId, appealId) ||
-                other.appealId == appealId) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.appealId, appealId) || other.appealId == appealId) &&
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -57,8 +54,7 @@ abstract mixin class $AppealResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$AppealResponseCopyWithImpl<$Res>
-    implements $AppealResponseCopyWith<$Res> {
+class _$AppealResponseCopyWithImpl<$Res> implements $AppealResponseCopyWith<$Res> {
   _$AppealResponseCopyWithImpl(this._self, this._then);
 
   final AppealResponse _self;

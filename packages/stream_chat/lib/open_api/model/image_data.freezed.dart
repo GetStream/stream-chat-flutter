@@ -23,8 +23,7 @@ mixin _$ImageData {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ImageDataCopyWith<ImageData> get copyWith =>
-      _$ImageDataCopyWithImpl<ImageData>(this as ImageData, _$identity);
+  $ImageDataCopyWith<ImageData> get copyWith => _$ImageDataCopyWithImpl<ImageData>(this as ImageData, _$identity);
 
   @override
   bool operator ==(Object other) {
@@ -39,8 +38,7 @@ mixin _$ImageData {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, frames, height, size, url, width);
+  int get hashCode => Object.hash(runtimeType, frames, height, size, url, width);
 
   @override
   String toString() {
@@ -50,8 +48,7 @@ mixin _$ImageData {
 
 /// @nodoc
 abstract mixin class $ImageDataCopyWith<$Res> {
-  factory $ImageDataCopyWith(ImageData value, $Res Function(ImageData) _then) =
-      _$ImageDataCopyWithImpl;
+  factory $ImageDataCopyWith(ImageData value, $Res Function(ImageData) _then) = _$ImageDataCopyWithImpl;
   @useResult
   $Res call({
     String frames,

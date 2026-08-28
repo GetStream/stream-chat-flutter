@@ -12,9 +12,7 @@ SearchResultMessage _$SearchResultMessageFromJson(
   attachments: (json['attachments'] as List<dynamic>)
       .map((e) => Attachment.fromJson(e as Map<String, dynamic>))
       .toList(),
-  channel: json['channel'] == null
-      ? null
-      : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
+  channel: json['channel'] == null ? null : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
   cid: json['cid'] as String,
   command: json['command'] as String?,
   createdAt: const StreamDateTimeConverter().fromJson(
@@ -27,17 +25,14 @@ SearchResultMessage _$SearchResultMessageFromJson(
   ),
   deletedForMe: json['deleted_for_me'] as bool?,
   deletedReplyCount: (json['deleted_reply_count'] as num).toInt(),
-  draft: json['draft'] == null
-      ? null
-      : DraftResponse.fromJson(json['draft'] as Map<String, dynamic>),
+  draft: json['draft'] == null ? null : DraftResponse.fromJson(json['draft'] as Map<String, dynamic>),
   html: json['html'] as String,
   i18n: (json['i18n'] as Map<String, dynamic>?)?.map(
     (k, e) => MapEntry(k, e as String),
   ),
   id: json['id'] as String,
   imageLabels: (json['image_labels'] as Map<String, dynamic>?)?.map(
-    (k, e) =>
-        MapEntry(k, (e as List<dynamic>).map((e) => e as String).toList()),
+    (k, e) => MapEntry(k, (e as List<dynamic>).map((e) => e as String).toList()),
   ),
   latestReactions: (json['latest_reactions'] as List<dynamic>)
       .map((e) => ReactionResponse.fromJson(e as Map<String, dynamic>))
@@ -48,23 +43,18 @@ SearchResultMessage _$SearchResultMessageFromJson(
           json['member'] as Map<String, dynamic>,
         ),
   mentionedChannel: json['mentioned_channel'] as bool,
-  mentionedChannelMembers:
-      (json['mentioned_channel_members'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(
-          k,
-          ChannelMemberPartialResponse.fromJson(e as Map<String, dynamic>),
-        ),
-      ),
-  mentionedGroupIds: (json['mentioned_group_ids'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  mentionedChannelMembers: (json['mentioned_channel_members'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(
+      k,
+      ChannelMemberPartialResponse.fromJson(e as Map<String, dynamic>),
+    ),
+  ),
+  mentionedGroupIds: (json['mentioned_group_ids'] as List<dynamic>?)?.map((e) => e as String).toList(),
   mentionedGroups: (json['mentioned_groups'] as List<dynamic>?)
       ?.map((e) => UserGroupResponse.fromJson(e as Map<String, dynamic>))
       .toList(),
   mentionedHere: json['mentioned_here'] as bool,
-  mentionedRoles: (json['mentioned_roles'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  mentionedRoles: (json['mentioned_roles'] as List<dynamic>?)?.map((e) => e as String).toList(),
   mentionedUsers: (json['mentioned_users'] as List<dynamic>)
       .map((e) => UserResponse.fromJson(e as Map<String, dynamic>))
       .toList(),
@@ -91,12 +81,8 @@ SearchResultMessage _$SearchResultMessageFromJson(
     json['pinned_at'],
     const StreamDateTimeConverter().fromJson,
   ),
-  pinnedBy: json['pinned_by'] == null
-      ? null
-      : UserResponse.fromJson(json['pinned_by'] as Map<String, dynamic>),
-  poll: json['poll'] == null
-      ? null
-      : PollResponseData.fromJson(json['poll'] as Map<String, dynamic>),
+  pinnedBy: json['pinned_by'] == null ? null : UserResponse.fromJson(json['pinned_by'] as Map<String, dynamic>),
+  poll: json['poll'] == null ? null : PollResponseData.fromJson(json['poll'] as Map<String, dynamic>),
   pollId: json['poll_id'] as String?,
   quotedMessage: json['quoted_message'] == null
       ? null
@@ -106,17 +92,12 @@ SearchResultMessage _$SearchResultMessageFromJson(
   quotedMessageId: json['quoted_message_id'] as String?,
   reactionCounts: Map<String, int>.from(json['reaction_counts'] as Map),
   reactionGroups: (json['reaction_groups'] as Map<String, dynamic>?)?.map(
-    (k, e) =>
-        MapEntry(k, ReactionGroupResponse.fromJson(e as Map<String, dynamic>)),
+    (k, e) => MapEntry(k, ReactionGroupResponse.fromJson(e as Map<String, dynamic>)),
   ),
   reactionScores: Map<String, int>.from(json['reaction_scores'] as Map),
-  reminder: json['reminder'] == null
-      ? null
-      : ReminderResponseData.fromJson(json['reminder'] as Map<String, dynamic>),
+  reminder: json['reminder'] == null ? null : ReminderResponseData.fromJson(json['reminder'] as Map<String, dynamic>),
   replyCount: (json['reply_count'] as num).toInt(),
-  restrictedVisibility: (json['restricted_visibility'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  restrictedVisibility: (json['restricted_visibility'] as List<dynamic>).map((e) => e as String).toList(),
   shadowed: json['shadowed'] as bool,
   sharedLocation: json['shared_location'] == null
       ? null
@@ -202,9 +183,7 @@ Map<String, dynamic> _$SearchResultMessageToJson(
   'show_in_channel': instance.showInChannel,
   'silent': instance.silent,
   'text': instance.text,
-  'thread_participants': instance.threadParticipants
-      ?.map((e) => e.toJson())
-      .toList(),
+  'thread_participants': instance.threadParticipants?.map((e) => e.toJson()).toList(),
   'type': instance.type,
   'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
   'user': instance.user.toJson(),

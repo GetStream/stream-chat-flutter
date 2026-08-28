@@ -20,8 +20,7 @@ mixin _$UpdateThreadPartialRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UpdateThreadPartialRequestCopyWith<UpdateThreadPartialRequest>
-  get copyWith =>
+  $UpdateThreadPartialRequestCopyWith<UpdateThreadPartialRequest> get copyWith =>
       _$UpdateThreadPartialRequestCopyWithImpl<UpdateThreadPartialRequest>(
         this as UpdateThreadPartialRequest,
         _$identity,
@@ -60,8 +59,7 @@ abstract mixin class $UpdateThreadPartialRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpdateThreadPartialRequestCopyWithImpl<$Res>
-    implements $UpdateThreadPartialRequestCopyWith<$Res> {
+class _$UpdateThreadPartialRequestCopyWithImpl<$Res> implements $UpdateThreadPartialRequestCopyWith<$Res> {
   _$UpdateThreadPartialRequestCopyWithImpl(this._self, this._then);
 
   final UpdateThreadPartialRequest _self;

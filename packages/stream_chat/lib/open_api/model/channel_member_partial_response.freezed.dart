@@ -21,8 +21,7 @@ mixin _$ChannelMemberPartialResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ChannelMemberPartialResponseCopyWith<ChannelMemberPartialResponse>
-  get copyWith =>
+  $ChannelMemberPartialResponseCopyWith<ChannelMemberPartialResponse> get copyWith =>
       _$ChannelMemberPartialResponseCopyWithImpl<ChannelMemberPartialResponse>(
         this as ChannelMemberPartialResponse,
         _$identity,
@@ -33,8 +32,7 @@ mixin _$ChannelMemberPartialResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ChannelMemberPartialResponse &&
-            (identical(other.channelRole, channelRole) ||
-                other.channelRole == channelRole) &&
+            (identical(other.channelRole, channelRole) || other.channelRole == channelRole) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.notificationsMuted, notificationsMuted) ||
                 other.notificationsMuted == notificationsMuted));
@@ -69,8 +67,7 @@ abstract mixin class $ChannelMemberPartialResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChannelMemberPartialResponseCopyWithImpl<$Res>
-    implements $ChannelMemberPartialResponseCopyWith<$Res> {
+class _$ChannelMemberPartialResponseCopyWithImpl<$Res> implements $ChannelMemberPartialResponseCopyWith<$Res> {
   _$ChannelMemberPartialResponseCopyWithImpl(this._self, this._then);
 
   final ChannelMemberPartialResponse _self;

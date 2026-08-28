@@ -46,13 +46,10 @@ mixin _$ChannelInputRequest {
                   autoTranslationLanguage,
                 ) ||
                 other.autoTranslationLanguage == autoTranslationLanguage) &&
-            (identical(other.configOverrides, configOverrides) ||
-                other.configOverrides == configOverrides) &&
-            (identical(other.createdBy, createdBy) ||
-                other.createdBy == createdBy) &&
+            (identical(other.configOverrides, configOverrides) || other.configOverrides == configOverrides) &&
+            (identical(other.createdBy, createdBy) || other.createdBy == createdBy) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.disabled, disabled) ||
-                other.disabled == disabled) &&
+            (identical(other.disabled, disabled) || other.disabled == disabled) &&
             (identical(other.frozen, frozen) || other.frozen == frozen) &&
             const DeepCollectionEquality().equals(other.invites, invites) &&
             const DeepCollectionEquality().equals(other.members, members) &&
@@ -102,8 +99,7 @@ abstract mixin class $ChannelInputRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChannelInputRequestCopyWithImpl<$Res>
-    implements $ChannelInputRequestCopyWith<$Res> {
+class _$ChannelInputRequestCopyWithImpl<$Res> implements $ChannelInputRequestCopyWith<$Res> {
   _$ChannelInputRequestCopyWithImpl(this._self, this._then);
 
   final ChannelInputRequest _self;

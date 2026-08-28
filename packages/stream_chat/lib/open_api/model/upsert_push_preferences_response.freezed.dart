@@ -14,27 +14,25 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UpsertPushPreferencesResponse {
   String get duration;
-  Map<String, Map<String, ChannelPushPreferencesResponse>>
-  get userChannelPreferences;
+  Map<String, Map<String, ChannelPushPreferencesResponse>> get userChannelPreferences;
   Map<String, PushPreferencesResponse> get userPreferences;
 
   /// Create a copy of UpsertPushPreferencesResponse
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UpsertPushPreferencesResponseCopyWith<UpsertPushPreferencesResponse>
-  get copyWith =>
-      _$UpsertPushPreferencesResponseCopyWithImpl<
-        UpsertPushPreferencesResponse
-      >(this as UpsertPushPreferencesResponse, _$identity);
+  $UpsertPushPreferencesResponseCopyWith<UpsertPushPreferencesResponse> get copyWith =>
+      _$UpsertPushPreferencesResponseCopyWithImpl<UpsertPushPreferencesResponse>(
+        this as UpsertPushPreferencesResponse,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UpsertPushPreferencesResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             const DeepCollectionEquality().equals(
               other.userChannelPreferences,
               userChannelPreferences,
@@ -68,15 +66,13 @@ abstract mixin class $UpsertPushPreferencesResponseCopyWith<$Res> {
   @useResult
   $Res call({
     String duration,
-    Map<String, Map<String, ChannelPushPreferencesResponse>>
-    userChannelPreferences,
+    Map<String, Map<String, ChannelPushPreferencesResponse>> userChannelPreferences,
     Map<String, PushPreferencesResponse> userPreferences,
   });
 }
 
 /// @nodoc
-class _$UpsertPushPreferencesResponseCopyWithImpl<$Res>
-    implements $UpsertPushPreferencesResponseCopyWith<$Res> {
+class _$UpsertPushPreferencesResponseCopyWithImpl<$Res> implements $UpsertPushPreferencesResponseCopyWith<$Res> {
   _$UpsertPushPreferencesResponseCopyWithImpl(this._self, this._then);
 
   final UpsertPushPreferencesResponse _self;

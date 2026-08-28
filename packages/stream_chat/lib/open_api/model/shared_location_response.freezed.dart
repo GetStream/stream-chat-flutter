@@ -42,24 +42,16 @@ mixin _$SharedLocationResponse {
         (other.runtimeType == runtimeType &&
             other is SharedLocationResponse &&
             (identical(other.channel, channel) || other.channel == channel) &&
-            (identical(other.channelCid, channelCid) ||
-                other.channelCid == channelCid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.createdByDeviceId, createdByDeviceId) ||
-                other.createdByDeviceId == createdByDeviceId) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.channelCid, channelCid) || other.channelCid == channelCid) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.createdByDeviceId, createdByDeviceId) || other.createdByDeviceId == createdByDeviceId) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.endAt, endAt) || other.endAt == endAt) &&
-            (identical(other.latitude, latitude) ||
-                other.latitude == latitude) &&
-            (identical(other.longitude, longitude) ||
-                other.longitude == longitude) &&
+            (identical(other.latitude, latitude) || other.latitude == latitude) &&
+            (identical(other.longitude, longitude) || other.longitude == longitude) &&
             (identical(other.message, message) || other.message == message) &&
-            (identical(other.messageId, messageId) ||
-                other.messageId == messageId) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
+            (identical(other.messageId, messageId) || other.messageId == messageId) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
             (identical(other.userId, userId) || other.userId == userId));
   }
 
@@ -110,8 +102,7 @@ abstract mixin class $SharedLocationResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$SharedLocationResponseCopyWithImpl<$Res>
-    implements $SharedLocationResponseCopyWith<$Res> {
+class _$SharedLocationResponseCopyWithImpl<$Res> implements $SharedLocationResponseCopyWith<$Res> {
   _$SharedLocationResponseCopyWithImpl(this._self, this._then);
 
   final SharedLocationResponse _self;

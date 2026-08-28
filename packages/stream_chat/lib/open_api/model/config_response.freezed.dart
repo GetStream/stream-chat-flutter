@@ -39,21 +39,18 @@ mixin _$ConfigResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ConfigResponseCopyWith<ConfigResponse> get copyWith =>
-      _$ConfigResponseCopyWithImpl<ConfigResponse>(
-        this as ConfigResponse,
-        _$identity,
-      );
+  $ConfigResponseCopyWith<ConfigResponse> get copyWith => _$ConfigResponseCopyWithImpl<ConfigResponse>(
+    this as ConfigResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ConfigResponse &&
-            (identical(other.aiAudioConfig, aiAudioConfig) ||
-                other.aiAudioConfig == aiAudioConfig) &&
-            (identical(other.aiImageConfig, aiImageConfig) ||
-                other.aiImageConfig == aiImageConfig) &&
+            (identical(other.aiAudioConfig, aiAudioConfig) || other.aiAudioConfig == aiAudioConfig) &&
+            (identical(other.aiImageConfig, aiImageConfig) || other.aiImageConfig == aiImageConfig) &&
             const DeepCollectionEquality().equals(
               other.aiImageLabelDefinitions,
               aiImageLabelDefinitions,
@@ -62,45 +59,36 @@ mixin _$ConfigResponse {
               other.aiImageSubclassifications,
               aiImageSubclassifications,
             ) &&
-            (identical(other.aiTextConfig, aiTextConfig) ||
-                other.aiTextConfig == aiTextConfig) &&
-            (identical(other.aiVideoConfig, aiVideoConfig) ||
-                other.aiVideoConfig == aiVideoConfig) &&
+            (identical(other.aiTextConfig, aiTextConfig) || other.aiTextConfig == aiTextConfig) &&
+            (identical(other.aiVideoConfig, aiVideoConfig) || other.aiVideoConfig == aiVideoConfig) &&
             (identical(other.async, async) || other.async == async) &&
             (identical(
                   other.automodPlatformCircumventionConfig,
                   automodPlatformCircumventionConfig,
                 ) ||
-                other.automodPlatformCircumventionConfig ==
-                    automodPlatformCircumventionConfig) &&
+                other.automodPlatformCircumventionConfig == automodPlatformCircumventionConfig) &&
             (identical(
                   other.automodSemanticFiltersConfig,
                   automodSemanticFiltersConfig,
                 ) ||
-                other.automodSemanticFiltersConfig ==
-                    automodSemanticFiltersConfig) &&
+                other.automodSemanticFiltersConfig == automodSemanticFiltersConfig) &&
             (identical(other.automodToxicityConfig, automodToxicityConfig) ||
                 other.automodToxicityConfig == automodToxicityConfig) &&
             const DeepCollectionEquality().equals(
               other.availableBodyguardProfiles,
               availableBodyguardProfiles,
             ) &&
-            (identical(other.blockListConfig, blockListConfig) ||
-                other.blockListConfig == blockListConfig) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.floodConfig, floodConfig) ||
-                other.floodConfig == floodConfig) &&
+            (identical(other.blockListConfig, blockListConfig) || other.blockListConfig == blockListConfig) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.floodConfig, floodConfig) || other.floodConfig == floodConfig) &&
             (identical(other.key, key) || other.key == key) &&
-            (identical(other.llmConfig, llmConfig) ||
-                other.llmConfig == llmConfig) &&
+            (identical(other.llmConfig, llmConfig) || other.llmConfig == llmConfig) &&
             const DeepCollectionEquality().equals(
               other.supportedVideoCallHarmTypes,
               supportedVideoCallHarmTypes,
             ) &&
             (identical(other.team, team) || other.team == team) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
             (identical(other.velocityFilterConfig, velocityFilterConfig) ||
                 other.velocityFilterConfig == velocityFilterConfig) &&
             (identical(other.videoCallRuleConfig, videoCallRuleConfig) ||
@@ -172,8 +160,7 @@ abstract mixin class $ConfigResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ConfigResponseCopyWithImpl<$Res>
-    implements $ConfigResponseCopyWith<$Res> {
+class _$ConfigResponseCopyWithImpl<$Res> implements $ConfigResponseCopyWith<$Res> {
   _$ConfigResponseCopyWithImpl(this._self, this._then);
 
   final ConfigResponse _self;
@@ -236,8 +223,7 @@ class _$ConfigResponseCopyWithImpl<$Res>
             ? _self.async
             : async // ignore: cast_nullable_to_non_nullable
                   as bool,
-        automodPlatformCircumventionConfig:
-            freezed == automodPlatformCircumventionConfig
+        automodPlatformCircumventionConfig: freezed == automodPlatformCircumventionConfig
             ? _self.automodPlatformCircumventionConfig
             : automodPlatformCircumventionConfig // ignore: cast_nullable_to_non_nullable
                   as AutomodPlatformCircumventionConfig?,

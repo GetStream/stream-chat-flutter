@@ -36,11 +36,11 @@ mixin _$NotificationChannelTruncatedEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $NotificationChannelTruncatedEventCopyWith<NotificationChannelTruncatedEvent>
-  get copyWith =>
-      _$NotificationChannelTruncatedEventCopyWithImpl<
-        NotificationChannelTruncatedEvent
-      >(this as NotificationChannelTruncatedEvent, _$identity);
+  $NotificationChannelTruncatedEventCopyWith<NotificationChannelTruncatedEvent> get copyWith =>
+      _$NotificationChannelTruncatedEventCopyWithImpl<NotificationChannelTruncatedEvent>(
+        this as NotificationChannelTruncatedEvent,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -52,35 +52,27 @@ mixin _$NotificationChannelTruncatedEvent {
               other.channelCustom,
               channelCustom,
             ) &&
-            (identical(other.channelId, channelId) ||
-                other.channelId == channelId) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
             (identical(other.channelMemberCount, channelMemberCount) ||
                 other.channelMemberCount == channelMemberCount) &&
             (identical(other.channelMessageCount, channelMessageCount) ||
                 other.channelMessageCount == channelMessageCount) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             const DeepCollectionEquality().equals(
               other.groupedUnreadChannels,
               groupedUnreadChannels,
             ) &&
             (identical(other.message, message) || other.message == message) &&
-            (identical(other.messageId, messageId) ||
-                other.messageId == messageId) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.messageId, messageId) || other.messageId == messageId) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.team, team) || other.team == team) &&
-            (identical(other.totalUnreadCount, totalUnreadCount) ||
-                other.totalUnreadCount == totalUnreadCount) &&
+            (identical(other.totalUnreadCount, totalUnreadCount) || other.totalUnreadCount == totalUnreadCount) &&
             (identical(other.type, type) || other.type == type) &&
-            (identical(other.unreadChannels, unreadChannels) ||
-                other.unreadChannels == unreadChannels) &&
-            (identical(other.unreadCount, unreadCount) ||
-                other.unreadCount == unreadCount));
+            (identical(other.unreadChannels, unreadChannels) || other.unreadChannels == unreadChannels) &&
+            (identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount));
   }
 
   @override

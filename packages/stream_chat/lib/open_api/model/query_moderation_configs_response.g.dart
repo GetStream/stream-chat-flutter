@@ -9,9 +9,7 @@ part of 'query_moderation_configs_response.dart';
 QueryModerationConfigsResponse _$QueryModerationConfigsResponseFromJson(
   Map<String, dynamic> json,
 ) => QueryModerationConfigsResponse(
-  configs: (json['configs'] as List<dynamic>)
-      .map((e) => ConfigResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  configs: (json['configs'] as List<dynamic>).map((e) => ConfigResponse.fromJson(e as Map<String, dynamic>)).toList(),
   duration: json['duration'] as String,
   next: json['next'] as String?,
   prev: json['prev'] as String?,

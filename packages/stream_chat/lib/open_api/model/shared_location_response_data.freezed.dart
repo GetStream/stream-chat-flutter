@@ -29,8 +29,7 @@ mixin _$SharedLocationResponseData {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $SharedLocationResponseDataCopyWith<SharedLocationResponseData>
-  get copyWith =>
+  $SharedLocationResponseDataCopyWith<SharedLocationResponseData> get copyWith =>
       _$SharedLocationResponseDataCopyWithImpl<SharedLocationResponseData>(
         this as SharedLocationResponseData,
         _$identity,
@@ -42,22 +41,15 @@ mixin _$SharedLocationResponseData {
         (other.runtimeType == runtimeType &&
             other is SharedLocationResponseData &&
             (identical(other.channel, channel) || other.channel == channel) &&
-            (identical(other.channelCid, channelCid) ||
-                other.channelCid == channelCid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.createdByDeviceId, createdByDeviceId) ||
-                other.createdByDeviceId == createdByDeviceId) &&
+            (identical(other.channelCid, channelCid) || other.channelCid == channelCid) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.createdByDeviceId, createdByDeviceId) || other.createdByDeviceId == createdByDeviceId) &&
             (identical(other.endAt, endAt) || other.endAt == endAt) &&
-            (identical(other.latitude, latitude) ||
-                other.latitude == latitude) &&
-            (identical(other.longitude, longitude) ||
-                other.longitude == longitude) &&
+            (identical(other.latitude, latitude) || other.latitude == latitude) &&
+            (identical(other.longitude, longitude) || other.longitude == longitude) &&
             (identical(other.message, message) || other.message == message) &&
-            (identical(other.messageId, messageId) ||
-                other.messageId == messageId) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
+            (identical(other.messageId, messageId) || other.messageId == messageId) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
             (identical(other.userId, userId) || other.userId == userId));
   }
 
@@ -106,8 +98,7 @@ abstract mixin class $SharedLocationResponseDataCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$SharedLocationResponseDataCopyWithImpl<$Res>
-    implements $SharedLocationResponseDataCopyWith<$Res> {
+class _$SharedLocationResponseDataCopyWithImpl<$Res> implements $SharedLocationResponseDataCopyWith<$Res> {
   _$SharedLocationResponseDataCopyWithImpl(this._self, this._then);
 
   final SharedLocationResponseData _self;

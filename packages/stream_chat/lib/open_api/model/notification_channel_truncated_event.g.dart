@@ -20,13 +20,10 @@ NotificationChannelTruncatedEvent _$NotificationChannelTruncatedEventFromJson(
     json['created_at'] as Object,
   ),
   custom: json['custom'] as Map<String, dynamic>,
-  groupedUnreadChannels:
-      (json['grouped_unread_channels'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, (e as num).toInt()),
-      ),
-  message: json['message'] == null
-      ? null
-      : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
+  groupedUnreadChannels: (json['grouped_unread_channels'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, (e as num).toInt()),
+  ),
+  message: json['message'] == null ? null : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
   messageId: json['message_id'] as String?,
   receivedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['received_at'],

@@ -38,22 +38,14 @@ mixin _$PushPreferenceInput {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is PushPreferenceInput &&
-            (identical(other.callLevel, callLevel) ||
-                other.callLevel == callLevel) &&
-            (identical(other.channelCid, channelCid) ||
-                other.channelCid == channelCid) &&
-            (identical(other.chatLevel, chatLevel) ||
-                other.chatLevel == chatLevel) &&
-            (identical(other.chatPreferences, chatPreferences) ||
-                other.chatPreferences == chatPreferences) &&
-            (identical(other.disabledUntil, disabledUntil) ||
-                other.disabledUntil == disabledUntil) &&
-            (identical(other.feedsLevel, feedsLevel) ||
-                other.feedsLevel == feedsLevel) &&
-            (identical(other.feedsPreferences, feedsPreferences) ||
-                other.feedsPreferences == feedsPreferences) &&
-            (identical(other.removeDisable, removeDisable) ||
-                other.removeDisable == removeDisable) &&
+            (identical(other.callLevel, callLevel) || other.callLevel == callLevel) &&
+            (identical(other.channelCid, channelCid) || other.channelCid == channelCid) &&
+            (identical(other.chatLevel, chatLevel) || other.chatLevel == chatLevel) &&
+            (identical(other.chatPreferences, chatPreferences) || other.chatPreferences == chatPreferences) &&
+            (identical(other.disabledUntil, disabledUntil) || other.disabledUntil == disabledUntil) &&
+            (identical(other.feedsLevel, feedsLevel) || other.feedsLevel == feedsLevel) &&
+            (identical(other.feedsPreferences, feedsPreferences) || other.feedsPreferences == feedsPreferences) &&
+            (identical(other.removeDisable, removeDisable) || other.removeDisable == removeDisable) &&
             (identical(other.userId, userId) || other.userId == userId));
   }
 
@@ -98,8 +90,7 @@ abstract mixin class $PushPreferenceInputCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$PushPreferenceInputCopyWithImpl<$Res>
-    implements $PushPreferenceInputCopyWith<$Res> {
+class _$PushPreferenceInputCopyWithImpl<$Res> implements $PushPreferenceInputCopyWith<$Res> {
   _$PushPreferenceInputCopyWithImpl(this._self, this._then);
 
   final PushPreferenceInput _self;

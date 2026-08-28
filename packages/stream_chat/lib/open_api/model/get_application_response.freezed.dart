@@ -32,8 +32,7 @@ mixin _$GetApplicationResponse {
         (other.runtimeType == runtimeType &&
             other is GetApplicationResponse &&
             (identical(other.app, app) || other.app == app) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -56,8 +55,7 @@ abstract mixin class $GetApplicationResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$GetApplicationResponseCopyWithImpl<$Res>
-    implements $GetApplicationResponseCopyWith<$Res> {
+class _$GetApplicationResponseCopyWithImpl<$Res> implements $GetApplicationResponseCopyWith<$Res> {
   _$GetApplicationResponseCopyWithImpl(this._self, this._then);
 
   final GetApplicationResponse _self;

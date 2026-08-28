@@ -25,11 +25,10 @@ mixin _$AppResponseFields {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $AppResponseFieldsCopyWith<AppResponseFields> get copyWith =>
-      _$AppResponseFieldsCopyWithImpl<AppResponseFields>(
-        this as AppResponseFields,
-        _$identity,
-      );
+  $AppResponseFieldsCopyWith<AppResponseFields> get copyWith => _$AppResponseFieldsCopyWithImpl<AppResponseFields>(
+    this as AppResponseFields,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -40,14 +39,11 @@ mixin _$AppResponseFields {
                 other.asyncUrlEnrichEnabled == asyncUrlEnrichEnabled) &&
             (identical(other.autoTranslationEnabled, autoTranslationEnabled) ||
                 other.autoTranslationEnabled == autoTranslationEnabled) &&
-            (identical(other.fileUploadConfig, fileUploadConfig) ||
-                other.fileUploadConfig == fileUploadConfig) &&
+            (identical(other.fileUploadConfig, fileUploadConfig) || other.fileUploadConfig == fileUploadConfig) &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.imageUploadConfig, imageUploadConfig) ||
-                other.imageUploadConfig == imageUploadConfig) &&
+            (identical(other.imageUploadConfig, imageUploadConfig) || other.imageUploadConfig == imageUploadConfig) &&
             (identical(other.name, name) || other.name == name) &&
-            (identical(other.placement, placement) ||
-                other.placement == placement));
+            (identical(other.placement, placement) || other.placement == placement));
   }
 
   @override
@@ -87,8 +83,7 @@ abstract mixin class $AppResponseFieldsCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$AppResponseFieldsCopyWithImpl<$Res>
-    implements $AppResponseFieldsCopyWith<$Res> {
+class _$AppResponseFieldsCopyWithImpl<$Res> implements $AppResponseFieldsCopyWith<$Res> {
   _$AppResponseFieldsCopyWithImpl(this._self, this._then);
 
   final AppResponseFields _self;

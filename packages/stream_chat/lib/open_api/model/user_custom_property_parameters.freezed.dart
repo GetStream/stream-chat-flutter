@@ -20,8 +20,7 @@ mixin _$UserCustomPropertyParameters {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UserCustomPropertyParametersCopyWith<UserCustomPropertyParameters>
-  get copyWith =>
+  $UserCustomPropertyParametersCopyWith<UserCustomPropertyParameters> get copyWith =>
       _$UserCustomPropertyParametersCopyWithImpl<UserCustomPropertyParameters>(
         this as UserCustomPropertyParameters,
         _$identity,
@@ -32,10 +31,8 @@ mixin _$UserCustomPropertyParameters {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UserCustomPropertyParameters &&
-            (identical(other.operator, operator) ||
-                other.operator == operator) &&
-            (identical(other.propertyKey, propertyKey) ||
-                other.propertyKey == propertyKey));
+            (identical(other.operator, operator) || other.operator == operator) &&
+            (identical(other.propertyKey, propertyKey) || other.propertyKey == propertyKey));
   }
 
   @override
@@ -58,8 +55,7 @@ abstract mixin class $UserCustomPropertyParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UserCustomPropertyParametersCopyWithImpl<$Res>
-    implements $UserCustomPropertyParametersCopyWith<$Res> {
+class _$UserCustomPropertyParametersCopyWithImpl<$Res> implements $UserCustomPropertyParametersCopyWith<$Res> {
   _$UserCustomPropertyParametersCopyWithImpl(this._self, this._then);
 
   final UserCustomPropertyParameters _self;

@@ -33,8 +33,7 @@ mixin _$AIImageLabelDefinition {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is AIImageLabelDefinition &&
-            (identical(other.description, description) ||
-                other.description == description) &&
+            (identical(other.description, description) || other.description == description) &&
             (identical(other.group, group) || other.group == group) &&
             (identical(other.key, key) || other.key == key) &&
             (identical(other.label, label) || other.label == label));
@@ -60,8 +59,7 @@ abstract mixin class $AIImageLabelDefinitionCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$AIImageLabelDefinitionCopyWithImpl<$Res>
-    implements $AIImageLabelDefinitionCopyWith<$Res> {
+class _$AIImageLabelDefinitionCopyWithImpl<$Res> implements $AIImageLabelDefinitionCopyWith<$Res> {
   _$AIImageLabelDefinitionCopyWithImpl(this._self, this._then);
 
   final AIImageLabelDefinition _self;

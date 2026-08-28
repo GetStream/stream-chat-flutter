@@ -31,8 +31,7 @@ mixin _$UpdateMessageResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UpdateMessageResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.message, message) || other.message == message));
   }
 
@@ -56,8 +55,7 @@ abstract mixin class $UpdateMessageResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpdateMessageResponseCopyWithImpl<$Res>
-    implements $UpdateMessageResponseCopyWith<$Res> {
+class _$UpdateMessageResponseCopyWithImpl<$Res> implements $UpdateMessageResponseCopyWith<$Res> {
   _$UpdateMessageResponseCopyWithImpl(this._self, this._then);
 
   final UpdateMessageResponse _self;

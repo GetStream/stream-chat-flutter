@@ -26,11 +26,10 @@ mixin _$FeedsPreferences {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $FeedsPreferencesCopyWith<FeedsPreferences> get copyWith =>
-      _$FeedsPreferencesCopyWithImpl<FeedsPreferences>(
-        this as FeedsPreferences,
-        _$identity,
-      );
+  $FeedsPreferencesCopyWith<FeedsPreferences> get copyWith => _$FeedsPreferencesCopyWithImpl<FeedsPreferences>(
+    this as FeedsPreferences,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -38,20 +37,16 @@ mixin _$FeedsPreferences {
         (other.runtimeType == runtimeType &&
             other is FeedsPreferences &&
             (identical(other.comment, comment) || other.comment == comment) &&
-            (identical(other.commentMention, commentMention) ||
-                other.commentMention == commentMention) &&
-            (identical(other.commentReaction, commentReaction) ||
-                other.commentReaction == commentReaction) &&
-            (identical(other.commentReply, commentReply) ||
-                other.commentReply == commentReply) &&
+            (identical(other.commentMention, commentMention) || other.commentMention == commentMention) &&
+            (identical(other.commentReaction, commentReaction) || other.commentReaction == commentReaction) &&
+            (identical(other.commentReply, commentReply) || other.commentReply == commentReply) &&
             const DeepCollectionEquality().equals(
               other.customActivityTypes,
               customActivityTypes,
             ) &&
             (identical(other.follow, follow) || other.follow == follow) &&
             (identical(other.mention, mention) || other.mention == mention) &&
-            (identical(other.reaction, reaction) ||
-                other.reaction == reaction));
+            (identical(other.reaction, reaction) || other.reaction == reaction));
   }
 
   @override
@@ -93,8 +88,7 @@ abstract mixin class $FeedsPreferencesCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FeedsPreferencesCopyWithImpl<$Res>
-    implements $FeedsPreferencesCopyWith<$Res> {
+class _$FeedsPreferencesCopyWithImpl<$Res> implements $FeedsPreferencesCopyWith<$Res> {
   _$FeedsPreferencesCopyWithImpl(this._self, this._then);
 
   final FeedsPreferences _self;

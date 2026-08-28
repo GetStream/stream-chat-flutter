@@ -9,9 +9,7 @@ part of 'message_new_event.dart';
 MessageNewEvent _$MessageNewEventFromJson(
   Map<String, dynamic> json,
 ) => MessageNewEvent(
-  channel: json['channel'] == null
-      ? null
-      : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
+  channel: json['channel'] == null ? null : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
   channelCustom: json['channel_custom'] as Map<String, dynamic>?,
   channelId: json['channel_id'] as String?,
   channelMemberCount: (json['channel_member_count'] as num?)?.toInt(),
@@ -22,10 +20,9 @@ MessageNewEvent _$MessageNewEventFromJson(
     json['created_at'] as Object,
   ),
   custom: json['custom'] as Map<String, dynamic>,
-  groupedUnreadChannels:
-      (json['grouped_unread_channels'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, (e as num).toInt()),
-      ),
+  groupedUnreadChannels: (json['grouped_unread_channels'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, (e as num).toInt()),
+  ),
   message: MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
   messageId: json['message_id'] as String,
   parentAuthor: json['parent_author'] as String?,
@@ -41,42 +38,37 @@ MessageNewEvent _$MessageNewEventFromJson(
   type: json['type'] as String,
   unreadChannels: (json['unread_channels'] as num?)?.toInt(),
   unreadCount: (json['unread_count'] as num?)?.toInt(),
-  user: json['user'] == null
-      ? null
-      : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
+  user: json['user'] == null ? null : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
   watcherCount: (json['watcher_count'] as num).toInt(),
 );
 
-Map<String, dynamic> _$MessageNewEventToJson(MessageNewEvent instance) =>
-    <String, dynamic>{
-      'channel': instance.channel?.toJson(),
-      'channel_custom': instance.channelCustom,
-      'channel_id': instance.channelId,
-      'channel_member_count': instance.channelMemberCount,
-      'channel_message_count': instance.channelMessageCount,
-      'channel_type': instance.channelType,
-      'cid': instance.cid,
-      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
-      'custom': instance.custom,
-      'grouped_unread_channels': instance.groupedUnreadChannels,
-      'message': instance.message.toJson(),
-      'message_id': instance.messageId,
-      'parent_author': instance.parentAuthor,
-      'received_at': _$JsonConverterToJson<Object, DateTime>(
-        instance.receivedAt,
-        const StreamDateTimeConverter().toJson,
-      ),
-      'team': instance.team,
-      'thread_participants': instance.threadParticipants
-          ?.map((e) => e.toJson())
-          .toList(),
-      'total_unread_count': instance.totalUnreadCount,
-      'type': instance.type,
-      'unread_channels': instance.unreadChannels,
-      'unread_count': instance.unreadCount,
-      'user': instance.user?.toJson(),
-      'watcher_count': instance.watcherCount,
-    };
+Map<String, dynamic> _$MessageNewEventToJson(MessageNewEvent instance) => <String, dynamic>{
+  'channel': instance.channel?.toJson(),
+  'channel_custom': instance.channelCustom,
+  'channel_id': instance.channelId,
+  'channel_member_count': instance.channelMemberCount,
+  'channel_message_count': instance.channelMessageCount,
+  'channel_type': instance.channelType,
+  'cid': instance.cid,
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
+  'custom': instance.custom,
+  'grouped_unread_channels': instance.groupedUnreadChannels,
+  'message': instance.message.toJson(),
+  'message_id': instance.messageId,
+  'parent_author': instance.parentAuthor,
+  'received_at': _$JsonConverterToJson<Object, DateTime>(
+    instance.receivedAt,
+    const StreamDateTimeConverter().toJson,
+  ),
+  'team': instance.team,
+  'thread_participants': instance.threadParticipants?.map((e) => e.toJson()).toList(),
+  'total_unread_count': instance.totalUnreadCount,
+  'type': instance.type,
+  'unread_channels': instance.unreadChannels,
+  'unread_count': instance.unreadCount,
+  'user': instance.user?.toJson(),
+  'watcher_count': instance.watcherCount,
+};
 
 Value? _$JsonConverterFromJson<Json, Value>(
   Object? json,

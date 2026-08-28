@@ -32,8 +32,7 @@ mixin _$DeleteChannelsRequest {
         (other.runtimeType == runtimeType &&
             other is DeleteChannelsRequest &&
             const DeepCollectionEquality().equals(other.cids, cids) &&
-            (identical(other.hardDelete, hardDelete) ||
-                other.hardDelete == hardDelete));
+            (identical(other.hardDelete, hardDelete) || other.hardDelete == hardDelete));
   }
 
   @override
@@ -60,8 +59,7 @@ abstract mixin class $DeleteChannelsRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$DeleteChannelsRequestCopyWithImpl<$Res>
-    implements $DeleteChannelsRequestCopyWith<$Res> {
+class _$DeleteChannelsRequestCopyWithImpl<$Res> implements $DeleteChannelsRequestCopyWith<$Res> {
   _$DeleteChannelsRequestCopyWithImpl(this._self, this._then);
 
   final DeleteChannelsRequest _self;

@@ -20,19 +20,17 @@ mixin _$PollResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $PollResponseCopyWith<PollResponse> get copyWith =>
-      _$PollResponseCopyWithImpl<PollResponse>(
-        this as PollResponse,
-        _$identity,
-      );
+  $PollResponseCopyWith<PollResponse> get copyWith => _$PollResponseCopyWithImpl<PollResponse>(
+    this as PollResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is PollResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.poll, poll) || other.poll == poll));
   }
 

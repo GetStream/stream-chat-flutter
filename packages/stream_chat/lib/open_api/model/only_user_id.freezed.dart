@@ -19,15 +19,12 @@ mixin _$OnlyUserID {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $OnlyUserIDCopyWith<OnlyUserID> get copyWith =>
-      _$OnlyUserIDCopyWithImpl<OnlyUserID>(this as OnlyUserID, _$identity);
+  $OnlyUserIDCopyWith<OnlyUserID> get copyWith => _$OnlyUserIDCopyWithImpl<OnlyUserID>(this as OnlyUserID, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is OnlyUserID &&
-            (identical(other.id, id) || other.id == id));
+        (other.runtimeType == runtimeType && other is OnlyUserID && (identical(other.id, id) || other.id == id));
   }
 
   @override

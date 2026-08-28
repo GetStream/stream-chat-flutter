@@ -20,8 +20,7 @@ mixin _$IPContentCountRuleParameters {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $IPContentCountRuleParametersCopyWith<IPContentCountRuleParameters>
-  get copyWith =>
+  $IPContentCountRuleParametersCopyWith<IPContentCountRuleParameters> get copyWith =>
       _$IPContentCountRuleParametersCopyWithImpl<IPContentCountRuleParameters>(
         this as IPContentCountRuleParameters,
         _$identity,
@@ -32,10 +31,8 @@ mixin _$IPContentCountRuleParameters {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is IPContentCountRuleParameters &&
-            (identical(other.threshold, threshold) ||
-                other.threshold == threshold) &&
-            (identical(other.timeWindow, timeWindow) ||
-                other.timeWindow == timeWindow));
+            (identical(other.threshold, threshold) || other.threshold == threshold) &&
+            (identical(other.timeWindow, timeWindow) || other.timeWindow == timeWindow));
   }
 
   @override
@@ -58,8 +55,7 @@ abstract mixin class $IPContentCountRuleParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$IPContentCountRuleParametersCopyWithImpl<$Res>
-    implements $IPContentCountRuleParametersCopyWith<$Res> {
+class _$IPContentCountRuleParametersCopyWithImpl<$Res> implements $IPContentCountRuleParametersCopyWith<$Res> {
   _$IPContentCountRuleParametersCopyWithImpl(this._self, this._then);
 
   final IPContentCountRuleParameters _self;

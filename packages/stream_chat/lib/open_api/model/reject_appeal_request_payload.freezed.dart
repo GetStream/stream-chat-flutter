@@ -19,8 +19,7 @@ mixin _$RejectAppealRequestPayload {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $RejectAppealRequestPayloadCopyWith<RejectAppealRequestPayload>
-  get copyWith =>
+  $RejectAppealRequestPayloadCopyWith<RejectAppealRequestPayload> get copyWith =>
       _$RejectAppealRequestPayloadCopyWithImpl<RejectAppealRequestPayload>(
         this as RejectAppealRequestPayload,
         _$identity,
@@ -31,8 +30,7 @@ mixin _$RejectAppealRequestPayload {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is RejectAppealRequestPayload &&
-            (identical(other.decisionReason, decisionReason) ||
-                other.decisionReason == decisionReason));
+            (identical(other.decisionReason, decisionReason) || other.decisionReason == decisionReason));
   }
 
   @override
@@ -55,8 +53,7 @@ abstract mixin class $RejectAppealRequestPayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$RejectAppealRequestPayloadCopyWithImpl<$Res>
-    implements $RejectAppealRequestPayloadCopyWith<$Res> {
+class _$RejectAppealRequestPayloadCopyWithImpl<$Res> implements $RejectAppealRequestPayloadCopyWith<$Res> {
   _$RejectAppealRequestPayloadCopyWithImpl(this._self, this._then);
 
   final RejectAppealRequestPayload _self;

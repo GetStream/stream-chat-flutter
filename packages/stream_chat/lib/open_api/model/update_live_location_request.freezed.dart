@@ -34,17 +34,13 @@ mixin _$UpdateLiveLocationRequest {
         (other.runtimeType == runtimeType &&
             other is UpdateLiveLocationRequest &&
             (identical(other.endAt, endAt) || other.endAt == endAt) &&
-            (identical(other.latitude, latitude) ||
-                other.latitude == latitude) &&
-            (identical(other.longitude, longitude) ||
-                other.longitude == longitude) &&
-            (identical(other.messageId, messageId) ||
-                other.messageId == messageId));
+            (identical(other.latitude, latitude) || other.latitude == latitude) &&
+            (identical(other.longitude, longitude) || other.longitude == longitude) &&
+            (identical(other.messageId, messageId) || other.messageId == messageId));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, endAt, latitude, longitude, messageId);
+  int get hashCode => Object.hash(runtimeType, endAt, latitude, longitude, messageId);
 
   @override
   String toString() {
@@ -68,8 +64,7 @@ abstract mixin class $UpdateLiveLocationRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpdateLiveLocationRequestCopyWithImpl<$Res>
-    implements $UpdateLiveLocationRequestCopyWith<$Res> {
+class _$UpdateLiveLocationRequestCopyWithImpl<$Res> implements $UpdateLiveLocationRequestCopyWith<$Res> {
   _$UpdateLiveLocationRequestCopyWithImpl(this._self, this._then);
 
   final UpdateLiveLocationRequest _self;

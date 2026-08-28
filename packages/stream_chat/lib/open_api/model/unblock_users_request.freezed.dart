@@ -30,8 +30,7 @@ mixin _$UnblockUsersRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UnblockUsersRequest &&
-            (identical(other.blockedUserId, blockedUserId) ||
-                other.blockedUserId == blockedUserId));
+            (identical(other.blockedUserId, blockedUserId) || other.blockedUserId == blockedUserId));
   }
 
   @override
@@ -54,8 +53,7 @@ abstract mixin class $UnblockUsersRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UnblockUsersRequestCopyWithImpl<$Res>
-    implements $UnblockUsersRequestCopyWith<$Res> {
+class _$UnblockUsersRequestCopyWithImpl<$Res> implements $UnblockUsersRequestCopyWith<$Res> {
   _$UnblockUsersRequestCopyWithImpl(this._self, this._then);
 
   final UnblockUsersRequest _self;

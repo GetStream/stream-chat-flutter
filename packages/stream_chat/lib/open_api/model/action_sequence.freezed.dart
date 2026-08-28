@@ -25,11 +25,10 @@ mixin _$ActionSequence {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ActionSequenceCopyWith<ActionSequence> get copyWith =>
-      _$ActionSequenceCopyWithImpl<ActionSequence>(
-        this as ActionSequence,
-        _$identity,
-      );
+  $ActionSequenceCopyWith<ActionSequence> get copyWith => _$ActionSequenceCopyWithImpl<ActionSequence>(
+    this as ActionSequence,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -38,15 +37,11 @@ mixin _$ActionSequence {
             other is ActionSequence &&
             (identical(other.action, action) || other.action == action) &&
             (identical(other.blur, blur) || other.blur == blur) &&
-            (identical(other.cooldownPeriod, cooldownPeriod) ||
-                other.cooldownPeriod == cooldownPeriod) &&
-            (identical(other.threshold, threshold) ||
-                other.threshold == threshold) &&
-            (identical(other.timeWindow, timeWindow) ||
-                other.timeWindow == timeWindow) &&
+            (identical(other.cooldownPeriod, cooldownPeriod) || other.cooldownPeriod == cooldownPeriod) &&
+            (identical(other.threshold, threshold) || other.threshold == threshold) &&
+            (identical(other.timeWindow, timeWindow) || other.timeWindow == timeWindow) &&
             (identical(other.warning, warning) || other.warning == warning) &&
-            (identical(other.warningText, warningText) ||
-                other.warningText == warningText));
+            (identical(other.warningText, warningText) || other.warningText == warningText));
   }
 
   @override
@@ -86,8 +81,7 @@ abstract mixin class $ActionSequenceCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ActionSequenceCopyWithImpl<$Res>
-    implements $ActionSequenceCopyWith<$Res> {
+class _$ActionSequenceCopyWithImpl<$Res> implements $ActionSequenceCopyWith<$Res> {
   _$ActionSequenceCopyWithImpl(this._self, this._then);
 
   final ActionSequence _self;

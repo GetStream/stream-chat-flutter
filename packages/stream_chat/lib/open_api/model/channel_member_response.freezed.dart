@@ -51,20 +51,15 @@ mixin _$ChannelMemberResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ChannelMemberResponse &&
-            (identical(other.archivedAt, archivedAt) ||
-                other.archivedAt == archivedAt) &&
-            (identical(other.banExpires, banExpires) ||
-                other.banExpires == banExpires) &&
+            (identical(other.archivedAt, archivedAt) || other.archivedAt == archivedAt) &&
+            (identical(other.banExpires, banExpires) || other.banExpires == banExpires) &&
             (identical(other.banFromFutureChannels, banFromFutureChannels) ||
                 other.banFromFutureChannels == banFromFutureChannels) &&
             (identical(other.banned, banned) || other.banned == banned) &&
-            (identical(other.channelRole, channelRole) ||
-                other.channelRole == channelRole) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.channelRole, channelRole) || other.channelRole == channelRole) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.deletedAt, deletedAt) ||
-                other.deletedAt == deletedAt) &&
+            (identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt) &&
             const DeepCollectionEquality().equals(
               other.deletedMessages,
               deletedMessages,
@@ -74,23 +69,17 @@ mixin _$ChannelMemberResponse {
                   futureChannelBanExpires,
                 ) ||
                 other.futureChannelBanExpires == futureChannelBanExpires) &&
-            (identical(other.inviteAcceptedAt, inviteAcceptedAt) ||
-                other.inviteAcceptedAt == inviteAcceptedAt) &&
-            (identical(other.inviteRejectedAt, inviteRejectedAt) ||
-                other.inviteRejectedAt == inviteRejectedAt) &&
+            (identical(other.inviteAcceptedAt, inviteAcceptedAt) || other.inviteAcceptedAt == inviteAcceptedAt) &&
+            (identical(other.inviteRejectedAt, inviteRejectedAt) || other.inviteRejectedAt == inviteRejectedAt) &&
             (identical(other.invited, invited) || other.invited == invited) &&
-            (identical(other.isModerator, isModerator) ||
-                other.isModerator == isModerator) &&
+            (identical(other.isModerator, isModerator) || other.isModerator == isModerator) &&
             (identical(other.notificationsMuted, notificationsMuted) ||
                 other.notificationsMuted == notificationsMuted) &&
-            (identical(other.pinnedAt, pinnedAt) ||
-                other.pinnedAt == pinnedAt) &&
+            (identical(other.pinnedAt, pinnedAt) || other.pinnedAt == pinnedAt) &&
             (identical(other.role, role) || other.role == role) &&
-            (identical(other.shadowBanned, shadowBanned) ||
-                other.shadowBanned == shadowBanned) &&
+            (identical(other.shadowBanned, shadowBanned) || other.shadowBanned == shadowBanned) &&
             (identical(other.status, status) || other.status == status) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
             (identical(other.user, user) || other.user == user) &&
             (identical(other.userId, userId) || other.userId == userId));
   }
@@ -162,8 +151,7 @@ abstract mixin class $ChannelMemberResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChannelMemberResponseCopyWithImpl<$Res>
-    implements $ChannelMemberResponseCopyWith<$Res> {
+class _$ChannelMemberResponseCopyWithImpl<$Res> implements $ChannelMemberResponseCopyWith<$Res> {
   _$ChannelMemberResponseCopyWithImpl(this._self, this._then);
 
   final ChannelMemberResponse _self;

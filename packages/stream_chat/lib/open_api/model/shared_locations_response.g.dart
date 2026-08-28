@@ -20,8 +20,6 @@ SharedLocationsResponse _$SharedLocationsResponseFromJson(
 Map<String, dynamic> _$SharedLocationsResponseToJson(
   SharedLocationsResponse instance,
 ) => <String, dynamic>{
-  'active_live_locations': instance.activeLiveLocations
-      .map((e) => e.toJson())
-      .toList(),
+  'active_live_locations': instance.activeLiveLocations.map((e) => e.toJson()).toList(),
   'duration': instance.duration,
 };

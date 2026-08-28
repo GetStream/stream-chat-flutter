@@ -23,11 +23,10 @@ mixin _$FileUploadConfig {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $FileUploadConfigCopyWith<FileUploadConfig> get copyWith =>
-      _$FileUploadConfigCopyWithImpl<FileUploadConfig>(
-        this as FileUploadConfig,
-        _$identity,
-      );
+  $FileUploadConfigCopyWith<FileUploadConfig> get copyWith => _$FileUploadConfigCopyWithImpl<FileUploadConfig>(
+    this as FileUploadConfig,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -50,8 +49,7 @@ mixin _$FileUploadConfig {
               other.blockedMimeTypes,
               blockedMimeTypes,
             ) &&
-            (identical(other.sizeLimit, sizeLimit) ||
-                other.sizeLimit == sizeLimit));
+            (identical(other.sizeLimit, sizeLimit) || other.sizeLimit == sizeLimit));
   }
 
   @override
@@ -87,8 +85,7 @@ abstract mixin class $FileUploadConfigCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FileUploadConfigCopyWithImpl<$Res>
-    implements $FileUploadConfigCopyWith<$Res> {
+class _$FileUploadConfigCopyWithImpl<$Res> implements $FileUploadConfigCopyWith<$Res> {
   _$FileUploadConfigCopyWithImpl(this._self, this._then);
 
   final FileUploadConfig _self;

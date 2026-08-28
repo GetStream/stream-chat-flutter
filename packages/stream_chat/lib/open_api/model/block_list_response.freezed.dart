@@ -30,26 +30,23 @@ mixin _$BlockListResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $BlockListResponseCopyWith<BlockListResponse> get copyWith =>
-      _$BlockListResponseCopyWithImpl<BlockListResponse>(
-        this as BlockListResponse,
-        _$identity,
-      );
+  $BlockListResponseCopyWith<BlockListResponse> get copyWith => _$BlockListResponseCopyWithImpl<BlockListResponse>(
+    this as BlockListResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is BlockListResponse &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             (identical(other.id, id) || other.id == id) &&
             (identical(
                   other.isConfusableFoldingEnabled,
                   isConfusableFoldingEnabled,
                 ) ||
-                other.isConfusableFoldingEnabled ==
-                    isConfusableFoldingEnabled) &&
+                other.isConfusableFoldingEnabled == isConfusableFoldingEnabled) &&
             (identical(other.isLeetCheckEnabled, isLeetCheckEnabled) ||
                 other.isLeetCheckEnabled == isLeetCheckEnabled) &&
             (identical(other.isPluralCheckEnabled, isPluralCheckEnabled) ||
@@ -58,15 +55,12 @@ mixin _$BlockListResponse {
                   other.isSubstringMatchingEnabled,
                   isSubstringMatchingEnabled,
                 ) ||
-                other.isSubstringMatchingEnabled ==
-                    isSubstringMatchingEnabled) &&
+                other.isSubstringMatchingEnabled == isSubstringMatchingEnabled) &&
             (identical(other.name, name) || other.name == name) &&
-            (identical(other.ownerUserId, ownerUserId) ||
-                other.ownerUserId == ownerUserId) &&
+            (identical(other.ownerUserId, ownerUserId) || other.ownerUserId == ownerUserId) &&
             (identical(other.team, team) || other.team == team) &&
             (identical(other.type, type) || other.type == type) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
             const DeepCollectionEquality().equals(other.words, words));
   }
 
@@ -117,8 +111,7 @@ abstract mixin class $BlockListResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$BlockListResponseCopyWithImpl<$Res>
-    implements $BlockListResponseCopyWith<$Res> {
+class _$BlockListResponseCopyWithImpl<$Res> implements $BlockListResponseCopyWith<$Res> {
   _$BlockListResponseCopyWithImpl(this._self, this._then);
 
   final BlockListResponse _self;

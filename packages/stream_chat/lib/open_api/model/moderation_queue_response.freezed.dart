@@ -39,21 +39,16 @@ mixin _$ModerationQueueResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ModerationQueueResponse &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.createdBy, createdBy) ||
-                other.createdBy == createdBy) &&
-            (identical(other.description, description) ||
-                other.description == description) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.createdBy, createdBy) || other.createdBy == createdBy) &&
+            (identical(other.description, description) || other.description == description) &&
             const DeepCollectionEquality().equals(other.filters, filters) &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.itemCount, itemCount) ||
-                other.itemCount == itemCount) &&
+            (identical(other.itemCount, itemCount) || other.itemCount == itemCount) &&
             (identical(other.name, name) || other.name == name) &&
             const DeepCollectionEquality().equals(other.sort, sort) &&
             (identical(other.type, type) || other.type == type) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
   }
 
   @override
@@ -99,8 +94,7 @@ abstract mixin class $ModerationQueueResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ModerationQueueResponseCopyWithImpl<$Res>
-    implements $ModerationQueueResponseCopyWith<$Res> {
+class _$ModerationQueueResponseCopyWithImpl<$Res> implements $ModerationQueueResponseCopyWith<$Res> {
   _$ModerationQueueResponseCopyWithImpl(this._self, this._then);
 
   final ModerationQueueResponse _self;

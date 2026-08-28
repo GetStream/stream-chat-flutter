@@ -20,9 +20,7 @@ PollVoteResponseData _$PollVoteResponseDataFromJson(
   updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,
   ),
-  user: json['user'] == null
-      ? null
-      : UserResponse.fromJson(json['user'] as Map<String, dynamic>),
+  user: json['user'] == null ? null : UserResponse.fromJson(json['user'] as Map<String, dynamic>),
   userId: json['user_id'] as String?,
 );
 

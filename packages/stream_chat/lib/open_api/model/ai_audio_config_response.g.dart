@@ -11,9 +11,7 @@ AIAudioConfigResponse _$AIAudioConfigResponseFromJson(
 ) => AIAudioConfigResponse(
   enabled: json['enabled'] as bool,
   profile: json['profile'] as String,
-  rules: (json['rules'] as List<dynamic>)
-      .map((e) => BodyguardRule.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  rules: (json['rules'] as List<dynamic>).map((e) => BodyguardRule.fromJson(e as Map<String, dynamic>)).toList(),
 );
 
 Map<String, dynamic> _$AIAudioConfigResponseToJson(

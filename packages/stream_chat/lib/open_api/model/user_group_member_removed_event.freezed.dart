@@ -25,8 +25,7 @@ mixin _$UserGroupMemberRemovedEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UserGroupMemberRemovedEventCopyWith<UserGroupMemberRemovedEvent>
-  get copyWith =>
+  $UserGroupMemberRemovedEventCopyWith<UserGroupMemberRemovedEvent> get copyWith =>
       _$UserGroupMemberRemovedEventCopyWithImpl<UserGroupMemberRemovedEvent>(
         this as UserGroupMemberRemovedEvent,
         _$identity,
@@ -37,16 +36,13 @@ mixin _$UserGroupMemberRemovedEvent {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UserGroupMemberRemovedEvent &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             const DeepCollectionEquality().equals(other.members, members) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(other.user, user) || other.user == user) &&
-            (identical(other.userGroup, userGroup) ||
-                other.userGroup == userGroup));
+            (identical(other.userGroup, userGroup) || other.userGroup == userGroup));
   }
 
   @override
@@ -86,8 +82,7 @@ abstract mixin class $UserGroupMemberRemovedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UserGroupMemberRemovedEventCopyWithImpl<$Res>
-    implements $UserGroupMemberRemovedEventCopyWith<$Res> {
+class _$UserGroupMemberRemovedEventCopyWithImpl<$Res> implements $UserGroupMemberRemovedEventCopyWith<$Res> {
   _$UserGroupMemberRemovedEventCopyWithImpl(this._self, this._then);
 
   final UserGroupMemberRemovedEvent _self;

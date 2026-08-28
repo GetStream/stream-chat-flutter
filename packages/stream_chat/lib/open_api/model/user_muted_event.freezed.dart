@@ -25,24 +25,20 @@ mixin _$UserMutedEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UserMutedEventCopyWith<UserMutedEvent> get copyWith =>
-      _$UserMutedEventCopyWithImpl<UserMutedEvent>(
-        this as UserMutedEvent,
-        _$identity,
-      );
+  $UserMutedEventCopyWith<UserMutedEvent> get copyWith => _$UserMutedEventCopyWithImpl<UserMutedEvent>(
+    this as UserMutedEvent,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UserMutedEvent &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
-            (identical(other.targetUser, targetUser) ||
-                other.targetUser == targetUser) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
+            (identical(other.targetUser, targetUser) || other.targetUser == targetUser) &&
             const DeepCollectionEquality().equals(
               other.targetUsers,
               targetUsers,
@@ -88,8 +84,7 @@ abstract mixin class $UserMutedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UserMutedEventCopyWithImpl<$Res>
-    implements $UserMutedEventCopyWith<$Res> {
+class _$UserMutedEventCopyWithImpl<$Res> implements $UserMutedEventCopyWith<$Res> {
   _$UserMutedEventCopyWithImpl(this._self, this._then);
 
   final UserMutedEvent _self;

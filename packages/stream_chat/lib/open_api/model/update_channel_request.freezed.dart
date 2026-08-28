@@ -42,8 +42,7 @@ mixin _$UpdateChannelRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UpdateChannelRequest &&
-            (identical(other.acceptInvite, acceptInvite) ||
-                other.acceptInvite == acceptInvite) &&
+            (identical(other.acceptInvite, acceptInvite) || other.acceptInvite == acceptInvite) &&
             const DeepCollectionEquality().equals(
               other.addFilterTags,
               addFilterTags,
@@ -52,17 +51,13 @@ mixin _$UpdateChannelRequest {
               other.addMembers,
               addMembers,
             ) &&
-            (identical(other.cooldown, cooldown) ||
-                other.cooldown == cooldown) &&
+            (identical(other.cooldown, cooldown) || other.cooldown == cooldown) &&
             (identical(other.data, data) || other.data == data) &&
-            (identical(other.hideHistory, hideHistory) ||
-                other.hideHistory == hideHistory) &&
-            (identical(other.hideHistoryBefore, hideHistoryBefore) ||
-                other.hideHistoryBefore == hideHistoryBefore) &&
+            (identical(other.hideHistory, hideHistory) || other.hideHistory == hideHistory) &&
+            (identical(other.hideHistoryBefore, hideHistoryBefore) || other.hideHistoryBefore == hideHistoryBefore) &&
             const DeepCollectionEquality().equals(other.invites, invites) &&
             (identical(other.message, message) || other.message == message) &&
-            (identical(other.rejectInvite, rejectInvite) ||
-                other.rejectInvite == rejectInvite) &&
+            (identical(other.rejectInvite, rejectInvite) || other.rejectInvite == rejectInvite) &&
             const DeepCollectionEquality().equals(
               other.removeFilterTags,
               removeFilterTags,
@@ -71,8 +66,7 @@ mixin _$UpdateChannelRequest {
               other.removeMembers,
               removeMembers,
             ) &&
-            (identical(other.skipPush, skipPush) ||
-                other.skipPush == skipPush));
+            (identical(other.skipPush, skipPush) || other.skipPush == skipPush));
   }
 
   @override
@@ -124,8 +118,7 @@ abstract mixin class $UpdateChannelRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpdateChannelRequestCopyWithImpl<$Res>
-    implements $UpdateChannelRequestCopyWith<$Res> {
+class _$UpdateChannelRequestCopyWithImpl<$Res> implements $UpdateChannelRequestCopyWith<$Res> {
   _$UpdateChannelRequestCopyWithImpl(this._self, this._then);
 
   final UpdateChannelRequest _self;

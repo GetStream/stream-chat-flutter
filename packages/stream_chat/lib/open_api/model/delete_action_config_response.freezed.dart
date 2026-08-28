@@ -20,8 +20,7 @@ mixin _$DeleteActionConfigResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $DeleteActionConfigResponseCopyWith<DeleteActionConfigResponse>
-  get copyWith =>
+  $DeleteActionConfigResponseCopyWith<DeleteActionConfigResponse> get copyWith =>
       _$DeleteActionConfigResponseCopyWithImpl<DeleteActionConfigResponse>(
         this as DeleteActionConfigResponse,
         _$identity,
@@ -33,8 +32,7 @@ mixin _$DeleteActionConfigResponse {
         (other.runtimeType == runtimeType &&
             other is DeleteActionConfigResponse &&
             (identical(other.deleted, deleted) || other.deleted == deleted) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -57,8 +55,7 @@ abstract mixin class $DeleteActionConfigResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$DeleteActionConfigResponseCopyWithImpl<$Res>
-    implements $DeleteActionConfigResponseCopyWith<$Res> {
+class _$DeleteActionConfigResponseCopyWithImpl<$Res> implements $DeleteActionConfigResponseCopyWith<$Res> {
   _$DeleteActionConfigResponseCopyWithImpl(this._self, this._then);
 
   final DeleteActionConfigResponse _self;

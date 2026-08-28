@@ -34,8 +34,7 @@ mixin _$UpdateChannelResponse {
         (other.runtimeType == runtimeType &&
             other is UpdateChannelResponse &&
             (identical(other.channel, channel) || other.channel == channel) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             const DeepCollectionEquality().equals(other.members, members) &&
             (identical(other.message, message) || other.message == message));
   }
@@ -71,8 +70,7 @@ abstract mixin class $UpdateChannelResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpdateChannelResponseCopyWithImpl<$Res>
-    implements $UpdateChannelResponseCopyWith<$Res> {
+class _$UpdateChannelResponseCopyWithImpl<$Res> implements $UpdateChannelResponseCopyWith<$Res> {
   _$UpdateChannelResponseCopyWithImpl(this._self, this._then);
 
   final UpdateChannelResponse _self;

@@ -33,11 +33,9 @@ mixin _$ImageUploadResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ImageUploadResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.file, file) || other.file == file) &&
-            (identical(other.thumbUrl, thumbUrl) ||
-                other.thumbUrl == thumbUrl) &&
+            (identical(other.thumbUrl, thumbUrl) || other.thumbUrl == thumbUrl) &&
             const DeepCollectionEquality().equals(
               other.uploadSizes,
               uploadSizes,
@@ -75,8 +73,7 @@ abstract mixin class $ImageUploadResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ImageUploadResponseCopyWithImpl<$Res>
-    implements $ImageUploadResponseCopyWith<$Res> {
+class _$ImageUploadResponseCopyWithImpl<$Res> implements $ImageUploadResponseCopyWith<$Res> {
   _$ImageUploadResponseCopyWithImpl(this._self, this._then);
 
   final ImageUploadResponse _self;

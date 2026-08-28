@@ -23,24 +23,21 @@ mixin _$ReactionRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ReactionRequestCopyWith<ReactionRequest> get copyWith =>
-      _$ReactionRequestCopyWithImpl<ReactionRequest>(
-        this as ReactionRequest,
-        _$identity,
-      );
+  $ReactionRequestCopyWith<ReactionRequest> get copyWith => _$ReactionRequestCopyWithImpl<ReactionRequest>(
+    this as ReactionRequest,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ReactionRequest &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.score, score) || other.score == score) &&
             (identical(other.type, type) || other.type == type) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
   }
 
   @override
@@ -76,8 +73,7 @@ abstract mixin class $ReactionRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ReactionRequestCopyWithImpl<$Res>
-    implements $ReactionRequestCopyWith<$Res> {
+class _$ReactionRequestCopyWithImpl<$Res> implements $ReactionRequestCopyWith<$Res> {
   _$ReactionRequestCopyWithImpl(this._self, this._then);
 
   final ReactionRequest _self;

@@ -23,8 +23,7 @@ mixin _$HarmConfig {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $HarmConfigCopyWith<HarmConfig> get copyWith =>
-      _$HarmConfigCopyWithImpl<HarmConfig>(this as HarmConfig, _$identity);
+  $HarmConfigCopyWith<HarmConfig> get copyWith => _$HarmConfigCopyWithImpl<HarmConfig>(this as HarmConfig, _$identity);
 
   @override
   bool operator ==(Object other) {
@@ -35,13 +34,10 @@ mixin _$HarmConfig {
               other.actionSequences,
               actionSequences,
             ) &&
-            (identical(other.cooldownPeriod, cooldownPeriod) ||
-                other.cooldownPeriod == cooldownPeriod) &&
+            (identical(other.cooldownPeriod, cooldownPeriod) || other.cooldownPeriod == cooldownPeriod) &&
             const DeepCollectionEquality().equals(other.harmTypes, harmTypes) &&
-            (identical(other.severity, severity) ||
-                other.severity == severity) &&
-            (identical(other.threshold, threshold) ||
-                other.threshold == threshold));
+            (identical(other.severity, severity) || other.severity == severity) &&
+            (identical(other.threshold, threshold) || other.threshold == threshold));
   }
 
   @override

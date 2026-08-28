@@ -10,9 +10,7 @@ AddUserGroupMembersRequest _$AddUserGroupMembersRequestFromJson(
   Map<String, dynamic> json,
 ) => AddUserGroupMembersRequest(
   asAdmin: json['as_admin'] as bool?,
-  memberIds: (json['member_ids'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  memberIds: (json['member_ids'] as List<dynamic>).map((e) => e as String).toList(),
   teamId: json['team_id'] as String?,
 );
 

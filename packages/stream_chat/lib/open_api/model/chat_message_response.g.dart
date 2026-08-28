@@ -6,128 +6,114 @@ part of 'chat_message_response.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ChatMessageResponse _$ChatMessageResponseFromJson(Map<String, dynamic> json) =>
-    ChatMessageResponse(
-      attachments: (json['attachments'] as List<dynamic>)
-          .map((e) => Attachment.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      cid: json['cid'] as String,
-      command: json['command'] as String?,
-      createdAt: const StreamDateTimeConverter().fromJson(
-        json['created_at'] as Object,
-      ),
-      custom: json['custom'] as Map<String, dynamic>,
-      deletedAt: _$JsonConverterFromJson<Object, DateTime>(
-        json['deleted_at'],
-        const StreamDateTimeConverter().fromJson,
-      ),
-      deletedForMe: json['deleted_for_me'] as bool?,
-      deletedReplyCount: (json['deleted_reply_count'] as num).toInt(),
-      draft: json['draft'] == null
-          ? null
-          : ChatDraftResponse.fromJson(json['draft'] as Map<String, dynamic>),
-      html: json['html'] as String,
-      i18n: (json['i18n'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, e as String),
-      ),
-      id: json['id'] as String,
-      imageLabels: (json['image_labels'] as Map<String, dynamic>?)?.map(
-        (k, e) =>
-            MapEntry(k, (e as List<dynamic>).map((e) => e as String).toList()),
-      ),
-      latestReactions: (json['latest_reactions'] as List<dynamic>)
-          .map((e) => ChatReactionResponse.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      member: json['member'] == null
-          ? null
-          : ChannelMemberPartialResponse.fromJson(
-              json['member'] as Map<String, dynamic>,
-            ),
-      mentionedChannel: json['mentioned_channel'] as bool,
-      mentionedGroupIds: (json['mentioned_group_ids'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
-      mentionedGroups: (json['mentioned_groups'] as List<dynamic>?)
-          ?.map((e) => UserGroupResponse.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      mentionedHere: json['mentioned_here'] as bool,
-      mentionedRoles: (json['mentioned_roles'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
-      mentionedUsers: (json['mentioned_users'] as List<dynamic>)
-          .map((e) => UserResponse.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      messageTextUpdatedAt: _$JsonConverterFromJson<Object, DateTime>(
-        json['message_text_updated_at'],
-        const StreamDateTimeConverter().fromJson,
-      ),
-      mml: json['mml'] as String?,
-      moderation: json['moderation'] == null
-          ? null
-          : ChatModerationV2Response.fromJson(
-              json['moderation'] as Map<String, dynamic>,
-            ),
-      ownReactions: (json['own_reactions'] as List<dynamic>)
-          .map((e) => ChatReactionResponse.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      parentId: json['parent_id'] as String?,
-      pinExpires: _$JsonConverterFromJson<Object, DateTime>(
-        json['pin_expires'],
-        const StreamDateTimeConverter().fromJson,
-      ),
-      pinned: json['pinned'] as bool,
-      pinnedAt: _$JsonConverterFromJson<Object, DateTime>(
-        json['pinned_at'],
-        const StreamDateTimeConverter().fromJson,
-      ),
-      pinnedBy: json['pinned_by'] == null
-          ? null
-          : UserResponse.fromJson(json['pinned_by'] as Map<String, dynamic>),
-      poll: json['poll'] == null
-          ? null
-          : PollResponseData.fromJson(json['poll'] as Map<String, dynamic>),
-      pollId: json['poll_id'] as String?,
-      quotedMessage: json['quoted_message'] == null
-          ? null
-          : ChatMessageResponse.fromJson(
-              json['quoted_message'] as Map<String, dynamic>,
-            ),
-      quotedMessageId: json['quoted_message_id'] as String?,
-      reactionCounts: Map<String, int>.from(json['reaction_counts'] as Map),
-      reactionGroups: (json['reaction_groups'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(
-          k,
-          ChatReactionGroupResponse.fromJson(e as Map<String, dynamic>),
+ChatMessageResponse _$ChatMessageResponseFromJson(Map<String, dynamic> json) => ChatMessageResponse(
+  attachments: (json['attachments'] as List<dynamic>)
+      .map((e) => Attachment.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  cid: json['cid'] as String,
+  command: json['command'] as String?,
+  createdAt: const StreamDateTimeConverter().fromJson(
+    json['created_at'] as Object,
+  ),
+  custom: json['custom'] as Map<String, dynamic>,
+  deletedAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['deleted_at'],
+    const StreamDateTimeConverter().fromJson,
+  ),
+  deletedForMe: json['deleted_for_me'] as bool?,
+  deletedReplyCount: (json['deleted_reply_count'] as num).toInt(),
+  draft: json['draft'] == null ? null : ChatDraftResponse.fromJson(json['draft'] as Map<String, dynamic>),
+  html: json['html'] as String,
+  i18n: (json['i18n'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, e as String),
+  ),
+  id: json['id'] as String,
+  imageLabels: (json['image_labels'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, (e as List<dynamic>).map((e) => e as String).toList()),
+  ),
+  latestReactions: (json['latest_reactions'] as List<dynamic>)
+      .map((e) => ChatReactionResponse.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  member: json['member'] == null
+      ? null
+      : ChannelMemberPartialResponse.fromJson(
+          json['member'] as Map<String, dynamic>,
         ),
-      ),
-      reactionScores: Map<String, int>.from(json['reaction_scores'] as Map),
-      reminder: json['reminder'] == null
-          ? null
-          : ChatReminderResponseData.fromJson(
-              json['reminder'] as Map<String, dynamic>,
-            ),
-      replyCount: (json['reply_count'] as num).toInt(),
-      restrictedVisibility: (json['restricted_visibility'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
-      shadowed: json['shadowed'] as bool,
-      sharedLocation: json['shared_location'] == null
-          ? null
-          : ChatSharedLocationResponseData.fromJson(
-              json['shared_location'] as Map<String, dynamic>,
-            ),
-      showInChannel: json['show_in_channel'] as bool?,
-      silent: json['silent'] as bool,
-      text: json['text'] as String,
-      threadParticipants: (json['thread_participants'] as List<dynamic>?)
-          ?.map((e) => UserResponse.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      type: json['type'] as String,
-      updatedAt: const StreamDateTimeConverter().fromJson(
-        json['updated_at'] as Object,
-      ),
-      user: UserResponse.fromJson(json['user'] as Map<String, dynamic>),
-    );
+  mentionedChannel: json['mentioned_channel'] as bool,
+  mentionedGroupIds: (json['mentioned_group_ids'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  mentionedGroups: (json['mentioned_groups'] as List<dynamic>?)
+      ?.map((e) => UserGroupResponse.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  mentionedHere: json['mentioned_here'] as bool,
+  mentionedRoles: (json['mentioned_roles'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  mentionedUsers: (json['mentioned_users'] as List<dynamic>)
+      .map((e) => UserResponse.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  messageTextUpdatedAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['message_text_updated_at'],
+    const StreamDateTimeConverter().fromJson,
+  ),
+  mml: json['mml'] as String?,
+  moderation: json['moderation'] == null
+      ? null
+      : ChatModerationV2Response.fromJson(
+          json['moderation'] as Map<String, dynamic>,
+        ),
+  ownReactions: (json['own_reactions'] as List<dynamic>)
+      .map((e) => ChatReactionResponse.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  parentId: json['parent_id'] as String?,
+  pinExpires: _$JsonConverterFromJson<Object, DateTime>(
+    json['pin_expires'],
+    const StreamDateTimeConverter().fromJson,
+  ),
+  pinned: json['pinned'] as bool,
+  pinnedAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['pinned_at'],
+    const StreamDateTimeConverter().fromJson,
+  ),
+  pinnedBy: json['pinned_by'] == null ? null : UserResponse.fromJson(json['pinned_by'] as Map<String, dynamic>),
+  poll: json['poll'] == null ? null : PollResponseData.fromJson(json['poll'] as Map<String, dynamic>),
+  pollId: json['poll_id'] as String?,
+  quotedMessage: json['quoted_message'] == null
+      ? null
+      : ChatMessageResponse.fromJson(
+          json['quoted_message'] as Map<String, dynamic>,
+        ),
+  quotedMessageId: json['quoted_message_id'] as String?,
+  reactionCounts: Map<String, int>.from(json['reaction_counts'] as Map),
+  reactionGroups: (json['reaction_groups'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(
+      k,
+      ChatReactionGroupResponse.fromJson(e as Map<String, dynamic>),
+    ),
+  ),
+  reactionScores: Map<String, int>.from(json['reaction_scores'] as Map),
+  reminder: json['reminder'] == null
+      ? null
+      : ChatReminderResponseData.fromJson(
+          json['reminder'] as Map<String, dynamic>,
+        ),
+  replyCount: (json['reply_count'] as num).toInt(),
+  restrictedVisibility: (json['restricted_visibility'] as List<dynamic>).map((e) => e as String).toList(),
+  shadowed: json['shadowed'] as bool,
+  sharedLocation: json['shared_location'] == null
+      ? null
+      : ChatSharedLocationResponseData.fromJson(
+          json['shared_location'] as Map<String, dynamic>,
+        ),
+  showInChannel: json['show_in_channel'] as bool?,
+  silent: json['silent'] as bool,
+  text: json['text'] as String,
+  threadParticipants: (json['thread_participants'] as List<dynamic>?)
+      ?.map((e) => UserResponse.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  type: json['type'] as String,
+  updatedAt: const StreamDateTimeConverter().fromJson(
+    json['updated_at'] as Object,
+  ),
+  user: UserResponse.fromJson(json['user'] as Map<String, dynamic>),
+);
 
 Map<String, dynamic> _$ChatMessageResponseToJson(
   ChatMessageResponse instance,
@@ -191,9 +177,7 @@ Map<String, dynamic> _$ChatMessageResponseToJson(
   'show_in_channel': instance.showInChannel,
   'silent': instance.silent,
   'text': instance.text,
-  'thread_participants': instance.threadParticipants
-      ?.map((e) => e.toJson())
-      .toList(),
+  'thread_participants': instance.threadParticipants?.map((e) => e.toJson()).toList(),
   'type': instance.type,
   'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
   'user': instance.user.toJson(),

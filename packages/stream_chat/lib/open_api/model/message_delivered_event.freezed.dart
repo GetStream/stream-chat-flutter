@@ -49,24 +49,19 @@ mixin _$MessageDeliveredEvent {
               other.channelCustom,
               channelCustom,
             ) &&
-            (identical(other.channelId, channelId) ||
-                other.channelId == channelId) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
             (identical(other.channelMemberCount, channelMemberCount) ||
                 other.channelMemberCount == channelMemberCount) &&
             (identical(other.channelMessageCount, channelMessageCount) ||
                 other.channelMessageCount == channelMessageCount) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.lastDeliveredAt, lastDeliveredAt) ||
-                other.lastDeliveredAt == lastDeliveredAt) &&
+            (identical(other.lastDeliveredAt, lastDeliveredAt) || other.lastDeliveredAt == lastDeliveredAt) &&
             (identical(other.lastDeliveredMessageId, lastDeliveredMessageId) ||
                 other.lastDeliveredMessageId == lastDeliveredMessageId) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.team, team) || other.team == team) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(other.user, user) || other.user == user));
@@ -125,8 +120,7 @@ abstract mixin class $MessageDeliveredEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MessageDeliveredEventCopyWithImpl<$Res>
-    implements $MessageDeliveredEventCopyWith<$Res> {
+class _$MessageDeliveredEventCopyWithImpl<$Res> implements $MessageDeliveredEventCopyWith<$Res> {
   _$MessageDeliveredEventCopyWithImpl(this._self, this._then);
 
   final MessageDeliveredEvent _self;

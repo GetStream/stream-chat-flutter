@@ -26,36 +26,28 @@ mixin _$ChatPreferences {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ChatPreferencesCopyWith<ChatPreferences> get copyWith =>
-      _$ChatPreferencesCopyWithImpl<ChatPreferences>(
-        this as ChatPreferences,
-        _$identity,
-      );
+  $ChatPreferencesCopyWith<ChatPreferences> get copyWith => _$ChatPreferencesCopyWithImpl<ChatPreferences>(
+    this as ChatPreferences,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ChatPreferences &&
-            (identical(other.channelMentions, channelMentions) ||
-                other.channelMentions == channelMentions) &&
-            (identical(other.defaultPreference, defaultPreference) ||
-                other.defaultPreference == defaultPreference) &&
-            (identical(other.directMentions, directMentions) ||
-                other.directMentions == directMentions) &&
+            (identical(other.channelMentions, channelMentions) || other.channelMentions == channelMentions) &&
+            (identical(other.defaultPreference, defaultPreference) || other.defaultPreference == defaultPreference) &&
+            (identical(other.directMentions, directMentions) || other.directMentions == directMentions) &&
             (identical(
                   other.distinctChannelMessages,
                   distinctChannelMessages,
                 ) ||
                 other.distinctChannelMessages == distinctChannelMessages) &&
-            (identical(other.groupMentions, groupMentions) ||
-                other.groupMentions == groupMentions) &&
-            (identical(other.hereMentions, hereMentions) ||
-                other.hereMentions == hereMentions) &&
-            (identical(other.roleMentions, roleMentions) ||
-                other.roleMentions == roleMentions) &&
-            (identical(other.threadReplies, threadReplies) ||
-                other.threadReplies == threadReplies));
+            (identical(other.groupMentions, groupMentions) || other.groupMentions == groupMentions) &&
+            (identical(other.hereMentions, hereMentions) || other.hereMentions == hereMentions) &&
+            (identical(other.roleMentions, roleMentions) || other.roleMentions == roleMentions) &&
+            (identical(other.threadReplies, threadReplies) || other.threadReplies == threadReplies));
   }
 
   @override
@@ -97,8 +89,7 @@ abstract mixin class $ChatPreferencesCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChatPreferencesCopyWithImpl<$Res>
-    implements $ChatPreferencesCopyWith<$Res> {
+class _$ChatPreferencesCopyWithImpl<$Res> implements $ChatPreferencesCopyWith<$Res> {
   _$ChatPreferencesCopyWithImpl(this._self, this._then);
 
   final ChatPreferences _self;

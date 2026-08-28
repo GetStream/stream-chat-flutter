@@ -34,11 +34,11 @@ mixin _$NotificationChannelDeletedEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $NotificationChannelDeletedEventCopyWith<NotificationChannelDeletedEvent>
-  get copyWith =>
-      _$NotificationChannelDeletedEventCopyWithImpl<
-        NotificationChannelDeletedEvent
-      >(this as NotificationChannelDeletedEvent, _$identity);
+  $NotificationChannelDeletedEventCopyWith<NotificationChannelDeletedEvent> get copyWith =>
+      _$NotificationChannelDeletedEventCopyWithImpl<NotificationChannelDeletedEvent>(
+        this as NotificationChannelDeletedEvent,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -50,32 +50,25 @@ mixin _$NotificationChannelDeletedEvent {
               other.channelCustom,
               channelCustom,
             ) &&
-            (identical(other.channelId, channelId) ||
-                other.channelId == channelId) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
             (identical(other.channelMemberCount, channelMemberCount) ||
                 other.channelMemberCount == channelMemberCount) &&
             (identical(other.channelMessageCount, channelMessageCount) ||
                 other.channelMessageCount == channelMessageCount) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             const DeepCollectionEquality().equals(
               other.groupedUnreadChannels,
               groupedUnreadChannels,
             ) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.team, team) || other.team == team) &&
-            (identical(other.totalUnreadCount, totalUnreadCount) ||
-                other.totalUnreadCount == totalUnreadCount) &&
+            (identical(other.totalUnreadCount, totalUnreadCount) || other.totalUnreadCount == totalUnreadCount) &&
             (identical(other.type, type) || other.type == type) &&
-            (identical(other.unreadChannels, unreadChannels) ||
-                other.unreadChannels == unreadChannels) &&
-            (identical(other.unreadCount, unreadCount) ||
-                other.unreadCount == unreadCount));
+            (identical(other.unreadChannels, unreadChannels) || other.unreadChannels == unreadChannels) &&
+            (identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount));
   }
 
   @override
@@ -133,8 +126,7 @@ abstract mixin class $NotificationChannelDeletedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$NotificationChannelDeletedEventCopyWithImpl<$Res>
-    implements $NotificationChannelDeletedEventCopyWith<$Res> {
+class _$NotificationChannelDeletedEventCopyWithImpl<$Res> implements $NotificationChannelDeletedEventCopyWith<$Res> {
   _$NotificationChannelDeletedEventCopyWithImpl(this._self, this._then);
 
   final NotificationChannelDeletedEvent _self;

@@ -30,8 +30,7 @@ mixin _$FlagCountRuleParameters {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is FlagCountRuleParameters &&
-            (identical(other.threshold, threshold) ||
-                other.threshold == threshold));
+            (identical(other.threshold, threshold) || other.threshold == threshold));
   }
 
   @override
@@ -54,8 +53,7 @@ abstract mixin class $FlagCountRuleParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FlagCountRuleParametersCopyWithImpl<$Res>
-    implements $FlagCountRuleParametersCopyWith<$Res> {
+class _$FlagCountRuleParametersCopyWithImpl<$Res> implements $FlagCountRuleParametersCopyWith<$Res> {
   _$FlagCountRuleParametersCopyWithImpl(this._self, this._then);
 
   final FlagCountRuleParameters _self;

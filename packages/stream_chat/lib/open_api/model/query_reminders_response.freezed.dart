@@ -33,8 +33,7 @@ mixin _$QueryRemindersResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is QueryRemindersResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.next, next) || other.next == next) &&
             (identical(other.prev, prev) || other.prev == prev) &&
             const DeepCollectionEquality().equals(other.reminders, reminders));
@@ -71,8 +70,7 @@ abstract mixin class $QueryRemindersResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryRemindersResponseCopyWithImpl<$Res>
-    implements $QueryRemindersResponseCopyWith<$Res> {
+class _$QueryRemindersResponseCopyWithImpl<$Res> implements $QueryRemindersResponseCopyWith<$Res> {
   _$QueryRemindersResponseCopyWithImpl(this._self, this._then);
 
   final QueryRemindersResponse _self;

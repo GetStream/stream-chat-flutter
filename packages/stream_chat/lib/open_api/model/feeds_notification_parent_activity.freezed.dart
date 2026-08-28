@@ -23,11 +23,11 @@ mixin _$FeedsNotificationParentActivity {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $FeedsNotificationParentActivityCopyWith<FeedsNotificationParentActivity>
-  get copyWith =>
-      _$FeedsNotificationParentActivityCopyWithImpl<
-        FeedsNotificationParentActivity
-      >(this as FeedsNotificationParentActivity, _$identity);
+  $FeedsNotificationParentActivityCopyWith<FeedsNotificationParentActivity> get copyWith =>
+      _$FeedsNotificationParentActivityCopyWithImpl<FeedsNotificationParentActivity>(
+        this as FeedsNotificationParentActivity,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -77,8 +77,7 @@ abstract mixin class $FeedsNotificationParentActivityCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FeedsNotificationParentActivityCopyWithImpl<$Res>
-    implements $FeedsNotificationParentActivityCopyWith<$Res> {
+class _$FeedsNotificationParentActivityCopyWithImpl<$Res> implements $FeedsNotificationParentActivityCopyWith<$Res> {
   _$FeedsNotificationParentActivityCopyWithImpl(this._self, this._then);
 
   final FeedsNotificationParentActivity _self;

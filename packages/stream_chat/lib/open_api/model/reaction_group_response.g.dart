@@ -32,8 +32,6 @@ Map<String, dynamic> _$ReactionGroupResponseToJson(
   'last_reaction_at': const StreamDateTimeConverter().toJson(
     instance.lastReactionAt,
   ),
-  'latest_reactions_by': instance.latestReactionsBy
-      .map((e) => e.toJson())
-      .toList(),
+  'latest_reactions_by': instance.latestReactionsBy.map((e) => e.toJson()).toList(),
   'sum_scores': instance.sumScores,
 };

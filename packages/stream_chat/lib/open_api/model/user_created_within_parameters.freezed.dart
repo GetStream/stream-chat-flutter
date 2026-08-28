@@ -19,8 +19,7 @@ mixin _$UserCreatedWithinParameters {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UserCreatedWithinParametersCopyWith<UserCreatedWithinParameters>
-  get copyWith =>
+  $UserCreatedWithinParametersCopyWith<UserCreatedWithinParameters> get copyWith =>
       _$UserCreatedWithinParametersCopyWithImpl<UserCreatedWithinParameters>(
         this as UserCreatedWithinParameters,
         _$identity,
@@ -54,8 +53,7 @@ abstract mixin class $UserCreatedWithinParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UserCreatedWithinParametersCopyWithImpl<$Res>
-    implements $UserCreatedWithinParametersCopyWith<$Res> {
+class _$UserCreatedWithinParametersCopyWithImpl<$Res> implements $UserCreatedWithinParametersCopyWith<$Res> {
   _$UserCreatedWithinParametersCopyWithImpl(this._self, this._then);
 
   final UserCreatedWithinParameters _self;

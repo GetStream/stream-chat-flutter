@@ -20,8 +20,7 @@ mixin _$UpsertActionConfigResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UpsertActionConfigResponseCopyWith<UpsertActionConfigResponse>
-  get copyWith =>
+  $UpsertActionConfigResponseCopyWith<UpsertActionConfigResponse> get copyWith =>
       _$UpsertActionConfigResponseCopyWithImpl<UpsertActionConfigResponse>(
         this as UpsertActionConfigResponse,
         _$identity,
@@ -32,10 +31,8 @@ mixin _$UpsertActionConfigResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UpsertActionConfigResponse &&
-            (identical(other.actionConfig, actionConfig) ||
-                other.actionConfig == actionConfig) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.actionConfig, actionConfig) || other.actionConfig == actionConfig) &&
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -58,8 +55,7 @@ abstract mixin class $UpsertActionConfigResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpsertActionConfigResponseCopyWithImpl<$Res>
-    implements $UpsertActionConfigResponseCopyWith<$Res> {
+class _$UpsertActionConfigResponseCopyWithImpl<$Res> implements $UpsertActionConfigResponseCopyWith<$Res> {
   _$UpsertActionConfigResponseCopyWithImpl(this._self, this._then);
 
   final UpsertActionConfigResponse _self;

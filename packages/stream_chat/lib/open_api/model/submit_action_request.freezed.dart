@@ -50,37 +50,26 @@ mixin _$SubmitActionRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is SubmitActionRequest &&
-            (identical(other.actionType, actionType) ||
-                other.actionType == actionType) &&
-            (identical(other.appealId, appealId) ||
-                other.appealId == appealId) &&
+            (identical(other.actionType, actionType) || other.actionType == actionType) &&
+            (identical(other.appealId, appealId) || other.appealId == appealId) &&
             (identical(other.ban, ban) || other.ban == ban) &&
             (identical(other.block, block) || other.block == block) &&
             (identical(other.bypass, bypass) || other.bypass == bypass) &&
             (identical(other.custom, custom) || other.custom == custom) &&
-            (identical(other.deleteActivity, deleteActivity) ||
-                other.deleteActivity == deleteActivity) &&
-            (identical(other.deleteComment, deleteComment) ||
-                other.deleteComment == deleteComment) &&
-            (identical(other.deleteMessage, deleteMessage) ||
-                other.deleteMessage == deleteMessage) &&
-            (identical(other.deleteReaction, deleteReaction) ||
-                other.deleteReaction == deleteReaction) &&
-            (identical(other.deleteUser, deleteUser) ||
-                other.deleteUser == deleteUser) &&
+            (identical(other.deleteActivity, deleteActivity) || other.deleteActivity == deleteActivity) &&
+            (identical(other.deleteComment, deleteComment) || other.deleteComment == deleteComment) &&
+            (identical(other.deleteMessage, deleteMessage) || other.deleteMessage == deleteMessage) &&
+            (identical(other.deleteReaction, deleteReaction) || other.deleteReaction == deleteReaction) &&
+            (identical(other.deleteUser, deleteUser) || other.deleteUser == deleteUser) &&
             (identical(other.deleteUserMessages, deleteUserMessages) ||
                 other.deleteUserMessages == deleteUserMessages) &&
-            (identical(other.escalate, escalate) ||
-                other.escalate == escalate) &&
+            (identical(other.escalate, escalate) || other.escalate == escalate) &&
             (identical(other.flag, flag) || other.flag == flag) &&
             (identical(other.itemId, itemId) || other.itemId == itemId) &&
-            (identical(other.markReviewed, markReviewed) ||
-                other.markReviewed == markReviewed) &&
-            (identical(other.rejectAppeal, rejectAppeal) ||
-                other.rejectAppeal == rejectAppeal) &&
+            (identical(other.markReviewed, markReviewed) || other.markReviewed == markReviewed) &&
+            (identical(other.rejectAppeal, rejectAppeal) || other.rejectAppeal == rejectAppeal) &&
             (identical(other.restore, restore) || other.restore == restore) &&
-            (identical(other.shadowBlock, shadowBlock) ||
-                other.shadowBlock == shadowBlock) &&
+            (identical(other.shadowBlock, shadowBlock) || other.shadowBlock == shadowBlock) &&
             (identical(other.unban, unban) || other.unban == unban) &&
             (identical(other.unblock, unblock) || other.unblock == unblock));
   }
@@ -150,8 +139,7 @@ abstract mixin class $SubmitActionRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$SubmitActionRequestCopyWithImpl<$Res>
-    implements $SubmitActionRequestCopyWith<$Res> {
+class _$SubmitActionRequestCopyWithImpl<$Res> implements $SubmitActionRequestCopyWith<$Res> {
   _$SubmitActionRequestCopyWithImpl(this._self, this._then);
 
   final SubmitActionRequest _self;

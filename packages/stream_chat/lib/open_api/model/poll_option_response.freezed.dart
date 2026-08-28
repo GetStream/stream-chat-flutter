@@ -20,21 +20,18 @@ mixin _$PollOptionResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $PollOptionResponseCopyWith<PollOptionResponse> get copyWith =>
-      _$PollOptionResponseCopyWithImpl<PollOptionResponse>(
-        this as PollOptionResponse,
-        _$identity,
-      );
+  $PollOptionResponseCopyWith<PollOptionResponse> get copyWith => _$PollOptionResponseCopyWithImpl<PollOptionResponse>(
+    this as PollOptionResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is PollOptionResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
-            (identical(other.pollOption, pollOption) ||
-                other.pollOption == pollOption));
+            (identical(other.duration, duration) || other.duration == duration) &&
+            (identical(other.pollOption, pollOption) || other.pollOption == pollOption));
   }
 
   @override
@@ -57,8 +54,7 @@ abstract mixin class $PollOptionResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$PollOptionResponseCopyWithImpl<$Res>
-    implements $PollOptionResponseCopyWith<$Res> {
+class _$PollOptionResponseCopyWithImpl<$Res> implements $PollOptionResponseCopyWith<$Res> {
   _$PollOptionResponseCopyWithImpl(this._self, this._then);
 
   final PollOptionResponse _self;

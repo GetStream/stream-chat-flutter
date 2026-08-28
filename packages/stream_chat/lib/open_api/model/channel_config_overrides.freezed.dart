@@ -45,31 +45,21 @@ mixin _$ChannelConfigOverrides {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ChannelConfigOverrides &&
-            (identical(other.blocklist, blocklist) ||
-                other.blocklist == blocklist) &&
-            (identical(other.blocklistBehavior, blocklistBehavior) ||
-                other.blocklistBehavior == blocklistBehavior) &&
-            (identical(other.chatPreferences, chatPreferences) ||
-                other.chatPreferences == chatPreferences) &&
+            (identical(other.blocklist, blocklist) || other.blocklist == blocklist) &&
+            (identical(other.blocklistBehavior, blocklistBehavior) || other.blocklistBehavior == blocklistBehavior) &&
+            (identical(other.chatPreferences, chatPreferences) || other.chatPreferences == chatPreferences) &&
             const DeepCollectionEquality().equals(other.commands, commands) &&
-            (identical(other.countMessages, countMessages) ||
-                other.countMessages == countMessages) &&
+            (identical(other.countMessages, countMessages) || other.countMessages == countMessages) &&
             const DeepCollectionEquality().equals(other.grants, grants) &&
-            (identical(other.maxMessageLength, maxMessageLength) ||
-                other.maxMessageLength == maxMessageLength) &&
-            (identical(other.pushLevel, pushLevel) ||
-                other.pushLevel == pushLevel) &&
+            (identical(other.maxMessageLength, maxMessageLength) || other.maxMessageLength == maxMessageLength) &&
+            (identical(other.pushLevel, pushLevel) || other.pushLevel == pushLevel) &&
             (identical(other.quotes, quotes) || other.quotes == quotes) &&
-            (identical(other.reactions, reactions) ||
-                other.reactions == reactions) &&
+            (identical(other.reactions, reactions) || other.reactions == reactions) &&
             (identical(other.replies, replies) || other.replies == replies) &&
-            (identical(other.sharedLocations, sharedLocations) ||
-                other.sharedLocations == sharedLocations) &&
-            (identical(other.typingEvents, typingEvents) ||
-                other.typingEvents == typingEvents) &&
+            (identical(other.sharedLocations, sharedLocations) || other.sharedLocations == sharedLocations) &&
+            (identical(other.typingEvents, typingEvents) || other.typingEvents == typingEvents) &&
             (identical(other.uploads, uploads) || other.uploads == uploads) &&
-            (identical(other.urlEnrichment, urlEnrichment) ||
-                other.urlEnrichment == urlEnrichment) &&
+            (identical(other.urlEnrichment, urlEnrichment) || other.urlEnrichment == urlEnrichment) &&
             (identical(other.userMessageReminders, userMessageReminders) ||
                 other.userMessageReminders == userMessageReminders));
   }
@@ -129,8 +119,7 @@ abstract mixin class $ChannelConfigOverridesCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChannelConfigOverridesCopyWithImpl<$Res>
-    implements $ChannelConfigOverridesCopyWith<$Res> {
+class _$ChannelConfigOverridesCopyWithImpl<$Res> implements $ChannelConfigOverridesCopyWith<$Res> {
   _$ChannelConfigOverridesCopyWithImpl(this._self, this._then);
 
   final ChannelConfigOverrides _self;

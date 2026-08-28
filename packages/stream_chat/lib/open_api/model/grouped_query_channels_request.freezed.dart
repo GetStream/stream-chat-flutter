@@ -22,8 +22,7 @@ mixin _$GroupedQueryChannelsRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $GroupedQueryChannelsRequestCopyWith<GroupedQueryChannelsRequest>
-  get copyWith =>
+  $GroupedQueryChannelsRequestCopyWith<GroupedQueryChannelsRequest> get copyWith =>
       _$GroupedQueryChannelsRequestCopyWithImpl<GroupedQueryChannelsRequest>(
         this as GroupedQueryChannelsRequest,
         _$identity,
@@ -36,8 +35,7 @@ mixin _$GroupedQueryChannelsRequest {
             other is GroupedQueryChannelsRequest &&
             const DeepCollectionEquality().equals(other.groups, groups) &&
             (identical(other.limit, limit) || other.limit == limit) &&
-            (identical(other.presence, presence) ||
-                other.presence == presence) &&
+            (identical(other.presence, presence) || other.presence == presence) &&
             (identical(other.watch, watch) || other.watch == watch));
   }
 
@@ -72,8 +70,7 @@ abstract mixin class $GroupedQueryChannelsRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$GroupedQueryChannelsRequestCopyWithImpl<$Res>
-    implements $GroupedQueryChannelsRequestCopyWith<$Res> {
+class _$GroupedQueryChannelsRequestCopyWithImpl<$Res> implements $GroupedQueryChannelsRequestCopyWith<$Res> {
   _$GroupedQueryChannelsRequestCopyWithImpl(this._self, this._then);
 
   final GroupedQueryChannelsRequest _self;

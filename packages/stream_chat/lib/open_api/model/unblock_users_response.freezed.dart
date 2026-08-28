@@ -30,8 +30,7 @@ mixin _$UnblockUsersResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UnblockUsersResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -54,8 +53,7 @@ abstract mixin class $UnblockUsersResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UnblockUsersResponseCopyWithImpl<$Res>
-    implements $UnblockUsersResponseCopyWith<$Res> {
+class _$UnblockUsersResponseCopyWithImpl<$Res> implements $UnblockUsersResponseCopyWith<$Res> {
   _$UnblockUsersResponseCopyWithImpl(this._self, this._then);
 
   final UnblockUsersResponse _self;

@@ -34,12 +34,9 @@ mixin _$BlockedUserResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is BlockedUserResponse &&
-            (identical(other.blockedUser, blockedUser) ||
-                other.blockedUser == blockedUser) &&
-            (identical(other.blockedUserId, blockedUserId) ||
-                other.blockedUserId == blockedUserId) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.blockedUser, blockedUser) || other.blockedUser == blockedUser) &&
+            (identical(other.blockedUserId, blockedUserId) || other.blockedUserId == blockedUserId) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             (identical(other.user, user) || other.user == user) &&
             (identical(other.userId, userId) || other.userId == userId));
   }
@@ -77,8 +74,7 @@ abstract mixin class $BlockedUserResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$BlockedUserResponseCopyWithImpl<$Res>
-    implements $BlockedUserResponseCopyWith<$Res> {
+class _$BlockedUserResponseCopyWithImpl<$Res> implements $BlockedUserResponseCopyWith<$Res> {
   _$BlockedUserResponseCopyWithImpl(this._self, this._then);
 
   final BlockedUserResponse _self;

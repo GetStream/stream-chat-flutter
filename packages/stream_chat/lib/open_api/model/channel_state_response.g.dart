@@ -14,12 +14,8 @@ ChannelStateResponse _$ChannelStateResponseFromJson(
         (e) => SharedLocationResponseData.fromJson(e as Map<String, dynamic>),
       )
       .toList(),
-  channel: json['channel'] == null
-      ? null
-      : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
-  draft: json['draft'] == null
-      ? null
-      : DraftResponse.fromJson(json['draft'] as Map<String, dynamic>),
+  channel: json['channel'] == null ? null : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
+  draft: json['draft'] == null ? null : DraftResponse.fromJson(json['draft'] as Map<String, dynamic>),
   duration: json['duration'] as String,
   hidden: json['hidden'] as bool?,
   hideMessagesBefore: _$JsonConverterFromJson<Object, DateTime>(
@@ -48,24 +44,18 @@ ChannelStateResponse _$ChannelStateResponseFromJson(
       : ChannelPushPreferencesResponse.fromJson(
           json['push_preferences'] as Map<String, dynamic>,
         ),
-  read: (json['read'] as List<dynamic>?)
-      ?.map((e) => ReadStateResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  read: (json['read'] as List<dynamic>?)?.map((e) => ReadStateResponse.fromJson(e as Map<String, dynamic>)).toList(),
   threads: (json['threads'] as List<dynamic>)
       .map((e) => ThreadStateResponse.fromJson(e as Map<String, dynamic>))
       .toList(),
   watcherCount: (json['watcher_count'] as num?)?.toInt(),
-  watchers: (json['watchers'] as List<dynamic>?)
-      ?.map((e) => UserResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  watchers: (json['watchers'] as List<dynamic>?)?.map((e) => UserResponse.fromJson(e as Map<String, dynamic>)).toList(),
 );
 
 Map<String, dynamic> _$ChannelStateResponseToJson(
   ChannelStateResponse instance,
 ) => <String, dynamic>{
-  'active_live_locations': instance.activeLiveLocations
-      ?.map((e) => e.toJson())
-      .toList(),
+  'active_live_locations': instance.activeLiveLocations?.map((e) => e.toJson()).toList(),
   'channel': instance.channel?.toJson(),
   'draft': instance.draft?.toJson(),
   'duration': instance.duration,

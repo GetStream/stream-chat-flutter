@@ -30,8 +30,7 @@ mixin _$MarkDeliveredResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is MarkDeliveredResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -54,8 +53,7 @@ abstract mixin class $MarkDeliveredResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MarkDeliveredResponseCopyWithImpl<$Res>
-    implements $MarkDeliveredResponseCopyWith<$Res> {
+class _$MarkDeliveredResponseCopyWithImpl<$Res> implements $MarkDeliveredResponseCopyWith<$Res> {
   _$MarkDeliveredResponseCopyWithImpl(this._self, this._then);
 
   final MarkDeliveredResponse _self;

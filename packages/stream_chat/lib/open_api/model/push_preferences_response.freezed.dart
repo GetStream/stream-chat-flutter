@@ -35,18 +35,12 @@ mixin _$PushPreferencesResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is PushPreferencesResponse &&
-            (identical(other.callLevel, callLevel) ||
-                other.callLevel == callLevel) &&
-            (identical(other.chatLevel, chatLevel) ||
-                other.chatLevel == chatLevel) &&
-            (identical(other.chatPreferences, chatPreferences) ||
-                other.chatPreferences == chatPreferences) &&
-            (identical(other.disabledUntil, disabledUntil) ||
-                other.disabledUntil == disabledUntil) &&
-            (identical(other.feedsLevel, feedsLevel) ||
-                other.feedsLevel == feedsLevel) &&
-            (identical(other.feedsPreferences, feedsPreferences) ||
-                other.feedsPreferences == feedsPreferences));
+            (identical(other.callLevel, callLevel) || other.callLevel == callLevel) &&
+            (identical(other.chatLevel, chatLevel) || other.chatLevel == chatLevel) &&
+            (identical(other.chatPreferences, chatPreferences) || other.chatPreferences == chatPreferences) &&
+            (identical(other.disabledUntil, disabledUntil) || other.disabledUntil == disabledUntil) &&
+            (identical(other.feedsLevel, feedsLevel) || other.feedsLevel == feedsLevel) &&
+            (identical(other.feedsPreferences, feedsPreferences) || other.feedsPreferences == feedsPreferences));
   }
 
   @override
@@ -84,8 +78,7 @@ abstract mixin class $PushPreferencesResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$PushPreferencesResponseCopyWithImpl<$Res>
-    implements $PushPreferencesResponseCopyWith<$Res> {
+class _$PushPreferencesResponseCopyWithImpl<$Res> implements $PushPreferencesResponseCopyWith<$Res> {
   _$PushPreferencesResponseCopyWithImpl(this._self, this._then);
 
   final PushPreferencesResponse _self;

@@ -33,10 +33,8 @@ mixin _$SendMessageResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is SendMessageResponse &&
-            (identical(other.channelContext, channelContext) ||
-                other.channelContext == channelContext) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.channelContext, channelContext) || other.channelContext == channelContext) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             const DeepCollectionEquality().equals(
               other.mentionedMembers,
               mentionedMembers,
@@ -75,8 +73,7 @@ abstract mixin class $SendMessageResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$SendMessageResponseCopyWithImpl<$Res>
-    implements $SendMessageResponseCopyWith<$Res> {
+class _$SendMessageResponseCopyWithImpl<$Res> implements $SendMessageResponseCopyWith<$Res> {
   _$SendMessageResponseCopyWithImpl(this._self, this._then);
 
   final SendMessageResponse _self;

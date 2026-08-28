@@ -24,27 +24,22 @@ mixin _$ReadStateResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ReadStateResponseCopyWith<ReadStateResponse> get copyWith =>
-      _$ReadStateResponseCopyWithImpl<ReadStateResponse>(
-        this as ReadStateResponse,
-        _$identity,
-      );
+  $ReadStateResponseCopyWith<ReadStateResponse> get copyWith => _$ReadStateResponseCopyWithImpl<ReadStateResponse>(
+    this as ReadStateResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ReadStateResponse &&
-            (identical(other.lastDeliveredAt, lastDeliveredAt) ||
-                other.lastDeliveredAt == lastDeliveredAt) &&
+            (identical(other.lastDeliveredAt, lastDeliveredAt) || other.lastDeliveredAt == lastDeliveredAt) &&
             (identical(other.lastDeliveredMessageId, lastDeliveredMessageId) ||
                 other.lastDeliveredMessageId == lastDeliveredMessageId) &&
-            (identical(other.lastRead, lastRead) ||
-                other.lastRead == lastRead) &&
-            (identical(other.lastReadMessageId, lastReadMessageId) ||
-                other.lastReadMessageId == lastReadMessageId) &&
-            (identical(other.unreadMessages, unreadMessages) ||
-                other.unreadMessages == unreadMessages) &&
+            (identical(other.lastRead, lastRead) || other.lastRead == lastRead) &&
+            (identical(other.lastReadMessageId, lastReadMessageId) || other.lastReadMessageId == lastReadMessageId) &&
+            (identical(other.unreadMessages, unreadMessages) || other.unreadMessages == unreadMessages) &&
             (identical(other.user, user) || other.user == user));
   }
 
@@ -83,8 +78,7 @@ abstract mixin class $ReadStateResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ReadStateResponseCopyWithImpl<$Res>
-    implements $ReadStateResponseCopyWith<$Res> {
+class _$ReadStateResponseCopyWithImpl<$Res> implements $ReadStateResponseCopyWith<$Res> {
   _$ReadStateResponseCopyWithImpl(this._self, this._then);
 
   final ReadStateResponse _self;

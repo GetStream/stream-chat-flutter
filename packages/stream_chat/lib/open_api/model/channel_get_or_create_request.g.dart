@@ -9,16 +9,10 @@ part of 'channel_get_or_create_request.dart';
 ChannelGetOrCreateRequest _$ChannelGetOrCreateRequestFromJson(
   Map<String, dynamic> json,
 ) => ChannelGetOrCreateRequest(
-  data: json['data'] == null
-      ? null
-      : ChannelInput.fromJson(json['data'] as Map<String, dynamic>),
+  data: json['data'] == null ? null : ChannelInput.fromJson(json['data'] as Map<String, dynamic>),
   hideForCreator: json['hide_for_creator'] as bool?,
-  memberCustomInclude: (json['member_custom_include'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
-  members: json['members'] == null
-      ? null
-      : PaginationParams.fromJson(json['members'] as Map<String, dynamic>),
+  memberCustomInclude: (json['member_custom_include'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  members: json['members'] == null ? null : PaginationParams.fromJson(json['members'] as Map<String, dynamic>),
   messages: json['messages'] == null
       ? null
       : MessagePaginationParams.fromJson(
@@ -28,9 +22,7 @@ ChannelGetOrCreateRequest _$ChannelGetOrCreateRequestFromJson(
   state: json['state'] as bool?,
   threadUnreadCounts: json['thread_unread_counts'] as bool?,
   watch: json['watch'] as bool?,
-  watchers: json['watchers'] == null
-      ? null
-      : PaginationParams.fromJson(json['watchers'] as Map<String, dynamic>),
+  watchers: json['watchers'] == null ? null : PaginationParams.fromJson(json['watchers'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$ChannelGetOrCreateRequestToJson(

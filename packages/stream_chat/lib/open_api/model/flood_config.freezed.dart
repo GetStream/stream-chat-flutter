@@ -30,8 +30,7 @@ mixin _$FloodConfig {
         (other.runtimeType == runtimeType &&
             other is FloodConfig &&
             const DeepCollectionEquality().equals(other.allowlist, allowlist) &&
-            (identical(other.identical_, identical_) ||
-                other.identical_ == identical_) &&
+            (identical(other.identical_, identical_) || other.identical_ == identical_) &&
             (identical(other.similar, similar) || other.similar == similar));
   }
 

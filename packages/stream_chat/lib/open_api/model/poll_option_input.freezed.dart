@@ -20,11 +20,10 @@ mixin _$PollOptionInput {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $PollOptionInputCopyWith<PollOptionInput> get copyWith =>
-      _$PollOptionInputCopyWithImpl<PollOptionInput>(
-        this as PollOptionInput,
-        _$identity,
-      );
+  $PollOptionInputCopyWith<PollOptionInput> get copyWith => _$PollOptionInputCopyWithImpl<PollOptionInput>(
+    this as PollOptionInput,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -59,8 +58,7 @@ abstract mixin class $PollOptionInputCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$PollOptionInputCopyWithImpl<$Res>
-    implements $PollOptionInputCopyWith<$Res> {
+class _$PollOptionInputCopyWithImpl<$Res> implements $PollOptionInputCopyWith<$Res> {
   _$PollOptionInputCopyWithImpl(this._self, this._then);
 
   final PollOptionInput _self;

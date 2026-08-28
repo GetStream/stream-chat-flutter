@@ -30,11 +30,10 @@ mixin _$ActionLogResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ActionLogResponseCopyWith<ActionLogResponse> get copyWith =>
-      _$ActionLogResponseCopyWithImpl<ActionLogResponse>(
-        this as ActionLogResponse,
-        _$identity,
-      );
+  $ActionLogResponseCopyWith<ActionLogResponse> get copyWith => _$ActionLogResponseCopyWithImpl<ActionLogResponse>(
+    this as ActionLogResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -45,19 +44,14 @@ mixin _$ActionLogResponse {
               other.aiProviders,
               aiProviders,
             ) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.reason, reason) || other.reason == reason) &&
-            (identical(other.reporterType, reporterType) ||
-                other.reporterType == reporterType) &&
-            (identical(other.reviewQueueItem, reviewQueueItem) ||
-                other.reviewQueueItem == reviewQueueItem) &&
-            (identical(other.targetUser, targetUser) ||
-                other.targetUser == targetUser) &&
-            (identical(other.targetUserId, targetUserId) ||
-                other.targetUserId == targetUserId) &&
+            (identical(other.reporterType, reporterType) || other.reporterType == reporterType) &&
+            (identical(other.reviewQueueItem, reviewQueueItem) || other.reviewQueueItem == reviewQueueItem) &&
+            (identical(other.targetUser, targetUser) || other.targetUser == targetUser) &&
+            (identical(other.targetUserId, targetUserId) || other.targetUserId == targetUserId) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(other.user, user) || other.user == user) &&
             (identical(other.userId, userId) || other.userId == userId));
@@ -110,8 +104,7 @@ abstract mixin class $ActionLogResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ActionLogResponseCopyWithImpl<$Res>
-    implements $ActionLogResponseCopyWith<$Res> {
+class _$ActionLogResponseCopyWithImpl<$Res> implements $ActionLogResponseCopyWith<$Res> {
   _$ActionLogResponseCopyWithImpl(this._self, this._then);
 
   final ActionLogResponse _self;

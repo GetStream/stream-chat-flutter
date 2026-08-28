@@ -20,21 +20,19 @@ mixin _$RemoveUserGroupMembersResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $RemoveUserGroupMembersResponseCopyWith<RemoveUserGroupMembersResponse>
-  get copyWith =>
-      _$RemoveUserGroupMembersResponseCopyWithImpl<
-        RemoveUserGroupMembersResponse
-      >(this as RemoveUserGroupMembersResponse, _$identity);
+  $RemoveUserGroupMembersResponseCopyWith<RemoveUserGroupMembersResponse> get copyWith =>
+      _$RemoveUserGroupMembersResponseCopyWithImpl<RemoveUserGroupMembersResponse>(
+        this as RemoveUserGroupMembersResponse,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is RemoveUserGroupMembersResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
-            (identical(other.userGroup, userGroup) ||
-                other.userGroup == userGroup));
+            (identical(other.duration, duration) || other.duration == duration) &&
+            (identical(other.userGroup, userGroup) || other.userGroup == userGroup));
   }
 
   @override
@@ -57,8 +55,7 @@ abstract mixin class $RemoveUserGroupMembersResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$RemoveUserGroupMembersResponseCopyWithImpl<$Res>
-    implements $RemoveUserGroupMembersResponseCopyWith<$Res> {
+class _$RemoveUserGroupMembersResponseCopyWithImpl<$Res> implements $RemoveUserGroupMembersResponseCopyWith<$Res> {
   _$RemoveUserGroupMembersResponseCopyWithImpl(this._self, this._then);
 
   final RemoveUserGroupMembersResponse _self;

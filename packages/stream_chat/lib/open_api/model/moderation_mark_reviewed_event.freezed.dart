@@ -24,8 +24,7 @@ mixin _$ModerationMarkReviewedEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ModerationMarkReviewedEventCopyWith<ModerationMarkReviewedEvent>
-  get copyWith =>
+  $ModerationMarkReviewedEventCopyWith<ModerationMarkReviewedEvent> get copyWith =>
       _$ModerationMarkReviewedEventCopyWithImpl<ModerationMarkReviewedEvent>(
         this as ModerationMarkReviewedEvent,
         _$identity,
@@ -36,13 +35,11 @@ mixin _$ModerationMarkReviewedEvent {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ModerationMarkReviewedEvent &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.item, item) || other.item == item) &&
             (identical(other.message, message) || other.message == message) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.type, type) || other.type == type));
   }
 
@@ -81,8 +78,7 @@ abstract mixin class $ModerationMarkReviewedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ModerationMarkReviewedEventCopyWithImpl<$Res>
-    implements $ModerationMarkReviewedEventCopyWith<$Res> {
+class _$ModerationMarkReviewedEventCopyWithImpl<$Res> implements $ModerationMarkReviewedEventCopyWith<$Res> {
   _$ModerationMarkReviewedEventCopyWithImpl(this._self, this._then);
 
   final ModerationMarkReviewedEvent _self;

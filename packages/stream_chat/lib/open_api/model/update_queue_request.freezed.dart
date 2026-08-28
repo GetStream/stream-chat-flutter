@@ -22,19 +22,17 @@ mixin _$UpdateQueueRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UpdateQueueRequestCopyWith<UpdateQueueRequest> get copyWith =>
-      _$UpdateQueueRequestCopyWithImpl<UpdateQueueRequest>(
-        this as UpdateQueueRequest,
-        _$identity,
-      );
+  $UpdateQueueRequestCopyWith<UpdateQueueRequest> get copyWith => _$UpdateQueueRequestCopyWithImpl<UpdateQueueRequest>(
+    this as UpdateQueueRequest,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UpdateQueueRequest &&
-            (identical(other.description, description) ||
-                other.description == description) &&
+            (identical(other.description, description) || other.description == description) &&
             const DeepCollectionEquality().equals(other.filters, filters) &&
             (identical(other.name, name) || other.name == name) &&
             const DeepCollectionEquality().equals(other.sort, sort));
@@ -71,8 +69,7 @@ abstract mixin class $UpdateQueueRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpdateQueueRequestCopyWithImpl<$Res>
-    implements $UpdateQueueRequestCopyWith<$Res> {
+class _$UpdateQueueRequestCopyWithImpl<$Res> implements $UpdateQueueRequestCopyWith<$Res> {
   _$UpdateQueueRequestCopyWithImpl(this._self, this._then);
 
   final UpdateQueueRequest _self;

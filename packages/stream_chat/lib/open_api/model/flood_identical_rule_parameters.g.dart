@@ -9,9 +9,7 @@ part of 'flood_identical_rule_parameters.dart';
 FloodIdenticalRuleParameters _$FloodIdenticalRuleParametersFromJson(
   Map<String, dynamic> json,
 ) => FloodIdenticalRuleParameters(
-  allowlist: (json['allowlist'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  allowlist: (json['allowlist'] as List<dynamic>?)?.map((e) => e as String).toList(),
   threshold: (json['threshold'] as num?)?.toInt(),
   timeWindow: json['time_window'] as String?,
 );

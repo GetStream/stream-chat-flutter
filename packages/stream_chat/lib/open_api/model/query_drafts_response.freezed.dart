@@ -34,8 +34,7 @@ mixin _$QueryDraftsResponse {
         (other.runtimeType == runtimeType &&
             other is QueryDraftsResponse &&
             const DeepCollectionEquality().equals(other.drafts, drafts) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.next, next) || other.next == next) &&
             (identical(other.prev, prev) || other.prev == prev));
   }
@@ -71,8 +70,7 @@ abstract mixin class $QueryDraftsResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryDraftsResponseCopyWithImpl<$Res>
-    implements $QueryDraftsResponseCopyWith<$Res> {
+class _$QueryDraftsResponseCopyWithImpl<$Res> implements $QueryDraftsResponseCopyWith<$Res> {
   _$QueryDraftsResponseCopyWithImpl(this._self, this._then);
 
   final QueryDraftsResponse _self;

@@ -20,19 +20,17 @@ mixin _$MessageUpdate {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $MessageUpdateCopyWith<MessageUpdate> get copyWith =>
-      _$MessageUpdateCopyWithImpl<MessageUpdate>(
-        this as MessageUpdate,
-        _$identity,
-      );
+  $MessageUpdateCopyWith<MessageUpdate> get copyWith => _$MessageUpdateCopyWithImpl<MessageUpdate>(
+    this as MessageUpdate,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is MessageUpdate &&
-            (identical(other.changeSet, changeSet) ||
-                other.changeSet == changeSet) &&
+            (identical(other.changeSet, changeSet) || other.changeSet == changeSet) &&
             (identical(other.oldText, oldText) || other.oldText == oldText));
   }
 
@@ -56,8 +54,7 @@ abstract mixin class $MessageUpdateCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MessageUpdateCopyWithImpl<$Res>
-    implements $MessageUpdateCopyWith<$Res> {
+class _$MessageUpdateCopyWithImpl<$Res> implements $MessageUpdateCopyWith<$Res> {
   _$MessageUpdateCopyWithImpl(this._self, this._then);
 
   final MessageUpdate _self;

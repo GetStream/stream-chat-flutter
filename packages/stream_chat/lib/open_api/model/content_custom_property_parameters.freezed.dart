@@ -20,21 +20,19 @@ mixin _$ContentCustomPropertyParameters {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ContentCustomPropertyParametersCopyWith<ContentCustomPropertyParameters>
-  get copyWith =>
-      _$ContentCustomPropertyParametersCopyWithImpl<
-        ContentCustomPropertyParameters
-      >(this as ContentCustomPropertyParameters, _$identity);
+  $ContentCustomPropertyParametersCopyWith<ContentCustomPropertyParameters> get copyWith =>
+      _$ContentCustomPropertyParametersCopyWithImpl<ContentCustomPropertyParameters>(
+        this as ContentCustomPropertyParameters,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ContentCustomPropertyParameters &&
-            (identical(other.operator, operator) ||
-                other.operator == operator) &&
-            (identical(other.propertyKey, propertyKey) ||
-                other.propertyKey == propertyKey));
+            (identical(other.operator, operator) || other.operator == operator) &&
+            (identical(other.propertyKey, propertyKey) || other.propertyKey == propertyKey));
   }
 
   @override
@@ -57,8 +55,7 @@ abstract mixin class $ContentCustomPropertyParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ContentCustomPropertyParametersCopyWithImpl<$Res>
-    implements $ContentCustomPropertyParametersCopyWith<$Res> {
+class _$ContentCustomPropertyParametersCopyWithImpl<$Res> implements $ContentCustomPropertyParametersCopyWith<$Res> {
   _$ContentCustomPropertyParametersCopyWithImpl(this._self, this._then);
 
   final ContentCustomPropertyParameters _self;

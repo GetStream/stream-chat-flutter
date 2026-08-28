@@ -28,11 +28,10 @@ mixin _$ModerationPayload {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ModerationPayloadCopyWith<ModerationPayload> get copyWith =>
-      _$ModerationPayloadCopyWithImpl<ModerationPayload>(
-        this as ModerationPayload,
-        _$identity,
-      );
+  $ModerationPayloadCopyWith<ModerationPayload> get copyWith => _$ModerationPayloadCopyWithImpl<ModerationPayload>(
+    this as ModerationPayload,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -103,8 +102,7 @@ abstract mixin class $ModerationPayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ModerationPayloadCopyWithImpl<$Res>
-    implements $ModerationPayloadCopyWith<$Res> {
+class _$ModerationPayloadCopyWithImpl<$Res> implements $ModerationPayloadCopyWith<$Res> {
   _$ModerationPayloadCopyWithImpl(this._self, this._then);
 
   final ModerationPayload _self;

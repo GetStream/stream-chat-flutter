@@ -27,27 +27,23 @@ mixin _$MessageChangeSet {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $MessageChangeSetCopyWith<MessageChangeSet> get copyWith =>
-      _$MessageChangeSetCopyWithImpl<MessageChangeSet>(
-        this as MessageChangeSet,
-        _$identity,
-      );
+  $MessageChangeSetCopyWith<MessageChangeSet> get copyWith => _$MessageChangeSetCopyWithImpl<MessageChangeSet>(
+    this as MessageChangeSet,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is MessageChangeSet &&
-            (identical(other.attachments, attachments) ||
-                other.attachments == attachments) &&
+            (identical(other.attachments, attachments) || other.attachments == attachments) &&
             (identical(other.custom, custom) || other.custom == custom) &&
             (identical(other.html, html) || other.html == html) &&
-            (identical(other.mentionedUserIds, mentionedUserIds) ||
-                other.mentionedUserIds == mentionedUserIds) &&
+            (identical(other.mentionedUserIds, mentionedUserIds) || other.mentionedUserIds == mentionedUserIds) &&
             (identical(other.mml, mml) || other.mml == mml) &&
             (identical(other.pin, pin) || other.pin == pin) &&
-            (identical(other.quotedMessageId, quotedMessageId) ||
-                other.quotedMessageId == quotedMessageId) &&
+            (identical(other.quotedMessageId, quotedMessageId) || other.quotedMessageId == quotedMessageId) &&
             (identical(other.silent, silent) || other.silent == silent) &&
             (identical(other.text, text) || other.text == text));
   }
@@ -93,8 +89,7 @@ abstract mixin class $MessageChangeSetCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MessageChangeSetCopyWithImpl<$Res>
-    implements $MessageChangeSetCopyWith<$Res> {
+class _$MessageChangeSetCopyWithImpl<$Res> implements $MessageChangeSetCopyWith<$Res> {
   _$MessageChangeSetCopyWithImpl(this._self, this._then);
 
   final MessageChangeSet _self;

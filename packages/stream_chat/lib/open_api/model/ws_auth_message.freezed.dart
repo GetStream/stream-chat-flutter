@@ -21,11 +21,10 @@ mixin _$WSAuthMessage {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $WSAuthMessageCopyWith<WSAuthMessage> get copyWith =>
-      _$WSAuthMessageCopyWithImpl<WSAuthMessage>(
-        this as WSAuthMessage,
-        _$identity,
-      );
+  $WSAuthMessageCopyWith<WSAuthMessage> get copyWith => _$WSAuthMessageCopyWithImpl<WSAuthMessage>(
+    this as WSAuthMessage,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -69,8 +68,7 @@ abstract mixin class $WSAuthMessageCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$WSAuthMessageCopyWithImpl<$Res>
-    implements $WSAuthMessageCopyWith<$Res> {
+class _$WSAuthMessageCopyWithImpl<$Res> implements $WSAuthMessageCopyWith<$Res> {
   _$WSAuthMessageCopyWithImpl(this._self, this._then);
 
   final WSAuthMessage _self;

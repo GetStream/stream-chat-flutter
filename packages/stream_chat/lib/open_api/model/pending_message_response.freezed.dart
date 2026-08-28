@@ -61,8 +61,7 @@ abstract mixin class $PendingMessageResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$PendingMessageResponseCopyWithImpl<$Res>
-    implements $PendingMessageResponseCopyWith<$Res> {
+class _$PendingMessageResponseCopyWithImpl<$Res> implements $PendingMessageResponseCopyWith<$Res> {
   _$PendingMessageResponseCopyWithImpl(this._self, this._then);
 
   final PendingMessageResponse _self;

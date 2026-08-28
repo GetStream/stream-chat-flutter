@@ -31,8 +31,7 @@ mixin _$AutomodRule {
             other is AutomodRule &&
             (identical(other.action, action) || other.action == action) &&
             (identical(other.label, label) || other.label == label) &&
-            (identical(other.threshold, threshold) ||
-                other.threshold == threshold));
+            (identical(other.threshold, threshold) || other.threshold == threshold));
   }
 
   @override

@@ -27,30 +27,24 @@ mixin _$ThreadParticipant {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ThreadParticipantCopyWith<ThreadParticipant> get copyWith =>
-      _$ThreadParticipantCopyWithImpl<ThreadParticipant>(
-        this as ThreadParticipant,
-        _$identity,
-      );
+  $ThreadParticipantCopyWith<ThreadParticipant> get copyWith => _$ThreadParticipantCopyWithImpl<ThreadParticipant>(
+    this as ThreadParticipant,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ThreadParticipant &&
-            (identical(other.channelCid, channelCid) ||
-                other.channelCid == channelCid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.channelCid, channelCid) || other.channelCid == channelCid) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.lastReadAt, lastReadAt) ||
-                other.lastReadAt == lastReadAt) &&
+            (identical(other.lastReadAt, lastReadAt) || other.lastReadAt == lastReadAt) &&
             (identical(other.lastThreadMessageAt, lastThreadMessageAt) ||
                 other.lastThreadMessageAt == lastThreadMessageAt) &&
-            (identical(other.leftThreadAt, leftThreadAt) ||
-                other.leftThreadAt == leftThreadAt) &&
-            (identical(other.threadId, threadId) ||
-                other.threadId == threadId) &&
+            (identical(other.leftThreadAt, leftThreadAt) || other.leftThreadAt == leftThreadAt) &&
+            (identical(other.threadId, threadId) || other.threadId == threadId) &&
             (identical(other.user, user) || other.user == user) &&
             (identical(other.userId, userId) || other.userId == userId));
   }
@@ -96,8 +90,7 @@ abstract mixin class $ThreadParticipantCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ThreadParticipantCopyWithImpl<$Res>
-    implements $ThreadParticipantCopyWith<$Res> {
+class _$ThreadParticipantCopyWithImpl<$Res> implements $ThreadParticipantCopyWith<$Res> {
   _$ThreadParticipantCopyWithImpl(this._self, this._then);
 
   final ThreadParticipant _self;

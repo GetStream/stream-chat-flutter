@@ -20,8 +20,7 @@ mixin _$CustomActionRequestPayload {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $CustomActionRequestPayloadCopyWith<CustomActionRequestPayload>
-  get copyWith =>
+  $CustomActionRequestPayloadCopyWith<CustomActionRequestPayload> get copyWith =>
       _$CustomActionRequestPayloadCopyWithImpl<CustomActionRequestPayload>(
         this as CustomActionRequestPayload,
         _$identity,
@@ -60,8 +59,7 @@ abstract mixin class $CustomActionRequestPayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$CustomActionRequestPayloadCopyWithImpl<$Res>
-    implements $CustomActionRequestPayloadCopyWith<$Res> {
+class _$CustomActionRequestPayloadCopyWithImpl<$Res> implements $CustomActionRequestPayloadCopyWith<$Res> {
   _$CustomActionRequestPayloadCopyWithImpl(this._self, this._then);
 
   final CustomActionRequestPayload _self;

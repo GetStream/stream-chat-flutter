@@ -67,69 +67,44 @@ mixin _$ReviewQueueItemResponse {
         (other.runtimeType == runtimeType &&
             other is ReviewQueueItemResponse &&
             const DeepCollectionEquality().equals(other.actions, actions) &&
-            (identical(other.activity, activity) ||
-                other.activity == activity) &&
-            (identical(other.aiTextSeverity, aiTextSeverity) ||
-                other.aiTextSeverity == aiTextSeverity) &&
+            (identical(other.activity, activity) || other.activity == activity) &&
+            (identical(other.aiTextSeverity, aiTextSeverity) || other.aiTextSeverity == aiTextSeverity) &&
             (identical(other.appeal, appeal) || other.appeal == appeal) &&
-            (identical(other.assignedTo, assignedTo) ||
-                other.assignedTo == assignedTo) &&
+            (identical(other.assignedTo, assignedTo) || other.assignedTo == assignedTo) &&
             const DeepCollectionEquality().equals(other.bans, bans) &&
             (identical(other.call, call) || other.call == call) &&
-            (identical(other.completedAt, completedAt) ||
-                other.completedAt == completedAt) &&
-            (identical(other.configKey, configKey) ||
-                other.configKey == configKey) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.entityCreator, entityCreator) ||
-                other.entityCreator == entityCreator) &&
-            (identical(other.entityCreatorId, entityCreatorId) ||
-                other.entityCreatorId == entityCreatorId) &&
-            (identical(other.entityId, entityId) ||
-                other.entityId == entityId) &&
-            (identical(other.entityType, entityType) ||
-                other.entityType == entityType) &&
-            (identical(other.escalated, escalated) ||
-                other.escalated == escalated) &&
-            (identical(other.escalatedAt, escalatedAt) ||
-                other.escalatedAt == escalatedAt) &&
-            (identical(other.escalatedBy, escalatedBy) ||
-                other.escalatedBy == escalatedBy) &&
+            (identical(other.completedAt, completedAt) || other.completedAt == completedAt) &&
+            (identical(other.configKey, configKey) || other.configKey == configKey) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.entityCreator, entityCreator) || other.entityCreator == entityCreator) &&
+            (identical(other.entityCreatorId, entityCreatorId) || other.entityCreatorId == entityCreatorId) &&
+            (identical(other.entityId, entityId) || other.entityId == entityId) &&
+            (identical(other.entityType, entityType) || other.entityType == entityType) &&
+            (identical(other.escalated, escalated) || other.escalated == escalated) &&
+            (identical(other.escalatedAt, escalatedAt) || other.escalatedAt == escalatedAt) &&
+            (identical(other.escalatedBy, escalatedBy) || other.escalatedBy == escalatedBy) &&
             (identical(other.escalationMetadata, escalationMetadata) ||
                 other.escalationMetadata == escalationMetadata) &&
-            (identical(other.feedsV2Activity, feedsV2Activity) ||
-                other.feedsV2Activity == feedsV2Activity) &&
-            (identical(other.feedsV2Reaction, feedsV2Reaction) ||
-                other.feedsV2Reaction == feedsV2Reaction) &&
-            (identical(other.feedsV3Activity, feedsV3Activity) ||
-                other.feedsV3Activity == feedsV3Activity) &&
-            (identical(other.feedsV3Comment, feedsV3Comment) ||
-                other.feedsV3Comment == feedsV3Comment) &&
+            (identical(other.feedsV2Activity, feedsV2Activity) || other.feedsV2Activity == feedsV2Activity) &&
+            (identical(other.feedsV2Reaction, feedsV2Reaction) || other.feedsV2Reaction == feedsV2Reaction) &&
+            (identical(other.feedsV3Activity, feedsV3Activity) || other.feedsV3Activity == feedsV3Activity) &&
+            (identical(other.feedsV3Comment, feedsV3Comment) || other.feedsV3Comment == feedsV3Comment) &&
             const DeepCollectionEquality().equals(other.flags, flags) &&
-            (identical(other.flagsCount, flagsCount) ||
-                other.flagsCount == flagsCount) &&
+            (identical(other.flagsCount, flagsCount) || other.flagsCount == flagsCount) &&
             (identical(other.id, id) || other.id == id) &&
             const DeepCollectionEquality().equals(other.languages, languages) &&
             (identical(other.latestModeratorAction, latestModeratorAction) ||
                 other.latestModeratorAction == latestModeratorAction) &&
             (identical(other.message, message) || other.message == message) &&
-            (identical(other.moderationPayload, moderationPayload) ||
-                other.moderationPayload == moderationPayload) &&
-            (identical(other.reaction, reaction) ||
-                other.reaction == reaction) &&
-            (identical(other.recommendedAction, recommendedAction) ||
-                other.recommendedAction == recommendedAction) &&
-            (identical(other.reviewedAt, reviewedAt) ||
-                other.reviewedAt == reviewedAt) &&
-            (identical(other.reviewedBy, reviewedBy) ||
-                other.reviewedBy == reviewedBy) &&
-            (identical(other.severity, severity) ||
-                other.severity == severity) &&
+            (identical(other.moderationPayload, moderationPayload) || other.moderationPayload == moderationPayload) &&
+            (identical(other.reaction, reaction) || other.reaction == reaction) &&
+            (identical(other.recommendedAction, recommendedAction) || other.recommendedAction == recommendedAction) &&
+            (identical(other.reviewedAt, reviewedAt) || other.reviewedAt == reviewedAt) &&
+            (identical(other.reviewedBy, reviewedBy) || other.reviewedBy == reviewedBy) &&
+            (identical(other.severity, severity) || other.severity == severity) &&
             (identical(other.status, status) || other.status == status) &&
             const DeepCollectionEquality().equals(other.teams, teams) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
   }
 
   @override
@@ -229,8 +204,7 @@ abstract mixin class $ReviewQueueItemResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ReviewQueueItemResponseCopyWithImpl<$Res>
-    implements $ReviewQueueItemResponseCopyWith<$Res> {
+class _$ReviewQueueItemResponseCopyWithImpl<$Res> implements $ReviewQueueItemResponseCopyWith<$Res> {
   _$ReviewQueueItemResponseCopyWithImpl(this._self, this._then);
 
   final ReviewQueueItemResponse _self;

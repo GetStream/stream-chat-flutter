@@ -22,18 +22,14 @@ ReactionUpdatedEvent _$ReactionUpdatedEventFromJson(
   custom: json['custom'] as Map<String, dynamic>,
   message: MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
   messageId: json['message_id'] as String,
-  reaction: json['reaction'] == null
-      ? null
-      : ReactionResponse.fromJson(json['reaction'] as Map<String, dynamic>),
+  reaction: json['reaction'] == null ? null : ReactionResponse.fromJson(json['reaction'] as Map<String, dynamic>),
   receivedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['received_at'],
     const StreamDateTimeConverter().fromJson,
   ),
   team: json['team'] as String?,
   type: json['type'] as String,
-  user: json['user'] == null
-      ? null
-      : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
+  user: json['user'] == null ? null : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$ReactionUpdatedEventToJson(

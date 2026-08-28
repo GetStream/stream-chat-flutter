@@ -11,9 +11,7 @@ AutomodPlatformCircumventionConfig _$AutomodPlatformCircumventionConfigFromJson(
 ) => AutomodPlatformCircumventionConfig(
   async: json['async'] as bool?,
   enabled: json['enabled'] as bool,
-  rules: (json['rules'] as List<dynamic>)
-      .map((e) => AutomodRule.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  rules: (json['rules'] as List<dynamic>).map((e) => AutomodRule.fromJson(e as Map<String, dynamic>)).toList(),
 );
 
 Map<String, dynamic> _$AutomodPlatformCircumventionConfigToJson(

@@ -9,9 +9,7 @@ part of 'mark_read_response_event.dart';
 MarkReadResponseEvent _$MarkReadResponseEventFromJson(
   Map<String, dynamic> json,
 ) => MarkReadResponseEvent(
-  channel: json['channel'] == null
-      ? null
-      : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
+  channel: json['channel'] == null ? null : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
   channelId: json['channel_id'] as String,
   channelLastMessageAt: _$JsonConverterFromJson<Object, DateTime>(
     json['channel_last_message_at'],
@@ -24,13 +22,9 @@ MarkReadResponseEvent _$MarkReadResponseEventFromJson(
   ),
   lastReadMessageId: json['last_read_message_id'] as String?,
   team: json['team'] as String?,
-  thread: json['thread'] == null
-      ? null
-      : ThreadResponse.fromJson(json['thread'] as Map<String, dynamic>),
+  thread: json['thread'] == null ? null : ThreadResponse.fromJson(json['thread'] as Map<String, dynamic>),
   type: json['type'] as String,
-  user: json['user'] == null
-      ? null
-      : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
+  user: json['user'] == null ? null : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$MarkReadResponseEventToJson(

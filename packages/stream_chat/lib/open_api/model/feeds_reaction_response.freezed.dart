@@ -36,16 +36,12 @@ mixin _$FeedsReactionResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is FeedsReactionResponse &&
-            (identical(other.activityId, activityId) ||
-                other.activityId == activityId) &&
-            (identical(other.commentId, commentId) ||
-                other.commentId == commentId) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.activityId, activityId) || other.activityId == activityId) &&
+            (identical(other.commentId, commentId) || other.commentId == commentId) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.type, type) || other.type == type) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
             (identical(other.user, user) || other.user == user));
   }
 
@@ -86,8 +82,7 @@ abstract mixin class $FeedsReactionResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FeedsReactionResponseCopyWithImpl<$Res>
-    implements $FeedsReactionResponseCopyWith<$Res> {
+class _$FeedsReactionResponseCopyWithImpl<$Res> implements $FeedsReactionResponseCopyWith<$Res> {
   _$FeedsReactionResponseCopyWithImpl(this._self, this._then);
 
   final FeedsReactionResponse _self;

@@ -12,9 +12,7 @@ FlagFeedbackResponse _$FlagFeedbackResponseFromJson(
   createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  labels: (json['labels'] as List<dynamic>)
-      .map((e) => LabelResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  labels: (json['labels'] as List<dynamic>).map((e) => LabelResponse.fromJson(e as Map<String, dynamic>)).toList(),
   messageId: json['message_id'] as String,
 );
 

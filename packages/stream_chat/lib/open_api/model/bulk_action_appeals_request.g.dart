@@ -12,9 +12,7 @@ BulkActionAppealsRequest _$BulkActionAppealsRequestFromJson(
   actionType: BulkActionAppealsRequestActionType.fromJson(
     json['action_type'] as String,
   ),
-  appealIds: (json['appeal_ids'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  appealIds: (json['appeal_ids'] as List<dynamic>).map((e) => e as String).toList(),
   markReviewed: json['mark_reviewed'] == null
       ? null
       : MarkReviewedRequestPayload.fromJson(

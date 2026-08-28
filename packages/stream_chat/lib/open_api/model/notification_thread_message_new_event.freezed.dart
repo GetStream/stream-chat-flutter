@@ -38,11 +38,11 @@ mixin _$NotificationThreadMessageNewEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $NotificationThreadMessageNewEventCopyWith<NotificationThreadMessageNewEvent>
-  get copyWith =>
-      _$NotificationThreadMessageNewEventCopyWithImpl<
-        NotificationThreadMessageNewEvent
-      >(this as NotificationThreadMessageNewEvent, _$identity);
+  $NotificationThreadMessageNewEventCopyWith<NotificationThreadMessageNewEvent> get copyWith =>
+      _$NotificationThreadMessageNewEventCopyWithImpl<NotificationThreadMessageNewEvent>(
+        this as NotificationThreadMessageNewEvent,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -54,28 +54,21 @@ mixin _$NotificationThreadMessageNewEvent {
               other.channelCustom,
               channelCustom,
             ) &&
-            (identical(other.channelId, channelId) ||
-                other.channelId == channelId) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
             (identical(other.channelMemberCount, channelMemberCount) ||
                 other.channelMemberCount == channelMemberCount) &&
             (identical(other.channelMessageCount, channelMessageCount) ||
                 other.channelMessageCount == channelMessageCount) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.message, message) || other.message == message) &&
-            (identical(other.messageId, messageId) ||
-                other.messageId == messageId) &&
-            (identical(other.parentAuthor, parentAuthor) ||
-                other.parentAuthor == parentAuthor) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.messageId, messageId) || other.messageId == messageId) &&
+            (identical(other.parentAuthor, parentAuthor) || other.parentAuthor == parentAuthor) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.team, team) || other.team == team) &&
-            (identical(other.threadId, threadId) ||
-                other.threadId == threadId) &&
+            (identical(other.threadId, threadId) || other.threadId == threadId) &&
             const DeepCollectionEquality().equals(
               other.threadParticipants,
               threadParticipants,
@@ -83,10 +76,8 @@ mixin _$NotificationThreadMessageNewEvent {
             (identical(other.type, type) || other.type == type) &&
             (identical(other.unreadThreadMessages, unreadThreadMessages) ||
                 other.unreadThreadMessages == unreadThreadMessages) &&
-            (identical(other.unreadThreads, unreadThreads) ||
-                other.unreadThreads == unreadThreads) &&
-            (identical(other.watcherCount, watcherCount) ||
-                other.watcherCount == watcherCount));
+            (identical(other.unreadThreads, unreadThreads) || other.unreadThreads == unreadThreads) &&
+            (identical(other.watcherCount, watcherCount) || other.watcherCount == watcherCount));
   }
 
   @override

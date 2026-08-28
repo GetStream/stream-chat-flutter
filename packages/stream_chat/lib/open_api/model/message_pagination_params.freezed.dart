@@ -40,18 +40,14 @@ mixin _$MessagePaginationParams {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is MessagePaginationParams &&
-            (identical(other.createdAtAfter, createdAtAfter) ||
-                other.createdAtAfter == createdAtAfter) &&
+            (identical(other.createdAtAfter, createdAtAfter) || other.createdAtAfter == createdAtAfter) &&
             (identical(other.createdAtAfterOrEqual, createdAtAfterOrEqual) ||
                 other.createdAtAfterOrEqual == createdAtAfterOrEqual) &&
-            (identical(other.createdAtAround, createdAtAround) ||
-                other.createdAtAround == createdAtAround) &&
-            (identical(other.createdAtBefore, createdAtBefore) ||
-                other.createdAtBefore == createdAtBefore) &&
+            (identical(other.createdAtAround, createdAtAround) || other.createdAtAround == createdAtAround) &&
+            (identical(other.createdAtBefore, createdAtBefore) || other.createdAtBefore == createdAtBefore) &&
             (identical(other.createdAtBeforeOrEqual, createdAtBeforeOrEqual) ||
                 other.createdAtBeforeOrEqual == createdAtBeforeOrEqual) &&
-            (identical(other.idAround, idAround) ||
-                other.idAround == idAround) &&
+            (identical(other.idAround, idAround) || other.idAround == idAround) &&
             (identical(other.idGt, idGt) || other.idGt == idGt) &&
             (identical(other.idGte, idGte) || other.idGte == idGte) &&
             (identical(other.idLt, idLt) || other.idLt == idLt) &&
@@ -104,8 +100,7 @@ abstract mixin class $MessagePaginationParamsCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MessagePaginationParamsCopyWithImpl<$Res>
-    implements $MessagePaginationParamsCopyWith<$Res> {
+class _$MessagePaginationParamsCopyWithImpl<$Res> implements $MessagePaginationParamsCopyWith<$Res> {
   _$MessagePaginationParamsCopyWithImpl(this._self, this._then);
 
   final MessagePaginationParams _self;

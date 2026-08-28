@@ -32,10 +32,8 @@ mixin _$CreateGuestResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is CreateGuestResponse &&
-            (identical(other.accessToken, accessToken) ||
-                other.accessToken == accessToken) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.accessToken, accessToken) || other.accessToken == accessToken) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.user, user) || other.user == user));
   }
 
@@ -59,8 +57,7 @@ abstract mixin class $CreateGuestResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$CreateGuestResponseCopyWithImpl<$Res>
-    implements $CreateGuestResponseCopyWith<$Res> {
+class _$CreateGuestResponseCopyWithImpl<$Res> implements $CreateGuestResponseCopyWith<$Res> {
   _$CreateGuestResponseCopyWithImpl(this._self, this._then);
 
   final CreateGuestResponse _self;

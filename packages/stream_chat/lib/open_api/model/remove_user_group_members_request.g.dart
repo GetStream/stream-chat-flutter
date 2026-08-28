@@ -9,9 +9,7 @@ part of 'remove_user_group_members_request.dart';
 RemoveUserGroupMembersRequest _$RemoveUserGroupMembersRequestFromJson(
   Map<String, dynamic> json,
 ) => RemoveUserGroupMembersRequest(
-  memberIds: (json['member_ids'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  memberIds: (json['member_ids'] as List<dynamic>).map((e) => e as String).toList(),
   teamId: json['team_id'] as String?,
 );
 

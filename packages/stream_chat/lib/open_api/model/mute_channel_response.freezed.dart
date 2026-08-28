@@ -33,14 +33,12 @@ mixin _$MuteChannelResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is MuteChannelResponse &&
-            (identical(other.channelMute, channelMute) ||
-                other.channelMute == channelMute) &&
+            (identical(other.channelMute, channelMute) || other.channelMute == channelMute) &&
             const DeepCollectionEquality().equals(
               other.channelMutes,
               channelMutes,
             ) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.ownUser, ownUser) || other.ownUser == ownUser));
   }
 
@@ -75,8 +73,7 @@ abstract mixin class $MuteChannelResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MuteChannelResponseCopyWithImpl<$Res>
-    implements $MuteChannelResponseCopyWith<$Res> {
+class _$MuteChannelResponseCopyWithImpl<$Res> implements $MuteChannelResponseCopyWith<$Res> {
   _$MuteChannelResponseCopyWithImpl(this._self, this._then);
 
   final MuteChannelResponse _self;

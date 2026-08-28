@@ -43,28 +43,20 @@ mixin _$MessageFlagResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is MessageFlagResponse &&
-            (identical(other.approvedAt, approvedAt) ||
-                other.approvedAt == approvedAt) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.createdByAutomod, createdByAutomod) ||
-                other.createdByAutomod == createdByAutomod) &&
+            (identical(other.approvedAt, approvedAt) || other.approvedAt == approvedAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.createdByAutomod, createdByAutomod) || other.createdByAutomod == createdByAutomod) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.details, details) || other.details == details) &&
             (identical(other.message, message) || other.message == message) &&
             (identical(other.moderationFeedback, moderationFeedback) ||
                 other.moderationFeedback == moderationFeedback) &&
-            (identical(other.moderationResult, moderationResult) ||
-                other.moderationResult == moderationResult) &&
+            (identical(other.moderationResult, moderationResult) || other.moderationResult == moderationResult) &&
             (identical(other.reason, reason) || other.reason == reason) &&
-            (identical(other.rejectedAt, rejectedAt) ||
-                other.rejectedAt == rejectedAt) &&
-            (identical(other.reviewedAt, reviewedAt) ||
-                other.reviewedAt == reviewedAt) &&
-            (identical(other.reviewedBy, reviewedBy) ||
-                other.reviewedBy == reviewedBy) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
+            (identical(other.rejectedAt, rejectedAt) || other.rejectedAt == rejectedAt) &&
+            (identical(other.reviewedAt, reviewedAt) || other.reviewedAt == reviewedAt) &&
+            (identical(other.reviewedBy, reviewedBy) || other.reviewedBy == reviewedBy) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
             (identical(other.user, user) || other.user == user));
   }
 
@@ -119,8 +111,7 @@ abstract mixin class $MessageFlagResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MessageFlagResponseCopyWithImpl<$Res>
-    implements $MessageFlagResponseCopyWith<$Res> {
+class _$MessageFlagResponseCopyWithImpl<$Res> implements $MessageFlagResponseCopyWith<$Res> {
   _$MessageFlagResponseCopyWithImpl(this._self, this._then);
 
   final MessageFlagResponse _self;

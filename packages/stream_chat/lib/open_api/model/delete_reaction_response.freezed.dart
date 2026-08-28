@@ -32,11 +32,9 @@ mixin _$DeleteReactionResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is DeleteReactionResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.message, message) || other.message == message) &&
-            (identical(other.reaction, reaction) ||
-                other.reaction == reaction));
+            (identical(other.reaction, reaction) || other.reaction == reaction));
   }
 
   @override
@@ -63,8 +61,7 @@ abstract mixin class $DeleteReactionResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$DeleteReactionResponseCopyWithImpl<$Res>
-    implements $DeleteReactionResponseCopyWith<$Res> {
+class _$DeleteReactionResponseCopyWithImpl<$Res> implements $DeleteReactionResponseCopyWith<$Res> {
   _$DeleteReactionResponseCopyWithImpl(this._self, this._then);
 
   final DeleteReactionResponse _self;

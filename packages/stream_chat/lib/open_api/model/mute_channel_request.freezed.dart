@@ -20,11 +20,10 @@ mixin _$MuteChannelRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $MuteChannelRequestCopyWith<MuteChannelRequest> get copyWith =>
-      _$MuteChannelRequestCopyWithImpl<MuteChannelRequest>(
-        this as MuteChannelRequest,
-        _$identity,
-      );
+  $MuteChannelRequestCopyWith<MuteChannelRequest> get copyWith => _$MuteChannelRequestCopyWithImpl<MuteChannelRequest>(
+    this as MuteChannelRequest,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -35,8 +34,7 @@ mixin _$MuteChannelRequest {
               other.channelCids,
               channelCids,
             ) &&
-            (identical(other.expiration, expiration) ||
-                other.expiration == expiration));
+            (identical(other.expiration, expiration) || other.expiration == expiration));
   }
 
   @override
@@ -63,8 +61,7 @@ abstract mixin class $MuteChannelRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MuteChannelRequestCopyWithImpl<$Res>
-    implements $MuteChannelRequestCopyWith<$Res> {
+class _$MuteChannelRequestCopyWithImpl<$Res> implements $MuteChannelRequestCopyWith<$Res> {
   _$MuteChannelRequestCopyWithImpl(this._self, this._then);
 
   final MuteChannelRequest _self;

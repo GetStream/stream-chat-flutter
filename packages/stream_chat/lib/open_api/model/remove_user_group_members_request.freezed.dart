@@ -20,11 +20,11 @@ mixin _$RemoveUserGroupMembersRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $RemoveUserGroupMembersRequestCopyWith<RemoveUserGroupMembersRequest>
-  get copyWith =>
-      _$RemoveUserGroupMembersRequestCopyWithImpl<
-        RemoveUserGroupMembersRequest
-      >(this as RemoveUserGroupMembersRequest, _$identity);
+  $RemoveUserGroupMembersRequestCopyWith<RemoveUserGroupMembersRequest> get copyWith =>
+      _$RemoveUserGroupMembersRequestCopyWithImpl<RemoveUserGroupMembersRequest>(
+        this as RemoveUserGroupMembersRequest,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -59,8 +59,7 @@ abstract mixin class $RemoveUserGroupMembersRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$RemoveUserGroupMembersRequestCopyWithImpl<$Res>
-    implements $RemoveUserGroupMembersRequestCopyWith<$Res> {
+class _$RemoveUserGroupMembersRequestCopyWithImpl<$Res> implements $RemoveUserGroupMembersRequestCopyWith<$Res> {
   _$RemoveUserGroupMembersRequestCopyWithImpl(this._self, this._then);
 
   final RemoveUserGroupMembersRequest _self;

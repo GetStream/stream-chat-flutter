@@ -39,40 +39,31 @@ mixin _$PollResponseData {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $PollResponseDataCopyWith<PollResponseData> get copyWith =>
-      _$PollResponseDataCopyWithImpl<PollResponseData>(
-        this as PollResponseData,
-        _$identity,
-      );
+  $PollResponseDataCopyWith<PollResponseData> get copyWith => _$PollResponseDataCopyWithImpl<PollResponseData>(
+    this as PollResponseData,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is PollResponseData &&
-            (identical(other.allowAnswers, allowAnswers) ||
-                other.allowAnswers == allowAnswers) &&
+            (identical(other.allowAnswers, allowAnswers) || other.allowAnswers == allowAnswers) &&
             (identical(
                   other.allowUserSuggestedOptions,
                   allowUserSuggestedOptions,
                 ) ||
                 other.allowUserSuggestedOptions == allowUserSuggestedOptions) &&
-            (identical(other.answersCount, answersCount) ||
-                other.answersCount == answersCount) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.createdBy, createdBy) ||
-                other.createdBy == createdBy) &&
-            (identical(other.createdById, createdById) ||
-                other.createdById == createdById) &&
+            (identical(other.answersCount, answersCount) || other.answersCount == answersCount) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.createdBy, createdBy) || other.createdBy == createdBy) &&
+            (identical(other.createdById, createdById) || other.createdById == createdById) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.description, description) ||
-                other.description == description) &&
-            (identical(other.enforceUniqueVote, enforceUniqueVote) ||
-                other.enforceUniqueVote == enforceUniqueVote) &&
+            (identical(other.description, description) || other.description == description) &&
+            (identical(other.enforceUniqueVote, enforceUniqueVote) || other.enforceUniqueVote == enforceUniqueVote) &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.isClosed, isClosed) ||
-                other.isClosed == isClosed) &&
+            (identical(other.isClosed, isClosed) || other.isClosed == isClosed) &&
             const DeepCollectionEquality().equals(
               other.latestAnswers,
               latestAnswers,
@@ -81,21 +72,17 @@ mixin _$PollResponseData {
               other.latestVotesByOption,
               latestVotesByOption,
             ) &&
-            (identical(other.maxVotesAllowed, maxVotesAllowed) ||
-                other.maxVotesAllowed == maxVotesAllowed) &&
+            (identical(other.maxVotesAllowed, maxVotesAllowed) || other.maxVotesAllowed == maxVotesAllowed) &&
             (identical(other.name, name) || other.name == name) &&
             const DeepCollectionEquality().equals(other.options, options) &&
             const DeepCollectionEquality().equals(other.ownVotes, ownVotes) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
-            (identical(other.voteCount, voteCount) ||
-                other.voteCount == voteCount) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
+            (identical(other.voteCount, voteCount) || other.voteCount == voteCount) &&
             const DeepCollectionEquality().equals(
               other.voteCountsByOption,
               voteCountsByOption,
             ) &&
-            (identical(other.votingVisibility, votingVisibility) ||
-                other.votingVisibility == votingVisibility));
+            (identical(other.votingVisibility, votingVisibility) || other.votingVisibility == votingVisibility));
   }
 
   @override
@@ -163,8 +150,7 @@ abstract mixin class $PollResponseDataCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$PollResponseDataCopyWithImpl<$Res>
-    implements $PollResponseDataCopyWith<$Res> {
+class _$PollResponseDataCopyWithImpl<$Res> implements $PollResponseDataCopyWith<$Res> {
   _$PollResponseDataCopyWithImpl(this._self, this._then);
 
   final PollResponseData _self;

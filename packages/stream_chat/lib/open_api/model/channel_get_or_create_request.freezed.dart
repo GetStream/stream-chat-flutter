@@ -40,23 +40,19 @@ mixin _$ChannelGetOrCreateRequest {
         (other.runtimeType == runtimeType &&
             other is ChannelGetOrCreateRequest &&
             (identical(other.data, data) || other.data == data) &&
-            (identical(other.hideForCreator, hideForCreator) ||
-                other.hideForCreator == hideForCreator) &&
+            (identical(other.hideForCreator, hideForCreator) || other.hideForCreator == hideForCreator) &&
             const DeepCollectionEquality().equals(
               other.memberCustomInclude,
               memberCustomInclude,
             ) &&
             (identical(other.members, members) || other.members == members) &&
-            (identical(other.messages, messages) ||
-                other.messages == messages) &&
-            (identical(other.presence, presence) ||
-                other.presence == presence) &&
+            (identical(other.messages, messages) || other.messages == messages) &&
+            (identical(other.presence, presence) || other.presence == presence) &&
             (identical(other.state, state) || other.state == state) &&
             (identical(other.threadUnreadCounts, threadUnreadCounts) ||
                 other.threadUnreadCounts == threadUnreadCounts) &&
             (identical(other.watch, watch) || other.watch == watch) &&
-            (identical(other.watchers, watchers) ||
-                other.watchers == watchers));
+            (identical(other.watchers, watchers) || other.watchers == watchers));
   }
 
   @override
@@ -102,8 +98,7 @@ abstract mixin class $ChannelGetOrCreateRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChannelGetOrCreateRequestCopyWithImpl<$Res>
-    implements $ChannelGetOrCreateRequestCopyWith<$Res> {
+class _$ChannelGetOrCreateRequestCopyWithImpl<$Res> implements $ChannelGetOrCreateRequestCopyWith<$Res> {
   _$ChannelGetOrCreateRequestCopyWithImpl(this._self, this._then);
 
   final ChannelGetOrCreateRequest _self;

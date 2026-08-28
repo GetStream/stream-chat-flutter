@@ -37,12 +37,9 @@ mixin _$IPFlagCountRuleParameters {
               other.harmLabels,
               harmLabels,
             ) &&
-            (identical(other.severity, severity) ||
-                other.severity == severity) &&
-            (identical(other.threshold, threshold) ||
-                other.threshold == threshold) &&
-            (identical(other.timeWindow, timeWindow) ||
-                other.timeWindow == timeWindow));
+            (identical(other.severity, severity) || other.severity == severity) &&
+            (identical(other.threshold, threshold) || other.threshold == threshold) &&
+            (identical(other.timeWindow, timeWindow) || other.timeWindow == timeWindow));
   }
 
   @override
@@ -76,8 +73,7 @@ abstract mixin class $IPFlagCountRuleParametersCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$IPFlagCountRuleParametersCopyWithImpl<$Res>
-    implements $IPFlagCountRuleParametersCopyWith<$Res> {
+class _$IPFlagCountRuleParametersCopyWithImpl<$Res> implements $IPFlagCountRuleParametersCopyWith<$Res> {
   _$IPFlagCountRuleParametersCopyWithImpl(this._self, this._then);
 
   final IPFlagCountRuleParameters _self;

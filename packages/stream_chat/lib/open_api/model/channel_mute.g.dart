@@ -7,9 +7,7 @@ part of 'channel_mute.dart';
 // **************************************************************************
 
 ChannelMute _$ChannelMuteFromJson(Map<String, dynamic> json) => ChannelMute(
-  channel: json['channel'] == null
-      ? null
-      : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
+  channel: json['channel'] == null ? null : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
   createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
@@ -20,22 +18,19 @@ ChannelMute _$ChannelMuteFromJson(Map<String, dynamic> json) => ChannelMute(
   updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,
   ),
-  user: json['user'] == null
-      ? null
-      : UserResponse.fromJson(json['user'] as Map<String, dynamic>),
+  user: json['user'] == null ? null : UserResponse.fromJson(json['user'] as Map<String, dynamic>),
 );
 
-Map<String, dynamic> _$ChannelMuteToJson(ChannelMute instance) =>
-    <String, dynamic>{
-      'channel': instance.channel?.toJson(),
-      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
-      'expires': _$JsonConverterToJson<Object, DateTime>(
-        instance.expires,
-        const StreamDateTimeConverter().toJson,
-      ),
-      'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
-      'user': instance.user?.toJson(),
-    };
+Map<String, dynamic> _$ChannelMuteToJson(ChannelMute instance) => <String, dynamic>{
+  'channel': instance.channel?.toJson(),
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
+  'expires': _$JsonConverterToJson<Object, DateTime>(
+    instance.expires,
+    const StreamDateTimeConverter().toJson,
+  ),
+  'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
+  'user': instance.user?.toJson(),
+};
 
 Value? _$JsonConverterFromJson<Json, Value>(
   Object? json,

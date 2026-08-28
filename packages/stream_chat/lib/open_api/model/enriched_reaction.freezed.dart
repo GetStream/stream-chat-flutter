@@ -29,19 +29,17 @@ mixin _$EnrichedReaction {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $EnrichedReactionCopyWith<EnrichedReaction> get copyWith =>
-      _$EnrichedReactionCopyWithImpl<EnrichedReaction>(
-        this as EnrichedReaction,
-        _$identity,
-      );
+  $EnrichedReactionCopyWith<EnrichedReaction> get copyWith => _$EnrichedReactionCopyWithImpl<EnrichedReaction>(
+    this as EnrichedReaction,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is EnrichedReaction &&
-            (identical(other.activityId, activityId) ||
-                other.activityId == activityId) &&
+            (identical(other.activityId, activityId) || other.activityId == activityId) &&
             const DeepCollectionEquality().equals(
               other.childrenCounts,
               childrenCounts,
@@ -111,8 +109,7 @@ abstract mixin class $EnrichedReactionCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$EnrichedReactionCopyWithImpl<$Res>
-    implements $EnrichedReactionCopyWith<$Res> {
+class _$EnrichedReactionCopyWithImpl<$Res> implements $EnrichedReactionCopyWith<$Res> {
   _$EnrichedReactionCopyWithImpl(this._self, this._then);
 
   final EnrichedReaction _self;

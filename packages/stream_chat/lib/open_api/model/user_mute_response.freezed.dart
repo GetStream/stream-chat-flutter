@@ -23,29 +23,25 @@ mixin _$UserMuteResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UserMuteResponseCopyWith<UserMuteResponse> get copyWith =>
-      _$UserMuteResponseCopyWithImpl<UserMuteResponse>(
-        this as UserMuteResponse,
-        _$identity,
-      );
+  $UserMuteResponseCopyWith<UserMuteResponse> get copyWith => _$UserMuteResponseCopyWithImpl<UserMuteResponse>(
+    this as UserMuteResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UserMuteResponse &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             (identical(other.expires, expires) || other.expires == expires) &&
             (identical(other.target, target) || other.target == target) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
             (identical(other.user, user) || other.user == user));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, createdAt, expires, target, updatedAt, user);
+  int get hashCode => Object.hash(runtimeType, createdAt, expires, target, updatedAt, user);
 
   @override
   String toString() {
@@ -70,8 +66,7 @@ abstract mixin class $UserMuteResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UserMuteResponseCopyWithImpl<$Res>
-    implements $UserMuteResponseCopyWith<$Res> {
+class _$UserMuteResponseCopyWithImpl<$Res> implements $UserMuteResponseCopyWith<$Res> {
   _$UserMuteResponseCopyWithImpl(this._self, this._then);
 
   final UserMuteResponse _self;

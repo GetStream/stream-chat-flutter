@@ -26,11 +26,11 @@ mixin _$ModerationActionConfigResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ModerationActionConfigResponseCopyWith<ModerationActionConfigResponse>
-  get copyWith =>
-      _$ModerationActionConfigResponseCopyWithImpl<
-        ModerationActionConfigResponse
-      >(this as ModerationActionConfigResponse, _$identity);
+  $ModerationActionConfigResponseCopyWith<ModerationActionConfigResponse> get copyWith =>
+      _$ModerationActionConfigResponseCopyWithImpl<ModerationActionConfigResponse>(
+        this as ModerationActionConfigResponse,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -39,15 +39,12 @@ mixin _$ModerationActionConfigResponse {
             other is ModerationActionConfigResponse &&
             (identical(other.action, action) || other.action == action) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.description, description) ||
-                other.description == description) &&
-            (identical(other.entityType, entityType) ||
-                other.entityType == entityType) &&
+            (identical(other.description, description) || other.description == description) &&
+            (identical(other.entityType, entityType) || other.entityType == entityType) &&
             (identical(other.icon, icon) || other.icon == icon) &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.order, order) || other.order == order) &&
-            (identical(other.queueType, queueType) ||
-                other.queueType == queueType));
+            (identical(other.queueType, queueType) || other.queueType == queueType));
   }
 
   @override
@@ -89,8 +86,7 @@ abstract mixin class $ModerationActionConfigResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ModerationActionConfigResponseCopyWithImpl<$Res>
-    implements $ModerationActionConfigResponseCopyWith<$Res> {
+class _$ModerationActionConfigResponseCopyWithImpl<$Res> implements $ModerationActionConfigResponseCopyWith<$Res> {
   _$ModerationActionConfigResponseCopyWithImpl(this._self, this._then);
 
   final ModerationActionConfigResponse _self;

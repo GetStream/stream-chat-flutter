@@ -41,17 +41,13 @@ mixin _$MarkReadResponseEvent {
         (other.runtimeType == runtimeType &&
             other is MarkReadResponseEvent &&
             (identical(other.channel, channel) || other.channel == channel) &&
-            (identical(other.channelId, channelId) ||
-                other.channelId == channelId) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
             (identical(other.channelLastMessageAt, channelLastMessageAt) ||
                 other.channelLastMessageAt == channelLastMessageAt) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.lastReadMessageId, lastReadMessageId) ||
-                other.lastReadMessageId == lastReadMessageId) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.lastReadMessageId, lastReadMessageId) || other.lastReadMessageId == lastReadMessageId) &&
             (identical(other.team, team) || other.team == team) &&
             (identical(other.thread, thread) || other.thread == thread) &&
             (identical(other.type, type) || other.type == type) &&
@@ -103,8 +99,7 @@ abstract mixin class $MarkReadResponseEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MarkReadResponseEventCopyWithImpl<$Res>
-    implements $MarkReadResponseEventCopyWith<$Res> {
+class _$MarkReadResponseEventCopyWithImpl<$Res> implements $MarkReadResponseEventCopyWith<$Res> {
   _$MarkReadResponseEventCopyWithImpl(this._self, this._then);
 
   final MarkReadResponseEvent _self;

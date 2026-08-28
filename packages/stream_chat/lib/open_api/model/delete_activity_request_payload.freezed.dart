@@ -22,8 +22,7 @@ mixin _$DeleteActivityRequestPayload {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $DeleteActivityRequestPayloadCopyWith<DeleteActivityRequestPayload>
-  get copyWith =>
+  $DeleteActivityRequestPayloadCopyWith<DeleteActivityRequestPayload> get copyWith =>
       _$DeleteActivityRequestPayloadCopyWithImpl<DeleteActivityRequestPayload>(
         this as DeleteActivityRequestPayload,
         _$identity,
@@ -34,18 +33,14 @@ mixin _$DeleteActivityRequestPayload {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is DeleteActivityRequestPayload &&
-            (identical(other.entityId, entityId) ||
-                other.entityId == entityId) &&
-            (identical(other.entityType, entityType) ||
-                other.entityType == entityType) &&
-            (identical(other.hardDelete, hardDelete) ||
-                other.hardDelete == hardDelete) &&
+            (identical(other.entityId, entityId) || other.entityId == entityId) &&
+            (identical(other.entityType, entityType) || other.entityType == entityType) &&
+            (identical(other.hardDelete, hardDelete) || other.hardDelete == hardDelete) &&
             (identical(other.reason, reason) || other.reason == reason));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, entityId, entityType, hardDelete, reason);
+  int get hashCode => Object.hash(runtimeType, entityId, entityType, hardDelete, reason);
 
   @override
   String toString() {
@@ -69,8 +64,7 @@ abstract mixin class $DeleteActivityRequestPayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$DeleteActivityRequestPayloadCopyWithImpl<$Res>
-    implements $DeleteActivityRequestPayloadCopyWith<$Res> {
+class _$DeleteActivityRequestPayloadCopyWithImpl<$Res> implements $DeleteActivityRequestPayloadCopyWith<$Res> {
   _$DeleteActivityRequestPayloadCopyWithImpl(this._self, this._then);
 
   final DeleteActivityRequestPayload _self;

@@ -21,8 +21,7 @@ mixin _$UpdateChannelPartialResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UpdateChannelPartialResponseCopyWith<UpdateChannelPartialResponse>
-  get copyWith =>
+  $UpdateChannelPartialResponseCopyWith<UpdateChannelPartialResponse> get copyWith =>
       _$UpdateChannelPartialResponseCopyWithImpl<UpdateChannelPartialResponse>(
         this as UpdateChannelPartialResponse,
         _$identity,
@@ -34,8 +33,7 @@ mixin _$UpdateChannelPartialResponse {
         (other.runtimeType == runtimeType &&
             other is UpdateChannelPartialResponse &&
             (identical(other.channel, channel) || other.channel == channel) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             const DeepCollectionEquality().equals(other.members, members));
   }
 
@@ -68,8 +66,7 @@ abstract mixin class $UpdateChannelPartialResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpdateChannelPartialResponseCopyWithImpl<$Res>
-    implements $UpdateChannelPartialResponseCopyWith<$Res> {
+class _$UpdateChannelPartialResponseCopyWithImpl<$Res> implements $UpdateChannelPartialResponseCopyWith<$Res> {
   _$UpdateChannelPartialResponseCopyWithImpl(this._self, this._then);
 
   final UpdateChannelPartialResponse _self;

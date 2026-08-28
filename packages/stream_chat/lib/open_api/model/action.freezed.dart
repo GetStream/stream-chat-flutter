@@ -23,8 +23,7 @@ mixin _$Action {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ActionCopyWith<Action> get copyWith =>
-      _$ActionCopyWithImpl<Action>(this as Action, _$identity);
+  $ActionCopyWith<Action> get copyWith => _$ActionCopyWithImpl<Action>(this as Action, _$identity);
 
   @override
   bool operator ==(Object other) {
@@ -49,8 +48,7 @@ mixin _$Action {
 
 /// @nodoc
 abstract mixin class $ActionCopyWith<$Res> {
-  factory $ActionCopyWith(Action value, $Res Function(Action) _then) =
-      _$ActionCopyWithImpl;
+  factory $ActionCopyWith(Action value, $Res Function(Action) _then) = _$ActionCopyWithImpl;
   @useResult
   $Res call({
     String name,

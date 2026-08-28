@@ -20,8 +20,7 @@ mixin _$OCRRule {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $OCRRuleCopyWith<OCRRule> get copyWith =>
-      _$OCRRuleCopyWithImpl<OCRRule>(this as OCRRule, _$identity);
+  $OCRRuleCopyWith<OCRRule> get copyWith => _$OCRRuleCopyWithImpl<OCRRule>(this as OCRRule, _$identity);
 
   @override
   bool operator ==(Object other) {
@@ -43,8 +42,7 @@ mixin _$OCRRule {
 
 /// @nodoc
 abstract mixin class $OCRRuleCopyWith<$Res> {
-  factory $OCRRuleCopyWith(OCRRule value, $Res Function(OCRRule) _then) =
-      _$OCRRuleCopyWithImpl;
+  factory $OCRRuleCopyWith(OCRRule value, $Res Function(OCRRule) _then) = _$OCRRuleCopyWithImpl;
   @useResult
   $Res call({OCRRuleAction action, String label});
 }

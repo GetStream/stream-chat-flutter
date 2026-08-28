@@ -36,20 +36,13 @@ mixin _$ChatPreferencesInput {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ChatPreferencesInput &&
-            (identical(other.channelMentions, channelMentions) ||
-                other.channelMentions == channelMentions) &&
-            (identical(other.defaultPreference, defaultPreference) ||
-                other.defaultPreference == defaultPreference) &&
-            (identical(other.directMentions, directMentions) ||
-                other.directMentions == directMentions) &&
-            (identical(other.groupMentions, groupMentions) ||
-                other.groupMentions == groupMentions) &&
-            (identical(other.hereMentions, hereMentions) ||
-                other.hereMentions == hereMentions) &&
-            (identical(other.roleMentions, roleMentions) ||
-                other.roleMentions == roleMentions) &&
-            (identical(other.threadReplies, threadReplies) ||
-                other.threadReplies == threadReplies));
+            (identical(other.channelMentions, channelMentions) || other.channelMentions == channelMentions) &&
+            (identical(other.defaultPreference, defaultPreference) || other.defaultPreference == defaultPreference) &&
+            (identical(other.directMentions, directMentions) || other.directMentions == directMentions) &&
+            (identical(other.groupMentions, groupMentions) || other.groupMentions == groupMentions) &&
+            (identical(other.hereMentions, hereMentions) || other.hereMentions == hereMentions) &&
+            (identical(other.roleMentions, roleMentions) || other.roleMentions == roleMentions) &&
+            (identical(other.threadReplies, threadReplies) || other.threadReplies == threadReplies));
   }
 
   @override
@@ -89,8 +82,7 @@ abstract mixin class $ChatPreferencesInputCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChatPreferencesInputCopyWithImpl<$Res>
-    implements $ChatPreferencesInputCopyWith<$Res> {
+class _$ChatPreferencesInputCopyWithImpl<$Res> implements $ChatPreferencesInputCopyWith<$Res> {
   _$ChatPreferencesInputCopyWithImpl(this._self, this._then);
 
   final ChatPreferencesInput _self;

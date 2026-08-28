@@ -21,11 +21,10 @@ mixin _$ImageUploadRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ImageUploadRequestCopyWith<ImageUploadRequest> get copyWith =>
-      _$ImageUploadRequestCopyWithImpl<ImageUploadRequest>(
-        this as ImageUploadRequest,
-        _$identity,
-      );
+  $ImageUploadRequestCopyWith<ImageUploadRequest> get copyWith => _$ImageUploadRequestCopyWithImpl<ImageUploadRequest>(
+    this as ImageUploadRequest,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -65,8 +64,7 @@ abstract mixin class $ImageUploadRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ImageUploadRequestCopyWithImpl<$Res>
-    implements $ImageUploadRequestCopyWith<$Res> {
+class _$ImageUploadRequestCopyWithImpl<$Res> implements $ImageUploadRequestCopyWith<$Res> {
   _$ImageUploadRequestCopyWithImpl(this._self, this._then);
 
   final ImageUploadRequest _self;

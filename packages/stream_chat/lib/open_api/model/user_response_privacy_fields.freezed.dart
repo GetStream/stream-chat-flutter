@@ -49,32 +49,24 @@ mixin _$UserResponsePrivacyFields {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UserResponsePrivacyFields &&
-            (identical(other.avgResponseTime, avgResponseTime) ||
-                other.avgResponseTime == avgResponseTime) &&
+            (identical(other.avgResponseTime, avgResponseTime) || other.avgResponseTime == avgResponseTime) &&
             (identical(other.banned, banned) || other.banned == banned) &&
             const DeepCollectionEquality().equals(
               other.blockedUserIds,
               blockedUserIds,
             ) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.deactivatedAt, deactivatedAt) ||
-                other.deactivatedAt == deactivatedAt) &&
-            (identical(other.deletedAt, deletedAt) ||
-                other.deletedAt == deletedAt) &&
+            (identical(other.deactivatedAt, deactivatedAt) || other.deactivatedAt == deactivatedAt) &&
+            (identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt) &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.image, image) || other.image == image) &&
-            (identical(other.invisible, invisible) ||
-                other.invisible == invisible) &&
-            (identical(other.language, language) ||
-                other.language == language) &&
-            (identical(other.lastActive, lastActive) ||
-                other.lastActive == lastActive) &&
+            (identical(other.invisible, invisible) || other.invisible == invisible) &&
+            (identical(other.language, language) || other.language == language) &&
+            (identical(other.lastActive, lastActive) || other.lastActive == lastActive) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.online, online) || other.online == online) &&
-            (identical(other.privacySettings, privacySettings) ||
-                other.privacySettings == privacySettings) &&
+            (identical(other.privacySettings, privacySettings) || other.privacySettings == privacySettings) &&
             (identical(
                   other.revokeTokensIssuedBefore,
                   revokeTokensIssuedBefore,
@@ -83,8 +75,7 @@ mixin _$UserResponsePrivacyFields {
             (identical(other.role, role) || other.role == role) &&
             const DeepCollectionEquality().equals(other.teams, teams) &&
             const DeepCollectionEquality().equals(other.teamsRole, teamsRole) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
   }
 
   @override
@@ -150,8 +141,7 @@ abstract mixin class $UserResponsePrivacyFieldsCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UserResponsePrivacyFieldsCopyWithImpl<$Res>
-    implements $UserResponsePrivacyFieldsCopyWith<$Res> {
+class _$UserResponsePrivacyFieldsCopyWithImpl<$Res> implements $UserResponsePrivacyFieldsCopyWith<$Res> {
   _$UserResponsePrivacyFieldsCopyWithImpl(this._self, this._then);
 
   final UserResponsePrivacyFields _self;

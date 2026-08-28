@@ -20,19 +20,17 @@ mixin _$BulkAppealError {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $BulkAppealErrorCopyWith<BulkAppealError> get copyWith =>
-      _$BulkAppealErrorCopyWithImpl<BulkAppealError>(
-        this as BulkAppealError,
-        _$identity,
-      );
+  $BulkAppealErrorCopyWith<BulkAppealError> get copyWith => _$BulkAppealErrorCopyWithImpl<BulkAppealError>(
+    this as BulkAppealError,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is BulkAppealError &&
-            (identical(other.appealId, appealId) ||
-                other.appealId == appealId) &&
+            (identical(other.appealId, appealId) || other.appealId == appealId) &&
             (identical(other.error, error) || other.error == error));
   }
 
@@ -56,8 +54,7 @@ abstract mixin class $BulkAppealErrorCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$BulkAppealErrorCopyWithImpl<$Res>
-    implements $BulkAppealErrorCopyWith<$Res> {
+class _$BulkAppealErrorCopyWithImpl<$Res> implements $BulkAppealErrorCopyWith<$Res> {
   _$BulkAppealErrorCopyWithImpl(this._self, this._then);
 
   final BulkAppealError _self;

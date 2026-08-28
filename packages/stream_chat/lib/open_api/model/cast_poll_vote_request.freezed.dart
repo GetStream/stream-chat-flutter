@@ -53,8 +53,7 @@ abstract mixin class $CastPollVoteRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$CastPollVoteRequestCopyWithImpl<$Res>
-    implements $CastPollVoteRequestCopyWith<$Res> {
+class _$CastPollVoteRequestCopyWithImpl<$Res> implements $CastPollVoteRequestCopyWith<$Res> {
   _$CastPollVoteRequestCopyWithImpl(this._self, this._then);
 
   final CastPollVoteRequest _self;

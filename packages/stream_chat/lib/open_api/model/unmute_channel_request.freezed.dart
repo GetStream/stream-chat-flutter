@@ -35,8 +35,7 @@ mixin _$UnmuteChannelRequest {
               other.channelCids,
               channelCids,
             ) &&
-            (identical(other.expiration, expiration) ||
-                other.expiration == expiration));
+            (identical(other.expiration, expiration) || other.expiration == expiration));
   }
 
   @override
@@ -63,8 +62,7 @@ abstract mixin class $UnmuteChannelRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UnmuteChannelRequestCopyWithImpl<$Res>
-    implements $UnmuteChannelRequestCopyWith<$Res> {
+class _$UnmuteChannelRequestCopyWithImpl<$Res> implements $UnmuteChannelRequestCopyWith<$Res> {
   _$UnmuteChannelRequestCopyWithImpl(this._self, this._then);
 
   final UnmuteChannelRequest _self;

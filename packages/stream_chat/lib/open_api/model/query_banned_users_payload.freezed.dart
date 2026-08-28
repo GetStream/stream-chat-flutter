@@ -78,8 +78,7 @@ abstract mixin class $QueryBannedUsersPayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryBannedUsersPayloadCopyWithImpl<$Res>
-    implements $QueryBannedUsersPayloadCopyWith<$Res> {
+class _$QueryBannedUsersPayloadCopyWithImpl<$Res> implements $QueryBannedUsersPayloadCopyWith<$Res> {
   _$QueryBannedUsersPayloadCopyWithImpl(this._self, this._then);
 
   final QueryBannedUsersPayload _self;

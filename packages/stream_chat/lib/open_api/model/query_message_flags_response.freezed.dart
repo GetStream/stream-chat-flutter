@@ -31,8 +31,7 @@ mixin _$QueryMessageFlagsResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is QueryMessageFlagsResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             const DeepCollectionEquality().equals(other.flags, flags));
   }
 
@@ -60,8 +59,7 @@ abstract mixin class $QueryMessageFlagsResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryMessageFlagsResponseCopyWithImpl<$Res>
-    implements $QueryMessageFlagsResponseCopyWith<$Res> {
+class _$QueryMessageFlagsResponseCopyWithImpl<$Res> implements $QueryMessageFlagsResponseCopyWith<$Res> {
   _$QueryMessageFlagsResponseCopyWithImpl(this._self, this._then);
 
   final QueryMessageFlagsResponse _self;

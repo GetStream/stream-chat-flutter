@@ -27,29 +27,23 @@ mixin _$TypingStartEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $TypingStartEventCopyWith<TypingStartEvent> get copyWith =>
-      _$TypingStartEventCopyWithImpl<TypingStartEvent>(
-        this as TypingStartEvent,
-        _$identity,
-      );
+  $TypingStartEventCopyWith<TypingStartEvent> get copyWith => _$TypingStartEventCopyWithImpl<TypingStartEvent>(
+    this as TypingStartEvent,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is TypingStartEvent &&
-            (identical(other.channelId, channelId) ||
-                other.channelId == channelId) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.parentId, parentId) ||
-                other.parentId == parentId) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.parentId, parentId) || other.parentId == parentId) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(other.user, user) || other.user == user));
   }
@@ -95,8 +89,7 @@ abstract mixin class $TypingStartEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$TypingStartEventCopyWithImpl<$Res>
-    implements $TypingStartEventCopyWith<$Res> {
+class _$TypingStartEventCopyWithImpl<$Res> implements $TypingStartEventCopyWith<$Res> {
   _$TypingStartEventCopyWithImpl(this._self, this._then);
 
   final TypingStartEvent _self;

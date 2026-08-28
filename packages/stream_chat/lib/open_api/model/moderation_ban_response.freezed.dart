@@ -30,8 +30,7 @@ mixin _$ModerationBanResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ModerationBanResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -54,8 +53,7 @@ abstract mixin class $ModerationBanResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ModerationBanResponseCopyWithImpl<$Res>
-    implements $ModerationBanResponseCopyWith<$Res> {
+class _$ModerationBanResponseCopyWithImpl<$Res> implements $ModerationBanResponseCopyWith<$Res> {
   _$ModerationBanResponseCopyWithImpl(this._self, this._then);
 
   final ModerationBanResponse _self;

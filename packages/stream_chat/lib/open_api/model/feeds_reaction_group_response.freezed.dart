@@ -21,8 +21,7 @@ mixin _$FeedsReactionGroupResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $FeedsReactionGroupResponseCopyWith<FeedsReactionGroupResponse>
-  get copyWith =>
+  $FeedsReactionGroupResponseCopyWith<FeedsReactionGroupResponse> get copyWith =>
       _$FeedsReactionGroupResponseCopyWithImpl<FeedsReactionGroupResponse>(
         this as FeedsReactionGroupResponse,
         _$identity,
@@ -34,15 +33,12 @@ mixin _$FeedsReactionGroupResponse {
         (other.runtimeType == runtimeType &&
             other is FeedsReactionGroupResponse &&
             (identical(other.count, count) || other.count == count) &&
-            (identical(other.firstReactionAt, firstReactionAt) ||
-                other.firstReactionAt == firstReactionAt) &&
-            (identical(other.lastReactionAt, lastReactionAt) ||
-                other.lastReactionAt == lastReactionAt));
+            (identical(other.firstReactionAt, firstReactionAt) || other.firstReactionAt == firstReactionAt) &&
+            (identical(other.lastReactionAt, lastReactionAt) || other.lastReactionAt == lastReactionAt));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, count, firstReactionAt, lastReactionAt);
+  int get hashCode => Object.hash(runtimeType, count, firstReactionAt, lastReactionAt);
 
   @override
   String toString() {
@@ -61,8 +57,7 @@ abstract mixin class $FeedsReactionGroupResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FeedsReactionGroupResponseCopyWithImpl<$Res>
-    implements $FeedsReactionGroupResponseCopyWith<$Res> {
+class _$FeedsReactionGroupResponseCopyWithImpl<$Res> implements $FeedsReactionGroupResponseCopyWith<$Res> {
   _$FeedsReactionGroupResponseCopyWithImpl(this._self, this._then);
 
   final FeedsReactionGroupResponse _self;

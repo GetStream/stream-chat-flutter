@@ -22,19 +22,17 @@ mixin _$PollVotesResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $PollVotesResponseCopyWith<PollVotesResponse> get copyWith =>
-      _$PollVotesResponseCopyWithImpl<PollVotesResponse>(
-        this as PollVotesResponse,
-        _$identity,
-      );
+  $PollVotesResponseCopyWith<PollVotesResponse> get copyWith => _$PollVotesResponseCopyWithImpl<PollVotesResponse>(
+    this as PollVotesResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is PollVotesResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.next, next) || other.next == next) &&
             (identical(other.prev, prev) || other.prev == prev) &&
             const DeepCollectionEquality().equals(other.votes, votes));
@@ -71,8 +69,7 @@ abstract mixin class $PollVotesResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$PollVotesResponseCopyWithImpl<$Res>
-    implements $PollVotesResponseCopyWith<$Res> {
+class _$PollVotesResponseCopyWithImpl<$Res> implements $PollVotesResponseCopyWith<$Res> {
   _$PollVotesResponseCopyWithImpl(this._self, this._then);
 
   final PollVotesResponse _self;

@@ -31,11 +31,10 @@ mixin _$ChannelInput {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ChannelInputCopyWith<ChannelInput> get copyWith =>
-      _$ChannelInputCopyWithImpl<ChannelInput>(
-        this as ChannelInput,
-        _$identity,
-      );
+  $ChannelInputCopyWith<ChannelInput> get copyWith => _$ChannelInputCopyWithImpl<ChannelInput>(
+    this as ChannelInput,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -49,15 +48,11 @@ mixin _$ChannelInput {
                   autoTranslationLanguage,
                 ) ||
                 other.autoTranslationLanguage == autoTranslationLanguage) &&
-            (identical(other.configOverrides, configOverrides) ||
-                other.configOverrides == configOverrides) &&
-            (identical(other.createdBy, createdBy) ||
-                other.createdBy == createdBy) &&
-            (identical(other.createdById, createdById) ||
-                other.createdById == createdById) &&
+            (identical(other.configOverrides, configOverrides) || other.configOverrides == configOverrides) &&
+            (identical(other.createdBy, createdBy) || other.createdBy == createdBy) &&
+            (identical(other.createdById, createdById) || other.createdById == createdById) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.disabled, disabled) ||
-                other.disabled == disabled) &&
+            (identical(other.disabled, disabled) || other.disabled == disabled) &&
             const DeepCollectionEquality().equals(
               other.filterTags,
               filterTags,
@@ -66,8 +61,7 @@ mixin _$ChannelInput {
             const DeepCollectionEquality().equals(other.invites, invites) &&
             const DeepCollectionEquality().equals(other.members, members) &&
             (identical(other.team, team) || other.team == team) &&
-            (identical(other.truncatedById, truncatedById) ||
-                other.truncatedById == truncatedById));
+            (identical(other.truncatedById, truncatedById) || other.truncatedById == truncatedById));
   }
 
   @override

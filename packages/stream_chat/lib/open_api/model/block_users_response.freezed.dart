@@ -22,25 +22,20 @@ mixin _$BlockUsersResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $BlockUsersResponseCopyWith<BlockUsersResponse> get copyWith =>
-      _$BlockUsersResponseCopyWithImpl<BlockUsersResponse>(
-        this as BlockUsersResponse,
-        _$identity,
-      );
+  $BlockUsersResponseCopyWith<BlockUsersResponse> get copyWith => _$BlockUsersResponseCopyWithImpl<BlockUsersResponse>(
+    this as BlockUsersResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is BlockUsersResponse &&
-            (identical(other.blockedByUserId, blockedByUserId) ||
-                other.blockedByUserId == blockedByUserId) &&
-            (identical(other.blockedUserId, blockedUserId) ||
-                other.blockedUserId == blockedUserId) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.blockedByUserId, blockedByUserId) || other.blockedByUserId == blockedByUserId) &&
+            (identical(other.blockedUserId, blockedUserId) || other.blockedUserId == blockedUserId) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -74,8 +69,7 @@ abstract mixin class $BlockUsersResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$BlockUsersResponseCopyWithImpl<$Res>
-    implements $BlockUsersResponseCopyWith<$Res> {
+class _$BlockUsersResponseCopyWithImpl<$Res> implements $BlockUsersResponseCopyWith<$Res> {
   _$BlockUsersResponseCopyWithImpl(this._self, this._then);
 
   final BlockUsersResponse _self;

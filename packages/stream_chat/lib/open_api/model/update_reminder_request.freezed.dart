@@ -30,8 +30,7 @@ mixin _$UpdateReminderRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UpdateReminderRequest &&
-            (identical(other.remindAt, remindAt) ||
-                other.remindAt == remindAt));
+            (identical(other.remindAt, remindAt) || other.remindAt == remindAt));
   }
 
   @override
@@ -54,8 +53,7 @@ abstract mixin class $UpdateReminderRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpdateReminderRequestCopyWithImpl<$Res>
-    implements $UpdateReminderRequestCopyWith<$Res> {
+class _$UpdateReminderRequestCopyWithImpl<$Res> implements $UpdateReminderRequestCopyWith<$Res> {
   _$UpdateReminderRequestCopyWithImpl(this._self, this._then);
 
   final UpdateReminderRequest _self;

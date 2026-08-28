@@ -35,8 +35,7 @@ mixin _$GetActionConfigResponse {
               other.actionConfig,
               actionConfig,
             ) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -66,8 +65,7 @@ abstract mixin class $GetActionConfigResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$GetActionConfigResponseCopyWithImpl<$Res>
-    implements $GetActionConfigResponseCopyWith<$Res> {
+class _$GetActionConfigResponseCopyWithImpl<$Res> implements $GetActionConfigResponseCopyWith<$Res> {
   _$GetActionConfigResponseCopyWithImpl(this._self, this._then);
 
   final GetActionConfigResponse _self;

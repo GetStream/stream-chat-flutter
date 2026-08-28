@@ -18,8 +18,7 @@ ChatReactionGroupResponse _$ChatReactionGroupResponseFromJson(
   ),
   latestReactionsBy: (json['latest_reactions_by'] as List<dynamic>)
       .map(
-        (e) =>
-            ChatReactionGroupUserResponse.fromJson(e as Map<String, dynamic>),
+        (e) => ChatReactionGroupUserResponse.fromJson(e as Map<String, dynamic>),
       )
       .toList(),
   sumScores: (json['sum_scores'] as num).toInt(),
@@ -35,8 +34,6 @@ Map<String, dynamic> _$ChatReactionGroupResponseToJson(
   'last_reaction_at': const StreamDateTimeConverter().toJson(
     instance.lastReactionAt,
   ),
-  'latest_reactions_by': instance.latestReactionsBy
-      .map((e) => e.toJson())
-      .toList(),
+  'latest_reactions_by': instance.latestReactionsBy.map((e) => e.toJson()).toList(),
   'sum_scores': instance.sumScores,
 };

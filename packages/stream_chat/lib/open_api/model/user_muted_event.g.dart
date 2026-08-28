@@ -29,19 +29,18 @@ UserMutedEvent _$UserMutedEventFromJson(
   user: UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
 );
 
-Map<String, dynamic> _$UserMutedEventToJson(UserMutedEvent instance) =>
-    <String, dynamic>{
-      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
-      'custom': instance.custom,
-      'received_at': _$JsonConverterToJson<Object, DateTime>(
-        instance.receivedAt,
-        const StreamDateTimeConverter().toJson,
-      ),
-      'target_user': instance.targetUser?.toJson(),
-      'target_users': instance.targetUsers?.map((e) => e.toJson()).toList(),
-      'type': instance.type,
-      'user': instance.user.toJson(),
-    };
+Map<String, dynamic> _$UserMutedEventToJson(UserMutedEvent instance) => <String, dynamic>{
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
+  'custom': instance.custom,
+  'received_at': _$JsonConverterToJson<Object, DateTime>(
+    instance.receivedAt,
+    const StreamDateTimeConverter().toJson,
+  ),
+  'target_user': instance.targetUser?.toJson(),
+  'target_users': instance.targetUsers?.map((e) => e.toJson()).toList(),
+  'type': instance.type,
+  'user': instance.user.toJson(),
+};
 
 Value? _$JsonConverterFromJson<Json, Value>(
   Object? json,

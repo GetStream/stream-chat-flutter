@@ -23,11 +23,10 @@ mixin _$AppEventResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $AppEventResponseCopyWith<AppEventResponse> get copyWith =>
-      _$AppEventResponseCopyWithImpl<AppEventResponse>(
-        this as AppEventResponse,
-        _$identity,
-      );
+  $AppEventResponseCopyWith<AppEventResponse> get copyWith => _$AppEventResponseCopyWithImpl<AppEventResponse>(
+    this as AppEventResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -38,10 +37,8 @@ mixin _$AppEventResponse {
                 other.asyncUrlEnrichEnabled == asyncUrlEnrichEnabled) &&
             (identical(other.autoTranslationEnabled, autoTranslationEnabled) ||
                 other.autoTranslationEnabled == autoTranslationEnabled) &&
-            (identical(other.fileUploadConfig, fileUploadConfig) ||
-                other.fileUploadConfig == fileUploadConfig) &&
-            (identical(other.imageUploadConfig, imageUploadConfig) ||
-                other.imageUploadConfig == imageUploadConfig) &&
+            (identical(other.fileUploadConfig, fileUploadConfig) || other.fileUploadConfig == fileUploadConfig) &&
+            (identical(other.imageUploadConfig, imageUploadConfig) || other.imageUploadConfig == imageUploadConfig) &&
             (identical(other.name, name) || other.name == name));
   }
 
@@ -78,8 +75,7 @@ abstract mixin class $AppEventResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$AppEventResponseCopyWithImpl<$Res>
-    implements $AppEventResponseCopyWith<$Res> {
+class _$AppEventResponseCopyWithImpl<$Res> implements $AppEventResponseCopyWith<$Res> {
   _$AppEventResponseCopyWithImpl(this._self, this._then);
 
   final AppEventResponse _self;

@@ -33,10 +33,8 @@ mixin _$CallRuleActionSequence {
         (other.runtimeType == runtimeType &&
             other is CallRuleActionSequence &&
             const DeepCollectionEquality().equals(other.actions, actions) &&
-            (identical(other.callOptions, callOptions) ||
-                other.callOptions == callOptions) &&
-            (identical(other.violationNumber, violationNumber) ||
-                other.violationNumber == violationNumber));
+            (identical(other.callOptions, callOptions) || other.callOptions == callOptions) &&
+            (identical(other.violationNumber, violationNumber) || other.violationNumber == violationNumber));
   }
 
   @override
@@ -68,8 +66,7 @@ abstract mixin class $CallRuleActionSequenceCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$CallRuleActionSequenceCopyWithImpl<$Res>
-    implements $CallRuleActionSequenceCopyWith<$Res> {
+class _$CallRuleActionSequenceCopyWithImpl<$Res> implements $CallRuleActionSequenceCopyWith<$Res> {
   _$CallRuleActionSequenceCopyWithImpl(this._self, this._then);
 
   final CallRuleActionSequence _self;

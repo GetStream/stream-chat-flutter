@@ -23,25 +23,21 @@ mixin _$SearchResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $SearchResponseCopyWith<SearchResponse> get copyWith =>
-      _$SearchResponseCopyWithImpl<SearchResponse>(
-        this as SearchResponse,
-        _$identity,
-      );
+  $SearchResponseCopyWith<SearchResponse> get copyWith => _$SearchResponseCopyWithImpl<SearchResponse>(
+    this as SearchResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is SearchResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.next, next) || other.next == next) &&
-            (identical(other.previous, previous) ||
-                other.previous == previous) &&
+            (identical(other.previous, previous) || other.previous == previous) &&
             const DeepCollectionEquality().equals(other.results, results) &&
-            (identical(other.resultsWarning, resultsWarning) ||
-                other.resultsWarning == resultsWarning));
+            (identical(other.resultsWarning, resultsWarning) || other.resultsWarning == resultsWarning));
   }
 
   @override
@@ -77,8 +73,7 @@ abstract mixin class $SearchResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$SearchResponseCopyWithImpl<$Res>
-    implements $SearchResponseCopyWith<$Res> {
+class _$SearchResponseCopyWithImpl<$Res> implements $SearchResponseCopyWith<$Res> {
   _$SearchResponseCopyWithImpl(this._self, this._then);
 
   final SearchResponse _self;

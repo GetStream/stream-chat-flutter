@@ -20,19 +20,17 @@ mixin _$EventResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $EventResponseCopyWith<EventResponse> get copyWith =>
-      _$EventResponseCopyWithImpl<EventResponse>(
-        this as EventResponse,
-        _$identity,
-      );
+  $EventResponseCopyWith<EventResponse> get copyWith => _$EventResponseCopyWithImpl<EventResponse>(
+    this as EventResponse,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is EventResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.event, event) || other.event == event));
   }
 
@@ -56,8 +54,7 @@ abstract mixin class $EventResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$EventResponseCopyWithImpl<$Res>
-    implements $EventResponseCopyWith<$Res> {
+class _$EventResponseCopyWithImpl<$Res> implements $EventResponseCopyWith<$Res> {
   _$EventResponseCopyWithImpl(this._self, this._then);
 
   final EventResponse _self;

@@ -20,11 +20,11 @@ mixin _$BulkUpsertActionConfigResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $BulkUpsertActionConfigResponseCopyWith<BulkUpsertActionConfigResponse>
-  get copyWith =>
-      _$BulkUpsertActionConfigResponseCopyWithImpl<
-        BulkUpsertActionConfigResponse
-      >(this as BulkUpsertActionConfigResponse, _$identity);
+  $BulkUpsertActionConfigResponseCopyWith<BulkUpsertActionConfigResponse> get copyWith =>
+      _$BulkUpsertActionConfigResponseCopyWithImpl<BulkUpsertActionConfigResponse>(
+        this as BulkUpsertActionConfigResponse,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -35,8 +35,7 @@ mixin _$BulkUpsertActionConfigResponse {
               other.actionConfigs,
               actionConfigs,
             ) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -66,8 +65,7 @@ abstract mixin class $BulkUpsertActionConfigResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$BulkUpsertActionConfigResponseCopyWithImpl<$Res>
-    implements $BulkUpsertActionConfigResponseCopyWith<$Res> {
+class _$BulkUpsertActionConfigResponseCopyWithImpl<$Res> implements $BulkUpsertActionConfigResponseCopyWith<$Res> {
   _$BulkUpsertActionConfigResponseCopyWithImpl(this._self, this._then);
 
   final BulkUpsertActionConfigResponse _self;

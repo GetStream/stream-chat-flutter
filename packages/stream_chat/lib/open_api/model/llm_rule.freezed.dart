@@ -22,8 +22,7 @@ mixin _$LLMRule {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $LLMRuleCopyWith<LLMRule> get copyWith =>
-      _$LLMRuleCopyWithImpl<LLMRule>(this as LLMRule, _$identity);
+  $LLMRuleCopyWith<LLMRule> get copyWith => _$LLMRuleCopyWithImpl<LLMRule>(this as LLMRule, _$identity);
 
   @override
   bool operator ==(Object other) {
@@ -31,8 +30,7 @@ mixin _$LLMRule {
         (other.runtimeType == runtimeType &&
             other is LLMRule &&
             (identical(other.action, action) || other.action == action) &&
-            (identical(other.description, description) ||
-                other.description == description) &&
+            (identical(other.description, description) || other.description == description) &&
             (identical(other.label, label) || other.label == label) &&
             const DeepCollectionEquality().equals(
               other.severityRules,
@@ -57,8 +55,7 @@ mixin _$LLMRule {
 
 /// @nodoc
 abstract mixin class $LLMRuleCopyWith<$Res> {
-  factory $LLMRuleCopyWith(LLMRule value, $Res Function(LLMRule) _then) =
-      _$LLMRuleCopyWithImpl;
+  factory $LLMRuleCopyWith(LLMRule value, $Res Function(LLMRule) _then) = _$LLMRuleCopyWithImpl;
   @useResult
   $Res call({
     LLMRuleAction action,

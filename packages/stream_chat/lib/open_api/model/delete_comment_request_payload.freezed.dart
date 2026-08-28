@@ -22,8 +22,7 @@ mixin _$DeleteCommentRequestPayload {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $DeleteCommentRequestPayloadCopyWith<DeleteCommentRequestPayload>
-  get copyWith =>
+  $DeleteCommentRequestPayloadCopyWith<DeleteCommentRequestPayload> get copyWith =>
       _$DeleteCommentRequestPayloadCopyWithImpl<DeleteCommentRequestPayload>(
         this as DeleteCommentRequestPayload,
         _$identity,
@@ -34,18 +33,14 @@ mixin _$DeleteCommentRequestPayload {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is DeleteCommentRequestPayload &&
-            (identical(other.entityId, entityId) ||
-                other.entityId == entityId) &&
-            (identical(other.entityType, entityType) ||
-                other.entityType == entityType) &&
-            (identical(other.hardDelete, hardDelete) ||
-                other.hardDelete == hardDelete) &&
+            (identical(other.entityId, entityId) || other.entityId == entityId) &&
+            (identical(other.entityType, entityType) || other.entityType == entityType) &&
+            (identical(other.hardDelete, hardDelete) || other.hardDelete == hardDelete) &&
             (identical(other.reason, reason) || other.reason == reason));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, entityId, entityType, hardDelete, reason);
+  int get hashCode => Object.hash(runtimeType, entityId, entityType, hardDelete, reason);
 
   @override
   String toString() {
@@ -69,8 +64,7 @@ abstract mixin class $DeleteCommentRequestPayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$DeleteCommentRequestPayloadCopyWithImpl<$Res>
-    implements $DeleteCommentRequestPayloadCopyWith<$Res> {
+class _$DeleteCommentRequestPayloadCopyWithImpl<$Res> implements $DeleteCommentRequestPayloadCopyWith<$Res> {
   _$DeleteCommentRequestPayloadCopyWithImpl(this._self, this._then);
 
   final DeleteCommentRequestPayload _self;

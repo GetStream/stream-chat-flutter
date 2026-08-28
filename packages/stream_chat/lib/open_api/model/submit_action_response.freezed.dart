@@ -33,18 +33,15 @@ mixin _$SubmitActionResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is SubmitActionResponse &&
-            (identical(other.appealItem, appealItem) ||
-                other.appealItem == appealItem) &&
+            (identical(other.appealItem, appealItem) || other.appealItem == appealItem) &&
             (identical(other.autoRestoreWarning, autoRestoreWarning) ||
                 other.autoRestoreWarning == autoRestoreWarning) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.item, item) || other.item == item));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, appealItem, autoRestoreWarning, duration, item);
+  int get hashCode => Object.hash(runtimeType, appealItem, autoRestoreWarning, duration, item);
 
   @override
   String toString() {
@@ -68,8 +65,7 @@ abstract mixin class $SubmitActionResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$SubmitActionResponseCopyWithImpl<$Res>
-    implements $SubmitActionResponseCopyWith<$Res> {
+class _$SubmitActionResponseCopyWithImpl<$Res> implements $SubmitActionResponseCopyWith<$Res> {
   _$SubmitActionResponseCopyWithImpl(this._self, this._then);
 
   final SubmitActionResponse _self;

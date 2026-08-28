@@ -36,13 +36,10 @@ mixin _$BulkActionAppealsRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is BulkActionAppealsRequest &&
-            (identical(other.actionType, actionType) ||
-                other.actionType == actionType) &&
+            (identical(other.actionType, actionType) || other.actionType == actionType) &&
             const DeepCollectionEquality().equals(other.appealIds, appealIds) &&
-            (identical(other.markReviewed, markReviewed) ||
-                other.markReviewed == markReviewed) &&
-            (identical(other.rejectAppeal, rejectAppeal) ||
-                other.rejectAppeal == rejectAppeal) &&
+            (identical(other.markReviewed, markReviewed) || other.markReviewed == markReviewed) &&
+            (identical(other.rejectAppeal, rejectAppeal) || other.rejectAppeal == rejectAppeal) &&
             (identical(other.restore, restore) || other.restore == restore) &&
             (identical(other.unban, unban) || other.unban == unban) &&
             (identical(other.unblock, unblock) || other.unblock == unblock));
@@ -85,8 +82,7 @@ abstract mixin class $BulkActionAppealsRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$BulkActionAppealsRequestCopyWithImpl<$Res>
-    implements $BulkActionAppealsRequestCopyWith<$Res> {
+class _$BulkActionAppealsRequestCopyWithImpl<$Res> implements $BulkActionAppealsRequestCopyWith<$Res> {
   _$BulkActionAppealsRequestCopyWithImpl(this._self, this._then);
 
   final BulkActionAppealsRequest _self;

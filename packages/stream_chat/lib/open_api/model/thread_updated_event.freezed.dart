@@ -26,27 +26,22 @@ mixin _$ThreadUpdatedEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ThreadUpdatedEventCopyWith<ThreadUpdatedEvent> get copyWith =>
-      _$ThreadUpdatedEventCopyWithImpl<ThreadUpdatedEvent>(
-        this as ThreadUpdatedEvent,
-        _$identity,
-      );
+  $ThreadUpdatedEventCopyWith<ThreadUpdatedEvent> get copyWith => _$ThreadUpdatedEventCopyWithImpl<ThreadUpdatedEvent>(
+    this as ThreadUpdatedEvent,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ThreadUpdatedEvent &&
-            (identical(other.channelId, channelId) ||
-                other.channelId == channelId) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.thread, thread) || other.thread == thread) &&
             (identical(other.type, type) || other.type == type));
   }
@@ -90,8 +85,7 @@ abstract mixin class $ThreadUpdatedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ThreadUpdatedEventCopyWithImpl<$Res>
-    implements $ThreadUpdatedEventCopyWith<$Res> {
+class _$ThreadUpdatedEventCopyWithImpl<$Res> implements $ThreadUpdatedEventCopyWith<$Res> {
   _$ThreadUpdatedEventCopyWithImpl(this._self, this._then);
 
   final ThreadUpdatedEvent _self;

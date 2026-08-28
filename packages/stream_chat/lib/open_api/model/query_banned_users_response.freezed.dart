@@ -32,8 +32,7 @@ mixin _$QueryBannedUsersResponse {
         (other.runtimeType == runtimeType &&
             other is QueryBannedUsersResponse &&
             const DeepCollectionEquality().equals(other.bans, bans) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -60,8 +59,7 @@ abstract mixin class $QueryBannedUsersResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryBannedUsersResponseCopyWithImpl<$Res>
-    implements $QueryBannedUsersResponseCopyWith<$Res> {
+class _$QueryBannedUsersResponseCopyWithImpl<$Res> implements $QueryBannedUsersResponseCopyWith<$Res> {
   _$QueryBannedUsersResponseCopyWithImpl(this._self, this._then);
 
   final QueryBannedUsersResponse _self;

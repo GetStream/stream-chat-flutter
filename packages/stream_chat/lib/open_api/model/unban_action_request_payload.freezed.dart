@@ -33,17 +33,14 @@ mixin _$UnbanActionRequestPayload {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UnbanActionRequestPayload &&
-            (identical(other.channelCid, channelCid) ||
-                other.channelCid == channelCid) &&
-            (identical(other.decisionReason, decisionReason) ||
-                other.decisionReason == decisionReason) &&
+            (identical(other.channelCid, channelCid) || other.channelCid == channelCid) &&
+            (identical(other.decisionReason, decisionReason) || other.decisionReason == decisionReason) &&
             (identical(
                   other.removeFutureChannelsBan,
                   removeFutureChannelsBan,
                 ) ||
                 other.removeFutureChannelsBan == removeFutureChannelsBan) &&
-            (identical(other.targetUserId, targetUserId) ||
-                other.targetUserId == targetUserId));
+            (identical(other.targetUserId, targetUserId) || other.targetUserId == targetUserId));
   }
 
   @override
@@ -77,8 +74,7 @@ abstract mixin class $UnbanActionRequestPayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UnbanActionRequestPayloadCopyWithImpl<$Res>
-    implements $UnbanActionRequestPayloadCopyWith<$Res> {
+class _$UnbanActionRequestPayloadCopyWithImpl<$Res> implements $UnbanActionRequestPayloadCopyWith<$Res> {
   _$UnbanActionRequestPayloadCopyWithImpl(this._self, this._then);
 
   final UnbanActionRequestPayload _self;

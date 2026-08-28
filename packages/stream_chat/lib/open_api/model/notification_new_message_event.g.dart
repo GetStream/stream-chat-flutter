@@ -20,10 +20,9 @@ NotificationNewMessageEvent _$NotificationNewMessageEventFromJson(
     json['created_at'] as Object,
   ),
   custom: json['custom'] as Map<String, dynamic>,
-  groupedUnreadChannels:
-      (json['grouped_unread_channels'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, (e as num).toInt()),
-      ),
+  groupedUnreadChannels: (json['grouped_unread_channels'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, (e as num).toInt()),
+  ),
   message: MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
   messageId: json['message_id'] as String,
   parentAuthor: json['parent_author'] as String?,
@@ -63,9 +62,7 @@ Map<String, dynamic> _$NotificationNewMessageEventToJson(
     const StreamDateTimeConverter().toJson,
   ),
   'team': instance.team,
-  'thread_participants': instance.threadParticipants
-      ?.map((e) => e.toJson())
-      .toList(),
+  'thread_participants': instance.threadParticipants?.map((e) => e.toJson()).toList(),
   'total_unread_count': instance.totalUnreadCount,
   'type': instance.type,
   'unread_channels': instance.unreadChannels,

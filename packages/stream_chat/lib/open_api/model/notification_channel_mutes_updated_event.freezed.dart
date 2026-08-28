@@ -23,25 +23,21 @@ mixin _$NotificationChannelMutesUpdatedEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $NotificationChannelMutesUpdatedEventCopyWith<
-    NotificationChannelMutesUpdatedEvent
-  >
-  get copyWith =>
-      _$NotificationChannelMutesUpdatedEventCopyWithImpl<
-        NotificationChannelMutesUpdatedEvent
-      >(this as NotificationChannelMutesUpdatedEvent, _$identity);
+  $NotificationChannelMutesUpdatedEventCopyWith<NotificationChannelMutesUpdatedEvent> get copyWith =>
+      _$NotificationChannelMutesUpdatedEventCopyWithImpl<NotificationChannelMutesUpdatedEvent>(
+        this as NotificationChannelMutesUpdatedEvent,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is NotificationChannelMutesUpdatedEvent &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.me, me) || other.me == me) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.type, type) || other.type == type));
   }
 

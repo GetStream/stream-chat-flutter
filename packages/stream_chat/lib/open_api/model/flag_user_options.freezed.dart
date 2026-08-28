@@ -19,11 +19,10 @@ mixin _$FlagUserOptions {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $FlagUserOptionsCopyWith<FlagUserOptions> get copyWith =>
-      _$FlagUserOptionsCopyWithImpl<FlagUserOptions>(
-        this as FlagUserOptions,
-        _$identity,
-      );
+  $FlagUserOptionsCopyWith<FlagUserOptions> get copyWith => _$FlagUserOptionsCopyWithImpl<FlagUserOptions>(
+    this as FlagUserOptions,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -53,8 +52,7 @@ abstract mixin class $FlagUserOptionsCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FlagUserOptionsCopyWithImpl<$Res>
-    implements $FlagUserOptionsCopyWith<$Res> {
+class _$FlagUserOptionsCopyWithImpl<$Res> implements $FlagUserOptionsCopyWith<$Res> {
   _$FlagUserOptionsCopyWithImpl(this._self, this._then);
 
   final FlagUserOptions _self;

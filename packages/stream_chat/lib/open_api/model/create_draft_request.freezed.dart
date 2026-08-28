@@ -19,11 +19,10 @@ mixin _$CreateDraftRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $CreateDraftRequestCopyWith<CreateDraftRequest> get copyWith =>
-      _$CreateDraftRequestCopyWithImpl<CreateDraftRequest>(
-        this as CreateDraftRequest,
-        _$identity,
-      );
+  $CreateDraftRequestCopyWith<CreateDraftRequest> get copyWith => _$CreateDraftRequestCopyWithImpl<CreateDraftRequest>(
+    this as CreateDraftRequest,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -53,8 +52,7 @@ abstract mixin class $CreateDraftRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$CreateDraftRequestCopyWithImpl<$Res>
-    implements $CreateDraftRequestCopyWith<$Res> {
+class _$CreateDraftRequestCopyWithImpl<$Res> implements $CreateDraftRequestCopyWith<$Res> {
   _$CreateDraftRequestCopyWithImpl(this._self, this._then);
 
   final CreateDraftRequest _self;

@@ -9,9 +9,7 @@ part of 'closed_caption_rule_parameters.dart';
 ClosedCaptionRuleParameters _$ClosedCaptionRuleParametersFromJson(
   Map<String, dynamic> json,
 ) => ClosedCaptionRuleParameters(
-  harmLabels: (json['harm_labels'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  harmLabels: (json['harm_labels'] as List<dynamic>?)?.map((e) => e as String).toList(),
   llmHarmLabels: (json['llm_harm_labels'] as Map<String, dynamic>?)?.map(
     (k, e) => MapEntry(k, e as String),
   ),

@@ -20,8 +20,7 @@ mixin _$User {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UserCopyWith<User> get copyWith =>
-      _$UserCopyWithImpl<User>(this as User, _$identity);
+  $UserCopyWith<User> get copyWith => _$UserCopyWithImpl<User>(this as User, _$identity);
 
   @override
   bool operator ==(Object other) {
@@ -33,8 +32,7 @@ mixin _$User {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(data), id);
+  int get hashCode => Object.hash(runtimeType, const DeepCollectionEquality().hash(data), id);
 
   @override
   String toString() {
@@ -44,8 +42,7 @@ mixin _$User {
 
 /// @nodoc
 abstract mixin class $UserCopyWith<$Res> {
-  factory $UserCopyWith(User value, $Res Function(User) _then) =
-      _$UserCopyWithImpl;
+  factory $UserCopyWith(User value, $Res Function(User) _then) = _$UserCopyWithImpl;
   @useResult
   $Res call({Map<String, Object?>? data, String id});
 }

@@ -40,16 +40,12 @@ mixin _$DeleteUserRequestPayload {
                   other.deleteConversationChannels,
                   deleteConversationChannels,
                 ) ||
-                other.deleteConversationChannels ==
-                    deleteConversationChannels) &&
+                other.deleteConversationChannels == deleteConversationChannels) &&
             (identical(other.deleteFeedsContent, deleteFeedsContent) ||
                 other.deleteFeedsContent == deleteFeedsContent) &&
-            (identical(other.entityId, entityId) ||
-                other.entityId == entityId) &&
-            (identical(other.entityType, entityType) ||
-                other.entityType == entityType) &&
-            (identical(other.hardDelete, hardDelete) ||
-                other.hardDelete == hardDelete) &&
+            (identical(other.entityId, entityId) || other.entityId == entityId) &&
+            (identical(other.entityType, entityType) || other.entityType == entityType) &&
+            (identical(other.hardDelete, hardDelete) || other.hardDelete == hardDelete) &&
             (identical(other.markMessagesDeleted, markMessagesDeleted) ||
                 other.markMessagesDeleted == markMessagesDeleted) &&
             (identical(other.reason, reason) || other.reason == reason));
@@ -92,8 +88,7 @@ abstract mixin class $DeleteUserRequestPayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$DeleteUserRequestPayloadCopyWithImpl<$Res>
-    implements $DeleteUserRequestPayloadCopyWith<$Res> {
+class _$DeleteUserRequestPayloadCopyWithImpl<$Res> implements $DeleteUserRequestPayloadCopyWith<$Res> {
   _$DeleteUserRequestPayloadCopyWithImpl(this._self, this._then);
 
   final DeleteUserRequestPayload _self;

@@ -10,9 +10,7 @@ AutomodDetailsResponse _$AutomodDetailsResponseFromJson(
   Map<String, dynamic> json,
 ) => AutomodDetailsResponse(
   action: json['action'] as String?,
-  imageLabels: (json['image_labels'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  imageLabels: (json['image_labels'] as List<dynamic>?)?.map((e) => e as String).toList(),
   messageDetails: json['message_details'] == null
       ? null
       : FlagMessageDetailsResponse.fromJson(

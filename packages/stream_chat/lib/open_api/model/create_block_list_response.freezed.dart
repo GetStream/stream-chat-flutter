@@ -31,10 +31,8 @@ mixin _$CreateBlockListResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is CreateBlockListResponse &&
-            (identical(other.blocklist, blocklist) ||
-                other.blocklist == blocklist) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.blocklist, blocklist) || other.blocklist == blocklist) &&
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -57,8 +55,7 @@ abstract mixin class $CreateBlockListResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$CreateBlockListResponseCopyWithImpl<$Res>
-    implements $CreateBlockListResponseCopyWith<$Res> {
+class _$CreateBlockListResponseCopyWithImpl<$Res> implements $CreateBlockListResponseCopyWith<$Res> {
   _$CreateBlockListResponseCopyWithImpl(this._self, this._then);
 
   final CreateBlockListResponse _self;

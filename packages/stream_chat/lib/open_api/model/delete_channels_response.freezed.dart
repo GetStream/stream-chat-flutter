@@ -32,8 +32,7 @@ mixin _$DeleteChannelsResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is DeleteChannelsResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             const DeepCollectionEquality().equals(other.result, result) &&
             (identical(other.taskId, taskId) || other.taskId == taskId));
   }
@@ -67,8 +66,7 @@ abstract mixin class $DeleteChannelsResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$DeleteChannelsResponseCopyWithImpl<$Res>
-    implements $DeleteChannelsResponseCopyWith<$Res> {
+class _$DeleteChannelsResponseCopyWithImpl<$Res> implements $DeleteChannelsResponseCopyWith<$Res> {
   _$DeleteChannelsResponseCopyWithImpl(this._self, this._then);
 
   final DeleteChannelsResponse _self;

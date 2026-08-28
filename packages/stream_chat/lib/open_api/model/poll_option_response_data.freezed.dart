@@ -62,8 +62,7 @@ abstract mixin class $PollOptionResponseDataCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$PollOptionResponseDataCopyWithImpl<$Res>
-    implements $PollOptionResponseDataCopyWith<$Res> {
+class _$PollOptionResponseDataCopyWithImpl<$Res> implements $PollOptionResponseDataCopyWith<$Res> {
   _$PollOptionResponseDataCopyWithImpl(this._self, this._then);
 
   final PollOptionResponseData _self;

@@ -30,11 +30,10 @@ mixin _$EnrichedActivity {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $EnrichedActivityCopyWith<EnrichedActivity> get copyWith =>
-      _$EnrichedActivityCopyWithImpl<EnrichedActivity>(
-        this as EnrichedActivity,
-        _$identity,
-      );
+  $EnrichedActivityCopyWith<EnrichedActivity> get copyWith => _$EnrichedActivityCopyWithImpl<EnrichedActivity>(
+    this as EnrichedActivity,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -42,8 +41,7 @@ mixin _$EnrichedActivity {
         (other.runtimeType == runtimeType &&
             other is EnrichedActivity &&
             (identical(other.actor, actor) || other.actor == actor) &&
-            (identical(other.foreignId, foreignId) ||
-                other.foreignId == foreignId) &&
+            (identical(other.foreignId, foreignId) || other.foreignId == foreignId) &&
             (identical(other.id, id) || other.id == id) &&
             const DeepCollectionEquality().equals(
               other.latestReactions,
@@ -112,8 +110,7 @@ abstract mixin class $EnrichedActivityCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$EnrichedActivityCopyWithImpl<$Res>
-    implements $EnrichedActivityCopyWith<$Res> {
+class _$EnrichedActivityCopyWithImpl<$Res> implements $EnrichedActivityCopyWith<$Res> {
   _$EnrichedActivityCopyWithImpl(this._self, this._then);
 
   final EnrichedActivity _self;

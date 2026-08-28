@@ -48,44 +48,33 @@ mixin _$UpsertConfigRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UpsertConfigRequest &&
-            (identical(other.aiAudioConfig, aiAudioConfig) ||
-                other.aiAudioConfig == aiAudioConfig) &&
-            (identical(other.aiImageConfig, aiImageConfig) ||
-                other.aiImageConfig == aiImageConfig) &&
-            (identical(other.aiTextConfig, aiTextConfig) ||
-                other.aiTextConfig == aiTextConfig) &&
-            (identical(other.aiVideoConfig, aiVideoConfig) ||
-                other.aiVideoConfig == aiVideoConfig) &&
+            (identical(other.aiAudioConfig, aiAudioConfig) || other.aiAudioConfig == aiAudioConfig) &&
+            (identical(other.aiImageConfig, aiImageConfig) || other.aiImageConfig == aiImageConfig) &&
+            (identical(other.aiTextConfig, aiTextConfig) || other.aiTextConfig == aiTextConfig) &&
+            (identical(other.aiVideoConfig, aiVideoConfig) || other.aiVideoConfig == aiVideoConfig) &&
             (identical(other.async, async) || other.async == async) &&
             (identical(
                   other.automodPlatformCircumventionConfig,
                   automodPlatformCircumventionConfig,
                 ) ||
-                other.automodPlatformCircumventionConfig ==
-                    automodPlatformCircumventionConfig) &&
+                other.automodPlatformCircumventionConfig == automodPlatformCircumventionConfig) &&
             (identical(
                   other.automodSemanticFiltersConfig,
                   automodSemanticFiltersConfig,
                 ) ||
-                other.automodSemanticFiltersConfig ==
-                    automodSemanticFiltersConfig) &&
+                other.automodSemanticFiltersConfig == automodSemanticFiltersConfig) &&
             (identical(other.automodToxicityConfig, automodToxicityConfig) ||
                 other.automodToxicityConfig == automodToxicityConfig) &&
             (identical(other.awsRekognitionConfig, awsRekognitionConfig) ||
                 other.awsRekognitionConfig == awsRekognitionConfig) &&
-            (identical(other.blockListConfig, blockListConfig) ||
-                other.blockListConfig == blockListConfig) &&
-            (identical(other.bodyguardConfig, bodyguardConfig) ||
-                other.bodyguardConfig == bodyguardConfig) &&
-            (identical(other.floodConfig, floodConfig) ||
-                other.floodConfig == floodConfig) &&
+            (identical(other.blockListConfig, blockListConfig) || other.blockListConfig == blockListConfig) &&
+            (identical(other.bodyguardConfig, bodyguardConfig) || other.bodyguardConfig == bodyguardConfig) &&
+            (identical(other.floodConfig, floodConfig) || other.floodConfig == floodConfig) &&
             (identical(other.googleVisionConfig, googleVisionConfig) ||
                 other.googleVisionConfig == googleVisionConfig) &&
             (identical(other.key, key) || other.key == key) &&
-            (identical(other.llmConfig, llmConfig) ||
-                other.llmConfig == llmConfig) &&
-            (identical(other.ruleBuilderConfig, ruleBuilderConfig) ||
-                other.ruleBuilderConfig == ruleBuilderConfig) &&
+            (identical(other.llmConfig, llmConfig) || other.llmConfig == llmConfig) &&
+            (identical(other.ruleBuilderConfig, ruleBuilderConfig) || other.ruleBuilderConfig == ruleBuilderConfig) &&
             (identical(other.team, team) || other.team == team) &&
             (identical(other.velocityFilterConfig, velocityFilterConfig) ||
                 other.velocityFilterConfig == velocityFilterConfig) &&
@@ -154,8 +143,7 @@ abstract mixin class $UpsertConfigRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpsertConfigRequestCopyWithImpl<$Res>
-    implements $UpsertConfigRequestCopyWith<$Res> {
+class _$UpsertConfigRequestCopyWithImpl<$Res> implements $UpsertConfigRequestCopyWith<$Res> {
   _$UpsertConfigRequestCopyWithImpl(this._self, this._then);
 
   final UpsertConfigRequest _self;
@@ -208,8 +196,7 @@ class _$UpsertConfigRequestCopyWithImpl<$Res>
             ? _self.async
             : async // ignore: cast_nullable_to_non_nullable
                   as bool?,
-        automodPlatformCircumventionConfig:
-            freezed == automodPlatformCircumventionConfig
+        automodPlatformCircumventionConfig: freezed == automodPlatformCircumventionConfig
             ? _self.automodPlatformCircumventionConfig
             : automodPlatformCircumventionConfig // ignore: cast_nullable_to_non_nullable
                   as AutomodPlatformCircumventionConfig?,

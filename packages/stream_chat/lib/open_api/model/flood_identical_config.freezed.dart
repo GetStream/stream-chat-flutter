@@ -35,15 +35,12 @@ mixin _$FloodIdenticalConfig {
             other is FloodIdenticalConfig &&
             (identical(other.action, action) || other.action == action) &&
             (identical(other.enabled, enabled) || other.enabled == enabled) &&
-            (identical(other.threshold, threshold) ||
-                other.threshold == threshold) &&
-            (identical(other.timeWindow, timeWindow) ||
-                other.timeWindow == timeWindow));
+            (identical(other.threshold, threshold) || other.threshold == threshold) &&
+            (identical(other.timeWindow, timeWindow) || other.timeWindow == timeWindow));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, action, enabled, threshold, timeWindow);
+  int get hashCode => Object.hash(runtimeType, action, enabled, threshold, timeWindow);
 
   @override
   String toString() {
@@ -62,8 +59,7 @@ abstract mixin class $FloodIdenticalConfigCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FloodIdenticalConfigCopyWithImpl<$Res>
-    implements $FloodIdenticalConfigCopyWith<$Res> {
+class _$FloodIdenticalConfigCopyWithImpl<$Res> implements $FloodIdenticalConfigCopyWith<$Res> {
   _$FloodIdenticalConfigCopyWithImpl(this._self, this._then);
 
   final FloodIdenticalConfig _self;

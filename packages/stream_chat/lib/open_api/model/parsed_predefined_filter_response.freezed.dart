@@ -21,11 +21,11 @@ mixin _$ParsedPredefinedFilterResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ParsedPredefinedFilterResponseCopyWith<ParsedPredefinedFilterResponse>
-  get copyWith =>
-      _$ParsedPredefinedFilterResponseCopyWithImpl<
-        ParsedPredefinedFilterResponse
-      >(this as ParsedPredefinedFilterResponse, _$identity);
+  $ParsedPredefinedFilterResponseCopyWith<ParsedPredefinedFilterResponse> get copyWith =>
+      _$ParsedPredefinedFilterResponseCopyWithImpl<ParsedPredefinedFilterResponse>(
+        this as ParsedPredefinedFilterResponse,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -66,8 +66,7 @@ abstract mixin class $ParsedPredefinedFilterResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ParsedPredefinedFilterResponseCopyWithImpl<$Res>
-    implements $ParsedPredefinedFilterResponseCopyWith<$Res> {
+class _$ParsedPredefinedFilterResponseCopyWithImpl<$Res> implements $ParsedPredefinedFilterResponseCopyWith<$Res> {
   _$ParsedPredefinedFilterResponseCopyWithImpl(this._self, this._then);
 
   final ParsedPredefinedFilterResponse _self;

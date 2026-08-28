@@ -23,11 +23,10 @@ mixin _$QueryPollsRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $QueryPollsRequestCopyWith<QueryPollsRequest> get copyWith =>
-      _$QueryPollsRequestCopyWithImpl<QueryPollsRequest>(
-        this as QueryPollsRequest,
-        _$identity,
-      );
+  $QueryPollsRequestCopyWith<QueryPollsRequest> get copyWith => _$QueryPollsRequestCopyWithImpl<QueryPollsRequest>(
+    this as QueryPollsRequest,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -74,8 +73,7 @@ abstract mixin class $QueryPollsRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$QueryPollsRequestCopyWithImpl<$Res>
-    implements $QueryPollsRequestCopyWith<$Res> {
+class _$QueryPollsRequestCopyWithImpl<$Res> implements $QueryPollsRequestCopyWith<$Res> {
   _$QueryPollsRequestCopyWithImpl(this._self, this._then);
 
   final QueryPollsRequest _self;

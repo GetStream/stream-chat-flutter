@@ -23,11 +23,10 @@ mixin _$FloodSimilarConfig {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $FloodSimilarConfigCopyWith<FloodSimilarConfig> get copyWith =>
-      _$FloodSimilarConfigCopyWithImpl<FloodSimilarConfig>(
-        this as FloodSimilarConfig,
-        _$identity,
-      );
+  $FloodSimilarConfigCopyWith<FloodSimilarConfig> get copyWith => _$FloodSimilarConfigCopyWithImpl<FloodSimilarConfig>(
+    this as FloodSimilarConfig,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -38,10 +37,8 @@ mixin _$FloodSimilarConfig {
             (identical(other.enabled, enabled) || other.enabled == enabled) &&
             (identical(other.similarityDistance, similarityDistance) ||
                 other.similarityDistance == similarityDistance) &&
-            (identical(other.threshold, threshold) ||
-                other.threshold == threshold) &&
-            (identical(other.timeWindow, timeWindow) ||
-                other.timeWindow == timeWindow));
+            (identical(other.threshold, threshold) || other.threshold == threshold) &&
+            (identical(other.timeWindow, timeWindow) || other.timeWindow == timeWindow));
   }
 
   @override
@@ -77,8 +74,7 @@ abstract mixin class $FloodSimilarConfigCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FloodSimilarConfigCopyWithImpl<$Res>
-    implements $FloodSimilarConfigCopyWith<$Res> {
+class _$FloodSimilarConfigCopyWithImpl<$Res> implements $FloodSimilarConfigCopyWith<$Res> {
   _$FloodSimilarConfigCopyWithImpl(this._self, this._then);
 
   final FloodSimilarConfig _self;

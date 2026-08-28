@@ -62,8 +62,7 @@ abstract mixin class $AIAudioConfigResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$AIAudioConfigResponseCopyWithImpl<$Res>
-    implements $AIAudioConfigResponseCopyWith<$Res> {
+class _$AIAudioConfigResponseCopyWithImpl<$Res> implements $AIAudioConfigResponseCopyWith<$Res> {
   _$AIAudioConfigResponseCopyWithImpl(this._self, this._then);
 
   final AIAudioConfigResponse _self;

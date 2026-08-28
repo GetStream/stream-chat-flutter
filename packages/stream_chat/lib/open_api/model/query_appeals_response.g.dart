@@ -10,9 +10,7 @@ QueryAppealsResponse _$QueryAppealsResponseFromJson(
   Map<String, dynamic> json,
 ) => QueryAppealsResponse(
   duration: json['duration'] as String,
-  items: (json['items'] as List<dynamic>)
-      .map((e) => AppealItemResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  items: (json['items'] as List<dynamic>).map((e) => AppealItemResponse.fromJson(e as Map<String, dynamic>)).toList(),
   next: json['next'] as String?,
   prev: json['prev'] as String?,
 );

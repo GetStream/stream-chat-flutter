@@ -34,8 +34,7 @@ mixin _$FlagDetailsResponse {
             other is FlagDetailsResponse &&
             (identical(other.automod, automod) || other.automod == automod) &&
             const DeepCollectionEquality().equals(other.extra, extra) &&
-            (identical(other.originalText, originalText) ||
-                other.originalText == originalText));
+            (identical(other.originalText, originalText) || other.originalText == originalText));
   }
 
   @override
@@ -67,8 +66,7 @@ abstract mixin class $FlagDetailsResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FlagDetailsResponseCopyWithImpl<$Res>
-    implements $FlagDetailsResponseCopyWith<$Res> {
+class _$FlagDetailsResponseCopyWithImpl<$Res> implements $FlagDetailsResponseCopyWith<$Res> {
   _$FlagDetailsResponseCopyWithImpl(this._self, this._then);
 
   final FlagDetailsResponse _self;

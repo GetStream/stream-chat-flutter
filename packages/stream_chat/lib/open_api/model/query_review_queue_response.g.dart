@@ -21,19 +21,18 @@ QueryReviewQueueResponse _$QueryReviewQueueResponseFromJson(
           .toList(),
     ),
   ),
-  defaultActionConfig: (json['default_action_config'] as Map<String, dynamic>?)
-      ?.map(
-        (k, e) => MapEntry(
-          k,
-          (e as List<dynamic>)
-              .map(
-                (e) => ModerationActionConfigResponse.fromJson(
-                  e as Map<String, dynamic>,
-                ),
-              )
-              .toList(),
-        ),
-      ),
+  defaultActionConfig: (json['default_action_config'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(
+      k,
+      (e as List<dynamic>)
+          .map(
+            (e) => ModerationActionConfigResponse.fromJson(
+              e as Map<String, dynamic>,
+            ),
+          )
+          .toList(),
+    ),
+  ),
   duration: json['duration'] as String,
   filterConfig: json['filter_config'] == null
       ? null

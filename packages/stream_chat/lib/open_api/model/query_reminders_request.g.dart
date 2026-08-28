@@ -13,9 +13,7 @@ QueryRemindersRequest _$QueryRemindersRequestFromJson(
   limit: (json['limit'] as num?)?.toInt(),
   next: json['next'] as String?,
   prev: json['prev'] as String?,
-  sort: (json['sort'] as List<dynamic>?)
-      ?.map((e) => SortParamRequest.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  sort: (json['sort'] as List<dynamic>?)?.map((e) => SortParamRequest.fromJson(e as Map<String, dynamic>)).toList(),
 );
 
 Map<String, dynamic> _$QueryRemindersRequestToJson(

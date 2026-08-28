@@ -34,8 +34,7 @@ mixin _$CreateUserGroupRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is CreateUserGroupRequest &&
-            (identical(other.description, description) ||
-                other.description == description) &&
+            (identical(other.description, description) || other.description == description) &&
             (identical(other.id, id) || other.id == id) &&
             const DeepCollectionEquality().equals(other.memberIds, memberIds) &&
             (identical(other.name, name) || other.name == name) &&
@@ -75,8 +74,7 @@ abstract mixin class $CreateUserGroupRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$CreateUserGroupRequestCopyWithImpl<$Res>
-    implements $CreateUserGroupRequestCopyWith<$Res> {
+class _$CreateUserGroupRequestCopyWithImpl<$Res> implements $CreateUserGroupRequestCopyWith<$Res> {
   _$CreateUserGroupRequestCopyWithImpl(this._self, this._then);
 
   final CreateUserGroupRequest _self;

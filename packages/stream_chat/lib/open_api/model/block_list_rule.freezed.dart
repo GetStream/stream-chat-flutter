@@ -21,11 +21,10 @@ mixin _$BlockListRule {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $BlockListRuleCopyWith<BlockListRule> get copyWith =>
-      _$BlockListRuleCopyWithImpl<BlockListRule>(
-        this as BlockListRule,
-        _$identity,
-      );
+  $BlockListRuleCopyWith<BlockListRule> get copyWith => _$BlockListRuleCopyWithImpl<BlockListRule>(
+    this as BlockListRule,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -57,8 +56,7 @@ abstract mixin class $BlockListRuleCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$BlockListRuleCopyWithImpl<$Res>
-    implements $BlockListRuleCopyWith<$Res> {
+class _$BlockListRuleCopyWithImpl<$Res> implements $BlockListRuleCopyWith<$Res> {
   _$BlockListRuleCopyWithImpl(this._self, this._then);
 
   final BlockListRule _self;

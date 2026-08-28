@@ -20,11 +20,10 @@ mixin _$PaginationParams {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $PaginationParamsCopyWith<PaginationParams> get copyWith =>
-      _$PaginationParamsCopyWithImpl<PaginationParams>(
-        this as PaginationParams,
-        _$identity,
-      );
+  $PaginationParamsCopyWith<PaginationParams> get copyWith => _$PaginationParamsCopyWithImpl<PaginationParams>(
+    this as PaginationParams,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -55,8 +54,7 @@ abstract mixin class $PaginationParamsCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$PaginationParamsCopyWithImpl<$Res>
-    implements $PaginationParamsCopyWith<$Res> {
+class _$PaginationParamsCopyWithImpl<$Res> implements $PaginationParamsCopyWith<$Res> {
   _$PaginationParamsCopyWithImpl(this._self, this._then);
 
   final PaginationParams _self;

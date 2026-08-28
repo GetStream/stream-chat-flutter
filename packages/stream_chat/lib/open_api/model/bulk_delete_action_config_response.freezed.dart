@@ -20,11 +20,11 @@ mixin _$BulkDeleteActionConfigResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $BulkDeleteActionConfigResponseCopyWith<BulkDeleteActionConfigResponse>
-  get copyWith =>
-      _$BulkDeleteActionConfigResponseCopyWithImpl<
-        BulkDeleteActionConfigResponse
-      >(this as BulkDeleteActionConfigResponse, _$identity);
+  $BulkDeleteActionConfigResponseCopyWith<BulkDeleteActionConfigResponse> get copyWith =>
+      _$BulkDeleteActionConfigResponseCopyWithImpl<BulkDeleteActionConfigResponse>(
+        this as BulkDeleteActionConfigResponse,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -32,8 +32,7 @@ mixin _$BulkDeleteActionConfigResponse {
         (other.runtimeType == runtimeType &&
             other is BulkDeleteActionConfigResponse &&
             (identical(other.deleted, deleted) || other.deleted == deleted) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -56,8 +55,7 @@ abstract mixin class $BulkDeleteActionConfigResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$BulkDeleteActionConfigResponseCopyWithImpl<$Res>
-    implements $BulkDeleteActionConfigResponseCopyWith<$Res> {
+class _$BulkDeleteActionConfigResponseCopyWithImpl<$Res> implements $BulkDeleteActionConfigResponseCopyWith<$Res> {
   _$BulkDeleteActionConfigResponseCopyWithImpl(this._self, this._then);
 
   final BulkDeleteActionConfigResponse _self;

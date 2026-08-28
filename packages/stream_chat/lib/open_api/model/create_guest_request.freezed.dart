@@ -19,11 +19,10 @@ mixin _$CreateGuestRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $CreateGuestRequestCopyWith<CreateGuestRequest> get copyWith =>
-      _$CreateGuestRequestCopyWithImpl<CreateGuestRequest>(
-        this as CreateGuestRequest,
-        _$identity,
-      );
+  $CreateGuestRequestCopyWith<CreateGuestRequest> get copyWith => _$CreateGuestRequestCopyWithImpl<CreateGuestRequest>(
+    this as CreateGuestRequest,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -53,8 +52,7 @@ abstract mixin class $CreateGuestRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$CreateGuestRequestCopyWithImpl<$Res>
-    implements $CreateGuestRequestCopyWith<$Res> {
+class _$CreateGuestRequestCopyWithImpl<$Res> implements $CreateGuestRequestCopyWith<$Res> {
   _$CreateGuestRequestCopyWithImpl(this._self, this._then);
 
   final CreateGuestRequest _self;

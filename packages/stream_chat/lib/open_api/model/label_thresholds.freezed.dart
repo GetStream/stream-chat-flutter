@@ -20,11 +20,10 @@ mixin _$LabelThresholds {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $LabelThresholdsCopyWith<LabelThresholds> get copyWith =>
-      _$LabelThresholdsCopyWithImpl<LabelThresholds>(
-        this as LabelThresholds,
-        _$identity,
-      );
+  $LabelThresholdsCopyWith<LabelThresholds> get copyWith => _$LabelThresholdsCopyWithImpl<LabelThresholds>(
+    this as LabelThresholds,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -55,8 +54,7 @@ abstract mixin class $LabelThresholdsCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$LabelThresholdsCopyWithImpl<$Res>
-    implements $LabelThresholdsCopyWith<$Res> {
+class _$LabelThresholdsCopyWithImpl<$Res> implements $LabelThresholdsCopyWith<$Res> {
   _$LabelThresholdsCopyWithImpl(this._self, this._then);
 
   final LabelThresholds _self;

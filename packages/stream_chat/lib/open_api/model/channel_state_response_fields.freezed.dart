@@ -33,8 +33,7 @@ mixin _$ChannelStateResponseFields {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ChannelStateResponseFieldsCopyWith<ChannelStateResponseFields>
-  get copyWith =>
+  $ChannelStateResponseFieldsCopyWith<ChannelStateResponseFields> get copyWith =>
       _$ChannelStateResponseFieldsCopyWithImpl<ChannelStateResponseFields>(
         this as ChannelStateResponseFields,
         _$identity,
@@ -55,8 +54,7 @@ mixin _$ChannelStateResponseFields {
             (identical(other.hideMessagesBefore, hideMessagesBefore) ||
                 other.hideMessagesBefore == hideMessagesBefore) &&
             const DeepCollectionEquality().equals(other.members, members) &&
-            (identical(other.membership, membership) ||
-                other.membership == membership) &&
+            (identical(other.membership, membership) || other.membership == membership) &&
             const DeepCollectionEquality().equals(other.messages, messages) &&
             const DeepCollectionEquality().equals(
               other.pendingMessages,
@@ -66,12 +64,10 @@ mixin _$ChannelStateResponseFields {
               other.pinnedMessages,
               pinnedMessages,
             ) &&
-            (identical(other.pushPreferences, pushPreferences) ||
-                other.pushPreferences == pushPreferences) &&
+            (identical(other.pushPreferences, pushPreferences) || other.pushPreferences == pushPreferences) &&
             const DeepCollectionEquality().equals(other.read, read) &&
             const DeepCollectionEquality().equals(other.threads, threads) &&
-            (identical(other.watcherCount, watcherCount) ||
-                other.watcherCount == watcherCount) &&
+            (identical(other.watcherCount, watcherCount) || other.watcherCount == watcherCount) &&
             const DeepCollectionEquality().equals(other.watchers, watchers));
   }
 
@@ -128,8 +124,7 @@ abstract mixin class $ChannelStateResponseFieldsCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChannelStateResponseFieldsCopyWithImpl<$Res>
-    implements $ChannelStateResponseFieldsCopyWith<$Res> {
+class _$ChannelStateResponseFieldsCopyWithImpl<$Res> implements $ChannelStateResponseFieldsCopyWith<$Res> {
   _$ChannelStateResponseFieldsCopyWithImpl(this._self, this._then);
 
   final ChannelStateResponseFields _self;

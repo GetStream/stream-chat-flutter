@@ -20,9 +20,7 @@ ChatSharedLocationResponseData _$ChatSharedLocationResponseDataFromJson(
   ),
   latitude: (json['latitude'] as num).toDouble(),
   longitude: (json['longitude'] as num).toDouble(),
-  message: json['message'] == null
-      ? null
-      : ChatMessageResponse.fromJson(json['message'] as Map<String, dynamic>),
+  message: json['message'] == null ? null : ChatMessageResponse.fromJson(json['message'] as Map<String, dynamic>),
   messageId: json['message_id'] as String,
   updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,

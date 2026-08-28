@@ -39,21 +39,15 @@ mixin _$AIIndicatorUpdateEvent {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is AIIndicatorUpdateEvent &&
-            (identical(other.aiMessage, aiMessage) ||
-                other.aiMessage == aiMessage) &&
+            (identical(other.aiMessage, aiMessage) || other.aiMessage == aiMessage) &&
             (identical(other.aiState, aiState) || other.aiState == aiState) &&
-            (identical(other.channelId, channelId) ||
-                other.channelId == channelId) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.messageId, messageId) ||
-                other.messageId == messageId) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.messageId, messageId) || other.messageId == messageId) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.type, type) || other.type == type));
   }
 
@@ -100,8 +94,7 @@ abstract mixin class $AIIndicatorUpdateEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$AIIndicatorUpdateEventCopyWithImpl<$Res>
-    implements $AIIndicatorUpdateEventCopyWith<$Res> {
+class _$AIIndicatorUpdateEventCopyWithImpl<$Res> implements $AIIndicatorUpdateEventCopyWith<$Res> {
   _$AIIndicatorUpdateEventCopyWithImpl(this._self, this._then);
 
   final AIIndicatorUpdateEvent _self;

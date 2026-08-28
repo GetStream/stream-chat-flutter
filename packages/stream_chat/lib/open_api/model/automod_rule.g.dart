@@ -12,9 +12,8 @@ AutomodRule _$AutomodRuleFromJson(Map<String, dynamic> json) => AutomodRule(
   threshold: (json['threshold'] as num).toDouble(),
 );
 
-Map<String, dynamic> _$AutomodRuleToJson(AutomodRule instance) =>
-    <String, dynamic>{
-      'action': instance.action.toJson(),
-      'label': instance.label,
-      'threshold': instance.threshold,
-    };
+Map<String, dynamic> _$AutomodRuleToJson(AutomodRule instance) => <String, dynamic>{
+  'action': instance.action.toJson(),
+  'label': instance.label,
+  'threshold': instance.threshold,
+};

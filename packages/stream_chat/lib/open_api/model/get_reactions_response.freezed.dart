@@ -31,8 +31,7 @@ mixin _$GetReactionsResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is GetReactionsResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             const DeepCollectionEquality().equals(other.reactions, reactions));
   }
 
@@ -60,8 +59,7 @@ abstract mixin class $GetReactionsResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$GetReactionsResponseCopyWithImpl<$Res>
-    implements $GetReactionsResponseCopyWith<$Res> {
+class _$GetReactionsResponseCopyWithImpl<$Res> implements $GetReactionsResponseCopyWith<$Res> {
   _$GetReactionsResponseCopyWithImpl(this._self, this._then);
 
   final GetReactionsResponse _self;

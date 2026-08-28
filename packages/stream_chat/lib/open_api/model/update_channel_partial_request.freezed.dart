@@ -20,8 +20,7 @@ mixin _$UpdateChannelPartialRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UpdateChannelPartialRequestCopyWith<UpdateChannelPartialRequest>
-  get copyWith =>
+  $UpdateChannelPartialRequestCopyWith<UpdateChannelPartialRequest> get copyWith =>
       _$UpdateChannelPartialRequestCopyWithImpl<UpdateChannelPartialRequest>(
         this as UpdateChannelPartialRequest,
         _$identity,
@@ -60,8 +59,7 @@ abstract mixin class $UpdateChannelPartialRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpdateChannelPartialRequestCopyWithImpl<$Res>
-    implements $UpdateChannelPartialRequestCopyWith<$Res> {
+class _$UpdateChannelPartialRequestCopyWithImpl<$Res> implements $UpdateChannelPartialRequestCopyWith<$Res> {
   _$UpdateChannelPartialRequestCopyWithImpl(this._self, this._then);
 
   final UpdateChannelPartialRequest _self;

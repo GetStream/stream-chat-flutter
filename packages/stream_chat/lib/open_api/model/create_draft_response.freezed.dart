@@ -32,8 +32,7 @@ mixin _$CreateDraftResponse {
         (other.runtimeType == runtimeType &&
             other is CreateDraftResponse &&
             (identical(other.draft, draft) || other.draft == draft) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration));
+            (identical(other.duration, duration) || other.duration == duration));
   }
 
   @override
@@ -56,8 +55,7 @@ abstract mixin class $CreateDraftResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$CreateDraftResponseCopyWithImpl<$Res>
-    implements $CreateDraftResponseCopyWith<$Res> {
+class _$CreateDraftResponseCopyWithImpl<$Res> implements $CreateDraftResponseCopyWith<$Res> {
   _$CreateDraftResponseCopyWithImpl(this._self, this._then);
 
   final CreateDraftResponse _self;

@@ -20,8 +20,7 @@ mixin _$UpdateMessagePartialResponse {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UpdateMessagePartialResponseCopyWith<UpdateMessagePartialResponse>
-  get copyWith =>
+  $UpdateMessagePartialResponseCopyWith<UpdateMessagePartialResponse> get copyWith =>
       _$UpdateMessagePartialResponseCopyWithImpl<UpdateMessagePartialResponse>(
         this as UpdateMessagePartialResponse,
         _$identity,
@@ -32,8 +31,7 @@ mixin _$UpdateMessagePartialResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UpdateMessagePartialResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.message, message) || other.message == message));
   }
 
@@ -57,8 +55,7 @@ abstract mixin class $UpdateMessagePartialResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpdateMessagePartialResponseCopyWithImpl<$Res>
-    implements $UpdateMessagePartialResponseCopyWith<$Res> {
+class _$UpdateMessagePartialResponseCopyWithImpl<$Res> implements $UpdateMessagePartialResponseCopyWith<$Res> {
   _$UpdateMessagePartialResponseCopyWithImpl(this._self, this._then);
 
   final UpdateMessagePartialResponse _self;

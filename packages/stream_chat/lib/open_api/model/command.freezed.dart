@@ -24,8 +24,7 @@ mixin _$Command {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $CommandCopyWith<Command> get copyWith =>
-      _$CommandCopyWithImpl<Command>(this as Command, _$identity);
+  $CommandCopyWith<Command> get copyWith => _$CommandCopyWithImpl<Command>(this as Command, _$identity);
 
   @override
   bool operator ==(Object other) {
@@ -33,14 +32,11 @@ mixin _$Command {
         (other.runtimeType == runtimeType &&
             other is Command &&
             (identical(other.args, args) || other.args == args) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.description, description) ||
-                other.description == description) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.description, description) || other.description == description) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.set, set) || other.set == set) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
   }
 
   @override
@@ -62,8 +58,7 @@ mixin _$Command {
 
 /// @nodoc
 abstract mixin class $CommandCopyWith<$Res> {
-  factory $CommandCopyWith(Command value, $Res Function(Command) _then) =
-      _$CommandCopyWithImpl;
+  factory $CommandCopyWith(Command value, $Res Function(Command) _then) = _$CommandCopyWithImpl;
   @useResult
   $Res call({
     String args,

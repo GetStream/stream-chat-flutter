@@ -17,9 +17,7 @@ QueryReviewQueueRequest _$QueryReviewQueueRequestFromJson(
   lockItems: json['lock_items'] as bool?,
   next: json['next'] as String?,
   prev: json['prev'] as String?,
-  sort: (json['sort'] as List<dynamic>?)
-      ?.map((e) => SortParamRequest.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  sort: (json['sort'] as List<dynamic>?)?.map((e) => SortParamRequest.fromJson(e as Map<String, dynamic>)).toList(),
   statsOnly: json['stats_only'] as bool?,
 );
 

@@ -10,9 +10,7 @@ QueryMessageFlagsResponse _$QueryMessageFlagsResponseFromJson(
   Map<String, dynamic> json,
 ) => QueryMessageFlagsResponse(
   duration: json['duration'] as String,
-  flags: (json['flags'] as List<dynamic>)
-      .map((e) => MessageFlagResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  flags: (json['flags'] as List<dynamic>).map((e) => MessageFlagResponse.fromJson(e as Map<String, dynamic>)).toList(),
 );
 
 Map<String, dynamic> _$QueryMessageFlagsResponseToJson(

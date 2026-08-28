@@ -32,11 +32,9 @@ mixin _$BodyguardProfileSummary {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is BodyguardProfileSummary &&
-            (identical(other.displayName, displayName) ||
-                other.displayName == displayName) &&
+            (identical(other.displayName, displayName) || other.displayName == displayName) &&
             (identical(other.name, name) || other.name == name) &&
-            (identical(other.textType, textType) ||
-                other.textType == textType));
+            (identical(other.textType, textType) || other.textType == textType));
   }
 
   @override
@@ -59,8 +57,7 @@ abstract mixin class $BodyguardProfileSummaryCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$BodyguardProfileSummaryCopyWithImpl<$Res>
-    implements $BodyguardProfileSummaryCopyWith<$Res> {
+class _$BodyguardProfileSummaryCopyWithImpl<$Res> implements $BodyguardProfileSummaryCopyWith<$Res> {
   _$BodyguardProfileSummaryCopyWithImpl(this._self, this._then);
 
   final BodyguardProfileSummary _self;

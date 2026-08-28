@@ -36,10 +36,8 @@ mixin _$ListBlockListResponse {
               other.blocklists,
               blocklists,
             ) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
-            (identical(other.nextCursor, nextCursor) ||
-                other.nextCursor == nextCursor));
+            (identical(other.duration, duration) || other.duration == duration) &&
+            (identical(other.nextCursor, nextCursor) || other.nextCursor == nextCursor));
   }
 
   @override
@@ -71,8 +69,7 @@ abstract mixin class $ListBlockListResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ListBlockListResponseCopyWithImpl<$Res>
-    implements $ListBlockListResponseCopyWith<$Res> {
+class _$ListBlockListResponseCopyWithImpl<$Res> implements $ListBlockListResponseCopyWith<$Res> {
   _$ListBlockListResponseCopyWithImpl(this._self, this._then);
 
   final ListBlockListResponse _self;

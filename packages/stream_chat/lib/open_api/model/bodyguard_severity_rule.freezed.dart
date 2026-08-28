@@ -32,8 +32,7 @@ mixin _$BodyguardSeverityRule {
         (other.runtimeType == runtimeType &&
             other is BodyguardSeverityRule &&
             (identical(other.action, action) || other.action == action) &&
-            (identical(other.severity, severity) ||
-                other.severity == severity));
+            (identical(other.severity, severity) || other.severity == severity));
   }
 
   @override
@@ -59,8 +58,7 @@ abstract mixin class $BodyguardSeverityRuleCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$BodyguardSeverityRuleCopyWithImpl<$Res>
-    implements $BodyguardSeverityRuleCopyWith<$Res> {
+class _$BodyguardSeverityRuleCopyWithImpl<$Res> implements $BodyguardSeverityRuleCopyWith<$Res> {
   _$BodyguardSeverityRuleCopyWithImpl(this._self, this._then);
 
   final BodyguardSeverityRule _self;

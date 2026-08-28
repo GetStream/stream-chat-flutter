@@ -13,9 +13,7 @@ UploadChannelRequest _$UploadChannelRequestFromJson(
   uploadSizes: (json['upload_sizes'] as List<dynamic>?)
       ?.map((e) => ImageSize.fromJson(e as Map<String, dynamic>))
       .toList(),
-  user: json['user'] == null
-      ? null
-      : OnlyUserID.fromJson(json['user'] as Map<String, dynamic>),
+  user: json['user'] == null ? null : OnlyUserID.fromJson(json['user'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$UploadChannelRequestToJson(

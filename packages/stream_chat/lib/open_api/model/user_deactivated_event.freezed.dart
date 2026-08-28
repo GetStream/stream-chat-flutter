@@ -35,13 +35,10 @@ mixin _$UserDeactivatedEvent {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UserDeactivatedEvent &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.createdBy, createdBy) ||
-                other.createdBy == createdBy) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.createdBy, createdBy) || other.createdBy == createdBy) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(other.user, user) || other.user == user));
   }
@@ -81,8 +78,7 @@ abstract mixin class $UserDeactivatedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UserDeactivatedEventCopyWithImpl<$Res>
-    implements $UserDeactivatedEventCopyWith<$Res> {
+class _$UserDeactivatedEventCopyWithImpl<$Res> implements $UserDeactivatedEventCopyWith<$Res> {
   _$UserDeactivatedEventCopyWithImpl(this._self, this._then);
 
   final UserDeactivatedEvent _self;

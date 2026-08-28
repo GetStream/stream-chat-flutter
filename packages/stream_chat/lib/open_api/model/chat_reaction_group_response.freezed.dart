@@ -35,16 +35,13 @@ mixin _$ChatReactionGroupResponse {
         (other.runtimeType == runtimeType &&
             other is ChatReactionGroupResponse &&
             (identical(other.count, count) || other.count == count) &&
-            (identical(other.firstReactionAt, firstReactionAt) ||
-                other.firstReactionAt == firstReactionAt) &&
-            (identical(other.lastReactionAt, lastReactionAt) ||
-                other.lastReactionAt == lastReactionAt) &&
+            (identical(other.firstReactionAt, firstReactionAt) || other.firstReactionAt == firstReactionAt) &&
+            (identical(other.lastReactionAt, lastReactionAt) || other.lastReactionAt == lastReactionAt) &&
             const DeepCollectionEquality().equals(
               other.latestReactionsBy,
               latestReactionsBy,
             ) &&
-            (identical(other.sumScores, sumScores) ||
-                other.sumScores == sumScores));
+            (identical(other.sumScores, sumScores) || other.sumScores == sumScores));
   }
 
   @override
@@ -80,8 +77,7 @@ abstract mixin class $ChatReactionGroupResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChatReactionGroupResponseCopyWithImpl<$Res>
-    implements $ChatReactionGroupResponseCopyWith<$Res> {
+class _$ChatReactionGroupResponseCopyWithImpl<$Res> implements $ChatReactionGroupResponseCopyWith<$Res> {
   _$ChatReactionGroupResponseCopyWithImpl(this._self, this._then);
 
   final ChatReactionGroupResponse _self;

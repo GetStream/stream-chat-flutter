@@ -32,8 +32,7 @@ mixin _$UpdateUsersResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UpdateUsersResponse &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
+            (identical(other.duration, duration) || other.duration == duration) &&
             (identical(
                   other.membershipDeletionTaskId,
                   membershipDeletionTaskId,
@@ -71,8 +70,7 @@ abstract mixin class $UpdateUsersResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpdateUsersResponseCopyWithImpl<$Res>
-    implements $UpdateUsersResponseCopyWith<$Res> {
+class _$UpdateUsersResponseCopyWithImpl<$Res> implements $UpdateUsersResponseCopyWith<$Res> {
   _$UpdateUsersResponseCopyWithImpl(this._self, this._then);
 
   final UpdateUsersResponse _self;

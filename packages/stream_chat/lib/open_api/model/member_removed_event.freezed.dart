@@ -32,11 +32,10 @@ mixin _$MemberRemovedEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $MemberRemovedEventCopyWith<MemberRemovedEvent> get copyWith =>
-      _$MemberRemovedEventCopyWithImpl<MemberRemovedEvent>(
-        this as MemberRemovedEvent,
-        _$identity,
-      );
+  $MemberRemovedEventCopyWith<MemberRemovedEvent> get copyWith => _$MemberRemovedEventCopyWithImpl<MemberRemovedEvent>(
+    this as MemberRemovedEvent,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -48,21 +47,17 @@ mixin _$MemberRemovedEvent {
               other.channelCustom,
               channelCustom,
             ) &&
-            (identical(other.channelId, channelId) ||
-                other.channelId == channelId) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
             (identical(other.channelMemberCount, channelMemberCount) ||
                 other.channelMemberCount == channelMemberCount) &&
             (identical(other.channelMessageCount, channelMessageCount) ||
                 other.channelMessageCount == channelMessageCount) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.member, member) || other.member == member) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.team, team) || other.team == team) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(other.user, user) || other.user == user));
@@ -119,8 +114,7 @@ abstract mixin class $MemberRemovedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MemberRemovedEventCopyWithImpl<$Res>
-    implements $MemberRemovedEventCopyWith<$Res> {
+class _$MemberRemovedEventCopyWithImpl<$Res> implements $MemberRemovedEventCopyWith<$Res> {
   _$MemberRemovedEventCopyWithImpl(this._self, this._then);
 
   final MemberRemovedEvent _self;

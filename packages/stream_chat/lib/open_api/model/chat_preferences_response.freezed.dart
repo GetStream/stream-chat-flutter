@@ -36,20 +36,13 @@ mixin _$ChatPreferencesResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ChatPreferencesResponse &&
-            (identical(other.channelMentions, channelMentions) ||
-                other.channelMentions == channelMentions) &&
-            (identical(other.defaultPreference, defaultPreference) ||
-                other.defaultPreference == defaultPreference) &&
-            (identical(other.directMentions, directMentions) ||
-                other.directMentions == directMentions) &&
-            (identical(other.groupMentions, groupMentions) ||
-                other.groupMentions == groupMentions) &&
-            (identical(other.hereMentions, hereMentions) ||
-                other.hereMentions == hereMentions) &&
-            (identical(other.roleMentions, roleMentions) ||
-                other.roleMentions == roleMentions) &&
-            (identical(other.threadReplies, threadReplies) ||
-                other.threadReplies == threadReplies));
+            (identical(other.channelMentions, channelMentions) || other.channelMentions == channelMentions) &&
+            (identical(other.defaultPreference, defaultPreference) || other.defaultPreference == defaultPreference) &&
+            (identical(other.directMentions, directMentions) || other.directMentions == directMentions) &&
+            (identical(other.groupMentions, groupMentions) || other.groupMentions == groupMentions) &&
+            (identical(other.hereMentions, hereMentions) || other.hereMentions == hereMentions) &&
+            (identical(other.roleMentions, roleMentions) || other.roleMentions == roleMentions) &&
+            (identical(other.threadReplies, threadReplies) || other.threadReplies == threadReplies));
   }
 
   @override
@@ -89,8 +82,7 @@ abstract mixin class $ChatPreferencesResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChatPreferencesResponseCopyWithImpl<$Res>
-    implements $ChatPreferencesResponseCopyWith<$Res> {
+class _$ChatPreferencesResponseCopyWithImpl<$Res> implements $ChatPreferencesResponseCopyWith<$Res> {
   _$ChatPreferencesResponseCopyWithImpl(this._self, this._then);
 
   final ChatPreferencesResponse _self;

@@ -9,13 +9,9 @@ part of 'truncate_channel_response.dart';
 TruncateChannelResponse _$TruncateChannelResponseFromJson(
   Map<String, dynamic> json,
 ) => TruncateChannelResponse(
-  channel: json['channel'] == null
-      ? null
-      : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
+  channel: json['channel'] == null ? null : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
   duration: json['duration'] as String,
-  message: json['message'] == null
-      ? null
-      : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
+  message: json['message'] == null ? null : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$TruncateChannelResponseToJson(

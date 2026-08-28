@@ -21,16 +21,14 @@ mixin _$Thresholds {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $ThresholdsCopyWith<Thresholds> get copyWith =>
-      _$ThresholdsCopyWithImpl<Thresholds>(this as Thresholds, _$identity);
+  $ThresholdsCopyWith<Thresholds> get copyWith => _$ThresholdsCopyWithImpl<Thresholds>(this as Thresholds, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is Thresholds &&
-            (identical(other.explicit, explicit) ||
-                other.explicit == explicit) &&
+            (identical(other.explicit, explicit) || other.explicit == explicit) &&
             (identical(other.spam, spam) || other.spam == spam) &&
             (identical(other.toxic, toxic) || other.toxic == toxic));
   }

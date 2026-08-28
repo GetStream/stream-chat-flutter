@@ -26,28 +26,23 @@ mixin _$PollClosedEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $PollClosedEventCopyWith<PollClosedEvent> get copyWith =>
-      _$PollClosedEventCopyWithImpl<PollClosedEvent>(
-        this as PollClosedEvent,
-        _$identity,
-      );
+  $PollClosedEventCopyWith<PollClosedEvent> get copyWith => _$PollClosedEventCopyWithImpl<PollClosedEvent>(
+    this as PollClosedEvent,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is PollClosedEvent &&
-            (identical(other.activityId, activityId) ||
-                other.activityId == activityId) &&
+            (identical(other.activityId, activityId) || other.activityId == activityId) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.messageId, messageId) ||
-                other.messageId == messageId) &&
+            (identical(other.messageId, messageId) || other.messageId == messageId) &&
             (identical(other.poll, poll) || other.poll == poll) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.type, type) || other.type == type));
   }
 
@@ -90,8 +85,7 @@ abstract mixin class $PollClosedEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$PollClosedEventCopyWithImpl<$Res>
-    implements $PollClosedEventCopyWith<$Res> {
+class _$PollClosedEventCopyWithImpl<$Res> implements $PollClosedEventCopyWith<$Res> {
   _$PollClosedEventCopyWithImpl(this._self, this._then);
 
   final PollClosedEvent _self;

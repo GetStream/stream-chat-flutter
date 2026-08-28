@@ -9,16 +9,12 @@ part of 'update_channel_response.dart';
 UpdateChannelResponse _$UpdateChannelResponseFromJson(
   Map<String, dynamic> json,
 ) => UpdateChannelResponse(
-  channel: json['channel'] == null
-      ? null
-      : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
+  channel: json['channel'] == null ? null : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
   duration: json['duration'] as String,
   members: (json['members'] as List<dynamic>)
       .map((e) => ChannelMemberResponse.fromJson(e as Map<String, dynamic>))
       .toList(),
-  message: json['message'] == null
-      ? null
-      : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
+  message: json['message'] == null ? null : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$UpdateChannelResponseToJson(

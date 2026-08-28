@@ -9,5 +9,6 @@ part of 'block_users_request.dart';
 BlockUsersRequest _$BlockUsersRequestFromJson(Map<String, dynamic> json) =>
     BlockUsersRequest(blockedUserId: json['blocked_user_id'] as String);
 
-Map<String, dynamic> _$BlockUsersRequestToJson(BlockUsersRequest instance) =>
-    <String, dynamic>{'blocked_user_id': instance.blockedUserId};
+Map<String, dynamic> _$BlockUsersRequestToJson(BlockUsersRequest instance) => <String, dynamic>{
+  'blocked_user_id': instance.blockedUserId,
+};

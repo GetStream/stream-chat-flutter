@@ -47,26 +47,20 @@ mixin _$UserResponseCommonFields {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UserResponseCommonFields &&
-            (identical(other.avgResponseTime, avgResponseTime) ||
-                other.avgResponseTime == avgResponseTime) &&
+            (identical(other.avgResponseTime, avgResponseTime) || other.avgResponseTime == avgResponseTime) &&
             (identical(other.banned, banned) || other.banned == banned) &&
             const DeepCollectionEquality().equals(
               other.blockedUserIds,
               blockedUserIds,
             ) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.deactivatedAt, deactivatedAt) ||
-                other.deactivatedAt == deactivatedAt) &&
-            (identical(other.deletedAt, deletedAt) ||
-                other.deletedAt == deletedAt) &&
+            (identical(other.deactivatedAt, deactivatedAt) || other.deactivatedAt == deactivatedAt) &&
+            (identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt) &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.image, image) || other.image == image) &&
-            (identical(other.language, language) ||
-                other.language == language) &&
-            (identical(other.lastActive, lastActive) ||
-                other.lastActive == lastActive) &&
+            (identical(other.language, language) || other.language == language) &&
+            (identical(other.lastActive, lastActive) || other.lastActive == lastActive) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.online, online) || other.online == online) &&
             (identical(
@@ -77,8 +71,7 @@ mixin _$UserResponseCommonFields {
             (identical(other.role, role) || other.role == role) &&
             const DeepCollectionEquality().equals(other.teams, teams) &&
             const DeepCollectionEquality().equals(other.teamsRole, teamsRole) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
   }
 
   @override
@@ -140,8 +133,7 @@ abstract mixin class $UserResponseCommonFieldsCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UserResponseCommonFieldsCopyWithImpl<$Res>
-    implements $UserResponseCommonFieldsCopyWith<$Res> {
+class _$UserResponseCommonFieldsCopyWithImpl<$Res> implements $UserResponseCommonFieldsCopyWith<$Res> {
   _$UserResponseCommonFieldsCopyWithImpl(this._self, this._then);
 
   final UserResponseCommonFields _self;

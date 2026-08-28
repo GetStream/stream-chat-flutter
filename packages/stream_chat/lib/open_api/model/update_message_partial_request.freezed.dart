@@ -22,8 +22,7 @@ mixin _$UpdateMessagePartialRequest {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UpdateMessagePartialRequestCopyWith<UpdateMessagePartialRequest>
-  get copyWith =>
+  $UpdateMessagePartialRequestCopyWith<UpdateMessagePartialRequest> get copyWith =>
       _$UpdateMessagePartialRequestCopyWithImpl<UpdateMessagePartialRequest>(
         this as UpdateMessagePartialRequest,
         _$identity,
@@ -35,10 +34,8 @@ mixin _$UpdateMessagePartialRequest {
         (other.runtimeType == runtimeType &&
             other is UpdateMessagePartialRequest &&
             const DeepCollectionEquality().equals(other.set, set) &&
-            (identical(other.skipEnrichUrl, skipEnrichUrl) ||
-                other.skipEnrichUrl == skipEnrichUrl) &&
-            (identical(other.skipPush, skipPush) ||
-                other.skipPush == skipPush) &&
+            (identical(other.skipEnrichUrl, skipEnrichUrl) || other.skipEnrichUrl == skipEnrichUrl) &&
+            (identical(other.skipPush, skipPush) || other.skipPush == skipPush) &&
             const DeepCollectionEquality().equals(other.unset, unset));
   }
 
@@ -73,8 +70,7 @@ abstract mixin class $UpdateMessagePartialRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpdateMessagePartialRequestCopyWithImpl<$Res>
-    implements $UpdateMessagePartialRequestCopyWith<$Res> {
+class _$UpdateMessagePartialRequestCopyWithImpl<$Res> implements $UpdateMessagePartialRequestCopyWith<$Res> {
   _$UpdateMessagePartialRequestCopyWithImpl(this._self, this._then);
 
   final UpdateMessagePartialRequest _self;

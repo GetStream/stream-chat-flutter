@@ -33,11 +33,9 @@ mixin _$BanResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is BanResponse &&
-            (identical(other.bannedBy, bannedBy) ||
-                other.bannedBy == bannedBy) &&
+            (identical(other.bannedBy, bannedBy) || other.bannedBy == bannedBy) &&
             (identical(other.channel, channel) || other.channel == channel) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             (identical(other.expires, expires) || other.expires == expires) &&
             (identical(other.reason, reason) || other.reason == reason) &&
             (identical(other.shadow, shadow) || other.shadow == shadow) &&

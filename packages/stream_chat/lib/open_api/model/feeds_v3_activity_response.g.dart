@@ -45,9 +45,7 @@ FeedsV3ActivityResponse _$FeedsV3ActivityResponseFromJson(
     const StreamDateTimeConverter().fromJson,
   ),
   feeds: (json['feeds'] as List<dynamic>).map((e) => e as String).toList(),
-  filterTags: (json['filter_tags'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  filterTags: (json['filter_tags'] as List<dynamic>).map((e) => e as String).toList(),
   friendReactionCount: (json['friend_reaction_count'] as num?)?.toInt(),
   friendReactions: (json['friend_reactions'] as List<dynamic>?)
       ?.map((e) => FeedsReactionResponse.fromJson(e as Map<String, dynamic>))
@@ -57,9 +55,7 @@ FeedsV3ActivityResponse _$FeedsV3ActivityResponseFromJson(
     (k, e) => MapEntry(k, e as String),
   ),
   id: json['id'] as String,
-  interestTags: (json['interest_tags'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  interestTags: (json['interest_tags'] as List<dynamic>).map((e) => e as String).toList(),
   isRead: json['is_read'] as bool?,
   isSeen: json['is_seen'] as bool?,
   isWatched: json['is_watched'] as bool?,
@@ -102,9 +98,7 @@ FeedsV3ActivityResponse _$FeedsV3ActivityResponseFromJson(
       : FeedsV3ActivityResponse.fromJson(
           json['parent'] as Map<String, dynamic>,
         ),
-  poll: json['poll'] == null
-      ? null
-      : PollResponseData.fromJson(json['poll'] as Map<String, dynamic>),
+  poll: json['poll'] == null ? null : PollResponseData.fromJson(json['poll'] as Map<String, dynamic>),
   popularity: (json['popularity'] as num).toInt(),
   preview: json['preview'] as bool,
   reactionCount: (json['reaction_count'] as num).toInt(),

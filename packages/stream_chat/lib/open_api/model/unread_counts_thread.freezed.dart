@@ -22,25 +22,20 @@ mixin _$UnreadCountsThread {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UnreadCountsThreadCopyWith<UnreadCountsThread> get copyWith =>
-      _$UnreadCountsThreadCopyWithImpl<UnreadCountsThread>(
-        this as UnreadCountsThread,
-        _$identity,
-      );
+  $UnreadCountsThreadCopyWith<UnreadCountsThread> get copyWith => _$UnreadCountsThreadCopyWithImpl<UnreadCountsThread>(
+    this as UnreadCountsThread,
+    _$identity,
+  );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UnreadCountsThread &&
-            (identical(other.lastRead, lastRead) ||
-                other.lastRead == lastRead) &&
-            (identical(other.lastReadMessageId, lastReadMessageId) ||
-                other.lastReadMessageId == lastReadMessageId) &&
-            (identical(other.parentMessageId, parentMessageId) ||
-                other.parentMessageId == parentMessageId) &&
-            (identical(other.unreadCount, unreadCount) ||
-                other.unreadCount == unreadCount));
+            (identical(other.lastRead, lastRead) || other.lastRead == lastRead) &&
+            (identical(other.lastReadMessageId, lastReadMessageId) || other.lastReadMessageId == lastReadMessageId) &&
+            (identical(other.parentMessageId, parentMessageId) || other.parentMessageId == parentMessageId) &&
+            (identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount));
   }
 
   @override
@@ -74,8 +69,7 @@ abstract mixin class $UnreadCountsThreadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UnreadCountsThreadCopyWithImpl<$Res>
-    implements $UnreadCountsThreadCopyWith<$Res> {
+class _$UnreadCountsThreadCopyWithImpl<$Res> implements $UnreadCountsThreadCopyWith<$Res> {
   _$UnreadCountsThreadCopyWithImpl(this._self, this._then);
 
   final UnreadCountsThread _self;

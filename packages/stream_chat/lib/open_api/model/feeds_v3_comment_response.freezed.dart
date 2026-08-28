@@ -60,21 +60,14 @@ mixin _$FeedsV3CommentResponse {
               other.attachments,
               attachments,
             ) &&
-            (identical(other.bookmarkCount, bookmarkCount) ||
-                other.bookmarkCount == bookmarkCount) &&
-            (identical(other.confidenceScore, confidenceScore) ||
-                other.confidenceScore == confidenceScore) &&
-            (identical(other.controversyScore, controversyScore) ||
-                other.controversyScore == controversyScore) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.bookmarkCount, bookmarkCount) || other.bookmarkCount == bookmarkCount) &&
+            (identical(other.confidenceScore, confidenceScore) || other.confidenceScore == confidenceScore) &&
+            (identical(other.controversyScore, controversyScore) || other.controversyScore == controversyScore) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.deletedAt, deletedAt) ||
-                other.deletedAt == deletedAt) &&
-            (identical(other.downvoteCount, downvoteCount) ||
-                other.downvoteCount == downvoteCount) &&
-            (identical(other.editedAt, editedAt) ||
-                other.editedAt == editedAt) &&
+            (identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt) &&
+            (identical(other.downvoteCount, downvoteCount) || other.downvoteCount == downvoteCount) &&
+            (identical(other.editedAt, editedAt) || other.editedAt == editedAt) &&
             const DeepCollectionEquality().equals(other.i18n, i18n) &&
             (identical(other.id, id) || other.id == id) &&
             const DeepCollectionEquality().equals(
@@ -85,33 +78,25 @@ mixin _$FeedsV3CommentResponse {
               other.mentionedUsers,
               mentionedUsers,
             ) &&
-            (identical(other.moderation, moderation) ||
-                other.moderation == moderation) &&
-            (identical(other.objectId, objectId) ||
-                other.objectId == objectId) &&
-            (identical(other.objectType, objectType) ||
-                other.objectType == objectType) &&
+            (identical(other.moderation, moderation) || other.moderation == moderation) &&
+            (identical(other.objectId, objectId) || other.objectId == objectId) &&
+            (identical(other.objectType, objectType) || other.objectType == objectType) &&
             const DeepCollectionEquality().equals(
               other.ownReactions,
               ownReactions,
             ) &&
-            (identical(other.parentId, parentId) ||
-                other.parentId == parentId) &&
-            (identical(other.reactionCount, reactionCount) ||
-                other.reactionCount == reactionCount) &&
+            (identical(other.parentId, parentId) || other.parentId == parentId) &&
+            (identical(other.reactionCount, reactionCount) || other.reactionCount == reactionCount) &&
             const DeepCollectionEquality().equals(
               other.reactionGroups,
               reactionGroups,
             ) &&
-            (identical(other.replyCount, replyCount) ||
-                other.replyCount == replyCount) &&
+            (identical(other.replyCount, replyCount) || other.replyCount == replyCount) &&
             (identical(other.score, score) || other.score == score) &&
             (identical(other.status, status) || other.status == status) &&
             (identical(other.text, text) || other.text == text) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
-            (identical(other.upvoteCount, upvoteCount) ||
-                other.upvoteCount == upvoteCount) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
+            (identical(other.upvoteCount, upvoteCount) || other.upvoteCount == upvoteCount) &&
             (identical(other.user, user) || other.user == user));
   }
 
@@ -192,8 +177,7 @@ abstract mixin class $FeedsV3CommentResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$FeedsV3CommentResponseCopyWithImpl<$Res>
-    implements $FeedsV3CommentResponseCopyWith<$Res> {
+class _$FeedsV3CommentResponseCopyWithImpl<$Res> implements $FeedsV3CommentResponseCopyWith<$Res> {
   _$FeedsV3CommentResponseCopyWithImpl(this._self, this._then);
 
   final FeedsV3CommentResponse _self;

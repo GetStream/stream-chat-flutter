@@ -9,9 +9,7 @@ part of 'create_block_list_response.dart';
 CreateBlockListResponse _$CreateBlockListResponseFromJson(
   Map<String, dynamic> json,
 ) => CreateBlockListResponse(
-  blocklist: json['blocklist'] == null
-      ? null
-      : BlockListResponse.fromJson(json['blocklist'] as Map<String, dynamic>),
+  blocklist: json['blocklist'] == null ? null : BlockListResponse.fromJson(json['blocklist'] as Map<String, dynamic>),
   duration: json['duration'] as String,
 );
 

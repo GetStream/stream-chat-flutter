@@ -14,9 +14,7 @@ ModerationMarkReviewedEvent _$ModerationMarkReviewedEventFromJson(
   ),
   custom: json['custom'] as Map<String, dynamic>,
   item: ReviewQueueItemResponse.fromJson(json['item'] as Map<String, dynamic>),
-  message: json['message'] == null
-      ? null
-      : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
+  message: json['message'] == null ? null : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
   receivedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['received_at'],
     const StreamDateTimeConverter().fromJson,

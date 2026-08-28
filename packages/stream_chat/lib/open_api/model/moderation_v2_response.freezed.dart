@@ -38,8 +38,7 @@ mixin _$ModerationV2Response {
         (other.runtimeType == runtimeType &&
             other is ModerationV2Response &&
             (identical(other.action, action) || other.action == action) &&
-            (identical(other.blocklistMatched, blocklistMatched) ||
-                other.blocklistMatched == blocklistMatched) &&
+            (identical(other.blocklistMatched, blocklistMatched) || other.blocklistMatched == blocklistMatched) &&
             const DeepCollectionEquality().equals(
               other.blocklistsMatched,
               blocklistsMatched,
@@ -48,8 +47,7 @@ mixin _$ModerationV2Response {
               other.imageHarms,
               imageHarms,
             ) &&
-            (identical(other.originalText, originalText) ||
-                other.originalText == originalText) &&
+            (identical(other.originalText, originalText) || other.originalText == originalText) &&
             (identical(other.platformCircumvented, platformCircumvented) ||
                 other.platformCircumvented == platformCircumvented) &&
             (identical(other.semanticFilterMatched, semanticFilterMatched) ||
@@ -96,8 +94,7 @@ abstract mixin class $ModerationV2ResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ModerationV2ResponseCopyWithImpl<$Res>
-    implements $ModerationV2ResponseCopyWith<$Res> {
+class _$ModerationV2ResponseCopyWithImpl<$Res> implements $ModerationV2ResponseCopyWith<$Res> {
   _$ModerationV2ResponseCopyWithImpl(this._self, this._then);
 
   final ModerationV2Response _self;

@@ -19,8 +19,7 @@ mixin _$UnblockActionRequestPayload {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $UnblockActionRequestPayloadCopyWith<UnblockActionRequestPayload>
-  get copyWith =>
+  $UnblockActionRequestPayloadCopyWith<UnblockActionRequestPayload> get copyWith =>
       _$UnblockActionRequestPayloadCopyWithImpl<UnblockActionRequestPayload>(
         this as UnblockActionRequestPayload,
         _$identity,
@@ -31,8 +30,7 @@ mixin _$UnblockActionRequestPayload {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UnblockActionRequestPayload &&
-            (identical(other.decisionReason, decisionReason) ||
-                other.decisionReason == decisionReason));
+            (identical(other.decisionReason, decisionReason) || other.decisionReason == decisionReason));
   }
 
   @override
@@ -55,8 +53,7 @@ abstract mixin class $UnblockActionRequestPayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UnblockActionRequestPayloadCopyWithImpl<$Res>
-    implements $UnblockActionRequestPayloadCopyWith<$Res> {
+class _$UnblockActionRequestPayloadCopyWithImpl<$Res> implements $UnblockActionRequestPayloadCopyWith<$Res> {
   _$UnblockActionRequestPayloadCopyWithImpl(this._self, this._then);
 
   final UnblockActionRequestPayload _self;

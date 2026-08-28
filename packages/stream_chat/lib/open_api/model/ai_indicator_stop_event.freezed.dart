@@ -36,16 +36,12 @@ mixin _$AIIndicatorStopEvent {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is AIIndicatorStopEvent &&
-            (identical(other.channelId, channelId) ||
-                other.channelId == channelId) &&
-            (identical(other.channelType, channelType) ||
-                other.channelType == channelType) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
             (identical(other.cid, cid) || other.cid == cid) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
-            (identical(other.receivedAt, receivedAt) ||
-                other.receivedAt == receivedAt) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.type, type) || other.type == type));
   }
 
@@ -86,8 +82,7 @@ abstract mixin class $AIIndicatorStopEventCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$AIIndicatorStopEventCopyWithImpl<$Res>
-    implements $AIIndicatorStopEventCopyWith<$Res> {
+class _$AIIndicatorStopEventCopyWithImpl<$Res> implements $AIIndicatorStopEventCopyWith<$Res> {
   _$AIIndicatorStopEventCopyWithImpl(this._self, this._then);
 
   final AIIndicatorStopEvent _self;

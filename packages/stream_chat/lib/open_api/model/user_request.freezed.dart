@@ -36,13 +36,10 @@ mixin _$UserRequest {
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.image, image) || other.image == image) &&
-            (identical(other.invisible, invisible) ||
-                other.invisible == invisible) &&
-            (identical(other.language, language) ||
-                other.language == language) &&
+            (identical(other.invisible, invisible) || other.invisible == invisible) &&
+            (identical(other.language, language) || other.language == language) &&
             (identical(other.name, name) || other.name == name) &&
-            (identical(other.privacySettings, privacySettings) ||
-                other.privacySettings == privacySettings));
+            (identical(other.privacySettings, privacySettings) || other.privacySettings == privacySettings));
   }
 
   @override

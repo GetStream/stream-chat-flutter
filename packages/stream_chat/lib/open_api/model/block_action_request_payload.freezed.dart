@@ -53,8 +53,7 @@ abstract mixin class $BlockActionRequestPayloadCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$BlockActionRequestPayloadCopyWithImpl<$Res>
-    implements $BlockActionRequestPayloadCopyWith<$Res> {
+class _$BlockActionRequestPayloadCopyWithImpl<$Res> implements $BlockActionRequestPayloadCopyWith<$Res> {
   _$BlockActionRequestPayloadCopyWithImpl(this._self, this._then);
 
   final BlockActionRequestPayload _self;

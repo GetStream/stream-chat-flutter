@@ -27,31 +27,28 @@ ChannelHiddenEvent _$ChannelHiddenEventFromJson(
   ),
   team: json['team'] as String?,
   type: json['type'] as String,
-  user: json['user'] == null
-      ? null
-      : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
+  user: json['user'] == null ? null : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
 );
 
-Map<String, dynamic> _$ChannelHiddenEventToJson(ChannelHiddenEvent instance) =>
-    <String, dynamic>{
-      'channel': instance.channel.toJson(),
-      'channel_custom': instance.channelCustom,
-      'channel_id': instance.channelId,
-      'channel_member_count': instance.channelMemberCount,
-      'channel_message_count': instance.channelMessageCount,
-      'channel_type': instance.channelType,
-      'cid': instance.cid,
-      'clear_history': instance.clearHistory,
-      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
-      'custom': instance.custom,
-      'received_at': _$JsonConverterToJson<Object, DateTime>(
-        instance.receivedAt,
-        const StreamDateTimeConverter().toJson,
-      ),
-      'team': instance.team,
-      'type': instance.type,
-      'user': instance.user?.toJson(),
-    };
+Map<String, dynamic> _$ChannelHiddenEventToJson(ChannelHiddenEvent instance) => <String, dynamic>{
+  'channel': instance.channel.toJson(),
+  'channel_custom': instance.channelCustom,
+  'channel_id': instance.channelId,
+  'channel_member_count': instance.channelMemberCount,
+  'channel_message_count': instance.channelMessageCount,
+  'channel_type': instance.channelType,
+  'cid': instance.cid,
+  'clear_history': instance.clearHistory,
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
+  'custom': instance.custom,
+  'received_at': _$JsonConverterToJson<Object, DateTime>(
+    instance.receivedAt,
+    const StreamDateTimeConverter().toJson,
+  ),
+  'team': instance.team,
+  'type': instance.type,
+  'user': instance.user?.toJson(),
+};
 
 Value? _$JsonConverterFromJson<Json, Value>(
   Object? json,

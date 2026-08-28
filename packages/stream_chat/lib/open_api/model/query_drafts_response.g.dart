@@ -6,15 +6,12 @@ part of 'query_drafts_response.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-QueryDraftsResponse _$QueryDraftsResponseFromJson(Map<String, dynamic> json) =>
-    QueryDraftsResponse(
-      drafts: (json['drafts'] as List<dynamic>)
-          .map((e) => DraftResponse.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      duration: json['duration'] as String,
-      next: json['next'] as String?,
-      prev: json['prev'] as String?,
-    );
+QueryDraftsResponse _$QueryDraftsResponseFromJson(Map<String, dynamic> json) => QueryDraftsResponse(
+  drafts: (json['drafts'] as List<dynamic>).map((e) => DraftResponse.fromJson(e as Map<String, dynamic>)).toList(),
+  duration: json['duration'] as String,
+  next: json['next'] as String?,
+  prev: json['prev'] as String?,
+);
 
 Map<String, dynamic> _$QueryDraftsResponseToJson(
   QueryDraftsResponse instance,
