@@ -89,6 +89,8 @@ The same applies, in a smaller way, to the channel shape embedded in threads (gr
 
 ## Definition of done
 
+- [ ] Re-enable the `stream_chat_flutter` and `stream_chat_localizations` jobs in `.github/workflows/pana.yml`,
+      disabled because pana resolves each package standalone and cannot solve git-vs-hosted `stream_core`.
 - [ ] `Result` and the core error types are exported from `lib/stream_chat.dart` via a `show` allowlist.
 - [ ] `ApiErrorInterceptor` is installed on the Dio backing `DefaultApi`, and the call adapter uses
       `runApiSafely`; a test asserts a failed call yields a `Failure` carrying a `StreamApiException` with a

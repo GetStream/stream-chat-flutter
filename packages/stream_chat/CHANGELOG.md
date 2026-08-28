@@ -1,5 +1,9 @@
 ## Upcoming
 
+🔄 Internal / Non-breaking
+
+- Added the OpenAPI-generated v2 client under `lib/open_api/`, along with the `melos run gen:openapi` tooling that produces it. No API uses it yet.
+
 🔄 Changed
 
 - `Channel.translateMessage` now merges the translated message into the channel state, so the translation reaches anything watching the channel without the caller applying the response itself.
