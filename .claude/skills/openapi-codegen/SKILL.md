@@ -21,12 +21,19 @@ or the generator changed — a new endpoint, a new field, or a generator fix you
 fold a regeneration into a migration slice.
 
 ```bash
-# preferred — pinned release spec from the protocol repo
+# preferred — download a released spec at an explicit ref, no protocol checkout
+PROTOCOL_REF=openapi-v237.2.0 CHAT_BACKEND_DIR=/path/to/chat melos run gen:openapi
+
+# same spec from a local protocol checkout — for iterating on an unreleased one
 PROTOCOL_DIR=/path/to/protocol CHAT_BACKEND_DIR=/path/to/chat melos run gen:openapi
 
 # fresh 'dev' spec straight from the backend monolith
 CHAT_BACKEND_DIR=/path/to/chat melos run gen:openapi
 ```
+
+`PROTOCOL_REF` has **no default** on purpose: a default of `main` would reintroduce the drift the stamp exists to
+catch. Naming the ref in the command is what makes it reproducible — more so than a checkout, which silently uses
+whatever it is sitting at. Both protocol modes produce byte-identical output and the same stamp.
 
 `scripts/generate.sh` resolves a spec, generates into `packages/stream_chat/lib/open_api`, patches it, runs
 `build_runner`, then formats the package. `CHAT_BACKEND_DIR` is required either way — `generate-client` lives in
@@ -48,7 +55,8 @@ feature migration would.
 | Knob | Meaning |
 |---|---|
 | `CHAT_BACKEND_DIR` | **Always required.** Checkout of the backend monolith |
-| `PROTOCOL_DIR` | Optional. Uses `openapi/v2/chat-clientside-api.json` as-is, skipping spec generation |
+| `PROTOCOL_DIR` | Optional. Uses `openapi/v2/chat-clientside-api.json` from a checkout, skipping spec generation |
+| `PROTOCOL_REF` | Optional. Downloads that spec at a tag/branch/sha instead. Mutually exclusive with `PROTOCOL_DIR`; needs `curl` |
 | `scripts/renamed-models.json` | Model renames. Currently `Response → DurationResponse` |
 | `tools/rename_openapi_models.dart` | Applies those renames to a spec generated without them |
 | `packages/stream_chat/build.yaml` | Builder order: freezed → json_serializable → retrofit_generator |

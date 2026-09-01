@@ -9,17 +9,23 @@ set -euo pipefail
 # CHAT_BACKEND_DIR points at a checkout of the backend monolith
 # (GetStream/chat), which hosts the OpenAPI spec + code generator.
 #
-# Optionally, PROTOCOL_DIR points at a checkout of the protocol repo
-# (GetStream/protocol), which publishes the released specs shared by every
-# Stream SDK. When set, that spec is used as-is instead of generating a fresh
-# one, which pins generation to a released API version and saves a minute.
+# The spec can come from three places. Both protocol modes pin generation to a
+# released API version and skip generating a spec:
+#
+#   PROTOCOL_REF=openapi-v237.2.0 CHAT_BACKEND_DIR=/path/to/chat melos run gen:openapi
+#     Downloads that ref's spec from GetStream/protocol. No checkout needed, and
+#     the ref is named in the command, so it cannot drift. There is no default.
 #
 #   PROTOCOL_DIR=/path/to/protocol CHAT_BACKEND_DIR=/path/to/chat melos run gen:openapi
+#     Uses a local protocol checkout — for iterating on an unreleased spec.
+#
+#   CHAT_BACKEND_DIR=/path/to/chat melos run gen:openapi
+#     Builds a fresh 'dev' spec from the monolith.
 #
 # CHAT_BACKEND_DIR is required either way: the client generator lives in the
 # backend monolith, and protocol ships specs only.
 #
-# Requires: go, dart
+# Requires: go, dart (curl for PROTOCOL_REF)
 # Melos sets MELOS_ROOT_PATH when invoked via `melos run`
 # ============================================================
 
@@ -31,6 +37,7 @@ or export it in your shell/profile.}"
 
 # ---------- config (env-optional) ----------
 PROTOCOL_DIR="${PROTOCOL_DIR:-}"
+PROTOCOL_REF="${PROTOCOL_REF:-}"
 
 # ---------- paths ----------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -51,9 +58,12 @@ PROTOCOL_SPEC_DIR_REL="openapi/${API_VERSION}"                      # protocol i
 section() { echo ""; echo "$*"; echo ""; }
 # The API version the spec was generated from ('dev' for locally built specs)
 spec_version() {
-  awk '/^info:/ { in_info = 1; next }
-       in_info && /^  version:/ { print $2; exit }
-       in_info && /^[^ ]/ { exit }' "$1"
+  case "$1" in
+    *.json) python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['info']['version'])" "$1" ;;
+    *) awk '/^info:/ { in_info = 1; next }
+            in_info && /^  version:/ { print $2; exit }
+            in_info && /^[^ ]/ { exit }' "$1" ;;
+  esac
 }
 # A stable identifier for a checkout: its nearest tag when it has one, else a
 # short sha, suffixed with -dirty when the tree carries uncommitted changes.
@@ -87,9 +97,14 @@ SPEC_API_VERSION=""
 SPEC_SOURCE_STAMP=""
 SPEC_CHECKSUM=""
 SPEC_SOURCE="backend ($CHAT_BACKEND_DIR)"
-if [[ -n "$PROTOCOL_DIR" ]]; then
+if [[ -n "$PROTOCOL_DIR" && -n "$PROTOCOL_REF" ]]; then
+  echo "❌ Set PROTOCOL_DIR or PROTOCOL_REF, not both — they name two different specs."
+  exit 1
+elif [[ -n "$PROTOCOL_DIR" ]]; then
   [[ -d "$PROTOCOL_DIR" ]] || { echo "❌ PROTOCOL_DIR not found: $PROTOCOL_DIR"; exit 1; }
   SPEC_SOURCE="protocol ($PROTOCOL_DIR)"
+elif [[ -n "$PROTOCOL_REF" ]]; then
+  SPEC_SOURCE="protocol @ $PROTOCOL_REF (downloaded)"
 fi
 
 echo ""
@@ -103,9 +118,27 @@ echo ""
 # ---------- [1/3] Resolve spec & generate client ----------
 section "➡️ [1/3] Resolving OpenAPI spec and generating Dart client…"
 
+# Compares a spec against the sha256 protocol publishes beside it. Verifying
+# rather than trusting: an edited or truncated spec would otherwise reach the
+# generator and be stamped with a checksum describing different bytes.
+verify_checksum() {
+  local spec="$1" sidecar="$2" actual
+  [[ -f "$sidecar" ]] || return 0
+
+  SPEC_CHECKSUM="$(awk '{ print $1; exit }' "$sidecar")"
+  actual="$(shasum -a 256 "$spec" | awk '{ print $1 }')"
+  [[ "$actual" == "$SPEC_CHECKSUM" ]] || {
+    echo "❌ Spec checksum mismatch for $spec"
+    echo "   expected $SPEC_CHECKSUM (from the .sha256 sidecar)"
+    echo "   actual   $actual"
+    exit 1
+  }
+}
+
+PROTOCOL_JSON=""   # set by both protocol modes; renames are applied to it below
+
 if [[ -n "$PROTOCOL_DIR" ]]; then
-  # Use the released spec published by the protocol repo as-is. It is generated
-  # without the -renamed-models flag, so the renames are applied here instead.
+  # Use the released spec from a protocol checkout as-is.
   PROTOCOL_SPEC="${PROTOCOL_DIR}/${PROTOCOL_SPEC_DIR_REL}/${SPEC_BASENAME}"
   for ext in yaml json; do
     [[ -f "${PROTOCOL_SPEC}.${ext}" ]] || {
@@ -115,35 +148,36 @@ if [[ -n "$PROTOCOL_DIR" ]]; then
     }
   done
 
-  SPEC_ORIGIN="${PROTOCOL_SPEC}.json"
-  SPEC_API_VERSION="$(spec_version "${PROTOCOL_SPEC}.yaml")"
+  PROTOCOL_JSON="${PROTOCOL_SPEC}.json"
+  SPEC_ORIGIN="$PROTOCOL_JSON"
   SPEC_SOURCE_STAMP="protocol @ $(git_stamp "$PROTOCOL_DIR")"
-  # protocol ships a checksum beside every spec; it identifies the exact bytes
-  # even when the checkout sits between tags.
-  if [[ -f "${PROTOCOL_SPEC}.json.sha256" ]]; then
-    SPEC_CHECKSUM="$(awk '{ print $1; exit }' "${PROTOCOL_SPEC}.json.sha256")"
+  verify_checksum "$PROTOCOL_JSON" "${PROTOCOL_JSON}.sha256"
 
-    # Verify rather than trust: a locally edited spec would otherwise reach the
-    # generator and be stamped with a checksum describing different bytes.
-    actual="$(shasum -a 256 "${PROTOCOL_SPEC}.json" | awk '{ print $1 }')"
-    [[ "$actual" == "$SPEC_CHECKSUM" ]] || {
-      echo "❌ Spec checksum mismatch for ${PROTOCOL_SPEC}.json"
-      echo "   expected $SPEC_CHECKSUM (from the .sha256 sidecar)"
-      echo "   actual   $actual"
-      echo "   The protocol checkout has local edits, or the sidecar is stale."
-      exit 1
-    }
-  fi
-  echo "• Using spec $SPEC_ORIGIN (API $SPEC_API_VERSION, $SPEC_SOURCE_STAMP)"
+elif [[ -n "$PROTOCOL_REF" ]]; then
+  # Fetch the released spec straight from protocol at an explicit ref. More
+  # reproducible than a checkout, which silently uses whatever it sits at —
+  # which is why there is no default ref.
+  command -v curl >/dev/null || { echo "❌ 'curl' is required for PROTOCOL_REF"; exit 1; }
 
-  SPEC_FILE="$SPEC_ORIGIN"
-  if [[ -f "$RENAMED_MODELS" ]]; then
-    SPEC_TMP_DIR="$(mktemp -d)"
-    trap 'rm -rf "$SPEC_TMP_DIR"' EXIT
+  SPEC_TMP_DIR="$(mktemp -d)"
+  trap 'rm -rf "$SPEC_TMP_DIR"' EXIT
 
-    SPEC_FILE="${SPEC_TMP_DIR}/${SPEC_BASENAME}.json"
-    dart "$RENAME_TOOL" "${PROTOCOL_SPEC}.json" "$RENAMED_MODELS" "$SPEC_FILE"
-  fi
+  PROTOCOL_URL="https://raw.githubusercontent.com/GetStream/protocol/${PROTOCOL_REF}/${PROTOCOL_SPEC_DIR_REL}/${SPEC_BASENAME}.json"
+  PROTOCOL_JSON="${SPEC_TMP_DIR}/${SPEC_BASENAME}.json"
+
+  echo "• Downloading $PROTOCOL_URL"
+  curl -fsSL --retry 2 -o "$PROTOCOL_JSON" "$PROTOCOL_URL" || {
+    echo "❌ Could not download the spec. Is '$PROTOCOL_REF' a valid tag, branch or sha?"
+    exit 1
+  }
+  # The sidecar is advisory here — a ref without one still generates, it just
+  # cannot be verified.
+  curl -fsSL --retry 2 -o "${PROTOCOL_JSON}.sha256" "${PROTOCOL_URL}.sha256" 2>/dev/null || true
+
+  SPEC_ORIGIN="$PROTOCOL_URL"
+  SPEC_SOURCE_STAMP="protocol @ ${PROTOCOL_REF}"
+  verify_checksum "$PROTOCOL_JSON" "${PROTOCOL_JSON}.sha256"
+
 else
   # Generate a fresh spec (YAML + JSON) from the backend monolith
   (
@@ -164,6 +198,21 @@ else
   SPEC_API_VERSION="$(spec_version "$SPEC_ORIGIN")"
   SPEC_SOURCE_STAMP="backend @ $(git_stamp "$CHAT_BACKEND_DIR")"
   echo "• Generated spec $SPEC_ORIGIN (API $SPEC_API_VERSION, $SPEC_SOURCE_STAMP)"
+fi
+
+# Both protocol modes land here with a published spec, which is generated
+# without -renamed-models — so the renames are applied to a copy instead.
+if [[ -n "$PROTOCOL_JSON" ]]; then
+  SPEC_API_VERSION="$(spec_version "$PROTOCOL_JSON")"
+  echo "• Using spec $SPEC_ORIGIN (API $SPEC_API_VERSION, $SPEC_SOURCE_STAMP)"
+
+  SPEC_FILE="$PROTOCOL_JSON"
+  if [[ -f "$RENAMED_MODELS" ]]; then
+    [[ -n "${SPEC_TMP_DIR:-}" ]] || { SPEC_TMP_DIR="$(mktemp -d)"; trap 'rm -rf "$SPEC_TMP_DIR"' EXIT; }
+
+    SPEC_FILE="${SPEC_TMP_DIR}/${SPEC_BASENAME}.renamed.json"
+    dart "$RENAME_TOOL" "$PROTOCOL_JSON" "$RENAMED_MODELS" "$SPEC_FILE"
+  fi
 fi
 
 # Clean target & ensure parent exists
