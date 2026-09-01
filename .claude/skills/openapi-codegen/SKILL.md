@@ -55,9 +55,21 @@ feature migration would.
 
 ## Things that will bite you
 
-- **Read the provenance line.** `• Using spec …json (API v237.2.0)` in protocol mode, `(API dev)` from the
-  backend. Protocol mode pins to whatever commit your clone sits at, so that line is the only thing standing
-  between you and silently regenerating against a stale API version.
+- **Read the provenance line, and the stamp it writes.** The run prints
+  `• Using spec …json (API v237.2.0, protocol @ openapi-v237.2.0)`, and `stamp_provenance` records the same facts
+  at the top of `lib/open_api/api.dart`:
+
+  ```dart
+  // Spec:      chat-clientside-api (API v237.2.0)
+  // Source:    protocol @ openapi-v237.2.0
+  // Checksum:  0750cb0e…            // protocol's sha256 sidecar for that spec
+  // Generator: GetStream/chat @ v237.3.0-135-g59094108e1
+  ```
+
+  So a checked-in client says which spec and which templates produced it. The stamp carries no timestamp on
+  purpose: regenerating from unchanged inputs must produce no diff, which is also how you tell a real template
+  change from noise. Watch for drift between the two versions — a generator far ahead of the spec is worth
+  knowing before you debug output.
 - **`Response → DurationResponse` is load-bearing.** `stream_core` re-exports `package:dio/dio.dart` wholesale, so
   a generated `Response` collides with dio's inside retrofit's `.g.dart`. Protocol specs ship without the rename,
   which is why `tools/rename_openapi_models.dart` applies it to a temp copy of the JSON spec.
