@@ -21,19 +21,32 @@ or the generator changed — a new endpoint, a new field, or a generator fix you
 fold a regeneration into a migration slice.
 
 ```bash
-# preferred — download a released spec at an explicit ref, no protocol checkout
+# the newest released spec, resolved for you — nothing to look up
+PROTOCOL_REF=latest CHAT_BACKEND_DIR=/path/to/chat melos run gen:openapi
+
+# a specific release
 PROTOCOL_REF=openapi-v237.2.0 CHAT_BACKEND_DIR=/path/to/chat melos run gen:openapi
 
 # same spec from a local protocol checkout — for iterating on an unreleased one
 PROTOCOL_DIR=/path/to/protocol CHAT_BACKEND_DIR=/path/to/chat melos run gen:openapi
 
-# fresh 'dev' spec straight from the backend monolith
+# the monolith's current API, spec and all — no protocol involvement
 CHAT_BACKEND_DIR=/path/to/chat melos run gen:openapi
 ```
 
+`CHAT_BACKEND_DIR` is required in every mode: the generator lives in the monolith, and protocol ships specs only.
+Setting `PROTOCOL_DIR` and `PROTOCOL_REF` together is an error rather than a precedence rule — they name two
+different specs. Requires `go`, `dart` and `python3`, plus `curl` for `PROTOCOL_REF`; checksum verification uses
+`shasum` or `sha256sum` and warns rather than fails if neither exists.
+
 `PROTOCOL_REF` has **no default** on purpose: a default of `main` would reintroduce the drift the stamp exists to
-catch. Naming the ref in the command is what makes it reproducible — more so than a checkout, which silently uses
-whatever it is sitting at. Both protocol modes produce byte-identical output and the same stamp.
+catch. Naming the ref — or asking for `latest`, which stamps the tag it resolved rather than the word — is what
+makes a run reproducible after the fact, more so than a checkout that silently uses whatever it sits at. Both
+protocol modes produce byte-identical output and the same stamp for the same release.
+
+Backend mode is the odd one out: its spec is built from the monolith's current routes, so it can carry unreleased
+endpoints and stamps `(API dev)` with a commit rather than a version. Right for "does this new endpoint generate
+cleanly?", wrong for a tree you intend to commit — nobody without your exact monolith commit can reproduce it.
 
 `scripts/generate.sh` resolves a spec, generates into `packages/stream_chat/lib/open_api`, patches it, runs
 `build_runner`, then formats the package. `CHAT_BACKEND_DIR` is required either way — `generate-client` lives in
@@ -56,7 +69,7 @@ feature migration would.
 |---|---|
 | `CHAT_BACKEND_DIR` | **Always required.** Checkout of the backend monolith |
 | `PROTOCOL_DIR` | Optional. Uses `openapi/v2/chat-clientside-api.json` from a checkout, skipping spec generation |
-| `PROTOCOL_REF` | Optional. Downloads that spec at a tag/branch/sha instead. Mutually exclusive with `PROTOCOL_DIR`; needs `curl` |
+| `PROTOCOL_REF` | Optional. Downloads that spec at a tag/branch/sha. `latest` resolves protocol's newest openapi release. Mutually exclusive with `PROTOCOL_DIR`; needs `curl` |
 | `scripts/renamed-models.json` | Model renames. Currently `Response → DurationResponse` |
 | `tools/rename_openapi_models.dart` | Applies those renames to a spec generated without them |
 | `packages/stream_chat/build.yaml` | Builder order: freezed → json_serializable → retrofit_generator |

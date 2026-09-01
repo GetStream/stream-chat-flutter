@@ -15,6 +15,8 @@ set -euo pipefail
 #   PROTOCOL_REF=openapi-v237.2.0 CHAT_BACKEND_DIR=/path/to/chat melos run gen:openapi
 #     Downloads that ref's spec from GetStream/protocol. No checkout needed, and
 #     the ref is named in the command, so it cannot drift. There is no default.
+#     PROTOCOL_REF=latest resolves protocol's newest openapi release for you;
+#     the resolved tag is what gets stamped, never the word 'latest'.
 #
 #   PROTOCOL_DIR=/path/to/protocol CHAT_BACKEND_DIR=/path/to/chat melos run gen:openapi
 #     Uses a local protocol checkout — for iterating on an unreleased spec.
@@ -167,6 +169,23 @@ elif [[ -n "$PROTOCOL_REF" ]]; then
   # reproducible than a checkout, which silently uses whatever it sits at —
   # which is why there is no default ref.
   command -v curl >/dev/null || { echo "❌ 'curl' is required for PROTOCOL_REF"; exit 1; }
+
+  # `latest` resolves to protocol's newest openapi release, so you do not have
+  # to go and find the tag. What gets stamped is the resolved tag, never
+  # 'latest' — the record has to say which spec this actually was.
+  if [[ "$PROTOCOL_REF" == "latest" ]]; then
+    PROTOCOL_REF="$(
+      curl -fsSL --retry 2 "https://api.github.com/repos/GetStream/protocol/tags?per_page=100" |
+        grep -oE '"name": *"openapi-v[0-9.]+"' | grep -oE 'openapi-v[0-9.]+' | sort -V | tail -1
+    )" || true
+
+    [[ -n "$PROTOCOL_REF" ]] || {
+      echo "❌ Could not resolve the latest openapi release from GetStream/protocol."
+      echo "   Pass an explicit tag instead: PROTOCOL_REF=openapi-vX.Y.Z"
+      exit 1
+    }
+    echo "• Resolved PROTOCOL_REF=latest to $PROTOCOL_REF"
+  fi
 
   SPEC_TMP_DIR="$(mktemp -d)"
   trap 'rm -rf "$SPEC_TMP_DIR"' EXIT
