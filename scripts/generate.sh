@@ -122,6 +122,17 @@ if [[ -n "$PROTOCOL_DIR" ]]; then
   # even when the checkout sits between tags.
   if [[ -f "${PROTOCOL_SPEC}.json.sha256" ]]; then
     SPEC_CHECKSUM="$(awk '{ print $1; exit }' "${PROTOCOL_SPEC}.json.sha256")"
+
+    # Verify rather than trust: a locally edited spec would otherwise reach the
+    # generator and be stamped with a checksum describing different bytes.
+    actual="$(shasum -a 256 "${PROTOCOL_SPEC}.json" | awk '{ print $1 }')"
+    [[ "$actual" == "$SPEC_CHECKSUM" ]] || {
+      echo "❌ Spec checksum mismatch for ${PROTOCOL_SPEC}.json"
+      echo "   expected $SPEC_CHECKSUM (from the .sha256 sidecar)"
+      echo "   actual   $actual"
+      echo "   The protocol checkout has local edits, or the sidecar is stale."
+      exit 1
+    }
   fi
   echo "• Using spec $SPEC_ORIGIN (API $SPEC_API_VERSION, $SPEC_SOURCE_STAMP)"
 
@@ -297,6 +308,13 @@ section "➡️ [3/3] Formatting stream_chat…"
   # at the width configured for this repo. Keep logs, ignore exit code.
   dart format . || true
 )
+
+# The stamp goes in before build_runner and the format pass rewrite the tree; a
+# formatter that drops it would leave a run looking successful but unprovenanced.
+grep -q 'Generator: GetStream/chat @' "$OUTPUT_DIR/api.dart" || {
+  echo "❌ The provenance stamp did not survive formatting — see stamp_provenance"
+  exit 1
+}
 
 section "✅ Formatting completed"
 

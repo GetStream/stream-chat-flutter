@@ -66,7 +66,11 @@ feature migration would.
   // Generator: GetStream/chat @ v237.3.0-135-g59094108e1
   ```
 
-  So a checked-in client says which spec and which templates produced it. The stamp carries no timestamp on
+  So a checked-in client says which spec and which templates produced it. Two readings to get right:
+  `Generator:` is a `git describe` of the backend checkout, not a release — `v237.3.0-135-g59094108e1` means 135
+  commits past that tag — and a `-dirty` suffix on either line means the client came from uncommitted local edits
+  and should not be committed. The checksum is verified against protocol's sidecar before generating, so a locally
+  edited spec fails the run rather than reaching 1,477 files. The stamp carries no timestamp on
   purpose: regenerating from unchanged inputs must produce no diff, which is also how you tell a real template
   change from noise. Watch for drift between the two versions — a generator far ahead of the spec is worth
   knowing before you debug output.
