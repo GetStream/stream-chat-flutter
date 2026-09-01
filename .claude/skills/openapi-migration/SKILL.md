@@ -157,10 +157,11 @@ Failure.error  →  StreamException (sealed)
                     └── StreamClientException   our own bug, or an undecodable body (cause preserved)
 ```
 
-`StreamException.tryFrom(Object?)` normalizes anything already in hand; `StreamErrorCode` is an
+`StreamException.tryFrom(Object?)` normalizes anything already in hand, and `StreamErrorCode` is an
 `extension type const StreamErrorCode(int) implements int` with named constants (`apiKeyInvalid`, `inputError`,
-`rateLimited`, `internalError`, …), and `exception.isRetriable` classifies a failure as about-the-moment versus
-about-the-request, feeding — not replacing — a `RetryPolicy`.
+`rateLimited`, `internalError`, …). The root is `sealed`, so a `switch` over it is exhaustive and no new direct
+subtype can appear outside core; the four subtypes are `base`, so chat can extend one if a case ever needs it but
+cannot implement it.
 
 **This supersedes our `ChatErrorCode`.** Core now owns the code vocabulary, so the plan is to drop ours rather
 than re-express it as an extension. Check `StreamErrorCode` for a constant before adding one here.

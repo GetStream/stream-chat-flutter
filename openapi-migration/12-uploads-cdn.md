@@ -36,11 +36,14 @@
 
 ## Decisions to make
 
+- **Adopt core's uploader, or keep ours?** `stream_core` is reworking uploads around `StreamAttachmentUploader`, which takes a `CdnClient` and returns an `AttachmentUploadTask` — a lifecycle `state` stream, a `cancel()`, and a `result` that never throws ([core#170](https://github.com/GetStream/stream-core-flutter/pull/170)). Our `AttachmentFileUploader` spreads the same three things across a `Future`, a `ProgressCallback` and a `CancelToken`. Adopting it is a bigger break than migrating the endpoints, and the strongest cross-product-consistency case in the whole plan.
+- Whichever shape wins, the hand-written `CdnApi` should implement core's `CdnClient` (`uploadFile` / `uploadImage` -> `Future<Result<UploadedFile>>`, `deleteFile` / `deleteImage` -> `Future<Result<void>>`) so it plugs into `StreamAttachmentUploader` — that is exactly how `stream_feeds` wires `FeedsCdnClient`.
 - `AttachmentFileUploader` is public and pluggable through `attachmentFileUploaderProvider`; changing its signature is a break that needs the usual justification.
 - The v2 multipart schema defines only `file`, `upload_sizes` and `user`, but our public `sendImage` / `sendFile` accept `extraData`. Decide: drop the parameter, or keep those two calls on v1.
 
 ## Risks
 
+- Core's `CdnClient` has no channel-scoped operations — it is `uploadFile` / `uploadImage` only — while half of chat's uploads are `/chat/channels/{type}/{id}/file`. Either our implementation closes over the channel, or core's interface needs a variant. Settle this before writing the client.
 - Attachment upload is the highest-traffic path in the SDK; a regression is immediately visible to end users.
 - The generated `uploadFile` / `uploadChannelFile` take a JSON body with no progress or cancellation, so this group cannot use them — it needs its own `CdnApi`.
 

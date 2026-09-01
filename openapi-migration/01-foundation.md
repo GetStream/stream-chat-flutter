@@ -41,8 +41,11 @@ There is no error-translation layer. Do not map to `StreamChatNetworkError` — 
 migration exists to delete.
 
 **`ChatErrorCode` is superseded.** Core ships `StreamErrorCode`, an `extension type const StreamErrorCode(int)
-implements int` with named constants, plus `isRetriable` and `RetryPolicy`. Drop our 25-entry enum rather than
-re-expressing it; check `StreamErrorCode` before adding a constant anywhere.
+implements int` with named constants. Drop our 25-entry enum rather than re-expressing it; check `StreamErrorCode`
+before adding a constant anywhere.
+
+Core carried `isRetriable` and a `RetryPolicy` at one point and no longer does, so retry classification stays
+ours for now. Check `stream_core` before writing one — this is the kind of thing that lands there.
 
 This resolves what was previously an open question here (`StreamDioException` versus `HttpClientException`): both
 are gone. `client_exception.dart` was deleted in core's error-layer rework, and the answer is the sealed

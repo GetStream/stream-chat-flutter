@@ -80,6 +80,7 @@ git_stamp() {
 [[ -d "$CHAT_BACKEND_DIR" ]] || { echo "❌ CHAT_BACKEND_DIR not found: $CHAT_BACKEND_DIR"; exit 1; }
 command -v go   >/dev/null || { echo "❌ 'go' is required in PATH"; exit 1; }
 command -v dart >/dev/null || { echo "❌ 'dart' is required in PATH"; exit 1; }
+command -v python3 >/dev/null || { echo "❌ 'python3' is required in PATH"; exit 1; }
 
 # Optional renamed-models flag
 RENAMED_MODELS_FLAG=()
@@ -125,8 +126,16 @@ verify_checksum() {
   local spec="$1" sidecar="$2" actual
   [[ -f "$sidecar" ]] || return 0
 
+  # Sets SPEC_CHECKSUM for the stamp as a side effect.
   SPEC_CHECKSUM="$(awk '{ print $1; exit }' "$sidecar")"
-  actual="$(shasum -a 256 "$spec" | awk '{ print $1 }')"
+  if command -v shasum >/dev/null; then
+    actual="$(shasum -a 256 "$spec" | awk '{ print $1 }')"
+  elif command -v sha256sum >/dev/null; then
+    actual="$(sha256sum "$spec" | awk '{ print $1 }')"
+  else
+    echo "⚠️ Neither shasum nor sha256sum found — skipping spec verification"
+    return 0
+  fi
   [[ "$actual" == "$SPEC_CHECKSUM" ]] || {
     echo "❌ Spec checksum mismatch for $spec"
     echo "   expected $SPEC_CHECKSUM (from the .sha256 sidecar)"
@@ -190,7 +199,7 @@ else
       --clientside \
       --encode-time-as-unix-timestamp \
       -output "$CHAT_BACKEND_DIR/$SPEC_DIR_REL/$SPEC_BASENAME" \
-      "${RENAMED_MODELS_FLAG[@]}"
+      ${RENAMED_MODELS_FLAG[@]+"${RENAMED_MODELS_FLAG[@]}"}
   )
 
   SPEC_FILE="${CHAT_BACKEND_DIR}/${SPEC_DIR_REL}/${SPEC_BASENAME}.yaml"

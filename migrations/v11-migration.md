@@ -143,9 +143,8 @@ counterpart: `code` is now a `StreamErrorCode` (an extension type over `int`, wi
 `rateLimited` and `inputError`), `statusCode` and `message` are unchanged in spirit, and
 `isRequestCancelledError` becomes `StreamNetworkException.isCancelled`.
 
-Two conveniences replace code you may have written by hand: `exception.isRetriable` classifies a failure as
-about-the-moment rather than about-the-request, and `StreamApiException` exposes `isTokenExpired`,
-`isTokenNotYetValid`, `isTokenSignatureInvalid`, `isApiKeyInvalid` and `isRateLimited` directly.
+`StreamApiException` exposes `isTokenExpired`, `isTokenNotYetValid`, `isTokenSignatureInvalid`,
+`isApiKeyInvalid` and `isRateLimited` directly, so the common checks need no code of your own.
 
 `ChatErrorCode` is removed — use `StreamErrorCode`.
 
