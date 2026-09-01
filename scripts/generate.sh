@@ -117,7 +117,7 @@ if [[ -n "$PROTOCOL_DIR" ]]; then
 
   SPEC_ORIGIN="${PROTOCOL_SPEC}.json"
   SPEC_API_VERSION="$(spec_version "${PROTOCOL_SPEC}.yaml")"
-  SPEC_SOURCE_STAMP="GetStream/protocol ${PROTOCOL_SPEC_DIR_REL}/${SPEC_BASENAME}.json @ $(git_stamp "$PROTOCOL_DIR")"
+  SPEC_SOURCE_STAMP="protocol @ $(git_stamp "$PROTOCOL_DIR")"
   # protocol ships a checksum beside every spec; it identifies the exact bytes
   # even when the checkout sits between tags.
   if [[ -f "${PROTOCOL_SPEC}.json.sha256" ]]; then
@@ -162,7 +162,7 @@ else
   SPEC_FILE="${CHAT_BACKEND_DIR}/${SPEC_DIR_REL}/${SPEC_BASENAME}.yaml"
   SPEC_ORIGIN="$SPEC_FILE"
   SPEC_API_VERSION="$(spec_version "$SPEC_ORIGIN")"
-  SPEC_SOURCE_STAMP="GetStream/chat ${SPEC_DIR_REL}/${SPEC_BASENAME}.yaml @ $(git_stamp "$CHAT_BACKEND_DIR")"
+  SPEC_SOURCE_STAMP="backend @ $(git_stamp "$CHAT_BACKEND_DIR")"
   echo "• Generated spec $SPEC_ORIGIN (API $SPEC_API_VERSION, $SPEC_SOURCE_STAMP)"
 fi
 
@@ -239,9 +239,7 @@ PY
 }
 patch_ws_event_models
 
-# Record what produced this tree, in the barrel a reader opens first. The
-# `// Source: <repo> <path> @ <tag>` line matches what stream_feeds stamps, so
-# the same grep answers "which spec is this SDK on" across products.
+# Record what produced this tree, in the barrel a reader opens first.
 #
 # The generator stamps no version of its own, so the closest thing to a
 # template version is the commit of the monolith that holds the templates. The
@@ -261,19 +259,17 @@ stamp_provenance() {
   }
 
   local checksum_line=""
-  [[ -n "$SPEC_CHECKSUM" ]] && checksum_line="// Checksum: ${SPEC_CHECKSUM}"
-
-  # The protocol tag already carries the API version, so only spell it out when
-  # it would tell the reader something new — `dev` on a backend-built spec.
-  local api_suffix=""
-  [[ "$SPEC_SOURCE_STAMP" == *"$SPEC_API_VERSION"* ]] || api_suffix=" (API ${SPEC_API_VERSION})"
+  [[ -n "$SPEC_CHECKSUM" ]] && checksum_line="// Checksum:  ${SPEC_CHECKSUM}"
 
   awk -v marker="$marker" \
-      -v source="// Source: ${SPEC_SOURCE_STAMP}${api_suffix}" \
+      -v spec="// Spec:      ${SPEC_BASENAME} (API ${SPEC_API_VERSION})" \
+      -v source="// Source:    ${SPEC_SOURCE_STAMP}" \
       -v checksum="$checksum_line" \
       -v generator="// Generator: GetStream/chat @ $(git_stamp "$CHAT_BACKEND_DIR")" '
     { print }
     $0 == marker {
+      print "//"
+      print spec
       print source
       if (checksum != "") print checksum
       print generator
