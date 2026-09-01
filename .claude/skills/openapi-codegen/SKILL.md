@@ -60,11 +60,14 @@ feature migration would.
   at the top of `lib/open_api/api.dart`:
 
   ```dart
-  // Spec:      chat-clientside-api (API v237.2.0)
-  // Source:    protocol @ openapi-v237.2.0
-  // Checksum:  0750cb0e…            // protocol's sha256 sidecar for that spec
+  // Source: GetStream/protocol openapi/v2/chat-clientside-api.json @ openapi-v237.2.0
+  // Checksum: 0750cb0e…            // protocol's sha256 sidecar, verified before generating
   // Generator: GetStream/chat @ v237.3.0-135-g59094108e1
   ```
+
+  The `// Source:` line matches what `stream_feeds` stamps, so one grep answers "which spec is this SDK on"
+  across products; `Checksum:` and `Generator:` are ours, because feeds records neither. The API version is
+  spelled out only when the source does not already imply it — a backend-built spec reads `(API dev)`.
 
   So a checked-in client says which spec and which templates produced it. Two readings to get right:
   `Generator:` is a `git describe` of the backend checkout, not a release — `v237.3.0-135-g59094108e1` means 135
