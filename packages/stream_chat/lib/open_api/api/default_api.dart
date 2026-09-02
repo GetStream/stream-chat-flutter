@@ -780,5 +780,5 @@ abstract interface class DefaultApi {
 
 class _ResultCallAdapter<T> extends CallAdapter<Future<T>, Future<Result<T>>> {
   @override
-  Future<Result<T>> adapt(Future<T> Function() call) => runSafely(call);
+  Future<Result<T>> adapt(Future<T> Function() call) => runApiSafely(call);
 }
