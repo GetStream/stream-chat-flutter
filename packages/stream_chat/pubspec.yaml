@@ -29,12 +29,26 @@ dependencies:
   freezed_annotation: ^3.0.0
   http_parser: ^4.1.2
   jose: ^0.3.5+1
-  json_annotation: ^4.11.0
+  json_annotation: ^4.12.0
   logging: ^1.3.0
   meta: ^1.9.1
   mime: ^2.0.0
   rate_limiter: ^1.1.0
+  retrofit: ^4.9.2
   rxdart: ^0.28.0
+  stream_core:
+    # The ignore below silences `invalid_dependency` because we occasionally
+    # pin stream_core to a git ref to iterate on it alongside this
+    # SDK between its releases.
+    #
+    # **Note:** Before publishing stream_chat, this MUST be swapped
+    # back to a pub version constraint — git deps are not allowed on pub.dev
+    # and will block the release.
+    # ignore: invalid_dependency
+    git:
+      url: https://github.com/GetStream/stream-core-flutter.git
+      ref: 505432f213af8911d54ab3c855d6ad6fbe492fc9
+      path: packages/stream_core
   synchronized: ^3.4.0
   uuid: ^4.5.3
   web_socket_channel: ^3.0.3
@@ -44,4 +58,5 @@ dev_dependencies:
   freezed: ^3.0.0
   json_serializable: ^6.13.2
   mocktail: ^1.0.5
+  retrofit_generator: ^10.2.6
   test: ^1.31.1

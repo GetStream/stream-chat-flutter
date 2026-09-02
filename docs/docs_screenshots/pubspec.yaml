@@ -39,3 +39,12 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+# `stream_core_flutter` depends on a published `stream_core`, which clashes with
+# the git pin in `stream_chat`. Override it here until `stream_core` is released.
+dependency_overrides:
+  stream_core:
+    git:
+      url: https://github.com/GetStream/stream-core-flutter.git
+      ref: 505432f213af8911d54ab3c855d6ad6fbe492fc9
+      path: packages/stream_core

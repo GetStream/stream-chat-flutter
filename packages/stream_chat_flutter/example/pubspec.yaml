@@ -40,6 +40,11 @@ dependency_overrides:
     path: ../../stream_chat_localizations
   stream_chat_persistence:
     path: ../../stream_chat_persistence
+  stream_core:
+    git:
+      url: https://github.com/GetStream/stream-core-flutter.git
+      ref: 505432f213af8911d54ab3c855d6ad6fbe492fc9
+      path: packages/stream_core
 
 flutter:
   uses-material-design: true
