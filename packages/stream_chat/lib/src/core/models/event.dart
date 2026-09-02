@@ -45,6 +45,7 @@ class Event {
     this.reminder,
     this.pushPreference,
     this.channelPushPreference,
+    this.channelMemberCount,
     this.channelMessageCount,
     this.watcherCount,
     this.lastDeliveredAt,
@@ -172,6 +173,13 @@ class Event {
   /// Push notification preferences for the current user for this channel.
   final ChannelPushPreference? channelPushPreference;
 
+  /// The total number of members in the channel.
+  ///
+  /// Sent with channel events such as `member.added`, `member.removed` and
+  /// `member.updated`, reflecting the authoritative member count after the
+  /// change.
+  final int? channelMemberCount;
+
   /// The total number of messages in the channel.
   final int? channelMessageCount;
 
@@ -229,6 +237,7 @@ class Event {
     'reminder',
     'push_preference',
     'channel_push_preference',
+    'channel_member_count',
     'channel_message_count',
     'watcher_count',
     'last_delivered_at',
@@ -277,6 +286,7 @@ class Event {
     MessageReminder? reminder,
     PushPreference? pushPreference,
     ChannelPushPreference? channelPushPreference,
+    int? channelMemberCount,
     int? channelMessageCount,
     int? watcherCount,
     DateTime? lastDeliveredAt,
@@ -318,6 +328,7 @@ class Event {
     reminder: reminder ?? this.reminder,
     pushPreference: pushPreference ?? this.pushPreference,
     channelPushPreference: channelPushPreference ?? this.channelPushPreference,
+    channelMemberCount: channelMemberCount ?? this.channelMemberCount,
     channelMessageCount: channelMessageCount ?? this.channelMessageCount,
     watcherCount: watcherCount ?? this.watcherCount,
     lastDeliveredAt: lastDeliveredAt ?? this.lastDeliveredAt,
