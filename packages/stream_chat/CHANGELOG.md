@@ -8,6 +8,7 @@
 
 - `Channel.translateMessage` now merges the translated message into the channel state, so the translation reaches anything watching the channel without the caller applying the response itself.
 - Raised minimum Dart SDK to `^3.12.0`.
+- `Channel` and `ClientState` streams that expose a single primitive value are now distinct, so they only emit when the value actually changes. Affects `Channel.memberCountStream`, `messageCountStream`, `watcherCountStream`, `cooldownStream`, `nameStream`, `imageStream`, `frozenStream`, `disabledStream`, `hiddenStream`, `isPinnedStream`, `isArchivedStream`, `createdAtStream`, `updatedAtStream`, `deletedAtStream`, `truncatedAtStream`, `lastMessageAtStream`, and `ClientState.totalUnreadCountStream`, `unreadChannelsStream`, `unreadThreadsStream`.
 
 🐞 Fixed
 
