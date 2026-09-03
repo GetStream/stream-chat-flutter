@@ -616,11 +616,15 @@ class StreamChatClient {
         // surface as an unhandled crash instead of reaching the app.
         try {
           // Sync the persistence client if available
-          if (persistenceEnabled) await sync(cids: cids);
+          var channelsRefreshedBySync = false;
+          if (persistenceEnabled) {
+            channelsRefreshedBySync = await _sync(cids: cids, refreshChannelsOnSkip: true);
+          }
 
-          // Recover the channels that were active before the connection was lost,
-          // only if the client is configured to do so.
-          if (_recoverStateOnReconnect) {
+          // Recover the channels that were active before the connection was
+          // lost, only if the client is configured to do so and the sync has
+          // not already refreshed them.
+          if (_recoverStateOnReconnect && !channelsRefreshedBySync) {
             await queryChannelsOnline(
               filter: Filter.in_('cid', cids),
               paginationParams: const PaginationParams(limit: 30),
@@ -658,34 +662,85 @@ class StreamChatClient {
   // Lock to make sure only one sync process is running at a time.
   final _syncLock = Lock();
 
+  // Maximum number of events replayed from a single `/sync` response before
+  // skipping replay to avoid stalling local persistence on reconnect.
+  static const _syncEventReplayMaximumEventCount = 250;
+
+  // Maximum number of channels a single `queryChannels` request returns.
+  static const _channelQueryMaximumPageSize = 30;
+
   /// Get the events missed while offline to sync the offline storage
   /// Will automatically fetch [cids] and [lastSyncedAt] if [persistenceEnabled]
+  ///
+  /// Events from an oversized payload are not replayed. The sync pointer still
+  /// advances, so callers relying on the replayed state should refresh it
+  /// themselves.
   Future<void> sync({List<String>? cids, DateTime? lastSyncAt}) {
+    return _sync(cids: cids, lastSyncAt: lastSyncAt);
+  }
+
+  // Runs the sync flow, returning whether the synced channels were refreshed.
+  //
+  // Set [refreshChannelsOnSkip] to refresh the synced channels when an
+  // oversized payload skips event replay, so that their state takes the place
+  // of the events that were dropped.
+  Future<bool> _sync({
+    List<String>? cids,
+    DateTime? lastSyncAt,
+    bool refreshChannelsOnSkip = false,
+  }) {
     return _syncLock.synchronized(() async {
       final channels = cids ?? await chatPersistenceClient?.getChannelCids();
-      if (channels == null || channels.isEmpty) return;
+      if (channels == null || channels.isEmpty) return false;
 
       final syncAt = lastSyncAt ?? await chatPersistenceClient?.getLastSyncAt();
       if (syncAt == null) {
         logger.info('Fresh sync start: lastSyncAt initialized to now.');
-        return chatPersistenceClient?.updateLastSyncAt(DateTime.now());
+        await chatPersistenceClient?.updateLastSyncAt(DateTime.timestamp());
+        return false;
       }
 
       try {
         logger.info('Syncing events since $syncAt for channels: $channels');
 
         final res = await _chatApi.general.sync(channels, syncAt);
-        final events = res.events.sorted(
-          (a, b) => a.createdAt.compareTo(b.createdAt),
-        );
+        final events = res.events.sorted((a, b) => a.createdAt.compareTo(b.createdAt));
+        final updatedSyncAt = events.lastOrNull?.createdAt ?? DateTime.timestamp();
+
+        // Bail out of oversized event replay. Replaying a large payload through
+        // [handleEvent] can hold local persistence and state updates long
+        // enough to slow down regular requests. Refresh the synced channels
+        // instead, and only advance the sync pointer once that succeeded:
+        // dropping the events is safe when their state has been re-fetched,
+        // but advancing past a failed refresh loses them for good.
+        if (events.length > _syncEventReplayMaximumEventCount) {
+          logger.info(
+            'Skipping replay of ${events.length} events, exceeding the '
+            'limit of $_syncEventReplayMaximumEventCount.',
+          );
+
+          if (refreshChannelsOnSkip) await _refreshChannels(channels);
+
+          // A channel refresh does not carry the read state, so keep honouring
+          // the mark-all-read events instead of losing them with the rest of
+          // the payload.
+          for (final event in events) {
+            if (event.type != EventType.notificationMarkRead) continue;
+            if (event.cid != null) continue;
+            handleEvent(event);
+          }
+
+          await chatPersistenceClient?.updateLastSyncAt(updatedSyncAt);
+          return refreshChannelsOnSkip;
+        }
 
         for (final event in events) {
           logger.fine('Syncing event: ${event.type}');
           handleEvent(event);
         }
 
-        final updatedSyncAt = events.lastOrNull?.createdAt ?? DateTime.now();
-        return await chatPersistenceClient?.updateLastSyncAt(updatedSyncAt);
+        await chatPersistenceClient?.updateLastSyncAt(updatedSyncAt);
+        return false;
       } catch (error, stk) {
         // If we got a 400 error, it means that either the sync time is too
         // old or the channel list is too long or too many events need to be
@@ -699,16 +754,35 @@ class StreamChatClient {
 
           try {
             await chatPersistenceClient?.flush();
-            return await chatPersistenceClient?.updateLastSyncAt(DateTime.now());
+            await chatPersistenceClient?.updateLastSyncAt(DateTime.timestamp());
           } catch (resetError, resetStk) {
             logger.warning('Error resetting the persistence client', resetError, resetStk);
-            return;
           }
+
+          return false;
         }
 
         logger.warning('Error syncing events', error, stk);
+        return false;
       }
     });
+  }
+
+  // Refreshes the state of the given channels from the server, a page at a
+  // time so that sets larger than [_channelQueryMaximumPageSize] are covered
+  // in full rather than truncated to the first page.
+  Future<void> _refreshChannels(List<String> cids) async {
+    logger.info('Refreshing ${cids.length} channels');
+
+    for (final batch in cids.slices(_channelQueryMaximumPageSize)) {
+      await queryChannelsOnline(
+        filter: Filter.in_('cid', batch),
+        paginationParams: PaginationParams(limit: batch.length),
+        // Fail fast if the connection dropped again: waiting for it here would
+        // hold the sync lock, blocking the sync the next reconnect starts.
+        waitForConnect: false,
+      );
+    }
   }
 
   final _queryChannelsCache = InFlightCache<String, QueryChannelsResult>();

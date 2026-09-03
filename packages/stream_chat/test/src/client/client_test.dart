@@ -5233,6 +5233,132 @@ void main() {
 
         verify(() => api.general.sync(cids, lastSyncAt)).called(1);
       });
+
+      test(
+        '''should replay events and advance lastSyncAt when the payload is within the replay limit''',
+        () async {
+          final cids = ['channel1'];
+          final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));
+          final fakeClient = FakePersistenceClient(
+            channelCids: cids,
+            lastSyncAt: lastSyncAt,
+          );
+
+          client.chatPersistenceClient = fakeClient;
+          final events = List.generate(
+            10,
+            (index) => Event(
+              type: EventType.messageNew,
+              cid: 'channel1',
+              message: Message(id: 'message-$index'),
+              createdAt: lastSyncAt.add(Duration(seconds: index + 1)),
+            ),
+          );
+          when(() => api.general.sync(cids, lastSyncAt)).thenAnswer(
+            (_) async => SyncResponse()..events = events,
+          );
+
+          final replayed = <Event>[];
+          final sub = client.on(EventType.messageNew).listen(replayed.add);
+          addTearDown(sub.cancel);
+
+          await client.sync();
+          await pumpEventQueue();
+
+          verify(() => api.general.sync(cids, lastSyncAt)).called(1);
+          // Within the limit, every event is replayed through the event handler.
+          expect(replayed, hasLength(events.length));
+          // lastSyncAt advances to the newest replayed event date.
+          expect(await fakeClient.getLastSyncAt(), events.last.createdAt);
+        },
+      );
+
+      test(
+        '''should skip replay but advance lastSyncAt when the payload exceeds the replay limit''',
+        () async {
+          final cids = ['channel1'];
+          final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));
+          final fakeClient = FakePersistenceClient(
+            channelCids: cids,
+            lastSyncAt: lastSyncAt,
+          );
+
+          client.chatPersistenceClient = fakeClient;
+          // 251 events exceeds the internal replay limit of 250.
+          final events = List.generate(
+            251,
+            (index) => Event(
+              type: EventType.messageNew,
+              cid: 'channel1',
+              message: Message(id: 'message-$index'),
+              createdAt: lastSyncAt.add(Duration(seconds: index + 1)),
+            ),
+          );
+          when(() => api.general.sync(cids, lastSyncAt)).thenAnswer(
+            (_) async => SyncResponse()..events = events,
+          );
+
+          final replayed = <Event>[];
+          final sub = client.on(EventType.messageNew).listen(replayed.add);
+          addTearDown(sub.cancel);
+
+          await client.sync();
+          await pumpEventQueue();
+
+          verify(() => api.general.sync(cids, lastSyncAt)).called(1);
+          // Replay is skipped; no events are dispatched through the handler.
+          expect(replayed, isEmpty);
+          // A direct call refreshes nothing on its own.
+          verifyZeroInteractions(api.channel);
+          // lastSyncAt still advances to the newest event date in the skipped
+          // payload, so the same oversized payload is not retried indefinitely.
+          expect(await fakeClient.getLastSyncAt(), events.last.createdAt);
+        },
+      );
+
+      test(
+        '''should still replay mark-all-read events from a payload that exceeds the replay limit''',
+        () async {
+          final cids = ['channel1'];
+          final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));
+          final fakeClient = FakePersistenceClient(
+            channelCids: cids,
+            lastSyncAt: lastSyncAt,
+          );
+
+          client.chatPersistenceClient = fakeClient;
+          final events = [
+            ...List.generate(
+              251,
+              (index) => Event(
+                type: EventType.messageNew,
+                cid: 'channel1',
+                message: Message(id: 'message-$index'),
+                createdAt: lastSyncAt.add(Duration(seconds: index + 1)),
+              ),
+            ),
+            // A channel-less `notification.mark_read` marks every channel read.
+            Event(
+              type: EventType.notificationMarkRead,
+              createdAt: lastSyncAt.add(const Duration(minutes: 5)),
+            ),
+          ];
+          when(() => api.general.sync(cids, lastSyncAt)).thenAnswer(
+            (_) async => SyncResponse()..events = events,
+          );
+
+          final replayed = <Event>[];
+          final sub = client.on(EventType.notificationMarkRead).listen(replayed.add);
+          addTearDown(sub.cancel);
+
+          await client.sync();
+          await pumpEventQueue();
+
+          // A channel refresh does not carry the read state, so these events
+          // survive the skip.
+          expect(replayed, hasLength(1));
+        },
+      );
     });
   });
 
@@ -5415,6 +5541,163 @@ void main() {
           paginationParams: any(named: 'paginationParams'),
         ),
       );
+    });
+
+    // Skipping event replay leaves the state of the synced channels behind, so
+    // the skip refreshes them itself, whatever this flag is set to.
+    test('should re-query active channels when the sync skipped event replay', () async {
+      client = StreamChatClient(apiKey, chatApi: api, ws: ws, recoverStateOnReconnect: false);
+      await client.connectUser(user, token);
+      await delay(300);
+
+      const cid = 'messaging:c1';
+      final channel = Channel.fromState(client, ChannelState(channel: ChannelModel(cid: cid)));
+      client.state.addChannels({cid: channel});
+
+      final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));
+      client.chatPersistenceClient = FakePersistenceClient(channelCids: const [cid], lastSyncAt: lastSyncAt);
+      await client.openPersistenceConnection(user);
+      addTearDown(() => client.chatPersistenceClient = null);
+
+      // 251 events exceeds the internal replay limit of 250.
+      final events = List.generate(
+        251,
+        (index) => Event(
+          type: EventType.messageNew,
+          cid: cid,
+          message: Message(id: 'message-$index'),
+          createdAt: lastSyncAt.add(Duration(seconds: index + 1)),
+        ),
+      );
+      when(() => api.general.sync(const [cid], lastSyncAt)).thenAnswer(
+        (_) async => SyncResponse()..events = events,
+      );
+
+      clearInteractions(api.channel);
+
+      await simulateReconnect();
+
+      verify(
+        () => api.channel.queryChannels(
+          filter: Filter.in_('cid', const [cid]),
+          sort: any(named: 'sort'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          memberLimit: any(named: 'memberLimit'),
+          messageLimit: any(named: 'messageLimit'),
+          paginationParams: const PaginationParams(limit: 1),
+        ),
+      ).called(1);
+    });
+
+    // Dropping the skipped events is only safe once their state has been
+    // re-fetched; advancing the pointer past a failed refresh loses them.
+    test('should keep lastSyncAt when the re-query after a skipped replay fails', () async {
+      when(
+        () => api.channel.queryChannels(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          memberLimit: any(named: 'memberLimit'),
+          messageLimit: any(named: 'messageLimit'),
+          paginationParams: any(named: 'paginationParams'),
+        ),
+      ).thenThrow(const StreamChatError('You cannot use queryChannels without an active connection.'));
+
+      client = StreamChatClient(apiKey, chatApi: api, ws: ws, recoverStateOnReconnect: false);
+      await client.connectUser(user, token);
+      await delay(300);
+
+      const cid = 'messaging:c1';
+      final channel = Channel.fromState(client, ChannelState(channel: ChannelModel(cid: cid)));
+      client.state.addChannels({cid: channel});
+
+      final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));
+      final persistenceClient = FakePersistenceClient(channelCids: const [cid], lastSyncAt: lastSyncAt);
+      client.chatPersistenceClient = persistenceClient;
+      await client.openPersistenceConnection(user);
+      addTearDown(() => client.chatPersistenceClient = null);
+
+      // 251 events exceeds the internal replay limit of 250.
+      final events = List.generate(
+        251,
+        (index) => Event(
+          type: EventType.messageNew,
+          cid: cid,
+          message: Message(id: 'message-$index'),
+          createdAt: lastSyncAt.add(Duration(seconds: index + 1)),
+        ),
+      );
+      when(() => api.general.sync(const [cid], lastSyncAt)).thenAnswer(
+        (_) async => SyncResponse()..events = events,
+      );
+
+      await simulateReconnect();
+
+      expect(await persistenceClient.getLastSyncAt(), lastSyncAt);
+    });
+
+    test('should re-query in batches when more channels are active than fit in one page', () async {
+      client = StreamChatClient(apiKey, chatApi: api, ws: ws, recoverStateOnReconnect: false);
+      await client.connectUser(user, token);
+      await delay(300);
+
+      // 31 channels spill over the 30-channel page size into a second request.
+      final cids = List.generate(31, (index) => 'messaging:c$index');
+      client.state.addChannels({
+        for (final cid in cids) cid: Channel.fromState(client, ChannelState(channel: ChannelModel(cid: cid))),
+      });
+
+      final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));
+      client.chatPersistenceClient = FakePersistenceClient(channelCids: cids, lastSyncAt: lastSyncAt);
+      await client.openPersistenceConnection(user);
+      addTearDown(() => client.chatPersistenceClient = null);
+
+      final events = List.generate(
+        251,
+        (index) => Event(
+          type: EventType.messageNew,
+          cid: cids.first,
+          message: Message(id: 'message-$index'),
+          createdAt: lastSyncAt.add(Duration(seconds: index + 1)),
+        ),
+      );
+      when(() => api.general.sync(cids, lastSyncAt)).thenAnswer(
+        (_) async => SyncResponse()..events = events,
+      );
+
+      clearInteractions(api.channel);
+
+      await simulateReconnect();
+
+      verify(
+        () => api.channel.queryChannels(
+          filter: Filter.in_('cid', cids.take(30).toList()),
+          sort: any(named: 'sort'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          memberLimit: any(named: 'memberLimit'),
+          messageLimit: any(named: 'messageLimit'),
+          paginationParams: const PaginationParams(limit: 30),
+        ),
+      ).called(1);
+
+      verify(
+        () => api.channel.queryChannels(
+          filter: Filter.in_('cid', cids.skip(30).toList()),
+          sort: any(named: 'sort'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          memberLimit: any(named: 'memberLimit'),
+          messageLimit: any(named: 'messageLimit'),
+          paginationParams: const PaginationParams(limit: 1),
+        ),
+      ).called(1);
     });
 
     test('should respect runtime toggling via the setter', () async {

@@ -98,6 +98,22 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
 
   @override
   Future<List<String>> getChannelCids() async => _channelCids;
+
+  @override
+  Future<void> saveChannelQueries({
+    required List<String> cids,
+    Filter? filter,
+    SortOrder<ChannelState>? sort,
+    String? predefinedFilter,
+    Filter? resolvedFilter,
+    SortOrder<ChannelState>? resolvedSort,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
+    bool clearQueryCache = false,
+  }) async {}
+
+  @override
+  Future<void> updateChannelStates(List<ChannelState> channelStates) async {}
 }
 
 class FakeChatApi extends Fake implements StreamChatApi {

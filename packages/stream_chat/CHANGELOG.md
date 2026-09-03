@@ -4,6 +4,8 @@
 
 - `Channel.translateMessage` now merges the translated message into the channel state, so the translation reaches anything watching the channel without the caller applying the response itself.
 - Raised minimum Dart SDK to `^3.12.0`.
+- `StreamChatClient.sync` now skips replaying oversized `/sync` payloads (over 250 events) to avoid stalling local persistence. On reconnect the synced channels are re-queried in their place before `lastSyncAt` advances.
+- `Channel.memberCountStream` is now distinct, so it only emits when the count actually changes.
 
 🐞 Fixed
 
