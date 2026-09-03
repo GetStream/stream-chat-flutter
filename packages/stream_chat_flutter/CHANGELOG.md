@@ -8,13 +8,17 @@
 
 - Long-pressing a reaction chip no longer opens the message actions modal; the chips always claim the long press. Left unset, `onReactionLongPress` defaults to opening the `ReactionDetailSheet`.
 - Tapping or long-pressing a reaction chip now opens the `ReactionDetailSheet` pre-filtered to that reaction; it previously opened unfiltered. Clustered and overflow chips map to no single reaction, so they still open unfiltered.
+- **BREAKING**: `PlatformFileX.toAttachmentFile` and `PlatformFileX.toAttachment` are now asynchronous, returning `Future<AttachmentFile>` and `Future<Attachment>`. `file_picker` 12 removed `PlatformFile`'s eagerly-loaded `bytes` and `size` getters, so the content is read on demand. Both are exported, so callers must `await` them; this matches the existing `XFileX` extensions.
 
 🔄 Changed
 
 - Raised minimum Flutter to `>=3.44.0` and Dart SDK to `^3.12.0`.
+- Bumped `file_picker` to `^12.1.0`.
+- `StreamAttachmentHandler.pickFile` no longer forwards `withData` and `withReadStream`; `file_picker` deprecated them in favour of reading the content on demand. The method's own signature is unchanged.
 
 🐞 Fixed
 
+- Fixed `StreamAttachmentHandler.pickFile` throwing when the picker returned an empty selection: it took `.files.first` unconditionally. It now returns `null`.
 - Fixed a crash on web when the message list rebuilt while messages were selectable, for example after opening the attachment picker.
 - Fixed the browser's native context menu reappearing over the message context menu on web after scrolling messages out of view or deleting one.
 - Fixed the SDK re-enabling the browser's native context menu on web in apps that had disabled it themselves.

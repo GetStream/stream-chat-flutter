@@ -135,19 +135,18 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
     bool withReadStream = false,
     bool lockParentWindow = true,
   }) async {
-    final result = await FilePicker.pickFiles(
+    final result = await FilePicker.pickFile(
       dialogTitle: dialogTitle,
       initialDirectory: initialDirectory,
       type: type,
       allowedExtensions: allowedExtensions,
       onFileLoading: onFileLoading,
       compressionQuality: compressionQuality,
-      withData: withData,
-      withReadStream: withReadStream,
-      lockParentWindow: lockParentWindow,
+      windowsOptions: WindowsOptions(lockParentWindow: lockParentWindow),
+      linuxOptions: LinuxOptions(lockParentWindow: lockParentWindow),
     );
 
-    return result?.files.first.toAttachment(type: type.toAttachmentType());
+    return await result?.toAttachment(type: type.toAttachmentType());
   }
 
   @override
