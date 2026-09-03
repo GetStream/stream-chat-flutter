@@ -612,7 +612,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
         _ => channel.state?.draftStream,
       };
 
-      _draftStreamSubscription = draftStream?.distinct().listen(_onDraftUpdate);
+      _draftStreamSubscription = draftStream?.listen(_onDraftUpdate);
     }
   }
 

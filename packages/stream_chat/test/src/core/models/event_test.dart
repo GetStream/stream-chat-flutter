@@ -20,6 +20,7 @@ void main() {
       expect(event.unreadThreads, 3);
       expect(event.channelLastMessageAt, isA<DateTime>());
       expect(event.watcherCount, 12);
+      expect(event.channelMemberCount, 4);
       expect(event.lastReadAt, null);
       expect(event.unreadMessages, null);
       expect(event.lastReadMessageId, null);
@@ -64,6 +65,7 @@ void main() {
         unreadThreads: 3,
         channelLastMessageAt: DateTime.parse('2019-03-27T17:40:17.155892Z'),
         watcherCount: 9,
+        channelMemberCount: 4,
         lastReadAt: DateTime.parse('2020-02-10T10:00:00.000Z'),
         unreadMessages: 5,
         lastReadMessageId: 'last-read-message-id',
@@ -109,6 +111,7 @@ void main() {
           'unread_thread_messages': 2,
           'unread_threads': 3,
           'channel_last_message_at': '2019-03-27T17:40:17.155892Z',
+          'channel_member_count': 4,
           'watcher_count': 9,
           'last_read_at': '2020-02-10T10:00:00.000Z',
           'unread_messages': 5,
@@ -149,6 +152,7 @@ void main() {
       expect(newEvent.unreadThreads, 3);
       expect(newEvent.channelLastMessageAt, isA<DateTime>());
       expect(newEvent.watcherCount, 12);
+      expect(newEvent.channelMemberCount, 4);
       expect(newEvent.lastReadAt, null);
       expect(newEvent.unreadMessages, null);
       expect(newEvent.lastReadMessageId, null);
@@ -176,6 +180,7 @@ void main() {
         unreadThreads: 7,
         channelLastMessageAt: DateTime.parse('2020-01-29T03:22:47.636130Z'),
         watcherCount: 21,
+        channelMemberCount: 8,
         lastReadAt: DateTime.parse('2020-02-10T10:00:00.000000Z'),
         unreadMessages: 5,
         lastReadMessageId: 'last-read-message-id',
@@ -202,6 +207,7 @@ void main() {
       );
       expect(newEvent.unreadMessages, 5);
       expect(newEvent.watcherCount, 21);
+      expect(newEvent.channelMemberCount, 8);
       expect(newEvent.lastReadMessageId, 'last-read-message-id');
       expect(newEvent.draft, isNotNull);
       expect(newEvent.draft, equals(draft));
