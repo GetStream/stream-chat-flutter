@@ -1,8 +1,16 @@
 ## Upcoming
 
+✅ Added
+
+- Added `Event.channelMemberCount`, exposing the server-provided `channel_member_count` field on channel events (e.g. `member.added`, `member.removed`, `member.updated`).
+
 ⚠️ Deprecated
 
 - Deprecated `StreamChatClient.unflagMessage` and `StreamChatClient.unflagUser`. The `/moderation/unflag` endpoint is no longer supported by the server and the calls have no effect; both methods will be removed in a future major release.
+
+🐞 Fixed
+
+- Fixed `Channel.memberCount` / `memberCountStream` staying stale for the rest of the session after members joined or left; channel events now apply the server-provided member count, the same way `messageCount` already did.
 
 ## 9.28.0
 

@@ -2246,7 +2246,7 @@ class ChannelClientState {
 
     _listenChannelUpdated();
 
-    _listenChannelMessageCount();
+    _listenChannelCounts();
 
     _listenMemberAdded();
 
@@ -2381,15 +2381,21 @@ class ChannelClientState {
     }));
   }
 
-  void _listenChannelMessageCount() {
+  // Most channel events carry the channel's member and message counts as
+  // event metadata, reflecting the authoritative values after the change.
+  // Applying them keeps the counts fresh for the whole session instead of
+  // only right after a `query` / `watch`.
+  void _listenChannelCounts() {
     _subscriptions.add(_channel.on().listen(
       (Event e) {
+        final memberCount = e.channelMemberCount;
         final messageCount = e.channelMessageCount;
-        if (messageCount == null) return;
+        if (memberCount == null && messageCount == null) return;
 
         updateChannelState(
           channelState.copyWith(
             channel: channelState.channel?.copyWith(
+              memberCount: memberCount,
               messageCount: messageCount,
             ),
           ),

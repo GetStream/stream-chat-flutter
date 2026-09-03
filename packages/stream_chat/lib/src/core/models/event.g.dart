@@ -76,6 +76,7 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
           ? null
           : ChannelPushPreference.fromJson(
               json['channel_push_preference'] as Map<String, dynamic>),
+      channelMemberCount: (json['channel_member_count'] as num?)?.toInt(),
       channelMessageCount: (json['channel_message_count'] as num?)?.toInt(),
       watcherCount: (json['watcher_count'] as num?)?.toInt(),
       lastDeliveredAt: json['last_delivered_at'] == null
@@ -130,6 +131,8 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
         'push_preference': value,
       if (instance.channelPushPreference?.toJson() case final value?)
         'channel_push_preference': value,
+      if (instance.channelMemberCount case final value?)
+        'channel_member_count': value,
       if (instance.channelMessageCount case final value?)
         'channel_message_count': value,
       if (instance.watcherCount case final value?) 'watcher_count': value,
