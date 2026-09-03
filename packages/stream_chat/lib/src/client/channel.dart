@@ -207,7 +207,9 @@ class Channel {
   /// Channel frozen status as a stream.
   Stream<bool> get frozenStream {
     _checkInitialized();
-    return state!.channelStateStream.map((cs) => cs.channel?.frozen == true);
+    return state!.channelStateStream
+        .map((cs) => cs.channel?.frozen == true)
+        .distinct();
   }
 
   /// Channel disabled status.
@@ -219,7 +221,9 @@ class Channel {
   /// Channel disabled status as a stream.
   Stream<bool> get disabledStream {
     _checkInitialized();
-    return state!.channelStateStream.map((cs) => cs.channel?.disabled == true);
+    return state!.channelStateStream
+        .map((cs) => cs.channel?.disabled == true)
+        .distinct();
   }
 
   /// Channel hidden status.
@@ -231,7 +235,9 @@ class Channel {
   /// Channel hidden status as a stream.
   Stream<bool> get hiddenStream {
     _checkInitialized();
-    return state!.channelStateStream.map((cs) => cs.channel?.hidden == true);
+    return state!.channelStateStream
+        .map((cs) => cs.channel?.hidden == true)
+        .distinct();
   }
 
   /// Channel pinned status.
@@ -244,7 +250,7 @@ class Channel {
   /// Channel pinned status as a stream.
   /// Status is specific to the current user.
   Stream<bool> get isPinnedStream {
-    return membershipStream.map((m) => m?.pinnedAt != null);
+    return membershipStream.map((m) => m?.pinnedAt != null).distinct();
   }
 
   /// Channel archived status.
@@ -257,7 +263,7 @@ class Channel {
   /// Channel archived status as a stream.
   /// Status is specific to the current user.
   Stream<bool> get isArchivedStream {
-    return membershipStream.map((m) => m?.archivedAt != null);
+    return membershipStream.map((m) => m?.archivedAt != null).distinct();
   }
 
   /// The last date at which the channel got truncated.
@@ -269,7 +275,9 @@ class Channel {
   /// The last date at which the channel got truncated as a stream.
   Stream<DateTime?> get truncatedAtStream {
     _checkInitialized();
-    return state!.channelStateStream.map((cs) => cs.channel?.truncatedAt);
+    return state!.channelStateStream
+        .map((cs) => cs.channel?.truncatedAt)
+        .distinct();
   }
 
   /// Cooldown count
@@ -281,7 +289,9 @@ class Channel {
   /// Cooldown count as a stream
   Stream<int> get cooldownStream {
     _checkInitialized();
-    return state!.channelStateStream.map((cs) => cs.channel?.cooldown ?? 0);
+    return state!.channelStateStream
+        .map((cs) => cs.channel?.cooldown ?? 0)
+        .distinct();
   }
 
   /// Remaining cooldown duration in seconds for the channel.
@@ -322,7 +332,9 @@ class Channel {
   /// Channel creation date as a stream.
   Stream<DateTime?> get createdAtStream {
     _checkInitialized();
-    return state!.channelStateStream.map((cs) => cs.channel?.createdAt);
+    return state!.channelStateStream
+        .map((cs) => cs.channel?.createdAt)
+        .distinct();
   }
 
   /// Channel last message date.
@@ -334,7 +346,9 @@ class Channel {
   /// Channel last message date as a stream.
   Stream<DateTime?> get lastMessageAtStream {
     _checkInitialized();
-    return state!.channelStateStream.map((cs) => cs.channel?.lastMessageAt);
+    return state!.channelStateStream
+        .map((cs) => cs.channel?.lastMessageAt)
+        .distinct();
   }
 
   DateTime? _currentUserLastMessageAt(List<Message>? messages) {
@@ -387,7 +401,9 @@ class Channel {
   /// Channel updated date as a stream.
   Stream<DateTime?> get updatedAtStream {
     _checkInitialized();
-    return state!.channelStateStream.map((cs) => cs.channel?.updatedAt);
+    return state!.channelStateStream
+        .map((cs) => cs.channel?.updatedAt)
+        .distinct();
   }
 
   /// Channel deletion date.
@@ -399,7 +415,9 @@ class Channel {
   /// Channel deletion date as a stream.
   Stream<DateTime?> get deletedAtStream {
     _checkInitialized();
-    return state!.channelStateStream.map((cs) => cs.channel?.deletedAt);
+    return state!.channelStateStream
+        .map((cs) => cs.channel?.deletedAt)
+        .distinct();
   }
 
   /// Channel member count.
@@ -411,7 +429,9 @@ class Channel {
   /// Channel member count as a stream.
   Stream<int?> get memberCountStream {
     _checkInitialized();
-    return state!.channelStateStream.map((cs) => cs.channel?.memberCount);
+    return state!.channelStateStream
+        .map((cs) => cs.channel?.memberCount)
+        .distinct();
   }
 
   /// Channel message count.
@@ -429,7 +449,9 @@ class Channel {
   /// enabled for your app.
   Stream<int?> get messageCountStream {
     _checkInitialized();
-    return state!.channelStateStream.map((cs) => cs.channel?.messageCount);
+    return state!.channelStateStream
+        .map((cs) => cs.channel?.messageCount)
+        .distinct();
   }
 
   /// List of filter tags applied to this channel.
@@ -496,7 +518,7 @@ class Channel {
   /// {@macro name}
   Stream<String?> get nameStream {
     _checkInitialized();
-    return extraDataStream.map((it) => it['name'] as String?);
+    return extraDataStream.map((it) => it['name'] as String?).distinct();
   }
 
   /// Shortcut to get channel image.
@@ -511,7 +533,7 @@ class Channel {
   /// {@macro image}
   Stream<String?> get imageStream {
     _checkInitialized();
-    return extraDataStream.map((it) => it['image'] as String?);
+    return extraDataStream.map((it) => it['image'] as String?).distinct();
   }
 
   /// The main Stream chat client.
@@ -3271,7 +3293,7 @@ class ChannelClientState {
 
   /// Channel watcher count as a stream.
   Stream<int?> get watcherCountStream =>
-      channelStateStream.map((cs) => cs.watcherCount);
+      channelStateStream.map((cs) => cs.watcherCount).distinct();
 
   /// Channel watchers list.
   List<User> get watchers => (_channelState.watchers ?? <User>[])

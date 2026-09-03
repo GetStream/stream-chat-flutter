@@ -7604,19 +7604,19 @@ void main() {
       test(
         'should provide messageCountStream for reactive updates',
         () async {
-          expectLater(
-            channel.messageCountStream.distinct(),
-            emitsInOrder([null, 1, 5, 10]),
-          );
+          final emitted = <int?>[];
+          final subscription = channel.messageCountStream.listen(emitted.add);
+          addTearDown(subscription.cancel);
+          await Future.delayed(Duration.zero);
 
-          // Update messageCount multiple times
-          final counts = [1, 5, 10];
-          for (final count in counts) {
+          // Update messageCount multiple times, repeating one of the counts.
+          final counts = [1, 5, 5, 10];
+          for (final (index, count) in counts.indexed) {
             final event = Event(
               cid: channel.cid,
               type: EventType.messageNew,
               message: Message(
-                id: 'msg-$count',
+                id: 'msg-$index',
                 text: 'Message $count',
                 user: User(id: 'user-1'),
               ),
@@ -7626,6 +7626,9 @@ void main() {
             client.addEvent(event);
             await Future.delayed(Duration.zero);
           }
+
+          // The repeated count should not be emitted twice.
+          expect(emitted, equals([null, 1, 5, 10]));
         },
       );
     });
@@ -7810,20 +7813,20 @@ void main() {
       test(
         'should provide memberCountStream for reactive updates',
         () async {
-          expectLater(
-            channel.memberCountStream.distinct(),
-            emitsInOrder([0, 1, 5, 10]),
-          );
+          final emitted = <int?>[];
+          final subscription = channel.memberCountStream.listen(emitted.add);
+          addTearDown(subscription.cancel);
+          await Future.delayed(Duration.zero);
 
-          // Update memberCount multiple times
-          final counts = [1, 5, 10];
-          for (final count in counts) {
+          // Update memberCount multiple times, repeating one of the counts.
+          final counts = [1, 5, 5, 10];
+          for (final (index, count) in counts.indexed) {
             final event = Event(
               cid: channel.cid,
               type: EventType.memberAdded,
               member: Member(
-                userId: 'user-$count',
-                user: User(id: 'user-$count'),
+                userId: 'user-$index',
+                user: User(id: 'user-$index'),
               ),
               channelMemberCount: count,
             );
@@ -7831,6 +7834,9 @@ void main() {
             client.addEvent(event);
             await Future.delayed(Duration.zero);
           }
+
+          // The repeated count should not be emitted twice.
+          expect(emitted, equals([0, 1, 5, 10]));
         },
       );
     });
