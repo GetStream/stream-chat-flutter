@@ -10016,6 +10016,209 @@ void main() {
         },
       );
     });
+
+    group('Channel member count events', () {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      late Channel channel;
+
+      setUp(() {
+        final channelState = _generateChannelState(channelId, channelType);
+        channel = Channel.fromState(client, channelState);
+      });
+
+      tearDown(() {
+        channel.dispose();
+      });
+
+      test(
+        'should update channel memberCount when event contains channelMemberCount',
+        () async {
+          // Verify initial state - default memberCount
+          expect(channel.memberCount, equals(0));
+
+          // Create event with channelMemberCount
+          final memberCountEvent = Event(
+            cid: channel.cid,
+            type: EventType.memberAdded,
+            member: Member(
+              userId: 'user-1',
+              user: User(id: 'user-1'),
+            ),
+            channelMemberCount: 42,
+          );
+
+          // Dispatch event
+          client.addEvent(memberCountEvent);
+
+          // Wait for the event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify channel memberCount was updated
+          expect(channel.memberCount, equals(42));
+        },
+      );
+
+      test(
+        'should update channel memberCount from member.added and member.removed events',
+        () async {
+          // Test with member.added event - count increases
+          final memberAddedEvent = Event(
+            cid: channel.cid,
+            type: EventType.memberAdded,
+            member: Member(
+              userId: 'user-1',
+              user: User(id: 'user-1'),
+            ),
+            channelMemberCount: 1,
+          );
+
+          client.addEvent(memberAddedEvent);
+          await Future.delayed(Duration.zero);
+          expect(channel.memberCount, equals(1));
+          expect(channel.state?.channelState.members?.map((it) => it.userId), equals(['user-1']));
+
+          // Test with another member.added event - count increases
+          final memberAddedEvent2 = Event(
+            cid: channel.cid,
+            type: EventType.memberAdded,
+            member: Member(
+              userId: 'user-2',
+              user: User(id: 'user-2'),
+            ),
+            channelMemberCount: 2,
+          );
+
+          client.addEvent(memberAddedEvent2);
+          await Future.delayed(Duration.zero);
+          expect(channel.memberCount, equals(2));
+          expect(
+            channel.state?.channelState.members?.map((it) => it.userId),
+            equals(['user-1', 'user-2']),
+          );
+
+          // Test with member.removed event - count decreases
+          final memberRemovedEvent = Event(
+            cid: channel.cid,
+            type: EventType.memberRemoved,
+            user: User(id: 'user-1'),
+            channelMemberCount: 1,
+          );
+
+          client.addEvent(memberRemovedEvent);
+          await Future.delayed(Duration.zero);
+          expect(channel.memberCount, equals(1));
+          expect(channel.state?.channelState.members?.map((it) => it.userId), equals(['user-2']));
+        },
+      );
+
+      test(
+        'should preserve other channel properties when updating memberCount',
+        () async {
+          // Set initial channel state with some properties
+          final initialChannel = channel.state?.channelState.channel?.copyWith(
+            extraData: {'name': 'Test Channel'},
+            messageCount: 7,
+            frozen: true,
+          );
+
+          if (initialChannel != null) {
+            channel.state?.updateChannelState(
+              channel.state!.channelState.copyWith(channel: initialChannel),
+            );
+          }
+
+          // Verify initial state
+          expect(channel.name, 'Test Channel');
+          expect(channel.messageCount, equals(7));
+          expect(channel.frozen, equals(true));
+          expect(channel.memberCount, equals(0));
+
+          // Update memberCount via event
+          final memberCountEvent = Event(
+            cid: channel.cid,
+            type: EventType.memberAdded,
+            member: Member(
+              userId: 'user-1',
+              user: User(id: 'user-1'),
+            ),
+            channelMemberCount: 100,
+          );
+
+          client.addEvent(memberCountEvent);
+          await Future.delayed(Duration.zero);
+
+          // Verify memberCount was updated while preserving other properties
+          expect(channel.memberCount, equals(100));
+          expect(channel.name, 'Test Channel');
+          expect(channel.messageCount, equals(7));
+          expect(channel.frozen, equals(true));
+        },
+      );
+
+      test(
+        'should not update memberCount when the event omits channelMemberCount',
+        () async {
+          // Seed a known member count.
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.memberAdded,
+              member: Member(
+                userId: 'user-1',
+                user: User(id: 'user-1'),
+              ),
+              channelMemberCount: 5,
+            ),
+          );
+
+          await Future.delayed(Duration.zero);
+          expect(channel.memberCount, equals(5));
+
+          // An event without the field should leave the count untouched.
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.memberAdded,
+              member: Member(
+                userId: 'user-2',
+                user: User(id: 'user-2'),
+              ),
+            ),
+          );
+
+          await Future.delayed(Duration.zero);
+          expect(channel.memberCount, equals(5));
+        },
+      );
+
+      test(
+        'should provide memberCountStream for reactive updates',
+        () async {
+          expectLater(
+            channel.memberCountStream.distinct(),
+            emitsInOrder([0, 1, 5, 10]),
+          );
+
+          // Update memberCount multiple times
+          final counts = [1, 5, 10];
+          for (final count in counts) {
+            final event = Event(
+              cid: channel.cid,
+              type: EventType.memberAdded,
+              member: Member(
+                userId: 'user-$count',
+                user: User(id: 'user-$count'),
+              ),
+              channelMemberCount: count,
+            );
+
+            client.addEvent(event);
+            await Future.delayed(Duration.zero);
+          }
+        },
+      );
+    });
   });
 
   group('Channel filterTags', () {
