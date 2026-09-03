@@ -1,3 +1,7 @@
+## 9.29.0
+
+- Minor bug fixes and improvements
+
 ## 9.28.0
 
 ✅ Added
