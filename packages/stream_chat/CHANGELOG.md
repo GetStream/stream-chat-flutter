@@ -15,6 +15,7 @@
 🐞 Fixed
 
 - Fixed `Channel.memberCount` / `memberCountStream` staying stale for the rest of the session after members joined or left; channel events now apply the server-provided member count, the same way `messageCount` already did.
+- Fixed every failed websocket connect leaving an unhandled error in the root zone, which crash reporters listening on `PlatformDispatcher.onError` report as a fatal crash. [#2921](https://github.com/GetStream/stream-chat-flutter/issues/2921)
 
 ## 9.28.0
 
