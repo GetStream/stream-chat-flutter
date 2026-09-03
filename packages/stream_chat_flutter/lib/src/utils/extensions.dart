@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_size_getter/file_input.dart'; // For compatibility with flutter web.
 import 'package:image_size_getter/image_size_getter.dart' hide Size;
+import 'package:markdown/markdown.dart' as md;
 
 import '../../stream_chat_flutter.dart';
 import '../audio/audio_playlist_state.dart';
@@ -46,6 +47,30 @@ extension StringExtension on String {
   /// Returns the capitalized string
   @Deprecated('Use sentenceCase instead')
   String capitalize() => sentenceCase;
+
+  /// Returns this markdown source as the plain text it renders as.
+  ///
+  /// Link and image syntax collapses to the text a reader sees, emphasis and
+  /// heading markers drop away, and the remaining blocks are joined by a
+  /// newline. `check [our docs](https://getstream.io)` becomes
+  /// `check our docs`.
+  ///
+  /// Announcing the source instead would spell out bracket and paren syntax
+  /// and read whole URLs aloud, so screen-reader labels derived from message
+  /// text pass through here first. Parsed with the same extension set that
+  /// `MarkdownBody` defaults to, so the result matches what was rendered.
+  String get markdownToPlainText {
+    if (trim().isEmpty) return this;
+
+    final document = md.Document(
+      extensionSet: md.ExtensionSet.gitHubFlavored,
+      encodeHtml: false,
+    );
+
+    final blocks = document.parse(this).map((it) => it.textContent.trim()).where((it) => it.isNotEmpty);
+
+    return blocks.join('\n');
+  }
 
   /// Returns the string in sentence case.
   ///

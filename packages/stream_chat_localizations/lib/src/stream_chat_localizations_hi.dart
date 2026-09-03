@@ -963,6 +963,22 @@ class _AccessibilityTranslationsHi extends AccessibilityTranslations {
   }
 
   @override
+  String attachmentPositionLabel({required int index, required int total}) => '$total में से $index';
+
+  @override
+  String outgoingReplyToOwnMessageLabel() => 'आपने अपने संदेश का उत्तर दिया';
+
+  @override
+  String outgoingReplyToMessageLabel({required String authorName}) => 'आपने $authorName के संदेश का उत्तर दिया';
+
+  @override
+  String incomingReplyToOwnMessageLabel({required String replierName}) => '$replierName ने आपके संदेश का उत्तर दिया';
+
+  @override
+  String incomingReplyToMessageLabel({required String replierName, required String authorName}) =>
+      '$replierName ने $authorName के संदेश का उत्तर दिया';
+
+  @override
   String get voiceRecordingPlayTooltip => 'चलाएँ';
 
   @override
@@ -1011,6 +1027,18 @@ class _AccessibilityTranslationsHi extends AccessibilityTranslations {
   }
 
   @override
+  String outgoingMessageLabel({required String body}) => 'आपने कहा, $body';
+
+  @override
+  String incomingMessageLabel({required String senderName, required String body}) => '$senderName ने कहा, $body';
+
+  @override
+  String outgoingDeletedMessageLabel({required String body}) => 'आप, $body';
+
+  @override
+  String incomingDeletedMessageLabel({required String senderName, required String body}) => '$senderName, $body';
+
+  @override
   String get pollPreviewLabel => 'पोल';
 
   @override
@@ -1027,6 +1055,9 @@ class _AccessibilityTranslationsHi extends AccessibilityTranslations {
 
   @override
   String get messageReadStatusLabel => 'पढ़ा गया';
+
+  @override
+  String get messageFailedStatusLabel => 'संदेश भेजना विफल रहा';
 
   @override
   String unreadMessagesLabel({required int count}) {

@@ -962,6 +962,22 @@ class _AccessibilityTranslationsEn extends AccessibilityTranslations {
   }
 
   @override
+  String attachmentPositionLabel({required int index, required int total}) => '$index of $total';
+
+  @override
+  String outgoingReplyToOwnMessageLabel() => 'You replied to your message';
+
+  @override
+  String outgoingReplyToMessageLabel({required String authorName}) => "You replied to $authorName's message";
+
+  @override
+  String incomingReplyToOwnMessageLabel({required String replierName}) => '$replierName replied to your message';
+
+  @override
+  String incomingReplyToMessageLabel({required String replierName, required String authorName}) =>
+      "$replierName replied to $authorName's message";
+
+  @override
   String get voiceRecordingPlayTooltip => 'Play';
 
   @override
@@ -1010,6 +1026,18 @@ class _AccessibilityTranslationsEn extends AccessibilityTranslations {
   }
 
   @override
+  String outgoingMessageLabel({required String body}) => 'You said, $body';
+
+  @override
+  String incomingMessageLabel({required String senderName, required String body}) => '$senderName said, $body';
+
+  @override
+  String outgoingDeletedMessageLabel({required String body}) => 'You, $body';
+
+  @override
+  String incomingDeletedMessageLabel({required String senderName, required String body}) => '$senderName, $body';
+
+  @override
   String get pollPreviewLabel => 'Poll';
 
   @override
@@ -1026,6 +1054,9 @@ class _AccessibilityTranslationsEn extends AccessibilityTranslations {
 
   @override
   String get messageReadStatusLabel => 'Read';
+
+  @override
+  String get messageFailedStatusLabel => 'Message failed to send';
 
   @override
   String unreadMessagesLabel({required int count}) {

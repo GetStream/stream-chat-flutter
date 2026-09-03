@@ -120,6 +120,54 @@ abstract class AccessibilityTranslations {
   /// `title` when set.
   String imageAttachmentLabel({String? title});
 
+  /// The screen-reader label for a quoted-message preview where the current
+  /// user replied to their own message, e.g. `"You replied to your message"`.
+  ///
+  /// Combined with the quoted body as `"You replied to your message, see you
+  /// tomorrow"`.
+  ///
+  /// The four reply labels are split by who replied rather than composed from
+  /// a word for "you", because a locale that inflects its verb for person
+  /// cannot conjugate a name it is handed at runtime: German needs "Du hast
+  /// geantwortet" against "Han Solo hat geantwortet", and substituting "Du"
+  /// into the third-person form yields "Du hat geantwortet".
+  String outgoingReplyToOwnMessageLabel();
+
+  /// The screen-reader label for a quoted-message preview where the current
+  /// user replied to [authorName]'s message, e.g. `"You replied to Leia's
+  /// message"`.
+  ///
+  /// See [outgoingReplyToOwnMessageLabel] for why the direction is part of the
+  /// method rather than a substituted name. [authorName] is part of the string
+  /// so every locale can form the possessive itself.
+  String outgoingReplyToMessageLabel({required String authorName});
+
+  /// The screen-reader label for a quoted-message preview where [replierName]
+  /// replied to the current user's message, e.g. `"Han Solo replied to your
+  /// message"`.
+  ///
+  /// [replierName] is the author of the message doing the quoting.
+  String incomingReplyToOwnMessageLabel({required String replierName});
+
+  /// The screen-reader label for a quoted-message preview where [replierName]
+  /// replied to [authorName]'s message, e.g. `"Han Solo replied to Leia's
+  /// message"`.
+  ///
+  /// Both names are part of the string so every locale can form the possessive
+  /// itself.
+  String incomingReplyToMessageLabel({
+    required String replierName,
+    required String authorName,
+  });
+
+  /// The screen-reader position of one attachment within a gallery, e.g.
+  /// `"2 of 5"`.
+  ///
+  /// Combined with the type label as `"Photo, 2 of 5"`. [index] is 1-based.
+  /// Only announced for galleries, where otherwise identical tiles need
+  /// telling apart.
+  String attachmentPositionLabel({required int index, required int total});
+
   /// The tooltip for the play button on a sent voice-recording
   /// attachment.
   String get voiceRecordingPlayTooltip;
@@ -172,6 +220,40 @@ abstract class AccessibilityTranslations {
   /// when [senderName] is null.
   String incomingMessagePreviewLabel({String? senderName});
 
+  /// The screen-reader announcement for a message in the message list that the
+  /// current user sent, e.g. `"You said, are we still meeting tomorrow"`.
+  ///
+  /// [body] is the already-composed message body — the message text, or a type
+  /// label such as `"2 Photos"` for an attachment-only message. The sender and
+  /// the body form a single translation unit so every locale can order and
+  /// inflect the whole clause; some phrase it as "my message" rather than
+  /// "you said".
+  String outgoingMessageLabel({required String body});
+
+  /// The screen-reader announcement for a message in the message list received
+  /// from [senderName], e.g. `"Han Solo said, are we still meeting tomorrow"`.
+  ///
+  /// [senderName] is the sender's resolved, non-empty display name — callers
+  /// omit the announcement entirely when there is no name to announce, so
+  /// implementations can interpolate it directly. See [outgoingMessageLabel]
+  /// for [body].
+  String incomingMessageLabel({required String senderName, required String body});
+
+  /// The screen-reader announcement for a message the current user deleted,
+  /// e.g. `"You, Message deleted"`.
+  ///
+  /// [body] is the composed deleted-message placeholder. Phrased without
+  /// "said" — the sender did not author the placeholder, they deleted what
+  /// they had authored. See [outgoingMessageLabel] for why the body is part
+  /// of the string.
+  String outgoingDeletedMessageLabel({required String body});
+
+  /// The screen-reader announcement for a message [senderName] deleted, e.g.
+  /// `"Han Solo, Message deleted"`.
+  ///
+  /// See [outgoingDeletedMessageLabel] for [body] and the phrasing.
+  String incomingDeletedMessageLabel({required String senderName, required String body});
+
   /// The screen-reader type label for a poll last-message preview, e.g.
   /// `"Poll"`.
   ///
@@ -199,6 +281,14 @@ abstract class AccessibilityTranslations {
   /// The screen-reader label for a message-delivery indicator once the
   /// message has been read by the recipient, e.g. `"Read"`.
   String get messageReadStatusLabel;
+
+  /// The screen-reader label for a message that could not be sent, e.g.
+  /// `"Message failed to send"`.
+  ///
+  /// Announced in place of a delivery status. The failure is shown as a badge
+  /// on the bubble, which carries no text of its own, so this is the only way
+  /// a screen reader learns the message did not go out.
+  String get messageFailedStatusLabel;
 
   /// The screen-reader phrasing for a batch of unread messages, e.g.
   /// `"9 unread messages"` / `"1 unread message"`.
@@ -423,6 +513,34 @@ class DefaultAccessibilityTranslations extends AccessibilityTranslations {
   }
 
   @override
+  String outgoingReplyToOwnMessageLabel() {
+    return 'You replied to your message';
+  }
+
+  @override
+  String outgoingReplyToMessageLabel({required String authorName}) {
+    return "You replied to $authorName's message";
+  }
+
+  @override
+  String incomingReplyToOwnMessageLabel({required String replierName}) {
+    return '$replierName replied to your message';
+  }
+
+  @override
+  String incomingReplyToMessageLabel({
+    required String replierName,
+    required String authorName,
+  }) {
+    return "$replierName replied to $authorName's message";
+  }
+
+  @override
+  String attachmentPositionLabel({required int index, required int total}) {
+    return '$index of $total';
+  }
+
+  @override
   String get voiceRecordingPlayTooltip => 'Play';
 
   @override
@@ -471,6 +589,22 @@ class DefaultAccessibilityTranslations extends AccessibilityTranslations {
   }
 
   @override
+  String outgoingMessageLabel({required String body}) => 'You said, $body';
+
+  @override
+  String incomingMessageLabel({required String senderName, required String body}) {
+    return '$senderName said, $body';
+  }
+
+  @override
+  String outgoingDeletedMessageLabel({required String body}) => 'You, $body';
+
+  @override
+  String incomingDeletedMessageLabel({required String senderName, required String body}) {
+    return '$senderName, $body';
+  }
+
+  @override
   String get pollPreviewLabel => 'Poll';
 
   @override
@@ -487,6 +621,9 @@ class DefaultAccessibilityTranslations extends AccessibilityTranslations {
 
   @override
   String get messageReadStatusLabel => 'Read';
+
+  @override
+  String get messageFailedStatusLabel => 'Message failed to send';
 
   @override
   String unreadMessagesLabel({required int count}) {

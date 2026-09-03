@@ -133,6 +133,10 @@ abstract interface class AccessibleMessagePreviewFormatter implements MessagePre
   /// [showCaption] mirrors [formatMessage]: when `true` (the default),
   /// attachment and location labels include the message text as a caption;
   /// when `false` they fall back to a type-only label.
+  ///
+  /// Omitting [channel] returns the body on its own, without a speaker prefix —
+  /// callers that compose their own prefix rely on this, so implementations
+  /// must honour it.
   String formatMessageSemanticsLabel(
     BuildContext context,
     Message message, {

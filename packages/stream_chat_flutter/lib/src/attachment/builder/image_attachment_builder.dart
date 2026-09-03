@@ -53,10 +53,15 @@ class ImageAttachmentBuilder extends StreamAttachmentWidgetBuilder {
       style: style,
       child: InkWell(
         onTap: onTap,
-        child: StreamImageAttachment(
-          message: message,
-          constraints: constraints,
-          image: image,
+        // Annotates the InkWell's node so the tile announces what it is; the
+        // thumbnail itself renders no text.
+        child: Semantics(
+          label: _mediaAttachmentSemanticsLabel(context, image),
+          child: StreamImageAttachment(
+            message: message,
+            constraints: constraints,
+            image: image,
+          ),
         ),
       ),
     );
