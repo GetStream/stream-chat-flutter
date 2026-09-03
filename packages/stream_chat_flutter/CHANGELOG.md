@@ -15,6 +15,7 @@
 
 🐞 Fixed
 
+- Fixed images failing to load (HTTP 403) from CDNs that sign URLs with standard base64. `StreamImageCDN.resolveUrl` rebuilt the query string in a way that re-encoded the `=` padding in signing parameters as `%3D`, invalidating the signature.
 - Fixed a crash on web when the message list rebuilt while messages were selectable, for example after opening the attachment picker.
 - Fixed the browser's native context menu reappearing over the message context menu on web after scrolling messages out of view or deleting one.
 - Fixed the SDK re-enabling the browser's native context menu on web in apps that had disabled it themselves.
