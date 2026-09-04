@@ -204,6 +204,13 @@ scripts:
     run: $MELOS_ROOT_PATH/scripts/generate.sh
     description: Generate the Chat Dart client from the Chat OpenAPI spec.
 
+  web:assets:
+    run: $MELOS_ROOT_PATH/scripts/fetch_web_assets.sh
+    description: >
+      Download the sqlite3.wasm and drift_worker.js files that
+      stream_chat_persistence needs on the web into every web app in this repo.
+      Re-run after bumping `drift` in melos.yaml.
+
   version:update:
     run: dart tools/generate_version.dart
     description: Updates the version.dart file in stream_chat package based on pubspec.yaml version.
