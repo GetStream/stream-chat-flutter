@@ -108,23 +108,11 @@ class SyncManager {
         final events = res.events.sorted((a, b) => a.createdAt.compareTo(b.createdAt));
         final updatedSyncAt = events.lastOrNull?.createdAt ?? DateTime.timestamp();
 
-        // Bail out of oversized event replay. Replaying a large payload through
-        // [StreamChatClient.handleEvent] can hold local persistence and state
-        // updates long enough to slow down regular requests, so the channels
-        // the payload covered are refreshed instead. `queryChannels` returns
-        // their messages, members and read state, which is what the replayed
-        // events would have rebuilt.
-        var refreshed = const <String>{};
-        if (events.length > _eventReplayMaximumEventCount) {
-          _logger?.info(
-            'Skipping replay of ${events.length} events, exceeding the '
-            'limit of $_eventReplayMaximumEventCount.',
-          );
-
-          if (refreshChannelsOnSkip) refreshed = await refreshChannels(channels);
-        } else {
-          _replayEvents(events);
-        }
+        final refreshed = await _replayOrRefresh(
+          events,
+          cids: channels,
+          refresh: refreshChannelsOnSkip,
+        );
 
         await persistenceClient?.updateLastSyncAt(updatedSyncAt);
         return refreshed;
@@ -133,6 +121,35 @@ class SyncManager {
         return const {};
       }
     });
+  }
+
+  // Replays [events] when the payload is small enough, and refreshes the
+  // channels in [cids] instead when it is not and [refresh] is set.
+  //
+  // Replaying a large payload through [StreamChatClient.handleEvent] can hold
+  // local persistence and state updates long enough to slow down the regular
+  // requests that need them. A refresh takes its place because `queryChannels`
+  // returns the messages, members and read state the replayed events would
+  // have rebuilt.
+  //
+  // Returns the cids that were refreshed.
+  Future<Set<String>> _replayOrRefresh(
+    List<Event> events, {
+    required List<String> cids,
+    required bool refresh,
+  }) async {
+    if (events.length <= _eventReplayMaximumEventCount) {
+      _replayEvents(events);
+      return const {};
+    }
+
+    _logger?.info(
+      'Skipping replay of ${events.length} events, exceeding the '
+      'limit of $_eventReplayMaximumEventCount.',
+    );
+
+    if (!refresh) return const {};
+    return refreshChannels(cids);
   }
 
   // Applies every event of a payload small enough to replay.
