@@ -5279,7 +5279,7 @@ void main() {
       );
 
       test(
-        '''should skip replay but advance lastSyncAt when the payload exceeds the replay limit''',
+        '''should refresh the synced channels in place of a payload that exceeds the replay limit''',
         () async {
           final cids = ['channel1'];
           final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));
@@ -5303,9 +5303,25 @@ void main() {
             (_) async => SyncResponse()..events = events,
           );
 
+          when(
+            () => api.channel.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              state: any(named: 'state'),
+              watch: any(named: 'watch'),
+              presence: any(named: 'presence'),
+              memberLimit: any(named: 'memberLimit'),
+              messageLimit: any(named: 'messageLimit'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          ).thenAnswer((_) async => QueryChannelsResponse()..channels = []);
+
           final replayed = <Event>[];
           final sub = client.on(EventType.messageNew).listen(replayed.add);
           addTearDown(sub.cancel);
+
+          // The group shares one api mock, so only count this test's calls.
+          clearInteractions(api.channel);
 
           await client.sync();
           await pumpEventQueue();
@@ -5313,8 +5329,19 @@ void main() {
           verify(() => api.general.sync(cids, lastSyncAt)).called(1);
           // Replay is skipped; no events are dispatched through the handler.
           expect(replayed, isEmpty);
-          // A direct call refreshes nothing on its own.
-          verifyZeroInteractions(api.channel);
+          // The channels the payload covered are refreshed in its place.
+          verify(
+            () => api.channel.queryChannels(
+              filter: Filter.in_('cid', cids),
+              sort: any(named: 'sort'),
+              state: any(named: 'state'),
+              watch: any(named: 'watch'),
+              presence: any(named: 'presence'),
+              memberLimit: any(named: 'memberLimit'),
+              messageLimit: any(named: 'messageLimit'),
+              paginationParams: const PaginationParams(limit: 1),
+            ),
+          ).called(1);
           // lastSyncAt moves to the newest event in the skipped payload, so
           // that payload is not re-fetched while anything after it still is.
           expect(await fakeClient.getLastSyncAt(), events.last.createdAt);
@@ -5558,10 +5585,10 @@ void main() {
       expect(await persistenceClient.getLastSyncAt(), events.last.createdAt);
     });
 
-    // A failed sync applied nothing, so the channels are refreshed to stand in
-    // for it — but the window stays outstanding for the next sync to fetch.
+    // A failed sync applied nothing and moved nothing, so the configured
+    // recovery still runs and the window stays outstanding for the next sync.
     test('should re-query active channels when the sync fails, keeping lastSyncAt', () async {
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws, recoverStateOnReconnect: false);
+      client = StreamChatClient(apiKey, chatApi: api, ws: ws);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5595,6 +5622,55 @@ void main() {
           paginationParams: const PaginationParams(limit: 1),
         ),
       ).called(1);
+
+      expect(await persistenceClient.getLastSyncAt(), lastSyncAt);
+    });
+
+    // Discarding the payload is only safe once its state has been re-fetched,
+    // so a failed refresh keeps the checkpoint and the range is asked for again.
+    test('should keep lastSyncAt when the refresh after a skipped replay fails', () async {
+      when(
+        () => api.channel.queryChannels(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          memberLimit: any(named: 'memberLimit'),
+          messageLimit: any(named: 'messageLimit'),
+          paginationParams: any(named: 'paginationParams'),
+        ),
+      ).thenThrow(const StreamChatError('You cannot use queryChannels without an active connection.'));
+
+      client = StreamChatClient(apiKey, chatApi: api, ws: ws, recoverStateOnReconnect: false);
+      await client.connectUser(user, token);
+      await delay(300);
+
+      const cid = 'messaging:c1';
+      final channel = Channel.fromState(client, ChannelState(channel: ChannelModel(cid: cid)));
+      client.state.addChannels({cid: channel});
+
+      final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));
+      final persistenceClient = FakePersistenceClient(channelCids: const [cid], lastSyncAt: lastSyncAt);
+      client.chatPersistenceClient = persistenceClient;
+      await client.openPersistenceConnection(user);
+      addTearDown(() => client.chatPersistenceClient = null);
+
+      // 251 events exceeds the internal replay limit of 250.
+      final events = List.generate(
+        251,
+        (index) => Event(
+          type: EventType.messageNew,
+          cid: cid,
+          message: Message(id: 'message-$index'),
+          createdAt: lastSyncAt.add(Duration(seconds: index + 1)),
+        ),
+      );
+      when(() => api.general.sync(const [cid], lastSyncAt)).thenAnswer(
+        (_) async => SyncResponse()..events = events,
+      );
+
+      await simulateReconnect();
 
       expect(await persistenceClient.getLastSyncAt(), lastSyncAt);
     });

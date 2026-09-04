@@ -68,15 +68,13 @@ class SyncManager {
     if (cids.isEmpty) return;
 
     try {
-      // The sync does not catch the channels up when it drops an oversized
-      // payload or fails outright, and it does not run at all without a
-      // persistence client to catch up.
-      var caughtUp = true;
-      if (client.persistenceEnabled) caughtUp = await _sync(cids: cids);
+      var refreshedBySync = false;
+      if (client.persistenceEnabled) refreshedBySync = await _sync(cids: cids);
 
-      // Refreshing stands in for the events the sync did not apply, and is
-      // also the recovery the client can be configured to always run.
-      if (caughtUp && !client.recoverStateOnReconnect) return;
+      // Recover the channels that were active before the connection was lost,
+      // unless the sync has already refreshed them in place of a window it
+      // could not replay.
+      if (!client.recoverStateOnReconnect || refreshedBySync) return;
 
       await refreshChannels(cids);
     } catch (error, stk) {
@@ -86,25 +84,25 @@ class SyncManager {
 
   // Fetches the events missed since the last sync and replays them.
   //
-  // Returns whether the channels were caught up. An oversized payload is not
-  // replayed and a failed request applies nothing, so in both cases the caller
-  // is left to put something in the place of those events.
+  // A window that cannot be replayed is discarded, and the channels it covered
+  // are refreshed in its place. The sync pointer moves past a discarded window
+  // only once that refresh succeeded: it is what makes discarding safe, and
+  // keeping the pointer means the next sync asks for the same range again.
   //
-  // The sync pointer moves past a dropped payload — it would otherwise be
-  // re-fetched on every later sync — but is left alone when the request
-  // failed, so that window is fetched again.
+  // Returns whether the channels were refreshed here, so the caller can skip
+  // refreshing them a second time.
   Future<bool> _sync({List<String>? cids, DateTime? lastSyncAt}) {
     return _syncLock.synchronized(() async {
       final persistenceClient = client.chatPersistenceClient;
 
       final channelCids = cids ?? await persistenceClient?.getChannelCids();
-      if (channelCids == null || channelCids.isEmpty) return true;
+      if (channelCids == null || channelCids.isEmpty) return false;
 
       final syncAt = lastSyncAt ?? await persistenceClient?.getLastSyncAt();
       if (syncAt == null) {
         _logger?.info('Fresh sync start: lastSyncAt initialized to now.');
         await persistenceClient?.updateLastSyncAt(DateTime.timestamp());
-        return true;
+        return false;
       }
 
       try {
@@ -123,8 +121,21 @@ class SyncManager {
             'limit of $_eventReplayMaximumEventCount.',
           );
 
+          try {
+            await refreshChannels(channelCids);
+          } catch (refreshError, refreshStk) {
+            _logger?.warning(
+              'Refreshing the channels in place of the skipped events failed, '
+              'keeping lastSyncAt so the same range is asked for again.',
+              refreshError,
+              refreshStk,
+            );
+
+            return false;
+          }
+
           await persistenceClient?.updateLastSyncAt(updatedSyncAt);
-          return false;
+          return true;
         }
 
         for (final event in events) {
@@ -133,7 +144,7 @@ class SyncManager {
         }
 
         await persistenceClient?.updateLastSyncAt(updatedSyncAt);
-        return true;
+        return false;
       } catch (error, stk) {
         // A 400 means the sync window is too old, or the channel list or event
         // count too large for the server to answer, so local state is flushed
@@ -151,12 +162,13 @@ class SyncManager {
 
         try {
           await persistenceClient?.flush();
+          await refreshChannels(channelCids);
           await persistenceClient?.updateLastSyncAt(DateTime.timestamp());
+          return true;
         } catch (resetError, resetStk) {
           _logger?.warning('Error resetting the persistence client', resetError, resetStk);
+          return false;
         }
-
-        return false;
       }
     });
   }
