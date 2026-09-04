@@ -46,13 +46,7 @@ class SyncManager {
   /// moves past them, so callers relying on the replayed state should refresh
   /// it themselves.
   Future<void> sync({List<String>? cids, DateTime? lastSyncAt}) async {
-    final replaySkipped = await _sync(cids: cids, lastSyncAt: lastSyncAt);
-    if (!replaySkipped) return;
-
-    // Nothing takes the place of the skipped events here, so the pointer moves
-    // past them regardless; leaving it behind would re-fetch the same oversized
-    // payload on every sync.
-    await client.chatPersistenceClient?.updateLastSyncAt(DateTime.timestamp());
+    await _sync(cids: cids, lastSyncAt: lastSyncAt);
   }
 
   /// Recovers the state of the channels that were active before the connection
@@ -69,41 +63,40 @@ class SyncManager {
     final cids = client.state.channels.keys.toList();
     if (cids.isEmpty) return;
 
-    var refreshed = const <String>{};
-    if (client.persistenceEnabled && await _sync(cids: cids)) {
-      // Replay was skipped, so the channels the payload covered take the place
-      // of those events. The pointer moves past them only once that succeeded:
-      // advancing over a failed refresh would lose them.
-      refreshed = await refreshChannels(cids);
-      await client.chatPersistenceClient?.updateLastSyncAt(DateTime.timestamp());
-    }
+    // The sync does not catch the channels up when it drops an oversized
+    // payload or fails outright, and it does not run at all without a
+    // persistence client to catch up.
+    var caughtUp = true;
+    if (client.persistenceEnabled) caughtUp = await _sync(cids: cids);
 
-    if (!client.recoverStateOnReconnect) return;
+    // Refreshing stands in for the events the sync did not apply, and is also
+    // the recovery the client can be configured to always run.
+    if (caughtUp && !client.recoverStateOnReconnect) return;
 
-    final stale = cids.whereNot(refreshed.contains).toList();
-    if (stale.isEmpty) return;
-
-    await refreshChannels(stale);
+    await refreshChannels(cids);
   }
 
-  // Fetches the events missed since the last sync and replays them, advancing
-  // the sync pointer once they are applied.
+  // Fetches the events missed since the last sync and replays them.
   //
-  // Returns whether an oversized payload skipped replay. The pointer is left
-  // where it was in that case: the caller decides what takes the place of the
-  // dropped events before moving past them.
+  // Returns whether the channels were caught up. An oversized payload is not
+  // replayed and a failed request applies nothing, so in both cases the caller
+  // is left to put something in the place of those events.
+  //
+  // The sync pointer moves past a dropped payload — it would otherwise be
+  // re-fetched on every later sync — but is left alone when the request
+  // failed, so that window is fetched again.
   Future<bool> _sync({List<String>? cids, DateTime? lastSyncAt}) {
     return _syncLock.synchronized(() async {
       final persistenceClient = client.chatPersistenceClient;
 
       final channelCids = cids ?? await persistenceClient?.getChannelCids();
-      if (channelCids == null || channelCids.isEmpty) return false;
+      if (channelCids == null || channelCids.isEmpty) return true;
 
       final syncAt = lastSyncAt ?? await persistenceClient?.getLastSyncAt();
       if (syncAt == null) {
         _logger?.info('Fresh sync start: lastSyncAt initialized to now.');
         await persistenceClient?.updateLastSyncAt(DateTime.timestamp());
-        return false;
+        return true;
       }
 
       try {
@@ -122,7 +115,8 @@ class SyncManager {
             'limit of $_eventReplayMaximumEventCount.',
           );
 
-          return true;
+          await persistenceClient?.updateLastSyncAt(updatedSyncAt);
+          return false;
         }
 
         for (final event in events) {
@@ -131,7 +125,7 @@ class SyncManager {
         }
 
         await persistenceClient?.updateLastSyncAt(updatedSyncAt);
-        return false;
+        return true;
       } catch (error, stk) {
         // A 400 means the sync window is too old, or the channel list or event
         // count too large for the server to answer, so local state is flushed
@@ -163,23 +157,18 @@ class SyncManager {
   ///
   /// Queries a page at a time so that sets larger than a single
   /// `queryChannels` response are covered in full rather than truncated to the
-  /// first page. Returns the cids that were refreshed.
-  Future<Set<String>> refreshChannels(List<String> cids) async {
+  /// first page.
+  Future<void> refreshChannels(List<String> cids) async {
     _logger?.info('Refreshing ${cids.length} channels');
 
-    final refreshed = <String>{};
     for (final batch in cids.slices(_channelQueryMaximumPageSize)) {
-      final channels = await client.queryChannelsOnline(
+      await client.queryChannelsOnline(
         filter: Filter.in_('cid', batch),
         paginationParams: PaginationParams(limit: batch.length),
         // Fail fast if the connection dropped again: waiting for it here would
         // hold the sync lock, blocking the sync the next reconnect starts.
         waitForConnect: false,
       );
-
-      refreshed.addAll(channels.map((it) => it.cid).nonNulls);
     }
-
-    return refreshed;
   }
 }

@@ -5315,10 +5315,9 @@ void main() {
           expect(replayed, isEmpty);
           // A direct call refreshes nothing on its own.
           verifyZeroInteractions(api.channel);
-          // lastSyncAt still moves past the skipped payload, so the same
-          // oversized payload is not re-fetched on every later sync.
-          final newLastSyncAt = await fakeClient.getLastSyncAt();
-          expect(newLastSyncAt?.isAfter(lastSyncAt), isTrue);
+          // lastSyncAt moves to the newest event in the skipped payload, so
+          // that payload is not re-fetched while anything after it still is.
+          expect(await fakeClient.getLastSyncAt(), events.last.createdAt);
         },
       );
     });
@@ -5518,7 +5517,8 @@ void main() {
       client.state.addChannels({cid: channel});
 
       final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));
-      client.chatPersistenceClient = FakePersistenceClient(channelCids: const [cid], lastSyncAt: lastSyncAt);
+      final persistenceClient = FakePersistenceClient(channelCids: const [cid], lastSyncAt: lastSyncAt);
+      client.chatPersistenceClient = persistenceClient;
       await client.openPersistenceConnection(user);
       addTearDown(() => client.chatPersistenceClient = null);
 
@@ -5552,24 +5552,15 @@ void main() {
           paginationParams: const PaginationParams(limit: 1),
         ),
       ).called(1);
+
+      // The pointer lands on the newest event in the skipped payload, not on
+      // the wall clock, so anything after it is still fetched next time.
+      expect(await persistenceClient.getLastSyncAt(), events.last.createdAt);
     });
 
-    // Dropping the skipped events is only safe once their state has been
-    // re-fetched; advancing the pointer past a failed refresh loses them.
-    test('should keep lastSyncAt when the re-query after a skipped replay fails', () async {
-      when(
-        () => api.channel.queryChannels(
-          filter: any(named: 'filter'),
-          sort: any(named: 'sort'),
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          memberLimit: any(named: 'memberLimit'),
-          messageLimit: any(named: 'messageLimit'),
-          paginationParams: any(named: 'paginationParams'),
-        ),
-      ).thenThrow(const StreamChatError('You cannot use queryChannels without an active connection.'));
-
+    // A failed sync applied nothing, so the channels are refreshed to stand in
+    // for it — but the window stays outstanding for the next sync to fetch.
+    test('should re-query active channels when the sync fails, keeping lastSyncAt', () async {
       client = StreamChatClient(apiKey, chatApi: api, ws: ws, recoverStateOnReconnect: false);
       await client.connectUser(user, token);
       await delay(300);
@@ -5584,21 +5575,26 @@ void main() {
       await client.openPersistenceConnection(user);
       addTearDown(() => client.chatPersistenceClient = null);
 
-      // 251 events exceeds the internal replay limit of 250.
-      final events = List.generate(
-        251,
-        (index) => Event(
-          type: EventType.messageNew,
-          cid: cid,
-          message: Message(id: 'message-$index'),
-          createdAt: lastSyncAt.add(Duration(seconds: index + 1)),
-        ),
-      );
-      when(() => api.general.sync(const [cid], lastSyncAt)).thenAnswer(
-        (_) async => SyncResponse()..events = events,
+      when(() => api.general.sync(const [cid], lastSyncAt)).thenThrow(
+        StreamChatNetworkError(ChatErrorCode.internalSystemError),
       );
 
+      clearInteractions(api.channel);
+
       await simulateReconnect();
+
+      verify(
+        () => api.channel.queryChannels(
+          filter: Filter.in_('cid', const [cid]),
+          sort: any(named: 'sort'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          memberLimit: any(named: 'memberLimit'),
+          messageLimit: any(named: 'messageLimit'),
+          paginationParams: const PaginationParams(limit: 1),
+        ),
+      ).called(1);
 
       expect(await persistenceClient.getLastSyncAt(), lastSyncAt);
     });
