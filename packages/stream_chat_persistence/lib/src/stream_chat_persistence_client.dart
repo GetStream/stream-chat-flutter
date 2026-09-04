@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'db/drift_chat_database.dart';
+import 'db/web_options.dart';
 
 /// Various connection modes on which [StreamChatPersistenceClient] can work
 enum ConnectionMode {
@@ -28,13 +29,14 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     this._connectionMode = ConnectionMode.regular,
     Level logLevel = Level.WARNING,
 
-    /// Whether to use an experimental storage implementation on the web
-    /// that uses IndexedDB if the current browser supports it.
-    /// Otherwise, falls back to the local storage based implementation.
-    bool webUseExperimentalIndexedDb = false,
+    /// Configuration for the WebAssembly based database used on Flutter web.
+    ///
+    /// Ignored on every other platform. Only needed when `sqlite3.wasm` and
+    /// `drift_worker.js` are not served next to the application's
+    /// `index.html` — see [StreamChatPersistenceWebOptions].
+    this._webOptions,
     LogHandlerFunction? logHandlerFunction,
-  }) : _webUseIndexedDbIfSupported = webUseExperimentalIndexedDb,
-       _logger = Logger.detached('💽')..level = logLevel {
+  }) : _logger = Logger.detached('💽')..level = logLevel {
     _logger.onRecord.listen(logHandlerFunction ?? _defaultLogHandler);
   }
 
@@ -44,7 +46,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
 
   final Logger _logger;
   final ConnectionMode _connectionMode;
-  final bool _webUseIndexedDbIfSupported;
+  final StreamChatPersistenceWebOptions? _webOptions;
 
   void _defaultLogHandler(LogRecord record) {
     print(
@@ -73,8 +75,9 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     ConnectionMode mode,
   ) => SharedDB.constructDatabase(
     userId,
+    logger: _logger,
     connectionMode: mode,
-    webUseIndexedDbIfSupported: _webUseIndexedDbIfSupported,
+    webOptions: _webOptions,
   );
 
   @override

@@ -1,10 +1,11 @@
-// ignore_for_file: avoid_redundant_argument_values, deprecated_member_use
+// ignore_for_file: avoid_redundant_argument_values
 
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
+import 'package:stream_chat_persistence/src/db/web_options.dart';
 import 'package:stream_chat_persistence/src/stream_chat_persistence_client.dart';
 
 import 'mock_chat_database.dart';
@@ -23,6 +24,24 @@ void main() {
       expect(client.isConnected, true);
       expect(client.db, isA<DriftChatDatabase>());
       expect(client.userId, userId);
+
+      addTearDown(() async {
+        await client.disconnect();
+      });
+    });
+
+    test('connects with web options on a non-web platform', () async {
+      // webOptions is web-only configuration; on every other platform it is
+      // accepted and ignored rather than rejected.
+      final client = StreamChatPersistenceClient(
+        logLevel: Level.ALL,
+        webOptions: StreamChatPersistenceWebOptions(
+          sqlite3Uri: Uri.parse('/assets/sqlite3.wasm'),
+          driftWorkerUri: Uri.parse('/assets/drift_worker.js'),
+        ),
+      );
+      await client.connect(userId, databaseProvider: testDatabaseProvider);
+      expect(client.isConnected, true);
 
       addTearDown(() async {
         await client.disconnect();
