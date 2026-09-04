@@ -7,7 +7,6 @@ import '../core/api/requests.dart';
 import '../core/error/error.dart';
 import '../core/models/event.dart';
 import '../core/models/filter.dart';
-import '../event_type.dart';
 import 'client.dart';
 
 /// Catches the client up on the events it missed while offline.
@@ -109,9 +108,20 @@ class SyncManager {
         final events = res.events.sorted((a, b) => a.createdAt.compareTo(b.createdAt));
         final updatedSyncAt = events.lastOrNull?.createdAt ?? DateTime.timestamp();
 
+        // Bail out of oversized event replay. Replaying a large payload through
+        // [StreamChatClient.handleEvent] can hold local persistence and state
+        // updates long enough to slow down regular requests, so the channels
+        // the payload covered are refreshed instead. `queryChannels` returns
+        // their messages, members and read state, which is what the replayed
+        // events would have rebuilt.
         var refreshed = const <String>{};
         if (events.length > _eventReplayMaximumEventCount) {
-          refreshed = await _skipEventReplay(events, cids: channels, refresh: refreshChannelsOnSkip);
+          _logger?.info(
+            'Skipping replay of ${events.length} events, exceeding the '
+            'limit of $_eventReplayMaximumEventCount.',
+          );
+
+          if (refreshChannelsOnSkip) refreshed = await refreshChannels(channels);
         } else {
           _replayEvents(events);
         }
@@ -131,39 +141,6 @@ class SyncManager {
       _logger?.fine('Syncing event: ${event.type}');
       client.handleEvent(event);
     }
-  }
-
-  // Bails out of oversized event replay. Replaying a large payload through
-  // [StreamChatClient.handleEvent] can hold local persistence and state updates
-  // long enough to slow down regular requests, so the channels the payload
-  // covered are refreshed instead when [refresh] is set.
-  //
-  // Returns the cids that were refreshed. The caller advances the sync pointer
-  // only once this has succeeded: dropping the events is safe when their state
-  // has been re-fetched, but advancing past a failed refresh loses them for
-  // good.
-  Future<Set<String>> _skipEventReplay(
-    List<Event> events, {
-    required List<String> cids,
-    required bool refresh,
-  }) async {
-    _logger?.info(
-      'Skipping replay of ${events.length} events, exceeding the '
-      'limit of $_eventReplayMaximumEventCount.',
-    );
-
-    var refreshed = const <String>{};
-    if (refresh) refreshed = await refreshChannels(cids);
-
-    // A channel refresh does not carry the read state, so keep honouring the
-    // mark-all-read events instead of losing them with the rest of the payload.
-    for (final event in events) {
-      if (event.type != EventType.notificationMarkRead) continue;
-      if (event.cid != null) continue;
-      client.handleEvent(event);
-    }
-
-    return refreshed;
   }
 
   // Handles a sync attempt that failed.

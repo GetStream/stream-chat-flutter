@@ -5315,50 +5315,6 @@ void main() {
           expect(await fakeClient.getLastSyncAt(), events.last.createdAt);
         },
       );
-
-      test(
-        '''should still replay mark-all-read events from a payload that exceeds the replay limit''',
-        () async {
-          final cids = ['channel1'];
-          final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));
-          final fakeClient = FakePersistenceClient(
-            channelCids: cids,
-            lastSyncAt: lastSyncAt,
-          );
-
-          client.chatPersistenceClient = fakeClient;
-          final events = [
-            ...List.generate(
-              251,
-              (index) => Event(
-                type: EventType.messageNew,
-                cid: 'channel1',
-                message: Message(id: 'message-$index'),
-                createdAt: lastSyncAt.add(Duration(seconds: index + 1)),
-              ),
-            ),
-            // A channel-less `notification.mark_read` marks every channel read.
-            Event(
-              type: EventType.notificationMarkRead,
-              createdAt: lastSyncAt.add(const Duration(minutes: 5)),
-            ),
-          ];
-          when(() => api.general.sync(cids, lastSyncAt)).thenAnswer(
-            (_) async => SyncResponse()..events = events,
-          );
-
-          final replayed = <Event>[];
-          final sub = client.on(EventType.notificationMarkRead).listen(replayed.add);
-          addTearDown(sub.cancel);
-
-          await client.sync();
-          await pumpEventQueue();
-
-          // A channel refresh does not carry the read state, so these events
-          // survive the skip.
-          expect(replayed, hasLength(1));
-        },
-      );
     });
   });
 
