@@ -8,9 +8,9 @@ import '../core/error/error.dart';
 import '../core/models/filter.dart';
 import 'client.dart';
 
-/// Catches the client up on the events it missed while offline.
+/// Catches a client up on the state it missed while offline.
 ///
-/// Obtained via [StreamChatClient.sync]. Not intended to be constructed
+/// Created and driven by [StreamChatClient]; not intended to be constructed
 /// directly.
 class SyncManager {
   /// Instantiate a new SyncManager object.
@@ -45,8 +45,8 @@ class SyncManager {
   /// Events from an oversized payload are not replayed. The pointer still
   /// advances, so callers relying on the replayed state should refresh it
   /// themselves.
-  Future<void> sync({List<String>? cids, DateTime? lastSyncAt}) {
-    return _sync(cids: cids, lastSyncAt: lastSyncAt);
+  Future<void> sync({List<String>? cids, DateTime? lastSyncAt}) async {
+    await _sync(cids: cids, lastSyncAt: lastSyncAt);
   }
 
   /// Recovers the state of the channels that were active before the connection
@@ -90,21 +90,21 @@ class SyncManager {
     return _syncLock.synchronized(() async {
       final persistenceClient = client.chatPersistenceClient;
 
-      final channels = cids ?? await persistenceClient?.getChannelCids();
-      if (channels == null || channels.isEmpty) return const {};
+      final channelCids = cids ?? await persistenceClient?.getChannelCids();
+      if (channelCids == null || channelCids.isEmpty) return const <String>{};
 
       final syncAt = lastSyncAt ?? await persistenceClient?.getLastSyncAt();
       if (syncAt == null) {
         _logger?.info('Fresh sync start: lastSyncAt initialized to now.');
         await persistenceClient?.updateLastSyncAt(DateTime.timestamp());
-        return const {};
+        return const <String>{};
       }
 
       try {
-        _logger?.info('Syncing events since $syncAt for channels: $channels');
+        _logger?.info('Syncing events since $syncAt for channels: $channelCids');
 
-        final res = await _api.sync(channels, syncAt);
-        final events = res.events.sorted((a, b) => a.createdAt.compareTo(b.createdAt));
+        final res = await _api.sync(channelCids, syncAt);
+        final events = res.events.sortedBy((it) => it.createdAt);
         final updatedSyncAt = events.lastOrNull?.createdAt ?? DateTime.timestamp();
 
         // Replaying a large payload through [StreamChatClient.handleEvent] can
@@ -120,7 +120,7 @@ class SyncManager {
 
           // The pointer moves past the dropped events only once their state has
           // been re-fetched; advancing past a failed refresh would lose them.
-          final refreshed = refreshChannelsOnSkip ? await refreshChannels(channels) : const <String>{};
+          final refreshed = refreshChannelsOnSkip ? await refreshChannels(channelCids) : const <String>{};
           await persistenceClient?.updateLastSyncAt(updatedSyncAt);
           return refreshed;
         }
@@ -131,7 +131,7 @@ class SyncManager {
         }
 
         await persistenceClient?.updateLastSyncAt(updatedSyncAt);
-        return const {};
+        return const <String>{};
       } catch (error, stk) {
         // A 400 means the sync window is too old, or the channel list or event
         // count too large for the server to answer, so local state is flushed
@@ -139,7 +139,7 @@ class SyncManager {
         // next attempt.
         if (error is! StreamChatNetworkError || error.statusCode != 400) {
           _logger?.warning('Error syncing events', error, stk);
-          return const {};
+          return const <String>{};
         }
 
         _logger?.warning(
@@ -154,7 +154,7 @@ class SyncManager {
           _logger?.warning('Error resetting the persistence client', resetError, resetStk);
         }
 
-        return const {};
+        return const <String>{};
       }
     });
   }
