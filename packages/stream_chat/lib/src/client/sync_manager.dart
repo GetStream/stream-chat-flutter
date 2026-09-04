@@ -43,13 +43,42 @@ class SyncManager {
   /// Both arguments fall back to the values held by the client's persistence
   /// client. Does nothing when there are no channels to recover.
   ///
-  /// An oversized payload is not replayed. Pass [refreshChannelsOnSkip] to
-  /// refresh the channels being recovered in place of those events; the
-  /// pointer then advances only once that refresh succeeded.
+  /// Events from an oversized payload are not replayed. The pointer still
+  /// advances, so callers relying on the replayed state should refresh it
+  /// themselves.
+  Future<void> sync({List<String>? cids, DateTime? lastSyncAt}) {
+    return _sync(cids: cids, lastSyncAt: lastSyncAt);
+  }
+
+  /// Recovers the state of [cids] after the connection was re-established.
   ///
-  /// Returns the cids whose state was refreshed, so the caller can skip
-  /// querying them again. Empty when the payload was replayed as usual.
-  Future<Set<String>> recoverMissedEvents({
+  /// Replays the events missed while offline, refreshes the channels an
+  /// oversized payload left behind, and re-queries the rest when the client is
+  /// configured to recover state on reconnect.
+  ///
+  /// Completes once the recovered state has been applied, so callers can
+  /// signal recovery only after this returns.
+  Future<void> recoverState(List<String> cids) async {
+    var refreshed = const <String>{};
+    if (client.persistenceEnabled) {
+      refreshed = await _sync(cids: cids, refreshChannelsOnSkip: true);
+    }
+
+    if (!client.recoverStateOnReconnect) return;
+
+    final stale = cids.whereNot(refreshed.contains).toList();
+    if (stale.isEmpty) return;
+
+    await refreshChannels(stale);
+  }
+
+  // Runs the sync flow, returning the cids whose state was refreshed in place
+  // of an oversized payload. Empty when the payload was replayed as usual.
+  //
+  // Set [refreshChannelsOnSkip] to refresh the channels being recovered when
+  // an oversized payload skips event replay, so that their state takes the
+  // place of the events that were dropped.
+  Future<Set<String>> _sync({
     List<String>? cids,
     DateTime? lastSyncAt,
     bool refreshChannelsOnSkip = false,

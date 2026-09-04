@@ -5426,6 +5426,7 @@ void main() {
 
       await simulateReconnect();
 
+      // The re-query asks for exactly the channels it lists, a page at a time.
       verify(
         () => api.channel.queryChannels(
           filter: Filter.in_('cid', const ['messaging:c1', 'messaging:c2']),
@@ -5435,7 +5436,7 @@ void main() {
           presence: any(named: 'presence'),
           memberLimit: any(named: 'memberLimit'),
           messageLimit: any(named: 'messageLimit'),
-          paginationParams: const PaginationParams(limit: 30),
+          paginationParams: const PaginationParams(limit: 2),
         ),
       ).called(1);
     });
@@ -5698,6 +5699,54 @@ void main() {
           paginationParams: const PaginationParams(limit: 1),
         ),
       ).called(1);
+    });
+
+    // Everything keyed off `connectionRecovered` — the list controllers, the
+    // retry queue — assumes the recovered state has already been applied when
+    // it fires. Emitting it before the catch-up finishes would have them act
+    // on state the sync has not written yet.
+    test('should finish recovering before `connectionRecovered` fires', () async {
+      client = StreamChatClient(apiKey, chatApi: api, ws: ws);
+      await client.connectUser(user, token);
+      await delay(300);
+
+      const cid = 'messaging:c1';
+      final channel = Channel.fromState(client, ChannelState(channel: ChannelModel(cid: cid)));
+      client.state.addChannels({cid: channel});
+
+      final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));
+      client.chatPersistenceClient = FakePersistenceClient(channelCids: const [cid], lastSyncAt: lastSyncAt);
+      await client.openPersistenceConnection(user);
+      addTearDown(() => client.chatPersistenceClient = null);
+
+      final calls = <String>[];
+      when(() => api.general.sync(const [cid], lastSyncAt)).thenAnswer((_) async {
+        calls.add('sync');
+        return SyncResponse()..events = [];
+      });
+      when(
+        () => api.channel.queryChannels(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          memberLimit: any(named: 'memberLimit'),
+          messageLimit: any(named: 'messageLimit'),
+          paginationParams: any(named: 'paginationParams'),
+        ),
+      ).thenAnswer((_) async {
+        calls.add('queryChannels');
+        return QueryChannelsResponse()..channels = [];
+      });
+
+      final sub = client.on(EventType.connectionRecovered).listen((_) => calls.add('connectionRecovered'));
+      addTearDown(sub.cancel);
+
+      await simulateReconnect();
+      await pumpEventQueue();
+
+      expect(calls, ['sync', 'queryChannels', 'connectionRecovered']);
     });
 
     test('should respect runtime toggling via the setter', () async {

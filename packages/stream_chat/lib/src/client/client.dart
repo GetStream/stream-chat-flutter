@@ -101,7 +101,7 @@ class StreamChatClient {
     AttachmentFileUploaderProvider attachmentFileUploaderProvider = StreamAttachmentFileUploader.new,
     Iterable<Interceptor>? chatApiInterceptors,
     HttpClientAdapter? httpClientAdapter,
-    this._recoverStateOnReconnect = true,
+    this.recoverStateOnReconnect = true,
     this.isLocalUnreadCountEnabled = false,
   }) {
     logger.info('Initiating new StreamChatClient');
@@ -244,17 +244,15 @@ class StreamChatClient {
   /// Whether the client should automatically refresh local state from the
   /// server when the WebSocket connection recovers.
   ///
-  /// When `true` (default), the client re-queries the active channels on
-  /// reconnect (capped at 30, ordered by `state.channels.keys`). The set of
-  /// state recovered on reconnect may grow in the future to cover threads,
-  /// reminders, etc.
+  /// When `true` (default), the client re-queries the channels that were
+  /// active before the connection was lost. The set of state recovered on
+  /// reconnect may grow in the future to cover threads, reminders, etc.
   ///
   /// Setting this to `false` disables that client-level recovery. Consumers
   /// that opt out are responsible for refreshing their own state when the
   /// [EventType.connectionRecovered] event fires — for example, by re-running
   /// their channel list query.
-  set recoverStateOnReconnect(bool value) => _recoverStateOnReconnect = value;
-  bool _recoverStateOnReconnect;
+  bool recoverStateOnReconnect;
 
   /// By default the Chat client will write all messages with level Warn or
   /// Error to stdout.
@@ -615,24 +613,7 @@ class StreamChatClient {
         // in flight. Nothing awaits this method, so an error here would
         // surface as an unhandled crash instead of reaching the app.
         try {
-          // Sync the persistence client if available
-          var refreshedBySync = const <String>{};
-          if (persistenceEnabled) {
-            refreshedBySync = await _syncManager.recoverMissedEvents(
-              cids: cids,
-              refreshChannelsOnSkip: true,
-            );
-          }
-
-          // Recover the channels that were active before the connection was
-          // lost, only if the client is configured to do so and the sync has
-          // not already refreshed them.
-          if (_recoverStateOnReconnect && refreshedBySync.isEmpty) {
-            await queryChannelsOnline(
-              filter: Filter.in_('cid', cids),
-              paginationParams: const PaginationParams(limit: 30),
-            );
-          }
+          await _syncManager.recoverState(cids);
         } catch (e, stk) {
           logger.warning('Error recovering state on reconnect', e, stk);
         }
@@ -675,7 +656,7 @@ class StreamChatClient {
   /// advances, so callers relying on the replayed state should refresh it
   /// themselves.
   Future<void> sync({List<String>? cids, DateTime? lastSyncAt}) {
-    return _syncManager.recoverMissedEvents(cids: cids, lastSyncAt: lastSyncAt);
+    return _syncManager.sync(cids: cids, lastSyncAt: lastSyncAt);
   }
 
   final _queryChannelsCache = InFlightCache<String, QueryChannelsResult>();
