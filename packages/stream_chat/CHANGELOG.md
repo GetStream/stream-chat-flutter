@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `CurrentPlatform` throwing `UnimplementedError` on WebAssembly builds.
+
 ## 10.4.0
 
 ✅ Added
