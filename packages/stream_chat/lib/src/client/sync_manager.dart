@@ -42,9 +42,9 @@ class SyncManager {
   /// Both arguments fall back to the values held by the client's persistence
   /// client. Does nothing when there are no channels to recover.
   ///
-  /// Events from an oversized payload are not replayed. The pointer still
-  /// advances, so callers relying on the replayed state should refresh it
-  /// themselves.
+  /// Events from an oversized payload are not replayed. The channels being
+  /// synced are refreshed instead, so their state takes the place of the events
+  /// that were dropped.
   Future<void> sync({List<String>? cids, DateTime? lastSyncAt}) async {
     await _sync(cids: cids, lastSyncAt: lastSyncAt);
   }
@@ -65,7 +65,7 @@ class SyncManager {
 
     var refreshed = const <String>{};
     if (client.persistenceEnabled) {
-      refreshed = await _sync(cids: cids, refreshChannelsOnSkip: true);
+      refreshed = await _sync(cids: cids);
     }
 
     if (!client.recoverStateOnReconnect) return;
@@ -78,15 +78,7 @@ class SyncManager {
 
   // Runs the sync flow, returning the cids whose state was refreshed in place
   // of an oversized payload. Empty when the payload was replayed as usual.
-  //
-  // Set [refreshChannelsOnSkip] to refresh the channels being recovered when
-  // an oversized payload skips event replay, so that their state takes the
-  // place of the events that were dropped.
-  Future<Set<String>> _sync({
-    List<String>? cids,
-    DateTime? lastSyncAt,
-    bool refreshChannelsOnSkip = false,
-  }) {
+  Future<Set<String>> _sync({List<String>? cids, DateTime? lastSyncAt}) {
     return _syncLock.synchronized(() async {
       final persistenceClient = client.chatPersistenceClient;
 
@@ -120,7 +112,7 @@ class SyncManager {
 
           // The pointer moves past the dropped events only once their state has
           // been re-fetched; advancing past a failed refresh would lose them.
-          final refreshed = refreshChannelsOnSkip ? await refreshChannels(channelCids) : const <String>{};
+          final refreshed = await refreshChannels(channelCids);
           await persistenceClient?.updateLastSyncAt(updatedSyncAt);
           return refreshed;
         }

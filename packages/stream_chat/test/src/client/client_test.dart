@@ -5172,6 +5172,11 @@ void main() {
     );
 
     group('Sync Method Tests', () {
+      setUpAll(() {
+        registerFallbackValue(const PaginationParams());
+        registerFallbackValue(Filter.equal('cid', ''));
+      });
+
       test(
         'should retrieve data from persistence client and sync successfully',
         () async {
@@ -5274,7 +5279,7 @@ void main() {
       );
 
       test(
-        '''should skip replay but advance lastSyncAt when the payload exceeds the replay limit''',
+        '''should refresh the synced channels instead of replaying when the payload exceeds the replay limit''',
         () async {
           final cids = ['channel1'];
           final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));
@@ -5298,6 +5303,19 @@ void main() {
             (_) async => SyncResponse()..events = events,
           );
 
+          when(
+            () => api.channel.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              state: any(named: 'state'),
+              watch: any(named: 'watch'),
+              presence: any(named: 'presence'),
+              memberLimit: any(named: 'memberLimit'),
+              messageLimit: any(named: 'messageLimit'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          ).thenAnswer((_) async => QueryChannelsResponse()..channels = []);
+
           final replayed = <Event>[];
           final sub = client.on(EventType.messageNew).listen(replayed.add);
           addTearDown(sub.cancel);
@@ -5308,10 +5326,23 @@ void main() {
           verify(() => api.general.sync(cids, lastSyncAt)).called(1);
           // Replay is skipped; no events are dispatched through the handler.
           expect(replayed, isEmpty);
-          // A direct call refreshes nothing on its own.
-          verifyZeroInteractions(api.channel);
-          // lastSyncAt still advances to the newest event date in the skipped
-          // payload, so the same oversized payload is not retried indefinitely.
+
+          // The synced channels are re-queried in place of those events.
+          verify(
+            () => api.channel.queryChannels(
+              filter: Filter.in_('cid', cids),
+              sort: any(named: 'sort'),
+              state: any(named: 'state'),
+              watch: any(named: 'watch'),
+              presence: any(named: 'presence'),
+              memberLimit: any(named: 'memberLimit'),
+              messageLimit: any(named: 'messageLimit'),
+              paginationParams: const PaginationParams(limit: 1),
+            ),
+          ).called(1);
+
+          // lastSyncAt advances to the newest event date in the skipped payload
+          // once the refresh took its place, so it is not retried indefinitely.
           expect(await fakeClient.getLastSyncAt(), events.last.createdAt);
         },
       );

@@ -648,9 +648,8 @@ class StreamChatClient {
   /// Get the events missed while offline to sync the offline storage
   /// Will automatically fetch [cids] and [lastSyncedAt] if [persistenceEnabled]
   ///
-  /// Events from an oversized payload are not replayed. The sync pointer still
-  /// advances, so callers relying on the replayed state should refresh it
-  /// themselves.
+  /// Events from an oversized payload are not replayed. The channels being
+  /// synced are refreshed with [queryChannelsOnline] instead.
   Future<void> sync({List<String>? cids, DateTime? lastSyncAt}) {
     return _syncManager.sync(cids: cids, lastSyncAt: lastSyncAt);
   }
