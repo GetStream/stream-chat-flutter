@@ -5,6 +5,7 @@ import 'package:synchronized/synchronized.dart';
 import '../core/api/general_api.dart';
 import '../core/api/requests.dart';
 import '../core/error/error.dart';
+import '../core/models/event.dart';
 import '../core/models/filter.dart';
 import '../event_type.dart';
 import 'client.dart';
@@ -108,66 +109,86 @@ class SyncManager {
         final events = res.events.sorted((a, b) => a.createdAt.compareTo(b.createdAt));
         final updatedSyncAt = events.lastOrNull?.createdAt ?? DateTime.timestamp();
 
-        // Bail out of oversized event replay. Replaying a large payload through
-        // [StreamChatClient.handleEvent] can hold local persistence and state
-        // updates long enough to slow down regular requests. Refresh the
-        // channels instead, and only advance the sync pointer once that
-        // succeeded: dropping the events is safe when their state has been
-        // re-fetched, but advancing past a failed refresh loses them for good.
+        var refreshed = const <String>{};
         if (events.length > _eventReplayMaximumEventCount) {
-          _logger?.info(
-            'Skipping replay of ${events.length} events, exceeding the '
-            'limit of $_eventReplayMaximumEventCount.',
-          );
-
-          var refreshed = const <String>{};
-          if (refreshChannelsOnSkip) refreshed = await refreshChannels(channels);
-
-          // A channel refresh does not carry the read state, so keep honouring
-          // the mark-all-read events instead of losing them with the rest of
-          // the payload.
-          for (final event in events) {
-            if (event.type != EventType.notificationMarkRead) continue;
-            if (event.cid != null) continue;
-            client.handleEvent(event);
-          }
-
-          await persistenceClient?.updateLastSyncAt(updatedSyncAt);
-          return refreshed;
-        }
-
-        for (final event in events) {
-          _logger?.fine('Syncing event: ${event.type}');
-          client.handleEvent(event);
+          refreshed = await _skipEventReplay(events, cids: channels, refresh: refreshChannelsOnSkip);
+        } else {
+          _replayEvents(events);
         }
 
         await persistenceClient?.updateLastSyncAt(updatedSyncAt);
-        return const {};
+        return refreshed;
       } catch (error, stk) {
-        // If we got a 400 error, it means that either the sync time is too
-        // old or the channel list is too long or too many events need to be
-        // synced. In this case, we should just flush the persistence client
-        // and start over.
-        if (error is StreamChatNetworkError && error.statusCode == 400) {
-          _logger?.warning(
-            'Failed to sync events due to stale or oversized state. '
-            'Resetting the persistence client to enable a fresh start.',
-          );
-
-          try {
-            await persistenceClient?.flush();
-            await persistenceClient?.updateLastSyncAt(DateTime.timestamp());
-          } catch (resetError, resetStk) {
-            _logger?.warning('Error resetting the persistence client', resetError, resetStk);
-          }
-
-          return const {};
-        }
-
-        _logger?.warning('Error syncing events', error, stk);
+        await _handleSyncFailure(error, stk);
         return const {};
       }
     });
+  }
+
+  // Applies every event of a payload small enough to replay.
+  void _replayEvents(List<Event> events) {
+    for (final event in events) {
+      _logger?.fine('Syncing event: ${event.type}');
+      client.handleEvent(event);
+    }
+  }
+
+  // Bails out of oversized event replay. Replaying a large payload through
+  // [StreamChatClient.handleEvent] can hold local persistence and state updates
+  // long enough to slow down regular requests, so the channels the payload
+  // covered are refreshed instead when [refresh] is set.
+  //
+  // Returns the cids that were refreshed. The caller advances the sync pointer
+  // only once this has succeeded: dropping the events is safe when their state
+  // has been re-fetched, but advancing past a failed refresh loses them for
+  // good.
+  Future<Set<String>> _skipEventReplay(
+    List<Event> events, {
+    required List<String> cids,
+    required bool refresh,
+  }) async {
+    _logger?.info(
+      'Skipping replay of ${events.length} events, exceeding the '
+      'limit of $_eventReplayMaximumEventCount.',
+    );
+
+    var refreshed = const <String>{};
+    if (refresh) refreshed = await refreshChannels(cids);
+
+    // A channel refresh does not carry the read state, so keep honouring the
+    // mark-all-read events instead of losing them with the rest of the payload.
+    for (final event in events) {
+      if (event.type != EventType.notificationMarkRead) continue;
+      if (event.cid != null) continue;
+      client.handleEvent(event);
+    }
+
+    return refreshed;
+  }
+
+  // Handles a sync attempt that failed.
+  //
+  // A 400 means the sync window is too old, or the channel list or event count
+  // too large for the server to answer, so local state is flushed and the sync
+  // pointer reset to start over. Anything else is left for the next attempt.
+  Future<void> _handleSyncFailure(Object error, StackTrace stk) async {
+    if (error is! StreamChatNetworkError || error.statusCode != 400) {
+      _logger?.warning('Error syncing events', error, stk);
+      return;
+    }
+
+    _logger?.warning(
+      'Failed to sync events due to stale or oversized state. '
+      'Resetting the persistence client to enable a fresh start.',
+    );
+
+    try {
+      final persistenceClient = client.chatPersistenceClient;
+      await persistenceClient?.flush();
+      await persistenceClient?.updateLastSyncAt(DateTime.timestamp());
+    } catch (resetError, resetStk) {
+      _logger?.warning('Error resetting the persistence client', resetError, resetStk);
+    }
   }
 
   /// Refreshes the state of the channels in [cids] from the server.
