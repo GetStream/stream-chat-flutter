@@ -140,8 +140,8 @@ gradle-wrapper.jar
 
 # Exceptions to the above rules
 !/pubspec.lock
-!**/example/web/sql-wasm.js
-!**/example/web/sql-wasm.wasm
-!/sample_app/web/sql-wasm.js
-!/sample_app/web/sql-wasm.wasm
+!**/example/web/drift_worker.js
+!**/example/web/sqlite3.wasm
+!/sample_app/web/drift_worker.js
+!/sample_app/web/sqlite3.wasm
 !/sample_app/android/app/google-services.json

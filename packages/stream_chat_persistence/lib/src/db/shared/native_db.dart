@@ -5,12 +5,13 @@ import 'dart:isolate';
 import 'package:drift/drift.dart';
 import 'package:drift/isolate.dart';
 import 'package:drift/native.dart';
+import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../../../stream_chat_persistence.dart';
 import '../../stream_chat_persistence_client.dart';
 import '../drift_chat_database.dart';
+import '../web_options.dart';
 
 /// A Helper class to construct new instances of [DriftChatDatabase]
 /// specifically for native platform applications.
@@ -18,9 +19,10 @@ class SharedDB {
   /// Returns a new instance of [DriftChatDatabase].
   static Future<DriftChatDatabase> constructDatabase(
     String userId, {
+    Logger? logger, // Ignored on native
     bool logStatements = false,
     ConnectionMode connectionMode = ConnectionMode.regular,
-    bool webUseIndexedDbIfSupported = false, // Ignored on native
+    StreamChatPersistenceWebOptions? webOptions, // Ignored on native
   }) async {
     final dbName = 'db_$userId';
     if (connectionMode == ConnectionMode.background) {

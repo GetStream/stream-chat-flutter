@@ -26,7 +26,7 @@ Add this to your `pubspec.yaml`, using the latest version [![Pub](https://img.sh
 
 ```yaml
 dependencies:
-  stream_chat_persistence: ^10.0.0
+  stream_chat_persistence: ^11.0.0
 ```
 
 Then run:
@@ -59,21 +59,72 @@ And you are ready to go.
 
 ## Flutter Web
 
-Due to Drift's web backend you need to include the sql.js library. Add the following to your `web/index.html`:
+On the web, drift runs sqlite3 as WebAssembly inside a web worker. That needs two files which are not part of your
+compiled app. Download them from the [drift release][drift-releases] matching the `drift` version your app resolves
+— both are published in the same release, which is the only combination guaranteed to be compatible — and copy them
+into your app's `web/` folder:
 
-```html
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <script defer src="sql-wasm.js"></script>
-    <script defer src="main.dart.js" type="application/javascript"></script>
-</head>
-<body></body>
-</html>
+```text
+web/
+├── drift_worker.js
+├── index.html
+└── sqlite3.wasm
 ```
 
-You can grab the latest version of `sql-wasm.js` and `sql-wasm.wasm` from the [sql.js releases](https://github.com/sql-js/sql.js/releases) and copy them into your `/web` folder.
+There is nothing to add to `index.html`. `drift_worker.js` is started by drift as a worker at runtime and must
+**not** be loaded with a `<script>` tag.
+
+That is the whole setup. drift probes the browser on startup and picks the most reliable storage it supports; the
+choice is reported through the client's logger at `Level.INFO`, with a warning when the browser can only offer
+storage that two open tabs could corrupt, and a severe record when it cannot persist at all.
+
+### Serve your app cross-origin isolated
+
+Which storage a browser can offer depends on whether your app is [cross-origin isolated][coi]. Serve it with these
+two response headers:
+
+```text
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Embedder-Policy: require-corp
+```
+
+| Browser | Without the headers | With the headers |
+| --- | --- | --- |
+| Firefox | origin private file system | origin private file system |
+| Chrome / Edge | IndexedDB, shared between tabs | origin private file system |
+| Safari | IndexedDB, shared between tabs | origin private file system |
+
+The headers make the browser expose `SharedArrayBuffer`, which is what lets drift turn the asynchronous file system
+API into the synchronous one sqlite3 needs. Without them Chrome and Safari fall back to IndexedDB behind a shared
+worker. Everything works either way; the headers only make it faster.
+
+During development, `flutter run -d chrome --web-header=Cross-Origin-Opener-Policy=same-origin
+--web-header=Cross-Origin-Embedder-Policy=require-corp` serves them.
+
+### Serving the files from somewhere else
+
+If the two files do not sit next to your `index.html` — a CDN, or a custom asset directory — say so with
+`webOptions`:
+
+```dart
+final chatPersistentClient = StreamChatPersistenceClient(
+  webOptions: StreamChatPersistenceWebOptions(
+    sqlite3Uri: Uri.parse('/assets/sqlite3.wasm'),
+    driftWorkerUri: Uri.parse('/assets/drift_worker.js'),
+  ),
+);
+```
+
+Both default to a path relative to your app's base href, so a non-root `<base href>` is handled for you. If
+`sqlite3.wasm` cannot be fetched, `connect` throws with the URI it looked at; if `drift_worker.js` cannot be
+fetched, drift falls back to a database that persists nothing and the client logs a severe record naming the file.
+
+A cached database that cannot be opened at all — one left corrupt by a killed tab, say — is discarded and rebuilt
+from an empty one, with a warning logged. The local database is only a cache, so this costs one extra sync rather
+than blocking sign-in.
+
+[drift-releases]: https://github.com/simolus3/drift/releases
+[coi]: https://developer.mozilla.org/en-US/docs/Web/API/crossOriginIsolated
 
 ## Contributing
 
