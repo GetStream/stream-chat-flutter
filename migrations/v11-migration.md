@@ -19,6 +19,7 @@ onto Stream's OpenAPI-generated API client.
 - [Error Handling](#error-handling)
     - [The error type changed too](#the-error-type-changed-too)
 - [Feature Areas](#feature-areas)
+    - [Web Persistence](#web-persistence)
 - [Migration Checklist](#migration-checklist)
 - [For AI Agents](#for-ai-agents)
 - [Contributing to this guide](#contributing-to-this-guide)
@@ -58,6 +59,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | Feature Area | Key Changes |
 | --- | --- |
 | [**Error Handling**](#error-handling) | API calls return `Result<T>` instead of throwing; failures carry `stream_core`'s sealed `StreamException` family instead of `StreamChatNetworkError`; `ChatErrorCode` → `StreamErrorCode` |
+| [**Web Persistence**](#web-persistence) | drift's deprecated sql.js backend replaced by WebAssembly, so `dart2wasm` builds are supported; `sql-wasm.js`/`sql-wasm.wasm` replaced by `sqlite3.wasm`/`drift_worker.js`; `webUseExperimentalIndexedDb` removed in favour of `webOptions`; web caches are refilled once |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -73,6 +75,8 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamChatNetworkError.code` / `.message` / `.statusCode` | `StreamApiException.code` / `.message` / `.statusCode` | `moved` | `code` is now a `StreamErrorCode` |
 | `StreamChatNetworkError.isRequestCancelledError` | `StreamNetworkException.isCancelled` | `moved` | |
 | `ChatErrorCode` | `StreamErrorCode` (`stream_core`) | `removed` | Extension type over `int` with named constants |
+| `StreamChatPersistenceClient(webUseExperimentalIndexedDb:)` | `StreamChatPersistenceClient(webOptions:)` | `removed` | Storage selection is automatic now, so there is no flag to forward |
+| — | `StreamChatPersistenceWebOptions` | `renamed` | New type, exported from `package:stream_chat_persistence/stream_chat_persistence.dart` |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -156,6 +160,84 @@ counterpart: `code` is now a `StreamErrorCode` (an extension type over `int`, wi
 
 _Each migrated feature gets a section here. Sections are added by the PR that migrates the feature, using the
 template in [Contributing to this guide](#contributing-to-this-guide)._
+
+### Web Persistence
+
+#### Key Changes:
+
+- `stream_chat_persistence` now runs sqlite3 as WebAssembly instead of through drift's deprecated sql.js
+  backend. Persistence works in apps compiled with `dart2wasm` for the first time; before, those builds fell
+  through to an implementation that threw `UnsupportedError`.
+- The files you copy into `web/` changed: **remove** `sql-wasm.js` and `sql-wasm.wasm`, **add** `sqlite3.wasm`
+  and `drift_worker.js`. Take both from the same [drift release][drift-releases] — that is the only
+  combination guaranteed to be compatible.
+- **Remove the `<script defer src="sql-wasm.js">` tag from `web/index.html`.** Nothing replaces it:
+  `drift_worker.js` is started by drift as a worker at runtime and must not be loaded into the page.
+- `webUseExperimentalIndexedDb` is removed. drift now probes the browser and picks the most reliable storage it
+  supports on its own, which is what the flag was approximating.
+- New `webOptions` parameter, taking a `StreamChatPersistenceWebOptions`, for pointing at the two files when they
+  are not served next to `index.html`.
+- **Existing web caches are not migrated.** The first launch after upgrading starts from an empty offline cache
+  and refills it from the API. Nothing is lost that is not on the server — the local database is a cache — but the
+  first load on web hits the network.
+- The storage drift chose is reported through the client's logger at `Level.INFO`, with a `WARNING` when the
+  browser can only offer storage that two open tabs could corrupt, and a `SEVERE` when it cannot persist at all.
+- A cached database that cannot be opened is discarded and rebuilt from an empty one rather than failing
+  `connect`, so a cache damaged by a killed tab costs one extra sync instead of blocking sign-in.
+
+#### Migration Steps:
+
+**Before:**
+```dart
+final chatPersistentClient = StreamChatPersistenceClient(
+  logLevel: Level.INFO,
+  connectionMode: ConnectionMode.regular,
+  webUseExperimentalIndexedDb: true,
+);
+```
+```html
+<!-- web/index.html -->
+<script defer src="sql-wasm.js"></script>
+```
+
+**After:**
+```dart
+final chatPersistentClient = StreamChatPersistenceClient(
+  logLevel: Level.INFO,
+  connectionMode: ConnectionMode.regular,
+);
+```
+```html
+<!-- web/index.html — no script tag needed -->
+```
+
+Copy `sqlite3.wasm` and `drift_worker.js` into `web/`, and serve your app with
+`Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp` so Chrome and Safari
+can use the origin private file system instead of IndexedDB. The
+[package README](https://pub.dev/packages/stream_chat_persistence#flutter-web) has the per-browser table.
+
+If the two files are hosted somewhere other than next to `index.html`:
+
+```dart
+final chatPersistentClient = StreamChatPersistenceClient(
+  webOptions: StreamChatPersistenceWebOptions(
+    sqlite3Uri: Uri.parse('/assets/sqlite3.wasm'),
+    driftWorkerUri: Uri.parse('/assets/drift_worker.js'),
+  ),
+);
+```
+
+The upgrade removes the two `localStorage` keys the old backend wrote (`moor_db_str_db_<userId>` and
+`moor_db_version_db_<userId>`) on the first connect. If you opted into `webUseExperimentalIndexedDb`, its data
+lives in an IndexedDB database named `moor_databases`, which is **not** removed automatically — that name is
+shared with any other database your app opened through drift's legacy web backend, so deleting it is your call.
+
+> **Why:** `package:drift/web.dart` is deprecated upstream and is built on `dart:html`, which does not exist
+> under `dart2wasm` — so the old backend both blocked WebAssembly builds of consumer apps and was on a path to
+> removal. The WebAssembly backend also stores data in the origin private file system or IndexedDB rather than a
+> `localStorage` string, which removes the ~5 MB storage ceiling that came with the sql.js approach.
+
+[drift-releases]: https://github.com/simolus3/drift/releases
 
 ---
 

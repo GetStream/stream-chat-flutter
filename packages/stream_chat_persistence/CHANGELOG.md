@@ -1,7 +1,20 @@
 ## Upcoming
 
+✅ Added
+
+- Added `StreamChatPersistenceClient.webOptions` for pointing the web database at `sqlite3.wasm` and
+  `drift_worker.js` when they are not served next to the app's `index.html`.
+
 🔄 Changed
 
+- Migrated the web database from drift's deprecated sql.js backend to WebAssembly, which also makes persistence
+  work in apps compiled with `dart2wasm`. Web apps must now serve `sqlite3.wasm` and `drift_worker.js` from their
+  `web/` folder in place of `sql-wasm.js` and `sql-wasm.wasm`, and drop the `sql-wasm.js` script tag from
+  `index.html`. Existing web caches are refilled from the API once.
+- Removed `StreamChatPersistenceClient.webUseExperimentalIndexedDb`. drift now picks the most reliable storage the
+  browser supports on its own and reports the choice through the client's logger.
+- A cached web database that cannot be opened — left corrupt by a killed tab, for instance — is now discarded and
+  rebuilt from an empty one instead of failing `connect`, so a damaged cache no longer prevents signing in.
 - Raised minimum Flutter to `>=3.44.0` and Dart SDK to `^3.12.0`.
 
 ## 10.3.0
