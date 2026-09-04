@@ -606,17 +606,13 @@ class StreamChatClient {
     final connectionRecovered = !wasConnected && isConnected;
 
     if (connectionRecovered) {
-      // connection recovered
-      final cids = [...state.channels.keys.toSet()];
-      if (cids.isNotEmpty) {
-        // Recovery is best-effort: the connection can drop again while it is
-        // in flight. Nothing awaits this method, so an error here would
-        // surface as an unhandled crash instead of reaching the app.
-        try {
-          await _syncManager.recoverState(cids);
-        } catch (e, stk) {
-          logger.warning('Error recovering state on reconnect', e, stk);
-        }
+      // Recovery is best-effort: the connection can drop again while it is
+      // in flight. Nothing awaits this method, so an error here would surface
+      // as an unhandled crash instead of reaching the app.
+      try {
+        await _syncManager.recoverState();
+      } catch (e, stk) {
+        logger.warning('Error recovering state on reconnect', e, stk);
       }
 
       handleEvent(

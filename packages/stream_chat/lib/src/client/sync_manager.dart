@@ -50,15 +50,20 @@ class SyncManager {
     return _sync(cids: cids, lastSyncAt: lastSyncAt);
   }
 
-  /// Recovers the state of [cids] after the connection was re-established.
+  /// Recovers the state of the channels that were active before the connection
+  /// was lost.
   ///
   /// Replays the events missed while offline, refreshes the channels an
   /// oversized payload left behind, and re-queries the rest when the client is
-  /// configured to recover state on reconnect.
+  /// configured to recover state on reconnect. Does nothing when no channels
+  /// are active.
   ///
   /// Completes once the recovered state has been applied, so callers can
   /// signal recovery only after this returns.
-  Future<void> recoverState(List<String> cids) async {
+  Future<void> recoverState() async {
+    final cids = client.state.channels.keys.toList();
+    if (cids.isEmpty) return;
+
     var refreshed = const <String>{};
     if (client.persistenceEnabled) {
       refreshed = await _sync(cids: cids, refreshChannelsOnSkip: true);
