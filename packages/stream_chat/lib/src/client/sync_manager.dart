@@ -59,21 +59,29 @@ class SyncManager {
   ///
   /// Completes once the recovered state has been applied, so callers can
   /// signal recovery only after this returns.
+  ///
+  /// Recovery is best-effort and never throws: the connection can drop again
+  /// while it is in flight, and the caller is a connection listener with no
+  /// way to hand that failure to the app.
   Future<void> recoverState() async {
     final cids = client.state.channels.keys.toList();
     if (cids.isEmpty) return;
 
-    // The sync does not catch the channels up when it drops an oversized
-    // payload or fails outright, and it does not run at all without a
-    // persistence client to catch up.
-    var caughtUp = true;
-    if (client.persistenceEnabled) caughtUp = await _sync(cids: cids);
+    try {
+      // The sync does not catch the channels up when it drops an oversized
+      // payload or fails outright, and it does not run at all without a
+      // persistence client to catch up.
+      var caughtUp = true;
+      if (client.persistenceEnabled) caughtUp = await _sync(cids: cids);
 
-    // Refreshing stands in for the events the sync did not apply, and is also
-    // the recovery the client can be configured to always run.
-    if (caughtUp && !client.recoverStateOnReconnect) return;
+      // Refreshing stands in for the events the sync did not apply, and is
+      // also the recovery the client can be configured to always run.
+      if (caughtUp && !client.recoverStateOnReconnect) return;
 
-    await refreshChannels(cids);
+      await refreshChannels(cids);
+    } catch (error, stk) {
+      _logger?.warning('Error recovering state on reconnect', error, stk);
+    }
   }
 
   // Fetches the events missed since the last sync and replays them.
