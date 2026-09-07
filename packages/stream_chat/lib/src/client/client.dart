@@ -54,7 +54,7 @@ import '../event_type.dart';
 import '../system_environment.dart';
 import '../ws/connection_status.dart';
 import '../ws/websocket.dart';
-import 'channel.dart';
+import 'channel/channel.dart';
 import 'channel_delivery_reporter.dart';
 import 'event_resolvers.dart' as event_resolvers;
 import 'query_channels_result.dart';

@@ -4,8 +4,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
-import '../fakes.dart';
-import '../mocks.dart';
+import '../../fakes.dart';
+import '../../mocks.dart';
 
 void main() {
   group('ChannelCapabilityCheck', () {

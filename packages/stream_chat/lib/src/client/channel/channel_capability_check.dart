@@ -1,4 +1,4 @@
-import '../../stream_chat.dart';
+import '../../../stream_chat.dart';
 
 /// Extension methods for checking channel capabilities on a Channel instance.
 ///

@@ -7,13 +7,7 @@ import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:synchronized/synchronized.dart';
 
-import '../../stream_chat.dart';
-
-// Re-exported so that importing this file directly keeps resolving the
-// extensions that used to be declared here.
-export 'channel_capability_check.dart';
-export 'channel_client_state.dart';
-export 'channel_read_helper.dart';
+import '../../../stream_chat.dart';
 
 /// The maximum time the incoming [Event.typingStart] event is valid before a
 /// [Event.typingStop] event is emitted automatically.

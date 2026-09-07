@@ -5,9 +5,9 @@ import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../../stream_chat.dart';
-import '../core/util/utils.dart';
-import 'retry_queue.dart';
+import '../../../stream_chat.dart';
+import '../../core/util/utils.dart';
+import '../retry_queue.dart';
 
 /// The class that handles the state of the channel listening to the events.
 class ChannelClientState {

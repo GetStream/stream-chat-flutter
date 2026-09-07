@@ -5,7 +5,7 @@ import 'package:synchronized/synchronized.dart';
 import '../core/models/message.dart';
 import '../core/models/message_delivery.dart';
 import '../core/util/message_rules.dart';
-import 'channel.dart';
+import 'channel/channel.dart';
 
 /// A callback that sends delivery receipts for multiple channels.
 ///
