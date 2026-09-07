@@ -76,7 +76,7 @@ class SyncManager {
       // could not replay.
       if (!client.recoverStateOnReconnect || refreshedBySync) return;
 
-      await refreshChannels(cids);
+      return await refreshChannels(cids);
     } catch (error, stk) {
       _logger?.warning('Error recovering state on reconnect', error, stk);
     }

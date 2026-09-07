@@ -252,6 +252,10 @@ class StreamChatClient {
   /// that opt out are responsible for refreshing their own state when the
   /// [EventType.connectionRecovered] event fires — for example, by re-running
   /// their channel list query.
+  ///
+  /// Replaying the events missed while offline is not affected either way: it
+  /// runs whenever a persistence client is connected, and the channels it
+  /// cannot replay are refreshed regardless of this flag.
   bool recoverStateOnReconnect;
 
   /// By default the Chat client will write all messages with level Warn or
@@ -596,25 +600,13 @@ class StreamChatClient {
     final isConnected = currStatus == ConnectionStatus.connected;
 
     // Notify the connection status change event
-    handleEvent(
-      Event(
-        type: EventType.connectionChanged,
-        online: isConnected,
-      ),
-    );
+    handleEvent(Event(type: EventType.connectionChanged, online: isConnected));
 
     final connectionRecovered = !wasConnected && isConnected;
+    if (!connectionRecovered) return;
 
-    if (connectionRecovered) {
-      await _syncManager.recoverState();
-
-      handleEvent(
-        Event(
-          type: EventType.connectionRecovered,
-          online: true,
-        ),
-      );
-    }
+    await _syncManager.recoverState();
+    handleEvent(Event(type: EventType.connectionRecovered, online: true));
   }
 
   /// Stream of [Event] coming from [_ws] connection
