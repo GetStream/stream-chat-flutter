@@ -518,6 +518,29 @@ void main() {
     await expectLater(harness.manager.recoverState(), completes);
   });
 
+  testWithClock('sync does not throw when applying an event does', () async {
+    final harness = buildHarness(
+      api: _FakeSyncEndpoint(events: eventsOf(2)),
+      persistence: FakePersistenceClient(lastSyncAt: anHourAgo),
+    );
+    when(() => harness.client.handleEvent(any())).thenThrow(Exception('a listener blew up'));
+
+    await expectLater(harness.manager.sync(cids: ['messaging:a']), completes);
+  });
+
+  testWithClock('sync keeps lastSyncAt when a window is only partly applied', () async {
+    final persistence = FakePersistenceClient(lastSyncAt: anHourAgo);
+    final harness = buildHarness(
+      api: _FakeSyncEndpoint(events: eventsOf(2)),
+      persistence: persistence,
+    );
+    when(() => harness.client.handleEvent(any())).thenThrow(Exception('a listener blew up'));
+
+    await harness.manager.sync(cids: ['messaging:a']);
+
+    expect(await persistence.getLastSyncAt(), anHourAgo);
+  });
+
   testWithClock('recoverState pages the refresh rather than truncating it', () async {
     final cids = List.generate(300, (i) => 'messaging:$i');
     final harness = buildHarness(

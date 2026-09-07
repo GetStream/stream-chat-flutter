@@ -124,12 +124,19 @@ class SyncManager {
 
     // A failed replay reports no refreshed channels rather than throwing, so the
     // refresh below still runs — it needs the network, not the local store.
-    var refreshed = const <String>{};
-    if (client.persistenceEnabled) refreshed = await sync(cids: cids);
+    // Guarded so the contract above holds: `persistenceEnabled` reads a
+    // user-supplied persistence client, and replaying an event runs the whole
+    // event pipeline. A throw here would stop the caller announcing recovery.
+    try {
+      var refreshed = const <String>{};
+      if (client.persistenceEnabled) refreshed = await sync(cids: cids);
 
-    if (client.recoverStateOnReconnect) {
-      final stale = cids.whereNot(refreshed.contains).toList();
-      if (stale.isNotEmpty) await _refreshPages(stale);
+      if (client.recoverStateOnReconnect) {
+        final stale = cids.whereNot(refreshed.contains).toList();
+        if (stale.isNotEmpty) await _refreshPages(stale);
+      }
+    } catch (error, stk) {
+      logger?.warning('Error recovering state on reconnect', error, stk);
     }
   }
 
@@ -198,9 +205,17 @@ class SyncManager {
       return _discardOversizedWindow(cappedCids, nextSyncAt);
     }
 
-    for (final event in events) {
-      logger?.fine('Syncing event: ${event.type}');
-      client.handleEvent(event);
+    // Applying an event runs the whole event pipeline, so a listener can throw.
+    // lastSyncAt stays where it is when one does: the window was only partly
+    // applied, and the next catch-up should ask for it again.
+    try {
+      for (final event in events) {
+        logger?.fine('Syncing event: ${event.type}');
+        client.handleEvent(event);
+      }
+    } catch (error, stk) {
+      logger?.warning('Stopped replaying the missed events, keeping lastSyncAt', error, stk);
+      return const <String>{};
     }
 
     await _advanceLastSyncAt(nextSyncAt);
