@@ -61,8 +61,8 @@ class ChannelClientState {
   StreamChatClient get _client => _channel.client;
   final _subscriptions = CompositeSubscription();
 
-  /// Removes the [watcher] from the channel state, optionally updating the
-  /// [watcherCount] when provided.
+  // Removes the watcher from the channel state, optionally updating the
+  // watcher count when provided.
   void _removeWatcher(User watcher, {int? watcherCount}) {
     // Writes the state directly: the watcher list merge in
     // [updateChannelState] would undo the removal.
@@ -73,9 +73,8 @@ class ChannelClientState {
     );
   }
 
-  /// Replaces the member matching [member]'s user id in the channel state.
-  ///
-  /// Does nothing if no member with the same user id exists.
+  // Replaces the member matching the given member's user id in the channel
+  // state. Does nothing if no member with the same user id exists.
   void _updateMember(Member member) {
     final currentMembers = [...members];
     final memberIndex = currentMembers.indexWhere(
@@ -692,12 +691,12 @@ class ChannelClientState {
   Map<User, Event> get typingEvents => _typingEventsController.value;
   final _typingEventsController = BehaviorSubject.seeded(<User, Event>{});
 
-  /// Adds or replaces the typing [event] for the given [user].
+  // Adds or replaces the typing event for the given user.
   void _upsertTypingEvent(User user, Event event) {
     _typingEventsController.safeAdd({...typingEvents, user: event});
   }
 
-  /// Removes the typing event for the given [user], if any.
+  // Removes the typing event for the given user, if any.
   void _removeTypingEvent(User user) {
     _typingEventsController.safeAdd({...typingEvents}..remove(user));
   }
@@ -792,8 +791,8 @@ class ChannelClientState {
     _channel.client.handleEvent(locationExpiredEvent);
   }
 
-  /// Deletes all messages from the user identified by [userId], both from
-  /// the persistence layer and the channel state.
+  // Deletes all messages from the user identified by the given id, both from
+  // the persistence layer and the channel state.
   Future<void> _deleteMessagesFromUser({
     required String userId,
     bool hardDelete = false,
