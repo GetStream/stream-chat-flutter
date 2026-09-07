@@ -1,13 +1,13 @@
 // ignore_for_file: cascade_invocations
 
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/src/client/channel_event_handler.dart';
-import 'package:stream_chat/src/client/channel_state_mutations.dart';
+import 'package:stream_chat/src/client/channel/channel_event_handler.dart';
+import 'package:stream_chat/src/client/channel/channel_state_mutations.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
-import '../fakes.dart';
-import '../mocks.dart';
+import '../../fakes.dart';
+import '../../mocks.dart';
 
 class MockChannel extends Mock implements Channel {}
 

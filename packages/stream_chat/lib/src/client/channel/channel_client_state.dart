@@ -6,10 +6,10 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../../stream_chat.dart';
 import '../../core/util/utils.dart';
-import '../channel_event_handler.dart';
-import '../channel_state_mutations.dart';
 import '../live_location_expiration_scheduler.dart';
 import '../retry_queue.dart';
+import 'channel_event_handler.dart';
+import 'channel_state_mutations.dart';
 
 /// The class that handles the state of the channel listening to the events.
 class ChannelClientState {

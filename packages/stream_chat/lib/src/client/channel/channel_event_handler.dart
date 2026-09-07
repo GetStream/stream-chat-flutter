@@ -1,4 +1,4 @@
-import '../../stream_chat.dart';
+import '../../../stream_chat.dart';
 import 'channel_state_mutations.dart';
 
 /// Routes channel events to the matching [ChannelStateMutations] methods.

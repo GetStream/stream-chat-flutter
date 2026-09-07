@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 
-import '../../stream_chat.dart';
+import '../../../stream_chat.dart';
 
 /// Applies channel event payloads as [ChannelClientState] mutations.
 ///
