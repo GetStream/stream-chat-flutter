@@ -6,12 +6,12 @@
 
 🔄 Changed
 
-- Reconnect state recovery now re-queries the active channels a page at a time, so consumers with more than 30 of them get all of them refreshed instead of only the first page.
-- `StreamChatClient.sync` now skips replaying oversized `/sync` payloads (over 250 events) to avoid stalling local persistence. The synced channels are re-queried in their place before `lastSyncAt` advances.
+- Reconnecting no longer replays very large event backlogs; the affected channels are re-queried instead, so a long spell offline does not stall the app on reconnect.
 
 🐞 Fixed
 
-- Fixed `StreamChatClient.sync` sending every known channel id to `/sync`, which the endpoint rejects past 255. Accounts over that many channels never caught up on missed events — every reconnect was refused, and the refusal was read as stale local state and wiped the entire offline database. At most 100 channels are now synced per request.
+- Fixed reconnecting with more than 255 channels clearing the offline cache and skipping the events missed while offline.
+- Fixed reconnect recovery refreshing only the first 30 active channels.
 - Fixed `CurrentPlatform` throwing `UnimplementedError` on WebAssembly builds.
 - Fixed live location expiry emitting repeated `location.expired` events for the same expired location.
 
