@@ -148,23 +148,18 @@ void main() {
     expect(api.calls.single.cids, ['messaging:a', 'messaging:b']);
   });
 
-  testWithClock('sync does not request a window older than 30 days', () async {
+  testWithClock('sync asks for a window the server may refuse rather than pre-judging it', () async {
     final api = _FakeSyncEndpoint();
     final persistence = FakePersistenceClient(lastSyncAt: t0.subtract(const Duration(days: 31)));
     final harness = buildHarness(api: api, persistence: persistence);
 
     await harness.manager.sync(cids: ['messaging:a']);
 
-    expect(api.calls, isEmpty);
-  });
-
-  testWithClock('sync moves the checkpoint on when the window is older than 30 days', () async {
-    final persistence = FakePersistenceClient(lastSyncAt: t0.subtract(const Duration(days: 31)));
-    final harness = buildHarness(api: _FakeSyncEndpoint(), persistence: persistence);
-
-    await harness.manager.sync(cids: ['messaging:a']);
-
-    expect(await persistence.getLastSyncAt(), t0);
+    expect(
+      api.calls,
+      hasLength(1),
+      reason: 'the server owns the age limit; a refusal is handled, not predicted',
+    );
   });
 
   testWithClock('sync does not request anything on a first sync', () async {

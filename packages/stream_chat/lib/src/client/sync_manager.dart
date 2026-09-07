@@ -45,10 +45,6 @@ class SyncManager {
   // A `queryChannels` response holds at most 30 channels.
   static const _channelPageSize = 30;
 
-  // The endpoint cannot serve a window older than this, so give one up locally
-  // rather than spending a request to be told so.
-  static const _maxSyncAge = Duration(days: 30);
-
   /// The client this manager catches up.
   final StreamChatClient client;
 
@@ -106,16 +102,9 @@ class SyncManager {
 
       if (channelCids == null || channelCids.isEmpty) return const <String>{};
 
-      final now = clock.now();
-
       if (syncAt == null) {
+        final now = clock.now();
         logger?.info('Fresh sync start: lastSyncAt initialized to $now.');
-        await _advanceLastSyncAt(now);
-        return const <String>{};
-      }
-
-      if (now.difference(syncAt) > _maxSyncAge) {
-        logger?.warning('Giving up on events since $syncAt, past the $_maxSyncAge limit.');
         await _advanceLastSyncAt(now);
         return const <String>{};
       }
@@ -189,9 +178,10 @@ class SyncManager {
       // lastSyncAt becomes the newest event's date, so the order has to be ours.
       events = res.events.sortedBy((it) => it.createdAt);
     } catch (error, stk) {
-      // A 400 means the window is too old, or too large to serve. The two are
-      // indistinguishable, and both say local state has drifted beyond
-      // reconciling, so the store is dropped and repopulated.
+      // A 400 means the window is too old, or held too many events to return.
+      // The two are indistinguishable, and either way the server refusing it is
+      // the signal that local state is too far behind to reconcile — so the
+      // store is dropped and repopulated rather than reconciled.
       if (error is StreamChatNetworkError && error.statusCode == 400) {
         logger?.warning('Resetting local state after a refused window', error, stk);
         return _discardRefusedWindow(cappedCids, clock.now());
