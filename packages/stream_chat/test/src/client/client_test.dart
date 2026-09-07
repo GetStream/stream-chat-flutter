@@ -5783,6 +5783,74 @@ void main() {
       expect(calls, ['sync', 'queryChannels', 'connectionRecovered']);
     });
 
+    // One page failing says nothing about the others, so the rest are still
+    // attempted — the channels that can be refreshed are.
+    test('should attempt every page when one of them fails', () async {
+      client = StreamChatClient(apiKey, chatApi: api, ws: ws, recoverStateOnReconnect: false);
+      await client.connectUser(user, token);
+      await delay(300);
+
+      // 31 channels spill over the 30-channel page size into a second request.
+      final cids = List.generate(31, (index) => 'messaging:c$index');
+      client.state.addChannels({
+        for (final cid in cids) cid: Channel.fromState(client, ChannelState(channel: ChannelModel(cid: cid))),
+      });
+
+      final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));
+      final persistenceClient = FakePersistenceClient(channelCids: cids, lastSyncAt: lastSyncAt);
+      client.chatPersistenceClient = persistenceClient;
+      await client.openPersistenceConnection(user);
+      addTearDown(() => client.chatPersistenceClient = null);
+
+      final events = List.generate(
+        251,
+        (index) => Event(
+          type: EventType.messageNew,
+          cid: cids.first,
+          message: Message(id: 'message-$index'),
+          createdAt: lastSyncAt.add(Duration(seconds: index + 1)),
+        ),
+      );
+      when(() => api.general.sync(cids, lastSyncAt)).thenAnswer(
+        (_) async => SyncResponse()..events = events,
+      );
+
+      // The first page fails, the second one succeeds.
+      when(
+        () => api.channel.queryChannels(
+          filter: Filter.in_('cid', cids.take(30).toList()),
+          sort: any(named: 'sort'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          memberLimit: any(named: 'memberLimit'),
+          messageLimit: any(named: 'messageLimit'),
+          paginationParams: any(named: 'paginationParams'),
+        ),
+      ).thenThrow(const StreamChatError('Failed to query channels'));
+
+      clearInteractions(api.channel);
+
+      await simulateReconnect();
+
+      // Both pages are asked for, even though the first one failed.
+      verify(
+        () => api.channel.queryChannels(
+          filter: Filter.in_('cid', cids.skip(30).toList()),
+          sort: any(named: 'sort'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          memberLimit: any(named: 'memberLimit'),
+          messageLimit: any(named: 'messageLimit'),
+          paginationParams: const PaginationParams(limit: 1),
+        ),
+      ).called(1);
+
+      // The failure still keeps the checkpoint.
+      expect(await persistenceClient.getLastSyncAt(), lastSyncAt);
+    });
+
     test('should respect runtime toggling via the setter', () async {
       client = StreamChatClient(apiKey, chatApi: api, ws: ws);
       await client.connectUser(user, token);

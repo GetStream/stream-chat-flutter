@@ -177,18 +177,35 @@ class SyncManager {
   ///
   /// Queries a page at a time so that sets larger than a single
   /// `queryChannels` response are covered in full rather than truncated to the
-  /// first page.
+  /// first page. Every page is attempted; if any of them failed, the first
+  /// failure is thrown once the rest are done.
   Future<void> refreshChannels(List<String> cids) async {
-    _logger?.info('Refreshing ${cids.length} channels');
+    _logger?.fine('Refreshing ${cids.length} channels');
 
+    ({Object error, StackTrace stackTrace})? failure;
     for (final batch in cids.slices(_channelQueryMaximumPageSize)) {
-      await client.queryChannelsOnline(
-        filter: Filter.in_('cid', batch),
-        paginationParams: PaginationParams(limit: batch.length),
-        // Fail fast if the connection dropped again: waiting for it here would
-        // hold the sync lock, blocking the sync the next reconnect starts.
-        waitForConnect: false,
-      );
+      try {
+        await client.queryChannelsOnline(
+          filter: Filter.in_('cid', batch),
+          paginationParams: PaginationParams(limit: batch.length),
+          // Fail fast if the connection dropped again. Recovery is best-effort
+          // and the caller is waiting to announce it, so waiting for a
+          // connection here would stall that — and when this runs as part of a
+          // sync it would hold the lock the next reconnect's sync needs.
+          waitForConnect: false,
+        );
+      } catch (error, stk) {
+        // Each page is its own request, so one failing says nothing about the
+        // others: refreshing the channels that can be refreshed still improves
+        // what the app shows, whatever the caller decides to do about the
+        // failure.
+        _logger?.warning('Failed to refresh ${batch.length} channels', error, stk);
+        failure ??= (error: error, stackTrace: stk);
+      }
+    }
+
+    if (failure != null) {
+      Error.throwWithStackTrace(failure.error, failure.stackTrace);
     }
   }
 }
