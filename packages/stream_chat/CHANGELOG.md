@@ -2,13 +2,28 @@
 
 🔄 Changed
 
-- `Channel.translateMessage` now merges the translated message into the channel state, so the translation reaches anything watching the channel without the caller applying the response itself.
-- Raised minimum Dart SDK to `^3.12.0`.
 - `StreamChatClient.sync` now skips replaying oversized `/sync` payloads (over 250 events) to avoid stalling local persistence. On reconnect the synced channels are re-queried in their place before `lastSyncAt` advances.
-- `Channel.memberCountStream` is now distinct, so it only emits when the count actually changes.
 
 🐞 Fixed
 
+- Fixed `CurrentPlatform` throwing `UnimplementedError` on WebAssembly builds.
+- Fixed live location expiry emitting repeated `location.expired` events for the same expired location.
+
+## 10.4.0
+
+✅ Added
+
+- Added `Event.channelMemberCount`, exposing the server-provided `channel_member_count` field on channel events (e.g. `member.added`, `member.removed`, `member.updated`).
+
+🔄 Changed
+
+- `Channel.translateMessage` now merges the translated message into the channel state, so the translation reaches anything watching the channel without the caller applying the response itself.
+- Raised minimum Dart SDK to `^3.12.0`.
+- `Channel` and `ClientState` streams that expose a single primitive value are now distinct, so they only emit when the value actually changes. Affects `Channel.memberCountStream`, `messageCountStream`, `watcherCountStream`, `cooldownStream`, `nameStream`, `imageStream`, `frozenStream`, `disabledStream`, `hiddenStream`, `isPinnedStream`, `isArchivedStream`, `createdAtStream`, `updatedAtStream`, `deletedAtStream`, `truncatedAtStream`, `lastMessageAtStream`, and `ClientState.totalUnreadCountStream`, `unreadChannelsStream`, `unreadThreadsStream`.
+
+🐞 Fixed
+
+- Fixed `Channel.memberCount` / `memberCountStream` staying stale for the rest of the session after members joined or left; channel events now apply the server-provided member count, the same way `messageCount` already did.
 - Fixed reconnect state recovery surfacing an uncatchable error when the connection dropped again mid-recovery; it is now logged, and `connection.recovered` still fires. [#2910](https://github.com/GetStream/stream-chat-flutter/issues/2910)
 - Fixed every failed websocket connect leaving an unhandled error in the root zone, which crash reporters listening on `PlatformDispatcher.onError` report as a fatal crash. [#2921](https://github.com/GetStream/stream-chat-flutter/issues/2921)
 
