@@ -34,31 +34,41 @@ void main() {
     tearDown(() => scheduler.cancel());
 
     test('fires onExpired exactly once at endAt', () async {
-      scheduler.schedule([_location(endsIn: const Duration(milliseconds: 200))]);
+      scheduler.schedule([_location(endsIn: const Duration(milliseconds: 800))]);
 
       // Before endAt nothing fires.
-      await delay(80);
+      await delay(200);
       expect(expired, isEmpty);
 
       // After endAt it fires exactly once.
-      await delay(250);
+      await delay(900);
       expect(expired, hasLength(1));
       expect(expired.single.messageId, 'msg1');
 
       // The timer is one-shot: no repeats even after more time passes.
-      await delay(200);
+      await delay(300);
       expect(expired, hasLength(1));
     });
 
-    test('ignores static, already-expired and message-id-less locations', () async {
+    test('ignores static and message-id-less locations', () async {
       scheduler.schedule([
         _location(messageId: 'static', endsIn: null),
-        _location(messageId: 'expired', endsIn: const Duration(milliseconds: -1)),
         _location(messageId: null),
       ]);
 
       await delay(150);
       expect(expired, isEmpty);
+    });
+
+    test('fires once for a location already expired when scheduled', () async {
+      // A live location can already be past its endAt by the local clock when
+      // it arrives, e.g. when the device clock runs ahead of the server or
+      // endAt passed while the response was in flight.
+      scheduler.schedule([_location(endsIn: const Duration(milliseconds: -1))]);
+
+      await delay(150);
+      expect(expired, hasLength(1));
+      expect(expired.single.messageId, 'msg1');
     });
 
     test('reports latest coordinates and keeps expiry time on update', () async {
@@ -67,49 +77,49 @@ void main() {
       final original = _location(
         latitude: 1,
         longitude: 1,
-        endsIn: const Duration(milliseconds: 250),
+        endsIn: const Duration(milliseconds: 800),
       );
       scheduler.schedule([original]);
 
-      await delay(80);
+      await delay(200);
       // Same messageId and endAt, only the coordinates differ.
       final moved = original.copyWith(latitude: 2, longitude: 2);
       scheduler.schedule([moved]);
 
       // Still fires once at the original endAt (the update didn't shift it)...
-      await delay(250);
+      await delay(850);
       expect(expired, hasLength(1));
       // ...and reports the latest coordinates, not the original ones.
       expect(expired.single.latitude, 2);
     });
 
     test('reschedules when endAt changes', () async {
-      final original = _location(endsIn: const Duration(milliseconds: 500));
+      final original = _location(endsIn: const Duration(milliseconds: 1500));
       scheduler.schedule([original]);
 
-      await delay(60);
+      await delay(300);
       final rescheduled = original.copyWith(
-        endAt: DateTime.now().add(const Duration(milliseconds: 150)),
+        endAt: DateTime.now().add(const Duration(milliseconds: 500)),
       );
       scheduler.schedule([rescheduled]);
 
       // Fires at the new (earlier) endAt, before the original one.
-      await delay(250);
+      await delay(700);
       expect(expired, hasLength(1));
       expect(expired.single.endAt, rescheduled.endAt);
 
       // The original timer was cancelled, so it never fires.
-      await delay(350);
+      await delay(700);
       expect(expired, hasLength(1));
     });
 
     test('does not fire for a location removed before expiry', () async {
-      scheduler.schedule([_location(endsIn: const Duration(milliseconds: 300))]);
+      scheduler.schedule([_location(endsIn: const Duration(milliseconds: 1000))]);
 
-      await delay(80);
+      await delay(250);
       scheduler.schedule([]); // Removed from the active set.
 
-      await delay(350);
+      await delay(1050);
       expect(expired, isEmpty);
     });
 

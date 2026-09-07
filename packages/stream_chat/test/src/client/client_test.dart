@@ -4268,23 +4268,23 @@ void main() {
             latitude: 40.7128,
             longitude: -74.0060,
             createdByDeviceId: 'device-1',
-            endAt: DateTime.now().add(const Duration(milliseconds: 200)),
+            endAt: DateTime.now().add(const Duration(milliseconds: 800)),
           ),
         ];
         expect(client.state.activeLiveLocations, hasLength(1));
 
         // Before endAt nothing is emitted and the location stays active.
-        await delay(80);
+        await delay(200);
         expect(expiredEvents, isEmpty);
         expect(client.state.activeLiveLocations, hasLength(1));
 
         // After endAt the timer fires once and the location is removed.
-        await delay(250);
+        await delay(900);
         expect(expiredEvents, hasLength(1));
         expect(client.state.activeLiveLocations, isEmpty);
 
         // The timer is one-shot: no further events are emitted.
-        await delay(200);
+        await delay(300);
         expect(expiredEvents, hasLength(1));
       });
 

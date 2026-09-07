@@ -3002,7 +3002,7 @@ void main() {
           latitude: 40.7128,
           longitude: -74.0060,
           createdByDeviceId: 'device1',
-          endAt: DateTime.now().add(const Duration(milliseconds: 200)),
+          endAt: DateTime.now().add(const Duration(milliseconds: 800)),
         );
 
         channel.state?.addNewMessage(
@@ -3011,11 +3011,11 @@ void main() {
         expect(channel.state?.activeLiveLocations, hasLength(1));
 
         // Before endAt no expiry event is emitted.
-        await Future.delayed(const Duration(milliseconds: 80));
+        await Future.delayed(const Duration(milliseconds: 200));
         verifyNever(() => client.handleEvent(any()));
 
         // After endAt the scheduler emits exactly one location.expired event.
-        await Future.delayed(const Duration(milliseconds: 250));
+        await Future.delayed(const Duration(milliseconds: 900));
         final captured = verify(() => client.handleEvent(captureAny())).captured;
         expect(captured, hasLength(1));
         final event = captured.single as Event;
@@ -3043,6 +3043,34 @@ void main() {
         // expiry event is emitted even after endAt passes.
         await Future.delayed(const Duration(milliseconds: 300));
         verifyNever(() => client.handleEvent(any()));
+      });
+
+      test("should auto-expire another user's location that arrives expired", () async {
+        final expiredLocation = Location(
+          channelCid: channel.cid,
+          userId: 'user1', // Another user.
+          messageId: 'msg1',
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device1',
+          endAt: DateTime.now().subtract(const Duration(minutes: 5)),
+        );
+
+        // Mirrors a query/watch response whose live location is already past
+        // endAt by the local clock, e.g. when the device clock runs ahead of
+        // the server or endAt passed while the response was in flight.
+        channel.state?.updateChannelState(
+          ChannelState(messages: const [], activeLiveLocations: [expiredLocation]),
+        );
+        expect(channel.state?.activeLiveLocations, hasLength(1));
+
+        // The scheduler fires straight away and emits exactly one event.
+        await Future.delayed(const Duration(milliseconds: 100));
+        final captured = verify(() => client.handleEvent(captureAny())).captured;
+        expect(captured, hasLength(1));
+        final event = captured.single as Event;
+        expect(event.type, EventType.locationExpired);
+        expect(event.message?.id, 'msg1');
       });
 
       test('should not add static location to active locations', () async {

@@ -47,8 +47,12 @@ class LiveLocationExpirationScheduler {
   }
 
   // Whether the [location] is a live location that should get an expiry timer.
+  //
+  // Already-expired locations are scheduled too: their timer fires on the next
+  // macrotask, so a location that is past its endAt by the local clock when it
+  // arrives still emits exactly one expiration.
   bool _shouldSchedule(Location location) {
-    return location.messageId != null && location.endAt != null && !location.isExpired;
+    return location.isLive && location.messageId != null;
   }
 
   // Cancels the timers of locations that are no longer scheduled.
