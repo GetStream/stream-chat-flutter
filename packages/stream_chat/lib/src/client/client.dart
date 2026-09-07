@@ -246,8 +246,7 @@ class StreamChatClient {
   /// server when the WebSocket connection recovers.
   ///
   /// When `true` (default), the client re-queries the channels that were
-  /// active before the connection was lost. The set of state recovered on
-  /// reconnect may grow in the future to cover threads, reminders, etc.
+  /// active before the connection was lost.
   ///
   /// Setting this to `false` disables that client-level recovery. Consumers
   /// that opt out are responsible for refreshing their own state when the
@@ -590,6 +589,12 @@ class StreamChatClient {
     return _eventController.safeAdd(event);
   }
 
+  late final _syncManager = SyncManager(
+    client: this,
+    logger: logger,
+    fetchMissedEvents: _chatApi.general.sync,
+  );
+
   void _onConnectionStatusChanged(
     ConnectionStatus prevStatus,
     ConnectionStatus currStatus,
@@ -625,17 +630,17 @@ class StreamChatClient {
     );
   }
 
-  late final _syncManager = SyncManager(
-    client: this,
-    api: _chatApi.general,
-    logger: logger,
-  );
-
-  /// Get the events missed while offline to sync the offline storage
-  /// Will automatically fetch [cids] and [lastSyncedAt] if [persistenceEnabled]
+  /// Replays the events missed while offline, applying them to client state and
+  /// to the offline storage.
   ///
-  /// Events from an oversized payload are not replayed. The channels being
-  /// synced are refreshed with [queryChannelsOnline] instead.
+  /// [cids] and [lastSyncAt] both fall back to the values held by the
+  /// persistence client when omitted.
+  ///
+  /// A window that cannot be replayed — too many events, or refused by the
+  /// server — is given up on, and the channels it covered are re-queried in its
+  /// place.
+  ///
+  /// Never throws: a failed catch-up is logged and left for the next one.
   Future<void> sync({List<String>? cids, DateTime? lastSyncAt}) {
     return _syncManager.sync(cids: cids, lastSyncAt: lastSyncAt);
   }

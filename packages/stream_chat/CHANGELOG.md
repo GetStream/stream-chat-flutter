@@ -11,6 +11,8 @@
 
 🐞 Fixed
 
+- Fixed `StreamChatClient.sync` sending every known channel id to `/sync`, which the endpoint rejects past 255. The rejection was read as stale local state and wiped the entire offline database, so browsing a long channel list and then reconnecting lost the offline cache. At most 100 channels are now synced per request.
+- Fixed `StreamChatClient.sync` requesting a window older than the 30 days `/sync` can serve, which took the same path and wiped the offline database. The checkpoint is now moved on without the request.
 - Fixed `CurrentPlatform` throwing `UnimplementedError` on WebAssembly builds.
 - Fixed live location expiry emitting repeated `location.expired` events for the same expired location.
 

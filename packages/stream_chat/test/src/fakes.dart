@@ -59,6 +59,7 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
   // Track method calls for testing
   int connectCallCount = 0;
   int disconnectCallCount = 0;
+  int flushCallCount = 0;
 
   @override
   bool get isConnected => _isConnected;
@@ -84,6 +85,7 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
 
   @override
   Future<void> flush() async {
+    flushCallCount++;
     _lastSyncAt = null;
     _channelCids = [];
   }

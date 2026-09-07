@@ -22,6 +22,7 @@ environment:
 
 dependencies:
   async: ^2.13.1
+  clock: ^1.1.2
   collection: ^1.19.1
   diacritic: ^0.1.6
   dio: ^5.11.0
