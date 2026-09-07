@@ -3,6 +3,7 @@
 🐞 Fixed
 
 - Fixed `CurrentPlatform` throwing `UnimplementedError` on WebAssembly builds.
+- Fixed live location expiry emitting repeated `location.expired` events for the same expired location.
 
 ## 10.4.0
 
