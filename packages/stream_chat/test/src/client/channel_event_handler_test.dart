@@ -39,6 +39,7 @@ void main() {
   late MockStreamChatClient client;
   late MockChannelStateMutations mutations;
   late ChannelEventHandler handler;
+  late List<LogRecord> logRecords;
 
   // Matches the default current user of [FakeClientState].
   const currentUserId = 'test-user-id';
@@ -69,7 +70,12 @@ void main() {
     client = MockStreamChatClient();
     mutations = MockChannelStateMutations();
 
+    logRecords = [];
+    final logger = Logger.detached('mock-client-logger')..level = Level.ALL;
+    logger.onRecord.listen(logRecords.add);
+
     when(() => channel.client).thenReturn(client);
+    when(() => client.logger).thenReturn(logger);
     when(() => client.state).thenReturn(FakeClientState());
     when(() => client.channelDeliveryReporter.reconcileDelivery(any())).thenAnswer((_) async {});
 
@@ -810,6 +816,92 @@ void main() {
 
       verifyNever(() => mutations.onLocationUpdated(any()));
       verifyNever(() => mutations.onLocationExpired(any()));
+    });
+  });
+
+  // Every dispatch region used to run on its own stream subscription, where a
+  // broadcast stream contained a throwing subscriber and still delivered the
+  // event to the rest. These pin that containment for the single-subscription
+  // dispatch: a throwing region must not skip the ones that follow it.
+  group('error isolation', () {
+    test('a throwing block 1 handler still runs the later regions', () {
+      when(
+        () => mutations.onMessageNew(any(), watcherCount: any(named: 'watcherCount')),
+      ).thenThrow(StateError('boom'));
+
+      handler.handleEvent(
+        Event(
+          type: EventType.messageNew,
+          message: Message(id: 'message-id', text: 'hi', user: otherUser),
+          user: otherUser,
+          channelMessageCount: 42,
+        ),
+      );
+
+      verify(
+        () => mutations.onChannelCounts(memberCount: null, messageCount: 42),
+      ).called(1);
+      verify(() => mutations.onMemberUserUpdated(otherUser)).called(1);
+    });
+
+    test('a throwing count refresh still runs the later regions', () {
+      when(
+        () => mutations.onChannelCounts(
+          memberCount: any(named: 'memberCount'),
+          messageCount: any(named: 'messageCount'),
+        ),
+      ).thenThrow(StateError('boom'));
+
+      handler.handleEvent(
+        Event(
+          type: EventType.userWatchingStart,
+          user: otherUser,
+          channelMessageCount: 42,
+        ),
+      );
+
+      verify(() => mutations.onMemberUserUpdated(otherUser)).called(1);
+      verify(
+        () => mutations.onUserStartWatching(otherUser, watcherCount: null),
+      ).called(1);
+    });
+
+    test('a throwing block 2 handler still runs the later regions', () {
+      final member = Member(userId: otherUser.id);
+      when(() => mutations.onMemberAdded(any())).thenThrow(StateError('boom'));
+
+      handler.handleEvent(
+        Event(type: EventType.memberAdded, member: member, user: otherUser),
+      );
+
+      verify(() => mutations.onMemberUserUpdated(otherUser)).called(1);
+    });
+
+    test('a throwing member user merge still runs the later regions', () {
+      final member = Member(userId: otherUser.id);
+      when(() => mutations.onMemberUserUpdated(any())).thenThrow(StateError('boom'));
+
+      handler.handleEvent(
+        Event(type: EventType.memberUpdated, member: member, user: otherUser),
+      );
+
+      verify(() => mutations.onMemberUpdated(member)).called(1);
+    });
+
+    test('a contained error is logged rather than swallowed', () {
+      when(() => mutations.onMemberAdded(any())).thenThrow(StateError('boom'));
+
+      handler.handleEvent(
+        Event(
+          type: EventType.memberAdded,
+          member: Member(userId: otherUser.id),
+        ),
+      );
+
+      expect(logRecords, hasLength(1));
+      expect(logRecords.single.level, Level.WARNING);
+      expect(logRecords.single.message, contains(EventType.memberAdded));
+      expect(logRecords.single.error, isA<StateError>());
     });
   });
 }

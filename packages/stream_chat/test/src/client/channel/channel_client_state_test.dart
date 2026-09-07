@@ -5064,6 +5064,43 @@ void main() {
         },
       );
     });
+
+    // The dispatch regions run sequentially off a single subscription, so a
+    // handler that throws must not stop the ones after it — otherwise the
+    // state silently diverges from the server with nothing surfaced.
+    group('Dispatch error isolation', () {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      late Channel channel;
+
+      setUp(() {
+        final channelState = _generateChannelState(channelId, channelType);
+        channel = Channel.fromState(client, channelState);
+      });
+
+      tearDown(() {
+        channel.dispose();
+      });
+
+      test('a throwing handler still lets the later regions apply', () async {
+        expect(channel.memberCount, equals(0));
+
+        // A message.deleted without a message throws on `event.message!` in
+        // the first dispatch region. The unfiltered count refresh that runs
+        // after it must still apply.
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.messageDeleted,
+            channelMemberCount: 9,
+          ),
+        );
+
+        await Future.delayed(Duration.zero);
+
+        expect(channel.memberCount, equals(9));
+      });
+    });
   });
 
   group('Local unread count', () {
