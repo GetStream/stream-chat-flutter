@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
+import 'paged_value_notifier.dart';
 
 /// Signature for a function that creates a widget for a given index, e.g., in a
 /// [PagedValueListView] and [PagedValueGridView].

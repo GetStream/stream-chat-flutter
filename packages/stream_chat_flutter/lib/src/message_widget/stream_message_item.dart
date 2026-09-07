@@ -3,11 +3,12 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
-import 'package:stream_chat_flutter/src/context_menu/context_menu.dart';
-import 'package:stream_chat_flutter/src/context_menu/context_menu_region.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
+
+import '../../platform_widget_builder/src/platform_widget_builder.dart';
+import '../../stream_chat_flutter.dart';
+import '../context_menu/context_menu.dart';
+import '../context_menu/context_menu_region.dart';
 
 /// A chat message widget that renders a single message with its attachments,
 /// reactions, and interaction callbacks.

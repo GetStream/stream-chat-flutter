@@ -1,4 +1,4 @@
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import '../../stream_chat_flutter.dart';
 
 /// A typed mention surfaced by the read-side render pipeline.
 ///

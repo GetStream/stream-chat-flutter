@@ -1,7 +1,8 @@
 import 'package:file_picker/file_picker.dart';
-import 'package:stream_chat_flutter/src/attachment/handler/common.dart';
-import 'package:stream_chat_flutter/src/attachment/handler/stream_attachment_handler_base.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../../stream_chat_flutter.dart';
+import 'common.dart';
+import 'stream_attachment_handler_base.dart';
 
 /// StreamAttachmentHandler implementation for html.
 class StreamAttachmentHandler extends StreamAttachmentHandlerBase {

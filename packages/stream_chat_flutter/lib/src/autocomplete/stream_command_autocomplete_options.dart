@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_input/attachment_picker/options/stream_command_icon.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../stream_chat_flutter.dart';
+import '../message_input/attachment_picker/options/stream_command_icon.dart';
+import '../misc/empty_widget.dart';
 
 // Caps the card height so a long command list scrolls internally
 // instead of pushing the composer / header off the screen.

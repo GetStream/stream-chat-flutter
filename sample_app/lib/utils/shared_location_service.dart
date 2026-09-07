@@ -2,8 +2,9 @@ import 'dart:async';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:sample_app/utils/location_provider.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import 'location_provider.dart';
 
 class SharedLocationService {
   SharedLocationService({

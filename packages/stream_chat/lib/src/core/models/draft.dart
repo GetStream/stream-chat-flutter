@@ -1,9 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:stream_chat/src/core/models/channel_model.dart';
-import 'package:stream_chat/src/core/models/comparable_field.dart';
-import 'package:stream_chat/src/core/models/draft_message.dart';
-import 'package:stream_chat/src/core/models/message.dart';
+import 'channel_model.dart';
+import 'comparable_field.dart';
+import 'draft_message.dart';
+import 'message.dart';
 
 part 'draft.g.dart';
 

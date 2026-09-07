@@ -1,4 +1,4 @@
-import 'package:stream_chat/src/core/models/attachment.dart';
+import 'attachment.dart';
 
 /// {@template giphy_info_type}
 /// The different types of quality for a Giphy attachment.

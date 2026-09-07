@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:stream_chat/src/core/http/system_environment_manager.dart';
-import 'package:stream_chat/stream_chat.dart';
+
+import '../../../../stream_chat.dart';
+import '../system_environment_manager.dart';
 
 /// Interceptor that sets additional headers for all requests.
 class AdditionalHeadersInterceptor extends Interceptor {

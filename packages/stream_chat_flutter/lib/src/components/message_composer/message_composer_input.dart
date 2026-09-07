@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_center.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_header.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_leading.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_trailing.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../../stream_chat_flutter.dart';
+import 'message_composer_input_center.dart';
+import 'message_composer_input_header.dart';
+import 'message_composer_input_leading.dart';
+import 'message_composer_input_trailing.dart';
 
 /// A widget that shows the input container of the message composer.
 /// Uses the factory to show a fully custom container or the default

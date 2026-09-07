@@ -4,9 +4,10 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_chat/src/client/retry_queue.dart';
-import 'package:stream_chat/src/core/util/utils.dart';
-import 'package:stream_chat/stream_chat.dart';
+
+import '../../stream_chat.dart';
+import '../core/util/utils.dart';
+import 'retry_queue.dart';
 
 /// The class that handles the state of the channel listening to the events.
 class ChannelClientState {
@@ -65,7 +66,7 @@ class ChannelClientState {
     // region CHANNEL EVENTS
     _listenChannelTruncated();
     _listenChannelUpdated();
-    _listenChannelMessageCount();
+    _listenChannelCounts();
     // endregion
 
     // region MEMBER EVENTS
@@ -219,16 +220,22 @@ class ChannelClientState {
     );
   }
 
-  void _listenChannelMessageCount() {
+  // Most channel events carry the channel's member and message counts as
+  // event metadata, reflecting the authoritative values after the change.
+  // Applying them keeps the counts fresh for the whole session instead of
+  // only right after a `query` / `watch`.
+  void _listenChannelCounts() {
     _subscriptions.add(
       _channel.on().listen(
         (Event e) {
+          final memberCount = e.channelMemberCount;
           final messageCount = e.channelMessageCount;
-          if (messageCount == null) return;
+          if (memberCount == null && messageCount == null) return;
 
           updateChannelState(
             channelState.copyWith(
               channel: channelState.channel?.copyWith(
+                memberCount: memberCount,
                 messageCount: messageCount,
               ),
             ),
@@ -1129,7 +1136,7 @@ class ChannelClientState {
   int? get watcherCount => _channelState.watcherCount;
 
   /// Channel watcher count as a stream.
-  Stream<int?> get watcherCountStream => channelStateStream.map((cs) => cs.watcherCount);
+  Stream<int?> get watcherCountStream => channelStateStream.map((cs) => cs.watcherCount).distinct();
 
   /// Channel watchers list.
   List<User> get watchers => (_channelState.watchers ?? <User>[]).map((e) => _client.state.users[e.id] ?? e).toList();

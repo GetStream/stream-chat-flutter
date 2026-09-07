@@ -1,21 +1,22 @@
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/models/attachment.dart';
-import 'package:stream_chat/src/core/models/comparable_field.dart';
-import 'package:stream_chat/src/core/models/draft.dart';
-import 'package:stream_chat/src/core/models/location.dart';
-import 'package:stream_chat/src/core/models/message_reminder.dart';
-import 'package:stream_chat/src/core/models/message_state.dart';
-import 'package:stream_chat/src/core/models/moderation.dart';
-import 'package:stream_chat/src/core/models/poll.dart';
-import 'package:stream_chat/src/core/models/reaction.dart';
-import 'package:stream_chat/src/core/models/reaction_group.dart';
-import 'package:stream_chat/src/core/models/user.dart';
-import 'package:stream_chat/src/core/models/user_group.dart';
-import 'package:stream_chat/src/core/util/extension.dart';
-import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:uuid/uuid.dart';
+
+import '../util/extension.dart';
+import '../util/serializer.dart';
+import 'attachment.dart';
+import 'comparable_field.dart';
+import 'draft.dart';
+import 'location.dart';
+import 'message_reminder.dart';
+import 'message_state.dart';
+import 'moderation.dart';
+import 'poll.dart';
+import 'reaction.dart';
+import 'reaction_group.dart';
+import 'user.dart';
+import 'user_group.dart';
 
 part 'message.g.dart';
 

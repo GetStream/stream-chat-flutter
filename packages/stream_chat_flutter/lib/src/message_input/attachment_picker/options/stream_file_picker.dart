@@ -1,10 +1,11 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/attachment/handler/stream_attachment_handler.dart';
-import 'package:stream_chat_flutter/src/message_input/attachment_picker/stream_attachment_picker.dart';
-import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
+
+import '../../../attachment/handler/stream_attachment_handler.dart';
+import '../../../utils/utils.dart';
+import '../stream_attachment_picker.dart';
 
 /// Widget used to pick files from the device
 class StreamFilePicker extends StatelessWidget {

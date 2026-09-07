@@ -1,12 +1,13 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:sample_app/pages/channel_file_display_screen.dart';
-import 'package:sample_app/pages/channel_media_display_screen.dart';
-import 'package:sample_app/pages/pinned_messages_screen.dart';
-import 'package:sample_app/widgets/add_members_sheet.dart';
-import 'package:sample_app/widgets/all_members_sheet.dart';
-import 'package:sample_app/widgets/edit_group_sheet.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../widgets/add_members_sheet.dart';
+import '../widgets/all_members_sheet.dart';
+import '../widgets/edit_group_sheet.dart';
+import 'channel_file_display_screen.dart';
+import 'channel_media_display_screen.dart';
+import 'pinned_messages_screen.dart';
 
 /// Detail screen for a group channel.
 ///

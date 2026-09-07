@@ -1,8 +1,8 @@
 // ignore_for_file: use_setters_to_change_properties
 
-import 'package:stream_chat/src/core/platform_detector/platform_detector.dart';
-import 'package:stream_chat/src/system_environment.dart';
-import 'package:stream_chat/version.dart';
+import '../../../version.dart';
+import '../../system_environment.dart';
+import '../platform_detector/platform_detector.dart';
 
 /// {@template systemEnvironmentManager}
 /// A manager class to handle the current [SystemEnvironment].

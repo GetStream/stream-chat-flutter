@@ -1,14 +1,14 @@
 import 'dart:convert';
 
-import 'package:stream_chat/src/core/api/requests.dart';
-import 'package:stream_chat/src/core/api/responses.dart';
-import 'package:stream_chat/src/core/api/sort_order.dart';
-import 'package:stream_chat/src/core/http/stream_http_client.dart';
-import 'package:stream_chat/src/core/models/draft.dart';
-import 'package:stream_chat/src/core/models/draft_message.dart';
-import 'package:stream_chat/src/core/models/filter.dart';
-import 'package:stream_chat/src/core/models/message.dart';
-import 'package:stream_chat/src/core/models/reaction.dart';
+import '../http/stream_http_client.dart';
+import '../models/draft.dart';
+import '../models/draft_message.dart';
+import '../models/filter.dart';
+import '../models/message.dart';
+import '../models/reaction.dart';
+import 'requests.dart';
+import 'responses.dart';
+import 'sort_order.dart';
 
 /// Defines the api dedicated to messages operations
 class MessageApi {

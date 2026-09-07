@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:stream_chat/src/core/models/poll.dart';
+import 'poll.dart';
 
 part 'poll_voting_mode.freezed.dart';
 

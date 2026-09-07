@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:stream_chat_flutter/src/attachment/builder/attachment_widget_builder.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_deleted.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_reactions.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_text.dart';
-import 'package:stream_chat_flutter/src/message_widget/stream_message_attachments.dart';
-import 'package:stream_chat_flutter/src/message_widget/stream_quoted_message.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
+
+import '../../attachment/builder/attachment_widget_builder.dart';
+import '../stream_message_attachments.dart';
+import '../stream_quoted_message.dart';
+import 'stream_message_deleted.dart';
+import 'stream_message_reactions.dart';
+import 'stream_message_text.dart';
 
 /// Composes the main message content including the bubble, attachments, text,
 /// and reactions.

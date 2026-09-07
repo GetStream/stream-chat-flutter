@@ -1,10 +1,11 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/components/avatar/stream_user_avatar.dart';
-import 'package:stream_chat_flutter/src/components/avatar/stream_user_avatar_group.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
+
+import '../../utils/extensions.dart';
+import 'stream_user_avatar.dart';
+import 'stream_user_avatar_group.dart';
 
 /// A circular avatar component for displaying a channel's image.
 ///

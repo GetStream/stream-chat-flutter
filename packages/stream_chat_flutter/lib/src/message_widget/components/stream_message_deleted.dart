@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
+
+import '../../utils/extensions.dart';
 
 /// Displays a "Message deleted" indicator inside a message bubble.
 ///

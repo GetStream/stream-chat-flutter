@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_persistence/src/converter/converter.dart';
+import 'converter.dart';
 
 /// A [TypeConverter] that serializes [VotingVisibility] to a [String] column.
 class ReactionGroupsConverter extends MapConverter<ReactionGroup> {

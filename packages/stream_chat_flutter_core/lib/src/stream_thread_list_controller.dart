@@ -4,8 +4,8 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
-import 'package:stream_chat_flutter_core/src/stream_thread_list_event_handler.dart';
+import 'paged_value_notifier.dart';
+import 'stream_thread_list_event_handler.dart';
 
 /// The default thread list page limit to load.
 const defaultThreadsPagedLimit = 10;

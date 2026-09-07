@@ -3,9 +3,9 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:marionette_flutter/marionette_flutter.dart';
-import 'package:sample_app/app.dart';
-import 'package:sample_app/firebase_options.dart';
-import 'package:sample_app/utils/platform_support.dart';
+import 'app.dart';
+import 'firebase_options.dart';
+import 'utils/platform_support.dart';
 
 Future<void> main() async {
   // In debug mode, initialize the Marionette binding so AI agents can drive

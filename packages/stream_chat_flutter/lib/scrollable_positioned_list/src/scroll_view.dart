@@ -4,8 +4,8 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/scrollable_positioned_list/src/viewport.dart';
-import 'package:stream_chat_flutter/scrollable_positioned_list/src/wrapping.dart';
+import 'viewport.dart';
+import 'wrapping.dart';
 
 /// {@template unbounded_custom_scroll_view}
 /// A version of [CustomScrollView] that allows does not constrict the extents

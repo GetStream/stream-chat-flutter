@@ -3,9 +3,9 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
-import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
-import 'package:stream_chat_flutter_core/src/search_debounce_mixin.dart';
-import 'package:stream_chat_flutter_core/src/search_debouncer.dart';
+import 'paged_value_notifier.dart';
+import 'search_debounce_mixin.dart';
+import 'search_debouncer.dart';
 
 /// The default channel page limit to load.
 const defaultMemberPagedLimit = 10;

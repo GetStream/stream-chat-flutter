@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
+import 'paged_value_notifier.dart';
 
 /// The default channel page limit to load.
 const defaultPollVotePagedLimit = 10;

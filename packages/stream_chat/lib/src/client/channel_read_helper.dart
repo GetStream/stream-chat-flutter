@@ -1,4 +1,4 @@
-import 'package:stream_chat/stream_chat.dart';
+import '../../stream_chat.dart';
 
 /// Extension methods for reading related operations on a ChannelClientState.
 extension ChannelReadHelper on ChannelClientState {

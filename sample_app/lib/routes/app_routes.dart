@@ -1,17 +1,18 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sample_app/pages/advanced_options_page.dart';
-import 'package:sample_app/pages/channel_list_page.dart';
-import 'package:sample_app/pages/chat_info_screen.dart';
-import 'package:sample_app/pages/choose_user_page.dart';
-import 'package:sample_app/pages/group_chat_details_screen.dart';
-import 'package:sample_app/pages/group_info_screen.dart';
-import 'package:sample_app/pages/new_chat_screen.dart';
-import 'package:sample_app/pages/new_group_chat_screen.dart';
-import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/state/new_group_chat_state.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../pages/advanced_options_page.dart';
+import '../pages/channel_list_page.dart';
+import '../pages/chat_info_screen.dart';
+import '../pages/choose_user_page.dart';
+import '../pages/group_chat_details_screen.dart';
+import '../pages/group_info_screen.dart';
+import '../pages/new_chat_screen.dart';
+import '../pages/new_group_chat_screen.dart';
+import '../state/new_group_chat_state.dart';
+import 'routes.dart';
 
 final appRoutes = [
   GoRoute(

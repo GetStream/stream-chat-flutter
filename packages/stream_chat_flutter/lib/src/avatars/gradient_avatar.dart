@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/utils/utils.dart';
+import '../utils/utils.dart';
 
 /// Fallback avatar with a polygon gradient background and initials overlay.
 ///
