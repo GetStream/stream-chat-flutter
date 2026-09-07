@@ -1,4 +1,5 @@
-import '../../client/channel.dart';
+import '../../client/channel/channel.dart';
+import '../../client/channel/channel_capability_check.dart';
 import '../models/message.dart';
 import '../models/own_user.dart';
 
