@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_widget/stream_giphy_ephemeral_message.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/src/utils/typedefs.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+
+import '../misc/empty_widget.dart';
+import '../utils/typedefs.dart';
+import 'stream_giphy_ephemeral_message.dart';
 
 /// {@template streamEphemeralMessage}
 /// Shows an ephemeral message in a [MessageWidget].

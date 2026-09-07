@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:stream_chat_flutter/src/attachment/builder/attachment_widget_builder.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_deleted.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_reactions.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_text.dart';
-import 'package:stream_chat_flutter/src/message_widget/stream_message_attachments.dart';
-import 'package:stream_chat_flutter/src/message_widget/stream_quoted_message.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
+
+import '../../attachment/builder/attachment_widget_builder.dart';
+import '../stream_message_attachments.dart';
+import '../stream_quoted_message.dart';
+import 'stream_message_deleted.dart';
+import 'stream_message_reactions.dart';
+import 'stream_message_text.dart';
 
 /// Composes the main message content including the bubble, attachments, text,
 /// and reactions.
@@ -41,8 +42,10 @@ class StreamMessageContent extends StatefulWidget {
     this.onMentionTap,
     this.onAnyMentionTap,
     this.onReactionTap,
+    this.onReactionLongPress,
     this.onQuotedMessageTap,
     this.reactionSorting,
+    this.showTranslatedText = true,
   });
 
   /// The message to display.
@@ -110,6 +113,13 @@ class StreamMessageContent extends StatefulWidget {
   /// clustered or overflow chip). If null, tapping reactions has no effect.
   final ValueSetter<Reaction?>? onReactionTap;
 
+  /// Called when a reaction chip is long-pressed, with the pressed [Reaction].
+  ///
+  /// Reports `null` when the long press does not map to a single reaction (a
+  /// clustered or overflow chip). If null, the chips register no long-press
+  /// gesture, leaving it to an ancestor.
+  final ValueSetter<Reaction?>? onReactionLongPress;
+
   /// Called when the quoted message is tapped.
   ///
   /// If null, tapping the quoted message has no effect.
@@ -119,6 +129,12 @@ class StreamMessageContent extends StatefulWidget {
   ///
   /// Passed through to [StreamMessageReactions.sorting].
   final Comparator<ReactionGroup>? reactionSorting;
+
+  /// Whether [message] should display its translation when [Message.i18n]
+  /// has one for the current user's language.
+  ///
+  /// Passed through to [StreamMessageText.showTranslatedText].
+  final bool showTranslatedText;
 
   @override
   State<StreamMessageContent> createState() => _StreamMessageContentState();
@@ -170,6 +186,7 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
             message: widget.message,
             sorting: widget.reactionSorting,
             onReactionTap: widget.onReactionTap,
+            onReactionLongPress: widget.onReactionLongPress,
             child: Builder(
               builder: (context) {
                 final bubbleContent = ConstrainedBox(
@@ -198,6 +215,7 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                           onLinkTap: widget.onLinkTap,
                           onMentionTap: widget.onMentionTap,
                           onAnyMentionTap: widget.onAnyMentionTap,
+                          showTranslatedText: widget.showTranslatedText,
                         ),
                     ],
                   ),

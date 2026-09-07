@@ -3,9 +3,10 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:stream_chat_flutter/src/attachment/thumbnail/thumbnail_size_calculator.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_core_flutter/chat.dart';
+
+import '../../attachment/thumbnail/thumbnail_size_calculator.dart';
+import '../../utils/extensions.dart';
 
 /// Widget that displays a photo or video item from the gallery.
 class StreamPhotoGalleryTile extends StatelessWidget {

@@ -1,10 +1,11 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/utils/client_extensions.dart';
-import 'package:sample_app/widgets/add_members_sheet.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../routes/routes.dart';
+import '../utils/client_extensions.dart';
+import 'add_members_sheet.dart';
 
 // ---------------------------------------------------------------------------
 // Public sheets + dispatcher

@@ -1,7 +1,7 @@
 import 'dart:ui' show SemanticsRole;
 
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
+import '../utils/extensions.dart';
 
 /// {@template streamMessageDialog}
 /// A customizable modal dialog for displaying message-related content.

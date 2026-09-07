@@ -85,13 +85,20 @@ final class _MessageList {
     description: 'message row for $id',
   );
 
+  /// The key the message actions modal gives its own copy of the message it
+  /// was opened for.
+  Key get actionsModalMessageKey => const Key('MessageItem');
+
   /// The row rendering the message whose text is exactly [text].
   ///
   /// The open actions modal renders its own copy of the message under
-  /// `Key('MessageItem')`; excluding keyed rows keeps this finder unambiguous
-  /// while the modal is up.
+  /// [actionsModalMessageKey]; excluding that one row keeps this finder
+  /// unambiguous while the modal is up. Rows in the list carry a key of their
+  /// own (a `ValueKey` of the message id), so they cannot be told apart from
+  /// the modal's copy by the mere absence of a key.
   Finder messageWithText(String text) => find.byWidgetPredicate(
-    (widget) => widget is StreamMessageItem && widget.key == null && widget.props.message.text == text,
+    (widget) =>
+        widget is StreamMessageItem && widget.key != actionsModalMessageKey && widget.props.message.text == text,
     description: 'message row with text "$text"',
   );
 

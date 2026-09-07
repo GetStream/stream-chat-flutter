@@ -796,6 +796,21 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String reminderAtText(String time) => 'Avui a les $time';
 
   @override
+  String get translatedLabel => 'Traduït';
+
+  @override
+  String get originalLabel => 'Original';
+
+  @override
+  String get showOriginalLabel => "Mostra l'original";
+
+  @override
+  String get showTranslationLabel => 'Mostra la traducció';
+
+  @override
+  String translatedFromLanguageText(String languageCode) => 'Traduït de ${_languageNameCa(languageCode)}';
+
+  @override
   String get createPollPromptLabel => 'Crea una enquesta i deixa que tothom voti!';
 
   @override
@@ -1155,3 +1170,68 @@ class _AccessibilityTranslationsCa extends AccessibilityTranslations {
     return parts.join(', ');
   }
 }
+
+// Display name for each language code Stream Chat's translation API
+// supports (`Message.i18n['language']`). Falls back to the uppercased code
+// itself for anything unrecognized.
+String _languageNameCa(String code) => _languageNamesCa[code] ?? code.toUpperCase();
+
+const _languageNamesCa = <String, String>{
+  'af': 'Afrikaans',
+  'sq': 'Albanès',
+  'am': 'Amhàric',
+  'ar': 'Àrab',
+  'az': 'Azerbaidjanès',
+  'bn': 'Bengalí',
+  'bs': 'Bosnià',
+  'bg': 'Búlgar',
+  'zh': 'Xinès (simplificat)',
+  'zh-TW': 'Xinès (tradicional)',
+  'hr': 'Croat',
+  'cs': 'Txec',
+  'da': 'Danès',
+  'fa-AF': 'Dari',
+  'nl': 'Neerlandès',
+  'en': 'Anglès',
+  'et': 'Estonià',
+  'fi': 'Finès',
+  'fr': 'Francès',
+  'fr-CA': 'Francès (Canadà)',
+  'ka': 'Georgià',
+  'de': 'Alemany',
+  'el': 'Grec',
+  'ht': 'Crioll haitià',
+  'ha': 'Haussa',
+  'he': 'Hebreu',
+  'hi': 'Hindi',
+  'hu': 'Hongarès',
+  'id': 'Indonesi',
+  'it': 'Italià',
+  'ja': 'Japonès',
+  'ko': 'Coreà',
+  'lv': 'Letó',
+  'lt': 'Lituà',
+  'ms': 'Malai',
+  'no': 'Noruec',
+  'fa': 'Persa',
+  'ps': 'Paixtu',
+  'pl': 'Polonès',
+  'pt': 'Portuguès',
+  'ro': 'Romanès',
+  'ru': 'Rus',
+  'sr': 'Serbi',
+  'sk': 'Eslovac',
+  'sl': 'Eslovè',
+  'so': 'Somali',
+  'es': 'Espanyol',
+  'es-MX': 'Espanyol (Mèxic)',
+  'sw': 'Swahili',
+  'sv': 'Suec',
+  'tl': 'Tagal',
+  'ta': 'Tàmil',
+  'th': 'Tailandès',
+  'tr': 'Turc',
+  'uk': 'Ucraïnès',
+  'ur': 'Urdú',
+  'vi': 'Vietnamita',
+};

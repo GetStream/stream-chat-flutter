@@ -816,6 +816,21 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String reminderAtText(String time) => 'Today at $time';
 
   @override
+  String get translatedLabel => 'Translated';
+
+  @override
+  String get originalLabel => 'Original';
+
+  @override
+  String get showOriginalLabel => 'Show original';
+
+  @override
+  String get showTranslationLabel => 'Show translation';
+
+  @override
+  String translatedFromLanguageText(String languageCode) => 'Translated from ${languageCode.toUpperCase()}';
+
+  @override
   String get createPollPromptLabel => 'Create a poll and let everyone vote!';
 
   @override

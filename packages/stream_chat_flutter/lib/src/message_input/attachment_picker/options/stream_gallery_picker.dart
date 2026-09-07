@@ -4,13 +4,14 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:stream_chat_flutter/src/message_input/attachment_picker/stream_attachment_picker.dart';
-import 'package:stream_chat_flutter/src/message_input/attachment_picker/stream_attachment_picker_controller.dart';
-import 'package:stream_chat_flutter/src/scroll_view/photo_gallery/stream_photo_gallery.dart';
-import 'package:stream_chat_flutter/src/scroll_view/photo_gallery/stream_photo_gallery_controller.dart';
-import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
+
+import '../../../scroll_view/photo_gallery/stream_photo_gallery.dart';
+import '../../../scroll_view/photo_gallery/stream_photo_gallery_controller.dart';
+import '../../../utils/utils.dart';
+import '../stream_attachment_picker.dart';
+import '../stream_attachment_picker_controller.dart';
 
 /// Max image resolution which can be resized by the CDN.
 /// Taken from https://getstream.io/chat/docs/flutter-dart/file_uploads/?language=dart#image-resizing

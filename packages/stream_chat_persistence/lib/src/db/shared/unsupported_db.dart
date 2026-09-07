@@ -1,6 +1,6 @@
 // coverage:ignore-file
-import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
-import 'package:stream_chat_persistence/stream_chat_persistence.dart';
+import '../../../stream_chat_persistence.dart';
+import '../drift_chat_database.dart';
 
 /// A Helper class to construct new instances of [DriftChatDatabase]
 class SharedDB {

@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import '../../../stream_chat_flutter.dart';
 
 /// Callback object that wires long-press gesture events from the voice-recording
 /// button through to the audio-recorder controller.

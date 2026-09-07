@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/misc/adaptive_dialog_action.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
+
+import '../misc/adaptive_dialog_action.dart';
+import '../utils/extensions.dart';
 
 /// {@template moderatedMessageActionsModal}
 /// A modal that is shown when a message is flagged by moderation policies.

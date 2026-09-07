@@ -5,10 +5,11 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
-import 'package:stream_chat_flutter/src/audio/audio_sampling.dart' as sampling;
-import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recorder_state.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+
+import '../../audio/audio_sampling.dart' as sampling;
+import '../../utils/extensions.dart';
+import 'audio_recorder_state.dart';
 
 /// {@template streamAudioRecorderController}
 /// A controller for recording audio tracks. It provides methods to start,
@@ -42,11 +43,10 @@ class StreamAudioRecorderController extends ValueNotifier<AudioRecorderState>
   @visibleForTesting
   StreamAudioRecorderController.raw({
     required this.config,
-    required AudioRecorder recorder,
+    required this._recorder,
     AudioRecorderState initialState = const RecordStateIdle(),
     Duration amplitudeInterval = const Duration(milliseconds: 100),
-  }) : _recorder = recorder,
-       super(initialState) {
+  }) : super(initialState) {
     // Listen to the recorder amplitude changes
     _recorderAmplitudeSubscription = _recorder
         .onAmplitudeChanged(amplitudeInterval) //

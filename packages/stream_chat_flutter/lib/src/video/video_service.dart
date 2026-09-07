@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
-import 'package:stream_chat_flutter/src/utils/device_segmentation.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_thumbnail/stream_thumbnail.dart';
 import 'package:thumblr/thumblr.dart' as thumblr;
+
+import '../../stream_chat_flutter.dart';
+import '../utils/device_segmentation.dart';
 
 ///
 // ignore: prefer-match-file-name

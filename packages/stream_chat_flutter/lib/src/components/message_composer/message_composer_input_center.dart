@@ -1,8 +1,9 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_recording_locked.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_recording_ongoing.dart';
-import 'package:stream_chat_flutter/src/message_input/dm_checkbox_list_tile.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../../stream_chat_flutter.dart';
+import '../../message_input/dm_checkbox_list_tile.dart';
+import 'message_composer_recording_locked.dart';
+import 'message_composer_recording_ongoing.dart';
 
 /// A widget that shows the center content of the message composer input area.
 /// Uses the factory to show custom components or the default implementation.

@@ -1,13 +1,14 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/models/channel_model.dart';
-import 'package:stream_chat/src/core/models/comparable_field.dart';
-import 'package:stream_chat/src/core/models/draft.dart';
-import 'package:stream_chat/src/core/models/message.dart';
-import 'package:stream_chat/src/core/models/read.dart';
-import 'package:stream_chat/src/core/models/thread_participant.dart';
-import 'package:stream_chat/src/core/models/user.dart';
-import 'package:stream_chat/src/core/util/serializer.dart';
+
+import '../util/serializer.dart';
+import 'channel_model.dart';
+import 'comparable_field.dart';
+import 'draft.dart';
+import 'message.dart';
+import 'read.dart';
+import 'thread_participant.dart';
+import 'user.dart';
 
 part 'thread.g.dart';
 

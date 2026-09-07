@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import '../../stream_chat_flutter.dart';
 
 /// {@template streamMessageActionsModal}
 /// A modal that displays a list of actions that can be performed on a message.

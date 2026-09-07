@@ -118,7 +118,8 @@ Optional local persistence using Drift (SQLite). Implements `ChatPersistenceClie
 ## Code Style
 
 - Line length: **120 characters** (configured in `analysis_options.yaml`)
-- Imports: always use package imports (`always_use_package_imports`), not relative imports
+- Imports: inside a package's own `lib/`, use relative imports (`prefer_relative_imports`); use
+  `package:` imports for anything from another package
 - All public APIs **must** have doc comments (`public_member_api_docs`)
 - Sort constructors first, unnamed constructors before named
 - Prefer `const` constructors, `final` locals, single quotes

@@ -1,9 +1,9 @@
 import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
-import 'package:stream_chat_persistence/src/entity/connection_events.dart';
+import '../db/drift_chat_database.dart';
+import '../entity/connection_events.dart';
 
-import 'package:stream_chat_persistence/src/mapper/mapper.dart';
+import '../mapper/mapper.dart';
 
 part 'connection_event_dao.g.dart';
 

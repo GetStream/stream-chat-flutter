@@ -3,12 +3,12 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
-import 'package:stream_chat_flutter/src/context_menu/context_menu.dart';
-import 'package:stream_chat_flutter/src/context_menu/context_menu_region.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_content.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
+
+import '../../platform_widget_builder/src/platform_widget_builder.dart';
+import '../../stream_chat_flutter.dart';
+import '../context_menu/context_menu.dart';
+import '../context_menu/context_menu_region.dart';
 
 /// A chat message widget that renders a single message with its attachments,
 /// reactions, and interaction callbacks.
@@ -86,6 +86,7 @@ class StreamMessageItem extends StatelessWidget {
     @Deprecated('Use onReactionTap instead. onReactionTap also reports the tapped reaction.')
     void Function(Message)? onReactionsTap,
     OnReactionTap? onReactionTap,
+    OnReactionLongPress? onReactionLongPress,
     void Function(Message quotedMessage)? onQuotedMessageTap,
     Comparator<ReactionGroup>? reactionSorting,
     MessageActionsBuilder? actionsBuilder,
@@ -116,6 +117,7 @@ class StreamMessageItem extends StatelessWidget {
          onReplyTap: onReplyTap,
          onReactionsTap: onReactionsTap,
          onReactionTap: onReactionTap,
+         onReactionLongPress: onReactionLongPress,
          onQuotedMessageTap: onQuotedMessageTap,
          reactionSorting: reactionSorting,
          actionsBuilder: actionsBuilder,
@@ -173,6 +175,7 @@ class StreamMessageItemProps {
     this.onReplyTap,
     @Deprecated('Use onReactionTap instead. onReactionTap also reports the tapped reaction.') this.onReactionsTap,
     this.onReactionTap,
+    this.onReactionLongPress,
     this.onQuotedMessageTap,
     this.reactionSorting,
     this.actionsBuilder,
@@ -322,9 +325,17 @@ class StreamMessageItemProps {
 
   /// {@macro onReactionTap}
   ///
-  /// If null, the default behaviour opens a [ReactionDetailSheet] showing
-  /// the full list of reactions.
+  /// If null, the default behaviour opens a [ReactionDetailSheet] pre-filtered
+  /// to the tapped reaction.
   final OnReactionTap? onReactionTap;
+
+  /// {@macro onReactionLongPress}
+  ///
+  /// If null, the default behaviour matches [onReactionTap] and opens a
+  /// [ReactionDetailSheet] pre-filtered to the long-pressed reaction. The
+  /// chips always claim the long press, so it never reaches the message's own
+  /// long-press handling.
+  final OnReactionLongPress? onReactionLongPress;
 
   /// Called when an inline quoted message is tapped.
   ///
@@ -391,6 +402,7 @@ class StreamMessageItemProps {
     @Deprecated('Use onReactionTap instead. onReactionTap also reports the tapped reaction.')
     void Function(Message)? onReactionsTap,
     OnReactionTap? onReactionTap,
+    OnReactionLongPress? onReactionLongPress,
     void Function(Message)? onQuotedMessageTap,
     Comparator<ReactionGroup>? reactionSorting,
     MessageActionsBuilder? actionsBuilder,
@@ -417,6 +429,7 @@ class StreamMessageItemProps {
       onReplyTap: onReplyTap ?? this.onReplyTap,
       onReactionsTap: onReactionsTap ?? this.onReactionsTap,
       onReactionTap: onReactionTap ?? this.onReactionTap,
+      onReactionLongPress: onReactionLongPress ?? this.onReactionLongPress,
       onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
       reactionSorting: reactionSorting ?? this.reactionSorting,
       actionsBuilder: actionsBuilder ?? this.actionsBuilder,
@@ -453,6 +466,10 @@ class DefaultStreamMessageItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final message = props.message;
+
+    // Depends on this message alone, so toggling another message in the same
+    // scope doesn't rebuild this one.
+    final showsOriginalText = StreamMessageTranslations.isShowingOriginalTextOf(context, message.id);
 
     final placement = StreamMessageLayout.of(context);
     final theme = core.StreamMessageItemTheme.of(context);
@@ -492,6 +509,8 @@ class DefaultStreamMessageItem extends StatelessWidget {
           final onTap? => () => onTap(message),
           _ => () => _onViewThread(context, message),
         },
+        showTranslatedText: !showsOriginalText,
+        onToggleTranslatedText: () => StreamMessageTranslations.toggleOriginalText(context, message.id),
       ),
     );
 
@@ -527,6 +546,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
       attachmentBuilders: props.attachmentBuilders,
       reactionSorting: props.reactionSorting,
       onQuotedMessageTap: props.onQuotedMessageTap,
+      showTranslatedText: !showsOriginalText,
       onLinkTap: (_, href, __) {
         if (href == null) return;
         if (props.onMessageLinkTap case final onTap?) return onTap(message, href);
@@ -549,7 +569,11 @@ class DefaultStreamMessageItem extends StatelessWidget {
       onReactionTap: switch ((props.onReactionTap, props.onReactionsTap)) {
         (final onReactionTap?, _) => (reaction) => onReactionTap(context, .new(message: message, reaction: reaction)),
         (_, final onReactionsTap?) => (_) => onReactionsTap(message),
-        _ => (_) => _showMessageReactionsModal(context, message),
+        _ => (reaction) => _showMessageReactionsModal(context, message, initialReaction: reaction),
+      },
+      onReactionLongPress: switch (props.onReactionLongPress) {
+        final onLongPress? => (reaction) => onLongPress(context, .new(message: message, reaction: reaction)),
+        _ => (reaction) => _showMessageReactionsModal(context, message, initialReaction: reaction),
       },
     );
 
@@ -717,13 +741,15 @@ class DefaultStreamMessageItem extends StatelessWidget {
   // Opens the reaction detail sheet and handles the returned action.
   Future<void> _showMessageReactionsModal(
     BuildContext context,
-    Message message,
-  ) async {
+    Message message, {
+    Reaction? initialReaction,
+  }) async {
     final channel = StreamChannel.of(context).channel;
 
     final action = await ReactionDetailSheet.show(
       context: context,
       message: message,
+      initialReactionType: initialReaction?.type,
     );
 
     if (action is! MessageAction) return;
@@ -844,6 +870,13 @@ class DefaultStreamMessageItem extends StatelessWidget {
       leadingInset = effectiveAvatarSize.value + effectiveSpacing;
     }
 
+    final messageWidget = StreamMessageItem(
+      key: const Key('MessageItem'),
+      message: message.trimmed,
+      padding: EdgeInsets.zero,
+      backgroundColor: core.StreamColors.transparent,
+    );
+
     final action = await showStreamDialog(
       context: context,
       useRootNavigator: false,
@@ -860,12 +893,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
             leadingInset: leadingInset,
             messageWidget: StreamChannel.value(
               channel: channel,
-              child: StreamMessageItem(
-                key: const Key('MessageItem'),
-                message: message.trimmed,
-                padding: EdgeInsets.zero,
-                backgroundColor: core.StreamColors.transparent,
-              ),
+              child: messageWidget,
             ),
           ),
         ),

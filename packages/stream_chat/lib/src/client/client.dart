@@ -5,60 +5,61 @@ import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_chat/src/client/channel.dart';
-import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
-import 'package:stream_chat/src/client/event_resolvers.dart' as event_resolvers;
-import 'package:stream_chat/src/client/live_location_expiration_scheduler.dart';
-import 'package:stream_chat/src/client/query_channels_result.dart';
-import 'package:stream_chat/src/client/retry_policy.dart';
-import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
-import 'package:stream_chat/src/core/api/requests.dart';
-import 'package:stream_chat/src/core/api/responses.dart';
-import 'package:stream_chat/src/core/api/sort_order.dart';
-import 'package:stream_chat/src/core/api/stream_chat_api.dart';
-import 'package:stream_chat/src/core/error/error.dart';
-import 'package:stream_chat/src/core/http/app_settings_manager.dart';
-import 'package:stream_chat/src/core/http/connection_id_manager.dart';
-import 'package:stream_chat/src/core/http/stream_http_client.dart';
-import 'package:stream_chat/src/core/http/system_environment_manager.dart';
-import 'package:stream_chat/src/core/http/token.dart';
-import 'package:stream_chat/src/core/http/token_manager.dart';
-import 'package:stream_chat/src/core/models/app_settings.dart';
-import 'package:stream_chat/src/core/models/attachment_file.dart';
-import 'package:stream_chat/src/core/models/banned_user.dart';
-import 'package:stream_chat/src/core/models/channel_state.dart';
-import 'package:stream_chat/src/core/models/draft.dart';
-import 'package:stream_chat/src/core/models/draft_message.dart';
-import 'package:stream_chat/src/core/models/event.dart';
-import 'package:stream_chat/src/core/models/filter.dart';
-import 'package:stream_chat/src/core/models/location.dart';
-import 'package:stream_chat/src/core/models/location_coordinates.dart';
-import 'package:stream_chat/src/core/models/member.dart';
-import 'package:stream_chat/src/core/models/message.dart';
-import 'package:stream_chat/src/core/models/message_delivery.dart';
-import 'package:stream_chat/src/core/models/message_reminder.dart';
-import 'package:stream_chat/src/core/models/own_user.dart';
-import 'package:stream_chat/src/core/models/poll.dart';
-import 'package:stream_chat/src/core/models/poll_option.dart';
-import 'package:stream_chat/src/core/models/poll_vote.dart';
-import 'package:stream_chat/src/core/models/push_preference.dart';
-import 'package:stream_chat/src/core/models/reaction.dart';
-import 'package:stream_chat/src/core/models/role.dart';
-import 'package:stream_chat/src/core/models/thread.dart';
-import 'package:stream_chat/src/core/models/user.dart';
-import 'package:stream_chat/src/core/util/event_controller.dart';
-import 'package:stream_chat/src/core/util/extension.dart';
-import 'package:stream_chat/src/core/util/immutable_collection_subjects.dart';
-import 'package:stream_chat/src/core/util/in_flight_cache.dart';
-import 'package:stream_chat/src/core/util/list_extensions.dart';
-import 'package:stream_chat/src/core/util/utils.dart';
-import 'package:stream_chat/src/db/chat_persistence_client.dart';
-import 'package:stream_chat/src/event_type.dart';
-import 'package:stream_chat/src/system_environment.dart';
-import 'package:stream_chat/src/ws/connection_status.dart';
-import 'package:stream_chat/src/ws/websocket.dart';
-import 'package:stream_chat/version.dart';
 import 'package:synchronized/synchronized.dart';
+
+import '../../version.dart';
+import '../core/api/attachment_file_uploader.dart';
+import '../core/api/requests.dart';
+import '../core/api/responses.dart';
+import '../core/api/sort_order.dart';
+import '../core/api/stream_chat_api.dart';
+import '../core/error/error.dart';
+import '../core/http/app_settings_manager.dart';
+import '../core/http/connection_id_manager.dart';
+import '../core/http/stream_http_client.dart';
+import '../core/http/system_environment_manager.dart';
+import '../core/http/token.dart';
+import '../core/http/token_manager.dart';
+import '../core/models/app_settings.dart';
+import '../core/models/attachment_file.dart';
+import '../core/models/banned_user.dart';
+import '../core/models/channel_state.dart';
+import '../core/models/draft.dart';
+import '../core/models/draft_message.dart';
+import '../core/models/event.dart';
+import '../core/models/filter.dart';
+import '../core/models/location.dart';
+import '../core/models/location_coordinates.dart';
+import '../core/models/member.dart';
+import '../core/models/message.dart';
+import '../core/models/message_delivery.dart';
+import '../core/models/message_reminder.dart';
+import '../core/models/own_user.dart';
+import '../core/models/poll.dart';
+import '../core/models/poll_option.dart';
+import '../core/models/poll_vote.dart';
+import '../core/models/push_preference.dart';
+import '../core/models/reaction.dart';
+import '../core/models/role.dart';
+import '../core/models/thread.dart';
+import '../core/models/user.dart';
+import '../core/util/event_controller.dart';
+import '../core/util/extension.dart';
+import '../core/util/immutable_collection_subjects.dart';
+import '../core/util/in_flight_cache.dart';
+import '../core/util/list_extensions.dart';
+import '../core/util/utils.dart';
+import '../db/chat_persistence_client.dart';
+import '../event_type.dart';
+import '../system_environment.dart';
+import '../ws/connection_status.dart';
+import '../ws/websocket.dart';
+import 'channel/channel.dart';
+import 'channel_delivery_reporter.dart';
+import 'event_resolvers.dart' as event_resolvers;
+import 'live_location_expiration_scheduler.dart';
+import 'query_channels_result.dart';
+import 'retry_policy.dart';
 
 /// Handler function used for logging records. Function requires a single
 /// [LogRecord] as the only parameter.
@@ -101,9 +102,9 @@ class StreamChatClient {
     AttachmentFileUploaderProvider attachmentFileUploaderProvider = StreamAttachmentFileUploader.new,
     Iterable<Interceptor>? chatApiInterceptors,
     HttpClientAdapter? httpClientAdapter,
-    bool recoverStateOnReconnect = true,
+    this._recoverStateOnReconnect = true,
     this.isLocalUnreadCountEnabled = false,
-  }) : _recoverStateOnReconnect = recoverStateOnReconnect {
+  }) {
     logger.info('Initiating new StreamChatClient');
 
     final options = StreamHttpClientOptions(
@@ -611,16 +612,23 @@ class StreamChatClient {
       // connection recovered
       final cids = [...state.channels.keys.toSet()];
       if (cids.isNotEmpty) {
-        // Sync the persistence client if available
-        if (persistenceEnabled) await sync(cids: cids);
+        // Recovery is best-effort: the connection can drop again while it is
+        // in flight. Nothing awaits this method, so an error here would
+        // surface as an unhandled crash instead of reaching the app.
+        try {
+          // Sync the persistence client if available
+          if (persistenceEnabled) await sync(cids: cids);
 
-        // Recover the channels that were active before the connection was lost,
-        // only if the client is configured to do so.
-        if (_recoverStateOnReconnect) {
-          await queryChannelsOnline(
-            filter: Filter.in_('cid', cids),
-            paginationParams: const PaginationParams(limit: 30),
-          );
+          // Recover the channels that were active before the connection was lost,
+          // only if the client is configured to do so.
+          if (_recoverStateOnReconnect) {
+            await queryChannelsOnline(
+              filter: Filter.in_('cid', cids),
+              paginationParams: const PaginationParams(limit: 30),
+            );
+          }
+        } catch (e, stk) {
+          logger.warning('Error recovering state on reconnect', e, stk);
         }
       }
 
@@ -1899,13 +1907,29 @@ class StreamChatClient {
   /// Flag a message
   Future<EmptyResponse> flagMessage(String messageId) => _chatApi.moderation.flagMessage(messageId);
 
-  /// Unflag a message
+  /// Unflag a message.
+  ///
+  /// The `/moderation/unflag` endpoint is no longer processed by the server:
+  /// the request is validated and an empty response is returned, but no flag
+  /// is removed.
+  @Deprecated(
+    'The /moderation/unflag endpoint is no longer supported by the server. '
+    'This will be removed in a future major release',
+  )
   Future<EmptyResponse> unflagMessage(String messageId) => _chatApi.moderation.unflagMessage(messageId);
 
   /// Flag a user
   Future<EmptyResponse> flagUser(String userId) => _chatApi.moderation.flagUser(userId);
 
-  /// Unflag a message
+  /// Unflag a user.
+  ///
+  /// The `/moderation/unflag` endpoint is no longer processed by the server:
+  /// the request is validated and an empty response is returned, but no flag
+  /// is removed.
+  @Deprecated(
+    'The /moderation/unflag endpoint is no longer supported by the server. '
+    'This will be removed in a future major release',
+  )
   Future<EmptyResponse> unflagUser(String userId) => _chatApi.moderation.unflagUser(userId);
 
   /// Mark all channels for this user as read
@@ -2897,19 +2921,19 @@ class ClientState {
   int get unreadChannels => _unreadChannelsController.value;
 
   /// The current unread channels count as a stream
-  Stream<int> get unreadChannelsStream => _unreadChannelsController.stream;
+  Stream<int> get unreadChannelsStream => _unreadChannelsController.stream.distinct();
 
   /// The current unread thread count.
   int get unreadThreads => _unreadThreadsController.value;
 
   /// The current unread threads count as a stream.
-  Stream<int> get unreadThreadsStream => _unreadThreadsController.stream;
+  Stream<int> get unreadThreadsStream => _unreadThreadsController.stream.distinct();
 
   /// The current total unread messages count
   int get totalUnreadCount => _totalUnreadCountController.value;
 
   /// The current total unread messages count as a stream
-  Stream<int> get totalUnreadCountStream => _totalUnreadCountController.stream;
+  Stream<int> get totalUnreadCountStream => _totalUnreadCountController.stream.distinct();
 
   /// The current list of channels in memory as a stream
   Stream<Map<String, Channel>> get channelsStream => _channelsController.stream;

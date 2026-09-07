@@ -8,20 +8,21 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide Message;
 import 'package:go_router/go_router.dart';
 import 'package:media_kit/media_kit.dart';
-import 'package:sample_app/auth/auth_controller.dart';
-import 'package:sample_app/config/sample_app_config.dart';
-import 'package:sample_app/notification/notification_service.dart';
-import 'package:sample_app/pages/splash_screen.dart';
-import 'package:sample_app/routes/app_routes.dart';
-import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/widgets/custom_message_actions.dart';
-import 'package:sample_app/widgets/location/location_attachment.dart';
-import 'package:sample_app/widgets/location/location_aware_message_composer.dart';
-import 'package:sample_app/widgets/location/location_detail_dialog.dart';
-import 'package:sample_app/widgets/video_player.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
+
+import 'auth/auth_controller.dart';
+import 'config/sample_app_config.dart';
+import 'notification/notification_service.dart';
+import 'pages/splash_screen.dart';
+import 'routes/app_routes.dart';
+import 'routes/routes.dart';
+import 'widgets/custom_message_actions.dart';
+import 'widgets/location/location_attachment.dart';
+import 'widgets/location/location_aware_message_composer.dart';
+import 'widgets/location/location_detail_dialog.dart';
+import 'widgets/video_player.dart';
 
 /// Root widget of the sample app: boots prefs + notifications, runs
 /// the router, and owns the [StreamChat] ancestor.
@@ -209,7 +210,13 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                           builder: (context, cachedChild) {
                             final wrapped = Directionality(
                               textDirection: config.forceRtl ? .rtl : .ltr,
-                              child: cachedChild ?? const SizedBox.shrink(),
+                              // Above the router so any screen — and the
+                              // dialogs it pushes — can fire snackbars via
+                              // `StreamSnackbarMessenger.of(context)`. Inside
+                              // the Directionality, which its Stack needs.
+                              child: StreamSnackbarScope(
+                                child: cachedChild ?? const SizedBox.shrink(),
+                              ),
                             );
 
                             // StreamChat stays mounted as long as a client
@@ -312,6 +319,10 @@ extension on SampleAppConfigData {
       enforceUniqueReactions: enforceUniqueReactions,
       reactionType: reactionType,
       reactionPosition: reactionPosition,
+      messageTranslation: StreamMessageTranslationConfiguration(
+        enabled: enableMessageTranslation,
+        annotationEnabled: enableMessageTranslation,
+      ),
       attachmentBuilders: [
         if (enableLocationSharing)
           LocationAttachmentBuilder(

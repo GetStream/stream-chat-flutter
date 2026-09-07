@@ -1,8 +1,8 @@
 import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_persistence/src/converter/converter.dart';
-import 'package:stream_chat_persistence/src/dao/dao.dart';
-import 'package:stream_chat_persistence/src/entity/entity.dart';
+import '../converter/converter.dart';
+import '../dao/dao.dart';
+import '../entity/entity.dart';
 
 export 'shared/shared_db.dart';
 

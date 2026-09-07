@@ -7,11 +7,12 @@ import 'package:flutter/material.dart';
 // Assertiveness comes from, which is why flutter/semantics.dart isn't imported.
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recorder_announcer.dart';
-import 'package:stream_chat_flutter/src/message_input/composer_attachment_announcer.dart';
-import 'package:stream_chat_flutter/src/message_input/error_alert_sheet.dart';
-import 'package:stream_chat_flutter/src/message_input/stream_chat_message_input.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../stream_chat_flutter.dart';
+import 'audio_recorder/audio_recorder_announcer.dart';
+import 'composer_attachment_announcer.dart';
+import 'error_alert_sheet.dart';
+import 'stream_chat_message_input.dart';
 
 const _kCommandTrigger = '/';
 const _kMentionTrigger = '@';
@@ -686,7 +687,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
         _ => channel.state?.draftStream,
       };
 
-      _draftStreamSubscription = draftStream?.distinct().listen(_onDraftUpdate);
+      _draftStreamSubscription = draftStream?.listen(_onDraftUpdate);
     }
 
     // Keeps the composer in sync with remote message changes.

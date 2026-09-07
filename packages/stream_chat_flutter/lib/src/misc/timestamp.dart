@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import '../../stream_chat_flutter.dart';
 
 /// {@template streamTimestamp}
 /// Represents a timestamp, that's used primarily for showing the time of a

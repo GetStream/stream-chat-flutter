@@ -59,6 +59,18 @@ Run these checks. **If any fail, stop the skill, surface the failing check to th
 - `gh pr list --head release/v<version> --state all --json number` returns `[]`.
 - Latest CI on the base-branch tip is green: `gh run list --branch <base> --limit 5` — no failures on the most
   recent runs.
+- No publishable package depends on `stream_core_flutter` by git ref or path — pub.dev rejects both, and
+  `release_publish.yml` publishes in dependency order, so the earlier packages go live and only
+  `stream_chat_flutter` fails, leaving the version half-published:
+
+  ```bash
+  grep -n -A4 '^\s*stream_core_flutter:' melos.yaml packages/*/pubspec.yaml
+  ```
+
+  Match on the dependency key and its source, not on a URL spelling — `git:` takes a scalar URL as well as a map,
+  and the URL need not end in `.git`. Anything other than a single-line version constraint is a hard stop:
+  `stream_core_flutter` must be released to pub.dev first (its own repo has a `release-pr` skill), then the pin
+  swapped to a version constraint. Surface it and stop — don't pick the version yourself.
 
 ## Steps
 
@@ -135,24 +147,53 @@ For each, **apply the first matching rule below** — it's a decision tree, not 
 **Every package gets a `## <version>` header**, even if it's only a dep-bump line. Empty version sections and
 missing headers both fail pana.
 
-### 4. Sanity-check
+### 4. Analyze, then commit
 
 ```bash
 melos run analyze
+```
+
+If it fails, surface to the user and stop.
+
+```bash
+git status --short          # nothing untracked should be release material
+git add -u                  # tracked modifications only
+git commit -m "chore(repo): release v<version>"
+```
+
+`git add -u`, not `-A`: pre-flight's `git status --short -uno` ignores untracked files, so `-A` would sweep local
+artifacts into the release commit. If a release ever does need a genuinely new tracked file, add it by path — the
+`git diff --stat` comparison in step 2 is what catches the omission.
+
+Single commit. The message format is load-bearing: `release_tag.yml` parses `vX.Y.Z` from it after merge — and it
+gates on the **tip** commit of `master`, so the PR must be **squash-merged**. A merge commit would leave
+`Merge pull request #…` at the tip and the tag job would silently never fire.
+
+`melos run lint:pub` is deliberately *not* here: it shells out to `pub publish -n`, which fails any dirty tree with
+"N checked-in files are modified in git". It can only pass once the release commit exists — hence step 5.
+
+### 5. Verify publishability, then push
+
+```bash
 melos run lint:pub
 ```
 
-If either fails, surface to the user and stop.
+This is the real publish gate. Read failures carefully — pub reports two severities and only one blocks:
 
-### 5. Commit and push
+- **"Package validation found the following error"** — blocks. `release_publish.yml` runs `pub publish -f`, and
+  `-f` does **not** bypass errors. Must be fixed before merge.
+- **"potential issue" / "Package has N warnings"** — `-f` publishes through these. Worth fixing, not blocking.
+
+A common error is a `lib/` or `test/` file importing a package absent from that package's own `dependencies` /
+`dev_dependencies`; it resolves locally through a transitive dep and only `pub publish` catches it. Fix at the
+import (prefer the barrel the rest of the package already uses) or by declaring the dep, and tell the user the
+release PR now carries a source change.
+
+If it fails, surface to the user and stop — don't push.
 
 ```bash
-git add -A
-git commit -m "chore(repo): release v<version>"
 git push -u origin release/v<version>
 ```
-
-Single commit. The message format is load-bearing: `release_tag.yml` parses `vX.Y.Z` from it after merge.
 
 ### 6. Generate the PR body
 

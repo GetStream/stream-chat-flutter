@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:stream_chat/src/core/models/location.dart';
+import '../core/models/location.dart';
 
 /// {@template liveLocationExpirationScheduler}
 /// Schedules a one-shot [Timer] per live [Location] that fires once at the

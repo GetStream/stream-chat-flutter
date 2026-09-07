@@ -1,8 +1,9 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/localization/translations.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
+
+import '../localization/translations.dart';
+import 'extensions.dart';
 
 /// Formats a [Message] or [DraftMessage] into a preview [TextSpan] suitable
 /// for channel lists, quoted replies, and similar compact contexts.

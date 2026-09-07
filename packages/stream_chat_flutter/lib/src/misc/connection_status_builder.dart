@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../stream_chat_flutter.dart';
+import 'empty_widget.dart';
 
 /// {@template streamConnectionStatusBuilder}
 /// A widget that builds itself based on the latest snapshot of interaction with

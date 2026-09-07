@@ -1,8 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
+
+import '../../stream_chat_configuration.dart';
 
 /// Displays reaction groups for a message as emoji chips overlaid on, or
 /// placed beneath, the [child] widget.
@@ -25,6 +26,7 @@ class StreamMessageReactions extends StatelessWidget {
     this.position,
     this.sorting,
     this.onReactionTap,
+    this.onReactionLongPress,
     this.child,
   });
 
@@ -55,6 +57,16 @@ class StreamMessageReactions extends StatelessWidget {
   /// Reports `null` when the tap does not map to a single reaction (a
   /// clustered or overflow chip). If null, tapping has no effect.
   final ValueSetter<Reaction?>? onReactionTap;
+
+  /// Called when a reaction chip is long-pressed, with the pressed [Reaction].
+  ///
+  /// Reports `null` when the long press does not map to a single reaction (a
+  /// clustered or overflow chip). If null, the chips register no long-press
+  /// gesture, leaving it to an ancestor.
+  ///
+  /// Only fires while [onReactionTap] is also set, since a chip without a tap
+  /// callback is disabled.
+  final ValueSetter<Reaction?>? onReactionLongPress;
 
   /// The child widget (typically the message bubble) that reactions are
   /// displayed on.
@@ -103,6 +115,10 @@ class StreamMessageReactions extends StatelessWidget {
       overlap: effectiveOverlap,
       onReactionPressed: switch (onReactionTap) {
         final onTap? => (item) => onTap(reactionOf(item)),
+        _ => null,
+      },
+      onReactionLongPressed: switch (onReactionLongPress) {
+        final onLongPress? => (item) => onLongPress(reactionOf(item)),
         _ => null,
       },
       items: [...?items],

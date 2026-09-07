@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_chat_flutter/src/message_widget/components/stream_message_reactions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../mocks.dart';
@@ -103,10 +104,194 @@ void main() {
     });
   });
 
+  group('StreamMessageItem reaction long press', () {
+    final currentUser = OwnUser(id: 'current-user');
+    final otherUser = User(id: 'other-user');
+
+    Widget buildScene({
+      OnReactionLongPress? onReactionLongPress,
+      void Function(Message)? onMessageLongPress,
+    }) {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel();
+      final channelState = MockChannelState();
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(currentUser);
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
+      when(() => channel.client).thenReturn(client);
+      when(() => channel.state).thenReturn(channelState);
+
+      final message = Message(
+        id: 'test-message',
+        text: 'Parent message',
+        createdAt: DateTime(2026),
+        user: otherUser,
+        state: MessageState.sent,
+        reactionGroups: {'love': ReactionGroup(count: 2)},
+      );
+
+      // Wrapping above the navigator keeps pushed routes — the reaction detail
+      // sheet — under StreamChat and StreamChannel. The sheet renders shipped
+      // strings, so this group uses the real translations.
+      return MaterialApp(
+        builder: (context, child) => StreamChat(
+          client: client,
+          connectivityStream: Stream.value(const [ConnectivityResult.mobile]),
+          child: StreamChannel(channel: channel, child: child!),
+        ),
+        home: Scaffold(
+          body: StreamMessageItem(
+            message: message,
+            onReactionLongPress: onReactionLongPress,
+            onMessageLongPress: onMessageLongPress,
+          ),
+        ),
+      );
+    }
+
+    // The reaction chips sit inside the message row's own long-press InkWell,
+    // so both recognizers enter the same gesture arena. The chip always
+    // registers one, so it always wins over the message's own long press.
+    Finder reactionChip() => find.descendant(
+      of: find.byType(StreamMessageReactions),
+      matching: find.byType(IconButton),
+    );
+
+    testWidgets('reports the long-pressed reaction', (tester) async {
+      Reaction? longPressed;
+
+      await tester.pumpWidget(
+        buildScene(onReactionLongPress: (_, details) => longPressed = details.reaction),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.longPress(reactionChip().first);
+      await tester.pumpAndSettle();
+
+      expect(longPressed?.type, 'love');
+    });
+
+    testWidgets('takes precedence over the message long press', (tester) async {
+      var messageLongPressed = false;
+
+      await tester.pumpWidget(
+        buildScene(
+          onReactionLongPress: (_, __) {},
+          onMessageLongPress: (_) => messageLongPressed = true,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.longPress(reactionChip().first);
+      await tester.pumpAndSettle();
+
+      expect(messageLongPressed, isFalse);
+    });
+
+    testWidgets('opens the detail sheet filtered to the reaction by default', (tester) async {
+      // The sheet needs more height than the default test surface.
+      tester.view.physicalSize = const Size(1200, 2000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      var messageLongPressed = false;
+
+      await tester.pumpWidget(
+        buildScene(onMessageLongPress: (_) => messageLongPressed = true),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.longPress(reactionChip().first);
+      await tester.pumpAndSettle();
+
+      final sheet = tester.widget<ReactionDetailSheet>(find.byType(ReactionDetailSheet));
+      expect(sheet.initialReactionType, 'love');
+      // The default pre-empts the message's long press rather than falling
+      // through to the actions modal.
+      expect(messageLongPressed, isFalse);
+    });
+  });
+
   // The widget tests above deliberately never see the shipped strings, so pin
   // the default table's pluralization here.
   test('DefaultTranslations pluralizes the thread reply count', () {
     expect(DefaultTranslations.instance.threadReplyCountText(1), '1 reply');
     expect(DefaultTranslations.instance.threadReplyCountText(3), '3 replies');
+  });
+
+  group('StreamMessageItem translation toggle', () {
+    final currentUser = OwnUser(id: 'current-user', language: 'en');
+    final otherUser = User(id: 'other-user');
+
+    final translated = Message(
+      id: 'translated',
+      text: 'Hola, mundo!',
+      createdAt: DateTime(2026),
+      user: otherUser,
+      state: MessageState.sent,
+      i18n: const {
+        'language': 'es',
+        'es_text': 'Hola, mundo!',
+        'en_text': 'Hello, world!',
+      },
+    );
+
+    Widget buildScene(StreamMessageTranslationStore store) {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel();
+      final channelState = MockChannelState();
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(currentUser);
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
+      when(() => channel.client).thenReturn(client);
+      when(() => channel.state).thenReturn(channelState);
+
+      return MaterialApp(
+        home: StreamChat(
+          client: client,
+          connectivityStream: Stream.value(const [ConnectivityResult.mobile]),
+          configData: StreamChatConfigurationData(
+            messageTranslation: const StreamMessageTranslationConfiguration(annotationEnabled: true),
+          ),
+          child: StreamChannel(
+            channel: channel,
+            child: Scaffold(
+              body: StreamMessageTranslations(
+                store: store,
+                child: StreamMessageItem(message: translated),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('tapping the annotation swaps the translation for the original text', (tester) async {
+      final store = StreamMessageTranslationStore();
+      addTearDown(store.dispose);
+
+      await tester.pumpWidget(buildScene(store));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Hello, world!'), findsOneWidget);
+      expect(find.text('Show original'), findsOneWidget);
+
+      await tester.tap(find.text('Show original'));
+      await tester.pumpAndSettle();
+
+      expect(store.isShowingOriginalText(translated.id), isTrue);
+      expect(find.text('Hola, mundo!'), findsOneWidget);
+      expect(find.text('Show translation'), findsOneWidget);
+
+      await tester.tap(find.text('Show translation'));
+      await tester.pumpAndSettle();
+
+      expect(store.isShowingOriginalText(translated.id), isFalse);
+      expect(find.text('Hello, world!'), findsOneWidget);
+    });
   });
 }

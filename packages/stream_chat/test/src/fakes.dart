@@ -47,10 +47,9 @@ class FakeMultiPartFile extends Fake implements MultipartFile {}
 /// Fake persistence client for testing persistence client reliability features
 class FakePersistenceClient extends Fake implements ChatPersistenceClient {
   FakePersistenceClient({
-    DateTime? lastSyncAt,
+    this._lastSyncAt,
     List<String>? channelCids,
-  }) : _lastSyncAt = lastSyncAt,
-       _channelCids = channelCids ?? [];
+  }) : _channelCids = channelCids ?? [];
 
   String? _userId;
   bool _isConnected = false;
@@ -160,8 +159,8 @@ class FakeChatApi extends Fake implements StreamChatApi {
 
 class FakeClientState extends Fake implements ClientState {
   FakeClientState({
-    OwnUser? currentUser,
-  }) : _currentUser = currentUser;
+    this._currentUser,
+  });
 
   OwnUser? _currentUser;
 

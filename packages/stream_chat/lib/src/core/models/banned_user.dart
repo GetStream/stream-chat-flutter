@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/models/channel_model.dart';
-import 'package:stream_chat/src/core/models/comparable_field.dart';
-import 'package:stream_chat/src/core/models/user.dart';
+import 'channel_model.dart';
+import 'comparable_field.dart';
+import 'user.dart';
 
 part 'banned_user.g.dart';
 

@@ -62,13 +62,16 @@ document; the section link is provided.
 
 - Line width: **120 characters** (configured in `analysis_options.yaml`). Comments and
   docs follow the same limit.
-- Single quotes, package imports (never relative), trailing commas preserved, `const`
+- Single quotes, relative imports within a package's own `lib/`, trailing commas preserved, `const`
   wherever possible, `final` for locals that aren't reassigned. These are enforced by
   the linter — do not disable them.
 - Prefer named parameters for booleans (`avoid_positional_boolean_parameters`). A
   positional `bool` at a call site tells the reader nothing.
 - File names are `snake_case.dart` (`file_names`). Imports follow the standard order:
   `dart:` → `package:` → relative — one blank line between groups (`directives_ordering`).
+- Web conditional imports select the web file with `dart.library.js_interop`, never
+  `dart.library.html`, which does not exist under `dart2wasm`.
+  → [Web conditional imports use `js_interop`, not `html`](#web-conditional-imports-use-js_interop-not-html)
 - Public API members require dartdoc (`///`). Private members (`_`-prefixed) use `//`
   block comments, not `///`. → [Private members use `//`](#private-members-use--not-)
 - Default to zero inline `//` comments in implementation. Prefer well-named locals and
@@ -926,6 +929,33 @@ Consuming streams in widgets:
   only rebuilds when the value changes.
 - Always cancel `StreamSubscription`s in `dispose()`.
 
+### Web conditional imports use `js_interop`, not `html`
+
+Conditional imports that swap in a web implementation key on `dart.library.js_interop`:
+
+```dart
+// GOOD
+import 'foo_stub.dart'
+    if (dart.library.js_interop) 'foo_web.dart'
+    if (dart.library.io) 'foo_io.dart';
+
+// BAD
+import 'foo_stub.dart'
+    if (dart.library.html) 'foo_web.dart'
+    if (dart.library.io) 'foo_io.dart';
+```
+
+`dart:html` does not exist under `dart2wasm`, and neither does `dart:io`. On a
+WebAssembly build the bad form therefore matches no condition and silently resolves to
+the stub. It still compiles cleanly; the failure appears only at runtime, when the stub
+throws `UnimplementedError`. `dart2js` supports both constants, so `js_interop` covers
+JS and Wasm alike.
+
+Nothing in the analyzer catches this. `avoid_web_libraries_in_flutter` inspects import
+URIs, and a condition is not a URI — so the bad form produces no warning.
+
+The same applies to `export` directives.
+
 
 ## Testing
 
@@ -1094,6 +1124,11 @@ fine (`// TODO(perf-migration): …`), but it's a category label, not a GitHub h
 Include an issue link when the deferred work is tracked; if the constraint is
 self-explanatory ("wait for backend enrichment", "wait for next major"), a link isn't
 required.
+
+A workaround that only exists because an upstream Flutter fix has not shipped yet uses the
+`// TODO(flutter):` tag and gets an entry in
+[`FLUTTER_BLOCKED.md`](FLUTTER_BLOCKED.md), which the floor raise reads. Both matter: the
+entry holds what does not fit in a comment, the tag survives the file drifting.
 
 ### Bare ignore directives are fine
 

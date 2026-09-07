@@ -5,18 +5,19 @@ import 'dart:math' as math;
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_chat/src/core/error/error.dart';
-import 'package:stream_chat/src/core/http/system_environment_manager.dart';
-import 'package:stream_chat/src/core/http/token_manager.dart';
-import 'package:stream_chat/src/core/models/event.dart';
-import 'package:stream_chat/src/core/models/own_user.dart';
-import 'package:stream_chat/src/core/util/extension.dart';
-import 'package:stream_chat/src/event_type.dart';
-import 'package:stream_chat/src/ws/connect_user_details.dart';
-import 'package:stream_chat/src/ws/connection_status.dart';
-import 'package:stream_chat/src/ws/timer_helper.dart';
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:web_socket_channel/web_socket_channel.dart';
+
+import '../core/error/error.dart';
+import '../core/http/system_environment_manager.dart';
+import '../core/http/token_manager.dart';
+import '../core/models/event.dart';
+import '../core/models/own_user.dart';
+import '../core/util/extension.dart';
+import '../event_type.dart';
+import 'connect_user_details.dart';
+import 'connection_status.dart';
+import 'timer_helper.dart';
 
 /// Typedef which exposes an [Event] as the only parameter.
 typedef EventHandler = void Function(Event);
@@ -40,14 +41,14 @@ class WebSocket with TimerHelper {
     required this.tokenManager,
     this.systemEnvironmentManager,
     this.handler,
-    Logger? logger,
+    this._logger,
     this.webSocketChannelProvider,
     this.reconnectionMonitorInterval = 10,
     this.healthCheckInterval = 20,
     this.reconnectionMonitorTimeout = 40,
     this.maxReconnectAttempts = 6,
     this.queryParameters = const {},
-  }) : _logger = logger;
+  });
 
   ///
   final String apiKey;
@@ -134,9 +135,9 @@ class WebSocket with TimerHelper {
       _closeWebSocketChannel();
     }
     _webSocketChannel = webSocketChannelProvider?.call(uri) ?? WebSocketChannel.connect(uri);
-    // Connection failures (e.g. DNS errors during background) are delivered
-    // via the stream's onError below; ignore the duplicate signal on sink.done
-    // so it doesn't surface as an unhandled future error.
+    // Connect failures reach onError below; ignore the ready and sink.done
+    // duplicates so they aren't reported as unhandled errors.
+    _webSocketChannel?.ready.ignore();
     _webSocketChannel?.sink.done.ignore();
     _subscribeToWebSocketChannel();
   }

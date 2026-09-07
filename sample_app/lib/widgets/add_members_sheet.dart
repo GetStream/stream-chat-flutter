@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:sample_app/widgets/search_text_field.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import 'search_text_field.dart';
 
 /// {@template showAddMembersSheet}
 /// Displays the Add Members bottom sheet for [channel] — Figma frame

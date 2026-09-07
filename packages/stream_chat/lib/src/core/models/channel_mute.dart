@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/models/channel_model.dart';
-import 'package:stream_chat/src/core/models/user.dart';
+import 'channel_model.dart';
+import 'user.dart';
 
 part 'channel_mute.g.dart';
 

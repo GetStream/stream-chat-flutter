@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import '../../stream_chat_flutter.dart';
 
 /// Sealed hierarchy describing why a particular placeholder is shown in
 /// [StreamMessageComposer].

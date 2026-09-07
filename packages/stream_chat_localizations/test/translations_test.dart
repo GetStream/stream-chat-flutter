@@ -358,6 +358,14 @@ void main() {
       expect(localizations.viewLabel, isNotNull);
       expect(localizations.reminderSetLabel, isNotNull);
       expect(localizations.reminderAtText('3:00 PM'), isNotNull);
+      expect(localizations.translatedLabel, isNotNull);
+      expect(localizations.originalLabel, isNotNull);
+      expect(localizations.showOriginalLabel, isNotNull);
+      expect(localizations.showTranslationLabel, isNotNull);
+      // known language code
+      expect(localizations.translatedFromLanguageText('es'), isNotNull);
+      // unknown language code, falls back to the uppercased code itself
+      expect(localizations.translatedFromLanguageText('xx'), contains('XX'));
       expect(localizations.createPollPromptLabel, isNotNull);
       expect(localizations.takePhotoAndShareLabel, isNotNull);
       expect(localizations.takeVideoAndShareLabel, isNotNull);
@@ -510,6 +518,41 @@ void main() {
       expect(a11y.unreadMessagesLabel(count: 5), isNotNull);
     });
   }
+
+  // Every language Stream's translation API can report as a message's source
+  // in `Message.i18n['language']`. Each one needs a display name in every
+  // locale, or "Translated from Spanish" degrades to "Translated from ES".
+  const translationLanguages = {
+    'af', 'sq', 'am', 'ar', 'az', 'bn', 'bs', 'bg', 'zh', 'zh-TW', 'hr', 'cs',
+    'da', 'fa-AF', 'nl', 'en', 'et', 'fi', 'fr', 'fr-CA', 'ka', 'de', 'el', 'ha',
+    'he', 'hi', 'hu', 'id', 'it', 'ja', 'ko', 'lv', 'ms', 'no', 'fa', 'ps', 'pl',
+    'pt', 'ro', 'ru', 'sr', 'sk', 'sl', 'so', 'es', 'es-MX', 'sw', 'sv', 'tl',
+    'ta', 'th', 'tr', 'uk', 'ur', 'vi', 'lt', 'ht', //
+  };
+
+  void expectEveryLanguageNamed(String Function(String code) translatedFrom, {required String locale}) {
+    for (final code in translationLanguages) {
+      // An unnamed language falls back to the uppercased code, so that's the
+      // tell — see the `'xx'` assertion in the per-locale test above.
+      expect(
+        translatedFrom(code),
+        isNot(contains(code.toUpperCase())),
+        reason: '$locale has no display name for "$code"',
+      );
+    }
+  }
+
+  for (final language in kStreamChatSupportedLanguages) {
+    test('every translation language has a display name in $language', () async {
+      final localizations = await GlobalStreamChatLocalizations.delegate.load(Locale(language));
+      expectEveryLanguageNamed(localizations.translatedFromLanguageText, locale: language);
+    });
+  }
+
+  test('every translation language has a display name in the default translations', () {
+    const translations = DefaultTranslations.instance;
+    expectEveryLanguageNamed(translations.translatedFromLanguageText, locale: 'default');
+  });
 
   test('should throw if try to load locale which is not supported', () async {
     const locale = Locale('not-supported-locale');

@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/models/channel_model.dart';
-import 'package:stream_chat/src/core/models/location_coordinates.dart';
-import 'package:stream_chat/src/core/models/message.dart';
+import 'channel_model.dart';
+import 'location_coordinates.dart';
+import 'message.dart';
 
 part 'location.g.dart';
 

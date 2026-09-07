@@ -5,17 +5,18 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:stream_chat_flutter/src/message_list_view/floating_date_divider.dart';
-import 'package:stream_chat_flutter/src/message_list_view/loading_indicator.dart';
-import 'package:stream_chat_flutter/src/message_list_view/mlv_utils.dart';
-import 'package:stream_chat_flutter/src/message_list_view/stream_message_list_empty_state.dart';
-import 'package:stream_chat_flutter/src/message_list_view/stream_message_list_skeleton_loading.dart';
-import 'package:stream_chat_flutter/src/message_list_view/thread_separator.dart';
-import 'package:stream_chat_flutter/src/message_list_view/unread_messages_separator.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/src/utils/network_error_text.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../scrollable_positioned_list/scrollable_positioned_list.dart';
+import '../../stream_chat_flutter.dart';
+import '../misc/empty_widget.dart';
+import '../utils/network_error_text.dart';
+import 'floating_date_divider.dart';
+import 'loading_indicator.dart';
+import 'mlv_utils.dart';
+import 'stream_message_list_empty_state.dart';
+import 'stream_message_list_skeleton_loading.dart';
+import 'thread_separator.dart';
+import 'unread_messages_separator.dart';
 
 /// Spacing Types (These are properties of a message to help inform the decision
 /// of how much space / which widget to build after it)
@@ -116,6 +117,7 @@ class StreamMessageListView extends StatefulWidget {
     this.onUserAvatarTap,
     @Deprecated('Use onReactionTap instead. onReactionTap also reports the tapped reaction.') this.onReactionsTap,
     this.onReactionTap,
+    this.onReactionLongPress,
     this.onQuotedMessageTap,
     this.onMessageLinkTap,
     @Deprecated('Use onMentionTap and switch on StreamUserMention instead') this.onUserMentionTap,
@@ -193,6 +195,11 @@ class StreamMessageListView extends StatefulWidget {
   ///
   /// Forwarded to each [StreamMessageItem] in the list.
   final OnReactionTap? onReactionTap;
+
+  /// {@macro onReactionLongPress}
+  ///
+  /// Forwarded to each [StreamMessageItem] in the list.
+  final OnReactionLongPress? onReactionLongPress;
 
   /// Called when a quoted message is tapped.
   ///
@@ -1084,6 +1091,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       onUserAvatarTap: widget.onUserAvatarTap,
       onReactionsTap: widget.onReactionsTap,
       onReactionTap: widget.onReactionTap,
+      onReactionLongPress: widget.onReactionLongPress,
       onQuotedMessageTap: widget.onQuotedMessageTap,
       onMessageLinkTap: widget.onMessageLinkTap,
       onUserMentionTap: widget.onUserMentionTap,
@@ -1210,6 +1218,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       onUserAvatarTap: widget.onUserAvatarTap,
       onReactionsTap: widget.onReactionsTap,
       onReactionTap: widget.onReactionTap,
+      onReactionLongPress: widget.onReactionLongPress,
       onMessageLinkTap: widget.onMessageLinkTap,
       onUserMentionTap: widget.onUserMentionTap,
       onMentionTap: widget.onMentionTap,
@@ -1238,7 +1247,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       child: Builder(
         builder: (context) => switch (widget.messageBuilder) {
           final builder? => builder.call(context, message, messageItemProps),
-          _ => StreamMessageItem.fromProps(props: messageItemProps),
+          // Keyed by message id so per-message local state (e.g. in the
+          // content/attachments/leading widgets) stays attached to the
+          // correct message when pagination prepends older messages and
+          // shifts every already-rendered item's index, rather than leaking
+          // onto whatever message next occupies the same position.
+          _ => StreamMessageItem.fromProps(key: ValueKey(message.id), props: messageItemProps),
         },
       ),
     );

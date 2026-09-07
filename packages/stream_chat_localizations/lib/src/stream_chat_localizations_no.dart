@@ -779,6 +779,21 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String reminderAtText(String time) => 'I dag kl. $time';
 
   @override
+  String get translatedLabel => 'Oversatt';
+
+  @override
+  String get originalLabel => 'Original';
+
+  @override
+  String get showOriginalLabel => 'Vis original';
+
+  @override
+  String get showTranslationLabel => 'Vis oversettelse';
+
+  @override
+  String translatedFromLanguageText(String languageCode) => 'Oversatt fra ${_languageNameNo(languageCode)}';
+
+  @override
   String get createPollPromptLabel => 'Lag en avstemning og la alle stemme!';
 
   @override
@@ -1137,3 +1152,68 @@ class _AccessibilityTranslationsNo extends AccessibilityTranslations {
     return parts.join(', ');
   }
 }
+
+// Display name for each language code Stream Chat's translation API
+// supports (`Message.i18n['language']`). Falls back to the uppercased code
+// itself for anything unrecognized.
+String _languageNameNo(String code) => _languageNamesNo[code] ?? code.toUpperCase();
+
+const _languageNamesNo = <String, String>{
+  'af': 'Afrikaans',
+  'sq': 'Albansk',
+  'am': 'Amharisk',
+  'ar': 'Arabisk',
+  'az': 'Aserbajdsjansk',
+  'bn': 'Bengali',
+  'bs': 'Bosnisk',
+  'bg': 'Bulgarsk',
+  'zh': 'Kinesisk (forenklet)',
+  'zh-TW': 'Kinesisk (tradisjonell)',
+  'hr': 'Kroatisk',
+  'cs': 'Tsjekkisk',
+  'da': 'Dansk',
+  'fa-AF': 'Dari',
+  'nl': 'Nederlandsk',
+  'en': 'Engelsk',
+  'et': 'Estisk',
+  'fi': 'Finsk',
+  'fr': 'Fransk',
+  'fr-CA': 'Fransk (Canada)',
+  'ka': 'Georgisk',
+  'de': 'Tysk',
+  'el': 'Gresk',
+  'ht': 'Haitisk kreolsk',
+  'ha': 'Hausa',
+  'he': 'Hebraisk',
+  'hi': 'Hindi',
+  'hu': 'Ungarsk',
+  'id': 'Indonesisk',
+  'it': 'Italiensk',
+  'ja': 'Japansk',
+  'ko': 'Koreansk',
+  'lv': 'Latvisk',
+  'lt': 'Litauisk',
+  'ms': 'Malayisk',
+  'no': 'Norsk',
+  'fa': 'Persisk',
+  'ps': 'Pashto',
+  'pl': 'Polsk',
+  'pt': 'Portugisisk',
+  'ro': 'Rumensk',
+  'ru': 'Russisk',
+  'sr': 'Serbisk',
+  'sk': 'Slovakisk',
+  'sl': 'Slovensk',
+  'so': 'Somalisk',
+  'es': 'Spansk',
+  'es-MX': 'Spansk (Mexico)',
+  'sw': 'Swahili',
+  'sv': 'Svensk',
+  'tl': 'Tagalog',
+  'ta': 'Tamilsk',
+  'th': 'Thai',
+  'tr': 'Tyrkisk',
+  'uk': 'Ukrainsk',
+  'ur': 'Urdu',
+  'vi': 'Vietnamesisk',
+};

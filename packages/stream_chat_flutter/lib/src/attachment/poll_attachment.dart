@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/components/stream_chat_component_builders.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/src/poll/interactor/poll_add_comment_dialog.dart';
-import 'package:stream_chat_flutter/src/poll/interactor/poll_end_vote_dialog.dart';
-import 'package:stream_chat_flutter/src/poll/interactor/poll_suggest_option_dialog.dart';
-import 'package:stream_chat_flutter/src/poll/interactor/stream_poll_interactor.dart';
-import 'package:stream_chat_flutter/src/poll/stream_poll_comments_sheet.dart';
-import 'package:stream_chat_flutter/src/poll/stream_poll_options_sheet.dart';
-import 'package:stream_chat_flutter/src/poll/stream_poll_results_sheet.dart';
-import 'package:stream_chat_flutter/src/stream_chat.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
+
+import '../components/stream_chat_component_builders.dart';
+import '../misc/empty_widget.dart';
+import '../poll/interactor/poll_add_comment_dialog.dart';
+import '../poll/interactor/poll_end_vote_dialog.dart';
+import '../poll/interactor/poll_suggest_option_dialog.dart';
+import '../poll/interactor/stream_poll_interactor.dart';
+import '../poll/stream_poll_comments_sheet.dart';
+import '../poll/stream_poll_options_sheet.dart';
+import '../poll/stream_poll_results_sheet.dart';
+import '../stream_chat.dart';
 
 /// An interactive poll attachment with voting and results.
 ///

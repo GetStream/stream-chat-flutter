@@ -1,21 +1,22 @@
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/models/attachment.dart';
-import 'package:stream_chat/src/core/models/comparable_field.dart';
-import 'package:stream_chat/src/core/models/draft.dart';
-import 'package:stream_chat/src/core/models/location.dart';
-import 'package:stream_chat/src/core/models/message_reminder.dart';
-import 'package:stream_chat/src/core/models/message_state.dart';
-import 'package:stream_chat/src/core/models/moderation.dart';
-import 'package:stream_chat/src/core/models/poll.dart';
-import 'package:stream_chat/src/core/models/reaction.dart';
-import 'package:stream_chat/src/core/models/reaction_group.dart';
-import 'package:stream_chat/src/core/models/user.dart';
-import 'package:stream_chat/src/core/models/user_group.dart';
-import 'package:stream_chat/src/core/util/extension.dart';
-import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:uuid/uuid.dart';
+
+import '../util/extension.dart';
+import '../util/serializer.dart';
+import 'attachment.dart';
+import 'comparable_field.dart';
+import 'draft.dart';
+import 'location.dart';
+import 'message_reminder.dart';
+import 'message_state.dart';
+import 'moderation.dart';
+import 'poll.dart';
+import 'reaction.dart';
+import 'reaction_group.dart';
+import 'user.dart';
+import 'user_group.dart';
 
 part 'message.g.dart';
 
@@ -47,7 +48,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     this.ownReactions,
     this.parentId,
     this.quotedMessage,
-    String? quotedMessageId,
+    this._quotedMessageId,
     this.replyCount = 0,
     this.threadParticipants,
     this.showInChannel,
@@ -66,7 +67,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     DateTime? pinExpires,
     this.pinnedBy,
     this.poll,
-    String? pollId,
+    this._pollId,
     this.extraData = const {},
     this.state = const MessageState.initial(),
     this.i18n,
@@ -81,9 +82,7 @@ class Message extends Equatable implements ComparableFieldProvider {
        pinExpires = pinExpires?.toUtc(),
        remoteCreatedAt = createdAt,
        remoteUpdatedAt = updatedAt,
-       remoteDeletedAt = deletedAt,
-       _quotedMessageId = quotedMessageId,
-       _pollId = pollId;
+       remoteDeletedAt = deletedAt;
 
   /// Create a new instance from JSON.
   factory Message.fromJson(Map<String, dynamic> json) {

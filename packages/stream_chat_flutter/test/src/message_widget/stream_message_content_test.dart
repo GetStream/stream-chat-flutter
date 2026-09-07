@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_content.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 // A deterministic attachment renderer so the post-frame width measurement

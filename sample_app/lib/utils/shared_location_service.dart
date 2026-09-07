@@ -2,15 +2,15 @@ import 'dart:async';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:sample_app/utils/location_provider.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import 'location_provider.dart';
 
 class SharedLocationService {
   SharedLocationService({
-    required StreamChatClient client,
-    LocationProvider? locationProvider,
-  }) : _client = client,
-       _locationProvider = locationProvider ?? LocationProvider();
+    required this._client,
+    required this._locationProvider,
+  });
 
   final StreamChatClient _client;
   final LocationProvider _locationProvider;

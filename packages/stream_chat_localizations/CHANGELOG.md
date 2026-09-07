@@ -1,3 +1,13 @@
+## 10.4.0
+
+✅ Added
+
+- Added message-translation strings for all supported locales: `translatedLabel`, `originalLabel`, `showOriginalLabel`, `showTranslationLabel`, and `translatedFromLanguageText(String languageCode)`, which names the source language of a translated message in the current locale.
+
+🔄 Changed
+
+- Raised minimum Flutter to `>=3.44.0` and Dart SDK to `^3.12.0`.
+
 ## 10.3.0
 
 ✅ Added

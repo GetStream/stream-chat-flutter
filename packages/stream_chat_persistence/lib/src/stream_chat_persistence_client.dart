@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
+import 'db/drift_chat_database.dart';
 
 /// Various connection modes on which [StreamChatPersistenceClient] can work
 enum ConnectionMode {
@@ -25,7 +25,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   /// Creates a new instance of the stream chat persistence client
   StreamChatPersistenceClient({
     /// Connection mode on which the client will work
-    ConnectionMode connectionMode = ConnectionMode.regular,
+    this._connectionMode = ConnectionMode.regular,
     Level logLevel = Level.WARNING,
 
     /// Whether to use an experimental storage implementation on the web
@@ -33,8 +33,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     /// Otherwise, falls back to the local storage based implementation.
     bool webUseExperimentalIndexedDb = false,
     LogHandlerFunction? logHandlerFunction,
-  }) : _connectionMode = connectionMode,
-       _webUseIndexedDbIfSupported = webUseExperimentalIndexedDb,
+  }) : _webUseIndexedDbIfSupported = webUseExperimentalIndexedDb,
        _logger = Logger.detached('💽')..level = logLevel {
     _logger.onRecord.listen(logHandlerFunction ?? _defaultLogHandler);
   }

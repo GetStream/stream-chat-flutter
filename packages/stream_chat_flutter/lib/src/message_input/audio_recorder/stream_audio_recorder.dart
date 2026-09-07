@@ -2,14 +2,15 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:stream_chat_flutter/src/audio/audio_playlist_controller.dart';
-import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
-import 'package:stream_chat_flutter/src/audio/audio_sampling.dart';
-import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recorder_state.dart';
-import 'package:stream_chat_flutter/src/message_input/stream_message_input_icon_button.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_core_flutter/chat.dart';
+
+import '../../audio/audio_playlist_controller.dart';
+import '../../audio/audio_playlist_state.dart';
+import '../../audio/audio_sampling.dart';
+import '../../misc/empty_widget.dart';
+import '../../utils/extensions.dart';
+import '../stream_message_input_icon_button.dart';
+import 'audio_recorder_state.dart';
 
 /// {@template audioRecorderBuilder}
 /// A builder function for constructing the audio recorder UI.

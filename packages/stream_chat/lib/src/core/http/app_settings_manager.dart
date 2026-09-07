@@ -1,7 +1,7 @@
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
-import 'package:stream_chat/src/core/api/general_api.dart';
-import 'package:stream_chat/src/core/models/app_settings.dart';
+import '../api/general_api.dart';
+import '../models/app_settings.dart';
 
 /// {@template appSettingsManager}
 /// Holds the [AppSettings] for the current connection.

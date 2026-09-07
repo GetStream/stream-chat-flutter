@@ -2,10 +2,10 @@
 
 import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
-import 'package:stream_chat_persistence/src/db/query_utils.dart';
-import 'package:stream_chat_persistence/src/entity/locations.dart';
-import 'package:stream_chat_persistence/src/mapper/mapper.dart';
+import '../db/drift_chat_database.dart';
+import '../db/query_utils.dart';
+import '../entity/locations.dart';
+import '../mapper/mapper.dart';
 
 part 'location_dao.g.dart';
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import '../../stream_chat_flutter.dart';
 
 /// {@template streamBackButton}
 /// A custom back button implementation
@@ -19,8 +19,8 @@ class StreamBackButton extends StatelessWidget {
       'This will be removed in a future version.',
     )
     this.channelId,
-    Widget? unreadIndicator = _unset,
-  }) : _unreadIndicator = unreadIndicator;
+    this._unreadIndicator = _unset,
+  });
 
   /// Callback for when button is pressed
   final VoidCallback? onPressed;

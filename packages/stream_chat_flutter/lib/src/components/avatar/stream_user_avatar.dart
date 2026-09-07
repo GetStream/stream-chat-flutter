@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
+
+import '../../utils/extensions.dart';
 
 /// A circular avatar component for displaying a user's profile.
 ///

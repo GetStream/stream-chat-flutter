@@ -50,6 +50,33 @@ The app connects to a demo Stream environment out of the box — no configuratio
 
 The default API key and demo user credentials live in `lib/utils/app_config.dart`. You can override the API key at runtime via the **Advanced Options** button on the login screen; the key is stored securely and used for subsequent sessions.
 
+#### Targeting a different Stream app
+
+To point the sample app at another backend — a staging environment, or your own
+Stream app — open **Advanced Options** on the login screen and fill in:
+
+| Field | Notes |
+| --- | --- |
+| **Chat API Key** | Prefilled with the app's configured key. |
+| **User ID** / **User Token** | A user on that app, with a token minted from its secret. The demo users on the login screen are signed for the demo app only. |
+| **Base URL** | Optional. HTTP base URL of the Stream API; the WebSocket URL is derived from it. Leave empty for the SDK's own endpoint. |
+
+Because these are entered at runtime, this works on an already-built
+deployment — including the [hosted web demo](https://getstream.github.io/stream-chat-flutter/).
+
+Whenever a custom API key or base URL is in use, the channel list drops the
+`stream_chat_flutter_sample_app` predefined filter — a saved query that exists
+only on the demo app — and uses a plain "channels I am a member of" filter
+instead.
+
+For local runs the same two settings have compile-time defaults:
+
+```bash
+flutter run \
+  --dart-define=STREAM_API_KEY=your-api-key \
+  --dart-define=STREAM_BASE_URL=https://chat-edge-us-east1-ce1.gcp.stream-io-api.com
+```
+
 ### Push Notifications
 
 Push notifications require a Firebase project. Add your `google-services.json` (Android) and/or `GoogleService-Info.plist` (iOS) to the respective platform directories. See the [push notifications guide](https://getstream.io/chat/docs/sdk/flutter/advanced-guides/push-notifications/) for full setup instructions.
