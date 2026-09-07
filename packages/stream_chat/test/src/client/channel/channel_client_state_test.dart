@@ -5065,9 +5065,6 @@ void main() {
       );
     });
 
-    // The dispatch regions run sequentially off a single subscription, so a
-    // handler that throws must not stop the ones after it — otherwise the
-    // state silently diverges from the server with nothing surfaced.
     group('Dispatch error isolation', () {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';

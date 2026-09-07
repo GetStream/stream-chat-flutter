@@ -819,10 +819,6 @@ void main() {
     });
   });
 
-  // Every dispatch region used to run on its own stream subscription, where a
-  // broadcast stream contained a throwing subscriber and still delivered the
-  // event to the rest. These pin that containment for the single-subscription
-  // dispatch: a throwing region must not skip the ones that follow it.
   group('error isolation', () {
     test('a throwing block 1 handler still runs the later regions', () {
       when(
@@ -886,6 +882,20 @@ void main() {
       );
 
       verify(() => mutations.onMemberUpdated(member)).called(1);
+    });
+
+    test('a throwing block 3 handler does not escape handleEvent', () {
+      when(
+        () => mutations.onUserStartWatching(any(), watcherCount: any(named: 'watcherCount')),
+      ).thenThrow(StateError('boom'));
+
+      handler.handleEvent(
+        Event(type: EventType.userWatchingStart, user: otherUser),
+      );
+
+      verify(
+        () => mutations.onUserStartWatching(otherUser, watcherCount: null),
+      ).called(1);
     });
 
     test('a contained error is logged rather than swallowed', () {
