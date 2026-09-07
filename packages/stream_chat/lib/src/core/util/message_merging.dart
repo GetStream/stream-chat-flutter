@@ -156,7 +156,7 @@ class MessageMerging {
   }
 
   /// Merges [toMerge] into the [existing] threads map, returning the updated
-  /// map, or [existing] as-is when [toMerge] carries no thread replies.
+  /// map.
   ///
   /// Replies are grouped by their parent id so each thread merge only sees
   /// its own messages. With [upsert] `false`, replies to threads not present
@@ -260,8 +260,7 @@ class MessageMerging {
   }
 
   /// Removes [toRemove] from the [existing] threads map, returning the
-  /// updated map, or [existing] as-is when [toRemove] carries no thread
-  /// replies.
+  /// updated map.
   ///
   /// Thread entries left with no messages are dropped from the map.
   static Map<String, List<Message>> removeThreadMessages({
