@@ -83,6 +83,11 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `TokenProvider` (typedef `Future<String> Function(String)`) | `TokenProvider` (interface, `stream_core`) | `retyped` | A closure no longer satisfies it: `TokenProvider.dynamic(loader)`, and the loader returns a `UserToken` |
 | `TokenManager.loadToken()` / `.isStatic` / `.setTokenOrProvider()` | `.getToken()` / `.usesStaticProvider` / `.setTokenProvider()` | `renamed` | `loadToken(refresh: true)` becomes `expireToken()` then `getToken()` |
 | `StreamChatClient.devToken(userId)` | — | `removed` | Generate tokens on your backend |
+| `StreamChatClient(logLevel:, logHandlerFunction:)` | `StreamChatClient(logConfig: StreamLogConfig(...))` | `retyped` | Default is unchanged: warnings and errors to the console |
+| `StreamChatClient.logger` (a `Logger`) | `StreamChatClient.logger` (a `StreamLogger`) | `retyped` | Messages are lazy: `logger.i(() => '…')` |
+| `StreamChatClient.detachedLogger` / `.defaultLogHandler` / `LogHandlerFunction` | — | `removed` | Supply a `StreamLogHandler`; `StreamLogHandler.console()` is the default |
+| `export 'package:logging'` (`Logger`, `Level`, `LogRecord`) | `StreamLogger`, `StreamLogConfig`, `StreamLogHandler`, `StreamLogFilter`, `StreamLogPriority`, `StreamLogRecord` | `removed` | `package:logging` is no longer a dependency |
+| `StreamChatPersistenceClient(logLevel:, logHandlerFunction:)` | — | `removed` | Logging is configured once, on the client |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -147,6 +152,46 @@ try {
 > because unmigrated endpoints used to throw it. Nothing throws it any more, so
 > `on StreamChatNetworkError catch (e)` still **compiles** and simply stops matching — the failure passes straight
 > through. Search your code for it; the deprecation warning tells you where.
+
+### Logging
+
+One `logConfig` replaces the two logging parameters, and records are `stream_core`'s:
+
+**Before:**
+```dart
+final client = StreamChatClient(
+  apiKey,
+  logLevel: Level.INFO,
+  logHandlerFunction: (LogRecord record) => myTracker.log(record.message),
+);
+```
+
+**After:**
+```dart
+class MyHandler extends StreamLogHandler {
+  const MyHandler();
+
+  @override
+  void handle(StreamLogRecord record) => myTracker.log(record.message);
+}
+
+final client = StreamChatClient(
+  apiKey,
+  logConfig: const StreamLogConfig(
+    priority: StreamLogPriority.info,
+    handler: MyHandler(),
+  ),
+);
+```
+
+Leave `logConfig` out and nothing changes from before: warnings and errors go to the console.
+
+Records carry a `tag` naming the subsystem — `SCh:Ws`, `SCh:Http`, `SCh:RetryQueue` — and
+`StreamLogFilter.prefix` filters on it, so you can turn one subsystem up without the rest. The
+handler is process-global across Stream SDKs, which is why the tags are prefixed per product.
+
+`StreamChatPersistenceClient` no longer takes logging parameters at all; it writes through the same
+logger.
 
 ### Anonymous connections identify as `!anon`
 

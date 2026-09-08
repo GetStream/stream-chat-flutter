@@ -17,12 +17,6 @@ void main() {
       registerFallbackValue(FakeAttachmentFile());
       registerFallbackValue(FakeEvent());
 
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
         delayFactor: Duration.zero,
@@ -34,7 +28,6 @@ void main() {
       when(() => client.state).thenReturn(clientState);
 
       // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
 
       // mock channel delivery reporter
       when(
@@ -5074,15 +5067,10 @@ void main() {
     late final client = MockStreamChatClient();
 
     setUpAll(() {
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
       when(() => client.retryPolicy).thenReturn(
         RetryPolicy(shouldRetry: (_, __, ___) => false, delayFactor: Duration.zero),
       );
       when(() => client.state).thenReturn(FakeClientState(currentUser: currentUser));
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
       when(
         () => client.channelDeliveryReporter.submitForDelivery(any()),
       ).thenAnswer((_) async {});
@@ -5143,15 +5131,10 @@ void main() {
       'disabled',
       () async {
         final disabledClient = MockStreamChatClient();
-        when(() => disabledClient.detachedLogger(any())).thenAnswer((invocation) {
-          final name = invocation.positionalArguments.first;
-          return _createLogger(name);
-        });
         when(() => disabledClient.retryPolicy).thenReturn(
           RetryPolicy(shouldRetry: (_, __, ___) => false),
         );
         when(() => disabledClient.state).thenReturn(FakeClientState(currentUser: currentUser));
-        when(() => disabledClient.logger).thenReturn(_createLogger('mock-client-logger'));
         when(
           () => disabledClient.channelDeliveryReporter.submitForDelivery(any()),
         ).thenAnswer((_) async {});
@@ -5490,10 +5473,6 @@ void main() {
     late final client = MockStreamChatClient();
 
     setUpAll(() {
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
       when(() => client.retryPolicy).thenReturn(
         RetryPolicy(
           shouldRetry: (_, __, ___) => false,
@@ -5501,7 +5480,6 @@ void main() {
         ),
       );
       when(() => client.state).thenReturn(FakeClientState());
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
       when(
         () => client.channelDeliveryReporter.submitForDelivery(any()),
       ).thenAnswer((_) async {});
@@ -5661,10 +5639,6 @@ void main() {
     late final client = MockStreamChatClient();
 
     setUpAll(() {
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
       when(() => client.retryPolicy).thenReturn(
         RetryPolicy(
           shouldRetry: (_, __, ___) => false,
@@ -5672,7 +5646,6 @@ void main() {
         ),
       );
       when(() => client.state).thenReturn(FakeClientState());
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
       when(
         () => client.channelDeliveryReporter.submitForDelivery(any()),
       ).thenAnswer((_) async {});
@@ -5800,13 +5773,6 @@ void main() {
     setUpAll(() {
       registerFallbackValue(FakeMessage());
       registerFallbackValue(<Message>[]);
-
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
 
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
@@ -6197,12 +6163,6 @@ ChannelState _generateChannelState(
     lastMessageAt: lastMessageAt,
   );
   return ChannelState(channel: channel);
-}
-
-Logger _createLogger(String name) {
-  final logger = Logger.detached(name)..level = Level.ALL;
-  logger.onRecord.listen(print);
-  return logger;
 }
 
 // endregion

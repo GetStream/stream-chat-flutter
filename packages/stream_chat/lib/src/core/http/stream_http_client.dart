@@ -1,15 +1,22 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_core/stream_core.dart'
-    show ApiErrorInterceptor, AuthInterceptor, DioExceptionMapping, SystemEnvironmentManager, TokenManager;
+    show
+        ApiErrorInterceptor,
+        AuthInterceptor,
+        ConnectionIdInterceptor,
+        DioExceptionMapping,
+        HeadersInterceptor,
+        LoggingInterceptor,
+        Standard,
+        StreamCoreHttpClient,
+        SystemEnvironmentManager,
+        TokenManager;
 import '../error/error.dart';
 import 'connection_id_manager.dart';
 import 'interceptor/additional_headers_interceptor.dart';
-import 'interceptor/connection_id_interceptor.dart';
-import 'interceptor/logging_interceptor.dart';
 
 part 'stream_http_client_options.dart';
 
@@ -24,11 +31,10 @@ class StreamHttpClient {
     TokenManager? tokenManager,
     ConnectionIdManager? connectionIdManager,
     SystemEnvironmentManager? systemEnvironmentManager,
-    Logger? logger,
     Iterable<Interceptor>? interceptors,
     HttpClientAdapter? httpClientAdapter,
   }) : _options = options ?? const StreamHttpClientOptions(),
-       httpClient = dio ?? Dio() {
+       httpClient = dio ?? StreamCoreHttpClient() {
     httpClient
       ..options.baseUrl = _options.baseUrl
       ..options.receiveTimeout = _options.receiveTimeout
@@ -43,28 +49,17 @@ class StreamHttpClient {
         ..._options.headers,
       }
       ..interceptors.addAll([
-        AdditionalHeadersInterceptor(systemEnvironmentManager),
-        if (tokenManager != null) AuthInterceptor(httpClient, tokenManager),
-        if (connectionIdManager != null) ConnectionIdInterceptor(connectionIdManager),
+        const AdditionalHeadersInterceptor(),
+        ?systemEnvironmentManager?.let(HeadersInterceptor.new),
+        ?tokenManager?.let((it) => AuthInterceptor(httpClient, it, tag: 'SCh:HttpAuth')),
+        ?connectionIdManager?.let((it) => ConnectionIdInterceptor(() => it.connectionId)),
         const ApiErrorInterceptor(),
         ...interceptors ??
             [
               // Add a default logging interceptor if no interceptors are
-              // provided.
-              if (logger != null && logger.level != Level.OFF)
-                LoggingInterceptor(
-                  requestHeader: true,
-                  logPrint: (step, message) {
-                    switch (step) {
-                      case InterceptStep.request:
-                        return logger.info(message);
-                      case InterceptStep.response:
-                        return logger.info(message);
-                      case InterceptStep.error:
-                        return logger.severe(message);
-                    }
-                  },
-                ),
+              // provided. What it writes is gated by the configured priority,
+              // so there is no separate on/off switch here.
+              LoggingInterceptor(requestHeader: true, tag: 'SCh:Http'),
             ],
       ]);
     if (httpClientAdapter != null) {

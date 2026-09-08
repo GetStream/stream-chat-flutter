@@ -76,7 +76,6 @@ command:
       json_annotation: ^4.12.0
       just_audio: ^0.10.5
       latlong2: ^0.9.1
-      logging: ^1.3.0
       lottie: ^3.3.3
       marionette_flutter: ^0.6.0
       media_kit: ^1.2.6

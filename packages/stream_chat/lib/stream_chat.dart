@@ -12,7 +12,6 @@ export 'package:dio/dio.dart'
         MultipartFile,
         Options,
         ProgressCallback;
-export 'package:logging/logging.dart' show Logger, Level, LogRecord;
 export 'package:rate_limiter/rate_limiter.dart';
 // Re-exported with a `show` allowlist rather than wholesale: `stream_core`
 // also declares names this barrel defines — `AttachmentFile`, `Filter`,
@@ -20,6 +19,9 @@ export 'package:rate_limiter/rate_limiter.dart';
 export 'package:stream_core/stream_core.dart'
     show
         Failure,
+        InterceptStep,
+        LogPrint,
+        LoggingInterceptor,
         Result,
         StreamApiError,
         StreamApiException,
@@ -27,6 +29,12 @@ export 'package:stream_core/stream_core.dart'
         StreamClientException,
         StreamErrorCode,
         StreamException,
+        StreamLogConfig,
+        StreamLogFilter,
+        StreamLogHandler,
+        StreamLogPriority,
+        StreamLogRecord,
+        StreamLogger,
         StreamNetworkException,
         Success,
         SystemEnvironment,
@@ -52,7 +60,6 @@ export 'src/core/api/responses.dart';
 export 'src/core/api/sort_order.dart';
 export 'src/core/api/stream_chat_api.dart';
 export 'src/core/error/error.dart';
-export 'src/core/http/interceptor/logging_interceptor.dart';
 export 'src/core/http/stream_http_client.dart';
 export 'src/core/models/action.dart';
 export 'src/core/models/app_settings.dart';

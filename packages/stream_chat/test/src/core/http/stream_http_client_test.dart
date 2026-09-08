@@ -1,14 +1,23 @@
 import 'package:dio/dio.dart';
-import 'package:logging/logging.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/api/responses.dart';
 import 'package:stream_chat/src/core/http/connection_id_manager.dart';
 import 'package:stream_chat/src/core/http/interceptor/additional_headers_interceptor.dart';
-import 'package:stream_chat/src/core/http/interceptor/connection_id_interceptor.dart';
-import 'package:stream_chat/src/core/http/interceptor/logging_interceptor.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_core/stream_core.dart'
-    show AuthInterceptor, StreamApiException, StreamDioException, StreamErrorCode, StreamNetworkException, TokenManager;
+    show
+        AuthInterceptor,
+        StreamLogHandler,
+        StreamLogPriority,
+        StreamLogRecord,
+        StreamLogger,
+        ConnectionIdInterceptor,
+        LoggingInterceptor,
+        StreamApiException,
+        StreamDioException,
+        StreamErrorCode,
+        StreamNetworkException,
+        TokenManager;
 import 'package:test/test.dart';
 
 import '../../mocks.dart';
@@ -78,71 +87,40 @@ void main() {
   );
 
   group('loggingInterceptor', () {
-    test('should be added if logger is provided', () {
-      const apiKey = 'api-key';
-      final client = StreamHttpClient(
-        apiKey,
-        logger: Logger('test-logger'),
-      );
+    test('is added by default', () {
+      final client = StreamHttpClient('api-key');
 
-      expect(
-        client.httpClient.interceptors.whereType<LoggingInterceptor>().length,
-        1,
-      );
+      expect(client.httpClient.interceptors.whereType<LoggingInterceptor>().length, 1);
     });
 
-    test('should not be added if logger.level is OFF', () {
-      const apiKey = 'api-key';
+    test('is not added if `interceptors` are provided', () {
       final client = StreamHttpClient(
-        apiKey,
-        logger: Logger.detached('test-logger')..level = Level.OFF,
-      );
-
-      expect(
-        client.httpClient.interceptors.whereType<LoggingInterceptor>().length,
-        0,
-      );
-    });
-
-    test('should not be added if `interceptors` are provided', () {
-      const apiKey = 'api-key';
-      final client = StreamHttpClient(
-        apiKey,
-        logger: Logger.detached('test-logger'),
+        'api-key',
         interceptors: [
           // Sample Interceptor.
           InterceptorsWrapper(),
         ],
       );
 
-      expect(
-        client.httpClient.interceptors.whereType<LoggingInterceptor>().length,
-        0,
-      );
+      expect(client.httpClient.interceptors.whereType<LoggingInterceptor>().length, 0);
     });
 
-    test('should log requests', () async {
-      const apiKey = 'api-key';
-      final logger = MockLogger();
-      final client = StreamHttpClient(apiKey, logger: logger);
+    test('writes what it logs to the configured handler', () async {
+      final records = <StreamLogRecord>[];
+      StreamLogger.handler = _CapturingHandler(records.add);
+      StreamLogger.priority = StreamLogPriority.verbose;
+      addTearDown(StreamLogger.reset);
+
+      final client = StreamHttpClient('api-key');
 
       try {
         await client.get('path');
       } catch (_) {}
 
-      verify(() => logger.info(any())).called(greaterThan(0));
-    });
-
-    test('should log error', () async {
-      const apiKey = 'api-key';
-      final logger = MockLogger();
-      final client = StreamHttpClient(apiKey, logger: logger);
-
-      try {
-        await client.get('path');
-      } catch (_) {}
-
-      verify(() => logger.severe(any())).called(greaterThan(0));
+      // The request is logged, and so is the failure to reach the server.
+      expect(records.map((it) => it.tag), everyElement('SCh:Http'));
+      expect(records.any((it) => it.priority == StreamLogPriority.debug), isTrue);
+      expect(records.any((it) => it.priority == StreamLogPriority.warning), isTrue);
     });
   });
 
@@ -626,4 +604,13 @@ void main() {
       verifyNoMoreInteractions(dio);
     },
   );
+}
+
+class _CapturingHandler extends StreamLogHandler {
+  const _CapturingHandler(this._onRecord);
+
+  final void Function(StreamLogRecord) _onRecord;
+
+  @override
+  void handle(StreamLogRecord record) => _onRecord(record);
 }

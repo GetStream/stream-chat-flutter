@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:logging/logging.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/client/channel/channel.dart';
 import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
@@ -40,11 +39,6 @@ class MockDio extends Mock implements Dio {
 
   @override
   Interceptors get interceptors => _interceptors ??= Interceptors();
-}
-
-class MockLogger extends Mock implements Logger {
-  @override
-  Level get level => Level.ALL;
 }
 
 class MockHttpClient extends Mock implements StreamHttpClient {}

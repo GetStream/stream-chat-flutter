@@ -3,62 +3,57 @@
 import 'package:dio/dio.dart';
 import 'package:stream_chat/src/core/http/interceptor/additional_headers_interceptor.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_core/stream_core.dart' show SystemEnvironmentManager;
+import 'package:stream_core/stream_core.dart' show HeadersInterceptor, SystemEnvironmentManager;
 import 'package:test/test.dart';
 
 void main() {
-  group('AdditionalHeadersInterceptor tests', () {
-    group('without SystemEnvironmentManager', () {
-      late AdditionalHeadersInterceptor additionalHeadersInterceptor;
+  Future<Map<String, dynamic>> headersAfter(Interceptor interceptor) async {
+    final options = RequestOptions(path: 'test-path');
+    final handler = RequestInterceptorHandler();
 
-      setUp(() {
-        additionalHeadersInterceptor = const AdditionalHeadersInterceptor();
-      });
+    interceptor.onRequest(options, handler);
 
-      test('should add additional headers in the request', () async {
-        StreamChatClient.additionalHeaders = {'test-header': 'test-value'};
-        addTearDown(() => StreamChatClient.additionalHeaders = {});
+    final updatedOptions = (await handler.future).data as RequestOptions;
+    return updatedOptions.headers;
+  }
 
-        final options = RequestOptions(path: 'test-path');
-        final handler = RequestInterceptorHandler();
+  group('AdditionalHeadersInterceptor', () {
+    test('applies the headers an integrator added', () async {
+      StreamChatClient.additionalHeaders = {'test-header': 'test-value'};
+      addTearDown(() => StreamChatClient.additionalHeaders = {});
 
-        await additionalHeadersInterceptor.onRequest(options, handler);
+      final headers = await headersAfter(const AdditionalHeadersInterceptor());
 
-        final updatedOptions = (await handler.future).data as RequestOptions;
-        final updateHeaders = updatedOptions.headers;
-
-        expect(updateHeaders.containsKey('test-header'), isTrue);
-        expect(updateHeaders['test-header'], 'test-value');
-        expect(updateHeaders.containsKey('X-Stream-Client'), isFalse);
-      });
+      expect(headers['test-header'], 'test-value');
+      // The user agent is `HeadersInterceptor`'s job, not this one's.
+      expect(headers.containsKey('X-Stream-Client'), isFalse);
     });
 
-    group('with SystemEnvironmentManager', () {
-      late AdditionalHeadersInterceptor additionalHeadersInterceptor;
+    test('reads the headers on every request, not once', () async {
+      const interceptor = AdditionalHeadersInterceptor();
+      addTearDown(() => StreamChatClient.additionalHeaders = {});
 
-      setUp(() {
-        additionalHeadersInterceptor = AdditionalHeadersInterceptor(
-          FakeSystemEnvironmentManager(),
-        );
-      });
+      StreamChatClient.additionalHeaders = {'test-header': 'first'};
+      expect((await headersAfter(interceptor))['test-header'], 'first');
 
-      test('should add user agent header when available', () async {
-        StreamChatClient.additionalHeaders = {'test-header': 'test-value'};
-        addTearDown(() => StreamChatClient.additionalHeaders = {});
+      StreamChatClient.additionalHeaders = {'test-header': 'second'};
+      expect((await headersAfter(interceptor))['test-header'], 'second');
+    });
 
-        final options = RequestOptions(path: 'test-path');
-        final handler = RequestInterceptorHandler();
+    test('adds nothing when none were added', () async {
+      final headers = await headersAfter(const AdditionalHeadersInterceptor());
 
-        await additionalHeadersInterceptor.onRequest(options, handler);
+      expect(headers.containsKey('test-header'), isFalse);
+    });
+  });
 
-        final updatedOptions = (await handler.future).data as RequestOptions;
-        final updateHeaders = updatedOptions.headers;
+  // `HeadersInterceptor` is `stream_core`'s, but `stream_core` has no test for
+  // it, and this is the environment manager this SDK hands it.
+  group('HeadersInterceptor', () {
+    test('reports the SDK identity in the Stream client header', () async {
+      final headers = await headersAfter(HeadersInterceptor(FakeSystemEnvironmentManager()));
 
-        expect(updateHeaders.containsKey('test-header'), isTrue);
-        expect(updateHeaders['test-header'], 'test-value');
-        expect(updateHeaders.containsKey('X-Stream-Client'), isTrue);
-        expect(updateHeaders['X-Stream-Client'], 'test-user-agent');
-      });
+      expect(headers['X-Stream-Client'], 'test-user-agent');
     });
   });
 }

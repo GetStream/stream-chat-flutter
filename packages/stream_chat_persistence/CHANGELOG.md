@@ -1,3 +1,9 @@
+## Upcoming Beta
+
+🛑️ Breaking
+
+- `StreamChatPersistenceClient` no longer takes `logLevel` or `logHandlerFunction`. It writes through `stream_core`'s logger, configured once via `StreamChatClient`'s `logConfig`.
+
 ## 10.4.0
 
 🔄 Changed

@@ -34,12 +34,6 @@ void main() {
     return state;
   }
 
-  Logger _createLogger(String name) {
-    final logger = Logger.detached(name)..level = Level.ALL;
-    logger.onRecord.listen(print);
-    return logger;
-  }
-
   group('Non-Initialized Channel', () {
     late final client = MockStreamChatClient();
     const channelId = 'test-channel-id';
@@ -47,15 +41,6 @@ void main() {
     late Channel channel;
 
     setUpAll(() {
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
-
       // fake clientState
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
@@ -165,12 +150,6 @@ void main() {
       registerFallbackValue(<Message>[]);
       registerFallbackValue(FakeAttachmentFile());
 
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
         delayFactor: Duration.zero,
@@ -187,9 +166,6 @@ void main() {
       final channelState = _generateChannelState(channelId, channelType);
       when(() => client.chatPersistenceClient.getChannelStateByCid(channelCid)).thenAnswer((_) async => channelState);
       when(() => client.chatPersistenceClient.updateMessages(channelCid, any())).thenAnswer((_) => Future.value());
-
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
     });
 
     // Setting up a initialized channel
@@ -216,12 +192,6 @@ void main() {
       registerFallbackValue(FakeAttachmentFile());
       registerFallbackValue(FakeEvent());
 
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
         delayFactor: Duration.zero,
@@ -231,9 +201,6 @@ void main() {
       // fake clientState
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
-
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
 
       // mock channel delivery reporter
       when(
@@ -4919,12 +4886,6 @@ void main() {
     const channelType = 'test-channel-type';
 
     setUpAll(() {
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
         delayFactor: Duration.zero,
@@ -4934,9 +4895,6 @@ void main() {
       // fake clientState
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
-
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
 
       // mock channel delivery reporter
       when(
@@ -5637,12 +5595,6 @@ void main() {
     const channelType = 'test-channel-type';
 
     setUpAll(() {
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
         delayFactor: Duration.zero,
@@ -5652,9 +5604,6 @@ void main() {
       // fake clientState
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
-
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
     });
 
     test('should return filterTags from channel state', () {
@@ -5707,12 +5656,6 @@ void main() {
       registerFallbackValue(FakeAttachmentFile());
       registerFallbackValue(FakeEvent());
 
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
         delayFactor: Duration.zero,
@@ -5722,9 +5665,6 @@ void main() {
       // fake clientState
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
-
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
     });
 
     test(
@@ -6030,12 +5970,6 @@ void main() {
     late final client = MockStreamChatClient();
 
     setUpAll(() {
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
         delayFactor: Duration.zero,
@@ -6045,9 +5979,6 @@ void main() {
       // fake clientState
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
-
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
     });
 
     test(
@@ -6335,13 +6266,6 @@ void main() {
       registerFallbackValue(FakeMessage());
       registerFallbackValue(<Message>[]);
       registerFallbackValue(FakeAttachmentFile());
-
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
 
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);

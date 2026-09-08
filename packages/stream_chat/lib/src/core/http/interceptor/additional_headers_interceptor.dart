@@ -1,27 +1,24 @@
 import 'package:dio/dio.dart';
-import 'package:stream_core/stream_core.dart' show SystemEnvironmentManager;
 
 import '../../../../stream_chat.dart';
 
-/// Interceptor that sets additional headers for all requests.
+/// Interceptor that applies [StreamChatClient.additionalHeaders] to every
+/// request.
+///
+/// The `X-Stream-Client` header is `stream_core`'s `HeadersInterceptor`; this
+/// carries only the headers an integrator adds, which is a chat-only concept.
+/// It is read on every request rather than captured once, so a change made
+/// after the client was built still applies.
 class AdditionalHeadersInterceptor extends Interceptor {
   /// Initialize a new [AdditionalHeadersInterceptor].
-  const AdditionalHeadersInterceptor([this._systemEnvironmentManager]);
-
-  final SystemEnvironmentManager? _systemEnvironmentManager;
+  const AdditionalHeadersInterceptor();
 
   @override
   Future<void> onRequest(
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    final userAgent = _systemEnvironmentManager?.userAgent;
-
-    options.headers = {
-      ...options.headers,
-      ...StreamChatClient.additionalHeaders,
-      if (userAgent != null) 'X-Stream-Client': userAgent,
-    };
+    options.headers.addAll(StreamChatClient.additionalHeaders);
     return handler.next(options);
   }
 }

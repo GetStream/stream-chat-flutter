@@ -7,8 +7,8 @@ import '../mocks.dart';
 
 void main() {
   late final channel = MockRetryQueueChannel();
-  late final logger = MockLogger();
   late RetryQueue retryQueue;
+  late List<StreamLogRecord> records;
 
   setUpAll(() {
     final retryPolicy = RetryPolicy(
@@ -18,17 +18,23 @@ void main() {
   });
 
   setUp(() {
-    retryQueue = RetryQueue(channel: channel, logger: logger);
+    // The queue owns its logger, so what it reports is observed through the
+    // handler rather than through an injected mock.
+    records = [];
+    StreamLogger.handler = _CapturingHandler(records.add);
+    StreamLogger.priority = StreamLogPriority.verbose;
+    retryQueue = RetryQueue(channel: channel);
   });
 
   tearDown(() {
     retryQueue.dispose();
+    StreamLogger.reset();
   });
 
   group('`.add`', () {
     test('should return if message list is empty', () {
       expect(() => retryQueue.add([]), returnsNormally);
-      verifyNever(() => logger.info(any()));
+      expect(records, isEmpty);
     });
 
     test('should throw if message state is not failed', () {
@@ -52,7 +58,7 @@ void main() {
       retryQueue.add([message]);
       expect(() => retryQueue.add([message]), returnsNormally);
       // Called only for the first message
-      verify(() => logger.info('Adding 1 messages to the queue')).called(1);
+      expect(records.where((it) => it.message == 'Adding 1 messages to the queue'), hasLength(1));
     });
 
     test('`.add` should add failed request to the queue', () async {
@@ -68,4 +74,13 @@ void main() {
       expect(retryQueue.hasMessages, isTrue);
     });
   });
+}
+
+class _CapturingHandler extends StreamLogHandler {
+  const _CapturingHandler(this._onRecord);
+
+  final void Function(StreamLogRecord) _onRecord;
+
+  @override
+  void handle(StreamLogRecord record) => _onRecord(record);
 }

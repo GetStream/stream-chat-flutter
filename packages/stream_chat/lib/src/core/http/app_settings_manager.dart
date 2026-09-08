@@ -1,5 +1,5 @@
-import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
+import 'package:stream_core/stream_core.dart' show StreamLogger;
 import '../api/general_api.dart';
 import '../models/app_settings.dart';
 
@@ -17,10 +17,13 @@ import '../models/app_settings.dart';
 @internal
 class AppSettingsManager {
   /// {@macro appSettingsManager}
-  AppSettingsManager(this._api);
+  AppSettingsManager(
+    this._api, {
+    String tag = 'SCh:AppSettings',
+  }) : _logger = StreamLogger(tag);
 
   final GeneralApi _api;
-  late final _logger = Logger('AppSettingsManager');
+  final StreamLogger _logger;
 
   /// The cached [AppSettings].
   ///
@@ -40,7 +43,7 @@ class AppSettingsManager {
       final response = await _api.getAppSettings();
       _appSettings = response.app;
     } catch (e, stk) {
-      _logger.warning('Failed to load app settings', e, stk);
+      _logger.w(() => 'Failed to load app settings', error: e, stackTrace: stk);
     }
   }
 

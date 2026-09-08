@@ -17,7 +17,7 @@ void main() {
   group('connect', () {
     const userId = 'testUserId';
     test('successfully connects with the Database', () async {
-      final client = StreamChatPersistenceClient(logLevel: Level.ALL);
+      final client = StreamChatPersistenceClient();
       expect(client.isConnected, false);
       await client.connect(userId, databaseProvider: testDatabaseProvider);
       expect(client.isConnected, true);
@@ -30,7 +30,7 @@ void main() {
     });
 
     test('throws if already connected', () async {
-      final client = StreamChatPersistenceClient(logLevel: Level.ALL);
+      final client = StreamChatPersistenceClient();
       expect(client.isConnected, false);
       await client.connect(userId, databaseProvider: testDatabaseProvider);
       expect(client.isConnected, true);
@@ -49,7 +49,7 @@ void main() {
 
   test('disconnect', () async {
     const userId = 'testUserId';
-    final client = StreamChatPersistenceClient(logLevel: Level.ALL);
+    final client = StreamChatPersistenceClient();
     await client.connect(userId, databaseProvider: testDatabaseProvider);
     expect(client.isConnected, true);
     await client.disconnect(flush: true);
@@ -58,7 +58,7 @@ void main() {
 
   test('flush', () async {
     const userId = 'testUserId';
-    final client = StreamChatPersistenceClient(logLevel: Level.ALL);
+    final client = StreamChatPersistenceClient();
 
     await client.connect(userId, databaseProvider: testDatabaseProvider);
     addTearDown(() async => client.disconnect());
@@ -88,7 +88,7 @@ void main() {
   });
 
   test('client function throws stateError if db is not yet connected', () {
-    final client = StreamChatPersistenceClient(logLevel: Level.ALL);
+    final client = StreamChatPersistenceClient();
     expect(
       // Running a function that requires db connection.
       () => client.getReplies('testParentId'),
@@ -109,7 +109,7 @@ void main() {
     });
 
     setUp(() async {
-      client = StreamChatPersistenceClient(logLevel: Level.ALL);
+      client = StreamChatPersistenceClient();
       await client.connect(userId, databaseProvider: _mockDatabaseProvider);
     });
 

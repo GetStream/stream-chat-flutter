@@ -14,46 +14,26 @@ enum ConnectionMode {
 /// Signature for a function which provides instance of [DriftChatDatabase]
 typedef DatabaseProvider = DriftChatDatabase Function(String, ConnectionMode);
 
-final _levelEmojiMapper = {
-  Level.INFO: 'ℹ️',
-  Level.WARNING: '⚠️',
-  Level.SEVERE: '🚨',
-};
-
 /// A [DriftChatDatabase] based implementation of the [ChatPersistenceClient]
 class StreamChatPersistenceClient extends ChatPersistenceClient {
   /// Creates a new instance of the stream chat persistence client
   StreamChatPersistenceClient({
     /// Connection mode on which the client will work
     this._connectionMode = ConnectionMode.regular,
-    Level logLevel = Level.WARNING,
 
     /// Whether to use an experimental storage implementation on the web
     /// that uses IndexedDB if the current browser supports it.
     /// Otherwise, falls back to the local storage based implementation.
     bool webUseExperimentalIndexedDb = false,
-    LogHandlerFunction? logHandlerFunction,
-  }) : _webUseIndexedDbIfSupported = webUseExperimentalIndexedDb,
-       _logger = Logger.detached('💽')..level = logLevel {
-    _logger.onRecord.listen(logHandlerFunction ?? _defaultLogHandler);
-  }
+  }) : _webUseIndexedDbIfSupported = webUseExperimentalIndexedDb;
 
   /// [DriftChatDatabase] instance used by this client.
   @visibleForTesting
   DriftChatDatabase? db;
 
-  final Logger _logger;
+  static const _logger = StreamLogger('SCh:Persistence');
   final ConnectionMode _connectionMode;
   final bool _webUseIndexedDbIfSupported;
-
-  void _defaultLogHandler(LogRecord record) {
-    print(
-      '(${record.time}) '
-      '${_levelEmojiMapper[record.level] ?? record.level.name} '
-      '${record.loggerName} ${record.message}',
-    );
-    if (record.stackTrace != null) print(record.stackTrace);
-  }
 
   bool get _debugIsConnected {
     assert(() {
@@ -94,91 +74,91 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
         'disconnect the previous instance before connecting again.',
       );
     }
-    _logger.info('connect');
+    _logger.i(() => 'connect');
     db = databaseProvider?.call(userId, _connectionMode) ?? await _defaultDatabaseProvider(userId, _connectionMode);
   }
 
   @override
   Future<Event?> getConnectionInfo() {
     assert(_debugIsConnected, '');
-    _logger.info('getConnectionInfo');
+    _logger.i(() => 'getConnectionInfo');
     return db!.connectionEventDao.connectionEvent;
   }
 
   @override
   Future<void> updateConnectionInfo(Event event) {
     assert(_debugIsConnected, '');
-    _logger.info('updateConnectionInfo');
+    _logger.i(() => 'updateConnectionInfo');
     return db!.connectionEventDao.updateConnectionEvent(event);
   }
 
   @override
   Future<void> updateLastSyncAt(DateTime lastSyncAt) {
     assert(_debugIsConnected, '');
-    _logger.info('updateLastSyncAt');
+    _logger.i(() => 'updateLastSyncAt');
     return db!.connectionEventDao.updateLastSyncAt(lastSyncAt);
   }
 
   @override
   Future<DateTime?> getLastSyncAt() {
     assert(_debugIsConnected, '');
-    _logger.info('getLastSyncAt');
+    _logger.i(() => 'getLastSyncAt');
     return db!.connectionEventDao.lastSyncAt;
   }
 
   @override
   Future<void> deleteChannels(List<String> cids) {
     assert(_debugIsConnected, '');
-    _logger.info('deleteChannels');
+    _logger.i(() => 'deleteChannels');
     return db!.channelDao.deleteChannelByCids(cids);
   }
 
   @override
   Future<List<String>> getChannelCids() {
     assert(_debugIsConnected, '');
-    _logger.info('getChannelCids');
+    _logger.i(() => 'getChannelCids');
     return db!.channelDao.cids;
   }
 
   @override
   Future<void> deleteMessageByIds(List<String> messageIds) {
     assert(_debugIsConnected, '');
-    _logger.info('deleteMessageByIds');
+    _logger.i(() => 'deleteMessageByIds');
     return db!.messageDao.deleteMessageByIds(messageIds);
   }
 
   @override
   Future<void> deletePinnedMessageByIds(List<String> messageIds) {
     assert(_debugIsConnected, '');
-    _logger.info('deletePinnedMessageByIds');
+    _logger.i(() => 'deletePinnedMessageByIds');
     return db!.pinnedMessageDao.deleteMessageByIds(messageIds);
   }
 
   @override
   Future<void> deleteMessageByCids(List<String> cids) {
     assert(_debugIsConnected, '');
-    _logger.info('deleteMessageByCids');
+    _logger.i(() => 'deleteMessageByCids');
     return db!.messageDao.deleteMessageByCids(cids);
   }
 
   @override
   Future<void> deletePinnedMessageByCids(List<String> cids) {
     assert(_debugIsConnected, '');
-    _logger.info('deletePinnedMessageByCids');
+    _logger.i(() => 'deletePinnedMessageByCids');
     return db!.pinnedMessageDao.deleteMessageByCids(cids);
   }
 
   @override
   Future<List<Member>> getMembersByCid(String cid) {
     assert(_debugIsConnected, '');
-    _logger.info('getMembersByCid');
+    _logger.i(() => 'getMembersByCid');
     return db!.memberDao.getMembersByCid(cid);
   }
 
   @override
   Future<ChannelModel?> getChannelByCid(String cid) {
     assert(_debugIsConnected, '');
-    _logger.info('getChannelByCid');
+    _logger.i(() => 'getChannelByCid');
     return db!.channelDao.getChannelByCid(cid);
   }
 
@@ -188,7 +168,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     PaginationParams? messagePagination,
   }) {
     assert(_debugIsConnected, '');
-    _logger.info('getMessagesByCid');
+    _logger.i(() => 'getMessagesByCid');
     return db!.messageDao.getMessagesByCid(
       cid,
       messagePagination: messagePagination,
@@ -201,7 +181,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     PaginationParams? messagePagination,
   }) {
     assert(_debugIsConnected, '');
-    _logger.info('getPinnedMessagesByCid');
+    _logger.i(() => 'getPinnedMessagesByCid');
     return db!.pinnedMessageDao.getMessagesByCid(
       cid,
       messagePagination: messagePagination,
@@ -216,7 +196,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     DateTime? deletedAt,
   }) async {
     assert(_debugIsConnected, '');
-    _logger.info('deleteMessagesFromUser');
+    _logger.i(() => 'deleteMessagesFromUser');
 
     // Delete from both messages and pinned_messages tables
     await Future.wait(
@@ -240,7 +220,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     String? parentId,
   }) {
     assert(_debugIsConnected, '');
-    _logger.info('getDraftMessageByCid');
+    _logger.i(() => 'getDraftMessageByCid');
     return db!.draftMessageDao.getDraftMessageByCid(
       cid,
       parentId: parentId,
@@ -250,28 +230,28 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @override
   Future<List<Location>> getLocationsByCid(String cid) async {
     assert(_debugIsConnected, '');
-    _logger.info('getLocationsByCid');
+    _logger.i(() => 'getLocationsByCid');
     return db!.locationDao.getLocationsByCid(cid);
   }
 
   @override
   Future<Location?> getLocationByMessageId(String messageId) async {
     assert(_debugIsConnected, '');
-    _logger.info('getLocationByMessageId');
+    _logger.i(() => 'getLocationByMessageId');
     return db!.locationDao.getLocationByMessageId(messageId);
   }
 
   @override
   Future<List<Read>> getReadsByCid(String cid) async {
     assert(_debugIsConnected, '');
-    _logger.info('getReadsByCid');
+    _logger.i(() => 'getReadsByCid');
     return db!.readDao.getReadsByCid(cid);
   }
 
   @override
   Future<Map<String, List<Message>>> getChannelThreads(String cid) async {
     assert(_debugIsConnected, '');
-    _logger.info('getChannelThreads');
+    _logger.i(() => 'getChannelThreads');
     final messages = await db!.messageDao.getThreadMessages(cid);
     final messageByParentIdDictionary = <String, List<Message>>{};
     for (final message in messages) {
@@ -291,7 +271,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     PaginationParams? options,
   }) {
     assert(_debugIsConnected, '');
-    _logger.info('getReplies');
+    _logger.i(() => 'getReplies');
     return db!.messageDao.getThreadMessagesByParentId(
       parentId,
       options: options,
@@ -330,7 +310,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     PaginationParams? paginationParams,
   }) async {
     assert(_debugIsConnected, '');
-    _logger.info('queryChannelStates');
+    _logger.i(() => 'queryChannelStates');
     if (predefinedFilter != null) {
       final (channelModels, resolvedFilter, resolvedSort) = await db!.channelQueryDao
           .getChannelsAndSpecByPredefinedFilter(
@@ -438,7 +418,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     bool clearQueryCache = false,
   }) {
     assert(_debugIsConnected, '');
-    _logger.info('saveChannelQueries');
+    _logger.i(() => 'saveChannelQueries');
     if (predefinedFilter != null) {
       return db!.channelQueryDao.updateChannelQueriesByPredefinedFilter(
         predefinedFilter,
@@ -462,91 +442,91 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @override
   Future<void> updateChannels(List<ChannelModel> channels) {
     assert(_debugIsConnected, '');
-    _logger.info('updateChannels');
+    _logger.i(() => 'updateChannels');
     return db!.channelDao.updateChannels(channels);
   }
 
   @override
   Future<void> updateDraftMessages(List<Draft> draftMessages) {
     assert(_debugIsConnected, '');
-    _logger.info('updateDraftMessages');
+    _logger.i(() => 'updateDraftMessages');
     return db!.draftMessageDao.updateDraftMessages(draftMessages);
   }
 
   @override
   Future<void> updatePolls(List<Poll> polls) {
     assert(_debugIsConnected, '');
-    _logger.info('updatePolls');
+    _logger.i(() => 'updatePolls');
     return db!.pollDao.updatePolls(polls);
   }
 
   @override
   Future<void> deletePollsByIds(List<String> pollIds) {
     assert(_debugIsConnected, '');
-    _logger.info('deletePollsByIds');
+    _logger.i(() => 'deletePollsByIds');
     return db!.pollDao.deletePollsByIds(pollIds);
   }
 
   @override
   Future<void> bulkUpdateMembers(Map<String, List<Member>?> members) {
     assert(_debugIsConnected, '');
-    _logger.info('bulkUpdateMembers');
+    _logger.i(() => 'bulkUpdateMembers');
     return db!.memberDao.bulkUpdateMembers(members);
   }
 
   @override
   Future<void> bulkUpdateMessages(Map<String, List<Message>?> messages) {
     assert(_debugIsConnected, '');
-    _logger.info('bulkUpdateMessages');
+    _logger.i(() => 'bulkUpdateMessages');
     return db!.messageDao.bulkUpdateMessages(messages);
   }
 
   @override
   Future<void> bulkUpdatePinnedMessages(Map<String, List<Message>?> messages) {
     assert(_debugIsConnected, '');
-    _logger.info('bulkUpdatePinnedMessages');
+    _logger.i(() => 'bulkUpdatePinnedMessages');
     return db!.pinnedMessageDao.bulkUpdateMessages(messages);
   }
 
   @override
   Future<void> updatePollVotes(List<PollVote> pollVotes) {
     assert(_debugIsConnected, '');
-    _logger.info('updatePollVotes');
+    _logger.i(() => 'updatePollVotes');
     return db!.pollVoteDao.updatePollVotes(pollVotes);
   }
 
   @override
   Future<void> updatePinnedMessageReactions(List<Reaction> reactions) {
     assert(_debugIsConnected, '');
-    _logger.info('updatePinnedMessageReactions');
+    _logger.i(() => 'updatePinnedMessageReactions');
     return db!.pinnedMessageReactionDao.updateReactions(reactions);
   }
 
   @override
   Future<void> updateReactions(List<Reaction> reactions) {
     assert(_debugIsConnected, '');
-    _logger.info('updateReactions');
+    _logger.i(() => 'updateReactions');
     return db!.reactionDao.updateReactions(reactions);
   }
 
   @override
   Future<void> bulkUpdateReads(Map<String, List<Read>?> reads) {
     assert(_debugIsConnected, '');
-    _logger.info('bulkUpdateReads');
+    _logger.i(() => 'bulkUpdateReads');
     return db!.readDao.bulkUpdateReads(reads);
   }
 
   @override
   Future<void> updateUsers(List<User> users) {
     assert(_debugIsConnected, '');
-    _logger.info('updateUsers');
+    _logger.i(() => 'updateUsers');
     return db!.userDao.updateUsers(users);
   }
 
   @override
   Future<void> updateLocations(List<Location> locations) async {
     assert(_debugIsConnected, '');
-    _logger.info('updateLocations');
+    _logger.i(() => 'updateLocations');
     return db!.locationDao.updateLocations(locations);
   }
 
@@ -555,35 +535,35 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     List<String> messageIds,
   ) {
     assert(_debugIsConnected, '');
-    _logger.info('deletePinnedMessageReactionsByMessageId');
+    _logger.i(() => 'deletePinnedMessageReactionsByMessageId');
     return db!.pinnedMessageReactionDao.deleteReactionsByMessageIds(messageIds);
   }
 
   @override
   Future<void> deleteReactionsByMessageId(List<String> messageIds) {
     assert(_debugIsConnected, '');
-    _logger.info('deleteReactionsByMessageId');
+    _logger.i(() => 'deleteReactionsByMessageId');
     return db!.reactionDao.deleteReactionsByMessageIds(messageIds);
   }
 
   @override
   Future<void> deletePollVotesByPollIds(List<String> pollIds) {
     assert(_debugIsConnected, '');
-    _logger.info('deletePollVotesByPollIds');
+    _logger.i(() => 'deletePollVotesByPollIds');
     return db!.pollVoteDao.deletePollVotesByPollIds(pollIds);
   }
 
   @override
   Future<void> deleteMembersByCids(List<String> cids) {
     assert(_debugIsConnected, '');
-    _logger.info('deleteMembersByCids');
+    _logger.i(() => 'deleteMembersByCids');
     return db!.memberDao.deleteMemberByCids(cids);
   }
 
   @override
   Future<void> deleteDraftMessagesByCids(List<String> cids) {
     assert(_debugIsConnected, '');
-    _logger.info('deleteDraftMessagesByCids');
+    _logger.i(() => 'deleteDraftMessagesByCids');
     return db!.draftMessageDao.deleteDraftMessagesByCids(cids);
   }
 
@@ -593,7 +573,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     String? parentId,
   }) {
     assert(_debugIsConnected, '');
-    _logger.info('deleteDraftMessageByCid');
+    _logger.i(() => 'deleteDraftMessageByCid');
     return db!.draftMessageDao.deleteDraftMessageByCid(
       cid,
       parentId: parentId,
@@ -603,14 +583,14 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @override
   Future<void> deleteLocationsByCid(String cid) {
     assert(_debugIsConnected, '');
-    _logger.info('deleteLocationsByCid');
+    _logger.i(() => 'deleteLocationsByCid');
     return db!.locationDao.deleteLocationsByCid(cid);
   }
 
   @override
   Future<void> deleteLocationsByMessageIds(List<String> messageIds) {
     assert(_debugIsConnected, '');
-    _logger.info('deleteLocationsByMessageIds');
+    _logger.i(() => 'deleteLocationsByMessageIds');
     return db!.locationDao.deleteLocationsByMessageIds(messageIds);
   }
 
@@ -620,31 +600,31 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     Map<String, List<Message>> threads,
   ) {
     assert(_debugIsConnected, '');
-    _logger.info('updateChannelThreads');
+    _logger.i(() => 'updateChannelThreads');
     return db!.transaction(() => super.updateChannelThreads(cid, threads));
   }
 
   @override
   Future<void> updateChannelStates(List<ChannelState> channelStates) {
     assert(_debugIsConnected, '');
-    _logger.info('updateChannelStates');
+    _logger.i(() => 'updateChannelStates');
     return db!.transaction(() => super.updateChannelStates(channelStates));
   }
 
   @override
   Future<void> flush() {
     assert(_debugIsConnected, '');
-    _logger.info('flush');
+    _logger.i(() => 'flush');
     return db!.flush();
   }
 
   @override
   Future<void> disconnect({bool flush = false}) async {
-    _logger.info('disconnect');
+    _logger.i(() => 'disconnect');
     if (isConnected) {
-      _logger.info('Disconnecting');
+      _logger.i(() => 'Disconnecting');
       if (flush) {
-        _logger.info('Flushing');
+        _logger.i(() => 'Flushing');
         await db!.flush();
       }
       await db!.disconnect();

@@ -16,7 +16,7 @@ Future<void> main() async {
   /// from your project dashboard.
   final client = StreamChatClient(
     's2dxdhpxd94g',
-    logLevel: Level.OFF,
+    logConfig: const StreamLogConfig(priority: StreamLogPriority.none),
   );
 
   /// Set the current user and connect the websocket. In a production

@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:logging/logging.dart';
 import 'package:stream_core/stream_core.dart' show SystemEnvironmentManager, TokenManager;
 
 import '../http/connection_id_manager.dart';
@@ -31,7 +30,6 @@ class StreamChatApi {
     ConnectionIdManager? connectionIdManager,
     SystemEnvironmentManager? systemEnvironmentManager,
     AttachmentFileUploaderProvider attachmentFileUploaderProvider = StreamAttachmentFileUploader.new,
-    Logger? logger,
     Iterable<Interceptor>? interceptors,
     HttpClientAdapter? httpClientAdapter,
   }) : _fileUploaderProvider = attachmentFileUploaderProvider,
@@ -43,7 +41,6 @@ class StreamChatApi {
              tokenManager: tokenManager,
              connectionIdManager: connectionIdManager,
              systemEnvironmentManager: systemEnvironmentManager,
-             logger: logger,
              interceptors: interceptors,
              httpClientAdapter: httpClientAdapter,
            );
