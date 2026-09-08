@@ -225,7 +225,7 @@ void main() {
                       foregroundColor: colorScheme.textPrimary,
                       backgroundColor: colorScheme.backgroundSurface,
                       onPressed: (_) {},
-                      child: Icon(icons.more, size: 20),
+                      child: Icon(icons.moreHorizontal, size: 20),
                     ),
                     CustomSlidableAction(
                       foregroundColor: colorScheme.textOnAccent,
@@ -350,7 +350,7 @@ void main() {
                           foregroundColor: colorScheme.textPrimary,
                           backgroundColor: colorScheme.backgroundSurface,
                           onPressed: (_) {},
-                          child: Icon(icons.more, size: 20),
+                          child: Icon(icons.moreHorizontal, size: 20),
                         ),
                         CustomSlidableAction(
                           foregroundColor: colorScheme.textOnAccent,

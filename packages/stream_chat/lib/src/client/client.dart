@@ -54,9 +54,10 @@ import '../event_type.dart';
 import '../system_environment.dart';
 import '../ws/connection_status.dart';
 import '../ws/websocket.dart';
-import 'channel.dart';
+import 'channel/channel.dart';
 import 'channel_delivery_reporter.dart';
 import 'event_resolvers.dart' as event_resolvers;
+import 'live_location_expiration_scheduler.dart';
 import 'query_channels_result.dart';
 import 'retry_policy.dart';
 
@@ -2654,8 +2655,6 @@ class ClientState {
     _listenLocationUpdated();
     _listenLocationExpired();
     // endregion
-
-    _startCleaningExpiredLocations();
   }
 
   /// Stops listening to the client events.
@@ -2843,34 +2842,25 @@ class ClientState {
     );
   }
 
-  Timer? _staleLiveLocationsCleanerTimer;
-  void _startCleaningExpiredLocations() {
-    _staleLiveLocationsCleanerTimer?.cancel();
-    _staleLiveLocationsCleanerTimer = Timer.periodic(
-      const Duration(seconds: 1),
-      (_) {
-        final expired = activeLiveLocations.where((it) => it.isExpired);
-        if (expired.isEmpty) return;
+  late final _locationExpirationScheduler = LiveLocationExpirationScheduler(
+    onExpired: _handleLocationExpired,
+  );
 
-        for (final sharedLocation in expired) {
-          final lastUpdatedAt = DateTime.timestamp();
+  // Emits a synthetic `location.expired` event for the expired [location].
+  void _handleLocationExpired(Location location) {
+    final lastUpdatedAt = DateTime.timestamp();
 
-          final locationExpiredEvent = Event(
-            type: EventType.locationExpired,
-            cid: sharedLocation.channelCid,
-            message: Message(
-              id: sharedLocation.messageId,
-              updatedAt: lastUpdatedAt,
-              sharedLocation: sharedLocation.copyWith(
-                updatedAt: lastUpdatedAt,
-              ),
-            ),
-          );
-
-          _client.handleEvent(locationExpiredEvent);
-        }
-      },
+    final locationExpiredEvent = Event(
+      type: EventType.locationExpired,
+      cid: location.channelCid,
+      message: Message(
+        id: location.messageId,
+        updatedAt: lastUpdatedAt,
+        sharedLocation: location.copyWith(updatedAt: lastUpdatedAt),
+      ),
     );
+
+    _client.handleEvent(locationExpiredEvent);
   }
 
   final StreamChatClient _client;
@@ -2920,27 +2910,30 @@ class ClientState {
   @internal
   set activeLiveLocations(List<Location> locations) {
     // For safe-keeping, we filter out any inactive locations before update.
-    final activeLocations = locations.where((it) => it.isActive);
-    _activeLiveLocationsController.safeAdd(activeLocations.toList());
+    final activeLocations = locations.where((it) => it.isActive).toList();
+    _activeLiveLocationsController.safeAdd(activeLocations);
+
+    // Reschedule the expiry timers for the updated set of active locations.
+    _locationExpirationScheduler.schedule(activeLocations);
   }
 
   /// The current unread channels count
   int get unreadChannels => _unreadChannelsController.value;
 
   /// The current unread channels count as a stream
-  Stream<int> get unreadChannelsStream => _unreadChannelsController.stream;
+  Stream<int> get unreadChannelsStream => _unreadChannelsController.stream.distinct();
 
   /// The current unread thread count.
   int get unreadThreads => _unreadThreadsController.value;
 
   /// The current unread threads count as a stream.
-  Stream<int> get unreadThreadsStream => _unreadThreadsController.stream;
+  Stream<int> get unreadThreadsStream => _unreadThreadsController.stream.distinct();
 
   /// The current total unread messages count
   int get totalUnreadCount => _totalUnreadCountController.value;
 
   /// The current total unread messages count as a stream
-  Stream<int> get totalUnreadCountStream => _totalUnreadCountController.stream;
+  Stream<int> get totalUnreadCountStream => _totalUnreadCountController.stream.distinct();
 
   /// The current list of channels in memory as a stream
   Stream<Map<String, Channel>> get channelsStream => _channelsController.stream;
@@ -3009,7 +3002,7 @@ class ClientState {
     _unreadThreadsController.close();
     _totalUnreadCountController.close();
     _activeLiveLocationsController.close();
-    _staleLiveLocationsCleanerTimer?.cancel();
+    _locationExpirationScheduler.cancel();
 
     _channelsController.close();
     for (final channel in channels.values) {
