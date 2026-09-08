@@ -1,5 +1,12 @@
 ## Upcoming
 
+⚠️ Changed
+
+- Video thumbnails now use `stream_thumbnail` on every platform, and the `thumblr`
+  dependency is gone.
+- Linux builds now need the FFmpeg and libwebp development packages — on Debian/Ubuntu:
+  `libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libwebp-dev`.
+
 🐞 Fixed
 
 - Fixed `StreamAttachmentHandler` throwing `UnimplementedError` on WebAssembly builds.
