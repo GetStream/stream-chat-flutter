@@ -2,18 +2,19 @@ import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/api/responses.dart';
-import 'package:stream_chat/src/core/error/error.dart';
 import 'package:stream_chat/src/core/http/connection_id_manager.dart';
 import 'package:stream_chat/src/core/http/interceptor/additional_headers_interceptor.dart';
 import 'package:stream_chat/src/core/http/interceptor/auth_interceptor.dart';
 import 'package:stream_chat/src/core/http/interceptor/connection_id_interceptor.dart';
 import 'package:stream_chat/src/core/http/interceptor/logging_interceptor.dart';
-import 'package:stream_chat/src/core/http/stream_chat_dio_error.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
+import 'package:stream_core/stream_core.dart'
+    show StreamApiException, StreamDioException, StreamErrorCode, StreamNetworkException;
 import 'package:test/test.dart';
 
 import '../../mocks.dart';
+import '../../utils.dart';
 
 void main() {
   Response successResponse(String path) => Response(
@@ -23,30 +24,29 @@ void main() {
 
   DioException throwableError(
     String path, {
-    StreamChatNetworkError? error,
+    StreamApiException? error,
     bool streamChatDioError = false,
   }) {
     if (streamChatDioError) assert(error != null, '');
     final options = RequestOptions(path: path);
+    if (streamChatDioError) {
+      // A rejection raised inside the pipeline, already classified.
+      return StreamDioException(exception: error!, requestOptions: options);
+    }
+
+    // A real answer from the server, carrying an error payload to decode.
     final data = ErrorResponse()
       ..code = error?.code
       ..statusCode = error?.statusCode
       ..message = error?.message;
-    DioException? dioError;
-    if (streamChatDioError) {
-      dioError = StreamChatDioError(error: error!, requestOptions: options);
-    } else {
-      dioError = DioException(
-        error: error,
+    return DioException(
+      requestOptions: options,
+      response: Response(
         requestOptions: options,
-        response: Response(
-          requestOptions: options,
-          statusCode: data.statusCode,
-          data: data.toJson(),
-        ),
-      );
-    }
-    return dioError;
+        statusCode: data.statusCode,
+        data: data.toJson(),
+      ),
+    );
   }
 
   test('UserAgentInterceptor should be added', () {
@@ -150,17 +150,19 @@ void main() {
 
   test('`.close` should close the dio client', () async {
     final client = StreamHttpClient('api-key')..close(force: true);
-    try {
-      await client.get('path');
-    } on StreamChatNetworkError catch (e) {
-      expect(e, isA<StreamChatNetworkError>());
-      expect(
-        e.message,
-        "The connection errored: Dio can't establish a new connection"
-        ' after it was closed. This indicates an error which most likely'
-        ' cannot be solved by the library.',
-      );
-    }
+
+    // A closed client never reaches the server, so the request fails without
+    // a verdict.
+    await expectLater(
+      client.get('path'),
+      throwsA(
+        isA<StreamNetworkException>().having(
+          (it) => it.message,
+          'message',
+          contains("Dio can't establish a new connection after it was closed"),
+        ),
+      ),
+    );
   });
 
   test('`.get` should return response successfully', () async {
@@ -190,14 +192,14 @@ void main() {
     verifyNoMoreInteractions(dio);
   });
 
-  test('`.get` should throw an instance of `StreamChatNetworkError`', () async {
+  test('`.get` should throw an instance of `StreamApiException`', () async {
     final dio = MockDio();
     final client = StreamHttpClient('api-key', dio: dio);
 
     const path = 'test-get-api-path';
     final error = throwableError(
       path,
-      error: StreamChatNetworkError(ChatErrorCode.internalSystemError),
+      error: apiException(code: StreamErrorCode.internalError, statusCode: 500),
     );
     when(
       () => dio.get(
@@ -209,8 +211,12 @@ void main() {
     try {
       await client.get(path);
     } catch (e) {
-      expect(e, isA<StreamChatNetworkError>());
-      expect(e, StreamChatNetworkError.fromDioException(error));
+      expect(e, isA<StreamApiException>());
+      // Assert on the facts the mapper read off the response rather than on
+      // object identity: the exception also carries the DioException as its
+      // cause, which equality would compare.
+      expect((e as StreamApiException).statusCode, 500);
+      expect(e.code, StreamErrorCode.internalError);
     }
 
     verify(
@@ -250,7 +256,7 @@ void main() {
   });
 
   test(
-    '`.post` should throw an instance of `StreamChatNetworkError`',
+    '`.post` should throw an instance of `StreamApiException`',
     () async {
       final dio = MockDio();
       final client = StreamHttpClient('api-key', dio: dio);
@@ -258,7 +264,7 @@ void main() {
       const path = 'test-post-api-path';
       final error = throwableError(
         path,
-        error: StreamChatNetworkError(ChatErrorCode.internalSystemError),
+        error: apiException(code: StreamErrorCode.internalError, statusCode: 500),
       );
       when(
         () => dio.post(
@@ -270,8 +276,12 @@ void main() {
       try {
         await client.post(path);
       } catch (e) {
-        expect(e, isA<StreamChatNetworkError>());
-        expect(e, StreamChatNetworkError.fromDioException(error));
+        expect(e, isA<StreamApiException>());
+        // Assert on the facts the mapper read off the response rather than on
+        // object identity: the exception also carries the DioException as its
+        // cause, which equality would compare.
+        expect((e as StreamApiException).statusCode, 500);
+        expect(e.code, StreamErrorCode.internalError);
       }
 
       verify(
@@ -312,7 +322,7 @@ void main() {
   });
 
   test(
-    '`.delete` should throw an instance of `StreamChatNetworkError`',
+    '`.delete` should throw an instance of `StreamApiException`',
     () async {
       final dio = MockDio();
       final client = StreamHttpClient('api-key', dio: dio);
@@ -320,7 +330,7 @@ void main() {
       const path = 'test-delete-api-path';
       final error = throwableError(
         path,
-        error: StreamChatNetworkError(ChatErrorCode.internalSystemError),
+        error: apiException(code: StreamErrorCode.internalError, statusCode: 500),
       );
       when(
         () => dio.delete(
@@ -332,8 +342,12 @@ void main() {
       try {
         await client.delete(path);
       } catch (e) {
-        expect(e, isA<StreamChatNetworkError>());
-        expect(e, StreamChatNetworkError.fromDioException(error));
+        expect(e, isA<StreamApiException>());
+        // Assert on the facts the mapper read off the response rather than on
+        // object identity: the exception also carries the DioException as its
+        // cause, which equality would compare.
+        expect((e as StreamApiException).statusCode, 500);
+        expect(e.code, StreamErrorCode.internalError);
       }
 
       verify(
@@ -374,7 +388,7 @@ void main() {
   });
 
   test(
-    '`.patch` should throw an instance of `StreamChatNetworkError`',
+    '`.patch` should throw an instance of `StreamApiException`',
     () async {
       final dio = MockDio();
       final client = StreamHttpClient('api-key', dio: dio);
@@ -382,7 +396,7 @@ void main() {
       const path = 'test-patch-api-path';
       final error = throwableError(
         path,
-        error: StreamChatNetworkError(ChatErrorCode.internalSystemError),
+        error: apiException(code: StreamErrorCode.internalError, statusCode: 500),
       );
       when(
         () => dio.patch(
@@ -394,8 +408,12 @@ void main() {
       try {
         await client.patch(path);
       } catch (e) {
-        expect(e, isA<StreamChatNetworkError>());
-        expect(e, StreamChatNetworkError.fromDioException(error));
+        expect(e, isA<StreamApiException>());
+        // Assert on the facts the mapper read off the response rather than on
+        // object identity: the exception also carries the DioException as its
+        // cause, which equality would compare.
+        expect((e as StreamApiException).statusCode, 500);
+        expect(e.code, StreamErrorCode.internalError);
       }
 
       verify(
@@ -436,7 +454,7 @@ void main() {
   });
 
   test(
-    '`.put` should throw an instance of `StreamChatNetworkError`',
+    '`.put` should throw an instance of `StreamApiException`',
     () async {
       final dio = MockDio();
       final client = StreamHttpClient('api-key', dio: dio);
@@ -444,7 +462,7 @@ void main() {
       const path = 'test-put-api-path';
       final error = throwableError(
         path,
-        error: StreamChatNetworkError(ChatErrorCode.internalSystemError),
+        error: apiException(code: StreamErrorCode.internalError, statusCode: 500),
       );
       when(
         () => dio.put(
@@ -456,8 +474,12 @@ void main() {
       try {
         await client.put(path);
       } catch (e) {
-        expect(e, isA<StreamChatNetworkError>());
-        expect(e, StreamChatNetworkError.fromDioException(error));
+        expect(e, isA<StreamApiException>());
+        // Assert on the facts the mapper read off the response rather than on
+        // object identity: the exception also carries the DioException as its
+        // cause, which equality would compare.
+        expect((e as StreamApiException).statusCode, 500);
+        expect(e.code, StreamErrorCode.internalError);
       }
 
       verify(
@@ -502,7 +524,7 @@ void main() {
   });
 
   test(
-    '`.postFile` should throw an instance of `StreamChatNetworkError`',
+    '`.postFile` should throw an instance of `StreamApiException`',
     () async {
       final dio = MockDio();
       final client = StreamHttpClient('api-key', dio: dio);
@@ -512,7 +534,7 @@ void main() {
 
       final error = throwableError(
         path,
-        error: StreamChatNetworkError(ChatErrorCode.internalSystemError),
+        error: apiException(code: StreamErrorCode.internalError, statusCode: 500),
       );
       when(
         () => dio.post(
@@ -525,8 +547,12 @@ void main() {
       try {
         await client.postFile(path, file);
       } catch (e) {
-        expect(e, isA<StreamChatNetworkError>());
-        expect(e, StreamChatNetworkError.fromDioException(error));
+        expect(e, isA<StreamApiException>());
+        // Assert on the facts the mapper read off the response rather than on
+        // object identity: the exception also carries the DioException as its
+        // cause, which equality would compare.
+        expect((e as StreamApiException).statusCode, 500);
+        expect(e.code, StreamErrorCode.internalError);
       }
 
       verify(
@@ -568,7 +594,7 @@ void main() {
   });
 
   test(
-    '`.request` should throw an instance of `StreamChatNetworkError`',
+    '`.request` should throw an instance of `StreamApiException`',
     () async {
       final dio = MockDio();
       final client = StreamHttpClient('api-key', dio: dio);
@@ -577,7 +603,7 @@ void main() {
       final error = throwableError(
         path,
         streamChatDioError: true,
-        error: StreamChatNetworkError(ChatErrorCode.internalSystemError),
+        error: apiException(code: StreamErrorCode.internalError, statusCode: 500),
       );
       when(
         () => dio.request(
@@ -589,7 +615,7 @@ void main() {
       try {
         await client.request(path);
       } catch (e) {
-        expect(e, isA<StreamChatNetworkError>());
+        expect(e, isA<StreamApiException>());
         expect(e, error.error);
       }
 

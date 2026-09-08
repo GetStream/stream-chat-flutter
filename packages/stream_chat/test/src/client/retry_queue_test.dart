@@ -12,9 +12,7 @@ void main() {
 
   setUpAll(() {
     final retryPolicy = RetryPolicy(
-      shouldRetry: (_, __, error) {
-        return error is StreamChatNetworkError && error.isRetriable;
-      },
+      shouldRetry: (_, __, error) => error?.isRetriable ?? false,
     );
     when(() => channel.client.retryPolicy).thenReturn(retryPolicy);
   });

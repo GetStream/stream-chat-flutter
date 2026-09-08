@@ -176,8 +176,8 @@ void main() {
       expect(controller.value.asSuccess.nextPageKey, isNull);
     });
 
-    test('handles StreamChatError by transitioning to error state', () async {
-      const chatError = StreamChatError('Network error');
+    test('handles a Stream failure by transitioning to error state', () async {
+      const chatError = StreamNetworkException(message: 'Network error');
 
       when(
         () => client.queryReactions(
@@ -200,7 +200,7 @@ void main() {
       expect((controller.value as Error).error, equals(chatError));
     });
 
-    test('wraps generic exceptions in StreamChatError', () async {
+    test('wraps generic exceptions in a StreamClientException', () async {
       final exception = Exception('API unavailable');
 
       when(
@@ -308,10 +308,10 @@ void main() {
       expect(capturedPagination?.next, equals(nextKey));
     });
 
-    test('loadMore preserves existing items on StreamChatError', () async {
+    test('loadMore preserves existing items on a Stream failure', () async {
       const nextKey = 'next_page_token';
       final existingReactions = generateReactions();
-      const chatError = StreamChatError('Network error');
+      const chatError = StreamNetworkException(message: 'Network error');
 
       when(
         () => client.queryReactions(

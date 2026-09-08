@@ -715,7 +715,7 @@ class Channel {
               }
             })
             .catchError((e, stk) {
-              if (e is StreamChatNetworkError && e.type == .cancel) {
+              if (e is StreamNetworkException && e.isCancelled) {
                 client.logger.info('Attachment ${it.id} upload cancelled');
 
                 // remove attachment from message if cancelled.

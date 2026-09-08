@@ -43,10 +43,10 @@ class StreamPhotoGalleryController extends PagedValueNotifier<int, AssetEntity> 
         items: mediaList,
         nextPageKey: nextKey,
       );
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       value = PagedValue.error(error);
     } catch (error) {
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: error.toString(), cause: error);
       value = PagedValue.error(chatError);
     }
   }
@@ -59,7 +59,7 @@ class StreamPhotoGalleryController extends PagedValueNotifier<int, AssetEntity> 
       final assets = await _getRecentAssetPathList();
 
       if (assets == null) {
-        const chatError = StreamChatError('No media found');
+        const chatError = StreamClientException(message: 'No media found');
         value = previousValue.copyWith(error: chatError);
         return;
       }
@@ -76,10 +76,10 @@ class StreamPhotoGalleryController extends PagedValueNotifier<int, AssetEntity> 
         items: newItems,
         nextPageKey: nextKey,
       );
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       value = previousValue.copyWith(error: error);
     } catch (error) {
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: error.toString(), cause: error);
       value = previousValue.copyWith(error: chatError);
     }
   }

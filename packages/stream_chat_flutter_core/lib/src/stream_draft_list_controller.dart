@@ -124,10 +124,10 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
       // Start listening to events
       if (disposed) return;
       _subscribeToDraftListEvents();
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       value = PagedValue.error(error);
     } catch (error) {
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: error.toString(), cause: error);
       value = PagedValue.error(chatError);
     }
   }
@@ -152,10 +152,10 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
         items: newItems,
         nextPageKey: nextKey,
       );
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       value = previousValue.copyWith(error: error);
     } catch (error) {
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: error.toString(), cause: error);
       value = previousValue.copyWith(error: chatError);
     }
   }

@@ -65,6 +65,14 @@ Core's manager is the better one: it takes `required SystemEnvironment environme
 read and drift the values an update is meant to be locked to. It also rejects an unrecognized
 `sdkIdentifier` outright, where ours only compared precedence.
 
+That last difference is **not** observable, which is why the swap is not a behavioural break.
+Ours resolved an update as `incoming.precedence < current.precedence ? current : incoming`; core
+rejects anything with a negative precedence first. The two disagree only when the *current*
+identifier is itself unrecognized — unreachable, since the baseline is always `dart` and an
+update can only ever store a value that already passed the check. Every reachable transition
+(unrecognized against `dart` or `flutter`, and the `dart` ⇄ `flutter` pair in both directions)
+yields the same result under both rules.
+
 Constructed with chat's baseline in `client.dart`:
 
 ```dart

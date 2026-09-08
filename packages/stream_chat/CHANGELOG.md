@@ -1,5 +1,21 @@
 ## Upcoming Beta
 
+🛑️ Breaking
+
+- A failed request now throws one of `stream_core`'s sealed `StreamException` kinds — `StreamApiException`, `StreamNetworkException`, `StreamAuthenticationException` or `StreamClientException` — instead of a `StreamChatNetworkError`. `StreamChatException` aliases the root, so `on StreamChatException catch` handles them all. See the [v11 migration guide](https://github.com/GetStream/stream-chat-flutter/blob/master/migrations/v11-migration.md#error-handling).
+- `ChatErrorCode` is removed in favour of `StreamErrorCode`. Note `requestTimeout` was `23`, which was never a code the API returns; the real one is `48`.
+- `RetryPolicy.shouldRetry` receives a `StreamChatException?` instead of a `StreamChatError?`.
+- `UploadState`'s variant classes are renamed to `UploadStatePreparing`, `UploadStateInProgress`, `UploadStateSuccess` and `UploadStateFailed`, freeing the names `Success` and `Failed`.
+- `Result` from `package:async` is no longer re-exported; the re-exported `Result` is `stream_core`'s.
+
+⚠️ Deprecated
+
+- `StreamChatNetworkError` is deprecated. Nothing throws it any more, so an `on StreamChatNetworkError catch` clause still compiles but no longer matches.
+
+🚀 Changed
+
+- Failed messages now retry on server errors. The retry policy follows `stream_core`'s table: retry a request that never reached the server, a 5xx, a 429 and a 408; never another 4xx, a cancelled request, broken credentials, or anything the server marked unrecoverable. Previously only failures without a parseable error body retried, so a 500 or a 429 did not.
+
 🔄 Changed
 
 - `SystemEnvironment` is now `stream_core`'s type, re-exported from this package. Its constructor and fields are unchanged, so existing usage keeps working.

@@ -201,10 +201,10 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
       // start listening to events
       if (disposed) return;
       _subscribeToChannelListEvents();
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       value = PagedValue.error(error);
     } catch (error) {
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: error.toString(), cause: error);
       value = PagedValue.error(chatError);
     }
   }
@@ -234,10 +234,10 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
           nextPageKey: nextKey,
         );
       }
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       value = previousValue.copyWith(error: error);
     } catch (error) {
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: error.toString(), cause: error);
       value = previousValue.copyWith(error: chatError);
     }
   }

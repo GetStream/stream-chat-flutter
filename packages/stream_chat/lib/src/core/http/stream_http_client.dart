@@ -3,14 +3,13 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
-import 'package:stream_core/stream_core.dart' show SystemEnvironmentManager;
+import 'package:stream_core/stream_core.dart' show ApiErrorInterceptor, DioExceptionMapping, SystemEnvironmentManager;
 import '../error/error.dart';
 import 'connection_id_manager.dart';
 import 'interceptor/additional_headers_interceptor.dart';
 import 'interceptor/auth_interceptor.dart';
 import 'interceptor/connection_id_interceptor.dart';
 import 'interceptor/logging_interceptor.dart';
-import 'stream_chat_dio_error.dart';
 import 'token_manager.dart';
 
 part 'stream_http_client_options.dart';
@@ -48,6 +47,7 @@ class StreamHttpClient {
         AdditionalHeadersInterceptor(systemEnvironmentManager),
         if (tokenManager != null) AuthInterceptor(this, tokenManager),
         if (connectionIdManager != null) ConnectionIdInterceptor(connectionIdManager),
+        const ApiErrorInterceptor(),
         ...interceptors ??
             [
               // Add a default logging interceptor if no interceptors are
@@ -97,12 +97,11 @@ class StreamHttpClient {
   /// calling [close] will throw an exception.
   void close({bool force = false}) => httpClient.close(force: force);
 
-  StreamChatNetworkError _parseError(DioException exception) {
-    // locally thrown dio error
-    if (exception is StreamChatDioError) return exception.error;
-    // real network request dio error
-    return StreamChatNetworkError.fromDioException(exception);
-  }
+  // Every failure leaving this client is one of the four `StreamException`
+  // kinds. `ApiErrorInterceptor` has usually mapped it already, and
+  // `toStreamException` unwraps that; a rejection raised past the pipeline is
+  // classified here instead.
+  StreamChatException _parseError(DioException exception) => exception.toStreamException();
 
   /// Handy method to make http GET request with error parsing.
   Future<Response<T>> get<T>(

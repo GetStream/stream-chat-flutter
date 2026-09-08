@@ -1,6 +1,9 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'package:dio/dio.dart';
 import 'package:stream_chat/src/core/api/responses.dart';
 import 'package:stream_chat/src/core/error/error.dart';
+import 'package:stream_core/stream_core.dart' show StreamErrorCode;
 import 'package:test/test.dart';
 
 DioException _dioException(DioExceptionType type) => DioException(
@@ -209,20 +212,18 @@ void main() {
     });
 
     test('`.retriable` should return true if data is not present', () {
-      const errorCode = ChatErrorCode.tokenExpired;
-      final error = StreamChatNetworkError(errorCode);
+      final error = StreamChatNetworkError.raw(code: StreamErrorCode.tokenExpired, message: 'token expired');
 
       expect(error.isRetriable, isTrue);
     });
 
     test('`.toString`', () {
-      const errorCode = ChatErrorCode.tokenExpired;
-      final error = StreamChatNetworkError(errorCode);
+      final error = StreamChatNetworkError.raw(code: StreamErrorCode.tokenExpired, message: 'token expired');
       expect(
         error.toString(),
         'StreamChatNetworkError('
-        'code: ${errorCode.code}, '
-        'message: ${errorCode.message})',
+        'code: ${StreamErrorCode.tokenExpired}, '
+        'message: token expired)',
       );
     });
 
@@ -261,7 +262,7 @@ void main() {
     });
 
     test('.type defaults to unknown for non-network errors', () {
-      final error = StreamChatNetworkError(ChatErrorCode.internalSystemError);
+      final error = StreamChatNetworkError.raw(code: StreamErrorCode.internalError, message: 'internal error');
       expect(error.type, StreamChatNetworkErrorType.unknown);
     });
 

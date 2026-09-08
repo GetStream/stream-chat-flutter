@@ -3,10 +3,10 @@
 import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/http/interceptor/auth_interceptor.dart';
-import 'package:stream_chat/src/core/http/stream_chat_dio_error.dart';
 import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_core/stream_core.dart' show StreamAuthenticationException, StreamDioException;
 import 'package:test/test.dart';
 
 import '../../../mocks.dart';
@@ -68,10 +68,10 @@ void main() {
       } catch (e) {
         // need to cast it as the type is private in dio
         var error = (e as dynamic).data;
-        expect(error, isA<StreamChatDioError>());
-        error = (error as StreamChatDioError).error;
-        expect(error.code, ChatErrorCode.undefinedToken.code);
-        expect(error.message, ChatErrorCode.undefinedToken.message);
+        expect(error, isA<StreamDioException>());
+        error = (error as StreamDioException).exception;
+        expect(error, isA<StreamAuthenticationException>());
+        expect(error.message, 'Failed to load the user token');
       }
     },
   );
@@ -79,10 +79,10 @@ void main() {
   test('`onError` should retry the request with refreshed token', () async {
     const path = 'test-request-path';
     final options = RequestOptions(path: path);
-    const code = ChatErrorCode.tokenExpired;
+    const code = StreamErrorCode.tokenExpired;
     final errorResponse = ErrorResponse()
       ..code = code.code
-      ..message = code.message;
+      ..message = 'token expired';
     final response = Response(
       requestOptions: options,
       data: errorResponse.toJson(),
@@ -127,10 +127,10 @@ void main() {
     () async {
       const path = 'test-request-path';
       final options = RequestOptions(path: path);
-      const code = ChatErrorCode.tokenExpired;
+      const code = StreamErrorCode.tokenExpired;
       final errorResponse = ErrorResponse()
         ..code = code.code
-        ..message = code.message;
+        ..message = 'token expired';
       final response = Response(
         requestOptions: options,
         data: errorResponse.toJson(),
@@ -170,10 +170,10 @@ void main() {
     () async {
       const path = 'test-request-path';
       final options = RequestOptions(path: path);
-      const code = ChatErrorCode.tokenExpired;
+      const code = StreamErrorCode.tokenExpired;
       final errorResponse = ErrorResponse()
         ..code = code.code
-        ..message = code.message;
+        ..message = 'token expired';
       final response = Response(
         requestOptions: options,
         data: errorResponse.toJson(),

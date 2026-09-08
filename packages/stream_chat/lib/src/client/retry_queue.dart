@@ -82,7 +82,7 @@ class RetryQueue {
           maxDelay: retryPolicy.maxDelay,
           maxAttempts: retryPolicy.maxRetryAttempts,
           retryIf: (error, attempt) {
-            if (error is! StreamChatError) return false;
+            if (error is! StreamChatException) return false;
             return retryPolicy.shouldRetry(client, attempt, error);
           },
         );

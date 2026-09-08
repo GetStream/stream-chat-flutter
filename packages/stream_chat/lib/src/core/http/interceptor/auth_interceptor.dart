@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:stream_core/stream_core.dart' show StreamAuthenticationException, StreamDioException, StreamErrorCode;
 import '../../api/responses.dart';
-import '../../error/error.dart';
-import '../stream_chat_dio_error.dart';
 import '../stream_http_client.dart';
 import '../token.dart';
 import '../token_manager.dart';
@@ -26,9 +25,11 @@ class AuthInterceptor extends QueuedInterceptor {
     try {
       token = await _tokenManager.loadToken();
     } catch (_) {
-      final error = StreamChatNetworkError(ChatErrorCode.undefinedToken);
-      final dioError = StreamChatDioError(
-        error: error,
+      // The token never went out, so this is about the credentials rather
+      // than about anything the server said.
+      const error = StreamAuthenticationException(message: 'Failed to load the user token');
+      final dioError = StreamDioException(
+        exception: error,
         requestOptions: options,
         stackTrace: StackTrace.current,
       );
@@ -56,7 +57,7 @@ class AuthInterceptor extends QueuedInterceptor {
     }
 
     final error = ErrorResponse.fromJson(data);
-    if (error.code == ChatErrorCode.tokenExpired.code) {
+    if (error.code == StreamErrorCode.tokenExpired) {
       if (_tokenManager.isStatic) return handler.next(exception);
       await _tokenManager.loadToken(refresh: true);
       try {

@@ -1,3 +1,9 @@
+## Upcoming Beta
+
+🛑️ Breaking
+
+- `errorBuilder` on the paged scroll views (`StreamChannelListView`, `StreamUserListView`, `StreamMemberListView`, `StreamThreadListView`, `StreamPollVoteListView`, `StreamReactionListView`, `StreamMessageSearchListView`, `StreamPhotoGallery` and the grid variants) now receives a `StreamChatException` instead of a `StreamChatError`.
+
 ## Upcoming
 
 🐞 Fixed

@@ -72,9 +72,7 @@ StreamChatClient _buildStreamChatClient(
       logHandlerFunction: _sampleAppLogHandler,
       retryPolicy: RetryPolicy(
         maxRetryAttempts: 3,
-        shouldRetry: (client, attempt, error) {
-          return error is StreamChatNetworkError && error.isRetriable;
-        },
+        shouldRetry: (client, attempt, error) => error?.isRetriable ?? false,
       ),
       baseURL: connectionOverride?.baseURL ?? baseUrl,
       baseWsUrl: connectionOverride?.baseWsUrl,

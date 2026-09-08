@@ -5,7 +5,7 @@ import 'dart:math' as math;
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_core/stream_core.dart' show SystemEnvironmentManager;
+import 'package:stream_core/stream_core.dart' show StreamErrorCode, SystemEnvironmentManager;
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -394,7 +394,7 @@ class WebSocket with TimerHelper {
     _resetRequestFlags();
 
     final error = StreamWebSocketError.fromStreamError(errorResponse);
-    final isTokenExpired = error.errorCode == ChatErrorCode.tokenExpired;
+    final isTokenExpired = error.errorCode == StreamErrorCode.tokenExpired;
     if (isTokenExpired && !tokenManager.isStatic) {
       _logger?.warning('Connection failed, token expired');
       return _reconnect(refreshToken: true);

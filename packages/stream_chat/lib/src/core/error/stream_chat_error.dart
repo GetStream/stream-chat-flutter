@@ -54,11 +54,11 @@ class StreamWebSocketError extends StreamChatError {
   /// The Stream error code, if one was provided.
   int? get code => data?.code;
 
-  /// The [ChatErrorCode] for this error, or null if unrecognised.
-  ChatErrorCode? get errorCode {
+  /// The [StreamErrorCode] for this error, or null if the server sent none.
+  StreamErrorCode? get errorCode {
     final code = this.code;
     if (code == null) return null;
-    return chatErrorCodeFromCode(code);
+    return StreamErrorCode(code);
   }
 
   /// Whether the operation can be retried.
@@ -77,20 +77,13 @@ class StreamWebSocketError extends StreamChatError {
 }
 
 /// An error raised when a network request to Stream fails.
+///
+/// Nothing in the SDK raises this any more: a failed request now reports a
+/// [StreamApiException] or a [StreamNetworkException] from `stream_core`. An
+/// `on StreamChatNetworkError catch` clause therefore still compiles but no
+/// longer matches — catch [StreamChatException] instead.
+@Deprecated('Use StreamApiException or StreamNetworkException instead')
 class StreamChatNetworkError extends StreamChatError {
-  /// Creates a [StreamChatNetworkError] for a known [errorCode].
-  StreamChatNetworkError(
-    ChatErrorCode errorCode, {
-    int? statusCode,
-    this.data,
-    StackTrace? stacktrace,
-    @Deprecated('Set type to StreamChatNetworkErrorType.cancel instead') this._isRequestCancelledError,
-    this.type = .unknown,
-  }) : code = errorCode.code,
-       statusCode = statusCode ?? data?.statusCode,
-       stackTrace = stacktrace ?? StackTrace.current,
-       super(errorCode.message);
-
   /// Creates a [StreamChatNetworkError] from raw values.
   StreamChatNetworkError.raw({
     required this.code,
@@ -134,7 +127,7 @@ class StreamChatNetworkError extends StreamChatError {
     );
   }
 
-  /// The Stream error code. See [ChatErrorCode].
+  /// The Stream error code. See [StreamErrorCode].
   final int code;
 
   /// The HTTP status code of the response, if any.
@@ -157,8 +150,8 @@ class StreamChatNetworkError extends StreamChatError {
   bool get isRequestCancelledError => _isRequestCancelledError ?? type == .cancel;
   final bool? _isRequestCancelledError;
 
-  /// The [ChatErrorCode] for this error, or null if unrecognised.
-  ChatErrorCode? get errorCode => chatErrorCodeFromCode(code);
+  /// The [StreamErrorCode] for this error.
+  StreamErrorCode get errorCode => StreamErrorCode(code);
 
   /// Whether the operation can be retried.
   bool get isRetriable => data == null;

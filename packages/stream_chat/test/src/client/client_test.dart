@@ -106,7 +106,7 @@ void main() {
 
         when(
           () => api.guest.getGuestUser(any(that: isSameUserAs(user))),
-        ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+        ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
         expectLater(
           client.wsConnectionStatusStream,
@@ -120,7 +120,7 @@ void main() {
         try {
           await client.connectGuestUser(user);
         } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
+          expect(e, isA<StreamApiException>());
         }
 
         verify(
@@ -764,7 +764,7 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
           when(() => persistence.getChannelThreads(any())).thenAnswer(
             (_) async => <String, List<Message>>{
@@ -1328,11 +1328,11 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
           expectLater(
             client.queryChannels(),
-            emitsError(isA<StreamChatNetworkError>()),
+            emitsError(isA<StreamApiException>()),
           );
 
           // Hack as `teardown` gets called even
@@ -1523,7 +1523,7 @@ void main() {
             ),
           ).thenAnswer((_) async {
             await delay(100);
-            throw StreamChatNetworkError(ChatErrorCode.inputError);
+            throw apiException(code: StreamErrorCode.inputError, statusCode: 400);
           });
 
           final errors = await Future.wait(
@@ -1540,7 +1540,7 @@ void main() {
           // Every caller surfaces the same error type.
           expect(errors, hasLength(5));
           for (final error in errors) {
-            expect(error, isA<StreamChatNetworkError>());
+            expect(error, isA<StreamApiException>());
           }
 
           // But only ONE HTTP request was made — the rest piggybacked.

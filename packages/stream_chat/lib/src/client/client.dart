@@ -140,9 +140,7 @@ class StreamChatClient {
     _retryPolicy =
         retryPolicy ??
         RetryPolicy(
-          shouldRetry: (_, __, error) {
-            return error is StreamChatNetworkError && error.isRetriable;
-          },
+          shouldRetry: (_, __, error) => error?.isRetriable ?? false,
         );
 
     _connectionStatusSubscription = wsConnectionStatusStream.pairwise().listen(

@@ -1,6 +1,6 @@
 library stream_chat;
 
-export 'package:async/async.dart';
+export 'package:async/async.dart' hide Result;
 export 'package:dio/dio.dart'
     show
         DioException,
@@ -17,7 +17,20 @@ export 'package:rate_limiter/rate_limiter.dart';
 // Re-exported with a `show` allowlist rather than wholesale: `stream_core`
 // also declares names this barrel defines — `AttachmentFile`, `Filter`,
 // `User` — so a blanket export would not compile.
-export 'package:stream_core/stream_core.dart' show SystemEnvironment;
+export 'package:stream_core/stream_core.dart'
+    show
+        Failure,
+        Result,
+        StreamApiError,
+        StreamApiException,
+        StreamAuthenticationException,
+        StreamClientException,
+        StreamErrorCode,
+        StreamException,
+        StreamNetworkException,
+        Success,
+        SystemEnvironment;
+
 export 'package:uuid/uuid.dart';
 
 export 'src/client/channel/channel.dart';

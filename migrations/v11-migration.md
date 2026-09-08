@@ -72,7 +72,13 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamChatNetworkError` | `StreamApiException` (`stream_core`) | `retyped` | Thrown-then-caught becomes `Failure.error`; a sealed family, so `switch` is exhaustive |
 | `StreamChatNetworkError.code` / `.message` / `.statusCode` | `StreamApiException.code` / `.message` / `.statusCode` | `moved` | `code` is now a `StreamErrorCode` |
 | `StreamChatNetworkError.isRequestCancelledError` | `StreamNetworkException.isCancelled` | `moved` | |
-| `ChatErrorCode` | `StreamErrorCode` (`stream_core`) | `removed` | Extension type over `int` with named constants |
+| `StreamChatNetworkError.stackTrace` | `Failure.stackTrace`, or the language at the throw site | `removed` | A `StreamException` carries `message` and `cause` and no trace: a trace records the raise, not the failure |
+| `StreamChatNetworkError.type` (`StreamChatNetworkErrorType`) | `StreamNetworkException.isTimeout` / `.isCancelled` | `retyped` | Lossy: `connectionTimeout`, `sendTimeout` and `receiveTimeout` all become `isTimeout` |
+| `ChatErrorCode` | `StreamErrorCode` (`stream_core`) | `removed` | Extension type over `int` with named constants. `requestTimeout` was `23`, which the API never returns; the real code is `48` |
+| `RetryPolicy.shouldRetry`'s `StreamChatError?` | `StreamChatException?` | `retyped` | |
+| `UploadState`'s `Preparing` / `InProgress` / `Success` / `Failed` | `UploadStatePreparing` / `UploadStateInProgress` / `UploadStateSuccess` / `UploadStateFailed` | `renamed` | Frees `Success` for `Result` |
+| `PagedValue.error(StreamChatError)` (`stream_chat_flutter_core`) | `PagedValue.error(StreamChatException)` | `retyped` | |
+| `errorBuilder: Function(BuildContext, StreamChatError)` (scroll views) | `Function(BuildContext, StreamChatException)` | `retyped` | |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -113,6 +119,39 @@ underlying error:
 final response = (await client.getDevices()).getOrThrow();
 ```
 
+### Endpoints that still throw
+
+`Result` arrives feature by feature. Until a given endpoint has migrated it still **throws** — but it throws a
+`StreamChatException` now, not a `StreamChatNetworkError`. So during the v11 betas both of these are live, and both
+report the same four kinds:
+
+```dart
+// A migrated endpoint returns a Result.
+final result = await client.getDevices();
+
+// One that has not yet still throws — the type is what changed.
+try {
+  await channel.sendMessage(message);
+} on StreamChatException catch (error) {
+  print(error.message);
+}
+```
+
+`StreamChatException` is an alias of `stream_core`'s `StreamException`, so either name catches the same failures.
+
+> **The one break you can ship without noticing.** `StreamChatNetworkError` is deprecated rather than deleted,
+> because unmigrated endpoints used to throw it. Nothing throws it any more, so
+> `on StreamChatNetworkError catch (e)` still **compiles** and simply stops matching — the failure passes straight
+> through. Search your code for it; the deprecation warning tells you where.
+
+### Retry behaviour changed
+
+If you rely on the SDK's automatic retry of failed messages, it now retries more: a request that never reached the
+server, a 5xx, a 429 and a 408. It still never retries another 4xx, a cancelled request, broken credentials, or
+anything the server marked `unrecoverable`. Previously only failures *without* a parseable error body retried, so a
+500 and a 429 did not. A custom `RetryPolicy.shouldRetry` overrides this, and `error.isRetriable` gives you the
+default decision.
+
 ### The error type changed too
 
 `Failure.error` is statically typed `Object`, and at runtime it is always a `StreamException` from `stream_core` —
@@ -146,7 +185,7 @@ counterpart: `code` is now a `StreamErrorCode` (an extension type over `int`, wi
 `StreamApiException` exposes `isTokenExpired`, `isTokenNotYetValid`, `isTokenSignatureInvalid`,
 `isApiKeyInvalid` and `isRateLimited` directly, so the common checks need no code of your own.
 
-`ChatErrorCode` is removed — use `StreamErrorCode`.
+`ChatErrorCode` is removed — use `StreamErrorCode`. One value differed from the API: `requestTimeout` was `23`, a code the backend never returns, so anything matching on it never matched. The real code is `48`.
 
 `Result` and the `StreamException` family are exported from `package:stream_chat/stream_chat.dart`.
 

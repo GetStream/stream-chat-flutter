@@ -12,7 +12,7 @@ with their core counterparts, the decisions that phase has to make, its risks, t
 | --- | --- | --- | --- | --- | --- |
 | [01](01-utilities.md) | Utilities — in-flight cache, list extensions | ~340 | ~200 | decision | ◐ |
 | [02](02-platform-and-environment.md) | Platform detector & system environment | ~330 | ~300 | yes (rename) | ◐ |
-| [03](03-errors.md) | Errors & the `Result` surface | ~410 | ~900 | **yes** | ☐ |
+| [03](03-errors.md) | Errors & the `Result` surface | ~410 | ~900 | **yes** | ◐ |
 | [04](04-token-and-auth.md) | Token & auth | ~225 | ~500 | **yes** | ☐ |
 | [05](05-http-client.md) | HTTP client & interceptor pipeline | ~600 | ~150 | yes | ☐ |
 | [06](06-logger.md) | Logger | — | ~670 | **yes** | ☐ |
@@ -37,6 +37,9 @@ that is already written and tested. Six direct dependencies become transitive.
 - The platform detector (02) — waiting on a `stream_core` **release**:
   `debugCurrentPlatformOverride` is on core's `main` but not in 0.5.0, and
   `stream_chat_flutter`'s tests need it.
+- The SDK's own precondition throws (03) — 23 sites still raise `StreamChatError`. Request
+  failures moved to the core kinds; reclassifying preconditions is a separate pass, and
+  [03](03-errors.md) records what has to happen before `stream_chat_error.dart` can be deleted.
 
 ## Scope
 
@@ -109,13 +112,14 @@ Decided once here, not re-argued per phase.
 cannot.** Exporting core wholesale from `lib/stream_chat.dart` still collides on `AttachmentFile`,
 `Filter`, `FilterOperator`, `NullOrdering`, `ComparableField`, `CurrentPlatform`, `PlatformType`,
 `TokenManager`, `AuthType`, `User`, `LoggingInterceptor`, `InterceptStep`, `LogPrint`,
-`AuthInterceptor`, `ConnectionIdInterceptor`, and `Success` — the last being chat's
-`UploadState.success` variant class against core's `Result` `Success<T>`. Core also re-exports all
-of dio, while our barrel deliberately re-exports a *narrowed* dio.
+`AuthInterceptor` and `ConnectionIdInterceptor`. Core also re-exports all of dio, while our barrel
+deliberately re-exports a *narrowed* dio — and `package:async`, which our barrel also re-exports,
+declares a `Result` of its own.
 
 Each landed phase shortens that list, since an adopted type stops being a duplicate:
-`InFlightCache`, `SystemEnvironment`, `SystemEnvironmentManager` and
-`XStreamClientHeaderExtension` are already off it. The allowlist is the mechanism throughout —
+`InFlightCache`, `SystemEnvironment`, `SystemEnvironmentManager`, `XStreamClientHeaderExtension`
+and `Success` are already off it — the last because phase [03](03-errors.md) renamed
+`UploadState`'s variants. The allowlist is the mechanism throughout —
 grow it phase by phase rather than switching to a wholesale export at the end.
 
 Narrowing is already the precedent in that file: `filter.dart show Filter, FilterOperator` and

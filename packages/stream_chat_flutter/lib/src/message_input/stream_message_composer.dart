@@ -1577,7 +1577,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
           stack: stackTrace,
           library: 'stream_chat_flutter',
           context: ErrorDescription('while sending a message'),
-          silent: error is StreamChatNetworkError,
+          silent: error is StreamChatException,
         ),
       );
     }
