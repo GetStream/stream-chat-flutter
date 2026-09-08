@@ -207,7 +207,7 @@ class SyncManager {
       // store is dropped and repopulated rather than reconciled.
       if (error is StreamChatNetworkError && error.statusCode == 400) {
         logger?.warning('Resetting local state after a refused window', error, stk);
-        return _discardRefusedWindow(cappedCids, clock.now());
+        return _discardRefusedWindow(cappedCids, to: clock.now());
       }
 
       // Anything else could succeed next time, so lastSyncAt stays put.
@@ -263,19 +263,20 @@ class SyncManager {
   // Gives up on a window the server would not serve.
   //
   // The store is dropped and repopulated from the refresh, as it is for an
-  // oversized window. Only the checkpoint differs: it moves to [syncAt] whether
-  // or not that refresh succeeded, because a window refused for what it is
-  // would be refused again on every reconnect for as long as it is held.
+  // oversized window. Only the checkpoint differs: it has nowhere to go back
+  // to, and moves to [to] whether or not that refresh succeeded, because a
+  // window refused for what it is would be refused again on every reconnect
+  // for as long as it is held.
   //
-  // [syncAt] is taken before the repopulation, so anything arriving during it
-  // is asked for again rather than skipped.
-  Future<Set<String>> _discardRefusedWindow(List<String> cids, DateTime syncAt) async {
+  // [to] is taken before the repopulation, so anything arriving during it is
+  // asked for again rather than skipped.
+  Future<Set<String>> _discardRefusedWindow(List<String> cids, {required DateTime to}) async {
     await _flushStore();
 
     // A failed page is already logged, and changes nothing here: the checkpoint
     // advances either way.
     final (refreshed, _) = await _refreshPages(cids);
-    await _recordLastSyncAt(syncAt);
+    await _recordLastSyncAt(to);
     return refreshed;
   }
 }
