@@ -8,14 +8,19 @@ One file per phase, in the order they should land. Each carries a goal, the exac
 with their core counterparts, the decisions that phase has to make, its risks, the upstream
 `stream_core` work it needs, and a definition of done.
 
+Two indexes cut across the phases:
+
+- [`DEFERRED.md`](DEFERRED.md) — everything consciously postponed, and what unblocks each item.
+- [`UPSTREAM.md`](UPSTREAM.md) — what should move the *other* way, chat → core.
+
 | | Phase | Chat LOC | Core LOC | Breaking | Status |
 | --- | --- | --- | --- | --- | --- |
 | [01](01-utilities.md) | Utilities — in-flight cache, list extensions | ~340 | ~200 | decision | ◐ |
 | [02](02-platform-and-environment.md) | Platform detector & system environment | ~330 | ~300 | yes (rename) | ◐ |
 | [03](03-errors.md) | Errors & the `Result` surface | ~410 | ~900 | **yes** | ◐ |
 | [04](04-token-and-auth.md) | Token & auth | ~225 | ~500 | **yes** | ◐ |
-| [05](05-http-client.md) | HTTP client & interceptor pipeline | ~600 | ~150 | yes | ☐ |
-| [06](06-logger.md) | Logger | — | ~670 | **yes** | ☐ |
+| [05](05-http-client.md) | HTTP client & interceptor pipeline | ~600 | ~150 | yes | ◐ |
+| [06](06-logger.md) | Logger | ~120 | ~670 | **yes** | ☑ |
 | [07](07-websocket.md) | WebSocket transport | ~790 | ~1,940 | **yes** | ☐ |
 | [08](08-query-dsl.md) | Query DSL — filter, sort, comparable field | ~600 | ~1,420 | **yes** | ☐ |
 | [09](09-uploads.md) | Uploads & CDN | ~520 | ~1,400 | yes | ☐ |
@@ -26,20 +31,10 @@ Status key: ☐ not started · ◐ partly landed · ☑ done.
 **Net:** ~4.0k LOC of hand-written `lib/src` deleted (of ~29.0k), replaced by ~5.5k LOC of core
 that is already written and tested. Six direct dependencies become transitive.
 
-**In progress.** Phase 01's `InFlightCache` and phase 02's `SystemEnvironment` /
-`SystemEnvironmentManager` have landed. Three items are parked, each for a different reason:
-
-- `list_extensions` (01) — pending a performance comparison. Core's `merge` is a
-  keyed-map-merge-then-sort where ours is a two-pointer merge, and it runs on every message,
-  member and read update.
-- `stream_chat_dio_error` (01) — moved into [03](03-errors.md), where its payload type becomes a
-  `StreamException`. It cannot move before that.
-- The platform detector (02) — waiting on a `stream_core` **release**:
-  `debugCurrentPlatformOverride` is on core's `main` but not in 0.5.0, and
-  `stream_chat_flutter`'s tests need it.
-- The SDK's own precondition throws (03) — 23 sites still raise `StreamChatError`. Request
-  failures moved to the core kinds; reclassifying preconditions is a separate pass, and
-  [03](03-errors.md) records what has to happen before `stream_chat_error.dart` can be deleted.
+**In progress.** Phases 01–06 have each landed their core adoption; what is left in them is
+indexed in [`DEFERRED.md`](DEFERRED.md), which says what unblocks each item. Notably 06 removed
+chat's own logger outright rather than bridging it, so no package in the repo imports
+`package:logging` any more.
 
 ## Scope
 
@@ -148,6 +143,9 @@ HTTP or token types anywhere in its public API — and putting transport provide
 the property. It is the eventual right home; it is not this plan's job to move it there.
 
 ### Upstream core work is batched, not blocking
+
+Tracked in [`UPSTREAM.md`](UPSTREAM.md), which also covers the reverse direction — things chat has
+that every product needs, and things chat's use has shown core to be missing or wrong about.
 
 Each phase names the `stream_core` changes it needs, and those should be grouped into as few core
 releases as possible. Only one is a hard block on API we already ship publicly: `Filter`'s
