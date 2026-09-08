@@ -1,5 +1,13 @@
 # 01 — Foundation
 
+> **The error layer and the `Result` surface are now owned by
+> [`core-migration/03-errors.md`](../core-migration/03-errors.md)**, which covers them as part of adopting
+> `stream_core` wholesale. Track that phase rather than re-deriving the work here; the rest of this file — the
+> `DefaultApi` wiring and the `User` shape decision — still belongs to this track.
+>
+> Two prerequisites below are also stale: `stream_core` is a **hosted** `^0.5.0` dependency (no git pin), and
+> 0.5.0 already ships the sealed error layer, so a core release is no longer a blocker.
+
 **Goal:** land everything that every feature group depends on, so no group has to invent it. Nothing user-visible
 migrates in this phase.
 

@@ -6,6 +6,10 @@ The plan for moving the low-level client off its hand-written HTTP layer and ont
 One file per feature group, in the order they should land. Each carries a goal, the exact hand-written methods and
 generated operations in scope, the decisions that group has to make, its risks, and a definition of done.
 
+> **Related plan:** [`core-migration/`](../core-migration/README.md) moves the low-level client's *foundation*
+> (HTTP, errors, token/auth, WebSocket, uploads, query DSL, logger) onto `stream_core`. It owns the error layer and
+> the `Result` surface that group 01 below previously claimed. The two tracks are otherwise independent.
+
 | | Group | Hand-written | Generated ops | Status |
 | --- | --- | --- | --- | --- |
 | [01](01-foundation.md) | Foundation — `Result`, errors, wiring | — | — | ☐ |
