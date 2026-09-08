@@ -260,6 +260,22 @@ void main() {
     ]);
   });
 
+  testWithClock('sync flushes the store for a window it did not replay', () async {
+    final persistence = FakePersistenceClient(lastSyncAt: anHourAgo);
+    final harness = buildHarness(
+      api: _FakeSyncEndpoint(events: eventsOf(251)),
+      persistence: persistence,
+    );
+
+    await harness.manager.sync(cids: ['messaging:a']);
+
+    expect(
+      persistence.flushCallCount,
+      1,
+      reason: 'what the store holds is missing every change the skipped events carried',
+    );
+  });
+
   testWithClock('sync advances past a window it did not replay', () async {
     final events = eventsOf(251);
     final persistence = FakePersistenceClient(lastSyncAt: anHourAgo);
@@ -304,7 +320,7 @@ void main() {
   });
 
   group('when a window cannot be replayed', () {
-    testWithClock('keeps the checkpoint if the refresh replacing it fails', () async {
+    testWithClock('puts the checkpoint back if the refresh replacing it fails', () async {
       final persistence = FakePersistenceClient(lastSyncAt: anHourAgo);
       final harness = buildHarness(
         api: _FakeSyncEndpoint(events: eventsOf(251)),
@@ -314,10 +330,11 @@ void main() {
 
       await harness.manager.sync(cids: ['messaging:a']);
 
+      expect(persistence.flushCallCount, 1);
       expect(
         await persistence.getLastSyncAt(),
         anHourAgo,
-        reason: 'the skipped events must stay recoverable',
+        reason: 'the flush took the checkpoint with it, and the skipped events must stay recoverable',
       );
     });
 
@@ -390,6 +407,18 @@ void main() {
         await persistence.getLastSyncAt(),
         t0,
         reason: 'a refused window is refused again, so holding it would flush on every reconnect',
+      );
+    });
+
+    testWithClock('does not let a failed flush escape to the caller', () async {
+      final harness = buildHarness(
+        api: _FakeSyncEndpoint(events: eventsOf(251)),
+        persistence: _ThrowingPersistenceClient(),
+      );
+
+      await expectLater(
+        harness.manager.sync(cids: ['messaging:a'], lastSyncAt: anHourAgo),
+        completes,
       );
     });
 

@@ -64,14 +64,30 @@ class SyncManager {
 
   ChatPersistenceClient? get _store => client.chatPersistenceClient;
 
-  // Swallows a write failure: a catch-up that applied its events but could not
-  // record how far it got is not a failed catch-up. The next one asks for a
-  // window it has already seen, which is wasted work rather than lost events.
-  Future<void> _advanceLastSyncAt(DateTime to) async {
+  // Records how far a catch-up got.
+  //
+  // Swallows a write failure: there is nowhere else to keep the checkpoint, and
+  // a catch-up that applied its events but could not write it down is not a
+  // failed catch-up.
+  Future<void> _recordLastSyncAt(DateTime to) async {
     try {
       await _store?.updateLastSyncAt(to);
     } catch (error, stk) {
       logger?.warning('Failed to record lastSyncAt as $to', error, stk);
+    }
+  }
+
+  // Drops everything the local store holds, lastSyncAt included, so every
+  // caller has to write the checkpoint afterwards.
+  //
+  // Swallows a failure: the store is dropped because what it holds can no
+  // longer be trusted, and failing to drop it does not make it trustworthy
+  // again. The refresh that repopulates it still has to run.
+  Future<void> _flushStore() async {
+    try {
+      await _store?.flush();
+    } catch (error, stk) {
+      logger?.warning('Failed to reset the persistence client', error, stk);
     }
   }
 
@@ -105,7 +121,7 @@ class SyncManager {
       if (syncAt == null) {
         final now = clock.now();
         logger?.info('Fresh sync start: lastSyncAt initialized to $now.');
-        await _advanceLastSyncAt(now);
+        await _recordLastSyncAt(now);
         return const <String>{};
       }
 
@@ -202,7 +218,7 @@ class SyncManager {
     final nextSyncAt = events.lastOrNull?.createdAt ?? clock.now();
     if (events.length > maxReplayEvents) {
       logger?.warning('Skipping replay of ${events.length} events, over the $maxReplayEvents limit.');
-      return _discardOversizedWindow(cappedCids, nextSyncAt);
+      return _discardOversizedWindow(cappedCids, from: lastSyncAt, to: nextSyncAt);
     }
 
     // Applying an event runs the whole event pipeline, so a listener can throw.
@@ -218,50 +234,48 @@ class SyncManager {
       return const <String>{};
     }
 
-    await _advanceLastSyncAt(nextSyncAt);
+    await _recordLastSyncAt(nextSyncAt);
     return const <String>{};
   }
 
   // Gives up on a window that arrived but held more events than may be replayed.
   //
-  // lastSyncAt moves past it only once every page of the refresh landed: a
-  // channel left unrefreshed is stale and its events are gone. On failure the
-  // next reconnect asks for the same window instead of losing it.
-  Future<Set<String>> _discardOversizedWindow(List<String> cids, DateTime syncAt) async {
+  // The store is dropped and repopulated from the refresh, since what it holds
+  // is missing every change those events carried. lastSyncAt moves to [to] only
+  // once every page of that refresh landed: a channel left unrefreshed has
+  // neither its events nor its state, so the checkpoint goes back to [from] and
+  // the next reconnect asks for the window again.
+  Future<Set<String>> _discardOversizedWindow(List<String> cids, {required DateTime from, required DateTime to}) async {
+    await _flushStore();
     final (refreshed, failure) = await _refreshPages(cids);
 
     // Reported even on failure, so the caller does not query them again.
     if (failure != null) {
-      logger?.warning('Refreshed only ${refreshed.length} of ${cids.length} channels, keeping lastSyncAt');
+      logger?.warning('Refreshed only ${refreshed.length} of ${cids.length} channels, putting lastSyncAt back');
+      await _recordLastSyncAt(from);
       return refreshed;
     }
 
-    await _advanceLastSyncAt(syncAt);
+    await _recordLastSyncAt(to);
     return refreshed;
   }
 
-  // Gives up on a window the server would not serve, dropping the local store
-  // and repopulating it from the refresh.
+  // Gives up on a window the server would not serve.
   //
-  // Unlike a window we chose to discard, lastSyncAt moves to [syncAt] whether
-  // or not that succeeded: the server refused this window for what it is, so
-  // asking again would be refused again and flush the store every reconnect.
+  // The store is dropped and repopulated from the refresh, as it is for an
+  // oversized window. Only the checkpoint differs: it moves to [syncAt] whether
+  // or not that refresh succeeded, because a window refused for what it is
+  // would be refused again on every reconnect for as long as it is held.
   //
   // [syncAt] is taken before the repopulation, so anything arriving during it
   // is asked for again rather than skipped.
   Future<Set<String>> _discardRefusedWindow(List<String> cids, DateTime syncAt) async {
-    // Caught locally: a failed flush must not stop lastSyncAt from advancing,
-    // or the same window is requested — and refused — on every reconnect.
-    try {
-      await _store?.flush();
-    } catch (error, stk) {
-      logger?.warning('Failed to reset the persistence client after a refused window', error, stk);
-    }
+    await _flushStore();
 
-    // A failed page is already logged, and changes nothing here: unlike a window
-    // we chose to discard, lastSyncAt advances either way.
+    // A failed page is already logged, and changes nothing here: the checkpoint
+    // advances either way.
     final (refreshed, _) = await _refreshPages(cids);
-    await _advanceLastSyncAt(syncAt);
+    await _recordLastSyncAt(syncAt);
     return refreshed;
   }
 }

@@ -6,7 +6,7 @@
 
 🔄 Changed
 
-- Reconnecting no longer replays very large event backlogs; the affected channels are re-queried instead, so a long spell offline does not stall the app on reconnect.
+- Reconnecting no longer replays very large event backlogs; the offline cache is reset and the affected channels are re-queried instead, so a long spell offline does not stall the app on reconnect.
 
 🐞 Fixed
 
