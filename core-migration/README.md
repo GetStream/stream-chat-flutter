@@ -148,8 +148,8 @@ Tracked in [`UPSTREAM.md`](UPSTREAM.md), which also covers the reverse direction
 that every product needs, and things chat's use has shown core to be missing or wrong about.
 
 Each phase names the `stream_core` changes it needs, and those should be grouped into as few core
-releases as possible. Only one is a hard block on API we already ship publicly: `Filter`'s
-`$ne` / `$nin` / `$nor` operators, for phase [08](08-query-dsl.md).
+releases as possible. Only one is a hard block on API we already ship publicly: `Filter`'s `$nor`
+operator, for phase [08](08-query-dsl.md).
 
 **Diff against the resolved package, not the sibling repo.** Two of this plan's original upstream
 asks turned out to be already satisfied, because they had been derived from

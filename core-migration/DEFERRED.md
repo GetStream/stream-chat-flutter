@@ -10,7 +10,7 @@ A row leaves this file when it lands, not when it is decided.
 | | What | Blocked on | Phase |
 | --- | --- | --- | --- |
 | ☐ | Adopt core's `CurrentPlatform` / `PlatformType`, renaming `.name` → `.operatingSystem` | A **`stream_core` release** carrying `debugCurrentPlatformOverride`. It is on core's `main`; 0.5.0 does not have it, and `stream_chat_flutter`'s tests set it in 8 places. | [02](02-platform-and-environment.md) |
-| ☐ | Adopt core's `Filter<T>` / `Sort<T>` / `ComparableField` | Core gaining `$ne` / `$nin` / `$nor`, which chat exposes publicly. The one hard block in the plan. | [08](08-query-dsl.md) |
+| ☐ | Adopt core's `Filter<T>` / `Sort<T>` / `ComparableField` | Core gaining `$nor`. `$ne` and `$nin` are *not* upstream asks — every other SDK has deprecated or dropped them. | [08](08-query-dsl.md) |
 | ☐ | A test proving a malformed response body surfaces as `StreamClientException` rather than a bare `TypeError` | A call through the generated client — nothing in this package exercises `runApiSafely` yet. Arrives with `openapi-migration` group 02. | [03](03-errors.md) |
 
 ## Needs a live check, not more code

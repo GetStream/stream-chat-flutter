@@ -14,7 +14,7 @@ Status: ☐ not raised · ◐ raised upstream · ☑ landed in core
 | --- | --- | --- | --- |
 | ☐ | **The retry table** — `isRetriable` over the sealed exception kinds | `ERROR_LAYER.md` §Retrying *specifies* this table, and core owns the doc. Chat now implements it ([03](03-errors.md)); feeds independently re-derived a partial version in `capabilities_repository.dart`'s `shouldRetry`. Two products deriving the same table from the same spec is the definition of a core concern. | Nothing. Strongest candidate here. |
 | ☐ | **`normalizeStringForSort`** (`core/util/string_sort_normalizer.dart`, 95 LOC) | Folds diacritics and ligatures (`Ł→l`, `Ø→o`, `Æ→ae`) so client-side name sorts match the server's collation. Nothing about it is chat-specific — any product sorting user names needs the same folding, and core's `ComparableField` currently uses a plain `String.compareTo`. | [08](08-query-dsl.md) needs it either way; upstreaming is the better half of that decision. |
-| ☐ | **`Filter` `$ne` / `$nin` / `$nor`** | Chat exposes all three publicly and core has none. Not a nicety: it is the one hard block in this plan. | Nothing. |
+| ☐ | **`Filter` `$nor`** | A *logical* operator, so it sits beside core's existing `AndOperator` / `OrOperator`. Chat, Swift and JS all expose it and none has deprecated it; core is the only one missing it. | Nothing. Small and obviously correct. |
 | ☐ | **The two-pointer `merge`** (`core/util/list_extensions.dart`) | If the benchmark [01](01-utilities.md) is parked on shows it beats core's keyed-map-merge-then-sort at real list sizes, core should take *ours* rather than chat taking core's — every product merges paginated lists. | The benchmark. |
 | ☐ | **`HeadersInterceptor` and `ConnectionIdInterceptor` tests** | Core ships both interceptors with **no tests**. Chat had tests for its forks, so this phase kept them chat-side (`additional_headers_interceptor_test.dart`, `connection_id_interceptor_test.dart`) pointed at core's types — they belong next to the code they cover. | Nothing. Port them up. |
 | ☐ | **A hand-written multipart CDN interface** | Feeds hand-wrote `CdnApi` because the generator emits a JSON `@Body()` for `multipart/form-data` operations, with no progress or cancellation. Chat will hand-write the same thing in [09](09-uploads.md). Two identical hand-written retrofit interfaces is a smell — either core owns one, or the generator is fixed. | Prefer the generator fix; see the `openapi-codegen` skill. |
@@ -44,8 +44,12 @@ core's `ConnectionIdGetter` closure cannot express.
 takes a `Channel`, reads `client.retryPolicy`, calls `channel.state.retryFailedMessages()` and
 listens for `EventType.connectionRecovered` — chat domain in every direction.
 
-**`StreamLoggerBridge`.** Forwarding core's records into a `package:logging` `Logger` matters because
-chat's public logging API is typed on that package. Feeds has no such history and would not use it.
+**`$ne` and `$nin`.** Core is *right* not to have them. Android deprecates both — `ne` with
+"the notEquals filter is inefficient and causes performance issues. It will not be supported in the
+future", `nin` with "this filter will stop to be supported in the future" — and the JS SDK, which
+is the reference client, does not declare either in its `QueryFilter` type at all. Chat should
+follow Android and deprecate them rather than push them upstream. (Swift still exposes both
+undeprecated, which looks like an oversight there rather than a signal.)
 
 **`Event`, `EventType`, `event_resolvers.dart`, `Serializer`, `message_rules.dart`.** Chat's domain
 vocabulary. `ERROR_LAYER.md`'s rule generalizes well here: a thing belongs in core when a second
@@ -55,7 +59,7 @@ product would react to it the same way. Nothing outside chat reacts to `message.
 
 Core is a separate repo with its own release cadence, so batch these: a row here is rarely urgent on
 its own, and each release chat has to wait for costs more than the change itself. The two worth
-pushing first are the ones this plan is actually blocked on — the `Filter` operators, and a release
+pushing first are the ones this plan is actually blocked on — `Filter`'s `$nor`, and a release
 carrying `debugCurrentPlatformOverride`.
 
 Cross-repo workflow is in [`STYLE_GUIDE.md`](../STYLE_GUIDE.md) (§Dependency management): a path
