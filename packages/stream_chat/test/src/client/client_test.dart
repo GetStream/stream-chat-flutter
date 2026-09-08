@@ -5432,15 +5432,25 @@ void main() {
       await delay(300);
     }
 
+    // Recovery asks about channels most recently active first, so every fixture
+    // pins its own recency rather than inheriting the moment it was built.
+    // Both dates are set so `lastUpdatedAt` lands on [lastActiveAt] either way.
+    Channel channelActiveAt(String cid, DateTime lastActiveAt) {
+      final channel = ChannelModel(cid: cid, createdAt: lastActiveAt, lastMessageAt: lastActiveAt);
+      return Channel.fromState(client, ChannelState(channel: channel));
+    }
+
     test('should re-query active channels on reconnect when enabled (default)', () async {
       // Setup: connect with default flag, register two channels.
       client = StreamChatClient(apiKey, chatApi: api, ws: ws);
       await client.connectUser(user, token);
       await delay(300);
 
-      final channel1 = Channel.fromState(client, ChannelState(channel: ChannelModel(cid: 'messaging:c1')));
-      final channel2 = Channel.fromState(client, ChannelState(channel: ChannelModel(cid: 'messaging:c2')));
-      client.state.addChannels({'messaging:c1': channel1, 'messaging:c2': channel2});
+      final now = DateTime.now();
+      client.state.addChannels({
+        'messaging:c1': channelActiveAt('messaging:c1', now),
+        'messaging:c2': channelActiveAt('messaging:c2', now.subtract(const Duration(minutes: 1))),
+      });
 
       // Drop interactions from the initial connect's (empty-channel) recovery
       // so we only count the reconnect call.
@@ -5715,9 +5725,11 @@ void main() {
       await delay(300);
 
       // 31 channels spill over the 30-channel page size into a second request.
+      // Listed most recently active first, which is the order recovery uses.
+      final now = DateTime.now();
       final cids = List.generate(31, (index) => 'messaging:c$index');
       client.state.addChannels({
-        for (final cid in cids) cid: Channel.fromState(client, ChannelState(channel: ChannelModel(cid: cid))),
+        for (final (index, cid) in cids.indexed) cid: channelActiveAt(cid, now.subtract(Duration(minutes: index))),
       });
 
       final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));
@@ -5825,9 +5837,11 @@ void main() {
       await delay(300);
 
       // 31 channels spill over the 30-channel page size into a second request.
+      // Listed most recently active first, which is the order recovery uses.
+      final now = DateTime.now();
       final cids = List.generate(31, (index) => 'messaging:c$index');
       client.state.addChannels({
-        for (final cid in cids) cid: Channel.fromState(client, ChannelState(channel: ChannelModel(cid: cid))),
+        for (final (index, cid) in cids.indexed) cid: channelActiveAt(cid, now.subtract(Duration(minutes: index))),
       });
 
       final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));

@@ -135,7 +135,7 @@ class SyncManager {
   /// Best-effort and never throws: the connection can drop again while this is
   /// in flight, and what did not recover is left for the next reconnect.
   Future<void> recoverState() async {
-    final cids = client.state.channels.keys.toList();
+    final cids = _activeCidsByRecency;
     if (cids.isEmpty) return;
 
     // A failed replay reports no refreshed channels rather than throwing, so the
@@ -154,6 +154,28 @@ class SyncManager {
     } catch (error, stk) {
       logger?.warning('Error recovering state on reconnect', error, stk);
     }
+  }
+
+  // Stands in for the recency of a channel whose state was never loaded, so it
+  // sorts behind every channel that has one.
+  static final _neverActive = DateTime.fromMillisecondsSinceEpoch(0);
+
+  // The channels held in memory, most recently active first.
+  //
+  // Ordered to match the cids the persistence client hands back, so the cap in
+  // [_performSync] keeps the most recently active channels whichever path the
+  // list arrived by rather than whichever ones a query paged through first.
+  //
+  // Recency is read off the channel state rather than through the date getters
+  // on `Channel`, which throw for one that was never initialized or has since
+  // been disposed. [recoverState] must not throw.
+  List<String> get _activeCidsByRecency {
+    final byRecency = client.state.channels.entries.sortedByCompare(
+      (it) => it.value.state?.channelState.channel?.lastUpdatedAt ?? _neverActive,
+      (a, b) => b.compareTo(a),
+    );
+
+    return byRecency.map((it) => it.key).toList();
   }
 
   // Refreshes [cids] a page at a time, so a set larger than one request is

@@ -30,14 +30,33 @@ class _ThrowingPersistenceClient extends Fake implements ChatPersistenceClient {
   Future<DateTime?> getLastSyncAt() async => throw Exception('database is gone');
 }
 
-// A channel is only ever read for its cid here. A plain fake rather than a mock:
-// stubbing one inside another stub's `thenAnswer` re-enters mocktail and
-// silently yields a null cid.
+// A channel is only ever read for its cid and how recently it was active here.
+// A plain fake rather than a mock: stubbing one inside another stub's
+// `thenAnswer` re-enters mocktail and silently yields a null cid.
+//
+// Leaving [lastActiveAt] off stands for a channel whose state was never loaded.
 class _FakeChannel extends Fake implements Channel {
-  _FakeChannel(this.cid);
+  _FakeChannel(this.cid, {DateTime? lastActiveAt})
+    : state = lastActiveAt == null ? null : _FakeChannelClientState(cid, lastActiveAt);
 
   @override
   final String? cid;
+
+  @override
+  final ChannelClientState? state;
+}
+
+// Holds just enough of a channel for `ChannelModel.lastUpdatedAt` to resolve.
+// Both dates are set to [lastActiveAt] so it resolves there whichever of the
+// two it picks.
+class _FakeChannelClientState extends Fake implements ChannelClientState {
+  _FakeChannelClientState(String? cid, DateTime lastActiveAt)
+    : channelState = ChannelState(
+        channel: ChannelModel(cid: cid, createdAt: lastActiveAt, lastMessageAt: lastActiveAt),
+      );
+
+  @override
+  final ChannelState channelState;
 }
 
 // The handles a test needs to observe a manager: what it replayed, and which
@@ -74,6 +93,7 @@ void main() {
     required _FakeSyncEndpoint api,
     required ChatPersistenceClient persistence,
     List<String> activeCids = const ['messaging:a'],
+    Map<String, DateTime> lastActiveAt = const {},
     bool persistenceEnabled = true,
     bool recoverStateOnReconnect = true,
     Object? Function(List<String> page)? onQueryPage,
@@ -87,7 +107,9 @@ void main() {
     client.persistenceEnabled = persistenceEnabled;
     when(() => client.recoverStateOnReconnect).thenReturn(recoverStateOnReconnect);
     when(() => client.state).thenReturn(state);
-    when(() => state.channels).thenReturn({for (final cid in activeCids) cid: _FakeChannel(cid)});
+    when(() => state.channels).thenReturn({
+      for (final cid in activeCids) cid: _FakeChannel(cid, lastActiveAt: lastActiveAt[cid]),
+    });
     when(() => client.handleEvent(any())).thenAnswer((invocation) {
       replayed.add(invocation.positionalArguments.first as Event);
     });
@@ -437,6 +459,45 @@ void main() {
       expect(harness.queriedPages, isEmpty);
       expect(await persistence.getLastSyncAt(), anHourAgo);
     });
+  });
+
+  testWithClock('recoverState asks about the most recently active channels first', () async {
+    final api = _FakeSyncEndpoint();
+    final harness = buildHarness(
+      api: api,
+      persistence: FakePersistenceClient(lastSyncAt: anHourAgo),
+      // Held in memory in the order queries paged through them, oldest first.
+      activeCids: ['messaging:quiet', 'messaging:busy'],
+      lastActiveAt: {
+        'messaging:quiet': anHourAgo.subtract(const Duration(days: 7)),
+        'messaging:busy': anHourAgo,
+      },
+    );
+
+    await harness.manager.recoverState();
+
+    expect(
+      api.calls.single.cids,
+      ['messaging:busy', 'messaging:quiet'],
+      reason: 'the cap drops whatever the request ends with, so recency has to decide the order',
+    );
+  });
+
+  testWithClock('recoverState leaves channels with no loaded state at the end', () async {
+    final api = _FakeSyncEndpoint();
+    final harness = buildHarness(
+      api: api,
+      persistence: FakePersistenceClient(lastSyncAt: anHourAgo),
+      activeCids: ['messaging:unloaded', 'messaging:quiet', 'messaging:busy'],
+      lastActiveAt: {
+        'messaging:quiet': anHourAgo.subtract(const Duration(days: 7)),
+        'messaging:busy': anHourAgo,
+      },
+    );
+
+    await harness.manager.recoverState();
+
+    expect(api.calls.single.cids, ['messaging:busy', 'messaging:quiet', 'messaging:unloaded']);
   });
 
   testWithClock('recoverState does not query the channels the sync already refreshed', () async {
