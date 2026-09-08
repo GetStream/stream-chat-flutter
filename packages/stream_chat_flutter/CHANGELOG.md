@@ -3,8 +3,7 @@
 ⚠️ Changed
 
 - Video thumbnails now use `stream_thumbnail` on every platform, and the `thumblr`
-  dependency is gone. Desktop can now thumbnail remote video URLs; macOS and Linux also
-  send `headers` for authenticated ones, which Windows cannot.
+  dependency is gone.
 - Linux builds now need the FFmpeg and libwebp development packages — on Debian/Ubuntu:
   `libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libwebp-dev`.
 
