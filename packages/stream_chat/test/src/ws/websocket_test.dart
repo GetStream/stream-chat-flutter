@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';

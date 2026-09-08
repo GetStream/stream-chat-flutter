@@ -41,3 +41,15 @@ StreamApiException apiException({
   int statusCode = 400,
   String message = 'The request was rejected',
 }) => StreamApiException(message: message, statusCode: statusCode, code: code);
+
+/// Builds a [UserToken] for [userId], for tests that need a well-formed one.
+///
+/// Carries the `devtoken` signature rather than one produced with an app
+/// secret, so it parses locally but only a development-tokens app would
+/// accept it.
+UserToken testUserToken(String userId) {
+  const header = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
+  const signature = 'devtoken';
+  final payload = base64.encode(utf8.encode(json.encode({'user_id': userId})));
+  return UserToken('$header.$payload.$signature');
+}

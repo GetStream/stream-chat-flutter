@@ -2,6 +2,9 @@
 
 🛑️ Breaking
 
+- The token layer is now `stream_core`'s. `Token` becomes `UserToken`, and `TokenProvider` becomes an interface rather than a `Future<String> Function(String)` typedef — pass `TokenProvider.dynamic(myLoader)` where you passed a closure, and note a loader now returns a `UserToken`. `TokenManager.loadToken` becomes `getToken`, `isStatic` becomes `usesStaticProvider`, and `setTokenOrProvider` becomes `setTokenProvider`.
+- Anonymous connections now identify as `!anon` rather than a client-generated random id, matching every other Stream SDK. The backend pins that id so a client cannot claim to be another user.
+- `StreamChatClient.devToken` is removed. It minted a `devtoken`-signed JWT, which only an app with development tokens enabled accepts; generate tokens on your backend, or build one in your own test helper.
 - A failed request now throws one of `stream_core`'s sealed `StreamException` kinds — `StreamApiException`, `StreamNetworkException`, `StreamAuthenticationException` or `StreamClientException` — instead of a `StreamChatNetworkError`. `StreamChatException` aliases the root, so `on StreamChatException catch` handles them all. See the [v11 migration guide](https://github.com/GetStream/stream-chat-flutter/blob/master/migrations/v11-migration.md#error-handling).
 - `ChatErrorCode` is removed in favour of `StreamErrorCode`. Note `requestTimeout` was `23`, which was never a code the API returns; the real one is `48`.
 - `RetryPolicy.shouldRetry` receives a `StreamChatException?` instead of a `StreamChatError?`.

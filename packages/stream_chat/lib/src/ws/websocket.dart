@@ -5,12 +5,11 @@ import 'dart:math' as math;
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_core/stream_core.dart' show StreamErrorCode, SystemEnvironmentManager;
+import 'package:stream_core/stream_core.dart' show StreamErrorCode, SystemEnvironmentManager, TokenManager;
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../core/error/error.dart';
-import '../core/http/token_manager.dart';
 import '../core/models/event.dart';
 import '../core/models/own_user.dart';
 import '../core/util/extension.dart';
@@ -176,7 +175,8 @@ class WebSocket with TimerHelper {
     bool includeUserDetails = true,
   }) async {
     final userDetails = ConnectUserDetails.fromOwnUser(_user!);
-    final token = await tokenManager.loadToken(refresh: refreshToken);
+    if (refreshToken) tokenManager.expireToken();
+    final token = await tokenManager.getToken();
     final params = {
       'user_id': userDetails.id,
       'user_details': includeUserDetails ? userDetails : {'id': userDetails.id},
@@ -395,7 +395,7 @@ class WebSocket with TimerHelper {
 
     final error = StreamWebSocketError.fromStreamError(errorResponse);
     final isTokenExpired = error.errorCode == StreamErrorCode.tokenExpired;
-    if (isTokenExpired && !tokenManager.isStatic) {
+    if (isTokenExpired && !tokenManager.usesStaticProvider) {
       _logger?.warning('Connection failed, token expired');
       return _reconnect(refreshToken: true);
     }

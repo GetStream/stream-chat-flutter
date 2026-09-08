@@ -12,31 +12,32 @@ import 'package:stream_chat/src/core/api/polls_api.dart';
 import 'package:stream_chat/src/core/api/roles_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/src/core/api/user_groups_api.dart';
-import 'package:stream_chat/src/core/http/token.dart';
-import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import 'mocks.dart';
+import 'utils.dart';
 
 class FakeTokenManager extends Fake implements TokenManager {
-  final token = Token.development('test-user-id');
+  final token = testUserToken('test-user-id');
 
   @override
-  bool get isStatic => true;
+  bool get usesStaticProvider => true;
 
   @override
   String? get userId => token.userId;
 
   @override
-  Future<Token> loadToken({bool refresh = false}) async => token;
+  UserToken? peekToken() => token;
 
   @override
-  Future<Token> setTokenOrProvider(
-    String userId, {
-    Token? token,
-    TokenProvider? provider,
-  }) async => this.token;
+  Future<UserToken> getToken() async => token;
+
+  @override
+  void setTokenProvider(String userId, {required TokenProvider tokenProvider}) {}
+
+  @override
+  void expireToken() {}
 
   @override
   void reset() {}

@@ -79,6 +79,10 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `UploadState`'s `Preparing` / `InProgress` / `Success` / `Failed` | `UploadStatePreparing` / `UploadStateInProgress` / `UploadStateSuccess` / `UploadStateFailed` | `renamed` | Frees `Success` for `Result` |
 | `PagedValue.error(StreamChatError)` (`stream_chat_flutter_core`) | `PagedValue.error(StreamChatException)` | `retyped` | |
 | `errorBuilder: Function(BuildContext, StreamChatError)` (scroll views) | `Function(BuildContext, StreamChatException)` | `retyped` | |
+| `Token` | `UserToken` (`stream_core`) | `renamed` | `Token.fromRawValue(x)` → `UserToken(x)`; parses `exp`, so expiry is known |
+| `TokenProvider` (typedef `Future<String> Function(String)`) | `TokenProvider` (interface, `stream_core`) | `retyped` | A closure no longer satisfies it: `TokenProvider.dynamic(loader)`, and the loader returns a `UserToken` |
+| `TokenManager.loadToken()` / `.isStatic` / `.setTokenOrProvider()` | `.getToken()` / `.usesStaticProvider` / `.setTokenProvider()` | `renamed` | `loadToken(refresh: true)` becomes `expireToken()` then `getToken()` |
+| `StreamChatClient.devToken(userId)` | — | `removed` | Generate tokens on your backend |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -143,6 +147,12 @@ try {
 > because unmigrated endpoints used to throw it. Nothing throws it any more, so
 > `on StreamChatNetworkError catch (e)` still **compiles** and simply stops matching — the failure passes straight
 > through. Search your code for it; the deprecation warning tells you where.
+
+### Anonymous connections identify as `!anon`
+
+`connectAnonymousUser` previously sent a client-generated random `user_id`; it now sends `!anon`, which is the id
+the backend reserves for anonymous access and what our other SDKs send. `client.state.currentUser.id` reflects it.
+If you keyed anything off that random id, it is no longer random.
 
 ### Retry behaviour changed
 

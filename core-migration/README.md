@@ -13,7 +13,7 @@ with their core counterparts, the decisions that phase has to make, its risks, t
 | [01](01-utilities.md) | Utilities — in-flight cache, list extensions | ~340 | ~200 | decision | ◐ |
 | [02](02-platform-and-environment.md) | Platform detector & system environment | ~330 | ~300 | yes (rename) | ◐ |
 | [03](03-errors.md) | Errors & the `Result` surface | ~410 | ~900 | **yes** | ◐ |
-| [04](04-token-and-auth.md) | Token & auth | ~225 | ~500 | **yes** | ☐ |
+| [04](04-token-and-auth.md) | Token & auth | ~225 | ~500 | **yes** | ◐ |
 | [05](05-http-client.md) | HTTP client & interceptor pipeline | ~600 | ~150 | yes | ☐ |
 | [06](06-logger.md) | Logger | — | ~670 | **yes** | ☐ |
 | [07](07-websocket.md) | WebSocket transport | ~790 | ~1,940 | **yes** | ☐ |

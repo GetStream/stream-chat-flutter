@@ -1,10 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
-import 'package:stream_core/stream_core.dart' show SystemEnvironmentManager;
+import 'package:stream_core/stream_core.dart' show SystemEnvironmentManager, TokenManager;
 
 import '../http/connection_id_manager.dart';
 import '../http/stream_http_client.dart';
-import '../http/token_manager.dart';
 import 'attachment_file_uploader.dart';
 import 'channel_api.dart';
 import 'device_api.dart';

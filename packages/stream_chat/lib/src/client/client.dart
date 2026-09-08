@@ -5,7 +5,8 @@ import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_core/stream_core.dart' show InFlightCache, SystemEnvironment, SystemEnvironmentManager;
+import 'package:stream_core/stream_core.dart'
+    show InFlightCache, SystemEnvironment, SystemEnvironmentManager, TokenManager, TokenProvider, UserToken;
 import 'package:synchronized/synchronized.dart';
 
 import '../../version.dart';
@@ -18,8 +19,6 @@ import '../core/error/error.dart';
 import '../core/http/app_settings_manager.dart';
 import '../core/http/connection_id_manager.dart';
 import '../core/http/stream_http_client.dart';
-import '../core/http/token.dart';
-import '../core/http/token_manager.dart';
 import '../core/models/app_settings.dart';
 import '../core/models/attachment_file.dart';
 import '../core/models/banned_user.dart';
@@ -159,7 +158,7 @@ class StreamChatClient {
   /// This client state
   late ClientState state;
 
-  final _tokenManager = TokenManager();
+  final _tokenManager = TokenManager.unconfigured();
   final _connectionIdManager = ConnectionIdManager();
   late final _appSettingsManager = AppSettingsManager(_chatApi.general);
   static final _systemEnvironmentManager = SystemEnvironmentManager(
@@ -357,7 +356,7 @@ class StreamChatClient {
     bool connectWebSocket = true,
   }) => _connectUser(
     user,
-    token: Token.fromRawValue(token),
+    tokenProvider: .static(UserToken(token)),
     connectWebSocket: connectWebSocket,
   );
 
@@ -369,7 +368,7 @@ class StreamChatClient {
     bool connectWebSocket = true,
   }) => _connectUser(
     user,
-    provider: tokenProvider,
+    tokenProvider: tokenProvider,
     connectWebSocket: connectWebSocket,
   );
 
@@ -379,11 +378,11 @@ class StreamChatClient {
   Future<OwnUser> connectAnonymousUser({
     bool connectWebSocket = true,
   }) async {
-    final token = Token.anonymous();
+    final token = UserToken.anonymous();
     final user = OwnUser(id: token.userId);
     return _connectUser(
       user,
-      token: token,
+      tokenProvider: .static(token),
       connectWebSocket: connectWebSocket,
     );
   }
@@ -394,29 +393,30 @@ class StreamChatClient {
     User user, {
     bool connectWebSocket = true,
   }) async {
-    final userId = user.id;
-    final anonymousToken = Token.anonymous(userId: userId);
-
-    // setting anonymous token so that getGuestUser works
-    _tokenManager.setTokenOrProvider(userId, token: anonymousToken);
+    // The exchange itself is authenticated anonymously: the guest has no token
+    // yet, and the server assigns the identity it answers with.
+    final anonymousToken = UserToken.anonymous();
+    _tokenManager.setTokenProvider(
+      anonymousToken.userId,
+      tokenProvider: .static(anonymousToken),
+    );
 
     final guestUser = await _chatApi.guest.getGuestUser(user);
 
     // resetting tokenManager after successful request
     _tokenManager.reset();
 
-    final guestUserToken = Token.fromRawValue(guestUser.accessToken);
+    final guestUserToken = UserToken(guestUser.accessToken);
     return _connectUser(
       guestUser.user,
-      token: guestUserToken,
+      tokenProvider: .static(guestUserToken),
       connectWebSocket: connectWebSocket,
     );
   }
 
   Future<OwnUser> _connectUser(
     User user, {
-    Token? token,
-    TokenProvider? provider,
+    required TokenProvider tokenProvider,
     bool connectWebSocket = true,
   }) async {
     if (_ws.connectionCompleter?.isCompleted == false) {
@@ -428,11 +428,7 @@ class StreamChatClient {
 
     logger.info('setting user : ${user.id}');
 
-    await _tokenManager.setTokenOrProvider(
-      user.id,
-      token: token,
-      provider: provider,
-    );
+    _tokenManager.setTokenProvider(user.id, tokenProvider: tokenProvider);
 
     final ownUser = OwnUser.fromUser(user);
     state.currentUser = ownUser;
@@ -1355,9 +1351,6 @@ class StreamChatClient {
 
     return res;
   }
-
-  /// Get a development token
-  Token devToken(String userId) => Token.development(userId);
 
   /// Returns a channel client with the given type, id and custom data.
   Channel channel(

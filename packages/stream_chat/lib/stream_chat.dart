@@ -29,7 +29,11 @@ export 'package:stream_core/stream_core.dart'
         StreamException,
         StreamNetworkException,
         Success,
-        SystemEnvironment;
+        SystemEnvironment,
+        TokenManager,
+        TokenProvider,
+        UserToken,
+        UserTokenLoader;
 
 export 'package:uuid/uuid.dart';
 

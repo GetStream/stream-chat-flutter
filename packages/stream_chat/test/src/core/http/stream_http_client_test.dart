@@ -4,13 +4,11 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/api/responses.dart';
 import 'package:stream_chat/src/core/http/connection_id_manager.dart';
 import 'package:stream_chat/src/core/http/interceptor/additional_headers_interceptor.dart';
-import 'package:stream_chat/src/core/http/interceptor/auth_interceptor.dart';
 import 'package:stream_chat/src/core/http/interceptor/connection_id_interceptor.dart';
 import 'package:stream_chat/src/core/http/interceptor/logging_interceptor.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
-import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_core/stream_core.dart'
-    show StreamApiException, StreamDioException, StreamErrorCode, StreamNetworkException;
+    show AuthInterceptor, StreamApiException, StreamDioException, StreamErrorCode, StreamNetworkException, TokenManager;
 import 'package:test/test.dart';
 
 import '../../mocks.dart';
@@ -58,7 +56,7 @@ void main() {
 
   test('AuthInterceptor should be added if tokenManager is provided', () {
     const apiKey = 'api-key';
-    final client = StreamHttpClient(apiKey, tokenManager: TokenManager());
+    final client = StreamHttpClient(apiKey, tokenManager: TokenManager.unconfigured());
 
     expect(client.httpClient.interceptors.whereType<AuthInterceptor>().length, 1);
   });
