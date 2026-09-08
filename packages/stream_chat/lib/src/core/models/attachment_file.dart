@@ -122,34 +122,34 @@ sealed class UploadState with _$UploadState {
   const UploadState._();
 
   /// Preparing state of the union
-  const factory UploadState.preparing() = Preparing;
+  const factory UploadState.preparing() = UploadStatePreparing;
 
   /// InProgress state of the union
   const factory UploadState.inProgress({
     required int uploaded,
     required int total,
-  }) = InProgress;
+  }) = UploadStateInProgress;
 
   /// Success state of the union
-  const factory UploadState.success() = Success;
+  const factory UploadState.success() = UploadStateSuccess;
 
   /// Failed state of the union
-  const factory UploadState.failed({required String error}) = Failed;
+  const factory UploadState.failed({required String error}) = UploadStateFailed;
 
   /// Creates a new instance from a json
   factory UploadState.fromJson(Map<String, dynamic> json) => _$UploadStateFromJson(json);
 
-  /// Returns true if state is [Preparing]
-  bool get isPreparing => this is Preparing;
+  /// Returns true if state is [UploadStatePreparing]
+  bool get isPreparing => this is UploadStatePreparing;
 
-  /// Returns true if state is [InProgress]
-  bool get isInProgress => this is InProgress;
+  /// Returns true if state is [UploadStateInProgress]
+  bool get isInProgress => this is UploadStateInProgress;
 
-  /// Returns true if state is [Success]
-  bool get isSuccess => this is Success;
+  /// Returns true if state is [UploadStateSuccess]
+  bool get isSuccess => this is UploadStateSuccess;
 
-  /// Returns true if state is [Failed]
-  bool get isFailed => this is Failed;
+  /// Returns true if state is [UploadStateFailed]
+  bool get isFailed => this is UploadStateFailed;
 }
 
 // coverage:ignore-start
@@ -166,10 +166,10 @@ extension UploadStatePatternMatching on UploadState {
   }) {
     final uploadState = this;
     return switch (uploadState) {
-      Preparing() => preparing(),
-      InProgress() => inProgress(uploadState.uploaded, uploadState.total),
-      Success() => success(),
-      Failed() => failed(uploadState.error),
+      UploadStatePreparing() => preparing(),
+      UploadStateInProgress() => inProgress(uploadState.uploaded, uploadState.total),
+      UploadStateSuccess() => success(),
+      UploadStateFailed() => failed(uploadState.error),
     };
   }
 
@@ -183,10 +183,10 @@ extension UploadStatePatternMatching on UploadState {
   }) {
     final uploadState = this;
     return switch (uploadState) {
-      Preparing() => preparing?.call(),
-      InProgress() => inProgress?.call(uploadState.uploaded, uploadState.total),
-      Success() => success?.call(),
-      Failed() => failed?.call(uploadState.error),
+      UploadStatePreparing() => preparing?.call(),
+      UploadStateInProgress() => inProgress?.call(uploadState.uploaded, uploadState.total),
+      UploadStateSuccess() => success?.call(),
+      UploadStateFailed() => failed?.call(uploadState.error),
     };
   }
 
@@ -201,10 +201,10 @@ extension UploadStatePatternMatching on UploadState {
   }) {
     final uploadState = this;
     final result = switch (uploadState) {
-      Preparing() => preparing?.call(),
-      InProgress() => inProgress?.call(uploadState.uploaded, uploadState.total),
-      Success() => success?.call(),
-      Failed() => failed?.call(uploadState.error),
+      UploadStatePreparing() => preparing?.call(),
+      UploadStateInProgress() => inProgress?.call(uploadState.uploaded, uploadState.total),
+      UploadStateSuccess() => success?.call(),
+      UploadStateFailed() => failed?.call(uploadState.error),
     };
 
     return result ?? orElse();
@@ -213,52 +213,52 @@ extension UploadStatePatternMatching on UploadState {
   /// @nodoc
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(Preparing value) preparing,
-    required TResult Function(InProgress value) inProgress,
-    required TResult Function(Success value) success,
-    required TResult Function(Failed value) failed,
+    required TResult Function(UploadStatePreparing value) preparing,
+    required TResult Function(UploadStateInProgress value) inProgress,
+    required TResult Function(UploadStateSuccess value) success,
+    required TResult Function(UploadStateFailed value) failed,
   }) {
     final uploadState = this;
     return switch (uploadState) {
-      Preparing() => preparing(uploadState),
-      InProgress() => inProgress(uploadState),
-      Success() => success(uploadState),
-      Failed() => failed(uploadState),
+      UploadStatePreparing() => preparing(uploadState),
+      UploadStateInProgress() => inProgress(uploadState),
+      UploadStateSuccess() => success(uploadState),
+      UploadStateFailed() => failed(uploadState),
     };
   }
 
   /// @nodoc
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(Preparing value)? preparing,
-    TResult? Function(InProgress value)? inProgress,
-    TResult? Function(Success value)? success,
-    TResult? Function(Failed value)? failed,
+    TResult? Function(UploadStatePreparing value)? preparing,
+    TResult? Function(UploadStateInProgress value)? inProgress,
+    TResult? Function(UploadStateSuccess value)? success,
+    TResult? Function(UploadStateFailed value)? failed,
   }) {
     final uploadState = this;
     return switch (uploadState) {
-      Preparing() => preparing?.call(uploadState),
-      InProgress() => inProgress?.call(uploadState),
-      Success() => success?.call(uploadState),
-      Failed() => failed?.call(uploadState),
+      UploadStatePreparing() => preparing?.call(uploadState),
+      UploadStateInProgress() => inProgress?.call(uploadState),
+      UploadStateSuccess() => success?.call(uploadState),
+      UploadStateFailed() => failed?.call(uploadState),
     };
   }
 
   /// @nodoc
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(Preparing value)? preparing,
-    TResult Function(InProgress value)? inProgress,
-    TResult Function(Success value)? success,
-    TResult Function(Failed value)? failed,
+    TResult Function(UploadStatePreparing value)? preparing,
+    TResult Function(UploadStateInProgress value)? inProgress,
+    TResult Function(UploadStateSuccess value)? success,
+    TResult Function(UploadStateFailed value)? failed,
     required TResult orElse(),
   }) {
     final uploadState = this;
     final result = switch (uploadState) {
-      Preparing() => preparing?.call(uploadState),
-      InProgress() => inProgress?.call(uploadState),
-      Success() => success?.call(uploadState),
-      Failed() => failed?.call(uploadState),
+      UploadStatePreparing() => preparing?.call(uploadState),
+      UploadStateInProgress() => inProgress?.call(uploadState),
+      UploadStateSuccess() => success?.call(uploadState),
+      UploadStateFailed() => failed?.call(uploadState),
     };
 
     return result ?? orElse();
