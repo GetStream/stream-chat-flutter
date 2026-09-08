@@ -2,8 +2,8 @@
 
 import 'package:dio/dio.dart';
 import 'package:stream_chat/src/core/http/interceptor/additional_headers_interceptor.dart';
-import 'package:stream_chat/src/core/http/system_environment_manager.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_core/stream_core.dart' show SystemEnvironmentManager;
 import 'package:test/test.dart';
 
 void main() {
@@ -64,6 +64,15 @@ void main() {
 }
 
 class FakeSystemEnvironmentManager extends SystemEnvironmentManager {
+  FakeSystemEnvironmentManager()
+    : super(
+        environment: const SystemEnvironment(
+          sdkName: 'stream-chat',
+          sdkIdentifier: 'dart',
+          sdkVersion: '0.0.0',
+        ),
+      );
+
   @override
   String get userAgent => 'test-user-agent';
 }

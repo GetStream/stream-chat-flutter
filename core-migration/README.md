@@ -11,7 +11,7 @@ with their core counterparts, the decisions that phase has to make, its risks, t
 | | Phase | Chat LOC | Core LOC | Breaking | Status |
 | --- | --- | --- | --- | --- | --- |
 | [01](01-utilities.md) | Utilities — in-flight cache, list extensions | ~340 | ~200 | decision | ◐ |
-| [02](02-platform-and-environment.md) | Platform detector & system environment | ~220 | ~300 | yes (rename) | ☐ |
+| [02](02-platform-and-environment.md) | Platform detector & system environment | ~330 | ~300 | yes (rename) | ◐ |
 | [03](03-errors.md) | Errors & the `Result` surface | ~410 | ~900 | **yes** | ☐ |
 | [04](04-token-and-auth.md) | Token & auth | ~225 | ~500 | **yes** | ☐ |
 | [05](05-http-client.md) | HTTP client & interceptor pipeline | ~600 | ~150 | yes | ☐ |
@@ -26,10 +26,17 @@ Status key: ☐ not started · ◐ partly landed · ☑ done.
 **Net:** ~4.0k LOC of hand-written `lib/src` deleted (of ~29.0k), replaced by ~5.5k LOC of core
 that is already written and tested. Six direct dependencies become transitive.
 
-**In progress:** phase 01's `InFlightCache` has landed. `list_extensions` is held back pending a
-performance comparison — core's `merge` is a keyed-map-merge-then-sort where ours is a two-pointer
-merge, and it runs on every message, member and read update. `stream_chat_dio_error` moved into
-phase [03](03-errors.md), which is where its payload type becomes a `StreamException`.
+**In progress.** Phase 01's `InFlightCache` and phase 02's `SystemEnvironment` /
+`SystemEnvironmentManager` have landed. Three items are parked, each for a different reason:
+
+- `list_extensions` (01) — pending a performance comparison. Core's `merge` is a
+  keyed-map-merge-then-sort where ours is a two-pointer merge, and it runs on every message,
+  member and read update.
+- `stream_chat_dio_error` (01) — moved into [03](03-errors.md), where its payload type becomes a
+  `StreamException`. It cannot move before that.
+- The platform detector (02) — waiting on a `stream_core` **release**:
+  `debugCurrentPlatformOverride` is on core's `main` but not in 0.5.0, and
+  `stream_chat_flutter`'s tests need it.
 
 ## Scope
 
@@ -99,16 +106,20 @@ Decided once here, not re-argued per phase.
 ### The barrel is a `show` allowlist
 
 `stream_feeds` opens its barrel with `export 'package:stream_core/stream_core.dart';`. **We
-cannot.** Exporting core wholesale from `lib/stream_chat.dart` collides on `AttachmentFile`,
+cannot.** Exporting core wholesale from `lib/stream_chat.dart` still collides on `AttachmentFile`,
 `Filter`, `FilterOperator`, `NullOrdering`, `ComparableField`, `CurrentPlatform`, `PlatformType`,
-`SystemEnvironment`, `SystemEnvironmentManager`, `XStreamClientHeaderExtension`, `TokenManager`,
-`AuthType`, `User`, `LoggingInterceptor`, `InterceptStep`, `LogPrint`, `AuthInterceptor`,
-`ConnectionIdInterceptor`, `InFlightCache`, and `Success` — the last being chat's
+`TokenManager`, `AuthType`, `User`, `LoggingInterceptor`, `InterceptStep`, `LogPrint`,
+`AuthInterceptor`, `ConnectionIdInterceptor`, and `Success` — the last being chat's
 `UploadState.success` variant class against core's `Result` `Success<T>`. Core also re-exports all
 of dio, while our barrel deliberately re-exports a *narrowed* dio.
 
-Narrowing is already the precedent in that file: `filter.dart show Filter, FilterOperator`
-(`stream_chat.dart:52`) and `device_api.dart show PushProvider`.
+Each landed phase shortens that list, since an adopted type stops being a duplicate:
+`InFlightCache`, `SystemEnvironment`, `SystemEnvironmentManager` and
+`XStreamClientHeaderExtension` are already off it. The allowlist is the mechanism throughout —
+grow it phase by phase rather than switching to a wholesale export at the end.
+
+Narrowing is already the precedent in that file: `filter.dart show Filter, FilterOperator` and
+`device_api.dart show PushProvider`.
 
 ### What stays ours
 
@@ -137,6 +148,13 @@ the property. It is the eventual right home; it is not this plan's job to move i
 Each phase names the `stream_core` changes it needs, and those should be grouped into as few core
 releases as possible. Only one is a hard block on API we already ship publicly: `Filter`'s
 `$ne` / `$nin` / `$nor` operators, for phase [08](08-query-dsl.md).
+
+**Diff against the resolved package, not the sibling repo.** Two of this plan's original upstream
+asks turned out to be already satisfied, because they had been derived from
+`stream-core-flutter`'s unreleased `main` rather than from
+`~/.pub-cache/hosted/pub.dev/stream_core-0.5.0`, which is what `stream_chat` actually resolves.
+The distinction also changes the *kind* of ask: something already on core's `main` needs a
+release, not a PR.
 
 Cross-repo workflow is in [`STYLE_GUIDE.md`](../STYLE_GUIDE.md) (§Dependency management): a path
 dependency while both repos change together, back to a hosted constraint in `melos.yaml` before

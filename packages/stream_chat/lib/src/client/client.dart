@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_core/stream_core.dart' show InFlightCache;
+import 'package:stream_core/stream_core.dart' show InFlightCache, SystemEnvironment, SystemEnvironmentManager;
 import 'package:synchronized/synchronized.dart';
 
 import '../../version.dart';
@@ -18,7 +18,6 @@ import '../core/error/error.dart';
 import '../core/http/app_settings_manager.dart';
 import '../core/http/connection_id_manager.dart';
 import '../core/http/stream_http_client.dart';
-import '../core/http/system_environment_manager.dart';
 import '../core/http/token.dart';
 import '../core/http/token_manager.dart';
 import '../core/models/app_settings.dart';
@@ -44,6 +43,7 @@ import '../core/models/reaction.dart';
 import '../core/models/role.dart';
 import '../core/models/thread.dart';
 import '../core/models/user.dart';
+import '../core/platform_detector/platform_detector.dart';
 import '../core/util/event_controller.dart';
 import '../core/util/extension.dart';
 import '../core/util/immutable_collection_subjects.dart';
@@ -51,7 +51,6 @@ import '../core/util/list_extensions.dart';
 import '../core/util/utils.dart';
 import '../db/chat_persistence_client.dart';
 import '../event_type.dart';
-import '../system_environment.dart';
 import '../ws/connection_status.dart';
 import '../ws/websocket.dart';
 import 'channel/channel.dart';
@@ -165,7 +164,14 @@ class StreamChatClient {
   final _tokenManager = TokenManager();
   final _connectionIdManager = ConnectionIdManager();
   late final _appSettingsManager = AppSettingsManager(_chatApi.general);
-  static final _systemEnvironmentManager = SystemEnvironmentManager();
+  static final _systemEnvironmentManager = SystemEnvironmentManager(
+    environment: SystemEnvironment(
+      sdkName: 'stream-chat',
+      sdkIdentifier: 'dart',
+      sdkVersion: PACKAGE_VERSION,
+      osName: CurrentPlatform.name,
+    ),
+  );
 
   /// Updates the system environment information used by the client.
   ///

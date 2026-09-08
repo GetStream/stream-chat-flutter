@@ -5,11 +5,11 @@ import 'dart:math' as math;
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_core/stream_core.dart' show SystemEnvironmentManager;
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../core/error/error.dart';
-import '../core/http/system_environment_manager.dart';
 import '../core/http/token_manager.dart';
 import '../core/models/event.dart';
 import '../core/models/own_user.dart';

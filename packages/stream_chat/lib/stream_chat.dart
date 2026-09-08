@@ -14,6 +14,10 @@ export 'package:dio/dio.dart'
         ProgressCallback;
 export 'package:logging/logging.dart' show Logger, Level, LogRecord;
 export 'package:rate_limiter/rate_limiter.dart';
+// Re-exported with a `show` allowlist rather than wholesale: `stream_core`
+// also declares names this barrel defines — `AttachmentFile`, `Filter`,
+// `User` — so a blanket export would not compile.
+export 'package:stream_core/stream_core.dart' show SystemEnvironment;
 export 'package:uuid/uuid.dart';
 
 export 'src/client/channel/channel.dart';
@@ -86,5 +90,4 @@ export 'src/core/util/list_extensions.dart';
 export 'src/core/util/message_rules.dart';
 export 'src/db/chat_persistence_client.dart';
 export 'src/event_type.dart';
-export 'src/system_environment.dart';
 export 'src/ws/connection_status.dart';
