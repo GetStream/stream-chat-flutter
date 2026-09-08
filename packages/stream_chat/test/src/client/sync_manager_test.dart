@@ -30,6 +30,15 @@ class _ThrowingPersistenceClient extends Fake implements ChatPersistenceClient {
   Future<DateTime?> getLastSyncAt() async => throw Exception('database is gone');
 }
 
+// Refuses to be reset but is otherwise readable, standing in for a store whose
+// flush rolled back and left every row in place.
+class _UnflushablePersistenceClient extends FakePersistenceClient {
+  _UnflushablePersistenceClient({super.lastSyncAt});
+
+  @override
+  Future<void> flush() async => throw Exception('could not reset the store');
+}
+
 // A channel is only ever read for its cid and how recently it was active here.
 // A plain fake rather than a mock: stubbing one inside another stub's
 // `thenAnswer` re-enters mocktail and silently yields a null cid.
@@ -429,6 +438,29 @@ void main() {
         await persistence.getLastSyncAt(),
         t0,
         reason: 'a refused window is refused again, so holding it would flush on every reconnect',
+      );
+    });
+
+    testWithClock('keeps the checkpoint when the store will not drop', () async {
+      final persistence = _UnflushablePersistenceClient(lastSyncAt: anHourAgo);
+      final harness = buildHarness(
+        api: _FakeSyncEndpoint(events: eventsOf(251)),
+        persistence: persistence,
+      );
+
+      await harness.manager.sync(cids: ['messaging:a']);
+
+      expect(
+        harness.queriedPages,
+        [
+          ['messaging:a'],
+        ],
+        reason: 'the refresh still runs, so the channel is at least current in memory',
+      );
+      expect(
+        await persistence.getLastSyncAt(),
+        anHourAgo,
+        reason: 'a store still holding the stale state must not be advanced past',
       );
     });
 

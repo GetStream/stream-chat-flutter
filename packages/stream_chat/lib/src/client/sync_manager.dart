@@ -80,14 +80,17 @@ class SyncManager {
   // Drops everything the local store holds, lastSyncAt included, so every
   // caller has to write the checkpoint afterwards.
   //
-  // Swallows a failure: the store is dropped because what it holds can no
-  // longer be trusted, and failing to drop it does not make it trustworthy
-  // again. The refresh that repopulates it still has to run.
-  Future<void> _flushStore() async {
+  // Reports whether it worked rather than throwing: a store that could not be
+  // dropped still holds the state the discarded events would have updated, so
+  // a caller may not want to advance past them. The refresh that repopulates
+  // it still has to run either way.
+  Future<bool> _flushStore() async {
     try {
       await _store?.flush();
+      return true;
     } catch (error, stk) {
       logger?.warning('Failed to reset the persistence client', error, stk);
+      return false;
     }
   }
 
@@ -135,7 +138,7 @@ class SyncManager {
   /// Best-effort and never throws: the connection can drop again while this is
   /// in flight, and what did not recover is left for the next reconnect.
   Future<void> recoverState() async {
-    final cids = _activeCidsByRecency;
+    final cids = _sortActiveCidsByRecency();
     if (cids.isEmpty) return;
 
     // A failed replay reports no refreshed channels rather than throwing, so the
@@ -160,7 +163,7 @@ class SyncManager {
   // sorts behind every channel that has one.
   static final _neverActive = DateTime.fromMillisecondsSinceEpoch(0);
 
-  // The channels held in memory, most recently active first.
+  // Sorts the channels held in memory, most recently active first.
   //
   // Ordered to match the cids the persistence client hands back, so the cap in
   // [_performSync] keeps the most recently active channels whichever path the
@@ -169,7 +172,7 @@ class SyncManager {
   // Recency is read off the channel state rather than through the date getters
   // on `Channel`, which throw for one that was never initialized or has since
   // been disposed. [recoverState] must not throw.
-  List<String> get _activeCidsByRecency {
+  List<String> _sortActiveCidsByRecency() {
     final byRecency = client.state.channels.entries.sortedByCompare(
       (it) => it.value.state?.channelState.channel?.lastUpdatedAt ?? _neverActive,
       (a, b) => b.compareTo(a),
@@ -264,16 +267,20 @@ class SyncManager {
   //
   // The store is dropped and repopulated from the refresh, since what it holds
   // is missing every change those events carried. lastSyncAt moves to [to] only
-  // once every page of that refresh landed: a channel left unrefreshed has
-  // neither its events nor its state, so the checkpoint goes back to [from] and
-  // the next reconnect asks for the window again.
+  // once both of those worked: a channel left unrefreshed, or a store that
+  // would not drop, still needs the events being discarded, so the checkpoint
+  // goes back to [from] and the next reconnect asks for the window again.
   Future<Set<String>> _discardOversizedWindow(List<String> cids, {required DateTime from, required DateTime to}) async {
-    await _flushStore();
+    final flushed = await _flushStore();
     final (refreshed, failure) = await _refreshPages(cids);
 
-    // Reported even on failure, so the caller does not query them again.
-    if (failure != null) {
-      logger?.warning('Refreshed only ${refreshed.length} of ${cids.length} channels, putting lastSyncAt back');
+    // Refreshed channels are reported even on failure, so the caller does not
+    // query them again.
+    if (!flushed || failure != null) {
+      logger?.warning(
+        'Putting lastSyncAt back: store dropped: $flushed, '
+        'refreshed ${refreshed.length} of ${cids.length} channels',
+      );
       await _recordLastSyncAt(from);
       return refreshed;
     }
@@ -286,17 +293,16 @@ class SyncManager {
   //
   // The store is dropped and repopulated from the refresh, as it is for an
   // oversized window. Only the checkpoint differs: it has nowhere to go back
-  // to, and moves to [to] whether or not that refresh succeeded, because a
+  // to, and moves to [to] whatever the flush and the refresh did, because a
   // window refused for what it is would be refused again on every reconnect
   // for as long as it is held.
   //
   // [to] is taken before the repopulation, so anything arriving during it is
   // asked for again rather than skipped.
   Future<Set<String>> _discardRefusedWindow(List<String> cids, {required DateTime to}) async {
+    // A failed flush or page is already logged, and changes nothing here: the
+    // checkpoint advances either way.
     await _flushStore();
-
-    // A failed page is already logged, and changes nothing here: the checkpoint
-    // advances either way.
     final (refreshed, _) = await _refreshPages(cids);
     await _recordLastSyncAt(to);
     return refreshed;
