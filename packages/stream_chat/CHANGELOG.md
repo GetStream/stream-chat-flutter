@@ -3,6 +3,7 @@
 🔄 Internal / Non-breaking
 
 - Added the OpenAPI-generated v2 client under `lib/open_api/`, along with the `melos run gen:openapi` tooling that produces it. No API uses it yet.
+- Replaced the internal `InFlightCache` with `stream_core`'s equivalent.
 
 ## Upcoming
 
