@@ -57,6 +57,14 @@ dependencies:
   stream_chat_flutter_core: ^10.4.0
   stream_core_flutter: ^0.5.1
   stream_thumbnail:
+    # The ignore below silences `invalid_dependency` because we occasionally
+    # pin stream_thumbnail to a git ref to iterate on it alongside this
+    # SDK between its releases.
+    #
+    # **Note:** Before publishing stream_chat_flutter, this MUST be swapped
+    # back to a pub version constraint — git deps are not allowed on pub.dev
+    # and will block the release.
+    # ignore: invalid_dependency
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
       ref: 2aea1413997af886ee951921d71e6b8cb8c5cfbb
