@@ -1,12 +1,7 @@
 import 'dart:async';
-import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:stream_thumbnail/stream_thumbnail.dart';
-import 'package:thumblr/thumblr.dart' as thumblr;
-
-import '../../stream_chat_flutter.dart';
-import '../utils/device_segmentation.dart';
 
 ///
 // ignore: prefer-match-file-name
@@ -18,20 +13,18 @@ class _IVideoService {
 
   /// Generates a thumbnail image data in memory as UInt8List.
   ///
-  /// The video source can be a local video file or a URL.
-  ///
-  /// Thumbnails are not supported on Web at this time.
+  /// The video source can be a local video file or a URL, on every platform.
   ///
   /// If no [video] path is supplied, or if a thumbnail cannot be generated,
   /// returns [generatePlaceholderThumbnail]. A stock placeholder image.
   ///
-  /// For desktop, you can specify the position of the video to generate
-  /// the thumbnail.
+  /// Use [timeMs] to pick the frame, and [maxHeight]/[maxWidth] to bound the
+  /// size or `0` to keep the source resolution. A lower [quality] reduces
+  /// image quality, but it gets ignored for PNG format.
   ///
-  /// For mobile, you can specify the maximum height or width for the thumbnail
-  /// or 0 for same resolution as the original video. The lower quality value
-  /// creates lower quality of the thumbnail image, but it gets ignored for
-  /// PNG format.
+  /// [headers] are sent when fetching a remote video, except on Windows, which
+  /// cannot attach them. Windows also has no WebP encoder, so
+  /// [StreamThumbnailFormat.webp] fails there.
   Future<Uint8List?> generateVideoThumbnail({
     String? video,
     Map<String, String>? headers,
@@ -45,22 +38,6 @@ class _IVideoService {
     if (video == null) return generatePlaceholderThumbnail();
 
     try {
-      // If the device is a desktop, use thumblr to generate the thumbnail.
-      if (isDesktopDevice) {
-        final thumbnail = await thumblr.generateThumbnail(filePath: video);
-        final byteData = await thumbnail.image.toByteData(
-          format: ui.ImageByteFormat.png,
-        );
-
-        final bytesList = byteData?.buffer.asUint8List();
-        if (bytesList != null && bytesList.isNotEmpty) {
-          return bytesList;
-        }
-
-        return await generatePlaceholderThumbnail();
-      }
-
-      // Otherwise, use the stream_thumbnail plugin to generate the thumbnail.
       return await StreamThumbnail.thumbnailData(
         video: video,
         headers: headers,

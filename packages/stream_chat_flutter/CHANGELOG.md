@@ -1,5 +1,16 @@
 ## Upcoming
 
+⚠️ Changed
+
+- Video thumbnails on macOS, Windows and Linux now come from `stream_thumbnail`, and the
+  `thumblr` dependency has been removed. `thumblr_macos` has no Swift Package Manager
+  support, which blocked SPM adoption, and `thumblr` only accepted a local file path —
+  desktop can now thumbnail remote video URLs, including authenticated ones.
+- A Linux build now requires the FFmpeg and libwebp development packages to be present:
+  on Debian/Ubuntu, `libavcodec-dev libavformat-dev libavutil-dev libswscale-dev
+  libwebp-dev`. On Windows, `headers` cannot be attached to a remote request, so an
+  authenticated video URL will not resolve there.
+
 🐞 Fixed
 
 - Fixed `StreamAttachmentHandler` throwing `UnimplementedError` on WebAssembly builds.
