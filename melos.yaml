@@ -84,6 +84,9 @@ command:
       media_kit_video: ^2.0.1
       meta: ^1.9.1
       mime: ^2.0.0
+      # Also listed under dev_dependencies; stream_chat_test declares it as a
+      # regular dependency because its public API surfaces mocktail types.
+      mocktail: ^1.0.5
       package_info_plus: ">=9.0.1 <11.0.0"
       path: ^1.9.1
       path_provider: ^2.1.5
@@ -107,6 +110,9 @@ command:
       stream_core_flutter: ^0.5.1
       stream_thumbnail: ^0.1.0
       synchronized: ^3.4.0
+      # Also listed under dev_dependencies; stream_chat_test declares it as a
+      # regular dependency because its public API surfaces package:test types.
+      test: ^1.31.1
       thumblr: ^0.0.4
       url_launcher: ^6.3.2
       uuid: ^4.5.3
