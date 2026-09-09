@@ -11,11 +11,6 @@ import 'stream_message_reminder_list_event_handler.dart';
 /// The default message reminder page limit to load.
 const defaultMessageReminderPagedLimit = 10;
 
-/// The default sort used for the message reminder list.
-const defaultMessageReminderListSort = [
-  SortOption<MessageReminder>.asc(MessageReminderSortKey.remindAt),
-];
-
 const _kDefaultBackendPaginationLimit = 30;
 
 /// {@template streamMessageReminderListController}
@@ -35,10 +30,10 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
     required this.client,
     StreamMessageReminderListEventHandler? eventHandler,
     this.filter,
-    this.sort = defaultMessageReminderListSort,
+    List<MessageReminderSort>? sort,
     this.limit = defaultMessageReminderPagedLimit,
   }) : _activeFilter = filter,
-       _activeSort = sort,
+       sort = sort ?? MessageReminderSort.defaultSort,
        _eventHandler = eventHandler ?? StreamMessageReminderListEventHandler(),
        super(const PagedValue.loading());
 
@@ -48,10 +43,10 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
     required this.client,
     StreamMessageReminderListEventHandler? eventHandler,
     this.filter,
-    this.sort = defaultMessageReminderListSort,
+    List<MessageReminderSort>? sort,
     this.limit = defaultMessageReminderPagedLimit,
   }) : _activeFilter = filter,
-       _activeSort = sort,
+       sort = sort ?? MessageReminderSort.defaultSort,
        _eventHandler = eventHandler ?? StreamMessageReminderListEventHandler();
 
   /// The Stream client used to perform the queries.
@@ -73,8 +68,8 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final SortOrder<MessageReminder>? sort;
-  SortOrder<MessageReminder>? _activeSort;
+  final List<MessageReminderSort>? sort;
+  late List<MessageReminderSort>? _activeSort = sort;
 
   /// The limit to apply to the message reminder list. The default is set to
   /// [defaultMessageReminderPagedLimit].
@@ -90,7 +85,7 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
   ///
   /// Use this if you need to support runtime sort changes,
   /// through custom sort UI.
-  set sort(SortOrder<MessageReminder>? value) => _activeSort = value;
+  set sort(List<MessageReminderSort>? value) => _activeSort = value;
 
   @override
   set value(PagedValue<String, MessageReminder> newValue) {

@@ -1,14 +1,15 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_core/stream_core.dart' show Sort, SortField;
+
 import 'channel_model.dart';
-import 'comparable_field.dart';
 import 'user.dart';
 
 part 'banned_user.g.dart';
 
 /// Contains information about a [User] that was banned from a [Channel] or App.
 @JsonSerializable()
-class BannedUser extends Equatable implements ComparableFieldProvider {
+class BannedUser extends Equatable {
   /// Creates a new instance of [BannedUser]
   const BannedUser({
     required this.user,
@@ -76,25 +77,39 @@ class BannedUser extends Equatable implements ComparableFieldProvider {
     shadow,
     reason,
   ];
-
-  @override
-  ComparableField? getComparableField(String sortKey) {
-    final value = switch (sortKey) {
-      BannedUserSortKey.createdAt => createdAt,
-      _ => null,
-    };
-
-    return ComparableField.fromValue(value);
-  }
 }
 
-/// Extension type representing sortable fields for [BannedUser].
+/// Represents a sorting operation for banned users.
 ///
-/// This type provides type-safe keys that can be used for sorting banned users
-/// in queries. Each constant represents a field that can be sorted on.
-extension type const BannedUserSortKey(String key) implements String {
-  /// Sort banned users by their creation date.
+/// See [BannedUserSortField] for the fields that can be sorted on.
+class BannedUserSort extends Sort<BannedUser> {
+  /// Sorts by [field], smallest first.
+  const BannedUserSort.asc(
+    BannedUserSortField super.field, {
+    super.nullOrdering,
+  }) : super.asc();
+
+  /// Sorts by [field], largest first.
+  const BannedUserSort.desc(
+    BannedUserSortField super.field, {
+    super.nullOrdering,
+  }) : super.desc();
+}
+
+/// Represents a field that banned-user queries can be sorted on.
+class BannedUserSortField extends SortField<BannedUser> {
+  /// Creates a banned-user sort field named [remote] on the wire, reading its
+  /// value off an instance with `localValue`.
+  ///
+  /// Prefer the fields this class declares — they are the ones the API accepts.
+  /// This is for a field the SDK has not modelled yet.
+  BannedUserSortField(super.remote, super.localValue);
+
+  /// Sorts banned users by their creation date.
   ///
   /// This is the default sort field (in descending order).
-  static const createdAt = BannedUserSortKey('created_at');
+  static final createdAt = BannedUserSortField(
+    'created_at',
+    (it) => it.createdAt,
+  );
 }

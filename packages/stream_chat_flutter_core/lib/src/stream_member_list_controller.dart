@@ -10,11 +10,6 @@ import 'search_debouncer.dart';
 /// The default channel page limit to load.
 const defaultMemberPagedLimit = 10;
 
-/// The default sort used for the member list.
-const defaultMemberListSort = [
-  SortOption<Member>.asc(MemberSortKey.createdAt),
-];
-
 const _kDefaultBackendPaginationLimit = 30;
 
 /// A controller for a member list.
@@ -37,10 +32,10 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
   StreamMemberListController({
     required this.channel,
     this.filter,
-    this.sort = defaultMemberListSort,
+    List<MemberSort>? sort,
     this.limit = defaultMemberPagedLimit,
   }) : _activeFilter = filter,
-       _activeSort = sort,
+       sort = sort ?? MemberSort.defaultSort,
        super(const PagedValue.loading());
 
   /// Creates a [StreamMemberListController] from the passed [value].
@@ -48,10 +43,10 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
     super.value, {
     required this.channel,
     this.filter,
-    this.sort = defaultMemberListSort,
+    List<MemberSort>? sort,
     this.limit = defaultMemberPagedLimit,
   }) : _activeFilter = filter,
-       _activeSort = sort;
+       sort = sort ?? MemberSort.defaultSort;
 
   /// The client to use for the channels list.
   final Channel channel;
@@ -70,8 +65,8 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final SortOrder<Member>? sort;
-  SortOrder<Member>? _activeSort;
+  final List<MemberSort>? sort;
+  late List<MemberSort>? _activeSort = sort;
 
   /// The limit to apply to the member list. The default is set to
   /// [defaultMemberPagedLimit].
@@ -93,7 +88,7 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new sort.
-  set sort(SortOrder<Member>? value) => _activeSort = value;
+  set sort(List<MemberSort>? value) => _activeSort = value;
 
   /// Searches members whose name matches [query], debounced by its length.
   ///

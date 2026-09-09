@@ -1,7 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_core/stream_core.dart' show Sort, SortField;
+
 import 'channel_model.dart';
-import 'comparable_field.dart';
 import 'message.dart';
 import 'user.dart';
 
@@ -26,7 +27,7 @@ const _nullConst = _NullConst();
 /// reference without notification.
 /// {@endtemplate}
 @JsonSerializable()
-class MessageReminder extends Equatable implements ComparableFieldProvider {
+class MessageReminder extends Equatable {
   /// {@macro messageReminder}
   MessageReminder({
     required this.channelCid,
@@ -133,31 +134,69 @@ class MessageReminder extends Equatable implements ComparableFieldProvider {
     createdAt,
     updatedAt,
   ];
-
-  @override
-  ComparableField? getComparableField(String sortKey) {
-    final value = switch (sortKey) {
-      MessageReminderSortKey.channelCid => channelCid,
-      MessageReminderSortKey.remindAt => remindAt,
-      MessageReminderSortKey.createdAt => createdAt,
-      _ => null,
-    };
-
-    return ComparableField.fromValue(value);
-  }
 }
 
-/// Extension type representing sortable fields for [MessageReminder].
+/// Represents a sorting operation for message reminders.
 ///
-/// This type provides type-safe keys that can be used for sorting reminders
-/// in queries. Each constant represents a field that can be sorted on.
-extension type const MessageReminderSortKey(String key) implements String {
+/// The API accepts only whole combinations, not an arbitrary mix:
+/// `channelCid` + `messageId`, `remindAt` + `messageId`, or `createdAt` alone.
+/// Anything else is rejected.
+///
+/// See [MessageReminderSortField] for the fields that can be sorted on.
+class MessageReminderSort extends Sort<MessageReminder> {
+  /// Sorts by [field], smallest first.
+  const MessageReminderSort.asc(
+    MessageReminderSortField super.field, {
+    super.nullOrdering,
+  }) : super.asc();
+
+  /// Sorts by [field], largest first.
+  const MessageReminderSort.desc(
+    MessageReminderSortField super.field, {
+    super.nullOrdering,
+  }) : super.desc();
+
+  /// The ordering the API applies to a reminder query when none is given.
+  ///
+  /// Sorts by when the user asked to be reminded, soonest first.
+  static final List<MessageReminderSort> defaultSort = [
+    MessageReminderSort.asc(MessageReminderSortField.remindAt),
+  ];
+}
+
+/// Represents a field that reminder queries can be sorted on.
+class MessageReminderSortField extends SortField<MessageReminder> {
+  /// Creates a reminder sort field named [remote] on the wire, reading its
+  /// value off an instance with `localValue`.
+  ///
+  /// Prefer the fields this class declares — they are the ones the API accepts.
+  /// This is for a field the SDK has not modelled yet.
+  MessageReminderSortField(super.remote, super.localValue);
+
   /// Sorts reminders by the channel CID.
-  static const channelCid = MessageReminderSortKey('channel_cid');
+  static final channelCid = MessageReminderSortField(
+    'channel_cid',
+    (it) => it.channelCid,
+  );
 
   /// Sorts reminders by the time at which the user wants to be reminded.
-  static const remindAt = MessageReminderSortKey('remind_at');
+  static final remindAt = MessageReminderSortField(
+    'remind_at',
+    (it) => it.remindAt,
+  );
 
   /// Sorts reminders by the date at which the reminder was created.
-  static const createdAt = MessageReminderSortKey('created_at');
+  static final createdAt = MessageReminderSortField(
+    'created_at',
+    (it) => it.createdAt,
+  );
+
+  /// Sorts reminders by the id of the message they are set on.
+  ///
+  /// Ties break on this field, so naming it explicitly is what makes a page
+  /// boundary reproducible.
+  static final messageId = MessageReminderSortField(
+    'message_id',
+    (it) => it.messageId,
+  );
 }

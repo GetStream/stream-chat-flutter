@@ -1,5 +1,4 @@
 import 'package:json_annotation/json_annotation.dart';
-import '../api/sort_order.dart';
 import 'channel_state.dart';
 import 'filter.dart';
 
@@ -34,21 +33,20 @@ class PredefinedFilter {
   final Filter filter;
 
   /// Sort specification as resolved by the server.
-  final SortOrder<ChannelState>? sort;
+  final List<ChannelSort>? sort;
 
   /// Sort to apply locally, matching what the server applies for this
   /// predefined filter — the echoed [sort], or a default derived from
   /// [filter] when [sort] is null.
-  SortOrder<ChannelState> get effectiveSort => sort ?? _defaultSortFor(filter);
+  List<ChannelSort> get effectiveSort => sort ?? _defaultSortFor(filter);
 
   static Filter _filterFromJson(Map<String, dynamic> json) => Filter.raw(value: json);
 }
 
-SortOrder<ChannelState> _defaultSortFor(Filter filter) {
-  if (_touchesField(filter, ChannelSortKey.lastMessageAt)) {
-    return const [SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt)];
-  }
-  return const [SortOption<ChannelState>.desc(ChannelSortKey.lastUpdated)];
+List<ChannelSort> _defaultSortFor(Filter filter) {
+  final touchesField = _touchesField(filter, ChannelSortField.lastMessageAt.remote);
+  if (touchesField) return [ChannelSort.desc(ChannelSortField.lastMessageAt)];
+  return ChannelSort.defaultSort;
 }
 
 bool _touchesField(Filter filter, String field) {

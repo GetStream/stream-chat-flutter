@@ -1,8 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_core/stream_core.dart' show Standard, Sort, SortField;
 
 import '../util/serializer.dart';
-import 'comparable_field.dart';
+import '../util/string_sort_normalizer.dart';
 import 'user.dart';
 
 part 'member.g.dart';
@@ -10,7 +11,7 @@ part 'member.g.dart';
 /// The class that contains the information about the user membership
 /// in a channel
 @JsonSerializable()
-class Member extends Equatable implements ComparableFieldProvider {
+class Member extends Equatable {
   /// Constructor used for json serialization
   Member({
     this.user,
@@ -172,37 +173,81 @@ class Member extends Equatable implements ComparableFieldProvider {
     deletedMessages,
     extraData,
   ];
-
-  @override
-  ComparableField? getComparableField(String sortKey) {
-    final value = switch (sortKey) {
-      MemberSortKey.createdAt => createdAt,
-      MemberSortKey.userId => userId,
-      MemberSortKey.name => user?.name,
-      MemberSortKey.channelRole => channelRole,
-      _ => extraData[sortKey],
-    };
-
-    return ComparableField.fromValue(value);
-  }
 }
 
-/// Extension type representing sortable fields for [Member].
+/// Represents a sorting operation for channel members.
 ///
-/// This type provides type-safe keys that can be used for sorting members
-/// in queries. Each constant represents a field that can be sorted on.
-extension type const MemberSortKey(String key) implements String {
-  /// Sort members by their creation date in the channel.
-  static const createdAt = MemberSortKey('created_at');
+/// See [MemberSortField] for the fields that can be sorted on.
+class MemberSort extends Sort<Member> {
+  /// Sorts by [field], smallest first.
+  const MemberSort.asc(
+    MemberSortField super.field, {
+    super.nullOrdering,
+  }) : super.asc();
 
-  /// Sort members by the user ID.
-  static const userId = MemberSortKey('user_id');
+  /// Sorts by [field], largest first.
+  const MemberSort.desc(
+    MemberSortField super.field, {
+    super.nullOrdering,
+  }) : super.desc();
 
-  /// Sort members by user name.
+  /// The ordering the API applies to a member query when none is given.
   ///
-  /// Note: This requires additional database joins and might be slower.
-  static const name = MemberSortKey('name');
+  /// Sorts by when the member joined, oldest first.
+  static final List<MemberSort> defaultSort = [
+    MemberSort.asc(MemberSortField.createdAt),
+  ];
+}
 
-  /// Sort members by the channel role.
-  static const channelRole = MemberSortKey('channel_role');
+/// Represents a field that member queries can be sorted on.
+class MemberSortField extends SortField<Member> {
+  /// Creates a member sort field named [remote] on the wire, reading its
+  /// value off an instance with `localValue`.
+  ///
+  /// Prefer the fields this class declares — they are the ones the API accepts.
+  /// This is for a field the SDK has not modelled yet.
+  MemberSortField(super.remote, super.localValue);
+
+  /// Creates a field the SDK does not model, read from [Member.extraData].
+  ///
+  /// Only declared for the models whose queries accept a custom sort field,
+  /// and slower than a field this class declares.
+  factory MemberSortField.custom(String remote) {
+    return MemberSortField(remote, (it) => it.extraData[remote]);
+  }
+
+  /// Sorts members by their creation date in the channel.
+  static final createdAt = MemberSortField(
+    'created_at',
+    (it) => it.createdAt,
+  );
+
+  /// Sorts members by the user ID.
+  static final userId = MemberSortField(
+    'user_id',
+    (it) => it.userId,
+  );
+
+  /// Sorts members by user name.
+  ///
+  /// Compared with case, diacritics and ligatures folded away, so a list
+  /// sorted locally matches the order a query returns.
+  ///
+  /// Slower than the other member sorts.
+  static final name = MemberSortField(
+    'name',
+    (it) => it.user?.name.let(normalizeStringForSort),
+  );
+
+  /// Sorts members by the channel role.
+  static final channelRole = MemberSortField(
+    'channel_role',
+    (it) => it.channelRole,
+  );
+
+  /// Sorts members by the date their membership was last updated.
+  static final updatedAt = MemberSortField(
+    'updated_at',
+    (it) => it.updatedAt,
+  );
 }

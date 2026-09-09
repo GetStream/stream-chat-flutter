@@ -284,7 +284,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @override
   Future<List<ChannelState>> getChannelStates({
     Filter? filter,
-    SortOrder<ChannelState>? channelStateSort,
+    List<ChannelSort>? channelStateSort,
     int? messageLimit,
     PaginationParams? paginationParams,
   }) async {
@@ -302,7 +302,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @override
   Future<QueryChannelsResponse> queryChannelStates({
     Filter? filter,
-    SortOrder<ChannelState>? sort,
+    List<ChannelSort>? sort,
     String? predefinedFilter,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
@@ -353,7 +353,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   // page with full channel state.
   Future<List<ChannelState>> _getChannelStatesPage(
     List<ChannelModel> channelModels,
-    SortOrder<ChannelState>? channelStateSort,
+    List<ChannelSort>? channelStateSort,
     PaginationParams? paginationParams, {
     int? messageLimit,
   }) async {
@@ -409,10 +409,10 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<void> saveChannelQueries({
     required List<String> cids,
     Filter? filter,
-    SortOrder<ChannelState>? sort,
+    List<ChannelSort>? sort,
     String? predefinedFilter,
     Filter? resolvedFilter,
-    SortOrder<ChannelState>? resolvedSort,
+    List<ChannelSort>? resolvedSort,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
     bool clearQueryCache = false,
@@ -632,8 +632,9 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     }
   }
 
-  bool _sortRequiresMembership(SortOrder<ChannelState>? sort) =>
-      sort?.any((opt) => opt.field == ChannelSortKey.pinnedAt) ?? false;
+  bool _sortRequiresMembership(List<ChannelSort>? sort) {
+    return sort?.any((it) => it.field.remote == ChannelSortField.pinnedAt.remote) ?? false;
+  }
 
   Future<List<ChannelState>> _attachMemberships(
     List<ChannelState> envelopes,

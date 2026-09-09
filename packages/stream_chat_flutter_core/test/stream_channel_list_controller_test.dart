@@ -11,6 +11,15 @@ import 'package:stream_chat_flutter_core/src/stream_channel_list_event_handler.d
 
 import 'mocks.dart';
 
+// The controller sorts locally by default, and the sort reads `channelState`
+// off every channel. Tests that only care about which channels came back stub
+// them identically, so the stable sort preserves the order they were given in.
+MockChannel unsortedMockChannel() {
+  final channel = MockChannel();
+  when(() => channel.state.channelState).thenReturn(const ChannelState());
+  return channel;
+}
+
 void main() {
   setUpAll(() {
     registerFallbackValue(const PaginationParams());
@@ -30,7 +39,7 @@ void main() {
   Future<StreamChannelListController> buildController({
     List<Channel> channels = const [],
     Filter? filter,
-    SortOrder<ChannelState>? channelStateSort = defaultChannelListSort,
+    List<ChannelSort>? channelStateSort,
     String? predefinedFilter,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
@@ -80,7 +89,7 @@ void main() {
 
   test('doInitialLoad forwards inline filter and sort to queryChannels', () async {
     final filter = Filter.in_('members', const ['u1']);
-    const sort = [SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt)];
+    final sort = [ChannelSort.desc(ChannelSortField.lastMessageAt)];
 
     await buildController(filter: filter, channelStateSort: sort);
 
@@ -114,7 +123,7 @@ void main() {
     verify(
       () => client.queryChannelsWithResult(
         filter: null,
-        channelStateSort: null,
+        channelStateSort: ChannelSort.defaultSort,
         predefinedFilter: presetName,
         filterValues: filterValues,
         sortValues: sortValues,
@@ -162,8 +171,8 @@ void main() {
     final filter = Filter.in_('members', const ['u1']);
     const nextPageKey = 2;
 
-    final existing = [MockChannel(), MockChannel()];
-    final fetched = [MockChannel()];
+    final existing = [unsortedMockChannel(), unsortedMockChannel()];
+    final fetched = [unsortedMockChannel()];
 
     when(
       () => client.queryChannelsWithResult(
@@ -186,7 +195,6 @@ void main() {
       ),
       client: client,
       filter: filter,
-      channelStateSort: null,
     );
 
     await controller.loadMore(nextPageKey);
@@ -200,7 +208,7 @@ void main() {
     final captured = verify(
       () => client.queryChannelsWithResult(
         filter: filter,
-        channelStateSort: null,
+        channelStateSort: ChannelSort.defaultSort,
         predefinedFilter: null,
         filterValues: null,
         sortValues: null,
@@ -221,8 +229,8 @@ void main() {
     const sortValues = {'preset': 'recent'};
     const nextPageKey = 2;
 
-    final existing = [MockChannel(), MockChannel()];
-    final fetched = [MockChannel()];
+    final existing = [unsortedMockChannel(), unsortedMockChannel()];
+    final fetched = [unsortedMockChannel()];
 
     when(
       () => client.queryChannelsWithResult(
@@ -261,7 +269,7 @@ void main() {
     final captured = verify(
       () => client.queryChannelsWithResult(
         filter: null,
-        channelStateSort: null,
+        channelStateSort: ChannelSort.defaultSort,
         predefinedFilter: presetName,
         filterValues: filterValues,
         sortValues: sortValues,
@@ -293,7 +301,7 @@ void main() {
 
     final controller = StreamChannelListController(
       client: client,
-      channelStateSort: defaultChannelListSort,
+      channelStateSort: ChannelSort.defaultSort,
     );
 
     expect(

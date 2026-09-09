@@ -2760,7 +2760,7 @@ void main() {
 
       test('should work fine with `query`', () async {
         const query = 'test-search-query';
-        const sort = [SortOption.asc('test-sort-field')];
+        final sort = [MessageSearchSort.asc(MessageSearchSortField.custom('test-sort-field'))];
         const pagination = PaginationParams();
 
         final results = List.generate(3, (index) => GetMessageResponse());
@@ -2797,7 +2797,7 @@ void main() {
 
       test('should work fine with `messageFilters`', () async {
         final messageFilters = Filter.query('key', 'text');
-        const sort = [SortOption.desc('test-sort-field')];
+        final sort = [MessageSearchSort.desc(MessageSearchSortField.custom('test-sort-field'))];
         const pagination = PaginationParams();
 
         final results = List.generate(3, (index) => GetMessageResponse());

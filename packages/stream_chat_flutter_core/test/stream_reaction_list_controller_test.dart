@@ -439,7 +439,7 @@ void main() {
     test('refresh resets filter and sort to initial values', () async {
       final reactions = generateReactions();
       final initialFilter = Filter.equal('type', 'like');
-      final sort = [const SortOption<Reaction>.desc(ReactionSortKey.createdAt)];
+      final sort = [ReactionSort.desc(ReactionSortField.createdAt)];
 
       final apiCalls = <Map<String, dynamic>>[];
 
@@ -473,7 +473,7 @@ void main() {
       // Change filter and sort at runtime
       controller
         ..filter = Filter.equal('type', 'love')
-        ..sort = [const SortOption<Reaction>.asc(ReactionSortKey.createdAt)];
+        ..sort = [ReactionSort.asc(ReactionSortField.createdAt)];
 
       await controller.refresh();
       await pumpEventQueue();
@@ -488,9 +488,9 @@ void main() {
     test('refresh with resetValue=false preserves current filter and sort', () async {
       final reactions = generateReactions();
       final initialFilter = Filter.equal('type', 'like');
-      final initialSort = [const SortOption<Reaction>.desc(ReactionSortKey.createdAt)];
+      final initialSort = [ReactionSort.desc(ReactionSortField.createdAt)];
       final newFilter = Filter.equal('type', 'love');
-      final newSort = [const SortOption<Reaction>.asc(ReactionSortKey.createdAt)];
+      final newSort = [ReactionSort.asc(ReactionSortField.createdAt)];
 
       final apiCalls = <Map<String, dynamic>>[];
 
@@ -559,7 +559,7 @@ void main() {
       final controller = StreamReactionListController(
         client: client,
         messageId: messageId,
-        sort: [const SortOption<Reaction>.desc(ReactionSortKey.createdAt)],
+        sort: [ReactionSort.desc(ReactionSortField.createdAt)],
       );
 
       await controller.doInitialLoad();

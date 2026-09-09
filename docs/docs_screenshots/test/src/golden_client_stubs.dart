@@ -10,11 +10,11 @@ void _ensureGoldenMocktailFallbacks() {
   registerFallbackValue(const Filter.empty());
   registerFallbackValue(const ThreadOptions());
   registerFallbackValue(const PaginationParams());
-  registerFallbackValue(<SortOption<User>>[]);
-  registerFallbackValue(<SortOption<Thread>>[]);
-  registerFallbackValue(<SortOption<ChannelState>>[]);
-  registerFallbackValue(<SortOption<Draft>>[]);
-  registerFallbackValue(<SortOption<Member>>[]);
+  registerFallbackValue(<Sort<User>>[]);
+  registerFallbackValue(<Sort<Thread>>[]);
+  registerFallbackValue(<Sort<ChannelState>>[]);
+  registerFallbackValue(<Sort<Draft>>[]);
+  registerFallbackValue(<Sort<Member>>[]);
   _registeredFallbacks = true;
 }
 

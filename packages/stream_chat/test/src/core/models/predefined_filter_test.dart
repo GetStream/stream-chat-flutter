@@ -1,7 +1,7 @@
-import 'package:stream_chat/src/core/api/sort_order.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/predefined_filter.dart';
+import 'package:stream_core/stream_core.dart' show SortDirection;
 import 'package:test/test.dart';
 
 void main() {
@@ -37,23 +37,62 @@ void main() {
     expect(parsed.name, 'unread');
     expect(parsed.filter.value, filterJson);
     expect(parsed.sort, hasLength(1));
-    expect(parsed.sort!.first.field, 'last_message_at');
-    expect(parsed.sort!.first.direction, SortOption.DESC);
+    expect(parsed.sort!.first.field.remote, 'last_message_at');
+    expect(parsed.sort!.first.direction, SortDirection.desc);
+  });
+
+  group('sort direction', () {
+    PredefinedFilter parseWithDirection(Object? direction) {
+      return PredefinedFilter.fromJson({
+        'name': 'unread',
+        'filter': <String, Object?>{},
+        'sort': [
+          {'field': 'last_message_at', 'direction': direction},
+        ],
+      });
+    }
+
+    test('-1 parses as descending', () {
+      expect(parseWithDirection(-1).sort!.single.direction, SortDirection.desc);
+    });
+
+    test('1 parses as ascending', () {
+      expect(parseWithDirection(1).sort!.single.direction, SortDirection.asc);
+    });
+
+    test('anything else parses as ascending, as the server reads it', () {
+      // The API treats a direction other than -1 as ascending — see
+      // `ToSortParameter` and `isAscending := sortValue.Direction != -1`.
+      expect(parseWithDirection(0).sort!.single.direction, SortDirection.asc);
+    });
+
+    test('a field the SDK does not model still resolves', () {
+      final parsed = PredefinedFilter.fromJson({
+        'name': 'unread',
+        'filter': <String, Object?>{},
+        'sort': [
+          {'field': 'some_custom_field', 'direction': -1},
+        ],
+      });
+
+      expect(parsed.sort!.single.field.remote, 'some_custom_field');
+      expect(parsed.sort!.single.direction, SortDirection.desc);
+    });
   });
 
   group('effectiveSort', () {
     test('returns the echoed sort when present', () {
-      const filter = PredefinedFilter(
+      final filter = PredefinedFilter(
         name: 'x',
-        filter: Filter.empty(),
-        sort: [SortOption<ChannelState>.asc(ChannelSortKey.createdAt)],
+        filter: const Filter.empty(),
+        sort: [ChannelSort.asc(ChannelSortField.createdAt)],
       );
 
       final sort = filter.effectiveSort;
 
       expect(sort, hasLength(1));
-      expect(sort.single.field, equals(ChannelSortKey.createdAt));
-      expect(sort.single.direction, equals(SortOption.ASC));
+      expect(sort.single.field.remote, equals(ChannelSortField.createdAt.remote));
+      expect(sort.single.direction, equals(SortDirection.asc));
     });
 
     test('falls back to lastUpdated desc when sort is null and filter is empty', () {
@@ -62,8 +101,8 @@ void main() {
       final sort = predefined.effectiveSort;
 
       expect(sort, hasLength(1));
-      expect(sort.single.field, equals(ChannelSortKey.lastUpdated));
-      expect(sort.single.direction, equals(SortOption.DESC));
+      expect(sort.single.field.remote, equals(ChannelSortField.lastUpdated.remote));
+      expect(sort.single.direction, equals(SortDirection.desc));
     });
 
     test('falls back to lastMessageAt desc when raw filter touches last_message_at', () {
@@ -78,8 +117,8 @@ void main() {
 
       final sort = predefined.effectiveSort;
 
-      expect(sort.single.field, equals(ChannelSortKey.lastMessageAt));
-      expect(sort.single.direction, equals(SortOption.DESC));
+      expect(sort.single.field.remote, equals(ChannelSortField.lastMessageAt.remote));
+      expect(sort.single.direction, equals(SortDirection.desc));
     });
 
     test(r'falls back to lastMessageAt desc when last_message_at is nested under $or', () {
@@ -101,7 +140,7 @@ void main() {
 
       final sort = predefined.effectiveSort;
 
-      expect(sort.single.field, equals(ChannelSortKey.lastMessageAt));
+      expect(sort.single.field.remote, equals(ChannelSortField.lastMessageAt.remote));
     });
 
     test('falls back to lastUpdated desc when filter touches only other fields', () {
@@ -123,7 +162,7 @@ void main() {
 
       final sort = predefined.effectiveSort;
 
-      expect(sort.single.field, equals(ChannelSortKey.lastUpdated));
+      expect(sort.single.field.remote, equals(ChannelSortField.lastUpdated.remote));
     });
 
     test('falls back to lastMessageAt desc when typed Filter.and touches last_message_at', () {
@@ -137,7 +176,7 @@ void main() {
 
       final sort = predefined.effectiveSort;
 
-      expect(sort.single.field, equals(ChannelSortKey.lastMessageAt));
+      expect(sort.single.field.remote, equals(ChannelSortField.lastMessageAt.remote));
     });
   });
 }

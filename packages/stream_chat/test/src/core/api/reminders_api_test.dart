@@ -6,7 +6,6 @@ import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/api/reminders_api.dart';
 import 'package:stream_chat/src/core/api/requests.dart';
-import 'package:stream_chat/src/core/api/sort_order.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/message_reminder.dart';
 import 'package:test/test.dart';
@@ -72,7 +71,7 @@ void main() {
     test('should query reminders with filter, sort, and pagination', () async {
       const path = '/reminders/query';
       final filter = Filter.equal('userId', 'test-user-id');
-      const sort = [SortOption<MessageReminder>.desc('remindAt')];
+      final sort = [MessageReminderSort.desc(MessageReminderSortField.remindAt)];
       const pagination = PaginationParams(limit: 10, offset: 5);
 
       final expectedPayload = jsonEncode({

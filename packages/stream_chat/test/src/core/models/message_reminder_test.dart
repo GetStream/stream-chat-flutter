@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'package:stream_chat/src/core/models/channel_model.dart';
-import 'package:stream_chat/src/core/models/comparable_field.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/message_reminder.dart';
 import 'package:stream_chat/src/core/models/user.dart';
@@ -265,37 +264,10 @@ void main() {
       expect(identical(mergedReminder, messageReminder), isTrue);
     });
 
-    test('should implement ComparableFieldProvider interface', () {
-      // Test channelCid field
-      final channelCidField = messageReminder.getComparableField(
-        MessageReminderSortKey.channelCid,
-      );
-      expect(channelCidField, isA<ComparableField>());
-      expect(channelCidField?.value, equals(channelCid));
-
-      // Test remindAt field
-      final remindAtField = messageReminder.getComparableField(
-        MessageReminderSortKey.remindAt,
-      );
-      expect(remindAtField, isA<ComparableField>());
-      expect(remindAtField?.value, equals(remindAt));
-
-      // Test createdAt field
-      final createdAtField = messageReminder.getComparableField(
-        MessageReminderSortKey.createdAt,
-      );
-      expect(createdAtField, isA<ComparableField>());
-      expect(createdAtField?.value, equals(now));
-
-      // Test non-existent field
-      final nonExistentField = messageReminder.getComparableField('unknown');
-      expect(nonExistentField?.value, isNull);
-    });
-
-    test('MessageReminderSortKey should have defined constants', () {
-      expect(MessageReminderSortKey.channelCid, equals('channel_cid'));
-      expect(MessageReminderSortKey.remindAt, equals('remind_at'));
-      expect(MessageReminderSortKey.createdAt, equals('created_at'));
+    test('MessageReminderSortField should name its remote fields', () {
+      expect(MessageReminderSortField.channelCid.remote, equals('channel_cid'));
+      expect(MessageReminderSortField.remindAt.remote, equals('remind_at'));
+      expect(MessageReminderSortField.createdAt.remote, equals('created_at'));
     });
   });
 }

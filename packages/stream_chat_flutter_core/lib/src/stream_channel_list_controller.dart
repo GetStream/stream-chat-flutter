@@ -9,11 +9,6 @@ import 'stream_channel_list_event_handler.dart';
 /// The default channel page limit to load.
 const defaultChannelPagedLimit = 10;
 
-/// The default sort used for the channel list.
-const defaultChannelListSort = [
-  SortOption<ChannelState>.desc(ChannelSortKey.lastUpdated),
-];
-
 const _kDefaultBackendPaginationLimit = 30;
 
 /// A controller for a Channel list.
@@ -59,7 +54,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     required this.client,
     StreamChannelListEventHandler? eventHandler,
     this.filter,
-    this.channelStateSort = defaultChannelListSort,
+    List<ChannelSort>? channelStateSort,
     this.predefinedFilter,
     this.filterValues,
     this.sortValues,
@@ -68,7 +63,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     this.messageLimit,
     this.memberLimit,
   }) : _eventHandler = eventHandler ?? StreamChannelListEventHandler(),
-       _resolvedChannelStateSort = channelStateSort,
+       channelStateSort = channelStateSort ?? ChannelSort.defaultSort,
        super(const PagedValue.loading());
 
   /// Creates a [StreamChannelListController] from the passed [value].
@@ -77,7 +72,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     required this.client,
     StreamChannelListEventHandler? eventHandler,
     this.filter,
-    this.channelStateSort = defaultChannelListSort,
+    List<ChannelSort>? channelStateSort,
     this.predefinedFilter,
     this.filterValues,
     this.sortValues,
@@ -86,7 +81,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     this.messageLimit,
     this.memberLimit,
   }) : _eventHandler = eventHandler ?? StreamChannelListEventHandler(),
-       _resolvedChannelStateSort = channelStateSort;
+       channelStateSort = channelStateSort ?? ChannelSort.defaultSort;
 
   /// The client to use for the channels list.
   final StreamChatClient client;
@@ -110,14 +105,14 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   /// created_at or member_count.
   ///
   /// Direction can be ascending or descending.
-  final SortOrder<ChannelState>? channelStateSort;
+  final List<ChannelSort>? channelStateSort;
 
   /// The sort actually applied to incoming events. Seeded from
   /// [channelStateSort] and overwritten whenever a query response carries a
   /// resolved [PredefinedFilter.sort], so event-driven inserts keep matching
   /// the server-resolved order even when callers only specify
   /// [predefinedFilter].
-  SortOrder<ChannelState>? _resolvedChannelStateSort;
+  late List<ChannelSort>? _resolvedChannelStateSort = channelStateSort;
 
   /// Identifier of a server-side predefined filter to query channels with.
   ///
@@ -243,11 +238,11 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   }
 
   void _resolveSort(QueryChannelsResult result) {
-    final predefinedFilter = result.predefinedFilter;
+    final resolved = result.predefinedFilter;
     // Update the active sort only when predefinedFilter is present,
     // otherwise use the initially set sort.
-    if (predefinedFilter == null) return;
-    _resolvedChannelStateSort = predefinedFilter.effectiveSort;
+    if (resolved == null) return;
+    _resolvedChannelStateSort = resolved.effectiveSort;
   }
 
   @override

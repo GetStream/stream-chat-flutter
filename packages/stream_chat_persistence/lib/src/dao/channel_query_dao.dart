@@ -74,7 +74,7 @@ class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase> with _$Channel
     String filterName,
     List<String> cids, {
     required Filter filter,
-    required SortOrder<ChannelState> sort,
+    required List<ChannelSort> sort,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
     bool clearQueryCache = false,
@@ -139,7 +139,7 @@ class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase> with _$Channel
   ///
   /// Returns a record `(channels, filter, sort)`. The two
   /// spec fields are null when no metadata row exists for this query.
-  Future<(List<ChannelModel>, Filter?, SortOrder<ChannelState>?)> getChannelsAndSpecByPredefinedFilter(
+  Future<(List<ChannelModel>, Filter?, List<ChannelSort>?)> getChannelsAndSpecByPredefinedFilter(
     String filterName, {
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,

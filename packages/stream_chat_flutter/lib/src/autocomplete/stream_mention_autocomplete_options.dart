@@ -287,7 +287,7 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
               Filter.autoComplete('id', query),
               Filter.autoComplete('name', query),
             ]),
-      sort: [const SortOption.asc('id')],
+      sort: [UserSort.asc(UserSortField.id)],
     );
     return response.users;
   }

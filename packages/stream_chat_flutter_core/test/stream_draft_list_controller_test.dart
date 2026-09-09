@@ -610,7 +610,7 @@ void main() {
     test('refresh resets filter and sort to initial values', () async {
       final drafts = generateDrafts();
       final initialFilter = Filter.equal('type', 'messaging');
-      const initialSort = [SortOption<Draft>.desc(DraftSortKey.createdAt)];
+      final initialSort = [DraftSort.desc(DraftSortField.createdAt)];
 
       final apiCalls = <Map<String, dynamic>>[];
 
@@ -641,7 +641,7 @@ void main() {
 
       controller
         ..filter = Filter.equal('type', 'team')
-        ..sort = const [SortOption<Draft>.asc(DraftSortKey.createdAt)];
+        ..sort = [DraftSort.asc(DraftSortField.createdAt)];
 
       await controller.refresh();
       await pumpEventQueue();
@@ -658,9 +658,9 @@ void main() {
       () async {
         final drafts = generateDrafts();
         final initialFilter = Filter.equal('type', 'messaging');
-        const initialSort = [SortOption<Draft>.desc(DraftSortKey.createdAt)];
+        final initialSort = [DraftSort.desc(DraftSortField.createdAt)];
         final newFilter = Filter.equal('type', 'team');
-        const newSort = [SortOption<Draft>.asc(DraftSortKey.createdAt)];
+        final newSort = [DraftSort.asc(DraftSortField.createdAt)];
 
         final apiCalls = <Map<String, dynamic>>[];
 

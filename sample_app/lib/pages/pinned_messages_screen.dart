@@ -24,7 +24,7 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
     client: StreamChat.of(context).client,
     filter: Filter.in_('cid', [StreamChannel.of(context).channel.cid!]),
     messageFilter: Filter.equal('pinned', true),
-    sort: const [SortOption.asc('created_at')],
+    sort: [MessageSearchSort.asc(MessageSearchSortField.createdAt)],
     limit: 20,
   );
 

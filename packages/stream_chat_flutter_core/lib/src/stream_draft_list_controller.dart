@@ -9,11 +9,6 @@ import 'stream_draft_list_event_handler.dart';
 /// The default channel page limit to load.
 const defaultDraftPagedLimit = 10;
 
-/// The default sort used for the draft list.
-const defaultDraftListSort = [
-  SortOption<Draft>.desc(DraftSortKey.createdAt),
-];
-
 const _kDefaultBackendPaginationLimit = 30;
 
 /// {@template streamDraftListController}
@@ -32,10 +27,10 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
     required this.client,
     StreamDraftListEventHandler? eventHandler,
     this.filter,
-    this.sort = defaultDraftListSort,
+    List<DraftSort>? sort,
     this.limit = defaultDraftPagedLimit,
   }) : _activeFilter = filter,
-       _activeSort = sort,
+       sort = sort ?? DraftSort.defaultSort,
        _eventHandler = eventHandler ?? StreamDraftListEventHandler(),
        super(const PagedValue.loading());
 
@@ -45,10 +40,10 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
     required this.client,
     StreamDraftListEventHandler? eventHandler,
     this.filter,
-    this.sort = defaultDraftListSort,
+    List<DraftSort>? sort,
     this.limit = defaultDraftPagedLimit,
   }) : _activeFilter = filter,
-       _activeSort = sort,
+       sort = sort ?? DraftSort.defaultSort,
        _eventHandler = eventHandler ?? StreamDraftListEventHandler();
 
   /// The Stream client used to perform the queries.
@@ -70,8 +65,8 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final SortOrder<Draft>? sort;
-  SortOrder<Draft>? _activeSort;
+  final List<DraftSort>? sort;
+  late List<DraftSort>? _activeSort = sort;
 
   /// The limit to apply to the poll vote list. The default is set to
   /// [defaultPollVotePagedLimit].
@@ -87,7 +82,7 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
   ///
   /// Use this if you need to support runtime sort changes,
   /// through custom sort UI.
-  set sort(SortOrder<Draft>? value) => _activeSort = value;
+  set sort(List<DraftSort>? value) => _activeSort = value;
 
   @override
   set value(PagedValue<String, Draft> newValue) {

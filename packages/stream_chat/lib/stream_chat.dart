@@ -18,11 +18,16 @@ export 'package:rate_limiter/rate_limiter.dart';
 // `User` — so a blanket export would not compile.
 export 'package:stream_core/stream_core.dart'
     show
+        CompositeComparator,
         Failure,
         InterceptStep,
         LogPrint,
         LoggingInterceptor,
+        NullOrdering,
         Result,
+        Sort,
+        SortDirection,
+        SortField,
         StreamApiError,
         StreamApiException,
         StreamAuthenticationException,
@@ -57,7 +62,6 @@ export 'src/client/retry_policy.dart';
 export 'src/core/api/attachment_file_uploader.dart';
 export 'src/core/api/requests.dart';
 export 'src/core/api/responses.dart';
-export 'src/core/api/sort_order.dart';
 export 'src/core/api/stream_chat_api.dart';
 export 'src/core/error/error.dart';
 export 'src/core/http/stream_http_client.dart';

@@ -67,8 +67,8 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final SortOrder<Thread>? sort;
-  SortOrder<Thread>? _activeSort;
+  final List<ThreadSort>? sort;
+  List<ThreadSort>? _activeSort;
 
   /// The limit to apply to the thread list.
   ///
@@ -97,7 +97,7 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new sort.
-  set sort(SortOrder<Thread>? value) => _activeSort = value;
+  set sort(List<ThreadSort>? value) => _activeSort = value;
 
   /// Allows for the change of the [options] at runtime.
   ///

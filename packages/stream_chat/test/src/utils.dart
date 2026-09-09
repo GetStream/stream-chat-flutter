@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:stream_chat/stream_chat.dart';
+import 'package:test/test.dart';
 
 String fixture(String name) {
   final dir = currentDirectory.path;
@@ -52,4 +53,25 @@ UserToken testUserToken(String userId) {
   const signature = 'devtoken';
   final payload = base64.encode(utf8.encode(json.encode({'user_id': userId})));
   return UserToken('$header.$payload.$signature');
+}
+
+/// Asserts [field] orders [smaller] before [larger], and reports them equal
+/// against themselves.
+///
+/// The ordering is the contract a sort field carries — the value it reads to
+/// get there is not observable — so this is how a registry entry is checked.
+void expectOrders<T extends Object>(SortField<T> field, T smaller, T larger) {
+  final ascending = [Sort.asc(field)];
+  expect(ascending.compare(smaller, larger), lessThan(0));
+  expect(ascending.compare(larger, smaller), greaterThan(0));
+  expect(ascending.compare(smaller, smaller), 0);
+
+  final descending = [Sort.desc(field)];
+  expect(descending.compare(smaller, larger), greaterThan(0));
+}
+
+/// Asserts [field] reads nothing off [instance], so it cannot order a list
+/// locally.
+void expectOrdersNothing<T extends Object>(SortField<T> field, T instance) {
+  expect([Sort.asc(field)].compare(instance, instance), 0);
 }

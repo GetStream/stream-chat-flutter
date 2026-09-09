@@ -101,8 +101,8 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final SortOrder? sort;
-  SortOrder? _activeSort;
+  final List<MessageSearchSort>? sort;
+  List<MessageSearchSort>? _activeSort;
 
   /// The limit to apply to the message search. The default is set to
   /// [defaultMessageSearchPagedLimit].
@@ -142,7 +142,7 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new sort.
-  set sort(SortOrder? value) => _activeSort = value;
+  set sort(List<MessageSearchSort>? value) => _activeSort = value;
 
   /// Searches messages whose text matches [query], debounced by its length.
   ///

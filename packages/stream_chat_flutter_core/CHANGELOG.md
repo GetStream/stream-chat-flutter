@@ -3,6 +3,8 @@
 🛑️ Breaking
 
 - `PagedValue.error` and every `errorBuilder` now carry a `StreamChatException` instead of a `StreamChatError`, following the low-level client's error layer. A generic throwable is reported as a `StreamClientException` naming the load that failed, with the original kept as its `cause` rather than stringified into the message.
+- The sort argument on every list controller is typed `List<ChannelSort>`, `List<MemberSort>` and so on, rather than `SortOrder<T>`.
+- `defaultChannelListSort`, `defaultMemberListSort`, `defaultUserListSort`, `defaultDraftListSort`, `defaultMessageReminderListSort` and `defaultPollVoteListSort` are removed. Use `ChannelSort.defaultSort`, `MemberSort.defaultSort` and so on from `stream_chat`. Leaving a controller's sort unset still applies the same ordering.
 
 ## 10.4.0
 

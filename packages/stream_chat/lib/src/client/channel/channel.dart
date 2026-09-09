@@ -1374,7 +1374,7 @@ class Channel {
   Future<SearchMessagesResponse> search({
     String? query,
     Filter? messageFilters,
-    List<SortOption>? sort,
+    List<MessageSearchSort>? sort,
     PaginationParams? paginationParams,
   }) {
     _checkInitialized();
@@ -1541,7 +1541,7 @@ class Channel {
   Future<QueryPollVotesResponse> queryPollVotes(
     String pollId, {
     Filter? filter,
-    SortOrder<PollVote>? sort,
+    List<PollVoteSort>? sort,
     PaginationParams pagination = const PaginationParams(),
   }) {
     _checkInitialized();
@@ -2212,7 +2212,7 @@ class Channel {
   /// Query channel members.
   Future<QueryMembersResponse> queryMembers({
     Filter? filter,
-    SortOrder<Member>? sort,
+    List<MemberSort>? sort,
     PaginationParams? pagination,
   }) => _client.queryMembers(
     type,
@@ -2226,7 +2226,7 @@ class Channel {
   /// Query channel banned users.
   Future<QueryBannedUsersResponse> queryBannedUsers({
     Filter? filter,
-    SortOrder<BannedUser>? sort,
+    List<BannedUserSort>? sort,
     PaginationParams? pagination,
   }) {
     _checkInitialized();

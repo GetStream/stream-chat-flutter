@@ -1,15 +1,16 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_core/stream_core.dart' show Standard, Sort, SortField;
 
 import '../util/extension.dart';
 import '../util/serializer.dart';
-import 'comparable_field.dart';
+import '../util/string_sort_normalizer.dart';
 
 part 'user.g.dart';
 
 /// Class that defines a Stream Chat User.
 @JsonSerializable(includeIfNull: false)
-class User extends Equatable implements ComparableFieldProvider {
+class User extends Equatable {
   /// Creates a new user.
   ///
   /// {@template name}
@@ -210,55 +211,103 @@ class User extends Equatable implements ComparableFieldProvider {
     teamsRole,
     avgResponseTime,
   ];
-
-  @override
-  ComparableField? getComparableField(String sortKey) {
-    final value = switch (sortKey) {
-      UserSortKey.id => id,
-      UserSortKey.createdAt => createdAt,
-      UserSortKey.updatedAt => updatedAt,
-      UserSortKey.name => name,
-      UserSortKey.role => role,
-      UserSortKey.banned => banned,
-      UserSortKey.lastActive => lastActive,
-      _ => extraData[sortKey],
-    };
-
-    return ComparableField.fromValue(value);
-  }
 }
 
-/// Extension type representing sortable fields for [User].
+/// Represents a sorting operation for users.
 ///
-/// This type provides type-safe keys that can be used for sorting users
-/// in queries. Each constant represents a field that can be sorted on.
-extension type const UserSortKey(String key) implements String {
-  /// Sort users by their ID.
-  static const id = UserSortKey('id');
+/// See [UserSortField] for the fields that can be sorted on.
+class UserSort extends Sort<User> {
+  /// Sorts by [field], smallest first.
+  const UserSort.asc(
+    UserSortField super.field, {
+    super.nullOrdering,
+  }) : super.asc();
 
-  /// Sort users by their creation date.
+  /// Sorts by [field], largest first.
+  const UserSort.desc(
+    UserSortField super.field, {
+    super.nullOrdering,
+  }) : super.desc();
+
+  /// The ordering the API applies to a user query when none is given.
+  ///
+  /// Sorts by when the user was created, newest first.
+  static final List<UserSort> defaultSort = [
+    UserSort.desc(UserSortField.createdAt),
+  ];
+}
+
+/// Represents a field that user queries can be sorted on.
+class UserSortField extends SortField<User> {
+  /// Creates a user sort field named [remote] on the wire, reading its
+  /// value off an instance with `localValue`.
+  ///
+  /// Prefer the fields this class declares — they are the ones the API accepts.
+  /// This is for a field the SDK has not modelled yet.
+  UserSortField(super.remote, super.localValue);
+
+  /// Creates a field the SDK does not model, read from [User.extraData].
+  ///
+  /// Only declared for the models whose queries accept a custom sort field,
+  /// and slower than a field this class declares.
+  factory UserSortField.custom(String remote) {
+    return UserSortField(remote, (it) => it.extraData[remote]);
+  }
+
+  /// Sorts users by their ID.
+  static final id = UserSortField(
+    'id',
+    (it) => it.id,
+  );
+
+  /// Sorts users by their creation date.
   ///
   /// This is part of the default sort (in descending order).
-  static const createdAt = UserSortKey('created_at');
+  static final createdAt = UserSortField(
+    'created_at',
+    (it) => it.createdAt,
+  );
 
-  /// Sort users by their last update date.
-  static const updatedAt = UserSortKey('updated_at');
+  /// Sorts users by their last update date.
+  static final updatedAt = UserSortField(
+    'updated_at',
+    (it) => it.updatedAt,
+  );
 
-  /// Sort users by their name.
+  /// Sorts users by their name.
   ///
-  /// Useful for alphabetical sorting of users.
-  static const name = UserSortKey('name');
+  /// Compared with case, diacritics and ligatures folded away, so a list
+  /// sorted locally matches the order a query returns.
+  static final name = UserSortField(
+    'name',
+    (it) => it.name.let(normalizeStringForSort),
+  );
 
-  /// Sort users by their role.
-  static const role = UserSortKey('role');
+  /// Sorts users by their role.
+  static final role = UserSortField(
+    'role',
+    (it) => it.role,
+  );
 
-  /// Sort users by whether they are banned.
+  /// Sorts users by whether they are banned.
   ///
   /// Banned users will appear first when sorting in ascending order.
-  static const banned = UserSortKey('banned');
+  static final banned = UserSortField(
+    'banned',
+    (it) => it.banned,
+  );
 
-  /// Sort users by their last active date.
+  /// Sorts users by their last active date.
   ///
   /// Useful for sorting users by recent activity.
-  static const lastActive = UserSortKey('last_active');
+  static final lastActive = UserSortField(
+    'last_active',
+    (it) => it.lastActive,
+  );
+
+  /// Sorts users by their preferred language.
+  static final language = UserSortField(
+    'language',
+    (it) => it.language,
+  );
 }

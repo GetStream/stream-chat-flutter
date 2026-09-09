@@ -8,11 +8,6 @@ import 'paged_value_notifier.dart';
 /// The default channel page limit to load.
 const defaultPollVotePagedLimit = 10;
 
-/// The default sort used for the poll vote list.
-const defaultPollVoteListSort = [
-  SortOption<PollVote>.asc(PollVoteSortKey.createdAt),
-];
-
 const _kDefaultBackendPaginationLimit = 30;
 
 /// A controller for a poll vote list.
@@ -33,11 +28,11 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
     required this.pollId,
     StreamPollVoteEventHandler? eventHandler,
     this.filter,
-    this.sort = defaultPollVoteListSort,
+    List<PollVoteSort>? sort,
     this.limit = defaultPollVotePagedLimit,
   }) : _eventHandler = eventHandler ?? StreamPollVoteEventHandler(),
        _activeFilter = filter,
-       _activeSort = sort,
+       sort = sort ?? PollVoteSort.defaultSort,
        super(const PagedValue.loading());
 
   /// Creates a [StreamPollVoteListController] from the passed [value].
@@ -47,11 +42,11 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
     required this.pollId,
     StreamPollVoteEventHandler? eventHandler,
     this.filter,
-    this.sort = defaultPollVoteListSort,
+    List<PollVoteSort>? sort,
     this.limit = defaultPollVotePagedLimit,
   }) : _eventHandler = eventHandler ?? StreamPollVoteEventHandler(),
        _activeFilter = filter,
-       _activeSort = sort;
+       sort = sort ?? PollVoteSort.defaultSort;
 
   /// The channel to use for the poll votes list.
   final Channel channel;
@@ -75,8 +70,8 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final SortOrder<PollVote>? sort;
-  SortOrder<PollVote>? _activeSort;
+  final List<PollVoteSort>? sort;
+  late List<PollVoteSort>? _activeSort = sort;
 
   /// The limit to apply to the poll vote list. The default is set to
   /// [defaultPollVotePagedLimit].
@@ -98,7 +93,7 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new sort.
-  set sort(SortOrder<PollVote>? value) => _activeSort = value;
+  set sort(List<PollVoteSort>? value) => _activeSort = value;
 
   @override
   set value(PagedValue<String, PollVote> newValue) {

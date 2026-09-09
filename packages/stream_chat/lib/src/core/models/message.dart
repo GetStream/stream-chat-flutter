@@ -1,12 +1,12 @@
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_core/stream_core.dart' show Sort, SortField;
 import 'package:uuid/uuid.dart';
 
 import '../util/extension.dart';
 import '../util/serializer.dart';
 import 'attachment.dart';
-import 'comparable_field.dart';
 import 'draft.dart';
 import 'location.dart';
 import 'message_reminder.dart';
@@ -28,7 +28,7 @@ const _nullConst = _NullConst();
 
 /// The class that contains the information about a message.
 @JsonSerializable()
-class Message extends Equatable implements ComparableFieldProvider {
+class Message extends Equatable {
   /// Constructor used for json serialization.
   Message({
     String? id,
@@ -724,35 +724,110 @@ class Message extends Equatable implements ComparableFieldProvider {
     sharedLocation,
     deletedForMe,
   ];
-
-  @override
-  ComparableField? getComparableField(String sortKey) {
-    final value = switch (sortKey) {
-      MessageSortKey.id => id,
-      MessageSortKey.createdAt => createdAt,
-      MessageSortKey.updatedAt => updatedAt,
-      _ => extraData[sortKey],
-    };
-
-    return ComparableField.fromValue(value);
-  }
 }
 
-/// Extension type representing sortable fields for [Message].
+/// Represents a sorting operation for a message search.
 ///
-/// This type provides type-safe keys that can be used for sorting messages
-/// in queries. Each constant represents a field that can be sorted on.
-extension type const MessageSortKey(String key) implements String {
-  /// Sort messages by their unique ID.
-  static const id = MessageSortKey('id');
+/// Searching is the only message query that takes a sort. It cannot be
+/// combined with a non-zero pagination offset.
+///
+/// See [MessageSearchSortField] for the fields that can be sorted on.
+class MessageSearchSort extends Sort<Message> {
+  /// Sorts by [field], smallest first.
+  const MessageSearchSort.asc(
+    MessageSearchSortField super.field, {
+    super.nullOrdering,
+  }) : super.asc();
 
-  /// Sort messages by their creation date.
+  /// Sorts by [field], largest first.
+  const MessageSearchSort.desc(
+    MessageSearchSortField super.field, {
+    super.nullOrdering,
+  }) : super.desc();
+}
+
+/// Represents a field that message queries can be sorted on.
+class MessageSearchSortField extends SortField<Message> {
+  /// Creates a message sort field named [remote] on the wire, reading its
+  /// value off an instance with `localValue`.
+  ///
+  /// Prefer the fields this class declares — they are the ones the API accepts.
+  /// This is for a field the SDK has not modelled yet.
+  MessageSearchSortField(super.remote, super.localValue);
+
+  /// Creates a field the SDK does not model, read from [Message.extraData].
+  ///
+  /// Only declared for the models whose queries accept a custom sort field,
+  /// and slower than a field this class declares.
+  factory MessageSearchSortField.custom(String remote) {
+    return MessageSearchSortField(remote, (it) => it.extraData[remote]);
+  }
+
+  /// Sorts messages by their unique ID.
+  static final id = MessageSearchSortField(
+    'id',
+    (it) => it.id,
+  );
+
+  /// Sorts messages by their creation date.
   ///
   /// This is the default sort field (in descending order).
-  static const createdAt = MessageSortKey('created_at');
+  static final createdAt = MessageSearchSortField(
+    'created_at',
+    (it) => it.createdAt,
+  );
 
-  /// Sort messages by their last update date.
-  static const updatedAt = MessageSortKey('updated_at');
+  /// Sorts messages by their last update date.
+  static final updatedAt = MessageSearchSortField(
+    'updated_at',
+    (it) => it.updatedAt,
+  );
+
+  /// Sorts messages by their text.
+  static final text = MessageSearchSortField(
+    'text',
+    (it) => it.text,
+  );
+
+  /// Sorts messages by their type.
+  static final type = MessageSearchSortField(
+    'type',
+    (it) => it.type,
+  );
+
+  /// Sorts messages by the id of the message they reply to.
+  static final parentId = MessageSearchSortField(
+    'parent_id',
+    (it) => it.parentId,
+  );
+
+  /// Sorts messages by how many replies they have.
+  static final replyCount = MessageSearchSortField(
+    'reply_count',
+    (it) => it.replyCount,
+  );
+
+  /// Sorts messages by whether they are pinned.
+  ///
+  /// Applied only by a search backed by the database. A search backed by the
+  /// index leaves the results in whatever order the other terms give.
+  static final pinned = MessageSearchSortField(
+    'pinned',
+    (it) => it.pinned,
+  );
+
+  /// Sorts search results by how well they match the query.
+  ///
+  /// Only meaningful for a message search that carries a text filter — a
+  /// `query`, or a message filter using `$autocomplete` / `$q`. A search
+  /// without one drops this sort rather than failing.
+  ///
+  /// Not carried on a [Message], so re-sorting a page locally leaves it in the
+  /// order it arrived in.
+  static final relevance = MessageSearchSortField(
+    'relevance',
+    (_) => null,
+  );
 }
 
 /// {@template messageType}
