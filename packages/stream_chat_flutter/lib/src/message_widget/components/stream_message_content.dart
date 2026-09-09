@@ -47,10 +47,24 @@ class StreamMessageContent extends StatefulWidget {
     this.onQuotedMessageTap,
     this.reactionSorting,
     this.showTranslatedText = true,
+    this.excludeTextFromSemantics = false,
   });
 
   /// The message to display.
   final Message message;
+
+  /// Whether the rendered message text stays out of the semantics tree.
+  ///
+  /// Set this when an enclosing row already announces the text as part of a
+  /// composed phrase — [StreamMessageItem] passes `true` whenever it labels the
+  /// row — so a screen reader hears the message once instead of once per
+  /// inline span. It covers the text and the deleted placeholder only: the
+  /// attachments, the poll, the quoted message and the reaction chips stay
+  /// reachable either way.
+  ///
+  /// Left `false` (the default) the text announces itself, which is what a
+  /// bubble outside such a row needs.
+  final bool excludeTextFromSemantics;
 
   /// Optional header widget displayed above the message content column.
   ///
@@ -176,11 +190,7 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
 
     // Only a row that speaks its own composed label has already said what the
     // bubble contains; without one the bubble is all a reader has.
-    final announcedByRow = StreamMessageRowLabelScope.isAnnouncedIn(context);
-    Widget hideFromRow(Widget child) {
-      if (!announcedByRow) return child;
-      return ExcludeSemantics(child: child);
-    }
+    final excluding = widget.excludeTextFromSemantics;
 
     // A deleted message keeps its metadata: the design shows the timestamp and
     // the delivery status below the placeholder, same as any other message.
@@ -190,7 +200,7 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
         footer: widget.footer,
         // The composed row label already speaks the placeholder, so announcing
         // it here as well would repeat it.
-        child: hideFromRow(const StreamMessageDeleted()),
+        child: ExcludeSemantics(excluding: excluding, child: const StreamMessageDeleted()),
       );
     }
 
@@ -240,13 +250,12 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                         // alternative — a focus stop per span, each repeating
                         // text the row just spoke — makes every message far
                         // more tedious to move through than it makes the rare
-                        // link easier to reach. The SwiftUI and React Native
-                        // SDKs collapse plain text the same way, and reserve
-                        // per-child focus for polls, quotes and attachments,
-                        // which is what `explicitChildNodes` keeps reachable
-                        // here too.
-                        hideFromRow(
-                          StreamMessageText(
+                        // link easier to reach. `explicitChildNodes` keeps the
+                        // parts worth a stop of their own — polls, quotes and
+                        // attachments — reachable.
+                        ExcludeSemantics(
+                          excluding: excluding,
+                          child: StreamMessageText(
                             message: widget.message,
                             onLinkTap: widget.onLinkTap,
                             onMentionTap: widget.onMentionTap,

@@ -3,12 +3,14 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:markdown/markdown.dart' as md;
 import 'package:stream_core_flutter/chat.dart' as core;
 
 import '../../platform_widget_builder/src/platform_widget_builder.dart';
 import '../../stream_chat_flutter.dart';
 import '../context_menu/context_menu.dart';
 import '../context_menu/context_menu_region.dart';
+import 'message_status_labels.dart';
 
 /// A chat message widget that renders a single message with its attachments,
 /// reactions, and interaction callbacks.
@@ -95,6 +97,7 @@ class StreamMessageItem extends StatelessWidget {
     void Function(Message)? onEditMessageTap,
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
     String? semanticsLabel,
+    bool excludeFromSemantics = false,
   }) : assert(
          onReactionsTap == null || onReactionTap == null,
          'Only one of onReactionsTap or onReactionTap can be provided. '
@@ -127,6 +130,7 @@ class StreamMessageItem extends StatelessWidget {
          onEditMessageTap: onEditMessageTap,
          attachmentBuilders: attachmentBuilders,
          semanticsLabel: semanticsLabel,
+         excludeFromSemantics: excludeFromSemantics,
        );
 
   /// Creates a chat message widget from pre-built [props].
@@ -186,6 +190,7 @@ class StreamMessageItemProps {
     this.onEditMessageTap,
     this.attachmentBuilders,
     this.semanticsLabel,
+    this.excludeFromSemantics = false,
   }) : assert(
          onReactionsTap == null || onReactionTap == null,
          'Only one of onReactionsTap or onReactionTap can be provided. '
@@ -393,8 +398,16 @@ class StreamMessageItemProps {
   ///
   /// Set this to replace that composition, for example when a custom
   /// attachment builder renders content the default composition cannot
-  /// describe. An empty string leaves the row unlabeled.
+  /// describe. Ignored when [excludeFromSemantics] is true.
   final String? semanticsLabel;
+
+  /// Whether the row leaves itself unlabeled.
+  ///
+  /// When true the row composes no phrase of its own and [semanticsLabel] is
+  /// ignored; the bubble and the footer announce their own parts instead, one
+  /// focus stop each. The row's children stay in the semantics tree either
+  /// way — this drops the row's own label, not the row.
+  final bool excludeFromSemantics;
 
   /// Returns a copy of this [StreamMessageItemProps] with the given fields
   /// replaced with new values.
@@ -426,6 +439,7 @@ class StreamMessageItemProps {
     void Function(Message)? onEditMessageTap,
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
     String? semanticsLabel,
+    bool? excludeFromSemantics,
   }) {
     return StreamMessageItemProps(
       message: message ?? this.message,
@@ -454,6 +468,7 @@ class StreamMessageItemProps {
       onEditMessageTap: onEditMessageTap ?? this.onEditMessageTap,
       attachmentBuilders: attachmentBuilders ?? this.attachmentBuilders,
       semanticsLabel: semanticsLabel ?? this.semanticsLabel,
+      excludeFromSemantics: excludeFromSemantics ?? this.excludeFromSemantics,
     );
   }
 }
@@ -508,7 +523,11 @@ class DefaultStreamMessageItem extends StatelessWidget {
     final effectiveErrorBadgeVisibility = resolve((theme) => theme?.errorBadgeVisibility);
     final effectiveMetadataVisibility = resolve((theme) => theme?.metadataVisibility);
     final effectiveRepliesVisibility = resolve((theme) => theme?.repliesVisibility);
-    final effectiveSemanticsLabel = props.semanticsLabel ?? _defaultSemanticsLabel(context, message);
+    // The row speaks for the bubble and the footer unless the caller opted
+    // out, and both of them need to know so they can step out of the semantics
+    // tree. Whether a label exists does not depend on composing it, so this
+    // costs nothing.
+    final announcedByRow = !props.excludeFromSemantics;
 
     final leadingWidget = effectiveAvatarVisibility.apply(
       StreamMessageLeading(
@@ -533,7 +552,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
     );
 
     final footerWidget = effectiveMetadataVisibility.apply(
-      StreamMessageFooter(message: message),
+      StreamMessageFooter(message: message, excludeFromSemantics: announcedByRow),
     );
 
     Widget? repliesWidget;
@@ -557,6 +576,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
 
     final contentWidget = StreamMessageContent(
       message: message,
+      excludeTextFromSemantics: announcedByRow,
       header: headerWidget,
       errorBadge: errorBadgeWidget,
       footer: footerWidget,
@@ -593,6 +613,27 @@ class DefaultStreamMessageItem extends StatelessWidget {
         final onLongPress? => (reaction) => onLongPress(context, .new(message: message, reaction: reaction)),
         _ => (reaction) => _showMessageReactionsModal(context, message, initialReaction: reaction),
       },
+    );
+
+    final row = Align(
+      alignment: StreamMessageLayout.alignmentDirectionalOf(context),
+      child: Padding(
+        padding: effectivePadding,
+        child: core.StreamRow(
+          mainAxisSize: .min,
+          spacing: effectiveSpacing,
+          crossAxisAlignment: .end,
+          children: [
+            ?leadingWidget,
+            Flexible(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: props.maxWidth),
+                child: contentWidget,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
 
     Widget result = Material(
@@ -638,31 +679,17 @@ class DefaultStreamMessageItem extends StatelessWidget {
             child: MouseRegion(child: child),
           );
         },
-        child: _MessageRowSemantics(
-          message: message,
-          label: effectiveSemanticsLabel,
-          showsMetadata: footerWidget != null,
-          child: Align(
-            alignment: StreamMessageLayout.alignmentDirectionalOf(context),
-            child: Padding(
-              padding: effectivePadding,
-              child: core.StreamRow(
-                mainAxisSize: .min,
-                spacing: effectiveSpacing,
-                crossAxisAlignment: .end,
-                children: [
-                  ?leadingWidget,
-                  Flexible(
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: props.maxWidth),
-                      child: contentWidget,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+        child: switch (announcedByRow) {
+          // Unlabeled: no annotation at all, so the row adds no focus stop of
+          // its own and the fragments below announce themselves.
+          false => row,
+          true => _MessageRowSemantics(
+            message: message,
+            customLabel: props.semanticsLabel,
+            showsMetadata: footerWidget != null,
+            child: row,
           ),
-        ),
+        },
       ),
     );
 
@@ -675,112 +702,6 @@ class DefaultStreamMessageItem extends StatelessWidget {
     }
 
     return result;
-  }
-
-  // Composes the screen-reader announcement for the whole row: who sent the
-  // message, what it says, and when it was sent. The fragments this label
-  // speaks are kept out of the semantics tree where they are rendered — see
-  // [StreamMessageContent] and [DefaultStreamMessageFooter] — so the row is
-  // announced once instead of once per fragment.
-  String _defaultSemanticsLabel(BuildContext context, Message message) {
-    final translations = context.translations;
-    final currentUser = StreamChat.maybeOf(context)?.currentUser;
-
-    final parts = [
-      _senderAwareBody(context, message, currentUser),
-      translations.accessibility.formatRecentDateTime(message.createdAt.toLocal()),
-      // Mirrors the footer, which drops the marker on a deleted message.
-      if (message.messageTextUpdatedAt != null && !message.isDeleted) translations.editedMessageLabel,
-    ];
-
-    return parts.where((it) => it.isNotEmpty).join(', ');
-  }
-
-  // "You said, ..." for the current user's own messages, "<name> said, ..." for
-  // everyone else's — the direction a sighted reader gets from the row's
-  // alignment and bubble color.
-  //
-  // A deleted message drops the "said": the sender did not author the
-  // placeholder, they deleted what they had authored, and "You said, Message
-  // deleted" reads as if they had spoken those words.
-  //
-  // Falls back to the bare body when there is no sender to name, and for
-  // system messages, which describe a channel event rather than something a
-  // sender authored.
-  String _senderAwareBody(BuildContext context, Message message, User? currentUser) {
-    final body = _bodySemanticsLabel(context, message, currentUser);
-    if (message.isSystem) return body;
-
-    final sender = message.user;
-    if (sender == null) return body;
-
-    final a11y = context.translations.accessibility;
-    final isDeleted = message.isDeleted;
-
-    if (sender.id == currentUser?.id) {
-      return switch (isDeleted) {
-        true => a11y.outgoingDeletedMessageLabel(body: body),
-        false => a11y.outgoingMessageLabel(body: body),
-      };
-    }
-
-    // Announce the full sender name — screen readers are not width-bound like
-    // the visual footer, and a surname disambiguates when several members share
-    // a first name.
-    //
-    // With no name there is nothing to attribute, so the body stands alone —
-    // the message text, or "Message deleted" for a deleted message, which is
-    // already what the formatter returns for one. [User.name] falls back to
-    // the user id, so this is close to unreachable.
-    final senderName = sender.name.trim();
-    if (senderName.isEmpty) return body;
-
-    return switch (isDeleted) {
-      true => a11y.incomingDeletedMessageLabel(senderName: senderName, body: body),
-      false => a11y.incomingMessageLabel(senderName: senderName, body: body),
-    };
-  }
-
-  // The message body — text, attachments, poll, location, or the deleted
-  // placeholder — from the formatter that already composes those labels for
-  // the channel list. Omitting `channel` asks for the body without the
-  // formatter's own speaker prefix; the row composes its own above.
-  String _bodySemanticsLabel(BuildContext context, Message message, User? currentUser) {
-    final formatter = StreamChatConfiguration.of(context).messagePreviewFormatter;
-
-    // Mirror what the bubble renders — mentions resolved to display names, and
-    // the translation only when one is actually shown — so the announcement
-    // matches the visible text instead of raw `@id` tokens or a translation the
-    // reader has toggled away. Mirrors [StreamMessageText].
-    final translationEnabled = StreamChatConfiguration.of(context).messageTranslation.enabled;
-    final showsOriginalText = StreamMessageTranslations.isShowingOriginalTextOf(context, message.id);
-
-    // No default language: `translate` returns the message unchanged when the
-    // reader has none set, which is what should be announced.
-    final shown = switch (translationEnabled && !showsOriginalText) {
-      true => message.translate(currentUser?.language),
-      false => message,
-    };
-
-    final withMentions = shown.replaceMentions(linkify: false);
-
-    // The bubble renders the text as markdown. Announcing the source would
-    // spell out the bracket and paren syntax and read whole URLs aloud, so it
-    // is resolved to the text that is actually on screen.
-    final announced = switch (withMentions.text) {
-      final text? when text.isNotEmpty => withMentions.copyWith(text: text.markdownToPlainText),
-      _ => withMentions,
-    };
-
-    return switch (formatter) {
-      final AccessibleMessagePreviewFormatter it => it.formatMessageSemanticsLabel(
-        context,
-        announced,
-        currentUser: currentUser,
-      ),
-      _ =>
-        formatter.formatMessage(context, announced, currentUser: currentUser).toPlainText(includePlaceholders: false),
-    };
   }
 
   // Builds the action list for a bounced (moderation-error) message.
@@ -1307,34 +1228,26 @@ class _StreamMessageItemDefaults extends core.StreamMessageItemThemeData {
   );
 }
 
-/// Annotates a message row with its composed screen-reader label.
-///
-/// The label is applied with `container: false` so it merges into the row's own
-/// tappable node instead of adding a second, wordless stop on top of it. Where
-/// nothing inside the row contributes a node — desktop and web, or a row whose
-/// tap and long-press callbacks are both null — this annotation forms that
-/// single node itself.
-///
-/// `explicitChildNodes` keeps the parts a screen reader must still be able to
-/// reach on their own — the attachments, the reaction chips, the quoted
-/// message, the replies row — as separate nodes rather than folding them into
-/// the row phrase.
-///
-/// For the current user's own messages the delivery status is appended to the
-/// label, tracking [ChannelClientState.readStream] so it stays in step with
-/// the icon in the footer. The icon itself is excluded from the semantics tree
-/// (see [DefaultStreamMessageFooter]), so the status is announced as part of
-/// the row instead of costing a focus stop of its own.
-class _MessageRowSemantics extends StatelessWidget {
+// Annotates a message row with its composed screen-reader label, keeping the
+// parts a screen reader must still reach on their own — the attachments, the
+// reaction chips, the quoted message, the replies row — as separate nodes
+// rather than folding them into the row phrase.
+//
+// For the current user's own messages the delivery status is appended to the
+// label, tracked off the channel's read state so it stays in step with the
+// icon the footer renders.
+class _MessageRowSemantics extends StatefulWidget {
   const _MessageRowSemantics({
     required this.message,
-    required this.label,
+    required this.customLabel,
     required this.showsMetadata,
     required this.child,
   });
 
   final Message message;
-  final String? label;
+
+  // Replaces the composed phrase when non-null.
+  final String? customLabel;
 
   // Whether the row renders its metadata footer. A stacked message hides it,
   // and so has no delivery status on screen to announce.
@@ -1343,8 +1256,36 @@ class _MessageRowSemantics extends StatelessWidget {
   final Widget child;
 
   @override
+  State<_MessageRowSemantics> createState() => _MessageRowSemanticsState();
+}
+
+class _MessageRowSemanticsState extends State<_MessageRowSemantics> {
+  // Composing the phrase parses the message text as markdown and runs it
+  // through the preview formatter, which is far too much to repeat on every
+  // build: a row rebuilds on new messages, read receipts, typing events and
+  // translation toggles. It is cached here instead and recomposed only when
+  // something it reads actually changes — the message itself (a value type, so
+  // `!=` covers an edit, a new attachment or a state change) via
+  // [didUpdateWidget], and the locale, the reader, the configured formatter and
+  // the translation toggle — all inherited — via [didChangeDependencies].
+  late String _label;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _label = widget.customLabel ?? _composeLabel();
+  }
+
+  @override
+  void didUpdateWidget(_MessageRowSemantics oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.message == oldWidget.message && widget.customLabel == oldWidget.customLabel) return;
+    _label = widget.customLabel ?? _composeLabel();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final label = this.label;
+    final message = widget.message;
     final currentUser = StreamChat.maybeOf(context)?.currentUser;
 
     // Compared as nullables, an authorless message read by nobody signed in
@@ -1354,14 +1295,9 @@ class _MessageRowSemantics extends StatelessWidget {
       _ => false,
     };
 
-    // Only the sender sees a delivery status, only a row that renders the
-    // footer shows one, and a row with no label of its own has nothing to
-    // append it to. An empty label is the documented way to leave a row
-    // unlabeled, so it counts as having none — otherwise the row would
-    // announce a bare ", Sent".
-    if (!isOwnMessage || !showsMetadata || label == null || label.isEmpty) {
-      return _annotate(label, child);
-    }
+    // Only the sender sees a delivery status, and only a row that renders the
+    // footer shows one.
+    if (!isOwnMessage || !widget.showsMetadata) return _annotate(_label);
 
     final channel = StreamChannel.maybeOf(context)?.channel;
 
@@ -1371,28 +1307,32 @@ class _MessageRowSemantics extends StatelessWidget {
       // Read state is null until the channel is watched, and a channel can be
       // rendered before then. Without this the row itself — not just the
       // status it would have carried — would drop out of the tree.
-      noDataBuilder: (_) => _annotate(label, child),
+      noDataBuilder: (_) => _annotate(_label),
       builder: (context, data) => _annotate(
         [
-          label,
+          _label,
           ?_statusLabel(
             context,
             isMessageRead: data.readsOf(message: message).isNotEmpty,
             isMessageDelivered: data.deliveriesOf(message: message).isNotEmpty,
           ),
         ].join(', '),
-        child,
       ),
     );
   }
 
-  // Applies [label] to the row, and tells the fragments below that the row
-  // speaks for them. A row with no label of its own makes no such claim, so
-  // its fragments keep announcing themselves.
-  Widget _annotate(String? label, Widget child) {
-    final annotated = Semantics(label: label, explicitChildNodes: true, child: child);
-    if (label == null || label.isEmpty) return annotated;
-    return StreamMessageRowLabelScope(child: annotated);
+  // `container: false` merges the label into the row's own tappable node
+  // instead of adding a second, wordless stop on top of it. Where nothing
+  // inside the row contributes a node — desktop and web, or a row whose tap
+  // and long-press callbacks are both null — this annotation forms that single
+  // node itself.
+  Widget _annotate(String label) {
+    return Semantics(
+      label: label,
+      container: false,
+      explicitChildNodes: true,
+      child: widget.child,
+    );
   }
 
   // Mirrors what the message shows for the same state — the footer's
@@ -1405,40 +1345,151 @@ class _MessageRowSemantics extends StatelessWidget {
   }) {
     final translations = context.translations;
 
-    return translations.attachmentUploadProgressLabel(message) ??
-        translations.messageDeliveryStatusLabel(
-          message,
+    return attachmentUploadProgressLabel(translations, widget.message) ??
+        MessageDeliveryStatus.of(
+          widget.message,
           isMessageRead: isMessageRead,
           isMessageDelivered: isMessageDelivered,
-        );
+        ).label(translations);
+  }
+
+  // Composes the screen-reader announcement for the whole row: who sent the
+  // message, what it says, and when it was sent. The fragments this label
+  // speaks are kept out of the semantics tree where they are rendered — see
+  // [StreamMessageContent.excludeTextFromSemantics] and
+  // [StreamMessageFooter.excludeFromSemantics] — so the row is announced once
+  // instead of once per fragment.
+  String _composeLabel() {
+    final message = widget.message;
+    final translations = context.translations;
+    final currentUser = StreamChat.maybeOf(context)?.currentUser;
+
+    final parts = [
+      _senderAwareBody(message, currentUser),
+      translations.accessibility.formatRecentDateTime(message.createdAt.toLocal()),
+      // Mirrors the footer, which drops the marker on a deleted message.
+      if (message.messageTextUpdatedAt != null && !message.isDeleted) translations.editedMessageLabel,
+    ];
+
+    return parts.where((it) => it.isNotEmpty).join(', ');
+  }
+
+  // "You said, ..." for the current user's own messages, "<name> said, ..." for
+  // everyone else's — the direction a sighted reader gets from the row's
+  // alignment and bubble color.
+  //
+  // A deleted message drops the "said": the sender did not author the
+  // placeholder, they deleted what they had authored, and "You said, Message
+  // deleted" reads as if they had spoken those words.
+  //
+  // Falls back to the bare body when there is no sender to name, and for
+  // system messages, which describe a channel event rather than something a
+  // sender authored.
+  String _senderAwareBody(Message message, User? currentUser) {
+    final body = _bodySemanticsLabel(message, currentUser);
+    if (message.isSystem) return body;
+
+    final sender = message.user;
+    if (sender == null) return body;
+
+    final a11y = context.translations.accessibility;
+    final isDeleted = message.isDeleted;
+
+    if (sender.id == currentUser?.id) {
+      return switch (isDeleted) {
+        true => a11y.outgoingDeletedMessageLabel(body: body),
+        false => a11y.outgoingMessageLabel(body: body),
+      };
+    }
+
+    // Announce the full sender name — screen readers are not width-bound like
+    // the visual footer, and a surname disambiguates when several members share
+    // a first name.
+    //
+    // With no name there is nothing to attribute, so the body stands alone —
+    // the message text, or "Message deleted" for a deleted message, which is
+    // already what the formatter returns for one. [User.name] falls back to
+    // the user id, so this is close to unreachable.
+    final senderName = sender.name.trim();
+    if (senderName.isEmpty) return body;
+
+    return switch (isDeleted) {
+      true => a11y.incomingDeletedMessageLabel(senderName: senderName, body: body),
+      false => a11y.incomingMessageLabel(senderName: senderName, body: body),
+    };
+  }
+
+  // The message body — text, attachments, poll, location, or the deleted
+  // placeholder — from the formatter that already composes those labels for
+  // the channel list. Omitting `channel` asks for the body without the
+  // formatter's own speaker prefix; the row composes its own above.
+  String _bodySemanticsLabel(Message message, User? currentUser) {
+    final formatter = StreamChatConfiguration.of(context).messagePreviewFormatter;
+
+    // Mirror what the bubble renders — mentions resolved to display names, and
+    // the translation only when one is actually shown — so the announcement
+    // matches the visible text instead of raw `@id` tokens or a translation the
+    // reader has toggled away. Mirrors [StreamMessageText].
+    final translationEnabled = StreamChatConfiguration.of(context).messageTranslation.enabled;
+    final showsOriginalText = StreamMessageTranslations.isShowingOriginalTextOf(context, message.id);
+
+    // No default language: `translate` returns the message unchanged when the
+    // reader has none set, which is what should be announced.
+    final shown = switch (translationEnabled && !showsOriginalText) {
+      true => message.translate(currentUser?.language),
+      false => message,
+    };
+
+    final withMentions = shown.replaceMentions(linkify: false);
+
+    // The bubble renders the text as markdown. Announcing the source would
+    // spell out the bracket and paren syntax and read whole URLs aloud, so it
+    // is resolved to the text that is actually on screen.
+    final announced = switch (withMentions.text) {
+      final text? when text.isNotEmpty => withMentions.copyWith(text: _markdownToPlainText(text)),
+      _ => withMentions,
+    };
+
+    return switch (formatter) {
+      final AccessibleMessagePreviewFormatter it => it.formatMessageSemanticsLabel(
+        context,
+        announced,
+        currentUser: currentUser,
+      ),
+      _ =>
+        formatter.formatMessage(context, announced, currentUser: currentUser).toPlainText(includePlaceholders: false),
+    };
   }
 }
 
-/// Marks a subtree whose metadata is already spoken by a composed row label.
-///
-/// [StreamMessageItem] announces the whole message row as a single phrase —
-/// sender, body, timestamp, edited marker and delivery status. The widgets
-/// that render those fragments consult this scope to decide whether to stay in
-/// the semantics tree: inside a row that already speaks them they step out, so
-/// the row is announced once instead of once per fragment, and outside one —
-/// [StreamGiphyEphemeralMessage], or any custom layout that reuses these
-/// components — they keep announcing themselves.
-///
-/// See also:
-///
-///  * [DefaultStreamMessageFooter], which excludes its metadata inside this
-///    scope and exposes it outside one.
-class StreamMessageRowLabelScope extends InheritedWidget {
-  /// Marks [child] as announced by an enclosing composed row label.
-  const StreamMessageRowLabelScope({super.key, required super.child});
+// Returns [source] as the plain text it renders as: link and image syntax
+// collapses to the text a reader sees, emphasis and heading markers drop away,
+// and the remaining blocks are joined by a newline. `check
+// [our docs](https://getstream.io)` becomes `check our docs`.
+//
+// Announcing the source instead would spell out bracket and paren syntax and
+// read whole URLs aloud. Parsed with the extension set the message bubble
+// renders with, so the result matches what is on screen.
+//
+// The parse does not register core's mention syntax, which is safe only because
+// the label path pre-resolves mentions with `replaceMentions(linkify: false)`
+// while the render path uses `linkify: true` — both land on `@Leia Organa`. A
+// future core syntax that changes visible text rather than only styling it
+// would diverge here.
+String _markdownToPlainText(String source) {
+  if (source.trim().isEmpty) return source;
 
-  /// Whether [context] sits inside a row that speaks its own composed label.
-  static bool isAnnouncedIn(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<StreamMessageRowLabelScope>() != null;
-  }
+  // A fresh document per call: `Document.linkReferences` is mutated during
+  // `parse`, so a shared instance would leak `[ref]: url` definitions from one
+  // message into the next.
+  final document = md.Document(
+    extensionSet: md.ExtensionSet.gitHubFlavored,
+    encodeHtml: false,
+  );
 
-  @override
-  bool updateShouldNotify(StreamMessageRowLabelScope oldWidget) => false;
+  final blocks = document.parse(source).map((it) => it.textContent.trim()).where((it) => it.isNotEmpty);
+
+  return blocks.join('\n');
 }
 
 StreamMention? _buildMention(Message message, core.StreamMentionType type, String id) {

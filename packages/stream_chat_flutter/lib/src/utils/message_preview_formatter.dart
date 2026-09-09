@@ -136,7 +136,8 @@ abstract interface class AccessibleMessagePreviewFormatter implements MessagePre
   ///
   /// Omitting [channel] returns the body on its own, without a speaker prefix —
   /// callers that compose their own prefix rely on this, so implementations
-  /// must honour it.
+  /// must honor it. An implementation that prefixes unconditionally makes a
+  /// message row announce "You said, You: hello".
   String formatMessageSemanticsLabel(
     BuildContext context,
     Message message, {

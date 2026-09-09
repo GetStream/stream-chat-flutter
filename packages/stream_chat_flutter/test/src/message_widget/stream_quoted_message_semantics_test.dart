@@ -136,7 +136,7 @@ void main() {
     testWidgets('falls back to the author name without a replying message', (tester) async {
       final handle = tester.ensureSemantics();
 
-      // A consumer building the preview directly gets today's behaviour.
+      // A consumer building the preview directly gets today's behavior.
       await tester.pumpWidget(
         wrap(
           StreamQuotedMessage(
