@@ -162,7 +162,9 @@ class ChannelSort extends Sort<ChannelState> {
   // ascending, which is how the API reads it — so a direction it did not
   // write, or none at all, is ascending rather than an error.
   //
-  // Belongs on `SortDirection` in stream_core; see core-migration/UPSTREAM.md.
+  // Stays here rather than on `SortDirection`: json_serializable decodes an
+  // enum through its generated value map, never a `fromJson` static, so one
+  // upstream would be reachable only by hand.
   static SortDirection _directionFromJson(Object? value) {
     if (value == SortDirection.desc.value) return SortDirection.desc;
     return SortDirection.asc;

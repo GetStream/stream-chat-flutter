@@ -63,44 +63,95 @@ class ChannelFilterField extends FilterField<Channel> {
 That registry is the bulk of this phase's work, and it is also the payoff: client-side filtering is
 something chat cannot do at all today.
 
-## The three operators core lacks: deprecate all three, upstream none
+## The filter half, decided
 
-Chat exposes `$ne`, `$nin` and `$nor`; core-flutter has none of them
-(`query/filter/filter_operator.dart` declares exactly 13: `$eq $gt $gte $lt $lte $in $q
-$autocomplete $exists $and $or $contains $path_exists`). An earlier draft called `$nor` a hard
-block on a core release. It is not, and the reason is that **this is a cross-platform core
-decision, not a Dart-only gap**:
+An earlier pass planned to deprecate `$ne`, `$nin` and `$nor` and upstream `$nor` to core. The
+first is right for a stronger reason than the one recorded; the second is wrong. What follows
+replaces it.
 
-| | `$ne` | `$nin` | `$nor` |
-| --- | --- | --- | --- |
-| `stream_core` (Dart, 0.5.0 and `main`) | ✗ | ✗ | ✗ |
-| StreamCore (Swift) — `OpenAPI/Query/FilterOperator.swift` | ✗ | ✗ | ✗ |
-| stream-android-core — `internal/filter/FilterOperator.kt` | ✗ | ✗ | ✗ |
-| chat-js — `QueryFilter` / `QueryLogicalOperators` (`types.ts:2233-2237`) | ✗ | ✗ | ✓ |
-| chat-swift — `Query/Filter.swift:49` | ✓ | ✓ | ✓ |
-| chat-android — `models/Filters.kt:55,67,97` | **`@Deprecated`** | **`@Deprecated`** | ✓ |
-| chat-flutter (today) | ✓ | ✓ | ✓ |
+**Remove `$ne` and `$nin`, citing the backend.** [GetStream/chat#15657](https://github.com/GetStream/chat/pull/15657)
+is merged: `FilterColumns()` stops publishing both to the OpenAPI spec for every product, because
+each scans a whole table to exclude a few rows and times out at customer scale. The same removal
+already ran on iOS (#3414), React (#2504), React Native (#2672) and JS LLC (#1363). That is a far
+better citation than Android's deprecation messages, which is all the earlier pass had.
 
-All three core SDKs omit all three operators, and their operator sets are otherwise identical.
-Adding `NorOperator` to core-flutter alone would put it out of parity with Swift and Android —
-which is a conversation to have with the core owners, not a prerequisite this phase can carry.
+It is **spec-only** — the query layer still accepts both — and the withdrawal is **per field, not
+blanket**. `isPublishedOperator` keeps `$ne` on classifier boolean fields and `$ne`/`$nin` on
+anti-join indexed ones, which for chat means `$ne` and `$nin` on `queryUsers.id`, and `$ne` on
+`banned`, `shadow_banned` and `bypass_moderation`. Those exceptions have to be named wherever the
+removal is documented.
 
-So chat deprecates all three and follows core:
+**Remove `$nor` too, and do not upstream it.** Neither StreamCore (Swift) nor stream-android-core
+models it, and adding it to Dart core alone breaks a parity the three otherwise keep. It is not
+deprecated anywhere and #15657 leaves it accepted, so the operator is not dead — but a chat client
+does not need to *offer* it, and a preset that uses it is handled by the raw fallback below.
 
-- **`$ne` and `$nin`** — Android's messages say why, and they are about the server: `ne` is
-  "inefficient and causes performance issues. It will not be supported in the future", `nin` "will
-  stop to be supported in the future". chat-js never declared either. Carry Android's rationale.
-- **`$nor`** — the only one the other chat SDKs all keep, so it needs the honest reason rather than
-  a performance one: core's typed filter family does not model it, and it is not expressible in
-  terms of what core does model (there is no `NotOperator` either, so NOR ≠ `not(or(...))`). A
-  consumer who needs it keeps whichever [escape hatch](#escape-hatches) survives, at the cost of
-  `matches()`.
+## `PredefinedFilter` is what makes the decode interesting
 
-The backend supports all three (`monolith/utils/mquery/operator.go`, and `field_mappings.go` lists
-them under `SupportedOperators`) — deprecating them is a client-side steer, not a wire-level
-removal.
+The server echoes the filter it resolved for a preset. That filter is authored server-side, and
+since #15657 is spec-only it can legitimately contain `$ne`, `$nin` or `$nor` — operators core's
+sealed `Filter` has no variant for. So the echo cannot always be represented by a typed filter,
+and `Filter` being sealed means chat cannot add a variant to hold it.
 
-Core has one we lack — `pathExists` `$path_exists` — which comes for free.
+Typing the field `Map<String, Object?>` was considered. It is honest and it deletes real code —
+`_filterFromJson`, `_touchesField` (whose `Filter`-walking branches are already dead for a raw
+value), and `FilterConverter`, which the existing `MapConverter<Object?>` replaces byte-for-byte
+on disk. It was rejected for asymmetry: `PredefinedFilter.sort` decodes into typed `ChannelSort`
+objects, and a filter that stays a map next to it is an inconsistency, not a simplification.
+
+**So the decode mirrors the sort side, and stays total by having a fallback at each level:**
+
+| | unknown value | fallback |
+| --- | --- | --- |
+| sort direction | not `-1` | `asc` |
+| sort field | not declared | `XSortField.custom(remote)` |
+| filter field | not declared | `XFilterField.custom(remote)` |
+| **filter operator** | `$ne` / `$nin` / `$nor` / anything new | **`Filter.raw({that node})`** |
+
+That is what `Filter.raw` is for, and it is the only reason core needs it — see
+[UPSTREAM.md](UPSTREAM.md). A preset using a withdrawn operator decodes into a tree that is typed
+everywhere except that one leaf, rather than throwing or collapsing to a blob.
+
+**chat-android is the reference implementation, and shows why we need one thing it does not.**
+Its `FilterObjectConverter` decodes a map by dispatching on the operator key — `$and`/`$or`/`$nor`
+recurse, leaves map to `Filters.eq/ne/contains/gt/gte/lt/lte/in/nin/autocomplete/exists` — and
+**throws `IllegalArgumentException`** on anything else. No fallback. Two things make that safe
+there and unsafe here:
+
+- It is a Room `TypeConverter` on `ChatDatabase`, so it only ever reads back a filter Android
+  itself wrote. The input cannot contain an operator Android's own API cannot produce. Our
+  predefined filter is authored server-side by the app owner, so it can.
+- Its field is a bare `fieldName: String`, so an unrecognised field is not a problem. Our
+  `FilterField<T>` carries a value getter, which is why the field needs a `custom` fallback and
+  Android's does not.
+
+Worth noting while reading it as a reference: Android models no `$q` at all, so its operator set
+is not a target to match.
+
+`Filter.fromJson` therefore depends on a per-model `FilterField` registry with a `fromRemote`,
+exactly as `ChannelSortField.fromRemote` works. The registry is not optional scaffolding for
+`matches()`; it is what makes the decode possible.
+
+## What `matches()` is, and is not, for
+
+The earlier pass called client-side filtering "the payoff". No Stream chat SDK does it:
+
+- **chat-flutter** — `StreamChannelListEventHandler` never reads the query's filter. Membership is
+  decided from event type alone.
+- **chat-android** — identical. `DefaultChatEventHandler` is handed the `FilterObject` and ignores
+  it; `FilterObject` has no `matches` at all.
+- **chat-swift** — evaluates, but not generically: it re-attaches a per-key CoreData
+  `predicateMapper` and builds an `NSPredicate?`, and `compactMap(\.predicate)` **drops** nodes it
+  cannot wire.
+
+So adopting core's `Filter` does not oblige us to call `matches()`, and nothing will at first.
+
+One consequence to carry: `matches()` on a `Filter.raw` leaf returns `true`. That is correct under
+`and` and wrong under `or` and `nor`, and it cannot be fixed — Swift's drop semantics needs the
+third state its nullable predicate provides, which `bool matches(T)` does not have. Harmless while
+nothing calls `matches()`. If list-membership correctness is ever taken on as a feature — a real
+gap in both SDKs, where a channel joins a list it does not match — this is the first thing to
+revisit.
 
 ## The registries are verified against the backend
 
