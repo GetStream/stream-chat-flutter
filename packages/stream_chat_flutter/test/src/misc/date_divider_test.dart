@@ -142,7 +142,7 @@ void main() {
       );
     }
 
-    testWidgets('announces the date it shows, without a time', (tester) async {
+    testWidgets('announces the full date behind the relative day', (tester) async {
       final handle = tester.ensureSemantics();
 
       await withClock(Clock.fixed(now), () async {
@@ -151,11 +151,34 @@ void main() {
       });
 
       final node = tester.semantics.find(find.byType(StreamDateDivider));
-      expect(node.label, 'Today');
+      // The divider shows only "Today"; a reader gets the date behind it too,
+      // since a label may be more explicit than the text it describes.
+      expect(node.label, 'Today, August 26, 2026');
       // Left to its default, StreamTimestamp would announce
       // `formatRecentDateTime`'s "Today at 3:00 PM" and invent a clock time
       // that the divider never shows.
       expect(node.label, isNot(contains('at')));
+
+      handle.dispose();
+    });
+
+    testWidgets('announces which day an abbreviated date stands for', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      // Three days back: the divider abbreviates this to the weekday alone,
+      // which tells a reader nothing about which week or year it belongs to.
+      final earlier = DateTime(2026, 8, 23, 15);
+
+      await withClock(Clock.fixed(now), () async {
+        await tester.pumpWidget(buildDivider(date: earlier));
+        await tester.pumpAndSettle();
+      });
+
+      expect(find.text('Sunday'), findsOneWidget);
+      expect(
+        tester.semantics.find(find.byType(StreamDateDivider)).label,
+        'August 23, 2026',
+      );
 
       handle.dispose();
     });
@@ -186,7 +209,10 @@ void main() {
 
       expect(find.text('TODAY'), findsOneWidget);
       // Some screen readers spell out all-caps words letter by letter.
-      expect(tester.semantics.find(find.byType(StreamDateDivider)).label, 'Today');
+      expect(
+        tester.semantics.find(find.byType(StreamDateDivider)).label,
+        'Today, August 26, 2026',
+      );
 
       handle.dispose();
     });
