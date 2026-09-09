@@ -22,6 +22,14 @@ command:
     # Run `pub get` sequentially to avoid races on the shared git-dep cache.
     runPubGetInParallel: false
 
+    # Resolve stream_core and stream_core_flutter from the sibling checkout
+    # while phase 08b lands alongside stream-core-flutter#181. Overriding
+    # rather than repointing the constraint keeps the published requirement
+    # honest and reverts by deleting these two lines.
+    dependencyOverridePaths:
+      - ../stream-core-flutter/packages/stream_core
+      - ../stream-core-flutter/packages/stream_core_flutter
+
     # Dart and Flutter environment used in the project.
     environment:
       sdk: ^3.12.0
