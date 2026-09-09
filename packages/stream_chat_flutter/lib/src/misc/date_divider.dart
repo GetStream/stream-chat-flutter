@@ -120,39 +120,80 @@ class StreamDateDivider extends StatelessWidget {
     final effectiveBackgroundColor = backgroundColor ?? colorScheme.backgroundSurfaceSubtle;
     final effectiveBorderRadius = borderRadius ?? BorderRadius.all(radius.max);
 
-    return Center(
-      child: Container(
-        margin: effectiveMargin,
-        decoration: BoxDecoration(
-          color: effectiveBackgroundColor,
-          borderRadius: effectiveBorderRadius,
-        ),
-        child: Padding(
-          padding: effectiveContentPadding,
-          child: StreamTimestamp(
-            date: dateTime.toLocal(),
-            style: effectiveTextStyle,
-            formatter: (context, date) {
-              if (formatter case final formatter?) {
-                final timestamp = formatter.call(context, date);
-                if (uppercase) return timestamp.toUpperCase();
-                return timestamp;
-              }
+    final localDate = dateTime.toLocal();
+    // Formatted once and reused by both the visible label and the
+    // announcement. [StreamTimestamp] has no ticker, so `date` cannot change
+    // under the closure.
+    final label = _formatDate(context, localDate);
 
-              final timestamp = switch (date) {
-                _ when date.isToday => context.translations.todayLabel,
-                _ when date.isYesterday => context.translations.yesterdayLabel,
-                _ when date.isWithinLastWeek => Jiffy.parseFromDateTime(date).EEEE,
-                _ when date.isInSameYear => Jiffy.parseFromDateTime(date).MMMd,
-                _ => Jiffy.parseFromDateTime(date).yMMMd,
-              };
-
-              if (uppercase) return timestamp.toUpperCase();
-              return timestamp;
-            },
+    // A date divider separates the list by day, so it doubles as a landmark:
+    // marking it a header lets a screen reader jump from day to day instead of
+    // swiping through every message in between. `container: true` makes the
+    // divider its own node rather than merging upward into the list.
+    return Semantics(
+      header: true,
+      container: true,
+      child: Center(
+        child: Container(
+          margin: effectiveMargin,
+          decoration: BoxDecoration(
+            color: effectiveBackgroundColor,
+            borderRadius: effectiveBorderRadius,
+          ),
+          child: Padding(
+            padding: effectiveContentPadding,
+            child: StreamTimestamp(
+              date: localDate,
+              style: effectiveTextStyle,
+              // A screen-reader label is allowed to be more explicit than the
+              // text it describes, and here it has to be: the visible label
+              // abbreviates to "Wednesday" or "Aug 26", neither of which says
+              // which Wednesday or which year. It must not pick up
+              // [StreamTimestamp]'s default either — `formatRecentDateTime`
+              // would announce "Yesterday at 1:06 PM" and invent a clock time
+              // the divider never shows. So: the full date, never abbreviated,
+              // never uppercased (some screen readers spell that out).
+              semanticsLabel: _formatDateForSemantics(context, localDate),
+              formatter: (context, date) => uppercase ? label.toUpperCase() : label,
+            ),
           ),
         ),
       ),
     );
+  }
+
+  // The announced date: the relative day where there is one, always paired
+  // with the full date behind it — "Today, 26 August 2026", "26 August 2026".
+  //
+  // A caller's [formatter] is deliberately not consulted. It exists to fit a
+  // date into the divider's width, and the abbreviations it produces are the
+  // problem being solved here.
+  String _formatDateForSemantics(BuildContext context, DateTime date) {
+    final fullDate = Jiffy.parseFromDateTime(date).yMMMMd;
+
+    final relativeDay = switch (date) {
+      _ when date.isToday => context.translations.todayLabel,
+      _ when date.isYesterday => context.translations.yesterdayLabel,
+      _ => null,
+    };
+
+    return switch (relativeDay) {
+      final day? => '$day, $fullDate',
+      null => fullDate,
+    };
+  }
+
+  // The visible date label: the caller's [formatter] when given, otherwise a
+  // relative-day phrasing that degrades to an absolute date.
+  String _formatDate(BuildContext context, DateTime date) {
+    if (formatter case final formatter?) return formatter.call(context, date);
+
+    return switch (date) {
+      _ when date.isToday => context.translations.todayLabel,
+      _ when date.isYesterday => context.translations.yesterdayLabel,
+      _ when date.isWithinLastWeek => Jiffy.parseFromDateTime(date).EEEE,
+      _ when date.isInSameYear => Jiffy.parseFromDateTime(date).MMMd,
+      _ => Jiffy.parseFromDateTime(date).yMMMd,
+    };
   }
 }

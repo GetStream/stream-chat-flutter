@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../stream_chat_flutter.dart';
+import '../message_widget/message_status_labels.dart';
 import '../misc/empty_widget.dart';
 
 /// {@template streamSendingIndicator}
@@ -37,45 +38,37 @@ class StreamSendingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final status = MessageDeliveryStatus.of(
+      message,
+      isMessageRead: isMessageRead,
+      isMessageDelivered: isMessageDelivered,
+    );
+
+    // A failed send is shown as an error badge on the bubble rather than a
+    // footer tick, so it has no icon of its own here.
+    final icon = switch (status) {
+      .read || .delivered => context.streamIcons.checks,
+      .sent => context.streamIcons.checkmark,
+      .sending => context.streamIcons.clock,
+      .failed || .none => null,
+    };
+
+    if (icon == null) return const Empty();
+
     final colorScheme = context.streamColorScheme;
-    final a11y = context.translations.accessibility;
 
-    if (isMessageRead) {
-      return Icon(
-        context.streamIcons.checks,
-        size: size,
-        color: color ?? colorScheme.accentPrimary,
-        semanticLabel: a11y.messageReadStatusLabel,
-      );
-    }
-
-    if (isMessageDelivered) {
-      return Icon(
-        context.streamIcons.checks,
-        size: size,
-        color: color ?? colorScheme.textSecondary,
-        semanticLabel: a11y.messageDeliveredStatusLabel,
-      );
-    }
-
-    if (message.state.isCompleted) {
-      return Icon(
-        context.streamIcons.checkmark,
-        size: size,
-        color: color ?? colorScheme.textSecondary,
-        semanticLabel: a11y.messageSentStatusLabel,
-      );
-    }
-
-    if (message.state.isOutgoing) {
-      return Icon(
-        context.streamIcons.clock,
-        size: size,
-        color: color ?? colorScheme.textSecondary,
-        semanticLabel: a11y.messageSendingStatusLabel,
-      );
-    }
-
-    return const Empty();
+    return Icon(
+      icon,
+      size: size,
+      color:
+          color ??
+          switch (status) {
+            .read => colorScheme.accentPrimary,
+            _ => colorScheme.textSecondary,
+          },
+      // Derived from the same resolved status as the icon, so the two cannot
+      // describe different states.
+      semanticLabel: status.label(context.translations),
+    );
   }
 }
