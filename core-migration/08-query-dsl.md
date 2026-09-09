@@ -132,6 +132,151 @@ is not a target to match.
 exactly as `ChannelSortField.fromRemote` works. The registry is not optional scaffolding for
 `matches()`; it is what makes the decode possible.
 
+## The filterable fields, verified
+
+Extracted from `mq.TableConfig.Columns` for each resource, resolving named operator sets
+(`SupportedColumnOperators` is `$eq $ne $gt $gte $lt $lte $in $nin $exists`). 111 fields. This is
+the registry to write, and the source for each field's **Supported operators:** line.
+
+Two things the table does not encode, both from
+[GetStream/chat#15657](https://github.com/GetStream/chat/pull/15657):
+
+**`$ne` and `$nin` are withdrawn from the published spec**, so they are struck from every field
+below *except* the index-safe exceptions. Those are `user` only, and they are real:
+
+```go
+BooleanFields:         {banned, shadow_banned, bypass_moderation}   // $ne stays
+AntiJoinIndexedFields: {id}                                          // $ne and $nin stay
+```
+
+`DefaultChannelConfig` declares neither, so no channel field keeps them.
+
+**This is the one place removing an operator costs a capability.** `$nin` on `user.id` is how you
+express "everyone except these people", which `classification_user.go` calls "the dominant
+exclude-self people-search pattern" and optimises deliberately — the same comment notes `$nor`
+over `id` is optimised for the same reason. Core models neither `$nin` nor `$nor`, so after the
+migration that query is reachable only through `Filter.raw`. Decide before writing `UserFilterField`
+whether that is acceptable or whether the registry should expose a purpose-built helper for it.
+
+<details>
+<summary>111 fields</summary>
+
+| resource | field | type | operators |
+| --- | --- | --- | --- |
+| channel | `id` | String | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| channel | `cid` | String | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| channel | `type` | String | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| channel | `last_message_at` | Date | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| channel | `last_updated` | Date | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| channel | `created_at` | Date | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| channel | `updated_at` | Date | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| channel | `member_count` | Number | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| channel | `message_count` | Number | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| channel | `frozen` | Boolean | `$eq` |
+| channel | `team` | String | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| channel | `created_by_id` | String | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| channel | `disabled` | Boolean | `$eq` |
+| channel | `hidden` | Boolean | `$eq` |
+| channel | `blocked` | Boolean | `$eq` |
+| channel | `archived` | Boolean | `$eq` |
+| channel | `joined` | Boolean | `$eq` |
+| channel | `invite` | String | `$eq` |
+| channel | `name` | String | `$autocomplete` `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` `$q` |
+| channel | `app_banned` | String | `$eq` |
+| channel | `muted` | Boolean | `$eq` |
+| channel | `member.user.name` | String | `$autocomplete` `$eq` `$ne` |
+| channel | `members` | String | `$in` `$nin` |
+| member | `id` | String | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| member | `user_id` | String | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| member | `created_at` | Date | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| member | `updated_at` | Date | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| member | `is_moderator` | Boolean | `$eq` `$ne` |
+| member | `channel_role` | String | `$eq` `$in` |
+| member | `banned` | Boolean | `$eq` |
+| member | `name` | String | `$autocomplete` `$eq` `$in` `$ne` `$nin` `$q` |
+| member | `user.email` | String | `$autocomplete` `$eq` `$in` `$ne` `$nin` `$q` |
+| member | `user.nd_deactivated` | Boolean | `$eq` |
+| member | `last_active` | Date | `$eq` `$gt` `$gte` `$lt` `$lte` `$ne` |
+| member | `cid` | String | `$eq` |
+| member | `invite` | String | `$eq` |
+| member | `joined` | Boolean | `$eq` |
+| member | `notifications_muted` | Boolean | `$eq` |
+| user | `id` | String | `MergeSupportedOperators` |
+| user | `name` | String | `$autocomplete` `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| user | `email` | String | `$eq` `$in` |
+| user | `username` | String | `$autocomplete` `$eq` |
+| user | `role` | String | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| user | `banned` | Boolean | `$eq` `$ne` |
+| user | `shadow_banned` | Boolean | `$eq` `$ne` |
+| user | `bypass_moderation` | Boolean | `$eq` `$ne` |
+| user | `created_at` | Date | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| user | `updated_at` | Date | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| user | `last_active` | Date | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| user | `language` | String | `$eq` `$ne` |
+| user | `teams` | String | `$contains` `$eq` `$in` |
+| message | `id` | String | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| message | `cid` | String | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| message | `text` | String | `MergeSupportedOperators` |
+| message | `relevance` | Number | `NoColumnOperators` |
+| message | `type` | String | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| message | `parent_id` | String | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| message | `reply_count` | Number | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| message | `attachments` | Boolean | `$exists` |
+| message | `attachments.type` | String | `$eq` `$in` |
+| message | `mentioned_users.id` | String | `$contains` |
+| message | `user.id` | String | `$eq` `$in` `$ne` `$nin` |
+| message | `user_id` | String | `$eq` `$in` `$ne` `$nin` |
+| message | `created_at` | Date | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| message | `updated_at` | Date | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| message | `pinned` | Boolean | `$eq` |
+| message | `custom` | Object | `$eq` `$gt` `$gte` `$in` `$lt` `$lte` |
+| draft | `channel_cid` | String | `$eq` `$in` |
+| draft | `parent_id` | String | `$eq` `$exists` `$in` |
+| draft | `created_at` | Date | `$eq` `$gt` `$gte` `$lt` `$lte` |
+| reaction | `type` | String | `$eq` `$in` |
+| reaction | `user_id` | String | `$eq` `$in` |
+| reaction | `created_at` | Date | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| poll | `id` | String | `$eq` `$in` |
+| poll | `name` | String | `$eq` `$in` |
+| poll | `voting_visibility` | String | `$eq` |
+| poll | `max_votes_allowed` | Number | `$eq` `$gt` `$gte` `$lt` `$lte` `$ne` |
+| poll | `allow_answers` | Boolean | `$eq` |
+| poll | `allow_user_suggested_options` | Boolean | `$eq` |
+| poll | `is_closed` | Boolean | `$eq` |
+| poll | `created_at` | Date | `$eq` `$gt` `$gte` `$lt` `$lte` |
+| poll | `updated_at` | Date | `$eq` `$gt` `$gte` `$lt` `$lte` |
+| poll | `created_by_id` | String | `$eq` `$in` |
+| poll_vote | `id` | String | `$eq` `$in` |
+| poll_vote | `poll_id` | String | `$eq` `$in` |
+| poll_vote | `user_id` | String | `$eq` `$in` |
+| poll_vote | `created_at` | Date | `$eq` `$gt` `$gte` `$lt` `$lte` |
+| poll_vote | `updated_at` | Date | `$eq` `$gt` `$gte` `$lt` `$lte` |
+| poll_vote | `option_id` | String | `$eq` `$exists` `$in` |
+| poll_vote | `is_answer` | Boolean | `$eq` |
+| reminder | `message_id` | String | `$eq` `$in` |
+| reminder | `channel_cid` | String | `$eq` `$in` |
+| reminder | `created_at` | Date | `$eq` `$gt` `$gte` `$lt` `$lte` |
+| reminder | `remind_at` | Date | `$eq` `$exists` `$gt` `$gte` `$lt` `$lte` |
+| thread | `channel_cid` | String | `$eq` `$in` |
+| thread | `parent_message_id` | String | `$eq` `$in` |
+| thread | `created_by_user_id` | String | `$eq` `$in` |
+| thread | `last_message_at` | Date | `$eq` `$gt` `$gte` `$lt` `$lte` |
+| thread | `created_at` | Date | `$eq` `$gt` `$gte` `$lt` `$lte` |
+| thread | `updated_at` | Date | `$eq` `$gt` `$gte` `$lt` `$lte` |
+| thread | `channel.disabled` | Boolean | `$eq` |
+| thread | `channel.team` | String | `$eq` `$in` |
+| thread | `participant_count` | Number | `$eq` `$gt` `$gte` `$lt` `$lte` |
+| thread | `reply_count` | Number | `$eq` `$gt` `$gte` `$lt` `$lte` |
+| thread | `active_participant_count` | Number | `$eq` `$gt` `$gte` `$lt` `$lte` |
+| thread | `has_unread` | Boolean | `$eq` |
+| ban | `user_id` | String | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| ban | `banned_by_id` | String | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| ban | `channel_cid` | String | `$eq` `$in` |
+| ban | `created_at` | Date | `$eq` `$exists` `$gt` `$gte` `$in` `$lt` `$lte` `$ne` `$nin` |
+| ban | `reason` | String | `MergeSupportedOperators` |
+
+</details>
+
 ## What `matches()` is, and is not, for
 
 The earlier pass called client-side filtering "the payoff". No Stream chat SDK does it:
