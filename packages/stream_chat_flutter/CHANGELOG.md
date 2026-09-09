@@ -2,17 +2,43 @@
 
 ✅ Added
 
-- Added `onReactionLongPress` to `StreamMessageItem` and `StreamMessageListView`, reporting the long-pressed message's `BuildContext` and a `ReactionLongPressDetails` with the `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction).
 - Added `StreamMessageItem.semanticsLabel`, which replaces the announcement composed for a message row, and `StreamMessageItem.excludeFromSemantics`, which leaves the row unlabeled so the bubble and footer announce their own parts.
 - Added `StreamQuotedMessage.replyMessage`, the message doing the quoting, which lets a quoted preview announce who replied to whom.
 - Added `StreamMessageContent.excludeTextFromSemantics` and `StreamMessageFooter.excludeFromSemantics`, which keep the message text and the metadata out of the semantics tree when an enclosing row already announces them.
 
 ⚠️ Changed
 
-- Long-pressing a reaction chip no longer opens the message actions modal; the chips always claim the long press. Left unset, `onReactionLongPress` defaults to opening the `ReactionDetailSheet`.
-- Tapping or long-pressing a reaction chip now opens the `ReactionDetailSheet` pre-filtered to that reaction; it previously opened unfiltered. Clustered and overflow chips map to no single reaction, so they still open unfiltered.
+- Video thumbnails now use `stream_thumbnail` on every platform, and the `thumblr`
+  dependency is gone.
+- Linux builds now need the FFmpeg and libwebp development packages — on Debian/Ubuntu:
+  `libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libwebp-dev`.
 - A deleted message now renders the timestamp and delivery status below the placeholder, matching the design, and no longer shows the "Edited" marker — there is no text left to have been edited.
 - `AccessibleMessagePreviewFormatter.formatMessageSemanticsLabel` must now return the body without a speaker prefix when `channel` is omitted. An implementation that prefixes unconditionally makes a message row announce "You said, You: hello".
+
+🐞 Fixed
+
+- Fixed `StreamAttachmentHandler` throwing `UnimplementedError` on WebAssembly builds.
+- Improved the screen-reader experience in the message list: each message is announced as a single phrase naming the sender, the body, the time, the edited marker and the delivery status, while the attachments, reaction chips, quoted message and replies row stay reachable one level deeper.
+- Fixed the message body being announced as its markdown source, so link and emphasis syntax is no longer read aloud.
+- Fixed a quoted message announcing only the quoted author's name, saying nothing about who replied to whom.
+- Fixed an attachment tile announcing nothing about its type or its position in a gallery.
+- Fixed a date divider announcing a clock time it never showed instead of the date it displays, and exposed it as a header so days can be jumped between.
+- Fixed the attachment upload progress on an outgoing message counting its link preview, which inflated the total against an attachment the sender never picked.
+- Fixed a message the moderation system bounced showing a read receipt once other members had read past it. It now shows only the error badge, matching what a screen reader announces for it.
+
+## 10.4.0
+
+✅ Added
+
+- Added `onReactionLongPress` to `StreamMessageItem` and `StreamMessageListView`, reporting the long-pressed message's `BuildContext` and a `ReactionLongPressDetails` with the `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction).
+- Exported this package's `StreamMessageContent`, which was previously unreachable from `package:stream_chat_flutter/stream_chat_flutter.dart`.
+- Added `StreamChatConfigurationData.messageTranslation`, a `StreamMessageTranslationConfiguration` with `enabled` (default `true`) to display translations from `Message.i18n` and `annotationEnabled` (default `false`) to opt into a "Translated"/"Original" annotation with a toggle link.
+- Added `StreamMessageTranslationStore`, tracking which messages show their original text instead of their translation. `StreamChat` owns one and provides it through a `StreamMessageTranslations` scope, so every message list agrees on which text a message shows. Also drivable per widget via `showTranslatedText` and `onToggleTranslatedText`.
+
+⚠️ Changed
+
+- Long-pressing a reaction chip no longer opens the message actions modal; the chips always claim the long press. Left unset, `onReactionLongPress` defaults to opening the `ReactionDetailSheet`.
+- Tapping or long-pressing a reaction chip now opens the `ReactionDetailSheet` pre-filtered to that reaction; it previously opened unfiltered. Clustered and overflow chips map to no single reaction, so they still open unfiltered.
 
 🔄 Changed
 
@@ -20,16 +46,10 @@
 
 🐞 Fixed
 
-- Improved the screen-reader experience in the message list: each message is announced as a single phrase naming the sender, the body, the time, the edited marker and the delivery status, while the attachments, reaction chips, quoted message and replies row stay reachable one level deeper.
-- Fixed the message body being announced as its markdown source, so link and emphasis syntax is no longer read aloud.
-- Fixed a quoted message announcing only the quoted author's name, saying nothing about who replied to whom.
-- Fixed an attachment tile announcing nothing about its type or its position in a gallery.
-- Fixed a date divider announcing a clock time it never showed instead of the date it displays, and exposed it as a header so days can be jumped between.
+- Fixed message text and previews translating to English for users with no `User.language` set; they now show the original text.
 - Fixed a crash on web when the message list rebuilt while messages were selectable, for example after opening the attachment picker.
 - Fixed the browser's native context menu reappearing over the message context menu on web after scrolling messages out of view or deleting one.
 - Fixed the SDK re-enabling the browser's native context menu on web in apps that had disabled it themselves.
-- Fixed the attachment upload progress on an outgoing message counting its link preview, which inflated the total against an attachment the sender never picked.
-- Fixed a message the moderation system bounced showing a read receipt once other members had read past it. It now shows only the error badge, matching what a screen reader announces for it.
 
 ## 10.3.0
 
@@ -58,9 +78,6 @@
 - Added `onReactionTap` to `StreamMessageItem` and `StreamMessageListView`, reporting the tapped message's `BuildContext` and a `ReactionTapDetails` with the tapped `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction).
 - Exported `StreamEphemeralMessage`, the row `StreamMessageListView` builds for ephemeral messages, matching its already-exported `StreamSystemMessage` and `StreamModeratedMessage` siblings.
 - Added an `unreadIndicator` parameter to `StreamBackButton` that overlays a widget (typically a `StreamUnreadIndicator`) on the button's top-end corner. Pass `StreamUnreadIndicator(excludeCid: cid)` to show the total unread count of other channels, or `StreamUnreadIndicator.channels(cid: cid)` for a single channel's count.
-- Exported this package's `StreamMessageContent`, which was previously unreachable from `package:stream_chat_flutter/stream_chat_flutter.dart`.
-- Added `StreamChatConfigurationData.messageTranslation`, a `StreamMessageTranslationConfiguration` with `enabled` (default `true`) to display translations from `Message.i18n` and `annotationEnabled` (default `false`) to opt into a "Translated"/"Original" annotation with a toggle link.
-- Added `StreamMessageTranslationStore`, tracking which messages show their original text instead of their translation. `StreamChat` owns one and provides it through a `StreamMessageTranslations` scope, so every message list agrees on which text a message shows. Also drivable per widget via `showTranslatedText` and `onToggleTranslatedText`.
 
 ⚠️ Deprecated
 
@@ -71,7 +88,6 @@
 
 🐞 Fixed
 
-- Fixed message text and previews translating to English for users with no `User.language` set; they now show the original text.
 - Fixed a failed send surfacing as an unhandled async error when `StreamMessageComposer` has no `onError`; it is now reported through `FlutterError.reportError`.
 - Fixed the default `StreamChannel` loading and error states not being themed or localized; `StreamChat` now installs themed, connection-aware defaults, overridable per `StreamChannel` or via `DefaultStreamChannelBuilders`.
 - Fixed the default list/scroll-view error states (channel, message, member, user, thread, poll-vote, reaction, search, and photo) showing raw or fixed errors; they are now connection-aware (no internet / slow connection), falling back to each view's specific error text.

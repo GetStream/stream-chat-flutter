@@ -1,5 +1,5 @@
 import '../core/models/predefined_filter.dart';
-import 'channel.dart';
+import 'channel/channel.dart';
 
 /// The result of a `queryChannelsWithResult` call on [StreamChatClient].
 ///

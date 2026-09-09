@@ -687,7 +687,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
         _ => channel.state?.draftStream,
       };
 
-      _draftStreamSubscription = draftStream?.distinct().listen(_onDraftUpdate);
+      _draftStreamSubscription = draftStream?.listen(_onDraftUpdate);
     }
 
     // Keeps the composer in sync with remote message changes.

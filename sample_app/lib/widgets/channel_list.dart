@@ -166,7 +166,7 @@ class _ChannelListDefault extends StatelessWidget {
                     foregroundColor: colorScheme.textPrimary,
                     backgroundColor: colorScheme.backgroundSurface,
                     onPressed: (_) => _openChannelDetailSheet(context, channel),
-                    child: Icon(icons.more, size: 20),
+                    child: Icon(icons.moreHorizontal, size: 20),
                   ),
                   BetterStreamBuilder<bool>(
                     stream: channel.isMutedStream,
