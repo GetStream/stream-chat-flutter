@@ -158,7 +158,7 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
     final repliedToOwnMessage = isCurrentUser(quotedAuthor);
 
     if (isCurrentUser(replier)) {
-      if (repliedToOwnMessage) return a11y.outgoingReplyToOwnMessageLabel();
+      if (repliedToOwnMessage) return a11y.outgoingReplyToOwnMessageLabel;
 
       final authorName = quotedAuthor.name.trim();
       if (authorName.isEmpty) return null;

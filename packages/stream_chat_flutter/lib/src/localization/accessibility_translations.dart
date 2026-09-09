@@ -16,6 +16,13 @@ import 'translations.dart';
 /// assistive technologies, and are surfaced through
 /// [Translations.accessibility].
 ///
+/// Labels that vary by who acted are split into one member per person rather
+/// than composed from a word for "you". A locale that inflects its verb for
+/// person cannot conjugate a name it is handed at runtime: German needs "Du
+/// hast geantwortet" against "Han Solo hat geantwortet", and substituting "Du"
+/// into the third-person form yields "Du hat geantwortet". The four reply
+/// labels are the current example.
+///
 /// See also:
 ///
 ///  * [DefaultAccessibilityTranslations], the default, English-only,
@@ -125,20 +132,14 @@ abstract class AccessibilityTranslations {
   ///
   /// Combined with the quoted body as `"You replied to your message, see you
   /// tomorrow"`.
-  ///
-  /// The four reply labels are split by who replied rather than composed from
-  /// a word for "you", because a locale that inflects its verb for person
-  /// cannot conjugate a name it is handed at runtime: German needs "Du hast
-  /// geantwortet" against "Han Solo hat geantwortet", and substituting "Du"
-  /// into the third-person form yields "Du hat geantwortet".
-  String outgoingReplyToOwnMessageLabel();
+  String get outgoingReplyToOwnMessageLabel;
 
   /// The screen-reader label for a quoted-message preview where the current
   /// user replied to [authorName]'s message, e.g. `"You replied to Leia's
   /// message"`.
   ///
-  /// See [outgoingReplyToOwnMessageLabel] for why the direction is part of the
-  /// method rather than a substituted name. [authorName] is part of the string
+  /// See [AccessibilityTranslations] for why the direction is part of the
+  /// member rather than a substituted name. [authorName] is part of the string
   /// so every locale can form the possessive itself.
   String outgoingReplyToMessageLabel({required String authorName});
 
@@ -513,9 +514,7 @@ class DefaultAccessibilityTranslations extends AccessibilityTranslations {
   }
 
   @override
-  String outgoingReplyToOwnMessageLabel() {
-    return 'You replied to your message';
-  }
+  String get outgoingReplyToOwnMessageLabel => 'You replied to your message';
 
   @override
   String outgoingReplyToMessageLabel({required String authorName}) {

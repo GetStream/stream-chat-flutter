@@ -950,7 +950,7 @@ class _AccessibilityTranslationsNo extends AccessibilityTranslations {
   String attachmentPositionLabel({required int index, required int total}) => '$index av $total';
 
   @override
-  String outgoingReplyToOwnMessageLabel() => 'Du svarte på din egen melding';
+  String get outgoingReplyToOwnMessageLabel => 'Du svarte på din egen melding';
 
   @override
   String outgoingReplyToMessageLabel({required String authorName}) => 'Du svarte på meldingen fra $authorName';

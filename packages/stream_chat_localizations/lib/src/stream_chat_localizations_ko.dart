@@ -947,7 +947,7 @@ class _AccessibilityTranslationsKo extends AccessibilityTranslations {
   String attachmentPositionLabel({required int index, required int total}) => '$total개 중 $index번째';
 
   @override
-  String outgoingReplyToOwnMessageLabel() => '내 메시지에 답장했습니다';
+  String get outgoingReplyToOwnMessageLabel => '내 메시지에 답장했습니다';
 
   @override
   String outgoingReplyToMessageLabel({required String authorName}) => '$authorName님의 메시지에 답장했습니다';

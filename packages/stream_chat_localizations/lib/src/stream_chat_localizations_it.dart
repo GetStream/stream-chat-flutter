@@ -979,7 +979,7 @@ class _AccessibilityTranslationsIt extends AccessibilityTranslations {
   String attachmentPositionLabel({required int index, required int total}) => '$index di $total';
 
   @override
-  String outgoingReplyToOwnMessageLabel() => 'Hai risposto al tuo stesso messaggio';
+  String get outgoingReplyToOwnMessageLabel => 'Hai risposto al tuo stesso messaggio';
 
   @override
   String outgoingReplyToMessageLabel({required String authorName}) => 'Hai risposto al messaggio di $authorName';

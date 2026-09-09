@@ -944,7 +944,7 @@ class _AccessibilityTranslationsJa extends AccessibilityTranslations {
   String attachmentPositionLabel({required int index, required int total}) => '$total件中$index件目';
 
   @override
-  String outgoingReplyToOwnMessageLabel() => '自分のメッセージに返信しました';
+  String get outgoingReplyToOwnMessageLabel => '自分のメッセージに返信しました';
 
   @override
   String outgoingReplyToMessageLabel({required String authorName}) => '$authorNameのメッセージに返信しました';

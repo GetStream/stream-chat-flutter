@@ -966,7 +966,7 @@ class _AccessibilityTranslationsHi extends AccessibilityTranslations {
   String attachmentPositionLabel({required int index, required int total}) => '$total में से $index';
 
   @override
-  String outgoingReplyToOwnMessageLabel() => 'आपने अपने संदेश का उत्तर दिया';
+  String get outgoingReplyToOwnMessageLabel => 'आपने अपने संदेश का उत्तर दिया';
 
   @override
   String outgoingReplyToMessageLabel({required String authorName}) => 'आपने $authorName के संदेश का उत्तर दिया';
