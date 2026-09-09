@@ -52,23 +52,13 @@ abstract base class BaseTester<S> with ApiMockerMixin {
   ///
   /// This is the user used for authentication and for performing all actions
   /// through the client.
-  ///
-  /// Example:
-  /// ```dart
-  /// // Use the configured user's ID for authentication
-  /// tester.mockSuccessfulAuth(tester.user.id);
-  /// ```
   final User user;
 
   @override
   @protected
   final FakeChatApi chatApi;
 
-  /// The underlying [StreamChatClient] from which the subject was built.
-  ///
-  /// Use this to access client-level properties and methods.
-  ///
-  /// Note: prefer using [subject] for testing the specific state object.
+  /// The underlying [StreamChatClient] from which the [subject] was built.
   StreamChatClient get client => _client;
   final StreamChatClient _client;
 
@@ -87,57 +77,30 @@ abstract base class BaseTester<S> with ApiMockerMixin {
   /// made.
   List<Uri> get connectUris => _wsTester.connectUris;
 
-  /// Configures WebSocket mocks to simulate successful authentication for
-  /// [userId].
+  /// Configures the fake server to accept a connection attempt for [userId].
   ///
-  /// Use this in test setup to configure how the WebSocket should respond to
-  /// connection attempts.
-  ///
-  /// Example:
-  /// ```dart
-  /// tester.mockSuccessfulAuth(tester.user.id);
-  /// await tester.client.connectUser(tester.user, token); // Will succeed
-  /// ```
+  /// Attempts carrying a different user id, or a token whose `user_id` claim
+  /// does not match, are rejected with an invalid-token-signature error frame.
   void mockSuccessfulAuth(String userId) {
     return _wsTester.mockSuccessfulAuth(userId);
   }
 
-  /// Configures WebSocket mocks to simulate authentication failure.
+  /// Configures the fake server to reject every connection attempt with an
+  /// error frame carrying [errorCode].
   ///
-  /// The [errorCode] parameter allows customizing the backend error code
-  /// returned; default is 40 ([ChatErrorCode.tokenExpired]). With the
-  /// harness's static token the connection attempt fails with a
-  /// [StreamWebSocketError]; a token *provider* turns code 40 into a silent
-  /// token refresh and reconnect instead.
-  ///
-  /// Use this in test setup when testing error scenarios.
-  ///
-  /// Example:
-  /// ```dart
-  /// tester.mockFailedAuth(errorCode: 43);
-  /// await expectLater(
-  ///   tester.client.connectUser(tester.user, token),
-  ///   throwsA(isA<StreamWebSocketError>()),
-  /// );
-  /// ```
+  /// The default 40 ([ChatErrorCode.tokenExpired]) fails the attempt with a
+  /// [StreamWebSocketError] under the harness's static token; with a token
+  /// provider it triggers a silent token refresh and reconnect instead. All
+  /// other codes fail the attempt regardless of the token setup.
   void mockFailedAuth({int errorCode = 40}) {
     return _wsTester.mockFailedAuth(errorCode: errorCode);
   }
 
-  /// Configures the WebSocket so that the transport fails.
+  /// Configures the WebSocket transport to fail with [error].
   ///
   /// The channel opens, but its stream immediately errors — a broken socket
   /// rather than a server that refuses. The connection attempt fails with a
   /// retriable [StreamWebSocketError].
-  ///
-  /// Example:
-  /// ```dart
-  /// tester.mockConnectionError();
-  /// await expectLater(
-  ///   tester.client.connectUser(tester.user, token),
-  ///   throwsA(isA<StreamWebSocketError>()),
-  /// );
-  /// ```
   void mockConnectionError({Object? error}) {
     return _wsTester.mockConnectionError(error: error);
   }
@@ -145,16 +108,7 @@ abstract base class BaseTester<S> with ApiMockerMixin {
   /// Emits a WebSocket [event] and pumps the event loop.
   ///
   /// The event goes through the engine's real JSON frame decoding before
-  /// reaching the client, exactly like a production server push. The event
-  /// loop is pumped afterwards to allow async event handlers to run.
-  ///
-  /// Example:
-  /// ```dart
-  /// await tester.emitEvent(
-  ///   createDefaultEvent(type: EventType.messageNew, cid: channel.cid),
-  /// );
-  /// expect(tester.channelState?.messages, hasLength(1));
-  /// ```
+  /// reaching the client, exactly like a production server push.
   Future<void> emitEvent(Event event) async {
     _wsTester.emitEvent(event);
     await pumpEventQueue();
@@ -169,26 +123,16 @@ abstract base class BaseTester<S> with ApiMockerMixin {
     await pumpEventQueue();
   }
 
-  /// Waits for events to be processed.
-  ///
-  /// Returns a [Future] that completes after the event loop has run the given
-  /// number of [times] (20 by default).
-  ///
-  /// Awaiting this approximates waiting until all asynchronous work (other
-  /// than work that's waiting for external resources) completes.
+  /// Waits for pending asynchronous work by running the event loop [times]
+  /// times.
   Future<void> pumpEventQueue({int times = 20}) {
     return test.pumpEventQueue(times: times);
   }
 
   /// Disposes resources held by this tester.
   ///
-  /// This method is called automatically after each test completes.
-  /// Subclasses can override this method to perform cleanup of resources such
-  /// as stream subscriptions, controllers, or other state that needs explicit
-  /// disposal.
-  ///
-  /// Subclasses that override this method should call `super.dispose()` to
-  /// ensure any base cleanup is performed.
+  /// Called automatically after each test completes. Overrides must call
+  /// `super.dispose()`.
   @mustCallSuper
   Future<void> dispose() async {}
 }
@@ -204,36 +148,19 @@ Future<T> createTester<T extends BaseTester<Object?>>({
   return tester;
 }
 
-/// Generic test helper for chat subjects with WebSocket support.
+/// Generic test helper backing the concrete `<subject>Test` entry points.
 ///
-/// Automatically sets up the test client, WebSocket infrastructure, and
-/// coordinates the test lifecycle.
+/// Builds a real [StreamChatClient] with three replaced seams — the REST API
+/// (a [FakeChatApi] whose sub-APIs are mocks), the WebSocket transport (a
+/// mocked channel behind the real [WebSocket] engine) and optionally
+/// [chatPersistenceClient] — then runs the phases
+/// `connect → setUp → body → verify → tearDown` in a guarded zone.
 ///
-/// The client is real; only three seams are replaced: the REST API (a
-/// [FakeChatApi] whose sub-APIs are mocks), the WebSocket transport (a mocked
-/// channel driven by a [WebSocketTester], with the real [WebSocket] engine in
-/// play), and optionally the persistence client.
-///
-/// Parameters:
-/// - [user]: the user the client is configured for (defaults to
-///   luke_skywalker)
-/// - [token]: the static token used to connect (defaults to a development
-///   token for [user])
-/// - [tokenProvider]: connects through [StreamChatClient.connectUserWithProvider]
-///   instead of a static token; also drives the engine's token refresh path
-/// - [chatPersistenceClient]: optional persistence client assigned to the
-///   client before connecting
-/// - [logLevel]: the client's log level (defaults to [Level.OFF] to keep test
-///   output quiet)
-/// - [build]: constructs the subject under test using the provided client
-/// - [createTesterFn]: the concrete tester factory function
-/// - [connect]: optional, custom connection logic (defaults to successful
-///   auth + connect + connection assertion)
-/// - [setUp]: optional, runs before body for setting up mocks and test state
-/// - [body]: the test callback that receives a tester for interactions
-/// - [verify]: optional, runs after body for verifying API calls
-/// - [tearDown]: optional, runs after verify for custom cleanup
-/// - [skip], [tags], [timeout]: forwarded to `test`
+/// The default connect phase authenticates [user] with [token], or through
+/// [tokenProvider] when given (which takes precedence over [token]), and
+/// asserts the connection; [connect] replaces it entirely. [logLevel] and
+/// [isLocalUnreadCountEnabled] are forwarded to the client constructor;
+/// [skip], [tags] and [timeout] to `test`.
 ///
 /// This function is for internal use by concrete test helpers.
 void testWithTester<S, T extends BaseTester<S>>(
@@ -243,6 +170,7 @@ void testWithTester<S, T extends BaseTester<S>>(
   TokenProvider? tokenProvider,
   ChatPersistenceClient? chatPersistenceClient,
   Level logLevel = Level.OFF,
+  bool isLocalUnreadCountEnabled = false,
   required S Function(StreamChatClient client) build,
   required TesterFactory<S, T> createTesterFn,
   FutureOr<void> Function(T tester)? connect,
@@ -315,6 +243,7 @@ void testWithTester<S, T extends BaseTester<S>>(
           chatApi: chatApi,
           ws: ws,
           logLevel: logLevel,
+          isLocalUnreadCountEnabled: isLocalUnreadCountEnabled,
         )..chatPersistenceClient = chatPersistenceClient;
         test.addTearDown(client.dispose); // Dispose client after test
 
@@ -376,8 +305,10 @@ FutureOr<void> Function(BaseTester<Object?>) _defaultConnect({
 // NOTE(parity): errors arriving AFTER the body has completed (e.g. a timer
 // armed during the test that fires in the teardown window) are silently
 // dropped by the `isCompleted` guards below, whereas plain `package:test`
-// would report them as "test failed after it had already completed". Kept
-// as-is for parity with stream_feeds_test's base_tester; fix in both
+// would report them as "test failed after it had already completed". The
+// window is most relevant after `mockConnectionError`, which leaves the
+// engine scheduling background reconnect work that only teardown cancels.
+// Kept as-is for parity with stream_feeds_test's base_tester; fix in both
 // packages together by forwarding post-completion errors to the parent zone.
 Future<void> _runZonedGuarded(Future<void> Function() body) {
   final completer = Completer<void>();

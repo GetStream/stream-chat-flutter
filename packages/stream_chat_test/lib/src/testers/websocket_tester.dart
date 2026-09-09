@@ -8,31 +8,18 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import '../helpers/mocks.dart';
 import '../helpers/test_data.dart';
 
-/// A test utility for managing WebSocket connection mocking and event emission.
+/// Simulates the server side of a WebSocket connection.
 ///
-/// This class encapsulates WebSocket channel mocking, authentication simulation,
-/// and event emission for testing real-time features. It provides methods to
-/// configure WebSocket behavior for both successful and failed connection
-/// scenarios.
+/// Only the transport is replaced: [channelProvider] is handed to the real
+/// [WebSocket] engine, so URI building, frame decoding, health checks and
+/// reconnection logic all run in tests. Chat authenticates through the connect
+/// URI, so credentials are validated from the URI captured by
+/// [channelProvider] and answered through the channel's stream.
 ///
-/// The real [WebSocket] engine is kept in play: [channelProvider] is passed as
-/// its `webSocketChannelProvider`, so real URI building, frame decoding,
-/// health-check monitoring and reconnection logic all run in tests — only the
-/// transport is simulated.
-///
-/// Chat authenticates through the connect URI (token and user payload in query
-/// parameters) rather than a first frame, so the fake server validates
-/// credentials from the URI captured by [channelProvider] and answers through
-/// the channel's stream.
-///
-/// This class is used internally by testers and should not be instantiated
-/// directly in test code.
+/// Used internally by testers; not intended to be instantiated in test code.
 final class WebSocketTester {
-  /// Creates a [WebSocketTester] with the given [channel] and
-  /// [streamController].
-  ///
-  /// The [channel] is the mock WebSocket channel to configure, and
-  /// [streamController] is used to emit frames that simulate server responses.
+  /// Creates a [WebSocketTester] configuring the mock [channel] and emitting
+  /// server frames through [streamController].
   WebSocketTester({
     required this._channel,
     required this._streamController,
@@ -48,7 +35,7 @@ final class WebSocketTester {
   ///
   /// Reconnection attempts append to this list, so tests can assert both on
   /// the auth payload of the initial attempt and on how many attempts were
-  /// made.
+  /// made. Only the tester appends to it — treat it as read-only in tests.
   final List<Uri> connectUris = [];
 
   // The configured server reaction to a connection attempt.
@@ -71,28 +58,13 @@ final class WebSocketTester {
     return _channel;
   }
 
-  /// Configures WebSocket mocks to simulate successful authentication.
+  /// Configures the fake server to accept a connection attempt for [userId].
   ///
-  /// Sets up the WebSocket channel to respond with a connected `health.check`
-  /// event when a connection is attempted with the specified [userId]. Like
-  /// the real backend, the fake server checks the credentials in the connect
-  /// URI — both the connect payload's user id and the `user_id` claim of the
-  /// token — and emits an error frame with code 43 (invalid token signature)
-  /// when either does not match [userId].
-  ///
-  /// Be aware that the token in the connect URI is always the one the harness
-  /// pre-loaded into the injected WebSocket's own token manager — the token
-  /// argument passed to `connectUser` never reaches it (see the README's
-  /// "Token handling" section), so the token check here only guards
-  /// harness-level credential mistakes.
-  ///
-  /// Call this before connecting the client in your test setup.
-  ///
-  /// Example:
-  /// ```dart
-  /// wsTester.mockSuccessfulAuth('user-123');
-  /// await client.connectUser(user, token); // Will succeed
-  /// ```
+  /// Like the real backend, the credentials in the connect URI are validated —
+  /// both the connect payload's user id and the token's `user_id` claim — and
+  /// a code 43 (invalid token signature) error frame is emitted when either
+  /// does not match [userId]. The token in the URI is always the harness token
+  /// (see the README's "Token handling" section).
   void mockSuccessfulAuth(String userId) {
     _resetFunction?.call(); // Reset previous mocks if any
     _resetFunction = _whenListenWebSocket(_channel);
@@ -114,35 +86,13 @@ final class WebSocketTester {
     };
   }
 
-  /// Configures WebSocket mocks to simulate authentication failure.
+  /// Configures the fake server to reject every connection attempt with an
+  /// error frame carrying [errorCode] (HTTP status 401).
   ///
-  /// Sets up the WebSocket channel to always respond with an error frame when
-  /// a connection is attempted, regardless of the provided credentials.
-  ///
-  /// The [errorCode] parameter allows customizing the backend error code
-  /// returned. Default is 40 ([ChatErrorCode.tokenExpired]). All errors use
-  /// HTTP status code 401.
-  ///
-  /// **Backend Error Codes (401 Status):**
-  ///
-  /// - `40`: tokenExpired — with a token *provider*, the engine silently
-  ///   refreshes the token and reconnects; with a static token (the harness
-  ///   default) there is no other token to load, so the connection attempt
-  ///   fails with a [StreamWebSocketError].
-  /// - `41`: tokenNotValidYet, `42`: tokenUsedBeforeIssuedAt,
-  ///   `43`: tokenSignatureInvalid, `2`: accessKeyError, `5`: authFailed —
-  ///   reported, never retried, because no other token repairs them.
-  ///
-  /// Call this before connecting the client when testing error scenarios.
-  ///
-  /// Example:
-  /// ```dart
-  /// wsTester.mockFailedAuth(errorCode: 43);
-  /// await expectLater(
-  ///   client.connectUser(user, token),
-  ///   throwsA(isA<StreamWebSocketError>()),
-  /// );
-  /// ```
+  /// The default 40 ([ChatErrorCode.tokenExpired]) makes the engine refresh
+  /// the token and reconnect when a token provider is used; with a static
+  /// token — and for all other codes (41, 42, 43, 2, 5) — the connection
+  /// attempt fails with a [StreamWebSocketError].
   void mockFailedAuth({int errorCode = 40}) {
     _resetFunction?.call(); // Reset previous mocks if any
     _resetFunction = _whenListenWebSocket(_channel);
@@ -152,23 +102,12 @@ final class WebSocketTester {
     };
   }
 
-  /// Configures the WebSocket so that the transport fails.
+  /// Configures the WebSocket transport to fail with [error].
   ///
   /// The channel opens, but its stream immediately errors — a broken socket
   /// rather than a server that refuses. The connection attempt fails with a
   /// retriable [StreamWebSocketError] and the engine schedules background
-  /// reconnects (cancelled when the client is disposed by the test teardown).
-  ///
-  /// Call this before connecting the client.
-  ///
-  /// Example:
-  /// ```dart
-  /// wsTester.mockConnectionError();
-  /// await expectLater(
-  ///   client.connectUser(user, token),
-  ///   throwsA(isA<StreamWebSocketError>()),
-  /// );
-  /// ```
+  /// reconnects, cancelled when the client is disposed by the test teardown.
   void mockConnectionError({Object? error}) {
     _resetFunction?.call(); // Reset previous mocks if any
     _resetFunction = _whenListenWebSocket(_channel);
@@ -177,20 +116,10 @@ final class WebSocketTester {
     };
   }
 
-  /// Emits a typed [event] to simulate a server message.
+  /// Emits a typed [event] as a server frame.
   ///
-  /// The event goes through the engine's real JSON frame decoding before
-  /// reaching the client, exactly like a production server push.
-  ///
-  /// **Note:** You must call [mockSuccessfulAuth] or [mockFailedAuth] before
-  /// calling this method.
-  ///
-  /// Example:
-  /// ```dart
-  /// wsTester.emitEvent(
-  ///   createDefaultEvent(type: EventType.messageNew, cid: 'messaging:123'),
-  /// );
-  /// ```
+  /// The frame goes through the engine's real JSON decoding before reaching
+  /// the client, exactly like a production server push.
   void emitEvent(Event event) => emitRawFrame(event);
 
   /// Emits a raw JSON-encodable [frame] to simulate a server message.
@@ -256,10 +185,8 @@ final class WebSocketTester {
   }
 }
 
-/// A function type for resetting WebSocket mock configuration.
-///
-/// This allows reconfiguring WebSocket mocks between different test scenarios
-/// by resetting the previous mock setup.
+/// A function that resets the current WebSocket mock configuration, allowing
+/// reconfiguration between test scenarios.
 typedef WebSocketResetFunction = void Function();
 
 // The authentication material chat places in the connect URI.

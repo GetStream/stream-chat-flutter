@@ -14,9 +14,9 @@ import 'websocket_tester.dart';
 /// Test helper for testing [Channel] behavior.
 ///
 /// By default the subject is a fresh, non-initialized channel of
-/// [channelType]/[channelId]; pass [build] to construct it differently (e.g.
-/// via [Channel.fromState]). Use [ChannelTester.watch] in [setUp] to seed the
-/// channel with an initial state before emitting events.
+/// [channelType]/[channelId]; [build] constructs it differently (e.g. via
+/// [Channel.fromState]). [ChannelTester.watch], typically called from [setUp],
+/// seeds the channel with an initial state before emitting events.
 ///
 /// Example:
 /// ```dart
@@ -48,6 +48,7 @@ void channelTest(
   TokenProvider? tokenProvider,
   ChatPersistenceClient? chatPersistenceClient,
   Level logLevel = Level.OFF,
+  bool isLocalUnreadCountEnabled = false,
   FutureOr<void> Function(ChannelTester tester)? connect,
   FutureOr<void> Function(ChannelTester tester)? setUp,
   required FutureOr<void> Function(ChannelTester tester) body,
@@ -64,6 +65,7 @@ void channelTest(
     tokenProvider: tokenProvider,
     chatPersistenceClient: chatPersistenceClient,
     logLevel: logLevel,
+    isLocalUnreadCountEnabled: isLocalUnreadCountEnabled,
     build: build ?? (client) => client.channel(channelType, id: channelId),
     createTesterFn: _createChannelTester,
     connect: connect,
@@ -101,12 +103,12 @@ final class ChannelTester extends BaseTester<Channel> {
   /// Stubs the channel query and watches the channel, seeding it with an
   /// initial state.
   ///
-  /// Call this in event tests to set up initial state before emitting events.
-  /// Skip this in tests that only verify API calls.
+  /// Typically called from the `setUp` phase to seed state before emitting
+  /// events; unnecessary for tests that only verify API calls.
   ///
   /// The stub matches the exact request the SDK sends for a watch — including
   /// `channelData: channel.extraData` — so it doubles as verification of the
-  /// request shape. Use [modifyResponse] to adjust the canonical seeded state:
+  /// request shape. [modifyResponse] adjusts the canonical seeded state:
   ///
   /// ```dart
   /// setUp: (tester) => tester.watch(

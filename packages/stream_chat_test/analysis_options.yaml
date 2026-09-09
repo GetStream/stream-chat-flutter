@@ -11,4 +11,6 @@ analyzer:
     # Allow accessing @internal and @visibleForTesting members in test utilities.
     invalid_use_of_internal_member: ignore
     invalid_use_of_visible_for_testing_member: ignore
+    # Currently unused (no @protected member is accessed across a subclass
+    # boundary yet); kept for symmetry with stream_feeds_test's setup.
     invalid_use_of_protected_member: ignore

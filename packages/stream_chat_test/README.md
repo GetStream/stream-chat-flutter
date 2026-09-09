@@ -143,7 +143,9 @@ The proper fix is a `@visibleForTesting TokenManager?` seam on the
 `StreamChatClient` constructor, letting the client and the injected WebSocket share
 one manager. That approach has been validated (the full `stream_chat` test suite
 passes with it) but is deliberately not applied yet — adopt it together with the
-internals-access re-evaluation below.
+internals-access re-evaluation below. Adopting it later is contained: tests using
+the default credentials behave identically with either wiring, so the only test
+whose outcome changes is the pinning one above (flip it to expect rejection).
 
 ## Tags
 

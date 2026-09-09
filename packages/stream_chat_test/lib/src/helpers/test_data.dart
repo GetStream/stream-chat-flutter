@@ -238,11 +238,13 @@ Member createDefaultMember({
 Read createDefaultRead({
   User? user,
   DateTime? lastRead,
+  DateTime? lastDeliveredAt,
   int unreadMessages = 0,
 }) {
   return Read(
     user: user ?? createDefaultUser(),
     lastRead: lastRead ?? testCreatedAt,
+    lastDeliveredAt: lastDeliveredAt,
     unreadMessages: unreadMessages,
   );
 }
