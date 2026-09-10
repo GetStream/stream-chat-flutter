@@ -80,6 +80,15 @@ class BannedUser extends Equatable {
 }
 
 /// A filter for a banned-user query.
+///
+/// See [BannedUserFilterField] for the fields that can be filtered on.
+///
+/// ```dart
+/// final filter = BannedUserFilter.equal(
+///   BannedUserFilterField.channelCid,
+///   'messaging:general',
+/// );
+/// ```
 typedef BannedUserFilter = Filter<BannedUser>;
 
 /// Represents a field that banned-user queries can be filtered on.
@@ -137,6 +146,10 @@ class BannedUserFilterField extends FilterField<BannedUser> {
 /// Represents a sorting operation for banned users.
 ///
 /// See [BannedUserSortField] for the fields that can be sorted on.
+///
+/// ```dart
+/// final sort = [BannedUserSort.desc(BannedUserSortField.createdAt)];
+/// ```
 class BannedUserSort extends Sort<BannedUser> {
   /// Sorts by [field], smallest first.
   const BannedUserSort.asc(

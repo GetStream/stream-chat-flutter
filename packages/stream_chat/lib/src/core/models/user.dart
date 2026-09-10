@@ -214,6 +214,15 @@ class User extends Equatable {
 }
 
 /// A filter for a user query.
+///
+/// See [UserFilterField] for the fields that can be filtered on.
+///
+/// ```dart
+/// final filter = UserFilter.or([
+///   UserFilter.autoComplete(UserFilterField.name, 'jo'),
+///   UserFilter.autoComplete(UserFilterField.id, 'jo'),
+/// ]);
+/// ```
 typedef UserFilter = Filter<User>;
 
 /// Represents a field that user queries can be filtered on.
@@ -335,6 +344,10 @@ class UserFilterField extends FilterField<User> {
 /// Represents a sorting operation for users.
 ///
 /// See [UserSortField] for the fields that can be sorted on.
+///
+/// ```dart
+/// final sort = [UserSort.asc(UserSortField.name)];
+/// ```
 class UserSort extends Sort<User> {
   /// Sorts by [field], smallest first.
   const UserSort.asc(

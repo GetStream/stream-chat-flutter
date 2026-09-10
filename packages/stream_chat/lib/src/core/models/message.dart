@@ -727,6 +727,15 @@ class Message extends Equatable {
 }
 
 /// A filter for a message search.
+///
+/// See [MessageSearchFilterField] for the fields that can be filtered on.
+///
+/// ```dart
+/// final filter = MessageSearchFilter.and([
+///   MessageSearchFilter.autoComplete(MessageSearchFilterField.text, 'deploy'),
+///   MessageSearchFilter.equal(MessageSearchFilterField.pinned, true),
+/// ]);
+/// ```
 typedef MessageSearchFilter = Filter<Message>;
 
 /// Represents a field that a message search can be filtered on.
@@ -852,6 +861,10 @@ class MessageSearchFilterField extends FilterField<Message> {
 /// combined with a non-zero pagination offset.
 ///
 /// See [MessageSearchSortField] for the fields that can be sorted on.
+///
+/// ```dart
+/// final sort = [MessageSearchSort.desc(MessageSearchSortField.relevance)];
+/// ```
 class MessageSearchSort extends Sort<Message> {
   /// Sorts by [field], smallest first.
   const MessageSearchSort.asc(

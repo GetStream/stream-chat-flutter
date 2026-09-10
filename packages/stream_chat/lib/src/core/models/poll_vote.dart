@@ -107,6 +107,12 @@ class PollVote extends Equatable {
 }
 
 /// A filter for a poll vote query.
+///
+/// See [PollVoteFilterField] for the fields that can be filtered on.
+///
+/// ```dart
+/// final filter = PollVoteFilter.equal(PollVoteFilterField.isAnswer, true);
+/// ```
 typedef PollVoteFilter = Filter<PollVote>;
 
 /// Represents a field that poll vote queries can be filtered on.
@@ -178,6 +184,10 @@ class PollVoteFilterField extends FilterField<PollVote> {
 /// Anything else is rejected.
 ///
 /// See [PollVoteSortField] for the fields that can be sorted on.
+///
+/// ```dart
+/// final sort = [PollVoteSort.desc(PollVoteSortField.createdAt)];
+/// ```
 class PollVoteSort extends Sort<PollVote> {
   /// Sorts by [field], smallest first.
   const PollVoteSort.asc(

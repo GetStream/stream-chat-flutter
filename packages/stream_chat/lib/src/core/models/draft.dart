@@ -85,6 +85,15 @@ class Draft extends Equatable {
 }
 
 /// A filter for a draft query.
+///
+/// See [DraftFilterField] for the fields that can be filtered on.
+///
+/// ```dart
+/// final filter = DraftFilter.equal(
+///   DraftFilterField.channelCid,
+///   'messaging:general',
+/// );
+/// ```
 typedef DraftFilter = Filter<Draft>;
 
 /// Represents a field that draft queries can be filtered on.
@@ -124,6 +133,10 @@ class DraftFilterField extends FilterField<Draft> {
 /// The API sorts drafts by `createdAt` only. Anything else is rejected.
 ///
 /// See [DraftSortField] for the fields that can be sorted on.
+///
+/// ```dart
+/// final sort = [DraftSort.desc(DraftSortField.createdAt)];
+/// ```
 class DraftSort extends Sort<Draft> {
   /// Sorts by [field], smallest first.
   const DraftSort.asc(

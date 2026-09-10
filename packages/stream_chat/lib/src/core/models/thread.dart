@@ -229,6 +229,15 @@ class Thread extends Equatable {
 }
 
 /// A filter for a thread query.
+///
+/// See [ThreadFilterField] for the fields that can be filtered on.
+///
+/// ```dart
+/// final filter = ThreadFilter.equal(
+///   ThreadFilterField.channelCid,
+///   'messaging:general',
+/// );
+/// ```
 typedef ThreadFilter = Filter<Thread>;
 
 /// Represents a field that thread queries can be filtered on.
@@ -344,6 +353,10 @@ class ThreadFilterField extends FilterField<Thread> {
 /// Anything else is rejected.
 ///
 /// See [ThreadSortField] for the fields that can be sorted on.
+///
+/// ```dart
+/// final sort = [ThreadSort.desc(ThreadSortField.lastMessageAt)];
+/// ```
 class ThreadSort extends Sort<Thread> {
   /// Sorts by [field], smallest first.
   ThreadSort.asc(

@@ -137,6 +137,15 @@ class MessageReminder extends Equatable {
 }
 
 /// A filter for a reminder query.
+///
+/// See [MessageReminderFilterField] for the fields that can be filtered on.
+///
+/// ```dart
+/// final filter = MessageReminderFilter.lessOrEqual(
+///   MessageReminderFilterField.remindAt,
+///   DateTime.timestamp().toIso8601String(),
+/// );
+/// ```
 typedef MessageReminderFilter = Filter<MessageReminder>;
 
 /// Represents a field that reminder queries can be filtered on.
@@ -186,6 +195,10 @@ class MessageReminderFilterField extends FilterField<MessageReminder> {
 /// Anything else is rejected.
 ///
 /// See [MessageReminderSortField] for the fields that can be sorted on.
+///
+/// ```dart
+/// final sort = [MessageReminderSort.asc(MessageReminderSortField.remindAt)];
+/// ```
 class MessageReminderSort extends Sort<MessageReminder> {
   /// Sorts by [field], smallest first.
   const MessageReminderSort.asc(

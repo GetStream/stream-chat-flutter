@@ -177,6 +177,12 @@ class Member extends Equatable {
 }
 
 /// A filter for a member query.
+///
+/// See [MemberFilterField] for the fields that can be filtered on.
+///
+/// ```dart
+/// final filter = MemberFilter.autoComplete(MemberFilterField.name, 'jo');
+/// ```
 typedef MemberFilter = Filter<Member>;
 
 /// Represents a field that member queries can be filtered on.
@@ -307,6 +313,10 @@ class MemberFilterField extends FilterField<Member> {
 /// Represents a sorting operation for channel members.
 ///
 /// See [MemberSortField] for the fields that can be sorted on.
+///
+/// ```dart
+/// final sort = [MemberSort.asc(MemberSortField.name)];
+/// ```
 class MemberSort extends Sort<Member> {
   /// Sorts by [field], smallest first.
   const MemberSort.asc(

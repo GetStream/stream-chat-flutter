@@ -271,6 +271,12 @@ class Poll extends Equatable {
 }
 
 /// A filter for a poll query.
+///
+/// See [PollFilterField] for the fields that can be filtered on.
+///
+/// ```dart
+/// final filter = PollFilter.equal(PollFilterField.isClosed, false);
+/// ```
 typedef PollFilter = Filter<Poll>;
 
 /// Represents a field that poll queries can be filtered on.
@@ -374,6 +380,10 @@ class PollFilterField extends FilterField<Poll> {
 /// `updatedAt` or `isClosed`. Anything else is rejected.
 ///
 /// See [PollSortField] for the fields that can be sorted on.
+///
+/// ```dart
+/// final sort = [PollSort.desc(PollSortField.createdAt)];
+/// ```
 class PollSort extends Sort<Poll> {
   /// Sorts by [field], smallest first.
   const PollSort.asc(

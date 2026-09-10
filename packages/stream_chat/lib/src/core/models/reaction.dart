@@ -135,6 +135,12 @@ class Reaction extends Equatable {
 }
 
 /// A filter for a reaction query.
+///
+/// See [ReactionFilterField] for the fields that can be filtered on.
+///
+/// ```dart
+/// final filter = ReactionFilter.equal(ReactionFilterField.type, 'like');
+/// ```
 typedef ReactionFilter = Filter<Reaction>;
 
 /// Represents a field that reaction queries can be filtered on.
@@ -172,6 +178,10 @@ class ReactionFilterField extends FilterField<Reaction> {
 /// Represents a sorting operation for reactions.
 ///
 /// See [ReactionSortField] for the fields that can be sorted on.
+///
+/// ```dart
+/// final sort = [ReactionSort.desc(ReactionSortField.createdAt)];
+/// ```
 class ReactionSort extends Sort<Reaction> {
   /// Sorts by [field], smallest first.
   const ReactionSort.asc(

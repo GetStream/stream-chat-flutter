@@ -130,6 +130,15 @@ class ChannelState {
 }
 
 /// A filter for a channel query.
+///
+/// See [ChannelFilterField] for the fields that can be filtered on.
+///
+/// ```dart
+/// final filter = ChannelFilter.and([
+///   ChannelFilter.equal(ChannelFilterField.type, 'messaging'),
+///   ChannelFilter.in_(ChannelFilterField.members, [user.id]),
+/// ]);
+/// ```
 typedef ChannelFilter = Filter<ChannelState>;
 
 /// Represents a field that channel queries can be filtered on.
@@ -343,6 +352,13 @@ class ChannelFilterField extends FilterField<ChannelState> {
 /// `nullOrdering` says otherwise.
 ///
 /// See [ChannelSortField] for the fields that can be sorted on.
+///
+/// ```dart
+/// final sort = [
+///   ChannelSort.desc(ChannelSortField.pinnedAt),
+///   ChannelSort.desc(ChannelSortField.lastMessageAt),
+/// ];
+/// ```
 class ChannelSort extends Sort<ChannelState> {
   /// Sorts by [field], smallest first.
   ChannelSort.asc(
