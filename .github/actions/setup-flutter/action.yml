@@ -9,6 +9,10 @@ inputs:
     description: 'Flutter release channel'
     required: false
     default: 'stable'
+  cache-sdk:
+    description: 'Cache the Flutter SDK. Turn off for jobs that run too rarely to hit it.'
+    required: false
+    default: 'true'
 runs:
   using: "composite"
   steps:
@@ -16,6 +20,7 @@ runs:
       with:
         flutter-version: ${{ inputs.flutter-version }}
         channel: ${{ inputs.channel }}
-        cache: true
+        cache: ${{ inputs.cache-sdk }}
+        pub-cache: 'true'
         cache-key: "flutter-:os:-:channel:-:version:-:arch:"
         pub-cache-key: "flutter-pub-:os:-${{ hashFiles('melos.yaml', '**/pubspec.yaml') }}"

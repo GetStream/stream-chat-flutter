@@ -26,6 +26,9 @@ jobs:
           channel: beta
           # Empty so the newest beta is used, whatever major it is.
           flutter-version: ''
+          # Weekly, and a new beta invalidates the key, so an SDK entry would
+          # almost never be restored before it expires.
+          cache-sdk: 'false'
 
       - name: 📊 Analyze and test packages
         uses: ./.github/actions/package_analysis
