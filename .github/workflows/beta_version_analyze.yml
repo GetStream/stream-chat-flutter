@@ -24,7 +24,9 @@ jobs:
         uses: ./.github/actions/setup-flutter
         with:
           channel: beta
-          # Empty so the newest beta is used, whatever major it is.
+          # Must stay empty. Inheriting the action's 3.x default would hold this
+          # job on 3.x betas, so it would stop catching the next major early —
+          # which is the only thing it exists to do.
           flutter-version: ''
           # Weekly, and a new beta invalidates the key, so an SDK entry would
           # almost never be restored before it expires.
