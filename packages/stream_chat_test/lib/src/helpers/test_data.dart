@@ -683,6 +683,55 @@ CastPollVoteResponse createDefaultCastPollVoteResponse({
     ..vote = vote ?? createDefaultPollVote();
 }
 
+/// Creates an [UpdateUsersResponse] wrapping the updated [users].
+UpdateUsersResponse createDefaultUpdateUsersResponse({
+  Map<String, User>? users,
+}) {
+  final updatedUser = createDefaultUser();
+  return UpdateUsersResponse()
+    ..duration = '10ms'
+    ..users = users ?? {updatedUser.id: updatedUser};
+}
+
+/// Creates a [UserBlockResponse] with sensible defaults.
+UserBlockResponse createDefaultUserBlockResponse({
+  String blockedUserId = 'darth_vader',
+  String blockedByUserId = 'luke_skywalker',
+  DateTime? createdAt,
+}) {
+  return UserBlockResponse()
+    ..duration = '10ms'
+    ..blockedUserId = blockedUserId
+    ..blockedByUserId = blockedByUserId
+    ..createdAt = createdAt ?? testCreatedAt;
+}
+
+/// Creates a [BlockedUsersResponse] wrapping [blocks].
+BlockedUsersResponse createDefaultBlockedUsersResponse({
+  List<UserBlock> blocks = const [],
+}) {
+  return BlockedUsersResponse()
+    ..duration = '10ms'
+    ..blocks = blocks;
+}
+
+/// Creates a [GetUnreadCountResponse] with sensible defaults.
+GetUnreadCountResponse createDefaultGetUnreadCountResponse({
+  int totalUnreadCount = 0,
+  int totalUnreadThreadsCount = 0,
+  List<UnreadCountsChannelType> channelType = const [],
+  List<UnreadCountsChannel> channels = const [],
+  List<UnreadCountsThread> threads = const [],
+}) {
+  return GetUnreadCountResponse()
+    ..duration = '10ms'
+    ..totalUnreadCount = totalUnreadCount
+    ..totalUnreadThreadsCount = totalUnreadThreadsCount
+    ..channelType = channelType
+    ..channels = channels
+    ..threads = threads;
+}
+
 /// Creates an [EmptyResponse].
 EmptyResponse createDefaultEmptyResponse() => EmptyResponse()..duration = '10ms';
 
