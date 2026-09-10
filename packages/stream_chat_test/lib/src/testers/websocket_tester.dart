@@ -6,6 +6,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../helpers/mocks.dart';
+import '../helpers/server_json.dart';
 import '../helpers/test_data.dart';
 
 /// Simulates the server side of a WebSocket connection.
@@ -118,9 +119,10 @@ final class WebSocketTester {
 
   /// Emits a typed [event] as a server frame.
   ///
-  /// The frame goes through the engine's real JSON decoding before reaching
-  /// the client, exactly like a production server push.
-  void emitEvent(Event event) => emitRawFrame(event);
+  /// The frame is serialized with server fidelity (see [serverEventJson]) and
+  /// goes through the engine's real JSON decoding before reaching the client,
+  /// exactly like a production server push.
+  void emitEvent(Event event) => emitRawFrame(serverEventJson(event));
 
   /// Emits a raw JSON-encodable [frame] to simulate a server message.
   ///

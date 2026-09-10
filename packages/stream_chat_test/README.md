@@ -108,7 +108,10 @@ with alias getters and a seeding method, and a private factory matching
   a mocktail stub only answers on a match, so stubbing doubles as request
   verification.
 - `WebSocketTester` — `mockSuccessfulAuth` / `mockFailedAuth` / `mockConnectionError` /
-  `emitEvent` / `emitRawFrame`. Chat authenticates through the connect URI (token and
+  `emitEvent` / `emitRawFrame`. Emitted events are serialized with server fidelity
+  (`serverEventJson`): nested message/reaction payloads keep the server-assigned fields
+  (`user`, timestamps, reactions, ...) that their request-shaped `toJson` omits.
+  Chat authenticates through the connect URI (token and
   user payload in query parameters), so the fake server validates credentials from
   the URI it receives and answers with the `health.check` + `me` handshake. Outgoing
   health-check pings are acknowledged automatically.

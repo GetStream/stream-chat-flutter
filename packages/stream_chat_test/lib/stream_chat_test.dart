@@ -17,6 +17,7 @@ export 'package:test/test.dart';
 export 'src/helpers/api_mocker_mixin.dart';
 export 'src/helpers/matchers.dart';
 export 'src/helpers/mocks.dart';
+export 'src/helpers/server_json.dart';
 export 'src/helpers/test_data.dart';
 
 // Testers
