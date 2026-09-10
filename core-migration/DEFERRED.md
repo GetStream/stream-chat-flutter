@@ -10,7 +10,6 @@ A row leaves this file when it lands, not when it is decided.
 | | What | Blocked on | Phase |
 | --- | --- | --- | --- |
 | ☐ | Adopt core's `CurrentPlatform` / `PlatformType`, renaming `.name` → `.operatingSystem` | A **`stream_core` release** carrying `debugCurrentPlatformOverride`. It is on core's `main`; 0.5.0 does not have it, and `stream_chat_flutter`'s tests set it in 8 places. | [02](02-platform-and-environment.md) |
-| ☐ | Adopt core's `Filter<T>` / `Sort<T>` / `ComparableField` | Core gaining `$nor`. `$ne` and `$nin` are *not* upstream asks — every other SDK has deprecated or dropped them. | [08](08-query-dsl.md) |
 | ☐ | A test proving a malformed response body surfaces as `StreamClientException` rather than a bare `TypeError` | A call through the generated client — nothing in this package exercises `runApiSafely` yet. Arrives with `openapi-migration` group 02. | [03](03-errors.md) |
 
 ## Needs a live check, not more code
@@ -33,10 +32,9 @@ A row leaves this file when it lands, not when it is decided.
 | ☐ | Mark `StreamHttpClient` `@internal` | `AttachmentFileUploaderProvider` is the only public signature naming it, and retyping that is phase 09's call. | [09](09-uploads.md) |
 | ☐ | Reclassify the SDK's own precondition throws | 23 sites still raise `StreamChatError`. `ERROR_LAYER.md` splits them further than a sweep can: a condition a correct program can hit becomes a `StreamException`, while genuine misuse should raise `StateError` / `ArgumentError` and never be wrapped. Doing it by sed would get it wrong. | [03](03-errors.md) |
 | ☐ | Delete `stream_chat_error.dart` | Four things first: group 12 removes `StreamChatNetworkError`, phase 07 (parked) removes `StreamWebSocketError`, the precondition throws above are reclassified, and the UI's attachment-validation subtypes stop being errors — they are *returned values*, never thrown. | [03](03-errors.md) |
-| ☐ | Decide the fate of `Filter.custom` / `Filter.raw` / `Filter.empty` | Core has no equivalent. At least one should survive: a typed `FilterField` registry cannot express a field the SDK does not model. | [08](08-query-dsl.md) |
 | ☐ | Move chat's WebSocket to `/api/v2/connect` | Three blockers, none of them chat-side: v2's handshake never calls `EnrichUserMutes` (`lib/chat/controller/v1/connect.go:118` only), it decodes `user_details` with `WithDecodeExtraFields(false)` so chat's root-promoted `extraData` is dropped, and core's `ConnectUserDetailsRequest` has no `privacySettings`. iOS is on core and v2 endpoints and still connects over v1. | [07](07-websocket.md) |
 | ☐ | Decide whether id-like sort fields should opt out of string folding | `StreamSortField` folds **every** string value through `normalizeStringForSort`, which is what `ComparableField` did, so [08](08-query-dsl.md) kept it. It also means `UserSortField.id`, `MessageSearchSortField.id`, `MemberSortField.userId`, `MessageReminderSortField.channelCid` and `ThreadSortField.parentMessageId` compare case- and diacritic-insensitively — two ids differing only in case tie, so a composite sort's tie-breaker stops breaking ties. Pre-existing, and a `foldStrings: false` per field would fix it; changing it is a behaviour change beyond the migration. | [08](08-query-dsl.md) |
-| ☐ | Decide whether core grows channel-scoped `CdnClient` operations, or chat keeps its broader uploader interface | Half of chat's uploads are channel-scoped and core's `CdnClient` has only four CDN-scoped methods. Must agree with `openapi-migration/12-uploads-cdn.md` before either starts. | [09](09-uploads.md) |
+| ☐ | Implement the uploader against core's task machinery | The **decision** is made — chat keeps its broader interface and implements a chat-side `CdnClient` for the CDN half ([09](09-uploads.md)). Only the work is outstanding. Must still agree with `openapi-migration/12-uploads-cdn.md` on who writes the multipart calls. | [09](09-uploads.md) |
 
 ## Landed, listed so nobody re-raises it
 
@@ -44,6 +42,9 @@ A row leaves this file when it lands, not when it is decided.
 | --- | --- | --- |
 | ☑ | Remove chat's own logger and `package:logging` | Done in [06](06-logger.md): the SDK writes through `StreamLogger`, `logConfig` replaces `logLevel` + `logHandlerFunction`, and no package in the repo imports `package:logging` any more. |
 | ☑ | Delete `StreamChatClient.devToken` | [04](04-token-and-auth.md) |
+| ☑ | Adopt core's `Filter<T>` / `Sort<T>` / `ComparableField` | Done in [08](08-query-dsl.md). It was never blocked on core gaining `$nor`: no core SDK models it, and chat removed `$nor`, `$ne` and `$nin` instead — the API is withdrawing all three. |
+| ☑ | Decide the fate of `Filter.custom` / `Filter.raw` / `Filter.empty` | [08](08-query-dsl.md): `custom` becomes a per-registry factory, `raw` moved to core, `empty` is replaced by nullability. |
+| ☑ | Adopt core's `LocationCoordinate` | [08](08-query-dsl.md), closing that phase. |
 | ☑ | Settle chat's keepalive frame | [07](07-websocket.md): no chat-side ping type. `MonitorHealth` (`client.go:607-620`) `Discard()`s every client frame, so the body is unread and core's default `pingRequestBuilder` is correct. iOS sends a raw protocol ping for the same reason. |
 
 ## The `StreamChatConfig` that absorbs several of these
