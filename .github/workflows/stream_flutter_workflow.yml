@@ -167,7 +167,7 @@ jobs:
             working-directory: sample_app/android
             build-command: bundle exec fastlane build_apk
           - platform: ios
-            os: macos-15 # Requires xcode 15 or later
+            os: xcode-27
             working-directory: sample_app/ios
             build-command: bundle exec fastlane build_ipa no_codesign:true
 
@@ -180,7 +180,7 @@ jobs:
       - uses: maxim-lobanov/setup-xcode@v1
         if: matrix.platform == 'ios'
         with:
-          xcode-version: '26.3'
+          xcode-version: 'latest'
       - name: "Install Tools"
         run: flutter pub global activate melos
       - name: "Bootstrap Workspace"

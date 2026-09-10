@@ -127,14 +127,8 @@ jobs:
       - name: Bootstrap
         run: |
           flutter precache --ios
-          flutter config --no-enable-swift-package-manager
           flutter pub global activate melos
           melos bootstrap
-
-      # After Bootstrap so the cache keys hash the resolved pubspec.lock
-      - uses: ./.github/actions/cache-cocoapods
-        with:
-          key-suffix: ${{ matrix.ios }}
 
       - name: Launch Allure TestOps
         working-directory: sample_app/ios

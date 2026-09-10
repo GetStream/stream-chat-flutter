@@ -148,14 +148,8 @@ jobs:
       - name: Bootstrap
         run: |
           flutter precache --ios
-          flutter config --no-enable-swift-package-manager
           flutter pub global activate melos
           melos bootstrap
-
-      # After Bootstrap so the cache keys hash the resolved pubspec.lock
-      - uses: ./.github/actions/cache-cocoapods
-        with:
-          key-suffix: ${{ runner.os }}
 
       - name: Run e2e (iOS simulator)
         working-directory: sample_app/ios

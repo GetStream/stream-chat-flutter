@@ -82,7 +82,7 @@ jobs:
   ios:
     needs: determine_platforms
     if: ${{ needs.determine_platforms.outputs.run_ios == 'true' }}
-    runs-on: macos-15 # Requires xcode 15 or later
+    runs-on: xcode-27
 
     steps:
       - name: Connect Bot
@@ -97,12 +97,9 @@ jobs:
 
       - uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '26.3'
+          xcode-version: 'latest'
 
       - uses: ./.github/actions/setup-flutter
-
-      - name: "Disable Swift Package Manager"
-        run: flutter config --no-enable-swift-package-manager
 
       - uses: ./.github/actions/setup-ruby
 
