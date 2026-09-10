@@ -3,11 +3,31 @@ import 'package:stream_chat/src/client/retry_queue.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
-import '../mocks.dart';
+class _MockClient extends Mock implements StreamChatClient {
+  @override
+  Stream<Event> on([
+    String? eventType,
+    String? eventType2,
+    String? eventType3,
+    String? eventType4,
+  ]) => const Stream.empty();
+}
+
+class _MockChannel extends Mock implements Channel {
+  final _client = _MockClient();
+
+  @override
+  StreamChatClient get client => _client;
+}
+
+class _MockLogger extends Mock implements Logger {
+  @override
+  Level get level => Level.ALL;
+}
 
 void main() {
-  late final channel = MockRetryQueueChannel();
-  late final logger = MockLogger();
+  late final channel = _MockChannel();
+  late final logger = _MockLogger();
   late RetryQueue retryQueue;
 
   setUpAll(() {

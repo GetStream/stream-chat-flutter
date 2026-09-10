@@ -1,9 +1,9 @@
+import 'dart:async';
+
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
-import '../fakes.dart';
-import '../mocks.dart';
 import '../utils.dart';
 
 void main() {
@@ -516,8 +516,8 @@ Logger _createLogger(String name) {
 }
 
 StreamChatClient _createMockClient() {
-  final client = MockStreamChatClient();
-  final clientState = FakeClientState(
+  final client = _MockStreamChatClient();
+  final clientState = _FakeClientState(
     currentUser: OwnUser(id: 'current-user-id'),
   );
 
@@ -621,6 +621,53 @@ Read _createCurrentUserRead(
     lastDeliveredMessageId: lastDeliveredMessageId,
     unreadMessages: unreadMessages,
   );
+}
+
+// endregion
+
+// region Test Doubles
+
+class _MockStreamChatClient extends Mock implements StreamChatClient {
+  @override
+  Stream<Event> get eventStream => _eventController.stream;
+  final _eventController = StreamController<Event>.broadcast();
+
+  @override
+  Stream<Event> on([
+    String? eventType,
+    String? eventType2,
+    String? eventType3,
+    String? eventType4,
+  ]) {
+    if (eventType == null || eventType == EventType.any) return eventStream;
+    return eventStream.where(
+      (event) =>
+          event.type == eventType || event.type == eventType2 || event.type == eventType3 || event.type == eventType4,
+    );
+  }
+
+  @override
+  Future<void> dispose() => _eventController.close();
+}
+
+class _FakeClientState extends Fake implements ClientState {
+  _FakeClientState({
+    this._currentUser,
+  });
+
+  final OwnUser? _currentUser;
+
+  @override
+  OwnUser? get currentUser => _currentUser;
+
+  @override
+  Map<String, Channel> get channels => _channels;
+  final _channels = <String, Channel>{};
+
+  @override
+  void addChannels(Map<String, Channel> channelMap) {
+    _channels.addAll(channelMap);
+  }
 }
 
 // endregion
