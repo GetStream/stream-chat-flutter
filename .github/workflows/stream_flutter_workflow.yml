@@ -177,6 +177,8 @@ jobs:
         with:
           fetch-depth: 0
       - uses: ./.github/actions/setup-flutter
+      - uses: ./.github/actions/cache-gradle
+        if: matrix.platform == 'android'
       - uses: maxim-lobanov/setup-xcode@v1
         if: matrix.platform == 'ios'
         with:
