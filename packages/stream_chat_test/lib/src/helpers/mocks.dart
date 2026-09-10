@@ -59,6 +59,100 @@ class MockWebSocketChannel extends Mock implements WebSocketChannel {}
 /// Mock implementation of [WebSocketSink].
 class MockWebSocketSink extends Mock implements WebSocketSink {}
 
+/// Mock implementation of [ChatPersistenceClient].
+///
+/// Tracks real connection state (`connect` / `disconnect` / [isConnected] /
+/// [userId]) so the client's persistence lifecycle works without stubbing;
+/// every other member is a regular mocktail mock. Pass it to the harness via
+/// the `chatPersistenceClient:` parameter.
+class MockPersistenceClient extends Mock implements ChatPersistenceClient {
+  String? _userId;
+  bool _isConnected = false;
+
+  @override
+  bool get isConnected => _isConnected;
+
+  @override
+  String? get userId => _userId;
+
+  @override
+  Future<void> connect(String userId) async {
+    _userId = userId;
+    _isConnected = true;
+  }
+
+  @override
+  Future<void> disconnect({bool flush = false}) async {
+    _userId = null;
+    _isConnected = false;
+  }
+}
+
+/// Fake implementation of [ChatPersistenceClient].
+///
+/// Implements the connection lifecycle and sync bookkeeping with real state
+/// and records how often `connect` / `disconnect` were called, for tests that
+/// assert on the persistence lifecycle itself. Members beyond these throw,
+/// as on any [Fake].
+class FakePersistenceClient extends Fake implements ChatPersistenceClient {
+  /// Creates a [FakePersistenceClient], optionally seeded with a last-sync
+  /// timestamp and a list of locally cached channel cids.
+  FakePersistenceClient({
+    this._lastSyncAt,
+    List<String>? channelCids,
+  }) : _channelCids = channelCids ?? [];
+
+  String? _userId;
+  bool _isConnected = false;
+  DateTime? _lastSyncAt;
+  List<String> _channelCids;
+
+  /// Number of times [connect] was called.
+  int connectCallCount = 0;
+
+  /// Number of times [disconnect] was called.
+  int disconnectCallCount = 0;
+
+  @override
+  bool get isConnected => _isConnected;
+
+  @override
+  String? get userId => _userId;
+
+  @override
+  Future<void> connect(String userId) async {
+    _userId = userId;
+    _isConnected = true;
+    connectCallCount++;
+  }
+
+  @override
+  Future<void> disconnect({bool flush = false}) async {
+    if (flush) await this.flush();
+
+    _userId = null;
+    _isConnected = false;
+    disconnectCallCount++;
+  }
+
+  @override
+  Future<void> flush() async {
+    _lastSyncAt = null;
+    _channelCids = [];
+  }
+
+  @override
+  Future<DateTime?> getLastSyncAt() async => _lastSyncAt;
+
+  @override
+  Future<void> updateLastSyncAt(DateTime lastSyncAt) async {
+    _lastSyncAt = lastSyncAt;
+  }
+
+  @override
+  Future<List<String>> getChannelCids() async => _channelCids;
+}
+
 /// A [StreamChatApi] whose sub-APIs are lazily-created mocks.
 ///
 /// Injected into [StreamChatClient] as the `chatApi:` seam so that every REST

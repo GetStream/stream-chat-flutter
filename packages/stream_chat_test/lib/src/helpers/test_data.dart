@@ -55,6 +55,7 @@ OwnUser createDefaultOwnUser({
   int unreadChannels = 0,
   List<Device> devices = const [],
   List<Mute> mutes = const [],
+  PrivacySettings? privacySettings,
   DateTime? createdAt,
   DateTime? updatedAt,
 }) {
@@ -66,6 +67,7 @@ OwnUser createDefaultOwnUser({
     unreadChannels: unreadChannels,
     devices: devices,
     mutes: mutes,
+    privacySettings: privacySettings,
     createdAt: createdAt ?? testCreatedAt,
     updatedAt: updatedAt ?? testUpdatedAt,
   );
@@ -198,6 +200,32 @@ ChannelModel createDefaultChannelModel({
   );
 }
 
+/// Creates a [ChannelConfig] with sensible defaults.
+///
+/// Timestamps are always passed explicitly because the constructor defaults
+/// them to `DateTime.now()`, which would break deterministic matching.
+ChannelConfig createDefaultChannelConfig({
+  bool readEvents = false,
+  bool typingEvents = false,
+  bool reactions = false,
+  bool replies = false,
+  bool mutes = false,
+  List<Command> commands = const [],
+  DateTime? createdAt,
+  DateTime? updatedAt,
+}) {
+  return ChannelConfig(
+    readEvents: readEvents,
+    typingEvents: typingEvents,
+    reactions: reactions,
+    replies: replies,
+    mutes: mutes,
+    commands: commands,
+    createdAt: createdAt ?? testCreatedAt,
+    updatedAt: updatedAt ?? testUpdatedAt,
+  );
+}
+
 /// Creates a [ChannelState] with sensible defaults.
 ChannelState createDefaultChannelState({
   ChannelModel? channel,
@@ -306,3 +334,39 @@ GetAppSettingsResponse createDefaultGetAppSettingsResponse({
 
 /// Creates an [EmptyResponse].
 EmptyResponse createDefaultEmptyResponse() => EmptyResponse()..duration = '10ms';
+
+/// Creates an [ErrorResponse] with sensible defaults.
+ErrorResponse createDefaultErrorResponse({
+  int code = 500,
+  String message = 'internal server error',
+  int statusCode = 500,
+}) {
+  return ErrorResponse()
+    ..code = code
+    ..message = message
+    ..statusCode = statusCode;
+}
+
+/// Creates a [StreamChatNetworkError] for [errorCode].
+///
+/// Non-retriable by default: the error carries an [ErrorResponse], the shape a
+/// server-rejected request produces, which the SDK's default retry policy does
+/// not retry. Pass `retriable: true` to omit the response data, making the
+/// error retriable and eligible for the SDK's retry queue.
+StreamChatNetworkError createDefaultNetworkError({
+  ChatErrorCode errorCode = ChatErrorCode.internalSystemError,
+  int? statusCode,
+  bool retriable = false,
+}) {
+  return StreamChatNetworkError(
+    errorCode,
+    statusCode: statusCode,
+    data: retriable
+        ? null
+        : createDefaultErrorResponse(
+            code: errorCode.code,
+            message: errorCode.message,
+            statusCode: statusCode ?? 500,
+          ),
+  );
+}
