@@ -44,4 +44,6 @@ dev_dependencies:
   freezed: ^3.0.0
   json_serializable: ^6.13.2
   mocktail: ^1.0.5
+  stream_chat_test:
+    path: ../stream_chat_test
   test: ^1.31.1
