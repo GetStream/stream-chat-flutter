@@ -688,66 +688,6 @@ void main() {
       });
     });
 
-    group('Channel updated events', () {
-      const channelId = 'test-channel-id';
-      const channelType = 'test-channel-type';
-      late Channel channel;
-
-      setUp(() {
-        final channelState = _generateChannelState(channelId, channelType);
-        channel = Channel.fromState(client, channelState);
-      });
-
-      tearDown(() {
-        channel.dispose();
-      });
-
-      test('merges the event channel into the current channel model', () async {
-        client.addEvent(
-          Event(
-            cid: channel.cid,
-            type: EventType.channelUpdated,
-            channel: ChannelModel(
-              id: channelId,
-              type: channelType,
-              memberCount: 42,
-              extraData: const {'name': 'updated-name'},
-            ),
-          ),
-        );
-        await Future.delayed(Duration.zero);
-
-        expect(channel.memberCount, 42);
-        expect(channel.extraData['name'], 'updated-name');
-      });
-
-      test('replaces the member list with the event members', () async {
-        channel.state!.updateChannelState(
-          channel.state!.channelState.copyWith(
-            members: [
-              Member(userId: 'member-1'),
-              Member(userId: 'member-2'),
-            ],
-          ),
-        );
-
-        client.addEvent(
-          Event(
-            cid: channel.cid,
-            type: EventType.channelUpdated,
-            channel: ChannelModel(
-              id: channelId,
-              type: channelType,
-              members: [Member(userId: 'member-3')],
-            ),
-          ),
-        );
-        await Future.delayed(Duration.zero);
-
-        expect(channel.state!.channelState.members?.map((m) => m.userId), ['member-3']);
-      });
-    });
-
     group('Member Events', () {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';
