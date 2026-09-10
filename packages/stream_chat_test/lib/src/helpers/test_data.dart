@@ -526,6 +526,15 @@ PartialUpdateChannelResponse createDefaultPartialUpdateChannelResponse({
     ..channel = channel ?? createDefaultChannelModel();
 }
 
+/// Creates a [PartialUpdateMemberResponse] wrapping [channelMember].
+PartialUpdateMemberResponse createDefaultPartialUpdateMemberResponse({
+  Member? channelMember,
+}) {
+  return PartialUpdateMemberResponse()
+    ..duration = '10ms'
+    ..channelMember = channelMember ?? createDefaultMember();
+}
+
 /// Creates an [AddMembersResponse] wrapping [channel], [members] and
 /// [message].
 AddMembersResponse createDefaultAddMembersResponse({
