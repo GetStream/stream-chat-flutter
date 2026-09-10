@@ -21,7 +21,7 @@ block and running `melos bootstrap`**, never the package manifest directly.
 | `jose: ^0.3.5+1` | 04 | Only `Token` parsed JWTs; `UserToken` does it in core. |
 | ~~`logging: ^1.3.0`~~ | 06 | **Done.** 06 removed chat's logger outright instead of bridging it, so the deprecation cycle never applied. Gone from `melos.yaml`, and no package imports it. |
 | `equatable: ^2.0.8` | — | **Stays.** 28 files in `stream_chat/lib` use it directly. |
-| `diacritic: ^0.1.6` | 08 | **Actionable now.** It moved upstream in core [#181](https://github.com/GetStream/stream-core-flutter/pull/181), but chat still keeps its own `core/util/string_sort_normalizer.dart`, which differs from core's only in its doc comment and `@internal`. Switch to core's and the dependency goes. It stays in `stream_chat_flutter`, which uses it in two files directly. |
+| ~~`diacritic: ^0.1.6`~~ | 08 | **Done.** Chat's `normalizeStringForSort` was a copy of core's, differing only in its doc comment, and was `@internal` so nothing public moved. The three sort fields that fold names now use core's. Still a direct dependency of `stream_chat_flutter`, which uses it in two files. |
 
 `rate_limiter` **stays** — `RetryQueue` uses its `backOff`, and `RetryPolicy` / `RetryQueue` are
 staying chat-side. `synchronized`, `collection`, `mime`, `http_parser`, `rxdart`, `meta`,
