@@ -446,6 +446,17 @@ SendActionResponse createDefaultSendActionResponse({
     ..message = message;
 }
 
+/// Creates a [SendReactionResponse] wrapping [message] and [reaction].
+SendReactionResponse createDefaultSendReactionResponse({
+  Message? message,
+  Reaction? reaction,
+}) {
+  return SendReactionResponse()
+    ..duration = '10ms'
+    ..message = message ?? createDefaultMessage()
+    ..reaction = reaction ?? createDefaultReaction();
+}
+
 /// Creates a [SearchMessagesResponse] wrapping [results].
 SearchMessagesResponse createDefaultSearchMessagesResponse({
   List<GetMessageResponse> results = const [],
@@ -459,6 +470,44 @@ SearchMessagesResponse createDefaultSearchMessagesResponse({
     ..previous = previous;
 }
 
+/// Creates a [QueryRepliesResponse] wrapping [messages].
+QueryRepliesResponse createDefaultQueryRepliesResponse({
+  List<Message> messages = const [],
+}) {
+  return QueryRepliesResponse()
+    ..duration = '10ms'
+    ..messages = messages;
+}
+
+/// Creates a [QueryReactionsResponse] wrapping [reactions].
+QueryReactionsResponse createDefaultQueryReactionsResponse({
+  List<Reaction> reactions = const [],
+  String? next,
+}) {
+  return QueryReactionsResponse()
+    ..duration = '10ms'
+    ..reactions = reactions
+    ..next = next;
+}
+
+/// Creates a [GetMessagesByIdResponse] wrapping [messages].
+GetMessagesByIdResponse createDefaultGetMessagesByIdResponse({
+  List<Message> messages = const [],
+}) {
+  return GetMessagesByIdResponse()
+    ..duration = '10ms'
+    ..messages = messages;
+}
+
+/// Creates a [TranslateMessageResponse] wrapping [message].
+TranslateMessageResponse createDefaultTranslateMessageResponse({
+  Message? message,
+}) {
+  return TranslateMessageResponse()
+    ..duration = '10ms'
+    ..message = message ?? createDefaultMessage();
+}
+
 /// Creates a [QueryChannelsResponse] wrapping [channels].
 QueryChannelsResponse createDefaultQueryChannelsResponse({
   List<ChannelState> channels = const [],
@@ -466,6 +515,29 @@ QueryChannelsResponse createDefaultQueryChannelsResponse({
   return QueryChannelsResponse()
     ..duration = '10ms'
     ..channels = channels;
+}
+
+/// Creates a [PartialUpdateChannelResponse] wrapping [channel].
+PartialUpdateChannelResponse createDefaultPartialUpdateChannelResponse({
+  ChannelModel? channel,
+}) {
+  return PartialUpdateChannelResponse()
+    ..duration = '10ms'
+    ..channel = channel ?? createDefaultChannelModel();
+}
+
+/// Creates an [AddMembersResponse] wrapping [channel], [members] and
+/// [message].
+AddMembersResponse createDefaultAddMembersResponse({
+  ChannelModel? channel,
+  List<Member> members = const [],
+  Message? message,
+}) {
+  return AddMembersResponse()
+    ..duration = '10ms'
+    ..channel = channel ?? createDefaultChannelModel()
+    ..members = members
+    ..message = message;
 }
 
 /// Creates a [GetAppSettingsResponse] with default [AppSettings].
