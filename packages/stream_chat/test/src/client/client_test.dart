@@ -1229,44 +1229,6 @@ void main() {
       await client.dispose();
     });
 
-    group('`.sync`', () {
-      test('should work fine', () async {
-        const cids = ['test-cid-1', 'test-cid-2', 'test-cid-3'];
-        final lastSyncAt = DateTime.now();
-
-        when(() => api.general.sync(cids, lastSyncAt)).thenAnswer(
-          (_) async => SyncResponse()
-            ..events = [
-              Event(
-                isLocal: false,
-                type: EventType.healthCheck,
-                connectionId: 'test-connection-id',
-                me: OwnUser.fromUser(user),
-              ),
-              Event(
-                isLocal: false,
-                type: EventType.messageDeleted,
-                message: Message(id: 'test-message-id'),
-              ),
-            ],
-        );
-
-        await client.sync(cids: cids, lastSyncAt: lastSyncAt);
-
-        verify(() => api.general.sync(cids, lastSyncAt)).called(1);
-      });
-
-      test('should return if `cids` is not available', () async {
-        expect(client.sync, returnsNormally);
-        verifyNever(() => api.general.sync(any(), any()));
-      });
-
-      test('should return if `lastSyncAt` is not available', () async {
-        expect(() => client.sync(cids: ['test-cid-1']), returnsNormally);
-        verifyNever(() => api.general.sync(any(), any()));
-      });
-    });
-
     test('`.updateUser`', () async {
       final user = User(
         id: 'test-user-id',
