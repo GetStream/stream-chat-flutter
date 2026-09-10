@@ -14,6 +14,8 @@ Map<String, Object?> serverEventJson(Event event) {
     if (event.channel case final channel?) 'channel': serverChannelJson(channel),
     if (event.message case final message?) 'message': serverMessageJson(message),
     if (event.reaction case final reaction?) 'reaction': serverReactionJson(reaction),
+    if (event.poll case final poll?) 'poll': serverPollJson(poll),
+    if (event.pollVote case final pollVote?) 'poll_vote': serverPollVoteJson(pollVote),
   };
 }
 
@@ -63,7 +65,7 @@ Map<String, Object?> serverMessageJson(Message message) {
     if (message.pinnedAt case final pinnedAt?) 'pinned_at': pinnedAt.toIso8601String(),
     if (message.pinnedBy case final pinnedBy?) 'pinned_by': pinnedBy.toJson(),
     if (message.quotedMessage case final quotedMessage?) 'quoted_message': serverMessageJson(quotedMessage),
-    if (message.poll case final poll?) 'poll': poll.toJson(),
+    if (message.poll case final poll?) 'poll': serverPollJson(poll),
     if (message.draft case final draft?) 'draft': draft.toJson(),
     if (message.reminder case final reminder?) 'reminder': reminder.toJson(),
     if (message.i18n case final i18n?) 'i18n': i18n,
@@ -85,6 +87,39 @@ Map<String, Object?> serverLocationJson(Location location) {
     if (location.userId case final userId?) 'user_id': userId,
     'created_at': location.createdAt.toIso8601String(),
     'updated_at': location.updatedAt.toIso8601String(),
+  };
+}
+
+/// Serializes [poll] the way a server sends it, restoring the
+/// server-assigned fields that `Poll.toJson` omits.
+Map<String, Object?> serverPollJson(Poll poll) {
+  return {
+    ...poll.toJson(),
+    'answers_count': poll.answersCount,
+    'vote_counts_by_option': poll.voteCountsByOption,
+    'latest_votes_by_option': poll.latestVotesByOption.map(
+      (optionId, votes) => MapEntry(optionId, [for (final vote in votes) serverPollVoteJson(vote)]),
+    ),
+    'latest_answers': [for (final answer in poll.latestAnswers) serverPollVoteJson(answer)],
+    'own_votes': [for (final vote in poll.ownVotesAndAnswers) serverPollVoteJson(vote)],
+    'vote_count': poll.voteCount,
+    if (poll.createdById case final createdById?) 'created_by_id': createdById,
+    if (poll.createdBy case final createdBy?) 'created_by': createdBy.toJson(),
+    'created_at': poll.createdAt.toIso8601String(),
+    'updated_at': poll.updatedAt.toIso8601String(),
+  };
+}
+
+/// Serializes [pollVote] the way a server sends it, restoring the
+/// server-assigned fields that `PollVote.toJson` omits.
+Map<String, Object?> serverPollVoteJson(PollVote pollVote) {
+  return {
+    ...pollVote.toJson(),
+    if (pollVote.pollId case final pollId?) 'poll_id': pollId,
+    if (pollVote.userId case final userId?) 'user_id': userId,
+    if (pollVote.user case final user?) 'user': user.toJson(),
+    'created_at': pollVote.createdAt.toIso8601String(),
+    'updated_at': pollVote.updatedAt.toIso8601String(),
   };
 }
 
