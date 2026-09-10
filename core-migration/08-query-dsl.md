@@ -380,12 +380,25 @@ The earlier pass called client-side filtering "the payoff". No Stream chat SDK d
 
 So adopting core's `Filter` does not oblige us to call `matches()`, and nothing will at first.
 
-One consequence to carry: `matches()` on a `Filter.raw` leaf returns `true`. That is correct under
-`and` and wrong under `or` and `nor`, and it cannot be fixed — Swift's drop semantics needs the
-third state its nullable predicate provides, which `bool matches(T)` does not have. Harmless while
-nothing calls `matches()`. If list-membership correctness is ever taken on as a feature — a real
-gap in both SDKs, where a channel joins a list it does not match — this is the first thing to
-revisit.
+Two consequences to carry.
+
+**`matches()` throws on a `Filter.raw` leaf.** Returning `true` is correct under `and` and wrong
+under `or`, and returning `false` inverts that; Swift's drop semantics needs the third state its
+nullable predicate provides, which `bool matches(T)` does not have. Refusing is the only outcome
+that cannot silently produce a wrong result, so core throws.
+
+**A name filter matches approximately.** `user.name` and `channel.name` are stored normalized —
+the column is `name_nf` — and `NormalizedNameHandlers` (`mq/name.go:23`) normalizes the filter
+value before comparing, so the server compares normalized against normalized. Locally we control
+only the field side: the caller's value reaches core's operator verbatim. Normalizing the getter
+would not reproduce the server, it would only move which inputs disagree, and it would break
+`equal(name, 'José')` — the natural call — to fix `equal(name, 'jose')`. So the getters stay raw.
+This is the opposite of the sort registry, where both compared values come from the getter, which
+is why normalizing is right there and wrong here. Fixing it properly means normalizing the query
+value too, which is a per-field transform in core's operators.
+
+If list-membership correctness is ever taken on as a feature — a real gap in both SDKs, where a
+channel joins a list it does not match — these are the first things to revisit.
 
 ## The registries are verified against the backend
 
