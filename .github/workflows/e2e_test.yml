@@ -140,9 +140,7 @@ jobs:
 
       - uses: ./.github/actions/setup-xcode
         with:
-          # Matches the simulator runtimes this job pins: macos-15 ships an iOS
-          # 26.2 runtime but no 26.3, so 'latest' (Xcode 26.3 on that image)
-          # would have no matching runtime.
+          # Pinned to match the simulator runtimes this job selects.
           xcode-version: '26.2'
 
       - uses: ./.github/actions/setup-flutter

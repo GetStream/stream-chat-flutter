@@ -59,15 +59,12 @@ platform :ios do
     export_method = options[:export_method] || "app-store"
     export_options_plist = export_files[export_method]
 
-    # `flutter build ipa` does not pass the export options plist through to the
-    # archive step (flutter/flutter#113977), so the identity and profile have to be
-    # supplied as build settings.
-    #
-    # They go into an xcconfig rather than FLUTTER_XCODE_* env vars: those reach
-    # xcodebuild as command-line settings, which apply to every target in the graph.
-    # The Swift Package plugin bundles would inherit them and fail the archive with
-    # "Signing for <plugin> requires a development team". Flutter/Release.xcconfig is
-    # the base configuration of the Runner target alone, so nothing else sees these.
+    # The export options plist does not reach the archive step
+    # (flutter/flutter#113977), so signing is supplied as build settings. It has to
+    # be an xcconfig, not FLUTTER_XCODE_*: those become xcodebuild command-line
+    # settings, which apply to every target including the Swift Package plugin
+    # bundles, and those cannot sign. Flutter/Release.xcconfig is scoped to the
+    # Runner target.
     signing_xcconfig = "#{root_path}/ios/Flutter/Signing.xcconfig"
     if no_codesign
       FileUtils.rm_f(signing_xcconfig)
