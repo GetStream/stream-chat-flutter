@@ -170,10 +170,18 @@ platform :ios do
       path: "#{root_path}/build/ios/archive/Runner.xcarchive/dSYMs"
     )
 
+    # Crashlytics ships upload-symbols inside the firebase-ios-sdk Swift Package
+    # checkout. fastlane only auto-discovers it under Pods/ and Fabric.app, so the
+    # path has to be passed explicitly.
+    upload_symbols = Dir.glob(
+      "#{root_path}/build/ios/SourcePackages/checkouts/*/Crashlytics/upload-symbols"
+    ).first
+    UI.user_error!('Could not find Crashlytics upload-symbols in build/ios/SourcePackages') if upload_symbols.nil?
+
     upload_symbols_to_crashlytics(
       dsym_path: dsym_zip,
       gsp_path: "#{root_path}/ios/Runner/GoogleService-Info.plist",
-      binary_path: "#{root_path}/ios/Pods/FirebaseCrashlytics/upload-symbols"
+      binary_path: upload_symbols
     )
   end
 
