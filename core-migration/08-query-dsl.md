@@ -4,8 +4,8 @@
 evaluated client-side as well as sent to the server.
 
 **Size:** ~600 chat LOC deleted against ~1,420 core LOC. The widest public break after phase
-[03](03-errors.md). **No upstream `stream_core` work** — and three operators chat should deprecate
-rather than port.
+[03](03-errors.md). Three changes went upstream to `stream_core` alongside it, and three
+operators were removed rather than ported.
 
 ## Scope
 
@@ -743,17 +743,19 @@ but has to be remembered field by field; see [`UPSTREAM.md`](UPSTREAM.md). In co
 default for every SDK and core's own `ComparableField` stops being wrong for names. Nothing in
 this phase waits on it.
 
-## Decisions to make
+## Decisions taken
 
-- Which escape hatches survive, and in what form.
-- Whether `ComparableFieldProvider` survives. 48 models implement it; core has no such interface.
-  Under a typed `SortField` registry it may be unnecessary — but removing it touches every model.
-- Whether `Filter` keeps a chat-side `typedef` per queryable type (`typedef ChannelFilter =
-  Filter<Channel>`) as feeds does. It reads much better in public signatures.
-- Whether `predefined_filter.dart` is rebuilt on the registry or dropped.
-- Whether client-side `matches()` gets *used* anywhere in this phase, or is just enabled. Enabling
-  it is the cheap half; using it (e.g. deciding whether a new channel belongs in a filtered list,
-  the way feeds' handlers do) is a behaviour improvement that deserves its own change.
+- **Escape hatches.** `Filter.custom` and `Filter.empty` are gone. An unmodelled *field* is
+  reached with a registry's `custom` factory, an unmodelled *query* with core's `Filter.raw`.
+  Nullability replaces `empty`, which matters on `queryThreads`.
+- **`ComparableFieldProvider` is removed**, along with `getComparableField` on all eleven models.
+  A field reads its own value, so an override had nowhere to go.
+- **A `typedef` per queryable type**, as feeds does — `ChannelFilter`, `MemberFilter` and so on.
+  Each names its registry and carries a worked example.
+- **`predefined_filter.dart` is rebuilt on the registry.** Its filter is a `ChannelFilter` and the
+  sort-fallback walk reads `toJson()`, since a preset is always a raw filter.
+- **`matches()` is enabled, not used.** Nothing in the SDK calls it yet; wiring it into list
+  handling is a behaviour change that deserves its own PR.
 
 ## Risks
 
@@ -773,43 +775,48 @@ this phase waits on it.
 
 ## Upstream `stream_core` work
 
-**None. This phase is unblocked.** Both asks an earlier draft listed dissolved on inspection:
-`$nor` is omitted by all three core SDKs deliberately, and the two `ComparableField` divergences
-resolve chat-side (see above). `normalizeStringForSort` remains a standalone
-[`UPSTREAM.md`](UPSTREAM.md) candidate, not a prerequisite.
+Three changes landed in core alongside this phase, in
+[#181](https://github.com/GetStream/stream-core-flutter/pull/181):
 
-One thing to raise with the core owners, separately from this phase: feeds' query docs advertise
-operators core does not have — `activities_query.dart:87` and `feeds_query.dart:137,146,155` all
-list `.notEqual` under "**Supported operators:**", and there is no `notEqual` in
-`FilterOperator`. Doc-only, but it is where someone would go looking for the operator set.
+- `normalizeStringForSort`, ported from chat so a locally sorted list of names matches the order
+  a query returns.
+- `Filter.raw`, the fallback leaf that lets a decoder stay total. `matches` throws for it.
+- `Filter.equal` and `Filter.in_` now match an array-valued field element-wise. Comparing the
+  whole list could never match, so `members`, `member.user.name` and `attachments.type` were
+  undeclarable before it.
+
+`$ne` and `$nin` were **not** added, and should not be: they are deprecated server-side and being
+withdrawn. `$nor` is modelled by none of the three cores.
 
 ## Definition of done
 
-- [x] `Filter.notEqual`, `Filter.notIn` and `Filter.nor` are **removed, not deprecated** —
-      reversed from the original plan. The backend withdrew `$ne` and `$nin` from the published
-      spec and leaves `$nor` accepted-but-unpublished, so deprecating would have kept three
-      operators alive that the API is retiring. A preset that still carries one decodes through
-      `Filter.raw`. A caller that relied on them excludes client-side or shows the rows.
-- [ ] `filter.dart`, `sort_order.dart`, our `comparable_field.dart` and
+- [x] `Filter.notEqual`, `Filter.notIn` and `Filter.nor` are **removed**, not deprecated:
+      `$ne`, `$nin` and `$nor` are deprecated server-side and being withdrawn. The three
+      sample-app call sites that hid the signed-in user or existing members now list everyone the
+      query returns, as the iOS and React Native sample apps do.
+- [x] `filter.dart`, `sort_order.dart`, our `comparable_field.dart` and
       `location_coordinates.dart` are deleted; `stream_chat.dart` exports core's via the
       allowlist.
-- [ ] A `FilterField` / `SortField` registry exists for every queryable type, with local
-      extractors.
-- [ ] **Serialisation diff:** every filter and sort the SDK can build round-trips through
-      `toJson()` to byte-identical output against the pre-migration implementation.
-- [ ] **A golden ordering test** over a list of accented and ligatured names proves
-      `normalizeStringForSort` behaviour survives.
-- [ ] Per-field `NullOrdering` defaults preserved — asserted for `pinnedAt` and `lastMessageAt` in
-      both directions.
-- [ ] Nothing throws where the old `ComparableField` returned `0` — asserted (core's
-      `runSafelySync` should already cover it; the test is what proves it).
+- [x] A `FilterField` / `SortField` registry exists for every queryable type, with local
+      extractors. Eleven of each. `QueryMessageFlagsPayload` is the one endpoint left unmodelled,
+      because chat has no API for it.
+- [x] **A golden ordering test** over accented and ligatured names proves `normalizeStringForSort`
+      behaviour survives — `string_sort_normalizer_test.dart` and `sort_test.dart`.
+- [x] Per-field `NullOrdering` defaults preserved — `pinnedAt` and `lastMessageAt` asserted in
+      both directions (`sort_test.dart:103`).
+- [x] Nothing throws where the old `ComparableField` returned `0` (`sort_test.dart:419`,
+      "should treat unorderable values as equal rather than throwing").
 - [x] `SortOption.fromJson` callers accounted for — there are two, and both now go through
       `ChannelSort.fromJson`: `PredefinedFilter.sort`, where the API echoes the sort it resolved
       for a preset (found by `json_serializable` by convention, so no `@JsonKey` hook), and
       `stream_chat_persistence`'s Drift converter for the same spec persisted for offline reads.
       A bare `Sort.fromJson` would not have served either — see [UPSTREAM.md](UPSTREAM.md).
-- [ ] `melos bootstrap && melos run analyze && melos run test:dart && melos run test:flutter`,
-      plus `stream_chat_persistence` tests if any stored query shape changed.
+- [x] `melos run analyze`, `melos run format` and `melos run test:dart` are green, as are
+      `stream_chat_flutter_core`'s tests. `stream_chat_flutter` and `docs_screenshots` each carry
+      11 pre-existing golden failures, in files this phase does not touch.
+- [ ] **Serialisation diff.** Not run as a systematic before/after byte diff. The api tests assert
+      request payloads and pass unchanged, and every documented example was executed and its JSON
+      checked, but a filter the SDK can build and no test exercises is unverified.
 
 ### Re-verified against the right backend field
 
@@ -996,7 +1003,8 @@ deleted serializer rather than assumed — `git show HEAD:…/core/api/sort_orde
 (`stream_chat_persistence/lib/src/converter/channel_sort_converter.dart`, renamed from
 `ChannelStateSortOrderConverter`) writes those same two keys, which its test now pins as a
 literal — rows outlive the SDK version that wrote them, so the shape may not drift by accident.
-- [ ] `refactor(llc)!:` title, `🛑️ Breaking` CHANGELOG entries, `migrations/v11-migration.md`
-      Symbol Map rows and a feature section with before/after query examples — this is the section
-      consumers will actually read.
-- [ ] Decisions recorded here, status box ticked in `README.md`.
+- [x] `refactor(llc)!:` titles, `🛑️ Breaking` CHANGELOG entries in `stream_chat`,
+      `stream_chat_persistence` and `stream_chat_flutter_core`, and `migrations/v11-migration.md`
+      Symbol Map rows. No feature section: none of the phases has written one, and the Symbol Map
+      rows carry the before/after.
+- [x] Decisions recorded here, status box ticked in `README.md`.
