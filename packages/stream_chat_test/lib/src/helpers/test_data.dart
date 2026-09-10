@@ -124,6 +124,8 @@ Event createDefaultEvent({
   OwnUser? me,
   int? totalUnreadCount,
   int? unreadChannels,
+  bool? hardDelete,
+  bool? deletedForMe,
   DateTime? createdAt,
   Map<String, Object?> extraData = const {},
 }) {
@@ -140,6 +142,8 @@ Event createDefaultEvent({
     me: me,
     totalUnreadCount: totalUnreadCount,
     unreadChannels: unreadChannels,
+    hardDelete: hardDelete,
+    deletedForMe: deletedForMe,
     createdAt: createdAt ?? testCreatedAt,
     extraData: extraData,
   );

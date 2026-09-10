@@ -49,6 +49,20 @@ Map<String, Object?> serverMessageJson(Message message) {
       'message_text_updated_at': textUpdatedAt.toIso8601String(),
     if (message.deletedForMe case final deletedForMe?) 'deleted_for_me': deletedForMe,
     if (message.command case final command?) 'command': command,
+    if (message.sharedLocation case final location?) 'shared_location': serverLocationJson(location),
+  };
+}
+
+/// Serializes [location] the way a server sends it, restoring the
+/// server-assigned fields that `Location.toJson` omits.
+Map<String, Object?> serverLocationJson(Location location) {
+  return {
+    ...location.toJson(),
+    if (location.channelCid case final channelCid?) 'channel_cid': channelCid,
+    if (location.messageId case final messageId?) 'message_id': messageId,
+    if (location.userId case final userId?) 'user_id': userId,
+    'created_at': location.createdAt.toIso8601String(),
+    'updated_at': location.updatedAt.toIso8601String(),
   };
 }
 
