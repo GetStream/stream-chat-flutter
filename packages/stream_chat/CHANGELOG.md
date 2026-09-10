@@ -20,6 +20,17 @@
 - `PollVoteSortField.answerText` is removed: the API rejects a sort on `answer_text`.
 - `ChannelSortField.cid` is added, matching the iOS and Android SDKs.
 - `search(sort:)` on the client and channel, and `StreamMessageSearchListController.sort`, are typed `List<MessageSearchSort>` rather than an untyped `SortOrder`. Searching is the only message query the API sorts, so the type is named for it.
+- Filtering is now `stream_core`'s. `Filter.equal('type', 'messaging')` becomes `ChannelFilter.equal(ChannelFilterField.type, 'messaging')` — one `Filter` alias and one field registry per query, matching the sort change. A field the SDK does not model is reached with `ChannelFilterField.custom('my_field')`.
+- `Filter` is sealed and no longer exposes `key`, `value` or `operator`. Read it with `toJson`, or pattern match on the operator classes.
+- `Filter` compares by identity rather than by value. Compare `toJson()` where you compared filters.
+- `FilterOperator` is an extension type over `String` rather than an enum, so `'$eq'` and `FilterOperator.equal` interchange.
+- `Filter.empty()` is removed. Every `filter` argument is nullable; pass `null` to match everything. This matters on `queryThreads`, where the API widens the query for an omitted filter but not for an empty one.
+- `Filter.notEqual`, `Filter.notIn` and `Filter.nor` are removed. `$ne`, `$nin` and `$nor` are deprecated server-side and are being withdrawn. A directory that hid the signed-in user, or a member picker that hid existing members, drops them from the result instead — the sample app now does, so it lists everyone the query returns.
+- `Filter.notExists(key)` becomes `Filter.exists(field, exists: false)`.
+- `Filter.custom({value, operator, key})` is removed. Use a registry's `custom` factory for an unmodelled field, or `Filter.raw` for a query this package cannot express.
+- `Filter.raw` takes its map positionally: `Filter.raw({...})` rather than `Filter.raw(value: {...})`. It is not validated, and `matches` throws for it.
+- Every query takes its own filter type — `queryChannels` a `ChannelFilter?`, `queryUsers` a `UserFilter?`, and so on — and `PredefinedFilter.filter` is a `ChannelFilter`.
+- `ChannelFilterField.members` and `.memberUserName` are declared, so the standard "channels I am in" query stays typed.
 - `DraftSortField` has no `custom` field: the API rejects a custom sort field on drafts.
 - A sort names its model's field type, so `MemberSort.asc` takes a `MemberSortField` and a field from another model does not compile. `XSortField.custom(key)` reads a field from the model's extra data, for the four models whose queries accept one.
 - Added `ChannelSort.empty`, `MemberSort.empty` and so on alongside each default — an empty sort, for querying with the ordering the API applies on its own.

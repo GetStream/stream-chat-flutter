@@ -28,17 +28,11 @@ class _NewChatScreenState extends State<NewChatScreen> {
     ],
   );
 
-  // Excludes the current user from the directory listing — searching must keep
-  // excluding them, so the search text is combined with this rather than
-  // replacing it.
-  Filter _filter({String query = ''}) {
-    return Filter.and([
-      Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
-      if (query.isNotEmpty)
-        Filter.or([
-          Filter.autoComplete('name', query),
-          Filter.autoComplete('id', query),
-        ]),
+  UserFilter? _filter({String query = ''}) {
+    if (query.isEmpty) return null;
+    return UserFilter.or([
+      UserFilter.autoComplete(UserFilterField.name, query),
+      UserFilter.autoComplete(UserFilterField.id, query),
     ]);
   }
 
@@ -90,8 +84,8 @@ class _NewChatScreenState extends State<NewChatScreen> {
         final res = await chatState.client.queryChannelsOnline(
           state: false,
           watch: false,
-          filter: Filter.raw(
-            value: {
+          filter: ChannelFilter.raw(
+            {
               'members': [
                 ..._selectedUsers.map((e) => e.id),
                 chatState.currentUser!.id,

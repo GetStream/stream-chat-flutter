@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_core/stream_core.dart' show NullOrdering, Sort, SortField;
+import 'package:stream_core/stream_core.dart' show Filter, FilterField, NullOrdering, Sort, SortField;
 
 import '../util/serializer.dart';
 import 'channel_model.dart';
@@ -226,6 +226,113 @@ class Thread extends Equatable {
     read,
     draft,
   ];
+}
+
+/// A filter for a thread query.
+typedef ThreadFilter = Filter<Thread>;
+
+/// Represents a field that thread queries can be filtered on.
+class ThreadFilterField extends FilterField<Thread> {
+  /// Creates a thread filter field named [remote] on the wire, reading its
+  /// value off an instance with [value].
+  ThreadFilterField(super.remote, super.value);
+
+  /// Creates a field the SDK does not model, read from [Thread.extraData].
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`, `$contains`, `$q`, `$autocomplete`
+  factory ThreadFilterField.custom(String remote) {
+    return ThreadFilterField(remote, (it) => it.extraData[remote]);
+  }
+
+  /// Filters threads by the full id of the channel they belong to, in the form
+  /// `type:id`.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final channelCid = ThreadFilterField(
+    'channel_cid',
+    (it) => it.channelCid,
+  );
+
+  /// Filters threads by the id of their parent message.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final parentMessageId = ThreadFilterField(
+    'parent_message_id',
+    (it) => it.parentMessageId,
+  );
+
+  /// Filters threads by the id of the user who created them.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final createdByUserId = ThreadFilterField(
+    'created_by_user_id',
+    (it) => it.createdByUserId,
+  );
+
+  /// Filters threads by how many replies they have.
+  ///
+  /// **Supported operators:** `$eq`, `$gt`, `$gte`, `$lt`, `$lte`
+  static final replyCount = ThreadFilterField(
+    'reply_count',
+    (it) => it.replyCount,
+  );
+
+  /// Filters threads by how many users have participated in them.
+  ///
+  /// **Supported operators:** `$eq`, `$gt`, `$gte`, `$lt`, `$lte`
+  static final participantCount = ThreadFilterField(
+    'participant_count',
+    (it) => it.participantCount,
+  );
+
+  /// Filters threads by how many participants are currently active.
+  ///
+  /// **Supported operators:** `$eq`, `$gt`, `$gte`, `$lt`, `$lte`
+  static final activeParticipantCount = ThreadFilterField(
+    'active_participant_count',
+    (it) => it.activeParticipantCount,
+  );
+
+  /// Filters threads by the date of their last message.
+  ///
+  /// **Supported operators:** `$eq`, `$gt`, `$gte`, `$lt`, `$lte`
+  static final lastMessageAt = ThreadFilterField(
+    'last_message_at',
+    (it) => it.lastMessageAt,
+  );
+
+  /// Filters threads by their creation date.
+  ///
+  /// **Supported operators:** `$eq`, `$gt`, `$gte`, `$lt`, `$lte`
+  static final createdAt = ThreadFilterField(
+    'created_at',
+    (it) => it.createdAt,
+  );
+
+  /// Filters threads by their last update date.
+  ///
+  /// **Supported operators:** `$eq`, `$gt`, `$gte`, `$lt`, `$lte`
+  static final updatedAt = ThreadFilterField(
+    'updated_at',
+    (it) => it.updatedAt,
+  );
+
+  /// Filters threads by the team of the channel they belong to.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final channelTeam = ThreadFilterField(
+    'channel.team',
+    (it) => it.channel?.team,
+  );
+
+  /// Filters threads by whether the channel they belong to is disabled.
+  ///
+  /// **Supported operators:** `$eq`
+  static final channelDisabled = ThreadFilterField(
+    'channel.disabled',
+    (it) => it.channel?.disabled,
+  );
 }
 
 /// Represents a sorting operation for threads.

@@ -61,8 +61,8 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
   /// You can query on any of the custom fields you've defined on the [User].
   ///
   /// You can also filter other built-in channel fields.
-  final Filter? filter;
-  Filter? _activeFilter;
+  final UserFilter? filter;
+  UserFilter? _activeFilter;
 
   /// The sorting used for the users matching the filters.
   ///
@@ -90,7 +90,7 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new filter.
-  set filter(Filter? value) => _activeFilter = value;
+  set filter(UserFilter? value) => _activeFilter = value;
 
   /// Allows for the change of the query sort used for user queries.
   ///
@@ -114,9 +114,9 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
     final trimmed = query.trim();
     if (trimmed.isEmpty) return searchWithFilter(filter);
 
-    final searchFilter = Filter.or([
-      Filter.autoComplete('name', trimmed),
-      Filter.autoComplete('id', trimmed),
+    final searchFilter = UserFilter.or([
+      UserFilter.autoComplete(UserFilterField.name, trimmed),
+      UserFilter.autoComplete(UserFilterField.id, trimmed),
     ]);
 
     return searchWithFilter(searchFilter);
@@ -129,7 +129,7 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
   /// the reload is debounced by that text's length; otherwise it reloads
   /// immediately. Rapidly superseded searches are dropped, so only the latest
   /// query's results are applied.
-  void searchWithFilter(Filter? filter) {
+  void searchWithFilter(UserFilter? filter) {
     _activeFilter = filter;
     debouncedSearch(searchQueryLength(filter));
   }

@@ -72,8 +72,11 @@ void main() {
 
         async.elapse(const Duration(milliseconds: 1));
         expect(
-          usedFilter,
-          Filter.or([Filter.autoComplete('name', 'abc'), Filter.autoComplete('id', 'abc')]),
+          usedFilter?.toJson(),
+          UserFilter.or([
+            UserFilter.autoComplete(UserFilterField.name, 'abc'),
+            UserFilter.autoComplete(UserFilterField.id, 'abc'),
+          ]).toJson(),
         );
       });
     });
@@ -125,7 +128,7 @@ void main() {
       fakeAsync((async) {
         final controller = StreamUserListController(
           client: client,
-          filter: Filter.notEqual('id', 'me'),
+          filter: UserFilter.equal(UserFilterField.role, 'user'),
         );
         addTearDown(controller.dispose);
 
@@ -135,8 +138,11 @@ void main() {
         // The base filter is not merged in — combining it with the search text
         // would let it skew the debounce policy and contradict the search.
         expect(
-          usedFilter,
-          Filter.or([Filter.autoComplete('name', 'abc'), Filter.autoComplete('id', 'abc')]),
+          usedFilter?.toJson(),
+          UserFilter.or([
+            UserFilter.autoComplete(UserFilterField.name, 'abc'),
+            UserFilter.autoComplete(UserFilterField.id, 'abc'),
+          ]).toJson(),
         );
       });
     });
@@ -155,7 +161,7 @@ void main() {
         return usersResponse([]);
       });
 
-      final baseFilter = Filter.notEqual('id', 'me');
+      final baseFilter = UserFilter.equal(UserFilterField.role, 'user');
 
       fakeAsync((async) {
         final controller = StreamUserListController(client: client, filter: baseFilter);
@@ -168,7 +174,7 @@ void main() {
         controller.search('');
         async.elapse(const Duration(milliseconds: 500));
 
-        expect(filters.last, baseFilter);
+        expect(filters.last?.toJson(), baseFilter.toJson());
       });
     });
 
@@ -234,8 +240,11 @@ void main() {
         async.elapse(const Duration(milliseconds: 300));
         expect(queryCount, 1);
         expect(
-          lastFilter,
-          Filter.or([Filter.autoComplete('name', 'abc'), Filter.autoComplete('id', 'abc')]),
+          lastFilter?.toJson(),
+          UserFilter.or([
+            UserFilter.autoComplete(UserFilterField.name, 'abc'),
+            UserFilter.autoComplete(UserFilterField.id, 'abc'),
+          ]).toJson(),
         );
 
         // No superseded query fires after the coalesced one.
@@ -264,9 +273,9 @@ void main() {
         final controller = StreamUserListController(client: client);
         addTearDown(controller.dispose);
 
-        final filter = Filter.and([
-          Filter.autoComplete('name', 'jo'),
-          Filter.notEqual('id', 'me'),
+        final filter = UserFilter.and([
+          UserFilter.autoComplete(UserFilterField.name, 'jo'),
+          UserFilter.equal(UserFilterField.role, 'user'),
         ]);
         controller.searchWithFilter(filter);
 
@@ -275,7 +284,7 @@ void main() {
         expect(usedFilter, isNull);
 
         async.elapse(const Duration(milliseconds: 1));
-        expect(usedFilter, filter);
+        expect(usedFilter?.toJson(), filter.toJson());
       });
     });
 
@@ -298,7 +307,7 @@ void main() {
         addTearDown(controller.dispose);
 
         // A non-text filter must not wait for any debounce delay.
-        controller.searchWithFilter(Filter.equal('id', 'user-1'));
+        controller.searchWithFilter(UserFilter.equal(UserFilterField.id, 'user-1'));
 
         async.flushMicrotasks();
         expect(queryCount, 1);

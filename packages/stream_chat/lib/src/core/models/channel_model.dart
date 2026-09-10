@@ -31,6 +31,8 @@ class ChannelModel {
     this.cooldown = 0,
     bool? disabled,
     bool? hidden,
+    bool? muted,
+    bool? blocked,
     DateTime? truncatedAt,
     this.messageCount,
     this.filterTags,
@@ -46,12 +48,14 @@ class ChannelModel {
        updatedAt = updatedAt ?? DateTime.now(),
        ownCapabilities = ownCapabilities?.map(ChannelCapability.new).toList(),
 
-       // For backwards compatibility, set 'disabled', 'hidden'
-       // and 'truncated_at' in [extraData].
+       // For backwards compatibility, set 'disabled', 'hidden', 'muted',
+       // 'blocked' and 'truncated_at' in [extraData].
        extraData = {
          ...extraData,
          if (disabled != null) 'disabled': disabled,
          if (hidden != null) 'hidden': hidden,
+         if (muted != null) 'muted': muted,
+         if (blocked != null) 'blocked': blocked,
          if (truncatedAt != null) 'truncated_at': truncatedAt.toIso8601String(),
        };
 
@@ -135,6 +139,14 @@ class ChannelModel {
   /// True if the channel is hidden
   @JsonKey(includeToJson: false, includeFromJson: false)
   bool? get hidden => extraData['hidden'].safeCast<bool>();
+
+  /// True if the channel is muted by the current user
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  bool? get muted => extraData['muted'].safeCast<bool>();
+
+  /// True if the channel is blocked by the current user
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  bool? get blocked => extraData['blocked'].safeCast<bool>();
 
   /// The date of the last time channel got truncated
   @JsonKey(includeToJson: false, includeFromJson: false)
@@ -222,6 +234,8 @@ class ChannelModel {
     int? cooldown,
     bool? disabled,
     bool? hidden,
+    bool? muted,
+    bool? blocked,
     DateTime? truncatedAt,
     int? messageCount,
     List<String>? filterTags,
@@ -244,6 +258,8 @@ class ChannelModel {
     cooldown: cooldown ?? this.cooldown,
     disabled: disabled ?? extraData?['disabled'] as bool? ?? this.disabled,
     hidden: hidden ?? extraData?['hidden'] as bool? ?? this.hidden,
+    muted: muted ?? extraData?['muted'] as bool? ?? this.muted,
+    blocked: blocked ?? extraData?['blocked'] as bool? ?? this.blocked,
     truncatedAt:
         truncatedAt ??
         (extraData?['truncated_at'] == null
@@ -278,6 +294,8 @@ class ChannelModel {
       cooldown: other.cooldown,
       disabled: other.disabled,
       hidden: other.hidden,
+      muted: other.muted,
+      blocked: other.blocked,
       truncatedAt: other.truncatedAt,
       messageCount: other.messageCount,
       filterTags: other.filterTags,

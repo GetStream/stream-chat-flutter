@@ -56,7 +56,8 @@ class DriftChatDatabase extends _$DriftChatDatabase {
   /// User id to which the database is connected
   String get userId => _userId;
 
-  // you should bump this number whenever you change or add a table definition.
+  // Band the version by SDK major, and bump the offset whenever you change or
+  // add a table definition.
   @override
   int get schemaVersion => 1100 + 1;
 

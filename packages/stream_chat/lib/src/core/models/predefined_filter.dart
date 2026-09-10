@@ -1,6 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'channel_state.dart';
-import 'filter.dart';
 
 part 'predefined_filter.g.dart';
 
@@ -27,10 +26,11 @@ class PredefinedFilter {
 
   /// Filter conditions as resolved by the server.
   ///
-  /// Wrapped in [Filter.raw] — the SDK does not evaluate filters locally.
-  /// Access the underlying map via [Filter.value] or [Filter.toJson].
+  /// Wrapped in [Filter.raw], since the server authors it and may use an
+  /// operator this package does not model. Read it with [Filter.toJson];
+  /// [Filter.matches] throws for it.
   @JsonKey(fromJson: _filterFromJson)
-  final Filter filter;
+  final ChannelFilter filter;
 
   /// Sort specification as resolved by the server.
   final List<ChannelSort>? sort;
@@ -40,25 +40,15 @@ class PredefinedFilter {
   /// [filter] when [sort] is null.
   List<ChannelSort> get effectiveSort => sort ?? _defaultSortFor(filter);
 
-  static Filter _filterFromJson(Map<String, dynamic> json) => Filter.raw(value: json);
+  static ChannelFilter _filterFromJson(Map<String, dynamic> json) => ChannelFilter.raw(json);
 }
 
-List<ChannelSort> _defaultSortFor(Filter filter) {
-  final touchesLastMessageAt = _touchesField(filter, ChannelSortField.lastMessageAt.remote);
-  if (touchesLastMessageAt) return [ChannelSort.desc(ChannelSortField.lastMessageAt)];
+List<ChannelSort> _defaultSortFor(ChannelFilter filter) {
+  final lastMessageAt = ChannelSortField.lastMessageAt;
+  if (_mapTouchesField(filter.toJson(), lastMessageAt.remote)) {
+    return [ChannelSort.desc(lastMessageAt)];
+  }
   return ChannelSort.defaultSort;
-}
-
-bool _touchesField(Filter filter, String field) {
-  if (filter.key == field) return true;
-  final value = filter.value;
-  if (value is List<Filter>) {
-    return value.any((sub) => _touchesField(sub, field));
-  }
-  if (value is Map<String, Object?>) {
-    return _mapTouchesField(value, field);
-  }
-  return false;
 }
 
 bool _mapTouchesField(Map<String, Object?> map, String field) {

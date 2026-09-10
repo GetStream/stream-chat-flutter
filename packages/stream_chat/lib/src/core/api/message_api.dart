@@ -3,7 +3,6 @@ import 'dart:convert';
 import '../http/stream_http_client.dart';
 import '../models/draft.dart';
 import '../models/draft_message.dart';
-import '../models/filter.dart';
 import '../models/message.dart';
 import '../models/reaction.dart';
 import 'requests.dart';
@@ -96,7 +95,7 @@ class MessageApi {
   ///
   /// Returns a [QueryDraftsResponse] containing the list of draft.
   Future<QueryDraftsResponse> queryDrafts({
-    Filter? filter,
+    DraftFilter? filter,
     List<DraftSort>? sort,
     PaginationParams? pagination,
   }) async {
@@ -263,7 +262,7 @@ class MessageApi {
   /// user ID, or creation date, sorting, and cursor-based pagination.
   Future<QueryReactionsResponse> queryReactions(
     String messageId, {
-    Filter? filter,
+    ReactionFilter? filter,
     List<ReactionSort>? sort,
     PaginationParams? pagination,
   }) async {

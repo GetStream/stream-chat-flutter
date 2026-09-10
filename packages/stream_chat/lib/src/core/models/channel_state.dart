@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_core/stream_core.dart' show NullOrdering, Sort, SortDirection, SortField, Standard;
+import 'package:stream_core/stream_core.dart'
+    show Filter, FilterField, NullOrdering, Sort, SortDirection, SortField, Standard;
 import '../util/string_sort_normalizer.dart';
 import 'channel_model.dart';
 import 'draft.dart';
@@ -125,6 +126,213 @@ class ChannelState {
     pendingMessages: pendingMessages ?? this.pendingMessages,
     pushPreferences: pushPreferences ?? this.pushPreferences,
     activeLiveLocations: activeLiveLocations ?? this.activeLiveLocations,
+  );
+}
+
+/// A filter for a channel query.
+typedef ChannelFilter = Filter<ChannelState>;
+
+/// Represents a field that channel queries can be filtered on.
+class ChannelFilterField extends FilterField<ChannelState> {
+  /// Creates a channel filter field named [remote] on the wire, reading its
+  /// value off an instance with [value].
+  ChannelFilterField(super.remote, super.value);
+
+  /// Creates a field the SDK does not model, read from [ChannelModel.extraData].
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`, `$exists`,
+  /// `$contains`, `$q`, `$autocomplete`
+  factory ChannelFilterField.custom(String remote) {
+    return ChannelFilterField(remote, (it) => it.channel?.extraData[remote]);
+  }
+
+  /// Filters channels by their id.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`, `$exists`
+  static final id = ChannelFilterField(
+    'id',
+    (it) => it.channel?.id,
+  );
+
+  /// Filters channels by their full id, in the form `type:id`.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`, `$exists`
+  static final cid = ChannelFilterField(
+    'cid',
+    (it) => it.channel?.cid,
+  );
+
+  /// Filters channels by their type.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`, `$exists`
+  static final type = ChannelFilterField(
+    'type',
+    (it) => it.channel?.type,
+  );
+
+  /// Filters channels by their name.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`, `$exists`, `$q`,
+  /// `$autocomplete`
+  static final name = ChannelFilterField(
+    'name',
+    (it) => it.channel?.name,
+  );
+
+  /// Filters channels by the id of the user who created them.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`, `$exists`
+  static final createdById = ChannelFilterField(
+    'created_by_id',
+    (it) => it.channel?.createdBy?.id,
+  );
+
+  /// Filters channels by the team they belong to.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`, `$exists`
+  static final team = ChannelFilterField(
+    'team',
+    (it) => it.channel?.team,
+  );
+
+  /// Filters channels by whether they are frozen.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`, `$exists`
+  static final frozen = ChannelFilterField(
+    'frozen',
+    (it) => it.channel?.frozen,
+  );
+
+  /// Filters channels by the date they were created.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`, `$exists`
+  static final createdAt = ChannelFilterField(
+    'created_at',
+    (it) => it.channel?.createdAt,
+  );
+
+  /// Filters channels by the date they were updated.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`, `$exists`
+  static final updatedAt = ChannelFilterField(
+    'updated_at',
+    (it) => it.channel?.updatedAt,
+  );
+
+  /// Filters channels by the timestamp of the last message.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`, `$exists`
+  static final lastMessageAt = ChannelFilterField(
+    'last_message_at',
+    (it) => it.channel?.lastMessageAt,
+  );
+
+  /// Filters channels by their last activity.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`, `$exists`
+  static final lastUpdated = ChannelFilterField(
+    'last_updated',
+    (it) => it.channel?.lastUpdatedAt,
+  );
+
+  /// Filters channels by the number of members.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`, `$exists`
+  static final memberCount = ChannelFilterField(
+    'member_count',
+    (it) => it.channel?.memberCount,
+  );
+
+  /// Filters channels by the number of messages.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`, `$exists`
+  static final messageCount = ChannelFilterField(
+    'message_count',
+    (it) => it.channel?.messageCount,
+  );
+
+  /// Filters channels by the tags assigned to them.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final filterTags = ChannelFilterField(
+    'filter_tags',
+    (it) => it.channel?.filterTags,
+  );
+
+  /// Filters channels by their members.
+  ///
+  /// `$eq` matches a channel whose members are exactly the given users, the
+  /// way a distinct channel is looked up. `$in` matches a channel any of them
+  /// belong to.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final members = ChannelFilterField(
+    'members',
+    (it) => it.members?.map((it) => it.userId),
+  );
+
+  /// Filters channels by the name of any of their members.
+  ///
+  /// **Supported operators:** `$eq`, `$autocomplete`
+  static final memberUserName = ChannelFilterField(
+    'member.user.name',
+    (it) => it.members?.map((it) => it.user?.name),
+  );
+
+  /// Filters channels by the current user's role in them.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final channelRole = ChannelFilterField(
+    'channel_role',
+    (it) => it.membership?.channelRole,
+  );
+
+  /// Filters channels by whether the current user pinned them.
+  ///
+  /// **Supported operators:** `$eq`
+  static final pinned = ChannelFilterField(
+    'pinned',
+    (it) => it.membership?.pinnedAt != null,
+  );
+
+  /// Filters channels by whether the current user hid them.
+  ///
+  /// **Supported operators:** `$eq`
+  static final hidden = ChannelFilterField(
+    'hidden',
+    (it) => it.channel?.hidden,
+  );
+
+  /// Filters channels by whether the current user muted them.
+  ///
+  /// **Supported operators:** `$eq`
+  static final muted = ChannelFilterField(
+    'muted',
+    (it) => it.channel?.muted,
+  );
+
+  /// Filters channels by whether the current user blocked them.
+  ///
+  /// **Supported operators:** `$eq`
+  static final blocked = ChannelFilterField(
+    'blocked',
+    (it) => it.channel?.blocked,
+  );
+
+  /// Filters channels by whether they are disabled.
+  ///
+  /// **Supported operators:** `$eq`
+  static final disabled = ChannelFilterField(
+    'disabled',
+    (it) => it.channel?.disabled,
+  );
+
+  /// Filters channels by whether the current user archived them.
+  ///
+  /// **Supported operators:** `$eq`
+  static final archived = ChannelFilterField(
+    'archived',
+    (it) => it.membership?.archivedAt != null,
   );
 }
 

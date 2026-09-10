@@ -149,6 +149,8 @@ void main() {
       registerFallbackValue(FakeMessage());
       registerFallbackValue(<Message>[]);
       registerFallbackValue(FakeAttachmentFile());
+      registerFallbackValue(const ChannelFilter.raw({}));
+      registerFallbackValue(const BannedUserFilter.raw({}));
 
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
@@ -2756,7 +2758,7 @@ void main() {
     });
 
     group('`.search`', () {
-      final filter = Filter.in_('cid', const [channelCid]);
+      final filter = ChannelFilter.in_(ChannelFilterField.cid, const [channelCid]);
 
       test('should work fine with `query`', () async {
         const query = 'test-search-query';
@@ -2767,7 +2769,7 @@ void main() {
 
         when(
           () => client.search(
-            filter,
+            any(that: isSameFilterAs(filter)),
             query: query,
             sort: any(named: 'sort'),
             paginationParams: any(named: 'paginationParams'),
@@ -2787,7 +2789,7 @@ void main() {
 
         verify(
           () => client.search(
-            filter,
+            any(that: isSameFilterAs(filter)),
             query: query,
             sort: any(named: 'sort'),
             paginationParams: any(named: 'paginationParams'),
@@ -2796,7 +2798,7 @@ void main() {
       });
 
       test('should work fine with `messageFilters`', () async {
-        final messageFilters = Filter.query('key', 'text');
+        final messageFilters = MessageSearchFilter.query(MessageSearchFilterField.text, 'text');
         final sort = [MessageSearchSort.desc(MessageSearchSortField.custom('test-sort-field'))];
         const pagination = PaginationParams();
 
@@ -2804,7 +2806,7 @@ void main() {
 
         when(
           () => client.search(
-            filter,
+            any(that: isSameFilterAs(filter)),
             messageFilters: messageFilters,
             sort: any(named: 'sort'),
             paginationParams: any(named: 'paginationParams'),
@@ -2824,7 +2826,7 @@ void main() {
 
         verify(
           () => client.search(
-            filter,
+            any(that: isSameFilterAs(filter)),
             messageFilters: messageFilters,
             sort: any(named: 'sort'),
             paginationParams: any(named: 'paginationParams'),
@@ -4428,7 +4430,7 @@ void main() {
     });
 
     test('`.queryMembers`', () async {
-      final filter = Filter.in_('cid', const [channelCid]);
+      final filter = MemberFilter.in_(MemberFilterField.userId, const ['test-user-id-0']);
 
       final members = List.generate(
         3,
@@ -4464,7 +4466,7 @@ void main() {
     });
 
     test('`.queryBannedUsers`', () async {
-      final filter = Filter.equal('channel_cid', channelCid);
+      final filter = BannedUserFilter.equal(BannedUserFilterField.channelCid, channelCid);
 
       final bans = List.generate(
         3,
@@ -4476,7 +4478,7 @@ void main() {
 
       when(
         () => client.queryBannedUsers(
-          filter: filter,
+          filter: any(named: 'filter', that: isSameFilterAs(filter)),
           sort: any(named: 'sort'),
           pagination: any(named: 'pagination'),
         ),
@@ -4489,7 +4491,7 @@ void main() {
 
       verify(
         () => client.queryBannedUsers(
-          filter: filter,
+          filter: any(named: 'filter', that: isSameFilterAs(filter)),
           sort: any(named: 'sort'),
           pagination: any(named: 'pagination'),
         ),

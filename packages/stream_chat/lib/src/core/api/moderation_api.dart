@@ -129,7 +129,7 @@ class ModerationApi {
 
   /// Queries banned users.
   Future<QueryBannedUsersResponse> queryBannedUsers({
-    Filter? filter,
+    BannedUserFilter? filter,
     List<BannedUserSort>? sort,
     PaginationParams? pagination,
   }) async {

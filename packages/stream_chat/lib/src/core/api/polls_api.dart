@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import '../http/stream_http_client.dart';
-import '../models/filter.dart';
 import '../models/poll.dart';
 import '../models/poll_option.dart';
 import '../models/poll_vote.dart';
@@ -161,7 +160,7 @@ class PollsApi {
   /// Queries polls with the given [filter], [sort], and [pagination]
   /// parameters.
   Future<QueryPollsResponse> queryPolls({
-    Filter? filter,
+    PollFilter? filter,
     List<PollSort>? sort,
     PaginationParams pagination = const PaginationParams(),
   }) async {
@@ -180,7 +179,7 @@ class PollsApi {
   /// Queries poll votes with the given [pollId], [filter], [sort], and
   Future<QueryPollVotesResponse> queryPollVotes(
     String pollId, {
-    Filter? filter,
+    PollVoteFilter? filter,
     List<PollVoteSort>? sort,
     PaginationParams pagination = const PaginationParams(),
   }) async {

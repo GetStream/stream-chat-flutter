@@ -682,7 +682,7 @@ void main() {
 
     test('refresh resets filter and sort to initial values', () async {
       final drafts = generateDrafts();
-      final initialFilter = Filter.equal('type', 'messaging');
+      final initialFilter = DraftFilter.equal(DraftFilterField.channelCid, 'messaging');
       final initialSort = [DraftSort.desc(DraftSortField.createdAt)];
 
       final apiCalls = <Map<String, dynamic>>[];
@@ -713,7 +713,7 @@ void main() {
       await pumpEventQueue();
 
       controller
-        ..filter = Filter.equal('type', 'team')
+        ..filter = DraftFilter.equal(DraftFilterField.channelCid, 'team')
         ..sort = [DraftSort.asc(DraftSortField.createdAt)];
 
       await controller.refresh();
@@ -730,9 +730,9 @@ void main() {
       'refresh with resetValue=false preserves current filter and sort',
       () async {
         final drafts = generateDrafts();
-        final initialFilter = Filter.equal('type', 'messaging');
+        final initialFilter = DraftFilter.equal(DraftFilterField.channelCid, 'messaging');
         final initialSort = [DraftSort.desc(DraftSortField.createdAt)];
-        final newFilter = Filter.equal('type', 'team');
+        final newFilter = DraftFilter.equal(DraftFilterField.channelCid, 'team');
         final newSort = [DraftSort.asc(DraftSortField.createdAt)];
 
         final apiCalls = <Map<String, dynamic>>[];

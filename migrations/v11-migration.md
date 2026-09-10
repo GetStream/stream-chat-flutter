@@ -108,6 +108,19 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `getComparableField(String)` on `User`, `Message`, `Member`, `Draft`, `Thread`, `Poll`, `PollVote`, `Reaction`, `BannedUser`, `MessageReminder` and `ChannelState` | — | `removed` | The types it named were unexported, but the method was public on all eleven models. A field reads its own value now, so an override has nowhere to go |
 | `NullOrdering` / `CompositeComparator` | `stream_core`'s, re-exported | `moved` | Same names and semantics |
 | `client.search(sort:)` / `channel.search(sort:)` / `StreamMessageSearchListController.sort`, taking `SortOrder?` | `List<MessageSearchSort>?` | `retyped` | Was untyped, so a channel field compiled — and the server does not reject one, it reads it as a custom message field, which is null on every message, so the term silently did nothing |
+| `Filter.equal('type', 'messaging')` | `ChannelFilter.equal(ChannelFilterField.type, 'messaging')` | `retyped` | One `Filter` alias and one field registry per query, as with sort and as in `stream_feeds` |
+| `Filter` (`key`, `value`, `operator`) | `stream_core`'s sealed `Filter<T>` | `retyped` | The parts are gone; read `toJson()`, or pattern match on `EqualOperator`, `LogicalOperator`, `EvaluationOperator` and friends |
+| `Filter` value equality | — | `removed` | It was `Equatable`; core's compares by identity. Compare `toJson()` |
+| `FilterOperator` (enum) | `FilterOperator` (extension type over `String`) | `retyped` | `'$eq'` and `FilterOperator.equal` interchange |
+| `Filter.empty()` | `null` | `removed` | Every `filter` argument is nullable. `queryThreads` widens for an omitted filter but not an empty one, so the two are not the same request |
+| `Filter.notEqual` / `Filter.notIn` / `Filter.nor` | — | `removed` | `$ne`, `$nin` and `$nor` are deprecated server-side and are being withdrawn. Drop the rows from the result instead, as the iOS and React Native sample apps do |
+| `Filter.notExists(key)` | `Filter.exists(field, exists: false)` | `renamed` | One operator with a flag, matching the wire shape |
+| `Filter.custom(value:, operator:, key:)` | `XFilterField.custom(remote)` or `Filter.raw` | `removed` | A field the SDK does not model, versus a query it cannot express |
+| `Filter.raw(value: {...})` | `Filter.raw({...})` | `retyped` | Positional. Not validated, and `matches` throws for it |
+| `queryChannels(filter:)`, `queryUsers(filter:)`, `queryMembers(filter:)`, … taking `Filter?` | `ChannelFilter?`, `UserFilter?`, `MemberFilter?`, … | `retyped` | A field from another model no longer compiles |
+| `ChatPersistenceClient` filter arguments | `ChannelFilter?` | `retyped` | `getChannelStates`, `queryChannelStates`, `updateChannelQueries`, `saveChannelQueries` |
+| _(new)_ | `ChannelFilterField.members` / `.memberUserName` | `added` | Keeps the standard "channels I am in" query typed |
+| _(new)_ | `ChannelModel.muted` / `.blocked`, `Channel.blocked` / `.blockedStream` | `added` | Already on the channel payload; now read without reaching into extra data |
 | _(more added per feature as PRs land)_ | | | |
 
 ---

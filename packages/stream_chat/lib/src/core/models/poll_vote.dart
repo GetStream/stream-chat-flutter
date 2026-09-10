@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_core/stream_core.dart' show Sort, SortField;
+import 'package:stream_core/stream_core.dart' show Filter, FilterField, Sort, SortField;
 
 import 'user.dart';
 
@@ -104,6 +104,72 @@ class PollVote extends Equatable {
     userId,
     user,
   ];
+}
+
+/// A filter for a poll vote query.
+typedef PollVoteFilter = Filter<PollVote>;
+
+/// Represents a field that poll vote queries can be filtered on.
+class PollVoteFilterField extends FilterField<PollVote> {
+  /// Creates a poll vote filter field named [remote] on the wire, reading its
+  /// value off an instance with [value].
+  PollVoteFilterField(super.remote, super.value);
+
+  /// Filters poll votes by their id.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final id = PollVoteFilterField(
+    'id',
+    (it) => it.id,
+  );
+
+  /// Filters poll votes by the id of the poll they belong to.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final pollId = PollVoteFilterField(
+    'poll_id',
+    (it) => it.pollId,
+  );
+
+  /// Filters poll votes by the id of the option they select.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$exists`
+  static final optionId = PollVoteFilterField(
+    'option_id',
+    (it) => it.optionId,
+  );
+
+  /// Filters poll votes by the id of the user who cast them.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final userId = PollVoteFilterField(
+    'user_id',
+    (it) => it.userId,
+  );
+
+  /// Filters poll votes by whether they are an answer rather than a vote.
+  ///
+  /// **Supported operators:** `$eq`
+  static final isAnswer = PollVoteFilterField(
+    'is_answer',
+    (it) => it.isAnswer,
+  );
+
+  /// Filters poll votes by their creation date.
+  ///
+  /// **Supported operators:** `$eq`, `$gt`, `$gte`, `$lt`, `$lte`
+  static final createdAt = PollVoteFilterField(
+    'created_at',
+    (it) => it.createdAt,
+  );
+
+  /// Filters poll votes by their last update date.
+  ///
+  /// **Supported operators:** `$eq`, `$gt`, `$gte`, `$lt`, `$lte`
+  static final updatedAt = PollVoteFilterField(
+    'updated_at',
+    (it) => it.updatedAt,
+  );
 }
 
 /// Represents a sorting operation for poll votes.

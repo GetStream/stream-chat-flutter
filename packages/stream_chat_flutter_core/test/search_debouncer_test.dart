@@ -83,25 +83,25 @@ void main() {
 
   group('searchQueryLength', () {
     test('returns the autocomplete text length', () {
-      expect(searchQueryLength(Filter.autoComplete('name', 'john')), 4);
+      expect(searchQueryLength(UserFilter.autoComplete(UserFilterField.name, 'john')), 4);
     });
 
     test('returns the query text length', () {
-      expect(searchQueryLength(Filter.query('name', 'jo')), 2);
+      expect(searchQueryLength(UserFilter.query(UserFilterField.name, 'jo')), 2);
     });
 
     test('returns the longest search text in a compound filter', () {
-      final filter = Filter.and([
-        Filter.notEqual('id', 'me'),
-        Filter.autoComplete('name', 'john'),
-        Filter.query('bio', 'developer'),
+      final filter = UserFilter.and([
+        UserFilter.equal(UserFilterField.role, 'user'),
+        UserFilter.autoComplete(UserFilterField.name, 'john'),
+        UserFilter.query(UserFilterField.custom('bio'), 'developer'),
       ]);
 
       expect(searchQueryLength(filter), 'developer'.length);
     });
 
     test('returns null for a filter with no text-search operator', () {
-      expect(searchQueryLength(Filter.equal('id', 'user-1')), isNull);
+      expect(searchQueryLength(UserFilter.equal(UserFilterField.id, 'user-1')), isNull);
     });
 
     test('returns null for a null filter', () {

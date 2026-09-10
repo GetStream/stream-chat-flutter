@@ -2237,7 +2237,7 @@ void main() {
             () => client.queryMembers(
               channelType,
               channelId: channelId,
-              filter: Filter.equal('id', 'bad-user'),
+              filter: any(named: 'filter'),
               members: any(named: 'members'),
               sort: any(named: 'sort'),
               pagination: any(named: 'pagination'),

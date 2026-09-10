@@ -52,7 +52,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(const PaginationParams());
-    registerFallbackValue(Filter.equal('type', 'like'));
+    registerFallbackValue(ReactionFilter.equal(ReactionFilterField.type, 'like'));
   });
 
   setUp(() {
@@ -468,7 +468,7 @@ void main() {
 
     test('refresh resets filter and sort to initial values', () async {
       final reactions = generateReactions();
-      final initialFilter = Filter.equal('type', 'like');
+      final initialFilter = ReactionFilter.equal(ReactionFilterField.type, 'like');
       final sort = [ReactionSort.desc(ReactionSortField.createdAt)];
 
       final apiCalls = <Map<String, dynamic>>[];
@@ -502,7 +502,7 @@ void main() {
 
       // Change filter and sort at runtime
       controller
-        ..filter = Filter.equal('type', 'love')
+        ..filter = ReactionFilter.equal(ReactionFilterField.type, 'love')
         ..sort = [ReactionSort.asc(ReactionSortField.createdAt)];
 
       await controller.refresh();
@@ -517,9 +517,9 @@ void main() {
 
     test('refresh with resetValue=false preserves current filter and sort', () async {
       final reactions = generateReactions();
-      final initialFilter = Filter.equal('type', 'like');
+      final initialFilter = ReactionFilter.equal(ReactionFilterField.type, 'like');
       final initialSort = [ReactionSort.desc(ReactionSortField.createdAt)];
-      final newFilter = Filter.equal('type', 'love');
+      final newFilter = ReactionFilter.equal(ReactionFilterField.type, 'love');
       final newSort = [ReactionSort.asc(ReactionSortField.createdAt)];
 
       final apiCalls = <Map<String, dynamic>>[];

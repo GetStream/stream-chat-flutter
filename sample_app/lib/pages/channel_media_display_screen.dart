@@ -17,8 +17,8 @@ class ChannelMediaDisplayScreen extends StatefulWidget {
 class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
   late final StreamMessageSearchListController _controller = StreamMessageSearchListController(
     client: StreamChat.of(context).client,
-    filter: Filter.in_('cid', [StreamChannel.of(context).channel.cid!]),
-    messageFilter: Filter.in_('attachments.type', const ['image', 'video']),
+    filter: .in_(ChannelFilterField.cid, [StreamChannel.of(context).channel.cid]),
+    messageFilter: .in_(MessageSearchFilterField.attachmentsType, const ['image', 'video']),
     sort: [MessageSearchSort.asc(MessageSearchSortField.createdAt)],
     limit: 20,
   );

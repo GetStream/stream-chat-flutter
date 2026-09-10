@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_core/stream_core.dart' show Sort, SortField;
+import 'package:stream_core/stream_core.dart' show Filter, FilterField, Standard, Sort, SortField;
 import 'package:uuid/uuid.dart';
 
 import '../util/extension.dart';
@@ -724,6 +724,126 @@ class Message extends Equatable {
     sharedLocation,
     deletedForMe,
   ];
+}
+
+/// A filter for a message search.
+typedef MessageSearchFilter = Filter<Message>;
+
+/// Represents a field that a message search can be filtered on.
+class MessageSearchFilterField extends FilterField<Message> {
+  /// Creates a message filter field named [remote] on the wire, reading its
+  /// value off an instance with [value].
+  MessageSearchFilterField(super.remote, super.value);
+
+  /// Creates a field the SDK does not model, read from [Message.extraData].
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`
+  factory MessageSearchFilterField.custom(String remote) {
+    return MessageSearchFilterField(remote, (it) => it.extraData[remote]);
+  }
+
+  /// Filters messages by their id.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`
+  static final id = MessageSearchFilterField(
+    'id',
+    (it) => it.id,
+  );
+
+  /// Filters messages by their text.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`, `$q`, `$autocomplete`
+  static final text = MessageSearchFilterField(
+    'text',
+    (it) => it.text,
+  );
+
+  /// Filters messages by their type.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`
+  static final type = MessageSearchFilterField(
+    'type',
+    (it) => it.type,
+  );
+
+  /// Filters messages by the id of the user who sent them.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final userId = MessageSearchFilterField(
+    'user_id',
+    (it) => it.user?.id,
+  );
+
+  /// Filters messages by the id of the message they reply to.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`
+  static final parentId = MessageSearchFilterField(
+    'parent_id',
+    (it) => it.parentId,
+  );
+
+  /// Filters messages by how many replies they have.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`
+  static final replyCount = MessageSearchFilterField(
+    'reply_count',
+    (it) => it.replyCount,
+  );
+
+  /// Filters messages by whether they are pinned.
+  ///
+  /// **Supported operators:** `$eq`
+  static final pinned = MessageSearchFilterField(
+    'pinned',
+    (it) => it.pinned,
+  );
+
+  /// Filters messages by whether they carry an attachment.
+  ///
+  /// **Supported operators:** `$exists`
+  static final attachments = MessageSearchFilterField(
+    'attachments',
+    (it) => it.attachments.takeIf((it) => it.isNotEmpty),
+  );
+
+  /// Filters messages by the type of any of their attachments.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final attachmentsType = MessageSearchFilterField(
+    'attachments.type',
+    (it) => it.attachments.map((it) => it.type),
+  );
+
+  /// Filters messages by the id of any of the users they mention.
+  ///
+  /// **Supported operators:** `$contains`
+  static final mentionedUsersId = MessageSearchFilterField(
+    'mentioned_users.id',
+    (it) => it.mentionedUsers.map((it) => it.id),
+  );
+
+  /// Filters messages by their creation date.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`
+  static final createdAt = MessageSearchFilterField(
+    'created_at',
+    (it) => it.createdAt,
+  );
+
+  /// Filters messages by their last update date.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`
+  static final updatedAt = MessageSearchFilterField(
+    'updated_at',
+    (it) => it.updatedAt,
+  );
 }
 
 /// Represents a sorting operation for a message search.

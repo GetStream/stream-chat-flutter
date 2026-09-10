@@ -55,8 +55,8 @@ class StreamReactionListController extends PagedValueNotifier<String?, Reaction>
   /// The query filters to use.
   ///
   /// Supported filter fields: `type`, `user_id`, `created_at`.
-  final Filter? filter;
-  Filter? _activeFilter;
+  final ReactionFilter? filter;
+  ReactionFilter? _activeFilter;
 
   /// The sorting used for the reactions matching the filters.
   ///
@@ -79,7 +79,7 @@ class StreamReactionListController extends PagedValueNotifier<String?, Reaction>
   ///
   /// Note: This will not trigger a new query. Make sure to call
   /// [doInitialLoad] or [refresh] after setting a new filter.
-  set filter(Filter? value) => _activeFilter = value;
+  set filter(ReactionFilter? value) => _activeFilter = value;
 
   /// Allows for the change of the query sort used for reaction queries.
   ///

@@ -56,8 +56,8 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
   ///
   /// You can query on any of the custom fields you've defined on the
   /// [Draft].
-  final Filter? filter;
-  Filter? _activeFilter;
+  final DraftFilter? filter;
+  DraftFilter? _activeFilter;
 
   /// The sorting used for the drafts matching the filters.
   ///
@@ -79,7 +79,7 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
   ///
   /// Use this if you need to support runtime filter changes,
   /// through custom filters UI.
-  set filter(Filter? value) => _activeFilter = value;
+  set filter(DraftFilter? value) => _activeFilter = value;
 
   /// Allows for the change of the query sort used for poll vote queries.
   ///

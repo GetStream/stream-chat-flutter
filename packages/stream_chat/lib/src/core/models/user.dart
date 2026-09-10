@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_core/stream_core.dart' show Standard, Sort, SortField;
+import 'package:stream_core/stream_core.dart' show Filter, FilterField, Standard, Sort, SortField;
 
 import '../util/extension.dart';
 import '../util/serializer.dart';
@@ -211,6 +211,125 @@ class User extends Equatable {
     teamsRole,
     avgResponseTime,
   ];
+}
+
+/// A filter for a user query.
+typedef UserFilter = Filter<User>;
+
+/// Represents a field that user queries can be filtered on.
+class UserFilterField extends FilterField<User> {
+  /// Creates a user filter field named [remote] on the wire, reading its value
+  /// off an instance with [value].
+  UserFilterField(super.remote, super.value);
+
+  /// Creates a field the SDK does not model, read from [User.extraData].
+  ///
+  /// A user query compares a custom field for equality only. Anything else is
+  /// rejected.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  factory UserFilterField.custom(String remote) {
+    return UserFilterField(remote, (it) => it.extraData[remote]);
+  }
+
+  /// Filters users by their id.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$autocomplete`
+  static final id = UserFilterField(
+    'id',
+    (it) => it.id,
+  );
+
+  /// Filters users by their name.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$autocomplete`
+  static final name = UserFilterField(
+    'name',
+    (it) => it.name,
+  );
+
+  /// Filters users by their username.
+  ///
+  /// **Supported operators:** `$eq`, `$autocomplete`
+  static final username = UserFilterField(
+    'username',
+    (it) => it.extraData['username'],
+  );
+
+  /// Filters users by their role.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final role = UserFilterField(
+    'role',
+    (it) => it.role,
+  );
+
+  /// Filters users by the teams they belong to.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$contains`
+  static final teams = UserFilterField(
+    'teams',
+    (it) => it.teams,
+  );
+
+  /// Filters users by whether they are banned.
+  ///
+  /// **Supported operators:** `$eq`
+  static final banned = UserFilterField(
+    'banned',
+    (it) => it.banned,
+  );
+
+  /// Filters users by whether they are shadow banned.
+  ///
+  /// **Supported operators:** `$eq`
+  static final shadowBanned = UserFilterField(
+    'shadow_banned',
+    (it) => it.extraData['shadow_banned'],
+  );
+
+  /// Filters users by whether they bypass moderation.
+  ///
+  /// **Supported operators:** `$eq`
+  static final bypassModeration = UserFilterField(
+    'bypass_moderation',
+    (it) => it.extraData['bypass_moderation'],
+  );
+
+  /// Filters users by when they were last online.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`
+  static final lastActive = UserFilterField(
+    'last_active',
+    (it) => it.lastActive,
+  );
+
+  /// Filters users by their creation date.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`
+  static final createdAt = UserFilterField(
+    'created_at',
+    (it) => it.createdAt,
+  );
+
+  /// Filters users by their last update date.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`
+  static final updatedAt = UserFilterField(
+    'updated_at',
+    (it) => it.updatedAt,
+  );
+
+  /// Filters users by the language they chose.
+  ///
+  /// **Supported operators:** `$eq`
+  static final language = UserFilterField(
+    'language',
+    (it) => it.language,
+  );
 }
 
 /// Represents a sorting operation for users.

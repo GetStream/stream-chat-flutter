@@ -1,5 +1,4 @@
 import 'package:stream_chat/src/core/models/channel_state.dart';
-import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/predefined_filter.dart';
 import 'package:stream_core/stream_core.dart' show SortDirection;
 import 'package:test/test.dart';
@@ -35,7 +34,7 @@ void main() {
     final parsed = PredefinedFilter.fromJson(json);
 
     expect(parsed.name, 'unread');
-    expect(parsed.filter.value, filterJson);
+    expect(parsed.filter.toJson(), filterJson);
     expect(parsed.sort, hasLength(1));
     expect(parsed.sort!.first.field.remote, 'last_message_at');
     expect(parsed.sort!.first.direction, SortDirection.desc);
@@ -84,7 +83,7 @@ void main() {
     test('returns the echoed sort when present', () {
       final filter = PredefinedFilter(
         name: 'x',
-        filter: const Filter.empty(),
+        filter: const ChannelFilter.raw({}),
         sort: [ChannelSort.asc(ChannelSortField.createdAt)],
       );
 
@@ -96,7 +95,7 @@ void main() {
     });
 
     test('falls back to lastUpdated desc when sort is null and filter is empty', () {
-      const predefined = PredefinedFilter(name: 'x', filter: Filter.empty());
+      const predefined = PredefinedFilter(name: 'x', filter: ChannelFilter.raw({}));
 
       final sort = predefined.effectiveSort;
 
@@ -108,8 +107,8 @@ void main() {
     test('falls back to lastMessageAt desc when raw filter touches last_message_at', () {
       const predefined = PredefinedFilter(
         name: 'x',
-        filter: Filter.raw(
-          value: {
+        filter: ChannelFilter.raw(
+          {
             'last_message_at': {r'$gt': '2024-01-01T00:00:00Z'},
           },
         ),
@@ -124,8 +123,8 @@ void main() {
     test(r'falls back to lastMessageAt desc when last_message_at is nested under $or', () {
       const predefined = PredefinedFilter(
         name: 'x',
-        filter: Filter.raw(
-          value: {
+        filter: ChannelFilter.raw(
+          {
             r'$or': [
               {
                 'type': {r'$eq': 'messaging'},
@@ -146,8 +145,8 @@ void main() {
     test('falls back to lastUpdated desc when filter touches only other fields', () {
       const predefined = PredefinedFilter(
         name: 'x',
-        filter: Filter.raw(
-          value: {
+        filter: ChannelFilter.raw(
+          {
             r'$and': [
               {'frozen': false},
               {
@@ -168,9 +167,9 @@ void main() {
     test('falls back to lastMessageAt desc when typed Filter.and touches last_message_at', () {
       final predefined = PredefinedFilter(
         name: 'x',
-        filter: Filter.and([
-          Filter.equal('type', 'messaging'),
-          Filter.greater('last_message_at', '2024-01-01T00:00:00Z'),
+        filter: ChannelFilter.and([
+          ChannelFilter.equal(ChannelFilterField.type, 'messaging'),
+          ChannelFilter.greater(ChannelFilterField.lastMessageAt, '2024-01-01T00:00:00Z'),
         ]),
       );
 

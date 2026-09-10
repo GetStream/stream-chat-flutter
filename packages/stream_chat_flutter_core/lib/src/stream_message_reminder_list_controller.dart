@@ -59,8 +59,8 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
   ///
   /// You can query on any of the custom fields you've defined on the
   /// [MessageReminder].
-  final Filter? filter;
-  Filter? _activeFilter;
+  final MessageReminderFilter? filter;
+  MessageReminderFilter? _activeFilter;
 
   /// The sorting used for the message reminders matching the filters.
   ///
@@ -82,7 +82,7 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
   ///
   /// Use this if you need to support runtime filter changes,
   /// through custom filters UI.
-  set filter(Filter? value) => _activeFilter = value;
+  set filter(MessageReminderFilter? value) => _activeFilter = value;
 
   /// Allows for the change of the query sort used for message reminder queries.
   ///

@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import '../http/stream_http_client.dart';
-import '../models/filter.dart';
 import '../models/location.dart';
 import '../models/location_coordinates.dart';
 import '../models/user.dart';
@@ -18,7 +17,7 @@ class UserApi {
   /// Requests users with a given query.
   Future<QueryUsersResponse> queryUsers({
     bool presence = false,
-    Filter? filter,
+    UserFilter? filter,
     List<UserSort>? sort,
     PaginationParams? pagination,
   }) async {

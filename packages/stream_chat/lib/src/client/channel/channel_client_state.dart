@@ -264,7 +264,7 @@ class ChannelClientState {
             (event) async {
               final user = event.user!;
               final member = await _channel
-                  .queryMembers(filter: Filter.equal('id', user.id))
+                  .queryMembers(filter: .equal(MemberFilterField.userId, user.id))
                   .then((it) => it.members.first);
 
               _updateMember(member);
@@ -317,7 +317,7 @@ class ChannelClientState {
             (event) async {
               final user = event.user!;
               final member = await _channel
-                  .queryMembers(filter: Filter.equal('id', user.id))
+                  .queryMembers(filter: .equal(MemberFilterField.userId, user.id))
                   .then((it) => it.members.first);
 
               _updateMember(member);

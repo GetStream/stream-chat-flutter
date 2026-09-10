@@ -6,7 +6,7 @@ void main() {
   const converter = FilterConverter();
 
   test('empty filter round-trips as empty', () {
-    const original = Filter.empty();
+    const original = ChannelFilter.raw({});
 
     final decoded = converter.fromSql(converter.toSql(original));
 
@@ -14,12 +14,10 @@ void main() {
   });
 
   test('raw map filter round-trips unchanged', () {
-    const original = Filter.raw(
-      value: {
-        'type': 'messaging',
-        'members': ['user-1', 'user-2'],
-      },
-    );
+    const original = ChannelFilter.raw({
+      'type': 'messaging',
+      'members': ['user-1', 'user-2'],
+    });
 
     final decoded = converter.fromSql(converter.toSql(original));
 
