@@ -134,28 +134,29 @@ exactly as `ChannelSortField.fromRemote` works. The registry is not optional sca
 
 ## A field is only safe to give a value getter if local agrees with the server
 
-Core's operators mirror postgres operators: generic `$in` compiles to
-`fmt.Sprintf("%s IN (?)", …)` (`mq/sql.go:1090`), plain scalar membership, and all three cores
-implement exactly that. So a value getter is only correct when the server evaluates that field
-with the generic operator over the same value the getter returns. Three ways a field fails that,
-each found while writing `ChannelFilterField`:
+Core's generic `$in` compiles to `fmt.Sprintf("%s IN (?)", …)` (`mq/sql.go:1090`), plain scalar
+membership. So a value getter is only correct when the server evaluates that field the same way
+over the same value the getter returns. Three ways a field can diverge, each found while writing
+`ChannelFilterField`:
 
-**No local value.** `disabled`, `hidden`, `blocked`, `archived`, `joined`, `invite`, `app_banned`
-and `muted` are server-side membership and moderation state a `ChannelState` does not carry.
+**No local value.** `app_banned` and `joined` are the only two of this group the channel
+response does not carry. `disabled`, `hidden`, `blocked` and `muted` arrive as extra data, and
+`ChannelModel` reads all four — `muted` and `blocked` were added for this — so they are declared.
+`pinned` and `archived` come off the membership row.
 
-**A collection the server resolves by joining.** `members` looks like `$in` over a list of ids,
-and it is not: `channelDenormMembers` (`channel_denorm.go:1682`) is a `CustomOpHandler` compiling
-to `EXISTS (SELECT 1 FROM channel_members m WHERE m.user_id IN (?) …)`. Locally that reads as
-"intersect the member ids", which is *not* what `$in` means — `[u1,u9] IN [u1,u2]` is false, and
-correctly so, because the generic operator compares the whole value. Core is right here and
-briefly changing it was a mistake: it would have bent the generic operator to fit one column's
-bespoke handler, and put Dart out of step with Swift's `isIn` and Android's `` `in` `` which are
-both plain membership.
+**A collection the server resolves element-wise.** `members` looks like `$in` over a list of ids,
+and the generic operator would compare the whole list against each candidate, which is never
+true. The server special-cases it: `channelDenormMembers` (`channel_denorm.go:1682`) compiles to
+`EXISTS (SELECT 1 FROM channel_members m WHERE m.user_id IN (?) …)`, and `$eq` counts instead,
+matching a channel whose member set is exactly the given users. Every array field the API exposes
+is matched the same way — `filter_tags` with `@> AND <@` then `&&`, `teams` with `?|`,
+`attachments.type` with a nested `@>` — and none is order-sensitive. Core now does that for any
+array-valued field, so `members`, `member.user.name` and `attachments.type` are declared with
+real getters.
 
-**A denormalised name.** `member.user.name` has no single local value at all.
-
-None of these gets a getter until we decide what an un-evaluatable field should do — see the
-options recorded against `Filter.raw`, which faces the same question one level up.
+**Derived from the query, not the row.** `distinct`, `has_unread` and `invite` are computed
+server-side from the request and the caller's read state, so no getter can agree with them. They
+stay undeclared, reachable through `Filter.raw`.
 
 ## The filterable fields, from the spec
 
