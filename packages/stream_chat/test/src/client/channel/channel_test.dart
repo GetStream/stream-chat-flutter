@@ -39,57 +39,6 @@ void main() {
     return logger;
   }
 
-  group('Initialized Channel with Persistence', () {
-    late final client = MockStreamChatClientWithPersistence();
-    const channelId = 'test-channel-id';
-    const channelType = 'test-channel-type';
-    const channelCid = '$channelType:$channelId';
-    late Channel channel;
-
-    setUpAll(() {
-      // Fallback values
-      registerFallbackValue(FakeMessage());
-      registerFallbackValue(<Message>[]);
-      registerFallbackValue(FakeAttachmentFile());
-
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
-      final retryPolicy = RetryPolicy(
-        shouldRetry: (_, __, ___) => false,
-        delayFactor: Duration.zero,
-      );
-      when(() => client.retryPolicy).thenReturn(retryPolicy);
-
-      // fake clientState
-      final clientState = FakeClientState();
-      when(() => client.state).thenReturn(clientState);
-
-      // mock persistence client
-      final channelThreads = <String, List<Message>>{};
-      when(() => client.chatPersistenceClient.getChannelThreads(channelCid)).thenAnswer((_) async => channelThreads);
-      final channelState = _generateChannelState(channelId, channelType);
-      when(() => client.chatPersistenceClient.getChannelStateByCid(channelCid)).thenAnswer((_) async => channelState);
-      when(() => client.chatPersistenceClient.updateMessages(channelCid, any())).thenAnswer((_) => Future.value());
-
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
-    });
-
-    // Setting up a initialized channel
-    setUp(() {
-      final channelState = _generateChannelState(channelId, channelType);
-      channel = Channel.fromState(client, channelState);
-    });
-
-    tearDown(() {
-      channel.dispose();
-    });
-  });
-
   group('Retry functionality with parameter preservation', () {
     late final client = MockStreamChatClient();
     const channelId = 'test-channel-id';
