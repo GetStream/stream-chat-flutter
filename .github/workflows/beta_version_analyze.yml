@@ -21,11 +21,11 @@ jobs:
           fetch-depth: 0
 
       - name: "Install Flutter"
-        uses: subosito/flutter-action@v2
+        uses: ./.github/actions/setup-flutter
         with:
           channel: beta
-          cache: true
-          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+          # Empty so the newest beta is used, whatever major it is.
+          flutter-version: ''
 
       - name: 📊 Analyze and test packages
         uses: ./.github/actions/package_analysis

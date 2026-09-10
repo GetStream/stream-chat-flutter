@@ -1,12 +1,21 @@
 name: 'Setup Flutter'
 description: 'Install Flutter with dependency caching'
+inputs:
+  flutter-version:
+    description: 'Flutter version to install. Empty selects the newest on the channel.'
+    required: false
+    default: '3.x'
+  channel:
+    description: 'Flutter release channel'
+    required: false
+    default: 'stable'
 runs:
   using: "composite"
   steps:
     - uses: subosito/flutter-action@v2
       with:
-        flutter-version: "3.x"
-        channel: stable
+        flutter-version: ${{ inputs.flutter-version }}
+        channel: ${{ inputs.channel }}
         cache: true
         cache-key: "flutter-:os:-:channel:-:version:-:arch:"
         pub-cache-key: "flutter-pub-:os:-${{ hashFiles('melos.yaml', '**/pubspec.yaml') }}"

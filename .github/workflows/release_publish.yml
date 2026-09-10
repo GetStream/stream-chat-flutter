@@ -29,7 +29,7 @@ jobs:
         uses: dart-lang/setup-dart@v1
 
       - name: 🐦 Install Flutter
-        uses: subosito/flutter-action@v2
+        uses: ./.github/actions/setup-flutter
 
       - name: 📦 Install Tools
         run: flutter pub global activate melos
