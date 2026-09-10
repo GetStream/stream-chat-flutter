@@ -1,60 +1,39 @@
 // ignore_for_file: deprecated_member_use_from_same_package
 
-import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:test/test.dart';
-
-import '../../fakes.dart';
-import '../../mocks.dart';
+import 'package:stream_chat_test/stream_chat_test.dart';
 
 void main() {
-  group('ChannelCapabilityCheck', () {
-    const channelId = 'test-channel-id';
-    const channelType = 'test-channel-type';
-    late final client = MockStreamChatClient();
+  // ============================================================
+  // FEATURE: Capability Getters
+  // ============================================================
 
-    setUpAll(() {
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
-      final retryPolicy = RetryPolicy(
-        shouldRetry: (_, __, ___) => false,
-        delayFactor: Duration.zero,
-      );
-      when(() => client.retryPolicy).thenReturn(retryPolicy);
-
-      // fake clientState
-      final clientState = FakeClientState();
-      when(() => client.state).thenReturn(clientState);
-
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
-    });
-
-    /// Parameterized test for channel capability extension properties
+  group('Channel Capability Check - Capability Getters', () {
+    /// Parameterized test for channel capability extension properties.
     void testCapability(
       String capabilityName,
       ChannelCapability capability,
       bool Function(Channel) getterMethod,
     ) {
-      test('can$capabilityName returns false when capability is absent', () {
-        final channelState = _generateChannelState(channelId, channelType);
-        final channel = Channel.fromState(client, channelState);
-        expect(getterMethod(channel), false);
-      });
+      channelTest(
+        'can$capabilityName - should return false when capability is absent',
+        setUp: (tester) => tester.watch(),
+        body: (tester) async {
+          expect(getterMethod(tester.channel), false);
+        },
+      );
 
-      test('can$capabilityName returns true when capability is present', () {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [capability],
-        );
-        final channel = Channel.fromState(client, channelState);
-        expect(getterMethod(channel), true);
-      });
+      channelTest(
+        'can$capabilityName - should return true when capability is present',
+        setUp: (tester) => tester.watch(
+          modifyResponse: (state) => state.copyWith(
+            channel: createDefaultChannelModel(ownCapabilities: [capability]),
+          ),
+        ),
+        body: (tester) async {
+          expect(getterMethod(tester.channel), true);
+        },
+      );
     }
 
     // Test all channel capabilities using the parameterized function
@@ -310,101 +289,78 @@ void main() {
       (channel) => channel.canNotifyGroup,
     );
 
-    test('returns correct values with multiple capabilities', () {
-      final channelState = _generateChannelState(
-        channelId,
-        channelType,
-        ownCapabilities: [
-          ChannelCapability.sendMessage,
-          ChannelCapability.sendReply,
-          ChannelCapability.deleteOwnMessage,
-        ],
-      );
+    channelTest(
+      'should return correct values with multiple capabilities',
+      setUp: (tester) => tester.watch(
+        modifyResponse: (state) => state.copyWith(
+          channel: createDefaultChannelModel(
+            ownCapabilities: [
+              ChannelCapability.sendMessage,
+              ChannelCapability.sendReply,
+              ChannelCapability.deleteOwnMessage,
+            ],
+          ),
+        ),
+      ),
+      body: (tester) async {
+        expect(tester.channel.canSendMessage, true);
+        expect(tester.channel.canSendReply, true);
+        expect(tester.channel.canDeleteOwnMessage, true);
+        expect(tester.channel.canDeleteAnyMessage, false);
+        expect(tester.channel.canUpdateChannel, false);
+      },
+    );
+  });
 
-      final channel = Channel.fromState(client, channelState);
-      expect(channel.canSendMessage, true);
-      expect(channel.canSendReply, true);
-      expect(channel.canDeleteOwnMessage, true);
-      expect(channel.canDeleteAnyMessage, false);
-      expect(channel.canUpdateChannel, false);
-    });
+  // ============================================================
+  // FEATURE: Local Unread Count
+  // ============================================================
 
-    group('usesLocalUnreadCount', () {
-      // `isLocalUnreadCountEnabled` is a settable field on the mock and the
-      // client is shared across the group, so reset it between tests.
-      tearDown(() => client.isLocalUnreadCountEnabled = false);
+  group('Channel Capability Check - Local Unread Count', () {
+    channelTest(
+      'usesLocalUnreadCount - should be false when disabled and read receipts are unavailable',
+      setUp: (tester) => tester.watch(),
+      body: (tester) async {
+        expect(tester.channel.usesLocalUnreadCount, false);
+      },
+    );
 
-      Channel channelWithReadEvents({required bool available}) {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [
-            if (available) ChannelCapability.readEvents,
-          ],
-        );
+    channelTest(
+      'usesLocalUnreadCount - should be false when disabled and read receipts are available',
+      setUp: (tester) => tester.watch(
+        modifyResponse: (state) => state.copyWith(
+          channel: createDefaultChannelModel(
+            ownCapabilities: [ChannelCapability.readEvents],
+          ),
+        ),
+      ),
+      body: (tester) async {
+        expect(tester.channel.usesLocalUnreadCount, false);
+      },
+    );
 
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
+    channelTest(
+      'usesLocalUnreadCount - should be false when enabled but the channel supports read receipts',
+      isLocalUnreadCountEnabled: true,
+      setUp: (tester) => tester.watch(
+        modifyResponse: (state) => state.copyWith(
+          channel: createDefaultChannelModel(
+            ownCapabilities: [ChannelCapability.readEvents],
+          ),
+        ),
+      ),
+      body: (tester) async {
+        expect(tester.channel.usesLocalUnreadCount, false);
+      },
+    );
 
-        return channel;
-      }
-
-      test('is false when disabled and read receipts are unavailable', () {
-        client.isLocalUnreadCountEnabled = false;
-        final channel = channelWithReadEvents(available: false);
-        expect(channel.usesLocalUnreadCount, false);
-      });
-
-      test('is false when disabled and read receipts are available', () {
-        client.isLocalUnreadCountEnabled = false;
-        final channel = channelWithReadEvents(available: true);
-        expect(channel.usesLocalUnreadCount, false);
-      });
-
-      test('is false when enabled but the channel supports read receipts', () {
-        client.isLocalUnreadCountEnabled = true;
-        final channel = channelWithReadEvents(available: true);
-        expect(channel.usesLocalUnreadCount, false);
-      });
-
-      test('is true when enabled and read receipts are unavailable', () {
-        client.isLocalUnreadCountEnabled = true;
-        final channel = channelWithReadEvents(available: false);
-        expect(channel.usesLocalUnreadCount, true);
-      });
-    });
+    channelTest(
+      'usesLocalUnreadCount - should be true when enabled and read receipts are unavailable',
+      isLocalUnreadCountEnabled: true,
+      setUp: (tester) => tester.watch(),
+      body: (tester) async {
+        expect(tester.channel.usesLocalUnreadCount, true);
+      },
+    );
   });
 }
-
-// region Test Helpers
-
-ChannelState _generateChannelState(
-  String channelId,
-  String channelType, {
-  DateTime? lastMessageAt,
-  List<ChannelCapability>? ownCapabilities,
-  bool mockChannelConfig = false,
-}) {
-  ChannelConfig? config;
-  if (mockChannelConfig) {
-    config = MockChannelConfig();
-    when(() => config!.readEvents).thenReturn(true);
-    when(() => config!.typingEvents).thenReturn(true);
-  }
-  final channel = ChannelModel(
-    id: channelId,
-    type: channelType,
-    config: config,
-    ownCapabilities: ownCapabilities,
-    lastMessageAt: lastMessageAt,
-  );
-  return ChannelState(channel: channel);
-}
-
-Logger _createLogger(String name) {
-  final logger = Logger.detached(name)..level = Level.ALL;
-  logger.onRecord.listen(print);
-  return logger;
-}
-
-// endregion
