@@ -1,7 +1,7 @@
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/location.dart';
-import 'package:stream_chat/src/core/models/location_coordinates.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_core/stream_core.dart' show LocationCoordinate;
 import 'package:test/test.dart';
 
 void main() {
@@ -139,7 +139,7 @@ void main() {
     test('should return correct coordinates', () {
       final coordinates = location.coordinates;
 
-      expect(coordinates, isA<LocationCoordinates>());
+      expect(coordinates, isA<LocationCoordinate>());
       expect(coordinates.latitude, equals(latitude));
       expect(coordinates.longitude, equals(longitude));
     });

@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_core/stream_core.dart' show LocationCoordinate;
 import 'channel_model.dart';
-import 'location_coordinates.dart';
 import 'message.dart';
 
 part 'location.g.dart';
@@ -101,12 +101,7 @@ class Location extends Equatable {
   bool get isStatic => endAt == null;
 
   /// Returns the coordinates of the shared location.
-  LocationCoordinates get coordinates {
-    return LocationCoordinates(
-      latitude: latitude,
-      longitude: longitude,
-    );
-  }
+  LocationCoordinate get coordinates => .new(latitude: latitude, longitude: longitude);
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$LocationToJson(this);

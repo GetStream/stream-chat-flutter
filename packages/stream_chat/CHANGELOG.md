@@ -31,6 +31,8 @@
 - `Filter.raw` takes its map positionally: `Filter.raw({...})` rather than `Filter.raw(value: {...})`. It is not validated, and `matches` throws for it.
 - Every query takes its own filter type — `queryChannels` a `ChannelFilter?`, `queryUsers` a `UserFilter?`, and so on — and `PredefinedFilter.filter` is a `ChannelFilter`.
 - `ChannelFilterField.members` and `.memberUserName` are declared, so the standard "channels I am in" query stays typed.
+- `LocationCoordinates` is now `stream_core`'s `LocationCoordinate` — singular, and re-exported from this package. Its `copyWith` is removed, and it gains `distanceTo`, which answers the distance between two points.
+- Two coordinates now compare equal when they agree to about a centimetre, rather than requiring identical doubles.
 - `DraftSortField` has no `custom` field: the API rejects a custom sort field on drafts.
 - A sort names its model's field type, so `MemberSort.asc` takes a `MemberSortField` and a field from another model does not compile. `XSortField.custom(key)` reads a field from the model's extra data, for the four models whose queries accept one.
 - Added `ChannelSort.empty`, `MemberSort.empty` and so on alongside each default — an empty sort, for querying with the ordering the API applies on its own.

@@ -121,6 +121,10 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `ChatPersistenceClient` filter arguments | `ChannelFilter?` | `retyped` | `getChannelStates`, `queryChannelStates`, `updateChannelQueries`, `saveChannelQueries` |
 | _(new)_ | `ChannelFilterField.members` / `.memberUserName` | `added` | Keeps the standard "channels I am in" query typed |
 | _(new)_ | `ChannelModel.muted` / `.blocked`, `Channel.blocked` / `.blockedStream` | `added` | Already on the channel payload; now read without reaching into extra data |
+| `LocationCoordinates` | `LocationCoordinate` | `renamed` | `stream_core`'s, re-exported. Singular, since it is one point |
+| `LocationCoordinates.copyWith` | — | `removed` | Two required doubles; construct a new one |
+| `LocationCoordinates` exact equality | `LocationCoordinate` equality within ~1cm | `retyped` | Compares to a 1e-7 epsilon, so coordinates that round-trip through the API still match |
+| _(new)_ | `LocationCoordinate.distanceTo` | `added` | Haversine distance, returning a `Distance` |
 | _(more added per feature as PRs land)_ | | | |
 
 ---

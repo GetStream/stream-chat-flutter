@@ -314,7 +314,7 @@ void main() {
     const messageId = 'test-message-id';
     const createdByDeviceId = 'test-device-id';
     final endAt = DateTime.timestamp().add(const Duration(hours: 1));
-    const coordinates = LocationCoordinates(
+    const coordinates = LocationCoordinate(
       latitude: 40.7128,
       longitude: -74.0060,
     );
