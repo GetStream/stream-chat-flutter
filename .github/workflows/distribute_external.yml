@@ -95,9 +95,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: 'latest'
+      - uses: ./.github/actions/setup-xcode
 
       - uses: ./.github/actions/setup-flutter
 

@@ -138,6 +138,12 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - uses: ./.github/actions/setup-xcode
+        with:
+          # macos-15 defaults to Xcode 16.4; the pinned simulator runtimes below
+          # need a 26.x toolchain.
+          xcode-version: '26.2'
+
       - uses: ./.github/actions/setup-flutter
 
       - uses: ./.github/actions/setup-ruby
