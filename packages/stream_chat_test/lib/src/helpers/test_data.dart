@@ -326,6 +326,24 @@ Reaction createDefaultReaction({
   );
 }
 
+/// Creates a [Draft] with sensible defaults.
+///
+/// The default [DraftMessage] is given an explicit id because the constructor
+/// defaults it to a random UUID, which would break deterministic matching.
+Draft createDefaultDraft({
+  String channelCid = 'messaging:test-channel',
+  DraftMessage? message,
+  String? parentId,
+  DateTime? createdAt,
+}) {
+  return Draft(
+    channelCid: channelCid,
+    message: message ?? DraftMessage(id: 'draft-message-id', text: 'draft message text'),
+    parentId: parentId,
+    createdAt: createdAt ?? testCreatedAt,
+  );
+}
+
 /// Creates a [MessageReminder] with sensible defaults.
 ///
 /// Timestamps are always passed explicitly because the constructor defaults
@@ -372,6 +390,73 @@ SendMessageResponse createDefaultSendMessageResponse({
   return SendMessageResponse()
     ..duration = '10ms'
     ..message = message ?? createDefaultMessage();
+}
+
+/// Creates a [CreateDraftResponse] wrapping [draft].
+CreateDraftResponse createDefaultCreateDraftResponse({
+  Draft? draft,
+}) {
+  return CreateDraftResponse()
+    ..duration = '10ms'
+    ..draft = draft ?? createDefaultDraft();
+}
+
+/// Creates a [GetDraftResponse] wrapping [draft].
+GetDraftResponse createDefaultGetDraftResponse({
+  Draft? draft,
+}) {
+  return GetDraftResponse()
+    ..duration = '10ms'
+    ..draft = draft ?? createDefaultDraft();
+}
+
+/// Creates a [CreateReminderResponse] wrapping [reminder].
+CreateReminderResponse createDefaultCreateReminderResponse({
+  MessageReminder? reminder,
+}) {
+  return CreateReminderResponse()
+    ..duration = '10ms'
+    ..reminder = reminder ?? createDefaultMessageReminder();
+}
+
+/// Creates an [UpdateReminderResponse] wrapping [reminder].
+UpdateReminderResponse createDefaultUpdateReminderResponse({
+  MessageReminder? reminder,
+}) {
+  return UpdateReminderResponse()
+    ..duration = '10ms'
+    ..reminder = reminder ?? createDefaultMessageReminder();
+}
+
+/// Creates an [UpdateMessageResponse] wrapping [message].
+UpdateMessageResponse createDefaultUpdateMessageResponse({
+  Message? message,
+}) {
+  return UpdateMessageResponse()
+    ..duration = '10ms'
+    ..message = message ?? createDefaultMessage();
+}
+
+/// Creates a [SendActionResponse] wrapping the optional [message].
+SendActionResponse createDefaultSendActionResponse({
+  Message? message,
+}) {
+  return SendActionResponse()
+    ..duration = '10ms'
+    ..message = message;
+}
+
+/// Creates a [SearchMessagesResponse] wrapping [results].
+SearchMessagesResponse createDefaultSearchMessagesResponse({
+  List<GetMessageResponse> results = const [],
+  String? next,
+  String? previous,
+}) {
+  return SearchMessagesResponse()
+    ..duration = '10ms'
+    ..results = results
+    ..next = next
+    ..previous = previous;
 }
 
 /// Creates a [QueryChannelsResponse] wrapping [channels].
