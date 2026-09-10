@@ -11,8 +11,30 @@ import 'package:stream_chat/stream_chat.dart';
 Map<String, Object?> serverEventJson(Event event) {
   return {
     ...event.toJson(),
+    if (event.channel case final channel?) 'channel': serverChannelJson(channel),
     if (event.message case final message?) 'message': serverMessageJson(message),
     if (event.reaction case final reaction?) 'reaction': serverReactionJson(reaction),
+  };
+}
+
+/// Serializes [channel] the way a server sends it, restoring the
+/// server-assigned fields that `ChannelModel.toJson` omits.
+Map<String, Object?> serverChannelJson(ChannelModel channel) {
+  return {
+    ...channel.toJson(),
+    'cid': channel.cid,
+    if (channel.ownCapabilities case final ownCapabilities?) 'own_capabilities': ownCapabilities,
+    'config': channel.config.toJson(),
+    if (channel.createdBy case final createdBy?) 'created_by': createdBy.toJson(),
+    if (channel.lastMessageAt case final lastMessageAt?) 'last_message_at': lastMessageAt.toIso8601String(),
+    'created_at': channel.createdAt.toIso8601String(),
+    'updated_at': channel.updatedAt.toIso8601String(),
+    if (channel.deletedAt case final deletedAt?) 'deleted_at': deletedAt.toIso8601String(),
+    'member_count': channel.memberCount,
+    if (channel.members case final members?) 'members': [for (final member in members) member.toJson()],
+    if (channel.team case final team?) 'team': team,
+    if (channel.messageCount case final messageCount?) 'message_count': messageCount,
+    if (channel.filterTags case final filterTags?) 'filter_tags': filterTags,
   };
 }
 
