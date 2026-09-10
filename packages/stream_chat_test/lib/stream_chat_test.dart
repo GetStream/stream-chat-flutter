@@ -9,7 +9,7 @@ export 'package:mocktail/mocktail.dart';
 // NOTE(re-evaluate): re-exported so tests can name `Token` / `TokenProvider`
 // without importing `package:stream_chat/src/...` themselves. Re-evaluate once
 // stream_chat exposes these from its public barrel or a testing entrypoint.
-export 'package:stream_chat/src/core/http/token.dart' show Token;
+export 'package:stream_chat/src/core/http/token.dart' show AuthType, Token;
 export 'package:stream_chat/src/core/http/token_manager.dart' show TokenProvider;
 export 'package:test/test.dart';
 

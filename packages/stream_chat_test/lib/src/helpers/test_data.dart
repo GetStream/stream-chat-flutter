@@ -125,6 +125,7 @@ Event createDefaultEvent({
   ChannelModel? channel,
   Draft? draft,
   MessageReminder? reminder,
+  PushPreference? pushPreference,
   ChannelPushPreference? channelPushPreference,
   OwnUser? me,
   int? totalUnreadCount,
@@ -157,6 +158,7 @@ Event createDefaultEvent({
     channel: channel,
     draft: draft,
     reminder: reminder,
+    pushPreference: pushPreference,
     channelPushPreference: channelPushPreference,
     me: me,
     totalUnreadCount: totalUnreadCount,
@@ -380,6 +382,76 @@ MessageReminder createDefaultMessageReminder({
   );
 }
 
+/// Creates a [Poll] with sensible defaults.
+///
+/// The id and timestamps are always passed explicitly because the constructor
+/// defaults them to a random UUID and `DateTime.now()` respectively, which
+/// would break deterministic matching.
+Poll createDefaultPoll({
+  String id = 'test-poll-id',
+  String name = 'What is your favorite color?',
+  List<PollOption>? options,
+  DateTime? createdAt,
+  DateTime? updatedAt,
+  Map<String, Object?> extraData = const {},
+}) {
+  return Poll(
+    id: id,
+    name: name,
+    options:
+        options ??
+        [
+          createDefaultPollOption(text: 'Red'),
+          createDefaultPollOption(text: 'Blue'),
+        ],
+    createdAt: createdAt ?? testCreatedAt,
+    updatedAt: updatedAt ?? testUpdatedAt,
+    extraData: extraData,
+  );
+}
+
+/// Creates a [PollOption] with sensible defaults.
+PollOption createDefaultPollOption({
+  String? id,
+  String text = 'Red',
+  Map<String, Object?> extraData = const {},
+}) {
+  return PollOption(
+    id: id,
+    text: text,
+    extraData: extraData,
+  );
+}
+
+/// Creates a [PollVote] with sensible defaults.
+///
+/// A vote must carry either an [optionId] or an [answerText]; when neither is
+/// provided, the vote defaults to an option vote for `test-option-id`.
+/// Timestamps are always passed explicitly because the constructor defaults
+/// them to `DateTime.now()`, which would break deterministic matching.
+PollVote createDefaultPollVote({
+  String? id,
+  String? pollId,
+  String? optionId,
+  String? answerText,
+  String? userId,
+  User? user,
+  DateTime? createdAt,
+  DateTime? updatedAt,
+}) {
+  final resolvedOptionId = optionId ?? (answerText == null ? 'test-option-id' : null);
+  return PollVote(
+    id: id,
+    pollId: pollId,
+    optionId: resolvedOptionId,
+    answerText: answerText,
+    userId: userId,
+    user: user,
+    createdAt: createdAt ?? testCreatedAt,
+    updatedAt: updatedAt ?? testUpdatedAt,
+  );
+}
+
 /// Creates a [GetMessageResponse] wrapping [message].
 GetMessageResponse createDefaultGetMessageResponse({
   Message? message,
@@ -516,13 +588,25 @@ TranslateMessageResponse createDefaultTranslateMessageResponse({
     ..message = message ?? createDefaultMessage();
 }
 
-/// Creates a [QueryChannelsResponse] wrapping [channels].
+/// Creates a [QueryChannelsResponse] wrapping [channels] and the optional
+/// server-resolved [predefinedFilter] spec.
 QueryChannelsResponse createDefaultQueryChannelsResponse({
   List<ChannelState> channels = const [],
+  PredefinedFilter? predefinedFilter,
 }) {
   return QueryChannelsResponse()
     ..duration = '10ms'
-    ..channels = channels;
+    ..channels = channels
+    ..predefinedFilter = predefinedFilter;
+}
+
+/// Creates a [SyncResponse] wrapping [events].
+SyncResponse createDefaultSyncResponse({
+  List<Event> events = const [],
+}) {
+  return SyncResponse()
+    ..duration = '10ms'
+    ..events = events;
 }
 
 /// Creates a [PartialUpdateChannelResponse] wrapping [channel].
@@ -564,6 +648,39 @@ GetAppSettingsResponse createDefaultGetAppSettingsResponse({
   return GetAppSettingsResponse()
     ..duration = '10ms'
     ..app = app;
+}
+
+/// Creates a [ConnectGuestUserResponse] wrapping [user] and [accessToken].
+///
+/// The default access token is a decodable development token for the guest
+/// user's id.
+ConnectGuestUserResponse createDefaultConnectGuestUserResponse({
+  User? user,
+  String? accessToken,
+}) {
+  final guestUser = user ?? createDefaultUser();
+  return ConnectGuestUserResponse()
+    ..duration = '10ms'
+    ..user = guestUser
+    ..accessToken = accessToken ?? createTestToken(guestUser.id).rawValue;
+}
+
+/// Creates an [UpdatePollResponse] wrapping [poll].
+UpdatePollResponse createDefaultUpdatePollResponse({
+  Poll? poll,
+}) {
+  return UpdatePollResponse()
+    ..duration = '10ms'
+    ..poll = poll ?? createDefaultPoll();
+}
+
+/// Creates a [CastPollVoteResponse] wrapping [vote].
+CastPollVoteResponse createDefaultCastPollVoteResponse({
+  PollVote? vote,
+}) {
+  return CastPollVoteResponse()
+    ..duration = '10ms'
+    ..vote = vote ?? createDefaultPollVote();
 }
 
 /// Creates an [EmptyResponse].

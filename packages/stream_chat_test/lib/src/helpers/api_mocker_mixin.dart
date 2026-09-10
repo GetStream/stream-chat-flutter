@@ -32,11 +32,18 @@ mixin ApiMockerMixin {
   FakeChatApi get chatApi;
 
   /// Mocks an API call to return the given [result].
+  ///
+  /// When [delay] is provided, the returned future completes only after it
+  /// elapses, keeping the request in flight for that duration.
   void mockApi<T>(
     Future<T> Function(StreamChatApi api) apiCall, {
     required T result,
+    Duration? delay,
   }) {
-    return when(() => apiCall(chatApi)).thenAnswer((_) async => result);
+    return when(() => apiCall(chatApi)).thenAnswer((_) async {
+      if (delay != null) await Future<void>.delayed(delay);
+      return result;
+    });
   }
 
   /// Mocks an API call to fail with the given [error].
@@ -44,12 +51,21 @@ mixin ApiMockerMixin {
   /// The returned future completes with the error — matching the real API
   /// layer, which always fails asynchronously. Defaults to a
   /// [StreamChatNetworkError] with [ChatErrorCode.internalSystemError].
+  ///
+  /// When [delay] is provided, the returned future fails only after it
+  /// elapses, keeping the request in flight for that duration.
   void mockApiFailure<T>(
     Future<T> Function(StreamChatApi api) apiCall, {
     Object? error,
+    Duration? delay,
   }) {
     final failure = error ?? StreamChatNetworkError(ChatErrorCode.internalSystemError);
-    return when(() => apiCall(chatApi)).thenAnswer((_) => Future.error(failure));
+    return when(() => apiCall(chatApi)).thenAnswer((_) {
+      if (delay case final delay?) {
+        return Future<void>.delayed(delay).then((_) => Future<T>.error(failure));
+      }
+      return Future<T>.error(failure);
+    });
   }
 
   /// Mocks an API call to fail with the given [error] on the first invocation
@@ -108,5 +124,16 @@ mixin ApiMockerMixin {
   /// Verifies that an API call was never made.
   VerificationResult verifyNeverCalled<T>(Future<T> Function(StreamChatApi api) apiCall) {
     return verifyNever(() => apiCall(chatApi));
+  }
+
+  /// Verifies that the sub-API selected by [subApi] received no interactions
+  /// beyond the ones already verified.
+  ///
+  /// ```dart
+  /// tester.verifyApi((api) => api.channel.markRead('channel-id', 'type'));
+  /// tester.verifyNoMoreApiInteractions((api) => api.channel);
+  /// ```
+  void verifyNoMoreApiInteractions(Object Function(StreamChatApi api) subApi) {
+    return verifyNoMoreInteractions(subApi(chatApi));
   }
 }
