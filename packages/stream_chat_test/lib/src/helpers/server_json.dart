@@ -21,6 +21,9 @@ Map<String, Object?> serverEventJson(Event event) {
 Map<String, Object?> serverMessageJson(Message message) {
   return {
     ...message.toJson(),
+    // The request shape only carries regular/system types; a server push
+    // carries every type.
+    'type': message.type,
     if (message.user case final user?) 'user': user.toJson(),
     'created_at': message.createdAt.toIso8601String(),
     'updated_at': message.updatedAt.toIso8601String(),
