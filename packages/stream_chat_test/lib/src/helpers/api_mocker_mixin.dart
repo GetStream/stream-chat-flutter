@@ -52,6 +52,31 @@ mixin ApiMockerMixin {
     return when(() => apiCall(chatApi)).thenAnswer((_) => Future.error(failure));
   }
 
+  /// Mocks an API call to fail with the given [error] on the first invocation
+  /// and return [result] on every subsequent one.
+  ///
+  /// Both outcomes complete asynchronously — matching the real API layer.
+  /// [error] defaults to a [StreamChatNetworkError] with
+  /// [ChatErrorCode.internalSystemError], which carries no response data and
+  /// is therefore retriable: the failed first call arms the SDK's retry queue
+  /// and the queue's immediate retry attempt succeeds without waiting on
+  /// backoff timers.
+  void mockApiFailureOnce<T>(
+    Future<T> Function(StreamChatApi api) apiCall, {
+    Object? error,
+    required T result,
+  }) {
+    final failure = error ?? StreamChatNetworkError(ChatErrorCode.internalSystemError);
+    var firstCall = true;
+    return when(() => apiCall(chatApi)).thenAnswer((_) {
+      if (firstCall) {
+        firstCall = false;
+        return Future.error(failure);
+      }
+      return Future.value(result);
+    });
+  }
+
   /// Verifies that an API call was made exactly once.
   void verifyApi<T>(Future<T> Function(StreamChatApi api) apiCall) {
     return verifyApiCalled(apiCall, times: 1);
