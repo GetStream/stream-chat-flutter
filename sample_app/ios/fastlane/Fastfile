@@ -173,7 +173,13 @@ platform :ios do
     upload_symbols = Dir.glob(
       "#{root_path}/build/ios/SourcePackages/checkouts/*/Crashlytics/upload-symbols"
     ).first
-    UI.user_error!('Could not find Crashlytics upload-symbols in build/ios/SourcePackages') if upload_symbols.nil?
+    # Both the SourcePackages directory and the checkout name are outside our
+    # control, so a miss is possible. This lane runs before the app is
+    # distributed: symbols can be uploaded later, a failed release cannot.
+    if upload_symbols.nil?
+      UI.error('Could not find Crashlytics upload-symbols under build/ios/SourcePackages; skipping dSYM upload')
+      next
+    end
 
     upload_symbols_to_crashlytics(
       dsym_path: dsym_zip,
