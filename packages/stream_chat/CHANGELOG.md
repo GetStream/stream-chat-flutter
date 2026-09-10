@@ -1,7 +1,18 @@
 ## Upcoming
 
+✅ Added
+
+- Added a getter for `StreamChatClient.recoverStateOnReconnect`, which was previously write-only.
+
+🔄 Changed
+
+- Reconnecting no longer replays very large event backlogs; the offline cache is reset and the affected channels are re-queried instead, so a long spell offline does not stall the app on reconnect.
+
 🐞 Fixed
 
+- Fixed reconnecting with more than 255 channels clearing the offline cache and skipping the events missed while offline.
+- Fixed reconnect recovery refreshing only the first 30 active channels.
+- Fixed reconnect catch-up covering an arbitrary subset of channels when more are active than one request holds; the most recently active are now covered first.
 - Fixed `CurrentPlatform` throwing `UnimplementedError` on WebAssembly builds.
 - Fixed live location expiry emitting repeated `location.expired` events for the same expired location.
 
