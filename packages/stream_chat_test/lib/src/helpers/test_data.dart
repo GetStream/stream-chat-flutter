@@ -123,12 +123,20 @@ Event createDefaultEvent({
   Reaction? reaction,
   Member? member,
   ChannelModel? channel,
+  Draft? draft,
+  MessageReminder? reminder,
   OwnUser? me,
   int? totalUnreadCount,
   int? unreadChannels,
   int? watcherCount,
   bool? hardDelete,
   bool? deletedForMe,
+  Thread? thread,
+  DateTime? lastReadAt,
+  int? unreadMessages,
+  String? lastReadMessageId,
+  DateTime? lastDeliveredAt,
+  String? lastDeliveredMessageId,
   DateTime? createdAt,
   Map<String, Object?> extraData = const {},
 }) {
@@ -144,12 +152,20 @@ Event createDefaultEvent({
     reaction: reaction,
     member: member,
     channel: channel,
+    draft: draft,
+    reminder: reminder,
     me: me,
     totalUnreadCount: totalUnreadCount,
     unreadChannels: unreadChannels,
     watcherCount: watcherCount,
     hardDelete: hardDelete,
     deletedForMe: deletedForMe,
+    thread: thread,
+    lastReadAt: lastReadAt,
+    unreadMessages: unreadMessages,
+    lastReadMessageId: lastReadMessageId,
+    lastDeliveredAt: lastDeliveredAt,
+    lastDeliveredMessageId: lastDeliveredMessageId,
     createdAt: createdAt ?? testCreatedAt,
     extraData: extraData,
   );
@@ -305,6 +321,34 @@ Reaction createDefaultReaction({
     user: user ?? createDefaultUser(),
     score: score,
     createdAt: createdAt ?? testCreatedAt,
+  );
+}
+
+/// Creates a [MessageReminder] with sensible defaults.
+///
+/// Timestamps are always passed explicitly because the constructor defaults
+/// them to `DateTime.now()`, which would break deterministic matching.
+MessageReminder createDefaultMessageReminder({
+  String channelCid = 'messaging:test-channel',
+  String messageId = 'message-id',
+  String userId = 'luke_skywalker',
+  ChannelModel? channel,
+  Message? message,
+  User? user,
+  DateTime? remindAt,
+  DateTime? createdAt,
+  DateTime? updatedAt,
+}) {
+  return MessageReminder(
+    channelCid: channelCid,
+    channel: channel,
+    messageId: messageId,
+    message: message,
+    userId: userId,
+    user: user,
+    remindAt: remindAt,
+    createdAt: createdAt ?? testCreatedAt,
+    updatedAt: updatedAt ?? testUpdatedAt,
   );
 }
 

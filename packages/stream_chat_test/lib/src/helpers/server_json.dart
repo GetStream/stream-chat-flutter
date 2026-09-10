@@ -16,6 +16,8 @@ Map<String, Object?> serverEventJson(Event event) {
     if (event.reaction case final reaction?) 'reaction': serverReactionJson(reaction),
     if (event.poll case final poll?) 'poll': serverPollJson(poll),
     if (event.pollVote case final pollVote?) 'poll_vote': serverPollVoteJson(pollVote),
+    if (event.draft case final draft?) 'draft': serverDraftJson(draft),
+    if (event.reminder case final reminder?) 'reminder': serverReminderJson(reminder),
   };
 }
 
@@ -66,14 +68,51 @@ Map<String, Object?> serverMessageJson(Message message) {
     if (message.pinnedBy case final pinnedBy?) 'pinned_by': pinnedBy.toJson(),
     if (message.quotedMessage case final quotedMessage?) 'quoted_message': serverMessageJson(quotedMessage),
     if (message.poll case final poll?) 'poll': serverPollJson(poll),
-    if (message.draft case final draft?) 'draft': draft.toJson(),
-    if (message.reminder case final reminder?) 'reminder': reminder.toJson(),
+    if (message.draft case final draft?) 'draft': serverDraftJson(draft),
+    if (message.reminder case final reminder?) 'reminder': serverReminderJson(reminder),
     if (message.i18n case final i18n?) 'i18n': i18n,
     if (message.messageTextUpdatedAt case final textUpdatedAt?)
       'message_text_updated_at': textUpdatedAt.toIso8601String(),
     if (message.deletedForMe case final deletedForMe?) 'deleted_for_me': deletedForMe,
     if (message.command case final command?) 'command': command,
     if (message.sharedLocation case final location?) 'shared_location': serverLocationJson(location),
+  };
+}
+
+/// Serializes [draft] the way a server sends it, restoring the nested
+/// payloads that `Draft.toJson` serializes through lossy request shapes.
+Map<String, Object?> serverDraftJson(Draft draft) {
+  return {
+    ...draft.toJson(),
+    'message': serverDraftMessageJson(draft.message),
+    if (draft.channel case final channel?) 'channel': serverChannelJson(channel),
+    if (draft.parentMessage case final parentMessage?) 'parent_message': serverMessageJson(parentMessage),
+    if (draft.quotedMessage case final quotedMessage?) 'quoted_message': serverMessageJson(quotedMessage),
+  };
+}
+
+/// Serializes [message] the way a server sends it, restoring the fields
+/// that `DraftMessage.toJson` omits or rewrites (command, poll, quoted
+/// message, full mentioned users, command-prefixed text).
+Map<String, Object?> serverDraftMessageJson(DraftMessage message) {
+  return {
+    ...message.toJson(),
+    if (message.text case final text?) 'text': text,
+    'mentioned_users': [for (final user in message.mentionedUsers) user.toJson()],
+    if (message.quotedMessage case final quotedMessage?) 'quoted_message': serverMessageJson(quotedMessage),
+    if (message.command case final command?) 'command': command,
+    if (message.poll case final poll?) 'poll': serverPollJson(poll),
+  };
+}
+
+/// Serializes [reminder] the way a server sends it, restoring the
+/// server-assigned fields that `MessageReminder.toJson` omits.
+Map<String, Object?> serverReminderJson(MessageReminder reminder) {
+  return {
+    ...reminder.toJson(),
+    if (reminder.channel case final channel?) 'channel': serverChannelJson(channel),
+    if (reminder.message case final message?) 'message': serverMessageJson(message),
+    if (reminder.user case final user?) 'user': user.toJson(),
   };
 }
 
