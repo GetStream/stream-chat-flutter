@@ -160,7 +160,8 @@ Future<T> createTester<T extends BaseTester<Object?>>({
 /// [tokenProvider] when given (which takes precedence over [token]), and
 /// asserts the connection; [connect] replaces it entirely. [logLevel] and
 /// [isLocalUnreadCountEnabled] are forwarded to the client constructor;
-/// [skip], [tags] and [timeout] to `test`.
+/// [skip], [tags] and [timeout] to `test`. [skip] carries the reason to skip
+/// this test; omit it to run the test.
 ///
 /// This function is for internal use by concrete test helpers.
 void testWithTester<S, T extends BaseTester<S>>(
@@ -178,10 +179,7 @@ void testWithTester<S, T extends BaseTester<S>>(
   required FutureOr<void> Function(T tester) body,
   FutureOr<void> Function(T tester)? verify,
   FutureOr<void> Function(T tester)? tearDown,
-  // NOTE(parity): typed `bool` to match stream_feeds_test, which prevents
-  // passing the skip *reason* STYLE_GUIDE.md requires (`package:test` accepts
-  // a String for exactly that). Widen together with the feeds package.
-  bool skip = false,
+  String? skip,
   Iterable<String> tags = const [],
   test.Timeout? timeout,
 }) {

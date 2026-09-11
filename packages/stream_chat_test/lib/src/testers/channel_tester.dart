@@ -54,7 +54,7 @@ void channelTest(
   required FutureOr<void> Function(ChannelTester tester) body,
   FutureOr<void> Function(ChannelTester tester)? verify,
   FutureOr<void> Function(ChannelTester tester)? tearDown,
-  bool skip = false,
+  String? skip,
   Iterable<String> tags = const ['channel'],
   test.Timeout? timeout,
 }) {

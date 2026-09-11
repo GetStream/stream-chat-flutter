@@ -40,7 +40,7 @@ void chatClientTest(
   required FutureOr<void> Function(ChatClientTester tester) body,
   FutureOr<void> Function(ChatClientTester tester)? verify,
   FutureOr<void> Function(ChatClientTester tester)? tearDown,
-  bool skip = false,
+  String? skip,
   Iterable<String> tags = const ['chat-client'],
   test.Timeout? timeout,
 }) {
