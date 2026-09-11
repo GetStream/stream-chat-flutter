@@ -158,6 +158,10 @@ Future<T> createTester<T extends BaseTester<Object?>>({
 /// [chatPersistenceClient] — then runs the phases
 /// `connect → setUp → body → verify → tearDown` in a guarded zone.
 ///
+/// [verify] and [tearDown] run straight after [body], in the same zone and
+/// under the same error handling: the split is a readability convention, not
+/// an isolation boundary, and a [body] that throws skips both.
+///
 /// The default connect phase authenticates [user] with [token], or through
 /// [tokenProvider] when given (which takes precedence over [token]), and
 /// asserts the connection; [connect] replaces it entirely. [logLevel] and

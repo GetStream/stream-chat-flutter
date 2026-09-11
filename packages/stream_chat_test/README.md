@@ -58,6 +58,10 @@ the connection.
 Pass `connect:` to replace it — e.g. to test failed connections, or to skip the
 socket entirely with `connect: (_) {}`.
 
+`verify:` and `tearDown:` run straight after `body:`, in the same zone and under
+the same error handling — the split reads as arrange/act/assert, it is not an
+isolation boundary, and a `body:` that throws skips both.
+
 ```dart
 chatClientTest(
   'fails to connect when authentication is rejected',
