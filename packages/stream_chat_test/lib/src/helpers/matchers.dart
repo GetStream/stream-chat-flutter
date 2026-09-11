@@ -22,20 +22,39 @@ class _IsSameMultipartFileAs extends Matcher {
 
 /// Matches an [Event] with the same type as [targetEvent].
 ///
-/// Usable both as a test matcher and as a mocktail argument matcher via
-/// `any(that: isSameEventAs(event))`.
-Matcher isSameEventAs(Event targetEvent) => _IsSameEventAs(targetEvent: targetEvent);
+/// The `match*` flags opt additional fields into the comparison. Usable both
+/// as a test matcher and as a mocktail argument matcher via
+/// `any(that: isSameEventAs(event))` — the form is needed when the SDK builds
+/// the event itself, so the test has no instance to compare against.
+Matcher isSameEventAs(
+  Event targetEvent, {
+  bool matchParentId = false,
+}) => _IsSameEventAs(
+  targetEvent: targetEvent,
+  matchParentId: matchParentId,
+);
 
 class _IsSameEventAs extends Matcher {
-  const _IsSameEventAs({required this.targetEvent});
+  const _IsSameEventAs({
+    required this.targetEvent,
+    this.matchParentId = false,
+  });
 
   final Event targetEvent;
+  final bool matchParentId;
 
   @override
   Description describe(Description description) => description.add('is same event as $targetEvent');
 
   @override
-  bool matches(covariant Event event, Map matchState) => event.type == targetEvent.type;
+  bool matches(covariant Event event, Map matchState) {
+    var matches = event.type == targetEvent.type;
+    if (matchParentId) {
+      matches &= event.parentId == targetEvent.parentId;
+    }
+
+    return matches;
+  }
 }
 
 /// Matches a [Message] with the same id as [targetMessage].

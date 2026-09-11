@@ -1,3 +1,4 @@
+import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_test/stream_chat_test.dart';
 
 void main() {
@@ -16,6 +17,21 @@ void main() {
 
       final token = createTestToken(user.id);
       expect(token.userId, user.id);
+    });
+  });
+
+  group('isSameEventAs', () {
+    final target = Event(type: EventType.typingStart);
+
+    test('matches on type alone by default', () {
+      expect(Event(type: EventType.typingStart, parentId: 'p1'), isSameEventAs(target));
+      expect(Event(type: EventType.typingStop), isNot(isSameEventAs(target)));
+    });
+
+    test('compares the parent id when asked to', () {
+      final matcher = isSameEventAs(target, matchParentId: true);
+      expect(Event(type: EventType.typingStart), matcher);
+      expect(Event(type: EventType.typingStart, parentId: 'p1'), isNot(matcher));
     });
   });
 }

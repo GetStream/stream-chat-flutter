@@ -49,7 +49,7 @@ void main() {
           (api) => api.channel.sendEvent(
             _channelId,
             _channelType,
-            any(that: isSameEventAs(typingEvent)),
+            any(that: isSameEventAs(typingEvent, matchParentId: true)),
           ),
         );
       },
@@ -75,7 +75,7 @@ void main() {
           (api) => api.channel.sendEvent(
             _channelId,
             _channelType,
-            any(that: isSameEventAs(typingEvent)),
+            any(that: isSameEventAs(typingEvent, matchParentId: true)),
           ),
         );
       },
@@ -100,7 +100,7 @@ void main() {
             (api) => api.channel.sendEvent(
               _channelId,
               _channelType,
-              any(that: isSameEventAs(startTypingEvent)),
+              any(that: isSameEventAs(startTypingEvent, matchParentId: true)),
             ),
             result: createDefaultEmptyResponse(),
           )
@@ -108,7 +108,7 @@ void main() {
             (api) => api.channel.sendEvent(
               _channelId,
               _channelType,
-              any(that: isSameEventAs(stopTypingEvent)),
+              any(that: isSameEventAs(stopTypingEvent, matchParentId: true)),
             ),
             result: createDefaultEmptyResponse(),
           );
@@ -120,14 +120,14 @@ void main() {
             (api) => api.channel.sendEvent(
               _channelId,
               _channelType,
-              any(that: isSameEventAs(startTypingEvent)),
+              any(that: isSameEventAs(startTypingEvent, matchParentId: true)),
             ),
           )
           ..verifyApi(
             (api) => api.channel.sendEvent(
               _channelId,
               _channelType,
-              any(that: isSameEventAs(stopTypingEvent)),
+              any(that: isSameEventAs(stopTypingEvent, matchParentId: true)),
             ),
           );
       },
@@ -150,7 +150,7 @@ void main() {
           (api) => api.channel.sendEvent(
             _channelId,
             _channelType,
-            any(that: isSameEventAs(typingStartEvent)),
+            any(that: isSameEventAs(typingStartEvent, matchParentId: true)),
           ),
         );
       },
@@ -176,7 +176,7 @@ void main() {
           (api) => api.channel.sendEvent(
             _channelId,
             _channelType,
-            any(that: isSameEventAs(typingStartEvent)),
+            any(that: isSameEventAs(typingStartEvent, matchParentId: true)),
           ),
         );
       },
@@ -198,7 +198,7 @@ void main() {
           (api) => api.channel.sendEvent(
             _channelId,
             _channelType,
-            any(that: isSameEventAs(typingStartEvent)),
+            any(that: isSameEventAs(typingStartEvent, matchParentId: true)),
           ),
           result: createDefaultEmptyResponse(),
         );
@@ -209,7 +209,7 @@ void main() {
           (api) => api.channel.sendEvent(
             _channelId,
             _channelType,
-            any(that: isSameEventAs(typingStartEvent)),
+            any(that: isSameEventAs(typingStartEvent, matchParentId: true)),
           ),
         );
       },
@@ -232,7 +232,7 @@ void main() {
           (api) => api.channel.sendEvent(
             _channelId,
             _channelType,
-            any(that: isSameEventAs(typingStopEvent)),
+            any(that: isSameEventAs(typingStopEvent, matchParentId: true)),
           ),
         );
       },
@@ -258,7 +258,7 @@ void main() {
           (api) => api.channel.sendEvent(
             _channelId,
             _channelType,
-            any(that: isSameEventAs(typingStopEvent)),
+            any(that: isSameEventAs(typingStopEvent, matchParentId: true)),
           ),
         );
       },
@@ -280,7 +280,7 @@ void main() {
           (api) => api.channel.sendEvent(
             _channelId,
             _channelType,
-            any(that: isSameEventAs(typingStopEvent)),
+            any(that: isSameEventAs(typingStopEvent, matchParentId: true)),
           ),
           result: createDefaultEmptyResponse(),
         );
@@ -291,7 +291,7 @@ void main() {
           (api) => api.channel.sendEvent(
             _channelId,
             _channelType,
-            any(that: isSameEventAs(typingStopEvent)),
+            any(that: isSameEventAs(typingStopEvent, matchParentId: true)),
           ),
         );
       },

@@ -941,11 +941,7 @@ void main() {
       final event = Event(type: EventType.any);
 
       tester.mockApi(
-        (api) => api.channel.sendEvent(
-          channelId,
-          channelType,
-          any(that: isSameEventAs(event)),
-        ),
+        (api) => api.channel.sendEvent(channelId, channelType, event),
         result: createDefaultEmptyResponse(),
       );
 
@@ -954,11 +950,7 @@ void main() {
 
       tester
         ..verifyApi(
-          (api) => api.channel.sendEvent(
-            channelId,
-            channelType,
-            any(that: isSameEventAs(event)),
-          ),
+          (api) => api.channel.sendEvent(channelId, channelType, event),
         )
         ..verifyNoMoreApiInteractions((api) => api.channel);
     },
