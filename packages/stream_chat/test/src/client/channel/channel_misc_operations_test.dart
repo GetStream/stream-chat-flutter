@@ -101,12 +101,11 @@ void main() {
     body: (tester) async {
       final event = Event(type: 'event.local');
 
+      // Pinned by value, not by matcher: `sendEvent` forwards the caller's
+      // event untouched, so the stub only answering on the exact instance is
+      // itself the assertion that nothing rewrote it on the way out.
       tester.mockApi(
-        (api) => api.channel.sendEvent(
-          _channelId,
-          _channelType,
-          any(that: isSameEventAs(event)),
-        ),
+        (api) => api.channel.sendEvent(_channelId, _channelType, event),
         result: createDefaultEmptyResponse(),
       );
 
@@ -115,11 +114,7 @@ void main() {
       expect(res, isNotNull);
 
       tester.verifyApi(
-        (api) => api.channel.sendEvent(
-          _channelId,
-          _channelType,
-          any(that: isSameEventAs(event)),
-        ),
+        (api) => api.channel.sendEvent(_channelId, _channelType, event),
       );
     },
   );

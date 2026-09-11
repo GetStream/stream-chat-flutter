@@ -197,7 +197,15 @@ void main() {
 
       final eventReceived = expectLater(
         tester.channel.on(eventType),
-        emitsInOrder([isSameEventAs(event)]),
+        // The old suite asserted on the event instance itself, which held
+        // because the event never left the process. Here it round-trips
+        // through the real wire decode, so pin every field it carries.
+        emitsInOrder([
+          isA<Event>()
+              .having((it) => it.type, 'type', event.type)
+              .having((it) => it.cid, 'cid', event.cid)
+              .having((it) => it.createdAt, 'createdAt', event.createdAt),
+        ]),
       );
 
       await tester.emitEvent(event);
