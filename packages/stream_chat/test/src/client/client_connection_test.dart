@@ -1,10 +1,11 @@
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_test/stream_chat_test.dart';
 
-// NOTE(migration): the monolith's `.connectAnonymousUser` tests are not
-// migrated — the anonymous token's user id cannot pass the fake server's
-// connect-URI validation without the TokenManager seam. They stay in
-// client_test.dart until the seam lands.
+// NOTE(migration): the `.connectAnonymousUser` tests are not here — the
+// anonymous token's user id cannot pass the fake server's connect-URI
+// validation without the TokenManager seam. They live in
+// client_reconnection_test.dart, on a hand-rolled fake socket, until the seam
+// lands.
 void main() {
   group('Fake web-socket connection functions', () {
     chatClientTest(
