@@ -5726,7 +5726,7 @@ void main() {
         );
         channel.state!.updateMessage(deleted);
 
-        // No message quotes `target`, so `updateIf` short-circuits and the
+        // No message quotes `target`, so `updateWhere` short-circuits and the
         // remaining messages keep their identities (only `target` itself was
         // replaced by `sortedUpsert`).
         final unrelatedAfter = channel.state!.messages.firstWhere((m) => m.id == 'u1');
@@ -5757,7 +5757,7 @@ void main() {
         channel.state!.updateMessage(target.copyWith(text: 'edited'));
 
         final quoterAfter = channel.state!.messages.firstWhere((m) => m.id == 'q1');
-        // `updateIf` is gated on `message.isDeleted`, so the quoter must keep
+        // `updateWhere` is gated on `message.isDeleted`, so the quoter must keep
         // its identity (no allocation, no quoted-message overwrite).
         expect(identical(quoterAfter, quoterBefore), isTrue);
       },

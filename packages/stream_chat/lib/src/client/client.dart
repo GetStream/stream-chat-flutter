@@ -8,6 +8,7 @@ import 'package:stream_core/stream_core.dart'
     show
         InFlightCache,
         LocationCoordinate,
+        SortedListExtensions,
         StreamApiException,
         StreamLogConfig,
         StreamLogger,
@@ -52,7 +53,6 @@ import '../core/platform_detector/platform_detector.dart';
 import '../core/util/event_controller.dart';
 import '../core/util/extension.dart';
 import '../core/util/immutable_collection_subjects.dart';
-import '../core/util/list_extensions.dart';
 import '../core/util/utils.dart';
 import '../db/chat_persistence_client.dart';
 import '../event_type.dart';

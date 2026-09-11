@@ -905,7 +905,7 @@ class ChannelClientState {
 
     updateChannelState(
       channelState.copyWith(
-        read: updatedReads.toList(),
+        read: updatedReads,
       ),
     );
   }
@@ -1340,7 +1340,7 @@ class ChannelClientState {
 
   /// Update channelState with updated information.
   void updateChannelState(ChannelState updatedState) {
-    final newMessages = messages.mergeSorted(
+    final newMessages = messages.sortedMerge(
       updatedState.messages,
       key: (message) => message.id,
       update: _mergeUpdate,
@@ -1362,11 +1362,11 @@ class ChannelClientState {
     _channelState = _channelState.copyWith(
       messages: newMessages,
       channel: _channelState.channel?.merge(updatedState.channel),
-      watchers: newWatchers.toList(),
+      watchers: newWatchers,
       watcherCount: updatedState.watcherCount,
       members: updatedState.members,
       membership: updatedState.membership,
-      read: newReads.toList(),
+      read: newReads,
       draft: updatedState.draft,
       pinnedMessages: updatedState.pinnedMessages,
       pendingMessages: updatedState.pendingMessages,
@@ -1831,15 +1831,14 @@ class ChannelClientState {
   }
 
   Iterable<Location> _mergeActiveLocationsIntoExisting({
-    required Iterable<Location> existing,
+    required List<Location> existing,
     required Iterable<Message> toMerge,
   }) {
     if (toMerge.isEmpty) return existing;
 
-    final mergedLocations = existing.mergeFrom(
-      toMerge,
+    final mergedLocations = existing.merge(
+      toMerge.map((it) => it.sharedLocation).nonNulls,
       key: (it) => (it.userId, it.channelCid, it.createdByDeviceId),
-      value: (message) => message.sharedLocation,
       update: (original, updated) => updated,
     );
 
@@ -1913,9 +1912,9 @@ class ChannelClientState {
       // should display, so we can skip the rewrite entirely.
       if (!resolved.isDeleted) return mergedMessages;
 
-      return mergedMessages.updateIf(
+      return mergedMessages.updateWhere(
         (it) => it.quotedMessageId == resolved.id,
-        (it) => it.copyWith(quotedMessage: resolved),
+        update: (it) => it.copyWith(quotedMessage: resolved),
       );
     }
 
@@ -1927,9 +1926,9 @@ class ChannelClientState {
     }
 
     // Batch path: receiver (`existingList`) is maintained sorted as a
-    // state invariant; `mergeSorted` sorts `toMergeList` internally and
+    // state invariant; `sortedMerge` sorts `toMergeList` internally and
     // returns a sorted result.
-    final mergedMessages = existingList.mergeSorted(
+    final mergedMessages = existingList.sortedMerge(
       toMergeList,
       key: (message) => message.id,
       update: update,
@@ -1937,16 +1936,16 @@ class ChannelClientState {
     );
 
     // Refresh embedded `quotedMessage` refs only for messages quoting an
-    // incoming message that is now deleted. `updateIf` returns the same
+    // incoming message that is now deleted. `updateWhere` returns the same
     // list reference when nothing matches, so steady-state allocates
     // nothing for this step.
     final deletedIds = toMergeList.where((m) => m.isDeleted).map((m) => m.id).toSet();
     if (deletedIds.isEmpty) return mergedMessages;
 
     final mergedById = {for (final m in mergedMessages) m.id: m};
-    return mergedMessages.updateIf(
+    return mergedMessages.updateWhere(
       (it) => deletedIds.contains(it.quotedMessageId),
-      (it) => it.copyWith(quotedMessage: mergedById[it.quotedMessageId]),
+      update: (it) => it.copyWith(quotedMessage: mergedById[it.quotedMessageId]),
     );
   }
 

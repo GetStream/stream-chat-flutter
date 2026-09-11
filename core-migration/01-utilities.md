@@ -56,10 +56,28 @@ optimization". `channel_client_state.dart` (2,154 LOC) calls these helpers on **
 member and read update, so this is the hottest path in the SDK and "same result for sorted
 inputs" is not "same cost".
 
-Before adopting, benchmark both implementations on realistic shapes — a 1k+ sorted message list
-with incremental upserts, a large member list, and the read-state map — and either confirm the
-difference is immaterial at these sizes or take the two-pointer algorithm upstream so core is
-fast for everyone. Do not swap on the strength of the TODO alone.
+**Benchmarked.** Mean per call, over `List<Item>` of `{String id, DateTime at}` sorted by date,
+merged with `key: (it) => it.id` and a date comparator, warmed up then averaged over 500–20,000
+reps depending on size:
+
+| shape | chat | core | |
+| --- | --- | --- | --- |
+| 1k existing + 1 new | 46us | 64us | chat 1.4x |
+| 5k existing + 1 new | 282us | 378us | chat 1.3x |
+| 1k existing + 25 page | 47us | 77us | chat 1.6x |
+| 1k existing + 25 updates | 43us | 62us | chat 1.4x |
+| 1k existing + 1k refresh | 107us | 105us | tie |
+| 50 existing + 1 new | 2us | 2us | tie |
+
+Chat's wins wherever the receiver is long and the increment is small, which is the shape the hot
+path actually has, and ties on a full refresh where core's re-sort is not wasted. **So chat keeps
+its merge; do not adopt core's.**
+
+Upstreaming ours is *not* a drop-in, though, and that is the second finding. The two disagree on
+duplicate keys **within** the incoming list: chat's emits both, core's map resolves them to one.
+Chat's behaviour is deliberate and pinned by a test (`'tolerates duplicate keys in other'`), so
+porting the algorithm up would change core's contract for feeds as well. Either the ask includes
+that semantic change, or the algorithm gains a dedup pass first — which costs some of the win.
 
 The file's own header already specifies the migration:
 
@@ -82,9 +100,10 @@ Core's split is different, not just renamed: `upsert` / `batchReplace` / `partit
 / `removeNested` / `updateNested` sit on `SortedListExtensions`. Map each call site to the right
 one; a blanket rename will not compile.
 
-Ours has `sortedUpsertAt`, `mergeSorted`, `mergeFrom` and `updateIf`; core has `sumOf`,
-`removeNested`, `updateNested` and `partition`. Confirm every method we call has a home before
-deleting, and take the missing ones upstream rather than keeping a two-method file behind.
+All of ours landed in core: `sortedUpsertAt` and `mergeSorted` (as `sortedMerge`) were added
+there, `updateIf` became `updateWhere`, and `mergeFrom` is expressed as `merge` over a projected
+list. `core/util/list_extensions.dart` is deleted; `SortedListExtensions` is re-exported from the
+barrel in its place.
 
 ### `stream_chat_dio_error`
 
@@ -97,11 +116,11 @@ error layer.
 
 ## Decisions to make
 
-Both remaining decisions belong to `list_extensions`, and both wait on the benchmark:
+Both remaining decisions belong to `list_extensions`. The first is now answered:
 
-- **Adopt core's `merge`, or upstream ours?** If the two-pointer merge measurably wins at chat's
-  list sizes, core should have it — that makes every product faster and removes the reason to keep
-  a fork. If the difference is noise, adopt core's and delete ours.
+- ~~**Adopt core's `merge`, or upstream ours?**~~ **Answered by the benchmark above: keep ours.**
+  It wins 1.3–1.6x on the shape the hot path has and never loses. Sending it up is a separate
+  question, tracked in [UPSTREAM.md](UPSTREAM.md), and gated on the duplicate-key contract.
 - **Deprecated forwarders, or a clean break?** `list_extensions.dart` is exported at
   `stream_chat.dart:85` and the extension names differ, so the renames are visible. A Dart
   `extension` cannot be aliased by a `typedef`, so a soft landing means keeping our extension
@@ -120,8 +139,9 @@ Both remaining decisions belong to `list_extensions`, and both wait on the bench
 
 ## Upstream `stream_core` work
 
-None so far. Possible outcomes of the benchmark: the two-pointer `merge`, and any of
-`sortedUpsertAt` / `mergeSorted` / `mergeFrom` / `updateIf` that core has no home for.
+Done: core gained `sortedUpsertAt` and `sortedMerge`, `merge` took a nullable `other`, and
+`updateWhere` became copy-on-write. Each was benchmarked against the chat method it replaced
+before the chat copy was deleted.
 
 ## Definition of done
 
