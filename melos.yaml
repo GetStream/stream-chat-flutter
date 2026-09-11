@@ -85,6 +85,7 @@ command:
       media_kit_video: ^2.0.1
       meta: ^1.9.1
       mime: ^2.0.0
+      mocktail: ^1.0.5
       package_info_plus: ">=9.0.1 <11.0.0"
       path: ^1.9.1
       path_provider: ^2.1.5
@@ -112,6 +113,7 @@ command:
           ref: 2aea1413997af886ee951921d71e6b8cb8c5cfbb
           path: packages/stream_thumbnail
       synchronized: ^3.4.0
+      test: ^1.31.1
       url_launcher: ^6.3.2
       uuid: ^4.5.3
       video_player: ^2.11.1
