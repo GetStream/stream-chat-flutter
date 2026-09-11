@@ -1,3 +1,9 @@
+## Upcoming Beta
+
+🔄 Internal / Non-breaking
+
+- Added the OpenAPI-generated v2 client under `lib/open_api/`, along with the `melos run gen:openapi` tooling that produces it. No API uses it yet.
+
 ## Upcoming
 
 🐞 Fixed

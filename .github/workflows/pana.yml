@@ -50,7 +50,16 @@ jobs:
           working_directory: packages/stream_chat_flutter_core
           min_score: 100
 
+  # Disabled while `stream_core` is a git dependency. pana resolves each package
+  # standalone, without the dependency_overrides melos generates, so any package
+  # pulling both `stream_chat` (git stream_core) and `stream_core_flutter`
+  # (hosted stream_core) fails version solving before pana can score it. The
+  # other packages still run — `stream_chat` alone resolves fine.
+  #
+  # Re-enable both jobs once stream_core is published; see
+  # openapi-migration/01-foundation.md.
   stream_chat_flutter:
+    if: false
     runs-on: ubuntu-latest
     steps:
       - name: 📚 Git Checkout
@@ -61,7 +70,16 @@ jobs:
           working_directory: packages/stream_chat_flutter
           min_score: 100
 
+  # Disabled while `stream_core` is a git dependency. pana resolves each package
+  # standalone, without the dependency_overrides melos generates, so any package
+  # pulling both `stream_chat` (git stream_core) and `stream_core_flutter`
+  # (hosted stream_core) fails version solving before pana can score it. The
+  # other packages still run — `stream_chat` alone resolves fine.
+  #
+  # Re-enable both jobs once stream_core is published; see
+  # openapi-migration/01-foundation.md.
   stream_chat_localizations:
+    if: false
     runs-on: ubuntu-latest
     steps:
       - name: 📚 Git Checkout
