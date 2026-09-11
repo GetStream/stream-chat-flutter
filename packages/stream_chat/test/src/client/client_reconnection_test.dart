@@ -115,6 +115,49 @@ void main() {
     );
   });
 
+  group('Fake web-socket connection function with failure and persistence', () {
+    const apiKey = 'test-api-key';
+    late final api = FakeChatApi();
+    late final persistence = MockPersistenceClient();
+
+    late StreamChatClient client;
+
+    setUpAll(() {
+      // fallback values
+      registerFallbackValue(_FakeUser());
+    });
+
+    setUp(() {
+      final ws = _FakeWebSocketWithConnectionError();
+      client = StreamChatClient(apiKey, chatApi: api, ws: ws)..chatPersistenceClient = persistence;
+    });
+
+    tearDown(() {
+      client.dispose();
+    });
+
+    test(
+      '''`.connectAnonymousUser` should connect successfully if persistence contains event''',
+      () async {
+        final user = User(id: 'test-user-id');
+
+        when(persistence.getConnectionInfo).thenAnswer(
+          (invocation) async => Event(
+            type: EventType.healthCheck,
+            connectionId: 'test-connection-id',
+            me: OwnUser.fromUser(user),
+          ),
+        );
+
+        final res = await client.connectAnonymousUser();
+        expect(res, isNotNull);
+
+        verify(persistence.getConnectionInfo).called(1);
+        verifyNoMoreInteractions(persistence);
+      },
+    );
+  });
+
   group('recoverStateOnReconnect', () {
     const apiKey = 'test-api-key';
     final user = User(id: 'test-user-id');
