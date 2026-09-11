@@ -26,20 +26,23 @@ class _MockLogger extends Mock implements Logger {
 }
 
 void main() {
-  late final channel = _MockChannel();
-  late final logger = _MockLogger();
+  // Built per test: the logger assertions below count interactions, so sharing
+  // the doubles would make them depend on the order the tests run in.
+  late _MockChannel channel;
+  late _MockLogger logger;
   late RetryQueue retryQueue;
 
-  setUpAll(() {
+  setUp(() {
+    channel = _MockChannel();
+    logger = _MockLogger();
+
     final retryPolicy = RetryPolicy(
       shouldRetry: (_, __, error) {
         return error is StreamChatNetworkError && error.isRetriable;
       },
     );
     when(() => channel.client.retryPolicy).thenReturn(retryPolicy);
-  });
 
-  setUp(() {
     retryQueue = RetryQueue(channel: channel, logger: logger);
   });
 
