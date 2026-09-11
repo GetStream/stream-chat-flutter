@@ -326,12 +326,11 @@ void main() {
               endAt: DateTime.now().subtract(const Duration(minutes: 1)),
             ),
           );
-          // NOTE(migration): a WS `message.updated` carrying an expired live
-          // location is rerouted by `locationExpiredResolver` to
-          // `location.expired` before channel state sees it, and that handler
-          // no-ops when the message isn't loaded. Apply the update exactly as
-          // the `message.updated` listener would, to keep pinning the
-          // state-layer guard the original test covered.
+          // Applied directly, the way the `message.updated` listener would:
+          // a WS `message.updated` carrying an expired live location is
+          // rerouted by `locationExpiredResolver` to `location.expired` before
+          // channel state sees it, and that handler no-ops when the message is
+          // not loaded. This keeps the state-layer guard itself pinned.
           tester.channelState!.updateMessage(expiredMessage, upsert: false);
           await Future.delayed(Duration.zero);
 

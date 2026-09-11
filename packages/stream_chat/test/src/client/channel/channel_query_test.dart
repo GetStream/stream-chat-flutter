@@ -269,8 +269,8 @@ void main() {
       'should NOT submit for delivery when querying with pagination (older messages)',
       channelType: _channelType,
       channelId: _channelId,
-      // Seeded exactly like the positive test above, so the absence of a
-      // receipt can only come from the pagination params.
+      // Seeded so a receipt would be submitted on a plain query: the absence
+      // of one can then only come from the pagination params.
       build: (client) => _buildInitializedChannel(
         client,
         ownCapabilities: const [ChannelCapability.readEvents, ChannelCapability.deliveryEvents],

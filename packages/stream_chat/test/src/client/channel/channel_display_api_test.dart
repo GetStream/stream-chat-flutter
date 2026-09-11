@@ -197,9 +197,9 @@ void main() {
 
       final eventReceived = expectLater(
         tester.channel.on(eventType),
-        // The old suite asserted on the event instance itself, which held
-        // because the event never left the process. Here it round-trips
-        // through the real wire decode, so pin every field it carries.
+        // The event round-trips through the real wire decode, so the
+        // delivered instance is never identical to `event`; pin every field it
+        // carries instead.
         emitsInOrder([
           isA<Event>()
               .having((it) => it.type, 'type', event.type)

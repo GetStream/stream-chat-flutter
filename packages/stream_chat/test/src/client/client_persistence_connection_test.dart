@@ -2,9 +2,9 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_test/stream_chat_test.dart';
 
 // Runs [body] as a [chatClientTest] whose client is backed by a fresh
-// [MockPersistenceClient] and whose WebSocket transport fails to connect,
-// mirroring the monolith group's setUp: the connect attempt fails with a
-// retriable error, so the client falls back to the persisted connection info.
+// [MockPersistenceClient] and whose WebSocket transport fails to connect: the
+// connect attempt fails with a retriable error, so the client falls back to
+// the persisted connection info.
 void _failedConnectionWithPersistenceTest(
   String description, {
   required Future<void> Function(ChatClientTester tester, MockPersistenceClient persistence) body,
@@ -19,9 +19,9 @@ void _failedConnectionWithPersistenceTest(
   );
 }
 
-// Runs [body] as a [chatClientTest] that never opens the socket, mirroring
-// the monolith group's setUp/tearDown: persistence starts disabled and the
-// persistence client is detached (and asserted disabled) after the body.
+// Runs [body] as a [chatClientTest] that never opens the socket: persistence
+// starts disabled, and the persistence client is detached and asserted
+// disabled again after the body.
 void _persistenceConnectionTest(
   String description, {
   required Future<void> Function(ChatClientTester tester) body,

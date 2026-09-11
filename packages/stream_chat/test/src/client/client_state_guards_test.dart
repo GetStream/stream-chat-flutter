@@ -3,8 +3,8 @@ import 'package:stream_chat_test/stream_chat_test.dart';
 
 void main() {
   group('ClientState mutation guards', () {
-    // The old suite exercised these guards on a client that was never
-    // connected; skipping the connect phase preserves that setup.
+    // The guards hold on a client that was never connected, so these skip
+    // the connect phase.
     chatClientTest(
       '`state.channels` returns an unmodifiable view',
       connect: (_) {},

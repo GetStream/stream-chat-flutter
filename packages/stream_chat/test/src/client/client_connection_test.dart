@@ -146,9 +146,8 @@ void main() {
         body: (tester) async {
           expect(tester.currentUser, isNull);
 
-          // NOTE(migration): the monolith establishes the connection through
-          // `.connectAnonymousUser`; the harness connects the regular user
-          // instead (see the anonymous carve-out note at the top).
+          // The anonymous connect path is unavailable here, so the
+          // connection is opened with the regular user instead.
           final token = createTestToken(tester.user.id).rawValue;
           await tester.client.connectUser(tester.user, token);
 
@@ -183,9 +182,8 @@ void main() {
             ]),
           );
 
-          // NOTE(migration): the monolith establishes the connection through
-          // `.connectAnonymousUser`; the harness connects the regular user
-          // instead (see the anonymous carve-out note at the top).
+          // The anonymous connect path is unavailable here, so the
+          // connection is opened with the regular user instead.
           final token = createTestToken(tester.user.id).rawValue;
           await tester.client.connectUser(tester.user, token);
 

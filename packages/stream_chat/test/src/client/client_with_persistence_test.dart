@@ -2,9 +2,9 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_test/stream_chat_test.dart';
 
 // Runs [body] as a [chatClientTest] whose client is backed by a fresh
-// [MockPersistenceClient], mirroring the monolith group's setUp: the
-// persistence stubs the connect path needs are installed first, then the
-// client is connected and persistence is asserted enabled.
+// [MockPersistenceClient]: the persistence stubs the connect path needs are
+// installed first, then the client is connected and persistence is asserted
+// enabled.
 void _clientWithPersistenceTest(
   String description, {
   required Future<void> Function(ChatClientTester tester, MockPersistenceClient persistence) body,

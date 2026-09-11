@@ -5,8 +5,8 @@ const _channelId = 'test-channel-id';
 const _channelType = 'test-channel-type';
 const _channelCid = '$_channelType:$_channelId';
 
-// Builds the channel already initialized from state, the way the monolith
-// group's setUp did, so the state attaches while a persistence client is set.
+// Builds the channel already initialized from state, so the state attaches
+// while a persistence client is set.
 Channel _buildInitializedChannel(StreamChatClient client) {
   return Channel.fromState(
     client,
@@ -16,10 +16,10 @@ Channel _buildInitializedChannel(StreamChatClient client) {
   );
 }
 
-// Stubs every persistence call the monolith group stubbed
-// (`getChannelThreads`, `getChannelStateByCid`, `updateMessages`) plus the
-// calls the real client makes on its own: `updateConnectionInfo` on connect
-// and the debounced channel state/thread writes.
+// Stubs the persistence calls these tests drive (`getChannelThreads`,
+// `getChannelStateByCid`, `updateMessages`) plus the ones the real client
+// makes on its own: `updateConnectionInfo` on connect and the debounced
+// channel state/thread writes.
 MockPersistenceClient _createPersistenceClient() {
   registerFallbackValue(createDefaultEvent());
   registerFallbackValue(createDefaultChannelState());

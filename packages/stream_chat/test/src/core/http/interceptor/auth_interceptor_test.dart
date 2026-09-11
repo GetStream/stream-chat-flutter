@@ -221,10 +221,9 @@ void main() {
     },
   );
 
-  // The test above sends a response with no data, so it never reaches the
-  // error-code check. This one carries a parseable error payload whose code is
-  // not `tokenExpired`: it has to pass straight through, without refreshing
-  // the token or replaying the request.
+  // A response whose error payload parses but is not a token expiry has to
+  // pass straight through, without refreshing the token or replaying the
+  // request.
   test(
     '`onError` should pass through an error response that is not a token expiry',
     () async {
