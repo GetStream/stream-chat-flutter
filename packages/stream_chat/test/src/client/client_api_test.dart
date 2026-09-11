@@ -887,4 +887,571 @@ void main() {
       expect(token.authType, AuthType.jwt);
     },
   );
+
+  chatClientTest(
+    '`.markAllRead`',
+    body: (tester) async {
+      tester.mockApi(
+        (api) => api.channel.markAllRead(),
+        result: createDefaultEmptyResponse(),
+      );
+
+      final res = await tester.client.markAllRead();
+      expect(res, isNotNull);
+
+      tester
+        ..verifyApi((api) => api.channel.markAllRead())
+        ..verifyNoMoreApiInteractions((api) => api.channel);
+    },
+  );
+
+  chatClientTest(
+    '`.markChannelsDelivered`',
+    body: (tester) async {
+      final deliveries = [
+        const MessageDelivery(
+          channelCid: 'messaging:test-channel-1',
+          messageId: 'test-message-id-1',
+        ),
+        const MessageDelivery(
+          channelCid: 'messaging:test-channel-2',
+          messageId: 'test-message-id-2',
+        ),
+      ];
+
+      tester.mockApi(
+        (api) => api.channel.markChannelsDelivered(deliveries),
+        result: createDefaultEmptyResponse(),
+      );
+
+      final res = await tester.client.markChannelsDelivered(deliveries);
+      expect(res, isNotNull);
+
+      tester
+        ..verifyApi((api) => api.channel.markChannelsDelivered(deliveries))
+        ..verifyNoMoreApiInteractions((api) => api.channel);
+    },
+  );
+
+  chatClientTest(
+    '`.sendEvent`',
+    body: (tester) async {
+      const channelType = 'test-channel-type';
+      const channelId = 'test-channel-id';
+      final event = Event(type: EventType.any);
+
+      tester.mockApi(
+        (api) => api.channel.sendEvent(
+          channelId,
+          channelType,
+          any(that: isSameEventAs(event)),
+        ),
+        result: createDefaultEmptyResponse(),
+      );
+
+      final res = await tester.client.sendEvent(channelId, channelType, event);
+      expect(res, isNotNull);
+
+      tester
+        ..verifyApi(
+          (api) => api.channel.sendEvent(
+            channelId,
+            channelType,
+            any(that: isSameEventAs(event)),
+          ),
+        )
+        ..verifyNoMoreApiInteractions((api) => api.channel);
+    },
+  );
+
+  chatClientTest(
+    '`.sendReaction`',
+    body: (tester) async {
+      const messageId = 'test-message-id';
+      const reactionType = 'like';
+      const emojiCode = '👍';
+      const score = 4;
+
+      final reaction = Reaction(
+        type: reactionType,
+        messageId: messageId,
+        emojiCode: emojiCode,
+        score: score,
+      );
+
+      tester.mockApi(
+        (api) => api.message.sendReaction(messageId, reaction),
+        result: createDefaultSendReactionResponse(
+          message: Message(id: messageId),
+          reaction: reaction,
+        ),
+      );
+
+      final res = await tester.client.sendReaction(messageId, reaction);
+      expect(res, isNotNull);
+      expect(res.message.id, messageId);
+      expect(res.reaction.type, reactionType);
+      expect(res.reaction.emojiCode, emojiCode);
+      expect(res.reaction.score, score);
+      expect(res.reaction.messageId, messageId);
+
+      tester
+        ..verifyApi((api) => api.message.sendReaction(messageId, reaction))
+        ..verifyNoMoreApiInteractions((api) => api.message);
+    },
+  );
+
+  chatClientTest(
+    '`.deleteReaction`',
+    body: (tester) async {
+      const messageId = 'test-message-id';
+      const reactionType = 'like';
+
+      tester.mockApi(
+        (api) => api.message.deleteReaction(messageId, reactionType),
+        result: createDefaultEmptyResponse(),
+      );
+
+      final res = await tester.client.deleteReaction(messageId, reactionType);
+      expect(res, isNotNull);
+
+      tester
+        ..verifyApi((api) => api.message.deleteReaction(messageId, reactionType))
+        ..verifyNoMoreApiInteractions((api) => api.message);
+    },
+  );
+
+  chatClientTest(
+    '`.sendMessage`',
+    body: (tester) async {
+      final message = Message(id: 'test-message-id');
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+
+      tester.mockApi(
+        (api) => api.message.sendMessage(channelId, channelType, any(that: isSameMessageAs(message))),
+        result: createDefaultSendMessageResponse(message: message),
+      );
+
+      final res = await tester.client.sendMessage(message, channelId, channelType);
+      expect(res, isNotNull);
+      expect(res.message, isSameMessageAs(message));
+
+      tester
+        ..verifyApi(
+          (api) => api.message.sendMessage(
+            channelId,
+            channelType,
+            any(that: isSameMessageAs(message)),
+          ),
+        )
+        ..verifyNoMoreApiInteractions((api) => api.message);
+    },
+  );
+
+  chatClientTest(
+    '`.createDraft`',
+    body: (tester) async {
+      final message = DraftMessage(id: 'test-message-id', text: 'Hello!');
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+
+      tester.mockApi(
+        (api) => api.message.createDraft(
+          channelId,
+          channelType,
+          any(that: isSameDraftMessageAs(message)),
+        ),
+        result: createDefaultCreateDraftResponse(
+          draft: createDefaultDraft(
+            channelCid: '$channelType:$channelId',
+            message: message,
+          ),
+        ),
+      );
+
+      final res = await tester.client.createDraft(
+        message,
+        channelId,
+        channelType,
+      );
+
+      expect(res, isNotNull);
+      expect(res.draft.message, isSameDraftMessageAs(message));
+
+      tester
+        ..verifyApi(
+          (api) => api.message.createDraft(
+            channelId,
+            channelType,
+            any(that: isSameDraftMessageAs(message)),
+          ),
+        )
+        ..verifyNoMoreApiInteractions((api) => api.message);
+    },
+  );
+
+  chatClientTest(
+    '`.deleteDraft`',
+    body: (tester) async {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+
+      tester.mockApi(
+        (api) => api.message.deleteDraft(channelId, channelType),
+        result: createDefaultEmptyResponse(),
+      );
+
+      final res = await tester.client.deleteDraft(channelId, channelType);
+      expect(res, isNotNull);
+
+      tester
+        ..verifyApi((api) => api.message.deleteDraft(channelId, channelType))
+        ..verifyNoMoreApiInteractions((api) => api.message);
+    },
+  );
+
+  chatClientTest(
+    '`.getDraft`',
+    body: (tester) async {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+
+      final message = DraftMessage(id: 'test-message-id', text: 'Hello!');
+
+      tester.mockApi(
+        (api) => api.message.getDraft(channelId, channelType),
+        result: createDefaultGetDraftResponse(
+          draft: createDefaultDraft(
+            channelCid: '$channelType:$channelId',
+            message: message,
+          ),
+        ),
+      );
+
+      final res = await tester.client.getDraft(channelId, channelType);
+
+      expect(res, isNotNull);
+      expect(res.draft.message, isSameDraftMessageAs(message));
+
+      tester
+        ..verifyApi((api) => api.message.getDraft(channelId, channelType))
+        ..verifyNoMoreApiInteractions((api) => api.message);
+    },
+  );
+
+  chatClientTest(
+    '`.queryDrafts`',
+    body: (tester) async {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+
+      final filter = Filter.equal('channel_cid', '$channelType:$channelId');
+      final sort = [const SortOption<Draft>.desc('created_at')];
+      const pagination = PaginationParams(limit: 20);
+
+      final drafts = [
+        createDefaultDraft(
+          channelCid: '$channelType:$channelId',
+          message: DraftMessage(id: 'test-message-id', text: 'Hello!'),
+        ),
+      ];
+
+      tester.mockApi(
+        (api) => api.message.queryDrafts(
+          filter: filter,
+          sort: sort,
+          pagination: pagination,
+        ),
+        result: QueryDraftsResponse()..drafts = drafts,
+      );
+
+      final res = await tester.client.queryDrafts(
+        filter: filter,
+        sort: sort,
+        pagination: pagination,
+      );
+
+      expect(res, isNotNull);
+      expect(res.drafts.length, drafts.length);
+
+      tester
+        ..verifyApi(
+          (api) => api.message.queryDrafts(
+            filter: filter,
+            sort: sort,
+            pagination: pagination,
+          ),
+        )
+        ..verifyNoMoreApiInteractions((api) => api.message);
+    },
+  );
+
+  chatClientTest(
+    '`.getReplies`',
+    body: (tester) async {
+      const parentId = 'test-parent-id';
+
+      final messages = List.generate(
+        3,
+        (index) => Message(id: 'test-message-id-$index'),
+      );
+
+      tester.mockApi(
+        (api) => api.message.getReplies(parentId),
+        result: createDefaultQueryRepliesResponse(messages: messages),
+      );
+
+      final res = await tester.client.getReplies(parentId);
+      expect(res, isNotNull);
+      expect(res.messages.length, messages.length);
+
+      tester
+        ..verifyApi((api) => api.message.getReplies(parentId))
+        ..verifyNoMoreApiInteractions((api) => api.message);
+    },
+  );
+
+  chatClientTest(
+    '`.getReactions`',
+    body: (tester) async {
+      const messageId = 'test-parent-id';
+
+      final reactions = List.generate(
+        3,
+        (index) => Reaction(
+          type: 'test-reactions-type-$index',
+          messageId: messageId,
+        ),
+      );
+
+      tester.mockApi(
+        (api) => api.message.getReactions(messageId),
+        result: createDefaultQueryReactionsResponse(reactions: reactions),
+      );
+
+      final res = await tester.client.getReactions(messageId);
+      expect(res, isNotNull);
+      expect(res.reactions.length, reactions.length);
+      expect(res.reactions.every((it) => it.messageId == messageId), isTrue);
+
+      tester
+        ..verifyApi((api) => api.message.getReactions(messageId))
+        ..verifyNoMoreApiInteractions((api) => api.message);
+    },
+  );
+
+  chatClientTest(
+    '`.queryReactions`',
+    body: (tester) async {
+      const messageId = 'test-message-id';
+
+      final reactions = List.generate(
+        3,
+        (index) => Reaction(
+          type: 'test-reactions-type-$index',
+          messageId: messageId,
+        ),
+      );
+
+      tester.mockApi(
+        (api) => api.message.queryReactions(messageId),
+        result: createDefaultQueryReactionsResponse(reactions: reactions),
+      );
+
+      final res = await tester.client.queryReactions(messageId);
+      expect(res, isNotNull);
+      expect(res.reactions.length, reactions.length);
+      expect(res.reactions.every((it) => it.messageId == messageId), isTrue);
+
+      tester
+        ..verifyApi((api) => api.message.queryReactions(messageId))
+        ..verifyNoMoreApiInteractions((api) => api.message);
+    },
+  );
+
+  chatClientTest(
+    '`.updateMessage`',
+    body: (tester) async {
+      final message = Message(id: 'test-message-id', text: 'Hello!');
+
+      tester.mockApi(
+        (api) => api.message.updateMessage(any(that: isSameMessageAs(message))),
+        result: createDefaultUpdateMessageResponse(message: message),
+      );
+
+      final res = await tester.client.updateMessage(message);
+      expect(res, isNotNull);
+      expect(res.message, isSameMessageAs(message));
+
+      tester
+        ..verifyApi(
+          (api) => api.message.updateMessage(any(that: isSameMessageAs(message))),
+        )
+        ..verifyNoMoreApiInteractions((api) => api.message);
+    },
+  );
+
+  chatClientTest(
+    '`.deleteMessage`',
+    body: (tester) async {
+      const messageId = 'test-message-id';
+
+      tester.mockApi(
+        (api) => api.message.deleteMessage(messageId, hard: false),
+        result: createDefaultEmptyResponse(),
+      );
+
+      final res = await tester.client.deleteMessage(messageId);
+      expect(res, isNotNull);
+
+      tester
+        ..verifyApi((api) => api.message.deleteMessage(messageId, hard: false))
+        ..verifyNoMoreApiInteractions((api) => api.message);
+    },
+  );
+
+  chatClientTest(
+    '`.deleteMessageForMe`',
+    body: (tester) async {
+      const messageId = 'test-message-id';
+
+      tester.mockApi(
+        (api) => api.message.deleteMessage(messageId, deleteForMe: true),
+        result: createDefaultEmptyResponse(),
+      );
+
+      final res = await tester.client.deleteMessageForMe(messageId);
+      expect(res, isNotNull);
+
+      tester
+        ..verifyApi((api) => api.message.deleteMessage(messageId, deleteForMe: true))
+        ..verifyNoMoreApiInteractions((api) => api.message);
+    },
+  );
+
+  chatClientTest(
+    '`.getMessage`',
+    body: (tester) async {
+      const messageId = 'test-message-id';
+      final message = Message(id: messageId);
+
+      tester.mockApi(
+        (api) => api.message.getMessage(messageId),
+        result: createDefaultGetMessageResponse(message: message),
+      );
+
+      final res = await tester.client.getMessage(messageId);
+      expect(res, isNotNull);
+      expect(res.message.id, messageId);
+
+      tester
+        ..verifyApi((api) => api.message.getMessage(messageId))
+        ..verifyNoMoreApiInteractions((api) => api.message);
+    },
+  );
+
+  chatClientTest(
+    '`.getMessagesById`',
+    body: (tester) async {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      const messageIds = ['test-message-id'];
+
+      final messages = messageIds.map((id) => Message(id: id)).toList();
+
+      tester.mockApi(
+        (api) => api.message.getMessagesById(channelId, channelType, messageIds),
+        result: createDefaultGetMessagesByIdResponse(messages: messages),
+      );
+
+      final res = await tester.client.getMessagesById(
+        channelId,
+        channelType,
+        messageIds,
+      );
+      expect(res, isNotNull);
+      expect(res.messages.length, messageIds.length);
+
+      tester
+        ..verifyApi(
+          (api) => api.message.getMessagesById(channelId, channelType, messageIds),
+        )
+        ..verifyNoMoreApiInteractions((api) => api.message);
+    },
+  );
+
+  chatClientTest(
+    '`.translateMessage`',
+    body: (tester) async {
+      const messageId = 'test-message-id';
+      const language = 'hi'; // Hindi
+      const translatedMessageText = 'नमस्ते';
+      final translatedMessage = Message(
+        i18n: const {
+          language: translatedMessageText,
+        },
+      );
+
+      tester.mockApi(
+        (api) => api.message.translateMessage(messageId, language),
+        result: createDefaultTranslateMessageResponse(message: translatedMessage),
+      );
+
+      final res = await tester.client.translateMessage(messageId, language);
+
+      expect(res, isNotNull);
+      expect(res.message.i18n, translatedMessage.i18n);
+
+      tester
+        ..verifyApi((api) => api.message.translateMessage(messageId, language))
+        ..verifyNoMoreApiInteractions((api) => api.message);
+    },
+  );
+
+  chatClientTest(
+    '`.partialUpdateMessage`',
+    body: (tester) async {
+      const messageId = 'test-message-id';
+      final message = Message(id: messageId);
+
+      const set = {'text': 'Update Message text'};
+      const unset = ['pinExpires'];
+
+      final updateMessageResponse = createDefaultUpdateMessageResponse(
+        message: message.copyWith(text: set['text'], pinExpires: null),
+      );
+
+      tester.mockApi(
+        (api) => api.message.partialUpdateMessage(
+          message.id,
+          set: set,
+          unset: unset,
+        ),
+        result: updateMessageResponse,
+      );
+
+      final res = await tester.client.partialUpdateMessage(
+        messageId,
+        set: set,
+        unset: unset,
+      );
+
+      expect(res, isNotNull);
+      expect(res.message.id, message.id);
+      expect(res.message.id, message.id);
+      expect(res.message.text, set['text']);
+      expect(res.message.pinExpires, isNull);
+
+      tester
+        ..verifyApi(
+          (api) => api.message.partialUpdateMessage(
+            message.id,
+            set: set,
+            unset: unset,
+          ),
+        )
+        ..verifyNoMoreApiInteractions((api) => api.message);
+    },
+  );
 }
