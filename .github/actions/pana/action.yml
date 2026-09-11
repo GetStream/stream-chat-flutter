@@ -31,12 +31,7 @@ runs:
           yq eval '.dependencies.stream_chat = {"path": "../stream_chat"}' -i packages/stream_chat_persistence/pubspec.yaml
 
     - name: Install Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        cache: true
-        channel: stable
-        flutter-version: "3.x"
-        cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+      uses: ./.github/actions/setup-flutter
 
     - name: Install Pana
       working-directory: ${{ inputs.working_directory }}
