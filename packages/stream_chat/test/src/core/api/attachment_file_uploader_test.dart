@@ -3,7 +3,6 @@ import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
 import 'package:stream_chat_test/stream_chat_test.dart';
 
-import '../../fakes.dart';
 import '../../mocks.dart';
 import '../../utils.dart';
 
@@ -13,7 +12,7 @@ void main() {
 
   setUp(() {
     fileUploader = StreamAttachmentFileUploader(client);
-    registerFallbackValue(FakeMultiPartFile());
+    registerFallbackValue(_FakeMultipartFile());
   });
 
   Response successResponse(String path, {Object? data}) => Response(
@@ -262,3 +261,5 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 }
+
+class _FakeMultipartFile extends Fake implements MultipartFile {}
