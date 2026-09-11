@@ -41,7 +41,7 @@ void chatClientTest(
   FutureOr<void> Function(ChatClientTester tester)? verify,
   FutureOr<void> Function(ChatClientTester tester)? tearDown,
   String? skip,
-  Iterable<String> tags = const ['chat-client'],
+  Iterable<String> tags = const [],
   test.Timeout? timeout,
 }) {
   return testWithTester<StreamChatClient, ChatClientTester>(

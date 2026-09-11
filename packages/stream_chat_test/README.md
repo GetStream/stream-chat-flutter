@@ -156,11 +156,10 @@ whose outcome changes is the pinning one above (flip it to expect rejection).
 
 ## Tags
 
-Tests declared through `chatClientTest` / `channelTest` are tagged `chat-client` /
-`channel` by default (`flutter test --tags channel` filters on them). This package
-declares the tags in its own `dart_test.yaml`; consuming packages must declare them
-in their own `dart_test.yaml` to avoid `package:test` warnings. Passing `tags:`
-explicitly *replaces* the default tag.
+Tests declared through `chatClientTest` / `channelTest` carry no tags. `tags:` is
+forwarded to `package:test` if you want to tag a test yourself, in which case the
+consuming package has to declare those tags in its own `dart_test.yaml` to avoid
+`package:test` warnings.
 
 ## Internals access — re-evaluate
 

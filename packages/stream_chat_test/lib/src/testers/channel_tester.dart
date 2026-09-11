@@ -55,7 +55,7 @@ void channelTest(
   FutureOr<void> Function(ChannelTester tester)? verify,
   FutureOr<void> Function(ChannelTester tester)? tearDown,
   String? skip,
-  Iterable<String> tags = const ['channel'],
+  Iterable<String> tags = const [],
   test.Timeout? timeout,
 }) {
   return testWithTester<Channel, ChannelTester>(
