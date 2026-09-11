@@ -125,6 +125,10 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `LocationCoordinates.copyWith` | — | `removed` | Two required doubles; construct a new one |
 | `LocationCoordinates` exact equality | `LocationCoordinate` equality within ~1cm | `retyped` | Compares to a 1e-7 epsilon, so coordinates that round-trip through the API still match |
 | _(new)_ | `LocationCoordinate.distanceTo` | `added` | Haversine distance, returning a `Distance` |
+| `SortedListX` / `IterableMergeX` / `ListX` | `SortedListExtensions` (`stream_core`) | `moved` | Re-exported from this package. One extension where there were three, so a call site that used two of them needs no extra import |
+| `mergeSorted` | `sortedMerge` | `renamed` | A key held twice now collapses to the last element carrying it, as `merge` does, rather than being carried through |
+| `updateIf(test, update)` | `updateWhere(test, update: update)` | `renamed` | The second argument is named |
+| `mergeFrom(other, key:, value:)` | `merge(other.map(value).nonNulls, key:)` | `removed` | Project first, then merge |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
