@@ -244,7 +244,9 @@ class _FakeMultipartFile extends Fake implements MultipartFile {}
 /// Registers mocktail fallback values for common chat argument types, so that
 /// `any()` / `captureAny()` matchers can be used with them.
 ///
-/// Idempotent; called automatically by the tester lifecycle.
+/// Called automatically by the tester lifecycle, so tests should not need to
+/// call it. Calling it again is harmless but appends another set of values —
+/// mocktail keeps every value it is given.
 void registerChatFallbackValues() {
   registerFallbackValue(_FakeMessage());
   registerFallbackValue(_FakeDraftMessage());

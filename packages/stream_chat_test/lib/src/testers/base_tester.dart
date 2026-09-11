@@ -294,11 +294,11 @@ FutureOr<void> Function(BaseTester<Object?>) _defaultConnect({
   };
 }
 
-// Runs the test body in a guarded zone to catch all errors.
+// Runs the test body in a guarded zone.
 //
-// This ensures that errors from event handlers, timers, and unawaited
-// futures are properly caught and reported, not just errors in the
-// main async chain.
+// Errors raised outside the main async chain while the body runs — from event
+// handlers, timers and unawaited futures — fail the test instead of escaping
+// it. Errors arriving after the body completes do not; see the note below.
 //
 // NOTE(parity): errors arriving AFTER the body has completed (e.g. a timer
 // armed during the test that fires in the teardown window) are silently

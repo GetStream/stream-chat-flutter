@@ -50,9 +50,11 @@ handling — is production code.
 ### Lifecycle
 
 Each test runs the phases `connect → setUp → body → verify → tearDown` inside a
-guarded zone (errors from event handlers, timers and unawaited futures fail the
-test). The default connect phase mocks successful authentication, connects the
-client as `luke_skywalker` with a development token, and asserts the connection.
+guarded zone (errors from event handlers, timers and unawaited futures raised
+while the body runs fail the test — see the limitation below for errors that
+arrive after it). The default connect phase mocks successful authentication,
+connects the client as `luke_skywalker` with a development token, and asserts
+the connection.
 Pass `connect:` to replace it — e.g. to test failed connections, or to skip the
 socket entirely with `connect: (_) {}`.
 
@@ -128,8 +130,6 @@ Kept 1:1 with `stream_feeds_test` on purpose; fix upstream and here together:
 - The guarded zone drops async errors that arrive **after** the test body has
   completed (a timer armed during the test that fires in the teardown window fails
   silently instead of failing the test, which plain `package:test` would report).
-- `skip:` is typed `bool`, so the skip *reason* required by `STYLE_GUIDE.md` cannot
-  be provided (`package:test` accepts a String for this).
 
 ## Token handling — known limitation
 
