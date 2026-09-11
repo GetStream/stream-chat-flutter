@@ -108,4 +108,49 @@ void main() {
       );
     },
   );
+
+  // The design system owns these sizes, and the switches mapping them fall
+  // back rather than being exhaustive, so adding one upstream no longer breaks
+  // the build. This is what tells us a new size has arrived and still needs a
+  // mapping of its own — the table has no entry for it.
+  group('online indicator size', () {
+    const expected = {
+      StreamAvatarSize.xs: StreamOnlineIndicatorSize.sm,
+      StreamAvatarSize.sm: StreamOnlineIndicatorSize.sm,
+      StreamAvatarSize.md: StreamOnlineIndicatorSize.md,
+      StreamAvatarSize.lg: StreamOnlineIndicatorSize.lg,
+      StreamAvatarSize.xl: StreamOnlineIndicatorSize.xl,
+      StreamAvatarSize.xxl: StreamOnlineIndicatorSize.xxl,
+      StreamAvatarSize.xxxl: StreamOnlineIndicatorSize.xxxl,
+    };
+
+    test('every avatar size is mapped', () {
+      expect(expected.keys, containsAll(StreamAvatarSize.values));
+    });
+
+    for (final size in StreamAvatarSize.values) {
+      testWidgets('$size gets ${expected[size]}', (tester) async {
+        when(() => user.online).thenReturn(true);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StreamChat(
+              client: client,
+              themeData: StreamChatThemeData(),
+              child: Scaffold(
+                body: Center(
+                  child: StreamUserAvatar(user: user, size: size),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        final indicator = tester.widget<StreamOnlineIndicator>(
+          find.byType(StreamOnlineIndicator),
+        );
+        expect(indicator.props.size, expected[size]);
+      });
+    }
+  });
 }

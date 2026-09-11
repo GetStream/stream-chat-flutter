@@ -115,4 +115,52 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  // See the online indicator size group in user_avatar_test.dart: the mapping
+  // falls back rather than being exhaustive, so this is what reports a size
+  // the design system has added and this package has not placed yet.
+  group('channel image avatar size', () {
+    const expected = {
+      StreamAvatarGroupSize.lg: StreamAvatarSize.lg,
+      StreamAvatarGroupSize.xl: StreamAvatarSize.xl,
+      StreamAvatarGroupSize.xxl: StreamAvatarSize.xxl,
+      StreamAvatarGroupSize.xxxl: StreamAvatarSize.xxxl,
+    };
+
+    test('every avatar group size is mapped', () {
+      expect(expected.keys, containsAll(StreamAvatarGroupSize.values));
+    });
+
+    for (final size in StreamAvatarGroupSize.values) {
+      testWidgets('$size gets ${expected[size]}', (tester) async {
+        final client = MockClient();
+        final channel = MockChannel();
+        final channelState = MockChannelState();
+
+        when(() => channel.state).thenReturn(channelState);
+        when(() => channel.client).thenReturn(client);
+        when(() => channel.image).thenReturn('https://example.com/channel.png');
+        when(() => channel.imageStream).thenAnswer(
+          (_) => Stream.value('https://example.com/channel.png'),
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StreamChat(
+              client: client,
+              themeData: StreamChatThemeData(),
+              child: Scaffold(
+                body: Center(
+                  child: StreamChannelAvatar(channel: channel, size: size),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        final avatar = tester.widget<StreamAvatar>(find.byType(StreamAvatar));
+        expect(avatar.props.size, expected[size]);
+      });
+    }
+  });
 }
