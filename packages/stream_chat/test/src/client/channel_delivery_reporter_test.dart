@@ -321,6 +321,9 @@ void main() {
         final channel = Channel(client, 'test-type', null);
 
         await reporter.reconcileDelivery([channel]);
+        await delay(150);
+
+        expect(capturedDeliveries, isEmpty);
       });
     });
 
