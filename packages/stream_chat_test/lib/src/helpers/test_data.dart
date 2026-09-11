@@ -209,7 +209,10 @@ Message createDefaultMessage({
 /// Creates a [ChannelModel] with sensible defaults.
 ///
 /// Timestamps are always passed explicitly because the constructor defaults
-/// them to `DateTime.now()`, which would break deterministic matching.
+/// them to `DateTime.now()`, which would break deterministic matching. The
+/// same applies to [config]: leaving it unset would build a [ChannelConfig]
+/// carrying `DateTime.now()` timestamps, so it defaults to
+/// [createDefaultChannelConfig] instead.
 ChannelModel createDefaultChannelModel({
   String cid = 'messaging:test-channel',
   User? createdBy,
@@ -231,7 +234,7 @@ ChannelModel createDefaultChannelModel({
     cooldown: cooldown,
     members: members,
     ownCapabilities: ownCapabilities,
-    config: config,
+    config: config ?? createDefaultChannelConfig(),
     filterTags: filterTags,
     createdAt: createdAt ?? testCreatedAt,
     updatedAt: updatedAt ?? testUpdatedAt,
