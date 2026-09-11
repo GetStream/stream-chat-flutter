@@ -150,4 +150,39 @@ void main() {
       },
     );
   });
+
+  chatClientTest(
+    '`.unpinMessage`',
+    body: (tester) async {
+      const messageId = 'test-message-id';
+      final message = Message(id: messageId, pinned: true);
+
+      tester.mockApi(
+        (api) => api.message.partialUpdateMessage(
+          messageId,
+          set: {'pinned': false},
+        ),
+        result: createDefaultUpdateMessageResponse(
+          message: message.copyWith(
+            pinned: false,
+            state: MessageState.sent,
+          ),
+        ),
+      );
+
+      final res = await tester.client.unpinMessage(messageId);
+
+      expect(res, isNotNull);
+      expect(res.message.pinned, isFalse);
+
+      tester
+        ..verifyApi(
+          (api) => api.message.partialUpdateMessage(
+            messageId,
+            set: {'pinned': false},
+          ),
+        )
+        ..verifyNoMoreApiInteractions((api) => api.message);
+    },
+  );
 }

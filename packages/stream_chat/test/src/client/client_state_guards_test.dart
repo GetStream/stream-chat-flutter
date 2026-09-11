@@ -140,4 +140,27 @@ void main() {
       },
     );
   });
+
+  // The unread counts are derived from the current user, so assigning a new
+  // one has to republish them.
+  chatClientTest(
+    'setting the `currentUser` should also compute and update the unreadCounts',
+    body: (tester) async {
+      final state = tester.clientState;
+      final initialUser = state.currentUser!;
+
+      expect(state.totalUnreadCount, 0);
+      expect(state.unreadChannels, 0);
+
+      final updateUser = initialUser.copyWith(
+        totalUnreadCount: 33,
+        unreadChannels: 33,
+      );
+      state.currentUser = updateUser;
+
+      expect(state.currentUser, updateUser);
+      expect(state.totalUnreadCount, 33);
+      expect(state.unreadChannels, 33);
+    },
+  );
 }

@@ -1454,4 +1454,36 @@ void main() {
         ..verifyNoMoreApiInteractions((api) => api.message);
     },
   );
+
+  chatClientTest(
+    '`.enrichUrl`',
+    body: (tester) async {
+      const url = 'https://www.techyourchance.com/finite-state-machine-with-unit-tests-real-world-example';
+
+      tester.mockApi(
+        (api) => api.general.enrichUrl(url),
+        result: OGAttachmentResponse()
+          ..type = 'image'
+          ..ogScrapeUrl = url
+          ..authorName = 'TechYourChance'
+          ..title = 'Finite State Machine with Unit Tests: Real World Example',
+      );
+
+      final res = await tester.client.enrichUrl(url);
+
+      expect(res, isNotNull);
+      expect(res.type, 'image');
+      expect(res.ogScrapeUrl, url);
+      expect(res.authorName, 'TechYourChance');
+      expect(
+        res.title,
+        'Finite State Machine with Unit Tests: Real World Example',
+      );
+
+      tester
+        ..verifyApi((api) => api.general.enrichUrl(url))
+        ..verifyApi((api) => api.general.getAppSettings())
+        ..verifyNoMoreApiInteractions((api) => api.general);
+    },
+  );
 }
