@@ -147,8 +147,11 @@ void main() {
     'setting the `currentUser` should also compute and update the unreadCounts',
     body: (tester) async {
       final state = tester.clientState;
-      final initialUser = state.currentUser!;
+      // Derived from the harness user rather than read back out of the state,
+      // so this still asserts that connecting produced the expected user.
+      final initialUser = OwnUser.fromUser(tester.user);
 
+      expect(state.currentUser, initialUser);
       expect(state.totalUnreadCount, 0);
       expect(state.unreadChannels, 0);
 
