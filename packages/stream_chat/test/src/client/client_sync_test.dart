@@ -37,7 +37,7 @@ void main() {
     chatClientTest(
       'should return if `cids` is not available',
       body: (tester) async {
-        expect(tester.client.sync, returnsNormally);
+        await expectLater(tester.client.sync(), completes);
         tester.verifyNeverCalled((api) => api.general.sync(any(), any()));
       },
     );
@@ -45,7 +45,7 @@ void main() {
     chatClientTest(
       'should return if `lastSyncAt` is not available',
       body: (tester) async {
-        expect(() => tester.client.sync(cids: ['test-cid-1']), returnsNormally);
+        await expectLater(tester.client.sync(cids: ['test-cid-1']), completes);
         tester.verifyNeverCalled((api) => api.general.sync(any(), any()));
       },
     );
