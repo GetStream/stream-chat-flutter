@@ -60,6 +60,32 @@ void main() {
       expect(decoded.quotedMessage?.createdAt, createDefaultMessage().createdAt);
     });
 
+    test('restores the moderation, mentioned groups and channel role', () {
+      final message = createDefaultMessage(id: 'message-1').copyWith(
+        moderation: const Moderation(
+          action: ModerationAction.bounce,
+          originalText: 'original text',
+        ),
+        mentionedGroups: [
+          UserGroup(
+            id: 'group-1',
+            name: 'Engineering',
+            createdAt: DateTime.utc(2021),
+            updatedAt: DateTime.utc(2021, 2),
+          ),
+        ],
+        channelRole: 'channel_moderator',
+      );
+
+      final decoded = Message.fromJson(serverMessageJson(message));
+
+      expect(decoded.moderation?.action, ModerationAction.bounce);
+      expect(decoded.moderation?.originalText, 'original text');
+      expect(decoded.mentionedGroups?.single.id, 'group-1');
+      expect(decoded.mentionedGroups?.single.name, 'Engineering');
+      expect(decoded.channelRole, 'channel_moderator');
+    });
+
     test('restores a shared location', () {
       final message = createDefaultMessage(id: 'message-1').copyWith(
         sharedLocation: testLocation(),

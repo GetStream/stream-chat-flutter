@@ -71,6 +71,11 @@ Map<String, Object?> serverMessageJson(Message message) {
     if (message.draft case final draft?) 'draft': serverDraftJson(draft),
     if (message.reminder case final reminder?) 'reminder': serverReminderJson(reminder),
     if (message.i18n case final i18n?) 'i18n': i18n,
+    if (message.moderation case final moderation?) 'moderation': moderation.toJson(),
+    if (message.mentionedGroups case final groups?) 'mentioned_groups': [for (final group in groups) group.toJson()],
+    // The sender's channel role rides inside the message's `member` object,
+    // which is where `Message.fromJson` reads it back from.
+    if (message.channelRole case final channelRole?) 'member': {'channel_role': channelRole},
     if (message.messageTextUpdatedAt case final textUpdatedAt?)
       'message_text_updated_at': textUpdatedAt.toIso8601String(),
     if (message.deletedForMe case final deletedForMe?) 'deleted_for_me': deletedForMe,
