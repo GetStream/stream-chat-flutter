@@ -40,6 +40,16 @@ void main() {
       );
 
       channelTest(
+        'should throw StateError when accessing config on non-initialized channel',
+        channelType: _channelType,
+        channelId: _channelId,
+        body: (tester) async {
+          final channel = tester.channel;
+          expect(() => channel.config, throwsA(isA<StateError>()));
+        },
+      );
+
+      channelTest(
         'should throw StateError when accessing getRemainingCooldown on non-initialized channel',
         channelType: _channelType,
         channelId: _channelId,
@@ -67,6 +77,24 @@ void main() {
         channelId: _channelId,
         setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
         body: (tester) => expect(tester.channel.cooldown, equals(0)),
+      );
+
+      channelTest(
+        'should return the config of an initialized channel',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(
+          modifyResponse: (_) => createDefaultChannelState(
+            channel: createDefaultChannelModel(
+              cid: _channelCid,
+              config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+            ),
+          ),
+        ),
+        body: (tester) async {
+          expect(tester.channel.config?.readEvents, isTrue);
+          expect(tester.channel.config?.typingEvents, isTrue);
+        },
       );
 
       channelTest(
