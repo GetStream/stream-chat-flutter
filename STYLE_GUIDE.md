@@ -997,6 +997,10 @@ functions called inside each test block. For cleanup, prefer `addTearDown` over 
 global `tearDown` callback — `addTearDown` registers cleanup at the exact point a
 resource is created, ensuring it only runs if initialization succeeded.
 
+The `setUp:` parameter of `chatClientTest` / `channelTest` is a different thing and is
+fine to use: it runs once per test against that test's own tester, and shares nothing
+with the tests around it.
+
 ### Prefer more test files, avoid long test files
 
 Organize tests into smaller files grouped by feature, widget, or behavior. It's easier
@@ -1028,6 +1032,52 @@ persistence client, WebSocket). Do not mock every collaborator.
 - When mocking a class that takes named parameters, use `mocktail`'s `when(() =>
   mock.method(any(named: 'foo')))` pattern; do not hand-roll a fake that duplicates the
   full interface.
+
+For `stream_chat` those seams are already replaced for you — see
+[Use the `stream_chat_test` harness for `stream_chat` tests](#use-the-stream_chat_test-harness-for-stream_chat-tests).
+
+### Use the `stream_chat_test` harness for `stream_chat` tests
+
+`chatClientTest` / `channelTest`, from the `stream_chat_test` package, build a **real**
+`StreamChatClient` with only the REST API, the WebSocket transport and — when asked
+for — the persistence client swapped out, so event decoding, state, retries and
+reconnection all run production code. Do not hand-roll a mocked `StreamChatClient`
+for these tests. See the package's README for the full API.
+
+```dart
+// BAD — mocking the subject itself; nothing underneath it is exercised.
+final client = MockStreamChatClient();
+when(() => client.markAllRead()).thenAnswer((_) async => EmptyResponse());
+
+// GOOD — the client, its state and the event pipeline are real; only the
+// REST call is stubbed.
+chatClientTest(
+  '`.markAllRead` marks every channel as read',
+  body: (tester) async {
+    tester.mockApi(
+      (api) => api.channel.markAllRead(),
+      result: createDefaultEmptyResponse(),
+    );
+
+    await tester.client.markAllRead();
+
+    tester.verifyApi((api) => api.channel.markAllRead());
+  },
+);
+```
+
+Three conventions keep that harness trustworthy. Breaking them tends to produce a
+confusing mismatch rather than a clear failure:
+
+- **Stub with exact argument values wherever the value is known.** A mocktail stub
+  only answers on a match, so an exact stub doubles as verification of the request
+  the SDK actually sent. Reach for `any()` only when the SDK stamps the argument
+  itself (e.g. a `Message`, which gets a local timestamp and sender attached).
+- **Keep fixtures deterministic.** Build them with the `createDefaultXxx` factories
+  and pass timestamps explicitly — a `DateTime.now()` in test data makes
+  equality-based matching differ from run to run.
+- **Use UTC for any `DateTime` inside an emitted event.** Emitted events go through
+  real JSON decoding, and local times do not survive that round-trip intact.
 
 ### Golden tests
 
