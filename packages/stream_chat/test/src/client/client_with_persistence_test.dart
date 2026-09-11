@@ -21,7 +21,7 @@ void _clientWithPersistenceTest(
       when(() => persistence.updateLastSyncAt(any())).thenAnswer((_) => Future.value());
       when(persistence.getLastSyncAt).thenAnswer((_) async => null);
 
-      tester.mockSuccessfulAuth(tester.user.id);
+      tester.mockSuccessfulAuth();
       await tester.client.connectUser(tester.user, createTestToken(tester.user.id).rawValue);
 
       expect(tester.client.persistenceEnabled, isTrue);

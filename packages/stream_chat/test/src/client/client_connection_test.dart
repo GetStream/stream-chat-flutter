@@ -10,7 +10,7 @@ void main() {
   group('Fake web-socket connection functions', () {
     chatClientTest(
       '`.connectUser` should work fine',
-      connect: (tester) => tester.mockSuccessfulAuth(tester.user.id),
+      connect: (tester) => tester.mockSuccessfulAuth(),
       body: (tester) async {
         final user = tester.user;
         final token = createTestToken(user.id).rawValue;
@@ -34,7 +34,7 @@ void main() {
 
     chatClientTest(
       '`.connectUserWithProvider` should work fine',
-      connect: (tester) => tester.mockSuccessfulAuth(tester.user.id),
+      connect: (tester) => tester.mockSuccessfulAuth(),
       body: (tester) async {
         final user = tester.user;
         Future<String> tokenProvider(String userId) async {
@@ -62,7 +62,7 @@ void main() {
     group('`.connectGuestUser`', () {
       chatClientTest(
         'should work fine',
-        connect: (tester) => tester.mockSuccessfulAuth(tester.user.id),
+        connect: (tester) => tester.mockSuccessfulAuth(),
         body: (tester) async {
           final user = tester.user;
           final token = createTestToken(user.id).rawValue;
@@ -142,7 +142,7 @@ void main() {
 
       chatClientTest(
         'should throw if connection is already available',
-        connect: (tester) => tester.mockSuccessfulAuth(tester.user.id),
+        connect: (tester) => tester.mockSuccessfulAuth(),
         body: (tester) async {
           expect(tester.currentUser, isNull);
 
@@ -167,7 +167,7 @@ void main() {
 
       chatClientTest(
         'should open connection for closed connection',
-        connect: (tester) => tester.mockSuccessfulAuth(tester.user.id),
+        connect: (tester) => tester.mockSuccessfulAuth(),
         body: (tester) async {
           final statusEmitted = expectLater(
             tester.client.wsConnectionStatusStream.skip(1),

@@ -23,6 +23,16 @@ void main() {
     );
 
     chatClientTest(
+      'echoes the configured user back as the connected user',
+      user: User(id: 'darth_vader', name: 'Darth Vader', role: 'admin'),
+      body: (tester) async {
+        expect(tester.currentUser?.id, 'darth_vader');
+        expect(tester.currentUser?.name, 'Darth Vader');
+        expect(tester.currentUser?.role, 'admin');
+      },
+    );
+
+    chatClientTest(
       'connects through a token provider',
       tokenProvider: (userId) async => createTestToken(userId).rawValue,
       body: (tester) async {
@@ -48,7 +58,7 @@ void main() {
 
     chatClientTest(
       'rejects a connection attempt for a different user',
-      connect: (tester) => tester.mockSuccessfulAuth('darth_vader'),
+      connect: (tester) => tester.mockSuccessfulAuth(User(id: 'darth_vader')),
       body: (tester) async {
         final token = createTestToken(tester.user.id);
 
@@ -68,7 +78,7 @@ void main() {
     // handling".
     chatClientTest(
       'KNOWN LIMITATION: accepts a connectUser token minted for another user',
-      connect: (tester) => tester.mockSuccessfulAuth(tester.user.id),
+      connect: (tester) => tester.mockSuccessfulAuth(),
       body: (tester) async {
         final wrongToken = createTestToken('darth_vader');
 

@@ -77,12 +77,14 @@ abstract base class BaseTester<S> with ApiMockerMixin {
   /// made.
   List<Uri> get connectUris => _wsTester.connectUris;
 
-  /// Configures the fake server to accept a connection attempt for [userId].
+  /// Configures the fake server to accept a connection attempt for [user],
+  /// defaulting to the user this tester is configured with.
   ///
   /// Attempts carrying a different user id, or a token whose `user_id` claim
   /// does not match, are rejected with an invalid-token-signature error frame.
-  void mockSuccessfulAuth(String userId) {
-    return _wsTester.mockSuccessfulAuth(userId);
+  /// The connected event echoes [user] back as the `me` payload.
+  void mockSuccessfulAuth([User? user]) {
+    return _wsTester.mockSuccessfulAuth(user ?? this.user);
   }
 
   /// Configures the fake server to reject every connection attempt with an
@@ -280,7 +282,7 @@ FutureOr<void> Function(BaseTester<Object?>) _defaultConnect({
 }) {
   return (tester) async {
     // Mock successful authentication for the configured user.
-    tester.mockSuccessfulAuth(tester.user.id);
+    tester.mockSuccessfulAuth();
 
     // Connect the client.
     final ownUser = await switch (tokenProvider) {

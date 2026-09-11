@@ -59,14 +59,18 @@ final class WebSocketTester {
     return _channel;
   }
 
-  /// Configures the fake server to accept a connection attempt for [userId].
+  /// Configures the fake server to accept a connection attempt for [user].
   ///
   /// Like the real backend, the credentials in the connect URI are validated —
   /// both the connect payload's user id and the token's `user_id` claim — and
   /// a code 43 (invalid token signature) error frame is emitted when either
-  /// does not match [userId]. The token in the URI is always the harness token
+  /// does not match [user]. The token in the URI is always the harness token
   /// (see the README's "Token handling" section).
-  void mockSuccessfulAuth(String userId) {
+  ///
+  /// The connected event echoes [user] back as the `me` payload, the way the
+  /// backend returns the connecting user's own details.
+  void mockSuccessfulAuth(User user) {
+    final userId = user.id;
     _resetFunction?.call(); // Reset previous mocks if any
     _resetFunction = _whenListenWebSocket(_channel);
     _onConnectionAttempt = (uri) {
@@ -83,7 +87,12 @@ final class WebSocketTester {
       }
 
       // Correct credentials - simulate successful authentication.
-      return emitEvent(createDefaultConnectedEvent(userId: userId));
+      return emitEvent(
+        createDefaultConnectedEvent(
+          userId: userId,
+          me: OwnUser.fromUser(user),
+        ),
+      );
     };
   }
 
