@@ -3,7 +3,10 @@ import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
 import 'package:stream_chat_test/stream_chat_test.dart';
 
-import '../../mocks.dart';
+// Shown explicitly: `mocks.dart` also declares doubles that `stream_chat_test`
+// exports under the same names, and importing both unqualified would make
+// those names ambiguous.
+import '../../mocks.dart' show MockHttpClient;
 import '../../utils.dart';
 
 void main() {
