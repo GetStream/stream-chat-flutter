@@ -1,11 +1,9 @@
 import 'package:dio/dio.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
-import 'package:test/test.dart';
+import 'package:stream_chat_test/stream_chat_test.dart';
 
 import '../../fakes.dart';
-import '../../matchers.dart';
 import '../../mocks.dart';
 import '../../utils.dart';
 
