@@ -33,6 +33,7 @@ export 'package:stream_core/stream_core.dart'
         LogicalOperator,
         NullOrdering,
         PlatformType,
+        PatternMatching,
         Result,
         Sort,
         SortDirection,
@@ -73,7 +74,7 @@ export 'src/core/api/attachment_file_uploader.dart';
 export 'src/core/api/requests.dart';
 export 'src/core/api/responses.dart';
 export 'src/core/api/stream_chat_api.dart';
-export 'src/core/error/error.dart';
+export 'src/core/error/stream_chat_exception.dart';
 export 'src/core/http/stream_http_client.dart';
 export 'src/core/models/action.dart';
 export 'src/core/models/app_settings.dart';

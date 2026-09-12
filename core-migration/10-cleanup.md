@@ -85,7 +85,7 @@ whether the old symbol is still in `stream_chat/lib`:
 | `Filter.equal('key', v)` | `XFilter.equal(XFilterField.key, v)` | 08 | forwarder only, see below |
 | `LocationCoordinates` | `LocationCoordinate` | 08 | yes — gone from chat |
 | `CurrentPlatform.name` | `.operatingSystem` | 02 | not yet — still 4 files |
-| `StreamChatNetworkError` | `StreamApiException` | 03 | not yet — still 4 files |
+| `StreamChatNetworkError` | `StreamApiException` | 03 | yes — gone from chat, along with `StreamChatError` and `StreamWebSocketError` |
 | `StreamHttpClient` | (removed) | 05 | not yet — still 17 files |
 | `ConnectionStatus` | `WebSocketConnectionState` | 07 | not yet, and 07 is parked |
 

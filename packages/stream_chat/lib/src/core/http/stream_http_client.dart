@@ -14,7 +14,7 @@ import 'package:stream_core/stream_core.dart'
         StreamCoreHttpClient,
         SystemEnvironmentManager,
         TokenManager;
-import '../error/error.dart';
+import '../error/stream_chat_exception.dart';
 import 'connection_id_manager.dart';
 import 'interceptor/additional_headers_interceptor.dart';
 

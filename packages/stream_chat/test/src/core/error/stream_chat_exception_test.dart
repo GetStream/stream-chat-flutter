@@ -1,4 +1,4 @@
-import 'package:stream_chat/src/core/error/error.dart';
+import 'package:stream_chat/src/core/error/stream_chat_exception.dart';
 import 'package:stream_core/stream_core.dart'
     show
         StreamApiError,

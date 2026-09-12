@@ -161,8 +161,8 @@ void main() {
 
           await client.openConnection();
         } catch (e) {
-          expect(e, isA<StreamChatError>());
-          final err = e as StreamChatError;
+          expect(e, isA<StreamClientException>());
+          final err = e as StreamClientException;
           expect(
             err.message.contains('Connection already available for'),
             isTrue,
@@ -223,7 +223,7 @@ void main() {
       try {
         await client.connectUser(user, token);
       } catch (e) {
-        expect(e, isA<StreamWebSocketError>());
+        expect(e, isA<StreamNetworkException>());
       }
     });
 
@@ -239,7 +239,7 @@ void main() {
         try {
           await client.connectUserWithProvider(user, TokenProvider.dynamic(tokenProvider));
         } catch (e) {
-          expect(e, isA<StreamWebSocketError>());
+          expect(e, isA<StreamNetworkException>());
         }
       },
     );
@@ -257,7 +257,7 @@ void main() {
       try {
         await client.connectGuestUser(user);
       } catch (e) {
-        expect(e, isA<StreamWebSocketError>());
+        expect(e, isA<StreamNetworkException>());
       }
       verify(
         () => api.guest.getGuestUser(any(that: isSameUserAs(user))),
@@ -270,7 +270,7 @@ void main() {
         try {
           await client.connectAnonymousUser();
         } catch (e) {
-          expect(e, isA<StreamWebSocketError>());
+          expect(e, isA<StreamNetworkException>());
         }
       },
     );
@@ -5128,7 +5128,7 @@ void main() {
 
         await expectLater(
           client.openPersistenceConnection(user.copyWith(id: 'new-id')),
-          throwsA(const TypeMatcher<StreamChatError>()),
+          throwsA(const TypeMatcher<StreamClientException>()),
         );
       },
     );
@@ -5138,7 +5138,7 @@ void main() {
       () async {
         await expectLater(
           client.openPersistenceConnection(user),
-          throwsA(const TypeMatcher<StreamChatError>()),
+          throwsA(const TypeMatcher<StreamClientException>()),
         );
       },
     );
@@ -5193,7 +5193,7 @@ void main() {
 
         await expectLater(
           client.connectUser(user, token, connectWebSocket: false),
-          throwsA(const TypeMatcher<StreamChatError>()),
+          throwsA(const TypeMatcher<StreamClientException>()),
         );
       },
     );
@@ -5405,7 +5405,7 @@ void main() {
           messageLimit: any(named: 'messageLimit'),
           paginationParams: any(named: 'paginationParams'),
         ),
-      ).thenThrow(const StreamChatError('You cannot use queryChannels without an active connection.'));
+      ).thenThrow(const StreamClientException(message: 'You cannot use queryChannels without an active connection.'));
 
       client = StreamChatClient(apiKey, chatApi: api, ws: ws);
       await client.connectUser(user, token);

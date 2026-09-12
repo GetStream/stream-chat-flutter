@@ -8,6 +8,7 @@
 - Anonymous connections now identify as `!anon` rather than a client-generated random id, matching every other Stream SDK. The backend pins that id so a client cannot claim to be another user.
 - `StreamChatClient.devToken` is removed. It minted a `devtoken`-signed JWT, which only an app with development tokens enabled accepts; generate tokens on your backend, or build one in your own test helper.
 - A failed request now throws one of `stream_core`'s sealed `StreamException` kinds — `StreamApiException`, `StreamNetworkException`, `StreamAuthenticationException` or `StreamClientException` — instead of a `StreamChatNetworkError`. `StreamChatException` aliases the root, so `on StreamChatException catch` handles them all. See the [v11 migration guide](https://github.com/GetStream/stream-chat-flutter/blob/master/migrations/v11-migration.md#error-handling).
+- `StreamChatError`, `StreamChatNetworkError`, `StreamChatNetworkErrorType` and `StreamWebSocketError` are removed rather than deprecated, so a clause catching one fails to compile instead of silently matching nothing. `isRetriable` is now an extension on `StreamChatException`.
 - `ChatErrorCode` is removed in favour of `StreamErrorCode`. One value was wrong: `requestTimeout` was `23`, which the API never returns; the real code is `48`.
 - `RetryPolicy.shouldRetry` receives a `StreamChatException?` instead of a `StreamChatError?`.
 - `UploadState`'s variant classes are renamed to `UploadStatePreparing`, `UploadStateInProgress`, `UploadStateSuccess` and `UploadStateFailed`, freeing the names `Success` and `Failed`.
@@ -40,9 +41,6 @@
 - Added `ChannelSort.empty`, `MemberSort.empty` and so on alongside each default — an empty sort, for querying with the ordering the API applies on its own.
 - Default sorts moved onto the sort that owns them: `ChannelSort.defaultSort`, `MemberSort.defaultSort` and so on, reachable now without the Flutter layer.
 
-⚠️ Deprecated
-
-- `StreamChatNetworkError` is deprecated. Nothing throws it any more, so an `on StreamChatNetworkError catch` clause still compiles but no longer matches.
 
 🔄 Changed
 

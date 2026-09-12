@@ -79,7 +79,7 @@ move to `/api/v2/connect` (`lib/core/api/connect/routes.go`), all verified in
 | `_needsToReconnect`, `pauseReconnect`, `resumeReconnect` | `AutomaticReconnectionPolicy` family + `CompositeReconnectionPolicy` |
 | `_reconnect`, `client.maybeReconnect()` | `ConnectionRecoveryHandler` |
 | `lib/src/ws/connection_status.dart` (11) — `enum ConnectionStatus` | `sealed WebSocketConnectionState` + `sealed DisconnectionSource` |
-| `StreamWebSocketError` (deferred from phase 03) | `DisconnectionSource.serverInitiated(error:)` |
+| the `StreamApiException` / `StreamNetworkException` raised by `_handleStreamError` and `_onConnectionError` (phase 03) | `DisconnectionSource.serverInitiated(error:)` |
 
 `lib/src/ws/connect_user_details.dart` maps onto core's `ConnectUserDetailsRequest`, which has
 `invisible` and `language` already — those are chat's fields, in core.
@@ -154,9 +154,9 @@ Then `ConnectionRecoveryHandler(client:, retryStrategy:, networkStateProvider:,
 lifecycleStateProvider:, policies:)`.
 
 `ConnectionRecoveryHandler` **only recovers a connection that was once `Connected`** — a first
-`connect()` that fails is never retried by it. Chat's `connectUser` catches
-`StreamWebSocketError.isRetriable` at `client.dart:459` and retries the initial connect itself;
-that behaviour has to stay somewhere, and it is not in core.
+`connect()` that fails is never retried by it. Chat's `connectUser` gates on `isRetriable` at
+`client.dart:459` and retries the initial connect itself; that behaviour has to stay somewhere,
+and it is not in core.
 
 ### 4. Rewrite `connectUser` around state observation
 
@@ -341,13 +341,14 @@ work — which is exactly why this is worth writing down rather than relying on.
   `connectionState.value case Connected(:final healthCheck)` the way feeds does would remove the
   per-ping churn at the root.
 
-### `StreamWebSocketError` would go with this phase
+### `StreamWebSocketError` did not wait for this phase
 
-Phase [03](03-errors.md) deferred it here: `DisconnectionSource.serverInitiated(error:)` carries
-the reason, so nothing would produce it. Its `data == null` retry test goes too — the offline
-fallback in `connectUser` keys off the sealed retry table instead. That closes one of the four
-preconditions for deleting `stream_chat_error.dart`, and closing it is now blocked on this phase
-resuming.
+It was deferred here on the assumption that only `DisconnectionSource.serverInitiated(error:)`
+could replace it. Phase [03](03-errors.md) deleted it instead: the socket path maps onto core's
+kinds without touching the transport, so this phase inherits no error type to clean up. What is
+still true is that `DisconnectionSource` is where the *reason* belongs once the transport moves —
+`_handleStreamError` and `_onConnectionError` both become codec/state concerns rather than
+exception construction.
 
 ## Decisions to make
 
@@ -412,6 +413,5 @@ resuming.
       server-initiated close; and a queued failed message draining after reconnect.
 - [ ] `melos bootstrap && melos run analyze && melos run test:dart && melos run test:flutter`.
 - [ ] `refactor(llc)!:` title, `🛑️ Breaking` CHANGELOG entries, `migrations/v11-migration.md`
-      Symbol Map rows for `ConnectionStatus` and `StreamWebSocketError`, plus a feature section on
-      the new connection state.
+      Symbol Map row for `ConnectionStatus`, plus a feature section on the new connection state.
 - [ ] Decisions recorded here, status box ticked in `README.md`.

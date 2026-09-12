@@ -5,11 +5,18 @@ import 'dart:math' as math;
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_core/stream_core.dart'
-    show StreamErrorCode, StreamLogger, SystemEnvironmentManager, TokenManager;
+    show
+        StreamApiException,
+        StreamClientException,
+        StreamException,
+        StreamApiError,
+        StreamLogger,
+        StreamNetworkException,
+        SystemEnvironmentManager,
+        TokenManager;
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import '../core/error/error.dart';
 import '../core/models/event.dart';
 import '../core/models/own_user.dart';
 import '../core/util/extension.dart';
@@ -226,10 +233,11 @@ class WebSocket with TimerHelper {
     bool includeUserDetails = false,
   }) {
     if (_connectRequestInProgress) {
-      throw const StreamWebSocketError('''
+      throw const StreamClientException(
+        message: '''
         You've called connect twice,
-        can only attempt 1 connection at the time,
-        ''');
+        can only attempt 1 connection at the time.''',
+      );
     }
     _connectRequestInProgress = true;
     _manuallyClosed = false;
@@ -393,8 +401,9 @@ class WebSocket with TimerHelper {
     // resetting connect, reconnect request flag
     _resetRequestFlags();
 
-    final error = StreamWebSocketError.fromStreamError(errorResponse);
-    final isTokenExpired = error.errorCode == StreamErrorCode.tokenExpired;
+    final data = StreamApiError.fromJson(errorResponse);
+    final error = StreamApiException.fromApiError(data);
+    final isTokenExpired = error.isTokenExpired;
     if (isTokenExpired && !tokenManager.usesStaticProvider) {
       _logger.w(() => 'Connection failed, token expired');
       return _reconnect(refreshToken: true);
@@ -451,18 +460,17 @@ class WebSocket with TimerHelper {
   void _onConnectionError(error, [stacktrace]) {
     _logger.w(() => '[onConnectionError] #ws; error occurred', error: error, stackTrace: stacktrace);
 
-    StreamWebSocketError wsError;
-    if (error is WebSocketChannelException) {
-      wsError = StreamWebSocketError.fromWebSocketChannelError(error);
-    } else {
-      wsError = StreamWebSocketError(error.toString());
-    }
+    var exception = StreamException.tryFrom(error);
+    exception ??= StreamNetworkException(
+      message: 'The connection reported an error',
+      cause: error,
+    );
 
     final completer = connectionCompleter;
     // complete with error if not yet completed
     if (completer != null && !completer.isCompleted) {
       // complete the connection with error
-      completer.completeError(wsError);
+      completer.completeError(exception);
     }
 
     // resetting connect, reconnect request flag

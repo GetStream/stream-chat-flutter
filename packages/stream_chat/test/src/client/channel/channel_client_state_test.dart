@@ -5339,7 +5339,7 @@ void main() {
 
         await expectLater(
           channel.markUnread('unknown-message-id'),
-          throwsA(isA<StreamChatError>()),
+          throwsA(isA<StreamClientException>()),
         );
         verifyNever(
           () => client.markChannelUnread(any(), any(), any()),
