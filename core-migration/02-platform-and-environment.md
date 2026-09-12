@@ -5,11 +5,15 @@
 
 **Size:** ~330 chat LOC deleted. One public type swap, one public rename.
 
-> **Read the resolved package, not the sibling repo.** The first pass at this phase claimed two
-> upstream core additions were needed. Both were wrong, because they were derived from
-> `stream-core-flutter/packages/stream_core` (unreleased `main`) rather than from
-> `~/.pub-cache/hosted/pub.dev/stream_core-0.5.0`, which is what `stream_chat` actually resolves.
-> Always diff against the pub-cache copy.
+> **Check what resolves before claiming core is missing something.** The first pass at this phase
+> named two upstream additions as prerequisites; both already existed. Where to look has since
+> moved: `melos.yaml` now lists `dependencyOverridePaths` for `stream_core`, so the sibling
+> checkout is what resolves, not `~/.pub-cache/.../stream_core-0.5.0`. Read the override target.
+>
+> **Merging is gated on a core release.** `debugCurrentPlatformOverride` is on core's `main` and
+> in its unreleased section, while `melos.yaml` still publishes against `stream_core: ^0.5.0`.
+> The work here is done and tested against the override; it cannot ship until core cuts a
+> version carrying it.
 
 ## Scope
 
@@ -146,10 +150,11 @@ code changes needed.
       `stream_chat_flutter` 1302 green (11 golden failures pre-existing on a clean tree —
       verified by stashing).
 - [x] CHANGELOG entry under `🔄 Changed` for the `SystemEnvironment` type swap.
-- [ ] `lib/src/core/platform_detector/` deleted; `stream_chat.dart` exports core's
-      `CurrentPlatform` / `PlatformType` — **after the core release**.
-- [ ] `CurrentPlatform.name` → `.operatingSystem` at both non-test call sites.
-- [ ] Wasm build verified (`flutter build web --wasm` on the sample app) once the platform half
-      lands — core's shape should make this a formality, but confirm rather than assume.
-- [ ] `migrations/v11-migration.md` Symbol Map row for `CurrentPlatform.name`.
-- [ ] Decisions recorded here, status box updated in `README.md`.
+- [x] `lib/src/core/platform_detector/` deleted; `stream_chat.dart` exports core's
+      `CurrentPlatform` / `PlatformType`.
+- [x] `CurrentPlatform.name` → `.operatingSystem` at both non-test call sites.
+- [x] Wasm needs no build to confirm: core has no web-conditional import to get wrong. Its
+      fallback returns `PlatformType.web` directly, so JS and wasm resolve the same file. Chat
+      needed the `js_interop` branch `#2940` added because its stub threw `UnimplementedError`.
+- [x] `migrations/v11-migration.md` Symbol Map row for `CurrentPlatform.name`.
+- [x] Decisions recorded here, status box updated in `README.md`.

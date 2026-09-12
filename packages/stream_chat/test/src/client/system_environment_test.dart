@@ -1,6 +1,6 @@
 import 'package:stream_chat/src/client/client.dart';
-import 'package:stream_chat/src/core/platform_detector/platform_detector.dart';
 import 'package:stream_chat/version.dart';
+import 'package:stream_core/stream_core.dart' show CurrentPlatform;
 import 'package:test/test.dart';
 
 void main() {
@@ -10,7 +10,7 @@ void main() {
   test('reports the chat SDK baseline in the default user agent', () {
     expect(
       StreamChatClient.defaultUserAgent,
-      'stream-chat-dart-v$PACKAGE_VERSION|os=${CurrentPlatform.name}',
+      'stream-chat-dart-v$PACKAGE_VERSION|os=${CurrentPlatform.operatingSystem}',
     );
   });
 }

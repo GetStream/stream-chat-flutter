@@ -19,6 +19,7 @@ export 'package:rate_limiter/rate_limiter.dart';
 export 'package:stream_core/stream_core.dart'
     show
         CompositeComparator,
+        CurrentPlatform,
         Distance,
         EvaluationOperator,
         Failure,
@@ -31,6 +32,7 @@ export 'package:stream_core/stream_core.dart'
         LoggingInterceptor,
         LogicalOperator,
         NullOrdering,
+        PlatformType,
         Result,
         Sort,
         SortDirection,
@@ -118,7 +120,6 @@ export 'src/core/models/user.dart';
 export 'src/core/models/user_block.dart';
 export 'src/core/models/user_group.dart';
 export 'src/core/models/user_group_member.dart';
-export 'src/core/platform_detector/platform_detector.dart';
 export 'src/core/util/extension.dart';
 export 'src/core/util/message_rules.dart';
 export 'src/db/chat_persistence_client.dart';

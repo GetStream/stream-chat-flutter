@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_core/stream_core.dart'
     show
+        CurrentPlatform,
         InFlightCache,
         LocationCoordinate,
         SortedListExtensions,
@@ -49,7 +50,6 @@ import '../core/models/reaction.dart';
 import '../core/models/role.dart';
 import '../core/models/thread.dart';
 import '../core/models/user.dart';
-import '../core/platform_detector/platform_detector.dart';
 import '../core/util/event_controller.dart';
 import '../core/util/extension.dart';
 import '../core/util/immutable_collection_subjects.dart';
@@ -161,7 +161,7 @@ class StreamChatClient {
       sdkName: 'stream-chat',
       sdkIdentifier: 'dart',
       sdkVersion: PACKAGE_VERSION,
-      osName: CurrentPlatform.name,
+      osName: CurrentPlatform.operatingSystem,
     ),
   );
 

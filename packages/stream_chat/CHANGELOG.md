@@ -32,6 +32,7 @@
 - Every query takes its own filter type — `queryChannels` a `ChannelFilter?`, `queryUsers` a `UserFilter?`, and so on — and `PredefinedFilter.filter` is a `ChannelFilter`.
 - `ChannelFilterField.members` and `.memberUserName` are declared, so the standard "channels I am in" query stays typed.
 - `LocationCoordinates` is now `stream_core`'s `LocationCoordinate` — singular, and re-exported from this package. Its `copyWith` is removed, and it gains `distanceTo`, which answers the distance between two points.
+- `CurrentPlatform` and `PlatformType` are now `stream_core`'s, re-exported from this package. `CurrentPlatform.name` becomes `CurrentPlatform.operatingSystem`, reporting the same string.
 - The list extensions are now `stream_core`'s `SortedListExtensions`, re-exported from this package. `SortedListX`, `IterableMergeX` and `ListX` are removed: `mergeSorted` becomes `sortedMerge` (and now collapses a repeated key instead of carrying it through, matching `merge`), `updateIf` becomes `updateWhere` (its `update` argument is now named), and `mergeFrom` is dropped in favour of `merge` over a projected list.
 - Two coordinates now compare equal when they agree to about a centimetre, rather than requiring identical doubles.
 - `DraftSortField` has no `custom` field: the API rejects a custom sort field on drafts.
