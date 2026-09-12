@@ -117,12 +117,12 @@ None.
 - [x] `melos run analyze` and `melos run format` clean; `stream_chat` 1664 tests green.
 - [x] `🛑️ Breaking` CHANGELOG entries and `migrations/v11-migration.md` Symbol Map rows for the
       whole rename map, plus a section on the anonymous id.
-- [ ] **Verify a live anonymous connect against a real app key.** Adopting core's token layer
-      changes the anonymous `user_id` from a random value to `!anon` (see below). The source
-      evidence says it is safe; only a live connect proves it.
-- [ ] Verified by hand in `sample_app`: cold login, a token that expires mid-session, and a
+- [x] **A live anonymous connect against a real app key succeeds.** Adopting core's token layer
+      changes the anonymous `user_id` from a random value to `!anon`; verified by hand, not from
+      source — see below for why the distinction mattered here.
+- [x] Verified by hand in `sample_app`: cold login, a token that expires mid-session, and a
       logout → login as a different user.
-- [ ] Status box updated in `README.md`.
+- [x] Status box updated in `README.md`.
 
 ### The anonymous id changed, deliberately
 
@@ -136,8 +136,31 @@ Adopting `!anon` is the right call rather than a compromise: `monolith/types/use
 *specifically so* "customers [cannot] create anon tokens that can be used to impersonate other
 users or a server". Chat's random id was the outlier.
 
-Why it still needs a live check: that enforcement only runs when a raw anon JWT is present, and
-chat's anonymous token has an empty `rawValue`, so the claims path is never exercised. What the
-server does with the `user_id` **query parameter** on an anonymous request is not settled from
-source — `types.NewAnonymousUser(...)` suggests it builds its own user and ignores the client's,
-but that is inference.
+That enforcement only runs when a raw anon JWT is present, and chat's anonymous token has an empty
+`rawValue`, so the claims path is never exercised — which is why this was checked live rather than
+argued from source. **A live anonymous connect against a real app key succeeds.**
+
+Two useful things came out of confirming it, one of which is a warning about this file's method.
+
+**The server discards the id.** On the anonymous path it never reads what the client sent:
+`AnonymousAuth.ConnectUserFromRequest` (`monolith/auth/auth.go:247`) takes the user as `_` and
+returns `types.NewAnonymousUser(...)`; `UserID()` returns the `!anon` constant unconditionally; and
+every session builder discards the user it is passed. So chat's old random id was never the
+server's notion of identity, and the switch to `!anon` could not have changed behaviour there.
+
+**A source-only reading predicted the opposite, and was wrong.** `Connect.handshake` validates
+`ConnectRequest` before authenticating, `ConnectUserDetails.ID` carries `validate:"userID,required"`
+(`v1/payload/connect_user_details.go:31`, and v2's `commonpayloads` type carries the identical
+tag), that tag runs `ValidUserIDOrTypeRe = ^[@\w .-]*$`
+(`monolith/internal/validator/registry.go:19,327`), and running that regex against `!anon` returns
+false. Read end to end that chain says an anonymous connect is rejected before auth ever sees it.
+It is not. **Why the live request passes is not established** — do not write an explanation into
+this file without one.
+
+The lesson is narrower than "don't read source": a chain of individually-correct source facts is
+not a prediction until something executes it. Note also that there is no anonymous WS connect test
+anywhere in the Go repo — `!anon` appears in HTTP response assertions
+(`send_message_test.go`, `query_channels_test.go`) but no testkit helper opens an anonymous socket.
+An uncovered path was exactly where a source-only reading was least safe.
+
+Anyone revisiting the anonymous id should start from the live result, not from the regex.
