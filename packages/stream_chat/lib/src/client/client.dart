@@ -397,7 +397,10 @@ class StreamChatClient {
 
     logger.i(() => 'setting user : ${user.id}');
 
-    _tokenManager.setTokenProvider(user.id, tokenProvider: tokenProvider);
+    _tokenManager.setTokenProvider(
+      user.id,
+      tokenProvider: tokenProvider,
+    );
 
     final ownUser = OwnUser.fromUser(user);
     state.currentUser = ownUser;
