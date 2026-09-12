@@ -6,17 +6,18 @@ import 'package:stream_chat/src/core/http/interceptor/additional_headers_interce
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_core/stream_core.dart'
     show
+        ApiErrorInterceptor,
         AuthInterceptor,
-        StreamLogHandler,
-        StreamLogPriority,
-        StreamLogRecord,
-        StreamLogger,
         ConnectionIdInterceptor,
         HeadersInterceptor,
         LoggingInterceptor,
         StreamApiException,
         StreamDioException,
         StreamErrorCode,
+        StreamLogHandler,
+        StreamLogPriority,
+        StreamLogRecord,
+        StreamLogger,
         StreamNetworkException,
         SystemEnvironment,
         SystemEnvironmentManager,
@@ -66,10 +67,16 @@ void main() {
     expect(client.httpClient.interceptors.whereType<AdditionalHeadersInterceptor>().length, 1);
   });
 
-  test('HeadersInterceptor should be added if systemEnvironmentManager is provided', () {
-    const apiKey = 'api-key';
+  // Order is behaviour, not style: `ApiErrorInterceptor` only maps what reaches
+  // it, so anything that rejects ahead of it escapes as a raw `DioException`,
+  // and anything logging ahead of it logs the transport error rather than the
+  // mapped one. A misordered pipeline still works until something fails, which
+  // is why it is pinned here rather than left to read correctly.
+  test('interceptors are installed in the order the pipeline depends on', () {
     final client = StreamHttpClient(
-      apiKey,
+      'api-key',
+      tokenManager: TokenManager.unconfigured(),
+      connectionIdManager: ConnectionIdManager(),
       systemEnvironmentManager: SystemEnvironmentManager(
         environment: const SystemEnvironment(
           sdkName: 'stream-chat',
@@ -79,8 +86,17 @@ void main() {
       ),
     );
 
-    // It is what carries `X-Stream-Client`, so losing it costs SDK attribution.
-    expect(client.httpClient.interceptors.whereType<HeadersInterceptor>().length, 1);
+    expect(
+      client.httpClient.interceptors.map((it) => it.runtimeType),
+      containsAllInOrder([
+        AdditionalHeadersInterceptor,
+        HeadersInterceptor,
+        AuthInterceptor,
+        ConnectionIdInterceptor,
+        ApiErrorInterceptor,
+        LoggingInterceptor,
+      ]),
+    );
   });
 
   test('AuthInterceptor should be added if tokenManager is provided', () {

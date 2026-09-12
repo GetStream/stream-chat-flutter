@@ -117,7 +117,11 @@ two.
   [09](09-uploads.md).
 - **`api_key` stays a query parameter**, so core's `ApiKeyInterceptor` is the one pipeline piece
   chat does not adopt. See below.
-- **Six verbs, not eight.** `fetch` and `request` had no callers in the api layer.
+- **Six verbs are used; eight still exist.** `fetch` and `request` have no caller in `lib/` — only
+  their own tests — but they were not removed. `StreamHttpClient` is still public, so dropping two
+  methods is a break for no gain while the class is on its way to `@internal` anyway. They go with
+  that move in [09](09-uploads.md). An earlier draft of this line claimed six had shipped; it had
+  not, and the facade the api layer actually needs is the relevant number.
 
 ## Risks
 
@@ -126,7 +130,11 @@ two.
   custom uploader breaks. Coordinate the retype with phase [09](09-uploads.md) rather than doing
   it twice.
 - Interceptor order mistakes fail *sometimes* — a misplaced `ApiErrorInterceptor` still works
-  until something rejects. Assert the order in a test rather than trusting the code reads right.
+  until something rejects. **Pinned by a test now** (`stream_http_client_test.dart`, "interceptors
+  are installed in the order the pipeline depends on"): the other interceptor tests only assert
+  each type is *present*, which a reordered pipeline satisfies just as well. The order matters
+  twice — anything rejecting ahead of `ApiErrorInterceptor` escapes as a raw `DioException`, and
+  anything logging ahead of it logs the transport error rather than the mapped one.
 - `dio` version skew: chat declares `^5.11.0`, core `^5.8.0+1`. Compatible today; worth pinning
   attention on when either moves.
 
@@ -188,6 +196,8 @@ rather than moved to core.
 - [x] Interceptor coverage kept: the connection-id test is retargeted at core's type through our
       closure, and a `HeadersInterceptor` group is added — core ships both interceptors with **no**
       tests of its own ([`UPSTREAM.md`](UPSTREAM.md)).
+- [x] The pipeline **order** is asserted, not just each interceptor's presence. Verified to fail on
+      a swap rather than only to pass as written.
 - [x] `melos run analyze` and `melos run format` clean; `stream_chat` 1670 tests green.
 - [x] `🛑️ Breaking` CHANGELOG entry for `LoggingInterceptor`.
 - [ ] `StreamHttpClient` itself is still ours — it *is* the verb facade. It becomes `@internal`
