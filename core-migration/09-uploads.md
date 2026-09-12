@@ -106,12 +106,20 @@ but is not a prerequisite.
 
 Option A is settled, above. What is left:
 
-- Whether `AttachmentFileUploaderProvider` is retyped (`AttachmentFileUploader Function(Dio)` once
-  phase [05](05-http-client.md) removes `StreamHttpClient`) or replaced by a `CdnClient` injection
-  point à la `FeedsConfig.cdnClient`. Either way it is a break for anyone with a custom uploader.
-  Note phase 05 has **not** landed: the typedef still reads
-  `AttachmentFileUploader Function(StreamHttpClient)` and carries no deprecation, so this phase
-  either waits for 05 or breaks it itself.
+- Whether `AttachmentFileUploaderProvider` stays as it is or is replaced by a `CdnClient` injection
+  point à la `FeedsConfig.cdnClient`.
+
+  **This decision changed shape, because phase [05](05-http-client.md) landed differently than
+  assumed here.** The original framing was "retyped to `AttachmentFileUploader Function(Dio)` once
+  05 removes `StreamHttpClient`". 05 did not remove it — it concluded `StreamHttpClient` *is* the
+  verb facade, kept it, and gave it core's `StreamCoreHttpClient` as the `Dio` it builds. The
+  typedef still reads `AttachmentFileUploader Function(StreamHttpClient httpClient)` and compiles
+  fine, so **nothing forces a retype any more**.
+
+  What remains is a choice, not an obligation: leave the typedef alone (no break for custom
+  uploaders, and 09 stays purely additive), or take the break deliberately to move to a `CdnClient`
+  injection point. Note 05's own last open item runs the other way — `StreamHttpClient` becomes
+  `@internal` only once this typedef stops naming it, so leaving it alone keeps that box open.
 - Whether `UploadState` gains a `cancelled` variant to mirror `UploadCancelled`. Today a cancelled
   upload has nowhere to land, which is why cancellation is invisible in the UI.
 - Whether progress and cancellation become public API in this phase or stay internal until the UI
