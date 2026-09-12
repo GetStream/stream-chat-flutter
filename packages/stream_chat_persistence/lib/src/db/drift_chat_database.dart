@@ -59,7 +59,7 @@ class DriftChatDatabase extends _$DriftChatDatabase {
   // Band the version by SDK major, and bump the offset whenever you change or
   // add a table definition.
   @override
-  int get schemaVersion => 1100 + 1;
+  int get schemaVersion => 1100 + 2;
 
   // Store DateTime as ISO-8601 text to preserve sub-second precision.
   @override
