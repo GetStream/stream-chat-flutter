@@ -745,7 +745,6 @@ void main() {
 
         expect(result.channels.single.channel!.cid, pagedCid);
       });
-
     });
 
     group('saveChannelQueries', () {
