@@ -159,9 +159,9 @@ class MessageReminderSort extends Sort<MessageReminder> {
   /// The ordering the API applies to a reminder query when none is given.
   ///
   /// Sorts by when the user asked to be reminded, soonest first.
-  static final List<MessageReminderSort> defaultSort = [
+  static final List<MessageReminderSort> defaultSort = List.unmodifiable([
     MessageReminderSort.asc(MessageReminderSortField.remindAt),
-  ];
+  ]);
 }
 
 /// Represents a field that reminder queries can be sorted on.

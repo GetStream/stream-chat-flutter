@@ -128,9 +128,9 @@ class PollVoteSort extends Sort<PollVote> {
   /// The ordering the API applies to a poll-vote query when none is given.
   ///
   /// Sorts by when the vote was cast, newest first.
-  static final List<PollVoteSort> defaultSort = [
+  static final List<PollVoteSort> defaultSort = List.unmodifiable([
     PollVoteSort.desc(PollVoteSortField.createdAt),
-  ];
+  ]);
 }
 
 /// Represents a field that poll-vote queries can be sorted on.

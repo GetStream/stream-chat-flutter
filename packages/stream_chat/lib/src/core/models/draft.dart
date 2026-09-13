@@ -105,9 +105,9 @@ class DraftSort extends Sort<Draft> {
   /// The ordering the API applies to a draft query when none is given.
   ///
   /// Sorts by when the draft was created, newest first.
-  static final List<DraftSort> defaultSort = [
+  static final List<DraftSort> defaultSort = List.unmodifiable([
     DraftSort.desc(DraftSortField.createdAt),
-  ];
+  ]);
 }
 
 /// Represents a field that draft queries can be sorted on.

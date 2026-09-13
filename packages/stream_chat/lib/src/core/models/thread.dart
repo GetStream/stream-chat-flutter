@@ -269,11 +269,11 @@ class ThreadSort extends Sort<Thread> {
   /// Declared to sort a thread list locally by the same ordering. Passing it to
   /// a query is redundant — it asks for the ordering a query with no sort
   /// already has, at more cost.
-  static final List<ThreadSort> defaultSort = [
+  static final List<ThreadSort> defaultSort = List.unmodifiable([
     ThreadSort.desc(ThreadSortField.hasUnread),
     ThreadSort.desc(ThreadSortField.lastMessageAt),
     ThreadSort.desc(ThreadSortField.parentMessageId),
-  ];
+  ]);
 }
 
 /// Represents a field that thread queries can be sorted on.

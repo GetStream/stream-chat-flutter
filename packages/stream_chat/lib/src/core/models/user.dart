@@ -232,9 +232,9 @@ class UserSort extends Sort<User> {
   /// The ordering the API applies to a user query when none is given.
   ///
   /// Sorts by when the user was created, newest first.
-  static final List<UserSort> defaultSort = [
+  static final List<UserSort> defaultSort = List.unmodifiable([
     UserSort.desc(UserSortField.createdAt),
-  ];
+  ]);
 }
 
 /// Represents a field that user queries can be sorted on.
