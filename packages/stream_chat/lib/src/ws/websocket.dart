@@ -129,7 +129,7 @@ class WebSocket with TimerHelper {
   }
 
   void _initWebSocketChannel(Uri uri) {
-    _logger.i(() => 'Initiating connection with $baseUrl');
+    _logger.d(() => 'Initiating connection with $baseUrl');
     if (_webSocketChannel != null) {
       _closeWebSocketChannel();
     }
@@ -142,7 +142,7 @@ class WebSocket with TimerHelper {
   }
 
   void _closeWebSocketChannel() {
-    _logger.i(() => 'Closing connection with $baseUrl');
+    _logger.d(() => 'Closing connection with $baseUrl');
     if (_webSocketChannel != null) {
       _unsubscribeFromWebSocketChannel();
       _webSocketChannel?.sink.close(status.normalClosure, 'Closing connection');
@@ -151,7 +151,7 @@ class WebSocket with TimerHelper {
   }
 
   void _subscribeToWebSocketChannel() {
-    _logger.i(() => 'Started listening to $baseUrl');
+    _logger.d(() => 'Started listening to $baseUrl');
     if (_webSocketChannelSubscription != null) {
       _unsubscribeFromWebSocketChannel();
     }
@@ -163,7 +163,7 @@ class WebSocket with TimerHelper {
   }
 
   void _unsubscribeFromWebSocketChannel() {
-    _logger.i(() => 'Stopped listening to $baseUrl');
+    _logger.d(() => 'Stopped listening to $baseUrl');
     if (_webSocketChannelSubscription != null) {
       _webSocketChannelSubscription?.cancel();
       _webSocketChannelSubscription = null;
@@ -207,7 +207,7 @@ class WebSocket with TimerHelper {
       _ => throw const FormatException('Invalid address format'),
     };
 
-    _logger.i(() => '[buildUri] #ws; scheme: $scheme, host: $host, port: $port');
+    _logger.d(() => '[buildUri] #ws; scheme: $scheme, host: $host, port: $port');
 
     return Uri(
       scheme: scheme,
@@ -251,7 +251,7 @@ class WebSocket with TimerHelper {
       final uri = await _buildUri(
         includeUserDetails: includeUserDetails,
       );
-      _logger.i(() => '[connect] #ws; uri: $uri');
+      _logger.d(() => '[connect] #ws; uri: ${uri.withoutCredentials}');
       _initWebSocketChannel(uri);
     } catch (e, stk) {
       _onConnectionError(e, stk);
@@ -272,14 +272,14 @@ class WebSocket with TimerHelper {
   /// Call [resumeReconnect] before re-establishing the connection.
   void pauseReconnect() {
     if (!_reconnectEnabled) return;
-    _logger.i(() => 'Pausing reconnection');
+    _logger.d(() => 'Pausing reconnection');
     _reconnectEnabled = false;
   }
 
   /// Re-enables automatic reconnection after a previous [pauseReconnect].
   void resumeReconnect() {
     if (_reconnectEnabled) return;
-    _logger.i(() => 'Resuming reconnection');
+    _logger.d(() => 'Resuming reconnection');
     _reconnectEnabled = true;
   }
 
@@ -292,7 +292,7 @@ class WebSocket with TimerHelper {
     _closeWebSocketChannel();
 
     if (!_reconnectEnabled) {
-      _logger.i(() => 'Reconnect skipped: paused');
+      _logger.d(() => 'Reconnect skipped: paused');
       _connectionStatus = ConnectionStatus.disconnected;
       return;
     }
@@ -326,7 +326,7 @@ class WebSocket with TimerHelper {
           refreshToken: refreshToken,
           includeUserDetails: false,
         );
-        _logger.i(() => '[reconnect] #ws; uri: $uri');
+        _logger.d(() => '[reconnect] #ws; uri: ${uri.withoutCredentials}');
         try {
           _initWebSocketChannel(uri);
         } catch (e, stk) {
@@ -349,7 +349,7 @@ class WebSocket with TimerHelper {
   }
 
   void _startMonitoringEvents() {
-    _logger.i(() => 'Starting monitoring events');
+    _logger.d(() => 'Starting monitoring events');
     // cancel all previous timers
     cancelAllTimers();
 
@@ -358,7 +358,7 @@ class WebSocket with TimerHelper {
   }
 
   void _stopMonitoringEvents() {
-    _logger.i(() => 'Stopped monitoring events');
+    _logger.d(() => 'Stopped monitoring events');
     // reset lastEvent
     _lastEventAt = null;
 
@@ -383,7 +383,7 @@ class WebSocket with TimerHelper {
   }
 
   void _handleHealthCheckEvent(Event event) {
-    _logger.i(() => 'HealthCheck received : ${event.connectionId}');
+    _logger.v(() => 'HealthCheck received : ${event.connectionId}');
 
     _connectionId = event.connectionId;
     _connectionStatus = ConnectionStatus.connected;
@@ -435,7 +435,7 @@ class WebSocket with TimerHelper {
     _lastEventAt = DateTime.now();
     // Read outside the closure: promotion does not reach inside one.
     final type = event.type;
-    _logger.i(() => 'Event received: $type');
+    _logger.v(() => 'Event received: $type');
 
     if (event.type == EventType.healthCheck) {
       if (event.me != null) {
@@ -504,12 +504,12 @@ class WebSocket with TimerHelper {
   }
 
   void _startReconnectionMonitor() {
-    _logger.i(() => 'Starting reconnection monitor');
+    _logger.d(() => 'Starting reconnection monitor');
     setPeriodicTimer(
       Duration(seconds: reconnectionMonitorInterval),
       (_) {
         final needsToReconnect = _needsToReconnect;
-        _logger.i(() => 'Needs to reconnect : $needsToReconnect');
+        _logger.v(() => 'Needs to reconnect : $needsToReconnect');
         if (needsToReconnect) _reconnect();
       },
       immediate: true,
@@ -517,11 +517,11 @@ class WebSocket with TimerHelper {
   }
 
   void _startHealthCheck() {
-    _logger.i(() => 'Starting health check monitor');
+    _logger.d(() => 'Starting health check monitor');
     setPeriodicTimer(
       Duration(seconds: healthCheckInterval),
       (_) {
-        _logger.i(() => 'Sending Event: ${EventType.healthCheck}');
+        _logger.v(() => 'Sending Event: ${EventType.healthCheck}');
         final event = Event(
           type: EventType.healthCheck,
           connectionId: connectionId,
@@ -552,11 +552,30 @@ class WebSocket with TimerHelper {
 
   /// Disposes the web-socket connection and releases resources
   Future<void> dispose() async {
-    _logger.i(() => 'Disposing web-socket connection');
+    _logger.d(() => 'Disposing web-socket connection');
 
     _stopMonitoringEvents();
     _unsubscribeFromWebSocketChannel();
     _closeWebSocketChannel();
     _connectionStatusController.close();
+  }
+}
+
+// The connect URI carries the user token twice — as `authorization`, and as
+// `user_token` inside the `json` payload — so neither reaches a log.
+extension on Uri {
+  Uri get withoutCredentials {
+    const redacted = '<redacted>';
+    final params = {...queryParameters};
+
+    if (params.containsKey('authorization')) params['authorization'] = redacted;
+
+    if (params['json'] case final payload?) {
+      if (jsonDecode(payload) case final Map<String, dynamic> decoded when decoded.containsKey('user_token')) {
+        params['json'] = jsonEncode({...decoded, 'user_token': redacted});
+      }
+    }
+
+    return replace(queryParameters: params);
   }
 }

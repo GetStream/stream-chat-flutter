@@ -57,7 +57,7 @@ class RetryQueue {
     // If there are no messages to add, return.
     if (messagesToAdd.isEmpty) return;
 
-    logger.i(() => 'Adding ${messagesToAdd.length} messages to the queue');
+    logger.d(() => 'Adding ${messagesToAdd.length} messages to the queue');
     _messageQueue.addAll(messagesToAdd);
 
     _processQueue();
@@ -69,9 +69,9 @@ class RetryQueue {
     if (_isProcessing) return;
     _isProcessing = true;
 
-    logger.i(() => 'Started retrying failed messages');
+    logger.d(() => 'Started retrying failed messages');
     while (_messageQueue.isNotEmpty) {
-      logger.i(() => '${_messageQueue.length} messages remaining in the queue');
+      logger.v(() => '${_messageQueue.length} messages remaining in the queue');
 
       final message = _messageQueue.first;
       final retryPolicy = _retryPolicy;

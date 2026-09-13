@@ -207,7 +207,7 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
       value = PagedValue.error(error);
     } catch (error) {
       if (isStale(generation)) return;
-      final chatError = StreamClientException(message: error.toString(), cause: error);
+      final chatError = StreamClientException(message: 'Failed to load message search results', cause: error);
       value = PagedValue.error(chatError);
     }
   }
@@ -243,7 +243,7 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
       value = previousValue.copyWith(error: error);
     } catch (error) {
       if (isStale(generation)) return;
-      final chatError = StreamClientException(message: error.toString(), cause: error);
+      final chatError = StreamClientException(message: 'Failed to load more message search results', cause: error);
       value = previousValue.copyWith(error: chatError);
     }
   }

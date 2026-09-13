@@ -127,7 +127,7 @@ class StreamReactionListController extends PagedValueNotifier<String?, Reaction>
     } on StreamChatException catch (error) {
       value = PagedValue.error(error);
     } catch (error) {
-      final chatError = StreamClientException(message: error.toString(), cause: error);
+      final chatError = StreamClientException(message: 'Failed to load reactions', cause: error);
       value = PagedValue.error(chatError);
     }
   }
@@ -156,7 +156,7 @@ class StreamReactionListController extends PagedValueNotifier<String?, Reaction>
     } on StreamChatException catch (error) {
       value = previousValue.copyWith(error: error);
     } catch (error) {
-      final chatError = StreamClientException(message: error.toString(), cause: error);
+      final chatError = StreamClientException(message: 'Failed to load more reactions', cause: error);
       value = previousValue.copyWith(error: chatError);
     }
   }

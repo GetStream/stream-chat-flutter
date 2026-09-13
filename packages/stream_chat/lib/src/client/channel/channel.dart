@@ -80,7 +80,7 @@ class Channel {
          if (name != null) 'name': name,
          if (image != null) 'image': image,
        } {
-    _logger.i(() => 'New Channel instance created, not yet initialized');
+    _logger.d(() => 'New Channel instance created, not yet initialized');
   }
 
   /// Create a channel client instance from a [ChannelState] object.
@@ -628,14 +628,14 @@ class Channel {
     });
 
     if (attachments.isEmpty) {
-      _logger.i(() => 'No attachments available to upload');
+      _logger.d(() => 'No attachments available to upload');
       if (message.attachments.every((it) => it.uploadState.isSuccess)) {
         _messageAttachmentsUploadCompleter.remove(messageId)?.complete(message);
       }
       return Future.value();
     }
 
-    _logger.i(() => 'Found ${attachments.length} attachments');
+    _logger.d(() => 'Found ${attachments.length} attachments');
 
     void updateAttachment(Attachment attachment, {bool remove = false}) {
       final index = message!.attachments.indexWhere(
@@ -659,7 +659,7 @@ class Channel {
 
     return Future.wait(
       attachments.map((it) {
-        _logger.i(() => 'Uploading ${it.id} attachment...');
+        _logger.d(() => 'Uploading ${it.id} attachment...');
 
         final throttledUpdateAttachment = updateAttachment.throttled(
           const Duration(milliseconds: 500),
@@ -694,7 +694,7 @@ class Channel {
         _cancelableAttachmentUploadRequest[it.id] = cancelToken;
         return future
             .then((response) {
-              _logger.i(() => 'Attachment ${it.id} uploaded successfully...');
+              _logger.d(() => 'Attachment ${it.id} uploaded successfully...');
 
               // If the response is SendFileResponse, then we might also be getting
               // thumbUrl in case of video. So we need to update the attachment with
@@ -718,7 +718,7 @@ class Channel {
             })
             .catchError((e, stk) {
               if (e is StreamNetworkException && e.isCancelled) {
-                _logger.i(() => 'Attachment ${it.id} upload cancelled');
+                _logger.d(() => 'Attachment ${it.id} upload cancelled');
 
                 // remove attachment from message if cancelled.
                 updateAttachment(it, remove: true);
@@ -2000,7 +2000,7 @@ class Channel {
     _initializedCompleter.safeComplete(true);
 
     if (cid case final cid?) client.state.addChannels({cid: this});
-    _logger.i(() => 'Channel ${channelState.channel?.cid} initialized');
+    _logger.d(() => 'Channel ${channelState.channel?.cid} initialized');
   }
 
   /// Loads the initial channel state and watches for changes.
@@ -2419,7 +2419,7 @@ class Channel {
   Future<void> keyStroke([String? parentId]) async {
     if (!_canSendTypingEvents) return;
 
-    _logger.i(() => 'KeyStroke received');
+    _logger.v(() => 'KeyStroke received');
     return _keyStrokeHandler(parentId);
   }
 
@@ -2427,7 +2427,7 @@ class Channel {
   Future<void> startTyping([String? parentId]) async {
     if (!_canSendTypingEvents) return;
 
-    _logger.i(() => 'start typing');
+    _logger.d(() => 'start typing');
     await sendEvent(
       Event(
         type: EventType.typingStart,
@@ -2440,7 +2440,7 @@ class Channel {
   Future<void> stopTyping([String? parentId]) async {
     if (!_canSendTypingEvents) return;
 
-    _logger.i(() => 'stop typing');
+    _logger.d(() => 'stop typing');
     await sendEvent(
       Event(
         type: EventType.typingStop,

@@ -130,7 +130,7 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
     } on StreamChatException catch (error) {
       value = PagedValue.error(error);
     } catch (error) {
-      final chatError = StreamClientException(message: error.toString(), cause: error);
+      final chatError = StreamClientException(message: 'Failed to load message reminders', cause: error);
       value = PagedValue.error(chatError);
     }
   }
@@ -158,7 +158,7 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
     } on StreamChatException catch (error) {
       value = previousValue.copyWith(error: error);
     } catch (error) {
-      final chatError = StreamClientException(message: error.toString(), cause: error);
+      final chatError = StreamClientException(message: 'Failed to load more message reminders', cause: error);
       value = previousValue.copyWith(error: chatError);
     }
   }

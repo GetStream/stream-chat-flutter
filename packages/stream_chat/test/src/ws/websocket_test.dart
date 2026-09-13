@@ -539,4 +539,51 @@ void main() {
 
     addTearDown(timer.cancel);
   });
+
+  test('logs the connect URI with the user token redacted', () async {
+    final records = <StreamLogRecord>[];
+    StreamLogger.handler = _CapturingHandler(records.add);
+    StreamLogger.priority = StreamLogPriority.verbose;
+    addTearDown(StreamLogger.reset);
+
+    final connectedWith = <Uri>[];
+    final socket = WebSocket(
+      apiKey: 'api-key',
+      baseUrl: 'ws://<local-ip>:8800',
+      tokenManager: tokenManager,
+      webSocketChannelProvider: (uri, {protocols}) {
+        connectedWith.add(uri);
+        return webSocketChannel;
+      },
+    );
+    addTearDown(socket.disconnect);
+
+    final user = OwnUser(id: 'test-user');
+    final timer = Timer(const Duration(milliseconds: 300), () {
+      webSocketSink.add(
+        json.encode(Event(type: EventType.healthCheck, connectionId: 'test-connection-id', me: user)),
+      );
+    });
+    addTearDown(timer.cancel);
+
+    await socket.connect(user);
+
+    final rawToken = (await tokenManager.getToken()).rawValue;
+    // Compared decoded, so a token that leaked percent-encoded is still caught.
+    final logged = records.map((it) => Uri.decodeFull(it.message));
+
+    // The connection itself still carries the token; only the record is redacted.
+    expect(Uri.decodeFull(connectedWith.single.toString()), contains(rawToken));
+    expect(logged, contains(startsWith('[connect] #ws; uri:')));
+    expect(logged, everyElement(isNot(contains(rawToken))));
+  });
+}
+
+class _CapturingHandler extends StreamLogHandler {
+  const _CapturingHandler(this._onRecord);
+
+  final void Function(StreamLogRecord) _onRecord;
+
+  @override
+  void handle(StreamLogRecord record) => _onRecord(record);
 }

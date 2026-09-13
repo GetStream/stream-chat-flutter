@@ -127,7 +127,7 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
     } on StreamChatException catch (error) {
       value = PagedValue.error(error);
     } catch (error) {
-      final chatError = StreamClientException(message: error.toString(), cause: error);
+      final chatError = StreamClientException(message: 'Failed to load drafts', cause: error);
       value = PagedValue.error(chatError);
     }
   }
@@ -155,7 +155,7 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
     } on StreamChatException catch (error) {
       value = previousValue.copyWith(error: error);
     } catch (error) {
-      final chatError = StreamClientException(message: error.toString(), cause: error);
+      final chatError = StreamClientException(message: 'Failed to load more drafts', cause: error);
       value = previousValue.copyWith(error: chatError);
     }
   }

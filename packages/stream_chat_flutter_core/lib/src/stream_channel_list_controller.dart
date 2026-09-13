@@ -204,7 +204,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     } on StreamChatException catch (error) {
       value = PagedValue.error(error);
     } catch (error) {
-      final chatError = StreamClientException(message: error.toString(), cause: error);
+      final chatError = StreamClientException(message: 'Failed to load channels', cause: error);
       value = PagedValue.error(chatError);
     }
   }
@@ -237,7 +237,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     } on StreamChatException catch (error) {
       value = previousValue.copyWith(error: error);
     } catch (error) {
-      final chatError = StreamClientException(message: error.toString(), cause: error);
+      final chatError = StreamClientException(message: 'Failed to load more channels', cause: error);
       value = previousValue.copyWith(error: chatError);
     }
   }

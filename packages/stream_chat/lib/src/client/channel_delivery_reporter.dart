@@ -164,7 +164,7 @@ class ChannelDeliveryReporter {
 
     if (messageDeliveries.isEmpty) return;
 
-    _logger.i(() => 'Marking ${messageDeliveries.length} channels as delivered');
+    _logger.d(() => 'Marking ${messageDeliveries.length} channels as delivered');
 
     try {
       await onMarkChannelsDelivered(messageDeliveries);

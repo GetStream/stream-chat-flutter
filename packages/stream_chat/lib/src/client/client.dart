@@ -460,7 +460,7 @@ class StreamChatClient {
     final client = chatPersistenceClient;
     // If the persistence client is never connected, we don't need to close it.
     if (client == null || !client.isConnected) {
-      logger.i(() => 'Chat persistence client is not connected');
+      logger.d(() => 'Chat persistence client is not connected');
       return;
     }
 
@@ -637,12 +637,12 @@ class StreamChatClient {
 
       final syncAt = lastSyncAt ?? await chatPersistenceClient?.getLastSyncAt();
       if (syncAt == null) {
-        logger.i(() => 'Fresh sync start: lastSyncAt initialized to now.');
+        logger.d(() => 'Fresh sync start: lastSyncAt initialized to now.');
         return chatPersistenceClient?.updateLastSyncAt(DateTime.now());
       }
 
       try {
-        logger.i(() => 'Syncing events since $syncAt for channels: $channels');
+        logger.d(() => 'Syncing events since $syncAt for channels: $channels');
 
         final res = await _chatApi.general.sync(channels, syncAt);
         final events = res.events.sorted(
@@ -863,7 +863,7 @@ class StreamChatClient {
   }) async {
     if (waitForConnect) {
       if (_ws.connectionCompleter?.isCompleted == false) {
-        logger.i(() => 'awaiting connection completer');
+        logger.d(() => 'awaiting connection completer');
         await _ws.connectionCompleter?.future;
       }
       if (wsConnectionStatus != ConnectionStatus.connected) {
@@ -879,7 +879,7 @@ class StreamChatClient {
       watch = false;
     }
 
-    logger.i(() => 'Query channel start');
+    logger.d(() => 'Query channel start');
     final res = await _chatApi.channel.queryChannels(
       filter: filter,
       sort: sort,
@@ -915,7 +915,7 @@ class StreamChatClient {
 
     this.state.updateUsers(users);
 
-    logger.i(() => 'Got ${res.channels.length} channels from api');
+    logger.d(() => 'Got ${res.channels.length} channels from api');
 
     final updateData = _mapChannelStateToChannel(channels);
     // Submit delivery report for the channels fetched in this query.
@@ -996,7 +996,7 @@ class StreamChatClient {
         (QueryChannelsResponse()..channels = const []);
 
     if (res.channels.isEmpty) {
-      logger.i(() => 'No channels found in offline storage for the given query');
+      logger.d(() => 'No channels found in offline storage for the given query');
       return QueryChannelsResult(
         channels: const [],
         predefinedFilter: res.predefinedFilter,
