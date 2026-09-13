@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'package:stream_core/stream_core.dart' show SortedListExtensions;
+
 import 'paged_value_notifier.dart';
 import 'stream_channel_list_event_handler.dart';
 
@@ -149,7 +150,9 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   set value(PagedValue<int, Channel> newValue) {
     super.value = newValue.maybeMap(
       orElse: () => newValue,
-      (success) => success.copyWith(items: success.items.sortedWith(_compareByState)),
+      (success) => success.copyWith(
+        items: success.items.sortedWith(_compareByState),
+      ),
     );
   }
 
