@@ -12,11 +12,14 @@ import 'package:stream_core/stream_core.dart'
         StreamLogRecord,
         StreamLogger,
         ConnectionIdInterceptor,
+        HeadersInterceptor,
         LoggingInterceptor,
         StreamApiException,
         StreamDioException,
         StreamErrorCode,
         StreamNetworkException,
+        SystemEnvironment,
+        SystemEnvironmentManager,
         TokenManager;
 import 'package:test/test.dart';
 
@@ -61,6 +64,23 @@ void main() {
     final client = StreamHttpClient(apiKey);
 
     expect(client.httpClient.interceptors.whereType<AdditionalHeadersInterceptor>().length, 1);
+  });
+
+  test('HeadersInterceptor should be added if systemEnvironmentManager is provided', () {
+    const apiKey = 'api-key';
+    final client = StreamHttpClient(
+      apiKey,
+      systemEnvironmentManager: SystemEnvironmentManager(
+        environment: const SystemEnvironment(
+          sdkName: 'stream-chat',
+          sdkIdentifier: 'dart',
+          sdkVersion: '0.0.0',
+        ),
+      ),
+    );
+
+    // It is what carries `X-Stream-Client`, so losing it costs SDK attribution.
+    expect(client.httpClient.interceptors.whereType<HeadersInterceptor>().length, 1);
   });
 
   test('AuthInterceptor should be added if tokenManager is provided', () {
