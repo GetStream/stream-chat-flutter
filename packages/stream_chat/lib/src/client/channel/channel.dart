@@ -849,7 +849,7 @@ class Channel {
 
       state?.updateMessage(failedMessage);
       // If the error is retriable, add it to the retry queue.
-      if (e is StreamChatNetworkError && e.isRetriable) {
+      if (e is StreamChatException && e.isRetriable) {
         state?.scheduleRetry(failedMessage);
       }
 
@@ -938,7 +938,7 @@ class Channel {
 
       state?.updateMessage(failedMessage);
       // If the error is retriable, add it to the retry queue.
-      if (e is StreamChatNetworkError && e.isRetriable) {
+      if (e is StreamChatException && e.isRetriable) {
         state?.scheduleRetry(failedMessage);
       }
 
@@ -1005,7 +1005,7 @@ class Channel {
 
       state?.updateMessage(failedMessage);
       // If the error is retriable, add it to the retry queue.
-      if (e is StreamChatNetworkError && e.isRetriable) {
+      if (e is StreamChatException && e.isRetriable) {
         state?.scheduleRetry(failedMessage);
       }
 
@@ -1100,7 +1100,7 @@ class Channel {
 
       state?.deleteMessage(failedMessage, hardDelete: scope.hard);
       // If the error is retriable, add it to the retry queue.
-      if (e is StreamChatNetworkError && e.isRetriable) {
+      if (e is StreamChatException && e.isRetriable) {
         state?.scheduleRetry(failedMessage);
       }
 

@@ -5242,9 +5242,11 @@ void main() {
         );
 
         client.chatPersistenceClient = fakeClient;
+        // What `/sync` answers when `lastSyncAt` is too old, or the channel
+        // list or event count is oversized.
         when(() => api.general.sync(cids, lastSyncAt)).thenThrow(
-          StreamChatNetworkError.raw(
-            code: 4,
+          apiException(
+            code: StreamErrorCode.inputError,
             statusCode: 400,
             message: 'Too many events',
           ),

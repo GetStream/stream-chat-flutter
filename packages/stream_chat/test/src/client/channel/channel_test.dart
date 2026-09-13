@@ -523,6 +523,61 @@ void main() {
         },
       );
 
+      test('should re-send the message through the retry queue when the failure is retriable', () async {
+        final message = Message(
+          id: 'test-message-id',
+          text: 'Hello world!',
+          user: client.state.currentUser,
+        );
+
+        when(
+          () => client.sendMessage(
+            any(that: isSameMessageAs(message)),
+            channelId,
+            channelType,
+          ),
+        ).thenThrow(apiException(code: StreamErrorCode.internalError, statusCode: 500));
+
+        await expectLater(channel.sendMessage(message), throwsA(isA<StreamApiException>()));
+        await pumpEventQueue();
+
+        // Once for the original send, once for the queue's retry attempt.
+        verify(
+          () => client.sendMessage(
+            any(that: isSameMessageAs(message)),
+            channelId,
+            channelType,
+          ),
+        ).called(2);
+      });
+
+      test('should not re-send the message when the failure is not retriable', () async {
+        final message = Message(
+          id: 'test-message-id',
+          text: 'Hello world!',
+          user: client.state.currentUser,
+        );
+
+        when(
+          () => client.sendMessage(
+            any(that: isSameMessageAs(message)),
+            channelId,
+            channelType,
+          ),
+        ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
+
+        await expectLater(channel.sendMessage(message), throwsA(isA<StreamApiException>()));
+        await pumpEventQueue();
+
+        verify(
+          () => client.sendMessage(
+            any(that: isSameMessageAs(message)),
+            channelId,
+            channelType,
+          ),
+        ).called(1);
+      });
+
       test('should update message state even when non-retriable error occurs', () async {
         final message = Message(
           id: 'test-message-id',

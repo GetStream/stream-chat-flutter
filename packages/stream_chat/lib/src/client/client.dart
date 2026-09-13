@@ -7,6 +7,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_core/stream_core.dart'
     show
         InFlightCache,
+        StreamApiException,
         StreamLogConfig,
         StreamLogger,
         SystemEnvironment,
@@ -660,7 +661,7 @@ class StreamChatClient {
         // old or the channel list is too long or too many events need to be
         // synced. In this case, we should just flush the persistence client
         // and start over.
-        if (error is StreamChatNetworkError && error.statusCode == 400) {
+        if (error is StreamApiException && error.statusCode == 400) {
           logger.w(
             () =>
                 'Failed to sync events due to stale or oversized state. '
