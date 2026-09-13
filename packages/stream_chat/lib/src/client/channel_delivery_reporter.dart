@@ -28,7 +28,7 @@ class ChannelDeliveryReporter {
   ///
   /// The [throttleDuration] controls how frequently delivery receipts are sent.
   ///
-  /// The optional [logger] logs warnings and errors during operation.
+  /// The [tag] names this reporter in the log records it writes.
   ChannelDeliveryReporter({
     required this.onMarkChannelsDelivered,
     this._throttleDuration = const Duration(seconds: 1),

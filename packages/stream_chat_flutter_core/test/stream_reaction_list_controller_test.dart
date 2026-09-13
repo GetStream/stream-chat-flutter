@@ -221,6 +221,7 @@ void main() {
       await pumpEventQueue();
 
       expect(controller.value, isA<Error>());
+      expect((controller.value as Error).error, isA<StreamClientException>());
       expect(
         (controller.value as Error).error.message,
         contains('API unavailable'),
@@ -535,7 +536,10 @@ void main() {
 
     test('value setter sorts items when sort is provided', () async {
       final now = DateTime.now();
-      final older = generateReaction(userId: 'user_1', createdAt: now.subtract(const Duration(hours: 1)));
+      final older = generateReaction(
+        userId: 'user_1',
+        createdAt: now.subtract(const Duration(hours: 1)),
+      );
       final newer = generateReaction(userId: 'user_2', createdAt: now);
 
       final response = QueryReactionsResponse()

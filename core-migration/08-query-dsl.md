@@ -4,7 +4,7 @@
 evaluated client-side as well as sent to the server.
 
 **Size:** ~600 chat LOC deleted against ~1,420 core LOC. The widest public break after phase
-[03](03-errors.md). One small upstream ask (), and two operators chat should deprecate
+[03](03-errors.md). One small upstream ask (`$nor`), and two operators chat should deprecate
 rather than port.
 
 ## Scope

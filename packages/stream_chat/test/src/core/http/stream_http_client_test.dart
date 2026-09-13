@@ -184,16 +184,17 @@ void main() {
       ),
     ).thenThrow(error);
 
-    try {
-      await client.get(path);
-    } catch (e) {
-      expect(e, isA<StreamApiException>());
-      // Assert on the facts the mapper read off the response rather than on
-      // object identity: the exception also carries the DioException as its
-      // cause, which equality would compare.
-      expect((e as StreamApiException).statusCode, 500);
-      expect(e.code, StreamErrorCode.internalError);
-    }
+    // Matched on the facts the mapper read off the response rather than on
+    // object identity: the exception also carries the DioException as its
+    // cause, which equality would compare.
+    await expectLater(
+      client.get(path),
+      throwsA(
+        isA<StreamApiException>()
+            .having((it) => it.statusCode, 'statusCode', 500)
+            .having((it) => it.code, 'code', StreamErrorCode.internalError),
+      ),
+    );
 
     verify(
       () => dio.get(
@@ -249,16 +250,14 @@ void main() {
         ),
       ).thenThrow(error);
 
-      try {
-        await client.post(path);
-      } catch (e) {
-        expect(e, isA<StreamApiException>());
-        // Assert on the facts the mapper read off the response rather than on
-        // object identity: the exception also carries the DioException as its
-        // cause, which equality would compare.
-        expect((e as StreamApiException).statusCode, 500);
-        expect(e.code, StreamErrorCode.internalError);
-      }
+      await expectLater(
+        client.post(path),
+        throwsA(
+          isA<StreamApiException>()
+              .having((it) => it.statusCode, 'statusCode', 500)
+              .having((it) => it.code, 'code', StreamErrorCode.internalError),
+        ),
+      );
 
       verify(
         () => dio.post(
@@ -315,16 +314,14 @@ void main() {
         ),
       ).thenThrow(error);
 
-      try {
-        await client.delete(path);
-      } catch (e) {
-        expect(e, isA<StreamApiException>());
-        // Assert on the facts the mapper read off the response rather than on
-        // object identity: the exception also carries the DioException as its
-        // cause, which equality would compare.
-        expect((e as StreamApiException).statusCode, 500);
-        expect(e.code, StreamErrorCode.internalError);
-      }
+      await expectLater(
+        client.delete(path),
+        throwsA(
+          isA<StreamApiException>()
+              .having((it) => it.statusCode, 'statusCode', 500)
+              .having((it) => it.code, 'code', StreamErrorCode.internalError),
+        ),
+      );
 
       verify(
         () => dio.delete(
@@ -381,16 +378,14 @@ void main() {
         ),
       ).thenThrow(error);
 
-      try {
-        await client.patch(path);
-      } catch (e) {
-        expect(e, isA<StreamApiException>());
-        // Assert on the facts the mapper read off the response rather than on
-        // object identity: the exception also carries the DioException as its
-        // cause, which equality would compare.
-        expect((e as StreamApiException).statusCode, 500);
-        expect(e.code, StreamErrorCode.internalError);
-      }
+      await expectLater(
+        client.patch(path),
+        throwsA(
+          isA<StreamApiException>()
+              .having((it) => it.statusCode, 'statusCode', 500)
+              .having((it) => it.code, 'code', StreamErrorCode.internalError),
+        ),
+      );
 
       verify(
         () => dio.patch(
@@ -447,16 +442,14 @@ void main() {
         ),
       ).thenThrow(error);
 
-      try {
-        await client.put(path);
-      } catch (e) {
-        expect(e, isA<StreamApiException>());
-        // Assert on the facts the mapper read off the response rather than on
-        // object identity: the exception also carries the DioException as its
-        // cause, which equality would compare.
-        expect((e as StreamApiException).statusCode, 500);
-        expect(e.code, StreamErrorCode.internalError);
-      }
+      await expectLater(
+        client.put(path),
+        throwsA(
+          isA<StreamApiException>()
+              .having((it) => it.statusCode, 'statusCode', 500)
+              .having((it) => it.code, 'code', StreamErrorCode.internalError),
+        ),
+      );
 
       verify(
         () => dio.put(
@@ -520,16 +513,14 @@ void main() {
         ),
       ).thenThrow(error);
 
-      try {
-        await client.postFile(path, file);
-      } catch (e) {
-        expect(e, isA<StreamApiException>());
-        // Assert on the facts the mapper read off the response rather than on
-        // object identity: the exception also carries the DioException as its
-        // cause, which equality would compare.
-        expect((e as StreamApiException).statusCode, 500);
-        expect(e.code, StreamErrorCode.internalError);
-      }
+      await expectLater(
+        client.postFile(path, file),
+        throwsA(
+          isA<StreamApiException>()
+              .having((it) => it.statusCode, 'statusCode', 500)
+              .having((it) => it.code, 'code', StreamErrorCode.internalError),
+        ),
+      );
 
       verify(
         () => dio.post(
@@ -588,12 +579,10 @@ void main() {
         ),
       ).thenThrow(error);
 
-      try {
-        await client.request(path);
-      } catch (e) {
-        expect(e, isA<StreamApiException>());
-        expect(e, error.error);
-      }
+      await expectLater(
+        client.request(path),
+        throwsA(isA<StreamApiException>().having((it) => it, 'error', error.error)),
+      );
 
       verify(
         () => dio.request(

@@ -176,13 +176,10 @@ reading. Shipping the bridge and breaking logging in v12 would have spent the sa
 
 ## Definition of done
 
-- [x] `StreamLogger.configure` is called once from `StreamChatClient`, with the priority mapped
-      from `logLevel`.
-- [x] The bridge exists and is tested: a record written through `StreamLogger` reaches a
-      consumer-supplied `Logger` with the right `Level`, `error` and `stackTrace`, and nothing
-      arrives while `stream_core` is unconfigured.
+- [x] `StreamLogger.configure` is called once from `StreamChatClient`, with the priority taken
+      from `logConfig.priority`.
 - [x] Every core type chat constructs is passed a `SCh:`-prefixed tag.
-- [x] Lazy messages (`() => '...'`) throughout the bridge's callers.
+- [x] Lazy messages (`() => '...'`) throughout the logger call sites.
 - [x] `melos run analyze` and `melos run format` clean; `stream_chat` 1670 tests green.
 - [ ] `logLevel` / `logHandlerFunction` / `logger` / `detachedLogger` deprecated — deferred with
       the rest of the removal above, since deprecating them needs the replacement to exist.
