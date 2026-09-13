@@ -21,10 +21,15 @@
 
 - Failed messages now retry on server errors. The retry policy follows `stream_core`'s table: retry a request that never reached the server, a 5xx, a 429 and a 408; never another 4xx, a cancelled request, broken credentials, or anything the server marked unrecoverable. Previously only failures without a parseable error body retried, so a 500 or a 429 did not.
 - `SystemEnvironment` is now `stream_core`'s type, re-exported from this package. Its constructor and fields are unchanged, so existing usage keeps working.
+- Most SDK logging moved off `info`. It now carries only client and connection lifecycle — client created and disposed, user set and disconnected, connection opening, established and closing — and per-operation, per-event and per-timer records are `debug` or `verbose`. Raising the priority to `info` to debug a problem no longer buries it under a health check every 20 seconds and a line per WebSocket frame.
 
 ✅ Added
 
 - Log records from the HTTP and token layers now reach the configured handler.
+
+🔒 Security
+
+- The WebSocket connect and reconnect URIs are logged with the user token redacted. They carried it in full, so an app that raised the log priority wrote a usable token to the console and to any handler it had installed.
 
 🔄 Internal / Non-breaking
 
