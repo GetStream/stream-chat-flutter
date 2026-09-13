@@ -45,15 +45,9 @@ class PredefinedFilter {
 
 List<ChannelSort> _defaultSortFor(Filter filter) {
   final touchesLastMessageAt = _touchesField(filter, ChannelSortField.lastMessageAt.remote);
-  if (touchesLastMessageAt) return _lastMessageAtSort;
+  if (touchesLastMessageAt) return [ChannelSort.desc(ChannelSortField.lastMessageAt)];
   return ChannelSort.defaultSort;
 }
-
-// The ordering a channel query falls back to when its filter names
-// last_message_at, which the API sorts on directly instead of last_updated.
-final _lastMessageAtSort = List<ChannelSort>.unmodifiable([
-  ChannelSort.desc(ChannelSortField.lastMessageAt),
-]);
 
 bool _touchesField(Filter filter, String field) {
   if (filter.key == field) return true;

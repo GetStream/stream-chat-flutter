@@ -189,9 +189,9 @@ class ChannelSort extends Sort<ChannelState> {
   ///
   /// Sorts by the last message date, or the channel creation date when it has
   /// no messages.
-  static final List<ChannelSort> defaultSort = List.unmodifiable([
+  static final List<ChannelSort> defaultSort = [
     ChannelSort.desc(ChannelSortField.lastUpdated),
-  ]);
+  ];
 }
 
 /// Represents a field that channel queries can be sorted on.

@@ -273,11 +273,11 @@ class ThreadSort extends Sort<Thread> {
   /// [ThreadSortField.hasUnread] contributes nothing and the last-message date
   /// leads. Passing it to a query asks for the ordering an unsorted query
   /// already has.
-  static final List<ThreadSort> defaultSort = List.unmodifiable([
+  static final List<ThreadSort> defaultSort = [
     ThreadSort.desc(ThreadSortField.hasUnread),
     ThreadSort.desc(ThreadSortField.lastMessageAt),
     ThreadSort.desc(ThreadSortField.parentMessageId),
-  ]);
+  ];
 }
 
 /// Represents a field that thread queries can be sorted on.

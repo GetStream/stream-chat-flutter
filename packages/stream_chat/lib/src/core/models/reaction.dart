@@ -153,9 +153,9 @@ class ReactionSort extends Sort<Reaction> {
   /// The ordering the API applies to a reaction query when none is given.
   ///
   /// Sorts by when the reaction was added, newest first.
-  static final List<ReactionSort> defaultSort = List.unmodifiable([
+  static final List<ReactionSort> defaultSort = [
     ReactionSort.desc(ReactionSortField.createdAt),
-  ]);
+  ];
 }
 
 /// Represents a field that reaction queries can be sorted on.

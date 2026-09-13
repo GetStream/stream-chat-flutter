@@ -195,9 +195,9 @@ class MemberSort extends Sort<Member> {
   /// The ordering the API applies to a member query when none is given.
   ///
   /// Sorts by when the member joined, oldest first.
-  static final List<MemberSort> defaultSort = List.unmodifiable([
+  static final List<MemberSort> defaultSort = [
     MemberSort.asc(MemberSortField.createdAt),
-  ]);
+  ];
 }
 
 /// Represents a field that member queries can be sorted on.
