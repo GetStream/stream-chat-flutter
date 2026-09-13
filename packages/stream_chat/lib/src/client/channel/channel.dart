@@ -608,14 +608,12 @@ class Channel {
   }) {
     final cancelToken = _cancelableAttachmentUploadRequest[attachmentId];
     if (cancelToken == null) {
-      throw const StreamClientException(
-        message: '''
-        Upload request for this Attachment hasn't started yet or maybe
-        Already completed''',
+      throw StateError(
+        "Upload request for attachment '$attachmentId' hasn't started yet, or has already completed.",
       );
     }
     if (cancelToken.isCancelled) {
-      throw const StreamClientException(message: 'Upload request already cancelled');
+      throw StateError("Upload request for attachment '$attachmentId' was already cancelled.");
     }
     cancelToken.cancel(reason);
   }
@@ -782,7 +780,7 @@ class Channel {
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
-    const cancelled = StreamClientException(message: 'Message cancelled');
+    const cancelled = StreamNetworkException(message: 'Message cancelled', isCancelled: true);
     _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(cancelled);
 
     final quotedMessage = state!.messages.firstWhereOrNull(
@@ -818,8 +816,8 @@ class Channel {
         message = await attachmentsUploadCompleter.future;
 
         // Fail the whole message if any attachment failed to upload
-        if (message.attachments.any((it) => it.uploadState.isFailed)) {
-          throw const StreamClientException(message: 'Failed to upload one or more attachments');
+        if (message.attachments.where((it) => it.uploadState.isFailed) case final failed when failed.isNotEmpty) {
+          throw StreamClientException(message: _uploadFailureMessage(failed));
         }
       }
 
@@ -888,7 +886,7 @@ class Channel {
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
-    const cancelled = StreamClientException(message: 'Message cancelled');
+    const cancelled = StreamNetworkException(message: 'Message cancelled', isCancelled: true);
     _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(cancelled);
 
     // ignore: parameter_assignments
@@ -919,8 +917,8 @@ class Channel {
         message = await attachmentsUploadCompleter.future;
 
         // Fail the whole message if any attachment failed to upload
-        if (message.attachments.any((it) => it.uploadState.isFailed)) {
-          throw const StreamClientException(message: 'Failed to upload one or more attachments');
+        if (message.attachments.where((it) => it.uploadState.isFailed) case final failed when failed.isNotEmpty) {
+          throw StreamClientException(message: _uploadFailureMessage(failed));
         }
       }
 
@@ -978,7 +976,7 @@ class Channel {
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
-    const cancelled = StreamClientException(message: 'Message cancelled');
+    const cancelled = StreamNetworkException(message: 'Message cancelled', isCancelled: true);
     _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(cancelled);
 
     // ignore: parameter_assignments
@@ -1144,7 +1142,9 @@ class Channel {
     // Removing the attachments upload completer to stop the `sendMessage`
     // waiting for attachments to complete.
     final completer = _messageAttachmentsUploadCompleter.remove(message.id);
-    completer?.completeError(const StreamClientException(message: 'Message deleted'));
+    completer?.completeError(
+      const StreamNetworkException(message: 'Message deleted', isCancelled: true),
+    );
   }
 
   // Deletes all the attachments associated with the given [message]
@@ -2492,4 +2492,23 @@ class Channel {
       '[Channel.fromState]',
     );
   }
+}
+
+// Names which attachments failed and what each reported, so the caller is not
+// left with "one or more".
+//
+// The reasons are strings because `UploadStateFailed.error` is one: whatever
+// each upload threw was stringified when its state was recorded, so there is no
+// throwable left to carry as a `cause`.
+String _uploadFailureMessage(Iterable<Attachment> failed) {
+  final reasons = failed.map((it) {
+    final reason = switch (it.uploadState) {
+      UploadStateFailed(:final error) => error,
+      _ => 'unknown error',
+    };
+
+    return '${it.id}: $reason';
+  });
+
+  return 'Failed to upload ${failed.length} attachment(s) — ${reasons.join('; ')}';
 }

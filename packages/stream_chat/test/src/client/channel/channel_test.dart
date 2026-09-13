@@ -1,5 +1,7 @@
 // ignore_for_file: lines_longer_than_80_chars, cascade_invocations, deprecated_member_use_from_same_package, avoid_redundant_argument_values
 
+import 'dart:async';
+
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
@@ -847,6 +849,44 @@ void main() {
 
         verifyNever(
           () => client.sendMessage(any(), channelId, channelType),
+        );
+      });
+
+      test('should report a superseded send as a cancelled request', () async {
+        final attachment = Attachment(
+          id: 'test-attachment-id',
+          type: 'image',
+          file: AttachmentFile(size: 100, path: 'test-file-path'),
+        );
+
+        final message = Message(id: 'test-message-id', attachments: [attachment]);
+
+        // Holds the first send inside its attachment upload, so the second one
+        // arrives while it is still in flight.
+        final upload = Completer<SendImageResponse>();
+        when(
+          () => client.sendImage(
+            any(),
+            channelId,
+            channelType,
+            onSendProgress: any(named: 'onSendProgress'),
+            cancelToken: any(named: 'cancelToken'),
+            extraData: any(named: 'extraData'),
+          ),
+        ).thenAnswer((_) => upload.future);
+        addTearDown(() => upload.complete(SendImageResponse()..file = 'url'));
+
+        final superseded = channel.sendMessage(message);
+        await pumpEventQueue();
+        unawaited(channel.sendMessage(message).catchError((_) => SendMessageResponse()));
+
+        // The caller stopped it, so it is a cancelled request rather than an
+        // SDK failure a crash tracker should hear about.
+        await expectLater(
+          superseded,
+          throwsA(
+            isA<StreamNetworkException>().having((it) => it.isCancelled, 'isCancelled', isTrue),
+          ),
         );
       });
 

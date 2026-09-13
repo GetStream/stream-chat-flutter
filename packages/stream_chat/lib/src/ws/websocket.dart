@@ -7,7 +7,6 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_core/stream_core.dart'
     show
         StreamApiException,
-        StreamClientException,
         StreamException,
         StreamApiError,
         StreamLogger,
@@ -233,10 +232,8 @@ class WebSocket with TimerHelper {
     bool includeUserDetails = false,
   }) {
     if (_connectRequestInProgress) {
-      throw const StreamClientException(
-        message: '''
-        You've called connect twice,
-        can only attempt 1 connection at the time.''',
+      throw StateError(
+        'A connection attempt is already in progress; only one is allowed at a time.',
       );
     }
     _connectRequestInProgress = true;

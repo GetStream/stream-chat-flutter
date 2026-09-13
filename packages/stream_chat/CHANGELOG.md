@@ -9,6 +9,8 @@
 - `StreamChatClient.devToken` is removed. It minted a `devtoken`-signed JWT, which only an app with development tokens enabled accepts; generate tokens on your backend, or build one in your own test helper.
 - A failed request now throws one of `stream_core`'s sealed `StreamException` kinds — `StreamApiException`, `StreamNetworkException`, `StreamAuthenticationException` or `StreamClientException` — instead of a `StreamChatNetworkError`. `StreamChatException` aliases the root, so `on StreamChatException catch` handles them all. See the [v11 migration guide](https://github.com/GetStream/stream-chat-flutter/blob/master/migrations/v11-migration.md#error-handling).
 - `StreamChatError`, `StreamChatNetworkError`, `StreamChatNetworkErrorType` and `StreamWebSocketError` are removed rather than deprecated, so a clause catching one fails to compile instead of silently matching nothing. `isRetriable` is now an extension on `StreamChatException`.
+- Misusing the client raises a `StateError` rather than a `StreamChatException`: connecting twice, opening a connection that is already open, `queryChannels` without one, using a persistence client that is not set or belongs to another user, and cancelling an attachment upload that never started or already finished. These say fix the call, not handle the failure, so they are outside the exception hierarchy.
+- A send superseded by a later one, and a pending upload dropped because its message was deleted, now report a `StreamNetworkException` with `isCancelled` set, matching how a cancelled attachment upload has always been reported. They were `StreamClientException`, which tells a caller to report them to a crash tracker.
 - `ChatErrorCode` is removed in favour of `StreamErrorCode`. One value was wrong: `requestTimeout` was `23`, which the API never returns; the real code is `48`.
 - `RetryPolicy.shouldRetry` receives a `StreamChatException?` instead of a `StreamChatError?`.
 - `UploadState`'s variant classes are renamed to `UploadStatePreparing`, `UploadStateInProgress`, `UploadStateSuccess` and `UploadStateFailed`, freeing the names `Success` and `Failed`.
@@ -41,6 +43,10 @@
 - Added `ChannelSort.empty`, `MemberSort.empty` and so on alongside each default — an empty sort, for querying with the ordering the API applies on its own.
 - Default sorts moved onto the sort that owns them: `ChannelSort.defaultSort`, `MemberSort.defaultSort` and so on, reachable now without the Flutter layer.
 
+
+🐞 Fixed
+
+- A message that fails because its attachments did not upload now says which ones and what each reported, instead of `Failed to upload one or more attachments`.
 
 🔄 Changed
 

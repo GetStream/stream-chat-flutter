@@ -204,7 +204,8 @@ void main() {
       // calling again before previous attempt finishes
       await webSocket.connect(user);
     } catch (e) {
-      expect(e, isA<StreamClientException>());
+      // Misuse, so it leaves the StreamException hierarchy entirely.
+      expect(e, isA<StateError>());
     }
   });
 

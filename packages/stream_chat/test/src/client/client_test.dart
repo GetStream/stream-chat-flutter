@@ -161,12 +161,9 @@ void main() {
 
           await client.openConnection();
         } catch (e) {
-          expect(e, isA<StreamClientException>());
-          final err = e as StreamClientException;
-          expect(
-            err.message.contains('Connection already available for'),
-            isTrue,
-          );
+          // Misuse, so it leaves the StreamException hierarchy entirely.
+          expect(e, isA<StateError>());
+          expect((e as StateError).message, contains('already available for'));
         }
       });
 
@@ -5128,7 +5125,7 @@ void main() {
 
         await expectLater(
           client.openPersistenceConnection(user.copyWith(id: 'new-id')),
-          throwsA(const TypeMatcher<StreamClientException>()),
+          throwsA(isA<StateError>()),
         );
       },
     );
@@ -5138,7 +5135,7 @@ void main() {
       () async {
         await expectLater(
           client.openPersistenceConnection(user),
-          throwsA(const TypeMatcher<StreamClientException>()),
+          throwsA(isA<StateError>()),
         );
       },
     );
@@ -5193,7 +5190,7 @@ void main() {
 
         await expectLater(
           client.connectUser(user, token, connectWebSocket: false),
-          throwsA(const TypeMatcher<StreamClientException>()),
+          throwsA(isA<StateError>()),
         );
       },
     );
@@ -5405,7 +5402,7 @@ void main() {
           messageLimit: any(named: 'messageLimit'),
           paginationParams: any(named: 'paginationParams'),
         ),
-      ).thenThrow(const StreamClientException(message: 'You cannot use queryChannels without an active connection.'));
+      ).thenThrow(StateError('queryChannels needs an active connection. Call `connectUser` first.'));
 
       client = StreamChatClient(apiKey, chatApi: api, ws: ws);
       await client.connectUser(user, token);

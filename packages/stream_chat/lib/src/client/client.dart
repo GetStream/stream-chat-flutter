@@ -11,7 +11,6 @@ import 'package:stream_core/stream_core.dart'
         LocationCoordinate,
         SortedListExtensions,
         StreamApiException,
-        StreamClientException,
         StreamLogConfig,
         StreamLogger,
         SystemEnvironment,
@@ -388,10 +387,8 @@ class StreamChatClient {
     bool connectWebSocket = true,
   }) async {
     if (_ws.connectionCompleter?.isCompleted == false) {
-      throw const StreamClientException(
-        message: '''
-        User already getting connected, try calling `disconnectUser`
-        before trying to connect again''',
+      throw StateError(
+        'A user is already being connected. Call `disconnectUser` before connecting again.',
       );
     }
 
@@ -441,7 +438,7 @@ class StreamChatClient {
   Future<void> openPersistenceConnection(User user) async {
     final client = chatPersistenceClient;
     if (client == null) {
-      throw const StreamClientException(message: 'Chat persistence client is not set');
+      throw StateError('No chat persistence client is set on this client.');
     }
 
     if (client.isConnected) {
@@ -449,10 +446,9 @@ class StreamChatClient {
       // we don't need to connect again.
       if (client.userId == user.id) return;
 
-      throw const StreamClientException(
-        message: '''
-        Chat persistence client is already connected to a different user,
-        please close the connection before connecting a new one.''',
+      throw StateError(
+        'The chat persistence client is connected to a different user. '
+        'Close that connection before opening a new one.',
       );
     }
 
@@ -490,11 +486,11 @@ class StreamChatClient {
     logger.i(() => 'Opening web-socket connection for ${user.id}');
 
     if (wsConnectionStatus == ConnectionStatus.connecting) {
-      throw StreamClientException(message: 'Connection already in progress for ${user.id}');
+      throw StateError('A connection is already in progress for ${user.id}.');
     }
 
     if (wsConnectionStatus == ConnectionStatus.connected) {
-      throw StreamClientException(message: 'Connection already available for ${user.id}');
+      throw StateError('A connection is already available for ${user.id}.');
     }
 
     try {
@@ -872,10 +868,8 @@ class StreamChatClient {
         await _ws.connectionCompleter?.future;
       }
       if (wsConnectionStatus != ConnectionStatus.connected) {
-        throw const StreamClientException(
-          message: '''
-          You cannot use queryChannels without an active connection.
-          Please call `connectUser` to connect the client.''',
+        throw StateError(
+          'queryChannels needs an active connection. Call `connectUser` first.',
         );
       }
     }
