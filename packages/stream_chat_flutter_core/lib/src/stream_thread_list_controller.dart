@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_core/stream_core.dart' show SortedListExtensions;
 import 'paged_value_notifier.dart';
 import 'stream_thread_list_event_handler.dart';
 
