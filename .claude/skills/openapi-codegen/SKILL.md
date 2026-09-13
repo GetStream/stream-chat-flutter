@@ -146,18 +146,17 @@ emitted by `model.tpl` / `discriminator.tpl` plus a `WsEvent` re-export from `mo
 
 `stream_chat` depends on `retrofit`, `retrofit_generator`, `json_annotation ^4.12.0` and `stream_core`.
 
-`stream_core` is pinned to a **git commit** on the v11 branch, not a hosted constraint:
-`melos.yaml` names a SHA for both `stream_core` and `stream_core_flutter`, because the branch uses
-core APIs no published version carries. `melos bootstrap` syncs that into each package manifest,
-which is why you will see a `git:` block there, and it makes those packages unpublishable until a
-hosted constraint is restored. 0.5.0 still ships `StreamDateTimeConverter` and the sealed error
-layer, which is everything the generated output needs, so **no core release blocks the generated
-client**. Change the constraint in `melos.yaml` only, then `melos bootstrap` — never in a package
-manifest.
+`stream_core` is currently pinned to a **git commit**, not a hosted constraint: `melos.yaml`'s
+`command.bootstrap.dependencies` names a SHA for both `stream_core` and `stream_core_flutter`,
+because the v11 branch uses core APIs no published version carries. `melos bootstrap` syncs that
+into each package manifest, which is why you will see a `git:` block there. It returns to a hosted
+constraint before the v11 release — see `core-migration/DEFERRED.md`, which is the authority. 0.5.0 ships
+`StreamDateTimeConverter` and the sealed error layer, which is everything the generated output needs. **There is no
+release blocker for the generated client.** Change the constraint in `melos.yaml` only, then `melos bootstrap` — never in a package manifest. Note a git dep under `dependencies` makes the package unpublishable until it is restored.
 
-That is the dependency side only. The generator is still a prerequisite on its own: `client.tpl`
-emits `runSafely`, and regenerating before the template change above lands reintroduces the old
-error mapping no matter which core version resolves.
+That is the dependency side only. The generator is still a prerequisite on its own:
+`client.tpl` emits `runSafely`, and regenerating before the template change above lands
+reintroduces the old error mapping no matter which core version resolves.
 
 If core ever goes back to a git ref for cross-repo work, it has to be pinned in every package that pulls both
 `stream_chat` and `stream_core_flutter`, because pub refuses git-vs-hosted for one package and honors an override's

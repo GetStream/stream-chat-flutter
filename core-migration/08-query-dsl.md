@@ -785,9 +785,11 @@ list `.notEqual` under "**Supported operators:**", and there is no `notEqual` in
 
 ## Definition of done
 
-- [ ] `Filter.notEqual`, `Filter.notIn` and `Filter.nor` are `@Deprecated` — the first two
-      carrying Android's server-performance rationale, `nor` carrying the real reason (core does
-      not model it and it is not expressible in terms of what core does).
+- [x] `Filter.notEqual`, `Filter.notIn` and `Filter.nor` are **removed, not deprecated** —
+      reversed from the original plan. The backend withdrew `$ne` and `$nin` from the published
+      spec and leaves `$nor` accepted-but-unpublished, so deprecating would have kept three
+      operators alive that the API is retiring. A preset that still carries one decodes through
+      `Filter.raw`. A caller that relied on them excludes client-side or shows the rows.
 - [ ] `filter.dart`, `sort_order.dart`, our `comparable_field.dart` and
       `location_coordinates.dart` are deleted; `stream_chat.dart` exports core's via the
       allowlist.

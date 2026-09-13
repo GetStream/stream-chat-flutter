@@ -66,11 +66,11 @@ product would react to it the same way. Nothing outside chat reacts to `message.
 ## How to raise one
 
 Core is a separate repo with its own release cadence, so batch these: a row here is rarely urgent on
-its own, and each release chat has to wait for costs more than the change itself. What is worth
-pushing first is whatever this plan is actually blocked on, which is one thing: a release carrying
-everything `melos.yaml` pins the branch to. As of phase [08](08-query-dsl.md) that is
-`Filter.raw`, `normalizeStringForSort`, `debugCurrentPlatformOverride` and `sortedWith`. The rest
-of the ☐ rows are improvements, not blockers, and can ride a later release.
+its own, and each release chat has to wait for costs more than the change itself. Neither of the two this file used to
+name is live any more: `$nor` is dropped (chat removes it in the same PR that adopts core's
+`Filter`, because the API is withdrawing it), and `debugCurrentPlatformOverride` has landed on
+core's `main`. What matters now is a single release carrying everything the branch pins to —
+[DEFERRED.md](DEFERRED.md) holds that list. The retry table is the strongest of the rest.
 
 Cross-repo workflow is in [`STYLE_GUIDE.md`](../STYLE_GUIDE.md) (§Dependency management): a path
 dependency while both repos change together, back to a hosted constraint in `melos.yaml` before
