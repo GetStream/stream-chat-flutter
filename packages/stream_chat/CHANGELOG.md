@@ -20,7 +20,6 @@
 - `PollVoteSortField.answerText` is removed: the API rejects a sort on `answer_text`.
 - `ChannelSortField.cid` is added, matching the iOS and Android SDKs.
 - `search(sort:)` on the client and channel, and `StreamMessageSearchListController.sort`, are typed `List<MessageSearchSort>` rather than an untyped `SortOrder`. Searching is the only message query the API sorts, so the type is named for it.
-- Passing `sort: null` to a list controller now selects that controller's default sort rather than sending none.
 - `DraftSortField` has no `custom` field: the API rejects a custom sort field on drafts.
 - A sort names its model's field type, so `MemberSort.asc` takes a `MemberSortField` and a field from another model does not compile. `XSortField.custom(key)` reads a field from the model's extra data, for the four models whose queries accept one.
 - Added `ChannelSort.empty`, `MemberSort.empty` and so on alongside each default — an empty sort, for querying with the ordering the API applies on its own.
