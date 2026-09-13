@@ -237,10 +237,6 @@ tempting one-for-one swap silently stops handling most failures:
 Note this differs from the `Result.fold` example further down: `Failure.error` is typed `Object`, so
 a `switch` on it *does* need a default arm. Only the caught root is sealed.
 
-> **The one break you can ship without noticing.** `StreamChatNetworkError` is deprecated rather than deleted,
-> because unmigrated endpoints used to throw it. Nothing throws it any more, so
-> `on StreamChatNetworkError catch (e)` still **compiles** and simply stops matching — the failure passes straight
-> through. Search your code for it; the deprecation warning tells you where.
 > **The old error types are deleted, not deprecated.** `StreamChatError`, `StreamChatNetworkError`,
 > `StreamChatNetworkErrorType` and `StreamWebSocketError` are gone. This is deliberate: a deprecated
 > `StreamChatNetworkError` would leave `on StreamChatNetworkError catch (e)` compiling while silently matching
@@ -344,7 +340,7 @@ counterpart: `code` is now a `StreamErrorCode` (an extension type over `int`, wi
 ## Offline Cache
 
 If you use `stream_chat_persistence`, the local database is **rebuilt from empty** the first time your app runs
-on v11. The Drift schema version moves from `1035` to `1101`, and the upgrade strategy drops and recreates every
+on v11. The Drift schema version moves from `1035` to `1102`, and the upgrade strategy drops and recreates every
 table rather than migrating rows.
 
 Everything held on disk is discarded: channels, messages, members, reads, drafts, locations, polls, poll votes

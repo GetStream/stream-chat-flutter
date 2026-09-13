@@ -7,13 +7,13 @@
 
 > **Check what resolves before claiming core is missing something.** The first pass at this phase
 > named two upstream additions as prerequisites; both already existed. Where to look has since
-> moved: `melos.yaml` now lists `dependencyOverridePaths` for `stream_core`, so the sibling
-> checkout is what resolves, not `~/.pub-cache/.../stream_core-0.5.0`. Read the override target.
+> moved: `melos.yaml` pins `stream_core` to a git commit, so that commit is what resolves, not
+> `~/.pub-cache/.../stream_core-0.5.0`. Read the pinned ref.
 >
-> **Merging is gated on a core release.** `debugCurrentPlatformOverride` is on core's `main` and
-> in its unreleased section, while `melos.yaml` still publishes against `stream_core: ^0.5.0`.
-> The work here is done and tested against the override; it cannot ship until core cuts a
-> version carrying it.
+> **This phase has landed.** It was gated on a core release, because
+> `debugCurrentPlatformOverride` is on core's `main` and not in 0.5.0. That was resolved by pinning
+> rather than waiting — see [DEFERRED.md](DEFERRED.md) for what restoring a hosted constraint
+> still requires before the v11 release.
 
 ## Scope
 
@@ -21,9 +21,9 @@
 | --- | --- | --- |
 | `lib/src/system_environment.dart` (57) | `stream_core` `api/system_environment.dart` | **done** |
 | `lib/src/core/http/system_environment_manager.dart` (111) | `stream_core` `api/system_environment_manager.dart` | **done** |
-| `lib/src/core/platform_detector/` — `platform_detector.dart` (~97) + `_stub` / `_web` / `_io` | `stream_core` `platform/current_platform.dart` + `platform/detector/` | **blocked on a `stream_core` release** |
+| `lib/src/core/platform_detector/` — `platform_detector.dart` (~97) + `_stub` / `_web` / `_io` | `stream_core` `platform/current_platform.dart` + `platform/detector/` | **done** |
 
-### Platform detector — blocked on a `stream_core` release
+### Platform detector — done, after the pin replaced the wait
 
 Both packages define `CurrentPlatform` **and** `PlatformType`, so `stream_chat.dart` must stop
 exporting ours in the same PR — there is no coexistence.

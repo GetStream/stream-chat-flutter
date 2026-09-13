@@ -10,10 +10,10 @@ A row leaves this file when it lands, not when it is decided.
 ### ⚠️ The branch does not compile against a released `stream_core`
 
 **The single thing gating everything else, and it is easy to miss because the tree is green.**
-`melos.yaml` declares `stream_core: ^0.5.0`, but `dependencyOverridePaths` resolves it to the
-sibling checkout at `../stream-core-flutter/packages/stream_core` — whose pubspec *also* says
-`0.5.0` while containing APIs that published 0.5.0 does not. So `analyze` and the test suites pass
-locally against code no consumer can get.
+`melos.yaml` pins both core packages to a git commit that no published version contains, so
+`analyze` and the test suites pass against code a consumer cannot resolve from pub.dev. (An earlier
+form of this used `dependencyOverridePaths` pointing at a sibling checkout; that only worked on a
+machine that had one, which is why CI went red and the pin replaced it.)
 
 Checked against `~/.pub-cache/hosted/pub.dev/stream_core-0.5.0`, chat already depends on five
 things missing from it:
