@@ -211,8 +211,7 @@ class MemberSortField extends SortField<Member> {
 
   /// Creates a field the SDK does not model, read from [Member.extraData].
   ///
-  /// Only declared for the models whose queries accept a custom sort field,
-  /// and slower than a field this class declares.
+  /// Declared only where the API accepts a custom sort field.
   factory MemberSortField.custom(String remote) {
     return MemberSortField(remote, (it) => it.extraData[remote]);
   }

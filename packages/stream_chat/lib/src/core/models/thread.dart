@@ -251,7 +251,9 @@ class ThreadSort extends Sort<Thread> {
   }) : super.desc(nullOrdering: nullOrdering ?? _orderingFor(field, .nullsFirst));
 
   // A thread with no replies yet belongs at the end whichever way the list is
-  // sorted, the same way a channel with no messages does.
+  // sorted. Unlike the channel case this is not API parity — the API's own
+  // last-message date is never absent — it is how a local sort should place a
+  // thread the SDK has no date for.
   static final _nullsLastFields = {ThreadSortField.lastMessageAt.remote};
 
   // Keyed on the remote name rather than the field instance, so a field built
@@ -266,11 +268,11 @@ class ThreadSort extends Sort<Thread> {
   /// Surfaces threads with unread replies first, then the most recently active.
   /// The parent message id breaks ties, so a page boundary is reproducible.
   ///
-  /// Declared to sort a thread list locally by the same ordering, minus the
-  /// unread term: a [Thread] does not carry the current user's unread state, so
-  /// [ThreadSortField.hasUnread] reads nothing and a local sort falls through to
-  /// the last-message date. Passing it to a query is redundant — it asks for the
-  /// ordering a query with no sort already has, at more cost.
+  /// Sorting a list locally by this reproduces every term but the unread one: a
+  /// [Thread] does not carry the current user's unread state, so
+  /// [ThreadSortField.hasUnread] contributes nothing and the last-message date
+  /// leads. Passing it to a query asks for the ordering an unsorted query
+  /// already has.
   static final List<ThreadSort> defaultSort = List.unmodifiable([
     ThreadSort.desc(ThreadSortField.hasUnread),
     ThreadSort.desc(ThreadSortField.lastMessageAt),

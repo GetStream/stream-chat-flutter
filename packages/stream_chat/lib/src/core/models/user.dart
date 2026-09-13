@@ -248,8 +248,7 @@ class UserSortField extends SortField<User> {
 
   /// Creates a field the SDK does not model, read from [User.extraData].
   ///
-  /// Only declared for the models whose queries accept a custom sort field,
-  /// and slower than a field this class declares.
+  /// Declared only where the API accepts a custom sort field.
   factory UserSortField.custom(String remote) {
     return UserSortField(remote, (it) => it.extraData[remote]);
   }

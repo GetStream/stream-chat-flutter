@@ -205,8 +205,7 @@ class ChannelSortField extends SortField<ChannelState> {
 
   /// Creates a field the SDK does not model, read from [ChannelModel.extraData].
   ///
-  /// Only declared for the models whose queries accept a custom sort field,
-  /// and slower than a field this class declares.
+  /// Declared only where the API accepts a custom sort field.
   ///
   /// String values are compared as they are, without the case and diacritic
   /// folding a declared name field applies.
