@@ -1,7 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_core/stream_core.dart'
-    show Filter, FilterField, NullOrdering, Sort, SortDirection, SortField, Standard;
-import '../util/string_sort_normalizer.dart';
+    show Filter, FilterField, NullOrdering, Sort, SortDirection, SortField, Standard, normalizeStringForSort;
 import 'channel_model.dart';
 import 'draft.dart';
 import 'location.dart';

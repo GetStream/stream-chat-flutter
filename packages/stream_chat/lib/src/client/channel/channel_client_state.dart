@@ -1368,7 +1368,11 @@ class ChannelClientState {
       membership: updatedState.membership,
       read: newReads,
       draft: updatedState.draft,
-      pinnedMessages: updatedState.pinnedMessages,
+      // Sorted on the way in because every later write goes through
+      // `_mergePinnedMessagesIntoExisting`, which merges by `createdAt` and
+      // requires a receiver already in that order. The API returns these by
+      // `pinned_at` descending, so the payload order is not it.
+      pinnedMessages: updatedState.pinnedMessages?.sorted(_sortByCreatedAt),
       pendingMessages: updatedState.pendingMessages,
       pushPreferences: updatedState.pushPreferences,
       activeLiveLocations: updatedState.activeLiveLocations,
