@@ -6,6 +6,10 @@
 - The sort argument on every list controller is typed `List<ChannelSort>`, `List<MemberSort>` and so on, rather than `SortOrder<T>`. On the controllers that have a default, the `sort` property is non-nullable: leaving it unset selects that default, and `ChannelSort.empty` / `MemberSort.empty` / … query with the ordering the API applies on its own.
 - `defaultChannelListSort`, `defaultMemberListSort`, `defaultUserListSort`, `defaultDraftListSort`, `defaultMessageReminderListSort` and `defaultPollVoteListSort` are removed. Use `ChannelSort.defaultSort`, `MemberSort.defaultSort` and so on from `stream_chat`. Leaving a controller's sort unset still applies the same ordering.
 
+🐞 Fixed
+
+- A list controller sorted each loaded page with an unstable sort, so rows the sort called equal — members added in the same batch, say — were reordered every time a page was appended, once the list grew past 32 items. They now keep the order they arrived in.
+
 ## 10.4.0
 
 🔄 Changed
