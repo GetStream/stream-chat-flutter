@@ -657,8 +657,10 @@ void main() {
 
     test('an empty sort leaves a page in the order it arrived in', () async {
       // The default sort is newest-first, so an oldest-first page comes back
-      // reordered unless the empty sort is left alone.
-      final oldestFirst = generateDrafts(count: 5).reversed.toList();
+      // reordered unless the empty sort is left alone. Over 32 items, because
+      // at or below that `List.sort` is an insertion sort, which is stable and
+      // would preserve the order whether the empty sort is skipped or not.
+      final oldestFirst = generateDrafts(count: 50).reversed.toList();
 
       when(
         () => client.queryDrafts(
