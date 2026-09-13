@@ -159,13 +159,8 @@ class ChannelSort extends Sort<ChannelState> {
     };
   }
 
-  // The direction the API wrote. Anything other than descending's value is
-  // ascending, which is how the API reads it — so a direction it did not
-  // write, or none at all, is ascending rather than an error.
-  //
-  // Stays here rather than on `SortDirection`: json_serializable decodes an
-  // enum through its generated value map, never a `fromJson` static, so one
-  // upstream would be reachable only by hand.
+  // Anything other than descending's value reads as ascending, which is how
+  // the API reads it — so an absent or unknown direction is not an error.
   static SortDirection _directionFromJson(Object? value) {
     if (value == SortDirection.desc.value) return SortDirection.desc;
     return SortDirection.asc;
@@ -178,17 +173,15 @@ class ChannelSort extends Sort<ChannelState> {
     ChannelSortField.lastMessageAt.remote,
   };
 
-  // Keyed on the remote name rather than the field instance, so a field built
-  // by hand for a name the API pins is ordered the same way ours is.
+  // Keyed on the remote name, so a field built by hand for a pinned name is
+  // ordered the same way.
   static NullOrdering _orderingFor(ChannelSortField field, NullOrdering fallback) {
     if (_nullsLastFields.contains(field.remote)) return NullOrdering.nullsLast;
     return fallback;
   }
 
-  /// An empty sort, which leaves the ordering to the API.
-  ///
-  /// Pass this where a sort is expected but none is wanted: a query carries
-  /// no sort term, and a channel list is left in the order it arrived in.
+  /// An empty sort: the query carries no sort term, and a list keeps the
+  /// order it arrived in.
   static const List<ChannelSort> empty = [];
 
   /// The ordering the API applies to a channel query when none is given.
@@ -202,11 +195,10 @@ class ChannelSort extends Sort<ChannelState> {
 
 /// Represents a field that channel queries can be sorted on.
 class ChannelSortField extends SortField<ChannelState> {
-  /// Creates a channel sort field named [remote] on the wire, reading its
-  /// value off an instance with `localValue`.
+  /// Creates a field named [remote] on the wire, reading its value off an
+  /// instance with `localValue`.
   ///
-  /// Prefer the fields this class declares — they are the ones the API accepts.
-  /// This is for a field the SDK has not modelled yet.
+  /// For a name the SDK has not modelled; prefer the fields declared here.
   ChannelSortField(super.remote, super.localValue);
 
   /// Creates a field the SDK does not model, read from [ChannelModel.extraData].
@@ -294,7 +286,6 @@ class ChannelSortField extends SortField<ChannelState> {
     (it) => it.membership?.pinnedAt,
   );
 
-  // Every field declared above.
   static final _fields = [
     lastUpdated,
     cid,
@@ -308,16 +299,13 @@ class ChannelSortField extends SortField<ChannelState> {
     pinnedAt,
   ];
 
-  // Keyed off the fields themselves, so a remote name is written once.
   static final _byRemote = {for (final field in _fields) field.remote: field};
 
   /// The field [remote] names, or a [ChannelSortField.custom] one when the SDK
   /// does not model it.
   ///
-  /// A name the API has added and this SDK has not caught up with still sorts
-  /// correctly. A name this SDK models as a channel property but does not
-  /// declare as a sort field does not: the query carries it, but a list sorted
-  /// locally ignores that term.
+  /// An undeclared name still sorts the query correctly, but reads nothing
+  /// locally, so a list sorted on it keeps the order it arrived in.
   static ChannelSortField fromRemote(String remote) {
     return _byRemote[remote] ?? ChannelSortField.custom(remote);
   }

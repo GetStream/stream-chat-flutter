@@ -250,23 +250,19 @@ class ThreadSort extends Sort<Thread> {
     NullOrdering? nullOrdering,
   }) : super.desc(nullOrdering: nullOrdering ?? _orderingFor(field, .nullsFirst));
 
-  // A thread with no replies yet belongs at the end whichever way the list is
-  // sorted. Unlike the channel case this is not API parity — the API's own
-  // last-message date is never absent — it is how a local sort should place a
-  // thread the SDK has no date for.
+  // A thread the SDK has no last-message date for belongs at the end whichever
+  // way the list is sorted. Not API parity: the API's own date is never absent.
   static final _nullsLastFields = {ThreadSortField.lastMessageAt.remote};
 
-  // Keyed on the remote name rather than the field instance, so a field built
-  // by hand for a name the API pins is ordered the same way ours is.
+  // Keyed on the remote name, so a field built by hand for a pinned name is
+  // ordered the same way.
   static NullOrdering _orderingFor(ThreadSortField field, NullOrdering fallback) {
     if (_nullsLastFields.contains(field.remote)) return NullOrdering.nullsLast;
     return fallback;
   }
 
-  /// An empty sort, which leaves the ordering to the API.
-  ///
-  /// Pass this where a sort is expected but none is wanted: a query carries
-  /// no sort term, and a thread list is left in the order it arrived in.
+  /// An empty sort: the query carries no sort term, and a list keeps the
+  /// order it arrived in.
   static const List<ThreadSort> empty = [];
 
   /// The ordering a thread query applies when it is given no sort at all.
@@ -288,11 +284,10 @@ class ThreadSort extends Sort<Thread> {
 
 /// Represents a field that thread queries can be sorted on.
 class ThreadSortField extends SortField<Thread> {
-  /// Creates a thread sort field named [remote] on the wire, reading its
-  /// value off an instance with `localValue`.
+  /// Creates a field named [remote] on the wire, reading its value off an
+  /// instance with `localValue`.
   ///
-  /// Prefer the fields this class declares — they are the ones the API accepts.
-  /// This is for a field the SDK has not modelled yet.
+  /// For a name the SDK has not modelled; prefer the fields declared here.
   ThreadSortField(super.remote, super.localValue);
 
   /// Sorts threads by their last message date.

@@ -71,8 +71,8 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
   ///
   /// Direction can be ascending or descending.
   ///
-  /// Defaults to [PollVoteSort.defaultSort]; pass [PollVoteSort.empty] to leave the
-  /// ordering to the API.
+  /// Defaults to [PollVoteSort.defaultSort]; pass [PollVoteSort.empty] to leave the ordering
+  /// to the API.
   final List<PollVoteSort> sort;
   late List<PollVoteSort> _activeSort = sort;
 
@@ -96,9 +96,6 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new sort.
-  ///
-  /// Pass [PollVoteSort.defaultSort] to restore the default, or
-  /// [PollVoteSort.empty] to leave the ordering to the API.
   set sort(List<PollVoteSort> value) => _activeSort = value;
 
   @override
@@ -108,7 +105,7 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
       final pollVoteSort => newValue.maybeMap(
         orElse: () => newValue,
         (success) => success.copyWith(
-          items: success.items.sorted(pollVoteSort.compare),
+          items: success.items.sortedByCompare((it) => it, pollVoteSort.compare),
         ),
       ),
     };

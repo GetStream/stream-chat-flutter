@@ -148,9 +148,6 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   @override
   set value(PagedValue<int, Channel> newValue) {
     super.value = switch (_resolvedChannelStateSort) {
-      // An empty sort compares every pair as equal, which is not the same as
-      // not sorting: `List.sort` is an unstable quicksort above 32 items, so
-      // running it would permute the page the query just ordered.
       [] => newValue,
       final channelSort => newValue.maybeMap(
         orElse: () => newValue,

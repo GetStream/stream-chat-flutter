@@ -131,7 +131,7 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
       final threadSort => newValue.maybeMap(
         orElse: () => newValue,
         (success) => success.copyWith(
-          items: success.items.sorted(threadSort.compare),
+          items: success.items.sortedByCompare((it) => it, threadSort.compare),
         ),
       ),
     };

@@ -357,9 +357,8 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     PaginationParams? paginationParams, {
     int? messageLimit,
   }) async {
-    // A caller that named no sort gets the ordering the API would have
-    // applied: a cached read has no server to defer to, and the rows arrive in
-    // whatever order the cid lookup returned.
+    // A cached read has no server to defer to, and the rows arrive in whatever
+    // order the cid lookup returned.
     final sort = switch (channelStateSort) {
       null || [] => ChannelSort.defaultSort,
       final channelStateSort => channelStateSort,

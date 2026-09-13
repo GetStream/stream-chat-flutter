@@ -192,10 +192,8 @@ class MemberSort extends Sort<Member> {
     super.nullOrdering,
   }) : super.desc();
 
-  /// An empty sort, which leaves the ordering to the API.
-  ///
-  /// Pass this where a sort is expected but none is wanted: a query carries
-  /// no sort term, and a member list is left in the order it arrived in.
+  /// An empty sort: the query carries no sort term, and a list keeps the
+  /// order it arrived in.
   static const List<MemberSort> empty = [];
 
   /// The ordering the API applies to a member query when none is given.
@@ -208,11 +206,10 @@ class MemberSort extends Sort<Member> {
 
 /// Represents a field that member queries can be sorted on.
 class MemberSortField extends SortField<Member> {
-  /// Creates a member sort field named [remote] on the wire, reading its
-  /// value off an instance with `localValue`.
+  /// Creates a field named [remote] on the wire, reading its value off an
+  /// instance with `localValue`.
   ///
-  /// Prefer the fields this class declares — they are the ones the API accepts.
-  /// This is for a field the SDK has not modelled yet.
+  /// For a name the SDK has not modelled; prefer the fields declared here.
   MemberSortField(super.remote, super.localValue);
 
   /// Creates a field the SDK does not model, read from [Member.extraData].

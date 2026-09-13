@@ -98,11 +98,10 @@ class BannedUserSort extends Sort<BannedUser> {
 
 /// Represents a field that banned-user queries can be sorted on.
 class BannedUserSortField extends SortField<BannedUser> {
-  /// Creates a banned-user sort field named [remote] on the wire, reading its
-  /// value off an instance with `localValue`.
+  /// Creates a field named [remote] on the wire, reading its value off an
+  /// instance with `localValue`.
   ///
-  /// Prefer the fields this class declares — they are the ones the API accepts.
-  /// This is for a field the SDK has not modelled yet.
+  /// For a name the SDK has not modelled; prefer the fields declared here.
   BannedUserSortField(super.remote, super.localValue);
 
   /// Sorts banned users by their creation date.

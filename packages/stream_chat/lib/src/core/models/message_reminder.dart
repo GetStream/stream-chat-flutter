@@ -156,10 +156,8 @@ class MessageReminderSort extends Sort<MessageReminder> {
     super.nullOrdering,
   }) : super.desc();
 
-  /// An empty sort, which leaves the ordering to the API.
-  ///
-  /// Pass this where a sort is expected but none is wanted: a query carries
-  /// no sort term, and a reminder list is left in the order it arrived in.
+  /// An empty sort: the query carries no sort term, and a list keeps the
+  /// order it arrived in.
   static const List<MessageReminderSort> empty = [];
 
   /// The ordering the API applies to a reminder query when none is given.
@@ -172,11 +170,10 @@ class MessageReminderSort extends Sort<MessageReminder> {
 
 /// Represents a field that reminder queries can be sorted on.
 class MessageReminderSortField extends SortField<MessageReminder> {
-  /// Creates a reminder sort field named [remote] on the wire, reading its
-  /// value off an instance with `localValue`.
+  /// Creates a field named [remote] on the wire, reading its value off an
+  /// instance with `localValue`.
   ///
-  /// Prefer the fields this class declares — they are the ones the API accepts.
-  /// This is for a field the SDK has not modelled yet.
+  /// For a name the SDK has not modelled; prefer the fields declared here.
   MessageReminderSortField(super.remote, super.localValue);
 
   /// Sorts reminders by the channel CID.

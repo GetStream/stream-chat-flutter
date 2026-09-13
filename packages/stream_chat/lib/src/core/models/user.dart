@@ -229,10 +229,8 @@ class UserSort extends Sort<User> {
     super.nullOrdering,
   }) : super.desc();
 
-  /// An empty sort, which leaves the ordering to the API.
-  ///
-  /// Pass this where a sort is expected but none is wanted: a query carries
-  /// no sort term, and a user list is left in the order it arrived in.
+  /// An empty sort: the query carries no sort term, and a list keeps the
+  /// order it arrived in.
   static const List<UserSort> empty = [];
 
   /// The ordering the API applies to a user query when none is given.
@@ -245,11 +243,10 @@ class UserSort extends Sort<User> {
 
 /// Represents a field that user queries can be sorted on.
 class UserSortField extends SortField<User> {
-  /// Creates a user sort field named [remote] on the wire, reading its
-  /// value off an instance with `localValue`.
+  /// Creates a field named [remote] on the wire, reading its value off an
+  /// instance with `localValue`.
   ///
-  /// Prefer the fields this class declares — they are the ones the API accepts.
-  /// This is for a field the SDK has not modelled yet.
+  /// For a name the SDK has not modelled; prefer the fields declared here.
   UserSortField(super.remote, super.localValue);
 
   /// Creates a field the SDK does not model, read from [User.extraData].

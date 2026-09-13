@@ -97,7 +97,7 @@ class StreamReactionListController extends PagedValueNotifier<String?, Reaction>
       final reactionSort => newValue.maybeMap(
         orElse: () => newValue,
         (success) => success.copyWith(
-          items: success.items.sorted(reactionSort.compare),
+          items: success.items.sortedByCompare((it) => it, reactionSort.compare),
         ),
       ),
     };

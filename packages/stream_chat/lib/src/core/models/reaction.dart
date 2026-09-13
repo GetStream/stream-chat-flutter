@@ -150,10 +150,8 @@ class ReactionSort extends Sort<Reaction> {
     super.nullOrdering,
   }) : super.desc();
 
-  /// An empty sort, which leaves the ordering to the API.
-  ///
-  /// Pass this where a sort is expected but none is wanted: a query carries
-  /// no sort term, and a reaction list is left in the order it arrived in.
+  /// An empty sort: the query carries no sort term, and a list keeps the
+  /// order it arrived in.
   static const List<ReactionSort> empty = [];
 
   /// The ordering the API applies to a reaction query when none is given.
@@ -166,11 +164,10 @@ class ReactionSort extends Sort<Reaction> {
 
 /// Represents a field that reaction queries can be sorted on.
 class ReactionSortField extends SortField<Reaction> {
-  /// Creates a reaction sort field named [remote] on the wire, reading its
-  /// value off an instance with `localValue`.
+  /// Creates a field named [remote] on the wire, reading its value off an
+  /// instance with `localValue`.
   ///
-  /// Prefer the fields this class declares — they are the ones the API accepts.
-  /// This is for a field the SDK has not modelled yet.
+  /// For a name the SDK has not modelled; prefer the fields declared here.
   ReactionSortField(super.remote, super.localValue);
 
   /// Sorts reactions by their creation date.

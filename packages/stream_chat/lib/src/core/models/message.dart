@@ -748,11 +748,10 @@ class MessageSearchSort extends Sort<Message> {
 
 /// Represents a field that message queries can be sorted on.
 class MessageSearchSortField extends SortField<Message> {
-  /// Creates a message sort field named [remote] on the wire, reading its
-  /// value off an instance with `localValue`.
+  /// Creates a field named [remote] on the wire, reading its value off an
+  /// instance with `localValue`.
   ///
-  /// Prefer the fields this class declares — they are the ones the API accepts.
-  /// This is for a field the SDK has not modelled yet.
+  /// For a name the SDK has not modelled; prefer the fields declared here.
   MessageSearchSortField(super.remote, super.localValue);
 
   /// Creates a field the SDK does not model, read from [Message.extraData].
@@ -817,12 +816,9 @@ class MessageSearchSortField extends SortField<Message> {
 
   /// Sorts search results by how well they match the query.
   ///
-  /// Only meaningful for a message search that carries a text filter — a
-  /// `query`, or a message filter using `$autocomplete` / `$q`. A search
-  /// without one drops this sort rather than failing.
-  ///
-  /// Not carried on a [Message], so re-sorting a page locally leaves it in the
-  /// order it arrived in.
+  /// Only meaningful for a search carrying a text filter; one without it drops
+  /// this sort rather than failing. Not carried on a [Message], so a page
+  /// re-sorted locally keeps the order it arrived in.
   static final relevance = MessageSearchSortField(
     'relevance',
     (_) => null,

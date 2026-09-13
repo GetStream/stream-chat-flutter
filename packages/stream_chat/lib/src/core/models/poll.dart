@@ -289,10 +289,8 @@ class PollSort extends Sort<Poll> {
     super.nullOrdering,
   }) : super.desc();
 
-  /// An empty sort, which leaves the ordering to the API.
-  ///
-  /// Pass this where a sort is expected but none is wanted: a query carries
-  /// no sort term, and a poll list is left in the order it arrived in.
+  /// An empty sort: the query carries no sort term, and a list keeps the
+  /// order it arrived in.
   static const List<PollSort> empty = [];
 
   /// The ordering the API applies to a poll query when none is given.
@@ -305,11 +303,10 @@ class PollSort extends Sort<Poll> {
 
 /// Represents a field that poll queries can be sorted on.
 class PollSortField extends SortField<Poll> {
-  /// Creates a poll sort field named [remote] on the wire, reading its
-  /// value off an instance with `localValue`.
+  /// Creates a field named [remote] on the wire, reading its value off an
+  /// instance with `localValue`.
   ///
-  /// Prefer the fields this class declares — they are the ones the API accepts.
-  /// This is for a field the SDK has not modelled yet.
+  /// For a name the SDK has not modelled; prefer the fields declared here.
   PollSortField(super.remote, super.localValue);
 
   /// Sorts polls by their unique ID.
