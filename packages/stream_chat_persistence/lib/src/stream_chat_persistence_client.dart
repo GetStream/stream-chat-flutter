@@ -357,21 +357,27 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     PaginationParams? paginationParams, {
     int? messageLimit,
   }) async {
+    // A caller that named no sort gets the ordering the API would have
+    // applied: a cached read has no server to defer to, and the rows arrive in
+    // whatever order the cid lookup returned.
+    final sort = switch (channelStateSort) {
+      null || [] => ChannelSort.defaultSort,
+      final channelStateSort => channelStateSort,
+    };
+
     // 1) Wrap each model in a sort envelope. No state loaded yet.
     var envelopes = channelModels.map((m) => ChannelState(channel: m)).toList(growable: false);
 
     // 2) If sort uses `pinnedAt`, preload the current user's memberships in
     //    one batched query and attach them to the envelopes.
     final clientUserId = userId;
-    if (clientUserId != null && _sortRequiresMembership(channelStateSort)) {
+    if (clientUserId != null && _sortRequiresMembership(sort)) {
       envelopes = await _attachMemberships(envelopes, clientUserId);
     }
 
     // 3) Sort using the comparator — on envelopes instead of fully-hydrated
     //    states.
-    if (channelStateSort != null && channelStateSort.isNotEmpty) {
-      envelopes.sort(channelStateSort.compare);
-    }
+    envelopes.sort(sort.compare);
 
     // 4) Slice the page.
     final total = envelopes.length;

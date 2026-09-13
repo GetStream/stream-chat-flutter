@@ -713,6 +713,39 @@ void main() {
           );
         }
       });
+
+      test('standard mode orders a cached page by the default sort when given none', () async {
+        // Cached rows arrive in whatever order the cid lookup returned, so the
+        // oldest is first here. The default sort is newest-first, which makes
+        // `oldest` the only cid a one-channel page should hydrate if it is
+        // applied, and the wrong one if it is not.
+        final baseDate = DateTime.utc(2025);
+        final oldest = ChannelModel(cid: 'messaging:oldest', lastMessageAt: baseDate);
+        final newest = ChannelModel(
+          cid: 'messaging:newest',
+          lastMessageAt: baseDate.add(const Duration(days: 1)),
+        );
+
+        when(() => mockDatabase.channelQueryDao.getChannels()).thenAnswer((_) async => [oldest, newest]);
+
+        const pagedCid = 'messaging:newest';
+        const messagePagination = PaginationParams(limit: 25);
+        when(() => mockDatabase.channelDao.getChannelByCid(pagedCid)).thenAnswer((_) async => newest);
+        when(() => mockDatabase.memberDao.getMembersByCid(pagedCid)).thenAnswer((_) async => <Member>[]);
+        when(() => mockDatabase.readDao.getReadsByCid(pagedCid)).thenAnswer((_) async => <Read>[]);
+        when(
+          () => mockDatabase.messageDao.getMessagesByCid(pagedCid, messagePagination: messagePagination),
+        ).thenAnswer((_) async => <Message>[]);
+        when(() => mockDatabase.pinnedMessageDao.getMessagesByCid(pagedCid)).thenAnswer((_) async => <Message>[]);
+        when(() => mockDatabase.draftMessageDao.getDraftMessageByCid(pagedCid)).thenAnswer((_) async => null);
+
+        final result = await client.queryChannelStates(
+          paginationParams: const PaginationParams(limit: 1),
+        );
+
+        expect(result.channels.single.channel!.cid, pagedCid);
+      });
+
     });
 
     group('saveChannelQueries', () {

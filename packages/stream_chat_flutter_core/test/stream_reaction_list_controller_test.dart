@@ -436,6 +436,36 @@ void main() {
   });
 
   group('Filtering and sorting', () {
+    test('an empty sort leaves a page in the order it arrived in', () async {
+      // Reactions arrive newest-first, so an oldest-first page comes back
+      // reordered unless the empty sort is left alone.
+      final oldestFirst = generateReactions(count: 5).reversed.toList();
+
+      when(
+        () => client.queryReactions(
+          any(),
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer(
+        (_) async => QueryReactionsResponse()
+          ..reactions = oldestFirst
+          ..next = null,
+      );
+
+      final controller = StreamReactionListController(
+        client: client,
+        messageId: 'message_123',
+        sort: ReactionSort.empty,
+      );
+
+      await controller.doInitialLoad();
+      await pumpEventQueue();
+
+      expect(controller.value.asSuccess.items, equals(oldestFirst));
+    });
+
     test('refresh resets filter and sort to initial values', () async {
       final reactions = generateReactions();
       final initialFilter = Filter.equal('type', 'like');
