@@ -300,7 +300,7 @@ void main() {
       });
 
       test(
-        'should add message to retry queue on a retriable failure with skipPush: true, skipEnrichUrl: false',
+        'should mark the message failed when the server refuses it with skipPush: true, skipEnrichUrl: false',
         () async {
           final message = Message(
             id: 'test-message-id',
@@ -356,7 +356,7 @@ void main() {
       );
 
       test(
-        'should add message to retry queue on a retriable failure with skipPush: true, skipEnrichUrl: true',
+        'should mark the message failed when the server refuses it with skipPush: true, skipEnrichUrl: true',
         () async {
           final message = Message(
             id: 'test-message-id-2',
@@ -414,7 +414,7 @@ void main() {
       );
 
       test(
-        'should add message to retry queue on a retriable failure with skipPush: false, skipEnrichUrl: true',
+        'should mark the message failed when the server refuses it with skipPush: false, skipEnrichUrl: true',
         () async {
           final message = Message(
             id: 'test-message-id-3',
@@ -470,7 +470,7 @@ void main() {
       );
 
       test(
-        'should add message to retry queue on a retriable failure with skipPush: false, skipEnrichUrl: false',
+        'should mark the message failed when the server refuses it with skipPush: false, skipEnrichUrl: false',
         () async {
           final message = Message(
             id: 'test-message-id-4',
@@ -1679,7 +1679,7 @@ void main() {
       });
 
       test(
-        'should add message to retry queue when a retriable failure occurs with skipPush: false, skipEnrichUrl: true',
+        'should mark the message failed and report the failure as retriable with skipPush: false, skipEnrichUrl: true',
         () async {
           final message = Message(
             id: 'test-message-id-retry-1',
@@ -1733,7 +1733,7 @@ void main() {
       );
 
       test(
-        'should add message to retry queue when a retriable failure occurs with skipPush: true, skipEnrichUrl: false',
+        'should mark the message failed and report the failure as retriable with skipPush: true, skipEnrichUrl: false',
         () async {
           final message = Message(
             id: 'test-message-id-retry-2',
@@ -2059,7 +2059,7 @@ void main() {
       });
 
       test(
-        'should add message to retry queue when a retriable failure occurs with skipEnrichUrl: true',
+        'should mark the message failed and report the failure as retriable with skipEnrichUrl: true',
         () async {
           final message = Message(
             id: 'test-message-id-retry-partial-1',
@@ -2131,7 +2131,7 @@ void main() {
       );
 
       test(
-        'should add message to retry queue when a retriable failure occurs with skipEnrichUrl: false',
+        'should mark the message failed and report the failure as retriable with skipEnrichUrl: false',
         () async {
           final message = Message(
             id: 'test-message-id-retry-partial-2',

@@ -6,20 +6,25 @@ import 'package:stream_core/stream_core.dart'
         StreamAuthenticationException,
         StreamClientException,
         StreamErrorCode,
+        StreamException,
         StreamNetworkException;
 import 'package:test/test.dart';
 
 void main() {
   group('StreamChatException', () {
-    test('aliases every kind of Stream failure', () {
-      const failures = <StreamChatException>[
+    test('is the same type as StreamException, so either name catches the same failures', () {
+      expect(StreamChatException, StreamException);
+    });
+
+    test('catches every kind of Stream failure', () {
+      const failures = [
         StreamApiException(message: 'refused', statusCode: 400),
         StreamNetworkException(message: 'offline'),
         StreamAuthenticationException(message: 'no token'),
         StreamClientException(message: 'our bug'),
       ];
 
-      expect(failures, hasLength(4));
+      expect(failures, everyElement(isA<StreamChatException>()));
     });
   });
 
