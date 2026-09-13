@@ -196,8 +196,9 @@ packages**, not one. `stream_chat_persistence` has zero and is untouched.
 
 All of it is retyped to `StreamException` here. The controllers already wrapped non-chat errors as
 `StreamChatError(error.toString())`, so those sites become `on StreamChatException catch` with the
-wrap rewritten as `StreamClientException(message: error.toString(), cause: error)` — the original
-throwable survives as `cause`, which the old wrap discarded.
+wrap rewritten as `StreamClientException(message: 'Failed to load channels', cause: error)` — the
+message names the load, and the original throwable survives as `cause`, which the old wrap
+discarded by stringifying it.
 
 ## Risks
 
