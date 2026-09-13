@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
+import 'package:stream_core/stream_core.dart' show SortedListExtensions;
 import 'paged_value_notifier.dart';
 import 'stream_channel_list_event_handler.dart';
 
@@ -150,13 +150,11 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     super.value = newValue.maybeMap(
       orElse: () => newValue,
       (success) => success.copyWith(
-        items: success.items.sortedByCompare(
-          // A channel loses its state when it is disposed — e.g. a client
-          // disconnect/logout or a channel-removal event racing an in-flight
-          // query — so the sort places it by the null ordering of its leading
-          // field rather than null-asserting on it.
-          (it) => it.state?.channelState,
-          _resolvedChannelStateSort.compare,
+        items: success.items.sortedWith(
+          (a, b) => _resolvedChannelStateSort.compare(
+            a.state?.channelState,
+            b.state?.channelState,
+          ),
         ),
       ),
     );

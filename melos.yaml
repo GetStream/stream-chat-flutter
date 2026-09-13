@@ -104,8 +104,21 @@ command:
       stream_chat_persistence: ^10.4.0
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
-      stream_core: ^0.5.0
-      stream_core_flutter: ^0.5.1
+      # Both core packages come from one pinned commit while v11 lands
+      # alongside stream-core-flutter. Pinned to a SHA rather than a branch:
+      # `stream_core_flutter` reaches `stream_core` through the same clone, and
+      # pub treats a branch ref and a resolved SHA as different sources, so a
+      # branch name fails to solve. Restore hosted constraints before release.
+      stream_core:
+        git:
+          url: https://github.com/GetStream/stream-core-flutter.git
+          path: packages/stream_core
+          ref: 6648852a6d72d4cded93aa8c4d285576a9c8a194
+      stream_core_flutter:
+        git:
+          url: https://github.com/GetStream/stream-core-flutter.git
+          path: packages/stream_core_flutter
+          ref: 6648852a6d72d4cded93aa8c4d285576a9c8a194
       stream_thumbnail: ^0.1.0
       synchronized: ^3.4.0
       thumblr: ^0.0.4

@@ -3,8 +3,8 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_core/stream_core.dart' show SortedListExtensions;
 import 'paged_value_notifier.dart';
 import 'stream_message_reminder_list_event_handler.dart';
 
@@ -95,7 +95,7 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
     super.value = newValue.maybeMap(
       orElse: () => newValue,
       (success) => success.copyWith(
-        items: success.items.sortedByCompare((it) => it, _activeSort.compare),
+        items: success.items.sortedWith(_activeSort.compare),
       ),
     );
   }
