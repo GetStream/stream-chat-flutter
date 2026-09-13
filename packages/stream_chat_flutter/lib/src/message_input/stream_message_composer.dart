@@ -1569,15 +1569,17 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       // The send button drops this future, so rethrowing would escape as an
       // unhandled async error. Forward it through Flutter's error plumbing
       // instead, so host apps (Crashlytics / Sentry / console) still see it.
-      // Connection failures are marked silent: the message is left in a failed
-      // state and retried on reconnect, so they are expected in release.
+      // A refusal from the server or a failed connection is marked silent: the
+      // message is left in a failed state and retried on reconnect, so both are
+      // expected in release. A `StreamClientException` is not — that one means
+      // the SDK itself failed, and it has to stay loud.
       FlutterError.reportError(
         FlutterErrorDetails(
           exception: error,
           stack: stackTrace,
           library: 'stream_chat_flutter',
           context: ErrorDescription('while sending a message'),
-          silent: error is StreamChatException,
+          silent: error is StreamApiException || error is StreamNetworkException,
         ),
       );
     }
