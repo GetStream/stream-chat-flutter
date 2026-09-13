@@ -12,7 +12,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 
 | | Group | Hand-written | Generated ops | Status |
 | --- | --- | --- | --- | --- |
-| [01](01-foundation.md) | Foundation — `Result`, errors, wiring | — | — | ☐ |
+| [01](01-foundation.md) | Foundation — `DefaultApi` wiring, `User` shape | — | — | ☐ |
 | [02](02-devices-and-push-preferences.md) | Devices & Push Preferences | 4 | 4 | ☐ |
 | [03](03-user-groups.md) | User Groups | 8 | 8 | ☐ |
 | [04](04-roles-guest-and-app.md) | Roles, Guest & App Settings | 4 | 5 | ☐ |

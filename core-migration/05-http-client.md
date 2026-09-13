@@ -66,10 +66,10 @@ StreamCoreHttpClient(
 )..interceptors.addAll([
   ApiKeyInterceptor(apiKey),
   HeadersInterceptor(systemEnvironmentManager),
-  if (user.type != UserType.anonymous) ConnectionIdInterceptor(connectionIdGetter),
-  AuthInterceptor(client, tokenManager),
-  const ApiErrorInterceptor(),    // last: every rejection leaves as a StreamDioException
-  LoggingInterceptor(requestHeader: true),
+  AuthInterceptor(client, tokenManager, tag: 'SCh:HttpAuth'),
+  ConnectionIdInterceptor(connectionIdGetter),
+  const ApiErrorInterceptor(),
+  LoggingInterceptor(requestHeader: true, tag: 'SCh:Http'),
 ]);
 ```
 
@@ -80,6 +80,16 @@ would otherwise clobber ours. As defaults, the interceptors always win.
 `ConnectionIdInterceptor` takes a `ConnectionIdGetter` (`String? Function()`). Feed it from our
 `ConnectionIdManager`, which stays — see the README's "What stays ours": connection-id is threaded
 into request *semantics* at `client.dart:774`, `:907` and `:1071`, not just into headers.
+
+Install it unconditionally rather than behind a `user.type` check. The pipeline is built once, at
+construction, and the same client later moves between anonymous, guest and authenticated
+identities — a construction-time check would leave an authenticated connection without a
+`connection_id`. The getter answers `null` until there is a connection id to send, which is the
+only gate needed.
+
+`ApiErrorInterceptor` comes last of the interceptors that *produce* errors, not last overall:
+`LoggingInterceptor` sits after it so the log line carries the converted `StreamApiException`
+rather than the raw `DioException`.
 
 ### Two things to settle on the wire
 
@@ -132,8 +142,8 @@ None, unless the `api_key` check concludes chat needs a query-parameter variant 
 - [ ] **Every one of the 115 call sites in the 13 `*_api.dart` files is unchanged.** That is the
       test of whether the facade held. A diff touching them means the facade is wrong.
 - [ ] `stream_http_client.dart` and our three forked interceptors are deleted.
-- [ ] The pipeline is assembled in exactly one place, and a test asserts the interceptor order and
-      that `ApiErrorInterceptor` is last.
+- [ ] The pipeline is assembled in exactly one place, and a test asserts the interceptor order —
+      including that `ApiErrorInterceptor` precedes `LoggingInterceptor`.
 - [ ] `api_key` placement verified against the live API, with the result recorded here.
 - [ ] `additionalHeaders` static deprecated; a test asserts two clients can carry different
       headers.

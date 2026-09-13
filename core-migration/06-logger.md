@@ -63,8 +63,17 @@ you", and the `package:logging` re-export can stay for one release before phase
 
 `StreamLogger`'s handler, priority and filter are **process-global write-only statics**, and
 `StreamLogRecord`'s sequence number is a static counter. Two Stream SDKs in one app settle on
-whichever client was constructed last. The mitigation is the tag prefix, which is what
-`StreamLogFilter.prefix` filters on:
+whichever client was constructed last.
+
+A tag prefix does not fix that — it decides which records a *given* filter passes, not who owns
+the handler. So the prefix is half the answer and the other half is a rule: **`StreamLogger` is
+configured by the last `StreamChatClient` constructed, and chat never configures it implicitly.**
+`logConfig` defaults to `const StreamLogConfig()`, which is the same configuration the previous
+client would have installed, so a second client is a no-op unless the caller passed one — and a
+caller who passes one is asking for it. Say that on `StreamChatClient.logConfig`, and leave
+process-wide arbitration to whoever owns the process.
+
+The prefix `StreamLogFilter.prefix` filters on:
 
 | SDK | Prefix |
 | --- | --- |

@@ -58,9 +58,10 @@ not a break.
 
 ## Decisions to make
 
-- Whether `CurrentPlatform.name` → `.operatingSystem` ships with a deprecated `name` getter on a
-  chat-side extension for one release, or as a clean rename. It is exported, but a platform-name
-  string is rarely load-bearing in app code.
+- `CurrentPlatform.name` → `.operatingSystem` has to be a clean rename. A deprecated `name` for
+  one release is not on the table: `name` is a static, and an extension can only add statics
+  under its own declaration name, so a chat-side shim could not answer `CurrentPlatform.name`.
+  It is exported, but a platform-name string is rarely load-bearing in app code.
 - Whether `debugCurrentPlatformOverride` goes upstream as-is (an `@visibleForTesting` static with
   an assert gate) or as something core's style guide prefers — core's `STYLE_GUIDE.md` has an
   "Avoid `@visibleForTesting`" section, so expect pushback and have a second shape ready.
