@@ -15,18 +15,21 @@ Two indexes cut across the phases:
 
 | | Phase | Chat LOC | Core LOC | Breaking | Status |
 | --- | --- | --- | --- | --- | --- |
-| [01](01-utilities.md) | Utilities — in-flight cache, list extensions | ~340 | ~200 | decision | ◐ |
-| [02](02-platform-and-environment.md) | Platform detector & system environment | ~330 | ~300 | yes (rename) | ◐ |
-| [03](03-errors.md) | Errors & the `Result` surface | ~410 | ~900 | **yes** | ◐ |
-| [04](04-token-and-auth.md) | Token & auth | ~225 | ~500 | **yes** | ◐ |
+| [01](01-utilities.md) | Utilities — in-flight cache, list extensions | ~340 | ~200 | yes | ☑ |
+| [02](02-platform-and-environment.md) | Platform detector & system environment | ~330 | ~300 | yes (rename) | ☑ |
+| [03](03-errors.md) | Errors & the `Result` surface | ~410 | ~900 | **yes** | ☑ |
+| [04](04-token-and-auth.md) | Token & auth | ~225 | ~500 | **yes** | ☑ |
 | [05](05-http-client.md) | HTTP client & interceptor pipeline | ~600 | ~150 | yes | ◐ |
 | [06](06-logger.md) | Logger | ~120 | ~670 | **yes** | ☑ |
-| [07](07-websocket.md) | WebSocket transport | ~790 | ~1,940 | **yes** | ☐ |
-| [08](08-query-dsl.md) | Query DSL — filter, sort, comparable field | ~600 | ~1,420 | **yes** | ☐ |
+| [07](07-websocket.md) | WebSocket transport | ~790 | ~1,940 | **yes** | ⏸ |
+| [08](08-query-dsl.md) | Query DSL — filter, sort, comparable field | ~600 | ~1,420 | **yes** | ☑ |
 | [09](09-uploads.md) | Uploads & CDN | ~520 | ~1,400 | yes | ☐ |
 | [10](10-cleanup.md) | Cleanup — deps, barrel, deprecation kit | — | — | no | ☐ |
 
-Status key: ☐ not started · ◐ partly landed · ☑ done.
+Status key: ☐ not started · ◐ partly landed · ☑ done · ⏸ parked.
+
+**07 is parked.** It was attempted in full and reverted; the findings are kept in its own file.
+Nothing after it depends on it, so 08–10 proceed as planned.
 
 **Net:** ~4.0k LOC of hand-written `lib/src` deleted (of ~29.0k), replaced by ~5.5k LOC of core
 that is already written and tested. Six direct dependencies become transitive.

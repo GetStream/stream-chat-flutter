@@ -4,8 +4,7 @@
 evaluated client-side as well as sent to the server.
 
 **Size:** ~600 chat LOC deleted against ~1,420 core LOC. The widest public break after phase
-[03](03-errors.md). One small upstream ask (`$nor`), and two operators chat should deprecate
-rather than port.
+[03](03-errors.md), and the one hard upstream block in the plan.
 
 ## Scope
 
@@ -63,31 +62,20 @@ class ChannelFilterField extends FilterField<Channel> {
 That registry is the bulk of this phase's work, and it is also the payoff: client-side filtering is
 something chat cannot do at all today.
 
-## The three operators core lacks, and what to do about each
+## The hard upstream block
 
-Chat exposes `$ne`, `$nin` and `$nor`; core has none of them
-(`lib/src/core/models/filter.dart:17,35,53` and `:132,138`). An earlier draft called all three a
-hard block. Checked against the other SDKs, only one is:
+**Core lacks three operators chat exposes publicly:**
 
-| Ours | Wire | JS (reference client) | Swift | Android | Verdict |
-| --- | --- | --- | --- | --- | --- |
-| `Filter.notEqual` | `$ne` | **not declared** in `QueryFilter` | present | **`@Deprecated`** | **deprecate here too** |
-| `Filter.notIn` | `$nin` | **not declared** in `QueryFilter` | present | **`@Deprecated`** | **deprecate here too** |
-| `Filter.nor` | `$nor` | declared, beside `$and` / `$or` | present | present | **upstream to core** |
+| Ours | Wire | In core? |
+| --- | --- | --- |
+| `Filter.notEqual` | `$ne` | **no** |
+| `Filter.notIn` | `$nin` | **no** |
+| `Filter.nor` | `$nor` | **no** |
 
-Android's messages say why, and they are about the server rather than the client: `ne` is
-"inefficient and causes performance issues. It will not be supported in the future", and `nin`
-"will stop to be supported in the future". The JS SDK simply never declared either. So core is
-*right* not to have them, and chat should follow Android — `@Deprecated` on both, pointing at the
-same guidance, and drop them in a later major.
-
-That leaves `$nor`, which is a **logical** operator like `$and` and `$or`, so it belongs beside
-core's existing `AndOperator` / `OrOperator` rather than among the comparisons. Landing it needs
-`matches()` too: NOR is "none of these match", so it is the negation of `OrOperator`'s result.
-
-The backend supports all three (`monolith/utils/mquery/operator.go`, and `field_mappings.go` lists
-them under `SupportedOperators`) — deprecation here is a client-side steer away from queries that
-perform badly, not a wire-level removal.
+Verified in `lib/src/core/models/filter.dart:17,35,53` and `:132,138`. These are in public use and
+cannot be dropped. **This is the one genuine hard block in the whole plan** — land them in core
+first, including `matches()` semantics for each (negation of the positive operator, with the
+PostgreSQL-ish null handling core's `filter_operation_utils.dart` already establishes).
 
 Core has one we lack — `pathExists` `$path_exists` — which comes for free.
 
@@ -169,16 +157,13 @@ strict library, but it converts a cosmetic ordering glitch into a crash in a lis
 
 ## Upstream `stream_core` work
 
-- **`Filter` `$nor`**, with `matches()` semantics (the negation of `OrOperator`). The only hard
-  block. `$ne` and `$nin` are *not* upstream asks — see above.
+- **`Filter` `$ne` / `$nin` / `$nor`**, with `matches()` semantics. **Hard block.**
 - A pluggable string comparator on `ComparableField` (or `normalizeStringForSort` upstreamed).
 - Worth arguing: returning `0` rather than throwing for incomparable types.
 
 ## Definition of done
 
-- [ ] Core ships `$nor` and chat is on that release.
-- [ ] `Filter.notEqual` and `Filter.notIn` are `@Deprecated`, carrying Android's rationale rather
-      than a bare "use something else".
+- [ ] Core ships `$ne` / `$nin` / `$nor` and chat is on that release.
 - [ ] `filter.dart`, `sort_order.dart`, our `comparable_field.dart` and
       `location_coordinates.dart` are deleted; `stream_chat.dart` exports core's via the
       allowlist.
