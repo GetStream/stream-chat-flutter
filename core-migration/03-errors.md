@@ -194,9 +194,10 @@ it is woven through `stream_chat_flutter_core`'s **public** API:
 Real totals for this phase: **205 `lib` references and 230 `test` references across three
 packages**, not one. `stream_chat_persistence` has zero and is untouched.
 
-All of it is retyped to `StreamException` here. Note the controllers already wrap non-chat errors
-as `StreamChatError(error.toString())`, so those sites become `on StreamException catch` with the
-wrap deleted rather than rewritten.
+All of it is retyped to `StreamException` here. The controllers already wrapped non-chat errors as
+`StreamChatError(error.toString())`, so those sites become `on StreamChatException catch` with the
+wrap rewritten as `StreamClientException(message: error.toString(), cause: error)` — the original
+throwable survives as `cause`, which the old wrap discarded.
 
 ## Risks
 

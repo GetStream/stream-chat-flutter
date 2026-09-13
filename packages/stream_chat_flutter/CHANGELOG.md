@@ -4,6 +4,10 @@
 
 - `errorBuilder` on the paged scroll views (`StreamChannelListView`, `StreamUserListView`, `StreamMemberListView`, `StreamThreadListView`, `StreamPollVoteListView`, `StreamReactionListView`, `StreamMessageSearchListView`, `StreamPhotoGallery` and the grid variants) now receives a `StreamChatException` instead of a `StreamChatError`.
 
+🔄 Changed
+
+- The default channel error state keys its copy off the failure kind rather than a transport enum, so "slow connection" now covers every timeout and "no internet" covers every other failure to reach the server.
+
 ## Upcoming
 
 🐞 Fixed

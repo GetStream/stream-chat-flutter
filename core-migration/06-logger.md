@@ -74,9 +74,10 @@ precisely so a product can namespace them — feeds passes `SF:Ws`, `SF:Http`, `
 
 ## Risks
 
-- **Anyone wiring `Logger.root.onRecord` sees their logs stop.** Chat's loggers were detached, so
-  they never reached `Logger.root` anyway — but anyone who passed `logHandlerFunction` gets a
-  compile error rather than silence, which is the outcome to want.
+- **Anyone wiring `Logger.root.onRecord` sees their logs stop.** Almost every chat logger was
+  detached, so it never reached `Logger.root` anyway; `AppSettingsManager` was the one exception,
+  holding a plain `Logger('AppSettingsManager')` whose records did. Anyone who passed
+  `logHandlerFunction` gets a compile error rather than silence, which is the outcome to want.
 - Global logger state means a chat client constructed after a feeds client overwrites the feeds
   configuration. Nothing in this plan fixes that; the tag prefix only makes the result legible.
   Worth raising upstream if it bites.
