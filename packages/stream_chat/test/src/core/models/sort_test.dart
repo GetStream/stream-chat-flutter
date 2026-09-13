@@ -383,6 +383,57 @@ void main() {
       expectRemotes([ReactionSortField.createdAt], {'created_at'});
       expectRemotes([BannedUserSortField.createdAt], {'created_at'});
     });
+
+    test('every default sort is the ordering its query already has', () {
+      // Pinned against the server's own default for each resource, because a
+      // `defaultSort` that disagrees reorders a list for no reason and costs a
+      // query it did not need. Each entry is that resource's `DefaultSort()`
+      // in the backend, or the fallback its query builder appends.
+      expect(
+        <String, List<Sort<Object>>>{
+          'channel': ChannelSort.defaultSort,
+          'user': UserSort.defaultSort,
+          'member': MemberSort.defaultSort,
+          'draft': DraftSort.defaultSort,
+          'reminder': MessageReminderSort.defaultSort,
+          'poll': PollSort.defaultSort,
+          'poll_vote': PollVoteSort.defaultSort,
+          'reaction': ReactionSort.defaultSort,
+          'thread': ThreadSort.defaultSort,
+        }.map((k, v) => MapEntry(k, v.map((it) => it.toJson()).toList())),
+        {
+          'channel': [
+            {'field': 'last_updated', 'direction': -1},
+          ],
+          'user': [
+            {'field': 'created_at', 'direction': -1},
+          ],
+          'member': [
+            {'field': 'created_at', 'direction': 1},
+          ],
+          'draft': [
+            {'field': 'created_at', 'direction': -1},
+          ],
+          'reminder': [
+            {'field': 'remind_at', 'direction': 1},
+          ],
+          'poll': [
+            {'field': 'created_at', 'direction': 1},
+          ],
+          'poll_vote': [
+            {'field': 'created_at', 'direction': 1},
+          ],
+          'reaction': [
+            {'field': 'created_at', 'direction': -1},
+          ],
+          'thread': [
+            {'field': 'has_unread', 'direction': -1},
+            {'field': 'last_message_at', 'direction': -1},
+            {'field': 'parent_message_id', 'direction': -1},
+          ],
+        },
+      );
+    });
   });
 
   group('server-parity value folding', () {

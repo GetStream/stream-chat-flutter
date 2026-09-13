@@ -127,9 +127,9 @@ class PollVoteSort extends Sort<PollVote> {
 
   /// The ordering the API applies to a poll-vote query when none is given.
   ///
-  /// Sorts by when the vote was cast, newest first.
+  /// Sorts by when the vote was cast, oldest first.
   static final List<PollVoteSort> defaultSort = List.unmodifiable([
-    PollVoteSort.desc(PollVoteSortField.createdAt),
+    PollVoteSort.asc(PollVoteSortField.createdAt),
   ]);
 }
 
@@ -150,7 +150,7 @@ class PollVoteSortField extends SortField<PollVote> {
 
   /// Sorts poll votes by their creation date.
   ///
-  /// This is the default sort field (in descending order).
+  /// This is the default sort field (in ascending order).
   static final createdAt = PollVoteSortField(
     'created_at',
     (it) => it.createdAt,
