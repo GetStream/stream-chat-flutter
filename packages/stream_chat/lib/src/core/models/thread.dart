@@ -266,9 +266,11 @@ class ThreadSort extends Sort<Thread> {
   /// Surfaces threads with unread replies first, then the most recently active.
   /// The parent message id breaks ties, so a page boundary is reproducible.
   ///
-  /// Declared to sort a thread list locally by the same ordering. Passing it to
-  /// a query is redundant — it asks for the ordering a query with no sort
-  /// already has, at more cost.
+  /// Declared to sort a thread list locally by the same ordering, minus the
+  /// unread term: a [Thread] does not carry the current user's unread state, so
+  /// [ThreadSortField.hasUnread] reads nothing and a local sort falls through to
+  /// the last-message date. Passing it to a query is redundant — it asks for the
+  /// ordering a query with no sort already has, at more cost.
   static final List<ThreadSort> defaultSort = List.unmodifiable([
     ThreadSort.desc(ThreadSortField.hasUnread),
     ThreadSort.desc(ThreadSortField.lastMessageAt),
@@ -284,14 +286,6 @@ class ThreadSortField extends SortField<Thread> {
   /// Prefer the fields this class declares — they are the ones the API accepts.
   /// This is for a field the SDK has not modelled yet.
   ThreadSortField(super.remote, super.localValue);
-
-  /// Creates a field the SDK does not model, read from [Thread.extraData].
-  ///
-  /// Only declared for the models whose queries accept a custom sort field,
-  /// and slower than a field this class declares.
-  factory ThreadSortField.custom(String remote) {
-    return ThreadSortField(remote, (it) => it.extraData[remote]);
-  }
 
   /// Sorts threads by their last message date.
   static final lastMessageAt = ThreadSortField(

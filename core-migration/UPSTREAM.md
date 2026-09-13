@@ -66,9 +66,10 @@ product would react to it the same way. Nothing outside chat reacts to `message.
 ## How to raise one
 
 Core is a separate repo with its own release cadence, so batch these: a row here is rarely urgent on
-its own, and each release chat has to wait for costs more than the change itself. The two worth
-pushing first are the ones this plan is actually blocked on — `Filter`'s `$nor`, and a release
-carrying `debugCurrentPlatformOverride`.
+its own, and each release chat has to wait for costs more than the change itself. What is worth
+pushing first is whatever this plan is actually blocked on, which today is one thing: a release
+carrying `Filter.raw`, `normalizeStringForSort` and `debugCurrentPlatformOverride` together. The
+rest of the ☐ rows are improvements, not blockers, and can ride a later release.
 
 Cross-repo workflow is in [`STYLE_GUIDE.md`](../STYLE_GUIDE.md) (§Dependency management): a path
 dependency while both repos change together, back to a hosted constraint in `melos.yaml` before

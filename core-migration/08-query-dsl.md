@@ -104,7 +104,7 @@ objects, and a filter that stays a map next to it is an inconsistency, not a sim
 | | unknown value | fallback |
 | --- | --- | --- |
 | sort direction | not `-1` | `asc` |
-| sort field | not declared | `XSortField.custom(remote)` |
+| sort field | not declared | `XSortField.custom(remote)` (channel, member, user and message search — the resources whose sort validation stays open) |
 | filter field | not declared | `XFilterField.custom(remote)` |
 | **filter operator** | `$ne` / `$nin` / `$nor` / anything new | **`Filter.raw({that node})`** |
 
@@ -159,7 +159,12 @@ migration that query is reachable only through `Filter.raw`. Decide before writi
 whether that is acceptable or whether the registry should expose a purpose-built helper for it.
 
 <details>
-<summary>111 fields</summary>
+<summary>111 fields — raw extraction; apply the two overlays above before reading a row</summary>
+
+The rows are `mq.TableConfig.Columns` verbatim, so they still carry `$ne` and `$nin` wherever the
+backend's query layer accepts them. The published spec does not: strike both from every row except
+`user.id` (`$ne`, `$nin`) and `user.banned` / `shadow_banned` / `bypass_moderation` (`$ne`). No
+channel row keeps either.
 
 | resource | field | type | operators |
 | --- | --- | --- | --- |
@@ -895,7 +900,10 @@ supplying a sort is not equivalent to omitting one: `query_threads.go:110` branc
 the same ordering off a wider code path. It exists to sort a thread list locally, and its
 dartdoc says so, since the asymmetry otherwise reads as an oversight.
 
-The persisted shape did not change, so there is no schema migration. Verified against the
+The persisted shape did not change, so no row needs rewriting — but `schemaVersion` still moves
+from `1000 + 35` to the `1100 + N` band, and drift's `onUpgrade` drops and recreates every table
+when it does. Cached channels, messages and reads are discarded on upgrade and refetched; that is
+the v11 behaviour generally, not something this phase introduces. Verified against the
 deleted serializer rather than assumed — `git show HEAD:…/core/api/sort_order.g.dart` shows
 `_$SortOptionToJson` emitted exactly `field` and `direction`, and **not** `nullOrdering` despite
 `SortOption` carrying it as a field. `ChannelSortConverter`

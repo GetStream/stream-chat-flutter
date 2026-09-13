@@ -113,21 +113,6 @@ void main() {
           createTestPoll(name: 'closed', isClosed: true),
         );
       });
-
-      test('a custom field orders by the poll extra data', () {
-        expectOrders(
-          PollSortField.custom('priority'),
-          createTestPoll(name: 'low', extraData: const {'priority': 1}),
-          createTestPoll(name: 'high', extraData: const {'priority': 10}),
-        );
-      });
-
-      test('a custom field the poll does not carry orders nothing', () {
-        expectOrdersNothing(
-          PollSortField.custom('non_existent_key'),
-          createTestPoll(name: 'plain'),
-        );
-      });
     });
   });
 }

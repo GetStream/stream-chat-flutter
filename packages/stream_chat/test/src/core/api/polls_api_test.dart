@@ -192,7 +192,9 @@ void main() {
 
     const path = '/polls/$pollId';
 
-    when(() => client.delete(path)).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.delete(path),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await pollsApi.deletePoll(pollId);
 
@@ -310,7 +312,9 @@ void main() {
 
     const path = '/polls/$pollId/options/$optionId';
 
-    when(() => client.delete(path)).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.delete(path),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await pollsApi.deletePollOption(pollId, optionId);
 
@@ -386,7 +390,7 @@ void main() {
   test('queryPolls', () async {
     const path = '/polls/query';
     final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
-    final sort = [PollSort.desc(PollSortField.custom('test-field'))];
+    final sort = [PollSort.desc(PollSortField.createdAt)];
     const pagination = PaginationParams(limit: 20);
 
     final payload = jsonEncode({

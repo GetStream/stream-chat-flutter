@@ -150,7 +150,7 @@ class PollVoteSortField extends SortField<PollVote> {
 
   /// Sorts poll votes by their creation date.
   ///
-  /// This is the default sort field (in ascending order).
+  /// This is the default sort field (in descending order).
   static final createdAt = PollVoteSortField(
     'created_at',
     (it) => it.createdAt,

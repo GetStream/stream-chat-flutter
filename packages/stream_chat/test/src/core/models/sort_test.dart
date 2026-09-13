@@ -368,14 +368,14 @@ void main() {
     });
 
     test('a custom field exists only where the API accepts one', () {
-      // Mirrors `CustomFieldName` on each resource's `mq.TableConfig`. Calling
-      // one the API does not accept fails the request at runtime.
+      // Declared where the resource's `mq.TableConfig` leaves sort validation
+      // open. Poll and thread queries pin their sort to whole combinations of
+      // declared fields, so neither offers one — a custom field there would
+      // fail the request at runtime.
       expect(ChannelSortField.custom('x').remote, 'x');
       expect(MessageSearchSortField.custom('x').remote, 'x');
       expect(UserSortField.custom('x').remote, 'x');
-      expect(PollSortField.custom('x').remote, 'x');
       expect(MemberSortField.custom('x').remote, 'x');
-      expect(ThreadSortField.custom('x').remote, 'x');
     });
 
     test('draft, reaction and banned user sort on created_at only', () {
@@ -481,31 +481,37 @@ void main() {
       expect(idsOf(channels.sorted(sort.compare)), ['pinned-old', 'pinned-new', 'unpinned']);
     });
 
-    test('should keep channels without messages at the bottom when sorting by lastMessageAt desc', () {
-      final channels = [
-        channelState('no-messages'),
-        channelState('newest', lastMessageAt: createdAt.add(const Duration(days: 5))),
-        channelState('oldest', lastMessageAt: createdAt.add(const Duration(days: 1))),
-      ];
+    test(
+      'should keep channels without messages at the bottom when sorting by lastMessageAt desc',
+      () {
+        final channels = [
+          channelState('no-messages'),
+          channelState('newest', lastMessageAt: createdAt.add(const Duration(days: 5))),
+          channelState('oldest', lastMessageAt: createdAt.add(const Duration(days: 1))),
+        ];
 
-      final sort = [ChannelSort.desc(ChannelSortField.lastMessageAt)];
+        final sort = [ChannelSort.desc(ChannelSortField.lastMessageAt)];
 
-      expect(idsOf(channels.sorted(sort.compare)), ['newest', 'oldest', 'no-messages']);
-    });
+        expect(idsOf(channels.sorted(sort.compare)), ['newest', 'oldest', 'no-messages']);
+      },
+    );
 
-    test('should keep channels without messages at the bottom when sorting by lastMessageAt asc', () {
-      // `last_message_at` ascending relies on the API leaving the direction
-      // bare, which Postgres orders nulls last.
-      final channels = [
-        channelState('no-messages'),
-        channelState('oldest', lastMessageAt: createdAt.add(const Duration(days: 1))),
-        channelState('newest', lastMessageAt: createdAt.add(const Duration(days: 5))),
-      ];
+    test(
+      'should keep channels without messages at the bottom when sorting by lastMessageAt asc',
+      () {
+        // `last_message_at` ascending relies on the API leaving the direction
+        // bare, which Postgres orders nulls last.
+        final channels = [
+          channelState('no-messages'),
+          channelState('oldest', lastMessageAt: createdAt.add(const Duration(days: 1))),
+          channelState('newest', lastMessageAt: createdAt.add(const Duration(days: 5))),
+        ];
 
-      final sort = [ChannelSort.asc(ChannelSortField.lastMessageAt)];
+        final sort = [ChannelSort.asc(ChannelSortField.lastMessageAt)];
 
-      expect(idsOf(channels.sorted(sort.compare)), ['oldest', 'newest', 'no-messages']);
-    });
+        expect(idsOf(channels.sorted(sort.compare)), ['oldest', 'newest', 'no-messages']);
+      },
+    );
 
     test('should keep nulls last for other fields when sorting asc', () {
       // A field with no pinned ordering follows the direction's default, which

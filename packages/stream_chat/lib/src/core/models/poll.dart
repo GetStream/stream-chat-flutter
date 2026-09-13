@@ -288,6 +288,13 @@ class PollSort extends Sort<Poll> {
     PollSortField super.field, {
     super.nullOrdering,
   }) : super.desc();
+
+  /// The ordering the API applies to a poll query when none is given.
+  ///
+  /// Sorts by when the poll was created, oldest first.
+  static final List<PollSort> defaultSort = List.unmodifiable([
+    PollSort.asc(PollSortField.createdAt),
+  ]);
 }
 
 /// Represents a field that poll queries can be sorted on.
@@ -298,14 +305,6 @@ class PollSortField extends SortField<Poll> {
   /// Prefer the fields this class declares — they are the ones the API accepts.
   /// This is for a field the SDK has not modelled yet.
   PollSortField(super.remote, super.localValue);
-
-  /// Creates a field the SDK does not model, read from [Poll.extraData].
-  ///
-  /// Only declared for the models whose queries accept a custom sort field,
-  /// and slower than a field this class declares.
-  factory PollSortField.custom(String remote) {
-    return PollSortField(remote, (it) => it.extraData[remote]);
-  }
 
   /// Sorts polls by their unique ID.
   static final id = PollSortField(

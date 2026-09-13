@@ -169,7 +169,7 @@ class ReactionSortField extends SortField<Reaction> {
 
   /// Sorts reactions by their creation date.
   ///
-  /// This is the default sort field (in ascending order).
+  /// This is the default sort field (in descending order).
   static final createdAt = ReactionSortField(
     'created_at',
     (it) => it.createdAt,
