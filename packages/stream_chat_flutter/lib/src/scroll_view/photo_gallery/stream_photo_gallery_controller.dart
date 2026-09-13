@@ -46,7 +46,7 @@ class StreamPhotoGalleryController extends PagedValueNotifier<int, AssetEntity> 
     } on StreamChatException catch (error) {
       value = PagedValue.error(error);
     } catch (error) {
-      final chatError = StreamClientException(message: error.toString(), cause: error);
+      final chatError = StreamClientException(message: 'Failed to load media', cause: error);
       value = PagedValue.error(chatError);
     }
   }
@@ -79,7 +79,7 @@ class StreamPhotoGalleryController extends PagedValueNotifier<int, AssetEntity> 
     } on StreamChatException catch (error) {
       value = previousValue.copyWith(error: error);
     } catch (error) {
-      final chatError = StreamClientException(message: error.toString(), cause: error);
+      final chatError = StreamClientException(message: 'Failed to load more media', cause: error);
       value = previousValue.copyWith(error: chatError);
     }
   }
