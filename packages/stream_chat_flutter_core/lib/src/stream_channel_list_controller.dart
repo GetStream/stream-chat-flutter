@@ -149,15 +149,24 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   set value(PagedValue<int, Channel> newValue) {
     super.value = newValue.maybeMap(
       orElse: () => newValue,
-      (success) => success.copyWith(
-        items: success.items.sortedWith(
-          (a, b) => _resolvedChannelStateSort.compare(
-            a.state?.channelState,
-            b.state?.channelState,
-          ),
-        ),
-      ),
+      (success) => success.copyWith(items: success.items.sortedWith(_compareByState)),
     );
+  }
+
+  // A channel loses its state when it is disposed — a client disconnect or
+  // logout, or a channel-removal event racing an in-flight query. It is no
+  // longer a row the list can order, so it goes last rather than wherever the
+  // leading field's null ordering would put it.
+  int _compareByState(Channel a, Channel b) {
+    final aState = a.state?.channelState;
+    final bState = b.state?.channelState;
+
+    // Handle disposed channels first, independent of sort direction.
+    if (aState == null && bState == null) return 0;
+    if (aState == null) return 1;
+    if (bState == null) return -1;
+
+    return _resolvedChannelStateSort.compare(aState, bState);
   }
 
   @override

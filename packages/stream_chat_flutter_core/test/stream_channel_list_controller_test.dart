@@ -284,7 +284,7 @@ void main() {
     expect((captured.single as PaginationParams).offset, equals(nextPageKey));
   });
 
-  test('local sort orders a channel with disposed state by the sort null ordering', () {
+  test('local sort places channels with disposed state last instead of crashing', () {
     ChannelState channelStateFor({required DateTime createdAt}) => ChannelState(
       channel: ChannelModel(cid: 'messaging:${createdAt.millisecondsSinceEpoch}', createdAt: createdAt),
     );
@@ -308,9 +308,7 @@ void main() {
       () => controller.value = PagedValue<int, Channel>(items: [disposed, older, newer]),
       returnsNormally,
     );
-    // `defaultSort` is descending, which orders nulls first, so the channel
-    // with no state to read sorts where any other null value would.
-    expect(controller.value.asSuccess.items, equals([disposed, newer, older]));
+    expect(controller.value.asSuccess.items, equals([newer, older, disposed]));
   });
 
   // The controller's only responsibility for events is routing them to the
