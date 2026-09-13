@@ -43,9 +43,9 @@
 - Added `MessageReminderSortField.messageId`, the field the API breaks reminder ties on.
 - Added `ThreadSort.defaultSort` — unread threads first, then most recently active, matching the Android SDK. Declared for callers to opt into; `StreamThreadListController` still sends no sort unless given one.
 - Added `ReactionSort.defaultSort`, which is the ordering the API already applies to a reaction query.
-- Added the message sort fields the JS client already exposed: `text`, `type`, `parentId`, `replyCount`, `pinned`, `userId`, `attachments`, `attachmentsType` and `mentionedUsersId`.
-- Added `MemberSortField.updatedAt` and `MemberSortField.lastActive`.
-- Added `UserSortField.language` and `UserSortField.teams`.
+- Added the message sort fields the JS client already exposed: `text`, `type`, `parentId`, `replyCount` and `pinned`.
+- Added `MemberSortField.updatedAt`.
+- Added `UserSortField.language`.
 
 🔒 Security
 
