@@ -26,9 +26,9 @@ class PredefinedFilter {
 
   /// Filter conditions as resolved by the server.
   ///
-  /// Wrapped in [Filter.raw], since the server authors it and may use an
-  /// operator this package does not model. Read it with [Filter.toJson];
-  /// [Filter.matches] throws for it.
+  /// Wrapped in [ChannelFilter.raw], since the server authors it and may use an
+  /// operator this package does not model. Read it with [ChannelFilter.toJson];
+  /// [ChannelFilter.matches] throws for it.
   @JsonKey(fromJson: _filterFromJson)
   final ChannelFilter filter;
 

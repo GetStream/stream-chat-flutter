@@ -256,10 +256,10 @@ class ChannelModel {
     extraData: extraData ?? this.extraData,
     team: team ?? this.team,
     cooldown: cooldown ?? this.cooldown,
-    disabled: disabled ?? extraData?['disabled'] as bool? ?? this.disabled,
-    hidden: hidden ?? extraData?['hidden'] as bool? ?? this.hidden,
-    muted: muted ?? extraData?['muted'] as bool? ?? this.muted,
-    blocked: blocked ?? extraData?['blocked'] as bool? ?? this.blocked,
+    disabled: disabled ?? extraData?['disabled'].safeCast<bool>() ?? this.disabled,
+    hidden: hidden ?? extraData?['hidden'].safeCast<bool>() ?? this.hidden,
+    muted: muted ?? extraData?['muted'].safeCast<bool>() ?? this.muted,
+    blocked: blocked ?? extraData?['blocked'].safeCast<bool>() ?? this.blocked,
     truncatedAt:
         truncatedAt ??
         (extraData?['truncated_at'] == null

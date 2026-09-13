@@ -172,8 +172,13 @@ thinks, and it has already applied `isPublishedOperator`, so
 [#15657](https://github.com/GetStream/chat/pull/15657) is baked in: exactly four `$ne` and one
 `$nin` survive, the index-safe exceptions on `QueryUsersPayload`.
 
-Regenerate with `git -C ~/GolandProjects/protocol pull` and re-reading that file; do not
-re-derive it from the Go source.
+Regenerate by re-reading that file from a current `GetStream/protocol` checkout, not by
+re-deriving it from the Go source:
+
+```bash
+PROTOCOL_DIR=${PROTOCOL_DIR:-~/GolandProjects/protocol}   # or wherever you cloned it
+git -C "$PROTOCOL_DIR" pull
+```
 
 **The same file's `x-stream-sort-fields` is *not* a usable oracle, and the sort registries must
 not be narrowed to it.** It publishes `AllowedSortColumns`, the indexed-column subset, while the
@@ -188,12 +193,7 @@ published `created_at`; it is acknowledged and unfixed as of openapi-v238.0.2. R
 later spec version lands.
 
 <details>
-<summary>166 fields — raw extraction; apply the two overlays above before reading a row</summary>
-
-The rows are `mq.TableConfig.Columns` verbatim, so they still carry `$ne` and `$nin` wherever the
-backend's query layer accepts them. The published spec does not: strike both from every row except
-`user.id` (`$ne`, `$nin`) and `user.banned` / `shadow_banned` / `bypass_moderation` (`$ne`). No
-channel row keeps either.
+<summary>166 fields</summary>
 
 | endpoint | field | type | operators |
 | --- | --- | --- | --- |
