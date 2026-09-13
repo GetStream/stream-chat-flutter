@@ -600,53 +600,30 @@ release.
 a stored sort (a persisted channel-list configuration, for instance), that needs a chat-side
 resolver mapping a remote name back to a `SortField`.
 
-## Why a chat-side `StreamSortField` survives
+## What shipped instead of a chat-side `StreamSortField`
 
-`sort_order.dart` shrinks from 268 LOC (with `comparable_field.dart`) to ~90, and re-exports
-core's `Sort`, `SortField`, `SortDirection`, `NullOrdering` and `CompositeComparator` behind a
-`show` allowlist. What it still declares is a `SortOrder<T> = List<Sort<T>>` typedef and one
-subclass — and the subclass is not a preference:
+**This section previously argued for a chat-side `StreamSortField` base class** — a `const`
+private constructor, per-field `nullOrdering`, an overridden `value` method — whose whole purpose
+was preserving `const` sort lists. None of it was built. `git grep "class StreamSortField"` returns
+nothing.
 
-**Core's `SortField` can never be const-constructed.** It takes a value closure and builds its
-comparator in the constructor, and a closure literal is not a constant expression in Dart. So
-`SortField('id', (it) => it.id)` is `final`, whatever core does to that constructor. Attempting it
-cascaded:
+What shipped is `class ChannelSortField extends SortField<ChannelState>` — core's base directly,
+with a non-const constructor and `static final` members. There is no `SortOrder<T>` typedef either;
+signatures name `List<ChannelSort>` and friends.
 
-- `defaultChannelListSort` and its five siblings become `final`, so the list controllers lose
-  `this.sort = defaultXListSort` as a default parameter;
-- working around that with `sort ??= defaultXListSort` changes `channelStateSort: null` from "send
-  no sort, do not sort locally" to "use the default" — which is the documented way to use a
-  predefined filter, where the *server* resolves the sort. `stream_channel_list_controller`'s own
-  tests catch it;
-- every `const [...]` sort list in the examples, the sample app and the tests loses its `const`.
+**So `const` sort lists are gone, and that is a consumer break.** Core's `SortField` takes a value
+closure and a closure literal is not a constant expression, so every registry member is
+`static final` and a caller cannot write `const [ChannelSort.desc(...)]`. Every v10 example and the
+sample app wrote `const`. That is now a row in `migrations/v11-migration.md`'s Symbol Map; it was
+missing for as long as this section claimed const-ness had been preserved, which is exactly how a
+stale plan turns into a missing migration note.
 
-Declaring `value` as an **overridden method** rather than a constructor closure restores
-const-ness, and that shape is only expressible as a subclass:
-
-```dart
-class ChannelSortField extends StreamSortField<ChannelState> {
-  const ChannelSortField._(super.remote, {super.nullOrdering});
-
-  static const pinnedAt = ChannelSortField._('pinned_at', nullOrdering: NullOrdering.nullsLast);
-
-  @override
-  Object? value(ChannelState instance) => switch (remote) {
-    'pinned_at' => instance.membership?.pinnedAt,
-    _ => instance.channel?.extraData[remote],
-  };
-}
-```
-
-One dispatch table per model — which is what `getComparableField` already was — and the
-`extraData` fallback comes free, so `XSortField.custom(key)` replaces the stringly-typed escape
-hatch without losing it.
-
-Two behaviours ride along in the same class rather than needing anything from core:
-`normalizeStringForSort` on string comparisons, and per-field `nullOrdering` (which the field
-enforces over the direction's default, so `Sort.desc(ChannelSortField.pinnedAt)` cannot silently
-lose server parity). The cost is that an explicit `nullOrdering:` on such a field is ignored — the
-old `SortOption` allowed that override, and dropping it is deliberate: server parity is not a
-preference.
+Per-field null ordering did survive, but on the `Sort` subclass rather than the field:
+`ChannelSort.asc` / `.desc` resolve `nullOrdering ?? _orderingFor(field, …)`, pinning `pinned_at`
+and `last_message_at` to nulls-last in either direction. An explicit `nullOrdering:` **wins** over
+that default — the earlier claim that it is ignored was backwards. `ThreadSort` gained the same
+treatment for `last_message_at` after a review caught that a thread with no replies had started
+sorting to the top.
 
 ## `ComparableField`: both divergences resolve chat-side
 
