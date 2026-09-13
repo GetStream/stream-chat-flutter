@@ -6,6 +6,8 @@ import 'package:stream_chat/src/core/models/message_reminder.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:test/test.dart';
 
+import '../../utils.dart';
+
 void main() {
   group('MessageReminder', () {
     final now = DateTime.now();
@@ -268,6 +270,53 @@ void main() {
       expect(MessageReminderSortField.channelCid.remote, equals('channel_cid'));
       expect(MessageReminderSortField.remindAt.remote, equals('remind_at'));
       expect(MessageReminderSortField.createdAt.remote, equals('created_at'));
+    });
+
+    // Each field reads a different property off the model, and a wrong one
+    // sorts plausibly while ordering by something else entirely. These pin the
+    // getter, not just the remote name.
+    group('MessageReminderSortField ordering', () {
+      MessageReminder reminderWith({
+        String cid = channelCid,
+        String messageId = 'm1',
+        DateTime? remindAt,
+        DateTime? createdAt,
+      }) => MessageReminder(
+        channelCid: cid,
+        messageId: messageId,
+        userId: 'u1',
+        remindAt: remindAt,
+        createdAt: createdAt,
+      );
+
+      test('remindAt orders the sooner reminder first', () {
+        expectOrders(
+          MessageReminderSortField.remindAt,
+          reminderWith(remindAt: DateTime.utc(2024, 1, 1)),
+          reminderWith(remindAt: DateTime.utc(2024, 6, 1)),
+        );
+      });
+
+      test('createdAt orders the older reminder first', () {
+        expectOrders(
+          MessageReminderSortField.createdAt,
+          reminderWith(createdAt: DateTime.utc(2024, 1, 1)),
+          reminderWith(createdAt: DateTime.utc(2024, 6, 1)),
+        );
+      });
+
+      test('channelCid and messageId order lexically', () {
+        expectOrders(
+          MessageReminderSortField.channelCid,
+          reminderWith(cid: 'messaging:aaa'),
+          reminderWith(cid: 'messaging:bbb'),
+        );
+        expectOrders(
+          MessageReminderSortField.messageId,
+          reminderWith(messageId: 'a'),
+          reminderWith(messageId: 'b'),
+        );
+      });
     });
   });
 }
