@@ -23,7 +23,6 @@
 - Passing `sort: null` to a list controller now selects that controller's default sort rather than sending none.
 - `DraftSortField` has no `custom` field: the API rejects a custom sort field on drafts.
 - A sort names its model's field type, so `MemberSort.asc` takes a `MemberSortField` and a field from another model does not compile. `XSortField.custom(key)` reads a field from the model's extra data, for the four models whose queries accept one.
-- A poll-vote list now defaults to newest vote first (`created_at` descending) rather than oldest first, matching the reaction list beside it and the ordering the API defaults reactions to.
 - Default sorts moved onto the sort that owns them: `ChannelSort.defaultSort`, `MemberSort.defaultSort` and so on. `stream_chat_flutter_core`'s `defaultChannelListSort`, `defaultMemberListSort`, `defaultUserListSort`, `defaultDraftListSort`, `defaultMessageReminderListSort` and `defaultPollVoteListSort` are removed — they were only reachable from the Flutter layer, and the ordering they described is the API's own.
 
 ⚠️ Deprecated

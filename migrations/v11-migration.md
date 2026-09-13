@@ -98,7 +98,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `SortOption.fromJson` | `ChannelSort.fromJson` | `moved` | `Sort` has no `fromJson`: the remote name has to resolve back to a declared field |
 | `SortOption(comparator:)` | — | `removed` | Declare a field whose value projects onto something orderable, or sort the list yourself |
 | `DraftSortKey`'s `extraData` fallback | — | `removed` | The server rejects a custom sort field on drafts |
-| `PollVoteSortKey.answerText` | — | `removed` | The API rejects a sort on `answer_text`: it is whitelisted in `AllowedCustomSortColumns` but the resource sets no custom-field container, so the request fails |
+| `PollVoteSortKey.answerText` | — | `removed` | The API rejects a sort on `answer_text` |
 | _(new)_ | `ChannelSortField.cid` | `added` | Both iOS and Android sort channels by `cid` |
 | _(new)_ | `MessageReminderSortField.messageId` | `added` | The server allows it and breaks reminder ties on it |
 | _(new)_ | `MessageSearchSortField.relevance` | `added` | Sorts search results by match quality; the server drops it when the request has no text filter |
