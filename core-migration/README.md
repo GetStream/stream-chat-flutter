@@ -182,3 +182,32 @@ Consumer-facing changes go in `migrations/v11-migration.md` **in the same PR tha
 the guide is written as the work happens, not reconstructed at release. One phase per PR, titled
 `refactor(llc)!:` when it breaks. Close the loop by ticking the phase's definition of done and its
 status box in the table above.
+
+---
+
+## Which PR lands which phase
+
+**The status column above describes the finished stack, not the PR you are reading it in.** The
+work ships as six stacked PRs and the phase numbering does not line up with them: a phase can
+split across two PRs, and one PR can carry three phases. So a phase marked ☑ may describe code
+that lands above the rung you are looking at — at the first rung, none of phase 01 is present yet.
+
+| Phase | Lands in |
+| --- | --- |
+| 01 Utilities | in-flight cache in **#2956**; list extensions in **#2959** |
+| 02 Platform & environment | `SystemEnvironment` in **#2956**; platform detector in **#2960** |
+| 03 Errors | error layer in **#2956**; old tree deleted, sealed family in **#2960** |
+| 04 Token & auth | **#2956** |
+| 05 HTTP client & interceptors | **#2956**, partially — see the phase doc |
+| 06 Logger | **#2956** |
+| 07 WebSocket | parked; nothing lands |
+| 08 Query DSL | `Sort` in **#2957**; `Filter` in **#2958**; `LocationCoordinate` and the sort normalizer in **#2959** |
+| 09 Uploads · 10 Cleanup | not started |
+
+Two consequences worth knowing before reading a phase doc against the code:
+
+- **A phase doc is accurate about the stack, not about its own PR.** Checking a ☑ against the rung
+  you are on will mislead you; check it against the tip.
+- **`stream_chat_dio_error` (01) and the precondition-throw reclassification (03) never landed at
+  all.** They are tracked in [DEFERRED.md](DEFERRED.md), which is the authority on what is still
+  outstanding.
