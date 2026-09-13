@@ -72,6 +72,15 @@ void expectOrders<T extends Object>(SortField<T> field, T smaller, T larger) {
 
 /// Asserts [field] reads nothing off [instance], so it cannot order a list
 /// locally.
-void expectOrdersNothing<T extends Object>(SortField<T> field, T instance) {
-  expect([Sort.asc(field)].compare(instance, instance), 0);
+///
+/// Pass [other] to also assert two different instances are left unordered —
+/// what tells a field reading nothing apart from one reading a fallback.
+void expectOrdersNothing<T extends Object>(
+  SortField<T> field,
+  T instance, [
+  T? other,
+]) {
+  final ascending = [Sort.asc(field)];
+  expect(ascending.compare(instance, instance), 0);
+  if (other != null) expect(ascending.compare(instance, other), 0);
 }

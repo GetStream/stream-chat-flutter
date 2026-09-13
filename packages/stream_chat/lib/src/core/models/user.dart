@@ -280,7 +280,10 @@ class UserSortField extends SortField<User> {
   /// sorted locally matches the order a query returns.
   static final name = UserSortField(
     'name',
-    (it) => it.name.let(normalizeStringForSort),
+    // Deliberately not `User.name`, which answers the id when a user has no
+    // name — sorting by that locally would order unnamed users among the
+    // named ones, where the API sorts them by an empty `name` column.
+    (it) => it.extraData['name'].safeCast<String>()?.let(normalizeStringForSort),
   );
 
   /// Sorts users by their role.

@@ -58,6 +58,17 @@ void main() {
         );
       });
 
+      test('name orders nothing for a member whose user has no name', () {
+        // `User.name` answers the id when a user has no name. Sorting by that
+        // would order unnamed members among the named ones, where the API
+        // sorts them together by an empty `name` column.
+        expectOrdersNothing(
+          MemberSortField.name,
+          createTestMember(userId: 'alice'),
+          createTestMember(userId: 'zara'),
+        );
+      });
+
       test('channelRole orders alphabetically', () {
         expectOrders(
           MemberSortField.channelRole,

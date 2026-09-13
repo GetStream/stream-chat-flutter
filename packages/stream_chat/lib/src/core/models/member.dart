@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_core/stream_core.dart' show Standard, Sort, SortField;
 
+import '../util/extension.dart';
 import '../util/serializer.dart';
 import '../util/string_sort_normalizer.dart';
 import 'user.dart';
@@ -236,7 +237,11 @@ class MemberSortField extends SortField<Member> {
   /// Slower than the other member sorts.
   static final name = MemberSortField(
     'name',
-    (it) => it.user?.name.let(normalizeStringForSort),
+    // Reads the raw name rather than `User.name`, which falls back to the id.
+    (it) {
+      final name = it.user?.extraData['name'];
+      return name.safeCast<String>()?.let(normalizeStringForSort);
+    },
   );
 
   /// Sorts members by the channel role.
