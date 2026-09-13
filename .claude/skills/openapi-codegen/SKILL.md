@@ -148,8 +148,12 @@ emitted by `model.tpl` / `discriminator.tpl` plus a `WsEvent` re-export from `mo
 
 `stream_core` is a **hosted** dependency: `^0.5.0`, declared in `melos.yaml` and
 `packages/stream_chat/pubspec.yaml`, with no `dependency_overrides` entry anywhere. 0.5.0 ships
-`StreamDateTimeConverter` and the sealed error layer, which is everything the generated output needs. **There is no
-release blocker.** Change the constraint in `melos.yaml` only, then `melos bootstrap` — never in a package manifest.
+`StreamDateTimeConverter` and the sealed error layer, so **no core release is blocking**. Change
+the constraint in `melos.yaml` only, then `melos bootstrap` — never in a package manifest.
+
+That is the dependency side only. The generator is still a prerequisite on its own: `client.tpl`
+emits `runSafely`, and regenerating before the template change above lands reintroduces the old
+error mapping no matter which core version resolves.
 
 If core ever goes back to a git ref for cross-repo work, it has to be pinned in every package that pulls both
 `stream_chat` and `stream_core_flutter`, because pub refuses git-vs-hosted for one package and honors an override's

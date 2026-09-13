@@ -142,7 +142,7 @@ None.
 - [ ] `migrations/v11-migration.md` is complete: every Symbol Map row filled, every feature
       section written, the Migration Checklist accurate, and the "For AI Agents" section reflecting
       the final shape.
-- [ ] The two `if: false` pana jobs in `.github/workflows/pana.yml` are green (they were
-      re-enabled when this directory was created; confirm they still pass).
+- [ ] The five pana jobs in `.github/workflows/pana.yml` are green (they were re-enabled when
+      this directory was created; confirm they still pass).
 - [ ] `melos bootstrap && melos run lint:all && melos run test:all`.
 - [ ] Every phase's status box ticked in `README.md`.

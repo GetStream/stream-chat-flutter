@@ -94,6 +94,14 @@ populated — that is step 1's job, checked here.
 **A decode failure logs and drops the frame; it never disconnects.** That is core's deliberate
 rule (`ERROR_LAYER.md`), and it matches what `_onDataReceived` effectively does today.
 
+**The encode side is not a straight `json.encode(message.toJson())`.** The only `WsRequest` chat
+sends is the health-check ping, and the two sides disagree on one key: core's
+`HealthCheckPingEvent.toJson()` writes `{'type': 'health.check', 'client_id': …}`, while chat
+serializes an `Event` and writes `connection_id`. Confirm which the chat gateway accepts before
+adopting the codec, and map the key in `ChatWsCodec.encode` if it is `connection_id`. A test
+asserting the exact encoded JSON is the guard — a wrong key here is silent until health checks
+stop being acknowledged.
+
 ### 3. Client, health, recovery
 
 ```dart
