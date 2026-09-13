@@ -2,7 +2,7 @@
 
 🛑️ Breaking
 
-- `PagedValue.error` and every `errorBuilder` now carry a `StreamChatException` instead of a `StreamChatError`, following the low-level client's error layer. A generic throwable is reported as a `StreamClientException` with the original kept as its `cause`.
+- `PagedValue.error` and every `errorBuilder` now carry a `StreamChatException` instead of a `StreamChatError`, following the low-level client's error layer. A generic throwable is reported as a `StreamClientException` naming the load that failed, with the original kept as its `cause` rather than stringified into the message.
 
 ## 10.4.0
 

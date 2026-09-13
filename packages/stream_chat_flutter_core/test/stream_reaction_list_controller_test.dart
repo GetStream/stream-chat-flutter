@@ -221,11 +221,13 @@ void main() {
       await pumpEventQueue();
 
       expect(controller.value, isA<Error>());
-      expect((controller.value as Error).error, isA<StreamClientException>());
-      expect(
-        (controller.value as Error).error.message,
-        contains('API unavailable'),
-      );
+
+      final error = (controller.value as Error).error;
+      expect(error, isA<StreamClientException>());
+      // The message names the load; the throwable itself survives as `cause`
+      // rather than being flattened into the message.
+      expect(error.message, 'Failed to load reactions');
+      expect(error.cause, same(exception));
     });
   });
 
@@ -368,11 +370,10 @@ void main() {
 
       expect(controller.value.isSuccess, isTrue);
       expect(controller.value.asSuccess.items, equals(existingReactions));
-      expect(controller.value.asSuccess.error, isNotNull);
-      expect(
-        controller.value.asSuccess.error!.message,
-        contains('Network error'),
-      );
+      final error = controller.value.asSuccess.error;
+      // The message names the load; the throwable survives as `cause`.
+      expect(error?.message, 'Failed to load more reactions');
+      expect(error?.cause, same(exception));
     });
   });
 
