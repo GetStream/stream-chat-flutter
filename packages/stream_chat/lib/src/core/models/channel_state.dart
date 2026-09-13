@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_core/stream_core.dart' show NullOrdering, Sort, SortDirection, SortField;
+import 'package:stream_core/stream_core.dart' show NullOrdering, Sort, SortDirection, SortField, Standard;
+import '../util/string_sort_normalizer.dart';
 import 'channel_model.dart';
 import 'draft.dart';
 import 'location.dart';
@@ -228,6 +229,15 @@ class ChannelSortField extends SortField<ChannelState> {
     (it) => it.channel?.cid,
   );
 
+  /// Sorts channels by their name.
+  ///
+  /// Compares the folded form, so a name differing only by case, a diacritic
+  /// or a ligature sorts where a reader expects it rather than after Z.
+  static final name = ChannelSortField(
+    'name',
+    (it) => it.channel?.name?.let(normalizeStringForSort),
+  );
+
   /// Sorts channels by the date they were created.
   static final createdAt = ChannelSortField(
     'created_at',
@@ -283,6 +293,7 @@ class ChannelSortField extends SortField<ChannelState> {
   static final _fields = [
     lastUpdated,
     cid,
+    name,
     createdAt,
     updatedAt,
     lastMessageAt,

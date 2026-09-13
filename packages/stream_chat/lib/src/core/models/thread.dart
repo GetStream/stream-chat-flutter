@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_core/stream_core.dart' show Sort, SortField;
+import 'package:stream_core/stream_core.dart' show NullOrdering, Sort, SortField;
 
 import '../util/serializer.dart';
 import 'channel_model.dart';
@@ -239,16 +239,27 @@ class Thread extends Equatable {
 /// See [ThreadSortField] for the fields that can be sorted on.
 class ThreadSort extends Sort<Thread> {
   /// Sorts by [field], smallest first.
-  const ThreadSort.asc(
+  ThreadSort.asc(
     ThreadSortField super.field, {
-    super.nullOrdering,
-  }) : super.asc();
+    NullOrdering? nullOrdering,
+  }) : super.asc(nullOrdering: nullOrdering ?? _orderingFor(field, .nullsLast));
 
   /// Sorts by [field], largest first.
-  const ThreadSort.desc(
+  ThreadSort.desc(
     ThreadSortField super.field, {
-    super.nullOrdering,
-  }) : super.desc();
+    NullOrdering? nullOrdering,
+  }) : super.desc(nullOrdering: nullOrdering ?? _orderingFor(field, .nullsFirst));
+
+  // A thread with no replies yet belongs at the end whichever way the list is
+  // sorted, the same way a channel with no messages does.
+  static final _nullsLastFields = {ThreadSortField.lastMessageAt.remote};
+
+  // Keyed on the remote name rather than the field instance, so a field built
+  // by hand for a name the API pins is ordered the same way ours is.
+  static NullOrdering _orderingFor(ThreadSortField field, NullOrdering fallback) {
+    if (_nullsLastFields.contains(field.remote)) return NullOrdering.nullsLast;
+    return fallback;
+  }
 
   /// The ordering a thread query applies when it is given no sort at all.
   ///
