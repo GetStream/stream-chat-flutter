@@ -70,8 +70,10 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final List<PollVoteSort>? sort;
-  late List<PollVoteSort>? _activeSort = sort;
+  ///
+  /// Defaults to [PollVoteSort.defaultSort].
+  final List<PollVoteSort> sort;
+  late List<PollVoteSort> _activeSort = sort;
 
   /// The limit to apply to the poll vote list. The default is set to
   /// [defaultPollVotePagedLimit].
@@ -93,19 +95,18 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new sort.
-  set sort(List<PollVoteSort>? value) => _activeSort = value;
+  ///
+  /// Passing null restores [PollVoteSort.defaultSort].
+  set sort(List<PollVoteSort>? value) => _activeSort = value ?? PollVoteSort.defaultSort;
 
   @override
   set value(PagedValue<String, PollVote> newValue) {
-    super.value = switch (_activeSort) {
-      null => newValue,
-      final pollVoteSort => newValue.maybeMap(
-        orElse: () => newValue,
-        (success) => success.copyWith(
-          items: success.items.sorted(pollVoteSort.compare),
-        ),
+    super.value = newValue.maybeMap(
+      orElse: () => newValue,
+      (success) => success.copyWith(
+        items: success.items.sorted(_activeSort.compare),
       ),
-    };
+    );
   }
 
   @override

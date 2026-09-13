@@ -70,8 +70,10 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final List<UserSort>? sort;
-  late List<UserSort>? _activeSort = sort;
+  ///
+  /// Defaults to [UserSort.defaultSort].
+  final List<UserSort> sort;
+  late List<UserSort> _activeSort = sort;
 
   /// If true you’ll receive user presence updates via the websocket events
   final bool presence;
@@ -96,7 +98,9 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new sort.
-  set sort(List<UserSort>? value) => _activeSort = value;
+  ///
+  /// Passing null restores [UserSort.defaultSort].
+  set sort(List<UserSort>? value) => _activeSort = value ?? UserSort.defaultSort;
 
   /// Searches users whose name or id matches [query], debounced by its length.
   ///
@@ -133,15 +137,12 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
 
   @override
   set value(PagedValue<int, User> newValue) {
-    super.value = switch (_activeSort) {
-      null => newValue,
-      final userSort => newValue.maybeMap(
-        orElse: () => newValue,
-        (success) => success.copyWith(
-          items: success.items.sorted(userSort.compare),
-        ),
+    super.value = newValue.maybeMap(
+      orElse: () => newValue,
+      (success) => success.copyWith(
+        items: success.items.sorted(_activeSort.compare),
       ),
-    };
+    );
   }
 
   @override

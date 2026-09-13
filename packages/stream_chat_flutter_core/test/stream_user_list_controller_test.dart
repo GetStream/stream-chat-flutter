@@ -20,6 +20,31 @@ void main() {
     return QueryUsersResponse()..users = users;
   }
 
+  test('setting sort to null queries with the default sort', () async {
+    final sorts = <Object?>[];
+    when(
+      () => client.queryUsers(
+        filter: any(named: 'filter'),
+        sort: any(named: 'sort'),
+        presence: any(named: 'presence'),
+        pagination: any(named: 'pagination'),
+      ),
+    ).thenAnswer((invocation) async {
+      sorts.add(invocation.namedArguments[#sort]);
+      return usersResponse([User(id: 'user-1')]);
+    });
+
+    final controller = StreamUserListController(
+      client: client,
+      sort: [UserSort.asc(UserSortField.name)],
+    )..sort = null;
+    addTearDown(controller.dispose);
+
+    await controller.doInitialLoad();
+
+    expect(sorts.single, equals(UserSort.defaultSort));
+  });
+
   group('search', () {
     test('queries users with the provided filter after debouncing', () {
       Filter? usedFilter;

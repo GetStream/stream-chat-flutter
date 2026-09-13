@@ -65,8 +65,10 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final List<MemberSort>? sort;
-  late List<MemberSort>? _activeSort = sort;
+  ///
+  /// Defaults to [MemberSort.defaultSort].
+  final List<MemberSort> sort;
+  late List<MemberSort> _activeSort = sort;
 
   /// The limit to apply to the member list. The default is set to
   /// [defaultMemberPagedLimit].
@@ -88,7 +90,9 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new sort.
-  set sort(List<MemberSort>? value) => _activeSort = value;
+  ///
+  /// Passing null restores [MemberSort.defaultSort].
+  set sort(List<MemberSort>? value) => _activeSort = value ?? MemberSort.defaultSort;
 
   /// Searches members whose name matches [query], debounced by its length.
   ///
@@ -122,15 +126,12 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
 
   @override
   set value(PagedValue<int, Member> newValue) {
-    super.value = switch (_activeSort) {
-      null => newValue,
-      final memberSort => newValue.maybeMap(
-        orElse: () => newValue,
-        (success) => success.copyWith(
-          items: success.items.sorted(memberSort.compare),
-        ),
+    super.value = newValue.maybeMap(
+      orElse: () => newValue,
+      (success) => success.copyWith(
+        items: success.items.sorted(_activeSort.compare),
       ),
-    };
+    );
   }
 
   @override

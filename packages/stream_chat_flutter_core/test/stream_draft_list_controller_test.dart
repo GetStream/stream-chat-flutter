@@ -607,6 +607,33 @@ void main() {
   });
 
   group('Filtering and sorting', () {
+    test('setting sort to null queries with the default sort', () async {
+      final sorts = <Object?>[];
+
+      when(
+        () => client.queryDrafts(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer((invocation) async {
+        sorts.add(invocation.namedArguments[const Symbol('sort')]);
+        return QueryDraftsResponse()
+          ..drafts = generateDrafts()
+          ..next = '';
+      });
+
+      final controller = StreamDraftListController(
+        client: client,
+        sort: [DraftSort.asc(DraftSortField.createdAt)],
+      )..sort = null;
+
+      await controller.doInitialLoad();
+      await pumpEventQueue();
+
+      expect(sorts.single, equals(DraftSort.defaultSort));
+    });
+
     test('refresh resets filter and sort to initial values', () async {
       final drafts = generateDrafts();
       final initialFilter = Filter.equal('type', 'messaging');

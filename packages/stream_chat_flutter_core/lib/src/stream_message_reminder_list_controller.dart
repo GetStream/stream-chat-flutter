@@ -68,8 +68,10 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final List<MessageReminderSort>? sort;
-  late List<MessageReminderSort>? _activeSort = sort;
+  ///
+  /// Defaults to [MessageReminderSort.defaultSort].
+  final List<MessageReminderSort> sort;
+  late List<MessageReminderSort> _activeSort = sort;
 
   /// The limit to apply to the message reminder list. The default is set to
   /// [defaultMessageReminderPagedLimit].
@@ -85,19 +87,18 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
   ///
   /// Use this if you need to support runtime sort changes,
   /// through custom sort UI.
-  set sort(List<MessageReminderSort>? value) => _activeSort = value;
+  ///
+  /// Passing null restores [MessageReminderSort.defaultSort].
+  set sort(List<MessageReminderSort>? value) => _activeSort = value ?? MessageReminderSort.defaultSort;
 
   @override
   set value(PagedValue<String, MessageReminder> newValue) {
-    super.value = switch (_activeSort) {
-      null => newValue,
-      final reminderSort => newValue.maybeMap(
-        orElse: () => newValue,
-        (success) => success.copyWith(
-          items: success.items.sorted(reminderSort.compare),
-        ),
+    super.value = newValue.maybeMap(
+      orElse: () => newValue,
+      (success) => success.copyWith(
+        items: success.items.sorted(_activeSort.compare),
       ),
-    };
+    );
   }
 
   @override
