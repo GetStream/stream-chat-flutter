@@ -30,7 +30,8 @@ Three documents cut across the phases:
 
 Status key: ☐ not started · ◐ partly landed · ☑ done · ⏸ parked.
 
-**07 is parked.** Nothing after it depends on it, so 08–10 proceed as planned.
+**07 is parked.** It was attempted in full and reverted; the findings are kept in its own file.
+Nothing after it depends on it, so 08–10 proceed as planned.
 
 **Net:** ~4.0k LOC of hand-written `lib/src` deleted (of ~29.0k), replaced by ~5.5k LOC of core
 that is already written and tested. Six direct dependencies become transitive.
@@ -108,18 +109,16 @@ Decided once here, not re-argued per phase.
 ### The barrel is a `show` allowlist
 
 `stream_feeds` opens its barrel with `export 'package:stream_core/stream_core.dart';`. **We
-cannot.** Exporting core wholesale from `lib/stream_chat.dart` still collides on `AttachmentFile`,
-`Filter`, `FilterOperator`, `NullOrdering`, `ComparableField`, `CurrentPlatform`, `PlatformType`
-and `User`. Core also re-exports all of dio, while our barrel deliberately re-exports a *narrowed*
-dio — and `package:async`, which our barrel also re-exports, declares a `Result` of its own.
+cannot.** Exporting core wholesale from `lib/stream_chat.dart` still collides on `AttachmentFile`
+and `User`, the two types [What stays ours](#what-stays-ours) keeps. Core also re-exports all of
+dio, while our barrel deliberately re-exports a *narrowed* dio — and `package:async`, which our
+barrel also re-exports, declares a `Result` of its own.
 
-Each landed phase shortens that list, since an adopted type stops being a duplicate.
-`InFlightCache`, `SystemEnvironment`, `SystemEnvironmentManager` and
-`XStreamClientHeaderExtension` are off it, as are `TokenManager`, `AuthType`, `AuthInterceptor`,
-`ConnectionIdInterceptor`, `LoggingInterceptor`, `InterceptStep` and `LogPrint` — chat declares
-none of them any more. `Success` went with the rename of `UploadState`'s variants. The allowlist
-is the mechanism throughout — grow it phase by phase rather than switching to a wholesale export
-at the end.
+Each landed phase shortened that list, since an adopted type stops being a duplicate. Everything
+else that was on it — the token and interceptor types, the logger types, `InFlightCache`, the
+system-environment types, `CurrentPlatform`, `PlatformType` and the whole query DSL — is core's
+now, and `Success` went with the rename of `UploadState`'s variants. The allowlist stays the
+mechanism: grow it phase by phase rather than switching to a wholesale export at the end.
 
 Narrowing is already the precedent in that file: `filter.dart show Filter, FilterOperator` and
 `device_api.dart show PushProvider`.
@@ -152,8 +151,10 @@ Tracked in [`UPSTREAM.md`](UPSTREAM.md), which also covers the reverse direction
 that every product needs, and things chat's use has shown core to be missing or wrong about.
 
 Each phase names the `stream_core` changes it needs, and those should be grouped into as few core
-releases as possible. Only one is a hard block on API we already ship publicly: `Filter`'s
-`$ne` / `$nin` / `$nor` operators, for phase [08](08-query-dsl.md).
+releases as possible. Nothing is blocking any more: phase [08](08-query-dsl.md)'s changes landed
+in [stream-core-flutter#181](https://github.com/GetStream/stream-core-flutter/pull/181), and the
+`$ne` / `$nin` / `$nor` operators an earlier pass called a hard block are not upstream asks at all
+— see that phase.
 
 **Diff against the resolved package, not the sibling repo.** Two of this plan's original upstream
 asks turned out to be already satisfied, because they had been derived from
