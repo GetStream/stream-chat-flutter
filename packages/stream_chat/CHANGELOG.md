@@ -25,7 +25,7 @@
 - `Filter` compares by identity rather than by value. Compare `toJson()` where you compared filters.
 - `FilterOperator` is an extension type over `String` rather than an enum, so `'$eq'` and `FilterOperator.equal` interchange.
 - `Filter.empty()` is removed. Every `filter` argument is nullable; pass `null` to match everything. This matters on `queryThreads`, where the API widens the query for an omitted filter but not for an empty one.
-- `Filter.notEqual`, `Filter.notIn` and `Filter.nor` are removed. `$ne`, `$nin` and `$nor` are deprecated server-side and are being withdrawn. A directory that hid the signed-in user, or a member picker that hid existing members, drops them from the result instead — the sample app now does, so it lists everyone the query returns.
+- `Filter.notEqual`, `Filter.notIn` and `Filter.nor` are removed. `$ne`, `$nin` and `$nor` are deprecated server-side and are being withdrawn. A query that excluded someone — a directory hiding the signed-in user, a member picker hiding existing members — has to do that in the client now, or show them. The sample app shows them.
 - `Filter.notExists(key)` becomes `Filter.exists(field, exists: false)`.
 - `Filter.custom({value, operator, key})` is removed. Use a registry's `custom` factory for an unmodelled field, or `Filter.raw` for a query this package cannot express.
 - `Filter.raw` takes its map positionally: `Filter.raw({...})` rather than `Filter.raw(value: {...})`. It is not validated, and `matches` throws for it.
