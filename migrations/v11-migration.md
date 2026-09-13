@@ -360,34 +360,27 @@ template in [Contributing to this guide](#contributing-to-this-guide)._
 
 ### Sorting
 
-Two changes here compile cleanly and change what your users see, so the analyzer will not find them for you.
-
-**`sort: null` now means the default sort, not no sort.** A list controller used to default the argument, so
-passing `null` explicitly suppressed sorting and let the server order the result. It is now coerced to that
-controller's default:
+**`sort: null` no longer suppresses sorting.** A list controller used to default the argument, so passing
+`null` explicitly sent no sort and let the server order the result. Its `sort` is non-nullable now: leaving the
+argument out applies the model's default, and `XSort.empty` is what sends no sort.
 
 ```dart
 // v10 — sends no sort, server ordering.
 StreamUserListController(client: client, sort: null);
 
-// v11 — same line, now sends UserSort.defaultSort.
-StreamUserListController(client: client, sort: null);
+// v11 — sends no sort, server ordering.
+StreamUserListController(client: client, sort: UserSort.empty);
+
+// v11 — sends UserSort.defaultSort.
+StreamUserListController(client: client);
 ```
 
 This applies to the user, member, draft, poll-vote, message-reminder and channel controllers.
-`StreamThreadListController` is the exception and still sends none. If you relied on server ordering, the
-`sort` setter still accepts `null` after construction.
+`StreamThreadListController`, `StreamReactionListController` and `StreamMessageSearchListController` declare no
+default and still send nothing unless given a sort.
 
-**A poll-vote list defaults to newest first.** It was oldest first. Every `StreamPollVoteListController` without
-an explicit sort has its order reversed. To keep the old order:
-
-```dart
-StreamPollVoteListController(
-  client: client,
-  pollId: pollId,
-  sort: [PollVoteSort.asc(PollVoteSortField.createdAt)],
-);
-```
+An empty sort also leaves a loaded page in the order it arrived in, rather than re-sorting it — including a page
+read from the offline cache, which orders by the model's default when the query named no sort.
 
 ---
 
@@ -405,8 +398,8 @@ Work top to bottom; each item is independently verifiable.
 - [ ] Re-check custom data access: fields that used to arrive in `extraData` may now be typed properties
 - [ ] If you implement `AttachmentFileUploader`, review its section under [Feature Areas](#feature-areas)
 - [ ] If you persist models yourself, re-check nullability as endpoints move to the generated types, which are nullable wherever the API allows it
-- [ ] Re-check any list controller you pass `sort: null` to, and the poll-vote list's default order — see
-      [Sorting](#sorting). Neither shows up as an analyzer error
+- [ ] Replace `sort: null` on any list controller with `XSort.empty` if you relied on server ordering — see
+      [Sorting](#sorting)
 - [ ] If you use `stream_chat_persistence`, expect one cold start after upgrading — see [Offline Cache](#offline-cache)
 - [ ] Run `dart analyze` and your test suite; the analyzer finds most of the mechanical work for you
 
