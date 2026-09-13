@@ -289,6 +289,12 @@ class PollSort extends Sort<Poll> {
     super.nullOrdering,
   }) : super.desc();
 
+  /// An empty sort, which leaves the ordering to the API.
+  ///
+  /// Pass this where a sort is expected but none is wanted: a query carries
+  /// no sort term, and a poll list is left in the order it arrived in.
+  static const List<PollSort> empty = [];
+
   /// The ordering the API applies to a poll query when none is given.
   ///
   /// Sorts by when the poll was created, oldest first.

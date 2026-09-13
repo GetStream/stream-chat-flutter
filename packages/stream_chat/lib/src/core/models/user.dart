@@ -229,6 +229,12 @@ class UserSort extends Sort<User> {
     super.nullOrdering,
   }) : super.desc();
 
+  /// An empty sort, which leaves the ordering to the API.
+  ///
+  /// Pass this where a sort is expected but none is wanted: a query carries
+  /// no sort term, and a user list is left in the order it arrived in.
+  static const List<UserSort> empty = [];
+
   /// The ordering the API applies to a user query when none is given.
   ///
   /// Sorts by when the user was created, newest first.

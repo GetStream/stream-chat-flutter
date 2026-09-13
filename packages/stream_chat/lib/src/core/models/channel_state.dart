@@ -185,6 +185,12 @@ class ChannelSort extends Sort<ChannelState> {
     return fallback;
   }
 
+  /// An empty sort, which leaves the ordering to the API.
+  ///
+  /// Pass this where a sort is expected but none is wanted: a query carries
+  /// no sort term, and a channel list is left in the order it arrived in.
+  static const List<ChannelSort> empty = [];
+
   /// The ordering the API applies to a channel query when none is given.
   ///
   /// Sorts by the last message date, or the channel creation date when it has

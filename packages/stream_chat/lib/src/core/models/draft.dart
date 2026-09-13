@@ -102,6 +102,12 @@ class DraftSort extends Sort<Draft> {
     super.nullOrdering,
   }) : super.desc();
 
+  /// An empty sort, which leaves the ordering to the API.
+  ///
+  /// Pass this where a sort is expected but none is wanted: a query carries
+  /// no sort term, and a draft list is left in the order it arrived in.
+  static const List<DraftSort> empty = [];
+
   /// The ordering the API applies to a draft query when none is given.
   ///
   /// Sorts by when the draft was created, newest first.

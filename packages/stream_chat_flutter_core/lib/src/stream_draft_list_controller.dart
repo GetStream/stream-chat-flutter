@@ -66,7 +66,8 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
   ///
   /// Direction can be ascending or descending.
   ///
-  /// Defaults to [DraftSort.defaultSort].
+  /// Defaults to [DraftSort.defaultSort]; pass [DraftSort.empty] to leave the
+  /// ordering to the API.
   final List<DraftSort> sort;
   late List<DraftSort> _activeSort = sort;
 
@@ -85,17 +86,21 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
   /// Use this if you need to support runtime sort changes,
   /// through custom sort UI.
   ///
-  /// Passing null restores [DraftSort.defaultSort].
-  set sort(List<DraftSort>? value) => _activeSort = value ?? DraftSort.defaultSort;
+  /// Pass [DraftSort.defaultSort] to restore the default, or
+  /// [DraftSort.empty] to leave the ordering to the API.
+  set sort(List<DraftSort> value) => _activeSort = value;
 
   @override
   set value(PagedValue<String, Draft> newValue) {
-    super.value = newValue.maybeMap(
-      orElse: () => newValue,
-      (success) => success.copyWith(
-        items: success.items.sorted(_activeSort.compare),
+    super.value = switch (_activeSort) {
+      [] => newValue,
+      final draftSort => newValue.maybeMap(
+        orElse: () => newValue,
+        (success) => success.copyWith(
+          items: success.items.sorted(draftSort.compare),
+        ),
       ),
-    );
+    };
   }
 
   @override

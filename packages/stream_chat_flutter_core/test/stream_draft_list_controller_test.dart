@@ -607,7 +607,7 @@ void main() {
   });
 
   group('Filtering and sorting', () {
-    test('setting sort to null queries with the default sort', () async {
+    test('an unset sort queries with the default sort', () async {
       final sorts = <Object?>[];
 
       when(
@@ -623,15 +623,61 @@ void main() {
           ..next = '';
       });
 
-      final controller = StreamDraftListController(
-        client: client,
-        sort: [DraftSort.asc(DraftSortField.createdAt)],
-      )..sort = null;
+      final controller = StreamDraftListController(client: client);
 
       await controller.doInitialLoad();
       await pumpEventQueue();
 
       expect(sorts.single, equals(DraftSort.defaultSort));
+    });
+
+    test('an empty sort queries without a sort term', () async {
+      final sorts = <Object?>[];
+
+      when(
+        () => client.queryDrafts(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer((invocation) async {
+        sorts.add(invocation.namedArguments[const Symbol('sort')]);
+        return QueryDraftsResponse()
+          ..drafts = generateDrafts()
+          ..next = '';
+      });
+
+      final controller = StreamDraftListController(client: client, sort: DraftSort.empty);
+
+      await controller.doInitialLoad();
+      await pumpEventQueue();
+
+      expect(sorts.single, isEmpty);
+    });
+
+    test('an empty sort leaves a page in the order it arrived in', () async {
+      // The default sort is newest-first, so an oldest-first page comes back
+      // reordered unless the empty sort is left alone.
+      final oldestFirst = generateDrafts(count: 5).reversed.toList();
+
+      when(
+        () => client.queryDrafts(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer(
+        (_) async => QueryDraftsResponse()
+          ..drafts = oldestFirst
+          ..next = '',
+      );
+
+      final controller = StreamDraftListController(client: client, sort: DraftSort.empty);
+
+      await controller.doInitialLoad();
+      await pumpEventQueue();
+
+      expect(controller.value.asSuccess.items, equals(oldestFirst));
     });
 
     test('refresh resets filter and sort to initial values', () async {

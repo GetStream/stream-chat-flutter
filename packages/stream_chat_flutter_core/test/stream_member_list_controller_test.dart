@@ -19,7 +19,7 @@ void main() {
     return QueryMembersResponse()..members = members;
   }
 
-  test('setting sort to null queries with the default sort', () async {
+  test('an empty sort queries without a sort term', () async {
     final sorts = <Object?>[];
     when(
       () => channel.queryMembers(
@@ -34,13 +34,13 @@ void main() {
 
     final controller = StreamMemberListController(
       channel: channel,
-      sort: [MemberSort.desc(MemberSortField.userId)],
-    )..sort = null;
+      sort: MemberSort.empty,
+    );
     addTearDown(controller.dispose);
 
     await controller.doInitialLoad();
 
-    expect(sorts.single, equals(MemberSort.defaultSort));
+    expect(sorts.single, isEmpty);
   });
 
   group('search', () {

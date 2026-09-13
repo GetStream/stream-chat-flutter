@@ -93,7 +93,7 @@ class StreamReactionListController extends PagedValueNotifier<String?, Reaction>
   @override
   set value(PagedValue<String?, Reaction> newValue) {
     super.value = switch (_activeSort) {
-      null => newValue,
+      null || [] => newValue,
       final reactionSort => newValue.maybeMap(
         orElse: () => newValue,
         (success) => success.copyWith(

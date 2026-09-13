@@ -20,7 +20,7 @@ void main() {
     return QueryUsersResponse()..users = users;
   }
 
-  test('setting sort to null queries with the default sort', () async {
+  test('an empty sort queries without a sort term', () async {
     final sorts = <Object?>[];
     when(
       () => client.queryUsers(
@@ -36,13 +36,13 @@ void main() {
 
     final controller = StreamUserListController(
       client: client,
-      sort: [UserSort.asc(UserSortField.name)],
-    )..sort = null;
+      sort: UserSort.empty,
+    );
     addTearDown(controller.dispose);
 
     await controller.doInitialLoad();
 
-    expect(sorts.single, equals(UserSort.defaultSort));
+    expect(sorts.single, isEmpty);
   });
 
   group('search', () {

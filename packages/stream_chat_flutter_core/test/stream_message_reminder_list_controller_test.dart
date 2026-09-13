@@ -129,7 +129,7 @@ void main() {
       expect(controller.value.asSuccess.items, equals(reminders));
     });
 
-    test('setting sort to null queries with the default sort', () async {
+    test('an empty sort queries without a sort term', () async {
       final sorts = <Object?>[];
 
       when(
@@ -147,13 +147,13 @@ void main() {
 
       final controller = StreamMessageReminderListController(
         client: client,
-        sort: [MessageReminderSort.desc(MessageReminderSortField.createdAt)],
-      )..sort = null;
+        sort: MessageReminderSort.empty,
+      );
 
       await controller.doInitialLoad();
       await pumpEventQueue();
 
-      expect(sorts.single, equals(MessageReminderSort.defaultSort));
+      expect(sorts.single, isEmpty);
     });
 
     test('handles a Stream failure properly', () async {

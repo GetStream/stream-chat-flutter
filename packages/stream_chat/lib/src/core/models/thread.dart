@@ -263,6 +263,12 @@ class ThreadSort extends Sort<Thread> {
     return fallback;
   }
 
+  /// An empty sort, which leaves the ordering to the API.
+  ///
+  /// Pass this where a sort is expected but none is wanted: a query carries
+  /// no sort term, and a thread list is left in the order it arrived in.
+  static const List<ThreadSort> empty = [];
+
   /// The ordering a thread query applies when it is given no sort at all.
   ///
   /// Surfaces threads with unread replies first, then the most recently active.

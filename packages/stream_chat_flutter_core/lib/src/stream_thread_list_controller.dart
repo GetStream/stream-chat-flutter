@@ -127,7 +127,7 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
   @override
   set value(PagedValue<String, Thread> newValue) {
     super.value = switch (_activeSort) {
-      null => newValue,
+      null || [] => newValue,
       final threadSort => newValue.maybeMap(
         orElse: () => newValue,
         (success) => success.copyWith(

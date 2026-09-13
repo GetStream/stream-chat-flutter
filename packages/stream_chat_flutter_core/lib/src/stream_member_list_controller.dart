@@ -66,7 +66,8 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
   ///
   /// Direction can be ascending or descending.
   ///
-  /// Defaults to [MemberSort.defaultSort].
+  /// Defaults to [MemberSort.defaultSort]; pass [MemberSort.empty] to leave the
+  /// ordering to the API.
   final List<MemberSort> sort;
   late List<MemberSort> _activeSort = sort;
 
@@ -91,8 +92,9 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new sort.
   ///
-  /// Passing null restores [MemberSort.defaultSort].
-  set sort(List<MemberSort>? value) => _activeSort = value ?? MemberSort.defaultSort;
+  /// Pass [MemberSort.defaultSort] to restore the default, or
+  /// [MemberSort.empty] to leave the ordering to the API.
+  set sort(List<MemberSort> value) => _activeSort = value;
 
   /// Searches members whose name matches [query], debounced by its length.
   ///
@@ -126,12 +128,15 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
 
   @override
   set value(PagedValue<int, Member> newValue) {
-    super.value = newValue.maybeMap(
-      orElse: () => newValue,
-      (success) => success.copyWith(
-        items: success.items.sorted(_activeSort.compare),
+    super.value = switch (_activeSort) {
+      [] => newValue,
+      final memberSort => newValue.maybeMap(
+        orElse: () => newValue,
+        (success) => success.copyWith(
+          items: success.items.sorted(memberSort.compare),
+        ),
       ),
-    );
+    };
   }
 
   @override

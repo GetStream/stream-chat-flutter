@@ -192,6 +192,12 @@ class MemberSort extends Sort<Member> {
     super.nullOrdering,
   }) : super.desc();
 
+  /// An empty sort, which leaves the ordering to the API.
+  ///
+  /// Pass this where a sort is expected but none is wanted: a query carries
+  /// no sort term, and a member list is left in the order it arrived in.
+  static const List<MemberSort> empty = [];
+
   /// The ordering the API applies to a member query when none is given.
   ///
   /// Sorts by when the member joined, oldest first.

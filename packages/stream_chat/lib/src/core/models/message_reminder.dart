@@ -156,6 +156,12 @@ class MessageReminderSort extends Sort<MessageReminder> {
     super.nullOrdering,
   }) : super.desc();
 
+  /// An empty sort, which leaves the ordering to the API.
+  ///
+  /// Pass this where a sort is expected but none is wanted: a query carries
+  /// no sort term, and a reminder list is left in the order it arrived in.
+  static const List<MessageReminderSort> empty = [];
+
   /// The ordering the API applies to a reminder query when none is given.
   ///
   /// Sorts by when the user asked to be reminded, soonest first.
