@@ -125,15 +125,12 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
 
   @override
   set value(PagedValue<int, Member> newValue) {
-    super.value = switch (_activeSort) {
-      [] => newValue,
-      final memberSort => newValue.maybeMap(
-        orElse: () => newValue,
-        (success) => success.copyWith(
-          items: success.items.sortedByCompare((it) => it, memberSort.compare),
-        ),
+    super.value = newValue.maybeMap(
+      orElse: () => newValue,
+      (success) => success.copyWith(
+        items: success.items.sortedByCompare((it) => it, _activeSort.compare),
       ),
-    };
+    );
   }
 
   @override

@@ -136,15 +136,12 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
 
   @override
   set value(PagedValue<int, User> newValue) {
-    super.value = switch (_activeSort) {
-      [] => newValue,
-      final userSort => newValue.maybeMap(
-        orElse: () => newValue,
-        (success) => success.copyWith(
-          items: success.items.sortedByCompare((it) => it, userSort.compare),
-        ),
+    super.value = newValue.maybeMap(
+      orElse: () => newValue,
+      (success) => success.copyWith(
+        items: success.items.sortedByCompare((it) => it, _activeSort.compare),
       ),
-    };
+    );
   }
 
   @override

@@ -92,15 +92,12 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
 
   @override
   set value(PagedValue<String, MessageReminder> newValue) {
-    super.value = switch (_activeSort) {
-      [] => newValue,
-      final reminderSort => newValue.maybeMap(
-        orElse: () => newValue,
-        (success) => success.copyWith(
-          items: success.items.sortedByCompare((it) => it, reminderSort.compare),
-        ),
+    super.value = newValue.maybeMap(
+      orElse: () => newValue,
+      (success) => success.copyWith(
+        items: success.items.sortedByCompare((it) => it, _activeSort.compare),
       ),
-    };
+    );
   }
 
   @override

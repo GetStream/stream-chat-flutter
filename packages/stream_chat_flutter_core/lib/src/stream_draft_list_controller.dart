@@ -89,15 +89,12 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
 
   @override
   set value(PagedValue<String, Draft> newValue) {
-    super.value = switch (_activeSort) {
-      [] => newValue,
-      final draftSort => newValue.maybeMap(
-        orElse: () => newValue,
-        (success) => success.copyWith(
-          items: success.items.sortedByCompare((it) => it, draftSort.compare),
-        ),
+    super.value = newValue.maybeMap(
+      orElse: () => newValue,
+      (success) => success.copyWith(
+        items: success.items.sortedByCompare((it) => it, _activeSort.compare),
       ),
-    };
+    );
   }
 
   @override

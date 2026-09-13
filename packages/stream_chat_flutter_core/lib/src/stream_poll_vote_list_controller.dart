@@ -100,15 +100,12 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
 
   @override
   set value(PagedValue<String, PollVote> newValue) {
-    super.value = switch (_activeSort) {
-      [] => newValue,
-      final pollVoteSort => newValue.maybeMap(
-        orElse: () => newValue,
-        (success) => success.copyWith(
-          items: success.items.sortedByCompare((it) => it, pollVoteSort.compare),
-        ),
+    super.value = newValue.maybeMap(
+      orElse: () => newValue,
+      (success) => success.copyWith(
+        items: success.items.sortedByCompare((it) => it, _activeSort.compare),
       ),
-    };
+    );
   }
 
   @override
