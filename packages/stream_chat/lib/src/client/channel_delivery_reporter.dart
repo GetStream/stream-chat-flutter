@@ -34,6 +34,8 @@ class ChannelDeliveryReporter {
     this._throttleDuration = const Duration(seconds: 1),
     String tag = 'SCh:Delivery',
   }) : _logger = StreamLogger(tag);
+
+  final StreamLogger _logger;
   final Duration _throttleDuration;
 
   /// The callback invoked to send delivery receipts.
@@ -79,8 +81,6 @@ class ChannelDeliveryReporter {
     // Trigger mark channels delivered request
     _throttledMarkCandidatesAsDelivered.call();
   }
-
-  final StreamLogger _logger;
 
   /// Reconciles delivery reporting for [channels] with their current state.
   ///

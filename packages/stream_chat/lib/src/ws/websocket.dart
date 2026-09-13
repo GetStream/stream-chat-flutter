@@ -49,6 +49,8 @@ class WebSocket with TimerHelper {
     String tag = 'SCh:Ws',
   }) : _logger = StreamLogger(tag);
 
+  final StreamLogger _logger;
+
   ///
   final String apiKey;
 
@@ -120,8 +122,6 @@ class WebSocket with TimerHelper {
   set _connectionStatus(ConnectionStatus status) {
     _connectionStatusController.safeAdd(status);
   }
-
-  final StreamLogger _logger;
 
   /// This notifies of connection status changes
   Stream<ConnectionStatus> get connectionStatusStream {
