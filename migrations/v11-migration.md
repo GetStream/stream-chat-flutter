@@ -80,7 +80,8 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `PagedValue.error(StreamChatError)` (`stream_chat_flutter_core`) | `PagedValue.error(StreamChatException)` | `retyped` | |
 | `errorBuilder: Function(BuildContext, StreamChatError)` (scroll views) | `Function(BuildContext, StreamChatException)` | `retyped` | |
 | `Token` | `UserToken` (`stream_core`) | `renamed` | `Token.fromRawValue(x)` → `UserToken(x)`; parses `exp`, so expiry is known |
-| `TokenProvider` (typedef `Future<String> Function(String)`) | `TokenProvider` (interface, `stream_core`) | `retyped` | A closure no longer satisfies it: `TokenProvider.dynamic(loader)`, and the loader returns a `UserToken` |
+| `TokenProvider` (typedef `Future<String> Function(String)`) | `TokenProvider` (interface, `stream_core`) | `retyped` | A closure no longer satisfies it. Wrap it: `TokenProvider.dynamic(loader)`, where `typedef UserTokenLoader = Future<UserToken> Function(String userId)` — so the loader returns a `UserToken`, not a `String`, and must be async |
+| — | `UserToken(rawJwt)` | `added` | **Throws on a malformed JWT**, where `Token.fromRawValue` accepted anything. It also rejects a token whose `user_id` claim does not match the id it was loaded for. Both present as "cannot log in" rather than as a compile error |
 | `TokenManager.loadToken()` / `.isStatic` / `.setTokenOrProvider()` | `.getToken()` / `.usesStaticProvider` / `.setTokenProvider()` | `renamed` | `loadToken(refresh: true)` becomes `expireToken()` then `getToken()` |
 | `StreamChatClient.devToken(userId)` | — | `removed` | Generate tokens on your backend |
 | `StreamChatClient(logLevel:, logHandlerFunction:)` | `StreamChatClient(logConfig: StreamLogConfig(...))` | `retyped` | Default is unchanged: warnings and errors to the console |
@@ -147,6 +148,33 @@ try {
 ```
 
 `StreamChatException` is an alias of `stream_core`'s `StreamException`, so either name catches the same failures.
+
+**Reading `.code` or `.statusCode` means catching a subtype — and that narrows what you catch.** The
+tempting one-for-one swap silently stops handling most failures:
+
+```dart
+// ✗ compiles, and no longer catches timeouts, cancellation, auth failures or
+//   a response the SDK could not decode.
+} on StreamApiException catch (e) {
+  if (e.statusCode == 429) backOff();
+}
+
+// ✓ catch the root, then match. `StreamChatException` is sealed, so this
+//   `switch` is exhaustive with no default arm.
+} on StreamChatException catch (e) {
+  switch (e) {
+    case StreamApiException(:final statusCode) when statusCode == 429: backOff();
+    case StreamNetworkException(isTimeout: true): retryLater();
+    case StreamAuthenticationException(): reauthenticate();
+    case StreamClientException(): rethrow;   // an SDK bug, not yours
+    case StreamApiException(): showError(e.message);
+    case StreamNetworkException(): showOffline();
+  }
+}
+```
+
+Note this differs from the `Result.fold` example further down: `Failure.error` is typed `Object`, so
+a `switch` on it *does* need a default arm. Only the caught root is sealed.
 
 > **The one break you can ship without noticing.** `StreamChatNetworkError` is deprecated rather than deleted,
 > because unmigrated endpoints used to throw it. Nothing throws it any more, so
