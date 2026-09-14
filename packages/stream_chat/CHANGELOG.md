@@ -12,10 +12,7 @@
 - `RetryPolicy.shouldRetry` receives a `StreamChatException?` instead of a `StreamChatError?`.
 - `UploadState`'s variant classes are renamed to `UploadStatePreparing`, `UploadStateInProgress`, `UploadStateSuccess` and `UploadStateFailed`, freeing the names `Success` and `Failed`.
 - `Result` from `package:async` is no longer re-exported; the re-exported `Result` is `stream_core`'s.
-
-⚠️ Deprecated
-
-- `StreamChatNetworkError` is deprecated. Nothing throws it any more, so an `on StreamChatNetworkError catch` clause still compiles but no longer matches.
+- `StreamChatNetworkError` and `StreamChatNetworkErrorType` are removed. Nothing throws them any more, so keeping them would let an `on StreamChatNetworkError catch` clause compile while matching nothing.
 
 🔄 Changed
 

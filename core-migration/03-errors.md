@@ -50,7 +50,7 @@ typedef StreamChatException = StreamException;
 is still a live base for things unrelated to request failures —
 `stream_chat_flutter`'s `AttachmentLimitReachedError`, `AttachmentTooLargeError` and
 `AttachmentBlockedError` extend it, and the SDK's own precondition throws raise it. It stays as it
-is; only `StreamChatNetworkError` is deprecated.
+is; `StreamChatNetworkError` is the one that goes.
 
 Export the alias from `lib/stream_chat.dart` alongside the allowlist below.
 
@@ -152,11 +152,14 @@ retryability is the caller's policy, so this is the intended shape, not a workar
    message. The new predicate retries network failures (unless cancelled), 5xx, 429 and 408, and
    never other 4xx, auth failures, client failures, or anything flagged `unrecoverable`. **This
    changes runtime behaviour** and gets its own CHANGELOG line.
-2. **`StreamChatNetworkError` is deprecated, not deleted.** It must survive: every endpoint
-   `openapi-migration` has not yet moved still flows through the hand-written verb facade. It goes
-   when group 12 lands. **The deprecation warning is not the whole story** — nothing throws it
-   any more, so `on StreamChatNetworkError catch` still *compiles* and silently stops matching.
-   The migration guide has to say that in those words.
+2. **`StreamChatNetworkError` is deleted, not deprecated.** An earlier draft deferred it to
+   `openapi-migration` group 12, on the grounds that endpoints that group has not moved still flow
+   through the hand-written verb facade. That reasoning does not survive this phase: the facade
+   throws a `StreamChatException` now, so nothing raises the type whichever endpoint you call.
+   Keeping it declared would buy source compatibility for a type that no longer works — an
+   `on StreamChatNetworkError catch` would still *compile* and silently match nothing, which is
+   the one break a consumer can ship without noticing. Deleting it makes that a compile error
+   instead. `StreamChatNetworkErrorType` goes with it.
 3. **`ChatErrorCode` is deleted**, as `migrations/v11-migration.md` already promises. An `enum`
    cannot alias an extension type, so a deprecated forwarder is not available, and three of its
    entries are not real wire codes anyway (see below).
@@ -206,9 +209,10 @@ discarded by stringifying it.
   `StreamChatNetworkError` is caught by type in `retry_queue.dart`, `app_settings_manager.dart`,
   `websocket.dart:392` and across `channel.dart` / `channel_client_state.dart`'s optimistic-update
   rollbacks.
-- **The silent-catch trap.** Because the type stays declared, `on StreamChatNetworkError catch`
-  keeps compiling and quietly matches nothing. This is the one break a consumer can ship without
-  noticing, in this phase and in their own code.
+- **The silent-catch trap, avoided by deleting rather than deprecating.** Had the type stayed
+  declared, `on StreamChatNetworkError catch` would keep compiling and quietly match nothing — the
+  one break a consumer can ship without noticing. It is gone, so the same clause fails to compile
+  and the consumer is sent to the migration guide.
 - **`StreamException` has no `stackTrace`, by design** — `ERROR_LAYER.md`: "a trace records the
   raise, not the failure." `StreamChatNetworkError` has one, plus
   `toString({bool printStackTrace})`. Traces now come from the carrier (`Failure.stackTrace`) or
@@ -229,9 +233,9 @@ None.
 ## Definition of done
 
 - [x] `chat_error_code.dart` and `stream_chat_dio_error.dart` deleted; `StreamChatNetworkError`
-      deprecated with its `ChatErrorCode` constructor removed; `StreamChatError` and
-      `StreamWebSocketError` kept (the WS layer still raises the latter until phase 07, and the UI
-      package's attachment-validation errors subclass the former).
+      and `StreamChatNetworkErrorType` deleted; `StreamChatError` and `StreamWebSocketError` kept
+      (the WS layer still raises the latter until phase 07, and the UI package's
+      attachment-validation errors subclass the former).
 - [x] `ApiErrorInterceptor` installed, before the logging interceptor so a rejection is mapped
       before it is logged. `_parseError` delegates to `DioExceptionMapping.toStreamException()`,
       so all seven verb wrappers throw a `StreamChatException`.
@@ -255,22 +259,21 @@ None.
 
 ### When `stream_chat_error.dart` goes
 
-The file holds three things with three different lifetimes, so it empties in stages rather than
+The file held three things with three different lifetimes, so it empties in stages rather than
 being deleted here:
 
 | In the file | Last users | Goes when |
 | --- | --- | --- |
-| `StreamChatNetworkError`, `StreamChatNetworkErrorType` | nothing raises them; consumers may still name them | `openapi-migration` **group 12** lands and no endpoint can reach the hand-written verb facade |
+| `StreamChatNetworkError`, `StreamChatNetworkErrorType` | none — nothing raised them once the verb facade threw `StreamChatException` | **this phase** |
 | `StreamWebSocketError` | `websocket.dart` raises it, `client.dart:459` catches it | phase [07](07-websocket.md), where `DisconnectionSource.serverInitiated(error:)` replaces it |
 | `StreamChatError` (the base) | 23 SDK precondition throws; `stream_chat_flutter`'s attachment-validation subtypes | two more pieces of work, below |
 
-So the file is deletable once **four** things are true — three of them already scheduled, and one
+So the file is deletable once **three** things are true — two of them already scheduled, and one
 that is not:
 
-1. Group 12 removes `StreamChatNetworkError`.
-2. Phase 07 removes `StreamWebSocketError`.
-3. The 23 precondition throws are reclassified (see below).
-4. **The attachment-validation errors stop being errors.** `StreamAttachmentValidator`'s own
+1. Phase 07 removes `StreamWebSocketError`.
+2. The 23 precondition throws are reclassified (see below).
+3. **The attachment-validation errors stop being errors.** `StreamAttachmentValidator`'s own
    dartdoc says it best: "Both return `null` on success and a typed `StreamChatError` subtype on
    failure — neither ever throws." `AttachmentLimitReachedError`, `AttachmentTooLargeError` and
    `AttachmentBlockedError` are *returned values* that `StreamMessageComposer` pattern-matches to
@@ -293,5 +296,3 @@ one of those legitimate uses.
   get it wrong.
 - **`StreamWebSocketError`** goes in phase [07](07-websocket.md), where
   `DisconnectionSource.serverInitiated(error:)` replaces it.
-- **`StreamChatNetworkError`** is deleted when `openapi-migration` group 12 lands and nothing can
-  reach the hand-written verb facade any more.
