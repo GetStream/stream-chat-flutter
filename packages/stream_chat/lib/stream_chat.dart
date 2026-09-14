@@ -16,6 +16,11 @@ export 'package:rate_limiter/rate_limiter.dart';
 // Re-exported with a `show` allowlist rather than wholesale: `stream_core`
 // also declares names this barrel defines — `AttachmentFile`, `User` — so a
 // blanket export would not compile.
+//
+// `Filter`'s operator subclasses stay out of the list: a filter is read with
+// `toJson`. `EvaluationOperator` and `LogicalOperator` are the exception,
+// because `searchQueryLength` needs to tell a text search from a compound
+// filter without re-parsing the JSON.
 export 'package:stream_core/stream_core.dart'
     show
         CompositeComparator,

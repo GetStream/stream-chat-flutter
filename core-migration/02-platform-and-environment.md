@@ -33,7 +33,7 @@ exporting ours in the same PR — there is no coexistence.
 | `enum PlatformType` — 7 values, no payload | same 7 values, each carrying `operatingSystem` — **identical strings** (`android`, `ios`, `web`, `macos`, `windows`, `linux`, `fuchsia`), so nothing on the wire changes |
 | `CurrentPlatform.name` (a `switch`) | `CurrentPlatform.operatingSystem` |
 | 7 `is*` getters + `isFlutterTest` | same, plus `isMobile` / `isDesktop` |
-| `@visibleForTesting static PlatformType? debugCurrentPlatformOverride`, honoured by an assert-gated `type` | **not in 0.5.0** — present on core's `main`, unreleased |
+| `@visibleForTesting static PlatformType? debugCurrentPlatformOverride`, honoured by an assert-gated `type` | not in 0.5.0, but **present at the pinned SHA**, which is what the branch resolves |
 | conditional import: `_stub` (throws) / `_web` on `dart.library.js_interop` / `_io` | `detector/platform_detector` (web) / `platform_detector_io` on `dart.library.io` |
 
 Two corrections to the original write-up:
