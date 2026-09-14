@@ -9,7 +9,7 @@ A row leaves this file when it lands, not when it is decided.
 
 | | What | Blocked on | Phase |
 | --- | --- | --- | --- |
-| ☐ | **Restore hosted `stream_core` / `stream_core_flutter` constraints** in `melos.yaml` | A `stream_core` release carrying `Filter.raw`, `normalizeStringForSort`, `debugCurrentPlatformOverride` and `sortedWith`. Until then `melos bootstrap` writes a `git:` block into `stream_chat`, `stream_chat_flutter_core` and `stream_chat_flutter`, which makes all three unpublishable. This is the row every other "blocked on a core release" note now folds into. | [08](08-query-dsl.md) |
+| ☐ | **Restore hosted `stream_core` / `stream_core_flutter` constraints** in `melos.yaml` | A `stream_core` release carrying `Filter.raw`, `normalizeStringForSort`, `debugCurrentPlatformOverride`, `sortedWith` and `LocationCoordinate`'s exact equality ([core#181](https://github.com/GetStream/stream-core-flutter/pull/181)). Until then `melos bootstrap` writes a `git:` block into `stream_chat`, `stream_chat_flutter_core` and `stream_chat_flutter`, which makes all three unpublishable. This is the row every other "blocked on a core release" note now folds into. | [08](08-query-dsl.md) |
 | ☐ | A test proving a malformed response body surfaces as `StreamClientException` rather than a bare `TypeError` | A call through the generated client — nothing in this package exercises `runApiSafely` yet. Arrives with `openapi-migration` group 02. | [03](03-errors.md) |
 
 ## Needs a live check, not more code
