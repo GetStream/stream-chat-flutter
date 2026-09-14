@@ -13,7 +13,7 @@ rather than port.
 | --- | --- |
 | `lib/src/core/models/filter.dart` (241) — `Filter`, `FilterOperator` | `stream_core` `query/filter/` — `sealed Filter<T>`, `FilterField<T>`, `FilterOperator` |
 | `lib/src/core/api/sort_order.dart` (183) — `SortOption`, `NullOrdering`, `CompositeComparator` | `stream_core` `query/sort.dart` — `Sort<T>`, `SortField<T>`, `SortDirection`, `NullOrdering`, `CompositeComparator` |
-| `lib/src/core/models/comparable_field.dart` (~85) — `ComparableField`, `ComparableFieldProvider` | folded into `StreamSortField` (see [below](#why-a-chat-side-streamsortfield-survives)) |
+| `lib/src/core/models/comparable_field.dart` (~85) — `ComparableField`, `ComparableFieldProvider` | folded into the per-model `SortField` subclasses — `ChannelSortField`, `MemberSortField`, … (see [below](#what-shipped-instead-of-a-chat-side-streamsortfield)) |
 | `lib/src/core/models/location_coordinates.dart` | `stream_core` `query/filter/location/location_coordinate.dart` |
 | `lib/src/core/models/predefined_filter.dart` (84) | reworked onto `FilterField` registries |
 
@@ -641,11 +641,11 @@ checked cross-SDK, so it was checked here.
 | Query | chat-flutter | chat-android | chat-swift | backend |
 | --- | --- | --- | --- | --- |
 | channel | `last_updated` desc | `last_updated` desc | sends none; local fallback `defaultSortingAt` desc | **`{last_updated: -1}`** (`channel_denorm_gate.go:341`, `fts_or_union_rewrite.go:296`) |
-| draft | `created_at` desc | `created_at` desc | — | — |
+| draft | `created_at` desc | `created_at` desc | — | **`DraftMessage.DefaultSort()` = `created_at` desc** |
 | member | `created_at` **asc** | caller must supply one | local fallback `memberCreatedAt` desc | no default; tiebreak `user_id` asc |
 | user | `created_at` desc | none | local fallback `id` desc | — |
-| reminder | `remind_at` **asc** | `QuerySortByField()` — empty | — | no default; tiebreak `message_id` desc |
-| poll vote | `created_at` desc *(was asc)* | `null` — none | — | no default; tiebreak `id` desc |
+| reminder | `remind_at` **asc** | `QuerySortByField()` — empty | — | **`MessageReminder.DefaultSort()` = `remind_at` asc**; tiebreak `message_id` desc |
+| poll vote | `created_at` **asc** | `null` — none | — | **`PollVote.DefaultSort()` = `created_at` asc**; tiebreak `id` desc |
 | thread | declared, not applied | `has_unread`, `last_message_at`, `parent_message_id` — all desc | — | — |
 | reaction | `created_at` desc | — | — | **`ReactionResponse.DefaultSort()` = `created_at` desc** |
 
@@ -655,12 +655,16 @@ Channel is confirmed against the authority and agrees with both other SDKs. Outc
   controller still sends nothing unless given a sort, so no list changes order.
 - **`ReactionSort.defaultSort` added.** The API defines it, so it is a fact rather than a choice;
   `reaction_detail_sheet.dart` had been restating it inline.
-- **Poll vote flipped to descending.** It was the one default that contradicted the house
-  convention: reactions and poll votes are the same UI shape, the API defaults reactions to
-  `created_at` desc, and it tiebreaks poll votes `id` desc.
-- **Member and reminder keep ascending**, deliberately. Oldest-member-first is *stable* as people
-  join — new members append instead of pushing every row down — and soonest-reminder-first is what
-  a to-do list wants. Neither matches another SDK because neither other SDK sends a default at all.
+- **Poll vote stays ascending**, because the API defines it that way. An earlier pass read the
+  backend column as "no default" and proposed flipping it to descending for consistency with
+  reactions — the two are the same UI shape. That premise was wrong: `PollVote.DefaultSort()`
+  returns `created_at` asc where `FeedsReaction`'s returns `created_at` desc, so the two genuinely
+  differ and the API's answer wins. The `id` desc tiebreak is real, and independent of this.
+- **Reminder keeps ascending because the API does.** `MessageReminder.DefaultSort()` is
+  `remind_at` asc, which is also what a to-do list wants. Neither other SDK sends a default at all.
+- **Member keeps ascending as a choice**, since the backend defines no default for it.
+  Oldest-member-first is *stable* as people join — new members append instead of pushing every row
+  down.
 
 ## Escape hatches
 

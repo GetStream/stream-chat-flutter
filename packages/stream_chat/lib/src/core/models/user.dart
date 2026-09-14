@@ -455,4 +455,13 @@ class UserSortField extends SortField<User> {
     'language',
     (it) => it.language,
   );
+
+  /// Sorts users by the teams they belong to.
+  ///
+  /// A team list has no ordering, so a page re-sorted locally keeps the order
+  /// it arrived in.
+  static final teams = UserSortField(
+    'teams',
+    (it) => it.teams,
+  );
 }
