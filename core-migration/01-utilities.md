@@ -105,15 +105,6 @@ there, `updateIf` became `updateWhere`, and `mergeFrom` is expressed as `merge` 
 list. `core/util/list_extensions.dart` is deleted; `SortedListExtensions` is re-exported from the
 barrel in its place.
 
-### `stream_chat_dio_error`
-
-`StreamChatDioError` is thrown by `AuthInterceptor.onRequest`'s reject path only, and it exists to
-carry a `StreamChatNetworkError` through dio. Its payload type belongs to phase
-[03](03-errors.md), its thrower to phase [04](04-token-and-auth.md) and its only consumer,
-`StreamHttpClient`, to phase [05](05-http-client.md) — so the file cannot be deleted here. This
-phase leaves it alone; the switch to core's `StreamDioException` and the deletion land with the
-error layer.
-
 ## Decisions to make
 
 Both belonged to `list_extensions`, and both are answered:
