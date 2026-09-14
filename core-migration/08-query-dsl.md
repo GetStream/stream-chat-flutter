@@ -154,9 +154,20 @@ is matched the same way — `filter_tags` with `@> AND <@` then `&&`, `teams` wi
 array-valued field, so `members`, `member.user.name` and `attachments.type` are declared with
 real getters.
 
+That covers the comparison and list operators only. `QueryOperator` and `AutoCompleteOperator`
+both bail on `fieldValue is! String` (core `filter.dart:540`, `:556`), so an iterable getter
+returns `false` from `matches()` whatever the value. The one field where that bites is
+`member.user.name`, whose **Supported operators:** line correctly lists `$autocomplete` — the
+server does support it — so the query is right and only local evaluation disagrees. Nothing in
+this package calls `matches()` yet; `stream_feeds` calls it in 36 event handlers, which is the
+shape chat will grow, so fix it in core before copying that pattern here.
+
 **Derived from the query, not the row.** `distinct`, `has_unread` and `invite` are computed
 server-side from the request and the caller's read state, so no getter can agree with them. They
-stay undeclared, reachable through `Filter.raw`.
+stay undeclared, reached through the registry's `custom` factory —
+`ChannelFilterField.custom('has_unread')` sends the same key a declared field would, so only
+`matches()` is given up. Both `custom` doc comments name them, so the list is discoverable from
+the API and not only from here.
 
 ## The filterable fields, from the spec
 
@@ -171,6 +182,15 @@ right source instead — it is keyed by *endpoint* rather than by table, which i
 thinks, and it has already applied `isPublishedOperator`, so
 [#15657](https://github.com/GetStream/chat/pull/15657) is baked in: exactly four `$ne` and one
 `$nin` survive, the index-safe exceptions on `QueryUsersPayload`.
+
+**It is a field oracle, not an operator oracle.** `isPublishedOperator` (`mq/config.go:189`)
+strips internal operators, `$ne` and `$nin` — nothing else — so every remaining row is the
+column's `SupportedOperators` verbatim, which is wider than what some endpoints accept at
+runtime. Two registry entries are deliberately narrower than the table below, from observed 400s
+rather than from source: `UserFilterField.name` drops the range operators, and
+`UserFilterField.custom` is `$eq`/`$in` only. `mq/user/user.go:25,43` allows both wider sets, so
+whoever reconciles code to config next will widen them back — re-probe against a live app key
+before doing that.
 
 Regenerate by re-reading that file from a current `GetStream/protocol` checkout, not by
 re-deriving it from the Go source:

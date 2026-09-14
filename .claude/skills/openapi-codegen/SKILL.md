@@ -149,10 +149,15 @@ emitted by `model.tpl` / `discriminator.tpl` plus a `WsEvent` re-export from `mo
 `stream_core` is currently pinned to a **git commit**, not a hosted constraint: `melos.yaml`'s
 `command.bootstrap.dependencies` names a SHA for both `stream_core` and `stream_core_flutter`,
 because the v11 branch uses core APIs no published version carries. `melos bootstrap` syncs that
-into each package manifest, which is why you will see a `git:` block there. It returns to a hosted
-constraint before the v11 release — see `core-migration/DEFERRED.md`, which is the authority. 0.5.0 ships
-`StreamDateTimeConverter` and the sealed error layer, which is everything the generated output needs. **There is no
-release blocker for the generated client.** Change the constraint in `melos.yaml` only, then `melos bootstrap` — never in a package manifest. Note a git dep under `dependencies` makes the package unpublishable until it is restored.
+into each package manifest, which is why you will see a `git:` block there, and **it makes
+`stream_chat`, `stream_chat_flutter_core` and `stream_chat_flutter` unpublishable until a hosted
+constraint is restored**. That restore is a v11 release task — `core-migration/DEFERRED.md` is the
+authority on what it waits for.
+
+The generated client itself needs nothing newer than 0.5.0, which already ships
+`StreamDateTimeConverter` and the sealed error layer, so regenerating is never what the pin is
+holding up. Change the constraint in `melos.yaml` only, then `melos bootstrap` — never in a package
+manifest.
 
 That is the dependency side only. The generator is still a prerequisite on its own:
 `client.tpl` emits `runSafely`, and regenerating before the template change above lands
