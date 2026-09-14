@@ -149,6 +149,10 @@ class ChannelFilterField extends FilterField<ChannelState> {
 
   /// Creates a field the SDK does not model, read from [ChannelModel.extraData].
   ///
+  /// The fields the server computes per request — `joined`, `has_unread`,
+  /// `invite`, `distinct` and `app_banned` — are reached this way. The server
+  /// resolves them against the caller; a local match cannot.
+  ///
   /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`, `$exists`,
   /// `$contains`, `$q`, `$autocomplete`
   factory ChannelFilterField.custom(String remote) {

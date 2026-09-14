@@ -262,7 +262,15 @@ class UserFilterField extends FilterField<User> {
   /// **Supported operators:** `$eq`, `$autocomplete`
   static final username = UserFilterField(
     'username',
-    (it) => it.extraData['username'],
+    (it) => it.extraData['username'].safeCast<String>(),
+  );
+
+  /// Filters users by their email address.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final email = UserFilterField(
+    'email',
+    (it) => it.extraData['email'].safeCast<String>(),
   );
 
   /// Filters users by their role.
@@ -294,7 +302,7 @@ class UserFilterField extends FilterField<User> {
   /// **Supported operators:** `$eq`
   static final shadowBanned = UserFilterField(
     'shadow_banned',
-    (it) => it.extraData['shadow_banned'],
+    (it) => it.extraData['shadow_banned'].safeCast<bool>(),
   );
 
   /// Filters users by whether they bypass moderation.
@@ -302,7 +310,7 @@ class UserFilterField extends FilterField<User> {
   /// **Supported operators:** `$eq`
   static final bypassModeration = UserFilterField(
     'bypass_moderation',
-    (it) => it.extraData['bypass_moderation'],
+    (it) => it.extraData['bypass_moderation'].safeCast<bool>(),
   );
 
   /// Filters users by when they were last online.
