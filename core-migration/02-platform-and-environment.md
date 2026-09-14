@@ -7,9 +7,12 @@
 
 > **Read the resolved package, not the sibling repo.** The first pass at this phase claimed two
 > upstream core additions were needed. Both were wrong, because they were derived from
-> `stream-core-flutter/packages/stream_core` (unreleased `main`) rather than from
-> `~/.pub-cache/hosted/pub.dev/stream_core-0.5.0`, which is what `stream_chat` actually resolves.
-> Always diff against the pub-cache copy.
+> `stream-core-flutter/packages/stream_core` (unreleased `main`) rather than from what
+> `stream_chat` actually resolves. Always diff against the pub-cache copy, and read the path out of
+> `packages/stream_chat/.dart_tool/package_config.json` rather than assuming it: `melos.yaml` pins
+> `stream_core` to a git `ref` for now, so the copy in use is under `~/.pub-cache/git/`, not
+> `~/.pub-cache/hosted/`. It returns to a hosted constraint when core next releases — see
+> [DEFERRED.md](DEFERRED.md).
 
 ## Scope
 

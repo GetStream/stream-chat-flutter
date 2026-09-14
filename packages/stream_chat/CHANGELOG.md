@@ -2,25 +2,25 @@
 
 🛑️ Breaking
 
-- Logging moves to `stream_core`. `logLevel` and `logHandlerFunction` become one `logConfig`, `client.logger` is a `StreamLogger`, and `detachedLogger`, `defaultLogHandler` and `LogHandlerFunction` are removed along with the `package:logging` re-export. The default is unchanged: warnings and errors to the console. Supply a `StreamLogHandler` to route records into your own facility.
+- Logging is rebuilt. `logLevel` and `logHandlerFunction` become one `logConfig`, `client.logger` is a `StreamLogger`, and `detachedLogger`, `defaultLogHandler` and `LogHandlerFunction` are removed along with the `package:logging` re-export. The default is unchanged: warnings and errors to the console. Supply a `StreamLogHandler` to route records into your own facility.
 - `LoggingInterceptor`, `InterceptStep` and `LogPrint` are no longer exported. The interceptor is installed by default and writes through the configured `StreamLogHandler`, so routing its output is a `logConfig` concern now.
-- The token layer is now `stream_core`'s. `Token` becomes `UserToken`, and `TokenProvider` becomes an interface rather than a `Future<String> Function(String)` typedef — pass `TokenProvider.dynamic(myLoader)` where you passed a closure, and note a loader now returns a `UserToken`. `TokenManager.loadToken` becomes `getToken`, `isStatic` becomes `usesStaticProvider`, and `setTokenOrProvider` becomes `setTokenProvider`.
+- The token layer is retyped. `Token` becomes `UserToken`, and `TokenProvider` becomes an interface rather than a `Future<String> Function(String)` typedef — pass `TokenProvider.dynamic(myLoader)` where you passed a closure, and note a loader now returns a `UserToken`. `TokenManager.loadToken` becomes `getToken`, `isStatic` becomes `usesStaticProvider`, and `setTokenOrProvider` becomes `setTokenProvider`.
 - Anonymous connections now identify as `!anon` rather than a client-generated random id, matching every other Stream SDK. The backend pins that id so a client cannot claim to be another user.
 - `StreamChatClient.devToken` is removed. It minted a `devtoken`-signed JWT, which only an app with development tokens enabled accepts; generate tokens on your backend, or build one in your own test helper.
-- A failed request now throws one of `stream_core`'s sealed `StreamException` kinds — `StreamApiException`, `StreamNetworkException`, `StreamAuthenticationException` or `StreamClientException` — instead of a `StreamChatNetworkError`. `StreamChatException` aliases the root, so `on StreamChatException catch` handles them all. See the [v11 migration guide](https://github.com/GetStream/stream-chat-flutter/blob/master/migrations/v11-migration.md#error-handling).
+- A failed request now throws one of four sealed `StreamException` kinds — `StreamApiException`, `StreamNetworkException`, `StreamAuthenticationException` or `StreamClientException` — instead of a `StreamChatNetworkError`. `StreamChatException` aliases the root, so `on StreamChatException catch` handles them all. See the [v11 migration guide](https://github.com/GetStream/stream-chat-flutter/blob/master/migrations/v11-migration.md#error-handling).
 - `ChatErrorCode` is removed in favour of `StreamErrorCode`. One value was wrong: `requestTimeout` was `23`, which the API never returns; the real code is `48`.
 - `RetryPolicy.shouldRetry` receives a `StreamChatException?` instead of a `StreamChatError?`.
 - `UploadState`'s variant classes are renamed to `UploadStatePreparing`, `UploadStateInProgress`, `UploadStateSuccess` and `UploadStateFailed`, freeing the names `Success` and `Failed`.
-- `Result` from `package:async` is no longer re-exported; the re-exported `Result` is `stream_core`'s.
-- Sorting is now `stream_core`'s. `SortOption<ChannelState>.desc(ChannelSortKey.lastUpdated)` becomes `ChannelSort.desc(ChannelSortField.lastUpdated)` — one `Sort` subclass and one field registry per model, with the same member names as the old `*SortKey`.
+- `Result` from `package:async` is no longer re-exported. The `Result` this package exports is a different type, with `Success` and `Failure` variants.
+- Sorting is restructured. `SortOption<ChannelState>.desc(ChannelSortKey.lastUpdated)` becomes `ChannelSort.desc(ChannelSortField.lastUpdated)` — one `Sort` subclass and one field registry per model, with the same member names as the old `*SortKey`.
 - `SortOrder<T>` is removed. Signatures take `List<ChannelSort>`, `List<MemberSort>` and so on.
-- `NullOrdering`, `SortDirection` and the `compare` extension are `stream_core`'s, re-exported from this package.
+- `NullOrdering`, `SortDirection` and the `compare` extension keep their names and are still exported from this package.
 - `ComparableField`, `ComparableFieldProvider` and `SortOption.fromJson` are removed. A stored sort is read back with `ChannelSort.fromJson`.
 - `SortOption`'s `comparator` argument is removed. Declare a field whose value projects onto something orderable, or sort the list yourself.
 - `PollVoteSortField.answerText` is removed: the API rejects a sort on `answer_text`.
 - `ChannelSortField.cid` is added, matching the iOS and Android SDKs.
 - `search(sort:)` on the client and channel, and `StreamMessageSearchListController.sort`, are typed `List<MessageSearchSort>` rather than an untyped `SortOrder`. Searching is the only message query the API sorts, so the type is named for it.
-- Filtering is now `stream_core`'s. `Filter.equal('type', 'messaging')` becomes `ChannelFilter.equal(ChannelFilterField.type, 'messaging')` — one `Filter` alias and one field registry per query, matching the sort change. A field the SDK does not model is reached with `ChannelFilterField.custom('my_field')`.
+- Filtering is restructured. `Filter.equal('type', 'messaging')` becomes `ChannelFilter.equal(ChannelFilterField.type, 'messaging')` — one `Filter` alias and one field registry per query, matching the sort change. A field the SDK does not model is reached with `ChannelFilterField.custom('my_field')`.
 - `Filter` is sealed and no longer exposes `key`, `value` or `operator`. Read it with `toJson`.
 - `Filter` compares by identity rather than by value. Compare `toJson()` where you compared filters.
 - `FilterOperator` is an extension type over `String` rather than an enum, so `'$eq'` and `FilterOperator.equal` interchange.
@@ -39,8 +39,8 @@
 
 🔄 Changed
 
-- Failed messages now retry on server errors. The retry policy follows `stream_core`'s table: retry a request that never reached the server, a 5xx, a 429 and a 408; never another 4xx, a cancelled request, broken credentials, or anything the server marked unrecoverable. Previously only failures without a parseable error body retried, so a 500 or a 429 did not.
-- `SystemEnvironment` is now `stream_core`'s type, re-exported from this package. Its constructor and fields are unchanged, so existing usage keeps working.
+- Failed messages now retry on server errors. The retry policy is now explicit: retry a request that never reached the server, a 5xx, a 429 and a 408; never another 4xx, a cancelled request, broken credentials, or anything the server marked unrecoverable. Previously only failures without a parseable error body retried, so a 500 or a 429 did not.
+- `SystemEnvironment` is a different type with the same constructor and fields, so existing usage keeps working.
 - Most SDK logging moved off `info`. It now carries only client and connection lifecycle — client created and disposed, user set and disconnected, connection opening, established and closing — and per-operation, per-event and per-timer records are `debug` or `verbose`. Raising the priority to `info` to debug a problem no longer buries it under a health check every 20 seconds and a line per WebSocket frame.
 
 ✅ Added
@@ -60,7 +60,7 @@
 🔄 Internal / Non-breaking
 
 - Added the OpenAPI-generated v2 client under `lib/open_api/`, along with the `melos run gen:openapi` tooling that produces it. No API uses it yet.
-- Replaced the internal `InFlightCache` and `SystemEnvironmentManager` with `stream_core`'s equivalents.
+- Replaced the internal `InFlightCache` and `SystemEnvironmentManager` with shared implementations.
 
 ## Upcoming
 
