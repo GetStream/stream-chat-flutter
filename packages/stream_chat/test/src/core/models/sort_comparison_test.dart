@@ -239,7 +239,7 @@ void main() {
     });
   });
 
-  group('single field', () {
+  group('a sort with one field', () {
     test('should compare two objects in descending order', () {
       final sort = [Sort.desc(TestSortField.age)];
       const a = TestModel(age: 30);
@@ -329,7 +329,7 @@ void main() {
     });
   });
 
-  group('Composite Sorting', () {
+  group('a sort with several fields', () {
     test('should sort list using multiple sort criteria', () {
       final models = [
         const TestModel(name: 'Alice', age: 30),

@@ -8,7 +8,7 @@
 
 🐞 Fixed
 
-- A list controller sorted each loaded page with an unstable sort, so rows the sort called equal — members added in the same batch, say — were reordered every time a page was appended, once the list grew past 32 items. They now keep the order they arrived in.
+- A list controller sorted each loaded page with an unstable sort, so rows it called equal — members sharing a `created_at`, say — were reordered on every page append. They keep the order they arrived in now.
 
 ## 10.4.0
 
