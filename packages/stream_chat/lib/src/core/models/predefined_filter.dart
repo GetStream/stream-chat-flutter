@@ -43,12 +43,16 @@ class PredefinedFilter {
   static ChannelFilter _filterFromJson(Map<String, dynamic> json) => ChannelFilter.raw(json);
 }
 
+// Mirrors the server's fallback for a channel query that carries no sort, so
+// the field is written out rather than taken from [ChannelSort.defaultSort]:
+// the two agree today, but one is the ordering this SDK picks and the other is
+// the ordering the server falls back to, and either may change alone.
 List<ChannelSort> _defaultSortFor(ChannelFilter filter) {
   final lastMessageAt = ChannelSortField.lastMessageAt;
   if (_mapTouchesField(filter.toJson(), lastMessageAt.remote)) {
     return [ChannelSort.desc(lastMessageAt)];
   }
-  return ChannelSort.defaultSort;
+  return [ChannelSort.desc(ChannelSortField.lastUpdated)];
 }
 
 bool _mapTouchesField(Map<String, Object?> map, String field) {
