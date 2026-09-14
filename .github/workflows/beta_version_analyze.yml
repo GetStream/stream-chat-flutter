@@ -21,11 +21,16 @@ jobs:
           fetch-depth: 0
 
       - name: "Install Flutter"
-        uses: subosito/flutter-action@v2
+        uses: ./.github/actions/setup-flutter
         with:
           channel: beta
-          cache: true
-          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+          # Must stay empty. Inheriting the action's 3.x default would hold this
+          # job on 3.x betas, so it would stop catching the next major early —
+          # which is the only thing it exists to do.
+          flutter-version: ''
+          # Weekly, and a new beta invalidates the key, so an SDK entry would
+          # almost never be restored before it expires.
+          cache-sdk: 'false'
 
       - name: 📊 Analyze and test packages
         uses: ./.github/actions/package_analysis

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
 
 import '../../../stream_chat_flutter.dart';
+import '../message_status_labels.dart';
 
 /// Displays the sending status of a message, including attachment upload
 /// progress and sent/delivered/read indicators.
@@ -29,24 +30,10 @@ class StreamMessageSendingStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final attachments = message.attachments;
-
-    final hasNonUrlAttachments = attachments.any((it) => it.type != AttachmentType.urlPreview);
-
-    if (hasNonUrlAttachments && message.state.isOutgoing) {
-      final attachments = message.attachments;
-
-      final totalAttachments = attachments.length;
-      final uploadedCount = attachments.where((it) => it.uploadState.isSuccess).length;
-
-      if (uploadedCount < totalAttachments) {
-        return Text(
-          context.translations.attachmentsUploadProgressText(
-            total: totalAttachments,
-            completed: uploadedCount,
-          ),
-        );
-      }
+    // Shared with the row announcement, so the progress a reader sees and the
+    // progress a screen reader hears are the same number.
+    if (attachmentUploadProgressLabel(context.translations, message) case final label?) {
+      return Text(label);
     }
 
     final channel = StreamChannel.maybeOf(context)?.channel;

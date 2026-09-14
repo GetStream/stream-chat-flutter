@@ -1,8 +1,30 @@
 ## Upcoming
 
+✅ Added
+
+- Added `StreamMessageItem.semanticsLabel`, which replaces the announcement composed for a message row, and `StreamMessageItem.excludeFromSemantics`, which leaves the row unlabeled so the bubble and footer announce their own parts.
+- Added `StreamQuotedMessage.replyMessage`, the message doing the quoting, which lets a quoted preview announce who replied to whom.
+- Added `StreamMessageContent.excludeTextFromSemantics` and `StreamMessageFooter.excludeFromSemantics`, which keep the message text and the metadata out of the semantics tree when an enclosing row already announces them.
+
+⚠️ Changed
+
+- Video thumbnails now use `stream_thumbnail` on every platform, and the `thumblr`
+  dependency is gone.
+- Linux builds now need the FFmpeg and libwebp development packages — on Debian/Ubuntu:
+  `libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libwebp-dev`.
+- A deleted message now renders the timestamp and delivery status below the placeholder, matching the design, and no longer shows the "Edited" marker — there is no text left to have been edited.
+- `AccessibleMessagePreviewFormatter.formatMessageSemanticsLabel` must now return the body without a speaker prefix when `channel` is omitted. An implementation that prefixes unconditionally makes a message row announce "You said, You: hello".
+
 🐞 Fixed
 
 - Fixed `StreamAttachmentHandler` throwing `UnimplementedError` on WebAssembly builds.
+- Improved the screen-reader experience in the message list: each message is announced as a single phrase naming the sender, the body, the time, the edited marker and the delivery status, while the attachments, reaction chips, quoted message and replies row stay reachable one level deeper.
+- Fixed the message body being announced as its markdown source, so link and emphasis syntax is no longer read aloud.
+- Fixed a quoted message announcing only the quoted author's name, saying nothing about who replied to whom.
+- Fixed an attachment tile announcing nothing about its type or its position in a gallery.
+- Fixed a date divider announcing a clock time it never showed instead of the date it displays, and exposed it as a header so days can be jumped between.
+- Fixed the attachment upload progress on an outgoing message counting its link preview, which inflated the total against an attachment the sender never picked.
+- Fixed a message the moderation system bounced showing a read receipt once other members had read past it. It now shows only the error badge, matching what a screen reader announces for it.
 
 ## 10.4.0
 

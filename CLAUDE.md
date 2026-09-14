@@ -140,6 +140,12 @@ After modifying any package, update its `CHANGELOG.md`.
 
 UI designs for this SDK are in the [Chat SDK Design System](https://www.figma.com/design/Us73erK1xFNcB5EH3hyq6Y/Chat-SDK-Design-System) Figma project. Use the Figma MCP server to look up designs when implementing or updating UI components.
 
+## Sibling SDK Alignment
+
+Stream ships the same product on other platforms — **stream-chat-swift**, **stream-chat-android**, **stream-chat-react-native**. Check how they name and shape an equivalent API before inventing one here, and prefer their vocabulary over a name derived only from Flutter code or design tokens.
+
+That alignment belongs in the **PR description**, never in the SDK's own docs or code comments. A comment that justifies a decision with "the SwiftUI and React Native SDKs do it this way" tells a reader nothing about what this code guarantees, and goes stale the moment those SDKs change — an integrator reading the dartdoc cannot verify it and has no reason to care. Describe the behavior and the trade-off directly; put the cross-platform argument, where it is genuinely persuasive, in the PR. See [`STYLE_GUIDE.md`](STYLE_GUIDE.md#no-cross-framework-justification-in-comments).
+
 ## `stream_core_flutter` (external sibling repo)
 
 Basic UI components that can be shared across Stream products live in the `stream_core_flutter` package in the **stream-core-flutter** repository (a sibling repo, not inside this monorepo). These components:
