@@ -680,6 +680,20 @@ Ours has three with no core equivalent:
 a typed registry that is exactly the case `FilterField` can't express, so at least one of them
 should survive — decide which, and note that a custom filter cannot support `matches()`.
 
+### `filter_tags` is left out of the channel registry on purpose
+
+**Nothing in code says so, which is why this note exists.** It is a live column with a GIN index
+and `$eq` / `$in` handlers, it is in the spec both ways (`add_filter_tags` / `remove_filter_tags`
+on the update request, `filter_tags` on the response), and Swift declares a hand-written
+`FilterKey` for it. Derive the registry from any of those and you will add it back — this phase
+did, and it was caught in review.
+
+It is deprecated as **customer guidance**, not in the API: new apps are told to use custom-data
+filtering or predefined filters instead. So it keeps working, and declaring it as a typed field
+would read as a recommendation. `ChannelFilterField.custom('filter_tags')` still reaches it for
+anyone already depending on it, and `ChannelModel.filterTags` stays — reading a value the server
+sends is not the same as recommending a query.
+
 ## Sort
 
 | Ours | Core |
