@@ -400,7 +400,6 @@ void main() {
           'poll': PollSort.defaultSort,
           'poll_vote': PollVoteSort.defaultSort,
           'reaction': ReactionSort.defaultSort,
-          'thread': ThreadSort.defaultSort,
         }.map((k, v) => MapEntry(k, v.map((it) => it.toJson()).toList())),
         {
           'channel': [
@@ -426,11 +425,6 @@ void main() {
           ],
           'reaction': [
             {'field': 'created_at', 'direction': -1},
-          ],
-          'thread': [
-            {'field': 'has_unread', 'direction': -1},
-            {'field': 'last_message_at', 'direction': -1},
-            {'field': 'parent_message_id', 'direction': -1},
           ],
         },
       );
