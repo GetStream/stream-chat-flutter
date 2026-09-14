@@ -884,8 +884,8 @@ resolving `last_message_at` agree.
 The real gap is the mirror being **looser than what it mirrors**. The server sets the flag only
 when *every* `last_message_at` node is reachable through `$and` alone **and** at least one narrows
 by value — `$eq` / `$ne` / `$gt` / `$gte` / `$lt` / `$lte`, or `$exists: true`
-(`DetectLastMessageAtFiltering`, `lib/core/mq/channel/modifiers.go`). `_touchesField` asks only
-whether `last_message_at` appears anywhere, under any operator, and recurses into `$or` / `$nor`.
+(`DetectLastMessageAtFiltering`, `lib/core/mq/channel/modifiers.go`). `_defaultSortFor` asks only
+whether `last_message_at` appears anywhere, under any operator, and walks into `$or` / `$nor`.
 So a preset whose filter puts `last_message_at` under `$or`, or matches it with `$in` or
 `$exists: false`, leaves the server on `last_updated` while the client answers `last_message_at` —
 and `loadMore`'s offset then indexes into a list ordered differently from the one displayed.
