@@ -125,9 +125,12 @@ class StreamAttachmentValidator {
 
 /// Why an attachment was rejected by [StreamAttachmentValidator].
 ///
-/// Returned rather than thrown by the validator itself, and matched on to
-/// choose the message shown to the user. Not one of `stream_core`'s
-/// [StreamChatException] kinds: nothing failed, the attachment was refused.
+/// The validator returns one instead of throwing, so pattern-match it to
+/// choose the message to show. [StreamAttachmentPickerController] does throw
+/// it, from `addAttachment` and from its `value` setter.
+///
+/// An `on StreamChatException` clause will not catch it: nothing failed, an
+/// attachment was refused.
 sealed class AttachmentValidationError implements Exception {
   /// Creates an [AttachmentValidationError] described by [message].
   const AttachmentValidationError(this.message);

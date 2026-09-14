@@ -107,8 +107,9 @@ class StreamAttachmentPickerController extends ValueNotifier<AttachmentPickerVal
     );
   }
 
-  /// Adds a new attachment to the message, throwing an
-  /// [AttachmentValidationError] when the validator refuses it —
+  /// Adds a new attachment to the message.
+  ///
+  /// Throws an [AttachmentValidationError] when the validator refuses it:
   /// [AttachmentTooLargeError] past the size limit, [AttachmentBlockedError]
   /// for a disallowed extension or MIME type.
   Future<void> addAttachment(Attachment attachment) async {
