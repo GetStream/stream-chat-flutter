@@ -67,9 +67,10 @@ product would react to it the same way. Nothing outside chat reacts to `message.
 
 Core is a separate repo with its own release cadence, so batch these: a row here is rarely urgent on
 its own, and each release chat has to wait for costs more than the change itself. What is worth
-pushing first is whatever this plan is actually blocked on, which today is one thing: a release
-carrying `Filter.raw`, `normalizeStringForSort` and `debugCurrentPlatformOverride` together. The
-rest of the ☐ rows are improvements, not blockers, and can ride a later release.
+pushing first is whatever this plan is actually blocked on, which is one thing: a release carrying
+everything `melos.yaml` pins the branch to. As of phase [08](08-query-dsl.md) that is
+`Filter.raw`, `normalizeStringForSort`, `debugCurrentPlatformOverride` and `sortedWith`. The rest
+of the ☐ rows are improvements, not blockers, and can ride a later release.
 
 Cross-repo workflow is in [`STYLE_GUIDE.md`](../STYLE_GUIDE.md) (§Dependency management): a path
 dependency while both repos change together, back to a hosted constraint in `melos.yaml` before
