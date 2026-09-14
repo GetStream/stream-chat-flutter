@@ -263,14 +263,6 @@ class ChannelFilterField extends FilterField<ChannelState> {
     (it) => it.channel?.messageCount,
   );
 
-  /// Filters channels by the tags assigned to them.
-  ///
-  /// **Supported operators:** `$eq`, `$in`
-  static final filterTags = ChannelFilterField(
-    'filter_tags',
-    (it) => it.channel?.filterTags,
-  );
-
   /// Filters channels by their members.
   ///
   /// `$eq` matches a channel whose members are exactly the given users, the
