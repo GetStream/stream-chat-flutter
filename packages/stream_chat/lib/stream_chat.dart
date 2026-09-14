@@ -19,9 +19,6 @@ export 'package:rate_limiter/rate_limiter.dart';
 export 'package:stream_core/stream_core.dart'
     show
         Failure,
-        InterceptStep,
-        LogPrint,
-        LoggingInterceptor,
         Result,
         StreamApiError,
         StreamApiException,

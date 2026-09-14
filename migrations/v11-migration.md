@@ -88,6 +88,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamChatClient.logger` (a `Logger`) | `StreamChatClient.logger` (a `StreamLogger`) | `retyped` | Messages are lazy: `logger.i(() => '…')` |
 | `StreamChatClient.detachedLogger` / `.defaultLogHandler` / `LogHandlerFunction` | — | `removed` | Supply a `StreamLogHandler`; `StreamLogHandler.console()` is the default |
 | `export 'package:logging'` (`Logger`, `Level`, `LogRecord`) | `StreamLogger`, `StreamLogConfig`, `StreamLogHandler`, `StreamLogFilter`, `StreamLogPriority`, `StreamLogRecord` | `removed` | `package:logging` is no longer a dependency |
+| `LoggingInterceptor` / `InterceptStep` / `LogPrint` | — | `removed` | The interceptor is installed by default and writes through your `StreamLogHandler`; route its output with `logConfig` |
 | `StreamChatPersistenceClient(logLevel:, logHandlerFunction:)` | — | `removed` | Logging is configured once, on the client |
 | _(more added per feature as PRs land)_ | | | |
 

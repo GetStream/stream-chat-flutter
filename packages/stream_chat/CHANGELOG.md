@@ -3,7 +3,7 @@
 🛑️ Breaking
 
 - Logging moves to `stream_core`. `logLevel` and `logHandlerFunction` become one `logConfig`, `client.logger` is a `StreamLogger`, and `detachedLogger`, `defaultLogHandler` and `LogHandlerFunction` are removed along with the `package:logging` re-export. The default is unchanged: warnings and errors to the console. Supply a `StreamLogHandler` to route records into your own facility.
-- `LoggingInterceptor` is now `stream_core`'s, re-exported from this package along with `InterceptStep` and `LogPrint`. Its `logPrint` is optional: without one it writes through `stream_core`'s logger.
+- `LoggingInterceptor`, `InterceptStep` and `LogPrint` are no longer exported. The interceptor is installed by default and writes through the configured `StreamLogHandler`, so routing its output is a `logConfig` concern now.
 - The token layer is now `stream_core`'s. `Token` becomes `UserToken`, and `TokenProvider` becomes an interface rather than a `Future<String> Function(String)` typedef — pass `TokenProvider.dynamic(myLoader)` where you passed a closure, and note a loader now returns a `UserToken`. `TokenManager.loadToken` becomes `getToken`, `isStatic` becomes `usesStaticProvider`, and `setTokenOrProvider` becomes `setTokenProvider`.
 - Anonymous connections now identify as `!anon` rather than a client-generated random id, matching every other Stream SDK. The backend pins that id so a client cannot claim to be another user.
 - `StreamChatClient.devToken` is removed. It minted a `devtoken`-signed JWT, which only an app with development tokens enabled accepts; generate tokens on your backend, or build one in your own test helper.
