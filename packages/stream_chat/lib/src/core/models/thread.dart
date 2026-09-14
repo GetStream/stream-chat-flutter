@@ -265,21 +265,12 @@ class ThreadSort extends Sort<Thread> {
   /// order it arrived in.
   static const List<ThreadSort> empty = [];
 
-  /// The ordering a thread query applies when it is given no sort at all.
-  ///
-  /// Surfaces threads with unread replies first, then the most recently active.
-  /// The parent message id breaks ties, so a page boundary is reproducible.
-  ///
-  /// Sorting a list locally by this reproduces every term but the unread one: a
-  /// [Thread] does not carry the current user's unread state, so
-  /// [ThreadSortField.hasUnread] contributes nothing and the last-message date
-  /// leads. Passing it to a query asks for the ordering an unsorted query
-  /// already has.
-  static final List<ThreadSort> defaultSort = [
-    ThreadSort.desc(ThreadSortField.hasUnread),
-    ThreadSort.desc(ThreadSortField.lastMessageAt),
-    ThreadSort.desc(ThreadSortField.parentMessageId),
-  ];
+  // No `defaultSort` here, unlike every other sort in this package. A thread
+  // query given no sort is already ordered by unread, then last message, then
+  // parent message id, and that ordering cannot be reproduced locally: a
+  // [Thread] carries no per-user unread state, so [ThreadSortField.hasUnread]
+  // reads nothing and the first term silently drops. Naming it would offer an
+  // ordering the client cannot deliver.
 }
 
 /// Represents a field that thread queries can be sorted on.
