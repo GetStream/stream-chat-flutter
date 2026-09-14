@@ -31,6 +31,13 @@ let group 09 merely execute it.
 The same applies, in a smaller way, to the channel shape embedded in threads (group 07) versus the channels group
 (group 11).
 
+**Decide `name` and `image` with it.** Both arrive as root fields on the wire and are pushed into `extraData` by
+`Serializer.moveToExtraDataFromRoot`; `User.name` is a getter over `extraData['name']` that falls back to `id`,
+and the constructor writes the arguments back into `extraData` "for backwards compatibility". Promoting them to
+real fields is a break worth making in v11 if it is made at all, and it belongs to this decision rather than to
+whichever group happens to touch `User` first. Raised on
+[#2957](https://github.com/GetStream/stream-chat-flutter/pull/2957).
+
 ## Prerequisites
 
 - **The generator's `client.tpl` calls `runApiSafely`, not `runSafely`.** Until it does, a regenerated client

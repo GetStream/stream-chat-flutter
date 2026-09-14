@@ -870,20 +870,33 @@ a `predefinedFilter` replaces `filter` **outright** (`query_channels.go:195`,
 filter is silently discarded. The sort is only overwritten when the preset *defines* one (`:224`);
 a preset with no sort template leaves the caller's sort in force.
 
-That leaves one known gap, accepted deliberately. For a preset with **no** sort template whose
-interpolated filter carries a `last_message_at` term, the server honours the `last_updated` we
-sent, while the response carries no sort — so `PredefinedFilter.effectiveSort` falls through to
-`_defaultSortFor`, which mirrors the server's *no-sort* fallback (`channel.go:756`: `last_updated`,
-or `last_message_at` when the filter mentions it) and answers `last_message_at`. Server and client
-then order by different fields, and `loadMore`'s offset indexes into a list ordered differently
-from the one displayed.
+That leaves one known gap, and it is not where it first looks. For a preset with **no** sort
+template, the response carries no sort, so `PredefinedFilter.effectiveSort` falls through to
+`_defaultSortFor` — a hand-written Dart mirror of the server's fallback in
+`lib/core/mq/channel/channel.go` ("Set Default Sorting"): `last_updated` desc, or `last_message_at`
+desc when the query is flagged as filtering on `last_message_at`.
 
-The alternative was tried and **rejected**: falling back to the sort we actually sent
-(`resolved.sort ?? <sent>` at both `effectiveSort` call sites) closes the gap and retires
-`_defaultSortFor`, but it also gives up the only sensible ordering an offline read has when a
-caller queries a preset directly without a sort — there the sent sort is null, and the cache would
-be left unordered. `_defaultSortFor` stays. It is a hand-written Dart mirror of `channel.go:756`
-and has to be re-checked whenever that fallback changes.
+The obvious mismatch does **not** happen. When that flag is set, a single sent `last_updated` is
+itself rewritten to `last_message_at` a few lines further down, so the server orders by
+`last_message_at` — the same field the client resolved. Sending `ChannelSort.defaultSort` and
+resolving `last_message_at` agree.
+
+The real gap is the mirror being **looser than what it mirrors**. The server sets the flag only
+when *every* `last_message_at` node is reachable through `$and` alone **and** at least one narrows
+by value — `$eq` / `$ne` / `$gt` / `$gte` / `$lt` / `$lte`, or `$exists: true`
+(`DetectLastMessageAtFiltering`, `lib/core/mq/channel/modifiers.go`). `_touchesField` asks only
+whether `last_message_at` appears anywhere, under any operator, and recurses into `$or` / `$nor`.
+So a preset whose filter puts `last_message_at` under `$or`, or matches it with `$in` or
+`$exists: false`, leaves the server on `last_updated` while the client answers `last_message_at` —
+and `loadMore`'s offset then indexes into a list ordered differently from the one displayed.
+Tightening the mirror is tracked in [DEFERRED.md](DEFERRED.md); a test currently pins the loose
+`$or` behaviour, so closing it inverts that test.
+
+One alternative was tried and **rejected**: falling back to the sort we actually sent
+(`resolved.sort ?? <sent>` at both `effectiveSort` call sites) retires `_defaultSortFor` entirely,
+but it also gives up the only sensible ordering an offline read has when a caller queries a preset
+directly without a sort — there the sent sort is null, and the cache would be left unordered.
+`_defaultSortFor` stays, and has to be re-checked whenever the server's fallback changes.
 
 Worth recording either way: because the client always sends a sort, a channel query never reaches
 `sql.go:620`'s `config.Model.DefaultSort()` — which would be a nil dereference, as the channel
@@ -897,8 +910,10 @@ supplying a sort is not equivalent to omitting one: `query_threads.go:110` branc
 `SelectThreadsForUser`, a narrower query whose `ORDER BY` is hardcoded to
 `has_unread DESC, thread.last_message_at DESC, thread.parent_message_id DESC`
 (`threadstate/store.go:513`) — which is exactly what `defaultSort` declares. So sending it buys
-the same ordering off a wider code path. It exists to sort a thread list locally, and its
-dartdoc says so, since the asymmetry otherwise reads as an oversight.
+the same ordering off a wider code path. Nothing in the SDK sorts a thread *list* locally either —
+`StreamThreadListController` only orders replies within a thread — so `ThreadSort.defaultSort` is
+there for a caller who wants to name that ordering, and its dartdoc says what a local sort by it
+would and would not reproduce, since the asymmetry otherwise reads as an oversight.
 
 The persisted shape did not change, so no row needs rewriting — but `schemaVersion` still moves
 from `1000 + 35` to the `1100 + N` band, and drift's `onUpgrade` drops and recreates every table
