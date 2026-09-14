@@ -109,7 +109,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `NullOrdering` / `CompositeComparator` | `stream_core`'s, re-exported | `moved` | Same names and semantics |
 | `client.search(sort:)` / `channel.search(sort:)` / `StreamMessageSearchListController.sort`, taking `SortOrder?` | `List<MessageSearchSort>?` | `retyped` | Was untyped, so a channel field compiled — and the server does not reject one, it reads it as a custom message field, which is null on every message, so the term silently did nothing |
 | `Filter.equal('type', 'messaging')` | `ChannelFilter.equal(ChannelFilterField.type, 'messaging')` | `retyped` | One `Filter` alias and one field registry per query, as with sort and as in `stream_feeds` |
-| `Filter` (`key`, `value`, `operator`) | `stream_core`'s sealed `Filter<T>` | `retyped` | The parts are gone; read `toJson()`, or pattern match on `EqualOperator`, `LogicalOperator`, `EvaluationOperator` and friends |
+| `Filter` (`key`, `value`, `operator`) | `stream_core`'s sealed `Filter<T>` | `retyped` | The parts are gone; read the filter with `toJson()` |
 | `Filter` value equality | — | `removed` | It was `Equatable`; core's compares by identity. Compare `toJson()` |
 | `FilterOperator` (enum) | `FilterOperator` (extension type over `String`) | `retyped` | `'$eq'` and `FilterOperator.equal` interchange |
 | `Filter.empty()` | `null` | `removed` | Every `filter` argument is nullable. `queryThreads` widens for an omitted filter but not an empty one, so the two are not the same request |

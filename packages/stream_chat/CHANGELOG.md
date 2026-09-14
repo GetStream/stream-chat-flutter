@@ -21,7 +21,7 @@
 - `ChannelSortField.cid` is added, matching the iOS and Android SDKs.
 - `search(sort:)` on the client and channel, and `StreamMessageSearchListController.sort`, are typed `List<MessageSearchSort>` rather than an untyped `SortOrder`. Searching is the only message query the API sorts, so the type is named for it.
 - Filtering is now `stream_core`'s. `Filter.equal('type', 'messaging')` becomes `ChannelFilter.equal(ChannelFilterField.type, 'messaging')` — one `Filter` alias and one field registry per query, matching the sort change. A field the SDK does not model is reached with `ChannelFilterField.custom('my_field')`.
-- `Filter` is sealed and no longer exposes `key`, `value` or `operator`. Read it with `toJson`, or pattern match on the operator classes.
+- `Filter` is sealed and no longer exposes `key`, `value` or `operator`. Read it with `toJson`.
 - `Filter` compares by identity rather than by value. Compare `toJson()` where you compared filters.
 - `FilterOperator` is an extension type over `String` rather than an enum, so `'$eq'` and `FilterOperator.equal` interchange.
 - `Filter.empty()` is removed. Every `filter` argument is nullable; pass `null` to match everything. This matters on `queryThreads`, where the API widens the query for an omitted filter but not for an empty one.

@@ -280,7 +280,7 @@ class MemberFilterField extends FilterField<Member> {
   /// **Supported operators:** `$eq`, `$in`, `$q`, `$autocomplete`
   static final userEmail = MemberFilterField(
     'user.email',
-    (it) => it.user?.extraData['email'],
+    (it) => it.user?.extraData['email'].safeCast<String>(),
   );
 
   /// Filters members by whether their user is deactivated.
@@ -288,7 +288,15 @@ class MemberFilterField extends FilterField<Member> {
   /// **Supported operators:** `$eq`
   static final userDeactivated = MemberFilterField(
     'user.nd_deactivated',
-    (it) => it.user?.extraData['nd_deactivated'],
+    (it) => it.user?.extraData['nd_deactivated'].safeCast<bool>(),
+  );
+
+  /// Filters members by whether they muted notifications for the channel.
+  ///
+  /// **Supported operators:** `$eq`
+  static final notificationsMuted = MemberFilterField(
+    'notifications_muted',
+    (it) => it.extraData['notifications_muted'].safeCast<bool>(),
   );
 
   /// Filters members by when they joined the channel.

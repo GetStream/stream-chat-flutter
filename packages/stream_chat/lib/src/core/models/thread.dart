@@ -248,6 +248,9 @@ class ThreadFilterField extends FilterField<Thread> {
 
   /// Creates a field the SDK does not model, read from [Thread.extraData].
   ///
+  /// `has_unread` is reached this way. The server resolves it against the
+  /// caller's read state; a local match cannot.
+  ///
   /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
   /// `$exists`, `$contains`, `$q`, `$autocomplete`
   factory ThreadFilterField.custom(String remote) {
