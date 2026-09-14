@@ -277,6 +277,7 @@ void main() {
           UserSortField.banned,
           UserSortField.lastActive,
           UserSortField.language,
+          UserSortField.teams,
         ],
         {
           'id',
@@ -287,6 +288,7 @@ void main() {
           'banned',
           'last_active',
           'language',
+          'teams',
         },
       );
     });

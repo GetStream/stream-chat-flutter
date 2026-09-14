@@ -375,8 +375,8 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     }
 
     // 3) Sort using the comparator — on envelopes instead of fully-hydrated
-    //    states.
-    envelopes.sort(sort.compare);
+    //    states. Stable, so the offset below cannot skip or repeat a tied cid.
+    envelopes = envelopes.sortedWith(sort.compare);
 
     // 4) Slice the page.
     final total = envelopes.length;
