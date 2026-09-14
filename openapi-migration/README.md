@@ -55,8 +55,9 @@ one group. Verified mechanically — see [Keeping this plan honest](#keeping-thi
   maintaining two shapes forever) or consistency with our other products. Not for cosmetics.
 - **Every break ships four artifacts**: `refactor(llc)!:` title, `🛑️ Breaking` CHANGELOG entry, a Symbol Map row
   plus feature section in `migrations/v11-migration.md`, and the reason in the PR body.
-- **Decide once, at the right level.** Cross-cutting shapes — `User`, errors, `Result` — are decided in
-  [01-foundation](01-foundation.md), not re-argued per group.
+- **Decide once, at the right level.** The `User` shape is decided in [01-foundation](01-foundation.md), not
+  re-argued per group. Errors and `Result` are decided in
+  [`core-migration/03-errors.md`](../core-migration/03-errors.md).
 
 ## Order, and why
 
@@ -76,9 +77,9 @@ surfaces before it reaches `Message` and `ChannelState`:
 
 ## Prerequisites
 
-- **A `stream_core` release.** `stream_chat` cannot be published while `stream_core` is a git dependency, and the
-  generated client needs `StreamDateTimeConverter`, which is not in the last published version.
 - **The generated client committed and building** — it is, in `lib/open_api/`.
+- **The generator's `client.tpl` calling `runApiSafely`, not `runSafely`** — see
+  [01-foundation](01-foundation.md#prerequisites).
 
 ## How to execute a group
 
