@@ -1636,7 +1636,7 @@ void main() {
         ).called(1);
       });
 
-      test('should update message state even when error is not StreamChatNetworkError', () async {
+      test('should update message state even when the error is not a StreamChatException', () async {
         final message = Message(
           id: 'test-message-id-error-1',
           state: MessageState.sent,
@@ -2000,7 +2000,7 @@ void main() {
     });
 
     group('`.partialUpdateMessage` error handling', () {
-      test('should update message state even when error is not StreamChatNetworkError', () async {
+      test('should update message state even when the error is not a StreamChatException', () async {
         final message = Message(
           id: 'test-message-id-error-partial-1',
           state: MessageState.sent,

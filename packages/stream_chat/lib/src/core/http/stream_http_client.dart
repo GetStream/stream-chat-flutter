@@ -54,13 +54,7 @@ class StreamHttpClient {
         ?tokenManager?.let((it) => AuthInterceptor(httpClient, it, tag: 'SCh:HttpAuth')),
         ?connectionIdManager?.let((it) => ConnectionIdInterceptor(() => it.connectionId)),
         const ApiErrorInterceptor(),
-        ...interceptors ??
-            [
-              // Add a default logging interceptor if no interceptors are
-              // provided. What it writes is gated by the configured priority,
-              // so there is no separate on/off switch here.
-              LoggingInterceptor(requestHeader: true, tag: 'SCh:Http'),
-            ],
+        ...interceptors ?? [LoggingInterceptor(requestHeader: true, tag: 'SCh:Http')],
       ]);
     if (httpClientAdapter != null) {
       httpClient.httpClientAdapter = httpClientAdapter;
