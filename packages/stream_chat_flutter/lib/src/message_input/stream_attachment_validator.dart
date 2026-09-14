@@ -204,7 +204,6 @@ final class AttachmentBlockedError extends AttachmentValidationError {
   final String? mimeType;
 
   @override
-  @override
   String toString() {
     final parts = <String>[
       if (fileExtension case final ext? when ext.isNotEmpty) 'extension: $ext',
