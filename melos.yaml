@@ -113,12 +113,12 @@ command:
         git:
           url: https://github.com/GetStream/stream-core-flutter.git
           path: packages/stream_core
-          ref: 6648852a6d72d4cded93aa8c4d285576a9c8a194
+          ref: b63a0fc12e5df62cb1c0723f8260be5e417da663
       stream_core_flutter:
         git:
           url: https://github.com/GetStream/stream-core-flutter.git
           path: packages/stream_core_flutter
-          ref: 6648852a6d72d4cded93aa8c4d285576a9c8a194
+          ref: b63a0fc12e5df62cb1c0723f8260be5e417da663
       stream_thumbnail: ^0.1.0
       synchronized: ^3.4.0
       thumblr: ^0.0.4
