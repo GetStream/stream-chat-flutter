@@ -810,11 +810,16 @@ list `.notEqual` under "**Supported operators:**", and there is no `notEqual` in
       spec and leaves `$nor` accepted-but-unpublished, so deprecating would have kept three
       operators alive that the API is retiring. A preset that still carries one decodes through
       `Filter.raw`. A caller that relied on them excludes client-side or shows the rows.
-- [ ] `filter.dart`, `sort_order.dart`, our `comparable_field.dart` and
-      `location_coordinates.dart` are deleted; `stream_chat.dart` exports core's via the
-      allowlist.
-- [ ] A `FilterField` / `SortField` registry exists for every queryable type, with local
-      extractors.
+- [x] `filter.dart`, `sort_order.dart` and our `comparable_field.dart` are deleted;
+      `stream_chat.dart` exports core's via the allowlist. The allowlist covers `Filter`,
+      `FilterField` and `FilterOperator`, plus `EvaluationOperator` and `LogicalOperator` for
+      `searchQueryLength` — the remaining operator subclasses stay out, because a filter is read
+      with `toJson()` and `stream_feeds` does the same in all 36 places it reads one.
+- [ ] `location_coordinates.dart` is deleted — still exported, the last of this row outstanding.
+- [x] A `FilterField` / `SortField` registry exists for every queryable type, with local
+      extractors. Wire names are pinned by `sort_registry_test.dart` and
+      `filter_registry_test.dart`; the fields deliberately left undeclared are named in each
+      registry's `custom` doc comment.
 - [ ] **Serialisation diff:** every filter and sort the SDK can build round-trips through
       `toJson()` to byte-identical output against the pre-migration implementation.
 - [ ] **A golden ordering test** over a list of accented and ligatured names proves

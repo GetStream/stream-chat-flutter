@@ -10,7 +10,6 @@ A row leaves this file when it lands, not when it is decided.
 | | What | Blocked on | Phase |
 | --- | --- | --- | --- |
 | ☐ | **Restore hosted `stream_core` / `stream_core_flutter` constraints** in `melos.yaml` | A `stream_core` release carrying `Filter.raw`, `normalizeStringForSort`, `debugCurrentPlatformOverride` and `sortedWith`. Until then `melos bootstrap` writes a `git:` block into `stream_chat`, `stream_chat_flutter_core` and `stream_chat_flutter`, which makes all three unpublishable. This is the row every other "blocked on a core release" note now folds into. | [08](08-query-dsl.md) |
-| ☐ | Adopt core's `CurrentPlatform` / `PlatformType`, renaming `.name` → `.operatingSystem` | Nothing any more — the SHA pinned in [08](08-query-dsl.md) carries `debugCurrentPlatformOverride`, which `stream_chat_flutter`'s tests set in 8 places. Rides the restore row above. | [02](02-platform-and-environment.md) |
 | ☐ | A test proving a malformed response body surfaces as `StreamClientException` rather than a bare `TypeError` | A call through the generated client — nothing in this package exercises `runApiSafely` yet. Arrives with `openapi-migration` group 02. | [03](03-errors.md) |
 
 ## Needs a live check, not more code
@@ -27,6 +26,7 @@ A row leaves this file when it lands, not when it is decided.
 
 | | What | Waiting on | Phase |
 | --- | --- | --- | --- |
+| ☐ | Adopt core's `CurrentPlatform` / `PlatformType`, renaming `.name` → `.operatingSystem` | The restore row above. No release of its own: the SHA pinned in [08](08-query-dsl.md) already carries `debugCurrentPlatformOverride`, which `stream_chat_flutter`'s tests set in 8 places, so this is doable now and only the hosted constraint is outstanding. | [02](02-platform-and-environment.md) |
 | ☐ | **A `StreamChatConfig`**, mirroring `FeedsConfig` | Deliberately last, as a cleanup step once the adoption is done. It subsumes several rows below, so doing it early would mean doing them twice. See [below](#the-streamchatconfig-that-absorbs-several-of-these). | [10](10-cleanup.md) |
 | ☐ | Retire `StreamChatClient.additionalHeaders` and `defaultUserAgent` | Both are public mutable statics, so two clients in one process share them. Replacing the first needs a per-client `headers` option; the second reads the static `_systemEnvironmentManager`, so they move together. | [10](10-cleanup.md) |
 | ☐ | Take `StreamHttpClientOptions` directly instead of `baseURL` / `connectTimeout` / `receiveTimeout` | Folds into the config above rather than being a separate break. | [10](10-cleanup.md) |
