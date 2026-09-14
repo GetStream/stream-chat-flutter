@@ -41,7 +41,7 @@
 - `DraftSortField` has no `custom` field: the API rejects a custom sort field on drafts.
 - A sort names its model's field type, so `MemberSort.asc` takes a `MemberSortField` and a field from another model does not compile. `XSortField.custom(key)` reads a field from the model's extra data, for the four models whose queries accept one.
 - Added `ChannelSort.empty`, `MemberSort.empty` and one on every other sort — an empty sort, for querying with the ordering the API applies on its own.
-- Default sorts moved onto the sort that owns them: `ChannelSort.defaultSort`, `MemberSort.defaultSort` and so on, reachable now without the Flutter layer. `ThreadSort` has none: a thread query with no sort is ordered by unread first, and a `Thread` carries no per-user unread state, so the client cannot reproduce that ordering.
+- Default sorts moved onto the sort that owns them: `ChannelSort.defaultSort`, `MemberSort.defaultSort` and so on, reachable now without the Flutter layer.
 
 🐞 Fixed
 
