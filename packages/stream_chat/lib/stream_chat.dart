@@ -20,9 +20,6 @@ export 'package:stream_core/stream_core.dart'
     show
         CompositeComparator,
         Failure,
-        InterceptStep,
-        LogPrint,
-        LoggingInterceptor,
         NullOrdering,
         Result,
         Sort,

@@ -88,6 +88,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamChatClient.logger` (a `Logger`) | `StreamChatClient.logger` (a `StreamLogger`) | `retyped` | Messages are lazy: `logger.i(() => '…')` |
 | `StreamChatClient.detachedLogger` / `.defaultLogHandler` / `LogHandlerFunction` | — | `removed` | Supply a `StreamLogHandler`; `StreamLogHandler.console()` is the default |
 | `export 'package:logging'` (`Logger`, `Level`, `LogRecord`) | `StreamLogger`, `StreamLogConfig`, `StreamLogHandler`, `StreamLogFilter`, `StreamLogPriority`, `StreamLogRecord` | `removed` | `package:logging` is no longer a dependency |
+| `LoggingInterceptor` / `InterceptStep` / `LogPrint` | — | `removed` | The interceptor is installed by default and writes through your `StreamLogHandler`; route its output with `logConfig` |
 | `StreamChatPersistenceClient(logLevel:, logHandlerFunction:)` | — | `removed` | Logging is configured once, on the client |
 | `SortOption<T>.asc(field)` / `.desc(field)` | `ChannelSort.asc(field)` / `MemberSort.desc(field)` / … | `renamed` | One `Sort` subclass per model, as in `stream_feeds`. `nullOrdering` is still a named parameter |
 | `SortOption.ASC` / `.DESC` | `SortDirection.asc` / `.desc` | `retyped` | An enum carrying `value` (`1` / `-1`) rather than a bare `int` |
@@ -195,10 +196,10 @@ tempting one-for-one swap silently stops handling most failures:
 Note this differs from the `Result.fold` example further down: `Failure.error` is typed `Object`, so
 a `switch` on it *does* need a default arm. Only the caught root is sealed.
 
-> **The one break you can ship without noticing.** `StreamChatNetworkError` is deprecated rather than deleted,
-> because unmigrated endpoints used to throw it. Nothing throws it any more, so
-> `on StreamChatNetworkError catch (e)` still **compiles** and simply stops matching — the failure passes straight
-> through. Search your code for it; the deprecation warning tells you where.
+> **`StreamChatNetworkError` is gone, not deprecated.** Nothing throws it any more, so leaving the name declared
+> would let `on StreamChatNetworkError catch (e)` keep compiling while silently matching nothing — a break you
+> could ship without noticing. Deleting it makes the same clause fail to compile, so the analyzer points at every
+> site you need to change.
 
 ### Logging
 

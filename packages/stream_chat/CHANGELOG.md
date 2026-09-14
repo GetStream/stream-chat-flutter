@@ -3,7 +3,7 @@
 🛑️ Breaking
 
 - Logging moves to `stream_core`. `logLevel` and `logHandlerFunction` become one `logConfig`, `client.logger` is a `StreamLogger`, and `detachedLogger`, `defaultLogHandler` and `LogHandlerFunction` are removed along with the `package:logging` re-export. The default is unchanged: warnings and errors to the console. Supply a `StreamLogHandler` to route records into your own facility.
-- `LoggingInterceptor` is now `stream_core`'s, re-exported from this package along with `InterceptStep` and `LogPrint`. Its `logPrint` is optional: without one it writes through `stream_core`'s logger.
+- `LoggingInterceptor`, `InterceptStep` and `LogPrint` are no longer exported. The interceptor is installed by default and writes through the configured `StreamLogHandler`, so routing its output is a `logConfig` concern now.
 - The token layer is now `stream_core`'s. `Token` becomes `UserToken`, and `TokenProvider` becomes an interface rather than a `Future<String> Function(String)` typedef — pass `TokenProvider.dynamic(myLoader)` where you passed a closure, and note a loader now returns a `UserToken`. `TokenManager.loadToken` becomes `getToken`, `isStatic` becomes `usesStaticProvider`, and `setTokenOrProvider` becomes `setTokenProvider`.
 - Anonymous connections now identify as `!anon` rather than a client-generated random id, matching every other Stream SDK. The backend pins that id so a client cannot claim to be another user.
 - `StreamChatClient.devToken` is removed. It minted a `devtoken`-signed JWT, which only an app with development tokens enabled accepts; generate tokens on your backend, or build one in your own test helper.
@@ -24,10 +24,7 @@
 - A sort names its model's field type, so `MemberSort.asc` takes a `MemberSortField` and a field from another model does not compile. `XSortField.custom(key)` reads a field from the model's extra data, for the four models whose queries accept one.
 - Added `ChannelSort.empty`, `MemberSort.empty` and so on alongside each default — an empty sort, for querying with the ordering the API applies on its own.
 - Default sorts moved onto the sort that owns them: `ChannelSort.defaultSort`, `MemberSort.defaultSort` and so on, reachable now without the Flutter layer.
-
-⚠️ Deprecated
-
-- `StreamChatNetworkError` is deprecated. Nothing throws it any more, so an `on StreamChatNetworkError catch` clause still compiles but no longer matches.
+- `StreamChatNetworkError` and `StreamChatNetworkErrorType` are removed. Nothing throws them any more, so keeping them would let an `on StreamChatNetworkError catch` clause compile while matching nothing.
 
 🔄 Changed
 

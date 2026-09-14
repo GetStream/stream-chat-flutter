@@ -2,7 +2,7 @@
 
 🛑️ Breaking
 
-- `StreamChatPersistenceClient` no longer takes `logLevel` or `logHandlerFunction`. It writes through `stream_core`'s logger, configured once via `StreamChatClient`'s `logConfig`.
+- `StreamChatPersistenceClient` no longer takes `logLevel` or `logHandlerFunction`. Logging is configured once, on `StreamChatClient`, with `logConfig`.
 - The sort arguments on `getChannelStates`, `queryChannelStates` and `saveChannelQueries` are typed `List<ChannelSort>` rather than `SortOrder<ChannelState>`.
 
 🔄 Changed
