@@ -37,7 +37,6 @@
 - `LocationCoordinates` is renamed `LocationCoordinate` — singular. Its `copyWith` is removed, and it gains `distanceTo`, which answers the distance between two points.
 - `CurrentPlatform` and `PlatformType` keep their names; `CurrentPlatform.name` becomes `CurrentPlatform.operatingSystem`, reporting the same string.
 - The list extensions are consolidated into one `SortedListExtensions`. `SortedListX`, `IterableMergeX` and `ListX` are removed: `mergeSorted` becomes `sortedMerge` (and now collapses a repeated key instead of carrying it through, matching `merge`), `updateIf` becomes `updateWhere` (its `update` argument is now named), and `mergeFrom` is dropped in favour of `merge` over a projected list.
-- Two coordinates now compare equal when they agree to about a centimetre, rather than requiring identical doubles.
 - `DraftSortField` has no `custom` field: the API rejects a custom sort field on drafts.
 - A sort names its model's field type, so `MemberSort.asc` takes a `MemberSortField` and a field from another model does not compile. `XSortField.custom(key)` reads a field from the model's extra data, for the four models whose queries accept one.
 - Added `ChannelSort.empty`, `MemberSort.empty` and one on every other sort — an empty sort, for querying with the ordering the API applies on its own.
