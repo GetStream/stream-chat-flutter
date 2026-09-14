@@ -15,7 +15,7 @@ A row leaves this file when it lands, not when it is decided.
 form of this used `dependencyOverridePaths` pointing at a sibling checkout; that only worked on a
 machine that had one, which is why CI went red and the pin replaced it.)
 
-Checked against `~/.pub-cache/hosted/pub.dev/stream_core-0.5.0`, chat already depends on five
+Checked against `~/.pub-cache/hosted/pub.dev/stream_core-0.5.0`, chat already depends on six
 things missing from it:
 
 | Missing from released 0.5.0 | Used by | Where it is |
@@ -25,9 +25,10 @@ things missing from it:
 | `normalizeStringForSort` | the sort registries | [core#181](https://github.com/GetStream/stream-core-flutter/pull/181) |
 | `Filter.raw` | `stream_chat_persistence`'s filter converter, `PredefinedFilter` | core#181 |
 | element-wise matching for array fields | `members`, `attachments.type` and friends | core#181 |
+| `LocationCoordinate`'s exact equality | `Location.coordinates`, and anything putting a coordinate in a `Set` or `Map` | core#181 |
 
-Nothing on this branch ships until one `stream_core` release carries all five. That is one release,
-not five — see [UPSTREAM.md](UPSTREAM.md) on batching. Until it exists, treat a green local run as
+Nothing on this branch ships until one `stream_core` release carries all six. That is one release,
+not six — see [UPSTREAM.md](UPSTREAM.md) on batching. Until it exists, treat a green local run as
 evidence about the sibling checkout and nothing more, and re-run against the hosted constraint
 before believing the branch is releasable.
 
