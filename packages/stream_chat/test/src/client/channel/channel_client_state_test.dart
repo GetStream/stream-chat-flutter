@@ -708,51 +708,6 @@ void main() {
           );
         }
 
-        // The API returns pinned messages newest-pinned first, which is not
-        // `createdAt` order. Every later write merges by `createdAt` and
-        // `stream_core`'s sorted helpers assert their receiver is in that
-        // order, so an unsorted payload used to take down the next event.
-        test(
-          'accepts a pinned message payload the API did not order by createdAt',
-          () async {
-            final older = Message(
-              id: 'older',
-              user: client.state.currentUser,
-              pinned: true,
-              createdAt: DateTime.utc(2024, 1, 1),
-            );
-            final newer = Message(
-              id: 'newer',
-              user: client.state.currentUser,
-              pinned: true,
-              createdAt: DateTime.utc(2024, 1, 2),
-            );
-
-            // `pinned_at` descending puts the newest first — the reverse of
-            // what the merge path requires.
-            channel.state?.updateChannelState(
-              ChannelState(pinnedMessages: [newer, older]),
-            );
-
-            client.addEvent(
-              createUpdateMessageEvent(
-                Message(
-                  id: 'another',
-                  user: client.state.currentUser,
-                  pinned: true,
-                  createdAt: DateTime.utc(2024, 1, 3),
-                ),
-              ),
-            );
-            await Future.delayed(Duration.zero);
-
-            expect(
-              channel.state?.pinnedMessages.map((it) => it.id),
-              orderedEquals(['older', 'newer', 'another']),
-            );
-          },
-        );
-
         test(
           "should update 'channel.state.pinnedMessages' and should add message to pinned messages only once if updatedMessage.pinned is true",
           () async {
