@@ -387,13 +387,6 @@ class ThreadSort extends Sort<Thread> {
   /// An empty sort: the query carries no sort term, and a list keeps the
   /// order it arrived in.
   static const List<ThreadSort> empty = [];
-
-  // No `defaultSort` here, unlike every other sort in this package. A thread
-  // query given no sort is already ordered by unread, then last message, then
-  // parent message id, and that ordering cannot be reproduced locally: a
-  // [Thread] carries no per-user unread state, so [ThreadSortField.hasUnread]
-  // reads nothing and the first term silently drops. Naming it would offer an
-  // ordering the client cannot deliver.
 }
 
 /// Represents a field that thread queries can be sorted on.
