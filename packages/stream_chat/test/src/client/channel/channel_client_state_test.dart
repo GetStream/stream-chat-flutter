@@ -5079,11 +5079,11 @@ void main() {
         channel.dispose();
       });
 
-      test('a throwing handler still lets the later regions apply', () async {
+      test('a throwing handler still lets the later stages apply', () async {
         expect(channel.memberCount, equals(0));
 
         // A message.deleted without a message throws on `event.message!` in
-        // the first dispatch region. The unfiltered count refresh that runs
+        // the first dispatch stage. The unfiltered count refresh that runs
         // after it must still apply.
         client.addEvent(
           Event(

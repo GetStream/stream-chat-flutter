@@ -114,6 +114,22 @@ void main() {
         () => mutations.onMemberUserUpdated(otherUser),
       ]);
     });
+
+    // `member.updated` carries both a member and a user, so both stages write
+    // the same member. The merge runs first, leaving the event member's user
+    // in place; reordering them would copy the event user over it instead.
+    test('merges the event user before applying an updated member', () {
+      final member = Member(userId: otherUser.id);
+
+      handler.handleEvent(
+        Event(type: EventType.memberUpdated, member: member, user: otherUser),
+      );
+
+      verifyInOrder([
+        () => mutations.onMemberUserUpdated(otherUser),
+        () => mutations.onMemberUpdated(member),
+      ]);
+    });
   });
 
   group('typing events', () {
@@ -251,11 +267,15 @@ void main() {
       verify(() => mutations.onDraftDeleted(draft)).called(1);
     });
 
-    test('draft events ignore events without a draft', () {
+    test('draft.updated ignores events without a draft', () {
       handler.handleEvent(Event(type: EventType.draftUpdated));
-      handler.handleEvent(Event(type: EventType.draftDeleted));
 
       verifyNever(() => mutations.onDraftUpdated(any()));
+    });
+
+    test('draft.deleted ignores events without a draft', () {
+      handler.handleEvent(Event(type: EventType.draftDeleted));
+
       verifyNever(() => mutations.onDraftDeleted(any()));
     });
   });
@@ -343,11 +363,15 @@ void main() {
       verifyNever(() => mutations.onPollCreated(any()));
     });
 
-    test('poll.updated and poll.closed delegate the poll', () {
+    test('poll.updated delegates the poll', () {
       handler.handleEvent(Event(type: EventType.pollUpdated, poll: poll));
-      handler.handleEvent(Event(type: EventType.pollClosed, poll: poll));
 
       verify(() => mutations.onPollUpdated(poll)).called(1);
+    });
+
+    test('poll.closed delegates the poll', () {
+      handler.handleEvent(Event(type: EventType.pollClosed, poll: poll));
+
       verify(() => mutations.onPollClosed(poll)).called(1);
     });
 
@@ -357,22 +381,43 @@ void main() {
       verifyNever(() => mutations.onPollUpdated(any()));
     });
 
-    test('poll vote events delegate the poll and vote', () {
+    test('poll.answer_casted delegates the poll and vote', () {
       handler.handleEvent(Event(type: EventType.pollAnswerCasted, poll: poll, pollVote: pollVote));
-      handler.handleEvent(Event(type: EventType.pollVoteCasted, poll: poll, pollVote: pollVote));
-      handler.handleEvent(Event(type: EventType.pollVoteChanged, poll: poll, pollVote: pollVote));
-      handler.handleEvent(Event(type: EventType.pollAnswerRemoved, poll: poll, pollVote: pollVote));
-      handler.handleEvent(Event(type: EventType.pollVoteRemoved, poll: poll, pollVote: pollVote));
 
       verify(() => mutations.onPollAnswerCasted(poll, pollVote)).called(1);
+    });
+
+    test('poll.vote_casted delegates the poll and vote', () {
+      handler.handleEvent(Event(type: EventType.pollVoteCasted, poll: poll, pollVote: pollVote));
+
       verify(() => mutations.onPollVoteCasted(poll, pollVote)).called(1);
+    });
+
+    test('poll.vote_changed delegates the poll and vote', () {
+      handler.handleEvent(Event(type: EventType.pollVoteChanged, poll: poll, pollVote: pollVote));
+
       verify(() => mutations.onPollVoteChanged(poll, pollVote)).called(1);
+    });
+
+    test('poll.answer_removed delegates the poll and vote', () {
+      handler.handleEvent(Event(type: EventType.pollAnswerRemoved, poll: poll, pollVote: pollVote));
+
       verify(() => mutations.onPollAnswerRemoved(poll, pollVote)).called(1);
+    });
+
+    test('poll.vote_removed delegates the poll and vote', () {
+      handler.handleEvent(Event(type: EventType.pollVoteRemoved, poll: poll, pollVote: pollVote));
+
       verify(() => mutations.onPollVoteRemoved(poll, pollVote)).called(1);
     });
 
-    test('poll vote events ignore events missing the poll or vote', () {
+    test('poll vote events ignore events without a vote', () {
       handler.handleEvent(Event(type: EventType.pollVoteCasted, poll: poll));
+
+      verifyNever(() => mutations.onPollVoteCasted(any(), any()));
+    });
+
+    test('poll vote events ignore events without a poll', () {
       handler.handleEvent(Event(type: EventType.pollVoteCasted, pollVote: pollVote));
 
       verifyNever(() => mutations.onPollVoteCasted(any(), any()));
@@ -726,11 +771,15 @@ void main() {
       verify(() => mutations.onUserStopWatching(otherUser, watcherCount: 2)).called(1);
     });
 
-    test('watching events ignore events without a user', () {
+    test('user.watching.start ignores events without a user', () {
       handler.handleEvent(Event(type: EventType.userWatchingStart));
-      handler.handleEvent(Event(type: EventType.userWatchingStop));
 
       verifyNever(() => mutations.onUserStartWatching(any(), watcherCount: any(named: 'watcherCount')));
+    });
+
+    test('user.watching.stop ignores events without a user', () {
+      handler.handleEvent(Event(type: EventType.userWatchingStop));
+
       verifyNever(() => mutations.onUserStopWatching(any(), watcherCount: any(named: 'watcherCount')));
     });
   });
@@ -743,11 +792,15 @@ void main() {
       remindAt: DateTime.now(),
     );
 
-    test('reminder.created and reminder.updated delegate the reminder', () {
+    test('reminder.created delegates the reminder', () {
       handler.handleEvent(Event(type: EventType.reminderCreated, reminder: reminder));
-      handler.handleEvent(Event(type: EventType.reminderUpdated, reminder: reminder));
 
       verify(() => mutations.onReminderCreated(reminder)).called(1);
+    });
+
+    test('reminder.updated delegates the reminder', () {
+      handler.handleEvent(Event(type: EventType.reminderUpdated, reminder: reminder));
+
       verify(() => mutations.onReminderUpdated(reminder)).called(1);
     });
 
@@ -757,11 +810,15 @@ void main() {
       verify(() => mutations.onReminderDeleted(reminder)).called(1);
     });
 
-    test('reminder events ignore events without a reminder', () {
+    test('reminder.created ignores events without a reminder', () {
       handler.handleEvent(Event(type: EventType.reminderCreated));
-      handler.handleEvent(Event(type: EventType.reminderDeleted));
 
       verifyNever(() => mutations.onReminderCreated(any()));
+    });
+
+    test('reminder.deleted ignores events without a reminder', () {
+      handler.handleEvent(Event(type: EventType.reminderDeleted));
+
       verifyNever(() => mutations.onReminderDeleted(any()));
     });
   });
@@ -810,17 +867,21 @@ void main() {
       verify(() => mutations.onLocationExpired(location)).called(1);
     });
 
-    test('location events ignore events without a location', () {
+    test('location.updated ignores events without a location', () {
       handler.handleEvent(Event(type: EventType.locationUpdated));
-      handler.handleEvent(Event(type: EventType.locationExpired));
 
       verifyNever(() => mutations.onLocationUpdated(any()));
+    });
+
+    test('location.expired ignores events without a location', () {
+      handler.handleEvent(Event(type: EventType.locationExpired));
+
       verifyNever(() => mutations.onLocationExpired(any()));
     });
   });
 
   group('error isolation', () {
-    test('a throwing block 1 handler still runs the later regions', () {
+    test('a throwing message and channel dispatch still runs the later stages', () {
       when(
         () => mutations.onMessageNew(any(), watcherCount: any(named: 'watcherCount')),
       ).thenThrow(StateError('boom'));
@@ -840,7 +901,7 @@ void main() {
       verify(() => mutations.onMemberUserUpdated(otherUser)).called(1);
     });
 
-    test('a throwing count refresh still runs the later regions', () {
+    test('a throwing channel counts stage still runs the later stages', () {
       when(
         () => mutations.onChannelCounts(
           memberCount: any(named: 'memberCount'),
@@ -862,7 +923,7 @@ void main() {
       ).called(1);
     });
 
-    test('a throwing block 2 handler still runs the later regions', () {
+    test('a throwing member list dispatch still runs the later stages', () {
       final member = Member(userId: otherUser.id);
       when(() => mutations.onMemberAdded(any())).thenThrow(StateError('boom'));
 
@@ -873,7 +934,7 @@ void main() {
       verify(() => mutations.onMemberUserUpdated(otherUser)).called(1);
     });
 
-    test('a throwing member user merge still runs the later regions', () {
+    test('a throwing member user merge still runs the later stages', () {
       final member = Member(userId: otherUser.id);
       when(() => mutations.onMemberUserUpdated(any())).thenThrow(StateError('boom'));
 
@@ -884,7 +945,7 @@ void main() {
       verify(() => mutations.onMemberUpdated(member)).called(1);
     });
 
-    test('a throwing block 3 handler does not escape handleEvent', () {
+    test('a throwing remaining dispatch does not escape handleEvent', () {
       when(
         () => mutations.onUserStartWatching(any(), watcherCount: any(named: 'watcherCount')),
       ).thenThrow(StateError('boom'));
@@ -912,6 +973,19 @@ void main() {
       expect(logRecords.single.level, Level.WARNING);
       expect(logRecords.single.message, contains(EventType.memberAdded));
       expect(logRecords.single.error, isA<StateError>());
+    });
+
+    test('a contained error names the stage that failed', () {
+      when(() => mutations.onMemberAdded(any())).thenThrow(StateError('boom'));
+
+      handler.handleEvent(
+        Event(
+          type: EventType.memberAdded,
+          member: Member(userId: otherUser.id),
+        ),
+      );
+
+      expect(logRecords.single.message, contains('member list dispatch'));
     });
   });
 }

@@ -25,164 +25,140 @@ class ChannelEventHandler {
 
   /// Handles the given channel [event].
   ///
-  /// Routes the event by its type through three dispatch blocks, running
-  /// [_onChannelCounts] between the first and second block and
-  /// [_onMemberUserUpdated] between the second and third; those two observe
-  /// every event regardless of its type.
+  /// Routes the event by its type, preserving the effect order the per-event
+  /// subscriptions used to produce.
   ///
-  /// Each of those five regions is contained: one that throws is logged and
-  /// the remaining regions still run for the same event.
+  /// Each of the five stages is contained: one that throws synchronously is
+  /// logged and the remaining stages still run for the same event. The four
+  /// `async` handlers are outside that guarantee — their futures are discarded
+  /// here, so a failure after the first `await` surfaces as an unhandled async
+  /// error instead of a logged warning.
   void handleEvent(Event event) {
-    // Block 1: typing, message, draft, reaction, poll, read, and channel
-    // events.
-    try {
-      switch (event.type) {
-        // typing events
-        case EventType.typingStart:
-          _onTypingStart(event);
-        case EventType.typingStop:
-          _onTypingStop(event);
-        // message events
-        case EventType.messageNew:
-        case EventType.notificationMessageNew:
-          _onMessageNew(event);
-        case EventType.messageDeleted:
-          _onMessageDeleted(event);
-        case EventType.messageUpdated:
-          _onMessageUpdated(event);
-        // draft events
-        case EventType.draftUpdated:
-          _onDraftUpdated(event);
-        case EventType.draftDeleted:
-          _onDraftDeleted(event);
-        // reaction events
-        case EventType.reactionNew:
-          _onReactionNew(event);
-        case EventType.reactionUpdated:
-          _onReactionUpdated(event);
-        case EventType.reactionDeleted:
-          _onReactionDeleted(event);
-        // poll events
-        case EventType.pollCreated:
-          _onPollCreated(event);
-        case EventType.pollUpdated:
-          _onPollUpdated(event);
-        case EventType.pollClosed:
-          _onPollClosed(event);
-        case EventType.pollAnswerCasted:
-          _onPollAnswerCasted(event);
-        case EventType.pollVoteCasted:
-          _onPollVoteCasted(event);
-        case EventType.pollVoteChanged:
-          _onPollVoteChanged(event);
-        case EventType.pollAnswerRemoved:
-          _onPollAnswerRemoved(event);
-        case EventType.pollVoteRemoved:
-          _onPollVoteRemoved(event);
-        // read events
-        case EventType.messageRead:
-        case EventType.notificationMarkRead:
-          _onMessageRead(event);
-        case EventType.notificationMarkUnread:
-          _onNotificationMarkUnread(event);
-        case EventType.messageDelivered:
-          _onMessageDelivered(event);
-        // channel events
-        case EventType.channelTruncated:
-        case EventType.notificationChannelTruncated:
-          _onChannelTruncated(event);
-        case EventType.channelUpdated:
-          _onChannelUpdated(event);
-      }
-    } catch (error, stackTrace) {
-      _client.logger.warning(
-        'Error handling ${event.type} event',
-        error,
-        stackTrace,
-      );
-    }
+    _guard(event, 'message and channel dispatch', () => _dispatchMessageAndChannelEvents(event));
+    _guard(event, 'channel counts', () => _onChannelCounts(event));
+    _guard(event, 'member list dispatch', () => _dispatchMemberListEvents(event));
+    _guard(event, 'member user merge', () => _onMemberUserUpdated(event));
+    _guard(event, 'remaining dispatch', () => _dispatchRemainingEvents(event));
+  }
 
-    // Updates the channel member and message counts on any event carrying one.
+  // Runs the given [stage] of [event] handling, containing a synchronous
+  // failure so the remaining stages still run for the same event.
+  void _guard(Event event, String stage, void Function() region) {
     try {
-      _onChannelCounts(event);
+      region();
     } catch (error, stackTrace) {
-      _client.logger.warning(
-        'Error handling ${event.type} event',
-        error,
-        stackTrace,
-      );
+      _client.logger.warning('Error handling ${event.type} event in $stage', error, stackTrace);
     }
+  }
 
-    // Block 2: member added and removed events.
-    try {
-      switch (event.type) {
-        // member events
-        case EventType.memberAdded:
-          _onMemberAdded(event);
-        case EventType.memberRemoved:
-          _onMemberRemoved(event);
-      }
-    } catch (error, stackTrace) {
-      _client.logger.warning(
-        'Error handling ${event.type} event',
-        error,
-        stackTrace,
-      );
+  // Routes typing, message, draft, reaction, poll, read, and channel events.
+  void _dispatchMessageAndChannelEvents(Event event) {
+    switch (event.type) {
+      // typing events
+      case EventType.typingStart:
+        _onTypingStart(event);
+      case EventType.typingStop:
+        _onTypingStop(event);
+      // message events
+      case EventType.messageNew:
+      case EventType.notificationMessageNew:
+        _onMessageNew(event);
+      case EventType.messageDeleted:
+        _onMessageDeleted(event);
+      case EventType.messageUpdated:
+        _onMessageUpdated(event);
+      // draft events
+      case EventType.draftUpdated:
+        _onDraftUpdated(event);
+      case EventType.draftDeleted:
+        _onDraftDeleted(event);
+      // reaction events
+      case EventType.reactionNew:
+        _onReactionNew(event);
+      case EventType.reactionUpdated:
+        _onReactionUpdated(event);
+      case EventType.reactionDeleted:
+        _onReactionDeleted(event);
+      // poll events
+      case EventType.pollCreated:
+        _onPollCreated(event);
+      case EventType.pollUpdated:
+        _onPollUpdated(event);
+      case EventType.pollClosed:
+        _onPollClosed(event);
+      case EventType.pollAnswerCasted:
+        _onPollAnswerCasted(event);
+      case EventType.pollVoteCasted:
+        _onPollVoteCasted(event);
+      case EventType.pollVoteChanged:
+        _onPollVoteChanged(event);
+      case EventType.pollAnswerRemoved:
+        _onPollAnswerRemoved(event);
+      case EventType.pollVoteRemoved:
+        _onPollVoteRemoved(event);
+      // read events
+      case EventType.messageRead:
+      case EventType.notificationMarkRead:
+        _onMessageRead(event);
+      case EventType.notificationMarkUnread:
+        _onNotificationMarkUnread(event);
+      case EventType.messageDelivered:
+        _onMessageDelivered(event);
+      // channel events
+      case EventType.channelTruncated:
+      case EventType.notificationChannelTruncated:
+        _onChannelTruncated(event);
+      case EventType.channelUpdated:
+        _onChannelUpdated(event);
     }
+  }
 
-    // Merges the event user into the member list on any event carrying one.
-    try {
-      _onMemberUserUpdated(event);
-    } catch (error, stackTrace) {
-      _client.logger.warning(
-        'Error handling ${event.type} event',
-        error,
-        stackTrace,
-      );
+  // Routes the member added and removed events.
+  void _dispatchMemberListEvents(Event event) {
+    switch (event.type) {
+      // member events
+      case EventType.memberAdded:
+        _onMemberAdded(event);
+      case EventType.memberRemoved:
+        _onMemberRemoved(event);
     }
+  }
 
-    // Block 3: remaining member, watching, reminder, location, and push
-    // preference events.
-    try {
-      switch (event.type) {
-        // member events
-        case EventType.memberUpdated:
-          _onMemberUpdated(event);
-        case EventType.userBanned:
-          _onMemberBanned(event);
-        case EventType.userUnbanned:
-          _onMemberUnbanned(event);
-        case EventType.userMessagesDeleted:
-          _onUserMessagesDeleted(event);
-        // user watching events
-        case EventType.userWatchingStart:
-          _onUserStartWatching(event);
-        case EventType.userWatchingStop:
-          _onUserStopWatching(event);
-        // reminder events
-        case EventType.reminderCreated:
-          _onReminderCreated(event);
-        case EventType.reminderUpdated:
-          _onReminderUpdated(event);
-        case EventType.reminderDeleted:
-          _onReminderDeleted(event);
-        // location events
-        case EventType.locationShared:
-          _onLocationShared(event);
-        case EventType.locationUpdated:
-          _onLocationUpdated(event);
-        case EventType.locationExpired:
-          _onLocationExpired(event);
-        // channel push preference events
-        case EventType.channelPushPreferenceUpdated:
-          _onChannelPushPreferenceUpdated(event);
-      }
-    } catch (error, stackTrace) {
-      _client.logger.warning(
-        'Error handling ${event.type} event',
-        error,
-        stackTrace,
-      );
+  // Routes the remaining member, watching, reminder, location, and channel
+  // push preference events.
+  void _dispatchRemainingEvents(Event event) {
+    switch (event.type) {
+      // member events
+      case EventType.memberUpdated:
+        _onMemberUpdated(event);
+      case EventType.userBanned:
+        _onMemberBanned(event);
+      case EventType.userUnbanned:
+        _onMemberUnbanned(event);
+      case EventType.userMessagesDeleted:
+        _onUserMessagesDeleted(event);
+      // user watching events
+      case EventType.userWatchingStart:
+        _onUserStartWatching(event);
+      case EventType.userWatchingStop:
+        _onUserStopWatching(event);
+      // reminder events
+      case EventType.reminderCreated:
+        _onReminderCreated(event);
+      case EventType.reminderUpdated:
+        _onReminderUpdated(event);
+      case EventType.reminderDeleted:
+        _onReminderDeleted(event);
+      // location events
+      case EventType.locationShared:
+        _onLocationShared(event);
+      case EventType.locationUpdated:
+        _onLocationUpdated(event);
+      case EventType.locationExpired:
+        _onLocationExpired(event);
+      // channel push preference events
+      case EventType.channelPushPreferenceUpdated:
+        _onChannelPushPreferenceUpdated(event);
     }
   }
 
