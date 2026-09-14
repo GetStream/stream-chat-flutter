@@ -50,6 +50,7 @@
 
 🔄 Changed
 
+- `ThreadSort` is the one sort with no `defaultSort`. A thread query with no sort is already ordered by unread, then last message, then parent message id, and a `Thread` carries no per-user unread state — so that ordering cannot be reproduced on the client.
 - Failed messages now retry on server errors. The retry policy follows `stream_core`'s table: retry a request that never reached the server, a 5xx, a 429 and a 408; never another 4xx, a cancelled request, broken credentials, or anything the server marked unrecoverable. Previously only failures without a parseable error body retried, so a 500 or a 429 did not.
 - `SystemEnvironment` is now `stream_core`'s type, re-exported from this package. Its constructor and fields are unchanged, so existing usage keeps working.
 - Most SDK logging moved off `info`. It now carries only client and connection lifecycle — client created and disposed, user set and disconnected, connection opening, established and closing — and per-operation, per-event and per-timer records are `debug` or `verbose`. Raising the priority to `info` to debug a problem no longer buries it under a health check every 20 seconds and a line per WebSocket frame.
@@ -59,7 +60,6 @@
 - Log records from the HTTP and token layers now reach the configured handler.
 - Added `MessageSearchSortField.relevance`, which sorts a message search by match quality.
 - Added `MessageReminderSortField.messageId`, the field the API breaks reminder ties on.
-- Added `ThreadSort.defaultSort` — unread threads first, then most recently active, matching the Android SDK. Declared for callers to opt into; `StreamThreadListController` still sends no sort unless given one.
 - Added `ReactionSort.defaultSort`, which is the ordering the API already applies to a reaction query.
 - Added the message sort fields the JS client already exposed: `text`, `type`, `parentId`, `replyCount` and `pinned`.
 - Added `MemberSortField.updatedAt`.

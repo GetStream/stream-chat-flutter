@@ -659,13 +659,13 @@ checked cross-SDK, so it was checked here.
 | user | `created_at` desc | none | local fallback `id` desc | — |
 | reminder | `remind_at` **asc** | `QuerySortByField()` — empty | — | **`MessageReminder.DefaultSort()` = `remind_at` asc**; tiebreak `message_id` desc |
 | poll vote | `created_at` **asc** | `null` — none | — | **`PollVote.DefaultSort()` = `created_at` asc**; tiebreak `id` desc |
-| thread | declared, not applied | `has_unread`, `last_message_at`, `parent_message_id` — all desc | — | — |
+| thread | **none** — see [below](#thread-is-the-one-resource-with-no-defaultsort) | `has_unread`, `last_message_at`, `parent_message_id` — all desc | — | **`ThreadWithLastReadAt.DefaultSort()` = those same three, desc** |
 | reaction | `created_at` desc | — | — | **`ReactionResponse.DefaultSort()` = `created_at` desc** |
 
 Channel is confirmed against the authority and agrees with both other SDKs. Outcomes:
 
-- **`ThreadSort.defaultSort` added**, mirroring Android's three-field default. Declared only — the
-  controller still sends nothing unless given a sort, so no list changes order.
+- **Thread gets no `defaultSort`**, alone among the eight. See
+  [below](#thread-is-the-one-resource-with-no-defaultsort).
 - **`ReactionSort.defaultSort` added.** The API defines it, so it is a fact rather than a choice;
   `reaction_detail_sheet.dart` had been restating it inline.
 - **Poll vote stays ascending**, because the API defines it that way. An earlier pass read the
@@ -1037,18 +1037,24 @@ Worth recording either way: because the client always sends a sort, a channel qu
 `sql.go:620`'s `config.Model.DefaultSort()` — which would be a nil dereference, as the channel
 `TableConfig` declares no `Model`.
 
-**`ThreadSort.defaultSort` is declared and deliberately not applied.** Every other controller
-resolves `sort ?? XSort.defaultSort`, because every other one *had* a local default constant
-before this phase. The thread controller did not, and threads are the one resource where
-supplying a sort is not equivalent to omitting one: `query_threads.go:110` branches on
-`request.Filter != nil || request.Sort != nil`, and the no-sort path is answered by
-`SelectThreadsForUser`, a narrower query whose `ORDER BY` is hardcoded to
+### Thread is the one resource with no `defaultSort`
+
+Every other sort declares one. `ThreadSort` does not, because the ordering it would name is one
+the client cannot deliver.
+
+A thread query given no sort is answered by `SelectThreadsForUser`, a narrower query whose
+`ORDER BY` is hardcoded to
 `has_unread DESC, thread.last_message_at DESC, thread.parent_message_id DESC`
-(`threadstate/store.go:513`) — which is exactly what `defaultSort` declares. So sending it buys
-the same ordering off a wider code path. Nothing in the SDK sorts a thread *list* locally either —
-`StreamThreadListController` only orders replies within a thread — so `ThreadSort.defaultSort` is
-there for a caller who wants to name that ordering, and its dartdoc says what a local sort by it
-would and would not reproduce, since the asymmetry otherwise reads as an oversight.
+(`threadstate/store.go:513`); `query_threads.go:110` branches on
+`request.Filter != nil || request.Sort != nil` to pick it. Sending that same ordering explicitly
+buys nothing but a wider code path.
+
+Locally it is worse than redundant. A `Thread` carries no per-user unread state, so
+`ThreadSortField.hasUnread` reads nothing and the first term silently drops — a list sorted by the
+"default" would come out ordered by last message date, which is *not* what the server returns.
+Nothing in the SDK sorts a thread list anyway (`StreamThreadListController` only orders replies
+within a thread), so declaring the constant would only invite a caller to reach for an ordering
+that does not hold. `ThreadSortField.hasUnread` stays, since the server can sort by it.
 
 The persisted shape did not change, so no row needs rewriting — but `schemaVersion` still moves
 from `1000 + 35` to the `1100 + N` band, and drift's `onUpgrade` drops and recreates every table
