@@ -165,6 +165,9 @@ None.
 ## Definition of done
 
 - [ ] `core/error/` deleted except whatever `StreamWebSocketError` needs to survive until 07.
+- [ ] `core/http/stream_chat_dio_error.dart` deleted — its payload becomes a `StreamException`
+      here, so core's `StreamDioException` carries it from this phase on. Deferred from
+      [01](01-utilities.md).
 - [ ] `ApiErrorInterceptor` installed last in the pipeline.
 - [ ] A test asserts a failed call yields a `Failure` carrying a `StreamApiException` with a
       parsed `.apiError`, and that a malformed response body yields a `StreamClientException`
