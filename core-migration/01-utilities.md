@@ -92,8 +92,8 @@ deleting, and take the missing ones upstream rather than keeping a two-method fi
 carry a `StreamChatNetworkError` through dio. Its payload type belongs to phase
 [03](03-errors.md), its thrower to phase [04](04-token-and-auth.md) and its only consumer,
 `StreamHttpClient`, to phase [05](05-http-client.md) — so the file cannot be deleted here. This
-phase leaves it alone; the switch to core's `StreamDioException` and the deletion land with the
-error layer.
+phase leaves it alone: [03](03-errors.md) switches the payload to core's `StreamDioException`, and
+[05](05-http-client.md) deletes the file once its last consumer is gone.
 
 ## Decisions to make
 
@@ -133,7 +133,8 @@ None so far. Possible outcomes of the benchmark: the two-pointer `merge`, and an
 - [ ] `merge` benchmarked on realistic shapes, with numbers recorded here.
 - [ ] `list_extensions.dart` resolved — adopted, or ours upstreamed — and the export at
       `stream_chat.dart:85` updated accordingly.
-- [ ] `stream_chat_dio_error.dart` handled in [03](03-errors.md) (tracked there, not here).
+- [ ] `stream_chat_dio_error.dart` untouched here — payload switched in [03](03-errors.md), file
+      deleted in [05](05-http-client.md).
 - [ ] `melos run analyze && melos run test:all` before the phase closes.
 - [ ] If the extension renames ship as a break: `refactor(llc)!:` title, `🛑️ Breaking` CHANGELOG
       entry, `migrations/v11-migration.md` Symbol Map rows.
