@@ -283,8 +283,8 @@ class UserSortField extends SortField<User> {
   static final name = UserSortField(
     'name',
     // Deliberately not `User.name`, which answers the id when a user has no
-    // name — sorting by that locally would order unnamed users among the
-    // named ones, where the API sorts them by an empty `name` column.
+    // name — sorting by that locally would scatter unnamed users among the
+    // named ones, where a query keeps them together.
     (it) => it.extraData['name'].safeCast<String>()?.let(normalizeStringForSort),
   );
 

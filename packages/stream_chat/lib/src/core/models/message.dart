@@ -807,8 +807,8 @@ class MessageSearchSortField extends SortField<Message> {
 
   /// Sorts messages by whether they are pinned.
   ///
-  /// Applied only by a search backed by the database. A search backed by the
-  /// index leaves the results in whatever order the other terms give.
+  /// Not honoured by every search: where it is not, the other terms decide the
+  /// order and this one is ignored.
   static final pinned = MessageSearchSortField(
     'pinned',
     (it) => it.pinned,
