@@ -272,9 +272,9 @@ class StreamChatClient {
   /// );
   /// ```
   ///
-  /// `stream_core`'s logger is process-global, so the last Stream client
-  /// constructed decides this for every Stream SDK in the app. Records from
-  /// this one are tagged `SCh:`.
+  /// Logging is configured process-wide, so the last Stream client constructed
+  /// decides this for every Stream SDK in the app. Records from this one are
+  /// tagged `SCh:`.
   final StreamLogConfig logConfig;
 
   /// Client specific logger instance.
