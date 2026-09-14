@@ -86,15 +86,6 @@ Ours has `sortedUpsertAt`, `mergeSorted`, `mergeFrom` and `updateIf`; core has `
 `removeNested`, `updateNested` and `partition`. Confirm every method we call has a home before
 deleting, and take the missing ones upstream rather than keeping a two-method file behind.
 
-### `stream_chat_dio_error`
-
-`StreamChatDioError` is thrown by `AuthInterceptor.onRequest`'s reject path only, and it exists to
-carry a `StreamChatNetworkError` through dio. Its payload type belongs to phase
-[03](03-errors.md), its thrower to phase [04](04-token-and-auth.md) and its only consumer,
-`StreamHttpClient`, to phase [05](05-http-client.md) — so the file cannot be deleted here. This
-phase leaves it alone; the switch to core's `StreamDioException` and the deletion land with the
-error layer.
-
 ## Decisions to make
 
 Both remaining decisions belong to `list_extensions`, and both wait on the benchmark:
