@@ -107,19 +107,24 @@ command:
       svg_icon_widget: ^0.0.1
       # Both core packages come from one pinned commit while v11 lands
       # alongside stream-core-flutter. Pinned to a SHA rather than a branch:
-      # `stream_core_flutter` reaches `stream_core` through the same clone, and
       # pub treats a branch ref and a resolved SHA as different sources, so a
-      # branch name fails to solve. Restore hosted constraints before release.
+      # branch name fails to solve.
+      #
+      # `stream_core_flutter` declares a hosted `stream_core`, which keeps it
+      # publishable but names a second source for a package taken here from
+      # git — and pub allows a package only one. Every workspace package that
+      # sees both therefore overrides `stream_core` to this same ref. Restore
+      # hosted constraints before release and the overrides go with them.
       stream_core:
         git:
           url: https://github.com/GetStream/stream-core-flutter.git
           path: packages/stream_core
-          ref: b63a0fc12e5df62cb1c0723f8260be5e417da663
+          ref: 04e0d1cb3a6893cf70cb6636a261deb11beff81c
       stream_core_flutter:
         git:
           url: https://github.com/GetStream/stream-core-flutter.git
           path: packages/stream_core_flutter
-          ref: b63a0fc12e5df62cb1c0723f8260be5e417da663
+          ref: 04e0d1cb3a6893cf70cb6636a261deb11beff81c
       stream_thumbnail:
         git:
           url: https://github.com/GetStream/stream-core-flutter.git
