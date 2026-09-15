@@ -1,10 +1,11 @@
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_core/stream_core.dart' show Standard, Sort, SortField;
 import 'package:uuid/uuid.dart';
 
 import '../util/serializer.dart';
-import 'comparable_field.dart';
+import '../util/string_sort_normalizer.dart';
 import 'poll_option.dart';
 import 'poll_vote.dart';
 import 'user.dart';
@@ -34,7 +35,7 @@ enum VotingVisibility {
 /// A model class representing a poll.
 /// {@endtemplate}
 @JsonSerializable()
-class Poll extends Equatable implements ComparableFieldProvider {
+class Poll extends Equatable {
   /// {@macro streamPoll}
   Poll({
     String? id,
@@ -267,45 +268,83 @@ class Poll extends Equatable implements ComparableFieldProvider {
     createdAt,
     updatedAt,
   ];
-
-  @override
-  ComparableField? getComparableField(String sortKey) {
-    final value = switch (sortKey) {
-      PollSortKey.id => id,
-      PollSortKey.name => name,
-      PollSortKey.createdAt => createdAt,
-      PollSortKey.updatedAt => updatedAt,
-      PollSortKey.isClosed => isClosed,
-      _ => extraData[sortKey],
-    };
-
-    return ComparableField.fromValue(value);
-  }
 }
 
-/// Extension type representing sortable fields for [Poll].
+/// Represents a sorting operation for polls.
 ///
-/// This type provides type-safe keys that can be used for sorting polls
-/// in queries. Each constant represents a field that can be sorted on.
-extension type const PollSortKey(String key) implements String {
-  /// Sort polls by their unique ID.
-  static const id = PollSortKey('id');
+/// The API sorts on one field at a time: `id`, `name`, `createdAt`,
+/// `updatedAt` or `isClosed`. Anything else is rejected.
+///
+/// See [PollSortField] for the fields that can be sorted on.
+class PollSort extends Sort<Poll> {
+  /// Sorts by [field], smallest first.
+  const PollSort.asc(
+    PollSortField super.field, {
+    super.nullOrdering,
+  }) : super.asc();
 
-  /// Sort polls by their name.
-  static const name = PollSortKey('name');
+  /// Sorts by [field], largest first.
+  const PollSort.desc(
+    PollSortField super.field, {
+    super.nullOrdering,
+  }) : super.desc();
 
-  /// Sort polls by their creation date.
+  /// An empty sort: the query carries no sort term, and a list keeps the
+  /// order it arrived in.
+  static const List<PollSort> empty = [];
+
+  /// The ordering the API applies to a poll query when none is given.
+  ///
+  /// Sorts by when the poll was created, oldest first.
+  static final List<PollSort> defaultSort = [
+    PollSort.asc(PollSortField.createdAt),
+  ];
+}
+
+/// Represents a field that poll queries can be sorted on.
+class PollSortField extends SortField<Poll> {
+  /// Creates a field named [remote] on the wire, reading its value off an
+  /// instance with `localValue`.
+  ///
+  /// For a name the SDK has not modelled; prefer the fields declared here.
+  PollSortField(super.remote, super.localValue);
+
+  /// Sorts polls by their unique ID.
+  static final id = PollSortField(
+    'id',
+    (it) => it.id,
+  );
+
+  /// Sorts polls by their name.
+  ///
+  /// Compared with case, diacritics and ligatures folded away, so a list
+  /// sorted locally matches the order a query returns.
+  static final name = PollSortField(
+    'name',
+    (it) => it.name.let(normalizeStringForSort),
+  );
+
+  /// Sorts polls by their creation date.
   ///
   /// This is the default sort field (in ascending order).
-  static const createdAt = PollSortKey('created_at');
+  static final createdAt = PollSortField(
+    'created_at',
+    (it) => it.createdAt,
+  );
 
-  /// Sort polls by their last update date.
-  static const updatedAt = PollSortKey('updated_at');
+  /// Sorts polls by their last update date.
+  static final updatedAt = PollSortField(
+    'updated_at',
+    (it) => it.updatedAt,
+  );
 
-  /// Sort polls by whether they are closed or not.
+  /// Sorts polls by whether they are closed or not.
   ///
   /// Closed polls will appear first when sorting in ascending order.
-  static const isClosed = PollSortKey('is_closed');
+  static final isClosed = PollSortField(
+    'is_closed',
+    (it) => it.isClosed,
+  );
 }
 
 /// Helper extension for [Poll] model.

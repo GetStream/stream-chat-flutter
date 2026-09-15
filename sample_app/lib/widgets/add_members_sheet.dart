@@ -65,7 +65,7 @@ class _AddMembersSheetState extends State<AddMembersSheet> {
     client: _client,
     limit: 25,
     filter: _filter(),
-    sort: const [SortOption<User>.asc(UserSortKey.name)],
+    sort: [UserSort.asc(UserSortField.name)],
   );
 
   late final TextEditingController _searchController = TextEditingController()..addListener(_onSearchChanged);

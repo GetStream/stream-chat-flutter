@@ -1,5 +1,4 @@
 import 'package:json_annotation/json_annotation.dart';
-import '../api/sort_order.dart';
 import 'channel_state.dart';
 import 'filter.dart';
 
@@ -34,21 +33,24 @@ class PredefinedFilter {
   final Filter filter;
 
   /// Sort specification as resolved by the server.
-  final SortOrder<ChannelState>? sort;
+  final List<ChannelSort>? sort;
 
   /// Sort to apply locally, matching what the server applies for this
   /// predefined filter — the echoed [sort], or a default derived from
   /// [filter] when [sort] is null.
-  SortOrder<ChannelState> get effectiveSort => sort ?? _defaultSortFor(filter);
+  List<ChannelSort> get effectiveSort => sort ?? _defaultSortFor(filter);
 
   static Filter _filterFromJson(Map<String, dynamic> json) => Filter.raw(value: json);
 }
 
-SortOrder<ChannelState> _defaultSortFor(Filter filter) {
-  if (_touchesField(filter, ChannelSortKey.lastMessageAt)) {
-    return const [SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt)];
-  }
-  return const [SortOption<ChannelState>.desc(ChannelSortKey.lastUpdated)];
+// Mirrors the server's fallback for a channel query that carries no sort, so
+// the field is written out rather than taken from [ChannelSort.defaultSort]:
+// the two agree today, but one is the ordering this SDK picks and the other is
+// the ordering the server falls back to, and either may change alone.
+List<ChannelSort> _defaultSortFor(Filter filter) {
+  final touchesLastMessageAt = _touchesField(filter, ChannelSortField.lastMessageAt.remote);
+  if (touchesLastMessageAt) return [ChannelSort.desc(ChannelSortField.lastMessageAt)];
+  return [ChannelSort.desc(ChannelSortField.lastUpdated)];
 }
 
 bool _touchesField(Filter filter, String field) {

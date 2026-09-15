@@ -1,97 +1,116 @@
-// ignore_for_file: avoid_redundant_argument_values
-
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
-import 'package:stream_chat/src/core/api/sort_order.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
-import 'package:stream_chat/src/core/models/comparable_field.dart';
 import 'package:stream_chat/src/core/models/member.dart';
+import 'package:stream_chat/src/core/util/string_sort_normalizer.dart';
+import 'package:stream_core/stream_core.dart'
+    show CompositeComparator, NullOrdering, Sort, SortField, SortFieldValueGetter, Standard;
 import 'package:test/test.dart';
 
-/// Simple test model that implements ComparableFieldProvider
-class TestModel extends Equatable implements ComparableFieldProvider {
+class TestModel extends Equatable {
   const TestModel({
     this.name,
     this.age,
     this.createdAt,
     this.active,
+    this.tag,
   });
 
   final String? name;
   final int? age;
   final DateTime? createdAt;
   final bool? active;
+  final Object? tag;
 
   @override
-  List<Object?> get props => [name, age, createdAt, active];
+  List<Object?> get props => [name, age, createdAt, active, tag];
+}
 
-  @override
-  ComparableField? getComparableField(String sortKey) {
-    return switch (sortKey) {
-      'name' => ComparableField.fromValue(name),
-      'age' => ComparableField.fromValue(age),
-      'created_at' => ComparableField.fromValue(createdAt),
-      'active' => ComparableField.fromValue(active),
-      _ => null,
-    };
-  }
+class TestSort extends Sort<TestModel> {
+  const TestSort.asc(
+    TestSortField super.field, {
+    super.nullOrdering = NullOrdering.nullsLast,
+  }) : super.asc();
+
+  const TestSort.desc(
+    TestSortField super.field, {
+    super.nullOrdering = NullOrdering.nullsFirst,
+  }) : super.desc();
+}
+
+class TestSortField extends SortField<TestModel> {
+  TestSortField(String remote, this.value) : super(remote, value);
+
+  final SortFieldValueGetter<TestModel, Object> value;
+
+  static final name = TestSortField('name', (it) => it.name?.let(normalizeStringForSort));
+  static final age = TestSortField('age', (it) => it.age);
+  static final createdAt = TestSortField('created_at', (it) => it.createdAt);
+  static final active = TestSortField('active', (it) => it.active);
+
+  // An arbitrary object, to prove an unorderable value does not throw.
+  static final tag = TestSortField('tag', (it) => it.tag);
+
+  // A field that projects onto something orderable, which is what replaces the
+  // custom comparator the old `SortOption` accepted.
+  static final nameLength = TestSortField('name_length', (it) => it.name?.length);
 }
 
 /// Helper to compare sorted lists cleanly
-void expectSorted<T extends ComparableFieldProvider>(
+void expectSorted<T extends Object>(
   List<T> input,
-  List<SortOption<T>> sortOptions,
+  List<Sort<T>> sort,
   List<T> expectedOrder,
 ) {
-  final sorted = input.sorted(sortOptions.compare);
+  final sorted = input.sorted(sort.compare);
   expect(sorted, equals(expectedOrder));
 }
 
 void main() {
-  group('SortOption basics', () {
-    test('serialization', () {
-      const option = SortOption.desc('name');
-      final j = option.toJson();
-      expect(j, {'field': 'name', 'direction': -1});
-    });
-
-    test('should create a SortOption with ASC direction', () {
-      const option = SortOption<TestModel>.asc('age');
-      expect(option.field, 'age');
-      expect(option.direction, SortOption.ASC);
-    });
-
-    test('should create a SortOption with DESC direction', () {
-      const option = SortOption<TestModel>.desc('age');
-      expect(option.field, 'age');
-      expect(option.direction, SortOption.DESC);
-    });
-
-    test('should default pinnedAt and lastMessageAt to nullsLast in both directions', () {
-      const sortKeys = [ChannelSortKey.pinnedAt, ChannelSortKey.lastMessageAt];
-      for (final key in sortKeys) {
-        expect(SortOption<ChannelState>.desc(key).nullOrdering, NullOrdering.nullsLast, reason: '$key desc');
-        expect(SortOption<ChannelState>.asc(key).nullOrdering, NullOrdering.nullsLast, reason: '$key asc');
-      }
-    });
-
-    test('should let an explicit nullOrdering override the default', () {
-      const option = SortOption<ChannelState>.desc(
-        ChannelSortKey.pinnedAt,
-        nullOrdering: NullOrdering.nullsFirst,
+  group('server-parity value folding', () {
+    // Regression: https://github.com/GetStream/stream-chat-flutter/issues/2601
+    // The reporter observed lowercase-starting names and non-ASCII names
+    // (Polish `Ł`, Norwegian `Ø`) getting pushed to the end of a list sorted
+    // by name, because the comparator was a raw codepoint compare.
+    test('should fold string values so name sorts match the server', () {
+      final models = ['Zara', 'jhon', 'Łukasz', 'Øystein', 'Adam', 'Marek'].map(
+        (it) => TestModel(name: it),
       );
-      expect(option.nullOrdering, NullOrdering.nullsFirst);
+
+      final sorted = models.sorted([Sort.asc(TestSortField.name)].compare);
+
+      expect(sorted.map((it) => it.name), [
+        'Adam',
+        'jhon',
+        'Łukasz',
+        'Marek',
+        'Øystein',
+        'Zara',
+      ]);
     });
 
-    test('should resolve field defaults when deserialized from json', () {
-      final pinnedAt = SortOption<ChannelState>.fromJson({'field': 'pinned_at', 'direction': -1});
-      final lastMessageAt = SortOption<ChannelState>.fromJson({'field': 'last_message_at', 'direction': -1});
-      final lastUpdated = SortOption<ChannelState>.fromJson({'field': 'last_updated', 'direction': -1});
+    test('should compare mixed numeric types correctly', () {
+      // A field can hand back either, and `10` must not order before or
+      // after `10.0`.
+      final sort = [TestSort.asc(TestSortField.tag)];
 
-      expect(pinnedAt.nullOrdering, NullOrdering.nullsLast);
-      expect(lastMessageAt.nullOrdering, NullOrdering.nullsLast);
-      expect(lastUpdated.nullOrdering, NullOrdering.nullsFirst);
+      expect(sort.compare(const TestModel(tag: 10), const TestModel(tag: 10.0)), 0);
+      expect(sort.compare(const TestModel(tag: 10), const TestModel(tag: 10.5)), lessThan(0));
+    });
+
+    test('should treat unorderable values as equal rather than throwing', () {
+      const a = TestModel(tag: Object());
+      const b = TestModel(tag: Object());
+
+      expect([Sort.asc(TestSortField.tag)].compare(a, b), 0);
+    });
+
+    test('should treat values of different types as equal rather than throwing', () {
+      const a = TestModel(tag: 'a string');
+      const b = TestModel(tag: 42);
+
+      expect([Sort.asc(TestSortField.tag)].compare(a, b), 0);
     });
   });
 
@@ -120,9 +139,9 @@ void main() {
         channelState('pinned-new', pinnedAt: createdAt.add(const Duration(days: 2))),
       ];
 
-      const sort = [
-        SortOption<ChannelState>.desc(ChannelSortKey.pinnedAt),
-        SortOption<ChannelState>.desc(ChannelSortKey.lastUpdated),
+      final sort = [
+        ChannelSort.desc(ChannelSortField.pinnedAt),
+        ChannelSort.desc(ChannelSortField.lastUpdated),
       ];
 
       expect(idsOf(channels.sorted(sort.compare)), [
@@ -140,21 +159,63 @@ void main() {
         channelState('pinned-old', pinnedAt: createdAt.add(const Duration(days: 1))),
       ];
 
-      const sort = [SortOption<ChannelState>.asc(ChannelSortKey.pinnedAt)];
+      final sort = [ChannelSort.asc(ChannelSortField.pinnedAt)];
 
       expect(idsOf(channels.sorted(sort.compare)), ['pinned-old', 'pinned-new', 'unpinned']);
     });
 
-    test('should keep channels without messages at the bottom when sorting by lastMessageAt desc', () {
+    test(
+      'should keep channels without messages at the bottom when sorting by lastMessageAt desc',
+      () {
+        final channels = [
+          channelState('no-messages'),
+          channelState('newest', lastMessageAt: createdAt.add(const Duration(days: 5))),
+          channelState('oldest', lastMessageAt: createdAt.add(const Duration(days: 1))),
+        ];
+
+        final sort = [ChannelSort.desc(ChannelSortField.lastMessageAt)];
+
+        expect(idsOf(channels.sorted(sort.compare)), ['newest', 'oldest', 'no-messages']);
+      },
+    );
+
+    test(
+      'should keep channels without messages at the bottom when sorting by lastMessageAt asc',
+      () {
+        // `last_message_at` ascending relies on the API leaving the direction
+        // bare, which Postgres orders nulls last.
+        final channels = [
+          channelState('no-messages'),
+          channelState('oldest', lastMessageAt: createdAt.add(const Duration(days: 1))),
+          channelState('newest', lastMessageAt: createdAt.add(const Duration(days: 5))),
+        ];
+
+        final sort = [ChannelSort.asc(ChannelSortField.lastMessageAt)];
+
+        expect(idsOf(channels.sorted(sort.compare)), ['oldest', 'newest', 'no-messages']);
+      },
+    );
+
+    test('should keep nulls last for other fields when sorting asc', () {
+      // A field with no pinned ordering follows the direction's default, which
+      // matches the bare `ASC` the API emits for it.
       final channels = [
-        channelState('no-messages'),
-        channelState('newest', lastMessageAt: createdAt.add(const Duration(days: 5))),
-        channelState('oldest', lastMessageAt: createdAt.add(const Duration(days: 1))),
+        ChannelState(
+          channel: ChannelModel(id: 'no-team', type: 'messaging', createdAt: createdAt),
+        ),
+        ChannelState(
+          channel: ChannelModel(
+            id: 'red-team',
+            type: 'messaging',
+            createdAt: createdAt,
+            extraData: const {'team': 'red'},
+          ),
+        ),
       ];
 
-      const sort = [SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt)];
+      final sort = [ChannelSort.asc(ChannelSortField.custom('team'))];
 
-      expect(idsOf(channels.sorted(sort.compare)), ['newest', 'oldest', 'no-messages']);
+      expect(idsOf(channels.sorted(sort.compare)), ['red-team', 'no-team']);
     });
 
     test('should keep nulls first for other fields when sorting desc', () {
@@ -172,74 +233,67 @@ void main() {
         ),
       ];
 
-      const sort = [SortOption<ChannelState>.desc('team')];
+      final sort = [ChannelSort.desc(ChannelSortField.custom('team'))];
 
       expect(idsOf(channels.sorted(sort.compare)), ['no-team', 'red-team']);
     });
   });
 
-  group('SortOption single field', () {
+  group('a sort with one field', () {
     test('should compare two objects in descending order', () {
-      const option = SortOption<TestModel>.desc('age');
+      final sort = [Sort.desc(TestSortField.age)];
       const a = TestModel(age: 30);
       const b = TestModel(age: 25);
-      expect(option.compare(a, b), lessThan(0));
+      expect(sort.compare(a, b), lessThan(0));
     });
 
     test('should compare two objects in ascending order', () {
-      const option = SortOption<TestModel>.asc('age');
+      final sort = [Sort.asc(TestSortField.age)];
       const a = TestModel(age: 25);
       const b = TestModel(age: 30);
-      expect(option.compare(a, b), lessThan(0));
+      expect(sort.compare(a, b), lessThan(0));
     });
 
     test('should handle null values correctly (default nullOrdering)', () {
-      const option = SortOption<TestModel>.desc('age');
+      final sort = [Sort.desc(TestSortField.age)];
       const a = TestModel(age: null);
       const b = TestModel(age: 25);
       const c = TestModel(age: null);
 
-      expect(option.compare(a, b), lessThan(0));
-      expect(option.compare(b, a), greaterThan(0));
-      expect(option.compare(a, c), equals(0));
+      expect(sort.compare(a, b), lessThan(0));
+      expect(sort.compare(b, a), greaterThan(0));
+      expect(sort.compare(a, c), equals(0));
     });
 
     test('should compare date fields correctly', () {
-      const option = SortOption<TestModel>.desc('created_at');
+      final sort = [Sort.desc(TestSortField.createdAt)];
       final now = DateTime.now();
       final earlier = now.subtract(const Duration(days: 1));
 
       final a = TestModel(createdAt: now);
       final b = TestModel(createdAt: earlier);
 
-      expect(option.compare(a, b), lessThan(0));
+      expect(sort.compare(a, b), lessThan(0));
     });
 
     test('should compare boolean fields correctly', () {
-      const option = SortOption<TestModel>.desc('active');
+      final sort = [Sort.desc(TestSortField.active)];
       const a = TestModel(active: true);
       const b = TestModel(active: false);
       const c = TestModel(active: true);
 
-      expect(option.compare(a, b), lessThan(0));
-      expect(option.compare(b, a), greaterThan(0));
-      expect(option.compare(a, c), equals(0));
+      expect(sort.compare(a, b), lessThan(0));
+      expect(sort.compare(b, a), greaterThan(0));
+      expect(sort.compare(a, c), equals(0));
     });
 
-    test('should handle custom comparator', () {
-      final option = SortOption<TestModel>.desc(
-        'name',
-        comparator: (a, b) {
-          final aLength = a.name?.length ?? 0;
-          final bLength = b.name?.length ?? 0;
-          return bLength.compareTo(aLength);
-        },
-      );
+    test('should order by whatever the extractor projects onto', () {
+      final sort = [Sort.desc(TestSortField.nameLength)];
 
       const a = TestModel(name: 'longer_name');
       const b = TestModel(name: 'short');
 
-      expect(option.compare(a, b), greaterThan(0));
+      expect(sort.compare(a, b), lessThan(0));
     });
 
     test('should respect explicit nullOrdering=nullsLast on DESC', () {
@@ -249,11 +303,9 @@ void main() {
         const TestModel(age: 30),
       ];
 
-      final sortOptions = <SortOption<TestModel>>[
-        const SortOption.desc('age', nullOrdering: NullOrdering.nullsLast),
-      ];
+      final sort = [Sort.desc(TestSortField.age, nullOrdering: NullOrdering.nullsLast)];
 
-      expectSorted(models, sortOptions, [
+      expectSorted(models, sort, [
         const TestModel(age: 40),
         const TestModel(age: 30),
         const TestModel(age: null),
@@ -267,11 +319,9 @@ void main() {
         const TestModel(name: 'Alice'),
       ];
 
-      final sortOptions = <SortOption<TestModel>>[
-        const SortOption.asc('name', nullOrdering: NullOrdering.nullsFirst),
-      ];
+      final sort = [Sort.asc(TestSortField.name, nullOrdering: NullOrdering.nullsFirst)];
 
-      expectSorted(models, sortOptions, [
+      expectSorted(models, sort, [
         const TestModel(name: null),
         const TestModel(name: 'Alice'),
         const TestModel(name: 'Bob'),
@@ -279,7 +329,7 @@ void main() {
     });
   });
 
-  group('Composite Sorting', () {
+  group('a sort with several fields', () {
     test('should sort list using multiple sort criteria', () {
       final models = [
         const TestModel(name: 'Alice', age: 30),
@@ -288,12 +338,9 @@ void main() {
         const TestModel(name: 'David', age: 40),
       ];
 
-      final sortOptions = <SortOption<TestModel>>[
-        const SortOption.desc('age'),
-        const SortOption.asc('name'),
-      ];
+      final sort = [Sort.desc(TestSortField.age), Sort.asc(TestSortField.name)];
 
-      expectSorted(models, sortOptions, [
+      expectSorted(models, sort, [
         const TestModel(name: 'David', age: 40),
         const TestModel(name: 'Alice', age: 30),
         const TestModel(name: 'Bob', age: 30),
@@ -309,12 +356,9 @@ void main() {
         const TestModel(name: null, age: 40),
       ];
 
-      final sortOptions = <SortOption<TestModel>>[
-        const SortOption.desc('age'),
-        const SortOption.asc('name'),
-      ];
+      final sort = [Sort.desc(TestSortField.age), Sort.asc(TestSortField.name)];
 
-      expectSorted(models, sortOptions, [
+      expectSorted(models, sort, [
         const TestModel(name: 'Alice', age: null),
         const TestModel(name: 'Charlie', age: null),
         const TestModel(name: null, age: 40),
@@ -328,9 +372,7 @@ void main() {
         const TestModel(name: 'Bob', age: 25),
       ];
 
-      final sortOptions = <SortOption<TestModel>>[];
-
-      expectSorted(models, sortOptions, [
+      expectSorted(models, <Sort<TestModel>>[], [
         const TestModel(name: 'Alice', age: 30),
         const TestModel(name: 'Bob', age: 25),
       ]);
@@ -346,13 +388,13 @@ void main() {
         TestModel(name: 'Charlie', active: true, createdAt: now),
       ];
 
-      final sortOptions = <SortOption<TestModel>>[
-        const SortOption.desc('created_at'),
-        const SortOption.desc('active'),
-        const SortOption.asc('name'),
+      final sort = [
+        Sort.desc(TestSortField.createdAt),
+        Sort.desc(TestSortField.active),
+        Sort.asc(TestSortField.name),
       ];
 
-      expectSorted(models, sortOptions, [
+      expectSorted(models, sort, [
         TestModel(name: 'Charlie', active: true, createdAt: now),
         TestModel(name: 'Bob', active: false, createdAt: now),
         TestModel(name: 'Alice', active: true, createdAt: yesterday),
@@ -366,12 +408,9 @@ void main() {
         const TestModel(name: 'Alice', age: 30),
       ];
 
-      final sortOptions = <SortOption<TestModel>>[
-        const SortOption.desc('age'),
-        const SortOption.asc('name'),
-      ];
+      final sort = [Sort.desc(TestSortField.age), Sort.asc(TestSortField.name)];
 
-      expectSorted(models, sortOptions, [
+      expectSorted(models, sort, [
         const TestModel(name: 'Alice', age: 30),
         const TestModel(name: 'Bob', age: 30),
         const TestModel(name: 'Charlie', age: 30),
@@ -384,12 +423,9 @@ void main() {
         const TestModel(name: null, age: null),
       ];
 
-      final sortOptions = <SortOption<TestModel>>[
-        const SortOption.desc('age'),
-        const SortOption.asc('name'),
-      ];
+      final sort = [Sort.desc(TestSortField.age), Sort.asc(TestSortField.name)];
 
-      expectSorted(models, sortOptions, [
+      expectSorted(models, sort, [
         const TestModel(name: null, age: null),
         const TestModel(name: null, age: null),
       ]);
@@ -402,12 +438,9 @@ void main() {
         const TestModel(name: 'Bob', age: null),
       ];
 
-      final sortOptions = <SortOption<TestModel>>[
-        const SortOption.desc('age'),
-        const SortOption.asc('name'),
-      ];
+      final sort = [Sort.desc(TestSortField.age), Sort.asc(TestSortField.name)];
 
-      expectSorted(models, sortOptions, [
+      expectSorted(models, sort, [
         const TestModel(name: 'Alice', age: null),
         const TestModel(name: 'Bob', age: null),
         const TestModel(name: null, age: null),

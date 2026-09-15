@@ -8,7 +8,6 @@ import '../models/message.dart';
 import '../models/reaction.dart';
 import 'requests.dart';
 import 'responses.dart';
-import 'sort_order.dart';
 
 /// Defines the api dedicated to messages operations
 class MessageApi {
@@ -98,7 +97,7 @@ class MessageApi {
   /// Returns a [QueryDraftsResponse] containing the list of draft.
   Future<QueryDraftsResponse> queryDrafts({
     Filter? filter,
-    SortOrder<Draft>? sort,
+    List<DraftSort>? sort,
     PaginationParams? pagination,
   }) async {
     final response = await _client.post(
@@ -265,7 +264,7 @@ class MessageApi {
   Future<QueryReactionsResponse> queryReactions(
     String messageId, {
     Filter? filter,
-    SortOrder<Reaction>? sort,
+    List<ReactionSort>? sort,
     PaginationParams? pagination,
   }) async {
     final response = await _client.post(

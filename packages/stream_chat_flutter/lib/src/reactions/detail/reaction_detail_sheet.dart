@@ -106,7 +106,7 @@ class _ReactionDetailSheetState extends State<ReactionDetailSheet> {
     _controller = .new(
       client: StreamChat.of(context).client,
       messageId: widget.message.id,
-      sort: const [.desc(ReactionSortKey.createdAt)],
+      sort: ReactionSort.defaultSort,
       filter: switch (_currentReactionType) {
         final type? => .equal('type', type),
         _ => null,

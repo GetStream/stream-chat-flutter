@@ -19,7 +19,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
     client: StreamChat.of(context).client,
     filter: Filter.in_('cid', [StreamChannel.of(context).channel.cid!]),
     messageFilter: Filter.in_('attachments.type', const ['image', 'video']),
-    sort: const [SortOption.asc('created_at')],
+    sort: [MessageSearchSort.asc(MessageSearchSortField.createdAt)],
     limit: 20,
   );
 

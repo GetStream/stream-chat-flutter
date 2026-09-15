@@ -35,7 +35,11 @@ dependencies:
   rate_limiter: ^1.1.0
   retrofit: ^4.9.2
   rxdart: ^0.28.0
-  stream_core: ^0.5.0
+  stream_core:
+    git:
+      url: https://github.com/GetStream/stream-core-flutter.git
+      ref: 04e0d1cb3a6893cf70cb6636a261deb11beff81c
+      path: packages/stream_core
   synchronized: ^3.4.0
   uuid: ^4.5.3
   web_socket_channel: ^3.0.3

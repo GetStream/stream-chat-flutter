@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
+import 'package:stream_core/stream_core.dart' show SortedListExtensions;
 import 'paged_value_notifier.dart';
 
 /// The default reaction list page limit to load.
@@ -61,11 +61,11 @@ class StreamReactionListController extends PagedValueNotifier<String?, Reaction>
   /// The sorting used for the reactions matching the filters.
   ///
   /// Sorting is based on field and direction. The only backend-supported sort
-  /// field is `created_at` (see [ReactionSortKey]).
+  /// field is `created_at` (see [ReactionSortField]).
   ///
   /// Direction can be ascending or descending.
-  final SortOrder<Reaction>? sort;
-  SortOrder<Reaction>? _activeSort;
+  final List<ReactionSort>? sort;
+  List<ReactionSort>? _activeSort;
 
   /// The limit to apply to the reaction list.
   ///
@@ -88,7 +88,7 @@ class StreamReactionListController extends PagedValueNotifier<String?, Reaction>
   ///
   /// Note: This will not trigger a new query. Make sure to call
   /// [doInitialLoad] or [refresh] after setting a new sort.
-  set sort(SortOrder<Reaction>? value) => _activeSort = value;
+  set sort(List<ReactionSort>? value) => _activeSort = value;
 
   @override
   set value(PagedValue<String?, Reaction> newValue) {
@@ -97,7 +97,7 @@ class StreamReactionListController extends PagedValueNotifier<String?, Reaction>
       final reactionSort => newValue.maybeMap(
         orElse: () => newValue,
         (success) => success.copyWith(
-          items: success.items.sorted(reactionSort.compare),
+          items: success.items.sortedWith(reactionSort.compare),
         ),
       ),
     };

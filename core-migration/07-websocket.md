@@ -1,5 +1,14 @@
 # 07 — WebSocket transport
 
+> **Parked.** A full attempt was written and reverted (`git reset` off
+> `refactor/migrate-to-core`); nothing from this phase is in the tree. Everything below is kept
+> because it is what the attempt established — read [Findings from the first
+> attempt](#findings-from-the-first-attempt) before restarting, since most of the cost was in
+> discovering those, not in the code.
+>
+> The phases after this one do not depend on it: `ConnectionIdManager` stays ours either way, and
+> `Event` is untouched. Resume when the WS is worth a PR of its own.
+
 **Goal:** replace our 560-line WebSocket monolith with core's decomposed engine, health monitor,
 retry strategy, reconnection policies and connection state machine — **on the existing v1
 protocol**, with v1 event shapes and chat's `Event` model untouched.
@@ -32,6 +41,31 @@ called **per attempt**, so a refreshed token is picked up on reconnect — which
 `_reconnect(refreshToken: true)` does today.
 
 **Moving to v2 remains out of scope.** This phase adopts the machinery, not the protocol.
+
+### Staying on v1 is the same call iOS made, and v2 is not ready for chat
+
+`stream-chat-swift` has migrated to `StreamCore` (`StreamCore+Extensions.swift`, the shared
+`WebSocketClient`) and to v2 OpenAPI endpoints for messages, reminders and message actions — and
+it still connects over v1 with `?json=` (`WebSocketConnectEndpoint.swift`, `WebSocketConnectPayload`).
+`stream-core-swift` absorbed chat's handshake quirks into the shared client rather than letting
+chat fork it: `healthCheckBeforeConnected` is documented "Compatibility reasons for chat which has
+to set it to true", alongside an optional `connectRequest` and a `requiresAuth` flag. That is the
+model this phase follows — stay on v1, push chat's needs into core where they generalize.
+
+Three things the server would have to change or core would have to grow before chat's WS could
+move to `/api/v2/connect` (`lib/core/api/connect/routes.go`), all verified in
+`~/GolandProjects/chat`:
+
+- **v2's connect does not enrich user mutes.** `chatState.EnrichUserMutes` is called in
+  `lib/chat/controller/v1/connect.go:118` and `longpoll.go:108`, and nowhere in
+  `lib/core/api/connect/controller/connect_v2.go`. `OwnUser.mutes` would come back empty.
+- **v2 drops root-level custom user fields.** Its `user_details` payload
+  (`commonpayloads.ConnectUserDetailsRequest`) is decoded with `WithDecodeExtraFields(false)` and
+  reads `custom` as a nested object, while v1 flattens unknown root keys into custom. Chat's
+  `ConnectUserDetails.toJson` promotes `extraData` to the root, so those fields would be silently
+  discarded.
+- **Core's `ConnectUserDetailsRequest` has no `privacySettings`.** The v2 Go payload accepts
+  `privacy_settings`; core's Dart mirror does not carry it.
 
 ## Scope
 
@@ -183,6 +217,137 @@ Core's equivalents are `InternetAvailabilityReconnectionPolicy(NetworkStateEmitt
 Implement both in `stream_chat_flutter_core` (see the README for why not `stream_core_flutter`)
 and inject them into the handler. Note `stream_chat_flutter_core.dart:3` re-exports all of
 `connectivity_plus` — keep the re-export, but this is itself a public change in that package.
+
+## Findings from the first attempt
+
+The attempt reached a green `stream_chat` suite before being reverted. What it established, in the
+order it would be rebuilt:
+
+**1. `Event extends WsEvent`** — additive, as planned. `healthCheckInfo` reports the connection id
+on `health.check`, which covers both the acknowledgement that opens a connection and the pongs that
+keep it alive. `error` stays `null` by inheritance.
+
+**2. `ChatWsCodec`** — simpler than feeds', which has to unwrap a generated union and patch in
+three frames its spec omits. Chat's protocol puts every event in the same shape, so a frame decodes
+straight to an `Event`; the one exception is a refusal, which becomes a `ConnectionErrorEvent`.
+
+The refusal frame is `{"type":"connection.error","created_at":…,"connection_id":"","error":{…}}` —
+it *does* carry a type (`monolith/types/event_schema_registry.go:374`,
+`event_video.go:533`), so dispatch on `type == 'connection.error'` and not on the presence of an
+`error` key. It needs its own event because `Event` has no field for the payload and would drop it.
+
+That event carries `Object error` rather than a `StreamApiError`, deliberately.
+`StreamApiError.fromJson` requires `code`, `message` and `StatusCode`, while chat's own
+`ErrorResponse` had all three nullable — so a payload missing one would throw and we would lose the
+refusal entirely, leaving only a close code that says nothing (auth, token and permission failures
+all close with 1000). Instead the raw payload is carried, and `stream_core` wraps anything it does
+not recognize in a `StreamClientException`; the frame still ends the connection either way.
+
+**3. `buildChatWsOptions`** — the connect URL, as a pure function, so it can be tested against
+what goes on the wire without a socket. `stream_core`'s provider does
+`Uri.parse(url).replace(queryParameters: …)`, so chat resolves the scheme (`http`/`ws` → `ws`,
+`https`/`wss` → `wss`), host, port and `/connect` path itself and hands over the query map.
+
+### The constraint feeds does not have: a synchronous options builder
+
+`WebSocketOptionsBuilder` is `WebSocketOptions Function()` — **synchronous**, called once per
+attempt. Chat's `_buildUri` was `async` because it awaited `tokenManager.getToken()`.
+
+Feeds has no such problem, and looking at why is what explains core's shape: its `optionsBuilder`
+carries **no token at all** — just `api_key`, `stream-auth-type` and `X-Stream-Client`, all
+synchronously available. The token goes out in `_authenticateUser`'s `WsAuthMessageRequest`, which
+*is* async, so feeds refreshes on `previousError.isTokenExpired` and sends the fresh token **within
+the same attempt**. Core's async authenticator exists precisely because v2 authenticates in a
+frame.
+
+Chat authenticates in the URL — the token appears three times, in `json`'s `user_token`, in
+`authorization` and via `stream-auth-type` — so it has to be readable synchronously at attempt
+time. Consequences, decided:
+
+- **The token is cached, not fetched, in the builder.** `StreamChatClient` loads one before it
+  calls `connect()`, so a first attempt is always fresh. `TokenManager.onTokenUpdated` keeps the
+  cached copy current.
+- **A refused token costs one extra attempt.** `onAuthenticate` still gets supplied — not to send
+  anything, since v1 sends nothing after open, but because it is the only async hook that receives
+  `previousError`. It expires and refetches there, which makes the *next* attempt's URL fresh
+  rather than the current one's. Chat used to do this in two attempts via
+  `_reconnect(refreshToken: true)`; core's recovery does it in three.
+- **That cost is narrow.** It only applies when the server refuses a token the client believed
+  valid — clock skew, or a revocation. `UserToken.isExpired` covers the ordinary case before the
+  URL is ever built, which chat's old `Token` could not do.
+
+The alternative was keeping chat's own reconnect loop so it could await a fresh token before each
+attempt, preserving two attempts exactly. Rejected: it would leave `ConnectionRecoveryHandler`,
+`RetryStrategy` and the reconnection policies unadopted, and with them the 410 lines of lifecycle
+and connectivity wiring in `stream_chat_flutter_core` that this phase exists to delete.
+
+### The ping frame is not a wire difference: use core's default
+
+Chat's old ping and core's default disagree on the key — chat serialized a whole `Event`
+(`{"type":"health.check","connection_id":"…","created_at":"…","is_local":true}`), core sends
+`{"type":"health.check","client_id":"…"}` — and it does not matter. The server never reads the
+body.
+
+`Client.MonitorHealth` (`monolith/engine/websocket/client.go:607-620`) reads the next frame,
+returns on `OpClose`, and otherwise calls `reader.Discard()`. Any frame at all is the keepalive;
+the health check it replies with is built server-side from its own client id
+(`coreevent.NewHealthCheckEvent(wsClientID)`). iOS relies on this directly: for
+`webSocketClientType == .coordinator` it sends a raw WebSocket protocol ping
+(`WebSocketClient.sendPing() → engine?.sendPing()`), no JSON at all.
+
+So `pingRequestBuilder` is left at its default and there is no chat-side ping type. The
+"backgrounding past the ping interval" case in the definition of done still applies — it exercises
+the monitor's cadence, not the frame.
+
+### Two traps in core's state emitter, both of which bit
+
+**`isActive` is not "connecting".** It means "anything but `Disconnected`", which includes
+`Initialized` — where every fresh client starts. Guarding `_connectUser` with it made *every* first
+connect throw "User already getting connected". The guard has to pattern-match
+`Connecting() || Authenticating()`.
+
+**`waitFor` resolves on the *current* value.** `connectionState` is a state emitter, so it replays
+what it holds to a new listener. `waitFor<Disconnected>()` therefore fired immediately on any
+client that had disconnected before, and `openConnection` reported "User initiated disconnection"
+for a connection it had not attempted yet. Both outcomes have to be armed **before** `connect()`,
+with the starting state dropped:
+
+```dart
+final acknowledged = _ws.events.whereType<Event>().firstWhere((it) => it.type == EventType.healthCheck);
+// `skip(1)` drops the state this attempt starts from.
+final refused = _ws.connectionState.skip(1).firstWhere((it) => it is Disconnected);
+
+_ws.connect().ignore();
+final outcome = await Future.any<Object>([acknowledged, refused]);
+```
+
+The real client sets `Connecting` synchronously inside `connect()`, so arming after it happens to
+work — which is exactly why this is worth writing down rather than relying on.
+
+### Three test-harness facts worth not rediscovering
+
+- **The fake has to be a real `StreamWebSocketClient`**, faked over `MutableEventEmitter<WsEvent>`
+  and `MutableConnectionStateEmitter` (both exported from core). Driving those two emitters is the
+  whole harness; `connect()` sets `Connecting` then emits a `health.check`.
+- **One subscription to `_ws.events`, not two.** A `firstWhere` inside `openConnection` alongside
+  the constructor's `listen(handleEvent)` gives no ordering guarantee between them, so
+  `openConnection` can return before `handleEvent` has run and `state.currentUser` is stale. Feed
+  the waiting completer *from* the single listener, after dispatching.
+- **A more faithful fake surfaces a pre-existing write.** Every server health check carries a
+  connection id, so `_handleHealthCheckEvent` writes `updateConnectionInfo` to persistence roughly
+  every 25s — that is current behaviour (the old code passed `handler: handleEvent` to `WebSocket`
+  too), but the old fake bypassed `handleEvent` entirely, so no test ever saw it. Groups that
+  connect with persistence need it stubbed. Sourcing the connection id from
+  `connectionState.value case Connected(:final healthCheck)` the way feeds does would remove the
+  per-ping churn at the root.
+
+### `StreamWebSocketError` would go with this phase
+
+Phase [03](03-errors.md) deferred it here: `DisconnectionSource.serverInitiated(error:)` carries
+the reason, so nothing would produce it. Its `data == null` retry test goes too — the offline
+fallback in `connectUser` keys off the sealed retry table instead. That closes one of the four
+preconditions for deleting `stream_chat_error.dart`, and closing it is now blocked on this phase
+resuming.
 
 ## Decisions to make
 

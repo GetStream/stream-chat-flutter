@@ -902,6 +902,10 @@ void main() {
             (i) => ChannelState(channel: ChannelModel(cid: 'test-type-$i:test-id-$i')),
           );
 
+          // `Sort` has no value equality, so the verify below has to match on
+          // the instance the response carried.
+          final resolvedSort = [ChannelSort.desc(ChannelSortField.lastMessageAt)];
+
           when(
             () => api.channel.queryChannels(
               predefinedFilter: filterName,
@@ -917,10 +921,10 @@ void main() {
           ).thenAnswer(
             (_) async => QueryChannelsResponse()
               ..channels = channelStates
-              ..predefinedFilter = const PredefinedFilter(
+              ..predefinedFilter = PredefinedFilter(
                 name: filterName,
-                filter: Filter.empty(),
-                sort: [SortOption<ChannelState>.desc('last_message_at')],
+                filter: const Filter.empty(),
+                sort: resolvedSort,
               ),
           );
 
@@ -957,7 +961,7 @@ void main() {
               sort: null,
               predefinedFilter: filterName,
               resolvedFilter: const Filter.empty(),
-              resolvedSort: const [SortOption<ChannelState>.desc('last_message_at')],
+              resolvedSort: resolvedSort,
               filterValues: filterValues,
               sortValues: sortValues,
               clearQueryCache: true,
@@ -1095,9 +1099,9 @@ void main() {
             (i) => ChannelState(channel: ChannelModel(cid: 'test-type-$i:test-id-$i')),
           );
 
-          const resolvedSort = [SortOption<ChannelState>.desc('last_message_at')];
+          final resolvedSort = [ChannelSort.desc(ChannelSortField.lastMessageAt)];
           const resolvedFilter = Filter.empty();
-          const expectedPredefinedFilter = PredefinedFilter(
+          final expectedPredefinedFilter = PredefinedFilter(
             name: filterName,
             filter: resolvedFilter,
             sort: resolvedSort,
@@ -3410,7 +3414,7 @@ void main() {
 
     test('`.queryPolls`', () async {
       final filter = Filter.in_('id', const ['test-poll-id']);
-      final sort = [const SortOption<Poll>.desc('created_at')];
+      final sort = [PollSort.desc(PollSortField.createdAt)];
       const pagination = PaginationParams(limit: 20);
 
       final polls = List.generate(
@@ -3456,7 +3460,7 @@ void main() {
     test('`.queryPollVotes`', () async {
       const pollId = 'test-poll-id';
       final filter = Filter.in_('id', const ['test-vote-id']);
-      final sort = [const SortOption<PollVote>.desc('created_at')];
+      final sort = [PollVoteSort.desc(PollVoteSortField.createdAt)];
       const pagination = PaginationParams(limit: 20);
 
       final votes = List.generate(
@@ -4602,7 +4606,7 @@ void main() {
       const channelType = 'test-channel-type';
 
       final filter = Filter.equal('channel_cid', '$channelType:$channelId');
-      final sort = [const SortOption<Draft>.desc('created_at')];
+      final sort = [DraftSort.desc(DraftSortField.createdAt)];
       const pagination = PaginationParams(limit: 20);
 
       final drafts = [

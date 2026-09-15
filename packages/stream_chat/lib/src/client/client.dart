@@ -21,7 +21,6 @@ import '../../version.dart';
 import '../core/api/attachment_file_uploader.dart';
 import '../core/api/requests.dart';
 import '../core/api/responses.dart';
-import '../core/api/sort_order.dart';
 import '../core/api/stream_chat_api.dart';
 import '../core/error/error.dart';
 import '../core/http/app_settings_manager.dart';
@@ -694,7 +693,7 @@ class StreamChatClient {
   /// [PredefinedFilter] spec.
   Stream<List<Channel>> queryChannels({
     Filter? filter,
-    SortOrder<ChannelState>? channelStateSort,
+    List<ChannelSort>? channelStateSort,
     String? predefinedFilter,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
@@ -729,7 +728,7 @@ class StreamChatClient {
   /// via [_queryChannelsCache].
   Stream<QueryChannelsResult> queryChannelsWithResult({
     Filter? filter,
-    SortOrder<ChannelState>? channelStateSort,
+    List<ChannelSort>? channelStateSort,
     String? predefinedFilter,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
@@ -818,7 +817,7 @@ class StreamChatClient {
   /// Requests channels with a given query from the API.
   Future<List<Channel>> queryChannelsOnline({
     Filter? filter,
-    SortOrder<ChannelState>? sort,
+    List<ChannelSort>? sort,
     String? predefinedFilter,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
@@ -849,7 +848,7 @@ class StreamChatClient {
 
   Future<QueryChannelsResult> _queryChannelsOnlineImpl({
     Filter? filter,
-    SortOrder<ChannelState>? sort,
+    List<ChannelSort>? sort,
     String? predefinedFilter,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
@@ -926,7 +925,7 @@ class StreamChatClient {
     final clearQueryCache = (paginationParams.offset ?? 0) == 0;
 
     Filter? resolvedFilter;
-    SortOrder<ChannelState>? resolvedSort;
+    List<ChannelSort>? resolvedSort;
     if (res.predefinedFilter case final resolvedPredefinedFilter?) {
       resolvedFilter = resolvedPredefinedFilter.filter;
       resolvedSort = resolvedPredefinedFilter.effectiveSort;
@@ -957,7 +956,7 @@ class StreamChatClient {
     String? predefinedFilter,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
-    SortOrder<ChannelState>? channelStateSort,
+    List<ChannelSort>? channelStateSort,
     int? messageLimit,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
@@ -978,7 +977,7 @@ class StreamChatClient {
     String? predefinedFilter,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
-    SortOrder<ChannelState>? channelStateSort,
+    List<ChannelSort>? channelStateSort,
     int? messageLimit,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
@@ -1036,7 +1035,7 @@ class StreamChatClient {
   Future<QueryUsersResponse> queryUsers({
     bool? presence,
     Filter? filter,
-    SortOrder<User>? sort,
+    List<UserSort>? sort,
     PaginationParams? pagination,
   }) async {
     final response = await _chatApi.user.queryUsers(
@@ -1052,7 +1051,7 @@ class StreamChatClient {
   /// Query banned users.
   Future<QueryBannedUsersResponse> queryBannedUsers({
     required Filter filter,
-    SortOrder<BannedUser>? sort,
+    List<BannedUserSort>? sort,
     PaginationParams? pagination,
   }) => _chatApi.moderation.queryBannedUsers(
     filter: filter,
@@ -1064,7 +1063,7 @@ class StreamChatClient {
   Future<SearchMessagesResponse> search(
     Filter filter, {
     String? query,
-    SortOrder? sort,
+    List<MessageSearchSort>? sort,
     PaginationParams? paginationParams,
     Filter? messageFilters,
   }) => _chatApi.general.searchMessages(
@@ -1391,7 +1390,7 @@ class StreamChatClient {
     Filter? filter,
     String? channelId,
     List<Member>? members,
-    SortOrder<Member>? sort,
+    List<MemberSort>? sort,
     PaginationParams? pagination,
   }) => _chatApi.general.queryMembers(
     channelType,
@@ -1703,7 +1702,7 @@ class StreamChatClient {
   /// Queries Polls with the given [filter] and [sort] options.
   Future<QueryPollsResponse> queryPolls({
     Filter? filter,
-    SortOrder<Poll>? sort,
+    List<PollSort>? sort,
     PaginationParams pagination = const PaginationParams(),
   }) => _chatApi.polls.queryPolls(
     filter: filter,
@@ -1716,7 +1715,7 @@ class StreamChatClient {
   Future<QueryPollVotesResponse> queryPollVotes(
     String pollId, {
     Filter? filter,
-    SortOrder<PollVote>? sort,
+    List<PollVoteSort>? sort,
     PaginationParams pagination = const PaginationParams(),
   }) => _chatApi.polls.queryPollVotes(
     pollId,
@@ -2002,7 +2001,7 @@ class StreamChatClient {
   Future<QueryReactionsResponse> queryReactions(
     String messageId, {
     Filter? filter,
-    SortOrder<Reaction>? sort,
+    List<ReactionSort>? sort,
     PaginationParams? pagination,
   }) => _chatApi.message.queryReactions(
     messageId,
@@ -2126,7 +2125,7 @@ class StreamChatClient {
   /// Queries drafts for the current user.
   Future<QueryDraftsResponse> queryDrafts({
     Filter? filter,
-    SortOrder<Draft>? sort,
+    List<DraftSort>? sort,
     PaginationParams? pagination,
   }) => _chatApi.message.queryDrafts(
     filter: filter,
@@ -2254,7 +2253,7 @@ class StreamChatClient {
   /// Optionally, pass [filter] and [sort] to filter and sort the threads.
   Future<QueryThreadsResponse> queryThreads({
     Filter? filter,
-    SortOrder<Thread>? sort,
+    List<ThreadSort>? sort,
     ThreadOptions options = const ThreadOptions(),
     PaginationParams pagination = const PaginationParams(),
   }) => _chatApi.threads.queryThreads(
@@ -2364,7 +2363,7 @@ class StreamChatClient {
   /// paginate the reminders.
   Future<QueryRemindersResponse> queryReminders({
     Filter? filter,
-    SortOrder<MessageReminder>? sort,
+    List<MessageReminderSort>? sort,
     PaginationParams pagination = const PaginationParams(),
   }) {
     return _chatApi.reminders.queryReminders(

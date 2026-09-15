@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_core/stream_core.dart' show NullOrdering, Sort, SortDirection, SortField, Standard;
+import '../util/string_sort_normalizer.dart';
 import 'channel_model.dart';
-import 'comparable_field.dart';
 import 'draft.dart';
 import 'location.dart';
 import 'member.dart';
@@ -19,7 +20,7 @@ const _nullConst = _NullConst();
 
 /// The class that contains the information about a channel
 @JsonSerializable()
-class ChannelState implements ComparableFieldProvider {
+class ChannelState {
   /// Constructor used for json serialization
   const ChannelState({
     this.channel,
@@ -125,54 +126,187 @@ class ChannelState implements ComparableFieldProvider {
     pushPreferences: pushPreferences ?? this.pushPreferences,
     activeLiveLocations: activeLiveLocations ?? this.activeLiveLocations,
   );
-
-  @override
-  ComparableField? getComparableField(String sortKey) {
-    final value = switch (sortKey) {
-      ChannelSortKey.lastUpdated => channel?.lastUpdatedAt,
-      ChannelSortKey.createdAt => channel?.createdAt,
-      ChannelSortKey.updatedAt => channel?.updatedAt,
-      ChannelSortKey.lastMessageAt => channel?.lastMessageAt,
-      ChannelSortKey.memberCount => channel?.memberCount,
-      ChannelSortKey.pinnedAt => membership?.pinnedAt,
-      // TODO: Support providing default value for hasUnread, unreadCount
-      ChannelSortKey.hasUnread => null,
-      ChannelSortKey.unreadCount => null,
-      _ => channel?.extraData[sortKey],
-    };
-
-    return ComparableField.fromValue(value);
-  }
 }
 
-/// Extension type representing sortable fields for [ChannelState].
+/// Represents a sorting operation for channels.
 ///
-/// This type provides type-safe keys that can be used for sorting channels
-/// in queries. Each constant represents a field that can be sorted on.
-extension type const ChannelSortKey(String key) implements String {
-  /// The default sorting is by the last message date or a channel created date
-  /// if no messages.
-  static const lastUpdated = ChannelSortKey('last_updated');
+/// Keeps [ChannelSortField.pinnedAt] and [ChannelSortField.lastMessageAt]
+/// nulls-last in either direction, the way the API orders them, unless a
+/// `nullOrdering` says otherwise.
+///
+/// See [ChannelSortField] for the fields that can be sorted on.
+class ChannelSort extends Sort<ChannelState> {
+  /// Sorts by [field], smallest first.
+  ChannelSort.asc(
+    ChannelSortField super.field, {
+    NullOrdering? nullOrdering,
+  }) : super.asc(nullOrdering: nullOrdering ?? _orderingFor(field, .nullsLast));
 
-  /// Sort channels by the date they were created.
-  static const createdAt = ChannelSortKey('created_at');
+  /// Sorts by [field], largest first.
+  ChannelSort.desc(
+    ChannelSortField super.field, {
+    NullOrdering? nullOrdering,
+  }) : super.desc(nullOrdering: nullOrdering ?? _orderingFor(field, .nullsFirst));
 
-  /// Sort channels by the date they were updated.
-  static const updatedAt = ChannelSortKey('updated_at');
+  /// Reads a sort back from the `{'field': …, 'direction': ±1}` shape [Sort]
+  /// serializes to.
+  factory ChannelSort.fromJson(Map<String, dynamic> json) {
+    final field = ChannelSortField.fromRemote(json['field'] as String);
 
-  /// Sort channels by the timestamp of the last message.
-  static const lastMessageAt = ChannelSortKey('last_message_at');
+    return switch (_directionFromJson(json['direction'])) {
+      SortDirection.asc => ChannelSort.asc(field),
+      SortDirection.desc => ChannelSort.desc(field),
+    };
+  }
 
-  /// Sort channels by the number of members.
-  static const memberCount = ChannelSortKey('member_count');
+  // Anything other than descending's value reads as ascending, which is how
+  // the API reads it — so an absent or unknown direction is not an error.
+  static SortDirection _directionFromJson(Object? value) {
+    if (value == SortDirection.desc.value) return SortDirection.desc;
+    return SortDirection.asc;
+  }
 
-  /// Sort channels by whether they have unread messages.
+  // The fields the API orders nulls-last whichever way they are sorted, so a
+  // channel with no messages and one that is not pinned stay at the end.
+  static final _nullsLastFields = {
+    ChannelSortField.pinnedAt.remote,
+    ChannelSortField.lastMessageAt.remote,
+  };
+
+  // Keyed on the remote name, so a field built by hand for a pinned name is
+  // ordered the same way.
+  static NullOrdering _orderingFor(ChannelSortField field, NullOrdering fallback) {
+    if (_nullsLastFields.contains(field.remote)) return NullOrdering.nullsLast;
+    return fallback;
+  }
+
+  /// An empty sort: the query carries no sort term, and a list keeps the
+  /// order it arrived in.
+  static const List<ChannelSort> empty = [];
+
+  /// The ordering the API applies to a channel query when none is given.
+  ///
+  /// Sorts by the last message date, or the channel creation date when it has
+  /// no messages.
+  static final List<ChannelSort> defaultSort = [
+    ChannelSort.desc(ChannelSortField.lastUpdated),
+  ];
+}
+
+/// Represents a field that channel queries can be sorted on.
+class ChannelSortField extends SortField<ChannelState> {
+  /// Creates a field named [remote] on the wire, reading its value off an
+  /// instance with `localValue`.
+  ///
+  /// For a name the SDK has not modelled; prefer the fields declared here.
+  ChannelSortField(super.remote, super.localValue);
+
+  /// Creates a field the SDK does not model, read from [ChannelModel.extraData].
+  ///
+  /// Declared only where the API accepts a custom sort field.
+  ///
+  /// String values are compared as they are, without the case and diacritic
+  /// folding a declared name field applies.
+  factory ChannelSortField.custom(String remote) {
+    return ChannelSortField(remote, (it) => it.channel?.extraData[remote]);
+  }
+
+  /// Sorts channels by their last activity.
+  ///
+  /// The date of the last message, or the channel creation date when it has
+  /// none.
+  static final lastUpdated = ChannelSortField(
+    'last_updated',
+    (it) => it.channel?.lastUpdatedAt,
+  );
+
+  /// Sorts channels by their channel id.
+  static final cid = ChannelSortField(
+    'cid',
+    (it) => it.channel?.cid,
+  );
+
+  /// Sorts channels by their name.
+  ///
+  /// Compares the folded form, so a name differing only by case, a diacritic
+  /// or a ligature sorts where a reader expects it rather than after Z.
+  static final name = ChannelSortField(
+    'name',
+    (it) => it.channel?.name?.let(normalizeStringForSort),
+  );
+
+  /// Sorts channels by the date they were created.
+  static final createdAt = ChannelSortField(
+    'created_at',
+    (it) => it.channel?.createdAt,
+  );
+
+  /// Sorts channels by the date they were updated.
+  static final updatedAt = ChannelSortField(
+    'updated_at',
+    (it) => it.channel?.updatedAt,
+  );
+
+  /// Sorts channels by the timestamp of the last message.
+  ///
+  /// Channels with no messages come last whichever direction this is sorted
+  /// in.
+  static final lastMessageAt = ChannelSortField(
+    'last_message_at',
+    (it) => it.channel?.lastMessageAt,
+  );
+
+  /// Sorts channels by the number of members.
+  static final memberCount = ChannelSortField(
+    'member_count',
+    (it) => it.channel?.memberCount,
+  );
+
+  /// Sorts channels by whether they have unread messages.
+  ///
   /// Useful for grouping read and unread channels.
-  static const hasUnread = ChannelSortKey('has_unread');
+  // TODO: Support providing default value for hasUnread
+  static final hasUnread = ChannelSortField(
+    'has_unread',
+    (_) => null,
+  );
 
-  /// Sort channels by the count of unread messages.
-  static const unreadCount = ChannelSortKey('unread_count');
+  /// Sorts channels by the count of unread messages.
+  // TODO: Support providing default value for unreadCount
+  static final unreadCount = ChannelSortField(
+    'unread_count',
+    (_) => null,
+  );
 
-  /// Sort channels by the date they were pinned.
-  static const pinnedAt = ChannelSortKey('pinned_at');
+  /// Sorts channels by the date they were pinned.
+  ///
+  /// Unpinned channels come last whichever direction this is sorted in.
+  static final pinnedAt = ChannelSortField(
+    'pinned_at',
+    (it) => it.membership?.pinnedAt,
+  );
+
+  static final _fields = [
+    lastUpdated,
+    cid,
+    name,
+    createdAt,
+    updatedAt,
+    lastMessageAt,
+    memberCount,
+    hasUnread,
+    unreadCount,
+    pinnedAt,
+  ];
+
+  static final _byRemote = {for (final field in _fields) field.remote: field};
+
+  /// The field [remote] names, or a [ChannelSortField.custom] one when the SDK
+  /// does not model it.
+  ///
+  /// An undeclared name still sorts the query correctly, but reads nothing
+  /// locally, so a list sorted on it keeps the order it arrived in.
+  static ChannelSortField fromRemote(String remote) {
+    return _byRemote[remote] ?? ChannelSortField.custom(remote);
+  }
 }

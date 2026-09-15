@@ -90,6 +90,25 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `export 'package:logging'` (`Logger`, `Level`, `LogRecord`) | `StreamLogger`, `StreamLogConfig`, `StreamLogHandler`, `StreamLogFilter`, `StreamLogPriority`, `StreamLogRecord` | `removed` | `package:logging` is no longer a dependency |
 | `LoggingInterceptor` / `InterceptStep` / `LogPrint` | — | `removed` | The interceptor is installed by default and writes through your `StreamLogHandler`; route its output with `logConfig` |
 | `StreamChatPersistenceClient(logLevel:, logHandlerFunction:)` | — | `removed` | Logging is configured once, on the client |
+| `SortOption<T>.asc(field)` / `.desc(field)` | `ChannelSort.asc(field)` / `MemberSort.desc(field)` / … | `renamed` | One `Sort` subclass per model, as in `stream_feeds`. `nullOrdering` is still a named parameter |
+| `SortOption.ASC` / `.DESC` | `SortDirection.asc` / `.desc` | `retyped` | An enum carrying `value` (`1` / `-1`) rather than a bare `int` |
+| `const [SortOption.desc(f)]` | `[ChannelSort.desc(f)]` | `retyped` | **Drop the `const`.** A sort list can no longer be `const`: a `SortField` holds a closure that reads the value off the model, which is not a constant expression. Every v10 example wrote `const`, so expect this on the first line you touch |
+| `ChannelSortKey` / `MessageSortKey` / `UserSortKey` / … (extension types over `String`) | `ChannelSortField` / `MessageSearchSortField` / `UserSortField` / … | `retyped` | Same member names. A field is no longer a `String`: read `field.remote` for the wire name. `MessageSortKey` is named for its one endpoint: searching |
+| `SortOption.desc('my_custom_field')` | `ChannelSort.desc(ChannelSortField.custom('my_custom_field'))` | `retyped` | Declared on channel, member, user and message-search sorts only — poll, poll-vote, thread, draft, reaction and banned-user queries pin their sort to declared fields and reject a custom one |
+| `SortOrder<T extends ComparableFieldProvider>` | `List<ChannelSort>`, `List<MemberSort>`, … | `removed` | The typedef is gone; signatures name the model's sort type |
+| `SortOption.fromJson` | `ChannelSort.fromJson` | `moved` | `Sort` has no `fromJson`: the remote name has to resolve back to a declared field |
+| `SortOption(comparator:)` | — | `removed` | Declare a field whose value projects onto something orderable, or sort the list yourself |
+| `DraftSortKey`'s `extraData` fallback | — | `removed` | The server rejects a custom sort field on drafts |
+| `PollVoteSortKey.answerText` | — | `removed` | The API rejects a sort on `answer_text` |
+| _(new)_ | `ChannelSortField.cid` | `added` | Both iOS and Android sort channels by `cid` |
+| _(new)_ | `MessageReminderSortField.messageId` | `added` | The server allows it and breaks reminder ties on it |
+| _(new)_ | `MessageSearchSortField.relevance` | `added` | Sorts search results by match quality; the server drops it when the request has no text filter |
+| `defaultChannelListSort` / `defaultMemberListSort` / `defaultUserListSort` / `defaultDraftListSort` / `defaultMessageReminderListSort` / `defaultPollVoteListSort` (`stream_chat_flutter_core`) | `ChannelSort.defaultSort` / `MemberSort.defaultSort` / … (`stream_chat`) | `moved` | The default belongs to the sort, as in `stream_feeds` and on Android. Now reachable without the Flutter layer |
+| `StreamChannelListController(channelStateSort: null)` and the other controllers' `sort: null` | omit the argument, or pass `ChannelSort.empty` | `retyped` | A controller's `sort` is non-nullable where the model declares a default. Omitting it applies that default; `XSort.empty` queries with the ordering the API applies on its own and leaves the page in the order it arrived in |
+| `ComparableField` / `ComparableFieldProvider` | — | `removed` | Never exported. A field now carries its own extractor, passed to `XSortField(remote, localValue)`; there is no public getter for the value it reads, so assert on the ordering a sort produces rather than on the value behind it |
+| `getComparableField(String)` on `User`, `Message`, `Member`, `Draft`, `Thread`, `Poll`, `PollVote`, `Reaction`, `BannedUser`, `MessageReminder` and `ChannelState` | — | `removed` | The types it named were unexported, but the method was public on all eleven models. A field reads its own value now, so an override has nowhere to go |
+| `NullOrdering` / `CompositeComparator` | `stream_core`'s, re-exported | `moved` | Same names and semantics |
+| `client.search(sort:)` / `channel.search(sort:)` / `StreamMessageSearchListController.sort`, taking `SortOrder?` | `List<MessageSearchSort>?` | `retyped` | Was untyped, so a channel field compiled — and the server does not reject one, it reads it as a custom message field, which is null on every message, so the term silently did nothing |
 | _(more added per feature as PRs land)_ | | | |
 
 ---

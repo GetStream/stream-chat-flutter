@@ -11011,14 +11011,14 @@ class $ChannelQueriesMetadataTable extends ChannelQueriesMetadata
     requiredDuringInsert: true,
   ).withConverter<Filter>($ChannelQueriesMetadataTable.$converterfilter);
   @override
-  late final GeneratedColumnWithTypeConverter<SortOrder<ChannelState>, String> sort =
+  late final GeneratedColumnWithTypeConverter<List<ChannelSort>, String> sort =
       GeneratedColumn<String>(
         'sort',
         aliasedName,
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: true,
-      ).withConverter<SortOrder<ChannelState>>(
+      ).withConverter<List<ChannelSort>>(
         $ChannelQueriesMetadataTable.$convertersort,
       );
   @override
@@ -11080,7 +11080,7 @@ class $ChannelQueriesMetadataTable extends ChannelQueriesMetadata
   }
 
   static TypeConverter<Filter, String> $converterfilter = const FilterConverter();
-  static TypeConverter<SortOrder<ChannelState>, String> $convertersort = const ChannelStateSortOrderConverter();
+  static TypeConverter<List<ChannelSort>, String> $convertersort = const ChannelSortConverter();
 }
 
 class ChannelQueryMetadataEntity extends DataClass implements Insertable<ChannelQueryMetadataEntity> {
@@ -11092,7 +11092,7 @@ class ChannelQueryMetadataEntity extends DataClass implements Insertable<Channel
   final Filter filter;
 
   /// The server-resolved sort spec to apply on offline reads.
-  final SortOrder<ChannelState> sort;
+  final List<ChannelSort> sort;
   const ChannelQueryMetadataEntity({
     required this.queryHash,
     required this.filter,
@@ -11123,7 +11123,7 @@ class ChannelQueryMetadataEntity extends DataClass implements Insertable<Channel
     return ChannelQueryMetadataEntity(
       queryHash: serializer.fromJson<String>(json['queryHash']),
       filter: serializer.fromJson<Filter>(json['filter']),
-      sort: serializer.fromJson<SortOrder<ChannelState>>(json['sort']),
+      sort: serializer.fromJson<List<ChannelSort>>(json['sort']),
     );
   }
   @override
@@ -11132,14 +11132,14 @@ class ChannelQueryMetadataEntity extends DataClass implements Insertable<Channel
     return <String, dynamic>{
       'queryHash': serializer.toJson<String>(queryHash),
       'filter': serializer.toJson<Filter>(filter),
-      'sort': serializer.toJson<SortOrder<ChannelState>>(sort),
+      'sort': serializer.toJson<List<ChannelSort>>(sort),
     };
   }
 
   ChannelQueryMetadataEntity copyWith({
     String? queryHash,
     Filter? filter,
-    SortOrder<ChannelState>? sort,
+    List<ChannelSort>? sort,
   }) => ChannelQueryMetadataEntity(
     queryHash: queryHash ?? this.queryHash,
     filter: filter ?? this.filter,
@@ -11179,7 +11179,7 @@ class ChannelQueryMetadataEntity extends DataClass implements Insertable<Channel
 class ChannelQueriesMetadataCompanion extends UpdateCompanion<ChannelQueryMetadataEntity> {
   final Value<String> queryHash;
   final Value<Filter> filter;
-  final Value<SortOrder<ChannelState>> sort;
+  final Value<List<ChannelSort>> sort;
   final Value<int> rowid;
   const ChannelQueriesMetadataCompanion({
     this.queryHash = const Value.absent(),
@@ -11190,7 +11190,7 @@ class ChannelQueriesMetadataCompanion extends UpdateCompanion<ChannelQueryMetada
   ChannelQueriesMetadataCompanion.insert({
     required String queryHash,
     required Filter filter,
-    required SortOrder<ChannelState> sort,
+    required List<ChannelSort> sort,
     this.rowid = const Value.absent(),
   }) : queryHash = Value(queryHash),
        filter = Value(filter),
@@ -11212,7 +11212,7 @@ class ChannelQueriesMetadataCompanion extends UpdateCompanion<ChannelQueryMetada
   ChannelQueriesMetadataCompanion copyWith({
     Value<String>? queryHash,
     Value<Filter>? filter,
-    Value<SortOrder<ChannelState>>? sort,
+    Value<List<ChannelSort>>? sort,
     Value<int>? rowid,
   }) {
     return ChannelQueriesMetadataCompanion(
@@ -18815,14 +18815,14 @@ typedef $$ChannelQueriesMetadataTableCreateCompanionBuilder =
     ChannelQueriesMetadataCompanion Function({
       required String queryHash,
       required Filter filter,
-      required SortOrder<ChannelState> sort,
+      required List<ChannelSort> sort,
       Value<int> rowid,
     });
 typedef $$ChannelQueriesMetadataTableUpdateCompanionBuilder =
     ChannelQueriesMetadataCompanion Function({
       Value<String> queryHash,
       Value<Filter> filter,
-      Value<SortOrder<ChannelState>> sort,
+      Value<List<ChannelSort>> sort,
       Value<int> rowid,
     });
 
@@ -18844,11 +18844,10 @@ class $$ChannelQueriesMetadataTableFilterComposer extends Composer<_$DriftChatDa
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<SortOrder<ChannelState>, SortOrder<ChannelState>, String> get sort =>
-      $composableBuilder(
-        column: $table.sort,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
+  ColumnWithTypeConverterFilters<List<ChannelSort>, List<ChannelSort>, String> get sort => $composableBuilder(
+    column: $table.sort,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
 }
 
 class $$ChannelQueriesMetadataTableOrderingComposer
@@ -18890,7 +18889,7 @@ class $$ChannelQueriesMetadataTableAnnotationComposer
   GeneratedColumnWithTypeConverter<Filter, String> get filter =>
       $composableBuilder(column: $table.filter, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<SortOrder<ChannelState>, String> get sort =>
+  GeneratedColumnWithTypeConverter<List<ChannelSort>, String> get sort =>
       $composableBuilder(column: $table.sort, builder: (column) => column);
 }
 
@@ -18935,7 +18934,7 @@ class $$ChannelQueriesMetadataTableTableManager
               ({
                 Value<String> queryHash = const Value.absent(),
                 Value<Filter> filter = const Value.absent(),
-                Value<SortOrder<ChannelState>> sort = const Value.absent(),
+                Value<List<ChannelSort>> sort = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ChannelQueriesMetadataCompanion(
                 queryHash: queryHash,
@@ -18947,7 +18946,7 @@ class $$ChannelQueriesMetadataTableTableManager
               ({
                 required String queryHash,
                 required Filter filter,
-                required SortOrder<ChannelState> sort,
+                required List<ChannelSort> sort,
                 Value<int> rowid = const Value.absent(),
               }) => ChannelQueriesMetadataCompanion.insert(
                 queryHash: queryHash,

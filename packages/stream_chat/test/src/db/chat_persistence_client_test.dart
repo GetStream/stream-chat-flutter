@@ -1,5 +1,4 @@
 import 'package:stream_chat/src/core/api/requests.dart';
-import 'package:stream_chat/src/core/api/sort_order.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/draft.dart';
@@ -83,7 +82,7 @@ class TestPersistenceClient extends ChatPersistenceClient {
   @override
   Future<List<ChannelState>> getChannelStates({
     Filter? filter,
-    SortOrder<ChannelState>? channelStateSort,
+    List<ChannelSort>? channelStateSort,
     int? messageLimit,
     PaginationParams? paginationParams,
   }) => throw UnimplementedError();

@@ -19,6 +19,30 @@ void main() {
     return QueryMembersResponse()..members = members;
   }
 
+  test('an empty sort queries without a sort term', () async {
+    final sorts = <Object?>[];
+    when(
+      () => channel.queryMembers(
+        filter: any(named: 'filter'),
+        sort: any(named: 'sort'),
+        pagination: any(named: 'pagination'),
+      ),
+    ).thenAnswer((invocation) async {
+      sorts.add(invocation.namedArguments[#sort]);
+      return membersResponse([Member(user: User(id: 'user-1'))]);
+    });
+
+    final controller = StreamMemberListController(
+      channel: channel,
+      sort: MemberSort.empty,
+    );
+    addTearDown(controller.dispose);
+
+    await controller.doInitialLoad();
+
+    expect(sorts.single, isEmpty);
+  });
+
   group('search', () {
     test('queries members with the provided filter after debouncing', () {
       Filter? usedFilter;

@@ -12,6 +12,18 @@
 - `RetryPolicy.shouldRetry` receives a `StreamChatException?` instead of a `StreamChatError?`.
 - `UploadState`'s variant classes are renamed to `UploadStatePreparing`, `UploadStateInProgress`, `UploadStateSuccess` and `UploadStateFailed`, freeing the names `Success` and `Failed`.
 - `Result` from `package:async` is no longer re-exported; the re-exported `Result` is `stream_core`'s.
+- Sorting is now `stream_core`'s. `SortOption<ChannelState>.desc(ChannelSortKey.lastUpdated)` becomes `ChannelSort.desc(ChannelSortField.lastUpdated)` — one `Sort` subclass and one field registry per model, with the same member names as the old `*SortKey`.
+- `SortOrder<T>` is removed. Signatures take `List<ChannelSort>`, `List<MemberSort>` and so on.
+- `NullOrdering`, `SortDirection` and the `compare` extension are `stream_core`'s, re-exported from this package.
+- `ComparableField`, `ComparableFieldProvider` and `SortOption.fromJson` are removed. A stored sort is read back with `ChannelSort.fromJson`.
+- `SortOption`'s `comparator` argument is removed. Declare a field whose value projects onto something orderable, or sort the list yourself.
+- `PollVoteSortField.answerText` is removed: the API rejects a sort on `answer_text`.
+- `ChannelSortField.cid` is added, matching the iOS and Android SDKs.
+- `search(sort:)` on the client and channel, and `StreamMessageSearchListController.sort`, are typed `List<MessageSearchSort>` rather than an untyped `SortOrder`. Searching is the only message query the API sorts, so the type is named for it.
+- `DraftSortField` has no `custom` field: the API rejects a custom sort field on drafts.
+- A sort names its model's field type, so `MemberSort.asc` takes a `MemberSortField` and a field from another model does not compile. `XSortField.custom(key)` reads a field from the model's extra data, for the four models whose queries accept one.
+- Added `ChannelSort.empty`, `MemberSort.empty` and one on every other sort — an empty sort, for querying with the ordering the API applies on its own.
+- Default sorts moved onto the sort that owns them: `ChannelSort.defaultSort`, `MemberSort.defaultSort` and so on, reachable now without the Flutter layer.
 - `StreamChatNetworkError` and `StreamChatNetworkErrorType` are removed. Nothing throws them any more, so keeping them would let an `on StreamChatNetworkError catch` clause compile while matching nothing.
 
 🔄 Changed
@@ -23,6 +35,12 @@
 ✅ Added
 
 - Log records from the HTTP and token layers now reach the configured handler.
+- Added `MessageSearchSortField.relevance`, which sorts a message search by match quality.
+- Added `MessageReminderSortField.messageId`, the field the API breaks reminder ties on.
+- Added `ReactionSort.defaultSort` and `PollSort.defaultSort`, each the ordering the API already applies to that query.
+- Added the message sort fields the JS client already exposed: `text`, `type`, `parentId`, `replyCount` and `pinned`.
+- Added `MemberSortField.updatedAt`.
+- Added `UserSortField.language` and `UserSortField.teams`.
 
 🔒 Security
 

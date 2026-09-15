@@ -105,7 +105,7 @@ void main() {
     setUpAll(() {
       registerFallbackValue(<String>[]);
       registerFallbackValue(const Filter.empty());
-      registerFallbackValue(const <SortOption<ChannelState>>[]);
+      registerFallbackValue([]);
     });
 
     setUp(() async {
@@ -338,8 +338,8 @@ void main() {
 
         final result = await client.getChannelStates(
           filter: filter,
-          channelStateSort: const [
-            SortOption<ChannelState>.desc(ChannelSortKey.pinnedAt),
+          channelStateSort: [
+            ChannelSort.desc(ChannelSortField.pinnedAt),
           ],
           messageLimit: messageLimit,
           paginationParams: const PaginationParams(offset: 1, limit: 1),
@@ -477,8 +477,8 @@ void main() {
 
         final result = await client.queryChannelStates(
           filter: filter,
-          sort: const [
-            SortOption<ChannelState>.desc(ChannelSortKey.pinnedAt),
+          sort: [
+            ChannelSort.desc(ChannelSortField.pinnedAt),
           ],
           messageLimit: messageLimit,
           paginationParams: const PaginationParams(offset: 1, limit: 1),
@@ -562,8 +562,8 @@ void main() {
         const cids = ['messaging:p0', 'messaging:p1', 'messaging:p2'];
 
         // Persisted sort uses `pinnedAt` so membership preload kicks in.
-        const persistedSort = <SortOption<ChannelState>>[
-          SortOption<ChannelState>.desc(ChannelSortKey.pinnedAt),
+        final persistedSort = [
+          ChannelSort.desc(ChannelSortField.pinnedAt),
         ];
 
         // pinnedAt values chosen so descending order is [p1, p2, p0]. With
@@ -713,6 +713,38 @@ void main() {
           );
         }
       });
+
+      test('standard mode orders a cached page by the default sort when given none', () async {
+        // Cached rows arrive in whatever order the cid lookup returned, so the
+        // oldest is first here. The default sort is newest-first, which makes
+        // `oldest` the only cid a one-channel page should hydrate if it is
+        // applied, and the wrong one if it is not.
+        final baseDate = DateTime.utc(2025);
+        final oldest = ChannelModel(cid: 'messaging:oldest', lastMessageAt: baseDate);
+        final newest = ChannelModel(
+          cid: 'messaging:newest',
+          lastMessageAt: baseDate.add(const Duration(days: 1)),
+        );
+
+        when(() => mockDatabase.channelQueryDao.getChannels()).thenAnswer((_) async => [oldest, newest]);
+
+        const pagedCid = 'messaging:newest';
+        const messagePagination = PaginationParams(limit: 25);
+        when(() => mockDatabase.channelDao.getChannelByCid(pagedCid)).thenAnswer((_) async => newest);
+        when(() => mockDatabase.memberDao.getMembersByCid(pagedCid)).thenAnswer((_) async => <Member>[]);
+        when(() => mockDatabase.readDao.getReadsByCid(pagedCid)).thenAnswer((_) async => <Read>[]);
+        when(
+          () => mockDatabase.messageDao.getMessagesByCid(pagedCid, messagePagination: messagePagination),
+        ).thenAnswer((_) async => <Message>[]);
+        when(() => mockDatabase.pinnedMessageDao.getMessagesByCid(pagedCid)).thenAnswer((_) async => <Message>[]);
+        when(() => mockDatabase.draftMessageDao.getDraftMessageByCid(pagedCid)).thenAnswer((_) async => null);
+
+        final result = await client.queryChannelStates(
+          paginationParams: const PaginationParams(limit: 1),
+        );
+
+        expect(result.channels.single.channel!.cid, pagedCid);
+      });
     });
 
     group('saveChannelQueries', () {
@@ -730,8 +762,8 @@ void main() {
         final filter = Filter.in_('members', const ['testUserId']);
         const cids = <String>['messaging:c0'];
         final resolvedFilter = Filter.equal('type', 'messaging');
-        const resolvedSort = <SortOption<ChannelState>>[
-          SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt),
+        final resolvedSort = [
+          ChannelSort.desc(ChannelSortField.lastMessageAt),
         ];
 
         when(
@@ -776,8 +808,8 @@ void main() {
         const sortValues = {'pinned_at': true};
         const cids = <String>['messaging:c0'];
         final resolvedFilter = Filter.equal('type', 'messaging');
-        const resolvedSort = <SortOption<ChannelState>>[
-          SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt),
+        final resolvedSort = [
+          ChannelSort.desc(ChannelSortField.lastMessageAt),
         ];
 
         when(
@@ -824,7 +856,7 @@ void main() {
             filterName,
             cids,
             filter: const Filter.empty(),
-            sort: const [],
+            sort: [],
             filterValues: null,
             sortValues: null,
             clearQueryCache: false,
@@ -838,7 +870,7 @@ void main() {
             filterName,
             cids,
             filter: const Filter.empty(),
-            sort: const [],
+            sort: [],
             filterValues: null,
             sortValues: null,
             clearQueryCache: false,

@@ -164,9 +164,9 @@ void main() {
     const sortValues = {'pinned_at': true};
     const cids = ['testCid1', 'testCid2', 'testCid3'];
     final filter = Filter.equal('type', 'messaging');
-    const sort = <SortOption<ChannelState>>[
-      SortOption<ChannelState>.desc(ChannelSortKey.pinnedAt),
-      SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt),
+    final sort = [
+      ChannelSort.desc(ChannelSortField.pinnedAt),
+      ChannelSort.desc(ChannelSortField.lastMessageAt),
     ];
 
     await _insertChannelsForCids(cids);
@@ -190,10 +190,10 @@ void main() {
     expect(storedFilter!.toJson(), filter.toJson());
     expect(storedSort, isNotNull);
     expect(storedSort!.length, 2);
-    expect(storedSort.first.field, ChannelSortKey.pinnedAt);
-    expect(storedSort.first.direction, SortOption.DESC);
-    expect(storedSort.last.field, ChannelSortKey.lastMessageAt);
-    expect(storedSort.last.direction, SortOption.DESC);
+    expect(storedSort.first.field.remote, ChannelSortField.pinnedAt.remote);
+    expect(storedSort.first.direction, SortDirection.desc);
+    expect(storedSort.last.field.remote, ChannelSortField.lastMessageAt.remote);
+    expect(storedSort.last.direction, SortDirection.desc);
   });
 
   test('clear queryCache before updateChannelQueriesByPredefinedFilter', () async {
@@ -203,9 +203,9 @@ void main() {
     const oldCids = ['oldCid1', 'oldCid2'];
     const newCids = ['newCid1'];
     final filter = Filter.equal('type', 'messaging');
-    const sort = <SortOption<ChannelState>>[
-      SortOption<ChannelState>.desc(ChannelSortKey.pinnedAt),
-      SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt),
+    final sort = [
+      ChannelSort.desc(ChannelSortField.pinnedAt),
+      ChannelSort.desc(ChannelSortField.lastMessageAt),
     ];
 
     await _insertChannelsForCids([...oldCids, ...newCids]);
@@ -238,10 +238,10 @@ void main() {
     expect(storedFilter!.toJson(), filter.toJson());
     expect(storedSort, isNotNull);
     expect(storedSort!.length, 2);
-    expect(storedSort.first.field, ChannelSortKey.pinnedAt);
-    expect(storedSort.first.direction, SortOption.DESC);
-    expect(storedSort.last.field, ChannelSortKey.lastMessageAt);
-    expect(storedSort.last.direction, SortOption.DESC);
+    expect(storedSort.first.field.remote, ChannelSortField.pinnedAt.remote);
+    expect(storedSort.first.direction, SortDirection.desc);
+    expect(storedSort.last.field.remote, ChannelSortField.lastMessageAt.remote);
+    expect(storedSort.last.direction, SortDirection.desc);
   });
 
   tearDown(() async {

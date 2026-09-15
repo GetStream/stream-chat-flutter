@@ -1,9 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_core/stream_core.dart' show NullOrdering, Sort, SortField;
 
 import '../util/serializer.dart';
 import 'channel_model.dart';
-import 'comparable_field.dart';
 import 'draft.dart';
 import 'message.dart';
 import 'read.dart';
@@ -23,7 +23,7 @@ const _nullConst = _NullConst();
 /// to a message in a channel.
 /// {@endtemplate}
 @JsonSerializable()
-class Thread extends Equatable implements ComparableFieldProvider {
+class Thread extends Equatable {
   /// {@macro streamThread}
   Thread({
     this.activeParticipantCount,
@@ -226,52 +226,100 @@ class Thread extends Equatable implements ComparableFieldProvider {
     read,
     draft,
   ];
-
-  @override
-  ComparableField? getComparableField(String sortKey) {
-    final value = switch (sortKey) {
-      ThreadSortKey.lastMessageAt => lastMessageAt,
-      ThreadSortKey.createdAt => createdAt,
-      ThreadSortKey.updatedAt => updatedAt,
-      ThreadSortKey.replyCount => replyCount,
-      ThreadSortKey.participantCount => participantCount,
-      ThreadSortKey.activeParticipantCount => activeParticipantCount,
-      ThreadSortKey.parentMessageId => parentMessageId,
-      // TODO: Support providing default value for hasUnread
-      ThreadSortKey.hasUnread => null,
-      _ => null,
-    };
-
-    return ComparableField.fromValue(value);
-  }
 }
 
-/// Extension type representing sortable fields for [Thread].
+/// Represents a sorting operation for threads.
 ///
-/// This type provides type-safe keys that can be used for sorting threads
-/// in queries. Each constant represents a field that can be sorted on.
-extension type const ThreadSortKey(String key) implements String {
-  /// Sort threads by their last message date.
-  static const lastMessageAt = ThreadSortKey('last_message_at');
+/// The API accepts only whole combinations, not an arbitrary mix:
+/// `hasUnread` + `lastMessageAt` + `parentMessageId`, `lastMessageAt` +
+/// `parentMessageId`, or any one of `createdAt`, `updatedAt`, `replyCount`,
+/// `participantCount`, `activeParticipantCount` and `parentMessageId` alone.
+/// Anything else is rejected.
+///
+/// See [ThreadSortField] for the fields that can be sorted on.
+class ThreadSort extends Sort<Thread> {
+  /// Sorts by [field], smallest first.
+  ThreadSort.asc(
+    ThreadSortField super.field, {
+    NullOrdering? nullOrdering,
+  }) : super.asc(nullOrdering: nullOrdering ?? _orderingFor(field, .nullsLast));
 
-  /// Sort threads by their creation date.
-  static const createdAt = ThreadSortKey('created_at');
+  /// Sorts by [field], largest first.
+  ThreadSort.desc(
+    ThreadSortField super.field, {
+    NullOrdering? nullOrdering,
+  }) : super.desc(nullOrdering: nullOrdering ?? _orderingFor(field, .nullsFirst));
 
-  /// Sort threads by their last update date.
-  static const updatedAt = ThreadSortKey('updated_at');
+  // A thread the SDK has no last-message date for belongs at the end whichever
+  // way the list is sorted. Not API parity: the API's own date is never absent.
+  static final _nullsLastFields = {ThreadSortField.lastMessageAt.remote};
 
-  /// Sort threads by their reply count.
-  static const replyCount = ThreadSortKey('reply_count');
+  // Keyed on the remote name, so a field built by hand for a pinned name is
+  // ordered the same way.
+  static NullOrdering _orderingFor(ThreadSortField field, NullOrdering fallback) {
+    if (_nullsLastFields.contains(field.remote)) return NullOrdering.nullsLast;
+    return fallback;
+  }
 
-  /// Sort threads by their participant count.
-  static const participantCount = ThreadSortKey('participant_count');
+  /// An empty sort: the query carries no sort term, and a list keeps the
+  /// order it arrived in.
+  static const List<ThreadSort> empty = [];
+}
 
-  /// Sort threads by their active participant count.
-  static const activeParticipantCount = ThreadSortKey('active_participant_count');
+/// Represents a field that thread queries can be sorted on.
+class ThreadSortField extends SortField<Thread> {
+  /// Creates a field named [remote] on the wire, reading its value off an
+  /// instance with `localValue`.
+  ///
+  /// For a name the SDK has not modelled; prefer the fields declared here.
+  ThreadSortField(super.remote, super.localValue);
 
-  /// Sort threads by their parent message id.
-  static const parentMessageId = ThreadSortKey('parent_message_id');
+  /// Sorts threads by their last message date.
+  static final lastMessageAt = ThreadSortField(
+    'last_message_at',
+    (it) => it.lastMessageAt,
+  );
 
-  /// Sort threads by their has unread.
-  static const hasUnread = ThreadSortKey('has_unread');
+  /// Sorts threads by their creation date.
+  static final createdAt = ThreadSortField(
+    'created_at',
+    (it) => it.createdAt,
+  );
+
+  /// Sorts threads by their last update date.
+  static final updatedAt = ThreadSortField(
+    'updated_at',
+    (it) => it.updatedAt,
+  );
+
+  /// Sorts threads by their reply count.
+  static final replyCount = ThreadSortField(
+    'reply_count',
+    (it) => it.replyCount,
+  );
+
+  /// Sorts threads by their participant count.
+  static final participantCount = ThreadSortField(
+    'participant_count',
+    (it) => it.participantCount,
+  );
+
+  /// Sorts threads by their active participant count.
+  static final activeParticipantCount = ThreadSortField(
+    'active_participant_count',
+    (it) => it.activeParticipantCount,
+  );
+
+  /// Sorts threads by their parent message id.
+  static final parentMessageId = ThreadSortField(
+    'parent_message_id',
+    (it) => it.parentMessageId,
+  );
+
+  /// Sorts threads by whether they have unread replies.
+  // TODO: Support providing default value for hasUnread
+  static final hasUnread = ThreadSortField(
+    'has_unread',
+    (_) => null,
+  );
 }

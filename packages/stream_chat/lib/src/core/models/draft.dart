@@ -1,7 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:stream_core/stream_core.dart' show Sort, SortField;
+
 import 'channel_model.dart';
-import 'comparable_field.dart';
 import 'draft_message.dart';
 import 'message.dart';
 
@@ -11,7 +12,7 @@ part 'draft.g.dart';
 ///
 /// This class is used to store the draft message and its metadata.
 @JsonSerializable(includeIfNull: false)
-class Draft extends Equatable implements ComparableFieldProvider {
+class Draft extends Equatable {
   /// Creates a new instance of [Draft].
   const Draft({
     required this.channelCid,
@@ -81,25 +82,51 @@ class Draft extends Equatable implements ComparableFieldProvider {
     parentMessage,
     quotedMessage,
   ];
-
-  @override
-  ComparableField? getComparableField(String sortKey) {
-    final value = switch (sortKey) {
-      DraftSortKey.createdAt => createdAt,
-      _ => message.extraData[sortKey],
-    };
-
-    return ComparableField.fromValue(value);
-  }
 }
 
-/// Extension type representing sortable fields for [Draft].
+/// Represents a sorting operation for drafts.
 ///
-/// This type provides type-safe keys that can be used for sorting drafts
-/// in queries. Each constant represents a field that can be sorted on.
-extension type const DraftSortKey(String key) implements String {
-  /// Sort drafts by their creation date.
+/// The API sorts drafts by `createdAt` only. Anything else is rejected.
+///
+/// See [DraftSortField] for the fields that can be sorted on.
+class DraftSort extends Sort<Draft> {
+  /// Sorts by [field], smallest first.
+  const DraftSort.asc(
+    DraftSortField super.field, {
+    super.nullOrdering,
+  }) : super.asc();
+
+  /// Sorts by [field], largest first.
+  const DraftSort.desc(
+    DraftSortField super.field, {
+    super.nullOrdering,
+  }) : super.desc();
+
+  /// An empty sort: the query carries no sort term, and a list keeps the
+  /// order it arrived in.
+  static const List<DraftSort> empty = [];
+
+  /// The ordering the API applies to a draft query when none is given.
+  ///
+  /// Sorts by when the draft was created, newest first.
+  static final List<DraftSort> defaultSort = [
+    DraftSort.desc(DraftSortField.createdAt),
+  ];
+}
+
+/// Represents a field that draft queries can be sorted on.
+class DraftSortField extends SortField<Draft> {
+  /// Creates a field named [remote] on the wire, reading its value off an
+  /// instance with `localValue`.
+  ///
+  /// For a name the SDK has not modelled; prefer the fields declared here.
+  DraftSortField(super.remote, super.localValue);
+
+  /// Sorts drafts by their creation date.
   ///
   /// This is the default sort field (in descending order).
-  static const createdAt = DraftSortKey('created_at');
+  static final createdAt = DraftSortField(
+    'created_at',
+    (it) => it.createdAt,
+  );
 }

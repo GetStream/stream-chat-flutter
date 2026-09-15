@@ -20,7 +20,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
     client: StreamChat.of(context).client,
     filter: Filter.in_('cid', [StreamChannel.of(context).channel.cid!]),
     messageFilter: Filter.in_('attachments.type', const ['file']),
-    sort: const [SortOption.desc('created_at')],
+    sort: [MessageSearchSort.desc(MessageSearchSortField.createdAt)],
     limit: 20,
   );
 

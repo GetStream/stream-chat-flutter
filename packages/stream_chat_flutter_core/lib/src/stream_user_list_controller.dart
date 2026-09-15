@@ -1,19 +1,14 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
+import 'package:stream_core/stream_core.dart' show SortedListExtensions;
 import 'paged_value_notifier.dart';
 import 'search_debounce_mixin.dart';
 import 'search_debouncer.dart';
 
 /// The default channel page limit to load.
 const defaultUserPagedLimit = 10;
-
-/// The default sort used for the user list.
-const defaultUserListSort = [
-  SortOption<User>.desc(UserSortKey.createdAt),
-];
 
 const _kDefaultBackendPaginationLimit = 30;
 
@@ -40,11 +35,11 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
   StreamUserListController({
     required this.client,
     this.filter,
-    this.sort = defaultUserListSort,
+    List<UserSort>? sort,
     this.presence = true,
     this.limit = defaultUserPagedLimit,
   }) : _activeFilter = filter,
-       _activeSort = sort,
+       sort = sort ?? UserSort.defaultSort,
        super(const PagedValue.loading());
 
   /// Creates a [StreamUserListController] from the passed [value].
@@ -52,11 +47,11 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
     super.value, {
     required this.client,
     this.filter,
-    this.sort = defaultUserListSort,
+    List<UserSort>? sort,
     this.presence = true,
     this.limit = defaultUserPagedLimit,
   }) : _activeFilter = filter,
-       _activeSort = sort;
+       sort = sort ?? UserSort.defaultSort;
 
   /// The client to use for the channels list.
   final StreamChatClient client;
@@ -75,8 +70,11 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final SortOrder<User>? sort;
-  SortOrder<User>? _activeSort;
+  ///
+  /// Defaults to [UserSort.defaultSort]; pass [UserSort.empty] to leave the ordering
+  /// to the API.
+  final List<UserSort> sort;
+  late List<UserSort> _activeSort = sort;
 
   /// If true you’ll receive user presence updates via the websocket events
   final bool presence;
@@ -101,7 +99,7 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new sort.
-  set sort(SortOrder<User>? value) => _activeSort = value;
+  set sort(List<UserSort> value) => _activeSort = value;
 
   /// Searches users whose name or id matches [query], debounced by its length.
   ///
@@ -138,15 +136,12 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
 
   @override
   set value(PagedValue<int, User> newValue) {
-    super.value = switch (_activeSort) {
-      null => newValue,
-      final userSort => newValue.maybeMap(
-        orElse: () => newValue,
-        (success) => success.copyWith(
-          items: success.items.sorted(userSort.compare),
-        ),
+    super.value = newValue.maybeMap(
+      orElse: () => newValue,
+      (success) => success.copyWith(
+        items: success.items.sortedWith(_activeSort.compare),
       ),
-    };
+    );
   }
 
   @override

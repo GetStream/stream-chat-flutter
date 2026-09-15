@@ -284,7 +284,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @override
   Future<List<ChannelState>> getChannelStates({
     Filter? filter,
-    SortOrder<ChannelState>? channelStateSort,
+    List<ChannelSort>? channelStateSort,
     int? messageLimit,
     PaginationParams? paginationParams,
   }) async {
@@ -302,7 +302,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @override
   Future<QueryChannelsResponse> queryChannelStates({
     Filter? filter,
-    SortOrder<ChannelState>? sort,
+    List<ChannelSort>? sort,
     String? predefinedFilter,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
@@ -353,25 +353,30 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   // page with full channel state.
   Future<List<ChannelState>> _getChannelStatesPage(
     List<ChannelModel> channelModels,
-    SortOrder<ChannelState>? channelStateSort,
+    List<ChannelSort>? channelStateSort,
     PaginationParams? paginationParams, {
     int? messageLimit,
   }) async {
+    // A cached read has no server to defer to, and the rows arrive in whatever
+    // order the cid lookup returned.
+    final sort = switch (channelStateSort) {
+      null || [] => ChannelSort.defaultSort,
+      final channelStateSort => channelStateSort,
+    };
+
     // 1) Wrap each model in a sort envelope. No state loaded yet.
     var envelopes = channelModels.map((m) => ChannelState(channel: m)).toList(growable: false);
 
     // 2) If sort uses `pinnedAt`, preload the current user's memberships in
     //    one batched query and attach them to the envelopes.
     final clientUserId = userId;
-    if (clientUserId != null && _sortRequiresMembership(channelStateSort)) {
+    if (clientUserId != null && _sortRequiresMembership(sort)) {
       envelopes = await _attachMemberships(envelopes, clientUserId);
     }
 
     // 3) Sort using the comparator — on envelopes instead of fully-hydrated
     //    states.
-    if (channelStateSort != null && channelStateSort.isNotEmpty) {
-      envelopes.sort(channelStateSort.compare);
-    }
+    envelopes.sort(sort.compare);
 
     // 4) Slice the page.
     final total = envelopes.length;
@@ -409,10 +414,10 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<void> saveChannelQueries({
     required List<String> cids,
     Filter? filter,
-    SortOrder<ChannelState>? sort,
+    List<ChannelSort>? sort,
     String? predefinedFilter,
     Filter? resolvedFilter,
-    SortOrder<ChannelState>? resolvedSort,
+    List<ChannelSort>? resolvedSort,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
     bool clearQueryCache = false,
@@ -632,8 +637,9 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     }
   }
 
-  bool _sortRequiresMembership(SortOrder<ChannelState>? sort) =>
-      sort?.any((opt) => opt.field == ChannelSortKey.pinnedAt) ?? false;
+  bool _sortRequiresMembership(List<ChannelSort>? sort) {
+    return sort?.any((it) => it.field.remote == ChannelSortField.pinnedAt.remote) ?? false;
+  }
 
   Future<List<ChannelState>> _attachMemberships(
     List<ChannelState> envelopes,

@@ -129,6 +129,33 @@ void main() {
       expect(controller.value.asSuccess.items, equals(reminders));
     });
 
+    test('an empty sort queries without a sort term', () async {
+      final sorts = <Object?>[];
+
+      when(
+        () => client.queryReminders(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer((invocation) async {
+        sorts.add(invocation.namedArguments[const Symbol('sort')]);
+        return QueryRemindersResponse()
+          ..reminders = generateMessageReminders()
+          ..next = null;
+      });
+
+      final controller = StreamMessageReminderListController(
+        client: client,
+        sort: MessageReminderSort.empty,
+      );
+
+      await controller.doInitialLoad();
+      await pumpEventQueue();
+
+      expect(sorts.single, isEmpty);
+    });
+
     test('handles a Stream failure properly', () async {
       const chatError = StreamNetworkException(message: 'Network error');
       when(

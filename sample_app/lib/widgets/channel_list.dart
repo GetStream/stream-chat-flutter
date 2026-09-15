@@ -53,8 +53,8 @@ class _ChannelList extends State<ChannelList> {
       limit: 5,
       searchQuery: searchQuery,
       sort: [
-        const SortOption.desc(ChannelSortKey.pinnedAt),
-        const SortOption.asc(ChannelSortKey.createdAt),
+        MessageSearchSort.desc(MessageSearchSortField.pinned),
+        MessageSearchSort.asc(MessageSearchSortField.createdAt),
       ],
     );
     if (searchQuery.isNotEmpty) _messageSearchListController.search(searchQuery);

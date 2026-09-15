@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import '../core/api/requests.dart';
 import '../core/api/responses.dart';
-import '../core/api/sort_order.dart';
 import '../core/models/attachment_file.dart';
 import '../core/models/channel_model.dart';
 import '../core/models/channel_state.dart';
@@ -133,7 +132,7 @@ abstract class ChatPersistenceClient {
   @Deprecated('Use queryChannelStates instead')
   Future<List<ChannelState>> getChannelStates({
     Filter? filter,
-    SortOrder<ChannelState>? channelStateSort,
+    List<ChannelSort>? channelStateSort,
     int? messageLimit,
     PaginationParams? paginationParams,
   });
@@ -173,7 +172,7 @@ abstract class ChatPersistenceClient {
   /// For standard mode, [QueryChannelsResponse.predefinedFilter] is null.
   Future<QueryChannelsResponse> queryChannelStates({
     Filter? filter,
-    SortOrder<ChannelState>? sort,
+    List<ChannelSort>? sort,
     String? predefinedFilter,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
@@ -216,10 +215,10 @@ abstract class ChatPersistenceClient {
   Future<void> saveChannelQueries({
     required List<String> cids,
     Filter? filter,
-    SortOrder<ChannelState>? sort,
+    List<ChannelSort>? sort,
     String? predefinedFilter,
     Filter? resolvedFilter,
-    SortOrder<ChannelState>? resolvedSort,
+    List<ChannelSort>? resolvedSort,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
     bool clearQueryCache = false,

@@ -5,7 +5,6 @@ import '../models/filter.dart';
 import '../models/thread.dart';
 import 'requests.dart';
 import 'responses.dart';
-import 'sort_order.dart';
 
 /// Defines the api dedicated to threads operations
 class ThreadsApi {
@@ -17,7 +16,7 @@ class ThreadsApi {
   /// Queries threads with the given [options] and [pagination] params.
   Future<QueryThreadsResponse> queryThreads({
     Filter? filter,
-    SortOrder<Thread>? sort,
+    List<ThreadSort>? sort,
     ThreadOptions options = const ThreadOptions(),
     PaginationParams pagination = const PaginationParams(),
   }) async {

@@ -3,10 +3,15 @@
 🛑️ Breaking
 
 - `StreamChatPersistenceClient` no longer takes `logLevel` or `logHandlerFunction`. Logging is configured once, on `StreamChatClient`, with `logConfig`.
+- The sort arguments on `getChannelStates`, `queryChannelStates` and `saveChannelQueries` are typed `List<ChannelSort>` rather than `SortOrder<ChannelState>`.
 
 🔄 Changed
 
 - Every persistence call logged its own name at `info`; that call trace is `verbose` now.
+
+🐞 Fixed
+
+- A cached channel query given no sort came back in whatever order the lookup returned; it now applies `ChannelSort.defaultSort`, the ordering the API would have.
 
 ## 10.4.0
 

@@ -7,7 +7,6 @@ import '../models/location_coordinates.dart';
 import '../models/user.dart';
 import 'requests.dart';
 import 'responses.dart';
-import 'sort_order.dart';
 
 /// Defines the api dedicated to users operations
 class UserApi {
@@ -20,7 +19,7 @@ class UserApi {
   Future<QueryUsersResponse> queryUsers({
     bool presence = false,
     Filter? filter,
-    SortOrder<User>? sort,
+    List<UserSort>? sort,
     PaginationParams? pagination,
   }) async {
     final response = await _client.get(

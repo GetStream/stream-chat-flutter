@@ -8,7 +8,6 @@ import '../models/message.dart';
 import '../models/message_delivery.dart';
 import 'requests.dart';
 import 'responses.dart';
-import 'sort_order.dart';
 
 /// Defines the api dedicated to channel operations
 class ChannelApi {
@@ -56,7 +55,7 @@ class ChannelApi {
   /// returns the materialized filter/sort on [QueryChannelsResponse].
   Future<QueryChannelsResponse> queryChannels({
     Filter? filter,
-    SortOrder<ChannelState>? sort,
+    List<ChannelSort>? sort,
     String? predefinedFilter,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,

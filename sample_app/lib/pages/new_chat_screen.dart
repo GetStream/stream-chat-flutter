@@ -24,7 +24,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
     limit: 25,
     filter: _filter(),
     sort: [
-      const SortOption.asc(UserSortKey.name),
+      UserSort.asc(UserSortField.name),
     ],
   );
 

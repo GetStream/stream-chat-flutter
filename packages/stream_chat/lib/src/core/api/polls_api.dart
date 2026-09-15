@@ -7,7 +7,6 @@ import '../models/poll_option.dart';
 import '../models/poll_vote.dart';
 import 'requests.dart';
 import 'responses.dart';
-import 'sort_order.dart';
 
 /// Defines the api dedicated to polls operations
 class PollsApi {
@@ -163,7 +162,7 @@ class PollsApi {
   /// parameters.
   Future<QueryPollsResponse> queryPolls({
     Filter? filter,
-    SortOrder<Poll>? sort,
+    List<PollSort>? sort,
     PaginationParams pagination = const PaginationParams(),
   }) async {
     final response = await _client.post(
@@ -182,7 +181,7 @@ class PollsApi {
   Future<QueryPollVotesResponse> queryPollVotes(
     String pollId, {
     Filter? filter,
-    SortOrder<PollVote>? sort,
+    List<PollVoteSort>? sort,
     PaginationParams pagination = const PaginationParams(),
   }) async {
     final response = await _client.post(

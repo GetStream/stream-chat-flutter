@@ -3,9 +3,9 @@ import 'dart:convert';
 import '../http/stream_http_client.dart';
 import '../models/filter.dart';
 import '../models/member.dart';
+import '../models/message.dart';
 import 'requests.dart';
 import 'responses.dart';
-import 'sort_order.dart';
 
 /// Defines the api dedicated to general operations
 class GeneralApi {
@@ -33,7 +33,7 @@ class GeneralApi {
   Future<SearchMessagesResponse> searchMessages(
     Filter filter, {
     String? query,
-    SortOrder? sort,
+    List<MessageSearchSort>? sort,
     PaginationParams? pagination,
     Filter? messageFilters,
   }) async {
@@ -75,7 +75,7 @@ class GeneralApi {
     Filter? filter,
     String? channelId,
     List<Member>? members,
-    SortOrder<Member>? sort,
+    List<MemberSort>? sort,
     PaginationParams? pagination,
   }) async {
     final response = await _client.get(

@@ -166,8 +166,11 @@ release. Never edit a package's `pubspec.yaml` constraints directly.
 
 ## Prerequisites
 
-**None. This can start today**, which contradicts what the two existing docs say. Verified against
-the tree rather than the docs:
+**None at the time this plan was written**, which contradicted what the two existing docs said.
+That is still true of *starting*, but it has stopped being true of *shipping* as of phase
+[08](08-query-dsl.md): `melos.yaml` pins both core packages to a commit no published version
+contains, so nothing merges to `master` until core publishes. The evidence below is what was
+checked when the plan was written:
 
 - `melos.yaml:108` declares `stream_core: ^0.5.0` **hosted**. There are zero `stream_core` entries
   in any `dependency_overrides` block — the five that exist are path overrides for sibling chat

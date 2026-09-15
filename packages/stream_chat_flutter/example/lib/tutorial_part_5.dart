@@ -78,7 +78,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
       'members',
       [StreamChat.of(context).currentUser!.id],
     ),
-    channelStateSort: const [SortOption.desc('last_message_at')],
+    channelStateSort: [ChannelSort.desc(ChannelSortField.lastMessageAt)],
     limit: 20,
   );
 
