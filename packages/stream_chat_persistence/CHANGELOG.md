@@ -1,3 +1,13 @@
+## Upcoming Beta
+
+🛑️ Breaking
+
+- `StreamChatPersistenceClient` no longer takes `logLevel` or `logHandlerFunction`. Logging is configured once, on `StreamChatClient`, with `logConfig`.
+
+🔄 Changed
+
+- Every persistence call logged its own name at `info`; that call trace is `verbose` now.
+
 ## 10.4.0
 
 🔄 Changed

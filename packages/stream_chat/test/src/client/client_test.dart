@@ -3,7 +3,6 @@
 import 'dart:async';
 
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
@@ -35,7 +34,7 @@ void main() {
 
     test('`.connectUser` should work fine', () async {
       final user = User(id: 'test-user-id');
-      final token = Token.development(user.id).rawValue;
+      final token = testUserToken(user.id).rawValue;
 
       expectLater(
         // skipping first seed status -> ConnectionStatus.disconnected
@@ -53,9 +52,9 @@ void main() {
 
     test('`.connectUserWithProvider` should work fine', () async {
       final user = User(id: 'test-user-id');
-      Future<String> tokenProvider(String userId) async {
+      Future<UserToken> tokenProvider(String userId) async {
         expect(userId, user.id);
-        return Token.development(userId).rawValue;
+        return testUserToken(userId);
       }
 
       expectLater(
@@ -67,7 +66,7 @@ void main() {
         ]),
       );
 
-      final res = await client.connectUserWithProvider(user, tokenProvider);
+      final res = await client.connectUserWithProvider(user, TokenProvider.dynamic(tokenProvider));
       expect(res, isNotNull);
       expect(res, isSameUserAs(user));
     });
@@ -75,7 +74,7 @@ void main() {
     group('`.connectGuestUser`', () {
       test('should work fine', () async {
         final user = User(id: 'test-user-id');
-        final token = Token.development(user.id).rawValue;
+        final token = testUserToken(user.id).rawValue;
 
         when(() => api.guest.getGuestUser(any(that: isSameUserAs(user)))).thenAnswer(
           (_) async => ConnectGuestUserResponse()
@@ -106,7 +105,7 @@ void main() {
 
         when(
           () => api.guest.getGuestUser(any(that: isSameUserAs(user))),
-        ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+        ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
         expectLater(
           client.wsConnectionStatusStream,
@@ -120,7 +119,7 @@ void main() {
         try {
           await client.connectGuestUser(user);
         } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
+          expect(e, isA<StreamApiException>());
         }
 
         verify(
@@ -219,7 +218,7 @@ void main() {
 
     test('`.connectUser` should throw if `ws.connect` fails', () async {
       final user = User(id: 'test-user-id');
-      final token = Token.development(user.id).rawValue;
+      final token = testUserToken(user.id).rawValue;
 
       try {
         await client.connectUser(user, token);
@@ -232,13 +231,13 @@ void main() {
       '`.connectUserWithProvider` should throw if `ws.connect` fails',
       () async {
         final user = User(id: 'test-user-id');
-        Future<String> tokenProvider(String userId) async {
+        Future<UserToken> tokenProvider(String userId) async {
           expect(userId, user.id);
-          return Token.development(userId).rawValue;
+          return testUserToken(userId);
         }
 
         try {
-          await client.connectUserWithProvider(user, tokenProvider);
+          await client.connectUserWithProvider(user, TokenProvider.dynamic(tokenProvider));
         } catch (e) {
           expect(e, isA<StreamWebSocketError>());
         }
@@ -247,7 +246,7 @@ void main() {
 
     test('`.connectGuestUser` should throw if `ws.connect` fails', () async {
       final user = User(id: 'test-user-id');
-      final token = Token.development(user.id).rawValue;
+      final token = testUserToken(user.id).rawValue;
 
       when(() => api.guest.getGuestUser(any(that: isSameUserAs(user)))).thenAnswer(
         (_) async => ConnectGuestUserResponse()
@@ -298,7 +297,7 @@ void main() {
 
     test('`.connectUser` should succeed without connecting', () async {
       final user = User(id: 'test-user-id');
-      final token = Token.development(user.id).rawValue;
+      final token = testUserToken(user.id).rawValue;
 
       final res = await client.connectUser(
         user,
@@ -313,14 +312,14 @@ void main() {
       '`.connectUserWithProvider` should succeed without connecting',
       () async {
         final user = User(id: 'test-user-id');
-        Future<String> tokenProvider(String userId) async {
+        Future<UserToken> tokenProvider(String userId) async {
           expect(userId, user.id);
-          return Token.development(userId).rawValue;
+          return testUserToken(userId);
         }
 
         final res = await client.connectUserWithProvider(
           user,
-          tokenProvider,
+          TokenProvider.dynamic(tokenProvider),
           connectWebSocket: false,
         );
         expect(res, isSameUserAs(user));
@@ -330,7 +329,7 @@ void main() {
 
     test('`.connectGuestUser` should succeed without connecting', () async {
       final user = User(id: 'test-user-id');
-      final token = Token.development(user.id).rawValue;
+      final token = testUserToken(user.id).rawValue;
 
       when(() => api.guest.getGuestUser(any(that: isSameUserAs(user)))).thenAnswer(
         (_) async => ConnectGuestUserResponse()
@@ -388,7 +387,7 @@ void main() {
       '''`.connectUser` should connect successfully if persistence contains event''',
       () async {
         final user = User(id: 'test-user-id');
-        final token = Token.development(user.id).rawValue;
+        final token = testUserToken(user.id).rawValue;
 
         final event = Event(
           type: EventType.healthCheck,
@@ -410,9 +409,9 @@ void main() {
       '''`.connectUserWithProvider` should connect successfully if persistence contains event''',
       () async {
         final user = User(id: 'test-user-id');
-        Future<String> tokenProvider(String userId) async {
+        Future<UserToken> tokenProvider(String userId) async {
           expect(userId, user.id);
-          return Token.development(userId).rawValue;
+          return testUserToken(userId);
         }
 
         final event = Event(
@@ -422,7 +421,7 @@ void main() {
         );
         when(persistence.getConnectionInfo).thenAnswer((_) async => event);
 
-        final res = await client.connectUserWithProvider(user, tokenProvider);
+        final res = await client.connectUserWithProvider(user, TokenProvider.dynamic(tokenProvider));
         expect(res, isNotNull);
         expect(res, isSameUserAs(user));
 
@@ -435,7 +434,7 @@ void main() {
       '''`.connectGuestUser` should connect successfully if persistence contains event''',
       () async {
         final user = User(id: 'test-user-id');
-        final token = Token.development(user.id).rawValue;
+        final token = testUserToken(user.id).rawValue;
 
         final event = Event(
           type: EventType.healthCheck,
@@ -489,7 +488,7 @@ void main() {
     late final persistence = MockPersistenceClient();
 
     final user = User(id: 'test-user-id');
-    final token = Token.development(user.id).rawValue;
+    final token = testUserToken(user.id).rawValue;
 
     late StreamChatClient client;
 
@@ -764,7 +763,7 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
           when(() => persistence.getChannelThreads(any())).thenAnswer(
             (_) async => <String, List<Message>>{
@@ -1195,7 +1194,7 @@ void main() {
     late final api = FakeChatApi();
 
     final user = User(id: userId);
-    final token = Token.development(user.id).rawValue;
+    final token = testUserToken(user.id).rawValue;
 
     late StreamChatClient client;
 
@@ -1328,11 +1327,11 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
           expectLater(
             client.queryChannels(),
-            emitsError(isA<StreamChatNetworkError>()),
+            emitsError(isA<StreamApiException>()),
           );
 
           // Hack as `teardown` gets called even
@@ -1523,7 +1522,7 @@ void main() {
             ),
           ).thenAnswer((_) async {
             await delay(100);
-            throw StreamChatNetworkError(ChatErrorCode.inputError);
+            throw apiException(code: StreamErrorCode.inputError, statusCode: 400);
           });
 
           final errors = await Future.wait(
@@ -1540,7 +1539,7 @@ void main() {
           // Every caller surfaces the same error type.
           expect(errors, hasLength(5));
           for (final error in errors) {
-            expect(error, isA<StreamChatNetworkError>());
+            expect(error, isA<StreamApiException>());
           }
 
           // But only ONE HTTP request was made — the rest piggybacked.
@@ -2322,16 +2321,6 @@ void main() {
         ),
       ).called(1);
       verifyNoMoreInteractions(api.roles);
-    });
-
-    test('`.devToken`', () async {
-      const userId = 'test-user-id';
-
-      final token = client.devToken(userId);
-
-      expect(token, isNotNull);
-      expect(token.userId, userId);
-      expect(token.authType, AuthType.jwt);
     });
 
     group('`.channel`', () {
@@ -5091,7 +5080,7 @@ void main() {
     late final api = FakeChatApi();
 
     final user = User(id: 'test-user-id');
-    final token = Token.development(user.id).rawValue;
+    final token = testUserToken(user.id).rawValue;
 
     late StreamChatClient client;
 
@@ -5253,9 +5242,11 @@ void main() {
         );
 
         client.chatPersistenceClient = fakeClient;
+        // What `/sync` answers when `lastSyncAt` is too old, or the channel
+        // list or event count is oversized.
         when(() => api.general.sync(cids, lastSyncAt)).thenThrow(
-          StreamChatNetworkError.raw(
-            code: 4,
+          apiException(
+            code: StreamErrorCode.inputError,
             statusCode: 400,
             message: 'Too many events',
           ),
@@ -5273,7 +5264,7 @@ void main() {
   group('recoverStateOnReconnect', () {
     const apiKey = 'test-api-key';
     final user = User(id: 'test-user-id');
-    final token = Token.development(user.id).rawValue;
+    final token = testUserToken(user.id).rawValue;
 
     late FakeChatApi api;
     late FakeWebSocket ws;
@@ -5497,7 +5488,7 @@ void main() {
   group('dispose during reconnect recovery', () {
     const apiKey = 'test-api-key';
     final user = User(id: 'test-user-id');
-    final token = Token.development(user.id).rawValue;
+    final token = testUserToken(user.id).rawValue;
 
     late FakeChatApi api;
     late FakeWebSocket ws;
@@ -5579,7 +5570,7 @@ void main() {
       client = StreamChatClient('test-api-key', ws: ws);
 
       final user = User(id: 'test-user-id');
-      final token = Token.development(user.id).rawValue;
+      final token = testUserToken(user.id).rawValue;
 
       await client.connectUser(user, token);
       await delay(300);

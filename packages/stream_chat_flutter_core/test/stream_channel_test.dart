@@ -382,12 +382,7 @@ void main() {
     (tester) async {
       final channel = NonInitializedMockChannel();
       when(() => channel.cid).thenReturn('test:channel');
-      final networkError = StreamChatNetworkError.fromDioException(
-        DioException(
-          requestOptions: RequestOptions(path: 'test'),
-          type: DioExceptionType.connectionError,
-        ),
-      );
+      const networkError = StreamNetworkException(message: 'connection failed');
       when(channel.watch).thenThrow(networkError);
 
       Object? capturedError;
@@ -418,8 +413,8 @@ void main() {
     (tester) async {
       final channel = NonInitializedMockChannel();
       when(() => channel.cid).thenReturn('test:channel');
-      final rawError = StreamChatNetworkError.raw(
-        code: -1,
+      const rawError = StreamApiException(
+        code: StreamErrorCode.internalError,
         message: 'super secret internal failure',
         statusCode: 500,
       );
@@ -438,7 +433,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // The raw error string must not leak to the UI.
-      expect(find.textContaining('StreamChatNetworkError'), findsNothing);
+      expect(find.textContaining('StreamApiException'), findsNothing);
       expect(find.textContaining('super secret internal failure'), findsNothing);
       expect(find.text('Oops, something went wrong'), findsOneWidget);
     },
@@ -450,12 +445,7 @@ void main() {
       final channel = NonInitializedMockChannel();
       when(() => channel.cid).thenReturn('test:channel');
       when(channel.watch).thenThrow(
-        StreamChatNetworkError.fromDioException(
-          DioException(
-            requestOptions: RequestOptions(path: 'test'),
-            type: DioExceptionType.connectionError,
-          ),
-        ),
+        const StreamNetworkException(message: 'connection failed'),
       );
 
       await tester.pumpWidget(
@@ -486,7 +476,7 @@ void main() {
       when(channel.watch).thenAnswer((_) async {
         attempts++;
         if (attempts == 1) {
-          throw StreamChatNetworkError.raw(code: -1, message: 'boom');
+          throw const StreamClientException(message: 'boom');
         }
         return const ChannelState();
       });
@@ -528,7 +518,7 @@ void main() {
         attempts++;
         if (attempts == 1) {
           return Future<ChannelState>.error(
-            StreamChatNetworkError.raw(code: -1, message: 'boom'),
+            const StreamClientException(message: 'boom'),
           );
         }
         secondWatch = Completer<ChannelState>();
@@ -571,7 +561,7 @@ void main() {
       when(() => channel.cid).thenReturn('test:channel');
       // Always fails, so the retry fails again.
       when(channel.watch).thenThrow(
-        StreamChatNetworkError.raw(code: -1, message: 'boom'),
+        const StreamClientException(message: 'boom'),
       );
 
       await tester.pumpWidget(
@@ -607,7 +597,7 @@ void main() {
       final channel = NonInitializedMockChannel();
       when(() => channel.cid).thenReturn('test:channel');
       when(channel.watch).thenThrow(
-        StreamChatNetworkError.raw(code: -1, message: 'boom'),
+        const StreamClientException(message: 'boom'),
       );
 
       await tester.pumpWidget(
@@ -637,7 +627,7 @@ void main() {
       final channel = NonInitializedMockChannel();
       when(() => channel.cid).thenReturn('test:channel');
       when(channel.watch).thenThrow(
-        StreamChatNetworkError.raw(code: -1, message: 'boom'),
+        const StreamClientException(message: 'boom'),
       );
 
       await tester.pumpWidget(

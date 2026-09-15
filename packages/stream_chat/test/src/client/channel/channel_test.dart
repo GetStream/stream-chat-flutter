@@ -7,6 +7,7 @@ import 'package:test/test.dart';
 import '../../fakes.dart';
 import '../../matchers.dart';
 import '../../mocks.dart';
+import '../../utils.dart';
 
 void main() {
   ChannelState _generateChannelState(
@@ -33,12 +34,6 @@ void main() {
     return state;
   }
 
-  Logger _createLogger(String name) {
-    final logger = Logger.detached(name)..level = Level.ALL;
-    logger.onRecord.listen(print);
-    return logger;
-  }
-
   group('Non-Initialized Channel', () {
     late final client = MockStreamChatClient();
     const channelId = 'test-channel-id';
@@ -46,15 +41,6 @@ void main() {
     late Channel channel;
 
     setUpAll(() {
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
-
       // fake clientState
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
@@ -127,19 +113,19 @@ void main() {
           membersPagination: any(named: 'membersPagination'),
           watchersPagination: any(named: 'watchersPagination'),
         ),
-      ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+      ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
       // A failed watch() also completes `initialized` with the error. Attach
       // the expectation up-front so that error has a listener the moment it
       // occurs and isn't reported as an unhandled async error.
       final initializedFailure = expectLater(
         channel.initialized,
-        throwsA(isA<StreamChatNetworkError>()),
+        throwsA(isA<StreamApiException>()),
       );
 
       await expectLater(
         channel.watch(),
-        throwsA(isA<StreamChatNetworkError>()),
+        throwsA(isA<StreamApiException>()),
       );
       await initializedFailure;
 
@@ -164,12 +150,6 @@ void main() {
       registerFallbackValue(<Message>[]);
       registerFallbackValue(FakeAttachmentFile());
 
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
         delayFactor: Duration.zero,
@@ -186,9 +166,6 @@ void main() {
       final channelState = _generateChannelState(channelId, channelType);
       when(() => client.chatPersistenceClient.getChannelStateByCid(channelCid)).thenAnswer((_) async => channelState);
       when(() => client.chatPersistenceClient.updateMessages(channelCid, any())).thenAnswer((_) => Future.value());
-
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
     });
 
     // Setting up a initialized channel
@@ -215,12 +192,6 @@ void main() {
       registerFallbackValue(FakeAttachmentFile());
       registerFallbackValue(FakeEvent());
 
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
         delayFactor: Duration.zero,
@@ -230,9 +201,6 @@ void main() {
       // fake clientState
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
-
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
 
       // mock channel delivery reporter
       when(
@@ -332,7 +300,7 @@ void main() {
       });
 
       test(
-        'should handle StreamChatNetworkError by adding message to retry queue with skipPush: true, skipEnrichUrl: false',
+        'should mark the message failed when the server refuses it with skipPush: true, skipEnrichUrl: false',
         () async {
           final message = Message(
             id: 'test-message-id',
@@ -347,7 +315,7 @@ void main() {
               channelType,
               skipPush: true,
             ),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+          ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -379,16 +347,16 @@ void main() {
               skipPush: true,
             );
           } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
+            expect(e, isA<StreamApiException>());
 
-            final networkError = e as StreamChatNetworkError;
-            expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
+            final networkError = e as StreamApiException;
+            expect(networkError.code, equals(StreamErrorCode.notAllowed));
           }
         },
       );
 
       test(
-        'should handle StreamChatNetworkError by adding message to retry queue with skipPush: true, skipEnrichUrl: true',
+        'should mark the message failed when the server refuses it with skipPush: true, skipEnrichUrl: true',
         () async {
           final message = Message(
             id: 'test-message-id-2',
@@ -404,7 +372,7 @@ void main() {
               skipPush: true,
               skipEnrichUrl: true,
             ),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+          ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -437,16 +405,16 @@ void main() {
               skipEnrichUrl: true,
             );
           } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
+            expect(e, isA<StreamApiException>());
 
-            final networkError = e as StreamChatNetworkError;
-            expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
+            final networkError = e as StreamApiException;
+            expect(networkError.code, equals(StreamErrorCode.notAllowed));
           }
         },
       );
 
       test(
-        'should handle StreamChatNetworkError by adding message to retry queue with skipPush: false, skipEnrichUrl: true',
+        'should mark the message failed when the server refuses it with skipPush: false, skipEnrichUrl: true',
         () async {
           final message = Message(
             id: 'test-message-id-3',
@@ -461,7 +429,7 @@ void main() {
               channelType,
               skipEnrichUrl: true,
             ),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+          ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -493,16 +461,16 @@ void main() {
               skipEnrichUrl: true,
             );
           } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
+            expect(e, isA<StreamApiException>());
 
-            final networkError = e as StreamChatNetworkError;
-            expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
+            final networkError = e as StreamApiException;
+            expect(networkError.code, equals(StreamErrorCode.notAllowed));
           }
         },
       );
 
       test(
-        'should handle StreamChatNetworkError by adding message to retry queue with skipPush: false, skipEnrichUrl: false',
+        'should mark the message failed when the server refuses it with skipPush: false, skipEnrichUrl: false',
         () async {
           final message = Message(
             id: 'test-message-id-4',
@@ -516,7 +484,7 @@ void main() {
               channelId,
               channelType,
             ),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+          ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -547,13 +515,68 @@ void main() {
               message,
             );
           } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
+            expect(e, isA<StreamApiException>());
 
-            final networkError = e as StreamChatNetworkError;
-            expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
+            final networkError = e as StreamApiException;
+            expect(networkError.code, equals(StreamErrorCode.notAllowed));
           }
         },
       );
+
+      test('should re-send the message through the retry queue when the failure is retriable', () async {
+        final message = Message(
+          id: 'test-message-id',
+          text: 'Hello world!',
+          user: client.state.currentUser,
+        );
+
+        when(
+          () => client.sendMessage(
+            any(that: isSameMessageAs(message)),
+            channelId,
+            channelType,
+          ),
+        ).thenThrow(apiException(code: StreamErrorCode.internalError, statusCode: 500));
+
+        await expectLater(channel.sendMessage(message), throwsA(isA<StreamApiException>()));
+        await pumpEventQueue();
+
+        // Once for the original send, once for the queue's retry attempt.
+        verify(
+          () => client.sendMessage(
+            any(that: isSameMessageAs(message)),
+            channelId,
+            channelType,
+          ),
+        ).called(2);
+      });
+
+      test('should not re-send the message when the failure is not retriable', () async {
+        final message = Message(
+          id: 'test-message-id',
+          text: 'Hello world!',
+          user: client.state.currentUser,
+        );
+
+        when(
+          () => client.sendMessage(
+            any(that: isSameMessageAs(message)),
+            channelId,
+            channelType,
+          ),
+        ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
+
+        await expectLater(channel.sendMessage(message), throwsA(isA<StreamApiException>()));
+        await pumpEventQueue();
+
+        verify(
+          () => client.sendMessage(
+            any(that: isSameMessageAs(message)),
+            channelId,
+            channelType,
+          ),
+        ).called(1);
+      });
 
       test('should update message state even when non-retriable error occurs', () async {
         final message = Message(
@@ -569,14 +592,7 @@ void main() {
             channelType,
           ),
         ).thenThrow(
-          StreamChatNetworkError.raw(
-            code: ChatErrorCode.inputError.code,
-            message: 'Input error',
-            data: ErrorResponse()
-              ..code = ChatErrorCode.inputError.code
-              ..message = 'Input error'
-              ..statusCode = 400,
-          ),
+          apiException(code: StreamErrorCode.inputError, statusCode: 400, message: 'Input error'),
         );
 
         expectLater(
@@ -606,7 +622,7 @@ void main() {
         try {
           await channel.sendMessage(message);
         } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
+          expect(e, isA<StreamApiException>());
         }
       });
 
@@ -823,11 +839,7 @@ void main() {
               extraData: any(named: 'extraData'),
             ),
           ).thenAnswer(
-            (_) async => throw StreamChatNetworkError.raw(
-              code: 0,
-              message: 'Request cancelled',
-              type: StreamChatNetworkErrorType.cancel,
-            ),
+            (_) async => throw const StreamNetworkException(message: 'Request cancelled', isCancelled: true),
           );
 
           expect(
@@ -877,11 +889,7 @@ void main() {
               extraData: any(named: 'extraData'),
             ),
           ).thenAnswer(
-            (_) async => throw StreamChatNetworkError.raw(
-              code: 0,
-              message: 'Request cancelled',
-              type: StreamChatNetworkErrorType.cancel,
-            ),
+            (_) async => throw const StreamNetworkException(message: 'Request cancelled', isCancelled: true),
           );
 
           when(
@@ -954,11 +962,7 @@ void main() {
               extraData: any(named: 'extraData'),
             ),
           ).thenAnswer(
-            (_) async => throw StreamChatNetworkError.raw(
-              code: 0,
-              message: 'Request cancelled',
-              type: StreamChatNetworkErrorType.cancel,
-            ),
+            (_) async => throw const StreamNetworkException(message: 'Request cancelled', isCancelled: true),
           );
 
           when(
@@ -1026,11 +1030,7 @@ void main() {
               extraData: any(named: 'extraData'),
             ),
           ).thenAnswer(
-            (_) async => throw StreamChatNetworkError.raw(
-              code: 0,
-              message: 'Request cancelled',
-              type: StreamChatNetworkErrorType.cancel,
-            ),
+            (_) async => throw const StreamNetworkException(message: 'Request cancelled', isCancelled: true),
           );
 
           when(
@@ -1634,7 +1634,7 @@ void main() {
         ).called(1);
       });
 
-      test('should update message state even when error is not StreamChatNetworkError', () async {
+      test('should update message state even when the error is not a StreamChatException', () async {
         final message = Message(
           id: 'test-message-id-error-1',
           state: MessageState.sent,
@@ -1679,7 +1679,7 @@ void main() {
       });
 
       test(
-        'should add message to retry queue when retriable StreamChatNetworkError occurs with skipPush: false, skipEnrichUrl: true',
+        'should mark the message failed and report the failure as retriable with skipPush: false, skipEnrichUrl: true',
         () async {
           final message = Message(
             id: 'test-message-id-retry-1',
@@ -1693,10 +1693,7 @@ void main() {
               skipEnrichUrl: true,
             ),
           ).thenThrow(
-            StreamChatNetworkError.raw(
-              code: ChatErrorCode.requestTimeout.code,
-              message: 'Request timed out',
-            ),
+            apiException(code: StreamErrorCode.requestTimeout, statusCode: 408, message: 'Request timed out'),
           );
 
           expectLater(
@@ -1726,17 +1723,17 @@ void main() {
           try {
             await channel.updateMessage(message, skipEnrichUrl: true);
           } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
+            expect(e, isA<StreamApiException>());
 
-            final networkError = e as StreamChatNetworkError;
-            expect(networkError.code, equals(ChatErrorCode.requestTimeout.code));
+            final networkError = e as StreamApiException;
+            expect(networkError.code, equals(StreamErrorCode.requestTimeout));
             expect(networkError.isRetriable, isTrue);
           }
         },
       );
 
       test(
-        'should add message to retry queue when retriable StreamChatNetworkError occurs with skipPush: true, skipEnrichUrl: false',
+        'should mark the message failed and report the failure as retriable with skipPush: true, skipEnrichUrl: false',
         () async {
           final message = Message(
             id: 'test-message-id-retry-2',
@@ -1750,10 +1747,7 @@ void main() {
               skipPush: true,
             ),
           ).thenThrow(
-            StreamChatNetworkError.raw(
-              code: ChatErrorCode.internalSystemError.code,
-              message: 'Internal system error',
-            ),
+            apiException(code: StreamErrorCode.internalError, statusCode: 500, message: 'Internal system error'),
           );
 
           expectLater(
@@ -1783,16 +1777,16 @@ void main() {
           try {
             await channel.updateMessage(message, skipPush: true);
           } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
+            expect(e, isA<StreamApiException>());
 
-            final networkError = e as StreamChatNetworkError;
-            expect(networkError.code, equals(ChatErrorCode.internalSystemError.code));
+            final networkError = e as StreamApiException;
+            expect(networkError.code, equals(StreamErrorCode.internalError));
             expect(networkError.isRetriable, isTrue);
           }
         },
       );
 
-      test('should handle non-retriable StreamChatNetworkError with skipPush: true, skipEnrichUrl: true', () async {
+      test('should handle a non-retriable failure with skipPush: true, skipEnrichUrl: true', () async {
         final message = Message(
           id: 'test-message-id-error-2',
           state: MessageState.sent,
@@ -1804,7 +1798,7 @@ void main() {
             skipPush: true,
             skipEnrichUrl: true,
           ),
-        ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+        ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
 
         expectLater(
           // skipping first seed message list -> [] messages
@@ -1837,14 +1831,14 @@ void main() {
             skipEnrichUrl: true,
           );
         } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
+          expect(e, isA<StreamApiException>());
 
-          final networkError = e as StreamChatNetworkError;
-          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
+          final networkError = e as StreamApiException;
+          expect(networkError.code, equals(StreamErrorCode.notAllowed));
         }
       });
 
-      test('should handle non-retriable StreamChatNetworkError with skipPush: false, skipEnrichUrl: false', () async {
+      test('should handle a non-retriable failure with skipPush: false, skipEnrichUrl: false', () async {
         final message = Message(
           id: 'test-message-id-error-3',
           state: MessageState.sent,
@@ -1854,7 +1848,7 @@ void main() {
           () => client.updateMessage(
             any(that: isSameMessageAs(message)),
           ),
-        ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+        ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
 
         expectLater(
           // skipping first seed message list -> [] messages
@@ -1883,10 +1877,10 @@ void main() {
         try {
           await channel.updateMessage(message);
         } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
+          expect(e, isA<StreamApiException>());
 
-          final networkError = e as StreamChatNetworkError;
-          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
+          final networkError = e as StreamApiException;
+          expect(networkError.code, equals(StreamErrorCode.notAllowed));
         }
       });
     });
@@ -2004,7 +1998,7 @@ void main() {
     });
 
     group('`.partialUpdateMessage` error handling', () {
-      test('should update message state even when error is not StreamChatNetworkError', () async {
+      test('should update message state even when the error is not a StreamChatException', () async {
         final message = Message(
           id: 'test-message-id-error-partial-1',
           state: MessageState.sent,
@@ -2065,7 +2059,7 @@ void main() {
       });
 
       test(
-        'should add message to retry queue when retriable StreamChatNetworkError occurs with skipEnrichUrl: true',
+        'should mark the message failed and report the failure as retriable with skipEnrichUrl: true',
         () async {
           final message = Message(
             id: 'test-message-id-retry-partial-1',
@@ -2087,10 +2081,7 @@ void main() {
               skipEnrichUrl: true,
             ),
           ).thenThrow(
-            StreamChatNetworkError.raw(
-              code: ChatErrorCode.requestTimeout.code,
-              message: 'Request timed out',
-            ),
+            apiException(code: StreamErrorCode.requestTimeout, statusCode: 408, message: 'Request timed out'),
           );
 
           expectLater(
@@ -2130,17 +2121,17 @@ void main() {
               skipEnrichUrl: true,
             );
           } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
+            expect(e, isA<StreamApiException>());
 
-            final networkError = e as StreamChatNetworkError;
-            expect(networkError.code, equals(ChatErrorCode.requestTimeout.code));
+            final networkError = e as StreamApiException;
+            expect(networkError.code, equals(StreamErrorCode.requestTimeout));
             expect(networkError.isRetriable, isTrue);
           }
         },
       );
 
       test(
-        'should add message to retry queue when retriable StreamChatNetworkError occurs with skipEnrichUrl: false',
+        'should mark the message failed and report the failure as retriable with skipEnrichUrl: false',
         () async {
           final message = Message(
             id: 'test-message-id-retry-partial-2',
@@ -2161,10 +2152,7 @@ void main() {
               unset: unset,
             ),
           ).thenThrow(
-            StreamChatNetworkError.raw(
-              code: ChatErrorCode.internalSystemError.code,
-              message: 'Internal system error',
-            ),
+            apiException(code: StreamErrorCode.internalError, statusCode: 500, message: 'Internal system error'),
           );
 
           expectLater(
@@ -2203,16 +2191,16 @@ void main() {
               unset: unset,
             );
           } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
+            expect(e, isA<StreamApiException>());
 
-            final networkError = e as StreamChatNetworkError;
-            expect(networkError.code, equals(ChatErrorCode.internalSystemError.code));
+            final networkError = e as StreamApiException;
+            expect(networkError.code, equals(StreamErrorCode.internalError));
             expect(networkError.isRetriable, isTrue);
           }
         },
       );
 
-      test('should handle non-retriable StreamChatNetworkError with skipEnrichUrl: true', () async {
+      test('should handle a non-retriable failure with skipEnrichUrl: true', () async {
         final message = Message(
           id: 'test-message-id-error-partial-2',
           state: MessageState.sent,
@@ -2231,7 +2219,7 @@ void main() {
             unset: unset,
             skipEnrichUrl: true,
           ),
-        ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+        ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
 
         expectLater(
           // skipping first seed message list -> [] messages
@@ -2270,14 +2258,14 @@ void main() {
             skipEnrichUrl: true,
           );
         } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
+          expect(e, isA<StreamApiException>());
 
-          final networkError = e as StreamChatNetworkError;
-          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
+          final networkError = e as StreamApiException;
+          expect(networkError.code, equals(StreamErrorCode.notAllowed));
         }
       });
 
-      test('should handle non-retriable StreamChatNetworkError with skipEnrichUrl: false', () async {
+      test('should handle a non-retriable failure with skipEnrichUrl: false', () async {
         final message = Message(
           id: 'test-message-id-error-partial-3',
           state: MessageState.sent,
@@ -2295,7 +2283,7 @@ void main() {
             set: set,
             unset: unset,
           ),
-        ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+        ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
 
         expectLater(
           // skipping first seed message list -> [] messages
@@ -2333,10 +2321,10 @@ void main() {
             unset: unset,
           );
         } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
+          expect(e, isA<StreamApiException>());
 
-          final networkError = e as StreamChatNetworkError;
-          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
+          final networkError = e as StreamApiException;
+          expect(networkError.code, equals(StreamErrorCode.notAllowed));
         }
       });
     });
@@ -2981,7 +2969,7 @@ void main() {
 
           when(
             () => client.sendReaction(message.id, reaction),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -3017,7 +3005,7 @@ void main() {
           try {
             await channel.sendReaction(message, reaction);
           } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
+            expect(e, isA<StreamApiException>());
           }
 
           verify(() => client.sendReaction(message.id, reaction)).called(1);
@@ -3185,7 +3173,7 @@ void main() {
 
           when(
             () => client.sendReaction(message.id, reaction),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -3223,7 +3211,7 @@ void main() {
           try {
             await channel.sendReaction(message, reaction);
           } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
+            expect(e, isA<StreamApiException>());
           }
 
           verify(() => client.sendReaction(message.id, reaction)).called(1);
@@ -3392,7 +3380,7 @@ void main() {
 
           when(
             () => client.deleteReaction(messageId, type),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -3422,7 +3410,7 @@ void main() {
           try {
             await channel.deleteReaction(message, reaction);
           } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
+            expect(e, isA<StreamApiException>());
           }
 
           verify(() => client.deleteReaction(messageId, type)).called(1);
@@ -3518,7 +3506,7 @@ void main() {
 
           when(
             () => client.deleteReaction(messageId, type),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -3550,7 +3538,7 @@ void main() {
           try {
             await channel.deleteReaction(message, reaction);
           } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
+            expect(e, isA<StreamApiException>());
           }
 
           verify(() => client.deleteReaction(messageId, type)).called(1);
@@ -4006,7 +3994,7 @@ void main() {
           ),
         ).thenAnswer((_) async {
           if (++attempts == 1) {
-            throw StreamChatNetworkError(ChatErrorCode.inputError);
+            throw apiException(code: StreamErrorCode.inputError, statusCode: 400);
           }
           return _generateChannelState(channelId, channelType);
         });
@@ -4015,11 +4003,11 @@ void main() {
         // Attach the expectation before watch() so the error is handled.
         final firstInit = expectLater(
           freshChannel.initialized,
-          throwsA(isA<StreamChatNetworkError>()),
+          throwsA(isA<StreamApiException>()),
         );
         await expectLater(
           freshChannel.watch(),
-          throwsA(isA<StreamChatNetworkError>()),
+          throwsA(isA<StreamApiException>()),
         );
         await firstInit;
         expect(freshChannel.state, isNull);
@@ -4042,12 +4030,12 @@ void main() {
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
           ),
-        ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+        ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
         try {
           await channel.watch();
         } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
+          expect(e, isA<StreamApiException>());
         }
 
         verify(
@@ -4240,12 +4228,12 @@ void main() {
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
           ),
-        ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+        ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
         try {
           await channel.query();
         } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
+          expect(e, isA<StreamApiException>());
         }
 
         verify(
@@ -4953,12 +4941,6 @@ void main() {
     const channelType = 'test-channel-type';
 
     setUpAll(() {
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
         delayFactor: Duration.zero,
@@ -4968,9 +4950,6 @@ void main() {
       // fake clientState
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
-
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
 
       // mock channel delivery reporter
       when(
@@ -5671,12 +5650,6 @@ void main() {
     const channelType = 'test-channel-type';
 
     setUpAll(() {
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
         delayFactor: Duration.zero,
@@ -5686,9 +5659,6 @@ void main() {
       // fake clientState
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
-
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
     });
 
     test('should return filterTags from channel state', () {
@@ -5741,12 +5711,6 @@ void main() {
       registerFallbackValue(FakeAttachmentFile());
       registerFallbackValue(FakeEvent());
 
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
         delayFactor: Duration.zero,
@@ -5756,9 +5720,6 @@ void main() {
       // fake clientState
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
-
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
     });
 
     test(
@@ -6064,12 +6025,6 @@ void main() {
     late final client = MockStreamChatClient();
 
     setUpAll(() {
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
         delayFactor: Duration.zero,
@@ -6079,9 +6034,6 @@ void main() {
       // fake clientState
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
-
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
     });
 
     test(
@@ -6370,20 +6322,11 @@ void main() {
       registerFallbackValue(<Message>[]);
       registerFallbackValue(FakeAttachmentFile());
 
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
-
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
 
       final retryPolicy = RetryPolicy(
-        shouldRetry: (_, __, error) {
-          return error is StreamChatNetworkError && error.isRetriable;
-        },
+        shouldRetry: (_, __, error) => error?.isRetriable ?? false,
       );
       when(() => client.retryPolicy).thenReturn(retryPolicy);
     });

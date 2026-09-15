@@ -129,8 +129,8 @@ void main() {
       expect(controller.value.asSuccess.items, equals(reminders));
     });
 
-    test('handles StreamChatError exceptions properly', () async {
-      const chatError = StreamChatError('Network error');
+    test('handles a Stream failure properly', () async {
+      const chatError = StreamNetworkException(message: 'Network error');
       when(
         () => client.queryReminders(
           filter: any(named: 'filter'),
@@ -195,10 +195,10 @@ void main() {
       expect(controller.value.asSuccess.nextPageKey, isNull);
     });
 
-    test('loadMore handles StreamChatError exceptions properly', () async {
+    test('loadMore handles a Stream failure properly', () async {
       const nextKey = 'next_page_token';
       final existingReminders = generateMessageReminders();
-      const chatError = StreamChatError('Network error');
+      const chatError = StreamNetworkException(message: 'Network error');
 
       when(
         () => client.queryReminders(

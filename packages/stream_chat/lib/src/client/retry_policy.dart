@@ -50,7 +50,7 @@ class RetryPolicy {
   final FutureOr<bool> Function(
     StreamChatClient client,
     int attempt,
-    StreamChatError? error,
+    StreamChatException? error,
   )
   shouldRetry;
 }

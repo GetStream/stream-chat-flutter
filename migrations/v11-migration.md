@@ -72,7 +72,24 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamChatNetworkError` | `StreamApiException` (`stream_core`) | `retyped` | Thrown-then-caught becomes `Failure.error`; a sealed family, so `switch` is exhaustive |
 | `StreamChatNetworkError.code` / `.message` / `.statusCode` | `StreamApiException.code` / `.message` / `.statusCode` | `moved` | `code` is now a `StreamErrorCode` |
 | `StreamChatNetworkError.isRequestCancelledError` | `StreamNetworkException.isCancelled` | `moved` | |
-| `ChatErrorCode` | `StreamErrorCode` (`stream_core`) | `removed` | Extension type over `int` with named constants |
+| `StreamChatNetworkError.stackTrace` | `Failure.stackTrace`, or the language at the throw site | `removed` | A `StreamException` carries `message` and `cause` and no trace: a trace records the raise, not the failure |
+| `StreamChatNetworkError.type` (`StreamChatNetworkErrorType`) | `StreamNetworkException.isTimeout` / `.isCancelled` | `retyped` | Lossy: `connectionTimeout`, `sendTimeout` and `receiveTimeout` all become `isTimeout` |
+| `ChatErrorCode` | `StreamErrorCode` (`stream_core`) | `removed` | Extension type over `int` with named constants. `requestTimeout` was `23`, which the API never returns; the real code is `48` |
+| `RetryPolicy.shouldRetry`'s `StreamChatError?` | `StreamChatException?` | `retyped` | |
+| `UploadState`'s `Preparing` / `InProgress` / `Success` / `Failed` | `UploadStatePreparing` / `UploadStateInProgress` / `UploadStateSuccess` / `UploadStateFailed` | `renamed` | Frees `Success` for `Result` |
+| `PagedValue.error(StreamChatError)` (`stream_chat_flutter_core`) | `PagedValue.error(StreamChatException)` | `retyped` | |
+| `errorBuilder: Function(BuildContext, StreamChatError)` (scroll views) | `Function(BuildContext, StreamChatException)` | `retyped` | |
+| `Token` | `UserToken` (`stream_core`) | `renamed` | `Token.fromRawValue(x)` → `UserToken(x)`; parses `exp`, so expiry is known |
+| `TokenProvider` (typedef `Future<String> Function(String)`) | `TokenProvider` (interface, `stream_core`) | `retyped` | A closure no longer satisfies it. Wrap it: `TokenProvider.dynamic(loader)`, where `typedef UserTokenLoader = Future<UserToken> Function(String userId)` — so the loader returns a `UserToken`, not a `String`, and must be async |
+| — | `UserToken(rawJwt)` | `added` | **Throws on a malformed JWT**, where `Token.fromRawValue` accepted anything. It also rejects a token whose `user_id` claim does not match the id it was loaded for. Both present as "cannot log in" rather than as a compile error |
+| `TokenManager.loadToken()` / `.isStatic` / `.setTokenOrProvider()` | `.getToken()` / `.usesStaticProvider` / `.setTokenProvider()` | `renamed` | `loadToken(refresh: true)` becomes `expireToken()` then `getToken()` |
+| `StreamChatClient.devToken(userId)` | — | `removed` | Generate tokens on your backend |
+| `StreamChatClient(logLevel:, logHandlerFunction:)` | `StreamChatClient(logConfig: StreamLogConfig(...))` | `retyped` | Default is unchanged: warnings and errors to the console |
+| `StreamChatClient.logger` (a `Logger`) | `StreamChatClient.logger` (a `StreamLogger`) | `retyped` | Messages are lazy: `logger.i(() => '…')` |
+| `StreamChatClient.detachedLogger` / `.defaultLogHandler` / `LogHandlerFunction` | — | `removed` | Supply a `StreamLogHandler`; `StreamLogHandler.console()` is the default |
+| `export 'package:logging'` (`Logger`, `Level`, `LogRecord`) | `StreamLogger`, `StreamLogConfig`, `StreamLogHandler`, `StreamLogFilter`, `StreamLogPriority`, `StreamLogRecord` | `removed` | `package:logging` is no longer a dependency |
+| `LoggingInterceptor` / `InterceptStep` / `LogPrint` | — | `removed` | The interceptor is installed by default and writes through your `StreamLogHandler`; route its output with `logConfig` |
+| `StreamChatPersistenceClient(logLevel:, logHandlerFunction:)` | — | `removed` | Logging is configured once, on the client |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -113,6 +130,112 @@ underlying error:
 final response = (await client.getDevices()).getOrThrow();
 ```
 
+### Endpoints that still throw
+
+`Result` arrives feature by feature. Until a given endpoint has migrated it still **throws** — but it throws a
+`StreamChatException` now, not a `StreamChatNetworkError`. So during the v11 betas both of these are live, and both
+report the same four kinds:
+
+```dart
+// A migrated endpoint returns a Result.
+final result = await client.getDevices();
+
+// One that has not yet still throws — the type is what changed.
+try {
+  await channel.sendMessage(message);
+} on StreamChatException catch (error) {
+  print(error.message);
+}
+```
+
+`StreamChatException` is an alias of `stream_core`'s `StreamException`, so either name catches the same failures.
+
+**Reading `.code` or `.statusCode` means catching a subtype — and that narrows what you catch.** The
+tempting one-for-one swap silently stops handling most failures:
+
+```dart
+// ✗ compiles, and no longer catches timeouts, cancellation, auth failures or
+//   a response the SDK could not decode.
+} on StreamApiException catch (e) {
+  if (e.statusCode == 429) backOff();
+}
+
+// ✓ catch the root, then match. `StreamChatException` is sealed, so this
+//   `switch` is exhaustive with no default arm.
+} on StreamChatException catch (e) {
+  switch (e) {
+    case StreamApiException(:final statusCode) when statusCode == 429: backOff();
+    case StreamNetworkException(isTimeout: true): retryLater();
+    case StreamAuthenticationException(): reauthenticate();
+    case StreamClientException(): rethrow;   // an SDK bug, not yours
+    case StreamApiException(): showError(e.message);
+    case StreamNetworkException(): showOffline();
+  }
+}
+```
+
+Note this differs from the `Result.fold` example further down: `Failure.error` is typed `Object`, so
+a `switch` on it *does* need a default arm. Only the caught root is sealed.
+
+> **`StreamChatNetworkError` is gone, not deprecated.** Nothing throws it any more, so leaving the name declared
+> would let `on StreamChatNetworkError catch (e)` keep compiling while silently matching nothing — a break you
+> could ship without noticing. Deleting it makes the same clause fail to compile, so the analyzer points at every
+> site you need to change.
+
+### Logging
+
+One `logConfig` replaces the two logging parameters, and records are `stream_core`'s:
+
+**Before:**
+```dart
+final client = StreamChatClient(
+  apiKey,
+  logLevel: Level.INFO,
+  logHandlerFunction: (LogRecord record) => myTracker.log(record.message),
+);
+```
+
+**After:**
+```dart
+class MyHandler extends StreamLogHandler {
+  const MyHandler();
+
+  @override
+  void handle(StreamLogRecord record) => myTracker.log(record.message);
+}
+
+final client = StreamChatClient(
+  apiKey,
+  logConfig: const StreamLogConfig(
+    priority: StreamLogPriority.info,
+    handler: MyHandler(),
+  ),
+);
+```
+
+Leave `logConfig` out and nothing changes from before: warnings and errors go to the console.
+
+Records carry a `tag` naming the subsystem — `SCh:Ws`, `SCh:Http`, `SCh:RetryQueue` — and
+`StreamLogFilter.prefix` filters on it, so you can turn one subsystem up without the rest. The
+handler is process-global across Stream SDKs, which is why the tags are prefixed per product.
+
+`StreamChatPersistenceClient` no longer takes logging parameters at all; it writes through the same
+logger.
+
+### Anonymous connections identify as `!anon`
+
+`connectAnonymousUser` previously sent a client-generated random `user_id`; it now sends `!anon`, which is the id
+the backend reserves for anonymous access and what our other SDKs send. `client.state.currentUser.id` reflects it.
+If you keyed anything off that random id, it is no longer random.
+
+### Retry behaviour changed
+
+If you rely on the SDK's automatic retry of failed messages, it now retries more: a request that never reached the
+server, a 5xx, a 429 and a 408. It still never retries another 4xx, a cancelled request, broken credentials, or
+anything the server marked `unrecoverable`. Previously only failures *without* a parseable error body retried, so a
+500 and a 429 did not. A custom `RetryPolicy.shouldRetry` overrides this, and `error.isRetriable` gives you the
+default decision.
+
 ### The error type changed too
 
 `Failure.error` is statically typed `Object`, and at runtime it is always a `StreamException` from `stream_core` —
@@ -146,7 +269,7 @@ counterpart: `code` is now a `StreamErrorCode` (an extension type over `int`, wi
 `StreamApiException` exposes `isTokenExpired`, `isTokenNotYetValid`, `isTokenSignatureInvalid`,
 `isApiKeyInvalid` and `isRateLimited` directly, so the common checks need no code of your own.
 
-`ChatErrorCode` is removed — use `StreamErrorCode`.
+`ChatErrorCode` is removed — use `StreamErrorCode`. One value differed from the API: `requestTimeout` was `23`, a code the backend never returns, so anything matching on it never matched. The real code is `48`.
 
 `Result` and the `StreamException` family are exported from `package:stream_chat/stream_chat.dart`.
 

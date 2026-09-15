@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:logging/logging.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/client/channel/channel.dart';
 import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
@@ -17,13 +16,13 @@ import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/src/core/api/user_groups_api.dart';
 import 'package:stream_chat/src/core/http/connection_id_manager.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
-import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/core/models/channel_config.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/util/event_controller.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
+import 'package:stream_core/stream_core.dart' show StreamLogger, TokenManager;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class MockWebSocketChannel extends Mock implements WebSocketChannel {}
@@ -40,11 +39,6 @@ class MockDio extends Mock implements Dio {
 
   @override
   Interceptors get interceptors => _interceptors ??= Interceptors();
-}
-
-class MockLogger extends Mock implements Logger {
-  @override
-  Level get level => Level.ALL;
 }
 
 class MockHttpClient extends Mock implements StreamHttpClient {}
@@ -101,6 +95,12 @@ class MockPersistenceClient extends Mock implements ChatPersistenceClient {
 class MockStreamChatClient extends Mock implements StreamChatClient {
   @override
   bool get persistenceEnabled => false;
+
+  // The real logger rather than a stub: it writes to `StreamLogger`'s global
+  // handler, so a test that wants the records installs a handler instead of
+  // reaching for this field.
+  @override
+  final StreamLogger logger = const StreamLogger('SCh:Client');
 
   // A plain settable field (not a `when(...)` stub) so tests can flip it
   // with a direct assignment, e.g. `client.isLocalUnreadCountEnabled = true`.

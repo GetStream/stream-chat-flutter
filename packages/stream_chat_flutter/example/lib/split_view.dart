@@ -5,7 +5,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 Future<void> main() async {
   final client = StreamChatClient(
     's2dxdhpxd94g',
-    logLevel: Level.INFO,
+    logConfig: const StreamLogConfig(priority: StreamLogPriority.info),
   );
 
   await client.connectUser(

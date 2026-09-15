@@ -47,7 +47,11 @@ class ChannelEventHandler {
     try {
       region();
     } catch (error, stackTrace) {
-      _client.logger.warning('Error handling ${event.type} event in $stage', error, stackTrace);
+      _client.logger.w(
+        () => 'Error handling ${event.type} event in $stage',
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
   }
 

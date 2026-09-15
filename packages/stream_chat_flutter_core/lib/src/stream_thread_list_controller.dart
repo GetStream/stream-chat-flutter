@@ -160,10 +160,10 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
       // Start listening to events
       if (disposed) return;
       _subscribeToThreadListEvents();
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       value = PagedValue.error(error);
     } catch (error) {
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load threads', cause: error);
       value = PagedValue.error(chatError);
     }
   }
@@ -189,10 +189,10 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
         items: newItems,
         nextPageKey: nextKey,
       );
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       value = previousValue.copyWith(error: error);
     } catch (error) {
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load more threads', cause: error);
       value = previousValue.copyWith(error: chatError);
     }
   }

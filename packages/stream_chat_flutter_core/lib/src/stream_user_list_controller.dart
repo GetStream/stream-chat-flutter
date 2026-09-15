@@ -175,12 +175,12 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
         items: users,
         nextPageKey: nextKey,
       );
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       if (isStale(generation)) return;
       value = PagedValue.error(error);
     } catch (error) {
       if (isStale(generation)) return;
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load users', cause: error);
       value = PagedValue.error(chatError);
     }
   }
@@ -209,12 +209,12 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
         items: newItems,
         nextPageKey: nextKey,
       );
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       if (isStale(generation)) return;
       value = previousValue.copyWith(error: error);
     } catch (error) {
       if (isStale(generation)) return;
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load more users', cause: error);
       value = previousValue.copyWith(error: chatError);
     }
   }

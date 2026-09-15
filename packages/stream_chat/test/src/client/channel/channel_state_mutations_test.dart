@@ -36,7 +36,6 @@ void main() {
     client = MockStreamChatClient();
     state = MockChannelClientState();
 
-    when(() => client.logger).thenReturn(MockLogger());
     when(() => client.state).thenReturn(FakeClientState());
 
     // A real channel (without an attached state) so that the capability and

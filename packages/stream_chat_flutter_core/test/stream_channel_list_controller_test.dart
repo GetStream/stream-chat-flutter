@@ -151,10 +151,11 @@ void main() {
     await pumpEventQueue();
 
     expect(controller.value, isA<Error>());
-    expect(
-      (controller.value as Error).error.message,
-      contains('API unavailable'),
-    );
+
+    final error = (controller.value as Error).error;
+    // The message names the load; the throwable survives as `cause`.
+    expect(error.message, 'Failed to load channels');
+    expect(error.cause, same(exception));
   });
 
   test('loadMore appends new channels and forwards inline filter', () async {

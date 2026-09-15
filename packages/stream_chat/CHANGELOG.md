@@ -1,8 +1,37 @@
 ## Upcoming Beta
 
+🛑️ Breaking
+
+- Logging moves to `stream_core`. `logLevel` and `logHandlerFunction` become one `logConfig`, `client.logger` is a `StreamLogger`, and `detachedLogger`, `defaultLogHandler` and `LogHandlerFunction` are removed along with the `package:logging` re-export. The default is unchanged: warnings and errors to the console. Supply a `StreamLogHandler` to route records into your own facility.
+- `LoggingInterceptor`, `InterceptStep` and `LogPrint` are no longer exported. The interceptor is installed by default and writes through the configured `StreamLogHandler`, so routing its output is a `logConfig` concern now.
+- The token layer is now `stream_core`'s. `Token` becomes `UserToken`, and `TokenProvider` becomes an interface rather than a `Future<String> Function(String)` typedef — pass `TokenProvider.dynamic(myLoader)` where you passed a closure, and note a loader now returns a `UserToken`. `TokenManager.loadToken` becomes `getToken`, `isStatic` becomes `usesStaticProvider`, and `setTokenOrProvider` becomes `setTokenProvider`.
+- Anonymous connections now identify as `!anon` rather than a client-generated random id, matching every other Stream SDK. The backend pins that id so a client cannot claim to be another user.
+- `StreamChatClient.devToken` is removed. It minted a `devtoken`-signed JWT, which only an app with development tokens enabled accepts; generate tokens on your backend, or build one in your own test helper.
+- A failed request now throws one of `stream_core`'s sealed `StreamException` kinds — `StreamApiException`, `StreamNetworkException`, `StreamAuthenticationException` or `StreamClientException` — instead of a `StreamChatNetworkError`. `StreamChatException` aliases the root, so `on StreamChatException catch` handles them all. See the [v11 migration guide](https://github.com/GetStream/stream-chat-flutter/blob/master/migrations/v11-migration.md#error-handling).
+- `ChatErrorCode` is removed in favour of `StreamErrorCode`. One value was wrong: `requestTimeout` was `23`, which the API never returns; the real code is `48`.
+- `RetryPolicy.shouldRetry` receives a `StreamChatException?` instead of a `StreamChatError?`.
+- `UploadState`'s variant classes are renamed to `UploadStatePreparing`, `UploadStateInProgress`, `UploadStateSuccess` and `UploadStateFailed`, freeing the names `Success` and `Failed`.
+- `Result` from `package:async` is no longer re-exported; the re-exported `Result` is `stream_core`'s.
+- `StreamChatNetworkError` and `StreamChatNetworkErrorType` are removed. Nothing throws them any more, so keeping them would let an `on StreamChatNetworkError catch` clause compile while matching nothing.
+
+🔄 Changed
+
+- Failed messages now retry on server errors. The retry policy follows `stream_core`'s table: retry a request that never reached the server, a 5xx, a 429 and a 408; never another 4xx, a cancelled request, broken credentials, or anything the server marked unrecoverable. Previously only failures without a parseable error body retried, so a 500 or a 429 did not.
+- `SystemEnvironment` is now `stream_core`'s type, re-exported from this package. Its constructor and fields are unchanged, so existing usage keeps working.
+- Most SDK logging moved off `info`. It now carries only client and connection lifecycle — client created and disposed, user set and disconnected, connection opening, established and closing — and per-operation, per-event and per-timer records are `debug` or `verbose`. Raising the priority to `info` to debug a problem no longer buries it under a health check every 20 seconds and a line per WebSocket frame.
+
+✅ Added
+
+- Log records from the HTTP and token layers now reach the configured handler.
+
+🔒 Security
+
+- The WebSocket connect and reconnect URIs are logged with the user token redacted. They carried it in full, so an app that raised the log priority wrote a usable token to the console and to any handler it had installed.
+
 🔄 Internal / Non-breaking
 
 - Added the OpenAPI-generated v2 client under `lib/open_api/`, along with the `melos run gen:openapi` tooling that produces it. No API uses it yet.
+- Replaced the internal `InFlightCache` and `SystemEnvironmentManager` with `stream_core`'s equivalents.
 
 ## Upcoming
 

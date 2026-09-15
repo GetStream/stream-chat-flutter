@@ -7,7 +7,6 @@ import 'package:rxdart/rxdart.dart';
 import '../../../stream_chat.dart';
 import '../../core/util/message_merging.dart';
 import '../../core/util/message_predicates.dart';
-import '../../core/util/utils.dart';
 import '../live_location_expiration_scheduler.dart';
 import '../retry_queue.dart';
 import 'channel_event_handler.dart';
@@ -20,12 +19,9 @@ class ChannelClientState {
     this._channel,
     ChannelState channelState,
   ) {
-    _retryQueue = RetryQueue(
-      channel: _channel,
-      logger: _client.detachedLogger(
-        '🔄 (${generateHash([_channel.cid])})',
-      ),
-    );
+    // Tagged with the channel, so a record says which queue reported it while
+    // staying under the `SCh:RetryQueue` prefix for filtering.
+    _retryQueue = RetryQueue(channel: _channel, tag: 'SCh:RetryQueue:${_channel.cid}');
 
     _channelStateController = BehaviorSubject.seeded(channelState);
     // Update the persistence storage with the seeded channel state.

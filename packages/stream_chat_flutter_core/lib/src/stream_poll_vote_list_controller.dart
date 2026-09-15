@@ -137,10 +137,10 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
       // start listening to events
       if (disposed) return;
       _subscribeToPollVoteEvents();
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       value = PagedValue.error(error);
     } catch (error) {
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load poll votes', cause: error);
       value = PagedValue.error(chatError);
     }
   }
@@ -166,10 +166,10 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
         items: newItems,
         nextPageKey: nextKey,
       );
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       value = previousValue.copyWith(error: error);
     } catch (error) {
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load more poll votes', cause: error);
       value = previousValue.copyWith(error: chatError);
     }
   }

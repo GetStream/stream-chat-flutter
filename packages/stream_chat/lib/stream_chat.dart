@@ -1,6 +1,6 @@
 library stream_chat;
 
-export 'package:async/async.dart';
+export 'package:async/async.dart' hide Result;
 export 'package:dio/dio.dart'
     show
         DioException,
@@ -12,8 +12,34 @@ export 'package:dio/dio.dart'
         MultipartFile,
         Options,
         ProgressCallback;
-export 'package:logging/logging.dart' show Logger, Level, LogRecord;
 export 'package:rate_limiter/rate_limiter.dart';
+// Re-exported with a `show` allowlist rather than wholesale: `stream_core`
+// also declares names this barrel defines — `AttachmentFile`, `Filter`,
+// `User` — so a blanket export would not compile.
+export 'package:stream_core/stream_core.dart'
+    show
+        Failure,
+        Result,
+        StreamApiError,
+        StreamApiException,
+        StreamAuthenticationException,
+        StreamClientException,
+        StreamErrorCode,
+        StreamException,
+        StreamLogConfig,
+        StreamLogFilter,
+        StreamLogHandler,
+        StreamLogPriority,
+        StreamLogRecord,
+        StreamLogger,
+        StreamNetworkException,
+        Success,
+        SystemEnvironment,
+        TokenManager,
+        TokenProvider,
+        UserToken,
+        UserTokenLoader;
+
 export 'package:uuid/uuid.dart';
 
 export 'src/client/channel/channel.dart';
@@ -31,7 +57,6 @@ export 'src/core/api/responses.dart';
 export 'src/core/api/sort_order.dart';
 export 'src/core/api/stream_chat_api.dart';
 export 'src/core/error/error.dart';
-export 'src/core/http/interceptor/logging_interceptor.dart';
 export 'src/core/http/stream_http_client.dart';
 export 'src/core/models/action.dart';
 export 'src/core/models/app_settings.dart';
@@ -86,5 +111,4 @@ export 'src/core/util/list_extensions.dart';
 export 'src/core/util/message_rules.dart';
 export 'src/db/chat_persistence_client.dart';
 export 'src/event_type.dart';
-export 'src/system_environment.dart';
 export 'src/ws/connection_status.dart';

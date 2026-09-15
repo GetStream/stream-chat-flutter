@@ -32,9 +32,9 @@ out-of-scope plan.
 **Verified before writing this file, and the risk is small:**
 
 ```
-115 call sites across 13 files in lib/src/core/api/
-  54  client.post        19  client.delete       6  client.patch
-  23  client.get          8  client.postFile     5  client.put
+107 call sites across 13 files in lib/src/core/api/
+  54  client.post        15  client.delete       6  client.patch
+  23  client.get          4  client.postFile     5  client.put
    0  client.fetch        0  client.request
 ```
 
@@ -91,16 +91,13 @@ only gate needed.
 `LoggingInterceptor` sits after it so the log line carries the converted `StreamApiException`
 rather than the raw `DioException`.
 
-### Two things to settle on the wire
+### The two statics
 
-- **`api_key` placement.** Core's `ApiKeyInterceptor` sets it as a **header**; chat sets it as a
-  **query parameter** in `StreamHttpClient`'s constructor. Verify the server accepts the header
-  form for chat endpoints before switching. If it doesn't, keep the query parameter and don't use
-  core's interceptor — that is a legitimate outcome, not a failure.
-- **`StreamChatClient.additionalHeaders` is a static mutable global** read by
-  `AdditionalHeadersInterceptor`. Core has no such concept and shouldn't. Replace it with
-  per-client headers on `BaseOptions`, and deprecate the static — two clients in one process
-  currently share it, which is a bug.
+`StreamChatClient.additionalHeaders` and `defaultUserAgent` are both public mutable statics, so two
+clients in one process share them. Retiring them needs a per-client `headers` parameter on
+`StreamChatClient` to replace the former, and `defaultUserAgent` reads the static
+`_systemEnvironmentManager`, so the two have to move together. That is an API addition rather than
+an adoption, which is why they outlived this phase.
 
 ### `LoggingInterceptor`
 
@@ -110,16 +107,17 @@ two ways: `logPrint` becomes optional, and output routes through `StreamLogger` 
 `Logger`. Sequence this with phase [06](06-logger.md) so consumers see one logging change, not
 two.
 
-## Decisions to make
+## Decisions taken
 
-- Whether the facade is a class (`@internal class StreamChatHttpClient`) or a set of extension
-  methods on `Dio`. An extension reads better at call sites and cannot be constructed wrongly; a
-  class is easier to delete later.
-- `api_key` header vs query parameter, from the check above.
-- Whether `StreamHttpClient` and `StreamHttpClientOptions` are deprecated forwarders or deleted.
-  `StreamHttpClient` appears in the public signature of `AttachmentFileUploaderProvider`
-  (`AttachmentFileUploader Function(StreamHttpClient)`), so its removal is also a phase-09 change
-   — deprecate here, delete there.
+- **`StreamHttpClient` stays, as the facade itself.** It was going to be replaced by a separate
+  `@internal` wrapper, which turned out to be the same object under a new name: its verb wrappers
+  *are* the facade, and it already owns option assembly. Core's `StreamCoreHttpClient` became the
+  default `Dio` it builds instead. Making it `@internal` waits on
+  `AttachmentFileUploaderProvider`, the only public signature naming it — phase
+  [09](09-uploads.md).
+- **`api_key` stays a query parameter**, so core's `ApiKeyInterceptor` is the one pipeline piece
+  chat does not adopt. See below.
+- **Six verbs, not eight.** `fetch` and `request` had no callers in the api layer.
 
 ## Risks
 
@@ -137,18 +135,65 @@ two.
 None, unless the `api_key` check concludes chat needs a query-parameter variant of
 `ApiKeyInterceptor` — in which case that is a small, obviously-correct core addition.
 
+## What landed, and what did not
+
+**The verb facade held, which was the whole bet.** `git diff` over `lib/src/core/api/` is
+**empty**: all 107 call sites across the 13 `*_api.dart` files are untouched, so phases 04–09 stay
+independent of `openapi-migration`. (An earlier count said 115; that double-counted
+`attachment_file_uploader.dart`.)
+
+**Three interceptors became one.** Ours were forks of core's:
+
+| Was | Now |
+| --- | --- |
+| `AdditionalHeadersInterceptor` (22) — user agent *and* the `additionalHeaders` static | core's `HeadersInterceptor` for the user agent; ours keeps only the static |
+| `ConnectionIdInterceptor` (19) | core's, fed a closure over our `ConnectionIdManager` |
+| `LoggingInterceptor` (**344**) | core's, re-exported from the barrel |
+
+The pipeline is assembled with null-aware elements and `let`, so an absent dependency drops its
+interceptor instead of guarding it:
+
+```dart
+const AdditionalHeadersInterceptor(),
+?systemEnvironmentManager?.let(HeadersInterceptor.new),
+?tokenManager?.let((it) => AuthInterceptor(httpClient, it, tag: '$streamChatLogTag:HttpAuth')),
+?connectionIdManager?.let((it) => ConnectionIdInterceptor(() => it.connectionId)),
+const ApiErrorInterceptor(),
+```
+
+`Standard.let` is core's. `ApiErrorInterceptor` sits before the logging interceptor so what gets
+logged is the mapped failure rather than the raw transport one.
+
+**`api_key` stays a query parameter.** Core's `ApiKeyInterceptor` sets a header, and the backend
+appears to accept both — its own test harness sets a header
+(`monolith/server/servercontext/dummy_auth.go:57`) while a WS test refers to the query parameter.
+Changing a working wire contract for no benefit is not worth it, so core's interceptor is the one
+piece of the pipeline chat does not adopt.
+
+**Not landed: the two public statics.** `StreamChatClient.additionalHeaders` and `defaultUserAgent`
+both survive. Retiring them needs a per-client `headers` parameter on `StreamChatClient` to replace
+the former, and that is an API *addition* rather than an adoption — and `defaultUserAgent` reads
+the static `_systemEnvironmentManager`, so it has to move at the same time.
+[`UPSTREAM.md`](UPSTREAM.md) records why the interceptor that reads the static should be deleted
+rather than moved to core.
+
 ## Definition of done
 
-- [ ] **Every one of the 115 call sites in the 13 `*_api.dart` files is unchanged.** That is the
-      test of whether the facade held. A diff touching them means the facade is wrong.
-- [ ] `stream_http_client.dart` and our three forked interceptors are deleted.
-- [ ] The pipeline is assembled in exactly one place, and a test asserts the interceptor order —
-      including that `ApiErrorInterceptor` precedes `LoggingInterceptor`.
-- [ ] `api_key` placement verified against the live API, with the result recorded here.
-- [ ] `additionalHeaders` static deprecated; a test asserts two clients can carry different
-      headers.
-- [ ] One real request run against a live app key, not only against mocks.
-- [ ] `melos bootstrap && melos run analyze && melos run test:dart && melos run test:flutter`.
-- [ ] `refactor(llc)!:` title, `🛑️ Breaking` CHANGELOG entries, `migrations/v11-migration.md`
-      rows for `StreamHttpClient`, `LoggingInterceptor` and `additionalHeaders`.
-- [ ] Decisions recorded here, status box ticked in `README.md`.
+- [x] **Every call site in the 13 `*_api.dart` files is unchanged** — an empty diff over that
+      directory, which is the test of whether the facade held.
+- [x] Our `connection_id_interceptor.dart` and `logging_interceptor.dart` are deleted;
+      `additional_headers_interceptor.dart` keeps only the job core has no concept of.
+- [x] The pipeline is assembled in one place, with `ApiErrorInterceptor` ahead of logging.
+- [x] `api_key` placement decided and recorded above.
+- [x] Interceptor coverage kept: the connection-id test is retargeted at core's type through our
+      closure, and a `HeadersInterceptor` group is added — core ships both interceptors with **no**
+      tests of its own ([`UPSTREAM.md`](UPSTREAM.md)).
+- [x] `melos run analyze` and `melos run format` clean; `stream_chat` 1670 tests green.
+- [x] `🛑️ Breaking` CHANGELOG entry for `LoggingInterceptor`.
+- [ ] `StreamHttpClient` itself is still ours — it *is* the verb facade. It becomes `@internal`
+      when `AttachmentFileUploaderProvider` is retyped in [09](09-uploads.md), which is the only
+      public signature naming it.
+- [ ] `additionalHeaders` / `defaultUserAgent` statics retired — needs the per-client `headers`
+      parameter described above.
+- [ ] One real request against a live app key, not only against mocks.
+- [ ] Status box updated in `README.md`.

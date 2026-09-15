@@ -163,12 +163,12 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
         items: members.where((it) => it.user != null).toList(),
         nextPageKey: nextKey,
       );
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       if (isStale(generation)) return;
       value = PagedValue.error(error);
     } catch (error) {
       if (isStale(generation)) return;
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load members', cause: error);
       value = PagedValue.error(chatError);
     }
   }
@@ -196,12 +196,12 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
         items: newItems.where((it) => it.user != null).toList(),
         nextPageKey: nextKey,
       );
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       if (isStale(generation)) return;
       value = previousValue.copyWith(error: error);
     } catch (error) {
       if (isStale(generation)) return;
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load more members', cause: error);
       value = previousValue.copyWith(error: chatError);
     }
   }

@@ -8,28 +8,35 @@ One file per phase, in the order they should land. Each carries a goal, the exac
 with their core counterparts, the decisions that phase has to make, its risks, the upstream
 `stream_core` work it needs, and a definition of done.
 
+Two indexes cut across the phases:
+
+- [`DEFERRED.md`](DEFERRED.md) — everything consciously postponed, and what unblocks each item.
+- [`UPSTREAM.md`](UPSTREAM.md) — what should move the *other* way, chat → core.
+
 | | Phase | Chat LOC | Core LOC | Breaking | Status |
 | --- | --- | --- | --- | --- | --- |
-| [01](01-utilities.md) | Utilities — in-flight cache, list extensions | ~340 | ~200 | decision | ◐ |
-| [02](02-platform-and-environment.md) | Platform detector & system environment | ~220 | ~300 | yes (rename) | ☐ |
-| [03](03-errors.md) | Errors & the `Result` surface | ~410 | ~900 | **yes** | ☐ |
-| [04](04-token-and-auth.md) | Token & auth | ~225 | ~500 | **yes** | ☐ |
-| [05](05-http-client.md) | HTTP client & interceptor pipeline | ~600 | ~150 | yes | ☐ |
-| [06](06-logger.md) | Logger | — | ~670 | **yes** | ☐ |
-| [07](07-websocket.md) | WebSocket transport | ~790 | ~1,940 | **yes** | ☐ |
-| [08](08-query-dsl.md) | Query DSL — filter, sort, comparable field | ~600 | ~1,420 | **yes** | ☐ |
+| [01](01-utilities.md) | Utilities — in-flight cache, list extensions | ~340 | ~200 | yes | ☑ |
+| [02](02-platform-and-environment.md) | Platform detector & system environment | ~330 | ~300 | yes (rename) | ☑ |
+| [03](03-errors.md) | Errors & the `Result` surface | ~410 | ~900 | **yes** | ☑ |
+| [04](04-token-and-auth.md) | Token & auth | ~225 | ~500 | **yes** | ☑ |
+| [05](05-http-client.md) | HTTP client & interceptor pipeline | ~600 | ~150 | yes | ◐ |
+| [06](06-logger.md) | Logger | ~120 | ~670 | **yes** | ☑ |
+| [07](07-websocket.md) | WebSocket transport | ~790 | ~1,940 | **yes** | ⏸ |
+| [08](08-query-dsl.md) | Query DSL — filter, sort, comparable field | ~600 | ~1,420 | **yes** | ☑ |
 | [09](09-uploads.md) | Uploads & CDN | ~520 | ~1,400 | yes | ☐ |
 | [10](10-cleanup.md) | Cleanup — deps, barrel, deprecation kit | — | — | no | ☐ |
 
-Status key: ☐ not started · ◐ partly landed · ☑ done.
+Status key: ☐ not started · ◐ partly landed · ☑ done · ⏸ parked.
+
+**07 is parked.** Nothing after it depends on it, so 08–10 proceed as planned.
 
 **Net:** ~4.0k LOC of hand-written `lib/src` deleted (of ~29.0k), replaced by ~5.5k LOC of core
 that is already written and tested. Six direct dependencies become transitive.
 
-**In progress:** phase 01's `InFlightCache` has landed. `list_extensions` is held back pending a
-performance comparison — core's `merge` is a keyed-map-merge-then-sort where ours is a two-pointer
-merge, and it runs on every message, member and read update. `stream_chat_dio_error` moved into
-phase [03](03-errors.md), which is where its payload type becomes a `StreamException`.
+**In progress.** Phases 01–06 have each landed their core adoption; what is left in them is
+indexed in [`DEFERRED.md`](DEFERRED.md), which says what unblocks each item. Notably 06 removed
+chat's own logger outright rather than bridging it, so no package in the repo imports
+`package:logging` any more.
 
 ## Scope
 
@@ -99,16 +106,21 @@ Decided once here, not re-argued per phase.
 ### The barrel is a `show` allowlist
 
 `stream_feeds` opens its barrel with `export 'package:stream_core/stream_core.dart';`. **We
-cannot.** Exporting core wholesale from `lib/stream_chat.dart` collides on `AttachmentFile`,
-`Filter`, `FilterOperator`, `NullOrdering`, `ComparableField`, `CurrentPlatform`, `PlatformType`,
-`SystemEnvironment`, `SystemEnvironmentManager`, `XStreamClientHeaderExtension`, `TokenManager`,
-`AuthType`, `User`, `LoggingInterceptor`, `InterceptStep`, `LogPrint`, `AuthInterceptor`,
-`ConnectionIdInterceptor`, `InFlightCache`, and `Success` — the last being chat's
-`UploadState.success` variant class against core's `Result` `Success<T>`. Core also re-exports all
-of dio, while our barrel deliberately re-exports a *narrowed* dio.
+cannot.** Exporting core wholesale from `lib/stream_chat.dart` still collides on `AttachmentFile`,
+`Filter`, `FilterOperator`, `NullOrdering`, `ComparableField`, `CurrentPlatform`, `PlatformType`
+and `User`. Core also re-exports all of dio, while our barrel deliberately re-exports a *narrowed*
+dio — and `package:async`, which our barrel also re-exports, declares a `Result` of its own.
 
-Narrowing is already the precedent in that file: `filter.dart show Filter, FilterOperator`
-(`stream_chat.dart:52`) and `device_api.dart show PushProvider`.
+Each landed phase shortens that list, since an adopted type stops being a duplicate.
+`InFlightCache`, `SystemEnvironment`, `SystemEnvironmentManager` and
+`XStreamClientHeaderExtension` are off it, as are `TokenManager`, `AuthType`, `AuthInterceptor`,
+`ConnectionIdInterceptor`, `LoggingInterceptor`, `InterceptStep` and `LogPrint` — chat declares
+none of them any more. `Success` went with the rename of `UploadState`'s variants. The allowlist
+is the mechanism throughout — grow it phase by phase rather than switching to a wholesale export
+at the end.
+
+Narrowing is already the precedent in that file: `filter.dart show Filter, FilterOperator` and
+`device_api.dart show PushProvider`.
 
 ### What stays ours
 
@@ -134,9 +146,19 @@ the property. It is the eventual right home; it is not this plan's job to move i
 
 ### Upstream core work is batched, not blocking
 
+Tracked in [`UPSTREAM.md`](UPSTREAM.md), which also covers the reverse direction — things chat has
+that every product needs, and things chat's use has shown core to be missing or wrong about.
+
 Each phase names the `stream_core` changes it needs, and those should be grouped into as few core
 releases as possible. Only one is a hard block on API we already ship publicly: `Filter`'s
 `$ne` / `$nin` / `$nor` operators, for phase [08](08-query-dsl.md).
+
+**Diff against the resolved package, not the sibling repo.** Two of this plan's original upstream
+asks turned out to be already satisfied, because they had been derived from
+`stream-core-flutter`'s unreleased `main` rather than from
+`~/.pub-cache/hosted/pub.dev/stream_core-0.5.0`, which is what `stream_chat` actually resolves.
+The distinction also changes the *kind* of ask: something already on core's `main` needs a
+release, not a PR.
 
 Cross-repo workflow is in [`STYLE_GUIDE.md`](../STYLE_GUIDE.md) (§Dependency management): a path
 dependency while both repos change together, back to a hosted constraint in `melos.yaml` before

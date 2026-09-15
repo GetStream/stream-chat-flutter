@@ -80,7 +80,7 @@ class Channel {
          if (name != null) 'name': name,
          if (image != null) 'image': image,
        } {
-    _client.logger.info('New Channel instance created, not yet initialized');
+    _logger.d(() => 'New Channel instance created, not yet initialized');
   }
 
   /// Create a channel client instance from a [ChannelState] object.
@@ -95,6 +95,8 @@ class Channel {
       _extraData = channelState.channel!.extraData {
     _initState(channelState); // Initialize the state immediately.
   }
+
+  late final _logger = StreamLogger('SCh:Channel:$cid');
 
   /// This client state
   ChannelClientState? state;
@@ -626,14 +628,14 @@ class Channel {
     });
 
     if (attachments.isEmpty) {
-      client.logger.info('No attachments available to upload');
+      _logger.d(() => 'No attachments available to upload');
       if (message.attachments.every((it) => it.uploadState.isSuccess)) {
         _messageAttachmentsUploadCompleter.remove(messageId)?.complete(message);
       }
       return Future.value();
     }
 
-    client.logger.info('Found ${attachments.length} attachments');
+    _logger.d(() => 'Found ${attachments.length} attachments');
 
     void updateAttachment(Attachment attachment, {bool remove = false}) {
       final index = message!.attachments.indexWhere(
@@ -657,7 +659,7 @@ class Channel {
 
     return Future.wait(
       attachments.map((it) {
-        client.logger.info('Uploading ${it.id} attachment...');
+        _logger.d(() => 'Uploading ${it.id} attachment...');
 
         final throttledUpdateAttachment = updateAttachment.throttled(
           const Duration(milliseconds: 500),
@@ -692,7 +694,7 @@ class Channel {
         _cancelableAttachmentUploadRequest[it.id] = cancelToken;
         return future
             .then((response) {
-              client.logger.info('Attachment ${it.id} uploaded successfully...');
+              _logger.d(() => 'Attachment ${it.id} uploaded successfully...');
 
               // If the response is SendFileResponse, then we might also be getting
               // thumbUrl in case of video. So we need to update the attachment with
@@ -715,15 +717,15 @@ class Channel {
               }
             })
             .catchError((e, stk) {
-              if (e is StreamChatNetworkError && e.type == .cancel) {
-                client.logger.info('Attachment ${it.id} upload cancelled');
+              if (e is StreamNetworkException && e.isCancelled) {
+                _logger.d(() => 'Attachment ${it.id} upload cancelled');
 
                 // remove attachment from message if cancelled.
                 updateAttachment(it, remove: true);
                 return;
               }
 
-              client.logger.severe('error uploading the attachment', e, stk);
+              _logger.e(() => 'error uploading the attachment', error: e, stackTrace: stk);
               updateAttachment(
                 it.copyWith(uploadState: UploadState.failed(error: e.toString())),
               );
@@ -807,7 +809,7 @@ class Channel {
 
       // Validate the final message before sending it to the server.
       if (MessageRules.canUpload(message) != true) {
-        client.logger.warning('Message is not valid for sending, removing it');
+        _logger.w(() => 'Message is not valid for sending, removing it');
 
         // Remove the message from state as it is invalid.
         state!.deleteMessage(message, hardDelete: true);
@@ -847,7 +849,7 @@ class Channel {
 
       state?.updateMessage(failedMessage);
       // If the error is retriable, add it to the retry queue.
-      if (e is StreamChatNetworkError && e.isRetriable) {
+      if (e is StreamChatException && e.isRetriable) {
         state?.scheduleRetry(failedMessage);
       }
 
@@ -936,7 +938,7 @@ class Channel {
 
       state?.updateMessage(failedMessage);
       // If the error is retriable, add it to the retry queue.
-      if (e is StreamChatNetworkError && e.isRetriable) {
+      if (e is StreamChatException && e.isRetriable) {
         state?.scheduleRetry(failedMessage);
       }
 
@@ -1003,7 +1005,7 @@ class Channel {
 
       state?.updateMessage(failedMessage);
       // If the error is retriable, add it to the retry queue.
-      if (e is StreamChatNetworkError && e.isRetriable) {
+      if (e is StreamChatException && e.isRetriable) {
         state?.scheduleRetry(failedMessage);
       }
 
@@ -1098,7 +1100,7 @@ class Channel {
 
       state?.deleteMessage(failedMessage, hardDelete: scope.hard);
       // If the error is retriable, add it to the retry queue.
-      if (e is StreamChatNetworkError && e.isRetriable) {
+      if (e is StreamChatException && e.isRetriable) {
         state?.scheduleRetry(failedMessage);
       }
 
@@ -1139,7 +1141,7 @@ class Channel {
     try {
       await Future.wait(deleteFutures);
     } catch (e, stk) {
-      _client.logger.warning('Error deleting message attachments', e, stk);
+      _logger.w(() => 'Error deleting message attachments', error: e, stackTrace: stk);
     }
   }
 
@@ -1998,7 +2000,7 @@ class Channel {
     _initializedCompleter.safeComplete(true);
 
     if (cid case final cid?) client.state.addChannels({cid: this});
-    _client.logger.info('Channel ${channelState.channel?.cid} initialized');
+    _logger.d(() => 'Channel ${channelState.channel?.cid} initialized');
   }
 
   /// Loads the initial channel state and watches for changes.
@@ -2417,7 +2419,7 @@ class Channel {
   Future<void> keyStroke([String? parentId]) async {
     if (!_canSendTypingEvents) return;
 
-    client.logger.info('KeyStroke received');
+    _logger.v(() => 'KeyStroke received');
     return _keyStrokeHandler(parentId);
   }
 
@@ -2425,7 +2427,7 @@ class Channel {
   Future<void> startTyping([String? parentId]) async {
     if (!_canSendTypingEvents) return;
 
-    client.logger.info('start typing');
+    _logger.d(() => 'start typing');
     await sendEvent(
       Event(
         type: EventType.typingStart,
@@ -2438,7 +2440,7 @@ class Channel {
   Future<void> stopTyping([String? parentId]) async {
     if (!_canSendTypingEvents) return;
 
-    client.logger.info('stop typing');
+    _logger.d(() => 'stop typing');
     await sendEvent(
       Event(
         type: EventType.typingStop,
