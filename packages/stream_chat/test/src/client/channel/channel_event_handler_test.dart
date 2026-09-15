@@ -39,7 +39,7 @@ void main() {
   late MockStreamChatClient client;
   late MockChannelStateMutations mutations;
   late ChannelEventHandler handler;
-  late List<LogRecord> logRecords;
+  late List<StreamLogRecord> logRecords;
 
   // Matches the default current user of [FakeClientState].
   const currentUserId = 'test-user-id';
@@ -70,12 +70,13 @@ void main() {
     client = MockStreamChatClient();
     mutations = MockChannelStateMutations();
 
+    // A `StreamLogger` writes to the global handler rather than to a stream of
+    // its own, so what the handler reports is observed through that handler.
     logRecords = [];
-    final logger = Logger.detached('mock-client-logger')..level = Level.ALL;
-    logger.onRecord.listen(logRecords.add);
+    StreamLogger.handler = _CapturingHandler(logRecords.add);
+    StreamLogger.priority = StreamLogPriority.verbose;
 
     when(() => channel.client).thenReturn(client);
-    when(() => client.logger).thenReturn(logger);
     when(() => client.state).thenReturn(FakeClientState());
     when(() => client.channelDeliveryReporter.reconcileDelivery(any())).thenAnswer((_) async {});
 
@@ -89,6 +90,8 @@ void main() {
 
     handler = ChannelEventHandler(channel: channel, mutations: mutations);
   });
+
+  tearDown(StreamLogger.reset);
 
   group('dispatch', () {
     test('does nothing for an unknown event without payloads', () {
@@ -970,7 +973,7 @@ void main() {
       );
 
       expect(logRecords, hasLength(1));
-      expect(logRecords.single.level, Level.WARNING);
+      expect(logRecords.single.priority, StreamLogPriority.warning);
       expect(logRecords.single.message, contains(EventType.memberAdded));
       expect(logRecords.single.error, isA<StateError>());
     });
@@ -988,4 +991,13 @@ void main() {
       expect(logRecords.single.message, contains('member list dispatch'));
     });
   });
+}
+
+class _CapturingHandler extends StreamLogHandler {
+  const _CapturingHandler(this._onRecord);
+
+  final void Function(StreamLogRecord) _onRecord;
+
+  @override
+  void handle(StreamLogRecord record) => _onRecord(record);
 }
