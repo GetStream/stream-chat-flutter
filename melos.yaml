@@ -77,6 +77,7 @@ command:
       just_audio: ^0.10.5
       latlong2: ^0.9.1
       lottie: ^3.3.3
+      markdown: ^7.3.0
       marionette_flutter: ^0.6.0
       media_kit: ^1.2.6
       media_kit_libs_video: ^1.0.6
@@ -119,9 +120,12 @@ command:
           url: https://github.com/GetStream/stream-core-flutter.git
           path: packages/stream_core_flutter
           ref: 6648852a6d72d4cded93aa8c4d285576a9c8a194
-      stream_thumbnail: ^0.1.0
+      stream_thumbnail:
+        git:
+          url: https://github.com/GetStream/stream-core-flutter.git
+          ref: 2aea1413997af886ee951921d71e6b8cb8c5cfbb
+          path: packages/stream_thumbnail
       synchronized: ^3.4.0
-      thumblr: ^0.0.4
       url_launcher: ^6.3.2
       uuid: ^4.5.3
       video_player: ^2.11.1

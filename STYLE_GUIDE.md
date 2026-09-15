@@ -99,7 +99,9 @@ document; the section link is provided.
   `BehaviorSubject`, "unmodifiable", "Stream emits X", or which internal type is used.
   → [Public docs describe the contract, not implementation](#public-docs-describe-the-contract-not-implementation)
 - Comments must not justify code via cross-references to Flutter framework internals
-  (e.g. "matching Flutter's AppBar"). → [No Flutter internals in comments](#no-flutter-internals-in-comments)
+  (e.g. "matching Flutter's AppBar") or to Stream's SDKs on other platforms (e.g. "the
+  SwiftUI SDK does it this way") — that argument goes in the PR description.
+  → [No cross-framework justification in comments](#no-cross-framework-justification-in-comments)
 
 **Process**
 
@@ -450,13 +452,34 @@ Stream<List<Member>> get membersStream;
 Stream<List<Member>> get membersStream;
 ```
 
-### No Flutter internals in comments
+### No cross-framework justification in comments
 
 Do not justify code by cross-referencing Flutter framework internals ("matching
 Flutter's `AppBar`", "same behavior as `MaterialButton`"). Public dartdoc describes
 the observable contract, not which internal widget tree we happen to mirror. If a
 behavior only makes sense in the context of another Flutter widget, describe the
 behavior directly; if that's impossible, the abstraction may be wrong.
+
+The same holds for Stream's SDKs on other platforms. Aligning with
+stream-chat-swift, stream-chat-android or stream-chat-react-native is a real
+argument for a decision — but it belongs in the PR description, not in a comment.
+An integrator reading the dartdoc cannot verify it, and it goes stale the moment
+those SDKs change:
+
+```dart
+// BAD:
+
+// Plain text is collapsed into the row label. The SwiftUI and React Native
+// SDKs collapse plain text the same way, and reserve per-child focus for
+// polls, quotes and attachments.
+
+// GOOD:
+
+// Plain text is collapsed into the row label, so the message is announced as
+// one phrase. This costs the inline link spans their own focus stops, in
+// exchange for not repeating the row phrase once per span; `explicitChildNodes`
+// keeps polls, quotes and attachments reachable.
+```
 
 ### Writing prompts for good documentation
 
