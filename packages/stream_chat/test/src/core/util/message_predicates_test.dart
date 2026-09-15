@@ -8,7 +8,7 @@ Message _message(
   bool? showInChannel,
   bool pinned = false,
   DateTime? pinExpires,
-  String type = 'regular',
+  String type = MessageType.regular,
 }) {
   return Message(
     id: id,
@@ -21,46 +21,42 @@ Message _message(
 }
 
 void main() {
-  group('MessagePredicates.isShownInChannel', () {
-    test('is true for a non-thread message', () {
-      expect(_message('m1').isShownInChannel, isTrue);
-    });
-
-    test('is true for a thread reply marked to show in the channel', () {
-      final reply = _message('m1', parentId: 'p1', showInChannel: true);
-      expect(reply.isShownInChannel, isTrue);
-    });
-
-    test('is false for a thread-only reply', () {
-      final reply = _message('m1', parentId: 'p1');
-      expect(reply.isShownInChannel, isFalse);
-    });
+  test('isShownInChannel is true for a non-thread message', () {
+    expect(_message('m1').isShownInChannel, isTrue);
   });
 
-  group('MessagePredicates.hasValidPin', () {
-    test('is false for a deleted message', () {
-      final message = _message('m1', pinned: true, type: MessageType.deleted);
-      expect(message.hasValidPin, isFalse);
-    });
+  test('isShownInChannel is true for a thread reply marked to show in the channel', () {
+    final reply = _message('m1', parentId: 'p1', showInChannel: true);
+    expect(reply.isShownInChannel, isTrue);
+  });
 
-    test('is false for an unpinned message', () {
-      final message = _message('m1');
-      expect(message.hasValidPin, isFalse);
-    });
+  test('isShownInChannel is false for a thread-only reply', () {
+    final reply = _message('m1', parentId: 'p1');
+    expect(reply.isShownInChannel, isFalse);
+  });
 
-    test('is true for a pinned message without expiration', () {
-      final message = _message('m1', pinned: true);
-      expect(message.hasValidPin, isTrue);
-    });
+  test('hasValidPin is false for a deleted message', () {
+    final message = _message('m1', pinned: true, type: MessageType.deleted);
+    expect(message.hasValidPin, isFalse);
+  });
 
-    test('is true while the pin expiration is in the future', () {
-      final message = _message('m1', pinned: true, pinExpires: DateTime.now().add(const Duration(hours: 1)));
-      expect(message.hasValidPin, isTrue);
-    });
+  test('hasValidPin is false for an unpinned message', () {
+    final message = _message('m1');
+    expect(message.hasValidPin, isFalse);
+  });
 
-    test('is false once the pin expiration has passed', () {
-      final message = _message('m1', pinned: true, pinExpires: DateTime.now().subtract(const Duration(hours: 1)));
-      expect(message.hasValidPin, isFalse);
-    });
+  test('hasValidPin is true for a pinned message without expiration', () {
+    final message = _message('m1', pinned: true);
+    expect(message.hasValidPin, isTrue);
+  });
+
+  test('hasValidPin is true while the pin expiration is in the future', () {
+    final message = _message('m1', pinned: true, pinExpires: DateTime.now().add(const Duration(hours: 1)));
+    expect(message.hasValidPin, isTrue);
+  });
+
+  test('hasValidPin is false once the pin expiration has passed', () {
+    final message = _message('m1', pinned: true, pinExpires: DateTime.now().subtract(const Duration(hours: 1)));
+    expect(message.hasValidPin, isFalse);
   });
 }

@@ -1,6 +1,9 @@
 import '../models/message.dart';
 
 /// Predicates over a [Message] used by the channel state management.
+///
+/// These encode channel-state rules rather than properties of the message
+/// itself.
 extension MessagePredicates on Message {
   /// Whether the message is shown in the channel message list.
   ///

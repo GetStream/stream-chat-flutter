@@ -6,22 +6,24 @@ import 'message_predicates.dart';
 /// Provides the merge and removal operations reconciling incoming messages
 /// with the locally-held channel state collections.
 ///
-/// Every operation is pure: it computes a new collection from the given
-/// inputs without reading or writing any state.
+/// Operations leave their inputs untouched and return new collections. Pin
+/// validity and live-location expiry are relative to the current time.
 class MessageMerging {
   const MessageMerging._();
 
-  /// The default `update` strategy for the merge operations: merges the
-  /// incoming [updated] into the locally-known [original] via
-  /// [Message.updateWith], preserving enrichment the server may strip on
-  /// partial payloads.
+  /// The default `update` strategy for the merge operations.
+  ///
+  /// Merges the incoming [updated] into the locally-known [original] via
+  /// [Message.updateWith]: fields absent from [updated] keep their value
+  /// from [original].
   static Message mergeUpdate(Message original, Message updated) => original.updateWith(updated);
 
-  /// The replacing `update` strategy: takes the incoming [updated] as-is.
-  /// Used by local rollback paths.
+  /// The replacing `update` strategy: takes the incoming [updated] as-is,
+  /// ignoring the locally-known message.
   static Message replaceUpdate(Message _, Message updated) => updated;
 
-  /// Compares [a] and [b] by their [Message.createdAt].
+  /// Orders messages by [Message.createdAt], the order every merge result is
+  /// returned in.
   static int sortByCreatedAt(Message a, Message b) => a.createdAt.compareTo(b.createdAt);
 
   /// Merges the live locations carried by [toMerge] into [existing].
@@ -72,17 +74,16 @@ class MessageMerging {
     ).where((it) => it.hasValidPin);
   }
 
-  /// Merges [toMerge] into [existing], returning a list sorted by
-  /// [Message.createdAt].
+  /// Merges [toMerge] into [existing].
   ///
-  /// [update] decides whether each pair is reconciled (default — see
-  /// [mergeUpdate]) or replaced ([replaceUpdate], used by local rollback
-  /// paths that don't want enrichment fallback to keep optimistic values).
+  /// The result is ordered by [Message.createdAt]. Returns [existing]
+  /// unchanged (same reference) when [toMerge] is empty, or when [upsert] is
+  /// `false` and no id in [toMerge] is present in [existing].
+  ///
+  /// [update] reconciles a pair whose id is already in [existing]; defaults
+  /// to [mergeUpdate], with [replaceUpdate] for a strict overwrite.
   ///
   /// [upsert] controls whether ids not already in [existing] are inserted.
-  /// Event-driven paths (`message.updated`, `message.deleted` soft) pass
-  /// `upsert: false` so an out-of-window message isn't dropped into a gap
-  /// between the loaded slice and history the client hasn't paged in yet.
   static Iterable<Message> mergeMessages({
     required Iterable<Message> existing,
     required Iterable<Message> toMerge,
@@ -156,11 +157,12 @@ class MessageMerging {
   }
 
   /// Merges [toMerge] into the [existing] threads map, returning the updated
-  /// map.
+  /// map, or [existing] unchanged (same reference) when [toMerge] carries no
+  /// thread replies.
   ///
-  /// Replies are grouped by their parent id so each thread merge only sees
-  /// its own messages. With [upsert] `false`, replies to threads not present
-  /// in [existing] are dropped instead of creating the thread entry.
+  /// Each reply is merged into the list for its [Message.parentId], leaving
+  /// other threads untouched. With [upsert] `false`, replies to threads not
+  /// present in [existing] are dropped instead of creating the thread entry.
   static Map<String, List<Message>> mergeThreadMessages({
     required Map<String, List<Message>> existing,
     required Iterable<Message> toMerge,
@@ -260,7 +262,8 @@ class MessageMerging {
   }
 
   /// Removes [toRemove] from the [existing] threads map, returning the
-  /// updated map.
+  /// updated map, or [existing] unchanged (same reference) when [toRemove]
+  /// carries no thread replies.
   ///
   /// Thread entries left with no messages are dropped from the map.
   static Map<String, List<Message>> removeThreadMessages({
