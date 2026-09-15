@@ -16,7 +16,7 @@ void main() {
   });
 
   test('updateChannelQueries', () async {
-    final filter = Filter.in_('members', const ['testUserId']);
+    final filter = ChannelFilter.in_(ChannelFilterField.members, const ['testUserId']);
 
     const cids = ['testCid1', 'testCid2', 'testCid3'];
 
@@ -31,7 +31,7 @@ void main() {
   });
 
   test('clear queryCache before updateChannelQueries', () async {
-    final filter = Filter.in_('members', const ['testUserId']);
+    final filter = ChannelFilter.in_(ChannelFilterField.members, const ['testUserId']);
 
     const cids = ['testCid1', 'testCid2', 'testCid3'];
 
@@ -50,7 +50,7 @@ void main() {
   });
 
   test('getCachedChannelCids', () async {
-    final filter = Filter.in_('members', const ['testUserId']);
+    final filter = ChannelFilter.in_(ChannelFilterField.members, const ['testUserId']);
 
     const cids = ['testCid1', 'testCid2', 'testCid3'];
 
@@ -65,7 +65,7 @@ void main() {
   });
 
   Future<List<ChannelModel>> _insertTestDataForGetChannel(
-    Filter filter, {
+    ChannelFilter filter, {
     int count = 3,
   }) async {
     final now = DateTime.now();
@@ -101,7 +101,7 @@ void main() {
   group('getChannels', () {
     tearDown(() async => database.flush());
 
-    final filter = Filter.in_('members', const ['testUserId']);
+    final filter = ChannelFilter.in_(ChannelFilterField.members, const ['testUserId']);
 
     test('should return empty list of channels', () async {
       final channels = await channelQueryDao.getChannels(filter: filter);
@@ -163,7 +163,7 @@ void main() {
     const filterValues = {'user_id': 'testUserId'};
     const sortValues = {'pinned_at': true};
     const cids = ['testCid1', 'testCid2', 'testCid3'];
-    final filter = Filter.equal('type', 'messaging');
+    final filter = ChannelFilter.equal(ChannelFilterField.type, 'messaging');
     final sort = [
       ChannelSort.desc(ChannelSortField.pinnedAt),
       ChannelSort.desc(ChannelSortField.lastMessageAt),
@@ -202,7 +202,7 @@ void main() {
     const sortValues = {'pinned_at': true};
     const oldCids = ['oldCid1', 'oldCid2'];
     const newCids = ['newCid1'];
-    final filter = Filter.equal('type', 'messaging');
+    final filter = ChannelFilter.equal(ChannelFilterField.type, 'messaging');
     final sort = [
       ChannelSort.desc(ChannelSortField.pinnedAt),
       ChannelSort.desc(ChannelSortField.lastMessageAt),

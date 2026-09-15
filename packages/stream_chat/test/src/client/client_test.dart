@@ -497,7 +497,7 @@ void main() {
       registerFallbackValue(FakeEvent());
       registerFallbackValue(const PaginationParams());
       registerFallbackValue(FakeChannelState());
-      registerFallbackValue(const Filter.empty());
+      registerFallbackValue(const ChannelFilter.raw({}));
     });
 
     setUp(() async {
@@ -828,7 +828,7 @@ void main() {
       test(
         'queryChannelsOnline with inline filter persists via saveChannelQueries',
         () async {
-          final filter = Filter.in_('members', const ['test-user-id']);
+          final filter = ChannelFilter.in_(ChannelFilterField.members, const ['test-user-id']);
 
           final channelStates = List.generate(
             3,
@@ -923,7 +923,7 @@ void main() {
               ..channels = channelStates
               ..predefinedFilter = PredefinedFilter(
                 name: filterName,
-                filter: const Filter.empty(),
+                filter: const ChannelFilter.raw({}),
                 sort: resolvedSort,
               ),
           );
@@ -960,7 +960,7 @@ void main() {
               filter: null,
               sort: null,
               predefinedFilter: filterName,
-              resolvedFilter: const Filter.empty(),
+              resolvedFilter: const ChannelFilter.raw({}),
               resolvedSort: resolvedSort,
               filterValues: filterValues,
               sortValues: sortValues,
@@ -1100,7 +1100,7 @@ void main() {
           );
 
           final resolvedSort = [ChannelSort.desc(ChannelSortField.lastMessageAt)];
-          const resolvedFilter = Filter.empty();
+          const resolvedFilter = ChannelFilter.raw({});
           final expectedPredefinedFilter = PredefinedFilter(
             name: filterName,
             filter: resolvedFilter,
@@ -1488,8 +1488,8 @@ void main() {
           });
 
           await Future.wait([
-            client.queryChannels(filter: Filter.in_('cid', const ['a'])).toList(),
-            client.queryChannels(filter: Filter.in_('cid', const ['b'])).toList(),
+            client.queryChannels(filter: ChannelFilter.in_(ChannelFilterField.cid, const ['a'])).toList(),
+            client.queryChannels(filter: ChannelFilter.in_(ChannelFilterField.cid, const ['b'])).toList(),
           ]);
 
           verify(
@@ -1611,7 +1611,7 @@ void main() {
       );
 
       const cid = 'message:nice-channel';
-      final filter = Filter.equal('channel_cid', cid);
+      final filter = BannedUserFilter.equal(BannedUserFilterField.channelCid, cid);
 
       when(
         () => api.moderation.queryBannedUsers(
@@ -1637,7 +1637,7 @@ void main() {
 
     test('`.search`', () async {
       const cid = 'test-type:test-id';
-      final filter = Filter.in_('cid', const [cid]);
+      final filter = ChannelFilter.in_(ChannelFilterField.cid, const [cid]);
 
       final messages = List.generate(
         3,
@@ -3413,7 +3413,7 @@ void main() {
     });
 
     test('`.queryPolls`', () async {
-      final filter = Filter.in_('id', const ['test-poll-id']);
+      final filter = PollFilter.in_(PollFilterField.id, const ['test-poll-id']);
       final sort = [PollSort.desc(PollSortField.createdAt)];
       const pagination = PaginationParams(limit: 20);
 
@@ -3459,7 +3459,7 @@ void main() {
 
     test('`.queryPollVotes`', () async {
       const pollId = 'test-poll-id';
-      final filter = Filter.in_('id', const ['test-vote-id']);
+      final filter = PollVoteFilter.in_(PollVoteFilterField.id, const ['test-vote-id']);
       final sort = [PollVoteSort.desc(PollVoteSortField.createdAt)];
       const pagination = PaginationParams(limit: 20);
 
@@ -4605,7 +4605,7 @@ void main() {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';
 
-      final filter = Filter.equal('channel_cid', '$channelType:$channelId');
+      final filter = DraftFilter.equal(DraftFilterField.channelCid, '$channelType:$channelId');
       final sort = [DraftSort.desc(DraftSortField.createdAt)];
       const pagination = PaginationParams(limit: 20);
 
@@ -5276,7 +5276,7 @@ void main() {
 
     setUpAll(() {
       registerFallbackValue(const PaginationParams());
-      registerFallbackValue(Filter.equal('cid', ''));
+      registerFallbackValue(ChannelFilter.equal(ChannelFilterField.cid, ''));
     });
 
     setUp(() {
@@ -5331,7 +5331,10 @@ void main() {
 
       verify(
         () => api.channel.queryChannels(
-          filter: Filter.in_('cid', const ['messaging:c1', 'messaging:c2']),
+          filter: any(
+            named: 'filter',
+            that: isSameFilterAs(ChannelFilter.in_(ChannelFilterField.cid, const ['messaging:c1', 'messaging:c2'])),
+          ),
           sort: any(named: 'sort'),
           state: any(named: 'state'),
           watch: any(named: 'watch'),
@@ -5501,7 +5504,7 @@ void main() {
 
     setUpAll(() {
       registerFallbackValue(const PaginationParams());
-      registerFallbackValue(Filter.equal('cid', ''));
+      registerFallbackValue(ChannelFilter.equal(ChannelFilterField.cid, ''));
     });
 
     setUp(() {

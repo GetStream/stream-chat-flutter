@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_core/stream_core.dart' show Sort, SortField;
+import 'package:stream_core/stream_core.dart' show Filter, FilterField, Sort, SortField;
 
 import 'channel_model.dart';
 import 'message.dart';
@@ -136,6 +136,58 @@ class MessageReminder extends Equatable {
   ];
 }
 
+/// A filter for a reminder query.
+///
+/// See [MessageReminderFilterField] for the fields that can be filtered on.
+///
+/// ```dart
+/// final filter = MessageReminderFilter.lessOrEqual(
+///   MessageReminderFilterField.remindAt,
+///   DateTime.timestamp().toIso8601String(),
+/// );
+/// ```
+typedef MessageReminderFilter = Filter<MessageReminder>;
+
+/// Represents a field that reminder queries can be filtered on.
+class MessageReminderFilterField extends FilterField<MessageReminder> {
+  /// Creates a reminder filter field named [remote] on the wire, reading its
+  /// value off an instance with [value].
+  MessageReminderFilterField(super.remote, super.value);
+
+  /// Filters reminders by the full id of the channel holding the message, in
+  /// the form `type:id`.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final channelCid = MessageReminderFilterField(
+    'channel_cid',
+    (it) => it.channelCid,
+  );
+
+  /// Filters reminders by the id of the message they mark.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final messageId = MessageReminderFilterField(
+    'message_id',
+    (it) => it.messageId,
+  );
+
+  /// Filters reminders by the time at which the user wants to be reminded.
+  ///
+  /// **Supported operators:** `$eq`, `$gt`, `$gte`, `$lt`, `$lte`, `$exists`
+  static final remindAt = MessageReminderFilterField(
+    'remind_at',
+    (it) => it.remindAt,
+  );
+
+  /// Filters reminders by their creation date.
+  ///
+  /// **Supported operators:** `$eq`, `$gt`, `$gte`, `$lt`, `$lte`
+  static final createdAt = MessageReminderFilterField(
+    'created_at',
+    (it) => it.createdAt,
+  );
+}
+
 /// Represents a sorting operation for message reminders.
 ///
 /// The API accepts only whole combinations, not an arbitrary mix:
@@ -143,6 +195,10 @@ class MessageReminder extends Equatable {
 /// Anything else is rejected.
 ///
 /// See [MessageReminderSortField] for the fields that can be sorted on.
+///
+/// ```dart
+/// final sort = [MessageReminderSort.asc(MessageReminderSortField.remindAt)];
+/// ```
 class MessageReminderSort extends Sort<MessageReminder> {
   /// Sorts by [field], smallest first.
   const MessageReminderSort.asc(

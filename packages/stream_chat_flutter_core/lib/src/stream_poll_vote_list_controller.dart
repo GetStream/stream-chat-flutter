@@ -61,8 +61,8 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
   ///
   /// You can query on any of the custom fields you've defined on the
   /// [PollVote].
-  final Filter? filter;
-  Filter? _activeFilter;
+  final PollVoteFilter? filter;
+  PollVoteFilter? _activeFilter;
 
   /// The sorting used for the poll votes matching the filters.
   ///
@@ -87,7 +87,7 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new filter.
-  set filter(Filter? value) => _activeFilter = value;
+  set filter(PollVoteFilter? value) => _activeFilter = value;
 
   /// Allows for the change of the query sort used for poll vote queries.
   ///

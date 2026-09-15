@@ -724,7 +724,7 @@ class StreamChannelState extends State<StreamChannel> {
 
   /// Query channel members.
   Future<List<Member>> queryMembers({
-    Filter? filter,
+    MemberFilter? filter,
     List<MemberSort>? sort,
     PaginationParams? pagination,
   }) async {

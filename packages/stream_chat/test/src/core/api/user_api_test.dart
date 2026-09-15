@@ -24,7 +24,7 @@ void main() {
 
   test('queryUsers', () async {
     const presence = true;
-    final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
+    final filter = UserFilter.in_(UserFilterField.id, const ['test-id-1', 'test-id-2']);
     final sort = [UserSort.desc(UserSortField.custom('test-field'))];
     const pagination = PaginationParams();
 

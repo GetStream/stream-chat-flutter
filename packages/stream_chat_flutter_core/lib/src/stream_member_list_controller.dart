@@ -56,8 +56,8 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
   /// You can query on any of the custom fields you've defined on the [Member].
   ///
   /// You can also filter other built-in channel fields.
-  final Filter? filter;
-  Filter? _activeFilter;
+  final MemberFilter? filter;
+  MemberFilter? _activeFilter;
 
   /// The sorting used for the members matching the filters.
   ///
@@ -82,7 +82,7 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new filter.
-  set filter(Filter? value) => _activeFilter = value;
+  set filter(MemberFilter? value) => _activeFilter = value;
 
   /// Allows for the change of the query sort used for member queries.
   ///
@@ -106,7 +106,7 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
     final trimmed = query.trim();
     if (trimmed.isEmpty) return searchWithFilter(filter);
 
-    final searchFilter = Filter.autoComplete('name', trimmed);
+    final searchFilter = MemberFilter.autoComplete(MemberFilterField.name, trimmed);
 
     return searchWithFilter(searchFilter);
   }
@@ -118,7 +118,7 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
   /// the reload is debounced by that text's length; otherwise it reloads
   /// immediately. Rapidly superseded searches are dropped, so only the latest
   /// query's results are applied.
-  void searchWithFilter(Filter? filter) {
+  void searchWithFilter(MemberFilter? filter) {
     _activeFilter = filter;
     debouncedSearch(searchQueryLength(filter));
   }

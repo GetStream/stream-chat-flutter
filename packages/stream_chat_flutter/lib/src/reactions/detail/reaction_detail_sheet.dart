@@ -108,7 +108,7 @@ class _ReactionDetailSheetState extends State<ReactionDetailSheet> {
       messageId: widget.message.id,
       sort: ReactionSort.defaultSort,
       filter: switch (_currentReactionType) {
-        final type? => .equal('type', type),
+        final type? => .equal(ReactionFilterField.type, type),
         _ => null,
       },
     );
@@ -119,7 +119,7 @@ class _ReactionDetailSheetState extends State<ReactionDetailSheet> {
     setState(() => _currentReactionType = type);
 
     final updatedFilter = switch (type) {
-      final type? => Filter.equal('type', type),
+      final type? => ReactionFilter.equal(ReactionFilterField.type, type),
       _ => null,
     };
 

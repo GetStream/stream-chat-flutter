@@ -14,7 +14,9 @@ class ChannelQueriesMetadata extends Table {
   TextColumn get queryHash => text()();
 
   /// The server-resolved filter spec to surface on offline reads.
-  TextColumn get filter => text().map(const FilterConverter())();
+  ///
+  /// Null when the query resolved to no filter at all.
+  TextColumn get filter => text().map(const FilterConverter()).nullable()();
 
   /// The server-resolved sort spec to apply on offline reads.
   TextColumn get sort => text().map(const ChannelSortConverter())();

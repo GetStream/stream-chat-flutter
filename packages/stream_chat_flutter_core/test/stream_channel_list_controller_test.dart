@@ -38,7 +38,7 @@ void main() {
 
   Future<StreamChannelListController> buildController({
     List<Channel> channels = const [],
-    Filter? filter,
+    ChannelFilter? filter,
     List<ChannelSort>? channelStateSort,
     String? predefinedFilter,
     Map<String, Object?>? filterValues,
@@ -88,7 +88,7 @@ void main() {
   });
 
   test('doInitialLoad forwards inline filter and sort to queryChannels', () async {
-    final filter = Filter.in_('members', const ['u1']);
+    final filter = ChannelFilter.in_(ChannelFilterField.members, const ['u1']);
     final sort = [ChannelSort.desc(ChannelSortField.lastMessageAt)];
 
     await buildController(filter: filter, channelStateSort: sort);
@@ -168,7 +168,7 @@ void main() {
   });
 
   test('loadMore appends new channels and forwards inline filter', () async {
-    final filter = Filter.in_('members', const ['u1']);
+    final filter = ChannelFilter.in_(ChannelFilterField.members, const ['u1']);
     const nextPageKey = 2;
 
     final existing = [unsortedMockChannel(), unsortedMockChannel()];

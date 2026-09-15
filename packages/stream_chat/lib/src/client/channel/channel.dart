@@ -268,6 +268,20 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.hidden == true).distinct();
   }
 
+  /// Channel blocked status.
+  /// Status is specific to the current user.
+  bool get blocked {
+    _checkInitialized();
+    return state!.channelState.channel?.blocked == true;
+  }
+
+  /// Channel blocked status as a stream.
+  /// Status is specific to the current user.
+  Stream<bool> get blockedStream {
+    _checkInitialized();
+    return state!.channelStateStream.map((cs) => cs.channel?.blocked == true).distinct();
+  }
+
   /// Channel pinned status.
   /// Status is specific to the current user.
   bool get isPinned {
@@ -1373,13 +1387,13 @@ class Channel {
   /// Search for a message with the given options.
   Future<SearchMessagesResponse> search({
     String? query,
-    Filter? messageFilters,
+    MessageSearchFilter? messageFilters,
     List<MessageSearchSort>? sort,
     PaginationParams? paginationParams,
   }) {
     _checkInitialized();
     return _client.search(
-      Filter.in_('cid', [cid!]),
+      .in_(ChannelFilterField.cid, [cid]),
       sort: sort,
       query: query,
       paginationParams: paginationParams,
@@ -1540,7 +1554,7 @@ class Channel {
   /// [sort] options.
   Future<QueryPollVotesResponse> queryPollVotes(
     String pollId, {
-    Filter? filter,
+    PollVoteFilter? filter,
     List<PollVoteSort>? sort,
     PaginationParams pagination = const PaginationParams(),
   }) {
@@ -2211,7 +2225,7 @@ class Channel {
 
   /// Query channel members.
   Future<QueryMembersResponse> queryMembers({
-    Filter? filter,
+    MemberFilter? filter,
     List<MemberSort>? sort,
     PaginationParams? pagination,
   }) => _client.queryMembers(
@@ -2225,12 +2239,12 @@ class Channel {
 
   /// Query channel banned users.
   Future<QueryBannedUsersResponse> queryBannedUsers({
-    Filter? filter,
+    BannedUserFilter? filter,
     List<BannedUserSort>? sort,
     PaginationParams? pagination,
   }) {
     _checkInitialized();
-    filter ??= Filter.equal('channel_cid', cid!);
+    filter ??= .equal(BannedUserFilterField.channelCid, cid);
     return _client.queryBannedUsers(
       filter: filter,
       sort: sort,

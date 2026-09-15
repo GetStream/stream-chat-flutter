@@ -14,12 +14,22 @@ export 'package:dio/dio.dart'
         ProgressCallback;
 export 'package:rate_limiter/rate_limiter.dart';
 // Re-exported with a `show` allowlist rather than wholesale: `stream_core`
-// also declares names this barrel defines — `AttachmentFile`, `Filter`,
-// `User` — so a blanket export would not compile.
+// also declares names this barrel defines — `AttachmentFile`, `User` — so a
+// blanket export would not compile.
+//
+// `Filter`'s operator subclasses stay out of the list: a filter is read with
+// `toJson`. `EvaluationOperator` and `LogicalOperator` are the exception,
+// because `searchQueryLength` needs to tell a text search from a compound
+// filter without re-parsing the JSON.
 export 'package:stream_core/stream_core.dart'
     show
         CompositeComparator,
+        EvaluationOperator,
         Failure,
+        Filter,
+        FilterField,
+        FilterOperator,
+        LogicalOperator,
         NullOrdering,
         Result,
         Sort,
@@ -78,7 +88,6 @@ export 'src/core/models/device.dart';
 export 'src/core/models/draft.dart';
 export 'src/core/models/draft_message.dart';
 export 'src/core/models/event.dart';
-export 'src/core/models/filter.dart' show Filter, FilterOperator;
 export 'src/core/models/location.dart';
 export 'src/core/models/location_coordinates.dart';
 export 'src/core/models/member.dart';

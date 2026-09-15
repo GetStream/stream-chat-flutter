@@ -68,7 +68,7 @@ void main() {
         expect(usedFilter, isNull);
 
         async.elapse(const Duration(milliseconds: 1));
-        expect(usedFilter, Filter.autoComplete('name', 'abc'));
+        expect(usedFilter?.toJson(), MemberFilter.autoComplete(MemberFilterField.name, 'abc').toJson());
       });
     });
 
@@ -88,7 +88,7 @@ void main() {
       fakeAsync((async) {
         final controller = StreamMemberListController(
           channel: channel,
-          filter: Filter.equal('banned', true),
+          filter: MemberFilter.equal(MemberFilterField.banned, true),
         );
         addTearDown(controller.dispose);
 
@@ -97,7 +97,7 @@ void main() {
 
         // The base filter is not merged in — combining it with the search text
         // would let it skew the debounce policy and contradict the search.
-        expect(usedFilter, Filter.autoComplete('name', 'abc'));
+        expect(usedFilter?.toJson(), MemberFilter.autoComplete(MemberFilterField.name, 'abc').toJson());
       });
     });
   });

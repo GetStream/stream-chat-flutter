@@ -7,9 +7,12 @@
 
 > **Read the resolved package, not the sibling repo.** The first pass at this phase claimed two
 > upstream core additions were needed. Both were wrong, because they were derived from
-> `stream-core-flutter/packages/stream_core` (unreleased `main`) rather than from
-> `~/.pub-cache/hosted/pub.dev/stream_core-0.5.0`, which is what `stream_chat` actually resolves.
-> Always diff against the pub-cache copy.
+> `stream-core-flutter/packages/stream_core` (unreleased `main`) rather than from what
+> `stream_chat` actually resolves. Always diff against the pub-cache copy, and read the path out of
+> `packages/stream_chat/.dart_tool/package_config.json` rather than assuming it: `melos.yaml` pins
+> `stream_core` to a git `ref` for now, so the copy in use is under `~/.pub-cache/git/`, not
+> `~/.pub-cache/hosted/`. It returns to a hosted constraint when core next releases — see
+> [DEFERRED.md](DEFERRED.md).
 
 ## Scope
 
@@ -17,9 +20,9 @@
 | --- | --- | --- |
 | `lib/src/system_environment.dart` (57) | `stream_core` `api/system_environment.dart` | **done** |
 | `lib/src/core/http/system_environment_manager.dart` (111) | `stream_core` `api/system_environment_manager.dart` | **done** |
-| `lib/src/core/platform_detector/` — `platform_detector.dart` (~97) + `_stub` / `_web` / `_io` | `stream_core` `platform/current_platform.dart` + `platform/detector/` | **blocked on a `stream_core` release** |
+| `lib/src/core/platform_detector/` — `platform_detector.dart` (~97) + `_stub` / `_web` / `_io` | `stream_core` `platform/current_platform.dart` + `platform/detector/` | **ready** — the SHA pinned in [08](08-query-dsl.md) carries what this needed |
 
-### Platform detector — blocked on a `stream_core` release
+### Platform detector — unblocked by the pin in phase 08
 
 Both packages define `CurrentPlatform` **and** `PlatformType`, so `stream_chat.dart` must stop
 exporting ours in the same PR — there is no coexistence.
@@ -29,7 +32,7 @@ exporting ours in the same PR — there is no coexistence.
 | `enum PlatformType` — 7 values, no payload | same 7 values, each carrying `operatingSystem` — **identical strings** (`android`, `ios`, `web`, `macos`, `windows`, `linux`, `fuchsia`), so nothing on the wire changes |
 | `CurrentPlatform.name` (a `switch`) | `CurrentPlatform.operatingSystem` |
 | 7 `is*` getters + `isFlutterTest` | same, plus `isMobile` / `isDesktop` |
-| `@visibleForTesting static PlatformType? debugCurrentPlatformOverride`, honoured by an assert-gated `type` | **not in 0.5.0** — present on core's `main`, unreleased |
+| `@visibleForTesting static PlatformType? debugCurrentPlatformOverride`, honoured by an assert-gated `type` | not in 0.5.0, but **present at the pinned SHA**, which is what the branch resolves |
 | conditional import: `_stub` (throws) / `_web` on `dart.library.js_interop` / `_io` | `detector/platform_detector` (web) / `platform_detector_io` on `dart.library.io` |
 
 Two corrections to the original write-up:

@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:stream_core/stream_core.dart' show Sort, SortField;
+import 'package:stream_core/stream_core.dart' show Filter, FilterField, Sort, SortField;
 
 import 'channel_model.dart';
 import 'draft_message.dart';
@@ -84,11 +84,59 @@ class Draft extends Equatable {
   ];
 }
 
+/// A filter for a draft query.
+///
+/// See [DraftFilterField] for the fields that can be filtered on.
+///
+/// ```dart
+/// final filter = DraftFilter.equal(
+///   DraftFilterField.channelCid,
+///   'messaging:general',
+/// );
+/// ```
+typedef DraftFilter = Filter<Draft>;
+
+/// Represents a field that draft queries can be filtered on.
+class DraftFilterField extends FilterField<Draft> {
+  /// Creates a draft filter field named [remote] on the wire, reading its
+  /// value off an instance with [value].
+  DraftFilterField(super.remote, super.value);
+
+  /// Filters drafts by the full id of the channel they belong to, in the form
+  /// `type:id`.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final channelCid = DraftFilterField(
+    'channel_cid',
+    (it) => it.channelCid,
+  );
+
+  /// Filters drafts by their creation date.
+  ///
+  /// **Supported operators:** `$eq`, `$gt`, `$gte`, `$lt`, `$lte`
+  static final createdAt = DraftFilterField(
+    'created_at',
+    (it) => it.createdAt,
+  );
+
+  /// Filters drafts by the id of the message they reply to.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$exists`
+  static final parentId = DraftFilterField(
+    'parent_id',
+    (it) => it.parentId,
+  );
+}
+
 /// Represents a sorting operation for drafts.
 ///
 /// The API sorts drafts by `createdAt` only. Anything else is rejected.
 ///
 /// See [DraftSortField] for the fields that can be sorted on.
+///
+/// ```dart
+/// final sort = [DraftSort.desc(DraftSortField.createdAt)];
+/// ```
 class DraftSort extends Sort<Draft> {
   /// Sorts by [field], smallest first.
   const DraftSort.asc(

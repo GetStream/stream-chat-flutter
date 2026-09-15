@@ -104,7 +104,7 @@ void main() {
 
     setUpAll(() {
       registerFallbackValue(<String>[]);
-      registerFallbackValue(const Filter.empty());
+      registerFallbackValue(const ChannelFilter.raw({}));
       registerFallbackValue([]);
     });
 
@@ -288,7 +288,7 @@ void main() {
         const cids = ['messaging:c0', 'messaging:c1', 'messaging:c2'];
 
         const currentUserId = 'test-user-id';
-        final filter = Filter.in_('members', const [currentUserId]);
+        final filter = ChannelFilter.in_(ChannelFilterField.members, const [currentUserId]);
 
         // pinnedAt values chosen so descending order is [c1, c2, c0]. With
         // offset 1 / limit 1 the only paged cid is c2.
@@ -372,7 +372,7 @@ void main() {
       });
 
       test('returns empty list and skips hydration when no channels match', () async {
-        final filter = Filter.in_('members', const ['unknown_user']);
+        final filter = ChannelFilter.in_(ChannelFilterField.members, const ['unknown_user']);
 
         when(() => mockDatabase.channelQueryDao.getChannels(filter: filter)).thenAnswer((_) async => <ChannelModel>[]);
 
@@ -408,7 +408,7 @@ void main() {
     });
 
     test('updateChannelQueries', () async {
-      final filter = Filter.in_('members', const ['testUserId']);
+      final filter = ChannelFilter.in_(ChannelFilterField.members, const ['testUserId']);
       const cids = <String>[];
       when(() => mockDatabase.channelQueryDao.updateChannelQueries(filter, cids)).thenAnswer((_) => Future.value());
 
@@ -427,7 +427,7 @@ void main() {
         const cids = ['messaging:c0', 'messaging:c1', 'messaging:c2'];
 
         const currentUserId = 'test-user-id';
-        final filter = Filter.in_('members', const [currentUserId]);
+        final filter = ChannelFilter.in_(ChannelFilterField.members, const [currentUserId]);
 
         // pinnedAt values chosen so descending order is [c1, c2, c0]. With
         // offset 1 / limit 1 the only paged cid is c2.
@@ -512,7 +512,7 @@ void main() {
       });
 
       test('standard mode returns empty response when no channels match', () async {
-        final filter = Filter.in_('members', const ['unknown_user']);
+        final filter = ChannelFilter.in_(ChannelFilterField.members, const ['unknown_user']);
 
         when(() => mockDatabase.channelQueryDao.getChannels(filter: filter)).thenAnswer((_) async => <ChannelModel>[]);
 
@@ -584,7 +584,7 @@ void main() {
           ),
         };
 
-        final persistedFilter = Filter.equal('type', 'messaging');
+        final persistedFilter = ChannelFilter.equal(ChannelFilterField.type, 'messaging');
 
         when(
           () => mockDatabase.channelQueryDao.getChannelsAndSpecByPredefinedFilter(
@@ -749,7 +749,7 @@ void main() {
 
     group('saveChannelQueries', () {
       test('standard mode forwards to channelQueryDao.updateChannelQueries', () async {
-        final filter = Filter.in_('members', const ['testUserId']);
+        final filter = ChannelFilter.in_(ChannelFilterField.members, const ['testUserId']);
         const cids = <String>[];
         when(() => mockDatabase.channelQueryDao.updateChannelQueries(filter, cids)).thenAnswer((_) => Future.value());
 
@@ -759,9 +759,9 @@ void main() {
       });
 
       test('standard mode ignores resolvedFilter and resolvedSort', () async {
-        final filter = Filter.in_('members', const ['testUserId']);
+        final filter = ChannelFilter.in_(ChannelFilterField.members, const ['testUserId']);
         const cids = <String>['messaging:c0'];
-        final resolvedFilter = Filter.equal('type', 'messaging');
+        final resolvedFilter = ChannelFilter.equal(ChannelFilterField.type, 'messaging');
         final resolvedSort = [
           ChannelSort.desc(ChannelSortField.lastMessageAt),
         ];
@@ -807,7 +807,7 @@ void main() {
         const filterValues = {'user_id': 'testUserId'};
         const sortValues = {'pinned_at': true};
         const cids = <String>['messaging:c0'];
-        final resolvedFilter = Filter.equal('type', 'messaging');
+        final resolvedFilter = ChannelFilter.equal(ChannelFilterField.type, 'messaging');
         final resolvedSort = [
           ChannelSort.desc(ChannelSortField.lastMessageAt),
         ];
@@ -847,7 +847,7 @@ void main() {
         ).called(1);
       });
 
-      test('predefined mode applies Filter.empty() and empty-sort fallback when resolved values are null', () async {
+      test('predefined mode passes a null filter and empty-sort fallback when resolved values are null', () async {
         const filterName = 'sample-app-list';
         const cids = <String>['messaging:c0'];
 
@@ -855,7 +855,7 @@ void main() {
           () => mockDatabase.channelQueryDao.updateChannelQueriesByPredefinedFilter(
             filterName,
             cids,
-            filter: const Filter.empty(),
+            filter: null,
             sort: [],
             filterValues: null,
             sortValues: null,
@@ -869,7 +869,7 @@ void main() {
           () => mockDatabase.channelQueryDao.updateChannelQueriesByPredefinedFilter(
             filterName,
             cids,
-            filter: const Filter.empty(),
+            filter: null,
             sort: [],
             filterValues: null,
             sortValues: null,

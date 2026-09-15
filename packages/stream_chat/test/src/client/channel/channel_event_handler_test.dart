@@ -57,7 +57,7 @@ void main() {
     registerFallbackValue(FakeMessageReminder());
     registerFallbackValue(FakeLocation());
     registerFallbackValue(FakeChannelPushPreference());
-    registerFallbackValue(Filter.equal('id', ''));
+    registerFallbackValue(MemberFilter.equal(MemberFilterField.userId, ''));
     registerFallbackValue('');
     registerFallbackValue(0);
     registerFallbackValue(false);
@@ -687,7 +687,15 @@ void main() {
       handler.handleEvent(event);
       await Future<void>.value();
 
-      verify(() => channel.queryMembers(filter: Filter.equal('id', otherUser.id))).called(1);
+      // A `Filter` compares by identity, so the query is checked against the
+      // filter it serializes to rather than against an equal instance.
+      final filter =
+          verify(
+                () => channel.queryMembers(filter: captureAny(named: 'filter')),
+              ).captured.single
+              as MemberFilter;
+
+      expect(filter.toJson(), MemberFilter.equal(MemberFilterField.userId, otherUser.id).toJson());
       verify(() => mutations.onMemberBanned(member)).called(1);
     });
 

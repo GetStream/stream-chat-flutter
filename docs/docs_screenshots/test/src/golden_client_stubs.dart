@@ -7,7 +7,7 @@ bool _registeredFallbacks = false;
 
 void _ensureGoldenMocktailFallbacks() {
   if (_registeredFallbacks) return;
-  registerFallbackValue(const Filter.empty());
+  registerFallbackValue(const ChannelFilter.raw({}));
   registerFallbackValue(const ThreadOptions());
   registerFallbackValue(const PaginationParams());
   registerFallbackValue(<Sort<User>>[]);

@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_core/stream_core.dart' show Sort, SortField;
+import 'package:stream_core/stream_core.dart' show Filter, FilterField, Sort, SortField;
 
 import 'channel_model.dart';
 import 'user.dart';
@@ -79,9 +79,77 @@ class BannedUser extends Equatable {
   ];
 }
 
+/// A filter for a banned-user query.
+///
+/// See [BannedUserFilterField] for the fields that can be filtered on.
+///
+/// ```dart
+/// final filter = BannedUserFilter.equal(
+///   BannedUserFilterField.channelCid,
+///   'messaging:general',
+/// );
+/// ```
+typedef BannedUserFilter = Filter<BannedUser>;
+
+/// Represents a field that banned-user queries can be filtered on.
+class BannedUserFilterField extends FilterField<BannedUser> {
+  /// Creates a banned-user filter field named [remote] on the wire, reading
+  /// its value off an instance with [value].
+  BannedUserFilterField(super.remote, super.value);
+
+  /// Filters banned users by their id.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`
+  static final userId = BannedUserFilterField(
+    'user_id',
+    (it) => it.user.id,
+  );
+
+  /// Filters banned users by the id of the user who banned them.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`
+  static final bannedById = BannedUserFilterField(
+    'banned_by_id',
+    (it) => it.bannedBy?.id,
+  );
+
+  /// Filters banned users by the full id of the channel they were banned in,
+  /// in the form `type:id`.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final channelCid = BannedUserFilterField(
+    'channel_cid',
+    (it) => it.channel?.cid,
+  );
+
+  /// Filters banned users by the reason given for the ban.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`, `$autocomplete`
+  static final reason = BannedUserFilterField(
+    'reason',
+    (it) => it.reason,
+  );
+
+  /// Filters banned users by the date the ban was created.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`
+  static final createdAt = BannedUserFilterField(
+    'created_at',
+    (it) => it.createdAt,
+  );
+}
+
 /// Represents a sorting operation for banned users.
 ///
 /// See [BannedUserSortField] for the fields that can be sorted on.
+///
+/// ```dart
+/// final sort = [BannedUserSort.desc(BannedUserSortField.createdAt)];
+/// ```
 class BannedUserSort extends Sort<BannedUser> {
   /// Sorts by [field], smallest first.
   const BannedUserSort.asc(

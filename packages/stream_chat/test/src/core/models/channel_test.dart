@@ -101,6 +101,19 @@ void main() {
     expect(newChannel.hidden, true);
   });
 
+  test('a non-boolean flag in replacement extraData falls back to the current value', () {
+    // The getters read these with `safeCast`, so `copyWith` has to as well —
+    // extra data is consumer-authored and can hold anything.
+    final channel = ChannelModel(cid: 'test:cid', muted: true, blocked: true);
+
+    final newChannel = channel.copyWith(
+      extraData: {'muted': 'yes', 'blocked': 1},
+    );
+
+    expect(newChannel.muted, true);
+    expect(newChannel.blocked, true);
+  });
+
   test('disabled property and extraData manipulation', () {
     final channel = ChannelModel(cid: 'test:cid', disabled: false);
 

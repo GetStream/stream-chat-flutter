@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_core/stream_core.dart' show Standard, Sort, SortField;
+import 'package:stream_core/stream_core.dart' show Filter, FilterField, Standard, Sort, SortField;
 import 'package:uuid/uuid.dart';
 
 import '../util/serializer.dart';
@@ -270,12 +270,120 @@ class Poll extends Equatable {
   ];
 }
 
+/// A filter for a poll query.
+///
+/// See [PollFilterField] for the fields that can be filtered on.
+///
+/// ```dart
+/// final filter = PollFilter.equal(PollFilterField.isClosed, false);
+/// ```
+typedef PollFilter = Filter<Poll>;
+
+/// Represents a field that poll queries can be filtered on.
+class PollFilterField extends FilterField<Poll> {
+  /// Creates a poll filter field named [remote] on the wire, reading its value
+  /// off an instance with [value].
+  PollFilterField(super.remote, super.value);
+
+  /// Creates a field the SDK does not model, read from [Poll.extraData].
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`, `$contains`, `$q`, `$autocomplete`
+  factory PollFilterField.custom(String remote) {
+    return PollFilterField(remote, (it) => it.extraData[remote]);
+  }
+
+  /// Filters polls by their id.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final id = PollFilterField(
+    'id',
+    (it) => it.id,
+  );
+
+  /// Filters polls by their name.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final name = PollFilterField(
+    'name',
+    (it) => it.name,
+  );
+
+  /// Filters polls by the id of the user who created them.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final createdById = PollFilterField(
+    'created_by_id',
+    (it) => it.createdById,
+  );
+
+  /// Filters polls by whether they are closed to further voting.
+  ///
+  /// **Supported operators:** `$eq`
+  static final isClosed = PollFilterField(
+    'is_closed',
+    (it) => it.isClosed,
+  );
+
+  /// Filters polls by how many votes each user may cast.
+  ///
+  /// **Supported operators:** `$eq`, `$gt`, `$gte`, `$lt`, `$lte`
+  static final maxVotesAllowed = PollFilterField(
+    'max_votes_allowed',
+    (it) => it.maxVotesAllowed,
+  );
+
+  /// Filters polls by whether they accept free-form answers.
+  ///
+  /// **Supported operators:** `$eq`
+  static final allowAnswers = PollFilterField(
+    'allow_answers',
+    (it) => it.allowAnswers,
+  );
+
+  /// Filters polls by whether users may add their own options.
+  ///
+  /// **Supported operators:** `$eq`
+  static final allowUserSuggestedOptions = PollFilterField(
+    'allow_user_suggested_options',
+    (it) => it.allowUserSuggestedOptions,
+  );
+
+  /// Filters polls by whether their votes are public or anonymous.
+  ///
+  /// **Supported operators:** `$eq`
+  static final votingVisibility = PollFilterField(
+    'voting_visibility',
+    (it) => _$VotingVisibilityEnumMap[it.votingVisibility],
+  );
+
+  /// Filters polls by their creation date.
+  ///
+  /// **Supported operators:** `$eq`, `$gt`, `$gte`, `$lt`, `$lte`
+  static final createdAt = PollFilterField(
+    'created_at',
+    (it) => it.createdAt,
+  );
+
+  /// Filters polls by their last update date.
+  ///
+  /// **Supported operators:** `$eq`, `$gt`, `$gte`, `$lt`, `$lte`
+  static final updatedAt = PollFilterField(
+    'updated_at',
+    (it) => it.updatedAt,
+  );
+}
+
 /// Represents a sorting operation for polls.
 ///
 /// The API sorts on one field at a time: `id`, `name`, `createdAt`,
 /// `updatedAt` or `isClosed`. Anything else is rejected.
 ///
 /// See [PollSortField] for the fields that can be sorted on.
+///
+/// ```dart
+/// final sort = [PollSort.desc(PollSortField.createdAt)];
+/// ```
 class PollSort extends Sort<Poll> {
   /// Sorts by [field], smallest first.
   const PollSort.asc(

@@ -59,7 +59,6 @@ class AddMembersSheet extends StatefulWidget {
 class _AddMembersSheetState extends State<AddMembersSheet> {
   late final Channel _channel = StreamChannel.of(context).channel;
   late final StreamChatClient _client = StreamChat.of(context).client;
-  late final String? _currentUserId = _client.state.currentUser?.id;
 
   late final StreamUserListController _userListController = StreamUserListController(
     client: _client,
@@ -80,22 +79,11 @@ class _AddMembersSheetState extends State<AddMembersSheet> {
 
   bool get _canConfirm => _selectedIds.isNotEmpty && !_saving;
 
-  // Excludes the current user and existing channel members from the directory
-  // search — they can't be added again, so the search text is combined with
-  // the exclusion rather than replacing it.
-  Filter _filter({String query = ''}) {
-    final excludedIds = <String>{
-      if (_currentUserId case final id?) id,
-      for (final member in _channel.state!.members)
-        if (member.userId case final id?) id,
-    };
-    return Filter.and([
-      Filter.notIn('id', excludedIds.toList()),
-      if (query.isNotEmpty)
-        Filter.or([
-          Filter.autoComplete('name', query),
-          Filter.autoComplete('id', query),
-        ]),
+  UserFilter? _filter({String query = ''}) {
+    if (query.isEmpty) return null;
+    return UserFilter.or([
+      UserFilter.autoComplete(UserFilterField.name, query),
+      UserFilter.autoComplete(UserFilterField.id, query),
     ]);
   }
 

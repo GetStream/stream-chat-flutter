@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import '../http/stream_http_client.dart';
-import '../models/filter.dart';
 import '../models/thread.dart';
 import 'requests.dart';
 import 'responses.dart';
@@ -15,7 +14,7 @@ class ThreadsApi {
 
   /// Queries threads with the given [options] and [pagination] params.
   Future<QueryThreadsResponse> queryThreads({
-    Filter? filter,
+    ThreadFilter? filter,
     List<ThreadSort>? sort,
     ThreadOptions options = const ThreadOptions(),
     PaginationParams pagination = const PaginationParams(),

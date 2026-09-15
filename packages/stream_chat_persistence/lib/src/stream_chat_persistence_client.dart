@@ -283,7 +283,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @Deprecated('Use queryChannelStates instead')
   @override
   Future<List<ChannelState>> getChannelStates({
-    Filter? filter,
+    ChannelFilter? filter,
     List<ChannelSort>? channelStateSort,
     int? messageLimit,
     PaginationParams? paginationParams,
@@ -301,7 +301,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   /// [ChatPersistenceClient.queryChannelStates].
   @override
   Future<QueryChannelsResponse> queryChannelStates({
-    Filter? filter,
+    ChannelFilter? filter,
     List<ChannelSort>? sort,
     String? predefinedFilter,
     Map<String, Object?>? filterValues,
@@ -397,7 +397,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @Deprecated('Use saveChannelQueries instead')
   @override
   Future<void> updateChannelQueries(
-    Filter? filter,
+    ChannelFilter? filter,
     List<String> cids, {
     bool clearQueryCache = false,
   }) {
@@ -413,10 +413,10 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @override
   Future<void> saveChannelQueries({
     required List<String> cids,
-    Filter? filter,
+    ChannelFilter? filter,
     List<ChannelSort>? sort,
     String? predefinedFilter,
-    Filter? resolvedFilter,
+    ChannelFilter? resolvedFilter,
     List<ChannelSort>? resolvedSort,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
@@ -428,7 +428,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
       return db!.channelQueryDao.updateChannelQueriesByPredefinedFilter(
         predefinedFilter,
         cids,
-        filter: resolvedFilter ?? const Filter.empty(),
+        filter: resolvedFilter,
         sort: resolvedSort ?? const [],
         filterValues: filterValues,
         sortValues: sortValues,

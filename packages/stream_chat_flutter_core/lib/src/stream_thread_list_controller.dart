@@ -59,8 +59,8 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
   /// The query filters to use.
   ///
   /// You can query on any of the custom fields you've defined on the [Thread].
-  final Filter? filter;
-  Filter? _activeFilter;
+  final ThreadFilter? filter;
+  ThreadFilter? _activeFilter;
 
   /// The sorting used for the threads matching the filters.
   ///
@@ -89,7 +89,7 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new filter.
-  set filter(Filter? value) => _activeFilter = value;
+  set filter(ThreadFilter? value) => _activeFilter = value;
 
   /// Allows for the change of the query sort used for thread queries.
   ///

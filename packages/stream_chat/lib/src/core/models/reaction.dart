@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_core/stream_core.dart' show Sort, SortField;
+import 'package:stream_core/stream_core.dart' show Filter, FilterField, Sort, SortField;
 
 import '../util/serializer.dart';
 import 'user.dart';
@@ -134,9 +134,54 @@ class Reaction extends Equatable {
   ];
 }
 
+/// A filter for a reaction query.
+///
+/// See [ReactionFilterField] for the fields that can be filtered on.
+///
+/// ```dart
+/// final filter = ReactionFilter.equal(ReactionFilterField.type, 'like');
+/// ```
+typedef ReactionFilter = Filter<Reaction>;
+
+/// Represents a field that reaction queries can be filtered on.
+class ReactionFilterField extends FilterField<Reaction> {
+  /// Creates a reaction filter field named [remote] on the wire, reading its
+  /// value off an instance with [value].
+  ReactionFilterField(super.remote, super.value);
+
+  /// Filters reactions by their type.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final type = ReactionFilterField(
+    'type',
+    (it) => it.type,
+  );
+
+  /// Filters reactions by the id of the user who sent them.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final userId = ReactionFilterField(
+    'user_id',
+    (it) => it.userId,
+  );
+
+  /// Filters reactions by their creation date.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`
+  static final createdAt = ReactionFilterField(
+    'created_at',
+    (it) => it.createdAt,
+  );
+}
+
 /// Represents a sorting operation for reactions.
 ///
 /// See [ReactionSortField] for the fields that can be sorted on.
+///
+/// ```dart
+/// final sort = [ReactionSort.desc(ReactionSortField.createdAt)];
+/// ```
 class ReactionSort extends Sort<Reaction> {
   /// Sorts by [field], smallest first.
   const ReactionSort.asc(
