@@ -9,7 +9,7 @@ import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/thread.dart';
 import 'package:stream_chat/src/core/models/user.dart';
-import 'package:stream_core/stream_core.dart' show FilterField;
+import 'package:stream_core/stream_core.dart' show CollectionEquality, FilterField;
 import 'package:test/test.dart';
 
 void main() {
@@ -309,6 +309,57 @@ void main() {
       expect(PollFilterField.custom('x').remote, 'x');
       expect(ThreadFilterField.custom('has_unread').remote, 'has_unread');
       expect(UserFilterField.custom('x').remote, 'x');
+    });
+  });
+
+  group('collection equality', () {
+    ChannelState channelOf(List<String> memberIds) => ChannelState(
+      members: [for (final id in memberIds) Member(userId: id)],
+    );
+
+    test('`members` matches the channel holding exactly those users', () {
+      final filter = ChannelFilter.equal(ChannelFilterField.members, const ['alice', 'bob']);
+
+      expect(filter.matches(channelOf(['alice', 'bob'])), isTrue);
+      // Membership is a set: the server looks a distinct channel up by a hash
+      // of its sorted user ids, so the order they arrive in cannot matter.
+      expect(filter.matches(channelOf(['bob', 'alice'])), isTrue);
+      expect(filter.matches(channelOf(['alice', 'bob', 'carol'])), isFalse);
+      expect(filter.matches(channelOf(['alice'])), isFalse);
+    });
+
+    test('a field describing a channel matches by containment', () {
+      final filter = ChannelFilter.equal(ChannelFilterField.memberUserName, const ['Alice']);
+
+      final channel = ChannelState(
+        members: [
+          Member(
+            userId: 'alice',
+            user: User(id: 'alice', name: 'Alice'),
+          ),
+          Member(
+            userId: 'bob',
+            user: User(id: 'bob', name: 'Bob'),
+          ),
+        ],
+      );
+
+      expect(filter.matches(channel), isTrue);
+    });
+
+    // Only a field that identifies its model by its elements asks for
+    // exactness. A new collection field defaults to containment, so pin the
+    // one exception rather than leave the choice implicit.
+    test('`members` is the only field asking for exactness', () {
+      final exact = <FilterField<Object>>[
+        ChannelFilterField.members,
+        ChannelFilterField.memberUserName,
+        MessageSearchFilterField.attachmentsType,
+        MessageSearchFilterField.mentionedUsersId,
+        UserFilterField.teams,
+      ].where((it) => it.collectionEquality == CollectionEquality.containsExactly);
+
+      expect(exact, [same(ChannelFilterField.members)]);
     });
   });
 }

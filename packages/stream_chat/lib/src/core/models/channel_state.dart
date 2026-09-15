@@ -158,6 +158,24 @@ class ChannelFilterField extends FilterField<ChannelState> {
     return ChannelFilterField(remote, (it) => it.channel?.extraData[remote]);
   }
 
+  // Creates a channel filter field that declares its [collectionEquality].
+  //
+  // The [remote] and [value] arguments behave as in the unnamed constructor.
+  // Use it for a field that declares how a query compares its elements:
+  //
+  // ```dart
+  // ChannelFilterField._(
+  //   'tags',
+  //   (it) => it.channel?.extraData['tags'],
+  //   collectionEquality: .containsExactly,
+  // );
+  // ```
+  ChannelFilterField._(
+    super.remote,
+    super.value, {
+    super.collectionEquality,
+  });
+
   /// Filters channels by their id.
   ///
   /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`, `$exists`
@@ -265,14 +283,15 @@ class ChannelFilterField extends FilterField<ChannelState> {
 
   /// Filters channels by their members.
   ///
-  /// `$eq` matches a channel whose members are exactly the given users, the
-  /// way a distinct channel is looked up. `$in` matches a channel any of them
-  /// belong to.
+  /// `$eq` matches a channel holding exactly the given users and no one else,
+  /// which is how a distinct channel is looked up. `$in` matches a channel any
+  /// of them belong to.
   ///
   /// **Supported operators:** `$eq`, `$in`
-  static final members = ChannelFilterField(
+  static final members = ChannelFilterField._(
     'members',
     (it) => it.members?.map((it) => it.userId),
+    collectionEquality: .containsExactly,
   );
 
   /// Filters channels by the name of any of their members.
