@@ -26,10 +26,12 @@ jobs:
       - name: 🏷️ Extract Version Tag
         id: extract_tag
         shell: bash
+        env:
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
         run: |
           set -euo pipefail
 
-          commit_msg="${{ github.event.head_commit.message }}"
+          commit_msg="$COMMIT_MSG"
           echo "📦 Commit message: $commit_msg"
 
           # Match vX.Y.Z or vX.Y.Z-suffix (case-insensitive)

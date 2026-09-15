@@ -1,5 +1,6 @@
-import 'package:sample_app/utils/serializer.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../utils/serializer.dart';
 
 /// A push notification delivered by Stream Chat.
 ///

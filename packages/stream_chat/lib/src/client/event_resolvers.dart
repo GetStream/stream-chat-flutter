@@ -1,5 +1,5 @@
-import 'package:stream_chat/src/core/models/event.dart';
-import 'package:stream_chat/src/event_type.dart';
+import '../core/models/event.dart';
+import '../event_type.dart';
 
 /// Resolves message new events into more specific `pollCreated` events
 /// for easier downstream state handling.

@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/models/user_group_member.dart';
+import 'user_group_member.dart';
 
 part 'user_group.g.dart';
 

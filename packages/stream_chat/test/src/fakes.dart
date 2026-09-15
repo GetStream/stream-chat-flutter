@@ -177,6 +177,9 @@ class FakeClientState extends Fake implements ClientState {
   }
 
   @override
+  Map<String, User> get users => const {};
+
+  @override
   void updateUser(User? user) {
     if (user == null) return;
     if (_currentUser case final current? when user.id != current.id) return;

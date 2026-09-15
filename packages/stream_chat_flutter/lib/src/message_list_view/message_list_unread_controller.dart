@@ -68,8 +68,9 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../scrollable_positioned_list/scrollable_positioned_list.dart';
+import '../../stream_chat_flutter.dart';
 
 // The current user's read boundary: where in the channel they had read up to.
 // A mark-unread moves it backward, which is how a fresh one is told apart
@@ -344,8 +345,8 @@ class MessageListUnreadController {
     // Seeded from the channel's own state rather than hardcoded to false:
     // a channel can mount with a manual mark-unread already active (mark
     // unread, leave, come back — the flag lives on the cached
-    // `ChannelClientState`). `currentUserReadStream` is backed by a
-    // `BehaviorSubject`, so the subscription the list sets up replays the
+    // `ChannelClientState`). `currentUserReadStream` is derived from
+    // `BehaviorSubject`s, so the subscription the list sets up replays the
     // current value straight away; without this seed that replay would read
     // as a brand-new mark-unread and restart a session that never ended.
     _wasMarkedAsUnread = channelState?.isMarkedAsUnread ?? false;

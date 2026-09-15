@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
-import 'package:stream_chat_flutter_core/src/search_debouncer.dart';
+import 'paged_value_notifier.dart';
+import 'search_debouncer.dart';
 
 /// Adds query-length-aware, debounced search to a [PagedValueNotifier].
 ///

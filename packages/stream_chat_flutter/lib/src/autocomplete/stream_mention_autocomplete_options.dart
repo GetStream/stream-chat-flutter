@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/autocomplete/user_mention_search.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../stream_chat_flutter.dart';
+import '../misc/empty_widget.dart';
+import 'user_mention_search.dart';
 
 // Caps the card height so a long mention list scrolls internally
 // instead of pushing the composer / header off the screen.

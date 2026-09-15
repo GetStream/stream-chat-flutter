@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import '../../../stream_chat_flutter.dart';
 
 part 'fallback_attachment_builder.dart';
 part 'file_attachment_builder.dart';
@@ -12,6 +12,33 @@ part 'unsupported_attachment_builder.dart';
 part 'video_attachment_builder.dart';
 part 'voice_recording_attachment_playlist_builder.dart';
 part 'poll_attachment_builder.dart';
+
+// Screen-reader label for a media attachment tile.
+//
+// Image, video and giphy tiles render no text of their own, so without this
+// they are focusable — they open a preview on tap — but announce nothing.
+//
+// [index] (0-based) and [total] are announced only for a gallery, where
+// otherwise identical tiles need telling apart. The type label already rides
+// on the message row's own phrase ("Han Solo said, 2 photos, ..."), so the
+// tiles deliberately repeat the type rather than inventing a second summary.
+String _mediaAttachmentSemanticsLabel(
+  BuildContext context,
+  Attachment attachment, {
+  int? index,
+  int? total,
+}) {
+  final a11y = context.translations.accessibility;
+
+  final typeLabel = switch (attachment.type) {
+    AttachmentType.video => a11y.videoAttachmentLabel(title: attachment.title),
+    AttachmentType.giphy => a11y.gifAttachmentLabel,
+    _ => a11y.imageAttachmentLabel(title: attachment.title),
+  };
+
+  if (index == null || total == null || total < 2) return typeLabel;
+  return '$typeLabel, ${a11y.attachmentPositionLabel(index: index + 1, total: total)}';
+}
 
 /// {@template streamAttachmentWidgetTapCallback}
 /// Signature for a function that's called when the user taps on an attachment.

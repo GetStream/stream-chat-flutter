@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:sample_app/widgets/stream_draft_list_view.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../widgets/stream_draft_list_view.dart';
 
 class DraftListPage extends StatefulWidget {
   const DraftListPage({super.key});

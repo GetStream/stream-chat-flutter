@@ -1,5 +1,5 @@
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter_core/src/stream_thread_list_controller.dart';
+import 'stream_thread_list_controller.dart';
 
 /// Contains handlers that are called from [StreamThreadListController] for
 /// certain [Event]s.

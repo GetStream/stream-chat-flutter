@@ -813,6 +813,21 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String reminderAtText(String time) => 'Oggi alle $time';
 
   @override
+  String get translatedLabel => 'Tradotto';
+
+  @override
+  String get originalLabel => 'Originale';
+
+  @override
+  String get showOriginalLabel => 'Mostra originale';
+
+  @override
+  String get showTranslationLabel => 'Mostra traduzione';
+
+  @override
+  String translatedFromLanguageText(String languageCode) => 'Tradotto da ${_languageNameIt(languageCode)}';
+
+  @override
   String get createPollPromptLabel => 'Crea un sondaggio e fai votare tutti!';
 
   @override
@@ -971,6 +986,22 @@ class _AccessibilityTranslationsIt extends AccessibilityTranslations {
   }
 
   @override
+  String attachmentPositionLabel({required int index, required int total}) => '$index di $total';
+
+  @override
+  String get outgoingReplyToOwnMessageLabel => 'Hai risposto al tuo stesso messaggio';
+
+  @override
+  String outgoingReplyToMessageLabel({required String authorName}) => 'Hai risposto al messaggio di $authorName';
+
+  @override
+  String incomingReplyToOwnMessageLabel({required String replierName}) => '$replierName ha risposto al tuo messaggio';
+
+  @override
+  String incomingReplyToMessageLabel({required String replierName, required String authorName}) =>
+      '$replierName ha risposto al messaggio di $authorName';
+
+  @override
   String get voiceRecordingPlayTooltip => 'Riproduci';
 
   @override
@@ -1019,6 +1050,18 @@ class _AccessibilityTranslationsIt extends AccessibilityTranslations {
   }
 
   @override
+  String outgoingMessageLabel({required String body}) => 'Hai detto, $body';
+
+  @override
+  String incomingMessageLabel({required String senderName, required String body}) => '$senderName ha detto, $body';
+
+  @override
+  String outgoingDeletedMessageLabel({required String body}) => 'Tu, $body';
+
+  @override
+  String incomingDeletedMessageLabel({required String senderName, required String body}) => '$senderName, $body';
+
+  @override
   String get pollPreviewLabel => 'Sondaggio';
 
   @override
@@ -1035,6 +1078,9 @@ class _AccessibilityTranslationsIt extends AccessibilityTranslations {
 
   @override
   String get messageReadStatusLabel => 'Letto';
+
+  @override
+  String get messageFailedStatusLabel => 'Invio del messaggio non riuscito';
 
   @override
   String unreadMessagesLabel({required int count}) {
@@ -1177,3 +1223,68 @@ class _AccessibilityTranslationsIt extends AccessibilityTranslations {
     return parts.join(', ');
   }
 }
+
+// Display name for each language code Stream Chat's translation API
+// supports (`Message.i18n['language']`). Falls back to the uppercased code
+// itself for anything unrecognized.
+String _languageNameIt(String code) => _languageNamesIt[code] ?? code.toUpperCase();
+
+const _languageNamesIt = <String, String>{
+  'af': 'Afrikaans',
+  'sq': 'Albanese',
+  'am': 'Amarico',
+  'ar': 'Arabo',
+  'az': 'Azero',
+  'bn': 'Bengalese',
+  'bs': 'Bosniaco',
+  'bg': 'Bulgaro',
+  'zh': 'Cinese (semplificato)',
+  'zh-TW': 'Cinese (tradizionale)',
+  'hr': 'Croato',
+  'cs': 'Ceco',
+  'da': 'Danese',
+  'fa-AF': 'Dari',
+  'nl': 'Olandese',
+  'en': 'Inglese',
+  'et': 'Estone',
+  'fi': 'Finlandese',
+  'fr': 'Francese',
+  'fr-CA': 'Francese (Canada)',
+  'ka': 'Georgiano',
+  'de': 'Tedesco',
+  'el': 'Greco',
+  'ht': 'Creolo haitiano',
+  'ha': 'Hausa',
+  'he': 'Ebraico',
+  'hi': 'Hindi',
+  'hu': 'Ungherese',
+  'id': 'Indonesiano',
+  'it': 'Italiano',
+  'ja': 'Giapponese',
+  'ko': 'Coreano',
+  'lv': 'Lettone',
+  'lt': 'Lituano',
+  'ms': 'Malese',
+  'no': 'Norvegese',
+  'fa': 'Persiano',
+  'ps': 'Pashto',
+  'pl': 'Polacco',
+  'pt': 'Portoghese',
+  'ro': 'Romeno',
+  'ru': 'Russo',
+  'sr': 'Serbo',
+  'sk': 'Slovacco',
+  'sl': 'Sloveno',
+  'so': 'Somalo',
+  'es': 'Spagnolo',
+  'es-MX': 'Spagnolo (Messico)',
+  'sw': 'Swahili',
+  'sv': 'Svedese',
+  'tl': 'Tagalog',
+  'ta': 'Tamil',
+  'th': 'Tailandese',
+  'tr': 'Turco',
+  'uk': 'Ucraino',
+  'ur': 'Urdu',
+  'vi': 'Vietnamita',
+};

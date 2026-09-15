@@ -55,10 +55,13 @@ class VideoAttachmentBuilder extends StreamAttachmentWidgetBuilder {
       style: style,
       child: InkWell(
         onTap: onTap,
-        child: StreamVideoAttachment(
-          message: message,
-          constraints: constraints,
-          video: video,
+        child: Semantics(
+          label: _mediaAttachmentSemanticsLabel(context, video),
+          child: StreamVideoAttachment(
+            message: message,
+            constraints: constraints,
+            video: video,
+          ),
         ),
       ),
     );

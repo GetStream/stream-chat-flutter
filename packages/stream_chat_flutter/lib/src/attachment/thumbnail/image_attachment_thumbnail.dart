@@ -1,8 +1,9 @@
 import 'dart:io' show File;
 
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/attachment/thumbnail/thumbnail_size_calculator.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../../stream_chat_flutter.dart';
+import 'thumbnail_size_calculator.dart';
 
 /// {@template imageAttachmentThumbnail}
 /// Widget for building image attachment thumbnail.

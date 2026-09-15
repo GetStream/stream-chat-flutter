@@ -1,0 +1,1054 @@
+import 'dart:async';
+
+import 'package:collection/collection.dart';
+import 'package:meta/meta.dart';
+import 'package:rxdart/rxdart.dart';
+
+import '../../../stream_chat.dart';
+import '../../core/util/message_merging.dart';
+import '../../core/util/message_predicates.dart';
+import '../../core/util/utils.dart';
+import '../live_location_expiration_scheduler.dart';
+import '../retry_queue.dart';
+import 'channel_event_handler.dart';
+import 'channel_state_mutations.dart';
+
+/// The class that handles the state of the channel listening to the events.
+class ChannelClientState {
+  /// Creates a new instance listening to events and updating the state.
+  ChannelClientState(
+    this._channel,
+    ChannelState channelState,
+  ) {
+    _retryQueue = RetryQueue(
+      channel: _channel,
+      logger: _client.detachedLogger(
+        '🔄 (${generateHash([_channel.cid])})',
+      ),
+    );
+
+    _channelStateController = BehaviorSubject.seeded(channelState);
+    // Update the persistence storage with the seeded channel state.
+    _debouncedUpdatePersistenceChannelState.call([channelState]);
+
+    final mutations = ChannelStateMutations(
+      channel: _channel,
+      state: this,
+      upsertTypingEvent: _upsertTypingEvent,
+      removeTypingEvent: _removeTypingEvent,
+      removeWatcher: _removeWatcher,
+      updateMember: _updateMember,
+      deleteMessagesFromUser: _deleteMessagesFromUser,
+    );
+    final handler = ChannelEventHandler(channel: _channel, mutations: mutations);
+    _subscriptions.add(_channel.on().listen(handler.handleEvent));
+
+    _startCleaningStaleTypingEvents();
+
+    _startCleaningStalePinnedMessages();
+
+    _startSchedulingLocationExpiration();
+
+    final persistenceClient = _client.chatPersistenceClient;
+    persistenceClient
+        ?.getChannelThreads(_channel.cid!)
+        .then((threads) {
+          // Load all the threads for the channel from the offline storage.
+          if (threads.isNotEmpty) _threads = threads;
+        })
+        .then((_) => retryFailedMessages());
+  }
+
+  final Channel _channel;
+  StreamChatClient get _client => _channel.client;
+  final _subscriptions = CompositeSubscription();
+
+  // Removes the watcher from the channel state, optionally updating the
+  // watcher count when provided.
+  void _removeWatcher(User watcher, {int? watcherCount}) {
+    // Writes the state directly: the watcher list merge in
+    // [updateChannelState] would undo the removal.
+    final existingWatchers = channelState.watchers ?? const <User>[];
+    _channelState = channelState.copyWith(
+      watchers: existingWatchers.where((user) => user.id != watcher.id).toList(),
+      watcherCount: watcherCount,
+    );
+  }
+
+  // Replaces the member matching the given member's user id in the channel
+  // state. Does nothing if no member with the same user id exists.
+  void _updateMember(Member member) {
+    final currentMembers = [...members];
+    final memberIndex = currentMembers.indexWhere(
+      (m) => m.userId == member.userId,
+    );
+
+    if (memberIndex == -1) return;
+    currentMembers[memberIndex] = member;
+
+    updateChannelState(
+      channelState.copyWith(
+        members: currentMembers,
+      ),
+    );
+  }
+
+  /// Flag which indicates if [ChannelClientState] contain latest/recent messages or not.
+  ///
+  /// This flag should be managed by UI sdks.
+  ///
+  /// When false, any new message received by WebSocket event
+  /// [EventType.messageNew] will not be pushed on to message list.
+  bool get isUpToDate => _isUpToDateController.value;
+
+  set isUpToDate(bool isUpToDate) => _isUpToDateController.safeAdd(isUpToDate);
+
+  /// [isUpToDate] flag count as a stream.
+  Stream<bool> get isUpToDateStream => _isUpToDateController.stream;
+  final _isUpToDateController = BehaviorSubject.seeded(true);
+
+  /// The retry queue associated to this channel.
+  late final RetryQueue _retryQueue;
+
+  /// Queues [message] for another send attempt.
+  @internal
+  void scheduleRetry(Message message) => _retryQueue.add([message]);
+
+  /// Retry failed message.
+  Future<void> retryFailedMessages() async {
+    final allMessages = [...messages, ...threads.values.flattened];
+    final failedMessages = allMessages.where((it) => it.state.isFailed);
+
+    if (failedMessages.isEmpty) return;
+    _retryQueue.add(failedMessages);
+  }
+
+  /// Updates the [reminder] of the message if it exists.
+  void updateReminder(MessageReminder reminder) {
+    final messageId = reminder.messageId;
+    // TODO: Improve once we have support for parentId in reminders.
+    for (final message in [...messages, ...threads.values.flattened]) {
+      if (message.id == messageId) {
+        return updateMessage(
+          message.copyWith(reminder: reminder),
+        );
+      }
+    }
+  }
+
+  /// Deletes the [reminder] of the message if it exists.
+  void deleteReminder(MessageReminder reminder) {
+    final messageId = reminder.messageId;
+    // TODO: Improve once we have support for parentId in reminders.
+    for (final message in [...messages, ...threads.values.flattened]) {
+      if (message.id == messageId) {
+        return updateMessage(
+          message.copyWith(reminder: null),
+        );
+      }
+    }
+  }
+
+  /// Adds a new message to the channel state and updates the unread count.
+  void addNewMessage(Message message) {
+    // A message not shown in the channel is necessarily a thread-only reply.
+    final isThreadOnlyMessage = !message.isShownInChannel;
+
+    // Only add the message if the channel is upToDate or if the message is
+    // a thread-only message.
+    if (isUpToDate || isThreadOnlyMessage) updateMessage(message);
+
+    // Otherwise, check if we can count the message as unread.
+    if (MessageRules.canCountAsUnread(message, _channel)) {
+      unreadCount += 1; // Increment unread count
+    }
+
+    _client.channelDeliveryReporter.submitForDelivery([_channel]);
+  }
+
+  /// Updates the [read] in the state if it exists. Adds it otherwise.
+  void updateRead([Iterable<Read>? read]) {
+    final existingReads = channelState.read ?? const <Read>[];
+    final updatedReads = existingReads.merge(
+      read,
+      key: (read) => read.user.id,
+    );
+
+    updateChannelState(
+      channelState.copyWith(
+        read: updatedReads.toList(),
+      ),
+    );
+  }
+
+  /// Updates the [draft] in the channel state or the message if it exists.
+  void updateDraft(Draft draft) {
+    if (draft.parentId case final parentId?) {
+      for (final message in messages) {
+        if (message.id == parentId) {
+          return updateMessage(message.copyWith(draft: draft));
+        }
+      }
+    }
+
+    updateChannelState(
+      channelState.copyWith(
+        draft: draft,
+      ),
+    );
+  }
+
+  /// Deletes the [draft] from the state if it exists.
+  void deleteDraft(Draft draft) async {
+    // Delete the draft from the persistence client.
+    await _client.chatPersistenceClient?.deleteDraftMessageByCid(
+      draft.channelCid,
+      parentId: draft.parentId,
+    );
+
+    if (draft.parentId case final parentId?) {
+      for (final message in messages) {
+        if (message.id == parentId) {
+          return updateMessage(
+            message.copyWith(draft: null),
+          );
+        }
+      }
+    }
+
+    updateChannelState(
+      channelState.copyWith(
+        draft: null,
+      ),
+    );
+  }
+
+  /// Updates the [message] in the state.
+  ///
+  /// Reconciles via `Message.updateWith`, so locally-known enrichment
+  /// (poll, sharedLocation, ownReactions, nested quotedMessage) is
+  /// preserved when [message] omits those fields. Use [replaceMessage]
+  /// for paths that need a strict overwrite.
+  ///
+  /// When [upsert] is `true` (the default) and [message] isn't already in
+  /// the state, it's added. When `false`, an unknown [message] is skipped
+  /// and the state is left unchanged; only a message already loaded in the
+  /// state is updated.
+  void updateMessage(Message message, {bool upsert = true}) => _updateMessages([message], upsert: upsert);
+
+  /// Replaces the [message] in the state if it exists, no-op otherwise.
+  ///
+  /// Unlike [updateMessage], this does **not** merge with the existing
+  /// state — [message] is used as-is. Useful for local rollbacks of an
+  /// optimistic update, where the caller has the full prior snapshot and
+  /// doesn't want the merge falling back to the optimistic values.
+  void replaceMessage(Message message) => _updateMessages([message], update: MessageMerging.replaceUpdate);
+
+  /// Cleans up all the stale error messages which requires no action.
+  void cleanUpStaleErrorMessages() {
+    final errorMessages = messages.where((message) {
+      return message.isError && !message.isBounced;
+    });
+
+    if (errorMessages.isEmpty) return;
+    return _removeMessages(errorMessages);
+  }
+
+  /// Remove a [message] from this [channelState].
+  void removeMessage(Message message) => _removeMessages([message]);
+
+  /// Removes/Updates the [message] based on the [hardDelete] value.
+  void deleteMessage(Message message, {bool hardDelete = false}) {
+    return _deleteMessages([message], hardDelete: hardDelete);
+  }
+
+  /// Channel message list.
+  List<Message> get messages => _channelState.messages ?? <Message>[];
+
+  /// Channel message list as a stream.
+  Stream<List<Message>> get messagesStream =>
+      channelStateStream.map((cs) => cs.messages ?? <Message>[]).distinct(const ListEquality().equals);
+
+  /// Channel pinned message list.
+  List<Message> get pinnedMessages => _channelState.pinnedMessages ?? <Message>[];
+
+  /// Channel pinned message list as a stream.
+  Stream<List<Message>> get pinnedMessagesStream =>
+      channelStateStream.map((cs) => cs.pinnedMessages ?? <Message>[]).distinct(const ListEquality().equals);
+
+  /// Channel pending message list.
+  List<Message> get pendingMessages => _channelState.pendingMessages ?? <Message>[];
+
+  /// Channel pending message list as a stream.
+  Stream<List<Message>> get pendingMessagesStream =>
+      channelStateStream.map((cs) => cs.pendingMessages ?? <Message>[]).distinct(const ListEquality().equals);
+
+  /// Get channel last message.
+  Message? get lastMessage => messages.lastOrNull;
+
+  /// Get channel last message as a stream.
+  Stream<Message?> get lastMessageStream {
+    return messagesStream.map((messages) => messages.lastOrNull);
+  }
+
+  /// Channel members list.
+  List<Member> get members =>
+      (_channelState.members ?? <Member>[]).map((e) => e.copyWith(user: _client.state.users[e.user!.id])).toList();
+
+  /// Channel members list as a stream.
+  Stream<List<Member>> get membersStream =>
+      CombineLatestStream.combine2<List<Member?>?, Map<String?, User?>, List<Member>>(
+        channelStateStream.map((cs) => cs.members),
+        _client.state.usersStream,
+        (members, users) => [...?members?.map((e) => e!.copyWith(user: users[e.user!.id]))],
+      ).distinct(const ListEquality().equals);
+
+  /// Channel watcher count.
+  int? get watcherCount => _channelState.watcherCount;
+
+  /// Channel watcher count as a stream.
+  Stream<int?> get watcherCountStream => channelStateStream.map((cs) => cs.watcherCount).distinct();
+
+  /// Channel watchers list.
+  List<User> get watchers => (_channelState.watchers ?? <User>[]).map((e) => _client.state.users[e.id] ?? e).toList();
+
+  /// Channel watchers list as a stream.
+  Stream<List<User>> get watchersStream => CombineLatestStream.combine2<List<User>?, Map<String?, User?>, List<User>>(
+    channelStateStream.map((cs) => cs.watchers),
+    _client.state.usersStream,
+    (watchers, users) => [...?watchers?.map((e) => users[e.id] ?? e)],
+  ).distinct(const ListEquality().equals);
+
+  /// Channel active live locations.
+  List<Location> get activeLiveLocations {
+    return _channelState.activeLiveLocations ?? <Location>[];
+  }
+
+  /// Channel active live locations as a stream.
+  Stream<List<Location>> get activeLiveLocationsStream =>
+      channelStateStream.map((cs) => cs.activeLiveLocations ?? <Location>[]).distinct(const ListEquality().equals);
+
+  /// Channel draft.
+  Draft? get draft => _channelState.draft;
+
+  /// Channel draft as a stream.
+  Stream<Draft?> get draftStream {
+    return channelStateStream.map((cs) => cs.draft).distinct();
+  }
+
+  /// Channel member for the current user.
+  Member? get currentUserMember => members.firstWhereOrNull(
+    (m) => m.user?.id == _client.state.currentUser?.id,
+  );
+
+  /// Channel role for the current user
+  String? get currentUserChannelRole => currentUserMember?.channelRole;
+
+  /// Channel read list.
+  List<Read> get read => _channelState.read ?? <Read>[];
+
+  /// Channel read list as a stream.
+  Stream<List<Read>> get readStream =>
+      channelStateStream.map((cs) => cs.read ?? <Read>[]).distinct(const ListEquality().equals);
+
+  /// Channel read for the logged in user.
+  Read? get currentUserRead {
+    final currentUser = _client.state.currentUser;
+    return userReadOf(userId: currentUser?.id);
+  }
+
+  /// Channel read for the logged in user as a stream.
+  ///
+  /// Re-subscribes only when the user id actually changes; null still
+  /// propagates downstream so consumers see the logged-out transition.
+  Stream<Read?> get currentUserReadStream {
+    final currentUserId = _client.state.currentUserStream.map((it) => it?.id).distinct();
+    return currentUserId.switchMap((id) => userReadStreamOf(userId: id)).distinct();
+  }
+
+  /// Unread count getter as a stream.
+  Stream<int> get unreadCountStream => currentUserReadStream.map((read) => read?.unreadMessages ?? 0).distinct();
+
+  /// Unread count getter.
+  int get unreadCount => currentUserRead?.unreadMessages ?? 0;
+
+  /// Setter for unread count.
+  set unreadCount(int count) {
+    final currentUser = _client.state.currentUser;
+    if (currentUser == null) return;
+
+    var existingUserRead = currentUserRead;
+    if (existingUserRead == null) {
+      final lastMessageAt = _channelState.channel?.lastMessageAt;
+      existingUserRead = Read(
+        user: currentUser,
+        lastRead: lastMessageAt ?? DateTime.now(),
+      );
+    }
+
+    return updateRead([existingUserRead.copyWith(unreadMessages: count)]);
+  }
+
+  /// Whether the current user explicitly marked a message in this channel as
+  /// unread during this session, without having read past that boundary
+  /// since.
+  ///
+  /// Set by [markUnreadLocally] and by a `notification.mark_unread` event for
+  /// the current user; cleared by [markReadLocally] and by a `message.read`
+  /// event for the current user. Intended for UI-layer gating that shouldn't
+  /// immediately undo a manual mark-unread.
+  bool get isMarkedAsUnread => _isMarkedAsUnread;
+
+  /// Records whether the current user has an outstanding manual mark-unread.
+  ///
+  /// Only meant for [ChannelEventHandler], which applies the read events the
+  /// server sends for the current user.
+  @internal
+  set isMarkedAsUnread(bool markedAsUnread) => _isMarkedAsUnread = markedAsUnread;
+
+  bool _isMarkedAsUnread = false;
+
+  /// Marks the channel as read locally, without making a network request.
+  ///
+  /// Used for channels that track unread counts locally (see
+  /// [Channel.usesLocalUnreadCount]), since the server rejects the mark-read
+  /// endpoint for channels that have read events disabled.
+  ///
+  /// [messageId] only sets the resulting [Read.lastReadMessageId]; it does not
+  /// narrow which messages stay unread. The count always drops to zero and
+  /// [Read.lastRead] is always `now`, so messages newer than [messageId] are
+  /// marked read as well. This differs from the server, which recomputes the
+  /// count as the number of messages after [messageId], and from
+  /// [markUnreadLocally], which does recompute from the locally-known
+  /// messages. Callers that need a partial boundary should use
+  /// [markUnreadLocally] instead.
+  void markReadLocally({String? messageId}) {
+    final currentUser = _client.state.currentUser;
+    if (currentUser == null) return;
+
+    final now = DateTime.now();
+    final lastReadMessageId = messageId ?? messages.lastOrNull?.id;
+
+    final existingUserRead = currentUserRead;
+    updateRead([
+      Read(
+        user: currentUser,
+        lastRead: now,
+        lastReadMessageId: lastReadMessageId,
+        lastDeliveredAt: existingUserRead?.lastDeliveredAt,
+        lastDeliveredMessageId: existingUserRead?.lastDeliveredMessageId,
+      ),
+    ]);
+
+    // Read supersedes delivered, so drop any pending delivery candidate the
+    // new read boundary just made ineligible. `delivery_events` is configured
+    // independently of `read_events`, so a channel tracking unread counts
+    // locally can still have delivery receipts enabled. Mirrors what the
+    // `message.read` event listener does for server-driven channels.
+    _client.channelDeliveryReporter.reconcileDelivery([_channel]);
+
+    _isMarkedAsUnread = false;
+  }
+
+  /// Marks the channel as unread locally, without making a network request.
+  ///
+  /// [lastRead] and [lastReadMessageId] define the new read boundary: any
+  /// locally-known message that is still eligible per
+  /// [MessageRules.canCountAsUnread] once this boundary is applied is counted
+  /// as unread.
+  ///
+  /// Used for channels that track unread counts locally (see
+  /// [Channel.usesLocalUnreadCount]), since the server rejects the
+  /// mark-unread endpoint for channels that have read events disabled.
+  void markUnreadLocally({
+    required DateTime lastRead,
+    String? lastReadMessageId,
+  }) {
+    final currentUser = _client.state.currentUser;
+    if (currentUser == null) return;
+
+    final existingUserRead = currentUserRead;
+
+    // Apply the new read boundary first so `MessageRules.canCountAsUnread`
+    // (which reads `channel.state?.currentUserRead`) evaluates against it.
+    updateRead([
+      Read(
+        user: currentUser,
+        lastRead: lastRead,
+        lastReadMessageId: lastReadMessageId,
+        lastDeliveredAt: existingUserRead?.lastDeliveredAt,
+        lastDeliveredMessageId: existingUserRead?.lastDeliveredMessageId,
+      ),
+    ]);
+
+    // Recompute the unread count from the locally-known messages now that
+    // the boundary above is in effect.
+    final unread = messages.where((it) => MessageRules.canCountAsUnread(it, _channel)).length;
+
+    unreadCount = unread;
+    _isMarkedAsUnread = true;
+  }
+
+  /// Counts the number of unread messages mentioning the current user.
+  ///
+  /// **NOTE**: The method relies on the [Channel.messages] list and doesn't do
+  /// any API call. Therefore, the count might be not reliable as it relies on
+  /// the local data.
+  int countUnreadMentions() {
+    final currentUserId = _client.state.currentUser?.id;
+
+    var count = 0;
+    for (final message in messages) {
+      if (!MessageRules.canCountAsUnread(message, _channel)) continue;
+      if (!message.mentionedUsers.any((it) => it.id == currentUserId)) continue;
+
+      count++;
+    }
+
+    return count;
+  }
+
+  /// Delete all channel messages.
+  void truncate() {
+    _channelState = _channelState.copyWith(
+      messages: [],
+    );
+  }
+
+  /// Drops the oldest messages, keeping at most [maxMessages].
+  ///
+  /// No-op when [maxMessages] is non-positive, when the current count is
+  /// already within the limit, or when [isUpToDate] is `false`.
+  ///
+  /// Prefer `StreamChannel.pruneOldest` when a [StreamChannel] is present:
+  /// it also resets the widget-layer "top reached" marker so top-pagination
+  /// can resume. Calling this directly leaves that marker untouched.
+  void pruneOldest(int maxMessages) {
+    if (maxMessages <= 0) return;
+    if (!isUpToDate) return;
+
+    final current = messages;
+    if (current.length <= maxMessages) return;
+
+    final pruned = current.sublist(current.length - maxMessages);
+    _channelState = _channelState.copyWith(messages: pruned);
+  }
+
+  /// Update channelState with updated information.
+  void updateChannelState(ChannelState updatedState) {
+    final newMessages = messages.mergeSorted(
+      updatedState.messages,
+      key: (message) => message.id,
+      update: MessageMerging.mergeUpdate,
+      compare: MessageMerging.sortByCreatedAt,
+    );
+
+    final watchers = _channelState.watchers ?? const <User>[];
+    final newWatchers = watchers.merge(
+      updatedState.watchers,
+      key: (watcher) => watcher.id,
+    );
+
+    final reads = _channelState.read ?? const <Read>[];
+    final newReads = reads.merge(
+      updatedState.read,
+      key: (read) => read.user.id,
+    );
+
+    _channelState = _channelState.copyWith(
+      messages: newMessages,
+      channel: _channelState.channel?.merge(updatedState.channel),
+      watchers: newWatchers.toList(),
+      watcherCount: updatedState.watcherCount,
+      members: updatedState.members,
+      membership: updatedState.membership,
+      read: newReads.toList(),
+      draft: updatedState.draft,
+      pinnedMessages: updatedState.pinnedMessages,
+      pendingMessages: updatedState.pendingMessages,
+      pushPreferences: updatedState.pushPreferences,
+      activeLiveLocations: updatedState.activeLiveLocations,
+    );
+  }
+
+  /// Applies a [remoteState] received from the server or offline storage
+  /// (e.g. a `query`/`watch` response), merging it into local state.
+  ///
+  /// Unlike [updateChannelState], this preserves the current user's
+  /// locally-tracked read state for channels that track unread counts
+  /// on-device (see [Channel.usesLocalUnreadCount]) — their `lastRead`,
+  /// `lastReadMessageId`, and `unreadMessages` are kept as-is instead of
+  /// being overwritten by the remote payload; only delivery fields are
+  /// still applied from it.
+  ///
+  /// Call this instead of [updateChannelState] whenever [remoteState]
+  /// genuinely comes from the network or offline storage.
+  void updateChannelStateFromServer(ChannelState remoteState) {
+    updateChannelState(_preserveLocalUnreadState(remoteState));
+  }
+
+  /// Rewrites the current user's [Read] in [remoteState], if present, to
+  /// keep the locally-tracked `lastRead` / `lastReadMessageId` /
+  /// `unreadMessages` while still adopting the remote delivery fields.
+  ///
+  /// No-op unless [Channel.usesLocalUnreadCount] is enabled and a local read
+  /// already exists for the current user.
+  ChannelState _preserveLocalUnreadState(ChannelState remoteState) {
+    if (!_channel.usesLocalUnreadCount) return remoteState;
+
+    final localRead = currentUserRead;
+    final remoteReads = remoteState.read;
+    if (localRead == null || remoteReads == null) return remoteState;
+
+    final currentUserId = localRead.user.id;
+    final preservedReads = remoteReads.map((read) {
+      if (read.user.id != currentUserId) return read;
+      return localRead.copyWith(
+        lastDeliveredAt: read.lastDeliveredAt,
+        lastDeliveredMessageId: read.lastDeliveredMessageId,
+      );
+    });
+
+    return remoteState.copyWith(read: preservedReads.toList());
+  }
+
+  /// The channel state related to this client.
+  ChannelState get _channelState => _channelStateController.value;
+
+  /// The channel state related to this client as a stream.
+  Stream<ChannelState> get channelStateStream => _channelStateController.stream;
+
+  /// The channel state related to this client.
+  ChannelState get channelState => _channelStateController.value;
+  late BehaviorSubject<ChannelState> _channelStateController;
+
+  late final _debouncedUpdatePersistenceChannelState = debounce(
+    (ChannelState state) {
+      final persistenceClient = _client.chatPersistenceClient;
+      return persistenceClient?.updateChannelState(state);
+    },
+    const Duration(seconds: 1),
+  );
+
+  set _channelState(ChannelState v) {
+    _channelStateController.safeAdd(v);
+    _debouncedUpdatePersistenceChannelState.call([v]);
+  }
+
+  late final _debouncedUpdatePersistenceChannelThreads = debounce(
+    (Map<String, List<Message>> threads) async {
+      final channelCid = _channel.cid;
+      if (channelCid == null) return;
+
+      final persistenceClient = _client.chatPersistenceClient;
+      return persistenceClient?.updateChannelThreads(channelCid, threads);
+    },
+    const Duration(seconds: 1),
+  );
+
+  /// The channel threads related to this channel.
+  Map<String, List<Message>> get threads => {..._threadsController.value};
+
+  /// The channel threads related to this channel as a stream.
+  Stream<Map<String, List<Message>>> get threadsStream => _threadsController;
+  final _threadsController = BehaviorSubject.seeded(<String, List<Message>>{});
+  set _threads(Map<String, List<Message>> threads) {
+    _threadsController.safeAdd(threads);
+    _debouncedUpdatePersistenceChannelThreads.call([threads]);
+  }
+
+  /// Clears all the replies in the thread identified by [parentId].
+  void clearThread(String parentId) {
+    final updatedThreads = {
+      ...threads,
+      parentId: <Message>[],
+    };
+
+    _threads = updatedThreads;
+  }
+
+  /// Update threads with updated information about messages.
+  void updateThreadInfo(String parentId, List<Message> messages) {
+    final updatedThreads = {...threads};
+
+    final threadMessages = updatedThreads[parentId] ?? <Message>[];
+    final updatedThreadMessages = MessageMerging.mergeMessages(
+      existing: threadMessages,
+      toMerge: messages.where((it) => it.id != parentId),
+    );
+
+    // Update the thread with the modified message list.
+    updatedThreads[parentId] = updatedThreadMessages.toList();
+
+    _threads = updatedThreads;
+  }
+
+  Draft? _getThreadDraft(String parentId, List<Message>? messages) {
+    return messages?.firstWhereOrNull((it) => it.id == parentId)?.draft;
+  }
+
+  /// Draft for a specific thread identified by [parentId].
+  Draft? threadDraft(String parentId) => _getThreadDraft(parentId, messages);
+
+  /// Stream of draft for a specific thread identified by [parentId].
+  ///
+  /// This stream emits a new value whenever the draft associated with the
+  /// specified thread is updated or removed.
+  Stream<Draft?> threadDraftStream(String parentId) =>
+      channelStateStream.map((cs) => _getThreadDraft(parentId, cs.messages)).distinct();
+
+  /// Channel related typing users stream.
+  Stream<Map<User, Event>> get typingEventsStream => _typingEventsController.stream;
+
+  /// Channel related typing users last value.
+  Map<User, Event> get typingEvents => _typingEventsController.value;
+  final _typingEventsController = BehaviorSubject.seeded(<User, Event>{});
+
+  // Adds or replaces the typing event for the given user.
+  void _upsertTypingEvent(User user, Event event) {
+    _typingEventsController.safeAdd({...typingEvents, user: event});
+  }
+
+  // Removes the typing event for the given user, if any.
+  void _removeTypingEvent(User user) {
+    _typingEventsController.safeAdd({...typingEvents}..remove(user));
+  }
+
+  Timer? _staleTypingEventsCleanerTimer;
+
+  // Checks and removes stale typing events that were not explicitly stopped by
+  // the sender due to technical difficulties. e.g. process death, loss of
+  // Internet connection or custom implementation.
+  void _startCleaningStaleTypingEvents() {
+    _staleTypingEventsCleanerTimer = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) {
+        final now = DateTime.now();
+        typingEvents.forEach((user, event) {
+          if (now.difference(event.createdAt).inSeconds > incomingTypingStartEventTimeout) {
+            _client.handleEvent(
+              Event(
+                type: EventType.typingStop,
+                user: user,
+                cid: _channel.cid,
+                parentId: event.parentId,
+              ),
+            );
+          }
+        });
+      },
+    );
+  }
+
+  Timer? _stalePinnedMessagesCleanerTimer;
+
+  // Checks and removes stale pinned messages that are not valid anymore.
+  void _startCleaningStalePinnedMessages() {
+    _stalePinnedMessagesCleanerTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) {
+        final now = DateTime.now();
+        var expiredMessages = channelState.pinnedMessages?.where((m) => m.pinExpires?.isBefore(now) == true).toList();
+        if (expiredMessages != null && expiredMessages.isNotEmpty) {
+          expiredMessages = expiredMessages
+              .map(
+                (m) => m.copyWith(
+                  pinExpires: null,
+                  pinned: false,
+                ),
+              )
+              .toList();
+
+          updateChannelState(
+            _channelState.copyWith(
+              pinnedMessages: pinnedMessages.where((it) => it.hasValidPin).toList(),
+              messages: expiredMessages,
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  late final _locationExpirationScheduler = LiveLocationExpirationScheduler(
+    onExpired: _handleLocationExpired,
+  );
+
+  // Listens for changes to the active live locations and (re)schedules the
+  // one-shot expiry timers accordingly.
+  void _startSchedulingLocationExpiration() {
+    _subscriptions.add(
+      activeLiveLocationsStream.listen(_locationExpirationScheduler.schedule),
+    );
+  }
+
+  // Emits a synthetic `location.expired` event for the expired [location].
+  void _handleLocationExpired(Location location) {
+    // The current user's own live locations are handled by the client-level
+    // scheduler in [ClientState]; skip them here.
+    final currentUserId = _channel.client.state.currentUser?.id;
+    if (currentUserId == null || location.userId == currentUserId) return;
+
+    final lastUpdatedAt = DateTime.timestamp();
+
+    final locationExpiredEvent = Event(
+      type: EventType.locationExpired,
+      cid: location.channelCid,
+      message: Message(
+        id: location.messageId,
+        updatedAt: lastUpdatedAt,
+        sharedLocation: location.copyWith(updatedAt: lastUpdatedAt),
+      ),
+    );
+
+    _channel.client.handleEvent(locationExpiredEvent);
+  }
+
+  // Deletes all messages from the user identified by the given id, both from
+  // the persistence layer and the channel state.
+  Future<void> _deleteMessagesFromUser({
+    required String userId,
+    bool hardDelete = false,
+    DateTime? deletedAt,
+  }) async {
+    // Delete messages from persistence.
+    //
+    // Note: We perform this operation separately even though [_removeMessages]
+    // already handles it as we need to delete all messages from the user, not
+    // only the ones present in the current state.
+    final persistence = _channel.client.chatPersistenceClient;
+    await persistence?.deleteMessagesFromUser(
+      userId: userId,
+      cid: _channel.cid,
+      hardDelete: hardDelete,
+      deletedAt: deletedAt,
+    );
+
+    // Gather messages to delete from state.
+    final userMessages = <String, Message>{};
+    for (final message in [...messages, ...threads.values.flattened]) {
+      if (message.user?.id != userId) continue;
+      userMessages[message.id] = message.copyWith(
+        type: MessageType.deleted,
+        deletedAt: deletedAt ?? DateTime.now(),
+        state: switch (hardDelete) {
+          true => MessageState.hardDeleted,
+          false => MessageState.softDeleted,
+        },
+      );
+    }
+
+    final messagesToDelete = userMessages.values;
+    return _deleteMessages(messagesToDelete, hardDelete: hardDelete);
+  }
+
+  void _deleteMessages(
+    Iterable<Message> messages, {
+    bool hardDelete = false,
+  }) {
+    if (messages.isEmpty) return;
+
+    if (hardDelete) return _removeMessages(messages);
+    return _updateMessages(messages, upsert: false);
+  }
+
+  void _updateMessages(
+    Iterable<Message> messages, {
+    Message Function(Message original, Message updated) update = MessageMerging.mergeUpdate,
+    bool upsert = true,
+  }) {
+    if (messages.isEmpty) return;
+
+    _updateThreadMessages(messages, update: update, upsert: upsert);
+    _updateChannelMessages(messages, update: update, upsert: upsert);
+    _updatePinnedMessages(messages, update: update);
+    _updateActiveLiveLocations(messages);
+  }
+
+  void _updateThreadMessages(
+    Iterable<Message> messages, {
+    Message Function(Message original, Message updated) update = MessageMerging.mergeUpdate,
+    bool upsert = true,
+  }) {
+    if (messages.isEmpty) return;
+
+    final currentThreads = threads;
+    final updatedThreads = MessageMerging.mergeThreadMessages(
+      existing: currentThreads,
+      toMerge: messages,
+      update: update,
+      upsert: upsert,
+    );
+
+    // Nothing targeted a thread — skip the write.
+    if (identical(updatedThreads, currentThreads)) return;
+
+    // Update the threads map.
+    _threads = updatedThreads;
+  }
+
+  void _updateChannelMessages(
+    Iterable<Message> messages, {
+    Message Function(Message original, Message updated) update = MessageMerging.mergeUpdate,
+    bool upsert = true,
+  }) {
+    if (messages.isEmpty) return;
+
+    // Only messages shown in the channel are affected.
+    final affectedMessages = messages.where((it) => it.isShownInChannel);
+
+    // If there are no affected messages, return early.
+    if (affectedMessages.isEmpty) return;
+
+    final channelMessages = [...this.messages];
+    final updatedChannelMessages = MessageMerging.mergeMessages(
+      existing: channelMessages,
+      toMerge: affectedMessages,
+      update: update,
+      upsert: upsert,
+    );
+
+    // Calculate the new last message at time.
+    var lastMessageAt = _channelState.channel?.lastMessageAt;
+    for (final message in affectedMessages) {
+      if (MessageRules.canUpdateChannelLastMessageAt(message, _channel)) {
+        lastMessageAt = [lastMessageAt, message.createdAt].nonNulls.max;
+      }
+    }
+
+    _channelState = _channelState.copyWith(
+      messages: updatedChannelMessages.toList(),
+      channel: _channelState.channel?.copyWith(lastMessageAt: lastMessageAt),
+    );
+  }
+
+  void _updatePinnedMessages(
+    Iterable<Message> messages, {
+    Message Function(Message original, Message updated) update = MessageMerging.mergeUpdate,
+  }) {
+    if (messages.isEmpty) return;
+
+    // No-op fast path: nothing was pinned, and nothing in the batch is
+    // becoming pinned — skip the merge/copyWith churn that would otherwise
+    // land right back on an empty `pinnedMessages` list.
+    if (pinnedMessages.isEmpty && messages.every((m) => !m.pinned)) return;
+
+    final updatedPinnedMessages = MessageMerging.mergePinnedMessages(
+      existing: pinnedMessages,
+      toMerge: messages,
+      update: update,
+    );
+
+    _channelState = _channelState.copyWith(
+      pinnedMessages: updatedPinnedMessages.toList(),
+    );
+  }
+
+  void _updateActiveLiveLocations(Iterable<Message> messages) {
+    if (messages.isEmpty) return;
+
+    final activeLiveLocations = [...this.activeLiveLocations];
+    final updatedActiveLiveLocations = MessageMerging.mergeActiveLocations(
+      existing: activeLiveLocations,
+      toMerge: messages,
+    );
+
+    _channelState = _channelState.copyWith(
+      activeLiveLocations: updatedActiveLiveLocations.toList(),
+    );
+  }
+
+  void _removeMessages(Iterable<Message> messages) {
+    if (messages.isEmpty) return;
+
+    final messageIds = messages.map((m) => m.id).toSet().toList();
+    final persistenceClient = _channel.client.chatPersistenceClient;
+    // Remove the messages from the persistence client.
+    persistenceClient?.deleteMessageByIds(messageIds);
+    persistenceClient?.deletePinnedMessageByIds(messageIds);
+
+    _removeThreadMessages(messages);
+    _removeChannelMessages(messages);
+    _removePinnedMessages(messages);
+    _removeActiveLiveLocations(messages);
+  }
+
+  void _removeThreadMessages(Iterable<Message> messages) {
+    if (messages.isEmpty) return;
+
+    final currentThreads = threads;
+    final updatedThreads = MessageMerging.removeThreadMessages(
+      existing: currentThreads,
+      toRemove: messages,
+    );
+
+    // Nothing targeted a thread — skip the write.
+    if (identical(updatedThreads, currentThreads)) return;
+
+    // Update the threads map.
+    _threads = updatedThreads;
+  }
+
+  void _removeChannelMessages(Iterable<Message> messages) {
+    if (messages.isEmpty) return;
+
+    // Only messages shown in the channel are affected.
+    final affectedMessages = messages.where((it) => it.isShownInChannel);
+
+    // If there are no affected messages, return early.
+    if (affectedMessages.isEmpty) return;
+
+    final channelMessages = [...this.messages];
+    final updatedChannelMessages = MessageMerging.removeMessages(
+      existing: channelMessages,
+      toRemove: affectedMessages,
+    );
+
+    _channelState = _channelState.copyWith(
+      messages: updatedChannelMessages.toList(),
+    );
+  }
+
+  void _removePinnedMessages(Iterable<Message> messages) {
+    if (messages.isEmpty) return;
+
+    final pinnedMessages = [...this.pinnedMessages];
+    final updatedPinnedMessages = MessageMerging.removePinnedMessages(
+      existing: pinnedMessages,
+      toRemove: messages,
+    );
+
+    _channelState = _channelState.copyWith(
+      pinnedMessages: updatedPinnedMessages.toList(),
+    );
+  }
+
+  void _removeActiveLiveLocations(Iterable<Message> messages) {
+    if (messages.isEmpty) return;
+
+    final activeLiveLocations = [...this.activeLiveLocations];
+    final updatedActiveLiveLocations = MessageMerging.removeActiveLocations(
+      existing: activeLiveLocations,
+      toRemove: messages,
+    );
+
+    _channelState = _channelState.copyWith(
+      activeLiveLocations: updatedActiveLiveLocations.toList(),
+    );
+  }
+
+  /// Call this method to dispose this object.
+  void dispose() {
+    _debouncedUpdatePersistenceChannelThreads.cancel();
+    _debouncedUpdatePersistenceChannelState.cancel();
+    _retryQueue.dispose();
+    _subscriptions.cancel();
+    _channelStateController.close();
+    _isUpToDateController.close();
+    _threadsController.close();
+    _staleTypingEventsCleanerTimer?.cancel();
+    _stalePinnedMessagesCleanerTimer?.cancel();
+    _locationExpirationScheduler.cancel();
+    _typingEventsController.close();
+  }
+}

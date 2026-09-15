@@ -1,4 +1,4 @@
-import 'package:stream_chat/src/core/http/token.dart';
+import 'token.dart';
 
 /// A function which can be used to request a Stream Chat API token from your
 /// own backend server.

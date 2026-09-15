@@ -3,8 +3,8 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
-import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
-import 'package:stream_chat_flutter_core/src/stream_channel_list_event_handler.dart';
+import 'paged_value_notifier.dart';
+import 'stream_channel_list_event_handler.dart';
 
 /// The default channel page limit to load.
 const defaultChannelPagedLimit = 10;

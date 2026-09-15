@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_input/attachment_picker/options/stream_command_icon.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../../../stream_chat_flutter.dart';
+import 'stream_command_icon.dart';
 
 /// Widget shown in the attachment picker for browsing and selecting commands.
 class StreamCommandPicker extends StatelessWidget {

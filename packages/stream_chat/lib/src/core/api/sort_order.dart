@@ -1,8 +1,8 @@
 // ignore_for_file: constant_identifier_names
 
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/models/channel_state.dart';
-import 'package:stream_chat/src/core/models/comparable_field.dart';
+import '../models/channel_state.dart';
+import '../models/comparable_field.dart';
 
 part 'sort_order.g.dart';
 

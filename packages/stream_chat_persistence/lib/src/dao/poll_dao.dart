@@ -1,12 +1,12 @@
 import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
-import 'package:stream_chat_persistence/src/db/query_utils.dart';
-import 'package:stream_chat_persistence/src/entity/poll_votes.dart';
-import 'package:stream_chat_persistence/src/entity/polls.dart';
-import 'package:stream_chat_persistence/src/entity/users.dart';
-import 'package:stream_chat_persistence/src/mapper/poll_mapper.dart';
-import 'package:stream_chat_persistence/src/mapper/user_mapper.dart';
+import '../db/drift_chat_database.dart';
+import '../db/query_utils.dart';
+import '../entity/poll_votes.dart';
+import '../entity/polls.dart';
+import '../entity/users.dart';
+import '../mapper/poll_mapper.dart';
+import '../mapper/user_mapper.dart';
 
 part 'poll_dao.g.dart';
 

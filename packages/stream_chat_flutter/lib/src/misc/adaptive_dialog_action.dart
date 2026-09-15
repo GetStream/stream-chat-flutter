@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import '../../stream_chat_flutter.dart';
 
 /// A platform-adaptive dialog action button that renders appropriately based on
 /// the platform.

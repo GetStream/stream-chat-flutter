@@ -534,6 +534,29 @@ Then, per `STYLE_GUIDE.md`, one short bullet under `🔄 Changed` in each of the
 
 Finish with `melos bootstrap` and commit the resulting root `pubspec.lock`.
 
+### Sweep the workarounds the new floor unblocks
+
+Still in Track B, after the constraints move. `FLUTTER_BLOCKED.md` lists every workaround that
+exists only because an upstream fix had not shipped; each row carries the release that makes it
+removable. Read it, and cross-check the code so a stale file cannot hide a site:
+
+```bash
+grep -rn 'TODO(flutter)' packages/ sample_app/   # every tagged site, even if the file drifted
+```
+
+For each row whose "Removable at" is now `<=` the new floor, confirm the fix really shipped
+before deleting anything — the recorded version is a prediction, and upstream fixes slip:
+
+```bash
+# in a Flutter checkout, using the fix commit named in the row
+git tag --contains <sha> | grep -vE '\-' | sort -V | head -1
+```
+
+Then remove the workaround, its `TODO(flutter)`, any test that only pinned the workaround's
+mechanism, and the row. If the fix slipped, re-date the row instead — do not silently drop it.
+
+Keep this in the Track B commit: it is only correct because the floor moved.
+
 ## Step 7 — Changelog and PR
 
 Track A changes that are user-visible (a widget swapped, a deprecation migrated) get a CHANGELOG bullet in the

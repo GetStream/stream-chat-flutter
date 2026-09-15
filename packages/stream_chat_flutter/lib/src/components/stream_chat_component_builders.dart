@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import '../../stream_chat_flutter.dart';
 
 /// Builds the list of component builders for the stream chat components.
 Iterable<StreamComponentBuilderExtension<Object>> streamChatComponentBuilders({

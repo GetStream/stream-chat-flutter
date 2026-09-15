@@ -2,12 +2,12 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
-import 'package:stream_chat_persistence/src/entity/channel_queries.dart';
-import 'package:stream_chat_persistence/src/entity/channel_queries_metadata.dart';
-import 'package:stream_chat_persistence/src/entity/channels.dart';
-import 'package:stream_chat_persistence/src/entity/users.dart';
-import 'package:stream_chat_persistence/src/mapper/mapper.dart';
+import '../db/drift_chat_database.dart';
+import '../entity/channel_queries.dart';
+import '../entity/channel_queries_metadata.dart';
+import '../entity/channels.dart';
+import '../entity/users.dart';
+import '../mapper/mapper.dart';
 
 part 'channel_query_dao.g.dart';
 

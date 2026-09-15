@@ -1,8 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/models/message.dart';
-import 'package:stream_chat/src/core/models/user.dart';
+import 'message.dart';
+import 'user.dart';
 
 part 'read.g.dart';
 
