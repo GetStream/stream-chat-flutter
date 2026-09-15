@@ -333,8 +333,14 @@ void main() {
 
       final channel = ChannelState(
         members: [
-          Member(userId: 'alice', user: User(id: 'alice', name: 'Alice')),
-          Member(userId: 'bob', user: User(id: 'bob', name: 'Bob')),
+          Member(
+            userId: 'alice',
+            user: User(id: 'alice', name: 'Alice'),
+          ),
+          Member(
+            userId: 'bob',
+            user: User(id: 'bob', name: 'Bob'),
+          ),
         ],
       );
 
