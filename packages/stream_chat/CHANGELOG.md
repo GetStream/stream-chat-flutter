@@ -7,7 +7,7 @@
 
 🔄 Internal / Non-breaking
 
-- Errors thrown while handling a channel event are now logged as warnings instead of reaching the root zone, where crash reporters report them as fatal.
+- Errors thrown synchronously while handling a channel event are now logged as warnings instead of reaching the root zone, where crash reporters report them as fatal.
 
 ## 10.4.0
 
