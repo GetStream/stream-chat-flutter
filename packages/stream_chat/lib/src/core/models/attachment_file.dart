@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart' show MultipartFile;
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:http_parser/http_parser.dart';
-import '../platform_detector/platform_detector.dart';
+import 'package:stream_core/stream_core.dart' show CurrentPlatform;
 import '../util/extension.dart';
 
 part 'attachment_file.freezed.dart';

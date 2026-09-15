@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:stream_core/stream_core.dart' show CurrentPlatform;
 import '../core/api/requests.dart';
 import '../core/api/responses.dart';
 import '../core/models/attachment_file.dart';
@@ -14,7 +15,6 @@ import '../core/models/poll_vote.dart';
 import '../core/models/reaction.dart';
 import '../core/models/read.dart';
 import '../core/models/user.dart';
-import '../core/platform_detector/platform_detector.dart';
 import '../core/util/extension.dart';
 
 /// A simple client used for persisting chat data locally.

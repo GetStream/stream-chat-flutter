@@ -13,7 +13,7 @@
 
 | Delete | Adopt |
 | --- | --- |
-| `lib/src/core/error/stream_chat_error.dart` (230) — `StreamChatError`, `StreamChatNetworkError`, `StreamChatNetworkErrorType`, `StreamWebSocketError` | `stream_core` `errors/stream_exception.dart` — `sealed StreamException` → `StreamApiException`, `StreamNetworkException`, `StreamAuthenticationException`, `StreamClientException` |
+| `lib/src/core/error/stream_chat_error.dart` (223) — `StreamChatError`, `StreamChatNetworkError`, `StreamChatNetworkErrorType`, `StreamWebSocketError` | `stream_core` `errors/stream_exception.dart` — `sealed StreamException` → `StreamApiException`, `StreamNetworkException`, `StreamAuthenticationException`, `StreamClientException` |
 | `lib/src/core/error/chat_error_code.dart` (158) — `ChatErrorCode` (25 values), `_errorCodeWithDescription`, `chatErrorCodeFromCode`, `ChatErrorCodeX` | `stream_core` `errors/stream_error_code.dart` — `StreamErrorCode`, an `extension type const StreamErrorCode(int) implements int` with ~40 constants, plus `StreamErrorCodePredicates` |
 | `ErrorResponse` decoding in `StreamHttpClient._parseError` | `stream_core` `errors/stream_api_error.dart` — `StreamApiError` |
 
@@ -45,12 +45,12 @@ typedef StreamChatException = StreamException;
   package. The four kinds keep their core names, since those are what a `switch` matches on and
   renaming them would break the shared-handler property.
 
-**`StreamChatError` is *not* aliased onto it.** An earlier draft of this file suggested
-`@Deprecated typedef StreamChatError = StreamException;`, which turned out to be wrong: that class
-is still a live base for things unrelated to request failures —
-`stream_chat_flutter`'s `AttachmentLimitReachedError`, `AttachmentTooLargeError` and
-`AttachmentBlockedError` extend it, and the SDK's own precondition throws raise it. It stays as it
-is; `StreamChatNetworkError` is the one that goes.
+**`StreamChatError` is *not* aliased onto it.** An earlier draft suggested
+`@Deprecated typedef StreamChatError = StreamException;`. That was wrong for a reason worth
+keeping: the class was a base for two unrelated things — request failures, and *returned* values
+that never get thrown (`stream_chat_flutter`'s three attachment-validation errors). An alias would
+have flattened that distinction instead of forcing it. Both were separated and the class deleted;
+see [`stream_chat_error.dart` is gone](#stream_chat_errordart-is-gone).
 
 Export the alias from `lib/stream_chat.dart` alongside the allowlist below.
 
@@ -64,9 +64,12 @@ It is **not installed anywhere in chat today.** That is why a call through the g
 currently hands back a `Failure` carrying a raw `DioException`: `DefaultApi` goes straight to
 `_dio.fetch` and bypasses `StreamHttpClient._parseError`, which only its own verb wrappers call.
 
-Install it **last** in the pipeline (it must see every rejection on the way out) and the guarantee
-holds: `runApiSafely` — already used by `default_api.dart:783` — maps a `DioException` through
-`toStreamException()`, passes a `StreamException` through unchanged, and wraps everything else,
+Install it **after every interceptor that can reject**, so it sees the rejection on the way out —
+in practice that means after auth and connection-id, and *before* the logging interceptor, so what
+gets logged is the mapped `StreamException` rather than a raw `DioException`. It is therefore not
+literally last: user-supplied interceptors and the default logger follow it. With it in place the
+guarantee holds: `runApiSafely` — already used by `default_api.dart:783` — maps a `DioException`
+through `toStreamException()`, passes a `StreamException` through unchanged, and wraps everything else,
 *including a `TypeError` from an undecodable response body*, in a `StreamClientException` with the
 original as `cause`.
 
@@ -85,10 +88,11 @@ export 'package:stream_core/stream_core.dart'
 
 Plus the `StreamChatException` alias above, from wherever it is declared.
 
-**Resolve the `Success` collision first.** Chat's `UploadState` is a `@freezed sealed` union whose
-success variant is a class named `Success`, and it is exported. Either rename it (breaking, and
-phase [09](09-uploads.md) touches `UploadState` anyway) or do not export core's `Success` and
-document `Result` pattern-matching through `switch` on the sealed type instead.
+**The `Success` collision had to be resolved first.** Chat's `UploadState` is a `@freezed sealed`
+union whose success variant was a class named `Success`, and it is exported. The options were to
+rename it (breaking, and phase [09](09-uploads.md) touches `UploadState` anyway) or to withhold
+core's `Success` from the allowlist and document `Result` pattern-matching through `switch` on the
+sealed type. It was renamed — see [the name to avoid](#the-success-collision-and-the-name-to-avoid).
 
 ### Keep the hand-written API layer throwing
 
@@ -97,8 +101,10 @@ of a `StreamChatNetworkError`. This is deliberate and it is what keeps this plan
 `openapi-migration`: each of that plan's 12 feature groups converts its own methods to
 `Future<Result<T>>` when it migrates, and until then nothing above the api layer changes shape.
 
-The break is already promised in `migrations/v11-migration.md`'s Symbol Map, so this phase
-delivers what that guide advertises rather than adding a new row.
+The break was already promised in `migrations/v11-migration.md`'s Symbol Map, so this phase mostly
+delivers what that guide advertised. It did add rows, for the symbols the guide had not
+anticipated being deleted outright: `StreamChatError`, `StreamWebSocketError`, `isRetriable`, and
+the attachment-validation retype.
 
 ### Error codes
 
@@ -119,47 +125,81 @@ matching the old constant.
 
 ### `isRetriable` stays ours
 
-It exists on both `StreamChatNetworkError` and `StreamWebSocketError` (`data == null`) and drives
+It lived on both `StreamChatNetworkError` and `StreamWebSocketError` (`data == null`) and drives
 `RetryQueue` via `RetryPolicy.shouldRetry`. Core has nothing equivalent — its
 `DisconnectionSource.isReconnectable` is transport-level policy for the socket, not for a request.
-Re-express ours as a chat-side extension over the core kinds. `ERROR_LAYER.md` is explicit that
+It is now a chat-side extension over the core kinds. `ERROR_LAYER.md` is explicit that
 retryability is the caller's policy, so this is the intended shape, not a workaround.
 
-### Two lossy conversions to document
+### The two types with no direct analogue
 
-- `StreamChatNetworkErrorType` mirrors `DioExceptionType` with 9 values.
+- **Lossy.** `StreamChatNetworkErrorType` mirrored `DioExceptionType` with 9 values.
   `StreamNetworkException` has `isCancelled` / `isTimeout` / `closeCode`, so `sendTimeout`,
   `receiveTimeout` and `connectionTimeout` all collapse into one `isTimeout`.
-- `StreamWebSocketError` has no analogue; core surfaces socket failures through
-  `DisconnectionSource.serverInitiated(error:)`. **Keep it alive through this phase** — the WS
-  layer still throws it until phase [07](07-websocket.md), and `client.dart:459` catches it by
-  type during `connectUser`.
+- **Not lossy, just relocated.** `StreamWebSocketError` is **deleted in this phase**, not carried
+  forward. It was originally scheduled for phase [07](07-websocket.md) on the assumption that only the new
+  transport could replace it, but the socket path maps onto core's kinds without touching the
+  transport at all: a frame carrying an `error` object becomes a `StreamApiException`, and a
+  failure raised by the channel itself becomes whatever `StreamException.tryFrom` recovers, or a
+  `StreamNetworkException` when the outcome of the connection is unknown. Phase 07 still replaces
+  the transport; it no longer inherits an error type to clean up.
 
-  **Be explicit that this is a carry-forward, not an oversight.** `StreamWebSocketError` outlives
-  this phase and stays fully live through phases 04–06: `websocket.dart` constructs it
-  (`_handleStreamError`, `websocket.dart:392`), `connectUser` catches it by type to decide whether
-  to retry the initial connect, and it keeps its own `isRetriable`. So for as long as 04–06 take,
-  the SDK has *two* error families in flight — the sealed `StreamException` everywhere else, and
-  this one type on the socket path. That is intended and bounded; it becomes dead code only when
-  07 replaces the transport, and 07's definition of done is what deletes it. Do not try to
-  half-migrate it here.
+  The `error` object is the server's `APIError` verbatim, so it parses as a `StreamApiError` with
+  no massaging — see below.
+
+### The WS error frame is a full `APIError`
+
+Worth writing down because the obvious assumption is wrong: a frame off the socket looks nothing
+like an HTTP response, so `StreamApiError.statusCode` (required, non-nullable) reads like a field
+the server cannot supply. It always does.
+
+Both emitters — `monolith/engine/websocket/conn.go` `CloseWithError` and `monolith/server/ws/server.go`
+— marshal `event.NewConnectionErrorEvent(*apiErr)`, whose `error` field is a full `errors.APIError`.
+`CloseWithError` guarantees a non-nil one: a cause that is not an `*APIError` is replaced with
+`InternalSystemError` (500). `StatusCode` carries no `omitempty`, `APIError` has no custom
+marshaller, and neither the V1 nor the V2 encode option set can drop a zero field — they only
+handle tag-ignored fields, null slices/maps, extra fields and time format. So `code`, `message`
+and `StatusCode` are always on the wire.
+
+This matters because it is easy to "fix" in the wrong direction. Seeding a default
+(`{...errorResponse}..['StatusCode'] ??= 0`) makes an under-specified *test fixture* parse and
+then reads, in the source, as a claim about the server. Core makes the same distinction
+deliberately: `duration` and `moreInfo` get `@JsonKey(defaultValue: '')` because they genuinely
+can be absent, while `message` and `statusCode` get no default. Build the fixture the way the
+server sends it instead.
+
+One loose end, checked and closed: `_onDataReceived` reads `jsonData['error']` as a map on *any*
+frame, not just `connection.error`, and the `export.*.error` events register under
+`openapi.ProductChat` with `error` typed as a **string** — which would be a `TypeError` inside the
+socket callback. They cannot reach one: they are built with `NewEventWithoutUserID`, so there is no
+user to route them to, and a client socket is user-scoped. Pre-existing either way, and unrelated
+to how the error object is parsed.
+
+`ErrorResponse` is now redundant and should go when something forces the issue. Its four fields
+(`code`, `message`, `StatusCode`, `moreInfo`) are a strict subset of `StreamApiError`, which adds
+`details`, `duration`, `exceptionFields` and `unrecoverable` — and `websocket_test.dart` builds an
+`ErrorResponse` for the sole purpose of being parsed back as a `StreamApiError`. It survives only
+because `responses.dart` is generated-adjacent and nothing in `lib/` reads it any more.
 
 ## Decisions taken
 
 1. **Retry policy adopts core's table** (`ERROR_LAYER.md` §Retrying) rather than preserving v10
-   behaviour. Today's predicate is `isRetriable => data == null` — it retries only when the
-   response carried *no* parseable Stream error payload, so a 500 or a 429 never retries a failed
-   message. The new predicate retries network failures (unless cancelled), 5xx, 429 and 408, and
-   never other 4xx, auth failures, client failures, or anything flagged `unrecoverable`. **This
-   changes runtime behaviour** and gets its own CHANGELOG line.
-2. **`StreamChatNetworkError` is deleted, not deprecated.** An earlier draft deferred it to
-   `openapi-migration` group 12, on the grounds that endpoints that group has not moved still flow
-   through the hand-written verb facade. That reasoning does not survive this phase: the facade
-   throws a `StreamChatException` now, so nothing raises the type whichever endpoint you call.
-   Keeping it declared would buy source compatibility for a type that no longer works — an
-   `on StreamChatNetworkError catch` would still *compile* and silently match nothing, which is
-   the one break a consumer can ship without noticing. Deleting it makes that a compile error
-   instead. `StreamChatNetworkErrorType` goes with it.
+   behaviour. The old predicate was `isRetriable => data == null` — it retried only when the
+   response carried *no* parseable Stream error payload, so a 500 or a 429 never retried a failed
+   message. The new one retries network failures (unless cancelled), 5xx, 429 and 408, and never
+   other 4xx, auth failures, client failures, or anything the server flagged `unrecoverable`.
+   Two token cases do not follow from the status alone and are decided by name: a token that is
+   *not yet valid* retries, because that is clock skew on `nbf`/`iat` healing itself and a fresh
+   token from the same skewed clock would not help; an *expired* one does not, because a refresh
+   already failed to fix it. **This changes runtime behaviour** and gets its own CHANGELOG line.
+2. **`StreamChatNetworkError` is deleted, not deprecated** — reversed during the phase. The
+   original reasoning was that it had to survive until `openapi-migration` group 12 moved the last
+   endpoint off the hand-written verb facade. That confused *who throws it* with *who names it*:
+   once the facade threw a `StreamException`, nothing in `lib/` raised or caught the old type, so
+   there was nothing for group 12 to release. Deprecating it would have been actively worse than
+   deleting it — nothing throws it, so `on StreamChatNetworkError catch` keeps compiling and
+   silently matches nothing, which is a break a consumer ships without noticing. Deleting it makes
+   that a compile error. The migration guide says so in those words.
 3. **`ChatErrorCode` is deleted**, as `migrations/v11-migration.md` already promises. An `enum`
    cannot alias an extension type, so a deprecated forwarder is not available, and three of its
    entries are not real wire codes anyway (see below).
@@ -172,10 +212,10 @@ retryability is the caller's policy, so this is the intended shape, not a workar
 Chat's `UploadState` union exports four strikingly generic names — `Preparing`, `InProgress`,
 `Success`, `Failed` — and `Success` is contended three ways: chat's `UploadState.success` variant,
 `stream_chat_flutter_core`'s `PagedValue.success` variant (`Success<Key, Value>`), and core's
-`Result` `Success<T>`. There are already **13 `hide Success` import clauses** in this repo working
-around the first two.
+`Result` `Success<T>`. Before this phase there were **13 `hide Success` import clauses** in this
+repo working around the first two; renaming took it to 5.
 
-Rename chat's four variants to `UploadStatePreparing`, `UploadStateInProgress`,
+Chat's four variants are now `UploadStatePreparing`, `UploadStateInProgress`,
 `UploadStateSuccess`, `UploadStateFailed`.
 
 **Do not name them `UploadPreparing` / `UploadInProgress` / `UploadSuccess` / `UploadFailed`,**
@@ -185,41 +225,43 @@ phase [09](09-uploads.md) puts core's union in scope *alongside* chat's — whic
 
 ## Downstream: the Flutter packages
 
-The original scope note undercounted this badly. `StreamChatError` is not confined to the LLC —
-it is woven through `stream_chat_flutter_core`'s **public** API:
+The original scope note undercounted this badly. `StreamChatError` was not confined to the LLC —
+it ran through `stream_chat_flutter_core`'s **public** API:
 
 | Surface | Where | Public |
 | --- | --- | --- |
 | `PagedValue.error(StreamChatError)`, plus the generated `when` / `map` / `maybeWhen` signatures | `paged_value_notifier.dart` | yes — backs every list controller |
 | `errorBuilder: Widget Function(BuildContext, StreamChatError)` | `paged_value_scroll_view.dart` (×2) | yes — widget API |
-| `on StreamChatError catch` followed by `StreamChatError(error.toString())` | 11 controllers, two sites each | internal |
+| `on StreamChatError catch` followed by `StreamChatError(error.toString())` | 9 list controllers, two sites each, plus one in `search_debounce_mixin.dart` | internal |
 
-Real totals for this phase: **205 `lib` references and 230 `test` references across three
-packages**, not one. `stream_chat_persistence` has zero and is untouched.
+Counted before the change: **205 `lib` references and 230 `test` references across three
+packages**, not one. `stream_chat_persistence` had zero and is untouched.
 
-All of it is retyped to `StreamException` here. The controllers already wrapped non-chat errors as
-`StreamChatError(error.toString())`, so those sites become `on StreamChatException catch` with the
-wrap rewritten as `StreamClientException(message: 'Failed to load channels', cause: error)` — the
-message names the load, and the original throwable survives as `cause`, which the old wrap
-discarded by stringifying it.
+All of it was retyped to `StreamChatException` here. The controllers had been wrapping non-chat
+errors as `StreamChatError(error.toString())`, so those sites became `on StreamChatException catch`
+with the wrap rewritten as `StreamClientException(message: 'Failed to load channels', cause: error)`
+— the message names the load, and the original throwable survives as `cause`, where stringifying it
+into the message was losing it.
 
 ## Risks
 
-- **The widest blast radius in the plan**, and it now spans three packages. Inside the LLC,
-  `StreamChatNetworkError` is caught by type in `retry_queue.dart`, `app_settings_manager.dart`,
-  `websocket.dart:392` and across `channel.dart` / `channel_client_state.dart`'s optimistic-update
-  rollbacks.
-- **The silent-catch trap, avoided by deleting rather than deprecating.** Had the type stayed
-  declared, `on StreamChatNetworkError catch` would keep compiling and quietly match nothing — the
-  one break a consumer can ship without noticing. It is gone, so the same clause fails to compile
-  and the consumer is sent to the migration guide.
+- **The widest blast radius in the plan**, and it spans three packages. Inside the LLC,
+  `StreamChatNetworkError` was caught by type in `retry_queue.dart`, `app_settings_manager.dart`,
+  `websocket.dart` and across `channel.dart` / `channel_client_state.dart`'s optimistic-update
+  rollbacks — every one of which had to be found by grep, not by a failing test. See
+  [Found after the fact](#found-after-the-fact).
+- **The silent-catch trap — avoided here, still live for consumers.** A *deprecated*
+  `on StreamChatNetworkError catch` keeps compiling and quietly matches nothing, which is the one
+  break a consumer can ship without noticing. Deleting the type is what turns it into a compile
+  error. The same trap applies to any `catch` clause in *their* code naming a type we retyped
+  rather than removed.
 - **`StreamException` has no `stackTrace`, by design** — `ERROR_LAYER.md`: "a trace records the
   raise, not the failure." `StreamChatNetworkError` has one, plus
   `toString({bool printStackTrace})`. Traces now come from the carrier (`Failure.stackTrace`) or
   from the language at the throw site.
-- **`RetryPolicy.shouldRetry` is public** and typed
-  `FutureOr<bool> Function(StreamChatClient, int, StreamChatError?)`. Its third parameter becomes
-  `StreamException?`, and `retry_queue.dart:85`'s `is! StreamChatError` guard changes with it.
+- **`RetryPolicy.shouldRetry` is public** and was typed
+  `FutureOr<bool> Function(StreamChatClient, int, StreamChatError?)`. Its third parameter is now
+  `StreamChatException?`, and `retry_queue.dart`'s guard reads `error is! StreamChatException`.
 - `StreamApiException.code` is **nullable** (null when no Stream payload reached us, e.g. a proxy's
   bare status), where `StreamChatNetworkError.code` was a non-null `int`. Every code read needs a
   null path.
@@ -232,67 +274,84 @@ None.
 
 ## Definition of done
 
-- [x] `chat_error_code.dart` and `stream_chat_dio_error.dart` deleted; `StreamChatNetworkError`
-      and `StreamChatNetworkErrorType` deleted; `StreamChatError` and `StreamWebSocketError` kept
-      (the WS layer still raises the latter until phase 07, and the UI package's
-      attachment-validation errors subclass the former).
+- [x] `chat_error_code.dart`, `stream_chat_dio_error.dart`, `stream_chat_error.dart` and the
+      `error.dart` barrel deleted. `StreamChatError`, `StreamChatNetworkError`,
+      `StreamChatNetworkErrorType` and `StreamWebSocketError` are gone with them; the UI package's
+      attachment-validation errors moved to their own sealed family.
 - [x] `ApiErrorInterceptor` installed, before the logging interceptor so a rejection is mapped
       before it is logged. `_parseError` delegates to `DioExceptionMapping.toStreamException()`,
-      so all seven verb wrappers throw a `StreamChatException`.
+      so all eight verb wrappers throw a `StreamChatException`.
 - [x] `Result` and the core error kinds exported via the `show` allowlist, plus the
       `StreamChatException` alias. The `Success` collision is resolved by renaming `UploadState`'s
       variants.
 - [x] `isRetriable` re-expressed chat-side over the sealed kinds, per `ERROR_LAYER.md` §Retrying,
       with a test per row of that table.
 - [x] The 23 → 48 `requestTimeout` correction has its own CHANGELOG line.
-- [x] `melos run analyze` clean across every package; `melos run format` clean. `stream_chat`
-      1672 tests green, `stream_chat_flutter_core` 362, `stream_chat_flutter` 1302 (the 11 macOS
-      golden failures are pre-existing — verified against a clean tree).
-- [x] `migrations/v11-migration.md`: Symbol Map rows for every retyped symbol, plus new sections
-      for endpoints that still throw, the silent-catch trap, and the retry change.
+- [x] `melos run analyze` clean across every package; `melos run format` clean; the non-golden
+      suites green in all three packages. (Goldens are not a local signal — alchemist compares
+      against CI-rendered images in CI and platform ones locally.)
+- [x] `migrations/v11-migration.md`: Symbol Map rows for every retyped and every deleted symbol,
+      plus new sections for endpoints that still throw, why the old types were deleted rather than
+      deprecated, and the retry change.
 - [x] `🛑️ Breaking` CHANGELOG entries in all three packages.
-- [ ] A test asserting a **malformed response body** yields a `StreamClientException` rather than a
-      bare `TypeError`. `runApiSafely` guarantees it, but nothing in this package exercises that
-      path yet — it needs a call through the generated client, which arrives with
-      `openapi-migration` group 02.
-- [ ] Status box updated in `README.md`.
+- [x] Status box updated in `README.md`.
 
-### When `stream_chat_error.dart` goes
+A test asserting a **malformed response body** yields a `StreamClientException` rather than a bare
+`TypeError` is *not* a condition of this phase. `runApiSafely` guarantees it and lives in
+`lib/open_api/api/default_api.dart`, which nothing under `lib/src` calls, so the path cannot be
+exercised until `openapi-migration` group 02 lands. It is owned by
+[DEFERRED.md](DEFERRED.md), which carries it against this phase.
 
-The file held three things with three different lifetimes, so it empties in stages rather than
-being deleted here:
+### `stream_chat_error.dart` is gone
 
-| In the file | Last users | Goes when |
+This was planned as a staged emptying — the file held three things with three different
+lifetimes, and two of them looked like they belonged to later phases. It was deleted outright
+instead, along with the `error.dart` barrel, because each of the supposed blockers dissolved on
+contact:
+
+| In the file | Planned exit | What actually happened |
 | --- | --- | --- |
-| `StreamChatNetworkError`, `StreamChatNetworkErrorType` | none — nothing raised them once the verb facade threw `StreamChatException` | **this phase** |
-| `StreamWebSocketError` | `websocket.dart` raises it, `client.dart:459` catches it | phase [07](07-websocket.md), where `DisconnectionSource.serverInitiated(error:)` replaces it |
-| `StreamChatError` (the base) | 23 SDK precondition throws; `stream_chat_flutter`'s attachment-validation subtypes | two more pieces of work, below |
+| `StreamChatNetworkError`, `StreamChatNetworkErrorType` | wait for `openapi-migration` group 12 | nothing in `lib/` raised or caught it once the verb facade threw `StreamException`, so there was nothing to wait for |
+| `StreamWebSocketError` | wait for phase 07's new transport | the socket path maps onto core's kinds without replacing the transport (see above) |
+| `StreamChatError` (the base) | 19 precondition throws + 3 attachment-validation subtypes | throws retyped to `StreamClientException`; the attachment errors became their own sealed family |
 
-So the file is deletable once **three** things are true — two of them already scheduled, and one
-that is not:
+The attachment errors are the one that needed a decision rather than a mechanical edit.
+`StreamAttachmentValidator`'s dartdoc had already noticed the smell — "Both return `null` on
+success and a typed subtype on failure — neither ever throws." They are *returned values* that
+`StreamMessageComposer` pattern-matches to choose localized copy, and they carry data
+(`maxCount`, `maxSize`, `fileExtension`). So they are now a sealed `AttachmentValidationError`
+family in `stream_chat_flutter`, deliberately **not** extending one of core's kinds: nothing
+failed, an attachment was refused, and typing a refusal as a transport or client exception invites
+callers to treat it as one.
 
-1. Phase 07 removes `StreamWebSocketError`.
-2. The 23 precondition throws are reclassified (see below).
-3. **The attachment-validation errors stop being errors.** `StreamAttachmentValidator`'s own
-   dartdoc says it best: "Both return `null` on success and a typed `StreamChatError` subtype on
-   failure — neither ever throws." `AttachmentLimitReachedError`, `AttachmentTooLargeError` and
-   `AttachmentBlockedError` are *returned values* that `StreamMessageComposer` pattern-matches to
-   choose localized copy. They carry data (`maxCount`, `maxSize`, `fileExtension`) and are never
-   raised, so they belong in a sealed result type of their own in `stream_chat_flutter` — not in
-   an exception hierarchy in the low-level client. That is a UI-package change and does not need
-   this plan.
+### Found after the fact
 
-Until then `StreamChatError` stays, undeprecated. Deprecating it now would put a warning on every
-one of those legitimate uses.
+Retyping the errors was done, but five `is` checks on the old type were not, and they were not
+the kind a test catches: `channel.dart` gated four `scheduleRetry` calls and `client.dart` gated
+the `sync` 400 recovery on `e is StreamChatNetworkError`. Nothing raises that type any more, so
+every branch was unreachable — a failed message was never queued for retry, and an app with a
+stale `last_sync_at` could not heal. `isRetriable` itself was correct and covered a row at a
+time; only the callers were missed.
+
+Five cases hid it rather than catching it, in two patterns. Four named "should add message to
+retry queue on a retriable failure" throw a 403, which is not retriable, and assert message state
+rather than the queue — so they passed whether or not the queue was reached. The fifth,
+`should flush persistence client on 400 error`, constructed a `StreamChatNetworkError` the SDK
+cannot produce, so it exercised a dead branch.
+
+The WS error fixture gave the same lesson from the other direction (above): **a fixture that does
+not parse is evidence about the fixture until the wire format says otherwise.**
+
+The lesson generalises to every phase that retypes something: grep for `is OldType` and
+`on OldType catch` across all packages, and treat a test that constructs the old type as
+evidence the test is stale rather than evidence the path works.
 
 ### Carried out of this phase
 
-- **The SDK's own precondition throws are untouched.** 23 sites still raise
-  `StreamChatError` — "Chat persistence client is not set", "Connection already in progress",
-  "Message not found", "Failed to upload one or more attachments". These are a different axis from
-  request failures, and `ERROR_LAYER.md` splits them further: a condition a correct program can hit
-  becomes a `StreamException`, while genuine misuse should raise `StateError`/`ArgumentError` and
-  never be wrapped. Reclassifying them one by one is worth its own change; doing it by sed would
-  get it wrong.
-- **`StreamWebSocketError`** goes in phase [07](07-websocket.md), where
-  `DisconnectionSource.serverInitiated(error:)` replaces it.
+- **The misuse-vs-failure split.** The 19 precondition throws were retyped to
+  `StreamClientException` mechanically, which is right for most of them but not all.
+  `ERROR_LAYER.md` splits the axis further: a condition a correct program can hit becomes a
+  `StreamException`, while genuine misuse should raise `StateError`/`ArgumentError` and never be
+  wrapped. "Connection already in progress" and "You cannot use `queryChannels` without an active
+  connection" read as the second kind. Reclassifying them one by one is worth its own change;
+  doing it by sed would get it wrong.

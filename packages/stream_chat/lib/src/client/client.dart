@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_core/stream_core.dart'
     show
+        CurrentPlatform,
         InFlightCache,
         LocationCoordinate,
         SortedListExtensions,
@@ -24,7 +25,7 @@ import '../core/api/attachment_file_uploader.dart';
 import '../core/api/requests.dart';
 import '../core/api/responses.dart';
 import '../core/api/stream_chat_api.dart';
-import '../core/error/error.dart';
+import '../core/error/stream_chat_exception.dart';
 import '../core/http/app_settings_manager.dart';
 import '../core/http/connection_id_manager.dart';
 import '../core/http/stream_http_client.dart';
@@ -49,7 +50,6 @@ import '../core/models/reaction.dart';
 import '../core/models/role.dart';
 import '../core/models/thread.dart';
 import '../core/models/user.dart';
-import '../core/platform_detector/platform_detector.dart';
 import '../core/util/event_controller.dart';
 import '../core/util/extension.dart';
 import '../core/util/immutable_collection_subjects.dart';
@@ -161,7 +161,7 @@ class StreamChatClient {
       sdkName: 'stream-chat',
       sdkIdentifier: 'dart',
       sdkVersion: PACKAGE_VERSION,
-      osName: CurrentPlatform.name,
+      osName: CurrentPlatform.operatingSystem,
     ),
   );
 
@@ -387,15 +387,17 @@ class StreamChatClient {
     bool connectWebSocket = true,
   }) async {
     if (_ws.connectionCompleter?.isCompleted == false) {
-      throw const StreamChatError(
-        'User already getting connected, try calling `disconnectUser` '
-        'before trying to connect again',
+      throw StateError(
+        'A user is already being connected. Call `disconnectUser` before connecting again.',
       );
     }
 
     logger.i(() => 'setting user : ${user.id}');
 
-    _tokenManager.setTokenProvider(user.id, tokenProvider: tokenProvider);
+    _tokenManager.setTokenProvider(
+      user.id,
+      tokenProvider: tokenProvider,
+    );
 
     final ownUser = OwnUser.fromUser(user);
     state.currentUser = ownUser;
@@ -423,7 +425,7 @@ class StreamChatClient {
 
       return state.currentUser!;
     } catch (e, stk) {
-      if (e is StreamWebSocketError && e.isRetriable) {
+      if (e is StreamChatException && e.isRetriable) {
         final event = await chatPersistenceClient?.getConnectionInfo();
         if (event != null) return ownUser.merge(event.me);
       }
@@ -436,7 +438,7 @@ class StreamChatClient {
   Future<void> openPersistenceConnection(User user) async {
     final client = chatPersistenceClient;
     if (client == null) {
-      throw const StreamChatError('Chat persistence client is not set');
+      throw StateError('No chat persistence client is set on this client.');
     }
 
     if (client.isConnected) {
@@ -444,9 +446,10 @@ class StreamChatClient {
       // we don't need to connect again.
       if (client.userId == user.id) return;
 
-      throw const StreamChatError('''
-        Chat persistence client is already connected to a different user,
-        please close the connection before connecting a new one.''');
+      throw StateError(
+        'The chat persistence client is connected to a different user. '
+        'Close that connection before opening a new one.',
+      );
     }
 
     // Connect the persistence client to the userId.
@@ -483,11 +486,11 @@ class StreamChatClient {
     logger.i(() => 'Opening web-socket connection for ${user.id}');
 
     if (wsConnectionStatus == ConnectionStatus.connecting) {
-      throw StreamChatError('Connection already in progress for ${user.id}');
+      throw StateError('A connection is already in progress for ${user.id}.');
     }
 
     if (wsConnectionStatus == ConnectionStatus.connected) {
-      throw StreamChatError('Connection already available for ${user.id}');
+      throw StateError('A connection is already available for ${user.id}.');
     }
 
     try {
@@ -865,9 +868,8 @@ class StreamChatClient {
         await _ws.connectionCompleter?.future;
       }
       if (wsConnectionStatus != ConnectionStatus.connected) {
-        throw const StreamChatError(
-          'You cannot use queryChannels without an active connection. '
-          'Please call `connectUser` to connect the client.',
+        throw StateError(
+          'queryChannels needs an active connection. Call `connectUser` first.',
         );
       }
     }

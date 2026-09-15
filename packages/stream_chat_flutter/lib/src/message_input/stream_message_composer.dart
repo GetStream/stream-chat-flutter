@@ -1449,7 +1449,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       return _handleAttachmentError(error);
     }
 
-    final validationErrors = <StreamChatError>[];
+    final validationErrors = <AttachmentValidationError>[];
     for (final attachment in attachments) {
       if (validator.validate(attachment) case final error?) {
         validationErrors.add(error);

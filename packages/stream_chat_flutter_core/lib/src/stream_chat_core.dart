@@ -212,7 +212,7 @@ class StreamChatCoreState extends State<StreamChatCore> with WidgetsBindingObser
       sdkVersion: StreamChatClient.packageVersion,
       appName: appName,
       appVersion: appVersion,
-      osName: CurrentPlatform.name,
+      osName: CurrentPlatform.operatingSystem,
       osVersion: osVersion,
       deviceModel: deviceModel,
     );

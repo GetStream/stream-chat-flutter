@@ -3,6 +3,7 @@
 🛑️ Breaking
 
 - `errorBuilder` on the paged scroll views (`StreamChannelListView`, `StreamUserListView`, `StreamMemberListView`, `StreamThreadListView`, `StreamPollVoteListView`, `StreamReactionListView`, `StreamMessageSearchListView`, `StreamPhotoGallery` and the grid variants) now receives a `StreamChatException` instead of a `StreamChatError`.
+- `AttachmentLimitReachedError`, `AttachmentTooLargeError` and `AttachmentBlockedError` now extend the sealed `AttachmentValidationError` rather than `StreamChatError`, and `StreamAttachmentValidator.validate` and `validateCount` return one. A refused attachment is not a failed call, so it is no longer one of the `StreamException` kinds.
 
 🔄 Changed
 

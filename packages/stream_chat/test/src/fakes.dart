@@ -288,7 +288,7 @@ class FakeWebSocketWithConnectionError extends Fake implements WebSocket {
     bool? includeUserDetails = true,
   }) async {
     connectionStatus = ConnectionStatus.connecting;
-    const error = StreamWebSocketError('Error Connecting');
+    const error = StreamNetworkException(message: 'Error Connecting');
     connectionCompleter = Completer()..completeError(error);
     return connectionCompleter!.future;
   }

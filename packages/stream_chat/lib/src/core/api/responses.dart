@@ -31,7 +31,7 @@ class _BaseResponse {
   String? duration;
 }
 
-/// Model response for the error payload a Stream server sends.
+/// The error payload the API returns on a failed request.
 @JsonSerializable()
 class ErrorResponse extends _BaseResponse {
   /// The http error code

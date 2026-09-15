@@ -24,6 +24,7 @@ export 'package:rate_limiter/rate_limiter.dart';
 export 'package:stream_core/stream_core.dart'
     show
         CompositeComparator,
+        CurrentPlatform,
         Distance,
         EvaluationOperator,
         Failure,
@@ -33,6 +34,8 @@ export 'package:stream_core/stream_core.dart'
         LocationCoordinate,
         LogicalOperator,
         NullOrdering,
+        PlatformType,
+        PatternMatching,
         Result,
         Sort,
         SortDirection,
@@ -73,7 +76,7 @@ export 'src/core/api/attachment_file_uploader.dart';
 export 'src/core/api/requests.dart';
 export 'src/core/api/responses.dart';
 export 'src/core/api/stream_chat_api.dart';
-export 'src/core/error/error.dart';
+export 'src/core/error/stream_chat_exception.dart';
 export 'src/core/http/stream_http_client.dart';
 export 'src/core/models/action.dart';
 export 'src/core/models/app_settings.dart';
@@ -120,7 +123,6 @@ export 'src/core/models/user.dart';
 export 'src/core/models/user_block.dart';
 export 'src/core/models/user_group.dart';
 export 'src/core/models/user_group_member.dart';
-export 'src/core/platform_detector/platform_detector.dart';
 export 'src/core/util/extension.dart';
 export 'src/core/util/message_rules.dart';
 export 'src/db/chat_persistence_client.dart';

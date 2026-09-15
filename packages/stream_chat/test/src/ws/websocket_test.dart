@@ -204,7 +204,8 @@ void main() {
       // calling again before previous attempt finishes
       await webSocket.connect(user);
     } catch (e) {
-      expect(e, isA<StreamWebSocketError>());
+      // Misuse, so it leaves the StreamException hierarchy entirely.
+      expect(e, isA<StateError>());
     }
   });
 
@@ -212,7 +213,8 @@ void main() {
     final user = OwnUser(id: 'test-user');
     final error = ErrorResponse()
       ..code = 333
-      ..message = 'Invalid request';
+      ..message = 'Invalid request'
+      ..statusCode = 400;
     // Sends error event to web-socket stream
     final timer = Timer(const Duration(milliseconds: 300), () {
       webSocketSink.add(json.encode({'error': error}));
@@ -230,9 +232,9 @@ void main() {
     try {
       await webSocket.connect(user);
     } catch (e) {
-      expect(e, isA<StreamWebSocketError>());
-      final err = e as StreamWebSocketError;
-      expect(err.code, error.code);
+      expect(e, isA<StreamApiException>());
+      final err = e as StreamApiException;
+      expect(err.code?.code, error.code);
       expect(err.message, error.message);
     }
 
@@ -271,7 +273,8 @@ void main() {
 
       final error = ErrorResponse()
         ..code = 333
-        ..message = 'Invalid request';
+        ..message = 'Invalid request'
+        ..statusCode = 400;
       // Sends error event to web-socket stream
       webSocketSink.add(json.encode({'error': error}));
 
@@ -343,7 +346,7 @@ void main() {
     final user = OwnUser(id: 'test-user');
     // Sends connect event to web-socket stream
     final timer = Timer(const Duration(milliseconds: 300), () {
-      const error = StreamWebSocketError('test-error');
+      const error = StreamNetworkException(message: 'test-error');
       webSocketSink.addError(error);
     });
 

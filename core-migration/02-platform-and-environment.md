@@ -5,14 +5,15 @@
 
 **Size:** ~330 chat LOC deleted. One public type swap, one public rename.
 
-> **Read the resolved package, not the sibling repo.** The first pass at this phase claimed two
-> upstream core additions were needed. Both were wrong, because they were derived from
-> `stream-core-flutter/packages/stream_core` (unreleased `main`) rather than from what
-> `stream_chat` actually resolves. Always diff against the pub-cache copy, and read the path out of
-> `packages/stream_chat/.dart_tool/package_config.json` rather than assuming it: `melos.yaml` pins
-> `stream_core` to a git `ref` for now, so the copy in use is under `~/.pub-cache/git/`, not
-> `~/.pub-cache/hosted/`. It returns to a hosted constraint when core next releases — see
-> [DEFERRED.md](DEFERRED.md).
+> **Check what resolves before claiming core is missing something.** The first pass at this phase
+> named two upstream additions as prerequisites; both already existed. Where to look has since
+> moved: `melos.yaml` pins `stream_core` to a git commit, so that commit is what resolves, not
+> `~/.pub-cache/.../stream_core-0.5.0`. Read the pinned ref.
+>
+> **This phase has landed.** It was gated on a core release, because
+> `debugCurrentPlatformOverride` is on core's `main` and not in 0.5.0. That was resolved by pinning
+> rather than waiting — see [DEFERRED.md](DEFERRED.md) for what restoring a hosted constraint
+> still requires before the v11 release.
 
 ## Scope
 
@@ -20,9 +21,9 @@
 | --- | --- | --- |
 | `lib/src/system_environment.dart` (57) | `stream_core` `api/system_environment.dart` | **done** |
 | `lib/src/core/http/system_environment_manager.dart` (111) | `stream_core` `api/system_environment_manager.dart` | **done** |
-| `lib/src/core/platform_detector/` — `platform_detector.dart` (~97) + `_stub` / `_web` / `_io` | `stream_core` `platform/current_platform.dart` + `platform/detector/` | **ready** — the SHA pinned in [08](08-query-dsl.md) carries what this needed |
+| `lib/src/core/platform_detector/` — `platform_detector.dart` (~97) + `_stub` / `_web` / `_io` | `stream_core` `platform/current_platform.dart` + `platform/detector/` | **done** |
 
-### Platform detector — unblocked by the pin in phase 08
+### Platform detector — done, after the pin replaced the wait
 
 Both packages define `CurrentPlatform` **and** `PlatformType`, so `stream_chat.dart` must stop
 exporting ours in the same PR — there is no coexistence.
@@ -149,10 +150,11 @@ code changes needed.
       `stream_chat_flutter` 1302 green (11 golden failures pre-existing on a clean tree —
       verified by stashing).
 - [x] CHANGELOG entry under `🔄 Changed` for the `SystemEnvironment` type swap.
-- [ ] `lib/src/core/platform_detector/` deleted; `stream_chat.dart` exports core's
-      `CurrentPlatform` / `PlatformType` — **after the core release**.
-- [ ] `CurrentPlatform.name` → `.operatingSystem` at both non-test call sites.
-- [ ] Wasm build verified (`flutter build web --wasm` on the sample app) once the platform half
-      lands — core's shape should make this a formality, but confirm rather than assume.
-- [ ] `migrations/v11-migration.md` Symbol Map row for `CurrentPlatform.name`.
-- [ ] Decisions recorded here, status box updated in `README.md`.
+- [x] `lib/src/core/platform_detector/` deleted; `stream_chat.dart` exports core's
+      `CurrentPlatform` / `PlatformType`.
+- [x] `CurrentPlatform.name` → `.operatingSystem` at both non-test call sites.
+- [x] Wasm needs no build to confirm: core has no web-conditional import to get wrong. Its
+      fallback returns `PlatformType.web` directly, so JS and wasm resolve the same file. Chat
+      needed the `js_interop` branch `#2940` added because its stub threw `UnimplementedError`.
+- [x] `migrations/v11-migration.md` Symbol Map row for `CurrentPlatform.name`.
+- [x] Decisions recorded here, status box updated in `README.md`.

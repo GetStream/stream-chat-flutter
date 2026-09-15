@@ -1,5 +1,7 @@
 // ignore_for_file: lines_longer_than_80_chars, cascade_invocations, deprecated_member_use_from_same_package, avoid_redundant_argument_values
 
+import 'dart:async';
+
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
@@ -251,6 +253,39 @@ void main() {
     });
 
     group('`.sendMessage`', () {
+      test('queues a failed send for retry when the failure is retriable', () async {
+        // The enqueue gate used to test a type nothing throws any more, so a
+        // failed send never reached the queue at all. The retry is observable
+        // as a second attempt, since adding to the queue processes it.
+        final message = Message(id: 'retriable-id', text: 'hi', user: client.state.currentUser);
+
+        when(
+          () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
+        ).thenThrow(apiException(statusCode: 500));
+
+        await expectLater(channel.sendMessage(message), throwsA(isA<StreamChatException>()));
+        await Future.delayed(const Duration(milliseconds: 50));
+
+        verify(
+          () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
+        ).called(greaterThan(1));
+      });
+
+      test('does not queue a failed send when the failure is not retriable', () async {
+        final message = Message(id: 'refused-id', text: 'hi', user: client.state.currentUser);
+
+        when(
+          () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
+        ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
+
+        await expectLater(channel.sendMessage(message), throwsA(isA<StreamChatException>()));
+        await Future.delayed(const Duration(milliseconds: 50));
+
+        verify(
+          () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
+        ).called(1);
+      });
+
       test('should work fine', () async {
         final message = Message(
           id: 'test-message-id',
@@ -302,7 +337,7 @@ void main() {
       });
 
       test(
-        'should mark the message failed when the server refuses it with skipPush: true, skipEnrichUrl: false',
+        'should mark a refused send as failed with skipPush: true, skipEnrichUrl: false',
         () async {
           final message = Message(
             id: 'test-message-id',
@@ -358,7 +393,7 @@ void main() {
       );
 
       test(
-        'should mark the message failed when the server refuses it with skipPush: true, skipEnrichUrl: true',
+        'should mark a refused send as failed with skipPush: true, skipEnrichUrl: true',
         () async {
           final message = Message(
             id: 'test-message-id-2',
@@ -416,7 +451,7 @@ void main() {
       );
 
       test(
-        'should mark the message failed when the server refuses it with skipPush: false, skipEnrichUrl: true',
+        'should mark a refused send as failed with skipPush: false, skipEnrichUrl: true',
         () async {
           final message = Message(
             id: 'test-message-id-3',
@@ -472,7 +507,7 @@ void main() {
       );
 
       test(
-        'should mark the message failed when the server refuses it with skipPush: false, skipEnrichUrl: false',
+        'should mark a refused send as failed with skipPush: false, skipEnrichUrl: false',
         () async {
           final message = Message(
             id: 'test-message-id-4',
@@ -809,11 +844,49 @@ void main() {
 
         expect(
           () => channel.sendMessage(message),
-          throwsA(isA<StreamChatError>()),
+          throwsA(isA<StreamClientException>()),
         );
 
         verifyNever(
           () => client.sendMessage(any(), channelId, channelType),
+        );
+      });
+
+      test('should report a superseded send as a cancelled request', () async {
+        final attachment = Attachment(
+          id: 'test-attachment-id',
+          type: 'image',
+          file: AttachmentFile(size: 100, path: 'test-file-path'),
+        );
+
+        final message = Message(id: 'test-message-id', attachments: [attachment]);
+
+        // Holds the first send inside its attachment upload, so the second one
+        // arrives while it is still in flight.
+        final upload = Completer<SendImageResponse>();
+        when(
+          () => client.sendImage(
+            any(),
+            channelId,
+            channelType,
+            onSendProgress: any(named: 'onSendProgress'),
+            cancelToken: any(named: 'cancelToken'),
+            extraData: any(named: 'extraData'),
+          ),
+        ).thenAnswer((_) => upload.future);
+        addTearDown(() => upload.complete(SendImageResponse()..file = 'url'));
+
+        final superseded = channel.sendMessage(message);
+        await pumpEventQueue();
+        unawaited(channel.sendMessage(message).catchError((_) => SendMessageResponse()));
+
+        // The caller stopped it, so it is a cancelled request rather than an
+        // SDK failure a crash tracker should hear about.
+        await expectLater(
+          superseded,
+          throwsA(
+            isA<StreamNetworkException>().having((it) => it.isCancelled, 'isCancelled', isTrue),
+          ),
         );
       });
 
@@ -846,7 +919,7 @@ void main() {
 
           expect(
             () => channel.sendMessage(message),
-            throwsA(isA<StreamChatError>()),
+            throwsA(isA<StreamClientException>()),
           );
 
           verify(
@@ -6052,7 +6125,7 @@ void main() {
 
         await expectLater(
           channel.markRead(messageId: 'message-id-123'),
-          throwsA(isA<StreamChatError>()),
+          throwsA(isA<StreamClientException>()),
         );
       },
     );
@@ -6106,7 +6179,7 @@ void main() {
 
         await expectLater(
           channel.markUnread('message-id-123'),
-          throwsA(isA<StreamChatError>()),
+          throwsA(isA<StreamClientException>()),
         );
       },
     );
@@ -6162,7 +6235,7 @@ void main() {
 
         await expectLater(
           channel.markUnreadByTimestamp(timestamp),
-          throwsA(isA<StreamChatError>()),
+          throwsA(isA<StreamClientException>()),
         );
       },
     );
@@ -6218,7 +6291,7 @@ void main() {
 
         await expectLater(
           channel.markThreadRead('thread-id-123'),
-          throwsA(isA<StreamChatError>()),
+          throwsA(isA<StreamClientException>()),
         );
       },
     );
@@ -6272,7 +6345,7 @@ void main() {
 
         await expectLater(
           channel.markThreadUnread('thread-id-123'),
-          throwsA(isA<StreamChatError>()),
+          throwsA(isA<StreamClientException>()),
         );
       },
     );
