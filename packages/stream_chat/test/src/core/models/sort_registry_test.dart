@@ -11,9 +11,8 @@ import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/thread.dart';
 import 'package:stream_chat/src/core/models/user.dart';
-import 'package:stream_chat/src/core/util/string_sort_normalizer.dart';
 import 'package:stream_core/stream_core.dart'
-    show CompositeComparator, NullOrdering, Sort, SortField, SortFieldValueGetter, Standard;
+    show CompositeComparator, NullOrdering, Sort, SortField, SortFieldValueGetter, Standard, normalizeStringForSort;
 import 'package:test/test.dart';
 
 class TestModel extends Equatable {

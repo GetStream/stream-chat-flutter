@@ -24,17 +24,20 @@ export 'package:rate_limiter/rate_limiter.dart';
 export 'package:stream_core/stream_core.dart'
     show
         CompositeComparator,
+        Distance,
         EvaluationOperator,
         Failure,
         Filter,
         FilterField,
         FilterOperator,
+        LocationCoordinate,
         LogicalOperator,
         NullOrdering,
         Result,
         Sort,
         SortDirection,
         SortField,
+        SortedListExtensions,
         StreamApiError,
         StreamApiException,
         StreamAuthenticationException,
@@ -89,7 +92,6 @@ export 'src/core/models/draft.dart';
 export 'src/core/models/draft_message.dart';
 export 'src/core/models/event.dart';
 export 'src/core/models/location.dart';
-export 'src/core/models/location_coordinates.dart';
 export 'src/core/models/member.dart';
 export 'src/core/models/message.dart';
 export 'src/core/models/message_delete_scope.dart';
@@ -120,7 +122,6 @@ export 'src/core/models/user_group.dart';
 export 'src/core/models/user_group_member.dart';
 export 'src/core/platform_detector/platform_detector.dart';
 export 'src/core/util/extension.dart';
-export 'src/core/util/list_extensions.dart';
 export 'src/core/util/message_rules.dart';
 export 'src/db/chat_persistence_client.dart';
 export 'src/event_type.dart';

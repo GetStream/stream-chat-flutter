@@ -8,10 +8,12 @@ One file per phase, in the order they should land. Each carries a goal, the exac
 with their core counterparts, the decisions that phase has to make, its risks, the upstream
 `stream_core` work it needs, and a definition of done.
 
-Two indexes cut across the phases:
+Three documents cut across the phases:
 
 - [`DEFERRED.md`](DEFERRED.md) — everything consciously postponed, and what unblocks each item.
 - [`UPSTREAM.md`](UPSTREAM.md) — what should move the *other* way, chat → core.
+- [`message-ordering.md`](message-ordering.md) — why messages sharing a `createdAt` change
+  places, and which of the obvious fixes are wrong.
 
 | | Phase | Chat LOC | Core LOC | Breaking | Status |
 | --- | --- | --- | --- | --- | --- |

@@ -172,7 +172,7 @@ class ChannelClientState {
 
     updateChannelState(
       channelState.copyWith(
-        read: updatedReads.toList(),
+        read: updatedReads,
       ),
     );
   }
@@ -510,7 +510,7 @@ class ChannelClientState {
 
   /// Update channelState with updated information.
   void updateChannelState(ChannelState updatedState) {
-    final newMessages = messages.mergeSorted(
+    final newMessages = messages.sortedMerge(
       updatedState.messages,
       key: (message) => message.id,
       update: MessageMerging.mergeUpdate,
@@ -532,11 +532,11 @@ class ChannelClientState {
     _channelState = _channelState.copyWith(
       messages: newMessages,
       channel: _channelState.channel?.merge(updatedState.channel),
-      watchers: newWatchers.toList(),
+      watchers: newWatchers,
       watcherCount: updatedState.watcherCount,
       members: updatedState.members,
       membership: updatedState.membership,
-      read: newReads.toList(),
+      read: newReads,
       draft: updatedState.draft,
       pinnedMessages: updatedState.pinnedMessages,
       pendingMessages: updatedState.pendingMessages,

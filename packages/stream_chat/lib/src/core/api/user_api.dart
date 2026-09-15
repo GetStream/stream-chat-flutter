@@ -1,8 +1,9 @@
 import 'dart:convert';
 
+import 'package:stream_core/stream_core.dart' show LocationCoordinate;
+
 import '../http/stream_http_client.dart';
 import '../models/location.dart';
-import '../models/location_coordinates.dart';
 import '../models/user.dart';
 import 'requests.dart';
 import 'responses.dart';
@@ -111,7 +112,7 @@ class UserApi {
   Future<Location> updateLiveLocation({
     required String messageId,
     String? createdByDeviceId,
-    LocationCoordinates? location,
+    LocationCoordinate? location,
     DateTime? endAt,
   }) async {
     final response = await _client.put(

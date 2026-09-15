@@ -7,6 +7,8 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_core/stream_core.dart'
     show
         InFlightCache,
+        LocationCoordinate,
+        SortedListExtensions,
         StreamApiException,
         StreamLogConfig,
         StreamLogger,
@@ -34,7 +36,6 @@ import '../core/models/draft.dart';
 import '../core/models/draft_message.dart';
 import '../core/models/event.dart';
 import '../core/models/location.dart';
-import '../core/models/location_coordinates.dart';
 import '../core/models/member.dart';
 import '../core/models/message.dart';
 import '../core/models/message_delivery.dart';
@@ -52,7 +53,6 @@ import '../core/platform_detector/platform_detector.dart';
 import '../core/util/event_controller.dart';
 import '../core/util/extension.dart';
 import '../core/util/immutable_collection_subjects.dart';
-import '../core/util/list_extensions.dart';
 import '../core/util/utils.dart';
 import '../db/chat_persistence_client.dart';
 import '../event_type.dart';
@@ -2152,7 +2152,7 @@ class StreamChatClient {
   Future<Location> updateLiveLocation({
     required String messageId,
     String? createdByDeviceId,
-    LocationCoordinates? location,
+    LocationCoordinate? location,
     DateTime? endAt,
   }) {
     return _chatApi.user.updateLiveLocation(

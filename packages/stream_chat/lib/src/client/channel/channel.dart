@@ -1290,7 +1290,7 @@ class Channel {
     String? id,
     String? messageText,
     String? createdByDeviceId,
-    required LocationCoordinates location,
+    required LocationCoordinate location,
     Map<String, Object?> extraData = const {},
   }) {
     final message = Message(
@@ -1323,7 +1323,7 @@ class Channel {
     String? messageText,
     String? createdByDeviceId,
     required DateTime endSharingAt,
-    required LocationCoordinates location,
+    required LocationCoordinate location,
     Map<String, Object?> extraData = const {},
   }) {
     final message = Message(

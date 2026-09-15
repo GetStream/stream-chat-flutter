@@ -1079,7 +1079,7 @@ void main() {
     group('`.sendStaticLocation`', () {
       const deviceId = 'test-device-id';
       const locationId = 'test-location-id';
-      const coordinates = LocationCoordinates(
+      const coordinates = LocationCoordinate(
         latitude: 40.7128,
         longitude: -74.0060,
       );
@@ -1128,7 +1128,7 @@ void main() {
       const deviceId = 'test-device-id';
       const locationId = 'test-location-id';
       final endSharingAt = DateTime.timestamp().add(const Duration(hours: 1));
-      const coordinates = LocationCoordinates(
+      const coordinates = LocationCoordinate(
         latitude: 40.7128,
         longitude: -74.0060,
       );

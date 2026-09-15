@@ -1,10 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_core/stream_core.dart' show Filter, FilterField, Standard, Sort, SortField;
+import 'package:stream_core/stream_core.dart'
+    show Filter, FilterField, Standard, Sort, SortField, normalizeStringForSort;
 
 import '../util/extension.dart';
 import '../util/serializer.dart';
-import '../util/string_sort_normalizer.dart';
 import 'user.dart';
 
 part 'member.g.dart';

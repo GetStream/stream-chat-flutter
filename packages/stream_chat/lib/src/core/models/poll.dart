@@ -1,11 +1,11 @@
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_core/stream_core.dart' show Filter, FilterField, Standard, Sort, SortField;
+import 'package:stream_core/stream_core.dart'
+    show Filter, FilterField, Standard, Sort, SortField, normalizeStringForSort;
 import 'package:uuid/uuid.dart';
 
 import '../util/serializer.dart';
-import '../util/string_sort_normalizer.dart';
 import 'poll_option.dart';
 import 'poll_vote.dart';
 import 'user.dart';

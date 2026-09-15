@@ -16,8 +16,8 @@ Drift persists.
 | --- | --- |
 | `abstract AttachmentFileUploader` — **8 methods**: `sendImage` / `sendFile` / `deleteImage` / `deleteFile` (channel-scoped, each taking `Map<String, Object?>? extraData`) and `uploadImage` / `uploadFile` / `removeImage` / `removeFile` (CDN-scoped) | `abstract interface CdnClient` — **4 methods**, CDN-scoped only, no `extraData` |
 | `StreamAttachmentFileUploader` — thin `client.postFile` / `client.delete` wrappers | `StreamAttachmentUploader(cdn: CdnClient)` — returns running `AttachmentUploadTask`s |
-| `AttachmentFileUploaderProvider = AttachmentFileUploader Function(StreamHttpClient)` — public pluggability, wired at `client.dart:102` | — |
-| `@freezed sealed UploadState` — `Preparing` / `InProgress(uploaded, total)` / `Success` / `Failed(error: String)`, JSON-serialisable, **stored on the `Attachment` model** | `sealed AttachmentUploadState` — `UploadQueued` / `UploadPreparing` / `UploadInProgress(UploadProgress)` / `UploadSuccess` / `UploadFailed(StreamException)` / `UploadCancelled`, **stored on the task** |
+| `AttachmentFileUploaderProvider = AttachmentFileUploader Function(StreamHttpClient)` — public pluggability, wired at `client.dart:94` | — |
+| `@freezed sealed UploadState` — `UploadStatePreparing` / `UploadStateInProgress(uploaded, total)` / `UploadStateSuccess` / `UploadStateFailed(error: String)`, JSON-serialisable, **stored on the `Attachment` model** | `sealed AttachmentUploadState` — `UploadQueued` / `UploadPreparing` / `UploadInProgress(UploadProgress)` / `UploadSuccess` / `UploadFailed(StreamException)` / `UploadCancelled`, **stored on the task** |
 | `AttachmentFile` — `@JsonSerializable`, nullable `path`, sync `size`, persisted to Drift | `AttachmentFile` — wraps `XFile`, non-nullable `path`, `Future<int> size`, not serialisable |
 
 ## The gating decision: channel-scoped uploads
@@ -35,9 +35,16 @@ pluggability point survives in recognisable form.
 need scoped uploads; today they don't, so it is chat-shaped API in a product-agnostic package —
 exactly the leak the README's non-goals warn about.
 
-**Recommend A.** It is cheaper, it does not block on a core release, and `CdnClient` is explicitly
-a pluggable seam — using it for the part that fits and not for the part that doesn't is the
-intended use. Record the decision here before starting.
+**A is decided.** It is cheaper, it does not block on a core release, and `CdnClient` is
+explicitly a pluggable seam — using it for the part that fits and not for the part that doesn't
+is the intended use.
+
+The one thing that could have sunk it is checked: `CdnClient.uploadImage` takes **core's**
+`AttachmentFile`, a different type of the same name from the one every chat model and the Drift
+payload use, so implementing it means both in scope and a conversion at the seam. That
+conversion is total — core ships `AttachmentFile.fromData(Uint8List bytes, {name})` for exactly
+the web case chat's nullable `path` exists to serve. Adapter: `path` when there is one,
+`fromData` otherwise.
 
 ## What core buys us either way
 
@@ -65,13 +72,19 @@ for a retry.
 *removed* `StreamAttachment.uploadState` and moved state to the task — a good design for feeds,
 and wrong for chat, because:
 
-- `AttachmentFile` is `@JsonSerializable` and persisted by `stream_chat_persistence` (Drift).
-  `path` nullable → non-nullable and `size` sync → `Future<int>` are both breaking, and the schema
-  depends on the serialisable form.
-- `UploadState` on `Attachment` is how the UI renders a half-uploaded attachment across an app
-  restart. Task state is in-memory and does not survive one.
-- A model retype here is simultaneously a `stream_chat` break, a `ChatPersistenceClient` interface
-  break, and a Drift schema migration. Three for the price of one, for no user-visible gain.
+- **`path` nullable → non-nullable is not expressible.** Chat's `AttachmentFile` carries
+  `String? path`, `Uint8List? bytes` and a sync `int? size`; a file picked on web has bytes and no
+  path. Core's wraps a single `XFile` with a non-nullable `path` and an async `Future<int> size`.
+- **`UploadState` on `Attachment` survives an app restart; task state does not.** It is how the UI
+  renders a half-uploaded attachment after a cold start. This is the argument that decides it.
+- It is also a `stream_chat` break and a `ChatPersistenceClient` one.
+
+The persistence half is weaker than it looks, and worth stating accurately so nobody plans a
+migration that isn't needed. `Attachment.toData()` serialises both `file` and `upload_state`, and
+the whole attachment goes into Drift's `attachments` **`text()`** column as JSON — there is no
+schema shaped around either type, so retyping them changes a payload, not a table. And any
+release that bumps `schemaVersion` drops every table on upgrade, so stale payloads are never read
+back by new code.
 
 So expose the task-based API **additively**: `StreamAttachmentUploader` drives the upload and its
 task state is *mirrored onto* `Attachment.uploadState` for persistence and rendering. That keeps
@@ -91,11 +104,14 @@ but is not a prerequisite.
 
 ## Decisions to make
 
-- **Option A or B**, above. Nothing else in the phase can be scoped until this is settled.
+Option A is settled, above. What is left:
+
 - Whether `AttachmentFileUploaderProvider` is retyped (`AttachmentFileUploader Function(Dio)` once
   phase [05](05-http-client.md) removes `StreamHttpClient`) or replaced by a `CdnClient` injection
-  point à la `FeedsConfig.cdnClient`. Either way it is a break for anyone with a custom uploader,
-  and phase 05 already deprecates the type in its signature.
+  point à la `FeedsConfig.cdnClient`. Either way it is a break for anyone with a custom uploader.
+  Note phase 05 has **not** landed: the typedef still reads
+  `AttachmentFileUploader Function(StreamHttpClient)` and carries no deprecation, so this phase
+  either waits for 05 or breaks it itself.
 - Whether `UploadState` gains a `cancelled` variant to mirror `UploadCancelled`. Today a cancelled
   upload has nowhere to land, which is why cancellation is invisible in the UI.
 - Whether progress and cancellation become public API in this phase or stay internal until the UI

@@ -2,14 +2,14 @@
 
 **Goal:** prove the pattern on files that touch no behaviour and almost no public surface.
 
-**Size:** 47 chat LOC deleted so far. No upstream core work.
+**Size:** 317 chat LOC deleted. Two methods added to `stream_core` — `sortedMerge` and `sortedUpsertAt`.
 
 ## Scope
 
 | Delete | Adopt | Status |
 | --- | --- | --- |
 | `lib/src/core/util/in_flight_cache.dart` (47) | `stream_core` `utils/in_flight_cache.dart` (32) | **done** |
-| `lib/src/core/util/list_extensions.dart` (270) | `stream_core` `utils/list_extensions.dart` (656) | **deferred** — needs a performance comparison first |
+| `lib/src/core/util/list_extensions.dart` (270) | `stream_core` `utils/list_extensions.dart` | **done** — every helper moved to core, measured at parity first |
 | `lib/src/core/http/stream_chat_dio_error.dart` (19) | `stream_core` `StreamDioException` | **moved to [03](03-errors.md)** — blocked on the error layer |
 
 ### `in_flight_cache` — done
@@ -48,18 +48,36 @@ Both its producers are phase-03/04 code anyway: `auth_interceptor.dart:30` const
 in [04](04-token-and-auth.md)) and `stream_http_client.dart:102` unwraps it (deleted in
 [05](05-http-client.md)). It goes when the payload type does.
 
-### `list_extensions` — deferred pending a performance comparison
+### `list_extensions` — moved to core, after a performance comparison
 
-**Deferred deliberately, not forgotten.** Core's `merge` is a keyed-map-merge-then-sort
+**Why this was held back rather than swapped.** Core's `merge` is a keyed-map-merge-then-sort
 (O(n log n)); ours is a two-pointer merge (O(n)) and the file's own header calls it "a runtime
 optimization". `channel_client_state.dart` (2,154 LOC) calls these helpers on **every** message,
 member and read update, so this is the hottest path in the SDK and "same result for sorted
 inputs" is not "same cost".
 
-Before adopting, benchmark both implementations on realistic shapes — a 1k+ sorted message list
-with incremental upserts, a large member list, and the read-state map — and either confirm the
-difference is immaterial at these sizes or take the two-pointer algorithm upstream so core is
-fast for everyone. Do not swap on the strength of the TODO alone.
+**Benchmarked.** Mean per call, over `List<Item>` of `{String id, DateTime at}` sorted by date,
+merged with `key: (it) => it.id` and a date comparator, warmed up then averaged over 500–20,000
+reps depending on size:
+
+| shape | chat | core | |
+| --- | --- | --- | --- |
+| 1k existing + 1 new | 46us | 64us | chat 1.4x |
+| 5k existing + 1 new | 282us | 378us | chat 1.3x |
+| 1k existing + 25 page | 47us | 77us | chat 1.6x |
+| 1k existing + 25 updates | 43us | 62us | chat 1.4x |
+| 1k existing + 1k refresh | 107us | 105us | tie |
+| 50 existing + 1 new | 2us | 2us | tie |
+
+Chat's wins wherever the receiver is long and the increment is small, which is the shape the hot
+path actually has, and ties on a full refresh where core's re-sort is not wasted. **So chat keeps
+its merge; do not adopt core's.**
+
+Upstreaming ours is *not* a drop-in, though, and that is the second finding. The two disagree on
+duplicate keys **within** the incoming list: chat's emits both, core's map resolves them to one.
+Chat's behaviour is deliberate and pinned by a test (`'tolerates duplicate keys in other'`), so
+porting the algorithm up would change core's contract for feeds as well. Either the ask includes
+that semantic change, or the algorithm gains a dedup pass first — which costs some of the win.
 
 The file's own header already specifies the migration:
 
@@ -82,23 +100,24 @@ Core's split is different, not just renamed: `upsert` / `batchReplace` / `partit
 / `removeNested` / `updateNested` sit on `SortedListExtensions`. Map each call site to the right
 one; a blanket rename will not compile.
 
-Ours has `sortedUpsertAt`, `mergeSorted`, `mergeFrom` and `updateIf`; core has `sumOf`,
-`removeNested`, `updateNested` and `partition`. Confirm every method we call has a home before
-deleting, and take the missing ones upstream rather than keeping a two-method file behind.
+All of ours landed in core: `sortedUpsertAt` and `mergeSorted` (as `sortedMerge`) were added
+there, `updateIf` became `updateWhere`, and `mergeFrom` is expressed as `merge` over a projected
+list. `core/util/list_extensions.dart` is deleted; `SortedListExtensions` is re-exported from the
+barrel in its place.
 
 ## Decisions to make
 
-Both remaining decisions belong to `list_extensions`, and both wait on the benchmark:
+Both belonged to `list_extensions`, and both are answered:
 
-- **Adopt core's `merge`, or upstream ours?** If the two-pointer merge measurably wins at chat's
-  list sizes, core should have it — that makes every product faster and removes the reason to keep
-  a fork. If the difference is noise, adopt core's and delete ours.
-- **Deprecated forwarders, or a clean break?** `list_extensions.dart` is exported at
-  `stream_chat.dart:85` and the extension names differ, so the renames are visible. A Dart
-  `extension` cannot be aliased by a `typedef`, so a soft landing means keeping our extension
-  names as thin forwarders for one release. Decide whether that is worth it for list helpers most
-  consumers never call directly — if not, this becomes a `refactor(llc)!:` with a migration entry
-  and the phase is no longer non-breaking.
+- ~~**Adopt core's `merge`, or upstream ours?**~~ **Neither, in the end.** Ours wins 1.76-1.86x
+  on the shape the hot path has, so adopting `merge` was not an option — but rather than keeping
+  it chat-side it went up as `sortedMerge`, a second method beside `merge` with the narrower
+  contract. See [UPSTREAM.md](UPSTREAM.md).
+- ~~**Deprecated forwarders, or a clean break?**~~ **A clean break.** A Dart `extension` cannot be
+  aliased by a `typedef`, so forwarders would mean keeping all three extension names alive for a
+  release. Not worth it for list helpers almost nobody calls directly, so this shipped as a
+  `refactor(llc)!:` with a CHANGELOG entry and Symbol Map rows, and the phase is breaking rather
+  than silent.
 
 ## Risks
 
@@ -111,8 +130,26 @@ Both remaining decisions belong to `list_extensions`, and both wait on the bench
 
 ## Upstream `stream_core` work
 
-None so far. Possible outcomes of the benchmark: the two-pointer `merge`, and any of
-`sortedUpsertAt` / `mergeSorted` / `mergeFrom` / `updateIf` that core has no home for.
+Done: core gained `sortedUpsertAt` and `sortedMerge`, `merge` took a nullable `other`, and
+`updateWhere` became copy-on-write. Each was benchmarked against the chat method it replaced
+before the chat copy was deleted.
+
+## Outcome
+
+Chat's file is deleted rather than kept. The plan allowed for keeping the two-pointer `merge`
+chat-side if it beat core's, and it did — so it moved to core as `sortedMerge` instead, alongside
+`sortedUpsertAt`. `updateIf` became core's `updateWhere`, and `mergeFrom` is expressed as `merge`
+over a projected list, so nothing needed a home chat-side.
+
+Each helper was measured against the one it replaced before that one was deleted: 0.97-1.01x on
+merges whose keys overlap, 0.92-0.95x where they do not, and identical output over 40k randomized
+merges. `sortedMerge` keeps the O(n + m) walk that made chat's version worth keeping; `merge`
+would have cost 1.76-1.86x on the same shapes.
+
+Two things came out of the benchmarking rather than the migration, and are written up in
+[message-ordering.md](message-ordering.md): what actually caused the duplicate-key crash in
+[#2660](https://github.com/GetStream/stream-chat-flutter/pull/2660), and why a tiebreak on
+`Message.id` is the wrong fix for tied timestamps.
 
 ## Definition of done
 
@@ -121,11 +158,11 @@ None so far. Possible outcomes of the benchmark: the two-pointer `merge`, and an
 - [x] `dart analyze --fatal-infos` clean on `stream_chat`; `dart format` clean.
 - [x] `stream_chat` tests green (1687 passing); `stream_chat_persistence` tests green (302
       passing) and analyze clean.
-- [ ] `merge` benchmarked on realistic shapes, with numbers recorded here.
-- [ ] `list_extensions.dart` resolved — adopted, or ours upstreamed — and the export at
-      `stream_chat.dart:85` updated accordingly.
-- [ ] `stream_chat_dio_error.dart` handled in [03](03-errors.md) (tracked there, not here).
-- [ ] `melos run analyze && melos run test:all` before the phase closes.
-- [ ] If the extension renames ship as a break: `refactor(llc)!:` title, `🛑️ Breaking` CHANGELOG
+- [x] `merge` benchmarked on realistic shapes, with numbers recorded here.
+- [x] `list_extensions.dart` resolved — every helper moved to core, the file deleted, and
+      `SortedListExtensions` re-exported from the barrel in its place.
+- [x] `stream_chat_dio_error.dart` handled in [03](03-errors.md) (tracked there, not here).
+- [x] `melos run analyze && melos run test:all` before the phase closes.
+- [x] The extension renames shipped as a break: `refactor(llc)!:` title, `🛑️ Breaking` CHANGELOG
       entry, `migrations/v11-migration.md` Symbol Map rows.
-- [ ] Decisions recorded here, status box updated in `README.md`.
+- [x] Decisions recorded here, status box updated in `README.md`.
