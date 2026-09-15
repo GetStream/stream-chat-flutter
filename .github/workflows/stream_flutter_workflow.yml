@@ -179,6 +179,8 @@ jobs:
       - uses: ./.github/actions/setup-flutter
       - uses: ./.github/actions/setup-xcode
         if: matrix.platform == 'ios'
+      - uses: ./.github/actions/cache-gradle
+        if: matrix.platform == 'android'
       - name: "Install Tools"
         run: flutter pub global activate melos
       - name: "Bootstrap Workspace"
