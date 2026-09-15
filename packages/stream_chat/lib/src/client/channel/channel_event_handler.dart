@@ -28,11 +28,11 @@ class ChannelEventHandler {
   /// Routes the event by its type, preserving the effect order the per-event
   /// subscriptions used to produce.
   ///
-  /// Each of the five stages is contained: one that throws synchronously is
-  /// logged and the remaining stages still run for the same event. The four
-  /// `async` handlers are outside that guarantee — their futures are discarded
-  /// here, so a failure after the first `await` surfaces as an unhandled async
-  /// error instead of a logged warning.
+  /// Only synchronous failures are contained: a stage that throws is logged
+  /// and the remaining stages still run for the same event. A failure after
+  /// an `await` is not — the `async` handlers have their futures discarded
+  /// here, and some state writes are themselves `async void`, so both surface
+  /// as unhandled async errors rather than logged warnings.
   void handleEvent(Event event) {
     _guard(event, 'message and channel dispatch', () => _dispatchMessageAndChannelEvents(event));
     _guard(event, 'channel counts', () => _onChannelCounts(event));
