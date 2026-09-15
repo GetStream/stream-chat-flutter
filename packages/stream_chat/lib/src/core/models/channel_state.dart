@@ -144,11 +144,7 @@ typedef ChannelFilter = Filter<ChannelState>;
 class ChannelFilterField extends FilterField<ChannelState> {
   /// Creates a channel filter field named [remote] on the wire, reading its
   /// value off an instance with [value].
-  ChannelFilterField(
-    super.remote,
-    super.value, {
-    super.collectionEquality,
-  });
+  ChannelFilterField(super.remote, super.value);
 
   /// Creates a field the SDK does not model, read from [ChannelModel.extraData].
   ///
@@ -161,6 +157,24 @@ class ChannelFilterField extends FilterField<ChannelState> {
   factory ChannelFilterField.custom(String remote) {
     return ChannelFilterField(remote, (it) => it.channel?.extraData[remote]);
   }
+
+  // Creates a channel filter field that declares its [collectionEquality].
+  //
+  // The [remote] and [value] arguments behave as in the unnamed constructor.
+  // Use it for a field that declares how a query compares its elements:
+  //
+  // ```dart
+  // ChannelFilterField._(
+  //   'tags',
+  //   (it) => it.channel?.extraData['tags'],
+  //   collectionEquality: .containsExactly,
+  // );
+  // ```
+  ChannelFilterField._(
+    super.remote,
+    super.value, {
+    super.collectionEquality,
+  });
 
   /// Filters channels by their id.
   ///
@@ -274,7 +288,7 @@ class ChannelFilterField extends FilterField<ChannelState> {
   /// of them belong to.
   ///
   /// **Supported operators:** `$eq`, `$in`
-  static final members = ChannelFilterField(
+  static final members = ChannelFilterField._(
     'members',
     (it) => it.members?.map((it) => it.userId),
     collectionEquality: .containsExactly,

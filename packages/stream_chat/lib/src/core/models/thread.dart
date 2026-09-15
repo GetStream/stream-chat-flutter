@@ -244,11 +244,7 @@ typedef ThreadFilter = Filter<Thread>;
 class ThreadFilterField extends FilterField<Thread> {
   /// Creates a thread filter field named [remote] on the wire, reading its
   /// value off an instance with [value].
-  ThreadFilterField(
-    super.remote,
-    super.value, {
-    super.collectionEquality,
-  });
+  ThreadFilterField(super.remote, super.value);
 
   /// Creates a field the SDK does not model, read from [Thread.extraData].
   ///

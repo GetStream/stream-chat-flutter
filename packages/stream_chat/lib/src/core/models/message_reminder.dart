@@ -152,11 +152,7 @@ typedef MessageReminderFilter = Filter<MessageReminder>;
 class MessageReminderFilterField extends FilterField<MessageReminder> {
   /// Creates a reminder filter field named [remote] on the wire, reading its
   /// value off an instance with [value].
-  MessageReminderFilterField(
-    super.remote,
-    super.value, {
-    super.collectionEquality,
-  });
+  MessageReminderFilterField(super.remote, super.value);
 
   /// Filters reminders by the full id of the channel holding the message, in
   /// the form `type:id`.

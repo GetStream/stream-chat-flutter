@@ -742,11 +742,7 @@ typedef MessageSearchFilter = Filter<Message>;
 class MessageSearchFilterField extends FilterField<Message> {
   /// Creates a message filter field named [remote] on the wire, reading its
   /// value off an instance with [value].
-  MessageSearchFilterField(
-    super.remote,
-    super.value, {
-    super.collectionEquality,
-  });
+  MessageSearchFilterField(super.remote, super.value);
 
   /// Creates a field the SDK does not model, read from [Message.extraData].
   ///

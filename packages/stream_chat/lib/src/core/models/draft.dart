@@ -100,11 +100,7 @@ typedef DraftFilter = Filter<Draft>;
 class DraftFilterField extends FilterField<Draft> {
   /// Creates a draft filter field named [remote] on the wire, reading its
   /// value off an instance with [value].
-  DraftFilterField(
-    super.remote,
-    super.value, {
-    super.collectionEquality,
-  });
+  DraftFilterField(super.remote, super.value);
 
   /// Filters drafts by the full id of the channel they belong to, in the form
   /// `type:id`.
