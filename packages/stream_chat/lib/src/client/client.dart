@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
@@ -60,6 +59,7 @@ import 'event_resolvers.dart' as event_resolvers;
 import 'live_location_expiration_scheduler.dart';
 import 'query_channels_result.dart';
 import 'retry_policy.dart';
+import 'sync_manager.dart';
 
 /// Handler function used for logging records. Function requires a single
 /// [LogRecord] as the only parameter.
@@ -102,7 +102,7 @@ class StreamChatClient {
     AttachmentFileUploaderProvider attachmentFileUploaderProvider = StreamAttachmentFileUploader.new,
     Iterable<Interceptor>? chatApiInterceptors,
     HttpClientAdapter? httpClientAdapter,
-    this._recoverStateOnReconnect = true,
+    this.recoverStateOnReconnect = true,
     this.isLocalUnreadCountEnabled = false,
   }) {
     logger.info('Initiating new StreamChatClient');
@@ -245,17 +245,18 @@ class StreamChatClient {
   /// Whether the client should automatically refresh local state from the
   /// server when the WebSocket connection recovers.
   ///
-  /// When `true` (default), the client re-queries the active channels on
-  /// reconnect (capped at 30, ordered by `state.channels.keys`). The set of
-  /// state recovered on reconnect may grow in the future to cover threads,
-  /// reminders, etc.
+  /// When `true` (default), the client re-queries the channels that were
+  /// active before the connection was lost.
   ///
   /// Setting this to `false` disables that client-level recovery. Consumers
   /// that opt out are responsible for refreshing their own state when the
   /// [EventType.connectionRecovered] event fires — for example, by re-running
   /// their channel list query.
-  set recoverStateOnReconnect(bool value) => _recoverStateOnReconnect = value;
-  bool _recoverStateOnReconnect;
+  ///
+  /// Replaying the events missed while offline is not affected either way: it
+  /// runs whenever a persistence client is connected, and the channels it
+  /// cannot replay are refreshed regardless of this flag.
+  bool recoverStateOnReconnect;
 
   /// By default the Chat client will write all messages with level Warn or
   /// Error to stdout.
@@ -588,6 +589,12 @@ class StreamChatClient {
     return _eventController.safeAdd(event);
   }
 
+  late final _syncManager = SyncManager(
+    client: this,
+    logger: logger,
+    fetchMissedEvents: _chatApi.general.sync,
+  );
+
   void _onConnectionStatusChanged(
     ConnectionStatus prevStatus,
     ConnectionStatus currStatus,
@@ -599,46 +606,13 @@ class StreamChatClient {
     final isConnected = currStatus == ConnectionStatus.connected;
 
     // Notify the connection status change event
-    handleEvent(
-      Event(
-        type: EventType.connectionChanged,
-        online: isConnected,
-      ),
-    );
+    handleEvent(Event(type: EventType.connectionChanged, online: isConnected));
 
     final connectionRecovered = !wasConnected && isConnected;
+    if (!connectionRecovered) return;
 
-    if (connectionRecovered) {
-      // connection recovered
-      final cids = [...state.channels.keys.toSet()];
-      if (cids.isNotEmpty) {
-        // Recovery is best-effort: the connection can drop again while it is
-        // in flight. Nothing awaits this method, so an error here would
-        // surface as an unhandled crash instead of reaching the app.
-        try {
-          // Sync the persistence client if available
-          if (persistenceEnabled) await sync(cids: cids);
-
-          // Recover the channels that were active before the connection was lost,
-          // only if the client is configured to do so.
-          if (_recoverStateOnReconnect) {
-            await queryChannelsOnline(
-              filter: Filter.in_('cid', cids),
-              paginationParams: const PaginationParams(limit: 30),
-            );
-          }
-        } catch (e, stk) {
-          logger.warning('Error recovering state on reconnect', e, stk);
-        }
-      }
-
-      handleEvent(
-        Event(
-          type: EventType.connectionRecovered,
-          online: true,
-        ),
-      );
-    }
+    await _syncManager.recoverState();
+    handleEvent(Event(type: EventType.connectionRecovered, online: true));
   }
 
   /// Stream of [Event] coming from [_ws] connection
@@ -656,60 +630,19 @@ class StreamChatClient {
     );
   }
 
-  // Lock to make sure only one sync process is running at a time.
-  final _syncLock = Lock();
-
-  /// Get the events missed while offline to sync the offline storage
-  /// Will automatically fetch [cids] and [lastSyncedAt] if [persistenceEnabled]
+  /// Replays the events missed while offline, applying them to client state and
+  /// to the offline storage.
+  ///
+  /// [cids] and [lastSyncAt] both fall back to the values held by the
+  /// persistence client when omitted.
+  ///
+  /// A window that cannot be replayed — too many events, or refused by the
+  /// server — is given up on, and the channels it covered are re-queried in its
+  /// place.
+  ///
+  /// Never throws: a failed catch-up is logged and left for the next one.
   Future<void> sync({List<String>? cids, DateTime? lastSyncAt}) {
-    return _syncLock.synchronized(() async {
-      final channels = cids ?? await chatPersistenceClient?.getChannelCids();
-      if (channels == null || channels.isEmpty) return;
-
-      final syncAt = lastSyncAt ?? await chatPersistenceClient?.getLastSyncAt();
-      if (syncAt == null) {
-        logger.info('Fresh sync start: lastSyncAt initialized to now.');
-        return chatPersistenceClient?.updateLastSyncAt(DateTime.now());
-      }
-
-      try {
-        logger.info('Syncing events since $syncAt for channels: $channels');
-
-        final res = await _chatApi.general.sync(channels, syncAt);
-        final events = res.events.sorted(
-          (a, b) => a.createdAt.compareTo(b.createdAt),
-        );
-
-        for (final event in events) {
-          logger.fine('Syncing event: ${event.type}');
-          handleEvent(event);
-        }
-
-        final updatedSyncAt = events.lastOrNull?.createdAt ?? DateTime.now();
-        return await chatPersistenceClient?.updateLastSyncAt(updatedSyncAt);
-      } catch (error, stk) {
-        // If we got a 400 error, it means that either the sync time is too
-        // old or the channel list is too long or too many events need to be
-        // synced. In this case, we should just flush the persistence client
-        // and start over.
-        if (error is StreamChatNetworkError && error.statusCode == 400) {
-          logger.warning(
-            'Failed to sync events due to stale or oversized state. '
-            'Resetting the persistence client to enable a fresh start.',
-          );
-
-          try {
-            await chatPersistenceClient?.flush();
-            return await chatPersistenceClient?.updateLastSyncAt(DateTime.now());
-          } catch (resetError, resetStk) {
-            logger.warning('Error resetting the persistence client', resetError, resetStk);
-            return;
-          }
-        }
-
-        logger.warning('Error syncing events', error, stk);
-      }
-    });
+    return _syncManager.sync(cids: cids, lastSyncAt: lastSyncAt);
   }
 
   final _queryChannelsCache = InFlightCache<String, QueryChannelsResult>();
