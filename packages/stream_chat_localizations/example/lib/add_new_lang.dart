@@ -913,7 +913,7 @@ void main() async {
   /// from your project dashboard.
   final client = StreamChatClient(
     's2dxdhpxd94g',
-    logLevel: Level.INFO,
+    logConfig: const StreamLogConfig(priority: StreamLogPriority.info),
   );
 
   /// Set the current user and connect the websocket. In a production

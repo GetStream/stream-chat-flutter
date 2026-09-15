@@ -47,7 +47,11 @@ class ChannelEventHandler {
     try {
       region();
     } catch (error, stackTrace) {
-      _client.logger.warning('Error handling ${event.type} event in $stage', error, stackTrace);
+      _client.logger.w(
+        () => 'Error handling ${event.type} event in $stage',
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -410,7 +414,9 @@ class ChannelEventHandler {
     if (event.cid == null) return;
 
     final user = event.user!;
-    final member = await _channel.queryMembers(filter: Filter.equal('id', user.id)).then((it) => it.members.first);
+    final member = await _channel
+        .queryMembers(filter: .equal(MemberFilterField.userId, user.id))
+        .then((it) => it.members.first);
 
     _mutations.onMemberBanned(member);
   }
@@ -420,7 +426,9 @@ class ChannelEventHandler {
     if (event.cid == null) return;
 
     final user = event.user!;
-    final member = await _channel.queryMembers(filter: Filter.equal('id', user.id)).then((it) => it.members.first);
+    final member = await _channel
+        .queryMembers(filter: .equal(MemberFilterField.userId, user.id))
+        .then((it) => it.members.first);
 
     _mutations.onMemberUnbanned(member);
   }

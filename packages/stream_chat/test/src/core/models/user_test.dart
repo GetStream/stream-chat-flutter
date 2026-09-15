@@ -246,146 +246,73 @@ void main() {
       expect(user.avgResponseTime, null);
     });
 
-    group('ComparableFieldProvider', () {
-      test('should return ComparableField for user.id', () {
-        final user = createTestUser(
-          id: 'test-user',
+    group('UserSortField', () {
+      test('id orders alphabetically', () {
+        expectOrders(
+          UserSortField.id,
+          createTestUser(id: 'alice'),
+          createTestUser(id: 'bob'),
         );
-
-        final field = user.getComparableField(UserSortKey.id);
-        expect(field, isNotNull);
-        expect(field!.value, equals('test-user'));
       });
 
-      test('should return ComparableField for user.name', () {
-        final user = createTestUser(
-          id: 'test-user',
-          name: 'Test User',
+      test('name orders alphabetically, folded', () {
+        // Folding is what makes a local sort agree with the server: `Zara`
+        // would otherwise sort before `alice`.
+        expectOrders(
+          UserSortField.name,
+          createTestUser(id: 'a', name: 'alice'),
+          createTestUser(id: 'z', name: 'Zara'),
         );
-
-        final field = user.getComparableField(UserSortKey.name);
-        expect(field, isNotNull);
-        expect(field!.value, equals('Test User'));
       });
 
-      test('should return ComparableField for user.role', () {
-        final user = createTestUser(
-          id: 'test-user',
-          role: 'admin',
+      test('name orders nothing for a user with no name', () {
+        // `User.name` answers the id when a user has no name. Sorting by that
+        // would order unnamed users among the named ones, where the API sorts
+        // them together by an empty `name` column.
+        expectOrdersNothing(
+          UserSortField.name,
+          createTestUser(id: 'alice'),
+          createTestUser(id: 'zara'),
         );
-
-        final field = user.getComparableField(UserSortKey.role);
-        expect(field, isNotNull);
-        expect(field!.value, equals('admin'));
       });
 
-      test('should return ComparableField for user.banned', () {
-        final user = createTestUser(
-          id: 'test-user',
-          banned: true,
+      test('role orders alphabetically', () {
+        expectOrders(
+          UserSortField.role,
+          createTestUser(id: 'a', role: 'admin'),
+          createTestUser(id: 'u', role: 'user'),
         );
-
-        final field = user.getComparableField(UserSortKey.banned);
-        expect(field, isNotNull);
-        expect(field!.value, isTrue);
       });
 
-      test('should return ComparableField for user.lastActive', () {
-        final lastActive = DateTime(2023, 6, 15);
-        final user = createTestUser(
-          id: 'test-user',
-          lastActive: lastActive,
+      test('banned orders unbanned users first', () {
+        expectOrders(
+          UserSortField.banned,
+          createTestUser(id: 'a', banned: false),
+          createTestUser(id: 'b', banned: true),
         );
-
-        final field = user.getComparableField(UserSortKey.lastActive);
-        expect(field, isNotNull);
-        expect(field!.value, equals(lastActive));
       });
 
-      test('should return ComparableField for user.extraData', () {
-        final user = createTestUser(
-          id: 'test-user',
-          extraData: {'score': 42},
+      test('lastActive orders less recent users first', () {
+        expectOrders(
+          UserSortField.lastActive,
+          createTestUser(id: 'a', lastActive: DateTime(2023, 6, 10)),
+          createTestUser(id: 'b', lastActive: DateTime(2023, 6, 15)),
         );
-
-        final field = user.getComparableField('score');
-        expect(field, isNotNull);
-        expect(field!.value, equals(42));
       });
 
-      test('should return null for non-existent extraData keys', () {
-        final user = createTestUser(
-          id: 'test-user',
+      test('a custom field orders by the user extra data', () {
+        expectOrders(
+          UserSortField.custom('score'),
+          createTestUser(id: 'a', extraData: const {'score': 10}),
+          createTestUser(id: 'b', extraData: const {'score': 90}),
         );
-
-        final field = user.getComparableField('non_existent_key');
-        expect(field, isNull);
       });
 
-      test('should compare two users correctly using name', () {
-        final user1 = createTestUser(
-          id: 'user1',
-          name: 'Alice',
+      test('a custom field the user does not carry orders nothing', () {
+        expectOrdersNothing(
+          UserSortField.custom('non_existent_key'),
+          createTestUser(id: 'plain'),
         );
-
-        final user2 = createTestUser(
-          id: 'user2',
-          name: 'Bob',
-        );
-
-        final field1 = user1.getComparableField(UserSortKey.name);
-        final field2 = user2.getComparableField(UserSortKey.name);
-
-        expect(field1!.compareTo(field2!), lessThan(0)); // Alice < Bob
-        expect(field2.compareTo(field1), greaterThan(0)); // Bob > Alice
-      });
-
-      test('should compare two users correctly using lastActive', () {
-        final recentlyActive = createTestUser(
-          id: 'recent',
-          lastActive: DateTime(2023, 6, 15),
-        );
-
-        final lessRecentlyActive = createTestUser(
-          id: 'old',
-          lastActive: DateTime(2023, 6, 10),
-        );
-
-        final field1 = recentlyActive.getComparableField(UserSortKey.lastActive);
-        final field2 = lessRecentlyActive.getComparableField(UserSortKey.lastActive);
-
-        expect(field1!.compareTo(field2!), greaterThan(0)); // More recent > Less recent
-        expect(field2.compareTo(field1), lessThan(0)); // Less recent < More recent
-      });
-
-      test('should compare two users correctly using banned status', () {
-        final bannedUser = createTestUser(
-          id: 'banned',
-          banned: true,
-        );
-
-        final notBannedUser = createTestUser(
-          id: 'not-banned',
-          banned: false,
-        );
-
-        final field1 = bannedUser.getComparableField(UserSortKey.banned);
-        final field2 = notBannedUser.getComparableField(UserSortKey.banned);
-
-        expect(field1!.compareTo(field2!), greaterThan(0)); // true > false
-        expect(field2.compareTo(field1), lessThan(0)); // false < true
-      });
-
-      test('should fallback to user id when name is null', () {
-        // The User implementation fallbacks to id when name is null
-        final user = createTestUser(
-          id: 'without-name',
-          name: null,
-        );
-
-        final field = user.getComparableField(UserSortKey.name);
-        expect(field, isNotNull);
-        expect(field!.value, equals('without-name')); // Fallback to user id
       });
     });
 

@@ -336,131 +336,67 @@ void main() {
       });
     });
 
-    group('ComparableFieldProvider', () {
-      test('should return ComparableField for message.id', () {
-        final message = createTestMessage(
-          id: 'test-message-id',
-          text: 'Hello world',
+    group('MessageSearchSortField', () {
+      test('id orders alphabetically', () {
+        expectOrders(
+          MessageSearchSortField.id,
+          createTestMessage(id: 'a-message'),
+          createTestMessage(id: 'b-message'),
         );
-
-        final field = message.getComparableField(MessageSortKey.id);
-        expect(field, isNotNull);
-        expect(field!.value, equals('test-message-id'));
       });
 
-      test('should return ComparableField for message.createdAt', () {
-        final createdAt = DateTime(2023, 6, 15);
-        final message = createTestMessage(
-          id: 'test-message-id',
-          text: 'Hello world',
-          createdAt: createdAt,
+      test('createdAt orders older messages first', () {
+        expectOrders(
+          MessageSearchSortField.createdAt,
+          createTestMessage(id: 'older', createdAt: DateTime(2023, 6, 10)),
+          createTestMessage(id: 'newer', createdAt: DateTime(2023, 6, 15)),
         );
-
-        final field = message.getComparableField(MessageSortKey.createdAt);
-        expect(field, isNotNull);
-        expect(field!.value, equals(createdAt));
       });
 
-      test('should return ComparableField for message.updatedAt', () {
-        final updatedAt = DateTime(2023, 6, 20);
-        final message = createTestMessage(
-          id: 'test-message-id',
-          text: 'Hello world',
-          updatedAt: updatedAt,
+      test('updatedAt orders older messages first', () {
+        expectOrders(
+          MessageSearchSortField.updatedAt,
+          createTestMessage(id: 'older', updatedAt: DateTime(2023, 6, 10)),
+          createTestMessage(id: 'newer', updatedAt: DateTime(2023, 6, 15)),
         );
-
-        final field = message.getComparableField(MessageSortKey.updatedAt);
-        expect(field, isNotNull);
-        expect(field!.value, equals(updatedAt));
       });
 
-      test('should return ComparableField for message.extraData', () {
-        final message = createTestMessage(
-          id: 'test-message-id',
-          text: 'Hello world',
-          extraData: {'priority': 5},
+      test('text orders alphabetically', () {
+        expectOrders(
+          MessageSearchSortField.text,
+          createTestMessage(id: 'a', text: 'Aardvark'),
+          createTestMessage(id: 'b', text: 'Zebra'),
         );
-
-        final field = message.getComparableField('priority');
-        expect(field, isNotNull);
-        expect(field!.value, equals(5));
       });
 
-      test('should return null for non-existent extraData keys', () {
-        final message = createTestMessage(
-          id: 'test-message-id',
-          text: 'Hello world',
+      test('replyCount orders fewer replies first', () {
+        expectOrders(
+          MessageSearchSortField.replyCount,
+          createTestMessage(id: 'a', replyCount: 1),
+          createTestMessage(id: 'b', replyCount: 9),
         );
-
-        final field = message.getComparableField('non_existent_key');
-        expect(field, isNull);
       });
 
-      test('should compare two messages correctly using id', () {
-        final message1 = createTestMessage(
-          id: 'message-a',
-          text: 'Message A',
+      test('a custom field orders by the message extra data', () {
+        expectOrders(
+          MessageSearchSortField.custom('priority'),
+          createTestMessage(id: 'a', extraData: const {'priority': 1}),
+          createTestMessage(id: 'b', extraData: const {'priority': 10}),
         );
-
-        final message2 = createTestMessage(
-          id: 'message-b',
-          text: 'Message B',
-        );
-
-        final field1 = message1.getComparableField(MessageSortKey.id);
-        final field2 = message2.getComparableField(MessageSortKey.id);
-
-        // message-a < message-b
-        expect(field1!.compareTo(field2!), lessThan(0));
-        // message-b > message-a
-        expect(field2.compareTo(field1), greaterThan(0));
       });
 
-      test('should compare two messages correctly using createdAt', () {
-        final newerMessage = createTestMessage(
-          id: 'newer',
-          text: 'Newer Message',
-          createdAt: DateTime(2023, 6, 15),
+      test('a custom field the message does not carry orders nothing', () {
+        expectOrdersNothing(
+          MessageSearchSortField.custom('non_existent_key'),
+          createTestMessage(id: 'plain'),
         );
-
-        final olderMessage = createTestMessage(
-          id: 'older',
-          text: 'Older Message',
-          createdAt: DateTime(2023, 6, 10),
-        );
-
-        final field1 = newerMessage.getComparableField(
-          MessageSortKey.createdAt,
-        );
-
-        final field2 = olderMessage.getComparableField(
-          MessageSortKey.createdAt,
-        );
-
-        // More recent > Less recent
-        expect(field1!.compareTo(field2!), greaterThan(0));
-        // Less recent < More recent
-        expect(field2.compareTo(field1), lessThan(0));
       });
 
-      test('should compare two messages correctly using extraData', () {
-        final highPriorityMessage = createTestMessage(
-          id: 'high',
-          text: 'High Priority Message',
-          extraData: {'priority': 10},
+      test('relevance orders nothing locally', () {
+        expectOrdersNothing(
+          MessageSearchSortField.relevance,
+          createTestMessage(id: 'plain'),
         );
-
-        final lowPriorityMessage = createTestMessage(
-          id: 'low',
-          text: 'Low Priority Message',
-          extraData: {'priority': 1},
-        );
-
-        final field1 = highPriorityMessage.getComparableField('priority');
-        final field2 = lowPriorityMessage.getComparableField('priority');
-
-        expect(field1!.compareTo(field2!), greaterThan(0)); // 10 > 1
-        expect(field2.compareTo(field1), lessThan(0)); // 1 < 10
       });
     });
 

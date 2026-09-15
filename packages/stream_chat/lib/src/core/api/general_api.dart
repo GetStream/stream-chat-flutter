@@ -1,11 +1,11 @@
 import 'dart:convert';
 
 import '../http/stream_http_client.dart';
-import '../models/filter.dart';
+import '../models/channel_state.dart';
 import '../models/member.dart';
+import '../models/message.dart';
 import 'requests.dart';
 import 'responses.dart';
-import 'sort_order.dart';
 
 /// Defines the api dedicated to general operations
 class GeneralApi {
@@ -31,11 +31,11 @@ class GeneralApi {
 
   /// A message search.
   Future<SearchMessagesResponse> searchMessages(
-    Filter filter, {
+    ChannelFilter filter, {
     String? query,
-    SortOrder? sort,
+    List<MessageSearchSort>? sort,
     PaginationParams? pagination,
-    Filter? messageFilters,
+    MessageSearchFilter? messageFilters,
   }) async {
     assert(
       pagination?.offset == null || pagination?.offset == 0 || sort == null,
@@ -72,10 +72,10 @@ class GeneralApi {
   /// Query channel members
   Future<QueryMembersResponse> queryMembers(
     String channelType, {
-    Filter? filter,
+    MemberFilter? filter,
     String? channelId,
     List<Member>? members,
-    SortOrder<Member>? sort,
+    List<MemberSort>? sort,
     PaginationParams? pagination,
   }) async {
     final response = await _client.get(

@@ -269,7 +269,7 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
   Future<List<Member>> _queryMembers(String query) async {
     final response = await widget.channel.queryMembers(
       pagination: PaginationParams(limit: widget.limit),
-      filter: query.isEmpty ? const Filter.empty() : Filter.autoComplete('name', query),
+      filter: query.isEmpty ? null : MemberFilter.autoComplete(MemberFilterField.name, query),
     );
     return response.members;
   }
@@ -282,12 +282,12 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
     final response = await widget.client!.queryUsers(
       pagination: PaginationParams(limit: widget.limit),
       filter: query.isEmpty
-          ? const Filter.empty()
-          : Filter.or([
-              Filter.autoComplete('id', query),
-              Filter.autoComplete('name', query),
+          ? null
+          : UserFilter.or([
+              UserFilter.autoComplete(UserFilterField.id, query),
+              UserFilter.autoComplete(UserFilterField.name, query),
             ]),
-      sort: [const SortOption.asc('id')],
+      sort: [UserSort.asc(UserSortField.id)],
     );
     return response.users;
   }

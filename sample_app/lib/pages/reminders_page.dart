@@ -202,15 +202,15 @@ enum MessageRemindersFilter {
   const MessageRemindersFilter(this.label);
   final String label;
 
-  Filter get queryFilter {
-    const key = 'remind_at';
+  MessageReminderFilter? get queryFilter {
+    final key = MessageReminderFilterField.remindAt;
     final now = DateTime.timestamp().toIso8601String();
     return switch (this) {
-      MessageRemindersFilter.all => const Filter.empty(),
-      MessageRemindersFilter.overdue => Filter.lessOrEqual(key, now),
-      MessageRemindersFilter.upcoming => Filter.greaterOrEqual(key, now),
-      MessageRemindersFilter.scheduled => Filter.exists(key),
-      MessageRemindersFilter.savedForLater => Filter.notExists(key),
+      MessageRemindersFilter.all => null,
+      MessageRemindersFilter.overdue => .lessOrEqual(key, now),
+      MessageRemindersFilter.upcoming => .greaterOrEqual(key, now),
+      MessageRemindersFilter.scheduled => .exists(key, exists: true),
+      MessageRemindersFilter.savedForLater => .exists(key, exists: false),
     };
   }
 }

@@ -411,12 +411,10 @@ Future<void> _openDirectChannel(BuildContext context, User user) async {
   final existing = await chat.client.queryChannelsOnline(
     state: false,
     watch: false,
-    filter: Filter.raw(
-      value: {
-        'members': [currentUser.id, user.id],
-        'distinct': true,
-      },
-    ),
+    filter: .raw({
+      'members': [currentUser.id, user.id],
+      'distinct': true,
+    }),
     messageLimit: 0,
     paginationParams: const PaginationParams(limit: 1),
   );

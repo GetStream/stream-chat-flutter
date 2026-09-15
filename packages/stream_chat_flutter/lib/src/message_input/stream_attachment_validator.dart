@@ -13,7 +13,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 ///    extension, and MIME-type rules from [fileUploadConfig] or
 ///    [imageUploadConfig].
 ///
-/// Both return `null` on success and a typed [StreamChatError] subtype
+/// Both return `null` on success and a typed [AttachmentValidationError]
 /// on failure — neither ever throws.
 ///
 /// See also:
@@ -50,7 +50,7 @@ class StreamAttachmentValidator {
   ///
   /// Returns `null` when within the limit, otherwise an
   /// [AttachmentLimitReachedError].
-  StreamChatError? validateCount(int total) {
+  AttachmentValidationError? validateCount(int total) {
     if (total <= maxAttachmentCount) return null;
     return AttachmentLimitReachedError(maxCount: maxAttachmentCount);
   }
@@ -69,7 +69,7 @@ class StreamAttachmentValidator {
   ///    list triggered the failure.
   ///  * [AttachmentTooLargeError] when the file exceeds the per-category
   ///    [UploadConfig.sizeLimit].
-  StreamChatError? validate(Attachment attachment) {
+  AttachmentValidationError? validate(Attachment attachment) {
     final file = attachment.file;
     if (file == null) return null;
 
@@ -123,6 +123,22 @@ class StreamAttachmentValidator {
   }
 }
 
+/// Why an attachment was rejected by [StreamAttachmentValidator].
+///
+/// The validator returns one instead of throwing, so pattern-match it to
+/// choose the message to show. [StreamAttachmentPickerController] does throw
+/// it, from `addAttachment` and from its `value` setter.
+///
+/// An `on StreamChatException` clause will not catch it: nothing failed, an
+/// attachment was refused.
+sealed class AttachmentValidationError implements Exception {
+  /// Creates an [AttachmentValidationError] described by [message].
+  const AttachmentValidationError(this.message);
+
+  /// A human-readable description of why the attachment was refused.
+  final String message;
+}
+
 /// Returned by [StreamAttachmentValidator.validateCount] when the
 /// attachment count exceeds [StreamAttachmentValidator.maxAttachmentCount].
 ///
@@ -130,7 +146,7 @@ class StreamAttachmentValidator {
 ///
 ///  * [AttachmentTooLargeError], [AttachmentBlockedError], for the other
 ///    validator failures.
-class AttachmentLimitReachedError extends StreamChatError {
+final class AttachmentLimitReachedError extends AttachmentValidationError {
   /// Creates a new [AttachmentLimitReachedError].
   const AttachmentLimitReachedError({
     required this.maxCount,
@@ -138,9 +154,6 @@ class AttachmentLimitReachedError extends StreamChatError {
 
   /// The maximum number of attachments allowed in a single message.
   final int maxCount;
-
-  @override
-  List<Object?> get props => [...super.props, maxCount];
 
   @override
   String toString() => 'AttachmentLimitReachedError: $message';
@@ -153,7 +166,7 @@ class AttachmentLimitReachedError extends StreamChatError {
 ///
 ///  * [AttachmentBlockedError], [AttachmentLimitReachedError], for the
 ///    other validator failures.
-class AttachmentTooLargeError extends StreamChatError {
+final class AttachmentTooLargeError extends AttachmentValidationError {
   /// Creates a new [AttachmentTooLargeError].
   const AttachmentTooLargeError({
     required this.fileSize,
@@ -165,9 +178,6 @@ class AttachmentTooLargeError extends StreamChatError {
 
   /// The maximum upload size, in bytes.
   final int maxSize;
-
-  @override
-  List<Object?> get props => [...super.props, fileSize, maxSize];
 
   @override
   String toString() => 'AttachmentTooLargeError: $message';
@@ -183,7 +193,7 @@ class AttachmentTooLargeError extends StreamChatError {
 ///
 ///  * [AttachmentTooLargeError], [AttachmentLimitReachedError], for the
 ///    other validator failures.
-class AttachmentBlockedError extends StreamChatError {
+final class AttachmentBlockedError extends AttachmentValidationError {
   /// Creates a new [AttachmentBlockedError].
   const AttachmentBlockedError({
     this.fileExtension,
@@ -195,9 +205,6 @@ class AttachmentBlockedError extends StreamChatError {
 
   /// The MIME type of the blocked attachment, if known.
   final String? mimeType;
-
-  @override
-  List<Object?> get props => [...super.props, fileExtension, mimeType];
 
   @override
   String toString() {

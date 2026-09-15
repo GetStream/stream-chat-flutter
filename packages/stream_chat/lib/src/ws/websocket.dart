@@ -2,15 +2,20 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_core/stream_core.dart'
+    show
+        StreamApiException,
+        StreamException,
+        StreamApiError,
+        StreamLogger,
+        StreamNetworkException,
+        SystemEnvironmentManager,
+        TokenManager;
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import '../core/error/error.dart';
-import '../core/http/system_environment_manager.dart';
-import '../core/http/token_manager.dart';
 import '../core/models/event.dart';
 import '../core/models/own_user.dart';
 import '../core/util/extension.dart';
@@ -41,14 +46,16 @@ class WebSocket with TimerHelper {
     required this.tokenManager,
     this.systemEnvironmentManager,
     this.handler,
-    this._logger,
     this.webSocketChannelProvider,
     this.reconnectionMonitorInterval = 10,
     this.healthCheckInterval = 20,
     this.reconnectionMonitorTimeout = 40,
     this.maxReconnectAttempts = 6,
     this.queryParameters = const {},
-  });
+    String tag = 'SCh:Ws',
+  }) : _logger = StreamLogger(tag);
+
+  final StreamLogger _logger;
 
   ///
   final String apiKey;
@@ -74,8 +81,6 @@ class WebSocket with TimerHelper {
   /// Functions that will be called every time a new event is received from the
   /// connection
   final EventHandler? handler;
-
-  final Logger? _logger;
 
   /// Connection function
   /// Used only for testing purpose
@@ -130,7 +135,7 @@ class WebSocket with TimerHelper {
   }
 
   void _initWebSocketChannel(Uri uri) {
-    _logger?.info('Initiating connection with $baseUrl');
+    _logger.d(() => 'Initiating connection with $baseUrl');
     if (_webSocketChannel != null) {
       _closeWebSocketChannel();
     }
@@ -143,7 +148,7 @@ class WebSocket with TimerHelper {
   }
 
   void _closeWebSocketChannel() {
-    _logger?.info('Closing connection with $baseUrl');
+    _logger.d(() => 'Closing connection with $baseUrl');
     if (_webSocketChannel != null) {
       _unsubscribeFromWebSocketChannel();
       _webSocketChannel?.sink.close(status.normalClosure, 'Closing connection');
@@ -152,7 +157,7 @@ class WebSocket with TimerHelper {
   }
 
   void _subscribeToWebSocketChannel() {
-    _logger?.info('Started listening to $baseUrl');
+    _logger.d(() => 'Started listening to $baseUrl');
     if (_webSocketChannelSubscription != null) {
       _unsubscribeFromWebSocketChannel();
     }
@@ -164,7 +169,7 @@ class WebSocket with TimerHelper {
   }
 
   void _unsubscribeFromWebSocketChannel() {
-    _logger?.info('Stopped listening to $baseUrl');
+    _logger.d(() => 'Stopped listening to $baseUrl');
     if (_webSocketChannelSubscription != null) {
       _webSocketChannelSubscription?.cancel();
       _webSocketChannelSubscription = null;
@@ -176,7 +181,8 @@ class WebSocket with TimerHelper {
     bool includeUserDetails = true,
   }) async {
     final userDetails = ConnectUserDetails.fromOwnUser(_user!);
-    final token = await tokenManager.loadToken(refresh: refreshToken);
+    if (refreshToken) tokenManager.expireToken();
+    final token = await tokenManager.getToken();
     final params = {
       'user_id': userDetails.id,
       'user_details': includeUserDetails ? userDetails : {'id': userDetails.id},
@@ -207,7 +213,7 @@ class WebSocket with TimerHelper {
       _ => throw const FormatException('Invalid address format'),
     };
 
-    _logger?.info('[buildUri] #ws; scheme: $scheme, host: $host, port: $port');
+    _logger.d(() => '[buildUri] #ws; scheme: $scheme, host: $host, port: $port');
 
     return Uri(
       scheme: scheme,
@@ -226,10 +232,9 @@ class WebSocket with TimerHelper {
     bool includeUserDetails = false,
   }) {
     if (_connectRequestInProgress) {
-      throw const StreamWebSocketError('''
-        You've called connect twice,
-        can only attempt 1 connection at the time,
-        ''');
+      throw StateError(
+        'A connection attempt is already in progress; only one is allowed at a time.',
+      );
     }
     _connectRequestInProgress = true;
     _manuallyClosed = false;
@@ -251,7 +256,7 @@ class WebSocket with TimerHelper {
       final uri = await _buildUri(
         includeUserDetails: includeUserDetails,
       );
-      _logger?.info('[connect] #ws; uri: $uri');
+      _logger.d(() => '[connect] #ws; uri: ${uri.withoutCredentials}');
       _initWebSocketChannel(uri);
     } catch (e, stk) {
       _onConnectionError(e, stk);
@@ -272,14 +277,14 @@ class WebSocket with TimerHelper {
   /// Call [resumeReconnect] before re-establishing the connection.
   void pauseReconnect() {
     if (!_reconnectEnabled) return;
-    _logger?.info('Pausing reconnection');
+    _logger.d(() => 'Pausing reconnection');
     _reconnectEnabled = false;
   }
 
   /// Re-enables automatic reconnection after a previous [pauseReconnect].
   void resumeReconnect() {
     if (_reconnectEnabled) return;
-    _logger?.info('Resuming reconnection');
+    _logger.d(() => 'Resuming reconnection');
     _reconnectEnabled = true;
   }
 
@@ -292,15 +297,15 @@ class WebSocket with TimerHelper {
     _closeWebSocketChannel();
 
     if (!_reconnectEnabled) {
-      _logger?.info('Reconnect skipped: paused');
+      _logger.d(() => 'Reconnect skipped: paused');
       _connectionStatus = ConnectionStatus.disconnected;
       return;
     }
 
-    _logger?.info('Retrying connection : $_reconnectAttempt');
+    _logger.i(() => 'Retrying connection : $_reconnectAttempt');
 
     if (_reconnectAttempt >= maxReconnectAttempts) {
-      _logger?.severe('Max reconnect attempts reached: $maxReconnectAttempts');
+      _logger.e(() => 'Max reconnect attempts reached: $maxReconnectAttempts');
       return disconnect();
     }
 
@@ -326,7 +331,7 @@ class WebSocket with TimerHelper {
           refreshToken: refreshToken,
           includeUserDetails: false,
         );
-        _logger?.info('[reconnect] #ws; uri: $uri');
+        _logger.d(() => '[reconnect] #ws; uri: ${uri.withoutCredentials}');
         try {
           _initWebSocketChannel(uri);
         } catch (e, stk) {
@@ -349,7 +354,7 @@ class WebSocket with TimerHelper {
   }
 
   void _startMonitoringEvents() {
-    _logger?.info('Starting monitoring events');
+    _logger.d(() => 'Starting monitoring events');
     // cancel all previous timers
     cancelAllTimers();
 
@@ -358,7 +363,7 @@ class WebSocket with TimerHelper {
   }
 
   void _stopMonitoringEvents() {
-    _logger?.info('Stopped monitoring events');
+    _logger.d(() => 'Stopped monitoring events');
     // reset lastEvent
     _lastEventAt = null;
 
@@ -370,7 +375,7 @@ class WebSocket with TimerHelper {
     _connectionId = event.connectionId;
     _connectionStatus = ConnectionStatus.connected;
 
-    _logger?.info('Connection successful: $_connectionId');
+    _logger.i(() => 'Connection successful: $_connectionId');
 
     // notify user that connection is completed
     final completer = connectionCompleter;
@@ -383,7 +388,7 @@ class WebSocket with TimerHelper {
   }
 
   void _handleHealthCheckEvent(Event event) {
-    _logger?.info('HealthCheck received : ${event.connectionId}');
+    _logger.v(() => 'HealthCheck received : ${event.connectionId}');
 
     _connectionId = event.connectionId;
     _connectionStatus = ConnectionStatus.connected;
@@ -393,14 +398,15 @@ class WebSocket with TimerHelper {
     // resetting connect, reconnect request flag
     _resetRequestFlags();
 
-    final error = StreamWebSocketError.fromStreamError(errorResponse);
-    final isTokenExpired = error.errorCode == ChatErrorCode.tokenExpired;
-    if (isTokenExpired && !tokenManager.isStatic) {
-      _logger?.warning('Connection failed, token expired');
+    final data = StreamApiError.fromJson(errorResponse);
+    final error = StreamApiException.fromApiError(data);
+    final isTokenExpired = error.isTokenExpired;
+    if (isTokenExpired && !tokenManager.usesStaticProvider) {
+      _logger.w(() => 'Connection failed, token expired');
       return _reconnect(refreshToken: true);
     }
 
-    _logger?.severe('Connection failed', error);
+    _logger.e(() => 'Connection failed', error: error);
 
     final completer = connectionCompleter;
     // complete with error if not yet completed
@@ -426,14 +432,16 @@ class WebSocket with TimerHelper {
     try {
       event = Event.fromJson(jsonData);
     } catch (e, stk) {
-      _logger?.warning('Error parsing an event: $e');
-      _logger?.warning('Stack trace: $stk');
+      _logger.w(() => 'Error parsing an event: $e');
+      _logger.w(() => 'Stack trace: $stk');
     }
 
     if (event == null) return;
 
     _lastEventAt = DateTime.now();
-    _logger?.info('Event received: ${event.type}');
+    // Read outside the closure: promotion does not reach inside one.
+    final type = event.type;
+    _logger.v(() => 'Event received: $type');
 
     if (event.type == EventType.healthCheck) {
       if (event.me != null) {
@@ -447,20 +455,19 @@ class WebSocket with TimerHelper {
   }
 
   void _onConnectionError(error, [stacktrace]) {
-    _logger?.warning('[onConnectionError] #ws; error occurred', error, stacktrace);
+    _logger.w(() => '[onConnectionError] #ws; error occurred', error: error, stackTrace: stacktrace);
 
-    StreamWebSocketError wsError;
-    if (error is WebSocketChannelException) {
-      wsError = StreamWebSocketError.fromWebSocketChannelError(error);
-    } else {
-      wsError = StreamWebSocketError(error.toString());
-    }
+    var exception = StreamException.tryFrom(error);
+    exception ??= StreamNetworkException(
+      message: 'The connection reported an error',
+      cause: error,
+    );
 
     final completer = connectionCompleter;
     // complete with error if not yet completed
     if (completer != null && !completer.isCompleted) {
       // complete the connection with error
-      completer.completeError(wsError);
+      completer.completeError(exception);
     }
 
     // resetting connect, reconnect request flag
@@ -472,7 +479,7 @@ class WebSocket with TimerHelper {
   bool _manuallyClosed = false;
 
   void _onConnectionClosed() {
-    _logger?.warning('Connection closed : $connectionId');
+    _logger.w(() => 'Connection closed : $connectionId');
 
     // resetting connect, reconnect request flag
     _resetRequestFlags();
@@ -502,12 +509,12 @@ class WebSocket with TimerHelper {
   }
 
   void _startReconnectionMonitor() {
-    _logger?.info('Starting reconnection monitor');
+    _logger.d(() => 'Starting reconnection monitor');
     setPeriodicTimer(
       Duration(seconds: reconnectionMonitorInterval),
       (_) {
         final needsToReconnect = _needsToReconnect;
-        _logger?.info('Needs to reconnect : $needsToReconnect');
+        _logger.v(() => 'Needs to reconnect : $needsToReconnect');
         if (needsToReconnect) _reconnect();
       },
       immediate: true,
@@ -515,11 +522,11 @@ class WebSocket with TimerHelper {
   }
 
   void _startHealthCheck() {
-    _logger?.info('Starting health check monitor');
+    _logger.d(() => 'Starting health check monitor');
     setPeriodicTimer(
       Duration(seconds: healthCheckInterval),
       (_) {
-        _logger?.info('Sending Event: ${EventType.healthCheck}');
+        _logger.v(() => 'Sending Event: ${EventType.healthCheck}');
         final event = Event(
           type: EventType.healthCheck,
           connectionId: connectionId,
@@ -535,7 +542,7 @@ class WebSocket with TimerHelper {
     if (connectionStatus == ConnectionStatus.disconnected) return;
     _connectionStatus = ConnectionStatus.disconnected;
 
-    _logger?.info('Disconnecting web-socket connection');
+    _logger.i(() => 'Disconnecting web-socket connection');
 
     _manuallyClosed = true;
     _resetRequestFlags(resetAttempts: true);
@@ -550,11 +557,30 @@ class WebSocket with TimerHelper {
 
   /// Disposes the web-socket connection and releases resources
   Future<void> dispose() async {
-    _logger?.info('Disposing web-socket connection');
+    _logger.d(() => 'Disposing web-socket connection');
 
     _stopMonitoringEvents();
     _unsubscribeFromWebSocketChannel();
     _closeWebSocketChannel();
     _connectionStatusController.close();
+  }
+}
+
+// The connect URI carries the user token twice — as `authorization`, and as
+// `user_token` inside the `json` payload — so neither reaches a log.
+extension on Uri {
+  Uri get withoutCredentials {
+    const redacted = '<redacted>';
+    final params = {...queryParameters};
+
+    if (params.containsKey('authorization')) params['authorization'] = redacted;
+
+    if (params['json'] case final payload?) {
+      if (jsonDecode(payload) case final Map<String, dynamic> decoded when decoded.containsKey('user_token')) {
+        params['json'] = jsonEncode({...decoded, 'user_token': redacted});
+      }
+    }
+
+    return replace(queryParameters: params);
   }
 }

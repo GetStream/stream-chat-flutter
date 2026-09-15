@@ -21,7 +21,7 @@ import 'search_debouncer.dart';
 ///     final response = await _fetch();
 ///     if (isStale(generation)) return;
 ///     value = PagedValue(items: response.items);
-///   } on StreamChatError catch (error) {
+///   } on StreamChatException catch (error) {
 ///     if (isStale(generation)) return;
 ///     value = PagedValue.error(error);
 ///   }

@@ -9,16 +9,16 @@ import 'package:stream_chat/stream_chat.dart';
 /// Used by the `channel_query_metadata` table to persist the server-resolved
 /// filter spec associated with a predefined-filter query, so that offline
 /// reads can reconstruct the full resolved spec.
-class FilterConverter extends TypeConverter<Filter, String> {
+class FilterConverter extends TypeConverter<ChannelFilter, String> {
   /// Creates a new instance.
   const FilterConverter();
 
   @override
-  Filter fromSql(String fromDb) {
+  ChannelFilter fromSql(String fromDb) {
     final value = jsonDecode(fromDb) as Map<String, dynamic>;
-    return Filter.raw(value: value);
+    return ChannelFilter.raw(value);
   }
 
   @override
-  String toSql(Filter value) => jsonEncode(value.toJson());
+  String toSql(ChannelFilter value) => jsonEncode(value.toJson());
 }

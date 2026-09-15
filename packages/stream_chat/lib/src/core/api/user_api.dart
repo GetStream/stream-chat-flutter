@@ -1,13 +1,12 @@
 import 'dart:convert';
 
+import 'package:stream_core/stream_core.dart' show LocationCoordinate;
+
 import '../http/stream_http_client.dart';
-import '../models/filter.dart';
 import '../models/location.dart';
-import '../models/location_coordinates.dart';
 import '../models/user.dart';
 import 'requests.dart';
 import 'responses.dart';
-import 'sort_order.dart';
 
 /// Defines the api dedicated to users operations
 class UserApi {
@@ -19,8 +18,8 @@ class UserApi {
   /// Requests users with a given query.
   Future<QueryUsersResponse> queryUsers({
     bool presence = false,
-    Filter? filter,
-    SortOrder<User>? sort,
+    UserFilter? filter,
+    List<UserSort>? sort,
     PaginationParams? pagination,
   }) async {
     final response = await _client.get(
@@ -29,7 +28,9 @@ class UserApi {
         'payload': jsonEncode({
           'presence': presence,
           if (sort != null) 'sort': sort,
-          if (filter != null) 'filter_conditions': filter,
+          // Sent even when empty: the endpoint declares `filter_conditions`
+          // required, and an omitted key is rejected where `{}` is accepted.
+          'filter_conditions': filter ?? const <String, Object?>{},
           if (pagination != null) ...pagination.toJson(),
         }),
       },
@@ -111,7 +112,7 @@ class UserApi {
   Future<Location> updateLiveLocation({
     required String messageId,
     String? createdByDeviceId,
-    LocationCoordinates? location,
+    LocationCoordinate? location,
     DateTime? endAt,
   }) async {
     final response = await _client.put(

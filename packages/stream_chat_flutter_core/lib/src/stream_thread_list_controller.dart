@@ -58,8 +58,8 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
   /// The query filters to use.
   ///
   /// You can query on any of the custom fields you've defined on the [Thread].
-  final Filter? filter;
-  Filter? _activeFilter;
+  final ThreadFilter? filter;
+  ThreadFilter? _activeFilter;
 
   /// The sorting used for the threads matching the filters.
   ///
@@ -67,8 +67,8 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final SortOrder<Thread>? sort;
-  SortOrder<Thread>? _activeSort;
+  final List<ThreadSort>? sort;
+  List<ThreadSort>? _activeSort;
 
   /// The limit to apply to the thread list.
   ///
@@ -88,7 +88,7 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new filter.
-  set filter(Filter? value) => _activeFilter = value;
+  set filter(ThreadFilter? value) => _activeFilter = value;
 
   /// Allows for the change of the query sort used for thread queries.
   ///
@@ -97,7 +97,7 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new sort.
-  set sort(SortOrder<Thread>? value) => _activeSort = value;
+  set sort(List<ThreadSort>? value) => _activeSort = value;
 
   /// Allows for the change of the [options] at runtime.
   ///
@@ -131,7 +131,7 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
       final threadSort => newValue.maybeMap(
         orElse: () => newValue,
         (success) => success.copyWith(
-          items: success.items.sorted(threadSort.compare),
+          items: success.items.sortedWith(threadSort.compare),
         ),
       ),
     };
@@ -160,10 +160,10 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
       // Start listening to events
       if (disposed) return;
       _subscribeToThreadListEvents();
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       value = PagedValue.error(error);
     } catch (error) {
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load threads', cause: error);
       value = PagedValue.error(chatError);
     }
   }
@@ -189,10 +189,10 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
         items: newItems,
         nextPageKey: nextKey,
       );
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       value = previousValue.copyWith(error: error);
     } catch (error) {
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load more threads', cause: error);
       value = previousValue.copyWith(error: chatError);
     }
   }

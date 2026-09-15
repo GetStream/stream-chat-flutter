@@ -129,8 +129,35 @@ void main() {
       expect(controller.value.asSuccess.items, equals(reminders));
     });
 
-    test('handles StreamChatError exceptions properly', () async {
-      const chatError = StreamChatError('Network error');
+    test('an empty sort queries without a sort term', () async {
+      final sorts = <Object?>[];
+
+      when(
+        () => client.queryReminders(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer((invocation) async {
+        sorts.add(invocation.namedArguments[const Symbol('sort')]);
+        return QueryRemindersResponse()
+          ..reminders = generateMessageReminders()
+          ..next = null;
+      });
+
+      final controller = StreamMessageReminderListController(
+        client: client,
+        sort: MessageReminderSort.empty,
+      );
+
+      await controller.doInitialLoad();
+      await pumpEventQueue();
+
+      expect(sorts.single, isEmpty);
+    });
+
+    test('handles a Stream failure properly', () async {
+      const chatError = StreamNetworkException(message: 'Network error');
       when(
         () => client.queryReminders(
           filter: any(named: 'filter'),
@@ -195,10 +222,10 @@ void main() {
       expect(controller.value.asSuccess.nextPageKey, isNull);
     });
 
-    test('loadMore handles StreamChatError exceptions properly', () async {
+    test('loadMore handles a Stream failure properly', () async {
       const nextKey = 'next_page_token';
       final existingReminders = generateMessageReminders();
-      const chatError = StreamChatError('Network error');
+      const chatError = StreamNetworkException(message: 'Network error');
 
       when(
         () => client.queryReminders(
