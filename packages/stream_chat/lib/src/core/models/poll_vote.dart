@@ -119,7 +119,11 @@ typedef PollVoteFilter = Filter<PollVote>;
 class PollVoteFilterField extends FilterField<PollVote> {
   /// Creates a poll vote filter field named [remote] on the wire, reading its
   /// value off an instance with [value].
-  PollVoteFilterField(super.remote, super.value);
+  PollVoteFilterField(
+    super.remote,
+    super.value, {
+    super.collectionEquality,
+  });
 
   /// Filters poll votes by their id.
   ///

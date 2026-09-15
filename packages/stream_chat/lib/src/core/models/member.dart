@@ -189,7 +189,11 @@ typedef MemberFilter = Filter<Member>;
 class MemberFilterField extends FilterField<Member> {
   /// Creates a member filter field named [remote] on the wire, reading its
   /// value off an instance with [value].
-  MemberFilterField(super.remote, super.value);
+  MemberFilterField(
+    super.remote,
+    super.value, {
+    super.collectionEquality,
+  });
 
   /// Creates a field the SDK does not model, read from [Member.extraData].
   ///

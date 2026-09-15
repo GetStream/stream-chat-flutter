@@ -283,7 +283,11 @@ typedef PollFilter = Filter<Poll>;
 class PollFilterField extends FilterField<Poll> {
   /// Creates a poll filter field named [remote] on the wire, reading its value
   /// off an instance with [value].
-  PollFilterField(super.remote, super.value);
+  PollFilterField(
+    super.remote,
+    super.value, {
+    super.collectionEquality,
+  });
 
   /// Creates a field the SDK does not model, read from [Poll.extraData].
   ///

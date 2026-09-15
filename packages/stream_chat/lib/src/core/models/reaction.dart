@@ -147,7 +147,11 @@ typedef ReactionFilter = Filter<Reaction>;
 class ReactionFilterField extends FilterField<Reaction> {
   /// Creates a reaction filter field named [remote] on the wire, reading its
   /// value off an instance with [value].
-  ReactionFilterField(super.remote, super.value);
+  ReactionFilterField(
+    super.remote,
+    super.value, {
+    super.collectionEquality,
+  });
 
   /// Filters reactions by their type.
   ///

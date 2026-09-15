@@ -229,7 +229,11 @@ typedef UserFilter = Filter<User>;
 class UserFilterField extends FilterField<User> {
   /// Creates a user filter field named [remote] on the wire, reading its value
   /// off an instance with [value].
-  UserFilterField(super.remote, super.value);
+  UserFilterField(
+    super.remote,
+    super.value, {
+    super.collectionEquality,
+  });
 
   /// Creates a field the SDK does not model, read from [User.extraData].
   ///

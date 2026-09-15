@@ -95,7 +95,11 @@ typedef BannedUserFilter = Filter<BannedUser>;
 class BannedUserFilterField extends FilterField<BannedUser> {
   /// Creates a banned-user filter field named [remote] on the wire, reading
   /// its value off an instance with [value].
-  BannedUserFilterField(super.remote, super.value);
+  BannedUserFilterField(
+    super.remote,
+    super.value, {
+    super.collectionEquality,
+  });
 
   /// Filters banned users by their id.
   ///

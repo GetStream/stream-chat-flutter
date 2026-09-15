@@ -144,7 +144,11 @@ typedef ChannelFilter = Filter<ChannelState>;
 class ChannelFilterField extends FilterField<ChannelState> {
   /// Creates a channel filter field named [remote] on the wire, reading its
   /// value off an instance with [value].
-  ChannelFilterField(super.remote, super.value);
+  ChannelFilterField(
+    super.remote,
+    super.value, {
+    super.collectionEquality,
+  });
 
   /// Creates a field the SDK does not model, read from [ChannelModel.extraData].
   ///
@@ -265,14 +269,15 @@ class ChannelFilterField extends FilterField<ChannelState> {
 
   /// Filters channels by their members.
   ///
-  /// `$eq` matches a channel whose members are exactly the given users, the
-  /// way a distinct channel is looked up. `$in` matches a channel any of them
-  /// belong to.
+  /// `$eq` matches a channel holding exactly the given users and no one else,
+  /// which is how a distinct channel is looked up. `$in` matches a channel any
+  /// of them belong to.
   ///
   /// **Supported operators:** `$eq`, `$in`
   static final members = ChannelFilterField(
     'members',
     (it) => it.members?.map((it) => it.userId),
+    collectionEquality: .containsExactly,
   );
 
   /// Filters channels by the name of any of their members.
