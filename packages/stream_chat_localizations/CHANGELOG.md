@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added the message-list accessibility strings for all supported locales, each with a native-language implementation.
+
 ## 10.4.0
 
 ✅ Added
