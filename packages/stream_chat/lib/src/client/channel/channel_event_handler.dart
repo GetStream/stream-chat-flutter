@@ -318,11 +318,13 @@ class ChannelEventHandler {
       lastReadMessageId: event.lastReadMessageId,
     );
 
-    // If the read event is from the current user, reconcile the
-    // channel delivery status with the updated read state.
+    // If the read event is from the current user, reconcile the channel
+    // delivery status with the updated read state, and clear any pending
+    // manual mark-unread — the user has read past it.
     final currentUser = _client.state.currentUser;
     if (event.isFromUser(userId: currentUser?.id)) {
       _client.channelDeliveryReporter.reconcileDelivery([_channel]);
+      _channel.state?.isMarkedAsUnread = false;
     }
   }
 
@@ -330,12 +332,19 @@ class ChannelEventHandler {
     final user = event.user;
     if (user == null) return;
 
-    return _mutations.onNotificationMarkUnread(
+    _mutations.onNotificationMarkUnread(
       user,
       lastRead: event.lastReadAt!,
       unreadMessages: event.unreadMessages,
       lastReadMessageId: event.lastReadMessageId,
     );
+
+    // Only a mark-unread for the current user's own read state should gate
+    // this device's auto mark-read.
+    final currentUser = _client.state.currentUser;
+    if (event.isFromUser(userId: currentUser?.id)) {
+      _channel.state?.isMarkedAsUnread = true;
+    }
   }
 
   void _onMessageDelivered(Event event) {

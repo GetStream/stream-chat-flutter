@@ -122,6 +122,23 @@ abstract class GlobalStreamChatLocalizations implements StreamChatLocalizations 
   /// (e.g. `'en'`, `'de'`, `'fr'`).
   final String localeName;
 
+  /// The label for the unread messages separator, e.g. "5 unread messages".
+  ///
+  /// Falls back to the count-less `unreadMessagesSeparatorText`, so a
+  /// subclass written before this method existed keeps rendering the custom
+  /// text it already overrides instead of reverting to the built-in copy.
+  /// The bundled locales override this to include the count.
+  ///
+  /// Note that the fallback only helps classes that extend (or mix in)
+  /// [GlobalStreamChatLocalizations]: Dart does not inherit method bodies
+  /// through `implements`, so a class implementing [StreamChatLocalizations]
+  /// directly has to add this member. See the CHANGELOG for the migration.
+  @override
+  String unreadMessagesSeparatorLabel({required int count}) {
+    // ignore: deprecated_member_use
+    return unreadMessagesSeparatorText();
+  }
+
   /// A [LocalizationsDelegate] for [StreamChatLocalizations].
   ///
   /// Most internationalized apps will use

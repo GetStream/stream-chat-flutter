@@ -389,6 +389,25 @@ class ChannelClientState {
     return updateRead([existingUserRead.copyWith(unreadMessages: count)]);
   }
 
+  /// Whether the current user explicitly marked a message in this channel as
+  /// unread during this session, without having read past that boundary
+  /// since.
+  ///
+  /// Set by [markUnreadLocally] and by a `notification.mark_unread` event for
+  /// the current user; cleared by [markReadLocally] and by a `message.read`
+  /// event for the current user. Intended for UI-layer gating that shouldn't
+  /// immediately undo a manual mark-unread.
+  bool get isMarkedAsUnread => _isMarkedAsUnread;
+
+  /// Records whether the current user has an outstanding manual mark-unread.
+  ///
+  /// Only meant for [ChannelEventHandler], which applies the read events the
+  /// server sends for the current user.
+  @internal
+  set isMarkedAsUnread(bool markedAsUnread) => _isMarkedAsUnread = markedAsUnread;
+
+  bool _isMarkedAsUnread = false;
+
   /// Marks the channel as read locally, without making a network request.
   ///
   /// Used for channels that track unread counts locally (see
@@ -427,6 +446,8 @@ class ChannelClientState {
     // locally can still have delivery receipts enabled. Mirrors what the
     // `message.read` event listener does for server-driven channels.
     _client.channelDeliveryReporter.reconcileDelivery([_channel]);
+
+    _isMarkedAsUnread = false;
   }
 
   /// Marks the channel as unread locally, without making a network request.
@@ -465,6 +486,7 @@ class ChannelClientState {
     final unread = messages.where((it) => MessageRules.canCountAsUnread(it, _channel)).length;
 
     unreadCount = unread;
+    _isMarkedAsUnread = true;
   }
 
   /// Counts the number of unread messages mentioning the current user.
