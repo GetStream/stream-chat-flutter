@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_widget/stream_system_message.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
-import 'package:stream_chat_flutter/src/utils/typedefs.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+
+import '../utils/extensions.dart';
+import '../utils/typedefs.dart';
+import 'stream_system_message.dart';
 
 /// {@template streamModeratedMessage}
 /// A widget that displays a message that has been moderated.

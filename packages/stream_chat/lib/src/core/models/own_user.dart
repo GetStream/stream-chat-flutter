@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/util/serializer.dart';
-import 'package:stream_chat/stream_chat.dart';
+
+import '../../../stream_chat.dart';
+import '../util/serializer.dart';
 
 part 'own_user.g.dart';
 

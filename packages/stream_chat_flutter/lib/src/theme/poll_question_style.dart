@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/theme/poll_card_style.dart';
 import 'package:theme_extensions_builder_annotation/theme_extensions_builder_annotation.dart';
+
+import 'poll_card_style.dart';
 
 part 'poll_question_style.g.theme.dart';
 

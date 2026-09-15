@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
 import 'package:jose/jose.dart';
-import 'package:stream_chat/src/core/models/user.dart';
-import 'package:stream_chat/src/core/util/utils.dart';
+import '../models/user.dart';
+import '../util/utils.dart';
 
 /// A function which can be used to request a Stream Chat API token from your
 /// own backend server

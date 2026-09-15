@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/src/client/channel.dart';
+import 'package:stream_chat/src/client/channel/channel.dart';
 import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
 import 'package:stream_chat/src/client/client.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';

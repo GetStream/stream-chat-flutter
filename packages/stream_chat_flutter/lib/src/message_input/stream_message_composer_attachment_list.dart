@@ -1,8 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/audio/audio_playlist_controller.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
+
+import '../../stream_chat_flutter.dart';
+import '../audio/audio_playlist_controller.dart';
 
 part 'stream_message_composer_attachment.dart';
 

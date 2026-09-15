@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:sample_app/pages/channel_file_display_screen.dart';
-import 'package:sample_app/pages/channel_media_display_screen.dart';
-import 'package:sample_app/pages/pinned_messages_screen.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import 'channel_file_display_screen.dart';
+import 'channel_media_display_screen.dart';
+import 'pinned_messages_screen.dart';
 
 /// Detail screen for a 1:1 chat correspondence.
 ///

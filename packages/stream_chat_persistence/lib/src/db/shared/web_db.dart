@@ -2,8 +2,9 @@
 // TODO: Replace with WASM implementation
 // ignore: deprecated_member_use
 import 'package:drift/web.dart';
-import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
-import 'package:stream_chat_persistence/src/stream_chat_persistence_client.dart';
+
+import '../../stream_chat_persistence_client.dart';
+import '../drift_chat_database.dart';
 
 /// A Helper class to construct new instances of [DriftChatDatabase]
 /// specifically for Web applications.

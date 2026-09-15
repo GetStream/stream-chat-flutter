@@ -1,6 +1,6 @@
 // coverage:ignore-file
 import 'package:drift/drift.dart';
-import 'package:stream_chat_persistence/src/entity/channels.dart';
+import 'channels.dart';
 
 /// Represents a [Reads] table in [DriftChatDatabase].
 @DataClassName('ReadEntity')

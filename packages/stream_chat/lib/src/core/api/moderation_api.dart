@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:stream_chat/stream_chat.dart';
+import '../../../stream_chat.dart';
 
 /// Defines the api dedicated to moderation operations
 class ModerationApi {

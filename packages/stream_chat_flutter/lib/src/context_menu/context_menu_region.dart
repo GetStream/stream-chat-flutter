@@ -105,14 +105,12 @@ class _ContextMenuRegionState extends State<ContextMenuRegion> {
   @override
   void initState() {
     super.initState();
-    // Prevent the browser's native context menu on web.
-    if (CurrentPlatform.isWeb) BrowserContextMenu.disableContextMenu();
+    _BrowserContextMenu.claim();
   }
 
   @override
   void dispose() {
-    // Restore browser context menu behavior.
-    if (CurrentPlatform.isWeb) BrowserContextMenu.enableContextMenu();
+    _BrowserContextMenu.release();
     super.dispose();
   }
 
@@ -136,5 +134,32 @@ class _ContextMenuRegionState extends State<ContextMenuRegion> {
       onSecondaryTapUp: (it) => _showContextMenu(context, it.globalPosition),
       child: widget.child,
     );
+  }
+}
+
+// Reference-counted suppression of the browser's native context menu.
+//
+// The setting is process-wide, so it stays suppressed while any region holds a
+// claim, and the last release only restores it if the app had it enabled.
+abstract final class _BrowserContextMenu {
+  static int _claims = 0;
+  static bool _restoreOnRelease = false;
+
+  static void claim() {
+    if (!CurrentPlatform.isWeb) return;
+    _claims += 1;
+    if (_claims > 1) return;
+    _restoreOnRelease = BrowserContextMenu.enabled;
+    if (!_restoreOnRelease) return;
+    return BrowserContextMenu.disableContextMenu().ignore();
+  }
+
+  static void release() {
+    if (!CurrentPlatform.isWeb) return;
+    assert(_claims > 0, 'release() called without a matching claim()');
+    _claims -= 1;
+    if (_claims > 0) return;
+    if (!_restoreOnRelease) return;
+    return BrowserContextMenu.enableContextMenu().ignore();
   }
 }

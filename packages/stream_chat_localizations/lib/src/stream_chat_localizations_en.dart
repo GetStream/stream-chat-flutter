@@ -794,6 +794,21 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String reminderAtText(String time) => 'Today at $time';
 
   @override
+  String get translatedLabel => 'Translated';
+
+  @override
+  String get originalLabel => 'Original';
+
+  @override
+  String get showOriginalLabel => 'Show original';
+
+  @override
+  String get showTranslationLabel => 'Show translation';
+
+  @override
+  String translatedFromLanguageText(String languageCode) => 'Translated from ${_languageNameEn(languageCode)}';
+
+  @override
   String get createPollPromptLabel => 'Create a poll and let everyone vote!';
 
   @override
@@ -947,6 +962,22 @@ class _AccessibilityTranslationsEn extends AccessibilityTranslations {
   }
 
   @override
+  String attachmentPositionLabel({required int index, required int total}) => '$index of $total';
+
+  @override
+  String get outgoingReplyToOwnMessageLabel => 'You replied to your message';
+
+  @override
+  String outgoingReplyToMessageLabel({required String authorName}) => "You replied to $authorName's message";
+
+  @override
+  String incomingReplyToOwnMessageLabel({required String replierName}) => '$replierName replied to your message';
+
+  @override
+  String incomingReplyToMessageLabel({required String replierName, required String authorName}) =>
+      "$replierName replied to $authorName's message";
+
+  @override
   String get voiceRecordingPlayTooltip => 'Play';
 
   @override
@@ -995,6 +1026,18 @@ class _AccessibilityTranslationsEn extends AccessibilityTranslations {
   }
 
   @override
+  String outgoingMessageLabel({required String body}) => 'You said, $body';
+
+  @override
+  String incomingMessageLabel({required String senderName, required String body}) => '$senderName said, $body';
+
+  @override
+  String outgoingDeletedMessageLabel({required String body}) => 'You, $body';
+
+  @override
+  String incomingDeletedMessageLabel({required String senderName, required String body}) => '$senderName, $body';
+
+  @override
   String get pollPreviewLabel => 'Poll';
 
   @override
@@ -1011,6 +1054,9 @@ class _AccessibilityTranslationsEn extends AccessibilityTranslations {
 
   @override
   String get messageReadStatusLabel => 'Read';
+
+  @override
+  String get messageFailedStatusLabel => 'Message failed to send';
 
   @override
   String unreadMessagesLabel({required int count}) {
@@ -1152,3 +1198,68 @@ class _AccessibilityTranslationsEn extends AccessibilityTranslations {
     return parts.join(', ');
   }
 }
+
+// Display name for each language code Stream Chat's translation API
+// supports (`Message.i18n['language']`). Falls back to the uppercased code
+// itself for anything unrecognized.
+String _languageNameEn(String code) => _languageNamesEn[code] ?? code.toUpperCase();
+
+const _languageNamesEn = <String, String>{
+  'af': 'Afrikaans',
+  'sq': 'Albanian',
+  'am': 'Amharic',
+  'ar': 'Arabic',
+  'az': 'Azerbaijani',
+  'bn': 'Bengali',
+  'bs': 'Bosnian',
+  'bg': 'Bulgarian',
+  'zh': 'Chinese (Simplified)',
+  'zh-TW': 'Chinese (Traditional)',
+  'hr': 'Croatian',
+  'cs': 'Czech',
+  'da': 'Danish',
+  'fa-AF': 'Dari',
+  'nl': 'Dutch',
+  'en': 'English',
+  'et': 'Estonian',
+  'fi': 'Finnish',
+  'fr': 'French',
+  'fr-CA': 'French (Canada)',
+  'ka': 'Georgian',
+  'de': 'German',
+  'el': 'Greek',
+  'ht': 'Haitian Creole',
+  'ha': 'Hausa',
+  'he': 'Hebrew',
+  'hi': 'Hindi',
+  'hu': 'Hungarian',
+  'id': 'Indonesian',
+  'it': 'Italian',
+  'ja': 'Japanese',
+  'ko': 'Korean',
+  'lv': 'Latvian',
+  'lt': 'Lithuanian',
+  'ms': 'Malay',
+  'no': 'Norwegian',
+  'fa': 'Persian',
+  'ps': 'Pashto',
+  'pl': 'Polish',
+  'pt': 'Portuguese',
+  'ro': 'Romanian',
+  'ru': 'Russian',
+  'sr': 'Serbian',
+  'sk': 'Slovak',
+  'sl': 'Slovenian',
+  'so': 'Somali',
+  'es': 'Spanish',
+  'es-MX': 'Spanish (Mexico)',
+  'sw': 'Swahili',
+  'sv': 'Swedish',
+  'tl': 'Tagalog',
+  'ta': 'Tamil',
+  'th': 'Thai',
+  'tr': 'Turkish',
+  'uk': 'Ukrainian',
+  'ur': 'Urdu',
+  'vi': 'Vietnamese',
+};

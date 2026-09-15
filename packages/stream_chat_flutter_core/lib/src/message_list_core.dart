@@ -4,9 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter_core/src/better_stream_builder.dart';
-import 'package:stream_chat_flutter_core/src/stream_channel.dart';
-import 'package:stream_chat_flutter_core/src/typedef.dart';
+import 'better_stream_builder.dart';
+import 'stream_channel.dart';
+import 'typedef.dart';
 
 /// Default filter for the message list
 bool Function(Message) defaultMessageFilter([String? currentUserId]) => (Message m) {

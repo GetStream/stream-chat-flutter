@@ -1,10 +1,11 @@
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:sample_app/utils/location_provider.dart';
-import 'package:sample_app/widgets/location/location_user_marker.dart';
-import 'package:sample_app/widgets/simple_map_view.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../utils/location_provider.dart';
+import '../simple_map_view.dart';
+import 'location_user_marker.dart';
 
 class LocationPickerResult {
   const LocationPickerResult({

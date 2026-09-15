@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:theme_extensions_builder_annotation/theme_extensions_builder_annotation.dart';
+
+import 'stream_chat_theme.dart';
 
 part 'message_list_view_theme.g.theme.dart';
 

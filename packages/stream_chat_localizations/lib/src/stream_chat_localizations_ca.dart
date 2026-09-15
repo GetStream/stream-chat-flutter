@@ -796,6 +796,21 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String reminderAtText(String time) => 'Avui a les $time';
 
   @override
+  String get translatedLabel => 'Traduït';
+
+  @override
+  String get originalLabel => 'Original';
+
+  @override
+  String get showOriginalLabel => "Mostra l'original";
+
+  @override
+  String get showTranslationLabel => 'Mostra la traducció';
+
+  @override
+  String translatedFromLanguageText(String languageCode) => 'Traduït de ${_languageNameCa(languageCode)}';
+
+  @override
   String get createPollPromptLabel => 'Crea una enquesta i deixa que tothom voti!';
 
   @override
@@ -949,6 +964,22 @@ class _AccessibilityTranslationsCa extends AccessibilityTranslations {
   }
 
   @override
+  String attachmentPositionLabel({required int index, required int total}) => '$index de $total';
+
+  @override
+  String get outgoingReplyToOwnMessageLabel => 'Has respost al teu propi missatge';
+
+  @override
+  String outgoingReplyToMessageLabel({required String authorName}) => 'Has respost al missatge de $authorName';
+
+  @override
+  String incomingReplyToOwnMessageLabel({required String replierName}) => '$replierName ha respost al teu missatge';
+
+  @override
+  String incomingReplyToMessageLabel({required String replierName, required String authorName}) =>
+      '$replierName ha respost al missatge de $authorName';
+
+  @override
   String get voiceRecordingPlayTooltip => 'Reprodueix';
 
   @override
@@ -997,6 +1028,18 @@ class _AccessibilityTranslationsCa extends AccessibilityTranslations {
   }
 
   @override
+  String outgoingMessageLabel({required String body}) => 'Has dit, $body';
+
+  @override
+  String incomingMessageLabel({required String senderName, required String body}) => '$senderName ha dit, $body';
+
+  @override
+  String outgoingDeletedMessageLabel({required String body}) => 'Tu, $body';
+
+  @override
+  String incomingDeletedMessageLabel({required String senderName, required String body}) => '$senderName, $body';
+
+  @override
   String get pollPreviewLabel => 'Enquesta';
 
   @override
@@ -1013,6 +1056,9 @@ class _AccessibilityTranslationsCa extends AccessibilityTranslations {
 
   @override
   String get messageReadStatusLabel => 'Llegit';
+
+  @override
+  String get messageFailedStatusLabel => "No s'ha pogut enviar el missatge";
 
   @override
   String unreadMessagesLabel({required int count}) {
@@ -1155,3 +1201,68 @@ class _AccessibilityTranslationsCa extends AccessibilityTranslations {
     return parts.join(', ');
   }
 }
+
+// Display name for each language code Stream Chat's translation API
+// supports (`Message.i18n['language']`). Falls back to the uppercased code
+// itself for anything unrecognized.
+String _languageNameCa(String code) => _languageNamesCa[code] ?? code.toUpperCase();
+
+const _languageNamesCa = <String, String>{
+  'af': 'Afrikaans',
+  'sq': 'Albanès',
+  'am': 'Amhàric',
+  'ar': 'Àrab',
+  'az': 'Azerbaidjanès',
+  'bn': 'Bengalí',
+  'bs': 'Bosnià',
+  'bg': 'Búlgar',
+  'zh': 'Xinès (simplificat)',
+  'zh-TW': 'Xinès (tradicional)',
+  'hr': 'Croat',
+  'cs': 'Txec',
+  'da': 'Danès',
+  'fa-AF': 'Dari',
+  'nl': 'Neerlandès',
+  'en': 'Anglès',
+  'et': 'Estonià',
+  'fi': 'Finès',
+  'fr': 'Francès',
+  'fr-CA': 'Francès (Canadà)',
+  'ka': 'Georgià',
+  'de': 'Alemany',
+  'el': 'Grec',
+  'ht': 'Crioll haitià',
+  'ha': 'Haussa',
+  'he': 'Hebreu',
+  'hi': 'Hindi',
+  'hu': 'Hongarès',
+  'id': 'Indonesi',
+  'it': 'Italià',
+  'ja': 'Japonès',
+  'ko': 'Coreà',
+  'lv': 'Letó',
+  'lt': 'Lituà',
+  'ms': 'Malai',
+  'no': 'Noruec',
+  'fa': 'Persa',
+  'ps': 'Paixtu',
+  'pl': 'Polonès',
+  'pt': 'Portuguès',
+  'ro': 'Romanès',
+  'ru': 'Rus',
+  'sr': 'Serbi',
+  'sk': 'Eslovac',
+  'sl': 'Eslovè',
+  'so': 'Somali',
+  'es': 'Espanyol',
+  'es-MX': 'Espanyol (Mèxic)',
+  'sw': 'Swahili',
+  'sv': 'Suec',
+  'tl': 'Tagal',
+  'ta': 'Tàmil',
+  'th': 'Tailandès',
+  'tr': 'Turc',
+  'uk': 'Ucraïnès',
+  'ur': 'Urdú',
+  'vi': 'Vietnamita',
+};

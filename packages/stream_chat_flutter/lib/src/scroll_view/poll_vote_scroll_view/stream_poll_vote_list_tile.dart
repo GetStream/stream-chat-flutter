@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import '../../../stream_chat_flutter.dart';
 
 /// {@template streamPollVoteListTile}
 /// A widget that displays a poll vote in a list tile.

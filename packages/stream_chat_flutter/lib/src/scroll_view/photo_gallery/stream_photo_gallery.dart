@@ -2,8 +2,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart' show AssetEntity, ThumbnailFormat, ThumbnailSize;
 
-import 'package:stream_chat_flutter/src/utils/network_error_text.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import '../../../stream_chat_flutter.dart';
+import '../../utils/network_error_text.dart';
 
 /// Default grid delegate  for [StreamPhotoGallery].
 const defaultStreamPhotoGalleryDelegate = SliverGridDelegateWithFixedCrossAxisCount(

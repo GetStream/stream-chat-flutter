@@ -1,7 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/attachment/builder/attachment_widget_builder.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+
+import 'builder/attachment_widget_builder.dart';
 
 /// {@template attachmentWidgetCatalog}
 /// A widget catalog which determines which attachment widget should be build

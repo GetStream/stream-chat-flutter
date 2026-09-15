@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sample_app/widgets/stream_draft_list_tile.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import 'stream_draft_list_tile.dart';
 
 /// Signature for the item builder that creates the children of the
 /// [StreamDraftListView].

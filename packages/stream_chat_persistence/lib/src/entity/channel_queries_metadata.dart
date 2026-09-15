@@ -1,6 +1,6 @@
 // coverage:ignore-file
 import 'package:drift/drift.dart';
-import 'package:stream_chat_persistence/src/converter/converter.dart';
+import '../converter/converter.dart';
 
 /// Represents a [ChannelQueriesMetadata] table in `DriftChatDatabase`.
 ///

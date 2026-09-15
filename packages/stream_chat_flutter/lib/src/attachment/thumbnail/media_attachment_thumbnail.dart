@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/attachment/thumbnail/giphy_attachment_thumbnail.dart';
-import 'package:stream_chat_flutter/src/attachment/thumbnail/image_attachment_thumbnail.dart';
-import 'package:stream_chat_flutter/src/attachment/thumbnail/thumbnail_error.dart';
-import 'package:stream_chat_flutter/src/attachment/thumbnail/video_attachment_thumbnail.dart';
-import 'package:stream_chat_flutter/src/utils/stream_image_cdn.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
+
+import '../../utils/stream_image_cdn.dart';
+import 'giphy_attachment_thumbnail.dart';
+import 'image_attachment_thumbnail.dart';
+import 'thumbnail_error.dart';
+import 'video_attachment_thumbnail.dart';
 
 /// {@template mediaAttachmentThumbnail}
 /// Widget for building media attachment thumbnail.

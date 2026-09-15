@@ -800,6 +800,21 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String reminderAtText(String time) => "Aujourd'hui à $time";
 
   @override
+  String get translatedLabel => 'Traduit';
+
+  @override
+  String get originalLabel => 'Original';
+
+  @override
+  String get showOriginalLabel => "Afficher l'original";
+
+  @override
+  String get showTranslationLabel => 'Afficher la traduction';
+
+  @override
+  String translatedFromLanguageText(String languageCode) => 'Traduit de ${_languageNameFr(languageCode)}';
+
+  @override
   String get createPollPromptLabel => 'Créez un sondage et laissez tout le monde voter !';
 
   @override
@@ -953,6 +968,22 @@ class _AccessibilityTranslationsFr extends AccessibilityTranslations {
   }
 
   @override
+  String attachmentPositionLabel({required int index, required int total}) => '$index sur $total';
+
+  @override
+  String get outgoingReplyToOwnMessageLabel => 'Vous avez répondu à votre propre message';
+
+  @override
+  String outgoingReplyToMessageLabel({required String authorName}) => 'Vous avez répondu au message de $authorName';
+
+  @override
+  String incomingReplyToOwnMessageLabel({required String replierName}) => '$replierName a répondu à votre message';
+
+  @override
+  String incomingReplyToMessageLabel({required String replierName, required String authorName}) =>
+      '$replierName a répondu au message de $authorName';
+
+  @override
   String get voiceRecordingPlayTooltip => 'Lire';
 
   @override
@@ -1001,6 +1032,18 @@ class _AccessibilityTranslationsFr extends AccessibilityTranslations {
   }
 
   @override
+  String outgoingMessageLabel({required String body}) => 'Vous avez dit, $body';
+
+  @override
+  String incomingMessageLabel({required String senderName, required String body}) => '$senderName a dit, $body';
+
+  @override
+  String outgoingDeletedMessageLabel({required String body}) => 'Vous, $body';
+
+  @override
+  String incomingDeletedMessageLabel({required String senderName, required String body}) => '$senderName, $body';
+
+  @override
   String get pollPreviewLabel => 'Sondage';
 
   @override
@@ -1017,6 +1060,9 @@ class _AccessibilityTranslationsFr extends AccessibilityTranslations {
 
   @override
   String get messageReadStatusLabel => 'Lu';
+
+  @override
+  String get messageFailedStatusLabel => "Échec de l'envoi du message";
 
   @override
   String unreadMessagesLabel({required int count}) {
@@ -1159,3 +1205,68 @@ class _AccessibilityTranslationsFr extends AccessibilityTranslations {
     return parts.join(', ');
   }
 }
+
+// Display name for each language code Stream Chat's translation API
+// supports (`Message.i18n['language']`). Falls back to the uppercased code
+// itself for anything unrecognized.
+String _languageNameFr(String code) => _languageNamesFr[code] ?? code.toUpperCase();
+
+const _languageNamesFr = <String, String>{
+  'af': 'Afrikaans',
+  'sq': 'Albanais',
+  'am': 'Amharique',
+  'ar': 'Arabe',
+  'az': 'Azerbaïdjanais',
+  'bn': 'Bengali',
+  'bs': 'Bosnien',
+  'bg': 'Bulgare',
+  'zh': 'Chinois (simplifié)',
+  'zh-TW': 'Chinois (traditionnel)',
+  'hr': 'Croate',
+  'cs': 'Tchèque',
+  'da': 'Danois',
+  'fa-AF': 'Dari',
+  'nl': 'Néerlandais',
+  'en': 'Anglais',
+  'et': 'Estonien',
+  'fi': 'Finnois',
+  'fr': 'Français',
+  'fr-CA': 'Français (Canada)',
+  'ka': 'Géorgien',
+  'de': 'Allemand',
+  'el': 'Grec',
+  'ht': 'Créole haïtien',
+  'ha': 'Haoussa',
+  'he': 'Hébreu',
+  'hi': 'Hindi',
+  'hu': 'Hongrois',
+  'id': 'Indonésien',
+  'it': 'Italien',
+  'ja': 'Japonais',
+  'ko': 'Coréen',
+  'lv': 'Letton',
+  'lt': 'Lituanien',
+  'ms': 'Malais',
+  'no': 'Norvégien',
+  'fa': 'Persan',
+  'ps': 'Pachto',
+  'pl': 'Polonais',
+  'pt': 'Portugais',
+  'ro': 'Roumain',
+  'ru': 'Russe',
+  'sr': 'Serbe',
+  'sk': 'Slovaque',
+  'sl': 'Slovène',
+  'so': 'Somali',
+  'es': 'Espagnol',
+  'es-MX': 'Espagnol (Mexique)',
+  'sw': 'Swahili',
+  'sv': 'Suédois',
+  'tl': 'Tagalog',
+  'ta': 'Tamoul',
+  'th': 'Thaï',
+  'tr': 'Turc',
+  'uk': 'Ukrainien',
+  'ur': 'Ourdou',
+  'vi': 'Vietnamien',
+};

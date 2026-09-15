@@ -62,13 +62,16 @@ document; the section link is provided.
 
 - Line width: **120 characters** (configured in `analysis_options.yaml`). Comments and
   docs follow the same limit.
-- Single quotes, package imports (never relative), trailing commas preserved, `const`
+- Single quotes, relative imports within a package's own `lib/`, trailing commas preserved, `const`
   wherever possible, `final` for locals that aren't reassigned. These are enforced by
   the linter — do not disable them.
 - Prefer named parameters for booleans (`avoid_positional_boolean_parameters`). A
   positional `bool` at a call site tells the reader nothing.
 - File names are `snake_case.dart` (`file_names`). Imports follow the standard order:
   `dart:` → `package:` → relative — one blank line between groups (`directives_ordering`).
+- Web conditional imports select the web file with `dart.library.js_interop`, never
+  `dart.library.html`, which does not exist under `dart2wasm`.
+  → [Web conditional imports use `js_interop`, not `html`](#web-conditional-imports-use-js_interop-not-html)
 - Public API members require dartdoc (`///`). Private members (`_`-prefixed) use `//`
   block comments, not `///`. → [Private members use `//`](#private-members-use--not-)
 - Default to zero inline `//` comments in implementation. Prefer well-named locals and
@@ -96,7 +99,9 @@ document; the section link is provided.
   `BehaviorSubject`, "unmodifiable", "Stream emits X", or which internal type is used.
   → [Public docs describe the contract, not implementation](#public-docs-describe-the-contract-not-implementation)
 - Comments must not justify code via cross-references to Flutter framework internals
-  (e.g. "matching Flutter's AppBar"). → [No Flutter internals in comments](#no-flutter-internals-in-comments)
+  (e.g. "matching Flutter's AppBar") or to Stream's SDKs on other platforms (e.g. "the
+  SwiftUI SDK does it this way") — that argument goes in the PR description.
+  → [No cross-framework justification in comments](#no-cross-framework-justification-in-comments)
 
 **Process**
 
@@ -447,13 +452,34 @@ Stream<List<Member>> get membersStream;
 Stream<List<Member>> get membersStream;
 ```
 
-### No Flutter internals in comments
+### No cross-framework justification in comments
 
 Do not justify code by cross-referencing Flutter framework internals ("matching
 Flutter's `AppBar`", "same behavior as `MaterialButton`"). Public dartdoc describes
 the observable contract, not which internal widget tree we happen to mirror. If a
 behavior only makes sense in the context of another Flutter widget, describe the
 behavior directly; if that's impossible, the abstraction may be wrong.
+
+The same holds for Stream's SDKs on other platforms. Aligning with
+stream-chat-swift, stream-chat-android or stream-chat-react-native is a real
+argument for a decision — but it belongs in the PR description, not in a comment.
+An integrator reading the dartdoc cannot verify it, and it goes stale the moment
+those SDKs change:
+
+```dart
+// BAD:
+
+// Plain text is collapsed into the row label. The SwiftUI and React Native
+// SDKs collapse plain text the same way, and reserve per-child focus for
+// polls, quotes and attachments.
+
+// GOOD:
+
+// Plain text is collapsed into the row label, so the message is announced as
+// one phrase. This costs the inline link spans their own focus stops, in
+// exchange for not repeating the row phrase once per span; `explicitChildNodes`
+// keeps polls, quotes and attachments reachable.
+```
 
 ### Writing prompts for good documentation
 
@@ -926,6 +952,33 @@ Consuming streams in widgets:
   only rebuilds when the value changes.
 - Always cancel `StreamSubscription`s in `dispose()`.
 
+### Web conditional imports use `js_interop`, not `html`
+
+Conditional imports that swap in a web implementation key on `dart.library.js_interop`:
+
+```dart
+// GOOD
+import 'foo_stub.dart'
+    if (dart.library.js_interop) 'foo_web.dart'
+    if (dart.library.io) 'foo_io.dart';
+
+// BAD
+import 'foo_stub.dart'
+    if (dart.library.html) 'foo_web.dart'
+    if (dart.library.io) 'foo_io.dart';
+```
+
+`dart:html` does not exist under `dart2wasm`, and neither does `dart:io`. On a
+WebAssembly build the bad form therefore matches no condition and silently resolves to
+the stub. It still compiles cleanly; the failure appears only at runtime, when the stub
+throws `UnimplementedError`. `dart2js` supports both constants, so `js_interop` covers
+JS and Wasm alike.
+
+Nothing in the analyzer catches this. `avoid_web_libraries_in_flutter` inspects import
+URIs, and a condition is not a URI — so the bad form produces no warning.
+
+The same applies to `export` directives.
+
 
 ## Testing
 
@@ -1094,6 +1147,11 @@ fine (`// TODO(perf-migration): …`), but it's a category label, not a GitHub h
 Include an issue link when the deferred work is tracked; if the constraint is
 self-explanatory ("wait for backend enrichment", "wait for next major"), a link isn't
 required.
+
+A workaround that only exists because an upstream Flutter fix has not shipped yet uses the
+`// TODO(flutter):` tag and gets an entry in
+[`FLUTTER_BLOCKED.md`](FLUTTER_BLOCKED.md), which the floor raise reads. Both matter: the
+entry holds what does not fit in a comment, the tag survives the file drifting.
 
 ### Bare ignore directives are fine
 
