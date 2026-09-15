@@ -22,7 +22,7 @@ dependencies:
   stream_core_flutter:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
-      ref: 6648852a6d72d4cded93aa8c4d285576a9c8a194
+      ref: 04e0d1cb3a6893cf70cb6636a261deb11beff81c
       path: packages/stream_core_flutter
 
 dev_dependencies:
@@ -39,3 +39,11 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+dependency_overrides:
+  # Forces one source for `stream_core`; see `melos.yaml`.
+  stream_core:
+    git:
+      url: https://github.com/GetStream/stream-core-flutter.git
+      path: packages/stream_core
+      ref: 04e0d1cb3a6893cf70cb6636a261deb11beff81c
