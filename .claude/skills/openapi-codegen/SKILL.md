@@ -3,8 +3,8 @@ name: openapi-codegen
 description: >
   Regenerate `stream_chat`'s OpenAPI client into `lib/open_api/`, and fix the generator when its output is wrong.
   Use when the spec or the generator changed and you need new endpoints or fields, when `melos run gen:openapi`
-  fails, when generated code does not compile, or when handling the `stream_core` git pin and the release blocker
-  it creates. For migrating call sites onto the generated client, use the `openapi-migration` skill instead.
+  fails, when generated code does not compile, or when changing the `stream_core` constraint the generated output
+  depends on. For migrating call sites onto the generated client, use the `openapi-migration` skill instead.
 allowed-tools:
   - Bash
   - Read
@@ -142,22 +142,25 @@ Don't propose "make `fromJson` a factory" — `WSEvent<T>` is generic, so a fact
 `_CustomEvent extends WSEvent<CustomEvent>` where `WSEvent<T>` is expected. The upstream shape is converters
 emitted by `model.tpl` / `discriminator.tpl` plus a `WsEvent` re-export from `models-barrel.tpl`.
 
-## Dependencies and the release blocker
+## Dependencies
 
 `stream_chat` depends on `retrofit`, `retrofit_generator`, `json_annotation ^4.12.0` and `stream_core`.
 
-**`stream_core` is pinned to a git ref in 8 places** — `melos.yaml`, `packages/stream_chat/pubspec.yaml`, and 6
-`dependency_overrides` blocks (`sample_app`, `docs/docs_screenshots`, `packages/stream_chat_flutter` and its
-example, `packages/stream_chat_localizations` and its example). `stream_core_flutter` declares a *published*
-`stream_core` and pub refuses git-vs-hosted for one package, so every consumer of both needs the override.
+`stream_core` is a **hosted** dependency: `^0.5.0`, declared in `melos.yaml` and
+`packages/stream_chat/pubspec.yaml`, with no `dependency_overrides` entry anywhere. 0.5.0 ships
+`StreamDateTimeConverter` and the sealed error layer, so **no core release is blocking**. Change
+the constraint in `melos.yaml` only, then `melos bootstrap` — never in a package manifest.
 
-Bump all 8 together. Pub honors the override's ref over the declared one, so a partial bump silently compiles
-against a different core commit than the pubspec claims. To find them all:
+That is the dependency side only. The generator is still a prerequisite on its own: `client.tpl`
+emits `runSafely`, and regenerating before the template change above lands reintroduces the old
+error mapping no matter which core version resolves.
+
+If core ever goes back to a git ref for cross-repo work, it has to be pinned in every package that pulls both
+`stream_chat` and `stream_core_flutter`, because pub refuses git-vs-hosted for one package and honors an override's
+ref over the declared one. Find them all with:
 
 ```bash
 grep -rn "stream_core:" --include=pubspec.yaml packages docs sample_app melos.yaml
 ```
 
-**`stream_chat` cannot be published while that git dep exists**, and the generator's output needs
-`StreamDateTimeConverter`, which is not in the last published `stream_core`. So a `stream_core` release is a
-prerequisite for any `stream_chat` release — and it collapses all 8 pins to one hosted constraint.
+A git dep under `dependencies` blocks publishing, so it must be back on a hosted constraint before release.
