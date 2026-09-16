@@ -74,7 +74,7 @@ class SyncManager {
     try {
       await _store?.updateLastSyncAt(to);
     } catch (error, stk) {
-      _logger.w(() => 'Failed to record lastSyncAt as $to', error: error, stackTrace: stk);
+      _logger.w(() => 'Failed to record how far this catch-up got', error: error, stackTrace: stk);
     }
   }
 
@@ -124,7 +124,7 @@ class SyncManager {
 
       if (syncAt == null) {
         final now = clock.now();
-        _logger.i(() => 'Fresh sync start: lastSyncAt initialized to $now.');
+        _logger.i(() => 'First catch-up for this user, starting from now');
         await _recordLastSyncAt(now);
         return const <String>{};
       }
@@ -233,7 +233,11 @@ class SyncManager {
       // the signal that local state is too far behind to reconcile — so the
       // store is dropped and repopulated rather than reconciled.
       if (error is StreamApiException && error.statusCode == 400) {
-        _logger.w(() => 'Resetting local state after a refused window', error: error, stackTrace: stk);
+        _logger.w(
+          () => 'Resetting local state: the server would not serve the missed events',
+          error: error,
+          stackTrace: stk,
+        );
         return _discardRefusedWindow(cappedCids, to: clock.now());
       }
 
@@ -244,7 +248,7 @@ class SyncManager {
 
     final nextSyncAt = events.lastOrNull?.createdAt ?? clock.now();
     if (events.length > maxReplayEvents) {
-      _logger.w(() => 'Skipping replay of ${events.length} events, over the $maxReplayEvents limit.');
+      _logger.w(() => 'Skipping replay of ${events.length} events, over the $maxReplayEvents limit');
       return _discardOversizedWindow(cappedCids, from: lastSyncAt, to: nextSyncAt);
     }
 
@@ -257,7 +261,11 @@ class SyncManager {
         client.handleEvent(event);
       }
     } catch (error, stk) {
-      _logger.w(() => 'Stopped replaying the missed events, keeping lastSyncAt', error: error, stackTrace: stk);
+      _logger.w(
+        () => 'Stopped replaying the missed events; they will be asked for again',
+        error: error,
+        stackTrace: stk,
+      );
       return const <String>{};
     }
 
