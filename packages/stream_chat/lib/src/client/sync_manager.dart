@@ -29,13 +29,16 @@ class SyncManager {
   });
 
   // The endpoint rejects more than 255, counted before duplicates collapse.
-  // Well under it because the 2000-event ceiling is shared across every channel
-  // asked about rather than applied per channel, so fewer channels buys more
-  // events each before the window is refused — and a refusal drops the store.
+  //
+  // Capped rather than left to the refusal, because this is the one refusal
+  // that does not clear itself: a window refused for its age or for the events
+  // it holds is not refused again once the checkpoint has moved past it, while
+  // one refused for its size is asked for again with the same channels — and
+  // every refusal drops the store.
   //
   // Channels past the cap are left to [recoverState]; a direct [sync] leaves
   // them as they were.
-  static const _maxSyncCids = 100;
+  static const _maxSyncCids = 255;
 
   // The endpoint returns up to 2000 events. Replaying that many runs a state
   // update and a persistence write for each, on the reconnect path, while the
@@ -246,9 +249,9 @@ class SyncManager {
       return _discardOversizedWindow(cappedCids, from: lastSyncAt, to: nextSyncAt);
     }
 
-    // Applying an event runs the whole event pipeline, so a listener can throw.
-    // lastSyncAt stays where it is when one does: the window was only partly
-    // applied, and the next catch-up should ask for it again.
+    // Resolving an event and applying it to client state can throw. lastSyncAt
+    // stays where it is when one does: the window was only partly applied, and
+    // the next catch-up should ask for it again.
     try {
       for (final event in events) {
         logger?.fine('Syncing event: ${event.type}');

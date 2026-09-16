@@ -154,7 +154,7 @@ void main() {
     test(description, () => withClock(Clock.fixed(t0), body));
   }
 
-  testWithClock('sync caps the channel ids named in the request at 100', () async {
+  testWithClock('sync caps the channel ids named in the request at 255', () async {
     final api = _FakeSyncEndpoint();
     final harness = buildHarness(
       api: api,
@@ -164,7 +164,7 @@ void main() {
     final cids = List.generate(300, (i) => 'messaging:$i');
     await harness.manager.sync(cids: cids);
 
-    expect(api.calls.single.cids, cids.take(100));
+    expect(api.calls.single.cids, cids.take(255));
   });
 
   testWithClock('sync collapses duplicate channel ids before the cap applies', () async {
@@ -645,7 +645,7 @@ void main() {
       api: _FakeSyncEndpoint(events: eventsOf(2)),
       persistence: FakePersistenceClient(lastSyncAt: anHourAgo),
     );
-    when(() => harness.client.handleEvent(any())).thenThrow(Exception('a listener blew up'));
+    when(() => harness.client.handleEvent(any())).thenThrow(Exception('an event resolver blew up'));
 
     await expectLater(harness.manager.sync(cids: ['messaging:a']), completes);
   });
@@ -656,7 +656,7 @@ void main() {
       api: _FakeSyncEndpoint(events: eventsOf(2)),
       persistence: persistence,
     );
-    when(() => harness.client.handleEvent(any())).thenThrow(Exception('a listener blew up'));
+    when(() => harness.client.handleEvent(any())).thenThrow(Exception('an event resolver blew up'));
 
     await harness.manager.sync(cids: ['messaging:a']);
 
