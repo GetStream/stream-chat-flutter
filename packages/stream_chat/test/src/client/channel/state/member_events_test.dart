@@ -195,6 +195,11 @@ void main() {
           ),
         );
 
+        // The merge runs unfiltered on every event carrying a user, so a
+        // non-member must not write state at all — an equal-but-new state
+        // would still notify every listener.
+        final before = tester.channelState!.channelState;
+
         await tester.emitEvent(
           createDefaultEvent(
             cid: tester.channel.cid,
@@ -204,6 +209,7 @@ void main() {
         );
 
         expect(tester.channelState!.channelState.members?.single.user?.name, 'old-name');
+        expect(identical(before, tester.channelState!.channelState), isTrue);
       },
     );
 
