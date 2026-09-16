@@ -37,6 +37,7 @@ class ChannelClientState {
       upsertTypingEvent: _upsertTypingEvent,
       removeTypingEvent: _removeTypingEvent,
       removeWatcher: _removeWatcher,
+      removeMember: _removeMember,
       updateMember: _updateMember,
       deleteMessagesFromUser: _deleteMessagesFromUser,
     );
@@ -72,6 +73,18 @@ class ChannelClientState {
     _channelState = channelState.copyWith(
       watchers: existingWatchers.where((user) => user.id != watcher.id).toList(),
       watcherCount: watcherCount,
+    );
+  }
+
+  // Removes the member and their read state from the channel state.
+  void _removeMember(User user) {
+    // Writes the state directly: the read list merge in [updateChannelState]
+    // would undo the read removal.
+    final existingMembers = channelState.members ?? const <Member>[];
+    final existingReads = channelState.read ?? const <Read>[];
+    _channelState = channelState.copyWith(
+      members: existingMembers.where((member) => member.userId != user.id).toList(),
+      read: existingReads.where((read) => read.user.id != user.id).toList(),
     );
   }
 
