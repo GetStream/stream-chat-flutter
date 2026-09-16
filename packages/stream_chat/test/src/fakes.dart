@@ -60,6 +60,7 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
   // Track method calls for testing
   int connectCallCount = 0;
   int disconnectCallCount = 0;
+  int flushCallCount = 0;
 
   @override
   bool get isConnected => _isConnected;
@@ -85,6 +86,7 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
 
   @override
   Future<void> flush() async {
+    flushCallCount++;
     _lastSyncAt = null;
     _channelCids = [];
   }
@@ -99,6 +101,22 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
 
   @override
   Future<List<String>> getChannelCids() async => _channelCids;
+
+  @override
+  Future<void> saveChannelQueries({
+    required List<String> cids,
+    Filter? filter,
+    SortOrder<ChannelState>? sort,
+    String? predefinedFilter,
+    Filter? resolvedFilter,
+    SortOrder<ChannelState>? resolvedSort,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
+    bool clearQueryCache = false,
+  }) async {}
+
+  @override
+  Future<void> updateChannelStates(List<ChannelState> channelStates) async {}
 }
 
 class FakeChatApi extends Fake implements StreamChatApi {

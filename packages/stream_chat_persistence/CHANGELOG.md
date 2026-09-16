@@ -15,6 +15,12 @@
 
 - A cached channel query given no sort came back in whatever order the lookup returned; it now applies `ChannelSort.defaultSort`, the ordering the API would have.
 
+## Upcoming
+
+🐞 Fixed
+
+- Fixed storing `lastSyncAt` silently doing nothing after the database was reset, which lost the events missed while offline.
+
 ## 10.4.0
 
 🔄 Changed
