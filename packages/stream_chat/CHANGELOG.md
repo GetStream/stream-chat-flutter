@@ -4,6 +4,7 @@
 
 - Fixed `CurrentPlatform` throwing `UnimplementedError` on WebAssembly builds.
 - Fixed live location expiry emitting repeated `location.expired` events for the same expired location.
+- Fixed members removed from a channel keeping their read state in the channel state.
 
 🔄 Internal / Non-breaking
 
