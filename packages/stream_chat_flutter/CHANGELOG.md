@@ -1,5 +1,9 @@
 ## Upcoming
 
+🛑️ Breaking
+
+- `PlatformFileX.toAttachmentFile` and `PlatformFileX.toAttachment` are now asynchronous, returning `Future<AttachmentFile>` and `Future<Attachment>`. `file_picker` 12 removed `PlatformFile`'s eagerly-loaded `bytes` and `size` getters, so the content is read on demand; this matches the existing `XFileX` extensions. Any `PlatformFile` you hold came from `FilePicker.pickFiles()`, whose return type also changed in `file_picker` 12, so that call site needs rewriting anyway and the added `await` goes in the same edit.
+
 ✅ Added
 
 - Added `StreamMessageItem.semanticsLabel`, which replaces the announcement composed for a message row, and `StreamMessageItem.excludeFromSemantics`, which leaves the row unlabeled so the bubble and footer announce their own parts.
@@ -8,6 +12,9 @@
 
 ⚠️ Changed
 
+- Bumped `file_picker` to `>=12.0.0 <14.0.0`.
+- Deprecated `withData` and `withReadStream` on `StreamAttachmentHandler.pickFile` and `StreamFilePicker`. Content is now read on demand, so both are ignored.
+- Android apps built from a Flutter template older than 3.44 must add `subprojects { project.evaluationDependsOn(":app") }` to their root `android/build.gradle`. Without it the build fails with `cannot find symbol: class FilePickerPlugin`, an error that says nothing about its cause.
 - Video thumbnails now use `stream_thumbnail` on every platform, and the `thumblr`
   dependency is gone.
 - Linux builds now need the FFmpeg and libwebp development packages — on Debian/Ubuntu:
@@ -17,6 +24,7 @@
 
 🐞 Fixed
 
+- Fixed `StreamAttachmentHandler.pickFile` throwing when the picker returned an empty selection: it took `.files.first` unconditionally. It now returns `null`.
 - Fixed `StreamAttachmentHandler` throwing `UnimplementedError` on WebAssembly builds.
 - Improved the screen-reader experience in the message list: each message is announced as a single phrase naming the sender, the body, the time, the edited marker and the delivery status, while the attachments, reaction chips, quoted message and replies row stay reachable one level deeper.
 - Fixed the message body being announced as its markdown source, so link and emphasis syntax is no longer read aloud.

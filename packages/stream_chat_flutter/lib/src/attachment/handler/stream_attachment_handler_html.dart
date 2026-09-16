@@ -22,8 +22,8 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
     List<String>? allowedExtensions,
     Function(FilePickerStatus)? onFileLoading,
     int compressionQuality = 0,
-    bool withData = true,
-    bool withReadStream = false,
+    @Deprecated('Content is read on demand; this no longer has any effect.') bool withData = true,
+    @Deprecated('Content is read on demand; this no longer has any effect.') bool withReadStream = false,
     bool lockParentWindow = true,
   }) async {
     final result = await FilePicker.pickFile(
