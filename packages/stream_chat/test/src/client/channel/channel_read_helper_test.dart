@@ -25,9 +25,9 @@ void main() {
   // FEATURE: User Reads
   // ============================================================
 
-  group('Channel Read Helper - User Reads', () {
+  group('ChannelReadHelper', () {
     channelTest(
-      'userReadOf - should return read for specific user',
+      'userReadOf should return read for specific user',
       setUp: (tester) => tester.watch(
         modifyResponse: (state) => state.copyWith(
           read: [
@@ -52,7 +52,7 @@ void main() {
     );
 
     channelTest(
-      'userReadOf - should return null when userId is null',
+      'userReadOf should return null when userId is null',
       setUp: (tester) => tester.watch(),
       body: (tester) async {
         final read = tester.channelState!.userReadOf(userId: null);
@@ -61,7 +61,7 @@ void main() {
     );
 
     channelTest(
-      'userReadStreamOf - should emit read updates for specific user',
+      'userReadStreamOf should emit read updates for specific user',
       setUp: (tester) => tester.watch(),
       body: (tester) async {
         final readStream = tester.channelState!.userReadStreamOf(userId: 'user-1');
@@ -84,15 +84,8 @@ void main() {
         await readEmitted;
       },
     );
-  });
-
-  // ============================================================
-  // FEATURE: Message Reads
-  // ============================================================
-
-  group('Channel Read Helper - Message Reads', () {
     channelTest(
-      'readsOf - should return reads that have marked message as read',
+      'readsOf should return reads that have marked message as read',
       setUp: (tester) => tester.watch(
         modifyResponse: (state) => state.copyWith(
           read: [
@@ -118,7 +111,7 @@ void main() {
     );
 
     channelTest(
-      'readsOfStream - should emit read updates for a message',
+      'readsOfStream should emit read updates for a message',
       setUp: (tester) => tester.watch(),
       body: (tester) async {
         final readsStream = tester.channelState!.readsOfStream(message: message);
@@ -143,15 +136,8 @@ void main() {
         await readsEmitted;
       },
     );
-  });
-
-  // ============================================================
-  // FEATURE: Message Deliveries
-  // ============================================================
-
-  group('Channel Read Helper - Message Deliveries', () {
     channelTest(
-      'deliveriesOf - should return reads that have delivered the message',
+      'deliveriesOf should return reads that have delivered the message',
       setUp: (tester) => tester.watch(
         modifyResponse: (state) => state.copyWith(
           read: [
@@ -198,7 +184,7 @@ void main() {
     );
 
     channelTest(
-      'deliveriesOfStream - should emit delivery updates for a message',
+      'deliveriesOfStream should emit delivery updates for a message',
       setUp: (tester) => tester.watch(),
       body: (tester) async {
         final deliveriesStream = tester.channelState!.deliveriesOfStream(message: message);

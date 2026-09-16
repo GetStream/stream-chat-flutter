@@ -4,11 +4,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_test/stream_chat_test.dart';
 
 void main() {
-  // ============================================================
-  // FEATURE: Capability Getters
-  // ============================================================
-
-  group('Channel Capability Check - Capability Getters', () {
+  group('ChannelCapabilityCheck', () {
     /// Parameterized test for channel capability extension properties.
     void testCapability(
       String capabilityName,
@@ -16,7 +12,7 @@ void main() {
       bool Function(Channel) getterMethod,
     ) {
       channelTest(
-        'can$capabilityName - should return false when capability is absent',
+        'can$capabilityName returns false when capability is absent',
         setUp: (tester) => tester.watch(),
         body: (tester) async {
           expect(getterMethod(tester.channel), false);
@@ -24,7 +20,7 @@ void main() {
       );
 
       channelTest(
-        'can$capabilityName - should return true when capability is present',
+        'can$capabilityName returns true when capability is present',
         setUp: (tester) => tester.watch(
           modifyResponse: (state) => state.copyWith(
             channel: createDefaultChannelModel(ownCapabilities: [capability]),
@@ -290,7 +286,7 @@ void main() {
     );
 
     channelTest(
-      'should return correct values with multiple capabilities',
+      'returns correct values with multiple capabilities',
       setUp: (tester) => tester.watch(
         modifyResponse: (state) => state.copyWith(
           channel: createDefaultChannelModel(
@@ -310,57 +306,52 @@ void main() {
         expect(tester.channel.canUpdateChannel, false);
       },
     );
-  });
+    group('usesLocalUnreadCount', () {
+      channelTest(
+        'is false when disabled and read receipts are unavailable',
+        setUp: (tester) => tester.watch(),
+        body: (tester) async {
+          expect(tester.channel.usesLocalUnreadCount, false);
+        },
+      );
 
-  // ============================================================
-  // FEATURE: Local Unread Count
-  // ============================================================
-
-  group('Channel Capability Check - Local Unread Count', () {
-    channelTest(
-      'usesLocalUnreadCount - should be false when disabled and read receipts are unavailable',
-      setUp: (tester) => tester.watch(),
-      body: (tester) async {
-        expect(tester.channel.usesLocalUnreadCount, false);
-      },
-    );
-
-    channelTest(
-      'usesLocalUnreadCount - should be false when disabled and read receipts are available',
-      setUp: (tester) => tester.watch(
-        modifyResponse: (state) => state.copyWith(
-          channel: createDefaultChannelModel(
-            ownCapabilities: [ChannelCapability.readEvents],
+      channelTest(
+        'is false when disabled and read receipts are available',
+        setUp: (tester) => tester.watch(
+          modifyResponse: (state) => state.copyWith(
+            channel: createDefaultChannelModel(
+              ownCapabilities: [ChannelCapability.readEvents],
+            ),
           ),
         ),
-      ),
-      body: (tester) async {
-        expect(tester.channel.usesLocalUnreadCount, false);
-      },
-    );
+        body: (tester) async {
+          expect(tester.channel.usesLocalUnreadCount, false);
+        },
+      );
 
-    channelTest(
-      'usesLocalUnreadCount - should be false when enabled but the channel supports read receipts',
-      isLocalUnreadCountEnabled: true,
-      setUp: (tester) => tester.watch(
-        modifyResponse: (state) => state.copyWith(
-          channel: createDefaultChannelModel(
-            ownCapabilities: [ChannelCapability.readEvents],
+      channelTest(
+        'is false when enabled but the channel supports read receipts',
+        isLocalUnreadCountEnabled: true,
+        setUp: (tester) => tester.watch(
+          modifyResponse: (state) => state.copyWith(
+            channel: createDefaultChannelModel(
+              ownCapabilities: [ChannelCapability.readEvents],
+            ),
           ),
         ),
-      ),
-      body: (tester) async {
-        expect(tester.channel.usesLocalUnreadCount, false);
-      },
-    );
+        body: (tester) async {
+          expect(tester.channel.usesLocalUnreadCount, false);
+        },
+      );
 
-    channelTest(
-      'usesLocalUnreadCount - should be true when enabled and read receipts are unavailable',
-      isLocalUnreadCountEnabled: true,
-      setUp: (tester) => tester.watch(),
-      body: (tester) async {
-        expect(tester.channel.usesLocalUnreadCount, true);
-      },
-    );
+      channelTest(
+        'is true when enabled and read receipts are unavailable',
+        isLocalUnreadCountEnabled: true,
+        setUp: (tester) => tester.watch(),
+        body: (tester) async {
+          expect(tester.channel.usesLocalUnreadCount, true);
+        },
+      );
+    });
   });
 }
