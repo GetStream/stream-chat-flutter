@@ -2240,7 +2240,7 @@ void main() {
       );
 
       channelTest(
-        '${EventType.memberRemoved} removes the member',
+        '${EventType.memberRemoved} removes the member and its read state',
         channelType: _channelType,
         channelId: _channelId,
         setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
@@ -2250,6 +2250,16 @@ void main() {
               members: [
                 Member(userId: 'member-1'),
                 Member(userId: 'member-2'),
+              ],
+              read: [
+                Read(
+                  user: User(id: 'member-1'),
+                  lastRead: DateTime.utc(2020),
+                ),
+                Read(
+                  user: User(id: 'member-2'),
+                  lastRead: DateTime.utc(2020),
+                ),
               ],
             ),
           );
@@ -2263,6 +2273,38 @@ void main() {
           );
 
           expect(tester.channelState!.channelState.members?.map((m) => m.userId), ['member-2']);
+          expect(tester.channelState!.channelState.read?.map((r) => r.user.id), ['member-2']);
+        },
+      );
+
+      channelTest(
+        '${EventType.memberRemoved} clears the read state of the only member',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          tester.channelState!.updateChannelState(
+            tester.channelState!.channelState.copyWith(
+              members: [Member(userId: 'member-1')],
+              read: [
+                Read(
+                  user: User(id: 'member-1'),
+                  lastRead: DateTime.utc(2020),
+                ),
+              ],
+            ),
+          );
+
+          await tester.emitEvent(
+            createDefaultEvent(
+              cid: tester.channel.cid,
+              type: EventType.memberRemoved,
+              user: User(id: 'member-1'),
+            ),
+          );
+
+          expect(tester.channelState!.channelState.members, isEmpty);
+          expect(tester.channelState!.channelState.read, isEmpty);
         },
       );
 

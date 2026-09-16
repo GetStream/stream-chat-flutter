@@ -151,6 +151,26 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
 
   @override
   Future<List<String>> getChannelCids() async => _channelCids;
+
+  // Written by the sync catch-up when it refreshes channels in place of
+  // replaying an oversized event payload. Unimplemented on a [Fake] these
+  // throw, and the connection-status listener swallows it, so the sync
+  // silently stops short of advancing `lastSyncAt`.
+  @override
+  Future<void> saveChannelQueries({
+    required List<String> cids,
+    Filter? filter,
+    SortOrder<ChannelState>? sort,
+    String? predefinedFilter,
+    Filter? resolvedFilter,
+    SortOrder<ChannelState>? resolvedSort,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
+    bool clearQueryCache = false,
+  }) async {}
+
+  @override
+  Future<void> updateChannelStates(List<ChannelState> channelStates) async {}
 }
 
 /// A [StreamChatApi] whose sub-APIs are lazily-created mocks.
