@@ -636,9 +636,9 @@ class StreamChatClient {
   /// [cids] and [lastSyncAt] both fall back to the values held by the
   /// persistence client when omitted.
   ///
-  /// A window that cannot be replayed — too many events, or refused by the
-  /// server — is given up on, and the channels it covered are re-queried in its
-  /// place.
+  /// Events that cannot be replayed — because too many were missed, or because
+  /// they are no longer available — are given up on, and the channels they
+  /// covered are re-queried instead.
   ///
   /// Never throws: a failed catch-up is logged and left for the next one.
   Future<void> sync({List<String>? cids, DateTime? lastSyncAt}) {
