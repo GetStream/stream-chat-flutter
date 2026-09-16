@@ -99,8 +99,11 @@ class MockPersistenceClient extends Mock implements ChatPersistenceClient {
 }
 
 class MockStreamChatClient extends Mock implements StreamChatClient {
+  // A plain settable field for the same reason as [isLocalUnreadCountEnabled]
+  // below: stubbing it via `when()` corrupts mocktail's global stubbing state
+  // when this mock is lazily constructed inside another `when()`.
   @override
-  bool get persistenceEnabled => false;
+  bool persistenceEnabled = false;
 
   // A plain settable field (not a `when(...)` stub) so tests can flip it
   // with a direct assignment, e.g. `client.isLocalUnreadCountEnabled = true`.
@@ -142,14 +145,19 @@ class MockStreamChatClient extends Mock implements StreamChatClient {
 }
 
 class MockStreamChatClientWithPersistence extends MockStreamChatClient {
+  MockStreamChatClientWithPersistence() {
+    // Sets the inherited field rather than overriding its getter, which would
+    // leave the inherited setter silently doing nothing.
+    persistenceEnabled = true;
+  }
+
   ChatPersistenceClient? _persistenceClient;
 
   @override
   ChatPersistenceClient get chatPersistenceClient => _persistenceClient ??= MockPersistenceClient();
-
-  @override
-  bool get persistenceEnabled => true;
 }
+
+class MockClientState extends Mock implements ClientState {}
 
 class MockChannelConfig extends Mock implements ChannelConfig {}
 

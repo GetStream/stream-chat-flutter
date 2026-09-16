@@ -14,8 +14,11 @@ class ConnectionEventDao extends DatabaseAccessor<DriftChatDatabase> with _$Conn
   ConnectionEventDao(super.db);
 
   /// Get the latest stored connection event
-  Future<Event?> get connectionEvent =>
-      select(connectionEvents).map((eventEntity) => eventEntity.toEvent()).getSingleOrNull();
+  Future<Event?> get connectionEvent => select(connectionEvents)
+      .map((eventEntity) => eventEntity.toEvent())
+      .getSingleOrNull()
+      // A row carrying only a checkpoint is not a connection event.
+      .then((event) => event?.type == EventType.any ? null : event);
 
   /// Get the latest stored lastSyncAt
   Future<DateTime?> get lastSyncAt => select(connectionEvents).getSingleOrNull().then((r) => r?.lastSyncAt);
@@ -37,10 +40,20 @@ class ConnectionEventDao extends DatabaseAccessor<DriftChatDatabase> with _$Conn
   });
 
   /// Update stored lastSyncAt with latest data
-  Future<int> updateLastSyncAt(DateTime lastSyncAt) async =>
-      (update(connectionEvents)..where((tbl) => tbl.id.equals(1))).write(
-        ConnectionEventsCompanion(
-          lastSyncAt: Value(lastSyncAt),
-        ),
-      );
+  ///
+  /// Inserts the row if the database was reset, so the checkpoint is not lost.
+  Future<int> updateLastSyncAt(DateTime lastSyncAt) => transaction(() async {
+    final connectionInfo = await select(connectionEvents).getSingleOrNull();
+    return into(connectionEvents).insertOnConflictUpdate(
+      ConnectionEventEntity(
+        id: 1,
+        type: connectionInfo?.type ?? EventType.any,
+        lastSyncAt: lastSyncAt,
+        lastEventAt: connectionInfo?.lastEventAt,
+        totalUnreadCount: connectionInfo?.totalUnreadCount,
+        ownUser: connectionInfo?.ownUser,
+        unreadChannels: connectionInfo?.unreadChannels,
+      ),
+    );
+  });
 }
