@@ -147,8 +147,8 @@ class SyncManager {
     // A failed replay reports no refreshed channels rather than throwing, so the
     // refresh below still runs — it needs the network, not the local store.
     // Guarded so the contract above holds: `persistenceEnabled` reads a
-    // user-supplied persistence client, and replaying an event runs the whole
-    // event pipeline. A throw here would stop the caller announcing recovery.
+    // user-supplied persistence client, which can throw. A throw here would
+    // stop the caller announcing recovery.
     try {
       var refreshed = const <String>{};
       if (client.persistenceEnabled) refreshed = await sync(cids: cids);
