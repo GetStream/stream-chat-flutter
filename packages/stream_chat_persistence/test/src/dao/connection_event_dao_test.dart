@@ -113,20 +113,53 @@ void main() {
   });
 
   test('updateLastSyncAt preserves millisecond precision', () async {
-    // A connection event must exist before lastSyncAt can be stored.
-    await eventDao.updateConnectionEvent(
-      Event(
-        createdAt: DateTime.now(),
-        me: OwnUser(id: 'testUserId'),
-      ),
-    );
-
     final preciseDate = DateTime.utc(2026, 5, 28, 12, 34, 56, 123);
     await eventDao.updateLastSyncAt(preciseDate);
 
     final readBack = await eventDao.lastSyncAt;
     expect(readBack, equals(preciseDate));
     expect(readBack!.millisecond, equals(123));
+  });
+
+  test('updateLastSyncAt stores the checkpoint after the database was reset', () async {
+    await eventDao.updateConnectionEvent(
+      Event(
+        createdAt: DateTime.now(),
+        me: OwnUser(id: 'testUserId'),
+      ),
+    );
+    await eventDao.updateLastSyncAt(DateTime.utc(2026, 5, 28, 11));
+
+    await database.flush();
+
+    final afterReset = DateTime.utc(2026, 5, 28, 12);
+    await eventDao.updateLastSyncAt(afterReset);
+
+    expect(await eventDao.lastSyncAt, equals(afterReset));
+  });
+
+  test('updateLastSyncAt keeps the stored connection event', () async {
+    final event = Event(
+      createdAt: DateTime.now(),
+      totalUnreadCount: 33,
+      unreadChannels: 3,
+      me: OwnUser(id: 'testUserId'),
+    );
+    await eventDao.updateConnectionEvent(event);
+
+    await eventDao.updateLastSyncAt(DateTime.now());
+
+    final storedEvent = await eventDao.connectionEvent;
+    expect(storedEvent, isNotNull);
+    expect(storedEvent!.me!.id, event.me!.id);
+    expect(storedEvent.totalUnreadCount, event.totalUnreadCount);
+    expect(storedEvent.unreadChannels, event.unreadChannels);
+  });
+
+  test('a checkpoint written on its own is not read back as a connection event', () async {
+    await eventDao.updateLastSyncAt(DateTime.now());
+
+    expect(await eventDao.connectionEvent, isNull);
   });
 
   tearDown(() async {
