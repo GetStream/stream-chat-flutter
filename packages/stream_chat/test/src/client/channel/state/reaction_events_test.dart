@@ -162,5 +162,39 @@ void main() {
         expect(stored.ownReactions, isEmpty);
       },
     );
+
+    channelTest(
+      '${EventType.reactionNew} for a message outside the loaded window is ignored',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+      body: (tester) async {
+        // No message is seeded, so the reaction has nothing to attach to.
+        expect(tester.channelState!.messages, isEmpty);
+
+        final reaction = Reaction(
+          type: 'like',
+          messageId: _messageId,
+          user: tester.currentUser,
+        );
+        await tester.emitEvent(
+          createDefaultEvent(
+            cid: tester.channel.cid,
+            type: EventType.reactionNew,
+            reaction: reaction,
+            message: Message(
+              id: _messageId,
+              user: User(id: 'other-user'),
+              createdAt: _createdAt,
+              latestReactions: [reaction],
+            ),
+          ),
+        );
+
+        // The unknown message is not inserted as a side effect of the reaction.
+        expect(tester.channelState!.messages, isEmpty);
+        expect(tester.channelState!.threads, isEmpty);
+      },
+    );
   });
 }

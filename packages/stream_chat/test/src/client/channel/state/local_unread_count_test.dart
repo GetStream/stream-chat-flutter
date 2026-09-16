@@ -115,6 +115,70 @@ void main() {
     );
 
     channelTest(
+      'does not decrement unreadCount below zero when a counted message is '
+      'hard-deleted',
+      channelType: _channelType,
+      channelId: _channelId,
+      isLocalUnreadCountEnabled: true,
+      setUp: (tester) => tester.watch(
+        modifyResponse: (_) => _livestreamChannelState(
+          messages: [countedMessage],
+          read: [
+            createDefaultRead(lastRead: countedMessage.createdAt.subtract(const Duration(days: 1))),
+          ],
+        ),
+      ),
+      body: (tester) async {
+        // The count is already exhausted, so the decrement has nothing left
+        // to take.
+        expect(tester.channelState?.unreadCount, equals(0));
+
+        await tester.emitEvent(
+          createDefaultEvent(
+            cid: tester.channel.cid,
+            type: EventType.messageDeleted,
+            message: countedMessage,
+            hardDelete: true,
+          ),
+        );
+
+        expect(tester.channelState?.unreadCount, equals(0));
+      },
+    );
+
+    channelTest(
+      'does not decrement unreadCount on hard delete when local unread count '
+      'tracking is disabled',
+      channelType: _channelType,
+      channelId: _channelId,
+      // Local unread count tracking stays at its default, disabled.
+      isLocalUnreadCountEnabled: false,
+      setUp: (tester) => tester.watch(
+        modifyResponse: (_) => _livestreamChannelState(
+          messages: [countedMessage],
+          read: [
+            createDefaultRead(lastRead: countedMessage.createdAt.subtract(const Duration(days: 1))),
+          ],
+        ),
+      ),
+      body: (tester) async {
+        // A server-driven count the client must leave alone.
+        tester.channelState!.unreadCount = 1;
+
+        await tester.emitEvent(
+          createDefaultEvent(
+            cid: tester.channel.cid,
+            type: EventType.messageDeleted,
+            message: countedMessage,
+            hardDelete: true,
+          ),
+        );
+
+        expect(tester.channelState?.unreadCount, equals(1));
+      },
+    );
+
+    channelTest(
       'does not decrement unreadCount when a message is soft-deleted',
       channelType: _channelType,
       channelId: _channelId,

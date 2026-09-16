@@ -342,5 +342,28 @@ void main() {
         expect(emitted, equals([0, 1, 5, 10]));
       },
     );
+
+    channelTest(
+      'should still apply the count refresh when an earlier dispatch stage throws',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+      body: (tester) async {
+        expect(tester.channel.memberCount, equals(0));
+
+        // A message.deleted without a message throws on `event.message!` in
+        // the first dispatch stage. The unfiltered count refresh that runs
+        // after it must still apply.
+        await tester.emitEvent(
+          createDefaultEvent(
+            cid: tester.channel.cid,
+            type: EventType.messageDeleted,
+            channelMemberCount: 9,
+          ),
+        );
+
+        expect(tester.channel.memberCount, equals(9));
+      },
+    );
   });
 }

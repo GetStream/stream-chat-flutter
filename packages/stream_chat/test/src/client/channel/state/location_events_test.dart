@@ -604,5 +604,84 @@ void main() {
         expect(activeLiveLocations?.first.longitude, equals(-74.1000));
       },
     );
+
+    channelTest(
+      'should ignore location.updated event without a message id',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannel),
+      body: (tester) async {
+        final locationMessage = Message(
+          id: 'msg1',
+          text: 'Live location shared',
+          sharedLocation: Location(
+            channelCid: _channelCid,
+            userId: 'user1',
+            messageId: 'msg1',
+            latitude: 40.7128,
+            longitude: -74.0060,
+            createdByDeviceId: 'device1',
+            endAt: DateTime.timestamp().add(const Duration(hours: 1)),
+          ),
+        );
+
+        tester.channelState?.addNewMessage(locationMessage);
+
+        await tester.emitEvent(
+          createDefaultEvent(
+            cid: _channelCid,
+            type: EventType.locationUpdated,
+            message: locationMessage.copyWith(
+              sharedLocation: Location(
+                channelCid: _channelCid,
+                userId: 'user1',
+                latitude: 40.7500,
+                longitude: -74.0060,
+                createdByDeviceId: 'device1',
+                endAt: DateTime.timestamp().add(const Duration(hours: 1)),
+              ),
+            ),
+          ),
+        );
+
+        final message = tester.channelState?.messages.firstWhere((m) => m.id == 'msg1');
+        expect(message?.sharedLocation?.latitude, equals(40.7128));
+      },
+    );
+
+    channelTest(
+      'should ignore location.updated event for a message outside the loaded window',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannel),
+      body: (tester) async {
+        // No message is seeded, so the location has nothing to attach to.
+        expect(tester.channelState?.messages, isEmpty);
+
+        await tester.emitEvent(
+          createDefaultEvent(
+            cid: _channelCid,
+            type: EventType.locationUpdated,
+            message: Message(
+              id: 'unknown-msg',
+              text: 'Live location shared',
+              sharedLocation: Location(
+                channelCid: _channelCid,
+                userId: 'user1',
+                messageId: 'unknown-msg',
+                latitude: 40.7128,
+                longitude: -74.0060,
+                createdByDeviceId: 'device1',
+                endAt: DateTime.timestamp().add(const Duration(hours: 1)),
+              ),
+            ),
+          ),
+        );
+
+        // The unknown message is not inserted as a side effect of the update.
+        expect(tester.channelState?.messages, isEmpty);
+        expect(tester.channelState?.activeLiveLocations, isEmpty);
+      },
+    );
   });
 }
