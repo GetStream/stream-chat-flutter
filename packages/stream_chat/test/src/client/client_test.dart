@@ -5198,7 +5198,7 @@ void main() {
     group('Sync Method Tests', () {
       setUpAll(() {
         registerFallbackValue(const PaginationParams());
-        registerFallbackValue(Filter.equal('cid', ''));
+        registerFallbackValue(ChannelFilter.equal(ChannelFilterField.cid, ''));
       });
 
       test(
@@ -5358,7 +5358,7 @@ void main() {
           // The channels the payload covered are refreshed in its place.
           verify(
             () => api.channel.queryChannels(
-              filter: Filter.in_('cid', cids),
+              filter: any(named: 'filter', that: isSameFilterAs(ChannelFilter.in_(ChannelFilterField.cid, cids))),
               sort: any(named: 'sort'),
               state: any(named: 'state'),
               watch: any(named: 'watch'),
@@ -5608,7 +5608,7 @@ void main() {
 
       verify(
         () => api.channel.queryChannels(
-          filter: Filter.in_('cid', const [cid]),
+          filter: any(named: 'filter', that: isSameFilterAs(ChannelFilter.in_(ChannelFilterField.cid, const [cid]))),
           sort: any(named: 'sort'),
           state: any(named: 'state'),
           watch: any(named: 'watch'),
@@ -5642,7 +5642,11 @@ void main() {
       addTearDown(() => client.chatPersistenceClient = null);
 
       when(() => api.general.sync(const [cid], lastSyncAt)).thenThrow(
-        StreamChatNetworkError(ChatErrorCode.internalSystemError),
+        const StreamApiException(
+          code: StreamErrorCode.internalError,
+          message: 'Something goes wrong in the system',
+          statusCode: 500,
+        ),
       );
 
       clearInteractions(api.channel);
@@ -5651,7 +5655,7 @@ void main() {
 
       verify(
         () => api.channel.queryChannels(
-          filter: Filter.in_('cid', const [cid]),
+          filter: any(named: 'filter', that: isSameFilterAs(ChannelFilter.in_(ChannelFilterField.cid, const [cid]))),
           sort: any(named: 'sort'),
           state: any(named: 'state'),
           watch: any(named: 'watch'),
@@ -5679,7 +5683,7 @@ void main() {
           messageLimit: any(named: 'messageLimit'),
           paginationParams: any(named: 'paginationParams'),
         ),
-      ).thenThrow(const StreamChatError('You cannot use queryChannels without an active connection.'));
+      ).thenThrow(StateError('queryChannels needs an active connection. Call `connectUser` first.'));
 
       client = StreamChatClient(apiKey, chatApi: api, ws: ws, recoverStateOnReconnect: false);
       await client.connectUser(user, token);
@@ -5751,7 +5755,10 @@ void main() {
 
       verify(
         () => api.channel.queryChannels(
-          filter: Filter.in_('cid', cids.take(30).toList()),
+          filter: any(
+            named: 'filter',
+            that: isSameFilterAs(ChannelFilter.in_(ChannelFilterField.cid, cids.take(30).toList())),
+          ),
           sort: any(named: 'sort'),
           state: any(named: 'state'),
           watch: any(named: 'watch'),
@@ -5764,7 +5771,10 @@ void main() {
 
       verify(
         () => api.channel.queryChannels(
-          filter: Filter.in_('cid', cids.skip(30).toList()),
+          filter: any(
+            named: 'filter',
+            that: isSameFilterAs(ChannelFilter.in_(ChannelFilterField.cid, cids.skip(30).toList())),
+          ),
           sort: any(named: 'sort'),
           state: any(named: 'state'),
           watch: any(named: 'watch'),
@@ -5861,7 +5871,10 @@ void main() {
       // The first page fails, the second one succeeds.
       when(
         () => api.channel.queryChannels(
-          filter: Filter.in_('cid', cids.take(30).toList()),
+          filter: any(
+            named: 'filter',
+            that: isSameFilterAs(ChannelFilter.in_(ChannelFilterField.cid, cids.take(30).toList())),
+          ),
           sort: any(named: 'sort'),
           state: any(named: 'state'),
           watch: any(named: 'watch'),
@@ -5870,7 +5883,7 @@ void main() {
           messageLimit: any(named: 'messageLimit'),
           paginationParams: any(named: 'paginationParams'),
         ),
-      ).thenThrow(const StreamChatError('Failed to query channels'));
+      ).thenThrow(StateError('Failed to query channels'));
 
       clearInteractions(api.channel);
 
@@ -5879,7 +5892,10 @@ void main() {
       // Both pages are asked for, even though the first one failed.
       verify(
         () => api.channel.queryChannels(
-          filter: Filter.in_('cid', cids.skip(30).toList()),
+          filter: any(
+            named: 'filter',
+            that: isSameFilterAs(ChannelFilter.in_(ChannelFilterField.cid, cids.skip(30).toList())),
+          ),
           sort: any(named: 'sort'),
           state: any(named: 'state'),
           watch: any(named: 'watch'),

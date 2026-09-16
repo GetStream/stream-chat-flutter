@@ -9,7 +9,6 @@ import 'package:stream_core/stream_core.dart'
         InFlightCache,
         LocationCoordinate,
         SortedListExtensions,
-        StreamApiException,
         StreamLogConfig,
         StreamLogger,
         SystemEnvironment,

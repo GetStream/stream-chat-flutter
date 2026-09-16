@@ -105,11 +105,11 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
   @override
   Future<void> saveChannelQueries({
     required List<String> cids,
-    Filter? filter,
-    SortOrder<ChannelState>? sort,
+    ChannelFilter? filter,
+    List<ChannelSort>? sort,
     String? predefinedFilter,
-    Filter? resolvedFilter,
-    SortOrder<ChannelState>? resolvedSort,
+    ChannelFilter? resolvedFilter,
+    List<ChannelSort>? resolvedSort,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
     bool clearQueryCache = false,
