@@ -122,13 +122,7 @@ void main() {
   });
 
   test('updateLastSyncAt stores the checkpoint after the database was reset', () async {
-    await eventDao.updateConnectionEvent(
-      Event(
-        createdAt: DateTime.now(),
-        me: OwnUser(id: 'testUserId'),
-      ),
-    );
-    await eventDao.updateLastSyncAt(DateTime.utc(2026, 5, 28, 11));
+    await eventDao.updateConnectionEvent(Event(createdAt: DateTime.now()));
 
     await database.flush();
 
