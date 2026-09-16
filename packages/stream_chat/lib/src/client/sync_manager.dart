@@ -281,8 +281,9 @@ class SyncManager {
       _logger.w(
         () =>
             '''
-Putting lastSyncAt back: store dropped: $flushed,
-refreshed ${refreshed.length} of ${cids.length} channels''',
+        Putting lastSyncAt back: store dropped: $flushed,
+        refreshed ${refreshed.length} of ${cids.length} channels
+        ''',
       );
       await _recordLastSyncAt(from);
       return refreshed;
