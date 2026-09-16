@@ -5171,6 +5171,68 @@ void main() {
           expect(channel.membership?.user?.role, equals(updatedUser?.role));
         },
       );
+
+      test(
+        '${EventType.memberRemoved} removes the member and its read state',
+        () async {
+          channel.state?.updateChannelState(
+            channel.state!.channelState.copyWith(
+              members: [
+                Member(userId: 'member-1'),
+                Member(userId: 'member-2'),
+              ],
+              read: [
+                Read(user: User(id: 'member-1'), lastRead: DateTime(2020)),
+                Read(user: User(id: 'member-2'), lastRead: DateTime(2020)),
+              ],
+            ),
+          );
+
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.memberRemoved,
+              user: User(id: 'member-1'),
+            ),
+          );
+          await Future.delayed(Duration.zero);
+
+          expect(
+            channel.state?.channelState.members?.map((m) => m.userId),
+            equals(['member-2']),
+          );
+          expect(
+            channel.state?.channelState.read?.map((r) => r.user.id),
+            equals(['member-2']),
+          );
+        },
+      );
+
+      test(
+        '${EventType.memberRemoved} clears the read state of the only member',
+        () async {
+          channel.state?.updateChannelState(
+            channel.state!.channelState.copyWith(
+              members: [Member(userId: 'member-1')],
+              read: [
+                Read(user: User(id: 'member-1'), lastRead: DateTime(2020)),
+              ],
+            ),
+          );
+
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.memberRemoved,
+              user: User(id: 'member-1'),
+            ),
+          );
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state?.channelState.members, isEmpty);
+          expect(channel.state?.channelState.read, isEmpty);
+        },
+      );
     });
 
     group('Watching Events', () {
