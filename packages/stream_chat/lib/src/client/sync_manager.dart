@@ -25,8 +25,8 @@ class SyncManager {
   SyncManager({
     required this.client,
     required this.fetchMissedEvents,
-    String tag = 'SCh:Sync',
     @visibleForTesting this.maxReplayEvents = _defaultMaxReplayEvents,
+    String tag = 'SCh:Sync',
   }) : _logger = StreamLogger(tag);
 
   // The endpoint rejects more than 255, counted before duplicates collapse.
