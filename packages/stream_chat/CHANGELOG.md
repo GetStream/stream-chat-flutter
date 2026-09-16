@@ -5,6 +5,10 @@
 - Fixed `CurrentPlatform` throwing `UnimplementedError` on WebAssembly builds.
 - Fixed live location expiry emitting repeated `location.expired` events for the same expired location.
 
+🔄 Internal / Non-breaking
+
+- Errors thrown synchronously while handling a channel event are now logged as warnings instead of reaching the root zone, where crash reporters report them as fatal.
+
 ## 10.4.0
 
 ✅ Added

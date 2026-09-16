@@ -106,10 +106,13 @@ jobs:
           - ios: "17.5"
             device: "iPhone 15 Pro"
             setup_runtime: true
-    env:
-      XCODE_VERSION: "26.2"
     steps:
       - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/setup-xcode
+        with:
+          # Pinned to match the simulator runtimes this job selects.
+          xcode-version: '26.2'
 
       - uses: ./.github/actions/setup-ruby
 
@@ -127,14 +130,8 @@ jobs:
       - name: Bootstrap
         run: |
           flutter precache --ios
-          flutter config --no-enable-swift-package-manager
           flutter pub global activate melos
           melos bootstrap
-
-      # After Bootstrap so the cache keys hash the resolved pubspec.lock
-      - uses: ./.github/actions/cache-cocoapods
-        with:
-          key-suffix: ${{ matrix.ios }}
 
       - name: Launch Allure TestOps
         working-directory: sample_app/ios

@@ -1,14 +1,17 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../stream_chat.dart';
+import '../../core/util/message_merging.dart';
+import '../../core/util/message_predicates.dart';
 import '../../core/util/utils.dart';
 import '../live_location_expiration_scheduler.dart';
 import '../retry_queue.dart';
+import 'channel_event_handler.dart';
+import 'channel_state_mutations.dart';
 
 /// The class that handles the state of the channel listening to the events.
 class ChannelClientState {
@@ -28,81 +31,23 @@ class ChannelClientState {
     // Update the persistence storage with the seeded channel state.
     _debouncedUpdatePersistenceChannelState.call([channelState]);
 
-    // region TYPING EVENTS
-    _listenTypingEvents();
-    // endregion
-
-    // region MESSAGE EVENTS
-    _listenMessageNew();
-    _listenMessageDeleted();
-    _listenMessageUpdated();
-    // endregion
-
-    // region DRAFT EVENTS
-    _listenDraftUpdated();
-    _listenDraftDeleted();
-    // endregion
-
-    // region REACTION EVENTS
-    _listenReactionNew();
-    _listenReactionUpdated();
-    _listenReactionDeleted();
-    // endregion
-
-    // region POLL EVENTS
-    _listenPollCreated();
-    _listenPollUpdated();
-    _listenPollClosed();
-    _listenPollAnswerCasted();
-    _listenPollVoteCasted();
-    _listenPollVoteChanged();
-    _listenPollAnswerRemoved();
-    _listenPollVoteRemoved();
-    // endregion
-
-    // region READ EVENTS
-    _listenReadEvents();
-    // endregion
-
-    // region CHANNEL EVENTS
-    _listenChannelTruncated();
-    _listenChannelUpdated();
-    _listenChannelCounts();
-    // endregion
-
-    // region MEMBER EVENTS
-    _listenMemberAdded();
-    _listenMemberRemoved();
-    _listenMemberUpdated();
-    _listenMemberBanned();
-    _listenMemberUnbanned();
-    _listenUserMessagesDeleted();
-    // endregion
-
-    // region USER WATCHING EVENTS
-    _listenUserStartWatching();
-    _listenUserStopWatching();
-    // endregion
-
-    // region REMINDER EVENTS
-    _listenReminderCreated();
-    _listenReminderUpdated();
-    _listenReminderDeleted();
-    // endregion
-
-    // region LOCATION EVENTS
-    _listenLocationShared();
-    _listenLocationUpdated();
-    _listenLocationExpired();
-    // endregion
+    final mutations = ChannelStateMutations(
+      channel: _channel,
+      state: this,
+      upsertTypingEvent: _upsertTypingEvent,
+      removeTypingEvent: _removeTypingEvent,
+      removeWatcher: _removeWatcher,
+      updateMember: _updateMember,
+      deleteMessagesFromUser: _deleteMessagesFromUser,
+    );
+    final handler = ChannelEventHandler(channel: _channel, mutations: mutations);
+    _subscriptions.add(_channel.on().listen(handler.handleEvent));
 
     _startCleaningStaleTypingEvents();
 
     _startCleaningStalePinnedMessages();
 
     _startSchedulingLocationExpiration();
-
-    _listenChannelPushPreferenceUpdated();
 
     final persistenceClient = _client.chatPersistenceClient;
     persistenceClient
@@ -118,218 +63,20 @@ class ChannelClientState {
   StreamChatClient get _client => _channel.client;
   final _subscriptions = CompositeSubscription();
 
-  void _listenMemberAdded() {
-    _subscriptions.add(
-      _channel.on(EventType.memberAdded).listen((Event e) {
-        final member = e.member!;
-        final existingMembers = channelState.members ?? [];
-
-        updateChannelState(
-          channelState.copyWith(
-            members: [...existingMembers, member],
-          ),
-        );
-      }),
+  // Removes the watcher from the channel state, optionally updating the
+  // watcher count when provided.
+  void _removeWatcher(User watcher, {int? watcherCount}) {
+    // Writes the state directly: the watcher list merge in
+    // [updateChannelState] would undo the removal.
+    final existingWatchers = channelState.watchers ?? const <User>[];
+    _channelState = channelState.copyWith(
+      watchers: existingWatchers.where((user) => user.id != watcher.id).toList(),
+      watcherCount: watcherCount,
     );
   }
 
-  void _listenMemberRemoved() {
-    _subscriptions.add(
-      _channel.on(EventType.memberRemoved).listen((Event e) {
-        final user = e.user!;
-        final existingRead = channelState.read ?? [];
-        final existingMembers = channelState.members ?? [];
-
-        updateChannelState(
-          channelState.copyWith(
-            read: [...existingRead.where((r) => r.user.id != user.id)],
-            members: [...existingMembers.where((m) => m.userId != user.id)],
-          ),
-        );
-      }),
-    );
-  }
-
-  void _listenMemberUpdated() {
-    _subscriptions
-      // Listen to events containing member users
-      ..add(
-        _channel.on().listen(
-          (event) {
-            final user = event.user;
-            if (user == null) return;
-
-            final existingMembers = [...?channelState.members];
-            final existingMembership = channelState.membership;
-
-            // Return if the user is not a existing member of the channel.
-            if (!existingMembers.any((m) => m.userId == user.id)) return;
-
-            Member? maybeUpdateMemberUser(Member? existingMember) {
-              if (existingMember == null) return null;
-              if (existingMember.userId == user.id) {
-                return existingMember.copyWith(user: user);
-              }
-              return existingMember;
-            }
-
-            updateChannelState(
-              channelState.copyWith(
-                membership: maybeUpdateMemberUser(existingMembership),
-                members: [...existingMembers.map(maybeUpdateMemberUser).nonNulls],
-              ),
-            );
-          },
-        ),
-      )
-      // Listen to member updated events.
-      ..add(
-        _channel.on(EventType.memberUpdated).listen(
-          (Event e) {
-            final member = e.member!;
-            final existingMembers = channelState.members ?? [];
-            final existingMembership = channelState.membership;
-
-            Member? maybeUpdateMember(Member? existingMember) {
-              if (existingMember == null) return null;
-              if (existingMember.userId == member.userId) return member;
-              return existingMember;
-            }
-
-            updateChannelState(
-              channelState.copyWith(
-                membership: maybeUpdateMember(existingMembership),
-                members: [...existingMembers.map(maybeUpdateMember).nonNulls],
-              ),
-            );
-          },
-        ),
-      );
-  }
-
-  void _listenChannelUpdated() {
-    _subscriptions.add(
-      _channel.on(EventType.channelUpdated).listen((Event e) {
-        final channel = e.channel!;
-        updateChannelState(
-          channelState.copyWith(
-            channel: channelState.channel?.merge(channel),
-            members: channel.members,
-          ),
-        );
-      }),
-    );
-  }
-
-  // Most channel events carry the channel's member and message counts as
-  // event metadata, reflecting the authoritative values after the change.
-  // Applying them keeps the counts fresh for the whole session instead of
-  // only right after a `query` / `watch`.
-  void _listenChannelCounts() {
-    _subscriptions.add(
-      _channel.on().listen(
-        (Event e) {
-          final memberCount = e.channelMemberCount;
-          final messageCount = e.channelMessageCount;
-          if (memberCount == null && messageCount == null) return;
-
-          updateChannelState(
-            channelState.copyWith(
-              channel: channelState.channel?.copyWith(
-                memberCount: memberCount,
-                messageCount: messageCount,
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  void _listenChannelTruncated() {
-    _subscriptions.add(
-      _channel.on(EventType.channelTruncated, EventType.notificationChannelTruncated).listen((event) async {
-        final channel = event.channel!;
-        await _client.chatPersistenceClient?.deleteMessageByCid(channel.cid);
-        truncate();
-        if (event.message != null) {
-          updateMessage(event.message!);
-        }
-      }),
-    );
-  }
-
-  void _listenMemberBanned() {
-    _subscriptions.add(
-      _channel
-          .on(EventType.userBanned)
-          .where((it) => it.cid != null) // filters channel ban from app ban
-          .listen(
-            (event) async {
-              final user = event.user!;
-              final member = await _channel
-                  .queryMembers(filter: Filter.equal('id', user.id))
-                  .then((it) => it.members.first);
-
-              _updateMember(member);
-            },
-          ),
-    );
-  }
-
-  void _listenUserStartWatching() {
-    _subscriptions.add(
-      _channel.on(EventType.userWatchingStart).listen((event) {
-        final watcher = event.user;
-        if (watcher != null) {
-          final existingWatchers = channelState.watchers;
-          updateChannelState(
-            channelState.copyWith(
-              watchers: [
-                watcher,
-                ...?existingWatchers?.where((user) => user.id != watcher.id),
-              ],
-              watcherCount: event.watcherCount,
-            ),
-          );
-        }
-      }),
-    );
-  }
-
-  void _listenUserStopWatching() {
-    _subscriptions.add(
-      _channel.on(EventType.userWatchingStop).listen((event) {
-        final watcher = event.user;
-        if (watcher != null) {
-          final existingWatchers = channelState.watchers ?? const <User>[];
-          _channelState = channelState.copyWith(
-            watchers: existingWatchers.where((user) => user.id != watcher.id).toList(),
-            watcherCount: event.watcherCount,
-          );
-        }
-      }),
-    );
-  }
-
-  void _listenMemberUnbanned() {
-    _subscriptions.add(
-      _channel
-          .on(EventType.userUnbanned)
-          .where((it) => it.cid != null) // filters channel ban from app ban
-          .listen(
-            (event) async {
-              final user = event.user!;
-              final member = await _channel
-                  .queryMembers(filter: Filter.equal('id', user.id))
-                  .then((it) => it.members.first);
-
-              _updateMember(member);
-            },
-          ),
-    );
-  }
-
+  // Replaces the member matching the given member's user id in the channel
+  // state. Does nothing if no member with the same user id exists.
   void _updateMember(Member member) {
     final currentMembers = [...members];
     final memberIndex = currentMembers.indexWhere(
@@ -376,274 +123,6 @@ class ChannelClientState {
     _retryQueue.add(failedMessages);
   }
 
-  Message? _findPollMessage(String pollId) {
-    final message = messages.firstWhereOrNull((it) => it.pollId == pollId);
-    if (message != null) return message;
-
-    final threadMessage = threads.values.flattened.firstWhereOrNull((it) {
-      return it.pollId == pollId;
-    });
-
-    return threadMessage;
-  }
-
-  void _listenPollCreated() {
-    _subscriptions.add(
-      _channel.on(EventType.pollCreated).listen((event) {
-        final message = event.message;
-        if (message == null || message.poll == null) return;
-
-        return addNewMessage(message);
-      }),
-    );
-  }
-
-  void _listenPollUpdated() {
-    _subscriptions.add(
-      _channel.on(EventType.pollUpdated).listen((event) {
-        final eventPoll = event.poll;
-        if (eventPoll == null) return;
-
-        final pollMessage = _findPollMessage(eventPoll.id);
-        if (pollMessage == null) return;
-
-        final oldPoll = pollMessage.poll;
-
-        final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
-        final ownVotesAndAnswers = oldPoll?.ownVotesAndAnswers ?? eventPoll.ownVotesAndAnswers;
-
-        final poll = eventPoll.copyWith(
-          latestAnswers: latestAnswers,
-          ownVotesAndAnswers: ownVotesAndAnswers,
-        );
-
-        final message = pollMessage.copyWith(poll: poll);
-        updateMessage(message);
-      }),
-    );
-  }
-
-  void _listenPollClosed() {
-    _subscriptions.add(
-      _channel.on(EventType.pollClosed).listen((event) {
-        final eventPoll = event.poll;
-        if (eventPoll == null) return;
-
-        final pollMessage = _findPollMessage(eventPoll.id);
-        if (pollMessage == null) return;
-
-        final oldPoll = pollMessage.poll;
-        final poll = oldPoll?.copyWith(isClosed: true) ?? eventPoll;
-
-        final message = pollMessage.copyWith(poll: poll);
-        updateMessage(message);
-      }),
-    );
-  }
-
-  void _listenPollAnswerCasted() {
-    _subscriptions.add(
-      _channel.on(EventType.pollAnswerCasted).listen((event) {
-        final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
-        if (eventPoll == null || eventPollVote == null) return;
-
-        final pollMessage = _findPollMessage(eventPoll.id);
-        if (pollMessage == null) return;
-
-        final oldPoll = pollMessage.poll;
-
-        final latestAnswers = <String, PollVote>{
-          for (final ans in oldPoll?.latestAnswers ?? []) ans.id: ans,
-          eventPollVote.id!: eventPollVote,
-        };
-
-        final currentUserId = _client.state.currentUser?.id;
-        final ownVotesAndAnswers = <String, PollVote>{
-          for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
-          if (eventPollVote.userId == currentUserId) eventPollVote.id!: eventPollVote,
-        };
-
-        final poll = eventPoll.copyWith(
-          latestAnswers: [...latestAnswers.values],
-          ownVotesAndAnswers: [...ownVotesAndAnswers.values],
-        );
-
-        final message = pollMessage.copyWith(poll: poll);
-        updateMessage(message);
-      }),
-    );
-  }
-
-  void _listenPollVoteCasted() {
-    _subscriptions.add(
-      _channel.on(EventType.pollVoteCasted).listen((event) {
-        final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
-        if (eventPoll == null || eventPollVote == null) return;
-
-        final pollMessage = _findPollMessage(eventPoll.id);
-        if (pollMessage == null) return;
-
-        final oldPoll = pollMessage.poll;
-
-        final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
-        final currentUserId = _client.state.currentUser?.id;
-        final ownVotesAndAnswers = <String, PollVote>{
-          for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
-          if (eventPollVote.userId == currentUserId) eventPollVote.id!: eventPollVote,
-        };
-
-        final poll = eventPoll.copyWith(
-          latestAnswers: latestAnswers,
-          ownVotesAndAnswers: [...ownVotesAndAnswers.values],
-        );
-
-        final message = pollMessage.copyWith(poll: poll);
-        updateMessage(message);
-      }),
-    );
-  }
-
-  void _listenPollAnswerRemoved() {
-    _subscriptions.add(
-      _channel.on(EventType.pollAnswerRemoved).listen((event) {
-        final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
-        if (eventPoll == null || eventPollVote == null) return;
-
-        final pollMessage = _findPollMessage(eventPoll.id);
-        if (pollMessage == null) return;
-
-        final oldPoll = pollMessage.poll;
-
-        final latestAnswers = <String, PollVote>{
-          for (final ans in oldPoll?.latestAnswers ?? []) ans.id: ans,
-        }..remove(eventPollVote.id);
-
-        final ownVotesAndAnswers = <String, PollVote>{
-          for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
-        }..remove(eventPollVote.id);
-
-        final poll = eventPoll.copyWith(
-          latestAnswers: [...latestAnswers.values],
-          ownVotesAndAnswers: [...ownVotesAndAnswers.values],
-        );
-
-        final message = pollMessage.copyWith(poll: poll);
-        updateMessage(message);
-      }),
-    );
-  }
-
-  void _listenPollVoteRemoved() {
-    _subscriptions.add(
-      _channel.on(EventType.pollVoteRemoved).listen((event) {
-        final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
-        if (eventPoll == null || eventPollVote == null) return;
-
-        final pollMessage = _findPollMessage(eventPoll.id);
-        if (pollMessage == null) return;
-
-        final oldPoll = pollMessage.poll;
-
-        final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
-        final ownVotesAndAnswers = <String, PollVote>{
-          for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
-        }..remove(eventPollVote.id);
-
-        final poll = eventPoll.copyWith(
-          latestAnswers: latestAnswers,
-          ownVotesAndAnswers: [...ownVotesAndAnswers.values],
-        );
-
-        final message = pollMessage.copyWith(poll: poll);
-        updateMessage(message);
-      }),
-    );
-  }
-
-  void _listenPollVoteChanged() {
-    _subscriptions.add(
-      _channel.on(EventType.pollVoteChanged).listen((event) {
-        final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
-        if (eventPoll == null || eventPollVote == null) return;
-
-        final pollMessage = _findPollMessage(eventPoll.id);
-        if (pollMessage == null) return;
-
-        final oldPoll = pollMessage.poll;
-
-        final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
-        final currentUserId = _client.state.currentUser?.id;
-        final ownVotesAndAnswers = <String, PollVote>{
-          for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
-          if (eventPollVote.userId == currentUserId) eventPollVote.id!: eventPollVote,
-        };
-
-        final poll = eventPoll.copyWith(
-          latestAnswers: latestAnswers,
-          ownVotesAndAnswers: [...ownVotesAndAnswers.values],
-        );
-
-        final message = pollMessage.copyWith(poll: poll);
-        updateMessage(message);
-      }),
-    );
-  }
-
-  void _listenDraftUpdated() {
-    _subscriptions.add(
-      _channel.on(EventType.draftUpdated).listen((event) {
-        final draft = event.draft;
-        if (draft == null) return;
-
-        return updateDraft(draft);
-      }),
-    );
-  }
-
-  void _listenDraftDeleted() {
-    _subscriptions.add(
-      _channel.on(EventType.draftDeleted).listen((event) {
-        final draft = event.draft;
-        if (draft == null) return;
-
-        return deleteDraft(draft);
-      }),
-    );
-  }
-
-  void _listenReminderCreated() {
-    _subscriptions.add(
-      _channel.on(EventType.reminderCreated).listen((event) {
-        final reminder = event.reminder;
-        if (reminder == null) return;
-
-        updateReminder(reminder);
-      }),
-    );
-  }
-
-  void _listenReminderUpdated() {
-    _subscriptions.add(
-      _channel.on(EventType.reminderUpdated).listen((event) {
-        final reminder = event.reminder;
-        if (reminder == null) return;
-
-        updateReminder(reminder);
-      }),
-    );
-  }
-
-  void _listenReminderDeleted() {
-    _subscriptions.add(
-      _channel.on(EventType.reminderDeleted).listen((event) {
-        final reminder = event.reminder;
-        if (reminder == null) return;
-
-        deleteReminder(reminder);
-      }),
-    );
-  }
-
   /// Updates the [reminder] of the message if it exists.
   void updateReminder(MessageReminder reminder) {
     final messageId = reminder.messageId;
@@ -670,222 +149,10 @@ class ChannelClientState {
     }
   }
 
-  Message? _findLocationMessage(String id) {
-    final message = messages.firstWhereOrNull((it) {
-      return it.sharedLocation?.messageId == id;
-    });
-
-    if (message != null) return message;
-
-    final threadMessage = threads.values.flattened.firstWhereOrNull((it) {
-      return it.sharedLocation?.messageId == id;
-    });
-
-    return threadMessage;
-  }
-
-  void _listenLocationShared() {
-    _subscriptions.add(
-      _channel.on(EventType.locationShared).listen((event) {
-        final message = event.message;
-        if (message == null || message.sharedLocation == null) return;
-
-        return addNewMessage(message);
-      }),
-    );
-  }
-
-  void _listenLocationUpdated() {
-    _subscriptions.add(
-      _channel.on(EventType.locationUpdated).listen((event) {
-        final location = event.message?.sharedLocation;
-        if (location == null) return;
-
-        final messageId = location.messageId;
-        if (messageId == null) return;
-
-        final oldMessage = _findLocationMessage(messageId);
-        if (oldMessage == null) return;
-
-        final updatedMessage = oldMessage.copyWith(sharedLocation: location);
-        return updateMessage(updatedMessage);
-      }),
-    );
-  }
-
-  void _listenLocationExpired() {
-    _subscriptions.add(
-      _channel.on(EventType.locationExpired).listen((event) {
-        final location = event.message?.sharedLocation;
-        if (location == null) return;
-
-        final messageId = location.messageId;
-        if (messageId == null) return;
-
-        final oldMessage = _findLocationMessage(messageId);
-        if (oldMessage == null) return;
-
-        final updatedMessage = oldMessage.copyWith(sharedLocation: location);
-        return updateMessage(updatedMessage);
-      }),
-    );
-  }
-
-  void _listenReactionDeleted() {
-    _subscriptions.add(
-      _channel.on(EventType.reactionDeleted).listen((event) {
-        final (eventReaction, eventMessage) = (event.reaction, event.message);
-        if (eventReaction == null || eventMessage == null) return;
-
-        final messageId = eventMessage.id;
-        final parentId = eventMessage.parentId;
-
-        for (final message in [...messages, ...?threads[parentId]]) {
-          if (message.id == messageId) {
-            final currentUserId = _channel.client.state.currentUser?.id;
-
-            final currentMessage = switch (currentUserId) {
-              final userId? when userId == eventReaction.userId => message.deleteMyReaction(
-                reactionType: eventReaction.type,
-              ),
-              _ => message,
-            };
-
-            return updateMessage(
-              eventMessage.copyWith(
-                ownReactions: currentMessage.ownReactions,
-              ),
-            );
-          }
-        }
-      }),
-    );
-  }
-
-  void _listenReactionNew() {
-    _subscriptions.add(
-      _channel.on(EventType.reactionNew).listen((event) {
-        final (eventReaction, eventMessage) = (event.reaction, event.message);
-        if (eventReaction == null || eventMessage == null) return;
-
-        final messageId = eventMessage.id;
-        final parentId = eventMessage.parentId;
-
-        for (final message in [...messages, ...?threads[parentId]]) {
-          if (message.id == messageId) {
-            final currentUserId = _channel.client.state.currentUser?.id;
-
-            final currentMessage = switch (currentUserId) {
-              final userId? when userId == eventReaction.userId => message.addMyReaction(eventReaction),
-              _ => message,
-            };
-
-            return updateMessage(
-              eventMessage.copyWith(
-                ownReactions: currentMessage.ownReactions,
-              ),
-            );
-          }
-        }
-      }),
-    );
-  }
-
-  void _listenReactionUpdated() {
-    _subscriptions.add(
-      _channel.on(EventType.reactionUpdated).listen((event) {
-        final (eventReaction, eventMessage) = (event.reaction, event.message);
-        if (eventReaction == null || eventMessage == null) return;
-
-        final messageId = eventMessage.id;
-        final parentId = eventMessage.parentId;
-
-        for (final message in [...messages, ...?threads[parentId]]) {
-          if (message.id == messageId) {
-            final currentUserId = _channel.client.state.currentUser?.id;
-
-            final currentMessage = switch (currentUserId) {
-              final userId? when userId == eventReaction.userId =>
-                // reaction.updated is only called if enforce_unique is true
-                message.addMyReaction(eventReaction, enforceUnique: true),
-              _ => message,
-            };
-
-            return updateMessage(
-              eventMessage.copyWith(
-                ownReactions: currentMessage.ownReactions,
-              ),
-            );
-          }
-        }
-      }),
-    );
-  }
-
-  void _listenMessageUpdated() {
-    _subscriptions.add(
-      _channel.on(EventType.messageUpdated).listen((event) {
-        final message = event.message;
-        if (message == null) return;
-
-        return updateMessage(message, upsert: false);
-      }),
-    );
-  }
-
-  void _listenMessageDeleted() {
-    _subscriptions.add(
-      _channel.on(EventType.messageDeleted).listen((event) {
-        final hardDelete = event.hardDelete ?? false;
-
-        final message = event.message!.copyWith(
-          // TODO: Remove once deletedForMe is properly enriched on the backend.
-          deletedForMe: event.deletedForMe,
-        );
-
-        // Decrement the locally-tracked unread count for hard-deleted
-        // messages that would have counted as unread. Soft-deleted messages
-        // keep their slot. Only applies to channels that track unread counts
-        // locally (see [Channel.usesLocalUnreadCount]) — server-driven
-        // channels get corrected counts from server read events instead.
-        if (hardDelete && _channel.usesLocalUnreadCount && MessageRules.canCountAsUnread(message, _channel)) {
-          unreadCount = math.max(0, unreadCount - 1);
-        }
-
-        return deleteMessage(message, hardDelete: hardDelete);
-      }),
-    );
-  }
-
-  void _listenMessageNew() {
-    _subscriptions.add(
-      _channel
-          .on(
-            EventType.messageNew,
-            EventType.notificationMessageNew,
-          )
-          .listen((event) {
-            final message = event.message;
-            if (message == null) return;
-
-            addNewMessage(message);
-
-            // Only message.new carries a reliable watcher count;
-            // notification.message_new targets non-watchers and reports 0.
-            if (event.watcherCount case final watcherCount? when event.type == EventType.messageNew) {
-              updateChannelState(
-                channelState.copyWith(watcherCount: watcherCount),
-              );
-            }
-          }),
-    );
-  }
-
   /// Adds a new message to the channel state and updates the unread count.
   void addNewMessage(Message message) {
-    final isThreadMessage = message.parentId != null;
-    final isNotShownInChannel = message.showInChannel != true;
-    final isThreadOnlyMessage = isThreadMessage && isNotShownInChannel;
+    // A message not shown in the channel is necessarily a thread-only reply.
+    final isThreadOnlyMessage = !message.isShownInChannel;
 
     // Only add the message if the channel is upToDate or if the message is
     // a thread-only message.
@@ -975,16 +242,7 @@ class ChannelClientState {
   /// state — [message] is used as-is. Useful for local rollbacks of an
   /// optimistic update, where the caller has the full prior snapshot and
   /// doesn't want the merge falling back to the optimistic values.
-  void replaceMessage(Message message) => _updateMessages([message], update: _replaceUpdate);
-
-  // Default `update` for [_updateMessages]: merge incoming with the
-  // locally-known message via `Message.updateWith`, preserving enrichment
-  // the server may strip on partial payloads.
-  static Message _mergeUpdate(Message original, Message updated) => original.updateWith(updated);
-
-  // Replace `update` for [_updateMessages]: take the incoming as-is. Used
-  // by local rollback paths.
-  static Message _replaceUpdate(Message _, Message updated) => updated;
+  void replaceMessage(Message message) => _updateMessages([message], update: MessageMerging.replaceUpdate);
 
   /// Cleans up all the stale error messages which requires no action.
   void cleanUpStaleErrorMessages() {
@@ -1002,94 +260,6 @@ class ChannelClientState {
   /// Removes/Updates the [message] based on the [hardDelete] value.
   void deleteMessage(Message message, {bool hardDelete = false}) {
     return _deleteMessages([message], hardDelete: hardDelete);
-  }
-
-  void _listenReadEvents() {
-    _subscriptions
-      ..add(
-        _channel.on(EventType.messageRead, EventType.notificationMarkRead).listen(
-          (event) {
-            // Skip handling the event if delivered for a thread
-            if (event.thread != null) return;
-
-            final user = event.user;
-            if (user == null) return;
-
-            final currentRead = userReadOf(userId: user.id);
-
-            final updatedRead = Read(
-              user: user,
-              lastRead: event.createdAt,
-              unreadMessages: 0, // Reset unread count
-              lastReadMessageId: event.lastReadMessageId,
-              // Preserve delivery info as it's not part of the read event.
-              lastDeliveredAt: currentRead?.lastDeliveredAt,
-              lastDeliveredMessageId: currentRead?.lastDeliveredMessageId,
-            );
-
-            updateRead([updatedRead]);
-
-            // If the read event is from the current user, reconcile the
-            // channel delivery status with the updated read state.
-            final currentUser = _client.state.currentUser;
-            if (event.isFromUser(userId: currentUser?.id)) {
-              _client.channelDeliveryReporter.reconcileDelivery([_channel]);
-            }
-          },
-        ),
-      )
-      ..add(
-        _channel.on(EventType.notificationMarkUnread).listen(
-          (event) {
-            final user = event.user;
-            if (user == null) return;
-
-            final currentRead = userReadOf(userId: user.id);
-
-            final updatedRead = Read(
-              user: user,
-              lastRead: event.lastReadAt!,
-              unreadMessages: event.unreadMessages,
-              lastReadMessageId: event.lastReadMessageId,
-              // Preserve delivery info as it's not part of the read event.
-              lastDeliveredAt: currentRead?.lastDeliveredAt,
-              lastDeliveredMessageId: currentRead?.lastDeliveredMessageId,
-            );
-
-            return updateRead([updatedRead]);
-          },
-        ),
-      )
-      ..add(
-        _channel.on(EventType.messageDelivered).listen(
-          (event) {
-            final user = event.user;
-            if (user == null) return;
-
-            final currentRead = userReadOf(userId: user.id);
-            final never = DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
-
-            final updatedRead = Read(
-              user: user,
-              lastDeliveredAt: event.lastDeliveredAt,
-              lastDeliveredMessageId: event.lastDeliveredMessageId,
-              // Preserve read info as it's not part of the delivery event.
-              lastRead: currentRead?.lastRead ?? never,
-              unreadMessages: currentRead?.unreadMessages,
-              lastReadMessageId: currentRead?.lastReadMessageId,
-            );
-
-            updateRead([updatedRead]);
-
-            // If the delivered event is from the current user, reconcile
-            // the channel delivery with the updated read state.
-            final currentUser = _client.state.currentUser;
-            if (event.isFromUser(userId: currentUser?.id)) {
-              _client.channelDeliveryReporter.reconcileDelivery([_channel]);
-            }
-          },
-        ),
-      );
   }
 
   /// Channel message list.
@@ -1347,8 +517,8 @@ class ChannelClientState {
     final newMessages = messages.mergeSorted(
       updatedState.messages,
       key: (message) => message.id,
-      update: _mergeUpdate,
-      compare: _sortByCreatedAt,
+      update: MessageMerging.mergeUpdate,
+      compare: MessageMerging.sortByCreatedAt,
     );
 
     final watchers = _channelState.watchers ?? const <User>[];
@@ -1420,8 +590,6 @@ class ChannelClientState {
     return remoteState.copyWith(read: preservedReads.toList());
   }
 
-  int _sortByCreatedAt(Message a, Message b) => a.createdAt.compareTo(b.createdAt);
-
   /// The channel state related to this client.
   ChannelState get _channelState => _channelStateController.value;
 
@@ -1482,7 +650,7 @@ class ChannelClientState {
     final updatedThreads = {...threads};
 
     final threadMessages = updatedThreads[parentId] ?? <Message>[];
-    final updatedThreadMessages = _mergeMessagesIntoExisting(
+    final updatedThreadMessages = MessageMerging.mergeMessages(
       existing: threadMessages,
       toMerge: messages.where((it) => it.id != parentId),
     );
@@ -1514,36 +682,14 @@ class ChannelClientState {
   Map<User, Event> get typingEvents => _typingEventsController.value;
   final _typingEventsController = BehaviorSubject.seeded(<User, Event>{});
 
-  void _listenTypingEvents() {
-    _subscriptions
-      ..add(
-        _channel.on(EventType.typingStart).listen(
-          (event) {
-            final user = event.user;
-            if (user == null) return;
+  // Adds or replaces the typing event for the given user.
+  void _upsertTypingEvent(User user, Event event) {
+    _typingEventsController.safeAdd({...typingEvents, user: event});
+  }
 
-            final currentUser = _client.state.currentUser;
-            if (event.isFromUser(userId: currentUser?.id)) return;
-
-            final events = {...typingEvents, user: event};
-            _typingEventsController.safeAdd(events);
-          },
-        ),
-      )
-      ..add(
-        _channel.on(EventType.typingStop).listen(
-          (event) {
-            final user = event.user;
-            if (user == null) return;
-
-            final currentUser = _client.state.currentUser;
-            if (event.isFromUser(userId: currentUser?.id)) return;
-
-            final events = {...typingEvents}..remove(user);
-            _typingEventsController.safeAdd(events);
-          },
-        ),
-      );
+  // Removes the typing event for the given user, if any.
+  void _removeTypingEvent(User user) {
+    _typingEventsController.safeAdd({...typingEvents}..remove(user));
   }
 
   Timer? _staleTypingEventsCleanerTimer;
@@ -1593,7 +739,7 @@ class ChannelClientState {
 
           updateChannelState(
             _channelState.copyWith(
-              pinnedMessages: pinnedMessages.where(_pinIsValid).toList(),
+              pinnedMessages: pinnedMessages.where((it) => it.hasValidPin).toList(),
               messages: expiredMessages,
             ),
           );
@@ -1636,24 +782,8 @@ class ChannelClientState {
     _channel.client.handleEvent(locationExpiredEvent);
   }
 
-  // Listens to channel push preference update events and updates the state
-  void _listenChannelPushPreferenceUpdated() {
-    _subscriptions.add(
-      _channel.on(EventType.channelPushPreferenceUpdated).listen(
-        (event) {
-          final pushPreferences = event.channelPushPreference;
-          if (pushPreferences == null) return;
-
-          updateChannelState(
-            channelState.copyWith(
-              pushPreferences: pushPreferences,
-            ),
-          );
-        },
-      ),
-    );
-  }
-
+  // Deletes all messages from the user identified by the given id, both from
+  // the persistence layer and the channel state.
   Future<void> _deleteMessagesFromUser({
     required String userId,
     bool hardDelete = false,
@@ -1702,7 +832,7 @@ class ChannelClientState {
 
   void _updateMessages(
     Iterable<Message> messages, {
-    Message Function(Message original, Message updated) update = _mergeUpdate,
+    Message Function(Message original, Message updated) update = MessageMerging.mergeUpdate,
     bool upsert = true,
   }) {
     if (messages.isEmpty) return;
@@ -1715,43 +845,21 @@ class ChannelClientState {
 
   void _updateThreadMessages(
     Iterable<Message> messages, {
-    Message Function(Message original, Message updated) update = _mergeUpdate,
+    Message Function(Message original, Message updated) update = MessageMerging.mergeUpdate,
     bool upsert = true,
   }) {
     if (messages.isEmpty) return;
 
-    // Group messages by parentId so each thread merge only sees its own
-    // replies — passing the full batch to every thread would leak replies
-    // across thread boundaries (the merge dedups by id, not by parentId).
-    final messagesByThread = <String, List<Message>>{};
-    for (final m in messages) {
-      if (m.parentId case final parentId?) (messagesByThread[parentId] ??= []).add(m);
-    }
+    final currentThreads = threads;
+    final updatedThreads = MessageMerging.mergeThreadMessages(
+      existing: currentThreads,
+      toMerge: messages,
+      update: update,
+      upsert: upsert,
+    );
 
-    // If there are no affected threads, return early.
-    if (messagesByThread.isEmpty) return;
-
-    final updatedThreads = {...threads};
-    for (final MapEntry(key: thread, :value) in messagesByThread.entries) {
-      final existingThreadMessages = updatedThreads[thread];
-
-      // Don't create a phantom entry for a thread that wasn't loaded: with
-      // `upsert: false` an out-of-window reply is dropped, so there's nothing
-      // to merge. Writing it back would make `threads.containsKey(parentId)`
-      // report a thread that was never paged in.
-      if (existingThreadMessages == null && !upsert) continue;
-
-      final threadMessages = existingThreadMessages ?? <Message>[];
-      final updatedThreadMessages = _mergeMessagesIntoExisting(
-        existing: threadMessages,
-        toMerge: value,
-        update: update,
-        upsert: upsert,
-      );
-
-      // Update the thread with the modified message list.
-      updatedThreads[thread] = updatedThreadMessages.toList();
-    }
+    // Nothing targeted a thread — skip the write.
+    if (identical(updatedThreads, currentThreads)) return;
 
     // Update the threads map.
     _threads = updatedThreads;
@@ -1759,25 +867,19 @@ class ChannelClientState {
 
   void _updateChannelMessages(
     Iterable<Message> messages, {
-    Message Function(Message original, Message updated) update = _mergeUpdate,
+    Message Function(Message original, Message updated) update = MessageMerging.mergeUpdate,
     bool upsert = true,
   }) {
     if (messages.isEmpty) return;
 
-    final affectedMessages = messages.map((it) {
-      // If it's not a thread message, consider it affected.
-      if (it.parentId == null) return it;
-      // If it's a thread message shown in channel, consider it affected.
-      if (it.showInChannel == true) return it;
-
-      return null; // Thread message not shown in channel, ignore it.
-    }).nonNulls;
+    // Only messages shown in the channel are affected.
+    final affectedMessages = messages.where((it) => it.isShownInChannel);
 
     // If there are no affected messages, return early.
     if (affectedMessages.isEmpty) return;
 
     final channelMessages = [...this.messages];
-    final updatedChannelMessages = _mergeMessagesIntoExisting(
+    final updatedChannelMessages = MessageMerging.mergeMessages(
       existing: channelMessages,
       toMerge: affectedMessages,
       update: update,
@@ -1800,7 +902,7 @@ class ChannelClientState {
 
   void _updatePinnedMessages(
     Iterable<Message> messages, {
-    Message Function(Message original, Message updated) update = _mergeUpdate,
+    Message Function(Message original, Message updated) update = MessageMerging.mergeUpdate,
   }) {
     if (messages.isEmpty) return;
 
@@ -1809,7 +911,7 @@ class ChannelClientState {
     // land right back on an empty `pinnedMessages` list.
     if (pinnedMessages.isEmpty && messages.every((m) => !m.pinned)) return;
 
-    final updatedPinnedMessages = _mergePinnedMessagesIntoExisting(
+    final updatedPinnedMessages = MessageMerging.mergePinnedMessages(
       existing: pinnedMessages,
       toMerge: messages,
       update: update,
@@ -1824,133 +926,13 @@ class ChannelClientState {
     if (messages.isEmpty) return;
 
     final activeLiveLocations = [...this.activeLiveLocations];
-    final updatedActiveLiveLocations = _mergeActiveLocationsIntoExisting(
+    final updatedActiveLiveLocations = MessageMerging.mergeActiveLocations(
       existing: activeLiveLocations,
       toMerge: messages,
     );
 
     _channelState = _channelState.copyWith(
       activeLiveLocations: updatedActiveLiveLocations.toList(),
-    );
-  }
-
-  Iterable<Location> _mergeActiveLocationsIntoExisting({
-    required Iterable<Location> existing,
-    required Iterable<Message> toMerge,
-  }) {
-    if (toMerge.isEmpty) return existing;
-
-    final mergedLocations = existing.mergeFrom(
-      toMerge,
-      key: (it) => (it.userId, it.channelCid, it.createdByDeviceId),
-      value: (message) => message.sharedLocation,
-      update: (original, updated) => updated,
-    );
-
-    final toUpdateMap = {for (final m in toMerge) m.id: m};
-    final updatedLocations = mergedLocations.where((it) {
-      // Remove the location if it's expired.
-      if (it.isExpired) return false;
-
-      final updatedMessage = toUpdateMap[it.messageId];
-      // Remove the location if the attached message is deleted.
-      if (updatedMessage?.isDeleted == true) return false;
-
-      return true;
-    });
-
-    return updatedLocations;
-  }
-
-  Iterable<Message> _mergePinnedMessagesIntoExisting({
-    required Iterable<Message> existing,
-    required Iterable<Message> toMerge,
-    Message Function(Message original, Message updated) update = _mergeUpdate,
-  }) {
-    return _mergeMessagesIntoExisting(
-      existing: existing,
-      toMerge: toMerge,
-      update: update,
-    ).where(_pinIsValid);
-  }
-
-  Iterable<Message> _mergeMessagesIntoExisting({
-    required Iterable<Message> existing,
-    required Iterable<Message> toMerge,
-    Message Function(Message original, Message updated) update = _mergeUpdate,
-    bool upsert = true,
-  }) {
-    if (toMerge.isEmpty) return existing;
-
-    // [update] decides whether each pair is reconciled (default — see
-    // `_mergeUpdate`) or replaced (`_replaceUpdate`, used by local rollback
-    // paths that don't want enrichment fallback to keep optimistic values).
-    //
-    // [upsert] controls whether ids not already in [existing] are inserted.
-    // Event-driven paths (`message.updated`, `message.deleted` soft) pass
-    // `upsert: false` so an out-of-window message isn't dropped into a gap
-    // between the loaded slice and history the client hasn't paged in yet.
-    final existingList = existing is List<Message> ? existing : existing.toList();
-    var toMergeList = toMerge is List<Message> ? toMerge : toMerge.toList();
-
-    // Single-message fast path. The hot ingest path (server echoes, edits,
-    // reactions, read receipts) always lands here, and `lastIndexWhere` +
-    // `sortedUpsertAt` skips the O(N) keymap build that the two-pointer
-    // merge would otherwise do up front.
-    if (toMergeList.length == 1) {
-      final message = toMergeList.first;
-      final oldIndex = existingList.lastIndexWhere((it) => it.id == message.id);
-
-      // upsert: false — skip update if message is not loaded
-      if (oldIndex == -1 && !upsert) return existingList;
-
-      final resolved = oldIndex == -1 ? message : update(existingList[oldIndex], message);
-
-      final mergedMessages = existingList.sortedUpsertAt(
-        oldIndex,
-        resolved,
-        update: update,
-        compare: _sortByCreatedAt,
-      );
-
-      // Non-delete updates can't change what embedded quotedMessage copies
-      // should display, so we can skip the rewrite entirely.
-      if (!resolved.isDeleted) return mergedMessages;
-
-      return mergedMessages.updateIf(
-        (it) => it.quotedMessageId == resolved.id,
-        (it) => it.copyWith(quotedMessage: resolved),
-      );
-    }
-
-    // upsert: false - skip messages not loaded in the window
-    if (!upsert) {
-      final existingIds = {for (final m in existingList) m.id};
-      toMergeList = toMergeList.where((m) => existingIds.contains(m.id)).toList();
-      if (toMergeList.isEmpty) return existingList;
-    }
-
-    // Batch path: receiver (`existingList`) is maintained sorted as a
-    // state invariant; `mergeSorted` sorts `toMergeList` internally and
-    // returns a sorted result.
-    final mergedMessages = existingList.mergeSorted(
-      toMergeList,
-      key: (message) => message.id,
-      update: update,
-      compare: _sortByCreatedAt,
-    );
-
-    // Refresh embedded `quotedMessage` refs only for messages quoting an
-    // incoming message that is now deleted. `updateIf` returns the same
-    // list reference when nothing matches, so steady-state allocates
-    // nothing for this step.
-    final deletedIds = toMergeList.where((m) => m.isDeleted).map((m) => m.id).toSet();
-    if (deletedIds.isEmpty) return mergedMessages;
-
-    final mergedById = {for (final m in mergedMessages) m.id: m};
-    return mergedMessages.updateIf(
-      (it) => deletedIds.contains(it.quotedMessageId),
-      (it) => it.copyWith(quotedMessage: mergedById[it.quotedMessageId]),
     );
   }
 
@@ -1972,32 +954,14 @@ class ChannelClientState {
   void _removeThreadMessages(Iterable<Message> messages) {
     if (messages.isEmpty) return;
 
-    final affectedThreads = {...messages.map((it) => it.parentId).nonNulls};
-    // If there are no affected threads, return early.
-    if (affectedThreads.isEmpty) return;
+    final currentThreads = threads;
+    final updatedThreads = MessageMerging.removeThreadMessages(
+      existing: currentThreads,
+      toRemove: messages,
+    );
 
-    final updatedThreads = {...threads};
-    for (final thread in affectedThreads) {
-      final threadMessages = updatedThreads[thread];
-      // Continue if the thread doesn't exist.
-      if (threadMessages == null) continue;
-
-      // Remove the deleted message from the thread messages and reference from
-      // other messages quoting it.
-      final updatedThreadMessages = _removeMessagesFromExisting(
-        existing: threadMessages,
-        toRemove: messages,
-      );
-
-      // If there are no more messages in the thread, remove the thread entry.
-      if (updatedThreadMessages.isEmpty) {
-        updatedThreads.remove(thread);
-        continue;
-      }
-
-      // Otherwise, update the thread with the modified message list.
-      updatedThreads[thread] = updatedThreadMessages.toList();
-    }
+    // Nothing targeted a thread — skip the write.
+    if (identical(updatedThreads, currentThreads)) return;
 
     // Update the threads map.
     _threads = updatedThreads;
@@ -2006,20 +970,14 @@ class ChannelClientState {
   void _removeChannelMessages(Iterable<Message> messages) {
     if (messages.isEmpty) return;
 
-    final affectedMessages = messages.map((it) {
-      // If it's not a thread message, consider it affected.
-      if (it.parentId == null) return it;
-      // If it's a thread message shown in channel, consider it affected.
-      if (it.showInChannel == true) return it;
-
-      return null; // Thread message not shown in channel, ignore it.
-    }).nonNulls;
+    // Only messages shown in the channel are affected.
+    final affectedMessages = messages.where((it) => it.isShownInChannel);
 
     // If there are no affected messages, return early.
     if (affectedMessages.isEmpty) return;
 
     final channelMessages = [...this.messages];
-    final updatedChannelMessages = _removeMessagesFromExisting(
+    final updatedChannelMessages = MessageMerging.removeMessages(
       existing: channelMessages,
       toRemove: affectedMessages,
     );
@@ -2033,7 +991,7 @@ class ChannelClientState {
     if (messages.isEmpty) return;
 
     final pinnedMessages = [...this.pinnedMessages];
-    final updatedPinnedMessages = _removePinnedMessagesFromExisting(
+    final updatedPinnedMessages = MessageMerging.removePinnedMessages(
       existing: pinnedMessages,
       toRemove: messages,
     );
@@ -2047,78 +1005,13 @@ class ChannelClientState {
     if (messages.isEmpty) return;
 
     final activeLiveLocations = [...this.activeLiveLocations];
-    final updatedActiveLiveLocations = _removeActiveLocationsFromExisting(
+    final updatedActiveLiveLocations = MessageMerging.removeActiveLocations(
       existing: activeLiveLocations,
       toRemove: messages,
     );
 
     _channelState = _channelState.copyWith(
       activeLiveLocations: updatedActiveLiveLocations.toList(),
-    );
-  }
-
-  Iterable<Location> _removeActiveLocationsFromExisting({
-    required Iterable<Location> existing,
-    required Iterable<Message> toRemove,
-  }) {
-    if (toRemove.isEmpty) return existing;
-
-    final toRemoveIds = toRemove.map((m) => m.id).toSet();
-    final updatedLocations = existing.where(
-      // Remove the location if its attached message is in the toRemove list.
-      (it) => !toRemoveIds.contains(it.messageId),
-    );
-
-    return updatedLocations;
-  }
-
-  Iterable<Message> _removePinnedMessagesFromExisting({
-    required Iterable<Message> existing,
-    required Iterable<Message> toRemove,
-  }) {
-    return _removeMessagesFromExisting(
-      existing: existing,
-      toRemove: toRemove,
-    ).where(_pinIsValid);
-  }
-
-  Iterable<Message> _removeMessagesFromExisting({
-    required Iterable<Message> existing,
-    required Iterable<Message> toRemove,
-  }) {
-    if (toRemove.isEmpty) return existing;
-
-    final toRemoveIds = toRemove.map((m) => m.id).toSet();
-    final updatedMessages = existing
-        .where((it) {
-          // Remove the message if it's in the toRemove list.
-          return !toRemoveIds.contains(it.id);
-        })
-        .map((it) {
-          // Continue if the message doesn't quote any of the deleted messages.
-          if (!toRemoveIds.contains(it.quotedMessageId)) return it;
-
-          // Setting it to null will remove the quoted message from the message.
-          return it.copyWith(quotedMessageId: null, quotedMessage: null);
-        });
-
-    return updatedMessages;
-  }
-
-  // Listens to user message deleted events and marks messages from that user
-  // as either soft or hard deleted based on the event data.
-  void _listenUserMessagesDeleted() {
-    _subscriptions.add(
-      _channel.on(EventType.userMessagesDeleted).listen((event) async {
-        final user = event.user;
-        if (user == null) return;
-
-        return _deleteMessagesFromUser(
-          userId: user.id,
-          hardDelete: event.hardDelete ?? false,
-          deletedAt: event.createdAt,
-        );
-      }),
     );
   }
 
@@ -2136,19 +1029,4 @@ class ChannelClientState {
     _locationExpirationScheduler.cancel();
     _typingEventsController.close();
   }
-}
-
-bool _pinIsValid(Message message) {
-  // If the message is deleted, the pin is not valid.
-  if (message.isDeleted) return false;
-
-  // If the message is not pinned, it's not valid.
-  if (message.pinned != true) return false;
-
-  // If there's no expiration, the pin is valid.
-  final pinExpires = message.pinExpires;
-  if (pinExpires == null) return true;
-
-  // If there's an expiration, check if it's still valid.
-  return pinExpires.isAfter(DateTime.now());
 }
