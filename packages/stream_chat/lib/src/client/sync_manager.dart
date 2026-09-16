@@ -30,10 +30,8 @@ class SyncManager {
 
   // The endpoint rejects more than 255, counted before duplicates collapse.
   //
-  // Capped rather than left to the refusal, because this is the one refusal
-  // that does not clear itself: a window refused for its age or for the events
-  // it holds is not refused again once the checkpoint has moved past it, while
-  // one refused for its size is asked for again with the same channels — and
+  // Capped rather than left to the refusal: unlike one refused for its age or
+  // its events, a window refused for its size is refused again next time, and
   // every refusal drops the store.
   //
   // Channels past the cap are left to [recoverState]; a direct [sync] leaves
@@ -147,8 +145,8 @@ class SyncManager {
     // A failed replay reports no refreshed channels rather than throwing, so the
     // refresh below still runs — it needs the network, not the local store.
     // Guarded so the contract above holds: `persistenceEnabled` reads a
-    // user-supplied persistence client, which can throw. A throw here would
-    // stop the caller announcing recovery.
+    // user-supplied persistence client, and a throw would stop the caller
+    // announcing recovery.
     try {
       var refreshed = const <String>{};
       if (client.persistenceEnabled) refreshed = await sync(cids: cids);
@@ -249,9 +247,9 @@ class SyncManager {
       return _discardOversizedWindow(cappedCids, from: lastSyncAt, to: nextSyncAt);
     }
 
-    // Resolving an event and applying it to client state can throw. lastSyncAt
-    // stays where it is when one does: the window was only partly applied, and
-    // the next catch-up should ask for it again.
+    // Resolving an event or applying it to client state can throw. lastSyncAt
+    // stays put when one does: the window was only partly applied, and the next
+    // catch-up should ask for it again.
     try {
       for (final event in events) {
         logger?.fine('Syncing event: ${event.type}');

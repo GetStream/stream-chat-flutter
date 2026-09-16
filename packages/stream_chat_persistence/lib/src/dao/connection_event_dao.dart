@@ -17,7 +17,7 @@ class ConnectionEventDao extends DatabaseAccessor<DriftChatDatabase> with _$Conn
   Future<Event?> get connectionEvent => select(connectionEvents)
       .map((eventEntity) => eventEntity.toEvent())
       .getSingleOrNull()
-      // A row that only carries a checkpoint is not a connection event.
+      // A row carrying only a checkpoint is not a connection event.
       .then((event) => event?.type == EventType.any ? null : event);
 
   /// Get the latest stored lastSyncAt
@@ -41,8 +41,7 @@ class ConnectionEventDao extends DatabaseAccessor<DriftChatDatabase> with _$Conn
 
   /// Update stored lastSyncAt with latest data
   ///
-  /// Inserts the row when there is none, so a checkpoint written after the
-  /// database was reset is kept rather than silently matching no rows.
+  /// Inserts the row if the database was reset, so the checkpoint is not lost.
   Future<int> updateLastSyncAt(DateTime lastSyncAt) => transaction(() async {
     final connectionInfo = await select(connectionEvents).getSingleOrNull();
     return into(connectionEvents).insertOnConflictUpdate(
