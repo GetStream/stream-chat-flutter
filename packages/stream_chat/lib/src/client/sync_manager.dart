@@ -20,12 +20,14 @@ typedef FetchMissedEvents = Future<SyncResponse> Function(List<String> cids, Dat
 /// directly.
 class SyncManager {
   /// Instantiate a new SyncManager object.
+  ///
+  /// Reports under [tag], so one prefix selects every record a catch-up wrote.
   SyncManager({
     required this.client,
     required this.fetchMissedEvents,
-    this.logger,
+    String tag = 'SCh:Sync',
     @visibleForTesting this.maxReplayEvents = _defaultMaxReplayEvents,
-  });
+  }) : _logger = StreamLogger(tag);
 
   // The endpoint rejects more than 255, counted before duplicates collapse.
   //
@@ -52,12 +54,11 @@ class SyncManager {
   /// expose the endpoint itself.
   final FetchMissedEvents fetchMissedEvents;
 
-  /// The logger associated to this manager.
-  final StreamLogger? logger;
-
   /// How many events may be replayed from one window before it is given up on
   /// and its channels refreshed instead.
   final int maxReplayEvents;
+
+  final StreamLogger _logger;
 
   // Only one catch-up runs at a time.
   final _syncLock = Lock();
@@ -73,7 +74,7 @@ class SyncManager {
     try {
       await _store?.updateLastSyncAt(to);
     } catch (error, stk) {
-      logger?.w(() => 'Failed to record lastSyncAt as $to', error: error, stackTrace: stk);
+      _logger.w(() => 'Failed to record lastSyncAt as $to', error: error, stackTrace: stk);
     }
   }
 
@@ -89,7 +90,7 @@ class SyncManager {
       await _store?.flush();
       return true;
     } catch (error, stk) {
-      logger?.w(() => 'Failed to reset the persistence client', error: error, stackTrace: stk);
+      _logger.w(() => 'Failed to reset the persistence client', error: error, stackTrace: stk);
       return false;
     }
   }
@@ -115,7 +116,7 @@ class SyncManager {
       } catch (error, stk) {
         // Not treated as "never synced": seeding lastSyncAt off an unreadable
         // store would discard a history that is still there.
-        logger?.w(() => 'Could not read where the last catch-up left off', error: error, stackTrace: stk);
+        _logger.w(() => 'Could not read where the last catch-up left off', error: error, stackTrace: stk);
         return const <String>{};
       }
 
@@ -123,7 +124,7 @@ class SyncManager {
 
       if (syncAt == null) {
         final now = clock.now();
-        logger?.i(() => 'Fresh sync start: lastSyncAt initialized to $now.');
+        _logger.i(() => 'Fresh sync start: lastSyncAt initialized to $now.');
         await _recordLastSyncAt(now);
         return const <String>{};
       }
@@ -155,7 +156,7 @@ class SyncManager {
         if (stale.isNotEmpty) await _refreshPages(stale);
       }
     } catch (error, stk) {
-      logger?.w(() => 'Error recovering state on reconnect', error: error, stackTrace: stk);
+      _logger.w(() => 'Error recovering state on reconnect', error: error, stackTrace: stk);
     }
   }
 
@@ -203,7 +204,7 @@ class SyncManager {
 
         refreshed.addAll(channels.map((it) => it.cid).nonNulls);
       } catch (error, stk) {
-        logger?.w(() => 'Failed to refresh ${page.length} channels', error: error, stackTrace: stk);
+        _logger.w(() => 'Failed to refresh ${page.length} channels', error: error, stackTrace: stk);
         failure ??= (error, stk);
       }
     }
@@ -218,7 +219,7 @@ class SyncManager {
     // Deduplicated before capping: the endpoint counts duplicates against its
     // own limit, so leaving them in would spend slots on nothing.
     final cappedCids = cids.toSet().take(_maxSyncCids).toList();
-    logger?.i(() => 'Syncing events since $lastSyncAt for channels: $cappedCids');
+    _logger.i(() => 'Syncing events since $lastSyncAt for channels: $cappedCids');
 
     final List<Event> events;
     try {
@@ -231,18 +232,18 @@ class SyncManager {
       // the signal that local state is too far behind to reconcile — so the
       // store is dropped and repopulated rather than reconciled.
       if (error is StreamApiException && error.statusCode == 400) {
-        logger?.w(() => 'Resetting local state after a refused window', error: error, stackTrace: stk);
+        _logger.w(() => 'Resetting local state after a refused window', error: error, stackTrace: stk);
         return _discardRefusedWindow(cappedCids, to: clock.now());
       }
 
       // Anything else could succeed next time, so lastSyncAt stays put.
-      logger?.w(() => 'Error syncing events', error: error, stackTrace: stk);
+      _logger.w(() => 'Error syncing events', error: error, stackTrace: stk);
       return const <String>{};
     }
 
     final nextSyncAt = events.lastOrNull?.createdAt ?? clock.now();
     if (events.length > maxReplayEvents) {
-      logger?.w(() => 'Skipping replay of ${events.length} events, over the $maxReplayEvents limit.');
+      _logger.w(() => 'Skipping replay of ${events.length} events, over the $maxReplayEvents limit.');
       return _discardOversizedWindow(cappedCids, from: lastSyncAt, to: nextSyncAt);
     }
 
@@ -251,11 +252,11 @@ class SyncManager {
     // catch-up should ask for it again.
     try {
       for (final event in events) {
-        logger?.d(() => 'Syncing event: ${event.type}');
+        _logger.d(() => 'Syncing event: ${event.type}');
         client.handleEvent(event);
       }
     } catch (error, stk) {
-      logger?.w(() => 'Stopped replaying the missed events, keeping lastSyncAt', error: error, stackTrace: stk);
+      _logger.w(() => 'Stopped replaying the missed events, keeping lastSyncAt', error: error, stackTrace: stk);
       return const <String>{};
     }
 
@@ -277,7 +278,7 @@ class SyncManager {
     // Refreshed channels are reported even on failure, so the caller does not
     // query them again.
     if (!flushed || failure != null) {
-      logger?.w(
+      _logger.w(
         () =>
             '''
 Putting lastSyncAt back: store dropped: $flushed,

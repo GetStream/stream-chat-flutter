@@ -560,7 +560,6 @@ class StreamChatClient {
 
   late final _syncManager = SyncManager(
     client: this,
-    logger: logger,
     fetchMissedEvents: _chatApi.general.sync,
   );
 
