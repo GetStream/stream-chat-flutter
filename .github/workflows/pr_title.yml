@@ -10,7 +10,8 @@ on:
       - v9
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # Use PR number — github.ref is the base branch under pull_request_target.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
