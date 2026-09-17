@@ -41,7 +41,7 @@
 - A sort names its model's field type, so `MemberSort.asc` takes a `MemberSortField` and a field from another model does not compile. `XSortField.custom(key)` reads a field from the model's extra data, for the four models whose queries accept one.
 - Added `ChannelSort.empty`, `MemberSort.empty` and one on every other sort — an empty sort, for querying with the ordering the API applies on its own.
 - Default sorts moved onto the sort that owns them: `ChannelSort.defaultSort`, `MemberSort.defaultSort` and so on, reachable now without the Flutter layer.
-- `client.wsConnectionStatus` and `wsConnectionStatusStream` become `connectionStatus` and `connectionStatusStream`. `ConnectionStatus` keeps its three values, now derived from the WebSocket's own state, so a client that has never connected still reads as `disconnected`.
+- `client.wsConnectionStatus` and `wsConnectionStatusStream` become `connectionStatus` and `connectionStatusStream`. `ConnectionStatus` keeps its three values, and a client that has never connected still reads as `disconnected`.
 - The WebSocket's state — `Connected`, `Connecting`, `Authenticating`, `Disconnected` and the disconnection sources — is no longer exported, and the client no longer reports it. `ConnectionStatus` is the whole connection API, as on the other Stream SDKs.
 - `StreamHttpClient` and `StreamChatApi` take a `ConnectionIdGetter? connectionId` where they took a `ConnectionIdManager?`. The manager only wrapped such a closure, and is removed.
 

@@ -1,10 +1,10 @@
 import 'package:meta/meta.dart';
 import 'package:stream_core/stream_core.dart';
 
-/// The connection, at the level a caller acts on.
+/// The connection a client works over.
 ///
-/// The three states this package reports. The WebSocket's own state says more — which step an
-/// attempt is on, and why one closed — and stays inside the SDK.
+/// Reported as one of three states, whichever step the connection is actually on: an attempt that
+/// is still authenticating reads as [connecting], and one that closed reads as [disconnected].
 enum ConnectionStatus {
   /// The connection is open and events are arriving.
   connected,
