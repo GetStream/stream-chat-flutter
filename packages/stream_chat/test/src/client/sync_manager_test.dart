@@ -3,7 +3,7 @@ import 'package:stream_chat/src/client/sync_manager.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_test/stream_chat_test.dart';
 
-import '../mocks.dart';
+import '../mocks.dart' show MockClientState, MockStreamChatClient;
 
 // Records what `/sync` was asked for, and answers with events or an error.
 // Callable, so it can be passed straight in as a [FetchMissedEvents].
