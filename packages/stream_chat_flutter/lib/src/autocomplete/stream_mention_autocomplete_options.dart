@@ -221,12 +221,8 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
 
   Future<List<Role>> _fetchRoles(String query) async {
     if (query.isEmpty || !widget.channel.canNotifyRole) return const [];
-    try {
-      final response = await widget.channel.client.searchRoles(query);
-      return response.roles;
-    } catch (_) {
-      return const [];
-    }
+    final result = await widget.channel.client.searchRoles(query);
+    return result.map((it) => it.roles).getOrDefault(const []);
   }
 
   Future<List<UserGroup>> _fetchUserGroups(String query) async {

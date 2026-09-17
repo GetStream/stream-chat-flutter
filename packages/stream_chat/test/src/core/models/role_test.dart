@@ -1,4 +1,4 @@
-import 'package:stream_chat/src/core/models/role.dart';
+import 'package:stream_chat/open_api/models.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -18,12 +18,36 @@ void main() {
       expect(role.createdAt, DateTime.parse('2024-01-01T00:00:00Z'));
       expect(role.updatedAt, DateTime.parse('2024-01-02T00:00:00Z'));
     });
-  });
 
-  group('src/models/role_type', () {
-    test('constants resolve to expected wire strings', () {
-      expect(RoleType.user, 'user');
-      expect(RoleType.channel, 'channel');
+    test('should parse epoch nanosecond timestamps', () {
+      final role = Role.fromJson(const {
+        'name': 'admin',
+        'custom': false,
+        'scopes': ['.app'],
+        'created_at': 1704067200000000000,
+        'updated_at': 1704153600000000000,
+      });
+
+      expect(role.createdAt, DateTime.parse('2024-01-01T00:00:00Z'));
+      expect(role.updatedAt, DateTime.parse('2024-01-02T00:00:00Z'));
+    });
+
+    test('should serialize to json correctly', () {
+      final role = Role(
+        name: 'custom_moderator',
+        custom: true,
+        scopes: const ['.app', 'messaging'],
+        createdAt: DateTime.parse('2024-01-01T00:00:00Z'),
+        updatedAt: DateTime.parse('2024-01-02T00:00:00Z'),
+      );
+
+      expect(role.toJson(), {
+        'name': 'custom_moderator',
+        'custom': true,
+        'scopes': ['.app', 'messaging'],
+        'created_at': '2024-01-01T00:00:00.000Z',
+        'updated_at': '2024-01-02T00:00:00.000Z',
+      });
     });
   });
 }

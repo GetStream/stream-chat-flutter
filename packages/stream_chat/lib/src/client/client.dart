@@ -8,7 +8,9 @@ import 'package:stream_core/stream_core.dart'
         CurrentPlatform,
         InFlightCache,
         LocationCoordinate,
+        Result,
         SortedListExtensions,
+        StreamCoreHttpClient,
         StreamLogConfig,
         StreamLogger,
         SystemEnvironment,
@@ -18,6 +20,7 @@ import 'package:stream_core/stream_core.dart'
         UserToken;
 import 'package:synchronized/synchronized.dart';
 
+import '../../open_api/api.dart' show DefaultApi, SearchRolesResponse;
 import '../../version.dart';
 import '../core/api/attachment_file_uploader.dart';
 import '../core/api/requests.dart';
@@ -45,7 +48,6 @@ import '../core/models/poll_option.dart';
 import '../core/models/poll_vote.dart';
 import '../core/models/push_preference.dart';
 import '../core/models/reaction.dart';
-import '../core/models/role.dart';
 import '../core/models/thread.dart';
 import '../core/models/user.dart';
 import '../core/util/event_controller.dart';
@@ -54,6 +56,7 @@ import '../core/util/immutable_collection_subjects.dart';
 import '../core/util/utils.dart';
 import '../db/chat_persistence_client.dart';
 import '../event_type.dart';
+import '../repository/roles_repository.dart';
 import '../ws/connection_status.dart';
 import '../ws/websocket.dart';
 import 'channel/channel.dart';
@@ -90,6 +93,7 @@ class StreamChatClient {
     Duration connectTimeout = kDefaultConnectTimeout,
     Duration receiveTimeout = kDefaultReceiveTimeout,
     StreamChatApi? chatApi,
+    DefaultApi? defaultApi,
     WebSocket? ws,
     AttachmentFileUploaderProvider attachmentFileUploaderProvider = StreamAttachmentFileUploader.new,
     Iterable<Interceptor>? chatApiInterceptors,
@@ -107,18 +111,35 @@ class StreamChatClient {
       receiveTimeout: receiveTimeout,
     );
 
+    // One Dio, two consumers. It is created bare here, configured in place by
+    // `StreamHttpClient` below — base url, api key, headers and the interceptor
+    // chain — and `DefaultApi` then wraps that same configured instance.
+    //
+    // Which is why `StreamHttpClient` is built here rather than inside
+    // `StreamChatApi`: it is what does the configuring, and an injected
+    // `chatApi` would skip it, leaving `DefaultApi` on a bare client.
+    final dio = StreamCoreHttpClient();
+
+    final httpClient = StreamHttpClient(
+      apiKey,
+      dio: dio,
+      options: options,
+      tokenManager: _tokenManager,
+      connectionIdManager: _connectionIdManager,
+      systemEnvironmentManager: _systemEnvironmentManager,
+      interceptors: chatApiInterceptors,
+      httpClientAdapter: httpClientAdapter,
+    );
+
     _chatApi =
         chatApi ??
         StreamChatApi(
           apiKey,
-          options: options,
-          tokenManager: _tokenManager,
-          connectionIdManager: _connectionIdManager,
-          systemEnvironmentManager: _systemEnvironmentManager,
+          client: httpClient,
           attachmentFileUploaderProvider: attachmentFileUploaderProvider,
-          interceptors: chatApiInterceptors,
-          httpClientAdapter: httpClientAdapter,
         );
+
+    _rolesRepository = RolesRepository(defaultApi ?? DefaultApi(dio));
 
     _ws =
         ws ??
@@ -147,6 +168,7 @@ class StreamChatClient {
   }
 
   late final StreamChatApi _chatApi;
+  late final RolesRepository _rolesRepository;
   late final WebSocket _ws;
 
   /// This client state
@@ -2431,19 +2453,20 @@ class StreamChatClient {
 
   /// Searches roles by name prefix (autocomplete).
   ///
-  /// [roleType] filters to user-assignable ([RoleType.user]) or
-  /// channel-assignable ([RoleType.channel]) roles when set; both kinds are
-  /// returned when omitted.
+  /// [roleType] filters to user-assignable (`user`) or channel-assignable
+  /// (`channel`) roles when set; both kinds are returned when omitted. The
+  /// server accepts only those two values and returns a validation error for
+  /// anything else.
   ///
   /// [includeGlobalRoles] includes roles prefixed `global_` when set to
   /// `true`. Defaults to `false`.
-  Future<SearchRolesResponse> searchRoles(
+  Future<Result<SearchRolesResponse>> searchRoles(
     String query, {
     int? limit,
     String? nameGt,
-    RoleType? roleType,
+    String? roleType,
     bool? includeGlobalRoles,
-  }) => _chatApi.roles.searchRoles(
+  }) => _rolesRepository.searchRoles(
     query,
     limit: limit,
     nameGt: nameGt,

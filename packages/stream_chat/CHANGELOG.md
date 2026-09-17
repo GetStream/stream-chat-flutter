@@ -41,6 +41,9 @@
 - A sort names its model's field type, so `MemberSort.asc` takes a `MemberSortField` and a field from another model does not compile. `XSortField.custom(key)` reads a field from the model's extra data, for the four models whose queries accept one.
 - Added `ChannelSort.empty`, `MemberSort.empty` and one on every other sort — an empty sort, for querying with the ordering the API applies on its own.
 - Default sorts moved onto the sort that owns them: `ChannelSort.defaultSort`, `MemberSort.defaultSort` and so on, reachable now without the Flutter layer.
+- `Role` and `SearchRolesResponse` are the OpenAPI-generated types. `Role` gains `copyWith` and `toJson`, and a response missing `duration` or `roles` now fails to decode instead of defaulting.
+- `RoleType` is removed; `searchRoles(roleType:)` takes a `String`, either `'user'` or `'channel'`.
+- `StreamChatClient.searchRoles` returns a `Result<SearchRolesResponse>` instead of throwing.
 
 🐞 Fixed
 

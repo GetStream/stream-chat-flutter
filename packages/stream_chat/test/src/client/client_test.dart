@@ -1193,6 +1193,7 @@ void main() {
     const apiKey = 'test-api-key';
     const userId = 'test-user-id';
     late final api = FakeChatApi();
+    late final defaultApi = MockDefaultApi();
 
     final user = User(id: userId);
     final token = testUserToken(user.id).rawValue;
@@ -1214,7 +1215,7 @@ void main() {
       clearInteractions(api.general);
 
       final ws = FakeWebSocket();
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws);
+      client = StreamChatClient(apiKey, chatApi: api, defaultApi: defaultApi, ws: ws);
       // Stub getAppSettings so the background fetch after connectUser succeeds.
       when(() => api.general.getAppSettings()).thenAnswer(
         (_) async => GetAppSettingsResponse()..app = const AppSettings(name: 'test'),
@@ -2290,18 +2291,20 @@ void main() {
       const query = 'adm';
       const limit = 10;
       const nameGt = 'admin';
-      const roleType = RoleType.user;
+      const roleType = 'user';
       const includeGlobalRoles = true;
 
       when(
-        () => api.roles.searchRoles(
-          query,
+        () => defaultApi.searchRoles(
+          query: query,
           limit: limit,
           nameGt: nameGt,
           roleType: roleType,
           includeGlobalRoles: includeGlobalRoles,
         ),
-      ).thenAnswer((_) async => SearchRolesResponse()..roles = const []);
+      ).thenAnswer(
+        (_) async => const Result.success(SearchRolesResponse(duration: '0.01ms', roles: [])),
+      );
 
       final res = await client.searchRoles(
         query,
@@ -2310,18 +2313,32 @@ void main() {
         roleType: roleType,
         includeGlobalRoles: includeGlobalRoles,
       );
-      expect(res, isNotNull);
+      expect(res, const Result.success(SearchRolesResponse(duration: '0.01ms', roles: [])));
 
       verify(
-        () => api.roles.searchRoles(
-          query,
+        () => defaultApi.searchRoles(
+          query: query,
           limit: limit,
           nameGt: nameGt,
           roleType: roleType,
           includeGlobalRoles: includeGlobalRoles,
         ),
       ).called(1);
-      verifyNoMoreInteractions(api.roles);
+      verifyNoMoreInteractions(defaultApi);
+    });
+
+    test('`.searchRoles` surfaces a failure without throwing', () async {
+      const query = 'adm';
+      const error = StreamClientException(message: 'boom');
+
+      when(
+        () => defaultApi.searchRoles(query: query),
+      ).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await client.searchRoles(query);
+
+      expect(res.isFailure, isTrue);
+      expect(res.exceptionOrNull(), error);
     });
 
     group('`.channel`', () {

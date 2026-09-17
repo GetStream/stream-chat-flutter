@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_chat/open_api/api.dart';
 import 'package:stream_chat/src/client/channel/channel.dart';
 import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
 import 'package:stream_chat/src/client/client.dart';
@@ -11,7 +12,6 @@ import 'package:stream_chat/src/core/api/guest_api.dart';
 import 'package:stream_chat/src/core/api/message_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
 import 'package:stream_chat/src/core/api/polls_api.dart';
-import 'package:stream_chat/src/core/api/roles_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/src/core/api/user_groups_api.dart';
 import 'package:stream_chat/src/core/http/connection_id_manager.dart';
@@ -21,6 +21,7 @@ import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/util/event_controller.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
+import 'package:stream_chat/src/repository/roles_repository.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:stream_core/stream_core.dart' show StreamLogger, TokenManager;
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -63,7 +64,9 @@ class MockModerationApi extends Mock implements ModerationApi {}
 
 class MockUserGroupsApi extends Mock implements UserGroupsApi {}
 
-class MockRolesApi extends Mock implements RolesApi {}
+class MockDefaultApi extends Mock implements DefaultApi {}
+
+class MockRolesRepository extends Mock implements RolesRepository {}
 
 class MockGeneralApi extends Mock implements GeneralApi {}
 
