@@ -86,6 +86,91 @@ are cases where multiple calls represent a single behavior (e.g. "when the WebSo
 disconnects and then reconnects, missed messages are re-fetched") — use your
 judgment. A larger number of shorter tests beats a smaller number of longer ones.
 
+## Assert thrown errors with `throwsA`, never a bare `try`/`catch`
+
+A `try`/`catch` that asserts inside the `catch` asserts *nothing* when the code stops
+throwing: the `catch` body never runs, and the test stays green.
+
+```dart
+// BAD — still passes after the `name` setter's guard is deleted.
+test('should throw if trying to set `name`', () {
+  try {
+    channel.name = 'New name';
+  } catch (e) {
+    expect(e, isA<StateError>());
+  }
+});
+```
+
+Use `throwsA`, which fails when nothing is thrown:
+
+```dart
+// GOOD — synchronous throw.
+expect(() => channel.name = 'New name', throwsA(isA<StateError>()));
+
+// GOOD — asynchronous throw.
+await expectLater(
+  channel.markUnread('message-id-123'),
+  throwsA(isA<StreamChatError>()),
+);
+```
+
+An error can leave a call two ways, and they need different forms:
+
+1. **Thrown synchronously** — the call raises before it returns a `Future` at all.
+2. **Delivered asynchronously** — the call returns a `Future` that completes with an
+   error.
+
+`throwsA` covers both, but only when it can invoke the call itself. Passing a future
+directly only ever covers the second case: in the first, the call throws while Dart is
+still evaluating the argument, so `expectLater` never runs and the error escapes as a
+raw failure instead of a matcher message.
+
+You cannot tell the two apart from a signature — `Future<T> foo()` can throw
+synchronously, `Future<T> foo() async` never does. Anything before the first `await`,
+including an `assert`, runs eagerly. So wrap the call in a closure whenever it might
+throw synchronously, and whenever you are not sure:
+
+```dart
+// `pinMessage` is not `async`, and validates in an `assert` before its first
+// `await` — so it throws synchronously even though it returns a `Future`.
+await expectLater(
+  () => channel.pinMessage(message, timeoutOrExpirationDate: 'invalid'),
+  throwsA(isA<ArgumentError>()),
+);
+```
+
+For an `async` method, which can only fail the second way, passing the future directly
+(as in the `markUnread` example above) is fine and reads better.
+
+To assert on the error's fields, compose the matcher with `having` instead of casting
+inside a `catch`:
+
+```dart
+await expectLater(
+  channel.sendMessage(message),
+  throwsA(
+    isA<StreamChatNetworkError>()
+        .having((it) => it.code, 'code', ChatErrorCode.notAllowed.code),
+  ),
+);
+```
+
+Where `throwsA` does not fit — an error raised inside a widget `builder`, or one wrapped
+in a type you have to unwrap before asserting — capture the error and assert **outside**
+the `try`, so a missing throw leaves the variable `null` and the matcher fails:
+
+```dart
+Object? caught;
+try {
+  StreamChannel.of(context);
+} catch (error) {
+  caught = error;
+}
+
+expect(caught, isA<FlutterError>());
+```
+
 ## Only include relevant details in a test
 
 Tests often need setup that isn't part of the behavior under test. When that setup

@@ -49,11 +49,10 @@ void main() {
       expect(tokenManager.userId, isNull);
 
       const userId = 'test-user-id';
-      try {
-        await tokenManager.setTokenOrProvider(userId);
-      } catch (e) {
-        expect(e, isA<AssertionError>());
-      }
+      await expectLater(
+        tokenManager.setTokenOrProvider(userId),
+        throwsA(isA<AssertionError>()),
+      );
     },
   );
 
@@ -65,15 +64,14 @@ void main() {
       const userId = 'test-user-id';
       final token = Token.development(userId);
       Future<String> tokenProvider(String userId) async => Token.development(userId).rawValue;
-      try {
-        await tokenManager.setTokenOrProvider(
+      await expectLater(
+        tokenManager.setTokenOrProvider(
           userId,
           token: token,
           provider: tokenProvider,
-        );
-      } catch (e) {
-        expect(e, isA<AssertionError>());
-      }
+        ),
+        throwsA(isA<AssertionError>()),
+      );
     },
   );
 
