@@ -14,7 +14,7 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
-      client.connectionState.value = const Connected(healthCheck: HealthCheckInfo(connectionId: 'test-connection-id'));
+      when(() => client.connectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
 
       await tester.pumpWidget(
         MaterialApp(
@@ -42,7 +42,7 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
-      client.connectionState.value = const Disconnected(source: ServerInitiated());
+      when(() => client.connectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.disconnected));
 
       await tester.pumpWidget(
         MaterialApp(
@@ -70,7 +70,7 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
-      client.connectionState.value = const Connecting();
+      when(() => client.connectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
 
       await tester.pumpWidget(
         MaterialApp(
@@ -98,7 +98,7 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
-      client.connectionState.value = const Connecting();
+      when(() => client.connectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
 
       await tester.pumpWidget(
         MaterialApp(
@@ -131,7 +131,7 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
-      client.connectionState.value = const Connected(healthCheck: HealthCheckInfo(connectionId: 'test-connection-id'));
+      when(() => client.connectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
 
       var trailingTapped = 0;
       await tester.pumpWidget(
@@ -171,7 +171,7 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
-      client.connectionState.value = const Connected(healthCheck: HealthCheckInfo(connectionId: 'test-connection-id'));
+      when(() => client.connectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
 
       await tester.pumpWidget(
         MaterialApp(

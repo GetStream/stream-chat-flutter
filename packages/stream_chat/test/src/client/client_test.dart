@@ -40,12 +40,8 @@ void main() {
 
       expectLater(
         // skipping first seed status -> ConnectionStatus.disconnected
-        client.connectionState.skip(1),
-        emitsInOrder([
-          isA<Connecting>(),
-          isA<Authenticating>(),
-          isA<Connected>(),
-        ]),
+        client.connectionStatusStream.skip(1),
+        emitsInOrder([ConnectionStatus.connecting, ConnectionStatus.connected]),
       );
 
       final res = await client.connectUser(user, token);
@@ -62,12 +58,8 @@ void main() {
 
       expectLater(
         // skipping first seed status -> ConnectionStatus.disconnected
-        client.connectionState.skip(1),
-        emitsInOrder([
-          isA<Connecting>(),
-          isA<Authenticating>(),
-          isA<Connected>(),
-        ]),
+        client.connectionStatusStream.skip(1),
+        emitsInOrder([ConnectionStatus.connecting, ConnectionStatus.connected]),
       );
 
       final res = await client.connectUserWithProvider(user, TokenProvider.dynamic(tokenProvider));
@@ -88,12 +80,8 @@ void main() {
 
         expectLater(
           // skipping first seed status -> ConnectionStatus.disconnected
-          client.connectionState.skip(1),
-          emitsInOrder([
-            isA<Connecting>(),
-            isA<Authenticating>(),
-            isA<Connected>(),
-          ]),
+          client.connectionStatusStream.skip(1),
+          emitsInOrder([ConnectionStatus.connecting, ConnectionStatus.connected]),
         );
 
         final res = await client.connectGuestUser(user);
@@ -113,11 +101,11 @@ void main() {
         ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
         expectLater(
-          client.connectionState,
+          client.connectionStatusStream,
           emitsInOrder([
             // only emits the seed -> disconnected status
             // as the call never reaches `ws.connect`
-            isA<Initialized>(),
+            ConnectionStatus.disconnected,
           ]),
         );
 
@@ -136,12 +124,8 @@ void main() {
     test('`.connectAnonymousUser` should work fine', () async {
       expectLater(
         // skipping first seed status -> ConnectionStatus.disconnected
-        client.connectionState.skip(1),
-        emitsInOrder([
-          isA<Connecting>(),
-          isA<Authenticating>(),
-          isA<Connected>(),
-        ]),
+        client.connectionStatusStream.skip(1),
+        emitsInOrder([ConnectionStatus.connecting, ConnectionStatus.connected]),
       );
 
       final res = await client.connectAnonymousUser();
@@ -175,19 +159,16 @@ void main() {
 
       test('should open connection for closed connection', () async {
         expectLater(
-          client.connectionState.skip(1),
+          client.connectionStatusStream.skip(1),
           emitsInOrder([
             // initial connectUser
-            isA<Connecting>(),
-            isA<Authenticating>(),
-            isA<Connected>(),
+            ConnectionStatus.connecting,
+            ConnectionStatus.connected,
             // close connection
-            isA<Disconnecting>(),
-            isA<Disconnected>(),
+            ConnectionStatus.disconnected,
             // open connection
-            isA<Connecting>(),
-            isA<Authenticating>(),
-            isA<Connected>(),
+            ConnectionStatus.connecting,
+            ConnectionStatus.connected,
           ]),
         );
 
@@ -311,7 +292,7 @@ void main() {
         connectWebSocket: false,
       );
       expect(res, isSameUserAs(user));
-      expect(client.connectionState.value, isA<Initialized>());
+      expect(client.connectionStatus, ConnectionStatus.disconnected);
     });
 
     test(
@@ -329,7 +310,7 @@ void main() {
           connectWebSocket: false,
         );
         expect(res, isSameUserAs(user));
-        expect(client.connectionState.value, isA<Initialized>());
+        expect(client.connectionStatus, ConnectionStatus.disconnected);
       },
     );
 
@@ -349,7 +330,7 @@ void main() {
       );
 
       expect(res, isSameUserAs(user));
-      expect(client.connectionState.value, isA<Initialized>());
+      expect(client.connectionStatus, ConnectionStatus.disconnected);
       verify(
         () => api.guest.getGuestUser(any(that: isSameUserAs(user))),
       ).called(1);
@@ -363,7 +344,7 @@ void main() {
         );
 
         expect(res, isNotNull);
-        expect(client.connectionState.value, isA<Initialized>());
+        expect(client.connectionStatus, ConnectionStatus.disconnected);
       },
     );
   });
@@ -517,7 +498,7 @@ void main() {
       await client.connectUser(user, token);
       await delay(300);
       expect(client.persistenceEnabled, isTrue);
-      expect(client.connectionState.value, isA<Connected>());
+      expect(client.connectionStatus, ConnectionStatus.connected);
     });
 
     tearDown(() async {
@@ -1182,18 +1163,18 @@ void main() {
 
     test('`.disconnectUser` should reset state and user', () async {
       expect(client.state.currentUser, isNotNull);
-      expect(client.connectionState.value, isA<Connected>());
+      expect(client.connectionStatus, ConnectionStatus.connected);
 
       expectLater(
         // skipping initial connected value
-        client.connectionState.skip(1),
-        emitsInOrder([isA<Disconnecting>(), isA<Disconnected>()]),
+        client.connectionStatusStream.skip(1),
+        emitsInOrder([ConnectionStatus.disconnected]),
       );
 
       await client.disconnectUser(flushChatPersistence: true);
 
       expect(client.state.currentUser, isNull);
-      expect(client.connectionState.value, isA<Disconnected>());
+      expect(client.connectionStatus, ConnectionStatus.disconnected);
     });
   });
 
@@ -1230,7 +1211,7 @@ void main() {
       await client.connectUser(user, token);
       await delay(300);
       expect(client.persistenceEnabled, isFalse);
-      expect(client.connectionState.value, isA<Connected>());
+      expect(client.connectionStatus, ConnectionStatus.connected);
     });
 
     tearDown(() async {
@@ -6034,7 +6015,7 @@ void main() {
       pendingQuery.complete(QueryChannelsResponse()..channels = []);
       await delay(300);
 
-      expect(client.connectionState.value, isA<Disconnected>());
+      expect(client.connectionStatus, ConnectionStatus.disconnected);
     });
   });
 
@@ -6050,7 +6031,7 @@ void main() {
 
       await client.connectUser(user, token);
       await delay(300);
-      expect(client.connectionState.value, isA<Connected>());
+      expect(client.connectionStatus, ConnectionStatus.connected);
     });
 
     tearDown(() async {
@@ -6327,7 +6308,7 @@ void main() {
       final client = StreamChatClient(apiKey, chatApi: FakeChatApi(), wsProvider: FakeChatServer().connect);
       addTearDown(client.dispose);
 
-      expect(client.connectionState.value, isA<Initialized>());
+      expect(client.connectionStatus, ConnectionStatus.disconnected);
       await expectLater(client.queryChannels().first, throwsStateError);
     });
 

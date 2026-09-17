@@ -2,17 +2,15 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter_core/src/stream_channel_list_controller.dart';
 import 'package:stream_chat_flutter_core/src/stream_channel_list_event_handler.dart';
-import 'package:stream_core/stream_core.dart' show MutableStateEmitter;
 
 class MockStreamChannelListController extends Mock implements StreamChannelListController {}
 
 class MockStreamChannelListEventHandler extends Mock implements StreamChannelListEventHandler {}
 
 class MockClient extends Mock implements StreamChatClient {
-  @override
-  final MutableStateEmitter<WebSocketConnectionState> connectionState = MutableStateEmitter(
-    const Connected(healthCheck: HealthCheckInfo(connectionId: 'test-connection-id')),
-  );
+  MockClient() {
+    when(() => connectionStatus).thenReturn(ConnectionStatus.connected);
+  }
 
   @override
   final StreamLogger logger = const StreamLogger('SCh:Test');

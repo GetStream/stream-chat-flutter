@@ -5,13 +5,7 @@ import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_core/stream_core.dart'
     show
-        Authenticating,
-        Connected,
-        ConnectionStateEmitter,
-        Connecting,
         CurrentPlatform,
-        Disconnected,
-        DisconnectionSourceReads,
         InFlightCache,
         LocationCoordinate,
         SortedListExtensions,
@@ -22,7 +16,6 @@ import 'package:stream_core/stream_core.dart'
         TokenManager,
         TokenProvider,
         UserToken,
-        WebSocketConnectionState,
         WebSocketProvider,
         WsEvent;
 import 'package:synchronized/synchronized.dart';
@@ -64,6 +57,7 @@ import '../db/chat_persistence_client.dart';
 import '../event_type.dart';
 import '../ws/connect_request.dart';
 import '../ws/connection_manager.dart';
+import '../ws/connection_status.dart';
 import '../ws/events/events.dart';
 import 'channel/channel.dart';
 import 'channel_delivery_reporter.dart';
@@ -151,10 +145,10 @@ class StreamChatClient {
           shouldRetry: (_, __, error) => error?.isRetriable ?? false,
         );
 
-    _connectionStateSubscription = connectionState.pairwise().listen(
-      (statePair) {
-        final [prevState, currState] = statePair;
-        return _onConnectionStateChanged(prevState, currState);
+    _connectionStatusSubscription = connectionStatusStream.pairwise().listen(
+      (statusPair) {
+        final [prevStatus, currStatus] = statusPair;
+        return _onConnectionStatusChanged(prevStatus, currStatus);
       },
     );
 
@@ -298,7 +292,7 @@ class StreamChatClient {
   /// Client specific logger instance.
   final StreamLogger logger = const StreamLogger('SCh:Client');
 
-  StreamSubscription<List<WebSocketConnectionState>>? _connectionStateSubscription;
+  StreamSubscription<List<ConnectionStatus>>? _connectionStatusSubscription;
 
   /// Manages delivery receipt reporting for channel messages.
   ///
@@ -322,12 +316,15 @@ class StreamChatClient {
     ],
   );
 
-  /// The state of the connection this client works over.
+  /// The connection this client works over.
   ///
-  /// Reports the current state on listen, then each change. A connection being opened passes
-  /// through [Connecting] and [Authenticating] before [Connected]; one that drops reports
-  /// [Disconnected] with the reason it closed, which says whether it will be opened again.
-  ConnectionStateEmitter get connectionState => _connection.connectionState;
+  /// [ConnectionStatus.connecting] covers every step of opening one, and
+  /// [ConnectionStatus.disconnected] covers both a connection that closed and
+  /// one that was never opened.
+  ConnectionStatus get connectionStatus => _connection.connectionState.status;
+
+  /// [connectionStatus] on listen, and again on each change.
+  Stream<ConnectionStatus> get connectionStatusStream => _connection.connectionState.statusStream;
 
   /// Connects the current user, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
@@ -402,7 +399,7 @@ class StreamChatClient {
     required TokenProvider tokenProvider,
     bool connectWebSocket = true,
   }) async {
-    if (_connection.connectionState.value case Connecting() || Authenticating()) {
+    if (connectionStatus == ConnectionStatus.connecting) {
       throw StateError(
         'A user is already being connected. Call `disconnectUser` before connecting again.',
       );
@@ -561,22 +558,15 @@ class StreamChatClient {
     fetchMissedEvents: _chatApi.general.sync,
   );
 
-  void _onConnectionStateChanged(
-    WebSocketConnectionState prevState,
-    WebSocketConnectionState currState,
+  void _onConnectionStatusChanged(
+    ConnectionStatus prevStatus,
+    ConnectionStatus currStatus,
   ) async {
-    // If the state hasn't changed, we don't need to do anything.
-    if (prevState == currState) return;
+    // If the status hasn't changed, we don't need to do anything.
+    if (prevStatus == currStatus) return;
 
-    // The lifecycle, at the level an app watching for outages reads. Keyed on losing a connection
-    // that was established, so an outage reports once rather than once per reconnect attempt.
-    if (currState case Connected()) logger.i(() => 'Connection established');
-    if (currState case Disconnected(:final source) when prevState.isConnected) {
-      logger.i(() => 'Connection lost: ${source.exception.message}', error: source.cause);
-    }
-
-    final wasConnected = prevState.isConnected;
-    final isConnected = currState.isConnected;
+    final wasConnected = prevStatus == ConnectionStatus.connected;
+    final isConnected = currStatus == ConnectionStatus.connected;
 
     // Notify the connection status change event
     handleEvent(Event(type: EventType.connectionChanged, online: isConnected));
@@ -781,8 +771,8 @@ class StreamChatClient {
   // The wait ends on the attempt settling either way, so one that fails raises here rather than
   // leaving the caller waiting on a connection nothing is opening any more.
   Future<void> _requireConnection(String operation) async {
-    final state = await _connection.settled;
-    if (state.isConnected) return;
+    await _connection.settled;
+    if (connectionStatus == ConnectionStatus.connected) return;
 
     throw StateError('$operation needs an active connection. Call `connectUser` first.');
   }
@@ -2485,7 +2475,7 @@ class StreamChatClient {
     await _wsEventSubscription?.cancel();
     await _connection.dispose();
     await _eventController.close();
-    await _connectionStateSubscription?.cancel();
+    await _connectionStatusSubscription?.cancel();
   }
 }
 

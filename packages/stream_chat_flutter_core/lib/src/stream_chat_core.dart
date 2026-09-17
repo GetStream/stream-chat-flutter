@@ -390,7 +390,7 @@ extension MaybeReconnect on StreamChatClient {
   /// client is not yet connected.
   Future<void> maybeReconnect() async {
     if (state.currentUser == null) return;
-    if (connectionState.value.isConnected) return;
+    if (connectionStatus == ConnectionStatus.connected) return;
 
     // Force immediate reconnection by resetting any ongoing retry delays
     // This ensures we don't wait up to 25s when user foregrounds the app
@@ -402,6 +402,7 @@ extension MaybeReconnect on StreamChatClient {
   /// connection is currently established.
   void maybeDisconnect() {
     if (state.currentUser == null) return;
+    if (connectionStatus == ConnectionStatus.disconnected) return;
 
     // Close the connection immediately
     return closeConnection();

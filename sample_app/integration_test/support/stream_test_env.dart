@@ -181,11 +181,11 @@ class StreamTestEnv {
       _connectivityPrimed = true;
     }
     _connectivity.add([if (online) ConnectivityResult.wifi else ConnectivityResult.none]);
-    await _waitForConnection(connected: online);
+    await _waitForConnection(online ? ConnectionStatus.connected : ConnectionStatus.disconnected);
   }
 
-  Future<void> _waitForConnection({
-    required bool connected,
+  Future<void> _waitForConnection(
+    ConnectionStatus status, {
     // Generous: StreamChatCore debounces connectivity changes ~3s before
     // acting, then the WebSocket (re)connects.
     Duration timeout = const Duration(seconds: 30),
@@ -193,10 +193,9 @@ class StreamTestEnv {
     final end = DateTime.now().add(timeout);
     while (DateTime.now().isBefore(end)) {
       await _tester.pump(const Duration(milliseconds: 200));
-      final state = authController.client?.connectionState.value;
-      if ((state is Connected) == connected) return;
+      if (authController.client?.connectionStatus == status) return;
     }
-    throw TestFailure('Timed out waiting for the connection to be ${connected ? 'open' : 'closed'}');
+    throw TestFailure('Timed out waiting for connection status: $status');
   }
 
   Future<void> tearDown() async {

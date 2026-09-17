@@ -1,7 +1,7 @@
 import 'package:stream_chat/src/ws/connect_request.dart';
 import 'package:stream_chat/src/ws/connection_manager.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_core/stream_core.dart' show SystemEnvironmentManager;
+import 'package:stream_core/stream_core.dart' show Disconnected, Initialized, SystemEnvironmentManager;
 import 'package:test/test.dart';
 
 import '../utils.dart';

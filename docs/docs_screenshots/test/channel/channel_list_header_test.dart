@@ -82,11 +82,11 @@ void main() {
         client: client,
         headerBuilder: (context) => StreamChannelListHeader(
           title: StreamConnectionStatusBuilder(
-            stateBuilder: (context, state) {
-              return switch (state) {
-                Connected() => const Text('My Chat App'),
-                Connecting() || Authenticating() => const Text('Connecting...'),
-                Initialized() || Disconnecting() || Disconnected() => const Text('Offline'),
+            statusBuilder: (context, status) {
+              return switch (status) {
+                ConnectionStatus.connected => const Text('My Chat App'),
+                ConnectionStatus.connecting => const Text('Connecting...'),
+                ConnectionStatus.disconnected => const Text('Offline'),
               };
             },
           ),

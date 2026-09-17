@@ -67,7 +67,7 @@ typedef EditMessageInputBuilder = Widget Function(BuildContext, Message);
 typedef ChannelListHeaderTitleBuilder =
     Widget Function(
       BuildContext context,
-      WebSocketConnectionState state,
+      ConnectionStatus status,
       StreamChatClient client,
     );
 

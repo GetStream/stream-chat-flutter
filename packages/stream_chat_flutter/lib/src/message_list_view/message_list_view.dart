@@ -651,17 +651,20 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       alignment: Alignment.center,
       children: [
         StreamConnectionStatusBuilder(
-          stateBuilder: (context, state) {
+          statusBuilder: (context, status) {
             var statusString = '';
             var showStatus = true;
-            switch (state) {
-              case Connected():
+            switch (status) {
+              case ConnectionStatus.connected:
                 statusString = context.translations.connectedLabel;
                 showStatus = false;
-              case Connecting() || Authenticating():
+                break;
+              case ConnectionStatus.connecting:
                 statusString = context.translations.reconnectingLabel;
-              case Initialized() || Disconnecting() || Disconnected():
+                break;
+              case ConnectionStatus.disconnected:
                 statusString = context.translations.disconnectedLabel;
+                break;
             }
 
             return StreamInfoTile(

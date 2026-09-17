@@ -84,19 +84,19 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
             },
           ),
           body: StreamConnectionStatusBuilder(
-            stateBuilder: (context, connection) {
+            statusBuilder: (context, status) {
               var statusString = '';
               var showStatus = true;
 
-              switch (connection) {
-                case Connected():
+              switch (status) {
+                case ConnectionStatus.connected:
                   statusString = 'Connected';
                   showStatus = false;
                   break;
-                case Connecting() || Authenticating():
+                case ConnectionStatus.connecting:
                   statusString = 'Reconnecting...';
                   break;
-                case Initialized() || Disconnecting() || Disconnected():
+                case ConnectionStatus.disconnected:
                   statusString = 'Disconnected';
                   break;
               }
