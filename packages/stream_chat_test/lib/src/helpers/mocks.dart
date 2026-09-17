@@ -113,6 +113,9 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
   /// Number of times [disconnect] was called.
   int disconnectCallCount = 0;
 
+  /// Number of times [flush] was called.
+  int flushCallCount = 0;
+
   @override
   bool get isConnected => _isConnected;
 
@@ -139,6 +142,7 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
   Future<void> flush() async {
     _lastSyncAt = null;
     _channelCids = [];
+    flushCallCount++;
   }
 
   @override
