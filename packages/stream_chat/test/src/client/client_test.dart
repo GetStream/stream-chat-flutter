@@ -6295,6 +6295,28 @@ void main() {
     });
   });
 
+  group('event resolvers', () {
+    // Recovering after an outage replays the events missed over `/sync`, not over the socket, so
+    // one carrying a poll has to be reported the same way as one that arrived live.
+    test('should report a poll message recovered after an outage as a poll created event', () async {
+      final client = StreamChatClient('test-api-key', chatApi: FakeChatApi(), wsProvider: FakeChatServer().connect);
+      addTearDown(client.dispose);
+
+      final poll = Poll(
+        name: 'What is your favorite color?',
+        options: const [
+          PollOption(text: 'Red'),
+          PollOption(text: 'Blue'),
+        ],
+      );
+
+      final reported = client.on(EventType.pollCreated).first;
+      client.handleEvent(Event(type: EventType.messageNew, poll: poll));
+
+      expect((await reported).poll, poll);
+    });
+  });
+
   group('`queryChannels` with `waitForConnect`', () {
     const apiKey = 'test-api-key';
     final user = User(id: 'test-user-id');
