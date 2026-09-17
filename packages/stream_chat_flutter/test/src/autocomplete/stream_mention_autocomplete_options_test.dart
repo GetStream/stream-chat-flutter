@@ -372,7 +372,6 @@ void main() {
         expect(find.textContaining('admin'), findsNothing);
       },
     );
-
   });
 
   group('user groups', () {
