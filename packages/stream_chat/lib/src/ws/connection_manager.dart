@@ -28,7 +28,7 @@ class ConnectionManager with Disposable {
     _ws = StreamWebSocketClient(
       tag: '$tag:Ws',
       messageCodec: const StreamChatWsCodec(),
-      optionsBuilder: _buildOptions,
+      optionsProvider: _buildOptions,
       wsProvider: wsProvider,
     );
 
@@ -149,9 +149,9 @@ class ConnectionManager with Disposable {
 
   // The request for a single attempt. Nothing is sent over the socket to authenticate one, so this
   // is where a refused token is replaced.
-  Future<WebSocketOptions> _buildOptions([
+  Future<WebSocketOptions> _buildOptions(
     StreamApiException? previousError,
-  ]) async {
+  ) async {
     final session = _session;
     if (session == null) throw StateError('No user is connected.');
 
