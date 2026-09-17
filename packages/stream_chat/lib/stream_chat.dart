@@ -130,5 +130,4 @@ export 'src/core/util/extension.dart';
 export 'src/core/util/message_rules.dart';
 export 'src/db/chat_persistence_client.dart';
 export 'src/event_type.dart';
-// The extension reading a connection's state is the SDK's own: the state it reads is not exported.
-export 'src/ws/connection_status.dart' hide ConnectionStatusEmitterReads;
+export 'src/ws/connection_status.dart' show ConnectionStatus;
