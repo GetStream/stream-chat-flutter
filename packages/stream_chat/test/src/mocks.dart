@@ -1,28 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/src/client/channel/channel.dart';
-import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
-import 'package:stream_chat/src/client/client.dart';
-import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
-import 'package:stream_chat/src/core/api/channel_api.dart';
-import 'package:stream_chat/src/core/api/device_api.dart';
 import 'package:stream_chat/src/core/api/general_api.dart';
-import 'package:stream_chat/src/core/api/guest_api.dart';
-import 'package:stream_chat/src/core/api/message_api.dart';
-import 'package:stream_chat/src/core/api/moderation_api.dart';
-import 'package:stream_chat/src/core/api/polls_api.dart';
-import 'package:stream_chat/src/core/api/roles_api.dart';
-import 'package:stream_chat/src/core/api/user_api.dart';
-import 'package:stream_chat/src/core/api/user_groups_api.dart';
 import 'package:stream_chat/src/core/http/connection_id_manager.dart';
-import 'package:stream_chat/src/core/http/stream_http_client.dart';
-import 'package:stream_chat/src/core/models/channel_config.dart';
-import 'package:stream_chat/src/core/models/event.dart';
-import 'package:stream_chat/src/core/util/event_controller.dart';
-import 'package:stream_chat/src/db/chat_persistence_client.dart';
-import 'package:stream_chat/src/event_type.dart';
-import 'package:stream_chat/src/ws/websocket.dart';
-import 'package:stream_core/stream_core.dart' show StreamLogger, TokenManager;
+import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_test/stream_chat_test.dart' show MockPersistenceClient;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class MockWebSocketChannel extends Mock implements WebSocketChannel {}
@@ -47,50 +28,9 @@ class MockTokenManager extends Mock implements TokenManager {}
 
 class MockConnectionIdManager extends Mock implements ConnectionIdManager {}
 
-class MockUserApi extends Mock implements UserApi {}
-
-class MockGuestApi extends Mock implements GuestApi {}
-
-class MockMessageApi extends Mock implements MessageApi {}
-
-class MockPollsApi extends Mock implements PollsApi {}
-
-class MockChannelApi extends Mock implements ChannelApi {}
-
-class MockDeviceApi extends Mock implements DeviceApi {}
-
-class MockModerationApi extends Mock implements ModerationApi {}
-
-class MockUserGroupsApi extends Mock implements UserGroupsApi {}
-
-class MockRolesApi extends Mock implements RolesApi {}
-
 class MockGeneralApi extends Mock implements GeneralApi {}
 
-class MockAttachmentFileUploader extends Mock implements AttachmentFileUploader {}
-
-class MockPersistenceClient extends Mock implements ChatPersistenceClient {
-  String? _userId;
-  bool _isConnected = false;
-
-  @override
-  bool get isConnected => _isConnected;
-
-  @override
-  String? get userId => _userId;
-
-  @override
-  Future<void> connect(String userId) async {
-    _userId = userId;
-    _isConnected = true;
-  }
-
-  @override
-  Future<void> disconnect({bool flush = false}) async {
-    _userId = null;
-    _isConnected = false;
-  }
-}
+class MockChannelDeliveryReporter extends Mock implements ChannelDeliveryReporter {}
 
 class MockStreamChatClient extends Mock implements StreamChatClient {
   // A plain settable field for the same reason as [isLocalUnreadCountEnabled]
@@ -120,28 +60,6 @@ class MockStreamChatClient extends Mock implements StreamChatClient {
   ChannelDeliveryReporter get channelDeliveryReporter {
     return _deliveryReporter ??= MockChannelDeliveryReporter();
   }
-
-  @override
-  Stream<Event> get eventStream => _eventController.stream;
-  final _eventController = EventController<Event>();
-  void addEvent(Event event) => _eventController.add(event);
-
-  @override
-  Stream<Event> on([
-    String? eventType,
-    String? eventType2,
-    String? eventType3,
-    String? eventType4,
-  ]) {
-    if (eventType == null || eventType == EventType.any) return eventStream;
-    return eventStream.where(
-      (event) =>
-          event.type == eventType || event.type == eventType2 || event.type == eventType3 || event.type == eventType4,
-    );
-  }
-
-  @override
-  Future<void> dispose() => _eventController.close();
 }
 
 class MockStreamChatClientWithPersistence extends MockStreamChatClient {
@@ -161,35 +79,50 @@ class MockClientState extends Mock implements ClientState {}
 
 class MockChannelConfig extends Mock implements ChannelConfig {}
 
-class MockRetryQueueChannel extends Mock implements Channel {
-  final channelId = 'test-channel-id';
-  final channelType = 'test-channel-type';
+class FakeClientState extends Fake implements ClientState {
+  FakeClientState({
+    this._currentUser,
+  });
+
+  OwnUser? _currentUser;
 
   @override
-  String? get id => channelId;
+  OwnUser? get currentUser {
+    return _currentUser ??= OwnUser(
+      id: 'test-user-id',
+      name: 'Test User',
+      privacySettings: const PrivacySettings(
+        typingIndicators: TypingIndicators(),
+        readReceipts: ReadReceipts(),
+      ),
+    );
+  }
 
   @override
-  String get type => channelType;
+  Map<String, User> get users => const {};
 
   @override
-  String? get cid => '$channelType:$channelId';
+  void updateUser(User? user) {
+    if (user == null) return;
+    if (_currentUser case final current? when user.id != current.id) return;
 
-  StreamChatClient? _client;
+    _currentUser = OwnUser.fromUser(user);
+  }
 
   @override
-  StreamChatClient get client => _client ??= MockStreamChatClient();
+  int totalUnreadCount = 0;
 
   @override
-  Stream<Event> on([
-    String? eventType,
-    String? eventType2,
-    String? eventType3,
-    String? eventType4,
-  ]) {
-    return client.on(eventType, eventType2, eventType3, eventType4).where((e) => e.cid == cid);
+  Map<String, Channel> get channels => _channels;
+  final _channels = <String, Channel>{};
+
+  @override
+  void addChannels(Map<String, Channel> channelMap) {
+    _channels.addAll(channelMap);
+  }
+
+  @override
+  void removeChannel(String channelCid) {
+    _channels.remove(channelCid);
   }
 }
-
-class MockWebSocket extends Mock implements WebSocket {}
-
-class MockChannelDeliveryReporter extends Mock implements ChannelDeliveryReporter {}

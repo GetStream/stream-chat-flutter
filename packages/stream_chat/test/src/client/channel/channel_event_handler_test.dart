@@ -1,13 +1,11 @@
 // ignore_for_file: cascade_invocations
 
-import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/client/channel/channel_event_handler.dart';
 import 'package:stream_chat/src/client/channel/channel_state_mutations.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:test/test.dart';
+import 'package:stream_chat_test/stream_chat_test.dart';
 
-import '../../fakes.dart';
-import '../../mocks.dart';
+import '../../mocks.dart' show FakeClientState, MockStreamChatClient, MockStreamChatClientWithPersistence;
 
 class MockChannel extends Mock implements Channel {}
 
@@ -46,13 +44,10 @@ void main() {
   final otherUser = User(id: 'other-user');
 
   setUpAll(() {
-    registerFallbackValue(FakeMessage());
-    registerFallbackValue(FakeUser());
-    registerFallbackValue(FakeEvent());
+    registerChatFallbackValues();
     registerFallbackValue(FakeDraft());
     registerFallbackValue(FakeReaction());
     registerFallbackValue(FakePoll());
-    registerFallbackValue(FakePollVote());
     registerFallbackValue(FakeMember());
     registerFallbackValue(FakeMessageReminder());
     registerFallbackValue(FakeLocation());

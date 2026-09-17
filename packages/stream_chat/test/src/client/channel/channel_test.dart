@@ -1,362 +1,659 @@
-// ignore_for_file: lines_longer_than_80_chars, cascade_invocations, deprecated_member_use_from_same_package, avoid_redundant_argument_values
-
 import 'dart:async';
 
-import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:test/test.dart';
+import 'package:stream_chat_test/stream_chat_test.dart';
 
-import '../../fakes.dart';
-import '../../matchers.dart';
-import '../../mocks.dart';
-import '../../utils.dart';
+const _channelId = 'test-channel-id';
+const _channelType = 'test-channel-type';
+const _channelCid = '$_channelType:$_channelId';
+
+// Builds the channel already initialized from state, so the state attaches
+// while a persistence client is set.
+Channel _buildInitializedChannel(StreamChatClient client) {
+  return Channel.fromState(
+    client,
+    createDefaultChannelState(
+      channel: createDefaultChannelModel(cid: _channelCid),
+    ),
+  );
+}
+
+// Stubs the persistence calls these tests drive (`getChannelThreads`,
+// `getChannelStateByCid`, `updateMessages`) plus the ones the real client
+// makes on its own: `updateConnectionInfo` on connect and the debounced
+// channel state/thread writes.
+MockPersistenceClient _createPersistenceClient() {
+  registerFallbackValue(createDefaultEvent());
+  registerFallbackValue(createDefaultChannelState());
+  registerFallbackValue(<Message>[]);
+  registerFallbackValue(<String, List<Message>>{});
+
+  final persistenceClient = MockPersistenceClient();
+  when(() => persistenceClient.updateConnectionInfo(any())).thenAnswer((_) async {});
+  when(() => persistenceClient.getChannelThreads(_channelCid)).thenAnswer((_) async => {});
+  when(() => persistenceClient.getChannelStateByCid(_channelCid)).thenAnswer(
+    (_) async => createDefaultChannelState(
+      channel: createDefaultChannelModel(cid: _channelCid),
+    ),
+  );
+  when(() => persistenceClient.updateMessages(_channelCid, any())).thenAnswer((_) => Future.value());
+  when(() => persistenceClient.updateChannelState(any())).thenAnswer((_) async {});
+  when(() => persistenceClient.updateChannelThreads(_channelCid, any())).thenAnswer((_) async {});
+  return persistenceClient;
+}
+
+final persistenceClient = _createPersistenceClient();
 
 void main() {
-  ChannelState _generateChannelState(
-    String channelId,
-    String channelType, {
-    DateTime? lastMessageAt,
-    List<ChannelCapability>? ownCapabilities,
-    bool mockChannelConfig = false,
-  }) {
-    ChannelConfig? config;
-    if (mockChannelConfig) {
-      config = MockChannelConfig();
-      when(() => config!.readEvents).thenReturn(true);
-      when(() => config!.typingEvents).thenReturn(true);
-    }
-    final channel = ChannelModel(
-      id: channelId,
-      type: channelType,
-      config: config,
-      ownCapabilities: ownCapabilities,
-      lastMessageAt: lastMessageAt,
-    );
-    final state = ChannelState(channel: channel);
-    return state;
-  }
-
   group('Non-Initialized Channel', () {
-    late final client = MockStreamChatClient();
-    const channelId = 'test-channel-id';
-    const channelType = 'test-channel-type';
-    late Channel channel;
+    channelTest(
+      'should be able to set `extraData`',
+      channelType: _channelType,
+      channelId: _channelId,
+      body: (tester) async {
+        final channel = tester.channel;
 
-    setUpAll(() {
-      // fake clientState
-      final clientState = FakeClientState();
-      when(() => client.state).thenReturn(clientState);
-    });
+        expect(channel.extraData.isEmpty, isTrue);
 
-    setUp(() {
-      channel = Channel(client, channelType, channelId);
-    });
+        expect(
+          () => channel.extraData = {'name': 'test-channel-name'},
+          returnsNormally,
+        );
 
-    tearDown(() {
-      channel.dispose();
-    });
+        expect(channel.extraData.isEmpty, isFalse);
+        expect(channel.extraData.containsKey('name'), isTrue);
+        expect(channel.extraData['name'], 'test-channel-name');
+      },
+    );
 
-    test('should be able to set `extraData`', () {
-      expect(channel.extraData.isEmpty, isTrue);
+    channelTest(
+      'should be able to get and set `image`',
+      channelType: _channelType,
+      channelId: _channelId,
+      body: (tester) async {
+        final channel = tester.channel;
 
-      expect(
-        () => channel.extraData = {'name': 'test-channel-name'},
-        returnsNormally,
-      );
+        expect(channel.extraData.isEmpty, isTrue);
 
-      expect(channel.extraData.isEmpty, isFalse);
-      expect(channel.extraData.containsKey('name'), isTrue);
-      expect(channel.extraData['name'], 'test-channel-name');
-    });
+        const imageUrl = 'https://getstream.io/some-image';
+        channel.image = imageUrl;
 
-    test('should be able to get and set `image`', () {
-      expect(channel.extraData.isEmpty, isTrue);
+        expect(channel.image, imageUrl);
+        expect(channel.extraData['image'], imageUrl);
 
-      const imageUrl = 'https://getstream.io/some-image';
-      channel.image = imageUrl;
+        const newImage = 'https://getstream.io/new-image';
+        final newChannelInstance = Channel(tester.client, _channelType, _channelId, image: newImage);
 
-      expect(channel.image, imageUrl);
-      expect(channel.extraData['image'], imageUrl);
+        expect(newChannelInstance.image, newImage);
+        expect(newChannelInstance.extraData['image'], newImage);
+      },
+    );
 
-      const newImage = 'https://getstream.io/new-image';
-      final newChannelInstance = Channel(client, channelType, channelId, image: newImage);
+    channelTest(
+      'should be able to get and set `name`',
+      channelType: _channelType,
+      channelId: _channelId,
+      body: (tester) async {
+        final channel = tester.channel;
 
-      expect(newChannelInstance.image, newImage);
-      expect(newChannelInstance.extraData['image'], newImage);
-    });
+        expect(channel.extraData.isEmpty, isTrue);
 
-    test('should be able to get and set `name`', () {
-      expect(channel.extraData.isEmpty, isTrue);
+        const name = 'Channel name';
+        channel.name = name;
 
-      const name = 'Channel name';
-      channel.name = name;
+        expect(channel.name, name);
+        expect(channel.extraData['name'], name);
 
-      expect(channel.name, name);
-      expect(channel.extraData['name'], name);
+        const newName = 'New channel name';
+        final newChannelInstance = Channel(tester.client, _channelType, _channelId, name: newName);
 
-      const newName = 'New channel name';
-      final newChannelInstance = Channel(client, channelType, channelId, name: newName);
+        expect(newChannelInstance.name, newName);
+        expect(newChannelInstance.extraData['name'], newName);
+      },
+    );
 
-      expect(newChannelInstance.name, newName);
-      expect(newChannelInstance.extraData['name'], newName);
-    });
+    channelTest(
+      'setters remain usable after a failed watch()',
+      channelType: _channelType,
+      channelId: _channelId,
+      body: (tester) async {
+        final channel = tester.channel;
 
-    test('setters remain usable after a failed watch()', () async {
-      // Make initialization fail.
-      when(
-        () => client.queryChannel(
-          channelType,
-          channelId: any(named: 'channelId'),
-          channelData: any(named: 'channelData'),
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          messagesPagination: any(named: 'messagesPagination'),
-          membersPagination: any(named: 'membersPagination'),
-          watchersPagination: any(named: 'watchersPagination'),
-        ),
-      ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
+        // Make initialization fail.
+        tester.mockApiFailure(
+          (api) => api.channel.queryChannel(
+            _channelType,
+            channelId: _channelId,
+            channelData: channel.extraData,
+            state: true,
+            watch: true,
+            presence: false,
+          ),
+          error: createDefaultNetworkError(code: StreamErrorCode.inputError, statusCode: 400),
+        );
 
-      // A failed watch() also completes `initialized` with the error. Attach
-      // the expectation up-front so that error has a listener the moment it
-      // occurs and isn't reported as an unhandled async error.
-      final initializedFailure = expectLater(
-        channel.initialized,
-        throwsA(isA<StreamApiException>()),
-      );
+        // A failed watch() also completes `initialized` with the error. Attach
+        // the expectation up-front so that error has a listener the moment it
+        // occurs and isn't reported as an unhandled async error.
+        final initializedFailure = expectLater(
+          channel.initialized,
+          throwsA(isA<StreamApiException>()),
+        );
 
-      await expectLater(
-        channel.watch(),
-        throwsA(isA<StreamApiException>()),
-      );
-      await initializedFailure;
+        await expectLater(
+          channel.watch(),
+          throwsA(isA<StreamApiException>()),
+        );
+        await initializedFailure;
 
-      // Init never *succeeded*, so the raw setters must still work. Previously
-      // they threw because the completer was merely `isCompleted` (it had
-      // completed with an error).
-      expect(() => channel.name = 'New name', returnsNormally);
-      expect(channel.name, 'New name');
-    });
+        // Init never *succeeded*, so the raw setters must still work. Previously
+        // they threw because the completer was merely `isCompleted` (it had
+        // completed with an error).
+        expect(() => channel.name = 'New name', returnsNormally);
+        expect(channel.name, 'New name');
+      },
+    );
   });
 
   group('Initialized Channel with Persistence', () {
-    late final client = MockStreamChatClientWithPersistence();
-    const channelId = 'test-channel-id';
-    const channelType = 'test-channel-type';
-    const channelCid = '$channelType:$channelId';
-    late Channel channel;
+    channelTest(
+      'initializes from state and loads channel threads from the persistence client',
+      channelType: _channelType,
+      channelId: _channelId,
+      build: _buildInitializedChannel,
+      chatPersistenceClient: persistenceClient,
+      body: (tester) async {
+        expect(tester.channel.cid, _channelCid);
+        expect(tester.channelState, isNotNull);
+        await expectLater(tester.channel.initialized, completion(isTrue));
 
-    setUpAll(() {
-      // Fallback values
-      registerFallbackValue(FakeMessage());
-      registerFallbackValue(<Message>[]);
-      registerFallbackValue(FakeAttachmentFile());
-      registerFallbackValue(const ChannelFilter.raw({}));
-      registerFallbackValue(const BannedUserFilter.raw({}));
-
-      final retryPolicy = RetryPolicy(
-        shouldRetry: (_, __, ___) => false,
-        delayFactor: Duration.zero,
-      );
-      when(() => client.retryPolicy).thenReturn(retryPolicy);
-
-      // fake clientState
-      final clientState = FakeClientState();
-      when(() => client.state).thenReturn(clientState);
-
-      // mock persistence client
-      final channelThreads = <String, List<Message>>{};
-      when(() => client.chatPersistenceClient.getChannelThreads(channelCid)).thenAnswer((_) async => channelThreads);
-      final channelState = _generateChannelState(channelId, channelType);
-      when(() => client.chatPersistenceClient.getChannelStateByCid(channelCid)).thenAnswer((_) async => channelState);
-      when(() => client.chatPersistenceClient.updateMessages(channelCid, any())).thenAnswer((_) => Future.value());
-    });
-
-    // Setting up a initialized channel
-    setUp(() {
-      final channelState = _generateChannelState(channelId, channelType);
-      channel = Channel.fromState(client, channelState);
-    });
-
-    tearDown(() {
-      channel.dispose();
-    });
+        // Attaching the state loads the channel's threads from the offline
+        // storage; the stubbed storage has none, so the state stays empty.
+        verify(() => persistenceClient.getChannelThreads(_channelCid)).called(1);
+        expect(tester.channelState!.threads, isEmpty);
+        expect(tester.channelState!.messages, isEmpty);
+      },
+    );
   });
 
   group('Initialized Channel', () {
-    late final client = MockStreamChatClient();
-    const channelId = 'test-channel-id';
-    const channelType = 'test-channel-type';
-    const channelCid = '$channelType:$channelId';
-    late Channel channel;
-
-    setUpAll(() {
-      // Fallback values
-      registerFallbackValue(FakeMessage());
-      registerFallbackValue(FakeAttachmentFile());
-      registerFallbackValue(FakeEvent());
-
-      final retryPolicy = RetryPolicy(
-        shouldRetry: (_, __, ___) => false,
-        delayFactor: Duration.zero,
-      );
-      when(() => client.retryPolicy).thenReturn(retryPolicy);
-
-      // fake clientState
-      final clientState = FakeClientState();
-      when(() => client.state).thenReturn(clientState);
-
-      // mock channel delivery reporter
-      when(
-        () => client.channelDeliveryReporter.submitForDelivery(any()),
-      ).thenAnswer((_) async {});
-    });
-
-    // Setting up a initialized channel
-    setUp(() {
-      final channelState = _generateChannelState(
-        channelId,
-        channelType,
-        mockChannelConfig: true,
+    ChannelState _seedChannel(ChannelState _) => createDefaultChannelState(
+      channel: createDefaultChannelModel(
+        cid: _channelCid,
+        config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
         ownCapabilities: [ChannelCapability.readEvents],
+      ),
+    );
+
+    ChannelState Function(ChannelState) _seedChannelLocationApi() {
+      return (_) => createDefaultChannelState(
+        channel: createDefaultChannelModel(
+          cid: _channelCid,
+          config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+          ownCapabilities: const [ChannelCapability.readEvents],
+        ),
       );
-      channel = Channel.fromState(client, channelState);
-    });
+    }
 
-    tearDown(() {
-      channel.dispose();
-      clearInteractions(client);
-    });
+    Future<ChannelState> _seedChannelDrafts(ChannelTester tester) => tester.watch(
+      modifyResponse: (_) => createDefaultChannelState(
+        channel: createDefaultChannelModel(
+          cid: _channelCid,
+          config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+          ownCapabilities: const [ChannelCapability.readEvents],
+        ),
+      ),
+    );
 
-    test('should throw if trying to set `extraData`', () {
-      try {
-        channel.extraData = {'name': 'test-channel-name'};
-      } catch (e) {
-        expect(e, isA<StateError>());
-      }
-    });
+    Future<ChannelState> _seedChannelReminders(ChannelTester tester) => tester.watch(
+      modifyResponse: (_) => createDefaultChannelState(
+        channel: createDefaultChannelModel(
+          cid: _channelCid,
+          config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+          ownCapabilities: const [ChannelCapability.readEvents],
+        ),
+      ),
+    );
 
-    test('should throw if trying to set `image`', () {
-      try {
-        channel.image = 'https://stream.io/some-image';
-      } catch (e) {
-        expect(e, isA<StateError>());
-      }
-    });
+    ChannelState Function(ChannelState) _seedChannelUpdateMessage() {
+      return (_) => createDefaultChannelState(
+        channel: createDefaultChannelModel(
+          cid: _channelCid,
+          config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+          ownCapabilities: [ChannelCapability.readEvents],
+        ),
+      );
+    }
 
-    test('should throw if trying to set `name`', () {
-      try {
-        channel.name = 'New name';
-      } catch (e) {
-        expect(e, isA<StateError>());
-      }
-    });
+    ChannelState Function(ChannelState) _seedChannelDeleteMessage() {
+      return (_) => createDefaultChannelState(
+        channel: createDefaultChannelModel(
+          cid: _channelCid,
+          config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+          ownCapabilities: [ChannelCapability.readEvents],
+        ),
+      );
+    }
+
+    ChannelState Function(ChannelState) _seedChannelPinMessage() {
+      return (_) => createDefaultChannelState(
+        channel: createDefaultChannelModel(
+          cid: _channelCid,
+          config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+          ownCapabilities: [ChannelCapability.readEvents],
+        ),
+      );
+    }
+
+    ChannelState Function(ChannelState) _seedChannelMiscOperations() {
+      return (_) => createDefaultChannelState(
+        channel: createDefaultChannelModel(
+          cid: _channelCid,
+          config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+          ownCapabilities: [ChannelCapability.readEvents],
+        ),
+      );
+    }
+
+    ChannelState Function(ChannelState) _seedChannelReactions() {
+      return (_) => createDefaultChannelState(
+        channel: createDefaultChannelModel(
+          cid: _channelCid,
+          config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+          ownCapabilities: const [ChannelCapability.readEvents],
+        ),
+      );
+    }
+
+    Future<ChannelState> _seedChannelUpdateApi(ChannelTester tester) => tester.watch(
+      modifyResponse: (_) => createDefaultChannelState(
+        channel: createDefaultChannelModel(
+          cid: _channelCid,
+          config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+          ownCapabilities: const [ChannelCapability.readEvents],
+        ),
+      ),
+    );
+
+    Future<ChannelState> _seedChannelMemberApi(ChannelTester tester) => tester.watch(
+      modifyResponse: (_) => createDefaultChannelState(
+        channel: createDefaultChannelModel(
+          cid: _channelCid,
+          config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+          ownCapabilities: const [ChannelCapability.readEvents],
+        ),
+      ),
+    );
+
+    ChannelState Function(ChannelState) _seedChannelWatch() {
+      return (_) => createDefaultChannelState(
+        channel: createDefaultChannelModel(
+          cid: _channelCid,
+          config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+          ownCapabilities: [ChannelCapability.readEvents],
+        ),
+      );
+    }
+
+    ChannelState Function(ChannelState) _seedChannelMessageQueries() {
+      return (_) => createDefaultChannelState(
+        channel: createDefaultChannelModel(
+          cid: _channelCid,
+          config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+          ownCapabilities: [ChannelCapability.readEvents],
+        ),
+      );
+    }
+
+    // Builds the channel already initialized from state — the `.query` tests
+    // exercise `queryChannel` themselves, so they cannot seed through
+    // `tester.watch()` without polluting the call counts they verify.
+    Channel _buildInitializedChannel(
+      StreamChatClient client, {
+      List<ChannelCapability> ownCapabilities = const [ChannelCapability.readEvents],
+      List<Message> messages = const [],
+    }) {
+      return Channel.fromState(
+        client,
+        createDefaultChannelState(
+          channel: createDefaultChannelModel(
+            cid: _channelCid,
+            config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+            ownCapabilities: ownCapabilities,
+          ),
+          messages: messages,
+        ),
+      );
+    }
+
+    ChannelState Function(ChannelState) _seedChannelModerationApi() {
+      return (_) => createDefaultChannelState(
+        channel: createDefaultChannelModel(
+          cid: _channelCid,
+          config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+          ownCapabilities: [ChannelCapability.readEvents],
+        ),
+      );
+    }
+
+    ChannelState Function(ChannelState) _seedChannelDisplayApi() {
+      return (_) => createDefaultChannelState(
+        channel: createDefaultChannelModel(
+          cid: _channelCid,
+          config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+          ownCapabilities: [ChannelCapability.readEvents],
+        ),
+      );
+    }
+
+    // A bare channel state (no config, no capabilities) used to seed messages
+    // directly into the channel's client state.
+    ChannelState _channelStateWith({
+      List<Message> messages = const [],
+      List<Message> pinnedMessages = const [],
+    }) {
+      return createDefaultChannelState(
+        channel: createDefaultChannelModel(cid: _channelCid),
+        messages: messages,
+        pinnedMessages: pinnedMessages,
+      );
+    }
+
+    // testing archiving
+
+    // testing pinning
+
+    channelTest(
+      'should throw if trying to set `extraData`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannel),
+      body: (tester) async {
+        try {
+          tester.channel.extraData = {'name': 'test-channel-name'};
+        } catch (e) {
+          expect(e, isA<StateError>());
+        }
+      },
+    );
+
+    channelTest(
+      'should throw if trying to set `image`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannel),
+      body: (tester) async {
+        try {
+          tester.channel.image = 'https://stream.io/some-image';
+        } catch (e) {
+          expect(e, isA<StateError>());
+        }
+      },
+    );
+
+    channelTest(
+      'should throw if trying to set `name`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannel),
+      body: (tester) async {
+        try {
+          tester.channel.name = 'New name';
+        } catch (e) {
+          expect(e, isA<StateError>());
+        }
+      },
+    );
 
     group('`.sendMessage`', () {
-      test('queues a failed send for retry when the failure is retriable', () async {
-        // The enqueue gate used to test a type nothing throws any more, so a
-        // failed send never reached the queue at all. The retry is observable
-        // as a second attempt, since adding to the queue processes it.
-        final message = Message(id: 'retriable-id', text: 'hi', user: client.state.currentUser);
-
-        when(
-          () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
-        ).thenThrow(apiException(statusCode: 500));
-
-        await expectLater(channel.sendMessage(message), throwsA(isA<StreamChatException>()));
-        await Future.delayed(const Duration(milliseconds: 50));
-
-        verify(
-          () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
-        ).called(greaterThan(1));
-      });
-
-      test('does not queue a failed send when the failure is not retriable', () async {
-        final message = Message(id: 'refused-id', text: 'hi', user: client.state.currentUser);
-
-        when(
-          () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
-        ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
-
-        await expectLater(channel.sendMessage(message), throwsA(isA<StreamChatException>()));
-        await Future.delayed(const Duration(milliseconds: 50));
-
-        verify(
-          () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
-        ).called(1);
-      });
-
-      test('should work fine', () async {
-        final message = Message(
-          id: 'test-message-id',
-          text: 'Hello world!',
-          user: client.state.currentUser,
-        );
-
-        final sendMessageResponse = SendMessageResponse()..message = message.copyWith(state: MessageState.sent);
-
-        when(
-          () => client.sendMessage(
-            any(that: isSameMessageAs(message)),
-            channelId,
-            channelType,
+      ChannelState Function(ChannelState) _seedChannel() {
+        return (_) => createDefaultChannelState(
+          channel: createDefaultChannelModel(
+            cid: _channelCid,
+            config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+            ownCapabilities: const [ChannelCapability.readEvents],
           ),
-        ).thenAnswer((_) async => sendMessageResponse);
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.sending),
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.sent),
-                matchMessageState: true,
-              ),
-            ],
-          ]),
         );
+      }
 
-        final res = await channel.sendMessage(message);
-
-        expect(res, isNotNull);
-        expect(res.message.id, message.id);
-
-        verify(
-          () => client.sendMessage(
-            any(that: isSameMessageAs(message)),
-            channelId,
-            channelType,
-          ),
-        ).called(1);
-      });
-
-      test(
-        'should mark a refused send as failed with skipPush: true, skipEnrichUrl: false',
-        () async {
+      channelTest(
+        'should work fine',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
           final message = Message(
             id: 'test-message-id',
             text: 'Hello world!',
-            user: client.state.currentUser,
+            user: tester.currentUser,
           );
 
-          when(
-            () => client.sendMessage(
+          tester.mockApi(
+            (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(message))),
+            result: createDefaultSendMessageResponse(message: message.copyWith(state: MessageState.sent)),
+          );
+
+          final messagesEmission = expectLater(
+            // skipping first seed message list -> [] messages
+            tester.channelState?.messagesStream.skip(1),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.sending),
+                  matchMessageState: true,
+                ),
+              ],
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.sent),
+                  matchMessageState: true,
+                ),
+              ],
+            ]),
+          );
+
+          final res = await tester.channel.sendMessage(message);
+
+          expect(res, isNotNull);
+          expect(res.message.id, message.id);
+
+          tester.verifyApi(
+            (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(message))),
+          );
+
+          await messagesEmission;
+        },
+      );
+
+      channelTest(
+        'queues a failed send for retry when the failure is retriable',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          // The enqueue gate used to test a type nothing throws any more, so a
+          // failed send never reached the queue at all. The retry is observable
+          // as a second attempt, since adding to the queue processes it.
+          final message = Message(id: 'retriable-id', text: 'hi', user: tester.currentUser);
+
+          tester.mockApiFailure(
+            (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(message))),
+            error: createDefaultNetworkError(statusCode: 500),
+          );
+
+          await expectLater(
+            tester.channel.sendMessage(message),
+            throwsA(isA<StreamChatException>()),
+          );
+          await tester.pumpEventQueue();
+
+          tester.verifyApiCalled(
+            (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(message))),
+            times: 2,
+          );
+        },
+      );
+
+      channelTest(
+        'does not queue a failed send when the failure is not retriable',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final message = Message(id: 'refused-id', text: 'hi', user: tester.currentUser);
+
+          tester.mockApiFailure(
+            (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(message))),
+            error: createDefaultNetworkError(code: StreamErrorCode.notAllowed, statusCode: 403),
+          );
+
+          await expectLater(
+            tester.channel.sendMessage(message),
+            throwsA(isA<StreamChatException>()),
+          );
+          await tester.pumpEventQueue();
+
+          tester.verifyApiCalled(
+            (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(message))),
+            times: 1,
+          );
+        },
+      );
+
+      channelTest(
+        'should re-send the message through the retry queue when the failure is retriable',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final message = Message(
+            id: 'test-message-id',
+            text: 'Hello world!',
+            user: tester.currentUser,
+          );
+
+          tester.mockApiFailure(
+            (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(message))),
+            error: createDefaultNetworkError(code: StreamErrorCode.internalError, statusCode: 500),
+          );
+
+          await expectLater(
+            tester.channel.sendMessage(message),
+            throwsA(isA<StreamApiException>()),
+          );
+          await tester.pumpEventQueue();
+
+          // Once for the original send, once for the queue's retry attempt.
+          tester.verifyApiCalled(
+            (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(message))),
+            times: 2,
+          );
+        },
+      );
+
+      channelTest(
+        'should not re-send the message when the failure is not retriable',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final message = Message(
+            id: 'test-message-id',
+            text: 'Hello world!',
+            user: tester.currentUser,
+          );
+
+          tester.mockApiFailure(
+            (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(message))),
+            error: createDefaultNetworkError(code: StreamErrorCode.inputError, statusCode: 400),
+          );
+
+          await expectLater(
+            tester.channel.sendMessage(message),
+            throwsA(isA<StreamApiException>()),
+          );
+          await tester.pumpEventQueue();
+
+          tester.verifyApiCalled(
+            (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(message))),
+            times: 1,
+          );
+        },
+      );
+
+      channelTest(
+        'should report a superseded send as a cancelled request',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final attachment = Attachment(
+            id: 'test-attachment-id',
+            type: 'image',
+            file: AttachmentFile(size: 100, path: 'test-file-path'),
+          );
+
+          final message = Message(id: 'test-message-id', attachments: [attachment]);
+
+          // Holds the first send inside its attachment upload, so the second
+          // one arrives while it is still in flight.
+          tester.mockApi(
+            (api) => api.fileUploader.sendImage(
+              any(),
+              _channelId,
+              _channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+            result: SendImageResponse()..file = 'url',
+            delay: const Duration(seconds: 1),
+          );
+
+          final superseded = tester.channel.sendMessage(message);
+          await tester.pumpEventQueue();
+          unawaited(
+            tester.channel.sendMessage(message).catchError((_) => SendMessageResponse()),
+          );
+
+          // The caller stopped it, so it is a cancelled request rather than an
+          // SDK failure a crash tracker should hear about.
+          await expectLater(
+            superseded,
+            throwsA(
+              isA<StreamNetworkException>().having((it) => it.isCancelled, 'isCancelled', isTrue),
+            ),
+          );
+        },
+      );
+
+      channelTest(
+        'should mark a refused send as failed with skipPush: true, skipEnrichUrl: false',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final message = Message(
+            id: 'test-message-id',
+            text: 'Hello world!',
+            user: tester.currentUser,
+          );
+
+          // A 403 is the server's verdict on the request, not a transient
+          // failure, so the queue declines it and the send is simply refused.
+          tester.mockApiFailure(
+            (api) => api.message.sendMessage(
+              _channelId,
+              _channelType,
               any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
               skipPush: true,
             ),
-          ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
+            error: createDefaultNetworkError(code: StreamErrorCode.notAllowed, statusCode: 403),
+          );
 
-          expectLater(
+          final messagesEmission = expectLater(
             // skipping first seed message list -> [] messages
-            channel.state?.messagesStream.skip(1),
+            tester.channelState?.messagesStream.skip(1),
             emitsInOrder([
               [
                 isSameMessageAs(
@@ -379,7 +676,7 @@ void main() {
           );
 
           try {
-            await channel.sendMessage(
+            await tester.channel.sendMessage(
               message,
               skipPush: true,
             );
@@ -389,31 +686,50 @@ void main() {
             final networkError = e as StreamApiException;
             expect(networkError.code, equals(StreamErrorCode.notAllowed));
           }
+
+          await messagesEmission;
+
+          // Sent once: a refused send is never handed to the retry queue.
+          tester.verifyApiCalled(
+            (api) => api.message.sendMessage(
+              _channelId,
+              _channelType,
+              any(that: isSameMessageAs(message)),
+              skipPush: true,
+            ),
+            times: 1,
+          );
         },
       );
 
-      test(
+      channelTest(
         'should mark a refused send as failed with skipPush: true, skipEnrichUrl: true',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
           final message = Message(
             id: 'test-message-id-2',
             text: 'Hello world!',
-            user: client.state.currentUser,
+            user: tester.currentUser,
           );
 
-          when(
-            () => client.sendMessage(
+          // A 403 is the server's verdict on the request, not a transient
+          // failure, so the queue declines it and the send is simply refused.
+          tester.mockApiFailure(
+            (api) => api.message.sendMessage(
+              _channelId,
+              _channelType,
               any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
               skipPush: true,
               skipEnrichUrl: true,
             ),
-          ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
+            error: createDefaultNetworkError(code: StreamErrorCode.notAllowed, statusCode: 403),
+          );
 
-          expectLater(
+          final messagesEmission = expectLater(
             // skipping first seed message list -> [] messages
-            channel.state?.messagesStream.skip(1),
+            tester.channelState?.messagesStream.skip(1),
             emitsInOrder([
               [
                 isSameMessageAs(
@@ -436,7 +752,7 @@ void main() {
           );
 
           try {
-            await channel.sendMessage(
+            await tester.channel.sendMessage(
               message,
               skipPush: true,
               skipEnrichUrl: true,
@@ -447,30 +763,50 @@ void main() {
             final networkError = e as StreamApiException;
             expect(networkError.code, equals(StreamErrorCode.notAllowed));
           }
+
+          await messagesEmission;
+
+          // Sent once: a refused send is never handed to the retry queue.
+          tester.verifyApiCalled(
+            (api) => api.message.sendMessage(
+              _channelId,
+              _channelType,
+              any(that: isSameMessageAs(message)),
+              skipPush: true,
+              skipEnrichUrl: true,
+            ),
+            times: 1,
+          );
         },
       );
 
-      test(
+      channelTest(
         'should mark a refused send as failed with skipPush: false, skipEnrichUrl: true',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
           final message = Message(
             id: 'test-message-id-3',
             text: 'Hello world!',
-            user: client.state.currentUser,
+            user: tester.currentUser,
           );
 
-          when(
-            () => client.sendMessage(
+          // A 403 is the server's verdict on the request, not a transient
+          // failure, so the queue declines it and the send is simply refused.
+          tester.mockApiFailure(
+            (api) => api.message.sendMessage(
+              _channelId,
+              _channelType,
               any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
               skipEnrichUrl: true,
             ),
-          ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
+            error: createDefaultNetworkError(code: StreamErrorCode.notAllowed, statusCode: 403),
+          );
 
-          expectLater(
+          final messagesEmission = expectLater(
             // skipping first seed message list -> [] messages
-            channel.state?.messagesStream.skip(1),
+            tester.channelState?.messagesStream.skip(1),
             emitsInOrder([
               [
                 isSameMessageAs(
@@ -493,7 +829,7 @@ void main() {
           );
 
           try {
-            await channel.sendMessage(
+            await tester.channel.sendMessage(
               message,
               skipEnrichUrl: true,
             );
@@ -503,29 +839,44 @@ void main() {
             final networkError = e as StreamApiException;
             expect(networkError.code, equals(StreamErrorCode.notAllowed));
           }
+
+          await messagesEmission;
+
+          // Sent once: a refused send is never handed to the retry queue.
+          tester.verifyApiCalled(
+            (api) => api.message.sendMessage(
+              _channelId,
+              _channelType,
+              any(that: isSameMessageAs(message)),
+              skipEnrichUrl: true,
+            ),
+            times: 1,
+          );
         },
       );
 
-      test(
+      channelTest(
         'should mark a refused send as failed with skipPush: false, skipEnrichUrl: false',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
           final message = Message(
             id: 'test-message-id-4',
             text: 'Hello world!',
-            user: client.state.currentUser,
+            user: tester.currentUser,
           );
 
-          when(
-            () => client.sendMessage(
-              any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
-            ),
-          ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
+          // A 403 is the server's verdict on the request, not a transient
+          // failure, so the queue declines it and the send is simply refused.
+          tester.mockApiFailure(
+            (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(message))),
+            error: createDefaultNetworkError(code: StreamErrorCode.notAllowed, statusCode: 403),
+          );
 
-          expectLater(
+          final messagesEmission = expectLater(
             // skipping first seed message list -> [] messages
-            channel.state?.messagesStream.skip(1),
+            tester.channelState?.messagesStream.skip(1),
             emitsInOrder([
               [
                 isSameMessageAs(
@@ -548,7 +899,7 @@ void main() {
           );
 
           try {
-            await channel.sendMessage(
+            await tester.channel.sendMessage(
               message,
             );
           } catch (e) {
@@ -557,342 +908,269 @@ void main() {
             final networkError = e as StreamApiException;
             expect(networkError.code, equals(StreamErrorCode.notAllowed));
           }
+
+          await messagesEmission;
+
+          // Sent once: a refused send is never handed to the retry queue.
+          tester.verifyApiCalled(
+            (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(message))),
+            times: 1,
+          );
         },
       );
 
-      test('should re-send the message through the retry queue when the failure is retriable', () async {
-        final message = Message(
-          id: 'test-message-id',
-          text: 'Hello world!',
-          user: client.state.currentUser,
-        );
+      channelTest(
+        'should update message state even when non-retriable error occurs',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final message = Message(
+            id: 'test-message-id',
+            text: 'Hello world!',
+            user: tester.currentUser,
+          );
 
-        when(
-          () => client.sendMessage(
-            any(that: isSameMessageAs(message)),
-            channelId,
-            channelType,
-          ),
-        ).thenThrow(apiException(code: StreamErrorCode.internalError, statusCode: 500));
+          tester.mockApiFailure(
+            (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(message))),
+            error: createDefaultNetworkError(code: StreamErrorCode.inputError, statusCode: 400),
+          );
 
-        await expectLater(channel.sendMessage(message), throwsA(isA<StreamApiException>()));
-        await pumpEventQueue();
-
-        // Once for the original send, once for the queue's retry attempt.
-        verify(
-          () => client.sendMessage(
-            any(that: isSameMessageAs(message)),
-            channelId,
-            channelType,
-          ),
-        ).called(2);
-      });
-
-      test('should not re-send the message when the failure is not retriable', () async {
-        final message = Message(
-          id: 'test-message-id',
-          text: 'Hello world!',
-          user: client.state.currentUser,
-        );
-
-        when(
-          () => client.sendMessage(
-            any(that: isSameMessageAs(message)),
-            channelId,
-            channelType,
-          ),
-        ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
-
-        await expectLater(channel.sendMessage(message), throwsA(isA<StreamApiException>()));
-        await pumpEventQueue();
-
-        verify(
-          () => client.sendMessage(
-            any(that: isSameMessageAs(message)),
-            channelId,
-            channelType,
-          ),
-        ).called(1);
-      });
-
-      test('should update message state even when non-retriable error occurs', () async {
-        final message = Message(
-          id: 'test-message-id',
-          text: 'Hello world!',
-          user: client.state.currentUser,
-        );
-
-        when(
-          () => client.sendMessage(
-            any(that: isSameMessageAs(message)),
-            channelId,
-            channelType,
-          ),
-        ).thenThrow(
-          apiException(code: StreamErrorCode.inputError, statusCode: 400, message: 'Input error'),
-        );
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.sending),
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.sendingFailed(
-                    skipPush: false,
-                    skipEnrichUrl: false,
-                  ),
+          final messagesEmission = expectLater(
+            // skipping first seed message list -> [] messages
+            tester.channelState?.messagesStream.skip(1),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.sending),
+                  matchMessageState: true,
                 ),
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
+              ],
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    state: MessageState.sendingFailed(
+                      skipPush: false,
+                      skipEnrichUrl: false,
+                    ),
+                  ),
+                  matchMessageState: true,
+                ),
+              ],
+            ]),
+          );
 
-        try {
-          await channel.sendMessage(message);
-        } catch (e) {
-          expect(e, isA<StreamApiException>());
-        }
-      });
+          try {
+            await tester.channel.sendMessage(message);
+          } catch (e) {
+            expect(e, isA<StreamApiException>());
+          }
 
-      test('with attachments should work just fine', () async {
-        final attachments = List.generate(
-          3,
-          (index) => Attachment(
-            id: 'test-attachment-id-$index',
-            type: index.isEven ? 'image' : 'file',
-            file: AttachmentFile(size: index * 33, path: 'test-file-path'),
-          ),
-        );
+          await messagesEmission;
+        },
+      );
 
-        final message = Message(
-          id: 'test-message-id',
-          attachments: attachments,
-        );
-
-        final sendImageResponse = SendImageResponse()..file = 'test-image-url';
-        final sendFileResponse = SendFileResponse()..file = 'test-file-url';
-
-        when(
-          () => client.sendImage(
-            any(),
-            channelId,
-            channelType,
-            onSendProgress: any(named: 'onSendProgress'),
-            cancelToken: any(named: 'cancelToken'),
-            extraData: any(named: 'extraData'),
-          ),
-        ).thenAnswer((_) async => sendImageResponse);
-
-        when(
-          () => client.sendFile(
-            any(),
-            channelId,
-            channelType,
-            onSendProgress: any(named: 'onSendProgress'),
-            cancelToken: any(named: 'cancelToken'),
-            extraData: any(named: 'extraData'),
-          ),
-        ).thenAnswer((_) async => sendFileResponse);
-
-        when(
-          () => client.sendMessage(
-            any(that: isSameMessageAs(message)),
-            channelId,
-            channelType,
-          ),
-        ).thenAnswer(
-          (_) async => SendMessageResponse()
-            ..message = message.copyWith(
-              attachments: attachments
-                  .map((it) => it.copyWith(uploadState: const UploadState.success()))
-                  .toList(growable: false),
-              state: MessageState.sent,
+      channelTest(
+        'with attachments should work just fine',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final attachments = List.generate(
+            3,
+            (index) => Attachment(
+              id: 'test-attachment-id-$index',
+              type: index.isEven ? 'image' : 'file',
+              file: AttachmentFile(size: index * 33, path: 'test-file-path'),
             ),
-        );
+          );
 
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder(
-            [
-              // preparing attachments to upload
-              [
-                isSameMessageAs(
-                  message.copyWith(
-                    state: MessageState.sending,
-                    attachments: [...attachments.map((it) => it.copyWith(uploadState: const UploadState.preparing()))],
-                  ),
-                  matchMessageState: true,
-                  matchAttachments: true,
-                  matchAttachmentsUploadState: true,
+          final message = Message(
+            id: 'test-message-id',
+            attachments: attachments,
+          );
+
+          tester
+            ..mockApi(
+              (api) => api.fileUploader.sendImage(
+                any(),
+                _channelId,
+                _channelType,
+                onSendProgress: any(named: 'onSendProgress'),
+                cancelToken: any(named: 'cancelToken'),
+                extraData: any(named: 'extraData'),
+              ),
+              result: SendImageResponse()..file = 'test-image-url',
+            )
+            ..mockApi(
+              (api) => api.fileUploader.sendFile(
+                any(),
+                _channelId,
+                _channelType,
+                onSendProgress: any(named: 'onSendProgress'),
+                cancelToken: any(named: 'cancelToken'),
+                extraData: any(named: 'extraData'),
+              ),
+              result: SendFileResponse()..file = 'test-file-url',
+            )
+            ..mockApi(
+              (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(message))),
+              result: createDefaultSendMessageResponse(
+                message: message.copyWith(
+                  attachments: attachments
+                      .map((it) => it.copyWith(uploadState: const UploadState.success()))
+                      .toList(growable: false),
+                  state: MessageState.sent,
                 ),
-              ],
-              // 0th attachment is successfully uploaded
+              ),
+            );
+
+          final messagesEmission = expectLater(
+            // skipping first seed message list -> [] messages
+            tester.channelState?.messagesStream.skip(1),
+            emitsInOrder(
               [
-                isSameMessageAs(
-                  message.copyWith(
-                    state: MessageState.sending,
-                    attachments: [...attachments]
-                      ..[0] = attachments[0].copyWith(
-                        uploadState: const UploadState.success(),
-                      ),
+                // preparing attachments to upload
+                [
+                  isSameMessageAs(
+                    message.copyWith(
+                      state: MessageState.sending,
+                      attachments: [
+                        ...attachments.map((it) => it.copyWith(uploadState: const UploadState.preparing())),
+                      ],
+                    ),
+                    matchMessageState: true,
+                    matchAttachments: true,
+                    matchAttachmentsUploadState: true,
                   ),
-                  matchMessageState: true,
-                  matchAttachments: true,
-                  matchAttachmentsUploadState: true,
-                ),
-              ],
-              // 0th and 1st attachment is successfully uploaded
-              [
-                isSameMessageAs(
-                  message.copyWith(
-                    state: MessageState.sending,
-                    attachments: [...attachments]
-                      ..[0] = attachments[0].copyWith(
-                        uploadState: const UploadState.success(),
-                      )
-                      ..[1] = attachments[1].copyWith(
-                        uploadState: const UploadState.success(),
-                      ),
+                ],
+                // 0th attachment is successfully uploaded
+                [
+                  isSameMessageAs(
+                    message.copyWith(
+                      state: MessageState.sending,
+                      attachments: [...attachments]
+                        ..[0] = attachments[0].copyWith(
+                          uploadState: const UploadState.success(),
+                        ),
+                    ),
+                    matchMessageState: true,
+                    matchAttachments: true,
+                    matchAttachmentsUploadState: true,
                   ),
-                  matchMessageState: true,
-                  matchAttachments: true,
-                  matchAttachmentsUploadState: true,
-                ),
-              ],
-              // all the attachments are successfully uploaded
-              [
-                isSameMessageAs(
-                  message.copyWith(
-                    state: MessageState.sending,
-                    attachments: [...attachments.map((it) => it.copyWith(uploadState: const UploadState.success()))],
+                ],
+                // 0th and 1st attachment is successfully uploaded
+                [
+                  isSameMessageAs(
+                    message.copyWith(
+                      state: MessageState.sending,
+                      attachments: [...attachments]
+                        ..[0] = attachments[0].copyWith(
+                          uploadState: const UploadState.success(),
+                        )
+                        ..[1] = attachments[1].copyWith(
+                          uploadState: const UploadState.success(),
+                        ),
+                    ),
+                    matchMessageState: true,
+                    matchAttachments: true,
+                    matchAttachmentsUploadState: true,
                   ),
-                  matchMessageState: true,
-                  matchAttachments: true,
-                  matchAttachmentsUploadState: true,
-                ),
-              ],
-              [
-                isSameMessageAs(
-                  message.copyWith(
-                    state: MessageState.sent,
-                    attachments: [...attachments.map((it) => it.copyWith(uploadState: const UploadState.success()))],
+                ],
+                // all the attachments are successfully uploaded
+                [
+                  isSameMessageAs(
+                    message.copyWith(
+                      state: MessageState.sending,
+                      attachments: [...attachments.map((it) => it.copyWith(uploadState: const UploadState.success()))],
+                    ),
+                    matchMessageState: true,
+                    matchAttachments: true,
+                    matchAttachmentsUploadState: true,
                   ),
-                  matchMessageState: true,
-                  matchAttachments: true,
-                  matchAttachmentsUploadState: true,
-                ),
+                ],
+                [
+                  isSameMessageAs(
+                    message.copyWith(
+                      state: MessageState.sent,
+                      attachments: [...attachments.map((it) => it.copyWith(uploadState: const UploadState.success()))],
+                    ),
+                    matchMessageState: true,
+                    matchAttachments: true,
+                    matchAttachmentsUploadState: true,
+                  ),
+                ],
               ],
-            ],
-          ),
-        );
+            ),
+          );
 
-        final res = await channel.sendMessage(message);
+          final res = await tester.channel.sendMessage(message);
 
-        expect(res, isNotNull);
-        expect(res.message.id, message.id);
-        expect(res.message.attachments.length, message.attachments.length);
-        expect(
-          res.message.attachments.every(
-            (it) => it.uploadState == const UploadState.success(),
-          ),
-          isTrue,
-        );
+          expect(res, isNotNull);
+          expect(res.message.id, message.id);
+          expect(res.message.attachments.length, message.attachments.length);
+          expect(
+            res.message.attachments.every(
+              (it) => it.uploadState == const UploadState.success(),
+            ),
+            isTrue,
+          );
 
-        verify(
-          () => client.sendImage(
-            any(),
-            channelId,
-            channelType,
-            onSendProgress: any(named: 'onSendProgress'),
-            cancelToken: any(named: 'cancelToken'),
-            extraData: any(named: 'extraData'),
-          ),
-        ).called(2);
+          tester
+            ..verifyApiCalled(
+              (api) => api.fileUploader.sendImage(
+                any(),
+                _channelId,
+                _channelType,
+                onSendProgress: any(named: 'onSendProgress'),
+                cancelToken: any(named: 'cancelToken'),
+                extraData: any(named: 'extraData'),
+              ),
+              times: 2,
+            )
+            ..verifyApi(
+              (api) => api.fileUploader.sendFile(
+                any(),
+                _channelId,
+                _channelType,
+                onSendProgress: any(named: 'onSendProgress'),
+                cancelToken: any(named: 'cancelToken'),
+                extraData: any(named: 'extraData'),
+              ),
+            )
+            ..verifyApi(
+              (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(message))),
+            );
 
-        verify(
-          () => client.sendFile(
-            any(),
-            channelId,
-            channelType,
-            onSendProgress: any(named: 'onSendProgress'),
-            cancelToken: any(named: 'cancelToken'),
-            extraData: any(named: 'extraData'),
-          ),
-        ).called(1);
+          await messagesEmission;
+        },
+      );
 
-        verify(
-          () => client.sendMessage(
-            any(that: isSameMessageAs(message)),
-            channelId,
-            channelType,
-          ),
-        ).called(1);
-      });
+      channelTest(
+        'should not send if the message is invalid',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final message = Message(id: 'test-message-id');
 
-      test('should not send if the message is invalid', () async {
-        final message = Message(id: 'test-message-id');
+          await expectLater(
+            () => tester.channel.sendMessage(message),
+            throwsA(isA<StreamClientException>()),
+          );
 
-        expect(
-          () => channel.sendMessage(message),
-          throwsA(isA<StreamClientException>()),
-        );
+          tester.verifyNeverCalled(
+            (api) => api.message.sendMessage(_channelId, _channelType, any()),
+          );
+        },
+      );
 
-        verifyNever(
-          () => client.sendMessage(any(), channelId, channelType),
-        );
-      });
-
-      test('should report a superseded send as a cancelled request', () async {
-        final attachment = Attachment(
-          id: 'test-attachment-id',
-          type: 'image',
-          file: AttachmentFile(size: 100, path: 'test-file-path'),
-        );
-
-        final message = Message(id: 'test-message-id', attachments: [attachment]);
-
-        // Holds the first send inside its attachment upload, so the second one
-        // arrives while it is still in flight.
-        final upload = Completer<SendImageResponse>();
-        when(
-          () => client.sendImage(
-            any(),
-            channelId,
-            channelType,
-            onSendProgress: any(named: 'onSendProgress'),
-            cancelToken: any(named: 'cancelToken'),
-            extraData: any(named: 'extraData'),
-          ),
-        ).thenAnswer((_) => upload.future);
-        addTearDown(() => upload.complete(SendImageResponse()..file = 'url'));
-
-        final superseded = channel.sendMessage(message);
-        await pumpEventQueue();
-        unawaited(channel.sendMessage(message).catchError((_) => SendMessageResponse()));
-
-        // The caller stopped it, so it is a cancelled request rather than an
-        // SDK failure a crash tracker should hear about.
-        await expectLater(
-          superseded,
-          throwsA(
-            isA<StreamNetworkException>().having((it) => it.isCancelled, 'isCancelled', isTrue),
-          ),
-        );
-      });
-
-      test(
+      channelTest(
         'should not send empty message when all attachments are cancelled',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
           final attachment = Attachment(
             id: 'test-attachment-id',
             type: 'image',
@@ -904,44 +1182,46 @@ void main() {
             attachments: [attachment],
           );
 
-          when(
-            () => client.sendImage(
+          tester.mockApiFailure(
+            (api) => api.fileUploader.sendImage(
               any(),
-              channelId,
-              channelType,
+              _channelId,
+              _channelType,
               onSendProgress: any(named: 'onSendProgress'),
               cancelToken: any(named: 'cancelToken'),
               extraData: any(named: 'extraData'),
             ),
-          ).thenAnswer(
-            (_) async => throw const StreamNetworkException(message: 'Request cancelled', isCancelled: true),
+            error: const StreamNetworkException(message: 'Request cancelled', isCancelled: true),
           );
 
-          expect(
-            () => channel.sendMessage(message),
+          await expectLater(
+            () => tester.channel.sendMessage(message),
             throwsA(isA<StreamClientException>()),
           );
 
-          verify(
-            () => client.sendImage(
-              any(),
-              channelId,
-              channelType,
-              onSendProgress: any(named: 'onSendProgress'),
-              cancelToken: any(named: 'cancelToken'),
-              extraData: any(named: 'extraData'),
-            ),
-          );
-
-          verifyNever(
-            () => client.sendMessage(any(), channelId, channelType),
-          );
+          tester
+            ..verifyApi(
+              (api) => api.fileUploader.sendImage(
+                any(),
+                _channelId,
+                _channelType,
+                onSendProgress: any(named: 'onSendProgress'),
+                cancelToken: any(named: 'cancelToken'),
+                extraData: any(named: 'extraData'),
+              ),
+            )
+            ..verifyNeverCalled(
+              (api) => api.message.sendMessage(_channelId, _channelType, any()),
+            );
         },
       );
 
-      test(
+      channelTest(
         'should send message when attachment is cancelled but text exists',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
           final attachment = Attachment(
             id: 'test-attachment-id',
             type: 'image',
@@ -954,62 +1234,56 @@ void main() {
             attachments: [attachment],
           );
 
-          when(
-            () => client.sendImage(
-              any(),
-              channelId,
-              channelType,
-              onSendProgress: any(named: 'onSendProgress'),
-              cancelToken: any(named: 'cancelToken'),
-              extraData: any(named: 'extraData'),
-            ),
-          ).thenAnswer(
-            (_) async => throw const StreamNetworkException(message: 'Request cancelled', isCancelled: true),
-          );
-
-          when(
-            () => client.sendMessage(
-              any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
-            ),
-          ).thenAnswer(
-            (_) async => SendMessageResponse()
-              ..message = message.copyWith(
-                attachments: [],
-                state: MessageState.sent,
+          tester
+            ..mockApiFailure(
+              (api) => api.fileUploader.sendImage(
+                any(),
+                _channelId,
+                _channelType,
+                onSendProgress: any(named: 'onSendProgress'),
+                cancelToken: any(named: 'cancelToken'),
+                extraData: any(named: 'extraData'),
               ),
-          );
+              error: const StreamNetworkException(message: 'Request cancelled', isCancelled: true),
+            )
+            ..mockApi(
+              (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(message))),
+              result: createDefaultSendMessageResponse(
+                message: message.copyWith(
+                  attachments: [],
+                  state: MessageState.sent,
+                ),
+              ),
+            );
 
-          final res = await channel.sendMessage(message);
+          final res = await tester.channel.sendMessage(message);
 
           expect(res, isNotNull);
           expect(res.message.text, 'Hello world!');
 
-          verify(
-            () => client.sendImage(
-              any(),
-              channelId,
-              channelType,
-              onSendProgress: any(named: 'onSendProgress'),
-              cancelToken: any(named: 'cancelToken'),
-              extraData: any(named: 'extraData'),
-            ),
-          );
-
-          verify(
-            () => client.sendMessage(
-              any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
-            ),
-          );
+          tester
+            ..verifyApi(
+              (api) => api.fileUploader.sendImage(
+                any(),
+                _channelId,
+                _channelType,
+                onSendProgress: any(named: 'onSendProgress'),
+                cancelToken: any(named: 'cancelToken'),
+                extraData: any(named: 'extraData'),
+              ),
+            )
+            ..verifyApi(
+              (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(message))),
+            );
         },
       );
 
-      test(
+      channelTest(
         'should send message when attachment is cancelled but quoted message exists',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
           final attachment = Attachment(
             id: 'test-attachment-id',
             type: 'image',
@@ -1027,62 +1301,56 @@ void main() {
             quotedMessageId: quotedMessage.id,
           );
 
-          when(
-            () => client.sendImage(
-              any(),
-              channelId,
-              channelType,
-              onSendProgress: any(named: 'onSendProgress'),
-              cancelToken: any(named: 'cancelToken'),
-              extraData: any(named: 'extraData'),
-            ),
-          ).thenAnswer(
-            (_) async => throw const StreamNetworkException(message: 'Request cancelled', isCancelled: true),
-          );
-
-          when(
-            () => client.sendMessage(
-              any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
-            ),
-          ).thenAnswer(
-            (_) async => SendMessageResponse()
-              ..message = message.copyWith(
-                attachments: [],
-                state: MessageState.sent,
+          tester
+            ..mockApiFailure(
+              (api) => api.fileUploader.sendImage(
+                any(),
+                _channelId,
+                _channelType,
+                onSendProgress: any(named: 'onSendProgress'),
+                cancelToken: any(named: 'cancelToken'),
+                extraData: any(named: 'extraData'),
               ),
-          );
+              error: const StreamNetworkException(message: 'Request cancelled', isCancelled: true),
+            )
+            ..mockApi(
+              (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(message))),
+              result: createDefaultSendMessageResponse(
+                message: message.copyWith(
+                  attachments: [],
+                  state: MessageState.sent,
+                ),
+              ),
+            );
 
-          final res = await channel.sendMessage(message);
+          final res = await tester.channel.sendMessage(message);
 
           expect(res, isNotNull);
           expect(res.message.quotedMessageId, quotedMessage.id);
 
-          verify(
-            () => client.sendImage(
-              any(),
-              channelId,
-              channelType,
-              onSendProgress: any(named: 'onSendProgress'),
-              cancelToken: any(named: 'cancelToken'),
-              extraData: any(named: 'extraData'),
-            ),
-          );
-
-          verify(
-            () => client.sendMessage(
-              any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
-            ),
-          );
+          tester
+            ..verifyApi(
+              (api) => api.fileUploader.sendImage(
+                any(),
+                _channelId,
+                _channelType,
+                onSendProgress: any(named: 'onSendProgress'),
+                cancelToken: any(named: 'cancelToken'),
+                extraData: any(named: 'extraData'),
+              ),
+            )
+            ..verifyApi(
+              (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(message))),
+            );
         },
       );
 
-      test(
+      channelTest(
         'should send message when attachment is cancelled but poll exists',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
           final attachment = Attachment(
             id: 'test-attachment-id',
             type: 'image',
@@ -1095,56 +1363,47 @@ void main() {
             pollId: 'poll-123',
           );
 
-          when(
-            () => client.sendImage(
-              any(),
-              channelId,
-              channelType,
-              onSendProgress: any(named: 'onSendProgress'),
-              cancelToken: any(named: 'cancelToken'),
-              extraData: any(named: 'extraData'),
-            ),
-          ).thenAnswer(
-            (_) async => throw const StreamNetworkException(message: 'Request cancelled', isCancelled: true),
-          );
-
-          when(
-            () => client.sendMessage(
-              any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
-            ),
-          ).thenAnswer(
-            (_) async => SendMessageResponse()
-              ..message = message.copyWith(
-                attachments: [],
-                state: MessageState.sent,
+          tester
+            ..mockApiFailure(
+              (api) => api.fileUploader.sendImage(
+                any(),
+                _channelId,
+                _channelType,
+                onSendProgress: any(named: 'onSendProgress'),
+                cancelToken: any(named: 'cancelToken'),
+                extraData: any(named: 'extraData'),
               ),
-          );
+              error: const StreamNetworkException(message: 'Request cancelled', isCancelled: true),
+            )
+            ..mockApi(
+              (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(message))),
+              result: createDefaultSendMessageResponse(
+                message: message.copyWith(
+                  attachments: [],
+                  state: MessageState.sent,
+                ),
+              ),
+            );
 
-          final res = await channel.sendMessage(message);
+          final res = await tester.channel.sendMessage(message);
 
           expect(res, isNotNull);
           expect(res.message.pollId, 'poll-123');
 
-          verify(
-            () => client.sendImage(
-              any(),
-              channelId,
-              channelType,
-              onSendProgress: any(named: 'onSendProgress'),
-              cancelToken: any(named: 'cancelToken'),
-              extraData: any(named: 'extraData'),
-            ),
-          );
-
-          verify(
-            () => client.sendMessage(
-              any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
-            ),
-          );
+          tester
+            ..verifyApi(
+              (api) => api.fileUploader.sendImage(
+                any(),
+                _channelId,
+                _channelType,
+                onSendProgress: any(named: 'onSendProgress'),
+                cancelToken: any(named: 'cancelToken'),
+                extraData: any(named: 'extraData'),
+              ),
+            )
+            ..verifyApi(
+              (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(message))),
+            );
         },
       );
     });
@@ -1157,44 +1416,58 @@ void main() {
         longitude: -74.0060,
       );
 
-      test('should create a static location and call sendMessage', () async {
-        when(
-          () => client.sendMessage(any(), channelId, channelType),
-        ).thenAnswer(
-          (_) async => SendMessageResponse()
-            ..message = Message(
-              id: locationId,
-              text: 'Location shared',
-              extraData: const {'custom': 'data'},
-              sharedLocation: Location(
-                channelCid: channel.cid,
-                messageId: locationId,
-                userId: client.state.currentUser?.id,
-                latitude: coordinates.latitude,
-                longitude: coordinates.longitude,
-                createdByDeviceId: deviceId,
+      channelTest(
+        'should create a static location and call sendMessage',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelLocationApi()),
+        body: (tester) async {
+          tester.mockApi(
+            (api) => api.message.sendMessage(
+              _channelId,
+              _channelType,
+              any(that: isSameMessageAs(Message(id: locationId))),
+            ),
+            result: createDefaultSendMessageResponse(
+              message: Message(
+                id: locationId,
+                text: 'Location shared',
+                extraData: const {'custom': 'data'},
+                sharedLocation: Location(
+                  channelCid: tester.channel.cid,
+                  messageId: locationId,
+                  userId: tester.currentUser?.id,
+                  latitude: coordinates.latitude,
+                  longitude: coordinates.longitude,
+                  createdByDeviceId: deviceId,
+                ),
               ),
             ),
-        );
+          );
 
-        final response = await channel.sendStaticLocation(
-          id: locationId,
-          messageText: 'Location shared',
-          createdByDeviceId: deviceId,
-          location: coordinates,
-          extraData: {'custom': 'data'},
-        );
+          final response = await tester.channel.sendStaticLocation(
+            id: locationId,
+            messageText: 'Location shared',
+            createdByDeviceId: deviceId,
+            location: coordinates,
+            extraData: {'custom': 'data'},
+          );
 
-        expect(response, isNotNull);
-        expect(response.message.id, locationId);
-        expect(response.message.text, 'Location shared');
-        expect(response.message.extraData['custom'], 'data');
-        expect(response.message.sharedLocation, isNotNull);
+          expect(response, isNotNull);
+          expect(response.message.id, locationId);
+          expect(response.message.text, 'Location shared');
+          expect(response.message.extraData['custom'], 'data');
+          expect(response.message.sharedLocation, isNotNull);
 
-        verify(
-          () => client.sendMessage(any(), channelId, channelType),
-        ).called(1);
-      });
+          tester.verifyApi(
+            (api) => api.message.sendMessage(
+              _channelId,
+              _channelType,
+              any(that: isSameMessageAs(Message(id: locationId))),
+            ),
+          );
+        },
+      );
     });
 
     group('`.startLiveLocationSharing`', () {
@@ -1206,30 +1479,37 @@ void main() {
         longitude: -74.0060,
       );
 
-      test(
+      channelTest(
         'should create message with live location and call sendMessage',
-        () async {
-          when(
-            () => client.sendMessage(any(), channelId, channelType),
-          ).thenAnswer(
-            (_) async => SendMessageResponse()
-              ..message = Message(
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelLocationApi()),
+        body: (tester) async {
+          tester.mockApi(
+            (api) => api.message.sendMessage(
+              _channelId,
+              _channelType,
+              any(that: isSameMessageAs(Message(id: locationId))),
+            ),
+            result: createDefaultSendMessageResponse(
+              message: Message(
                 id: locationId,
                 text: 'Location shared',
                 extraData: const {'custom': 'data'},
                 sharedLocation: Location(
-                  channelCid: channel.cid,
+                  channelCid: tester.channel.cid,
                   messageId: locationId,
-                  userId: client.state.currentUser?.id,
+                  userId: tester.currentUser?.id,
                   latitude: coordinates.latitude,
                   longitude: coordinates.longitude,
                   createdByDeviceId: deviceId,
                   endAt: endSharingAt,
                 ),
               ),
+            ),
           );
 
-          final response = await channel.startLiveLocationSharing(
+          final response = await tester.channel.startLiveLocationSharing(
             id: locationId,
             messageText: 'Location shared',
             createdByDeviceId: deviceId,
@@ -1245,9 +1525,13 @@ void main() {
           expect(response.message.sharedLocation, isNotNull);
           expect(response.message.sharedLocation?.endAt, endSharingAt);
 
-          verify(
-            () => client.sendMessage(any(), channelId, channelType),
-          ).called(1);
+          tester.verifyApi(
+            (api) => api.message.sendMessage(
+              _channelId,
+              _channelType,
+              any(that: isSameMessageAs(Message(id: locationId))),
+            ),
+          );
         },
       );
     });
@@ -1255,525 +1539,527 @@ void main() {
     group('`.createDraft`', () {
       final draftMessage = DraftMessage(text: 'Draft message text');
 
-      setUp(() {
-        when(
-          () => client.createDraft(
-            draftMessage,
-            channelId,
-            channelType,
-          ),
-        ).thenAnswer(
-          (_) async => CreateDraftResponse()
-            ..draft = Draft(
-              channelCid: channelCid,
-              createdAt: DateTime.now(),
-              message: draftMessage,
+      channelTest(
+        'should call client.createDraft',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: _seedChannelDrafts,
+        body: (tester) async {
+          tester.mockApi(
+            (api) => api.message.createDraft(_channelId, _channelType, draftMessage),
+            result: createDefaultCreateDraftResponse(
+              draft: createDefaultDraft(channelCid: _channelCid, message: draftMessage),
             ),
-        );
-      });
+          );
 
-      test('should call client.createDraft', () async {
-        final res = await channel.createDraft(draftMessage);
+          final res = await tester.channel.createDraft(draftMessage);
 
-        expect(res, isNotNull);
-        expect(res.draft.message, draftMessage);
+          expect(res, isNotNull);
+          expect(res.draft.message, draftMessage);
 
-        verify(
-          () => channel.client.createDraft(
-            draftMessage,
-            channelId,
-            channelType,
-          ),
-        ).called(1);
-      });
+          tester.verifyApi(
+            (api) => api.message.createDraft(_channelId, _channelType, draftMessage),
+          );
+        },
+      );
     });
 
     group('`.getDraft`', () {
       final draftMessage = DraftMessage(text: 'Draft message text');
 
-      setUp(() {
-        when(
-          () => client.getDraft(
-            channelId,
-            channelType,
-            parentId: any(named: 'parentId'),
-          ),
-        ).thenAnswer(
-          (_) async => GetDraftResponse()
-            ..draft = Draft(
-              channelCid: channelCid,
-              createdAt: DateTime.now(),
-              message: draftMessage,
+      channelTest(
+        'should call client.getDraft',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: _seedChannelDrafts,
+        body: (tester) async {
+          tester.mockApi(
+            (api) => api.message.getDraft(_channelId, _channelType),
+            result: createDefaultGetDraftResponse(
+              draft: createDefaultDraft(channelCid: _channelCid, message: draftMessage),
             ),
-        );
-      });
+          );
 
-      test('should call client.getDraft', () async {
-        final res = await channel.getDraft();
+          final res = await tester.channel.getDraft();
 
-        expect(res, isNotNull);
-        expect(res.draft.message, draftMessage);
+          expect(res, isNotNull);
+          expect(res.draft.message, draftMessage);
 
-        verify(
-          () => channel.client.getDraft(
-            channelId,
-            channelType,
-          ),
-        ).called(1);
-      });
+          tester.verifyApi(
+            (api) => api.message.getDraft(_channelId, _channelType),
+          );
+        },
+      );
 
-      test('with parentId should pass parentId to client', () async {
-        const parentId = 'parent-123';
-        final res = await channel.getDraft(parentId: parentId);
+      channelTest(
+        'with parentId should pass parentId to client',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: _seedChannelDrafts,
+        body: (tester) async {
+          const parentId = 'parent-123';
+          tester.mockApi(
+            (api) => api.message.getDraft(_channelId, _channelType, parentId: parentId),
+            result: createDefaultGetDraftResponse(
+              draft: createDefaultDraft(channelCid: _channelCid, message: draftMessage),
+            ),
+          );
 
-        expect(res, isNotNull);
-        expect(res.draft.message, draftMessage);
+          final res = await tester.channel.getDraft(parentId: parentId);
 
-        verify(
-          () => channel.client.getDraft(
-            channelId,
-            channelType,
-            parentId: parentId,
-          ),
-        ).called(1);
-      });
+          expect(res, isNotNull);
+          expect(res.draft.message, draftMessage);
+
+          tester.verifyApi(
+            (api) => api.message.getDraft(_channelId, _channelType, parentId: parentId),
+          );
+        },
+      );
     });
 
     group('`.deleteDraft`', () {
-      setUp(() {
-        when(
-          () => client.deleteDraft(
-            channelId,
-            channelType,
-            parentId: any(named: 'parentId'),
-          ),
-        ).thenAnswer((_) async => EmptyResponse());
-      });
+      channelTest(
+        'should call client.deleteDraft',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: _seedChannelDrafts,
+        body: (tester) async {
+          tester.mockApi(
+            (api) => api.message.deleteDraft(_channelId, _channelType),
+            result: createDefaultEmptyResponse(),
+          );
 
-      test('should call client.deleteDraft', () async {
-        final res = await channel.deleteDraft();
+          final res = await tester.channel.deleteDraft();
 
-        expect(res, isNotNull);
+          expect(res, isNotNull);
 
-        verify(
-          () => channel.client.deleteDraft(
-            channelId,
-            channelType,
-          ),
-        ).called(1);
-      });
+          tester.verifyApi(
+            (api) => api.message.deleteDraft(_channelId, _channelType),
+          );
+        },
+      );
 
-      test('with parentId should pass parentId to client', () async {
-        const parentId = 'parent-123';
-        final res = await channel.deleteDraft(parentId: parentId);
+      channelTest(
+        'with parentId should pass parentId to client',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: _seedChannelDrafts,
+        body: (tester) async {
+          const parentId = 'parent-123';
+          tester.mockApi(
+            (api) => api.message.deleteDraft(_channelId, _channelType, parentId: parentId),
+            result: createDefaultEmptyResponse(),
+          );
 
-        expect(res, isNotNull);
+          final res = await tester.channel.deleteDraft(parentId: parentId);
 
-        verify(
-          () => channel.client.deleteDraft(
-            channelId,
-            channelType,
-            parentId: parentId,
-          ),
-        ).called(1);
-      });
+          expect(res, isNotNull);
+
+          tester.verifyApi(
+            (api) => api.message.deleteDraft(_channelId, _channelType, parentId: parentId),
+          );
+        },
+      );
     });
 
     group('`.createReminder`', () {
       const messageId = 'test-message-id';
+      final reminderRemindAt = DateTime.utc(2024, 6, 15, 14, 30);
 
-      setUp(() {
-        when(
-          () => client.createReminder(
-            messageId,
-            remindAt: any(named: 'remindAt'),
-          ),
-        ).thenAnswer(
-          (_) async => CreateReminderResponse()
-            ..reminder = MessageReminder(
-              messageId: messageId,
-              channelCid: channelCid,
-              userId: 'test-user-id',
-              remindAt: DateTime(2024, 6, 15, 14, 30),
-              createdAt: DateTime.now(),
-              updatedAt: DateTime.now(),
+      channelTest(
+        'should call client.createReminder',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: _seedChannelReminders,
+        body: (tester) async {
+          tester.mockApi(
+            (api) => api.reminders.createReminder(messageId),
+            result: createDefaultCreateReminderResponse(
+              reminder: createDefaultMessageReminder(
+                messageId: messageId,
+                channelCid: _channelCid,
+                remindAt: reminderRemindAt,
+              ),
             ),
-        );
-      });
+          );
 
-      test('should call client.createReminder', () async {
-        final res = await channel.createReminder(messageId);
+          final res = await tester.channel.createReminder(messageId);
 
-        expect(res, isNotNull);
-        expect(res.reminder.messageId, messageId);
+          expect(res, isNotNull);
+          expect(res.reminder.messageId, messageId);
 
-        verify(() => channel.client.createReminder(messageId)).called(1);
-      });
+          tester.verifyApi(
+            (api) => api.reminders.createReminder(messageId),
+          );
+        },
+      );
 
-      test('with remindAt should pass remindAt to client', () async {
-        final remindAt = DateTime(2024, 6, 15, 14, 30);
-        final res = await channel.createReminder(messageId, remindAt: remindAt);
+      channelTest(
+        'with remindAt should pass remindAt to client',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: _seedChannelReminders,
+        body: (tester) async {
+          final remindAt = DateTime.utc(2024, 6, 15, 14, 30);
+          tester.mockApi(
+            (api) => api.reminders.createReminder(messageId, remindAt: remindAt),
+            result: createDefaultCreateReminderResponse(
+              reminder: createDefaultMessageReminder(
+                messageId: messageId,
+                channelCid: _channelCid,
+                remindAt: reminderRemindAt,
+              ),
+            ),
+          );
 
-        expect(res, isNotNull);
-        expect(res.reminder.messageId, messageId);
-        expect(res.reminder.remindAt, remindAt);
+          final res = await tester.channel.createReminder(messageId, remindAt: remindAt);
 
-        verify(
-          () => channel.client.createReminder(
-            messageId,
-            remindAt: remindAt,
-          ),
-        ).called(1);
-      });
+          expect(res, isNotNull);
+          expect(res.reminder.messageId, messageId);
+          expect(res.reminder.remindAt, remindAt);
+
+          tester.verifyApi(
+            (api) => api.reminders.createReminder(messageId, remindAt: remindAt),
+          );
+        },
+      );
     });
 
     group('`.updateReminder`', () {
       const messageId = 'test-message-id';
+      final reminderRemindAt = DateTime.utc(2024, 8, 20, 16, 45);
 
-      setUp(() {
-        when(
-          () => client.updateReminder(
-            messageId,
-            remindAt: any(named: 'remindAt'),
-          ),
-        ).thenAnswer(
-          (_) async => UpdateReminderResponse()
-            ..reminder = MessageReminder(
-              messageId: messageId,
-              channelCid: channelCid,
-              userId: 'test-user-id',
-              remindAt: DateTime(2024, 8, 20, 16, 45),
-              createdAt: DateTime.now(),
-              updatedAt: DateTime.now(),
+      channelTest(
+        'should call client.updateReminder',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: _seedChannelReminders,
+        body: (tester) async {
+          tester.mockApi(
+            (api) => api.reminders.updateReminder(messageId),
+            result: createDefaultUpdateReminderResponse(
+              reminder: createDefaultMessageReminder(
+                messageId: messageId,
+                channelCid: _channelCid,
+                remindAt: reminderRemindAt,
+              ),
             ),
-        );
-      });
+          );
 
-      test('should call client.updateReminder', () async {
-        final res = await channel.updateReminder(messageId);
+          final res = await tester.channel.updateReminder(messageId);
 
-        expect(res, isNotNull);
-        expect(res.reminder.messageId, messageId);
+          expect(res, isNotNull);
+          expect(res.reminder.messageId, messageId);
 
-        verify(() => channel.client.updateReminder(messageId)).called(1);
-      });
+          tester.verifyApi(
+            (api) => api.reminders.updateReminder(messageId),
+          );
+        },
+      );
 
-      test('with remindAt should pass remindAt to client', () async {
-        final remindAt = DateTime(2024, 8, 20, 16, 45);
-        final res = await channel.updateReminder(messageId, remindAt: remindAt);
+      channelTest(
+        'with remindAt should pass remindAt to client',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: _seedChannelReminders,
+        body: (tester) async {
+          final remindAt = DateTime.utc(2024, 8, 20, 16, 45);
+          tester.mockApi(
+            (api) => api.reminders.updateReminder(messageId, remindAt: remindAt),
+            result: createDefaultUpdateReminderResponse(
+              reminder: createDefaultMessageReminder(
+                messageId: messageId,
+                channelCid: _channelCid,
+                remindAt: reminderRemindAt,
+              ),
+            ),
+          );
 
-        expect(res, isNotNull);
-        expect(res.reminder.messageId, messageId);
-        expect(res.reminder.remindAt, remindAt);
+          final res = await tester.channel.updateReminder(messageId, remindAt: remindAt);
 
-        verify(
-          () => channel.client.updateReminder(
-            messageId,
-            remindAt: remindAt,
-          ),
-        ).called(1);
-      });
+          expect(res, isNotNull);
+          expect(res.reminder.messageId, messageId);
+          expect(res.reminder.remindAt, remindAt);
+
+          tester.verifyApi(
+            (api) => api.reminders.updateReminder(messageId, remindAt: remindAt),
+          );
+        },
+      );
     });
 
     group('`.deleteReminder`', () {
       const messageId = 'test-message-id';
 
-      setUp(() {
-        when(() => client.deleteReminder(messageId)).thenAnswer(
-          (_) async => EmptyResponse(),
-        );
-      });
+      channelTest(
+        'should call client.deleteReminder',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: _seedChannelReminders,
+        body: (tester) async {
+          tester.mockApi(
+            (api) => api.reminders.deleteReminder(messageId),
+            result: createDefaultEmptyResponse(),
+          );
 
-      test('should call client.deleteReminder', () async {
-        final res = await channel.deleteReminder(messageId);
+          final res = await tester.channel.deleteReminder(messageId);
 
-        expect(res, isNotNull);
+          expect(res, isNotNull);
 
-        verify(() => channel.client.deleteReminder(messageId)).called(1);
-      });
+          tester.verifyApi(
+            (api) => api.reminders.deleteReminder(messageId),
+          );
+        },
+      );
     });
 
     group('`.updateMessage`', () {
-      test('should work fine', () async {
-        final message = Message(
-          id: 'test-message-id',
-          state: MessageState.sent,
-        );
-
-        final updateMessageResponse = UpdateMessageResponse()..message = message;
-
-        when(
-          () => client.updateMessage(any(that: isSameMessageAs(message))),
-        ).thenAnswer((_) async => updateMessageResponse);
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.updated),
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        final res = await channel.updateMessage(message);
-
-        expect(res, isNotNull);
-        expect(res.message.id, message.id);
-
-        verify(
-          () => client.updateMessage(
-            any(that: isSameMessageAs(message)),
-          ),
-        ).called(1);
-      });
-
-      test('with attachments should work just fine', () async {
-        final attachments = List.generate(
-          3,
-          (index) => Attachment(
-            id: 'test-attachment-id-$index',
-            type: index.isEven ? 'image' : 'file',
-            file: AttachmentFile(size: index * 33, path: 'test-file-path'),
-          ),
-        );
-
-        final message = Message(
-          id: 'test-message-id',
-          attachments: attachments,
-        );
-
-        final sendImageResponse = SendImageResponse()..file = 'test-image-url';
-        final sendFileResponse = SendFileResponse()..file = 'test-file-url';
-
-        when(
-          () => client.sendImage(
-            any(),
-            channelId,
-            channelType,
-            onSendProgress: any(named: 'onSendProgress'),
-            cancelToken: any(named: 'cancelToken'),
-            extraData: any(named: 'extraData'),
-          ),
-        ).thenAnswer((_) async => sendImageResponse);
-
-        when(
-          () => client.sendFile(
-            any(),
-            channelId,
-            channelType,
-            onSendProgress: any(named: 'onSendProgress'),
-            cancelToken: any(named: 'cancelToken'),
-            extraData: any(named: 'extraData'),
-          ),
-        ).thenAnswer((_) async => sendFileResponse);
-
-        when(
-          () => client.updateMessage(
-            any(that: isSameMessageAs(message)),
-          ),
-        ).thenAnswer(
-          (_) async => UpdateMessageResponse()
-            ..message = message.copyWith(
-              state: MessageState.sent,
-              attachments: attachments
-                  .map((it) => it.copyWith(uploadState: const UploadState.success()))
-                  .toList(growable: false),
-            ),
-        );
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder(
-            [
-              // preparing attachments to upload
-              [
-                isSameMessageAs(
-                  message.copyWith(
-                    state: MessageState.updating,
-                    attachments: [...attachments.map((it) => it.copyWith(uploadState: const UploadState.preparing()))],
-                  ),
-                  matchMessageState: true,
-                  matchAttachments: true,
-                  matchAttachmentsUploadState: true,
-                ),
-              ],
-              // 0th attachment is successfully uploaded
-              [
-                isSameMessageAs(
-                  message.copyWith(
-                    state: MessageState.updating,
-                    attachments: [...attachments]
-                      ..[0] = attachments[0].copyWith(
-                        uploadState: const UploadState.success(),
-                      ),
-                  ),
-                  matchMessageState: true,
-                  matchAttachments: true,
-                  matchAttachmentsUploadState: true,
-                ),
-              ],
-              // 0th and 1st attachment is successfully uploaded
-              [
-                isSameMessageAs(
-                  message.copyWith(
-                    state: MessageState.updating,
-                    attachments: [...attachments]
-                      ..[0] = attachments[0].copyWith(
-                        uploadState: const UploadState.success(),
-                      )
-                      ..[1] = attachments[1].copyWith(
-                        uploadState: const UploadState.success(),
-                      ),
-                  ),
-                  matchMessageState: true,
-                  matchAttachments: true,
-                  matchAttachmentsUploadState: true,
-                ),
-              ],
-              // all the attachments are successfully uploaded
-              [
-                isSameMessageAs(
-                  message.copyWith(
-                    state: MessageState.updating,
-                    attachments: [...attachments.map((it) => it.copyWith(uploadState: const UploadState.success()))],
-                  ),
-                  matchMessageState: true,
-                  matchAttachments: true,
-                  matchAttachmentsUploadState: true,
-                ),
-              ],
-              [
-                isSameMessageAs(
-                  message.copyWith(
-                    state: MessageState.updated,
-                    attachments: [...attachments.map((it) => it.copyWith(uploadState: const UploadState.success()))],
-                  ),
-                  matchMessageState: true,
-                  matchAttachments: true,
-                  matchAttachmentsUploadState: true,
-                ),
-              ],
-            ],
-          ),
-        );
-
-        final res = await channel.updateMessage(message);
-
-        expect(res, isNotNull);
-        expect(res.message.id, message.id);
-        expect(res.message.attachments.length, message.attachments.length);
-        expect(
-          res.message.attachments.every(
-            (it) => it.uploadState == const UploadState.success(),
-          ),
-          isTrue,
-        );
-
-        verify(
-          () => client.sendImage(
-            any(),
-            channelId,
-            channelType,
-            onSendProgress: any(named: 'onSendProgress'),
-            cancelToken: any(named: 'cancelToken'),
-            extraData: any(named: 'extraData'),
-          ),
-        ).called(2);
-
-        verify(
-          () => client.sendFile(
-            any(),
-            channelId,
-            channelType,
-            onSendProgress: any(named: 'onSendProgress'),
-            cancelToken: any(named: 'cancelToken'),
-            extraData: any(named: 'extraData'),
-          ),
-        ).called(1);
-
-        verify(
-          () => client.updateMessage(
-            any(that: isSameMessageAs(message)),
-          ),
-        ).called(1);
-      });
-
-      test('should update message state even when the error is not a StreamChatException', () async {
-        final message = Message(
-          id: 'test-message-id-error-1',
-          state: MessageState.sent,
-        );
-
-        when(
-          () => client.updateMessage(
-            any(that: isSameMessageAs(message)),
-            skipEnrichUrl: true,
-          ),
-        ).thenThrow(ArgumentError('Invalid argument'));
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.updatingFailed(
-                    skipPush: false,
-                    skipEnrichUrl: true,
-                  ),
-                ),
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        try {
-          await channel.updateMessage(message, skipEnrichUrl: true);
-        } catch (e) {
-          expect(e, isA<ArgumentError>());
-        }
-      });
-
-      test(
-        'should mark the message failed and report the failure as retriable with skipPush: false, skipEnrichUrl: true',
-        () async {
+      channelTest(
+        'should work fine',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelUpdateMessage()),
+        body: (tester) async {
           final message = Message(
-            id: 'test-message-id-retry-1',
+            id: 'test-message-id',
             state: MessageState.sent,
           );
 
-          // Create a retriable error (data == null)
-          when(
-            () => client.updateMessage(
+          tester.mockApi(
+            (api) => api.message.updateMessage(any(that: isSameMessageAs(message))),
+            result: createDefaultUpdateMessageResponse(message: message),
+          );
+
+          final messagesEmits = expectLater(
+            // skipping first seed message list -> [] messages
+            tester.channelState?.messagesStream.skip(1),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.updating),
+                  matchMessageState: true,
+                ),
+              ],
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.updated),
+                  matchMessageState: true,
+                ),
+              ],
+            ]),
+          );
+
+          final res = await tester.channel.updateMessage(message);
+
+          expect(res, isNotNull);
+          expect(res.message.id, message.id);
+
+          await messagesEmits;
+
+          tester.verifyApi(
+            (api) => api.message.updateMessage(any(that: isSameMessageAs(message))),
+          );
+        },
+      );
+
+      channelTest(
+        'with attachments should work just fine',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelUpdateMessage()),
+        body: (tester) async {
+          final attachments = List.generate(
+            3,
+            (index) => Attachment(
+              id: 'test-attachment-id-$index',
+              type: index.isEven ? 'image' : 'file',
+              file: AttachmentFile(size: index * 33, path: 'test-file-path'),
+            ),
+          );
+
+          final message = Message(
+            id: 'test-message-id',
+            attachments: attachments,
+          );
+
+          tester
+            ..mockApi(
+              (api) => api.fileUploader.sendImage(
+                any(),
+                _channelId,
+                _channelType,
+                onSendProgress: any(named: 'onSendProgress'),
+                cancelToken: any(named: 'cancelToken'),
+                extraData: any(named: 'extraData'),
+              ),
+              result: SendImageResponse()..file = 'test-image-url',
+            )
+            ..mockApi(
+              (api) => api.fileUploader.sendFile(
+                any(),
+                _channelId,
+                _channelType,
+                onSendProgress: any(named: 'onSendProgress'),
+                cancelToken: any(named: 'cancelToken'),
+                extraData: any(named: 'extraData'),
+              ),
+              result: SendFileResponse()..file = 'test-file-url',
+            )
+            ..mockApi(
+              (api) => api.message.updateMessage(any(that: isSameMessageAs(message))),
+              result: createDefaultUpdateMessageResponse(
+                message: message.copyWith(
+                  state: MessageState.sent,
+                  attachments: attachments
+                      .map((it) => it.copyWith(uploadState: const UploadState.success()))
+                      .toList(growable: false),
+                ),
+              ),
+            );
+
+          final messagesEmits = expectLater(
+            // skipping first seed message list -> [] messages
+            tester.channelState?.messagesStream.skip(1),
+            emitsInOrder(
+              [
+                // preparing attachments to upload
+                [
+                  isSameMessageAs(
+                    message.copyWith(
+                      state: MessageState.updating,
+                      attachments: [
+                        ...attachments.map((it) => it.copyWith(uploadState: const UploadState.preparing())),
+                      ],
+                    ),
+                    matchMessageState: true,
+                    matchAttachments: true,
+                    matchAttachmentsUploadState: true,
+                  ),
+                ],
+                // 0th attachment is successfully uploaded
+                [
+                  isSameMessageAs(
+                    message.copyWith(
+                      state: MessageState.updating,
+                      attachments: [...attachments]
+                        ..[0] = attachments[0].copyWith(
+                          uploadState: const UploadState.success(),
+                        ),
+                    ),
+                    matchMessageState: true,
+                    matchAttachments: true,
+                    matchAttachmentsUploadState: true,
+                  ),
+                ],
+                // 0th and 1st attachment is successfully uploaded
+                [
+                  isSameMessageAs(
+                    message.copyWith(
+                      state: MessageState.updating,
+                      attachments: [...attachments]
+                        ..[0] = attachments[0].copyWith(
+                          uploadState: const UploadState.success(),
+                        )
+                        ..[1] = attachments[1].copyWith(
+                          uploadState: const UploadState.success(),
+                        ),
+                    ),
+                    matchMessageState: true,
+                    matchAttachments: true,
+                    matchAttachmentsUploadState: true,
+                  ),
+                ],
+                // all the attachments are successfully uploaded
+                [
+                  isSameMessageAs(
+                    message.copyWith(
+                      state: MessageState.updating,
+                      attachments: [...attachments.map((it) => it.copyWith(uploadState: const UploadState.success()))],
+                    ),
+                    matchMessageState: true,
+                    matchAttachments: true,
+                    matchAttachmentsUploadState: true,
+                  ),
+                ],
+                [
+                  isSameMessageAs(
+                    message.copyWith(
+                      state: MessageState.updated,
+                      attachments: [...attachments.map((it) => it.copyWith(uploadState: const UploadState.success()))],
+                    ),
+                    matchMessageState: true,
+                    matchAttachments: true,
+                    matchAttachmentsUploadState: true,
+                  ),
+                ],
+              ],
+            ),
+          );
+
+          final res = await tester.channel.updateMessage(message);
+
+          expect(res, isNotNull);
+          expect(res.message.id, message.id);
+          expect(res.message.attachments.length, message.attachments.length);
+          expect(
+            res.message.attachments.every(
+              (it) => it.uploadState == const UploadState.success(),
+            ),
+            isTrue,
+          );
+
+          await messagesEmits;
+
+          tester
+            ..verifyApiCalled(
+              (api) => api.fileUploader.sendImage(
+                any(),
+                _channelId,
+                _channelType,
+                onSendProgress: any(named: 'onSendProgress'),
+                cancelToken: any(named: 'cancelToken'),
+                extraData: any(named: 'extraData'),
+              ),
+              times: 2,
+            )
+            ..verifyApi(
+              (api) => api.fileUploader.sendFile(
+                any(),
+                _channelId,
+                _channelType,
+                onSendProgress: any(named: 'onSendProgress'),
+                cancelToken: any(named: 'cancelToken'),
+                extraData: any(named: 'extraData'),
+              ),
+            )
+            ..verifyApi(
+              (api) => api.message.updateMessage(any(that: isSameMessageAs(message))),
+            );
+        },
+      );
+
+      channelTest(
+        'should update message state even when the error is not a StreamChatException',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelUpdateMessage()),
+        body: (tester) async {
+          final message = Message(
+            id: 'test-message-id-error-1',
+            state: MessageState.sent,
+          );
+
+          tester.mockApiFailure(
+            (api) => api.message.updateMessage(
               any(that: isSameMessageAs(message)),
               skipEnrichUrl: true,
             ),
-          ).thenThrow(
-            apiException(code: StreamErrorCode.requestTimeout, statusCode: 408, message: 'Request timed out'),
+            error: ArgumentError('Invalid argument'),
           );
 
-          expectLater(
+          final messagesEmits = expectLater(
             // skipping first seed message list -> [] messages
-            channel.state?.messagesStream.skip(1),
+            tester.channelState?.messagesStream.skip(1),
             emitsInOrder([
               [
                 isSameMessageAs(
@@ -1796,7 +2082,77 @@ void main() {
           );
 
           try {
-            await channel.updateMessage(message, skipEnrichUrl: true);
+            await tester.channel.updateMessage(message, skipEnrichUrl: true);
+          } catch (e) {
+            expect(e, isA<ArgumentError>());
+          }
+
+          await messagesEmits;
+        },
+      );
+
+      channelTest(
+        'should mark the message failed and report the failure as retriable with skipPush: false, skipEnrichUrl: true',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelUpdateMessage()),
+        body: (tester) async {
+          final message = Message(
+            id: 'test-message-id-retry-1',
+            state: MessageState.sent,
+          );
+
+          // Create a retriable error (data == null). The retriable failure arms
+          // the live retry queue; its immediate retry attempt succeeds, so the
+          // queue drains without waiting on backoff timers.
+          tester.mockApiFailureOnce(
+            (api) => api.message.updateMessage(
+              any(that: isSameMessageAs(message)),
+              skipEnrichUrl: true,
+            ),
+            error: createDefaultNetworkError(code: StreamErrorCode.requestTimeout, statusCode: 408),
+            result: createDefaultUpdateMessageResponse(message: message),
+          );
+
+          final messagesEmits = expectLater(
+            // skipping first seed message list -> [] messages
+            tester.channelState?.messagesStream.skip(1),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.updating),
+                  matchMessageState: true,
+                ),
+              ],
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    state: MessageState.updatingFailed(
+                      skipPush: false,
+                      skipEnrichUrl: true,
+                    ),
+                  ),
+                  matchMessageState: true,
+                ),
+              ],
+              // The retry queue retries the queued update with the same flags.
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.updating),
+                  matchMessageState: true,
+                ),
+              ],
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.updated),
+                  matchMessageState: true,
+                ),
+              ],
+            ]),
+          );
+
+          try {
+            await tester.channel.updateMessage(message, skipEnrichUrl: true);
           } catch (e) {
             expect(e, isA<StreamApiException>());
 
@@ -1804,30 +2160,46 @@ void main() {
             expect(networkError.code, equals(StreamErrorCode.requestTimeout));
             expect(networkError.isRetriable, isTrue);
           }
+
+          await messagesEmits;
+
+          // Initial attempt + the retry-queue retry, both with the same flags.
+          tester.verifyApiCalled(
+            (api) => api.message.updateMessage(
+              any(that: isSameMessageAs(message)),
+              skipEnrichUrl: true,
+            ),
+            times: 2,
+          );
         },
       );
 
-      test(
+      channelTest(
         'should mark the message failed and report the failure as retriable with skipPush: true, skipEnrichUrl: false',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelUpdateMessage()),
+        body: (tester) async {
           final message = Message(
             id: 'test-message-id-retry-2',
             state: MessageState.sent,
           );
 
-          // Create a retriable error (data == null)
-          when(
-            () => client.updateMessage(
+          // Create a retriable error (data == null). The retriable failure arms
+          // the live retry queue; its immediate retry attempt succeeds, so the
+          // queue drains without waiting on backoff timers.
+          tester.mockApiFailureOnce(
+            (api) => api.message.updateMessage(
               any(that: isSameMessageAs(message)),
               skipPush: true,
             ),
-          ).thenThrow(
-            apiException(code: StreamErrorCode.internalError, statusCode: 500, message: 'Internal system error'),
+            error: createDefaultNetworkError(code: StreamErrorCode.internalError, statusCode: 500),
+            result: createDefaultUpdateMessageResponse(message: message),
           );
 
-          expectLater(
+          final messagesEmits = expectLater(
             // skipping first seed message list -> [] messages
-            channel.state?.messagesStream.skip(1),
+            tester.channelState?.messagesStream.skip(1),
             emitsInOrder([
               [
                 isSameMessageAs(
@@ -1846,11 +2218,24 @@ void main() {
                   matchMessageState: true,
                 ),
               ],
+              // The retry queue retries the queued update with the same flags.
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.updating),
+                  matchMessageState: true,
+                ),
+              ],
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.updated),
+                  matchMessageState: true,
+                ),
+              ],
             ]),
           );
 
           try {
-            await channel.updateMessage(message, skipPush: true);
+            await tester.channel.updateMessage(message, skipPush: true);
           } catch (e) {
             expect(e, isA<StreamApiException>());
 
@@ -1858,244 +2243,235 @@ void main() {
             expect(networkError.code, equals(StreamErrorCode.internalError));
             expect(networkError.isRetriable, isTrue);
           }
+
+          await messagesEmits;
+
+          // Initial attempt + the retry-queue retry, both with the same flags.
+          tester.verifyApiCalled(
+            (api) => api.message.updateMessage(
+              any(that: isSameMessageAs(message)),
+              skipPush: true,
+            ),
+            times: 2,
+          );
         },
       );
 
-      test('should handle a non-retriable failure with skipPush: true, skipEnrichUrl: true', () async {
-        final message = Message(
-          id: 'test-message-id-error-2',
-          state: MessageState.sent,
-        );
-
-        when(
-          () => client.updateMessage(
-            any(that: isSameMessageAs(message)),
-            skipPush: true,
-            skipEnrichUrl: true,
-          ),
-        ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.updatingFailed(
-                    skipPush: true,
-                    skipEnrichUrl: true,
-                  ),
-                ),
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        try {
-          await channel.updateMessage(
-            message,
-            skipPush: true,
-            skipEnrichUrl: true,
+      channelTest(
+        'should handle a non-retriable failure with skipPush: true, skipEnrichUrl: true',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelUpdateMessage()),
+        body: (tester) async {
+          final message = Message(
+            id: 'test-message-id-error-2',
+            state: MessageState.sent,
           );
-        } catch (e) {
-          expect(e, isA<StreamApiException>());
 
-          final networkError = e as StreamApiException;
-          expect(networkError.code, equals(StreamErrorCode.notAllowed));
-        }
-      });
+          tester.mockApiFailure(
+            (api) => api.message.updateMessage(
+              any(that: isSameMessageAs(message)),
+              skipPush: true,
+              skipEnrichUrl: true,
+            ),
+            error: createDefaultNetworkError(code: StreamErrorCode.notAllowed, statusCode: 403),
+          );
 
-      test('should handle a non-retriable failure with skipPush: false, skipEnrichUrl: false', () async {
-        final message = Message(
-          id: 'test-message-id-error-3',
-          state: MessageState.sent,
-        );
-
-        when(
-          () => client.updateMessage(
-            any(that: isSameMessageAs(message)),
-          ),
-        ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.updatingFailed(
-                    skipPush: false,
-                    skipEnrichUrl: false,
-                  ),
+          final messagesEmits = expectLater(
+            // skipping first seed message list -> [] messages
+            tester.channelState?.messagesStream.skip(1),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.updating),
+                  matchMessageState: true,
                 ),
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
+              ],
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    state: MessageState.updatingFailed(
+                      skipPush: true,
+                      skipEnrichUrl: true,
+                    ),
+                  ),
+                  matchMessageState: true,
+                ),
+              ],
+            ]),
+          );
 
-        try {
-          await channel.updateMessage(message);
-        } catch (e) {
-          expect(e, isA<StreamApiException>());
+          try {
+            await tester.channel.updateMessage(
+              message,
+              skipPush: true,
+              skipEnrichUrl: true,
+            );
+          } catch (e) {
+            expect(e, isA<StreamApiException>());
 
-          final networkError = e as StreamApiException;
-          expect(networkError.code, equals(StreamErrorCode.notAllowed));
-        }
-      });
+            final networkError = e as StreamApiException;
+            expect(networkError.code, equals(StreamErrorCode.notAllowed));
+          }
+
+          await messagesEmits;
+        },
+      );
+
+      channelTest(
+        'should handle a non-retriable failure with skipPush: false, skipEnrichUrl: false',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelUpdateMessage()),
+        body: (tester) async {
+          final message = Message(
+            id: 'test-message-id-error-3',
+            state: MessageState.sent,
+          );
+
+          tester.mockApiFailure(
+            (api) => api.message.updateMessage(
+              any(that: isSameMessageAs(message)),
+            ),
+            error: createDefaultNetworkError(code: StreamErrorCode.notAllowed, statusCode: 403),
+          );
+
+          final messagesEmits = expectLater(
+            // skipping first seed message list -> [] messages
+            tester.channelState?.messagesStream.skip(1),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.updating),
+                  matchMessageState: true,
+                ),
+              ],
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    state: MessageState.updatingFailed(
+                      skipPush: false,
+                      skipEnrichUrl: false,
+                    ),
+                  ),
+                  matchMessageState: true,
+                ),
+              ],
+            ]),
+          );
+
+          try {
+            await tester.channel.updateMessage(message);
+          } catch (e) {
+            expect(e, isA<StreamApiException>());
+
+            final networkError = e as StreamApiException;
+            expect(networkError.code, equals(StreamErrorCode.notAllowed));
+          }
+
+          await messagesEmits;
+        },
+      );
     });
 
     group('`ChannelClientState.updateMessage`', () {
-      test('upsert: true (default) adds an unknown message', () async {
-        final message = Message(
-          id: 'unknown-message',
-          user: client.state.currentUser,
-          text: 'hello',
-          createdAt: DateTime.utc(2026),
-        );
+      channelTest(
+        'upsert: true (default) adds an unknown message',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelUpdateMessage()),
+        body: (tester) async {
+          final message = Message(
+            id: 'unknown-message',
+            user: tester.currentUser,
+            text: 'hello',
+            createdAt: DateTime.utc(2026),
+          );
 
-        expect(channel.state!.messages, isEmpty);
+          expect(tester.channelState!.messages, isEmpty);
 
-        channel.state!.updateMessage(message);
+          tester.channelState!.updateMessage(message);
 
-        expect(channel.state!.messages.map((m) => m.id), ['unknown-message']);
-      });
+          expect(tester.channelState!.messages.map((m) => m.id), ['unknown-message']);
+        },
+      );
 
-      test('upsert: false does NOT add an unknown message', () async {
-        final message = Message(
-          id: 'unknown-message',
-          user: client.state.currentUser,
-          text: 'hello',
-          createdAt: DateTime.utc(2026),
-        );
+      channelTest(
+        'upsert: false does NOT add an unknown message',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelUpdateMessage()),
+        body: (tester) async {
+          final message = Message(
+            id: 'unknown-message',
+            user: tester.currentUser,
+            text: 'hello',
+            createdAt: DateTime.utc(2026),
+          );
 
-        expect(channel.state!.messages, isEmpty);
+          expect(tester.channelState!.messages, isEmpty);
 
-        channel.state!.updateMessage(message, upsert: false);
+          tester.channelState!.updateMessage(message, upsert: false);
 
-        expect(channel.state!.messages, isEmpty);
-      });
+          expect(tester.channelState!.messages, isEmpty);
+        },
+      );
 
-      test('upsert: false updates a message already in the window', () async {
-        const messageId = 'known-message';
-        final seeded = Message(
-          id: messageId,
-          user: client.state.currentUser,
-          text: 'old',
-          createdAt: DateTime.utc(2026),
-        );
-        channel.state!.updateChannelState(
-          channel.state!.channelState.copyWith(messages: [seeded]),
-        );
+      channelTest(
+        'upsert: false updates a message already in the window',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelUpdateMessage()),
+        body: (tester) async {
+          const messageId = 'known-message';
+          final seeded = Message(
+            id: messageId,
+            user: tester.currentUser,
+            text: 'old',
+            createdAt: DateTime.utc(2026),
+          );
+          tester.channelState!.updateChannelState(
+            tester.channelState!.channelState.copyWith(messages: [seeded]),
+          );
 
-        channel.state!.updateMessage(
-          seeded.copyWith(text: 'new'),
-          upsert: false,
-        );
+          tester.channelState!.updateMessage(
+            seeded.copyWith(text: 'new'),
+            upsert: false,
+          );
 
-        final stored = channel.state!.messages.single;
-        expect(stored.id, equals(messageId));
-        expect(stored.text, equals('new'));
-      });
+          final stored = tester.channelState!.messages.single;
+          expect(stored.id, equals(messageId));
+          expect(stored.text, equals('new'));
+        },
+      );
     });
 
-    test('`.partialUpdateMessage`', () async {
-      final message = Message(
-        id: 'test-message-id',
-        state: MessageState.sent,
-      );
-
-      const set = {'text': 'Update Message text'};
-      const unset = ['pinExpires'];
-
-      final updateMessageResponse = UpdateMessageResponse()
-        ..message = message.copyWith(text: set['text'], pinExpires: null);
-
-      when(
-        () => client.partialUpdateMessage(message.id, set: set, unset: unset),
-      ).thenAnswer((_) async => updateMessageResponse);
-
-      expectLater(
-        // skipping first seed message list -> [] messages
-        channel.state?.messagesStream.skip(1),
-        emitsInOrder([
-          [
-            isSameMessageAs(
-              message.copyWith(
-                state: MessageState.updating,
-              ),
-              matchText: true,
-              matchMessageState: true,
-            ),
-          ],
-          [
-            isSameMessageAs(
-              updateMessageResponse.message.copyWith(
-                state: MessageState.updated,
-              ),
-              matchText: true,
-              matchMessageState: true,
-            ),
-          ],
-        ]),
-      );
-
-      final res = await channel.partialUpdateMessage(
-        message,
-        set: set,
-        unset: unset,
-      );
-
-      expect(res, isNotNull);
-      expect(res.message.id, message.id);
-      expect(res.message.id, message.id);
-      expect(res.message.text, set['text']);
-      expect(res.message.pinExpires, isNull);
-
-      verify(
-        () => client.partialUpdateMessage(message.id, set: set, unset: unset),
-      ).called(1);
-    });
-
-    group('`.partialUpdateMessage` error handling', () {
-      test('should update message state even when the error is not a StreamChatException', () async {
+    channelTest(
+      '`.partialUpdateMessage`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelUpdateMessage()),
+      body: (tester) async {
         final message = Message(
-          id: 'test-message-id-error-partial-1',
+          id: 'test-message-id',
           state: MessageState.sent,
         );
-
-        // Add message to channel state first
-        channel.state?.updateMessage(message);
 
         const set = {'text': 'Update Message text'};
         const unset = ['pinExpires'];
 
-        when(
-          () => client.partialUpdateMessage(
-            message.id,
-            set: set,
-            unset: unset,
-          ),
-        ).thenThrow(ArgumentError('Invalid argument'));
+        final updateMessageResponse = createDefaultUpdateMessageResponse(
+          message: message.copyWith(text: set['text'], pinExpires: null),
+        );
 
-        expectLater(
+        tester.mockApi(
+          (api) => api.message.partialUpdateMessage(message.id, set: set, unset: unset),
+          result: updateMessageResponse,
+        );
+
+        final messagesEmits = expectLater(
           // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
+          tester.channelState?.messagesStream.skip(1),
           emitsInOrder([
             [
               isSameMessageAs(
@@ -2108,12 +2484,8 @@ void main() {
             ],
             [
               isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.partialUpdatingFailed(
-                    set: set,
-                    unset: unset,
-                    skipEnrichUrl: false,
-                  ),
+                updateMessageResponse.message.copyWith(
+                  state: MessageState.updated,
                 ),
                 matchText: true,
                 matchMessageState: true,
@@ -2122,46 +2494,337 @@ void main() {
           ]),
         );
 
-        try {
-          await channel.partialUpdateMessage(
-            message,
-            set: set,
-            unset: unset,
-          );
-        } catch (e) {
-          expect(e, isA<ArgumentError>());
-        }
-      });
+        final res = await tester.channel.partialUpdateMessage(
+          message,
+          set: set,
+          unset: unset,
+        );
 
-      test(
+        expect(res, isNotNull);
+        expect(res.message.id, message.id);
+        expect(res.message.id, message.id);
+        expect(res.message.text, set['text']);
+        expect(res.message.pinExpires, isNull);
+
+        await messagesEmits;
+
+        tester.verifyApi(
+          (api) => api.message.partialUpdateMessage(message.id, set: set, unset: unset),
+        );
+      },
+    );
+
+    group('`.partialUpdateMessage` error handling', () {
+      channelTest(
+        'should update message state even when the error is not a StreamChatException',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelUpdateMessage()),
+        body: (tester) async {
+          final message = Message(
+            id: 'test-message-id-error-partial-1',
+            state: MessageState.sent,
+          );
+
+          // Add message to channel state first
+          tester.channelState?.updateMessage(message);
+
+          const set = {'text': 'Update Message text'};
+          const unset = ['pinExpires'];
+
+          tester.mockApiFailure(
+            (api) => api.message.partialUpdateMessage(
+              message.id,
+              set: set,
+              unset: unset,
+            ),
+            error: ArgumentError('Invalid argument'),
+          );
+
+          final messagesEmits = expectLater(
+            // skipping first seed message list -> [] messages
+            tester.channelState?.messagesStream.skip(1),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    state: MessageState.updating,
+                  ),
+                  matchText: true,
+                  matchMessageState: true,
+                ),
+              ],
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    state: MessageState.partialUpdatingFailed(
+                      set: set,
+                      unset: unset,
+                      skipEnrichUrl: false,
+                    ),
+                  ),
+                  matchText: true,
+                  matchMessageState: true,
+                ),
+              ],
+            ]),
+          );
+
+          try {
+            await tester.channel.partialUpdateMessage(
+              message,
+              set: set,
+              unset: unset,
+            );
+          } catch (e) {
+            expect(e, isA<ArgumentError>());
+          }
+
+          await messagesEmits;
+        },
+      );
+
+      channelTest(
         'should mark the message failed and report the failure as retriable with skipEnrichUrl: true',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelUpdateMessage()),
+        body: (tester) async {
           final message = Message(
             id: 'test-message-id-retry-partial-1',
             state: MessageState.sent,
           );
 
           // Add message to channel state first
-          channel.state?.updateMessage(message);
+          tester.channelState?.updateMessage(message);
 
           const set = {'text': 'Update Message text'};
           const unset = ['pinExpires'];
 
-          // Create a retriable error (data == null)
-          when(
-            () => client.partialUpdateMessage(
+          // Create a retriable error (data == null). The retriable failure arms
+          // the live retry queue; its immediate retry attempt succeeds, so the
+          // queue drains without waiting on backoff timers.
+          tester.mockApiFailureOnce(
+            (api) => api.message.partialUpdateMessage(
               message.id,
               set: set,
               unset: unset,
               skipEnrichUrl: true,
             ),
-          ).thenThrow(
-            apiException(code: StreamErrorCode.requestTimeout, statusCode: 408, message: 'Request timed out'),
+            error: createDefaultNetworkError(code: StreamErrorCode.requestTimeout, statusCode: 408),
+            result: createDefaultUpdateMessageResponse(message: message),
           );
 
-          expectLater(
+          final messagesEmits = expectLater(
             // skipping first seed message list -> [] messages
-            channel.state?.messagesStream.skip(1),
+            tester.channelState?.messagesStream.skip(1),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    state: MessageState.updating,
+                  ),
+                  matchText: true,
+                  matchMessageState: true,
+                ),
+              ],
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    state: MessageState.partialUpdatingFailed(
+                      set: set,
+                      unset: unset,
+                      skipEnrichUrl: true,
+                    ),
+                  ),
+                  matchText: true,
+                  matchMessageState: true,
+                ),
+              ],
+              // The retry queue retries the queued partial update with the same
+              // set/unset and flags.
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.updating),
+                  matchText: true,
+                  matchMessageState: true,
+                ),
+              ],
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.updated),
+                  matchText: true,
+                  matchMessageState: true,
+                ),
+              ],
+            ]),
+          );
+
+          try {
+            await tester.channel.partialUpdateMessage(
+              message,
+              set: set,
+              unset: unset,
+              skipEnrichUrl: true,
+            );
+          } catch (e) {
+            expect(e, isA<StreamApiException>());
+
+            final networkError = e as StreamApiException;
+            expect(networkError.code, equals(StreamErrorCode.requestTimeout));
+            expect(networkError.isRetriable, isTrue);
+          }
+
+          await messagesEmits;
+
+          // Initial attempt + the retry-queue retry, both with the same
+          // set/unset and flags.
+          tester.verifyApiCalled(
+            (api) => api.message.partialUpdateMessage(
+              message.id,
+              set: set,
+              unset: unset,
+              skipEnrichUrl: true,
+            ),
+            times: 2,
+          );
+        },
+      );
+
+      channelTest(
+        'should mark the message failed and report the failure as retriable with skipEnrichUrl: false',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelUpdateMessage()),
+        body: (tester) async {
+          final message = Message(
+            id: 'test-message-id-retry-partial-2',
+            state: MessageState.sent,
+          );
+
+          // Add message to channel state first
+          tester.channelState?.updateMessage(message);
+
+          const set = {'text': 'Update Message text'};
+          const unset = ['pinExpires'];
+
+          // Create a retriable error (data == null). The retriable failure arms
+          // the live retry queue; its immediate retry attempt succeeds, so the
+          // queue drains without waiting on backoff timers.
+          tester.mockApiFailureOnce(
+            (api) => api.message.partialUpdateMessage(
+              message.id,
+              set: set,
+              unset: unset,
+            ),
+            error: createDefaultNetworkError(code: StreamErrorCode.internalError, statusCode: 500),
+            result: createDefaultUpdateMessageResponse(message: message),
+          );
+
+          final messagesEmits = expectLater(
+            // skipping first seed message list -> [] messages
+            tester.channelState?.messagesStream.skip(1),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    state: MessageState.updating,
+                  ),
+                  matchText: true,
+                  matchMessageState: true,
+                ),
+              ],
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    state: MessageState.partialUpdatingFailed(
+                      set: set,
+                      unset: unset,
+                      skipEnrichUrl: false,
+                    ),
+                  ),
+                  matchText: true,
+                  matchMessageState: true,
+                ),
+              ],
+              // The retry queue retries the queued partial update with the same
+              // set/unset and flags.
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.updating),
+                  matchText: true,
+                  matchMessageState: true,
+                ),
+              ],
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.updated),
+                  matchText: true,
+                  matchMessageState: true,
+                ),
+              ],
+            ]),
+          );
+
+          try {
+            await tester.channel.partialUpdateMessage(
+              message,
+              set: set,
+              unset: unset,
+            );
+          } catch (e) {
+            expect(e, isA<StreamApiException>());
+
+            final networkError = e as StreamApiException;
+            expect(networkError.code, equals(StreamErrorCode.internalError));
+            expect(networkError.isRetriable, isTrue);
+          }
+
+          await messagesEmits;
+
+          // Initial attempt + the retry-queue retry, both with the same
+          // set/unset and flags.
+          tester.verifyApiCalled(
+            (api) => api.message.partialUpdateMessage(
+              message.id,
+              set: set,
+              unset: unset,
+            ),
+            times: 2,
+          );
+        },
+      );
+
+      channelTest(
+        'should handle a non-retriable failure with skipEnrichUrl: true',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelUpdateMessage()),
+        body: (tester) async {
+          final message = Message(
+            id: 'test-message-id-error-partial-2',
+            state: MessageState.sent,
+          );
+
+          // Add message to channel state first
+          tester.channelState?.updateMessage(message);
+
+          const set = {'text': 'Update Message text'};
+          const unset = ['pinExpires'];
+
+          tester.mockApiFailure(
+            (api) => api.message.partialUpdateMessage(
+              message.id,
+              set: set,
+              unset: unset,
+              skipEnrichUrl: true,
+            ),
+            error: createDefaultNetworkError(code: StreamErrorCode.notAllowed, statusCode: 403),
+          );
+
+          final messagesEmits = expectLater(
+            // skipping first seed message list -> [] messages
+            tester.channelState?.messagesStream.skip(1),
             emitsInOrder([
               [
                 isSameMessageAs(
@@ -2189,7 +2852,7 @@ void main() {
           );
 
           try {
-            await channel.partialUpdateMessage(
+            await tester.channel.partialUpdateMessage(
               message,
               set: set,
               unset: unset,
@@ -2199,40 +2862,42 @@ void main() {
             expect(e, isA<StreamApiException>());
 
             final networkError = e as StreamApiException;
-            expect(networkError.code, equals(StreamErrorCode.requestTimeout));
-            expect(networkError.isRetriable, isTrue);
+            expect(networkError.code, equals(StreamErrorCode.notAllowed));
           }
+
+          await messagesEmits;
         },
       );
 
-      test(
-        'should mark the message failed and report the failure as retriable with skipEnrichUrl: false',
-        () async {
+      channelTest(
+        'should handle a non-retriable failure with skipEnrichUrl: false',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelUpdateMessage()),
+        body: (tester) async {
           final message = Message(
-            id: 'test-message-id-retry-partial-2',
+            id: 'test-message-id-error-partial-3',
             state: MessageState.sent,
           );
 
           // Add message to channel state first
-          channel.state?.updateMessage(message);
+          tester.channelState?.updateMessage(message);
 
           const set = {'text': 'Update Message text'};
           const unset = ['pinExpires'];
 
-          // Create a retriable error (data == null)
-          when(
-            () => client.partialUpdateMessage(
+          tester.mockApiFailure(
+            (api) => api.message.partialUpdateMessage(
               message.id,
               set: set,
               unset: unset,
             ),
-          ).thenThrow(
-            apiException(code: StreamErrorCode.internalError, statusCode: 500, message: 'Internal system error'),
+            error: createDefaultNetworkError(code: StreamErrorCode.notAllowed, statusCode: 403),
           );
 
-          expectLater(
+          final messagesEmits = expectLater(
             // skipping first seed message list -> [] messages
-            channel.state?.messagesStream.skip(1),
+            tester.channelState?.messagesStream.skip(1),
             emitsInOrder([
               [
                 isSameMessageAs(
@@ -2260,7 +2925,7 @@ void main() {
           );
 
           try {
-            await channel.partialUpdateMessage(
+            await tester.channel.partialUpdateMessage(
               message,
               set: set,
               unset: unset,
@@ -2269,228 +2934,131 @@ void main() {
             expect(e, isA<StreamApiException>());
 
             final networkError = e as StreamApiException;
-            expect(networkError.code, equals(StreamErrorCode.internalError));
-            expect(networkError.isRetriable, isTrue);
+            expect(networkError.code, equals(StreamErrorCode.notAllowed));
           }
+
+          await messagesEmits;
         },
       );
-
-      test('should handle a non-retriable failure with skipEnrichUrl: true', () async {
-        final message = Message(
-          id: 'test-message-id-error-partial-2',
-          state: MessageState.sent,
-        );
-
-        // Add message to channel state first
-        channel.state?.updateMessage(message);
-
-        const set = {'text': 'Update Message text'};
-        const unset = ['pinExpires'];
-
-        when(
-          () => client.partialUpdateMessage(
-            message.id,
-            set: set,
-            unset: unset,
-            skipEnrichUrl: true,
-          ),
-        ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.updating,
-                ),
-                matchText: true,
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.partialUpdatingFailed(
-                    set: set,
-                    unset: unset,
-                    skipEnrichUrl: true,
-                  ),
-                ),
-                matchText: true,
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        try {
-          await channel.partialUpdateMessage(
-            message,
-            set: set,
-            unset: unset,
-            skipEnrichUrl: true,
-          );
-        } catch (e) {
-          expect(e, isA<StreamApiException>());
-
-          final networkError = e as StreamApiException;
-          expect(networkError.code, equals(StreamErrorCode.notAllowed));
-        }
-      });
-
-      test('should handle a non-retriable failure with skipEnrichUrl: false', () async {
-        final message = Message(
-          id: 'test-message-id-error-partial-3',
-          state: MessageState.sent,
-        );
-
-        // Add message to channel state first
-        channel.state?.updateMessage(message);
-
-        const set = {'text': 'Update Message text'};
-        const unset = ['pinExpires'];
-
-        when(
-          () => client.partialUpdateMessage(
-            message.id,
-            set: set,
-            unset: unset,
-          ),
-        ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.updating,
-                ),
-                matchText: true,
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.partialUpdatingFailed(
-                    set: set,
-                    unset: unset,
-                    skipEnrichUrl: false,
-                  ),
-                ),
-                matchText: true,
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        try {
-          await channel.partialUpdateMessage(
-            message,
-            set: set,
-            unset: unset,
-          );
-        } catch (e) {
-          expect(e, isA<StreamApiException>());
-
-          final networkError = e as StreamApiException;
-          expect(networkError.code, equals(StreamErrorCode.notAllowed));
-        }
-      });
     });
 
     group('`.deleteMessage`', () {
-      test('should work fine', () async {
-        const messageId = 'test-message-id';
-        final message = Message(
-          id: messageId,
-          createdAt: DateTime.now(),
-          state: MessageState.sent,
-        );
+      channelTest(
+        'should work fine',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelDeleteMessage()),
+        body: (tester) async {
+          const messageId = 'test-message-id';
+          final message = Message(
+            id: messageId,
+            createdAt: DateTime.utc(2021, 3),
+            state: MessageState.sent,
+          );
 
-        when(() => client.deleteMessage(messageId)).thenAnswer((_) async => EmptyResponse());
+          tester.mockApi(
+            (api) => api.message.deleteMessage(messageId, hard: false),
+            result: createDefaultEmptyResponse(),
+          );
 
-        // A soft delete only updates a message already in the loaded window,
-        // so seed it first — a delete must never insert a phantom record.
-        channel.state?.addNewMessage(message);
+          // A soft delete only updates a message already in the loaded window,
+          // so seed it first — a delete must never insert a phantom record.
+          tester.channelState?.addNewMessage(message);
 
-        expectLater(
-          // skip the seeded message -> [message]
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.softDeleting),
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.softDeleted),
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
+          final messagesEmits = expectLater(
+            // skip the seeded message -> [message]
+            tester.channelState?.messagesStream.skip(1),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.softDeleting),
+                  matchMessageState: true,
+                ),
+              ],
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.softDeleted),
+                  matchMessageState: true,
+                ),
+              ],
+            ]),
+          );
 
-        final res = await channel.deleteMessage(message);
+          final res = await tester.channel.deleteMessage(message);
 
-        expect(res, isNotNull);
+          expect(res, isNotNull);
 
-        verify(() => client.deleteMessage(messageId)).called(1);
-      });
+          await messagesEmits;
 
-      test('should delete attachments for hard delete', () async {
-        final attachments = List.generate(
-          3,
-          (index) => Attachment(
-            id: 'test-attachment-id-$index',
-            type: index.isEven ? 'image' : 'file',
-            file: AttachmentFile(size: index * 33, path: 'test-file-path'),
-            imageUrl: index.isEven ? 'test-image-url-$index' : null,
-            assetUrl: index.isOdd ? 'test-asset-url-$index' : null,
-            uploadState: const UploadState.success(),
-          ),
-        );
+          tester.verifyApi(
+            (api) => api.message.deleteMessage(messageId, hard: false),
+          );
+        },
+      );
 
-        const messageId = 'test-message-id';
-        final message = Message(
-          id: messageId,
-          attachments: attachments,
-          createdAt: DateTime.now(),
-          state: MessageState.sent,
-        );
+      channelTest(
+        'should delete attachments for hard delete',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelDeleteMessage()),
+        body: (tester) async {
+          final attachments = List.generate(
+            3,
+            (index) => Attachment(
+              id: 'test-attachment-id-$index',
+              type: index.isEven ? 'image' : 'file',
+              file: AttachmentFile(size: index * 33, path: 'test-file-path'),
+              imageUrl: index.isEven ? 'test-image-url-$index' : null,
+              assetUrl: index.isOdd ? 'test-asset-url-$index' : null,
+              uploadState: const UploadState.success(),
+            ),
+          );
 
-        when(
-          () => client.deleteMessage(messageId, hard: true),
-        ).thenAnswer((_) async => EmptyResponse());
+          const messageId = 'test-message-id';
+          final message = Message(
+            id: messageId,
+            attachments: attachments,
+            createdAt: DateTime.utc(2021, 3),
+            state: MessageState.sent,
+          );
 
-        when(
-          () => client.deleteImage(any(), channelId, channelType),
-        ).thenAnswer((_) async => EmptyResponse());
+          tester
+            ..mockApi(
+              (api) => api.message.deleteMessage(messageId, hard: true),
+              result: createDefaultEmptyResponse(),
+            )
+            ..mockApi(
+              (api) => api.fileUploader.deleteImage(any(), _channelId, _channelType),
+              result: createDefaultEmptyResponse(),
+            )
+            ..mockApi(
+              (api) => api.fileUploader.deleteFile(any(), _channelId, _channelType),
+              result: createDefaultEmptyResponse(),
+            );
 
-        when(
-          () => client.deleteFile(any(), channelId, channelType),
-        ).thenAnswer((_) async => EmptyResponse());
+          final res = await tester.channel.deleteMessage(message, hard: true);
+          expect(res, isNotNull);
 
-        final res = await channel.deleteMessage(message, hard: true);
-        expect(res, isNotNull);
+          tester
+            ..verifyApi(
+              (api) => api.message.deleteMessage(messageId, hard: true),
+            )
+            ..verifyApiCalled(
+              (api) => api.fileUploader.deleteImage(any(), _channelId, _channelType),
+              times: 2,
+            )
+            ..verifyApi(
+              (api) => api.fileUploader.deleteFile(any(), _channelId, _channelType),
+            );
+        },
+      );
 
-        verify(() => client.deleteMessage(messageId, hard: true)).called(1);
-
-        verify(() => client.deleteImage(any(), channelId, channelType)).called(2);
-
-        verify(() => client.deleteFile(any(), channelId, channelType)).called(1);
-      });
-
-      test(
+      channelTest(
         'should hard delete the message if the state is sending or failed',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelDeleteMessage()),
+        body: (tester) async {
           const messageId = 'test-message-id';
           final message = Message(
             id: messageId,
@@ -2498,9 +3066,9 @@ void main() {
             state: MessageState.sending,
           );
 
-          expectLater(
+          final messagesEmits = expectLater(
             // skipping first seed message list -> [] messages
-            channel.state?.messagesStream.skip(1),
+            tester.channelState?.messagesStream.skip(1),
             emitsInOrder([
               [
                 isSameMessageAs(
@@ -2513,60 +3081,81 @@ void main() {
           );
 
           // Add message to channel state first
-          channel.state?.addNewMessage(message);
+          tester.channelState?.addNewMessage(message);
 
-          final res = await channel.deleteMessage(message);
+          final res = await tester.channel.deleteMessage(message);
 
           expect(res, isNotNull);
-          verifyNever(() => client.deleteMessage(messageId));
+
+          await messagesEmits;
+
+          tester.verifyNeverCalled(
+            (api) => api.message.deleteMessage(messageId, hard: false),
+          );
         },
       );
     });
 
     group('`.deleteMessageForMe`', () {
-      test('should work fine', () async {
-        const messageId = 'test-message-id';
-        final message = Message(
-          id: messageId,
-          createdAt: DateTime.now(),
-          state: MessageState.sent,
-        );
+      channelTest(
+        'should work fine',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelDeleteMessage()),
+        body: (tester) async {
+          const messageId = 'test-message-id';
+          final message = Message(
+            id: messageId,
+            createdAt: DateTime.utc(2021, 3),
+            state: MessageState.sent,
+          );
 
-        when(() => client.deleteMessageForMe(messageId)).thenAnswer((_) async => EmptyResponse());
+          tester.mockApi(
+            (api) => api.message.deleteMessage(messageId, deleteForMe: true),
+            result: createDefaultEmptyResponse(),
+          );
 
-        // A soft delete only updates a message already in the loaded window,
-        // so seed it first — a delete must never insert a phantom record.
-        channel.state?.addNewMessage(message);
+          // A soft delete only updates a message already in the loaded window,
+          // so seed it first — a delete must never insert a phantom record.
+          tester.channelState?.addNewMessage(message);
 
-        expectLater(
-          // skip the seeded message -> [message]
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.deletingForMe),
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.deletedForMe),
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
+          final messagesEmits = expectLater(
+            // skip the seeded message -> [message]
+            tester.channelState?.messagesStream.skip(1),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.deletingForMe),
+                  matchMessageState: true,
+                ),
+              ],
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.deletedForMe),
+                  matchMessageState: true,
+                ),
+              ],
+            ]),
+          );
 
-        final res = await channel.deleteMessageForMe(message);
+          final res = await tester.channel.deleteMessageForMe(message);
 
-        expect(res, isNotNull);
+          expect(res, isNotNull);
 
-        verify(() => client.deleteMessageForMe(messageId)).called(1);
-      });
+          await messagesEmits;
 
-      test(
+          tester.verifyApi(
+            (api) => api.message.deleteMessage(messageId, deleteForMe: true),
+          );
+        },
+      );
+
+      channelTest(
         'should hard delete the message if the state is sending or failed',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelDeleteMessage()),
+        body: (tester) async {
           const messageId = 'test-message-id';
           final message = Message(
             id: messageId,
@@ -2574,9 +3163,9 @@ void main() {
             state: MessageState.sending,
           );
 
-          expectLater(
+          final messagesEmits = expectLater(
             // skipping first seed message list -> [] messages
-            channel.state?.messagesStream.skip(1),
+            tester.channelState?.messagesStream.skip(1),
             emitsInOrder([
               [
                 isSameMessageAs(
@@ -2589,37 +3178,251 @@ void main() {
           );
 
           // Add message to channel state first
-          channel.state?.addNewMessage(message);
+          tester.channelState?.addNewMessage(message);
 
-          final res = await channel.deleteMessageForMe(message);
+          final res = await tester.channel.deleteMessageForMe(message);
 
           expect(res, isNotNull);
-          verifyNever(() => client.deleteMessageForMe(messageId));
+
+          await messagesEmits;
+
+          tester.verifyNeverCalled(
+            (api) => api.message.deleteMessage(messageId, deleteForMe: true),
+          );
         },
       );
     });
 
     group('`.pinMessage`', () {
-      test('should work fine without passing timeoutOrExpirationDate', () async {
-        final message = Message(id: 'test-message-id');
+      channelTest(
+        'should work fine without passing timeoutOrExpirationDate',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelPinMessage()),
+        body: (tester) async {
+          final message = Message(id: 'test-message-id');
 
-        when(
-          () => client.partialUpdateMessage(
-            message.id,
-            set: any(named: 'set'),
-            unset: any(named: 'unset'),
-          ),
-        ).thenAnswer(
-          (_) async => UpdateMessageResponse()
-            ..message = message.copyWith(
-              pinned: true,
-              pinExpires: null,
+          tester.mockApi(
+            (api) => api.message.partialUpdateMessage(
+              message.id,
+              set: {'pinned': true, 'pin_expires': null},
             ),
+            result: createDefaultUpdateMessageResponse(
+              message: message.copyWith(
+                pinned: true,
+                pinExpires: null,
+              ),
+            ),
+          );
+
+          final messagesEmits = expectLater(
+            // skipping first seed message list -> [] messages
+            tester.channelState?.messagesStream.skip(1),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.updating),
+                  matchMessageState: true,
+                ),
+              ],
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.updated),
+                  matchMessageState: true,
+                ),
+              ],
+            ]),
+          );
+
+          final res = await tester.channel.pinMessage(message);
+
+          expect(res, isNotNull);
+          expect(res.message.pinned, isTrue);
+          expect(res.message.pinExpires, isNull);
+
+          await messagesEmits;
+
+          tester.verifyApi(
+            (api) => api.message.partialUpdateMessage(
+              message.id,
+              set: {'pinned': true, 'pin_expires': null},
+            ),
+          );
+        },
+      );
+
+      channelTest(
+        'should work fine if passed timeoutOrExpirationDate as num(seconds)',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelPinMessage()),
+        body: (tester) async {
+          final message = Message(id: 'test-message-id');
+          const timeoutOrExpirationDate = 300; // 300 seconds
+
+          // The channel computes `pin_expires` from the current time, so the
+          // stub cannot match the exact `set` map.
+          tester.mockApi(
+            (api) => api.message.partialUpdateMessage(
+              message.id,
+              set: any(named: 'set'),
+            ),
+            result: createDefaultUpdateMessageResponse(
+              message: message.copyWith(
+                pinned: true,
+                pinExpires: DateTime.utc(2021, 3).add(
+                  const Duration(seconds: timeoutOrExpirationDate),
+                ),
+              ),
+            ),
+          );
+
+          final messagesEmits = expectLater(
+            // skipping first seed message list -> [] messages
+            tester.channelState?.messagesStream.skip(1),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.updating),
+                  matchMessageState: true,
+                ),
+              ],
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.updated),
+                  matchMessageState: true,
+                ),
+              ],
+            ]),
+          );
+
+          final res = await tester.channel.pinMessage(
+            message,
+            timeoutOrExpirationDate: timeoutOrExpirationDate,
+          );
+
+          expect(res, isNotNull);
+          expect(res.message.pinned, isTrue);
+          expect(res.message.pinExpires, isNotNull);
+
+          await messagesEmits;
+
+          tester.verifyApi(
+            (api) => api.message.partialUpdateMessage(
+              message.id,
+              set: any(named: 'set'),
+            ),
+          );
+        },
+      );
+
+      channelTest(
+        'should work fine if passed timeoutOrExpirationDate as DateTime',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelPinMessage()),
+        body: (tester) async {
+          final message = Message(id: 'test-message-id');
+          final timeoutOrExpirationDate = DateTime.utc(2021, 3).add(const Duration(days: 3)); // 3 days
+
+          tester.mockApi(
+            (api) => api.message.partialUpdateMessage(
+              message.id,
+              set: {
+                'pinned': true,
+                'pin_expires': timeoutOrExpirationDate.toUtc().toIso8601String(),
+              },
+            ),
+            result: createDefaultUpdateMessageResponse(
+              message: message.copyWith(
+                pinned: true,
+                pinExpires: timeoutOrExpirationDate,
+              ),
+            ),
+          );
+
+          final messagesEmits = expectLater(
+            // skipping first seed message list -> [] messages
+            tester.channelState?.messagesStream.skip(1),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.updating),
+                  matchMessageState: true,
+                ),
+              ],
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.updated),
+                  matchMessageState: true,
+                ),
+              ],
+            ]),
+          );
+
+          final res = await tester.channel.pinMessage(
+            message,
+            timeoutOrExpirationDate: timeoutOrExpirationDate,
+          );
+
+          expect(res, isNotNull);
+          expect(res.message.pinned, isTrue);
+          expect(res.message.pinExpires, isNotNull);
+          expect(res.message.pinExpires, timeoutOrExpirationDate.toUtc());
+
+          await messagesEmits;
+
+          tester.verifyApi(
+            (api) => api.message.partialUpdateMessage(
+              message.id,
+              set: {
+                'pinned': true,
+                'pin_expires': timeoutOrExpirationDate.toUtc().toIso8601String(),
+              },
+            ),
+          );
+        },
+      );
+
+      chatClientTest(
+        'should throw if invalid timeoutOrExpirationDate is passed',
+        body: (tester) async {
+          const messageId = 'test-message-id';
+          const timeoutOrExpirationDate = 'invalid-value';
+
+          try {
+            await tester.client.pinMessage(
+              messageId,
+              timeoutOrExpirationDate: timeoutOrExpirationDate,
+            );
+          } catch (e) {
+            expect(e, isA<ArgumentError>());
+          }
+        },
+      );
+    });
+
+    channelTest(
+      '`.unpinMessage`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelPinMessage()),
+      body: (tester) async {
+        final message = Message(id: 'test-message-id', pinned: true);
+
+        tester.mockApi(
+          (api) => api.message.partialUpdateMessage(
+            message.id,
+            set: {'pinned': false},
+          ),
+          result: createDefaultUpdateMessageResponse(
+            message: message.copyWith(pinned: false),
+          ),
         );
 
-        expectLater(
+        final messagesEmits = expectLater(
           // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
+          tester.channelState?.messagesStream.skip(1),
           emitsInOrder([
             [
               isSameMessageAs(
@@ -2636,400 +3439,293 @@ void main() {
           ]),
         );
 
-        final res = await channel.pinMessage(message);
+        final res = await tester.channel.unpinMessage(message);
 
         expect(res, isNotNull);
-        expect(res.message.pinned, isTrue);
-        expect(res.message.pinExpires, isNull);
+        expect(res.message.pinned, isFalse);
 
-        verify(
-          () => client.partialUpdateMessage(
+        await messagesEmits;
+
+        tester.verifyApi(
+          (api) => api.message.partialUpdateMessage(
             message.id,
-            set: any(named: 'set'),
-            unset: any(named: 'unset'),
+            set: {'pinned': false},
           ),
-        ).called(1);
-      });
-
-      test(
-        'should work fine if passed timeoutOrExpirationDate as num(seconds)',
-        () async {
-          final message = Message(id: 'test-message-id');
-          const timeoutOrExpirationDate = 300; // 300 seconds
-
-          when(
-            () => client.partialUpdateMessage(
-              message.id,
-              set: any(named: 'set'),
-              unset: any(named: 'unset'),
-            ),
-          ).thenAnswer(
-            (_) async => UpdateMessageResponse()
-              ..message = message.copyWith(
-                pinned: true,
-                pinExpires: DateTime.now().add(
-                  const Duration(seconds: timeoutOrExpirationDate),
-                ),
-              ),
-          );
-
-          expectLater(
-            // skipping first seed message list -> [] messages
-            channel.state?.messagesStream.skip(1),
-            emitsInOrder([
-              [
-                isSameMessageAs(
-                  message.copyWith(state: MessageState.updating),
-                  matchMessageState: true,
-                ),
-              ],
-              [
-                isSameMessageAs(
-                  message.copyWith(state: MessageState.updated),
-                  matchMessageState: true,
-                ),
-              ],
-            ]),
-          );
-
-          final res = await channel.pinMessage(
-            message,
-            timeoutOrExpirationDate: timeoutOrExpirationDate,
-          );
-
-          expect(res, isNotNull);
-          expect(res.message.pinned, isTrue);
-          expect(res.message.pinExpires, isNotNull);
-
-          verify(
-            () => client.partialUpdateMessage(
-              message.id,
-              set: any(named: 'set'),
-              unset: any(named: 'unset'),
-            ),
-          ).called(1);
-        },
-      );
-
-      test(
-        'should work fine if passed timeoutOrExpirationDate as DateTime',
-        () async {
-          final message = Message(id: 'test-message-id');
-          final timeoutOrExpirationDate = DateTime.now().add(const Duration(days: 3)); // 3 days
-
-          when(
-            () => client.partialUpdateMessage(
-              message.id,
-              set: any(named: 'set'),
-              unset: any(named: 'unset'),
-            ),
-          ).thenAnswer(
-            (_) async => UpdateMessageResponse()
-              ..message = message.copyWith(
-                pinned: true,
-                pinExpires: timeoutOrExpirationDate,
-              ),
-          );
-
-          expectLater(
-            // skipping first seed message list -> [] messages
-            channel.state?.messagesStream.skip(1),
-            emitsInOrder([
-              [
-                isSameMessageAs(
-                  message.copyWith(state: MessageState.updating),
-                  matchMessageState: true,
-                ),
-              ],
-              [
-                isSameMessageAs(
-                  message.copyWith(state: MessageState.updated),
-                  matchMessageState: true,
-                ),
-              ],
-            ]),
-          );
-
-          final res = await channel.pinMessage(
-            message,
-            timeoutOrExpirationDate: timeoutOrExpirationDate,
-          );
-
-          expect(res, isNotNull);
-          expect(res.message.pinned, isTrue);
-          expect(res.message.pinExpires, isNotNull);
-          expect(res.message.pinExpires, timeoutOrExpirationDate.toUtc());
-
-          verify(
-            () => client.partialUpdateMessage(
-              message.id,
-              set: any(named: 'set'),
-              unset: any(named: 'unset'),
-            ),
-          ).called(1);
-        },
-      );
-
-      test(
-        'should throw if invalid timeoutOrExpirationDate is passed',
-        () async {
-          final message = Message(id: 'test-message-id');
-          const timeoutOrExpirationDate = 'invalid-value';
-
-          try {
-            await channel.pinMessage(
-              message,
-              timeoutOrExpirationDate: timeoutOrExpirationDate,
-            );
-          } catch (e) {
-            expect(e, isA<ArgumentError>());
-          }
-        },
-      );
-    });
-
-    test('`.unpinMessage`', () async {
-      final message = Message(id: 'test-message-id', pinned: true);
-
-      when(
-        () => client.partialUpdateMessage(
-          message.id,
-          set: {'pinned': false},
-        ),
-      ).thenAnswer((_) async => UpdateMessageResponse()..message = message.copyWith(pinned: false));
-
-      expectLater(
-        // skipping first seed message list -> [] messages
-        channel.state?.messagesStream.skip(1),
-        emitsInOrder([
-          [
-            isSameMessageAs(
-              message.copyWith(state: MessageState.updating),
-              matchMessageState: true,
-            ),
-          ],
-          [
-            isSameMessageAs(
-              message.copyWith(state: MessageState.updated),
-              matchMessageState: true,
-            ),
-          ],
-        ]),
-      );
-
-      final res = await channel.unpinMessage(message);
-
-      expect(res, isNotNull);
-      expect(res.message.pinned, isFalse);
-
-      verify(
-        () => client.partialUpdateMessage(
-          message.id,
-          set: {'pinned': false},
-        ),
-      ).called(1);
-    });
+        );
+      },
+    );
 
     group('`.search`', () {
-      final filter = ChannelFilter.in_(ChannelFilterField.cid, const [channelCid]);
-
-      test('should work fine with `query`', () async {
-        const query = 'test-search-query';
-        final sort = [MessageSearchSort.asc(MessageSearchSortField.custom('test-sort-field'))];
-        const pagination = PaginationParams();
-
-        final results = List.generate(3, (index) => GetMessageResponse());
-
-        when(
-          () => client.search(
-            any(that: isSameFilterAs(filter)),
-            query: query,
-            sort: any(named: 'sort'),
-            paginationParams: any(named: 'paginationParams'),
+      ChannelState Function(ChannelState) _seedChannel() {
+        return (_) => createDefaultChannelState(
+          channel: createDefaultChannelModel(
+            cid: _channelCid,
+            config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+            ownCapabilities: const [ChannelCapability.readEvents],
           ),
-        ).thenAnswer(
-          (_) async => SearchMessagesResponse()..results = results,
+        );
+      }
+
+      // The channel builds this filter itself, and a filter compares by
+      // identity, so the stubs below match on what it sends.
+      final filter = ChannelFilter.in_(ChannelFilterField.cid, const [_channelCid]);
+
+      channelTest(
+        'should work fine with `query`',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          const query = 'test-search-query';
+          final sort = [MessageSearchSort.asc(MessageSearchSortField.custom('test-sort-field'))];
+          const pagination = PaginationParams();
+
+          final results = List.generate(3, (index) => createDefaultGetMessageResponse());
+
+          tester.mockApi(
+            (api) => api.general.searchMessages(
+              any(that: isSameFilterAs(filter)),
+              query: query,
+              sort: any(named: 'sort'),
+              pagination: any(named: 'pagination'),
+            ),
+            result: createDefaultSearchMessagesResponse(results: results),
+          );
+
+          final res = await tester.channel.search(
+            query: query,
+            sort: sort,
+            paginationParams: pagination,
+          );
+
+          expect(res, isNotNull);
+          expect(res.results.length, results.length);
+
+          tester.verifyApi(
+            (api) => api.general.searchMessages(
+              any(that: isSameFilterAs(filter)),
+              query: query,
+              sort: any(named: 'sort'),
+              pagination: any(named: 'pagination'),
+            ),
+          );
+        },
+      );
+
+      channelTest(
+        'should work fine with `messageFilters`',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final messageFilters = MessageSearchFilter.query(MessageSearchFilterField.text, 'text');
+          final sort = [MessageSearchSort.desc(MessageSearchSortField.custom('test-sort-field'))];
+          const pagination = PaginationParams();
+
+          final results = List.generate(3, (index) => createDefaultGetMessageResponse());
+
+          tester.mockApi(
+            (api) => api.general.searchMessages(
+              any(that: isSameFilterAs(filter)),
+              messageFilters: messageFilters,
+              sort: any(named: 'sort'),
+              pagination: any(named: 'pagination'),
+            ),
+            result: createDefaultSearchMessagesResponse(results: results),
+          );
+
+          final res = await tester.channel.search(
+            sort: sort,
+            paginationParams: pagination,
+            messageFilters: messageFilters,
+          );
+
+          expect(res, isNotNull);
+          expect(res.results.length, results.length);
+
+          tester.verifyApi(
+            (api) => api.general.searchMessages(
+              any(that: isSameFilterAs(filter)),
+              messageFilters: messageFilters,
+              sort: any(named: 'sort'),
+              pagination: any(named: 'pagination'),
+            ),
+          );
+        },
+      );
+    });
+
+    channelTest(
+      '`.deleteFile`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelMiscOperations()),
+      body: (tester) async {
+        const url = 'test-file-url';
+
+        tester.mockApi(
+          (api) => api.fileUploader.deleteFile(url, _channelId, _channelType),
+          result: createDefaultEmptyResponse(),
         );
 
-        final res = await channel.search(
-          query: query,
-          sort: sort,
-          paginationParams: pagination,
-        );
+        final res = await tester.channel.deleteFile(url);
 
         expect(res, isNotNull);
-        expect(res.results.length, results.length);
 
-        verify(
-          () => client.search(
-            any(that: isSameFilterAs(filter)),
-            query: query,
-            sort: any(named: 'sort'),
-            paginationParams: any(named: 'paginationParams'),
-          ),
-        ).called(1);
-      });
+        tester.verifyApi(
+          (api) => api.fileUploader.deleteFile(url, _channelId, _channelType),
+        );
+      },
+    );
 
-      test('should work fine with `messageFilters`', () async {
-        final messageFilters = MessageSearchFilter.query(MessageSearchFilterField.text, 'text');
-        final sort = [MessageSearchSort.desc(MessageSearchSortField.custom('test-sort-field'))];
-        const pagination = PaginationParams();
+    channelTest(
+      '`.deleteImage`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelMiscOperations()),
+      body: (tester) async {
+        const url = 'test-image-url';
 
-        final results = List.generate(3, (index) => GetMessageResponse());
-
-        when(
-          () => client.search(
-            any(that: isSameFilterAs(filter)),
-            messageFilters: messageFilters,
-            sort: any(named: 'sort'),
-            paginationParams: any(named: 'paginationParams'),
-          ),
-        ).thenAnswer(
-          (_) async => SearchMessagesResponse()..results = results,
+        tester.mockApi(
+          (api) => api.fileUploader.deleteImage(url, _channelId, _channelType),
+          result: createDefaultEmptyResponse(),
         );
 
-        final res = await channel.search(
-          sort: sort,
-          paginationParams: pagination,
-          messageFilters: messageFilters,
-        );
+        final res = await tester.channel.deleteImage(url);
 
         expect(res, isNotNull);
-        expect(res.results.length, results.length);
 
-        verify(
-          () => client.search(
-            any(that: isSameFilterAs(filter)),
-            messageFilters: messageFilters,
-            sort: any(named: 'sort'),
-            paginationParams: any(named: 'paginationParams'),
+        tester.verifyApi(
+          (api) => api.fileUploader.deleteImage(url, _channelId, _channelType),
+        );
+      },
+    );
+
+    channelTest(
+      '`.stopAIResponse`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelMiscOperations()),
+      body: (tester) async {
+        final stopAIEvent = Event(type: EventType.aiIndicatorStop);
+
+        tester.mockApi(
+          (api) => api.channel.sendEvent(
+            _channelId,
+            _channelType,
+            any(that: isSameEventAs(stopAIEvent)),
           ),
-        ).called(1);
-      });
-    });
+          result: createDefaultEmptyResponse(),
+        );
 
-    test('`.deleteFile`', () async {
-      const url = 'test-file-url';
+        final res = await tester.channel.stopAIResponse();
 
-      when(
-        () => client.deleteFile(url, channelId, channelType, cancelToken: any(named: 'cancelToken')),
-      ).thenAnswer((_) async => EmptyResponse());
+        expect(res, isNotNull);
 
-      final res = await channel.deleteFile(url);
+        tester.verifyApi(
+          (api) => api.channel.sendEvent(
+            _channelId,
+            _channelType,
+            any(that: isSameEventAs(stopAIEvent)),
+          ),
+        );
+      },
+    );
 
-      expect(res, isNotNull);
+    channelTest(
+      '`.sendEvent`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelMiscOperations()),
+      body: (tester) async {
+        final event = Event(type: 'event.local');
 
-      verify(() => client.deleteFile(url, channelId, channelType, cancelToken: any(named: 'cancelToken'))).called(1);
-    });
+        // Pinned by value, not by matcher: `sendEvent` forwards the caller's
+        // event untouched, so the stub only answering on the exact instance is
+        // itself the assertion that nothing rewrote it on the way out.
+        tester.mockApi(
+          (api) => api.channel.sendEvent(_channelId, _channelType, event),
+          result: createDefaultEmptyResponse(),
+        );
 
-    test('`.deleteImage`', () async {
-      const url = 'test-image-url';
+        final res = await tester.channel.sendEvent(event);
 
-      when(
-        () => client.deleteImage(url, channelId, channelType, cancelToken: any(named: 'cancelToken')),
-      ).thenAnswer((_) async => EmptyResponse());
+        expect(res, isNotNull);
 
-      final res = await channel.deleteImage(url);
-
-      expect(res, isNotNull);
-
-      verify(() => client.deleteImage(url, channelId, channelType, cancelToken: any(named: 'cancelToken'))).called(1);
-    });
-
-    test('`.stopAIResponse`', () async {
-      final stopAIEvent = Event(type: EventType.aiIndicatorStop);
-
-      when(
-        () => client.sendEvent(
-          channelId,
-          channelType,
-          any(that: isSameEventAs(stopAIEvent)),
-        ),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await channel.stopAIResponse();
-
-      expect(res, isNotNull);
-
-      verify(
-        () => client.sendEvent(
-          channelId,
-          channelType,
-          any(that: isSameEventAs(stopAIEvent)),
-        ),
-      ).called(1);
-    });
-
-    test('`.sendEvent`', () async {
-      final event = Event(type: 'event.local');
-
-      when(() => client.sendEvent(channelId, channelType, event)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await channel.sendEvent(event);
-
-      expect(res, isNotNull);
-
-      verify(() => client.sendEvent(channelId, channelType, event)).called(1);
-    });
+        tester.verifyApi(
+          (api) => api.channel.sendEvent(_channelId, _channelType, event),
+        );
+      },
+    );
 
     group('`.sendReaction`', () {
-      test('should work fine', () async {
-        final message = Message(
-          id: 'test-message-id',
-          state: MessageState.sent,
-        );
+      channelTest(
+        'should work fine',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelReactions()),
+        body: (tester) async {
+          final message = Message(
+            id: 'test-message-id',
+            state: MessageState.sent,
+          );
 
-        const type = 'like';
-        const emojiCode = '👍';
-        const score = 4;
+          const type = 'like';
+          const emojiCode = '👍';
+          const score = 4;
 
-        final reaction = Reaction(
-          type: type,
-          messageId: message.id,
-          emojiCode: emojiCode,
-          score: score,
-          user: client.state.currentUser,
-        );
+          final reaction = Reaction(
+            type: type,
+            messageId: message.id,
+            emojiCode: emojiCode,
+            score: score,
+            user: tester.currentUser,
+          );
 
-        when(() => client.sendReaction(message.id, reaction)).thenAnswer(
-          (_) async => SendReactionResponse()
-            ..message = message
-            ..reaction = reaction,
-        );
+          tester.mockApi(
+            (api) => api.message.sendReaction(message.id, reaction),
+            result: createDefaultSendReactionResponse(message: message, reaction: reaction),
+          );
 
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.sent,
-                  reactionGroups: {type: ReactionGroup(count: 1, sumScores: 1)},
-                  latestReactions: [reaction],
-                  ownReactions: [reaction],
+          final messagesEmission = expectLater(
+            // skipping first seed message list -> [] messages
+            tester.channelState?.messagesStream.skip(1),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    state: MessageState.sent,
+                    reactionGroups: {type: ReactionGroup(count: 1, sumScores: 1)},
+                    latestReactions: [reaction],
+                    ownReactions: [reaction],
+                  ),
+                  matchReactions: true,
+                  matchMessageState: true,
                 ),
-                matchReactions: true,
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
+              ],
+            ]),
+          );
 
-        final res = await channel.sendReaction(message, reaction);
+          final res = await tester.channel.sendReaction(message, reaction);
 
-        expect(res, isNotNull);
-        expect(res.reaction.type, type);
-        expect(res.reaction.messageId, message.id);
-        expect(res.reaction.emojiCode, emojiCode);
-        expect(res.reaction.score, score);
+          expect(res, isNotNull);
+          expect(res.reaction.type, type);
+          expect(res.reaction.messageId, message.id);
+          expect(res.reaction.emojiCode, emojiCode);
+          expect(res.reaction.score, score);
 
-        verify(() => client.sendReaction(message.id, reaction)).called(1);
-      });
+          tester.verifyApi((api) => api.message.sendReaction(message.id, reaction));
 
-      test(
+          await messagesEmission;
+        },
+      );
+
+      channelTest(
         'should restore previous message if `client.sendReaction` throws',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelReactions()),
+        body: (tester) async {
           const type = 'test-reaction-type';
           final message = Message(
             id: 'test-message-id',
@@ -3039,16 +3735,17 @@ void main() {
           final reaction = Reaction(
             type: type,
             messageId: message.id,
-            user: client.state.currentUser,
+            user: tester.currentUser,
           );
 
-          when(
-            () => client.sendReaction(message.id, reaction),
-          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
+          tester.mockApiFailure(
+            (api) => api.message.sendReaction(message.id, reaction),
+            error: createDefaultNetworkError(code: StreamErrorCode.inputError, statusCode: 400),
+          );
 
-          expectLater(
+          final messagesEmission = expectLater(
             // skipping first seed message list -> [] messages
-            channel.state?.messagesStream.skip(1),
+            tester.channelState?.messagesStream.skip(1),
             emitsInOrder([
               [
                 isSameMessageAs(
@@ -3078,24 +3775,29 @@ void main() {
           );
 
           try {
-            await channel.sendReaction(message, reaction);
+            await tester.channel.sendReaction(message, reaction);
           } catch (e) {
             expect(e, isA<StreamApiException>());
           }
 
-          verify(() => client.sendReaction(message.id, reaction)).called(1);
+          tester.verifyApi((api) => api.message.sendReaction(message.id, reaction));
+
+          await messagesEmission;
         },
       );
 
-      test(
+      channelTest(
         '''should override previous reaction if present and `enforceUnique` is true''',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelReactions()),
+        body: (tester) async {
           const messageId = 'test-message-id';
           const prevType = 'test-reaction-type';
           final prevReaction = Reaction(
             type: prevType,
             messageId: messageId,
-            user: client.state.currentUser,
+            user: tester.currentUser,
           );
           final message = Message(
             id: messageId,
@@ -3114,7 +3816,7 @@ void main() {
           final newReaction = Reaction(
             type: type,
             messageId: messageId,
-            user: client.state.currentUser,
+            user: tester.currentUser,
           );
           final newMessage = message.copyWith(
             ownReactions: [newReaction],
@@ -3123,21 +3825,18 @@ void main() {
 
           const enforceUnique = true;
 
-          when(
-            () => client.sendReaction(
+          tester.mockApi(
+            (api) => api.message.sendReaction(
               messageId,
               newReaction,
               enforceUnique: enforceUnique,
             ),
-          ).thenAnswer(
-            (_) async => SendReactionResponse()
-              ..message = newMessage
-              ..reaction = newReaction,
+            result: createDefaultSendReactionResponse(message: newMessage, reaction: newReaction),
           );
 
-          expectLater(
+          final messagesEmission = expectLater(
             // skipping first seed message list -> [] messages
-            channel.state?.messagesStream.skip(1),
+            tester.channelState?.messagesStream.skip(1),
             emitsInOrder([
               [
                 isSameMessageAs(
@@ -3149,7 +3848,7 @@ void main() {
             ]),
           );
 
-          final res = await channel.sendReaction(
+          final res = await tester.channel.sendReaction(
             message,
             newReaction,
             enforceUnique: enforceUnique,
@@ -3159,77 +3858,89 @@ void main() {
           expect(res.reaction.type, type);
           expect(res.reaction.messageId, messageId);
 
-          verify(
-            () => client.sendReaction(
+          tester.verifyApi(
+            (api) => api.message.sendReaction(
               messageId,
               newReaction,
               enforceUnique: enforceUnique,
             ),
-          ).called(1);
+          );
+
+          await messagesEmission;
         },
       );
     });
 
     group('`.sendReaction in thread`', () {
-      test('should work fine', () async {
-        const type = 'test-reaction-type';
-        final message = Message(
-          id: 'test-message-id',
-          parentId: 'test-parent-id', // is thread message
-          state: MessageState.sent,
-        );
+      channelTest(
+        'should work fine',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelReactions()),
+        body: (tester) async {
+          const type = 'test-reaction-type';
+          final message = Message(
+            id: 'test-message-id',
+            parentId: 'test-parent-id', // is thread message
+            state: MessageState.sent,
+          );
 
-        final reaction = Reaction(
-          type: type,
-          messageId: message.id,
-          user: client.state.currentUser,
-        );
+          final reaction = Reaction(
+            type: type,
+            messageId: message.id,
+            user: tester.currentUser,
+          );
 
-        when(() => client.sendReaction(message.id, reaction)).thenAnswer(
-          (_) async => SendReactionResponse()
-            ..message = message
-            ..reaction = reaction,
-        );
+          tester.mockApi(
+            (api) => api.message.sendReaction(message.id, reaction),
+            result: createDefaultSendReactionResponse(message: message, reaction: reaction),
+          );
 
-        expectLater(
-          channel.state?.threadsStream
-              // skipping first seed message list -> [] messages
-              .skip(1)
-              .map((event) => event['test-parent-id']),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.sent,
-                  reactionGroups: {
-                    type: ReactionGroup(
-                      count: 1,
-                      sumScores: 1,
-                    ),
-                  },
-                  latestReactions: [reaction],
-                  ownReactions: [reaction],
+          final threadsEmission = expectLater(
+            tester.channelState?.threadsStream
+                // skipping first seed message list -> [] messages
+                .skip(1)
+                .map((event) => event['test-parent-id']),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    state: MessageState.sent,
+                    reactionGroups: {
+                      type: ReactionGroup(
+                        count: 1,
+                        sumScores: 1,
+                      ),
+                    },
+                    latestReactions: [reaction],
+                    ownReactions: [reaction],
+                  ),
+                  matchReactions: true,
+                  matchMessageState: true,
+                  matchParentId: true,
                 ),
-                matchReactions: true,
-                matchMessageState: true,
-                matchParentId: true,
-              ),
-            ],
-          ]),
-        );
+              ],
+            ]),
+          );
 
-        final res = await channel.sendReaction(message, reaction);
+          final res = await tester.channel.sendReaction(message, reaction);
 
-        expect(res, isNotNull);
-        expect(res.reaction.type, type);
-        expect(res.reaction.messageId, message.id);
+          expect(res, isNotNull);
+          expect(res.reaction.type, type);
+          expect(res.reaction.messageId, message.id);
 
-        verify(() => client.sendReaction(message.id, reaction)).called(1);
-      });
+          tester.verifyApi((api) => api.message.sendReaction(message.id, reaction));
 
-      test(
+          await threadsEmission;
+        },
+      );
+
+      channelTest(
         '''should restore previous thread message if `client.sendReaction` throws''',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelReactions()),
+        body: (tester) async {
           const type = 'test-reaction-type';
           final message = Message(
             id: 'test-message-id',
@@ -3237,22 +3948,23 @@ void main() {
             state: MessageState.sent,
             // `Message.createdAt` falls back to `DateTime.now()` per call
             // when not provided, which breaks merge/sort keyed on createdAt.
-            createdAt: DateTime.now(),
+            createdAt: DateTime.utc(2021, 3),
           );
 
           final reaction = Reaction(
             type: type,
             messageId: message.id,
-            user: client.state.currentUser,
+            user: tester.currentUser,
           );
 
-          when(
-            () => client.sendReaction(message.id, reaction),
-          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
+          tester.mockApiFailure(
+            (api) => api.message.sendReaction(message.id, reaction),
+            error: createDefaultNetworkError(code: StreamErrorCode.inputError, statusCode: 400),
+          );
 
-          expectLater(
+          final threadsEmission = expectLater(
             // skipping first seed message list -> [] messages
-            channel.state?.threadsStream.skip(1).map((event) => event['test-parent-id']),
+            tester.channelState?.threadsStream.skip(1).map((event) => event['test-parent-id']),
             emitsInOrder([
               [
                 isSameMessageAs(
@@ -3284,25 +3996,30 @@ void main() {
           );
 
           try {
-            await channel.sendReaction(message, reaction);
+            await tester.channel.sendReaction(message, reaction);
           } catch (e) {
             expect(e, isA<StreamApiException>());
           }
 
-          verify(() => client.sendReaction(message.id, reaction)).called(1);
+          tester.verifyApi((api) => api.message.sendReaction(message.id, reaction));
+
+          await threadsEmission;
         },
       );
 
-      test(
+      channelTest(
         '''should override previous thread reaction if present and `enforceUnique` is true''',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelReactions()),
+        body: (tester) async {
           const messageId = 'test-message-id';
           const parentId = 'test-parent-id';
           const prevType = 'test-reaction-type';
           final prevReaction = Reaction(
             type: prevType,
             messageId: messageId,
-            user: client.state.currentUser,
+            user: tester.currentUser,
           );
           final message = Message(
             id: messageId,
@@ -3322,7 +4039,7 @@ void main() {
           final newReaction = Reaction(
             type: type,
             messageId: messageId,
-            user: client.state.currentUser,
+            user: tester.currentUser,
           );
           final newMessage = message.copyWith(
             ownReactions: [newReaction],
@@ -3331,21 +4048,18 @@ void main() {
 
           const enforceUnique = true;
 
-          when(
-            () => client.sendReaction(
+          tester.mockApi(
+            (api) => api.message.sendReaction(
               messageId,
               newReaction,
               enforceUnique: enforceUnique,
             ),
-          ).thenAnswer(
-            (_) async => SendReactionResponse()
-              ..message = newMessage
-              ..reaction = newReaction,
+            result: createDefaultSendReactionResponse(message: newMessage, reaction: newReaction),
           );
 
-          expectLater(
+          final threadsEmission = expectLater(
             // skipping first seed message list -> [] messages
-            channel.state?.threadsStream.skip(1).map((event) => event['test-parent-id']),
+            tester.channelState?.threadsStream.skip(1).map((event) => event['test-parent-id']),
             emitsInOrder([
               [
                 isSameMessageAs(
@@ -3358,7 +4072,7 @@ void main() {
             ]),
           );
 
-          final res = await channel.sendReaction(
+          final res = await tester.channel.sendReaction(
             message,
             newReaction,
             enforceUnique: enforceUnique,
@@ -3368,70 +4082,26 @@ void main() {
           expect(res.reaction.type, type);
           expect(res.reaction.messageId, messageId);
 
-          verify(
-            () => client.sendReaction(
+          tester.verifyApi(
+            (api) => api.message.sendReaction(
               messageId,
               newReaction,
               enforceUnique: enforceUnique,
             ),
-          ).called(1);
+          );
+
+          await threadsEmission;
         },
       );
     });
 
     group('`.deleteReaction`', () {
-      test('should work fine', () async {
-        const userId = 'test-user-id';
-        const messageId = 'test-message-id';
-        const type = 'test-reaction-type';
-        final reaction = Reaction(
-          type: type,
-          messageId: messageId,
-          userId: userId,
-        );
-        final message = Message(
-          id: messageId,
-          ownReactions: [reaction],
-          latestReactions: [reaction],
-          reactionGroups: {
-            type: ReactionGroup(
-              count: 1,
-              sumScores: 1,
-            ),
-          },
-          state: MessageState.sent,
-        );
-
-        when(() => client.deleteReaction(messageId, type)).thenAnswer((_) async => EmptyResponse());
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.sent,
-                  latestReactions: [],
-                  ownReactions: [],
-                ),
-                matchReactions: true,
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        final res = await channel.deleteReaction(message, reaction);
-
-        expect(res, isNotNull);
-
-        verify(() => client.deleteReaction(messageId, type)).called(1);
-      });
-
-      test(
-        'should restore prev message state if `client.deleteReaction` throws',
-        () async {
+      channelTest(
+        'should work fine',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelReactions()),
+        body: (tester) async {
           const userId = 'test-user-id';
           const messageId = 'test-message-id';
           const type = 'test-reaction-type';
@@ -3453,13 +4123,74 @@ void main() {
             state: MessageState.sent,
           );
 
-          when(
-            () => client.deleteReaction(messageId, type),
-          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
+          tester.mockApi(
+            (api) => api.message.deleteReaction(messageId, type),
+            result: createDefaultEmptyResponse(),
+          );
 
-          expectLater(
+          final messagesEmission = expectLater(
             // skipping first seed message list -> [] messages
-            channel.state?.messagesStream.skip(1),
+            tester.channelState?.messagesStream.skip(1),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    state: MessageState.sent,
+                    latestReactions: [],
+                    ownReactions: [],
+                  ),
+                  matchReactions: true,
+                  matchMessageState: true,
+                ),
+              ],
+            ]),
+          );
+
+          final res = await tester.channel.deleteReaction(message, reaction);
+
+          expect(res, isNotNull);
+
+          tester.verifyApi((api) => api.message.deleteReaction(messageId, type));
+
+          await messagesEmission;
+        },
+      );
+
+      channelTest(
+        'should restore prev message state if `client.deleteReaction` throws',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelReactions()),
+        body: (tester) async {
+          const userId = 'test-user-id';
+          const messageId = 'test-message-id';
+          const type = 'test-reaction-type';
+          final reaction = Reaction(
+            type: type,
+            messageId: messageId,
+            userId: userId,
+          );
+          final message = Message(
+            id: messageId,
+            ownReactions: [reaction],
+            latestReactions: [reaction],
+            reactionGroups: {
+              type: ReactionGroup(
+                count: 1,
+                sumScores: 1,
+              ),
+            },
+            state: MessageState.sent,
+          );
+
+          tester.mockApiFailure(
+            (api) => api.message.deleteReaction(messageId, type),
+            error: createDefaultNetworkError(code: StreamErrorCode.inputError, statusCode: 400),
+          );
+
+          final messagesEmission = expectLater(
+            // skipping first seed message list -> [] messages
+            tester.channelState?.messagesStream.skip(1),
             emitsInOrder([
               [
                 isSameMessageAs(
@@ -3483,76 +4214,92 @@ void main() {
           );
 
           try {
-            await channel.deleteReaction(message, reaction);
+            await tester.channel.deleteReaction(message, reaction);
           } catch (e) {
             expect(e, isA<StreamApiException>());
           }
 
-          verify(() => client.deleteReaction(messageId, type)).called(1);
+          tester.verifyApi((api) => api.message.deleteReaction(messageId, type));
+
+          await messagesEmission;
         },
       );
     });
 
     group('`.deleteReaction in thread`', () {
-      test('should work fine', () async {
-        const userId = 'test-user-id';
-        const messageId = 'test-message-id';
-        const parentId = 'test-parent-id';
-        const type = 'test-reaction-type';
-        final reaction = Reaction(
-          type: type,
-          messageId: messageId,
-          userId: userId,
-        );
-        final message = Message(
-          id: messageId,
-          parentId: parentId,
-          // is thread
-          ownReactions: [reaction],
-          latestReactions: [reaction],
-          reactionGroups: {
-            type: ReactionGroup(
-              count: 1,
-              sumScores: 1,
-            ),
-          },
-          state: MessageState.sent,
-          // `Message.createdAt` falls back to `DateTime.now()` per call when
-          // not provided, which breaks merge/sort keyed on createdAt.
-          createdAt: DateTime.now(),
-        );
-
-        when(() => client.deleteReaction(messageId, type)).thenAnswer((_) async => EmptyResponse());
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.threadsStream.skip(1).map((event) => event['test-parent-id']),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.sent,
-                  latestReactions: [],
-                  ownReactions: [],
-                ),
-                matchReactions: true,
-                matchMessageState: true,
-                matchParentId: true,
+      channelTest(
+        'should work fine',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelReactions()),
+        body: (tester) async {
+          const userId = 'test-user-id';
+          const messageId = 'test-message-id';
+          const parentId = 'test-parent-id';
+          const type = 'test-reaction-type';
+          final reaction = Reaction(
+            type: type,
+            messageId: messageId,
+            userId: userId,
+          );
+          final message = Message(
+            id: messageId,
+            parentId: parentId,
+            // is thread
+            ownReactions: [reaction],
+            latestReactions: [reaction],
+            reactionGroups: {
+              type: ReactionGroup(
+                count: 1,
+                sumScores: 1,
               ),
-            ],
-          ]),
-        );
+            },
+            state: MessageState.sent,
+            // `Message.createdAt` falls back to `DateTime.now()` per call when
+            // not provided, which breaks merge/sort keyed on createdAt.
+            createdAt: DateTime.utc(2021, 3),
+          );
 
-        final res = await channel.deleteReaction(message, reaction);
+          tester.mockApi(
+            (api) => api.message.deleteReaction(messageId, type),
+            result: createDefaultEmptyResponse(),
+          );
 
-        expect(res, isNotNull);
+          final threadsEmission = expectLater(
+            // skipping first seed message list -> [] messages
+            tester.channelState?.threadsStream.skip(1).map((event) => event['test-parent-id']),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  message.copyWith(
+                    state: MessageState.sent,
+                    latestReactions: [],
+                    ownReactions: [],
+                  ),
+                  matchReactions: true,
+                  matchMessageState: true,
+                  matchParentId: true,
+                ),
+              ],
+            ]),
+          );
 
-        verify(() => client.deleteReaction(messageId, type)).called(1);
-      });
+          final res = await tester.channel.deleteReaction(message, reaction);
 
-      test(
+          expect(res, isNotNull);
+
+          tester.verifyApi((api) => api.message.deleteReaction(messageId, type));
+
+          await threadsEmission;
+        },
+      );
+
+      channelTest(
         'should restore prev message state if `client.deleteReaction` throws',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelReactions()),
+        body: (tester) async {
           const userId = 'test-user-id';
           const messageId = 'test-message-id';
           const parentId = 'test-parent-id';
@@ -3576,16 +4323,17 @@ void main() {
             state: MessageState.sent,
             // `Message.createdAt` falls back to `DateTime.now()` per call
             // when not provided, which breaks merge/sort keyed on createdAt.
-            createdAt: DateTime.now(),
+            createdAt: DateTime.utc(2021, 3),
           );
 
-          when(
-            () => client.deleteReaction(messageId, type),
-          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
+          tester.mockApiFailure(
+            (api) => api.message.deleteReaction(messageId, type),
+            error: createDefaultNetworkError(code: StreamErrorCode.inputError, statusCode: 400),
+          );
 
-          expectLater(
+          final threadsEmission = expectLater(
             // skipping first seed message list -> [] messages
-            channel.state?.threadsStream.skip(1).map((event) => event['test-parent-id']),
+            tester.channelState?.threadsStream.skip(1).map((event) => event['test-parent-id']),
             emitsInOrder([
               [
                 isSameMessageAs(
@@ -3611,1242 +4359,1658 @@ void main() {
           );
 
           try {
-            await channel.deleteReaction(message, reaction);
+            await tester.channel.deleteReaction(message, reaction);
           } catch (e) {
             expect(e, isA<StreamApiException>());
           }
 
-          verify(() => client.deleteReaction(messageId, type)).called(1);
+          tester.verifyApi((api) => api.message.deleteReaction(messageId, type));
+
+          await threadsEmission;
         },
       );
     });
 
-    test('`.update`', () async {
-      const channelData = {
-        'name': 'Stream Team',
-        'profile_image': 'test-profile-image',
-      };
-      final updateMessage = Message(
-        id: 'test-message-id',
-        text: 'updated channel',
-      );
-
-      final channelModel = ChannelModel(
-        cid: channelCid,
-        extraData: channelData,
-      );
-
-      when(() => client.updateChannel(channelId, channelType, channelData, message: any(named: 'message'))).thenAnswer(
-        (_) async => UpdateChannelResponse()
-          ..channel = channelModel
-          ..message = updateMessage,
-      );
-
-      final res = await channel.update(
-        channelData,
-        updateMessage: updateMessage,
-      );
-
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelModel.cid);
-      expect(res.channel.extraData, channelData);
-      expect(res.message?.id, updateMessage.id);
-
-      verify(() => client.updateChannel(channelId, channelType, channelData, message: any(named: 'message'))).called(1);
-    });
-
-    test('`.updateImage`', () async {
-      const image = 'https://getstream.io/new-image';
-
-      final channelModel = ChannelModel(
-        cid: channelCid,
-        extraData: {'image': image},
-      );
-
-      when(
-        () => client.updateChannelPartial(
-          channelId,
-          channelType,
-          set: {'image': image},
-        ),
-      ).thenAnswer(
-        (_) async => PartialUpdateChannelResponse()..channel = channelModel,
-      );
-
-      final res = await channel.updateImage(image);
-
-      expect(res, isNotNull);
-      expect(res.channel.extraData['image'], image);
-
-      verify(
-        () => client.updateChannelPartial(
-          channelId,
-          channelType,
-          set: {'image': image},
-        ),
-      ).called(1);
-    });
-
-    test('`.updateName`', () async {
-      const name = 'Name';
-
-      final channelModel = ChannelModel(
-        cid: channelCid,
-        extraData: {'name': name},
-      );
-
-      when(
-        () => client.updateChannelPartial(
-          channelId,
-          channelType,
-          set: {'name': name},
-        ),
-      ).thenAnswer(
-        (_) async => PartialUpdateChannelResponse()..channel = channelModel,
-      );
-
-      final res = await channel.updateName(name);
-
-      expect(res, isNotNull);
-      expect(res.channel.extraData['name'], name);
-
-      verify(
-        () => client.updateChannelPartial(
-          channelId,
-          channelType,
-          set: {'name': name},
-        ),
-      ).called(1);
-    });
-
-    test('`.updatePartial`', () async {
-      const set = {
-        'name': 'Stream Team',
-        'profile_image': 'test-profile-image',
-      };
-
-      const unset = ['tag', 'last_name'];
-
-      final channelModel = ChannelModel(
-        cid: channelCid,
-        extraData: {
-          'coolness': 999,
-          ...set,
-        },
-      );
-
-      when(
-        () => client.updateChannelPartial(
-          channelId,
-          channelType,
-          set: set,
-          unset: unset,
-        ),
-      ).thenAnswer(
-        (_) async => PartialUpdateChannelResponse()..channel = channelModel,
-      );
-
-      final res = await channel.updatePartial(set: set, unset: unset);
-
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelModel.cid);
-      expect(
-        res.channel.extraData,
-        {'coolness': 999, ...set},
-      );
-
-      verify(
-        () => client.updateChannelPartial(
-          channelId,
-          channelType,
-          set: set,
-          unset: unset,
-        ),
-      ).called(1);
-    });
-
-    test('`.delete`', () async {
-      when(() => client.deleteChannel(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await channel.delete();
-
-      expect(res, isNotNull);
-
-      verify(() => client.deleteChannel(channelId, channelType)).called(1);
-    });
-
-    test('`.truncate`', () async {
-      when(() => client.truncateChannel(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await channel.truncate();
-
-      expect(res, isNotNull);
-
-      verify(() => client.truncateChannel(channelId, channelType)).called(1);
-    });
-
-    test('`.acceptInvite`', () async {
-      final message = Message(id: 'test-message-id', text: 'Invite Accepted');
-
-      final channelModel = ChannelModel(cid: channelCid);
-
-      when(() => client.acceptChannelInvite(channelId, channelType, message: any(named: 'message'))).thenAnswer(
-        (_) async => AcceptInviteResponse()
-          ..channel = channelModel
-          ..message = message,
-      );
-
-      final res = await channel.acceptInvite(message);
-
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelModel.cid);
-      expect(res.message?.id, message.id);
-
-      verify(() => client.acceptChannelInvite(channelId, channelType, message: any(named: 'message'))).called(1);
-    });
-
-    test('`.rejectInvite`', () async {
-      final message = Message(id: 'test-message-id', text: 'Invite Rejected');
-
-      final channelModel = ChannelModel(cid: channelCid);
-
-      when(() => client.rejectChannelInvite(channelId, channelType, message: any(named: 'message'))).thenAnswer(
-        (_) async => RejectInviteResponse()
-          ..channel = channelModel
-          ..message = message,
-      );
-
-      final res = await channel.rejectInvite(message);
-
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelModel.cid);
-      expect(res.message?.id, message.id);
-
-      verify(() => client.rejectChannelInvite(channelId, channelType, message: any(named: 'message'))).called(1);
-    });
-
-    test('`.addMembers`', () async {
-      final members = List.generate(
-        3,
-        (index) => Member(userId: 'test-member-id-$index'),
-      );
-      final memberIds = members.map((it) => it.userId).whereType<String>().toList(growable: false);
-      final message = Message(id: 'test-message-id', text: 'Members Added');
-
-      final channelModel = ChannelModel(cid: channelCid);
-
-      when(
-        () => client.addChannelMembers(channelId, channelType, memberIds, message: any(named: 'message')),
-      ).thenAnswer(
-        (_) async => AddMembersResponse()
-          ..channel = channelModel
-          ..members = members
-          ..message = message,
-      );
-
-      final res = await channel.addMembers(memberIds, message: message);
-
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelModel.cid);
-      expect(res.members.length, members.length);
-      expect(res.message?.id, message.id);
-
-      verify(
-        () => client.addChannelMembers(channelId, channelType, memberIds, message: any(named: 'message')),
-      ).called(1);
-    });
-
-    test('`.addMembers` with hideHistoryBefore', () async {
-      final members = List.generate(
-        3,
-        (index) => Member(userId: 'test-member-id-$index'),
-      );
-      final memberIds = members.map((it) => it.userId).whereType<String>().toList(growable: false);
-      final message = Message(id: 'test-message-id', text: 'Members Added');
-      final hideHistoryBefore = DateTime.parse('2024-01-01T00:00:00Z');
-
-      final channelModel = ChannelModel(cid: channelCid);
-
-      when(
-        () => client.addChannelMembers(
-          channelId,
-          channelType,
-          memberIds,
-          message: message,
-          hideHistoryBefore: hideHistoryBefore,
-        ),
-      ).thenAnswer(
-        (_) async => AddMembersResponse()
-          ..channel = channelModel
-          ..members = members
-          ..message = message,
-      );
-
-      final res = await channel.addMembers(
-        memberIds,
-        message: message,
-        hideHistoryBefore: hideHistoryBefore,
-      );
-
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelModel.cid);
-      expect(res.members.length, members.length);
-      expect(res.message?.id, message.id);
-
-      verify(
-        () => client.addChannelMembers(
-          channelId,
-          channelType,
-          memberIds,
-          message: message,
-          hideHistoryBefore: hideHistoryBefore,
-        ),
-      ).called(1);
-    });
-
-    test('`.inviteMembers`', () async {
-      final members = List.generate(
-        3,
-        (index) => Member(userId: 'test-member-id-$index'),
-      );
-      final memberIds = members.map((it) => it.userId).whereType<String>().toList(growable: false);
-      final message = Message(id: 'test-message-id', text: 'Members Invited');
-
-      final channelModel = ChannelModel(cid: channelCid);
-
-      when(
-        () => client.inviteChannelMembers(channelId, channelType, memberIds, message: any(named: 'message')),
-      ).thenAnswer(
-        (_) async => InviteMembersResponse()
-          ..channel = channelModel
-          ..members = members
-          ..message = message,
-      );
-
-      final res = await channel.inviteMembers(memberIds, message: message);
-
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelModel.cid);
-      expect(res.members.length, members.length);
-      expect(res.message?.id, message.id);
-
-      verify(
-        () => client.inviteChannelMembers(channelId, channelType, memberIds, message: any(named: 'message')),
-      ).called(1);
-    });
-
-    test('`.removeMembers`', () async {
-      final members = List.generate(
-        3,
-        (index) => Member(userId: 'test-member-id-$index'),
-      );
-      final memberIds = members.map((it) => it.userId).whereType<String>().toList(growable: false);
-      final message = Message(id: 'test-message-id', text: 'Members Removed');
-
-      final channelModel = ChannelModel(cid: channelCid);
-
-      when(
-        () => client.removeChannelMembers(channelId, channelType, memberIds, message: any(named: 'message')),
-      ).thenAnswer(
-        (_) async => RemoveMembersResponse()
-          ..channel = channelModel
-          ..members = members
-          ..message = message,
-      );
-
-      final res = await channel.removeMembers(memberIds, message: message);
-
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelModel.cid);
-      expect(res.members.length, members.length);
-      expect(res.message?.id, message.id);
-
-      verify(
-        () => client.removeChannelMembers(channelId, channelType, memberIds, message: any(named: 'message')),
-      ).called(1);
-    });
-
-    group('`.sendAction`', () {
-      test('should work fine', () async {
-        final message = Message(id: 'test-message-id', text: 'Action Sent');
-        const formData = {'key': 'value'};
-
-        when(
-          () => client.sendAction(channelId, channelType, message.id, formData),
-        ).thenAnswer((_) async => SendActionResponse());
-
-        final res = await channel.sendAction(message, formData);
-
-        expect(res, isNotNull);
-
-        verify(
-          () => client.sendAction(channelId, channelType, message.id, formData),
-        ).called(1);
-      });
-
-      test('should emit received message if not null', () async {
-        final message = Message(id: 'test-message-id', text: 'Action Sent');
-        const formData = {'key': 'value'};
-
-        when(
-          () => client.sendAction(channelId, channelType, message.id, formData),
-        ).thenAnswer((_) async => SendActionResponse()..message = message);
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message,
-                matchMessageState: true,
-              ),
-            ],
-          ]),
+    channelTest(
+      '`.update`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: _seedChannelUpdateApi,
+      body: (tester) async {
+        const channelData = {
+          'name': 'Stream Team',
+          'profile_image': 'test-profile-image',
+        };
+        final updateMessage = Message(
+          id: 'test-message-id',
+          text: 'updated channel',
         );
 
-        final res = await channel.sendAction(message, formData);
+        final channelModel = createDefaultChannelModel(
+          cid: _channelCid,
+          extraData: channelData,
+        );
+
+        tester.mockApi(
+          (api) => api.channel.updateChannel(_channelId, _channelType, channelData, message: updateMessage),
+          result: UpdateChannelResponse()
+            ..channel = channelModel
+            ..message = updateMessage,
+        );
+
+        final res = await tester.channel.update(
+          channelData,
+          updateMessage: updateMessage,
+        );
 
         expect(res, isNotNull);
+        expect(res.channel.cid, channelModel.cid);
+        expect(res.channel.extraData, channelData);
+        expect(res.message?.id, updateMessage.id);
+
+        tester.verifyApi(
+          (api) => api.channel.updateChannel(_channelId, _channelType, channelData, message: updateMessage),
+        );
+      },
+    );
+
+    channelTest(
+      '`.updateImage`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: _seedChannelUpdateApi,
+      body: (tester) async {
+        const image = 'https://getstream.io/new-image';
+
+        final channelModel = createDefaultChannelModel(
+          cid: _channelCid,
+          extraData: {'image': image},
+        );
+
+        tester.mockApi(
+          (api) => api.channel.updateChannelPartial(
+            _channelId,
+            _channelType,
+            set: {'image': image},
+          ),
+          result: createDefaultPartialUpdateChannelResponse(channel: channelModel),
+        );
+
+        final res = await tester.channel.updateImage(image);
+
+        expect(res, isNotNull);
+        expect(res.channel.extraData['image'], image);
+
+        tester.verifyApi(
+          (api) => api.channel.updateChannelPartial(
+            _channelId,
+            _channelType,
+            set: {'image': image},
+          ),
+        );
+      },
+    );
+
+    channelTest(
+      '`.updateName`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: _seedChannelUpdateApi,
+      body: (tester) async {
+        const name = 'Name';
+
+        final channelModel = createDefaultChannelModel(
+          cid: _channelCid,
+          extraData: {'name': name},
+        );
+
+        tester.mockApi(
+          (api) => api.channel.updateChannelPartial(
+            _channelId,
+            _channelType,
+            set: {'name': name},
+          ),
+          result: createDefaultPartialUpdateChannelResponse(channel: channelModel),
+        );
+
+        final res = await tester.channel.updateName(name);
+
+        expect(res, isNotNull);
+        expect(res.channel.extraData['name'], name);
+
+        tester.verifyApi(
+          (api) => api.channel.updateChannelPartial(
+            _channelId,
+            _channelType,
+            set: {'name': name},
+          ),
+        );
+      },
+    );
+
+    channelTest(
+      '`.updatePartial`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: _seedChannelUpdateApi,
+      body: (tester) async {
+        const set = {
+          'name': 'Stream Team',
+          'profile_image': 'test-profile-image',
+        };
+
+        const unset = ['tag', 'last_name'];
+
+        final channelModel = createDefaultChannelModel(
+          cid: _channelCid,
+          extraData: {
+            'coolness': 999,
+            ...set,
+          },
+        );
+
+        tester.mockApi(
+          (api) => api.channel.updateChannelPartial(
+            _channelId,
+            _channelType,
+            set: set,
+            unset: unset,
+          ),
+          result: createDefaultPartialUpdateChannelResponse(channel: channelModel),
+        );
+
+        final res = await tester.channel.updatePartial(set: set, unset: unset);
+
+        expect(res, isNotNull);
+        expect(res.channel.cid, channelModel.cid);
+        expect(
+          res.channel.extraData,
+          {'coolness': 999, ...set},
+        );
+
+        tester.verifyApi(
+          (api) => api.channel.updateChannelPartial(
+            _channelId,
+            _channelType,
+            set: set,
+            unset: unset,
+          ),
+        );
+      },
+    );
+
+    channelTest(
+      '`.delete`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: _seedChannelUpdateApi,
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.deleteChannel(_channelId, _channelType),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.channel.delete();
+
+        expect(res, isNotNull);
+
+        tester.verifyApi(
+          (api) => api.channel.deleteChannel(_channelId, _channelType),
+        );
+      },
+    );
+
+    channelTest(
+      '`.truncate`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: _seedChannelUpdateApi,
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.truncateChannel(_channelId, _channelType),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.channel.truncate();
+
+        expect(res, isNotNull);
+
+        tester.verifyApi(
+          (api) => api.channel.truncateChannel(_channelId, _channelType),
+        );
+      },
+    );
+
+    channelTest(
+      '`.acceptInvite`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: _seedChannelMemberApi,
+      body: (tester) async {
+        final message = Message(id: 'test-message-id', text: 'Invite Accepted');
+
+        final channelModel = createDefaultChannelModel(cid: _channelCid);
+
+        tester.mockApi(
+          (api) => api.channel.acceptChannelInvite(_channelId, _channelType, message: message),
+          result: AcceptInviteResponse()
+            ..channel = channelModel
+            ..message = message,
+        );
+
+        final res = await tester.channel.acceptInvite(message);
+
+        expect(res, isNotNull);
+        expect(res.channel.cid, channelModel.cid);
         expect(res.message?.id, message.id);
 
-        verify(
-          () => client.sendAction(channelId, channelType, message.id, formData),
-        ).called(1);
-      });
+        tester.verifyApi(
+          (api) => api.channel.acceptChannelInvite(_channelId, _channelType, message: message),
+        );
+      },
+    );
+
+    channelTest(
+      '`.rejectInvite`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: _seedChannelMemberApi,
+      body: (tester) async {
+        final message = Message(id: 'test-message-id', text: 'Invite Rejected');
+
+        final channelModel = createDefaultChannelModel(cid: _channelCid);
+
+        tester.mockApi(
+          (api) => api.channel.rejectChannelInvite(_channelId, _channelType, message: message),
+          result: RejectInviteResponse()
+            ..channel = channelModel
+            ..message = message,
+        );
+
+        final res = await tester.channel.rejectInvite(message);
+
+        expect(res, isNotNull);
+        expect(res.channel.cid, channelModel.cid);
+        expect(res.message?.id, message.id);
+
+        tester.verifyApi(
+          (api) => api.channel.rejectChannelInvite(_channelId, _channelType, message: message),
+        );
+      },
+    );
+
+    channelTest(
+      '`.addMembers`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: _seedChannelMemberApi,
+      body: (tester) async {
+        final members = List.generate(
+          3,
+          (index) => Member(userId: 'test-member-id-$index'),
+        );
+        final memberIds = members.map((it) => it.userId).whereType<String>().toList(growable: false);
+        final message = Message(id: 'test-message-id', text: 'Members Added');
+
+        final channelModel = createDefaultChannelModel(cid: _channelCid);
+
+        tester.mockApi(
+          (api) => api.channel.addMembers(_channelId, _channelType, memberIds, message: message),
+          result: createDefaultAddMembersResponse(
+            channel: channelModel,
+            members: members,
+            message: message,
+          ),
+        );
+
+        final res = await tester.channel.addMembers(memberIds, message: message);
+
+        expect(res, isNotNull);
+        expect(res.channel.cid, channelModel.cid);
+        expect(res.members.length, members.length);
+        expect(res.message?.id, message.id);
+
+        tester.verifyApi(
+          (api) => api.channel.addMembers(_channelId, _channelType, memberIds, message: message),
+        );
+      },
+    );
+
+    channelTest(
+      '`.addMembers` with hideHistoryBefore',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: _seedChannelMemberApi,
+      body: (tester) async {
+        final members = List.generate(
+          3,
+          (index) => Member(userId: 'test-member-id-$index'),
+        );
+        final memberIds = members.map((it) => it.userId).whereType<String>().toList(growable: false);
+        final message = Message(id: 'test-message-id', text: 'Members Added');
+        final hideHistoryBefore = DateTime.parse('2024-01-01T00:00:00Z');
+
+        final channelModel = createDefaultChannelModel(cid: _channelCid);
+
+        tester.mockApi(
+          (api) => api.channel.addMembers(
+            _channelId,
+            _channelType,
+            memberIds,
+            message: message,
+            hideHistoryBefore: hideHistoryBefore,
+          ),
+          result: createDefaultAddMembersResponse(
+            channel: channelModel,
+            members: members,
+            message: message,
+          ),
+        );
+
+        final res = await tester.channel.addMembers(
+          memberIds,
+          message: message,
+          hideHistoryBefore: hideHistoryBefore,
+        );
+
+        expect(res, isNotNull);
+        expect(res.channel.cid, channelModel.cid);
+        expect(res.members.length, members.length);
+        expect(res.message?.id, message.id);
+
+        tester.verifyApi(
+          (api) => api.channel.addMembers(
+            _channelId,
+            _channelType,
+            memberIds,
+            message: message,
+            hideHistoryBefore: hideHistoryBefore,
+          ),
+        );
+      },
+    );
+
+    channelTest(
+      '`.inviteMembers`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: _seedChannelMemberApi,
+      body: (tester) async {
+        final members = List.generate(
+          3,
+          (index) => Member(userId: 'test-member-id-$index'),
+        );
+        final memberIds = members.map((it) => it.userId).whereType<String>().toList(growable: false);
+        final message = Message(id: 'test-message-id', text: 'Members Invited');
+
+        final channelModel = createDefaultChannelModel(cid: _channelCid);
+
+        tester.mockApi(
+          (api) => api.channel.inviteChannelMembers(_channelId, _channelType, memberIds, message: message),
+          result: InviteMembersResponse()
+            ..channel = channelModel
+            ..members = members
+            ..message = message,
+        );
+
+        final res = await tester.channel.inviteMembers(memberIds, message: message);
+
+        expect(res, isNotNull);
+        expect(res.channel.cid, channelModel.cid);
+        expect(res.members.length, members.length);
+        expect(res.message?.id, message.id);
+
+        tester.verifyApi(
+          (api) => api.channel.inviteChannelMembers(_channelId, _channelType, memberIds, message: message),
+        );
+      },
+    );
+
+    channelTest(
+      '`.removeMembers`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: _seedChannelMemberApi,
+      body: (tester) async {
+        final members = List.generate(
+          3,
+          (index) => Member(userId: 'test-member-id-$index'),
+        );
+        final memberIds = members.map((it) => it.userId).whereType<String>().toList(growable: false);
+        final message = Message(id: 'test-message-id', text: 'Members Removed');
+
+        final channelModel = createDefaultChannelModel(cid: _channelCid);
+
+        tester.mockApi(
+          (api) => api.channel.removeMembers(_channelId, _channelType, memberIds, message: message),
+          result: RemoveMembersResponse()
+            ..channel = channelModel
+            ..members = members
+            ..message = message,
+        );
+
+        final res = await tester.channel.removeMembers(memberIds, message: message);
+
+        expect(res, isNotNull);
+        expect(res.channel.cid, channelModel.cid);
+        expect(res.members.length, members.length);
+        expect(res.message?.id, message.id);
+
+        tester.verifyApi(
+          (api) => api.channel.removeMembers(_channelId, _channelType, memberIds, message: message),
+        );
+      },
+    );
+
+    group('`.sendAction`', () {
+      ChannelState Function(ChannelState) _seedChannel() {
+        return (_) => createDefaultChannelState(
+          channel: createDefaultChannelModel(
+            cid: _channelCid,
+            config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+            ownCapabilities: const [ChannelCapability.readEvents],
+          ),
+        );
+      }
+
+      channelTest(
+        'should work fine',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final message = Message(id: 'test-message-id', text: 'Action Sent');
+          const formData = {'key': 'value'};
+
+          tester.mockApi(
+            (api) => api.message.sendAction(_channelId, _channelType, message.id, formData),
+            result: createDefaultSendActionResponse(),
+          );
+
+          final res = await tester.channel.sendAction(message, formData);
+
+          expect(res, isNotNull);
+
+          tester.verifyApi(
+            (api) => api.message.sendAction(_channelId, _channelType, message.id, formData),
+          );
+        },
+      );
+
+      channelTest(
+        'should emit received message if not null',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final message = Message(id: 'test-message-id', text: 'Action Sent');
+          const formData = {'key': 'value'};
+
+          tester.mockApi(
+            (api) => api.message.sendAction(_channelId, _channelType, message.id, formData),
+            result: createDefaultSendActionResponse(message: message),
+          );
+
+          final messagesEmission = expectLater(
+            // skipping first seed message list -> [] messages
+            tester.channelState?.messagesStream.skip(1),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  message,
+                  matchMessageState: true,
+                ),
+              ],
+            ]),
+          );
+
+          final res = await tester.channel.sendAction(message, formData);
+
+          expect(res, isNotNull);
+          expect(res.message?.id, message.id);
+
+          tester.verifyApi(
+            (api) => api.message.sendAction(_channelId, _channelType, message.id, formData),
+          );
+
+          await messagesEmission;
+        },
+      );
     });
 
     group('`.watch`', () {
-      test('should work fine', () async {
-        when(
-          () => client.queryChannel(
-            channelType,
-            channelId: channelId,
-            watch: true,
-            channelData: any(named: 'channelData'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
+      // Builds the channel already initialized from state — the `.watch` tests
+      // exercise `queryChannel` themselves, so they cannot seed through
+      // `tester.watch()` without polluting the call counts they verify.
+      Channel _buildInitializedChannel(StreamChatClient client) {
+        return Channel.fromState(
+          client,
+          createDefaultChannelState(
+            channel: createDefaultChannelModel(
+              cid: _channelCid,
+              config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+              ownCapabilities: [ChannelCapability.readEvents],
+            ),
           ),
-        ).thenAnswer(
-          (_) async => _generateChannelState(channelId, channelType),
+        );
+      }
+
+      channelTest(
+        'should work fine',
+        channelType: _channelType,
+        channelId: _channelId,
+        build: _buildInitializedChannel,
+        body: (tester) async {
+          tester.mockApi(
+            (api) => api.channel.queryChannel(
+              _channelType,
+              channelId: _channelId,
+              channelData: tester.channel.extraData,
+              state: true,
+              watch: true,
+              presence: false,
+            ),
+            result: createDefaultChannelState(
+              channel: createDefaultChannelModel(cid: _channelCid),
+            ),
+          );
+
+          final res = await tester.channel.watch();
+
+          expect(res, isNotNull);
+          expect(res.channel, isNotNull);
+          expect(res.channel?.cid, _channelCid);
+
+          tester.verifyApi(
+            (api) => api.channel.queryChannel(
+              _channelType,
+              channelId: _channelId,
+              channelData: tester.channel.extraData,
+              state: true,
+              watch: true,
+              presence: false,
+            ),
+          );
+        },
+      );
+
+      channelTest(
+        'a successful retry after a failed init reconciles '
+        '`initialized` and `state`',
+        channelType: _channelType,
+        channelId: _channelId,
+        body: (tester) async {
+          final freshChannel = tester.channel;
+
+          tester.mockApiFailureOnce(
+            (api) => api.channel.queryChannel(
+              _channelType,
+              channelId: _channelId,
+              channelData: freshChannel.extraData,
+              state: true,
+              watch: true,
+              presence: false,
+            ),
+            error: createDefaultNetworkError(code: StreamErrorCode.inputError, statusCode: 400),
+            result: createDefaultChannelState(
+              channel: createDefaultChannelModel(cid: _channelCid),
+            ),
+          );
+
+          // First init fails: `initialized` errors and `state` stays null.
+          // Attach the expectation before watch() so the error is handled.
+          final firstInit = expectLater(
+            freshChannel.initialized,
+            throwsA(isA<StreamApiException>()),
+          );
+          await expectLater(
+            freshChannel.watch(),
+            throwsA(isA<StreamApiException>()),
+          );
+          await firstInit;
+          expect(freshChannel.state, isNull);
+
+          // Retrying resets the completer; the successful watch initializes the
+          // channel and `initialized`/`state` agree again.
+          await freshChannel.watch();
+          expect(freshChannel.state, isNotNull);
+          await expectLater(freshChannel.initialized, completion(isTrue));
+        },
+      );
+
+      channelTest(
+        'should rethrow if `.query` throws',
+        channelType: _channelType,
+        channelId: _channelId,
+        build: _buildInitializedChannel,
+        body: (tester) async {
+          tester.mockApiFailure(
+            (api) => api.channel.queryChannel(
+              _channelType,
+              channelId: _channelId,
+              channelData: tester.channel.extraData,
+              state: true,
+              watch: true,
+              presence: false,
+            ),
+            error: createDefaultNetworkError(code: StreamErrorCode.inputError, statusCode: 400),
+          );
+
+          try {
+            await tester.channel.watch();
+          } catch (e) {
+            expect(e, isA<StreamApiException>());
+          }
+
+          tester.verifyApi(
+            (api) => api.channel.queryChannel(
+              _channelType,
+              channelId: _channelId,
+              channelData: tester.channel.extraData,
+              state: true,
+              watch: true,
+              presence: false,
+            ),
+          );
+        },
+      );
+    });
+
+    channelTest(
+      '`.stopWatching`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelWatch()),
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.stopWatching(_channelId, _channelType),
+          result: createDefaultEmptyResponse(),
         );
 
-        final res = await channel.watch();
+        final res = await tester.channel.stopWatching();
 
         expect(res, isNotNull);
-        expect(res.channel, isNotNull);
-        expect(res.channel?.cid, channelCid);
 
-        verify(
-          () => client.queryChannel(
-            channelType,
-            channelId: channelId,
-            watch: true,
-            channelData: any(named: 'channelData'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-          ),
-        ).called(1);
-      });
-
-      test('a successful retry after a failed init reconciles '
-          '`initialized` and `state`', () async {
-        final freshChannel = Channel(client, channelType, channelId);
-        addTearDown(freshChannel.dispose);
-
-        var attempts = 0;
-        when(
-          () => client.queryChannel(
-            channelType,
-            channelId: channelId,
-            watch: true,
-            channelData: any(named: 'channelData'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-          ),
-        ).thenAnswer((_) async {
-          if (++attempts == 1) {
-            throw apiException(code: StreamErrorCode.inputError, statusCode: 400);
-          }
-          return _generateChannelState(channelId, channelType);
-        });
-
-        // First init fails: `initialized` errors and `state` stays null.
-        // Attach the expectation before watch() so the error is handled.
-        final firstInit = expectLater(
-          freshChannel.initialized,
-          throwsA(isA<StreamApiException>()),
+        tester.verifyApi(
+          (api) => api.channel.stopWatching(_channelId, _channelType),
         );
-        await expectLater(
-          freshChannel.watch(),
-          throwsA(isA<StreamApiException>()),
-        );
-        await firstInit;
-        expect(freshChannel.state, isNull);
+      },
+    );
 
-        // Retrying resets the completer; the successful watch initializes the
-        // channel and `initialized`/`state` agree again.
-        await freshChannel.watch();
-        expect(freshChannel.state, isNotNull);
-        await expectLater(freshChannel.initialized, completion(isTrue));
-      });
+    channelTest(
+      '`.getReplies`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelMessageQueries()),
+      body: (tester) async {
+        const parentId = 'test-parent-id';
 
-      test('should rethrow if `.query` throws', () async {
-        when(
-          () => client.queryChannel(
-            channelType,
-            channelId: channelId,
-            watch: true,
-            channelData: any(named: 'channelData'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-          ),
-        ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
-
-        try {
-          await channel.watch();
-        } catch (e) {
-          expect(e, isA<StreamApiException>());
-        }
-
-        verify(
-          () => client.queryChannel(
-            channelType,
-            channelId: channelId,
-            watch: true,
-            channelData: any(named: 'channelData'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-          ),
-        ).called(1);
-      });
-    });
-
-    test('`.stopWatching`', () async {
-      when(() => client.stopChannelWatching(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await channel.stopWatching();
-
-      expect(res, isNotNull);
-
-      verify(() => client.stopChannelWatching(channelId, channelType)).called(1);
-    });
-
-    test('`.getReplies`', () async {
-      const parentId = 'test-parent-id';
-
-      final messages = List.generate(
-        3,
-        (index) => Message(
-          id: 'test-message-id-$index',
-          parentId: parentId,
-        ),
-      );
-
-      when(() => client.getReplies(parentId)).thenAnswer(
-        (_) async => QueryRepliesResponse()..messages = messages,
-      );
-
-      final res = await channel.getReplies(parentId);
-
-      expect(res, isNotNull);
-      expect(res.messages.length, messages.length);
-      expect(res.messages.every((it) => it.parentId == parentId), isTrue);
-
-      verify(() => client.getReplies(parentId)).called(1);
-    });
-
-    test('`.getReplies` keeps the parent message out of the thread', () async {
-      const parentId = 'test-parent-id';
-
-      // Some backends return the parent as the first message of the oldest
-      // page. It is rendered from its own copy, so it must not also become a
-      // reply — otherwise the thread shows its root twice.
-      final messages = [
-        Message(id: parentId),
-        ...List.generate(
+        final messages = List.generate(
           3,
-          (index) => Message(id: 'test-message-id-$index', parentId: parentId),
-        ),
-      ];
+          (index) => Message(
+            id: 'test-message-id-$index',
+            parentId: parentId,
+          ),
+        );
 
-      when(() => client.getReplies(parentId)).thenAnswer(
-        (_) async => QueryRepliesResponse()..messages = messages,
-      );
+        tester.mockApi(
+          (api) => api.message.getReplies(parentId),
+          result: createDefaultQueryRepliesResponse(messages: messages),
+        );
 
-      await channel.getReplies(parentId);
+        final res = await tester.channel.getReplies(parentId);
 
-      final threadMessages = channel.state!.threads[parentId];
-      expect(threadMessages, isNotNull);
-      expect(threadMessages!.length, messages.length - 1);
-      expect(threadMessages.any((it) => it.id == parentId), isFalse);
-    });
+        expect(res, isNotNull);
+        expect(res.messages.length, messages.length);
+        expect(res.messages.every((it) => it.parentId == parentId), isTrue);
 
-    test('`.getReactions`', () async {
-      const messageId = 'test-message-id';
+        tester.verifyApi((api) => api.message.getReplies(parentId));
+      },
+    );
 
-      final reactions = List.generate(
-        3,
-        (index) => Reaction(
-          type: 'test-reaction-type-$index',
-          messageId: messageId,
-        ),
-      );
+    channelTest(
+      '`.getReplies` keeps the parent message out of the thread',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelMessageQueries()),
+      body: (tester) async {
+        const parentId = 'test-parent-id';
 
-      when(() => client.getReactions(messageId)).thenAnswer(
-        (_) async => QueryReactionsResponse()..reactions = reactions,
-      );
+        // Some backends return the parent as the first message of the oldest
+        // page. It is rendered from its own copy, so it must not also become a
+        // reply — otherwise the thread shows its root twice.
+        final messages = [
+          Message(id: parentId),
+          ...List.generate(
+            3,
+            (index) => Message(id: 'test-message-id-$index', parentId: parentId),
+          ),
+        ];
 
-      final res = await channel.getReactions(messageId);
+        tester.mockApi(
+          (api) => api.message.getReplies(parentId),
+          result: createDefaultQueryRepliesResponse(messages: messages),
+        );
 
-      expect(res, isNotNull);
-      expect(res.reactions.length, reactions.length);
-      expect(res.reactions.every((it) => it.messageId == messageId), isTrue);
+        await tester.channel.getReplies(parentId);
 
-      verify(() => client.getReactions(messageId)).called(1);
-    });
+        final threadMessages = tester.channelState!.threads[parentId];
+        expect(threadMessages, isNotNull);
+        expect(threadMessages!.length, messages.length - 1);
+        expect(threadMessages.any((it) => it.id == parentId), isFalse);
+      },
+    );
 
-    test('`.getMessagesById`', () async {
-      final messages = List.generate(
-        3,
-        (index) => Message(id: 'test-message-id-$index'),
-      );
+    channelTest(
+      '`.getReactions`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelMessageQueries()),
+      body: (tester) async {
+        const messageId = 'test-message-id';
 
-      final messageIds = messages.map((it) => it.id).toList(growable: false);
+        final reactions = List.generate(
+          3,
+          (index) => Reaction(
+            type: 'test-reaction-type-$index',
+            messageId: messageId,
+          ),
+        );
 
-      when(() => client.getMessagesById(channelId, channelType, messageIds)).thenAnswer(
-        (_) async => GetMessagesByIdResponse()..messages = messages,
-      );
+        tester.mockApi(
+          (api) => api.message.getReactions(messageId),
+          result: createDefaultQueryReactionsResponse(reactions: reactions),
+        );
 
-      final res = await channel.getMessagesById(messageIds);
+        final res = await tester.channel.getReactions(messageId);
 
-      expect(res, isNotNull);
-      expect(res.messages.length, messageIds.length);
+        expect(res, isNotNull);
+        expect(res.reactions.length, reactions.length);
+        expect(res.reactions.every((it) => it.messageId == messageId), isTrue);
 
-      verify(
-        () => client.getMessagesById(channelId, channelType, messageIds),
-      ).called(1);
-    });
+        tester.verifyApi((api) => api.message.getReactions(messageId));
+      },
+    );
 
-    test('`.translateMessage`', () async {
-      const messageId = 'test-message-id';
-      const language = 'hi'; // Hindi
-      const translatedMessageText = 'नमस्ते';
+    channelTest(
+      '`.getMessagesById`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelMessageQueries()),
+      body: (tester) async {
+        final messages = List.generate(
+          3,
+          (index) => Message(id: 'test-message-id-$index'),
+        );
 
-      final message = Message(id: messageId, text: 'Hello');
-      channel.state!.updateMessage(message);
+        final messageIds = messages.map((it) => it.id).toList(growable: false);
 
-      final translatedMessage = message.copyWith(
-        i18n: {'language': 'en', '${language}_text': translatedMessageText},
-      );
+        tester.mockApi(
+          (api) => api.message.getMessagesById(_channelId, _channelType, messageIds),
+          result: createDefaultGetMessagesByIdResponse(messages: messages),
+        );
 
-      when(() => client.translateMessage(messageId, language)).thenAnswer(
-        (_) async => TranslateMessageResponse()..message = translatedMessage,
-      );
+        final res = await tester.channel.getMessagesById(messageIds);
 
-      final res = await channel.translateMessage(messageId, language);
+        expect(res, isNotNull);
+        expect(res.messages.length, messageIds.length);
 
-      expect(res, isNotNull);
-      expect(res.message.i18n, translatedMessage.i18n);
+        tester.verifyApi(
+          (api) => api.message.getMessagesById(_channelId, _channelType, messageIds),
+        );
+      },
+    );
 
-      // The translation is merged into the channel state, so callers don't
-      // have to apply the response themselves.
-      final stateMessage = channel.state!.messages.firstWhere((it) => it.id == messageId);
-      expect(stateMessage.i18n, translatedMessage.i18n);
+    channelTest(
+      '`.translateMessage`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelMessageQueries()),
+      body: (tester) async {
+        const messageId = 'test-message-id';
+        const language = 'hi'; // Hindi
+        const translatedMessageText = 'नमस्ते';
 
-      verify(() => client.translateMessage(messageId, language)).called(1);
-    });
+        final message = Message(id: messageId, text: 'Hello');
+        tester.channelState!.updateMessage(message);
+
+        final translatedMessage = message.copyWith(
+          i18n: {'language': 'en', '${language}_text': translatedMessageText},
+        );
+
+        tester.mockApi(
+          (api) => api.message.translateMessage(messageId, language),
+          result: createDefaultTranslateMessageResponse(message: translatedMessage),
+        );
+
+        final res = await tester.channel.translateMessage(messageId, language);
+
+        expect(res, isNotNull);
+        expect(res.message.i18n, translatedMessage.i18n);
+
+        // The translation is merged into the channel state, so callers don't
+        // have to apply the response themselves.
+        final stateMessage = tester.channelState!.messages.firstWhere((it) => it.id == messageId);
+        expect(stateMessage.i18n, translatedMessage.i18n);
+
+        tester.verifyApi((api) => api.message.translateMessage(messageId, language));
+      },
+    );
 
     group('`.query`', () {
-      test('should work fine', () async {
-        final channelState = _generateChannelState(channelId, channelType);
-
-        when(
-          () => client.queryChannel(
-            channelType,
-            channelId: channelId,
-            channelData: any(named: 'channelData'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-          ),
-        ).thenAnswer((_) async => channelState);
-
-        final res = await channel.query();
-
-        expect(res, isNotNull);
-
-        verify(
-          () => client.queryChannel(
-            channelType,
-            channelId: channelId,
-            channelData: any(named: 'channelData'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-          ),
-        ).called(1);
-      });
-
-      test('should rethrow if `client.queryChannel` throws', () async {
-        when(
-          () => client.queryChannel(
-            channelType,
-            channelId: channelId,
-            channelData: any(named: 'channelData'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-          ),
-        ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
-
-        try {
-          await channel.query();
-        } catch (e) {
-          expect(e, isA<StreamApiException>());
-        }
-
-        verify(
-          () => client.queryChannel(
-            channelType,
-            channelId: channelId,
-            channelData: any(named: 'channelData'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-          ),
-        ).called(1);
-      });
-
-      test('should truncate state when querying around message id', () async {
-        final initialMessages = [
-          Message(id: 'msg1', text: 'Hello 1'),
-          Message(id: 'msg2', text: 'Hello 2'),
-          Message(id: 'msg3', text: 'Hello 3'),
-        ];
-
-        final stateWithMessages = _generateChannelState(
-          channelId,
-          channelType,
-        ).copyWith(messages: initialMessages);
-
-        channel.state!.updateChannelState(stateWithMessages);
-        expect(channel.state!.messages, hasLength(3));
-
-        final newState =
-            _generateChannelState(
-              channelId,
-              channelType,
-            ).copyWith(
-              messages: [
-                Message(id: 'msg-before-1', text: 'Message before 1'),
-                Message(id: 'msg-before-2', text: 'Message before 2'),
-                Message(id: 'target-message-id', text: 'Target message'),
-                Message(id: 'msg-after-1', text: 'Message after 1'),
-                Message(id: 'msg-after-2', text: 'Message after 2'),
-              ],
-            );
-
-        when(
-          () => client.queryChannel(
-            channelType,
-            channelId: channelId,
-            channelData: any(named: 'channelData'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-          ),
-        ).thenAnswer((_) async => newState);
-
-        const pagination = PaginationParams(idAround: 'target-message-id');
-
-        final res = await channel.query(messagesPagination: pagination);
-
-        expect(res, isNotNull);
-        expect(channel.state!.messages, hasLength(5));
-        expect(channel.state!.messages[2].id, 'target-message-id');
-
-        verify(
-          () => client.queryChannel(
-            channelType,
-            channelId: channelId,
-            channelData: any(named: 'channelData'),
-            messagesPagination: pagination,
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-          ),
-        ).called(1);
-      });
-
-      test('should truncate state when querying around created date', () async {
-        final initialMessages = [
-          Message(id: 'msg1', text: 'Hello 1'),
-          Message(id: 'msg2', text: 'Hello 2'),
-          Message(id: 'msg3', text: 'Hello 3'),
-        ];
-
-        final stateWithMessages = _generateChannelState(
-          channelId,
-          channelType,
-        ).copyWith(messages: initialMessages);
-
-        channel.state!.updateChannelState(stateWithMessages);
-        expect(channel.state!.messages, hasLength(3));
-
-        final targetDate = DateTime.now();
-        final newState =
-            _generateChannelState(
-              channelId,
-              channelType,
-            ).copyWith(
-              messages: [
-                Message(id: 'msg-before-1', text: 'Message before 1'),
-                Message(id: 'msg-before-2', text: 'Message before 2'),
-                Message(id: 'target-message', text: 'Target message'),
-                Message(id: 'msg-after-1', text: 'Message after 1'),
-                Message(id: 'msg-after-2', text: 'Message after 2'),
-              ],
-            );
-
-        when(
-          () => client.queryChannel(
-            channelType,
-            channelId: channelId,
-            channelData: any(named: 'channelData'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-          ),
-        ).thenAnswer((_) async => newState);
-
-        final pagination = PaginationParams(createdAtAround: targetDate);
-
-        final res = await channel.query(messagesPagination: pagination);
-
-        expect(res, isNotNull);
-        expect(channel.state!.messages, hasLength(5));
-        expect(channel.state!.messages[2].id, 'target-message');
-
-        verify(
-          () => client.queryChannel(
-            channelType,
-            channelId: channelId,
-            channelData: any(named: 'channelData'),
-            messagesPagination: pagination,
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-          ),
-        ).called(1);
-      });
-
-      test(
-        'should submit for delivery when querying latest messages (no pagination)',
-        () async {
-          final channelState = _generateChannelState(channelId, channelType);
-
-          when(
-            () => client.queryChannel(
-              channelType,
-              channelId: channelId,
-              channelData: any(named: 'channelData'),
-              messagesPagination: any(named: 'messagesPagination'),
-              membersPagination: any(named: 'membersPagination'),
-              watchersPagination: any(named: 'watchersPagination'),
+      channelTest(
+        'should work fine',
+        channelType: _channelType,
+        channelId: _channelId,
+        build: _buildInitializedChannel,
+        body: (tester) async {
+          tester.mockApi(
+            (api) => api.channel.queryChannel(
+              _channelType,
+              channelId: _channelId,
+              channelData: tester.channel.extraData,
             ),
-          ).thenAnswer((_) async => channelState);
+            result: createDefaultChannelState(
+              channel: createDefaultChannelModel(cid: _channelCid),
+            ),
+          );
+
+          final res = await tester.channel.query();
+
+          expect(res, isNotNull);
+
+          tester.verifyApi(
+            (api) => api.channel.queryChannel(
+              _channelType,
+              channelId: _channelId,
+              channelData: tester.channel.extraData,
+            ),
+          );
+        },
+      );
+
+      channelTest(
+        'should rethrow if `client.queryChannel` throws',
+        channelType: _channelType,
+        channelId: _channelId,
+        build: _buildInitializedChannel,
+        body: (tester) async {
+          tester.mockApiFailure(
+            (api) => api.channel.queryChannel(
+              _channelType,
+              channelId: _channelId,
+              channelData: tester.channel.extraData,
+            ),
+            error: createDefaultNetworkError(code: StreamErrorCode.inputError, statusCode: 400),
+          );
+
+          try {
+            await tester.channel.query();
+          } catch (e) {
+            expect(e, isA<StreamApiException>());
+          }
+
+          tester.verifyApi(
+            (api) => api.channel.queryChannel(
+              _channelType,
+              channelId: _channelId,
+              channelData: tester.channel.extraData,
+            ),
+          );
+        },
+      );
+
+      channelTest(
+        'should truncate state when querying around message id',
+        channelType: _channelType,
+        channelId: _channelId,
+        build: _buildInitializedChannel,
+        body: (tester) async {
+          final initialMessages = [
+            Message(id: 'msg1', text: 'Hello 1'),
+            Message(id: 'msg2', text: 'Hello 2'),
+            Message(id: 'msg3', text: 'Hello 3'),
+          ];
+
+          final stateWithMessages = createDefaultChannelState(
+            channel: createDefaultChannelModel(cid: _channelCid),
+            messages: initialMessages,
+          );
+
+          tester.channelState!.updateChannelState(stateWithMessages);
+          expect(tester.channelState!.messages, hasLength(3));
+
+          final newState = createDefaultChannelState(
+            channel: createDefaultChannelModel(cid: _channelCid),
+            messages: [
+              Message(id: 'msg-before-1', text: 'Message before 1'),
+              Message(id: 'msg-before-2', text: 'Message before 2'),
+              Message(id: 'target-message-id', text: 'Target message'),
+              Message(id: 'msg-after-1', text: 'Message after 1'),
+              Message(id: 'msg-after-2', text: 'Message after 2'),
+            ],
+          );
+
+          const pagination = PaginationParams(idAround: 'target-message-id');
+
+          tester.mockApi(
+            (api) => api.channel.queryChannel(
+              _channelType,
+              channelId: _channelId,
+              channelData: tester.channel.extraData,
+              messagesPagination: pagination,
+            ),
+            result: newState,
+          );
+
+          final res = await tester.channel.query(messagesPagination: pagination);
+
+          expect(res, isNotNull);
+          expect(tester.channelState!.messages, hasLength(5));
+          expect(tester.channelState!.messages[2].id, 'target-message-id');
+
+          tester.verifyApi(
+            (api) => api.channel.queryChannel(
+              _channelType,
+              channelId: _channelId,
+              channelData: tester.channel.extraData,
+              messagesPagination: pagination,
+            ),
+          );
+        },
+      );
+
+      channelTest(
+        'should truncate state when querying around created date',
+        channelType: _channelType,
+        channelId: _channelId,
+        build: _buildInitializedChannel,
+        body: (tester) async {
+          final initialMessages = [
+            Message(id: 'msg1', text: 'Hello 1'),
+            Message(id: 'msg2', text: 'Hello 2'),
+            Message(id: 'msg3', text: 'Hello 3'),
+          ];
+
+          final stateWithMessages = createDefaultChannelState(
+            channel: createDefaultChannelModel(cid: _channelCid),
+            messages: initialMessages,
+          );
+
+          tester.channelState!.updateChannelState(stateWithMessages);
+          expect(tester.channelState!.messages, hasLength(3));
+
+          final targetDate = DateTime.utc(2021, 3);
+          final newState = createDefaultChannelState(
+            channel: createDefaultChannelModel(cid: _channelCid),
+            messages: [
+              Message(id: 'msg-before-1', text: 'Message before 1'),
+              Message(id: 'msg-before-2', text: 'Message before 2'),
+              Message(id: 'target-message', text: 'Target message'),
+              Message(id: 'msg-after-1', text: 'Message after 1'),
+              Message(id: 'msg-after-2', text: 'Message after 2'),
+            ],
+          );
+
+          final pagination = PaginationParams(createdAtAround: targetDate);
+
+          tester.mockApi(
+            (api) => api.channel.queryChannel(
+              _channelType,
+              channelId: _channelId,
+              channelData: tester.channel.extraData,
+              messagesPagination: pagination,
+            ),
+            result: newState,
+          );
+
+          final res = await tester.channel.query(messagesPagination: pagination);
+
+          expect(res, isNotNull);
+          expect(tester.channelState!.messages, hasLength(5));
+          expect(tester.channelState!.messages[2].id, 'target-message');
+
+          tester.verifyApi(
+            (api) => api.channel.queryChannel(
+              _channelType,
+              channelId: _channelId,
+              channelData: tester.channel.extraData,
+              messagesPagination: pagination,
+            ),
+          );
+        },
+      );
+
+      channelTest(
+        'should submit for delivery when querying latest messages (no pagination)',
+        channelType: _channelType,
+        channelId: _channelId,
+        // The delivery reporter is real in the harness: it only records a
+        // channel whose last message qualifies for a receipt, so the channel is
+        // seeded with the `deliveryEvents` capability and a message from
+        // another user.
+        build: (client) => _buildInitializedChannel(
+          client,
+          ownCapabilities: const [ChannelCapability.readEvents, ChannelCapability.deliveryEvents],
+          messages: [
+            Message(
+              id: 'test-message-id',
+              user: User(id: 'other-user'),
+              createdAt: DateTime.utc(2021, 1, 2),
+            ),
+          ],
+        ),
+        body: (tester) async {
+          tester.mockApi(
+            (api) => api.channel.queryChannel(
+              _channelType,
+              channelId: _channelId,
+              channelData: tester.channel.extraData,
+            ),
+            result: createDefaultChannelState(
+              channel: createDefaultChannelModel(cid: _channelCid),
+            ),
+          );
+
+          registerFallbackValue(<MessageDelivery>[]);
+          tester.mockApi(
+            (api) => api.channel.markChannelsDelivered(any()),
+            result: createDefaultEmptyResponse(),
+          );
 
           // Query without pagination params (fetching latest messages)
-          await channel.query();
+          await tester.channel.query();
 
-          // Verify submitForDelivery was called
-          verify(
-            () => client.channelDeliveryReporter.submitForDelivery([channel]),
-          ).called(1);
+          // The delivery reporter batches receipts behind a 1s trailing
+          // throttle.
+          await Future.delayed(const Duration(milliseconds: 1100));
+
+          // Verify the channel's last message was marked as delivered
+          final captured = tester.captureApi(
+            (api) => api.channel.markChannelsDelivered(captureAny()),
+          );
+          final deliveries = captured.single! as List<MessageDelivery>;
+          expect(deliveries.single.channelCid, _channelCid);
+          expect(deliveries.single.messageId, 'test-message-id');
         },
       );
 
-      test(
+      channelTest(
         'should NOT submit for delivery when querying with pagination (older messages)',
-        () async {
-          final channelState = _generateChannelState(channelId, channelType);
-
-          when(
-            () => client.queryChannel(
-              channelType,
-              channelId: channelId,
-              channelData: any(named: 'channelData'),
-              messagesPagination: any(named: 'messagesPagination'),
-              membersPagination: any(named: 'membersPagination'),
-              watchersPagination: any(named: 'watchersPagination'),
+        channelType: _channelType,
+        channelId: _channelId,
+        // Seeded so a receipt would be submitted on a plain query: the absence
+        // of one can then only come from the pagination params.
+        build: (client) => _buildInitializedChannel(
+          client,
+          ownCapabilities: const [ChannelCapability.readEvents, ChannelCapability.deliveryEvents],
+          messages: [
+            Message(
+              id: 'test-message-id',
+              user: User(id: 'other-user'),
+              createdAt: DateTime.utc(2021, 1, 2),
             ),
-          ).thenAnswer((_) async => channelState);
+          ],
+        ),
+        body: (tester) async {
+          registerFallbackValue(<MessageDelivery>[]);
+          tester.mockApi(
+            (api) => api.channel.markChannelsDelivered(any()),
+            result: createDefaultEmptyResponse(),
+          );
+
+          const pagination = PaginationParams(limit: 20, lessThan: 'some-message-id');
+
+          tester.mockApi(
+            (api) => api.channel.queryChannel(
+              _channelType,
+              channelId: _channelId,
+              channelData: tester.channel.extraData,
+              messagesPagination: pagination,
+            ),
+            result: createDefaultChannelState(
+              channel: createDefaultChannelModel(cid: _channelCid),
+            ),
+          );
 
           // Query with pagination params (fetching older messages)
-          await channel.query(
-            messagesPagination: const PaginationParams(
-              limit: 20,
-              lessThan: 'some-message-id',
-            ),
-          );
+          await tester.channel.query(messagesPagination: pagination);
 
-          // Verify submitForDelivery was NOT called
-          verifyNever(
-            () => client.channelDeliveryReporter.submitForDelivery([channel]),
+          // Wait out the reporter's 1s trailing throttle so a receipt would
+          // have been sent by now if the channel had been submitted.
+          await Future.delayed(const Duration(milliseconds: 1100));
+
+          // Verify no delivery receipt was sent
+          tester.verifyNeverCalled(
+            (api) => api.channel.markChannelsDelivered(any()),
           );
         },
       );
     });
 
-    test('`.queryMembers`', () async {
-      final filter = MemberFilter.in_(MemberFilterField.userId, const ['test-user-id-0']);
-
-      final members = List.generate(
-        3,
-        (index) => Member(userId: 'test-user-id-$index'),
-      );
-
-      when(
-        () => client.queryMembers(
-          channelType,
-          channelId: channelId,
-          filter: filter,
-          members: any(named: 'members'),
-          sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
-        ),
-      ).thenAnswer((_) async => QueryMembersResponse()..members = members);
-
-      final res = await channel.queryMembers(filter: filter);
-
-      expect(res, isNotNull);
-      expect(res.members.length, members.length);
-
-      verify(
-        () => client.queryMembers(
-          channelType,
-          channelId: channelId,
-          filter: filter,
-          members: any(named: 'members'),
-          sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
-        ),
-      ).called(1);
-    });
-
-    test('`.queryBannedUsers`', () async {
-      final filter = BannedUserFilter.equal(BannedUserFilterField.channelCid, channelCid);
-
-      final bans = List.generate(
-        3,
-        (index) => BannedUser(
-          user: User(id: 'test-user-id-$index'),
-          bannedBy: User(id: 'test-user-id-${index + 1}'),
-        ),
-      );
-
-      when(
-        () => client.queryBannedUsers(
-          filter: any(named: 'filter', that: isSameFilterAs(filter)),
-          sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
-        ),
-      ).thenAnswer((_) async => QueryBannedUsersResponse()..bans = bans);
-
-      final res = await channel.queryBannedUsers();
-
-      expect(res, isNotNull);
-      expect(res.bans.length, bans.length);
-
-      verify(
-        () => client.queryBannedUsers(
-          filter: any(named: 'filter', that: isSameFilterAs(filter)),
-          sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
-        ),
-      ).called(1);
-    });
-
-    test('`.mute`', () async {
-      when(
-        () => client.muteChannel(
-          channelCid,
-          expiration: any(named: 'expiration'),
-        ),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await channel.mute();
-
-      expect(res, isNotNull);
-
-      verify(
-        () => client.muteChannel(
-          channelCid,
-          expiration: any(named: 'expiration'),
-        ),
-      ).called(1);
-    });
-
-    test('`.mute with expiration`', () async {
-      const expiration = Duration(seconds: 3);
-
-      when(
-        () => client.muteChannel(
-          channelCid,
-          expiration: expiration,
-        ),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      when(() => client.unmuteChannel(channelCid)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await channel.mute(expiration: expiration);
-
-      expect(res, isNotNull);
-
-      verify(
-        () => client.muteChannel(
-          channelCid,
-          expiration: expiration,
-        ),
-      ).called(1);
-
-      // wait for expiration
-      await Future.delayed(expiration);
-      verify(() => client.unmuteChannel(channelCid)).called(1);
-    });
-
-    test('`.unmute`', () async {
-      when(
-        () => client.unmuteChannel(channelCid),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await channel.unmute();
-
-      expect(res, isNotNull);
-
-      verify(
-        () => client.unmuteChannel(channelCid),
-      ).called(1);
-    });
-
-    test('`.enableSlowMode`', () async {
-      const cooldown = 10;
-
-      final channelModel = ChannelModel(
-        cid: channelCid,
-        cooldown: cooldown,
-      );
-
-      when(
-        () => client.enableSlowdown(
-          channelId,
-          channelType,
-          cooldown,
-        ),
-      ).thenAnswer((_) async => PartialUpdateChannelResponse()..channel = channelModel);
-
-      final res = await channel.enableSlowMode(cooldownInterval: 10);
-
-      expect(res, isNotNull);
-
-      verify(
-        () => client.enableSlowdown(
-          channelId,
-          channelType,
-          cooldown,
-        ),
-      ).called(1);
-    });
-
-    test('`.disableSlowMode`', () async {
-      final channelModel = ChannelModel(
-        cid: channelCid,
-      );
-
-      when(
-        () => client.disableSlowdown(
-          channelId,
-          channelType,
-        ),
-      ).thenAnswer((_) async => PartialUpdateChannelResponse()..channel = channelModel);
-
-      final res = await channel.disableSlowMode();
-
-      expect(res, isNotNull);
-
-      verify(() => client.disableSlowdown(channelId, channelType)).called(1);
-    });
-
-    test('`.banUser`', () async {
-      const userId = 'test-user-id';
-      const options = {'key': 'value'};
-
-      when(
-        () => client.banUser(
-          userId,
-          {'type': channelType, 'id': channelId, ...options},
-        ),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await channel.banMember(userId, options);
-
-      expect(res, isNotNull);
-
-      verify(
-        () => client.banUser(
-          userId,
-          {'type': channelType, 'id': channelId, ...options},
-        ),
-      ).called(1);
-    });
-
-    test('`.unbanUser`', () async {
-      const userId = 'test-user-id';
-
-      when(() => client.unbanUser(userId, any())).thenAnswer((_) async => EmptyResponse());
-
-      final res = await channel.unbanMember(userId);
-
-      expect(res, isNotNull);
-
-      verify(() => client.unbanUser(userId, any())).called(1);
-    });
-
-    test('`.shadowBan`', () async {
-      const userId = 'test-user-id';
-      const options = {'key': 'value'};
-
-      when(
-        () => client.shadowBan(
-          userId,
-          {'type': channelType, 'id': channelId, ...options},
-        ),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await channel.shadowBan(userId, options);
-
-      expect(res, isNotNull);
-
-      verify(
-        () => client.shadowBan(
-          userId,
-          {'type': channelType, 'id': channelId, ...options},
-        ),
-      ).called(1);
-    });
-
-    test('`.removeShadowBan`', () async {
-      const userId = 'test-user-id';
-
-      when(() => client.removeShadowBan(userId, any())).thenAnswer((_) async => EmptyResponse());
-
-      final res = await channel.removeShadowBan(userId);
-
-      expect(res, isNotNull);
-
-      verify(() => client.removeShadowBan(userId, any())).called(1);
-    });
-
-    test('`.hide`', () async {
-      const clearHistory = true;
-
-      when(
-        () => client.hideChannel(
-          channelId,
-          channelType,
-          clearHistory: clearHistory,
-        ),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await channel.hide(clearHistory: clearHistory);
-
-      expect(res, isNotNull);
-
-      verify(
-        () => client.hideChannel(
-          channelId,
-          channelType,
-          clearHistory: clearHistory,
-        ),
-      ).called(1);
-    });
-
-    test('`.show`', () async {
-      when(() => client.showChannel(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await channel.show();
-
-      expect(res, isNotNull);
-
-      verify(() => client.showChannel(channelId, channelType)).called(1);
-    });
+    channelTest(
+      '`.queryMembers`',
+      channelType: _channelType,
+      channelId: _channelId,
+      build: _buildInitializedChannel,
+      body: (tester) async {
+        final filter = MemberFilter.in_(MemberFilterField.userId, const ['test-user-id-0']);
+
+        final members = List.generate(
+          3,
+          (index) => Member(userId: 'test-user-id-$index'),
+        );
+
+        tester.mockApi(
+          // The seeded channel state holds no members, so the SDK forwards an
+          // empty list.
+          (api) => api.general.queryMembers(
+            _channelType,
+            channelId: _channelId,
+            filter: filter,
+            members: const <Member>[],
+          ),
+          result: QueryMembersResponse()..members = members,
+        );
+
+        final res = await tester.channel.queryMembers(filter: filter);
+
+        expect(res, isNotNull);
+        expect(res.members.length, members.length);
+
+        tester.verifyApi(
+          (api) => api.general.queryMembers(
+            _channelType,
+            channelId: _channelId,
+            filter: filter,
+            members: const <Member>[],
+          ),
+        );
+      },
+    );
+
+    channelTest(
+      '`.queryBannedUsers`',
+      channelType: _channelType,
+      channelId: _channelId,
+      build: _buildInitializedChannel,
+      body: (tester) async {
+        // Built by the channel rather than passed in, and a filter compares
+        // by identity, so the stubs below match on what it sends.
+        final filter = BannedUserFilter.equal(BannedUserFilterField.channelCid, _channelCid);
+
+        final bans = List.generate(
+          3,
+          (index) => BannedUser(
+            user: User(id: 'test-user-id-$index'),
+            bannedBy: User(id: 'test-user-id-${index + 1}'),
+          ),
+        );
+
+        tester.mockApi(
+          (api) => api.moderation.queryBannedUsers(
+            filter: any(named: 'filter', that: isSameFilterAs(filter)),
+          ),
+          result: QueryBannedUsersResponse()..bans = bans,
+        );
+
+        final res = await tester.channel.queryBannedUsers();
+
+        expect(res, isNotNull);
+        expect(res.bans.length, bans.length);
+
+        tester.verifyApi(
+          (api) => api.moderation.queryBannedUsers(
+            filter: any(named: 'filter', that: isSameFilterAs(filter)),
+          ),
+        );
+      },
+    );
+
+    channelTest(
+      '`.mute`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelModerationApi()),
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.moderation.muteChannel(_channelCid),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.channel.mute();
+
+        expect(res, isNotNull);
+
+        tester.verifyApi(
+          (api) => api.moderation.muteChannel(_channelCid),
+        );
+      },
+    );
+
+    channelTest(
+      '`.mute with expiration`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelModerationApi()),
+      body: (tester) async {
+        const expiration = Duration(seconds: 3);
+
+        tester
+          ..mockApi(
+            (api) => api.moderation.muteChannel(_channelCid, expiration: expiration),
+            result: createDefaultEmptyResponse(),
+          )
+          ..mockApi(
+            (api) => api.moderation.unmuteChannel(_channelCid),
+            result: createDefaultEmptyResponse(),
+          );
+
+        final res = await tester.channel.mute(expiration: expiration);
+
+        expect(res, isNotNull);
+
+        tester.verifyApi(
+          (api) => api.moderation.muteChannel(_channelCid, expiration: expiration),
+        );
+
+        // wait for expiration
+        await Future.delayed(expiration);
+        tester.verifyApi((api) => api.moderation.unmuteChannel(_channelCid));
+      },
+    );
+
+    channelTest(
+      '`.unmute`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelModerationApi()),
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.moderation.unmuteChannel(_channelCid),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.channel.unmute();
+
+        expect(res, isNotNull);
+
+        tester.verifyApi(
+          (api) => api.moderation.unmuteChannel(_channelCid),
+        );
+      },
+    );
+
+    channelTest(
+      '`.enableSlowMode`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelModerationApi()),
+      body: (tester) async {
+        const cooldown = 10;
+
+        final channelModel = ChannelModel(
+          cid: _channelCid,
+          cooldown: cooldown,
+        );
+
+        tester.mockApi(
+          (api) => api.channel.enableSlowdown(_channelId, _channelType, cooldown),
+          result: createDefaultPartialUpdateChannelResponse(channel: channelModel),
+        );
+
+        final res = await tester.channel.enableSlowMode(cooldownInterval: 10);
+
+        expect(res, isNotNull);
+
+        tester.verifyApi(
+          (api) => api.channel.enableSlowdown(_channelId, _channelType, cooldown),
+        );
+      },
+    );
+
+    channelTest(
+      '`.disableSlowMode`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelModerationApi()),
+      body: (tester) async {
+        final channelModel = ChannelModel(
+          cid: _channelCid,
+        );
+
+        tester.mockApi(
+          (api) => api.channel.disableSlowdown(_channelId, _channelType),
+          result: createDefaultPartialUpdateChannelResponse(channel: channelModel),
+        );
+
+        final res = await tester.channel.disableSlowMode();
+
+        expect(res, isNotNull);
+
+        tester.verifyApi(
+          (api) => api.channel.disableSlowdown(_channelId, _channelType),
+        );
+      },
+    );
+
+    channelTest(
+      '`.banUser`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelModerationApi()),
+      body: (tester) async {
+        const userId = 'test-user-id';
+        const options = {'key': 'value'};
+
+        tester.mockApi(
+          (api) => api.moderation.banUser(
+            userId,
+            options: {'type': _channelType, 'id': _channelId, ...options},
+          ),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.channel.banMember(userId, options);
+
+        expect(res, isNotNull);
+
+        tester.verifyApi(
+          (api) => api.moderation.banUser(
+            userId,
+            options: {'type': _channelType, 'id': _channelId, ...options},
+          ),
+        );
+      },
+    );
+
+    channelTest(
+      '`.unbanUser`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelModerationApi()),
+      body: (tester) async {
+        const userId = 'test-user-id';
+
+        tester.mockApi(
+          (api) => api.moderation.unbanUser(
+            userId,
+            options: {'type': _channelType, 'id': _channelId},
+          ),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.channel.unbanMember(userId);
+
+        expect(res, isNotNull);
+
+        tester.verifyApi(
+          (api) => api.moderation.unbanUser(
+            userId,
+            options: {'type': _channelType, 'id': _channelId},
+          ),
+        );
+      },
+    );
+
+    channelTest(
+      '`.shadowBan`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelModerationApi()),
+      body: (tester) async {
+        const userId = 'test-user-id';
+        const options = {'key': 'value'};
+
+        tester.mockApi(
+          (api) => api.moderation.banUser(
+            userId,
+            options: {'shadow': true, 'type': _channelType, 'id': _channelId, ...options},
+          ),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.channel.shadowBan(userId, options);
+
+        expect(res, isNotNull);
+
+        tester.verifyApi(
+          (api) => api.moderation.banUser(
+            userId,
+            options: {'shadow': true, 'type': _channelType, 'id': _channelId, ...options},
+          ),
+        );
+      },
+    );
+
+    channelTest(
+      '`.removeShadowBan`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelModerationApi()),
+      body: (tester) async {
+        const userId = 'test-user-id';
+
+        tester.mockApi(
+          (api) => api.moderation.unbanUser(
+            userId,
+            options: {'shadow': true, 'type': _channelType, 'id': _channelId},
+          ),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.channel.removeShadowBan(userId);
+
+        expect(res, isNotNull);
+
+        tester.verifyApi(
+          (api) => api.moderation.unbanUser(
+            userId,
+            options: {'shadow': true, 'type': _channelType, 'id': _channelId},
+          ),
+        );
+      },
+    );
+
+    channelTest(
+      '`.hide`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelDisplayApi()),
+      body: (tester) async {
+        const clearHistory = true;
+
+        tester.mockApi(
+          (api) => api.channel.hideChannel(
+            _channelId,
+            _channelType,
+            clearHistory: clearHistory,
+          ),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.channel.hide(clearHistory: clearHistory);
+
+        expect(res, isNotNull);
+
+        tester.verifyApi(
+          (api) => api.channel.hideChannel(
+            _channelId,
+            _channelType,
+            clearHistory: clearHistory,
+          ),
+        );
+      },
+    );
+
+    channelTest(
+      '`.show`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelDisplayApi()),
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.showChannel(_channelId, _channelType),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.channel.show();
+
+        expect(res, isNotNull);
+
+        tester.verifyApi(
+          (api) => api.channel.showChannel(_channelId, _channelType),
+        );
+      },
+    );
 
     // testing archiving
-    test('`.archive`', () async {
-      when(() => client.archiveChannel(channelId: channelId, channelType: channelType)).thenAnswer(
-        (_) async => FakePartialUpdateMemberResponse(),
-      );
+    channelTest(
+      '`.archive`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelDisplayApi()),
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.updateMemberPartial(
+            channelId: _channelId,
+            channelType: _channelType,
+            set: {'archived': true},
+          ),
+          result: createDefaultPartialUpdateMemberResponse(),
+        );
 
-      final res = await channel.archive();
+        final res = await tester.channel.archive();
 
-      expect(res, isNotNull);
+        expect(res, isNotNull);
 
-      verify(() => client.archiveChannel(channelId: channelId, channelType: channelType)).called(1);
-    });
+        tester.verifyApi(
+          (api) => api.channel.updateMemberPartial(
+            channelId: _channelId,
+            channelType: _channelType,
+            set: {'archived': true},
+          ),
+        );
+      },
+    );
 
-    test('`.unarchive`', () async {
-      when(() => client.unarchiveChannel(channelId: channelId, channelType: channelType)).thenAnswer(
-        (_) async => FakePartialUpdateMemberResponse(),
-      );
+    channelTest(
+      '`.unarchive`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelDisplayApi()),
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.updateMemberPartial(
+            channelId: _channelId,
+            channelType: _channelType,
+            unset: ['archived'],
+          ),
+          result: createDefaultPartialUpdateMemberResponse(),
+        );
 
-      final res = await channel.unarchive();
+        final res = await tester.channel.unarchive();
 
-      expect(res, isNotNull);
+        expect(res, isNotNull);
 
-      verify(() => client.unarchiveChannel(channelId: channelId, channelType: channelType)).called(1);
-    });
+        tester.verifyApi(
+          (api) => api.channel.updateMemberPartial(
+            channelId: _channelId,
+            channelType: _channelType,
+            unset: ['archived'],
+          ),
+        );
+      },
+    );
 
     // testing pinning
-    test('`.pin`', () async {
-      when(
-        () => client.pinChannel(channelId: channelId, channelType: channelType),
-      ).thenAnswer((_) async => FakePartialUpdateMemberResponse());
+    channelTest(
+      '`.pin`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelDisplayApi()),
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.updateMemberPartial(
+            channelId: _channelId,
+            channelType: _channelType,
+            set: {'pinned': true},
+          ),
+          result: createDefaultPartialUpdateMemberResponse(),
+        );
 
-      final res = await channel.pin();
+        final res = await tester.channel.pin();
 
-      expect(res, isNotNull);
+        expect(res, isNotNull);
 
-      verify(() => client.pinChannel(channelId: channelId, channelType: channelType)).called(1);
-    });
+        tester.verifyApi(
+          (api) => api.channel.updateMemberPartial(
+            channelId: _channelId,
+            channelType: _channelType,
+            set: {'pinned': true},
+          ),
+        );
+      },
+    );
 
-    test('`.unpin`', () async {
-      when(
-        () => client.unpinChannel(channelId: channelId, channelType: channelType),
-      ).thenAnswer((_) async => FakePartialUpdateMemberResponse());
+    channelTest(
+      '`.unpin`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelDisplayApi()),
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.updateMemberPartial(
+            channelId: _channelId,
+            channelType: _channelType,
+            unset: ['pinned'],
+          ),
+          result: createDefaultPartialUpdateMemberResponse(),
+        );
 
-      final res = await channel.unpin();
+        final res = await tester.channel.unpin();
 
-      expect(res, isNotNull);
+        expect(res, isNotNull);
 
-      verify(() => client.unpinChannel(channelId: channelId, channelType: channelType)).called(1);
-    });
+        tester.verifyApi(
+          (api) => api.channel.updateMemberPartial(
+            channelId: _channelId,
+            channelType: _channelType,
+            unset: ['pinned'],
+          ),
+        );
+      },
+    );
 
-    test('`.on`', () async {
-      const eventType = 'test.event';
-      final event = Event(type: eventType, cid: channelCid);
+    channelTest(
+      '`.on`',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(modifyResponse: _seedChannelDisplayApi()),
+      body: (tester) async {
+        const eventType = 'test.event';
+        final event = createDefaultEvent(type: eventType, cid: _channelCid);
 
-      Future.microtask(() => client.addEvent(event));
+        final eventReceived = expectLater(
+          tester.channel.on(eventType),
+          // The event round-trips through the real wire decode, so the
+          // delivered instance is never identical to `event`; pin every field it
+          // carries instead.
+          emitsInOrder([
+            isA<Event>()
+                .having((it) => it.type, 'type', event.type)
+                .having((it) => it.cid, 'cid', event.cid)
+                .having((it) => it.createdAt, 'createdAt', event.createdAt),
+          ]),
+        );
 
-      return expectLater(channel.on(eventType), emitsInOrder([event]));
-    });
+        await tester.emitEvent(event);
+
+        await eventReceived;
+      },
+    );
 
     group('stale error message cleanup', () {
-      final channelState = _generateChannelState(channelId, channelType);
-
       final errorMessage = Message(type: MessageType.error);
       final bouncedErrorMessage = Message(
         type: MessageType.error,
@@ -4857,310 +6021,366 @@ void main() {
       );
 
       // Test case: sending a message cleans up stale error messages
-      test('when sending a new message', () async {
+
+      // Test case: sending a message cleans up stale error messages
+      channelTest(
+        'when sending a new message',
+        channelType: _channelType,
+        channelId: _channelId,
         // Channel with 2 error messages
-        final channel = Channel.fromState(
-          client,
-          channelState.copyWith(
+        setUp: (tester) => tester.watch(
+          modifyResponse: (_) => _channelStateWith(
             messages: [errorMessage, bouncedErrorMessage],
           ),
-        );
+        ),
+        body: (tester) async {
+          // Set up the mock response for sending message
+          final newMessage = Message(text: 'New message');
 
-        // Set up the mock response for sending message
-        final newMessage = Message(text: 'New message');
+          tester.mockApi(
+            (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(newMessage))),
+            result: createDefaultSendMessageResponse(message: newMessage.copyWith(state: MessageState.sent)),
+          );
 
-        when(
-          () => client.sendMessage(any(), channelId, channelType),
-        ).thenAnswer((_) async => SendMessageResponse()..message = newMessage.copyWith(state: MessageState.sent));
+          // Send a new message
+          await tester.channel.sendMessage(newMessage);
+          final messages = tester.channelState!.messages;
 
-        // Send a new message
-        await channel.sendMessage(newMessage);
-        final messages = channel.state!.messages;
+          // Verify the cleanup
+          expect(messages.length, 2);
+          expect(messages.any((m) => m.id == errorMessage.id), false);
+          expect(messages.any((m) => m.id == bouncedErrorMessage.id), true);
+          expect(messages.any((m) => m.id == newMessage.id), true);
 
-        // Verify the cleanup
-        expect(messages.length, 2);
-        expect(messages.any((m) => m.id == errorMessage.id), false);
-        expect(messages.any((m) => m.id == bouncedErrorMessage.id), true);
-        expect(messages.any((m) => m.id == newMessage.id), true);
-
-        verify(() => client.sendMessage(any(), channelId, channelType));
-      });
+          tester.verifyApi(
+            (api) => api.message.sendMessage(_channelId, _channelType, any(that: isSameMessageAs(newMessage))),
+          );
+        },
+      );
     });
 
     group('`.state.pruneOldest`', () {
+      ChannelState Function(ChannelState) _seedChannel() {
+        return (_) => createDefaultChannelState(
+          channel: createDefaultChannelModel(
+            cid: _channelCid,
+            config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+            ownCapabilities: [ChannelCapability.readEvents],
+          ),
+        );
+      }
+
       List<Message> _generateMessages(int count) => List.generate(
         count,
         (i) => Message(
           id: 'msg-$i',
           text: 'Hello $i',
-          createdAt: DateTime(2024).add(Duration(seconds: i)),
+          createdAt: DateTime.utc(2024).add(Duration(seconds: i)),
         ),
       );
 
-      test('keeps only the [maxMessages] most recent messages', () {
-        final initial = _generateMessages(10);
-        channel.state!.updateChannelState(
-          _generateChannelState(channelId, channelType).copyWith(messages: initial),
-        );
-        expect(channel.state!.messages, hasLength(10));
+      channelTest(
+        'keeps only the [maxMessages] most recent messages',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final initial = _generateMessages(10);
+          tester.channelState!.updateChannelState(_channelStateWith(messages: initial));
+          expect(tester.channelState!.messages, hasLength(10));
 
-        channel.state!.pruneOldest(4);
+          tester.channelState!.pruneOldest(4);
 
-        final pruned = channel.state!.messages;
-        expect(pruned, hasLength(4));
-        expect(pruned.map((m) => m.id), ['msg-6', 'msg-7', 'msg-8', 'msg-9']);
-      });
+          final pruned = tester.channelState!.messages;
+          expect(pruned, hasLength(4));
+          expect(pruned.map((m) => m.id), ['msg-6', 'msg-7', 'msg-8', 'msg-9']);
+        },
+      );
 
-      test('emits the pruned list on `messagesStream`', () async {
-        final initial = _generateMessages(6);
-        channel.state!.updateChannelState(
-          _generateChannelState(channelId, channelType).copyWith(messages: initial),
-        );
+      channelTest(
+        'emits the pruned list on `messagesStream`',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final initial = _generateMessages(6);
+          tester.channelState!.updateChannelState(_channelStateWith(messages: initial));
 
-        final next = channel.state!.messagesStream.firstWhere((messages) => messages.length == 3);
+          final next = tester.channelState!.messagesStream.firstWhere((messages) => messages.length == 3);
 
-        channel.state!.pruneOldest(3);
+          tester.channelState!.pruneOldest(3);
 
-        final emitted = await next;
-        expect(emitted.map((m) => m.id), ['msg-3', 'msg-4', 'msg-5']);
-      });
+          final emitted = await next;
+          expect(emitted.map((m) => m.id), ['msg-3', 'msg-4', 'msg-5']);
+        },
+      );
 
-      test('is a no-op when message count is within the limit', () {
-        final initial = _generateMessages(3);
-        channel.state!.updateChannelState(
-          _generateChannelState(channelId, channelType).copyWith(messages: initial),
-        );
+      channelTest(
+        'is a no-op when message count is within the limit',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final initial = _generateMessages(3);
+          tester.channelState!.updateChannelState(_channelStateWith(messages: initial));
 
-        channel.state!.pruneOldest(5);
-        expect(channel.state!.messages, hasLength(3));
+          tester.channelState!.pruneOldest(5);
+          expect(tester.channelState!.messages, hasLength(3));
 
-        channel.state!.pruneOldest(3);
-        expect(channel.state!.messages, hasLength(3));
-      });
+          tester.channelState!.pruneOldest(3);
+          expect(tester.channelState!.messages, hasLength(3));
+        },
+      );
 
-      test('is a no-op when [maxMessages] is zero or negative', () {
-        final initial = _generateMessages(5);
-        channel.state!.updateChannelState(
-          _generateChannelState(channelId, channelType).copyWith(messages: initial),
-        );
+      channelTest(
+        'is a no-op when [maxMessages] is zero or negative',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final initial = _generateMessages(5);
+          tester.channelState!.updateChannelState(_channelStateWith(messages: initial));
 
-        channel.state!.pruneOldest(0);
-        expect(channel.state!.messages, hasLength(5));
+          tester.channelState!.pruneOldest(0);
+          expect(tester.channelState!.messages, hasLength(5));
 
-        channel.state!.pruneOldest(-1);
-        expect(channel.state!.messages, hasLength(5));
-      });
+          tester.channelState!.pruneOldest(-1);
+          expect(tester.channelState!.messages, hasLength(5));
+        },
+      );
 
-      test('is a no-op when `isUpToDate` is false', () {
-        final initial = _generateMessages(10);
-        channel.state!.updateChannelState(
-          _generateChannelState(channelId, channelType).copyWith(messages: initial),
-        );
+      channelTest(
+        'is a no-op when `isUpToDate` is false',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final initial = _generateMessages(10);
+          tester.channelState!.updateChannelState(_channelStateWith(messages: initial));
 
-        channel.state!.isUpToDate = false;
-        channel.state!.pruneOldest(3);
-        expect(channel.state!.messages, hasLength(10));
-      });
+          tester.channelState!.isUpToDate = false;
+          tester.channelState!.pruneOldest(3);
+          expect(tester.channelState!.messages, hasLength(10));
+        },
+      );
 
-      test('only mutates `messages`; other channel state fields untouched', () {
-        final initial = _generateMessages(10);
-        final pinned = [
-          Message(
-            id: 'pinned-1',
-            text: 'pinned message',
-            createdAt: DateTime(2024),
-          ),
-        ];
+      channelTest(
+        'only mutates `messages`; other channel state fields untouched',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final initial = _generateMessages(10);
+          final pinned = [
+            Message(
+              id: 'pinned-1',
+              text: 'pinned message',
+              createdAt: DateTime.utc(2024),
+            ),
+          ];
 
-        channel.state!.updateChannelState(
-          _generateChannelState(channelId, channelType).copyWith(
-            messages: initial,
-            pinnedMessages: pinned,
-          ),
-        );
+          tester.channelState!.updateChannelState(
+            _channelStateWith(messages: initial, pinnedMessages: pinned),
+          );
 
-        channel.state!.pruneOldest(3);
+          tester.channelState!.pruneOldest(3);
 
-        expect(channel.state!.messages, hasLength(3));
-        expect(channel.state!.pinnedMessages, equals(pinned));
-      });
+          expect(tester.channelState!.messages, hasLength(3));
+          expect(tester.channelState!.pinnedMessages, equals(pinned));
+        },
+      );
 
-      test('does not emit on `messagesStream` for no-op calls', () async {
-        final initial = _generateMessages(5);
-        channel.state!.updateChannelState(
-          _generateChannelState(channelId, channelType).copyWith(messages: initial),
-        );
+      channelTest(
+        'does not emit on `messagesStream` for no-op calls',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final initial = _generateMessages(5);
+          tester.channelState!.updateChannelState(_channelStateWith(messages: initial));
 
-        // Skip the seeded emission from updateChannelState.
-        await pumpEventQueue();
+          // Skip the seeded emission from updateChannelState.
+          await pumpEventQueue();
 
-        final emissions = <List<Message>>[];
-        final sub = channel.state!.messagesStream.skip(1).listen(emissions.add);
-        addTearDown(sub.cancel);
+          final emissions = <List<Message>>[];
+          final sub = tester.channelState!.messagesStream.skip(1).listen(emissions.add);
+          addTearDown(sub.cancel);
 
-        channel.state!.pruneOldest(0); // non-positive guard
-        channel.state!.pruneOldest(-1); // non-positive guard
-        channel.state!.pruneOldest(10); // within limit guard
-        channel.state!.isUpToDate = false;
-        channel.state!.pruneOldest(2); // !isUpToDate guard
+          tester.channelState!.pruneOldest(0); // non-positive guard
+          tester.channelState!.pruneOldest(-1); // non-positive guard
+          tester.channelState!.pruneOldest(10); // within limit guard
+          tester.channelState!.isUpToDate = false;
+          tester.channelState!.pruneOldest(2); // !isUpToDate guard
 
-        await pumpEventQueue();
-        expect(emissions, isEmpty);
-      });
+          await pumpEventQueue();
+          expect(emissions, isEmpty);
+        },
+      );
     });
   });
 
   group('Channel State Validation and Cooldown', () {
-    late final client = MockStreamChatClient();
-    const channelId = 'test-channel-id';
-    const channelType = 'test-channel-type';
+    // seconds
 
-    setUpAll(() {
-      final retryPolicy = RetryPolicy(
-        shouldRetry: (_, __, ___) => false,
-        delayFactor: Duration.zero,
+    // A bare channel state (no config, no capabilities).
+    ChannelState Function(ChannelState) _seedChannel() {
+      return (_) => createDefaultChannelState(
+        channel: createDefaultChannelModel(cid: _channelCid),
       );
-      when(() => client.retryPolicy).thenReturn(retryPolicy);
+    }
 
-      // fake clientState
-      final clientState = FakeClientState();
-      when(() => client.state).thenReturn(clientState);
-
-      // mock channel delivery reporter
-      when(
-        () => client.channelDeliveryReporter.submitForDelivery(any()),
-      ).thenAnswer((_) async {});
-    });
+    // A bare channel state (no config, no capabilities).
+    ChannelState Function(ChannelState) _seedChannelCountEvents() {
+      return (_) => createDefaultChannelState(
+        channel: createDefaultChannelModel(cid: _channelCid),
+      );
+    }
 
     group('Non-initialized channel state validation', () {
-      test(
+      channelTest(
         'should throw StateError when accessing cooldown on non-initialized channel',
-        () {
-          final channel = Channel(client, channelType, channelId);
+        channelType: _channelType,
+        channelId: _channelId,
+        body: (tester) async {
+          final channel = tester.channel;
           expect(() => channel.cooldown, throwsA(isA<StateError>()));
         },
       );
 
-      test(
+      channelTest(
         'should throw StateError when accessing getRemainingCooldown on non-initialized channel',
-        () {
-          final channel = Channel(client, channelType, channelId);
+        channelType: _channelType,
+        channelId: _channelId,
+        body: (tester) async {
+          final channel = tester.channel;
           expect(channel.getRemainingCooldown, throwsA(isA<StateError>()));
         },
       );
 
-      test(
+      channelTest(
         'should throw StateError when accessing cooldownStream on non-initialized channel',
-        () {
-          final channel = Channel(client, channelType, channelId);
+        channelType: _channelType,
+        channelId: _channelId,
+        body: (tester) async {
+          final channel = tester.channel;
           expect(() => channel.cooldownStream, throwsA(isA<StateError>()));
         },
       );
     });
 
     group('Initialized channel cooldown functionality', () {
-      late Channel channel;
-
-      setUp(() {
-        final channelState = _generateChannelState(channelId, channelType);
-        channel = Channel.fromState(client, channelState);
-      });
-
-      tearDown(() => channel.dispose());
-
-      test(
+      channelTest(
         'should return default cooldown value of 0 for initialized channel',
-        () => expect(channel.cooldown, equals(0)),
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) => expect(tester.channel.cooldown, equals(0)),
       );
 
-      test('should return custom cooldown value when set in channel model', () {
-        final channelWithCooldown = ChannelModel(
-          id: channelId,
-          type: channelType,
-          cooldown: 30,
-        );
+      channelTest(
+        'should return custom cooldown value when set in channel model',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final channelWithCooldown = ChannelModel(
+            id: _channelId,
+            type: _channelType,
+            cooldown: 30,
+          );
 
-        final stateWithCooldown = ChannelState(channel: channelWithCooldown);
-        final testChannel = Channel.fromState(client, stateWithCooldown);
-        addTearDown(testChannel.dispose);
+          final stateWithCooldown = ChannelState(channel: channelWithCooldown);
+          final testChannel = Channel.fromState(tester.client, stateWithCooldown);
+          addTearDown(testChannel.dispose);
 
-        expect(testChannel.cooldown, equals(30));
-      });
+          expect(testChannel.cooldown, equals(30));
+        },
+      );
 
-      test('should return 0 remaining cooldown when no cooldown is set', () {
-        expect(channel.getRemainingCooldown(), equals(0));
-      });
+      channelTest(
+        'should return 0 remaining cooldown when no cooldown is set',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          expect(tester.channel.getRemainingCooldown(), equals(0));
+        },
+      );
 
-      test('should return cooldown stream with default value', () {
-        expectLater(channel.cooldownStream.take(1), emits(0));
-      });
+      channelTest(
+        'should return cooldown stream with default value',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          await expectLater(tester.channel.cooldownStream.take(1), emits(0));
+        },
+      );
     });
 
     group('Thread reply cooldown', () {
-      const currentUserId = 'test-user-id'; // matches FakeClientState default
-      const cooldownDuration = 30; // seconds
+      const _cooldownDuration = 30;
 
-      Channel _buildChannelWithCooldown() {
-        final channelModel = ChannelModel(
-          id: channelId,
-          type: channelType,
-          cooldown: cooldownDuration,
-          ownCapabilities: [ChannelCapability.slowMode],
+      // A channel with an active cooldown and the slow-mode capability.
+      // `isUpToDate` is seeded true by default.
+      ChannelState Function(ChannelState) _seedChannelWithCooldown() {
+        return (_) => createDefaultChannelState(
+          channel: createDefaultChannelModel(
+            cid: _channelCid,
+            cooldown: _cooldownDuration,
+            ownCapabilities: [ChannelCapability.slowMode],
+          ),
         );
-        final state = ChannelState(channel: channelModel);
-        final ch = Channel.fromState(client, state);
-        // isUpToDate is seeded true by default
-        return ch;
       }
 
-      test(
+      channelTest(
         'should return positive cooldown after current user sends a thread reply',
-        () {
-          final ch = _buildChannelWithCooldown();
-          addTearDown(ch.dispose);
-
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelWithCooldown()),
+        body: (tester) async {
           // Simulate a thread reply by the current user sent just now.
           final threadReply = Message(
             id: 'thread-reply-1',
             parentId: 'parent-msg-1',
             showInChannel: false,
             createdAt: DateTime.timestamp(),
-            user: User(id: currentUserId),
+            user: User(id: tester.currentUser!.id),
           );
-          ch.state!.updateThreadInfo('parent-msg-1', [threadReply]);
+          tester.channelState!.updateThreadInfo('parent-msg-1', [threadReply]);
 
-          expect(ch.getRemainingCooldown(), greaterThan(0));
+          expect(tester.channel.getRemainingCooldown(), greaterThan(0));
         },
       );
 
-      test(
+      channelTest(
         'should return 0 cooldown when thread reply was sent outside the cooldown window',
-        () {
-          final ch = _buildChannelWithCooldown();
-          addTearDown(ch.dispose);
-
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelWithCooldown()),
+        body: (tester) async {
           // Reply sent cooldownDuration+5 seconds ago — outside the window.
           final oldReply = Message(
             id: 'thread-reply-old',
             parentId: 'parent-msg-1',
             showInChannel: false,
             createdAt: DateTime.timestamp().subtract(
-              const Duration(seconds: cooldownDuration + 5),
+              const Duration(seconds: _cooldownDuration + 5),
             ),
-            user: User(id: currentUserId),
+            user: User(id: tester.currentUser!.id),
           );
-          ch.state!.updateThreadInfo('parent-msg-1', [oldReply]);
+          tester.channelState!.updateThreadInfo('parent-msg-1', [oldReply]);
 
-          expect(ch.getRemainingCooldown(), equals(0));
+          expect(tester.channel.getRemainingCooldown(), equals(0));
         },
       );
 
-      test(
+      channelTest(
         'should not trigger cooldown for a thread reply from another user',
-        () {
-          final ch = _buildChannelWithCooldown();
-          addTearDown(ch.dispose);
-
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelWithCooldown()),
+        body: (tester) async {
           final otherUserReply = Message(
             id: 'thread-reply-other',
             parentId: 'parent-msg-1',
@@ -5168,50 +6388,50 @@ void main() {
             createdAt: DateTime.timestamp(),
             user: User(id: 'other-user-id'),
           );
-          ch.state!.updateThreadInfo('parent-msg-1', [otherUserReply]);
+          tester.channelState!.updateThreadInfo('parent-msg-1', [otherUserReply]);
 
-          expect(ch.getRemainingCooldown(), equals(0));
+          expect(tester.channel.getRemainingCooldown(), equals(0));
         },
       );
 
-      test(
+      channelTest(
         'should clear cooldown when the most-recent own message is hard-deleted',
-        () {
-          final ch = _buildChannelWithCooldown();
-          addTearDown(ch.dispose);
-
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelWithCooldown()),
+        body: (tester) async {
           final ownMessage = Message(
             id: 'msg-1',
             createdAt: DateTime.timestamp(),
-            user: User(id: currentUserId),
+            user: User(id: tester.currentUser!.id),
           );
-          ch.state!.updateMessage(ownMessage);
-          expect(ch.getRemainingCooldown(), greaterThan(0));
+          tester.channelState!.updateMessage(ownMessage);
+          expect(tester.channel.getRemainingCooldown(), greaterThan(0));
 
-          ch.state!.deleteMessage(ownMessage, hardDelete: true);
-          expect(ch.getRemainingCooldown(), equals(0));
+          tester.channelState!.deleteMessage(ownMessage, hardDelete: true);
+          expect(tester.channel.getRemainingCooldown(), equals(0));
         },
       );
 
-      test(
+      channelTest(
         'currentUserLastMessageAtStream emits a new timestamp when own message is added',
-        () async {
-          final ch = _buildChannelWithCooldown();
-          addTearDown(ch.dispose);
-
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelWithCooldown()),
+        body: (tester) async {
           final emissions = <DateTime?>[];
-          final sub = ch.currentUserLastMessageAtStream.listen(emissions.add);
+          final sub = tester.channel.currentUserLastMessageAtStream.listen(emissions.add);
           addTearDown(sub.cancel);
 
           // Let the seed emission settle.
           await Future<void>.delayed(Duration.zero);
           final seededLast = emissions.last;
 
-          ch.state!.updateMessage(
+          tester.channelState!.updateMessage(
             Message(
               id: 'msg-1',
               createdAt: DateTime.timestamp(),
-              user: User(id: currentUserId),
+              user: User(id: tester.currentUser!.id),
             ),
           );
           await Future<void>.delayed(Duration.zero);
@@ -5221,57 +6441,57 @@ void main() {
         },
       );
 
-      test(
+      channelTest(
         'getRemainingCooldown uses the explicit [lastMessageAt] override',
-        () {
-          final ch = _buildChannelWithCooldown();
-          addTearDown(ch.dispose);
-
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelWithCooldown()),
+        body: (tester) async {
           // No messages in state, so the default path returns 0.
-          expect(ch.getRemainingCooldown(), equals(0));
+          expect(tester.channel.getRemainingCooldown(), equals(0));
 
           // Override pointing inside the cooldown window → positive remaining.
           final recent = DateTime.timestamp().subtract(const Duration(seconds: 5));
-          expect(ch.getRemainingCooldown(lastMessageAt: recent), greaterThan(0));
+          expect(tester.channel.getRemainingCooldown(lastMessageAt: recent), greaterThan(0));
 
           // Override pointing outside the window → 0.
           final old = DateTime.timestamp().subtract(
-            const Duration(seconds: cooldownDuration + 5),
+            const Duration(seconds: _cooldownDuration + 5),
           );
-          expect(ch.getRemainingCooldown(lastMessageAt: old), equals(0));
+          expect(tester.channel.getRemainingCooldown(lastMessageAt: old), equals(0));
         },
       );
 
-      test(
+      channelTest(
         'currentUserLastMessageAt picks the latest across channel messages and threads',
-        () {
-          final ch = _buildChannelWithCooldown();
-          addTearDown(ch.dispose);
-
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelWithCooldown()),
+        body: (tester) async {
           final older = DateTime.timestamp().subtract(const Duration(seconds: 20));
           final newer = DateTime.timestamp().subtract(const Duration(seconds: 5));
 
           // Older message in the main channel.
-          ch.state!.updateMessage(
+          tester.channelState!.updateMessage(
             Message(
               id: 'msg-1',
               createdAt: older,
-              user: User(id: currentUserId),
+              user: User(id: tester.currentUser!.id),
             ),
           );
           // Newer reply in a thread.
-          ch.state!.updateThreadInfo('parent-msg-1', [
+          tester.channelState!.updateThreadInfo('parent-msg-1', [
             Message(
               id: 'thread-reply-1',
               parentId: 'parent-msg-1',
               showInChannel: false,
               createdAt: newer,
-              user: User(id: currentUserId),
+              user: User(id: tester.currentUser!.id),
             ),
           ]);
 
           // Should pick the newer thread reply, not the older channel message.
-          final result = ch.currentUserLastMessageAt;
+          final result = tester.channel.currentUserLastMessageAt;
           expect(result, isNotNull);
           expect(result!.isAtSameMomentAs(newer), isTrue);
         },
@@ -5279,16 +6499,14 @@ void main() {
     });
 
     group('Disposed channel state validation', () {
-      late Channel channel;
-
-      setUp(() {
-        final channelState = _generateChannelState(channelId, channelType);
-        channel = Channel.fromState(client, channelState);
-      });
-
-      test(
+      channelTest(
         'should throw StateError when accessing cooldown after disposal',
-        () {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final channel = tester.channel;
+
           // First verify it works when initialized
           expect(channel.cooldown, equals(0));
 
@@ -5300,9 +6518,14 @@ void main() {
         },
       );
 
-      test(
+      channelTest(
         'should throw StateError when accessing getRemainingCooldown after disposal',
-        () {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final channel = tester.channel;
+
           // First verify it works when initialized
           expect(channel.getRemainingCooldown(), equals(0));
 
@@ -5314,11 +6537,16 @@ void main() {
         },
       );
 
-      test(
+      channelTest(
         'should throw StateError when accessing cooldownStream after disposal',
-        () {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final channel = tester.channel;
+
           // First verify it works when initialized
-          expectLater(channel.cooldownStream.take(1), emits(0));
+          await expectLater(channel.cooldownStream.take(1), emits(0));
 
           // Dispose the channel
           channel.dispose();
@@ -5328,12 +6556,17 @@ void main() {
         },
       );
 
-      test(
+      channelTest(
         'should handle race condition scenario - initialization then quick disposal',
-        () {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
           // This test simulates the race condition that was causing the production crash
-          final channelState = _generateChannelState(channelId, channelType);
-          final raceChannel = Channel.fromState(client, channelState);
+          final channelState = createDefaultChannelState(
+            channel: createDefaultChannelModel(cid: _channelCid),
+          );
+          final raceChannel = Channel.fromState(tester.client, channelState);
 
           // Verify it works initially
           expect(raceChannel.cooldown, equals(0));
@@ -5350,51 +6583,41 @@ void main() {
     });
 
     group('Channel message count events', () {
-      const channelId = 'test-channel-id';
-      const channelType = 'test-channel-type';
-      late Channel channel;
-
-      setUp(() {
-        final channelState = _generateChannelState(channelId, channelType);
-        channel = Channel.fromState(client, channelState);
-      });
-
-      tearDown(() {
-        channel.dispose();
-      });
-
-      test(
+      channelTest(
         'should update channel messageCount when event contains channelMessageCount',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelCountEvents()),
+        body: (tester) async {
           // Verify initial state - no messageCount
-          expect(channel.messageCount, isNull);
+          expect(tester.channel.messageCount, isNull);
 
           // Create event with channelMessageCount
-          final messageCountEvent = Event(
-            cid: channel.cid,
+          final messageCountEvent = createDefaultEvent(
+            cid: tester.channel.cid,
             type: EventType.messageNew,
             channelMessageCount: 42,
           );
 
-          // Dispatch event
-          client.addEvent(messageCountEvent);
-
-          // Wait for the event to be processed
-          await Future.delayed(Duration.zero);
+          // Dispatch event and wait for it to be processed
+          await tester.emitEvent(messageCountEvent);
 
           // Verify channel messageCount was updated
-          expect(channel.messageCount, equals(42));
+          expect(tester.channel.messageCount, equals(42));
         },
       );
 
-      test(
+      channelTest(
         'should update channel messageCount from message.new and message.deleted events',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelCountEvents()),
+        body: (tester) async {
           // Test with message.new event - count increases
-          final messageNewEvent = Event(
-            cid: channel.cid,
+          final messageNewEvent = createDefaultEvent(
+            cid: tester.channel.cid,
             type: EventType.messageNew,
-            message: Message(
+            message: createDefaultMessage(
               id: 'new-message-1',
               text: 'Hello world!',
               user: User(id: 'user-1'),
@@ -5402,15 +6625,14 @@ void main() {
             channelMessageCount: 1,
           );
 
-          client.addEvent(messageNewEvent);
-          await Future.delayed(Duration.zero);
-          expect(channel.messageCount, equals(1));
+          await tester.emitEvent(messageNewEvent);
+          expect(tester.channel.messageCount, equals(1));
 
           // Test with another message.new event - count increases
-          final messageNewEvent2 = Event(
-            cid: channel.cid,
+          final messageNewEvent2 = createDefaultEvent(
+            cid: tester.channel.cid,
             type: EventType.messageNew,
-            message: Message(
+            message: createDefaultMessage(
               id: 'new-message-2',
               text: 'Second message',
               user: User(id: 'user-2'),
@@ -5418,15 +6640,14 @@ void main() {
             channelMessageCount: 2,
           );
 
-          client.addEvent(messageNewEvent2);
-          await Future.delayed(Duration.zero);
-          expect(channel.messageCount, equals(2));
+          await tester.emitEvent(messageNewEvent2);
+          expect(tester.channel.messageCount, equals(2));
 
           // Test with message.deleted event - count decreases
-          final messageDeletedEvent = Event(
-            cid: channel.cid,
+          final messageDeletedEvent = createDefaultEvent(
+            cid: tester.channel.cid,
             type: EventType.messageDeleted,
-            message: Message(
+            message: createDefaultMessage(
               id: 'new-message-1',
               text: 'Hello world!',
               user: User(id: 'user-1'),
@@ -5434,67 +6655,71 @@ void main() {
             channelMessageCount: 1,
           );
 
-          client.addEvent(messageDeletedEvent);
-          await Future.delayed(Duration.zero);
-          expect(channel.messageCount, equals(1));
+          await tester.emitEvent(messageDeletedEvent);
+          expect(tester.channel.messageCount, equals(1));
         },
       );
 
-      test(
+      channelTest(
         'should preserve other channel properties when updating messageCount',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelCountEvents()),
+        body: (tester) async {
           // Set initial channel state with some properties
-          final initialChannel = channel.state?.channelState.channel?.copyWith(
+          final initialChannel = tester.channelState?.channelState.channel?.copyWith(
             extraData: {'name': 'Test Channel'},
             memberCount: 5,
             frozen: true,
           );
 
           if (initialChannel != null) {
-            channel.state?.updateChannelState(
-              channel.state!.channelState.copyWith(channel: initialChannel),
+            tester.channelState?.updateChannelState(
+              tester.channelState!.channelState.copyWith(channel: initialChannel),
             );
           }
 
           // Verify initial state
-          expect(channel.name, 'Test Channel');
-          expect(channel.memberCount, equals(5));
-          expect(channel.frozen, equals(true));
-          expect(channel.messageCount, isNull);
+          expect(tester.channel.name, 'Test Channel');
+          expect(tester.channel.memberCount, equals(5));
+          expect(tester.channel.frozen, equals(true));
+          expect(tester.channel.messageCount, isNull);
 
           // Update messageCount via event
-          final messageCountEvent = Event(
-            cid: channel.cid,
+          final messageCountEvent = createDefaultEvent(
+            cid: tester.channel.cid,
             type: EventType.messageNew,
             channelMessageCount: 100,
           );
 
-          client.addEvent(messageCountEvent);
-          await Future.delayed(Duration.zero);
+          await tester.emitEvent(messageCountEvent);
 
           // Verify messageCount was updated while preserving other properties
-          expect(channel.messageCount, equals(100));
-          expect(channel.name, 'Test Channel');
-          expect(channel.memberCount, equals(5));
-          expect(channel.frozen, equals(true));
+          expect(tester.channel.messageCount, equals(100));
+          expect(tester.channel.name, 'Test Channel');
+          expect(tester.channel.memberCount, equals(5));
+          expect(tester.channel.frozen, equals(true));
         },
       );
 
-      test(
+      channelTest(
         'should provide messageCountStream for reactive updates',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelCountEvents()),
+        body: (tester) async {
           final emitted = <int?>[];
-          final subscription = channel.messageCountStream.listen(emitted.add);
+          final subscription = tester.channel.messageCountStream.listen(emitted.add);
           addTearDown(subscription.cancel);
           await Future.delayed(Duration.zero);
 
           // Update messageCount multiple times, repeating one of the counts.
           final counts = [1, 5, 5, 10];
           for (final (index, count) in counts.indexed) {
-            final event = Event(
-              cid: channel.cid,
+            final event = createDefaultEvent(
+              cid: tester.channel.cid,
               type: EventType.messageNew,
-              message: Message(
+              message: createDefaultMessage(
                 id: 'msg-$index',
                 text: 'Message $count',
                 user: User(id: 'user-1'),
@@ -5502,8 +6727,7 @@ void main() {
               channelMessageCount: count,
             );
 
-            client.addEvent(event);
-            await Future.delayed(Duration.zero);
+            await tester.emitEvent(event);
           }
 
           // The repeated count should not be emitted twice.
@@ -5513,203 +6737,174 @@ void main() {
     });
 
     group('Channel member count events', () {
-      const channelId = 'test-channel-id';
-      const channelType = 'test-channel-type';
-      late Channel channel;
-
-      setUp(() {
-        final channelState = _generateChannelState(channelId, channelType);
-        channel = Channel.fromState(client, channelState);
-      });
-
-      tearDown(() {
-        channel.dispose();
-      });
-
-      test(
+      channelTest(
         'should update channel memberCount when event contains channelMemberCount',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelCountEvents()),
+        body: (tester) async {
           // Verify initial state - default memberCount
-          expect(channel.memberCount, equals(0));
+          expect(tester.channel.memberCount, equals(0));
 
           // Create event with channelMemberCount
-          final memberCountEvent = Event(
-            cid: channel.cid,
+          final memberCountEvent = createDefaultEvent(
+            cid: tester.channel.cid,
             type: EventType.memberAdded,
-            member: Member(
-              userId: 'user-1',
-              user: User(id: 'user-1'),
-            ),
+            member: createDefaultMember(user: User(id: 'user-1')),
             channelMemberCount: 42,
           );
 
-          // Dispatch event
-          client.addEvent(memberCountEvent);
-
-          // Wait for the event to be processed
-          await Future.delayed(Duration.zero);
+          // Dispatch event and wait for it to be processed
+          await tester.emitEvent(memberCountEvent);
 
           // Verify channel memberCount was updated
-          expect(channel.memberCount, equals(42));
+          expect(tester.channel.memberCount, equals(42));
         },
       );
 
-      test(
+      channelTest(
         'should update channel memberCount from member.added and member.removed events',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelCountEvents()),
+        body: (tester) async {
           // Test with member.added event - count increases
-          final memberAddedEvent = Event(
-            cid: channel.cid,
+          final memberAddedEvent = createDefaultEvent(
+            cid: tester.channel.cid,
             type: EventType.memberAdded,
-            member: Member(
-              userId: 'user-1',
-              user: User(id: 'user-1'),
-            ),
+            member: createDefaultMember(user: User(id: 'user-1')),
             channelMemberCount: 1,
           );
 
-          client.addEvent(memberAddedEvent);
-          await Future.delayed(Duration.zero);
-          expect(channel.memberCount, equals(1));
-          expect(channel.state?.channelState.members?.map((it) => it.userId), equals(['user-1']));
+          await tester.emitEvent(memberAddedEvent);
+          expect(tester.channel.memberCount, equals(1));
+          expect(tester.channelState?.channelState.members?.map((it) => it.userId), equals(['user-1']));
 
           // Test with another member.added event - count increases
-          final memberAddedEvent2 = Event(
-            cid: channel.cid,
+          final memberAddedEvent2 = createDefaultEvent(
+            cid: tester.channel.cid,
             type: EventType.memberAdded,
-            member: Member(
-              userId: 'user-2',
-              user: User(id: 'user-2'),
-            ),
+            member: createDefaultMember(user: User(id: 'user-2')),
             channelMemberCount: 2,
           );
 
-          client.addEvent(memberAddedEvent2);
-          await Future.delayed(Duration.zero);
-          expect(channel.memberCount, equals(2));
+          await tester.emitEvent(memberAddedEvent2);
+          expect(tester.channel.memberCount, equals(2));
           expect(
-            channel.state?.channelState.members?.map((it) => it.userId),
+            tester.channelState?.channelState.members?.map((it) => it.userId),
             equals(['user-1', 'user-2']),
           );
 
           // Test with member.removed event - count decreases
-          final memberRemovedEvent = Event(
-            cid: channel.cid,
+          final memberRemovedEvent = createDefaultEvent(
+            cid: tester.channel.cid,
             type: EventType.memberRemoved,
             user: User(id: 'user-1'),
             channelMemberCount: 1,
           );
 
-          client.addEvent(memberRemovedEvent);
-          await Future.delayed(Duration.zero);
-          expect(channel.memberCount, equals(1));
-          expect(channel.state?.channelState.members?.map((it) => it.userId), equals(['user-2']));
+          await tester.emitEvent(memberRemovedEvent);
+          expect(tester.channel.memberCount, equals(1));
+          expect(tester.channelState?.channelState.members?.map((it) => it.userId), equals(['user-2']));
         },
       );
 
-      test(
+      channelTest(
         'should preserve other channel properties when updating memberCount',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelCountEvents()),
+        body: (tester) async {
           // Set initial channel state with some properties
-          final initialChannel = channel.state?.channelState.channel?.copyWith(
+          final initialChannel = tester.channelState?.channelState.channel?.copyWith(
             extraData: {'name': 'Test Channel'},
             messageCount: 7,
             frozen: true,
           );
 
           if (initialChannel != null) {
-            channel.state?.updateChannelState(
-              channel.state!.channelState.copyWith(channel: initialChannel),
+            tester.channelState?.updateChannelState(
+              tester.channelState!.channelState.copyWith(channel: initialChannel),
             );
           }
 
           // Verify initial state
-          expect(channel.name, 'Test Channel');
-          expect(channel.messageCount, equals(7));
-          expect(channel.frozen, equals(true));
-          expect(channel.memberCount, equals(0));
+          expect(tester.channel.name, 'Test Channel');
+          expect(tester.channel.messageCount, equals(7));
+          expect(tester.channel.frozen, equals(true));
+          expect(tester.channel.memberCount, equals(0));
 
           // Update memberCount via event
-          final memberCountEvent = Event(
-            cid: channel.cid,
+          final memberCountEvent = createDefaultEvent(
+            cid: tester.channel.cid,
             type: EventType.memberAdded,
-            member: Member(
-              userId: 'user-1',
-              user: User(id: 'user-1'),
-            ),
+            member: createDefaultMember(user: User(id: 'user-1')),
             channelMemberCount: 100,
           );
 
-          client.addEvent(memberCountEvent);
-          await Future.delayed(Duration.zero);
+          await tester.emitEvent(memberCountEvent);
 
           // Verify memberCount was updated while preserving other properties
-          expect(channel.memberCount, equals(100));
-          expect(channel.name, 'Test Channel');
-          expect(channel.messageCount, equals(7));
-          expect(channel.frozen, equals(true));
+          expect(tester.channel.memberCount, equals(100));
+          expect(tester.channel.name, 'Test Channel');
+          expect(tester.channel.messageCount, equals(7));
+          expect(tester.channel.frozen, equals(true));
         },
       );
 
-      test(
+      channelTest(
         'should not update memberCount when the event omits channelMemberCount',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelCountEvents()),
+        body: (tester) async {
           // Seed a known member count.
-          client.addEvent(
-            Event(
-              cid: channel.cid,
+          await tester.emitEvent(
+            createDefaultEvent(
+              cid: tester.channel.cid,
               type: EventType.memberAdded,
-              member: Member(
-                userId: 'user-1',
-                user: User(id: 'user-1'),
-              ),
+              member: createDefaultMember(user: User(id: 'user-1')),
               channelMemberCount: 5,
             ),
           );
 
-          await Future.delayed(Duration.zero);
-          expect(channel.memberCount, equals(5));
+          expect(tester.channel.memberCount, equals(5));
 
           // An event without the field should leave the count untouched.
-          client.addEvent(
-            Event(
-              cid: channel.cid,
+          await tester.emitEvent(
+            createDefaultEvent(
+              cid: tester.channel.cid,
               type: EventType.memberAdded,
-              member: Member(
-                userId: 'user-2',
-                user: User(id: 'user-2'),
-              ),
+              member: createDefaultMember(user: User(id: 'user-2')),
             ),
           );
 
-          await Future.delayed(Duration.zero);
-          expect(channel.memberCount, equals(5));
+          expect(tester.channel.memberCount, equals(5));
         },
       );
 
-      test(
+      channelTest(
         'should provide memberCountStream for reactive updates',
-        () async {
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannelCountEvents()),
+        body: (tester) async {
           final emitted = <int?>[];
-          final subscription = channel.memberCountStream.listen(emitted.add);
+          final subscription = tester.channel.memberCountStream.listen(emitted.add);
           addTearDown(subscription.cancel);
           await Future.delayed(Duration.zero);
 
           // Update memberCount multiple times, repeating one of the counts.
           final counts = [1, 5, 5, 10];
           for (final (index, count) in counts.indexed) {
-            final event = Event(
-              cid: channel.cid,
+            final event = createDefaultEvent(
+              cid: tester.channel.cid,
               type: EventType.memberAdded,
-              member: Member(
-                userId: 'user-$index',
-                user: User(id: 'user-$index'),
-              ),
+              member: createDefaultMember(user: User(id: 'user-$index')),
               channelMemberCount: count,
             );
 
-            client.addEvent(event);
-            await Future.delayed(Duration.zero);
+            await tester.emitEvent(event);
           }
 
           // The repeated count should not be emitted twice.
@@ -5717,989 +6912,985 @@ void main() {
         },
       );
     });
+
+    channelTest(
+      'should throw StateError when accessing config on non-initialized channel',
+      channelType: _channelType,
+      channelId: _channelId,
+      body: (tester) async {
+        final channel = tester.channel;
+        expect(() => channel.config, throwsA(isA<StateError>()));
+      },
+    );
+
+    channelTest(
+      'should return the config of an initialized channel',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(
+        modifyResponse: (_) => createDefaultChannelState(
+          channel: createDefaultChannelModel(
+            cid: _channelCid,
+            config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+          ),
+        ),
+      ),
+      body: (tester) async {
+        expect(tester.channel.config?.readEvents, isTrue);
+        expect(tester.channel.config?.typingEvents, isTrue);
+      },
+    );
   });
 
   group('Channel filterTags', () {
-    late final client = MockStreamChatClient();
-    const channelId = 'test-channel-id';
-    const channelType = 'test-channel-type';
-
-    setUpAll(() {
-      final retryPolicy = RetryPolicy(
-        shouldRetry: (_, __, ___) => false,
-        delayFactor: Duration.zero,
+    ChannelState Function(ChannelState) _seedChannel({
+      List<String>? filterTags,
+    }) {
+      return (_) => createDefaultChannelState(
+        channel: createDefaultChannelModel(
+          cid: _channelCid,
+          filterTags: filterTags,
+        ),
       );
-      when(() => client.retryPolicy).thenReturn(retryPolicy);
+    }
 
-      // fake clientState
-      final clientState = FakeClientState();
-      when(() => client.state).thenReturn(clientState);
-    });
+    channelTest(
+      'should return filterTags from channel state',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(
+        modifyResponse: _seedChannel(filterTags: ['tag1', 'tag2']),
+      ),
+      body: (tester) async {
+        expect(tester.channel.filterTags, equals(['tag1', 'tag2']));
+      },
+    );
 
-    test('should return filterTags from channel state', () {
-      final channelModel = ChannelModel(
-        id: channelId,
-        type: channelType,
-        filterTags: ['tag1', 'tag2'],
-      );
+    channelTest(
+      'should update filterTags when channel state is updated',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(
+        modifyResponse: _seedChannel(filterTags: ['tag1', 'tag2']),
+      ),
+      body: (tester) async {
+        expect(tester.channel.filterTags, equals(['tag1', 'tag2']));
 
-      final channelState = ChannelState(channel: channelModel);
-      final testChannel = Channel.fromState(client, channelState);
-      addTearDown(testChannel.dispose);
+        final channelModel = tester.channelState!.channelState.channel!;
+        final updatedChannel = channelModel.copyWith(
+          filterTags: ['tag3', 'tag4', 'tag5'],
+        );
 
-      expect(testChannel.filterTags, equals(['tag1', 'tag2']));
-    });
+        tester.channelState?.updateChannelState(
+          tester.channelState!.channelState.copyWith(channel: updatedChannel),
+        );
 
-    test('should update filterTags when channel state is updated', () {
-      final channelModel = ChannelModel(
-        id: channelId,
-        type: channelType,
-        filterTags: ['tag1', 'tag2'],
-      );
-
-      final channelState = ChannelState(channel: channelModel);
-      final testChannel = Channel.fromState(client, channelState);
-      addTearDown(testChannel.dispose);
-
-      expect(testChannel.filterTags, equals(['tag1', 'tag2']));
-
-      final updatedChannel = channelModel.copyWith(
-        filterTags: ['tag3', 'tag4', 'tag5'],
-      );
-
-      testChannel.state?.updateChannelState(
-        testChannel.state!.channelState.copyWith(channel: updatedChannel),
-      );
-
-      expect(testChannel.filterTags, equals(['tag3', 'tag4', 'tag5']));
-    });
+        expect(tester.channel.filterTags, equals(['tag3', 'tag4', 'tag5']));
+      },
+    );
   });
 
   group('Typing Indicator', () {
-    const channelId = 'test-channel-id';
-    const channelType = 'test-channel-type';
-    late final client = MockStreamChatClient();
-
-    setUpAll(() {
-      // Fallback values
-      registerFallbackValue(FakeMessage());
-      registerFallbackValue(FakeAttachmentFile());
-      registerFallbackValue(FakeEvent());
-
-      final retryPolicy = RetryPolicy(
-        shouldRetry: (_, __, ___) => false,
-        delayFactor: Duration.zero,
+    ChannelState Function(ChannelState) _seedChannel({
+      List<ChannelCapability> ownCapabilities = const [],
+    }) {
+      return (_) => createDefaultChannelState(
+        channel: createDefaultChannelModel(
+          cid: _channelCid,
+          ownCapabilities: ownCapabilities,
+        ),
       );
-      when(() => client.retryPolicy).thenReturn(retryPolicy);
+    }
 
-      // fake clientState
-      final clientState = FakeClientState();
-      when(() => client.state).thenReturn(clientState);
-    });
+    // Reconnects the current user with typing indicators disabled in their
+    // privacy settings, the way a server-sent `health.check` frame would.
+    Future<void> _disableTypingIndicators(ChannelTester tester) {
+      return tester.emitEvent(
+        createDefaultConnectedEvent(
+          me: createDefaultOwnUser(
+            privacySettings: const PrivacySettings(
+              typingIndicators: TypingIndicators(enabled: false),
+            ),
+          ),
+        ),
+      );
+    }
 
-    test(
+    channelTest(
       ".keystore should return if we don't have the capability",
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [], // no typingEvents capability
-        );
-
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
-
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(
+        // no typingEvents capability
+        modifyResponse: _seedChannel(ownCapabilities: []),
+      ),
+      body: (tester) async {
         final typingEvent = Event(type: EventType.typingStart);
 
-        await expectLater(channel.keyStroke(), completes);
+        await expectLater(tester.channel.keyStroke(), completes);
 
-        verifyNever(
-          () => client.sendEvent(
-            channelId,
-            channelType,
-            any(that: isSameEventAs(typingEvent)),
+        tester.verifyNeverCalled(
+          (api) => api.channel.sendEvent(
+            _channelId,
+            _channelType,
+            any(that: isSameEventAs(typingEvent, matchParentId: true)),
           ),
         );
       },
     );
 
-    test(
+    channelTest(
       '.keystore should return when user privacy settings is disabled',
-      () async {
-        final currentUser = client.state.currentUser;
-        final updatedUser = currentUser?.copyWith(
-          privacySettings: const PrivacySettings(
-            typingIndicators: TypingIndicators(enabled: false),
-          ),
-        );
-
-        client.state.updateUser(updatedUser);
-        addTearDown(() => client.state.updateUser(currentUser));
-
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(
+        modifyResponse: _seedChannel(
           ownCapabilities: [ChannelCapability.typingEvents],
-        );
-
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
+        ),
+      ),
+      body: (tester) async {
+        await _disableTypingIndicators(tester);
 
         final typingEvent = Event(type: EventType.typingStart);
 
-        await expectLater(channel.keyStroke(), completes);
+        await expectLater(tester.channel.keyStroke(), completes);
 
-        verifyNever(
-          () => client.sendEvent(
-            channelId,
-            channelType,
-            any(that: isSameEventAs(typingEvent)),
+        tester.verifyNeverCalled(
+          (api) => api.channel.sendEvent(
+            _channelId,
+            _channelType,
+            any(that: isSameEventAs(typingEvent, matchParentId: true)),
           ),
         );
       },
     );
 
-    test(
+    channelTest(
       ".keystore should send 'typingStart' event if there is not already a typingEvent or the difference between the two is > 3 seconds",
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(
+        modifyResponse: _seedChannel(
           ownCapabilities: [ChannelCapability.typingEvents],
-        );
-
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
-
+        ),
+      ),
+      body: (tester) async {
         final startTypingEvent = Event(type: EventType.typingStart);
         final stopTypingEvent = Event(type: EventType.typingStop);
 
-        when(
-          () => client.sendEvent(
-            channelId,
-            channelType,
-            any(that: isSameEventAs(startTypingEvent)),
-          ),
-        ).thenAnswer((_) async => EmptyResponse());
+        tester
+          ..mockApi(
+            (api) => api.channel.sendEvent(
+              _channelId,
+              _channelType,
+              any(that: isSameEventAs(startTypingEvent, matchParentId: true)),
+            ),
+            result: createDefaultEmptyResponse(),
+          )
+          ..mockApi(
+            (api) => api.channel.sendEvent(
+              _channelId,
+              _channelType,
+              any(that: isSameEventAs(stopTypingEvent, matchParentId: true)),
+            ),
+            result: createDefaultEmptyResponse(),
+          );
 
-        when(
-          () => client.sendEvent(
-            channelId,
-            channelType,
-            any(that: isSameEventAs(stopTypingEvent)),
-          ),
-        ).thenAnswer((_) async => EmptyResponse());
+        await expectLater(tester.channel.keyStroke(), completes);
 
-        await expectLater(channel.keyStroke(), completes);
-
-        verify(
-          () => client.sendEvent(
-            channelId,
-            channelType,
-            any(that: isSameEventAs(startTypingEvent)),
-          ),
-        ).called(1);
-
-        verify(
-          () => client.sendEvent(
-            channelId,
-            channelType,
-            any(that: isSameEventAs(stopTypingEvent)),
-          ),
-        ).called(1);
+        tester
+          ..verifyApi(
+            (api) => api.channel.sendEvent(
+              _channelId,
+              _channelType,
+              any(that: isSameEventAs(startTypingEvent, matchParentId: true)),
+            ),
+          )
+          ..verifyApi(
+            (api) => api.channel.sendEvent(
+              _channelId,
+              _channelType,
+              any(that: isSameEventAs(stopTypingEvent, matchParentId: true)),
+            ),
+          );
       },
     );
 
-    test(
+    channelTest(
       ".startTyping should return if we don't have the capability",
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [], // no typingEvents capability
-        );
-
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
-
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(
+        // no typingEvents capability
+        modifyResponse: _seedChannel(ownCapabilities: []),
+      ),
+      body: (tester) async {
         final typingStartEvent = Event(type: EventType.typingStart);
 
-        await expectLater(channel.startTyping(), completes);
+        await expectLater(tester.channel.startTyping(), completes);
 
-        verifyNever(
-          () => client.sendEvent(
-            channelId,
-            channelType,
-            any(that: isSameEventAs(typingStartEvent)),
+        tester.verifyNeverCalled(
+          (api) => api.channel.sendEvent(
+            _channelId,
+            _channelType,
+            any(that: isSameEventAs(typingStartEvent, matchParentId: true)),
           ),
         );
       },
     );
 
-    test(
+    channelTest(
       '.startTyping should return when user privacy settings is disabled',
-      () async {
-        final currentUser = client.state.currentUser;
-        final updatedUser = currentUser?.copyWith(
-          privacySettings: const PrivacySettings(
-            typingIndicators: TypingIndicators(enabled: false),
-          ),
-        );
-
-        client.state.updateUser(updatedUser);
-        addTearDown(() => client.state.updateUser(currentUser));
-
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(
+        modifyResponse: _seedChannel(
           ownCapabilities: [ChannelCapability.typingEvents],
-        );
-
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
+        ),
+      ),
+      body: (tester) async {
+        await _disableTypingIndicators(tester);
 
         final typingStartEvent = Event(type: EventType.typingStart);
 
-        await expectLater(channel.startTyping(), completes);
+        await expectLater(tester.channel.startTyping(), completes);
 
-        verifyNever(
-          () => client.sendEvent(
-            channelId,
-            channelType,
-            any(that: isSameEventAs(typingStartEvent)),
+        tester.verifyNeverCalled(
+          (api) => api.channel.sendEvent(
+            _channelId,
+            _channelType,
+            any(that: isSameEventAs(typingStartEvent, matchParentId: true)),
           ),
         );
       },
     );
 
-    test(".startTyping should send 'typingStart' successfully", () async {
-      final channelState = _generateChannelState(
-        channelId,
-        channelType,
-        ownCapabilities: [ChannelCapability.typingEvents],
-      );
-
-      final channel = Channel.fromState(client, channelState);
-      addTearDown(channel.dispose);
-
-      final typingStartEvent = Event(type: EventType.typingStart);
-
-      when(
-        () => client.sendEvent(
-          channelId,
-          channelType,
-          any(that: isSameEventAs(typingStartEvent)),
+    channelTest(
+      ".startTyping should send 'typingStart' successfully",
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(
+        modifyResponse: _seedChannel(
+          ownCapabilities: [ChannelCapability.typingEvents],
         ),
-      ).thenAnswer((_) async => EmptyResponse());
+      ),
+      body: (tester) async {
+        final typingStartEvent = Event(type: EventType.typingStart);
 
-      await expectLater(channel.startTyping(), completes);
+        tester.mockApi(
+          (api) => api.channel.sendEvent(
+            _channelId,
+            _channelType,
+            any(that: isSameEventAs(typingStartEvent, matchParentId: true)),
+          ),
+          result: createDefaultEmptyResponse(),
+        );
 
-      verify(
-        () => client.sendEvent(
-          channelId,
-          channelType,
-          any(that: isSameEventAs(typingStartEvent)),
-        ),
-      ).called(1);
-    });
+        await expectLater(tester.channel.startTyping(), completes);
 
-    test(".stopTyping should return if we don't have the capability", () async {
-      final channelState = _generateChannelState(
-        channelId,
-        channelType,
-        ownCapabilities: [], // no typingEvents capability
-      );
-
-      final channel = Channel.fromState(client, channelState);
-      addTearDown(channel.dispose);
-
-      final typingStopEvent = Event(type: EventType.typingStop);
-
-      await expectLater(channel.stopTyping(), completes);
-
-      verifyNever(
-        () => client.sendEvent(
-          channelId,
-          channelType,
-          any(that: isSameEventAs(typingStopEvent)),
-        ),
-      );
-    });
-
-    test(
-      '.stopTyping should return when user privacy settings is disabled',
-      () async {
-        final currentUser = client.state.currentUser;
-        final updatedUser = currentUser?.copyWith(
-          privacySettings: const PrivacySettings(
-            typingIndicators: TypingIndicators(enabled: false),
+        tester.verifyApi(
+          (api) => api.channel.sendEvent(
+            _channelId,
+            _channelType,
+            any(that: isSameEventAs(typingStartEvent, matchParentId: true)),
           ),
         );
+      },
+    );
 
-        client.state.updateUser(updatedUser);
-        addTearDown(() => client.state.updateUser(currentUser));
+    channelTest(
+      ".stopTyping should return if we don't have the capability",
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(
+        // no typingEvents capability
+        modifyResponse: _seedChannel(ownCapabilities: []),
+      ),
+      body: (tester) async {
+        final typingStopEvent = Event(type: EventType.typingStop);
 
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [ChannelCapability.typingEvents],
+        await expectLater(tester.channel.stopTyping(), completes);
+
+        tester.verifyNeverCalled(
+          (api) => api.channel.sendEvent(
+            _channelId,
+            _channelType,
+            any(that: isSameEventAs(typingStopEvent, matchParentId: true)),
+          ),
         );
+      },
+    );
 
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
+    channelTest(
+      '.stopTyping should return when user privacy settings is disabled',
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(
+        modifyResponse: _seedChannel(
+          ownCapabilities: [ChannelCapability.typingEvents],
+        ),
+      ),
+      body: (tester) async {
+        await _disableTypingIndicators(tester);
 
         final typingStopEvent = Event(type: EventType.typingStop);
 
-        await expectLater(channel.stopTyping(), completes);
+        await expectLater(tester.channel.stopTyping(), completes);
 
-        verifyNever(
-          () => client.sendEvent(
-            channelId,
-            channelType,
-            any(that: isSameEventAs(typingStopEvent)),
+        tester.verifyNeverCalled(
+          (api) => api.channel.sendEvent(
+            _channelId,
+            _channelType,
+            any(that: isSameEventAs(typingStopEvent, matchParentId: true)),
           ),
         );
       },
     );
 
-    test(".stopTyping should send 'typingStop' successfully", () async {
-      final channelState = _generateChannelState(
-        channelId,
-        channelType,
-        ownCapabilities: [ChannelCapability.typingEvents],
-      );
-
-      final channel = Channel.fromState(client, channelState);
-      addTearDown(channel.dispose);
-
-      final typingStopEvent = Event(type: EventType.typingStop);
-
-      when(
-        () => client.sendEvent(
-          channelId,
-          channelType,
-          any(that: isSameEventAs(typingStopEvent)),
+    channelTest(
+      ".stopTyping should send 'typingStop' successfully",
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(
+        modifyResponse: _seedChannel(
+          ownCapabilities: [ChannelCapability.typingEvents],
         ),
-      ).thenAnswer((_) async => EmptyResponse());
+      ),
+      body: (tester) async {
+        final typingStopEvent = Event(type: EventType.typingStop);
 
-      await expectLater(channel.stopTyping(), completes);
+        tester.mockApi(
+          (api) => api.channel.sendEvent(
+            _channelId,
+            _channelType,
+            any(that: isSameEventAs(typingStopEvent, matchParentId: true)),
+          ),
+          result: createDefaultEmptyResponse(),
+        );
 
-      verify(
-        () => client.sendEvent(
-          channelId,
-          channelType,
-          any(that: isSameEventAs(typingStopEvent)),
-        ),
-      ).called(1);
-    });
+        await expectLater(tester.channel.stopTyping(), completes);
+
+        tester.verifyApi(
+          (api) => api.channel.sendEvent(
+            _channelId,
+            _channelType,
+            any(that: isSameEventAs(typingStopEvent, matchParentId: true)),
+          ),
+        );
+      },
+    );
   });
 
   group('Read Receipts', () {
-    const channelId = 'test-channel-id';
-    const channelType = 'test-channel-type';
-    late final client = MockStreamChatClient();
-
-    setUpAll(() {
-      final retryPolicy = RetryPolicy(
-        shouldRetry: (_, __, ___) => false,
-        delayFactor: Duration.zero,
+    ChannelState Function(ChannelState) _seedChannel({
+      List<ChannelCapability> ownCapabilities = const [],
+    }) {
+      return (_) => createDefaultChannelState(
+        channel: createDefaultChannelModel(
+          cid: _channelCid,
+          ownCapabilities: ownCapabilities,
+        ),
       );
-      when(() => client.retryPolicy).thenReturn(retryPolicy);
+    }
 
-      // fake clientState
-      final clientState = FakeClientState();
-      when(() => client.state).thenReturn(clientState);
-    });
-
-    test(
+    channelTest(
       ".markRead should throw if we don't have the capability",
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [], // no readEvents capability
-        );
-
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
-
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(
+        // no readEvents capability
+        modifyResponse: _seedChannel(ownCapabilities: []),
+      ),
+      body: (tester) async {
         await expectLater(
-          channel.markRead(messageId: 'message-id-123'),
+          tester.channel.markRead(messageId: 'message-id-123'),
           throwsA(isA<StreamClientException>()),
         );
       },
     );
 
-    test(
+    channelTest(
       '.markRead should succeed if we have the capability',
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(
+        modifyResponse: _seedChannel(
           ownCapabilities: [ChannelCapability.readEvents],
-        );
-
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
-
-        when(
-          () => client.markChannelRead(
-            channelId,
-            channelType,
+        ),
+      ),
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.markRead(
+            _channelId,
+            _channelType,
             messageId: 'message-id-123',
           ),
-        ).thenAnswer((_) async => EmptyResponse());
+          result: createDefaultEmptyResponse(),
+        );
 
         await expectLater(
-          channel.markRead(messageId: 'message-id-123'),
+          tester.channel.markRead(messageId: 'message-id-123'),
           completes,
         );
 
-        verify(
-          () => client.markChannelRead(
-            channelId,
-            channelType,
+        tester.verifyApi(
+          (api) => api.channel.markRead(
+            _channelId,
+            _channelType,
             messageId: 'message-id-123',
           ),
-        ).called(1);
+        );
       },
     );
 
-    test(
+    channelTest(
       ".markUnread should throw if we don't have the capability",
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [], // no readEvents capability
-        );
-
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
-
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(
+        // no readEvents capability
+        modifyResponse: _seedChannel(ownCapabilities: []),
+      ),
+      body: (tester) async {
         await expectLater(
-          channel.markUnread('message-id-123'),
+          tester.channel.markUnread('message-id-123'),
           throwsA(isA<StreamClientException>()),
         );
       },
     );
 
-    test(
+    channelTest(
       '.markUnread should succeed if we have the capability',
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(
+        modifyResponse: _seedChannel(
           ownCapabilities: [ChannelCapability.readEvents],
-        );
-
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
-
-        when(
-          () => client.markChannelUnread(
-            channelId,
-            channelType,
+        ),
+      ),
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.markUnread(
+            _channelId,
+            _channelType,
             'message-id-123',
           ),
-        ).thenAnswer((_) async => EmptyResponse());
+          result: createDefaultEmptyResponse(),
+        );
 
         await expectLater(
-          channel.markUnread('message-id-123'),
+          tester.channel.markUnread('message-id-123'),
           completes,
         );
 
-        verify(
-          () => client.markChannelUnread(
-            channelId,
-            channelType,
+        tester.verifyApi(
+          (api) => api.channel.markUnread(
+            _channelId,
+            _channelType,
             'message-id-123',
           ),
-        ).called(1);
+        );
       },
     );
 
-    test(
+    channelTest(
       ".markUnreadByTimestamp should throw if we don't have the capability",
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [], // no readEvents capability
-        );
-
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
-
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(
+        // no readEvents capability
+        modifyResponse: _seedChannel(ownCapabilities: []),
+      ),
+      body: (tester) async {
         final timestamp = DateTime.parse('2024-01-01T00:00:00Z');
 
         await expectLater(
-          channel.markUnreadByTimestamp(timestamp),
+          tester.channel.markUnreadByTimestamp(timestamp),
           throwsA(isA<StreamClientException>()),
         );
       },
     );
 
-    test(
+    channelTest(
       '.markUnreadByTimestamp should succeed if we have the capability',
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(
+        modifyResponse: _seedChannel(
           ownCapabilities: [ChannelCapability.readEvents],
-        );
-
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
-
+        ),
+      ),
+      body: (tester) async {
         final timestamp = DateTime.parse('2024-01-01T00:00:00Z');
 
-        when(
-          () => client.markChannelUnreadByTimestamp(
-            channelId,
-            channelType,
+        tester.mockApi(
+          (api) => api.channel.markUnreadByTimestamp(
+            _channelId,
+            _channelType,
             timestamp,
           ),
-        ).thenAnswer((_) async => EmptyResponse());
+          result: createDefaultEmptyResponse(),
+        );
 
         await expectLater(
-          channel.markUnreadByTimestamp(timestamp),
+          tester.channel.markUnreadByTimestamp(timestamp),
           completes,
         );
 
-        verify(
-          () => client.markChannelUnreadByTimestamp(
-            channelId,
-            channelType,
+        tester.verifyApi(
+          (api) => api.channel.markUnreadByTimestamp(
+            _channelId,
+            _channelType,
             timestamp,
           ),
-        ).called(1);
+        );
       },
     );
 
-    test(
+    channelTest(
       ".markThreadRead should throw if we don't have the capability",
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [], // no readEvents capability
-        );
-
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
-
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(
+        // no readEvents capability
+        modifyResponse: _seedChannel(ownCapabilities: []),
+      ),
+      body: (tester) async {
         await expectLater(
-          channel.markThreadRead('thread-id-123'),
+          tester.channel.markThreadRead('thread-id-123'),
           throwsA(isA<StreamClientException>()),
         );
       },
     );
 
-    test(
+    channelTest(
       '.markThreadRead should succeed if we have the capability',
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(
+        modifyResponse: _seedChannel(
           ownCapabilities: [ChannelCapability.readEvents],
-        );
-
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
-
-        when(
-          () => client.markThreadRead(
-            channelId,
-            channelType,
+        ),
+      ),
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.markThreadRead(
+            _channelId,
+            _channelType,
             'thread-id-123',
           ),
-        ).thenAnswer((_) async => EmptyResponse());
+          result: createDefaultEmptyResponse(),
+        );
 
         await expectLater(
-          channel.markThreadRead('thread-id-123'),
+          tester.channel.markThreadRead('thread-id-123'),
           completes,
         );
 
-        verify(
-          () => client.markThreadRead(
-            channelId,
-            channelType,
+        tester.verifyApi(
+          (api) => api.channel.markThreadRead(
+            _channelId,
+            _channelType,
             'thread-id-123',
           ),
-        ).called(1);
+        );
       },
     );
 
-    test(
+    channelTest(
       ".markThreadUnread should throw if we don't have the capability",
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [], // no readEvents capability
-        );
-
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
-
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(
+        // no readEvents capability
+        modifyResponse: _seedChannel(ownCapabilities: []),
+      ),
+      body: (tester) async {
         await expectLater(
-          channel.markThreadUnread('thread-id-123'),
+          tester.channel.markThreadUnread('thread-id-123'),
           throwsA(isA<StreamClientException>()),
         );
       },
     );
 
-    test(
+    channelTest(
       '.markThreadUnread should succeed if we have the capability',
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
+      channelType: _channelType,
+      channelId: _channelId,
+      setUp: (tester) => tester.watch(
+        modifyResponse: _seedChannel(
           ownCapabilities: [ChannelCapability.readEvents],
-        );
-
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
-
-        when(
-          () => client.markThreadUnread(
-            channelId,
-            channelType,
+        ),
+      ),
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.markThreadUnread(
+            _channelId,
+            _channelType,
             'thread-id-123',
           ),
-        ).thenAnswer((_) async => EmptyResponse());
+          result: createDefaultEmptyResponse(),
+        );
 
         await expectLater(
-          channel.markThreadUnread('thread-id-123'),
+          tester.channel.markThreadUnread('thread-id-123'),
           completes,
         );
 
-        verify(
-          () => client.markThreadUnread(
-            channelId,
-            channelType,
+        tester.verifyApi(
+          (api) => api.channel.markThreadUnread(
+            _channelId,
+            _channelType,
             'thread-id-123',
           ),
-        ).called(1);
+        );
       },
     );
   });
 
   group('Retry functionality with parameter preservation', () {
-    late final client = MockStreamChatClient();
-    const channelId = 'test-channel-id';
-    const channelType = 'test-channel-type';
-    late Channel channel;
-
-    setUpAll(() {
-      registerFallbackValue(FakeMessage());
-      registerFallbackValue(<Message>[]);
-      registerFallbackValue(FakeAttachmentFile());
-
-      final clientState = FakeClientState();
-      when(() => client.state).thenReturn(clientState);
-
-      final retryPolicy = RetryPolicy(
-        shouldRetry: (_, __, error) => error?.isRetriable ?? false,
-      );
-      when(() => client.retryPolicy).thenReturn(retryPolicy);
-    });
-
-    setUp(() {
-      final channelState = _generateChannelState(channelId, channelType);
-      channel = Channel.fromState(client, channelState);
-    });
-
-    tearDown(() {
-      channel.dispose();
-    });
-
     group('retryMessage method', () {
-      test('should call sendMessage with preserved skipPush and skipEnrichUrl parameters', () async {
-        final message = Message(
-          id: 'test-message-id',
-          text: 'Hello, World!',
-          state: MessageState.sendingFailed(
-            skipPush: true,
-            skipEnrichUrl: true,
-          ),
+      ChannelState Function(ChannelState) _seedChannel() {
+        return (_) => createDefaultChannelState(
+          channel: createDefaultChannelModel(cid: _channelCid),
         );
+      }
 
-        final sendMessageResponse = SendMessageResponse()..message = message.copyWith(state: MessageState.sent);
+      channelTest(
+        'should call sendMessage with preserved skipPush and skipEnrichUrl parameters',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final message = Message(
+            id: 'test-message-id',
+            text: 'Hello, World!',
+            state: MessageState.sendingFailed(
+              skipPush: true,
+              skipEnrichUrl: true,
+            ),
+          );
 
-        when(
-          () => client.sendMessage(
-            any(that: isSameMessageAs(message)),
-            channelId,
-            channelType,
-            skipPush: true,
-            skipEnrichUrl: true,
-          ),
-        ).thenAnswer((_) async => sendMessageResponse);
+          tester.mockApi(
+            (api) => api.message.sendMessage(
+              _channelId,
+              _channelType,
+              any(that: isSameMessageAs(message)),
+              skipPush: true,
+              skipEnrichUrl: true,
+            ),
+            result: createDefaultSendMessageResponse(message: message.copyWith(state: MessageState.sent)),
+          );
 
-        final result = await channel.retryMessage(message);
+          final result = await tester.channel.retryMessage(message);
 
-        expect(result, isNotNull);
-        expect(result, isA<SendMessageResponse>());
+          expect(result, isNotNull);
+          expect(result, isA<SendMessageResponse>());
 
-        verify(
-          () => client.sendMessage(
-            any(that: isSameMessageAs(message)),
-            channelId,
-            channelType,
-            skipPush: true,
-            skipEnrichUrl: true,
-          ),
-        ).called(1);
-      });
+          tester.verifyApi(
+            (api) => api.message.sendMessage(
+              _channelId,
+              _channelType,
+              any(that: isSameMessageAs(message)),
+              skipPush: true,
+              skipEnrichUrl: true,
+            ),
+          );
+        },
+      );
 
-      test('should call sendMessage with preserved skipPush parameter', () async {
-        final message = Message(
-          id: 'test-message-id',
-          text: 'Hello, World!',
-          state: MessageState.sendingFailed(
-            skipPush: true,
-            skipEnrichUrl: false,
-          ),
-        );
+      channelTest(
+        'should call sendMessage with preserved skipPush parameter',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final message = Message(
+            id: 'test-message-id',
+            text: 'Hello, World!',
+            state: MessageState.sendingFailed(
+              skipPush: true,
+              skipEnrichUrl: false,
+            ),
+          );
 
-        final sendMessageResponse = SendMessageResponse()..message = message.copyWith(state: MessageState.sent);
+          tester.mockApi(
+            (api) => api.message.sendMessage(
+              _channelId,
+              _channelType,
+              any(that: isSameMessageAs(message)),
+              skipPush: true,
+            ),
+            result: createDefaultSendMessageResponse(message: message.copyWith(state: MessageState.sent)),
+          );
 
-        when(
-          () => client.sendMessage(
-            any(that: isSameMessageAs(message)),
-            channelId,
-            channelType,
-            skipPush: true,
-          ),
-        ).thenAnswer((_) async => sendMessageResponse);
+          final result = await tester.channel.retryMessage(message);
 
-        final result = await channel.retryMessage(message);
+          expect(result, isNotNull);
+          expect(result, isA<SendMessageResponse>());
 
-        expect(result, isNotNull);
-        expect(result, isA<SendMessageResponse>());
+          tester.verifyApi(
+            (api) => api.message.sendMessage(
+              _channelId,
+              _channelType,
+              any(that: isSameMessageAs(message)),
+              skipPush: true,
+            ),
+          );
+        },
+      );
 
-        verify(
-          () => client.sendMessage(
-            any(that: isSameMessageAs(message)),
-            channelId,
-            channelType,
-            skipPush: true,
-          ),
-        ).called(1);
-      });
+      channelTest(
+        'should call sendMessage with preserved skipEnrichUrl parameter',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final message = Message(
+            id: 'test-message-id',
+            text: 'Hello, World!',
+            state: MessageState.sendingFailed(
+              skipPush: false,
+              skipEnrichUrl: true,
+            ),
+          );
 
-      test('should call sendMessage with preserved skipEnrichUrl parameter', () async {
-        final message = Message(
-          id: 'test-message-id',
-          text: 'Hello, World!',
-          state: MessageState.sendingFailed(
-            skipPush: false,
-            skipEnrichUrl: true,
-          ),
-        );
+          tester.mockApi(
+            (api) => api.message.sendMessage(
+              _channelId,
+              _channelType,
+              any(that: isSameMessageAs(message)),
+              skipEnrichUrl: true,
+            ),
+            result: createDefaultSendMessageResponse(message: message.copyWith(state: MessageState.sent)),
+          );
 
-        final sendMessageResponse = SendMessageResponse()..message = message.copyWith(state: MessageState.sent);
+          final result = await tester.channel.retryMessage(message);
 
-        when(
-          () => client.sendMessage(
-            any(that: isSameMessageAs(message)),
-            channelId,
-            channelType,
-            skipEnrichUrl: true,
-          ),
-        ).thenAnswer((_) async => sendMessageResponse);
+          expect(result, isNotNull);
+          expect(result, isA<SendMessageResponse>());
 
-        final result = await channel.retryMessage(message);
+          tester.verifyApi(
+            (api) => api.message.sendMessage(
+              _channelId,
+              _channelType,
+              any(that: isSameMessageAs(message)),
+              skipEnrichUrl: true,
+            ),
+          );
+        },
+      );
 
-        expect(result, isNotNull);
-        expect(result, isA<SendMessageResponse>());
+      channelTest(
+        'should call sendMessage with preserved false skipPush and skipEnrichUrl parameters',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final message = Message(
+            id: 'test-message-id',
+            text: 'Hello, World!',
+            state: MessageState.sendingFailed(
+              skipPush: false,
+              skipEnrichUrl: false,
+            ),
+          );
 
-        verify(
-          () => client.sendMessage(
-            any(that: isSameMessageAs(message)),
-            channelId,
-            channelType,
-            skipEnrichUrl: true,
-          ),
-        ).called(1);
-      });
+          tester.mockApi(
+            (api) => api.message.sendMessage(
+              _channelId,
+              _channelType,
+              any(that: isSameMessageAs(message)),
+            ),
+            result: createDefaultSendMessageResponse(message: message.copyWith(state: MessageState.sent)),
+          );
 
-      test('should call sendMessage with preserved false skipPush and skipEnrichUrl parameters', () async {
-        final message = Message(
-          id: 'test-message-id',
-          text: 'Hello, World!',
-          state: MessageState.sendingFailed(
-            skipPush: false,
-            skipEnrichUrl: false,
-          ),
-        );
+          final result = await tester.channel.retryMessage(message);
 
-        final sendMessageResponse = SendMessageResponse()..message = message.copyWith(state: MessageState.sent);
+          expect(result, isNotNull);
+          expect(result, isA<SendMessageResponse>());
 
-        when(
-          () => client.sendMessage(
-            any(that: isSameMessageAs(message)),
-            channelId,
-            channelType,
-          ),
-        ).thenAnswer((_) async => sendMessageResponse);
+          tester.verifyApi(
+            (api) => api.message.sendMessage(
+              _channelId,
+              _channelType,
+              any(that: isSameMessageAs(message)),
+            ),
+          );
+        },
+      );
 
-        final result = await channel.retryMessage(message);
+      channelTest(
+        'should call updateMessage with preserved skipPush, skipEnrichUrl parameter',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final message = Message(
+            id: 'test-message-id',
+            text: 'Hello, World!',
+            state: MessageState.updatingFailed(
+              skipPush: true,
+              skipEnrichUrl: true,
+            ),
+          );
 
-        expect(result, isNotNull);
-        expect(result, isA<SendMessageResponse>());
+          tester.mockApi(
+            (api) => api.message.updateMessage(
+              any(that: isSameMessageAs(message)),
+              skipPush: true,
+              skipEnrichUrl: true,
+            ),
+            result: createDefaultUpdateMessageResponse(message: message.copyWith(state: MessageState.updated)),
+          );
 
-        verify(
-          () => client.sendMessage(
-            any(that: isSameMessageAs(message)),
-            channelId,
-            channelType,
-          ),
-        ).called(1);
-      });
+          final result = await tester.channel.retryMessage(message);
 
-      test('should call updateMessage with preserved skipPush, skipEnrichUrl parameter', () async {
-        final message = Message(
-          id: 'test-message-id',
-          text: 'Hello, World!',
-          state: MessageState.updatingFailed(
-            skipPush: true,
-            skipEnrichUrl: true,
-          ),
-        );
+          expect(result, isNotNull);
+          expect(result, isA<UpdateMessageResponse>());
 
-        final updateMessageResponse = UpdateMessageResponse()..message = message.copyWith(state: MessageState.updated);
+          tester.verifyApi(
+            (api) => api.message.updateMessage(
+              any(that: isSameMessageAs(message)),
+              skipPush: true,
+              skipEnrichUrl: true,
+            ),
+          );
+        },
+      );
 
-        when(
-          () => client.updateMessage(
-            any(that: isSameMessageAs(message)),
-            skipPush: true,
-            skipEnrichUrl: true,
-          ),
-        ).thenAnswer((_) async => updateMessageResponse);
+      channelTest(
+        'should call updateMessage with preserved false skipPush, skipEnrichUrl parameter',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final message = Message(
+            id: 'test-message-id',
+            state: MessageState.updatingFailed(
+              skipPush: false,
+              skipEnrichUrl: false,
+            ),
+          );
 
-        final result = await channel.retryMessage(message);
+          tester.mockApi(
+            (api) => api.message.updateMessage(
+              any(that: isSameMessageAs(message)),
+            ),
+            result: createDefaultUpdateMessageResponse(message: message.copyWith(state: MessageState.updated)),
+          );
 
-        expect(result, isNotNull);
-        expect(result, isA<UpdateMessageResponse>());
+          final result = await tester.channel.retryMessage(message);
 
-        verify(
-          () => client.updateMessage(
-            any(that: isSameMessageAs(message)),
-            skipPush: true,
-            skipEnrichUrl: true,
-          ),
-        ).called(1);
-      });
+          expect(result, isNotNull);
+          expect(result, isA<UpdateMessageResponse>());
 
-      test('should call updateMessage with preserved false skipPush, skipEnrichUrl parameter', () async {
-        final message = Message(
-          id: 'test-message-id',
-          state: MessageState.updatingFailed(
-            skipPush: false,
-            skipEnrichUrl: false,
-          ),
-        );
+          tester.verifyApi(
+            (api) => api.message.updateMessage(
+              any(that: isSameMessageAs(message)),
+            ),
+          );
+        },
+      );
 
-        final updateMessageResponse = UpdateMessageResponse()..message = message.copyWith(state: MessageState.updated);
+      channelTest(
+        'should call deleteMessage with preserved hard parameter',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final message = Message(
+            id: 'test-message-id',
+            createdAt: DateTime.utc(2021, 3),
+            state: MessageState.hardDeletingFailed,
+          );
 
-        when(
-          () => client.updateMessage(
-            any(that: isSameMessageAs(message)),
-          ),
-        ).thenAnswer((_) async => updateMessageResponse);
+          tester.mockApi(
+            (api) => api.message.deleteMessage(message.id, hard: true),
+            result: createDefaultEmptyResponse(),
+          );
 
-        final result = await channel.retryMessage(message);
+          final result = await tester.channel.retryMessage(message);
 
-        expect(result, isNotNull);
-        expect(result, isA<UpdateMessageResponse>());
+          expect(result, isNotNull);
+          expect(result, isA<EmptyResponse>());
 
-        verify(
-          () => client.updateMessage(
-            any(that: isSameMessageAs(message)),
-          ),
-        ).called(1);
-      });
+          tester.verifyApi(
+            (api) => api.message.deleteMessage(message.id, hard: true),
+          );
+        },
+      );
 
-      test('should call deleteMessage with preserved hard parameter', () async {
-        final message = Message(
-          id: 'test-message-id',
-          createdAt: DateTime.now(),
-          state: MessageState.hardDeletingFailed,
-        );
+      channelTest(
+        'should call deleteMessage with preserved false hard parameter',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final message = Message(
+            id: 'test-message-id',
+            createdAt: DateTime.utc(2021, 3),
+            state: MessageState.softDeletingFailed,
+          );
 
-        when(
-          () => client.deleteMessage(
-            message.id,
-            hard: true,
-          ),
-        ).thenAnswer((_) async => EmptyResponse());
+          tester.mockApi(
+            (api) => api.message.deleteMessage(message.id, hard: false),
+            result: createDefaultEmptyResponse(),
+          );
 
-        final result = await channel.retryMessage(message);
+          final result = await tester.channel.retryMessage(message);
 
-        expect(result, isNotNull);
-        expect(result, isA<EmptyResponse>());
+          expect(result, isNotNull);
+          expect(result, isA<EmptyResponse>());
 
-        verify(
-          () => client.deleteMessage(
-            message.id,
-            hard: true,
-          ),
-        ).called(1);
-      });
+          tester.verifyApi(
+            (api) => api.message.deleteMessage(message.id, hard: false),
+          );
+        },
+      );
 
-      test('should call deleteMessage with preserved false hard parameter', () async {
-        final message = Message(
-          id: 'test-message-id',
-          createdAt: DateTime.now(),
-          state: MessageState.softDeletingFailed,
-        );
+      channelTest(
+        'should call deleteMessageForMe for deletingForMeFailed state',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final message = Message(
+            id: 'test-message-id',
+            createdAt: DateTime.utc(2021, 3),
+            state: MessageState.deletingForMeFailed,
+          );
 
-        when(
-          () => client.deleteMessage(
-            message.id,
-          ),
-        ).thenAnswer((_) async => EmptyResponse());
+          tester.mockApi(
+            (api) => api.message.deleteMessage(message.id, deleteForMe: true),
+            result: createDefaultEmptyResponse(),
+          );
 
-        final result = await channel.retryMessage(message);
+          final result = await tester.channel.retryMessage(message);
 
-        expect(result, isNotNull);
-        expect(result, isA<EmptyResponse>());
+          expect(result, isNotNull);
+          expect(result, isA<EmptyResponse>());
 
-        verify(
-          () => client.deleteMessage(
-            message.id,
-          ),
-        ).called(1);
-      });
+          tester.verifyApi(
+            (api) => api.message.deleteMessage(message.id, deleteForMe: true),
+          );
+        },
+      );
 
-      test('should call deleteMessageForMe for deletingForMeFailed state', () async {
-        final message = Message(
-          id: 'test-message-id',
-          createdAt: DateTime.now(),
-          state: MessageState.deletingForMeFailed,
-        );
+      channelTest(
+        'should throw AssertionError when message state is not failed',
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final message = Message(
+            id: 'test-message-id',
+            state: MessageState.sent,
+          );
 
-        when(() => client.deleteMessageForMe(message.id)).thenAnswer((_) async => EmptyResponse());
-
-        final result = await channel.retryMessage(message);
-
-        expect(result, isNotNull);
-        expect(result, isA<EmptyResponse>());
-
-        verify(() => client.deleteMessageForMe(message.id)).called(1);
-      });
-
-      test('should throw AssertionError when message state is not failed', () async {
-        final message = Message(
-          id: 'test-message-id',
-          state: MessageState.sent,
-        );
-
-        expect(() => channel.retryMessage(message), throwsA(isA<AssertionError>()));
-      });
+          expect(() => tester.channel.retryMessage(message), throwsA(isA<AssertionError>()));
+        },
+      );
     });
   });
 }
