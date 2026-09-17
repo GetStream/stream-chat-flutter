@@ -220,4 +220,36 @@ void main() {
       }
     },
   );
+
+  // A response whose error payload parses but is not a token expiry has to
+  // pass straight through, without refreshing the token or replaying the
+  // request.
+  test(
+    '`onError` should pass through an error response that is not a token expiry',
+    () async {
+      const path = 'test-request-path';
+      final options = RequestOptions(path: path);
+      const code = ChatErrorCode.inputError;
+      final errorResponse = ErrorResponse()
+        ..code = code.code
+        ..message = code.message;
+      final response = Response(
+        requestOptions: options,
+        data: errorResponse.toJson(),
+      );
+      final err = DioException(requestOptions: options, response: response);
+      final handler = ErrorInterceptorHandler();
+
+      authInterceptor.onError(err, handler);
+
+      await expectLater(
+        handler.future,
+        // the wrapper type is private in dio, so assert on its payload
+        throwsA(predicate<Object>((e) => (e as dynamic).data is DioException)),
+      );
+
+      verifyZeroInteractions(tokenManager);
+      verifyZeroInteractions(client);
+    },
+  );
 }

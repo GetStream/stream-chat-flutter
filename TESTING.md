@@ -138,6 +138,10 @@ The helpers (`_emptyChannelListController`, `_pumpChannelListView`) live at the 
 of the test file. Their names tell the reader what they do; the reader doesn't need to
 look inside unless something breaks.
 
+When testing `stream_chat`, the `connect:` and `setUp:` phases of `chatClientTest` /
+`channelTest` are where this setup belongs, so the body holds only the behavior under
+test.
+
 ## Optimize tests for comprehension
 
 Even a well-factored test benefits from small edits that separate "the thing under
@@ -241,5 +245,7 @@ your machine — see [Golden tests in STYLE_GUIDE.md](STYLE_GUIDE.md#golden-test
 
 - [STYLE_GUIDE.md — Testing](STYLE_GUIDE.md#testing) — repo-level testing conventions
   (mocktail, alchemist golden tests, self-contained tests, `addTearDown`).
+- [`packages/stream_chat_test/README.md`](packages/stream_chat_test/README.md) — the
+  `chatClientTest` / `channelTest` harness used by the `stream_chat` test suite.
 - Flutter's [Writing-Effective-Tests](https://github.com/flutter/flutter/blob/master/docs/contributing/testing/Writing-Effective-Tests.md)
   — the source this guide was adapted from.

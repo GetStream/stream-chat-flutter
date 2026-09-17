@@ -1,11 +1,10 @@
 // ignore_for_file: avoid_redundant_argument_values
 
+import 'dart:async';
+
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
-
-import '../../fakes.dart';
-import '../../mocks.dart';
 
 void main() {
   group('MessageRules', () {
@@ -698,8 +697,8 @@ StreamChatClient _createMockClient({
   OwnUser? currentUser,
   bool isLocalUnreadCountEnabled = false,
 }) {
-  final client = MockStreamChatClient();
-  final clientState = FakeClientState(currentUser: currentUser);
+  final client = _MockStreamChatClient();
+  final clientState = _FakeClientState(currentUser: currentUser);
 
   when(() => client.state).thenReturn(clientState);
   when(() => client.detachedLogger(any())).thenAnswer((invocation) {
@@ -754,6 +753,70 @@ Channel _createChannel(
   );
 
   return Channel.fromState(client, channelState);
+}
+
+// endregion
+
+// region Test Doubles
+
+class _MockStreamChatClient extends Mock implements StreamChatClient {
+  // A plain settable field (not a `when(...)` stub) so tests can flip it
+  // with a direct assignment, e.g. `client.isLocalUnreadCountEnabled = true`.
+  // Stubbing it via `when()` in this constructor would be re-entrant: this
+  // mock is often stored in a `late final` and lazily constructed as a side
+  // effect of evaluating another `when(() => client....)` call already in
+  // progress, which corrupts mocktail's global stubbing state.
+  @override
+  bool isLocalUnreadCountEnabled = false;
+
+  @override
+  Stream<Event> get eventStream => _eventController.stream;
+  final _eventController = StreamController<Event>.broadcast();
+
+  @override
+  Stream<Event> on([
+    String? eventType,
+    String? eventType2,
+    String? eventType3,
+    String? eventType4,
+  ]) {
+    if (eventType == null || eventType == EventType.any) return eventStream;
+    return eventStream.where(
+      (event) =>
+          event.type == eventType || event.type == eventType2 || event.type == eventType3 || event.type == eventType4,
+    );
+  }
+
+  @override
+  Future<void> dispose() => _eventController.close();
+}
+
+class _FakeClientState extends Fake implements ClientState {
+  _FakeClientState({
+    this._currentUser,
+  });
+
+  OwnUser? _currentUser;
+
+  @override
+  OwnUser? get currentUser => _currentUser;
+
+  @override
+  void updateUser(User? user) {
+    if (user == null) return;
+    if (_currentUser case final current? when user.id != current.id) return;
+
+    _currentUser = OwnUser.fromUser(user);
+  }
+
+  @override
+  Map<String, Channel> get channels => _channels;
+  final _channels = <String, Channel>{};
+
+  @override
+  void addChannels(Map<String, Channel> channelMap) {
+    _channels.addAll(channelMap);
+  }
 }
 
 // endregion
