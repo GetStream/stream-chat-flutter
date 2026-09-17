@@ -16,10 +16,10 @@ import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/src/core/api/user_groups_api.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/models/channel_config.dart';
-import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/util/event_controller.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
+import 'package:stream_chat/src/ws/events/event.dart';
 import 'package:stream_core/stream_core.dart' show StreamLogger, StreamWebSocketClient, TokenManager;
 import 'package:web_socket_channel/web_socket_channel.dart';
 

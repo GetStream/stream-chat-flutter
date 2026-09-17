@@ -1,9 +1,9 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:stream_core/stream_core.dart';
 
-import '../../core/models/event.dart';
 import '../../core/models/own_user.dart';
 import '../../event_type.dart';
+import 'event.dart';
 
 part 'events.freezed.dart';
 part 'events.g.dart';

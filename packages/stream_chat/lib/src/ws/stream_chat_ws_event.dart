@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:stream_core/stream_core.dart';
 
-import '../core/models/event.dart';
 import '../event_type.dart';
+import 'events/event.dart';
 import 'events/events.dart';
 
 /// Encodes and decodes Stream Chat WebSocket messages.

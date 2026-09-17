@@ -7,8 +7,8 @@ import 'package:synchronized/synchronized.dart';
 import '../core/api/requests.dart';
 import '../core/api/responses.dart';
 import '../core/models/channel_state.dart';
-import '../core/models/event.dart';
 import '../db/chat_persistence_client.dart';
+import '../ws/events/event.dart';
 import 'client.dart';
 
 /// Fetches the events missed on [cids] since [lastSyncAt].

@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import '../../../stream_chat.dart';
-import '../util/serializer.dart';
+import '../../core/util/serializer.dart';
 
 part 'event.g.dart';
 
