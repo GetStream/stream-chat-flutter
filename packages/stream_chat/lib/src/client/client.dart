@@ -62,7 +62,6 @@ import '../ws/events/event_resolvers.dart' as event_resolvers;
 import '../ws/events/events.dart';
 import 'channel/channel.dart';
 import 'channel_delivery_reporter.dart';
-
 import 'live_location_expiration_scheduler.dart';
 import 'query_channels_result.dart';
 import 'retry_policy.dart';
