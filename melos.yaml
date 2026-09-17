@@ -121,14 +121,13 @@ command:
       # git — and pub allows a package only one. Every workspace package that
       # sees both therefore overrides `stream_core` to this same ref. Restore
       # hosted constraints before release and the overrides go with them.
-      # TODO(ws-migration): move to the commit `feat/ws-async-options` merges as. The ref below
-      # predates the asynchronous `WebSocketOptionsBuilder` this package now needs, so it only
-      # resolves against the sibling checkout `dependencyOverridePaths` points at.
+      # TODO(ws-migration): move to a ref on `main` once GetStream/stream-core-flutter#186 merges.
+      # The ref below is that PR's head, which is where `optionsProvider` lives.
       stream_core:
         git:
           url: https://github.com/GetStream/stream-core-flutter.git
           path: packages/stream_core
-          ref: 04e0d1cb3a6893cf70cb6636a261deb11beff81c
+          ref: ddf0447ad8cecb8ea135fa0a9132e0b14de09e71
       stream_core_flutter:
         git:
           url: https://github.com/GetStream/stream-core-flutter.git

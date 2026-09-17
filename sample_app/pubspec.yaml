@@ -65,7 +65,10 @@ flutter:
 
 dependency_overrides:
   # Forces one source for `stream_core`; see `melos.yaml`.
-  # TODO(ws-migration): restore the git ref here once `feat/ws-async-options` is merged.
-  # `dependencyOverridePaths` cannot reach these packages, because this block outranks it.
+  # TODO(ws-migration): move to a ref on `main` once GetStream/stream-core-flutter#186 merges.
+  # Repeated here because this block outranks `melos.yaml`'s `dependencyOverridePaths`.
   stream_core:
-    path: ../../stream-core-flutter/packages/stream_core
+    git:
+      url: https://github.com/GetStream/stream-core-flutter.git
+      path: packages/stream_core
+      ref: ddf0447ad8cecb8ea135fa0a9132e0b14de09e71
