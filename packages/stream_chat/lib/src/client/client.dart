@@ -667,11 +667,6 @@ class StreamChatClient {
     PaginationParams paginationParams = const PaginationParams(),
     bool waitForConnect = true,
   }) async* {
-    if (!_hasConnectionId) {
-      // ignore: parameter_assignments
-      watch = false;
-    }
-
     final hash = generateHash([
       filter,
       channelStateSort,

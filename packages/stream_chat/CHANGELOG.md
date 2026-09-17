@@ -47,6 +47,8 @@
 
 🐞 Fixed
 
+- `queryChannels` no longer gives up watching the channels it loads when it is called before the connection is open. Whether they can be watched is read when the request is sent, which is after the query has waited for the connection.
+
 - A message that fails because its attachments did not upload now says which ones and what each reported, instead of `Failed to upload one or more attachments`.
 
 🔄 Changed

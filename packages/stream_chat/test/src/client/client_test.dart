@@ -6312,6 +6312,50 @@ void main() {
       await expectLater(client.queryChannels().first, throwsStateError);
     });
 
+    // Whether the channels can be watched is read when the request is sent, not when the query is
+    // made, so one that waited for a connection still watches what it loads.
+    test('should watch the channels it loads when the connection lands mid-query', () async {
+      final api = FakeChatApi();
+      final ws = FakeChatServer(user: OwnUser.fromUser(user));
+      final client = StreamChatClient(apiKey, chatApi: api, wsProvider: ws.connect);
+      addTearDown(client.dispose);
+
+      when(
+        () => api.channel.queryChannels(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          memberLimit: any(named: 'memberLimit'),
+          messageLimit: any(named: 'messageLimit'),
+          paginationParams: any(named: 'paginationParams'),
+        ),
+      ).thenAnswer((_) async => QueryChannelsResponse()..channels = []);
+
+      // Not awaited: the query below has to arrive while the attempt is still in flight.
+      final connecting = client.connectUser(user, token);
+      final queried = client.queryChannels().first;
+
+      await connecting;
+      await queried;
+
+      final watched = verify(
+        () => api.channel.queryChannels(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          state: any(named: 'state'),
+          watch: captureAny(named: 'watch'),
+          presence: any(named: 'presence'),
+          memberLimit: any(named: 'memberLimit'),
+          messageLimit: any(named: 'messageLimit'),
+          paginationParams: any(named: 'paginationParams'),
+        ),
+      ).captured;
+
+      expect(watched.single, isTrue);
+    });
+
     // The wait ends when the attempt settles either way: one that fails has to raise rather than
     // leave the caller waiting on a connection nothing is opening any more.
     test('should throw rather than hang when the connection being opened fails', () async {
