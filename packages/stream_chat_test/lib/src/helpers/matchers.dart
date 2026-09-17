@@ -1,19 +1,14 @@
 import 'package:collection/collection.dart';
-import 'package:dio/dio.dart' show MultipartFile;
-import 'package:stream_chat/src/client/channel/channel.dart';
-import 'package:stream_chat/src/core/models/attachment.dart';
-import 'package:stream_chat/src/core/models/channel_state.dart';
-import 'package:stream_chat/src/core/models/draft_message.dart';
-import 'package:stream_chat/src/core/models/event.dart';
-import 'package:stream_chat/src/core/models/message.dart';
-import 'package:stream_chat/src/core/models/user.dart';
-import 'package:stream_core/stream_core.dart' show Filter;
+import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
 /// Matches a filter that serializes the same way as [target].
 ///
 /// A filter compares by identity, so two filters built from the same field
 /// and value are not equal. Comparing what they send is what callers mean.
+///
+/// Usable both as a test matcher and as a mocktail argument matcher via
+/// `any(named: 'filter', that: isSameFilterAs(filter))`.
 Matcher isSameFilterAs(Filter<Object> target) {
   return predicate<Filter<Object>>(
     (it) => const DeepCollectionEquality().equals(it.toJson(), target.toJson()),
@@ -21,6 +16,28 @@ Matcher isSameFilterAs(Filter<Object> target) {
   );
 }
 
+/// Matches a list of sorts that serializes the same way as [target].
+///
+/// A sort compares by identity for the same reason a [Filter] does, so a
+/// `verify` naming one has to match on what it sends.
+///
+/// Usable both as a test matcher and as a mocktail argument matcher via
+/// `any(named: 'sort', that: isSameSortAs(sort))`.
+Matcher isSameSortAs(List<Sort<Object>> target) {
+  final expected = target.map((it) => it.toJson()).toList();
+  return predicate<List<Sort<Object>>>(
+    (it) => const DeepCollectionEquality().equals(
+      it.map((it) => it.toJson()).toList(),
+      expected,
+    ),
+    'a sort serializing to $expected',
+  );
+}
+
+/// Matches a [MultipartFile] with the same length as [targetFile].
+///
+/// Usable both as a test matcher and as a mocktail argument matcher via
+/// `any(that: isSameMultipartFileAs(file))`.
 Matcher isSameMultipartFileAs(MultipartFile targetFile) => _IsSameMultipartFileAs(targetFile: targetFile);
 
 class _IsSameMultipartFileAs extends Matcher {
@@ -35,20 +52,50 @@ class _IsSameMultipartFileAs extends Matcher {
   bool matches(covariant MultipartFile file, Map matchState) => file.length == targetFile.length;
 }
 
-Matcher isSameEventAs(Event targetEvent) => _IsSameEventAs(targetEvent: targetEvent);
+/// Matches an [Event] with the same type as [targetEvent].
+///
+/// The `match*` flags opt additional fields into the comparison. Usable both
+/// as a test matcher and as a mocktail argument matcher via
+/// `any(that: isSameEventAs(event))` — the form is needed when the SDK builds
+/// the event itself, so the test has no instance to compare against.
+Matcher isSameEventAs(
+  Event targetEvent, {
+  bool matchParentId = false,
+}) => _IsSameEventAs(
+  targetEvent: targetEvent,
+  matchParentId: matchParentId,
+);
 
 class _IsSameEventAs extends Matcher {
-  const _IsSameEventAs({required this.targetEvent});
+  const _IsSameEventAs({
+    required this.targetEvent,
+    this.matchParentId = false,
+  });
 
   final Event targetEvent;
+  final bool matchParentId;
 
   @override
   Description describe(Description description) => description.add('is same event as $targetEvent');
 
   @override
-  bool matches(covariant Event event, Map matchState) => event.type == targetEvent.type;
+  bool matches(covariant Event event, Map matchState) {
+    var matches = event.type == targetEvent.type;
+    if (matchParentId) {
+      matches &= event.parentId == targetEvent.parentId;
+    }
+
+    return matches;
+  }
 }
 
+/// Matches a [Message] with the same id as [targetMessage].
+///
+/// The `match*` flags opt additional fields into the comparison. Usable both
+/// as a test matcher and as a mocktail argument matcher via
+/// `any(that: isSameMessageAs(message))` — the form message-carrying API stubs
+/// must take, because the SDK stamps fields like `localCreatedAt` and `user`
+/// on outgoing messages, so exact equality never holds.
 Matcher isSameMessageAs(
   Message targetMessage, {
   bool matchText = false,
@@ -135,6 +182,11 @@ class _IsSameMessageAs extends Matcher {
   }
 }
 
+/// Matches a [DraftMessage] with the same id as [targetMessage].
+///
+/// The `match*` flags opt additional fields into the comparison. Usable both
+/// as a test matcher and as a mocktail argument matcher via
+/// `any(that: isSameDraftMessageAs(message))`.
 Matcher isSameDraftMessageAs(
   DraftMessage targetMessage, {
   bool matchText = false,
@@ -192,6 +244,11 @@ class _IsSameDraftMessageAs extends Matcher {
   }
 }
 
+/// Matches an [Attachment] with the same id as [targetAttachment].
+///
+/// [matchUploadState] opts the upload state into the comparison. Usable both
+/// as a test matcher and as a mocktail argument matcher via
+/// `any(that: isSameAttachmentAs(attachment))`.
 Matcher isSameAttachmentAs(
   Attachment targetAttachment, {
   bool matchUploadState = false,
@@ -222,6 +279,10 @@ class _IsSameAttachmentAs extends Matcher {
   }
 }
 
+/// Matches a [User] with the same id as [targetUser].
+///
+/// Usable both as a test matcher and as a mocktail argument matcher via
+/// `any(that: isSameUserAs(user))`.
 Matcher isSameUserAs(User targetUser) => _IsSameUserAs(targetUser: targetUser);
 
 class _IsSameUserAs extends Matcher {
@@ -236,6 +297,10 @@ class _IsSameUserAs extends Matcher {
   bool matches(covariant User user, Map matchState) => user.id == targetUser.id;
 }
 
+/// Matches a [Channel] whose cid equals the cid of [channelState].
+///
+/// Usable both as a test matcher and as a mocktail argument matcher via
+/// `any(that: isCorrectChannelFor(channelState))`.
 Matcher isCorrectChannelFor(ChannelState channelState) => _IsCorrectChannelFor(channelState: channelState);
 
 class _IsCorrectChannelFor extends Matcher {

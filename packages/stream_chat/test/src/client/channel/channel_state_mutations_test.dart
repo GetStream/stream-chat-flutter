@@ -1,12 +1,10 @@
 // ignore_for_file: cascade_invocations
 
-import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/client/channel/channel_state_mutations.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:test/test.dart';
+import 'package:stream_chat_test/stream_chat_test.dart';
 
-import '../../fakes.dart';
-import '../../mocks.dart';
+import '../../mocks.dart' show FakeClientState, MockStreamChatClient;
 
 class MockChannelClientState extends Mock implements ChannelClientState {}
 
@@ -28,8 +26,7 @@ void main() {
   final otherUser = User(id: 'other-user');
 
   setUpAll(() {
-    registerFallbackValue(FakeMessage());
-    registerFallbackValue(FakeChannelState());
+    registerChatFallbackValues();
     registerFallbackValue(0);
   });
 

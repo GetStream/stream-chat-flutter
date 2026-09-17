@@ -51,4 +51,6 @@ dev_dependencies:
   json_serializable: ^6.13.2
   mocktail: ^1.0.5
   retrofit_generator: ^10.2.6
+  stream_chat_test:
+    path: ../stream_chat_test
   test: ^1.31.1

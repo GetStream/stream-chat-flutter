@@ -1,15 +1,27 @@
-// ignore_for_file: avoid_redundant_argument_values, lines_longer_than_80_chars, deprecated_member_use_from_same_package
+// LEGACY CARVE-OUT: these tests intentionally stay on a hand-rolled fake
+// WebSocket instead of the `stream_chat_test` BDD harness:
+//
+// - The `.connectAnonymousUser` tests: the anonymous token's user id cannot
+//   pass the fake server's connect-URI validation without a TokenManager seam.
+// - The reconnect-recovery tests: the harness exposes no seam to drop and
+//   restore the underlying connection mid-test.
+//
+// Revisit once the TokenManager seam lands in the harness.
 
 import 'dart:async';
 
-import 'package:mocktail/mocktail.dart';
+import 'package:dio/dio.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:test/test.dart';
+import 'package:stream_chat_test/stream_chat_test.dart';
 
-import '../fakes.dart';
-import '../matchers.dart';
-import '../mocks.dart';
-import '../utils.dart';
+const _channelId = 'test-channel-id';
+const _channelType = 'test-channel-type';
+const _channelCid = '$_channelType:$_channelId';
+
+// The unread counts are derived from the current user, so assigning a new
+// one has to republish them.
 
 void main() {
   group('Fake web-socket connection functions', () {
@@ -20,11 +32,11 @@ void main() {
 
     setUpAll(() {
       // fallback values
-      registerFallbackValue(FakeUser());
+      registerFallbackValue(_FakeUser());
     });
 
     setUp(() {
-      final ws = FakeWebSocket();
+      final ws = _FakeWebSocket();
       client = StreamChatClient(apiKey, ws: ws, chatApi: api);
     });
 
@@ -32,100 +44,123 @@ void main() {
       client.dispose();
     });
 
-    test('`.connectUser` should work fine', () async {
-      final user = User(id: 'test-user-id');
-      final token = testUserToken(user.id).rawValue;
+    chatClientTest(
+      '`.connectUser` should work fine',
+      connect: (tester) => tester.mockSuccessfulAuth(),
+      body: (tester) async {
+        final user = tester.user;
+        final token = createTestToken(user.id).rawValue;
 
-      expectLater(
-        // skipping first seed status -> ConnectionStatus.disconnected
-        client.wsConnectionStatusStream.skip(1),
-        emitsInOrder([
-          ConnectionStatus.connecting,
-          ConnectionStatus.connected,
-        ]),
-      );
-
-      final res = await client.connectUser(user, token);
-      expect(res, isNotNull);
-      expect(res, isSameUserAs(user));
-    });
-
-    test('`.connectUserWithProvider` should work fine', () async {
-      final user = User(id: 'test-user-id');
-      Future<UserToken> tokenProvider(String userId) async {
-        expect(userId, user.id);
-        return testUserToken(userId);
-      }
-
-      expectLater(
-        // skipping first seed status -> ConnectionStatus.disconnected
-        client.wsConnectionStatusStream.skip(1),
-        emitsInOrder([
-          ConnectionStatus.connecting,
-          ConnectionStatus.connected,
-        ]),
-      );
-
-      final res = await client.connectUserWithProvider(user, TokenProvider.dynamic(tokenProvider));
-      expect(res, isNotNull);
-      expect(res, isSameUserAs(user));
-    });
-
-    group('`.connectGuestUser`', () {
-      test('should work fine', () async {
-        final user = User(id: 'test-user-id');
-        final token = testUserToken(user.id).rawValue;
-
-        when(() => api.guest.getGuestUser(any(that: isSameUserAs(user)))).thenAnswer(
-          (_) async => ConnectGuestUserResponse()
-            ..user = user
-            ..accessToken = token,
-        );
-
-        expectLater(
+        final statusEmitted = expectLater(
           // skipping first seed status -> ConnectionStatus.disconnected
-          client.wsConnectionStatusStream.skip(1),
+          tester.client.wsConnectionStatusStream.skip(1),
           emitsInOrder([
             ConnectionStatus.connecting,
             ConnectionStatus.connected,
           ]),
         );
 
-        final res = await client.connectGuestUser(user);
+        final res = await tester.client.connectUser(user, token);
         expect(res, isNotNull);
         expect(res, isSameUserAs(user));
 
-        verify(
-          () => api.guest.getGuestUser(any(that: isSameUserAs(user))),
-        ).called(1);
-      });
+        await statusEmitted;
+      },
+    );
 
-      test('should throw if `.getGuestUser` fails', () async {
-        final user = User(id: 'test-user-id');
+    chatClientTest(
+      '`.connectUserWithProvider` should work fine',
+      connect: (tester) => tester.mockSuccessfulAuth(),
+      body: (tester) async {
+        final user = tester.user;
+        Future<UserToken> tokenProvider(String userId) async {
+          expect(userId, user.id);
+          return createTestToken(userId);
+        }
 
-        when(
-          () => api.guest.getGuestUser(any(that: isSameUserAs(user))),
-        ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
-
-        expectLater(
-          client.wsConnectionStatusStream,
+        final statusEmitted = expectLater(
+          // skipping first seed status -> ConnectionStatus.disconnected
+          tester.client.wsConnectionStatusStream.skip(1),
           emitsInOrder([
-            // only emits the seed -> disconnected status
-            // as the call never reaches `ws.connect`
-            ConnectionStatus.disconnected,
+            ConnectionStatus.connecting,
+            ConnectionStatus.connected,
           ]),
         );
 
-        try {
-          await client.connectGuestUser(user);
-        } catch (e) {
-          expect(e, isA<StreamApiException>());
-        }
+        final res = await tester.client.connectUserWithProvider(user, TokenProvider.dynamic(tokenProvider));
+        expect(res, isNotNull);
+        expect(res, isSameUserAs(user));
 
-        verify(
-          () => api.guest.getGuestUser(any(that: isSameUserAs(user))),
-        ).called(1);
-      });
+        await statusEmitted;
+      },
+    );
+
+    group('`.connectGuestUser`', () {
+      chatClientTest(
+        'should work fine',
+        connect: (tester) => tester.mockSuccessfulAuth(),
+        body: (tester) async {
+          final user = tester.user;
+          final token = createTestToken(user.id).rawValue;
+
+          tester.mockApi(
+            (api) => api.guest.getGuestUser(any(that: isSameUserAs(user))),
+            result: createDefaultConnectGuestUserResponse(user: user, accessToken: token),
+          );
+
+          final statusEmitted = expectLater(
+            // skipping first seed status -> ConnectionStatus.disconnected
+            tester.client.wsConnectionStatusStream.skip(1),
+            emitsInOrder([
+              ConnectionStatus.connecting,
+              ConnectionStatus.connected,
+            ]),
+          );
+
+          final res = await tester.client.connectGuestUser(user);
+          expect(res, isNotNull);
+          expect(res, isSameUserAs(user));
+
+          tester.verifyApi(
+            (api) => api.guest.getGuestUser(any(that: isSameUserAs(user))),
+          );
+
+          await statusEmitted;
+        },
+      );
+
+      chatClientTest(
+        'should throw if `.getGuestUser` fails',
+        connect: (_) {},
+        body: (tester) async {
+          final user = tester.user;
+
+          tester.mockApiFailure(
+            (api) => api.guest.getGuestUser(any(that: isSameUserAs(user))),
+            error: createDefaultNetworkError(code: StreamErrorCode.inputError, statusCode: 400),
+          );
+
+          final statusEmitted = expectLater(
+            tester.client.wsConnectionStatusStream,
+            emitsInOrder([
+              // only emits the seed -> disconnected status
+              // as the call never reaches `ws.connect`
+              ConnectionStatus.disconnected,
+            ]),
+          );
+
+          await expectLater(
+            tester.client.connectGuestUser(user),
+            throwsA(isA<StreamApiException>()),
+          );
+
+          tester.verifyApi(
+            (api) => api.guest.getGuestUser(any(that: isSameUserAs(user))),
+          );
+
+          await statusEmitted;
+        },
+      );
     });
 
     test('`.connectAnonymousUser` should work fine', () async {
@@ -143,53 +178,73 @@ void main() {
     });
 
     group('`.openConnection`', () {
-      test('should throw if state does not contain user', () async {
-        expect(client.state.currentUser, isNull);
-        try {
-          await client.openConnection();
-        } catch (e) {
-          expect(e, isA<AssertionError>());
-        }
-      });
+      chatClientTest(
+        'should throw if state does not contain user',
+        connect: (_) {},
+        body: (tester) async {
+          expect(tester.currentUser, isNull);
+          await expectLater(
+            tester.client.openConnection(),
+            throwsA(isA<AssertionError>()),
+          );
+        },
+      );
 
-      test('should throw if connection is already available', () async {
-        expect(client.state.currentUser, isNull);
-        try {
-          await client.connectAnonymousUser();
-          // waiting 300ms for `wsConnectionStatusStream` to emit
-          await delay(300);
+      chatClientTest(
+        'should throw if connection is already available',
+        connect: (tester) => tester.mockSuccessfulAuth(),
+        body: (tester) async {
+          expect(tester.currentUser, isNull);
 
-          await client.openConnection();
-        } catch (e) {
-          // Misuse, so it leaves the StreamException hierarchy entirely.
-          expect(e, isA<StateError>());
-          expect((e as StateError).message, contains('already available for'));
-        }
-      });
+          // The anonymous connect path is unavailable here, so the
+          // connection is opened with the regular user instead.
+          final token = createTestToken(tester.user.id).rawValue;
+          await tester.client.connectUser(tester.user, token);
 
-      test('should open connection for closed connection', () async {
-        expectLater(
-          client.wsConnectionStatusStream.skip(1),
-          emitsInOrder([
-            // initial connectUser
-            ConnectionStatus.connecting,
-            ConnectionStatus.connected,
-            // close connection
-            ConnectionStatus.disconnected,
-            // open connection
-            ConnectionStatus.connecting,
-            ConnectionStatus.connected,
-          ]),
-        );
+          await expectLater(
+            tester.client.openConnection(),
+            throwsA(
+              // Misuse, so it leaves the StreamException hierarchy entirely.
+              isA<StateError>().having(
+                (error) => error.message,
+                'message',
+                contains('already available for'),
+              ),
+            ),
+          );
+        },
+      );
 
-        await client.connectAnonymousUser();
-        // waiting 300ms for `wsConnectionStatusStream` to emit
-        await delay(300);
+      chatClientTest(
+        'should open connection for closed connection',
+        connect: (tester) => tester.mockSuccessfulAuth(),
+        body: (tester) async {
+          final statusEmitted = expectLater(
+            tester.client.wsConnectionStatusStream.skip(1),
+            emitsInOrder([
+              // initial connectUser
+              ConnectionStatus.connecting,
+              ConnectionStatus.connected,
+              // close connection
+              ConnectionStatus.disconnected,
+              // open connection
+              ConnectionStatus.connecting,
+              ConnectionStatus.connected,
+            ]),
+          );
 
-        client.closeConnection();
+          // The anonymous connect path is unavailable here, so the
+          // connection is opened with the regular user instead.
+          final token = createTestToken(tester.user.id).rawValue;
+          await tester.client.connectUser(tester.user, token);
 
-        await client.openConnection();
-      });
+          tester.client.closeConnection();
+
+          await tester.client.openConnection();
+
+          await statusEmitted;
+        },
+      );
     });
   });
 
@@ -201,11 +256,11 @@ void main() {
 
     setUpAll(() {
       // fallback values
-      registerFallbackValue(FakeUser());
+      registerFallbackValue(_FakeUser());
     });
 
     setUp(() {
-      final ws = FakeWebSocketWithConnectionError();
+      final ws = _FakeWebSocketWithConnectionError();
       client = StreamChatClient(apiKey, chatApi: api, ws: ws);
     });
 
@@ -213,53 +268,59 @@ void main() {
       client.dispose();
     });
 
-    test('`.connectUser` should throw if `ws.connect` fails', () async {
-      final user = User(id: 'test-user-id');
-      final token = testUserToken(user.id).rawValue;
+    chatClientTest(
+      '`.connectUser` should throw if `ws.connect` fails',
+      connect: (tester) => tester.mockConnectionError(),
+      body: (tester) async {
+        final user = tester.user;
+        final token = createTestToken(user.id).rawValue;
 
-      try {
-        await client.connectUser(user, token);
-      } catch (e) {
-        expect(e, isA<StreamNetworkException>());
-      }
-    });
-
-    test(
-      '`.connectUserWithProvider` should throw if `ws.connect` fails',
-      () async {
-        final user = User(id: 'test-user-id');
-        Future<UserToken> tokenProvider(String userId) async {
-          expect(userId, user.id);
-          return testUserToken(userId);
-        }
-
-        try {
-          await client.connectUserWithProvider(user, TokenProvider.dynamic(tokenProvider));
-        } catch (e) {
-          expect(e, isA<StreamNetworkException>());
-        }
+        await expectLater(
+          tester.client.connectUser(user, token),
+          throwsA(isA<StreamNetworkException>()),
+        );
       },
     );
 
-    test('`.connectGuestUser` should throw if `ws.connect` fails', () async {
-      final user = User(id: 'test-user-id');
-      final token = testUserToken(user.id).rawValue;
+    chatClientTest(
+      '`.connectUserWithProvider` should throw if `ws.connect` fails',
+      connect: (tester) => tester.mockConnectionError(),
+      body: (tester) async {
+        final user = tester.user;
+        Future<UserToken> tokenProvider(String userId) async {
+          expect(userId, user.id);
+          return createTestToken(userId);
+        }
 
-      when(() => api.guest.getGuestUser(any(that: isSameUserAs(user)))).thenAnswer(
-        (_) async => ConnectGuestUserResponse()
-          ..user = user
-          ..accessToken = token,
-      );
+        await expectLater(
+          tester.client.connectUserWithProvider(user, TokenProvider.dynamic(tokenProvider)),
+          throwsA(isA<StreamNetworkException>()),
+        );
+      },
+    );
 
-      try {
-        await client.connectGuestUser(user);
-      } catch (e) {
-        expect(e, isA<StreamNetworkException>());
-      }
-      verify(
-        () => api.guest.getGuestUser(any(that: isSameUserAs(user))),
-      ).called(1);
-    });
+    chatClientTest(
+      '`.connectGuestUser` should throw if `ws.connect` fails',
+      connect: (tester) => tester.mockConnectionError(),
+      body: (tester) async {
+        final user = tester.user;
+        final token = createTestToken(user.id).rawValue;
+
+        tester.mockApi(
+          (api) => api.guest.getGuestUser(any(that: isSameUserAs(user))),
+          result: createDefaultConnectGuestUserResponse(user: user, accessToken: token),
+        );
+
+        await expectLater(
+          tester.client.connectGuestUser(user),
+          throwsA(isA<StreamNetworkException>()),
+        );
+
+        tester.verifyApi(
+          (api) => api.guest.getGuestUser(any(that: isSameUserAs(user))),
+        );
+      },
+    );
 
     test(
       '`.connectAnonymousUser` should throw if `ws.connect` fails',
@@ -281,7 +342,7 @@ void main() {
 
     setUpAll(() {
       // fallback values
-      registerFallbackValue(FakeUser());
+      registerFallbackValue(_FakeUser());
     });
 
     setUp(() {
@@ -292,59 +353,67 @@ void main() {
       client.dispose();
     });
 
-    test('`.connectUser` should succeed without connecting', () async {
-      final user = User(id: 'test-user-id');
-      final token = testUserToken(user.id).rawValue;
+    chatClientTest(
+      '`.connectUser` should succeed without connecting',
+      connect: (_) {},
+      body: (tester) async {
+        final user = tester.user;
+        final token = createTestToken(user.id).rawValue;
 
-      final res = await client.connectUser(
-        user,
-        token,
-        connectWebSocket: false,
-      );
-      expect(res, isSameUserAs(user));
-      expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
-    });
+        final res = await tester.client.connectUser(
+          user,
+          token,
+          connectWebSocket: false,
+        );
+        expect(res, isSameUserAs(user));
+        expect(tester.connectionStatus, ConnectionStatus.disconnected);
+      },
+    );
 
-    test(
+    chatClientTest(
       '`.connectUserWithProvider` should succeed without connecting',
-      () async {
-        final user = User(id: 'test-user-id');
+      connect: (_) {},
+      body: (tester) async {
+        final user = tester.user;
         Future<UserToken> tokenProvider(String userId) async {
           expect(userId, user.id);
-          return testUserToken(userId);
+          return createTestToken(userId);
         }
 
-        final res = await client.connectUserWithProvider(
+        final res = await tester.client.connectUserWithProvider(
           user,
           TokenProvider.dynamic(tokenProvider),
           connectWebSocket: false,
         );
         expect(res, isSameUserAs(user));
-        expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
+        expect(tester.connectionStatus, ConnectionStatus.disconnected);
       },
     );
 
-    test('`.connectGuestUser` should succeed without connecting', () async {
-      final user = User(id: 'test-user-id');
-      final token = testUserToken(user.id).rawValue;
+    chatClientTest(
+      '`.connectGuestUser` should succeed without connecting',
+      connect: (_) {},
+      body: (tester) async {
+        final user = tester.user;
+        final token = createTestToken(user.id).rawValue;
 
-      when(() => api.guest.getGuestUser(any(that: isSameUserAs(user)))).thenAnswer(
-        (_) async => ConnectGuestUserResponse()
-          ..user = user
-          ..accessToken = token,
-      );
+        tester.mockApi(
+          (api) => api.guest.getGuestUser(any(that: isSameUserAs(user))),
+          result: createDefaultConnectGuestUserResponse(user: user, accessToken: token),
+        );
 
-      final res = await client.connectGuestUser(
-        user,
-        connectWebSocket: false,
-      );
+        final res = await tester.client.connectGuestUser(
+          user,
+          connectWebSocket: false,
+        );
 
-      expect(res, isSameUserAs(user));
-      expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
-      verify(
-        () => api.guest.getGuestUser(any(that: isSameUserAs(user))),
-      ).called(1);
-    });
+        expect(res, isSameUserAs(user));
+        expect(tester.connectionStatus, ConnectionStatus.disconnected);
+        tester.verifyApi(
+          (api) => api.guest.getGuestUser(any(that: isSameUserAs(user))),
+        );
+      },
+    );
 
     test(
       '`.connectAnonymousUser` should succeed without connecting',
@@ -360,6 +429,24 @@ void main() {
   });
 
   group('Fake web-socket connection function with failure and persistence', () {
+    // Runs [body] as a [chatClientTest] whose client is backed by a fresh
+    // [MockPersistenceClient] and whose WebSocket transport fails to connect: the
+    // connect attempt fails with a retriable error, so the client falls back to
+    // the persisted connection info.
+    void _failedConnectionWithPersistenceTest(
+      String description, {
+      required Future<void> Function(ChatClientTester tester, MockPersistenceClient persistence) body,
+    }) {
+      final persistence = MockPersistenceClient();
+
+      chatClientTest(
+        description,
+        chatPersistenceClient: persistence,
+        connect: (tester) => tester.mockConnectionError(),
+        body: (tester) => body(tester, persistence),
+      );
+    }
+
     const apiKey = 'test-api-key';
     late final api = FakeChatApi();
     late final persistence = MockPersistenceClient();
@@ -368,11 +455,11 @@ void main() {
 
     setUpAll(() {
       // fallback values
-      registerFallbackValue(FakeUser());
+      registerFallbackValue(_FakeUser());
     });
 
     setUp(() {
-      final ws = FakeWebSocketWithConnectionError();
+      final ws = _FakeWebSocketWithConnectionError();
       client = StreamChatClient(apiKey, chatApi: api, ws: ws)..chatPersistenceClient = persistence;
     });
 
@@ -380,11 +467,10 @@ void main() {
       client.dispose();
     });
 
-    test(
-      '''`.connectUser` should connect successfully if persistence contains event''',
-      () async {
-        final user = User(id: 'test-user-id');
-        final token = testUserToken(user.id).rawValue;
+    _failedConnectionWithPersistenceTest(
+      '`.connectUser` should connect successfully if persistence contains event',
+      body: (tester, persistence) async {
+        final user = tester.user;
 
         final event = Event(
           type: EventType.healthCheck,
@@ -393,7 +479,7 @@ void main() {
         );
         when(persistence.getConnectionInfo).thenAnswer((_) async => event);
 
-        final res = await client.connectUser(user, token);
+        final res = await tester.client.connectUser(user, createTestToken(user.id).rawValue);
         expect(res, isNotNull);
         expect(res, isSameUserAs(user));
 
@@ -402,13 +488,13 @@ void main() {
       },
     );
 
-    test(
-      '''`.connectUserWithProvider` should connect successfully if persistence contains event''',
-      () async {
-        final user = User(id: 'test-user-id');
+    _failedConnectionWithPersistenceTest(
+      '`.connectUserWithProvider` should connect successfully if persistence contains event',
+      body: (tester, persistence) async {
+        final user = tester.user;
         Future<UserToken> tokenProvider(String userId) async {
           expect(userId, user.id);
-          return testUserToken(userId);
+          return createTestToken(userId);
         }
 
         final event = Event(
@@ -418,7 +504,7 @@ void main() {
         );
         when(persistence.getConnectionInfo).thenAnswer((_) async => event);
 
-        final res = await client.connectUserWithProvider(user, TokenProvider.dynamic(tokenProvider));
+        final res = await tester.client.connectUserWithProvider(user, TokenProvider.dynamic(tokenProvider));
         expect(res, isNotNull);
         expect(res, isSameUserAs(user));
 
@@ -427,11 +513,10 @@ void main() {
       },
     );
 
-    test(
-      '''`.connectGuestUser` should connect successfully if persistence contains event''',
-      () async {
-        final user = User(id: 'test-user-id');
-        final token = testUserToken(user.id).rawValue;
+    _failedConnectionWithPersistenceTest(
+      '`.connectGuestUser` should connect successfully if persistence contains event',
+      body: (tester, persistence) async {
+        final user = tester.user;
 
         final event = Event(
           type: EventType.healthCheck,
@@ -440,20 +525,20 @@ void main() {
         );
         when(persistence.getConnectionInfo).thenAnswer((_) async => event);
 
-        when(() => api.guest.getGuestUser(any(that: isSameUserAs(user)))).thenAnswer(
-          (_) async => ConnectGuestUserResponse()
-            ..user = user
-            ..accessToken = token,
+        tester.mockApi(
+          (api) => api.guest.getGuestUser(any(that: isSameUserAs(user))),
+          result: createDefaultConnectGuestUserResponse(user: user),
         );
 
-        final res = await client.connectGuestUser(user);
+        final res = await tester.client.connectGuestUser(user);
         expect(res, isNotNull);
         expect(res, isSameUserAs(user));
 
         verify(persistence.getConnectionInfo).called(1);
         verifyNoMoreInteractions(persistence);
-        verify(() => api.guest.getGuestUser(any(that: isSameUserAs(user)))).called(1);
-        verifyNoMoreInteractions(api.guest);
+        tester
+          ..verifyApi((api) => api.guest.getGuestUser(any(that: isSameUserAs(user))))
+          ..verifyNoMoreApiInteractions((api) => api.guest);
       },
     );
 
@@ -480,56 +565,55 @@ void main() {
   });
 
   group('Client with connected user with persistence', () {
-    const apiKey = 'test-api-key';
-    late final api = FakeChatApi();
-    late final persistence = MockPersistenceClient();
+    // Runs [body] as a [chatClientTest] whose client is backed by a fresh
+    // [MockPersistenceClient]: the persistence stubs the connect path needs are
+    // installed first, then the client is connected and persistence is asserted
+    // enabled.
+    void _clientWithPersistenceTest(
+      String description, {
+      required Future<void> Function(ChatClientTester tester, MockPersistenceClient persistence) body,
+    }) {
+      final persistence = MockPersistenceClient();
 
-    final user = User(id: 'test-user-id');
-    final token = testUserToken(user.id).rawValue;
+      chatClientTest(
+        description,
+        chatPersistenceClient: persistence,
+        connect: (tester) async {
+          // The real engine routes the connect health-check through the client,
+          // which forwards it to persistence — stub the writes up front.
+          when(() => persistence.updateConnectionInfo(any())).thenAnswer((_) => Future.value());
+          when(() => persistence.updateLastSyncAt(any())).thenAnswer((_) => Future.value());
+          when(persistence.getLastSyncAt).thenAnswer((_) async => null);
 
-    late StreamChatClient client;
+          tester.mockSuccessfulAuth();
+          await tester.client.connectUser(tester.user, createTestToken(tester.user.id).rawValue);
 
-    setUpAll(() {
-      // fallback values
-      registerFallbackValue(FakeEvent());
-      registerFallbackValue(const PaginationParams());
-      registerFallbackValue(FakeChannelState());
-      registerFallbackValue(const ChannelFilter.raw({}));
-    });
-
-    setUp(() async {
-      when(() => persistence.updateLastSyncAt(any())).thenAnswer((_) => Future.value());
-      when(persistence.getLastSyncAt).thenAnswer((_) async => null);
-      final ws = FakeWebSocket();
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws)..chatPersistenceClient = persistence;
-      await client.connectUser(user, token);
-      await delay(300);
-      expect(client.persistenceEnabled, isTrue);
-      expect(client.wsConnectionStatus, ConnectionStatus.connected);
-    });
-
-    tearDown(() async {
-      await client.dispose();
-    });
+          expect(tester.client.persistenceEnabled, isTrue);
+          expect(tester.connectionStatus, ConnectionStatus.connected);
+        },
+        body: (tester) => body(tester, persistence),
+      );
+    }
 
     group('`.sync`', () {
-      test(
+      _clientWithPersistenceTest(
         '''should update persistence connectionInfo and lastSync when sync succeeds''',
-        () async {
+        body: (tester, persistence) async {
           // persistence.updateLastSyncAt might be called
           // when connecting the user.
           // Resetting the logs so we start counting invocations correctly.
           reset(persistence);
           const cids = ['test-cid-1', 'test-cid-2', 'test-cid-3'];
-          final lastSyncAt = DateTime.now();
-          when(() => api.general.sync(cids, lastSyncAt)).thenAnswer(
-            (_) async => SyncResponse()
-              ..events = [
+          final lastSyncAt = DateTime.utc(2021, 3);
+          tester.mockApi(
+            (api) => api.general.sync(cids, lastSyncAt),
+            result: createDefaultSyncResponse(
+              events: [
                 Event(
                   isLocal: false,
                   type: EventType.healthCheck,
                   connectionId: 'test-connection-id',
-                  me: OwnUser.fromUser(user),
+                  me: OwnUser.fromUser(tester.user),
                 ),
                 Event(
                   isLocal: false,
@@ -537,40 +621,42 @@ void main() {
                   message: Message(id: 'test-message-id'),
                 ),
               ],
+            ),
           );
 
           when(() => persistence.updateConnectionInfo(any())).thenAnswer((_) => Future.value());
           when(() => persistence.updateLastSyncAt(any())).thenAnswer((_) => Future.value());
 
-          await client.sync(cids: cids, lastSyncAt: lastSyncAt);
+          await tester.client.sync(cids: cids, lastSyncAt: lastSyncAt);
 
           verify(() => persistence.updateConnectionInfo(any())).called(1);
           verify(() => persistence.updateLastSyncAt(any())).called(1);
-          verify(() => api.general.sync(cids, lastSyncAt)).called(1);
+          tester.verifyApi((api) => api.general.sync(cids, lastSyncAt));
         },
       );
 
-      test(
+      _clientWithPersistenceTest(
         'should work fine if persistence contains sync params',
-        () async {
+        body: (tester, persistence) async {
           // persistence.updateLastSyncAt might be called
           // when connecting the user.
           // Resetting the logs so we start counting invocations correctly.
           reset(persistence);
           const cids = ['test-cid-1', 'test-cid-2', 'test-cid-3'];
-          final lastSyncAt = DateTime.now();
+          final lastSyncAt = DateTime.utc(2021, 3);
 
           when(persistence.getChannelCids).thenAnswer((_) async => cids);
           when(persistence.getLastSyncAt).thenAnswer((_) async => lastSyncAt);
 
-          when(() => api.general.sync(cids, lastSyncAt)).thenAnswer(
-            (_) async => SyncResponse()
-              ..events = [
+          tester.mockApi(
+            (api) => api.general.sync(cids, lastSyncAt),
+            result: createDefaultSyncResponse(
+              events: [
                 Event(
                   isLocal: false,
                   type: EventType.healthCheck,
                   connectionId: 'test-connection-id',
-                  me: OwnUser.fromUser(user),
+                  me: OwnUser.fromUser(tester.user),
                 ),
                 Event(
                   isLocal: false,
@@ -578,16 +664,17 @@ void main() {
                   message: Message(id: 'test-message-id', text: 'Hey!'),
                 ),
               ],
+            ),
           );
 
           when(() => persistence.updateConnectionInfo(any())).thenAnswer((_) => Future.value());
           when(() => persistence.updateLastSyncAt(any())).thenAnswer((_) => Future.value());
 
-          await client.sync();
+          await tester.client.sync();
 
           verify(() => persistence.updateConnectionInfo(any())).called(1);
           verify(() => persistence.updateLastSyncAt(any())).called(1);
-          verify(() => api.general.sync(cids, lastSyncAt)).called(1);
+          tester.verifyApi((api) => api.general.sync(cids, lastSyncAt));
           verify(persistence.getChannelCids).called(1);
           verify(persistence.getLastSyncAt).called(1);
         },
@@ -595,13 +682,13 @@ void main() {
     });
 
     group('`.queryChannels`', () {
-      test(
+      _clientWithPersistenceTest(
         'should emit channels twice if persistence contains some channels',
-        () async {
+        body: (tester, persistence) async {
           final persistentChannelStates = List.generate(
             3,
-            (index) => ChannelState(
-              channel: ChannelModel(cid: 'test-type-$index:test-id-$index'),
+            (index) => createDefaultChannelState(
+              channel: createDefaultChannelModel(cid: 'test-type-$index:test-id-$index'),
             ),
           );
 
@@ -615,17 +702,17 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenAnswer((_) async => QueryChannelsResponse()..channels = persistentChannelStates);
+          ).thenAnswer((_) async => createDefaultQueryChannelsResponse(channels: persistentChannelStates));
 
           final channelStates = List.generate(
             3,
-            (index) => ChannelState(
-              channel: ChannelModel(cid: 'test-type-$index:test-id-$index'),
+            (index) => createDefaultChannelState(
+              channel: createDefaultChannelModel(cid: 'test-type-$index:test-id-$index'),
             ),
           );
 
-          when(
-            () => api.channel.queryChannels(
+          tester.mockApi(
+            (api) => api.channel.queryChannels(
               filter: any(named: 'filter'),
               sort: any(named: 'sort'),
               state: any(named: 'state'),
@@ -635,14 +722,13 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenAnswer(
-            (_) async => QueryChannelsResponse()..channels = channelStates,
+            result: createDefaultQueryChannelsResponse(channels: channelStates),
           );
 
           when(() => persistence.getChannelThreads(any())).thenAnswer(
             (_) async => <String, List<Message>>{
               for (final channelState in channelStates)
-                channelState.channel!.cid: [Message(id: 'test-message-id', text: 'Test message')],
+                channelState.channel!.cid: [createDefaultMessage(id: 'test-message-id', text: 'Test message')],
             },
           );
 
@@ -662,14 +748,15 @@ void main() {
             ),
           ).thenAnswer((_) => Future.value());
 
-          // setUp's `connectUser` schedules debounced persistence writes
-          // (1s window) that would otherwise fire during this test's wait
-          // and pollute the call counts. Wait past the debounce, then clear.
-          await delay(1100);
+          // The connect phase's `connectUser` schedules debounced persistence
+          // writes (1s window) that would otherwise fire during this test's
+          // wait and pollute the call counts. Wait past the debounce, then
+          // clear.
+          await Future.delayed(const Duration(milliseconds: 1100));
           clearInteractions(persistence);
 
           await expectLater(
-            client.queryChannels(),
+            tester.client.queryChannels(),
             emitsInOrder([
               // emits persistent channels first
               persistentChannelStates.map(isCorrectChannelFor),
@@ -681,7 +768,7 @@ void main() {
           // Wait safely past the 1s debounce on persistence writes
           // (updateChannelState, updateChannelThreads) so all trailing
           // invocations have fired before we verify counts.
-          await delay(1500);
+          await Future.delayed(const Duration(milliseconds: 1500));
 
           verify(
             () => persistence.queryChannelStates(
@@ -695,8 +782,8 @@ void main() {
             ),
           ).called(1);
 
-          verify(
-            () => api.channel.queryChannels(
+          tester.verifyApi(
+            (api) => api.channel.queryChannels(
               filter: any(named: 'filter'),
               sort: any(named: 'sort'),
               state: any(named: 'state'),
@@ -706,7 +793,7 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).called(1);
+          );
 
           verify(() => persistence.getChannelThreads(any())).called(channelStates.length);
           verify(() => persistence.updateChannelState(any())).called(channelStates.length);
@@ -727,13 +814,13 @@ void main() {
         },
       );
 
-      test(
+      _clientWithPersistenceTest(
         '''should never rethrow network call if persistence already emitted some channels''',
-        () async {
+        body: (tester, persistence) async {
           final persistentChannelStates = List.generate(
             3,
-            (index) => ChannelState(
-              channel: ChannelModel(cid: 'test-type-$index:test-id-$index'),
+            (index) => createDefaultChannelState(
+              channel: createDefaultChannelModel(cid: 'test-type-$index:test-id-$index'),
             ),
           );
 
@@ -747,10 +834,10 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenAnswer((_) async => QueryChannelsResponse()..channels = persistentChannelStates);
+          ).thenAnswer((_) async => createDefaultQueryChannelsResponse(channels: persistentChannelStates));
 
-          when(
-            () => api.channel.queryChannels(
+          tester.mockApiFailure(
+            (api) => api.channel.queryChannels(
               filter: any(named: 'filter'),
               sort: any(named: 'sort'),
               state: any(named: 'state'),
@@ -760,26 +847,28 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
+            error: createDefaultNetworkError(code: StreamErrorCode.inputError, statusCode: 400),
+          );
 
           when(() => persistence.getChannelThreads(any())).thenAnswer(
             (_) async => <String, List<Message>>{
               for (final channelState in persistentChannelStates)
-                channelState.channel!.cid: [Message(id: 'test-message-id', text: 'Test message')],
+                channelState.channel!.cid: [createDefaultMessage(id: 'test-message-id', text: 'Test message')],
             },
           );
 
           when(() => persistence.updateChannelState(any())).thenAnswer((_) async => {});
           when(() => persistence.updateChannelThreads(any(), any())).thenAnswer((_) async => {});
 
-          // setUp's `connectUser` schedules debounced persistence writes
-          // (1s window) that would otherwise fire during this test's wait
-          // and pollute the call counts. Wait past the debounce, then clear.
-          await delay(1100);
+          // The connect phase's `connectUser` schedules debounced persistence
+          // writes (1s window) that would otherwise fire during this test's
+          // wait and pollute the call counts. Wait past the debounce, then
+          // clear.
+          await Future.delayed(const Duration(milliseconds: 1100));
           clearInteractions(persistence);
 
           await expectLater(
-            client.queryChannels(),
+            tester.client.queryChannels(),
             emitsInOrder([
               // emits persistent channels
               persistentChannelStates.map(isCorrectChannelFor),
@@ -789,7 +878,7 @@ void main() {
           // Wait safely past the 1s debounce on persistence writes
           // (updateChannelState, updateChannelThreads) so all trailing
           // invocations have fired before we verify counts.
-          await delay(1500);
+          await Future.delayed(const Duration(milliseconds: 1500));
 
           verify(
             () => persistence.queryChannelStates(
@@ -803,8 +892,8 @@ void main() {
             ),
           ).called(1);
 
-          verify(
-            () => api.channel.queryChannels(
+          tester.verifyApi(
+            (api) => api.channel.queryChannels(
               filter: any(named: 'filter'),
               sort: any(named: 'sort'),
               state: any(named: 'state'),
@@ -814,7 +903,7 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).called(1);
+          );
 
           verify(() => persistence.getChannelThreads(any())).called(persistentChannelStates.length);
           verify(() => persistence.updateChannelState(any())).called(persistentChannelStates.length);
@@ -822,18 +911,20 @@ void main() {
         },
       );
 
-      test(
+      _clientWithPersistenceTest(
         'queryChannelsOnline with inline filter persists via saveChannelQueries',
-        () async {
+        body: (tester, persistence) async {
           final filter = ChannelFilter.in_(ChannelFilterField.members, const ['test-user-id']);
 
           final channelStates = List.generate(
             3,
-            (i) => ChannelState(channel: ChannelModel(cid: 'test-type-$i:test-id-$i')),
+            (i) => createDefaultChannelState(
+              channel: createDefaultChannelModel(cid: 'test-type-$i:test-id-$i'),
+            ),
           );
 
-          when(
-            () => api.channel.queryChannels(
+          tester.mockApi(
+            (api) => api.channel.queryChannels(
               filter: filter,
               state: any(named: 'state'),
               watch: any(named: 'watch'),
@@ -842,8 +933,7 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenAnswer(
-            (_) async => QueryChannelsResponse()..channels = channelStates,
+            result: createDefaultQueryChannelsResponse(channels: channelStates),
           );
 
           when(() => persistence.getChannelThreads(any())).thenAnswer((_) async => <String, List<Message>>{});
@@ -863,10 +953,10 @@ void main() {
             ),
           ).thenAnswer((_) => Future.value());
 
-          await delay(1100);
+          await Future.delayed(const Duration(milliseconds: 1100));
           clearInteractions(persistence);
 
-          await client.queryChannelsOnline(filter: filter);
+          await tester.client.queryChannelsOnline(filter: filter);
 
           // The standard path passes filter (the inline filter) and a null
           // predefinedFilter. resolvedFilter / resolvedSort stay null —
@@ -887,24 +977,26 @@ void main() {
         },
       );
 
-      test(
+      _clientWithPersistenceTest(
         'queryChannelsOnline with predefined filter persists via saveChannelQueries with resolved sort',
-        () async {
+        body: (tester, persistence) async {
           const filterName = 'sample-app-list';
           const filterValues = {'user_id': 'test-user-id'};
           const sortValues = {'pinned_at': true};
 
           final channelStates = List.generate(
             3,
-            (i) => ChannelState(channel: ChannelModel(cid: 'test-type-$i:test-id-$i')),
+            (i) => createDefaultChannelState(
+              channel: createDefaultChannelModel(cid: 'test-type-$i:test-id-$i'),
+            ),
           );
 
           // `Sort` has no value equality, so the verify below has to match on
           // the instance the response carried.
           final resolvedSort = [ChannelSort.desc(ChannelSortField.lastMessageAt)];
 
-          when(
-            () => api.channel.queryChannels(
+          tester.mockApi(
+            (api) => api.channel.queryChannels(
               predefinedFilter: filterName,
               filterValues: filterValues,
               sortValues: sortValues,
@@ -915,14 +1007,14 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenAnswer(
-            (_) async => QueryChannelsResponse()
-              ..channels = channelStates
-              ..predefinedFilter = PredefinedFilter(
+            result: createDefaultQueryChannelsResponse(
+              channels: channelStates,
+              predefinedFilter: PredefinedFilter(
                 name: filterName,
                 filter: const ChannelFilter.raw({}),
                 sort: resolvedSort,
               ),
+            ),
           );
 
           when(() => persistence.getChannelThreads(any())).thenAnswer((_) async => <String, List<Message>>{});
@@ -942,10 +1034,10 @@ void main() {
             ),
           ).thenAnswer((_) => Future.value());
 
-          await delay(1100);
+          await Future.delayed(const Duration(milliseconds: 1100));
           clearInteractions(persistence);
 
-          await client.queryChannelsOnline(
+          await tester.client.queryChannelsOnline(
             predefinedFilter: filterName,
             filterValues: filterValues,
             sortValues: sortValues,
@@ -967,16 +1059,18 @@ void main() {
         },
       );
 
-      test(
+      _clientWithPersistenceTest(
         'queryChannelsOffline with predefined filter reads via queryChannelStates',
-        () async {
+        body: (tester, persistence) async {
           const filterName = 'sample-app-list';
           const filterValues = {'user_id': 'test-user-id'};
           const sortValues = {'pinned_at': true};
 
           final channelStates = List.generate(
             3,
-            (i) => ChannelState(channel: ChannelModel(cid: 'test-type-$i:test-id-$i')),
+            (i) => createDefaultChannelState(
+              channel: createDefaultChannelModel(cid: 'test-type-$i:test-id-$i'),
+            ),
           );
 
           when(
@@ -989,16 +1083,16 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenAnswer((_) async => QueryChannelsResponse()..channels = channelStates);
+          ).thenAnswer((_) async => createDefaultQueryChannelsResponse(channels: channelStates));
 
           when(() => persistence.getChannelThreads(any())).thenAnswer((_) async => <String, List<Message>>{});
           when(() => persistence.updateChannelState(any())).thenAnswer((_) async {});
           when(() => persistence.updateChannelThreads(any(), any())).thenAnswer((_) async {});
 
-          await delay(1100);
+          await Future.delayed(const Duration(milliseconds: 1100));
           clearInteractions(persistence);
 
-          final channels = await client.queryChannelsOffline(
+          final channels = await tester.client.queryChannelsOffline(
             predefinedFilter: filterName,
             filterValues: filterValues,
             sortValues: sortValues,
@@ -1020,12 +1114,14 @@ void main() {
         },
       );
 
-      test(
+      _clientWithPersistenceTest(
         'queryChannelsWithResult yields QueryChannelsResult with predefinedFilter=null for inline filter',
-        () async {
+        body: (tester, persistence) async {
           final channelStates = List.generate(
             2,
-            (i) => ChannelState(channel: ChannelModel(cid: 'test-type-$i:test-id-$i')),
+            (i) => createDefaultChannelState(
+              channel: createDefaultChannelModel(cid: 'test-type-$i:test-id-$i'),
+            ),
           );
 
           when(
@@ -1038,10 +1134,10 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenAnswer((_) async => QueryChannelsResponse()..channels = const []);
+          ).thenAnswer((_) async => createDefaultQueryChannelsResponse());
 
-          when(
-            () => api.channel.queryChannels(
+          tester.mockApi(
+            (api) => api.channel.queryChannels(
               filter: any(named: 'filter'),
               sort: any(named: 'sort'),
               state: any(named: 'state'),
@@ -1051,8 +1147,7 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenAnswer(
-            (_) async => QueryChannelsResponse()..channels = channelStates,
+            result: createDefaultQueryChannelsResponse(channels: channelStates),
           );
 
           when(() => persistence.getChannelThreads(any())).thenAnswer((_) async => <String, List<Message>>{});
@@ -1072,10 +1167,10 @@ void main() {
             ),
           ).thenAnswer((_) => Future.value());
 
-          await delay(1100);
+          await Future.delayed(const Duration(milliseconds: 1100));
           clearInteractions(persistence);
 
-          final results = await client.queryChannelsWithResult().toList();
+          final results = await tester.client.queryChannelsWithResult().toList();
 
           // Persistence returned empty, so only the online emission is yielded.
           expect(results, hasLength(1));
@@ -1084,16 +1179,18 @@ void main() {
         },
       );
 
-      test(
+      _clientWithPersistenceTest(
         'queryChannelsWithResult yields QueryChannelsResult with predefinedFilter populated for predefined query',
-        () async {
+        body: (tester, persistence) async {
           const filterName = 'sample-app-list';
           const filterValues = {'user_id': 'test-user-id'};
           const sortValues = {'pinned_at': true};
 
           final channelStates = List.generate(
             2,
-            (i) => ChannelState(channel: ChannelModel(cid: 'test-type-$i:test-id-$i')),
+            (i) => createDefaultChannelState(
+              channel: createDefaultChannelModel(cid: 'test-type-$i:test-id-$i'),
+            ),
           );
 
           final resolvedSort = [ChannelSort.desc(ChannelSortField.lastMessageAt)];
@@ -1114,10 +1211,10 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenAnswer((_) async => QueryChannelsResponse()..channels = const []);
+          ).thenAnswer((_) async => createDefaultQueryChannelsResponse());
 
-          when(
-            () => api.channel.queryChannels(
+          tester.mockApi(
+            (api) => api.channel.queryChannels(
               predefinedFilter: filterName,
               filterValues: filterValues,
               sortValues: sortValues,
@@ -1128,10 +1225,10 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenAnswer(
-            (_) async => QueryChannelsResponse()
-              ..channels = channelStates
-              ..predefinedFilter = expectedPredefinedFilter,
+            result: createDefaultQueryChannelsResponse(
+              channels: channelStates,
+              predefinedFilter: expectedPredefinedFilter,
+            ),
           );
 
           when(() => persistence.getChannelThreads(any())).thenAnswer((_) async => <String, List<Message>>{});
@@ -1151,10 +1248,10 @@ void main() {
             ),
           ).thenAnswer((_) => Future.value());
 
-          await delay(1100);
+          await Future.delayed(const Duration(milliseconds: 1100));
           clearInteractions(persistence);
 
-          final results = await client
+          final results = await tester.client
               .queryChannelsWithResult(
                 predefinedFilter: filterName,
                 filterValues: filterValues,
@@ -1172,191 +1269,163 @@ void main() {
       );
     });
 
-    test('`.disconnectUser` should reset state and user', () async {
-      expect(client.state.currentUser, isNotNull);
-      expect(client.wsConnectionStatus, ConnectionStatus.connected);
+    _clientWithPersistenceTest(
+      '`.disconnectUser` should reset state and user',
+      body: (tester, persistence) async {
+        expect(tester.clientState.currentUser, isNotNull);
+        expect(tester.connectionStatus, ConnectionStatus.connected);
 
-      expectLater(
-        // skipping initial connected value
-        client.wsConnectionStatusStream.skip(1),
-        emits(ConnectionStatus.disconnected),
-      );
+        expectLater(
+          // skipping initial connected value
+          tester.client.wsConnectionStatusStream.skip(1),
+          emits(ConnectionStatus.disconnected),
+        );
 
-      await client.disconnectUser(flushChatPersistence: true);
+        await tester.client.disconnectUser(flushChatPersistence: true);
 
-      expect(client.state.currentUser, isNull);
-      expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
-    });
+        expect(tester.clientState.currentUser, isNull);
+        expect(tester.connectionStatus, ConnectionStatus.disconnected);
+      },
+    );
   });
 
   group('Client with connected user without persistence', () {
-    const apiKey = 'test-api-key';
-    const userId = 'test-user-id';
-    late final api = FakeChatApi();
-
-    final user = User(id: userId);
-    final token = testUserToken(user.id).rawValue;
-
-    late StreamChatClient client;
-
-    setUpAll(() {
-      // fallback values
-      registerFallbackValue(FakeEvent());
-      registerFallbackValue(FakeMessage());
-      registerFallbackValue(FakeDraftMessage());
-      registerFallbackValue(FakePollVote());
-      registerFallbackValue(const PaginationParams());
-    });
-
-    setUp(() async {
-      // Clear any accumulated interactions from a previous test so that
-      // verifyNoMoreInteractions on api.general stays accurate.
-      clearInteractions(api.general);
-
-      final ws = FakeWebSocket();
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws);
-      // Stub getAppSettings so the background fetch after connectUser succeeds.
-      when(() => api.general.getAppSettings()).thenAnswer(
-        (_) async => GetAppSettingsResponse()..app = const AppSettings(name: 'test'),
-      );
-      await client.connectUser(user, token);
-      await delay(300);
-      expect(client.persistenceEnabled, isFalse);
-      expect(client.wsConnectionStatus, ConnectionStatus.connected);
-    });
-
-    tearDown(() async {
-      await client.dispose();
-    });
+    const _channelData = {'name': 'test-channel-name'};
 
     group('`.sync`', () {
-      test('should work fine', () async {
-        const cids = ['test-cid-1', 'test-cid-2', 'test-cid-3'];
-        final lastSyncAt = DateTime.now();
+      chatClientTest(
+        'should work fine',
+        body: (tester) async {
+          const cids = ['test-cid-1', 'test-cid-2', 'test-cid-3'];
+          final lastSyncAt = DateTime.utc(2021, 3);
 
-        when(() => api.general.sync(cids, lastSyncAt)).thenAnswer(
-          (_) async => SyncResponse()
-            ..events = [
-              Event(
-                isLocal: false,
-                type: EventType.healthCheck,
-                connectionId: 'test-connection-id',
-                me: OwnUser.fromUser(user),
-              ),
-              Event(
-                isLocal: false,
-                type: EventType.messageDeleted,
-                message: Message(id: 'test-message-id'),
-              ),
-            ],
-        );
-
-        await client.sync(cids: cids, lastSyncAt: lastSyncAt);
-
-        verify(() => api.general.sync(cids, lastSyncAt)).called(1);
-      });
-
-      test('should return if `cids` is not available', () async {
-        expect(client.sync, returnsNormally);
-        verifyNever(() => api.general.sync(any(), any()));
-      });
-
-      test('should return if `lastSyncAt` is not available', () async {
-        expect(() => client.sync(cids: ['test-cid-1']), returnsNormally);
-        verifyNever(() => api.general.sync(any(), any()));
-      });
-    });
-
-    group('`.queryChannels`', () {
-      test('should work fine without persistent channels', () async {
-        final channelStates = List.generate(
-          3,
-          (index) => ChannelState(
-            channel: ChannelModel(cid: 'test-type-$index:test-id-$index'),
-          ),
-        );
-
-        when(
-          () => api.channel.queryChannels(
-            filter: any(named: 'filter'),
-            sort: any(named: 'sort'),
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            memberLimit: any(named: 'memberLimit'),
-            messageLimit: any(named: 'messageLimit'),
-            paginationParams: any(named: 'paginationParams'),
-          ),
-        ).thenAnswer(
-          (_) async => QueryChannelsResponse()..channels = channelStates,
-        );
-
-        expectLater(
-          client.queryChannels(),
-          emitsInOrder([channelStates.map(isCorrectChannelFor)]),
-        );
-
-        // Hack as `teardown` gets called even
-        // before our stream starts emitting data
-        await delay(300);
-
-        verify(
-          () => api.channel.queryChannels(
-            filter: any(named: 'filter'),
-            sort: any(named: 'sort'),
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            memberLimit: any(named: 'memberLimit'),
-            messageLimit: any(named: 'messageLimit'),
-            paginationParams: any(named: 'paginationParams'),
-          ),
-        ).called(1);
-      });
-
-      test(
-        '''should rethrow if `.queryChannelsOnline` throws and persistence channels are empty''',
-        () async {
-          when(
-            () => api.channel.queryChannels(
-              filter: any(named: 'filter'),
-              sort: any(named: 'sort'),
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
+          tester.mockApi(
+            (api) => api.general.sync(cids, lastSyncAt),
+            result: createDefaultSyncResponse(
+              events: [
+                Event(
+                  isLocal: false,
+                  type: EventType.healthCheck,
+                  connectionId: 'test-connection-id',
+                  me: OwnUser.fromUser(tester.user),
+                ),
+                Event(
+                  isLocal: false,
+                  type: EventType.messageDeleted,
+                  message: Message(id: 'test-message-id'),
+                ),
+              ],
             ),
-          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
-
-          expectLater(
-            client.queryChannels(),
-            emitsError(isA<StreamApiException>()),
           );
 
-          // Hack as `teardown` gets called even
-          // before our stream starts emitting data
-          await delay(300);
+          await tester.client.sync(cids: cids, lastSyncAt: lastSyncAt);
 
-          verify(
-            () => api.channel.queryChannels(
-              filter: any(named: 'filter'),
-              sort: any(named: 'sort'),
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
-            ),
-          ).called(1);
+          tester.verifyApi((api) => api.general.sync(cids, lastSyncAt));
         },
       );
 
-      test(
+      chatClientTest(
+        'should return if `cids` is not available',
+        body: (tester) async {
+          await expectLater(tester.client.sync(), completes);
+          tester.verifyNeverCalled((api) => api.general.sync(any(), any()));
+        },
+      );
+
+      chatClientTest(
+        'should return if `lastSyncAt` is not available',
+        body: (tester) async {
+          await expectLater(tester.client.sync(cids: ['test-cid-1']), completes);
+          tester.verifyNeverCalled((api) => api.general.sync(any(), any()));
+        },
+      );
+    });
+
+    group('`.queryChannels`', () {
+      chatClientTest(
+        'should work fine without persistent channels',
+        body: (tester) async {
+          final channelStates = List.generate(
+            3,
+            (index) => createDefaultChannelState(
+              channel: createDefaultChannelModel(cid: 'test-type-$index:test-id-$index'),
+            ),
+          );
+
+          tester.mockApi(
+            (api) => api.channel.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              state: any(named: 'state'),
+              watch: any(named: 'watch'),
+              presence: any(named: 'presence'),
+              memberLimit: any(named: 'memberLimit'),
+              messageLimit: any(named: 'messageLimit'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+            result: createDefaultQueryChannelsResponse(channels: channelStates),
+          );
+
+          await expectLater(
+            tester.client.queryChannels(),
+            emitsInOrder([channelStates.map(isCorrectChannelFor)]),
+          );
+
+          tester.verifyApi(
+            (api) => api.channel.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              state: any(named: 'state'),
+              watch: any(named: 'watch'),
+              presence: any(named: 'presence'),
+              memberLimit: any(named: 'memberLimit'),
+              messageLimit: any(named: 'messageLimit'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          );
+        },
+      );
+
+      chatClientTest(
+        '''should rethrow if `.queryChannelsOnline` throws and persistence channels are empty''',
+        body: (tester) async {
+          tester.mockApiFailure(
+            (api) => api.channel.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              state: any(named: 'state'),
+              watch: any(named: 'watch'),
+              presence: any(named: 'presence'),
+              memberLimit: any(named: 'memberLimit'),
+              messageLimit: any(named: 'messageLimit'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+            error: createDefaultNetworkError(code: StreamErrorCode.inputError, statusCode: 400),
+          );
+
+          await expectLater(
+            tester.client.queryChannels(),
+            emitsError(isA<StreamApiException>()),
+          );
+
+          tester.verifyApi(
+            (api) => api.channel.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              state: any(named: 'state'),
+              watch: any(named: 'watch'),
+              presence: any(named: 'presence'),
+              memberLimit: any(named: 'memberLimit'),
+              messageLimit: any(named: 'messageLimit'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          );
+        },
+      );
+
+      chatClientTest(
         'should coalesce concurrent identical calls into a single HTTP request',
-        () async {
+        body: (tester) async {
           // Regression test for a TOCTOU race in the _queryChannelsStreams
           // cache: the cache write previously happened after an offline-await,
           // so N sibling calls in the same event-loop tick all missed the
@@ -1367,15 +1436,15 @@ void main() {
           // share its result.
           final channelStates = List.generate(
             3,
-            (index) => ChannelState(
-              channel: ChannelModel(cid: 'test-type-$index:test-id-$index'),
+            (index) => createDefaultChannelState(
+              channel: createDefaultChannelModel(cid: 'test-type-$index:test-id-$index'),
             ),
           );
 
           // Slow down the API so all concurrent callers are guaranteed to be
           // in flight at the same time when the cache write happens.
-          when(
-            () => api.channel.queryChannels(
+          tester.mockApi(
+            (api) => api.channel.queryChannels(
               filter: any(named: 'filter'),
               sort: any(named: 'sort'),
               state: any(named: 'state'),
@@ -1385,14 +1454,13 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenAnswer((_) async {
-            await delay(100);
-            return QueryChannelsResponse()..channels = channelStates;
-          });
+            result: createDefaultQueryChannelsResponse(channels: channelStates),
+            delay: const Duration(milliseconds: 100),
+          );
 
           // Fire 5 identical calls back-to-back in the same tick.
           final results = await Future.wait(
-            List.generate(5, (_) => client.queryChannels().toList()),
+            List.generate(5, (_) => tester.client.queryChannels().toList()),
           );
 
           // All callers should receive the same channels.
@@ -1402,8 +1470,8 @@ void main() {
           }
 
           // But only ONE HTTP request should have been issued.
-          verify(
-            () => api.channel.queryChannels(
+          tester.verifyApi(
+            (api) => api.channel.queryChannels(
               filter: any(named: 'filter'),
               sort: any(named: 'sort'),
               state: any(named: 'state'),
@@ -1413,25 +1481,25 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).called(1);
+          );
         },
       );
 
-      test(
+      chatClientTest(
         'should fire a fresh request once the cached future has settled',
-        () async {
+        body: (tester) async {
           // After the in-flight future completes, the cache slot is freed and
           // the next call must hit the API again — only concurrent callers
           // share the future, not sequential ones.
           final channelStates = List.generate(
             3,
-            (index) => ChannelState(
-              channel: ChannelModel(cid: 'test-type-$index:test-id-$index'),
+            (index) => createDefaultChannelState(
+              channel: createDefaultChannelModel(cid: 'test-type-$index:test-id-$index'),
             ),
           );
 
-          when(
-            () => api.channel.queryChannels(
+          tester.mockApi(
+            (api) => api.channel.queryChannels(
               filter: any(named: 'filter'),
               sort: any(named: 'sort'),
               state: any(named: 'state'),
@@ -1441,15 +1509,14 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenAnswer(
-            (_) async => QueryChannelsResponse()..channels = channelStates,
+            result: createDefaultQueryChannelsResponse(channels: channelStates),
           );
 
-          await client.queryChannels().toList();
-          await client.queryChannels().toList();
+          await tester.client.queryChannels().toList();
+          await tester.client.queryChannels().toList();
 
-          verify(
-            () => api.channel.queryChannels(
+          tester.verifyApiCalled(
+            (api) => api.channel.queryChannels(
               filter: any(named: 'filter'),
               sort: any(named: 'sort'),
               state: any(named: 'state'),
@@ -1459,17 +1526,18 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).called(2);
+            times: 2,
+          );
         },
       );
 
-      test(
+      chatClientTest(
         'concurrent calls with different filters do not share the cache',
-        () async {
+        body: (tester) async {
           // The cache is keyed on a hash of the query parameters. Callers
           // with different filters/limits must each fire their own request.
-          when(
-            () => api.channel.queryChannels(
+          tester.mockApi(
+            (api) => api.channel.queryChannels(
               filter: any(named: 'filter'),
               sort: any(named: 'sort'),
               state: any(named: 'state'),
@@ -1479,18 +1547,17 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenAnswer((_) async {
-            await delay(100);
-            return QueryChannelsResponse()..channels = [];
-          });
+            result: createDefaultQueryChannelsResponse(),
+            delay: const Duration(milliseconds: 100),
+          );
 
           await Future.wait([
-            client.queryChannels(filter: ChannelFilter.in_(ChannelFilterField.cid, const ['a'])).toList(),
-            client.queryChannels(filter: ChannelFilter.in_(ChannelFilterField.cid, const ['b'])).toList(),
+            tester.client.queryChannels(filter: ChannelFilter.in_(ChannelFilterField.cid, const ['a'])).toList(),
+            tester.client.queryChannels(filter: ChannelFilter.in_(ChannelFilterField.cid, const ['b'])).toList(),
           ]);
 
-          verify(
-            () => api.channel.queryChannels(
+          tester.verifyApiCalled(
+            (api) => api.channel.queryChannels(
               filter: any(named: 'filter'),
               sort: any(named: 'sort'),
               state: any(named: 'state'),
@@ -1500,18 +1567,19 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).called(2);
+            times: 2,
+          );
         },
       );
 
-      test(
+      chatClientTest(
         'concurrent calls share the same error when the request fails',
-        () async {
+        body: (tester) async {
           // If the in-flight HTTP request fails, every concurrent caller
           // awaiting the shared future should see the same error rather than
           // each firing its own retry request.
-          when(
-            () => api.channel.queryChannels(
+          tester.mockApiFailure(
+            (api) => api.channel.queryChannels(
               filter: any(named: 'filter'),
               sort: any(named: 'sort'),
               state: any(named: 'state'),
@@ -1521,15 +1589,14 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenAnswer((_) async {
-            await delay(100);
-            throw apiException(code: StreamErrorCode.inputError, statusCode: 400);
-          });
+            error: createDefaultNetworkError(code: StreamErrorCode.inputError, statusCode: 400),
+            delay: const Duration(milliseconds: 100),
+          );
 
           final errors = await Future.wait(
             List.generate(5, (_) async {
               try {
-                await client.queryChannels().toList();
+                await tester.client.queryChannels().toList();
                 return null;
               } catch (e) {
                 return e;
@@ -1544,8 +1611,8 @@ void main() {
           }
 
           // But only ONE HTTP request was made — the rest piggybacked.
-          verify(
-            () => api.channel.queryChannels(
+          tester.verifyApi(
+            (api) => api.channel.queryChannels(
               filter: any(named: 'filter'),
               sort: any(named: 'sort'),
               state: any(named: 'state'),
@@ -1555,2225 +1622,2433 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).called(1);
+          );
         },
       );
     });
 
-    test('`.queryUsers`', () async {
-      final users = List.generate(
-        3,
-        (index) => User(id: 'test-user-id-$index'),
-      );
-
-      when(
-        () => api.user.queryUsers(
-          presence: any(named: 'presence'),
-          filter: any(named: 'filter'),
-          sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
-        ),
-      ).thenAnswer((_) async => QueryUsersResponse()..users = users);
-
-      expectLater(
-        // skipping initial seed event -> {} users
-        client.state.usersStream.skip(1),
-        emitsInOrder([
-          {for (final user in users) user.id: user},
-        ]),
-      );
-
-      final res = await client.queryUsers();
-      expect(res, isNotNull);
-      expect(res.users.length, users.length);
-
-      verify(
-        () => api.user.queryUsers(
-          presence: any(named: 'presence'),
-          filter: any(named: 'filter'),
-          sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.user);
-    });
-
-    test('`.queryBannedUsers`', () async {
-      final bans = List.generate(
-        3,
-        (index) => BannedUser(
-          user: User(id: 'test-user-id-$index'),
-          bannedBy: User(id: 'test-user-id-${index + 1}'),
-        ),
-      );
-
-      const cid = 'message:nice-channel';
-      final filter = BannedUserFilter.equal(BannedUserFilterField.channelCid, cid);
-
-      when(
-        () => api.moderation.queryBannedUsers(
-          filter: filter,
-          sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
-        ),
-      ).thenAnswer((_) async => QueryBannedUsersResponse()..bans = bans);
-
-      final res = await client.queryBannedUsers(filter: filter);
-      expect(res, isNotNull);
-      expect(res.bans.length, bans.length);
-
-      verify(
-        () => api.moderation.queryBannedUsers(
-          filter: filter,
-          sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.moderation);
-    });
-
-    test('`.search`', () async {
-      const cid = 'test-type:test-id';
-      final filter = ChannelFilter.in_(ChannelFilterField.cid, const [cid]);
-
-      final messages = List.generate(
-        3,
-        (index) => GetMessageResponse()
-          ..channel = ChannelModel(cid: cid)
-          ..message = Message(id: 'test-message-id-$index'),
-      );
-
-      when(
-        () => api.general.searchMessages(
-          filter,
-          query: any(named: 'query'),
-          sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
-          messageFilters: any(named: 'messageFilters'),
-        ),
-      ).thenAnswer((_) async => SearchMessagesResponse()..results = messages);
-
-      final res = await client.search(filter);
-      expect(res, isNotNull);
-      expect(res.results.length, messages.length);
-
-      verify(
-        () => api.general.searchMessages(
-          filter,
-          query: any(named: 'query'),
-          sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
-          messageFilters: any(named: 'messageFilters'),
-        ),
-      ).called(1);
-      verify(() => api.general.getAppSettings()).called(1);
-      verifyNoMoreInteractions(api.general);
-    });
-
-    test('`.sendFile`', () async {
-      const channelId = 'test-channel-id';
-      const channelType = 'test-channel-type';
-      final file = AttachmentFile(size: 33, path: 'test-file-path');
-
-      const fileUrl = 'test-file-url';
-
-      when(
-        () => api.fileUploader.sendFile(file, channelId, channelType),
-      ).thenAnswer((_) async => SendFileResponse()..file = fileUrl);
-
-      final res = await client.sendFile(file, channelId, channelType);
-      expect(res, isNotNull);
-      expect(res.file, fileUrl);
-
-      verify(() => api.fileUploader.sendFile(file, channelId, channelType)).called(1);
-      verifyNoMoreInteractions(api.fileUploader);
-    });
-
-    test('`.sendImage`', () async {
-      const channelId = 'test-channel-id';
-      const channelType = 'test-channel-type';
-      final image = AttachmentFile(size: 33, path: 'test-image-path');
-
-      const fileUrl = 'test-image-url';
-
-      when(
-        () => api.fileUploader.sendImage(image, channelId, channelType),
-      ).thenAnswer((_) async => SendImageResponse()..file = fileUrl);
-
-      final res = await client.sendImage(image, channelId, channelType);
-      expect(res, isNotNull);
-      expect(res.file, fileUrl);
-
-      verify(() => api.fileUploader.sendImage(image, channelId, channelType)).called(1);
-      verifyNoMoreInteractions(api.fileUploader);
-    });
-
-    test('`.deleteFile`', () async {
-      const channelId = 'test-channel-id';
-      const channelType = 'test-channel-type';
-      const fileUrl = 'test-file-url';
-
-      when(() => api.fileUploader.deleteFile(fileUrl, channelId, channelType)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.deleteFile(fileUrl, channelId, channelType);
-      expect(res, isNotNull);
-
-      verify(() => api.fileUploader.deleteFile(fileUrl, channelId, channelType)).called(1);
-      verifyNoMoreInteractions(api.fileUploader);
-    });
-
-    test('`.deleteImage`', () async {
-      const channelId = 'test-channel-id';
-      const channelType = 'test-channel-type';
-      const imageUrl = 'test-image-url';
-
-      when(
-        () => api.fileUploader.deleteImage(imageUrl, channelId, channelType),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.deleteImage(imageUrl, channelId, channelType);
-      expect(res, isNotNull);
-
-      verify(
-        () => api.fileUploader.deleteImage(imageUrl, channelId, channelType),
-      ).called(1);
-      verifyNoMoreInteractions(api.fileUploader);
-    });
-
-    test('`.uploadImage`', () async {
-      final image = AttachmentFile(size: 33, path: 'test-image-path');
-      const fileUrl = 'test-image-url';
-
-      when(() => api.fileUploader.uploadImage(image)).thenAnswer((_) async => UploadImageResponse()..file = fileUrl);
-
-      final res = await client.uploadImage(image);
-      expect(res, isNotNull);
-      expect(res.file, fileUrl);
-
-      verify(() => api.fileUploader.uploadImage(image)).called(1);
-      verifyNoMoreInteractions(api.fileUploader);
-    });
-
-    test('`.uploadFile`', () async {
-      final file = AttachmentFile(size: 33, path: 'test-file-path');
-      const fileUrl = 'test-file-url';
-
-      when(() => api.fileUploader.uploadFile(file)).thenAnswer((_) async => UploadFileResponse()..file = fileUrl);
-
-      final res = await client.uploadFile(file);
-      expect(res, isNotNull);
-      expect(res.file, fileUrl);
-
-      verify(() => api.fileUploader.uploadFile(file)).called(1);
-      verifyNoMoreInteractions(api.fileUploader);
-    });
-
-    test('`.removeImage`', () async {
-      const imageUrl = 'test-image-url';
-
-      when(() => api.fileUploader.removeImage(imageUrl)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.removeImage(imageUrl);
-      expect(res, isNotNull);
-
-      verify(() => api.fileUploader.removeImage(imageUrl)).called(1);
-      verifyNoMoreInteractions(api.fileUploader);
-    });
-
-    test('`.removeFile`', () async {
-      const fileUrl = 'test-file-url';
-
-      when(() => api.fileUploader.removeFile(fileUrl)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.removeFile(fileUrl);
-      expect(res, isNotNull);
-
-      verify(() => api.fileUploader.removeFile(fileUrl)).called(1);
-      verifyNoMoreInteractions(api.fileUploader);
-    });
-
-    test('`.updateChannel`', () async {
-      const channelId = 'test-channel-id';
-      const channelType = 'test-channel-type';
-      const data = {'name': 'test-channel'};
-
-      when(() => api.channel.updateChannel(channelId, channelType, data)).thenAnswer(
-        (invocation) async => UpdateChannelResponse()
-          ..channel = ChannelModel(
-            id: channelId,
-            type: channelType,
-            extraData: {...data},
-          ),
-      );
-
-      final res = await client.updateChannel(channelId, channelType, data);
-      expect(res, isNotNull);
-      expect(res.channel.cid, '$channelType:$channelId');
-      expect(res.channel.extraData['name'], 'test-channel');
-
-      verify(() => api.channel.updateChannel(channelId, channelType, data)).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.updateChannelPartial`', () async {
-      const channelId = 'test-channel-id';
-      const channelType = 'test-channel-type';
-      const set = {
-        'name': 'Stream Team',
-        'profile_image': 'test-profile-image',
-      };
-      const unset = ['tag', 'last_name'];
-
-      when(() => api.channel.updateChannelPartial(channelId, channelType, set: set, unset: unset)).thenAnswer(
-        (invocation) async => PartialUpdateChannelResponse()
-          ..channel = ChannelModel(
-            id: channelId,
-            type: channelType,
-            extraData: {...set},
-          ),
-      );
-
-      final res = await client.updateChannelPartial(
-        channelId,
-        channelType,
-        set: set,
-        unset: unset,
-      );
-      expect(res, isNotNull);
-      expect(res.channel.cid, '$channelType:$channelId');
-      expect(res.channel.extraData, set);
-
-      verify(() => api.channel.updateChannelPartial(channelId, channelType, set: set, unset: unset)).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.addDevice should work`', () async {
-      const id = 'test-device-id';
-      const provider = PushProvider.firebase;
-
-      when(() => api.device.addDevice(id, provider)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.addDevice(id, provider);
-      expect(res, isNotNull);
-
-      verify(() => api.device.addDevice(id, provider)).called(1);
-      verifyNoMoreInteractions(api.device);
-    });
-
-    test('`.addDevice should work with pushProviderName`', () async {
-      const id = 'test-device-id';
-      const provider = PushProvider.firebase;
-      const pushProviderName = 'my-custom-config';
-
-      when(
-        () => api.device.addDevice(
-          id,
-          provider,
-          pushProviderName: pushProviderName,
-        ),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.addDevice(
-        id,
-        provider,
-        pushProviderName: pushProviderName,
-      );
-      expect(res, isNotNull);
-
-      verify(
-        () => api.device.addDevice(
-          id,
-          provider,
-          pushProviderName: pushProviderName,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.device);
-    });
-
-    test('`.getDevices`', () async {
-      final devices = List.generate(
-        3,
-        (index) => Device(
-          id: 'test-device-id-$index',
-          pushProvider: PushProvider.firebase.name,
-        ),
-      );
-
-      when(() => api.device.getDevices()).thenAnswer((_) async => ListDevicesResponse()..devices = devices);
-
-      final res = await client.getDevices();
-      expect(res, isNotNull);
-      expect(res.devices.length, devices.length);
-
-      verify(() => api.device.getDevices()).called(1);
-      verifyNoMoreInteractions(api.device);
-    });
-
-    test('`.removeDevice`', () async {
-      const deviceId = 'test-device-id';
-
-      when(() => api.device.removeDevice(deviceId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.removeDevice(deviceId);
-      expect(res, isNotNull);
-
-      verify(() => api.device.removeDevice(deviceId)).called(1);
-      verifyNoMoreInteractions(api.device);
-    });
-
-    test('`.setPushPreferences`', () async {
-      const pushPreferenceInput = PushPreferenceInput(
-        chatLevel: ChatLevel.mentions,
-      );
-
-      const channelCid = 'messaging:123';
-      const channelPreferenceInput = PushPreferenceInput.channel(
-        channelCid: channelCid,
-        chatLevel: ChatLevel.mentions,
-      );
-
-      const preferences = [pushPreferenceInput, channelPreferenceInput];
-
-      final currentUser = client.state.currentUser;
-      when(() => api.device.setPushPreferences(preferences)).thenAnswer(
-        (_) async => UpsertPushPreferencesResponse()
-          ..userPreferences = {
-            '${currentUser?.id}': PushPreference(
-              chatLevel: pushPreferenceInput.chatLevel,
-            ),
-          }
-          ..userChannelPreferences = {
-            '${currentUser?.id}': {
-              channelCid: ChannelPushPreference(
-                chatLevel: channelPreferenceInput.chatLevel,
-              ),
-            },
-          },
-      );
-
-      expect(
-        client.eventStream,
-        emitsInOrder([
-          isA<Event>().having(
-            (e) => e.type,
-            'push_preference.updated event',
-            EventType.pushPreferenceUpdated,
-          ),
-          isA<Event>().having(
-            (e) => e.type,
-            'channel.push_preference.updated event',
-            EventType.channelPushPreferenceUpdated,
-          ),
-        ]),
-      );
-
-      final res = await client.setPushPreferences(preferences);
-      expect(res, isNotNull);
-
-      verify(() => api.device.setPushPreferences(preferences)).called(1);
-      verifyNoMoreInteractions(api.device);
-    });
-
-    test('should handle push_preference.updated event', () async {
-      final pushPreference = PushPreference(
-        chatLevel: ChatLevel.mentions,
-        callLevel: CallLevel.all,
-        disabledUntil: DateTime.now().add(const Duration(hours: 1)),
-      );
-
-      final event = Event(
-        type: EventType.pushPreferenceUpdated,
-        pushPreference: pushPreference,
-      );
-
-      // Initially null
-      expect(client.state.currentUser?.pushPreferences, isNull);
-
-      // Trigger the event
-      client.handleEvent(event);
-
-      // Wait for the event to get processed
-      await Future.delayed(Duration.zero);
-
-      // Should update currentUser.pushPreferences
-      final pushPreferences = client.state.currentUser?.pushPreferences;
-      expect(pushPreferences, isNotNull);
-      expect(pushPreferences?.chatLevel, ChatLevel.mentions);
-      expect(pushPreferences?.callLevel, CallLevel.all);
-      expect(pushPreferences?.disabledUntil, pushPreference.disabledUntil);
-    });
-
-    test('`.listUserGroups`', () async {
-      const limit = 10;
-      const idGt = 'cursor-group-id';
-      final createdAtGt = DateTime.utc(2024, 6, 15, 12);
-      const teamId = 'test-team-id';
-
-      when(
-        () => api.userGroups.listUserGroups(
-          limit: limit,
-          idGt: idGt,
-          createdAtGt: createdAtGt,
-          teamId: teamId,
-        ),
-      ).thenAnswer((_) async => ListUserGroupsResponse()..userGroups = const []);
-
-      final res = await client.listUserGroups(
-        limit: limit,
-        idGt: idGt,
-        createdAtGt: createdAtGt,
-        teamId: teamId,
-      );
-      expect(res, isNotNull);
-
-      verify(
-        () => api.userGroups.listUserGroups(
-          limit: limit,
-          idGt: idGt,
-          createdAtGt: createdAtGt,
-          teamId: teamId,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.userGroups);
-    });
-
-    test('`.searchUserGroups`', () async {
-      const query = 'eng';
-      const limit = 10;
-      const nameGt = 'engineering';
-      const idGt = 'cursor-group-id';
-      const teamId = 'test-team-id';
-
-      when(
-        () => api.userGroups.searchUserGroups(
-          query,
-          limit: limit,
-          nameGt: nameGt,
-          idGt: idGt,
-          teamId: teamId,
-        ),
-      ).thenAnswer((_) async => SearchUserGroupsResponse()..userGroups = const []);
-
-      final res = await client.searchUserGroups(
-        query,
-        limit: limit,
-        nameGt: nameGt,
-        idGt: idGt,
-        teamId: teamId,
-      );
-      expect(res, isNotNull);
-
-      verify(
-        () => api.userGroups.searchUserGroups(
-          query,
-          limit: limit,
-          nameGt: nameGt,
-          idGt: idGt,
-          teamId: teamId,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.userGroups);
-    });
-
-    test('`.getUserGroup`', () async {
-      const id = 'test-group-id';
-      const teamId = 'test-team-id';
-
-      when(() => api.userGroups.getUserGroup(id, teamId: teamId)).thenAnswer(
-        (_) async => GetUserGroupResponse()
-          ..userGroup = UserGroup(
-            id: id,
-            name: 'test-group-name',
-            createdAt: DateTime.utc(2024, 1, 1),
-            updatedAt: DateTime.utc(2024, 1, 2),
-          ),
-      );
-
-      final res = await client.getUserGroup(id, teamId: teamId);
-      expect(res, isNotNull);
-      expect(res.userGroup.id, id);
-
-      verify(() => api.userGroups.getUserGroup(id, teamId: teamId)).called(1);
-      verifyNoMoreInteractions(api.userGroups);
-    });
-
-    test('`.createUserGroup`', () async {
-      const name = 'Engineering';
-      const id = 'eng';
-      const description = 'Engineering team';
-      const teamId = 'test-team-id';
-      const memberIds = ['user-1', 'user-2'];
-
-      when(
-        () => api.userGroups.createUserGroup(
-          name,
-          id: id,
-          description: description,
-          teamId: teamId,
-          memberIds: memberIds,
-        ),
-      ).thenAnswer(
-        (_) async => CreateUserGroupResponse()
-          ..userGroup = UserGroup(
-            id: id,
-            name: name,
-            description: description,
-            teamId: teamId,
-            createdAt: DateTime.utc(2024, 1, 1),
-            updatedAt: DateTime.utc(2024, 1, 2),
-          ),
-      );
-
-      final res = await client.createUserGroup(
-        name,
-        id: id,
-        description: description,
-        teamId: teamId,
-        memberIds: memberIds,
-      );
-      expect(res, isNotNull);
-      expect(res.userGroup.id, id);
-
-      verify(
-        () => api.userGroups.createUserGroup(
-          name,
-          id: id,
-          description: description,
-          teamId: teamId,
-          memberIds: memberIds,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.userGroups);
-    });
-
-    test('`.updateUserGroup`', () async {
-      const id = 'test-group-id';
-      const name = 'New Name';
-      const description = 'New description';
-      const teamId = 'test-team-id';
-
-      when(
-        () => api.userGroups.updateUserGroup(
-          id,
-          name: name,
-          description: description,
-          teamId: teamId,
-        ),
-      ).thenAnswer(
-        (_) async => UpdateUserGroupResponse()
-          ..userGroup = UserGroup(
-            id: id,
-            name: name,
-            description: description,
-            teamId: teamId,
-            createdAt: DateTime.utc(2024, 1, 1),
-            updatedAt: DateTime.utc(2024, 1, 2),
-          ),
-      );
-
-      final res = await client.updateUserGroup(
-        id,
-        name: name,
-        description: description,
-        teamId: teamId,
-      );
-      expect(res, isNotNull);
-      expect(res.userGroup.name, name);
-
-      verify(
-        () => api.userGroups.updateUserGroup(
-          id,
-          name: name,
-          description: description,
-          teamId: teamId,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.userGroups);
-    });
-
-    test('`.deleteUserGroup`', () async {
-      const id = 'test-group-id';
-      const teamId = 'test-team-id';
-
-      when(() => api.userGroups.deleteUserGroup(id, teamId: teamId)).thenAnswer(
-        (_) async => EmptyResponse(),
-      );
-
-      final res = await client.deleteUserGroup(id, teamId: teamId);
-      expect(res, isNotNull);
-
-      verify(() => api.userGroups.deleteUserGroup(id, teamId: teamId)).called(1);
-      verifyNoMoreInteractions(api.userGroups);
-    });
-
-    test('`.addUserGroupMembers`', () async {
-      const id = 'test-group-id';
-      const memberIds = ['user-1', 'user-2'];
-      const asAdmin = true;
-      const teamId = 'test-team-id';
-
-      when(
-        () => api.userGroups.addUserGroupMembers(
-          id,
-          memberIds,
-          asAdmin: asAdmin,
-          teamId: teamId,
-        ),
-      ).thenAnswer(
-        (_) async => AddUserGroupMembersResponse()
-          ..userGroup = UserGroup(
-            id: id,
-            name: 'test-group-name',
-            createdAt: DateTime.utc(2024, 1, 1),
-            updatedAt: DateTime.utc(2024, 1, 2),
-          ),
-      );
-
-      final res = await client.addUserGroupMembers(
-        id,
-        memberIds,
-        asAdmin: asAdmin,
-        teamId: teamId,
-      );
-      expect(res, isNotNull);
-
-      verify(
-        () => api.userGroups.addUserGroupMembers(
-          id,
-          memberIds,
-          asAdmin: asAdmin,
-          teamId: teamId,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.userGroups);
-    });
-
-    test('`.removeUserGroupMembers`', () async {
-      const id = 'test-group-id';
-      const memberIds = ['user-1', 'user-2'];
-      const teamId = 'test-team-id';
-
-      when(
-        () => api.userGroups.removeUserGroupMembers(
-          id,
-          memberIds,
-          teamId: teamId,
-        ),
-      ).thenAnswer(
-        (_) async => RemoveUserGroupMembersResponse()
-          ..userGroup = UserGroup(
-            id: id,
-            name: 'test-group-name',
-            createdAt: DateTime.utc(2024, 1, 1),
-            updatedAt: DateTime.utc(2024, 1, 2),
-          ),
-      );
-
-      final res = await client.removeUserGroupMembers(
-        id,
-        memberIds,
-        teamId: teamId,
-      );
-      expect(res, isNotNull);
-
-      verify(
-        () => api.userGroups.removeUserGroupMembers(
-          id,
-          memberIds,
-          teamId: teamId,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.userGroups);
-    });
-
-    test('`.searchRoles`', () async {
-      const query = 'adm';
-      const limit = 10;
-      const nameGt = 'admin';
-      const roleType = RoleType.user;
-      const includeGlobalRoles = true;
-
-      when(
-        () => api.roles.searchRoles(
-          query,
-          limit: limit,
-          nameGt: nameGt,
-          roleType: roleType,
-          includeGlobalRoles: includeGlobalRoles,
-        ),
-      ).thenAnswer((_) async => SearchRolesResponse()..roles = const []);
-
-      final res = await client.searchRoles(
-        query,
-        limit: limit,
-        nameGt: nameGt,
-        roleType: roleType,
-        includeGlobalRoles: includeGlobalRoles,
-      );
-      expect(res, isNotNull);
-
-      verify(
-        () => api.roles.searchRoles(
-          query,
-          limit: limit,
-          nameGt: nameGt,
-          roleType: roleType,
-          includeGlobalRoles: includeGlobalRoles,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.roles);
-    });
-
-    group('`.channel`', () {
-      test('should return back a new channel instance', () {
-        const channelType = 'test-channel-type';
-        const channelId = 'test-channel-id';
-        const channelData = {'name': 'test-channel-name'};
-
-        final channel = client.channel(
-          channelType,
-          id: channelId,
-          extraData: channelData,
+    chatClientTest(
+      '`.queryUsers`',
+      body: (tester) async {
+        final users = List.generate(
+          3,
+          (index) => User(id: 'test-user-id-$index'),
         );
 
-        expect(channel, isNotNull);
-        expect(channel.type, channelType);
-        expect(channel.id, channelId);
-        expect(channel.cid, '$channelType:$channelId');
-        expect(channel.extraData, channelData);
-      });
-
-      test('should return back in memory channel instance if available', () async {
-        const channelType = 'test-channel-type';
-        const channelId = 'test-channel-id';
-        const channelData = {'name': 'test-channel-name'};
-        const channelCid = '$channelType:$channelId';
-
-        final channel = client.channel(
-          channelType,
-          id: channelId,
-          extraData: channelData,
+        tester.mockApi(
+          (api) => api.user.queryUsers(presence: true),
+          result: QueryUsersResponse()..users = users,
         );
 
-        final channelState = ChannelState(
-          channel: ChannelModel(cid: channelCid),
-        );
-
-        when(
-          () => api.channel.queryChannel(
-            channelType,
-            channelId: channelId,
-            channelData: channelData,
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-          ),
-        ).thenAnswer((_) async => channelState);
-
-        expectLater(
-          client.state.channelsStream.skip(1),
+        final usersEmitted = expectLater(
+          // skipping initial seed event -> {} users
+          tester.clientState.usersStream.skip(1),
           emitsInOrder([
-            {channelCid: isCorrectChannelFor(channelState)},
+            {for (final user in users) user.id: user},
           ]),
         );
 
-        await channel.watch();
+        final res = await tester.client.queryUsers();
+        expect(res, isNotNull);
+        expect(res.users.length, users.length);
 
-        final newChannel = client.channel(channelType, id: channelId);
-        expect(newChannel, channel);
+        await usersEmitted;
 
-        verify(
-          () => api.channel.queryChannel(
-            channelType,
-            channelId: channelId,
-            channelData: channelData,
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
+        tester
+          ..verifyApi((api) => api.user.queryUsers(presence: true))
+          ..verifyNoMoreApiInteractions((api) => api.user);
+      },
+    );
+
+    chatClientTest(
+      '`.queryBannedUsers`',
+      body: (tester) async {
+        final bans = List.generate(
+          3,
+          (index) => BannedUser(
+            user: User(id: 'test-user-id-$index'),
+            bannedBy: User(id: 'test-user-id-${index + 1}'),
           ),
-        ).called(1);
-      });
-    });
-
-    test('`.createChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelData = {'name': 'test-channel-name'};
-      const channelCid = '$channelType:$channelId';
-
-      final channelState = ChannelState(
-        channel: ChannelModel(cid: channelCid, extraData: channelData),
-      );
-
-      when(
-        () => api.channel.queryChannel(
-          channelType,
-          channelId: channelId,
-          channelData: channelData,
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          messagesPagination: any(named: 'messagesPagination'),
-          membersPagination: any(named: 'membersPagination'),
-          watchersPagination: any(named: 'watchersPagination'),
-        ),
-      ).thenAnswer((_) async => channelState);
-
-      final res = await client.createChannel(
-        channelType,
-        channelId: channelId,
-        channelData: channelData,
-      );
-
-      expect(res, isNotNull);
-      expect(res.channel, isNotNull);
-      final channel = res.channel!;
-      expect(channel.type, channelType);
-      expect(channel.id, channelId);
-      expect(channel.cid, '$channelType:$channelId');
-      expect(channel.extraData, channelData);
-
-      verify(
-        () => api.channel.queryChannel(
-          channelType,
-          channelId: channelId,
-          channelData: channelData,
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          messagesPagination: any(named: 'messagesPagination'),
-          membersPagination: any(named: 'membersPagination'),
-          watchersPagination: any(named: 'watchersPagination'),
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.watchChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelData = {'name': 'test-channel-name'};
-      const channelCid = '$channelType:$channelId';
-
-      final channelState = ChannelState(
-        channel: ChannelModel(cid: channelCid, extraData: channelData),
-      );
-
-      when(
-        () => api.channel.queryChannel(
-          channelType,
-          channelId: channelId,
-          channelData: channelData,
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          messagesPagination: any(named: 'messagesPagination'),
-          membersPagination: any(named: 'membersPagination'),
-          watchersPagination: any(named: 'watchersPagination'),
-        ),
-      ).thenAnswer((_) async => channelState);
-
-      final res = await client.watchChannel(
-        channelType,
-        channelId: channelId,
-        channelData: channelData,
-      );
-
-      expect(res, isNotNull);
-      expect(res.channel, isNotNull);
-      final channel = res.channel!;
-      expect(channel.type, channelType);
-      expect(channel.id, channelId);
-      expect(channel.cid, '$channelType:$channelId');
-      expect(channel.extraData, channelData);
-
-      verify(
-        () => api.channel.queryChannel(
-          channelType,
-          channelId: channelId,
-          channelData: channelData,
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          messagesPagination: any(named: 'messagesPagination'),
-          membersPagination: any(named: 'membersPagination'),
-          watchersPagination: any(named: 'watchersPagination'),
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.queryChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelData = {'name': 'test-channel-name'};
-      const channelCid = '$channelType:$channelId';
-
-      final channelState = ChannelState(
-        channel: ChannelModel(cid: channelCid, extraData: channelData),
-      );
-
-      when(
-        () => api.channel.queryChannel(
-          channelType,
-          channelId: channelId,
-          channelData: channelData,
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          messagesPagination: any(named: 'messagesPagination'),
-          membersPagination: any(named: 'membersPagination'),
-          watchersPagination: any(named: 'watchersPagination'),
-        ),
-      ).thenAnswer((_) async => channelState);
-
-      final res = await client.queryChannel(
-        channelType,
-        channelId: channelId,
-        channelData: channelData,
-      );
-
-      expect(res, isNotNull);
-      expect(res.channel, isNotNull);
-      final channel = res.channel!;
-      expect(channel.type, channelType);
-      expect(channel.id, channelId);
-      expect(channel.cid, '$channelType:$channelId');
-      expect(channel.extraData, channelData);
-
-      verify(
-        () => api.channel.queryChannel(
-          channelType,
-          channelId: channelId,
-          channelData: channelData,
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          messagesPagination: any(named: 'messagesPagination'),
-          membersPagination: any(named: 'membersPagination'),
-          watchersPagination: any(named: 'watchersPagination'),
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.queryMembers`', () async {
-      const channelType = 'test-channel-type';
-
-      final members = List.generate(
-        3,
-        (index) => Member(userId: 'test-user-id-$index'),
-      );
-
-      when(() => api.general.queryMembers(channelType)).thenAnswer(
-        (_) async => QueryMembersResponse()..members = members,
-      );
-
-      final res = await client.queryMembers(channelType);
-      expect(res, isNotNull);
-      expect(res.members.length, members.length);
-
-      verify(() => api.general.queryMembers(channelType)).called(1);
-      verify(() => api.general.getAppSettings()).called(1);
-      verifyNoMoreInteractions(api.general);
-    });
-
-    test('`.hideChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-
-      when(() => api.channel.hideChannel(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.hideChannel(channelId, channelType);
-
-      expect(res, isNotNull);
-
-      verify(() => api.channel.hideChannel(channelId, channelType)).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.showChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-
-      when(() => api.channel.showChannel(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.showChannel(channelId, channelType);
-
-      expect(res, isNotNull);
-
-      verify(() => api.channel.showChannel(channelId, channelType)).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.deleteChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-
-      when(() => api.channel.deleteChannel(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.deleteChannel(channelId, channelType);
-
-      expect(res, isNotNull);
-
-      verify(() => api.channel.deleteChannel(channelId, channelType)).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.truncateChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-
-      when(() => api.channel.truncateChannel(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.truncateChannel(channelId, channelType);
-
-      expect(res, isNotNull);
-
-      verify(
-        () => api.channel.truncateChannel(channelId, channelType),
-      ).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.muteChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelCid = '$channelType:$channelId';
-
-      when(() => api.moderation.muteChannel(channelCid)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.muteChannel(channelCid);
-
-      expect(res, isNotNull);
-
-      verify(() => api.moderation.muteChannel(channelCid)).called(1);
-      verifyNoMoreInteractions(api.moderation);
-    });
-
-    test('`.unmuteChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelCid = '$channelType:$channelId';
-
-      when(() => api.moderation.unmuteChannel(channelCid)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.unmuteChannel(channelCid);
-
-      expect(res, isNotNull);
-
-      verify(() => api.moderation.unmuteChannel(channelCid)).called(1);
-      verifyNoMoreInteractions(api.moderation);
-    });
-
-    test('`.partialMemberUpdate with userId`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const otherUserId = 'test-other-user-id';
-      const set = {'pinned': true};
-      const unset = ['pinned'];
-
-      when(
-        () => api.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          set: set,
-          unset: unset,
-        ),
-      ).thenAnswer(
-        (_) async => FakePartialUpdateMemberResponse(
-          channelMember: Member(userId: otherUserId),
-        ),
-      );
-
-      final res = await client.partialMemberUpdate(
-        channelId: channelId,
-        channelType: channelType,
-        set: set,
-        unset: unset,
-      );
-
-      expect(res, isNotNull);
-      expect(res.channelMember.userId, otherUserId);
-
-      verify(
-        () => api.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          set: set,
-          unset: unset,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.partialMemberUpdate with current user`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const set = {'pinned': true};
-      const unset = ['pinned'];
-
-      when(
-        () => api.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          set: set,
-          unset: unset,
-        ),
-      ).thenAnswer(
-        (_) async => FakePartialUpdateMemberResponse(
-          channelMember: Member(userId: userId),
-        ),
-      );
-
-      final res = await client.partialMemberUpdate(
-        channelId: channelId,
-        channelType: channelType,
-        set: set,
-        unset: unset,
-      );
-
-      expect(res, isNotNull);
-      expect(res.channelMember.userId, userId);
-      verify(
-        () => api.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          set: set,
-          unset: unset,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.pinChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-
-      when(
-        () => api.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          set: const MemberUpdatePayload(pinned: true).toJson(),
-        ),
-      ).thenAnswer(
-        (_) async => FakePartialUpdateMemberResponse(
-          channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
-        ),
-      );
-
-      final res = await client.pinChannel(
-        channelId: channelId,
-        channelType: channelType,
-      );
-
-      expect(res, isNotNull);
-
-      verify(
-        () => api.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          set: const MemberUpdatePayload(pinned: true).toJson(),
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.unpinChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-
-      when(
-        () => api.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          unset: [MemberUpdateType.pinned.name],
-        ),
-      ).thenAnswer(
-        (_) async => FakePartialUpdateMemberResponse(
-          channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
-        ),
-      );
-
-      final res = await client.unpinChannel(
-        channelId: channelId,
-        channelType: channelType,
-      );
-
-      expect(res, isNotNull);
-
-      verify(
-        () => api.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          unset: [MemberUpdateType.pinned.name],
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.archiveChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-
-      when(
-        () => api.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          set: const MemberUpdatePayload(archived: true).toJson(),
-        ),
-      ).thenAnswer(
-        (_) async => FakePartialUpdateMemberResponse(
-          channelMember: Member(userId: userId, archivedAt: DateTime.now()),
-        ),
-      );
-
-      final res = await client.archiveChannel(
-        channelId: channelId,
-        channelType: channelType,
-      );
-
-      expect(res, isNotNull);
-
-      verify(
-        () => api.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          set: const MemberUpdatePayload(archived: true).toJson(),
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.unarchiveChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-
-      when(
-        () => api.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          unset: [MemberUpdateType.archived.name],
-        ),
-      ).thenAnswer(
-        (_) async => FakePartialUpdateMemberResponse(
-          channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
-        ),
-      );
-
-      final res = await client.unarchiveChannel(
-        channelId: channelId,
-        channelType: channelType,
-      );
-
-      expect(res, isNotNull);
-
-      verify(
-        () => api.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          unset: [MemberUpdateType.archived.name],
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.acceptChannelInvite`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelCid = '$channelType:$channelId';
-
-      when(
-        () => api.channel.acceptChannelInvite(channelId, channelType),
-      ).thenAnswer((_) async => AcceptInviteResponse()..channel = ChannelModel(cid: channelCid));
-
-      final res = await client.acceptChannelInvite(channelId, channelType);
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelCid);
-
-      verify(() => api.channel.acceptChannelInvite(channelId, channelType)).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.rejectChannelInvite`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelCid = '$channelType:$channelId';
-
-      when(
-        () => api.channel.rejectChannelInvite(channelId, channelType),
-      ).thenAnswer((_) async => RejectInviteResponse()..channel = ChannelModel(cid: channelCid));
-
-      final res = await client.rejectChannelInvite(channelId, channelType);
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelCid);
-
-      verify(() => api.channel.rejectChannelInvite(channelId, channelType)).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.addChannelMembers`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelCid = '$channelType:$channelId';
-
-      final members = List.generate(
-        3,
-        (index) => Member(userId: 'test-user-id-$index'),
-      );
-
-      final memberIds = members.map((e) => e.userId!).toList(growable: false);
-
-      when(() => api.channel.addMembers(channelId, channelType, memberIds)).thenAnswer(
-        (_) async => AddMembersResponse()
-          ..channel = ChannelModel(cid: channelCid)
-          ..members = members,
-      );
-
-      final res = await client.addChannelMembers(
-        channelId,
-        channelType,
-        memberIds,
-      );
-
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelCid);
-      expect(res.members.length, memberIds.length);
-
-      verify(
-        () => api.channel.addMembers(channelId, channelType, memberIds),
-      ).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.addChannelMembers` with hideHistoryBefore', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelCid = '$channelType:$channelId';
-
-      final members = List.generate(
-        3,
-        (index) => Member(userId: 'test-user-id-$index'),
-      );
-
-      final memberIds = members.map((e) => e.userId!).toList(growable: false);
-      final hideHistoryBefore = DateTime.parse('2024-01-01T00:00:00Z');
-
-      when(
-        () => api.channel.addMembers(
-          channelId,
-          channelType,
-          memberIds,
-          hideHistoryBefore: hideHistoryBefore,
-        ),
-      ).thenAnswer(
-        (_) async => AddMembersResponse()
-          ..channel = ChannelModel(cid: channelCid)
-          ..members = members,
-      );
-
-      final res = await client.addChannelMembers(
-        channelId,
-        channelType,
-        memberIds,
-        hideHistoryBefore: hideHistoryBefore,
-      );
-
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelCid);
-      expect(res.members.length, memberIds.length);
-
-      verify(
-        () => api.channel.addMembers(
-          channelId,
-          channelType,
-          memberIds,
-          hideHistoryBefore: hideHistoryBefore,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.removeChannelMembers`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelCid = '$channelType:$channelId';
-
-      final members = List.generate(
-        3,
-        (index) => Member(userId: 'test-user-id-$index'),
-      );
-
-      final memberIds = members.map((e) => e.userId!).toList(growable: false);
-
-      when(() => api.channel.removeMembers(channelId, channelType, memberIds)).thenAnswer(
-        (_) async => RemoveMembersResponse()
-          ..channel = ChannelModel(cid: channelCid)
-          ..members = members,
-      );
-
-      final res = await client.removeChannelMembers(
-        channelId,
-        channelType,
-        memberIds,
-      );
-
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelCid);
-      expect(res.members.length, memberIds.length);
-
-      verify(
-        () => api.channel.removeMembers(channelId, channelType, memberIds),
-      ).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.inviteChannelMembers`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelCid = '$channelType:$channelId';
-
-      final members = List.generate(
-        3,
-        (index) => Member(userId: 'test-user-id-$index'),
-      );
-
-      final memberIds = members.map((e) => e.userId!).toList(growable: false);
-
-      when(() => api.channel.inviteChannelMembers(channelId, channelType, memberIds)).thenAnswer(
-        (_) async => InviteMembersResponse()
-          ..channel = ChannelModel(cid: channelCid)
-          ..members = members,
-      );
-
-      final res = await client.inviteChannelMembers(
-        channelId,
-        channelType,
-        memberIds,
-      );
-
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelCid);
-      expect(res.members.length, memberIds.length);
-
-      verify(() => api.channel.inviteChannelMembers(channelId, channelType, memberIds)).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.stopChannelWatching`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-
-      when(() => api.channel.stopWatching(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.stopChannelWatching(channelId, channelType);
-      expect(res, isNotNull);
-
-      verify(() => api.channel.stopWatching(channelId, channelType)).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.sendAction`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const messageId = 'test-message-id';
-      const formData = {'key': 'value'};
-
-      when(
-        () => api.message.sendAction(channelId, channelType, messageId, formData),
-      ).thenAnswer((_) async => SendActionResponse());
-
-      final res = await client.sendAction(
-        channelId,
-        channelType,
-        messageId,
-        formData,
-      );
-
-      expect(res, isNotNull);
-
-      verify(() => api.message.sendAction(channelId, channelType, messageId, formData)).called(1);
-      verifyNoMoreInteractions(api.message);
-    });
-
-    test('`.markChannelRead`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-
-      when(() => api.channel.markRead(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.markChannelRead(channelId, channelType);
-
-      expect(res, isNotNull);
-
-      verify(() => api.channel.markRead(channelId, channelType)).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.markChannelUnread`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const messageId = 'test-message-id';
-
-      when(() => api.channel.markUnread(channelId, channelType, messageId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.markChannelUnread(
-        channelId,
-        channelType,
-        messageId,
-      );
-
-      expect(res, isNotNull);
-
-      verify(() => api.channel.markUnread(channelId, channelType, messageId)).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.markChannelUnreadByTimestamp`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      final timestamp = DateTime.parse('2024-01-01T00:00:00Z');
-
-      when(
-        () => api.channel.markUnreadByTimestamp(
-          channelId,
-          channelType,
-          timestamp,
-        ),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.markChannelUnreadByTimestamp(
-        channelId,
-        channelType,
-        timestamp,
-      );
-
-      expect(res, isNotNull);
-
-      verify(
-        () => api.channel.markUnreadByTimestamp(
-          channelId,
-          channelType,
-          timestamp,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.createPoll`', () async {
-      final poll = Poll(
-        name: 'What is your favorite color?',
-        options: const [
-          PollOption(text: 'Red'),
-          PollOption(text: 'Blue'),
-        ],
-      );
-
-      when(() => api.polls.createPoll(poll)).thenAnswer(
-        (_) async => CreatePollResponse()..poll = poll,
-      );
-
-      final res = await client.createPoll(poll);
-      expect(res, isNotNull);
-      expect(res.poll, poll);
-
-      verify(() => api.polls.createPoll(poll)).called(1);
-      verifyNoMoreInteractions(api.polls);
-    });
-
-    test('`.getPoll`', () async {
-      const pollId = 'test-poll-id';
-      final poll = Poll(
-        id: pollId,
-        name: 'What is your favorite color?',
-        options: const [
-          PollOption(text: 'Red'),
-          PollOption(text: 'Blue'),
-        ],
-      );
-
-      when(() => api.polls.getPoll(pollId)).thenAnswer(
-        (_) async => GetPollResponse()..poll = poll,
-      );
-
-      final res = await client.getPoll(pollId);
-      expect(res, isNotNull);
-      expect(res.poll, poll);
-
-      verify(() => api.polls.getPoll(pollId)).called(1);
-      verifyNoMoreInteractions(api.polls);
-    });
-
-    test('`.updatePoll`', () async {
-      final poll = Poll(
-        id: 'test-poll-id',
-        name: 'What is your favorite color?',
-        options: const [
-          PollOption(text: 'Red'),
-          PollOption(text: 'Blue'),
-        ],
-      );
-
-      when(() => api.polls.updatePoll(poll)).thenAnswer(
-        (_) async => UpdatePollResponse()..poll = poll,
-      );
-
-      final res = await client.updatePoll(poll);
-      expect(res, isNotNull);
-      expect(res.poll, poll);
-
-      verify(() => api.polls.updatePoll(poll)).called(1);
-      verifyNoMoreInteractions(api.polls);
-    });
-
-    test('`.partialUpdatePoll`', () async {
-      const pollId = 'test-poll-id';
-      final set = {'name': 'What is your favorite color?'};
-      final unset = <String>[];
-
-      final poll = Poll(
-        id: pollId,
-        name: set['name']!,
-        options: const [
-          PollOption(text: 'Red'),
-          PollOption(text: 'Blue'),
-        ],
-      );
-
-      when(
-        () => api.polls.partialUpdatePoll(pollId, set: set, unset: unset),
-      ).thenAnswer((_) async => UpdatePollResponse()..poll = poll);
-
-      final res = await client.partialUpdatePoll(pollId, set: set, unset: unset);
-      expect(res, isNotNull);
-      expect(res.poll.id, pollId);
-      expect(res.poll.name, set['name']);
-
-      verify(() => api.polls.partialUpdatePoll(pollId, set: set, unset: unset)).called(1);
-      verifyNoMoreInteractions(api.polls);
-    });
-
-    test('`.deletePoll`', () async {
-      const pollId = 'test-poll-id';
-
-      when(() => api.polls.deletePoll(pollId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.deletePoll(pollId);
-      expect(res, isNotNull);
-
-      verify(() => api.polls.deletePoll(pollId)).called(1);
-      verifyNoMoreInteractions(api.polls);
-    });
-
-    test('`.closePoll`', () async {
-      const pollId = 'test-poll-id';
-
-      when(
-        () => api.polls.partialUpdatePoll(pollId, set: {'is_closed': true}),
-      ).thenAnswer((_) async => UpdatePollResponse());
-
-      final res = await client.closePoll(pollId);
-      expect(res, isNotNull);
-
-      verify(() => api.polls.partialUpdatePoll(pollId, set: {'is_closed': true})).called(1);
-      verifyNoMoreInteractions(api.polls);
-    });
-
-    test('`.createPollOption`', () async {
-      const pollId = 'test-poll-id';
-      const option = PollOption(text: 'Red');
-
-      when(
-        () => api.polls.createPollOption(pollId, option),
-      ).thenAnswer((_) async => CreatePollOptionResponse()..pollOption = option);
-
-      final res = await client.createPollOption(pollId, option);
-      expect(res, isNotNull);
-      expect(res.pollOption, option);
-
-      verify(() => api.polls.createPollOption(pollId, option)).called(1);
-      verifyNoMoreInteractions(api.polls);
-    });
-
-    test('`.getPollOption`', () async {
-      const pollId = 'test-poll-id';
-      const optionId = 'test-option-id';
-      const option = PollOption(id: optionId, text: 'Red');
-
-      when(
-        () => api.polls.getPollOption(pollId, optionId),
-      ).thenAnswer((_) async => GetPollOptionResponse()..pollOption = option);
-
-      final res = await client.getPollOption(pollId, optionId);
-      expect(res, isNotNull);
-      expect(res.pollOption, option);
-
-      verify(() => api.polls.getPollOption(pollId, optionId)).called(1);
-      verifyNoMoreInteractions(api.polls);
-    });
-
-    test('`.updatePollOption`', () async {
-      const pollId = 'test-poll-id';
-      const option = PollOption(id: 'test-option-id', text: 'Red');
-
-      when(
-        () => api.polls.updatePollOption(pollId, option),
-      ).thenAnswer((_) async => UpdatePollOptionResponse()..pollOption = option);
-
-      final res = await client.updatePollOption(pollId, option);
-      expect(res, isNotNull);
-      expect(res.pollOption, option);
-
-      verify(() => api.polls.updatePollOption(pollId, option)).called(1);
-      verifyNoMoreInteractions(api.polls);
-    });
-
-    test('`.deletePollOption`', () async {
-      const pollId = 'test-poll-id';
-      const optionId = 'test-option-id';
-
-      when(() => api.polls.deletePollOption(pollId, optionId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.deletePollOption(pollId, optionId);
-      expect(res, isNotNull);
-
-      verify(() => api.polls.deletePollOption(pollId, optionId)).called(1);
-      verifyNoMoreInteractions(api.polls);
-    });
-
-    test('`.castPollVote`', () async {
-      const messageId = 'test-message-id';
-      const pollId = 'test-poll-id';
-      const optionId = 'test-option-id';
-      final vote = PollVote(optionId: optionId);
-
-      // Custom matcher to check if the Vote object has the specified id
-      Matcher matchesVoteOption(String expected) => predicate<PollVote>(
-        (vote) => vote.optionId == expected,
-        'Vote with option $expected',
-      );
-
-      when(
-        () => api.polls.castPollVote(messageId, pollId, any(that: matchesVoteOption(optionId))),
-      ).thenAnswer((_) async => CastPollVoteResponse()..vote = vote);
-
-      final res = await client.castPollVote(messageId, pollId, optionId: optionId);
-      expect(res, isNotNull);
-      expect(res.vote, vote);
-
-      verify(() => api.polls.castPollVote(messageId, pollId, any(that: matchesVoteOption(optionId)))).called(1);
-      verifyNoMoreInteractions(api.polls);
-    });
-
-    test('`.addPollAnswer`', () async {
-      const messageId = 'test-message-id';
-      const pollId = 'test-poll-id';
-      const answerText = 'Red';
-      final vote = PollVote(answerText: answerText);
-
-      // Custom matcher to check if the Vote object has the specified id
-      Matcher matchesVoteAnswer(String expected) => predicate<PollVote>(
-        (vote) => vote.answerText == expected,
-        'Vote with answer $expected',
-      );
-
-      when(
-        () => api.polls.castPollVote(messageId, pollId, any(that: matchesVoteAnswer(answerText))),
-      ).thenAnswer((_) async => CastPollVoteResponse()..vote = vote);
-
-      final res = await client.addPollAnswer(messageId, pollId, answerText: answerText);
-      expect(res, isNotNull);
-      expect(res.vote, vote);
-
-      verify(() => api.polls.castPollVote(messageId, pollId, any(that: matchesVoteAnswer(answerText)))).called(1);
-      verifyNoMoreInteractions(api.polls);
-    });
-
-    test('`.removePollVote`', () async {
-      const messageId = 'test-message-id';
-      const pollId = 'test-poll-id';
-      const voteId = 'test-vote-id';
-
-      when(() => api.polls.removePollVote(messageId, pollId, voteId)).thenAnswer((_) async => RemovePollVoteResponse());
-
-      final res = await client.removePollVote(messageId, pollId, voteId);
-      expect(res, isNotNull);
-
-      verify(() => api.polls.removePollVote(messageId, pollId, voteId)).called(1);
-      verifyNoMoreInteractions(api.polls);
-    });
-
-    test('`.queryPolls`', () async {
-      final filter = PollFilter.in_(PollFilterField.id, const ['test-poll-id']);
-      final sort = [PollSort.desc(PollSortField.createdAt)];
-      const pagination = PaginationParams(limit: 20);
-
-      final polls = List.generate(
-        pagination.limit,
-        (index) => Poll(
-          id: 'test-poll-id-$index',
-          name: 'What is your favorite color?',
-          options: const [
-            PollOption(text: 'Red'),
-            PollOption(text: 'Blue'),
-          ],
-        ),
-      );
-
-      when(
-        () => api.polls.queryPolls(
-          filter: filter,
-          sort: sort,
-          pagination: pagination,
-        ),
-      ).thenAnswer(
-        (_) async => QueryPollsResponse()..polls = polls,
-      );
-
-      final res = await client.queryPolls(
-        filter: filter,
-        sort: sort,
-        pagination: pagination,
-      );
-      expect(res, isNotNull);
-      expect(res.polls.length, polls.length);
-
-      verify(
-        () => api.polls.queryPolls(
-          filter: filter,
-          sort: sort,
-          pagination: pagination,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.polls);
-    });
-
-    test('`.queryPollVotes`', () async {
-      const pollId = 'test-poll-id';
-      final filter = PollVoteFilter.in_(PollVoteFilterField.id, const ['test-vote-id']);
-      final sort = [PollVoteSort.desc(PollVoteSortField.createdAt)];
-      const pagination = PaginationParams(limit: 20);
-
-      final votes = List.generate(
-        pagination.limit,
-        (index) => PollVote(id: 'test-vote-id-$index', answerText: 'Red'),
-      );
-
-      when(
-        () => api.polls.queryPollVotes(
-          pollId,
-          filter: filter,
-          sort: sort,
-          pagination: pagination,
-        ),
-      ).thenAnswer(
-        (_) async => QueryPollVotesResponse()..votes = votes,
-      );
-
-      final res = await client.queryPollVotes(
-        pollId,
-        filter: filter,
-        sort: sort,
-        pagination: pagination,
-      );
-      expect(res, isNotNull);
-      expect(res.votes.length, votes.length);
-
-      verify(
-        () => api.polls.queryPollVotes(
-          pollId,
-          filter: filter,
-          sort: sort,
-          pagination: pagination,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.polls);
-    });
-
-    test('`.updateUser`', () async {
-      final user = User(
-        id: 'test-user-id',
-        extraData: const {'name': 'test-user'},
-      );
-
-      when(() => api.user.updateUsers([user])).thenAnswer((_) async => UpdateUsersResponse()..users = {user.id: user});
-
-      final res = await client.updateUser(user);
-
-      expect(res, isNotNull);
-      expect(res.users, {user.id: user});
-
-      verify(() => api.user.updateUsers([user])).called(1);
-      verifyNoMoreInteractions(api.user);
-    });
-
-    test('`.partialUpdateUser`', () async {
-      const userId = 'test-user-id';
-
-      final set = {'color': 'yellow'};
-      final unset = <String>[];
-
-      final partialUpdateRequest = PartialUpdateUserRequest(
-        id: userId,
-        set: set,
-        unset: unset,
-      );
-
-      final updatedUser = User(
-        id: userId,
-        extraData: {'color': set['color']},
-      );
-
-      when(() => api.user.partialUpdateUsers([partialUpdateRequest])).thenAnswer(
-        (_) async => UpdateUsersResponse()
-          ..users = {
-            updatedUser.id: updatedUser,
-          },
-      );
-
-      final res = await client.partialUpdateUser(
-        userId,
-        set: set,
-        unset: unset,
-      );
-
-      expect(res, isNotNull);
-      expect(res.users, {updatedUser.id: updatedUser});
-
-      verify(
-        () => api.user.partialUpdateUsers([partialUpdateRequest]),
-      ).called(1);
-      verifyNoMoreInteractions(api.user);
-    });
-
-    test('`.banUser`', () async {
-      const userId = 'test-user-id';
-
-      when(
-        () => api.moderation.banUser(userId, options: any(named: 'options')),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.banUser(userId);
-
-      expect(res, isNotNull);
-
-      verify(
-        () => api.moderation.banUser(userId, options: any(named: 'options')),
-      ).called(1);
-      verifyNoMoreInteractions(api.moderation);
-    });
-
-    test('`.unbanUser`', () async {
-      const userId = 'test-user-id';
-
-      when(
-        () => api.moderation.unbanUser(userId, options: any(named: 'options')),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.unbanUser(userId);
-
-      expect(res, isNotNull);
-
-      verify(
-        () => api.moderation.unbanUser(userId, options: any(named: 'options')),
-      ).called(1);
-      verifyNoMoreInteractions(api.moderation);
-    });
-
-    test('`.blockUser`', () async {
-      const userId = 'test-user-id';
-
-      when(() => api.user.blockUser(userId)).thenAnswer(
-        (_) async => UserBlockResponse.fromJson({
-          'blocked_by_user_id': 'deven',
-          'blocked_user_id': 'jaap',
-          'created_at': '2024-10-01 12:45:23.456',
-        }),
-      );
-
-      final res = await client.blockUser(userId);
-
-      expect(res, isNotNull);
-
-      verify(
-        () => api.user.blockUser(userId),
-      ).called(1);
-      verifyNoMoreInteractions(api.user);
-    });
-
-    test('`.unblockUser`', () async {
-      const userId = 'test-user-id';
-
-      when(() => api.user.unblockUser(userId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.unblockUser(userId);
-
-      expect(res, isNotNull);
-
-      verify(
-        () => api.user.unblockUser(userId),
-      ).called(1);
-      verifyNoMoreInteractions(api.user);
-    });
-
-    test('`.queryBlockedUsers`', () async {
-      final users = List.generate(
-        3,
-        (index) => User(id: 'test-user-id-$index'),
-      );
-
-      when(() => api.user.queryBlockedUsers()).thenAnswer(
-        (_) async => BlockedUsersResponse()
-          ..blocks = [
-            UserBlock(user: users[0], blockedUser: users[1]),
-            UserBlock(user: users[0], blockedUser: users[2]),
-          ],
-      );
-
-      final res = await client.queryBlockedUsers();
-      expect(res, isNotNull);
-      expect(res.blocks.length, 2);
-
-      verify(() => api.user.queryBlockedUsers()).called(1);
-      verifyNoMoreInteractions(api.user);
-    });
-
-    group('Block user state management', () {
-      test('blockUser should update blockedUserIds on client state', () async {
-        final testUser = OwnUser(id: 'test-user');
-        const userId = 'blocked-user-id';
-
-        // Verify initial state
-        expect(client.state.currentUser?.blockedUserIds, isEmpty);
-
-        when(() => api.user.blockUser(userId)).thenAnswer(
-          (_) async => UserBlockResponse()
-            ..blockedUserId = userId
-            ..blockedByUserId = testUser.id
-            ..createdAt = DateTime.now(),
         );
 
-        await client.blockUser(userId);
+        const cid = 'message:nice-channel';
+        final filter = BannedUserFilter.equal(BannedUserFilterField.channelCid, cid);
 
-        // Verify - should now include the blocked user ID
-        expect(client.state.currentUser?.blockedUserIds, contains(userId));
-        verify(() => api.user.blockUser(userId)).called(1);
-        verifyNoMoreInteractions(api.user);
-      });
+        tester.mockApi(
+          (api) => api.moderation.queryBannedUsers(filter: filter),
+          result: QueryBannedUsersResponse()..bans = bans,
+        );
 
-      test(
-        'blockUser should not duplicate existing blocked user IDs',
-        () async {
-          const userId = 'blocked-user-id';
-          client.state.blockedUserIds = const [userId];
+        final res = await tester.client.queryBannedUsers(filter: filter);
+        expect(res, isNotNull);
+        expect(res.bans.length, bans.length);
 
-          // Verify the user is already in the blocked list
-          expect(client.state.currentUser?.blockedUserIds, contains(userId));
+        tester
+          ..verifyApi((api) => api.moderation.queryBannedUsers(filter: filter))
+          ..verifyNoMoreApiInteractions((api) => api.moderation);
+      },
+    );
 
-          when(() => api.user.blockUser(userId)).thenAnswer(
-            (_) async => UserBlockResponse()
-              ..blockedUserId = userId
-              ..blockedByUserId = client.state.currentUser!.id
-              ..createdAt = DateTime.now(),
+    chatClientTest(
+      '`.search`',
+      body: (tester) async {
+        const cid = 'test-type:test-id';
+        final filter = ChannelFilter.in_(ChannelFilterField.cid, const [cid]);
+
+        final messages = List.generate(
+          3,
+          (index) => createDefaultGetMessageResponse(
+            channel: ChannelModel(cid: cid),
+            message: Message(id: 'test-message-id-$index'),
+          ),
+        );
+
+        tester.mockApi(
+          (api) => api.general.searchMessages(filter),
+          result: createDefaultSearchMessagesResponse(results: messages),
+        );
+
+        final res = await tester.client.search(filter);
+        expect(res, isNotNull);
+        expect(res.results.length, messages.length);
+
+        tester
+          ..verifyApi((api) => api.general.searchMessages(filter))
+          ..verifyApi((api) => api.general.getAppSettings())
+          ..verifyNoMoreApiInteractions((api) => api.general);
+      },
+    );
+
+    chatClientTest(
+      '`.sendFile`',
+      body: (tester) async {
+        const channelId = 'test-channel-id';
+        const channelType = 'test-channel-type';
+        final file = AttachmentFile(size: 33, path: 'test-file-path');
+
+        const fileUrl = 'test-file-url';
+
+        tester.mockApi(
+          (api) => api.fileUploader.sendFile(file, channelId, channelType),
+          result: SendFileResponse()..file = fileUrl,
+        );
+
+        final res = await tester.client.sendFile(file, channelId, channelType);
+        expect(res, isNotNull);
+        expect(res.file, fileUrl);
+
+        tester
+          ..verifyApi((api) => api.fileUploader.sendFile(file, channelId, channelType))
+          ..verifyNoMoreApiInteractions((api) => api.fileUploader);
+      },
+    );
+
+    chatClientTest(
+      '`.sendImage`',
+      body: (tester) async {
+        const channelId = 'test-channel-id';
+        const channelType = 'test-channel-type';
+        final image = AttachmentFile(size: 33, path: 'test-image-path');
+
+        const fileUrl = 'test-image-url';
+
+        tester.mockApi(
+          (api) => api.fileUploader.sendImage(image, channelId, channelType),
+          result: SendImageResponse()..file = fileUrl,
+        );
+
+        final res = await tester.client.sendImage(image, channelId, channelType);
+        expect(res, isNotNull);
+        expect(res.file, fileUrl);
+
+        tester
+          ..verifyApi((api) => api.fileUploader.sendImage(image, channelId, channelType))
+          ..verifyNoMoreApiInteractions((api) => api.fileUploader);
+      },
+    );
+
+    chatClientTest(
+      '`.deleteFile`',
+      body: (tester) async {
+        const channelId = 'test-channel-id';
+        const channelType = 'test-channel-type';
+        const fileUrl = 'test-file-url';
+
+        tester.mockApi(
+          (api) => api.fileUploader.deleteFile(fileUrl, channelId, channelType),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.deleteFile(fileUrl, channelId, channelType);
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.fileUploader.deleteFile(fileUrl, channelId, channelType))
+          ..verifyNoMoreApiInteractions((api) => api.fileUploader);
+      },
+    );
+
+    chatClientTest(
+      '`.deleteImage`',
+      body: (tester) async {
+        const channelId = 'test-channel-id';
+        const channelType = 'test-channel-type';
+        const imageUrl = 'test-image-url';
+
+        tester.mockApi(
+          (api) => api.fileUploader.deleteImage(imageUrl, channelId, channelType),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.deleteImage(imageUrl, channelId, channelType);
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.fileUploader.deleteImage(imageUrl, channelId, channelType))
+          ..verifyNoMoreApiInteractions((api) => api.fileUploader);
+      },
+    );
+
+    chatClientTest(
+      '`.uploadImage`',
+      body: (tester) async {
+        final image = AttachmentFile(size: 33, path: 'test-image-path');
+        const fileUrl = 'test-image-url';
+
+        tester.mockApi(
+          (api) => api.fileUploader.uploadImage(image),
+          result: UploadImageResponse()..file = fileUrl,
+        );
+
+        final res = await tester.client.uploadImage(image);
+        expect(res, isNotNull);
+        expect(res.file, fileUrl);
+
+        tester
+          ..verifyApi((api) => api.fileUploader.uploadImage(image))
+          ..verifyNoMoreApiInteractions((api) => api.fileUploader);
+      },
+    );
+
+    chatClientTest(
+      '`.uploadFile`',
+      body: (tester) async {
+        final file = AttachmentFile(size: 33, path: 'test-file-path');
+        const fileUrl = 'test-file-url';
+
+        tester.mockApi(
+          (api) => api.fileUploader.uploadFile(file),
+          result: UploadFileResponse()..file = fileUrl,
+        );
+
+        final res = await tester.client.uploadFile(file);
+        expect(res, isNotNull);
+        expect(res.file, fileUrl);
+
+        tester
+          ..verifyApi((api) => api.fileUploader.uploadFile(file))
+          ..verifyNoMoreApiInteractions((api) => api.fileUploader);
+      },
+    );
+
+    chatClientTest(
+      '`.removeImage`',
+      body: (tester) async {
+        const imageUrl = 'test-image-url';
+
+        tester.mockApi(
+          (api) => api.fileUploader.removeImage(imageUrl),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.removeImage(imageUrl);
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.fileUploader.removeImage(imageUrl))
+          ..verifyNoMoreApiInteractions((api) => api.fileUploader);
+      },
+    );
+
+    chatClientTest(
+      '`.removeFile`',
+      body: (tester) async {
+        const fileUrl = 'test-file-url';
+
+        tester.mockApi(
+          (api) => api.fileUploader.removeFile(fileUrl),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.removeFile(fileUrl);
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.fileUploader.removeFile(fileUrl))
+          ..verifyNoMoreApiInteractions((api) => api.fileUploader);
+      },
+    );
+
+    chatClientTest(
+      '`.updateChannel`',
+      body: (tester) async {
+        const channelId = 'test-channel-id';
+        const channelType = 'test-channel-type';
+        const data = {'name': 'test-channel'};
+
+        tester.mockApi(
+          (api) => api.channel.updateChannel(channelId, channelType, data),
+          result: UpdateChannelResponse()
+            ..channel = ChannelModel(
+              id: channelId,
+              type: channelType,
+              extraData: {...data},
+            ),
+        );
+
+        final res = await tester.client.updateChannel(channelId, channelType, data);
+        expect(res, isNotNull);
+        expect(res.channel.cid, '$channelType:$channelId');
+        expect(res.channel.extraData['name'], 'test-channel');
+
+        tester
+          ..verifyApi((api) => api.channel.updateChannel(channelId, channelType, data))
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.updateChannelPartial`',
+      body: (tester) async {
+        const channelId = 'test-channel-id';
+        const channelType = 'test-channel-type';
+        const set = {
+          'name': 'Stream Team',
+          'profile_image': 'test-profile-image',
+        };
+        const unset = ['tag', 'last_name'];
+
+        tester.mockApi(
+          (api) => api.channel.updateChannelPartial(channelId, channelType, set: set, unset: unset),
+          result: createDefaultPartialUpdateChannelResponse(
+            channel: ChannelModel(
+              id: channelId,
+              type: channelType,
+              extraData: {...set},
+            ),
+          ),
+        );
+
+        final res = await tester.client.updateChannelPartial(
+          channelId,
+          channelType,
+          set: set,
+          unset: unset,
+        );
+        expect(res, isNotNull);
+        expect(res.channel.cid, '$channelType:$channelId');
+        expect(res.channel.extraData, set);
+
+        tester
+          ..verifyApi((api) => api.channel.updateChannelPartial(channelId, channelType, set: set, unset: unset))
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.addDevice should work`',
+      body: (tester) async {
+        const id = 'test-device-id';
+        const provider = PushProvider.firebase;
+
+        tester.mockApi(
+          (api) => api.device.addDevice(id, provider),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.addDevice(id, provider);
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.device.addDevice(id, provider))
+          ..verifyNoMoreApiInteractions((api) => api.device);
+      },
+    );
+
+    chatClientTest(
+      '`.addDevice should work with pushProviderName`',
+      body: (tester) async {
+        const id = 'test-device-id';
+        const provider = PushProvider.firebase;
+        const pushProviderName = 'my-custom-config';
+
+        tester.mockApi(
+          (api) => api.device.addDevice(
+            id,
+            provider,
+            pushProviderName: pushProviderName,
+          ),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.addDevice(
+          id,
+          provider,
+          pushProviderName: pushProviderName,
+        );
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi(
+            (api) => api.device.addDevice(
+              id,
+              provider,
+              pushProviderName: pushProviderName,
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.device);
+      },
+    );
+
+    chatClientTest(
+      '`.getDevices`',
+      body: (tester) async {
+        final devices = List.generate(
+          3,
+          (index) => Device(
+            id: 'test-device-id-$index',
+            pushProvider: PushProvider.firebase.name,
+          ),
+        );
+
+        tester.mockApi(
+          (api) => api.device.getDevices(),
+          result: ListDevicesResponse()..devices = devices,
+        );
+
+        final res = await tester.client.getDevices();
+        expect(res, isNotNull);
+        expect(res.devices.length, devices.length);
+
+        tester
+          ..verifyApi((api) => api.device.getDevices())
+          ..verifyNoMoreApiInteractions((api) => api.device);
+      },
+    );
+
+    chatClientTest(
+      '`.removeDevice`',
+      body: (tester) async {
+        const deviceId = 'test-device-id';
+
+        tester.mockApi(
+          (api) => api.device.removeDevice(deviceId),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.removeDevice(deviceId);
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.device.removeDevice(deviceId))
+          ..verifyNoMoreApiInteractions((api) => api.device);
+      },
+    );
+
+    chatClientTest(
+      '`.setPushPreferences`',
+      body: (tester) async {
+        const pushPreferenceInput = PushPreferenceInput(
+          chatLevel: ChatLevel.mentions,
+        );
+
+        const channelCid = 'messaging:123';
+        const channelPreferenceInput = PushPreferenceInput.channel(
+          channelCid: channelCid,
+          chatLevel: ChatLevel.mentions,
+        );
+
+        const preferences = [pushPreferenceInput, channelPreferenceInput];
+
+        final currentUser = tester.currentUser;
+        tester.mockApi(
+          (api) => api.device.setPushPreferences(preferences),
+          result: UpsertPushPreferencesResponse()
+            ..userPreferences = {
+              '${currentUser?.id}': PushPreference(
+                chatLevel: pushPreferenceInput.chatLevel,
+              ),
+            }
+            ..userChannelPreferences = {
+              '${currentUser?.id}': {
+                channelCid: ChannelPushPreference(
+                  chatLevel: channelPreferenceInput.chatLevel,
+                ),
+              },
+            },
+        );
+
+        expect(
+          tester.events,
+          emitsInOrder([
+            isA<Event>().having(
+              (e) => e.type,
+              'push_preference.updated event',
+              EventType.pushPreferenceUpdated,
+            ),
+            isA<Event>().having(
+              (e) => e.type,
+              'channel.push_preference.updated event',
+              EventType.channelPushPreferenceUpdated,
+            ),
+          ]),
+        );
+
+        final res = await tester.client.setPushPreferences(preferences);
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.device.setPushPreferences(preferences))
+          ..verifyNoMoreApiInteractions((api) => api.device);
+      },
+    );
+
+    chatClientTest(
+      'should handle push_preference.updated event',
+      body: (tester) async {
+        final pushPreference = PushPreference(
+          chatLevel: ChatLevel.mentions,
+          callLevel: CallLevel.all,
+          disabledUntil: DateTime.utc(2021, 3),
+        );
+
+        final event = createDefaultEvent(
+          type: EventType.pushPreferenceUpdated,
+          pushPreference: pushPreference,
+        );
+
+        // Initially null
+        expect(tester.currentUser?.pushPreferences, isNull);
+
+        // Trigger the event
+        await tester.emitEvent(event);
+
+        // Should update currentUser.pushPreferences
+        final pushPreferences = tester.currentUser?.pushPreferences;
+        expect(pushPreferences, isNotNull);
+        expect(pushPreferences?.chatLevel, ChatLevel.mentions);
+        expect(pushPreferences?.callLevel, CallLevel.all);
+        expect(pushPreferences?.disabledUntil, pushPreference.disabledUntil);
+      },
+    );
+
+    chatClientTest(
+      '`.listUserGroups`',
+      body: (tester) async {
+        const limit = 10;
+        const idGt = 'cursor-group-id';
+        final createdAtGt = DateTime.utc(2024, 6, 15, 12);
+        const teamId = 'test-team-id';
+
+        tester.mockApi(
+          (api) => api.userGroups.listUserGroups(
+            limit: limit,
+            idGt: idGt,
+            createdAtGt: createdAtGt,
+            teamId: teamId,
+          ),
+          result: ListUserGroupsResponse()..userGroups = const [],
+        );
+
+        final res = await tester.client.listUserGroups(
+          limit: limit,
+          idGt: idGt,
+          createdAtGt: createdAtGt,
+          teamId: teamId,
+        );
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi(
+            (api) => api.userGroups.listUserGroups(
+              limit: limit,
+              idGt: idGt,
+              createdAtGt: createdAtGt,
+              teamId: teamId,
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.userGroups);
+      },
+    );
+
+    chatClientTest(
+      '`.searchUserGroups`',
+      body: (tester) async {
+        const query = 'eng';
+        const limit = 10;
+        const nameGt = 'engineering';
+        const idGt = 'cursor-group-id';
+        const teamId = 'test-team-id';
+
+        tester.mockApi(
+          (api) => api.userGroups.searchUserGroups(
+            query,
+            limit: limit,
+            nameGt: nameGt,
+            idGt: idGt,
+            teamId: teamId,
+          ),
+          result: SearchUserGroupsResponse()..userGroups = const [],
+        );
+
+        final res = await tester.client.searchUserGroups(
+          query,
+          limit: limit,
+          nameGt: nameGt,
+          idGt: idGt,
+          teamId: teamId,
+        );
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi(
+            (api) => api.userGroups.searchUserGroups(
+              query,
+              limit: limit,
+              nameGt: nameGt,
+              idGt: idGt,
+              teamId: teamId,
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.userGroups);
+      },
+    );
+
+    chatClientTest(
+      '`.getUserGroup`',
+      body: (tester) async {
+        const id = 'test-group-id';
+        const teamId = 'test-team-id';
+
+        tester.mockApi(
+          (api) => api.userGroups.getUserGroup(id, teamId: teamId),
+          result: GetUserGroupResponse()
+            ..userGroup = UserGroup(
+              id: id,
+              name: 'test-group-name',
+              createdAt: DateTime.utc(2024, 1, 1),
+              updatedAt: DateTime.utc(2024, 1, 2),
+            ),
+        );
+
+        final res = await tester.client.getUserGroup(id, teamId: teamId);
+        expect(res, isNotNull);
+        expect(res.userGroup.id, id);
+
+        tester
+          ..verifyApi((api) => api.userGroups.getUserGroup(id, teamId: teamId))
+          ..verifyNoMoreApiInteractions((api) => api.userGroups);
+      },
+    );
+
+    chatClientTest(
+      '`.createUserGroup`',
+      body: (tester) async {
+        const name = 'Engineering';
+        const id = 'eng';
+        const description = 'Engineering team';
+        const teamId = 'test-team-id';
+        const memberIds = ['user-1', 'user-2'];
+
+        tester.mockApi(
+          (api) => api.userGroups.createUserGroup(
+            name,
+            id: id,
+            description: description,
+            teamId: teamId,
+            memberIds: memberIds,
+          ),
+          result: CreateUserGroupResponse()
+            ..userGroup = UserGroup(
+              id: id,
+              name: name,
+              description: description,
+              teamId: teamId,
+              createdAt: DateTime.utc(2024, 1, 1),
+              updatedAt: DateTime.utc(2024, 1, 2),
+            ),
+        );
+
+        final res = await tester.client.createUserGroup(
+          name,
+          id: id,
+          description: description,
+          teamId: teamId,
+          memberIds: memberIds,
+        );
+        expect(res, isNotNull);
+        expect(res.userGroup.id, id);
+
+        tester
+          ..verifyApi(
+            (api) => api.userGroups.createUserGroup(
+              name,
+              id: id,
+              description: description,
+              teamId: teamId,
+              memberIds: memberIds,
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.userGroups);
+      },
+    );
+
+    chatClientTest(
+      '`.updateUserGroup`',
+      body: (tester) async {
+        const id = 'test-group-id';
+        const name = 'New Name';
+        const description = 'New description';
+        const teamId = 'test-team-id';
+
+        tester.mockApi(
+          (api) => api.userGroups.updateUserGroup(
+            id,
+            name: name,
+            description: description,
+            teamId: teamId,
+          ),
+          result: UpdateUserGroupResponse()
+            ..userGroup = UserGroup(
+              id: id,
+              name: name,
+              description: description,
+              teamId: teamId,
+              createdAt: DateTime.utc(2024, 1, 1),
+              updatedAt: DateTime.utc(2024, 1, 2),
+            ),
+        );
+
+        final res = await tester.client.updateUserGroup(
+          id,
+          name: name,
+          description: description,
+          teamId: teamId,
+        );
+        expect(res, isNotNull);
+        expect(res.userGroup.name, name);
+
+        tester
+          ..verifyApi(
+            (api) => api.userGroups.updateUserGroup(
+              id,
+              name: name,
+              description: description,
+              teamId: teamId,
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.userGroups);
+      },
+    );
+
+    chatClientTest(
+      '`.deleteUserGroup`',
+      body: (tester) async {
+        const id = 'test-group-id';
+        const teamId = 'test-team-id';
+
+        tester.mockApi(
+          (api) => api.userGroups.deleteUserGroup(id, teamId: teamId),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.deleteUserGroup(id, teamId: teamId);
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.userGroups.deleteUserGroup(id, teamId: teamId))
+          ..verifyNoMoreApiInteractions((api) => api.userGroups);
+      },
+    );
+
+    chatClientTest(
+      '`.addUserGroupMembers`',
+      body: (tester) async {
+        const id = 'test-group-id';
+        const memberIds = ['user-1', 'user-2'];
+        const asAdmin = true;
+        const teamId = 'test-team-id';
+
+        tester.mockApi(
+          (api) => api.userGroups.addUserGroupMembers(
+            id,
+            memberIds,
+            asAdmin: asAdmin,
+            teamId: teamId,
+          ),
+          result: AddUserGroupMembersResponse()
+            ..userGroup = UserGroup(
+              id: id,
+              name: 'test-group-name',
+              createdAt: DateTime.utc(2024, 1, 1),
+              updatedAt: DateTime.utc(2024, 1, 2),
+            ),
+        );
+
+        final res = await tester.client.addUserGroupMembers(
+          id,
+          memberIds,
+          asAdmin: asAdmin,
+          teamId: teamId,
+        );
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi(
+            (api) => api.userGroups.addUserGroupMembers(
+              id,
+              memberIds,
+              asAdmin: asAdmin,
+              teamId: teamId,
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.userGroups);
+      },
+    );
+
+    chatClientTest(
+      '`.removeUserGroupMembers`',
+      body: (tester) async {
+        const id = 'test-group-id';
+        const memberIds = ['user-1', 'user-2'];
+        const teamId = 'test-team-id';
+
+        tester.mockApi(
+          (api) => api.userGroups.removeUserGroupMembers(
+            id,
+            memberIds,
+            teamId: teamId,
+          ),
+          result: RemoveUserGroupMembersResponse()
+            ..userGroup = UserGroup(
+              id: id,
+              name: 'test-group-name',
+              createdAt: DateTime.utc(2024, 1, 1),
+              updatedAt: DateTime.utc(2024, 1, 2),
+            ),
+        );
+
+        final res = await tester.client.removeUserGroupMembers(
+          id,
+          memberIds,
+          teamId: teamId,
+        );
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi(
+            (api) => api.userGroups.removeUserGroupMembers(
+              id,
+              memberIds,
+              teamId: teamId,
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.userGroups);
+      },
+    );
+
+    chatClientTest(
+      '`.searchRoles`',
+      body: (tester) async {
+        const query = 'adm';
+        const limit = 10;
+        const nameGt = 'admin';
+        const roleType = RoleType.user;
+        const includeGlobalRoles = true;
+
+        tester.mockApi(
+          (api) => api.roles.searchRoles(
+            query,
+            limit: limit,
+            nameGt: nameGt,
+            roleType: roleType,
+            includeGlobalRoles: includeGlobalRoles,
+          ),
+          result: SearchRolesResponse()..roles = const [],
+        );
+
+        final res = await tester.client.searchRoles(
+          query,
+          limit: limit,
+          nameGt: nameGt,
+          roleType: roleType,
+          includeGlobalRoles: includeGlobalRoles,
+        );
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi(
+            (api) => api.roles.searchRoles(
+              query,
+              limit: limit,
+              nameGt: nameGt,
+              roleType: roleType,
+              includeGlobalRoles: includeGlobalRoles,
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.roles);
+      },
+    );
+
+    group('`.channel`', () {
+      chatClientTest(
+        'should return back a new channel instance',
+        body: (tester) {
+          final channel = tester.client.channel(
+            _channelType,
+            id: _channelId,
+            extraData: _channelData,
           );
 
-          await client.blockUser(userId);
-
-          // Verify - should still have only one entry
-          expect(client.state.currentUser?.blockedUserIds, contains(userId));
-          expect(client.state.currentUser?.blockedUserIds.length, 1);
-          verify(() => api.user.blockUser(userId)).called(1);
-          verifyNoMoreInteractions(api.user);
+          expect(channel, isNotNull);
+          expect(channel.type, _channelType);
+          expect(channel.id, _channelId);
+          expect(channel.cid, _channelCid);
+          expect(channel.extraData, _channelData);
         },
       );
 
-      test('unblockUser should remove user from blockedUserIds', () async {
-        const blockedUserId = 'blocked-user-id';
-        const otherBlockedId = 'other-blocked-id';
-        client.state.blockedUserIds = const [blockedUserId, otherBlockedId];
+      chatClientTest(
+        'should return back in memory channel instance if available',
+        body: (tester) async {
+          final channel = tester.client.channel(
+            _channelType,
+            id: _channelId,
+            extraData: _channelData,
+          );
 
-        // Verify initial state includes both blocked IDs
-        expect(
-          client.state.currentUser?.blockedUserIds,
-          containsAll([blockedUserId, otherBlockedId]),
+          final channelState = createDefaultChannelState(
+            channel: createDefaultChannelModel(cid: _channelCid),
+          );
+
+          tester.mockApi(
+            (api) => api.channel.queryChannel(
+              _channelType,
+              channelId: _channelId,
+              channelData: _channelData,
+              state: true,
+              watch: true,
+              presence: false,
+            ),
+            result: channelState,
+          );
+
+          final channelsEmission = expectLater(
+            tester.clientState.channelsStream.skip(1),
+            emitsInOrder([
+              {_channelCid: isCorrectChannelFor(channelState)},
+            ]),
+          );
+
+          await channel.watch();
+          await channelsEmission;
+
+          final newChannel = tester.client.channel(_channelType, id: _channelId);
+          expect(newChannel, channel);
+
+          tester.verifyApi(
+            (api) => api.channel.queryChannel(
+              _channelType,
+              channelId: _channelId,
+              channelData: _channelData,
+              state: true,
+              watch: true,
+              presence: false,
+            ),
+          );
+        },
+      );
+    });
+
+    chatClientTest(
+      '`.createChannel`',
+      body: (tester) async {
+        final channelState = createDefaultChannelState(
+          channel: createDefaultChannelModel(cid: _channelCid, extraData: _channelData),
         );
 
-        when(() => api.user.unblockUser(blockedUserId)).thenAnswer(
-          (_) async => EmptyResponse(),
+        tester.mockApi(
+          (api) => api.channel.queryChannel(
+            _channelType,
+            channelId: _channelId,
+            channelData: _channelData,
+            state: false,
+          ),
+          result: channelState,
         );
 
-        await client.unblockUser(blockedUserId);
-
-        // Verify - blockedUserId should be removed
-        expect(
-          client.state.currentUser?.blockedUserIds,
-          contains(otherBlockedId),
+        final res = await tester.client.createChannel(
+          _channelType,
+          channelId: _channelId,
+          channelData: _channelData,
         );
 
-        expect(
-          client.state.currentUser?.blockedUserIds,
-          isNot(contains(blockedUserId)),
+        expect(res, isNotNull);
+        expect(res.channel, isNotNull);
+        final channel = res.channel!;
+        expect(channel.type, _channelType);
+        expect(channel.id, _channelId);
+        expect(channel.cid, _channelCid);
+        expect(channel.extraData, _channelData);
+
+        tester
+          ..verifyApi(
+            (api) => api.channel.queryChannel(
+              _channelType,
+              channelId: _channelId,
+              channelData: _channelData,
+              state: false,
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.watchChannel`',
+      body: (tester) async {
+        final channelState = createDefaultChannelState(
+          channel: createDefaultChannelModel(cid: _channelCid, extraData: _channelData),
         );
 
-        verify(() => api.user.unblockUser(blockedUserId)).called(1);
-        verifyNoMoreInteractions(api.user);
-      });
+        tester.mockApi(
+          (api) => api.channel.queryChannel(
+            _channelType,
+            channelId: _channelId,
+            channelData: _channelData,
+            watch: true,
+          ),
+          result: channelState,
+        );
 
-      test(
-        'unblockUser should be resilient if user ID not in blocked list',
-        () async {
-          const nonBlockedUserId = 'not-in-list';
-          const otherBlockedId = 'other-blocked-id';
-          client.state.blockedUserIds = const [otherBlockedId];
+        final res = await tester.client.watchChannel(
+          _channelType,
+          channelId: _channelId,
+          channelData: _channelData,
+        );
+
+        expect(res, isNotNull);
+        expect(res.channel, isNotNull);
+        final channel = res.channel!;
+        expect(channel.type, _channelType);
+        expect(channel.id, _channelId);
+        expect(channel.cid, _channelCid);
+        expect(channel.extraData, _channelData);
+
+        tester
+          ..verifyApi(
+            (api) => api.channel.queryChannel(
+              _channelType,
+              channelId: _channelId,
+              channelData: _channelData,
+              watch: true,
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.queryChannel`',
+      body: (tester) async {
+        final channelState = createDefaultChannelState(
+          channel: createDefaultChannelModel(cid: _channelCid, extraData: _channelData),
+        );
+
+        tester.mockApi(
+          (api) => api.channel.queryChannel(
+            _channelType,
+            channelId: _channelId,
+            channelData: _channelData,
+          ),
+          result: channelState,
+        );
+
+        final res = await tester.client.queryChannel(
+          _channelType,
+          channelId: _channelId,
+          channelData: _channelData,
+        );
+
+        expect(res, isNotNull);
+        expect(res.channel, isNotNull);
+        final channel = res.channel!;
+        expect(channel.type, _channelType);
+        expect(channel.id, _channelId);
+        expect(channel.cid, _channelCid);
+        expect(channel.extraData, _channelData);
+
+        tester
+          ..verifyApi(
+            (api) => api.channel.queryChannel(
+              _channelType,
+              channelId: _channelId,
+              channelData: _channelData,
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.queryMembers`',
+      body: (tester) async {
+        final members = List.generate(
+          3,
+          (index) => Member(userId: 'test-user-id-$index'),
+        );
+
+        tester.mockApi(
+          (api) => api.general.queryMembers(_channelType),
+          result: QueryMembersResponse()..members = members,
+        );
+
+        final res = await tester.client.queryMembers(_channelType);
+        expect(res, isNotNull);
+        expect(res.members.length, members.length);
+
+        tester
+          ..verifyApi((api) => api.general.queryMembers(_channelType))
+          ..verifyApi((api) => api.general.getAppSettings())
+          ..verifyNoMoreApiInteractions((api) => api.general);
+      },
+    );
+
+    chatClientTest(
+      '`.hideChannel`',
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.hideChannel(_channelId, _channelType),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.hideChannel(_channelId, _channelType);
+
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.channel.hideChannel(_channelId, _channelType))
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.showChannel`',
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.showChannel(_channelId, _channelType),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.showChannel(_channelId, _channelType);
+
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.channel.showChannel(_channelId, _channelType))
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.deleteChannel`',
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.deleteChannel(_channelId, _channelType),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.deleteChannel(_channelId, _channelType);
+
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.channel.deleteChannel(_channelId, _channelType))
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.truncateChannel`',
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.truncateChannel(_channelId, _channelType),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.truncateChannel(_channelId, _channelType);
+
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi(
+            (api) => api.channel.truncateChannel(_channelId, _channelType),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.muteChannel`',
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.moderation.muteChannel(_channelCid),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.muteChannel(_channelCid);
+
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.moderation.muteChannel(_channelCid))
+          ..verifyNoMoreApiInteractions((api) => api.moderation);
+      },
+    );
+
+    chatClientTest(
+      '`.unmuteChannel`',
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.moderation.unmuteChannel(_channelCid),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.unmuteChannel(_channelCid);
+
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.moderation.unmuteChannel(_channelCid))
+          ..verifyNoMoreApiInteractions((api) => api.moderation);
+      },
+    );
+
+    chatClientTest(
+      '`.partialMemberUpdate with userId`',
+      body: (tester) async {
+        const otherUserId = 'test-other-user-id';
+        const set = {'pinned': true};
+        const unset = ['pinned'];
+
+        tester.mockApi(
+          (api) => api.channel.updateMemberPartial(
+            channelId: _channelId,
+            channelType: _channelType,
+            set: set,
+            unset: unset,
+          ),
+          result: createDefaultPartialUpdateMemberResponse(
+            channelMember: Member(userId: otherUserId),
+          ),
+        );
+
+        final res = await tester.client.partialMemberUpdate(
+          channelId: _channelId,
+          channelType: _channelType,
+          set: set,
+          unset: unset,
+        );
+
+        expect(res, isNotNull);
+        expect(res.channelMember.userId, otherUserId);
+
+        tester
+          ..verifyApi(
+            (api) => api.channel.updateMemberPartial(
+              channelId: _channelId,
+              channelType: _channelType,
+              set: set,
+              unset: unset,
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.partialMemberUpdate with current user`',
+      body: (tester) async {
+        const set = {'pinned': true};
+        const unset = ['pinned'];
+
+        tester.mockApi(
+          (api) => api.channel.updateMemberPartial(
+            channelId: _channelId,
+            channelType: _channelType,
+            set: set,
+            unset: unset,
+          ),
+          result: createDefaultPartialUpdateMemberResponse(
+            channelMember: Member(userId: tester.user.id),
+          ),
+        );
+
+        final res = await tester.client.partialMemberUpdate(
+          channelId: _channelId,
+          channelType: _channelType,
+          set: set,
+          unset: unset,
+        );
+
+        expect(res, isNotNull);
+        expect(res.channelMember.userId, tester.user.id);
+        tester
+          ..verifyApi(
+            (api) => api.channel.updateMemberPartial(
+              channelId: _channelId,
+              channelType: _channelType,
+              set: set,
+              unset: unset,
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.pinChannel`',
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.updateMemberPartial(
+            channelId: _channelId,
+            channelType: _channelType,
+            set: const MemberUpdatePayload(pinned: true).toJson(),
+          ),
+          result: createDefaultPartialUpdateMemberResponse(
+            channelMember: Member(userId: tester.user.id, pinnedAt: DateTime.utc(2021, 3)),
+          ),
+        );
+
+        final res = await tester.client.pinChannel(
+          channelId: _channelId,
+          channelType: _channelType,
+        );
+
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi(
+            (api) => api.channel.updateMemberPartial(
+              channelId: _channelId,
+              channelType: _channelType,
+              set: const MemberUpdatePayload(pinned: true).toJson(),
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.unpinChannel`',
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.updateMemberPartial(
+            channelId: _channelId,
+            channelType: _channelType,
+            unset: [MemberUpdateType.pinned.name],
+          ),
+          result: createDefaultPartialUpdateMemberResponse(
+            channelMember: Member(userId: tester.user.id, pinnedAt: DateTime.utc(2021, 3)),
+          ),
+        );
+
+        final res = await tester.client.unpinChannel(
+          channelId: _channelId,
+          channelType: _channelType,
+        );
+
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi(
+            (api) => api.channel.updateMemberPartial(
+              channelId: _channelId,
+              channelType: _channelType,
+              unset: [MemberUpdateType.pinned.name],
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.archiveChannel`',
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.updateMemberPartial(
+            channelId: _channelId,
+            channelType: _channelType,
+            set: const MemberUpdatePayload(archived: true).toJson(),
+          ),
+          result: createDefaultPartialUpdateMemberResponse(
+            channelMember: Member(userId: tester.user.id, archivedAt: DateTime.utc(2021, 3)),
+          ),
+        );
+
+        final res = await tester.client.archiveChannel(
+          channelId: _channelId,
+          channelType: _channelType,
+        );
+
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi(
+            (api) => api.channel.updateMemberPartial(
+              channelId: _channelId,
+              channelType: _channelType,
+              set: const MemberUpdatePayload(archived: true).toJson(),
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.unarchiveChannel`',
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.updateMemberPartial(
+            channelId: _channelId,
+            channelType: _channelType,
+            unset: [MemberUpdateType.archived.name],
+          ),
+          result: createDefaultPartialUpdateMemberResponse(
+            channelMember: Member(userId: tester.user.id, pinnedAt: DateTime.utc(2021, 3)),
+          ),
+        );
+
+        final res = await tester.client.unarchiveChannel(
+          channelId: _channelId,
+          channelType: _channelType,
+        );
+
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi(
+            (api) => api.channel.updateMemberPartial(
+              channelId: _channelId,
+              channelType: _channelType,
+              unset: [MemberUpdateType.archived.name],
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.acceptChannelInvite`',
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.acceptChannelInvite(_channelId, _channelType),
+          result: AcceptInviteResponse()..channel = createDefaultChannelModel(cid: _channelCid),
+        );
+
+        final res = await tester.client.acceptChannelInvite(_channelId, _channelType);
+        expect(res, isNotNull);
+        expect(res.channel.cid, _channelCid);
+
+        tester
+          ..verifyApi((api) => api.channel.acceptChannelInvite(_channelId, _channelType))
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.rejectChannelInvite`',
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.rejectChannelInvite(_channelId, _channelType),
+          result: RejectInviteResponse()..channel = createDefaultChannelModel(cid: _channelCid),
+        );
+
+        final res = await tester.client.rejectChannelInvite(_channelId, _channelType);
+        expect(res, isNotNull);
+        expect(res.channel.cid, _channelCid);
+
+        tester
+          ..verifyApi((api) => api.channel.rejectChannelInvite(_channelId, _channelType))
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.addChannelMembers`',
+      body: (tester) async {
+        final members = List.generate(
+          3,
+          (index) => Member(userId: 'test-user-id-$index'),
+        );
+
+        final memberIds = members.map((e) => e.userId!).toList(growable: false);
+
+        tester.mockApi(
+          (api) => api.channel.addMembers(_channelId, _channelType, memberIds),
+          result: createDefaultAddMembersResponse(
+            channel: createDefaultChannelModel(cid: _channelCid),
+            members: members,
+          ),
+        );
+
+        final res = await tester.client.addChannelMembers(
+          _channelId,
+          _channelType,
+          memberIds,
+        );
+
+        expect(res, isNotNull);
+        expect(res.channel.cid, _channelCid);
+        expect(res.members.length, memberIds.length);
+
+        tester
+          ..verifyApi(
+            (api) => api.channel.addMembers(_channelId, _channelType, memberIds),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.addChannelMembers` with hideHistoryBefore',
+      body: (tester) async {
+        final members = List.generate(
+          3,
+          (index) => Member(userId: 'test-user-id-$index'),
+        );
+
+        final memberIds = members.map((e) => e.userId!).toList(growable: false);
+        final hideHistoryBefore = DateTime.parse('2024-01-01T00:00:00Z');
+
+        tester.mockApi(
+          (api) => api.channel.addMembers(
+            _channelId,
+            _channelType,
+            memberIds,
+            hideHistoryBefore: hideHistoryBefore,
+          ),
+          result: createDefaultAddMembersResponse(
+            channel: createDefaultChannelModel(cid: _channelCid),
+            members: members,
+          ),
+        );
+
+        final res = await tester.client.addChannelMembers(
+          _channelId,
+          _channelType,
+          memberIds,
+          hideHistoryBefore: hideHistoryBefore,
+        );
+
+        expect(res, isNotNull);
+        expect(res.channel.cid, _channelCid);
+        expect(res.members.length, memberIds.length);
+
+        tester
+          ..verifyApi(
+            (api) => api.channel.addMembers(
+              _channelId,
+              _channelType,
+              memberIds,
+              hideHistoryBefore: hideHistoryBefore,
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.removeChannelMembers`',
+      body: (tester) async {
+        final members = List.generate(
+          3,
+          (index) => Member(userId: 'test-user-id-$index'),
+        );
+
+        final memberIds = members.map((e) => e.userId!).toList(growable: false);
+
+        tester.mockApi(
+          (api) => api.channel.removeMembers(_channelId, _channelType, memberIds),
+          result: RemoveMembersResponse()
+            ..channel = createDefaultChannelModel(cid: _channelCid)
+            ..members = members,
+        );
+
+        final res = await tester.client.removeChannelMembers(
+          _channelId,
+          _channelType,
+          memberIds,
+        );
+
+        expect(res, isNotNull);
+        expect(res.channel.cid, _channelCid);
+        expect(res.members.length, memberIds.length);
+
+        tester
+          ..verifyApi(
+            (api) => api.channel.removeMembers(_channelId, _channelType, memberIds),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.inviteChannelMembers`',
+      body: (tester) async {
+        final members = List.generate(
+          3,
+          (index) => Member(userId: 'test-user-id-$index'),
+        );
+
+        final memberIds = members.map((e) => e.userId!).toList(growable: false);
+
+        tester.mockApi(
+          (api) => api.channel.inviteChannelMembers(_channelId, _channelType, memberIds),
+          result: InviteMembersResponse()
+            ..channel = createDefaultChannelModel(cid: _channelCid)
+            ..members = members,
+        );
+
+        final res = await tester.client.inviteChannelMembers(
+          _channelId,
+          _channelType,
+          memberIds,
+        );
+
+        expect(res, isNotNull);
+        expect(res.channel.cid, _channelCid);
+        expect(res.members.length, memberIds.length);
+
+        tester
+          ..verifyApi((api) => api.channel.inviteChannelMembers(_channelId, _channelType, memberIds))
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.stopChannelWatching`',
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.stopWatching(_channelId, _channelType),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.stopChannelWatching(_channelId, _channelType);
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.channel.stopWatching(_channelId, _channelType))
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.sendAction`',
+      body: (tester) async {
+        const messageId = 'test-message-id';
+        const formData = {'key': 'value'};
+
+        tester.mockApi(
+          (api) => api.message.sendAction(_channelId, _channelType, messageId, formData),
+          result: createDefaultSendActionResponse(),
+        );
+
+        final res = await tester.client.sendAction(
+          _channelId,
+          _channelType,
+          messageId,
+          formData,
+        );
+
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.message.sendAction(_channelId, _channelType, messageId, formData))
+          ..verifyNoMoreApiInteractions((api) => api.message);
+      },
+    );
+
+    chatClientTest(
+      '`.markChannelRead`',
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.markRead(_channelId, _channelType),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.markChannelRead(_channelId, _channelType);
+
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.channel.markRead(_channelId, _channelType))
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.markChannelUnread`',
+      body: (tester) async {
+        const messageId = 'test-message-id';
+
+        tester.mockApi(
+          (api) => api.channel.markUnread(_channelId, _channelType, messageId),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.markChannelUnread(
+          _channelId,
+          _channelType,
+          messageId,
+        );
+
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.channel.markUnread(_channelId, _channelType, messageId))
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.markChannelUnreadByTimestamp`',
+      body: (tester) async {
+        final timestamp = DateTime.parse('2024-01-01T00:00:00Z');
+
+        tester.mockApi(
+          (api) => api.channel.markUnreadByTimestamp(
+            _channelId,
+            _channelType,
+            timestamp,
+          ),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.markChannelUnreadByTimestamp(
+          _channelId,
+          _channelType,
+          timestamp,
+        );
+
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi(
+            (api) => api.channel.markUnreadByTimestamp(
+              _channelId,
+              _channelType,
+              timestamp,
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.createPoll`',
+      body: (tester) async {
+        final poll = createDefaultPoll();
+
+        tester.mockApi(
+          (api) => api.polls.createPoll(poll),
+          result: CreatePollResponse()..poll = poll,
+        );
+
+        final res = await tester.client.createPoll(poll);
+        expect(res, isNotNull);
+        expect(res.poll, poll);
+
+        tester
+          ..verifyApi((api) => api.polls.createPoll(poll))
+          ..verifyNoMoreApiInteractions((api) => api.polls);
+      },
+    );
+
+    chatClientTest(
+      '`.getPoll`',
+      body: (tester) async {
+        const pollId = 'test-poll-id';
+        final poll = createDefaultPoll(id: pollId);
+
+        tester.mockApi(
+          (api) => api.polls.getPoll(pollId),
+          result: GetPollResponse()..poll = poll,
+        );
+
+        final res = await tester.client.getPoll(pollId);
+        expect(res, isNotNull);
+        expect(res.poll, poll);
+
+        tester
+          ..verifyApi((api) => api.polls.getPoll(pollId))
+          ..verifyNoMoreApiInteractions((api) => api.polls);
+      },
+    );
+
+    chatClientTest(
+      '`.updatePoll`',
+      body: (tester) async {
+        final poll = createDefaultPoll(id: 'test-poll-id');
+
+        tester.mockApi(
+          (api) => api.polls.updatePoll(poll),
+          result: createDefaultUpdatePollResponse(poll: poll),
+        );
+
+        final res = await tester.client.updatePoll(poll);
+        expect(res, isNotNull);
+        expect(res.poll, poll);
+
+        tester
+          ..verifyApi((api) => api.polls.updatePoll(poll))
+          ..verifyNoMoreApiInteractions((api) => api.polls);
+      },
+    );
+
+    chatClientTest(
+      '`.partialUpdatePoll`',
+      body: (tester) async {
+        const pollId = 'test-poll-id';
+        final set = {'name': 'What is your favorite color?'};
+        final unset = <String>[];
+
+        final poll = createDefaultPoll(id: pollId, name: set['name']!);
+
+        tester.mockApi(
+          (api) => api.polls.partialUpdatePoll(pollId, set: set, unset: unset),
+          result: createDefaultUpdatePollResponse(poll: poll),
+        );
+
+        final res = await tester.client.partialUpdatePoll(pollId, set: set, unset: unset);
+        expect(res, isNotNull);
+        expect(res.poll.id, pollId);
+        expect(res.poll.name, set['name']);
+
+        tester
+          ..verifyApi((api) => api.polls.partialUpdatePoll(pollId, set: set, unset: unset))
+          ..verifyNoMoreApiInteractions((api) => api.polls);
+      },
+    );
+
+    chatClientTest(
+      '`.deletePoll`',
+      body: (tester) async {
+        const pollId = 'test-poll-id';
+
+        tester.mockApi(
+          (api) => api.polls.deletePoll(pollId),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.deletePoll(pollId);
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.polls.deletePoll(pollId))
+          ..verifyNoMoreApiInteractions((api) => api.polls);
+      },
+    );
+
+    chatClientTest(
+      '`.closePoll`',
+      body: (tester) async {
+        const pollId = 'test-poll-id';
+
+        tester.mockApi(
+          (api) => api.polls.partialUpdatePoll(pollId, set: {'is_closed': true}),
+          result: createDefaultUpdatePollResponse(),
+        );
+
+        final res = await tester.client.closePoll(pollId);
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.polls.partialUpdatePoll(pollId, set: {'is_closed': true}))
+          ..verifyNoMoreApiInteractions((api) => api.polls);
+      },
+    );
+
+    chatClientTest(
+      '`.createPollOption`',
+      body: (tester) async {
+        const pollId = 'test-poll-id';
+        final option = createDefaultPollOption();
+
+        tester.mockApi(
+          (api) => api.polls.createPollOption(pollId, option),
+          result: CreatePollOptionResponse()..pollOption = option,
+        );
+
+        final res = await tester.client.createPollOption(pollId, option);
+        expect(res, isNotNull);
+        expect(res.pollOption, option);
+
+        tester
+          ..verifyApi((api) => api.polls.createPollOption(pollId, option))
+          ..verifyNoMoreApiInteractions((api) => api.polls);
+      },
+    );
+
+    chatClientTest(
+      '`.getPollOption`',
+      body: (tester) async {
+        const pollId = 'test-poll-id';
+        const optionId = 'test-option-id';
+        final option = createDefaultPollOption(id: optionId);
+
+        tester.mockApi(
+          (api) => api.polls.getPollOption(pollId, optionId),
+          result: GetPollOptionResponse()..pollOption = option,
+        );
+
+        final res = await tester.client.getPollOption(pollId, optionId);
+        expect(res, isNotNull);
+        expect(res.pollOption, option);
+
+        tester
+          ..verifyApi((api) => api.polls.getPollOption(pollId, optionId))
+          ..verifyNoMoreApiInteractions((api) => api.polls);
+      },
+    );
+
+    chatClientTest(
+      '`.updatePollOption`',
+      body: (tester) async {
+        const pollId = 'test-poll-id';
+        final option = createDefaultPollOption(id: 'test-option-id');
+
+        tester.mockApi(
+          (api) => api.polls.updatePollOption(pollId, option),
+          result: UpdatePollOptionResponse()..pollOption = option,
+        );
+
+        final res = await tester.client.updatePollOption(pollId, option);
+        expect(res, isNotNull);
+        expect(res.pollOption, option);
+
+        tester
+          ..verifyApi((api) => api.polls.updatePollOption(pollId, option))
+          ..verifyNoMoreApiInteractions((api) => api.polls);
+      },
+    );
+
+    chatClientTest(
+      '`.deletePollOption`',
+      body: (tester) async {
+        const pollId = 'test-poll-id';
+        const optionId = 'test-option-id';
+
+        tester.mockApi(
+          (api) => api.polls.deletePollOption(pollId, optionId),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.deletePollOption(pollId, optionId);
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.polls.deletePollOption(pollId, optionId))
+          ..verifyNoMoreApiInteractions((api) => api.polls);
+      },
+    );
+
+    chatClientTest(
+      '`.castPollVote`',
+      body: (tester) async {
+        const messageId = 'test-message-id';
+        const pollId = 'test-poll-id';
+        const optionId = 'test-option-id';
+        final vote = createDefaultPollVote(optionId: optionId);
+
+        // Custom matcher to check if the Vote object has the specified id
+        Matcher matchesVoteOption(String expected) => predicate<PollVote>(
+          (vote) => vote.optionId == expected,
+          'Vote with option $expected',
+        );
+
+        tester.mockApi(
+          (api) => api.polls.castPollVote(messageId, pollId, any(that: matchesVoteOption(optionId))),
+          result: createDefaultCastPollVoteResponse(vote: vote),
+        );
+
+        final res = await tester.client.castPollVote(messageId, pollId, optionId: optionId);
+        expect(res, isNotNull);
+        expect(res.vote, vote);
+
+        tester
+          ..verifyApi((api) => api.polls.castPollVote(messageId, pollId, any(that: matchesVoteOption(optionId))))
+          ..verifyNoMoreApiInteractions((api) => api.polls);
+      },
+    );
+
+    chatClientTest(
+      '`.addPollAnswer`',
+      body: (tester) async {
+        const messageId = 'test-message-id';
+        const pollId = 'test-poll-id';
+        const answerText = 'Red';
+        final vote = createDefaultPollVote(answerText: answerText);
+
+        // Custom matcher to check if the Vote object has the specified id
+        Matcher matchesVoteAnswer(String expected) => predicate<PollVote>(
+          (vote) => vote.answerText == expected,
+          'Vote with answer $expected',
+        );
+
+        tester.mockApi(
+          (api) => api.polls.castPollVote(messageId, pollId, any(that: matchesVoteAnswer(answerText))),
+          result: createDefaultCastPollVoteResponse(vote: vote),
+        );
+
+        final res = await tester.client.addPollAnswer(messageId, pollId, answerText: answerText);
+        expect(res, isNotNull);
+        expect(res.vote, vote);
+
+        tester
+          ..verifyApi((api) => api.polls.castPollVote(messageId, pollId, any(that: matchesVoteAnswer(answerText))))
+          ..verifyNoMoreApiInteractions((api) => api.polls);
+      },
+    );
+
+    chatClientTest(
+      '`.removePollVote`',
+      body: (tester) async {
+        const messageId = 'test-message-id';
+        const pollId = 'test-poll-id';
+        const voteId = 'test-vote-id';
+
+        tester.mockApi(
+          (api) => api.polls.removePollVote(messageId, pollId, voteId),
+          result: RemovePollVoteResponse(),
+        );
+
+        final res = await tester.client.removePollVote(messageId, pollId, voteId);
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.polls.removePollVote(messageId, pollId, voteId))
+          ..verifyNoMoreApiInteractions((api) => api.polls);
+      },
+    );
+
+    chatClientTest(
+      '`.queryPolls`',
+      body: (tester) async {
+        final filter = PollFilter.in_(PollFilterField.id, const ['test-poll-id']);
+        final sort = [PollSort.desc(PollSortField.createdAt)];
+        const pagination = PaginationParams(limit: 20);
+
+        final polls = List.generate(
+          pagination.limit,
+          (index) => createDefaultPoll(id: 'test-poll-id-$index'),
+        );
+
+        tester.mockApi(
+          (api) => api.polls.queryPolls(
+            filter: filter,
+            sort: sort,
+            pagination: pagination,
+          ),
+          result: QueryPollsResponse()..polls = polls,
+        );
+
+        final res = await tester.client.queryPolls(
+          filter: filter,
+          sort: sort,
+          pagination: pagination,
+        );
+        expect(res, isNotNull);
+        expect(res.polls.length, polls.length);
+
+        tester
+          ..verifyApi(
+            (api) => api.polls.queryPolls(
+              filter: filter,
+              sort: sort,
+              pagination: pagination,
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.polls);
+      },
+    );
+
+    chatClientTest(
+      '`.queryPollVotes`',
+      body: (tester) async {
+        const pollId = 'test-poll-id';
+        final filter = PollVoteFilter.in_(PollVoteFilterField.id, const ['test-vote-id']);
+        final sort = [PollVoteSort.desc(PollVoteSortField.createdAt)];
+        const pagination = PaginationParams(limit: 20);
+
+        final votes = List.generate(
+          pagination.limit,
+          (index) => createDefaultPollVote(id: 'test-vote-id-$index', answerText: 'Red'),
+        );
+
+        tester.mockApi(
+          (api) => api.polls.queryPollVotes(
+            pollId,
+            filter: filter,
+            sort: sort,
+            pagination: pagination,
+          ),
+          result: QueryPollVotesResponse()..votes = votes,
+        );
+
+        final res = await tester.client.queryPollVotes(
+          pollId,
+          filter: filter,
+          sort: sort,
+          pagination: pagination,
+        );
+        expect(res, isNotNull);
+        expect(res.votes.length, votes.length);
+
+        tester
+          ..verifyApi(
+            (api) => api.polls.queryPollVotes(
+              pollId,
+              filter: filter,
+              sort: sort,
+              pagination: pagination,
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.polls);
+      },
+    );
+
+    chatClientTest(
+      '`.updateUser`',
+      body: (tester) async {
+        final user = User(
+          id: 'test-user-id',
+          extraData: const {'name': 'test-user'},
+        );
+
+        tester.mockApi(
+          (api) => api.user.updateUsers([user]),
+          result: createDefaultUpdateUsersResponse(users: {user.id: user}),
+        );
+
+        final res = await tester.client.updateUser(user);
+
+        expect(res, isNotNull);
+        expect(res.users, {user.id: user});
+
+        tester
+          ..verifyApi((api) => api.user.updateUsers([user]))
+          ..verifyNoMoreApiInteractions((api) => api.user);
+      },
+    );
+
+    chatClientTest(
+      '`.partialUpdateUser`',
+      body: (tester) async {
+        const userId = 'test-user-id';
+
+        final set = {'color': 'yellow'};
+        final unset = <String>[];
+
+        final partialUpdateRequest = PartialUpdateUserRequest(
+          id: userId,
+          set: set,
+          unset: unset,
+        );
+
+        final updatedUser = User(
+          id: userId,
+          extraData: {'color': set['color']},
+        );
+
+        tester.mockApi(
+          (api) => api.user.partialUpdateUsers([partialUpdateRequest]),
+          result: createDefaultUpdateUsersResponse(users: {updatedUser.id: updatedUser}),
+        );
+
+        final res = await tester.client.partialUpdateUser(
+          userId,
+          set: set,
+          unset: unset,
+        );
+
+        expect(res, isNotNull);
+        expect(res.users, {updatedUser.id: updatedUser});
+
+        tester
+          ..verifyApi((api) => api.user.partialUpdateUsers([partialUpdateRequest]))
+          ..verifyNoMoreApiInteractions((api) => api.user);
+      },
+    );
+
+    chatClientTest(
+      '`.banUser`',
+      body: (tester) async {
+        const userId = 'test-user-id';
+
+        tester.mockApi(
+          (api) => api.moderation.banUser(userId, options: any(named: 'options')),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.banUser(userId);
+
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.moderation.banUser(userId, options: any(named: 'options')))
+          ..verifyNoMoreApiInteractions((api) => api.moderation);
+      },
+    );
+
+    chatClientTest(
+      '`.unbanUser`',
+      body: (tester) async {
+        const userId = 'test-user-id';
+
+        tester.mockApi(
+          (api) => api.moderation.unbanUser(userId, options: any(named: 'options')),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.unbanUser(userId);
+
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.moderation.unbanUser(userId, options: any(named: 'options')))
+          ..verifyNoMoreApiInteractions((api) => api.moderation);
+      },
+    );
+
+    chatClientTest(
+      '`.blockUser`',
+      body: (tester) async {
+        const userId = 'test-user-id';
+
+        tester.mockApi(
+          (api) => api.user.blockUser(userId),
+          result: UserBlockResponse.fromJson({
+            'blocked_by_user_id': 'deven',
+            'blocked_user_id': 'jaap',
+            'created_at': '2024-10-01 12:45:23.456',
+          }),
+        );
+
+        final res = await tester.client.blockUser(userId);
+
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.user.blockUser(userId))
+          ..verifyNoMoreApiInteractions((api) => api.user);
+      },
+    );
+
+    chatClientTest(
+      '`.unblockUser`',
+      body: (tester) async {
+        const userId = 'test-user-id';
+
+        tester.mockApi(
+          (api) => api.user.unblockUser(userId),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.unblockUser(userId);
+
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.user.unblockUser(userId))
+          ..verifyNoMoreApiInteractions((api) => api.user);
+      },
+    );
+
+    chatClientTest(
+      '`.queryBlockedUsers`',
+      body: (tester) async {
+        final users = List.generate(
+          3,
+          (index) => User(id: 'test-user-id-$index'),
+        );
+
+        tester.mockApi(
+          (api) => api.user.queryBlockedUsers(),
+          result: createDefaultBlockedUsersResponse(
+            blocks: [
+              UserBlock(user: users[0], blockedUser: users[1]),
+              UserBlock(user: users[0], blockedUser: users[2]),
+            ],
+          ),
+        );
+
+        final res = await tester.client.queryBlockedUsers();
+        expect(res, isNotNull);
+        expect(res.blocks.length, 2);
+
+        tester
+          ..verifyApi((api) => api.user.queryBlockedUsers())
+          ..verifyNoMoreApiInteractions((api) => api.user);
+      },
+    );
+
+    group('Block user state management', () {
+      chatClientTest(
+        'blockUser should update blockedUserIds on client state',
+        body: (tester) async {
+          final testUser = OwnUser(id: 'test-user');
+          const userId = 'blocked-user-id';
 
           // Verify initial state
+          expect(tester.currentUser?.blockedUserIds, isEmpty);
+
+          tester.mockApi(
+            (api) => api.user.blockUser(userId),
+            result: createDefaultUserBlockResponse(
+              blockedUserId: userId,
+              blockedByUserId: testUser.id,
+            ),
+          );
+
+          await tester.client.blockUser(userId);
+
+          // Verify - should now include the blocked user ID
+          expect(tester.currentUser?.blockedUserIds, contains(userId));
+          tester
+            ..verifyApi((api) => api.user.blockUser(userId))
+            ..verifyNoMoreApiInteractions((api) => api.user);
+        },
+      );
+
+      chatClientTest(
+        'blockUser should not duplicate existing blocked user IDs',
+        body: (tester) async {
+          const userId = 'blocked-user-id';
+          tester.clientState.blockedUserIds = const [userId];
+
+          // Verify the user is already in the blocked list
+          expect(tester.currentUser?.blockedUserIds, contains(userId));
+
+          tester.mockApi(
+            (api) => api.user.blockUser(userId),
+            result: createDefaultUserBlockResponse(
+              blockedUserId: userId,
+              blockedByUserId: tester.currentUser!.id,
+            ),
+          );
+
+          await tester.client.blockUser(userId);
+
+          // Verify - should still have only one entry
+          expect(tester.currentUser?.blockedUserIds, contains(userId));
+          expect(tester.currentUser?.blockedUserIds.length, 1);
+          tester
+            ..verifyApi((api) => api.user.blockUser(userId))
+            ..verifyNoMoreApiInteractions((api) => api.user);
+        },
+      );
+
+      chatClientTest(
+        'unblockUser should remove user from blockedUserIds',
+        body: (tester) async {
+          const blockedUserId = 'blocked-user-id';
+          const otherBlockedId = 'other-blocked-id';
+          tester.clientState.blockedUserIds = const [blockedUserId, otherBlockedId];
+
+          // Verify initial state includes both blocked IDs
           expect(
-            client.state.currentUser?.blockedUserIds,
+            tester.currentUser?.blockedUserIds,
+            containsAll([blockedUserId, otherBlockedId]),
+          );
+
+          tester.mockApi(
+            (api) => api.user.unblockUser(blockedUserId),
+            result: createDefaultEmptyResponse(),
+          );
+
+          await tester.client.unblockUser(blockedUserId);
+
+          // Verify - blockedUserId should be removed
+          expect(
+            tester.currentUser?.blockedUserIds,
             contains(otherBlockedId),
           );
 
           expect(
-            client.state.currentUser?.blockedUserIds,
-            isNot(contains(nonBlockedUserId)),
+            tester.currentUser?.blockedUserIds,
+            isNot(contains(blockedUserId)),
           );
 
-          when(() => api.user.unblockUser(nonBlockedUserId)).thenAnswer(
-            (_) async => EmptyResponse(),
-          );
-
-          await client.unblockUser(nonBlockedUserId);
-
-          // Verify - should remain unchanged
-          expect(client.state.currentUser?.blockedUserIds, contains(otherBlockedId));
-          expect(client.state.currentUser?.blockedUserIds, isNot(contains(nonBlockedUserId)));
-          verify(() => api.user.unblockUser(nonBlockedUserId)).called(1);
-          verifyNoMoreInteractions(api.user);
+          tester
+            ..verifyApi((api) => api.user.unblockUser(blockedUserId))
+            ..verifyNoMoreApiInteractions((api) => api.user);
         },
       );
 
-      test(
+      chatClientTest(
+        'unblockUser should be resilient if user ID not in blocked list',
+        body: (tester) async {
+          const nonBlockedUserId = 'not-in-list';
+          const otherBlockedId = 'other-blocked-id';
+          tester.clientState.blockedUserIds = const [otherBlockedId];
+
+          // Verify initial state
+          expect(
+            tester.currentUser?.blockedUserIds,
+            contains(otherBlockedId),
+          );
+
+          expect(
+            tester.currentUser?.blockedUserIds,
+            isNot(contains(nonBlockedUserId)),
+          );
+
+          tester.mockApi(
+            (api) => api.user.unblockUser(nonBlockedUserId),
+            result: createDefaultEmptyResponse(),
+          );
+
+          await tester.client.unblockUser(nonBlockedUserId);
+
+          // Verify - should remain unchanged
+          expect(tester.currentUser?.blockedUserIds, contains(otherBlockedId));
+          expect(tester.currentUser?.blockedUserIds, isNot(contains(nonBlockedUserId)));
+          tester
+            ..verifyApi((api) => api.user.unblockUser(nonBlockedUserId))
+            ..verifyNoMoreApiInteractions((api) => api.user);
+        },
+      );
+
+      chatClientTest(
         'queryBlockedUsers should update client state with blockedUserIds',
-        () async {
+        body: (tester) async {
           const blockedId1 = 'blocked-1';
           const blockedId2 = 'blocked-2';
 
           // Verify initial state
-          expect(client.state.currentUser?.blockedUserIds, isEmpty);
+          expect(tester.currentUser?.blockedUserIds, isEmpty);
 
           // Create mock users
+          final user = tester.user;
           final blockedUser1 = User(id: 'blocked-user-1');
           final blockedUser2 = User(id: 'blocked-user-2');
 
           // Mock the queryBlockedUsers API call
-          when(() => api.user.queryBlockedUsers()).thenAnswer(
-            (_) async => BlockedUsersResponse()
-              ..blocks = [
+          tester.mockApi(
+            (api) => api.user.queryBlockedUsers(),
+            result: createDefaultBlockedUsersResponse(
+              blocks: [
                 UserBlock(
                   user: user,
                   userId: user.id,
@@ -3787,1134 +4062,1325 @@ void main() {
                   blockedUserId: blockedId2,
                 ),
               ],
+            ),
           );
 
-          await client.queryBlockedUsers();
+          await tester.client.queryBlockedUsers();
 
           // Verify - should now include both blocked IDs
           expect(
-            client.state.currentUser?.blockedUserIds,
+            tester.currentUser?.blockedUserIds,
             containsAll([blockedId1, blockedId2]),
           );
 
-          verify(() => api.user.queryBlockedUsers()).called(1);
-          verifyNoMoreInteractions(api.user);
+          tester
+            ..verifyApi((api) => api.user.queryBlockedUsers())
+            ..verifyNoMoreApiInteractions((api) => api.user);
         },
       );
     });
 
-    test('`.getUnreadCount`', () async {
-      when(() => api.user.getUnreadCount()).thenAnswer(
-        (_) async => GetUnreadCountResponse()
-          ..totalUnreadCount = 42
-          ..totalUnreadThreadsCount = 8
-          ..channelType = []
-          ..channels = [
-            UnreadCountsChannel(
-              channelId: 'messaging:test-channel-1',
-              unreadCount: 10,
-              lastRead: DateTime.now(),
-            ),
-            UnreadCountsChannel(
-              channelId: 'messaging:test-channel-2',
-              unreadCount: 15,
-              lastRead: DateTime.now(),
-            ),
-          ]
-          ..threads = [
-            UnreadCountsThread(
-              unreadCount: 3,
-              lastRead: DateTime.now(),
-              lastReadMessageId: 'message-1',
-              parentMessageId: 'parent-message-1',
-            ),
-            UnreadCountsThread(
-              unreadCount: 5,
-              lastRead: DateTime.now(),
-              lastReadMessageId: 'message-2',
-              parentMessageId: 'parent-message-2',
-            ),
-          ],
-      );
-
-      final res = await client.getUnreadCount();
-
-      expect(res, isNotNull);
-      expect(res.totalUnreadCount, 42);
-      expect(res.totalUnreadThreadsCount, 8);
-
-      verify(() => api.user.getUnreadCount()).called(1);
-      verifyNoMoreInteractions(api.user);
-    });
-
-    test(
-      '`.getUnreadCount` should also update user unread count as a side effect',
-      () async {
-        when(() => api.user.getUnreadCount()).thenAnswer(
-          (_) async => GetUnreadCountResponse()
-            ..totalUnreadCount = 25
-            ..totalUnreadThreadsCount = 2
-            ..channelType = []
-            ..channels = [
+    chatClientTest(
+      '`.getUnreadCount`',
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.user.getUnreadCount(),
+          result: createDefaultGetUnreadCountResponse(
+            totalUnreadCount: 42,
+            totalUnreadThreadsCount: 8,
+            channels: [
               UnreadCountsChannel(
                 channelId: 'messaging:test-channel-1',
                 unreadCount: 10,
-                lastRead: DateTime.now(),
+                lastRead: DateTime.utc(2021, 3),
               ),
               UnreadCountsChannel(
                 channelId: 'messaging:test-channel-2',
                 unreadCount: 15,
-                lastRead: DateTime.now(),
+                lastRead: DateTime.utc(2021, 3),
               ),
-            ]
-            ..threads = [
+            ],
+            threads: [
               UnreadCountsThread(
                 unreadCount: 3,
-                lastRead: DateTime.now(),
+                lastRead: DateTime.utc(2021, 3),
                 lastReadMessageId: 'message-1',
                 parentMessageId: 'parent-message-1',
               ),
               UnreadCountsThread(
                 unreadCount: 5,
-                lastRead: DateTime.now(),
+                lastRead: DateTime.utc(2021, 3),
                 lastReadMessageId: 'message-2',
                 parentMessageId: 'parent-message-2',
               ),
             ],
+          ),
         );
 
-        client.getUnreadCount().ignore();
+        final res = await tester.client.getUnreadCount();
+
+        expect(res, isNotNull);
+        expect(res.totalUnreadCount, 42);
+        expect(res.totalUnreadThreadsCount, 8);
+
+        tester
+          ..verifyApi((api) => api.user.getUnreadCount())
+          ..verifyNoMoreApiInteractions((api) => api.user);
+      },
+    );
+
+    chatClientTest(
+      '`.getUnreadCount` should also update user unread count as a side effect',
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.user.getUnreadCount(),
+          result: createDefaultGetUnreadCountResponse(
+            totalUnreadCount: 25,
+            totalUnreadThreadsCount: 2,
+            channels: [
+              UnreadCountsChannel(
+                channelId: 'messaging:test-channel-1',
+                unreadCount: 10,
+                lastRead: DateTime.utc(2021, 3),
+              ),
+              UnreadCountsChannel(
+                channelId: 'messaging:test-channel-2',
+                unreadCount: 15,
+                lastRead: DateTime.utc(2021, 3),
+              ),
+            ],
+            threads: [
+              UnreadCountsThread(
+                unreadCount: 3,
+                lastRead: DateTime.utc(2021, 3),
+                lastReadMessageId: 'message-1',
+                parentMessageId: 'parent-message-1',
+              ),
+              UnreadCountsThread(
+                unreadCount: 5,
+                lastRead: DateTime.utc(2021, 3),
+                lastReadMessageId: 'message-2',
+                parentMessageId: 'parent-message-2',
+              ),
+            ],
+          ),
+        );
+
+        tester.client.getUnreadCount().ignore();
 
         // Wait for the local side effect event to be processed
         await Future.delayed(Duration.zero);
 
-        expect(client.state.currentUser?.totalUnreadCount, 25);
-        expect(client.state.currentUser?.unreadChannels, 2); // channels.length
-        expect(client.state.currentUser?.unreadThreads, 2); // threads.length
+        expect(tester.currentUser?.totalUnreadCount, 25);
+        expect(tester.currentUser?.unreadChannels, 2); // channels.length
+        expect(tester.currentUser?.unreadThreads, 2); // threads.length
 
-        verify(() => api.user.getUnreadCount()).called(1);
-        verifyNoMoreInteractions(api.user);
+        tester
+          ..verifyApi((api) => api.user.getUnreadCount())
+          ..verifyNoMoreApiInteractions((api) => api.user);
       },
     );
 
-    test('`.shadowBan`', () async {
-      const userId = 'test-user-id';
+    chatClientTest(
+      '`.shadowBan`',
+      body: (tester) async {
+        const userId = 'test-user-id';
 
-      when(() => api.moderation.banUser(userId, options: {'shadow': true})).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.shadowBan(userId);
-
-      expect(res, isNotNull);
-
-      verify(
-        () => api.moderation.banUser(userId, options: {'shadow': true}),
-      ).called(1);
-      verifyNoMoreInteractions(api.moderation);
-    });
-
-    test('`.removeShadowBan`', () async {
-      const userId = 'test-user-id';
-
-      when(() => api.moderation.unbanUser(userId, options: {'shadow': true})).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.removeShadowBan(userId);
-
-      expect(res, isNotNull);
-
-      verify(
-        () => api.moderation.unbanUser(userId, options: {'shadow': true}),
-      ).called(1);
-      verifyNoMoreInteractions(api.moderation);
-    });
-
-    test('`.muteUser`', () async {
-      const userId = 'test-user-id';
-
-      when(() => api.moderation.muteUser(userId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.muteUser(userId);
-
-      expect(res, isNotNull);
-
-      verify(() => api.moderation.muteUser(userId)).called(1);
-      verifyNoMoreInteractions(api.moderation);
-    });
-
-    test('`.unmuteUser`', () async {
-      const userId = 'test-user-id';
-
-      when(() => api.moderation.unmuteUser(userId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.unmuteUser(userId);
-
-      expect(res, isNotNull);
-
-      verify(() => api.moderation.unmuteUser(userId)).called(1);
-      verifyNoMoreInteractions(api.moderation);
-    });
-
-    test('`.flagMessage`', () async {
-      const messageId = 'test-message-id';
-
-      when(() => api.moderation.flagMessage(messageId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.flagMessage(messageId);
-
-      expect(res, isNotNull);
-
-      verify(() => api.moderation.flagMessage(messageId)).called(1);
-      verifyNoMoreInteractions(api.moderation);
-    });
-
-    test('`.unflagMessage`', () async {
-      const messageId = 'test-message-id';
-
-      when(() => api.moderation.unflagMessage(messageId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.unflagMessage(messageId);
-
-      expect(res, isNotNull);
-
-      verify(() => api.moderation.unflagMessage(messageId)).called(1);
-      verifyNoMoreInteractions(api.moderation);
-    });
-
-    test('`.flagUser`', () async {
-      const userId = 'test-message-id';
-
-      when(() => api.moderation.flagUser(userId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.flagUser(userId);
-
-      expect(res, isNotNull);
-
-      verify(() => api.moderation.flagUser(userId)).called(1);
-      verifyNoMoreInteractions(api.moderation);
-    });
-
-    test('`.unflagUser`', () async {
-      const userId = 'test-message-id';
-
-      when(() => api.moderation.unflagUser(userId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.unflagUser(userId);
-
-      expect(res, isNotNull);
-
-      verify(() => api.moderation.unflagUser(userId)).called(1);
-      verifyNoMoreInteractions(api.moderation);
-    });
-
-    test('`.getActiveLiveLocations`', () async {
-      final locations = [
-        Location(
-          latitude: 40.7128,
-          longitude: -74.0060,
-          createdByDeviceId: 'device-1',
-          endAt: DateTime.now().add(const Duration(hours: 1)),
-        ),
-        Location(
-          latitude: 34.0522,
-          longitude: -118.2437,
-          createdByDeviceId: 'device-2',
-          endAt: DateTime.now().add(const Duration(hours: 2)),
-        ),
-      ];
-
-      when(() => api.user.getActiveLiveLocations()).thenAnswer(
-        (_) async =>
-            GetActiveLiveLocationsResponse() //
-              ..activeLiveLocations = locations,
-      );
-
-      // Initial state should be empty
-      expect(client.state.activeLiveLocations, isEmpty);
-
-      final res = await client.getActiveLiveLocations();
-
-      expect(res, isNotNull);
-      expect(res.activeLiveLocations, hasLength(2));
-      expect(res.activeLiveLocations, equals(locations));
-      expect(client.state.activeLiveLocations, equals(locations));
-
-      verify(() => api.user.getActiveLiveLocations()).called(1);
-      verifyNoMoreInteractions(api.user);
-    });
-
-    test('`.updateLiveLocation`', () async {
-      const messageId = 'test-message-id';
-      const createdByDeviceId = 'test-device-id';
-      final endAt = DateTime.timestamp().add(const Duration(hours: 1));
-      const location = LocationCoordinate(
-        latitude: 40.7128,
-        longitude: -74.0060,
-      );
-
-      final expectedLocation = Location(
-        latitude: location.latitude,
-        longitude: location.longitude,
-        createdByDeviceId: createdByDeviceId,
-        endAt: endAt,
-      );
-
-      when(
-        () => api.user.updateLiveLocation(
-          messageId: messageId,
-          createdByDeviceId: createdByDeviceId,
-          location: location,
-          endAt: endAt,
-        ),
-      ).thenAnswer((_) async => expectedLocation);
-
-      final res = await client.updateLiveLocation(
-        messageId: messageId,
-        createdByDeviceId: createdByDeviceId,
-        location: location,
-        endAt: endAt,
-      );
-
-      expect(res, isNotNull);
-      expect(res, equals(expectedLocation));
-
-      verify(
-        () => api.user.updateLiveLocation(
-          messageId: messageId,
-          createdByDeviceId: createdByDeviceId,
-          location: location,
-          endAt: endAt,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.user);
-    });
-
-    test('`.stopLiveLocation`', () async {
-      const messageId = 'test-message-id';
-      const createdByDeviceId = 'test-device-id';
-
-      final expectedLocation = Location(
-        latitude: 40.7128,
-        longitude: -74.0060,
-        createdByDeviceId: createdByDeviceId,
-        endAt: DateTime.now(), // Should be expired
-      );
-
-      when(
-        () => api.user.updateLiveLocation(
-          messageId: messageId,
-          createdByDeviceId: createdByDeviceId,
-          endAt: any(named: 'endAt'),
-        ),
-      ).thenAnswer((_) async => expectedLocation);
-
-      final res = await client.stopLiveLocation(
-        messageId: messageId,
-        createdByDeviceId: createdByDeviceId,
-      );
-
-      expect(res, isNotNull);
-      expect(res, equals(expectedLocation));
-
-      verify(
-        () => api.user.updateLiveLocation(
-          messageId: messageId,
-          createdByDeviceId: createdByDeviceId,
-          endAt: any(named: 'endAt'),
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.user);
-    });
-
-    group('Live Location Event Handling', () {
-      test('should handle location.shared event', () async {
-        final location = Location(
-          channelCid: 'test-channel:123',
-          messageId: 'message-123',
-          userId: userId,
-          latitude: 40.7128,
-          longitude: -74.0060,
-          createdByDeviceId: 'device-1',
-          endAt: DateTime.now().add(const Duration(hours: 1)),
+        tester.mockApi(
+          (api) => api.moderation.banUser(userId, options: {'shadow': true}),
+          result: createDefaultEmptyResponse(),
         );
 
-        final event = Event(
-          type: EventType.locationShared,
-          cid: 'test-channel:123',
-          message: Message(
-            id: 'message-123',
-            sharedLocation: location,
-          ),
+        final res = await tester.client.shadowBan(userId);
+
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.moderation.banUser(userId, options: {'shadow': true}))
+          ..verifyNoMoreApiInteractions((api) => api.moderation);
+      },
+    );
+
+    chatClientTest(
+      '`.removeShadowBan`',
+      body: (tester) async {
+        const userId = 'test-user-id';
+
+        tester.mockApi(
+          (api) => api.moderation.unbanUser(userId, options: {'shadow': true}),
+          result: createDefaultEmptyResponse(),
         );
 
-        // Initially empty
-        expect(client.state.activeLiveLocations, isEmpty);
+        final res = await tester.client.removeShadowBan(userId);
 
-        // Trigger the event
-        client.handleEvent(event);
+        expect(res, isNotNull);
 
-        // Wait for the event to get processed
-        await Future.delayed(Duration.zero);
+        tester
+          ..verifyApi((api) => api.moderation.unbanUser(userId, options: {'shadow': true}))
+          ..verifyNoMoreApiInteractions((api) => api.moderation);
+      },
+    );
 
-        // Should add location to active live locations
-        final activeLiveLocations = client.state.activeLiveLocations;
-        expect(activeLiveLocations, hasLength(1));
-        expect(activeLiveLocations.first.messageId, equals('message-123'));
-      });
+    chatClientTest(
+      '`.muteUser`',
+      body: (tester) async {
+        const userId = 'test-user-id';
 
-      test('should handle location.updated event', () async {
-        final initialLocation = Location(
-          channelCid: 'test-channel:123',
-          messageId: 'message-123',
-          userId: userId,
-          latitude: 40.7128,
-          longitude: -74.0060,
-          createdByDeviceId: 'device-1',
-          endAt: DateTime.now().add(const Duration(hours: 1)),
+        tester.mockApi(
+          (api) => api.moderation.muteUser(userId),
+          result: createDefaultEmptyResponse(),
         );
 
-        // Set initial location
-        client.state.activeLiveLocations = [initialLocation];
+        final res = await tester.client.muteUser(userId);
 
-        final updatedLocation = Location(
-          channelCid: 'test-channel:123',
-          messageId: 'message-123',
-          userId: userId,
-          latitude: 40.7500, // Updated latitude
-          longitude: -74.1000, // Updated longitude
-          createdByDeviceId: 'device-1',
-          endAt: DateTime.now().add(const Duration(hours: 1)),
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.moderation.muteUser(userId))
+          ..verifyNoMoreApiInteractions((api) => api.moderation);
+      },
+    );
+
+    chatClientTest(
+      '`.unmuteUser`',
+      body: (tester) async {
+        const userId = 'test-user-id';
+
+        tester.mockApi(
+          (api) => api.moderation.unmuteUser(userId),
+          result: createDefaultEmptyResponse(),
         );
 
-        final event = Event(
-          type: EventType.locationUpdated,
-          cid: 'test-channel:123',
-          message: Message(
-            id: 'message-123',
-            sharedLocation: updatedLocation,
-          ),
+        final res = await tester.client.unmuteUser(userId);
+
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.moderation.unmuteUser(userId))
+          ..verifyNoMoreApiInteractions((api) => api.moderation);
+      },
+    );
+
+    chatClientTest(
+      '`.flagMessage`',
+      body: (tester) async {
+        const messageId = 'test-message-id';
+
+        tester.mockApi(
+          (api) => api.moderation.flagMessage(messageId),
+          result: createDefaultEmptyResponse(),
         );
 
-        // Trigger the event
-        client.handleEvent(event);
+        final res = await tester.client.flagMessage(messageId);
 
-        // Wait for the event to get processed
-        await Future.delayed(Duration.zero);
+        expect(res, isNotNull);
 
-        // Should update the location
-        final activeLiveLocations = client.state.activeLiveLocations;
-        expect(activeLiveLocations, hasLength(1));
-        expect(activeLiveLocations.first.latitude, equals(40.7500));
-        expect(activeLiveLocations.first.longitude, equals(-74.1000));
-      });
+        tester
+          ..verifyApi((api) => api.moderation.flagMessage(messageId))
+          ..verifyNoMoreApiInteractions((api) => api.moderation);
+      },
+    );
 
-      test('should handle location.expired event', () async {
-        final location = Location(
-          channelCid: 'test-channel:123',
-          messageId: 'message-123',
-          userId: userId,
-          latitude: 40.7128,
-          longitude: -74.0060,
-          createdByDeviceId: 'device-1',
-          endAt: DateTime.now().add(const Duration(hours: 1)),
+    chatClientTest(
+      '`.unflagMessage`',
+      body: (tester) async {
+        const messageId = 'test-message-id';
+
+        tester.mockApi(
+          (api) => api.moderation.unflagMessage(messageId),
+          result: createDefaultEmptyResponse(),
         );
 
-        // Set initial location
-        client.state.activeLiveLocations = [location];
-        expect(client.state.activeLiveLocations, hasLength(1));
+        final res = await tester.client.unflagMessage(messageId);
 
-        final expiredLocation = location.copyWith(
-          endAt: DateTime.now().subtract(const Duration(hours: 1)),
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.moderation.unflagMessage(messageId))
+          ..verifyNoMoreApiInteractions((api) => api.moderation);
+      },
+    );
+
+    chatClientTest(
+      '`.flagUser`',
+      body: (tester) async {
+        const userId = 'test-message-id';
+
+        tester.mockApi(
+          (api) => api.moderation.flagUser(userId),
+          result: createDefaultEmptyResponse(),
         );
 
-        final event = Event(
-          type: EventType.locationExpired,
-          cid: 'test-channel:123',
-          message: Message(
-            id: 'message-123',
-            sharedLocation: expiredLocation,
-          ),
+        final res = await tester.client.flagUser(userId);
+
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.moderation.flagUser(userId))
+          ..verifyNoMoreApiInteractions((api) => api.moderation);
+      },
+    );
+
+    chatClientTest(
+      '`.unflagUser`',
+      body: (tester) async {
+        const userId = 'test-message-id';
+
+        tester.mockApi(
+          (api) => api.moderation.unflagUser(userId),
+          result: createDefaultEmptyResponse(),
         );
 
-        // Trigger the event
-        client.handleEvent(event);
+        final res = await tester.client.unflagUser(userId);
 
-        // Wait for the event to get processed
-        await Future.delayed(Duration.zero);
+        expect(res, isNotNull);
 
-        // Should remove the location
-        expect(client.state.activeLiveLocations, isEmpty);
-      });
+        tester
+          ..verifyApi((api) => api.moderation.unflagUser(userId))
+          ..verifyNoMoreApiInteractions((api) => api.moderation);
+      },
+    );
 
-      test('should auto-expire an active live location once at endAt', () async {
-        final expiredEvents = <Event>[];
-        final sub = client.on(EventType.locationExpired).listen(expiredEvents.add);
-        addTearDown(sub.cancel);
-
-        // Setting an active location schedules a one-shot expiry timer.
-        client.state.activeLiveLocations = [
+    chatClientTest(
+      '`.getActiveLiveLocations`',
+      body: (tester) async {
+        final locations = [
           Location(
-            channelCid: 'test-channel:123',
-            messageId: 'message-123',
-            userId: userId,
             latitude: 40.7128,
             longitude: -74.0060,
             createdByDeviceId: 'device-1',
-            endAt: DateTime.now().add(const Duration(milliseconds: 800)),
+            endAt: DateTime.timestamp().add(const Duration(hours: 1)),
+          ),
+          Location(
+            latitude: 34.0522,
+            longitude: -118.2437,
+            createdByDeviceId: 'device-2',
+            endAt: DateTime.timestamp().add(const Duration(hours: 2)),
           ),
         ];
-        expect(client.state.activeLiveLocations, hasLength(1));
 
-        // Before endAt nothing is emitted and the location stays active.
-        await delay(200);
-        expect(expiredEvents, isEmpty);
-        expect(client.state.activeLiveLocations, hasLength(1));
+        tester.mockApi(
+          (api) => api.user.getActiveLiveLocations(),
+          result: GetActiveLiveLocationsResponse()..activeLiveLocations = locations,
+        );
 
-        // After endAt the timer fires once and the location is removed.
-        await delay(900);
-        expect(expiredEvents, hasLength(1));
-        expect(client.state.activeLiveLocations, isEmpty);
+        // Initial state should be empty
+        expect(tester.clientState.activeLiveLocations, isEmpty);
 
-        // The timer is one-shot: no further events are emitted.
-        await delay(300);
-        expect(expiredEvents, hasLength(1));
-      });
+        final res = await tester.client.getActiveLiveLocations();
 
-      test('should ignore location events for other users', () async {
-        final location = Location(
-          channelCid: 'test-channel:123',
-          messageId: 'message-123',
-          userId: 'other-user', // Different user
+        expect(res, isNotNull);
+        expect(res.activeLiveLocations, hasLength(2));
+        expect(res.activeLiveLocations, equals(locations));
+        expect(tester.clientState.activeLiveLocations, equals(locations));
+
+        tester
+          ..verifyApi((api) => api.user.getActiveLiveLocations())
+          ..verifyNoMoreApiInteractions((api) => api.user);
+      },
+    );
+
+    chatClientTest(
+      '`.updateLiveLocation`',
+      body: (tester) async {
+        const messageId = 'test-message-id';
+        const createdByDeviceId = 'test-device-id';
+        final endAt = DateTime.timestamp().add(const Duration(hours: 1));
+        const location = LocationCoordinate(
           latitude: 40.7128,
           longitude: -74.0060,
-          createdByDeviceId: 'device-1',
-          endAt: DateTime.now().add(const Duration(hours: 1)),
         );
 
-        final event = Event(
-          type: EventType.locationShared,
-          cid: 'test-channel:123',
-          message: Message(
-            id: 'message-123',
-            sharedLocation: location,
+        final expectedLocation = Location(
+          latitude: location.latitude,
+          longitude: location.longitude,
+          createdByDeviceId: createdByDeviceId,
+          endAt: endAt,
+        );
+
+        tester.mockApi(
+          (api) => api.user.updateLiveLocation(
+            messageId: messageId,
+            createdByDeviceId: createdByDeviceId,
+            location: location,
+            endAt: endAt,
           ),
+          result: expectedLocation,
         );
 
-        // Trigger the event
-        client.handleEvent(event);
-
-        // Wait for the event to get processed
-        await Future.delayed(Duration.zero);
-
-        // Should not add location from other user
-        expect(client.state.activeLiveLocations, isEmpty);
-      });
-
-      test('should ignore static location events', () async {
-        final staticLocation = Location(
-          channelCid: 'test-channel:123',
-          messageId: 'message-123',
-          userId: userId,
-          latitude: 40.7128,
-          longitude: -74.0060,
-          createdByDeviceId: 'device-1',
-          // No endAt means it's static
-        );
-
-        final event = Event(
-          type: EventType.locationShared,
-          cid: 'test-channel:123',
-          message: Message(
-            id: 'message-123',
-            sharedLocation: staticLocation,
-          ),
-        );
-
-        // Trigger the event
-        client.handleEvent(event);
-
-        // Wait for the event to get processed
-        await Future.delayed(Duration.zero);
-
-        // Should not add static location
-        expect(client.state.activeLiveLocations, isEmpty);
-      });
-
-      test('should merge locations with same key', () async {
-        final location1 = Location(
-          channelCid: 'test-channel:123',
-          messageId: 'message-123',
-          userId: userId,
-          latitude: 40.7128,
-          longitude: -74.0060,
-          createdByDeviceId: 'device-1',
-          endAt: DateTime.now().add(const Duration(hours: 1)),
-        );
-
-        final location2 = Location(
-          channelCid: 'test-channel:123',
-          messageId: 'message-456',
-          userId: userId,
-          latitude: 40.7500,
-          longitude: -74.1000,
-          createdByDeviceId: 'device-1', // Same device, should merge
-          endAt: DateTime.now().add(const Duration(hours: 1)),
-        );
-
-        final event1 = Event(
-          type: EventType.locationShared,
-          cid: 'test-channel:123',
-          message: Message(
-            id: 'message-123',
-            sharedLocation: location1,
-          ),
-        );
-
-        final event2 = Event(
-          type: EventType.locationShared,
-          cid: 'test-channel:123',
-          message: Message(
-            id: 'message-456',
-            sharedLocation: location2,
-          ),
-        );
-
-        // Trigger first event
-        client.handleEvent(event1);
-        await Future.delayed(Duration.zero);
-
-        final activeLiveLocations = client.state.activeLiveLocations;
-        expect(activeLiveLocations, hasLength(1));
-        expect(activeLiveLocations.first.messageId, equals('message-123'));
-
-        // Trigger second event - should merge/update
-        client.handleEvent(event2);
-        await Future.delayed(Duration.zero);
-
-        final activeLiveLocations2 = client.state.activeLiveLocations;
-        expect(activeLiveLocations2, hasLength(1));
-        expect(activeLiveLocations2.first.messageId, equals('message-456'));
-      });
-    });
-
-    test('`.markAllRead`', () async {
-      when(() => api.channel.markAllRead()).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.markAllRead();
-      expect(res, isNotNull);
-
-      verify(() => api.channel.markAllRead()).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.markChannelsDelivered`', () async {
-      final deliveries = [
-        const MessageDelivery(
-          channelCid: 'messaging:test-channel-1',
-          messageId: 'test-message-id-1',
-        ),
-        const MessageDelivery(
-          channelCid: 'messaging:test-channel-2',
-          messageId: 'test-message-id-2',
-        ),
-      ];
-
-      when(() => api.channel.markChannelsDelivered(deliveries)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.markChannelsDelivered(deliveries);
-      expect(res, isNotNull);
-
-      verify(() => api.channel.markChannelsDelivered(deliveries)).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.sendEvent`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      final event = Event(type: EventType.any);
-
-      when(
-        () => api.channel.sendEvent(
-          channelId,
-          channelType,
-          any(that: isSameEventAs(event)),
-        ),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.sendEvent(channelId, channelType, event);
-      expect(res, isNotNull);
-
-      verify(
-        () => api.channel.sendEvent(
-          channelId,
-          channelType,
-          any(that: isSameEventAs(event)),
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.sendReaction`', () async {
-      const messageId = 'test-message-id';
-      const reactionType = 'like';
-      const emojiCode = '👍';
-      const score = 4;
-
-      final reaction = Reaction(
-        type: reactionType,
-        messageId: messageId,
-        emojiCode: emojiCode,
-        score: score,
-      );
-
-      when(() => api.message.sendReaction(messageId, reaction)).thenAnswer(
-        (_) async => SendReactionResponse()
-          ..message = Message(id: messageId)
-          ..reaction = reaction,
-      );
-
-      final res = await client.sendReaction(messageId, reaction);
-      expect(res, isNotNull);
-      expect(res.message.id, messageId);
-      expect(res.reaction.type, reactionType);
-      expect(res.reaction.emojiCode, emojiCode);
-      expect(res.reaction.score, score);
-      expect(res.reaction.messageId, messageId);
-
-      verify(() => api.message.sendReaction(messageId, reaction)).called(1);
-      verifyNoMoreInteractions(api.message);
-    });
-
-    test('`.deleteReaction`', () async {
-      const messageId = 'test-message-id';
-      const reactionType = 'like';
-
-      when(() => api.message.deleteReaction(messageId, reactionType)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.deleteReaction(messageId, reactionType);
-      expect(res, isNotNull);
-
-      verify(
-        () => api.message.deleteReaction(messageId, reactionType),
-      ).called(1);
-      verifyNoMoreInteractions(api.message);
-    });
-
-    test('`.sendMessage`', () async {
-      final message = Message(id: 'test-message-id');
-      const channelId = 'test-channel-id';
-      const channelType = 'test-channel-type';
-
-      when(
-        () => api.message.sendMessage(channelId, channelType, any(that: isSameMessageAs(message))),
-      ).thenAnswer((_) async => SendMessageResponse()..message = message);
-
-      final res = await client.sendMessage(message, channelId, channelType);
-      expect(res, isNotNull);
-      expect(res.message, isSameMessageAs(message));
-
-      verify(
-        () => api.message.sendMessage(
-          channelId,
-          channelType,
-          any(that: isSameMessageAs(message)),
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.message);
-    });
-
-    test('`.createDraft`', () async {
-      final message = DraftMessage(id: 'test-message-id', text: 'Hello!');
-      const channelId = 'test-channel-id';
-      const channelType = 'test-channel-type';
-
-      when(
-        () => api.message.createDraft(
-          channelId,
-          channelType,
-          any(that: isSameDraftMessageAs(message)),
-        ),
-      ).thenAnswer(
-        (_) async => CreateDraftResponse()
-          ..draft = Draft(
-            channelCid: '$channelType:$channelId',
-            createdAt: DateTime.now(),
-            message: message,
-          ),
-      );
-
-      final res = await client.createDraft(
-        message,
-        channelId,
-        channelType,
-      );
-
-      expect(res, isNotNull);
-      expect(res.draft.message, isSameDraftMessageAs(message));
-
-      verify(
-        () => api.message.createDraft(
-          channelId,
-          channelType,
-          any(that: isSameDraftMessageAs(message)),
-        ),
-      ).called(1);
-
-      verifyNoMoreInteractions(api.message);
-    });
-
-    test('`.deleteDraft`', () async {
-      const channelId = 'test-channel-id';
-      const channelType = 'test-channel-type';
-
-      when(() => api.message.deleteDraft(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.deleteDraft(channelId, channelType);
-      expect(res, isNotNull);
-
-      verify(() => api.message.deleteDraft(channelId, channelType));
-      verifyNoMoreInteractions(api.message);
-    });
-
-    test('`.getDraft`', () async {
-      const channelId = 'test-channel-id';
-      const channelType = 'test-channel-type';
-
-      final message = DraftMessage(id: 'test-message-id', text: 'Hello!');
-
-      when(() => api.message.getDraft(channelId, channelType)).thenAnswer(
-        (_) async => GetDraftResponse()
-          ..draft = Draft(
-            channelCid: '$channelType:$channelId',
-            createdAt: DateTime.now(),
-            message: message,
-          ),
-      );
-
-      final res = await client.getDraft(channelId, channelType);
-
-      expect(res, isNotNull);
-      expect(res.draft.message, isSameDraftMessageAs(message));
-
-      verify(() => api.message.getDraft(channelId, channelType));
-      verifyNoMoreInteractions(api.message);
-    });
-
-    test('`.queryDrafts`', () async {
-      const channelId = 'test-channel-id';
-      const channelType = 'test-channel-type';
-
-      final filter = DraftFilter.equal(DraftFilterField.channelCid, '$channelType:$channelId');
-      final sort = [DraftSort.desc(DraftSortField.createdAt)];
-      const pagination = PaginationParams(limit: 20);
-
-      final drafts = [
-        Draft(
-          channelCid: '$channelType:$channelId',
-          createdAt: DateTime.now(),
-          message: DraftMessage(id: 'test-message-id', text: 'Hello!'),
-        ),
-      ];
-
-      when(
-        () => api.message.queryDrafts(
-          filter: filter,
-          sort: sort,
-          pagination: pagination,
-        ),
-      ).thenAnswer((_) async => QueryDraftsResponse()..drafts = drafts);
-
-      final res = await client.queryDrafts(
-        filter: filter,
-        sort: sort,
-        pagination: pagination,
-      );
-
-      expect(res, isNotNull);
-      expect(res.drafts.length, drafts.length);
-
-      verify(
-        () => api.message.queryDrafts(
-          filter: filter,
-          sort: sort,
-          pagination: pagination,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.message);
-    });
-
-    test('`.getReplies`', () async {
-      const parentId = 'test-parent-id';
-
-      final messages = List.generate(
-        3,
-        (index) => Message(id: 'test-message-id-$index'),
-      );
-
-      when(() => api.message.getReplies(parentId)).thenAnswer((_) async => QueryRepliesResponse()..messages = messages);
-
-      final res = await client.getReplies(parentId);
-      expect(res, isNotNull);
-      expect(res.messages.length, messages.length);
-
-      verify(() => api.message.getReplies(parentId)).called(1);
-      verifyNoMoreInteractions(api.message);
-    });
-
-    test('`.getReactions`', () async {
-      const messageId = 'test-parent-id';
-
-      final reactions = List.generate(
-        3,
-        (index) => Reaction(
-          type: 'test-reactions-type-$index',
+        final res = await tester.client.updateLiveLocation(
           messageId: messageId,
-        ),
-      );
+          createdByDeviceId: createdByDeviceId,
+          location: location,
+          endAt: endAt,
+        );
 
-      when(
-        () => api.message.getReactions(messageId),
-      ).thenAnswer((_) async => QueryReactionsResponse()..reactions = reactions);
+        expect(res, isNotNull);
+        expect(res, equals(expectedLocation));
 
-      final res = await client.getReactions(messageId);
-      expect(res, isNotNull);
-      expect(res.reactions.length, reactions.length);
-      expect(res.reactions.every((it) => it.messageId == messageId), isTrue);
+        tester
+          ..verifyApi(
+            (api) => api.user.updateLiveLocation(
+              messageId: messageId,
+              createdByDeviceId: createdByDeviceId,
+              location: location,
+              endAt: endAt,
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.user);
+      },
+    );
 
-      verify(() => api.message.getReactions(messageId)).called(1);
-      verifyNoMoreInteractions(api.message);
-    });
+    chatClientTest(
+      '`.stopLiveLocation`',
+      body: (tester) async {
+        const messageId = 'test-message-id';
+        const createdByDeviceId = 'test-device-id';
 
-    test('`.queryReactions`', () async {
-      const messageId = 'test-message-id';
+        final expectedLocation = Location(
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: createdByDeviceId,
+          endAt: DateTime.timestamp(), // Should be expired
+        );
 
-      final reactions = List.generate(
-        3,
-        (index) => Reaction(
-          type: 'test-reactions-type-$index',
+        tester.mockApi(
+          (api) => api.user.updateLiveLocation(
+            messageId: messageId,
+            createdByDeviceId: createdByDeviceId,
+            endAt: any(named: 'endAt'),
+          ),
+          result: expectedLocation,
+        );
+
+        final res = await tester.client.stopLiveLocation(
           messageId: messageId,
-        ),
-      );
+          createdByDeviceId: createdByDeviceId,
+        );
 
-      when(
-        () => api.message.queryReactions(messageId),
-      ).thenAnswer(
-        (_) async => QueryReactionsResponse()
-          ..reactions = reactions
-          ..next = null,
-      );
+        expect(res, isNotNull);
+        expect(res, equals(expectedLocation));
 
-      final res = await client.queryReactions(messageId);
-      expect(res, isNotNull);
-      expect(res.reactions.length, reactions.length);
-      expect(res.reactions.every((it) => it.messageId == messageId), isTrue);
+        tester
+          ..verifyApi(
+            (api) => api.user.updateLiveLocation(
+              messageId: messageId,
+              createdByDeviceId: createdByDeviceId,
+              endAt: any(named: 'endAt'),
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.user);
+      },
+    );
 
-      verify(() => api.message.queryReactions(messageId)).called(1);
-      verifyNoMoreInteractions(api.message);
-    });
+    group('Live Location Event Handling', () {
+      chatClientTest(
+        'should handle location.shared event',
+        body: (tester) async {
+          final location = Location(
+            channelCid: 'test-channel:123',
+            messageId: 'message-123',
+            userId: tester.currentUser!.id,
+            latitude: 40.7128,
+            longitude: -74.0060,
+            createdByDeviceId: 'device-1',
+            endAt: DateTime.timestamp().add(const Duration(hours: 1)),
+          );
 
-    test('`.updateMessage`', () async {
-      final message = Message(id: 'test-message-id', text: 'Hello!');
+          final event = createDefaultEvent(
+            type: EventType.locationShared,
+            cid: 'test-channel:123',
+            message: Message(
+              id: 'message-123',
+              sharedLocation: location,
+            ),
+          );
 
-      when(
-        () => api.message.updateMessage(any(that: isSameMessageAs(message))),
-      ).thenAnswer((_) async => UpdateMessageResponse()..message = message);
+          // Initially empty
+          expect(tester.clientState.activeLiveLocations, isEmpty);
 
-      final res = await client.updateMessage(message);
-      expect(res, isNotNull);
-      expect(res.message, isSameMessageAs(message));
+          // Trigger the event
+          await tester.emitEvent(event);
 
-      verify(
-        () => api.message.updateMessage(any(that: isSameMessageAs(message))),
-      ).called(1);
-      verifyNoMoreInteractions(api.message);
-    });
-
-    test('`.deleteMessage`', () async {
-      const messageId = 'test-message-id';
-
-      when(() => api.message.deleteMessage(messageId, hard: false)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.deleteMessage(messageId);
-      expect(res, isNotNull);
-
-      verify(() => api.message.deleteMessage(messageId, hard: false)).called(1);
-      verifyNoMoreInteractions(api.message);
-    });
-
-    test('`.deleteMessageForMe`', () async {
-      const messageId = 'test-message-id';
-
-      when(() => api.message.deleteMessage(messageId, deleteForMe: true)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.deleteMessageForMe(messageId);
-      expect(res, isNotNull);
-
-      verify(() => api.message.deleteMessage(messageId, deleteForMe: true)).called(1);
-      verifyNoMoreInteractions(api.message);
-    });
-
-    test('`.getMessage`', () async {
-      const messageId = 'test-message-id';
-      final message = Message(id: messageId);
-
-      when(() => api.message.getMessage(messageId)).thenAnswer((_) async => GetMessageResponse()..message = message);
-
-      final res = await client.getMessage(messageId);
-      expect(res, isNotNull);
-      expect(res.message.id, messageId);
-
-      verify(() => api.message.getMessage(messageId)).called(1);
-      verifyNoMoreInteractions(api.message);
-    });
-
-    test('`.getMessagesById`', () async {
-      const channelId = 'test-channel-id';
-      const channelType = 'test-channel-type';
-      const messageIds = ['test-message-id'];
-
-      final messages = messageIds.map((id) => Message(id: id)).toList();
-
-      when(
-        () => api.message.getMessagesById(channelId, channelType, messageIds),
-      ).thenAnswer((_) async => GetMessagesByIdResponse()..messages = messages);
-
-      final res = await client.getMessagesById(
-        channelId,
-        channelType,
-        messageIds,
-      );
-      expect(res, isNotNull);
-      expect(res.messages.length, messageIds.length);
-
-      verify(
-        () => api.message.getMessagesById(channelId, channelType, messageIds),
-      ).called(1);
-      verifyNoMoreInteractions(api.message);
-    });
-
-    test('`.translateMessage`', () async {
-      const messageId = 'test-message-id';
-      const language = 'hi'; // Hindi
-      const translatedMessageText = 'नमस्ते';
-      final translatedMessage = Message(
-        i18n: const {
-          language: translatedMessageText,
+          // Should add location to active live locations
+          final activeLiveLocations = tester.clientState.activeLiveLocations;
+          expect(activeLiveLocations, hasLength(1));
+          expect(activeLiveLocations.first.messageId, equals('message-123'));
         },
       );
 
-      when(() => api.message.translateMessage(messageId, language)).thenAnswer(
-        (_) async => TranslateMessageResponse()..message = translatedMessage,
+      chatClientTest(
+        'should handle location.updated event',
+        body: (tester) async {
+          final initialLocation = Location(
+            channelCid: 'test-channel:123',
+            messageId: 'message-123',
+            userId: tester.currentUser!.id,
+            latitude: 40.7128,
+            longitude: -74.0060,
+            createdByDeviceId: 'device-1',
+            endAt: DateTime.timestamp().add(const Duration(hours: 1)),
+          );
+
+          // Set initial location
+          tester.clientState.activeLiveLocations = [initialLocation];
+
+          final updatedLocation = Location(
+            channelCid: 'test-channel:123',
+            messageId: 'message-123',
+            userId: tester.currentUser!.id,
+            latitude: 40.7500, // Updated latitude
+            longitude: -74.1000, // Updated longitude
+            createdByDeviceId: 'device-1',
+            endAt: DateTime.timestamp().add(const Duration(hours: 1)),
+          );
+
+          final event = createDefaultEvent(
+            type: EventType.locationUpdated,
+            cid: 'test-channel:123',
+            message: Message(
+              id: 'message-123',
+              sharedLocation: updatedLocation,
+            ),
+          );
+
+          // Trigger the event
+          await tester.emitEvent(event);
+
+          // Should update the location
+          final activeLiveLocations = tester.clientState.activeLiveLocations;
+          expect(activeLiveLocations, hasLength(1));
+          expect(activeLiveLocations.first.latitude, equals(40.7500));
+          expect(activeLiveLocations.first.longitude, equals(-74.1000));
+        },
       );
 
-      final res = await client.translateMessage(messageId, language);
+      chatClientTest(
+        'should handle location.expired event',
+        body: (tester) async {
+          final location = Location(
+            channelCid: 'test-channel:123',
+            messageId: 'message-123',
+            userId: tester.currentUser!.id,
+            latitude: 40.7128,
+            longitude: -74.0060,
+            createdByDeviceId: 'device-1',
+            endAt: DateTime.timestamp().add(const Duration(hours: 1)),
+          );
 
-      expect(res, isNotNull);
-      expect(res.message.i18n, translatedMessage.i18n);
+          // Set initial location
+          tester.clientState.activeLiveLocations = [location];
+          expect(tester.clientState.activeLiveLocations, hasLength(1));
 
-      verify(() => api.message.translateMessage(messageId, language)).called(1);
-      verifyNoMoreInteractions(api.message);
-    });
+          final expiredLocation = location.copyWith(
+            endAt: DateTime.timestamp().subtract(const Duration(hours: 1)),
+          );
 
-    test('`.partialUpdateMessage`', () async {
-      const messageId = 'test-message-id';
-      final message = Message(id: messageId);
+          final event = createDefaultEvent(
+            type: EventType.locationExpired,
+            cid: 'test-channel:123',
+            message: Message(
+              id: 'message-123',
+              sharedLocation: expiredLocation,
+            ),
+          );
 
-      const set = {'text': 'Update Message text'};
-      const unset = ['pinExpires'];
+          // Trigger the event
+          await tester.emitEvent(event);
 
-      final updateMessageResponse = UpdateMessageResponse()
-        ..message = message.copyWith(text: set['text'], pinExpires: null);
-
-      when(
-        () => api.message.partialUpdateMessage(
-          message.id,
-          set: set,
-          unset: unset,
-        ),
-      ).thenAnswer((_) async => updateMessageResponse);
-
-      final res = await client.partialUpdateMessage(
-        messageId,
-        set: set,
-        unset: unset,
+          // Should remove the location
+          expect(tester.clientState.activeLiveLocations, isEmpty);
+        },
       );
 
-      expect(res, isNotNull);
-      expect(res.message.id, message.id);
-      expect(res.message.id, message.id);
-      expect(res.message.text, set['text']);
-      expect(res.message.pinExpires, isNull);
+      chatClientTest(
+        'should auto-expire an active live location once at endAt',
+        body: (tester) async {
+          final expiredEvents = <Event>[];
+          final sub = tester.client.on(EventType.locationExpired).listen(expiredEvents.add);
+          addTearDown(sub.cancel);
 
-      verify(
-        () => api.message.partialUpdateMessage(
-          message.id,
-          set: set,
-          unset: unset,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.message);
+          // Setting an active location schedules a one-shot expiry timer.
+          tester.clientState.activeLiveLocations = [
+            Location(
+              channelCid: 'test-channel:123',
+              messageId: 'message-123',
+              userId: tester.currentUser!.id,
+              latitude: 40.7128,
+              longitude: -74.0060,
+              createdByDeviceId: 'device-1',
+              endAt: DateTime.timestamp().add(const Duration(milliseconds: 800)),
+            ),
+          ];
+          expect(tester.clientState.activeLiveLocations, hasLength(1));
+
+          // Before endAt nothing is emitted and the location stays active.
+          await Future.delayed(const Duration(milliseconds: 200));
+          expect(expiredEvents, isEmpty);
+          expect(tester.clientState.activeLiveLocations, hasLength(1));
+
+          // After endAt the timer fires once and the location is removed.
+          await Future.delayed(const Duration(milliseconds: 900));
+          expect(expiredEvents, hasLength(1));
+          expect(tester.clientState.activeLiveLocations, isEmpty);
+
+          // The timer is one-shot: no further events are emitted.
+          await Future.delayed(const Duration(milliseconds: 300));
+          expect(expiredEvents, hasLength(1));
+        },
+      );
+
+      chatClientTest(
+        'should ignore location events for other users',
+        body: (tester) async {
+          final location = Location(
+            channelCid: 'test-channel:123',
+            messageId: 'message-123',
+            userId: 'other-user', // Different user
+            latitude: 40.7128,
+            longitude: -74.0060,
+            createdByDeviceId: 'device-1',
+            endAt: DateTime.timestamp().add(const Duration(hours: 1)),
+          );
+
+          final event = createDefaultEvent(
+            type: EventType.locationShared,
+            cid: 'test-channel:123',
+            message: Message(
+              id: 'message-123',
+              sharedLocation: location,
+            ),
+          );
+
+          // Trigger the event
+          await tester.emitEvent(event);
+
+          // Should not add location from other user
+          expect(tester.clientState.activeLiveLocations, isEmpty);
+        },
+      );
+
+      chatClientTest(
+        'should ignore static location events',
+        body: (tester) async {
+          final staticLocation = Location(
+            channelCid: 'test-channel:123',
+            messageId: 'message-123',
+            userId: tester.currentUser!.id,
+            latitude: 40.7128,
+            longitude: -74.0060,
+            createdByDeviceId: 'device-1',
+            // No endAt means it's static
+          );
+
+          final event = createDefaultEvent(
+            type: EventType.locationShared,
+            cid: 'test-channel:123',
+            message: Message(
+              id: 'message-123',
+              sharedLocation: staticLocation,
+            ),
+          );
+
+          // Trigger the event
+          await tester.emitEvent(event);
+
+          // Should not add static location
+          expect(tester.clientState.activeLiveLocations, isEmpty);
+        },
+      );
+
+      chatClientTest(
+        'should merge locations with same key',
+        body: (tester) async {
+          final location1 = Location(
+            channelCid: 'test-channel:123',
+            messageId: 'message-123',
+            userId: tester.currentUser!.id,
+            latitude: 40.7128,
+            longitude: -74.0060,
+            createdByDeviceId: 'device-1',
+            endAt: DateTime.timestamp().add(const Duration(hours: 1)),
+          );
+
+          final location2 = Location(
+            channelCid: 'test-channel:123',
+            messageId: 'message-456',
+            userId: tester.currentUser!.id,
+            latitude: 40.7500,
+            longitude: -74.1000,
+            createdByDeviceId: 'device-1', // Same device, should merge
+            endAt: DateTime.timestamp().add(const Duration(hours: 1)),
+          );
+
+          final event1 = createDefaultEvent(
+            type: EventType.locationShared,
+            cid: 'test-channel:123',
+            message: Message(
+              id: 'message-123',
+              sharedLocation: location1,
+            ),
+          );
+
+          final event2 = createDefaultEvent(
+            type: EventType.locationShared,
+            cid: 'test-channel:123',
+            message: Message(
+              id: 'message-456',
+              sharedLocation: location2,
+            ),
+          );
+
+          // Trigger first event
+          await tester.emitEvent(event1);
+
+          final activeLiveLocations = tester.clientState.activeLiveLocations;
+          expect(activeLiveLocations, hasLength(1));
+          expect(activeLiveLocations.first.messageId, equals('message-123'));
+
+          // Trigger second event - should merge/update
+          await tester.emitEvent(event2);
+
+          final activeLiveLocations2 = tester.clientState.activeLiveLocations;
+          expect(activeLiveLocations2, hasLength(1));
+          expect(activeLiveLocations2.first.messageId, equals('message-456'));
+        },
+      );
     });
 
-    group('`.pinMessage`', () {
-      test('should work fine without passing timeoutOrExpirationDate', () async {
+    chatClientTest(
+      '`.markAllRead`',
+      body: (tester) async {
+        tester.mockApi(
+          (api) => api.channel.markAllRead(),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.markAllRead();
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.channel.markAllRead())
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.markChannelsDelivered`',
+      body: (tester) async {
+        final deliveries = [
+          const MessageDelivery(
+            channelCid: 'messaging:test-channel-1',
+            messageId: 'test-message-id-1',
+          ),
+          const MessageDelivery(
+            channelCid: 'messaging:test-channel-2',
+            messageId: 'test-message-id-2',
+          ),
+        ];
+
+        tester.mockApi(
+          (api) => api.channel.markChannelsDelivered(deliveries),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.markChannelsDelivered(deliveries);
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.channel.markChannelsDelivered(deliveries))
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.sendEvent`',
+      body: (tester) async {
+        const channelType = 'test-channel-type';
+        const channelId = 'test-channel-id';
+        final event = Event(type: EventType.any);
+
+        tester.mockApi(
+          (api) => api.channel.sendEvent(channelId, channelType, event),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.sendEvent(channelId, channelType, event);
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi(
+            (api) => api.channel.sendEvent(channelId, channelType, event),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.channel);
+      },
+    );
+
+    chatClientTest(
+      '`.sendReaction`',
+      body: (tester) async {
+        const messageId = 'test-message-id';
+        const reactionType = 'like';
+        const emojiCode = '👍';
+        const score = 4;
+
+        final reaction = Reaction(
+          type: reactionType,
+          messageId: messageId,
+          emojiCode: emojiCode,
+          score: score,
+        );
+
+        tester.mockApi(
+          (api) => api.message.sendReaction(messageId, reaction),
+          result: createDefaultSendReactionResponse(
+            message: Message(id: messageId),
+            reaction: reaction,
+          ),
+        );
+
+        final res = await tester.client.sendReaction(messageId, reaction);
+        expect(res, isNotNull);
+        expect(res.message.id, messageId);
+        expect(res.reaction.type, reactionType);
+        expect(res.reaction.emojiCode, emojiCode);
+        expect(res.reaction.score, score);
+        expect(res.reaction.messageId, messageId);
+
+        tester
+          ..verifyApi((api) => api.message.sendReaction(messageId, reaction))
+          ..verifyNoMoreApiInteractions((api) => api.message);
+      },
+    );
+
+    chatClientTest(
+      '`.deleteReaction`',
+      body: (tester) async {
+        const messageId = 'test-message-id';
+        const reactionType = 'like';
+
+        tester.mockApi(
+          (api) => api.message.deleteReaction(messageId, reactionType),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.deleteReaction(messageId, reactionType);
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.message.deleteReaction(messageId, reactionType))
+          ..verifyNoMoreApiInteractions((api) => api.message);
+      },
+    );
+
+    chatClientTest(
+      '`.sendMessage`',
+      body: (tester) async {
+        final message = Message(id: 'test-message-id');
+        const channelId = 'test-channel-id';
+        const channelType = 'test-channel-type';
+
+        tester.mockApi(
+          (api) => api.message.sendMessage(channelId, channelType, any(that: isSameMessageAs(message))),
+          result: createDefaultSendMessageResponse(message: message),
+        );
+
+        final res = await tester.client.sendMessage(message, channelId, channelType);
+        expect(res, isNotNull);
+        expect(res.message, isSameMessageAs(message));
+
+        tester
+          ..verifyApi(
+            (api) => api.message.sendMessage(
+              channelId,
+              channelType,
+              any(that: isSameMessageAs(message)),
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.message);
+      },
+    );
+
+    chatClientTest(
+      '`.createDraft`',
+      body: (tester) async {
+        final message = DraftMessage(id: 'test-message-id', text: 'Hello!');
+        const channelId = 'test-channel-id';
+        const channelType = 'test-channel-type';
+
+        tester.mockApi(
+          (api) => api.message.createDraft(
+            channelId,
+            channelType,
+            any(that: isSameDraftMessageAs(message)),
+          ),
+          result: createDefaultCreateDraftResponse(
+            draft: createDefaultDraft(
+              channelCid: '$channelType:$channelId',
+              message: message,
+            ),
+          ),
+        );
+
+        final res = await tester.client.createDraft(
+          message,
+          channelId,
+          channelType,
+        );
+
+        expect(res, isNotNull);
+        expect(res.draft.message, isSameDraftMessageAs(message));
+
+        tester
+          ..verifyApi(
+            (api) => api.message.createDraft(
+              channelId,
+              channelType,
+              any(that: isSameDraftMessageAs(message)),
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.message);
+      },
+    );
+
+    chatClientTest(
+      '`.deleteDraft`',
+      body: (tester) async {
+        const channelId = 'test-channel-id';
+        const channelType = 'test-channel-type';
+
+        tester.mockApi(
+          (api) => api.message.deleteDraft(channelId, channelType),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.deleteDraft(channelId, channelType);
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.message.deleteDraft(channelId, channelType))
+          ..verifyNoMoreApiInteractions((api) => api.message);
+      },
+    );
+
+    chatClientTest(
+      '`.getDraft`',
+      body: (tester) async {
+        const channelId = 'test-channel-id';
+        const channelType = 'test-channel-type';
+
+        final message = DraftMessage(id: 'test-message-id', text: 'Hello!');
+
+        tester.mockApi(
+          (api) => api.message.getDraft(channelId, channelType),
+          result: createDefaultGetDraftResponse(
+            draft: createDefaultDraft(
+              channelCid: '$channelType:$channelId',
+              message: message,
+            ),
+          ),
+        );
+
+        final res = await tester.client.getDraft(channelId, channelType);
+
+        expect(res, isNotNull);
+        expect(res.draft.message, isSameDraftMessageAs(message));
+
+        tester
+          ..verifyApi((api) => api.message.getDraft(channelId, channelType))
+          ..verifyNoMoreApiInteractions((api) => api.message);
+      },
+    );
+
+    chatClientTest(
+      '`.queryDrafts`',
+      body: (tester) async {
+        const channelId = 'test-channel-id';
+        const channelType = 'test-channel-type';
+
+        final filter = DraftFilter.equal(DraftFilterField.channelCid, '$channelType:$channelId');
+        final sort = [DraftSort.desc(DraftSortField.createdAt)];
+        const pagination = PaginationParams(limit: 20);
+
+        final drafts = [
+          createDefaultDraft(
+            channelCid: '$channelType:$channelId',
+            message: DraftMessage(id: 'test-message-id', text: 'Hello!'),
+          ),
+        ];
+
+        tester.mockApi(
+          (api) => api.message.queryDrafts(
+            filter: filter,
+            sort: sort,
+            pagination: pagination,
+          ),
+          result: QueryDraftsResponse()..drafts = drafts,
+        );
+
+        final res = await tester.client.queryDrafts(
+          filter: filter,
+          sort: sort,
+          pagination: pagination,
+        );
+
+        expect(res, isNotNull);
+        expect(res.drafts.length, drafts.length);
+
+        tester
+          ..verifyApi(
+            (api) => api.message.queryDrafts(
+              filter: filter,
+              sort: sort,
+              pagination: pagination,
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.message);
+      },
+    );
+
+    chatClientTest(
+      '`.getReplies`',
+      body: (tester) async {
+        const parentId = 'test-parent-id';
+
+        final messages = List.generate(
+          3,
+          (index) => Message(id: 'test-message-id-$index'),
+        );
+
+        tester.mockApi(
+          (api) => api.message.getReplies(parentId),
+          result: createDefaultQueryRepliesResponse(messages: messages),
+        );
+
+        final res = await tester.client.getReplies(parentId);
+        expect(res, isNotNull);
+        expect(res.messages.length, messages.length);
+
+        tester
+          ..verifyApi((api) => api.message.getReplies(parentId))
+          ..verifyNoMoreApiInteractions((api) => api.message);
+      },
+    );
+
+    chatClientTest(
+      '`.getReactions`',
+      body: (tester) async {
+        const messageId = 'test-parent-id';
+
+        final reactions = List.generate(
+          3,
+          (index) => Reaction(
+            type: 'test-reactions-type-$index',
+            messageId: messageId,
+          ),
+        );
+
+        tester.mockApi(
+          (api) => api.message.getReactions(messageId),
+          result: createDefaultQueryReactionsResponse(reactions: reactions),
+        );
+
+        final res = await tester.client.getReactions(messageId);
+        expect(res, isNotNull);
+        expect(res.reactions.length, reactions.length);
+        expect(res.reactions.every((it) => it.messageId == messageId), isTrue);
+
+        tester
+          ..verifyApi((api) => api.message.getReactions(messageId))
+          ..verifyNoMoreApiInteractions((api) => api.message);
+      },
+    );
+
+    chatClientTest(
+      '`.queryReactions`',
+      body: (tester) async {
+        const messageId = 'test-message-id';
+
+        final reactions = List.generate(
+          3,
+          (index) => Reaction(
+            type: 'test-reactions-type-$index',
+            messageId: messageId,
+          ),
+        );
+
+        tester.mockApi(
+          (api) => api.message.queryReactions(messageId),
+          result: createDefaultQueryReactionsResponse(reactions: reactions),
+        );
+
+        final res = await tester.client.queryReactions(messageId);
+        expect(res, isNotNull);
+        expect(res.reactions.length, reactions.length);
+        expect(res.reactions.every((it) => it.messageId == messageId), isTrue);
+
+        tester
+          ..verifyApi((api) => api.message.queryReactions(messageId))
+          ..verifyNoMoreApiInteractions((api) => api.message);
+      },
+    );
+
+    chatClientTest(
+      '`.updateMessage`',
+      body: (tester) async {
+        final message = Message(id: 'test-message-id', text: 'Hello!');
+
+        tester.mockApi(
+          (api) => api.message.updateMessage(any(that: isSameMessageAs(message))),
+          result: createDefaultUpdateMessageResponse(message: message),
+        );
+
+        final res = await tester.client.updateMessage(message);
+        expect(res, isNotNull);
+        expect(res.message, isSameMessageAs(message));
+
+        tester
+          ..verifyApi(
+            (api) => api.message.updateMessage(any(that: isSameMessageAs(message))),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.message);
+      },
+    );
+
+    chatClientTest(
+      '`.deleteMessage`',
+      body: (tester) async {
+        const messageId = 'test-message-id';
+
+        tester.mockApi(
+          (api) => api.message.deleteMessage(messageId, hard: false),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.deleteMessage(messageId);
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.message.deleteMessage(messageId, hard: false))
+          ..verifyNoMoreApiInteractions((api) => api.message);
+      },
+    );
+
+    chatClientTest(
+      '`.deleteMessageForMe`',
+      body: (tester) async {
+        const messageId = 'test-message-id';
+
+        tester.mockApi(
+          (api) => api.message.deleteMessage(messageId, deleteForMe: true),
+          result: createDefaultEmptyResponse(),
+        );
+
+        final res = await tester.client.deleteMessageForMe(messageId);
+        expect(res, isNotNull);
+
+        tester
+          ..verifyApi((api) => api.message.deleteMessage(messageId, deleteForMe: true))
+          ..verifyNoMoreApiInteractions((api) => api.message);
+      },
+    );
+
+    chatClientTest(
+      '`.getMessage`',
+      body: (tester) async {
         const messageId = 'test-message-id';
         final message = Message(id: messageId);
 
-        when(
-          () => api.message.partialUpdateMessage(
-            messageId,
-            set: any(named: 'set'),
-            unset: any(named: 'unset'),
-          ),
-        ).thenAnswer(
-          (_) async => UpdateMessageResponse()
-            ..message = message.copyWith(
-              pinned: true,
-              pinExpires: null,
-              state: MessageState.sent,
-            ),
+        tester.mockApi(
+          (api) => api.message.getMessage(messageId),
+          result: createDefaultGetMessageResponse(message: message),
         );
 
-        final res = await client.pinMessage(messageId);
+        final res = await tester.client.getMessage(messageId);
+        expect(res, isNotNull);
+        expect(res.message.id, messageId);
+
+        tester
+          ..verifyApi((api) => api.message.getMessage(messageId))
+          ..verifyNoMoreApiInteractions((api) => api.message);
+      },
+    );
+
+    chatClientTest(
+      '`.getMessagesById`',
+      body: (tester) async {
+        const channelId = 'test-channel-id';
+        const channelType = 'test-channel-type';
+        const messageIds = ['test-message-id'];
+
+        final messages = messageIds.map((id) => Message(id: id)).toList();
+
+        tester.mockApi(
+          (api) => api.message.getMessagesById(channelId, channelType, messageIds),
+          result: createDefaultGetMessagesByIdResponse(messages: messages),
+        );
+
+        final res = await tester.client.getMessagesById(
+          channelId,
+          channelType,
+          messageIds,
+        );
+        expect(res, isNotNull);
+        expect(res.messages.length, messageIds.length);
+
+        tester
+          ..verifyApi(
+            (api) => api.message.getMessagesById(channelId, channelType, messageIds),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.message);
+      },
+    );
+
+    chatClientTest(
+      '`.translateMessage`',
+      body: (tester) async {
+        const messageId = 'test-message-id';
+        const language = 'hi'; // Hindi
+        const translatedMessageText = 'नमस्ते';
+        final translatedMessage = Message(
+          i18n: const {
+            language: translatedMessageText,
+          },
+        );
+
+        tester.mockApi(
+          (api) => api.message.translateMessage(messageId, language),
+          result: createDefaultTranslateMessageResponse(message: translatedMessage),
+        );
+
+        final res = await tester.client.translateMessage(messageId, language);
 
         expect(res, isNotNull);
-        expect(res.message.pinned, isTrue);
+        expect(res.message.i18n, translatedMessage.i18n);
+
+        tester
+          ..verifyApi((api) => api.message.translateMessage(messageId, language))
+          ..verifyNoMoreApiInteractions((api) => api.message);
+      },
+    );
+
+    chatClientTest(
+      '`.partialUpdateMessage`',
+      body: (tester) async {
+        const messageId = 'test-message-id';
+        final message = Message(id: messageId);
+
+        const set = {'text': 'Update Message text'};
+        const unset = ['pinExpires'];
+
+        final updateMessageResponse = createDefaultUpdateMessageResponse(
+          message: message.copyWith(text: set['text'], pinExpires: null),
+        );
+
+        tester.mockApi(
+          (api) => api.message.partialUpdateMessage(
+            message.id,
+            set: set,
+            unset: unset,
+          ),
+          result: updateMessageResponse,
+        );
+
+        final res = await tester.client.partialUpdateMessage(
+          messageId,
+          set: set,
+          unset: unset,
+        );
+
+        expect(res, isNotNull);
+        expect(res.message.id, message.id);
+        expect(res.message.id, message.id);
+        expect(res.message.text, set['text']);
         expect(res.message.pinExpires, isNull);
 
-        verify(
-          () => api.message.partialUpdateMessage(
-            messageId,
-            set: any(named: 'set'),
-            unset: any(named: 'unset'),
-          ),
-        ).called(1);
-        verifyNoMoreInteractions(api.message);
-      });
+        tester
+          ..verifyApi(
+            (api) => api.message.partialUpdateMessage(
+              message.id,
+              set: set,
+              unset: unset,
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.message);
+      },
+    );
 
-      test(
+    group('`.pinMessage`', () {
+      ChannelState Function(ChannelState) _seedChannel() {
+        return (_) => createDefaultChannelState(
+          channel: createDefaultChannelModel(
+            cid: _channelCid,
+            config: createDefaultChannelConfig(readEvents: true, typingEvents: true),
+            ownCapabilities: [ChannelCapability.readEvents],
+          ),
+        );
+      }
+
+      chatClientTest(
+        'should work fine without passing timeoutOrExpirationDate',
+        body: (tester) async {
+          const messageId = 'test-message-id';
+          final message = Message(id: messageId);
+
+          tester.mockApi(
+            (api) => api.message.partialUpdateMessage(
+              messageId,
+              set: {'pinned': true, 'pin_expires': null},
+            ),
+            result: createDefaultUpdateMessageResponse(
+              message: message.copyWith(
+                pinned: true,
+                pinExpires: null,
+                state: MessageState.sent,
+              ),
+            ),
+          );
+
+          final res = await tester.client.pinMessage(messageId);
+
+          expect(res, isNotNull);
+          expect(res.message.pinned, isTrue);
+          expect(res.message.pinExpires, isNull);
+
+          tester
+            ..verifyApi(
+              (api) => api.message.partialUpdateMessage(
+                messageId,
+                set: {'pinned': true, 'pin_expires': null},
+              ),
+            )
+            ..verifyNoMoreApiInteractions((api) => api.message);
+        },
+      );
+
+      chatClientTest(
         'should work fine if passed timeoutOrExpirationDate as num(seconds)',
-        () async {
+        body: (tester) async {
           const messageId = 'test-message-id';
           final message = Message(id: messageId);
           const timeoutOrExpirationDate = 300; // 300 seconds
 
-          when(
-            () => api.message.partialUpdateMessage(
+          // The client computes `pin_expires` from the current time, so the
+          // stub cannot match the exact `set` map.
+          tester.mockApi(
+            (api) => api.message.partialUpdateMessage(
               message.id,
               set: any(named: 'set'),
-              unset: any(named: 'unset'),
             ),
-          ).thenAnswer(
-            (_) async => UpdateMessageResponse()
-              ..message = message.copyWith(
+            result: createDefaultUpdateMessageResponse(
+              message: message.copyWith(
                 pinned: true,
-                pinExpires: DateTime.now().add(
+                pinExpires: DateTime.utc(2021, 3).add(
                   const Duration(seconds: timeoutOrExpirationDate),
                 ),
                 state: MessageState.sent,
               ),
+            ),
           );
 
-          final res = await client.pinMessage(
+          final res = await tester.client.pinMessage(
             messageId,
             timeoutOrExpirationDate: timeoutOrExpirationDate,
           );
@@ -4923,40 +5389,42 @@ void main() {
           expect(res.message.pinned, isTrue);
           expect(res.message.pinExpires, isNotNull);
 
-          verify(
-            () => api.message.partialUpdateMessage(
-              messageId,
-              set: any(named: 'set'),
-              unset: any(named: 'unset'),
-            ),
-          ).called(1);
-          verifyNoMoreInteractions(api.message);
+          tester
+            ..verifyApi(
+              (api) => api.message.partialUpdateMessage(
+                messageId,
+                set: any(named: 'set'),
+              ),
+            )
+            ..verifyNoMoreApiInteractions((api) => api.message);
         },
       );
 
-      test(
+      chatClientTest(
         'should work fine if passed timeoutOrExpirationDate as DateTime',
-        () async {
+        body: (tester) async {
           const messageId = 'test-message-id';
           final message = Message(id: messageId);
-          final timeoutOrExpirationDate = DateTime.now().add(const Duration(days: 3)); // 3 days
+          final timeoutOrExpirationDate = DateTime.utc(2021, 3).add(const Duration(days: 3)); // 3 days
 
-          when(
-            () => api.message.partialUpdateMessage(
+          tester.mockApi(
+            (api) => api.message.partialUpdateMessage(
               messageId,
-              set: any(named: 'set'),
-              unset: any(named: 'unset'),
+              set: {
+                'pinned': true,
+                'pin_expires': timeoutOrExpirationDate.toUtc().toIso8601String(),
+              },
             ),
-          ).thenAnswer(
-            (_) async => UpdateMessageResponse()
-              ..message = message.copyWith(
+            result: createDefaultUpdateMessageResponse(
+              message: message.copyWith(
                 pinned: true,
                 pinExpires: timeoutOrExpirationDate,
                 state: MessageState.sent,
               ),
+            ),
           );
 
-          final res = await client.pinMessage(
+          final res = await tester.client.pinMessage(
             messageId,
             timeoutOrExpirationDate: timeoutOrExpirationDate,
           );
@@ -4966,26 +5434,32 @@ void main() {
           expect(res.message.pinExpires, isNotNull);
           expect(res.message.pinExpires, timeoutOrExpirationDate.toUtc());
 
-          verify(
-            () => api.message.partialUpdateMessage(
-              messageId,
-              set: any(named: 'set'),
-              unset: any(named: 'unset'),
-            ),
-          ).called(1);
-          verifyNoMoreInteractions(api.message);
+          tester
+            ..verifyApi(
+              (api) => api.message.partialUpdateMessage(
+                messageId,
+                set: {
+                  'pinned': true,
+                  'pin_expires': timeoutOrExpirationDate.toUtc().toIso8601String(),
+                },
+              ),
+            )
+            ..verifyNoMoreApiInteractions((api) => api.message);
         },
       );
 
-      test(
+      channelTest(
         'should throw if invalid timeoutOrExpirationDate is passed',
-        () async {
-          const messageId = 'test-message-id';
+        channelType: _channelType,
+        channelId: _channelId,
+        setUp: (tester) => tester.watch(modifyResponse: _seedChannel()),
+        body: (tester) async {
+          final message = Message(id: 'test-message-id');
           const timeoutOrExpirationDate = 'invalid-value';
 
           try {
-            await client.pinMessage(
-              messageId,
+            await tester.channel.pinMessage(
+              message,
               timeoutOrExpirationDate: timeoutOrExpirationDate,
             );
           } catch (e) {
@@ -4995,69 +5469,82 @@ void main() {
       );
     });
 
-    test('`.unpinMessage`', () async {
-      const messageId = 'test-message-id';
-      final message = Message(id: messageId, pinned: true);
+    chatClientTest(
+      '`.unpinMessage`',
+      body: (tester) async {
+        const messageId = 'test-message-id';
+        final message = Message(id: messageId, pinned: true);
 
-      when(
-        () => api.message.partialUpdateMessage(
-          messageId,
-          set: {'pinned': false},
-        ),
-      ).thenAnswer(
-        (_) async => UpdateMessageResponse()
-          ..message = message.copyWith(
-            pinned: false,
-            state: MessageState.sent,
+        tester.mockApi(
+          (api) => api.message.partialUpdateMessage(
+            messageId,
+            set: {'pinned': false},
           ),
-      );
+          result: createDefaultUpdateMessageResponse(
+            message: message.copyWith(
+              pinned: false,
+              state: MessageState.sent,
+            ),
+          ),
+        );
 
-      final res = await client.unpinMessage(messageId);
+        final res = await tester.client.unpinMessage(messageId);
 
-      expect(res, isNotNull);
-      expect(res.message.pinned, isFalse);
+        expect(res, isNotNull);
+        expect(res.message.pinned, isFalse);
 
-      verify(
-        () => api.message.partialUpdateMessage(
-          messageId,
-          set: {'pinned': false},
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.message);
-    });
+        tester
+          ..verifyApi(
+            (api) => api.message.partialUpdateMessage(
+              messageId,
+              set: {'pinned': false},
+            ),
+          )
+          ..verifyNoMoreApiInteractions((api) => api.message);
+      },
+    );
 
-    test('`.enrichUrl`', () async {
-      const url = 'https://www.techyourchance.com/finite-state-machine-with-unit-tests-real-world-example';
+    chatClientTest(
+      '`.enrichUrl`',
+      body: (tester) async {
+        const url = 'https://www.techyourchance.com/finite-state-machine-with-unit-tests-real-world-example';
 
-      when(() => api.general.enrichUrl(url)).thenAnswer(
-        (_) async => OGAttachmentResponse()
-          ..type = 'image'
-          ..ogScrapeUrl = url
-          ..authorName = 'TechYourChance'
-          ..title = 'Finite State Machine with Unit Tests: Real World Example',
-      );
+        tester.mockApi(
+          (api) => api.general.enrichUrl(url),
+          result: OGAttachmentResponse()
+            ..type = 'image'
+            ..ogScrapeUrl = url
+            ..authorName = 'TechYourChance'
+            ..title = 'Finite State Machine with Unit Tests: Real World Example',
+        );
 
-      final res = await client.enrichUrl(url);
+        final res = await tester.client.enrichUrl(url);
 
-      expect(res, isNotNull);
-      expect(res.type, 'image');
-      expect(res.ogScrapeUrl, url);
-      expect(res.authorName, 'TechYourChance');
-      expect(
-        res.title,
-        'Finite State Machine with Unit Tests: Real World Example',
-      );
+        expect(res, isNotNull);
+        expect(res.type, 'image');
+        expect(res.ogScrapeUrl, url);
+        expect(res.authorName, 'TechYourChance');
+        expect(
+          res.title,
+          'Finite State Machine with Unit Tests: Real World Example',
+        );
 
-      verify(() => api.general.enrichUrl(url)).called(1);
-      verify(() => api.general.getAppSettings()).called(1);
-      verifyNoMoreInteractions(api.general);
-    });
+        tester
+          ..verifyApi((api) => api.general.enrichUrl(url))
+          ..verifyApi((api) => api.general.getAppSettings())
+          ..verifyNoMoreApiInteractions((api) => api.general);
+      },
+    );
 
-    test(
+    // The unread counts are derived from the current user, so assigning a new
+    // one has to republish them.
+    chatClientTest(
       '''setting the `currentUser` should also compute and update the unreadCounts''',
-      () {
-        final state = client.state;
-        final initialUser = OwnUser.fromUser(user);
+      body: (tester) async {
+        final state = tester.clientState;
+        // Derived from the harness user rather than read back out of the state,
+        // so this still asserts that connecting produced the expected user.
+        final initialUser = OwnUser.fromUser(tester.user);
 
         expect(state.currentUser, initialUser);
         expect(state.totalUnreadCount, 0);
@@ -5077,119 +5564,132 @@ void main() {
   });
 
   group('PersistenceConnectionTests', () {
-    const apiKey = 'test-api-key';
-    late final api = FakeChatApi();
+    // Runs [body] as a [chatClientTest] that never opens the socket: persistence
+    // starts disabled, and the persistence client is detached and asserted
+    // disabled again after the body.
+    void _persistenceConnectionTest(
+      String description, {
+      required Future<void> Function(ChatClientTester tester) body,
+    }) {
+      chatClientTest(
+        description,
+        connect: (_) {},
+        setUp: (tester) => expect(tester.client.persistenceEnabled, isFalse),
+        body: body,
+        tearDown: (tester) {
+          tester.client.chatPersistenceClient = null;
+          expect(tester.client.persistenceEnabled, isFalse);
+        },
+      );
+    }
 
-    final user = User(id: 'test-user-id');
-    final token = testUserToken(user.id).rawValue;
+    _persistenceConnectionTest(
+      'openPersistenceConnection connects the client to the user',
+      body: (tester) async {
+        tester.client.chatPersistenceClient = MockPersistenceClient();
+        await tester.client.openPersistenceConnection(tester.user);
+        expect(tester.client.persistenceEnabled, isTrue);
+      },
+    );
 
-    late StreamChatClient client;
-
-    setUp(() async {
-      final ws = FakeWebSocket();
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws);
-      expect(client.persistenceEnabled, isFalse);
-    });
-
-    tearDown(() async {
-      client.chatPersistenceClient = null;
-      expect(client.persistenceEnabled, isFalse);
-      await client.dispose();
-    });
-
-    test('openPersistenceConnection connects the client to the user', () async {
-      client.chatPersistenceClient = MockPersistenceClient();
-      await client.openPersistenceConnection(user);
-      expect(client.persistenceEnabled, isTrue);
-    });
-
-    test(
+    _persistenceConnectionTest(
       '''multiple call to openPersistenceConnection does not throws an error if already connected to the same user''',
-      () async {
-        client.chatPersistenceClient = MockPersistenceClient();
-        await client.openPersistenceConnection(user);
-        expect(client.persistenceEnabled, isTrue);
+      body: (tester) async {
+        tester.client.chatPersistenceClient = MockPersistenceClient();
+        await tester.client.openPersistenceConnection(tester.user);
+        expect(tester.client.persistenceEnabled, isTrue);
 
-        await expectLater(client.openPersistenceConnection(user), completes);
-        await expectLater(client.openPersistenceConnection(user), completes);
-        await expectLater(client.openPersistenceConnection(user), completes);
+        await expectLater(tester.client.openPersistenceConnection(tester.user), completes);
+        await expectLater(tester.client.openPersistenceConnection(tester.user), completes);
+        await expectLater(tester.client.openPersistenceConnection(tester.user), completes);
       },
     );
 
-    test(
+    _persistenceConnectionTest(
       '''openPersistenceConnection throws an error if client is already connected to a different user''',
-      () async {
-        client.chatPersistenceClient = MockPersistenceClient();
-        await client.openPersistenceConnection(user);
-        expect(client.persistenceEnabled, isTrue);
+      body: (tester) async {
+        tester.client.chatPersistenceClient = MockPersistenceClient();
+        await tester.client.openPersistenceConnection(tester.user);
+        expect(tester.client.persistenceEnabled, isTrue);
 
         await expectLater(
-          client.openPersistenceConnection(user.copyWith(id: 'new-id')),
+          tester.client.openPersistenceConnection(tester.user.copyWith(id: 'new-id')),
           throwsA(isA<StateError>()),
         );
       },
     );
 
-    test(
+    _persistenceConnectionTest(
       '''openPersistenceConnection throws an error if chatPersistenceClient is not set''',
-      () async {
+      body: (tester) async {
         await expectLater(
-          client.openPersistenceConnection(user),
+          tester.client.openPersistenceConnection(tester.user),
           throwsA(isA<StateError>()),
         );
       },
     );
 
-    test('closePersistenceConnection disconnects the client', () async {
-      client.chatPersistenceClient = MockPersistenceClient();
-      await client.openPersistenceConnection(user);
-      expect(client.persistenceEnabled, isTrue);
+    _persistenceConnectionTest(
+      'closePersistenceConnection disconnects the client',
+      body: (tester) async {
+        tester.client.chatPersistenceClient = MockPersistenceClient();
+        await tester.client.openPersistenceConnection(tester.user);
+        expect(tester.client.persistenceEnabled, isTrue);
 
-      await client.closePersistenceConnection();
-      expect(client.persistenceEnabled, isFalse);
-    });
+        await tester.client.closePersistenceConnection();
+        expect(tester.client.persistenceEnabled, isFalse);
+      },
+    );
 
-    test(
+    _persistenceConnectionTest(
       '''closePersistenceConnection compeletes normally if chatPersistenceClient is not connected''',
-      () async {
-        client.chatPersistenceClient = MockPersistenceClient();
-        expect(client.chatPersistenceClient!.isConnected, isFalse);
+      body: (tester) async {
+        tester.client.chatPersistenceClient = MockPersistenceClient();
+        expect(tester.client.chatPersistenceClient!.isConnected, isFalse);
 
-        await expectLater(client.closePersistenceConnection(), completes);
+        await expectLater(tester.client.closePersistenceConnection(), completes);
       },
     );
 
-    test(
+    _persistenceConnectionTest(
       '''closePersistenceConnection completes normally if chatPersistenceClient is not set''',
-      () async {
-        expect(client.persistenceEnabled, isFalse);
-        await expectLater(client.closePersistenceConnection(), completes);
+      body: (tester) async {
+        expect(tester.client.persistenceEnabled, isFalse);
+        await expectLater(tester.client.closePersistenceConnection(), completes);
       },
     );
 
-    test(
+    _persistenceConnectionTest(
       '''connectUser completes normally if the persistence connection is already connected to the same user''',
-      () async {
-        client.chatPersistenceClient = MockPersistenceClient();
-        await client.openPersistenceConnection(user);
-        expect(client.persistenceEnabled, isTrue);
+      body: (tester) async {
+        tester.client.chatPersistenceClient = MockPersistenceClient();
+        await tester.client.openPersistenceConnection(tester.user);
+        expect(tester.client.persistenceEnabled, isTrue);
 
         await expectLater(
-          client.connectUser(user, token, connectWebSocket: false),
+          tester.client.connectUser(
+            tester.user,
+            createTestToken(tester.user.id).rawValue,
+            connectWebSocket: false,
+          ),
           completes,
         );
       },
     );
 
-    test(
+    _persistenceConnectionTest(
       '''connectUser should throw if the persistence connection if already connected to a different user''',
-      () async {
-        client.chatPersistenceClient = MockPersistenceClient();
-        await client.openPersistenceConnection(user.copyWith(id: 'new-id'));
-        expect(client.persistenceEnabled, isTrue);
+      body: (tester) async {
+        tester.client.chatPersistenceClient = MockPersistenceClient();
+        await tester.client.openPersistenceConnection(tester.user.copyWith(id: 'new-id'));
+        expect(tester.client.persistenceEnabled, isTrue);
 
         await expectLater(
-          client.connectUser(user, token, connectWebSocket: false),
+          tester.client.connectUser(
+            tester.user,
+            createTestToken(tester.user.id).rawValue,
+            connectWebSocket: false,
+          ),
           throwsA(isA<StateError>()),
         );
       },
@@ -5197,85 +5697,96 @@ void main() {
 
     group('Sync Method Tests', () {
       setUpAll(() {
+        // fallback values
+        registerFallbackValue(<String>[]);
+        registerFallbackValue(DateTime(0));
         registerFallbackValue(const PaginationParams());
         registerFallbackValue(ChannelFilter.equal(ChannelFilterField.cid, ''));
       });
 
-      test(
+      _persistenceConnectionTest(
         'should retrieve data from persistence client and sync successfully',
-        () async {
+        body: (tester) async {
           final cids = ['channel1', 'channel2'];
-          final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));
+          final lastSyncAt = DateTime.utc(2021, 3);
           final fakeClient = FakePersistenceClient(
             channelCids: cids,
             lastSyncAt: lastSyncAt,
           );
 
-          client.chatPersistenceClient = fakeClient;
-          when(() => api.general.sync(cids, lastSyncAt)).thenAnswer(
-            (_) async => SyncResponse()..events = [],
+          tester.client.chatPersistenceClient = fakeClient;
+          tester.mockApi(
+            (api) => api.general.sync(cids, lastSyncAt),
+            result: createDefaultSyncResponse(),
           );
 
-          await client.sync();
+          await tester.client.sync();
 
-          verify(() => api.general.sync(cids, lastSyncAt)).called(1);
+          tester.verifyApi((api) => api.general.sync(cids, lastSyncAt));
 
           final newLastSyncAt = await fakeClient.getLastSyncAt();
           expect(newLastSyncAt?.isAfter(lastSyncAt), isTrue);
         },
       );
 
-      test('should set lastSyncAt on first sync when null', () async {
-        final fakeClient = FakePersistenceClient(
-          channelCids: ['channel1'],
-          lastSyncAt: null,
-        );
+      _persistenceConnectionTest(
+        'should set lastSyncAt on first sync when null',
+        body: (tester) async {
+          final fakeClient = FakePersistenceClient(
+            channelCids: ['channel1'],
+            lastSyncAt: null,
+          );
 
-        client.chatPersistenceClient = fakeClient;
+          tester.client.chatPersistenceClient = fakeClient;
 
-        await client.sync();
+          await tester.client.sync();
 
-        expectLater(fakeClient.getLastSyncAt(), completion(isNotNull));
-        verifyNever(() => api.general.sync(any(), any()));
-      });
+          expectLater(fakeClient.getLastSyncAt(), completion(isNotNull));
+          tester.verifyNeverCalled((api) => api.general.sync(any(), any()));
+        },
+      );
 
-      test('should flush persistence client on 400 error', () async {
-        final cids = ['channel1'];
-        final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));
-        final fakeClient = FakePersistenceClient(
-          channelCids: cids,
-          lastSyncAt: lastSyncAt,
-        );
-
-        client.chatPersistenceClient = fakeClient;
-        // What `/sync` answers when `lastSyncAt` is too old, or the channel
-        // list or event count is oversized.
-        when(() => api.general.sync(cids, lastSyncAt)).thenThrow(
-          apiException(
-            code: StreamErrorCode.inputError,
-            statusCode: 400,
-            message: 'Too many events',
-          ),
-        );
-
-        await client.sync();
-
-        expect(await fakeClient.getChannelCids(), isEmpty); // Should be flushed
-
-        verify(() => api.general.sync(cids, lastSyncAt)).called(1);
-      });
-
-      test(
-        '''should replay events and advance lastSyncAt when the payload is within the replay limit''',
-        () async {
+      _persistenceConnectionTest(
+        'should flush persistence client on 400 error',
+        body: (tester) async {
           final cids = ['channel1'];
-          final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));
+          final lastSyncAt = DateTime.utc(2021, 3);
           final fakeClient = FakePersistenceClient(
             channelCids: cids,
             lastSyncAt: lastSyncAt,
           );
 
-          client.chatPersistenceClient = fakeClient;
+          tester.client.chatPersistenceClient = fakeClient;
+          tester.mockApiFailure(
+            (api) => api.general.sync(cids, lastSyncAt),
+            // What `/sync` answers when the window it was asked for is wider
+            // than the server will serve.
+            error: createDefaultNetworkError(
+              code: StreamErrorCode.inputError,
+              statusCode: 400,
+              message: 'Too many events',
+            ),
+          );
+
+          await tester.client.sync();
+
+          expect(await fakeClient.getChannelCids(), isEmpty); // Should be flushed
+
+          tester.verifyApi((api) => api.general.sync(cids, lastSyncAt));
+        },
+      );
+
+      _persistenceConnectionTest(
+        '''should replay events and advance lastSyncAt when the payload is within the replay limit''',
+        body: (tester) async {
+          final cids = ['channel1'];
+          final lastSyncAt = DateTime.timestamp().subtract(const Duration(hours: 1));
+          final fakeClient = FakePersistenceClient(
+            channelCids: cids,
+            lastSyncAt: lastSyncAt,
+          );
+
+          tester.client.chatPersistenceClient = fakeClient;
           final events = List.generate(
             10,
             (index) => Event(
@@ -5285,18 +5796,19 @@ void main() {
               createdAt: lastSyncAt.add(Duration(seconds: index + 1)),
             ),
           );
-          when(() => api.general.sync(cids, lastSyncAt)).thenAnswer(
-            (_) async => SyncResponse()..events = events,
+          tester.mockApi(
+            (api) => api.general.sync(cids, lastSyncAt),
+            result: SyncResponse()..events = events,
           );
 
           final replayed = <Event>[];
-          final sub = client.on(EventType.messageNew).listen(replayed.add);
+          final sub = tester.client.on(EventType.messageNew).listen(replayed.add);
           addTearDown(sub.cancel);
 
-          await client.sync();
+          await tester.client.sync();
           await pumpEventQueue();
 
-          verify(() => api.general.sync(cids, lastSyncAt)).called(1);
+          tester.verifyApi((api) => api.general.sync(cids, lastSyncAt));
           // Within the limit, every event is replayed through the event handler.
           expect(replayed, hasLength(events.length));
           // lastSyncAt advances to the newest replayed event date.
@@ -5304,17 +5816,17 @@ void main() {
         },
       );
 
-      test(
+      _persistenceConnectionTest(
         '''should refresh the synced channels in place of a payload that exceeds the replay limit''',
-        () async {
+        body: (tester) async {
           final cids = ['channel1'];
-          final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));
+          final lastSyncAt = DateTime.timestamp().subtract(const Duration(hours: 1));
           final fakeClient = FakePersistenceClient(
             channelCids: cids,
             lastSyncAt: lastSyncAt,
           );
 
-          client.chatPersistenceClient = fakeClient;
+          tester.client.chatPersistenceClient = fakeClient;
           // 251 events exceeds the internal replay limit of 250.
           final events = List.generate(
             251,
@@ -5325,40 +5837,43 @@ void main() {
               createdAt: lastSyncAt.add(Duration(seconds: index + 1)),
             ),
           );
-          when(() => api.general.sync(cids, lastSyncAt)).thenAnswer(
-            (_) async => SyncResponse()..events = events,
-          );
-
-          when(
-            () => api.channel.queryChannels(
-              filter: any(named: 'filter'),
-              sort: any(named: 'sort'),
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
-            ),
-          ).thenAnswer((_) async => QueryChannelsResponse()..channels = []);
+          tester
+            ..mockApi(
+              (api) => api.general.sync(cids, lastSyncAt),
+              result: SyncResponse()..events = events,
+            )
+            ..mockApi(
+              (api) => api.channel.queryChannels(
+                filter: any(named: 'filter'),
+                sort: any(named: 'sort'),
+                state: any(named: 'state'),
+                watch: any(named: 'watch'),
+                presence: any(named: 'presence'),
+                memberLimit: any(named: 'memberLimit'),
+                messageLimit: any(named: 'messageLimit'),
+                paginationParams: any(named: 'paginationParams'),
+              ),
+              result: QueryChannelsResponse()..channels = [],
+            );
 
           final replayed = <Event>[];
-          final sub = client.on(EventType.messageNew).listen(replayed.add);
+          final sub = tester.client.on(EventType.messageNew).listen(replayed.add);
           addTearDown(sub.cancel);
 
-          // The group shares one api mock, so only count this test's calls.
-          clearInteractions(api.channel);
-
-          await client.sync();
+          await tester.client.sync();
           await pumpEventQueue();
 
-          verify(() => api.general.sync(cids, lastSyncAt)).called(1);
+          tester.verifyApi((api) => api.general.sync(cids, lastSyncAt));
           // Replay is skipped; no events are dispatched through the handler.
           expect(replayed, isEmpty);
           // The channels the payload covered are refreshed in its place.
-          verify(
-            () => api.channel.queryChannels(
-              filter: any(named: 'filter', that: isSameFilterAs(ChannelFilter.in_(ChannelFilterField.cid, cids))),
+          tester.verifyApi(
+            (api) => api.channel.queryChannels(
+              // A filter compares by identity, so match on what it sends.
+              filter: any(
+                named: 'filter',
+                that: isSameFilterAs(ChannelFilter.in_(ChannelFilterField.cid, cids)),
+              ),
               sort: any(named: 'sort'),
               state: any(named: 'state'),
               watch: any(named: 'watch'),
@@ -5367,7 +5882,7 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: const PaginationParams(limit: 1),
             ),
-          ).called(1);
+          );
           // lastSyncAt moves to the newest event in the skipped payload, so
           // that payload is not re-fetched while anything after it still is.
           expect(await fakeClient.getLastSyncAt(), events.last.createdAt);
@@ -5379,10 +5894,10 @@ void main() {
   group('recoverStateOnReconnect', () {
     const apiKey = 'test-api-key';
     final user = User(id: 'test-user-id');
-    final token = testUserToken(user.id).rawValue;
+    final token = createTestToken(user.id).rawValue;
 
     late FakeChatApi api;
-    late FakeWebSocket ws;
+    late _FakeWebSocket ws;
     late StreamChatClient client;
 
     setUpAll(() {
@@ -5392,7 +5907,7 @@ void main() {
 
     setUp(() {
       api = FakeChatApi();
-      ws = FakeWebSocket();
+      ws = _FakeWebSocket();
 
       // Stub queryChannels for every test — it's the API the recovery path
       // calls when enabled, and a missing stub would surface as an unhandled
@@ -5415,7 +5930,7 @@ void main() {
       await client.dispose();
     });
 
-    // Drives the FakeWebSocket through a connected → disconnected → connected
+    // Drives the _FakeWebSocket through a connected → disconnected → connected
     // transition so the client's pairwise listener fires the recovery path.
     Future<void> simulateReconnect() async {
       ws.connectionStatus = ConnectionStatus.disconnected;
@@ -5423,6 +5938,10 @@ void main() {
       ws.connectionStatus = ConnectionStatus.connected;
       await delay(300);
     }
+
+    // Recovery runs inside the client's own connection-status listener, so a
+    // failure there has no future for the app to catch. It must be swallowed,
+    // and must not stop `connectionRecovered` from firing.
 
     // Recovery asks about channels most recently active first, so every fixture
     // pins its own recency rather than inheriting the moment it was built.
@@ -5956,10 +6475,10 @@ void main() {
   group('dispose during reconnect recovery', () {
     const apiKey = 'test-api-key';
     final user = User(id: 'test-user-id');
-    final token = testUserToken(user.id).rawValue;
+    final token = createTestToken(user.id).rawValue;
 
     late FakeChatApi api;
-    late FakeWebSocket ws;
+    late _FakeWebSocket ws;
     late StreamChatClient client;
     var disposed = false;
 
@@ -5970,7 +6489,7 @@ void main() {
 
     setUp(() {
       api = FakeChatApi();
-      ws = FakeWebSocket();
+      ws = _FakeWebSocket();
       disposed = false;
     });
 
@@ -5978,6 +6497,10 @@ void main() {
     tearDown(() async {
       if (!disposed) await client.dispose();
     });
+
+    // Disposing the client while a reconnect is still recovering must complete
+    // cleanly: recovery work that finishes after disposal is discarded, never
+    // surfacing as an error.
 
     // Disposing the client while a reconnect is still recovering must complete
     // cleanly: recovery work that finishes after disposal is discarded, never
@@ -6031,28 +6554,10 @@ void main() {
   });
 
   group('WS events', () {
-    late StreamChatClient client;
-
-    setUp(() async {
-      final ws = FakeWebSocket();
-      client = StreamChatClient('test-api-key', ws: ws);
-
-      final user = User(id: 'test-user-id');
-      final token = testUserToken(user.id).rawValue;
-
-      await client.connectUser(user, token);
-      await delay(300);
-      expect(client.wsConnectionStatus, ConnectionStatus.connected);
-    });
-
-    tearDown(() async {
-      await client.dispose();
-    });
-
     group('User messages deleted event', () {
-      test(
+      chatClientTest(
         'should broadcast global user.messages.deleted event to all channels',
-        () async {
+        body: (tester) async {
           // Add messages from the user to be deleted
           final bannedUser = User(id: 'banned-user', name: 'Banned User');
           final message1 = Message(
@@ -6067,20 +6572,20 @@ void main() {
           );
 
           // Setup: Create multiple channels with state
-          final channelState1 = ChannelState(
-            channel: ChannelModel(id: 'channel-1', type: 'messaging'),
+          final channelState1 = createDefaultChannelState(
+            channel: createDefaultChannelModel(cid: 'messaging:channel-1'),
             messages: [message1],
           );
-          final channelState2 = ChannelState(
-            channel: ChannelModel(id: 'channel-2', type: 'messaging'),
+          final channelState2 = createDefaultChannelState(
+            channel: createDefaultChannelModel(cid: 'messaging:channel-2'),
             messages: [message2],
           );
 
-          final channel1 = Channel.fromState(client, channelState1);
-          final channel2 = Channel.fromState(client, channelState2);
+          final channel1 = Channel.fromState(tester.client, channelState1);
+          final channel2 = Channel.fromState(tester.client, channelState2);
 
           // Register channels in client state
-          client.state.addChannels({
+          tester.clientState.addChannels({
             'messaging:channel-1': channel1,
             'messaging:channel-2': channel2,
           });
@@ -6089,18 +6594,15 @@ void main() {
           expect(channel1.state?.messages.length, equals(1));
           expect(channel2.state?.messages.length, equals(1));
 
-          // Simulate global user.messages.deleted event being broadcast to channels
-          // (In production, ClientState._listenUserMessagesDeleted does this)
-          final event = Event(
+          // Emit a global (cid-less) user.messages.deleted event;
+          // ClientState rebroadcasts it to every registered channel.
+          final event = createDefaultEvent(
             type: EventType.userMessagesDeleted,
             user: bannedUser,
             hardDelete: false,
           );
 
-          client.handleEvent(event);
-
-          // Wait for the events to be processed
-          await Future.delayed(Duration.zero);
+          await tester.emitEvent(event);
 
           // Verify messages are soft deleted in all channels
           final channel1Message = channel1.state?.messages.first;
@@ -6113,9 +6615,9 @@ void main() {
         },
       );
 
-      test(
+      chatClientTest(
         'should broadcast global hard delete to all channels',
-        () async {
+        body: (tester) async {
           // Add messages from the user to be deleted
           final bannedUser = User(id: 'banned-user', name: 'Banned User');
           final otherUser = User(id: 'other-user', name: 'Other User');
@@ -6137,20 +6639,20 @@ void main() {
           );
 
           // Setup: Create multiple channels with state
-          final channelState1 = ChannelState(
-            channel: ChannelModel(id: 'channel-1', type: 'messaging'),
+          final channelState1 = createDefaultChannelState(
+            channel: createDefaultChannelModel(cid: 'messaging:channel-1'),
             messages: [message1, message3],
           );
-          final channelState2 = ChannelState(
-            channel: ChannelModel(id: 'channel-2', type: 'messaging'),
+          final channelState2 = createDefaultChannelState(
+            channel: createDefaultChannelModel(cid: 'messaging:channel-2'),
             messages: [message2],
           );
 
-          final channel1 = Channel.fromState(client, channelState1);
-          final channel2 = Channel.fromState(client, channelState2);
+          final channel1 = Channel.fromState(tester.client, channelState1);
+          final channel2 = Channel.fromState(tester.client, channelState2);
 
           // Register channels in client state
-          client.state.addChannels({
+          tester.clientState.addChannels({
             'messaging:channel-1': channel1,
             'messaging:channel-2': channel2,
           });
@@ -6159,18 +6661,15 @@ void main() {
           expect(channel1.state?.messages.length, equals(2));
           expect(channel2.state?.messages.length, equals(1));
 
-          // Simulate global user.messages.deleted event being broadcast to channels
-          // (In production, ClientState._listenUserMessagesDeleted does this)
-          final event = Event(
+          // Emit a global (cid-less) user.messages.deleted event;
+          // ClientState rebroadcasts it to every registered channel.
+          final event = createDefaultEvent(
             type: EventType.userMessagesDeleted,
             user: bannedUser,
             hardDelete: true,
           );
 
-          client.handleEvent(event);
-
-          // Wait for the events to be processed
-          await Future.delayed(Duration.zero);
+          await tester.emitEvent(event);
 
           // Verify banned user's messages are removed from all channels
           expect(channel1.state?.messages.length, equals(1));
@@ -6189,120 +6688,276 @@ void main() {
   });
 
   group('ClientState mutation guards', () {
-    const apiKey = 'test-api-key';
-    late final api = FakeChatApi();
-    late StreamChatClient client;
+    // The guards hold on a client that was never connected, so these skip
+    // the connect phase.
 
-    setUp(() {
-      final ws = FakeWebSocket();
-      client = StreamChatClient(apiKey, ws: ws, chatApi: api);
-    });
+    // The guards hold on a client that was never connected, so these skip
+    // the connect phase.
+    chatClientTest(
+      '`state.channels` returns an unmodifiable view',
+      connect: (_) {},
+      body: (tester) async {
+        final channel = Channel.fromState(
+          tester.client,
+          createDefaultChannelState(channel: createDefaultChannelModel(cid: 'messaging:c1')),
+        );
+        tester.clientState.addChannels({'messaging:c1': channel});
 
-    tearDown(() {
-      client.dispose();
-    });
+        expect(tester.clientState.channels, hasLength(1));
+        expect(() => tester.clientState.channels.remove('messaging:c1'), throwsUnsupportedError);
+        expect(() => tester.clientState.channels.clear(), throwsUnsupportedError);
+        expect(() => tester.clientState.channels['messaging:c2'] = channel, throwsUnsupportedError);
+      },
+    );
 
-    test('`state.channels` returns an unmodifiable view', () {
-      final channel = Channel.fromState(
-        client,
-        ChannelState(channel: ChannelModel(cid: 'messaging:c1')),
+    chatClientTest(
+      '`state.users` returns an unmodifiable view',
+      connect: (_) {},
+      body: (tester) async {
+        tester.clientState.updateUser(User(id: 'u1'));
+
+        expect(tester.clientState.users.containsKey('u1'), isTrue);
+        expect(() => tester.clientState.users.remove('u1'), throwsUnsupportedError);
+        expect(() => tester.clientState.users.clear(), throwsUnsupportedError);
+      },
+    );
+
+    chatClientTest(
+      '`state.activeLiveLocations` returns an unmodifiable view',
+      connect: (_) {},
+      body: (tester) async {
+        expect(() => tester.clientState.activeLiveLocations.clear(), throwsUnsupportedError);
+      },
+    );
+
+    chatClientTest(
+      '`removeChannel` emits a fresh map so distinct subscribers see the change',
+      connect: (_) {},
+      body: (tester) async {
+        final channel = Channel.fromState(
+          tester.client,
+          createDefaultChannelState(channel: createDefaultChannelModel(cid: 'messaging:c1')),
+        );
+        tester.clientState.addChannels({'messaging:c1': channel});
+
+        final received = <Map<String, Channel>>[];
+        // Skip the BehaviorSubject's replay of the current value to new subscribers.
+        final sub = tester.clientState.channelsStream.distinct().skip(1).listen(received.add);
+
+        tester.clientState.removeChannel('messaging:c1');
+        await Future<void>.delayed(Duration.zero);
+
+        expect(received, hasLength(1));
+        expect(received.single, isEmpty);
+
+        await sub.cancel();
+      },
+    );
+
+    chatClientTest(
+      'initial seeded values are unmodifiable (before any write)',
+      connect: (_) {},
+      body: (tester) async {
+        // Fresh client, no mutations yet — subscribers connecting at this point
+        // still see unmodifiable seeds.
+        expect(() => tester.clientState.channels.clear(), throwsUnsupportedError);
+        expect(() => tester.clientState.users.clear(), throwsUnsupportedError);
+        expect(() => tester.clientState.activeLiveLocations.clear(), throwsUnsupportedError);
+      },
+    );
+
+    chatClientTest(
+      '`channelsStream` emits unmodifiable maps',
+      connect: (_) {},
+      body: (tester) async {
+        final received = <Map<String, Channel>>[];
+        final sub = tester.clientState.channelsStream.listen(received.add);
+
+        final channel = Channel.fromState(
+          tester.client,
+          createDefaultChannelState(channel: createDefaultChannelModel(cid: 'messaging:c1')),
+        );
+        tester.clientState.addChannels({'messaging:c1': channel});
+        await Future<void>.delayed(Duration.zero);
+
+        // Both the initial seed and the post-write emission must be unmodifiable.
+        expect(received, hasLength(greaterThanOrEqualTo(2)));
+        for (final emitted in received) {
+          expect(emitted.clear, throwsUnsupportedError);
+        }
+
+        await sub.cancel();
+      },
+    );
+
+    chatClientTest(
+      '`usersStream` emits unmodifiable maps',
+      connect: (_) {},
+      body: (tester) async {
+        final received = <Map<String, User>>[];
+        final sub = tester.clientState.usersStream.listen(received.add);
+
+        tester.clientState.updateUser(User(id: 'u1'));
+        await Future<void>.delayed(Duration.zero);
+
+        expect(received, hasLength(greaterThanOrEqualTo(2)));
+        for (final emitted in received) {
+          expect(emitted.clear, throwsUnsupportedError);
+        }
+
+        await sub.cancel();
+      },
+    );
+
+    chatClientTest(
+      '`activeLiveLocationsStream` emits unmodifiable lists',
+      connect: (_) {},
+      body: (tester) async {
+        final received = <List<Location>>[];
+        final sub = tester.clientState.activeLiveLocationsStream.listen(received.add);
+
+        tester.clientState.activeLiveLocations = const [];
+        await Future<void>.delayed(Duration.zero);
+
+        expect(received, isNotEmpty);
+        for (final emitted in received) {
+          expect(emitted.clear, throwsUnsupportedError);
+        }
+
+        await sub.cancel();
+      },
+    );
+  });
+
+  group('default REST wiring', () {
+    setUpAll(() => registerFallbackValue(RequestOptions()));
+
+    test('builds a REST stack carrying the api key and user credentials', () async {
+      const apiKey = 'test-api-key';
+      final adapter = _MockHttpClientAdapter();
+
+      when(() => adapter.fetch(any(), any(), any())).thenAnswer(
+        (_) async => ResponseBody.fromString(
+          '{"app":{}}',
+          200,
+          headers: {
+            Headers.contentTypeHeader: [Headers.jsonContentType],
+          },
+        ),
       );
-      client.state.addChannels({'messaging:c1': channel});
 
-      expect(client.state.channels, hasLength(1));
-      expect(() => client.state.channels.remove('messaging:c1'), throwsUnsupportedError);
-      expect(() => client.state.channels.clear(), throwsUnsupportedError);
-      expect(() => client.state.channels['messaging:c2'] = channel, throwsUnsupportedError);
-    });
+      final client = StreamChatClient(apiKey, httpClientAdapter: adapter);
+      addTearDown(client.dispose);
 
-    test('`state.users` returns an unmodifiable view', () {
-      client.state.updateUser(User(id: 'u1'));
+      final user = User(id: 'test-user-id');
+      final token = createTestToken(user.id);
 
-      expect(client.state.users.containsKey('u1'), isTrue);
-      expect(() => client.state.users.remove('u1'), throwsUnsupportedError);
-      expect(() => client.state.users.clear(), throwsUnsupportedError);
-    });
+      // Connecting without a socket still loads the app settings, which is the
+      // request captured below.
+      await client.connectUser(user, token.rawValue, connectWebSocket: false);
+      await pumpEventQueue();
 
-    test('`state.activeLiveLocations` returns an unmodifiable view', () {
-      expect(() => client.state.activeLiveLocations.clear(), throwsUnsupportedError);
-    });
+      final captured = verify(() => adapter.fetch(captureAny(), any(), any())).captured;
+      final options = captured.first as RequestOptions;
 
-    test('`removeChannel` emits a fresh map so distinct subscribers see the change', () async {
-      final channel = Channel.fromState(
-        client,
-        ChannelState(channel: ChannelModel(cid: 'messaging:c1')),
-      );
-      client.state.addChannels({'messaging:c1': channel});
-
-      final received = <Map<String, Channel>>[];
-      // Skip the BehaviorSubject's replay of the current value to new subscribers.
-      final sub = client.state.channelsStream.distinct().skip(1).listen(received.add);
-
-      client.state.removeChannel('messaging:c1');
-      await Future<void>.delayed(Duration.zero);
-
-      expect(received, hasLength(1));
-      expect(received.single, isEmpty);
-
-      await sub.cancel();
-    });
-
-    test('initial seeded values are unmodifiable (before any write)', () {
-      // Fresh client, no mutations yet — subscribers connecting at this point
-      // still see unmodifiable seeds.
-      expect(() => client.state.channels.clear(), throwsUnsupportedError);
-      expect(() => client.state.users.clear(), throwsUnsupportedError);
-      expect(() => client.state.activeLiveLocations.clear(), throwsUnsupportedError);
-    });
-
-    test('`channelsStream` emits unmodifiable maps', () async {
-      final received = <Map<String, Channel>>[];
-      final sub = client.state.channelsStream.listen(received.add);
-
-      final channel = Channel.fromState(
-        client,
-        ChannelState(channel: ChannelModel(cid: 'messaging:c1')),
-      );
-      client.state.addChannels({'messaging:c1': channel});
-      await Future<void>.delayed(Duration.zero);
-
-      // Both the initial seed and the post-write emission must be unmodifiable.
-      expect(received, hasLength(greaterThanOrEqualTo(2)));
-      for (final emitted in received) {
-        expect(emitted.clear, throwsUnsupportedError);
-      }
-
-      await sub.cancel();
-    });
-
-    test('`usersStream` emits unmodifiable maps', () async {
-      final received = <Map<String, User>>[];
-      final sub = client.state.usersStream.listen(received.add);
-
-      client.state.updateUser(User(id: 'u1'));
-      await Future<void>.delayed(Duration.zero);
-
-      expect(received, hasLength(greaterThanOrEqualTo(2)));
-      for (final emitted in received) {
-        expect(emitted.clear, throwsUnsupportedError);
-      }
-
-      await sub.cancel();
-    });
-
-    test('`activeLiveLocationsStream` emits unmodifiable lists', () async {
-      final received = <List<Location>>[];
-      final sub = client.state.activeLiveLocationsStream.listen(received.add);
-
-      client.state.activeLiveLocations = const [];
-      await Future<void>.delayed(Duration.zero);
-
-      expect(received, isNotEmpty);
-      for (final emitted in received) {
-        expect(emitted.clear, throwsUnsupportedError);
-      }
-
-      await sub.cancel();
+      expect(options.queryParameters['api_key'], apiKey);
+      expect(options.queryParameters['user_id'], user.id);
+      expect(options.headers['Authorization'], token.rawValue);
+      expect(options.headers['stream-auth-type'], token.authType.name);
     });
   });
 }
+
+class _MockHttpClientAdapter extends Mock implements HttpClientAdapter {}
+
+class _FakeUser extends Fake implements User {}
+
+class _FakeWebSocket extends Fake implements WebSocket {
+  late final _connectionStatusController = BehaviorSubject.seeded(
+    ConnectionStatus.disconnected,
+  );
+
+  set connectionStatus(ConnectionStatus value) {
+    _connectionStatusController.add(value);
+  }
+
+  @override
+  ConnectionStatus get connectionStatus => _connectionStatusController.value;
+
+  @override
+  Stream<ConnectionStatus> get connectionStatusStream => _connectionStatusController.stream;
+
+  @override
+  Completer<Event>? connectionCompleter;
+
+  @override
+  Future<Event> connect(
+    User user, {
+    bool? includeUserDetails = true,
+  }) async {
+    connectionStatus = ConnectionStatus.connecting;
+    final event = Event(
+      type: EventType.healthCheck,
+      connectionId: 'fake-connection-id',
+      me: OwnUser.fromUser(user),
+    );
+    connectionCompleter = Completer()..complete(event);
+    connectionStatus = ConnectionStatus.connected;
+    return connectionCompleter!.future;
+  }
+
+  @override
+  void disconnect() {
+    connectionStatus = ConnectionStatus.disconnected;
+    connectionCompleter = null;
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _connectionStatusController.close();
+  }
+}
+
+class _FakeWebSocketWithConnectionError extends Fake implements WebSocket {
+  late final _connectionStatusController = BehaviorSubject.seeded(
+    ConnectionStatus.disconnected,
+  );
+
+  set connectionStatus(ConnectionStatus value) {
+    _connectionStatusController.add(value);
+  }
+
+  @override
+  ConnectionStatus get connectionStatus => _connectionStatusController.value;
+
+  @override
+  Stream<ConnectionStatus> get connectionStatusStream => _connectionStatusController.stream;
+
+  @override
+  Completer<Event>? connectionCompleter;
+
+  @override
+  Future<Event> connect(
+    User user, {
+    bool? includeUserDetails = true,
+  }) async {
+    connectionStatus = ConnectionStatus.connecting;
+    const error = StreamNetworkException(message: 'Error Connecting');
+    connectionCompleter = Completer()..completeError(error);
+    return connectionCompleter!.future;
+  }
+
+  @override
+  void disconnect() {
+    connectionStatus = ConnectionStatus.disconnected;
+    connectionCompleter = null;
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _connectionStatusController.close();
+  }
+}
+
+// Top level util function to delay the code execution
+Future delay(num milliseconds) => Future.delayed(Duration(milliseconds: milliseconds.toInt()));

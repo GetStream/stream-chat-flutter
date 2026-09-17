@@ -7,8 +7,8 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import '../fakes.dart';
 import '../mocks.dart';
+import '../utils.dart';
 
 void main() {
   late TokenManager tokenManager;
@@ -17,7 +17,7 @@ void main() {
   late WebSocket webSocket;
 
   setUp(() {
-    tokenManager = FakeTokenManager();
+    tokenManager = _FakeTokenManager();
     webSocketChannel = MockWebSocketChannel();
 
     WebSocketChannel channelProvider(
@@ -589,4 +589,29 @@ class _CapturingHandler extends StreamLogHandler {
 
   @override
   void handle(StreamLogRecord record) => _onRecord(record);
+}
+
+class _FakeTokenManager extends Fake implements TokenManager {
+  final token = testUserToken('test-user-id');
+
+  @override
+  bool get usesStaticProvider => true;
+
+  @override
+  String? get userId => token.userId;
+
+  @override
+  UserToken? peekToken() => token;
+
+  @override
+  Future<UserToken> getToken() async => token;
+
+  @override
+  void setTokenProvider(String userId, {required TokenProvider tokenProvider}) {}
+
+  @override
+  void expireToken() {}
+
+  @override
+  void reset() {}
 }
