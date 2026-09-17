@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed members removed from a channel keeping their read state in the channel state.
+
 ## 9.29.0
 
 ✅ Added

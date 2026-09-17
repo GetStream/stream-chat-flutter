@@ -2330,11 +2330,11 @@ class ChannelClientState {
       final existingRead = channelState.read ?? [];
       final existingMembers = channelState.members ?? [];
 
-      updateChannelState(
-        channelState.copyWith(
-          read: [...existingRead.where((r) => r.user.id != user.id)],
-          members: [...existingMembers.where((m) => m.userId != user.id)],
-        ),
+      // Writes the state directly: the read list merge in
+      // [updateChannelState] would undo the read removal.
+      _channelState = channelState.copyWith(
+        read: [...existingRead.where((r) => r.user.id != user.id)],
+        members: [...existingMembers.where((m) => m.userId != user.id)],
       );
     }));
   }
