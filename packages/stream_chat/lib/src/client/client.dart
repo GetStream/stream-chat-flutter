@@ -317,10 +317,6 @@ class StreamChatClient {
   );
 
   /// The connection this client works over.
-  ///
-  /// [ConnectionStatus.connecting] covers every step of opening one, and
-  /// [ConnectionStatus.disconnected] covers both a connection that closed and
-  /// one that was never opened.
   ConnectionStatus get connectionStatus => _connection.connectionState.status;
 
   /// [connectionStatus] on listen, and again on each change.
