@@ -88,6 +88,7 @@
 - Fixed reconnect catch-up covering an arbitrary subset of channels when more are active than one request holds; the most recently active are now covered first.
 - Fixed `CurrentPlatform` throwing `UnimplementedError` on WebAssembly builds.
 - Fixed live location expiry emitting repeated `location.expired` events for the same expired location.
+- Fixed members removed from a channel keeping their read state in the channel state.
 
 🔄 Internal / Non-breaking
 
