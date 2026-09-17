@@ -23,12 +23,24 @@ export 'package:rate_limiter/rate_limiter.dart';
 // filter without re-parsing the JSON.
 export 'package:stream_core/stream_core.dart'
     show
+        Authenticating,
+        AuthenticationFailed,
         CompositeComparator,
+        Connected,
+        Connecting,
+        ConnectTimeout,
+        ConnectionIdGetter,
+        ConnectionStateEmitter,
         CurrentPlatform,
+        Disconnected,
+        Disconnecting,
+        DisconnectionSource,
         Distance,
         EvaluationOperator,
         Failure,
         Filter,
+        HealthCheckInfo,
+        Initialized,
         FilterField,
         FilterOperator,
         LocationCoordinate,
@@ -53,13 +65,19 @@ export 'package:stream_core/stream_core.dart'
         StreamLogPriority,
         StreamLogRecord,
         StreamLogger,
+        ServerInitiated,
         StreamNetworkException,
         Success,
+        SystemInitiated,
         SystemEnvironment,
         TokenManager,
         TokenProvider,
+        UnHealthyConnection,
+        UserInitiated,
         UserToken,
-        UserTokenLoader;
+        UserTokenLoader,
+        WebSocketConnectionState,
+        WsEvent;
 
 export 'package:uuid/uuid.dart';
 
@@ -127,4 +145,3 @@ export 'src/core/util/extension.dart';
 export 'src/core/util/message_rules.dart';
 export 'src/db/chat_persistence_client.dart';
 export 'src/event_type.dart';
-export 'src/ws/connection_status.dart';

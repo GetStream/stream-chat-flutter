@@ -3,25 +3,23 @@ import 'package:flutter/material.dart';
 import '../../stream_chat_flutter.dart';
 import 'empty_widget.dart';
 
-/// {@template streamConnectionStatusBuilder}
-/// A widget that builds itself based on the latest snapshot of interaction with
-/// a [Stream] of type [ConnectionStatus].
+/// {@template streamConnectionStateBuilder}
+/// A widget that builds itself from the state of the connection the client works over.
 ///
-/// The widget will use the closest [StreamChatClient.wsConnectionStatusStream]
-/// in case no stream is provided.
+/// Uses the connection of the closest [StreamChatClient] when no stream is given.
 /// {@endtemplate}
 class StreamConnectionStatusBuilder extends StatelessWidget {
-  /// {@macro streamConnectionStatusBuilder}
+  /// {@macro streamConnectionStateBuilder}
   const StreamConnectionStatusBuilder({
     super.key,
-    required this.statusBuilder,
-    this.connectionStatusStream,
+    required this.stateBuilder,
+    this.connectionStateStream,
     this.errorBuilder,
     this.loadingBuilder,
   });
 
   /// The asynchronous computation to which this builder is currently connected.
-  final Stream<ConnectionStatus>? connectionStatusStream;
+  final Stream<WebSocketConnectionState>? connectionStateStream;
 
   /// The builder that will be used in case of error
   final Widget Function(BuildContext context, Object? error)? errorBuilder;
@@ -30,14 +28,14 @@ class StreamConnectionStatusBuilder extends StatelessWidget {
   final WidgetBuilder? loadingBuilder;
 
   /// The builder that will be used in case of data
-  final Widget Function(BuildContext context, ConnectionStatus status) statusBuilder;
+  final Widget Function(BuildContext context, WebSocketConnectionState state) stateBuilder;
 
   @override
   Widget build(BuildContext context) {
-    final stream = connectionStatusStream ?? StreamChat.of(context).client.wsConnectionStatusStream;
     final client = StreamChat.of(context).client;
-    return BetterStreamBuilder<ConnectionStatus>(
-      initialData: client.wsConnectionStatus,
+    final stream = connectionStateStream ?? client.connectionState;
+    return BetterStreamBuilder<WebSocketConnectionState>(
+      initialData: client.connectionState.value,
       stream: stream,
       noDataBuilder: loadingBuilder,
       errorBuilder: (context, error) {
@@ -46,7 +44,7 @@ class StreamConnectionStatusBuilder extends StatelessWidget {
         }
         return const Empty();
       },
-      builder: statusBuilder,
+      builder: stateBuilder,
     );
   }
 }

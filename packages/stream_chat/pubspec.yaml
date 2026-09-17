@@ -43,7 +43,6 @@ dependencies:
       path: packages/stream_core
   synchronized: ^3.4.0
   uuid: ^4.5.3
-  web_socket_channel: ^3.0.3
 
 dev_dependencies:
   build_runner: ^2.15.0
@@ -52,3 +51,4 @@ dev_dependencies:
   mocktail: ^1.0.5
   retrofit_generator: ^10.2.6
   test: ^1.31.1
+  web_socket_channel: ^3.0.3

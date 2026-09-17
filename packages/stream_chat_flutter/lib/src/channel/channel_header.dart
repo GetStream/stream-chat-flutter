@@ -186,19 +186,19 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
 
     return Portal(
       child: StreamConnectionStatusBuilder(
-        statusBuilder: (context, status) {
+        stateBuilder: (context, state) {
           var statusString = '';
           var showStatus = true;
 
-          switch (status) {
-            case ConnectionStatus.connected:
+          switch (state) {
+            case Connected():
               statusString = context.translations.connectedLabel;
               showStatus = false;
               break;
-            case ConnectionStatus.connecting:
+            case Connecting() || Authenticating():
               statusString = context.translations.reconnectingLabel;
               break;
-            case ConnectionStatus.disconnected:
+            case Initialized() || Disconnecting() || Disconnected():
               statusString = context.translations.disconnectedLabel;
               break;
           }

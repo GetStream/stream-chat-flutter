@@ -41,11 +41,10 @@ dependency_overrides:
   stream_chat_persistence:
     path: ../../stream_chat_persistence
   # Forces one source for `stream_core`; see `melos.yaml`.
+  # TODO(ws-migration): restore the git ref here once `feat/ws-async-options` is merged.
+  # `dependencyOverridePaths` cannot reach these packages, because this block outranks it.
   stream_core:
-    git:
-      url: https://github.com/GetStream/stream-core-flutter.git
-      path: packages/stream_core
-      ref: 04e0d1cb3a6893cf70cb6636a261deb11beff81c
+    path: ../../../../stream-core-flutter/packages/stream_core
 
 flutter:
   uses-material-design: true

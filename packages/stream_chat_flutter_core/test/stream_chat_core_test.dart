@@ -191,7 +191,9 @@ void main() {
       when(
         mockClient.openConnection,
       ).thenAnswer((_) async => OwnUser(id: 'test-user'));
-      when(() => mockClient.wsConnectionStatus).thenReturn(ConnectionStatus.connected);
+      mockClient.connectionState.value = const Connected(
+        healthCheck: HealthCheckInfo(connectionId: 'test-connection-id'),
+      );
     });
 
     tearDown(() {
@@ -251,9 +253,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Reset connection status to disconnected
-        when(
-          () => mockClient.wsConnectionStatus,
-        ).thenReturn(ConnectionStatus.disconnected);
+        mockClient.connectionState.value = const Disconnected(source: ServerInitiated());
 
         // Act - bring app to foreground
         tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
@@ -279,9 +279,7 @@ void main() {
         verifyNever(mockClient.resumeReconnect);
 
         // Reset connection status so foreground triggers a reconnect.
-        when(
-          () => mockClient.wsConnectionStatus,
-        ).thenReturn(ConnectionStatus.disconnected);
+        mockClient.connectionState.value = const Disconnected(source: ServerInitiated());
 
         // Act - foreground
         tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
@@ -352,9 +350,7 @@ void main() {
         await pumpStreamChatCore(tester);
 
         // Set connection status to disconnected
-        when(
-          () => mockClient.wsConnectionStatus,
-        ).thenReturn(ConnectionStatus.disconnected);
+        mockClient.connectionState.value = const Disconnected(source: ServerInitiated());
 
         // Act - restore connectivity (pump past the debounce window)
         connectivityController.add([ConnectivityResult.mobile]);
@@ -372,9 +368,9 @@ void main() {
         await pumpStreamChatCore(tester);
 
         // Set connection status to connected
-        when(
-          () => mockClient.wsConnectionStatus,
-        ).thenReturn(ConnectionStatus.connected);
+        mockClient.connectionState.value = const Connected(
+          healthCheck: HealthCheckInfo(connectionId: 'test-connection-id'),
+        );
 
         // Act - lose connectivity (pump past the debounce window)
         connectivityController.add([ConnectivityResult.none]);
@@ -416,7 +412,7 @@ void main() {
         // only the trailing-edge state should drive one reconnect.
         await pumpStreamChatCore(tester);
 
-        when(() => mockClient.wsConnectionStatus).thenReturn(ConnectionStatus.disconnected);
+        mockClient.connectionState.value = const Disconnected(source: ServerInitiated());
 
         // Fire three events spaced under 1 s — all inside the debounce window.
         connectivityController.add([ConnectivityResult.none]);
@@ -440,7 +436,7 @@ void main() {
       (tester) async {
         await pumpStreamChatCore(tester);
 
-        when(() => mockClient.wsConnectionStatus).thenReturn(ConnectionStatus.disconnected);
+        mockClient.connectionState.value = const Disconnected(source: ServerInitiated());
 
         connectivityController.add([ConnectivityResult.mobile]);
         await tester.pump(const Duration(seconds: 4));
@@ -461,9 +457,7 @@ void main() {
         );
 
         // Set up for reconnection scenario
-        when(
-          () => mockClient.wsConnectionStatus,
-        ).thenReturn(ConnectionStatus.disconnected);
+        mockClient.connectionState.value = const Disconnected(source: ServerInitiated());
 
         // Clear any previous calls
         clearInteractions(mockClient);

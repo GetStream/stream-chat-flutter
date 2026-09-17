@@ -41,8 +41,9 @@ class _SampleAppLogHandler extends StreamLogHandler {
 
     if (kDebugMode) const StreamLogHandler.console().handle(record);
 
-    // report errors to Firebase Crashlytics
-    if (record.error != null || record.stackTrace != null) {
+    // Report errors to Firebase Crashlytics, keyed on the priority rather than on an error being
+    // attached: a warning carries one too, and reconnecting while offline logs several per outage.
+    if (record.priority >= StreamLogPriority.error && (record.error != null || record.stackTrace != null)) {
       FirebaseCrashlytics.instance
           .recordError(
             record.error,
@@ -75,7 +76,7 @@ StreamChatClient _buildStreamChatClient(
   final priority = switch ((connectionOverride, kDebugMode)) {
     // The e2e harness asserts on output, so keep the SDK quiet for it.
     (final _?, _) => StreamLogPriority.none,
-    (_, true) => StreamLogPriority.info,
+    (_, true) => StreamLogPriority.debug,
     _ => StreamLogPriority.error,
   };
   return StreamChatClient(

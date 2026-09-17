@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core/stream_core.dart' show MutableStateEmitter;
 
 class MockClient extends Mock implements StreamChatClient {
   MockClient() {
-    when(() => wsConnectionStatus).thenReturn(ConnectionStatus.connected);
-    when(() => wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
     when(() => state).thenReturn(MockClientState());
   }
+
+  // A real emitter rather than a stub: a test drives a transition by setting `value`,
+  // and mocktail refuses to `thenReturn` anything that is a `Stream`.
+  @override
+  final MutableStateEmitter<WebSocketConnectionState> connectionState = MutableStateEmitter(
+    const Connected(healthCheck: HealthCheckInfo(connectionId: 'test-connection-id')),
+  );
 }
 
 class MockClientState extends Mock implements ClientState {}

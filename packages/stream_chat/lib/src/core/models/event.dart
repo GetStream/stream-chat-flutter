@@ -7,7 +7,7 @@ part 'event.g.dart';
 
 /// The class that contains the information about an event
 @JsonSerializable(includeIfNull: false)
-class Event {
+class Event extends WsEvent {
   /// Constructor used for json serialization
   Event({
     this.type = 'local.event',

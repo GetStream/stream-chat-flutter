@@ -22,6 +22,12 @@ command:
     # Run `pub get` sequentially to avoid races on the shared git-dep cache.
     runPubGetInParallel: false
 
+    # Resolves `stream_core` from a sibling checkout when there is one, so the two repos can be
+    # worked on together without editing the ref below. Scoped to `stream_core` on purpose:
+    # `packages/**` would also capture `stream_thumbnail`, which is pinned to a different commit.
+    dependencyOverridePaths:
+      - '../stream-core-flutter/packages/stream_core'
+
     # Dart and Flutter environment used in the project.
     environment:
       sdk: ^3.12.0
@@ -115,6 +121,9 @@ command:
       # git — and pub allows a package only one. Every workspace package that
       # sees both therefore overrides `stream_core` to this same ref. Restore
       # hosted constraints before release and the overrides go with them.
+      # TODO(ws-migration): move to the commit `feat/ws-async-options` merges as. The ref below
+      # predates the asynchronous `WebSocketOptionsBuilder` this package now needs, so it only
+      # resolves against the sibling checkout `dependencyOverridePaths` points at.
       stream_core:
         git:
           url: https://github.com/GetStream/stream-core-flutter.git
@@ -134,7 +143,6 @@ command:
       url_launcher: ^6.3.2
       uuid: ^4.5.3
       video_player: ^2.11.1
-      web_socket_channel: ^3.0.3
 
     # List of all the dev_dependencies used in the project.
     dev_dependencies:
@@ -157,6 +165,7 @@ command:
       test: ^1.31.1
       theme_extensions_builder: ^7.3.0
       url_launcher_platform_interface: ^2.3.2
+      web_socket_channel: ^3.0.3
 
     hooks:
       # Updates the version.dart file after bootstrapping with the current version from pubspec.yaml

@@ -1,5 +1,9 @@
 ## Upcoming Beta
 
+🔄 Changed
+
+- `maybeReconnect` and `maybeDisconnect` read the client's `connectionState` rather than the removed `wsConnectionStatus`. Behaviour is unchanged: a connection still in progress is closed when the app backgrounds, and a client that has never connected is left alone.
+
 🛑️ Breaking
 
 - `PagedValue.error` and every `errorBuilder` now carry a `StreamChatException` instead of a `StreamChatError`, following the low-level client's error layer. A generic throwable is reported as a `StreamClientException` naming the load that failed, with the original kept as its `cause` rather than stringified into the message.

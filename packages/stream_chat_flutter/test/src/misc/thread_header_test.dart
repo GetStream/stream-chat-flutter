@@ -42,7 +42,7 @@ void main() {
           user: User(id: 'user-id'),
         ),
       ]);
-      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
+      client.connectionState.value = const Connecting();
       when(() => clientState.totalUnreadCount).thenAnswer((i) => 1);
       when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(1));
 
@@ -84,7 +84,7 @@ void main() {
       when(() => clientState.channels).thenReturn({channel.cid!: channel});
       when(() => clientState.totalUnreadCount).thenReturn(0);
       when(() => clientState.totalUnreadCountStream).thenAnswer((_) => Stream.value(0));
-      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
+      client.connectionState.value = const Connected(healthCheck: HealthCheckInfo(connectionId: 'test-connection-id'));
 
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);

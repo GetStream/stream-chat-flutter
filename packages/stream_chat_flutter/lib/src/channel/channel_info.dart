@@ -44,9 +44,9 @@ class StreamChannelInfo extends StatelessWidget {
       stream: channel.state!.membersStream,
       initialData: channel.state!.members,
       builder: (context, data) => StreamConnectionStatusBuilder(
-        statusBuilder: (context, status) {
-          switch (status) {
-            case ConnectionStatus.connected:
+        stateBuilder: (context, state) {
+          switch (state) {
+            case Connected():
               return _ConnectedTitleState(
                 channel: channel,
                 showTypingIndicator: showTypingIndicator,
@@ -54,9 +54,9 @@ class StreamChannelInfo extends StatelessWidget {
                 members: data,
                 parentId: parentId,
               );
-            case ConnectionStatus.connecting:
+            case Connecting() || Authenticating():
               return _ConnectingTitleState(textStyle: effectiveTextStyle);
-            case ConnectionStatus.disconnected:
+            case Initialized() || Disconnecting() || Disconnected():
               return _DisconnectedTitleState(
                 client: client,
                 textStyle: effectiveTextStyle,

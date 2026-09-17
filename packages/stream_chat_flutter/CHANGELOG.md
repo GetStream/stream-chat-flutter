@@ -4,6 +4,7 @@
 
 - `errorBuilder` on the paged scroll views (`StreamChannelListView`, `StreamUserListView`, `StreamMemberListView`, `StreamThreadListView`, `StreamPollVoteListView`, `StreamReactionListView`, `StreamMessageSearchListView`, `StreamPhotoGallery` and the grid variants) now receives a `StreamChatException` instead of a `StreamChatError`.
 - `AttachmentLimitReachedError`, `AttachmentTooLargeError` and `AttachmentBlockedError` now extend the sealed `AttachmentValidationError` rather than `StreamChatError`, and `StreamAttachmentValidator.validate` and `validateCount` return one. A refused attachment is not a failed call, so it is no longer one of the `StreamException` kinds.
+- `StreamConnectionStatusBuilder`'s `connectionStatusStream` and `statusBuilder` become `connectionStateStream` and `stateBuilder`, carrying a `WebSocketConnectionState` instead of a `ConnectionStatus`. Match on `Connected`, `Connecting`, `Disconnected` and the other variants where you compared enum values; a client that has never connected reports `Initialized`, not `Disconnected`.
 
 🔄 Changed
 
