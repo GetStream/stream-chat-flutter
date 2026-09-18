@@ -9,10 +9,10 @@ void main() {
     });
 
     test('should interchange with a raw string', () {
-      const fromLiteral = RoleType('user');
+      const raw = 'user';
 
-      expect(fromLiteral, RoleType.user);
-      expect(RoleType.user.rawType, 'user');
+      expect(RoleType.user, raw);
+      expect(RoleType.user.rawType, raw);
       expect(<String>[RoleType.user, RoleType.channel], ['user', 'channel']);
     });
 
