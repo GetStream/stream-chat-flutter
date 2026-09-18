@@ -51,6 +51,19 @@ dependencies:
   video_player: ^2.11.1
   yaml: ^3.1.2
 
+# TODO(e2e): temporary — remove this pin once the e2e suite no longer depends on
+# animation frame timing.
+#
+# lottie 3.6.1 schedules frames at the composition frame rate instead of every
+# vsync, which changes when the widget tree goes quiescent. The e2e harness
+# settles the tree between acting on it, so the splash screen's animation
+# shifted when settling completed and the suite began failing across every
+# branch. The SDK itself is compatible with 3.6.1 (its own tests pass against
+# it), so this is pinned here rather than capped in melos.yaml, which would
+# constrain integrators for a problem that is ours.
+dependency_overrides:
+  lottie: 3.5.1
+
 dev_dependencies:
   flutter_launcher_icons: ^0.14.4
   integration_test:
