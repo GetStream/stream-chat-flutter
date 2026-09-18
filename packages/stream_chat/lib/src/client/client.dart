@@ -317,10 +317,10 @@ class StreamChatClient {
   );
 
   /// The connection this client works over.
-  ConnectionStatus get connectionStatus => _connection.connectionState.status;
+  ConnectionStatus get connectionStatus => _connection.status;
 
   /// [connectionStatus] on listen, and again on each change.
-  Stream<ConnectionStatus> get connectionStatusStream => _connection.connectionState.statusStream;
+  Stream<ConnectionStatus> get connectionStatusStream => _connection.statusStream;
 
   /// Connects the current user, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
@@ -390,57 +390,73 @@ class StreamChatClient {
     );
   }
 
+  // The sign-in each caller of [_connectUser] waits on, while one is under way.
+  final _connecting = InFlightCache<String, OwnUser>();
+
   Future<OwnUser> _connectUser(
     User user, {
     required TokenProvider tokenProvider,
     bool connectWebSocket = true,
   }) async {
-    if (connectionStatus == ConnectionStatus.connecting) {
+    // Signing another in over them leaves everything built for them behind, including a connection
+    // nothing would close. Signing the same one in again is left to the connection.
+    if (state.currentUser case final signedIn? when signedIn.id != user.id) {
       throw StateError(
-        'A user is already being connected. Call `disconnectUser` before connecting again.',
+        'Cannot connect ${user.id} while ${signedIn.id} is signed in. '
+        'Call `disconnectUser` before connecting a different user.',
       );
     }
 
-    logger.i(() => 'Setting user: ${user.id}');
-
-    _tokenManager.setTokenProvider(
+    return _connecting.run(
       user.id,
-      tokenProvider: tokenProvider,
-    );
+      () async {
+        logger.i(() => 'Setting user: ${user.id}');
 
-    final ownUser = OwnUser.fromUser(user);
-    state.currentUser = ownUser;
-
-    try {
-      // Connect to persistence client if its set.
-      if (chatPersistenceClient != null) {
-        await openPersistenceConnection(ownUser);
-      }
-
-      // Connect to websocket if [connectWebSocket] is true.
-      //
-      // This is useful when you want to connect to websocket
-      // at a later stage or use the client in connection-less mode.
-      if (connectWebSocket) {
-        final connectedUser = await openConnection(
-          includeUserDetailsInConnectCall: true,
+        _tokenManager.setTokenProvider(
+          user.id,
+          tokenProvider: tokenProvider,
         );
-        state.currentUser = connectedUser;
-      }
 
-      // Start loading app settings in the background, we don't need to await
-      // for this to complete to consider the user connected.
-      unawaited(_appSettingsManager.loadAppSettings());
+        final ownUser = OwnUser.fromUser(user);
+        final signedIn = state.currentUser;
+        state.currentUser = ownUser;
 
-      return state.currentUser!;
-    } catch (e, stk) {
-      if (e is StreamChatException && e.isRetriable) {
-        final event = await chatPersistenceClient?.getConnectionInfo();
-        if (event != null) return ownUser.merge(event.me);
-      }
-      logger.e(() => 'error connecting user : ${ownUser.id}', error: e, stackTrace: stk);
-      rethrow;
-    }
+        try {
+          // Connect to persistence client if its set.
+          if (chatPersistenceClient != null) {
+            await openPersistenceConnection(ownUser);
+          }
+
+          // Connect to websocket if [connectWebSocket] is true.
+          //
+          // This is useful when you want to connect to websocket
+          // at a later stage or use the client in connection-less mode.
+          if (connectWebSocket) {
+            final connectedUser = await openConnection(
+              includeUserDetailsInConnectCall: true,
+            );
+            state.currentUser = connectedUser;
+          }
+
+          // Start loading app settings in the background, we don't need to await
+          // for this to complete to consider the user connected.
+          unawaited(_appSettingsManager.loadAppSettings());
+
+          return state.currentUser!;
+        } catch (e, stk) {
+          if (e is StreamChatException && e.isRetriable) {
+            final event = await chatPersistenceClient?.getConnectionInfo();
+            if (event != null) return ownUser.merge(event.me);
+          }
+          // Whoever was signed in before this, so a user who never signed in does not have the
+          // next connect refused on their behalf.
+          state.currentUser = signedIn;
+
+          logger.e(() => 'error connecting user : ${ownUser.id}', error: e, stackTrace: stk);
+          rethrow;
+        }
+      },
+    );
   }
 
   /// Connects the [chatPersistenceClient] to the given [user].

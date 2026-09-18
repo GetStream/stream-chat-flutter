@@ -387,9 +387,7 @@ extension MaybeReconnect on StreamChatClient {
   /// client is not yet connected.
   Future<void> maybeReconnect() async {
     if (state.currentUser == null) return;
-
-    // Opening one from any other status is an error.
-    if (connectionStatus != ConnectionStatus.disconnected) return;
+    if (connectionStatus == ConnectionStatus.connected) return;
 
     await openConnection();
   }
@@ -397,8 +395,8 @@ extension MaybeReconnect on StreamChatClient {
   /// Optionally disconnect the client if the user is logged in.
   Future<void> maybeDisconnect() async {
     if (state.currentUser == null) return;
+    if (connectionStatus == ConnectionStatus.disconnected) return;
 
-    // Unconditional: one reported as disconnected may be one the socket is waiting to reopen.
     return closeConnection();
   }
 }

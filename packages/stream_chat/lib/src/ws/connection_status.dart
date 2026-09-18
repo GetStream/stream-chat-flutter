@@ -12,32 +12,21 @@ enum ConnectionStatus {
   /// No connection is open, and none is being opened.
   disconnected;
 
-  /// The status [state] presents as.
+  /// The status a connection in [state] presents as.
+  ///
+  /// [isRecovering] is whether one that dropped is on its way back, which [state] does not say:
+  /// one waiting to be reopened and one nothing will reopen read the same.
   ///
   /// A connection that has yet to be opened reads as [disconnected], the same as one that closed:
   /// neither carries events.
   @internal
   static ConnectionStatus fromState(
-    WebSocketConnectionState state,
-  ) => switch (state) {
+    WebSocketConnectionState state, {
+    required bool isRecovering,
+  }) => switch (state) {
     Connected() => connected,
     Connecting() || Authenticating() => connecting,
-    // One on its way back is still connecting, through the teardown and the wait that follow a
-    // failed attempt as much as through the attempt itself.
-    Disconnecting(:final source) || Disconnected(:final source) when source.isReconnectable => connecting,
+    Disconnecting() || Disconnected() when isRecovering => connecting,
     Initialized() || Disconnecting() || Disconnected() => disconnected,
   };
-}
-
-/// Reads the state a connection reports as the [ConnectionStatus] it presents as.
-@internal
-extension ConnectionStatusEmitterReads on ConnectionStateEmitter {
-  /// The status the connection is in.
-  ConnectionStatus get status => ConnectionStatus.fromState(value);
-
-  /// [status] on listen, and again on each change.
-  ///
-  /// Reports once per change in status, so the steps a connection passes through on its way to
-  /// being open do not each report one.
-  Stream<ConnectionStatus> get statusStream => map(ConnectionStatus.fromState).distinct();
 }

@@ -342,28 +342,12 @@ void main() {
     );
 
     testWidgets(
-      'should leave a connection the socket is already opening alone',
-      (tester) async {
-        // Reopening one would throw away the delay the socket is retrying with.
-        when(() => mockClient.connectionStatus).thenReturn(ConnectionStatus.connecting);
-
-        await pumpStreamChatCore(tester);
-
-        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-        await tester.pumpAndSettle();
-        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-        await tester.pumpAndSettle();
-
-        verifyNever(mockClient.openConnection);
-      },
-    );
-
-    testWidgets(
       'should close a connection the socket is still waiting to reopen',
       (tester) async {
         await tester.runAsync(() async {
-          // Disconnected covers a connection the socket is waiting to reopen.
-          when(() => mockClient.connectionStatus).thenReturn(ConnectionStatus.disconnected);
+          // What a connection the socket is waiting to reopen reads as. Left open, it would go on
+          // retrying behind an app that has been put away.
+          when(() => mockClient.connectionStatus).thenReturn(ConnectionStatus.connecting);
 
           await pumpStreamChatCore(
             tester,

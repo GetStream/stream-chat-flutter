@@ -8,6 +8,14 @@ import '../utils.dart';
 import 'fake_chat_server.dart';
 
 void main() {
+  final records = <StreamLogRecord>[];
+  setUp(() {
+    records.clear();
+    StreamLogger.handler = _CapturingHandler(records.add);
+    StreamLogger.priority = StreamLogPriority.verbose;
+    addTearDown(StreamLogger.reset);
+  });
+
   test('ConnectionManager names no connection until one is established', () async {
     final manager = _manager();
     addTearDown(manager.dispose);
@@ -64,14 +72,56 @@ void main() {
     await expectLater(manager.connect(_user()), throwsA(isA<StreamAuthenticationException>()));
   });
 
-  test('ConnectionManager refuses a second connection while one is being opened', () async {
+  test('ConnectionManager waits on the connection being opened for the same user', () async {
     final manager = _manager();
     addTearDown(manager.dispose);
 
     final user = _user();
     final first = manager.connect(user);
 
-    expect(() => manager.connect(user), throwsStateError);
+    // The attempt in flight is the connection this caller asked for, so they are answered with it
+    // rather than refused.
+    final second = manager.connect(user);
+
+    await expectLater(first, throwsA(isA<StreamChatException>()));
+    await expectLater(second, throwsA(isA<StreamChatException>()));
+
+    // One attempt, not two run alongside each other: the second caller waits on the work the first
+    // one set off rather than repeating it, so the failure is reported once.
+    expect(records.where((it) => it.message.contains('failed')), hasLength(1));
+  });
+
+  test('ConnectionManager answers a connect for the user it already has a connection for', () async {
+    final manager = _manager(server: FakeChatServer(user: _user()));
+    addTearDown(manager.dispose);
+
+    final user = _user();
+    final established = await manager.connect(user);
+
+    // The connection being asked for is the one already open, so the caller is answered with the
+    // frame that opened it rather than told they should have disconnected first.
+    expect(await manager.connect(user), established);
+  });
+
+  test('ConnectionManager refuses a connect for another user while one is connected', () async {
+    final manager = _manager(server: FakeChatServer(user: _user()));
+    addTearDown(manager.dispose);
+
+    await manager.connect(_user());
+
+    // Opening one here would leave the connection in hand unreferenced.
+    expect(() => manager.connect(OwnUser(id: 'someone-else')), throwsStateError);
+  });
+
+  test('ConnectionManager refuses a second connection while one is being opened for another user', () async {
+    final manager = _manager();
+    addTearDown(manager.dispose);
+
+    final first = manager.connect(_user());
+
+    // Opening one here would leave the attempt in flight unreferenced, and hand this caller a
+    // connection signed in as somebody else.
+    expect(() => manager.connect(OwnUser(id: 'someone-else')), throwsStateError);
     await expectLater(first, throwsA(isA<StreamChatException>()));
   });
 }
@@ -96,4 +146,13 @@ ConnectionManager _manager({FakeChatServer? server, TokenProvider? tokenProvider
         // Never opens: a test about what the connection reports does not need one to succeed.
         (_) => throw const StreamNetworkException(message: 'no socket in this test'),
   );
+}
+
+class _CapturingHandler extends StreamLogHandler {
+  const _CapturingHandler(this._onRecord);
+
+  final void Function(StreamLogRecord) _onRecord;
+
+  @override
+  void handle(StreamLogRecord record) => _onRecord(record);
 }

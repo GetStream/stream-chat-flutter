@@ -142,19 +142,17 @@ void main() {
         }
       });
 
-      test('should throw if connection is already available', () async {
+      test('should answer with the connection already open', () async {
         expect(client.state.currentUser, isNull);
-        try {
-          await client.connectAnonymousUser();
-          // waiting 300ms for `wsConnectionStatusStream` to emit
-          await delay(300);
 
-          await client.openConnection();
-        } catch (e) {
-          // Misuse, so it leaves the StreamException hierarchy entirely.
-          expect(e, isA<StateError>());
-          expect((e as StateError).message, contains('already available for'));
-        }
+        final connected = await client.connectAnonymousUser();
+        // waiting 300ms for `wsConnectionStatusStream` to emit
+        await delay(300);
+
+        // The connection being asked for is the one already open, so the caller is answered with
+        // it rather than told they should have disconnected first.
+        expect(await client.openConnection(), connected);
+        expect(client.connectionStatus, ConnectionStatus.connected);
       });
 
       test('should open connection for closed connection', () async {
@@ -6366,6 +6364,180 @@ void main() {
       // The delay it waits out between them is a state of its own, which an app reads as still
       // on its way back rather than as a connection nothing is opening.
       expect(reported, [ConnectionStatus.connected, ConnectionStatus.connecting]);
+    });
+
+    test('should report a first attempt that failed as disconnected', () async {
+      final server = FakeChatServer(user: OwnUser.fromUser(user))..handshakeFails = true;
+      final client = StreamChatClient(apiKey, chatApi: FakeChatApi(), wsProvider: server.connect);
+      addTearDown(client.dispose);
+
+      await expectLater(client.connectUser(user, token), throwsA(isA<StreamException>()));
+
+      // Closed for a reason worth retrying, and left to the caller who was told it failed.
+      // Reported as connecting, nothing would ever move it off that.
+      expect(client.connectionStatus, ConnectionStatus.disconnected);
+
+      await Future<void>.delayed(const Duration(seconds: 1));
+      expect(server.sockets, hasLength(1));
+      expect(client.connectionStatus, ConnectionStatus.disconnected);
+    });
+
+    test('should report a drop while reconnection is paused as disconnected', () async {
+      final (client, server) = await connectedClient();
+      client.pauseReconnect();
+
+      final reported = client.connectionStatusStream.skip(1).first;
+      server
+        ..handshakeFails = true
+        ..drop(closeCode: 1006);
+
+      // Worth retrying, with nothing retrying it until reconnection resumes.
+      expect(await reported, ConnectionStatus.disconnected);
+      expect(server.sockets, hasLength(1));
+    });
+
+    // `connecting` covers two connections a caller cannot tell apart, and opening one is right for
+    // only one of them. Driven against a real socket, which is the only thing that distinguishes
+    // them; a status alone does not.
+    test('should open a connection waiting out a delay rather than wait with it', () async {
+      final (client, server) = await connectedClient();
+      server
+        ..handshakeFails = true
+        ..drop(closeCode: 1006);
+
+      await pumpEventQueue();
+      expect(client.connectionStatus, ConnectionStatus.connecting);
+
+      // The delay the socket is waiting out was started before the caller asked, so there is no
+      // reason to sit through the rest of it.
+      server.handshakeFails = false;
+      await client.openConnection();
+
+      expect(client.connectionStatus, ConnectionStatus.connected);
+    });
+
+    test('should wait on the attempt in flight rather than open a second connection', () async {
+      final server = FakeChatServer(user: OwnUser.fromUser(user));
+      final client = StreamChatClient(apiKey, chatApi: FakeChatApi(), wsProvider: server.connect);
+      addTearDown(client.dispose);
+
+      // Reported the same way as a connection waiting out a delay, which is what makes asking to
+      // open one on a foreground or a network change land here.
+      final connecting = client.connectUser(user, token);
+      expect(client.connectionStatus, ConnectionStatus.connecting);
+
+      final joined = client.openConnection();
+
+      // The attempt already in flight, answered to both callers. A second socket would leave the
+      // first connection unreferenced, and refusing would raise on a path neither can act on.
+      expect((await joined).id, user.id);
+      expect((await connecting).id, user.id);
+      expect(server.sockets, hasLength(1));
+    });
+
+    test('should answer a connectUser for the user already connected with that connection', () async {
+      final (client, server) = await connectedClient();
+      final connected = client.state.currentUser;
+
+      // The connection being asked for is the one already in hand, so the caller is answered with
+      // it rather than told they should have disconnected first.
+      final again = await client.connectUser(user, token);
+
+      expect(again, connected);
+      expect(server.sockets, hasLength(1));
+      expect(client.connectionStatus, ConnectionStatus.connected);
+    });
+
+    test('should open a connection asked for while the last one was still closing', () async {
+      final (client, server) = await connectedClient();
+
+      // Closing and opening without waiting in between, which leaves the socket still closing when
+      // the second call arrives.
+      client.closeConnection().ignore();
+      await client.openConnection();
+
+      expect(client.connectionStatus, ConnectionStatus.connected);
+      expect(server.sockets, hasLength(2));
+    });
+
+    test('should refuse a connectUser for another user while one is connected', () async {
+      final (client, _) = await connectedClient();
+
+      // Signing another user in over this one would leave the connection it has unreferenced.
+      await expectLater(
+        client.connectUser(User(id: 'someone-else'), testUserToken('someone-else').rawValue),
+        throwsA(
+          isA<StateError>().having(
+            (it) => it.message,
+            'message',
+            allOf(contains('someone-else'), contains(user.id), contains('disconnectUser')),
+          ),
+        ),
+      );
+    });
+
+    test('should answer both callers connecting the same user at once with one connection', () async {
+      final api = FakeChatApi();
+      final server = FakeChatServer(user: OwnUser.fromUser(user));
+      final client = StreamChatClient(apiKey, chatApi: api, wsProvider: server.connect);
+      addTearDown(client.dispose);
+
+      // The second lands while the first is still opening, which is where the status cannot tell a
+      // connection being opened from one waiting to be.
+      final first = client.connectUser(user, token);
+      final second = client.connectUser(user, token);
+
+      expect((await first).id, user.id);
+      expect((await second).id, user.id);
+      expect(server.sockets, hasLength(1));
+
+      // One sign-in, not two alongside each other: what it does for the user behind the connection
+      // is done for the pair rather than once each.
+      await pumpEventQueue();
+      verify(() => api.general.getAppSettings()).called(1);
+    });
+
+    test('should leave nobody signed in when connecting a user fails', () async {
+      final server = FakeChatServer()..handshakeFails = true;
+      final client = StreamChatClient(apiKey, chatApi: FakeChatApi(), wsProvider: server.connect);
+      addTearDown(client.dispose);
+
+      await expectLater(client.connectUser(user, token), throwsA(isA<StreamException>()));
+
+      expect(client.state.currentUser, isNull);
+    });
+
+    test('should connect another user after connecting one failed', () async {
+      final server = FakeChatServer()..handshakeFails = true;
+      final client = StreamChatClient(apiKey, chatApi: FakeChatApi(), wsProvider: server.connect);
+      addTearDown(client.dispose);
+
+      await expectLater(client.connectUser(user, token), throwsA(isA<StreamException>()));
+
+      // A user who never signed in would otherwise have this refused on their behalf, and be
+      // named in the refusal as the one who is signed in.
+      server.handshakeFails = false;
+      final other = User(id: 'someone-else');
+
+      expect((await client.connectUser(other, testUserToken(other.id).rawValue)).id, other.id);
+    });
+
+    test('should leave the connected user signed in when reconnecting them fails', () async {
+      final (client, server) = await connectedClient();
+      final connected = client.state.currentUser;
+
+      // The connection drops and is being retried, which is where asking for one again opens it
+      // now rather than waiting out the delay.
+      server
+        ..handshakeFails = true
+        ..drop(closeCode: 1006);
+      await pumpEventQueue();
+
+      await expectLater(client.connectUser(user, token), throwsA(isA<StreamException>()));
+
+      // The socket is still retrying on their behalf, so dropping them here would leave it working
+      // for a user the client says is not signed in.
+      expect(client.state.currentUser, connected);
     });
 
     test('should stop reopening once the caller closes the connection', () async {
