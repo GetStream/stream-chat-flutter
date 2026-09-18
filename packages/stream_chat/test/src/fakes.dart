@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/core/api/channel_api.dart';
-import 'package:stream_chat/src/core/api/device_api.dart';
 import 'package:stream_chat/src/core/api/general_api.dart';
 import 'package:stream_chat/src/core/api/guest_api.dart';
 import 'package:stream_chat/src/core/api/message_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
 import 'package:stream_chat/src/core/api/polls_api.dart';
+import 'package:stream_chat/src/core/api/push_preferences_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/src/core/api/user_groups_api.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
@@ -144,10 +144,10 @@ class FakeChatApi extends Fake implements StreamChatApi {
   @override
   ChannelApi get channel => _channel ??= MockChannelApi();
 
-  DeviceApi? _device;
+  PushPreferencesApi? _pushPreferences;
 
   @override
-  DeviceApi get device => _device ??= MockDeviceApi();
+  PushPreferencesApi get pushPreferences => _pushPreferences ??= MockPushPreferencesApi();
 
   ModerationApi? _moderation;
 

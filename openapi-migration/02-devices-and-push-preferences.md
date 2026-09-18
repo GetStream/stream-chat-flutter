@@ -26,23 +26,80 @@
 | `GET` | `/api/v2/devices` | `listDevices` | `ListDevicesResponse` |
 | `POST` | `/api/v2/push_preferences` | `updatePushNotificationPreferences` | `UpsertPushPreferencesResponse` |
 
-## Decisions to make
+## Decisions
 
-- `PushProvider` (our public enum) against the generated per-operation extension type — write the adapter here, it sets the precedent for every enum that follows.
-- `setPushPreferences` reads its response into client state and emits `EventType.pushPreferenceUpdated`; decide whether that stays in the api layer or moves up.
+The three device methods have landed. `setPushPreferences` has not — see [Deferred](#deferred) below.
+
+- **`Device` → generated `DeviceResponse`, adopted.** Our two fields dropped seven the server sends
+  (`user_id`, `created_at`, `disabled`, `disabled_reason`, `hardware_id`, `push_provider_name`,
+  `voip`), and the spec makes `OwnUserResponse.devices` a `List<DeviceResponse>` regardless, so
+  keeping ours meant a lossy copy of one shape maintained forever. `created_at` and `user_id` are
+  required; `test/fixtures/own_user.json` confirms the own-user payload carries both.
+- **`ListDevicesResponse` → the generated one, adopted.** Same-name shadow with nothing of ours to keep.
+- **`PushProvider` → `CreateDeviceRequestPushProvider`, adopted under the generated name.** No alias:
+  one name per concept, taken from the spec. **This is the enum precedent for every later group** —
+  the generated per-operation extension type is adopted as-is rather than wrapped. It costs `.name`
+  and `.values`, both recorded in the migration guide.
+- **`hardwareId` and `voipToken` are left unset.** `voipToken` is typed `bool?` — a flag meaning "this
+  id is a VoIP token", not the token — and surfacing it would imply a VoIP-push story the SDK does not
+  have. Neither has an in-tree consumer. Adding them later is non-breaking.
+- **The empty-string `pushProviderName` normalization is preserved,** in the repository. Today `''`
+  and `null` are identical on the wire because the key is omitted for both; after the migration they
+  would diverge, and `""` is a dashboard lookup key the server can only reject. Keeping it means no
+  new wire value ships untested.
+- **Mapping lives in the repository,** not in extension methods on generated types and not in a
+  separate mapper file. Here that is only request construction, which keeps `StreamChatClient` a pure
+  delegate.
+- **`setPushPreferences` stays on the hand-written api,** so `device_api.dart` was renamed
+  `push_preferences_api.dart` (`DeviceApi` → `PushPreferencesApi`, `StreamChatApi.device` →
+  `StreamChatApi.pushPreferences`) rather than deleted — the file split rather than migrating whole.
+
+### Deferred
+
+**`setPushPreferences` and every push-preference model.** The generated
+`UpsertPushPreferencesResponse.userPreferences` is `Map<String, PushPreferencesResponse>` with
+non-nullable values, but our `_userPreferencesFromJson` (`responses.dart`) exists specifically to drop
+`null` entries — its doc comment states the server returns `null` for users the upsert did not touch,
+and `responses_test.dart` pins it. Adopting the generated type would turn a routine channel-only
+upsert into a decode failure.
+
+Resolve it with a live capture of a channel-only upsert before writing code. If the server does send
+`null`, the fix belongs in the spec (`user_preferences` wants nullable `additionalProperties`) and is
+`openapi-codegen` work, not a hand-rolled decoder here.
+
+Two things that PR must account for, which this one did not have to:
+
+- `ChannelConfig.chatPreferences` **is** persisted, inside the `channels.config` JSON blob. Deleting
+  `chat_preferences.dart` retypes it and touches `channel_mapper_test.dart`, dragging `ChannelConfig`
+  — a group 11 model — along. No schema change, but it is a persistence change.
+- `PushPreference` / `ChannelPushPreference` ride on `Event`, `OwnUser.pushPreferences` and
+  `ChannelState.pushPreferences`, so adopting them reaches into the event and channel-state layers.
 
 ## Risks
 
-- Generated `DeviceResponse` has 9 fields against our `Device`'s 2 — drop or widen, and record which.
+- **Request bodies carry explicit nulls — verified harmless.** No model under `lib/open_api/model/`
+  sets `includeIfNull: false`, so `CreateDeviceRequest.toJson` emits
+  `{"hardware_id":null,"id":"…","push_provider":"firebase","push_provider_name":null,"voip_token":null}`
+  where the hand-written path omitted those keys. This is the first request *body* through the
+  generated client, so it applies to **every** group from here on; a live `createDevice` against the
+  demo app accepted it and returned success. Recorded rather than fixed — if a later endpoint does
+  mind, the fix is the generator's model template, never a hand-rolled request builder.
+- `ChannelState.pushPreferences` is **not** persisted — checked, no entity, DAO or mapper. Devices are
+  not persisted either. `OwnUser` *is*, inside `connection_events.own_user`, but v11's schema bump
+  drops and recreates every table, so no v10 row survives to be read back against the new shape.
 
 ## Definition of done
 
-- [ ] Every method above either routes through `DefaultApi` or is listed here as deliberately left
-      hand-written, with the reason.
-- [ ] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
-- [ ] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
-- [ ] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
+Devices only. The group stays open until `setPushPreferences` lands.
+
+- [x] Every method above either routes through `DefaultApi` or is listed here as deliberately left
+      hand-written, with the reason. — `setPushPreferences` is deliberately hand-written; see Deferred.
+- [x] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
+- [x] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
+- [x] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
       persists anything.
-- [ ] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.
-- [ ] CHANGELOG entry under `🛑️ Breaking` for each break; PR title `refactor(llc)!:`.
-- [ ] Decisions recorded in this file, and the status box ticked in `README.md`.
+- [x] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.
+- [x] CHANGELOG entry under `🛑️ Breaking` for each break; PR title `refactor(llc)!:`.
+- [x] Decisions recorded in this file.
+- [ ] `setPushPreferences` migrated.
+- [ ] Status box ticked in `README.md` — deliberately left unticked while the group is half done.

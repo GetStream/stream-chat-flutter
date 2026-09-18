@@ -10,7 +10,7 @@ class MockMute extends Mock implements Mute {}
 
 class ChannelMockMute extends Mock implements ChannelMute {}
 
-class MockDevice extends Mock implements Device {}
+class MockDevice extends Mock implements DeviceResponse {}
 
 void main() {
   final devices = [MockDevice(), MockDevice()];
@@ -298,6 +298,7 @@ void main() {
             'id': 'device-1',
             'push_provider': 'firebase',
             'created_at': '2023-01-01T00:00:00.000Z',
+            'user_id': 'test-user',
           },
         ],
       };
@@ -423,9 +424,11 @@ void main() {
           'custom_field': 'custom_value',
         },
         devices: [
-          Device(
+          DeviceResponse(
             id: 'device-1',
             pushProvider: 'firebase',
+            createdAt: DateTime.utc(2024),
+            userId: 'test-user-id',
           ),
         ],
         totalUnreadCount: 10,
@@ -482,13 +485,17 @@ void main() {
             'is_verified': true,
           },
           devices: [
-            Device(
+            DeviceResponse(
               id: 'device-1',
               pushProvider: 'firebase',
+              createdAt: DateTime.utc(2024),
+              userId: 'test-user-id',
             ),
-            Device(
+            DeviceResponse(
               id: 'device-2',
               pushProvider: 'apn',
+              createdAt: DateTime.utc(2024),
+              userId: 'test-user-id',
             ),
           ],
           totalUnreadCount: 25,

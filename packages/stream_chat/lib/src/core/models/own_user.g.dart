@@ -8,7 +8,8 @@ part of 'own_user.dart';
 
 OwnUser _$OwnUserFromJson(Map<String, dynamic> json) => OwnUser(
   devices:
-      (json['devices'] as List<dynamic>?)?.map((e) => Device.fromJson(e as Map<String, dynamic>)).toList() ?? const [],
+      (json['devices'] as List<dynamic>?)?.map((e) => DeviceResponse.fromJson(e as Map<String, dynamic>)).toList() ??
+      const [],
   mutes: (json['mutes'] as List<dynamic>?)?.map((e) => Mute.fromJson(e as Map<String, dynamic>)).toList() ?? const [],
   totalUnreadCount: (json['total_unread_count'] as num?)?.toInt() ?? 0,
   unreadChannels: (json['unread_channels'] as num?)?.toInt() ?? 0,

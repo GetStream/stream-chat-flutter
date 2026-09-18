@@ -26,6 +26,7 @@ onto Stream's OpenAPI-generated API client.
 - [Feature Areas](#feature-areas)
     - [Sorting](#sorting)
     - [Roles](#roles)
+    - [Devices](#devices)
 - [Migration Checklist](#migration-checklist)
 - [For AI Agents](#for-ai-agents)
 - [Contributing to this guide](#contributing-to-this-guide)
@@ -153,6 +154,13 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `Role` (hand-written) | `Role` (generated) | `retyped` | Same five fields, same types. Gains `copyWith` and `toJson`; equality is unchanged |
 | `SearchRolesResponse` (hand-written) | `SearchRolesResponse` (generated) | `retyped` | `duration` and `roles` are required — a body omitting either now fails to decode rather than defaulting |
 | `StreamChatClient.searchRoles` → `Future<SearchRolesResponse>` | `Future<Result<SearchRolesResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `Device` (hand-written) | `DeviceResponse` (generated) | `retyped` | Two fields become nine. `created_at` and `user_id` are required, so a device entry missing either now fails to decode |
+| `ListDevicesResponse` (hand-written) | `ListDevicesResponse` (generated) | `retyped` | `devices` and `duration` are required — a body omitting either now fails to decode rather than defaulting to `[]` |
+| `PushProvider` (enum) | `CreateDeviceRequestPushProvider` (generated) | `retyped` | Same four values and the same wire strings, as an extension type over `String` |
+| `PushProvider.firebase.name` | `CreateDeviceRequestPushProvider.firebase` | `removed` | The value *is* the string, so there is no `.name` — and no `.values` |
+| `StreamChatClient.addDevice` / `removeDevice` → `Future<EmptyResponse>` | `Future<Result<DurationResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `StreamChatClient.getDevices` → `Future<ListDevicesResponse>` | `Future<Result<ListDevicesResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `StreamChatApi.device` | `StreamChatApi.pushPreferences` | `renamed` | The class handles only `setPushPreferences` now; device calls moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -160,14 +168,15 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 ## Error Handling
 
 **This is the change that will touch every call site.** API methods will return a `Result<T>` instead of
-throwing, matching the `stream_feeds` SDK. That conversion lands endpoint by endpoint and none has moved yet —
-what has already changed is the *type* of failure every endpoint throws.
+throwing, matching the `stream_feeds` SDK. That conversion lands endpoint by endpoint, so what an endpoint does
+today depends on whether it has moved — and for every endpoint that has not, the *type* of failure it throws has
+changed regardless.
 
 **Before:**
 ```dart
 try {
-  final response = await client.getDevices();
-  print(response.devices);
+  final response = await client.queryChannels(filter: filter).first;
+  print(response);
 } on StreamChatNetworkError catch (error) {
   print(error.message);
 }
@@ -416,6 +425,52 @@ result.fold(
 **Decoding is stricter.** `SearchRolesResponse` requires `duration` and `roles`; a response omitting
 either now fails to decode rather than falling back to `null` and `[]`. `Role` itself is unchanged
 field-for-field, and additionally gains `copyWith` and `toJson`.
+
+### Devices
+
+**`addDevice`, `getDevices` and `removeDevice` return a `Result` instead of throwing**, and their
+types come from the OpenAPI spec.
+
+> **Why:** the generated `DeviceResponse` carries seven fields our two-field `Device` dropped —
+> `user_id`, `created_at`, `disabled`, `disabled_reason`, `hardware_id`, `push_provider_name` and
+> `voip`. Keeping ours meant maintaining a lossy copy of one shape forever.
+
+```dart
+// v10
+try {
+  await client.addDevice(token, PushProvider.firebase);
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await client.addDevice(token, CreateDeviceRequestPushProvider.firebase);
+result.fold(
+  onSuccess: (_) => registered(),
+  onFailure: (error, _) => report(error),
+);
+```
+
+**`PushProvider` is now `CreateDeviceRequestPushProvider`,** an extension type over `String` rather
+than an enum. The four values and their wire strings are unchanged, and a provider *is* its string:
+
+```dart
+// v10
+final wireValue = PushProvider.firebase.name; // 'firebase'
+
+// v11
+const wireValue = CreateDeviceRequestPushProvider.firebase; // already 'firebase'
+```
+
+There is no `.values`, so code that iterated the enum needs an explicit list. A provider the spec does
+not name still round-trips, through `CreateDeviceRequestPushProvider.fromJson`.
+
+**`Device` is replaced by `DeviceResponse`,** including in `OwnUser.devices`. Reading `id` and
+`pushProvider` is unchanged; constructing one now also requires `createdAt` and `userId`.
+
+**Decoding is stricter.** `ListDevicesResponse` requires `devices` and `duration`, and each
+`DeviceResponse` requires `created_at` and `user_id` — responses omitting any of them now fail to
+decode rather than defaulting.
 
 ---
 
