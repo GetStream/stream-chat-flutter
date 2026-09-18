@@ -8,6 +8,13 @@ analyzer:
     - packages/*/lib/**/*.g.dart
     - packages/*/lib/scrollable_positioned_list/**
     - packages/*/lib/**/*.freezed.dart
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 formatter:
   page_width: 120
