@@ -37,7 +37,7 @@ class RetryQueue {
         .distinct()
         .listen((event) {
           if (event.online == true) {
-            logger.i(() => 'Connection recovered, retrying failed messages');
+            logger.d(() => 'Connection recovered, retrying failed messages');
             channel.state?.retryFailedMessages();
           }
         })
