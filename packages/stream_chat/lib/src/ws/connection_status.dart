@@ -22,6 +22,9 @@ enum ConnectionStatus {
   ) => switch (state) {
     Connected() => connected,
     Connecting() || Authenticating() => connecting,
+    // One on its way back is still connecting, through the teardown and the wait that follow a
+    // failed attempt as much as through the attempt itself.
+    Disconnecting(:final source) || Disconnected(:final source) when source.isReconnectable => connecting,
     Initialized() || Disconnecting() || Disconnected() => disconnected,
   };
 }

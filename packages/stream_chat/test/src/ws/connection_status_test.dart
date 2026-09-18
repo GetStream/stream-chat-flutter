@@ -23,7 +23,7 @@ void main() {
     expect(ConnectionStatus.fromState(const Authenticating()), ConnectionStatus.connecting);
   });
 
-  test('ConnectionStatus reports a connection that is not open as disconnected', () {
+  test('ConnectionStatus reports a connection nothing will reopen as disconnected', () {
     // Including one that was never opened: neither carries events.
     expect(ConnectionStatus.fromState(const Initialized()), ConnectionStatus.disconnected);
     expect(
@@ -31,8 +31,16 @@ void main() {
       ConnectionStatus.disconnected,
     );
     expect(
-      ConnectionStatus.fromState(const Disconnected(source: ServerInitiated())),
+      ConnectionStatus.fromState(const Disconnected(source: UserInitiated())),
       ConnectionStatus.disconnected,
+    );
+  });
+
+  test('ConnectionStatus reports a connection waiting to be reopened as connecting', () {
+    // The socket sits here for the whole delay it retries with, which is most of an outage.
+    expect(
+      ConnectionStatus.fromState(const Disconnected(source: ServerInitiated())),
+      ConnectionStatus.connecting,
     );
   });
 }

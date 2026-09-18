@@ -6346,17 +6346,26 @@ void main() {
       expect(server.sockets, hasLength(2));
     });
 
-    test('should keep reopening while the attempts that follow a drop fail', () async {
+    test('should report connecting for as long as it keeps reopening', () async {
       final (client, server) = await connectedClient();
       server.handshakeFails = true;
 
-      final retried = client.connectionStatusStream.skip(1).where((it) => it == ConnectionStatus.connecting);
+      final reported = <ConnectionStatus>[];
+      final listening = client.connectionStatusStream.listen(reported.add);
+      addTearDown(listening.cancel);
 
       server.drop(closeCode: 1006);
 
-      // Two attempts of its own: the one that follows the drop, and the one that follows its
-      // failure.
-      await retried.take(2).last.timeout(const Duration(seconds: 10));
+      // Long enough for the attempt that follows the drop and the one that follows its failure:
+      // the first is immediate and the delay after a single failure is at most two seconds.
+      await Future<void>.delayed(const Duration(seconds: 3));
+
+      // Attempts of its own, without being asked.
+      expect(server.sockets.length, greaterThan(2));
+
+      // The delay it waits out between them is a state of its own, which an app reads as still
+      // on its way back rather than as a connection nothing is opening.
+      expect(reported, [ConnectionStatus.connected, ConnectionStatus.connecting]);
     });
 
     test('should stop reopening once the caller closes the connection', () async {
