@@ -378,33 +378,27 @@ final class _ChatLifecycleManager {
   }
 }
 
-/// Extension on [StreamChatClient] to provide a convenient method for
-/// conditionally reconnecting the client if the user is logged in and
-/// the connection is not yet established.
+/// Opens and closes the client's connection as the app and the network come and
+/// go.
 ///
-/// This helps ensure the client attempts to reconnect immediately
-/// (bypassing any retry delays) when the app returns to the foreground
-/// or when connectivity is restored.
+/// Neither reopens a connection that dropped: the socket retries that one.
 extension MaybeReconnect on StreamChatClient {
   /// Optionally trigger a reconnect if the user is already logged in and the
   /// client is not yet connected.
   Future<void> maybeReconnect() async {
     if (state.currentUser == null) return;
-    if (connectionStatus == ConnectionStatus.connected) return;
 
-    // Force immediate reconnection by resetting any ongoing retry delays
-    // This ensures we don't wait up to 25s when user foregrounds the app
-    closeConnection();
+    // The only status one can be opened from: the other two throw.
+    if (connectionStatus != ConnectionStatus.disconnected) return;
+
     await openConnection();
   }
 
-  /// Optionally disconnect the client if the user is logged in and the
-  /// connection is currently established.
+  /// Optionally disconnect the client if the user is logged in.
   void maybeDisconnect() {
     if (state.currentUser == null) return;
-    if (connectionStatus == ConnectionStatus.disconnected) return;
 
-    // Close the connection immediately
+    // Unconditional: one reported as disconnected may be one the socket is waiting to reopen.
     return closeConnection();
   }
 }

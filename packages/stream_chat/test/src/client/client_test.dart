@@ -6317,6 +6317,71 @@ void main() {
     });
   });
 
+  group('reconnecting a connection that dropped', () {
+    const apiKey = 'test-api-key';
+    final user = User(id: 'test-user-id');
+    final token = testUserToken(user.id).rawValue;
+
+    Future<(StreamChatClient, FakeChatServer)> connectedClient() async {
+      final server = FakeChatServer(user: OwnUser.fromUser(user));
+      final client = StreamChatClient(apiKey, chatApi: FakeChatApi(), wsProvider: server.connect);
+      addTearDown(client.dispose);
+
+      await client.connectUser(user, token);
+      return (client, server);
+    }
+
+    test('should reopen a dropped connection without being asked to', () async {
+      final (client, server) = await connectedClient();
+
+      final reconnected = client.connectionStatusStream
+          .skip(1)
+          .firstWhere(
+            (it) => it == ConnectionStatus.connected,
+          );
+
+      server.drop(closeCode: 1006);
+      await reconnected;
+
+      expect(server.sockets, hasLength(2));
+    });
+
+    test('should keep reopening while the attempts that follow a drop fail', () async {
+      final (client, server) = await connectedClient();
+      server.handshakeFails = true;
+
+      final retried = client.connectionStatusStream.skip(1).where((it) => it == ConnectionStatus.connecting);
+
+      server.drop(closeCode: 1006);
+
+      // Two attempts of its own: the one that follows the drop, and the one that follows its
+      // failure.
+      await retried.take(2).last.timeout(const Duration(seconds: 10));
+    });
+
+    test('should stop reopening once the caller closes the connection', () async {
+      final (client, server) = await connectedClient();
+      server
+        ..handshakeFails = true
+        ..drop(closeCode: 1006);
+
+      client.closeConnection();
+
+      final attempts = server.sockets.length;
+      await expectLater(
+        client.connectionStatusStream
+            .skip(1)
+            .firstWhere((it) => it == ConnectionStatus.connecting)
+            .timeout(
+              const Duration(seconds: 3),
+            ),
+        throwsA(isA<TimeoutException>()),
+      );
+
+      expect(server.sockets, hasLength(attempts));
+    });
+  });
+
   group('`queryChannels` with `waitForConnect`', () {
     const apiKey = 'test-api-key';
     final user = User(id: 'test-user-id');
