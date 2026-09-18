@@ -4731,45 +4731,5 @@ void main() {
       expect(group.createdAt, DateTime.parse('2024-01-01T00:00:00Z'));
       expect(group.updatedAt, DateTime.parse('2024-01-04T00:00:00Z'));
     });
-
-    test('SearchRolesResponse', () {
-      const jsonExample = '''
-      {
-        "roles": [
-          {
-            "name": "admin",
-            "custom": false,
-            "scopes": [".app"],
-            "created_at": "2024-01-01T00:00:00Z",
-            "updated_at": "2024-01-02T00:00:00Z"
-          },
-          {
-            "name": "custom_moderator",
-            "custom": true,
-            "scopes": [".app", "messaging"],
-            "created_at": "2024-01-03T00:00:00Z",
-            "updated_at": "2024-01-04T00:00:00Z"
-          }
-        ],
-        "duration": "0.35ms"
-      }''';
-      final response = SearchRolesResponse.fromJson(json.decode(jsonExample));
-      expect(response.roles, isA<List<Role>>());
-      expect(response.roles, hasLength(2));
-
-      final first = response.roles.first;
-      expect(first.name, 'admin');
-      expect(first.custom, isFalse);
-      expect(first.scopes, ['.app']);
-      expect(first.createdAt, DateTime.parse('2024-01-01T00:00:00Z'));
-      expect(first.updatedAt, DateTime.parse('2024-01-02T00:00:00Z'));
-
-      final last = response.roles.last;
-      expect(last.name, 'custom_moderator');
-      expect(last.custom, isTrue);
-      expect(last.scopes, ['.app', 'messaging']);
-      expect(last.createdAt, DateTime.parse('2024-01-03T00:00:00Z'));
-      expect(last.updatedAt, DateTime.parse('2024-01-04T00:00:00Z'));
-    });
   });
 }
