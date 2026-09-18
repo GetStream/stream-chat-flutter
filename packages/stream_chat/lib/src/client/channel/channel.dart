@@ -2025,7 +2025,7 @@ class Channel {
     _initializedCompleter.safeComplete(true);
 
     if (cid case final cid?) client.state.addChannels({cid: this});
-    _logger.d(() => 'Channel ${channelState.channel?.cid} initialized');
+    _logger.v(() => 'State initialized');
   }
 
   /// Loads the initial channel state and watches for changes.
