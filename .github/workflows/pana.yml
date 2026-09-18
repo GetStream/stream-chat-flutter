@@ -4,9 +4,11 @@ on:
   pull_request:
     branches:
       - master
+      - v11
   push:
     branches:
       - master
+      - v11
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
