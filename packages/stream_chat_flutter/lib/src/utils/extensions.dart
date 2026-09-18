@@ -116,19 +116,22 @@ extension IterableExtension<T> on Iterable<T> {
 /// Useful extension for [PlatformFile]
 extension PlatformFileX on PlatformFile {
   /// Converts the [PlatformFile] into [AttachmentFile]
-  AttachmentFile get toAttachmentFile {
+  ///
+  /// Reads the file content on demand, so the result is asynchronous.
+  Future<AttachmentFile> get toAttachmentFile async {
+    final bytes = await readAsBytes();
     return AttachmentFile(
       // Path is not supported on web.
       path: CurrentPlatform.isWeb ? null : path,
       name: name,
+      size: bytes.length,
       bytes: bytes,
-      size: size,
     );
   }
 
   /// Converts the [PlatformFile] to a [Attachment].
-  Attachment toAttachment({required String type}) {
-    final file = toAttachmentFile;
+  Future<Attachment> toAttachment({required String type}) async {
+    final file = await toAttachmentFile;
     final extraDataMap = <String, Object>{};
 
     final mimeType = file.mediaType?.mimeType;

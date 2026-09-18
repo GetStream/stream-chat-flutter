@@ -25,6 +25,17 @@ subprojects {
 
 }
 
+// Plugin projects evaluate before `:app` by default, but the Flutter Gradle
+// plugin only registers the `flutter` extension on them while `:app` is being
+// configured. A plugin whose build script reads that extension at configuration
+// time — android_file_picker, pulled in by file_picker 12 — fails without this.
+// Present in the current Flutter app template; this module predates it. Kept in
+// its own block, after the one above: forcing evaluation from inside that block
+// would run `:app` before its `afterEvaluate` is registered.
+subprojects {
+    project.evaluationDependsOn(":app")
+}
+
 tasks.register("clean", Delete) {
     delete rootProject.layout.buildDirectory
 }
