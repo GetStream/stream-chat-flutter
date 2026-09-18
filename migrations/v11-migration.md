@@ -25,6 +25,7 @@ onto Stream's OpenAPI-generated API client.
 - [Offline Cache](#offline-cache)
 - [Feature Areas](#feature-areas)
     - [Sorting](#sorting)
+    - [Roles](#roles)
 - [Migration Checklist](#migration-checklist)
 - [For AI Agents](#for-ai-agents)
 - [Contributing to this guide](#contributing-to-this-guide)
@@ -149,6 +150,9 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `Result` (`package:async`, via this barrel) | `Result` (`stream_core`) | `retyped` | A different type under the same name. `package:async` is still re-exported, but with `Result` hidden |
 | `CurrentPlatform` / `PlatformType` (`stream_chat`) | `CurrentPlatform` / `PlatformType` (`stream_core`) | `moved` | Re-exported from this package. Same seven platforms and the same strings |
 | `CurrentPlatform.name` | `CurrentPlatform.operatingSystem` | `renamed` | Same value — `'android'`, `'ios'`, `'web'`, `'macos'`, … |
+| `Role` (hand-written) | `Role` (generated) | `retyped` | Same five fields, same types. Gains `copyWith` and `toJson`; equality is unchanged |
+| `SearchRolesResponse` (hand-written) | `SearchRolesResponse` (generated) | `retyped` | `duration` and `roles` are required — a body omitting either now fails to decode rather than defaulting |
+| `StreamChatClient.searchRoles` → `Future<SearchRolesResponse>` | `Future<Result<SearchRolesResponse>>` | `retyped` | Returns a `Result` instead of throwing |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -381,6 +385,37 @@ default and still send nothing unless given a sort.
 
 An empty sort also leaves a loaded page in the order it arrived in, rather than re-sorting it — including a page
 read from the offline cache, which orders by the model's default when the query named no sort.
+
+### Roles
+
+**`searchRoles` returns a `Result` instead of throwing**, and its types come from the OpenAPI spec.
+
+> **Why:** it is the first endpoint on the generated client. Our `Role` and the generated one were
+> field-for-field identical, so keeping ours meant maintaining two copies of one shape forever.
+
+```dart
+// v10
+try {
+  final response = await client.searchRoles('admin');
+  useRoles(response.roles);
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await client.searchRoles('admin');
+result.fold(
+  onSuccess: (response) => useRoles(response.roles),
+  onFailure: (error, _) => report(error),
+);
+```
+
+`getOrDefault`, `getOrNull` and `map` are available when you only want the happy path — see
+[Error Handling](#error-handling) for the full `Result` surface.
+
+**Decoding is stricter.** `SearchRolesResponse` requires `duration` and `roles`; a response omitting
+either now fails to decode rather than falling back to `null` and `[]`. `Role` itself is unchanged
+field-for-field, and additionally gains `copyWith` and `toJson`.
 
 ---
 

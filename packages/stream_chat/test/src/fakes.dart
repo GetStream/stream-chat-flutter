@@ -9,7 +9,6 @@ import 'package:stream_chat/src/core/api/guest_api.dart';
 import 'package:stream_chat/src/core/api/message_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
 import 'package:stream_chat/src/core/api/polls_api.dart';
-import 'package:stream_chat/src/core/api/roles_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/src/core/api/user_groups_api.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
@@ -159,11 +158,6 @@ class FakeChatApi extends Fake implements StreamChatApi {
 
   @override
   UserGroupsApi get userGroups => _userGroups ??= MockUserGroupsApi();
-
-  RolesApi? _roles;
-
-  @override
-  RolesApi get roles => _roles ??= MockRolesApi();
 
   GeneralApi? _general;
 

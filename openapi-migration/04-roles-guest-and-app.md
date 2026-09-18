@@ -31,6 +31,25 @@
 
 - `AppSettings` is public and hand-shaped; the generated `AppResponseFields` is the wire shape. Keep ours unless the generated one is genuinely better.
 
+## Decisions taken
+
+- **`Role` and `SearchRolesResponse` are the generated types.** They were field-for-field identical to
+  ours, so keeping ours meant maintaining two copies of one shape forever.
+- **`RoleType` stays hand-written.** `searchRoles(roleType:)` accepts exactly `'user'` or `'channel'`
+  and the server rejects anything else with a 400, but the v2 spec models `role_type` as an open
+  string, so there is nothing generated to adopt. It is an `extension type const RoleType(String)
+  implements String` in `lib/src/core/models/role_type.dart`, following `PushLevel`.
+
+  **This is the precedent for every later group that meets an untyped-but-constrained parameter:** the
+  absence of a generated type is not a reason to make the public parameter a bare `String`. An
+  extension type costs nothing — it *is* the string, so it passes straight into the generated query
+  parameter with no mapper — while keeping the valid values discoverable at the call site. It stays
+  honest about the wire contract too: the set is open, so a third value the server adds later needs no
+  SDK release.
+
+  The trade-off, for the record: no `.values`, no exhaustive `switch`, and `RoleType('nonsense')` is
+  constructible and reaches the wire. That matches the four extension types this package already ships.
+
 ## Risks
 
 - `general_api.dart` is split across four groups — only `enrichUrl` and `getAppSettings` belong here. `sync` and `queryMembers` go to group 11, `searchMessages` to group 10. Do not migrate the file as a unit.

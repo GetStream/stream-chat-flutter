@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_chat/open_api/api.dart';
 import 'package:stream_chat/src/client/channel/channel.dart';
 import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
 import 'package:stream_chat/src/client/client.dart';
@@ -11,7 +12,6 @@ import 'package:stream_chat/src/core/api/guest_api.dart';
 import 'package:stream_chat/src/core/api/message_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
 import 'package:stream_chat/src/core/api/polls_api.dart';
-import 'package:stream_chat/src/core/api/roles_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/src/core/api/user_groups_api.dart';
 import 'package:stream_chat/src/core/http/connection_id_manager.dart';
@@ -63,7 +63,7 @@ class MockModerationApi extends Mock implements ModerationApi {}
 
 class MockUserGroupsApi extends Mock implements UserGroupsApi {}
 
-class MockRolesApi extends Mock implements RolesApi {}
+class MockDefaultApi extends Mock implements DefaultApi {}
 
 class MockGeneralApi extends Mock implements GeneralApi {}
 

@@ -63,6 +63,8 @@ export 'package:stream_core/stream_core.dart'
 
 export 'package:uuid/uuid.dart';
 
+export 'open_api/models.dart' show Role, SearchRolesResponse;
+
 export 'src/client/channel/channel.dart';
 export 'src/client/channel/channel_capability_check.dart';
 export 'src/client/channel/channel_client_state.dart';
@@ -115,7 +117,7 @@ export 'src/core/models/push_preference.dart';
 export 'src/core/models/reaction.dart';
 export 'src/core/models/reaction_group.dart';
 export 'src/core/models/read.dart';
-export 'src/core/models/role.dart';
+export 'src/core/models/role_type.dart';
 export 'src/core/models/thread.dart';
 export 'src/core/models/thread_participant.dart';
 export 'src/core/models/unread_counts.dart';
