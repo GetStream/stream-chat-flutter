@@ -133,22 +133,16 @@ class StreamChatClient {
           httpClientAdapter: httpClientAdapter,
         );
 
-    // The generated client runs on its own `Dio`: base options up front, then
-    // the interceptor chain applied to the very instance `AuthInterceptor`
-    // needs to replay a request through.
-    //
-    // Separate on purpose from the one `StreamChatApi` builds for the
-    // hand-written v1 wrappers. Those keep theirs untouched until the last of
-    // them is gone, at which point this is the only one left.
+    // Interceptors are added after construction because `AuthInterceptor`
+    // replays requests through the client it is given.
     httpClient =
         StreamCoreHttpClient(
           options: BaseOptions(
             baseUrl: options.baseUrl,
             connectTimeout: options.connectTimeout,
             receiveTimeout: options.receiveTimeout,
-            // Only the integrator's own. Every header the SDK sends comes
-            // from an interceptor, and Dio supplies `Content-Type` for the
-            // requests that carry a body.
+            // The integrator's own; every header the SDK sends is set by an
+            // interceptor.
             queryParameters: options.queryParameters,
             headers: options.headers,
           ),
@@ -197,11 +191,8 @@ class StreamChatClient {
   late final RolesRepository _rolesRepository;
   late final WebSocket _ws;
 
-  /// The [Dio] the generated api client runs on.
-  ///
-  /// Distinct from the one [StreamChatApi] holds for the hand-written
-  /// wrappers. Exposed so tests can assert on the request pipeline —
-  /// interceptors, headers, query parameters — without a mocked api.
+  /// The [Dio] the generated api client runs on, separate from the one
+  /// [StreamChatApi] holds for the hand-written wrappers.
   @visibleForTesting
   late final StreamCoreHttpClient httpClient;
 
