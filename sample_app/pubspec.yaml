@@ -51,6 +51,15 @@ dependencies:
   video_player: ^2.11.1
   yaml: ^3.1.2
 
+# lottie 3.6.1 moved animation scheduling from every vsync to the composition
+# frame rate, which changes when the widget tree goes quiescent. The e2e harness
+# settles the tree between acting on it, so the splash screen's animation made
+# `pumpAndSettle` return at a different moment and the login tap started racing
+# a rebuild. Pinned here rather than in melos.yaml so the published SDK
+# constraint stays open for integrators.
+dependency_overrides:
+  lottie: 3.5.1
+
 dev_dependencies:
   flutter_launcher_icons: ^0.14.4
   integration_test:
