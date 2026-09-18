@@ -2291,7 +2291,7 @@ void main() {
       const query = 'adm';
       const limit = 10;
       const nameGt = 'admin';
-      const roleType = 'user';
+      const roleType = RoleType.user;
       const includeGlobalRoles = true;
 
       when(

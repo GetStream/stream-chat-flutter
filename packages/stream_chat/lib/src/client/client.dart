@@ -56,6 +56,7 @@ import '../core/models/poll_option.dart';
 import '../core/models/poll_vote.dart';
 import '../core/models/push_preference.dart';
 import '../core/models/reaction.dart';
+import '../core/models/role_type.dart';
 import '../core/models/thread.dart';
 import '../core/models/user.dart';
 import '../core/util/event_controller.dart';
@@ -2486,10 +2487,9 @@ class StreamChatClient {
 
   /// Searches roles by name prefix (autocomplete).
   ///
-  /// [roleType] filters to user-assignable (`user`) or channel-assignable
-  /// (`channel`) roles when set; both kinds are returned when omitted. The
-  /// server accepts only those two values and returns a validation error for
-  /// anything else.
+  /// [roleType] filters to user-assignable ([RoleType.user]) or
+  /// channel-assignable ([RoleType.channel]) roles when set; both kinds are
+  /// returned when omitted.
   ///
   /// [includeGlobalRoles] includes roles prefixed `global_` when set to
   /// `true`. Defaults to `false`.
@@ -2497,7 +2497,7 @@ class StreamChatClient {
     String query, {
     int? limit,
     String? nameGt,
-    String? roleType,
+    RoleType? roleType,
     bool? includeGlobalRoles,
   }) => _rolesRepository.searchRoles(
     query,

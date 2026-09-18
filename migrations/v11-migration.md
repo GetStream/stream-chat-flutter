@@ -152,7 +152,6 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `CurrentPlatform.name` | `CurrentPlatform.operatingSystem` | `renamed` | Same value — `'android'`, `'ios'`, `'web'`, `'macos'`, … |
 | `Role` (hand-written) | `Role` (generated) | `retyped` | Same five fields, same types. Gains `copyWith` and `toJson`; equality is unchanged |
 | `SearchRolesResponse` (hand-written) | `SearchRolesResponse` (generated) | `retyped` | `duration` and `roles` are required — a body omitting either now fails to decode rather than defaulting |
-| `RoleType.user` / `RoleType.channel` | `'user'` / `'channel'` | `removed` | The v2 spec models `role_type` as an untyped string, so there is no generated equivalent |
 | `StreamChatClient.searchRoles` → `Future<SearchRolesResponse>` | `Future<Result<SearchRolesResponse>>` | `retyped` | Returns a `Result` instead of throwing |
 | _(more added per feature as PRs land)_ | | | |
 
@@ -413,19 +412,6 @@ result.fold(
 
 `getOrDefault`, `getOrNull` and `map` are available when you only want the happy path — see
 [Error Handling](#error-handling) for the full `Result` surface.
-
-**`RoleType` is gone.** Pass the string directly:
-
-```dart
-// v10
-await client.searchRoles('adm', roleType: RoleType.user);
-
-// v11
-await client.searchRoles('adm', roleType: 'user');
-```
-
-The server accepts only `'user'` and `'channel'`, and rejects anything else with a 400. The v2 spec
-models the parameter as an untyped string, so there is no generated type carrying those two values.
 
 **Decoding is stricter.** `SearchRolesResponse` requires `duration` and `roles`; a response omitting
 either now fails to decode rather than falling back to `null` and `[]`. `Role` itself is unchanged

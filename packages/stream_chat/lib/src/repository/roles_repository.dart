@@ -2,6 +2,7 @@ import 'package:stream_core/stream_core.dart' show Result;
 
 import '../../open_api/api.dart' show DefaultApi;
 import '../../open_api/models.dart' show SearchRolesResponse;
+import '../core/models/role_type.dart';
 
 /// Repository dedicated to roles operations.
 class RolesRepository {
@@ -12,10 +13,9 @@ class RolesRepository {
 
   /// Searches roles by name prefix (autocomplete).
   ///
-  /// [roleType] filters to user-assignable (`user`) or channel-assignable
-  /// (`channel`) roles when set; both kinds are returned when omitted. The
-  /// server accepts only those two values and returns a validation error for
-  /// anything else.
+  /// [roleType] filters to user-assignable ([RoleType.user]) or
+  /// channel-assignable ([RoleType.channel]) roles when set; both kinds are
+  /// returned when omitted.
   ///
   /// [includeGlobalRoles] includes roles prefixed `global_` when set to
   /// `true`. Defaults to `false` on the server.
@@ -23,7 +23,7 @@ class RolesRepository {
     String query, {
     int? limit,
     String? nameGt,
-    String? roleType,
+    RoleType? roleType,
     bool? includeGlobalRoles,
   }) => _api.searchRoles(
     query: query,

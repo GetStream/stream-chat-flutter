@@ -2,6 +2,7 @@
 
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/open_api/api.dart';
+import 'package:stream_chat/src/core/models/role_type.dart';
 import 'package:stream_chat/src/repository/roles_repository.dart';
 import 'package:stream_core/stream_core.dart';
 import 'package:test/test.dart';
@@ -43,7 +44,7 @@ void main() {
         query: 'adm',
         limit: 10,
         nameGt: 'admin',
-        roleType: 'user',
+        roleType: RoleType.user,
         includeGlobalRoles: true,
       ),
     ).thenAnswer(
@@ -54,7 +55,7 @@ void main() {
       'adm',
       limit: 10,
       nameGt: 'admin',
-      roleType: 'user',
+      roleType: RoleType.user,
       includeGlobalRoles: true,
     );
 
@@ -64,7 +65,7 @@ void main() {
         query: 'adm',
         limit: 10,
         nameGt: 'admin',
-        roleType: 'user',
+        roleType: RoleType.user,
         includeGlobalRoles: true,
       ),
     ).called(1);
