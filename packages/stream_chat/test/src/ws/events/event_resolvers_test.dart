@@ -1,7 +1,5 @@
 // ignore_for_file: avoid_redundant_argument_values, lines_longer_than_80_chars
 
-import 'package:stream_chat/src/client/event_resolvers.dart';
-import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
@@ -9,6 +7,8 @@ import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/event_type.dart';
+import 'package:stream_chat/src/ws/events/event.dart';
+import 'package:stream_chat/src/ws/events/event_resolvers.dart';
 import 'package:test/test.dart';
 
 void main() {

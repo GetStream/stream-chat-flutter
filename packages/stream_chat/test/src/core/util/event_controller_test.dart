@@ -1,9 +1,9 @@
 // ignore_for_file: cascade_invocations, avoid_redundant_argument_values
 
 import 'dart:async';
-import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/util/event_controller.dart';
 import 'package:stream_chat/src/event_type.dart';
+import 'package:stream_chat/src/ws/events/event.dart';
 import 'package:test/test.dart';
 
 void main() {

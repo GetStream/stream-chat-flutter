@@ -149,6 +149,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `Result` (`package:async`, via this barrel) | `Result` (`stream_core`) | `retyped` | A different type under the same name. `package:async` is still re-exported, but with `Result` hidden |
 | `CurrentPlatform` / `PlatformType` (`stream_chat`) | `CurrentPlatform` / `PlatformType` (`stream_core`) | `moved` | Re-exported from this package. Same seven platforms and the same strings |
 | `CurrentPlatform.name` | `CurrentPlatform.operatingSystem` | `renamed` | Same value — `'android'`, `'ios'`, `'web'`, `'macos'`, … |
+| `client.wsConnectionStatus` / `.wsConnectionStatusStream` | `client.connectionStatus` / `.connectionStatusStream` | `renamed` | Same `ConnectionStatus`, same three values. The WebSocket's own state, and the disconnection sources it carries, are no longer exported: `ConnectionStatus` is the whole connection API, as on the other Stream SDKs |
 | _(more added per feature as PRs land)_ | | | |
 
 ---

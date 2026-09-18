@@ -1,8 +1,8 @@
 import 'dart:convert';
 
+import '../../ws/events/event.dart';
 import '../http/stream_http_client.dart';
 import '../models/channel_state.dart';
-import '../models/event.dart';
 import '../models/message.dart';
 import '../models/message_delivery.dart';
 import 'requests.dart';

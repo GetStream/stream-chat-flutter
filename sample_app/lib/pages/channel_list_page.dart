@@ -88,6 +88,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
     return StreamScaffold(
       backgroundColor: colorScheme.backgroundApp,
       appBar: StreamChannelListHeader(
+        showConnectionStateTile: true,
         title: Text(enabledTabs[_currentIndex].navItem.label, style: textTheme.headingSm),
       ),
       drawer: LeftDrawer(user: user),

@@ -4,9 +4,9 @@ import 'package:stream_chat/src/client/channel/channel.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/draft_message.dart';
-import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/ws/events/event.dart';
 import 'package:stream_core/stream_core.dart' show Filter;
 import 'package:test/test.dart';
 
