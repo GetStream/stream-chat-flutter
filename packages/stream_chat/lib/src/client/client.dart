@@ -2437,14 +2437,11 @@ class StreamChatClient {
     // Cancelling delivery reporter.
     channelDeliveryReporter.cancel();
 
-    // closing web-socket connection, and waiting for it: a caller disconnecting a user is entitled
-    // to a connection that is closed by the time this returns, not one still closing.
+    // closing web-socket connection
     await _connection.disconnect();
 
     // resetting state.
-    state
-      ..cancelEventSubscription()
-      ..dispose();
+    state.dispose();
     state = ClientState(this);
 
     // clearing app settings cache.
