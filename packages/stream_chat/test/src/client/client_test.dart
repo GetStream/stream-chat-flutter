@@ -117,11 +117,10 @@ void main() {
           ]),
         );
 
-        try {
-          await client.connectGuestUser(user);
-        } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
-        }
+        await expectLater(
+          client.connectGuestUser(user),
+          throwsA(isA<StreamChatNetworkError>()),
+        );
 
         verify(
           () => api.guest.getGuestUser(any(that: isSameUserAs(user))),
@@ -146,29 +145,28 @@ void main() {
     group('`.openConnection`', () {
       test('should throw if state does not contain user', () async {
         expect(client.state.currentUser, isNull);
-        try {
-          await client.openConnection();
-        } catch (e) {
-          expect(e, isA<AssertionError>());
-        }
+        await expectLater(
+          client.openConnection(),
+          throwsA(isA<AssertionError>()),
+        );
       });
 
       test('should throw if connection is already available', () async {
         expect(client.state.currentUser, isNull);
-        try {
-          await client.connectAnonymousUser();
-          // waiting 300ms for `wsConnectionStatusStream` to emit
-          await delay(300);
+        await client.connectAnonymousUser();
+        // waiting 300ms for `wsConnectionStatusStream` to emit
+        await delay(300);
 
-          await client.openConnection();
-        } catch (e) {
-          expect(e, isA<StreamChatError>());
-          final err = e as StreamChatError;
-          expect(
-            err.message.contains('Connection already available for'),
-            isTrue,
-          );
-        }
+        await expectLater(
+          client.openConnection(),
+          throwsA(
+            isA<StreamChatError>().having(
+              (it) => it.message,
+              'message',
+              contains('Connection already available for'),
+            ),
+          ),
+        );
       });
 
       test('should open connection for closed connection', () async {
@@ -221,11 +219,10 @@ void main() {
       final user = User(id: 'test-user-id');
       final token = Token.development(user.id).rawValue;
 
-      try {
-        await client.connectUser(user, token);
-      } catch (e) {
-        expect(e, isA<StreamWebSocketError>());
-      }
+      await expectLater(
+        client.connectUser(user, token),
+        throwsA(isA<StreamWebSocketError>()),
+      );
     });
 
     test(
@@ -237,11 +234,10 @@ void main() {
           return Token.development(userId).rawValue;
         }
 
-        try {
-          await client.connectUserWithProvider(user, tokenProvider);
-        } catch (e) {
-          expect(e, isA<StreamWebSocketError>());
-        }
+        await expectLater(
+          client.connectUserWithProvider(user, tokenProvider),
+          throwsA(isA<StreamWebSocketError>()),
+        );
       },
     );
 
@@ -255,11 +251,10 @@ void main() {
           ..accessToken = token,
       );
 
-      try {
-        await client.connectGuestUser(user);
-      } catch (e) {
-        expect(e, isA<StreamWebSocketError>());
-      }
+      await expectLater(
+        client.connectGuestUser(user),
+        throwsA(isA<StreamWebSocketError>()),
+      );
       verify(
         () => api.guest.getGuestUser(any(that: isSameUserAs(user))),
       ).called(1);
@@ -268,11 +263,10 @@ void main() {
     test(
       '`.connectAnonymousUser` should throw if `ws.connect` fails',
       () async {
-        try {
-          await client.connectAnonymousUser();
-        } catch (e) {
-          expect(e, isA<StreamWebSocketError>());
-        }
+        await expectLater(
+          client.connectAnonymousUser(),
+          throwsA(isA<StreamWebSocketError>()),
+        );
       },
     );
   });
@@ -4993,14 +4987,15 @@ void main() {
           const messageId = 'test-message-id';
           const timeoutOrExpirationDate = 'invalid-value';
 
-          try {
-            await client.pinMessage(
+          // `pinMessage` validates in an `assert` before its first `await`,
+          // so it throws synchronously and the call must stay in a closure.
+          await expectLater(
+            () => client.pinMessage(
               messageId,
               timeoutOrExpirationDate: timeoutOrExpirationDate,
-            );
-          } catch (e) {
-            expect(e, isA<ArgumentError>());
-          }
+            ),
+            throwsA(isA<ArgumentError>()),
+          );
         },
       );
     });

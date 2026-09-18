@@ -200,13 +200,14 @@ void main() {
 
   test('`connect` should throw if already in connection attempt', () async {
     final user = OwnUser(id: 'test-user');
-    webSocket.connect(user);
-    try {
-      // calling again before previous attempt finishes
-      await webSocket.connect(user);
-    } catch (e) {
-      expect(e, isA<StreamWebSocketError>());
-    }
+    unawaited(webSocket.connect(user));
+
+    // calling again before previous attempt finishes. The guard throws
+    // synchronously, so the call has to stay inside a closure.
+    expect(
+      () => webSocket.connect(user),
+      throwsA(isA<StreamWebSocketError>()),
+    );
   });
 
   test('`connect` should throw if `onMessage` contains error', () async {
@@ -228,14 +229,14 @@ void main() {
       ]),
     );
 
-    try {
-      await webSocket.connect(user);
-    } catch (e) {
-      expect(e, isA<StreamWebSocketError>());
-      final err = e as StreamWebSocketError;
-      expect(err.code, error.code);
-      expect(err.message, error.message);
-    }
+    await expectLater(
+      webSocket.connect(user),
+      throwsA(
+        isA<StreamWebSocketError>()
+            .having((it) => it.code, 'code', error.code)
+            .having((it) => it.message, 'message', error.message),
+      ),
+    );
 
     addTearDown(timer.cancel);
   });
