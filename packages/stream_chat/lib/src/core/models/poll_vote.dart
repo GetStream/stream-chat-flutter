@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'comparable_field.dart';
+import 'package:stream_core/stream_core.dart' show Filter, FilterField, Sort, SortField;
+
 import 'user.dart';
 
 part 'poll_vote.g.dart';
@@ -9,7 +10,7 @@ part 'poll_vote.g.dart';
 /// A model class representing a poll vote.
 /// {@endtemplate}
 @JsonSerializable()
-class PollVote extends Equatable implements ComparableFieldProvider {
+class PollVote extends Equatable {
   /// {@macro streamPollVote}
   PollVote({
     this.id,
@@ -103,39 +104,140 @@ class PollVote extends Equatable implements ComparableFieldProvider {
     userId,
     user,
   ];
-
-  @override
-  ComparableField? getComparableField(String sortKey) {
-    final value = switch (sortKey) {
-      PollVoteSortKey.id => id,
-      PollVoteSortKey.createdAt => createdAt,
-      PollVoteSortKey.updatedAt => updatedAt,
-      PollVoteSortKey.answerText => answerText,
-      _ => null,
-    };
-
-    return ComparableField.fromValue(value);
-  }
 }
 
-/// Extension type representing sortable fields for [PollVote].
+/// A filter for a poll vote query.
 ///
-/// This type provides type-safe keys that can be used for sorting poll votes
-/// in queries. Each constant represents a field that can be sorted on.
-extension type const PollVoteSortKey(String key) implements String {
-  /// Sort poll votes by their ID.
-  static const id = PollVoteSortKey('id');
+/// See [PollVoteFilterField] for the fields that can be filtered on.
+///
+/// ```dart
+/// final filter = PollVoteFilter.equal(PollVoteFilterField.isAnswer, true);
+/// ```
+typedef PollVoteFilter = Filter<PollVote>;
 
-  /// Sort poll votes by their creation date.
+/// Represents a field that poll vote queries can be filtered on.
+class PollVoteFilterField extends FilterField<PollVote> {
+  /// Creates a poll vote filter field named [remote] on the wire, reading its
+  /// value off an instance with [value].
+  PollVoteFilterField(super.remote, super.value);
+
+  /// Filters poll votes by their id.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final id = PollVoteFilterField(
+    'id',
+    (it) => it.id,
+  );
+
+  /// Filters poll votes by the id of the poll they belong to.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final pollId = PollVoteFilterField(
+    'poll_id',
+    (it) => it.pollId,
+  );
+
+  /// Filters poll votes by the id of the option they select.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$exists`
+  static final optionId = PollVoteFilterField(
+    'option_id',
+    (it) => it.optionId,
+  );
+
+  /// Filters poll votes by the id of the user who cast them.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final userId = PollVoteFilterField(
+    'user_id',
+    (it) => it.userId,
+  );
+
+  /// Filters poll votes by whether they are an answer rather than a vote.
+  ///
+  /// **Supported operators:** `$eq`
+  static final isAnswer = PollVoteFilterField(
+    'is_answer',
+    (it) => it.isAnswer,
+  );
+
+  /// Filters poll votes by their creation date.
+  ///
+  /// **Supported operators:** `$eq`, `$gt`, `$gte`, `$lt`, `$lte`
+  static final createdAt = PollVoteFilterField(
+    'created_at',
+    (it) => it.createdAt,
+  );
+
+  /// Filters poll votes by their last update date.
+  ///
+  /// **Supported operators:** `$eq`, `$gt`, `$gte`, `$lt`, `$lte`
+  static final updatedAt = PollVoteFilterField(
+    'updated_at',
+    (it) => it.updatedAt,
+  );
+}
+
+/// Represents a sorting operation for poll votes.
+///
+/// The API sorts on one field at a time: `id`, `createdAt` or `updatedAt`.
+/// Anything else is rejected.
+///
+/// See [PollVoteSortField] for the fields that can be sorted on.
+///
+/// ```dart
+/// final sort = [PollVoteSort.desc(PollVoteSortField.createdAt)];
+/// ```
+class PollVoteSort extends Sort<PollVote> {
+  /// Sorts by [field], smallest first.
+  const PollVoteSort.asc(
+    PollVoteSortField super.field, {
+    super.nullOrdering,
+  }) : super.asc();
+
+  /// Sorts by [field], largest first.
+  const PollVoteSort.desc(
+    PollVoteSortField super.field, {
+    super.nullOrdering,
+  }) : super.desc();
+
+  /// An empty sort: the query carries no sort term, and a list keeps the
+  /// order it arrived in.
+  static const List<PollVoteSort> empty = [];
+
+  /// The ordering the API applies to a poll-vote query when none is given.
+  ///
+  /// Sorts by when the vote was cast, oldest first.
+  static final List<PollVoteSort> defaultSort = [
+    PollVoteSort.asc(PollVoteSortField.createdAt),
+  ];
+}
+
+/// Represents a field that poll-vote queries can be sorted on.
+class PollVoteSortField extends SortField<PollVote> {
+  /// Creates a field named [remote] on the wire, reading its value off an
+  /// instance with `localValue`.
+  ///
+  /// For a name the SDK has not modelled; prefer the fields declared here.
+  PollVoteSortField(super.remote, super.localValue);
+
+  /// Sorts poll votes by their ID.
+  static final id = PollVoteSortField(
+    'id',
+    (it) => it.id,
+  );
+
+  /// Sorts poll votes by their creation date.
   ///
   /// This is the default sort field (in ascending order).
-  static const createdAt = PollVoteSortKey('created_at');
+  static final createdAt = PollVoteSortField(
+    'created_at',
+    (it) => it.createdAt,
+  );
 
-  /// Sort poll votes by their last update date.
-  static const updatedAt = PollVoteSortKey('updated_at');
-
-  /// Sort poll votes by their answer text.
-  ///
-  /// Only applicable for votes that have answer text.
-  static const answerText = PollVoteSortKey('answer_text');
+  /// Sorts poll votes by their last update date.
+  static final updatedAt = PollVoteSortField(
+    'updated_at',
+    (it) => it.updatedAt,
+  );
 }

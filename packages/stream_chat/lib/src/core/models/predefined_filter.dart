@@ -1,7 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import '../api/sort_order.dart';
 import 'channel_state.dart';
-import 'filter.dart';
 
 part 'predefined_filter.g.dart';
 
@@ -28,39 +26,33 @@ class PredefinedFilter {
 
   /// Filter conditions as resolved by the server.
   ///
-  /// Wrapped in [Filter.raw] — the SDK does not evaluate filters locally.
-  /// Access the underlying map via [Filter.value] or [Filter.toJson].
+  /// Wrapped in [ChannelFilter.raw], since the server authors it and may use an
+  /// operator this package does not model. Read it with [ChannelFilter.toJson];
+  /// [ChannelFilter.matches] throws for it.
   @JsonKey(fromJson: _filterFromJson)
-  final Filter filter;
+  final ChannelFilter filter;
 
   /// Sort specification as resolved by the server.
-  final SortOrder<ChannelState>? sort;
+  final List<ChannelSort>? sort;
 
   /// Sort to apply locally, matching what the server applies for this
   /// predefined filter — the echoed [sort], or a default derived from
   /// [filter] when [sort] is null.
-  SortOrder<ChannelState> get effectiveSort => sort ?? _defaultSortFor(filter);
+  List<ChannelSort> get effectiveSort => sort ?? _defaultSortFor(filter);
 
-  static Filter _filterFromJson(Map<String, dynamic> json) => Filter.raw(value: json);
+  static ChannelFilter _filterFromJson(Map<String, dynamic> json) => ChannelFilter.raw(json);
 }
 
-SortOrder<ChannelState> _defaultSortFor(Filter filter) {
-  if (_touchesField(filter, ChannelSortKey.lastMessageAt)) {
-    return const [SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt)];
+// Mirrors the server's fallback for a channel query that carries no sort, so
+// the field is written out rather than taken from [ChannelSort.defaultSort]:
+// the two agree today, but one is the ordering this SDK picks and the other is
+// the ordering the server falls back to, and either may change alone.
+List<ChannelSort> _defaultSortFor(ChannelFilter filter) {
+  final lastMessageAt = ChannelSortField.lastMessageAt;
+  if (_mapTouchesField(filter.toJson(), lastMessageAt.remote)) {
+    return [ChannelSort.desc(lastMessageAt)];
   }
-  return const [SortOption<ChannelState>.desc(ChannelSortKey.lastUpdated)];
-}
-
-bool _touchesField(Filter filter, String field) {
-  if (filter.key == field) return true;
-  final value = filter.value;
-  if (value is List<Filter>) {
-    return value.any((sub) => _touchesField(sub, field));
-  }
-  if (value is Map<String, Object?>) {
-    return _mapTouchesField(value, field);
-  }
-  return false;
+  return [ChannelSort.desc(ChannelSortField.lastUpdated)];
 }
 
 bool _mapTouchesField(Map<String, Object?> map, String field) {

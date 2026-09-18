@@ -14,12 +14,6 @@ void main() {
     late final client = MockStreamChatClient();
 
     setUpAll(() {
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
         delayFactor: Duration.zero,
@@ -31,7 +25,6 @@ void main() {
       when(() => client.state).thenReturn(clientState);
 
       // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
     });
 
     /// Parameterized test for channel capability extension properties
@@ -399,12 +392,6 @@ ChannelState _generateChannelState(
     lastMessageAt: lastMessageAt,
   );
   return ChannelState(channel: channel);
-}
-
-Logger _createLogger(String name) {
-  final logger = Logger.detached(name)..level = Level.ALL;
-  logger.onRecord.listen(print);
-  return logger;
 }
 
 // endregion

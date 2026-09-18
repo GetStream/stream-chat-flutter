@@ -26,24 +26,31 @@ const _kAndroidPushProvider = PushProvider.firebase(name: 'firebase');
 
 /// Shared across every client so reconnecting doesn't need a second
 /// SQLite connection.
-final _chatPersistenceClient = StreamChatPersistenceClient(
-  logLevel: Level.SEVERE,
-);
+final _chatPersistenceClient = StreamChatPersistenceClient();
 
 bool get isE2eTestRun => authController.debugConnectionOverride != null;
 
-Future<void> _sampleAppLogHandler(LogRecord record) async {
-  if (isE2eTestRun) return;
+/// Prints records in debug builds and reports the ones carrying an error to
+/// Crashlytics.
+class _SampleAppLogHandler extends StreamLogHandler {
+  const _SampleAppLogHandler();
 
-  if (kDebugMode) StreamChatClient.defaultLogHandler(record);
+  @override
+  void handle(StreamLogRecord record) {
+    if (isE2eTestRun) return;
 
-  // report errors to Firebase Crashlytics
-  if (record.error != null || record.stackTrace != null) {
-    await FirebaseCrashlytics.instance.recordError(
-      record.error,
-      record.stackTrace,
-      reason: record.message,
-    );
+    if (kDebugMode) const StreamLogHandler.console().handle(record);
+
+    // report errors to Firebase Crashlytics
+    if (record.error != null || record.stackTrace != null) {
+      FirebaseCrashlytics.instance
+          .recordError(
+            record.error,
+            record.stackTrace,
+            reason: record.message,
+          )
+          .ignore();
+    }
   }
 }
 
@@ -65,16 +72,21 @@ StreamChatClient _buildStreamChatClient(
   String? baseUrl,
   StreamConnectionOverride? connectionOverride,
 }) {
-  final logLevel = connectionOverride != null ? Level.OFF : (kDebugMode ? Level.INFO : Level.SEVERE);
+  final priority = switch ((connectionOverride, kDebugMode)) {
+    // The e2e harness asserts on output, so keep the SDK quiet for it.
+    (final _?, _) => StreamLogPriority.none,
+    (_, true) => StreamLogPriority.info,
+    _ => StreamLogPriority.error,
+  };
   return StreamChatClient(
       apiKey,
-      logLevel: logLevel,
-      logHandlerFunction: _sampleAppLogHandler,
+      logConfig: StreamLogConfig(
+        priority: priority,
+        handler: const _SampleAppLogHandler(),
+      ),
       retryPolicy: RetryPolicy(
         maxRetryAttempts: 3,
-        shouldRetry: (client, attempt, error) {
-          return error is StreamChatNetworkError && error.isRetriable;
-        },
+        shouldRetry: (client, attempt, error) => error?.isRetriable ?? false,
       ),
       baseURL: connectionOverride?.baseURL ?? baseUrl,
       baseWsUrl: connectionOverride?.baseWsUrl,

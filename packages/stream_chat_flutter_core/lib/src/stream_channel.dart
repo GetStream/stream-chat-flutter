@@ -741,8 +741,8 @@ class StreamChannelState extends State<StreamChannel> {
 
   /// Query channel members.
   Future<List<Member>> queryMembers({
-    Filter? filter,
-    SortOrder<Member>? sort,
+    MemberFilter? filter,
+    List<MemberSort>? sort,
     PaginationParams? pagination,
   }) async {
     final response = await channel.queryMembers(
@@ -1032,13 +1032,13 @@ class DefaultStreamChannelBuilders extends InheritedWidget {
     // translations, so copy/styling are hardcoded. Apps can override with
     // [StreamChannel.errorBuilder] for a themed, localized state.
     final (title, message) = switch (error) {
-      StreamChatNetworkError(type: .connectionError) => (
-        'No Internet Connection',
-        'Please check your internet connection',
-      ),
-      StreamChatNetworkError(type: .connectionTimeout || .sendTimeout || .receiveTimeout) => (
+      StreamNetworkException(isTimeout: true) => (
         'Slow Internet Connection',
         'There seems to be a problem with your internet connection',
+      ),
+      StreamNetworkException() => (
+        'No Internet Connection',
+        'Please check your internet connection',
       ),
       _ => ('Error', 'Oops, something went wrong'),
     };

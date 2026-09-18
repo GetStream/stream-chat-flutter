@@ -62,7 +62,7 @@ void main() {
     test(
       'should throw if `query` and `messageFilters` is not provided',
       () async {
-        final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
+        final filter = ChannelFilter.in_(ChannelFilterField.cid, const ['test-cid-1', 'test-cid-2']);
         try {
           await generalApi.searchMessages(filter);
         } catch (e) {
@@ -74,9 +74,9 @@ void main() {
     test(
       'should throw if `query` and `messageFilters` both are provided',
       () async {
-        final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
+        final filter = ChannelFilter.in_(ChannelFilterField.cid, const ['test-cid-1', 'test-cid-2']);
         const query = 'test-query';
-        final messageFilter = Filter.query('key', 'text');
+        final messageFilter = MessageSearchFilter.query(MessageSearchFilterField.text, 'text');
         try {
           await generalApi.searchMessages(
             filter,
@@ -92,8 +92,8 @@ void main() {
     test(
       'should throw if `pagination.offset` and `sort` both are provided',
       () async {
-        final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
-        const sort = [SortOption.desc('test-field')];
+        final filter = ChannelFilter.in_(ChannelFilterField.cid, const ['test-cid-1', 'test-cid-2']);
+        final sort = [MessageSearchSort.desc(MessageSearchSortField.custom('test-field'))];
         const pagination = PaginationParams(offset: 10);
         try {
           await generalApi.searchMessages(
@@ -108,9 +108,9 @@ void main() {
     );
 
     test('should run successfully with `query`', () async {
-      final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
+      final filter = ChannelFilter.in_(ChannelFilterField.cid, const ['test-cid-1', 'test-cid-2']);
       const query = 'test-query';
-      const sort = [SortOption.desc('test-field')];
+      final sort = [MessageSearchSort.desc(MessageSearchSortField.custom('test-field'))];
       const pagination = PaginationParams();
 
       const path = '/search';
@@ -148,9 +148,9 @@ void main() {
     });
 
     test('should run successfully with `messageFilter`', () async {
-      final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
-      const sort = [SortOption.desc('test-field')];
-      final messageFilter = Filter.query('key', 'text');
+      final filter = ChannelFilter.in_(ChannelFilterField.cid, const ['test-cid-1', 'test-cid-2']);
+      final sort = [MessageSearchSort.desc(MessageSearchSortField.custom('test-field'))];
+      final messageFilter = MessageSearchFilter.query(MessageSearchFilterField.text, 'text');
       const pagination = PaginationParams();
 
       const path = '/search';
@@ -192,9 +192,9 @@ void main() {
     test('with `channelId`', () async {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
-      final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
+      final filter = MemberFilter.in_(MemberFilterField.userId, const ['u1', 'u2']);
       const pagination = PaginationParams();
-      const sort = [SortOption<Member>.desc('test-field')];
+      final sort = [MemberSort.desc(MemberSortField.custom('test-field'))];
 
       const path = '/members';
 
@@ -246,9 +246,9 @@ void main() {
 
     test('with `members`', () async {
       const channelType = 'test-channel-type';
-      final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
+      final filter = MemberFilter.in_(MemberFilterField.userId, const ['u1', 'u2']);
       const pagination = PaginationParams();
-      const sort = [SortOption<Member>.desc('test-field')];
+      final sort = [MemberSort.desc(MemberSortField.custom('test-field'))];
 
       const path = '/members';
 

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
@@ -205,7 +204,8 @@ void main() {
       // calling again before previous attempt finishes
       await webSocket.connect(user);
     } catch (e) {
-      expect(e, isA<StreamWebSocketError>());
+      // Misuse, so it leaves the StreamException hierarchy entirely.
+      expect(e, isA<StateError>());
     }
   });
 
@@ -213,7 +213,8 @@ void main() {
     final user = OwnUser(id: 'test-user');
     final error = ErrorResponse()
       ..code = 333
-      ..message = 'Invalid request';
+      ..message = 'Invalid request'
+      ..statusCode = 400;
     // Sends error event to web-socket stream
     final timer = Timer(const Duration(milliseconds: 300), () {
       webSocketSink.add(json.encode({'error': error}));
@@ -231,9 +232,9 @@ void main() {
     try {
       await webSocket.connect(user);
     } catch (e) {
-      expect(e, isA<StreamWebSocketError>());
-      final err = e as StreamWebSocketError;
-      expect(err.code, error.code);
+      expect(e, isA<StreamApiException>());
+      final err = e as StreamApiException;
+      expect(err.code?.code, error.code);
       expect(err.message, error.message);
     }
 
@@ -272,7 +273,8 @@ void main() {
 
       final error = ErrorResponse()
         ..code = 333
-        ..message = 'Invalid request';
+        ..message = 'Invalid request'
+        ..statusCode = 400;
       // Sends error event to web-socket stream
       webSocketSink.add(json.encode({'error': error}));
 
@@ -344,7 +346,7 @@ void main() {
     final user = OwnUser(id: 'test-user');
     // Sends connect event to web-socket stream
     final timer = Timer(const Duration(milliseconds: 300), () {
-      const error = StreamWebSocketError('test-error');
+      const error = StreamNetworkException(message: 'test-error');
       webSocketSink.addError(error);
     });
 
@@ -540,4 +542,51 @@ void main() {
 
     addTearDown(timer.cancel);
   });
+
+  test('logs the connect URI with the user token redacted', () async {
+    final records = <StreamLogRecord>[];
+    StreamLogger.handler = _CapturingHandler(records.add);
+    StreamLogger.priority = StreamLogPriority.verbose;
+    addTearDown(StreamLogger.reset);
+
+    final connectedWith = <Uri>[];
+    final socket = WebSocket(
+      apiKey: 'api-key',
+      baseUrl: 'ws://<local-ip>:8800',
+      tokenManager: tokenManager,
+      webSocketChannelProvider: (uri, {protocols}) {
+        connectedWith.add(uri);
+        return webSocketChannel;
+      },
+    );
+    addTearDown(socket.disconnect);
+
+    final user = OwnUser(id: 'test-user');
+    final timer = Timer(const Duration(milliseconds: 300), () {
+      webSocketSink.add(
+        json.encode(Event(type: EventType.healthCheck, connectionId: 'test-connection-id', me: user)),
+      );
+    });
+    addTearDown(timer.cancel);
+
+    await socket.connect(user);
+
+    final rawToken = (await tokenManager.getToken()).rawValue;
+    // Compared decoded, so a token that leaked percent-encoded is still caught.
+    final logged = records.map((it) => Uri.decodeFull(it.message));
+
+    // The connection itself still carries the token; only the record is redacted.
+    expect(Uri.decodeFull(connectedWith.single.toString()), contains(rawToken));
+    expect(logged, contains(startsWith('[connect] #ws; uri:')));
+    expect(logged, everyElement(isNot(contains(rawToken))));
+  });
+}
+
+class _CapturingHandler extends StreamLogHandler {
+  const _CapturingHandler(this._onRecord);
+
+  final void Function(StreamLogRecord) _onRecord;
+
+  @override
+  void handle(StreamLogRecord record) => _onRecord(record);
 }

@@ -49,12 +49,12 @@ class _ChannelList extends State<ChannelList> {
 
     _messageSearchListController = StreamMessageSearchListController(
       client: _streamChat.client,
-      filter: Filter.in_('members', [_streamChat.currentUser!.id]),
+      filter: .in_(ChannelFilterField.members, [_streamChat.currentUser!.id]),
       limit: 5,
       searchQuery: searchQuery,
       sort: [
-        const SortOption.desc(ChannelSortKey.pinnedAt),
-        const SortOption.asc(ChannelSortKey.createdAt),
+        MessageSearchSort.desc(MessageSearchSortField.pinned),
+        MessageSearchSort.asc(MessageSearchSortField.createdAt),
       ],
     );
     if (searchQuery.isNotEmpty) _messageSearchListController.search(searchQuery);
@@ -65,7 +65,7 @@ class _ChannelList extends State<ChannelList> {
     final predefinedFilter = authController.usingCustomBackend ? null : kChannelListPredefinedFilter;
     _channelListController = StreamChannelListController(
       client: _streamChat.client,
-      filter: predefinedFilter == null ? Filter.in_('members', [userId]) : null,
+      filter: predefinedFilter == null ? ChannelFilter.in_(ChannelFilterField.members, [userId]) : null,
       predefinedFilter: predefinedFilter,
       filterValues: predefinedFilter == null ? null : {'user_id': userId},
       limit: 30,

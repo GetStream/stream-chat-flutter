@@ -1,17 +1,11 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'paged_value_notifier.dart';
 
 /// The default channel page limit to load.
 const defaultPollVotePagedLimit = 10;
-
-/// The default sort used for the poll vote list.
-const defaultPollVoteListSort = [
-  SortOption<PollVote>.asc(PollVoteSortKey.createdAt),
-];
 
 const _kDefaultBackendPaginationLimit = 30;
 
@@ -33,11 +27,11 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
     required this.pollId,
     StreamPollVoteEventHandler? eventHandler,
     this.filter,
-    this.sort = defaultPollVoteListSort,
+    List<PollVoteSort>? sort,
     this.limit = defaultPollVotePagedLimit,
   }) : _eventHandler = eventHandler ?? StreamPollVoteEventHandler(),
        _activeFilter = filter,
-       _activeSort = sort,
+       sort = sort ?? PollVoteSort.defaultSort,
        super(const PagedValue.loading());
 
   /// Creates a [StreamPollVoteListController] from the passed [value].
@@ -47,11 +41,11 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
     required this.pollId,
     StreamPollVoteEventHandler? eventHandler,
     this.filter,
-    this.sort = defaultPollVoteListSort,
+    List<PollVoteSort>? sort,
     this.limit = defaultPollVotePagedLimit,
   }) : _eventHandler = eventHandler ?? StreamPollVoteEventHandler(),
        _activeFilter = filter,
-       _activeSort = sort;
+       sort = sort ?? PollVoteSort.defaultSort;
 
   /// The channel to use for the poll votes list.
   final Channel channel;
@@ -66,8 +60,8 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
   ///
   /// You can query on any of the custom fields you've defined on the
   /// [PollVote].
-  final Filter? filter;
-  Filter? _activeFilter;
+  final PollVoteFilter? filter;
+  PollVoteFilter? _activeFilter;
 
   /// The sorting used for the poll votes matching the filters.
   ///
@@ -75,8 +69,11 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final SortOrder<PollVote>? sort;
-  SortOrder<PollVote>? _activeSort;
+  ///
+  /// Defaults to [PollVoteSort.defaultSort]; pass [PollVoteSort.empty] to leave the ordering
+  /// to the API.
+  final List<PollVoteSort> sort;
+  late List<PollVoteSort> _activeSort = sort;
 
   /// The limit to apply to the poll vote list. The default is set to
   /// [defaultPollVotePagedLimit].
@@ -89,7 +86,7 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new filter.
-  set filter(Filter? value) => _activeFilter = value;
+  set filter(PollVoteFilter? value) => _activeFilter = value;
 
   /// Allows for the change of the query sort used for poll vote queries.
   ///
@@ -98,19 +95,16 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new sort.
-  set sort(SortOrder<PollVote>? value) => _activeSort = value;
+  set sort(List<PollVoteSort> value) => _activeSort = value;
 
   @override
   set value(PagedValue<String, PollVote> newValue) {
-    super.value = switch (_activeSort) {
-      null => newValue,
-      final pollVoteSort => newValue.maybeMap(
-        orElse: () => newValue,
-        (success) => success.copyWith(
-          items: success.items.sorted(pollVoteSort.compare),
-        ),
+    super.value = newValue.maybeMap(
+      orElse: () => newValue,
+      (success) => success.copyWith(
+        items: success.items.sortedWith(_activeSort.compare),
       ),
-    };
+    );
   }
 
   @override
@@ -137,10 +131,10 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
       // start listening to events
       if (disposed) return;
       _subscribeToPollVoteEvents();
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       value = PagedValue.error(error);
     } catch (error) {
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load poll votes', cause: error);
       value = PagedValue.error(chatError);
     }
   }
@@ -166,10 +160,10 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
         items: newItems,
         nextPageKey: nextKey,
       );
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       value = previousValue.copyWith(error: error);
     } catch (error) {
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load more poll votes', cause: error);
       value = previousValue.copyWith(error: chatError);
     }
   }

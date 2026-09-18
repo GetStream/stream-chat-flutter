@@ -1,6 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
 import '../../client/client.dart';
-import '../error/error.dart';
 import '../models/app_settings.dart';
 import '../models/banned_user.dart';
 import '../models/channel_model.dart';
@@ -32,7 +31,7 @@ class _BaseResponse {
   String? duration;
 }
 
-/// Model response for [StreamChatNetworkError] data
+/// The error payload the API returns on a failed request.
 @JsonSerializable()
 class ErrorResponse extends _BaseResponse {
   /// The http error code

@@ -1,4 +1,9 @@
 analyzer:
+  errors:
+    # `stream_core` comes from a git ref until it is published for v11,
+    # which makes these packages temporarily unpublishable. Remove this
+    # together with the git dependency in `melos.yaml`.
+    invalid_dependency: ignore
   exclude:
     - packages/*/lib/**/*.g.dart
     - packages/*/lib/scrollable_positioned_list/**

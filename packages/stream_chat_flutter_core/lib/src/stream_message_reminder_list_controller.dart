@@ -3,18 +3,12 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'paged_value_notifier.dart';
 import 'stream_message_reminder_list_event_handler.dart';
 
 /// The default message reminder page limit to load.
 const defaultMessageReminderPagedLimit = 10;
-
-/// The default sort used for the message reminder list.
-const defaultMessageReminderListSort = [
-  SortOption<MessageReminder>.asc(MessageReminderSortKey.remindAt),
-];
 
 const _kDefaultBackendPaginationLimit = 30;
 
@@ -35,10 +29,10 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
     required this.client,
     StreamMessageReminderListEventHandler? eventHandler,
     this.filter,
-    this.sort = defaultMessageReminderListSort,
+    List<MessageReminderSort>? sort,
     this.limit = defaultMessageReminderPagedLimit,
   }) : _activeFilter = filter,
-       _activeSort = sort,
+       sort = sort ?? MessageReminderSort.defaultSort,
        _eventHandler = eventHandler ?? StreamMessageReminderListEventHandler(),
        super(const PagedValue.loading());
 
@@ -48,10 +42,10 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
     required this.client,
     StreamMessageReminderListEventHandler? eventHandler,
     this.filter,
-    this.sort = defaultMessageReminderListSort,
+    List<MessageReminderSort>? sort,
     this.limit = defaultMessageReminderPagedLimit,
   }) : _activeFilter = filter,
-       _activeSort = sort,
+       sort = sort ?? MessageReminderSort.defaultSort,
        _eventHandler = eventHandler ?? StreamMessageReminderListEventHandler();
 
   /// The Stream client used to perform the queries.
@@ -64,8 +58,8 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
   ///
   /// You can query on any of the custom fields you've defined on the
   /// [MessageReminder].
-  final Filter? filter;
-  Filter? _activeFilter;
+  final MessageReminderFilter? filter;
+  MessageReminderFilter? _activeFilter;
 
   /// The sorting used for the message reminders matching the filters.
   ///
@@ -73,8 +67,11 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final SortOrder<MessageReminder>? sort;
-  SortOrder<MessageReminder>? _activeSort;
+  ///
+  /// Defaults to [MessageReminderSort.defaultSort]; pass [MessageReminderSort.empty] to leave the ordering
+  /// to the API.
+  final List<MessageReminderSort> sort;
+  late List<MessageReminderSort> _activeSort = sort;
 
   /// The limit to apply to the message reminder list. The default is set to
   /// [defaultMessageReminderPagedLimit].
@@ -84,25 +81,22 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
   ///
   /// Use this if you need to support runtime filter changes,
   /// through custom filters UI.
-  set filter(Filter? value) => _activeFilter = value;
+  set filter(MessageReminderFilter? value) => _activeFilter = value;
 
   /// Allows for the change of the query sort used for message reminder queries.
   ///
   /// Use this if you need to support runtime sort changes,
   /// through custom sort UI.
-  set sort(SortOrder<MessageReminder>? value) => _activeSort = value;
+  set sort(List<MessageReminderSort> value) => _activeSort = value;
 
   @override
   set value(PagedValue<String, MessageReminder> newValue) {
-    super.value = switch (_activeSort) {
-      null => newValue,
-      final reminderSort => newValue.maybeMap(
-        orElse: () => newValue,
-        (success) => success.copyWith(
-          items: success.items.sorted(reminderSort.compare),
-        ),
+    super.value = newValue.maybeMap(
+      orElse: () => newValue,
+      (success) => success.copyWith(
+        items: success.items.sortedWith(_activeSort.compare),
       ),
-    };
+    );
   }
 
   @override
@@ -127,10 +121,10 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
       // Start listening to events
       if (disposed) return;
       _subscribeToReminderListEvents();
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       value = PagedValue.error(error);
     } catch (error) {
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load message reminders', cause: error);
       value = PagedValue.error(chatError);
     }
   }
@@ -155,10 +149,10 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
         items: newItems,
         nextPageKey: nextKey,
       );
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       value = previousValue.copyWith(error: error);
     } catch (error) {
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load more message reminders', cause: error);
       value = previousValue.copyWith(error: chatError);
     }
   }

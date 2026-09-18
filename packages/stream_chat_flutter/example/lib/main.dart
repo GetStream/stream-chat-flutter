@@ -16,7 +16,7 @@ Future<void> main() async {
   /// from your project dashboard.
   final client = StreamChatClient(
     's2dxdhpxd94g',
-    logLevel: Level.OFF,
+    logConfig: const StreamLogConfig(priority: StreamLogPriority.none),
   );
 
   /// Set the current user and connect the websocket. In a production
@@ -184,11 +184,11 @@ class ChannelListPage extends StatefulWidget {
 class _ChannelListPageState extends State<ChannelListPage> {
   late final _listController = StreamChannelListController(
     client: StreamChat.of(context).client,
-    filter: Filter.in_(
-      'members',
+    filter: .in_(
+      ChannelFilterField.members,
       [StreamChat.of(context).currentUser!.id],
     ),
-    channelStateSort: const [SortOption.desc('last_message_at')],
+    channelStateSort: [ChannelSort.desc(ChannelSortField.lastMessageAt)],
     limit: 20,
   );
 
