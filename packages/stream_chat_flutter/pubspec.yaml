@@ -126,4 +126,4 @@ dependency_overrides:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
       path: packages/stream_core
-      ref: 366b34a5bf7b5387db658669392ec23f9e4cda4d
+      ref: 33f58220527369e1f742ccc9ffd8dbbcc6f4c72f
