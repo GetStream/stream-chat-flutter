@@ -219,8 +219,9 @@ class SyncManager {
     // Deduplicated before capping: the endpoint counts duplicates against its
     // own limit, so leaving them in would spend slots on nothing.
     final cappedCids = cids.toSet().take(_maxSyncCids).toList();
-    _logger.i(() => 'Syncing events since $lastSyncAt for ${cappedCids.length} channels');
-    _logger.d(() => 'Syncing channels: $cappedCids');
+    _logger
+      ..i(() => 'Syncing events since $lastSyncAt for ${cappedCids.length} channels')
+      ..d(() => 'Syncing channels: $cappedCids');
 
     final List<Event> events;
     try {
