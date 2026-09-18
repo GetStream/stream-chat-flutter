@@ -120,10 +120,9 @@ platforms:
 
 dependency_overrides:
   # Forces one source for `stream_core`; see `melos.yaml`.
-  # TODO(ws-migration): move to a ref on `main` once GetStream/stream-core-flutter#186 merges.
   # Repeated here because this block outranks `melos.yaml`'s `dependencyOverridePaths`.
   stream_core:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
       path: packages/stream_core
-      ref: 86c4664986507d1e7ce6d698cba1c2ddade28b61
+      ref: 6042453b56c782d9c8b29a2d103ae73ba433814c

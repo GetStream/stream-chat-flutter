@@ -73,12 +73,12 @@ StreamChatClient _buildStreamChatClient(
   String? baseUrl,
   StreamConnectionOverride? connectionOverride,
 }) {
-  final priority = switch ((connectionOverride, kDebugMode)) {
-    // The e2e harness asserts on output, so keep the SDK quiet for it.
-    (final _?, _) => StreamLogPriority.none,
-    (_, true) => StreamLogPriority.debug,
+  final priority = switch (connectionOverride) {
+    _? => StreamLogPriority.none,
+    _ when kDebugMode => StreamLogPriority.debug,
     _ => StreamLogPriority.error,
   };
+
   return StreamChatClient(
       apiKey,
       logConfig: StreamLogConfig(
