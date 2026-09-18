@@ -6367,6 +6367,7 @@ void main() {
 
       client.closeConnection();
 
+      // Long enough to catch one: the delay after a single failure is at most two seconds.
       final attempts = server.sockets.length;
       await expectLater(
         client.connectionStatusStream

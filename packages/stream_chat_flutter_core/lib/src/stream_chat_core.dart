@@ -349,7 +349,7 @@ final class _ChatLifecycleManager {
 
     _backgroundTimer = Timer(backgroundKeepAlive, () {
       _cancelEventSubscription();
-      client.maybeDisconnect();
+      client.maybeDisconnect().ignore();
     });
   }
 
@@ -359,7 +359,7 @@ final class _ChatLifecycleManager {
     final hasConnectivity = !results.contains(ConnectivityResult.none);
 
     if (hasConnectivity) return client.maybeReconnect().ignore();
-    return client.maybeDisconnect();
+    return client.maybeDisconnect().ignore();
   }
 
   void _cancelBackgroundTimer() {
@@ -388,14 +388,14 @@ extension MaybeReconnect on StreamChatClient {
   Future<void> maybeReconnect() async {
     if (state.currentUser == null) return;
 
-    // The only status one can be opened from: the other two throw.
+    // Opening one from any other status is an error.
     if (connectionStatus != ConnectionStatus.disconnected) return;
 
     await openConnection();
   }
 
   /// Optionally disconnect the client if the user is logged in.
-  void maybeDisconnect() {
+  Future<void> maybeDisconnect() async {
     if (state.currentUser == null) return;
 
     // Unconditional: one reported as disconnected may be one the socket is waiting to reopen.

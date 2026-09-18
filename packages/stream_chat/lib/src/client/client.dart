@@ -301,8 +301,9 @@ class StreamChatClient {
     onMarkChannelsDelivered: markChannelsDelivered,
   );
 
-  /// Stream of [Event] coming from [_ws] connection
-  /// Listen to this or use the [on] method to filter specific event types
+  /// Every [Event] the client receives, whichever connection carried it.
+  ///
+  /// Listen to this or use the [on] method to filter specific event types.
   Stream<Event> get eventStream => _eventController.stream;
   late final _eventController = EventController<Event>(
     resolvers: [
@@ -504,18 +505,17 @@ class StreamChatClient {
     return user.merge(healthCheck.me);
   }
 
-  /// Disconnects the [_ws] connection,
-  /// without removing the user set on client.
+  /// Closes the connection, without removing the user set on client.
   ///
-  /// This will not trigger default auto-retry mechanism for reconnection.
-  /// You need to call [openConnection] to reconnect to [_ws].
-  void closeConnection() {
+  /// Completes once it is closed. A connection closed this way is not reopened
+  /// on its own; call [openConnection] to open another.
+  Future<void> closeConnection() {
     logger.i(() => 'Closing web-socket connection for ${state.currentUser?.id}');
 
     // Stop listening to events
     state.cancelEventSubscription();
 
-    _connection.disconnect().ignore();
+    return _connection.disconnect();
   }
 
   /// Suspends the WebSocket's automatic reconnection without tearing down the
@@ -573,8 +573,9 @@ class StreamChatClient {
     handleEvent(Event(type: EventType.connectionRecovered, online: true));
   }
 
-  /// Stream of [Event] coming from [_ws] connection
-  /// Pass an eventType as parameter in order to filter just a type of event
+  /// Every [Event] the client receives, of the types named.
+  ///
+  /// Pass an eventType as parameter in order to filter just a type of event.
   Stream<Event> on([
     String? eventType,
     String? eventType2,
@@ -2428,7 +2429,8 @@ class StreamChatClient {
     includeGlobalRoles: includeGlobalRoles,
   );
 
-  /// Closes the [_ws] connection and resets the [state]
+  /// Closes the connection and resets the [state].
+  ///
   /// If [flushChatPersistence] is true the client deletes all offline
   /// user's data.
   Future<void> disconnectUser({bool flushChatPersistence = false}) async {
