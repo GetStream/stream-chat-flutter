@@ -5,11 +5,18 @@ import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_core/stream_core.dart'
     show
+        ApiErrorInterceptor,
+        ApiKeyInterceptor,
+        AuthInterceptor,
+        ConnectionIdInterceptor,
         CurrentPlatform,
+        HeadersInterceptor,
         InFlightCache,
         LocationCoordinate,
+        LoggingInterceptor,
         Result,
         SortedListExtensions,
+        Standard,
         StreamCoreHttpClient,
         StreamLogConfig,
         StreamLogger,
@@ -29,6 +36,7 @@ import '../core/api/stream_chat_api.dart';
 import '../core/error/stream_chat_exception.dart';
 import '../core/http/app_settings_manager.dart';
 import '../core/http/connection_id_manager.dart';
+import '../core/http/interceptor/additional_headers_interceptor.dart';
 import '../core/http/stream_http_client.dart';
 import '../core/models/app_settings.dart';
 import '../core/models/attachment_file.dart';
@@ -111,35 +119,52 @@ class StreamChatClient {
       receiveTimeout: receiveTimeout,
     );
 
-    // One Dio, two consumers. It is created bare here, configured in place by
-    // `StreamHttpClient` below — base url, api key, headers and the interceptor
-    // chain — and `DefaultApi` then wraps that same configured instance.
-    //
-    // Which is why `StreamHttpClient` is built here rather than inside
-    // `StreamChatApi`: it is what does the configuring, and an injected
-    // `chatApi` would skip it, leaving `DefaultApi` on a bare client.
-    final dio = StreamCoreHttpClient();
-
-    final httpClient = StreamHttpClient(
-      apiKey,
-      dio: dio,
-      options: options,
-      tokenManager: _tokenManager,
-      connectionIdManager: _connectionIdManager,
-      systemEnvironmentManager: _systemEnvironmentManager,
-      interceptors: chatApiInterceptors,
-      httpClientAdapter: httpClientAdapter,
-    );
-
     _chatApi =
         chatApi ??
         StreamChatApi(
           apiKey,
-          client: httpClient,
+          options: options,
+          tokenManager: _tokenManager,
+          connectionIdManager: _connectionIdManager,
+          systemEnvironmentManager: _systemEnvironmentManager,
           attachmentFileUploaderProvider: attachmentFileUploaderProvider,
+          interceptors: chatApiInterceptors,
+          httpClientAdapter: httpClientAdapter,
         );
 
-    _rolesRepository = RolesRepository(defaultApi ?? DefaultApi(dio));
+    // The generated client runs on its own `Dio`: base options up front, then
+    // the interceptor chain applied to the very instance `AuthInterceptor`
+    // needs to replay a request through.
+    //
+    // Separate on purpose from the one `StreamChatApi` builds for the
+    // hand-written v1 wrappers. Those keep theirs untouched until the last of
+    // them is gone, at which point this is the only one left.
+    httpClient =
+        StreamCoreHttpClient(
+          options: BaseOptions(
+            baseUrl: options.baseUrl,
+            connectTimeout: options.connectTimeout,
+            receiveTimeout: options.receiveTimeout,
+            // Only the integrator's own. Every header the SDK sends comes
+            // from an interceptor, and Dio supplies `Content-Type` for the
+            // requests that carry a body.
+            queryParameters: options.queryParameters,
+            headers: options.headers,
+          ),
+          httpClientAdapter: httpClientAdapter,
+        ).apply(
+          (client) => client.interceptors.addAll([
+            ApiKeyInterceptor(apiKey),
+            const AdditionalHeadersInterceptor(),
+            HeadersInterceptor(_systemEnvironmentManager),
+            ConnectionIdInterceptor(() => _connectionIdManager.connectionId),
+            AuthInterceptor(client, _tokenManager, tag: 'SCh:HttpAuth'),
+            const ApiErrorInterceptor(),
+            ...chatApiInterceptors ?? [LoggingInterceptor(requestHeader: true, tag: 'SCh:Http')],
+          ]),
+        );
+
+    _rolesRepository = RolesRepository(defaultApi ?? DefaultApi(httpClient));
 
     _ws =
         ws ??
@@ -170,6 +195,14 @@ class StreamChatClient {
   late final StreamChatApi _chatApi;
   late final RolesRepository _rolesRepository;
   late final WebSocket _ws;
+
+  /// The [Dio] the generated api client runs on.
+  ///
+  /// Distinct from the one [StreamChatApi] holds for the hand-written
+  /// wrappers. Exposed so tests can assert on the request pipeline —
+  /// interceptors, headers, query parameters — without a mocked api.
+  @visibleForTesting
+  late final StreamCoreHttpClient httpClient;
 
   /// This client state
   late ClientState state;
@@ -2508,6 +2541,7 @@ class StreamChatClient {
     await disconnectUser();
     await _ws.dispose();
     await _eventController.close();
+    httpClient.close();
     await _connectionStatusSubscription?.cancel();
   }
 }
