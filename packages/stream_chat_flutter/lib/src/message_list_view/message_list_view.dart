@@ -12,11 +12,11 @@ import '../misc/empty_widget.dart';
 import '../utils/network_error_text.dart';
 import 'floating_date_divider.dart';
 import 'loading_indicator.dart';
+import 'message_list_unread_controller.dart';
 import 'mlv_utils.dart';
 import 'stream_message_list_empty_state.dart';
 import 'stream_message_list_skeleton_loading.dart';
 import 'thread_separator.dart';
-import 'unread_messages_separator.dart';
 
 /// Spacing Types (These are properties of a message to help inform the decision
 /// of how much space / which widget to build after it)
@@ -313,16 +313,19 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   late final ItemPositionsListener _itemPositionListener;
   StreamChannelState? streamChannel;
 
-  // Drives the unread-messages separator. Held in a [ValueNotifier] so read
-  // events can update it without rebuilding the entire list view.
-  final _unreadState = ValueNotifier<({int count, String? firstUnreadId})>((count: 0, firstUnreadId: null));
-
-  // Snapshot of the current user's unread state, sourced from the channel. Used
-  // both to seed [_unreadState] on channel attach and to refresh it from the
-  // [Channel.currentUserReadStream] listener.
-  ({int count, String? firstUnreadId}) _readUnreadSnapshot() => (
-    count: streamChannel?.channel.state?.unreadCount ?? 0,
-    firstUnreadId: streamChannel?.getFirstUnreadMessage()?.id,
+  // Owns every piece of unread state: the unread messages divider and its
+  // floating pill, the scroll-to-bottom badge count, and the auto mark-read
+  // gate. Signals are forwarded to it from the listeners below; the build
+  // methods render from the listenables it exposes.
+  late final _unreadController = MessageListUnreadController(
+    channel: () => streamChannel?.channel,
+    getFirstUnreadMessage: (read) => streamChannel?.getFirstUnreadMessage(read),
+    parentMessage: () => widget.parentMessage,
+    messages: () => messages,
+    itemPositions: () => _itemPositionListener.itemPositions.value,
+    markReadWhenAtTheBottom: () => _config.markReadWhenAtTheBottom,
+    scrollToMessage: (id) => _scrollToMessage(messageId: id, highlight: false),
+    attachToken: () => streamChannel,
   );
 
   bool get _upToDate => streamChannel!.channel.state!.isUpToDate;
@@ -395,10 +398,14 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     if (newStreamChannel != streamChannel) {
       streamChannel = newStreamChannel;
 
-      debouncedMarkRead.cancel();
-      debouncedMarkThreadRead.cancel();
+      final newChannelState = newStreamChannel.channel.state;
 
-      _unreadState.value = _readUnreadSnapshot();
+      _showScrollToBottom.value = false;
+      // Runs after `streamChannel` is reassigned (so the controller resolves
+      // the new channel) and before the read-stream subscription below, whose
+      // `BehaviorSubject` replays straight away — the reset seeds the state
+      // that replay is checked against.
+      _unreadController.attach();
 
       final highlightInitialMessage = _config.highlightInitialMessage;
       final highlightMessageId = switch ((highlightInitialMessage, _isThreadConversation)) {
@@ -414,7 +421,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         });
       }
 
-      final state = streamChannel?.channel.state;
+      final state = newChannelState;
       final newMessageStream = switch (widget.parentMessage?.id) {
         final parentId? => state?.newThreadMessageStream(parentId),
         _ => state?.newMessageStream,
@@ -422,12 +429,22 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
       _messageNewListener?.cancel();
       _messageNewListener = newMessageStream?.listen((message) {
+        final currentUser = streamChannel?.channel.client.state.currentUser;
+        final isAtBottom = !_showScrollToBottom.value;
+
+        // Counted before the in-motion guard below, not after: a message
+        // landing while the user happens to be mid-drag or mid-fling is
+        // exactly what the badge and divider exist to report, and bailing
+        // first would drop it from both counts permanently.
+        _unreadController.handleMessageArrived(
+          message,
+          currentUser: currentUser,
+          isAtBottom: isAtBottom,
+        );
+
         // Don't fight a scroll already in motion (drag, fling, or
         // still-running animated scrollTo).
         if (_scrollController?.isScrolling == true) return;
-
-        final currentUser = streamChannel?.channel.client.state.currentUser;
-        final isAtBottom = !_showScrollToBottom.value;
 
         final details = StreamAutoScrollDetails(
           message: message,
@@ -454,7 +471,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
       _userReadListener?.cancel();
       _userReadListener = state?.currentUserReadStream.listen((_) {
-        _unreadState.value = _readUnreadSnapshot();
+        _unreadController.handleCurrentUserReadChanged();
       });
     }
   }
@@ -469,16 +486,15 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   @override
   void dispose() {
-    // Tear down anything that could write to [_unreadState] or
+    // Tear down anything that could write to the unread/badge notifiers or
     // [_showScrollToBottom] before disposing them.
     _messageNewListener?.cancel();
     _messageNewListener = null;
     _userReadListener?.cancel();
     _userReadListener = null;
     _itemPositionListener.itemPositions.removeListener(_handleItemPositionsChanged);
-    debouncedMarkRead.cancel();
-    debouncedMarkThreadRead.cancel();
-    _unreadState.dispose();
+    _unreadController.dispose();
+    _showScrollToBottom.dispose();
     _highlightState.dispose();
     super.dispose();
   }
@@ -495,7 +511,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     _highlightState.value = (id: messageId, generation: _highlightState.value.generation + 1);
   }
 
-  Future<void> _scrollToMessage({
+  // Returns whether the list actually scrolled to `messageId` — `false` for
+  // any of the bail-out paths below (target not found even after
+  // pagination, widget unmounted mid-pagination, or the SPL not attached).
+  Future<bool> _scrollToMessage({
     required String messageId,
     double alignment = 0.5, // center the message in the viewport by default
     bool highlight = true,
@@ -509,7 +528,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     if (index < 0) {
       // No around-reply pagination in thread mode yet — bail rather than
       // clobber the parent channel's loaded window.
-      if (_isThreadConversation) return;
+      if (_isThreadConversation) return false;
 
       // Target isn't in the loaded channel window. Paginate around it, wait
       // one frame for the BetterStreamBuilder rebuild to flush `messages`,
@@ -517,17 +536,17 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       // `_buildListView` on each emission, so an index captured before the
       // await would be stale.
       await streamChannel!.loadChannelAtMessage(messageId);
-      if (!mounted) return;
+      if (!mounted) return false;
       await WidgetsBinding.instance.endOfFrame;
-      if (!mounted) return;
+      if (!mounted) return false;
       index = messages.indexWhere((m) => m.id == messageId);
-      if (index < 0) return;
+      if (index < 0) return false;
     }
 
     // Bail when the SPL isn't attached — `scrollTo` would throw, and
     // highlighting an off-screen message is meaningless.
     final controller = _scrollController;
-    if (controller == null || !controller.isAttached) return;
+    if (controller == null || !controller.isAttached) return false;
 
     // Wait for the scroll to settle before flagging the message as
     // highlighted; otherwise the highlight tween fires while the list is
@@ -539,6 +558,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     );
 
     if (highlight && mounted) _highlightMessage(messageId);
+    return true;
   }
 
   // Wraps [child] in the highlight pulse if [message] is the currently
@@ -640,6 +660,17 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   Widget _buildListView(List<Message> data) {
     messages = data;
+
+    // Top pagination may not have finished loading the unread boundary when
+    // the baseline was first captured; retry once this frame's layout
+    // settles. Deferred (not synchronous) since mutating a [ValueNotifier]
+    // read by a [ValueListenableBuilder] further down this same build would
+    // notify a listener that hasn't rebuilt yet this frame.
+    if (_unreadController.needsAnchorResolution) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _unreadController.resolveDividerAnchor();
+      });
+    }
 
     final itemCount =
         messages.length + // total messages
@@ -876,9 +907,41 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         if (_config.showUnreadIndicator && !_isThreadConversation)
           Positioned(
             top: math.max(_scaffoldInsets.top, context.streamSpacing.sm),
-            child: UnreadIndicatorButton(
-              onJumpTap: scrollToUnreadDefaultTapAction,
-              onDismissTap: _markMessagesAsRead,
+            child: ValueListenableBuilder(
+              valueListenable: _unreadController.unreadDivider,
+              builder: (context, unread, _) {
+                // Gated on the frozen count, not the anchor: the count is
+                // known immediately from the baseline `Read`, while the
+                // anchor can take a while longer to resolve if top
+                // pagination hasn't loaded that far back yet. Waiting for
+                // the anchor would mean the pill — the whole point of
+                // which is to point at unread content the user hasn't
+                // scrolled to — only appeared once they'd already
+                // scrolled most of the way there themselves.
+                if (unread.count <= 0) return const Empty();
+                return ValueListenableBuilder<bool>(
+                  valueListenable: _unreadController.hasLaidOut,
+                  builder: (context, laidOut, ___) {
+                    // Item positions decide whether the boundary is already
+                    // on screen, and they only arrive after the first frame
+                    // is laid out. Painting before then would flash the pill
+                    // for a frame on every channel opened at its first
+                    // unread message — which is the default.
+                    if (!laidOut) return const Empty();
+                    return ValueListenableBuilder<bool>(
+                      valueListenable: _unreadController.hasSeenFirstUnread,
+                      builder: (context, seen, __) {
+                        if (seen) return const Empty();
+                        return UnreadIndicatorButton(
+                          unreadCount: unread.count,
+                          onJumpTap: (_) => _unreadController.onPillJumpTapped(),
+                          onDismissTap: _unreadController.onPillDismissTapped,
+                        );
+                      },
+                    );
+                  },
+                );
+              },
             ),
           ),
       ],
@@ -921,33 +984,32 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }
 
   Widget _buildUnreadMessagesSeparator(int unreadCount) {
-    if (widget.builders.unreadMessagesSeparator != null) {
-      return widget.builders.unreadMessagesSeparator!(context, unreadCount);
+    if (widget.builders.unreadMessagesSeparator case final builder?) {
+      return builder(context, unreadCount);
     }
     return UnreadMessagesSeparator(unreadCount: unreadCount);
   }
 
   // Wraps an already-built [separator] with the unread-messages line if
-  // [message] happens to be the first unread one. Defined as a method
-  // (rather than a closure inside [separatorBuilder]) so a fresh inner
-  // closure isn't allocated for every visible separator on every rebuild.
+  // [message] happens to be the unread divider's anchor. Defined as a method
+  // (rather than a closure inside [separatorBuilder]) so a fresh inner closure
+  // isn't allocated for every visible separator on every rebuild.
   Widget _maybeBuildWithUnreadMessagesSeparator({
     required Message message,
     required Widget separator,
   }) {
     if (_isThreadConversation) return separator;
     return ValueListenableBuilder(
-      valueListenable: _unreadState,
-      builder: (context, state, _) {
-        if (state.count == 0) return separator;
-        if (state.firstUnreadId != message.id) return separator;
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            separator,
-            _buildUnreadMessagesSeparator(state.count),
-          ],
+      valueListenable: _unreadController.unreadDivider,
+      builder: (context, unread, _) {
+        if (unread.anchorId != message.id) return separator;
+        return ValueListenableBuilder<int>(
+          valueListenable: _unreadController.unreadDividerGrowth,
+          builder: (context, growth, __) => Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [separator, _buildUnreadMessagesSeparator(unread.count + growth)],
+          ),
         );
       },
     );
@@ -970,55 +1032,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
     if (_scrollController case final controller? when controller.isAttached) {
       return controller.scrollTo(index: 0);
-    }
-  }
-
-  Future<void> scrollToUnreadDefaultTapAction(String? lastReadMessageId) async {
-    final firstUnreadId = _unreadState.value.firstUnreadId;
-    if (firstUnreadId == null) return;
-
-    // Scroll to the first unread message in the list.
-    final firstUnreadMessageIndex = messages.lastIndexWhere((it) => it.id == firstUnreadId);
-    if (firstUnreadMessageIndex == -1) return;
-
-    if (_scrollController case final controller? when controller.isAttached) {
-      return controller.scrollTo(
-        index: math.max(firstUnreadMessageIndex + 2, 0),
-        alignment: 0.5, // center the message in the viewport
-      );
-    }
-  }
-
-  late final debouncedMarkRead = debounce(
-    ([String? id]) => streamChannel?.channel.markRead(messageId: id),
-    const Duration(seconds: 1),
-    leading: true,
-  );
-
-  late final debouncedMarkThreadRead = debounce(
-    (String parentId) => streamChannel?.channel.markThreadRead(parentId),
-    const Duration(seconds: 1),
-    leading: true,
-  );
-
-  Future<void> _markMessagesAsRead() async {
-    if (widget.parentMessage case final parent?) {
-      // If we are in a thread, mark the thread as read immediately.
-      await streamChannel?.channel.markThreadRead(parent.id);
-      return;
-    }
-
-    // Otherwise, mark the channel as read immediately.
-    await streamChannel?.channel.markRead();
-  }
-
-  Future<void> _debouncedMarkMessagesAsRead() async {
-    if (widget.parentMessage case final parent?) {
-      // If we are in a thread, mark the thread as read.
-      debouncedMarkThreadRead.call([parent.id]);
-    } else {
-      // Otherwise, mark the channel as read.
-      debouncedMarkRead.call();
     }
   }
 
@@ -1123,15 +1136,14 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }
 
   Widget _buildScrollToBottom() {
-    return ValueListenableBuilder(
-      valueListenable: _unreadState,
-      builder: (_, state, __) {
-        final unreadCount = state.count;
+    return ValueListenableBuilder<int>(
+      valueListenable: _unreadController.scrollToBottomBadge,
+      builder: (_, badgeCount, __) {
         if (widget.builders.scrollToBottomButton case final builder?) {
-          return builder(unreadCount, scrollToBottomDefaultTapAction);
+          return builder(badgeCount, scrollToBottomDefaultTapAction);
         }
 
-        final showUnreadCount = unreadCount > 0;
+        final showUnreadCount = badgeCount > 0;
 
         Widget button = StreamButton.icon(
           style: .secondary,
@@ -1142,12 +1154,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             true => Icon(context.streamIcons.arrowDown),
             false => Icon(context.streamIcons.arrowUp),
           },
-          onPressed: () => scrollToBottomDefaultTapAction(unreadCount),
+          onPressed: () => scrollToBottomDefaultTapAction(badgeCount),
         );
 
         if (showUnreadCount && _config.showUnreadCountOnScrollToBottom) {
           button = StreamBadgeNotification(
-            label: '${unreadCount > 99 ? '99+' : unreadCount}',
+            label: '${badgeCount > 99 ? '99+' : badgeCount}',
             child: button,
           );
         }
@@ -1261,6 +1273,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }
 
   void _handleItemPositionsChanged() {
+    if (!mounted) return;
+
     final itemPositions = _itemPositionListener.itemPositions.value;
     if (itemPositions.isEmpty) return;
 
@@ -1279,62 +1293,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       isLastItemFullyVisible = (lastItemPosition.contentLeadingEdge ?? lastItemPosition.itemLeadingEdge) >= 0;
     }
 
-    if (mounted) _showScrollToBottom.value = !isLastItemFullyVisible;
-    if (isLastItemFullyVisible) return _handleLastItemFullyVisible();
-  }
-
-  Message? _lastFullyVisibleMessage;
-  void _handleLastItemFullyVisible() {
-    // We are using the first message as the last fully visible message
-    // because the messages are reversed in the list view.
-    final newLastFullyVisibleMessage = messages.firstOrNull;
-
-    final lastFullyVisibleMessageChanged = switch (_lastFullyVisibleMessage) {
-      final message? => message.id != newLastFullyVisibleMessage?.id,
-      null => true, // Allows setting the initial value.
-    };
-
-    // If the last fully visible message has been changed, we need to update the
-    // value and maybe mark messages as read if needed.
-    if (lastFullyVisibleMessageChanged) {
-      _lastFullyVisibleMessage = newLastFullyVisibleMessage;
-
-      // Mark messages as read if needed.
-      if (_config.markReadWhenAtTheBottom) {
-        _maybeMarkMessagesAsRead().ignore();
-      }
-    }
-  }
-
-  // Marks messages as read if the conditions are met.
-  //
-  // The conditions are:
-  // 1. The channel is up to date or we are in a thread conversation.
-  // 2. There are unread messages or we are in a thread conversation.
-  // 3. In a thread, the parent has at least one reply — the server-side
-  //    thread object doesn't exist until the first reply lands.
-  //
-  // If any of the conditions are not met, the function returns early.
-  // Otherwise, it calls the _markMessagesAsRead function to mark the messages
-  // as read.
-  Future<void> _maybeMarkMessagesAsRead() async {
-    final channel = streamChannel?.channel;
-    if (channel == null) return;
-
-    final isInThread = widget.parentMessage != null;
-
-    // A server-side thread object only exists once the parent has at least
-    // one reply; markThreadRead on a reply-less parent returns 404.
-    if (isInThread && (widget.parentMessage?.replyCount ?? 0) == 0) return;
-
-    final isUpToDate = channel.state?.isUpToDate ?? false;
-    if (!isInThread && !isUpToDate) return;
-
-    final hasUnread = (channel.state?.unreadCount ?? 0) > 0;
-    if (!isInThread && !hasUnread) return;
-
-    // Mark messages as read if it's allowed.
-    return _debouncedMarkMessagesAsRead();
+    _showScrollToBottom.value = !isLastItemFullyVisible;
+    _unreadController.handleItemPositionsChanged(
+      itemPositions,
+      isAtBottom: isLastItemFullyVisible,
+    );
   }
 
   void _getOnThreadTap() {
