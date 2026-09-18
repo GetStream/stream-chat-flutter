@@ -90,6 +90,7 @@ class MockChannelState extends Mock implements ChannelClientState {
     when(() => typingEventsStream).thenAnswer((_) => Stream.value({}));
     when(() => unreadCount).thenReturn(0);
     when(() => isUpToDate).thenReturn(true);
+    when(() => isMarkedAsUnread).thenReturn(false);
     when(() => read).thenReturn([]);
     when(() => draftStream).thenAnswer((_) => Stream.value(null));
     when(() => threadDraftStream(any())).thenAnswer((_) => Stream.value(null));

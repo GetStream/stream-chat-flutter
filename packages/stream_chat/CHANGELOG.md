@@ -95,6 +95,7 @@
 - Fixed reconnect catch-up covering an arbitrary subset of channels when more are active than one request holds; the most recently active are now covered first.
 - Fixed `CurrentPlatform` throwing `UnimplementedError` on WebAssembly builds.
 - Fixed live location expiry emitting repeated `location.expired` events for the same expired location.
+- Fixed members removed from a channel keeping their read state in the channel state.
 
 🔄 Internal / Non-breaking
 
@@ -129,6 +130,7 @@
 - Added `StreamChatClient.isLocalUnreadCountEnabled` (default `false`). When enabled, channels that have read events disabled (e.g. livestream channel types) track their unread count locally, on-device: incoming messages increment it, hard-deleted messages decrement it, and `Channel.markRead` / `markUnread` / `markUnreadByTimestamp` update it locally without a network request — including `Read.lastReadMessageId`, so the unread divider and jump-to-unread button anchor to the right message. Channels that support read receipts are unaffected and keep relying on server-driven unread counts.
 - Added `Event.watcherCount`, exposing the server-provided `watcher_count` field on events (e.g. `user.watching.start`, `user.watching.stop`, `message.new`).
 - Added `StreamChatNetworkError.type` (a `StreamChatNetworkErrorType` capturing the transport failure kind — connection error, timeout, cancellation, etc.).
+- Added `ChannelClientState.isMarkedAsUnread`, reporting whether the current user has an active manual mark-unread on the channel that hasn't been read past yet. Set by `markUnreadLocally` and by a `notification.mark_unread` event for the current user; cleared by `markReadLocally` and by a `message.read` event for the current user.
 - Exported `FilterOperator` alongside `Filter`.
 
 ⚠️ Deprecated
