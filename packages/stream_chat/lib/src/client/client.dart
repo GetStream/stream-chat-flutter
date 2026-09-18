@@ -141,8 +141,6 @@ class StreamChatClient {
             baseUrl: options.baseUrl,
             connectTimeout: options.connectTimeout,
             receiveTimeout: options.receiveTimeout,
-            // The integrator's own; every header the SDK sends is set by an
-            // interceptor.
             queryParameters: options.queryParameters,
             headers: options.headers,
           ),
@@ -152,8 +150,8 @@ class StreamChatClient {
             ApiKeyInterceptor(apiKey),
             const AdditionalHeadersInterceptor(),
             HeadersInterceptor(_systemEnvironmentManager),
-            ConnectionIdInterceptor(() => _connectionIdManager.connectionId),
             AuthInterceptor(client, _tokenManager, tag: 'SCh:HttpAuth'),
+            ConnectionIdInterceptor(() => _connectionIdManager.connectionId),
             const ApiErrorInterceptor(),
             ...chatApiInterceptors ?? [LoggingInterceptor(requestHeader: true, tag: 'SCh:Http')],
           ]),
