@@ -63,7 +63,7 @@ class OwnUser extends User {
     DateTime? banExpires,
     List<String>? teams,
     List<ChannelMute>? channelMutes,
-    List<Device>? devices,
+    List<DeviceResponse>? devices,
     List<Mute>? mutes,
     List<String>? blockedUserIds,
     int? totalUnreadCount,
@@ -141,7 +141,7 @@ class OwnUser extends User {
   }
 
   /// List of user devices.
-  final List<Device> devices;
+  final List<DeviceResponse> devices;
 
   /// List of users muted by the user.
   final List<Mute> mutes;

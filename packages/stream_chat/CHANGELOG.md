@@ -43,6 +43,11 @@
 - Default sorts moved onto the sort that owns them: `ChannelSort.defaultSort`, `MemberSort.defaultSort` and so on, reachable now without the Flutter layer.
 - `Role` and `SearchRolesResponse` are the OpenAPI-generated types. `Role` gains `copyWith` and `toJson`, and a response missing `duration` or `roles` now fails to decode instead of defaulting.
 - `StreamChatClient.searchRoles` returns a `Result<SearchRolesResponse>` instead of throwing.
+- `StreamChatClient.addDevice`, `getDevices` and `removeDevice` return a `Result` instead of throwing; `addDevice` and `removeDevice` answer a `DurationResponse`, `getDevices` a `ListDevicesResponse`.
+- `Device` is replaced by the generated `DeviceResponse`, including in `OwnUser.devices`. It carries seven more fields, and `userId` and `createdAt` are required, so a device entry missing either now fails to decode.
+- `ListDevicesResponse` is the generated type; `devices` and `duration` are required, so a response omitting either fails to decode instead of defaulting.
+- `PushProvider` is replaced by the generated `CreateDeviceRequestPushProvider`, an extension type over `String`. The four values and their wire strings are unchanged, but `.name` and `.values` are gone — a provider is its own string.
+- `StreamChatApi.device` is renamed `StreamChatApi.pushPreferences` and handles only `setPushPreferences`.
 
 🐞 Fixed
 

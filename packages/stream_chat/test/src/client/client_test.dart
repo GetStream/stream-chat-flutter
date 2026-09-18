@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_chat/open_api/api.dart' show CreateDeviceRequest;
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
@@ -1213,6 +1214,7 @@ void main() {
       // Clear any accumulated interactions from a previous test so that
       // verifyNoMoreInteractions on api.general stays accurate.
       clearInteractions(api.general);
+      clearInteractions(defaultApi);
 
       final ws = FakeWebSocket();
       client = StreamChatClient(apiKey, chatApi: api, defaultApi: defaultApi, ws: ws);
@@ -1850,76 +1852,92 @@ void main() {
 
     test('`.addDevice should work`', () async {
       const id = 'test-device-id';
-      const provider = PushProvider.firebase;
+      const provider = CreateDeviceRequestPushProvider.firebase;
+      const request = CreateDeviceRequest(id: id, pushProvider: provider);
 
-      when(() => api.device.addDevice(id, provider)).thenAnswer((_) async => EmptyResponse());
+      when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
+        (_) async => const Result.success(DurationResponse(duration: '0.01ms')),
+      );
 
       final res = await client.addDevice(id, provider);
-      expect(res, isNotNull);
+      expect(res, const Result.success(DurationResponse(duration: '0.01ms')));
 
-      verify(() => api.device.addDevice(id, provider)).called(1);
-      verifyNoMoreInteractions(api.device);
+      verify(() => defaultApi.createDevice(createDeviceRequest: request)).called(1);
+      verifyNoMoreInteractions(defaultApi);
     });
 
     test('`.addDevice should work with pushProviderName`', () async {
       const id = 'test-device-id';
-      const provider = PushProvider.firebase;
+      const provider = CreateDeviceRequestPushProvider.firebase;
       const pushProviderName = 'my-custom-config';
-
-      when(
-        () => api.device.addDevice(
-          id,
-          provider,
-          pushProviderName: pushProviderName,
-        ),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.addDevice(
-        id,
-        provider,
+      const request = CreateDeviceRequest(
+        id: id,
+        pushProvider: provider,
         pushProviderName: pushProviderName,
       );
-      expect(res, isNotNull);
 
-      verify(
-        () => api.device.addDevice(
-          id,
-          provider,
-          pushProviderName: pushProviderName,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(api.device);
+      when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
+        (_) async => const Result.success(DurationResponse(duration: '0.01ms')),
+      );
+
+      final res = await client.addDevice(id, provider, pushProviderName: pushProviderName);
+      expect(res.isSuccess, isTrue);
+
+      verify(() => defaultApi.createDevice(createDeviceRequest: request)).called(1);
+      verifyNoMoreInteractions(defaultApi);
+    });
+
+    test('`.addDevice` surfaces a failure without throwing', () async {
+      const error = StreamClientException(message: 'boom');
+      const request = CreateDeviceRequest(
+        id: 'test-device-id',
+        pushProvider: CreateDeviceRequestPushProvider.firebase,
+      );
+
+      when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
+        (_) async => const Result.failure(error),
+      );
+
+      final res = await client.addDevice('test-device-id', CreateDeviceRequestPushProvider.firebase);
+
+      expect(res.isFailure, isTrue);
+      expect(res.exceptionOrNull(), error);
     });
 
     test('`.getDevices`', () async {
       final devices = List.generate(
         3,
-        (index) => Device(
+        (index) => DeviceResponse(
           id: 'test-device-id-$index',
-          pushProvider: PushProvider.firebase.name,
+          pushProvider: CreateDeviceRequestPushProvider.firebase,
+          createdAt: DateTime.utc(2024),
+          userId: userId,
         ),
       );
 
-      when(() => api.device.getDevices()).thenAnswer((_) async => ListDevicesResponse()..devices = devices);
+      when(defaultApi.listDevices).thenAnswer(
+        (_) async => Result.success(ListDevicesResponse(duration: '0.01ms', devices: devices)),
+      );
 
       final res = await client.getDevices();
-      expect(res, isNotNull);
-      expect(res.devices.length, devices.length);
+      expect(res.getOrNull()?.devices, devices);
 
-      verify(() => api.device.getDevices()).called(1);
-      verifyNoMoreInteractions(api.device);
+      verify(defaultApi.listDevices).called(1);
+      verifyNoMoreInteractions(defaultApi);
     });
 
     test('`.removeDevice`', () async {
       const deviceId = 'test-device-id';
 
-      when(() => api.device.removeDevice(deviceId)).thenAnswer((_) async => EmptyResponse());
+      when(() => defaultApi.deleteDevice(id: deviceId)).thenAnswer(
+        (_) async => const Result.success(DurationResponse(duration: '0.01ms')),
+      );
 
       final res = await client.removeDevice(deviceId);
-      expect(res, isNotNull);
+      expect(res, const Result.success(DurationResponse(duration: '0.01ms')));
 
-      verify(() => api.device.removeDevice(deviceId)).called(1);
-      verifyNoMoreInteractions(api.device);
+      verify(() => defaultApi.deleteDevice(id: deviceId)).called(1);
+      verifyNoMoreInteractions(defaultApi);
     });
 
     test('`.setPushPreferences`', () async {
@@ -1936,7 +1954,7 @@ void main() {
       const preferences = [pushPreferenceInput, channelPreferenceInput];
 
       final currentUser = client.state.currentUser;
-      when(() => api.device.setPushPreferences(preferences)).thenAnswer(
+      when(() => api.pushPreferences.setPushPreferences(preferences)).thenAnswer(
         (_) async => UpsertPushPreferencesResponse()
           ..userPreferences = {
             '${currentUser?.id}': PushPreference(
@@ -1971,8 +1989,8 @@ void main() {
       final res = await client.setPushPreferences(preferences);
       expect(res, isNotNull);
 
-      verify(() => api.device.setPushPreferences(preferences)).called(1);
-      verifyNoMoreInteractions(api.device);
+      verify(() => api.pushPreferences.setPushPreferences(preferences)).called(1);
+      verifyNoMoreInteractions(api.pushPreferences);
     });
 
     test('should handle push_preference.updated event', () async {

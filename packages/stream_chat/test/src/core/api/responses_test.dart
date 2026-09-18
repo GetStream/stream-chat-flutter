@@ -3415,12 +3415,6 @@ void main() {
       expect(response.results, isA<List<GetMessageResponse>>());
     });
 
-    test('ListDevicesResponse', () {
-      const jsonExample = '''{"devices":[{"push_provider":"firebase","id":"test"}],"duration":"0.35ms"}''';
-      final response = ListDevicesResponse.fromJson(json.decode(jsonExample));
-      expect(response.devices, isA<List<Device>>());
-    });
-
     test('SendFileResponse', () {
       const jsonExample = '''{"file": "file-url","duration":"0.35ms"}''';
       final response = SendFileResponse.fromJson(json.decode(jsonExample));

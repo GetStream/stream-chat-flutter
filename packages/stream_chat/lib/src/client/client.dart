@@ -27,7 +27,8 @@ import 'package:stream_core/stream_core.dart'
         UserToken;
 import 'package:synchronized/synchronized.dart';
 
-import '../../open_api/api.dart' show DefaultApi, SearchRolesResponse;
+import '../../open_api/api.dart'
+    show CreateDeviceRequestPushProvider, DefaultApi, DurationResponse, ListDevicesResponse, SearchRolesResponse;
 import '../../version.dart';
 import '../core/api/attachment_file_uploader.dart';
 import '../core/api/requests.dart';
@@ -65,6 +66,7 @@ import '../core/util/immutable_collection_subjects.dart';
 import '../core/util/utils.dart';
 import '../db/chat_persistence_client.dart';
 import '../event_type.dart';
+import '../repository/devices_repository.dart';
 import '../repository/roles_repository.dart';
 import '../ws/connection_status.dart';
 import '../ws/websocket.dart';
@@ -157,7 +159,9 @@ class StreamChatClient {
           ]),
         );
 
-    _rolesRepository = RolesRepository(defaultApi ?? DefaultApi(httpClient));
+    final api = defaultApi ?? DefaultApi(httpClient);
+    _rolesRepository = RolesRepository(api);
+    _devicesRepository = DevicesRepository(api);
 
     _ws =
         ws ??
@@ -187,6 +191,7 @@ class StreamChatClient {
 
   late final StreamChatApi _chatApi;
   late final RolesRepository _rolesRepository;
+  late final DevicesRepository _devicesRepository;
   late final WebSocket _ws;
 
   /// The [Dio] the generated api client runs on, separate from the one
@@ -1203,22 +1208,27 @@ class StreamChatClient {
     unset: unset,
   );
 
-  /// Add a device for Push Notifications.
-  Future<EmptyResponse> addDevice(
+  /// Registers a device to receive push notifications.
+  ///
+  /// [id] is the token the push provider issued for this device.
+  ///
+  /// [pushProviderName] names which of the app's configurations for
+  /// [pushProvider] to use, for apps that have more than one.
+  Future<Result<DurationResponse>> addDevice(
     String id,
-    PushProvider pushProvider, {
+    CreateDeviceRequestPushProvider pushProvider, {
     String? pushProviderName,
-  }) => _chatApi.device.addDevice(
+  }) => _devicesRepository.addDevice(
     id,
     pushProvider,
     pushProviderName: pushProviderName,
   );
 
-  /// Gets a list of user devices.
-  Future<ListDevicesResponse> getDevices() => _chatApi.device.getDevices();
+  /// Lists the devices registered for the current user.
+  Future<Result<ListDevicesResponse>> getDevices() => _devicesRepository.getDevices();
 
-  /// Remove a user's device.
-  Future<EmptyResponse> removeDevice(String id) => _chatApi.device.removeDevice(id);
+  /// Removes a registered device, stopping push notifications to it.
+  Future<Result<DurationResponse>> removeDevice(String id) => _devicesRepository.removeDevice(id);
 
   /// Set push preferences for the current user.
   ///
@@ -1265,7 +1275,7 @@ class StreamChatClient {
   Future<UpsertPushPreferencesResponse> setPushPreferences(
     List<PushPreferenceInput> preferences,
   ) async {
-    final res = await _chatApi.device.setPushPreferences(preferences);
+    final res = await _chatApi.pushPreferences.setPushPreferences(preferences);
 
     final currentUser = state.currentUser;
     final currentUserId = currentUser?.id;
