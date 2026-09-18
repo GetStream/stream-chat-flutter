@@ -27,8 +27,7 @@ import 'package:stream_core/stream_core.dart'
         UserToken;
 import 'package:synchronized/synchronized.dart';
 
-import '../../open_api/api.dart'
-    show CreateDeviceRequestPushProvider, DefaultApi, DurationResponse, ListDevicesResponse, SearchRolesResponse;
+import '../../open_api/api.dart' show DefaultApi, DurationResponse, ListDevicesResponse, SearchRolesResponse;
 import '../../version.dart';
 import '../core/api/attachment_file_uploader.dart';
 import '../core/api/requests.dart';
@@ -56,6 +55,7 @@ import '../core/models/poll.dart';
 import '../core/models/poll_option.dart';
 import '../core/models/poll_vote.dart';
 import '../core/models/push_preference.dart';
+import '../core/models/push_provider.dart';
 import '../core/models/reaction.dart';
 import '../core/models/role_type.dart';
 import '../core/models/thread.dart';
@@ -1216,7 +1216,7 @@ class StreamChatClient {
   /// [pushProvider] to use, for apps that have more than one.
   Future<Result<DurationResponse>> addDevice(
     String id,
-    CreateDeviceRequestPushProvider pushProvider, {
+    PushProvider pushProvider, {
     String? pushProviderName,
   }) => _devicesRepository.addDevice(
     id,

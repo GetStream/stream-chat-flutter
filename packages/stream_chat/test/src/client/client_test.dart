@@ -1852,7 +1852,7 @@ void main() {
 
     test('`.addDevice should work`', () async {
       const id = 'test-device-id';
-      const provider = CreateDeviceRequestPushProvider.firebase;
+      const provider = PushProvider.firebase;
       const request = CreateDeviceRequest(id: id, pushProvider: provider);
 
       when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
@@ -1868,7 +1868,7 @@ void main() {
 
     test('`.addDevice should work with pushProviderName`', () async {
       const id = 'test-device-id';
-      const provider = CreateDeviceRequestPushProvider.firebase;
+      const provider = PushProvider.firebase;
       const pushProviderName = 'my-custom-config';
       const request = CreateDeviceRequest(
         id: id,
@@ -1891,14 +1891,14 @@ void main() {
       const error = StreamClientException(message: 'boom');
       const request = CreateDeviceRequest(
         id: 'test-device-id',
-        pushProvider: CreateDeviceRequestPushProvider.firebase,
+        pushProvider: PushProvider.firebase,
       );
 
       when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
         (_) async => const Result.failure(error),
       );
 
-      final res = await client.addDevice('test-device-id', CreateDeviceRequestPushProvider.firebase);
+      final res = await client.addDevice('test-device-id', PushProvider.firebase);
 
       expect(res.isFailure, isTrue);
       expect(res.exceptionOrNull(), error);
@@ -1909,7 +1909,7 @@ void main() {
         3,
         (index) => DeviceResponse(
           id: 'test-device-id-$index',
-          pushProvider: CreateDeviceRequestPushProvider.firebase,
+          pushProvider: PushProvider.firebase,
           createdAt: DateTime.utc(2024),
           userId: userId,
         ),

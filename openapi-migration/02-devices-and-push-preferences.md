@@ -36,10 +36,23 @@ The three device methods have landed. `setPushPreferences` has not — see [Defe
   keeping ours meant a lossy copy of one shape maintained forever. `created_at` and `user_id` are
   required; `test/fixtures/own_user.json` confirms the own-user payload carries both.
 - **`ListDevicesResponse` → the generated one, adopted.** Same-name shadow with nothing of ours to keep.
-- **`PushProvider` → `CreateDeviceRequestPushProvider`, adopted under the generated name.** No alias:
-  one name per concept, taken from the spec. **This is the enum precedent for every later group** —
-  the generated per-operation extension type is adopted as-is rather than wrapped. It costs `.name`
-  and `.values`, both recorded in the migration guide.
+- **`PushProvider` is a typedef onto the generated `CreateDeviceRequestPushProvider`.**
+  **This is the enum precedent for every later group,** and it is deliberately *not* the same answer
+  as `RoleType` in group 04. The two cases differ in the generated code, not in taste: `role_type` is
+  a bare `String?` in the generated signature, so a hand-written `RoleType` adds a type where none
+  existed; `push_provider` already has a complete generated extension type with the same four values,
+  so hand-writing one would be a second copy that silently misses a fifth provider the spec adds
+  later.
+
+  What the generated type gets wrong is only its *name* — it is named for the request it happens to
+  hang off, not for the concept. A typedef fixes the name with no second definition and no mapper:
+  the alias **is** the generated type, so it passes straight into `CreateDeviceRequest` unchanged.
+
+  So the rule for later groups is: adopt the generated type when one exists and is complete, alias it
+  when its name is operation-scoped, and hand-write only when the generated side has no type at all.
+
+  Costs, recorded in the migration guide: `.name` and `.values` are gone (v10 shipped an enum), and
+  the alias is transparent, so hovers and analyzer messages show `CreateDeviceRequestPushProvider`.
 - **`hardwareId` and `voipToken` are left unset.** `voipToken` is typed `bool?` — a flag meaning "this
   id is a VoIP token", not the token — and surfacing it would imply a VoIP-push story the SDK does not
   have. Neither has an in-tree consumer. Adding them later is non-breaking.

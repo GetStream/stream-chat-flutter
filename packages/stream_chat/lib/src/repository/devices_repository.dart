@@ -1,8 +1,8 @@
 import 'package:stream_core/stream_core.dart' show Result;
 
 import '../../open_api/api.dart' show DefaultApi;
-import '../../open_api/models.dart'
-    show CreateDeviceRequest, CreateDeviceRequestPushProvider, DurationResponse, ListDevicesResponse;
+import '../../open_api/models.dart' show CreateDeviceRequest, DurationResponse, ListDevicesResponse;
+import '../core/models/push_provider.dart';
 
 /// Repository dedicated to device operations.
 class DevicesRepository {
@@ -19,7 +19,7 @@ class DevicesRepository {
   /// [pushProvider] to use, for apps that have more than one.
   Future<Result<DurationResponse>> addDevice(
     String id,
-    CreateDeviceRequestPushProvider pushProvider, {
+    PushProvider pushProvider, {
     String? pushProviderName,
   }) => _api.createDevice(
     createDeviceRequest: CreateDeviceRequest(
