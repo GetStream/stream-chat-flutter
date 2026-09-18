@@ -63,14 +63,7 @@ export 'package:stream_core/stream_core.dart'
 
 export 'package:uuid/uuid.dart';
 
-export 'open_api/models.dart'
-    show
-        CreateDeviceRequestPushProvider,
-        DeviceResponse,
-        DurationResponse,
-        ListDevicesResponse,
-        Role,
-        SearchRolesResponse;
+export 'open_api/models.dart' show DeviceResponse, DurationResponse, ListDevicesResponse, Role, SearchRolesResponse;
 
 export 'src/client/channel/channel.dart';
 export 'src/client/channel/channel_capability_check.dart';
@@ -120,6 +113,7 @@ export 'src/core/models/predefined_filter.dart';
 export 'src/core/models/privacy_settings.dart';
 export 'src/core/models/push_level.dart';
 export 'src/core/models/push_preference.dart';
+export 'src/core/models/push_provider.dart';
 export 'src/core/models/reaction.dart';
 export 'src/core/models/reaction_group.dart';
 export 'src/core/models/read.dart';

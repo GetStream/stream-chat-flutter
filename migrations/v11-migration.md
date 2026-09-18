@@ -156,8 +156,8 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamChatClient.searchRoles` → `Future<SearchRolesResponse>` | `Future<Result<SearchRolesResponse>>` | `retyped` | Returns a `Result` instead of throwing |
 | `Device` (hand-written) | `DeviceResponse` (generated) | `retyped` | Two fields become nine. `created_at` and `user_id` are required, so a device entry missing either now fails to decode |
 | `ListDevicesResponse` (hand-written) | `ListDevicesResponse` (generated) | `retyped` | `devices` and `duration` are required — a body omitting either now fails to decode rather than defaulting to `[]` |
-| `PushProvider` (enum) | `CreateDeviceRequestPushProvider` (generated) | `retyped` | Same four values and the same wire strings, as an extension type over `String` |
-| `PushProvider.firebase.name` | `CreateDeviceRequestPushProvider.firebase` | `removed` | The value *is* the string, so there is no `.name` — and no `.values` |
+| `PushProvider` (enum) | `PushProvider` (extension type over `String`, alias of the generated `CreateDeviceRequestPushProvider`) | `retyped` | Same name, same four values, same wire strings |
+| `PushProvider.firebase.name` | `PushProvider.firebase` | `removed` | The value *is* the string, so there is no `.name` — and no `.values` |
 | `StreamChatClient.addDevice` / `removeDevice` → `Future<EmptyResponse>` | `Future<Result<DurationResponse>>` | `retyped` | Returns a `Result` instead of throwing |
 | `StreamChatClient.getDevices` → `Future<ListDevicesResponse>` | `Future<Result<ListDevicesResponse>>` | `retyped` | Returns a `Result` instead of throwing |
 | `StreamChatApi.device` | `StreamChatApi.pushPreferences` | `renamed` | The class handles only `setPushPreferences` now; device calls moved to the generated client |
@@ -444,26 +444,32 @@ try {
 }
 
 // v11
-final result = await client.addDevice(token, CreateDeviceRequestPushProvider.firebase);
+final result = await client.addDevice(token, PushProvider.firebase);
 result.fold(
   onSuccess: (_) => registered(),
   onFailure: (error, _) => report(error),
 );
 ```
 
-**`PushProvider` is now `CreateDeviceRequestPushProvider`,** an extension type over `String` rather
-than an enum. The four values and their wire strings are unchanged, and a provider *is* its string:
+**`PushProvider` keeps its name but is now an extension type over `String`** rather than an enum —
+an alias of the generated `CreateDeviceRequestPushProvider`, so there is one definition rather than a
+hand-maintained copy. The four values and their wire strings are unchanged, and a provider *is* its
+string:
 
 ```dart
 // v10
 final wireValue = PushProvider.firebase.name; // 'firebase'
 
 // v11
-const wireValue = CreateDeviceRequestPushProvider.firebase; // already 'firebase'
+const wireValue = PushProvider.firebase; // already 'firebase'
 ```
 
 There is no `.values`, so code that iterated the enum needs an explicit list. A provider the spec does
-not name still round-trips, through `CreateDeviceRequestPushProvider.fromJson`.
+not name still round-trips, through `PushProvider.fromJson`.
+
+Because the alias is transparent, IDE hovers and analyzer messages name the underlying
+`CreateDeviceRequestPushProvider`. That is the generated type's own name; `PushProvider` is what the
+SDK exports and what you write.
 
 **`Device` is replaced by `DeviceResponse`,** including in `OwnUser.devices`. Reading `id` and
 `pushProvider` is unchanged; constructing one now also requires `createdAt` and `userId`.

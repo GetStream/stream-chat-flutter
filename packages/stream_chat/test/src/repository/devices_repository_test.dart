@@ -1,5 +1,6 @@
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/open_api/api.dart';
+import 'package:stream_chat/src/core/models/push_provider.dart';
 import 'package:stream_chat/src/repository/devices_repository.dart';
 import 'package:stream_core/stream_core.dart';
 import 'package:test/test.dart';
@@ -19,7 +20,7 @@ void main() {
     test('should forward the id and provider without a name', () async {
       const request = CreateDeviceRequest(
         id: 'device-id',
-        pushProvider: CreateDeviceRequestPushProvider.firebase,
+        pushProvider: PushProvider.firebase,
       );
 
       when(() => api.createDevice(createDeviceRequest: request)).thenAnswer(
@@ -28,7 +29,7 @@ void main() {
 
       final res = await repository.addDevice(
         'device-id',
-        CreateDeviceRequestPushProvider.firebase,
+        PushProvider.firebase,
       );
 
       expect(res, const Result.success(DurationResponse(duration: '0.01ms')));
@@ -39,7 +40,7 @@ void main() {
     test('should forward the provider name when given', () async {
       const request = CreateDeviceRequest(
         id: 'device-id',
-        pushProvider: CreateDeviceRequestPushProvider.apn,
+        pushProvider: PushProvider.apn,
         pushProviderName: 'staging',
       );
 
@@ -49,7 +50,7 @@ void main() {
 
       await repository.addDevice(
         'device-id',
-        CreateDeviceRequestPushProvider.apn,
+        PushProvider.apn,
         pushProviderName: 'staging',
       );
 
@@ -60,7 +61,7 @@ void main() {
     test('should send an empty provider name as no name', () async {
       const request = CreateDeviceRequest(
         id: 'device-id',
-        pushProvider: CreateDeviceRequestPushProvider.apn,
+        pushProvider: PushProvider.apn,
       );
 
       when(() => api.createDevice(createDeviceRequest: request)).thenAnswer(
@@ -69,7 +70,7 @@ void main() {
 
       await repository.addDevice(
         'device-id',
-        CreateDeviceRequestPushProvider.apn,
+        PushProvider.apn,
         pushProviderName: '',
       );
 
@@ -79,10 +80,10 @@ void main() {
 
     test('should send every provider under its wire value', () async {
       const providers = {
-        CreateDeviceRequestPushProvider.apn: 'apn',
-        CreateDeviceRequestPushProvider.firebase: 'firebase',
-        CreateDeviceRequestPushProvider.huawei: 'huawei',
-        CreateDeviceRequestPushProvider.xiaomi: 'xiaomi',
+        PushProvider.apn: 'apn',
+        PushProvider.firebase: 'firebase',
+        PushProvider.huawei: 'huawei',
+        PushProvider.xiaomi: 'xiaomi',
       };
 
       for (final MapEntry(key: provider, value: wireValue) in providers.entries) {
@@ -94,7 +95,7 @@ void main() {
 
         await repository.addDevice('device-id', provider);
 
-        expect(request.toJson()['push_provider'], wireValue);
+        expect(provider, wireValue);
         verify(() => api.createDevice(createDeviceRequest: request)).called(1);
       }
 
@@ -105,7 +106,7 @@ void main() {
       const error = StreamClientException(message: 'boom');
       const request = CreateDeviceRequest(
         id: 'device-id',
-        pushProvider: CreateDeviceRequestPushProvider.firebase,
+        pushProvider: PushProvider.firebase,
       );
 
       when(() => api.createDevice(createDeviceRequest: request)).thenAnswer(
@@ -114,7 +115,7 @@ void main() {
 
       final res = await repository.addDevice(
         'device-id',
-        CreateDeviceRequestPushProvider.firebase,
+        PushProvider.firebase,
       );
 
       expect(res.isFailure, isTrue);

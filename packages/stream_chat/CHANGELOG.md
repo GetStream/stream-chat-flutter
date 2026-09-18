@@ -46,7 +46,7 @@
 - `StreamChatClient.addDevice`, `getDevices` and `removeDevice` return a `Result` instead of throwing; `addDevice` and `removeDevice` answer a `DurationResponse`, `getDevices` a `ListDevicesResponse`.
 - `Device` is replaced by the generated `DeviceResponse`, including in `OwnUser.devices`. It carries seven more fields, and `userId` and `createdAt` are required, so a device entry missing either now fails to decode.
 - `ListDevicesResponse` is the generated type; `devices` and `duration` are required, so a response omitting either fails to decode instead of defaulting.
-- `PushProvider` is replaced by the generated `CreateDeviceRequestPushProvider`, an extension type over `String`. The four values and their wire strings are unchanged, but `.name` and `.values` are gone — a provider is its own string.
+- `PushProvider` is an extension type over `String` rather than an enum, aliasing the generated `CreateDeviceRequestPushProvider`. The name, the four values and their wire strings are unchanged, but `.name` and `.values` are gone — a provider is its own string.
 - `StreamChatApi.device` is renamed `StreamChatApi.pushPreferences` and handles only `setPushPreferences`.
 
 🐞 Fixed
