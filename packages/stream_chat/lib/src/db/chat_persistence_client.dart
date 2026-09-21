@@ -6,7 +6,6 @@ import '../core/models/attachment_file.dart';
 import '../core/models/channel_model.dart';
 import '../core/models/channel_state.dart';
 import '../core/models/draft.dart';
-import '../core/models/event.dart';
 import '../core/models/location.dart';
 import '../core/models/member.dart';
 import '../core/models/message.dart';
@@ -16,6 +15,7 @@ import '../core/models/reaction.dart';
 import '../core/models/read.dart';
 import '../core/models/user.dart';
 import '../core/util/extension.dart';
+import '../ws/events/event.dart';
 
 /// A simple client used for persisting chat data locally.
 abstract class ChatPersistenceClient {

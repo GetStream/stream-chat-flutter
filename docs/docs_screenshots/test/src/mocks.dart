@@ -17,8 +17,8 @@ void stubMockClientCurrentUser(MockClient client, OwnUser user) {
 
 class MockClient extends Mock implements StreamChatClient {
   MockClient() {
-    when(() => wsConnectionStatus).thenReturn(ConnectionStatus.connected);
-    when(() => wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
+    when(() => connectionStatus).thenReturn(ConnectionStatus.connected);
+    when(() => connectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
     final mockState = MockClientState();
     when(() => state).thenReturn(mockState);
   }

@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_chat/src/ws/events/events.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
@@ -10,6 +11,7 @@ import '../fakes.dart';
 import '../matchers.dart';
 import '../mocks.dart';
 import '../utils.dart';
+import '../ws/fake_chat_server.dart';
 
 void main() {
   group('Fake web-socket connection functions', () {
@@ -24,8 +26,8 @@ void main() {
     });
 
     setUp(() {
-      final ws = FakeWebSocket();
-      client = StreamChatClient(apiKey, ws: ws, chatApi: api);
+      final ws = FakeChatServer();
+      client = StreamChatClient(apiKey, wsProvider: ws.connect, chatApi: api);
     });
 
     tearDown(() {
@@ -38,11 +40,8 @@ void main() {
 
       expectLater(
         // skipping first seed status -> ConnectionStatus.disconnected
-        client.wsConnectionStatusStream.skip(1),
-        emitsInOrder([
-          ConnectionStatus.connecting,
-          ConnectionStatus.connected,
-        ]),
+        client.connectionStatusStream.skip(1),
+        emitsInOrder([ConnectionStatus.connecting, ConnectionStatus.connected]),
       );
 
       final res = await client.connectUser(user, token);
@@ -59,11 +58,8 @@ void main() {
 
       expectLater(
         // skipping first seed status -> ConnectionStatus.disconnected
-        client.wsConnectionStatusStream.skip(1),
-        emitsInOrder([
-          ConnectionStatus.connecting,
-          ConnectionStatus.connected,
-        ]),
+        client.connectionStatusStream.skip(1),
+        emitsInOrder([ConnectionStatus.connecting, ConnectionStatus.connected]),
       );
 
       final res = await client.connectUserWithProvider(user, TokenProvider.dynamic(tokenProvider));
@@ -84,11 +80,8 @@ void main() {
 
         expectLater(
           // skipping first seed status -> ConnectionStatus.disconnected
-          client.wsConnectionStatusStream.skip(1),
-          emitsInOrder([
-            ConnectionStatus.connecting,
-            ConnectionStatus.connected,
-          ]),
+          client.connectionStatusStream.skip(1),
+          emitsInOrder([ConnectionStatus.connecting, ConnectionStatus.connected]),
         );
 
         final res = await client.connectGuestUser(user);
@@ -108,7 +101,7 @@ void main() {
         ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
         expectLater(
-          client.wsConnectionStatusStream,
+          client.connectionStatusStream,
           emitsInOrder([
             // only emits the seed -> disconnected status
             // as the call never reaches `ws.connect`
@@ -131,11 +124,8 @@ void main() {
     test('`.connectAnonymousUser` should work fine', () async {
       expectLater(
         // skipping first seed status -> ConnectionStatus.disconnected
-        client.wsConnectionStatusStream.skip(1),
-        emitsInOrder([
-          ConnectionStatus.connecting,
-          ConnectionStatus.connected,
-        ]),
+        client.connectionStatusStream.skip(1),
+        emitsInOrder([ConnectionStatus.connecting, ConnectionStatus.connected]),
       );
 
       final res = await client.connectAnonymousUser();
@@ -152,24 +142,22 @@ void main() {
         }
       });
 
-      test('should throw if connection is already available', () async {
+      test('should answer with the connection already open', () async {
         expect(client.state.currentUser, isNull);
-        try {
-          await client.connectAnonymousUser();
-          // waiting 300ms for `wsConnectionStatusStream` to emit
-          await delay(300);
 
-          await client.openConnection();
-        } catch (e) {
-          // Misuse, so it leaves the StreamException hierarchy entirely.
-          expect(e, isA<StateError>());
-          expect((e as StateError).message, contains('already available for'));
-        }
+        final connected = await client.connectAnonymousUser();
+        // waiting 300ms for `wsConnectionStatusStream` to emit
+        await delay(300);
+
+        // The connection being asked for is the one already open, so the caller is answered with
+        // it rather than told they should have disconnected first.
+        expect(await client.openConnection(), connected);
+        expect(client.connectionStatus, ConnectionStatus.connected);
       });
 
       test('should open connection for closed connection', () async {
         expectLater(
-          client.wsConnectionStatusStream.skip(1),
+          client.connectionStatusStream.skip(1),
           emitsInOrder([
             // initial connectUser
             ConnectionStatus.connecting,
@@ -205,8 +193,8 @@ void main() {
     });
 
     setUp(() {
-      final ws = FakeWebSocketWithConnectionError();
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws);
+      final ws = FakeChatServer()..handshakeFails = true;
+      client = StreamChatClient(apiKey, chatApi: api, wsProvider: ws.connect);
     });
 
     tearDown(() {
@@ -302,7 +290,7 @@ void main() {
         connectWebSocket: false,
       );
       expect(res, isSameUserAs(user));
-      expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
+      expect(client.connectionStatus, ConnectionStatus.disconnected);
     });
 
     test(
@@ -320,7 +308,7 @@ void main() {
           connectWebSocket: false,
         );
         expect(res, isSameUserAs(user));
-        expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
+        expect(client.connectionStatus, ConnectionStatus.disconnected);
       },
     );
 
@@ -340,7 +328,7 @@ void main() {
       );
 
       expect(res, isSameUserAs(user));
-      expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
+      expect(client.connectionStatus, ConnectionStatus.disconnected);
       verify(
         () => api.guest.getGuestUser(any(that: isSameUserAs(user))),
       ).called(1);
@@ -354,7 +342,7 @@ void main() {
         );
 
         expect(res, isNotNull);
-        expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
+        expect(client.connectionStatus, ConnectionStatus.disconnected);
       },
     );
   });
@@ -372,8 +360,8 @@ void main() {
     });
 
     setUp(() {
-      final ws = FakeWebSocketWithConnectionError();
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws)..chatPersistenceClient = persistence;
+      final ws = FakeChatServer()..handshakeFails = true;
+      client = StreamChatClient(apiKey, chatApi: api, wsProvider: ws.connect)..chatPersistenceClient = persistence;
     });
 
     tearDown(() {
@@ -500,21 +488,36 @@ void main() {
     setUp(() async {
       when(() => persistence.updateLastSyncAt(any())).thenAnswer((_) => Future.value());
       when(persistence.getLastSyncAt).thenAnswer((_) async => null);
-      final ws = FakeWebSocket();
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws)..chatPersistenceClient = persistence;
+      // The hello frame reaches the client through the socket now, so connecting stores the
+      // connection info before any test has had a chance to stub it.
+      when(() => persistence.updateConnectionInfo(any())).thenAnswer((_) => Future.value());
+      final ws = FakeChatServer();
+      client = StreamChatClient(apiKey, chatApi: api, wsProvider: ws.connect)..chatPersistenceClient = persistence;
       await client.connectUser(user, token);
       await delay(300);
       expect(client.persistenceEnabled, isTrue);
-      expect(client.wsConnectionStatus, ConnectionStatus.connected);
+      expect(client.connectionStatus, ConnectionStatus.connected);
     });
 
     tearDown(() async {
       await client.dispose();
     });
 
+    // The store holds the connection the cached state belongs to, and only the hello frame names
+    // one — the `/sync` endpoint reads the channel event store, which never holds a health check.
+    test('should store the connection the hello frame established', () async {
+      final captured = verify(() => persistence.updateConnectionInfo(captureAny())).captured;
+
+      expect(captured, hasLength(1));
+      expect(
+        captured.single,
+        isA<HealthCheckEvent>().having((it) => it.connectionId, 'connectionId', isNotEmpty),
+      );
+    });
+
     group('`.sync`', () {
       test(
-        '''should update persistence connectionInfo and lastSync when sync succeeds''',
+        'should update lastSync when sync succeeds',
         () async {
           // persistence.updateLastSyncAt might be called
           // when connecting the user.
@@ -527,24 +530,16 @@ void main() {
               ..events = [
                 Event(
                   isLocal: false,
-                  type: EventType.healthCheck,
-                  connectionId: 'test-connection-id',
-                  me: OwnUser.fromUser(user),
-                ),
-                Event(
-                  isLocal: false,
                   type: EventType.messageDeleted,
                   message: Message(id: 'test-message-id'),
                 ),
               ],
           );
 
-          when(() => persistence.updateConnectionInfo(any())).thenAnswer((_) => Future.value());
           when(() => persistence.updateLastSyncAt(any())).thenAnswer((_) => Future.value());
 
           await client.sync(cids: cids, lastSyncAt: lastSyncAt);
 
-          verify(() => persistence.updateConnectionInfo(any())).called(1);
           verify(() => persistence.updateLastSyncAt(any())).called(1);
           verify(() => api.general.sync(cids, lastSyncAt)).called(1);
         },
@@ -568,24 +563,16 @@ void main() {
               ..events = [
                 Event(
                   isLocal: false,
-                  type: EventType.healthCheck,
-                  connectionId: 'test-connection-id',
-                  me: OwnUser.fromUser(user),
-                ),
-                Event(
-                  isLocal: false,
                   type: EventType.messageDeleted,
                   message: Message(id: 'test-message-id', text: 'Hey!'),
                 ),
               ],
           );
 
-          when(() => persistence.updateConnectionInfo(any())).thenAnswer((_) => Future.value());
           when(() => persistence.updateLastSyncAt(any())).thenAnswer((_) => Future.value());
 
           await client.sync();
 
-          verify(() => persistence.updateConnectionInfo(any())).called(1);
           verify(() => persistence.updateLastSyncAt(any())).called(1);
           verify(() => api.general.sync(cids, lastSyncAt)).called(1);
           verify(persistence.getChannelCids).called(1);
@@ -1174,18 +1161,18 @@ void main() {
 
     test('`.disconnectUser` should reset state and user', () async {
       expect(client.state.currentUser, isNotNull);
-      expect(client.wsConnectionStatus, ConnectionStatus.connected);
+      expect(client.connectionStatus, ConnectionStatus.connected);
 
       expectLater(
         // skipping initial connected value
-        client.wsConnectionStatusStream.skip(1),
-        emits(ConnectionStatus.disconnected),
+        client.connectionStatusStream.skip(1),
+        emitsInOrder([ConnectionStatus.disconnected]),
       );
 
       await client.disconnectUser(flushChatPersistence: true);
 
       expect(client.state.currentUser, isNull);
-      expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
+      expect(client.connectionStatus, ConnectionStatus.disconnected);
     });
   });
 
@@ -1214,8 +1201,8 @@ void main() {
       // verifyNoMoreInteractions on api.general stays accurate.
       clearInteractions(api.general);
 
-      final ws = FakeWebSocket();
-      client = StreamChatClient(apiKey, chatApi: api, defaultApi: defaultApi, ws: ws);
+      final ws = FakeChatServer();
+      client = StreamChatClient(apiKey, chatApi: api, defaultApi: defaultApi, wsProvider: ws.connect);
       // Stub getAppSettings so the background fetch after connectUser succeeds.
       when(() => api.general.getAppSettings()).thenAnswer(
         (_) async => GetAppSettingsResponse()..app = const AppSettings(name: 'test'),
@@ -1223,7 +1210,7 @@ void main() {
       await client.connectUser(user, token);
       await delay(300);
       expect(client.persistenceEnabled, isFalse);
-      expect(client.wsConnectionStatus, ConnectionStatus.connected);
+      expect(client.connectionStatus, ConnectionStatus.connected);
     });
 
     tearDown(() async {
@@ -5103,8 +5090,8 @@ void main() {
     late StreamChatClient client;
 
     setUp(() async {
-      final ws = FakeWebSocket();
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws);
+      final ws = FakeChatServer();
+      client = StreamChatClient(apiKey, chatApi: api, wsProvider: ws.connect);
       expect(client.persistenceEnabled, isFalse);
     });
 
@@ -5399,7 +5386,7 @@ void main() {
     final token = testUserToken(user.id).rawValue;
 
     late FakeChatApi api;
-    late FakeWebSocket ws;
+    late FakeChatServer ws;
     late StreamChatClient client;
 
     setUpAll(() {
@@ -5409,7 +5396,7 @@ void main() {
 
     setUp(() {
       api = FakeChatApi();
-      ws = FakeWebSocket();
+      ws = FakeChatServer();
 
       // Stub queryChannels for every test — it's the API the recovery path
       // calls when enabled, and a missing stub would surface as an unhandled
@@ -5435,9 +5422,9 @@ void main() {
     // Drives the FakeWebSocket through a connected → disconnected → connected
     // transition so the client's pairwise listener fires the recovery path.
     Future<void> simulateReconnect() async {
-      ws.connectionStatus = ConnectionStatus.disconnected;
+      ws.drop();
       await delay(100);
-      ws.connectionStatus = ConnectionStatus.connected;
+      await client.openConnection();
       await delay(300);
     }
 
@@ -5451,7 +5438,7 @@ void main() {
 
     test('should re-query active channels on reconnect when enabled (default)', () async {
       // Setup: connect with default flag, register two channels.
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws);
+      client = StreamChatClient(apiKey, chatApi: api, wsProvider: ws.connect);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5486,7 +5473,7 @@ void main() {
     });
 
     test('should skip the re-query on reconnect when disabled', () async {
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws, recoverStateOnReconnect: false);
+      client = StreamChatClient(apiKey, chatApi: api, wsProvider: ws.connect, recoverStateOnReconnect: false);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5511,7 +5498,7 @@ void main() {
     });
 
     test('should still emit `connectionRecovered` when disabled', () async {
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws, recoverStateOnReconnect: false);
+      client = StreamChatClient(apiKey, chatApi: api, wsProvider: ws.connect, recoverStateOnReconnect: false);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5546,7 +5533,7 @@ void main() {
         ),
       ).thenThrow(StateError('queryChannels needs an active connection. Call `connectUser` first.'));
 
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws);
+      client = StreamChatClient(apiKey, chatApi: api, wsProvider: ws.connect);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5565,7 +5552,7 @@ void main() {
     });
 
     test('should skip the re-query when no active channels are tracked', () async {
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws);
+      client = StreamChatClient(apiKey, chatApi: api, wsProvider: ws.connect);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5591,7 +5578,7 @@ void main() {
     // Skipping event replay leaves the state of the synced channels behind, so
     // the skip refreshes them itself, whatever this flag is set to.
     test('should re-query active channels when the sync skipped event replay', () async {
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws, recoverStateOnReconnect: false);
+      client = StreamChatClient(apiKey, chatApi: api, wsProvider: ws.connect, recoverStateOnReconnect: false);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5644,7 +5631,7 @@ void main() {
     // A failed sync applied nothing and moved nothing, so the configured
     // recovery still runs and the window stays outstanding for the next sync.
     test('should re-query active channels when the sync fails, keeping lastSyncAt', () async {
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws);
+      client = StreamChatClient(apiKey, chatApi: api, wsProvider: ws.connect);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5702,7 +5689,7 @@ void main() {
         ),
       ).thenThrow(StateError('queryChannels needs an active connection. Call `connectUser` first.'));
 
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws, recoverStateOnReconnect: false);
+      client = StreamChatClient(apiKey, chatApi: api, wsProvider: ws.connect, recoverStateOnReconnect: false);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5736,7 +5723,7 @@ void main() {
     });
 
     test('should re-query in batches when more channels are active than fit in one page', () async {
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws, recoverStateOnReconnect: false);
+      client = StreamChatClient(apiKey, chatApi: api, wsProvider: ws.connect, recoverStateOnReconnect: false);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5808,7 +5795,7 @@ void main() {
     // it fires. Emitting it before the catch-up finishes would have them act
     // on state the sync has not written yet.
     test('should finish recovering before `connectionRecovered` fires', () async {
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws);
+      client = StreamChatClient(apiKey, chatApi: api, wsProvider: ws.connect);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5854,7 +5841,7 @@ void main() {
     // One page failing says nothing about the others, so the rest are still
     // attempted — the channels that can be refreshed are.
     test('should attempt every page when one of them fails', () async {
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws, recoverStateOnReconnect: false);
+      client = StreamChatClient(apiKey, chatApi: api, wsProvider: ws.connect, recoverStateOnReconnect: false);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5928,7 +5915,7 @@ void main() {
     });
 
     test('should respect runtime toggling via the setter', () async {
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws);
+      client = StreamChatClient(apiKey, chatApi: api, wsProvider: ws.connect);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5976,7 +5963,7 @@ void main() {
     final token = testUserToken(user.id).rawValue;
 
     late FakeChatApi api;
-    late FakeWebSocket ws;
+    late FakeChatServer ws;
     late StreamChatClient client;
     var disposed = false;
 
@@ -5987,7 +5974,7 @@ void main() {
 
     setUp(() {
       api = FakeChatApi();
-      ws = FakeWebSocket();
+      ws = FakeChatServer();
       disposed = false;
     });
 
@@ -6016,7 +6003,7 @@ void main() {
         ),
       ).thenAnswer((_) => pendingQuery.future);
 
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws);
+      client = StreamChatClient(apiKey, chatApi: api, wsProvider: ws.connect);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -6029,9 +6016,9 @@ void main() {
       client.state.addChannels({'messaging:c1': channel});
 
       // Drop then restore the connection to start a reconnect recovery.
-      ws.connectionStatus = ConnectionStatus.disconnected;
+      ws.drop();
       await delay(100);
-      ws.connectionStatus = ConnectionStatus.connected;
+      await client.openConnection();
       await delay(100);
 
       // Dispose while the recovery is still in flight.
@@ -6043,7 +6030,7 @@ void main() {
       pendingQuery.complete(QueryChannelsResponse()..channels = []);
       await delay(300);
 
-      expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
+      expect(client.connectionStatus, ConnectionStatus.disconnected);
     });
   });
 
@@ -6051,15 +6038,15 @@ void main() {
     late StreamChatClient client;
 
     setUp(() async {
-      final ws = FakeWebSocket();
-      client = StreamChatClient('test-api-key', ws: ws);
+      final ws = FakeChatServer();
+      client = StreamChatClient('test-api-key', wsProvider: ws.connect);
 
       final user = User(id: 'test-user-id');
       final token = testUserToken(user.id).rawValue;
 
       await client.connectUser(user, token);
       await delay(300);
-      expect(client.wsConnectionStatus, ConnectionStatus.connected);
+      expect(client.connectionStatus, ConnectionStatus.connected);
     });
 
     tearDown(() async {
@@ -6211,8 +6198,8 @@ void main() {
     late StreamChatClient client;
 
     setUp(() {
-      final ws = FakeWebSocket();
-      client = StreamChatClient(apiKey, ws: ws, chatApi: api);
+      final ws = FakeChatServer();
+      client = StreamChatClient(apiKey, wsProvider: ws.connect, chatApi: api);
     });
 
     tearDown(() {
@@ -6320,6 +6307,353 @@ void main() {
       }
 
       await sub.cancel();
+    });
+  });
+
+  group('event resolvers', () {
+    // Recovering after an outage replays the events missed over `/sync`, not over the socket, so
+    // one carrying a poll has to be reported the same way as one that arrived live.
+    test('should report a poll message recovered after an outage as a poll created event', () async {
+      final client = StreamChatClient('test-api-key', chatApi: FakeChatApi(), wsProvider: FakeChatServer().connect);
+      addTearDown(client.dispose);
+
+      final poll = Poll(
+        name: 'What is your favorite color?',
+        options: const [
+          PollOption(text: 'Red'),
+          PollOption(text: 'Blue'),
+        ],
+      );
+
+      final reported = client.on(EventType.pollCreated).first;
+      client.handleEvent(Event(type: EventType.messageNew, poll: poll));
+
+      expect((await reported).poll, poll);
+    });
+  });
+
+  group('reconnecting a connection that dropped', () {
+    const apiKey = 'test-api-key';
+    final user = User(id: 'test-user-id');
+    final token = testUserToken(user.id).rawValue;
+
+    Future<(StreamChatClient, FakeChatServer)> connectedClient() async {
+      final server = FakeChatServer(user: OwnUser.fromUser(user));
+      final client = StreamChatClient(apiKey, chatApi: FakeChatApi(), wsProvider: server.connect);
+      addTearDown(client.dispose);
+
+      await client.connectUser(user, token);
+      return (client, server);
+    }
+
+    test('should reopen a dropped connection without being asked to', () async {
+      final (client, server) = await connectedClient();
+
+      final reconnected = client.connectionStatusStream
+          .skip(1)
+          .firstWhere(
+            (it) => it == ConnectionStatus.connected,
+          );
+
+      server.drop(closeCode: 1006);
+      await reconnected;
+
+      expect(server.sockets, hasLength(2));
+    });
+
+    test('should report connecting for as long as it keeps reopening', () async {
+      final (client, server) = await connectedClient();
+      server.handshakeFails = true;
+
+      final reported = <ConnectionStatus>[];
+      final listening = client.connectionStatusStream.listen(reported.add);
+      addTearDown(listening.cancel);
+
+      server.drop(closeCode: 1006);
+
+      // Long enough for the attempt that follows the drop and the one that follows its failure:
+      // the first is immediate and the delay after a single failure is at most two seconds.
+      await Future<void>.delayed(const Duration(seconds: 3));
+
+      // Attempts of its own, without being asked.
+      expect(server.sockets.length, greaterThan(2));
+
+      // The delay it waits out between them is a state of its own, which an app reads as still
+      // on its way back rather than as a connection nothing is opening.
+      expect(reported, [ConnectionStatus.connected, ConnectionStatus.connecting]);
+    });
+
+    test('should report a first attempt that failed as disconnected', () async {
+      final server = FakeChatServer(user: OwnUser.fromUser(user))..handshakeFails = true;
+      final client = StreamChatClient(apiKey, chatApi: FakeChatApi(), wsProvider: server.connect);
+      addTearDown(client.dispose);
+
+      await expectLater(client.connectUser(user, token), throwsA(isA<StreamException>()));
+
+      // Closed for a reason worth retrying, and left to the caller who was told it failed.
+      // Reported as connecting, nothing would ever move it off that.
+      expect(client.connectionStatus, ConnectionStatus.disconnected);
+
+      await Future<void>.delayed(const Duration(seconds: 1));
+      expect(server.sockets, hasLength(1));
+      expect(client.connectionStatus, ConnectionStatus.disconnected);
+    });
+
+    test('should report a drop while reconnection is paused as disconnected', () async {
+      final (client, server) = await connectedClient();
+      client.pauseReconnect();
+
+      final reported = client.connectionStatusStream.skip(1).first;
+      server
+        ..handshakeFails = true
+        ..drop(closeCode: 1006);
+
+      // Worth retrying, with nothing retrying it until reconnection resumes.
+      expect(await reported, ConnectionStatus.disconnected);
+      expect(server.sockets, hasLength(1));
+    });
+
+    // `connecting` covers two connections a caller cannot tell apart, and opening one is right for
+    // only one of them. Driven against a real socket, which is the only thing that distinguishes
+    // them; a status alone does not.
+    test('should open a connection waiting out a delay rather than wait with it', () async {
+      final (client, server) = await connectedClient();
+      server
+        ..handshakeFails = true
+        ..drop(closeCode: 1006);
+
+      await pumpEventQueue();
+      expect(client.connectionStatus, ConnectionStatus.connecting);
+
+      // The delay the socket is waiting out was started before the caller asked, so there is no
+      // reason to sit through the rest of it.
+      server.handshakeFails = false;
+      await client.openConnection();
+
+      expect(client.connectionStatus, ConnectionStatus.connected);
+    });
+
+    test('should wait on the attempt in flight rather than open a second connection', () async {
+      final server = FakeChatServer(user: OwnUser.fromUser(user));
+      final client = StreamChatClient(apiKey, chatApi: FakeChatApi(), wsProvider: server.connect);
+      addTearDown(client.dispose);
+
+      // Reported the same way as a connection waiting out a delay, which is what makes asking to
+      // open one on a foreground or a network change land here.
+      final connecting = client.connectUser(user, token);
+      expect(client.connectionStatus, ConnectionStatus.connecting);
+
+      final joined = client.openConnection();
+
+      // The attempt already in flight, answered to both callers. A second socket would leave the
+      // first connection unreferenced, and refusing would raise on a path neither can act on.
+      expect((await joined).id, user.id);
+      expect((await connecting).id, user.id);
+      expect(server.sockets, hasLength(1));
+    });
+
+    test('should answer a connectUser for the user already connected with that connection', () async {
+      final (client, server) = await connectedClient();
+      final connected = client.state.currentUser;
+
+      // The connection being asked for is the one already in hand, so the caller is answered with
+      // it rather than told they should have disconnected first.
+      final again = await client.connectUser(user, token);
+
+      expect(again, connected);
+      expect(server.sockets, hasLength(1));
+      expect(client.connectionStatus, ConnectionStatus.connected);
+    });
+
+    test('should open a connection asked for while the last one was still closing', () async {
+      final (client, server) = await connectedClient();
+
+      // Closing and opening without waiting in between, which leaves the socket still closing when
+      // the second call arrives.
+      client.closeConnection().ignore();
+      await client.openConnection();
+
+      expect(client.connectionStatus, ConnectionStatus.connected);
+      expect(server.sockets, hasLength(2));
+    });
+
+    test('should refuse a connectUser for another user while one is connected', () async {
+      final (client, _) = await connectedClient();
+
+      // Signing another user in over this one would leave the connection it has unreferenced.
+      await expectLater(
+        client.connectUser(User(id: 'someone-else'), testUserToken('someone-else').rawValue),
+        throwsA(
+          isA<StateError>().having(
+            (it) => it.message,
+            'message',
+            allOf(contains('someone-else'), contains(user.id), contains('disconnectUser')),
+          ),
+        ),
+      );
+    });
+
+    test('should answer both callers connecting the same user at once with one connection', () async {
+      final api = FakeChatApi();
+      final server = FakeChatServer(user: OwnUser.fromUser(user));
+      final client = StreamChatClient(apiKey, chatApi: api, wsProvider: server.connect);
+      addTearDown(client.dispose);
+
+      // The second lands while the first is still opening, which is where the status cannot tell a
+      // connection being opened from one waiting to be.
+      final first = client.connectUser(user, token);
+      final second = client.connectUser(user, token);
+
+      expect((await first).id, user.id);
+      expect((await second).id, user.id);
+      expect(server.sockets, hasLength(1));
+
+      // One sign-in, not two alongside each other: what it does for the user behind the connection
+      // is done for the pair rather than once each.
+      await pumpEventQueue();
+      verify(() => api.general.getAppSettings()).called(1);
+    });
+
+    test('should leave nobody signed in when connecting a user fails', () async {
+      final server = FakeChatServer()..handshakeFails = true;
+      final client = StreamChatClient(apiKey, chatApi: FakeChatApi(), wsProvider: server.connect);
+      addTearDown(client.dispose);
+
+      await expectLater(client.connectUser(user, token), throwsA(isA<StreamException>()));
+
+      expect(client.state.currentUser, isNull);
+    });
+
+    test('should connect another user after connecting one failed', () async {
+      final server = FakeChatServer()..handshakeFails = true;
+      final client = StreamChatClient(apiKey, chatApi: FakeChatApi(), wsProvider: server.connect);
+      addTearDown(client.dispose);
+
+      await expectLater(client.connectUser(user, token), throwsA(isA<StreamException>()));
+
+      // A user who never signed in would otherwise have this refused on their behalf, and be
+      // named in the refusal as the one who is signed in.
+      server.handshakeFails = false;
+      final other = User(id: 'someone-else');
+
+      expect((await client.connectUser(other, testUserToken(other.id).rawValue)).id, other.id);
+    });
+
+    test('should leave the connected user signed in when reconnecting them fails', () async {
+      final (client, server) = await connectedClient();
+      final connected = client.state.currentUser;
+
+      // The connection drops and is being retried, which is where asking for one again opens it
+      // now rather than waiting out the delay.
+      server
+        ..handshakeFails = true
+        ..drop(closeCode: 1006);
+      await pumpEventQueue();
+
+      await expectLater(client.connectUser(user, token), throwsA(isA<StreamException>()));
+
+      // The socket is still retrying on their behalf, so dropping them here would leave it working
+      // for a user the client says is not signed in.
+      expect(client.state.currentUser, connected);
+    });
+
+    test('should stop reopening once the caller closes the connection', () async {
+      final (client, server) = await connectedClient();
+      server
+        ..handshakeFails = true
+        ..drop(closeCode: 1006);
+
+      client.closeConnection();
+
+      // Long enough to catch one: the delay after a single failure is at most two seconds.
+      final attempts = server.sockets.length;
+      await expectLater(
+        client.connectionStatusStream
+            .skip(1)
+            .firstWhere((it) => it == ConnectionStatus.connecting)
+            .timeout(
+              const Duration(seconds: 3),
+            ),
+        throwsA(isA<TimeoutException>()),
+      );
+
+      expect(server.sockets, hasLength(attempts));
+    });
+  });
+
+  group('`queryChannels` with `waitForConnect`', () {
+    const apiKey = 'test-api-key';
+    final user = User(id: 'test-user-id');
+    final token = testUserToken(user.id).rawValue;
+
+    setUpAll(() => registerFallbackValue(const PaginationParams()));
+
+    // A client that never connected has nothing to wait for, so the query says so rather than
+    // waiting on a connection nobody asked for.
+    test('should throw when no connection was ever opened', () async {
+      final client = StreamChatClient(apiKey, chatApi: FakeChatApi(), wsProvider: FakeChatServer().connect);
+      addTearDown(client.dispose);
+
+      expect(client.connectionStatus, ConnectionStatus.disconnected);
+      await expectLater(client.queryChannels().first, throwsStateError);
+    });
+
+    // Whether the channels can be watched is read when the request is sent, not when the query is
+    // made, so one that waited for a connection still watches what it loads.
+    test('should watch the channels it loads when the connection lands mid-query', () async {
+      final api = FakeChatApi();
+      final ws = FakeChatServer(user: OwnUser.fromUser(user));
+      final client = StreamChatClient(apiKey, chatApi: api, wsProvider: ws.connect);
+      addTearDown(client.dispose);
+
+      when(
+        () => api.channel.queryChannels(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          memberLimit: any(named: 'memberLimit'),
+          messageLimit: any(named: 'messageLimit'),
+          paginationParams: any(named: 'paginationParams'),
+        ),
+      ).thenAnswer((_) async => QueryChannelsResponse()..channels = []);
+
+      // Not awaited: the query below has to arrive while the attempt is still in flight.
+      final connecting = client.connectUser(user, token);
+      final queried = client.queryChannels().first;
+
+      await connecting;
+      await queried;
+
+      final watched = verify(
+        () => api.channel.queryChannels(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          state: any(named: 'state'),
+          watch: captureAny(named: 'watch'),
+          presence: any(named: 'presence'),
+          memberLimit: any(named: 'memberLimit'),
+          messageLimit: any(named: 'messageLimit'),
+          paginationParams: any(named: 'paginationParams'),
+        ),
+      ).captured;
+
+      expect(watched.single, isTrue);
+    });
+
+    // The wait ends when the attempt settles either way: one that fails has to raise rather than
+    // leave the caller waiting on a connection nothing is opening any more.
+    test('should throw rather than hang when the connection being opened fails', () async {
+      final ws = FakeChatServer()..handshakeFails = true;
+      final client = StreamChatClient(apiKey, chatApi: FakeChatApi(), wsProvider: ws.connect);
+      addTearDown(client.dispose);
+
+      // Not awaited: the query below has to arrive while the attempt is still in flight.
+      final connecting = client.connectUser(user, token);
+
+      await expectLater(client.queryChannels().first, throwsStateError);
+      await expectLater(connecting, throwsA(isA<StreamChatException>()));
     });
   });
 }

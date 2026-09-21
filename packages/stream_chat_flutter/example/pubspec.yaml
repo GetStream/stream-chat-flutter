@@ -41,11 +41,12 @@ dependency_overrides:
   stream_chat_persistence:
     path: ../../stream_chat_persistence
   # Forces one source for `stream_core`; see `melos.yaml`.
+  # Repeated here because this block outranks `melos.yaml`'s `dependencyOverridePaths`.
   stream_core:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
       path: packages/stream_core
-      ref: 04e0d1cb3a6893cf70cb6636a261deb11beff81c
+      ref: 6042453b56c782d9c8b29a2d103ae73ba433814c
 
 flutter:
   uses-material-design: true

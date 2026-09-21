@@ -7,8 +7,8 @@ import 'package:synchronized/synchronized.dart';
 import '../core/api/requests.dart';
 import '../core/api/responses.dart';
 import '../core/models/channel_state.dart';
-import '../core/models/event.dart';
 import '../db/chat_persistence_client.dart';
+import '../ws/events/event.dart';
 import 'client.dart';
 
 /// Fetches the events missed on [cids] since [lastSyncAt].
@@ -219,8 +219,9 @@ class SyncManager {
     // Deduplicated before capping: the endpoint counts duplicates against its
     // own limit, so leaving them in would spend slots on nothing.
     final cappedCids = cids.toSet().take(_maxSyncCids).toList();
-    _logger.i(() => 'Syncing events since $lastSyncAt for ${cappedCids.length} channels');
-    _logger.d(() => 'Syncing channels: $cappedCids');
+    _logger
+      ..i(() => 'Syncing events since $lastSyncAt for ${cappedCids.length} channels')
+      ..d(() => 'Syncing channels: $cappedCids');
 
     final List<Event> events;
     try {

@@ -3,7 +3,6 @@ import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/draft.dart';
 import 'package:stream_chat/src/core/models/draft_message.dart';
-import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
@@ -13,6 +12,7 @@ import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/read.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
+import 'package:stream_chat/src/ws/events/event.dart';
 import 'package:test/test.dart';
 
 class TestPersistenceClient extends ChatPersistenceClient {

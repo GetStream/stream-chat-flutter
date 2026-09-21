@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:mocktail/mocktail.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/core/api/channel_api.dart';
 import 'package:stream_chat/src/core/api/device_api.dart';
 import 'package:stream_chat/src/core/api/general_api.dart';
@@ -11,7 +10,6 @@ import 'package:stream_chat/src/core/api/moderation_api.dart';
 import 'package:stream_chat/src/core/api/polls_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/src/core/api/user_groups_api.dart';
-import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import 'mocks.dart';
@@ -60,6 +58,9 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
   int connectCallCount = 0;
   int disconnectCallCount = 0;
   int flushCallCount = 0;
+
+  /// The health check last persisted, and `null` until one is.
+  Event? connectionInfo;
 
   @override
   bool get isConnected => _isConnected;
@@ -116,6 +117,11 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
 
   @override
   Future<void> updateChannelStates(List<ChannelState> channelStates) async {}
+
+  @override
+  Future<void> updateConnectionInfo(Event event) async {
+    connectionInfo = event;
+  }
 }
 
 class FakeChatApi extends Fake implements StreamChatApi {
@@ -229,93 +235,6 @@ class FakeEvent extends Fake implements Event {}
 class FakeUser extends Fake implements User {}
 
 class FakePollVote extends Fake implements PollVote {}
-
-class FakeWebSocket extends Fake implements WebSocket {
-  late final _connectionStatusController = BehaviorSubject.seeded(
-    ConnectionStatus.disconnected,
-  );
-
-  set connectionStatus(ConnectionStatus value) {
-    _connectionStatusController.add(value);
-  }
-
-  @override
-  ConnectionStatus get connectionStatus => _connectionStatusController.value;
-
-  @override
-  Stream<ConnectionStatus> get connectionStatusStream => _connectionStatusController.stream;
-
-  @override
-  Completer<Event>? connectionCompleter;
-
-  @override
-  Future<Event> connect(
-    User user, {
-    bool? includeUserDetails = true,
-  }) async {
-    connectionStatus = ConnectionStatus.connecting;
-    final event = Event(
-      type: EventType.healthCheck,
-      connectionId: 'fake-connection-id',
-      me: OwnUser.fromUser(user),
-    );
-    connectionCompleter = Completer()..complete(event);
-    connectionStatus = ConnectionStatus.connected;
-    return connectionCompleter!.future;
-  }
-
-  @override
-  void disconnect() {
-    connectionStatus = ConnectionStatus.disconnected;
-    connectionCompleter = null;
-  }
-
-  @override
-  Future<void> dispose() async {
-    await _connectionStatusController.close();
-  }
-}
-
-class FakeWebSocketWithConnectionError extends Fake implements WebSocket {
-  late final _connectionStatusController = BehaviorSubject.seeded(
-    ConnectionStatus.disconnected,
-  );
-
-  set connectionStatus(ConnectionStatus value) {
-    _connectionStatusController.add(value);
-  }
-
-  @override
-  ConnectionStatus get connectionStatus => _connectionStatusController.value;
-
-  @override
-  Stream<ConnectionStatus> get connectionStatusStream => _connectionStatusController.stream;
-
-  @override
-  Completer<Event>? connectionCompleter;
-
-  @override
-  Future<Event> connect(
-    User user, {
-    bool? includeUserDetails = true,
-  }) async {
-    connectionStatus = ConnectionStatus.connecting;
-    const error = StreamNetworkException(message: 'Error Connecting');
-    connectionCompleter = Completer()..completeError(error);
-    return connectionCompleter!.future;
-  }
-
-  @override
-  void disconnect() {
-    connectionStatus = ConnectionStatus.disconnected;
-    connectionCompleter = null;
-  }
-
-  @override
-  Future<void> dispose() async {
-    await _connectionStatusController.close();
-  }
-}
 
 class FakeChannelState extends Fake implements ChannelState {}
 
