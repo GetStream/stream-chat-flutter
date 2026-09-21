@@ -5,10 +5,19 @@ import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_core/stream_core.dart'
     show
+        ApiErrorInterceptor,
+        ApiKeyInterceptor,
+        AuthInterceptor,
+        ConnectionIdInterceptor,
         CurrentPlatform,
+        HeadersInterceptor,
         InFlightCache,
         LocationCoordinate,
+        LoggingInterceptor,
+        Result,
         SortedListExtensions,
+        Standard,
+        StreamCoreHttpClient,
         StreamLogConfig,
         StreamLogger,
         SystemEnvironment,
@@ -20,6 +29,7 @@ import 'package:stream_core/stream_core.dart'
         WsEvent;
 import 'package:synchronized/synchronized.dart';
 
+import '../../open_api/api.dart' show DefaultApi, SearchRolesResponse;
 import '../../version.dart';
 import '../core/api/attachment_file_uploader.dart';
 import '../core/api/requests.dart';
@@ -27,6 +37,7 @@ import '../core/api/responses.dart';
 import '../core/api/stream_chat_api.dart';
 import '../core/error/stream_chat_exception.dart';
 import '../core/http/app_settings_manager.dart';
+import '../core/http/interceptor/additional_headers_interceptor.dart';
 import '../core/http/stream_http_client.dart';
 import '../core/models/app_settings.dart';
 import '../core/models/attachment_file.dart';
@@ -45,7 +56,7 @@ import '../core/models/poll_option.dart';
 import '../core/models/poll_vote.dart';
 import '../core/models/push_preference.dart';
 import '../core/models/reaction.dart';
-import '../core/models/role.dart';
+import '../core/models/role_type.dart';
 import '../core/models/thread.dart';
 import '../core/models/user.dart';
 import '../core/util/event_controller.dart';
@@ -54,6 +65,7 @@ import '../core/util/immutable_collection_subjects.dart';
 import '../core/util/utils.dart';
 import '../db/chat_persistence_client.dart';
 import '../event_type.dart';
+import '../repository/roles_repository.dart';
 import '../ws/connect_request.dart';
 import '../ws/connection_manager.dart';
 import '../ws/connection_status.dart';
@@ -93,6 +105,7 @@ class StreamChatClient {
     Duration connectTimeout = kDefaultConnectTimeout,
     Duration receiveTimeout = kDefaultReceiveTimeout,
     StreamChatApi? chatApi,
+    DefaultApi? defaultApi,
     @visibleForTesting WebSocketProvider? wsProvider,
     AttachmentFileUploaderProvider attachmentFileUploaderProvider = StreamAttachmentFileUploader.new,
     Iterable<Interceptor>? chatApiInterceptors,
@@ -122,6 +135,32 @@ class StreamChatClient {
           interceptors: chatApiInterceptors,
           httpClientAdapter: httpClientAdapter,
         );
+
+    // Interceptors are added after construction because `AuthInterceptor`
+    // replays requests through the client it is given.
+    httpClient =
+        StreamCoreHttpClient(
+          options: BaseOptions(
+            baseUrl: options.baseUrl,
+            connectTimeout: options.connectTimeout,
+            receiveTimeout: options.receiveTimeout,
+            queryParameters: options.queryParameters,
+            headers: options.headers,
+          ),
+          httpClientAdapter: httpClientAdapter,
+        ).apply(
+          (client) => client.interceptors.addAll([
+            ApiKeyInterceptor(apiKey),
+            const AdditionalHeadersInterceptor(),
+            HeadersInterceptor(_systemEnvironmentManager),
+            AuthInterceptor(client, _tokenManager, tag: 'SCh:HttpAuth'),
+            ConnectionIdInterceptor(() => _connection.connectionId),
+            const ApiErrorInterceptor(),
+            ...chatApiInterceptors ?? [LoggingInterceptor(requestHeader: true, tag: 'SCh:Http')],
+          ]),
+        );
+
+    _rolesRepository = RolesRepository(defaultApi ?? DefaultApi(httpClient));
 
     _connection = ConnectionManager(
       request: ConnectRequest.forApi(
@@ -155,11 +194,17 @@ class StreamChatClient {
   }
 
   late final StreamChatApi _chatApi;
+  late final RolesRepository _rolesRepository;
   late final ConnectionManager _connection;
   StreamSubscription<WsEvent>? _wsEventSubscription;
 
   // Whether the open connection has an id to name on the requests that need one.
   bool get _hasConnectionId => _connection.connectionId != null;
+
+  /// The [Dio] the generated api client runs on, separate from the one
+  /// [StreamChatApi] holds for the hand-written wrappers.
+  @visibleForTesting
+  late final StreamCoreHttpClient httpClient;
 
   /// This client state
   late ClientState state;
@@ -2431,13 +2476,13 @@ class StreamChatClient {
   ///
   /// [includeGlobalRoles] includes roles prefixed `global_` when set to
   /// `true`. Defaults to `false`.
-  Future<SearchRolesResponse> searchRoles(
+  Future<Result<SearchRolesResponse>> searchRoles(
     String query, {
     int? limit,
     String? nameGt,
     RoleType? roleType,
     bool? includeGlobalRoles,
-  }) => _chatApi.roles.searchRoles(
+  }) => _rolesRepository.searchRoles(
     query,
     limit: limit,
     nameGt: nameGt,
@@ -2480,6 +2525,7 @@ class StreamChatClient {
     await _wsEventSubscription?.cancel();
     await _connection.dispose();
     await _eventController.close();
+    httpClient.close();
     await _connectionStatusSubscription?.cancel();
   }
 }

@@ -59,6 +59,18 @@ def owns(*prefixes, unless=()):
     return match
 
 
+DONE = textwrap.dedent("""\
+    - [ ] Every method above either routes through `DefaultApi` or is listed here as deliberately left
+          hand-written, with the reason.
+    - [ ] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
+    - [ ] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
+    - [ ] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
+          persists anything.
+    - [ ] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.
+    - [ ] CHANGELOG entry under `🛑️ Breaking` for each break; PR title `refactor(llc)!:`.
+    - [ ] Decisions recorded in this file, and the status box ticked in `README.md`.
+    """)
+
 GROUPS = [
     dict(
         num='02', slug='devices-and-push-preferences', title='Devices & Push Preferences',
@@ -93,7 +105,7 @@ GROUPS = [
     ),
     dict(
         num='04', slug='roles-guest-and-app', title='Roles, Guest & App Settings',
-        hand=['roles_api.dart', 'guest_api.dart',
+        hand=['guest_api.dart',
               'general_api.dart::enrichUrl', 'general_api.dart::getAppSettings'],
         match=owns('/api/v2/roles', '/api/v2/guest', '/api/v2/app', '/api/v2/og', '/api/v2/longpoll'),
         goal='Sweep up the singletons — one-method families that share no state and can land in one PR.',
@@ -101,6 +113,24 @@ GROUPS = [
             '`AppSettings` is public and hand-shaped; the generated `AppResponseFields` is the wire shape. Keep '
             'ours unless the generated one is genuinely better.',
         ],
+        taken=textwrap.dedent("""\
+            - **`Role` and `SearchRolesResponse` are the generated types.** They were field-for-field identical to
+              ours, so keeping ours meant maintaining two copies of one shape forever.
+            - **`RoleType` stays hand-written.** `searchRoles(roleType:)` accepts exactly `'user'` or `'channel'`
+              and the server rejects anything else with a 400, but the v2 spec models `role_type` as an open
+              string, so there is nothing generated to adopt. It is an `extension type const RoleType(String)
+              implements String` in `lib/src/core/models/role_type.dart`, following `PushLevel`.
+
+              **This is the precedent for every later group that meets an untyped-but-constrained parameter:** the
+              absence of a generated type is not a reason to make the public parameter a bare `String`. An
+              extension type costs nothing — it *is* the string, so it passes straight into the generated query
+              parameter with no mapper — while keeping the valid values discoverable at the call site. It stays
+              honest about the wire contract too: the set is open, so a third value the server adds later needs no
+              SDK release.
+
+              The trade-off, for the record: no `.values`, no exhaustive `switch`, and `RoleType('nonsense')` is
+              constructible and reaches the wire. That matches the four extension types this package already ships.
+            """),
         risks=[
             '`general_api.dart` is split across four groups — only `enrichUrl` and `getAppSettings` belong here. '
             '`sync` and `queryMembers` go to group 11, `searchMessages` to group 10. Do not migrate the file as a '
@@ -221,6 +251,13 @@ GROUPS = [
         decisions=[
             '`ChannelState`, `ChannelModel` and `Member` are public, persisted, and rebuilt from WebSocket '
             'events. Keep ours and map.',
+            '**Whether `ChannelModel` promotes its `extraData`-backed flags to real fields.** `disabled`, '
+            '`hidden`, `muted`, `blocked` and `truncatedAt` all arrive as root fields on `ChannelResponse` but '
+            'are pushed into `extraData` and read back through getters, which the constructor comment calls '
+            '"for backwards compatibility". Promoting them is a break worth making in v11 if it is made at '
+            'all, and it belongs with this group\'s model shape rather than with whichever phase happens to '
+            'add the next flag. Raised on '
+            '[#2958](https://github.com/GetStream/stream-chat-flutter/pull/2958).',
             '`sync` returns `SyncResponse` — one of the two models that needed the WSEvent generator patch. '
             'Verify it decodes before relying on it.',
         ],
@@ -267,17 +304,6 @@ GROUPS = [
     ),
 ]
 
-DONE = textwrap.dedent("""\
-    - [ ] Every method above either routes through `DefaultApi` or is listed here as deliberately left
-          hand-written, with the reason.
-    - [ ] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
-    - [ ] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
-    - [ ] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
-          persists anything.
-    - [ ] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.
-    - [ ] CHANGELOG entry under `🛑️ Breaking` for each break; PR title `refactor(llc)!:`.
-    - [ ] Decisions recorded in this file, and the status box ticked in `README.md`.
-    """)
 
 
 def hand_for(group, hand):
@@ -313,12 +339,16 @@ def render(g, hand, ops):
           '| Verb | Path | Operation | Response |', '| --- | --- | --- | --- |']
     L += [f'| `{verb}` | `{path}` | `{name}` | `{ret}` |' for verb, path, ret, name in
           [(v, p, r, n) for v, p, r, n in gops]]
-    L.append('\n## Decisions to make\n')
-    L += [f'- {d}' for d in g['decisions']]
+    if g['decisions']:
+        L.append('\n## Decisions to make\n')
+        L += [f'- {d}' for d in g['decisions']]
+    if g.get('taken'):
+        L.append('\n## Decisions taken\n')
+        L.append(g['taken'].strip())
     L.append('\n## Risks\n')
     L += [f'- {r}' for r in g['risks']]
     L.append('\n## Definition of done\n')
-    L.append(DONE)
+    L.append(g.get('done', DONE))
     return '\n'.join(L)
 
 

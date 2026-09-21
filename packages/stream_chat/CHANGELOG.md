@@ -44,6 +44,8 @@
 - `client.wsConnectionStatus` and `wsConnectionStatusStream` become `connectionStatus` and `connectionStatusStream`. `ConnectionStatus` keeps its three values, and a client that has never connected still reads as `disconnected`.
 - The WebSocket's state — `Connected`, `Connecting`, `Authenticating`, `Disconnected` and the disconnection sources — is no longer exported, and the client no longer reports it. `ConnectionStatus` is the whole connection API, as on the other Stream SDKs.
 - `StreamHttpClient` and `StreamChatApi` take a `ConnectionIdGetter? connectionId` where they took a `ConnectionIdManager?`. The manager only wrapped such a closure, and is removed.
+- `Role` and `SearchRolesResponse` are the OpenAPI-generated types. `Role` gains `copyWith` and `toJson`, and a response missing `duration` or `roles` now fails to decode instead of defaulting.
+- `StreamChatClient.searchRoles` returns a `Result<SearchRolesResponse>` instead of throwing.
 
 🐞 Fixed
 

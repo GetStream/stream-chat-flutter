@@ -18,7 +18,6 @@ import '../models/predefined_filter.dart';
 import '../models/push_preference.dart';
 import '../models/reaction.dart';
 import '../models/read.dart';
-import '../models/role.dart';
 import '../models/thread.dart';
 import '../models/unread_counts.dart';
 import '../models/user.dart';
@@ -879,17 +878,6 @@ class RemoveUserGroupMembersResponse extends _BaseResponse {
   /// Create a new instance from a json
   static RemoveUserGroupMembersResponse fromJson(Map<String, dynamic> json) =>
       _$RemoveUserGroupMembersResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.searchRoles] api call
-@JsonSerializable(createToJson: false)
-class SearchRolesResponse extends _BaseResponse {
-  /// List of roles returned by the api call
-  @JsonKey(defaultValue: [])
-  late List<Role> roles;
-
-  /// Create a new instance from a json
-  static SearchRolesResponse fromJson(Map<String, dynamic> json) => _$SearchRolesResponseFromJson(json);
 }
 
 /// Model response for [StreamChatClient.getAppSettings] api call.

@@ -11,7 +11,6 @@ import 'message_api.dart';
 import 'moderation_api.dart';
 import 'polls_api.dart';
 import 'reminders_api.dart';
-import 'roles_api.dart';
 import 'threads_api.dart';
 import 'user_api.dart';
 import 'user_groups_api.dart';
@@ -86,10 +85,6 @@ class StreamChatApi {
   /// Api dedicated to user groups operations
   UserGroupsApi get userGroups => _userGroups ??= UserGroupsApi(_client);
   UserGroupsApi? _userGroups;
-
-  /// Api dedicated to roles operations
-  RolesApi get roles => _roles ??= RolesApi(_client);
-  RolesApi? _roles;
 
   /// Api dedicated to general operations
   GeneralApi get general => _general ??= GeneralApi(_client);
