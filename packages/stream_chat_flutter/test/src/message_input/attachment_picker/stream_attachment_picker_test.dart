@@ -151,7 +151,7 @@ void main() {
     );
 
     testWidgets(
-      'should enable only the gallery when a video is already attached',
+      'should enable videos when a video is attached but videos is not allowed',
       (tester) async {
         final controller = StreamAttachmentPickerController(
           initialAttachments: [
