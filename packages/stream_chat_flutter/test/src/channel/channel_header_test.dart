@@ -38,7 +38,7 @@ void main() {
       when(() => channel.imageStream).thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
       when(() => channel.image).thenReturn('https://bit.ly/321RmWb');
       when(() => channelState.unreadCount).thenReturn(1);
-      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
+      when(() => client.connectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
       when(() => channelState.unreadCountStream).thenAnswer((i) => Stream.value(1));
       when(() => clientState.totalUnreadCount).thenAnswer((i) => 1);
       when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(1));
@@ -119,8 +119,8 @@ void main() {
           user: User(id: 'user-id'),
         ),
       ]);
-      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.disconnected));
-      when(() => client.wsConnectionStatus).thenReturn(ConnectionStatus.disconnected);
+      when(() => client.connectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.disconnected));
+      when(() => client.connectionStatus).thenReturn(ConnectionStatus.disconnected);
       when(() => clientState.totalUnreadCount).thenAnswer((i) => 1);
       when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(1));
       when(() => clientState.channels).thenReturn({channel.cid!: channel});
@@ -187,7 +187,7 @@ void main() {
           user: User(id: 'user-id'),
         ),
       ]);
-      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
+      when(() => client.connectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
       when(() => clientState.totalUnreadCount).thenAnswer((i) => 1);
       when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(1));
       when(() => clientState.channels).thenReturn({channel.cid!: channel});
@@ -258,7 +258,7 @@ void main() {
           user: User(id: 'user-id'),
         ),
       ]);
-      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
+      when(() => client.connectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
       when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(1));
 
       await tester.pumpWidget(
@@ -334,7 +334,7 @@ void main() {
           user: User(id: 'user-id'),
         ),
       ]);
-      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.disconnected));
+      when(() => client.connectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.disconnected));
 
       await tester.pumpWidget(
         MaterialApp(
@@ -399,7 +399,7 @@ void main() {
           user: User(id: 'user-id'),
         ),
       ]);
-      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
+      when(() => client.connectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
       when(() => clientState.totalUnreadCount).thenAnswer((i) => 1);
       when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(1));
       when(() => clientState.channels).thenReturn({channel.cid!: channel});
@@ -460,7 +460,7 @@ void main() {
       when(() => clientState.totalUnreadCount).thenReturn(0);
       when(() => clientState.totalUnreadCountStream).thenAnswer((_) => Stream.value(0));
       when(() => clientState.channels).thenReturn({channel.cid!: channel});
-      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
+      when(() => client.connectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
 
       when(() => channel.client).thenReturn(client);
       when(() => channel.state).thenReturn(channelState);
@@ -525,7 +525,7 @@ void main() {
       when(() => clientState.totalUnreadCount).thenReturn(0);
       when(() => clientState.totalUnreadCountStream).thenAnswer((_) => Stream.value(0));
       when(() => clientState.channels).thenReturn({channel.cid!: channel});
-      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
+      when(() => client.connectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
 
       when(() => channel.client).thenReturn(client);
       when(() => channel.state).thenReturn(channelState);

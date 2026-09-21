@@ -181,7 +181,7 @@ class _DisconnectedTitleState extends StatelessWidget {
               vertical: VisualDensity.minimumDensity,
             ),
           ),
-          onPressed: client.maybeReconnect,
+          onPressed: () => client.maybeReconnect().ignore(),
           child: Text(
             context.translations.tryAgainLabel,
             style: textStyle?.copyWith(

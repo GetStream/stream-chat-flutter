@@ -9,7 +9,7 @@ class MockStreamChannelListEventHandler extends Mock implements StreamChannelLis
 
 class MockClient extends Mock implements StreamChatClient {
   MockClient() {
-    when(() => wsConnectionStatus).thenReturn(ConnectionStatus.connected);
+    when(() => connectionStatus).thenReturn(ConnectionStatus.connected);
   }
 
   @override

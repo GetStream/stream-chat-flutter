@@ -292,7 +292,7 @@ class _DisconnectedTitleState extends StatelessWidget {
           type: .ghost,
           style: .primary,
           size: .small,
-          onPressed: client.maybeReconnect,
+          onPressed: () => client.maybeReconnect().ignore(),
           child: Text(context.translations.tryAgainLabel),
         ),
       ],

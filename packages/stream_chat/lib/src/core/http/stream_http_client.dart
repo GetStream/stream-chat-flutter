@@ -6,6 +6,7 @@ import 'package:stream_core/stream_core.dart'
     show
         ApiErrorInterceptor,
         AuthInterceptor,
+        ConnectionIdGetter,
         ConnectionIdInterceptor,
         DioExceptionMapping,
         HeadersInterceptor,
@@ -15,7 +16,6 @@ import 'package:stream_core/stream_core.dart'
         SystemEnvironmentManager,
         TokenManager;
 import '../error/stream_chat_exception.dart';
-import 'connection_id_manager.dart';
 import 'interceptor/additional_headers_interceptor.dart';
 
 part 'stream_http_client_options.dart';
@@ -29,7 +29,7 @@ class StreamHttpClient {
     Dio? dio,
     StreamHttpClientOptions? options,
     TokenManager? tokenManager,
-    ConnectionIdManager? connectionIdManager,
+    ConnectionIdGetter? connectionId,
     SystemEnvironmentManager? systemEnvironmentManager,
     Iterable<Interceptor>? interceptors,
     HttpClientAdapter? httpClientAdapter,
@@ -52,7 +52,7 @@ class StreamHttpClient {
         const AdditionalHeadersInterceptor(),
         ?systemEnvironmentManager?.let(HeadersInterceptor.new),
         ?tokenManager?.let((it) => AuthInterceptor(httpClient, it, tag: 'SCh:HttpAuth')),
-        ?connectionIdManager?.let((it) => ConnectionIdInterceptor(() => it.connectionId)),
+        ?connectionId?.let(ConnectionIdInterceptor.new),
         const ApiErrorInterceptor(),
         ...interceptors ?? [LoggingInterceptor(requestHeader: true, tag: 'SCh:Http')],
       ]);

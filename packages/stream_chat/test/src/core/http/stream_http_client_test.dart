@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/api/responses.dart';
-import 'package:stream_chat/src/core/http/connection_id_manager.dart';
 import 'package:stream_chat/src/core/http/interceptor/additional_headers_interceptor.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_core/stream_core.dart'
@@ -76,7 +75,7 @@ void main() {
     final client = StreamHttpClient(
       'api-key',
       tokenManager: TokenManager.unconfigured(),
-      connectionIdManager: ConnectionIdManager(),
+      connectionId: () => null,
       systemEnvironmentManager: SystemEnvironmentManager(
         environment: const SystemEnvironment(
           sdkName: 'stream-chat',
@@ -112,7 +111,7 @@ void main() {
       const apiKey = 'api-key';
       final client = StreamHttpClient(
         apiKey,
-        connectionIdManager: ConnectionIdManager(),
+        connectionId: () => null,
       );
 
       expect(

@@ -41,8 +41,13 @@
 - A sort names its model's field type, so `MemberSort.asc` takes a `MemberSortField` and a field from another model does not compile. `XSortField.custom(key)` reads a field from the model's extra data, for the four models whose queries accept one.
 - Added `ChannelSort.empty`, `MemberSort.empty` and one on every other sort — an empty sort, for querying with the ordering the API applies on its own.
 - Default sorts moved onto the sort that owns them: `ChannelSort.defaultSort`, `MemberSort.defaultSort` and so on, reachable now without the Flutter layer.
+- `client.wsConnectionStatus` and `wsConnectionStatusStream` become `connectionStatus` and `connectionStatusStream`. `ConnectionStatus` keeps its three values, and a client that has never connected still reads as `disconnected`.
+- The WebSocket's state — `Connected`, `Connecting`, `Authenticating`, `Disconnected` and the disconnection sources — is no longer exported, and the client no longer reports it. `ConnectionStatus` is the whole connection API, as on the other Stream SDKs.
+- `StreamHttpClient` and `StreamChatApi` take a `ConnectionIdGetter? connectionId` where they took a `ConnectionIdManager?`. The manager only wrapped such a closure, and is removed.
 
 🐞 Fixed
+
+- `queryChannels` no longer gives up watching the channels it loads when it is called before the connection is open. Whether they can be watched is read when the request is sent, which is after the query has waited for the connection.
 
 - A message that fails because its attachments did not upload now says which ones and what each reported, instead of `Failed to upload one or more attachments`.
 
@@ -64,11 +69,13 @@
 
 🔒 Security
 
-- The WebSocket connect and reconnect URIs are logged with the user token redacted. They carried it in full, so an app that raised the log priority wrote a usable token to the console and to any handler it had installed.
+- The WebSocket connect and reconnect URIs are logged with the user token redacted. They carried it in full, so an app that raised the log priority wrote a usable token to the console and to any handler it had installed. The token now travels in query parameters the socket never logs, so nothing has to redact it.
 
 🔄 Internal / Non-breaking
 
 - Added the OpenAPI-generated v2 client under `lib/open_api/`, along with the `melos run gen:openapi` tooling that produces it. No API uses it yet.
+- The WebSocket is now `stream_core`'s `StreamWebSocketClient`. `Event` extends `WsEvent`, the two frames the socket acts on rather than publishes — the health check and the connection error — are their own types under `lib/src/ws/events/`, and `EventType.connectionError` is added. The hand-rolled socket, its reconnection monitor and its timer helper are removed, along with the `web_socket_channel` dependency.
+- The connect URL no longer repeats the user token inside its `json` payload. The server reads the token from the `authorization` query parameter and never looked at `user_token`.
 - Replaced the internal `InFlightCache` and `SystemEnvironmentManager` with shared implementations.
 
 ## Upcoming

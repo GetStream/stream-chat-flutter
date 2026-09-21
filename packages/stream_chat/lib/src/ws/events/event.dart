@@ -1,13 +1,13 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import '../../../stream_chat.dart';
-import '../util/serializer.dart';
+import '../../core/util/serializer.dart';
 
 part 'event.g.dart';
 
 /// The class that contains the information about an event
 @JsonSerializable(includeIfNull: false)
-class Event {
+class Event extends WsEvent {
   /// Constructor used for json serialization
   Event({
     this.type = 'local.event',
