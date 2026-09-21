@@ -73,20 +73,83 @@ DONE = textwrap.dedent("""\
 
 GROUPS = [
     dict(
-        num='02', slug='devices-and-push-preferences', title='Devices & Push Preferences',
-        hand=['device_api.dart'],
-        match=owns('/api/v2/devices', '/api/v2/push_preferences'),
-        goal='Prove the whole pattern end to end on the smallest real surface: four methods, no persistence, '
+        num='02', slug='devices', title='Devices',
+        hand=[],
+        match=owns('/api/v2/devices'),
+        goal='Prove the whole pattern end to end on the smallest real surface: three methods, no persistence, '
              'no channel scope.',
-        decisions=[
-            '`PushProvider` (our public enum) against the generated per-operation extension type — write the '
-            'adapter here, it sets the precedent for every enum that follows.',
-            '`setPushPreferences` reads its response into client state and emits `EventType.pushPreferenceUpdated`; '
-            'decide whether that stays in the api layer or moves up.',
-        ],
+        decisions=[],
+        taken=textwrap.dedent("""\
+            - **`Device` → generated `DeviceResponse`, adopted.** Our two fields dropped seven the server sends
+              (`user_id`, `created_at`, `disabled`, `disabled_reason`, `hardware_id`, `push_provider_name`,
+              `voip`), and the spec makes `OwnUserResponse.devices` a `List<DeviceResponse>` regardless, so
+              keeping ours meant a lossy copy of one shape maintained forever. `created_at` and `user_id` are
+              required, and both are always sent: `user_id` is part of the devices table's composite primary
+              key, and neither field carries `omitempty` on the response struct.
+            - **`ListDevicesResponse` → the generated one, adopted.** Same-name shadow with nothing of ours to keep.
+            - **`PushProvider` is a typedef onto the generated `CreateDeviceRequestPushProvider`.**
+              **This is the enum precedent for every later group,** and it is deliberately *not* the same answer
+              as `RoleType` in group 04. The two cases differ in the generated code, not in taste: `role_type` is
+              a bare `String?` in the generated signature, so a hand-written `RoleType` adds a type where none
+              existed; `push_provider` already has a complete generated extension type with the same four values,
+              so hand-writing one would be a second copy that silently misses a fifth provider the spec adds
+              later.
+
+              What the generated type gets wrong is only its *name* — it is named for the request it happens to
+              hang off, not for the concept. A typedef fixes the name with no second definition and no mapper:
+              the alias **is** the generated type, so it passes straight into `CreateDeviceRequest` unchanged.
+
+              So the rule for later groups is: adopt the generated type when one exists and is complete, alias it
+              when its name is operation-scoped, and hand-write only when the generated side has no type at all.
+
+              Costs, recorded in the migration guide: `.name` and `.values` are gone (v10 shipped an enum), and
+              the alias is transparent, so hovers and analyzer messages show `CreateDeviceRequestPushProvider`.
+              The `.values` loss also costs the test that asserted every provider was covered; an extension type
+              cannot enumerate itself, so a fifth provider is caught by the spec, not by this package's suite.
+            - **`hardwareId` and `voipToken` are left unset.** `voipToken` is typed `bool?` — a flag meaning "this
+              id is a VoIP token", not the token — and surfacing it would imply a VoIP-push story the SDK does not
+              have. Neither has an in-tree consumer. Adding them later is non-breaking.
+            - **The empty-string `pushProviderName` normalization is preserved,** in the repository. `''` and
+              `null` were identical on the wire because the key was omitted for both; keeping the normalization
+              means no new wire value ships untested. Note the server does configure providers under the empty
+              name — omitting the key resolves to that default — so `''` is normalized because it always was,
+              not because the server would reject it.
+            - **Mapping lives in the repository,** not in extension methods on generated types and not in a
+              separate mapper file. Here that is only request construction, which keeps `StreamChatClient` a pure
+              delegate.
+            - **The wire contract is generator-owned, and deliberately not re-pinned here.** The deleted
+              `device_api_test.dart` asserted verb, path and body-versus-query placement, because the
+              hand-written api owned them. They now come from the spec through retrofit annotations, so
+              asserting them in this package would test the generator. The residual risk is named rather than
+              covered: a regeneration that moved a parameter between query and body would pass CI. **This is
+              the testing precedent for every later group** — mock at the `DefaultApi` seam, and let the
+              generated client own the transport.
+            - **Generated response models are not given `fromJson` tests,** following group 04. Decoding is
+              exercised where the SDK owns the surface: `OwnUser.fromJson` pins every field of a device entry
+              and pins that a device missing one the server always sends fails to decode.
+            - **`setPushPreferences` did not come along,** so `device_api.dart` was renamed
+              `push_preferences_api.dart` (`DeviceApi` → `PushPreferencesApi`, `StreamChatApi.device` →
+              `StreamChatApi.pushPreferences`) rather than deleted — the file split rather than migrating whole.
+              It is [group 13](13-push-preferences.md), which is gated behind a spec question and reaches into
+              models this group deliberately avoids.
+            """),
         risks=[
-            "Generated `DeviceResponse` has 9 fields against our `Device`'s 2 — drop or widen, and record which.",
+            '**Request bodies carry explicit nulls — verified harmless.** No model under `lib/open_api/model/` '
+            'sets `includeIfNull: false`, so `CreateDeviceRequest.toJson` emits '
+            '`{"hardware_id":null,"id":"…","push_provider":"firebase","push_provider_name":null,'
+            '"voip_token":null}` where the hand-written path omitted those keys. This is the first request '
+            '*body* through the generated client, so it applies to **every** group from here on; a live '
+            '`createDevice` accepted it. Recorded rather than fixed — if a later endpoint does mind, the fix '
+            "is the generator's model template, never a hand-rolled request builder.",
+            'Devices are **not** persisted — no entity, DAO or mapper. `OwnUser` *is*, inside '
+            "`connection_events.own_user`, but v11's schema bump drops and recreates every table, so no v10 "
+            'row survives to be read back against the new shape. A device registered by the published v10 '
+            'SDK was read back through both `getDevices` and `me.devices` on connect.',
+            '`pushProviderName` is re-derived from the app\'s configured providers on `GET /devices` but not '
+            'on the `me` payload, so the same device can carry a name from `getDevices()` and `null` from '
+            '`OwnUser.devices`. New surface rather than a regression — v10 did not expose the field at all.',
         ],
+        done=DONE.replace('- [ ]', '- [x]'),
     ),
     dict(
         num='03', slug='user-groups', title='User Groups',
@@ -300,6 +363,35 @@ GROUPS = [
             'users.',
             'The generated `uploadFile` / `uploadChannelFile` take a JSON body with no progress or cancellation, '
             'so this group cannot use them — it needs its own `CdnApi`.',
+        ],
+    ),
+    dict(
+        num='13', slug='push-preferences', title='Push Preferences',
+        hand=['push_preferences_api.dart'],
+        match=owns('/api/v2/push_preferences'),
+        goal='Migrate the one method group 02 left behind — last, because its dependencies are group 11\'s, '
+             'not group 02\'s.',
+        decisions=[
+            '**Whether the spec can express a push-preference map the server only partly fills.** The generated '
+            '`UpsertPushPreferencesResponse.userPreferences` is `Map<String, PushPreferencesResponse>` with '
+            'non-nullable values, but our `_userPreferencesFromJson` (`responses.dart`) exists specifically to '
+            'drop `null` entries — its doc comment states the server returns `null` for users the upsert did '
+            'not touch, and `responses_test.dart` pins it. Adopting the generated type as it stands would turn '
+            'a routine channel-only upsert into a decode failure. Resolve it with a live capture of a '
+            'channel-only upsert **before** writing code; if the server does send `null`, the fix belongs in '
+            'the spec (`user_preferences` wants nullable `additionalProperties`) and is `openapi-codegen` '
+            'work, not a hand-rolled decoder here.',
+            'Whether `setPushPreferences` keeps reading its response into client state and emitting '
+            '`EventType.pushPreferenceUpdated` from the api layer, or that moves up.',
+        ],
+        risks=[
+            '`ChannelConfig.chatPreferences` **is** persisted, inside the `channels.config` JSON blob. Deleting '
+            '`chat_preferences.dart` retypes it and touches `channel_mapper_test.dart`, dragging '
+            '`ChannelConfig` — a group 11 model — along. No schema change, but it is a persistence change, and '
+            'it is why this group sorts after 11 rather than beside devices.',
+            '`PushPreference` / `ChannelPushPreference` ride on `Event`, `OwnUser.pushPreferences` and '
+            '`ChannelState.pushPreferences`, so adopting them reaches into the event and channel-state layers.',
+            '`ChannelState.pushPreferences` is **not** persisted — checked, no entity, DAO or mapper.',
         ],
     ),
 ]
