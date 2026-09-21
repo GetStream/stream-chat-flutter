@@ -661,12 +661,6 @@ extension _AttachmentPickerTypesX on Iterable<AttachmentPickerType> {
       if (mediaType != null) mediaTypes.add(mediaType);
     }
 
-    assert(
-      mediaTypes.isNotEmpty,
-      'At least one media type is required; an empty request type makes '
-      'photo_manager build an empty media query.',
-    );
-
     return RequestType.fromTypes(mediaTypes);
   }
 }
