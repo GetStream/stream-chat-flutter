@@ -883,7 +883,7 @@ Widget mobileAttachmentPickerBuilder({
             );
           },
         ),
-      }.where((option) => option.supportedTypes.any(allowedTypes.contains)),
+      }.where((option) => option.supportedTypes.isAllowedBy(allowedTypes)),
     },
   );
 }
@@ -931,7 +931,7 @@ Widget webOrDesktopAttachmentPickerBuilder({
           icon: const StreamSvgIcon(icon: StreamSvgIcons.polls),
           title: context.translations.createPollLabel(isNew: true),
         ),
-      }.where((option) => option.supportedTypes.any(allowedTypes.contains)),
+      }.where((option) => option.supportedTypes.isAllowedBy(allowedTypes)),
     },
     onOptionTap: (context, controller, option) async {
       // Handle the polls type option separately
@@ -966,10 +966,18 @@ Widget webOrDesktopAttachmentPickerBuilder({
 }
 
 extension _AttachmentPickerTypesX on Iterable<AttachmentPickerType> {
+  // Whether these types pass the allowedTypes filter.
+  //
+  // An option can declare no supported type at all, in which case there is
+  // nothing to gate and it always passes.
+  bool isAllowedBy(List<AttachmentPickerType> allowedTypes) {
+    if (isEmpty) return true;
+    return any(allowedTypes.contains);
+  }
+
   // Converts these picker types to the equivalent media RequestType.
   //
-  // Types without media, such as files and polls, are ignored. Falls back to
-  // RequestType.common when none are left.
+  // Types without media, such as files and polls, are ignored.
   RequestType toRequestType() {
     final mediaTypes = <RequestType>[];
     for (final type in this) {
@@ -983,7 +991,6 @@ extension _AttachmentPickerTypesX on Iterable<AttachmentPickerType> {
       if (mediaType != null) mediaTypes.add(mediaType);
     }
 
-    if (mediaTypes.isEmpty) return RequestType.common;
     return RequestType.fromTypes(mediaTypes);
   }
 }

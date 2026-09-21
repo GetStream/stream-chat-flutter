@@ -122,6 +122,67 @@ void main() {
         expect(gallery.mediaType, RequestType.common);
       },
     );
+
+    testWidgets(
+      'should keep a custom option declaring no supported type',
+      (tester) async {
+        final controller = StreamAttachmentPickerController();
+        addTearDown(controller.dispose);
+
+        await _pumpMobilePicker(
+          tester,
+          controller: controller,
+          allowedTypes: [AttachmentPickerType.images],
+          customOptions: [
+            const AttachmentPickerOption(
+              key: 'custom-picker',
+              icon: StreamSvgIcon(icon: StreamSvgIcons.search),
+              supportedTypes: [],
+            ),
+          ],
+        );
+
+        final picker = tester.widget<StreamMobileAttachmentPickerBottomSheet>(
+          find.byType(StreamMobileAttachmentPickerBottomSheet),
+        );
+
+        expect(picker.options.map((it) => it.key), contains('custom-picker'));
+      },
+    );
+
+    testWidgets(
+      'should enable only the gallery when a video is already attached',
+      (tester) async {
+        final controller = StreamAttachmentPickerController(
+          initialAttachments: [
+            Attachment(
+              id: 'video-attachment',
+              type: AttachmentType.video,
+              title: 'video.mp4',
+            ),
+          ],
+        );
+        addTearDown(controller.dispose);
+
+        await _pumpMobilePicker(
+          tester,
+          controller: controller,
+          allowedTypes: [
+            AttachmentPickerType.images,
+            AttachmentPickerType.files,
+          ],
+        );
+
+        final picker = tester.widget<StreamMobileAttachmentPickerBottomSheet>(
+          find.byType(StreamMobileAttachmentPickerBottomSheet),
+        );
+
+        expect(
+          controller.filterEnabledTypes(options: picker.options),
+          {AttachmentPickerType.images, AttachmentPickerType.videos},
+        );
+      },
+    );
   });
 }
 
@@ -129,6 +190,7 @@ Future<void> _pumpMobilePicker(
   WidgetTester tester, {
   required StreamAttachmentPickerController controller,
   required List<AttachmentPickerType> allowedTypes,
+  Iterable<AttachmentPickerOption>? customOptions,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -142,6 +204,7 @@ Future<void> _pumpMobilePicker(
                 context: context,
                 controller: controller,
                 allowedTypes: allowedTypes,
+                customOptions: customOptions,
               );
             },
           ),
