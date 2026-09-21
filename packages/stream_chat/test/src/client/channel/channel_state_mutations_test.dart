@@ -19,6 +19,7 @@ void main() {
   late List<(User, Event)> upsertTypingEventCalls;
   late List<User> removeTypingEventCalls;
   late List<(User, int?)> removeWatcherCalls;
+  late List<User> removeMemberCalls;
   late List<Member> updateMemberCalls;
   late List<(String, bool, DateTime?)> deleteMessagesFromUserCalls;
 
@@ -45,6 +46,7 @@ void main() {
     upsertTypingEventCalls = [];
     removeTypingEventCalls = [];
     removeWatcherCalls = [];
+    removeMemberCalls = [];
     updateMemberCalls = [];
     deleteMessagesFromUserCalls = [];
 
@@ -54,6 +56,7 @@ void main() {
       upsertTypingEvent: (user, event) => upsertTypingEventCalls.add((user, event)),
       removeTypingEvent: removeTypingEventCalls.add,
       removeWatcher: (watcher, {watcherCount}) => removeWatcherCalls.add((watcher, watcherCount)),
+      removeMember: removeMemberCalls.add,
       updateMember: updateMemberCalls.add,
       deleteMessagesFromUser: ({required userId, hardDelete = false, deletedAt}) async {
         deleteMessagesFromUserCalls.add((userId, hardDelete, deletedAt));
@@ -580,27 +583,10 @@ void main() {
       expect(capturedChannelState().members, [existingMember, member]);
     });
 
-    test('onMemberRemoved removes the member and its read state', () {
-      final existingMember = Member(user: User(id: 'existing-user'));
-      final existingRead = Read(
-        user: User(id: 'existing-user'),
-        lastRead: DateTime.now(),
-      );
-      stubChannelState(
-        ChannelState(
-          members: [existingMember, member],
-          read: [
-            existingRead,
-            Read(user: otherUser, lastRead: DateTime.now()),
-          ],
-        ),
-      );
-
+    test('onMemberRemoved removes the member', () {
       mutations.onMemberRemoved(otherUser);
 
-      final updated = capturedChannelState();
-      expect(updated.members, [existingMember]);
-      expect(updated.read, [existingRead]);
+      expect(removeMemberCalls, [otherUser]);
     });
 
     test('onMemberUserUpdated merges the user into the member and membership', () {
