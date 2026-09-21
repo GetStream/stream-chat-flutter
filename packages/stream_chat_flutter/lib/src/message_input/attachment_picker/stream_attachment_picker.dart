@@ -991,6 +991,11 @@ extension _AttachmentPickerTypesX on Iterable<AttachmentPickerType> {
       if (mediaType != null) mediaTypes.add(mediaType);
     }
 
+    // photo_manager has no valid "no media" request type — an empty one builds
+    // an empty media-type predicate and throws on both platforms. Callers
+    // intersect with the gallery's own supportedTypes, so this stays non-empty.
+    assert(mediaTypes.isNotEmpty, 'at least one media type is required');
+
     return RequestType.fromTypes(mediaTypes);
   }
 }
