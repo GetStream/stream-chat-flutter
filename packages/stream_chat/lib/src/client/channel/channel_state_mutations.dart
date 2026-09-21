@@ -16,6 +16,7 @@ class ChannelStateMutations {
     required this._upsertTypingEvent,
     required this._removeTypingEvent,
     required this._removeWatcher,
+    required this._removeMember,
     required this._updateMember,
     required this._deleteMessagesFromUser,
   });
@@ -26,6 +27,7 @@ class ChannelStateMutations {
   final void Function(User user, Event event) _upsertTypingEvent;
   final void Function(User user) _removeTypingEvent;
   final void Function(User watcher, {int? watcherCount}) _removeWatcher;
+  final void Function(User user) _removeMember;
   final void Function(Member member) _updateMember;
   final Future<void> Function({
     required String userId,
@@ -430,17 +432,7 @@ class ChannelStateMutations {
   }
 
   /// Removes the [user]'s membership and read state.
-  void onMemberRemoved(User user) {
-    final existingRead = _state.channelState.read ?? [];
-    final existingMembers = _state.channelState.members ?? [];
-
-    _state.updateChannelState(
-      _state.channelState.copyWith(
-        read: [...existingRead.where((r) => r.user.id != user.id)],
-        members: [...existingMembers.where((m) => m.userId != user.id)],
-      ),
-    );
-  }
+  void onMemberRemoved(User user) => _removeMember(user);
 
   /// Merges the updated [user] into the matching member and membership.
   ///
