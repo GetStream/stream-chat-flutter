@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed image attachments requesting two near-identical renditions of the same image from the CDN.
+
 ## 9.29.0
 
 - Minor bug fixes and improvements
