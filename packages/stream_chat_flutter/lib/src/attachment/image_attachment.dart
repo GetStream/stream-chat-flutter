@@ -12,9 +12,10 @@ class StreamImageAttachment extends StatelessWidget {
     required this.image,
     this.shape,
     this.constraints = const BoxConstraints(),
-    this.imageThumbnailSize,
-    this.imageThumbnailResizeType = 'clip',
-    this.imageThumbnailCropType = 'center',
+    this.resize,
+    @Deprecated("Use 'resize' instead") this.imageThumbnailSize,
+    @Deprecated("Use 'resize' instead") this.imageThumbnailResizeType,
+    @Deprecated("Use 'resize' instead") this.imageThumbnailCropType,
   });
 
   /// The [Message] that the image is attached to.
@@ -31,21 +32,42 @@ class StreamImageAttachment extends StatelessWidget {
   /// The constraints to use when displaying the image.
   final BoxConstraints constraints;
 
+  /// The resize configuration for the image attachment thumbnail.
+  ///
+  /// When provided, its [ImageResize.width] and [ImageResize.height] are used
+  /// directly as the CDN resize dimensions.
+  ///
+  /// When null, the size is auto-calculated from the layout constraints and
+  /// defaults to [ResizeMode.clip] and [CropMode.center].
+  final ImageResize? resize;
+
   /// Size of the attachment image thumbnail.
   final Size? imageThumbnailSize;
 
   /// Resize type of the image attachment thumbnail.
   ///
   /// Defaults to [crop]
-  final String /*clip|crop|scale|fill*/ imageThumbnailResizeType;
+  final String? /*clip|crop|scale|fill*/ imageThumbnailResizeType;
 
   /// Crop type of the image attachment thumbnail.
   ///
   /// Defaults to [center]
-  final String /*center|top|bottom|left|right*/ imageThumbnailCropType;
+  final String? /*center|top|bottom|left|right*/ imageThumbnailCropType;
+
+  bool _hasDeprecatedOptions() {
+    var hasDeprecatedOptions = imageThumbnailSize != null;
+    hasDeprecatedOptions |= imageThumbnailResizeType != null;
+    hasDeprecatedOptions |= imageThumbnailCropType != null;
+    return hasDeprecatedOptions;
+  }
 
   @override
   Widget build(BuildContext context) {
+    assert(
+      resize == null || !_hasDeprecatedOptions(),
+      'Cannot provide both a resize and the deprecated thumbnail options',
+    );
+
     BoxFit? fit;
     final imageSize = image.originalSize;
 
@@ -85,8 +107,12 @@ class StreamImageAttachment extends StatelessWidget {
               fit: fit,
               width: double.infinity,
               height: double.infinity,
+              resize: resize,
+              // ignore: deprecated_member_use_from_same_package
               thumbnailSize: imageThumbnailSize,
+              // ignore: deprecated_member_use_from_same_package
               thumbnailResizeType: imageThumbnailResizeType,
+              // ignore: deprecated_member_use_from_same_package
               thumbnailCropType: imageThumbnailCropType,
             ),
             Padding(

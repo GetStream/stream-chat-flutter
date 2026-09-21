@@ -1,3 +1,14 @@
+## Upcoming
+
+✅ Added
+
+- Added `StreamChatConfigurationData.imageCDN`; image caching now keys on the rendition, not the signed URL, so re-signing no longer re-downloads. Extend `StreamImageCDN` for a custom CDN.
+
+⚠️ Deprecated
+
+- Deprecated `String.getResizedImageUrl`; use `StreamImageCDN.resolveUrl`.
+- Deprecated the `thumbnailSize`, `thumbnailResizeType` and `thumbnailCropType` parameters; use `resize`.
+
 ## 9.29.0
 
 - Minor bug fixes and improvements

@@ -3,6 +3,7 @@ import 'package:stream_chat_flutter/src/attachment/thumbnail/giphy_attachment_th
 import 'package:stream_chat_flutter/src/attachment/thumbnail/image_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/thumbnail_error.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/video_attachment_thumbnail.dart';
+import 'package:stream_chat_flutter/src/utils/stream_image_cdn.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// {@template mediaAttachmentThumbnail}
@@ -24,9 +25,10 @@ class StreamMediaAttachmentThumbnail extends StatelessWidget {
     this.width,
     this.height,
     this.fit,
-    this.thumbnailSize,
-    this.thumbnailResizeType = 'clip',
-    this.thumbnailCropType = 'center',
+    this.resize,
+    @Deprecated("Use 'resize' instead") this.thumbnailSize,
+    @Deprecated("Use 'resize' instead") this.thumbnailResizeType,
+    @Deprecated("Use 'resize' instead") this.thumbnailCropType,
     this.gifInfoType = GiphyInfoType.original,
     this.errorBuilder = _defaultErrorBuilder,
   });
@@ -46,6 +48,17 @@ class StreamMediaAttachmentThumbnail extends StatelessWidget {
   /// Builder used when the thumbnail fails to load.
   final ThumbnailErrorBuilder errorBuilder;
 
+  /// The resize configuration for the image attachment thumbnail.
+  ///
+  /// When provided, its [ImageResize.width] and [ImageResize.height] are used
+  /// directly as the CDN resize dimensions.
+  ///
+  /// When null, the size is auto-calculated from the layout constraints and
+  /// defaults to [ResizeMode.clip] and [CropMode.center].
+  ///
+  /// Ignored if the [Attachment.type] is not [AttachmentType.image].
+  final ImageResize? resize;
+
   /// Size of the attachment image thumbnail.
   ///
   /// Ignored if the [Attachment.type] is not [AttachmentType.image].
@@ -56,14 +69,14 @@ class StreamMediaAttachmentThumbnail extends StatelessWidget {
   /// Defaults to [crop]
   ///
   /// Ignored if the [Attachment.type] is not [AttachmentType.image].
-  final String /*clip|crop|scale|fill*/ thumbnailResizeType;
+  final String? /*clip|crop|scale|fill*/ thumbnailResizeType;
 
   /// Crop type of the image attachment thumbnail.
   ///
   /// Defaults to [center]
   ///
   /// Ignored if the [Attachment.type] is not [AttachmentType.image].
-  final String /*center|top|bottom|left|right*/ thumbnailCropType;
+  final String? /*center|top|bottom|left|right*/ thumbnailCropType;
 
   /// The type of giphy thumbnail to build.
   ///
@@ -85,8 +98,20 @@ class StreamMediaAttachmentThumbnail extends StatelessWidget {
     );
   }
 
+  bool _hasDeprecatedOptions() {
+    var hasDeprecatedOptions = thumbnailSize != null;
+    hasDeprecatedOptions |= thumbnailResizeType != null;
+    hasDeprecatedOptions |= thumbnailCropType != null;
+    return hasDeprecatedOptions;
+  }
+
   @override
   Widget build(BuildContext context) {
+    assert(
+      resize == null || !_hasDeprecatedOptions(),
+      'Cannot provide both a resize and the deprecated thumbnail options',
+    );
+
     final type = media.type;
     if (type == AttachmentType.image) {
       return StreamImageAttachmentThumbnail(
@@ -94,8 +119,12 @@ class StreamMediaAttachmentThumbnail extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
+        resize: resize,
+        // ignore: deprecated_member_use_from_same_package
         thumbnailSize: thumbnailSize,
+        // ignore: deprecated_member_use_from_same_package
         thumbnailResizeType: thumbnailResizeType,
+        // ignore: deprecated_member_use_from_same_package
         thumbnailCropType: thumbnailCropType,
         errorBuilder: errorBuilder,
       );

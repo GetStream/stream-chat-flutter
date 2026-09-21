@@ -116,6 +116,7 @@ class StreamChatConfigurationData {
     bool? enforceUniqueReactions,
     bool draftMessagesEnabled = false,
     MessagePreviewFormatter? messagePreviewFormatter,
+    StreamImageCDN imageCDN = const StreamImageCDN(),
   }) {
     return StreamChatConfigurationData._(
       loadingIndicator: loadingIndicator,
@@ -126,6 +127,7 @@ class StreamChatConfigurationData {
       draftMessagesEnabled: draftMessagesEnabled,
       messagePreviewFormatter:
           messagePreviewFormatter ?? MessagePreviewFormatter(),
+      imageCDN: imageCDN,
     );
   }
 
@@ -137,6 +139,7 @@ class StreamChatConfigurationData {
     required this.enforceUniqueReactions,
     required this.draftMessagesEnabled,
     required this.messagePreviewFormatter,
+    required this.imageCDN,
   });
 
   /// Copies the configuration options from one [StreamChatConfigurationData] to
@@ -149,6 +152,7 @@ class StreamChatConfigurationData {
     bool? enforceUniqueReactions,
     bool? draftMessagesEnabled,
     MessagePreviewFormatter? messagePreviewFormatter,
+    StreamImageCDN? imageCDN,
   }) {
     return StreamChatConfigurationData(
       reactionIcons: reactionIcons ?? this.reactionIcons,
@@ -160,6 +164,7 @@ class StreamChatConfigurationData {
       draftMessagesEnabled: draftMessagesEnabled ?? this.draftMessagesEnabled,
       messagePreviewFormatter:
           messagePreviewFormatter ?? this.messagePreviewFormatter,
+      imageCDN: imageCDN ?? this.imageCDN,
     );
   }
 
@@ -179,6 +184,13 @@ class StreamChatConfigurationData {
 
   /// Assets used for rendering reactions.
   final List<StreamReactionIcon> reactionIcons;
+
+  /// The image CDN used for generating resized image URLs and stable
+  /// cache keys.
+  ///
+  /// Defaults to [StreamImageCDN], which supports Stream's own CDN.
+  /// Extend [StreamImageCDN] to customize behavior for a custom CDN.
+  final StreamImageCDN imageCDN;
 
   /// Whether a new reaction should replace the existing one.
   final bool enforceUniqueReactions;

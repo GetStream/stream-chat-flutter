@@ -19,26 +19,29 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: StreamChatTheme(
-            data: streamTheme,
-            child: StreamChannel(
-              channel: channel,
-              child: SizedBox(
-                child: StreamGiphyAttachment(
-                  constraints: BoxConstraints.tight(const Size(
-                    300,
-                    300,
-                  )),
-                  message: Message(),
-                  giphy: Attachment(
-                    type: 'giphy',
-                    title: 'example.gif',
-                    imageUrl:
-                        'https://media.giphy.com/media/35H0pwQNaO2iLTnnBf/giphy.gif',
-                    extraData: const {
-                      'mime_type': 'gif',
-                    },
-                    uploadState: const UploadState.success(),
+          home: StreamChatConfiguration(
+            data: StreamChatConfigurationData(),
+            child: StreamChatTheme(
+              data: streamTheme,
+              child: StreamChannel(
+                channel: channel,
+                child: SizedBox(
+                  child: StreamGiphyAttachment(
+                    constraints: BoxConstraints.tight(const Size(
+                      300,
+                      300,
+                    )),
+                    message: Message(),
+                    giphy: Attachment(
+                      type: 'giphy',
+                      title: 'example.gif',
+                      imageUrl:
+                          'https://media.giphy.com/media/35H0pwQNaO2iLTnnBf/giphy.gif',
+                      extraData: const {
+                        'mime_type': 'gif',
+                      },
+                      uploadState: const UploadState.success(),
+                    ),
                   ),
                 ),
               ),
