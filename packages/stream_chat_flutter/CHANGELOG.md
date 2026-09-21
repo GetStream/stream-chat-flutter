@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed image attachments being requested from the CDN at more pixels than the original holds.
+
 ## 9.29.0
 
 - Minor bug fixes and improvements

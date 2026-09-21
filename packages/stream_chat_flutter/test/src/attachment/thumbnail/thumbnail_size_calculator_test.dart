@@ -216,17 +216,14 @@ void main() {
         expect(result.height, closeTo(5.625, 0.01));
       });
 
-      test('handles very large target sizes', () {
+      test('caps a target larger than the original at the original', () {
         final result = ThumbnailSizeCalculator.calculate(
           originalSize: const Size(1920, 1080),
           targetSize: const Size(4000, 3000),
           pixelRatio: 1,
         );
 
-        expect(result, isNotNull);
-        // Should still maintain aspect ratio for upscaling
-        expect(result!.width, closeTo(4000, 0.01));
-        expect(result.height, closeTo(2250, 0.01));
+        expect(result, const Size(1920, 1080));
       });
 
       test('handles fractional pixel ratio', () {
@@ -254,18 +251,35 @@ void main() {
         expect(result.height, closeTo(225, 0.01));
       });
 
-      test('handles original size smaller than target', () {
-        // Small original image (100x100) being scaled up to 400x300
+      test('caps a square original fitted to a wider box', () {
         final result = ThumbnailSizeCalculator.calculate(
           originalSize: const Size(100, 100),
           targetSize: const Size(400, 300),
           pixelRatio: 1,
         );
 
-        expect(result, isNotNull);
-        // Should still maintain aspect ratio (1:1)
-        expect(result!.width, closeTo(300, 0.01));
-        expect(result.height, closeTo(300, 0.01));
+        expect(result, const Size(100, 100));
+      });
+
+      test('caps at the original when the pixel ratio overshoots it', () {
+        // Would otherwise be requested at 768x576.
+        final result = ThumbnailSizeCalculator.calculate(
+          originalSize: const Size(400, 300),
+          targetSize: const Size(256, 192),
+          pixelRatio: 3,
+        );
+
+        expect(result, const Size(400, 300));
+      });
+
+      test('returns the original when the target matches it exactly', () {
+        final result = ThumbnailSizeCalculator.calculate(
+          originalSize: const Size(400, 300),
+          targetSize: const Size(400, 300),
+          pixelRatio: 1,
+        );
+
+        expect(result, const Size(400, 300));
       });
     });
   });
