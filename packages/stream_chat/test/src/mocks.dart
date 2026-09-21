@@ -14,15 +14,13 @@ import 'package:stream_chat/src/core/api/polls_api.dart';
 import 'package:stream_chat/src/core/api/push_preferences_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/src/core/api/user_groups_api.dart';
-import 'package:stream_chat/src/core/http/connection_id_manager.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/models/channel_config.dart';
-import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/util/event_controller.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
-import 'package:stream_chat/src/ws/websocket.dart';
-import 'package:stream_core/stream_core.dart' show StreamLogger, TokenManager;
+import 'package:stream_chat/src/ws/events/event.dart';
+import 'package:stream_core/stream_core.dart' show StreamLogger, StreamWebSocketClient, TokenManager;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class MockWebSocketChannel extends Mock implements WebSocketChannel {}
@@ -44,8 +42,6 @@ class MockDio extends Mock implements Dio {
 class MockHttpClient extends Mock implements StreamHttpClient {}
 
 class MockTokenManager extends Mock implements TokenManager {}
-
-class MockConnectionIdManager extends Mock implements ConnectionIdManager {}
 
 class MockUserApi extends Mock implements UserApi {}
 
@@ -190,6 +186,9 @@ class MockRetryQueueChannel extends Mock implements Channel {
   }
 }
 
-class MockWebSocket extends Mock implements WebSocket {}
+class MockWebSocket extends Mock implements StreamWebSocketClient {
+  @override
+  Future<void> dispose() async {}
+}
 
 class MockChannelDeliveryReporter extends Mock implements ChannelDeliveryReporter {}

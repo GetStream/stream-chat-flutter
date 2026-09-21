@@ -24,11 +24,13 @@ export 'package:rate_limiter/rate_limiter.dart';
 export 'package:stream_core/stream_core.dart'
     show
         CompositeComparator,
+        ConnectionIdGetter,
         CurrentPlatform,
         Distance,
         EvaluationOperator,
         Failure,
         Filter,
+        HealthCheckInfo,
         FilterField,
         FilterOperator,
         LocationCoordinate,
@@ -59,7 +61,8 @@ export 'package:stream_core/stream_core.dart'
         TokenManager,
         TokenProvider,
         UserToken,
-        UserTokenLoader;
+        UserTokenLoader,
+        WsEvent;
 
 export 'package:uuid/uuid.dart';
 
@@ -94,7 +97,6 @@ export 'src/core/models/chat_preferences.dart';
 export 'src/core/models/command.dart';
 export 'src/core/models/draft.dart';
 export 'src/core/models/draft_message.dart';
-export 'src/core/models/event.dart';
 export 'src/core/models/location.dart';
 export 'src/core/models/member.dart';
 export 'src/core/models/message.dart';
@@ -129,4 +131,5 @@ export 'src/core/util/extension.dart';
 export 'src/core/util/message_rules.dart';
 export 'src/db/chat_persistence_client.dart';
 export 'src/event_type.dart';
-export 'src/ws/connection_status.dart';
+export 'src/ws/connection_status.dart' show ConnectionStatus;
+export 'src/ws/events/event.dart';

@@ -1,11 +1,11 @@
 import 'package:json_annotation/json_annotation.dart';
 import '../../client/client.dart';
+import '../../ws/events/event.dart';
 import '../models/app_settings.dart';
 import '../models/banned_user.dart';
 import '../models/channel_model.dart';
 import '../models/channel_state.dart';
 import '../models/draft.dart';
-import '../models/event.dart';
 import '../models/location.dart';
 import '../models/member.dart';
 import '../models/message.dart';

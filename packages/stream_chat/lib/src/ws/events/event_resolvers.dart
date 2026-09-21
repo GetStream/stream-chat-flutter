@@ -1,5 +1,5 @@
-import '../core/models/event.dart';
-import '../event_type.dart';
+import '../../event_type.dart';
+import 'event.dart';
 
 /// Resolves message new events into more specific `pollCreated` events
 /// for easier downstream state handling.
