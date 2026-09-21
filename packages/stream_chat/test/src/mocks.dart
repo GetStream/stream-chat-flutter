@@ -6,12 +6,12 @@ import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
 import 'package:stream_chat/src/client/client.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/api/channel_api.dart';
-import 'package:stream_chat/src/core/api/device_api.dart';
 import 'package:stream_chat/src/core/api/general_api.dart';
 import 'package:stream_chat/src/core/api/guest_api.dart';
 import 'package:stream_chat/src/core/api/message_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
 import 'package:stream_chat/src/core/api/polls_api.dart';
+import 'package:stream_chat/src/core/api/push_preferences_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/src/core/api/user_groups_api.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
@@ -53,7 +53,7 @@ class MockPollsApi extends Mock implements PollsApi {}
 
 class MockChannelApi extends Mock implements ChannelApi {}
 
-class MockDeviceApi extends Mock implements DeviceApi {}
+class MockPushPreferencesApi extends Mock implements PushPreferencesApi {}
 
 class MockModerationApi extends Mock implements ModerationApi {}
 

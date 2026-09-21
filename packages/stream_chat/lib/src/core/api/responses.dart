@@ -5,7 +5,6 @@ import '../models/app_settings.dart';
 import '../models/banned_user.dart';
 import '../models/channel_model.dart';
 import '../models/channel_state.dart';
-import '../models/device.dart';
 import '../models/draft.dart';
 import '../models/location.dart';
 import '../models/member.dart';
@@ -165,17 +164,6 @@ class QueryRepliesResponse extends _BaseResponse {
 
   /// Create a new instance from a json
   static QueryRepliesResponse fromJson(Map<String, dynamic> json) => _$QueryRepliesResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.getDevices] api call
-@JsonSerializable(createToJson: false)
-class ListDevicesResponse extends _BaseResponse {
-  /// List of user devices
-  @JsonKey(defaultValue: [])
-  late List<Device> devices;
-
-  /// Create a new instance from a json
-  static ListDevicesResponse fromJson(Map<String, dynamic> json) => _$ListDevicesResponseFromJson(json);
 }
 
 /// Base Model response for [Channel.sendImage] and [Channel.sendFile] api call.

@@ -66,7 +66,8 @@ export 'package:stream_core/stream_core.dart'
 
 export 'package:uuid/uuid.dart';
 
-export 'open_api/models.dart' show Role, SearchRolesResponse;
+export 'open_api/models.dart'
+    show CreateDeviceRequestPushProvider, DeviceResponse, ListDevicesResponse, Role, SearchRolesResponse;
 
 export 'src/client/channel/channel.dart';
 export 'src/client/channel/channel_capability_check.dart';
@@ -95,7 +96,6 @@ export 'src/core/models/channel_mute.dart';
 export 'src/core/models/channel_state.dart';
 export 'src/core/models/chat_preferences.dart';
 export 'src/core/models/command.dart';
-export 'src/core/models/device.dart';
 export 'src/core/models/draft.dart';
 export 'src/core/models/draft_message.dart';
 export 'src/core/models/location.dart';

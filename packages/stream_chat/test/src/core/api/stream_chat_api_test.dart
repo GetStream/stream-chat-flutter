@@ -35,8 +35,8 @@ void main() {
     expect(streamChatApi.channel, isNotNull);
   });
 
-  test('`.device`', () {
-    expect(streamChatApi.device, isNotNull);
+  test('`.pushPreferences`', () {
+    expect(streamChatApi.pushPreferences, isNotNull);
   });
 
   test('`.moderation`', () {

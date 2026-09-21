@@ -10,7 +10,7 @@ class MockMute extends Mock implements Mute {}
 
 class ChannelMockMute extends Mock implements ChannelMute {}
 
-class MockDevice extends Mock implements Device {}
+class MockDevice extends Mock implements DeviceResponse {}
 
 void main() {
   final devices = [MockDevice(), MockDevice()];
@@ -31,7 +31,17 @@ void main() {
       expect(ownUser.lastActive, DateTime.parse('2021-06-16T11:59:59.003453014Z'));
       expect(ownUser.banned, false);
       expect(ownUser.online, true);
-      expect(ownUser.devices.length, 1);
+      expect(ownUser.devices, hasLength(1));
+      final device = ownUser.devices.single;
+      expect(device.id, startsWith('cRS8elU4Q-qqdCAvHR2kSa:'));
+      expect(device.pushProvider, 'firebase');
+      expect(device.userId, 'super-band-9');
+      expect(device.createdAt, DateTime.parse('2020-04-23T14:36:21.838196Z'));
+      expect(device.pushProviderName, isNull);
+      expect(device.hardwareId, isNull);
+      expect(device.voip, isNull);
+      expect(device.disabled, isNull);
+      expect(device.disabledReason, isNull);
       expect(ownUser.mutes.length, 0);
       expect(ownUser.channelMutes.length, 1);
       expect(ownUser.totalUnreadCount, 0);
@@ -40,6 +50,24 @@ void main() {
       expect(ownUser.extraData['image'], 'https://placehold.jp/150x150.png');
       expect(ownUser.extraData['name'], 'Proud darkness');
       expect(ownUser.extraData['username'], 'Rioland');
+    });
+
+    test('should fail to decode a device missing a field the server always sends', () {
+      final json = jsonFixture('own_user.json');
+      final device = Map<String, dynamic>.from((json['devices']! as List).single as Map);
+
+      for (final field in ['id', 'push_provider', 'created_at', 'user_id']) {
+        final incomplete = Map<String, dynamic>.from(device)..remove(field);
+
+        expect(
+          () => OwnUser.fromJson({
+            ...json,
+            'devices': [incomplete],
+          }),
+          throwsA(isA<TypeError>()),
+          reason: 'a device without $field should not decode',
+        );
+      }
     });
 
     test('should initialize a OwnUser from a User correctly', () {
@@ -298,6 +326,7 @@ void main() {
             'id': 'device-1',
             'push_provider': 'firebase',
             'created_at': '2023-01-01T00:00:00.000Z',
+            'user_id': 'test-user',
           },
         ],
       };
@@ -423,9 +452,11 @@ void main() {
           'custom_field': 'custom_value',
         },
         devices: [
-          Device(
+          DeviceResponse(
             id: 'device-1',
             pushProvider: 'firebase',
+            createdAt: DateTime.utc(2024),
+            userId: 'test-user-id',
           ),
         ],
         totalUnreadCount: 10,
@@ -482,13 +513,17 @@ void main() {
             'is_verified': true,
           },
           devices: [
-            Device(
+            DeviceResponse(
               id: 'device-1',
               pushProvider: 'firebase',
+              createdAt: DateTime.utc(2024),
+              userId: 'test-user-id',
             ),
-            Device(
+            DeviceResponse(
               id: 'device-2',
               pushProvider: 'apn',
+              createdAt: DateTime.utc(2024),
+              userId: 'test-user-id',
             ),
           ],
           totalUnreadCount: 25,

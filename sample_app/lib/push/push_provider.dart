@@ -15,7 +15,7 @@ class PushProvider {
   const PushProvider.firebase({
     required this.name,
     this._tokenStreamProvider = _firebaseTokenProvider,
-  }) : type = chat.PushProvider.firebase;
+  }) : type = chat.CreateDeviceRequestPushProvider.firebase;
 
   /// Raw Apple Push Notification service.
   ///
@@ -26,7 +26,7 @@ class PushProvider {
   const PushProvider.apn({
     required this.name,
     this._tokenStreamProvider = _apnTokenProvider,
-  }) : type = chat.PushProvider.apn;
+  }) : type = chat.CreateDeviceRequestPushProvider.apn;
 
   static Stream<String> _firebaseTokenProvider() async* {
     // On iOS, `getToken()` throws if the APNs token isn't registered with
@@ -77,7 +77,7 @@ class PushProvider {
   final String name;
 
   /// The Stream Chat provider type (FCM or APNs).
-  final chat.PushProvider type;
+  final chat.CreateDeviceRequestPushProvider type;
 
   /// Returns the current push token, or throws [TimeoutException] if
   /// the token isn't available within [timeout].

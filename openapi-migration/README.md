@@ -13,9 +13,9 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | | Group | Hand-written | Generated ops | Status |
 | --- | --- | --- | --- | --- |
 | [01](01-foundation.md) | Foundation — `DefaultApi` wiring, `User` shape | — | — | ☐ |
-| [02](02-devices-and-push-preferences.md) | Devices & Push Preferences | 4 | 4 | ☐ |
+| [02](02-devices.md) | Devices | 0 | 3 | ☑ |
 | [03](03-user-groups.md) | User Groups | 8 | 8 | ☐ |
-| [04](04-roles-guest-and-app.md) | Roles, Guest & App Settings | 4 | 5 | ☐ |
+| [04](04-roles-guest-and-app.md) | Roles, Guest & App Settings | 3 | 5 | ☐ |
 | [05](05-polls.md) | Polls | 13 | 13 | ☐ |
 | [06](06-reminders.md) | Message Reminders | 4 | 4 | ☐ |
 | [07](07-threads-and-drafts.md) | Threads & Drafts | 7 | 7 | ☐ |
@@ -24,8 +24,9 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [10](10-messages.md) | Messages & Search | 14 | 12 | ☐ |
 | [11](11-channels-and-members.md) | Channels, Members & Sync | 27 | 24 | ☐ |
 | [12](12-uploads-cdn.md) | Uploads (CDN) | 8 | 8 | ☐ |
+| [13](13-push-preferences.md) | Push Preferences | 1 | 1 | ☐ |
 
-**Coverage:** 109 hand-written methods across 13 files, and all 128 generated operations, each claimed by exactly
+**Coverage:** 105 hand-written methods across 12 files, and all 128 generated operations, each claimed by exactly
 one group. Verified mechanically — see [Keeping this plan honest](#keeping-this-plan-honest).
 
 ## Goals

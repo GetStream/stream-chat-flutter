@@ -83,11 +83,6 @@ QueryRepliesResponse _$QueryRepliesResponseFromJson(
   ..messages =
       (json['messages'] as List<dynamic>?)?.map((e) => Message.fromJson(e as Map<String, dynamic>)).toList() ?? [];
 
-ListDevicesResponse _$ListDevicesResponseFromJson(Map<String, dynamic> json) => ListDevicesResponse()
-  ..duration = json['duration'] as String?
-  ..devices =
-      (json['devices'] as List<dynamic>?)?.map((e) => Device.fromJson(e as Map<String, dynamic>)).toList() ?? [];
-
 SendAttachmentResponse _$SendAttachmentResponseFromJson(
   Map<String, dynamic> json,
 ) => SendAttachmentResponse()
