@@ -72,12 +72,7 @@
 ## Decisions to make
 
 - `ChannelState`, `ChannelModel` and `Member` are public, persisted, and rebuilt from WebSocket events. Keep ours and map.
-- **Whether `ChannelModel` promotes its `extraData`-backed flags to real fields.** `disabled`, `hidden`,
-  `muted`, `blocked` and `truncatedAt` all arrive as root fields on `ChannelResponse` but are pushed into
-  `extraData` and read back through getters, which the constructor comment calls "for backwards compatibility".
-  Promoting them is a break worth making in v11 if it is made at all, and it belongs with this group's model
-  shape rather than with whichever phase happens to add the next flag. Raised on
-  [#2958](https://github.com/GetStream/stream-chat-flutter/pull/2958).
+- **Whether `ChannelModel` promotes its `extraData`-backed flags to real fields.** `disabled`, `hidden`, `muted`, `blocked` and `truncatedAt` all arrive as root fields on `ChannelResponse` but are pushed into `extraData` and read back through getters, which the constructor comment calls "for backwards compatibility". Promoting them is a break worth making in v11 if it is made at all, and it belongs with this group's model shape rather than with whichever phase happens to add the next flag. Raised on [#2958](https://github.com/GetStream/stream-chat-flutter/pull/2958).
 - `sync` returns `SyncResponse` — one of the two models that needed the WSEvent generator patch. Verify it decodes before relying on it.
 
 ## Risks
