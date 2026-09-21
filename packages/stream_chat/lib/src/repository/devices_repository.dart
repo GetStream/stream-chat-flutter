@@ -25,9 +25,6 @@ class DevicesRepository {
     createDeviceRequest: CreateDeviceRequest(
       id: id,
       pushProvider: pushProvider,
-      // An empty name is sent as no name, as it always has been: no provider
-      // is configured under the empty string, so it is a lookup key the
-      // server can only reject.
       pushProviderName: switch (pushProviderName) {
         final name? when name.isNotEmpty => name,
         _ => null,
