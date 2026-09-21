@@ -87,7 +87,7 @@ GROUPS = [
               required, and both are always sent: `user_id` is part of the devices table's composite primary
               key, and neither field carries `omitempty` on the response struct.
             - **`ListDevicesResponse` → the generated one, adopted.** Same-name shadow with nothing of ours to keep.
-            - **`PushProvider` is a typedef onto the generated `CreateDeviceRequestPushProvider`.**
+            - **`PushProvider` is deleted; the generated `CreateDeviceRequestPushProvider` is the public type.**
               **This is the enum precedent for every later group,** and it is deliberately *not* the same answer
               as `RoleType` in group 04. The two cases differ in the generated code, not in taste: `role_type` is
               a bare `String?` in the generated signature, so a hand-written `RoleType` adds a type where none
@@ -95,17 +95,25 @@ GROUPS = [
               so hand-writing one would be a second copy that silently misses a fifth provider the spec adds
               later.
 
-              What the generated type gets wrong is only its *name* — it is named for the request it happens to
-              hang off, not for the concept. A typedef fixes the name with no second definition and no mapper:
-              the alias **is** the generated type, so it passes straight into `CreateDeviceRequest` unchanged.
+              This started as a typedef aliasing the generated type to a better name, and that was reverted in
+              review. The rule for later groups is therefore: **adopt the generated type when one exists and is
+              complete, including its name, and hand-write only when the generated side has no type at all.**
+              Do not alias a generated type merely to rename it — an alias is a second name for one concept, and
+              it hides from the reader that the spec is what needs fixing.
 
-              So the rule for later groups is: adopt the generated type when one exists and is complete, alias it
-              when its name is operation-scoped, and hand-write only when the generated side has no type at all.
+              The name really is wrong: `CreateDeviceRequestPushProvider` is named for the request it hangs off,
+              not for the concept, and it is what a consumer writes and what hovers show. That is accepted as
+              temporary, because a spec change is prepared that renames these types. When it lands the fix is a
+              rename in one place rather than the unwinding of an alias.
 
-              Costs, recorded in the migration guide: `.name` and `.values` are gone (v10 shipped an enum), and
-              the alias is transparent, so hovers and analyzer messages show `CreateDeviceRequestPushProvider`.
+              Costs, recorded in the migration guide: `.name` and `.values` are gone (v10 shipped an enum).
               The `.values` loss also costs the test that asserted every provider was covered; an extension type
               cannot enumerate itself, so a fifth provider is caught by the spec, not by this package's suite.
+            - **The write calls answer nothing.** `addDevice` and `removeDevice` return `Result<void>`
+              rather than the generated `DurationResponse`, whose only field is a server-timing string no
+              integrator acts on. `stream_feeds` already does this, and it keeps `DurationResponse` off the
+              public surface entirely. **The precedent for every later group: a write that returns only an
+              envelope returns `Result<void>`.**
             - **`hardwareId` and `voipToken` are left unset.** `voipToken` is typed `bool?` — a flag meaning "this
               id is a VoIP token", not the token — and surfacing it would imply a VoIP-push story the SDK does not
               have. Neither has an in-tree consumer. Adding them later is non-breaking.

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart' show debugPrint;
-import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide PushProvider;
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'push_provider.dart';
 

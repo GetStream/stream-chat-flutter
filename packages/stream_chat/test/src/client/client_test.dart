@@ -3,7 +3,8 @@
 import 'dart:async';
 
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/open_api/api.dart' show CreateDeviceRequest;
+import 'package:stream_chat/open_api/api.dart'
+    show CreateDeviceRequest, CreateDeviceRequestPushProvider, DurationResponse;
 import 'package:stream_chat/src/ws/events/events.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
@@ -1839,7 +1840,7 @@ void main() {
 
     test('`.addDevice should work`', () async {
       const id = 'test-device-id';
-      const provider = PushProvider.firebase;
+      const provider = CreateDeviceRequestPushProvider.firebase;
       const request = CreateDeviceRequest(id: id, pushProvider: provider);
 
       when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
@@ -1847,7 +1848,7 @@ void main() {
       );
 
       final res = await client.addDevice(id, provider);
-      expect(res, const Result.success(DurationResponse(duration: '0.01ms')));
+      expect(res.isSuccess, isTrue);
 
       verify(() => defaultApi.createDevice(createDeviceRequest: request)).called(1);
       verifyNoMoreInteractions(defaultApi);
@@ -1855,7 +1856,7 @@ void main() {
 
     test('`.addDevice should work with pushProviderName`', () async {
       const id = 'test-device-id';
-      const provider = PushProvider.firebase;
+      const provider = CreateDeviceRequestPushProvider.firebase;
       const pushProviderName = 'my-custom-config';
       const request = CreateDeviceRequest(
         id: id,
@@ -1878,14 +1879,14 @@ void main() {
       const error = StreamClientException(message: 'boom');
       const request = CreateDeviceRequest(
         id: 'test-device-id',
-        pushProvider: PushProvider.firebase,
+        pushProvider: CreateDeviceRequestPushProvider.firebase,
       );
 
       when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
         (_) async => const Result.failure(error),
       );
 
-      final res = await client.addDevice('test-device-id', PushProvider.firebase);
+      final res = await client.addDevice('test-device-id', CreateDeviceRequestPushProvider.firebase);
 
       expect(res.isFailure, isTrue);
       expect(res.exceptionOrNull(), error);
@@ -1896,7 +1897,7 @@ void main() {
         3,
         (index) => DeviceResponse(
           id: 'test-device-id-$index',
-          pushProvider: PushProvider.firebase,
+          pushProvider: CreateDeviceRequestPushProvider.firebase,
           createdAt: DateTime.utc(2024),
           userId: userId,
         ),
@@ -1921,7 +1922,7 @@ void main() {
       );
 
       final res = await client.removeDevice(deviceId);
-      expect(res, const Result.success(DurationResponse(duration: '0.01ms')));
+      expect(res.isSuccess, isTrue);
 
       verify(() => defaultApi.deleteDevice(id: deviceId)).called(1);
       verifyNoMoreInteractions(defaultApi);

@@ -1,8 +1,7 @@
 import 'package:stream_core/stream_core.dart' show Result;
 
 import '../../open_api/api.dart' show DefaultApi;
-import '../../open_api/models.dart' show CreateDeviceRequest, DurationResponse, ListDevicesResponse;
-import '../core/models/push_provider.dart';
+import '../../open_api/models.dart' show CreateDeviceRequest, CreateDeviceRequestPushProvider, ListDevicesResponse;
 
 /// Repository dedicated to device operations.
 class DevicesRepository {
@@ -17,9 +16,9 @@ class DevicesRepository {
   ///
   /// [pushProviderName] names which of the app's configurations for
   /// [pushProvider] to use, for apps that have more than one.
-  Future<Result<DurationResponse>> addDevice(
+  Future<Result<void>> addDevice(
     String id,
-    PushProvider pushProvider, {
+    CreateDeviceRequestPushProvider pushProvider, {
     String? pushProviderName,
   }) => _api.createDevice(
     createDeviceRequest: CreateDeviceRequest(
@@ -36,5 +35,5 @@ class DevicesRepository {
   Future<Result<ListDevicesResponse>> getDevices() => _api.listDevices();
 
   /// Removes a registered device, stopping push notifications to it.
-  Future<Result<DurationResponse>> removeDevice(String id) => _api.deleteDevice(id: id);
+  Future<Result<void>> removeDevice(String id) => _api.deleteDevice(id: id);
 }

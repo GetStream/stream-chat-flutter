@@ -157,9 +157,9 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamChatClient.searchRoles` → `Future<SearchRolesResponse>` | `Future<Result<SearchRolesResponse>>` | `retyped` | Returns a `Result` instead of throwing |
 | `Device` (hand-written) | `DeviceResponse` (generated) | `retyped` | Two fields become nine. `created_at` and `user_id` are required, so a device entry missing either now fails to decode |
 | `ListDevicesResponse` (hand-written) | `ListDevicesResponse` (generated) | `retyped` | `devices` and `duration` are required — a body omitting either now fails to decode rather than defaulting to `[]` |
-| `PushProvider` (enum) | `PushProvider` (extension type over `String`, alias of the generated `CreateDeviceRequestPushProvider`) | `retyped` | Same name, same four values, same wire strings |
-| `PushProvider.firebase.name` | `PushProvider.firebase` | `removed` | The value *is* the string, so there is no `.name` — and no `.values` |
-| `StreamChatClient.addDevice` / `removeDevice` → `Future<EmptyResponse>` | `Future<Result<DurationResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `PushProvider` (enum) | `CreateDeviceRequestPushProvider` (extension type over `String`) | `renamed` | Same four values and wire strings. The name is the generated one, and operation-scoped until the spec is regenerated |
+| `PushProvider.firebase.name` | `CreateDeviceRequestPushProvider.firebase` | `removed` | The value *is* the string, so there is no `.name` — and no `.values` |
+| `StreamChatClient.addDevice` / `removeDevice` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing, and carries no value on success |
 | `StreamChatClient.getDevices` → `Future<ListDevicesResponse>` | `Future<Result<ListDevicesResponse>>` | `retyped` | Returns a `Result` instead of throwing |
 | `StreamChatApi.device` | `StreamChatApi.pushPreferences` | `renamed` | The class handles only `setPushPreferences` now; device calls moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
@@ -439,38 +439,37 @@ types come from the OpenAPI spec.
 ```dart
 // v10
 try {
-  await client.addDevice(token, PushProvider.firebase);
+  await client.addDevice(token, CreateDeviceRequestPushProvider.firebase);
 } on StreamChatException catch (e) {
   report(e);
 }
 
 // v11
-final result = await client.addDevice(token, PushProvider.firebase);
+final result = await client.addDevice(token, CreateDeviceRequestPushProvider.firebase);
 result.fold(
   onSuccess: (_) => registered(),
   onFailure: (error, _) => report(error),
 );
 ```
 
-**`PushProvider` keeps its name but is now an extension type over `String`** rather than an enum —
-an alias of the generated `CreateDeviceRequestPushProvider`, so there is one definition rather than a
-hand-maintained copy. The four values and their wire strings are unchanged, and a provider *is* its
-string:
+**`PushProvider` is replaced by the generated `CreateDeviceRequestPushProvider`,** an extension type
+over `String` rather than an enum. There is one definition rather than a hand-maintained copy. The four
+values and their wire strings are unchanged, and a provider *is* its string:
 
 ```dart
 // v10
 final wireValue = PushProvider.firebase.name; // 'firebase'
 
 // v11
-const wireValue = PushProvider.firebase; // already 'firebase'
+const wireValue = CreateDeviceRequestPushProvider.firebase; // already 'firebase'
 ```
 
 There is no `.values`, so code that iterated the enum needs an explicit list. A provider the spec does
-not name still round-trips, through `PushProvider.fromJson`.
+not name still round-trips, through `CreateDeviceRequestPushProvider.fromJson`.
 
-Because the alias is transparent, IDE hovers and analyzer messages name the underlying
-`CreateDeviceRequestPushProvider`. That is the generated type's own name; `PushProvider` is what the
-SDK exports and what you write.
+The name is the generated one, and it is scoped to the operation it hangs off rather than to the
+concept. That is temporary: a spec change is prepared that will give the type a better name, at which
+point this becomes a rename rather than a new concept.
 
 **`Device` is replaced by `DeviceResponse`,** including in `OwnUser.devices`. Reading `id` and
 `pushProvider` is unchanged; constructing one now also requires `createdAt` and `userId`.
