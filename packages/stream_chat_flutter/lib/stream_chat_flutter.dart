@@ -1,5 +1,5 @@
 export 'package:jiffy/jiffy.dart';
-export 'package:photo_manager/photo_manager.dart' show ThumbnailSize, ThumbnailFormat;
+export 'package:photo_manager/photo_manager.dart' show RequestType, ThumbnailSize, ThumbnailFormat;
 export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 export 'package:stream_core_flutter/chat.dart'
     hide

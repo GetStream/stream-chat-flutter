@@ -18,6 +18,7 @@
 🐞 Fixed
 
 - Fixed `StreamAttachmentHandler` throwing `UnimplementedError` on WebAssembly builds.
+- Fixed the gallery tab vanishing from the attachment picker when `allowedAttachmentPickerTypes` allowed images or videos but not both. It now stays available and lists only the allowed media.
 - Improved the screen-reader experience in the message list: each message is announced as a single phrase naming the sender, the body, the time, the edited marker and the delivery status, while the attachments, reaction chips, quoted message and replies row stay reachable one level deeper.
 - Fixed the message body being announced as its markdown source, so link and emphasis syntax is no longer read aloud.
 - Fixed a quoted message announcing only the quoted author's name, saying nothing about who replied to whom.

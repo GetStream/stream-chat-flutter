@@ -399,15 +399,15 @@ Widget tabbedAttachmentPickerBuilder({
       key: 'gallery-picker',
       icon: context.streamIcons.image,
       title: context.translations.photosAndVideosLabel,
-      supportedTypes: [
-        AttachmentPickerType.images,
-        AttachmentPickerType.videos,
-      ],
+      supportedTypes: StreamGalleryPicker.supportedTypes,
       optionViewBuilder: (context, controller) {
         final attachment = controller.value.attachments;
         final selectedIds = attachment.map((it) => it.id);
+        final galleryTypes = StreamGalleryPicker.supportedTypes.where(allowedTypes.contains);
+
         return StreamGalleryPicker(
           config: galleryPickerConfig,
+          mediaType: galleryTypes.toRequestType(),
           selectedMediaItems: selectedIds,
           onMediaItemSelected: (media) async {
             try {
@@ -523,7 +523,7 @@ Widget tabbedAttachmentPickerBuilder({
     controller: controller,
     options: {
       ...validOptions.where(
-        (option) => option.supportedTypes.every(allowedTypes.contains),
+        (option) => option.supportedTypes.any(allowedTypes.contains),
       ),
     },
   );
@@ -629,8 +629,31 @@ Widget systemAttachmentPickerBuilder({
     controller: controller,
     options: {
       ...validOptions.where(
-        (option) => option.supportedTypes.every(allowedTypes.contains),
+        (option) => option.supportedTypes.any(allowedTypes.contains),
       ),
     },
   );
+}
+
+extension _AttachmentPickerTypesX on Iterable<AttachmentPickerType> {
+  // Converts these picker types to the equivalent media RequestType.
+  //
+  // Types without media, such as files and polls, are ignored. Falls back to
+  // RequestType.common when none are left.
+  RequestType toRequestType() {
+    final mediaTypes = <RequestType>[];
+    for (final type in this) {
+      final mediaType = switch (type) {
+        ImagesPickerType() => RequestType.image,
+        VideosPickerType() => RequestType.video,
+        AudiosPickerType() => RequestType.audio,
+        _ => null,
+      };
+
+      if (mediaType != null) mediaTypes.add(mediaType);
+    }
+
+    if (mediaTypes.isEmpty) return RequestType.common;
+    return RequestType.fromTypes(mediaTypes);
+  }
 }
