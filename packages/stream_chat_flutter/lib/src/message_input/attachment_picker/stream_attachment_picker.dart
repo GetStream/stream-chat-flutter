@@ -767,14 +767,16 @@ Widget mobileAttachmentPickerBuilder({
         AttachmentPickerOption(
           key: 'gallery-picker',
           icon: const StreamSvgIcon(icon: StreamSvgIcons.pictures),
-          supportedTypes: [
-            AttachmentPickerType.images,
-            AttachmentPickerType.videos,
-          ],
+          supportedTypes: StreamGalleryPicker.supportedTypes,
           optionViewBuilder: (context, controller) {
             final attachment = controller.value.attachments;
             final selectedIds = attachment.map((it) => it.id);
+            final galleryTypes = StreamGalleryPicker.supportedTypes.where(
+              allowedTypes.contains,
+            );
+
             return StreamGalleryPicker(
+              mediaType: galleryTypes.toRequestType(),
               selectedMediaItems: selectedIds,
               mediaThumbnailSize: attachmentThumbnailSize,
               mediaThumbnailFormat: attachmentThumbnailFormat,
@@ -881,7 +883,7 @@ Widget mobileAttachmentPickerBuilder({
             );
           },
         ),
-      }.where((option) => option.supportedTypes.every(allowedTypes.contains)),
+      }.where((option) => option.supportedTypes.any(allowedTypes.contains)),
     },
   );
 }
@@ -929,7 +931,7 @@ Widget webOrDesktopAttachmentPickerBuilder({
           icon: const StreamSvgIcon(icon: StreamSvgIcons.polls),
           title: context.translations.createPollLabel(isNew: true),
         ),
-      }.where((option) => option.supportedTypes.every(allowedTypes.contains)),
+      }.where((option) => option.supportedTypes.any(allowedTypes.contains)),
     },
     onOptionTap: (context, controller, option) async {
       // Handle the polls type option separately
@@ -961,4 +963,27 @@ Widget webOrDesktopAttachmentPickerBuilder({
       }
     },
   );
+}
+
+extension _AttachmentPickerTypesX on Iterable<AttachmentPickerType> {
+  // Converts these picker types to the equivalent media RequestType.
+  //
+  // Types without media, such as files and polls, are ignored. Falls back to
+  // RequestType.common when none are left.
+  RequestType toRequestType() {
+    final mediaTypes = <RequestType>[];
+    for (final type in this) {
+      final mediaType = switch (type) {
+        AttachmentPickerType.images => RequestType.image,
+        AttachmentPickerType.videos => RequestType.video,
+        AttachmentPickerType.audios => RequestType.audio,
+        AttachmentPickerType.files || AttachmentPickerType.poll => null,
+      };
+
+      if (mediaType != null) mediaTypes.add(mediaType);
+    }
+
+    if (mediaTypes.isEmpty) return RequestType.common;
+    return RequestType.fromTypes(mediaTypes);
+  }
 }

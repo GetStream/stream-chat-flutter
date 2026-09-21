@@ -23,6 +23,7 @@ class StreamGalleryPicker extends StatefulWidget {
   const StreamGalleryPicker({
     super.key,
     this.limit = 50,
+    this.mediaType = RequestType.common,
     required this.selectedMediaItems,
     required this.onMediaItemSelected,
     this.mediaThumbnailSize = const ThumbnailSize(400, 400),
@@ -31,8 +32,19 @@ class StreamGalleryPicker extends StatefulWidget {
     this.mediaThumbnailScale = 1,
   });
 
+  /// The attachment picker types a device gallery can show.
+  static const supportedTypes = [
+    AttachmentPickerType.images,
+    AttachmentPickerType.videos,
+  ];
+
   /// Maximum number of media items that can be selected.
   final int limit;
+
+  /// The type of media to show in the gallery.
+  ///
+  /// Defaults to [RequestType.common], which shows both images and videos.
+  final RequestType mediaType;
 
   /// List of selected media items.
   final Iterable<String> selectedMediaItems;
@@ -70,7 +82,7 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
   @override
   void initState() {
     super.initState();
-    _controller = StreamPhotoGalleryController(limit: widget.limit);
+    _controller = _createController();
     requestPermission = runInPermissionRequestLock(
       PhotoManager.requestPermissionExtend,
     );
@@ -79,10 +91,18 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
   @override
   void didUpdateWidget(StreamGalleryPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.limit != oldWidget.limit) {
+    if (widget.limit != oldWidget.limit ||
+        widget.mediaType != oldWidget.mediaType) {
       _controller.dispose();
-      _controller = StreamPhotoGalleryController(limit: widget.limit);
+      _controller = _createController();
     }
+  }
+
+  StreamPhotoGalleryController _createController() {
+    return StreamPhotoGalleryController(
+      limit: widget.limit,
+      mediaType: widget.mediaType,
+    );
   }
 
   @override
