@@ -26,7 +26,7 @@ void main() {
     repository = RolesRepository(api);
   });
 
-  test('should forward only the query when nothing else is passed', () async {
+  test('searchRoles forwards only the query when nothing else is given', () async {
     when(() => api.searchRoles(query: 'adm')).thenAnswer(
       (_) async => const Result.success(SearchRolesResponse(duration: '0.01ms', roles: [])),
     );
@@ -38,7 +38,7 @@ void main() {
     verifyNoMoreInteractions(api);
   });
 
-  test('should forward every parameter to the generated client', () async {
+  test('searchRoles forwards every parameter it is given', () async {
     when(
       () => api.searchRoles(
         query: 'adm',
@@ -72,7 +72,7 @@ void main() {
     verifyNoMoreInteractions(api);
   });
 
-  test('should return the failure without throwing', () async {
+  test('searchRoles returns the failure without throwing', () async {
     const error = StreamClientException(message: 'boom');
     when(() => api.searchRoles(query: 'adm')).thenAnswer((_) async => const Result.failure(error));
 
