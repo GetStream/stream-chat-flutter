@@ -207,3 +207,7 @@ rather than moved to core.
       parameter described above.
 - [ ] One real request against a live app key, not only against mocks.
 - [ ] Status box updated in `README.md`.
+- [ ] Public dartdoc follows [`STYLE_GUIDE.md` § Documentation](../STYLE_GUIDE.md#documentation),
+      including on symbols this phase retyped but whose docs it left alone.
+- [ ] Tests follow [`TESTING.md`](../TESTING.md): no `group` organizing a file by method, each
+      name states its subject and behaviour.

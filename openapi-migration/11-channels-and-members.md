@@ -92,3 +92,7 @@
 - [ ] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.
 - [ ] CHANGELOG entry under `🛑️ Breaking` for each break; PR title `refactor(llc)!:`.
 - [ ] Decisions recorded in this file, and the status box ticked in `README.md`.
+- [ ] Public dartdoc follows [`STYLE_GUIDE.md` § Documentation](../STYLE_GUIDE.md#documentation),
+      including on symbols this group retyped but whose docs it left alone.
+- [ ] Tests follow [`TESTING.md`](../TESTING.md): no `group` organizing a file by method, each
+      name states its subject and behaviour.

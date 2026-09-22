@@ -31,6 +31,10 @@ Two documents bracket this work, and you should read both before starting:
   reconstructed at release. Read its Symbol Map and Error Handling sections before designing a change: they define
   the shape consumers have already been promised.
 
+**`STYLE_GUIDE.md`** (§ Documentation, § Testing) and **`TESTING.md`** are the repo's conventions, and a
+migration follows them like any other change. Phases 4 and 5 name the rules migrations keep breaking; that is a
+shortlist, not a substitute for the guides. Where they disagree with this skill, the guides win.
+
 Work the phases in order. Most of the cost is in phases 1–2 — the code is mechanical once the inventory and the
 shape decisions exist.
 
@@ -242,6 +246,20 @@ comm -12 \
     | sed "s|.*/\([a-z_]*\)\.dart';|\1|" | sort)
 ```
 
+### Documenting the public surface
+
+Write these as you write the code. `public_member_api_docs` only checks a doc *exists*, so a placeholder survives
+`melos run analyze`. The rules are `STYLE_GUIDE.md` § Documentation; three things migrations get wrong:
+
+- **Scope is the surface the group touches**, not just the new repository. The `StreamChatClient` delegates
+  duplicate its docs verbatim, so a fix belongs in both.
+- **Retyping a field leaves its doc describing the old type**, and that line is not in the diff. `OwnUser.devices`
+  still reads `/// List of user devices.` after becoming a `DeviceResponse`. Re-read the docs on what you retyped.
+- **Describe behaviour, and every non-obvious parameter** — a bare `nameGt` cursor tells a reader nothing. Why a
+  shape was adopted belongs in the plan file and the PR body, not in a doc comment.
+
+Stop at docs the migration neither touched nor invalidated; one feature group per PR applies to docs too.
+
 ## Phase 5 — rewrite the tests
 
 Budget for this: on a typical feature it is most of the diff, and none of it is mechanical.
@@ -255,6 +273,17 @@ Budget for this: on a typical feature it is most of the diff, and none of it is 
 - `test/src/core/api/responses_test.dart` round-trips the DTO from JSON — keep it passing while the DTO exists,
   delete it with the DTO.
 
+Rewrite onto `TESTING.md` rather than carrying the old file's habits across. What breaks most often:
+
+- **No `group` organizing a file by method.** `group('addDevice')`, `group('getDevices')` is the shape a migrated
+  repository test falls into, and `TESTING.md` names it an anti-pattern. A `group` states a shared precondition;
+  anything else belongs in a separate file.
+- **Each name states subject and behaviour**, so `dart test` output says what broke:
+  `searchRoles forwards only the query when nothing else is given`.
+- **No two tests share a name**, which dropping the groups is what exposes — three identical
+  `returns the failure without throwing`.
+- **One behaviour per test.**
+
 ## Phase 6 — verify and land
 
 `melos run analyze`, `melos run test:dart`, plus `stream_chat_persistence`'s tests if the feature's responses feed
@@ -263,6 +292,10 @@ persistence.
 **`melos run analyze` does not cover the generated client's own output.** `analysis_options.yaml` excludes
 `**/*.g.dart` and `**/*.freezed.dart` repo-wide, so the retrofit `default_api.g.dart` and ~490 generated
 `.freezed.dart` files are never analyzed. Exercising the code in a test is what actually compiles it.
+
+**Neither does it cover the guides.** `--fatal-infos` checks a public member *has* a doc, never what it says or
+how a test is named. Re-read the diff against `STYLE_GUIDE.md` § Documentation and `TESTING.md` before opening
+the PR — that read is what the last two definition-of-done boxes stand for.
 
 The PR body carries the group's scope, the phase 2 decisions with their reasons, and any endpoint left
 hand-written and why. Then close the loop in the plan: tick the definition-of-done boxes in the group's file and

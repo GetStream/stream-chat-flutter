@@ -89,6 +89,11 @@ tests → verify). Use **`openapi-codegen`** when a type or operation is missing
 
 Consumer-facing changes go in `migrations/v11-migration.md` in the same PR that makes them.
 
+A migration follows [`STYLE_GUIDE.md`](../STYLE_GUIDE.md) and [`TESTING.md`](../TESTING.md) like any other
+change. Nothing in CI checks either — `dart analyze --fatal-infos` checks a public member *has* a doc, never what
+it says or how a test is named — so the last two boxes of every definition of done stand for reading the diff
+against them.
+
 ## Keeping this plan honest
 
 The scope tables are generated from the SDK, not typed by hand:
