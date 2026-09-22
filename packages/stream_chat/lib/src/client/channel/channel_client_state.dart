@@ -37,6 +37,7 @@ class ChannelClientState {
       upsertTypingEvent: _upsertTypingEvent,
       removeTypingEvent: _removeTypingEvent,
       removeWatcher: _removeWatcher,
+      removeMember: _removeMember,
       updateMember: _updateMember,
       deleteMessagesFromUser: _deleteMessagesFromUser,
     );
@@ -72,6 +73,18 @@ class ChannelClientState {
     _channelState = channelState.copyWith(
       watchers: existingWatchers.where((user) => user.id != watcher.id).toList(),
       watcherCount: watcherCount,
+    );
+  }
+
+  // Removes the member and their read state from the channel state.
+  void _removeMember(User user) {
+    // Writes the state directly: the read list merge in [updateChannelState]
+    // would undo the read removal.
+    final existingMembers = channelState.members ?? const <Member>[];
+    final existingReads = channelState.read ?? const <Read>[];
+    _channelState = channelState.copyWith(
+      members: existingMembers.where((member) => member.userId != user.id).toList(),
+      read: existingReads.where((read) => read.user.id != user.id).toList(),
     );
   }
 
@@ -389,6 +402,25 @@ class ChannelClientState {
     return updateRead([existingUserRead.copyWith(unreadMessages: count)]);
   }
 
+  /// Whether the current user explicitly marked a message in this channel as
+  /// unread during this session, without having read past that boundary
+  /// since.
+  ///
+  /// Set by [markUnreadLocally] and by a `notification.mark_unread` event for
+  /// the current user; cleared by [markReadLocally] and by a `message.read`
+  /// event for the current user. Intended for UI-layer gating that shouldn't
+  /// immediately undo a manual mark-unread.
+  bool get isMarkedAsUnread => _isMarkedAsUnread;
+
+  /// Records whether the current user has an outstanding manual mark-unread.
+  ///
+  /// Only meant for [ChannelEventHandler], which applies the read events the
+  /// server sends for the current user.
+  @internal
+  set isMarkedAsUnread(bool markedAsUnread) => _isMarkedAsUnread = markedAsUnread;
+
+  bool _isMarkedAsUnread = false;
+
   /// Marks the channel as read locally, without making a network request.
   ///
   /// Used for channels that track unread counts locally (see
@@ -427,6 +459,8 @@ class ChannelClientState {
     // locally can still have delivery receipts enabled. Mirrors what the
     // `message.read` event listener does for server-driven channels.
     _client.channelDeliveryReporter.reconcileDelivery([_channel]);
+
+    _isMarkedAsUnread = false;
   }
 
   /// Marks the channel as unread locally, without making a network request.
@@ -465,6 +499,7 @@ class ChannelClientState {
     final unread = messages.where((it) => MessageRules.canCountAsUnread(it, _channel)).length;
 
     unreadCount = unread;
+    _isMarkedAsUnread = true;
   }
 
   /// Counts the number of unread messages mentioning the current user.
