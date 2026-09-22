@@ -27,6 +27,89 @@ class _FixedSizeAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   }
 }
 
+/// Mirrors the layout shape of a real image attachment: the bounded box from
+/// `_kDefaultImageConstraints`, an [AspectRatio] driven by the image's own
+/// ratio, and a [LayoutBuilder] at the leaf — which is where
+/// [StreamImageAttachmentThumbnail] reads `constraints.biggest` and turns it
+/// into a CDN `w`/`h`. Records the width seen on every layout pass.
+class _RecordingAttachmentBuilder extends StreamAttachmentWidgetBuilder {
+  _RecordingAttachmentBuilder({required this.widths});
+
+  /// Width passed to the leaf on each layout pass, in order.
+  final List<double> widths;
+
+  @override
+  bool canHandle(Message message, Map<String, List<Attachment>> attachments) =>
+      true;
+
+  @override
+  Widget build(
+    BuildContext context,
+    Message message,
+    Map<String, List<Attachment>> attachments,
+  ) {
+    return Container(
+      constraints: const BoxConstraints(
+        minWidth: 170,
+        maxWidth: 256,
+        minHeight: 100,
+        maxHeight: 300,
+      ),
+      child: AspectRatio(
+        // A 3:4 portrait photo, the ratio behind the most common size pair in
+        // the reported traffic.
+        aspectRatio: 0.75,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            widths.add(constraints.biggest.width);
+            return const SizedBox.expand();
+          },
+        ),
+      ),
+    );
+  }
+}
+
+/// Mirrors a two-column gallery: the tight box, padding and spacing that
+/// [GalleryAttachmentBuilder] lays its tiles out with. Records the width each
+/// tile is given on every layout pass.
+class _RecordingGalleryBuilder extends StreamAttachmentWidgetBuilder {
+  _RecordingGalleryBuilder({required this.widths});
+
+  /// Width of the first tile on each layout pass, in order.
+  final List<double> widths;
+
+  @override
+  bool canHandle(Message message, Map<String, List<Attachment>> attachments) =>
+      true;
+
+  @override
+  Widget build(
+    BuildContext context,
+    Message message,
+    Map<String, List<Attachment>> attachments,
+  ) {
+    return Container(
+      constraints: const BoxConstraints.tightFor(width: 256, height: 195),
+      padding: const EdgeInsets.all(2),
+      child: Row(
+        children: [
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                widths.add(constraints.biggest.width);
+                return const SizedBox.expand();
+              },
+            ),
+          ),
+          const SizedBox(width: 2),
+          const Expanded(child: SizedBox.expand()),
+        ],
+      ),
+    );
+  }
+}
+
 MessageCard _buildCard({
   required bool hasNonUrlAttachments,
   StreamAttachmentWidgetBuilder? attachmentBuilder,
@@ -77,6 +160,23 @@ Widget _wrap(Widget child) {
   );
 }
 
+/// The max width the card currently imposes on its content.
+///
+/// The limit lives on the outermost [ConstrainedBox] inside [MessageCard] —
+/// inside the decoration, so the border does not eat into it.
+double? _widthLimitOf(WidgetTester tester) {
+  // Deliberately not `.first`: `tester.widget` throws on multiple matches, so
+  // a second ConstrainedBox appearing above this one fails loudly instead of
+  // silently asserting against the wrong box.
+  final box = tester.widget<ConstrainedBox>(
+    find.descendant(
+      of: find.byType(MessageCard),
+      matching: find.byType(ConstrainedBox),
+    ),
+  );
+  return box.constraints.maxWidth;
+}
+
 void main() {
   group('MessageCard._updateWidthLimit', () {
     testWidgets(
@@ -97,13 +197,7 @@ void main() {
         // fire and apply the width limit via setState.
         await tester.pump();
 
-        final container = tester.widget<Container>(
-          find.descendant(
-            of: find.byType(MessageCard),
-            matching: find.byType(Container),
-          ),
-        );
-        expect(container.constraints?.maxWidth, attachmentSize.width);
+        expect(_widthLimitOf(tester), attachmentSize.width);
       },
     );
 
@@ -146,15 +240,57 @@ void main() {
         );
         await tester.pump();
 
-        final container = tester.widget<Container>(
-          find.descendant(
-            of: find.byType(MessageCard),
-            matching: find.byType(Container),
-          ),
-        );
         // The early-return on `attachmentsWidth == 0` means widthLimit stays
         // null and the constraints stay unconstrained on the width axis.
-        expect(container.constraints?.maxWidth, double.infinity);
+        expect(_widthLimitOf(tester), double.infinity);
+      },
+    );
+
+    testWidgets(
+      'lays the attachment out at the same width before and after the '
+      'measured width limit is applied',
+      (tester) async {
+        final widths = <double>[];
+
+        await tester.pumpWidget(
+          _wrap(
+            _buildCard(
+              hasNonUrlAttachments: true,
+              attachmentBuilder: _RecordingAttachmentBuilder(widths: widths),
+            ),
+          ),
+        );
+        // Let the post-frame callback apply the measured width limit and
+        // lay the subtree out a second time.
+        await tester.pump();
+
+        // Feeding the measured width back in must not shrink the box it was
+        // measured from. A narrower second pass makes the thumbnail ask the
+        // CDN for a second, near-identical size for the same image.
+        expect(widths, isNotEmpty);
+        expect(widths.toSet(), hasLength(1), reason: 'saw widths: $widths');
+      },
+    );
+
+    testWidgets(
+      'lays gallery tiles out at the same width across both passes',
+      (tester) async {
+        final widths = <double>[];
+
+        await tester.pumpWidget(
+          _wrap(
+            _buildCard(
+              hasNonUrlAttachments: true,
+              attachmentBuilder: _RecordingGalleryBuilder(widths: widths),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        // A gallery row splits the card's width between its tiles, so a
+        // shrinking second pass costs each tile a fraction of it.
+        expect(widths, isNotEmpty);
+        expect(widths.toSet(), hasLength(1), reason: 'saw widths: $widths');
       },
     );
 

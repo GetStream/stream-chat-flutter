@@ -168,62 +168,66 @@ class _MessageCardState extends State<MessageCard> {
     final quotedMessageBuilder = widget.quotedMessageBuilder;
 
     return Container(
-      constraints: const BoxConstraints().copyWith(maxWidth: widthLimit),
       margin: EdgeInsets.symmetric(
         horizontal: (widget.isFailedState ? 12.0 : 0.0) +
             (widget.showUserAvatar == DisplayWidget.gone ? 0 : 4.0),
       ),
       clipBehavior: Clip.hardEdge,
       decoration: _buildDecoration(widget.messageTheme),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (widget.hasQuotedMessage)
-            InkWell(
-              onTap: !widget.message.quotedMessage!.isDeleted &&
-                      onQuotedMessageTap != null
-                  ? () => onQuotedMessageTap(widget.message.quotedMessageId)
-                  : null,
-              child: quotedMessageBuilder?.call(
-                    context,
-                    widget.message.quotedMessage!,
-                  ) ??
-                  QuotedMessage(
-                    message: widget.message,
-                    textBuilder: widget.textBuilder,
-                    hasNonUrlAttachments: widget.hasNonUrlAttachments,
-                  ),
-            ),
-          if (hasAttachments)
-            ParseAttachments(
-              key: attachmentsKey,
+      // Not on the Container: a bordered ShapeDecoration pads its child, so
+      // the attachment would lay out narrower than the measured [widthLimit].
+      child: ConstrainedBox(
+        constraints: const BoxConstraints().copyWith(maxWidth: widthLimit),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (widget.hasQuotedMessage)
+              InkWell(
+                onTap: !widget.message.quotedMessage!.isDeleted &&
+                        onQuotedMessageTap != null
+                    ? () => onQuotedMessageTap(widget.message.quotedMessageId)
+                    : null,
+                child: quotedMessageBuilder?.call(
+                      context,
+                      widget.message.quotedMessage!,
+                    ) ??
+                    QuotedMessage(
+                      message: widget.message,
+                      textBuilder: widget.textBuilder,
+                      hasNonUrlAttachments: widget.hasNonUrlAttachments,
+                    ),
+              ),
+            if (hasAttachments)
+              ParseAttachments(
+                key: attachmentsKey,
+                message: widget.message,
+                attachmentBuilders: widget.attachmentBuilders,
+                attachmentPadding: widget.attachmentPadding,
+                attachmentShape: widget.attachmentShape,
+                onAttachmentTap: widget.onAttachmentTap,
+                onShowMessage: widget.onShowMessage,
+                onReplyTap: widget.onReplyTap,
+                attachmentActionsModalBuilder:
+                    widget.attachmentActionsModalBuilder,
+              ),
+            if (widget.hasPoll)
+              PollMessage(
+                message: widget.message,
+              ),
+            TextBubble(
+              messageTheme: widget.messageTheme,
               message: widget.message,
-              attachmentBuilders: widget.attachmentBuilders,
-              attachmentPadding: widget.attachmentPadding,
-              attachmentShape: widget.attachmentShape,
-              onAttachmentTap: widget.onAttachmentTap,
-              onShowMessage: widget.onShowMessage,
-              onReplyTap: widget.onReplyTap,
-              attachmentActionsModalBuilder:
-                  widget.attachmentActionsModalBuilder,
+              textPadding: widget.textPadding,
+              textBuilder: widget.textBuilder,
+              isOnlyEmoji: widget.isOnlyEmoji,
+              hasQuotedMessage: widget.hasQuotedMessage,
+              hasUrlAttachments: widget.hasUrlAttachments,
+              onLinkTap: widget.onLinkTap,
+              onMentionTap: widget.onMentionTap,
             ),
-          if (widget.hasPoll)
-            PollMessage(
-              message: widget.message,
-            ),
-          TextBubble(
-            messageTheme: widget.messageTheme,
-            message: widget.message,
-            textPadding: widget.textPadding,
-            textBuilder: widget.textBuilder,
-            isOnlyEmoji: widget.isOnlyEmoji,
-            hasQuotedMessage: widget.hasQuotedMessage,
-            hasUrlAttachments: widget.hasUrlAttachments,
-            onLinkTap: widget.onLinkTap,
-            onMentionTap: widget.onMentionTap,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
