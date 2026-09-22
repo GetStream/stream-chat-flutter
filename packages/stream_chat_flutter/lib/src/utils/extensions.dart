@@ -96,6 +96,7 @@ extension StringExtension on String {
   /// and [crop] if it is from Stream CDN or Dashboard.
   ///
   /// Read more at https://getstream.io/chat/docs/flutter-dart/file_uploads/?language=dart#image-resizing
+  @Deprecated("Use 'StreamImageCDN.resolveUrl' instead")
   String getResizedImageUrl({
     // TODO: Are these sizes optimal? Consider web/desktop
     double width = 400,
