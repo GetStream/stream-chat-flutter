@@ -126,10 +126,11 @@ directly only ever covers the second case: in the first, the call throws while D
 still evaluating the argument, so `expectLater` never runs and the error escapes as a
 raw failure instead of a matcher message.
 
-You cannot tell the two apart from a signature — `Future<T> foo()` can throw
-synchronously, `Future<T> foo() async` never does. Anything before the first `await`,
-including an `assert`, runs eagerly. So wrap the call in a closure whenever it might
-throw synchronously, and whenever you are not sure:
+The call site doesn't tell you which one you have: `async` is part of the declaration,
+not the return type — `Future<T> foo()` can throw synchronously,
+`Future<T> foo() async` never does. An `async` body's throws are captured into the
+returned future even when they happen before the first `await`. So wrap the call in a
+closure whenever it might throw synchronously, and whenever you are not sure:
 
 ```dart
 // `pinMessage` is not `async`, and validates in an `assert` before its first
