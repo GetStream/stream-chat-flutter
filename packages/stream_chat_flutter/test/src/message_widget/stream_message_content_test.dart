@@ -30,7 +30,7 @@ class _FixedSizeAttachmentBuilder extends StreamAttachmentWidgetBuilder {
 class _RecordingAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   _RecordingAttachmentBuilder({required this.widths});
 
-  /// Width passed to the leaf on each layout pass, in order.
+  // Width passed to the leaf on each layout pass, in order.
   final List<double> widths;
 
   @override
@@ -234,7 +234,9 @@ void main() {
     // subtree out a second time.
     await tester.pump();
 
-    expect(widths, isNotEmpty);
+    // Measured once, then laid out again with the limit applied. Without the
+    // count the equality below stays green if the second pass stops running.
+    expect(widths, hasLength(2), reason: 'saw widths: $widths');
     expect(widths.toSet(), hasLength(1), reason: 'saw widths: $widths');
   });
 
