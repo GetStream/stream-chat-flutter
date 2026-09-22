@@ -88,6 +88,20 @@ void main() {
         expect(result, isNot(contains('crop=')));
       });
 
+      test('resizes a URL carrying a crop or a mode but no dimensions', () {
+        const resize = ImageResize(width: 200, height: 300);
+
+        for (final query in ['crop=center', 'resize=fill']) {
+          final result = cdn.resolveUrl(
+            'https://us-east.stream-io-cdn.com/1/images/a.jpg?$query',
+            resize: resize,
+          );
+
+          expect(result, contains('w=200'), reason: '?$query was not resized');
+          expect(result, contains('h=300'), reason: '?$query was not resized');
+        }
+      });
+
       test('leaves a URL that already asks for a size alone', () {
         const url = 'https://us-east.stream-io-cdn.com/102400/images/photo.jpg?w=100&h=100&resize=fill';
         const resize = ImageResize(width: 200, height: 300);

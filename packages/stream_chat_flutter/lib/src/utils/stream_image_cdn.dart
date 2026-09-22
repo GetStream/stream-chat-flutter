@@ -133,8 +133,7 @@ class StreamImageCDN {
   // Parameters that identify a rendition, in cache-key order.
   //
   // These are the image-transformation parameters that affect which rendition
-  // is returned, so they decide both whether a URL is already sized and which
-  // parameters survive into its cache key.
+  // is returned; everything else is stripped from the cache key.
   static const _persistedParameters = ['crop', 'h', 'resize', 'w'];
 
   /// Resolves the [sourceUrl] by appending resize/transform parameters
@@ -172,10 +171,11 @@ class StreamImageCDN {
     return uri.replace(queryParameters: queryParameters).toString();
   }
 
-  // Whether [uri] already asks the CDN for a specific rendition.
+  // Whether [uri] already asks the CDN for a specific size. A crop or a
+  // resize mode alone does not select one.
   static bool _isAlreadySized(Uri uri) {
     final params = uri.queryParameters;
-    return _persistedParameters.any((name) {
+    return const ['w', 'h'].any((name) {
       final value = params[name];
       return value != null && value != _wildcard;
     });
@@ -185,10 +185,9 @@ class StreamImageCDN {
   /// authentication parameters (e.g. CloudFront signed URL tokens)
   /// while preserving those that identify distinct image renditions.
   ///
-  /// This uses an allowlist approach, keeping only the parameters that
-  /// identify a rendition (`crop`, `h`, `resize`, `w`), always in the same
-  /// order, so one rendition yields one key however the source URL ordered
-  /// them.
+  /// Only the parameters that identify a rendition (`crop`, `h`, `resize`,
+  /// `w`) are kept, always in the same order, so one rendition yields one key
+  /// however the source URL ordered them.
   ///
   /// For non-Stream CDN URLs, returns the full URL string unchanged.
   ///

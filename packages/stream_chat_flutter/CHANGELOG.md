@@ -27,7 +27,8 @@
 - Fixed the attachment upload progress on an outgoing message counting its link preview, which inflated the total against an attachment the sender never picked.
 - Fixed a message the moderation system bounced showing a read receipt once other members had read past it. It now shows only the error badge, matching what a screen reader announces for it.
 - Fixed image attachments being requested from the CDN at more pixels than the original holds.
-- Fixed one image rendition yielding two cache entries when its resize parameters arrived in a different order, or a crop from an earlier resize was left on the URL.
+- Fixed one image rendition yielding two cache entries when its resize parameters arrived in a different order, or a crop on the URL survived a resize that does not crop.
+- Fixed image attachments not being resized at all when the URL carried a crop or a resize mode but no dimensions.
 - Fixed a URL whose host merely contains `stream-io-cdn.com` being treated as Stream's CDN.
 
 ## 10.4.0
