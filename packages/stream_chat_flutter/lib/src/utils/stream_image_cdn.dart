@@ -120,9 +120,15 @@ class StreamImageCDN {
 
   // Whether [uri] is served from Stream's image CDN.
   //
-  // Matched as a dot-separated suffix so a lookalike registrable domain such
-  // as `evilstream-io-cdn.com` is not mistaken for ours.
-  static bool _isStreamCDN(Uri uri) => uri.host.endsWith('.$_streamCDNHost');
+  // Matched whole or as a dot-separated suffix, so a lookalike such as
+  // `evilstream-io-cdn.com` is not mistaken for ours.
+  static bool _isStreamCDN(Uri uri) {
+    // A trailing dot is the absolute form of the same host.
+    var host = uri.host;
+    if (host.endsWith('.')) host = host.substring(0, host.length - 1);
+
+    return host == _streamCDNHost || host.endsWith('.$_streamCDNHost');
+  }
 
   // Parameters that identify a rendition, in cache-key order.
   //

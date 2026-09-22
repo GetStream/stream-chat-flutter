@@ -4,6 +4,19 @@ import 'package:stream_chat_flutter/src/utils/stream_image_cdn.dart';
 void main() {
   const cdn = StreamImageCDN();
 
+  // Every host shape the CDN legitimately serves from.
+  const streamHosts = [
+    'us-east.stream-io-cdn.com', // region subdomain
+    'stream-io-cdn.com', // apex
+    'ohio.stream-io-cdn.com.', // absolute form
+  ];
+
+  // Hosts that merely contain the CDN name and must not be treated as ours.
+  const lookalikeHosts = [
+    'stream-io-cdn.com.example', // ours as a prefix
+    'evilstream-io-cdn.com', // ours without the separating dot
+  ];
+
   group('StreamImageCDN.resolveUrl', () {
     group('Stream CDN URLs', () {
       test('returns unchanged URL when resize is null', () {
@@ -82,6 +95,18 @@ void main() {
         expect(cdn.resolveUrl(url, resize: resize), equals(url));
       });
 
+      test('resizes every legitimate form of the CDN host', () {
+        const resize = ImageResize(width: 200, height: 300);
+
+        for (final host in streamHosts) {
+          expect(
+            cdn.resolveUrl('https://$host/photo.jpg', resize: resize),
+            contains('w=200'),
+            reason: '$host should be resized',
+          );
+        }
+      });
+
       test('treats wildcard placeholders as unsized and resizes them', () {
         const url = 'https://us-east.stream-io-cdn.com/102400/images/photo.jpg?crop=*&h=*&resize=*&w=*';
 
@@ -147,10 +172,7 @@ void main() {
       test('does not treat a lookalike host as ours', () {
         const resize = ImageResize(width: 200, height: 300);
 
-        for (final host in [
-          'stream-io-cdn.com.example', // ours as a prefix
-          'evilstream-io-cdn.com', // ours without the dot
-        ]) {
+        for (final host in lookalikeHosts) {
           final url = 'https://$host/photo.jpg';
 
           expect(
@@ -235,6 +257,20 @@ void main() {
         expect(key, contains('h=300'));
       });
 
+      test('strips signing parameters for every form of the CDN host', () {
+        for (final host in streamHosts) {
+          final key = cdn.cacheKey('https://$host/a.jpg?Policy=abc&w=200');
+
+          expect(
+            key,
+            isNot(contains('Policy')),
+            reason:
+                '$host kept its signing tokens, so every re-sign is a new '
+                'cache entry',
+          );
+        }
+      });
+
       test('is identical whatever order the source URL lists params in', () {
         const signed = 'Key-Pair-Id=APK&Policy=POL&Signature=SIG';
         const path = 'https://us-east.stream-io-cdn.com/1/images/a.jpg';
@@ -270,10 +306,7 @@ void main() {
       });
 
       test('keeps the whole query for a lookalike host', () {
-        for (final host in [
-          'stream-io-cdn.com.example', // ours as a prefix
-          'evilstream-io-cdn.com', // ours without the dot
-        ]) {
+        for (final host in lookalikeHosts) {
           final url = 'https://$host/photo.jpg?w=200&token=abc';
 
           expect(
