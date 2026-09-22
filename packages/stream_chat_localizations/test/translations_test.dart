@@ -584,13 +584,12 @@ void main() {
     expectEveryLanguageNamed(translations.translatedFromLanguageText, locale: 'default');
   });
 
-  test('should throw if try to load locale which is not supported', () async {
+  test('should throw if try to load locale which is not supported', () {
     const locale = Locale('not-supported-locale');
-    try {
-      getStreamChatTranslation(locale);
-    } catch (e) {
-      expect(e, isA<AssertionError>());
-    }
+    expect(
+      () => getStreamChatTranslation(locale),
+      throwsA(isA<AssertionError>()),
+    );
   });
 
   test('`.toString`', () {
