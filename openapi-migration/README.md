@@ -19,15 +19,17 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [05](05-polls.md) | Polls | 13 | 13 | ☐ |
 | [06](06-reminders.md) | Message Reminders | 4 | 4 | ☐ |
 | [07](07-threads-and-drafts.md) | Threads & Drafts | 7 | 7 | ☐ |
-| [08](08-moderation-and-blocklists.md) | Moderation & Blocklists | 11 | 34 | ☐ |
+| [08](08-moderation-and-blocklists.md) | Moderation & Blocklists | 1 | 35 | ◐ |
 | [09](09-users.md) | Users | 9 | 9 | ☐ |
 | [10](10-messages.md) | Messages & Search | 14 | 12 | ☐ |
 | [11](11-channels-and-members.md) | Channels, Members & Sync | 27 | 24 | ☐ |
 | [12](12-uploads-cdn.md) | Uploads (CDN) | 8 | 8 | ☐ |
 | [13](13-push-preferences.md) | Push Preferences | 1 | 1 | ☐ |
 
-**Coverage:** 105 hand-written methods across 12 files, and all 128 generated operations, each claimed by exactly
+**Coverage:** 95 hand-written methods across 12 files, and all 129 generated operations, each claimed by exactly
 one group. Verified mechanically — see [Keeping this plan honest](#keeping-this-plan-honest).
+
+☑ done · ◐ partly done, with the remainder and its reason in the group's file · ☐ not started
 
 ## Goals
 
@@ -70,7 +72,7 @@ surfaces before it reaches `Message` and `ChannelState`:
 
 - **02–04** have no persistence and almost no public model surface. Group 02 is the pattern-proving slice.
 - **05–07** introduce persisted models and WebSocket-delivered updates, one at a time.
-- **08** is where we decide what *not* to expose: 34 generated operations against 11 hand-written methods.
+- **08** is where we decide what *not* to expose: 35 generated operations against 11 hand-written methods.
 - **09** freezes the `User` mapping that everything else already depends on (the *decision* is made in 01; this
   group executes it).
 - **10–11** are the core of the SDK, and carry the `custom` / `extraData` promotion problem.
@@ -114,4 +116,9 @@ though they sit under `/chat/messages/...`, and draft operations belong to Threa
 under `/chat/channels/...`.
 
 Re-run it after a regeneration adds or renames operations, and treat a reported problem as a plan bug rather
-than a script bug. Prose sections are hand-written and survive regeneration.
+than a script bug.
+
+**The group files are generated in full, prose included.** Goal, decisions, risks and the definition
+of done live in the `GROUPS` list inside `generate_plan.py`, not in the markdown — editing a `0N-*.md`
+file directly works until the next person regenerates, then it is silently lost. Record a group's decisions
+in the generator and re-run it.
