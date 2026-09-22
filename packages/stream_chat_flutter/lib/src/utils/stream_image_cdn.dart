@@ -118,6 +118,8 @@ class StreamImageCDN {
   // The host suffix for Stream's image CDN.
   static const _streamCDNHost = 'stream-io-cdn.com';
 
+  // Whether [uri] is served from Stream's image CDN.
+  //
   // Matched as a dot-separated suffix so a lookalike registrable domain such
   // as `evilstream-io-cdn.com` is not mistaken for ours.
   static bool _isStreamCDN(Uri uri) => uri.host.endsWith('.$_streamCDNHost');
