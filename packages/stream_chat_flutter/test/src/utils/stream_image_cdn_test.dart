@@ -75,23 +75,24 @@ void main() {
         expect(result, isNot(contains('crop=')));
       });
 
-      test('always overrides existing resize params', () {
-        const url =
-            'https://us-east.stream-io-cdn.com/102400/images/photo.jpg'
-            '?w=100&h=100&resize=fill';
-        const resize = ImageResize(
-          width: 200,
-          height: 300,
-          mode: ResizeMode.crop,
-          crop: CropMode.left,
-        );
+      test('leaves a URL that already asks for a size alone', () {
+        const url = 'https://us-east.stream-io-cdn.com/102400/images/photo.jpg?w=100&h=100&resize=fill';
+        const resize = ImageResize(width: 200, height: 300);
 
-        final result = cdn.resolveUrl(url, resize: resize);
+        expect(cdn.resolveUrl(url, resize: resize), equals(url));
+      });
+
+      test('treats wildcard placeholders as unsized and resizes them', () {
+        const url = 'https://us-east.stream-io-cdn.com/102400/images/photo.jpg?crop=*&h=*&resize=*&w=*';
+
+        final result = cdn.resolveUrl(
+          url,
+          resize: const ImageResize(width: 200, height: 300),
+        );
 
         expect(result, contains('w=200'));
         expect(result, contains('h=300'));
-        expect(result, contains('resize=crop'));
-        expect(result, contains('crop=left'));
+        expect(result, contains('resize=clip'));
       });
 
       test('preserves existing non-resize query parameters', () {

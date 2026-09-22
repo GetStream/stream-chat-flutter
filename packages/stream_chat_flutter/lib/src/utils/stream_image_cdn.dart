@@ -112,6 +112,9 @@ class StreamImageCDN {
   /// Creates a new [StreamImageCDN] instance.
   const StreamImageCDN();
 
+  // Placeholder for an unset dimension; not a size the client chose.
+  static const _wildcard = '*';
+
   // The host suffix for Stream's image CDN.
   static const _streamCDNHost = 'stream-io-cdn.com';
 
@@ -133,18 +136,19 @@ class StreamImageCDN {
   /// [sourceUrl] is returned unchanged.
   ///
   /// For non-Stream CDN URLs, returns [sourceUrl] unchanged regardless
-  /// of [resize].
+  /// of [resize]. A URL that already requests a specific size is also
+  /// returned unchanged, so a size chosen server-side is not overridden.
   ///
   /// Override this to customize URL rewriting for a custom CDN.
   String resolveUrl(String sourceUrl, {ImageResize? resize}) {
     final uri = Uri.tryParse(sourceUrl);
     if (uri == null || !_isStreamCDN(uri)) return sourceUrl;
-    if (resize == null) return sourceUrl;
+    if (resize == null || _isAlreadySized(uri)) return sourceUrl;
 
     final queryParameters = {
       ...uri.queryParameters,
-      'w': resize.width == 0 ? '*' : resize.width.floor().toString(),
-      'h': resize.height == 0 ? '*' : resize.height.floor().toString(),
+      'w': resize.width == 0 ? _wildcard : resize.width.floor().toString(),
+      'h': resize.height == 0 ? _wildcard : resize.height.floor().toString(),
       'resize': resize.mode.value,
       'ro': '0',
     };
@@ -158,6 +162,15 @@ class StreamImageCDN {
     }
 
     return uri.replace(queryParameters: queryParameters).toString();
+  }
+
+  // Whether [uri] already asks the CDN for a specific rendition.
+  static bool _isAlreadySized(Uri uri) {
+    final params = uri.queryParameters;
+    return _persistedParameters.any((name) {
+      final value = params[name];
+      return value != null && value != _wildcard;
+    });
   }
 
   /// Returns a stable cache key for [imageUrl], stripping volatile
