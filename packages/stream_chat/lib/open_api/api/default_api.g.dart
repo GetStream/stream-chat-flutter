@@ -616,7 +616,7 @@ class _DefaultApi implements DefaultApi {
     );
   }
 
-  Future<ReminderResponseData> _createReminder({
+  Future<CreateReminderResponse> _createReminder({
     required String messageId,
     CreateReminderRequest? createReminderRequest,
   }) async {
@@ -626,7 +626,7 @@ class _DefaultApi implements DefaultApi {
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(createReminderRequest?.toJson() ?? <String, dynamic>{});
-    final _options = _setStreamType<Result<ReminderResponseData>>(
+    final _options = _setStreamType<Result<CreateReminderResponse>>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -637,9 +637,9 @@ class _DefaultApi implements DefaultApi {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late ReminderResponseData _value;
+    late CreateReminderResponse _value;
     try {
-      _value = ReminderResponseData.fromJson(_result.data!);
+      _value = CreateReminderResponse.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -648,11 +648,11 @@ class _DefaultApi implements DefaultApi {
   }
 
   @override
-  Future<Result<ReminderResponseData>> createReminder({
+  Future<Result<CreateReminderResponse>> createReminder({
     required String messageId,
     CreateReminderRequest? createReminderRequest,
   }) {
-    return _ResultCallAdapter<ReminderResponseData>().adapt(
+    return _ResultCallAdapter<CreateReminderResponse>().adapt(
       () => _createReminder(
         messageId: messageId,
         createReminderRequest: createReminderRequest,
@@ -4104,7 +4104,7 @@ class _DefaultApi implements DefaultApi {
     );
   }
 
-  Future<MessageActionResponse> _translateMessage({
+  Future<TranslateMessageResponse> _translateMessage({
     required String id,
     required TranslateMessageRequest translateMessageRequest,
   }) async {
@@ -4113,7 +4113,7 @@ class _DefaultApi implements DefaultApi {
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(translateMessageRequest.toJson());
-    final _options = _setStreamType<Result<MessageActionResponse>>(
+    final _options = _setStreamType<Result<TranslateMessageResponse>>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -4124,9 +4124,9 @@ class _DefaultApi implements DefaultApi {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late MessageActionResponse _value;
+    late TranslateMessageResponse _value;
     try {
-      _value = MessageActionResponse.fromJson(_result.data!);
+      _value = TranslateMessageResponse.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -4135,11 +4135,11 @@ class _DefaultApi implements DefaultApi {
   }
 
   @override
-  Future<Result<MessageActionResponse>> translateMessage({
+  Future<Result<TranslateMessageResponse>> translateMessage({
     required String id,
     required TranslateMessageRequest translateMessageRequest,
   }) {
-    return _ResultCallAdapter<MessageActionResponse>().adapt(
+    return _ResultCallAdapter<TranslateMessageResponse>().adapt(
       () => _translateMessage(
         id: id,
         translateMessageRequest: translateMessageRequest,
@@ -4191,6 +4191,49 @@ class _DefaultApi implements DefaultApi {
         id: id,
         truncateChannelRequest: truncateChannelRequest,
       ),
+    );
+  }
+
+  Future<UnbanResponse> _unban({
+    required String targetUserId,
+    String? channelCid,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'target_user_id': targetUserId,
+      r'channel_cid': channelCid,
+    };
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<Result<UnbanResponse>>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v2/moderation/unban',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late UnbanResponse _value;
+    try {
+      _value = UnbanResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Result<UnbanResponse>> unban({
+    required String targetUserId,
+    String? channelCid,
+  }) {
+    return _ResultCallAdapter<UnbanResponse>().adapt(
+      () => _unban(targetUserId: targetUserId, channelCid: channelCid),
     );
   }
 

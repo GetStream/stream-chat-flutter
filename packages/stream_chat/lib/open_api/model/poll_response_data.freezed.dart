@@ -21,6 +21,7 @@ mixin _$PollResponseData {
   String get createdById;
   Map<String, Object?> get custom;
   String get description;
+  Map<String, String>? get descriptionI18n;
   bool get enforceUniqueVote;
   String get id;
   bool? get isClosed;
@@ -28,6 +29,7 @@ mixin _$PollResponseData {
   Map<String, List<PollVoteResponseData>> get latestVotesByOption;
   int? get maxVotesAllowed;
   String get name;
+  Map<String, String>? get nameI18n;
   List<PollOptionResponseData> get options;
   List<PollVoteResponseData> get ownVotes;
   DateTime get updatedAt;
@@ -61,6 +63,10 @@ mixin _$PollResponseData {
             (identical(other.createdById, createdById) || other.createdById == createdById) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.description, description) || other.description == description) &&
+            const DeepCollectionEquality().equals(
+              other.descriptionI18n,
+              descriptionI18n,
+            ) &&
             (identical(other.enforceUniqueVote, enforceUniqueVote) || other.enforceUniqueVote == enforceUniqueVote) &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.isClosed, isClosed) || other.isClosed == isClosed) &&
@@ -74,6 +80,7 @@ mixin _$PollResponseData {
             ) &&
             (identical(other.maxVotesAllowed, maxVotesAllowed) || other.maxVotesAllowed == maxVotesAllowed) &&
             (identical(other.name, name) || other.name == name) &&
+            const DeepCollectionEquality().equals(other.nameI18n, nameI18n) &&
             const DeepCollectionEquality().equals(other.options, options) &&
             const DeepCollectionEquality().equals(other.ownVotes, ownVotes) &&
             (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
@@ -96,6 +103,7 @@ mixin _$PollResponseData {
     createdById,
     const DeepCollectionEquality().hash(custom),
     description,
+    const DeepCollectionEquality().hash(descriptionI18n),
     enforceUniqueVote,
     id,
     isClosed,
@@ -103,6 +111,7 @@ mixin _$PollResponseData {
     const DeepCollectionEquality().hash(latestVotesByOption),
     maxVotesAllowed,
     name,
+    const DeepCollectionEquality().hash(nameI18n),
     const DeepCollectionEquality().hash(options),
     const DeepCollectionEquality().hash(ownVotes),
     updatedAt,
@@ -113,7 +122,7 @@ mixin _$PollResponseData {
 
   @override
   String toString() {
-    return 'PollResponseData(allowAnswers: $allowAnswers, allowUserSuggestedOptions: $allowUserSuggestedOptions, answersCount: $answersCount, createdAt: $createdAt, createdBy: $createdBy, createdById: $createdById, custom: $custom, description: $description, enforceUniqueVote: $enforceUniqueVote, id: $id, isClosed: $isClosed, latestAnswers: $latestAnswers, latestVotesByOption: $latestVotesByOption, maxVotesAllowed: $maxVotesAllowed, name: $name, options: $options, ownVotes: $ownVotes, updatedAt: $updatedAt, voteCount: $voteCount, voteCountsByOption: $voteCountsByOption, votingVisibility: $votingVisibility)';
+    return 'PollResponseData(allowAnswers: $allowAnswers, allowUserSuggestedOptions: $allowUserSuggestedOptions, answersCount: $answersCount, createdAt: $createdAt, createdBy: $createdBy, createdById: $createdById, custom: $custom, description: $description, descriptionI18n: $descriptionI18n, enforceUniqueVote: $enforceUniqueVote, id: $id, isClosed: $isClosed, latestAnswers: $latestAnswers, latestVotesByOption: $latestVotesByOption, maxVotesAllowed: $maxVotesAllowed, name: $name, nameI18n: $nameI18n, options: $options, ownVotes: $ownVotes, updatedAt: $updatedAt, voteCount: $voteCount, voteCountsByOption: $voteCountsByOption, votingVisibility: $votingVisibility)';
   }
 }
 
@@ -133,6 +142,7 @@ abstract mixin class $PollResponseDataCopyWith<$Res> {
     String createdById,
     Map<String, Object?> custom,
     String description,
+    Map<String, String>? descriptionI18n,
     bool enforceUniqueVote,
     String id,
     bool? isClosed,
@@ -140,6 +150,7 @@ abstract mixin class $PollResponseDataCopyWith<$Res> {
     Map<String, List<PollVoteResponseData>> latestVotesByOption,
     int? maxVotesAllowed,
     String name,
+    Map<String, String>? nameI18n,
     List<PollOptionResponseData> options,
     List<PollVoteResponseData> ownVotes,
     DateTime updatedAt,
@@ -169,6 +180,7 @@ class _$PollResponseDataCopyWithImpl<$Res> implements $PollResponseDataCopyWith<
     Object? createdById = null,
     Object? custom = null,
     Object? description = null,
+    Object? descriptionI18n = freezed,
     Object? enforceUniqueVote = null,
     Object? id = null,
     Object? isClosed = freezed,
@@ -176,6 +188,7 @@ class _$PollResponseDataCopyWithImpl<$Res> implements $PollResponseDataCopyWith<
     Object? latestVotesByOption = null,
     Object? maxVotesAllowed = freezed,
     Object? name = null,
+    Object? nameI18n = freezed,
     Object? options = null,
     Object? ownVotes = null,
     Object? updatedAt = null,
@@ -217,6 +230,10 @@ class _$PollResponseDataCopyWithImpl<$Res> implements $PollResponseDataCopyWith<
             ? _self.description
             : description // ignore: cast_nullable_to_non_nullable
                   as String,
+        descriptionI18n: freezed == descriptionI18n
+            ? _self.descriptionI18n
+            : descriptionI18n // ignore: cast_nullable_to_non_nullable
+                  as Map<String, String>?,
         enforceUniqueVote: null == enforceUniqueVote
             ? _self.enforceUniqueVote
             : enforceUniqueVote // ignore: cast_nullable_to_non_nullable
@@ -245,6 +262,10 @@ class _$PollResponseDataCopyWithImpl<$Res> implements $PollResponseDataCopyWith<
             ? _self.name
             : name // ignore: cast_nullable_to_non_nullable
                   as String,
+        nameI18n: freezed == nameI18n
+            ? _self.nameI18n
+            : nameI18n // ignore: cast_nullable_to_non_nullable
+                  as Map<String, String>?,
         options: null == options
             ? _self.options
             : options // ignore: cast_nullable_to_non_nullable

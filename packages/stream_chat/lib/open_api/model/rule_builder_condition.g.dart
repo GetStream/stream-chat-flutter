@@ -131,6 +131,16 @@ RuleBuilderCondition _$RuleBuilderConditionFromJson(
       : UserIdenticalContentCountParameters.fromJson(
           json['user_identical_content_count_params'] as Map<String, dynamic>,
         ),
+  userIdenticalImageCountParams: json['user_identical_image_count_params'] == null
+      ? null
+      : UserIdenticalImageCountParameters.fromJson(
+          json['user_identical_image_count_params'] as Map<String, dynamic>,
+        ),
+  userReactionCountParams: json['user_reaction_count_params'] == null
+      ? null
+      : UserReactionCountRuleParameters.fromJson(
+          json['user_reaction_count_params'] as Map<String, dynamic>,
+        ),
   userRoleParams: json['user_role_params'] == null
       ? null
       : UserRoleParameters.fromJson(
@@ -182,6 +192,8 @@ Map<String, dynamic> _$RuleBuilderConditionToJson(
   'user_custom_property_params': instance.userCustomPropertyParams?.toJson(),
   'user_flag_count_rule_params': instance.userFlagCountRuleParams?.toJson(),
   'user_identical_content_count_params': instance.userIdenticalContentCountParams?.toJson(),
+  'user_identical_image_count_params': instance.userIdenticalImageCountParams?.toJson(),
+  'user_reaction_count_params': instance.userReactionCountParams?.toJson(),
   'user_role_params': instance.userRoleParams?.toJson(),
   'user_rule_params': instance.userRuleParams?.toJson(),
   'video_content_params': instance.videoContentParams?.toJson(),

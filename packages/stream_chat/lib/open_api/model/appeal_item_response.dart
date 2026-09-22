@@ -21,6 +21,7 @@ class AppealItemResponse with _$AppealItemResponse {
     this.actions,
     this.aiTextSeverity,
     required this.appealReason,
+    this.appealReasonLanguage,
     this.attachments,
     this.channelCid,
     this.configKey,
@@ -33,6 +34,7 @@ class AppealItemResponse with _$AppealItemResponse {
     this.flagTypes,
     this.flags,
     required this.id,
+    this.languages,
     this.moderationAction,
     this.originalModerationAction,
     this.recommendedAction,
@@ -54,6 +56,10 @@ class AppealItemResponse with _$AppealItemResponse {
   @override
   @JsonKey(name: 'appeal_reason')
   final String appealReason;
+
+  @override
+  @JsonKey(name: 'appeal_reason_language')
+  final String? appealReasonLanguage;
 
   @override
   @JsonKey(name: 'attachments')
@@ -103,6 +109,10 @@ class AppealItemResponse with _$AppealItemResponse {
   @override
   @JsonKey(name: 'id')
   final String id;
+
+  @override
+  @JsonKey(name: 'languages')
+  final List<String>? languages;
 
   @override
   @JsonKey(name: 'moderation_action')

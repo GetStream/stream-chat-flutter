@@ -14,6 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PollVoteResponseData {
   String? get answerText;
+  Map<String, String>? get answerTextI18n;
   DateTime get createdAt;
   String get id;
   bool? get isAnswer;
@@ -39,6 +40,10 @@ mixin _$PollVoteResponseData {
         (other.runtimeType == runtimeType &&
             other is PollVoteResponseData &&
             (identical(other.answerText, answerText) || other.answerText == answerText) &&
+            const DeepCollectionEquality().equals(
+              other.answerTextI18n,
+              answerTextI18n,
+            ) &&
             (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.isAnswer, isAnswer) || other.isAnswer == isAnswer) &&
@@ -53,6 +58,7 @@ mixin _$PollVoteResponseData {
   int get hashCode => Object.hash(
     runtimeType,
     answerText,
+    const DeepCollectionEquality().hash(answerTextI18n),
     createdAt,
     id,
     isAnswer,
@@ -65,7 +71,7 @@ mixin _$PollVoteResponseData {
 
   @override
   String toString() {
-    return 'PollVoteResponseData(answerText: $answerText, createdAt: $createdAt, id: $id, isAnswer: $isAnswer, optionId: $optionId, pollId: $pollId, updatedAt: $updatedAt, user: $user, userId: $userId)';
+    return 'PollVoteResponseData(answerText: $answerText, answerTextI18n: $answerTextI18n, createdAt: $createdAt, id: $id, isAnswer: $isAnswer, optionId: $optionId, pollId: $pollId, updatedAt: $updatedAt, user: $user, userId: $userId)';
   }
 }
 
@@ -78,6 +84,7 @@ abstract mixin class $PollVoteResponseDataCopyWith<$Res> {
   @useResult
   $Res call({
     String? answerText,
+    Map<String, String>? answerTextI18n,
     DateTime createdAt,
     String id,
     bool? isAnswer,
@@ -102,6 +109,7 @@ class _$PollVoteResponseDataCopyWithImpl<$Res> implements $PollVoteResponseDataC
   @override
   $Res call({
     Object? answerText = freezed,
+    Object? answerTextI18n = freezed,
     Object? createdAt = null,
     Object? id = null,
     Object? isAnswer = freezed,
@@ -117,6 +125,10 @@ class _$PollVoteResponseDataCopyWithImpl<$Res> implements $PollVoteResponseDataC
             ? _self.answerText
             : answerText // ignore: cast_nullable_to_non_nullable
                   as String?,
+        answerTextI18n: freezed == answerTextI18n
+            ? _self.answerTextI18n
+            : answerTextI18n // ignore: cast_nullable_to_non_nullable
+                  as Map<String, String>?,
         createdAt: null == createdAt
             ? _self.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable

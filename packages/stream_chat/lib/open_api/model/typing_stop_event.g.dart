@@ -14,6 +14,11 @@ TypingStopEvent _$TypingStopEventFromJson(Map<String, dynamic> json) => TypingSt
     json['created_at'] as Object,
   ),
   custom: json['custom'] as Map<String, dynamic>,
+  member: json['member'] == null
+      ? null
+      : ChannelMemberPartialResponse.fromJson(
+          json['member'] as Map<String, dynamic>,
+        ),
   parentId: json['parent_id'] as String?,
   receivedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['received_at'],
@@ -33,6 +38,7 @@ Map<String, dynamic> _$TypingStopEventToJson(TypingStopEvent instance) => <Strin
   'cid': instance.cid,
   'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'custom': instance.custom,
+  'member': instance.member?.toJson(),
   'parent_id': instance.parentId,
   'received_at': _$JsonConverterToJson<Object, DateTime>(
     instance.receivedAt,

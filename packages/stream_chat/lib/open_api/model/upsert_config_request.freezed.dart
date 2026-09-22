@@ -16,7 +16,7 @@ mixin _$UpsertConfigRequest {
   AIAudioConfigRequest? get aiAudioConfig;
   AIImageConfig? get aiImageConfig;
   AITextConfig? get aiTextConfig;
-  AIVideoConfig? get aiVideoConfig;
+  AIVideoConfigRequest? get aiVideoConfig;
   bool? get async;
   AutomodPlatformCircumventionConfig? get automodPlatformCircumventionConfig;
   AutomodSemanticFiltersConfig? get automodSemanticFiltersConfig;
@@ -123,7 +123,7 @@ abstract mixin class $UpsertConfigRequestCopyWith<$Res> {
     AIAudioConfigRequest? aiAudioConfig,
     AIImageConfig? aiImageConfig,
     AITextConfig? aiTextConfig,
-    AIVideoConfig? aiVideoConfig,
+    AIVideoConfigRequest? aiVideoConfig,
     bool? async,
     AutomodPlatformCircumventionConfig? automodPlatformCircumventionConfig,
     AutomodSemanticFiltersConfig? automodSemanticFiltersConfig,
@@ -191,7 +191,7 @@ class _$UpsertConfigRequestCopyWithImpl<$Res> implements $UpsertConfigRequestCop
         aiVideoConfig: freezed == aiVideoConfig
             ? _self.aiVideoConfig
             : aiVideoConfig // ignore: cast_nullable_to_non_nullable
-                  as AIVideoConfig?,
+                  as AIVideoConfigRequest?,
         async: freezed == async
             ? _self.async
             : async // ignore: cast_nullable_to_non_nullable

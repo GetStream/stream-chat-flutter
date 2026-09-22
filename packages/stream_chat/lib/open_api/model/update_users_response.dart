@@ -28,6 +28,7 @@ class UpdateUsersResponse with _$UpdateUsersResponse {
   final String duration;
 
   @override
+  @Deprecated('This field is deprecated.')
   @JsonKey(name: 'membership_deletion_task_id')
   final String membershipDeletionTaskId;
 

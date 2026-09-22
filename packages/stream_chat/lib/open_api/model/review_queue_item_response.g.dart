@@ -22,6 +22,7 @@ ReviewQueueItemResponse _$ReviewQueueItemResponseFromJson(
     json['completed_at'],
     const StreamDateTimeConverter().fromJson,
   ),
+  confidenceScore: (json['confidence_score'] as num?)?.toDouble(),
   configKey: json['config_key'] as String?,
   createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
@@ -105,6 +106,7 @@ Map<String, dynamic> _$ReviewQueueItemResponseToJson(
     instance.completedAt,
     const StreamDateTimeConverter().toJson,
   ),
+  'confidence_score': instance.confidenceScore,
   'config_key': instance.configKey,
   'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'entity_creator': instance.entityCreator?.toJson(),

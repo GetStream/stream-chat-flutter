@@ -14,6 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ModerationPayload {
   List<String>? get audios;
+  String? get countryCode;
   Map<String, Object?>? get custom;
   Map<String, String>? get imageIds;
   List<String>? get imageOrderedKeys;
@@ -39,6 +40,7 @@ mixin _$ModerationPayload {
         (other.runtimeType == runtimeType &&
             other is ModerationPayload &&
             const DeepCollectionEquality().equals(other.audios, audios) &&
+            (identical(other.countryCode, countryCode) || other.countryCode == countryCode) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             const DeepCollectionEquality().equals(other.imageIds, imageIds) &&
             const DeepCollectionEquality().equals(
@@ -63,6 +65,7 @@ mixin _$ModerationPayload {
   int get hashCode => Object.hash(
     runtimeType,
     const DeepCollectionEquality().hash(audios),
+    countryCode,
     const DeepCollectionEquality().hash(custom),
     const DeepCollectionEquality().hash(imageIds),
     const DeepCollectionEquality().hash(imageOrderedKeys),
@@ -76,7 +79,7 @@ mixin _$ModerationPayload {
 
   @override
   String toString() {
-    return 'ModerationPayload(audios: $audios, custom: $custom, imageIds: $imageIds, imageOrderedKeys: $imageOrderedKeys, images: $images, otherMedia: $otherMedia, textIds: $textIds, textOrderedKeys: $textOrderedKeys, texts: $texts, videos: $videos)';
+    return 'ModerationPayload(audios: $audios, countryCode: $countryCode, custom: $custom, imageIds: $imageIds, imageOrderedKeys: $imageOrderedKeys, images: $images, otherMedia: $otherMedia, textIds: $textIds, textOrderedKeys: $textOrderedKeys, texts: $texts, videos: $videos)';
   }
 }
 
@@ -89,6 +92,7 @@ abstract mixin class $ModerationPayloadCopyWith<$Res> {
   @useResult
   $Res call({
     List<String>? audios,
+    String? countryCode,
     Map<String, Object?>? custom,
     Map<String, String>? imageIds,
     List<String>? imageOrderedKeys,
@@ -114,6 +118,7 @@ class _$ModerationPayloadCopyWithImpl<$Res> implements $ModerationPayloadCopyWit
   @override
   $Res call({
     Object? audios = freezed,
+    Object? countryCode = freezed,
     Object? custom = freezed,
     Object? imageIds = freezed,
     Object? imageOrderedKeys = freezed,
@@ -130,6 +135,10 @@ class _$ModerationPayloadCopyWithImpl<$Res> implements $ModerationPayloadCopyWit
             ? _self.audios
             : audios // ignore: cast_nullable_to_non_nullable
                   as List<String>?,
+        countryCode: freezed == countryCode
+            ? _self.countryCode
+            : countryCode // ignore: cast_nullable_to_non_nullable
+                  as String?,
         custom: freezed == custom
             ? _self.custom
             : custom // ignore: cast_nullable_to_non_nullable

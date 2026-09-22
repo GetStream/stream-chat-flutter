@@ -22,7 +22,9 @@ UpsertConfigRequest _$UpsertConfigRequestFromJson(
       : AITextConfig.fromJson(json['ai_text_config'] as Map<String, dynamic>),
   aiVideoConfig: json['ai_video_config'] == null
       ? null
-      : AIVideoConfig.fromJson(json['ai_video_config'] as Map<String, dynamic>),
+      : AIVideoConfigRequest.fromJson(
+          json['ai_video_config'] as Map<String, dynamic>,
+        ),
   async: json['async'] as bool?,
   automodPlatformCircumventionConfig: json['automod_platform_circumvention_config'] == null
       ? null

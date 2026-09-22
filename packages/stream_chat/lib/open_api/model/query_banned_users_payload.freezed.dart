@@ -13,6 +13,10 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$QueryBannedUsersPayload {
+  DateTime? get createdAtAfter;
+  DateTime? get createdAtAfterOrEqual;
+  DateTime? get createdAtBefore;
+  DateTime? get createdAtBeforeOrEqual;
   bool? get excludeExpiredBans;
   Map<String, Object?> get filterConditions;
   int? get limit;
@@ -34,6 +38,12 @@ mixin _$QueryBannedUsersPayload {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is QueryBannedUsersPayload &&
+            (identical(other.createdAtAfter, createdAtAfter) || other.createdAtAfter == createdAtAfter) &&
+            (identical(other.createdAtAfterOrEqual, createdAtAfterOrEqual) ||
+                other.createdAtAfterOrEqual == createdAtAfterOrEqual) &&
+            (identical(other.createdAtBefore, createdAtBefore) || other.createdAtBefore == createdAtBefore) &&
+            (identical(other.createdAtBeforeOrEqual, createdAtBeforeOrEqual) ||
+                other.createdAtBeforeOrEqual == createdAtBeforeOrEqual) &&
             (identical(other.excludeExpiredBans, excludeExpiredBans) ||
                 other.excludeExpiredBans == excludeExpiredBans) &&
             const DeepCollectionEquality().equals(
@@ -48,6 +58,10 @@ mixin _$QueryBannedUsersPayload {
   @override
   int get hashCode => Object.hash(
     runtimeType,
+    createdAtAfter,
+    createdAtAfterOrEqual,
+    createdAtBefore,
+    createdAtBeforeOrEqual,
     excludeExpiredBans,
     const DeepCollectionEquality().hash(filterConditions),
     limit,
@@ -57,7 +71,7 @@ mixin _$QueryBannedUsersPayload {
 
   @override
   String toString() {
-    return 'QueryBannedUsersPayload(excludeExpiredBans: $excludeExpiredBans, filterConditions: $filterConditions, limit: $limit, offset: $offset, sort: $sort)';
+    return 'QueryBannedUsersPayload(createdAtAfter: $createdAtAfter, createdAtAfterOrEqual: $createdAtAfterOrEqual, createdAtBefore: $createdAtBefore, createdAtBeforeOrEqual: $createdAtBeforeOrEqual, excludeExpiredBans: $excludeExpiredBans, filterConditions: $filterConditions, limit: $limit, offset: $offset, sort: $sort)';
   }
 }
 
@@ -69,6 +83,10 @@ abstract mixin class $QueryBannedUsersPayloadCopyWith<$Res> {
   ) = _$QueryBannedUsersPayloadCopyWithImpl;
   @useResult
   $Res call({
+    DateTime? createdAtAfter,
+    DateTime? createdAtAfterOrEqual,
+    DateTime? createdAtBefore,
+    DateTime? createdAtBeforeOrEqual,
     bool? excludeExpiredBans,
     Map<String, Object?> filterConditions,
     int? limit,
@@ -89,6 +107,10 @@ class _$QueryBannedUsersPayloadCopyWithImpl<$Res> implements $QueryBannedUsersPa
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? createdAtAfter = freezed,
+    Object? createdAtAfterOrEqual = freezed,
+    Object? createdAtBefore = freezed,
+    Object? createdAtBeforeOrEqual = freezed,
     Object? excludeExpiredBans = freezed,
     Object? filterConditions = null,
     Object? limit = freezed,
@@ -97,6 +119,22 @@ class _$QueryBannedUsersPayloadCopyWithImpl<$Res> implements $QueryBannedUsersPa
   }) {
     return _then(
       QueryBannedUsersPayload(
+        createdAtAfter: freezed == createdAtAfter
+            ? _self.createdAtAfter
+            : createdAtAfter // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        createdAtAfterOrEqual: freezed == createdAtAfterOrEqual
+            ? _self.createdAtAfterOrEqual
+            : createdAtAfterOrEqual // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        createdAtBefore: freezed == createdAtBefore
+            ? _self.createdAtBefore
+            : createdAtBefore // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        createdAtBeforeOrEqual: freezed == createdAtBeforeOrEqual
+            ? _self.createdAtBeforeOrEqual
+            : createdAtBeforeOrEqual // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
         excludeExpiredBans: freezed == excludeExpiredBans
             ? _self.excludeExpiredBans
             : excludeExpiredBans // ignore: cast_nullable_to_non_nullable

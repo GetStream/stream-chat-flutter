@@ -20,6 +20,7 @@ class AppealRequest with _$AppealRequest {
   const AppealRequest({
     required this.appealReason,
     this.attachments,
+    this.channelCid,
     required this.entityId,
     required this.entityType,
     this.reviewQueueItemId,
@@ -32,6 +33,10 @@ class AppealRequest with _$AppealRequest {
   @override
   @JsonKey(name: 'attachments')
   final List<String>? attachments;
+
+  @override
+  @JsonKey(name: 'channel_cid')
+  final String? channelCid;
 
   @override
   @JsonKey(name: 'entity_id')

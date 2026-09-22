@@ -13,8 +13,6 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$BanRequest {
-  UserRequest? get bannedBy;
-  String? get bannedById;
   String? get channelCid;
   BanRequestDeleteMessages? get deleteMessages;
   bool? get ipBan;
@@ -34,8 +32,6 @@ mixin _$BanRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is BanRequest &&
-            (identical(other.bannedBy, bannedBy) || other.bannedBy == bannedBy) &&
-            (identical(other.bannedById, bannedById) || other.bannedById == bannedById) &&
             (identical(other.channelCid, channelCid) || other.channelCid == channelCid) &&
             (identical(other.deleteMessages, deleteMessages) || other.deleteMessages == deleteMessages) &&
             (identical(other.ipBan, ipBan) || other.ipBan == ipBan) &&
@@ -48,8 +44,6 @@ mixin _$BanRequest {
   @override
   int get hashCode => Object.hash(
     runtimeType,
-    bannedBy,
-    bannedById,
     channelCid,
     deleteMessages,
     ipBan,
@@ -61,7 +55,7 @@ mixin _$BanRequest {
 
   @override
   String toString() {
-    return 'BanRequest(bannedBy: $bannedBy, bannedById: $bannedById, channelCid: $channelCid, deleteMessages: $deleteMessages, ipBan: $ipBan, reason: $reason, shadow: $shadow, targetUserId: $targetUserId, timeout: $timeout)';
+    return 'BanRequest(channelCid: $channelCid, deleteMessages: $deleteMessages, ipBan: $ipBan, reason: $reason, shadow: $shadow, targetUserId: $targetUserId, timeout: $timeout)';
   }
 }
 
@@ -73,8 +67,6 @@ abstract mixin class $BanRequestCopyWith<$Res> {
   ) = _$BanRequestCopyWithImpl;
   @useResult
   $Res call({
-    UserRequest? bannedBy,
-    String? bannedById,
     String? channelCid,
     BanRequestDeleteMessages? deleteMessages,
     bool? ipBan,
@@ -97,8 +89,6 @@ class _$BanRequestCopyWithImpl<$Res> implements $BanRequestCopyWith<$Res> {
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? bannedBy = freezed,
-    Object? bannedById = freezed,
     Object? channelCid = freezed,
     Object? deleteMessages = freezed,
     Object? ipBan = freezed,
@@ -109,14 +99,6 @@ class _$BanRequestCopyWithImpl<$Res> implements $BanRequestCopyWith<$Res> {
   }) {
     return _then(
       BanRequest(
-        bannedBy: freezed == bannedBy
-            ? _self.bannedBy
-            : bannedBy // ignore: cast_nullable_to_non_nullable
-                  as UserRequest?,
-        bannedById: freezed == bannedById
-            ? _self.bannedById
-            : bannedById // ignore: cast_nullable_to_non_nullable
-                  as String?,
         channelCid: freezed == channelCid
             ? _self.channelCid
             : channelCid // ignore: cast_nullable_to_non_nullable

@@ -18,6 +18,7 @@ mixin _$TypingStopEvent {
   String? get cid;
   DateTime get createdAt;
   Map<String, Object?> get custom;
+  ChannelMemberPartialResponse? get member;
   String? get parentId;
   DateTime? get receivedAt;
   String get type;
@@ -42,6 +43,7 @@ mixin _$TypingStopEvent {
             (identical(other.cid, cid) || other.cid == cid) &&
             (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
+            (identical(other.member, member) || other.member == member) &&
             (identical(other.parentId, parentId) || other.parentId == parentId) &&
             (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.type, type) || other.type == type) &&
@@ -56,6 +58,7 @@ mixin _$TypingStopEvent {
     cid,
     createdAt,
     const DeepCollectionEquality().hash(custom),
+    member,
     parentId,
     receivedAt,
     type,
@@ -64,7 +67,7 @@ mixin _$TypingStopEvent {
 
   @override
   String toString() {
-    return 'TypingStopEvent(channelId: $channelId, channelType: $channelType, cid: $cid, createdAt: $createdAt, custom: $custom, parentId: $parentId, receivedAt: $receivedAt, type: $type, user: $user)';
+    return 'TypingStopEvent(channelId: $channelId, channelType: $channelType, cid: $cid, createdAt: $createdAt, custom: $custom, member: $member, parentId: $parentId, receivedAt: $receivedAt, type: $type, user: $user)';
   }
 }
 
@@ -81,6 +84,7 @@ abstract mixin class $TypingStopEventCopyWith<$Res> {
     String? cid,
     DateTime createdAt,
     Map<String, Object?> custom,
+    ChannelMemberPartialResponse? member,
     String? parentId,
     DateTime? receivedAt,
     String type,
@@ -105,6 +109,7 @@ class _$TypingStopEventCopyWithImpl<$Res> implements $TypingStopEventCopyWith<$R
     Object? cid = freezed,
     Object? createdAt = null,
     Object? custom = null,
+    Object? member = freezed,
     Object? parentId = freezed,
     Object? receivedAt = freezed,
     Object? type = null,
@@ -132,6 +137,10 @@ class _$TypingStopEventCopyWithImpl<$Res> implements $TypingStopEventCopyWith<$R
             ? _self.custom
             : custom // ignore: cast_nullable_to_non_nullable
                   as Map<String, Object?>,
+        member: freezed == member
+            ? _self.member
+            : member // ignore: cast_nullable_to_non_nullable
+                  as ChannelMemberPartialResponse?,
         parentId: freezed == parentId
             ? _self.parentId
             : parentId // ignore: cast_nullable_to_non_nullable

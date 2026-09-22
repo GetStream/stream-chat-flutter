@@ -44,6 +44,8 @@ class RuleBuilderCondition with _$RuleBuilderCondition {
     this.userCustomPropertyParams,
     this.userFlagCountRuleParams,
     this.userIdenticalContentCountParams,
+    this.userIdenticalImageCountParams,
+    this.userReactionCountParams,
     this.userRoleParams,
     this.userRuleParams,
     this.videoContentParams,
@@ -153,6 +155,14 @@ class RuleBuilderCondition with _$RuleBuilderCondition {
   @override
   @JsonKey(name: 'user_identical_content_count_params')
   final UserIdenticalContentCountParameters? userIdenticalContentCountParams;
+
+  @override
+  @JsonKey(name: 'user_identical_image_count_params')
+  final UserIdenticalImageCountParameters? userIdenticalImageCountParams;
+
+  @override
+  @JsonKey(name: 'user_reaction_count_params')
+  final UserReactionCountRuleParameters? userReactionCountParams;
 
   @override
   @JsonKey(name: 'user_role_params')

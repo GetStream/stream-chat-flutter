@@ -21,6 +21,7 @@ mixin _$ReviewQueueItemResponse {
   List<BanInfoResponse> get bans;
   ModerationCallResponse? get call;
   DateTime? get completedAt;
+  double? get confidenceScore;
   String? get configKey;
   DateTime get createdAt;
   EntityCreatorResponse? get entityCreator;
@@ -74,6 +75,7 @@ mixin _$ReviewQueueItemResponse {
             const DeepCollectionEquality().equals(other.bans, bans) &&
             (identical(other.call, call) || other.call == call) &&
             (identical(other.completedAt, completedAt) || other.completedAt == completedAt) &&
+            (identical(other.confidenceScore, confidenceScore) || other.confidenceScore == confidenceScore) &&
             (identical(other.configKey, configKey) || other.configKey == configKey) &&
             (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             (identical(other.entityCreator, entityCreator) || other.entityCreator == entityCreator) &&
@@ -118,6 +120,7 @@ mixin _$ReviewQueueItemResponse {
     const DeepCollectionEquality().hash(bans),
     call,
     completedAt,
+    confidenceScore,
     configKey,
     createdAt,
     entityCreator,
@@ -151,7 +154,7 @@ mixin _$ReviewQueueItemResponse {
 
   @override
   String toString() {
-    return 'ReviewQueueItemResponse(actions: $actions, activity: $activity, aiTextSeverity: $aiTextSeverity, appeal: $appeal, assignedTo: $assignedTo, bans: $bans, call: $call, completedAt: $completedAt, configKey: $configKey, createdAt: $createdAt, entityCreator: $entityCreator, entityCreatorId: $entityCreatorId, entityId: $entityId, entityType: $entityType, escalated: $escalated, escalatedAt: $escalatedAt, escalatedBy: $escalatedBy, escalationMetadata: $escalationMetadata, feedsV2Activity: $feedsV2Activity, feedsV2Reaction: $feedsV2Reaction, feedsV3Activity: $feedsV3Activity, feedsV3Comment: $feedsV3Comment, flags: $flags, flagsCount: $flagsCount, id: $id, languages: $languages, latestModeratorAction: $latestModeratorAction, message: $message, moderationPayload: $moderationPayload, reaction: $reaction, recommendedAction: $recommendedAction, reviewedAt: $reviewedAt, reviewedBy: $reviewedBy, severity: $severity, status: $status, teams: $teams, updatedAt: $updatedAt)';
+    return 'ReviewQueueItemResponse(actions: $actions, activity: $activity, aiTextSeverity: $aiTextSeverity, appeal: $appeal, assignedTo: $assignedTo, bans: $bans, call: $call, completedAt: $completedAt, confidenceScore: $confidenceScore, configKey: $configKey, createdAt: $createdAt, entityCreator: $entityCreator, entityCreatorId: $entityCreatorId, entityId: $entityId, entityType: $entityType, escalated: $escalated, escalatedAt: $escalatedAt, escalatedBy: $escalatedBy, escalationMetadata: $escalationMetadata, feedsV2Activity: $feedsV2Activity, feedsV2Reaction: $feedsV2Reaction, feedsV3Activity: $feedsV3Activity, feedsV3Comment: $feedsV3Comment, flags: $flags, flagsCount: $flagsCount, id: $id, languages: $languages, latestModeratorAction: $latestModeratorAction, message: $message, moderationPayload: $moderationPayload, reaction: $reaction, recommendedAction: $recommendedAction, reviewedAt: $reviewedAt, reviewedBy: $reviewedBy, severity: $severity, status: $status, teams: $teams, updatedAt: $updatedAt)';
   }
 }
 
@@ -171,6 +174,7 @@ abstract mixin class $ReviewQueueItemResponseCopyWith<$Res> {
     List<BanInfoResponse> bans,
     ModerationCallResponse? call,
     DateTime? completedAt,
+    double? confidenceScore,
     String? configKey,
     DateTime createdAt,
     EntityCreatorResponse? entityCreator,
@@ -223,6 +227,7 @@ class _$ReviewQueueItemResponseCopyWithImpl<$Res> implements $ReviewQueueItemRes
     Object? bans = null,
     Object? call = freezed,
     Object? completedAt = freezed,
+    Object? confidenceScore = freezed,
     Object? configKey = freezed,
     Object? createdAt = null,
     Object? entityCreator = freezed,
@@ -287,6 +292,10 @@ class _$ReviewQueueItemResponseCopyWithImpl<$Res> implements $ReviewQueueItemRes
             ? _self.completedAt
             : completedAt // ignore: cast_nullable_to_non_nullable
                   as DateTime?,
+        confidenceScore: freezed == confidenceScore
+            ? _self.confidenceScore
+            : confidenceScore // ignore: cast_nullable_to_non_nullable
+                  as double?,
         configKey: freezed == configKey
             ? _self.configKey
             : configKey // ignore: cast_nullable_to_non_nullable

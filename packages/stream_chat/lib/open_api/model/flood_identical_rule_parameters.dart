@@ -19,13 +19,19 @@ part 'flood_identical_rule_parameters.freezed.dart';
 class FloodIdenticalRuleParameters with _$FloodIdenticalRuleParameters {
   const FloodIdenticalRuleParameters({
     this.allowlist,
+    this.minTextLength,
     this.threshold,
     this.timeWindow,
+    this.trackAcrossUsers,
   });
 
   @override
   @JsonKey(name: 'allowlist')
   final List<String>? allowlist;
+
+  @override
+  @JsonKey(name: 'min_text_length')
+  final int? minTextLength;
 
   @override
   @JsonKey(name: 'threshold')
@@ -34,6 +40,10 @@ class FloodIdenticalRuleParameters with _$FloodIdenticalRuleParameters {
   @override
   @JsonKey(name: 'time_window')
   final String? timeWindow;
+
+  @override
+  @JsonKey(name: 'track_across_users')
+  final bool? trackAcrossUsers;
 
   Map<String, dynamic> toJson() => _$FloodIdenticalRuleParametersToJson(this);
 

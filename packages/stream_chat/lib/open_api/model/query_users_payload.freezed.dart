@@ -14,6 +14,10 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$QueryUsersPayload {
   Map<String, Object?> get filterConditions;
+  String? get idGt;
+  String? get idGte;
+  String? get idLt;
+  String? get idLte;
   bool? get includeDeactivatedUsers;
   int? get limit;
   int? get offset;
@@ -38,6 +42,10 @@ mixin _$QueryUsersPayload {
               other.filterConditions,
               filterConditions,
             ) &&
+            (identical(other.idGt, idGt) || other.idGt == idGt) &&
+            (identical(other.idGte, idGte) || other.idGte == idGte) &&
+            (identical(other.idLt, idLt) || other.idLt == idLt) &&
+            (identical(other.idLte, idLte) || other.idLte == idLte) &&
             (identical(
                   other.includeDeactivatedUsers,
                   includeDeactivatedUsers,
@@ -53,6 +61,10 @@ mixin _$QueryUsersPayload {
   int get hashCode => Object.hash(
     runtimeType,
     const DeepCollectionEquality().hash(filterConditions),
+    idGt,
+    idGte,
+    idLt,
+    idLte,
     includeDeactivatedUsers,
     limit,
     offset,
@@ -62,7 +74,7 @@ mixin _$QueryUsersPayload {
 
   @override
   String toString() {
-    return 'QueryUsersPayload(filterConditions: $filterConditions, includeDeactivatedUsers: $includeDeactivatedUsers, limit: $limit, offset: $offset, presence: $presence, sort: $sort)';
+    return 'QueryUsersPayload(filterConditions: $filterConditions, idGt: $idGt, idGte: $idGte, idLt: $idLt, idLte: $idLte, includeDeactivatedUsers: $includeDeactivatedUsers, limit: $limit, offset: $offset, presence: $presence, sort: $sort)';
   }
 }
 
@@ -75,6 +87,10 @@ abstract mixin class $QueryUsersPayloadCopyWith<$Res> {
   @useResult
   $Res call({
     Map<String, Object?> filterConditions,
+    String? idGt,
+    String? idGte,
+    String? idLt,
+    String? idLte,
     bool? includeDeactivatedUsers,
     int? limit,
     int? offset,
@@ -96,6 +112,10 @@ class _$QueryUsersPayloadCopyWithImpl<$Res> implements $QueryUsersPayloadCopyWit
   @override
   $Res call({
     Object? filterConditions = null,
+    Object? idGt = freezed,
+    Object? idGte = freezed,
+    Object? idLt = freezed,
+    Object? idLte = freezed,
     Object? includeDeactivatedUsers = freezed,
     Object? limit = freezed,
     Object? offset = freezed,
@@ -108,6 +128,22 @@ class _$QueryUsersPayloadCopyWithImpl<$Res> implements $QueryUsersPayloadCopyWit
             ? _self.filterConditions
             : filterConditions // ignore: cast_nullable_to_non_nullable
                   as Map<String, Object?>,
+        idGt: freezed == idGt
+            ? _self.idGt
+            : idGt // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        idGte: freezed == idGte
+            ? _self.idGte
+            : idGte // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        idLt: freezed == idLt
+            ? _self.idLt
+            : idLt // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        idLte: freezed == idLte
+            ? _self.idLte
+            : idLte // ignore: cast_nullable_to_non_nullable
+                  as String?,
         includeDeactivatedUsers: freezed == includeDeactivatedUsers
             ? _self.includeDeactivatedUsers
             : includeDeactivatedUsers // ignore: cast_nullable_to_non_nullable

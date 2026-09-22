@@ -18,6 +18,7 @@ part 'moderation_flag_response.freezed.dart';
 @JsonSerializable()
 class ModerationFlagResponse with _$ModerationFlagResponse {
   const ModerationFlagResponse({
+    this.contentPublishedAt,
     required this.createdAt,
     this.custom,
     this.entityCreatorId,
@@ -34,6 +35,11 @@ class ModerationFlagResponse with _$ModerationFlagResponse {
     this.user,
     required this.userId,
   });
+
+  @override
+  @StreamDateTimeConverter()
+  @JsonKey(name: 'content_published_at')
+  final DateTime? contentPublishedAt;
 
   @override
   @StreamDateTimeConverter()

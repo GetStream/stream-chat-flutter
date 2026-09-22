@@ -18,7 +18,7 @@ mixin _$ConfigResponse {
   List<AIImageLabelDefinition>? get aiImageLabelDefinitions;
   Map<String, List<String>>? get aiImageSubclassifications;
   AITextConfig? get aiTextConfig;
-  AIVideoConfig? get aiVideoConfig;
+  AIVideoConfigResponse? get aiVideoConfig;
   bool get async;
   AutomodPlatformCircumventionConfig? get automodPlatformCircumventionConfig;
   AutomodSemanticFiltersConfig? get automodSemanticFiltersConfig;
@@ -140,7 +140,7 @@ abstract mixin class $ConfigResponseCopyWith<$Res> {
     List<AIImageLabelDefinition>? aiImageLabelDefinitions,
     Map<String, List<String>>? aiImageSubclassifications,
     AITextConfig? aiTextConfig,
-    AIVideoConfig? aiVideoConfig,
+    AIVideoConfigResponse? aiVideoConfig,
     bool async,
     AutomodPlatformCircumventionConfig? automodPlatformCircumventionConfig,
     AutomodSemanticFiltersConfig? automodSemanticFiltersConfig,
@@ -218,7 +218,7 @@ class _$ConfigResponseCopyWithImpl<$Res> implements $ConfigResponseCopyWith<$Res
         aiVideoConfig: freezed == aiVideoConfig
             ? _self.aiVideoConfig
             : aiVideoConfig // ignore: cast_nullable_to_non_nullable
-                  as AIVideoConfig?,
+                  as AIVideoConfigResponse?,
         async: null == async
             ? _self.async
             : async // ignore: cast_nullable_to_non_nullable

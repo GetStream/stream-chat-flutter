@@ -13,6 +13,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$ModerationFlagResponse {
+  DateTime? get contentPublishedAt;
   DateTime get createdAt;
   Map<String, Object?>? get custom;
   String? get entityCreatorId;
@@ -44,6 +45,8 @@ mixin _$ModerationFlagResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ModerationFlagResponse &&
+            (identical(other.contentPublishedAt, contentPublishedAt) ||
+                other.contentPublishedAt == contentPublishedAt) &&
             (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.entityCreatorId, entityCreatorId) || other.entityCreatorId == entityCreatorId) &&
@@ -64,6 +67,7 @@ mixin _$ModerationFlagResponse {
   @override
   int get hashCode => Object.hash(
     runtimeType,
+    contentPublishedAt,
     createdAt,
     const DeepCollectionEquality().hash(custom),
     entityCreatorId,
@@ -83,7 +87,7 @@ mixin _$ModerationFlagResponse {
 
   @override
   String toString() {
-    return 'ModerationFlagResponse(createdAt: $createdAt, custom: $custom, entityCreatorId: $entityCreatorId, entityId: $entityId, entityType: $entityType, labels: $labels, moderationPayload: $moderationPayload, reason: $reason, result: $result, reviewQueueItem: $reviewQueueItem, reviewQueueItemId: $reviewQueueItemId, type: $type, updatedAt: $updatedAt, user: $user, userId: $userId)';
+    return 'ModerationFlagResponse(contentPublishedAt: $contentPublishedAt, createdAt: $createdAt, custom: $custom, entityCreatorId: $entityCreatorId, entityId: $entityId, entityType: $entityType, labels: $labels, moderationPayload: $moderationPayload, reason: $reason, result: $result, reviewQueueItem: $reviewQueueItem, reviewQueueItemId: $reviewQueueItemId, type: $type, updatedAt: $updatedAt, user: $user, userId: $userId)';
   }
 }
 
@@ -95,6 +99,7 @@ abstract mixin class $ModerationFlagResponseCopyWith<$Res> {
   ) = _$ModerationFlagResponseCopyWithImpl;
   @useResult
   $Res call({
+    DateTime? contentPublishedAt,
     DateTime createdAt,
     Map<String, Object?>? custom,
     String? entityCreatorId,
@@ -125,6 +130,7 @@ class _$ModerationFlagResponseCopyWithImpl<$Res> implements $ModerationFlagRespo
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? contentPublishedAt = freezed,
     Object? createdAt = null,
     Object? custom = freezed,
     Object? entityCreatorId = freezed,
@@ -143,6 +149,10 @@ class _$ModerationFlagResponseCopyWithImpl<$Res> implements $ModerationFlagRespo
   }) {
     return _then(
       ModerationFlagResponse(
+        contentPublishedAt: freezed == contentPublishedAt
+            ? _self.contentPublishedAt
+            : contentPublishedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
         createdAt: null == createdAt
             ? _self.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable

@@ -21,6 +21,7 @@ class PollOptionResponseData with _$PollOptionResponseData {
     required this.custom,
     required this.id,
     required this.text,
+    this.textI18n,
   });
 
   @override
@@ -34,6 +35,10 @@ class PollOptionResponseData with _$PollOptionResponseData {
   @override
   @JsonKey(name: 'text')
   final String text;
+
+  @override
+  @JsonKey(name: 'text_i18n')
+  final Map<String, String>? textI18n;
 
   Map<String, dynamic> toJson() => _$PollOptionResponseDataToJson(this);
 

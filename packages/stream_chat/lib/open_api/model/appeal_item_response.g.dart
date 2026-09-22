@@ -12,6 +12,7 @@ AppealItemResponse _$AppealItemResponseFromJson(Map<String, dynamic> json) => Ap
       .toList(),
   aiTextSeverity: json['ai_text_severity'] as String?,
   appealReason: json['appeal_reason'] as String,
+  appealReasonLanguage: json['appeal_reason_language'] as String?,
   attachments: (json['attachments'] as List<dynamic>?)?.map((e) => e as String).toList(),
   channelCid: json['channel_cid'] as String?,
   configKey: json['config_key'] as String?,
@@ -34,6 +35,7 @@ AppealItemResponse _$AppealItemResponseFromJson(Map<String, dynamic> json) => Ap
       )
       .toList(),
   id: json['id'] as String,
+  languages: (json['languages'] as List<dynamic>?)?.map((e) => e as String).toList(),
   moderationAction: json['moderation_action'] == null
       ? null
       : ActionLogResponse.fromJson(
@@ -58,6 +60,7 @@ Map<String, dynamic> _$AppealItemResponseToJson(AppealItemResponse instance) => 
   'actions': instance.actions?.map((e) => e.toJson()).toList(),
   'ai_text_severity': instance.aiTextSeverity,
   'appeal_reason': instance.appealReason,
+  'appeal_reason_language': instance.appealReasonLanguage,
   'attachments': instance.attachments,
   'channel_cid': instance.channelCid,
   'config_key': instance.configKey,
@@ -70,6 +73,7 @@ Map<String, dynamic> _$AppealItemResponseToJson(AppealItemResponse instance) => 
   'flag_types': instance.flagTypes,
   'flags': instance.flags?.map((e) => e.toJson()).toList(),
   'id': instance.id,
+  'languages': instance.languages,
   'moderation_action': instance.moderationAction?.toJson(),
   'original_moderation_action': instance.originalModerationAction?.toJson(),
   'recommended_action': instance.recommendedAction,

@@ -19,6 +19,10 @@ part 'query_users_payload.freezed.dart';
 class QueryUsersPayload with _$QueryUsersPayload {
   const QueryUsersPayload({
     required this.filterConditions,
+    this.idGt,
+    this.idGte,
+    this.idLt,
+    this.idLte,
     this.includeDeactivatedUsers,
     this.limit,
     this.offset,
@@ -29,6 +33,22 @@ class QueryUsersPayload with _$QueryUsersPayload {
   @override
   @JsonKey(name: 'filter_conditions')
   final Map<String, Object?> filterConditions;
+
+  @override
+  @JsonKey(name: 'id_gt')
+  final String? idGt;
+
+  @override
+  @JsonKey(name: 'id_gte')
+  final String? idGte;
+
+  @override
+  @JsonKey(name: 'id_lt')
+  final String? idLt;
+
+  @override
+  @JsonKey(name: 'id_lte')
+  final String? idLte;
 
   @override
   @JsonKey(name: 'include_deactivated_users')
