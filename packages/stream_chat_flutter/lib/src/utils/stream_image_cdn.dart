@@ -102,7 +102,7 @@ class ImageResize {
 /// ```dart
 /// StreamChat(
 ///   client: client,
-///   configData: StreamChatConfigurationData(
+///   streamChatConfigData: StreamChatConfigurationData(
 ///     imageCDN: MyImageCDN(),
 ///   ),
 ///   child: ...,
@@ -117,6 +117,10 @@ class StreamImageCDN {
 
   // The host suffix for Stream's image CDN.
   static const _streamCDNHost = 'stream-io-cdn.com';
+
+  // Matched as a dot-separated suffix so a lookalike registrable domain such
+  // as `evilstream-io-cdn.com` is not mistaken for ours.
+  static bool _isStreamCDN(Uri uri) => uri.host.endsWith('.$_streamCDNHost');
 
   // Parameters that identify a rendition, in cache-key order.
   static const _persistedParameters = ['crop', 'h', 'resize', 'w'];
@@ -134,7 +138,7 @@ class StreamImageCDN {
   /// Override this to customize URL rewriting for a custom CDN.
   String resolveUrl(String sourceUrl, {ImageResize? resize}) {
     final uri = Uri.tryParse(sourceUrl);
-    if (uri == null || !uri.host.contains(_streamCDNHost)) return sourceUrl;
+    if (uri == null || !_isStreamCDN(uri)) return sourceUrl;
     if (resize == null || _isAlreadySized(uri)) return sourceUrl;
 
     final queryParameters = {
@@ -177,7 +181,7 @@ class StreamImageCDN {
   /// Override this to customize cache key generation for a custom CDN.
   String cacheKey(String imageUrl) {
     final uri = Uri.tryParse(imageUrl);
-    if (uri == null || !uri.host.contains(_streamCDNHost)) return imageUrl;
+    if (uri == null || !_isStreamCDN(uri)) return imageUrl;
 
     final params = uri.queryParameters;
     final filteredParams = {

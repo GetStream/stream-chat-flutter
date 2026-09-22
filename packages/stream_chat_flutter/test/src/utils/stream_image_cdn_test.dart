@@ -143,6 +143,23 @@ void main() {
 
         expect(cdn.resolveUrl(url), equals(url));
       });
+
+      test('does not treat a lookalike host as ours', () {
+        const resize = ImageResize(width: 200, height: 300);
+
+        for (final host in [
+          'stream-io-cdn.com.example', // ours as a prefix
+          'evilstream-io-cdn.com', // ours without the dot
+        ]) {
+          final url = 'https://$host/photo.jpg';
+
+          expect(
+            cdn.resolveUrl(url, resize: resize),
+            equals(url),
+            reason: '$host should not be resized',
+          );
+        }
+      });
     });
   });
 
@@ -250,6 +267,21 @@ void main() {
         const url = 'https://example.com/photo.jpg?token=abc';
 
         expect(cdn.cacheKey(url), equals(url));
+      });
+
+      test('keeps the whole query for a lookalike host', () {
+        for (final host in [
+          'stream-io-cdn.com.example', // ours as a prefix
+          'evilstream-io-cdn.com', // ours without the dot
+        ]) {
+          final url = 'https://$host/photo.jpg?w=200&token=abc';
+
+          expect(
+            cdn.cacheKey(url),
+            equals(url),
+            reason: '$host should keep its full query',
+          );
+        }
       });
     });
   });
