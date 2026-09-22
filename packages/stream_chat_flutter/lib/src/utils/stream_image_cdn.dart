@@ -122,11 +122,11 @@ class StreamImageCDN {
   // as `evilstream-io-cdn.com` is not mistaken for ours.
   static bool _isStreamCDN(Uri uri) => uri.host.endsWith('.$_streamCDNHost');
 
-  // Query parameter names that are preserved in cache keys, in key order.
+  // Parameters that identify a rendition, in cache-key order.
   //
-  // These are the image-transformation parameters that affect
-  // which rendition of the image is returned. All other parameters
-  // (e.g. signed URL tokens) are stripped.
+  // These are the image-transformation parameters that affect which rendition
+  // is returned, so they decide both whether a URL is already sized and which
+  // parameters survive into its cache key.
   static const _persistedParameters = ['crop', 'h', 'resize', 'w'];
 
   /// Resolves the [sourceUrl] by appending resize/transform parameters
@@ -177,9 +177,10 @@ class StreamImageCDN {
   /// authentication parameters (e.g. CloudFront signed URL tokens)
   /// while preserving those that identify distinct image renditions.
   ///
-  /// This uses an allowlist approach, keeping only the parameters in
-  /// [_persistedParameters] for Stream CDN URLs, always in the same order, so
-  /// one rendition yields one key however the source URL ordered them.
+  /// This uses an allowlist approach, keeping only the parameters that
+  /// identify a rendition (`crop`, `h`, `resize`, `w`), always in the same
+  /// order, so one rendition yields one key however the source URL ordered
+  /// them.
   ///
   /// For non-Stream CDN URLs, returns the full URL string unchanged.
   ///

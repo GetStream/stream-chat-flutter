@@ -234,36 +234,32 @@ void main() {
         expect(key, contains('w=200'));
         expect(key, contains('h=300'));
       });
-    });
 
-    test('is identical whatever order the source URL lists params in', () {
-      const signed = 'Key-Pair-Id=APK&Policy=POL&Signature=SIG';
-      const path = 'https://us-east.stream-io-cdn.com/1/images/a.jpg';
-      const resize = ImageResize(width: 450, height: 600);
+      test('is identical whatever order the source URL lists params in', () {
+        const signed = 'Key-Pair-Id=APK&Policy=POL&Signature=SIG';
+        const path = 'https://us-east.stream-io-cdn.com/1/images/a.jpg';
+        const resize = ImageResize(width: 450, height: 600);
 
-      final bare = cdn.resolveUrl('$path?$signed', resize: resize);
-      // The wildcard shape real signed URLs arrive in.
-      final wildcards = cdn.resolveUrl(
-        '$path?crop=*&h=*&resize=*&ro=0&w=*&$signed',
-        resize: resize,
-      );
+        final bare = cdn.resolveUrl('$path?$signed', resize: resize);
+        // The wildcard shape real signed URLs arrive in.
+        final wildcards = cdn.resolveUrl(
+          '$path?crop=*&h=*&resize=*&ro=0&w=*&$signed',
+          resize: resize,
+        );
 
-      expect(cdn.cacheKey(bare), cdn.cacheKey(wildcards));
-    });
+        expect(cdn.cacheKey(bare), cdn.cacheKey(wildcards));
+      });
 
-    test('orders the persisted parameters by name', () {
-      const path = 'https://us-east.stream-io-cdn.com/1/images/a.jpg';
+      test('orders the persisted parameters by name', () {
+        const path = 'https://us-east.stream-io-cdn.com/1/images/a.jpg';
 
-      final url = cdn.resolveUrl(
-        '$path?crop=*&h=*&resize=*&w=*',
-        resize: const ImageResize(
-          width: 450,
-          height: 600,
-          mode: ResizeMode.crop,
-        ),
-      );
+        final url = cdn.resolveUrl(
+          '$path?crop=*&h=*&resize=*&w=*',
+          resize: const ImageResize(width: 450, height: 600, mode: ResizeMode.crop),
+        );
 
-      expect(cdn.cacheKey(url), endsWith('?crop=center&h=600&resize=crop&w=450'));
+        expect(cdn.cacheKey(url), endsWith('?crop=center&h=600&resize=crop&w=450'));
+      });
     });
 
     group('non-Stream URLs', () {
