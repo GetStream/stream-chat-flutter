@@ -118,9 +118,17 @@ class StreamImageCDN {
   // The host suffix for Stream's image CDN.
   static const _streamCDNHost = 'stream-io-cdn.com';
 
-  // Matched as a dot-separated suffix so a lookalike registrable domain such
-  // as `evilstream-io-cdn.com` is not mistaken for ours.
-  static bool _isStreamCDN(Uri uri) => uri.host.endsWith('.$_streamCDNHost');
+  // Whether [uri] is served from Stream's image CDN.
+  //
+  // Matched whole or as a dot-separated suffix, so a lookalike such as
+  // `evilstream-io-cdn.com` is not mistaken for ours.
+  static bool _isStreamCDN(Uri uri) {
+    // A trailing dot is the absolute form of the same host.
+    var host = uri.host;
+    if (host.endsWith('.')) host = host.substring(0, host.length - 1);
+
+    return host == _streamCDNHost || host.endsWith('.$_streamCDNHost');
+  }
 
   // Parameters that identify a rendition, in cache-key order.
   static const _persistedParameters = ['crop', 'h', 'resize', 'w'];
@@ -159,10 +167,11 @@ class StreamImageCDN {
     return uri.replace(queryParameters: queryParameters).toString();
   }
 
-  // Whether [uri] already asks the CDN for a specific rendition.
+  // Whether [uri] already asks the CDN for a specific size. A crop or a
+  // resize mode alone does not select one.
   static bool _isAlreadySized(Uri uri) {
     final params = uri.queryParameters;
-    return _persistedParameters.any((name) {
+    return const ['w', 'h'].any((name) {
       final value = params[name];
       return value != null && value != _wildcard;
     });
