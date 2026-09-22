@@ -387,6 +387,28 @@ void main() {
         expect(result.height, closeTo(80, 0.01));
       });
 
+      test('BoxFit.none caps only the axis that overflows', () {
+        final result = ThumbnailSizeCalculator.calculate(
+          originalSize: const Size(1920, 1080),
+          targetSize: const Size(400, 2000),
+          pixelRatio: 1,
+          fit: BoxFit.none,
+        );
+
+        expect(result, const Size(400, 1080));
+      });
+
+      test('BoxFit.fill caps only the axis that overflows', () {
+        final result = ThumbnailSizeCalculator.calculate(
+          originalSize: const Size(1920, 1080),
+          targetSize: const Size(400, 2000),
+          pixelRatio: 1,
+          fit: BoxFit.fill,
+        );
+
+        expect(result, const Size(400, 1080));
+      });
+
       test('BoxFit.scaleDown matches contain when image overflows', () {
         final result = ThumbnailSizeCalculator.calculate(
           originalSize: const Size(1920, 1080),
