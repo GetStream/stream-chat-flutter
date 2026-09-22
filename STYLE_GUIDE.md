@@ -395,8 +395,12 @@ than the CI expects.
 We use dartdoc for public API documentation. All public members in SDK packages must
 have documentation (`public_member_api_docs` lint is enabled).
 
-In general, follow the [Effective Dart documentation guide](https://dart.dev/effective-dart/documentation)
-except where this page contradicts it.
+In general, follow the Effective Dart documentation guide — vendored in this repo as
+[`EFFECTIVE_DART_DOC.md`](EFFECTIVE_DART_DOC.md) so it is readable offline
+(canonical version at [dart.dev](https://dart.dev/effective-dart/documentation)) — except where
+this page contradicts it. Read it before writing or reviewing dartdoc: the rules most often
+missed are single-sentence first paragraphs, "Whether…" for booleans, noun phrases for
+properties, square brackets for in-scope identifiers, and throws documented in prose.
 
 ### Answer your own questions straight away
 

@@ -168,3 +168,8 @@ Worth filing regardless: the generator emitting JSON bodies for `multipart/form-
       Symbol Map rows plus a File Upload feature section — the guide already promises one.
 - [ ] Decisions recorded here, status box ticked in `README.md`, and
       `openapi-migration/12-uploads-cdn.md` updated to point at what this phase settled.
+- [ ] Public dartdoc follows [`STYLE_GUIDE.md` § Documentation](../STYLE_GUIDE.md#documentation)
+      and [`EFFECTIVE_DART_DOC.md`](../EFFECTIVE_DART_DOC.md), including on symbols this phase
+      retyped but whose docs it left alone.
+- [ ] Tests follow [`TESTING.md`](../TESTING.md): no `group` organizing a file by method, each
+      name states its subject and behaviour.

@@ -59,3 +59,8 @@ whichever group happens to touch `User` first. Raised on
 - [ ] `DefaultApi` construction is settled in one place, with no `invalid_use_of_visible_for_testing_member`.
 - [ ] The `User` / `OwnUser` decision is written into `09-users.md`.
 - [ ] `melos run analyze` clean, `melos run test:dart` green.
+- [ ] Public dartdoc follows [`STYLE_GUIDE.md` § Documentation](../STYLE_GUIDE.md#documentation)
+      and [`EFFECTIVE_DART_DOC.md`](../EFFECTIVE_DART_DOC.md), including on symbols this group
+      retyped but whose docs it left alone.
+- [ ] Tests follow [`TESTING.md`](../TESTING.md): no `group` organizing a file by method, each
+      name states its subject and behaviour.
