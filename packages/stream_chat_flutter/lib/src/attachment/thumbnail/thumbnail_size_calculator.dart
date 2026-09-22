@@ -20,6 +20,7 @@ class ThumbnailSizeCalculator {
   ///    dimension
   /// 2. Maintains aspect ratio to prevent image distortion
   /// 3. Applies [pixelRatio] for device-appropriate resolution
+  /// 4. Caps the result at [originalSize], so the image is never upscaled
   ///
   /// Example:
   /// ```dart
@@ -36,11 +37,10 @@ class ThumbnailSizeCalculator {
     required Size targetSize,
     required double pixelRatio,
   }) {
-    final originalAspectRatio = originalSize?.aspectRatio;
-    // If original aspect ratio is not available, skip optimization
-    // We need the aspect ratio to avoid incorrect cropping
-    if (originalAspectRatio == null) return null;
+    final original = originalSize;
+    if (original == null) return null;
 
+    final originalAspectRatio = original.aspectRatio;
     // Invalid aspect ratio indicates invalid original size
     if (originalAspectRatio.isInfinite || originalAspectRatio <= 0) {
       return null;
@@ -74,6 +74,13 @@ class ThumbnailSizeCalculator {
     }
 
     // Apply pixel ratio to get physical pixel dimensions
-    return Size(thumbnailWidth * pixelRatio, thumbnailHeight * pixelRatio);
+    final width = thumbnailWidth * pixelRatio;
+    final height = thumbnailHeight * pixelRatio;
+
+    // Asking for more than the source holds costs bytes for pixels it does
+    // not have.
+    if (width >= original.width || height >= original.height) return original;
+
+    return Size(width, height);
   }
 }

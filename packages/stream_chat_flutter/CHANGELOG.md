@@ -2,6 +2,7 @@
 
 🐞 Fixed
 
+- Fixed image attachments being requested from the CDN at more pixels than the original holds.
 - Fixed image attachments requesting two near-identical renditions of the same image from the CDN.
 
 ## 9.29.0
