@@ -1,6 +1,6 @@
 export 'package:jiffy/jiffy.dart';
 export 'package:photo_manager/photo_manager.dart'
-    show ThumbnailSize, ThumbnailFormat;
+    show RequestType, ThumbnailSize, ThumbnailFormat;
 export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 export 'src/ai_assistant/ai_typing_indicator_view.dart';

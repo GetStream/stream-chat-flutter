@@ -17,6 +17,7 @@
 
 - Fixed image attachments being requested from the CDN at more pixels than the original holds.
 - Fixed image attachments requesting two near-identical renditions of the same image from the CDN.
+- Fixed the gallery tab vanishing from the attachment picker when `allowedAttachmentPickerTypes` allowed images or videos but not both. It now stays available and lists only the allowed media.
 
 ## 9.29.0
 
