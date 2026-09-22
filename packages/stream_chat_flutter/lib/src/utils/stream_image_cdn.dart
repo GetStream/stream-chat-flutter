@@ -137,7 +137,7 @@ class StreamImageCDN {
   ///
   /// For non-Stream CDN URLs, returns [sourceUrl] unchanged regardless
   /// of [resize]. A URL that already requests a specific size is also
-  /// returned unchanged, so a size chosen server-side is not overridden.
+  /// returned unchanged, so [resize] never replaces a size already on it.
   ///
   /// Override this to customize URL rewriting for a custom CDN.
   String resolveUrl(String sourceUrl, {ImageResize? resize}) {

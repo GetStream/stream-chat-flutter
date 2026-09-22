@@ -43,8 +43,8 @@ class _RecordingAttachmentBuilder extends StreamAttachmentWidgetBuilder {
     return Container(
       constraints: const BoxConstraints(minWidth: 170, maxWidth: 256, minHeight: 100, maxHeight: 300),
       child: AspectRatio(
-        // A 3:4 portrait photo, the ratio behind the most common size pair in
-        // the reported traffic.
+        // A 3:4 portrait photo, so the tile is narrower than its box and the
+        // measured width is the photo's rather than the box's.
         aspectRatio: 0.75,
         child: LayoutBuilder(
           builder: (context, constraints) {

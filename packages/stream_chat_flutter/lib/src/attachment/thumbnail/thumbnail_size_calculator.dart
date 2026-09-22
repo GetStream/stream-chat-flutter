@@ -98,8 +98,8 @@ class ThumbnailSizeCalculator {
     // Apply pixel ratio to get physical pixel dimensions
     final scaled = resolved * pixelRatio;
 
-    // Never ask for more pixels than the original holds. The CDN will not
-    // enlarge one, but the requested size still reaches the cache key.
+    // Never ask for more pixels than the original holds; the requested size
+    // reaches the cache key, so overshooting only costs an entry that misses.
     return scaled < originalSize ? scaled : originalSize;
   }
 
