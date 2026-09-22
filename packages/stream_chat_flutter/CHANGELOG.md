@@ -23,6 +23,10 @@
 
 - Deprecated `withData` and `withReadStream` on `StreamAttachmentHandler.pickFile` and `StreamFilePicker`; they no longer have any effect.
 
+⚠️ Deprecated
+
+- Deprecated `AITypingIndicatorView`, `AnimatedDots`, `TypewriterController`, `TypewriterValue`, `TypewriterState`, `TypewriterWidgetBuilder`, `StreamTypewriterBuilder` and `StreamingMessageView`. They have moved to `package:stream_chat_flutter_ai` and will be removed from this package in a future release. Migrate by adding `stream_chat_flutter_ai` to your `pubspec.yaml` and updating the imports.
+
 🐞 Fixed
 
 - Fixed `StreamAttachmentHandler.pickFile` throwing on an empty selection; it now returns `null`.
