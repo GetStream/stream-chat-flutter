@@ -21,11 +21,13 @@
   `libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libwebp-dev`.
 - A deleted message now renders the timestamp and delivery status below the placeholder, matching the design, and no longer shows the "Edited" marker — there is no text left to have been edited.
 - `AccessibleMessagePreviewFormatter.formatMessageSemanticsLabel` must now return the body without a speaker prefix when `channel` is omitted. An implementation that prefixes unconditionally makes a message row announce "You said, You: hello".
+- `StreamImageCDN.resolveUrl` now leaves a URL that already asks for a specific size alone, rather than replacing it with the size the layout computed.
 
 🐞 Fixed
 
 - Fixed `StreamAttachmentHandler.pickFile` throwing when the picker returned an empty selection: it took `.files.first` unconditionally. It now returns `null`.
 - Fixed `StreamAttachmentHandler` throwing `UnimplementedError` on WebAssembly builds.
+- Fixed the gallery tab vanishing from the attachment picker when `allowedAttachmentPickerTypes` allowed images or videos but not both. It now stays available and lists only the allowed media.
 - Improved the screen-reader experience in the message list: each message is announced as a single phrase naming the sender, the body, the time, the edited marker and the delivery status, while the attachments, reaction chips, quoted message and replies row stay reachable one level deeper.
 - Fixed the message body being announced as its markdown source, so link and emphasis syntax is no longer read aloud.
 - Fixed a quoted message announcing only the quoted author's name, saying nothing about who replied to whom.
@@ -33,6 +35,10 @@
 - Fixed a date divider announcing a clock time it never showed instead of the date it displays, and exposed it as a header so days can be jumped between.
 - Fixed the attachment upload progress on an outgoing message counting its link preview, which inflated the total against an attachment the sender never picked.
 - Fixed a message the moderation system bounced showing a read receipt once other members had read past it. It now shows only the error badge, matching what a screen reader announces for it.
+- Fixed image attachments being requested from the CDN at more pixels than the original holds.
+- Fixed one image rendition yielding two cache entries when its resize parameters arrived in a different order, or a crop on the URL survived a resize that does not crop.
+- Fixed image attachments not being resized at all when the URL carried a crop or a resize mode but no dimensions.
+- Fixed a URL whose host merely contains `stream-io-cdn.com` being treated as Stream's CDN.
 
 ## 10.4.0
 
