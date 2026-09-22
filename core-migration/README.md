@@ -211,8 +211,9 @@ the guide is written as the work happens, not reconstructed at release. One phas
 `refactor(llc)!:` when it breaks. Close the loop by ticking the phase's definition of done and its
 status box in the table above.
 
-A phase follows [`STYLE_GUIDE.md`](../STYLE_GUIDE.md) and [`TESTING.md`](../TESTING.md) like any
-other change, including on docs it leaves describing a type it retyped. Nothing in CI checks
+A phase follows [`STYLE_GUIDE.md`](../STYLE_GUIDE.md), [`EFFECTIVE_DART_DOC.md`](../EFFECTIVE_DART_DOC.md)
+and [`TESTING.md`](../TESTING.md) like any other change, including on docs it leaves describing a
+type it retyped. Nothing in CI checks
 either — `dart analyze --fatal-infos` checks a public member *has* a doc, never what it says or
 how a test is named — so reading the diff against them is part of closing the phase.
 

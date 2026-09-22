@@ -31,9 +31,11 @@ Two documents bracket this work, and you should read both before starting:
   reconstructed at release. Read its Symbol Map and Error Handling sections before designing a change: they define
   the shape consumers have already been promised.
 
-**`STYLE_GUIDE.md`** (§ Documentation, § Testing) and **`TESTING.md`** are the repo's conventions, and a
-migration follows them like any other change. Phases 4 and 5 name the rules migrations keep breaking; that is a
-shortlist, not a substitute for the guides. Where they disagree with this skill, the guides win.
+**`STYLE_GUIDE.md`** (§ Documentation, § Testing), **`EFFECTIVE_DART_DOC.md`** and **`TESTING.md`** are the
+repo's conventions, and a migration follows them like any other change. `EFFECTIVE_DART_DOC.md` is Effective
+Dart's documentation guide vendored into the repo; the style guide wins where the two disagree. Phases 4 and 5
+name the rules migrations keep breaking; that is a shortlist, not a substitute for the guides. Where they
+disagree with this skill, the guides win.
 
 Work the phases in order. Most of the cost is in phases 1–2 — the code is mechanical once the inventory and the
 shape decisions exist.
@@ -249,7 +251,10 @@ comm -12 \
 ### Documenting the public surface
 
 Write these as you write the code. `public_member_api_docs` only checks a doc *exists*, so a placeholder survives
-`melos run analyze`. The rules are `STYLE_GUIDE.md` § Documentation; three things migrations get wrong:
+`melos run analyze`. The rules are `STYLE_GUIDE.md` § Documentation over `EFFECTIVE_DART_DOC.md` — the latter
+covers dartdoc form (single-sentence first paragraph, "Whether…" for booleans, noun phrases for properties,
+square brackets for in-scope identifiers), the former wins where they disagree. Three things migrations get
+wrong on top of that:
 
 - **Scope is the surface the group touches**, not just the new repository. The `StreamChatClient` delegates
   duplicate its docs verbatim, so a fix belongs in both.
@@ -294,8 +299,8 @@ persistence.
 `.freezed.dart` files are never analyzed. Exercising the code in a test is what actually compiles it.
 
 **Neither does it cover the guides.** `--fatal-infos` checks a public member *has* a doc, never what it says or
-how a test is named. Re-read the diff against `STYLE_GUIDE.md` § Documentation and `TESTING.md` before opening
-the PR — that read is what the last two definition-of-done boxes stand for.
+how a test is named. Re-read the diff against `STYLE_GUIDE.md` § Documentation, `EFFECTIVE_DART_DOC.md` and
+`TESTING.md` before opening the PR — that read is what the last two definition-of-done boxes stand for.
 
 The PR body carries the group's scope, the phase 2 decisions with their reasons, and any endpoint left
 hand-written and why. Then close the loop in the plan: tick the definition-of-done boxes in the group's file and
