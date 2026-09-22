@@ -415,3 +415,8 @@ exception construction.
 - [ ] `refactor(llc)!:` title, `🛑️ Breaking` CHANGELOG entries, `migrations/v11-migration.md`
       Symbol Map row for `ConnectionStatus`, plus a feature section on the new connection state.
 - [ ] Decisions recorded here, status box ticked in `README.md`.
+- [ ] Public dartdoc follows [`STYLE_GUIDE.md` § Documentation](../STYLE_GUIDE.md#documentation)
+      and [`EFFECTIVE_DART_DOC.md`](../EFFECTIVE_DART_DOC.md), including on symbols this phase
+      retyped but whose docs it left alone.
+- [ ] Tests follow [`TESTING.md`](../TESTING.md): no `group` organizing a file by method, each
+      name states its subject and behaviour.
