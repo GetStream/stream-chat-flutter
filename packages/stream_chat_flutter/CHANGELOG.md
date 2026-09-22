@@ -1,4 +1,4 @@
-## Upcoming
+## 9.30.0
 
 ✅ Added
 
