@@ -9,6 +9,10 @@ part of 'moderation_flag_response.dart';
 ModerationFlagResponse _$ModerationFlagResponseFromJson(
   Map<String, dynamic> json,
 ) => ModerationFlagResponse(
+  contentPublishedAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['content_published_at'],
+    const StreamDateTimeConverter().fromJson,
+  ),
   createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
@@ -41,6 +45,10 @@ ModerationFlagResponse _$ModerationFlagResponseFromJson(
 Map<String, dynamic> _$ModerationFlagResponseToJson(
   ModerationFlagResponse instance,
 ) => <String, dynamic>{
+  'content_published_at': _$JsonConverterToJson<Object, DateTime>(
+    instance.contentPublishedAt,
+    const StreamDateTimeConverter().toJson,
+  ),
   'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'custom': instance.custom,
   'entity_creator_id': instance.entityCreatorId,
@@ -57,3 +65,13 @@ Map<String, dynamic> _$ModerationFlagResponseToJson(
   'user': instance.user?.toJson(),
   'user_id': instance.userId,
 };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);

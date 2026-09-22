@@ -13,6 +13,10 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$QueryMembersPayload {
+  DateTime? get createdAtAfter;
+  DateTime? get createdAtAfterOrEqual;
+  DateTime? get createdAtBefore;
+  DateTime? get createdAtBeforeOrEqual;
   Map<String, Object?>? get filterConditions;
   String? get id;
   int? get limit;
@@ -20,6 +24,10 @@ mixin _$QueryMembersPayload {
   int? get offset;
   List<SortParamRequest>? get sort;
   String get type;
+  String? get userIdGt;
+  String? get userIdGte;
+  String? get userIdLt;
+  String? get userIdLte;
 
   /// Create a copy of QueryMembersPayload
   /// with the given fields replaced by the non-null parameter values.
@@ -36,6 +44,12 @@ mixin _$QueryMembersPayload {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is QueryMembersPayload &&
+            (identical(other.createdAtAfter, createdAtAfter) || other.createdAtAfter == createdAtAfter) &&
+            (identical(other.createdAtAfterOrEqual, createdAtAfterOrEqual) ||
+                other.createdAtAfterOrEqual == createdAtAfterOrEqual) &&
+            (identical(other.createdAtBefore, createdAtBefore) || other.createdAtBefore == createdAtBefore) &&
+            (identical(other.createdAtBeforeOrEqual, createdAtBeforeOrEqual) ||
+                other.createdAtBeforeOrEqual == createdAtBeforeOrEqual) &&
             const DeepCollectionEquality().equals(
               other.filterConditions,
               filterConditions,
@@ -45,12 +59,20 @@ mixin _$QueryMembersPayload {
             const DeepCollectionEquality().equals(other.members, members) &&
             (identical(other.offset, offset) || other.offset == offset) &&
             const DeepCollectionEquality().equals(other.sort, sort) &&
-            (identical(other.type, type) || other.type == type));
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.userIdGt, userIdGt) || other.userIdGt == userIdGt) &&
+            (identical(other.userIdGte, userIdGte) || other.userIdGte == userIdGte) &&
+            (identical(other.userIdLt, userIdLt) || other.userIdLt == userIdLt) &&
+            (identical(other.userIdLte, userIdLte) || other.userIdLte == userIdLte));
   }
 
   @override
   int get hashCode => Object.hash(
     runtimeType,
+    createdAtAfter,
+    createdAtAfterOrEqual,
+    createdAtBefore,
+    createdAtBeforeOrEqual,
     const DeepCollectionEquality().hash(filterConditions),
     id,
     limit,
@@ -58,11 +80,15 @@ mixin _$QueryMembersPayload {
     offset,
     const DeepCollectionEquality().hash(sort),
     type,
+    userIdGt,
+    userIdGte,
+    userIdLt,
+    userIdLte,
   );
 
   @override
   String toString() {
-    return 'QueryMembersPayload(filterConditions: $filterConditions, id: $id, limit: $limit, members: $members, offset: $offset, sort: $sort, type: $type)';
+    return 'QueryMembersPayload(createdAtAfter: $createdAtAfter, createdAtAfterOrEqual: $createdAtAfterOrEqual, createdAtBefore: $createdAtBefore, createdAtBeforeOrEqual: $createdAtBeforeOrEqual, filterConditions: $filterConditions, id: $id, limit: $limit, members: $members, offset: $offset, sort: $sort, type: $type, userIdGt: $userIdGt, userIdGte: $userIdGte, userIdLt: $userIdLt, userIdLte: $userIdLte)';
   }
 }
 
@@ -74,6 +100,10 @@ abstract mixin class $QueryMembersPayloadCopyWith<$Res> {
   ) = _$QueryMembersPayloadCopyWithImpl;
   @useResult
   $Res call({
+    DateTime? createdAtAfter,
+    DateTime? createdAtAfterOrEqual,
+    DateTime? createdAtBefore,
+    DateTime? createdAtBeforeOrEqual,
     Map<String, Object?>? filterConditions,
     String? id,
     int? limit,
@@ -81,6 +111,10 @@ abstract mixin class $QueryMembersPayloadCopyWith<$Res> {
     int? offset,
     List<SortParamRequest>? sort,
     String type,
+    String? userIdGt,
+    String? userIdGte,
+    String? userIdLt,
+    String? userIdLte,
   });
 }
 
@@ -96,6 +130,10 @@ class _$QueryMembersPayloadCopyWithImpl<$Res> implements $QueryMembersPayloadCop
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? createdAtAfter = freezed,
+    Object? createdAtAfterOrEqual = freezed,
+    Object? createdAtBefore = freezed,
+    Object? createdAtBeforeOrEqual = freezed,
     Object? filterConditions = freezed,
     Object? id = freezed,
     Object? limit = freezed,
@@ -103,9 +141,29 @@ class _$QueryMembersPayloadCopyWithImpl<$Res> implements $QueryMembersPayloadCop
     Object? offset = freezed,
     Object? sort = freezed,
     Object? type = null,
+    Object? userIdGt = freezed,
+    Object? userIdGte = freezed,
+    Object? userIdLt = freezed,
+    Object? userIdLte = freezed,
   }) {
     return _then(
       QueryMembersPayload(
+        createdAtAfter: freezed == createdAtAfter
+            ? _self.createdAtAfter
+            : createdAtAfter // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        createdAtAfterOrEqual: freezed == createdAtAfterOrEqual
+            ? _self.createdAtAfterOrEqual
+            : createdAtAfterOrEqual // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        createdAtBefore: freezed == createdAtBefore
+            ? _self.createdAtBefore
+            : createdAtBefore // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        createdAtBeforeOrEqual: freezed == createdAtBeforeOrEqual
+            ? _self.createdAtBeforeOrEqual
+            : createdAtBeforeOrEqual // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
         filterConditions: freezed == filterConditions
             ? _self.filterConditions
             : filterConditions // ignore: cast_nullable_to_non_nullable
@@ -134,6 +192,22 @@ class _$QueryMembersPayloadCopyWithImpl<$Res> implements $QueryMembersPayloadCop
             ? _self.type
             : type // ignore: cast_nullable_to_non_nullable
                   as String,
+        userIdGt: freezed == userIdGt
+            ? _self.userIdGt
+            : userIdGt // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        userIdGte: freezed == userIdGte
+            ? _self.userIdGte
+            : userIdGte // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        userIdLt: freezed == userIdLt
+            ? _self.userIdLt
+            : userIdLt // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        userIdLte: freezed == userIdLte
+            ? _self.userIdLte
+            : userIdLte // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }

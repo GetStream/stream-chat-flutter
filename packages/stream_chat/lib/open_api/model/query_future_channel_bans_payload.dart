@@ -18,12 +18,36 @@ part 'query_future_channel_bans_payload.freezed.dart';
 @JsonSerializable()
 class QueryFutureChannelBansPayload with _$QueryFutureChannelBansPayload {
   const QueryFutureChannelBansPayload({
+    this.createdAtAfter,
+    this.createdAtAfterOrEqual,
+    this.createdAtBefore,
+    this.createdAtBeforeOrEqual,
     this.excludeExpiredBans,
     this.includeTotal,
     this.limit,
     this.offset,
     this.targetUserId,
   });
+
+  @override
+  @StreamDateTimeConverter()
+  @JsonKey(name: 'created_at_after')
+  final DateTime? createdAtAfter;
+
+  @override
+  @StreamDateTimeConverter()
+  @JsonKey(name: 'created_at_after_or_equal')
+  final DateTime? createdAtAfterOrEqual;
+
+  @override
+  @StreamDateTimeConverter()
+  @JsonKey(name: 'created_at_before')
+  final DateTime? createdAtBefore;
+
+  @override
+  @StreamDateTimeConverter()
+  @JsonKey(name: 'created_at_before_or_equal')
+  final DateTime? createdAtBeforeOrEqual;
 
   @override
   @JsonKey(name: 'exclude_expired_bans')

@@ -40,7 +40,7 @@
 | `POST` | `/api/v2/chat/messages/{id}/action` | `runMessageAction` | `MessageActionResponse` |
 | `GET` | `/api/v2/chat/search` | `search` | `SearchResponse` |
 | `POST` | `/api/v2/chat/messages/{id}/reaction` | `sendReaction` | `SendReactionResponse` |
-| `POST` | `/api/v2/chat/messages/{id}/translate` | `translateMessage` | `MessageActionResponse` |
+| `POST` | `/api/v2/chat/messages/{id}/translate` | `translateMessage` | `TranslateMessageResponse` |
 | `POST` | `/api/v2/chat/messages/{id}` | `updateMessage` | `UpdateMessageResponse` |
 | `PUT` | `/api/v2/chat/messages/{id}` | `updateMessagePartial` | `UpdateMessagePartialResponse` |
 

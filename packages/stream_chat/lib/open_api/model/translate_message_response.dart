@@ -10,32 +10,27 @@ import 'package:stream_core/stream_core.dart' as core;
 
 import '../models.dart';
 
-part 'ai_video_config.g.dart';
-part 'ai_video_config.freezed.dart';
+part 'translate_message_response.g.dart';
+part 'translate_message_response.freezed.dart';
 
 @freezed
 @immutable
 @JsonSerializable()
-class AIVideoConfig with _$AIVideoConfig {
-  const AIVideoConfig({
-    this.async,
-    required this.enabled,
-    required this.rules,
+class TranslateMessageResponse with _$TranslateMessageResponse {
+  const TranslateMessageResponse({
+    required this.duration,
+    required this.message,
   });
 
   @override
-  @JsonKey(name: 'async')
-  final bool? async;
+  @JsonKey(name: 'duration')
+  final String duration;
 
   @override
-  @JsonKey(name: 'enabled')
-  final bool enabled;
+  @JsonKey(name: 'message')
+  final MessageResponse message;
 
-  @override
-  @JsonKey(name: 'rules')
-  final List<AWSRekognitionRule> rules;
+  Map<String, dynamic> toJson() => _$TranslateMessageResponseToJson(this);
 
-  Map<String, dynamic> toJson() => _$AIVideoConfigToJson(this);
-
-  static AIVideoConfig fromJson(Map<String, dynamic> json) => _$AIVideoConfigFromJson(json);
+  static TranslateMessageResponse fromJson(Map<String, dynamic> json) => _$TranslateMessageResponseFromJson(json);
 }

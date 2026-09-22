@@ -53,7 +53,7 @@ class UpsertConfigRequest with _$UpsertConfigRequest {
 
   @override
   @JsonKey(name: 'ai_video_config')
-  final AIVideoConfig? aiVideoConfig;
+  final AIVideoConfigRequest? aiVideoConfig;
 
   @override
   @JsonKey(name: 'async')

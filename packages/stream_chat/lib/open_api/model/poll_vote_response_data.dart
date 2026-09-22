@@ -19,6 +19,7 @@ part 'poll_vote_response_data.freezed.dart';
 class PollVoteResponseData with _$PollVoteResponseData {
   const PollVoteResponseData({
     this.answerText,
+    this.answerTextI18n,
     required this.createdAt,
     required this.id,
     this.isAnswer,
@@ -32,6 +33,10 @@ class PollVoteResponseData with _$PollVoteResponseData {
   @override
   @JsonKey(name: 'answer_text')
   final String? answerText;
+
+  @override
+  @JsonKey(name: 'answer_text_i18n')
+  final Map<String, String>? answerTextI18n;
 
   @override
   @StreamDateTimeConverter()

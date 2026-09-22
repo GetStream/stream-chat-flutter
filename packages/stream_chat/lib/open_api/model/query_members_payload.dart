@@ -18,6 +18,10 @@ part 'query_members_payload.freezed.dart';
 @JsonSerializable()
 class QueryMembersPayload with _$QueryMembersPayload {
   const QueryMembersPayload({
+    this.createdAtAfter,
+    this.createdAtAfterOrEqual,
+    this.createdAtBefore,
+    this.createdAtBeforeOrEqual,
     this.filterConditions,
     this.id,
     this.limit,
@@ -25,7 +29,31 @@ class QueryMembersPayload with _$QueryMembersPayload {
     this.offset,
     this.sort,
     required this.type,
+    this.userIdGt,
+    this.userIdGte,
+    this.userIdLt,
+    this.userIdLte,
   });
+
+  @override
+  @StreamDateTimeConverter()
+  @JsonKey(name: 'created_at_after')
+  final DateTime? createdAtAfter;
+
+  @override
+  @StreamDateTimeConverter()
+  @JsonKey(name: 'created_at_after_or_equal')
+  final DateTime? createdAtAfterOrEqual;
+
+  @override
+  @StreamDateTimeConverter()
+  @JsonKey(name: 'created_at_before')
+  final DateTime? createdAtBefore;
+
+  @override
+  @StreamDateTimeConverter()
+  @JsonKey(name: 'created_at_before_or_equal')
+  final DateTime? createdAtBeforeOrEqual;
 
   @override
   @JsonKey(name: 'filter_conditions')
@@ -54,6 +82,22 @@ class QueryMembersPayload with _$QueryMembersPayload {
   @override
   @JsonKey(name: 'type')
   final String type;
+
+  @override
+  @JsonKey(name: 'user_id_gt')
+  final String? userIdGt;
+
+  @override
+  @JsonKey(name: 'user_id_gte')
+  final String? userIdGte;
+
+  @override
+  @JsonKey(name: 'user_id_lt')
+  final String? userIdLt;
+
+  @override
+  @JsonKey(name: 'user_id_lte')
+  final String? userIdLte;
 
   Map<String, dynamic> toJson() => _$QueryMembersPayloadToJson(this);
 

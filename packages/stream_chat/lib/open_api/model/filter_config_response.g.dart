@@ -17,6 +17,7 @@ FilterConfigResponse _$FilterConfigResponseFromJson(
   configKeys: (json['config_keys'] as List<dynamic>?)?.map((e) => e as String).toList(),
   filterableCustomKeys: (json['filterable_custom_keys'] as List<dynamic>?)?.map((e) => e as String).toList(),
   llmLabels: (json['llm_labels'] as List<dynamic>).map((e) => e as String).toList(),
+  ruleNames: (json['rule_names'] as List<dynamic>?)?.map((e) => e as String).toList(),
 );
 
 Map<String, dynamic> _$FilterConfigResponseToJson(
@@ -28,4 +29,5 @@ Map<String, dynamic> _$FilterConfigResponseToJson(
   'config_keys': instance.configKeys,
   'filterable_custom_keys': instance.filterableCustomKeys,
   'llm_labels': instance.llmLabels,
+  'rule_names': instance.ruleNames,
 };

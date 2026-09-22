@@ -12,6 +12,9 @@ PollOptionResponseData _$PollOptionResponseDataFromJson(
   custom: json['custom'] as Map<String, dynamic>,
   id: json['id'] as String,
   text: json['text'] as String,
+  textI18n: (json['text_i18n'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, e as String),
+  ),
 );
 
 Map<String, dynamic> _$PollOptionResponseDataToJson(
@@ -20,4 +23,5 @@ Map<String, dynamic> _$PollOptionResponseDataToJson(
   'custom': instance.custom,
   'id': instance.id,
   'text': instance.text,
+  'text_i18n': instance.textI18n,
 };

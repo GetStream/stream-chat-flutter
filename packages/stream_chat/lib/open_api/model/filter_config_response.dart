@@ -24,6 +24,7 @@ class FilterConfigResponse with _$FilterConfigResponse {
     this.configKeys,
     this.filterableCustomKeys,
     required this.llmLabels,
+    this.ruleNames,
   });
 
   @override
@@ -49,6 +50,10 @@ class FilterConfigResponse with _$FilterConfigResponse {
   @override
   @JsonKey(name: 'llm_labels')
   final List<String> llmLabels;
+
+  @override
+  @JsonKey(name: 'rule_names')
+  final List<String>? ruleNames;
 
   Map<String, dynamic> toJson() => _$FilterConfigResponseToJson(this);
 

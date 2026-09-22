@@ -23,6 +23,7 @@ class TypingStartEvent extends core.WsEvent with _$TypingStartEvent {
     this.cid,
     required this.createdAt,
     required this.custom,
+    this.member,
     this.parentId,
     this.receivedAt,
     required this.type,
@@ -49,6 +50,10 @@ class TypingStartEvent extends core.WsEvent with _$TypingStartEvent {
   @override
   @JsonKey(name: 'custom')
   final Map<String, Object?> custom;
+
+  @override
+  @JsonKey(name: 'member')
+  final ChannelMemberPartialResponse? member;
 
   @override
   @JsonKey(name: 'parent_id')

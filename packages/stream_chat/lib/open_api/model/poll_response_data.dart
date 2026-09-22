@@ -35,6 +35,7 @@ class PollResponseData with _$PollResponseData {
     required this.createdById,
     required this.custom,
     required this.description,
+    this.descriptionI18n,
     required this.enforceUniqueVote,
     required this.id,
     this.isClosed,
@@ -42,6 +43,7 @@ class PollResponseData with _$PollResponseData {
     required this.latestVotesByOption,
     this.maxVotesAllowed,
     required this.name,
+    this.nameI18n,
     required this.options,
     required this.ownVotes,
     required this.updatedAt,
@@ -84,6 +86,10 @@ class PollResponseData with _$PollResponseData {
   final String description;
 
   @override
+  @JsonKey(name: 'description_i18n')
+  final Map<String, String>? descriptionI18n;
+
+  @override
   @JsonKey(name: 'enforce_unique_vote')
   final bool enforceUniqueVote;
 
@@ -110,6 +116,10 @@ class PollResponseData with _$PollResponseData {
   @override
   @JsonKey(name: 'name')
   final String name;
+
+  @override
+  @JsonKey(name: 'name_i18n')
+  final Map<String, String>? nameI18n;
 
   @override
   @JsonKey(name: 'options')

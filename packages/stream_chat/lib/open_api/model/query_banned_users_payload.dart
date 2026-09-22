@@ -18,12 +18,36 @@ part 'query_banned_users_payload.freezed.dart';
 @JsonSerializable()
 class QueryBannedUsersPayload with _$QueryBannedUsersPayload {
   const QueryBannedUsersPayload({
+    this.createdAtAfter,
+    this.createdAtAfterOrEqual,
+    this.createdAtBefore,
+    this.createdAtBeforeOrEqual,
     this.excludeExpiredBans,
     required this.filterConditions,
     this.limit,
     this.offset,
     this.sort,
   });
+
+  @override
+  @StreamDateTimeConverter()
+  @JsonKey(name: 'created_at_after')
+  final DateTime? createdAtAfter;
+
+  @override
+  @StreamDateTimeConverter()
+  @JsonKey(name: 'created_at_after_or_equal')
+  final DateTime? createdAtAfterOrEqual;
+
+  @override
+  @StreamDateTimeConverter()
+  @JsonKey(name: 'created_at_before')
+  final DateTime? createdAtBefore;
+
+  @override
+  @StreamDateTimeConverter()
+  @JsonKey(name: 'created_at_before_or_equal')
+  final DateTime? createdAtBeforeOrEqual;
 
   @override
   @JsonKey(name: 'exclude_expired_bans')

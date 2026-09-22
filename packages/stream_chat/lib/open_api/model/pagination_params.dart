@@ -18,9 +18,29 @@ part 'pagination_params.freezed.dart';
 @JsonSerializable()
 class PaginationParams with _$PaginationParams {
   const PaginationParams({
+    this.idGt,
+    this.idGte,
+    this.idLt,
+    this.idLte,
     this.limit,
     this.offset,
   });
+
+  @override
+  @JsonKey(name: 'id_gt')
+  final int? idGt;
+
+  @override
+  @JsonKey(name: 'id_gte')
+  final int? idGte;
+
+  @override
+  @JsonKey(name: 'id_lt')
+  final int? idLt;
+
+  @override
+  @JsonKey(name: 'id_lte')
+  final int? idLte;
 
   @override
   @JsonKey(name: 'limit')

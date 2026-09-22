@@ -13,6 +13,10 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$PaginationParams {
+  int? get idGt;
+  int? get idGte;
+  int? get idLt;
+  int? get idLte;
   int? get limit;
   int? get offset;
 
@@ -30,16 +34,20 @@ mixin _$PaginationParams {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is PaginationParams &&
+            (identical(other.idGt, idGt) || other.idGt == idGt) &&
+            (identical(other.idGte, idGte) || other.idGte == idGte) &&
+            (identical(other.idLt, idLt) || other.idLt == idLt) &&
+            (identical(other.idLte, idLte) || other.idLte == idLte) &&
             (identical(other.limit, limit) || other.limit == limit) &&
             (identical(other.offset, offset) || other.offset == offset));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, limit, offset);
+  int get hashCode => Object.hash(runtimeType, idGt, idGte, idLt, idLte, limit, offset);
 
   @override
   String toString() {
-    return 'PaginationParams(limit: $limit, offset: $offset)';
+    return 'PaginationParams(idGt: $idGt, idGte: $idGte, idLt: $idLt, idLte: $idLte, limit: $limit, offset: $offset)';
   }
 }
 
@@ -50,7 +58,14 @@ abstract mixin class $PaginationParamsCopyWith<$Res> {
     $Res Function(PaginationParams) _then,
   ) = _$PaginationParamsCopyWithImpl;
   @useResult
-  $Res call({int? limit, int? offset});
+  $Res call({
+    int? idGt,
+    int? idGte,
+    int? idLt,
+    int? idLte,
+    int? limit,
+    int? offset,
+  });
 }
 
 /// @nodoc
@@ -64,9 +79,32 @@ class _$PaginationParamsCopyWithImpl<$Res> implements $PaginationParamsCopyWith<
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? limit = freezed, Object? offset = freezed}) {
+  $Res call({
+    Object? idGt = freezed,
+    Object? idGte = freezed,
+    Object? idLt = freezed,
+    Object? idLte = freezed,
+    Object? limit = freezed,
+    Object? offset = freezed,
+  }) {
     return _then(
       PaginationParams(
+        idGt: freezed == idGt
+            ? _self.idGt
+            : idGt // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        idGte: freezed == idGte
+            ? _self.idGte
+            : idGte // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        idLt: freezed == idLt
+            ? _self.idLt
+            : idLt // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        idLte: freezed == idLte
+            ? _self.idLte
+            : idLte // ignore: cast_nullable_to_non_nullable
+                  as int?,
         limit: freezed == limit
             ? _self.limit
             : limit // ignore: cast_nullable_to_non_nullable

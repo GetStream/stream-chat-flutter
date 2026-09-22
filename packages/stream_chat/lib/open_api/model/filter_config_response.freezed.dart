@@ -19,6 +19,7 @@ mixin _$FilterConfigResponse {
   List<String>? get configKeys;
   List<String>? get filterableCustomKeys;
   List<String> get llmLabels;
+  List<String>? get ruleNames;
 
   /// Create a copy of FilterConfigResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -55,7 +56,8 @@ mixin _$FilterConfigResponse {
               other.filterableCustomKeys,
               filterableCustomKeys,
             ) &&
-            const DeepCollectionEquality().equals(other.llmLabels, llmLabels));
+            const DeepCollectionEquality().equals(other.llmLabels, llmLabels) &&
+            const DeepCollectionEquality().equals(other.ruleNames, ruleNames));
   }
 
   @override
@@ -67,11 +69,12 @@ mixin _$FilterConfigResponse {
     const DeepCollectionEquality().hash(configKeys),
     const DeepCollectionEquality().hash(filterableCustomKeys),
     const DeepCollectionEquality().hash(llmLabels),
+    const DeepCollectionEquality().hash(ruleNames),
   );
 
   @override
   String toString() {
-    return 'FilterConfigResponse(aiImageLabels: $aiImageLabels, aiImageTaxonomy: $aiImageTaxonomy, aiTextLabels: $aiTextLabels, configKeys: $configKeys, filterableCustomKeys: $filterableCustomKeys, llmLabels: $llmLabels)';
+    return 'FilterConfigResponse(aiImageLabels: $aiImageLabels, aiImageTaxonomy: $aiImageTaxonomy, aiTextLabels: $aiTextLabels, configKeys: $configKeys, filterableCustomKeys: $filterableCustomKeys, llmLabels: $llmLabels, ruleNames: $ruleNames)';
   }
 }
 
@@ -89,6 +92,7 @@ abstract mixin class $FilterConfigResponseCopyWith<$Res> {
     List<String>? configKeys,
     List<String>? filterableCustomKeys,
     List<String> llmLabels,
+    List<String>? ruleNames,
   });
 }
 
@@ -110,6 +114,7 @@ class _$FilterConfigResponseCopyWithImpl<$Res> implements $FilterConfigResponseC
     Object? configKeys = freezed,
     Object? filterableCustomKeys = freezed,
     Object? llmLabels = null,
+    Object? ruleNames = freezed,
   }) {
     return _then(
       FilterConfigResponse(
@@ -137,6 +142,10 @@ class _$FilterConfigResponseCopyWithImpl<$Res> implements $FilterConfigResponseC
             ? _self.llmLabels
             : llmLabels // ignore: cast_nullable_to_non_nullable
                   as List<String>,
+        ruleNames: freezed == ruleNames
+            ? _self.ruleNames
+            : ruleNames // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
       ),
     );
   }

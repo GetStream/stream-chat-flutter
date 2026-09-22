@@ -21,7 +21,7 @@
 
 | Verb | Path | Operation | Response |
 | --- | --- | --- | --- |
-| `POST` | `/api/v2/chat/messages/{message_id}/reminders` | `createReminder` | `ReminderResponseData` |
+| `POST` | `/api/v2/chat/messages/{message_id}/reminders` | `createReminder` | `CreateReminderResponse` |
 | `DELETE` | `/api/v2/chat/messages/{message_id}/reminders` | `deleteReminder` | `DeleteReminderResponse` |
 | `POST` | `/api/v2/chat/reminders/query` | `queryReminders` | `QueryRemindersResponse` |
 | `PATCH` | `/api/v2/chat/messages/{message_id}/reminders` | `updateReminder` | `UpdateReminderResponse` |

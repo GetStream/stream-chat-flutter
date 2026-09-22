@@ -10,6 +10,9 @@ PollVoteResponseData _$PollVoteResponseDataFromJson(
   Map<String, dynamic> json,
 ) => PollVoteResponseData(
   answerText: json['answer_text'] as String?,
+  answerTextI18n: (json['answer_text_i18n'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, e as String),
+  ),
   createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
@@ -28,6 +31,7 @@ Map<String, dynamic> _$PollVoteResponseDataToJson(
   PollVoteResponseData instance,
 ) => <String, dynamic>{
   'answer_text': instance.answerText,
+  'answer_text_i18n': instance.answerTextI18n,
   'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'id': instance.id,
   'is_answer': instance.isAnswer,

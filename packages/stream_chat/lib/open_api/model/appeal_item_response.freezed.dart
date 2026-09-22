@@ -16,6 +16,7 @@ mixin _$AppealItemResponse {
   List<ActionLogResponse>? get actions;
   String? get aiTextSeverity;
   String get appealReason;
+  String? get appealReasonLanguage;
   List<String>? get attachments;
   String? get channelCid;
   String? get configKey;
@@ -28,6 +29,7 @@ mixin _$AppealItemResponse {
   List<String>? get flagTypes;
   List<ModerationFlagResponse>? get flags;
   String get id;
+  List<String>? get languages;
   ActionLogResponse? get moderationAction;
   ActionLogResponse? get originalModerationAction;
   String? get recommendedAction;
@@ -54,6 +56,8 @@ mixin _$AppealItemResponse {
             const DeepCollectionEquality().equals(other.actions, actions) &&
             (identical(other.aiTextSeverity, aiTextSeverity) || other.aiTextSeverity == aiTextSeverity) &&
             (identical(other.appealReason, appealReason) || other.appealReason == appealReason) &&
+            (identical(other.appealReasonLanguage, appealReasonLanguage) ||
+                other.appealReasonLanguage == appealReasonLanguage) &&
             const DeepCollectionEquality().equals(
               other.attachments,
               attachments,
@@ -72,6 +76,7 @@ mixin _$AppealItemResponse {
             const DeepCollectionEquality().equals(other.flagTypes, flagTypes) &&
             const DeepCollectionEquality().equals(other.flags, flags) &&
             (identical(other.id, id) || other.id == id) &&
+            const DeepCollectionEquality().equals(other.languages, languages) &&
             (identical(other.moderationAction, moderationAction) || other.moderationAction == moderationAction) &&
             (identical(
                   other.originalModerationAction,
@@ -92,6 +97,7 @@ mixin _$AppealItemResponse {
     const DeepCollectionEquality().hash(actions),
     aiTextSeverity,
     appealReason,
+    appealReasonLanguage,
     const DeepCollectionEquality().hash(attachments),
     channelCid,
     configKey,
@@ -104,6 +110,7 @@ mixin _$AppealItemResponse {
     const DeepCollectionEquality().hash(flagTypes),
     const DeepCollectionEquality().hash(flags),
     id,
+    const DeepCollectionEquality().hash(languages),
     moderationAction,
     originalModerationAction,
     recommendedAction,
@@ -116,7 +123,7 @@ mixin _$AppealItemResponse {
 
   @override
   String toString() {
-    return 'AppealItemResponse(actions: $actions, aiTextSeverity: $aiTextSeverity, appealReason: $appealReason, attachments: $attachments, channelCid: $channelCid, configKey: $configKey, createdAt: $createdAt, decisionReason: $decisionReason, entityContent: $entityContent, entityId: $entityId, entityType: $entityType, flagLabels: $flagLabels, flagTypes: $flagTypes, flags: $flags, id: $id, moderationAction: $moderationAction, originalModerationAction: $originalModerationAction, recommendedAction: $recommendedAction, reviewQueueItemId: $reviewQueueItemId, severity: $severity, status: $status, updatedAt: $updatedAt, user: $user)';
+    return 'AppealItemResponse(actions: $actions, aiTextSeverity: $aiTextSeverity, appealReason: $appealReason, appealReasonLanguage: $appealReasonLanguage, attachments: $attachments, channelCid: $channelCid, configKey: $configKey, createdAt: $createdAt, decisionReason: $decisionReason, entityContent: $entityContent, entityId: $entityId, entityType: $entityType, flagLabels: $flagLabels, flagTypes: $flagTypes, flags: $flags, id: $id, languages: $languages, moderationAction: $moderationAction, originalModerationAction: $originalModerationAction, recommendedAction: $recommendedAction, reviewQueueItemId: $reviewQueueItemId, severity: $severity, status: $status, updatedAt: $updatedAt, user: $user)';
   }
 }
 
@@ -131,6 +138,7 @@ abstract mixin class $AppealItemResponseCopyWith<$Res> {
     List<ActionLogResponse>? actions,
     String? aiTextSeverity,
     String appealReason,
+    String? appealReasonLanguage,
     List<String>? attachments,
     String? channelCid,
     String? configKey,
@@ -143,6 +151,7 @@ abstract mixin class $AppealItemResponseCopyWith<$Res> {
     List<String>? flagTypes,
     List<ModerationFlagResponse>? flags,
     String id,
+    List<String>? languages,
     ActionLogResponse? moderationAction,
     ActionLogResponse? originalModerationAction,
     String? recommendedAction,
@@ -169,6 +178,7 @@ class _$AppealItemResponseCopyWithImpl<$Res> implements $AppealItemResponseCopyW
     Object? actions = freezed,
     Object? aiTextSeverity = freezed,
     Object? appealReason = null,
+    Object? appealReasonLanguage = freezed,
     Object? attachments = freezed,
     Object? channelCid = freezed,
     Object? configKey = freezed,
@@ -181,6 +191,7 @@ class _$AppealItemResponseCopyWithImpl<$Res> implements $AppealItemResponseCopyW
     Object? flagTypes = freezed,
     Object? flags = freezed,
     Object? id = null,
+    Object? languages = freezed,
     Object? moderationAction = freezed,
     Object? originalModerationAction = freezed,
     Object? recommendedAction = freezed,
@@ -204,6 +215,10 @@ class _$AppealItemResponseCopyWithImpl<$Res> implements $AppealItemResponseCopyW
             ? _self.appealReason
             : appealReason // ignore: cast_nullable_to_non_nullable
                   as String,
+        appealReasonLanguage: freezed == appealReasonLanguage
+            ? _self.appealReasonLanguage
+            : appealReasonLanguage // ignore: cast_nullable_to_non_nullable
+                  as String?,
         attachments: freezed == attachments
             ? _self.attachments
             : attachments // ignore: cast_nullable_to_non_nullable
@@ -252,6 +267,10 @@ class _$AppealItemResponseCopyWithImpl<$Res> implements $AppealItemResponseCopyW
             ? _self.id
             : id // ignore: cast_nullable_to_non_nullable
                   as String,
+        languages: freezed == languages
+            ? _self.languages
+            : languages // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
         moderationAction: freezed == moderationAction
             ? _self.moderationAction
             : moderationAction // ignore: cast_nullable_to_non_nullable

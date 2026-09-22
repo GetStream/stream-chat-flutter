@@ -26,6 +26,7 @@ class ReviewQueueItemResponse with _$ReviewQueueItemResponse {
     required this.bans,
     this.call,
     this.completedAt,
+    this.confidenceScore,
     this.configKey,
     required this.createdAt,
     this.entityCreator,
@@ -89,6 +90,10 @@ class ReviewQueueItemResponse with _$ReviewQueueItemResponse {
   @StreamDateTimeConverter()
   @JsonKey(name: 'completed_at')
   final DateTime? completedAt;
+
+  @override
+  @JsonKey(name: 'confidence_score')
+  final double? confidenceScore;
 
   @override
   @JsonKey(name: 'config_key')

@@ -63,7 +63,7 @@ class ConfigResponse with _$ConfigResponse {
 
   @override
   @JsonKey(name: 'ai_video_config')
-  final AIVideoConfig? aiVideoConfig;
+  final AIVideoConfigResponse? aiVideoConfig;
 
   @override
   @JsonKey(name: 'async')

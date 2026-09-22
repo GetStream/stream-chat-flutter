@@ -99,7 +99,7 @@ abstract interface class DefaultApi {
   });
 
   @POST('/api/v2/chat/messages/{message_id}/reminders')
-  Future<Result<ReminderResponseData>> createReminder({
+  Future<Result<CreateReminderResponse>> createReminder({
     @Path('message_id') required String messageId,
     @Body() CreateReminderRequest? createReminderRequest,
   });
@@ -613,7 +613,7 @@ abstract interface class DefaultApi {
   });
 
   @POST('/api/v2/chat/messages/{id}/translate')
-  Future<Result<MessageActionResponse>> translateMessage({
+  Future<Result<TranslateMessageResponse>> translateMessage({
     @Path('id') required String id,
     @Body() required TranslateMessageRequest translateMessageRequest,
   });
@@ -623,6 +623,12 @@ abstract interface class DefaultApi {
     @Path('type') required String type,
     @Path('id') required String id,
     @Body() TruncateChannelRequest? truncateChannelRequest,
+  });
+
+  @POST('/api/v2/moderation/unban')
+  Future<Result<UnbanResponse>> unban({
+    @Query('target_user_id') required String targetUserId,
+    @Query('channel_cid') String? channelCid,
   });
 
   @POST('/api/v2/users/unblock')

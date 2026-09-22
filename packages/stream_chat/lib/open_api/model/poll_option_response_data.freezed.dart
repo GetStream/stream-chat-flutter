@@ -16,6 +16,7 @@ mixin _$PollOptionResponseData {
   Map<String, Object?> get custom;
   String get id;
   String get text;
+  Map<String, String>? get textI18n;
 
   /// Create a copy of PollOptionResponseData
   /// with the given fields replaced by the non-null parameter values.
@@ -34,7 +35,8 @@ mixin _$PollOptionResponseData {
             other is PollOptionResponseData &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.text, text) || other.text == text));
+            (identical(other.text, text) || other.text == text) &&
+            const DeepCollectionEquality().equals(other.textI18n, textI18n));
   }
 
   @override
@@ -43,11 +45,12 @@ mixin _$PollOptionResponseData {
     const DeepCollectionEquality().hash(custom),
     id,
     text,
+    const DeepCollectionEquality().hash(textI18n),
   );
 
   @override
   String toString() {
-    return 'PollOptionResponseData(custom: $custom, id: $id, text: $text)';
+    return 'PollOptionResponseData(custom: $custom, id: $id, text: $text, textI18n: $textI18n)';
   }
 }
 
@@ -58,7 +61,12 @@ abstract mixin class $PollOptionResponseDataCopyWith<$Res> {
     $Res Function(PollOptionResponseData) _then,
   ) = _$PollOptionResponseDataCopyWithImpl;
   @useResult
-  $Res call({Map<String, Object?> custom, String id, String text});
+  $Res call({
+    Map<String, Object?> custom,
+    String id,
+    String text,
+    Map<String, String>? textI18n,
+  });
 }
 
 /// @nodoc
@@ -72,7 +80,12 @@ class _$PollOptionResponseDataCopyWithImpl<$Res> implements $PollOptionResponseD
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? custom = null, Object? id = null, Object? text = null}) {
+  $Res call({
+    Object? custom = null,
+    Object? id = null,
+    Object? text = null,
+    Object? textI18n = freezed,
+  }) {
     return _then(
       PollOptionResponseData(
         custom: null == custom
@@ -87,6 +100,10 @@ class _$PollOptionResponseDataCopyWithImpl<$Res> implements $PollOptionResponseD
             ? _self.text
             : text // ignore: cast_nullable_to_non_nullable
                   as String,
+        textI18n: freezed == textI18n
+            ? _self.textI18n
+            : textI18n // ignore: cast_nullable_to_non_nullable
+                  as Map<String, String>?,
       ),
     );
   }
