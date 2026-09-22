@@ -215,20 +215,28 @@ void main() {
         expect(result.height, closeTo(5.625, 0.01));
       });
 
-      test('handles very large target sizes', () {
+      test('caps a target larger than the original at the original', () {
         final result = ThumbnailSizeCalculator.calculate(
           originalSize: const Size(1920, 1080),
           targetSize: const Size(4000, 3000),
           pixelRatio: 1,
-          // Default (scaleDown) would keep 1920x1080. Force contain to
-          // exercise upscale-to-fit behavior.
+          // A fit that would otherwise enlarge is capped just the same.
           fit: BoxFit.contain,
         );
 
-        expect(result, isNotNull);
-        // Should still maintain aspect ratio for upscaling
-        expect(result!.width, closeTo(4000, 0.01));
-        expect(result.height, closeTo(2250, 0.01));
+        expect(result, const Size(1920, 1080));
+      });
+
+      test('caps at the original when the pixel ratio overshoots it', () {
+        // The photo fits its box, so the fit returns the photo's own
+        // dimensions and the pixel ratio would scale past them.
+        final result = ThumbnailSizeCalculator.calculate(
+          originalSize: const Size(1002, 1400),
+          targetSize: const Size(1200, 1600),
+          pixelRatio: 1.497,
+        );
+
+        expect(result, const Size(1002, 1400));
       });
 
       test('handles fractional pixel ratio', () {
@@ -257,20 +265,14 @@ void main() {
       });
 
       test('handles original size smaller than target', () {
-        // Small original image (100x100) being scaled up to 400x300
         final result = ThumbnailSizeCalculator.calculate(
           originalSize: const Size(100, 100),
           targetSize: const Size(400, 300),
           pixelRatio: 1,
-          // Default (scaleDown) would keep 100x100. Force contain to
-          // exercise upscale-to-fit behavior.
           fit: BoxFit.contain,
         );
 
-        expect(result, isNotNull);
-        // Should still maintain aspect ratio (1:1)
-        expect(result!.width, closeTo(300, 0.01));
-        expect(result.height, closeTo(300, 0.01));
+        expect(result, const Size(100, 100));
       });
     });
 

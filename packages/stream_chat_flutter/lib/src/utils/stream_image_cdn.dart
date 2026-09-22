@@ -115,12 +115,16 @@ class StreamImageCDN {
   // The host suffix for Stream's image CDN.
   static const _streamCDNHost = 'stream-io-cdn.com';
 
-  // Query parameter names that are preserved in cache keys.
+  // Matched as a dot-separated suffix so a lookalike registrable domain such
+  // as `evilstream-io-cdn.com` is not mistaken for ours.
+  static bool _isStreamCDN(Uri uri) => uri.host.endsWith('.$_streamCDNHost');
+
+  // Query parameter names that are preserved in cache keys, in key order.
   //
   // These are the image-transformation parameters that affect
   // which rendition of the image is returned. All other parameters
   // (e.g. signed URL tokens) are stripped.
-  static const _persistedParameters = {'w', 'h', 'resize', 'crop'};
+  static const _persistedParameters = ['crop', 'h', 'resize', 'w'];
 
   /// Resolves the [sourceUrl] by appending resize/transform parameters
   /// appropriate for the CDN.
@@ -134,7 +138,7 @@ class StreamImageCDN {
   /// Override this to customize URL rewriting for a custom CDN.
   String resolveUrl(String sourceUrl, {ImageResize? resize}) {
     final uri = Uri.tryParse(sourceUrl);
-    if (uri == null || !uri.host.contains(_streamCDNHost)) return sourceUrl;
+    if (uri == null || !_isStreamCDN(uri)) return sourceUrl;
     if (resize == null) return sourceUrl;
 
     final queryParameters = {
@@ -143,8 +147,15 @@ class StreamImageCDN {
       'h': resize.height == 0 ? '*' : resize.height.floor().toString(),
       'resize': resize.mode.value,
       'ro': '0',
-      if (resize.mode == ResizeMode.crop) 'crop': resize.crop.value,
     };
+
+    // Only meaningful with a crop resize, and it reaches the cache key, so a
+    // crop left over from the source URL would split one rendition in two.
+    if (resize.mode == ResizeMode.crop) {
+      queryParameters['crop'] = resize.crop.value;
+    } else {
+      queryParameters.remove('crop');
+    }
 
     return uri.replace(queryParameters: queryParameters).toString();
   }
@@ -154,18 +165,20 @@ class StreamImageCDN {
   /// while preserving those that identify distinct image renditions.
   ///
   /// This uses an allowlist approach, keeping only the parameters in
-  /// [_persistedParameters] for Stream CDN URLs.
+  /// [_persistedParameters] for Stream CDN URLs, always in the same order, so
+  /// one rendition yields one key however the source URL ordered them.
   ///
   /// For non-Stream CDN URLs, returns the full URL string unchanged.
   ///
   /// Override this to customize cache key generation for a custom CDN.
   String cacheKey(String imageUrl) {
     final uri = Uri.tryParse(imageUrl);
-    if (uri == null || !uri.host.contains(_streamCDNHost)) return imageUrl;
+    if (uri == null || !_isStreamCDN(uri)) return imageUrl;
 
-    final filteredParams = <String, String>{
-      for (final MapEntry(:key, :value) in uri.queryParameters.entries)
-        if (_persistedParameters.contains(key)) key: value,
+    final params = uri.queryParameters;
+    final filteredParams = {
+      for (final name in _persistedParameters)
+        if (params[name] case final value?) name: value,
     };
 
     return uri.replace(queryParameters: filteredParams).toString();

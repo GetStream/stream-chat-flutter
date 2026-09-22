@@ -96,7 +96,11 @@ class ThumbnailSizeCalculator {
     );
 
     // Apply pixel ratio to get physical pixel dimensions
-    return resolved * pixelRatio;
+    final scaled = resolved * pixelRatio;
+
+    // Never ask for more pixels than the original holds. The CDN will not
+    // enlarge one, but the requested size still reaches the cache key.
+    return scaled < originalSize ? scaled : originalSize;
   }
 
   static Size _applyFit({

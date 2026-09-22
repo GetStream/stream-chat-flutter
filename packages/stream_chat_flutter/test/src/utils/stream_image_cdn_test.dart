@@ -64,6 +64,17 @@ void main() {
         }
       });
 
+      test('drops a crop already on the URL when the mode is not crop', () {
+        const url = 'https://us-east.stream-io-cdn.com/102400/images/photo.jpg?crop=*';
+
+        final result = cdn.resolveUrl(
+          url,
+          resize: const ImageResize(width: 200, height: 300),
+        );
+
+        expect(result, isNot(contains('crop=')));
+      });
+
       test('always overrides existing resize params', () {
         const url =
             'https://us-east.stream-io-cdn.com/102400/images/photo.jpg'
@@ -130,6 +141,23 @@ void main() {
         const url = 'https://example.com/photo.jpg?token=abc';
 
         expect(cdn.resolveUrl(url), equals(url));
+      });
+
+      test('does not treat a lookalike host as ours', () {
+        const resize = ImageResize(width: 200, height: 300);
+
+        for (final host in [
+          'stream-io-cdn.com.example', // ours as a prefix
+          'evilstream-io-cdn.com', // ours without the dot
+        ]) {
+          final url = 'https://$host/photo.jpg';
+
+          expect(
+            cdn.resolveUrl(url, resize: resize),
+            equals(url),
+            reason: '$host should not be resized',
+          );
+        }
       });
     });
   });
@@ -207,11 +235,56 @@ void main() {
       });
     });
 
+    test('is identical whatever order the source URL lists params in', () {
+      const signed = 'Key-Pair-Id=APK&Policy=POL&Signature=SIG';
+      const path = 'https://us-east.stream-io-cdn.com/1/images/a.jpg';
+      const resize = ImageResize(width: 450, height: 600);
+
+      final bare = cdn.resolveUrl('$path?$signed', resize: resize);
+      // The wildcard shape real signed URLs arrive in.
+      final wildcards = cdn.resolveUrl(
+        '$path?crop=*&h=*&resize=*&ro=0&w=*&$signed',
+        resize: resize,
+      );
+
+      expect(cdn.cacheKey(bare), cdn.cacheKey(wildcards));
+    });
+
+    test('orders the persisted parameters by name', () {
+      const path = 'https://us-east.stream-io-cdn.com/1/images/a.jpg';
+
+      final url = cdn.resolveUrl(
+        '$path?crop=*&h=*&resize=*&w=*',
+        resize: const ImageResize(
+          width: 450,
+          height: 600,
+          mode: ResizeMode.crop,
+        ),
+      );
+
+      expect(cdn.cacheKey(url), endsWith('?crop=center&h=600&resize=crop&w=450'));
+    });
+
     group('non-Stream URLs', () {
       test('returns full URL string unchanged', () {
         const url = 'https://example.com/photo.jpg?token=abc';
 
         expect(cdn.cacheKey(url), equals(url));
+      });
+
+      test('keeps the whole query for a lookalike host', () {
+        for (final host in [
+          'stream-io-cdn.com.example', // ours as a prefix
+          'evilstream-io-cdn.com', // ours without the dot
+        ]) {
+          final url = 'https://$host/photo.jpg?w=200&token=abc';
+
+          expect(
+            cdn.cacheKey(url),
+            equals(url),
+            reason: '$host should keep its full query',
+          );
+        }
       });
     });
   });
