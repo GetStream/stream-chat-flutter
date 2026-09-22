@@ -232,7 +232,7 @@ typedef TypewriterWidgetBuilder =
 /// value.
 /// {@endtemplate}
 @Deprecated(
-  'Moved to package:stream_chat_flutter_ai. '
+  'Moved to package:stream_chat_flutter_ai and renamed to TypewriterBuilder. '
   'Will be removed in a future release.',
 )
 class StreamTypewriterBuilder extends StatelessWidget {
