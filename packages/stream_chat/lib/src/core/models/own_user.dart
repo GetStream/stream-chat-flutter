@@ -140,7 +140,7 @@ class OwnUser extends User {
     );
   }
 
-  /// List of user devices.
+  /// The devices registered for this user to receive push notifications.
   final List<DeviceResponse> devices;
 
   /// List of users muted by the user.
