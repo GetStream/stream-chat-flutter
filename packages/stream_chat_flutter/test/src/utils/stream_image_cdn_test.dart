@@ -290,7 +290,7 @@ void main() {
         const path = 'https://us-east.stream-io-cdn.com/1/images/a.jpg';
 
         final url = cdn.resolveUrl(
-          '$path?crop=*&h=*&resize=*&w=*',
+          '$path?w=*&resize=*&h=*&crop=*',
           resize: const ImageResize(width: 450, height: 600, mode: ResizeMode.crop),
         );
 
