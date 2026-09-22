@@ -18,6 +18,8 @@
 - Fixed image attachments being requested from the CDN at more pixels than the original holds.
 - Fixed image attachments requesting two near-identical renditions of the same image from the CDN.
 - Fixed the gallery tab vanishing from the attachment picker when `allowedAttachmentPickerTypes` allowed images or videos but not both. It now stays available and lists only the allowed media.
+- Fixed image attachments not being resized at all when the URL carried a crop or a resize mode but no dimensions.
+- Fixed `stream-io-cdn.com` itself, and the trailing-dot form of any CDN host, not being recognised as Stream's CDN — their signed URLs re-downloaded on every re-sign.
 
 ## 9.29.0
 
