@@ -41,31 +41,28 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: StreamChatConfiguration(
-            data: StreamChatConfigurationData(),
-            child: StreamChatTheme(
-              data: streamTheme,
-              child: StreamChannel(
-                channel: channel,
-                child: SizedBox(
-                  child: StreamGalleryAttachment(
-                    constraints: BoxConstraints.tight(const Size(
-                      300,
-                      300,
-                    )),
-                    message: Message(),
-                    attachments: attachments,
-                    itemBuilder: (context, index) {
-                      final attachment = attachments[index];
+          home: StreamChatTheme(
+            data: streamTheme,
+            child: StreamChannel(
+              channel: channel,
+              child: SizedBox(
+                child: StreamGalleryAttachment(
+                  constraints: BoxConstraints.tight(const Size(
+                    300,
+                    300,
+                  )),
+                  message: Message(),
+                  attachments: attachments,
+                  itemBuilder: (context, index) {
+                    final attachment = attachments[index];
 
-                      return StreamImageAttachmentThumbnail(
-                        image: attachment,
-                        width: double.infinity,
-                        height: double.infinity,
-                        fit: BoxFit.cover,
-                      );
-                    },
-                  ),
+                    return StreamImageAttachmentThumbnail(
+                      image: attachment,
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover,
+                    );
+                  },
                 ),
               ),
             ),

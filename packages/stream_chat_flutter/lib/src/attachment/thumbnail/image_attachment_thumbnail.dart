@@ -110,7 +110,8 @@ class StreamImageAttachmentThumbnail extends StatelessWidget {
       'Cannot provide both a resize and the deprecated thumbnail options',
     );
 
-    final imageCDN = StreamChatConfiguration.of(context).imageCDN;
+    final configuration = StreamChatConfiguration.maybeOf(context);
+    final imageCDN = configuration?.imageCDN ?? const StreamImageCDN();
 
     return LayoutBuilder(
       builder: (context, constraints) {

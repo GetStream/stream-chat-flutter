@@ -19,21 +19,18 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: StreamChatConfiguration(
-            data: StreamChatConfigurationData(),
-            child: StreamChatTheme(
-              data: streamTheme,
-              child: StreamChannel(
-                channel: channel,
-                child: SizedBox(
-                  child: StreamUrlAttachment(
-                    messageTheme: streamTheme.ownMessageTheme,
-                    message: Message(),
-                    hostDisplayName: 'Test',
-                    urlAttachment: Attachment(
-                      title: 'Flutter',
-                      titleLink: 'https://flutter.dev',
-                    ),
+          home: StreamChatTheme(
+            data: streamTheme,
+            child: StreamChannel(
+              channel: channel,
+              child: SizedBox(
+                child: StreamUrlAttachment(
+                  messageTheme: streamTheme.ownMessageTheme,
+                  message: Message(),
+                  hostDisplayName: 'Test',
+                  urlAttachment: Attachment(
+                    title: 'Flutter',
+                    titleLink: 'https://flutter.dev',
                   ),
                 ),
               ),
