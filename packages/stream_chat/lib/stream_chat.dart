@@ -67,7 +67,13 @@ export 'package:stream_core/stream_core.dart'
 export 'package:uuid/uuid.dart';
 
 export 'open_api/models.dart'
-    show CreateDeviceRequestPushProvider, DeviceResponse, ListDevicesResponse, Role, SearchRolesResponse;
+    show
+        BanRequestDeleteMessages,
+        CreateDeviceRequestPushProvider,
+        DeviceResponse,
+        ListDevicesResponse,
+        Role,
+        SearchRolesResponse;
 
 export 'src/client/channel/channel.dart';
 export 'src/client/channel/channel_capability_check.dart';

@@ -2,6 +2,14 @@
 
 🛑️ Breaking
 
+- Muting, banning and flagging return a `Result<void>` instead of throwing, on both `StreamChatClient` and `Channel`. `OwnUser.mutes` and `channelMutes` still arrive over `notification.mutes_updated`.
+- `muteUser`, `banUser` and the flag methods move to the moderation v2 API, which is in beta and refuses an app pinned to the v1 moderation flow.
+- `banUser`'s options map becomes named parameters: `channelCid`, `timeout`, `reason`, `shadow`, `ipBan`, `deleteMessages`. `Channel.banMember` and `shadowBan` take the same, minus `channelCid`.
+- `unbanUser` takes `channelCid` and no longer accepts `remove_future_channels_ban` or `reason`, which its replacement has neither of.
+- `removeShadowBan` is removed. It was an alias of `unbanUser` and `Channel.unbanMember` — use those.
+- `unflagMessage` and `unflagUser` are removed. They removed no flag, which is why both were already deprecated.
+- `StreamChatApi.moderation` handles only `queryBannedUsers`; the other ten methods moved off it.
+
 - Logging is rebuilt. `logLevel` and `logHandlerFunction` become one `logConfig`, `client.logger` is a `StreamLogger`, and `detachedLogger`, `defaultLogHandler` and `LogHandlerFunction` are removed along with the `package:logging` re-export. The default is unchanged: warnings and errors to the console. Supply a `StreamLogHandler` to route records into your own facility.
 - `LoggingInterceptor`, `InterceptStep` and `LogPrint` are no longer exported. The interceptor is installed by default and writes through the configured `StreamLogHandler`, so routing its output is a `logConfig` concern now.
 - The token layer is retyped. `Token` becomes `UserToken`, and `TokenProvider` becomes an interface rather than a `Future<String> Function(String)` typedef — pass `TokenProvider.dynamic(myLoader)` where you passed a closure, and note a loader now returns a `UserToken`. `TokenManager.loadToken` becomes `getToken`, `isStatic` becomes `usesStaticProvider`, and `setTokenOrProvider` becomes `setTokenProvider`.
@@ -73,6 +81,7 @@
 - Added the message sort fields the JS client already exposed: `text`, `type`, `parentId`, `replyCount` and `pinned`.
 - Added `MemberSortField.updatedAt`.
 - Added `UserSortField.language` and `UserSortField.teams`.
+- Added optional `reason` and `custom` arguments to `flagMessage` and `flagUser`, recorded with the flag.
 
 🔒 Security
 

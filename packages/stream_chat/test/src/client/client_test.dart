@@ -4,7 +4,22 @@ import 'dart:async';
 
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/open_api/api.dart'
-    show CreateDeviceRequest, CreateDeviceRequestPushProvider, DurationResponse;
+    show
+        BanRequest,
+        CreateDeviceRequest,
+        CreateDeviceRequestPushProvider,
+        DurationResponse,
+        FlagItemResponse,
+        FlagRequest,
+        ModerationBanResponse,
+        MuteChannelRequest,
+        MuteChannelResponse,
+        MuteRequest,
+        MuteResponse,
+        UnbanResponse,
+        UnmuteChannelRequest,
+        UnmuteRequest,
+        UnmuteResponse;
 import 'package:stream_chat/src/ws/events/events.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
@@ -2665,34 +2680,47 @@ void main() {
       verifyNoMoreInteractions(api.channel);
     });
 
-    test('`.muteChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelCid = '$channelType:$channelId';
+    test('`.muteChannel` sends the cid as a single-element list', () async {
+      const channelCid = 'test-channel-type:test-channel-id';
+      const request = MuteChannelRequest(channelCids: [channelCid]);
 
-      when(() => api.moderation.muteChannel(channelCid)).thenAnswer((_) async => EmptyResponse());
+      when(() => defaultApi.muteChannel(muteChannelRequest: request)).thenAnswer(
+        (_) async => const Result.success(MuteChannelResponse(duration: '0.01ms')),
+      );
 
       final res = await client.muteChannel(channelCid);
+      expect(res.isSuccess, isTrue);
 
-      expect(res, isNotNull);
-
-      verify(() => api.moderation.muteChannel(channelCid)).called(1);
-      verifyNoMoreInteractions(api.moderation);
+      verify(() => defaultApi.muteChannel(muteChannelRequest: request)).called(1);
+      verifyNoMoreInteractions(defaultApi);
     });
 
-    test('`.unmuteChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelCid = '$channelType:$channelId';
+    test('`.muteChannel` sends the expiration in milliseconds', () async {
+      const channelCid = 'test-channel-type:test-channel-id';
+      const request = MuteChannelRequest(channelCids: [channelCid], expiration: 60000);
 
-      when(() => api.moderation.unmuteChannel(channelCid)).thenAnswer((_) async => EmptyResponse());
+      when(() => defaultApi.muteChannel(muteChannelRequest: request)).thenAnswer(
+        (_) async => const Result.success(MuteChannelResponse(duration: '0.01ms')),
+      );
+
+      await client.muteChannel(channelCid, expiration: const Duration(minutes: 1));
+
+      verify(() => defaultApi.muteChannel(muteChannelRequest: request)).called(1);
+    });
+
+    test('`.unmuteChannel` sends the cid as a single-element list', () async {
+      const channelCid = 'test-channel-type:test-channel-id';
+      const request = UnmuteChannelRequest(channelCids: [channelCid]);
+
+      when(() => defaultApi.unmuteChannel(unmuteChannelRequest: request)).thenAnswer(
+        (_) async => const Result.success(UnmuteResponse(duration: '0.01ms')),
+      );
 
       final res = await client.unmuteChannel(channelCid);
+      expect(res.isSuccess, isTrue);
 
-      expect(res, isNotNull);
-
-      verify(() => api.moderation.unmuteChannel(channelCid)).called(1);
-      verifyNoMoreInteractions(api.moderation);
+      verify(() => defaultApi.unmuteChannel(unmuteChannelRequest: request)).called(1);
+      verifyNoMoreInteractions(defaultApi);
     });
 
     test('`.partialMemberUpdate with userId`', () async {
@@ -3575,38 +3603,60 @@ void main() {
       verifyNoMoreInteractions(api.user);
     });
 
-    test('`.banUser`', () async {
+    test('`.banUser` sends only the target when nothing else is given', () async {
       const userId = 'test-user-id';
+      const request = BanRequest(targetUserId: userId);
 
-      when(
-        () => api.moderation.banUser(userId, options: any(named: 'options')),
-      ).thenAnswer((_) async => EmptyResponse());
+      when(() => defaultApi.ban(banRequest: request)).thenAnswer(
+        (_) async => const Result.success(ModerationBanResponse(duration: '0.01ms')),
+      );
 
       final res = await client.banUser(userId);
+      expect(res.isSuccess, isTrue);
 
-      expect(res, isNotNull);
-
-      verify(
-        () => api.moderation.banUser(userId, options: any(named: 'options')),
-      ).called(1);
-      verifyNoMoreInteractions(api.moderation);
+      verify(() => defaultApi.ban(banRequest: request)).called(1);
+      verifyNoMoreInteractions(defaultApi);
     });
 
-    test('`.unbanUser`', () async {
+    test('`.banUser` sends the timeout in minutes', () async {
+      const userId = 'test-user-id';
+      const request = BanRequest(targetUserId: userId, timeout: 30);
+
+      when(() => defaultApi.ban(banRequest: request)).thenAnswer(
+        (_) async => const Result.success(ModerationBanResponse(duration: '0.01ms')),
+      );
+
+      await client.banUser(userId, timeout: const Duration(minutes: 30));
+
+      verify(() => defaultApi.ban(banRequest: request)).called(1);
+    });
+
+    test('`.banUser` surfaces a failure without throwing', () async {
+      const error = StreamClientException(message: 'boom');
+      const request = BanRequest(targetUserId: 'test-user-id');
+
+      when(() => defaultApi.ban(banRequest: request)).thenAnswer(
+        (_) async => const Result.failure(error),
+      );
+
+      final res = await client.banUser('test-user-id');
+
+      expect(res.isFailure, isTrue);
+      expect(res.exceptionOrNull(), error);
+    });
+
+    test('`.unbanUser` sends the target as a query parameter', () async {
       const userId = 'test-user-id';
 
-      when(
-        () => api.moderation.unbanUser(userId, options: any(named: 'options')),
-      ).thenAnswer((_) async => EmptyResponse());
+      when(() => defaultApi.unban(targetUserId: userId)).thenAnswer(
+        (_) async => const Result.success(UnbanResponse(duration: '0.01ms')),
+      );
 
       final res = await client.unbanUser(userId);
+      expect(res.isSuccess, isTrue);
 
-      expect(res, isNotNull);
-
-      verify(
-        () => api.moderation.unbanUser(userId, options: any(named: 'options')),
-      ).called(1);
-      verifyNoMoreInteractions(api.moderation);
+      verify(() => defaultApi.unban(targetUserId: userId)).called(1);
+      verifyNoMoreInteractions(defaultApi);
     });
 
     test('`.blockUser`', () async {
@@ -3920,112 +3970,79 @@ void main() {
       },
     );
 
-    test('`.shadowBan`', () async {
+    test('`.shadowBan` sets the shadow flag on the ban', () async {
       const userId = 'test-user-id';
+      const request = BanRequest(targetUserId: userId, shadow: true);
 
-      when(() => api.moderation.banUser(userId, options: {'shadow': true})).thenAnswer((_) async => EmptyResponse());
+      when(() => defaultApi.ban(banRequest: request)).thenAnswer(
+        (_) async => const Result.success(ModerationBanResponse(duration: '0.01ms')),
+      );
 
       final res = await client.shadowBan(userId);
+      expect(res.isSuccess, isTrue);
 
-      expect(res, isNotNull);
-
-      verify(
-        () => api.moderation.banUser(userId, options: {'shadow': true}),
-      ).called(1);
-      verifyNoMoreInteractions(api.moderation);
+      verify(() => defaultApi.ban(banRequest: request)).called(1);
+      verifyNoMoreInteractions(defaultApi);
     });
 
-    test('`.removeShadowBan`', () async {
+    test('`.muteUser` sends the user id as a single-element target list', () async {
       const userId = 'test-user-id';
+      const request = MuteRequest(targetIds: [userId]);
 
-      when(() => api.moderation.unbanUser(userId, options: {'shadow': true})).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.removeShadowBan(userId);
-
-      expect(res, isNotNull);
-
-      verify(
-        () => api.moderation.unbanUser(userId, options: {'shadow': true}),
-      ).called(1);
-      verifyNoMoreInteractions(api.moderation);
-    });
-
-    test('`.muteUser`', () async {
-      const userId = 'test-user-id';
-
-      when(() => api.moderation.muteUser(userId)).thenAnswer((_) async => EmptyResponse());
+      when(() => defaultApi.mute(muteRequest: request)).thenAnswer(
+        (_) async => const Result.success(MuteResponse(duration: '0.01ms')),
+      );
 
       final res = await client.muteUser(userId);
+      expect(res.isSuccess, isTrue);
 
-      expect(res, isNotNull);
-
-      verify(() => api.moderation.muteUser(userId)).called(1);
-      verifyNoMoreInteractions(api.moderation);
+      verify(() => defaultApi.mute(muteRequest: request)).called(1);
+      verifyNoMoreInteractions(defaultApi);
     });
 
-    test('`.unmuteUser`', () async {
+    test('`.unmuteUser` sends the user id as a single-element target list', () async {
       const userId = 'test-user-id';
+      const request = UnmuteRequest(targetIds: [userId]);
 
-      when(() => api.moderation.unmuteUser(userId)).thenAnswer((_) async => EmptyResponse());
+      when(() => defaultApi.unmute(unmuteRequest: request)).thenAnswer(
+        (_) async => const Result.success(UnmuteResponse(duration: '0.01ms')),
+      );
 
       final res = await client.unmuteUser(userId);
+      expect(res.isSuccess, isTrue);
 
-      expect(res, isNotNull);
-
-      verify(() => api.moderation.unmuteUser(userId)).called(1);
-      verifyNoMoreInteractions(api.moderation);
+      verify(() => defaultApi.unmute(unmuteRequest: request)).called(1);
+      verifyNoMoreInteractions(defaultApi);
     });
 
-    test('`.flagMessage`', () async {
+    test('`.flagMessage` flags the message entity type', () async {
       const messageId = 'test-message-id';
+      const request = FlagRequest(entityType: 'stream:chat:v1:message', entityId: messageId);
 
-      when(() => api.moderation.flagMessage(messageId)).thenAnswer((_) async => EmptyResponse());
+      when(() => defaultApi.flag(flagRequest: request)).thenAnswer(
+        (_) async => const Result.success(FlagItemResponse(duration: '0.01ms', itemId: 'item-id')),
+      );
 
       final res = await client.flagMessage(messageId);
+      expect(res.isSuccess, isTrue);
 
-      expect(res, isNotNull);
-
-      verify(() => api.moderation.flagMessage(messageId)).called(1);
-      verifyNoMoreInteractions(api.moderation);
+      verify(() => defaultApi.flag(flagRequest: request)).called(1);
+      verifyNoMoreInteractions(defaultApi);
     });
 
-    test('`.unflagMessage`', () async {
-      const messageId = 'test-message-id';
+    test('`.flagUser` flags the user entity type', () async {
+      const userId = 'test-user-id';
+      const request = FlagRequest(entityType: 'stream:user', entityId: userId);
 
-      when(() => api.moderation.unflagMessage(messageId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.unflagMessage(messageId);
-
-      expect(res, isNotNull);
-
-      verify(() => api.moderation.unflagMessage(messageId)).called(1);
-      verifyNoMoreInteractions(api.moderation);
-    });
-
-    test('`.flagUser`', () async {
-      const userId = 'test-message-id';
-
-      when(() => api.moderation.flagUser(userId)).thenAnswer((_) async => EmptyResponse());
+      when(() => defaultApi.flag(flagRequest: request)).thenAnswer(
+        (_) async => const Result.success(FlagItemResponse(duration: '0.01ms', itemId: 'item-id')),
+      );
 
       final res = await client.flagUser(userId);
+      expect(res.isSuccess, isTrue);
 
-      expect(res, isNotNull);
-
-      verify(() => api.moderation.flagUser(userId)).called(1);
-      verifyNoMoreInteractions(api.moderation);
-    });
-
-    test('`.unflagUser`', () async {
-      const userId = 'test-message-id';
-
-      when(() => api.moderation.unflagUser(userId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.unflagUser(userId);
-
-      expect(res, isNotNull);
-
-      verify(() => api.moderation.unflagUser(userId)).called(1);
-      verifyNoMoreInteractions(api.moderation);
+      verify(() => defaultApi.flag(flagRequest: request)).called(1);
+      verifyNoMoreInteractions(defaultApi);
     });
 
     test('`.getActiveLiveLocations`', () async {

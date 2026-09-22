@@ -28,7 +28,7 @@ class DebugRemoveShadowBan extends StatelessWidget {
           final userId = value.trim();
           try {
             debugPrint('[removeShadowBan] userId: $userId');
-            final result = await client.removeShadowBan(userId);
+            final result = await client.unbanUser(userId);
             debugPrint('[removeShadowBan] result: $result');
           } catch (e) {
             debugPrint('[removeShadowBan] failed: $e');

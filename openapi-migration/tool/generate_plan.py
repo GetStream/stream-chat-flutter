@@ -270,15 +270,68 @@ GROUPS = [
                    '/api/v2/chat/query_banned_users', '/api/v2/chat/query_future_channel_bans'),
         goal='The largest generated surface relative to ours — decide what stays unexposed.',
         decisions=[
-            'Most generated moderation operations have no hand-written counterpart. Decide explicitly which we '
-            'expose now and which stay internal; do not surface ~20 new public methods as a side effect of '
-            'migrating 11.',
-            'Flag/unflag was deprecated recently on our side — check its current state before mapping it.',
+            'None outstanding. `queryBannedUsers` is the one method still hand-written; see below for when it '
+            'moves.',
         ],
+        taken=textwrap.dedent("""\
+            - **The ten write operations route through `DefaultApi`; `queryBannedUsers` stays hand-written.**
+              The writes answer with nothing we keep, so they need no model mapping. `queryBannedUsers` answers
+              with `BanResponse`, which carries a `UserResponse` and a `ChannelResponse` — mapping those onto our
+              `BannedUser` means writing the `User` mapper [01-foundation](01-foundation.md) reserves for
+              [09](09-users.md) *and* the 28-field `ChannelResponse` mapper belonging to
+              [11](11-channels-and-members.md), privately, then deleting both when those groups land. It moves
+              with 09.
+
+            - **`muteUser`, `unmuteUser`, `banUser` and the flag methods change service, not just shape.** Ours
+              called the chat v1 routes `lib/chat/routes.go` mounts at the root and comments as deprecated; the
+              generated operations are the moderation product under `/api/v2/moderation/`. The handlers are
+              equivalent — `moderation/controller/mute.go` uses the same `state.InsertUserMutes` and emits the
+              same `notification.mutes_updated` and `user.muted` events as `chat/controller/v1/mute_user.go`.
+              They are `Beta: true` and gated on `FeatureFlagEnabled -> app.ModerationV2Enabled()`, which defaults
+              on (`moderation_enabled` unset means enabled); an app explicitly pinned to the v1 flow gets
+              `"this endpoint needs a feature flag"`.
+
+            - **Every migrated method returns `Result<void>`, discarding the response body.** `ban`, `unban` and
+              `unmute*` answer with only `duration`. `mute` and `muteChannel` answer with `MuteResponse` /
+              `MuteChannelResponse`, and `flag` with a review-queue `itemId` — but `OwnUser.mutes` and
+              `channelMutes` are fed by `notification.mutes_updated` and the connect payload, not by these
+              responses, and returning them would put `OwnUserResponse`, `UserMuteResponse` and the generated
+              `ChannelMute` in the barrel ahead of groups 09 and 11. The `itemId` is only usable with
+              `submitAction` and `queryReviewQueue`, which this group does not expose.
+
+            - **`unflagMessage` and `unflagUser` are removed, not migrated.** `POST /moderation/unflag` has no v2
+              operation and is a chat-v1-only route the server no longer acts on: it validates the request,
+              answers successfully, and leaves the flag in place. Both were already deprecated here for that
+              reason, in a released version.
+
+            - **`banUser`'s `Map<String, Object?> options` becomes typed parameters**, mirroring the generated
+              `BanRequest`. This drops `remove_future_channels_ban` and `reason` on *unban*, which chat v1
+              accepted and the moderation v2 `UnbanRequest` does not, and it fixes `Channel.banMember` /
+              `unbanMember`, which sent the `type` + `id` pair chat v1 deprecates in favour of `channel_cid`.
+              `timeout` is a `Duration` converted with `inMinutes`; `DurationInMinutes.ToTime()` treats `0` as no
+              expiry, so a sub-minute value never expires the ban.
+
+            - **None of the other 23 generated operations are exposed.** Blocklists, review queues, moderation
+              configs, appeals, action configs and `submitAction` are dashboard and server-side surfaces with no
+              hand-written counterpart; migrating 11 methods is not a reason to publish 23 new ones. They stay
+              reachable through `DefaultApi` for anyone who needs them.
+            """),
         risks=[
-            '`query_banned_users` may omit the `created_at_after` / `created_at_before` filters our request sends; '
-            'verify before migrating or those filters silently disappear.',
+            '~~`query_banned_users` may omit the `created_at_after` / `created_at_before` filters our request '
+            'sends~~ — resolved. It did, at `openapi-v237.2.0`: the server reads them off an embedded '
+            '`*types.BansPager` in `GetPager()` and the spec did not flatten the embed. `openapi-v239.10.0` does, '
+            'so `QueryBannedUsersPayload` now carries all four cursors. Regenerating also added `unban`, without '
+            'which `banUser` would have migrated while `unbanUser` did not.',
         ],
+        done=DONE.replace('- [ ]', '- [x]').replace(
+            'Hand-written request/response DTOs for this group are deleted, or their retention is justified.',
+            'Hand-written request/response DTOs for this group are deleted, or their retention is justified.\n'
+            '      `QueryBannedUsersResponse` and `BannedUser` are kept deliberately, with `queryBannedUsers`.',
+        ).replace(
+            'Decisions recorded in this file, and the status box ticked in `README.md`.',
+            'Decisions recorded in this file, and the status box ticked in `README.md`.\n'
+            '      It reads `◐`, not `☑`: `queryBannedUsers` moves with [09](09-users.md).',
+        ),
     ),
     dict(
         num='09', slug='users', title='Users',

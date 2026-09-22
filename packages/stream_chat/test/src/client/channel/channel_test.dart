@@ -4571,17 +4571,17 @@ void main() {
       ).called(1);
     });
 
-    test('`.mute`', () async {
+    test('`.mute` mutes the channel by cid', () async {
       when(
         () => client.muteChannel(
           channelCid,
           expiration: any(named: 'expiration'),
         ),
-      ).thenAnswer((_) async => EmptyResponse());
+      ).thenAnswer((_) async => const Result.success(null));
 
       final res = await channel.mute();
 
-      expect(res, isNotNull);
+      expect(res.isSuccess, isTrue);
 
       verify(
         () => client.muteChannel(
@@ -4591,7 +4591,7 @@ void main() {
       ).called(1);
     });
 
-    test('`.mute with expiration`', () async {
+    test('`.mute` unmutes the channel once the expiration elapses', () async {
       const expiration = Duration(seconds: 3);
 
       when(
@@ -4599,13 +4599,13 @@ void main() {
           channelCid,
           expiration: expiration,
         ),
-      ).thenAnswer((_) async => EmptyResponse());
+      ).thenAnswer((_) async => const Result.success(null));
 
-      when(() => client.unmuteChannel(channelCid)).thenAnswer((_) async => EmptyResponse());
+      when(() => client.unmuteChannel(channelCid)).thenAnswer((_) async => const Result.success(null));
 
       final res = await channel.mute(expiration: expiration);
 
-      expect(res, isNotNull);
+      expect(res.isSuccess, isTrue);
 
       verify(
         () => client.muteChannel(
@@ -4619,14 +4619,14 @@ void main() {
       verify(() => client.unmuteChannel(channelCid)).called(1);
     });
 
-    test('`.unmute`', () async {
+    test('`.unmute` unmutes the channel by cid', () async {
       when(
         () => client.unmuteChannel(channelCid),
-      ).thenAnswer((_) async => EmptyResponse());
+      ).thenAnswer((_) async => const Result.success(null));
 
       final res = await channel.unmute();
 
-      expect(res, isNotNull);
+      expect(res.isSuccess, isTrue);
 
       verify(
         () => client.unmuteChannel(channelCid),
@@ -4681,74 +4681,48 @@ void main() {
       verify(() => client.disableSlowdown(channelId, channelType)).called(1);
     });
 
-    test('`.banUser`', () async {
+    test('`.banMember` scopes the ban to the channel cid', () async {
       const userId = 'test-user-id';
-      const options = {'key': 'value'};
 
       when(
-        () => client.banUser(
-          userId,
-          {'type': channelType, 'id': channelId, ...options},
-        ),
-      ).thenAnswer((_) async => EmptyResponse());
+        () => client.banUser(userId, channelCid: channelCid, reason: 'spam'),
+      ).thenAnswer((_) async => const Result.success(null));
 
-      final res = await channel.banMember(userId, options);
+      final res = await channel.banMember(userId, reason: 'spam');
 
-      expect(res, isNotNull);
+      expect(res.isSuccess, isTrue);
 
       verify(
-        () => client.banUser(
-          userId,
-          {'type': channelType, 'id': channelId, ...options},
-        ),
+        () => client.banUser(userId, channelCid: channelCid, reason: 'spam'),
       ).called(1);
     });
 
-    test('`.unbanUser`', () async {
+    test('`.unbanMember` scopes the unban to the channel cid', () async {
       const userId = 'test-user-id';
 
-      when(() => client.unbanUser(userId, any())).thenAnswer((_) async => EmptyResponse());
+      when(
+        () => client.unbanUser(userId, channelCid: channelCid),
+      ).thenAnswer((_) async => const Result.success(null));
 
       final res = await channel.unbanMember(userId);
 
-      expect(res, isNotNull);
+      expect(res.isSuccess, isTrue);
 
-      verify(() => client.unbanUser(userId, any())).called(1);
+      verify(() => client.unbanUser(userId, channelCid: channelCid)).called(1);
     });
 
-    test('`.shadowBan`', () async {
+    test('`.shadowBan` scopes the shadow ban to the channel cid', () async {
       const userId = 'test-user-id';
-      const options = {'key': 'value'};
 
       when(
-        () => client.shadowBan(
-          userId,
-          {'type': channelType, 'id': channelId, ...options},
-        ),
-      ).thenAnswer((_) async => EmptyResponse());
+        () => client.shadowBan(userId, channelCid: channelCid),
+      ).thenAnswer((_) async => const Result.success(null));
 
-      final res = await channel.shadowBan(userId, options);
+      final res = await channel.shadowBan(userId);
 
-      expect(res, isNotNull);
+      expect(res.isSuccess, isTrue);
 
-      verify(
-        () => client.shadowBan(
-          userId,
-          {'type': channelType, 'id': channelId, ...options},
-        ),
-      ).called(1);
-    });
-
-    test('`.removeShadowBan`', () async {
-      const userId = 'test-user-id';
-
-      when(() => client.removeShadowBan(userId, any())).thenAnswer((_) async => EmptyResponse());
-
-      final res = await channel.removeShadowBan(userId);
-
-      expect(res, isNotNull);
-
-      verify(() => client.removeShadowBan(userId, any())).called(1);
+      verify(() => client.shadowBan(userId, channelCid: channelCid)).called(1);
     });
 
     test('`.hide`', () async {

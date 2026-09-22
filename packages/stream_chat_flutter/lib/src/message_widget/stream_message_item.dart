@@ -1014,7 +1014,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
   }
 
   // Shows a confirmation dialog before flagging the message.
-  Future<EmptyResponse?> _maybeFlagMessage(
+  Future<Result<void>?> _maybeFlagMessage(
     BuildContext context,
     Message message,
     Channel channel,
