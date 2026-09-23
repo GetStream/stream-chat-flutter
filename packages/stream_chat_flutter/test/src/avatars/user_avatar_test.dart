@@ -154,4 +154,48 @@ void main() {
       });
     }
   });
+
+  // See the online indicator size group above: this is what reports a new
+  // size whose number of initials has not been decided yet.
+  group('placeholder initials', () {
+    const expected = {
+      StreamAvatarSize.xs: 'A',
+      StreamAvatarSize.sm: 'A',
+      StreamAvatarSize.md: 'AL',
+      StreamAvatarSize.lg: 'AL',
+      StreamAvatarSize.xl: 'AL',
+      StreamAvatarSize.xlPlus: 'AL',
+      StreamAvatarSize.xxl: 'AL',
+      StreamAvatarSize.xxxl: 'AL',
+    };
+
+    test('every avatar size is mapped', () {
+      expect(expected.keys, containsAll(StreamAvatarSize.values));
+    });
+
+    for (final size in StreamAvatarSize.values) {
+      testWidgets('$size shows ${expected[size]}', (tester) async {
+        final user = MockUser();
+        when(() => user.id).thenReturn('ada');
+        when(() => user.name).thenReturn('Ada Lovelace');
+        when(() => user.online).thenReturn(false);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StreamChat(
+              client: client,
+              themeData: StreamChatThemeData(),
+              child: Scaffold(
+                body: Center(
+                  child: StreamUserAvatar(user: user, size: size),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        expect(find.text(expected[size]!), findsOneWidget);
+      });
+    }
+  });
 }
