@@ -102,7 +102,7 @@ final class _FakePlatformFile extends PlatformFile {
   int? lengthSync() => _bytes.length;
 
   @override
-  Future<int?> length() async => _bytes.length;
+  Future<int> length() async => _bytes.length;
 
   @override
   Future<Uint8List> readAsBytes() async => _bytes;
