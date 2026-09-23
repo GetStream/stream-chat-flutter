@@ -1038,6 +1038,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
               autofocus: widget.props.autofocus,
               autocorrect: widget.props.autoCorrect,
               isFloating: isFloating,
+              contentInsertionConfiguration: _buildContentInsertionConfiguration(),
             ),
           ),
         );
@@ -1460,6 +1461,38 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     }
 
     if (validationErrors.firstOrNull case final error?) _handleAttachmentError(error);
+  }
+
+  // Lets keyboards such as Gboard insert images and GIFs. Accepted only where
+  // the picker would accept an image, and validated the same way.
+  ContentInsertionConfiguration? _buildContentInsertionConfiguration() {
+    if (widget.props.disableAttachments) return null;
+    if (!_getAllowedAttachmentPickerTypes().contains(AttachmentPickerType.images)) return null;
+
+    return ContentInsertionConfiguration(onContentInserted: _onContentInserted);
+  }
+
+  void _onContentInserted(KeyboardInsertedContent content) {
+    // The keyboard failed to hand over the bytes; there is nothing to attach.
+    if (content.data case final bytes?) {
+      final file = AttachmentFile(
+        size: bytes.length,
+        bytes: bytes,
+        name: _insertedContentFileName(content),
+      );
+
+      _addAttachments([Attachment(type: AttachmentType.image, file: file)]);
+    }
+  }
+
+  // The name must carry an extension: the attachment's MIME type, and so its
+  // upload validation, is derived from it.
+  String _insertedContentFileName(KeyboardInsertedContent content) {
+    final lastSegment = Uri.tryParse(content.uri)?.pathSegments.lastOrNull;
+    if (lastSegment != null && lastSegment.contains('.')) return lastSegment;
+
+    final extension = content.mimeType.split('/').last;
+    return 'keyboard_${DateTime.now().millisecondsSinceEpoch}.$extension';
   }
 
   StreamAttachmentValidator _buildAttachmentValidator() {

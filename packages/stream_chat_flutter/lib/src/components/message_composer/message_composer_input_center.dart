@@ -86,6 +86,7 @@ class DefaultStreamMessageComposerInputCenter extends StatelessWidget {
             autofocus: props.autofocus,
             autocorrect: props.autocorrect,
             enabled: !props.isSlowModeActive,
+            contentInsertionConfiguration: props.contentInsertionConfiguration,
           ),
         ),
         if (props.canAlsoSendToChannel)
