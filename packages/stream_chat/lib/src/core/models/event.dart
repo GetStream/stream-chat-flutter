@@ -200,7 +200,7 @@ class Event {
 
   /// Known top level fields.
   /// Useful for [Serializer] methods.
-  static final topLevelFields = [
+  static const topLevelFields = [
     'type',
     'user_id',
     'cid',
