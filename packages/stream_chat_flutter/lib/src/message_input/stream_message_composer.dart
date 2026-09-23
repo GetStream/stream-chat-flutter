@@ -990,11 +990,35 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     );
   }
 
+  // Without the upload-file capability every upload is rejected, so the
+  // composer offers no way to add one: no attachment button, voice recording,
+  // dropped files or keyboard images. A channel that isn't created yet has no
+  // capabilities to check, so uploads stay available until it is.
   Widget _buildMessageInput(
     BuildContext context,
     StreamMessageComposerController controller,
     FocusNode focusNode,
   ) {
+    final channel = StreamChannel.of(context).channel;
+    if (channel.state == null) {
+      return _buildMessageInputContent(context, controller, focusNode, canUploadFile: true);
+    }
+
+    return BetterStreamBuilder<bool>(
+      stream: channel.ownCapabilitiesStream.map((it) => it.contains(ChannelCapability.uploadFile)),
+      initialData: channel.canUploadFile,
+      builder: (context, canUploadFile) {
+        return _buildMessageInputContent(context, controller, focusNode, canUploadFile: canUploadFile);
+      },
+    );
+  }
+
+  Widget _buildMessageInputContent(
+    BuildContext context,
+    StreamMessageComposerController controller,
+    FocusNode focusNode, {
+    required bool canUploadFile,
+  }) {
     final currentUserId = StreamChat.of(context).currentUser?.id;
     final isFloating = _resolveSurfaceStyle(context).isFloating;
 
@@ -1005,6 +1029,8 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
         // gradient height stable when the picker (a sibling) opens.
         final pill = DropTarget(
           onDragDone: (details) async {
+            if (!canUploadFile) return;
+
             final attachments = <Attachment>[];
             for (final file in details.files) {
               attachments.add(await file.toAttachment(type: AttachmentType.file));
@@ -1019,13 +1045,17 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
             child: StreamChatMessageInput(
               controller: controller,
               currentUserId: currentUserId,
-              onAttachmentButtonPressed: widget.props.disableAttachments ? null : _onAttachmentButtonPressed,
+              onAttachmentButtonPressed: widget.props.disableAttachments || !canUploadFile
+                  ? null
+                  : _onAttachmentButtonPressed,
               isPickerOpen: _isPickerVisible,
               placeholder: _buildPlaceholder(context),
               focusNode: focusNode,
               onSendPressed: sendMessage,
               canAlsoSendToChannel: _shouldShowSendToChannelCheckbox(),
-              audioRecorderController: widget.props.enableVoiceRecording ? _audioRecorderController : null,
+              audioRecorderController: widget.props.enableVoiceRecording && canUploadFile
+                  ? _audioRecorderController
+                  : null,
               sendVoiceRecordingAutomatically: widget.props.sendVoiceRecordingAutomatically,
               feedback: widget.props.voiceRecordingFeedback,
               onQuotedMessageCleared: () {
@@ -1038,7 +1068,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
               autofocus: widget.props.autofocus,
               autocorrect: widget.props.autoCorrect,
               isFloating: isFloating,
-              contentInsertionConfiguration: _buildContentInsertionConfiguration(),
+              contentInsertionConfiguration: canUploadFile ? _buildContentInsertionConfiguration() : null,
             ),
           ),
         );
@@ -1469,7 +1499,6 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   ContentInsertionConfiguration? _buildContentInsertionConfiguration() {
     if (widget.props.disableAttachments) return null;
     if (_commandEnabled) return null;
-    if (!StreamChannel.of(context).channel.canUploadFile) return null;
     if (!_getAllowedAttachmentPickerTypes().contains(AttachmentPickerType.images)) return null;
 
     return ContentInsertionConfiguration(onContentInserted: _onContentInserted);
