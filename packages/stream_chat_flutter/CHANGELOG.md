@@ -1,9 +1,5 @@
 ## Upcoming
 
-🛑️ Breaking
-
-- `PlatformFileX.toAttachmentFile` and `PlatformFileX.toAttachment` are now asynchronous, returning `Future<AttachmentFile>` and `Future<Attachment>`. `file_picker` 12 removed `PlatformFile`'s eagerly-loaded `bytes` and `size` getters, so the content is read on demand; this matches the existing `XFileX` extensions. Any `PlatformFile` you hold came from `FilePicker.pickFiles()`, whose return type also changed in `file_picker` 12, so that call site needs rewriting anyway and the added `await` goes in the same edit.
-
 ✅ Added
 
 - Added `StreamMessageItem.semanticsLabel`, which replaces the announcement composed for a message row, and `StreamMessageItem.excludeFromSemantics`, which leaves the row unlabeled so the bubble and footer announce their own parts.
@@ -13,8 +9,9 @@
 ⚠️ Changed
 
 - Bumped `file_picker` to `>=12.0.0 <14.0.0`.
-- Deprecated `withData` and `withReadStream` on `StreamAttachmentHandler.pickFile` and `StreamFilePicker`. Content is now read on demand, so both are ignored.
-- Android apps built from a Flutter template older than 3.44 must add `subprojects { project.evaluationDependsOn(":app") }` to their root `android/build.gradle`. Without it the build fails with `cannot find symbol: class FilePickerPlugin`, an error that says nothing about its cause.
+- `PlatformFileX.toAttachmentFile` and `PlatformFileX.toAttachment` are now async.
+- Deprecated `withData` and `withReadStream` on `StreamAttachmentHandler.pickFile` and `StreamFilePicker`; they no longer have any effect.
+- Android apps whose root `android/build.gradle` dropped the template's `subprojects { project.evaluationDependsOn(":app") }` must restore it, or the build fails with `Extension with name 'flutter' does not exist`.
 - Video thumbnails now use `stream_thumbnail` on every platform, and the `thumblr`
   dependency is gone.
 - Linux builds now need the FFmpeg and libwebp development packages — on Debian/Ubuntu:
@@ -25,7 +22,7 @@
 
 🐞 Fixed
 
-- Fixed `StreamAttachmentHandler.pickFile` throwing when the picker returned an empty selection: it took `.files.first` unconditionally. It now returns `null`.
+- Fixed `StreamAttachmentHandler.pickFile` throwing on an empty selection; it now returns `null`.
 - Fixed the package no longer compiling when `stream_core_flutter` adds an avatar size. The three switches mapping `StreamAvatarSize` and `StreamAvatarGroupSize` onto an indicator size, an inner avatar size and the number of initials were exhaustive, so a size added upstream broke the build here. They fall back to the largest size they know now, and `StreamAvatarSize.xlPlus` (64px), `StreamAvatarSize.xxxl` / `StreamAvatarGroupSize.xxxl` (104px) are mapped explicitly.
 - Fixed `StreamAttachmentHandler` throwing `UnimplementedError` on WebAssembly builds.
 - Fixed the gallery tab vanishing from the attachment picker when `allowedAttachmentPickerTypes` allowed images or videos but not both. It now stays available and lists only the allowed media.
