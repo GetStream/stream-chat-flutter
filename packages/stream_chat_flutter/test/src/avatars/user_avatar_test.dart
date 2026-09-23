@@ -120,6 +120,7 @@ void main() {
       StreamAvatarSize.md: StreamOnlineIndicatorSize.md,
       StreamAvatarSize.lg: StreamOnlineIndicatorSize.lg,
       StreamAvatarSize.xl: StreamOnlineIndicatorSize.xl,
+      StreamAvatarSize.xlPlus: StreamOnlineIndicatorSize.xxl,
       StreamAvatarSize.xxl: StreamOnlineIndicatorSize.xxl,
       StreamAvatarSize.xxxl: StreamOnlineIndicatorSize.xxxl,
     };

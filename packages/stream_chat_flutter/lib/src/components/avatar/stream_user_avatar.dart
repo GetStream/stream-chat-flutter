@@ -154,7 +154,7 @@ class StreamUserAvatar extends StatelessWidget {
     .md => StreamOnlineIndicatorSize.md,
     .lg => StreamOnlineIndicatorSize.lg,
     .xl => StreamOnlineIndicatorSize.xl,
-    .xxl => StreamOnlineIndicatorSize.xxl,
+    .xlPlus || .xxl => StreamOnlineIndicatorSize.xxl,
     .xxxl => StreamOnlineIndicatorSize.xxxl,
     // ignore: unreachable_switch_case, for forward compatibility
     _ => StreamOnlineIndicatorSize.xxxl,
@@ -187,7 +187,7 @@ class _StreamUserAvatarPlaceholder extends StatelessWidget {
     final Widget content;
     if (userInitials != null && userInitials.isNotEmpty) {
       content = switch (size) {
-        .md || .lg || .xl || .xxl || .xxxl => Text(userInitials),
+        .md || .lg || .xl || .xlPlus || .xxl || .xxxl => Text(userInitials),
         .xs || .sm => Text(userInitials.characters.first),
         // ignore: unreachable_switch_case, for forward compatibility
         _ => Text(userInitials),
