@@ -1464,9 +1464,12 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   }
 
   // Lets keyboards such as Gboard insert images and GIFs. Accepted only where
-  // the picker would accept an image, and validated the same way.
+  // the picker would accept an image, and validated the same way. Off while a
+  // command is active, as commands carry no attachments.
   ContentInsertionConfiguration? _buildContentInsertionConfiguration() {
     if (widget.props.disableAttachments) return null;
+    if (_commandEnabled) return null;
+    if (!StreamChannel.of(context).channel.canUploadFile) return null;
     if (!_getAllowedAttachmentPickerTypes().contains(AttachmentPickerType.images)) return null;
 
     return ContentInsertionConfiguration(onContentInserted: _onContentInserted);
@@ -1488,13 +1491,17 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     _addAttachments([Attachment(type: AttachmentType.image, file: file)]);
   }
 
-  // The name must carry an extension: the attachment's MIME type, and so its
-  // upload validation, is derived from it.
+  // The name must carry an extension matching the keyboard's MIME type: the
+  // attachment's MIME type, and so its upload validation, is derived from it.
   String _insertedContentFileName(KeyboardInsertedContent content) {
-    final lastSegment = Uri.tryParse(content.uri)?.pathSegments.lastOrNull;
-    if (lastSegment != null && lastSegment.contains('.')) return lastSegment;
-
     final extension = content.mimeType.split('/').last;
+    // Resolved from a name rather than compared to content.mimeType directly,
+    // so a non-standard type such as image/jpg still matches a .jpg name.
+    final expected = 'file.$extension'.mediaType?.mimeType;
+
+    final lastSegment = Uri.tryParse(content.uri)?.pathSegments.lastOrNull;
+    if (lastSegment != null && lastSegment.mediaType?.mimeType == expected) return lastSegment;
+
     return 'keyboard_${DateTime.now().millisecondsSinceEpoch}.$extension';
   }
 

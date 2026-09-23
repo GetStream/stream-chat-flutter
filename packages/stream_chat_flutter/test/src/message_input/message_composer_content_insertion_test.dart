@@ -43,10 +43,11 @@ Future<void> _pumpComposer(
   AppSettings? appSettings,
   bool disableAttachments = false,
   List<AttachmentPickerType> allowedAttachmentPickerTypes = AttachmentPickerType.values,
+  List<ChannelCapability> ownCapabilities = const [ChannelCapability.sendMessage, ChannelCapability.uploadFile],
 }) async {
   final client = MockClient();
   final clientState = MockClientState();
-  final channel = MockChannel();
+  final channel = MockChannel(ownCapabilities: ownCapabilities);
   final channelState = MockChannelState();
   final member = Member(
     userId: 'user-id',
@@ -184,6 +185,36 @@ void main() {
       );
 
       expect(_editableText(tester).contentInsertionConfiguration, isNull);
+    });
+
+    testWidgets('is off while a command is active', (tester) async {
+      await _pumpComposer(tester, controller: controller);
+
+      controller.setCommand(Command(name: 'giphy'));
+      await tester.pumpAndSettle();
+
+      expect(_editableText(tester).contentInsertionConfiguration, isNull);
+    });
+
+    testWidgets('is off when the user cannot upload files', (tester) async {
+      await _pumpComposer(
+        tester,
+        controller: controller,
+        ownCapabilities: [ChannelCapability.sendMessage],
+      );
+
+      expect(_editableText(tester).contentInsertionConfiguration, isNull);
+    });
+
+    testWidgets('names the file from the MIME type when the URI extension disagrees', (tester) async {
+      await _pumpComposer(tester, controller: controller);
+
+      _insert(tester, _content(uri: 'content://keyboard/cache/1695812.0'));
+      await tester.pumpAndSettle();
+
+      final attachment = controller.attachments.single;
+      expect(attachment.file?.name, endsWith('.gif'));
+      expect(attachment.extraData['mime_type'], 'image/gif');
     });
   });
 }
