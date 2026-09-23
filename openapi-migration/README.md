@@ -19,17 +19,17 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [05](05-polls.md) | Polls | 13 | 13 | ☐ |
 | [06](06-reminders.md) | Message Reminders | 4 | 4 | ☐ |
 | [07](07-threads-and-drafts.md) | Threads & Drafts | 7 | 7 | ☐ |
-| [08](08-moderation-and-blocklists.md) | Moderation & Blocklists | 1 | 35 | ◐ |
+| [08](08-moderation-and-blocklists.md) | Moderation & Blocklists | 10 | 34 | ☑ |
 | [09](09-users.md) | Users | 9 | 9 | ☐ |
 | [10](10-messages.md) | Messages & Search | 14 | 12 | ☐ |
 | [11](11-channels-and-members.md) | Channels, Members & Sync | 27 | 24 | ☐ |
 | [12](12-uploads-cdn.md) | Uploads (CDN) | 8 | 8 | ☐ |
 | [13](13-push-preferences.md) | Push Preferences | 1 | 1 | ☐ |
+| [14](14-banned-users.md) | Banned Users — split out of 08 | 1 | 1 | ☐ |
 
 **Coverage:** 95 hand-written methods across 12 files, and all 129 generated operations, each claimed by exactly
 one group. Verified mechanically — see [Keeping this plan honest](#keeping-this-plan-honest).
 
-☑ done · ◐ partly done, with the remainder and its reason in the group's file · ☐ not started
 
 ## Goals
 
@@ -72,7 +72,9 @@ surfaces before it reaches `Message` and `ChannelState`:
 
 - **02–04** have no persistence and almost no public model surface. Group 02 is the pattern-proving slice.
 - **05–07** introduce persisted models and WebSocket-delivered updates, one at a time.
-- **08** is where we decide what *not* to expose: 35 generated operations against 11 hand-written methods.
+- **08** is where we decide what *not* to expose: 34 generated operations against 10 hand-written methods.
+- **14** is `queryBannedUsers`, split out of 08 because it is the only moderation call that answers with a
+  model. It waits on 09, so it sorts after the groups that decide the shapes it embeds.
 - **09** freezes the `User` mapping that everything else already depends on (the *decision* is made in 01; this
   group executes it).
 - **10–11** are the core of the SDK, and carry the `custom` / `extraData` promotion problem.

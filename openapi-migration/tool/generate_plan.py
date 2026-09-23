@@ -267,20 +267,18 @@ GROUPS = [
         num='08', slug='moderation-and-blocklists', title='Moderation & Blocklists',
         hand=['moderation_api.dart'],
         match=owns('/api/v2/moderation', '/api/v2/chat/moderation', '/api/v2/blocklists',
-                   '/api/v2/chat/query_banned_users', '/api/v2/chat/query_future_channel_bans'),
+                   '/api/v2/chat/query_future_channel_bans'),
         goal='The largest generated surface relative to ours — decide what stays unexposed.',
         decisions=[
             'None outstanding. `queryBannedUsers` is the one method still hand-written; see below for when it '
             'moves.',
         ],
         taken=textwrap.dedent("""\
-            - **The ten write operations route through `DefaultApi`; `queryBannedUsers` stays hand-written.**
-              The writes answer with nothing we keep, so they need no model mapping. `queryBannedUsers` answers
-              with `BanResponse`, which carries a `UserResponse` and a `ChannelResponse` — mapping those onto our
-              `BannedUser` means writing the `User` mapper [01-foundation](01-foundation.md) reserves for
-              [09](09-users.md) *and* the 28-field `ChannelResponse` mapper belonging to
-              [11](11-channels-and-members.md), privately, then deleting both when those groups land. It moves
-              with 09.
+            - **The moderation *writes* are this group; the one *read* was split into
+              [14](14-banned-users.md).** Every method here answers with nothing we keep, so none of them needs
+              model mapping — which is why they moved together and cleanly. `queryBannedUsers` answers with
+              `BanResponse`, whose `UserResponse` and `ChannelResponse` belong to groups 09 and 11, so it became
+              its own group rather than an asterisk on this one.
 
             - **`muteUser`, `unmuteUser`, `banUser` and the flag methods change service, not just shape.** Ours
               called the chat v1 routes `lib/chat/routes.go` mounts at the root and comments as deprecated; the
@@ -323,15 +321,7 @@ GROUPS = [
             'so `QueryBannedUsersPayload` now carries all four cursors. Regenerating also added `unban`, without '
             'which `banUser` would have migrated while `unbanUser` did not.',
         ],
-        done=DONE.replace('- [ ]', '- [x]').replace(
-            'Hand-written request/response DTOs for this group are deleted, or their retention is justified.',
-            'Hand-written request/response DTOs for this group are deleted, or their retention is justified.\n'
-            '      `QueryBannedUsersResponse` and `BannedUser` are kept deliberately, with `queryBannedUsers`.',
-        ).replace(
-            'Decisions recorded in this file, and the status box ticked in `README.md`.',
-            'Decisions recorded in this file, and the status box ticked in `README.md`.\n'
-            '      It reads `◐`, not `☑`: `queryBannedUsers` moves with [09](09-users.md).',
-        ),
+        done=DONE.replace('- [ ]', '- [x]'),
     ),
     dict(
         num='09', slug='users', title='Users',
@@ -458,6 +448,36 @@ GROUPS = [
             '`PushPreference` / `ChannelPushPreference` ride on `Event`, `OwnUser.pushPreferences` and '
             '`ChannelState.pushPreferences`, so adopting them reaches into the event and channel-state layers.',
             '`ChannelState.pushPreferences` is **not** persisted — checked, no entity, DAO or mapper.',
+        ],
+    ),
+    dict(
+        num='14', slug='banned-users', title='Banned Users',
+        hand=['moderation_api.dart::queryBannedUsers'],
+        match=owns('/api/v2/chat/query_banned_users'),
+        goal='Migrate the one method group 08 left behind — the only moderation call that answers with a model.',
+        decisions=[
+            '**What `BannedUser` becomes.** Keep it and map `BanResponse` at the boundary, or adopt `BanResponse` '
+            'and re-parameterise `BannedUserFilter` / `BannedUserSort` onto it. The answer follows group 09\'s '
+            '`User` decision — it is not a free choice here.',
+            '**What to do with a `BanResponse` whose `user` is null.** Ours is non-nullable; skip the entry or '
+            'fail the decode, but decide it rather than reaching for `!`.',
+        ],
+        taken=textwrap.dedent("""\
+            - **This is a group, not an asterisk on [08](08-moderation-and-blocklists.md).** Every other
+              moderation method answers with nothing we keep, so they needed no mapping and moved together.
+              This one cannot move until the shapes it embeds are decided, and a group that is *mostly* done
+              hides that from the next reader. Splitting it keeps both records honest.
+            """),
+        risks=[
+            '`BannedUser` is the type parameter for `BannedUserFilter` and `BannedUserSort`, whose fields read '
+            'values off it (`it.user.id`, `it.bannedBy?.id`, `it.channel?.cid`, `it.createdAt`). Retyping the '
+            'response retypes that registry too.',
+            '`UserResponse.custom` → `User.extraData` drops `name` and `image` unless the mapper promotes them: '
+            'they arrive as root fields, `Serializer.moveToExtraDataFromRoot` normally moves them, and '
+            '`User.name` falls back to `id`. A mapper that misses this makes every banned user\'s name their '
+            'id, and passes any test that does not assert on `.name`.',
+            'It is the last method in `moderation_api.dart`. Closing this group deletes that file and the '
+            '`StreamChatApi.moderation` getter.',
         ],
     ),
 ]

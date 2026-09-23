@@ -562,9 +562,10 @@ await client.moderation.muteUser(userId);
 and `queryBannedUsers` — keep their place, because they are scoped to that channel.
 `queryBannedUsers` stays on the client too.
 
-**`queryBannedUsers` is unchanged and still throws**, on both the client and the channel. It answers
-with `BannedUser`, whose `User` and `ChannelModel` shapes are decided by later groups in this
-migration; it moves when they do. See [Endpoints that still throw](#endpoints-that-still-throw).
+**`queryBannedUsers` is unchanged and still throws**, on both the client and the channel. It is the
+only moderation call that answers with a model, and the `User` and `ChannelModel` shapes it embeds
+are decided by later groups in this migration; it moves when they do. See
+[Endpoints that still throw](#endpoints-that-still-throw).
 
 ---
 

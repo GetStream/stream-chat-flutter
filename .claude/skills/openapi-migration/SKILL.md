@@ -379,21 +379,28 @@ files are generated in full — goal, decisions, risks and definition of done al
 generator. Editing the markdown works until the next regeneration silently reverts it. Add a `taken=textwrap.dedent(...)`
 block and a `done=DONE.replace('- [ ]', '- [x]')` to the group's entry, then re-run the script.
 
-**A group may land partially, and the status box says so.** "One feature group per PR" is about not splitting a
-group across PRs for convenience — it does not mean every method must move. Phase 1's three checks exist precisely
-to find the ones that cannot, and the first definition-of-done box already allows an endpoint to be "deliberately
-left hand-written, with the reason". When that happens:
+**When a method cannot move, split it into its own group rather than leaving one partly done.** Phase 1's three
+checks exist to find those, and the first definition-of-done box allows an endpoint to be "deliberately left
+hand-written, with the reason" — but a group sitting at nine-of-ten is a status nobody can act on, and the reason
+decays into a footnote. Give the remainder a group of its own, with its own blocker, decisions and definition of
+done:
 
-- mark the group `◐` in `README.md`, not `☑` — the legend is at the top of the status table;
-- name the held-back method, its blocker, and the group it moves with, in the group file;
-- say in `migrations/v11-migration.md` that it still throws. A group where some methods return `Result` and one
-  does not is a mixed error contract, and consumers must not have to discover that by catching;
+- add it to `GROUPS` in `generate_plan.py` claiming the method explicitly (`'moderation_api.dart::queryBannedUsers'`)
+  and owning its generated path; the parent group's file-level claim covers the remainder automatically;
+- number it at the end and say in `README.md` what it was split from and what it waits on — plan order is
+  dependency order, not file order;
+- say in `migrations/v11-migration.md` that it still throws. Two groups where one returns `Result` and the other
+  does not is a mixed error contract, and consumers must not discover it by catching;
 - leave its `*_api.dart` in place with only that method, and its `StreamChatApi` getter. Reviewers look for the
-  deleted file — the group file entry is what explains why it survived.
+  deleted file — the new group's file is what explains why it survived.
 
-What is *not* acceptable is splitting a pair. `banUser` migrating while `unbanUser` stays hand-written leaves
+Both groups then read as true: one done, one not started. Group 08 (moderation) and 14 (banned users) are the
+worked example.
+
+What is *not* acceptable is splitting a **pair**. `banUser` migrating while `unbanUser` stays hand-written leaves
 consumers writing one call each way, which the plan's README rightly calls worse than not migrating. If half a
-pair is blocked, either unblock it (usually a regeneration) or hold both.
+pair is blocked, either unblock it (usually a regeneration) or hold both. Split on what the *caller* thinks of
+separately — a read versus a set of writes — never on what happens to be easy.
 
 Landing a break means four artifacts in the same PR: the `refactor(scope)!:` title, the `🛑️ Breaking` CHANGELOG
 entry, the `migrations/v11-migration.md` Symbol Map row plus feature section (template lives at the bottom of that
