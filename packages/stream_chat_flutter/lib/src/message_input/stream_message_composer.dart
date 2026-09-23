@@ -1473,16 +1473,19 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   }
 
   void _onContentInserted(KeyboardInsertedContent content) {
-    // The keyboard failed to hand over the bytes; there is nothing to attach.
-    if (content.data case final bytes?) {
-      final file = AttachmentFile(
-        size: bytes.length,
-        bytes: bytes,
-        name: _insertedContentFileName(content),
-      );
+    // The platform reads the content before handing it over, and a failed read
+    // can arrive as no data or as empty data; either way there is nothing to
+    // attach.
+    final bytes = content.data;
+    if (bytes == null || bytes.isEmpty) return;
 
-      _addAttachments([Attachment(type: AttachmentType.image, file: file)]);
-    }
+    final file = AttachmentFile(
+      size: bytes.length,
+      bytes: bytes,
+      name: _insertedContentFileName(content),
+    );
+
+    _addAttachments([Attachment(type: AttachmentType.image, file: file)]);
   }
 
   // The name must carry an extension: the attachment's MIME type, and so its

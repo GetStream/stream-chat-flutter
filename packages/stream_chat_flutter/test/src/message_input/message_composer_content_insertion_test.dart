@@ -148,6 +148,18 @@ void main() {
       expect(controller.attachments, isEmpty);
     });
 
+    testWidgets('ignores content the keyboard handed over as empty data', (tester) async {
+      await _pumpComposer(tester, controller: controller);
+
+      _insert(
+        tester,
+        KeyboardInsertedContent(mimeType: 'image/gif', uri: 'content://keyboard/cat.gif', data: Uint8List(0)),
+      );
+      await tester.pumpAndSettle();
+
+      expect(controller.attachments, isEmpty);
+    });
+
     testWidgets('rejects an image over the upload size limit, like the picker does', (tester) async {
       await _pumpComposer(tester, controller: controller, appSettings: _appSettings(imageSizeLimit: 10));
 
