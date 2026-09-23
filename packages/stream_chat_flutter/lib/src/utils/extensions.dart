@@ -119,9 +119,7 @@ extension PlatformFileX on PlatformFile {
   Future<AttachmentFile> get toAttachmentFile => xFile.toAttachmentFile;
 
   /// Converts the [PlatformFile] to a [Attachment].
-  Future<Attachment> toAttachment({required String type}) {
-    return xFile.toAttachment(type: type);
-  }
+  Future<Attachment> toAttachment({required String type}) => xFile.toAttachment(type: type);
 }
 
 /// Useful extension for [XFile]
