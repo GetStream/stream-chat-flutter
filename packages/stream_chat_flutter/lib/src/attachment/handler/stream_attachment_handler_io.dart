@@ -146,7 +146,7 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
       linuxOptions: LinuxOptions(lockParentWindow: lockParentWindow),
     );
 
-    return await result?.toAttachment(type: type.toAttachmentType());
+    return await result?.xFile.toAttachment(type: type.toAttachmentType());
   }
 
   @override
