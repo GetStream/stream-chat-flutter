@@ -8,6 +8,8 @@
 
 ⚠️ Changed
 
+- Bumped `file_picker` to `>=12.0.0 <14.0.0`.
+- `PlatformFileX.toAttachmentFile` and `PlatformFileX.toAttachment` are now async.
 - Video thumbnails now use `stream_thumbnail` on every platform, and the `thumblr`
   dependency is gone.
 - Linux builds now need the FFmpeg and libwebp development packages — on Debian/Ubuntu:
@@ -16,8 +18,13 @@
 - `AccessibleMessagePreviewFormatter.formatMessageSemanticsLabel` must now return the body without a speaker prefix when `channel` is omitted. An implementation that prefixes unconditionally makes a message row announce "You said, You: hello".
 - `StreamImageCDN.resolveUrl` now leaves a URL that already asks for a specific size alone, rather than replacing it with the size the layout computed.
 
+⚠️ Deprecated
+
+- Deprecated `withData` and `withReadStream` on `StreamAttachmentHandler.pickFile` and `StreamFilePicker`; they no longer have any effect.
+
 🐞 Fixed
 
+- Fixed `StreamAttachmentHandler.pickFile` throwing on an empty selection; it now returns `null`.
 - Fixed the package no longer compiling when `stream_core_flutter` adds an avatar size. The three switches mapping `StreamAvatarSize` and `StreamAvatarGroupSize` onto an indicator size, an inner avatar size and the number of initials were exhaustive, so a size added upstream broke the build here. They fall back to the largest size they know now, and `StreamAvatarSize.xlPlus` (64px), `StreamAvatarSize.xxxl` / `StreamAvatarGroupSize.xxxl` (104px) are mapped explicitly.
 - Fixed `StreamAttachmentHandler` throwing `UnimplementedError` on WebAssembly builds.
 - Fixed the gallery tab vanishing from the attachment picker when `allowedAttachmentPickerTypes` allowed images or videos but not both. It now stays available and lists only the allowed media.
