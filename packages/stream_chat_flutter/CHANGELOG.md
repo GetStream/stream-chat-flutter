@@ -14,11 +14,13 @@
   `libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libwebp-dev`.
 - A deleted message now renders the timestamp and delivery status below the placeholder, matching the design, and no longer shows the "Edited" marker — there is no text left to have been edited.
 - `AccessibleMessagePreviewFormatter.formatMessageSemanticsLabel` must now return the body without a speaker prefix when `channel` is omitted. An implementation that prefixes unconditionally makes a message row announce "You said, You: hello".
+- `StreamImageCDN.resolveUrl` now leaves a URL that already asks for a specific size alone, rather than replacing it with the size the layout computed.
 
 🐞 Fixed
 
 - Fixed the package no longer compiling when `stream_core_flutter` adds an avatar size. The three switches mapping `StreamAvatarSize` and `StreamAvatarGroupSize` onto an indicator size, an inner avatar size and the number of initials were exhaustive, so a size added upstream broke the build here. They fall back to the largest size they know now, and `StreamAvatarSize.xlPlus` (64px), `StreamAvatarSize.xxxl` / `StreamAvatarGroupSize.xxxl` (104px) are mapped explicitly.
 - Fixed `StreamAttachmentHandler` throwing `UnimplementedError` on WebAssembly builds.
+- Fixed the gallery tab vanishing from the attachment picker when `allowedAttachmentPickerTypes` allowed images or videos but not both. It now stays available and lists only the allowed media.
 - Improved the screen-reader experience in the message list: each message is announced as a single phrase naming the sender, the body, the time, the edited marker and the delivery status, while the attachments, reaction chips, quoted message and replies row stay reachable one level deeper.
 - Fixed the message body being announced as its markdown source, so link and emphasis syntax is no longer read aloud.
 - Fixed a quoted message announcing only the quoted author's name, saying nothing about who replied to whom.
@@ -26,6 +28,10 @@
 - Fixed a date divider announcing a clock time it never showed instead of the date it displays, and exposed it as a header so days can be jumped between.
 - Fixed the attachment upload progress on an outgoing message counting its link preview, which inflated the total against an attachment the sender never picked.
 - Fixed a message the moderation system bounced showing a read receipt once other members had read past it. It now shows only the error badge, matching what a screen reader announces for it.
+- Fixed image attachments being requested from the CDN at more pixels than the original holds.
+- Fixed one image rendition yielding two cache entries when its resize parameters arrived in a different order, or a crop on the URL survived a resize that does not crop.
+- Fixed image attachments not being resized at all when the URL carried a crop or a resize mode but no dimensions.
+- Fixed a URL whose host merely contains `stream-io-cdn.com` being treated as Stream's CDN.
 
 ## 10.4.0
 
@@ -40,6 +46,10 @@
 
 - Long-pressing a reaction chip no longer opens the message actions modal; the chips always claim the long press. Left unset, `onReactionLongPress` defaults to opening the `ReactionDetailSheet`.
 - Tapping or long-pressing a reaction chip now opens the `ReactionDetailSheet` pre-filtered to that reaction; it previously opened unfiltered. Clustered and overflow chips map to no single reaction, so they still open unfiltered.
+
+🐞 Fixed
+
+- Message annotations no longer wrap their label mid-sentence when they don't fit on one line, leaving the action stranded beside the label's last line. The action now moves below the label as a whole — `Replied to a thread · View` becomes `Replied to a thread` above `View` — and the `·` is dropped, since it no longer sits between anything.
 
 🔄 Changed
 
@@ -79,6 +89,18 @@
 - Added `onReactionTap` to `StreamMessageItem` and `StreamMessageListView`, reporting the tapped message's `BuildContext` and a `ReactionTapDetails` with the tapped `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction).
 - Exported `StreamEphemeralMessage`, the row `StreamMessageListView` builds for ephemeral messages, matching its already-exported `StreamSystemMessage` and `StreamModeratedMessage` siblings.
 - Added an `unreadIndicator` parameter to `StreamBackButton` that overlays a widget (typically a `StreamUnreadIndicator`) on the button's top-end corner. Pass `StreamUnreadIndicator(excludeCid: cid)` to show the total unread count of other channels, or `StreamUnreadIndicator.channels(cid: cid)` for a single channel's count.
+- Added `StreamChannel.openAtFirstUnread` (`stream_chat_flutter_core`), defaulting to `true`. Set to `false` to always open a channel at the latest message instead of scrolling to the first pre-existing unread message.
+- Added `Translations.unreadMessagesSeparatorLabel`, used by the default `UnreadMessagesSeparator` to show a count, e.g. "5 unread messages". It falls back to the (now deprecated) `unreadMessagesSeparatorText`, so a class that extends `Translations` keeps showing any custom text it already overrides.
+- Exported `UnreadMessagesSeparator`, the divider widget `StreamMessageListView` renders at the unread boundary.
+- Added an optional `unreadCount` to `UnreadIndicatorButton`. When supplied, the widget renders unconditionally with that count and skips its internal read-state subscription, letting the host own visibility — this is how `StreamMessageListView` now drives it. Omitting it keeps the previous self-subscribing behaviour, and `onJumpTap` keeps its `String? lastReadMessageId` argument, so existing usages are unaffected.
+
+🔄 Changed
+
+- `Translations.unreadMessagesSeparatorLabel` is a new interface member. Classes that `extends Translations` (or `GlobalStreamChatLocalizations`) inherit the fallback and need no change, but a class that `implements` either interface directly must add this member — Dart does not inherit method bodies through `implements`. Forward it to your existing `unreadMessagesSeparatorText()` to keep the previous copy.
+- Changed the "↑ N unread" jump-to-unread pill to a count fixed when the channel opens, shown as soon as that count is known and dismissed permanently for the session once tapped, dismissed, or scrolled past.
+- Changed the scroll-to-bottom badge to count only messages that arrive out of view during the current session, rather than being seeded from the channel's unread count. It always resets to 0 once the user reaches the bottom.
+- Changed the "unread messages" divider to show a count, starting at the channel's open-time unread total and counting up as further messages arrive during the session, instead of a fixed, count-less label.
+- Tightened `StreamMessageListView`'s automatic mark-read gating to also require that the pre-existing unread boundary has been seen or scrolled past, and that there's no pending manual mark-unread. Channels with no boundary to reach — opened fully read, never opened at all, or tracking unread locally — are unaffected.
 
 ⚠️ Deprecated
 
@@ -86,6 +108,7 @@
 - Deprecated `onReactionsTap` (and the `OnReactionsTap` typedef) on `StreamMessageItem` and `StreamMessageListView` in favor of `onReactionTap`.
 - Deprecated `height`/`width` of `StreamScrollViewLoadingWidget` in favor of `size`.
 - Deprecated `StreamBackButton.showUnreadCount` and `StreamBackButton.channelId` in favor of `unreadIndicator`.
+- Deprecated `Translations.unreadMessagesSeparatorText` in favor of `unreadMessagesSeparatorLabel`, which takes a `count`. The old string is still used as the fallback for translation classes that haven't overridden the new one.
 
 🐞 Fixed
 
@@ -97,6 +120,12 @@
 - Fixed the "Message deleted" bubble overflowing its maximum width when the localized label is long; the label now wraps instead.
 - Fixed the thread scroll-to-bottom button keying off the parent channel's up-to-date state instead of the thread's own scroll position, so it no longer appears while already at the newest reply.
 - Fixed the `StreamBackButton` unread badge including the currently open channel in its total count.
+- Fixed messages arriving while the user was mid-drag or mid-fling being dropped from the scroll-to-bottom badge and the unread divider's count. The "don't fight a scroll in motion" guard ran before the counting, so those arrivals were never counted at all.
+- Fixed the scroll-to-bottom badge and unread divider counting messages the channel's own unread count ignores — silent, shadowed, ephemeral, thread-only, restricted, own and muted-sender messages no longer inflate either counter, and neither counts at all while the user has read receipts disabled.
+- Fixed thread reads being blocked whenever the parent channel wasn't up to date. `markThreadRead` no longer consults the channel's `isUpToDate`, which is unrelated to a thread's own read state.
+- Fixed the jump-to-unread pill being dismissed by the slightest scroll after marking a message unread. Its anchor is the message the user just acted on, so it starts out on screen; only scrolling past it now retires the pill.
+- Fixed the jump-to-unread pill flickering back in and straight out on every new message after being dismissed. The mark-unread reset now runs on the transition into the marked-unread state rather than on every read-state emission while it is set.
+- Fixed tapping the jump-to-unread pill doing nothing on a channel the current user has never opened, where there is no read boundary to jump to. It now scrolls to the oldest loaded message and pulls in the next page, leaving the pill up until the real boundary is reached.
 - Fixed the thread-replies footer under a message in the channel being hardcoded English and reading "1 replies" for a single reply; it now uses `threadReplyCountText`, which is localized and correctly singularized.
 - Fixed a channel-list row briefly previewing another channel's last message after the list reorders. The preserved last-known message is now dropped when a row is rebound to a different channel, instead of being used as a fallback while the new channel is still loading.
 - Fixed the channel list still showing a timestamp next to "No messages yet" after a channel is truncated. `ChannelLastMessageDate` now reads the date off the message the preview actually shows instead of `Channel.lastMessageAt`, which cannot be cleared once a truncation removes every message.

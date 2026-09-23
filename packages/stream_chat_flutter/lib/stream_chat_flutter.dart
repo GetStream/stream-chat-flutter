@@ -1,5 +1,5 @@
 export 'package:jiffy/jiffy.dart';
-export 'package:photo_manager/photo_manager.dart' show ThumbnailSize, ThumbnailFormat;
+export 'package:photo_manager/photo_manager.dart' show RequestType, ThumbnailSize, ThumbnailFormat;
 export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 export 'package:stream_core_flutter/chat.dart'
     hide
@@ -90,6 +90,7 @@ export 'src/message_list_view/message_list_view.dart';
 export 'src/message_list_view/stream_message_list_view_builders.dart';
 export 'src/message_list_view/stream_message_list_view_configuration.dart';
 export 'src/message_list_view/unread_indicator_button.dart';
+export 'src/message_list_view/unread_messages_separator.dart';
 export 'src/message_modal/message_action_confirmation_modal.dart';
 export 'src/message_modal/message_actions_modal.dart';
 export 'src/message_modal/message_modal.dart';

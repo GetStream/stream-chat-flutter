@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/rendering.dart';
 
 /// Utility class for calculating optimal thumbnail sizes for image
@@ -20,6 +22,7 @@ class ThumbnailSizeCalculator {
   ///    dimension
   /// 2. Applies [fit] semantics to determine sizing behavior
   /// 3. Applies [pixelRatio] for device-appropriate resolution
+  /// 4. Caps each dimension at [originalSize], so the image is never upscaled
   ///
   /// The [fit] parameter controls how the image is sized within
   /// [targetSize]. When null (the default), [BoxFit.scaleDown] is used —
@@ -96,7 +99,14 @@ class ThumbnailSizeCalculator {
     );
 
     // Apply pixel ratio to get physical pixel dimensions
-    return resolved * pixelRatio;
+    final scaled = resolved * pixelRatio;
+
+    // Never ask for more pixels than the original holds. Per axis, since a
+    // fit that ignores the aspect ratio can overflow just one of them.
+    return Size(
+      math.min(scaled.width, originalSize.width),
+      math.min(scaled.height, originalSize.height),
+    );
   }
 
   static Size _applyFit({

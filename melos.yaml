@@ -105,7 +105,11 @@ command:
       stream_chat_persistence: ^10.4.0
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
-      stream_core_flutter: ^0.5.1
+      stream_core_flutter:
+        git:
+          url: https://github.com/GetStream/stream-core-flutter.git
+          ref: b994522cf5cd495a24c65055cccffe3a5c8056da
+          path: packages/stream_core_flutter
       stream_thumbnail:
         git:
           url: https://github.com/GetStream/stream-core-flutter.git

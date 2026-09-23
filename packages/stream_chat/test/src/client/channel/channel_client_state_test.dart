@@ -2159,12 +2159,22 @@ void main() {
         expect(channel.state!.channelState.members?.map((m) => m.userId), ['new-member']);
       });
 
-      test('${EventType.memberRemoved} removes the member', () async {
+      test('${EventType.memberRemoved} removes the member and its read state', () async {
         channel.state!.updateChannelState(
           channel.state!.channelState.copyWith(
             members: [
               Member(userId: 'member-1'),
               Member(userId: 'member-2'),
+            ],
+            read: [
+              Read(
+                user: User(id: 'member-1'),
+                lastRead: DateTime(2020),
+              ),
+              Read(
+                user: User(id: 'member-2'),
+                lastRead: DateTime(2020),
+              ),
             ],
           ),
         );
@@ -2179,6 +2189,33 @@ void main() {
         await Future.delayed(Duration.zero);
 
         expect(channel.state!.channelState.members?.map((m) => m.userId), ['member-2']);
+        expect(channel.state!.channelState.read?.map((r) => r.user.id), ['member-2']);
+      });
+
+      test('${EventType.memberRemoved} clears the read state of the only member', () async {
+        channel.state!.updateChannelState(
+          channel.state!.channelState.copyWith(
+            members: [Member(userId: 'member-1')],
+            read: [
+              Read(
+                user: User(id: 'member-1'),
+                lastRead: DateTime(2020),
+              ),
+            ],
+          ),
+        );
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.memberRemoved,
+            user: User(id: 'member-1'),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.channelState.members, isEmpty);
+        expect(channel.state!.channelState.read, isEmpty);
       });
 
       test('${EventType.memberUpdated} replaces the member entry', () async {
@@ -2852,6 +2889,120 @@ void main() {
           ).called(1);
         },
       );
+
+      group('isMarkedAsUnread', () {
+        setUp(() {
+          // A message.read event from the current user also reconciles
+          // delivery status — stub it so that call doesn't throw.
+          when(
+            () => client.channelDeliveryReporter.reconcileDelivery(any()),
+          ).thenAnswer((_) async {});
+        });
+
+        test('defaults to false', () {
+          expect(channel.state?.isMarkedAsUnread, isFalse);
+        });
+
+        test(
+          'is set by a notification.mark_unread event from the current user',
+          () async {
+            final currentUser = client.state.currentUser!;
+
+            final markUnreadEvent = Event(
+              cid: channel.cid,
+              type: EventType.notificationMarkUnread,
+              user: currentUser,
+              lastReadAt: DateTime(2019),
+              unreadMessages: 5,
+            );
+            client.addEvent(markUnreadEvent);
+            await Future.delayed(Duration.zero);
+
+            expect(channel.state?.isMarkedAsUnread, isTrue);
+          },
+        );
+
+        test(
+          'is NOT set by a notification.mark_unread event from a different user',
+          () async {
+            final markUnreadEvent = Event(
+              cid: channel.cid,
+              type: EventType.notificationMarkUnread,
+              user: User(id: 'someone-else'),
+              lastReadAt: DateTime(2019),
+              unreadMessages: 5,
+            );
+            client.addEvent(markUnreadEvent);
+            await Future.delayed(Duration.zero);
+
+            expect(channel.state?.isMarkedAsUnread, isFalse);
+          },
+        );
+
+        test(
+          'is cleared by a message.read event from the current user',
+          () async {
+            final currentUser = client.state.currentUser!;
+
+            client.addEvent(
+              Event(
+                cid: channel.cid,
+                type: EventType.notificationMarkUnread,
+                user: currentUser,
+                lastReadAt: DateTime(2019),
+                unreadMessages: 5,
+              ),
+            );
+            await Future.delayed(Duration.zero);
+            expect(channel.state?.isMarkedAsUnread, isTrue);
+
+            client.addEvent(
+              Event(
+                cid: channel.cid,
+                type: EventType.messageRead,
+                user: currentUser,
+                createdAt: DateTime(2022),
+                unreadMessages: 0,
+              ),
+            );
+            await Future.delayed(Duration.zero);
+
+            expect(channel.state?.isMarkedAsUnread, isFalse);
+          },
+        );
+
+        test(
+          'is NOT cleared by a message.read event from a different user',
+          () async {
+            final currentUser = client.state.currentUser!;
+
+            client.addEvent(
+              Event(
+                cid: channel.cid,
+                type: EventType.notificationMarkUnread,
+                user: currentUser,
+                lastReadAt: DateTime(2019),
+                unreadMessages: 5,
+              ),
+            );
+            await Future.delayed(Duration.zero);
+            expect(channel.state?.isMarkedAsUnread, isTrue);
+
+            client.addEvent(
+              Event(
+                cid: channel.cid,
+                type: EventType.messageRead,
+                user: User(id: 'someone-else'),
+                createdAt: DateTime(2022),
+                unreadMessages: 0,
+              ),
+            );
+            await Future.delayed(Duration.zero);
+
+            expect(channel.state?.isMarkedAsUnread, isTrue);
+          },
+        );
+      });
 
       test(
         'should reset unread count on notification mark read event',
@@ -5064,6 +5215,40 @@ void main() {
         },
       );
     });
+
+    group('Dispatch error isolation', () {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      late Channel channel;
+
+      setUp(() {
+        final channelState = _generateChannelState(channelId, channelType);
+        channel = Channel.fromState(client, channelState);
+      });
+
+      tearDown(() {
+        channel.dispose();
+      });
+
+      test('a throwing handler still lets the later stages apply', () async {
+        expect(channel.memberCount, equals(0));
+
+        // A message.deleted without a message throws on `event.message!` in
+        // the first dispatch stage. The unfiltered count refresh that runs
+        // after it must still apply.
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.messageDeleted,
+            channelMemberCount: 9,
+          ),
+        );
+
+        await Future.delayed(Duration.zero);
+
+        expect(channel.memberCount, equals(9));
+      });
+    });
   });
 
   group('Local unread count', () {
@@ -5330,6 +5515,34 @@ void main() {
         verify(
           () => client.channelDeliveryReporter.reconcileDelivery([channel]),
         ).called(1);
+      },
+    );
+
+    test(
+      'markUnreadByTimestamp sets isMarkedAsUnread locally',
+      () async {
+        final channel = _createLivestreamChannel();
+        expect(channel.state?.isMarkedAsUnread, isFalse);
+
+        await expectLater(
+          channel.markUnreadByTimestamp(DateTime(2024, 1, 1)),
+          completes,
+        );
+
+        expect(channel.state?.isMarkedAsUnread, isTrue);
+      },
+    );
+
+    test(
+      'markRead clears isMarkedAsUnread locally',
+      () async {
+        final channel = _createLivestreamChannel();
+        await channel.markUnreadByTimestamp(DateTime(2024, 1, 1));
+        expect(channel.state?.isMarkedAsUnread, isTrue);
+
+        await expectLater(channel.markRead(), completes);
+
+        expect(channel.state?.isMarkedAsUnread, isFalse);
       },
     );
 
