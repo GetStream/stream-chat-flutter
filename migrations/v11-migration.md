@@ -173,6 +173,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `Channel.banMember(id, Map options)` / `shadowBan(id, Map options)` | `banMember(id, {timeout, reason, shadow, ipBan, deleteMessages})` / `shadowBan(id, {…})` | `retyped` | The channel supplies its own `channelCid`; the `type` + `id` pair it used to send is deprecated server-side |
 | `Channel.mute` / `unmute` / `unbanMember` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing |
 | — | `BanRequestDeleteMessages` | `added` | `soft` / `pruning` / `hard`, for `banUser(deleteMessages:)` |
+| `StreamChatClient.muteUser` / `unmuteUser` / `muteChannel` / `unmuteChannel` / `banUser` / `unbanUser` / `shadowBan` / `flagMessage` / `flagUser` | `StreamChatClient.moderation.<same name>` | `moved` | Grouped onto a `ModerationClient`. `Channel`'s moderation methods keep their place |
 | `StreamChatApi.device` | `StreamChatApi.pushPreferences` | `renamed` | The class handles only `setPushPreferences` now; device calls moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
 
@@ -544,6 +545,22 @@ endpoints are in beta and are refused for an app explicitly pinned to the v1 mod
 (`moderation_enabled: false`) — contact support to enable moderation v2 if your app is one of them.
 Muting and unmuting a *channel* are unaffected: they were already the endpoint the generated client
 calls.
+
+**The client's moderation methods moved to `client.moderation`.** `StreamChatClient` carried
+148 async members; the moderation ones are now grouped on a `ModerationClient`, reached
+through one field:
+
+```dart
+// v10
+await client.muteUser(userId);
+
+// v11
+await client.moderation.muteUser(userId);
+```
+
+`Channel`'s moderation methods — `banMember`, `unbanMember`, `shadowBan`, `mute`, `unmute`
+and `queryBannedUsers` — keep their place, because they are scoped to that channel.
+`queryBannedUsers` stays on the client too.
 
 **`queryBannedUsers` is unchanged and still throws**, on both the client and the channel. It answers
 with `BannedUser`, whose `User` and `ChannelModel` shapes are decided by later groups in this

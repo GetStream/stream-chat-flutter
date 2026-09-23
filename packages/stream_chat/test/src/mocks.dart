@@ -4,6 +4,7 @@ import 'package:stream_chat/open_api/api.dart';
 import 'package:stream_chat/src/client/channel/channel.dart';
 import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
 import 'package:stream_chat/src/client/client.dart';
+import 'package:stream_chat/src/client/moderation_client.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/api/channel_api.dart';
 import 'package:stream_chat/src/core/api/general_api.dart';
@@ -60,6 +61,8 @@ class MockModerationApi extends Mock implements ModerationApi {}
 class MockUserGroupsApi extends Mock implements UserGroupsApi {}
 
 class MockDefaultApi extends Mock implements DefaultApi {}
+
+class MockModerationClient extends Mock implements ModerationClient {}
 
 class MockGeneralApi extends Mock implements GeneralApi {}
 

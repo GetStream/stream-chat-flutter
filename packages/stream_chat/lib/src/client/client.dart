@@ -30,12 +30,7 @@ import 'package:stream_core/stream_core.dart'
 import 'package:synchronized/synchronized.dart';
 
 import '../../open_api/api.dart'
-    show
-        BanRequestDeleteMessages,
-        CreateDeviceRequestPushProvider,
-        DefaultApi,
-        ListDevicesResponse,
-        SearchRolesResponse;
+    show CreateDeviceRequestPushProvider, DefaultApi, ListDevicesResponse, SearchRolesResponse;
 import '../../version.dart';
 import '../core/api/attachment_file_uploader.dart';
 import '../core/api/requests.dart';
@@ -83,6 +78,7 @@ import '../ws/events/events.dart';
 import 'channel/channel.dart';
 import 'channel_delivery_reporter.dart';
 import 'live_location_expiration_scheduler.dart';
+import 'moderation_client.dart';
 import 'query_channels_result.dart';
 import 'retry_policy.dart';
 import 'sync_manager.dart';
@@ -174,6 +170,8 @@ class StreamChatClient {
     _devicesRepository = DevicesRepository(api);
     _moderationRepository = ModerationRepository(api);
 
+    moderation = ModerationClient(_moderationRepository);
+
     _connection = ConnectionManager(
       request: ConnectRequest.forApi(
         apiKey: apiKey,
@@ -210,6 +208,9 @@ class StreamChatClient {
   late final RolesRepository _rolesRepository;
   late final DevicesRepository _devicesRepository;
   late final ModerationRepository _moderationRepository;
+
+  /// Muting, banning and flagging, for the connected user.
+  late final ModerationClient moderation;
 
   late final ConnectionManager _connection;
   StreamSubscription<WsEvent>? _wsEventSubscription;
@@ -1441,23 +1442,6 @@ class StreamChatClient {
     truncatedAt: truncatedAt,
   );
 
-  /// Mutes the channel [channelCid] for the current user.
-  ///
-  /// The mute lasts until it is removed. An [expiration] expires it after
-  /// that long.
-  Future<Result<void>> muteChannel(
-    String channelCid, {
-    Duration? expiration,
-  }) => _moderationRepository.muteChannel(
-    channelCid,
-    expiration: expiration,
-  );
-
-  /// Removes the current user's mute on the channel [channelCid].
-  Future<Result<void>> unmuteChannel(
-    String channelCid,
-  ) => _moderationRepository.unmuteChannel(channelCid);
-
   /// Accept invitation to the channel
   Future<AcceptInviteResponse> acceptChannelInvite(
     String channelId,
@@ -1747,74 +1731,6 @@ class StreamChatClient {
     List<PartialUpdateUserRequest> users,
   ) => _chatApi.user.partialUpdateUsers(users);
 
-  /// Bans [targetUserId].
-  ///
-  /// The ban covers the whole app, or only [channelCid] if one is given.
-  ///
-  /// It lasts until it is removed. A [timeout] expires it after that long,
-  /// rounded down to whole minutes, so a shorter one never expires it.
-  ///
-  /// If [shadow] is true, their messages stop reaching anyone else and they
-  /// are not told.
-  ///
-  /// If [ipBan] is true, the address they connected from is banned as well.
-  ///
-  /// [deleteMessages] decides what happens to the messages they already
-  /// sent, and [reason] is recorded with the ban.
-  Future<Result<void>> banUser(
-    String targetUserId, {
-    String? channelCid,
-    Duration? timeout,
-    String? reason,
-    bool? shadow,
-    bool? ipBan,
-    BanRequestDeleteMessages? deleteMessages,
-  }) => _moderationRepository.banUser(
-    targetUserId,
-    channelCid: channelCid,
-    timeout: timeout,
-    reason: reason,
-    shadow: shadow,
-    ipBan: ipBan,
-    deleteMessages: deleteMessages,
-  );
-
-  /// Removes the ban on [targetUserId].
-  ///
-  /// Lifts the app-wide ban, or the ban on [channelCid] if one is given.
-  ///
-  /// A shadow ban lifts the same way as any other.
-  Future<Result<void>> unbanUser(
-    String targetUserId, {
-    String? channelCid,
-  }) => _moderationRepository.unbanUser(
-    targetUserId,
-    channelCid: channelCid,
-  );
-
-  /// Bans [targetUserId] without telling them, hiding their messages.
-  ///
-  /// The same as [banUser] with `shadow` set, and the other arguments behave
-  /// the same way.
-  ///
-  /// Remove it with [unbanUser].
-  Future<Result<void>> shadowBan(
-    String targetUserId, {
-    String? channelCid,
-    Duration? timeout,
-    String? reason,
-    bool? ipBan,
-    BanRequestDeleteMessages? deleteMessages,
-  }) => banUser(
-    targetUserId,
-    channelCid: channelCid,
-    timeout: timeout,
-    reason: reason,
-    shadow: true,
-    ipBan: ipBan,
-    deleteMessages: deleteMessages,
-  );
-
   final _userBlockLock = Lock();
 
   /// Blocks a user with the provided [userId].
@@ -1893,49 +1809,6 @@ class StreamChatClient {
 
     return response;
   }
-
-  /// Mutes [userId] for the current user.
-  ///
-  /// The mute lasts until it is removed. A [timeout] expires it after that
-  /// long, rounded down to whole minutes, so a shorter one never expires it.
-  Future<Result<void>> muteUser(
-    String userId, {
-    Duration? timeout,
-  }) => _moderationRepository.muteUser(
-    userId,
-    timeout: timeout,
-  );
-
-  /// Removes the current user's mute on [userId].
-  Future<Result<void>> unmuteUser(
-    String userId,
-  ) => _moderationRepository.unmuteUser(userId);
-
-  /// Flags [messageId] for moderator review.
-  ///
-  /// [reason] and [custom] are recorded with the flag.
-  Future<Result<void>> flagMessage(
-    String messageId, {
-    String? reason,
-    Map<String, Object?>? custom,
-  }) => _moderationRepository.flagMessage(
-    messageId,
-    reason: reason,
-    custom: custom,
-  );
-
-  /// Flags [userId] for moderator review.
-  ///
-  /// [reason] and [custom] are recorded with the flag.
-  Future<Result<void>> flagUser(
-    String userId, {
-    String? reason,
-    Map<String, Object?>? custom,
-  }) => _moderationRepository.flagUser(
-    userId,
-    reason: reason,
-    custom: custom,
-  );
 
   /// Mark all channels for this user as read
   Future<EmptyResponse> markAllRead() => _chatApi.channel.markAllRead();

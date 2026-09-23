@@ -2281,7 +2281,7 @@ class Channel {
       _muteExpirationTimer = Timer(expiration, unmute);
     }
 
-    return _client.muteChannel(cid!, expiration: expiration);
+    return _client.moderation.muteChannel(cid!, expiration: expiration);
   }
 
   /// Removes the current user's mute on this channel.
@@ -2292,7 +2292,7 @@ class Channel {
     _muteExpirationTimer?.cancel();
     _muteExpirationTimer = null;
 
-    return _client.unmuteChannel(cid!);
+    return _client.moderation.unmuteChannel(cid!);
   }
 
   /// Bans [userID] from this channel.
@@ -2316,7 +2316,7 @@ class Channel {
     BanRequestDeleteMessages? deleteMessages,
   }) {
     _checkInitialized();
-    return _client.banUser(
+    return _client.moderation.banUser(
       userID,
       channelCid: cid,
       timeout: timeout,
@@ -2332,7 +2332,7 @@ class Channel {
   /// A shadow ban lifts the same way as any other.
   Future<Result<void>> unbanMember(String userID) {
     _checkInitialized();
-    return _client.unbanUser(userID, channelCid: cid);
+    return _client.moderation.unbanUser(userID, channelCid: cid);
   }
 
   /// Bans [userID] without telling them, hiding their messages.
@@ -2349,7 +2349,7 @@ class Channel {
     BanRequestDeleteMessages? deleteMessages,
   }) {
     _checkInitialized();
-    return _client.shadowBan(
+    return _client.moderation.shadowBan(
       userID,
       channelCid: cid,
       timeout: timeout,

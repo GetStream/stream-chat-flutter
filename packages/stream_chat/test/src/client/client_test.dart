@@ -2688,7 +2688,7 @@ void main() {
         (_) async => const Result.success(MuteChannelResponse(duration: '0.01ms')),
       );
 
-      final res = await client.muteChannel(channelCid);
+      final res = await client.moderation.muteChannel(channelCid);
       expect(res.isSuccess, isTrue);
 
       verify(() => defaultApi.muteChannel(muteChannelRequest: request)).called(1);
@@ -2703,7 +2703,7 @@ void main() {
         (_) async => const Result.success(MuteChannelResponse(duration: '0.01ms')),
       );
 
-      await client.muteChannel(channelCid, expiration: const Duration(minutes: 1));
+      await client.moderation.muteChannel(channelCid, expiration: const Duration(minutes: 1));
 
       verify(() => defaultApi.muteChannel(muteChannelRequest: request)).called(1);
     });
@@ -2716,7 +2716,7 @@ void main() {
         (_) async => const Result.success(UnmuteResponse(duration: '0.01ms')),
       );
 
-      final res = await client.unmuteChannel(channelCid);
+      final res = await client.moderation.unmuteChannel(channelCid);
       expect(res.isSuccess, isTrue);
 
       verify(() => defaultApi.unmuteChannel(unmuteChannelRequest: request)).called(1);
@@ -3611,7 +3611,7 @@ void main() {
         (_) async => const Result.success(ModerationBanResponse(duration: '0.01ms')),
       );
 
-      final res = await client.banUser(userId);
+      final res = await client.moderation.banUser(userId);
       expect(res.isSuccess, isTrue);
 
       verify(() => defaultApi.ban(banRequest: request)).called(1);
@@ -3626,7 +3626,7 @@ void main() {
         (_) async => const Result.success(ModerationBanResponse(duration: '0.01ms')),
       );
 
-      await client.banUser(userId, timeout: const Duration(minutes: 30));
+      await client.moderation.banUser(userId, timeout: const Duration(minutes: 30));
 
       verify(() => defaultApi.ban(banRequest: request)).called(1);
     });
@@ -3639,7 +3639,7 @@ void main() {
         (_) async => const Result.failure(error),
       );
 
-      final res = await client.banUser('test-user-id');
+      final res = await client.moderation.banUser('test-user-id');
 
       expect(res.isFailure, isTrue);
       expect(res.exceptionOrNull(), error);
@@ -3652,7 +3652,7 @@ void main() {
         (_) async => const Result.success(UnbanResponse(duration: '0.01ms')),
       );
 
-      final res = await client.unbanUser(userId);
+      final res = await client.moderation.unbanUser(userId);
       expect(res.isSuccess, isTrue);
 
       verify(() => defaultApi.unban(targetUserId: userId)).called(1);
@@ -3978,10 +3978,25 @@ void main() {
         (_) async => const Result.success(ModerationBanResponse(duration: '0.01ms')),
       );
 
-      final res = await client.shadowBan(userId);
+      final res = await client.moderation.shadowBan(userId);
       expect(res.isSuccess, isTrue);
 
       verify(() => defaultApi.ban(banRequest: request)).called(1);
+      verifyNoMoreInteractions(defaultApi);
+    });
+
+    test('`.moderation` reaches the same endpoint as the client delegate', () async {
+      const userId = 'test-user-id';
+      const request = MuteRequest(targetIds: [userId]);
+
+      when(() => defaultApi.mute(muteRequest: request)).thenAnswer(
+        (_) async => const Result.success(MuteResponse(duration: '0.01ms')),
+      );
+
+      final res = await client.moderation.muteUser(userId);
+      expect(res.isSuccess, isTrue);
+
+      verify(() => defaultApi.mute(muteRequest: request)).called(1);
       verifyNoMoreInteractions(defaultApi);
     });
 
@@ -3993,7 +4008,7 @@ void main() {
         (_) async => const Result.success(MuteResponse(duration: '0.01ms')),
       );
 
-      final res = await client.muteUser(userId);
+      final res = await client.moderation.muteUser(userId);
       expect(res.isSuccess, isTrue);
 
       verify(() => defaultApi.mute(muteRequest: request)).called(1);
@@ -4008,7 +4023,7 @@ void main() {
         (_) async => const Result.success(UnmuteResponse(duration: '0.01ms')),
       );
 
-      final res = await client.unmuteUser(userId);
+      final res = await client.moderation.unmuteUser(userId);
       expect(res.isSuccess, isTrue);
 
       verify(() => defaultApi.unmute(unmuteRequest: request)).called(1);
@@ -4023,7 +4038,7 @@ void main() {
         (_) async => const Result.success(FlagItemResponse(duration: '0.01ms', itemId: 'item-id')),
       );
 
-      final res = await client.flagMessage(messageId);
+      final res = await client.moderation.flagMessage(messageId);
       expect(res.isSuccess, isTrue);
 
       verify(() => defaultApi.flag(flagRequest: request)).called(1);
@@ -4038,7 +4053,7 @@ void main() {
         (_) async => const Result.success(FlagItemResponse(duration: '0.01ms', itemId: 'item-id')),
       );
 
-      final res = await client.flagUser(userId);
+      final res = await client.moderation.flagUser(userId);
       expect(res.isSuccess, isTrue);
 
       verify(() => defaultApi.flag(flagRequest: request)).called(1);

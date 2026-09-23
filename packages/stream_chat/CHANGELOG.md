@@ -2,7 +2,8 @@
 
 🛑️ Breaking
 
-- Muting, banning and flagging return a `Result<void>` instead of throwing, on both `StreamChatClient` and `Channel`. `OwnUser.mutes` and `channelMutes` still arrive over `notification.mutes_updated`.
+- The moderation methods move from `StreamChatClient` to `StreamChatClient.moderation`: `client.muteUser(id)` becomes `client.moderation.muteUser(id)`. `Channel`'s own moderation methods are unchanged.
+- Muting, banning and flagging return a `Result<void>` instead of throwing, on both `StreamChatClient.moderation` and `Channel`. `OwnUser.mutes` and `channelMutes` still arrive over `notification.mutes_updated`.
 - `muteUser`, `banUser` and the flag methods move to the moderation v2 API, which is in beta and refuses an app pinned to the v1 moderation flow.
 - `banUser`'s options map becomes named parameters: `channelCid`, `timeout`, `reason`, `shadow`, `ipBan`, `deleteMessages`. `Channel.banMember` and `shadowBan` take the same, minus `channelCid`.
 - `unbanUser` takes `channelCid` and no longer accepts `remove_future_channels_ban` or `reason`, which its replacement has neither of.
