@@ -5,7 +5,7 @@
 - Added `StreamMessageItem.semanticsLabel`, which replaces the announcement composed for a message row, and `StreamMessageItem.excludeFromSemantics`, which leaves the row unlabeled so the bubble and footer announce their own parts.
 - Added `StreamQuotedMessage.replyMessage`, the message doing the quoting, which lets a quoted preview announce who replied to whom.
 - Added `StreamMessageContent.excludeTextFromSemantics` and `StreamMessageFooter.excludeFromSemantics`, which keep the message text and the metadata out of the semantics tree when an enclosing row already announces them.
-- Added `contentInsertionConfiguration` to `StreamChatMessageInput`, `StreamMessageComposerInputField`, `MessageComposerInputProps` and `MessageComposerInputCenterProps`, which lets the input accept images and GIFs sent from the keyboard.
+- Added `contentInsertionConfiguration` to `StreamChatMessageInput`, `StreamMessageComposerInputField`, `MessageComposerInputProps` and `MessageComposerInputCenterProps`, and `StreamMessageComposer` now accepts images and GIFs from the keyboard (such as Gboard on Android), adding them as image attachments validated like picked ones. It stays off when `disableAttachments` is set or `allowedAttachmentPickerTypes` excludes images.
 
 ⚠️ Changed
 
@@ -27,7 +27,6 @@
 
 - Fixed `StreamAttachmentHandler.pickFile` throwing on an empty selection; it now returns `null`.
 - Fixed the package no longer compiling when `stream_core_flutter` adds an avatar size. The three switches mapping `StreamAvatarSize` and `StreamAvatarGroupSize` onto an indicator size, an inner avatar size and the number of initials were exhaustive, so a size added upstream broke the build here. They fall back to the largest size they know now, and `StreamAvatarSize.xlPlus` (64px), `StreamAvatarSize.xxxl` / `StreamAvatarGroupSize.xxxl` (104px) are mapped explicitly.
-- Fixed Android keyboards such as Gboard reporting that the composer doesn't support images. `StreamMessageComposer` now accepts images and GIFs from the keyboard and adds them as image attachments, validated like picked ones. It stays off when `disableAttachments` is set or `allowedAttachmentPickerTypes` excludes images.
 - Fixed `StreamAttachmentHandler` throwing `UnimplementedError` on WebAssembly builds.
 - Fixed the gallery tab vanishing from the attachment picker when `allowedAttachmentPickerTypes` allowed images or videos but not both. It now stays available and lists only the allowed media.
 - Improved the screen-reader experience in the message list: each message is announced as a single phrase naming the sender, the body, the time, the edited marker and the delivery status, while the attachments, reaction chips, quoted message and replies row stay reachable one level deeper.
