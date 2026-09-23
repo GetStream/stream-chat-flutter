@@ -18,6 +18,7 @@
 
 🐞 Fixed
 
+- Fixed the package no longer compiling when `stream_core_flutter` adds an avatar size. The three switches mapping `StreamAvatarSize` and `StreamAvatarGroupSize` onto an indicator size, an inner avatar size and the number of initials were exhaustive, so a size added upstream broke the build here. They fall back to the largest size they know now, and `StreamAvatarSize.xlPlus` (64px), `StreamAvatarSize.xxxl` / `StreamAvatarGroupSize.xxxl` (104px) are mapped explicitly.
 - Fixed `StreamAttachmentHandler` throwing `UnimplementedError` on WebAssembly builds.
 - Fixed the gallery tab vanishing from the attachment picker when `allowedAttachmentPickerTypes` allowed images or videos but not both. It now stays available and lists only the allowed media.
 - Improved the screen-reader experience in the message list: each message is announced as a single phrase naming the sender, the body, the time, the edited marker and the delivery status, while the attachments, reaction chips, quoted message and replies row stay reachable one level deeper.
