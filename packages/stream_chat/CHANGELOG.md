@@ -17,6 +17,9 @@
 - Fixed `CurrentPlatform` throwing `UnimplementedError` on WebAssembly builds.
 - Fixed live location expiry emitting repeated `location.expired` events for the same expired location.
 - Fixed members removed from a channel keeping their read state in the channel state.
+- Fixed `AttachmentFile.extension` returning the whole file name when the file has no extension.
+- Fixed `UploadConfig.sizeLimit` being `0` when no size limit is set in the Stream Dashboard; it now falls back to `UploadConfig.defaultSizeLimit`.
+- Fixed a slow first app settings load replacing a newer `StreamChatClient.getAppSettings()` result.
 
 🔄 Internal / Non-breaking
 

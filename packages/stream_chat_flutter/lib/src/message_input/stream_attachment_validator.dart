@@ -83,7 +83,7 @@ class StreamAttachmentValidator {
     }
 
     final size = attachment.fileSize ?? 0;
-    final maxSize = config.sizeLimit > 0 ? config.sizeLimit : UploadConfig.defaultSizeLimit;
+    final maxSize = config.sizeLimit;
     if (size > maxSize) return AttachmentTooLargeError(fileSize: size, maxSize: maxSize);
 
     return null;

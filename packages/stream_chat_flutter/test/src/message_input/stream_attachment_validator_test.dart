@@ -219,6 +219,16 @@ void main() {
           isA<AttachmentBlockedError>(),
         );
       });
+
+      test('reports no extension for a blocked file without one', () {
+        const validator = StreamAttachmentValidator(
+          fileUploadConfig: UploadConfig(allowedFileExtensions: ['.pdf']),
+        );
+        expect(
+          validator.validate(_attachment(path: '/tmp/somefile')),
+          isA<AttachmentBlockedError>().having((e) => e.fileExtension, 'fileExtension', isNull),
+        );
+      });
     });
 
     group('size limit', () {
@@ -229,17 +239,6 @@ void main() {
         final result = validator.validate(_attachment(path: '/tmp/big.pdf', size: 100));
         expect(result, isA<AttachmentTooLargeError>());
         expect((result! as AttachmentTooLargeError).maxSize, 50);
-      });
-
-      test('falls back to defaultSizeLimit when backend size is 0', () {
-        const validator = StreamAttachmentValidator(
-          fileUploadConfig: UploadConfig(sizeLimit: 0),
-        );
-        final result = validator.validate(
-          _attachment(path: '/tmp/file.pdf', size: UploadConfig.defaultSizeLimit + 1),
-        );
-        expect(result, isA<AttachmentTooLargeError>());
-        expect((result! as AttachmentTooLargeError).maxSize, UploadConfig.defaultSizeLimit);
       });
 
       test('ext/MIME error wins when both ext and size are invalid', () {

@@ -463,17 +463,25 @@ Widget tabbedAttachmentPickerBuilder({
       icon: context.streamIcons.file,
       title: context.translations.uploadAFileLabel,
       supportedTypes: [AttachmentPickerType.files],
-      optionViewBuilder: (context, controller) => StreamFilePicker(
-        onFilePicked: (file) async {
-          try {
-            if (file != null) await controller.addAttachment(file);
-          } catch (e, stk) {
-            onError?.call(
-              AttachmentPickerError(error: e, stackTrace: stk),
-            );
-          }
-        },
-      ),
+      optionViewBuilder: (context, controller) {
+        final fileConfig = controller.validator.fileUploadConfig;
+        final extensions = _filePickerExtensions(fileConfig);
+        final type = extensions == null ? FileType.any : FileType.custom;
+
+        return StreamFilePicker(
+          type: type,
+          allowedExtensions: extensions,
+          onFilePicked: (file) async {
+            try {
+              if (file != null) await controller.addAttachment(file);
+            } catch (e, stk) {
+              onError?.call(
+                AttachmentPickerError(error: e, stackTrace: stk),
+              );
+            }
+          },
+        );
+      },
     ),
     TabbedAttachmentPickerOption(
       key: 'poll-creator',
@@ -553,10 +561,14 @@ Widget systemAttachmentPickerBuilder({
 }) {
   Future<void> pickSystemFile(
     StreamAttachmentPickerController controller,
-    FileType type,
-  ) async {
+    FileType type, {
+    List<String>? allowedExtensions,
+  }) async {
     try {
-      final file = await StreamAttachmentHandler.instance.pickFile(type: type);
+      final file = await StreamAttachmentHandler.instance.pickFile(
+        type: type,
+        allowedExtensions: allowedExtensions,
+      );
       if (file != null) await controller.addAttachment(file);
     } catch (e, stk) {
       onError?.call(AttachmentPickerError(error: e, stackTrace: stk));
@@ -588,7 +600,11 @@ Widget systemAttachmentPickerBuilder({
       icon: context.streamIcons.file,
       title: context.translations.uploadAFileLabel,
       onTap: (context, controller) async {
-        await pickSystemFile(controller, FileType.any);
+        final fileConfig = controller.validator.fileUploadConfig;
+        final extensions = _filePickerExtensions(fileConfig);
+        final type = extensions == null ? FileType.any : FileType.custom;
+
+        await pickSystemFile(controller, type, allowedExtensions: extensions);
       },
     ),
     SystemAttachmentPickerOption(
@@ -663,4 +679,18 @@ extension _AttachmentPickerTypesX on Iterable<AttachmentPickerType> {
 
     return RequestType.fromTypes(mediaTypes);
   }
+}
+
+// The extensions [config] allows, in the format file pickers expect (`pdf` for
+// `.pdf`), or `null` when every extension is allowed.
+List<String>? _filePickerExtensions(UploadConfig config) {
+  final extensions = <String>[];
+  for (final entry in config.allowedFileExtensions) {
+    final extension = entry.startsWith('.') ? entry.substring(1) : entry;
+    if (extension.isEmpty) continue;
+
+    extensions.add(extension.toLowerCase());
+  }
+
+  return extensions.isEmpty ? null : extensions;
 }

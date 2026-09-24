@@ -10,6 +10,7 @@
 ⚠️ Changed
 
 - Bumped `file_picker` to `>=12.0.0 <14.0.0`.
+- `StreamAttachmentValidator` now applies `UploadConfig.sizeLimit` as given, instead of treating `0` as the default limit.
 - `PlatformFileX.toAttachmentFile` and `PlatformFileX.toAttachment` are now async.
 - Video thumbnails now use `stream_thumbnail` on every platform, and the `thumblr`
   dependency is gone.
@@ -25,6 +26,7 @@
 
 🐞 Fixed
 
+- Fixed the file picker offering file types the Stream Dashboard doesn't allow; it now only offers the allowed file extensions.
 - Fixed `StreamAttachmentHandler.pickFile` throwing on an empty selection; it now returns `null`.
 - Fixed the package no longer compiling when `stream_core_flutter` adds an avatar size. The three switches mapping `StreamAvatarSize` and `StreamAvatarGroupSize` onto an indicator size, an inner avatar size and the number of initials were exhaustive, so a size added upstream broke the build here. They fall back to the largest size they know now, and `StreamAvatarSize.xlPlus` (64px), `StreamAvatarSize.xxxl` / `StreamAvatarGroupSize.xxxl` (104px) are mapped explicitly.
 - Fixed `StreamAttachmentHandler` throwing `UnimplementedError` on WebAssembly builds.
