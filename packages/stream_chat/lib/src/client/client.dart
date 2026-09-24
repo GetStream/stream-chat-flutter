@@ -39,13 +39,17 @@ import '../core/error/stream_chat_exception.dart';
 import '../core/http/app_settings_manager.dart';
 import '../core/http/interceptor/additional_headers_interceptor.dart';
 import '../core/http/stream_http_client.dart';
+import '../core/models/add_user_group_members_response.dart';
 import '../core/models/app_settings.dart';
 import '../core/models/attachment_file.dart';
 import '../core/models/banned_user.dart';
 import '../core/models/channel_state.dart';
+import '../core/models/create_user_group_response.dart';
 import '../core/models/draft.dart';
 import '../core/models/draft_message.dart';
+import '../core/models/get_user_group_response.dart';
 import '../core/models/list_devices_response.dart';
+import '../core/models/list_user_groups_response.dart';
 import '../core/models/location.dart';
 import '../core/models/member.dart';
 import '../core/models/message.dart';
@@ -58,9 +62,12 @@ import '../core/models/poll_vote.dart';
 import '../core/models/push_preference.dart';
 import '../core/models/push_provider.dart';
 import '../core/models/reaction.dart';
+import '../core/models/remove_user_group_members_response.dart';
 import '../core/models/role_type.dart';
 import '../core/models/search_roles_response.dart';
+import '../core/models/search_user_groups_response.dart';
 import '../core/models/thread.dart';
+import '../core/models/update_user_group_response.dart';
 import '../core/models/user.dart';
 import '../core/util/event_controller.dart';
 import '../core/util/extension.dart';
@@ -70,6 +77,7 @@ import '../db/chat_persistence_client.dart';
 import '../event_type.dart';
 import '../repository/devices_repository.dart';
 import '../repository/roles_repository.dart';
+import '../repository/user_groups_repository.dart';
 import '../ws/connect_request.dart';
 import '../ws/connection_manager.dart';
 import '../ws/connection_status.dart';
@@ -167,6 +175,7 @@ class StreamChatClient {
     final api = defaultApi ?? DefaultApi(httpClient);
     _rolesRepository = RolesRepository(api);
     _devicesRepository = DevicesRepository(api);
+    _userGroupsRepository = UserGroupsRepository(api);
 
     _connection = ConnectionManager(
       request: ConnectRequest.forApi(
@@ -202,6 +211,7 @@ class StreamChatClient {
   late final StreamChatApi _chatApi;
   late final RolesRepository _rolesRepository;
   late final DevicesRepository _devicesRepository;
+  late final UserGroupsRepository _userGroupsRepository;
   late final ConnectionManager _connection;
   StreamSubscription<WsEvent>? _wsEventSubscription;
 
@@ -2387,12 +2397,15 @@ class StreamChatClient {
   }
 
   /// Lists user groups with cursor-based pagination.
-  Future<ListUserGroupsResponse> listUserGroups({
+  ///
+  /// [idGt] and [createdAtGt] are cursors: each returns only the groups
+  /// ordering after the value given.
+  Future<Result<ListUserGroupsResponse>> listUserGroups({
     int? limit,
     String? idGt,
     DateTime? createdAtGt,
     String? teamId,
-  }) => _chatApi.userGroups.listUserGroups(
+  }) => _userGroupsRepository.listUserGroups(
     limit: limit,
     idGt: idGt,
     createdAtGt: createdAtGt,
@@ -2400,13 +2413,13 @@ class StreamChatClient {
   );
 
   /// Searches user groups by name prefix (autocomplete).
-  Future<SearchUserGroupsResponse> searchUserGroups(
+  Future<Result<SearchUserGroupsResponse>> searchUserGroups(
     String query, {
     int? limit,
     String? nameGt,
     String? idGt,
     String? teamId,
-  }) => _chatApi.userGroups.searchUserGroups(
+  }) => _userGroupsRepository.searchUserGroups(
     query,
     limit: limit,
     nameGt: nameGt,
@@ -2415,19 +2428,19 @@ class StreamChatClient {
   );
 
   /// Gets a user group by ID, including its members.
-  Future<GetUserGroupResponse> getUserGroup(
+  Future<Result<GetUserGroupResponse>> getUserGroup(
     String id, {
     String? teamId,
-  }) => _chatApi.userGroups.getUserGroup(id, teamId: teamId);
+  }) => _userGroupsRepository.getUserGroup(id, teamId: teamId);
 
   /// Creates a new user group, optionally with initial members.
-  Future<CreateUserGroupResponse> createUserGroup(
+  Future<Result<CreateUserGroupResponse>> createUserGroup(
     String name, {
     String? id,
     String? description,
     String? teamId,
     List<String>? memberIds,
-  }) => _chatApi.userGroups.createUserGroup(
+  }) => _userGroupsRepository.createUserGroup(
     name,
     id: id,
     description: description,
@@ -2438,12 +2451,12 @@ class StreamChatClient {
   /// Updates a user group's name and/or description.
   ///
   /// [teamId] scopes the lookup; a group's team cannot be changed.
-  Future<UpdateUserGroupResponse> updateUserGroup(
+  Future<Result<UpdateUserGroupResponse>> updateUserGroup(
     String id, {
     String? name,
     String? description,
     String? teamId,
-  }) => _chatApi.userGroups.updateUserGroup(
+  }) => _userGroupsRepository.updateUserGroup(
     id,
     name: name,
     description: description,
@@ -2451,18 +2464,18 @@ class StreamChatClient {
   );
 
   /// Deletes a user group and all its memberships.
-  Future<EmptyResponse> deleteUserGroup(
+  Future<Result<void>> deleteUserGroup(
     String id, {
     String? teamId,
-  }) => _chatApi.userGroups.deleteUserGroup(id, teamId: teamId);
+  }) => _userGroupsRepository.deleteUserGroup(id, teamId: teamId);
 
   /// Adds members to a user group.
-  Future<AddUserGroupMembersResponse> addUserGroupMembers(
+  Future<Result<AddUserGroupMembersResponse>> addUserGroupMembers(
     String id,
     List<String> memberIds, {
     bool? asAdmin,
     String? teamId,
-  }) => _chatApi.userGroups.addUserGroupMembers(
+  }) => _userGroupsRepository.addUserGroupMembers(
     id,
     memberIds,
     asAdmin: asAdmin,
@@ -2470,11 +2483,11 @@ class StreamChatClient {
   );
 
   /// Removes members from a user group.
-  Future<RemoveUserGroupMembersResponse> removeUserGroupMembers(
+  Future<Result<RemoveUserGroupMembersResponse>> removeUserGroupMembers(
     String id,
     List<String> memberIds, {
     String? teamId,
-  }) => _chatApi.userGroups.removeUserGroupMembers(
+  }) => _userGroupsRepository.removeUserGroupMembers(
     id,
     memberIds,
     teamId: teamId,

@@ -53,7 +53,7 @@ extension MessageEntityX on MessageEntity {
     pinnedBy: pinnedBy,
     mentionedChannel: mentionedChannel,
     mentionedGroupIds: mentionedGroupIds,
-    mentionedGroups: mentionedGroups?.map((e) => UserGroup.fromJson(jsonDecode(e))).toList(),
+    mentionedGroups: mentionedGroups?.map((e) => _userGroupFromJson(jsonDecode(e))).toList(),
     mentionedHere: mentionedHere,
     mentionedRoles: mentionedRoles,
     mentionedUsers: mentionedUsers.map((e) => User.fromJson(jsonDecode(e))).toList(),
@@ -84,7 +84,7 @@ extension MessageX on Message {
     reactionGroups: reactionGroups,
     mentionedChannel: mentionedChannel,
     mentionedGroupIds: mentionedGroupIds,
-    mentionedGroups: mentionedGroups?.map(jsonEncode).toList(),
+    mentionedGroups: mentionedGroups?.map((e) => jsonEncode(_userGroupToJson(e))).toList(),
     mentionedHere: mentionedHere,
     mentionedRoles: mentionedRoles,
     mentionedUsers: mentionedUsers.map(jsonEncode).toList(),
@@ -107,3 +107,42 @@ extension MessageX on Message {
     restrictedVisibility: restrictedVisibility,
   );
 }
+
+// A mentioned group is stored under the keys earlier versions wrote, so cached rows still read back.
+Map<String, Object?> _userGroupToJson(UserGroup group) => {
+  'created_at': group.createdAt.toIso8601String(),
+  'created_by': ?group.createdBy,
+  'description': ?group.description,
+  'id': group.id,
+  'members': ?group.members?.map(_userGroupMemberToJson).toList(),
+  'name': group.name,
+  'team_id': ?group.teamId,
+  'updated_at': group.updatedAt.toIso8601String(),
+};
+
+UserGroup _userGroupFromJson(Map<String, dynamic> json) => UserGroup(
+  createdAt: DateTime.parse(json['created_at'] as String),
+  createdBy: json['created_by'] as String?,
+  description: json['description'] as String?,
+  id: json['id'] as String,
+  members: (json['members'] as List<dynamic>?)
+      ?.map((member) => _userGroupMemberFromJson(member as Map<String, dynamic>))
+      .toList(),
+  name: json['name'] as String,
+  teamId: json['team_id'] as String?,
+  updatedAt: DateTime.parse(json['updated_at'] as String),
+);
+
+Map<String, Object?> _userGroupMemberToJson(UserGroupMember member) => {
+  'created_at': member.createdAt.toIso8601String(),
+  'group_id': member.groupId,
+  'is_admin': member.isAdmin,
+  'user_id': member.userId,
+};
+
+UserGroupMember _userGroupMemberFromJson(Map<String, dynamic> json) => UserGroupMember(
+  createdAt: DateTime.parse(json['created_at'] as String),
+  groupId: json['group_id'] as String,
+  isAdmin: json['is_admin'] as bool,
+  userId: json['user_id'] as String,
+);

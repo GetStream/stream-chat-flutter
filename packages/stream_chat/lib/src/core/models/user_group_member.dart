@@ -1,12 +1,11 @@
-import 'package:equatable/equatable.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'user_group_member.g.dart';
+part 'user_group_member.freezed.dart';
 
-/// Class that defines a member of a user group.
-@JsonSerializable(includeIfNull: false)
-class UserGroupMember extends Equatable {
-  /// Create a new instance of [UserGroupMember].
+/// A user's membership in a [UserGroup].
+@freezed
+class UserGroupMember with _$UserGroupMember {
+  /// Creates a new [UserGroupMember].
   const UserGroupMember({
     required this.createdAt,
     required this.groupId,
@@ -14,29 +13,19 @@ class UserGroupMember extends Equatable {
     required this.userId,
   });
 
-  /// Create a new instance from a json.
-  factory UserGroupMember.fromJson(Map<String, dynamic> json) => _$UserGroupMemberFromJson(json);
-
   /// The date when the member was added to the group.
+  @override
   final DateTime createdAt;
 
   /// The id of the group the member belongs to.
+  @override
   final String groupId;
 
   /// Whether the member is an admin of the group.
+  @override
   final bool isAdmin;
 
   /// The id of the member.
-  final String userId;
-
-  /// Serialize model to json.
-  Map<String, dynamic> toJson() => _$UserGroupMemberToJson(this);
-
   @override
-  List<Object?> get props => [
-    createdAt,
-    groupId,
-    isAdmin,
-    userId,
-  ];
+  final String userId;
 }

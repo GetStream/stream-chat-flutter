@@ -391,7 +391,7 @@ void main() {
         );
         when(
           () => mocks.client.searchUserGroups(any(), teamId: any(named: 'teamId')),
-        ).thenAnswer((_) async => SearchUserGroupsResponse()..userGroups = []);
+        ).thenAnswer((_) async => const Result.success(SearchUserGroupsResponse(duration: '0ms')));
 
         await _pumpMentionOptions(
           tester,
@@ -412,7 +412,7 @@ void main() {
         final mocks = _setupMocks(ownCapabilities: const []);
         when(
           () => mocks.client.searchUserGroups(any(), teamId: any(named: 'teamId')),
-        ).thenAnswer((_) async => SearchUserGroupsResponse()..userGroups = []);
+        ).thenAnswer((_) async => const Result.success(SearchUserGroupsResponse(duration: '0ms')));
 
         await _pumpMentionOptions(
           tester,
@@ -436,7 +436,8 @@ void main() {
         when(
           () => mocks.client.searchUserGroups('eng', teamId: any(named: 'teamId')),
         ).thenAnswer(
-          (_) async => SearchUserGroupsResponse()..userGroups = [buildUserGroup('engineering')],
+          (_) async =>
+              Result.success(SearchUserGroupsResponse(duration: '0ms', userGroups: [buildUserGroup('engineering')])),
         );
 
         await _pumpMentionOptions(
@@ -463,7 +464,8 @@ void main() {
         when(
           () => mocks.client.searchUserGroups('eng', teamId: any(named: 'teamId')),
         ).thenAnswer(
-          (_) async => SearchUserGroupsResponse()..userGroups = [buildUserGroup('engineering')],
+          (_) async =>
+              Result.success(SearchUserGroupsResponse(duration: '0ms', userGroups: [buildUserGroup('engineering')])),
         );
 
         await _pumpMentionOptions(
@@ -480,7 +482,7 @@ void main() {
     );
 
     testWidgets(
-      'searchUserGroups error is swallowed and does not blank the list',
+      'searchUserGroups failure is swallowed and does not blank the list',
       (tester) async {
         final mocks = _setupMocks(
           ownCapabilities: const [
@@ -490,7 +492,7 @@ void main() {
         );
         when(
           () => mocks.client.searchUserGroups(any(), teamId: any(named: 'teamId')),
-        ).thenThrow(StateError('test error'));
+        ).thenAnswer((_) async => const Result.failure(StreamClientException(message: 'test error')));
 
         await _pumpMentionOptions(
           tester,
@@ -802,15 +804,19 @@ void main() {
       when(
         () => mocks.client.searchUserGroups('h', teamId: any(named: 'teamId')),
       ).thenAnswer(
-        (_) async => SearchUserGroupsResponse()
-          ..userGroups = [
-            UserGroup(
-              id: 'hr-id',
-              name: 'hr',
-              createdAt: DateTime.utc(2024),
-              updatedAt: DateTime.utc(2024),
-            ),
-          ],
+        (_) async => Result.success(
+          SearchUserGroupsResponse(
+            duration: '0ms',
+            userGroups: [
+              UserGroup(
+                id: 'hr-id',
+                name: 'hr',
+                createdAt: DateTime.utc(2024),
+                updatedAt: DateTime.utc(2024),
+              ),
+            ],
+          ),
+        ),
       );
 
       await _pumpMentionOptions(
@@ -889,15 +895,19 @@ void main() {
         when(
           () => mocks.client.searchUserGroups('h', teamId: any(named: 'teamId')),
         ).thenAnswer(
-          (_) async => SearchUserGroupsResponse()
-            ..userGroups = [
-              UserGroup(
-                id: 'hr-id',
-                name: 'hr',
-                createdAt: DateTime.utc(2024),
-                updatedAt: DateTime.utc(2024),
-              ),
-            ],
+          (_) async => Result.success(
+            SearchUserGroupsResponse(
+              duration: '0ms',
+              userGroups: [
+                UserGroup(
+                  id: 'hr-id',
+                  name: 'hr',
+                  createdAt: DateTime.utc(2024),
+                  updatedAt: DateTime.utc(2024),
+                ),
+              ],
+            ),
+          ),
         );
         return MaterialAppWrapper(
           home: _buildMentionOptionsBody(

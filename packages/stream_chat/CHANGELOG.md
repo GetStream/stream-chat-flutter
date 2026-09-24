@@ -53,6 +53,14 @@
 - `Device`, `ListDevicesResponse` and `SearchRolesResponse` compare by value and gain `copyWith`.
 - `Role` no longer extends `Equatable`, so `props` is removed; it still compares by value and gains `copyWith`.
 - `StreamChatApi.device` is renamed `StreamChatApi.pushPreferences` and handles only `setPushPreferences`.
+- `StreamChatClient.listUserGroups`, `searchUserGroups`, `getUserGroup`, `createUserGroup`, `updateUserGroup`, `addUserGroupMembers` and `removeUserGroupMembers` return a `Result` instead of throwing.
+- `StreamChatClient.deleteUserGroup` returns a `Result<void>` instead of throwing, and carries no value on success.
+- `UserGroup`, `UserGroupMember` and the user group responses no longer decode from or encode to JSON.
+- The user group responses are immutable, built through a const constructor, and their `duration` is a non-nullable `String`.
+- `userGroup` is nullable on `GetUserGroupResponse`, `CreateUserGroupResponse`, `UpdateUserGroupResponse`, `AddUserGroupMembersResponse` and `RemoveUserGroupMembersResponse`.
+- `UserGroup` and `UserGroupMember` no longer extend `Equatable`, so `props` is removed; they still compare by value and gain `copyWith`.
+- The user group responses compare by value and gain `copyWith`.
+- `StreamChatApi.userGroups` is removed; its endpoints are reached through `StreamChatClient`.
 
 🐞 Fixed
 
