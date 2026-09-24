@@ -178,6 +178,17 @@ void main() {
         );
       });
 
+      test('an allow-list entry without a leading dot accepts matching files',
+          () {
+        const validator = StreamAttachmentValidator(
+          fileUploadConfig: UploadConfig(allowedFileExtensions: ['pdf']),
+        );
+        expect(
+          validator.validate(_attachment(path: '/tmp/report.pdf')),
+          isNull,
+        );
+      });
+
       test('a .gz allow-list entry accepts .tar.gz files', () {
         const validator = StreamAttachmentValidator(
           fileUploadConfig: UploadConfig(allowedFileExtensions: ['.gz']),

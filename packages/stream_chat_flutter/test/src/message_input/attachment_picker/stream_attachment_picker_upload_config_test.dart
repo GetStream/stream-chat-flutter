@@ -26,6 +26,22 @@ void main() {
   );
 
   testWidgets(
+    'mobileAttachmentPickerBuilder leaves compound allow-list entries out of '
+    'the file picker',
+    (tester) async {
+      const validator = StreamAttachmentValidator(
+        fileUploadConfig: UploadConfig(
+          allowedFileExtensions: ['.pdf', '.tar.gz'],
+        ),
+      );
+
+      final filePicker = await _buildMobileFilePicker(tester, validator);
+
+      expect(filePicker.allowedExtensions, ['pdf']);
+    },
+  );
+
+  testWidgets(
     'mobileAttachmentPickerBuilder offers any file when no extension '
     'allow-list is set',
     (tester) async {

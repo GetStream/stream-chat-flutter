@@ -1074,11 +1074,14 @@ extension _AttachmentPickerTypesX on Iterable<AttachmentPickerType> {
 
 // The extensions [config] allows, in the format file pickers expect (`pdf` for
 // `.pdf`), or `null` when every extension is allowed.
+//
+// Compound entries like `.tar.gz` are left out: validation only compares a
+// file's last extension, so no file can match them.
 List<String>? _filePickerExtensions(UploadConfig config) {
   final extensions = <String>[];
   for (final entry in config.allowedFileExtensions) {
     final extension = entry.startsWith('.') ? entry.substring(1) : entry;
-    if (extension.isEmpty) continue;
+    if (extension.isEmpty || extension.contains('.')) continue;
 
     extensions.add(extension.toLowerCase());
   }
