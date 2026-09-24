@@ -48,7 +48,7 @@ void main() {
     test('OwnUser.toJson writes each device under its id and push_provider keys', () {
       final ownUser = OwnUser(
         id: 'user-id',
-        devices: [
+        devices: const [
           Device(id: 'device-1', pushProvider: 'firebase'),
           Device(id: 'device-2', pushProvider: 'apn'),
         ],
@@ -65,7 +65,7 @@ void main() {
     test('OwnUser.fromJson reads back the devices OwnUser.toJson wrote', () {
       final json = OwnUser(
         id: 'user-id',
-        devices: [Device(id: 'device-1', pushProvider: 'firebase')],
+        devices: const [Device(id: 'device-1', pushProvider: 'firebase')],
       ).toJson();
 
       final decoded = OwnUser.fromJson(json);
@@ -472,7 +472,7 @@ void main() {
           'department': 'Engineering',
           'custom_field': 'custom_value',
         },
-        devices: [
+        devices: const [
           Device(
             id: 'device-1',
             pushProvider: 'firebase',
@@ -531,7 +531,7 @@ void main() {
             'location': 'Amsterdam',
             'is_verified': true,
           },
-          devices: [
+          devices: const [
             Device(
               id: 'device-1',
               pushProvider: 'firebase',

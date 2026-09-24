@@ -158,6 +158,8 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `Device.fromJson` / `toJson`, `Role.fromJson` | — | `removed` | The models are plain classes; construct them directly |
 | `ListDevicesResponse.fromJson`, `SearchRolesResponse.fromJson`, `ListDevicesResponse()..devices = …` | `ListDevicesResponse(duration: …, devices: …)` | `retyped` | The responses are plain classes with a const constructor and final fields |
 | `ListDevicesResponse.duration` / `SearchRolesResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| `Device` / `ListDevicesResponse` / `SearchRolesResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
+| `Role extends Equatable`, `Role.props` | `Role` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and `Role` is no longer an `Equatable` |
 | `StreamChatApi.device` | `StreamChatApi.pushPreferences` | `renamed` | The class handles only `setPushPreferences` now; device calls moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
 

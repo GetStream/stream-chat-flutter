@@ -141,6 +141,8 @@ a public signature.
 - **Envelopes are immutable:** they are built through a const constructor with final fields, not a no-argument
   constructor and `late` setters.
 - **`duration` is a non-nullable `String`** on every envelope; v10 typed it `String?`.
+- **Models and envelopes are `@freezed`:** they compare by value, and one that extended `Equatable` in v10 loses
+  `props`.
 
 Anything else a migration would change about what the caller holds needs its own reason. A server field our v10
 model lacks is exposed later, as an additive change, not by swapping in the generated type.

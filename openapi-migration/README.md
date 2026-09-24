@@ -69,18 +69,20 @@ breaks against v10:
 - a write whose response carries only `duration` returns `Result<void>` rather than `EmptyResponse`;
 - public models and envelopes lose `fromJson` and `toJson`;
 - envelopes are immutable, built through a const constructor rather than `late` setters;
-- `duration` is a non-nullable `String` on every envelope, where v10 typed it `String?`.
+- `duration` is a non-nullable `String` on every envelope, where v10 typed it `String?`;
+- public models and envelopes are `@freezed`, so they compare by value; one that extended `Equatable` in v10 no
+  longer does, and loses `props`.
 
 Each ships with a CHANGELOG entry and a Symbol Map row like any other break.
 
 
 1. **No generated type in a public signature.** `lib/stream_chat.dart` exports nothing from `open_api/`, and no
    other package or the sample app imports it. `generate_plan.py --check` enforces both.
-2. **Public models keep their v10 shape** — names, fields, nullability, defaults, `Equatable` — as plain classes
-   with no `fromJson`, `toJson` or json_serializable. A field the server adds is exposed later, as an additive
+2. **Public models keep their v10 names, fields, nullability and defaults,** as `@freezed` classes (value
+   equality, `copyWith`, `toString`) with no `fromJson`, `toJson` or json_serializable. A field the server adds is exposed later, as an additive
    change.
-3. **Responses keep their v10 envelopes,** as plain immutable classes carrying a non-nullable `duration` and the
-   payload, one file per class under `lib/src/core/models/responses/`. A write whose response carries only
+3. **Responses keep their v10 envelopes,** as `@freezed` classes carrying a non-nullable `duration` and the
+   payload, one file per class under `lib/src/core/models/`. A write whose response carries only
    `duration` returns `Result<void>`: `EmptyResponse` stays behind for the unmigrated APIs.
 4. **Public methods return `Result<T>`,** per [`core-migration/03-errors.md`](../core-migration/03-errors.md).
 5. **Mapping happens in the repository,** on the `Result` the generated call returns

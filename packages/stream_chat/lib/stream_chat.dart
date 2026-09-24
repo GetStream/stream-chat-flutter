@@ -63,7 +63,6 @@ export 'package:stream_core/stream_core.dart'
         UserToken,
         UserTokenLoader,
         WsEvent;
-
 export 'package:uuid/uuid.dart';
 
 export 'src/client/channel/channel.dart';
@@ -96,6 +95,7 @@ export 'src/core/models/command.dart';
 export 'src/core/models/device.dart';
 export 'src/core/models/draft.dart';
 export 'src/core/models/draft_message.dart';
+export 'src/core/models/list_devices_response.dart';
 export 'src/core/models/location.dart';
 export 'src/core/models/member.dart';
 export 'src/core/models/message.dart';
@@ -117,10 +117,9 @@ export 'src/core/models/push_preference.dart';
 export 'src/core/models/reaction.dart';
 export 'src/core/models/reaction_group.dart';
 export 'src/core/models/read.dart';
-export 'src/core/models/responses/list_devices_response.dart';
-export 'src/core/models/responses/search_roles_response.dart';
 export 'src/core/models/role.dart';
 export 'src/core/models/role_type.dart';
+export 'src/core/models/search_roles_response.dart';
 export 'src/core/models/thread.dart';
 export 'src/core/models/thread_participant.dart';
 export 'src/core/models/unread_counts.dart';

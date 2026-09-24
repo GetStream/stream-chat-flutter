@@ -1,6 +1,6 @@
 import '../../../open_api/api.dart' as api;
-import '../../core/models/responses/search_roles_response.dart';
 import '../../core/models/role.dart';
+import '../../core/models/search_roles_response.dart';
 
 /// Maps a generated [api.Role] to a [Role].
 extension RoleMapper on api.Role {

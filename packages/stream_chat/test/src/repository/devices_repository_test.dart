@@ -1,6 +1,7 @@
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/open_api/api.dart' as api;
 import 'package:stream_chat/src/core/models/device.dart';
+import 'package:stream_chat/src/core/models/list_devices_response.dart';
 import 'package:stream_chat/src/repository/devices_repository.dart';
 import 'package:stream_core/stream_core.dart';
 import 'package:test/test.dart';
@@ -94,8 +95,13 @@ void main() {
 
     final res = await DevicesRepository(defaultApi).getDevices();
 
-    final response = res.getOrNull()!;
-    expect((response.duration, response.devices.single.id), ('0.02ms', 'device-id'));
+    expect(
+      res.getOrNull(),
+      const ListDevicesResponse(
+        duration: '0.02ms',
+        devices: [Device(id: 'device-id', pushProvider: 'firebase')],
+      ),
+    );
   });
 
   test('DevicesRepository.getDevices returns the failure without throwing', () async {

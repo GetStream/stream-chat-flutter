@@ -1,6 +1,6 @@
 import '../../../open_api/api.dart' as api;
 import '../../core/models/device.dart';
-import '../../core/models/responses/list_devices_response.dart';
+import '../../core/models/list_devices_response.dart';
 
 /// Maps a generated [api.DeviceResponse] to a [Device].
 extension DeviceResponseMapper on api.DeviceResponse {

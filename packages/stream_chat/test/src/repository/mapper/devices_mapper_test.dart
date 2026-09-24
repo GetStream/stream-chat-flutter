@@ -17,9 +17,7 @@ void main() {
       voip: false,
     );
 
-    final device = response.toModel();
-
-    expect((device.id, device.pushProvider), ('device-id', 'firebase'));
+    expect(response.toModel(), const Device(id: 'device-id', pushProvider: 'firebase'));
   });
 
   test('ListDevicesResponse.toModel keeps the duration', () {
@@ -38,12 +36,10 @@ void main() {
       ],
     );
 
-    final devices = response.toModel().devices;
-
-    expect(devices.map((it) => (it.id, it.pushProvider)), [
-      ('device-1', 'firebase'),
-      ('device-2', 'apn'),
-      ('device-3', 'huawei'),
+    expect(response.toModel().devices, const [
+      Device(id: 'device-1', pushProvider: 'firebase'),
+      Device(id: 'device-2', pushProvider: 'apn'),
+      Device(id: 'device-3', pushProvider: 'huawei'),
     ]);
   });
 
