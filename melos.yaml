@@ -58,7 +58,7 @@ command:
       # upper bounds once FlutterFire ships a fixed release.
       firebase_crashlytics: '>=5.2.0 <5.2.5'
       firebase_messaging: '>=16.0.0 <16.4.2'
-      file_picker: ^11.0.0
+      file_picker: '>=12.0.0 <14.0.0'
       file_selector: ^1.1.0
       app_badge_plus: ^1.3.2
       flutter_local_notifications: ^21.0.0
@@ -130,7 +130,7 @@ command:
         git:
           url: https://github.com/GetStream/stream-core-flutter.git
           path: packages/stream_core_flutter
-          ref: 04e0d1cb3a6893cf70cb6636a261deb11beff81c
+          ref: 2daa0a641519abe9ab637bcb41c69ed3ea4273b7
       stream_thumbnail:
         git:
           url: https://github.com/GetStream/stream-core-flutter.git

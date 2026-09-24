@@ -13,11 +13,10 @@ void main() {
       test(
         'should throw if non-zero `offset` and `next` both are provided',
         () {
-          try {
-            PaginationParams(offset: 10, next: 'next-message-id');
-          } catch (e) {
-            expect(e, isA<AssertionError>());
-          }
+          expect(
+            () => PaginationParams(offset: 10, next: 'next-message-id'),
+            throwsA(isA<AssertionError>()),
+          );
         },
       );
 

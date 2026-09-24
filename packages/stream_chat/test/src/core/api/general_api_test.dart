@@ -63,11 +63,10 @@ void main() {
       'should throw if `query` and `messageFilters` is not provided',
       () async {
         final filter = ChannelFilter.in_(ChannelFilterField.cid, const ['test-cid-1', 'test-cid-2']);
-        try {
-          await generalApi.searchMessages(filter);
-        } catch (e) {
-          expect(e, isA<ArgumentError>());
-        }
+        await expectLater(
+          generalApi.searchMessages(filter),
+          throwsA(isA<ArgumentError>()),
+        );
       },
     );
 
@@ -77,15 +76,14 @@ void main() {
         final filter = ChannelFilter.in_(ChannelFilterField.cid, const ['test-cid-1', 'test-cid-2']);
         const query = 'test-query';
         final messageFilter = MessageSearchFilter.query(MessageSearchFilterField.text, 'text');
-        try {
-          await generalApi.searchMessages(
+        await expectLater(
+          generalApi.searchMessages(
             filter,
             query: query,
             messageFilters: messageFilter,
-          );
-        } catch (e) {
-          expect(e, isA<ArgumentError>());
-        }
+          ),
+          throwsA(isA<ArgumentError>()),
+        );
       },
     );
 
@@ -95,15 +93,14 @@ void main() {
         final filter = ChannelFilter.in_(ChannelFilterField.cid, const ['test-cid-1', 'test-cid-2']);
         final sort = [MessageSearchSort.desc(MessageSearchSortField.custom('test-field'))];
         const pagination = PaginationParams(offset: 10);
-        try {
-          await generalApi.searchMessages(
+        await expectLater(
+          generalApi.searchMessages(
             filter,
             sort: sort,
             pagination: pagination,
-          );
-        } catch (e) {
-          expect(e, isA<AssertionError>());
-        }
+          ),
+          throwsA(isA<AssertionError>()),
+        );
       },
     );
 
