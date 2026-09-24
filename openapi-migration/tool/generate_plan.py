@@ -166,21 +166,48 @@ GROUPS = [
     ),
     dict(
         num='03', slug='user-groups', title='User Groups',
-        hand=['user_groups_api.dart'],
+        hand=[],
         match=owns('/api/v2/usergroups'),
         goal='A clean 1:1 group — eight methods against eight generated operations, no client state, '
              'no persistence.',
-        decisions=[
-            'Follows the [domain-model rules](README.md#domain-models): `UserGroup`, `UserGroupMember` and the '
-            'seven v10 response envelopes stay public in their v10 shapes, as plain classes, mapped from the '
-            'generated types in the repository.',
-            '`Message.mentionedGroups` still decodes v1 JSON, so it needs a temporary `UserGroupV1JsonConverter` '
-            '(removed by group 10), and the persistence mapper serializes `mentioned_groups` itself.',
-        ],
+        decisions=[],
+        taken=textwrap.dedent("""\
+            Follows the [domain-model rules](README.md#domain-models).
+
+            - **`UserGroup` and `UserGroupMember` stay our public types, with their current fields,** as plain
+              classes with no JSON. The generated `UserGroupMember.appPk` — the app's internal id, the same for
+              every member — is not exposed; adding it later is non-breaking.
+            - **The seven responses keep their names,** one file per class. `ListUserGroupsResponse` and
+              `SearchUserGroupsResponse` carry a non-nullable `userGroups`, as the generated types do.
+            - **`userGroup` is nullable on the five single-group responses** (`Get`, `Create`, `Update`,
+              `AddUserGroupMembers`, `RemoveUserGroupMembers`), where v10 declared it non-null. The spec marks it
+              optional, so the public type says what the API promises instead of turning a missing group into a
+              failure the server never reported. A break outside the sanctioned list, taken deliberately.
+            - **A missing list is never mapped to an empty one.** The only nullable generated list,
+              `UserGroupResponse.members`, stays `null` when the response leaves it out (list and search do),
+              which is not the same as a group with no members.
+            - **`deleteUserGroup` returns `Result<void>`,** through `ignoreValue()`, per the duration-only rule.
+            - **`StreamChatApi.userGroups` is removed** with `user_groups_api.dart`; every method now routes
+              through `DefaultApi`.
+            - **All mapping lives in `mapper/user_groups_mapper.dart`,** entity and response mappers together.
+            - **`Message.mentionedGroups` decodes through `userGroupsFromV1Json`,** a temporary decode-only function
+              rather than a `JsonConverter`: `Message.toJson` never writes the field, so a `toJson` would be dead
+              code. It reads the v1 keys directly instead of through `api.UserGroupResponse.fromJson`, whose
+              members require `app_pk` — a payload without it should not fail the whole message. Dates go through
+              `StreamDateTimeConverter`: v1 sends ISO-8601 strings, but v2 sends epoch nanoseconds, which a live
+              check against the demo app caught. Removed by [group 10](10-messages.md).
+            - **Persistence stores `mentioned_groups` under the keys v10 wrote,** through private helpers in
+              `message_mapper.dart`, so cached rows read back unchanged.
+            - **The mention UI keeps `UserGroup`.** `StreamMentionAutocompleteOptions` reads the `Result` the way it
+              already reads `searchRoles`; no UI type changes.
+            """),
         risks=[
-            '`UserGroup` and `UserGroupMember` collide by name with generated types. Import the generated code '
-            'with a prefix; the generated types are never exported.',
+            '**`updateUserGroup` sends explicit nulls — verified harmless.** `UpdateUserGroupRequest.toJson` '
+            'emits `"description": null` where the hand-written path omitted the key, and v10 documented an '
+            'omitted `description` as "leave unchanged". A live check confirmed a `null` still leaves it '
+            'unchanged.',
         ],
+        done=DONE.replace('- [ ]', '- [x]'),
     ),
     dict(
         num='04', slug='roles-guest-and-app', title='Roles, Guest & App Settings',

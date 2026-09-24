@@ -14,7 +14,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | --- | --- | --- | --- | --- |
 | [01](01-foundation.md) | Foundation — `DefaultApi` wiring, `User` shape | — | — | ☐ |
 | [02](02-devices.md) | Devices | 0 | 3 | ☑ |
-| [03](03-user-groups.md) | User Groups | 8 | 8 | ☐ |
+| [03](03-user-groups.md) | User Groups | 0 | 8 | ☑ |
 | [04](04-roles-guest-and-app.md) | Roles, Guest & App Settings | 3 | 5 | ☐ |
 | [05](05-polls.md) | Polls | 13 | 13 | ☐ |
 | [06](06-reminders.md) | Message Reminders | 4 | 4 | ☐ |
@@ -93,7 +93,8 @@ Each ships with a CHANGELOG entry and a Symbol Map row like any other break.
 6. **Request enums are hand-written** and mapped to the generated enum in the repository (`PushProvider` →
    `CreateDeviceRequestPushProvider`).
 7. **A plain model embedded in a json_serializable parent gets a temporary converter.** Some parents still decode
-   v1 REST or WebSocket JSON with json_serializable; their field gets a `JsonConverter` in
+   v1 REST or WebSocket JSON with json_serializable; their field gets a `JsonConverter` — or a decode-only
+   `fromJson` function when the parent never writes the field — in
    `lib/src/core/models/converters/v1_json_converters.dart`, marked
    `// TODO(openapi-migration): remove in group NN` and listed below. The group that migrates the parent deletes
    it, and `generate_plan.py --check` fails if a ticked group leaves one behind.
@@ -106,6 +107,7 @@ Each ships with a CHANGELOG entry and a Symbol Map row like any other break.
 | Adapter | Field | Removed by |
 | --- | --- | --- |
 | `DeviceV1JsonConverter` | `OwnUser.devices` | [09](09-users.md) |
+| `userGroupsFromV1Json` | `Message.mentionedGroups` | [10](10-messages.md) |
 
 Before group 09 starts, decide how v1 events decode a parent once it becomes a plain model: through the
 generated types plus a shim that rebuilds `custom` from the flattened v1 keys, or through a private v1 decoder in
