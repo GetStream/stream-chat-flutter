@@ -8,10 +8,12 @@ import '../poll/interactor/poll_add_comment_dialog.dart';
 import '../poll/interactor/poll_end_vote_dialog.dart';
 import '../poll/interactor/poll_suggest_option_dialog.dart';
 import '../poll/interactor/stream_poll_interactor.dart';
+import '../poll/poll_translation.dart';
 import '../poll/stream_poll_comments_sheet.dart';
 import '../poll/stream_poll_options_sheet.dart';
 import '../poll/stream_poll_results_sheet.dart';
 import '../stream_chat.dart';
+import '../utils/extensions.dart';
 
 /// An interactive poll attachment with voting and results.
 ///
@@ -169,7 +171,9 @@ class _DefaultStreamPollAttachmentState extends State<DefaultStreamPollAttachmen
         return ConstrainedBox(
           constraints: constraints,
           child: StreamPollInteractor(
-            poll: poll,
+            // Only what is displayed is translated: the callbacks keep acting
+            // on the original poll.
+            poll: poll.translate(pollTranslationLanguageOf(context, message)),
             currentUser: currentUser,
             visibleOptionCount: _maxVisibleOptionCount,
             onEndVote: onEndVote,

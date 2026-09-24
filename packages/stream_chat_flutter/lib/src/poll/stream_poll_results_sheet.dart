@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../stream_chat_flutter.dart';
 import '../misc/empty_widget.dart';
+import 'poll_translation.dart';
 
 /// {@template showStreamPollResultsSheet}
 /// Displays an interactive bottom sheet to show the results of a poll.
@@ -21,17 +22,22 @@ Future<T?> showStreamPollResultsSheet<T extends Object?>({
   required BuildContext context,
   required ValueListenable<Message> messageNotifier,
 }) {
+  // Resolved from the caller's context, as the sheet's own may not be below
+  // [StreamChat]; see [pollTranslationLanguageOf].
+  final language = pollTranslationLanguageOf(context, messageNotifier.value);
+
   return showStreamSheet<T>(
     context: context,
     builder: (_, scrollController) => StreamChannel.value(
       channel: StreamChannel.of(context).channel,
       child: ValueListenableBuilder(
         valueListenable: messageNotifier,
-        builder: (context, message, _) {
+        builder: (_, message, _) {
           final poll = message.poll;
           if (poll == null) return const Empty();
 
           void onShowAllVotesPressed(PollOption option) {
+            // The caller's context, for the same reason as `language` above.
             showStreamPollOptionVotesSheet(
               context: context,
               messageNotifier: messageNotifier,
@@ -40,7 +46,7 @@ Future<T?> showStreamPollResultsSheet<T extends Object?>({
           }
 
           return StreamPollResultsSheet(
-            poll: poll,
+            poll: poll.translate(language),
             visibleVotesCount: 5,
             scrollController: scrollController,
             onShowAllVotesPressed: onShowAllVotesPressed,

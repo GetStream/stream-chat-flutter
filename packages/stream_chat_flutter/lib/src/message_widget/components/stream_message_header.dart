@@ -114,7 +114,8 @@ class StreamMessageHeaderProps {
 ///     channel or thread view, and includes a tappable "View" link that
 ///     invokes [StreamMessageHeaderProps.onViewChannelTap].
 ///  4. **Reminder** — when a reminder exists with a scheduled time.
-///  5. **Translated** — when [Message.i18n] has a translation for the
+///  5. **Translated** — when [Message.i18n], or the message's [Message.poll]
+///     (see [PollTranslationX.hasTranslation]), has a translation for the
 ///     current user's language, the message was not written in that language,
 ///     and [StreamMessageTranslationConfiguration.annotationEnabled] is set.
 ///     Reads "Translated from {language}" when the original language is
@@ -232,10 +233,13 @@ class _DefaultStreamMessageHeaderState extends core.NullableState<DefaultStreamM
       // A translation into the reader's own language is what there is to
       // toggle; `translatedText` returns null when there is nothing to show,
       // including for a reader of the language the message was written in.
-      if (message.translatedText(_language) != null) {
+      // A poll translates along with its message, so it counts too.
+      final hasTranslation =
+          message.translatedText(_language) != null || (message.poll?.hasTranslation(_language) ?? false);
+      if (hasTranslation) {
         final label = switch (props.showTranslatedText) {
           false => translations.originalLabel,
-          true => switch (message.originalLanguage) {
+          true => switch (message.originalLanguage ?? message.poll?.originalLanguage) {
             null => translations.translatedLabel,
             final sourceLanguage => translations.translatedFromLanguageText(sourceLanguage),
           },

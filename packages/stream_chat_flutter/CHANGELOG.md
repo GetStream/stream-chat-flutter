@@ -2,6 +2,8 @@
 
 ✅ Added
 
+- Polls now display their translations, like message text does: the question, description, options and comments are shown in the current user's language in the poll attachment, its options, results, votes and comments sheets, and the channel, thread and quoted-message previews. `StreamMessageTranslationConfiguration.enabled` turns this off, and with `annotationEnabled` a translated poll gets the "Translated · Show original" annotation, which switches the poll back to its original text.
+- Added `PollTranslationX`, `PollOptionTranslationX` and `PollVoteTranslationX`, with `translatedName`, `translatedText`, `translatedAnswerText`, `hasTranslation` and `translate` helpers mirroring `Message.translatedText` and `Message.translate`, and `StreamPollCommentsSheet.language` to show its comments translated.
 - Added `StreamMessageItem.semanticsLabel`, which replaces the announcement composed for a message row, and `StreamMessageItem.excludeFromSemantics`, which leaves the row unlabeled so the bubble and footer announce their own parts.
 - Added `StreamQuotedMessage.replyMessage`, the message doing the quoting, which lets a quoted preview announce who replied to whom.
 - Added `StreamMessageContent.excludeTextFromSemantics` and `StreamMessageFooter.excludeFromSemantics`, which keep the message text and the metadata out of the semantics tree when an enclosing row already announces them.
@@ -14,6 +16,7 @@
   `libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libwebp-dev`.
 - A deleted message now renders the timestamp and delivery status below the placeholder, matching the design, and no longer shows the "Edited" marker — there is no text left to have been edited.
 - `AccessibleMessagePreviewFormatter.formatMessageSemanticsLabel` must now return the body without a speaker prefix when `channel` is omitted. An implementation that prefixes unconditionally makes a message row announce "You said, You: hello".
+- `Message.translate` now also translates the message's poll, so previews and screen-reader labels of a poll message use the poll's translation.
 - `StreamImageCDN.resolveUrl` now leaves a URL that already asks for a specific size alone, rather than replacing it with the size the layout computed.
 
 🐞 Fixed

@@ -464,10 +464,7 @@ extension MessageX on Message {
   /// auto-translation API, or `null` when it is unknown.
   ///
   /// An ISO 639-1 code, optionally with a regional suffix (e.g. `zh-TW`).
-  String? get originalLanguage => switch (i18n?['language']) {
-    null || '' => null,
-    final language => language,
-  };
+  String? get originalLanguage => _sourceLanguageOf(i18n);
 
   /// It returns the translation of this message into [language], or `null`
   /// when there is none available locally.
@@ -481,20 +478,20 @@ extension MessageX on Message {
   /// Returns `null` when [language] is `null` or empty — Stream's API
   /// defaults [User.language] to `''` rather than omitting it, so both are
   /// treated as "no language to translate to".
-  String? translatedText(String? language) {
-    if (language == null || language.isEmpty) return null;
-    if (language.toLowerCase() == originalLanguage?.toLowerCase()) return null;
-    return i18n?['${language}_text'];
-  }
+  String? translatedText(String? language) => _translationOf(i18n, language);
 
-  /// It returns the message with the translated text if available locally.
+  /// It returns the message with the translated text, and the translated
+  /// [poll] (see [PollTranslationX.translate]), if available locally.
   ///
-  /// Returns the message unchanged when [translatedText] has no translation
-  /// into [language].
-  Message translate(String? language) => switch (translatedText(language)) {
-    null => this,
-    final translatedText => copyWith(text: translatedText),
-  };
+  /// Returns the message unchanged when neither its text nor its poll has a
+  /// translation into [language].
+  Message translate(String? language) {
+    final translatedText = this.translatedText(language);
+    final translatedPoll = poll?.translate(language);
+    if (translatedText == null && translatedPoll == poll) return this;
+
+    return copyWith(text: translatedText, poll: translatedPoll);
+  }
 
   /// It returns the message replacing the mentioned user names with
   ///  the respective user ids
@@ -514,6 +511,110 @@ extension MessageX on Message {
 
     return copyWith(text: messageTextToSend);
   }
+}
+
+// The language the text behind a server-provided translation map was written
+// in, or `null` when it is unknown.
+String? _sourceLanguageOf(Map<String, String>? i18n) => switch (i18n?['language']) {
+  null || '' => null,
+  final language => language,
+};
+
+// The translation into [language] held by a server-provided translation map
+// (`{'language': 'en', 'nl_text': '…'}`), or `null` when there is none.
+//
+// Stream echoes a self-referential entry for the source language, and
+// defaults `User.language` to `''` — neither is something to translate to.
+String? _translationOf(Map<String, String>? i18n, String? language) {
+  if (language == null || language.isEmpty) return null;
+  if (language.toLowerCase() == _sourceLanguageOf(i18n)?.toLowerCase()) return null;
+  return i18n?['${language}_text'];
+}
+
+/// Translation helpers for a [Poll] sent to a channel with automatic
+/// translation enabled.
+///
+/// Every lookup follows the same rules as [MessageX.translatedText]: `null`
+/// when [language] is `null` or empty, or when it is the language the text
+/// was written in.
+extension PollTranslationX on Poll {
+  /// The language this poll was written in, as reported by Stream's
+  /// auto-translation API, or `null` when it is unknown.
+  String? get originalLanguage =>
+      _sourceLanguageOf(nameI18n) ??
+      _sourceLanguageOf(descriptionI18n) ??
+      options.map((it) => _sourceLanguageOf(it.textI18n)).nonNulls.firstOrNull;
+
+  /// The translation of [Poll.name] into [language], or `null` when there is
+  /// none available locally.
+  String? translatedName(String? language) => _translationOf(nameI18n, language);
+
+  /// The translation of [Poll.description] into [language], or `null` when
+  /// there is none available locally.
+  String? translatedDescription(String? language) => _translationOf(descriptionI18n, language);
+
+  /// Whether the poll's own content — its name, description or any of its
+  /// options — has a translation into [language].
+  ///
+  /// Answers are not included: each is written by a different user, often in
+  /// a different language than the poll itself.
+  bool hasTranslation(String? language) =>
+      translatedName(language) != null ||
+      translatedDescription(language) != null ||
+      options.any((it) => it.translatedText(language) != null);
+
+  /// It returns a copy of the poll to display, with its name, description,
+  /// options and answers replaced by their translations into [language]
+  /// where available locally.
+  ///
+  /// Everything else, ids included, is left as is, but the copy is meant for
+  /// display only: pass the original poll to API calls, and use its texts to
+  /// prefill anything the user edits.
+  Poll translate(String? language) {
+    if (language == null || language.isEmpty) return this;
+
+    return copyWith(
+      name: translatedName(language),
+      description: translatedDescription(language),
+      options: [for (final option in options) option.translate(language)],
+      latestAnswers: [for (final answer in latestAnswers) answer.translate(language)],
+      ownVotesAndAnswers: [for (final vote in ownVotesAndAnswers) vote.translate(language)],
+    );
+  }
+}
+
+/// Translation helpers for a [PollOption] of a poll sent to a channel with
+/// automatic translation enabled.
+extension PollOptionTranslationX on PollOption {
+  /// The translation of [PollOption.text] into [language], or `null` when
+  /// there is none available locally.
+  ///
+  /// Follows the same rules as [MessageX.translatedText].
+  String? translatedText(String? language) => _translationOf(textI18n, language);
+
+  /// It returns the option with its text replaced by its translation into
+  /// [language], or unchanged when there is none available locally.
+  PollOption translate(String? language) => switch (translatedText(language)) {
+    null => this,
+    final translatedText => copyWith(text: translatedText),
+  };
+}
+
+/// Translation helpers for a [PollVote] of a poll sent to a channel with
+/// automatic translation enabled.
+extension PollVoteTranslationX on PollVote {
+  /// The translation of [PollVote.answerText] into [language], or `null` when
+  /// there is none available locally.
+  ///
+  /// Follows the same rules as [MessageX.translatedText].
+  String? translatedAnswerText(String? language) => _translationOf(answerTextI18n, language);
+
+  /// It returns the vote with its answer text replaced by its translation
+  /// into [language], or unchanged when there is none available locally.
+  PollVote translate(String? language) => switch (translatedAnswerText(language)) {
+    null => this,
+    final translatedAnswerText => copyWith(answerText: translatedAnswerText),
+  };
 }
 
 /// Extensions on [Uri]

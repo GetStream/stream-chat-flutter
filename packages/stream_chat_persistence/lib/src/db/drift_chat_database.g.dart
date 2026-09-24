@@ -6306,6 +6306,14 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  @override
+  late final GeneratedColumnWithTypeConverter<Map<String, String>?, String> nameI18n = GeneratedColumn<String>(
+    'name_i18n',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  ).withConverter<Map<String, String>?>($PollsTable.$converternameI18n);
   static const VerificationMeta _descriptionMeta = const VerificationMeta(
     'description',
   );
@@ -6317,6 +6325,14 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  @override
+  late final GeneratedColumnWithTypeConverter<Map<String, String>?, String> descriptionI18n = GeneratedColumn<String>(
+    'description_i18n',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  ).withConverter<Map<String, String>?>($PollsTable.$converterdescriptionI18n);
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String> options = GeneratedColumn<String>(
     'options',
@@ -6482,7 +6498,9 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
   List<GeneratedColumn> get $columns => [
     id,
     name,
+    nameI18n,
     description,
+    descriptionI18n,
     options,
     votingVisibility,
     enforceUniqueVote,
@@ -6627,9 +6645,21 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
         DriftSqlType.string,
         data['${effectivePrefix}name'],
       )!,
+      nameI18n: $PollsTable.$converternameI18n.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}name_i18n'],
+        ),
+      ),
       description: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}description'],
+      ),
+      descriptionI18n: $PollsTable.$converterdescriptionI18n.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}description_i18n'],
+        ),
       ),
       options: $PollsTable.$converteroptions.fromSql(
         attachedDatabase.typeMapping.read(
@@ -6703,6 +6733,8 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
     return $PollsTable(attachedDatabase, alias);
   }
 
+  static TypeConverter<Map<String, String>?, String?> $converternameI18n = NullableMapConverter<String>();
+  static TypeConverter<Map<String, String>?, String?> $converterdescriptionI18n = NullableMapConverter<String>();
   static TypeConverter<List<String>, String> $converteroptions = ListConverter<String>();
   static TypeConverter<VotingVisibility, String> $convertervotingVisibility = const VotingVisibilityConverter();
   static TypeConverter<Map<String, int>, String> $convertervoteCountsByOption = MapConverter<int>();
@@ -6719,8 +6751,14 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
   /// The name of the poll.
   final String name;
 
+  /// A Map of [name] translations.
+  final Map<String, String>? nameI18n;
+
   /// The description of the poll.
   final String? description;
+
+  /// A Map of [description] translations.
+  final Map<String, String>? descriptionI18n;
 
   /// The list of options available for the poll.
   final List<String> options;
@@ -6774,7 +6812,9 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
   const PollEntity({
     required this.id,
     required this.name,
+    this.nameI18n,
     this.description,
+    this.descriptionI18n,
     required this.options,
     required this.votingVisibility,
     required this.enforceUniqueVote,
@@ -6795,8 +6835,18 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['name'] = Variable<String>(name);
+    if (!nullToAbsent || nameI18n != null) {
+      map['name_i18n'] = Variable<String>(
+        $PollsTable.$converternameI18n.toSql(nameI18n),
+      );
+    }
     if (!nullToAbsent || description != null) {
       map['description'] = Variable<String>(description);
+    }
+    if (!nullToAbsent || descriptionI18n != null) {
+      map['description_i18n'] = Variable<String>(
+        $PollsTable.$converterdescriptionI18n.toSql(descriptionI18n),
+      );
     }
     {
       map['options'] = Variable<String>(
@@ -6845,7 +6895,11 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
     return PollEntity(
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
+      nameI18n: serializer.fromJson<Map<String, String>?>(json['nameI18n']),
       description: serializer.fromJson<String?>(json['description']),
+      descriptionI18n: serializer.fromJson<Map<String, String>?>(
+        json['descriptionI18n'],
+      ),
       options: serializer.fromJson<List<String>>(json['options']),
       votingVisibility: serializer.fromJson<VotingVisibility>(
         json['votingVisibility'],
@@ -6874,7 +6928,11 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
+      'nameI18n': serializer.toJson<Map<String, String>?>(nameI18n),
       'description': serializer.toJson<String?>(description),
+      'descriptionI18n': serializer.toJson<Map<String, String>?>(
+        descriptionI18n,
+      ),
       'options': serializer.toJson<List<String>>(options),
       'votingVisibility': serializer.toJson<VotingVisibility>(votingVisibility),
       'enforceUniqueVote': serializer.toJson<bool>(enforceUniqueVote),
@@ -6899,7 +6957,9 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
   PollEntity copyWith({
     String? id,
     String? name,
+    Value<Map<String, String>?> nameI18n = const Value.absent(),
     Value<String?> description = const Value.absent(),
+    Value<Map<String, String>?> descriptionI18n = const Value.absent(),
     List<String>? options,
     VotingVisibility? votingVisibility,
     bool? enforceUniqueVote,
@@ -6917,7 +6977,9 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
   }) => PollEntity(
     id: id ?? this.id,
     name: name ?? this.name,
+    nameI18n: nameI18n.present ? nameI18n.value : this.nameI18n,
     description: description.present ? description.value : this.description,
+    descriptionI18n: descriptionI18n.present ? descriptionI18n.value : this.descriptionI18n,
     options: options ?? this.options,
     votingVisibility: votingVisibility ?? this.votingVisibility,
     enforceUniqueVote: enforceUniqueVote ?? this.enforceUniqueVote,
@@ -6937,7 +6999,9 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
     return PollEntity(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
+      nameI18n: data.nameI18n.present ? data.nameI18n.value : this.nameI18n,
       description: data.description.present ? data.description.value : this.description,
+      descriptionI18n: data.descriptionI18n.present ? data.descriptionI18n.value : this.descriptionI18n,
       options: data.options.present ? data.options.value : this.options,
       votingVisibility: data.votingVisibility.present ? data.votingVisibility.value : this.votingVisibility,
       enforceUniqueVote: data.enforceUniqueVote.present ? data.enforceUniqueVote.value : this.enforceUniqueVote,
@@ -6962,7 +7026,9 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
     return (StringBuffer('PollEntity(')
           ..write('id: $id, ')
           ..write('name: $name, ')
+          ..write('nameI18n: $nameI18n, ')
           ..write('description: $description, ')
+          ..write('descriptionI18n: $descriptionI18n, ')
           ..write('options: $options, ')
           ..write('votingVisibility: $votingVisibility, ')
           ..write('enforceUniqueVote: $enforceUniqueVote, ')
@@ -6985,7 +7051,9 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
   int get hashCode => Object.hash(
     id,
     name,
+    nameI18n,
     description,
+    descriptionI18n,
     options,
     votingVisibility,
     enforceUniqueVote,
@@ -7007,7 +7075,9 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
       (other is PollEntity &&
           other.id == this.id &&
           other.name == this.name &&
+          other.nameI18n == this.nameI18n &&
           other.description == this.description &&
+          other.descriptionI18n == this.descriptionI18n &&
           other.options == this.options &&
           other.votingVisibility == this.votingVisibility &&
           other.enforceUniqueVote == this.enforceUniqueVote &&
@@ -7027,7 +7097,9 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
 class PollsCompanion extends UpdateCompanion<PollEntity> {
   final Value<String> id;
   final Value<String> name;
+  final Value<Map<String, String>?> nameI18n;
   final Value<String?> description;
+  final Value<Map<String, String>?> descriptionI18n;
   final Value<List<String>> options;
   final Value<VotingVisibility> votingVisibility;
   final Value<bool> enforceUniqueVote;
@@ -7046,7 +7118,9 @@ class PollsCompanion extends UpdateCompanion<PollEntity> {
   const PollsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
+    this.nameI18n = const Value.absent(),
     this.description = const Value.absent(),
+    this.descriptionI18n = const Value.absent(),
     this.options = const Value.absent(),
     this.votingVisibility = const Value.absent(),
     this.enforceUniqueVote = const Value.absent(),
@@ -7066,7 +7140,9 @@ class PollsCompanion extends UpdateCompanion<PollEntity> {
   PollsCompanion.insert({
     required String id,
     required String name,
+    this.nameI18n = const Value.absent(),
     this.description = const Value.absent(),
+    this.descriptionI18n = const Value.absent(),
     required List<String> options,
     this.votingVisibility = const Value.absent(),
     this.enforceUniqueVote = const Value.absent(),
@@ -7089,7 +7165,9 @@ class PollsCompanion extends UpdateCompanion<PollEntity> {
   static Insertable<PollEntity> custom({
     Expression<String>? id,
     Expression<String>? name,
+    Expression<String>? nameI18n,
     Expression<String>? description,
+    Expression<String>? descriptionI18n,
     Expression<String>? options,
     Expression<String>? votingVisibility,
     Expression<bool>? enforceUniqueVote,
@@ -7109,7 +7187,9 @@ class PollsCompanion extends UpdateCompanion<PollEntity> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
+      if (nameI18n != null) 'name_i18n': nameI18n,
       if (description != null) 'description': description,
+      if (descriptionI18n != null) 'description_i18n': descriptionI18n,
       if (options != null) 'options': options,
       if (votingVisibility != null) 'voting_visibility': votingVisibility,
       if (enforceUniqueVote != null) 'enforce_unique_vote': enforceUniqueVote,
@@ -7131,7 +7211,9 @@ class PollsCompanion extends UpdateCompanion<PollEntity> {
   PollsCompanion copyWith({
     Value<String>? id,
     Value<String>? name,
+    Value<Map<String, String>?>? nameI18n,
     Value<String?>? description,
+    Value<Map<String, String>?>? descriptionI18n,
     Value<List<String>>? options,
     Value<VotingVisibility>? votingVisibility,
     Value<bool>? enforceUniqueVote,
@@ -7151,7 +7233,9 @@ class PollsCompanion extends UpdateCompanion<PollEntity> {
     return PollsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
+      nameI18n: nameI18n ?? this.nameI18n,
       description: description ?? this.description,
+      descriptionI18n: descriptionI18n ?? this.descriptionI18n,
       options: options ?? this.options,
       votingVisibility: votingVisibility ?? this.votingVisibility,
       enforceUniqueVote: enforceUniqueVote ?? this.enforceUniqueVote,
@@ -7179,8 +7263,18 @@ class PollsCompanion extends UpdateCompanion<PollEntity> {
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
+    if (nameI18n.present) {
+      map['name_i18n'] = Variable<String>(
+        $PollsTable.$converternameI18n.toSql(nameI18n.value),
+      );
+    }
     if (description.present) {
       map['description'] = Variable<String>(description.value);
+    }
+    if (descriptionI18n.present) {
+      map['description_i18n'] = Variable<String>(
+        $PollsTable.$converterdescriptionI18n.toSql(descriptionI18n.value),
+      );
     }
     if (options.present) {
       map['options'] = Variable<String>(
@@ -7247,7 +7341,9 @@ class PollsCompanion extends UpdateCompanion<PollEntity> {
     return (StringBuffer('PollsCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
+          ..write('nameI18n: $nameI18n, ')
           ..write('description: $description, ')
+          ..write('descriptionI18n: $descriptionI18n, ')
           ..write('options: $options, ')
           ..write('votingVisibility: $votingVisibility, ')
           ..write('enforceUniqueVote: $enforceUniqueVote, ')
@@ -7316,6 +7412,17 @@ class $PollVotesTable extends PollVotes with TableInfo<$PollVotesTable, PollVote
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  @override
+  late final GeneratedColumnWithTypeConverter<Map<String, String>?, String> answerTextI18n =
+      GeneratedColumn<String>(
+        'answer_text_i18n',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<Map<String, String>?>(
+        $PollVotesTable.$converteranswerTextI18n,
+      );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -7355,6 +7462,7 @@ class $PollVotesTable extends PollVotes with TableInfo<$PollVotesTable, PollVote
     pollId,
     optionId,
     answerText,
+    answerTextI18n,
     createdAt,
     updatedAt,
     userId,
@@ -7435,6 +7543,12 @@ class $PollVotesTable extends PollVotes with TableInfo<$PollVotesTable, PollVote
         DriftSqlType.string,
         data['${effectivePrefix}answer_text'],
       ),
+      answerTextI18n: $PollVotesTable.$converteranswerTextI18n.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}answer_text_i18n'],
+        ),
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -7454,6 +7568,8 @@ class $PollVotesTable extends PollVotes with TableInfo<$PollVotesTable, PollVote
   $PollVotesTable createAlias(String alias) {
     return $PollVotesTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<Map<String, String>?, String?> $converteranswerTextI18n = NullableMapConverter<String>();
 }
 
 class PollVoteEntity extends DataClass implements Insertable<PollVoteEntity> {
@@ -7473,6 +7589,9 @@ class PollVoteEntity extends DataClass implements Insertable<PollVoteEntity> {
   /// Nullable if the user selected an option.
   final String? answerText;
 
+  /// A Map of [answerText] translations.
+  final Map<String, String>? answerTextI18n;
+
   /// The date when the poll vote was created.
   final DateTime createdAt;
 
@@ -7488,6 +7607,7 @@ class PollVoteEntity extends DataClass implements Insertable<PollVoteEntity> {
     this.pollId,
     this.optionId,
     this.answerText,
+    this.answerTextI18n,
     required this.createdAt,
     required this.updatedAt,
     this.userId,
@@ -7507,6 +7627,11 @@ class PollVoteEntity extends DataClass implements Insertable<PollVoteEntity> {
     if (!nullToAbsent || answerText != null) {
       map['answer_text'] = Variable<String>(answerText);
     }
+    if (!nullToAbsent || answerTextI18n != null) {
+      map['answer_text_i18n'] = Variable<String>(
+        $PollVotesTable.$converteranswerTextI18n.toSql(answerTextI18n),
+      );
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || userId != null) {
@@ -7525,6 +7650,9 @@ class PollVoteEntity extends DataClass implements Insertable<PollVoteEntity> {
       pollId: serializer.fromJson<String?>(json['pollId']),
       optionId: serializer.fromJson<String?>(json['optionId']),
       answerText: serializer.fromJson<String?>(json['answerText']),
+      answerTextI18n: serializer.fromJson<Map<String, String>?>(
+        json['answerTextI18n'],
+      ),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       userId: serializer.fromJson<String?>(json['userId']),
@@ -7538,6 +7666,7 @@ class PollVoteEntity extends DataClass implements Insertable<PollVoteEntity> {
       'pollId': serializer.toJson<String?>(pollId),
       'optionId': serializer.toJson<String?>(optionId),
       'answerText': serializer.toJson<String?>(answerText),
+      'answerTextI18n': serializer.toJson<Map<String, String>?>(answerTextI18n),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'userId': serializer.toJson<String?>(userId),
@@ -7549,6 +7678,7 @@ class PollVoteEntity extends DataClass implements Insertable<PollVoteEntity> {
     Value<String?> pollId = const Value.absent(),
     Value<String?> optionId = const Value.absent(),
     Value<String?> answerText = const Value.absent(),
+    Value<Map<String, String>?> answerTextI18n = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<String?> userId = const Value.absent(),
@@ -7557,6 +7687,7 @@ class PollVoteEntity extends DataClass implements Insertable<PollVoteEntity> {
     pollId: pollId.present ? pollId.value : this.pollId,
     optionId: optionId.present ? optionId.value : this.optionId,
     answerText: answerText.present ? answerText.value : this.answerText,
+    answerTextI18n: answerTextI18n.present ? answerTextI18n.value : this.answerTextI18n,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     userId: userId.present ? userId.value : this.userId,
@@ -7567,6 +7698,7 @@ class PollVoteEntity extends DataClass implements Insertable<PollVoteEntity> {
       pollId: data.pollId.present ? data.pollId.value : this.pollId,
       optionId: data.optionId.present ? data.optionId.value : this.optionId,
       answerText: data.answerText.present ? data.answerText.value : this.answerText,
+      answerTextI18n: data.answerTextI18n.present ? data.answerTextI18n.value : this.answerTextI18n,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       userId: data.userId.present ? data.userId.value : this.userId,
@@ -7580,6 +7712,7 @@ class PollVoteEntity extends DataClass implements Insertable<PollVoteEntity> {
           ..write('pollId: $pollId, ')
           ..write('optionId: $optionId, ')
           ..write('answerText: $answerText, ')
+          ..write('answerTextI18n: $answerTextI18n, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('userId: $userId')
@@ -7593,6 +7726,7 @@ class PollVoteEntity extends DataClass implements Insertable<PollVoteEntity> {
     pollId,
     optionId,
     answerText,
+    answerTextI18n,
     createdAt,
     updatedAt,
     userId,
@@ -7605,6 +7739,7 @@ class PollVoteEntity extends DataClass implements Insertable<PollVoteEntity> {
           other.pollId == this.pollId &&
           other.optionId == this.optionId &&
           other.answerText == this.answerText &&
+          other.answerTextI18n == this.answerTextI18n &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.userId == this.userId);
@@ -7615,6 +7750,7 @@ class PollVotesCompanion extends UpdateCompanion<PollVoteEntity> {
   final Value<String?> pollId;
   final Value<String?> optionId;
   final Value<String?> answerText;
+  final Value<Map<String, String>?> answerTextI18n;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<String?> userId;
@@ -7624,6 +7760,7 @@ class PollVotesCompanion extends UpdateCompanion<PollVoteEntity> {
     this.pollId = const Value.absent(),
     this.optionId = const Value.absent(),
     this.answerText = const Value.absent(),
+    this.answerTextI18n = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.userId = const Value.absent(),
@@ -7634,6 +7771,7 @@ class PollVotesCompanion extends UpdateCompanion<PollVoteEntity> {
     this.pollId = const Value.absent(),
     this.optionId = const Value.absent(),
     this.answerText = const Value.absent(),
+    this.answerTextI18n = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.userId = const Value.absent(),
@@ -7644,6 +7782,7 @@ class PollVotesCompanion extends UpdateCompanion<PollVoteEntity> {
     Expression<String>? pollId,
     Expression<String>? optionId,
     Expression<String>? answerText,
+    Expression<String>? answerTextI18n,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<String>? userId,
@@ -7654,6 +7793,7 @@ class PollVotesCompanion extends UpdateCompanion<PollVoteEntity> {
       if (pollId != null) 'poll_id': pollId,
       if (optionId != null) 'option_id': optionId,
       if (answerText != null) 'answer_text': answerText,
+      if (answerTextI18n != null) 'answer_text_i18n': answerTextI18n,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (userId != null) 'user_id': userId,
@@ -7666,6 +7806,7 @@ class PollVotesCompanion extends UpdateCompanion<PollVoteEntity> {
     Value<String?>? pollId,
     Value<String?>? optionId,
     Value<String?>? answerText,
+    Value<Map<String, String>?>? answerTextI18n,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<String?>? userId,
@@ -7676,6 +7817,7 @@ class PollVotesCompanion extends UpdateCompanion<PollVoteEntity> {
       pollId: pollId ?? this.pollId,
       optionId: optionId ?? this.optionId,
       answerText: answerText ?? this.answerText,
+      answerTextI18n: answerTextI18n ?? this.answerTextI18n,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       userId: userId ?? this.userId,
@@ -7697,6 +7839,11 @@ class PollVotesCompanion extends UpdateCompanion<PollVoteEntity> {
     }
     if (answerText.present) {
       map['answer_text'] = Variable<String>(answerText.value);
+    }
+    if (answerTextI18n.present) {
+      map['answer_text_i18n'] = Variable<String>(
+        $PollVotesTable.$converteranswerTextI18n.toSql(answerTextI18n.value),
+      );
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -7720,6 +7867,7 @@ class PollVotesCompanion extends UpdateCompanion<PollVoteEntity> {
           ..write('pollId: $pollId, ')
           ..write('optionId: $optionId, ')
           ..write('answerText: $answerText, ')
+          ..write('answerTextI18n: $answerTextI18n, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('userId: $userId, ')
@@ -15926,7 +16074,9 @@ typedef $$PollsTableCreateCompanionBuilder =
     PollsCompanion Function({
       required String id,
       required String name,
+      Value<Map<String, String>?> nameI18n,
       Value<String?> description,
+      Value<Map<String, String>?> descriptionI18n,
       required List<String> options,
       Value<VotingVisibility> votingVisibility,
       Value<bool> enforceUniqueVote,
@@ -15947,7 +16097,9 @@ typedef $$PollsTableUpdateCompanionBuilder =
     PollsCompanion Function({
       Value<String> id,
       Value<String> name,
+      Value<Map<String, String>?> nameI18n,
       Value<String?> description,
+      Value<Map<String, String>?> descriptionI18n,
       Value<List<String>> options,
       Value<VotingVisibility> votingVisibility,
       Value<bool> enforceUniqueVote,
@@ -16005,10 +16157,21 @@ class $$PollsTableFilterComposer extends Composer<_$DriftChatDatabase, $PollsTab
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnWithTypeConverterFilters<Map<String, String>?, Map<String, String>, String> get nameI18n => $composableBuilder(
+    column: $table.nameI18n,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
   ColumnFilters<String> get description => $composableBuilder(
     column: $table.description,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnWithTypeConverterFilters<Map<String, String>?, Map<String, String>, String> get descriptionI18n =>
+      $composableBuilder(
+        column: $table.descriptionI18n,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnWithTypeConverterFilters<List<String>, List<String>, String> get options => $composableBuilder(
     column: $table.options,
@@ -16125,8 +16288,18 @@ class $$PollsTableOrderingComposer extends Composer<_$DriftChatDatabase, $PollsT
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get nameI18n => $composableBuilder(
+    column: $table.nameI18n,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get description => $composableBuilder(
     column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get descriptionI18n => $composableBuilder(
+    column: $table.descriptionI18n,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -16213,8 +16386,16 @@ class $$PollsTableAnnotationComposer extends Composer<_$DriftChatDatabase, $Poll
 
   GeneratedColumn<String> get name => $composableBuilder(column: $table.name, builder: (column) => column);
 
+  GeneratedColumnWithTypeConverter<Map<String, String>?, String> get nameI18n =>
+      $composableBuilder(column: $table.nameI18n, builder: (column) => column);
+
   GeneratedColumn<String> get description => $composableBuilder(
     column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<Map<String, String>?, String> get descriptionI18n => $composableBuilder(
+    column: $table.descriptionI18n,
     builder: (column) => column,
   );
 
@@ -16324,7 +16505,9 @@ class $$PollsTableTableManager
               ({
                 Value<String> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
+                Value<Map<String, String>?> nameI18n = const Value.absent(),
                 Value<String?> description = const Value.absent(),
+                Value<Map<String, String>?> descriptionI18n = const Value.absent(),
                 Value<List<String>> options = const Value.absent(),
                 Value<VotingVisibility> votingVisibility = const Value.absent(),
                 Value<bool> enforceUniqueVote = const Value.absent(),
@@ -16343,7 +16526,9 @@ class $$PollsTableTableManager
               }) => PollsCompanion(
                 id: id,
                 name: name,
+                nameI18n: nameI18n,
                 description: description,
+                descriptionI18n: descriptionI18n,
                 options: options,
                 votingVisibility: votingVisibility,
                 enforceUniqueVote: enforceUniqueVote,
@@ -16364,7 +16549,9 @@ class $$PollsTableTableManager
               ({
                 required String id,
                 required String name,
+                Value<Map<String, String>?> nameI18n = const Value.absent(),
                 Value<String?> description = const Value.absent(),
+                Value<Map<String, String>?> descriptionI18n = const Value.absent(),
                 required List<String> options,
                 Value<VotingVisibility> votingVisibility = const Value.absent(),
                 Value<bool> enforceUniqueVote = const Value.absent(),
@@ -16383,7 +16570,9 @@ class $$PollsTableTableManager
               }) => PollsCompanion.insert(
                 id: id,
                 name: name,
+                nameI18n: nameI18n,
                 description: description,
+                descriptionI18n: descriptionI18n,
                 options: options,
                 votingVisibility: votingVisibility,
                 enforceUniqueVote: enforceUniqueVote,
@@ -16449,6 +16638,7 @@ typedef $$PollVotesTableCreateCompanionBuilder =
       Value<String?> pollId,
       Value<String?> optionId,
       Value<String?> answerText,
+      Value<Map<String, String>?> answerTextI18n,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<String?> userId,
@@ -16460,6 +16650,7 @@ typedef $$PollVotesTableUpdateCompanionBuilder =
       Value<String?> pollId,
       Value<String?> optionId,
       Value<String?> answerText,
+      Value<Map<String, String>?> answerTextI18n,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<String?> userId,
@@ -16509,6 +16700,12 @@ class $$PollVotesTableFilterComposer extends Composer<_$DriftChatDatabase, $Poll
     column: $table.answerText,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnWithTypeConverterFilters<Map<String, String>?, Map<String, String>, String> get answerTextI18n =>
+      $composableBuilder(
+        column: $table.answerTextI18n,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
@@ -16571,6 +16768,11 @@ class $$PollVotesTableOrderingComposer extends Composer<_$DriftChatDatabase, $Po
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get answerTextI18n => $composableBuilder(
+    column: $table.answerTextI18n,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -16623,6 +16825,11 @@ class $$PollVotesTableAnnotationComposer extends Composer<_$DriftChatDatabase, $
 
   GeneratedColumn<String> get answerText => $composableBuilder(
     column: $table.answerText,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<Map<String, String>?, String> get answerTextI18n => $composableBuilder(
+    column: $table.answerTextI18n,
     builder: (column) => column,
   );
 
@@ -16684,6 +16891,7 @@ class $$PollVotesTableTableManager
                 Value<String?> pollId = const Value.absent(),
                 Value<String?> optionId = const Value.absent(),
                 Value<String?> answerText = const Value.absent(),
+                Value<Map<String, String>?> answerTextI18n = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<String?> userId = const Value.absent(),
@@ -16693,6 +16901,7 @@ class $$PollVotesTableTableManager
                 pollId: pollId,
                 optionId: optionId,
                 answerText: answerText,
+                answerTextI18n: answerTextI18n,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 userId: userId,
@@ -16704,6 +16913,7 @@ class $$PollVotesTableTableManager
                 Value<String?> pollId = const Value.absent(),
                 Value<String?> optionId = const Value.absent(),
                 Value<String?> answerText = const Value.absent(),
+                Value<Map<String, String>?> answerTextI18n = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<String?> userId = const Value.absent(),
@@ -16713,6 +16923,7 @@ class $$PollVotesTableTableManager
                 pollId: pollId,
                 optionId: optionId,
                 answerText: answerText,
+                answerTextI18n: answerTextI18n,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 userId: userId,

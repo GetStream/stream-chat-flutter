@@ -73,6 +73,54 @@ void main() {
       expect(json['is_closed'], false);
     });
 
+    test('parses the server translations of the poll, its options and answers', () {
+      final poll = Poll.fromJson({
+        ...jsonFixture('poll.json'),
+        'name_i18n': const {'language': 'en', 'nl_text': 'toets'},
+        'description_i18n': const {'language': 'en', 'nl_text': 'omschrijving'},
+        'options': const [
+          {
+            'id': 'option1',
+            'text': 'option1 text',
+            'text_i18n': {'language': 'en', 'nl_text': 'optie1 tekst'},
+          },
+        ],
+        'latest_answers': const [
+          {
+            'id': 'answer1',
+            'answer_text': 'great',
+            'answer_text_i18n': {'language': 'en', 'nl_text': 'geweldig'},
+          },
+        ],
+      });
+
+      expect(poll.nameI18n, {'language': 'en', 'nl_text': 'toets'});
+      expect(poll.descriptionI18n, {'language': 'en', 'nl_text': 'omschrijving'});
+      expect(poll.options.single.textI18n, {'language': 'en', 'nl_text': 'optie1 tekst'});
+      expect(poll.latestAnswers.single.answerTextI18n, {'language': 'en', 'nl_text': 'geweldig'});
+      expect(poll.extraData, isNot(contains('name_i18n')));
+      expect(poll.extraData, isNot(contains('description_i18n')));
+    });
+
+    test('does not send the server translations back when serialized', () {
+      final poll = Poll(
+        name: 'test',
+        nameI18n: const {'language': 'en', 'nl_text': 'toets'},
+        descriptionI18n: const {'language': 'en', 'nl_text': 'omschrijving'},
+        options: const [
+          PollOption(text: 'option1 text', textI18n: {'language': 'en', 'nl_text': 'optie1 tekst'}),
+        ],
+      );
+
+      final json = poll.toJson();
+
+      expect(json, isNot(contains('name_i18n')));
+      expect(json, isNot(contains('description_i18n')));
+      expect(json['options'], [
+        {'text': 'option1 text'},
+      ]);
+    });
+
     group('ComparableFieldProvider', () {
       test('should return ComparableField for poll.id', () {
         final poll = createTestPoll(

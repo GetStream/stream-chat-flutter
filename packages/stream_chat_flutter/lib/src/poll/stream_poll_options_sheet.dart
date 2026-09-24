@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../stream_chat_flutter.dart';
 import '../misc/empty_widget.dart';
 import 'interactor/poll_options_list_view.dart';
+import 'poll_translation.dart';
 
 /// {@template showStreamPollOptionsSheet}
 /// Displays an interactive bottom sheet to show all the available options for
@@ -15,6 +16,10 @@ Future<T?> showStreamPollOptionsSheet<T extends Object?>({
   required BuildContext context,
   required ValueListenable<Message> messageNotifier,
 }) {
+  // Resolved from the caller's context, as the sheet's own may not be below
+  // [StreamChat]; see [pollTranslationLanguageOf].
+  final language = pollTranslationLanguageOf(context, messageNotifier.value);
+
   return showStreamSheet<T>(
     context: context,
     builder: (_, scrollController) => StreamChannel.value(
@@ -36,7 +41,7 @@ Future<T?> showStreamPollOptionsSheet<T extends Object?>({
           }
 
           return StreamPollOptionsSheet(
-            poll: poll,
+            poll: poll.translate(language),
             scrollController: scrollController,
             onCastVote: onCastVote,
             onRemoveVote: onRemoveVote,
