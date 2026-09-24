@@ -9,7 +9,8 @@
 
 ⚠️ Changed
 
-- Bumped `file_picker` to `>=12.0.0 <14.0.0`.- `PlatformFileX.toAttachmentFile` and `PlatformFileX.toAttachment` are now async.
+- Bumped `file_picker` to `>=12.0.0 <14.0.0`.
+- `PlatformFileX.toAttachmentFile` and `PlatformFileX.toAttachment` are now async.
 - Video thumbnails now use `stream_thumbnail` on every platform, and the `thumblr`
   dependency is gone.
 - Linux builds now need the FFmpeg and libwebp development packages — on Debian/Ubuntu:
