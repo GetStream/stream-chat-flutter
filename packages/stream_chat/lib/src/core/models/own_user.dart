@@ -141,7 +141,7 @@ class OwnUser extends User {
     );
   }
 
-  /// List of user devices.
+  /// The devices registered for this user to receive push notifications.
   @DeviceV1JsonConverter()
   final List<Device> devices;
 

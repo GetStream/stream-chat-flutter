@@ -14,6 +14,11 @@ class RolesRepository {
 
   /// Searches roles by name prefix (autocomplete).
   ///
+  /// [limit] caps how many roles come back in one page.
+  ///
+  /// [nameGt] is a cursor: only roles ordering after this name are returned.
+  /// Pass the last name of the previous page to read the next one.
+  ///
   /// [roleType] filters to user-assignable ([RoleType.user]) or
   /// channel-assignable ([RoleType.channel]) roles when set; both kinds are
   /// returned when omitted.
