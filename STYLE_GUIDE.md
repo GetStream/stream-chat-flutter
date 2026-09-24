@@ -456,6 +456,94 @@ Stream<List<Member>> get membersStream;
 Stream<List<Member>> get membersStream;
 ```
 
+### Document parameters in prose, not a roll call
+
+Effective Dart says to explain parameters in prose rather than `@param` tags. Writing
+one paragraph per parameter, each starting with the parameter's own name, is still
+`@param` — just with the tag deleted. It reads like Java and it buries the behaviour,
+because the reader gets a list of pieces instead of a description of what the call does.
+
+Weave parameters into sentences about what happens, the way `dart:core` does —
+*"Creates a new string with the first occurrence of [from] replaced by [to]"* — and use
+"If [x] …" for conditions, "The [x] …" for constraints.
+
+```dart
+// BAD — one paragraph per parameter, subject first:
+
+/// Bans [userID] from this channel.
+///
+/// [timeout] expires the ban, rounded down to whole minutes.
+///
+/// [shadow] hides their messages without telling them, [ipBan] also bans their
+/// address, and [deleteMessages] handles the messages they sent.
+
+// GOOD — parameters inside sentences about the behaviour, one concern per paragraph:
+
+/// Bans [userID] from this channel.
+///
+/// The ban lasts until it is removed. A [timeout] expires it after that long,
+/// rounded down to whole minutes, so a shorter one never expires it.
+///
+/// If [shadow] is true, their messages stop reaching anyone else and they are
+/// not told.
+///
+/// If [ipBan] is true, the address they connected from is banned as well.
+///
+/// [deleteMessages] decides what happens to the messages they already sent,
+/// and [reason] is recorded with the ban.
+```
+
+**One paragraph per distinct concern.** Avoiding the roll call does not mean merging
+unrelated behaviours into one block — a reader looking for what `ipBan` does should not
+have to read four sentences to find it. `dart:io`'s `Process.start` gives each `mode`
+value its own paragraph for the same reason.
+
+Group by behaviour, not by signature order: parameters that describe *one* thing share a
+paragraph (`deleteMessages` and `reason` above), and a parameter needing only a clause
+gets a clause rather than a paragraph of its own.
+
+### No server or transport details in docs or comments
+
+The same rule applies to everything on the far side of the network. An integrator
+reads the SDK's contract, not ours with the API. Keep out of dartdoc — and out of
+`//` comments:
+
+- Endpoints, paths, verbs and API versions (`POST /moderation/flag`, "the v2 endpoint")
+- Wire field names, request and response type names, and how a value is serialized
+  (`entity_type`, "sent as `target_ids`", "the wire models this as an open string")
+- What "the server" or "the backend" does with a value, and whether an endpoint is
+  deprecated, in beta, or behind a feature flag
+
+Describe the same thing as observable behaviour instead. A caller cannot verify a
+claim about the server, and the claim goes stale the moment the API changes — but
+they can observe what their own call does:
+
+```dart
+// BAD:
+
+/// [timeout] lifts the ban once it elapses.
+///
+/// Sent as `timeout` in minutes; the server applies it with minute granularity.
+
+// GOOD:
+
+/// [timeout] lifts the ban once it elapses; the ban lasts until it is removed
+/// when omitted. It is rounded down to whole minutes, so a value under a minute
+/// never lifts the ban.
+```
+
+Two things this does **not** forbid:
+
+- **Naming a concept the API owns and the caller works in** — a channel `cid`, a
+  user's `role`, a `team`. Those are domain vocabulary, not transport details.
+- **Saying so where the reader is a consumer deciding whether to upgrade.** Which
+  endpoint moved, what is in beta, and what a feature flag gates belong in
+  `CHANGELOG.md`, `migrations/*.md` and the PR body — those are read once, alongside
+  a version, and are expected to date.
+
+When the wire shape genuinely explains a piece of code, put it in the plan or the PR,
+and leave the code saying what it does.
+
 ### No cross-framework justification in comments
 
 Do not justify code by cross-referencing Flutter framework internals ("matching
@@ -1490,6 +1578,27 @@ someone deciding whether to upgrade — but avoid sub-bullets, per-method enumer
 and internal implementation notes. Reviewers reading a release should understand what
 changed without reading the diff; details that only matter to the person writing the
 PR belong in the PR description, not here.
+
+### An entry describes the change since the last *release*
+
+A changelog is read by someone upgrading from a published version, so an entry only
+earns its place if it describes a difference they can observe. Churn within an
+unreleased section is invisible to them.
+
+So on a long-lived unreleased branch — a `v11` beta, or anything accumulating under
+`Upcoming` — write the entry against the last release, not against the previous commit:
+
+- **Never add an entry for something that branch itself introduced and then changed.**
+  A method added under `Upcoming` and later renamed gets **one** entry, describing where
+  it landed. A bug introduced and fixed on the same unreleased branch gets **none** — it
+  never shipped, so there is nothing to fix from a reader's point of view. Edit the
+  existing entry instead of appending a second.
+- **Check what the last release actually shipped** before claiming prior state.
+  `git tag --contains <sha>` answers it. "Was already deprecated" is only true if a
+  released version carried the deprecation.
+- **File by what the change is to a consumer, not by how it felt to write.** A new
+  optional parameter is `✅ Added` even when the PR around it is breaking, and belongs
+  in the `✅ Added` section rather than buried among the breaks.
 
 ### Cross-package PRs
 

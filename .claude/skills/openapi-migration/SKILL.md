@@ -79,8 +79,41 @@ The inventory needs five lists:
 5. **Tests** — `test/src/core/api/<feature>_api_test.dart`, the feature's cases in
    `test/src/client/client_test.dart`, and its round-trips in `test/src/core/api/responses_test.dart`.
 
-Close the phase by checking for a **blocking mismatch**: if the generated payload omits a field our current request
-sends, that endpoint stays hand-written and the inventory says why. Migrating it would silently drop behaviour.
+Close the phase with three checks. Any of them can take an endpoint off the table.
+
+**1. Blocking mismatch.** If the generated payload omits a field our current request sends, that endpoint stays
+hand-written and the inventory says why. Migrating it would silently drop behaviour — but check the newest spec
+before concluding it is permanent; see the ladder below.
+
+**2. Is the generated operation even the same endpoint?** A matching name is not proof. Our hand-written client
+calls `baseUrl` + a bare path, which is the **chat v1** surface; a generated operation under `/api/v2/<product>/`
+may belong to a *different product* with its own handler. Moderation is the live example: `muteUser` called the
+chat v1 route that `lib/chat/routes.go` mounts at the root and comments as deprecated, while the generated `mute`
+is `/api/v2/moderation/mute` in `lib/moderation/routes.go`. The paths look like a rename; the services are not.
+
+Compare the two handlers in the backend checkout and answer one question — does the generated one write the same
+state and emit the same WS events the SDK already depends on?
+
+```bash
+# the route tables, to see which product owns each path
+grep -n '/mute' "$CHAT_BACKEND_DIR"/lib/chat/routes.go "$CHAT_BACKEND_DIR"/lib/<product>/routes.go
+# then read both controllers side by side
+```
+
+Equivalent handlers make the switch safe. Divergent ones mean the endpoint stays hand-written, with the reason
+recorded.
+
+**3. Is it gated or in beta?** A generated operation can be fully present and still refused at runtime. Check the
+controller for `FeatureFlagEnabled` and `Beta: true`:
+
+```bash
+grep -n "FeatureFlagEnabled\|Beta:" "$CHAT_BACKEND_DIR"/lib/<product>/controller/<op>.go
+```
+
+`monolith/server/base.go` rejects a gated endpoint with `NotAllowedError("this endpoint needs a feature flag…")`,
+so migrating onto one changes who can call it. Read the flag's default before judging — moderation v2's
+`ModerationV2Enabled()` returns true when unset, so only apps that explicitly opted out are affected. Either way it
+is a behavioural break for the CHANGELOG and the migration guide, not a silent detail.
 
 ### When the type or operation isn't in the generated client
 
@@ -100,6 +133,21 @@ Work the ladder in order — the answer changes depending on *where* it's missin
    contort the call site around a broken signature.
 3. **In a newer spec than the one our tree was generated from.** Regenerate — its own PR, never folded into a
    feature slice. Also `openapi-codegen`.
+
+   **Check this before declaring anything blocked**, including a phase-1 blocking mismatch. The committed tree can
+   be many spec versions behind, and both kinds of gap close the same way. Compare against the newest released
+   spec, not against another SDK's generated output — a sibling's tree is just as likely to be stale:
+
+   ```bash
+   python3 -c "import json,sys; s=json.load(open(sys.argv[1])); print(s['info']['version']); \
+     print('\n'.join(p for p in s['paths'] if 'unban' in p))" \
+     "$PROTOCOL_DIR"/openapi/v2/chat-clientside-api.json
+   head -5 packages/stream_chat/lib/open_api/api.dart   # what our tree was generated from
+   ```
+
+   Group 08 hit both at once: `unban` was absent, and `QueryBannedUsersPayload` dropped four `created_at_*` cursors
+   the server reads off an embedded pager. Both looked permanent against the committed tree; regenerating from
+   `v237.2.0` to `v239.10.0` fixed both, and turned a two-method-blocked group into one.
 4. **Absent from the clientside spec entirely.** It is server-side only, deprecated (spec generation skips
    deprecated operations), or not yet exposed on v2. Confirm against the spec before concluding:
 
@@ -131,6 +179,20 @@ rather than one `PushProvider`). That is usually a worse public API than what we
   it makes Stream's API coherent for people working across them.
 
 Not sufficient on their own: avoiding a small mapping function, cosmetic naming, or "the generated one is newer".
+
+**Establish a claim before you rely on it, and know which source answers which question.**
+
+- **What the API actually does** — the backend is the authority, and the only external source this skill reaches
+  for. Route tables, request payload structs and controller code answer units, validation, deprecation and
+  gating. Verify there rather than inferring from a field name or from the spec's prose.
+- **What our public API should look like** — the backend cannot answer this, and neither can this skill. When the
+  shape is a genuine judgement call — whether a convenience method earns its place, whether to expose a generated
+  type, whether a break is worth it — **put the options to the user with the trade-offs and let them decide**.
+  Do not settle it by copying another Stream SDK: their constraints differ, their trees go stale, and a claim
+  about one is not verifiable from this repo.
+
+Whatever is decided goes in the PR body, never in a doc comment — see `STYLE_GUIDE.md`
+§ *No server or transport details in docs or comments*.
 
 When you do break, four things ship in the same PR: a `refactor(scope)!:` commit/PR title, a `🛑️ Breaking`
 CHANGELOG entry naming the old and new symbol, a Symbol Map row plus feature section in
@@ -225,11 +287,17 @@ conversion lives in `StreamHttpClient._parseError`, which only its own `get`/`po
 `DefaultApi` goes straight to `_dio.fetch` and bypasses it. Hand the `Result` to the caller instead; `getOrThrow()`
 is a tool for *consumers* migrating incrementally, not for us.
 
-Two data-shape traps while mapping:
+Three data-shape traps while mapping:
 
 - **`custom` vs `extraData`** (channel / message / user features). The wire puts extra fields in `custom`;
   hand-written models flatten them into `extraData`. Write that promotion explicitly, including which keys are
   excluded.
+- **Units on anything that takes a `Duration`.** The wire carries a bare integer and the field name rarely says
+  in what. Read the Go payload type: `commonpayloads.DurationInMinutes` and `DurationMilliseconds` sit on sibling
+  endpoints in the same feature — `ban.timeout` and `mute.timeout` are minutes, `muteChannel.expiration` is
+  milliseconds. Getting it wrong is silent, and `Duration.inMinutes` truncates, so a sub-minute value arrives as
+  `0` — which `DurationInMinutes.ToTime()` reads as *no expiry*, turning a short ban permanent. Test that edge,
+  not just the round number.
 - **`DateTime` on anything that also arrives over the WebSocket.** Generated models decode through
   `StreamDateTimeConverter` (epoch nanoseconds *or* RFC3339); hand-written models use `DateTime.parse`. A model fed
   by both REST v2 and WS events must tolerate both.
@@ -305,6 +373,34 @@ how a test is named. Re-read the diff against `STYLE_GUIDE.md` § Documentation,
 The PR body carries the group's scope, the phase 2 decisions with their reasons, and any endpoint left
 hand-written and why. Then close the loop in the plan: tick the definition-of-done boxes in the group's file and
 its status box in `openapi-migration/README.md`, so the next person sees where the migration actually stands.
+
+**Write the group's record into `openapi-migration/tool/generate_plan.py`, not into the `0N-*.md` file.** Those
+files are generated in full — goal, decisions, risks and definition of done all come from the `GROUPS` list in the
+generator. Editing the markdown works until the next regeneration silently reverts it. Add a `taken=textwrap.dedent(...)`
+block and a `done=DONE.replace('- [ ]', '- [x]')` to the group's entry, then re-run the script.
+
+**When a method cannot move, split it into its own group rather than leaving one partly done.** Phase 1's three
+checks exist to find those, and the first definition-of-done box allows an endpoint to be "deliberately left
+hand-written, with the reason" — but a group sitting at nine-of-ten is a status nobody can act on, and the reason
+decays into a footnote. Give the remainder a group of its own, with its own blocker, decisions and definition of
+done:
+
+- add it to `GROUPS` in `generate_plan.py` claiming the method explicitly (`'moderation_api.dart::queryBannedUsers'`)
+  and owning its generated path; the parent group's file-level claim covers the remainder automatically;
+- number it at the end and say in `README.md` what it was split from and what it waits on — plan order is
+  dependency order, not file order;
+- say in `migrations/v11-migration.md` that it still throws. Two groups where one returns `Result` and the other
+  does not is a mixed error contract, and consumers must not discover it by catching;
+- leave its `*_api.dart` in place with only that method, and its `StreamChatApi` getter. Reviewers look for the
+  deleted file — the new group's file is what explains why it survived.
+
+Both groups then read as true: one done, one not started. Group 08 (moderation) and 14 (banned users) are the
+worked example.
+
+What is *not* acceptable is splitting a **pair**. `banUser` migrating while `unbanUser` stays hand-written leaves
+consumers writing one call each way, which the plan's README rightly calls worse than not migrating. If half a
+pair is blocked, either unblock it (usually a regeneration) or hold both. Split on what the *caller* thinks of
+separately — a read versus a set of writes — never on what happens to be easy.
 
 Landing a break means four artifacts in the same PR: the `refactor(scope)!:` title, the `🛑️ Breaking` CHANGELOG
 entry, the `migrations/v11-migration.md` Symbol Map row plus feature section (template lives at the bottom of that

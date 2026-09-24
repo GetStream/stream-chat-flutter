@@ -123,11 +123,51 @@ Optional local persistence using Drift (SQLite). Implements `ChatPersistenceClie
 - Line length: **120 characters** (configured in `analysis_options.yaml`)
 - Imports: inside a package's own `lib/`, use relative imports (`prefer_relative_imports`); use
   `package:` imports for anything from another package
-- All public APIs **must** have doc comments (`public_member_api_docs`)
+- All public APIs **must** have doc comments (`public_member_api_docs`) — see
+  [Writing dartdoc](#writing-dartdoc) below, because that lint only checks one exists
 - Sort constructors first, unnamed constructors before named
 - Prefer `const` constructors, `final` locals, single quotes
 - Trailing commas: `preserve` (formatter setting)
 - Generated files (`.g.dart`, `.freezed.dart`) are excluded from analysis
+
+### Writing dartdoc
+
+`public_member_api_docs` only checks a doc **exists** — a placeholder passes
+`melos run analyze`. Nothing in CI reads what a doc says, so read
+[`STYLE_GUIDE.md` § Documentation](STYLE_GUIDE.md#documentation) and
+[`EFFECTIVE_DART_DOC.md`](EFFECTIVE_DART_DOC.md) before writing any. Two rules break
+most often:
+
+**Never restate the signature, and describe behaviour rather than listing parameters.**
+A paragraph per parameter, each starting with that parameter's name, is `@param` with
+the tag deleted — it reads like Java. Weave them into sentences about what happens, the
+way `dart:core` does (*"Creates a new string with the first occurrence of [from]
+replaced by [to]"*), using "If [x] …" for conditions and "The [x] …" for constraints:
+
+```dart
+// BAD:
+/// Mutes the user with the given [userId] for the current user.
+///
+/// [timeout] expires the mute, rounded down to whole minutes. Under a minute or
+/// omitted, it lasts until removed.
+
+// GOOD:
+/// Mutes [userId] for the current user.
+///
+/// The mute lasts until it is removed. A [timeout] expires it after that long,
+/// rounded down to whole minutes, so a shorter one never expires it.
+```
+
+One paragraph per distinct concern — avoiding the roll call is not a reason to merge
+unrelated behaviours into one block.
+
+**No server or transport details**, in dartdoc or in `//` comments: no endpoints or
+paths, no wire field names, no claims about what "the server" does or whether
+something is deprecated, beta or feature-flagged. An integrator cannot verify any of
+it and it goes stale the moment the API changes — describe what the caller observes
+instead. That information belongs in `CHANGELOG.md`, `migrations/*.md` and the PR
+body, which are read once next to a version. See
+[`STYLE_GUIDE.md`](STYLE_GUIDE.md#no-server-or-transport-details-in-docs-or-comments).
 
 ## Breaking Changes
 

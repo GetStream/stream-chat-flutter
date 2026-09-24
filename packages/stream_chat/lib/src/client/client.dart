@@ -67,6 +67,7 @@ import '../core/util/utils.dart';
 import '../db/chat_persistence_client.dart';
 import '../event_type.dart';
 import '../repository/devices_repository.dart';
+import '../repository/moderation_repository.dart';
 import '../repository/roles_repository.dart';
 import '../ws/connect_request.dart';
 import '../ws/connection_manager.dart';
@@ -77,6 +78,7 @@ import '../ws/events/events.dart';
 import 'channel/channel.dart';
 import 'channel_delivery_reporter.dart';
 import 'live_location_expiration_scheduler.dart';
+import 'moderation_client.dart';
 import 'query_channels_result.dart';
 import 'retry_policy.dart';
 import 'sync_manager.dart';
@@ -163,8 +165,12 @@ class StreamChatClient {
         );
 
     final api = defaultApi ?? DefaultApi(httpClient);
+
     _rolesRepository = RolesRepository(api);
     _devicesRepository = DevicesRepository(api);
+    _moderationRepository = ModerationRepository(api);
+
+    moderation = ModerationClient(_moderationRepository);
 
     _connection = ConnectionManager(
       request: ConnectRequest.forApi(
@@ -198,8 +204,14 @@ class StreamChatClient {
   }
 
   late final StreamChatApi _chatApi;
+
   late final RolesRepository _rolesRepository;
   late final DevicesRepository _devicesRepository;
+  late final ModerationRepository _moderationRepository;
+
+  /// Muting, banning and flagging, for the connected user.
+  late final ModerationClient moderation;
+
   late final ConnectionManager _connection;
   StreamSubscription<WsEvent>? _wsEventSubscription;
 
@@ -1430,18 +1442,6 @@ class StreamChatClient {
     truncatedAt: truncatedAt,
   );
 
-  /// Mutes the channel
-  Future<EmptyResponse> muteChannel(
-    String channelCid, {
-    Duration? expiration,
-  }) => _chatApi.moderation.muteChannel(
-    channelCid,
-    expiration: expiration,
-  );
-
-  /// Unmutes the channel
-  Future<EmptyResponse> unmuteChannel(String channelCid) => _chatApi.moderation.unmuteChannel(channelCid);
-
   /// Accept invitation to the channel
   Future<AcceptInviteResponse> acceptChannelInvite(
     String channelId,
@@ -1731,42 +1731,6 @@ class StreamChatClient {
     List<PartialUpdateUserRequest> users,
   ) => _chatApi.user.partialUpdateUsers(users);
 
-  /// Bans a user from all channels
-  Future<EmptyResponse> banUser(
-    String targetUserId, [
-    Map<String, dynamic> options = const {},
-  ]) => _chatApi.moderation.banUser(
-    targetUserId,
-    options: options,
-  );
-
-  /// Remove global ban for a user
-  Future<EmptyResponse> unbanUser(
-    String targetUserId, [
-    Map<String, dynamic> options = const {},
-  ]) => _chatApi.moderation.unbanUser(
-    targetUserId,
-    options: options,
-  );
-
-  /// Shadow bans a user
-  Future<EmptyResponse> shadowBan(
-    String targetID, [
-    Map<String, dynamic> options = const {},
-  ]) => banUser(targetID, {
-    'shadow': true,
-    ...options,
-  });
-
-  /// Removes shadow ban from a user
-  Future<EmptyResponse> removeShadowBan(
-    String targetID, [
-    Map<String, dynamic> options = const {},
-  ]) => unbanUser(targetID, {
-    'shadow': true,
-    ...options,
-  });
-
   final _userBlockLock = Lock();
 
   /// Blocks a user with the provided [userId].
@@ -1845,40 +1809,6 @@ class StreamChatClient {
 
     return response;
   }
-
-  /// Mutes a user
-  Future<EmptyResponse> muteUser(String userId) => _chatApi.moderation.muteUser(userId);
-
-  /// Unmutes a user
-  Future<EmptyResponse> unmuteUser(String userId) => _chatApi.moderation.unmuteUser(userId);
-
-  /// Flag a message
-  Future<EmptyResponse> flagMessage(String messageId) => _chatApi.moderation.flagMessage(messageId);
-
-  /// Unflag a message.
-  ///
-  /// The `/moderation/unflag` endpoint is no longer processed by the server:
-  /// the request is validated and an empty response is returned, but no flag
-  /// is removed.
-  @Deprecated(
-    'The /moderation/unflag endpoint is no longer supported by the server. '
-    'This will be removed in a future major release',
-  )
-  Future<EmptyResponse> unflagMessage(String messageId) => _chatApi.moderation.unflagMessage(messageId);
-
-  /// Flag a user
-  Future<EmptyResponse> flagUser(String userId) => _chatApi.moderation.flagUser(userId);
-
-  /// Unflag a user.
-  ///
-  /// The `/moderation/unflag` endpoint is no longer processed by the server:
-  /// the request is validated and an empty response is returned, but no flag
-  /// is removed.
-  @Deprecated(
-    'The /moderation/unflag endpoint is no longer supported by the server. '
-    'This will be removed in a future major release',
-  )
-  Future<EmptyResponse> unflagUser(String userId) => _chatApi.moderation.unflagUser(userId);
 
   /// Mark all channels for this user as read
   Future<EmptyResponse> markAllRead() => _chatApi.channel.markAllRead();

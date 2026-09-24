@@ -28,7 +28,7 @@ class DebugUnbanUser extends StatelessWidget {
           final userId = value.trim();
           try {
             debugPrint('[unbanUser] userId: $userId');
-            final result = await client.unbanUser(userId);
+            final result = await client.moderation.unbanUser(userId);
             debugPrint('[unbanUser] completed: $result');
           } catch (e) {
             debugPrint('[unbanUser] failed: $e');
