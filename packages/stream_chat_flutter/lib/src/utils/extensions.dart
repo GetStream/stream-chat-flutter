@@ -480,6 +480,15 @@ extension MessageX on Message {
   /// treated as "no language to translate to".
   String? translatedText(String? language) => _translationOf(i18n, language);
 
+  /// Whether this message has a translation into [language] available
+  /// locally, either of its own text ([translatedText]) or of its [poll]
+  /// ([PollTranslationX.hasTranslation]).
+  ///
+  /// Follows the same rules as [translatedText]: `false` when [language] is
+  /// `null`, empty, or the language the message was written in.
+  bool hasTranslation(String? language) =>
+      translatedText(language) != null || (poll?.hasTranslation(language) ?? false);
+
   /// It returns the message with the translated text, and the translated
   /// [poll] (see [PollTranslationX.translate]), if available locally.
   ///

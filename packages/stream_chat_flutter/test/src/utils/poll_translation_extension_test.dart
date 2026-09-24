@@ -119,4 +119,26 @@ void main() {
 
     expect(message.translate('nl'), same(message));
   });
+
+  test('Message.hasTranslation is true when only its poll is translated', () {
+    final message = Message(poll: poll);
+
+    expect(message.hasTranslation('nl'), isTrue);
+  });
+
+  test('Message.hasTranslation is true when only its text is translated', () {
+    final message = Message(text: 'Hello', i18n: const {'language': 'en', 'nl_text': 'Hallo'});
+
+    expect(message.hasTranslation('nl'), isTrue);
+  });
+
+  test('Message.hasTranslation is false for the language the message and its poll were written in', () {
+    final message = Message(
+      text: 'Hello',
+      i18n: const {'language': 'en', 'en_text': 'Hello', 'nl_text': 'Hallo'},
+      poll: poll,
+    );
+
+    expect(message.hasTranslation('en'), isFalse);
+  });
 }
