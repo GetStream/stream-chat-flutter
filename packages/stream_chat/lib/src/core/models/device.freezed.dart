@@ -20,8 +20,7 @@ mixin _$Device {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $DeviceCopyWith<Device> get copyWith =>
-      _$DeviceCopyWithImpl<Device>(this as Device, _$identity);
+  $DeviceCopyWith<Device> get copyWith => _$DeviceCopyWithImpl<Device>(this as Device, _$identity);
 
   @override
   bool operator ==(Object other) {
@@ -29,8 +28,7 @@ mixin _$Device {
         (other.runtimeType == runtimeType &&
             other is Device &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.pushProvider, pushProvider) ||
-                other.pushProvider == pushProvider));
+            (identical(other.pushProvider, pushProvider) || other.pushProvider == pushProvider));
   }
 
   @override
@@ -44,8 +42,7 @@ mixin _$Device {
 
 /// @nodoc
 abstract mixin class $DeviceCopyWith<$Res> {
-  factory $DeviceCopyWith(Device value, $Res Function(Device) _then) =
-      _$DeviceCopyWithImpl;
+  factory $DeviceCopyWith(Device value, $Res Function(Device) _then) = _$DeviceCopyWithImpl;
   @useResult
   $Res call({String id, PushProvider pushProvider});
 }
