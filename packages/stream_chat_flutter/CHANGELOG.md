@@ -5,7 +5,7 @@
 - Added `StreamMessageItem.semanticsLabel`, which replaces the announcement composed for a message row, and `StreamMessageItem.excludeFromSemantics`, which leaves the row unlabeled so the bubble and footer announce their own parts.
 - Added `StreamQuotedMessage.replyMessage`, the message doing the quoting, which lets a quoted preview announce who replied to whom.
 - Added `StreamMessageContent.excludeTextFromSemantics` and `StreamMessageFooter.excludeFromSemantics`, which keep the message text and the metadata out of the semantics tree when an enclosing row already announces them.
-- Added `contentInsertionConfiguration` to `StreamChatMessageInput`, `StreamMessageComposerInputField`, `MessageComposerInputProps` and `MessageComposerInputCenterProps`, and `StreamMessageComposer` now accepts images and GIFs from the keyboard (such as Gboard on Android), adding them as image attachments validated like picked ones. It stays off when `disableAttachments` is set or `allowedAttachmentPickerTypes` excludes images.
+- Added support for inserting images and GIFs from the keyboard (e.g. Gboard) in `StreamMessageComposer`, configurable via `contentInsertionConfiguration`.
 
 ⚠️ Changed
 
