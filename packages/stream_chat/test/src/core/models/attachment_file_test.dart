@@ -18,6 +18,23 @@ void main() {
       );
     });
 
+    group('extension', () {
+      test('returns the text after the last dot', () {
+        final file = AttachmentFile(path: '/me/user/archive.tar.gz', size: 1);
+        expect(file.extension, 'gz');
+      });
+
+      test('returns null when the name has no extension', () {
+        final file = AttachmentFile(path: '/me/user/somefile', size: 1);
+        expect(file.extension, isNull);
+      });
+
+      test('returns null when the name ends with a dot', () {
+        final file = AttachmentFile(path: '/me/user/somefile.', size: 1);
+        expect(file.extension, isNull);
+      });
+    });
+
     test('should serialize to json correctly', () {
       final attachment = AttachmentFile(
         size: 12,
