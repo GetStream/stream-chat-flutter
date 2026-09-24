@@ -33,7 +33,7 @@ class PushTokenManager {
     );
 
     result.fold(
-      onSuccess: (_) => debugPrint('[push] addDevice OK (type=${provider.type.name}, name=${provider.name})'),
+      onSuccess: (_) => debugPrint('[push] addDevice OK (type=${provider.type}, name=${provider.name})'),
       onFailure: (e, stk) => debugPrint('[push] addDevice failed: $e; $stk'),
     );
   }

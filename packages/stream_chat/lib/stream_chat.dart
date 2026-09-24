@@ -114,6 +114,7 @@ export 'src/core/models/predefined_filter.dart';
 export 'src/core/models/privacy_settings.dart';
 export 'src/core/models/push_level.dart';
 export 'src/core/models/push_preference.dart';
+export 'src/core/models/push_provider.dart';
 export 'src/core/models/reaction.dart';
 export 'src/core/models/reaction_group.dart';
 export 'src/core/models/read.dart';

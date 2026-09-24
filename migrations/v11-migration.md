@@ -156,6 +156,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamChatClient.addDevice` / `removeDevice` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing, and carries no value on success |
 | `StreamChatClient.getDevices` → `Future<ListDevicesResponse>` | `Future<Result<ListDevicesResponse>>` | `retyped` | Returns a `Result` instead of throwing |
 | `Device.fromJson` / `toJson`, `Role.fromJson` | — | `removed` | The models are plain classes; construct them directly |
+| `PushProvider` (enum), `Device.pushProvider` (`String`) | `PushProvider` (extension type over `String`), `Device.pushProvider` (`PushProvider`) | `retyped` | Same four constants and wire values, and still usable as a `String`. `.name` and `.values` are gone and a `switch` over it needs a default; wrap a raw value as `PushProvider('firebase')` |
 | `ListDevicesResponse.fromJson`, `SearchRolesResponse.fromJson`, `ListDevicesResponse()..devices = …` | `ListDevicesResponse(duration: …, devices: …)` | `retyped` | The responses are plain classes with a const constructor and final fields |
 | `ListDevicesResponse.duration` / `SearchRolesResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
 | `Device` / `ListDevicesResponse` / `SearchRolesResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
@@ -436,8 +437,7 @@ final response = SearchRolesResponse(duration: '0ms', roles: [role]);
 ### Devices
 
 **`addDevice`, `getDevices` and `removeDevice` return a `Result` instead of throwing.** `addDevice` and
-`removeDevice` carry no value on success. `Device`, `PushProvider` and `ListDevicesResponse` keep their
-fields and values.
+`removeDevice` carry no value on success. `Device` and `ListDevicesResponse` keep their fields.
 
 ```dart
 // v10
@@ -461,6 +461,23 @@ constructors — `ListDevicesResponse(duration: '0ms', devices: [device])` where
 `id` and `push_provider` keys.
 
 **`ListDevicesResponse.duration` is a non-nullable `String`**, where v10 typed it `String?`.
+
+**`PushProvider` is an extension type over its wire string, and `Device.pushProvider` is a `PushProvider`.** The
+four constants and their values are unchanged, and a `PushProvider` still compares equal to its string, so
+`PushProvider.firebase` and `device.pushProvider == 'firebase'` keep working. A provider without a constant is
+named by wrapping its value.
+
+```dart
+// v10
+final String wireValue = PushProvider.firebase.name;
+final device = Device(id: token, pushProvider: 'firebase');
+
+// v11
+final String wireValue = PushProvider.firebase;
+final device = Device(id: token, pushProvider: PushProvider.firebase);
+```
+
+A `switch` over a `PushProvider` is no longer exhaustive; give it a default case.
 
 ---
 

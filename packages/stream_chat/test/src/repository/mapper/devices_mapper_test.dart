@@ -1,5 +1,6 @@
 import 'package:stream_chat/open_api/api.dart' as api;
 import 'package:stream_chat/src/core/models/device.dart';
+import 'package:stream_chat/src/core/models/push_provider.dart';
 import 'package:stream_chat/src/repository/mapper/devices_mapper.dart';
 import 'package:test/test.dart';
 
@@ -17,7 +18,7 @@ void main() {
       voip: false,
     );
 
-    expect(response.toModel(), const Device(id: 'device-id', pushProvider: 'firebase'));
+    expect(response.toModel(), const Device(id: 'device-id', pushProvider: PushProvider.firebase));
   });
 
   test('ListDevicesResponse.toModel keeps the duration', () {
@@ -37,18 +38,31 @@ void main() {
     );
 
     expect(response.toModel().devices, const [
-      Device(id: 'device-1', pushProvider: 'firebase'),
-      Device(id: 'device-2', pushProvider: 'apn'),
-      Device(id: 'device-3', pushProvider: 'huawei'),
+      Device(id: 'device-1', pushProvider: PushProvider.firebase),
+      Device(id: 'device-2', pushProvider: PushProvider.apn),
+      Device(id: 'device-3', pushProvider: PushProvider.huawei),
     ]);
   });
 
-  test('PushProvider.toRequest maps every provider to the generated value with the same wire name', () {
-    final requests = {for (final provider in PushProvider.values) provider: provider.toRequest()};
+  test('PushProvider.toRequest carries the wire value of every provider, named or not', () {
+    const providers = [
+      PushProvider.firebase,
+      PushProvider.huawei,
+      PushProvider.xiaomi,
+      PushProvider.apn,
+      PushProvider('onesignal'),
+    ];
 
-    expect(requests, {
-      for (final provider in PushProvider.values) provider: api.CreateDeviceRequestPushProvider.fromJson(provider.name),
-    });
+    expect(
+      [for (final provider in providers) provider.toRequest()],
+      [
+        api.CreateDeviceRequestPushProvider.firebase,
+        api.CreateDeviceRequestPushProvider.huawei,
+        api.CreateDeviceRequestPushProvider.xiaomi,
+        api.CreateDeviceRequestPushProvider.apn,
+        api.CreateDeviceRequestPushProvider.fromJson('onesignal'),
+      ],
+    );
   });
 }
 

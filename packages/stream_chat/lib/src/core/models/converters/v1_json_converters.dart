@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
 import '../device.dart';
+import '../push_provider.dart';
 
 // Converters for plain models embedded in json_serializable models that still decode v1 JSON. Each one is deleted
 // by the migration group that turns its parent into a plain model.
@@ -18,7 +19,7 @@ class DeviceV1JsonConverter implements JsonConverter<Device, Map<String, dynamic
   @override
   Device fromJson(Map<String, dynamic> json) => Device(
     id: json['id'] as String,
-    pushProvider: json['push_provider'] as String,
+    pushProvider: PushProvider(json['push_provider'] as String),
   );
 
   @override

@@ -108,9 +108,13 @@ GROUPS = [
             - **`ListDevicesResponse` is hand-written,** under its v10 name, as a plain class carrying `duration`
               and `devices`. An envelope rather than a bare list, so a field the server adds to the response can
               be exposed without changing the method's signature.
-            - **`PushProvider` stays the v10 enum,** mapped to the generated `CreateDeviceRequestPushProvider`
-              in the repository. **This is the enum precedent for every later group:** a generated request enum
-              gets a hand-written public type, so the generator's naming never reaches a signature.
+            - **`PushProvider` becomes an extension type over its wire string,** where v10 declared an enum, and
+              `Device.pushProvider` is typed with it rather than `String`. The server answers the provider as a
+              free-form string, so a device registered with a provider the SDK does not name still decodes, and a
+              provider added later is a new constant rather than a breaking enum value. The repository maps it to
+              the generated `CreateDeviceRequestPushProvider` by its wire value. **This is the enum precedent for
+              every later group:** a generated request enum gets a hand-written public type, so the generator's
+              naming never reaches a signature.
             - **The write calls answer nothing.** `addDevice` and `removeDevice` return `Result<void>`: the
               generated `DurationResponse` carries only a server-timing string no integrator acts on, and v10's
               `EmptyResponse` is a json_serializable, mutable envelope the domain-model rules retire. **The

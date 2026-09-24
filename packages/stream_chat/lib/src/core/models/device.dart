@@ -1,21 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'push_provider.dart';
+
 part 'device.freezed.dart';
-
-/// Provider used to send push notifications.
-enum PushProvider {
-  /// Send notifications using Google's Firebase Cloud Messaging.
-  firebase,
-
-  /// Send notifications using Huawei's Push Kit.
-  huawei,
-
-  /// Send notifications using Xiaomi's Mi Push Service.
-  xiaomi,
-
-  /// Send notifications using Apple's Push Notification service.
-  apn,
-}
 
 /// A device registered to receive push notifications for the current user.
 ///
@@ -32,9 +19,7 @@ class Device with _$Device {
   @override
   final String id;
 
-  /// The name of the provider that delivers pushes to this device, such as `firebase` or `apn`.
-  ///
-  /// One of the [PushProvider] names.
+  /// The provider that delivers pushes to this device.
   @override
-  final String pushProvider;
+  final PushProvider pushProvider;
 }
