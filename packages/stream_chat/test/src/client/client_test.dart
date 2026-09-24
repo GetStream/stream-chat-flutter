@@ -3,8 +3,7 @@
 import 'dart:async';
 
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/open_api/api.dart'
-    show CreateDeviceRequest, CreateDeviceRequestPushProvider, DurationResponse;
+import 'package:stream_chat/open_api/api.dart' as openapi;
 import 'package:stream_chat/src/ws/events/events.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
@@ -1840,15 +1839,17 @@ void main() {
 
     test('`.addDevice should work`', () async {
       const id = 'test-device-id';
-      const provider = CreateDeviceRequestPushProvider.firebase;
-      const request = CreateDeviceRequest(id: id, pushProvider: provider);
-
-      when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
-        (_) async => const Result.success(DurationResponse(duration: '0.01ms')),
+      const request = openapi.CreateDeviceRequest(
+        id: id,
+        pushProvider: openapi.CreateDeviceRequestPushProvider.firebase,
       );
 
-      final res = await client.addDevice(id, provider);
-      expect(res.isSuccess, isTrue);
+      when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
+        (_) async => const Result.success(openapi.DurationResponse(duration: '0.01ms')),
+      );
+
+      final res = await client.addDevice(id, PushProvider.firebase);
+      expect(res.getOrNull()?.duration, '0.01ms');
 
       verify(() => defaultApi.createDevice(createDeviceRequest: request)).called(1);
       verifyNoMoreInteractions(defaultApi);
@@ -1856,19 +1857,18 @@ void main() {
 
     test('`.addDevice should work with pushProviderName`', () async {
       const id = 'test-device-id';
-      const provider = CreateDeviceRequestPushProvider.firebase;
       const pushProviderName = 'my-custom-config';
-      const request = CreateDeviceRequest(
+      const request = openapi.CreateDeviceRequest(
         id: id,
-        pushProvider: provider,
+        pushProvider: openapi.CreateDeviceRequestPushProvider.firebase,
         pushProviderName: pushProviderName,
       );
 
       when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
-        (_) async => const Result.success(DurationResponse(duration: '0.01ms')),
+        (_) async => const Result.success(openapi.DurationResponse(duration: '0.01ms')),
       );
 
-      final res = await client.addDevice(id, provider, pushProviderName: pushProviderName);
+      final res = await client.addDevice(id, PushProvider.firebase, pushProviderName: pushProviderName);
       expect(res.isSuccess, isTrue);
 
       verify(() => defaultApi.createDevice(createDeviceRequest: request)).called(1);
@@ -1877,16 +1877,16 @@ void main() {
 
     test('`.addDevice` surfaces a failure without throwing', () async {
       const error = StreamClientException(message: 'boom');
-      const request = CreateDeviceRequest(
+      const request = openapi.CreateDeviceRequest(
         id: 'test-device-id',
-        pushProvider: CreateDeviceRequestPushProvider.firebase,
+        pushProvider: openapi.CreateDeviceRequestPushProvider.firebase,
       );
 
       when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
         (_) async => const Result.failure(error),
       );
 
-      final res = await client.addDevice('test-device-id', CreateDeviceRequestPushProvider.firebase);
+      final res = await client.addDevice('test-device-id', PushProvider.firebase);
 
       expect(res.isFailure, isTrue);
       expect(res.exceptionOrNull(), error);
@@ -1895,20 +1895,20 @@ void main() {
     test('`.getDevices`', () async {
       final devices = List.generate(
         3,
-        (index) => DeviceResponse(
+        (index) => openapi.DeviceResponse(
           id: 'test-device-id-$index',
-          pushProvider: CreateDeviceRequestPushProvider.firebase,
+          pushProvider: openapi.CreateDeviceRequestPushProvider.firebase,
           createdAt: DateTime.utc(2024),
           userId: userId,
         ),
       );
 
       when(defaultApi.listDevices).thenAnswer(
-        (_) async => Result.success(ListDevicesResponse(duration: '0.01ms', devices: devices)),
+        (_) async => Result.success(openapi.ListDevicesResponse(duration: '0.01ms', devices: devices)),
       );
 
       final res = await client.getDevices();
-      expect(res.getOrNull()?.devices, devices);
+      expect(res.getOrNull()?.devices.map((it) => it.id), [for (final device in devices) device.id]);
 
       verify(defaultApi.listDevices).called(1);
       verifyNoMoreInteractions(defaultApi);
@@ -1918,11 +1918,11 @@ void main() {
       const deviceId = 'test-device-id';
 
       when(() => defaultApi.deleteDevice(id: deviceId)).thenAnswer(
-        (_) async => const Result.success(DurationResponse(duration: '0.01ms')),
+        (_) async => const Result.success(openapi.DurationResponse(duration: '0.01ms')),
       );
 
       final res = await client.removeDevice(deviceId);
-      expect(res.isSuccess, isTrue);
+      expect(res.getOrNull()?.duration, '0.01ms');
 
       verify(() => defaultApi.deleteDevice(id: deviceId)).called(1);
       verifyNoMoreInteractions(defaultApi);
@@ -2309,7 +2309,7 @@ void main() {
           includeGlobalRoles: includeGlobalRoles,
         ),
       ).thenAnswer(
-        (_) async => const Result.success(SearchRolesResponse(duration: '0.01ms', roles: [])),
+        (_) async => const Result.success(openapi.SearchRolesResponse(duration: '0.01ms', roles: [])),
       );
 
       final res = await client.searchRoles(
@@ -2319,7 +2319,8 @@ void main() {
         roleType: roleType,
         includeGlobalRoles: includeGlobalRoles,
       );
-      expect(res, const Result.success(SearchRolesResponse(duration: '0.01ms', roles: [])));
+      expect(res.getOrNull()?.duration, '0.01ms');
+      expect(res.getOrNull()?.roles, isEmpty);
 
       verify(
         () => defaultApi.searchRoles(

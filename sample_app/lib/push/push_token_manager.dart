@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart' show debugPrint;
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide PushProvider;
 
 import 'push_provider.dart';
 
@@ -33,7 +33,7 @@ class PushTokenManager {
     );
 
     result.fold(
-      onSuccess: (_) => debugPrint('[push] addDevice OK (type=${provider.type}, name=${provider.name})'),
+      onSuccess: (_) => debugPrint('[push] addDevice OK (type=${provider.type.name}, name=${provider.name})'),
       onFailure: (e, stk) => debugPrint('[push] addDevice failed: $e; $stk'),
     );
   }

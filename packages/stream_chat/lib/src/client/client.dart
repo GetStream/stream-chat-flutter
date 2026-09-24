@@ -29,8 +29,7 @@ import 'package:stream_core/stream_core.dart'
         WsEvent;
 import 'package:synchronized/synchronized.dart';
 
-import '../../open_api/api.dart'
-    show CreateDeviceRequestPushProvider, DefaultApi, ListDevicesResponse, SearchRolesResponse;
+import '../../open_api/api.dart' show DefaultApi;
 import '../../version.dart';
 import '../core/api/attachment_file_uploader.dart';
 import '../core/api/requests.dart';
@@ -44,6 +43,7 @@ import '../core/models/app_settings.dart';
 import '../core/models/attachment_file.dart';
 import '../core/models/banned_user.dart';
 import '../core/models/channel_state.dart';
+import '../core/models/device.dart';
 import '../core/models/draft.dart';
 import '../core/models/draft_message.dart';
 import '../core/models/location.dart';
@@ -57,6 +57,8 @@ import '../core/models/poll_option.dart';
 import '../core/models/poll_vote.dart';
 import '../core/models/push_preference.dart';
 import '../core/models/reaction.dart';
+import '../core/models/responses/list_devices_response.dart';
+import '../core/models/responses/search_roles_response.dart';
 import '../core/models/role_type.dart';
 import '../core/models/thread.dart';
 import '../core/models/user.dart';
@@ -107,7 +109,7 @@ class StreamChatClient {
     Duration connectTimeout = kDefaultConnectTimeout,
     Duration receiveTimeout = kDefaultReceiveTimeout,
     StreamChatApi? chatApi,
-    DefaultApi? defaultApi,
+    @internal DefaultApi? defaultApi,
     @visibleForTesting WebSocketProvider? wsProvider,
     AttachmentFileUploaderProvider attachmentFileUploaderProvider = StreamAttachmentFileUploader.new,
     Iterable<Interceptor>? chatApiInterceptors,
@@ -1208,9 +1210,9 @@ class StreamChatClient {
   ///
   /// [pushProviderName] names which of the app's configurations for
   /// [pushProvider] to use, for apps that have more than one.
-  Future<Result<void>> addDevice(
+  Future<Result<EmptyResponse>> addDevice(
     String id,
-    CreateDeviceRequestPushProvider pushProvider, {
+    PushProvider pushProvider, {
     String? pushProviderName,
   }) => _devicesRepository.addDevice(
     id,
@@ -1222,7 +1224,7 @@ class StreamChatClient {
   Future<Result<ListDevicesResponse>> getDevices() => _devicesRepository.getDevices();
 
   /// Removes a registered device, stopping push notifications to it.
-  Future<Result<void>> removeDevice(String id) => _devicesRepository.removeDevice(id);
+  Future<Result<EmptyResponse>> removeDevice(String id) => _devicesRepository.removeDevice(id);
 
   /// Set push preferences for the current user.
   ///

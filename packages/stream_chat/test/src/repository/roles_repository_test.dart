@@ -1,7 +1,8 @@
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/open_api/api.dart';
+import 'package:stream_chat/open_api/api.dart' as api;
+import 'package:stream_chat/src/core/models/role.dart';
 import 'package:stream_chat/src/core/models/role_type.dart';
 import 'package:stream_chat/src/repository/roles_repository.dart';
 import 'package:stream_core/stream_core.dart';
@@ -10,37 +11,22 @@ import 'package:test/test.dart';
 import '../mocks.dart';
 
 void main() {
-  late MockDefaultApi api;
-  late RolesRepository repository;
-
-  Role role(String name) => Role(
-    name: name,
-    custom: false,
-    scopes: const ['.app'],
-    createdAt: DateTime.utc(2024),
-    updatedAt: DateTime.utc(2024),
-  );
-
-  setUp(() {
-    api = MockDefaultApi();
-    repository = RolesRepository(api);
-  });
-
-  test('should forward only the query when nothing else is passed', () async {
-    when(() => api.searchRoles(query: 'adm')).thenAnswer(
-      (_) async => const Result.success(SearchRolesResponse(duration: '0.01ms', roles: [])),
+  test('searchRoles forwards only the query when nothing else is passed', () async {
+    final defaultApi = MockDefaultApi();
+    when(() => defaultApi.searchRoles(query: 'adm')).thenAnswer(
+      (_) async => const Result.success(api.SearchRolesResponse(duration: '0.01ms', roles: [])),
     );
 
-    final res = await repository.searchRoles('adm');
+    await RolesRepository(defaultApi).searchRoles('adm');
 
-    expect(res.getOrNull()?.roles, isEmpty);
-    verify(() => api.searchRoles(query: 'adm')).called(1);
-    verifyNoMoreInteractions(api);
+    verify(() => defaultApi.searchRoles(query: 'adm')).called(1);
+    verifyNoMoreInteractions(defaultApi);
   });
 
-  test('should forward every parameter to the generated client', () async {
+  test('searchRoles forwards every parameter to the generated client', () async {
+    final defaultApi = MockDefaultApi();
     when(
-      () => api.searchRoles(
+      () => defaultApi.searchRoles(
         query: 'adm',
         limit: 10,
         nameGt: 'admin',
@@ -48,10 +34,10 @@ void main() {
         includeGlobalRoles: true,
       ),
     ).thenAnswer(
-      (_) async => Result.success(SearchRolesResponse(duration: '0.01ms', roles: [role('admin')])),
+      (_) async => const Result.success(api.SearchRolesResponse(duration: '0.01ms', roles: [])),
     );
 
-    final res = await repository.searchRoles(
+    await RolesRepository(defaultApi).searchRoles(
       'adm',
       limit: 10,
       nameGt: 'admin',
@@ -59,9 +45,8 @@ void main() {
       includeGlobalRoles: true,
     );
 
-    expect(res.getOrNull()?.roles.single.name, 'admin');
     verify(
-      () => api.searchRoles(
+      () => defaultApi.searchRoles(
         query: 'adm',
         limit: 10,
         nameGt: 'admin',
@@ -69,16 +54,54 @@ void main() {
         includeGlobalRoles: true,
       ),
     ).called(1);
-    verifyNoMoreInteractions(api);
+    verifyNoMoreInteractions(defaultApi);
   });
 
-  test('should return the failure without throwing', () async {
+  test('searchRoles maps every field of each generated role', () async {
+    final defaultApi = MockDefaultApi();
+    final generated = api.Role(
+      name: 'moderator',
+      custom: true,
+      scopes: const ['.app', 'messaging'],
+      createdAt: DateTime.utc(2024, 1, 2),
+      updatedAt: DateTime.utc(2024, 3, 4),
+    );
+    when(() => defaultApi.searchRoles(query: 'mod')).thenAnswer(
+      (_) async => Result.success(api.SearchRolesResponse(duration: '0.01ms', roles: [generated])),
+    );
+
+    final res = await RolesRepository(defaultApi).searchRoles('mod');
+
+    expect(
+      res.getOrNull()?.roles.single,
+      Role(
+        name: 'moderator',
+        custom: true,
+        scopes: const ['.app', 'messaging'],
+        createdAt: DateTime.utc(2024, 1, 2),
+        updatedAt: DateTime.utc(2024, 3, 4),
+      ),
+    );
+  });
+
+  test('searchRoles answers the server duration', () async {
+    final defaultApi = MockDefaultApi();
+    when(() => defaultApi.searchRoles(query: 'mod')).thenAnswer(
+      (_) async => const Result.success(api.SearchRolesResponse(duration: '0.02ms', roles: [])),
+    );
+
+    final res = await RolesRepository(defaultApi).searchRoles('mod');
+
+    expect(res.getOrNull()?.duration, '0.02ms');
+  });
+
+  test('searchRoles returns the failure without throwing', () async {
+    final defaultApi = MockDefaultApi();
     const error = StreamClientException(message: 'boom');
-    when(() => api.searchRoles(query: 'adm')).thenAnswer((_) async => const Result.failure(error));
+    when(() => defaultApi.searchRoles(query: 'adm')).thenAnswer((_) async => const Result.failure(error));
 
-    final res = await repository.searchRoles('adm');
+    final res = await RolesRepository(defaultApi).searchRoles('adm');
 
-    expect(res.isFailure, isTrue);
     expect(res.exceptionOrNull(), error);
   });
 }

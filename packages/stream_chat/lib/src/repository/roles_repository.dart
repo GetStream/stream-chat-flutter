@@ -1,15 +1,16 @@
-import 'package:stream_core/stream_core.dart' show Result;
+import 'package:stream_core/stream_core.dart' show PatternMatching, Result;
 
-import '../../open_api/api.dart' show DefaultApi;
-import '../../open_api/models.dart' show SearchRolesResponse;
+import '../../open_api/api.dart' as api;
+import '../core/models/responses/search_roles_response.dart';
 import '../core/models/role_type.dart';
+import 'mapper/roles_mapper.dart';
 
 /// Repository dedicated to roles operations.
 class RolesRepository {
   /// Initialize a new roles repository.
   const RolesRepository(this._api);
 
-  final DefaultApi _api;
+  final api.DefaultApi _api;
 
   /// Searches roles by name prefix (autocomplete).
   ///
@@ -25,11 +26,15 @@ class RolesRepository {
     String? nameGt,
     RoleType? roleType,
     bool? includeGlobalRoles,
-  }) => _api.searchRoles(
-    query: query,
-    limit: limit,
-    nameGt: nameGt,
-    roleType: roleType,
-    includeGlobalRoles: includeGlobalRoles,
-  );
+  }) async {
+    final result = await _api.searchRoles(
+      query: query,
+      limit: limit,
+      nameGt: nameGt,
+      roleType: roleType,
+      includeGlobalRoles: includeGlobalRoles,
+    );
+
+    return result.map((response) => response.toDomain());
+  }
 }
