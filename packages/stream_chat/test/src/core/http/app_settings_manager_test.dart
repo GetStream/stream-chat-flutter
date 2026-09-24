@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/http/app_settings_manager.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -82,6 +84,25 @@ void main() {
       expect(refreshed, response.app);
       expect(manager.appSettings, response.app);
       verify(() => api.getAppSettings()).called(2);
+    });
+
+    test('is not overwritten by an earlier pending load', () async {
+      final pendingLoad = Completer<GetAppSettingsResponse>();
+      final refreshed = GetAppSettingsResponse()
+        ..app = const AppSettings(name: 'refreshed');
+      final stale = GetAppSettingsResponse()
+        ..app = const AppSettings(name: 'stale');
+
+      when(() => api.getAppSettings()).thenAnswer((_) => pendingLoad.future);
+      final load = manager.loadAppSettings();
+
+      when(() => api.getAppSettings()).thenAnswer((_) async => refreshed);
+      await manager.refresh();
+
+      pendingLoad.complete(stale);
+      await load;
+
+      expect(manager.appSettings, refreshed.app);
     });
 
     test('propagates errors instead of swallowing them', () async {

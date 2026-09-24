@@ -80,7 +80,7 @@ class StreamAttachmentValidator {
 
     if (_extensionRejected(filename, config) || _mimeRejected(mime, config)) {
       return AttachmentBlockedError(
-        fileExtension: file.extension,
+        fileExtension: _extensionOf(file.name),
         mimeType: mime,
       );
     }
@@ -93,6 +93,17 @@ class StreamAttachmentValidator {
     }
 
     return null;
+  }
+
+  // The text after the last dot in [filename], e.g. `pdf` for `report.pdf`,
+  // or `null` when [filename] has no extension.
+  static String? _extensionOf(String? filename) {
+    if (filename == null) return null;
+
+    final dot = filename.lastIndexOf('.');
+    if (dot < 0 || dot == filename.length - 1) return null;
+
+    return filename.substring(dot + 1);
   }
 
   // True when [filename] is rejected by the file-extension lists.

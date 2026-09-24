@@ -225,6 +225,17 @@ void main() {
           isA<AttachmentBlockedError>(),
         );
       });
+
+      test('reports no extension for a blocked file without one', () {
+        const validator = StreamAttachmentValidator(
+          fileUploadConfig: UploadConfig(allowedFileExtensions: ['.pdf']),
+        );
+        expect(
+          validator.validate(_attachment(path: '/tmp/somefile')),
+          isA<AttachmentBlockedError>()
+              .having((e) => e.fileExtension, 'fileExtension', isNull),
+        );
+      });
     });
 
     group('size limit', () {
