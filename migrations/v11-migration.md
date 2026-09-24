@@ -157,6 +157,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamChatClient.getDevices` → `Future<ListDevicesResponse>` | `Future<Result<ListDevicesResponse>>` | `retyped` | Returns a `Result` instead of throwing |
 | `Device.fromJson` / `toJson`, `Role.fromJson` | — | `removed` | The models are plain classes; construct them directly |
 | `ListDevicesResponse.fromJson`, `SearchRolesResponse.fromJson`, `ListDevicesResponse()..devices = …` | `ListDevicesResponse(duration: …, devices: …)` | `retyped` | The responses are plain classes with a const constructor and final fields |
+| `ListDevicesResponse.duration` / `SearchRolesResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
 | `StreamChatApi.device` | `StreamChatApi.pushPreferences` | `renamed` | The class handles only `setPushPreferences` now; device calls moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
 
@@ -428,6 +429,8 @@ final response = SearchRolesResponse()..roles = [role];
 final response = SearchRolesResponse(duration: '0ms', roles: [role]);
 ```
 
+**`SearchRolesResponse.duration` is a non-nullable `String`**, where v10 typed it `String?`.
+
 ### Devices
 
 **`addDevice`, `getDevices` and `removeDevice` return a `Result` instead of throwing.** `Device`,
@@ -453,6 +456,8 @@ result.fold(
 constructors — `ListDevicesResponse(duration: '0ms', devices: [device])` where v10 wrote
 `ListDevicesResponse()..devices = [device]`. `OwnUser.devices` still decodes from, and encodes to, the same
 `id` and `push_provider` keys.
+
+**`ListDevicesResponse.duration` is a non-nullable `String`**, where v10 typed it `String?`.
 
 ---
 

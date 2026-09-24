@@ -52,8 +52,8 @@ one group. Verified mechanically — see [Keeping this plan honest](#keeping-thi
 
 - **One feature group per PR.** A group is a set of endpoints a caller thinks of together, and it moves across
   completely — half-migrated features are worse than unmigrated ones.
-- **Keep our shape.** The public API keeps the v10 models, names and envelopes; the migration changes how a
-  call reaches the server, not what the caller holds. See [Domain models](#domain-models).
+- **Keep our shape.** The public API keeps the v10 models, names and envelopes. Beyond `Result`, the only
+  sanctioned breaks are the ones [Domain models](#domain-models) lists.
 - **Every break ships four artifacts**: `refactor(llc)!:` title, `🛑️ Breaking` CHANGELOG entry, a Symbol Map row
   plus feature section in `migrations/v11-migration.md`, and the reason in the PR body.
 - **Decide once, at the right level.** The `User` shape is decided in [01-foundation](01-foundation.md), not
@@ -62,15 +62,24 @@ one group. Verified mechanically — see [Keeping this plan honest](#keeping-thi
 
 ## Domain models
 
-The generated client is an implementation detail. Every group follows these rules:
+The generated client is an implementation detail. Every group follows these rules, and makes exactly these
+breaks against v10:
+
+- public methods return `Result<T>` instead of throwing;
+- public models and envelopes lose `fromJson` and `toJson`;
+- envelopes are immutable, built through a const constructor rather than `late` setters;
+- `duration` is a non-nullable `String` on every envelope, where v10 typed it `String?`.
+
+Each ships with a CHANGELOG entry and a Symbol Map row like any other break.
+
 
 1. **No generated type in a public signature.** `lib/stream_chat.dart` exports nothing from `open_api/`, and no
    other package or the sample app imports it. `generate_plan.py --check` enforces both.
 2. **Public models keep their v10 shape** — names, fields, nullability, defaults, `Equatable` — as plain classes
    with no `fromJson`, `toJson` or json_serializable. A field the server adds is exposed later, as an additive
    change.
-3. **Responses keep their v10 envelopes,** as plain classes carrying `duration` and the payload, one file per
-   class under `lib/src/core/models/responses/`. A write that answered `EmptyResponse` in v10 still does.
+3. **Responses keep their v10 envelopes,** as plain immutable classes carrying a non-nullable `duration` and the
+   payload, one file per class under `lib/src/core/models/responses/`. A write that answered `EmptyResponse` in v10 still does.
 4. **Public methods return `Result<T>`,** per [`core-migration/03-errors.md`](../core-migration/03-errors.md).
 5. **Mapping happens in the repository,** on the `Result` the generated call returns
    (`result.map((response) => response.toModel())`), through extensions in

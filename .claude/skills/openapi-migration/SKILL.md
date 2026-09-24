@@ -132,8 +132,16 @@ Generated types are wire shapes — nullable wherever the spec is loose, with pe
 of shared enums (`CreateDeviceRequestPushProvider` rather than one `PushProvider`) — which is why they never reach
 a public signature.
 
-**The one break a migration still makes is the error contract** (below). A server field our v10 model lacks is
-exposed later, as an additive change, not by swapping in the generated type.
+**A migration makes exactly these breaks, and no others:**
+
+- **The error contract:** public methods return `Result<T>` instead of throwing (below).
+- **No JSON on public models or envelopes:** their `fromJson` and `toJson` are removed.
+- **Envelopes are immutable:** they are built through a const constructor with final fields, not a no-argument
+  constructor and `late` setters.
+- **`duration` is a non-nullable `String`** on every envelope; v10 typed it `String?`.
+
+Anything else a migration would change about what the caller holds needs its own reason. A server field our v10
+model lacks is exposed later, as an additive change, not by swapping in the generated type.
 
 When you do break, four things ship in the same PR: a `refactor(scope)!:` commit/PR title, a `🛑️ Breaking`
 CHANGELOG entry naming the old and new symbol, a Symbol Map row plus feature section in

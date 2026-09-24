@@ -46,7 +46,8 @@
 - `StreamHttpClient` and `StreamChatApi` take a `ConnectionIdGetter? connectionId` where they took a `ConnectionIdManager?`. The manager only wrapped such a closure, and is removed.
 - `StreamChatClient.searchRoles` returns a `Result<SearchRolesResponse>` instead of throwing.
 - `StreamChatClient.addDevice`, `getDevices` and `removeDevice` return a `Result` instead of throwing.
-- `Device`, `Role`, `ListDevicesResponse` and `SearchRolesResponse` no longer have `fromJson` or `toJson`, and the two responses take their fields through a const constructor.
+- `Device`, `Role`, `ListDevicesResponse` and `SearchRolesResponse` no longer decode from or encode to JSON.
+- `ListDevicesResponse` and `SearchRolesResponse` are immutable, built through a const constructor, and their `duration` is a non-nullable `String`.
 - `StreamChatApi.device` is renamed `StreamChatApi.pushPreferences` and handles only `setPushPreferences`.
 
 🐞 Fixed
