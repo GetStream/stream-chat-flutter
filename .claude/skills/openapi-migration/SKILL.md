@@ -211,7 +211,7 @@ import 'mapper/devices_mapper.dart';
 
 Future<Result<ListDevicesResponse>> getDevices() async {
   final result = await _api.listDevices();                 // Future<Result<api.ListDevicesResponse>>
-  return result.map((response) => response.toDomain());    // transforms Success, passes Failure through untouched
+  return result.map((response) => response.toModel());    // transforms Success, passes Failure through untouched
 }
 ```
 

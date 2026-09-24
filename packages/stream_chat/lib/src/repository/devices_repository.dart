@@ -28,7 +28,7 @@ class DevicesRepository {
     final result = await _api.createDevice(
       createDeviceRequest: api.CreateDeviceRequest(
         id: id,
-        pushProvider: pushProvider.toApi(),
+        pushProvider: pushProvider.toRequest(),
         pushProviderName: switch (pushProviderName) {
           final name? when name.isNotEmpty => name,
           _ => null,
@@ -36,18 +36,18 @@ class DevicesRepository {
       ),
     );
 
-    return result.map((response) => response.toDomain());
+    return result.map((response) => response.toModel());
   }
 
   /// Lists the devices registered for the current user.
   Future<Result<ListDevicesResponse>> getDevices() async {
     final result = await _api.listDevices();
-    return result.map((response) => response.toDomain());
+    return result.map((response) => response.toModel());
   }
 
   /// Removes a registered device, stopping push notifications to it.
   Future<Result<EmptyResponse>> removeDevice(String id) async {
     final result = await _api.deleteDevice(id: id);
-    return result.map((response) => response.toDomain());
+    return result.map((response) => response.toModel());
   }
 }

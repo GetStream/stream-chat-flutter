@@ -5,7 +5,7 @@ import '../../core/models/role.dart';
 /// Maps a generated [api.Role] to a [Role].
 extension RoleMapper on api.Role {
   /// Converts this generated role into a [Role].
-  Role toDomain() => Role(
+  Role toModel() => Role(
     createdAt: createdAt,
     custom: custom,
     name: name,
@@ -17,8 +17,8 @@ extension RoleMapper on api.Role {
 /// Maps a generated [api.SearchRolesResponse] to a [SearchRolesResponse].
 extension SearchRolesResponseMapper on api.SearchRolesResponse {
   /// Converts this response into a [SearchRolesResponse].
-  SearchRolesResponse toDomain() => SearchRolesResponse(
+  SearchRolesResponse toModel() => SearchRolesResponse(
     duration: duration,
-    roles: [for (final role in roles) role.toDomain()],
+    roles: [for (final role in roles) role.toModel()],
   );
 }

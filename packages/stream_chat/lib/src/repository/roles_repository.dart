@@ -35,6 +35,6 @@ class RolesRepository {
       includeGlobalRoles: includeGlobalRoles,
     );
 
-    return result.map((response) => response.toDomain());
+    return result.map((response) => response.toModel());
   }
 }

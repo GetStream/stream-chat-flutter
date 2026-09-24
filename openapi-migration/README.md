@@ -73,7 +73,7 @@ The generated client is an implementation detail. Every group follows these rule
    class under `lib/src/core/models/responses/`. A write that answered `EmptyResponse` in v10 still does.
 4. **Public methods return `Result<T>`,** per [`core-migration/03-errors.md`](../core-migration/03-errors.md).
 5. **Mapping happens in the repository,** on the `Result` the generated call returns
-   (`result.map((response) => response.toDomain())`), through extensions in
+   (`result.map((response) => response.toModel())`), through extensions in
    `lib/src/repository/mapper/<feature>_mapper.dart`. The mappers are package-internal so later groups can compose
    them. Repositories import the generated code with a prefix (`as api`), which keeps its names from colliding
    with ours.
