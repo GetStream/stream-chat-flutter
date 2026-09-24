@@ -864,7 +864,7 @@ Widget mobileAttachmentPickerBuilder({
           supportedTypes: [AttachmentPickerType.files],
           optionViewBuilder: (context, controller) {
             final fileConfig = controller.validator.fileUploadConfig;
-            final extensions = fileConfig.filePickerExtensions;
+            final extensions = _filePickerExtensions(fileConfig);
             final type = extensions == null ? FileType.any : FileType.custom;
 
             return StreamFilePicker(
@@ -1016,7 +1016,7 @@ Widget webOrDesktopAttachmentPickerBuilder({
 
       final fileConfig = controller.validator.fileUploadConfig;
       final extensions = switch (option.type) {
-        AttachmentPickerType.files => fileConfig.filePickerExtensions,
+        AttachmentPickerType.files => _filePickerExtensions(fileConfig),
         _ => null,
       };
 
@@ -1072,20 +1072,16 @@ extension _AttachmentPickerTypesX on Iterable<AttachmentPickerType> {
   }
 }
 
-extension on UploadConfig {
-  // The allowed extensions in the format file pickers expect, e.g. `pdf` for
-  // `.pdf`, or `null` when every extension is allowed.
-  List<String>? get filePickerExtensions {
-    final extensions = <String>[];
-    for (final entry in allowedFileExtensions) {
-      final extension = entry.replaceFirst(_leadingDot, '').toLowerCase();
-      if (extension.isEmpty) continue;
+// The extensions [config] allows, in the format file pickers expect (`pdf` for
+// `.pdf`), or `null` when every extension is allowed.
+List<String>? _filePickerExtensions(UploadConfig config) {
+  final extensions = <String>[];
+  for (final entry in config.allowedFileExtensions) {
+    final extension = entry.startsWith('.') ? entry.substring(1) : entry;
+    if (extension.isEmpty) continue;
 
-      extensions.add(extension);
-    }
-
-    return extensions.isEmpty ? null : extensions;
+    extensions.add(extension.toLowerCase());
   }
-}
 
-final _leadingDot = RegExp(r'^\.');
+  return extensions.isEmpty ? null : extensions;
+}
