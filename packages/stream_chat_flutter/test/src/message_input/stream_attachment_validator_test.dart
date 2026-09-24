@@ -167,6 +167,13 @@ void main() {
         );
       });
 
+      test('a .gz allow-list entry accepts .tar.gz files', () {
+        const validator = StreamAttachmentValidator(
+          fileUploadConfig: UploadConfig(allowedFileExtensions: ['.gz']),
+        );
+        expect(validator.validate(_attachment(path: '/tmp/archive.tar.gz')), isNull);
+      });
+
       test('a .tar.gz allow-list entry rejects a plain .gz file', () {
         const validator = StreamAttachmentValidator(
           fileUploadConfig: UploadConfig(allowedFileExtensions: ['.tar.gz']),
