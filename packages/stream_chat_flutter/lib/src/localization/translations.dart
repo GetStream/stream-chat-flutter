@@ -128,6 +128,12 @@ abstract class Translations {
   /// while uploading via [StreamMessageInput]
   String fileTooLargeError(double limitInMB);
 
+  /// The error shown when the file type is not allowed for upload.
+  ///
+  /// [extension] is the file extension without the leading dot, e.g. `exe`,
+  /// or `null` when the extension is unknown.
+  String fileTypeNotSupportedError(String? extension);
+
   /// The error shown when the file being read has no bytes
   String get couldNotReadBytesFromFileError;
 
@@ -707,6 +713,12 @@ class DefaultTranslations implements Translations {
   @override
   String fileTooLargeError(double limitInMB) =>
       'The file is too large to upload. The file size limit is $limitInMB MB.';
+
+  @override
+  String fileTypeNotSupportedError(String? extension) {
+    if (extension == null) return 'This file type is not supported for upload.';
+    return "'.$extension' files are not supported for upload.";
+  }
 
   @override
   String get couldNotReadBytesFromFileError =>

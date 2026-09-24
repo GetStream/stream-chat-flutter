@@ -109,4 +109,10 @@ class GeneralApi {
 
     return OGAttachmentResponse.fromJson(response.data);
   }
+
+  /// Fetches the app settings, including the upload configuration.
+  Future<GetAppSettingsResponse> getAppSettings() async {
+    final response = await _client.get('/app');
+    return GetAppSettingsResponse.fromJson(response.data);
+  }
 }

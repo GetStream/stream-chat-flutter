@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added `StreamChatClient.appSettings` and `StreamChatClient.getAppSettings()` to read the upload configuration set in the Stream Dashboard.
+
 ## 9.30.0
 
 🐞 Fixed

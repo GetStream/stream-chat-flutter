@@ -701,4 +701,13 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String get draftLabel => 'Esborrany';
+
+  @override
+  String fileTypeNotSupportedError(String? extension) {
+    if (extension == null) {
+      return "Aquest tipus de fitxer no s'admet per pujar.";
+    }
+
+    return "Els fitxers '.$extension' no s'admeten per pujar.";
+  }
 }

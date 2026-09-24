@@ -700,4 +700,13 @@ Não é possível adicionar mais de $limit arquivos de uma vez
 
   @override
   String get draftLabel => 'Rascunho';
+
+  @override
+  String fileTypeNotSupportedError(String? extension) {
+    if (extension == null) {
+      return 'Este tipo de arquivo não é suportado para upload.';
+    }
+
+    return "Os arquivos '.$extension' não são suportados para upload.";
+  }
 }

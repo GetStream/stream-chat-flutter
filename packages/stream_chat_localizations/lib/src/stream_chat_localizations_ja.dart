@@ -672,4 +672,13 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String get draftLabel => '下書き';
+
+  @override
+  String fileTypeNotSupportedError(String? extension) {
+    if (extension == null) {
+      return 'このファイル形式はアップロードに対応していません。';
+    }
+
+    return "'.$extension'ファイルはアップロードに対応していません。";
+  }
 }

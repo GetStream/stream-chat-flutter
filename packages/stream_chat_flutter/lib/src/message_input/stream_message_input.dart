@@ -130,7 +130,10 @@ class StreamMessageInput extends StatefulWidget {
     @Deprecated("Use 'activeSendIcon' instead") Widget? activeSendButton,
     this.showCommandsButton = true,
     this.userMentionsTileBuilder,
-    this.maxAttachmentSize = kDefaultMaxAttachmentSize,
+    @Deprecated(
+      'Has no effect. Set the size limit in the Stream Dashboard instead.',
+    )
+    this.maxAttachmentSize = UploadConfig.defaultSizeLimit,
     this.onError,
     this.attachmentLimit = 10,
     this.allowedAttachmentPickerTypes = AttachmentPickerType.values,
@@ -192,9 +195,10 @@ class StreamMessageInput extends StatefulWidget {
   /// List of triggers for showing autocomplete.
   final Iterable<StreamAutocompleteTrigger> customAutocompleteTriggers;
 
-  /// Max attachment size in bytes:
-  /// - Defaults to 20 MB
-  /// - Do not set it if you're using our default CDN
+  /// Max attachment size in bytes.
+  ///
+  /// Has no effect, the size limit set in the Stream Dashboard applies
+  /// instead.
   final int maxAttachmentSize;
 
   /// Function called after sending the message.
@@ -1050,7 +1054,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
     final value = await showStreamAttachmentPickerModalBottomSheet(
       context: context,
-      onError: widget.onError,
+      onError: _handleAttachmentError,
+      validator: _buildAttachmentValidator(),
       allowedTypes: allowedTypes,
       pollConfig: widget.pollConfig,
       initialPoll: initialPoll,
@@ -1481,23 +1486,71 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   /// Adds an attachment to the [messageInputController.attachments] map
   void _addAttachments(Iterable<Attachment> attachments) {
-    final limit = widget.attachmentLimit;
-    final length = _effectiveController.attachments.length + attachments.length;
-    if (length > limit) {
-      final onAttachmentLimitExceed = widget.onAttachmentLimitExceed;
-      if (onAttachmentLimitExceed != null) {
-        return onAttachmentLimitExceed(
-          widget.attachmentLimit,
-          context.translations.attachmentLimitExceedError(limit),
-        );
-      }
-      return _showErrorAlert(
-        context.translations.attachmentLimitExceedError(limit),
-      );
+    final validator = _buildAttachmentValidator();
+
+    final count = _effectiveController.attachments.length + attachments.length;
+    if (validator.validateCount(count) case final error?) {
+      return _handleAttachmentError(error);
     }
+
+    StreamChatError? firstError;
     for (final attachment in attachments) {
+      final error = validator.validate(attachment);
+
+      if (error != null) {
+        firstError ??= error;
+        continue;
+      }
+
       _effectiveController.addAttachment(attachment);
     }
+
+    if (firstError != null) _handleAttachmentError(firstError);
+  }
+
+  StreamAttachmentValidator _buildAttachmentValidator() {
+    final client = StreamChat.maybeOf(context)?.client;
+    final appSettings = client?.appSettings ?? const AppSettings();
+
+    // Never below the attachments the message already holds, e.g. when
+    // editing a message sent with a higher limit.
+    final attachmentCount = _effectiveController.attachments.length;
+
+    return StreamAttachmentValidator(
+      fileUploadConfig: appSettings.fileUploadConfig,
+      imageUploadConfig: appSettings.imageUploadConfig,
+      maxAttachmentCount: max(widget.attachmentLimit, attachmentCount),
+    );
+  }
+
+  void _handleAttachmentError(Object error, [StackTrace? stackTrace]) {
+    final translations = context.translations;
+    if (error case AttachmentLimitReachedError(:final maxCount)) {
+      final message = translations.attachmentLimitExceedError(maxCount);
+      if (widget.onAttachmentLimitExceed case final onLimitExceed?) {
+        return onLimitExceed(maxCount, message);
+      }
+    }
+
+    if (widget.onError case final onError?) {
+      return onError(error, stackTrace ?? StackTrace.current);
+    }
+
+    return switch (error) {
+      AttachmentLimitReachedError(:final maxCount) => _showErrorAlert(
+          translations.attachmentLimitExceedError(maxCount),
+        ),
+      AttachmentBlockedError(:final fileExtension) => _showErrorAlert(
+          translations.fileTypeNotSupportedError(fileExtension),
+        ),
+      AttachmentTooLargeError(:final maxSize) => _showErrorAlert(
+          translations.fileTooLargeError(maxSize / (1024 * 1024)),
+        ),
+      _ => Error.throwWithStackTrace(
+          error,
+          stackTrace ?? StackTrace.current,
+        ),
+    };
   }
 
   /// Sends the current message
@@ -1593,9 +1646,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
           topRight: Radius.circular(16),
         ),
       ),
-      builder: (context) => ErrorAlertSheet(
-        errorDescription: context.translations.somethingWentWrongError,
-      ),
+      builder: (context) => ErrorAlertSheet(errorDescription: description),
     );
   }
 

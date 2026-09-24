@@ -62,6 +62,14 @@ void main() {
     expect(translations.instantCommandsLabel, isNotNull);
     expect(translations.fileTooLargeAfterCompressionError(33), isNotNull);
     expect(translations.fileTooLargeError(33), isNotNull);
+    expect(
+      translations.fileTypeNotSupportedError('exe'),
+      "'.exe' files are not supported for upload.",
+    );
+    expect(
+      translations.fileTypeNotSupportedError(null),
+      'This file type is not supported for upload.',
+    );
     expect(translations.addAFileLabel, isNotNull);
     expect(translations.photoFromCameraLabel, isNotNull);
     expect(translations.uploadAFileLabel, isNotNull);

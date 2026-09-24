@@ -702,4 +702,13 @@ No es posible añadir más de $limit archivos adjuntos
 
   @override
   String get draftLabel => 'Borrador';
+
+  @override
+  String fileTypeNotSupportedError(String? extension) {
+    if (extension == null) {
+      return 'Este tipo de archivo no es compatible para subir.';
+    }
+
+    return "Los archivos '.$extension' no son compatibles para subir.";
+  }
 }

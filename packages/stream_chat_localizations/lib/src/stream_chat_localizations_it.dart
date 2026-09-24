@@ -706,4 +706,13 @@ Attenzione: il limite massimo di $limit file è stato superato.
 
   @override
   String get draftLabel => 'Bozza';
+
+  @override
+  String fileTypeNotSupportedError(String? extension) {
+    if (extension == null) {
+      return 'Questo tipo di file non è supportato per il caricamento.';
+    }
+
+    return "I file '.$extension' non sono supportati per il caricamento.";
+  }
 }

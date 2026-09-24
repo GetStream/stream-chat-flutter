@@ -673,4 +673,13 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String get draftLabel => '임시글';
+
+  @override
+  String fileTypeNotSupportedError(String? extension) {
+    if (extension == null) {
+      return '이 파일 형식은 업로드를 지원하지 않습니다.';
+    }
+
+    return "'.$extension' 파일은 업로드를 지원하지 않습니다.";
+  }
 }

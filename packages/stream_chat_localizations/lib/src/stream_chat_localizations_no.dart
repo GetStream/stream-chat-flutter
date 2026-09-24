@@ -686,4 +686,13 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get draftLabel => 'Utkast';
+
+  @override
+  String fileTypeNotSupportedError(String? extension) {
+    if (extension == null) {
+      return 'Denne filtypen støttes ikke for opplasting.';
+    }
+
+    return "'.$extension'-filer støttes ikke for opplasting.";
+  }
 }
