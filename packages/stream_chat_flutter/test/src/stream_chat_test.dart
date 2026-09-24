@@ -218,6 +218,50 @@ void main() {
         expect(captured, same(sibling));
       },
     );
+
+    testWidgets(
+      'a dialog opened below StreamChat follows the app theme when the '
+      'brightness changes',
+      (tester) async {
+        tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
+        addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+
+        final mockClient = MockClient();
+        final light = StreamTheme.light();
+        final dark = StreamTheme.dark();
+        StreamTheme? captured;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(extensions: [light]),
+            darkTheme: ThemeData(brightness: Brightness.dark, extensions: [dark]),
+            home: StreamChat(
+              client: mockClient,
+              child: Builder(
+                builder: (context) => TextButton(
+                  onPressed: () => showDialog<void>(
+                    context: context,
+                    builder: (context) {
+                      captured = Theme.of(context).extension<StreamTheme>();
+                      return const Text('Dialog');
+                    },
+                  ),
+                  child: const Text('Open'),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('Open'));
+        await tester.pumpAndSettle();
+        expect(captured, same(light));
+
+        tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+        await tester.pumpAndSettle();
+        expect(captured, same(dark));
+      },
+    );
   });
 }
 
