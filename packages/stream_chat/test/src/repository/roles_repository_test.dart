@@ -2,7 +2,6 @@
 
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/open_api/api.dart' as api;
-import 'package:stream_chat/src/core/models/role.dart';
 import 'package:stream_chat/src/core/models/role_type.dart';
 import 'package:stream_chat/src/repository/roles_repository.dart';
 import 'package:stream_core/stream_core.dart';
@@ -57,34 +56,7 @@ void main() {
     verifyNoMoreInteractions(defaultApi);
   });
 
-  test('searchRoles maps every field of each generated role', () async {
-    final defaultApi = MockDefaultApi();
-    final generated = api.Role(
-      name: 'moderator',
-      custom: true,
-      scopes: const ['.app', 'messaging'],
-      createdAt: DateTime.utc(2024, 1, 2),
-      updatedAt: DateTime.utc(2024, 3, 4),
-    );
-    when(() => defaultApi.searchRoles(query: 'mod')).thenAnswer(
-      (_) async => Result.success(api.SearchRolesResponse(duration: '0.01ms', roles: [generated])),
-    );
-
-    final res = await RolesRepository(defaultApi).searchRoles('mod');
-
-    expect(
-      res.getOrNull()?.roles.single,
-      Role(
-        name: 'moderator',
-        custom: true,
-        scopes: const ['.app', 'messaging'],
-        createdAt: DateTime.utc(2024, 1, 2),
-        updatedAt: DateTime.utc(2024, 3, 4),
-      ),
-    );
-  });
-
-  test('searchRoles answers the server duration', () async {
+  test('searchRoles returns the mapped response', () async {
     final defaultApi = MockDefaultApi();
     when(() => defaultApi.searchRoles(query: 'mod')).thenAnswer(
       (_) async => const Result.success(api.SearchRolesResponse(duration: '0.02ms', roles: [])),

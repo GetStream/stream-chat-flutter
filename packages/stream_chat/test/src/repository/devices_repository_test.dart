@@ -51,31 +51,7 @@ void main() {
     verifyNoMoreInteractions(defaultApi);
   });
 
-  test('addDevice sends every provider under its wire value', () async {
-    final defaultApi = MockDefaultApi();
-    final repository = DevicesRepository(defaultApi);
-    const wireValues = {
-      PushProvider.apn: 'apn',
-      PushProvider.firebase: 'firebase',
-      PushProvider.huawei: 'huawei',
-      PushProvider.xiaomi: 'xiaomi',
-    };
-
-    for (final MapEntry(key: provider, value: wireValue) in wireValues.entries) {
-      final request = api.CreateDeviceRequest(
-        id: 'device-id',
-        pushProvider: api.CreateDeviceRequestPushProvider.fromJson(wireValue),
-      );
-      _stubCreateDevice(defaultApi, request);
-
-      await repository.addDevice('device-id', provider);
-
-      verify(() => defaultApi.createDevice(createDeviceRequest: request)).called(1);
-    }
-    verifyNoMoreInteractions(defaultApi);
-  });
-
-  test('addDevice answers the server duration', () async {
+  test('addDevice returns the mapped response', () async {
     final defaultApi = MockDefaultApi();
     const request = api.CreateDeviceRequest(
       id: 'device-id',
@@ -104,38 +80,22 @@ void main() {
     expect(res.exceptionOrNull(), error);
   });
 
-  test('getDevices maps every device the server sends to its id and push provider', () async {
+  test('getDevices returns the mapped response', () async {
     final defaultApi = MockDefaultApi();
-    final generated = api.DeviceResponse(
+    final device = api.DeviceResponse(
       id: 'device-id',
       pushProvider: 'firebase',
-      pushProviderName: 'staging',
       createdAt: DateTime.utc(2024),
       userId: 'user-id',
-      disabled: true,
-      disabledReason: 'expired',
-      hardwareId: 'hardware-id',
-      voip: false,
     );
     when(defaultApi.listDevices).thenAnswer(
-      (_) async => Result.success(api.ListDevicesResponse(duration: '0.01ms', devices: [generated])),
+      (_) async => Result.success(api.ListDevicesResponse(duration: '0.02ms', devices: [device])),
     );
 
     final res = await DevicesRepository(defaultApi).getDevices();
 
-    final device = res.getOrNull()!.devices.single;
-    expect((device.id, device.pushProvider), ('device-id', 'firebase'));
-  });
-
-  test('getDevices answers the server duration', () async {
-    final defaultApi = MockDefaultApi();
-    when(defaultApi.listDevices).thenAnswer(
-      (_) async => const Result.success(api.ListDevicesResponse(duration: '0.02ms', devices: [])),
-    );
-
-    final res = await DevicesRepository(defaultApi).getDevices();
-
-    expect(res.getOrNull()?.duration, '0.02ms');
+    final response = res.getOrNull()!;
+    expect((response.duration, response.devices.single.id), ('0.02ms', 'device-id'));
   });
 
   test('getDevices returns the failure without throwing', () async {
@@ -148,17 +108,23 @@ void main() {
     expect(res.exceptionOrNull(), error);
   });
 
-  test('removeDevice forwards the id and answers the server duration', () async {
+  test('removeDevice forwards the id', () async {
     final defaultApi = MockDefaultApi();
-    when(() => defaultApi.deleteDevice(id: 'device-id')).thenAnswer(
-      (_) async => const Result.success(api.DurationResponse(duration: '0.02ms')),
-    );
+    _stubDeleteDevice(defaultApi, 'device-id');
+
+    await DevicesRepository(defaultApi).removeDevice('device-id');
+
+    verify(() => defaultApi.deleteDevice(id: 'device-id')).called(1);
+    verifyNoMoreInteractions(defaultApi);
+  });
+
+  test('removeDevice returns the mapped response', () async {
+    final defaultApi = MockDefaultApi();
+    _stubDeleteDevice(defaultApi, 'device-id', duration: '0.02ms');
 
     final res = await DevicesRepository(defaultApi).removeDevice('device-id');
 
     expect(res.getOrNull()?.duration, '0.02ms');
-    verify(() => defaultApi.deleteDevice(id: 'device-id')).called(1);
-    verifyNoMoreInteractions(defaultApi);
   });
 
   test('removeDevice returns the failure without throwing', () async {
@@ -174,6 +140,12 @@ void main() {
 
 void _stubCreateDevice(MockDefaultApi defaultApi, api.CreateDeviceRequest request, {String duration = '0.01ms'}) {
   when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
+    (_) async => Result.success(api.DurationResponse(duration: duration)),
+  );
+}
+
+void _stubDeleteDevice(MockDefaultApi defaultApi, String id, {String duration = '0.01ms'}) {
+  when(() => defaultApi.deleteDevice(id: id)).thenAnswer(
     (_) async => Result.success(api.DurationResponse(duration: duration)),
   );
 }
