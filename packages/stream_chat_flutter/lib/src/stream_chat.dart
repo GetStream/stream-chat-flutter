@@ -217,8 +217,14 @@ class StreamChatState extends State<StreamChat> {
     final theme = widget.themeData ?? StreamChatThemeData();
     child = StreamChatTheme(data: theme, child: child);
 
-    final streamTheme = StreamTheme.of(context);
-    child = Theme(data: Theme.of(context).withExtension(streamTheme), child: child);
+    // Only when the app has not registered a StreamTheme itself: dialogs and
+    // sheets opened below this point copy the Theme once and would stop
+    // following the app's brightness.
+    final materialTheme = Theme.of(context);
+    if (materialTheme.extension<StreamTheme>() == null) {
+      final streamTheme = StreamTheme.of(context);
+      child = Theme(data: materialTheme.withExtension(streamTheme), child: child);
+    }
 
     if (widget.componentBuilders case final builders?) {
       child = StreamComponentFactory(builders: builders, child: child);
