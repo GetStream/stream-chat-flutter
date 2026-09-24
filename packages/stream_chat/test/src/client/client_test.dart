@@ -1839,7 +1839,7 @@ void main() {
       verifyNoMoreInteractions(fakeChatApi.channel);
     });
 
-    test('`.addDevice should work`', () async {
+    test('StreamChatClient.addDevice returns a success once the device is registered', () async {
       const id = 'test-device-id';
       const request = api.CreateDeviceRequest(
         id: id,
@@ -1857,7 +1857,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('`.addDevice should work with pushProviderName`', () async {
+    test('StreamChatClient.addDevice forwards the push provider name', () async {
       const id = 'test-device-id';
       const pushProviderName = 'my-custom-config';
       const request = api.CreateDeviceRequest(
@@ -1877,7 +1877,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('`.addDevice` surfaces a failure without throwing', () async {
+    test('StreamChatClient.addDevice returns the failure without throwing', () async {
       const error = StreamClientException(message: 'boom');
       const request = api.CreateDeviceRequest(
         id: 'test-device-id',
@@ -1894,7 +1894,7 @@ void main() {
       expect(res.exceptionOrNull(), error);
     });
 
-    test('`.getDevices`', () async {
+    test('StreamChatClient.getDevices returns the registered devices', () async {
       final devices = List.generate(
         3,
         (index) => api.DeviceResponse(
@@ -1916,7 +1916,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('`.removeDevice`', () async {
+    test('StreamChatClient.removeDevice returns a success once the device is removed', () async {
       const deviceId = 'test-device-id';
 
       when(() => defaultApi.deleteDevice(id: deviceId)).thenAnswer(
@@ -2295,7 +2295,7 @@ void main() {
       verifyNoMoreInteractions(fakeChatApi.userGroups);
     });
 
-    test('`.searchRoles`', () async {
+    test('StreamChatClient.searchRoles returns the roles matching the query', () async {
       const query = 'adm';
       const limit = 10;
       const nameGt = 'admin';
@@ -2336,7 +2336,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('`.searchRoles` surfaces a failure without throwing', () async {
+    test('StreamChatClient.searchRoles returns the failure without throwing', () async {
       const query = 'adm';
       const error = StreamClientException(message: 'boom');
 
