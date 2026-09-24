@@ -153,7 +153,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `CurrentPlatform.name` | `CurrentPlatform.operatingSystem` | `renamed` | Same value — `'android'`, `'ios'`, `'web'`, `'macos'`, … |
 | `client.wsConnectionStatus` / `.wsConnectionStatusStream` | `client.connectionStatus` / `.connectionStatusStream` | `renamed` | Same `ConnectionStatus`, same three values. The WebSocket's own state, and the disconnection sources it carries, are no longer exported: `ConnectionStatus` is the whole connection API, as on the other Stream SDKs |
 | `StreamChatClient.searchRoles` → `Future<SearchRolesResponse>` | `Future<Result<SearchRolesResponse>>` | `retyped` | Returns a `Result` instead of throwing |
-| `StreamChatClient.addDevice` / `removeDevice` → `Future<EmptyResponse>` | `Future<Result<EmptyResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `StreamChatClient.addDevice` / `removeDevice` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing, and carries no value on success |
 | `StreamChatClient.getDevices` → `Future<ListDevicesResponse>` | `Future<Result<ListDevicesResponse>>` | `retyped` | Returns a `Result` instead of throwing |
 | `Device.fromJson` / `toJson`, `Role.fromJson` | — | `removed` | The models are plain classes; construct them directly |
 | `ListDevicesResponse.fromJson`, `SearchRolesResponse.fromJson`, `ListDevicesResponse()..devices = …` | `ListDevicesResponse(duration: …, devices: …)` | `retyped` | The responses are plain classes with a const constructor and final fields |
@@ -433,8 +433,9 @@ final response = SearchRolesResponse(duration: '0ms', roles: [role]);
 
 ### Devices
 
-**`addDevice`, `getDevices` and `removeDevice` return a `Result` instead of throwing.** `Device`,
-`PushProvider` and `ListDevicesResponse` keep their fields and values.
+**`addDevice`, `getDevices` and `removeDevice` return a `Result` instead of throwing.** `addDevice` and
+`removeDevice` carry no value on success. `Device`, `PushProvider` and `ListDevicesResponse` keep their
+fields and values.
 
 ```dart
 // v10

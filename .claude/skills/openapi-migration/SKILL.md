@@ -135,6 +135,8 @@ a public signature.
 **A migration makes exactly these breaks, and no others:**
 
 - **The error contract:** public methods return `Result<T>` instead of throwing (below).
+- **Duration-only writes answer nothing:** a write whose generated response is `DurationResponse` returns
+  `Result<void>`, not `EmptyResponse`.
 - **No JSON on public models or envelopes:** their `fromJson` and `toJson` are removed.
 - **Envelopes are immutable:** they are built through a const constructor with final fields, not a no-argument
   constructor and `late` setters.

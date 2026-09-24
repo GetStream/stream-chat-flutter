@@ -1,11 +1,9 @@
 import 'package:stream_core/stream_core.dart' show PatternMatching, Result;
 
 import '../../open_api/api.dart' as api;
-import '../core/api/responses.dart';
 import '../core/models/device.dart';
 import '../core/models/responses/list_devices_response.dart';
 import 'mapper/devices_mapper.dart';
-import 'mapper/duration_response_mapper.dart';
 
 /// Repository dedicated to device operations.
 class DevicesRepository {
@@ -20,7 +18,7 @@ class DevicesRepository {
   ///
   /// [pushProviderName] names which of the app's configurations for
   /// [pushProvider] to use, for apps that have more than one.
-  Future<Result<EmptyResponse>> addDevice(
+  Future<Result<void>> addDevice(
     String id,
     PushProvider pushProvider, {
     String? pushProviderName,
@@ -36,7 +34,7 @@ class DevicesRepository {
       ),
     );
 
-    return result.map((response) => response.toModel());
+    return result.map((_) {});
   }
 
   /// Lists the devices registered for the current user.
@@ -46,8 +44,8 @@ class DevicesRepository {
   }
 
   /// Removes a registered device, stopping push notifications to it.
-  Future<Result<EmptyResponse>> removeDevice(String id) async {
+  Future<Result<void>> removeDevice(String id) async {
     final result = await _api.deleteDevice(id: id);
-    return result.map((response) => response.toModel());
+    return result.map((_) {});
   }
 }

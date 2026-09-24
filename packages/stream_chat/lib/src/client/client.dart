@@ -1210,7 +1210,7 @@ class StreamChatClient {
   ///
   /// [pushProviderName] names which of the app's configurations for
   /// [pushProvider] to use, for apps that have more than one.
-  Future<Result<EmptyResponse>> addDevice(
+  Future<Result<void>> addDevice(
     String id,
     PushProvider pushProvider, {
     String? pushProviderName,
@@ -1224,7 +1224,7 @@ class StreamChatClient {
   Future<Result<ListDevicesResponse>> getDevices() => _devicesRepository.getDevices();
 
   /// Removes a registered device, stopping push notifications to it.
-  Future<Result<EmptyResponse>> removeDevice(String id) => _devicesRepository.removeDevice(id);
+  Future<Result<void>> removeDevice(String id) => _devicesRepository.removeDevice(id);
 
   /// Set push preferences for the current user.
   ///

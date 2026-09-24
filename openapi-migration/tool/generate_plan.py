@@ -111,8 +111,11 @@ GROUPS = [
             - **`PushProvider` stays the v10 enum,** mapped to the generated `CreateDeviceRequestPushProvider`
               in the repository. **This is the enum precedent for every later group:** a generated request enum
               gets a hand-written public type, so the generator's naming never reaches a signature.
-            - **The write calls answer `EmptyResponse`,** as in v10, mapped from the generated
-              `DurationResponse`.
+            - **The write calls answer nothing.** `addDevice` and `removeDevice` return `Result<void>`: the
+              generated `DurationResponse` carries only a server-timing string no integrator acts on, and v10's
+              `EmptyResponse` is a json_serializable, mutable envelope the domain-model rules retire. **The
+              precedent for every later group: a write whose response carries only `duration` returns
+              `Result<void>`.**
             - **`hardwareId` and `voipToken` are left unset.** `voipToken` is typed `bool?` — a flag meaning "this
               id is a VoIP token", not the token — and surfacing it would imply a VoIP-push story the SDK does not
               have. Neither has an in-tree consumer. Adding them later is non-breaking.

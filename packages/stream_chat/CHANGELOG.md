@@ -45,7 +45,8 @@
 - The WebSocket's state — `Connected`, `Connecting`, `Authenticating`, `Disconnected` and the disconnection sources — is no longer exported, and the client no longer reports it. `ConnectionStatus` is the whole connection API, as on the other Stream SDKs.
 - `StreamHttpClient` and `StreamChatApi` take a `ConnectionIdGetter? connectionId` where they took a `ConnectionIdManager?`. The manager only wrapped such a closure, and is removed.
 - `StreamChatClient.searchRoles` returns a `Result<SearchRolesResponse>` instead of throwing.
-- `StreamChatClient.addDevice`, `getDevices` and `removeDevice` return a `Result` instead of throwing.
+- `StreamChatClient.getDevices` returns a `Result<ListDevicesResponse>` instead of throwing.
+- `StreamChatClient.addDevice` and `removeDevice` return a `Result<void>` instead of throwing, and carry no value on success.
 - `Device`, `Role`, `ListDevicesResponse` and `SearchRolesResponse` no longer decode from or encode to JSON.
 - `ListDevicesResponse` and `SearchRolesResponse` are immutable, built through a const constructor, and their `duration` is a non-nullable `String`.
 - `StreamChatApi.device` is renamed `StreamChatApi.pushPreferences` and handles only `setPushPreferences`.

@@ -1857,7 +1857,7 @@ void main() {
       );
 
       final res = await client.addDevice(id, PushProvider.firebase);
-      expect(res.getOrNull()?.duration, '0.01ms');
+      expect(res.isSuccess, isTrue);
 
       verify(() => defaultApi.createDevice(createDeviceRequest: request)).called(1);
       verifyNoMoreInteractions(defaultApi);
@@ -1930,7 +1930,7 @@ void main() {
       );
 
       final res = await client.removeDevice(deviceId);
-      expect(res.getOrNull()?.duration, '0.01ms');
+      expect(res.isSuccess, isTrue);
 
       verify(() => defaultApi.deleteDevice(id: deviceId)).called(1);
       verifyNoMoreInteractions(defaultApi);

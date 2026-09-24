@@ -66,6 +66,7 @@ The generated client is an implementation detail. Every group follows these rule
 breaks against v10:
 
 - public methods return `Result<T>` instead of throwing;
+- a write whose response carries only `duration` returns `Result<void>` rather than `EmptyResponse`;
 - public models and envelopes lose `fromJson` and `toJson`;
 - envelopes are immutable, built through a const constructor rather than `late` setters;
 - `duration` is a non-nullable `String` on every envelope, where v10 typed it `String?`.
@@ -79,7 +80,8 @@ Each ships with a CHANGELOG entry and a Symbol Map row like any other break.
    with no `fromJson`, `toJson` or json_serializable. A field the server adds is exposed later, as an additive
    change.
 3. **Responses keep their v10 envelopes,** as plain immutable classes carrying a non-nullable `duration` and the
-   payload, one file per class under `lib/src/core/models/responses/`. A write that answered `EmptyResponse` in v10 still does.
+   payload, one file per class under `lib/src/core/models/responses/`. A write whose response carries only
+   `duration` returns `Result<void>`: `EmptyResponse` stays behind for the unmigrated APIs.
 4. **Public methods return `Result<T>`,** per [`core-migration/03-errors.md`](../core-migration/03-errors.md).
 5. **Mapping happens in the repository,** on the `Result` the generated call returns
    (`result.map((response) => response.toModel())`), through extensions in
