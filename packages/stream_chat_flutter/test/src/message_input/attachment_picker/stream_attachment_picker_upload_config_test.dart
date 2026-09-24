@@ -19,6 +19,19 @@ void main() {
   );
 
   testWidgets(
+    'tabbedAttachmentPickerBuilder leaves compound allow-list entries out of the file picker',
+    (tester) async {
+      final filePicker = _useFakeFilePicker();
+      final controller = _controllerAllowing(['.pdf', '.tar.gz']);
+
+      await _pumpTabbedFilePicker(tester, controller: controller);
+
+      final [(_, extensions)] = filePicker.calls;
+      expect(extensions, ['pdf']);
+    },
+  );
+
+  testWidgets(
     'tabbedAttachmentPickerBuilder offers any file when no extension allow-list is set',
     (tester) async {
       final filePicker = _useFakeFilePicker();

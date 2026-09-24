@@ -95,16 +95,21 @@ class StreamAttachmentValidator {
   // `archive.tar.gz` is checked as `.gz`.
   //
   // Precondition: [extension] is already lowercased and has no leading dot.
-  // List entries are lowercased here for comparison.
+  // List entries are lowercased and stripped of their leading dot here, so
+  // `.pdf` and `pdf` match the same files.
   //
   // A file without an extension is rejected only when an allow-list is
   // present; when no allow-list is configured it passes.
   static bool _extensionRejected(String? extension, UploadConfig config) {
     if (extension == null) return config.allowedFileExtensions.isNotEmpty;
-    bool matches(String entry) => entry.toLowerCase() == '.$extension';
+    bool matches(String entry) => _withoutLeadingDot(entry.toLowerCase()) == extension;
     if (config.blockedFileExtensions.any(matches)) return true;
     if (config.allowedFileExtensions.isEmpty) return false;
     return !config.allowedFileExtensions.any(matches);
+  }
+
+  static String _withoutLeadingDot(String entry) {
+    return entry.startsWith('.') ? entry.substring(1) : entry;
   }
 
   // True when [mime] is rejected by the MIME-type lists.
