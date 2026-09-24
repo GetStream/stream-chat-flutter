@@ -75,10 +75,10 @@ class StreamAttachmentValidator {
 
     final isImage = attachment.type == AttachmentType.image;
     final config = isImage ? imageUploadConfig : fileUploadConfig;
-    final filename = file.name?.toLowerCase();
+    final extension = file.extension?.toLowerCase();
     final mime = file.mediaType?.mimeType.toLowerCase();
 
-    if (_extensionRejected(filename, config) || _mimeRejected(mime, config)) {
+    if (_extensionRejected(extension, config) || _mimeRejected(mime, config)) {
       return AttachmentBlockedError(
         fileExtension: file.extension,
         mimeType: mime,
@@ -94,22 +94,19 @@ class StreamAttachmentValidator {
     return null;
   }
 
-  // True when [filename] is rejected by the file-extension lists.
+  // True when [extension] is rejected by the file-extension lists.
   //
-  // Matching is suffix-based on the filename, which supports compound
-  // extensions like `.tar.gz`.
+  // Only the last extension is compared, the same as the backend, so
+  // `archive.tar.gz` is checked as `.gz`.
   //
-  // Precondition: [filename] is already lowercased. List entries are
-  // lowercased here for comparison.
+  // Precondition: [extension] is already lowercased and has no leading dot.
+  // List entries are lowercased here for comparison.
   //
-  // An empty filename is rejected only when an allow-list is present (the
-  // file can't satisfy the whitelist); when no allow-list is configured it
-  // passes.
-  static bool _extensionRejected(String? filename, UploadConfig config) {
-    if (filename == null || filename.isEmpty) {
-      return config.allowedFileExtensions.isNotEmpty;
-    }
-    bool matches(String entry) => filename.endsWith(entry.toLowerCase());
+  // A file without an extension is rejected only when an allow-list is
+  // present; when no allow-list is configured it passes.
+  static bool _extensionRejected(String? extension, UploadConfig config) {
+    if (extension == null) return config.allowedFileExtensions.isNotEmpty;
+    bool matches(String entry) => entry.toLowerCase() == '.$extension';
     if (config.blockedFileExtensions.any(matches)) return true;
     if (config.allowedFileExtensions.isEmpty) return false;
     return !config.allowedFileExtensions.any(matches);
