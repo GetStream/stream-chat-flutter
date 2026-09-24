@@ -50,48 +50,21 @@ class AttachmentPickerValue {
 class StreamAttachmentPickerController
     extends ValueNotifier<AttachmentPickerValue> {
   /// Creates a new instance of [StreamAttachmentPickerController].
-  factory StreamAttachmentPickerController({
+  StreamAttachmentPickerController({
     Poll? initialPoll,
     List<Attachment>? initialAttachments,
     @Deprecated('Use validator instead.') int? maxAttachmentSize,
     @Deprecated('Use validator instead.') int? maxAttachmentCount,
     StreamAttachmentValidator? validator,
-  }) {
-    assert(
-      maxAttachmentSize == null || validator == null,
-      'Only one of maxAttachmentSize or validator can be provided. '
-      'Prefer validator; maxAttachmentSize is deprecated.',
-    );
-    assert(
-      maxAttachmentCount == null || validator == null,
-      'Only one of maxAttachmentCount or validator can be provided. '
-      'Prefer validator; maxAttachmentCount is deprecated.',
-    );
-
-    if (validator != null) {
-      return StreamAttachmentPickerController._(
-        initialPoll: initialPoll,
-        initialAttachments: initialAttachments,
-        validator: validator,
-      );
-    }
-
-    // Keeps the deprecated size and count limits, and the default count,
-    // working.
-    final uploadConfig = UploadConfig(
-      sizeLimit: maxAttachmentSize ?? UploadConfig.defaultSizeLimit,
-    );
-
-    return StreamAttachmentPickerController._(
-      initialPoll: initialPoll,
-      initialAttachments: initialAttachments,
-      validator: StreamAttachmentValidator(
-        fileUploadConfig: uploadConfig,
-        imageUploadConfig: uploadConfig,
-        maxAttachmentCount: maxAttachmentCount ?? _defaultMaxAttachmentCount,
-      ),
-    );
-  }
+  }) : this._(
+          initialPoll: initialPoll,
+          initialAttachments: initialAttachments,
+          validator: _resolveValidator(
+            validator,
+            maxAttachmentSize,
+            maxAttachmentCount,
+          ),
+        );
 
   StreamAttachmentPickerController._({
     this.initialPoll,
@@ -108,6 +81,37 @@ class StreamAttachmentPickerController
             attachments: initialAttachments ?? const [],
           ),
         );
+
+  // Returns [validator], or builds one from the deprecated size and count
+  // limits when it's not provided.
+  static StreamAttachmentValidator _resolveValidator(
+    StreamAttachmentValidator? validator,
+    int? maxAttachmentSize,
+    int? maxAttachmentCount,
+  ) {
+    assert(
+      maxAttachmentSize == null || validator == null,
+      'Only one of maxAttachmentSize or validator can be provided. '
+      'Prefer validator; maxAttachmentSize is deprecated.',
+    );
+    assert(
+      maxAttachmentCount == null || validator == null,
+      'Only one of maxAttachmentCount or validator can be provided. '
+      'Prefer validator; maxAttachmentCount is deprecated.',
+    );
+
+    if (validator != null) return validator;
+
+    final uploadConfig = UploadConfig(
+      sizeLimit: maxAttachmentSize ?? UploadConfig.defaultSizeLimit,
+    );
+
+    return StreamAttachmentValidator(
+      fileUploadConfig: uploadConfig,
+      imageUploadConfig: uploadConfig,
+      maxAttachmentCount: maxAttachmentCount ?? _defaultMaxAttachmentCount,
+    );
+  }
 
   /// The max attachment size allowed in bytes.
   @Deprecated('Use validator.fileUploadConfig.sizeLimit instead.')

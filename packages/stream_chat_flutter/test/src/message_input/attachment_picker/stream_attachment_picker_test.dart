@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:photo_manager/photo_manager.dart' show AssetEntity;
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
@@ -208,17 +207,6 @@ void main() {
           return File('${dir.path}/photo.jpg').writeAsBytes([1, 2, 3]);
         });
 
-        // Serve the photo's file the way photo_manager does on a device.
-        const photoManager = MethodChannel('com.fluttercandies/photo_manager');
-        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-          photoManager,
-          (call) async => call.method == 'getFullFile' ? photo!.path : null,
-        );
-        addTearDown(
-          () => tester.binding.defaultBinaryMessenger
-              .setMockMethodCallHandler(photoManager, null),
-        );
-
         Object? error;
         await tester.pumpWidget(
           MaterialApp(
@@ -253,9 +241,7 @@ void main() {
         );
 
         await tester.runAsync(() async {
-          gallery.onMediaItemSelected(
-            AssetEntity(id: 'photo', typeInt: 1, width: 100, height: 100),
-          );
+          gallery.onMediaItemSelected(_FakeAssetEntity(photo!));
           await Future<void>.delayed(const Duration(milliseconds: 100));
         });
         await tester.pumpAndSettle();
@@ -337,6 +323,13 @@ void main() {
       addTearDown(controller.dispose);
 
       expect(controller.validator.maxAttachmentCount, 10);
+    });
+
+    test('should allow subclassing the controller', () {
+      final controller = _SubclassedController();
+      addTearDown(controller.dispose);
+
+      expect(controller.validator.maxAttachmentCount, 5);
     });
 
     test('should still apply the deprecated limits', () async {
@@ -565,4 +558,22 @@ class _FakeFilePicker extends FilePicker with MockPlatformInterfaceMixin {
     calls.add((type, allowedExtensions));
     return null;
   }
+}
+
+// Serves the photo's file directly, since photo_manager only loads files on
+// the platforms it supports.
+class _FakeAssetEntity extends AssetEntity {
+  _FakeAssetEntity(this._file)
+      : super(id: 'photo', typeInt: 1, width: 100, height: 100);
+
+  final File _file;
+
+  @override
+  Future<File?> get originFile async => _file;
+}
+
+class _SubclassedController extends StreamAttachmentPickerController {
+  _SubclassedController()
+      : super(
+            validator: const StreamAttachmentValidator(maxAttachmentCount: 5));
 }
