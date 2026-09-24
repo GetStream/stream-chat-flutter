@@ -123,8 +123,8 @@ class StreamAttachmentPickerController
 
   /// The upload rules every added attachment is checked against.
   ///
-  /// Custom attachment pickers can read the configured rules from here,
-  /// e.g. to only offer the allowed file extensions.
+  /// Custom attachment pickers can read the configured rules from here, such
+  /// as to only offer the allowed file extensions.
   final StreamAttachmentValidator validator;
 
   /// The initial poll.

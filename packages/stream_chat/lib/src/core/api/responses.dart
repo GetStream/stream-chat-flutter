@@ -865,7 +865,7 @@ class GetAppSettingsResponse extends _BaseResponse {
   /// The app settings.
   late AppSettings app;
 
-  /// Create a new instance from a json
+  /// Creates a new instance from a json.
   static GetAppSettingsResponse fromJson(Map<String, dynamic> json) =>
       _$GetAppSettingsResponseFromJson(json);
 }

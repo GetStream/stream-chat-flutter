@@ -195,9 +195,9 @@ class StreamMessageInput extends StatefulWidget {
   /// List of triggers for showing autocomplete.
   final Iterable<StreamAutocompleteTrigger> customAutocompleteTriggers;
 
-  /// Max attachment size in bytes.
+  /// The maximum attachment size, in bytes.
   ///
-  /// Has no effect, the size limit set in the Stream Dashboard applies
+  /// Has no effect; the size limit set in the Stream Dashboard applies
   /// instead.
   final int maxAttachmentSize;
 
@@ -1512,7 +1512,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     final client = StreamChat.maybeOf(context)?.client;
     final appSettings = client?.appSettings ?? const AppSettings();
 
-    // Never below the attachments the message already holds, e.g. when
+    // Never below the attachments the message already holds, such as when
     // editing a message sent with a higher limit.
     final attachmentCount = _effectiveController.attachments.length;
 

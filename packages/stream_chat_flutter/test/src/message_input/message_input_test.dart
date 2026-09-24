@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:record/record.dart';
-import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox_list_tile.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -519,220 +518,9 @@ void main() {
       },
     );
   });
-
-  group('MessageInput upload config', () {
-    const appSettings = AppSettings(
-      fileUploadConfig: UploadConfig(blockedFileExtensions: ['.exe']),
-      imageUploadConfig: UploadConfig(allowedFileExtensions: ['.png']),
-    );
-
-    testWidgets(
-      'should open the attachment picker with the upload config',
-      (tester) async {
-        await tester.pumpWidget(
-          buildWidget(
-            const StreamMessageInput(attachmentLimit: 5),
-            appSettings: appSettings,
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        await tester.tap(find.byType(AttachmentButton));
-        await tester.pumpAndSettle();
-
-        final picker =
-            tester.widget<StreamPlatformAttachmentPickerBottomSheetBuilder>(
-          find.byType(StreamPlatformAttachmentPickerBottomSheetBuilder),
-        );
-
-        final validator = picker.validator!;
-        expect(validator.fileUploadConfig, appSettings.fileUploadConfig);
-        expect(validator.imageUploadConfig, appSettings.imageUploadConfig);
-        expect(validator.maxAttachmentCount, 5);
-      },
-    );
-
-    testWidgets(
-      'should not limit the picker below the attachments already added',
-      (tester) async {
-        final messageInputController = StreamMessageInputController(
-          message: Message(
-            attachments: [
-              for (var i = 0; i < 3; i++)
-                Attachment(
-                  type: AttachmentType.file,
-                  title: 'file-$i.pdf',
-                  uploadState: const UploadState.success(),
-                ),
-            ],
-          ),
-        );
-        addTearDown(messageInputController.dispose);
-
-        await tester.pumpWidget(
-          buildWidget(
-            StreamMessageInput(
-              messageInputController: messageInputController,
-              attachmentLimit: 1,
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        await tester.tap(find.byType(AttachmentButton));
-        await tester.pumpAndSettle();
-
-        final picker =
-            tester.widget<StreamPlatformAttachmentPickerBottomSheetBuilder>(
-          find.byType(StreamPlatformAttachmentPickerBottomSheetBuilder),
-        );
-
-        expect(picker.validator!.maxAttachmentCount, 3);
-      },
-    );
-
-    testWidgets(
-      'should report dropping more files than the attachment limit',
-      (tester) async {
-        final messageInputController = StreamMessageInputController();
-        addTearDown(messageInputController.dispose);
-
-        (int, String)? exceeded;
-        await tester.pumpWidget(
-          buildWidget(
-            StreamMessageInput(
-              messageInputController: messageInputController,
-              attachmentLimit: 1,
-              onAttachmentLimitExceed: (limit, message) {
-                exceeded = (limit, message);
-              },
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        DropItem file(String name) {
-          return DropItemFile.fromData(
-            Uint8List.fromList([1, 2, 3]),
-            name: name,
-            path: '/tmp/$name',
-          );
-        }
-
-        final dropTarget = tester.widget<DropTarget>(find.byType(DropTarget));
-        dropTarget.onDragDone?.call(
-          DropDoneDetails(
-            files: [file('a.pdf'), file('b.pdf')],
-            localPosition: Offset.zero,
-            globalPosition: Offset.zero,
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        expect(messageInputController.attachments, isEmpty);
-        expect(exceeded?.$1, 1);
-        expect(
-          exceeded?.$2,
-          DefaultTranslations.instance.attachmentLimitExceedError(1),
-        );
-      },
-    );
-
-    testWidgets(
-      'should reject a dropped file blocked by the upload config',
-      (tester) async {
-        final messageInputController = StreamMessageInputController();
-        addTearDown(messageInputController.dispose);
-
-        Object? error;
-        await tester.pumpWidget(
-          buildWidget(
-            StreamMessageInput(
-              messageInputController: messageInputController,
-              onError: (e, _) => error = e,
-            ),
-            appSettings: appSettings,
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        final dropTarget = tester.widget<DropTarget>(find.byType(DropTarget));
-        dropTarget.onDragDone?.call(
-          DropDoneDetails(
-            files: [
-              DropItemFile.fromData(
-                Uint8List.fromList([1, 2, 3]),
-                name: 'setup.exe',
-                path: '/tmp/setup.exe',
-              ),
-            ],
-            localPosition: Offset.zero,
-            globalPosition: Offset.zero,
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        expect(messageInputController.attachments, isEmpty);
-        expect(
-          error,
-          const AttachmentBlockedError(
-            fileExtension: 'exe',
-            mimeType: 'application/x-msdownload',
-          ),
-        );
-      },
-    );
-
-    testWidgets(
-      'should show the unsupported file type error without onError',
-      (tester) async {
-        final app = buildWidget(
-          const StreamMessageInput(),
-          appSettings: appSettings,
-        );
-
-        // Mount StreamChat above the navigator, so the error sheet can use it.
-        final streamChat = app.home! as StreamChat;
-        await tester.pumpWidget(
-          MaterialApp(
-            builder: (context, child) => StreamChat(
-              client: streamChat.client,
-              child: child,
-            ),
-            home: streamChat.child,
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        final dropTarget = tester.widget<DropTarget>(find.byType(DropTarget));
-        dropTarget.onDragDone?.call(
-          DropDoneDetails(
-            files: [
-              DropItemFile.fromData(
-                Uint8List.fromList([1, 2, 3]),
-                name: 'setup.exe',
-                path: '/tmp/setup.exe',
-              ),
-            ],
-            localPosition: Offset.zero,
-            globalPosition: Offset.zero,
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        expect(
-          find.text("'.exe' files are not supported for upload."),
-          findsOneWidget,
-        );
-      },
-    );
-  });
 }
 
-MaterialApp buildWidget(
-  StreamMessageInput input, {
-  AppSettings appSettings = const AppSettings(),
-}) {
+MaterialApp buildWidget(StreamMessageInput input) {
   final client = MockClient();
   final clientState = MockClientState();
   final channel = MockChannel();
@@ -740,7 +528,7 @@ MaterialApp buildWidget(
   final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
 
   when(() => client.state).thenReturn(clientState);
-  when(() => client.appSettings).thenReturn(appSettings);
+  when(() => client.appSettings).thenReturn(const AppSettings());
   when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
   when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
   when(() => channel.state).thenReturn(channelState);

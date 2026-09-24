@@ -60,7 +60,7 @@ class AttachmentFile {
   /// The file size in bytes.
   final int? size;
 
-  /// File extension for this file, e.g. `pdf` for `report.pdf`.
+  /// The extension of this file's name, such as `pdf` for `report.pdf`.
   ///
   /// Returns `null` when the file name has no extension.
   String? get extension {

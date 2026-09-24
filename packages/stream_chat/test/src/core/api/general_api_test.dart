@@ -314,7 +314,7 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
-  test('getAppSettings', () async {
+  test('getAppSettings fetches the app settings from /app', () async {
     const path = '/app';
     final fixture = jsonFixture('app_settings.json');
 

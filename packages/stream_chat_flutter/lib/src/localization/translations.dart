@@ -130,8 +130,8 @@ abstract class Translations {
 
   /// The error shown when the file type is not allowed for upload.
   ///
-  /// [extension] is the file extension without the leading dot, e.g. `exe`,
-  /// or `null` when the extension is unknown.
+  /// The `extension` argument is the file extension without the leading dot,
+  /// such as `exe`, or `null` when the extension is unknown.
   String fileTypeNotSupportedError(String? extension);
 
   /// The error shown when the file being read has no bytes

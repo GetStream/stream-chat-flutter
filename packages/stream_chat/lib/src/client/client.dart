@@ -195,8 +195,9 @@ class StreamChatClient {
 
   /// The cached [AppSettings] for this client.
   ///
-  /// Returns a default instance until the background load started by
-  /// [connectUser] completes. Call [getAppSettings] to force a re-fetch.
+  /// Returns a default instance until the settings loaded by [connectUser]
+  /// arrive. To pick up changes made during a session, consider calling
+  /// [getAppSettings].
   AppSettings get appSettings => _appSettingsManager.appSettings;
 
   /// Chat persistence client
@@ -426,7 +427,6 @@ class StreamChatClient {
         state.currentUser = connectedUser;
       }
 
-      // Load the app settings in the background
       unawaited(_appSettingsManager.loadAppSettings());
 
       return state.currentUser!;
