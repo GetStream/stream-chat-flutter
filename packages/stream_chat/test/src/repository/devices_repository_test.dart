@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 import '../mocks.dart';
 
 void main() {
-  test('addDevice forwards the id and provider without a name', () async {
+  test('DevicesRepository.addDevice forwards the id and provider without a name', () async {
     final defaultApi = MockDefaultApi();
     const request = api.CreateDeviceRequest(
       id: 'device-id',
@@ -22,7 +22,7 @@ void main() {
     verifyNoMoreInteractions(defaultApi);
   });
 
-  test('addDevice forwards the provider name when given', () async {
+  test('DevicesRepository.addDevice forwards the provider name when given', () async {
     final defaultApi = MockDefaultApi();
     const request = api.CreateDeviceRequest(
       id: 'device-id',
@@ -37,7 +37,7 @@ void main() {
     verifyNoMoreInteractions(defaultApi);
   });
 
-  test('addDevice sends an empty provider name as no name', () async {
+  test('DevicesRepository.addDevice sends an empty provider name as no name', () async {
     final defaultApi = MockDefaultApi();
     const request = api.CreateDeviceRequest(
       id: 'device-id',
@@ -51,7 +51,7 @@ void main() {
     verifyNoMoreInteractions(defaultApi);
   });
 
-  test('addDevice returns the mapped response', () async {
+  test('DevicesRepository.addDevice returns the mapped response', () async {
     final defaultApi = MockDefaultApi();
     const request = api.CreateDeviceRequest(
       id: 'device-id',
@@ -64,7 +64,7 @@ void main() {
     expect(res.getOrNull()?.duration, '0.02ms');
   });
 
-  test('addDevice returns the failure without throwing', () async {
+  test('DevicesRepository.addDevice returns the failure without throwing', () async {
     final defaultApi = MockDefaultApi();
     const error = StreamClientException(message: 'boom');
     const request = api.CreateDeviceRequest(
@@ -80,7 +80,7 @@ void main() {
     expect(res.exceptionOrNull(), error);
   });
 
-  test('getDevices returns the mapped response', () async {
+  test('DevicesRepository.getDevices returns the mapped response', () async {
     final defaultApi = MockDefaultApi();
     final device = api.DeviceResponse(
       id: 'device-id',
@@ -98,7 +98,7 @@ void main() {
     expect((response.duration, response.devices.single.id), ('0.02ms', 'device-id'));
   });
 
-  test('getDevices returns the failure without throwing', () async {
+  test('DevicesRepository.getDevices returns the failure without throwing', () async {
     final defaultApi = MockDefaultApi();
     const error = StreamClientException(message: 'boom');
     when(defaultApi.listDevices).thenAnswer((_) async => const Result.failure(error));
@@ -108,7 +108,7 @@ void main() {
     expect(res.exceptionOrNull(), error);
   });
 
-  test('removeDevice forwards the id', () async {
+  test('DevicesRepository.removeDevice forwards the id', () async {
     final defaultApi = MockDefaultApi();
     _stubDeleteDevice(defaultApi, 'device-id');
 
@@ -118,7 +118,7 @@ void main() {
     verifyNoMoreInteractions(defaultApi);
   });
 
-  test('removeDevice returns the mapped response', () async {
+  test('DevicesRepository.removeDevice returns the mapped response', () async {
     final defaultApi = MockDefaultApi();
     _stubDeleteDevice(defaultApi, 'device-id', duration: '0.02ms');
 
@@ -127,7 +127,7 @@ void main() {
     expect(res.getOrNull()?.duration, '0.02ms');
   });
 
-  test('removeDevice returns the failure without throwing', () async {
+  test('DevicesRepository.removeDevice returns the failure without throwing', () async {
     final defaultApi = MockDefaultApi();
     const error = StreamClientException(message: 'boom');
     when(() => defaultApi.deleteDevice(id: 'device-id')).thenAnswer((_) async => const Result.failure(error));

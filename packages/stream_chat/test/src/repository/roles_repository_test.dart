@@ -10,7 +10,7 @@ import 'package:test/test.dart';
 import '../mocks.dart';
 
 void main() {
-  test('searchRoles forwards only the query when nothing else is passed', () async {
+  test('RolesRepository.searchRoles forwards only the query when nothing else is passed', () async {
     final defaultApi = MockDefaultApi();
     when(() => defaultApi.searchRoles(query: 'adm')).thenAnswer(
       (_) async => const Result.success(api.SearchRolesResponse(duration: '0.01ms', roles: [])),
@@ -22,7 +22,7 @@ void main() {
     verifyNoMoreInteractions(defaultApi);
   });
 
-  test('searchRoles forwards every parameter to the generated client', () async {
+  test('RolesRepository.searchRoles forwards every parameter to the generated client', () async {
     final defaultApi = MockDefaultApi();
     when(
       () => defaultApi.searchRoles(
@@ -56,7 +56,7 @@ void main() {
     verifyNoMoreInteractions(defaultApi);
   });
 
-  test('searchRoles returns the mapped response', () async {
+  test('RolesRepository.searchRoles returns the mapped response', () async {
     final defaultApi = MockDefaultApi();
     when(() => defaultApi.searchRoles(query: 'mod')).thenAnswer(
       (_) async => const Result.success(api.SearchRolesResponse(duration: '0.02ms', roles: [])),
@@ -67,7 +67,7 @@ void main() {
     expect(res.getOrNull()?.duration, '0.02ms');
   });
 
-  test('searchRoles returns the failure without throwing', () async {
+  test('RolesRepository.searchRoles returns the failure without throwing', () async {
     final defaultApi = MockDefaultApi();
     const error = StreamClientException(message: 'boom');
     when(() => defaultApi.searchRoles(query: 'adm')).thenAnswer((_) async => const Result.failure(error));
