@@ -140,16 +140,9 @@ void main() {
         );
       });
 
-      test('compound extension like .tar.gz matches an allow-list entry', () {
+      test('a .tar.gz allow-list entry rejects .tar.gz files, since only the last extension is compared', () {
         const validator = StreamAttachmentValidator(
           fileUploadConfig: UploadConfig(allowedFileExtensions: ['.tar.gz']),
-        );
-        expect(validator.validate(_attachment(path: '/tmp/archive.tar.gz')), isNull);
-      });
-
-      test('compound extension like .tar.gz matches a block-list entry', () {
-        const validator = StreamAttachmentValidator(
-          fileUploadConfig: UploadConfig(blockedFileExtensions: ['.tar.gz']),
         );
         expect(
           validator.validate(_attachment(path: '/tmp/archive.tar.gz')),
@@ -157,9 +150,14 @@ void main() {
         );
       });
 
-      test('a broader .gz block-list entry also catches .tar.gz files', () {
-        // Suffix matching: `archive.tar.gz` ends with `.gz`, so the entry
-        // for `.gz` covers all gzip-compressed payloads including `.tar.gz`.
+      test('a .tar.gz block-list entry lets .tar.gz files through, since only the last extension is compared', () {
+        const validator = StreamAttachmentValidator(
+          fileUploadConfig: UploadConfig(blockedFileExtensions: ['.tar.gz']),
+        );
+        expect(validator.validate(_attachment(path: '/tmp/archive.tar.gz')), isNull);
+      });
+
+      test('a .gz block-list entry blocks .tar.gz files', () {
         const validator = StreamAttachmentValidator(
           fileUploadConfig: UploadConfig(blockedFileExtensions: ['.gz']),
         );
@@ -169,10 +167,7 @@ void main() {
         );
       });
 
-      test('a .tar.gz allow-list entry does not accept a plain .gz file', () {
-        // Suffix matching is strict: `archive.gz` does not end with
-        // `.tar.gz`, so an allow-list scoped to compound archives rejects
-        // bare gzip files.
+      test('a .tar.gz allow-list entry rejects a plain .gz file', () {
         const validator = StreamAttachmentValidator(
           fileUploadConfig: UploadConfig(allowedFileExtensions: ['.tar.gz']),
         );
