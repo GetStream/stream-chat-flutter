@@ -2,27 +2,43 @@ import UIKit
 import Flutter
 
 @main
-@objc class AppDelegate: FlutterAppDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
     let sharedDefaults = UserDefaults(suiteName: "group.io.getstream.flutter")
-    
+
     override func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        if let messageQueue = sharedDefaults?.stringArray(forKey: "messageQueue") {
-            UserDefaults.standard.setValue(messageQueue, forKey: "flutter.messageQueue")
-            sharedDefaults?.removeObject(forKey: "messageQueue")
-        }
+        restoreMessageQueue()
 
         if #available(iOS 10.0, *) {
           UNUserNotificationCenter.current().delegate = self
         }
 
-        GeneratedPluginRegistrant.register(with: self)
+        // With the UIScene lifecycle, the app delegate's own background and
+        // foreground callbacks are no longer called, so observe the app-wide
+        // notifications instead.
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(didEnterBackground),
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(willEnterForeground),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil
+        )
+
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
-    
-    override func applicationDidEnterBackground(_ application: UIApplication) {
+
+    func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+        GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+    }
+
+    @objc private func didEnterBackground() {
         if let apiKey = UserDefaults.standard.string(forKey: "flutter.KEY_API_KEY") {
             sharedDefaults?.setValue(apiKey, forKey: "KEY_API_KEY")
         }
@@ -35,8 +51,12 @@ import Flutter
             sharedDefaults?.setValue(userId, forKey: "KEY_USER_ID")
         }
     }
-    
-    override func applicationWillEnterForeground(_ application: UIApplication) {
+
+    @objc private func willEnterForeground() {
+        restoreMessageQueue()
+    }
+
+    private func restoreMessageQueue() {
         if let messageQueue = sharedDefaults?.stringArray(forKey: "messageQueue") {
             UserDefaults.standard.setValue(messageQueue, forKey: "flutter.messageQueue")
             sharedDefaults?.removeObject(forKey: "messageQueue")
