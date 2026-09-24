@@ -4,6 +4,7 @@ import '../../open_api/api.dart' as api;
 import '../core/models/list_devices_response.dart';
 import '../core/models/push_provider.dart';
 import 'mapper/devices_mapper.dart';
+import 'mapper/result_mapper.dart';
 
 /// Repository dedicated to device operations.
 class DevicesRepository {
@@ -34,7 +35,7 @@ class DevicesRepository {
       ),
     );
 
-    return result.map((_) {});
+    return result.ignoreResult();
   }
 
   /// Lists the devices registered for the current user.
@@ -46,6 +47,6 @@ class DevicesRepository {
   /// Removes a registered device, stopping push notifications to it.
   Future<Result<void>> removeDevice(String id) async {
     final result = await _api.deleteDevice(id: id);
-    return result.map((_) {});
+    return result.ignoreResult();
   }
 }

@@ -53,7 +53,7 @@ void main() {
     verifyNoMoreInteractions(defaultApi);
   });
 
-  test('DevicesRepository.addDevice returns success when the server accepts the device', () async {
+  test('DevicesRepository.addDevice returns a success with no value when the server accepts the device', () async {
     final defaultApi = MockDefaultApi();
     const request = api.CreateDeviceRequest(
       id: 'device-id',
@@ -63,7 +63,7 @@ void main() {
 
     final res = await DevicesRepository(defaultApi).addDevice('device-id', PushProvider.firebase);
 
-    expect(res.isSuccess, isTrue);
+    expect(res, const Result<void>.success(null));
   });
 
   test('DevicesRepository.addDevice returns the failure without throwing', () async {
@@ -125,13 +125,13 @@ void main() {
     verifyNoMoreInteractions(defaultApi);
   });
 
-  test('DevicesRepository.removeDevice returns success when the server removes the device', () async {
+  test('DevicesRepository.removeDevice returns a success with no value when the server removes the device', () async {
     final defaultApi = MockDefaultApi();
     _stubDeleteDevice(defaultApi, 'device-id');
 
     final res = await DevicesRepository(defaultApi).removeDevice('device-id');
 
-    expect(res.isSuccess, isTrue);
+    expect(res, const Result<void>.success(null));
   });
 
   test('DevicesRepository.removeDevice returns the failure without throwing', () async {
