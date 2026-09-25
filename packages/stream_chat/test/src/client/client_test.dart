@@ -2012,7 +2012,7 @@ void main() {
       expect(pushPreferences?.disabledUntil, pushPreference.disabledUntil);
     });
 
-    test('StreamChatClient.listUserGroups returns the groups on the requested page', () async {
+    test('StreamChatClient.listUserGroups sends the pagination arguments and returns the mapped groups', () async {
       const limit = 10;
       const idGt = 'cursor-group-id';
       final createdAtGt = DateTime.utc(2024, 6, 15, 12);
@@ -2045,7 +2045,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.searchUserGroups returns the groups matching the query', () async {
+    test('StreamChatClient.searchUserGroups sends the query and returns the mapped groups', () async {
       const query = 'eng';
       const limit = 10;
       const nameGt = 'engineering';
@@ -2069,7 +2069,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.getUserGroup returns the group fetched for the id and team', () async {
+    test('StreamChatClient.getUserGroup sends the id and team and returns the mapped group', () async {
       const id = 'test-group-id';
       const teamId = 'test-team-id';
 
@@ -2135,7 +2135,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.deleteUserGroup returns a success with no value once the group is deleted', () async {
+    test('StreamChatClient.deleteUserGroup sends the id and team and returns a success with no value', () async {
       const id = 'test-group-id';
       const teamId = 'test-team-id';
 
