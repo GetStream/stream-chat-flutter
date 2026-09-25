@@ -1,7 +1,7 @@
 import 'package:stream_core/stream_core.dart' show Failure, Result, StreamLogger, Success;
 
 import '../core/models/app_settings.dart';
-import '../core/models/get_app_settings_response.dart';
+import '../core/models/response/get_app_settings_response.dart';
 import '../repository/app_settings_repository.dart';
 
 /// {@template appSettingsManager}

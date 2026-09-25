@@ -1,7 +1,7 @@
 import 'package:stream_core/stream_core.dart' show PatternMatching, Result;
 
 import '../../open_api/api.dart' as api;
-import '../core/models/get_app_settings_response.dart';
+import '../core/models/response/get_app_settings_response.dart';
 import 'mapper/app_settings_mapper.dart';
 
 /// Repository dedicated to application settings operations.

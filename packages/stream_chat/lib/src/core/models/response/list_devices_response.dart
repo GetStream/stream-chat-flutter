@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import 'device.dart';
+import '../device.dart';
 
 part 'list_devices_response.freezed.dart';
 

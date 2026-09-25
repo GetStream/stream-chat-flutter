@@ -1,6 +1,6 @@
 import '../../../open_api/api.dart' as api;
 import '../../core/models/app_settings.dart';
-import '../../core/models/get_app_settings_response.dart';
+import '../../core/models/response/get_app_settings_response.dart';
 import '../../core/models/upload_config.dart';
 
 /// Maps a generated [api.FileUploadConfig] to an [UploadConfig].

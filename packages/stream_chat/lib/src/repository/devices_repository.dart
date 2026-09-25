@@ -1,8 +1,8 @@
 import 'package:stream_core/stream_core.dart' show PatternMatching, Result;
 
 import '../../open_api/api.dart' as api;
-import '../core/models/list_devices_response.dart';
 import '../core/models/push_provider.dart';
+import '../core/models/response/list_devices_response.dart';
 import 'mapper/devices_mapper.dart';
 import 'mapper/result_mapper.dart';
 
