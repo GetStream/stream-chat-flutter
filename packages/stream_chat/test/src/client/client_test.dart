@@ -1839,7 +1839,7 @@ void main() {
       verifyNoMoreInteractions(fakeChatApi.channel);
     });
 
-    test('`.addDevice should work`', () async {
+    test('StreamChatClient.addDevice sends the device and returns a success', () async {
       const id = 'test-device-id';
       const request = api.CreateDeviceRequest(
         id: id,
@@ -1857,7 +1857,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('`.addDevice should work with pushProviderName`', () async {
+    test('StreamChatClient.addDevice forwards the push provider name', () async {
       const id = 'test-device-id';
       const pushProviderName = 'my-custom-config';
       const request = api.CreateDeviceRequest(
@@ -1877,7 +1877,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('`.addDevice` surfaces a failure without throwing', () async {
+    test('StreamChatClient.addDevice returns the failure without throwing', () async {
       const error = StreamClientException(message: 'boom');
       const request = api.CreateDeviceRequest(
         id: 'test-device-id',
@@ -1894,7 +1894,7 @@ void main() {
       expect(res.exceptionOrNull(), error);
     });
 
-    test('`.getDevices`', () async {
+    test('StreamChatClient.getDevices returns the registered devices', () async {
       final devices = List.generate(
         3,
         (index) => api.DeviceResponse(
@@ -1916,7 +1916,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('`.removeDevice`', () async {
+    test('StreamChatClient.removeDevice sends the device id and returns a success', () async {
       const deviceId = 'test-device-id';
 
       when(() => defaultApi.deleteDevice(id: deviceId)).thenAnswer(
@@ -2012,41 +2012,40 @@ void main() {
       expect(pushPreferences?.disabledUntil, pushPreference.disabledUntil);
     });
 
-    test('`.listUserGroups`', () async {
+    test('StreamChatClient.listUserGroups sends the pagination arguments and returns the mapped groups', () async {
       const limit = 10;
       const idGt = 'cursor-group-id';
       final createdAtGt = DateTime.utc(2024, 6, 15, 12);
       const teamId = 'test-team-id';
 
       when(
-        () => fakeChatApi.userGroups.listUserGroups(
+        () => defaultApi.listUserGroups(
           limit: limit,
           idGt: idGt,
-          createdAtGt: createdAtGt,
+          createdAtGt: '2024-06-15T12:00:00.000Z',
           teamId: teamId,
         ),
-      ).thenAnswer((_) async => ListUserGroupsResponse()..userGroups = const []);
-
-      final res = await client.listUserGroups(
-        limit: limit,
-        idGt: idGt,
-        createdAtGt: createdAtGt,
-        teamId: teamId,
+      ).thenAnswer(
+        (_) async => Result.success(
+          api.ListUserGroupsResponse(duration: '0.01ms', userGroups: [_generatedUserGroup('group-id')]),
+        ),
       );
-      expect(res, isNotNull);
+
+      final res = await client.listUserGroups(limit: limit, idGt: idGt, createdAtGt: createdAtGt, teamId: teamId);
+      expect(res.getOrNull()?.userGroups, [_userGroup('group-id')]);
 
       verify(
-        () => fakeChatApi.userGroups.listUserGroups(
+        () => defaultApi.listUserGroups(
           limit: limit,
           idGt: idGt,
-          createdAtGt: createdAtGt,
+          createdAtGt: '2024-06-15T12:00:00.000Z',
           teamId: teamId,
         ),
       ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.userGroups);
+      verifyNoMoreInteractions(defaultApi);
     });
 
-    test('`.searchUserGroups`', () async {
+    test('StreamChatClient.searchUserGroups sends the query and returns the mapped groups', () async {
       const query = 'eng';
       const limit = 10;
       const nameGt = 'engineering';
@@ -2054,83 +2053,54 @@ void main() {
       const teamId = 'test-team-id';
 
       when(
-        () => fakeChatApi.userGroups.searchUserGroups(
-          query,
-          limit: limit,
-          nameGt: nameGt,
-          idGt: idGt,
-          teamId: teamId,
+        () => defaultApi.searchUserGroups(query: query, limit: limit, nameGt: nameGt, idGt: idGt, teamId: teamId),
+      ).thenAnswer(
+        (_) async => Result.success(
+          api.SearchUserGroupsResponse(duration: '0.01ms', userGroups: [_generatedUserGroup('group-id')]),
         ),
-      ).thenAnswer((_) async => SearchUserGroupsResponse()..userGroups = const []);
-
-      final res = await client.searchUserGroups(
-        query,
-        limit: limit,
-        nameGt: nameGt,
-        idGt: idGt,
-        teamId: teamId,
       );
-      expect(res, isNotNull);
+
+      final res = await client.searchUserGroups(query, limit: limit, nameGt: nameGt, idGt: idGt, teamId: teamId);
+      expect(res.getOrNull()?.userGroups, [_userGroup('group-id')]);
 
       verify(
-        () => fakeChatApi.userGroups.searchUserGroups(
-          query,
-          limit: limit,
-          nameGt: nameGt,
-          idGt: idGt,
-          teamId: teamId,
-        ),
+        () => defaultApi.searchUserGroups(query: query, limit: limit, nameGt: nameGt, idGt: idGt, teamId: teamId),
       ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.userGroups);
+      verifyNoMoreInteractions(defaultApi);
     });
 
-    test('`.getUserGroup`', () async {
+    test('StreamChatClient.getUserGroup sends the id and team and returns the mapped group', () async {
       const id = 'test-group-id';
       const teamId = 'test-team-id';
 
-      when(() => fakeChatApi.userGroups.getUserGroup(id, teamId: teamId)).thenAnswer(
-        (_) async => GetUserGroupResponse()
-          ..userGroup = UserGroup(
-            id: id,
-            name: 'test-group-name',
-            createdAt: DateTime.utc(2024, 1, 1),
-            updatedAt: DateTime.utc(2024, 1, 2),
-          ),
+      when(() => defaultApi.getUserGroup(id: id, teamId: teamId)).thenAnswer(
+        (_) async => Result.success(api.GetUserGroupResponse(duration: '0.01ms', userGroup: _generatedUserGroup(id))),
       );
 
       final res = await client.getUserGroup(id, teamId: teamId);
-      expect(res, isNotNull);
-      expect(res.userGroup.id, id);
+      expect(res.getOrNull()?.userGroup, _userGroup(id));
 
-      verify(() => fakeChatApi.userGroups.getUserGroup(id, teamId: teamId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.userGroups);
+      verify(() => defaultApi.getUserGroup(id: id, teamId: teamId)).called(1);
+      verifyNoMoreInteractions(defaultApi);
     });
 
-    test('`.createUserGroup`', () async {
+    test('StreamChatClient.createUserGroup sends the arguments and returns the mapped group', () async {
       const name = 'Engineering';
-      const id = 'eng';
-      const description = 'Engineering team';
+      const id = 'test-group-id';
+      const description = 'The engineers';
       const teamId = 'test-team-id';
-      const memberIds = ['user-1', 'user-2'];
+      const memberIds = ['test-user-id'];
+      const request = api.CreateUserGroupRequest(
+        name: name,
+        id: id,
+        description: description,
+        teamId: teamId,
+        memberIds: memberIds,
+      );
 
-      when(
-        () => fakeChatApi.userGroups.createUserGroup(
-          name,
-          id: id,
-          description: description,
-          teamId: teamId,
-          memberIds: memberIds,
-        ),
-      ).thenAnswer(
-        (_) async => CreateUserGroupResponse()
-          ..userGroup = UserGroup(
-            id: id,
-            name: name,
-            description: description,
-            teamId: teamId,
-            createdAt: DateTime.utc(2024, 1, 1),
-            updatedAt: DateTime.utc(2024, 1, 2),
-          ),
+      when(() => defaultApi.createUserGroup(createUserGroupRequest: request)).thenAnswer(
+        (_) async =>
+            Result.success(api.CreateUserGroupResponse(duration: '0.01ms', userGroup: _generatedUserGroup(id))),
       );
 
       final res = await client.createUserGroup(
@@ -2140,162 +2110,95 @@ void main() {
         teamId: teamId,
         memberIds: memberIds,
       );
-      expect(res, isNotNull);
-      expect(res.userGroup.id, id);
+      expect(res.getOrNull()?.userGroup, _userGroup(id));
 
-      verify(
-        () => fakeChatApi.userGroups.createUserGroup(
-          name,
-          id: id,
-          description: description,
-          teamId: teamId,
-          memberIds: memberIds,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.userGroups);
+      verify(() => defaultApi.createUserGroup(createUserGroupRequest: request)).called(1);
+      verifyNoMoreInteractions(defaultApi);
     });
 
-    test('`.updateUserGroup`', () async {
+    test('StreamChatClient.updateUserGroup sends the arguments and returns the mapped group', () async {
       const id = 'test-group-id';
-      const name = 'New Name';
-      const description = 'New description';
+      const name = 'Engineering';
+      const description = 'The engineers';
+      const teamId = 'test-team-id';
+      const request = api.UpdateUserGroupRequest(name: name, description: description, teamId: teamId);
+
+      when(() => defaultApi.updateUserGroup(id: id, updateUserGroupRequest: request)).thenAnswer(
+        (_) async =>
+            Result.success(api.UpdateUserGroupResponse(duration: '0.01ms', userGroup: _generatedUserGroup(id))),
+      );
+
+      final res = await client.updateUserGroup(id, name: name, description: description, teamId: teamId);
+      expect(res.getOrNull()?.userGroup, _userGroup(id));
+
+      verify(() => defaultApi.updateUserGroup(id: id, updateUserGroupRequest: request)).called(1);
+      verifyNoMoreInteractions(defaultApi);
+    });
+
+    test('StreamChatClient.deleteUserGroup sends the id and team and returns a success with no value', () async {
+      const id = 'test-group-id';
       const teamId = 'test-team-id';
 
       when(
-        () => fakeChatApi.userGroups.updateUserGroup(
-          id,
-          name: name,
-          description: description,
-          teamId: teamId,
-        ),
-      ).thenAnswer(
-        (_) async => UpdateUserGroupResponse()
-          ..userGroup = UserGroup(
-            id: id,
-            name: name,
-            description: description,
-            teamId: teamId,
-            createdAt: DateTime.utc(2024, 1, 1),
-            updatedAt: DateTime.utc(2024, 1, 2),
-          ),
-      );
-
-      final res = await client.updateUserGroup(
-        id,
-        name: name,
-        description: description,
-        teamId: teamId,
-      );
-      expect(res, isNotNull);
-      expect(res.userGroup.name, name);
-
-      verify(
-        () => fakeChatApi.userGroups.updateUserGroup(
-          id,
-          name: name,
-          description: description,
-          teamId: teamId,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.userGroups);
-    });
-
-    test('`.deleteUserGroup`', () async {
-      const id = 'test-group-id';
-      const teamId = 'test-team-id';
-
-      when(() => fakeChatApi.userGroups.deleteUserGroup(id, teamId: teamId)).thenAnswer(
-        (_) async => EmptyResponse(),
-      );
+        () => defaultApi.deleteUserGroup(id: id, teamId: teamId),
+      ).thenAnswer((_) async => const Result.success(api.DurationResponse(duration: '0.01ms')));
 
       final res = await client.deleteUserGroup(id, teamId: teamId);
-      expect(res, isNotNull);
+      expect(res, const Result<void>.success(null));
 
-      verify(() => fakeChatApi.userGroups.deleteUserGroup(id, teamId: teamId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.userGroups);
+      verify(() => defaultApi.deleteUserGroup(id: id, teamId: teamId)).called(1);
+      verifyNoMoreInteractions(defaultApi);
     });
 
-    test('`.addUserGroupMembers`', () async {
+    test('StreamChatClient.addUserGroupMembers sends the members and returns the mapped group', () async {
       const id = 'test-group-id';
-      const memberIds = ['user-1', 'user-2'];
-      const asAdmin = true;
+      const memberIds = ['test-user-id'];
       const teamId = 'test-team-id';
+      const request = api.AddUserGroupMembersRequest(memberIds: memberIds, asAdmin: true, teamId: teamId);
+
+      when(() => defaultApi.addUserGroupMembers(id: id, addUserGroupMembersRequest: request)).thenAnswer(
+        (_) async =>
+            Result.success(api.AddUserGroupMembersResponse(duration: '0.01ms', userGroup: _generatedUserGroup(id))),
+      );
+
+      final res = await client.addUserGroupMembers(id, memberIds, asAdmin: true, teamId: teamId);
+      expect(res.getOrNull()?.userGroup, _userGroup(id));
+
+      verify(() => defaultApi.addUserGroupMembers(id: id, addUserGroupMembersRequest: request)).called(1);
+      verifyNoMoreInteractions(defaultApi);
+    });
+
+    test('StreamChatClient.removeUserGroupMembers sends the members and returns the mapped group', () async {
+      const id = 'test-group-id';
+      const memberIds = ['test-user-id'];
+      const teamId = 'test-team-id';
+      const request = api.RemoveUserGroupMembersRequest(memberIds: memberIds, teamId: teamId);
+
+      when(() => defaultApi.removeUserGroupMembers(id: id, removeUserGroupMembersRequest: request)).thenAnswer(
+        (_) async =>
+            Result.success(api.RemoveUserGroupMembersResponse(duration: '0.01ms', userGroup: _generatedUserGroup(id))),
+      );
+
+      final res = await client.removeUserGroupMembers(id, memberIds, teamId: teamId);
+      expect(res.getOrNull()?.userGroup, _userGroup(id));
+
+      verify(() => defaultApi.removeUserGroupMembers(id: id, removeUserGroupMembersRequest: request)).called(1);
+      verifyNoMoreInteractions(defaultApi);
+    });
+
+    test('StreamChatClient.searchUserGroups returns the failure without throwing', () async {
+      const error = StreamClientException(message: 'boom');
 
       when(
-        () => fakeChatApi.userGroups.addUserGroupMembers(
-          id,
-          memberIds,
-          asAdmin: asAdmin,
-          teamId: teamId,
-        ),
-      ).thenAnswer(
-        (_) async => AddUserGroupMembersResponse()
-          ..userGroup = UserGroup(
-            id: id,
-            name: 'test-group-name',
-            createdAt: DateTime.utc(2024, 1, 1),
-            updatedAt: DateTime.utc(2024, 1, 2),
-          ),
-      );
+        () => defaultApi.searchUserGroups(query: 'eng'),
+      ).thenAnswer((_) async => const Result.failure(error));
 
-      final res = await client.addUserGroupMembers(
-        id,
-        memberIds,
-        asAdmin: asAdmin,
-        teamId: teamId,
-      );
-      expect(res, isNotNull);
+      final res = await client.searchUserGroups('eng');
 
-      verify(
-        () => fakeChatApi.userGroups.addUserGroupMembers(
-          id,
-          memberIds,
-          asAdmin: asAdmin,
-          teamId: teamId,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.userGroups);
+      expect(res.exceptionOrNull(), error);
     });
 
-    test('`.removeUserGroupMembers`', () async {
-      const id = 'test-group-id';
-      const memberIds = ['user-1', 'user-2'];
-      const teamId = 'test-team-id';
-
-      when(
-        () => fakeChatApi.userGroups.removeUserGroupMembers(
-          id,
-          memberIds,
-          teamId: teamId,
-        ),
-      ).thenAnswer(
-        (_) async => RemoveUserGroupMembersResponse()
-          ..userGroup = UserGroup(
-            id: id,
-            name: 'test-group-name',
-            createdAt: DateTime.utc(2024, 1, 1),
-            updatedAt: DateTime.utc(2024, 1, 2),
-          ),
-      );
-
-      final res = await client.removeUserGroupMembers(
-        id,
-        memberIds,
-        teamId: teamId,
-      );
-      expect(res, isNotNull);
-
-      verify(
-        () => fakeChatApi.userGroups.removeUserGroupMembers(
-          id,
-          memberIds,
-          teamId: teamId,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.userGroups);
-    });
-
-    test('`.searchRoles`', () async {
+    test('StreamChatClient.searchRoles sends the query and returns the mapped response', () async {
       const query = 'adm';
       const limit = 10;
       const nameGt = 'admin';
@@ -2336,7 +2239,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('`.searchRoles` surfaces a failure without throwing', () async {
+    test('StreamChatClient.searchRoles returns the failure without throwing', () async {
       const query = 'adm';
       const error = StreamClientException(message: 'boom');
 
@@ -6697,4 +6600,22 @@ void main() {
       await expectLater(connecting, throwsA(isA<StreamChatException>()));
     });
   });
+}
+
+api.UserGroupResponse _generatedUserGroup(String id) {
+  return api.UserGroupResponse(
+    createdAt: DateTime.utc(2024),
+    id: id,
+    name: 'name-$id',
+    updatedAt: DateTime.utc(2024),
+  );
+}
+
+UserGroup _userGroup(String id) {
+  return UserGroup(
+    createdAt: DateTime.utc(2024),
+    id: id,
+    name: 'name-$id',
+    updatedAt: DateTime.utc(2024),
+  );
 }

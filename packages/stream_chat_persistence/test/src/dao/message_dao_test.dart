@@ -53,6 +53,29 @@ void main() {
           'testType': ReactionGroup(count: 3, sumScores: 10),
           'testType2': ReactionGroup(count: 5, sumScores: 20),
         },
+        mentionedGroupIds: const ['testGroupId1', 'testGroupId2'],
+        mentionedGroups: [
+          UserGroup(
+            createdAt: DateTime.utc(2024, 1, 1),
+            id: 'testGroupId1',
+            members: [
+              UserGroupMember(
+                createdAt: DateTime.utc(2024, 1, 3),
+                groupId: 'testGroupId1',
+                isAdmin: true,
+                userId: 'u1',
+              ),
+            ],
+            name: 'Engineering',
+            updatedAt: DateTime.utc(2024, 1, 2),
+          ),
+          UserGroup(
+            createdAt: DateTime.utc(2024, 1, 1),
+            id: 'testGroupId2',
+            name: 'Design',
+            updatedAt: DateTime.utc(2024, 1, 2),
+          ),
+        ],
         i18n: {
           'en_text': 'Hello #$index',
           'hi_text': 'नमस्ते #$index',
@@ -256,6 +279,7 @@ void main() {
     final fetchedMessage = await messageDao.getMessageById(id);
     expect(fetchedMessage, isNotNull);
     expect(fetchedMessage!.id, insertedMessages.first.id);
+    expect(fetchedMessage.mentionedGroups, insertedMessages.first.mentionedGroups);
   });
 
   test('getThreadMessages', () async {

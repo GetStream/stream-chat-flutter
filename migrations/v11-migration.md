@@ -27,6 +27,7 @@ onto Stream's OpenAPI-generated API client.
     - [Sorting](#sorting)
     - [Roles](#roles)
     - [Devices](#devices)
+    - [User Groups](#user-groups)
 - [Migration Checklist](#migration-checklist)
 - [For AI Agents](#for-ai-agents)
 - [Contributing to this guide](#contributing-to-this-guide)
@@ -162,6 +163,15 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `Device` / `ListDevicesResponse` / `SearchRolesResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
 | `Role extends Equatable`, `Role.props` | `Role` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and `Role` is no longer an `Equatable` |
 | `StreamChatApi.device` | `StreamChatApi.pushPreferences` | `renamed` | The class handles only `setPushPreferences` now; device calls moved to the generated client |
+| `StreamChatClient.listUserGroups` / `searchUserGroups` / `getUserGroup` / `createUserGroup` / `updateUserGroup` / `addUserGroupMembers` / `removeUserGroupMembers` → `Future<XResponse>` | `Future<Result<XResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `StreamChatClient.deleteUserGroup` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing, and carries no value on success |
+| `UserGroup.fromJson` / `toJson`, `UserGroupMember.fromJson` / `toJson`, the user group responses' `fromJson` | — | `removed` | The models are plain classes; construct them directly. `fromData` / `toData` are the offline database's format, not API JSON |
+| `ListUserGroupsResponse()..userGroups = …` and the other user group responses' `late` setters | `ListUserGroupsResponse(duration: …, userGroups: …)` | `retyped` | The responses are plain classes with a const constructor and final fields |
+| The user group responses' `duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| `GetUserGroupResponse` / `CreateUserGroupResponse` / `UpdateUserGroupResponse` / `AddUserGroupMembersResponse` / `RemoveUserGroupMembersResponse`.`userGroup` (`UserGroup`) | `UserGroup?` | `retyped` | The API does not guarantee the group in the response; handle `null` |
+| `UserGroup` / `UserGroupMember extends Equatable`, `.props` | value `==`, plus `copyWith` | `removed` | Equality is unchanged; `props` is gone |
+| The user group responses' identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
+| `StreamChatApi.userGroups` | `StreamChatClient` user group methods | `removed` | The endpoints moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -478,6 +488,51 @@ final device = Device(id: token, pushProvider: PushProvider.firebase);
 ```
 
 A `switch` over a `PushProvider` is no longer exhaustive; give it a default case.
+
+### User Groups
+
+**The eight user group methods return a `Result` instead of throwing.** `deleteUserGroup` carries no value on
+success. `UserGroup`, `UserGroupMember` and the seven responses keep their names and fields.
+
+```dart
+// v10
+try {
+  final response = await client.searchUserGroups('eng');
+  showGroups(response.userGroups);
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await client.searchUserGroups('eng');
+result.fold(
+  onSuccess: (response) => showGroups(response.userGroups),
+  onFailure: (error, _) => report(error),
+);
+```
+
+**`userGroup` is nullable on the five single-group responses** — `GetUserGroupResponse`, `CreateUserGroupResponse`,
+`UpdateUserGroupResponse`, `AddUserGroupMembersResponse` and `RemoveUserGroupMembersResponse`. The API does not
+guarantee the group in the response, so handle `null`:
+
+```dart
+// v10
+final group = (await client.getUserGroup(id)).userGroup;
+
+// v11
+final group = (await client.getUserGroup(id)).getOrNull()?.userGroup;
+if (group == null) return;
+```
+
+**`UserGroup`, `UserGroupMember` and the responses no longer decode JSON.** They are plain classes; build them with
+their constructors — `ListUserGroupsResponse(duration: '0ms', userGroups: [group])` where v10 wrote
+`ListUserGroupsResponse()..userGroups = [group]`. `Message.mentionedGroups` still decodes from the same keys.
+`UserGroup.fromData` and `toData` read and write the format the offline database stores; they are not a way to
+decode API responses.
+
+**The responses' `duration` is a non-nullable `String`**, where v10 typed it `String?`.
+
+**`StreamChatApi.userGroups` is removed.** Call the user group methods on `StreamChatClient` instead.
 
 ---
 

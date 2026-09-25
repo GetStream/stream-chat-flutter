@@ -48,6 +48,7 @@
 
 - `Message` is public, persisted, WebSocket-delivered and the most customised type in the SDK. Keep ours; treat the generated `MessageResponse` as a mapping source only.
 - `Attachment`: the generated model defines fields our `extraData` currently absorbs. Decide the promotion rules before writing the mapper.
+- Replace the temporary `@DataSerializable` storage codec (`UserGroup`, `UserGroupMember`): decide between dedicated tables and codecs owned by `stream_chat_persistence` before `Message` and `Attachment` become plain models, then delete the typedef and every `fromData`/`toData` it generates.
 
 ## Risks
 

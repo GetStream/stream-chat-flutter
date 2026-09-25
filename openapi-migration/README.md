@@ -14,7 +14,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | --- | --- | --- | --- | --- |
 | [01](01-foundation.md) | Foundation — `DefaultApi` wiring, `User` shape | — | — | ☐ |
 | [02](02-devices.md) | Devices | 0 | 3 | ☑ |
-| [03](03-user-groups.md) | User Groups | 8 | 8 | ☐ |
+| [03](03-user-groups.md) | User Groups | 0 | 8 | ☑ |
 | [04](04-roles-guest-and-app.md) | Roles, Guest & App Settings | 3 | 5 | ☐ |
 | [05](05-polls.md) | Polls | 13 | 13 | ☐ |
 | [06](06-reminders.md) | Message Reminders | 4 | 4 | ☐ |
@@ -80,7 +80,7 @@ Each ships with a CHANGELOG entry and a Symbol Map row like any other break.
    other package or the sample app imports it. `generate_plan.py --check` enforces both.
 2. **Public models keep their v10 names, fields, nullability and defaults,** as `@freezed` classes (value
    equality, `copyWith`, `toString`) with no `fromJson`, `toJson` or json_serializable. A field the server adds is exposed later, as an additive
-   change.
+   change. The one exception is the temporary `@DataSerializable` storage codec in rule 8.
 3. **Responses keep their v10 envelopes,** as `@freezed` classes carrying a non-nullable `duration` and the
    payload, one file per class under `lib/src/core/models/`. A write whose response carries only
    `duration` returns `Result<void>`: `EmptyResponse` stays behind for the unmigrated APIs.
@@ -93,19 +93,27 @@ Each ships with a CHANGELOG entry and a Symbol Map row like any other break.
 6. **Request enums are hand-written** and mapped to the generated enum in the repository (`PushProvider` →
    `CreateDeviceRequestPushProvider`).
 7. **A plain model embedded in a json_serializable parent gets a temporary converter.** Some parents still decode
-   v1 REST or WebSocket JSON with json_serializable; their field gets a `JsonConverter` in
+   v1 REST or WebSocket JSON with json_serializable; their field gets a `JsonConverter` — or a decode-only
+   `fromJson` function when the parent never writes the field — in
    `lib/src/core/models/converters/v1_json_converters.dart`, marked
    `// TODO(openapi-migration): remove in group NN` and listed below. The group that migrates the parent deletes
    it, and `generate_plan.py --check` fails if a ticked group leaves one behind.
-8. **Persistence serializes our models itself.** A Drift mapper that stores a model as JSON text uses private
-   helpers in `stream_chat_persistence`, never a model's `fromJson` or `toJson`. The cache is disposable, so the
-   stored format is ours to choose.
+8. **Persistence stores a model as JSON text through its `@DataSerializable` codec.** `DataSerializable`
+   (`lib/src/db/data_serializable.dart`) is a typedef for `JsonSerializable`, and the only class-level json_serializable
+   annotation a public model may carry. The model exposes the generated code as `fromData` and `toData`, which only
+   `stream_chat_persistence` calls; it never gains `fromJson` or `toJson`. A field holding another plain model
+   needs `@JsonKey(fromJson: ..., toJson: ...)` functions that call the nested `fromData` and `toData`, because
+   json_serializable only looks for `fromJson` and `toJson` on nested types. The codec is temporary: every use is
+   marked `// TODO(openapi-migration): remove in group 10` and listed below, and group 10 decides what replaces
+   it. The cache is disposable, so the stored format is ours to choose.
 
 ### Temporary adapters
 
 | Adapter | Field | Removed by |
 | --- | --- | --- |
 | `DeviceV1JsonConverter` | `OwnUser.devices` | [09](09-users.md) |
+| `userGroupsFromV1Json` | `Message.mentionedGroups` | [10](10-messages.md) |
+| `DataSerializable` | `UserGroup`, `UserGroupMember` (`fromData`, `toData`) | [10](10-messages.md) |
 
 Before group 09 starts, decide how v1 events decode a parent once it becomes a plain model: through the
 generated types plus a shim that rebuilds `custom` from the flattened v1 keys, or through a private v1 decoder in
@@ -119,7 +127,8 @@ the WebSocket layer. Record the answer in [01-foundation](01-foundation.md).
 The order runs from smallest and most isolated to largest and most entangled, so the pattern is proven on cheap
 surfaces before it reaches `Message` and `ChannelState`:
 
-- **02–04** have no persistence and almost no public model surface. Group 02 is the pattern-proving slice.
+- **02–04** have almost no persistence (03 stores mentioned groups) and almost no public model surface. Group 02
+  is the pattern-proving slice.
 - **05–07** introduce persisted models and WebSocket-delivered updates, one at a time.
 - **08** is where we decide what *not* to expose: 34 generated operations against 11 hand-written methods.
 - **09** freezes the `User` mapping that everything else already depends on (the *decision* is made in 01; this

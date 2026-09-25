@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../util/extension.dart';
 import '../util/serializer.dart';
 import 'attachment.dart';
+import 'converters/v1_json_converters.dart';
 import 'draft.dart';
 import 'location.dart';
 import 'message_reminder.dart';
@@ -137,7 +138,7 @@ class Message extends Equatable {
 
   /// The list of groups mentioned in the message, hydrated by the server from
   /// [mentionedGroupIds].
-  @JsonKey(includeToJson: false)
+  @JsonKey(includeToJson: false, fromJson: userGroupsFromV1Json)
   final List<UserGroup>? mentionedGroups;
 
   /// Boolean indicator if the message contains a "@here" mention.
