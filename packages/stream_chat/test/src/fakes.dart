@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_chat/open_api/api.dart' as api;
 import 'package:stream_chat/src/core/api/channel_api.dart';
 import 'package:stream_chat/src/core/api/general_api.dart';
 import 'package:stream_chat/src/core/api/guest_api.dart';
@@ -174,6 +175,36 @@ class FakeChatApi extends Fake implements StreamChatApi {
 
   @override
   AttachmentFileUploader get fileUploader => _fileUploader ??= MockAttachmentFileUploader();
+}
+
+/// Answers the `getApp` call `connectUser` makes on the generated client.
+class FakeDefaultApi extends Fake implements api.DefaultApi {
+  @override
+  Future<Result<api.GetApplicationResponse>> getApp() async => Result.success(fakeGetApplicationResponse());
+}
+
+/// A generated application response, for tests that need `getApp` to answer.
+api.GetApplicationResponse fakeGetApplicationResponse({String name = 'test-app'}) {
+  const unrestricted = api.FileUploadConfig(
+    allowedFileExtensions: [],
+    allowedMimeTypes: [],
+    blockedFileExtensions: [],
+    blockedMimeTypes: [],
+    sizeLimit: 0,
+  );
+
+  return api.GetApplicationResponse(
+    duration: '0.01ms',
+    app: api.AppResponseFields(
+      id: 42,
+      name: name,
+      placement: 'us-east',
+      asyncUrlEnrichEnabled: false,
+      autoTranslationEnabled: false,
+      fileUploadConfig: unrestricted,
+      imageUploadConfig: unrestricted,
+    ),
+  );
 }
 
 class FakeClientState extends Fake implements ClientState {

@@ -1,7 +1,8 @@
-import 'package:meta/meta.dart';
-import 'package:stream_core/stream_core.dart' show StreamLogger;
-import '../api/general_api.dart';
-import '../models/app_settings.dart';
+import 'package:stream_core/stream_core.dart' show Failure, Result, StreamLogger, Success;
+
+import '../core/models/app_settings.dart';
+import '../core/models/response/get_app_settings_response.dart';
+import '../repository/app_settings_repository.dart';
 
 /// {@template appSettingsManager}
 /// Holds the [AppSettings] for the current connection.
@@ -14,15 +15,14 @@ import '../models/app_settings.dart';
 ///
 ///  * [StreamChatClient.appSettings], for the public entry point.
 /// {@endtemplate}
-@internal
 class AppSettingsManager {
   /// {@macro appSettingsManager}
   AppSettingsManager(
-    this._api, {
+    this._repository, {
     String tag = 'SCh:AppSettings',
   }) : _logger = StreamLogger(tag);
 
-  final GeneralApi _api;
+  final AppSettingsRepository _repository;
   final StreamLogger _logger;
 
   /// The cached [AppSettings].
@@ -34,26 +34,28 @@ class AppSettingsManager {
 
   /// Performs the initial load of [AppSettings].
   ///
-  /// No-op when a cached value already exists. Errors are logged and
-  /// suppressed so the caller is never blocked; use [refresh] when
-  /// errors should propagate.
+  /// No-op when a cached value already exists. Failures are logged and
+  /// suppressed so the caller is never blocked; use [refresh] when a
+  /// failure should reach the caller.
   Future<void> loadAppSettings() async {
     if (_appSettings != null) return;
-    try {
-      final response = await _api.getAppSettings();
-      _appSettings = response.app;
-    } catch (e, stk) {
-      _logger.w(() => 'Failed to load app settings', error: e, stackTrace: stk);
+
+    switch (await _repository.getAppSettings()) {
+      case Success(:final data):
+        _appSettings = data.app;
+      case Failure(:final error, :final stackTrace):
+        _logger.w(() => 'Failed to load app settings', error: error, stackTrace: stackTrace);
     }
   }
 
-  /// Re-fetches and replaces the cached [AppSettings].
+  /// Re-fetches the [AppSettings] and replaces the cached value.
   ///
-  /// Returns the newly fetched value, or throws when the request fails.
-  Future<AppSettings> refresh() async {
-    final response = await _api.getAppSettings();
-    _appSettings = response.app;
-    return response.app;
+  /// The cached value is replaced only on success, so a failed refresh
+  /// leaves it as it was.
+  Future<Result<GetAppSettingsResponse>> refresh() async {
+    final result = await _repository.getAppSettings();
+    if (result case Success(:final data)) _appSettings = data.app;
+    return result;
   }
 
   /// Clears the cached [AppSettings].

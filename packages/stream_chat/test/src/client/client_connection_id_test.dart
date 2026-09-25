@@ -3,6 +3,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
+import '../fakes.dart';
 import '../utils.dart';
 import '../ws/fake_chat_server.dart';
 
@@ -24,7 +25,14 @@ void main() {
     );
 
     ws = FakeChatServer();
-    client = StreamChatClient('test-api-key', wsProvider: ws.connect, httpClientAdapter: adapter);
+    // Faked: the generated client shares this adapter, and its connect-time
+    // request would land among the ones captured below.
+    client = StreamChatClient(
+      'test-api-key',
+      defaultApi: FakeDefaultApi(),
+      wsProvider: ws.connect,
+      httpClientAdapter: adapter,
+    );
   });
 
   tearDown(() => client.dispose());

@@ -53,6 +53,12 @@
 - `Device`, `ListDevicesResponse` and `SearchRolesResponse` compare by value and gain `copyWith`.
 - `Role` no longer extends `Equatable`, so `props` is removed; it still compares by value and gains `copyWith`.
 - `StreamChatApi.device` is renamed `StreamChatApi.pushPreferences` and handles only `setPushPreferences`.
+- `StreamChatClient.getAppSettings` returns a `Result<GetAppSettingsResponse>` instead of an `AppSettings`, and no longer throws.
+- `AppSettings`, `UploadConfig` and `GetAppSettingsResponse` no longer decode from JSON.
+- `GetAppSettingsResponse` is immutable, built through a const constructor, and its `duration` is a non-nullable `String`.
+- `GetAppSettingsResponse` compares by value and gains `copyWith`.
+- `AppSettings` and `UploadConfig` no longer extend `Equatable`, so `props` is removed; they still compare by value and gain `copyWith`.
+- `StreamChatApi.general.getAppSettings` is removed; call `StreamChatClient.getAppSettings` instead.
 
 🐞 Fixed
 

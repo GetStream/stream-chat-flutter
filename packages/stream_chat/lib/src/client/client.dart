@@ -36,7 +36,6 @@ import '../core/api/requests.dart';
 import '../core/api/responses.dart';
 import '../core/api/stream_chat_api.dart';
 import '../core/error/stream_chat_exception.dart';
-import '../core/http/app_settings_manager.dart';
 import '../core/http/interceptor/additional_headers_interceptor.dart';
 import '../core/http/stream_http_client.dart';
 import '../core/models/app_settings.dart';
@@ -45,7 +44,6 @@ import '../core/models/banned_user.dart';
 import '../core/models/channel_state.dart';
 import '../core/models/draft.dart';
 import '../core/models/draft_message.dart';
-import '../core/models/list_devices_response.dart';
 import '../core/models/location.dart';
 import '../core/models/member.dart';
 import '../core/models/message.dart';
@@ -58,8 +56,10 @@ import '../core/models/poll_vote.dart';
 import '../core/models/push_preference.dart';
 import '../core/models/push_provider.dart';
 import '../core/models/reaction.dart';
+import '../core/models/response/get_app_settings_response.dart';
+import '../core/models/response/list_devices_response.dart';
+import '../core/models/response/search_roles_response.dart';
 import '../core/models/role_type.dart';
-import '../core/models/search_roles_response.dart';
 import '../core/models/thread.dart';
 import '../core/models/user.dart';
 import '../core/util/event_controller.dart';
@@ -68,6 +68,7 @@ import '../core/util/immutable_collection_subjects.dart';
 import '../core/util/utils.dart';
 import '../db/chat_persistence_client.dart';
 import '../event_type.dart';
+import '../repository/app_settings_repository.dart';
 import '../repository/devices_repository.dart';
 import '../repository/roles_repository.dart';
 import '../ws/connect_request.dart';
@@ -76,6 +77,7 @@ import '../ws/connection_status.dart';
 import '../ws/events/event.dart';
 import '../ws/events/event_resolvers.dart' as event_resolvers;
 import '../ws/events/events.dart';
+import 'app_settings_manager.dart';
 import 'channel/channel.dart';
 import 'channel_delivery_reporter.dart';
 import 'live_location_expiration_scheduler.dart';
@@ -167,6 +169,7 @@ class StreamChatClient {
     final api = defaultApi ?? DefaultApi(httpClient);
     _rolesRepository = RolesRepository(api);
     _devicesRepository = DevicesRepository(api);
+    _appSettingsManager = AppSettingsManager(AppSettingsRepository(api));
 
     _connection = ConnectionManager(
       request: ConnectRequest.forApi(
@@ -202,6 +205,7 @@ class StreamChatClient {
   late final StreamChatApi _chatApi;
   late final RolesRepository _rolesRepository;
   late final DevicesRepository _devicesRepository;
+  late final AppSettingsManager _appSettingsManager;
   late final ConnectionManager _connection;
   StreamSubscription<WsEvent>? _wsEventSubscription;
 
@@ -217,7 +221,6 @@ class StreamChatClient {
   late ClientState state;
 
   final _tokenManager = TokenManager.unconfigured();
-  late final _appSettingsManager = AppSettingsManager(_chatApi.general);
   static final _systemEnvironmentManager = SystemEnvironmentManager(
     environment: SystemEnvironment(
       sdkName: 'stream-chat',
@@ -2222,13 +2225,13 @@ class StreamChatClient {
   /// Get OpenGraph data of the given [url].
   Future<OGAttachmentResponse> enrichUrl(String url) => _chatApi.general.enrichUrl(url);
 
-  /// Re-fetches the [AppSettings] and updates [appSettings].
+  /// Re-fetches the [AppSettings].
+  ///
+  /// [appSettings] is replaced on success and left as it was on failure.
   ///
   /// [connectUser] populates the cache automatically, so calling this is
   /// only needed to pick up changes made during an active session.
-  ///
-  /// Returns the newly fetched value, or throws when the request fails.
-  Future<AppSettings> getAppSettings() => _appSettingsManager.refresh();
+  Future<Result<GetAppSettingsResponse>> getAppSettings() => _appSettingsManager.refresh();
 
   /// Queries threads with the given [options] and [pagination] params.
   ///
