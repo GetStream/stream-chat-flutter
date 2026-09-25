@@ -94,18 +94,6 @@ class GeneralApi {
     return QueryMembersResponse.fromJson(response.data);
   }
 
-  /// Get OpenGraph data of the given [url].
-  Future<OGAttachmentResponse> enrichUrl(String url) async {
-    final response = await _client.get(
-      '/og',
-      queryParameters: {
-        'url': url,
-      },
-    );
-
-    return OGAttachmentResponse.fromJson(response.data);
-  }
-
   /// Fetches the app settings from the `GET /app` endpoint.
   Future<GetAppSettingsResponse> getAppSettings() async {
     final response = await _client.get('/app');
