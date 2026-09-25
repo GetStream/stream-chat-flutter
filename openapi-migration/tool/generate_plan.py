@@ -184,8 +184,7 @@ GROUPS = [
     ),
     dict(
         num='04', slug='roles-guest-and-app', title='Roles, Guest & App Settings',
-        hand=['guest_api.dart',
-              'general_api.dart::enrichUrl', 'general_api.dart::getAppSettings'],
+        hand=['guest_api.dart', 'general_api.dart::getAppSettings'],
         match=owns('/api/v2/roles', '/api/v2/guest', '/api/v2/app', '/api/v2/og', '/api/v2/longpoll'),
         goal='Sweep up the singletons — one-method families that share no state and can land in one PR.',
         decisions=[
@@ -211,9 +210,22 @@ GROUPS = [
 
               The trade-off, for the record: no `.values`, no exhaustive `switch`, and `RoleType('nonsense')` is
               constructible and reaches the wire. That matches the four extension types this package already ships.
+            - **`OGAttachmentResponse` stays our public type, with its v10 name and fields,** as a plain class with no
+              JSON, mapped from the generated `GetOGResponse` in `lib/src/repository/mapper/general_mapper.dart`.
+              `enrichUrl` routes through `getOG` via `GeneralRepository`. The v10 name is kept although the generated
+              one differs: it is the name customers already use.
+            - **`ogScrapeUrl` is nullable,** where v10 declared it non-null. The spec marks it optional, so the public
+              type says what the API promises instead of turning a missing URL into a failure the server never
+              reported. The SDK's composer shows no link preview for a response without it. A break outside the
+              sanctioned list, taken deliberately.
+            - **The twelve fields the generated response adds are not exposed** (`actions`, `author_icon`, `color`,
+              `custom`, `fallback`, `fields`, `footer`, `footer_icon`, `giphy`, `original_height`, `original_width`,
+              `pretext`). Adding them later is non-breaking. `Attachment.fromOGAttachment` is unchanged.
+            - **`Action` is left alone.** `OGAttachmentResponse` carries no actions, so nothing here needs it; it is
+              converted with its parent `Attachment` in [group 10](10-messages.md).
             """),
         risks=[
-            '`general_api.dart` is split across four groups — only `enrichUrl` and `getAppSettings` belong here. '
+            '`general_api.dart` is split across three groups — only `getAppSettings` is left here. '
             '`sync` and `queryMembers` go to group 11, `searchMessages` to group 10. Do not migrate the file as a '
             'unit.',
         ],
@@ -317,6 +329,9 @@ GROUPS = [
             'ours; treat the generated `MessageResponse` as a mapping source only.',
             '`Attachment`: the generated model defines fields our `extraData` currently absorbs. Decide the '
             'promotion rules before writing the mapper.',
+            '`Action` is still the v10 json_serializable class, embedded in `Attachment.actions`, which '
+            '`Attachment.toJson` writes when sending and `toData` writes to persistence. It becomes a plain model '
+            'with `Attachment`; group 04 left it alone.',
         ],
         risks=[
             '`message_api.dart` also holds the four draft methods, which belong to group 07 — leave them alone '

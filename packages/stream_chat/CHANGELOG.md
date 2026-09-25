@@ -53,6 +53,12 @@
 - `Device`, `ListDevicesResponse` and `SearchRolesResponse` compare by value and gain `copyWith`.
 - `Role` no longer extends `Equatable`, so `props` is removed; it still compares by value and gains `copyWith`.
 - `StreamChatApi.device` is renamed `StreamChatApi.pushPreferences` and handles only `setPushPreferences`.
+- `StreamChatClient.enrichUrl` returns a `Result<OGAttachmentResponse>` instead of throwing.
+- `OGAttachmentResponse` no longer decodes from JSON.
+- `OGAttachmentResponse` is immutable, built through a const constructor, and its `duration` is a non-nullable `String`.
+- `OGAttachmentResponse.ogScrapeUrl` is nullable.
+- `OGAttachmentResponse` compares by value and gains `copyWith`.
+- `StreamChatApi.general.enrichUrl` is removed; call `StreamChatClient.enrichUrl` instead.
 
 🐞 Fixed
 
