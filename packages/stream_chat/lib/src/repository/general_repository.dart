@@ -18,6 +18,6 @@ class GeneralRepository {
   Future<Result<OGAttachmentResponse>> enrichUrl(String url) async {
     final result = await _api.getOG(url: url);
 
-    return result.map((response) => response.toModel());
+    return result.map((response) => response.toModel(requestedUrl: url));
   }
 }

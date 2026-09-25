@@ -10,7 +10,7 @@ class OGAttachmentResponse with _$OGAttachmentResponse {
   /// Creates a new [OGAttachmentResponse].
   const OGAttachmentResponse({
     required this.duration,
-    this.ogScrapeUrl,
+    required this.ogScrapeUrl,
     this.assetUrl,
     this.authorLink,
     this.authorName,
@@ -27,10 +27,8 @@ class OGAttachmentResponse with _$OGAttachmentResponse {
   final String duration;
 
   /// The URL of the page that was scraped.
-  ///
-  /// `null` when the response leaves it out; the API does not guarantee it.
   @override
-  final String? ogScrapeUrl;
+  final String ogScrapeUrl;
 
   /// The URL of the audio, video or image the page links to.
   @override

@@ -5103,6 +5103,20 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
+    test('StreamChatClient.enrichUrl returns the failure without throwing', () async {
+      const url = 'https://unreachable.example';
+      const error = StreamApiException(
+        code: StreamErrorCode.inputError,
+        message: 'could not find any opengraph data for the given URL',
+        statusCode: 400,
+      );
+      when(() => defaultApi.getOG(url: url)).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await client.enrichUrl(url);
+
+      expect(res.exceptionOrNull(), error);
+    });
+
     test(
       '''setting the `currentUser` should also compute and update the unreadCounts''',
       () {

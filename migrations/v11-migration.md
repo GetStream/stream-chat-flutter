@@ -167,7 +167,6 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `OGAttachmentResponse.fromJson` | — | `removed` | The response is a plain class; construct it directly |
 | `OGAttachmentResponse()..ogScrapeUrl = …` and its other setters | `OGAttachmentResponse(duration: …, ogScrapeUrl: …)` | `retyped` | A plain class with a const constructor and final fields |
 | `OGAttachmentResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
-| `OGAttachmentResponse.ogScrapeUrl` (`String`) | `String?` | `retyped` | The API does not guarantee the scraped URL in the response; handle `null` |
 | `OGAttachmentResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
 | `StreamChatApi.general.enrichUrl` | `StreamChatClient.enrichUrl` | `removed` | The endpoint moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
@@ -508,9 +507,6 @@ result.fold(
   onFailure: (error, _) => report(error),
 );
 ```
-
-**`ogScrapeUrl` is nullable.** The API does not guarantee the scraped URL in the response, so handle `null`. The
-`Attachment` that `fromOGAttachment` builds already typed it `String?`.
 
 **`OGAttachmentResponse` no longer decodes JSON.** It is a plain class; build it with its constructor —
 `OGAttachmentResponse(duration: '0ms', ogScrapeUrl: url)` where v10 wrote `OGAttachmentResponse()..ogScrapeUrl = url`.

@@ -1403,10 +1403,6 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
         ).then(
           (result) => result.fold(
             onSuccess: (ogAttachment) {
-              // The controller finds its link preview by the scraped URL, so a
-              // response without one cannot be shown or cleared later.
-              if (ogAttachment.ogScrapeUrl == null) return _effectiveController.clearOGAttachment();
-
               final attachment = Attachment.fromOGAttachment(ogAttachment);
               _effectiveController.setOGAttachment(attachment);
             },

@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$OGAttachmentResponse {
   String get duration;
-  String? get ogScrapeUrl;
+  String get ogScrapeUrl;
   String? get assetUrl;
   String? get authorLink;
   String? get authorName;
@@ -79,7 +79,7 @@ abstract mixin class $OGAttachmentResponseCopyWith<$Res> {
   @useResult
   $Res call({
     String duration,
-    String? ogScrapeUrl,
+    String ogScrapeUrl,
     String? assetUrl,
     String? authorLink,
     String? authorName,
@@ -105,7 +105,7 @@ class _$OGAttachmentResponseCopyWithImpl<$Res> implements $OGAttachmentResponseC
   @override
   $Res call({
     Object? duration = null,
-    Object? ogScrapeUrl = freezed,
+    Object? ogScrapeUrl = null,
     Object? assetUrl = freezed,
     Object? authorLink = freezed,
     Object? authorName = freezed,
@@ -122,10 +122,10 @@ class _$OGAttachmentResponseCopyWithImpl<$Res> implements $OGAttachmentResponseC
             ? _self.duration
             : duration // ignore: cast_nullable_to_non_nullable
                   as String,
-        ogScrapeUrl: freezed == ogScrapeUrl
+        ogScrapeUrl: null == ogScrapeUrl
             ? _self.ogScrapeUrl
             : ogScrapeUrl // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as String,
         assetUrl: freezed == assetUrl
             ? _self.assetUrl
             : assetUrl // ignore: cast_nullable_to_non_nullable

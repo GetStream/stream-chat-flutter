@@ -53,10 +53,9 @@
   JSON, mapped from the generated `GetOGResponse` in `lib/src/repository/mapper/general_mapper.dart`.
   `enrichUrl` routes through `getOG` via `GeneralRepository`. The v10 name is kept although the generated
   one differs: it is the name customers already use.
-- **`ogScrapeUrl` is nullable,** where v10 declared it non-null. The spec marks it optional, so the public
-  type says what the API promises instead of turning a missing URL into a failure the server never
-  reported. The SDK's composer shows no link preview for a response without it. A break outside the
-  sanctioned list, taken deliberately.
+- **`ogScrapeUrl` stays non-null, as in v10.** The server sets it on every successful scrape; the spec marks
+  it optional only because the response embeds the shared attachment payload. The mapper falls back to the
+  requested URL, which cannot happen in practice.
 - **The twelve fields the generated response adds are not exposed** (`actions`, `author_icon`, `color`,
   `custom`, `fallback`, `fields`, `footer`, `footer_icon`, `giphy`, `original_height`, `original_width`,
   `pretext`). Adding them later is non-breaking. `Attachment.fromOGAttachment` is unchanged.

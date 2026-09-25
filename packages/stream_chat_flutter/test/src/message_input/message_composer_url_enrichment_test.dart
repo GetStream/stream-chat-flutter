@@ -127,33 +127,28 @@ void main() {
       expect(controller.ogAttachment?.ogScrapeUrl, 'https://example.com');
     });
 
-    testWidgets('a failed scrape clears the link preview and reports the error', (tester) async {
+    testWidgets('a failed scrape clears the existing link preview', (tester) async {
       const error = StreamApiException(code: StreamErrorCode.inputError, message: 'unreachable', statusCode: 400);
       when(() => client.enrichUrl('https://unreachable.example')).thenAnswer((_) async => const Result.failure(error));
       final controller = StreamMessageComposerController();
       addTearDown(controller.dispose);
-      final errors = <Object>[];
-      await pumpComposer(tester, controller: controller, onError: (error, _) => errors.add(error));
+      await pumpComposer(tester, controller: controller);
       await typeAndWaitForEnrichment(tester, 'https://example.com');
 
       await typeAndWaitForEnrichment(tester, 'https://unreachable.example');
 
       expect(controller.ogAttachment, isNull);
-      expect(errors, [error]);
     });
 
-    testWidgets('a scrape without a scraped url shows no link preview', (tester) async {
-      when(() => client.enrichUrl(any())).thenAnswer(
-        (_) async => const Result.success(OGAttachmentResponse(duration: '0.01ms', title: 'Example Domain')),
-      );
-      final controller = StreamMessageComposerController();
-      addTearDown(controller.dispose);
-      await pumpComposer(tester, controller: controller);
+    testWidgets('a failed scrape reports the error to onError', (tester) async {
+      const error = StreamApiException(code: StreamErrorCode.inputError, message: 'unreachable', statusCode: 400);
+      when(() => client.enrichUrl('https://unreachable.example')).thenAnswer((_) async => const Result.failure(error));
+      final errors = <Object>[];
+      await pumpComposer(tester, onError: (error, _) => errors.add(error));
 
-      await typeAndWaitForEnrichment(tester, 'https://example.com');
-      await typeAndWaitForEnrichment(tester, 'https://example.com ');
+      await typeAndWaitForEnrichment(tester, 'https://unreachable.example');
 
-      expect(controller.attachments, isEmpty);
+      expect(errors, [error]);
     });
 
     testWidgets('a url scraped earlier is previewed again without a second request', (tester) async {
