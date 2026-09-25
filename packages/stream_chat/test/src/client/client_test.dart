@@ -1839,7 +1839,7 @@ void main() {
       verifyNoMoreInteractions(fakeChatApi.channel);
     });
 
-    test('StreamChatClient.addDevice returns a success once the device is registered', () async {
+    test('StreamChatClient.addDevice sends the device and returns a success', () async {
       const id = 'test-device-id';
       const request = api.CreateDeviceRequest(
         id: id,
@@ -1916,7 +1916,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.removeDevice returns a success once the device is removed', () async {
+    test('StreamChatClient.removeDevice sends the device id and returns a success', () async {
       const deviceId = 'test-device-id';
 
       when(() => defaultApi.deleteDevice(id: deviceId)).thenAnswer(
@@ -2012,7 +2012,7 @@ void main() {
       expect(pushPreferences?.disabledUntil, pushPreference.disabledUntil);
     });
 
-    test('StreamChatClient.listUserGroups returns the groups on the requested page', () async {
+    test('StreamChatClient.listUserGroups sends the pagination arguments and returns the mapped groups', () async {
       const limit = 10;
       const idGt = 'cursor-group-id';
       final createdAtGt = DateTime.utc(2024, 6, 15, 12);
@@ -2045,7 +2045,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.searchUserGroups returns the groups matching the query', () async {
+    test('StreamChatClient.searchUserGroups sends the query and returns the mapped groups', () async {
       const query = 'eng';
       const limit = 10;
       const nameGt = 'engineering';
@@ -2069,7 +2069,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.getUserGroup returns the group fetched for the id and team', () async {
+    test('StreamChatClient.getUserGroup sends the id and team and returns the mapped group', () async {
       const id = 'test-group-id';
       const teamId = 'test-team-id';
 
@@ -2084,7 +2084,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.createUserGroup returns the group created from the arguments', () async {
+    test('StreamChatClient.createUserGroup sends the arguments and returns the mapped group', () async {
       const name = 'Engineering';
       const id = 'test-group-id';
       const description = 'The engineers';
@@ -2116,7 +2116,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.updateUserGroup returns the group updated with the arguments', () async {
+    test('StreamChatClient.updateUserGroup sends the arguments and returns the mapped group', () async {
       const id = 'test-group-id';
       const name = 'Engineering';
       const description = 'The engineers';
@@ -2135,7 +2135,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.deleteUserGroup returns a success with no value once the group is deleted', () async {
+    test('StreamChatClient.deleteUserGroup sends the id and team and returns a success with no value', () async {
       const id = 'test-group-id';
       const teamId = 'test-team-id';
 
@@ -2150,7 +2150,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.addUserGroupMembers returns the group with the added members', () async {
+    test('StreamChatClient.addUserGroupMembers sends the members and returns the mapped group', () async {
       const id = 'test-group-id';
       const memberIds = ['test-user-id'];
       const teamId = 'test-team-id';
@@ -2168,7 +2168,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.removeUserGroupMembers returns the group without the removed members', () async {
+    test('StreamChatClient.removeUserGroupMembers sends the members and returns the mapped group', () async {
       const id = 'test-group-id';
       const memberIds = ['test-user-id'];
       const teamId = 'test-team-id';
@@ -2186,7 +2186,19 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.searchRoles returns the roles matching the query', () async {
+    test('StreamChatClient.searchUserGroups returns the failure without throwing', () async {
+      const error = StreamClientException(message: 'boom');
+
+      when(
+        () => defaultApi.searchUserGroups(query: 'eng'),
+      ).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await client.searchUserGroups('eng');
+
+      expect(res.exceptionOrNull(), error);
+    });
+
+    test('StreamChatClient.searchRoles sends the query and returns the mapped response', () async {
       const query = 'adm';
       const limit = 10;
       const nameGt = 'admin';

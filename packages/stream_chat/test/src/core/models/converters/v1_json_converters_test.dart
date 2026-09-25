@@ -1,5 +1,6 @@
 import 'package:stream_chat/src/core/models/converters/v1_json_converters.dart';
 import 'package:stream_chat/src/core/models/device.dart';
+import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/push_provider.dart';
 import 'package:stream_chat/src/core/models/user_group.dart';
 import 'package:stream_chat/src/core/models/user_group_member.dart';
@@ -72,6 +73,18 @@ void main() {
 
     expect(groups!.single.createdAt, DateTime.utc(2024, 1, 1, 0, 0, 0, 123, 456));
     expect(groups.single.updatedAt, DateTime.utc(2024, 1, 2));
+  });
+
+  test('Message.fromJson reads mentioned groups whose dates are sent as epoch nanoseconds', () {
+    final message = Message.fromJson(const {
+      'id': 'message-id',
+      'mentioned_groups': [
+        {'id': 'g1', 'name': 'Engineering', 'created_at': 1704067200123456000, 'updated_at': 1704153600000000000},
+      ],
+    });
+
+    expect(message.mentionedGroups!.single.createdAt, DateTime.utc(2024, 1, 1, 0, 0, 0, 123, 456));
+    expect(message.mentionedGroups!.single.updatedAt, DateTime.utc(2024, 1, 2));
   });
 
   test('userGroupsFromV1Json reads members that carry no app_pk', () {
