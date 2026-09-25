@@ -1,11 +1,15 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../db/data_serializable.dart';
 import 'user_group_member.dart';
 
 part 'user_group.freezed.dart';
+part 'user_group.g.dart';
 
 /// A named group of users that can be mentioned together in a message.
 @freezed
+// TODO(openapi-migration): remove in group 10
+@DataSerializable(includeIfNull: false)
 class UserGroup with _$UserGroup {
   /// Creates a new [UserGroup].
   const UserGroup({
@@ -18,6 +22,9 @@ class UserGroup with _$UserGroup {
     this.teamId,
     required this.updatedAt,
   });
+
+  /// Creates a [UserGroup] from data stored by [toData].
+  factory UserGroup.fromData(Map<String, dynamic> json) => _$UserGroupFromJson(json);
 
   /// The date when the group was created.
   @override
@@ -38,6 +45,7 @@ class UserGroup with _$UserGroup {
 
   /// The members of the group (null when listing/searching user groups).
   @override
+  @JsonKey(fromJson: _membersFromData, toJson: _membersToData)
   final List<UserGroupMember>? members;
 
   /// The name of the group.
@@ -51,4 +59,13 @@ class UserGroup with _$UserGroup {
   /// The date when the group was last updated.
   @override
   final DateTime updatedAt;
+
+  /// Serializes this group for local storage.
+  Map<String, dynamic> toData() => _$UserGroupToJson(this);
 }
+
+List<UserGroupMember>? _membersFromData(List<dynamic>? data) =>
+    data?.map((it) => UserGroupMember.fromData(it as Map<String, dynamic>)).toList();
+
+List<Map<String, dynamic>>? _membersToData(List<UserGroupMember>? members) =>
+    members?.map((it) => it.toData()).toList();
