@@ -80,7 +80,8 @@ document; the section link is provided.
   `didChangeDependencies` or `didUpdateWidget` instead.
   → [No InheritedWidget lookup in initState](#no-inheritedwidget-lookup-in-initstate)
 - Prefer early returns inside each conditional branch over reassigning a shared
-  `child`/`result` variable. → [Prefer early returns](#prefer-early-returns)
+  `child`/`result` variable, and one early return per check over a wrapped `||`/`&&`/`??` chain.
+  → [Prefer early returns](#prefer-early-returns)
 - `// ignore: ...` directives do **not** require an explanatory comment in this repo.
   This intentionally diverges from Flutter's style guide.
   → [Bare ignore directives are fine](#bare-ignore-directives-are-fine)
@@ -934,6 +935,9 @@ Widget build(BuildContext context) {
 If the post-processing is expensive enough that duplicating it hurts readability,
 extract a helper method — don't reintroduce the shared-variable pattern.
 
+The same applies to a chain of `||`, `&&` or `??` checks: return at each check rather than wrapping the
+chain or hoisting it into locals. → [Use braces for long function bodies](#use-braces-for-long-function-bodies)
+
 ### Use streams for real-time data
 
 This repo builds a real-time chat SDK. `Stream` is the primary reactive primitive for
@@ -1299,6 +1303,38 @@ that uses it.
 
 Use a block (with braces) when a body would wrap onto more than one line — do not force
 `=>` onto a multi-line expression.
+
+When that body is a chain of `||`, `&&` or `??` over separate checks, write one early return per
+check, in order, so evaluation stops at the first check that decides the result. Wrapping the chain
+in braces still reads badly, and hoisting every check into a local evaluates all of them.
+
+```dart
+// BAD:
+bool canEdit(Document document) {
+  return document.ownerId == userId ||
+      permissions.contains(Permission.editAny) ||
+      editors.any((editor) => editor.id == userId);
+}
+
+// BAD:
+bool canEdit(Document document) {
+  final isOwner = document.ownerId == userId;
+  final canEditAny = permissions.contains(Permission.editAny);
+  final isEditor = editors.any((editor) => editor.id == userId); // Scans even for the owner.
+  return isOwner || canEditAny || isEditor;
+}
+
+// GOOD:
+bool canEdit(Document document) {
+  if (document.ownerId == userId) return true;
+  if (permissions.contains(Permission.editAny)) return true;
+  return editors.any((editor) => editor.id == userId);
+}
+```
+
+Named locals are still fine when every value is cheap and all of them are needed anyway. A uniform run
+of comparisons, like the [`operator ==` boilerplate](#common-boilerplates-for-operator--and-hashcode), stays
+one expression.
 
 ### Prefer `+=` over `++`
 
