@@ -41,12 +41,11 @@ List<UserGroup>? userGroupsFromV1Json(List<dynamic>? json) {
   return json?.map((group) => _userGroupFromV1Json(group as Map<String, dynamic>)).toList();
 }
 
-// Reads the keys directly rather than through the generated group type, whose members require `app_pk`: a payload
-// without it should not fail the whole message.
-//
 // Dates arrive as ISO-8601 strings on v1 and as epoch nanoseconds on v2; the converter reads both.
 const _dateTime = StreamDateTimeConverter();
 
+// Reads the keys directly rather than through the generated group type, whose members require `app_pk`: a payload
+// without it should not fail the whole message.
 UserGroup _userGroupFromV1Json(Map<String, dynamic> json) => UserGroup(
   createdAt: _dateTime.fromJson(json['created_at'] as Object),
   createdBy: json['created_by'] as String?,
