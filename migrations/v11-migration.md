@@ -27,6 +27,7 @@ onto Stream's OpenAPI-generated API client.
     - [Sorting](#sorting)
     - [Roles](#roles)
     - [Devices](#devices)
+    - [App Settings](#app-settings)
 - [Migration Checklist](#migration-checklist)
 - [For AI Agents](#for-ai-agents)
 - [Contributing to this guide](#contributing-to-this-guide)
@@ -162,6 +163,13 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `Device` / `ListDevicesResponse` / `SearchRolesResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
 | `Role extends Equatable`, `Role.props` | `Role` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and `Role` is no longer an `Equatable` |
 | `StreamChatApi.device` | `StreamChatApi.pushPreferences` | `renamed` | The class handles only `setPushPreferences` now; device calls moved to the generated client |
+| `StreamChatClient.getAppSettings` → `Future<AppSettings>` | `Future<Result<GetAppSettingsResponse>>` | `retyped` | Returns a `Result` instead of throwing, and answers the whole response: read the settings off `.app`. `client.appSettings` is unchanged |
+| `AppSettings.fromJson`, `UploadConfig.fromJson` | — | `removed` | The models are plain classes; construct them directly |
+| `GetAppSettingsResponse.fromJson`, `GetAppSettingsResponse()..app = …` | `GetAppSettingsResponse(duration: …, app: …)` | `retyped` | The response is a plain class with a const constructor and final fields |
+| `GetAppSettingsResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| `GetAppSettingsResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
+| `AppSettings extends Equatable` / `UploadConfig extends Equatable`, `props` | `AppSettings` / `UploadConfig` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and neither is an `Equatable` any more |
+| `StreamChatApi.general.getAppSettings()` | `StreamChatClient.getAppSettings()` | `removed` | The call moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -478,6 +486,39 @@ final device = Device(id: token, pushProvider: PushProvider.firebase);
 ```
 
 A `switch` over a `PushProvider` is no longer exhaustive; give it a default case.
+
+### App Settings
+
+**`getAppSettings` returns a `Result` instead of throwing, and answers the whole response** rather than the
+settings alone, so read them off `.app`. `AppSettings` and `UploadConfig` keep their fields and defaults, and
+`client.appSettings` — the copy `connectUser` loads — is unchanged.
+
+```dart
+// v10
+try {
+  final settings = await client.getAppSettings();
+  useSettings(settings);
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await client.getAppSettings();
+result.fold(
+  onSuccess: (response) => useSettings(response.app),
+  onFailure: (error, _) => report(error),
+);
+```
+
+**`AppSettings`, `UploadConfig` and `GetAppSettingsResponse` no longer decode JSON.** All three are plain classes;
+build them with their constructors — `GetAppSettingsResponse(duration: '0ms', app: settings)` where v10 wrote
+`GetAppSettingsResponse()..app = settings`. `const AppSettings()`, `const UploadConfig()` and
+`UploadConfig.defaultSizeLimit` are unchanged.
+
+**`GetAppSettingsResponse.duration` is a non-nullable `String`**, where v10 typed it `String?`.
+
+**`AppSettings` and `UploadConfig` no longer extend `Equatable`.** They still compare by value, `props` is
+gone, and both gain `copyWith`.
 
 ---
 
