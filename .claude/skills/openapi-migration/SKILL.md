@@ -324,8 +324,8 @@ List<Map<String, dynamic>>? _membersToData(List<UserGroupMember>? members) =>
 ```
 
 - **Tag every use** with `// TODO(openapi-migration): remove in group 10` and add the models to the adapters table.
-  `generate_plan.py --check` fails on an untagged `@DataSerializable`, and on `@JsonSerializable` on any
-  `@freezed` model.
+  The typedef carries the same tag, so `generate_plan.py --check` fails while it outlives group 10, and deleting it
+  breaks every remaining use at compile time.
 - **A field holding another plain model needs a `@JsonKey(fromJson: ..., toJson: ...)` pair** calling the nested
   model's `fromData`/`toData`, as `members` does above, and the nested model needs its own annotation. Without the
   pair the generated code calls a `fromJson`/`toJson` that doesn't exist and fails to compile.

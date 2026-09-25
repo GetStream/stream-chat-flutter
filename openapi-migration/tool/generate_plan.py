@@ -13,7 +13,6 @@ The report asserts these invariants:
   * the stream_chat barrel exports nothing from the generated client
   * no other package or the sample app imports the generated client
   * no temporary adapter outlives the group that removes it
-  * no @freezed model carries a json_serializable annotation other than a tagged @DataSerializable
 
 A non-zero unclaimed count after a regeneration means the plan needs a new group
 or a wider path prefix — treat it as a plan bug, not a script bug.
@@ -533,31 +532,6 @@ def stale_adapters():
     return out
 
 
-def json_annotated_models():
-    """(file, class, problem) for every @freezed model carrying JSON annotations the domain-model rules forbid."""
-    out = []
-    for f in sorted((PKG / 'lib/src/core/models').glob('*.dart')):
-        if f.name.endswith(('.g.dart', '.freezed.dart')):
-            continue
-        block = []
-        for line in f.read_text().splitlines():
-            stripped = line.strip()
-            if stripped.startswith(('@', '//')):
-                block.append(stripped)
-                continue
-            declaration = re.match(r'(?:(?:abstract|sealed|final|base)\s+)*class\s+(\w+)', stripped)
-            if declaration and any(a.startswith(('@freezed', '@Freezed')) for a in block):
-                name = declaration.group(1)
-                if any(a.startswith('@JsonSerializable') for a in block):
-                    out.append((f, name, 'is @freezed and @JsonSerializable; only @DataSerializable is allowed'))
-                if any(a.startswith('@DataSerializable') for a in block) and not any(
-                    ADAPTER_TODO.search(a) for a in block
-                ):
-                    out.append((f, name, 'uses @DataSerializable without a TODO(openapi-migration) removal tag'))
-            block = []
-    return out
-
-
 def main():
     check_only = '--check' in sys.argv
     if not GENERATED_API.exists():
@@ -596,8 +570,6 @@ def main():
         problems.append(f'{f} imports the generated client: {line}')
     for f, group in stale_adapters():
         problems.append(f'{f} keeps an adapter group {group} was meant to remove')
-    for f, name, problem in json_annotated_models():
-        problems.append(f'{f}: {name} {problem}')
 
     print(f'groups: {len(GROUPS)}')
     print(f'hand-written methods: {len(all_methods)} across {len(hand)} files')

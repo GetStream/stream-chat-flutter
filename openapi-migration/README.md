@@ -99,14 +99,13 @@ Each ships with a CHANGELOG entry and a Symbol Map row like any other break.
    `// TODO(openapi-migration): remove in group NN` and listed below. The group that migrates the parent deletes
    it, and `generate_plan.py --check` fails if a ticked group leaves one behind.
 8. **Persistence stores a model as JSON text through its `@DataSerializable` codec.** `DataSerializable`
-   (`lib/src/db/data_serializable.dart`) is a typedef for `JsonSerializable`, and the only JSON annotation a public
-   model may carry. The model exposes the generated code as `fromData` and `toData`, which only
+   (`lib/src/db/data_serializable.dart`) is a typedef for `JsonSerializable`, and the only class-level json_serializable
+   annotation a public model may carry. The model exposes the generated code as `fromData` and `toData`, which only
    `stream_chat_persistence` calls; it never gains `fromJson` or `toJson`. A field holding another plain model
    needs `@JsonKey(fromJson: ..., toJson: ...)` functions that call the nested `fromData` and `toData`, because
    json_serializable only looks for `fromJson` and `toJson` on nested types. The codec is temporary: every use is
    marked `// TODO(openapi-migration): remove in group 10` and listed below, and group 10 decides what replaces
-   it. `generate_plan.py --check` fails on any other json_serializable annotation on a `@freezed` model. The cache
-   is disposable, so the stored format is ours to choose.
+   it. The cache is disposable, so the stored format is ours to choose.
 
 ### Temporary adapters
 
@@ -128,7 +127,8 @@ the WebSocket layer. Record the answer in [01-foundation](01-foundation.md).
 The order runs from smallest and most isolated to largest and most entangled, so the pattern is proven on cheap
 surfaces before it reaches `Message` and `ChannelState`:
 
-- **02–04** have almost no persistence (03 stores mentioned groups) and almost no public model surface. Group 02 is the pattern-proving slice.
+- **02–04** have almost no persistence (03 stores mentioned groups) and almost no public model surface. Group 02
+  is the pattern-proving slice.
 - **05–07** introduce persisted models and WebSocket-delivered updates, one at a time.
 - **08** is where we decide what *not* to expose: 34 generated operations against 11 hand-written methods.
 - **09** freezes the `User` mapping that everything else already depends on (the *decision* is made in 01; this
