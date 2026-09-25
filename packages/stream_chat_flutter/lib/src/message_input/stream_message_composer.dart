@@ -1412,7 +1412,6 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
             },
             onFailure: _handleEnrichUrlError,
           ),
-          onError: _handleEnrichUrlError,
         );
   }
 
