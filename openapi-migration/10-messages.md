@@ -48,6 +48,7 @@
 
 - `Message` is public, persisted, WebSocket-delivered and the most customised type in the SDK. Keep ours; treat the generated `MessageResponse` as a mapping source only.
 - `Attachment`: the generated model defines fields our `extraData` currently absorbs. Decide the promotion rules before writing the mapper.
+- `Action` is still the v10 json_serializable class, embedded in `Attachment.actions`, which `Attachment.toJson` writes when sending and `toData` writes to persistence. It becomes a plain model with `Attachment`; group 04 left it alone.
 
 ## Risks
 

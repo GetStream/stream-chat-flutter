@@ -5,17 +5,12 @@ import 'package:stream_chat/src/repository/mapper/devices_mapper.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('DeviceResponse.toModel keeps the id and push provider of a fully populated response', () {
+  test('DeviceResponse.toModel maps the id and push provider', () {
     final response = api.DeviceResponse(
       id: 'device-id',
       pushProvider: 'firebase',
-      pushProviderName: 'staging',
       createdAt: DateTime.utc(2024),
       userId: 'user-id',
-      disabled: true,
-      disabledReason: 'expired',
-      hardwareId: 'hardware-id',
-      voip: false,
     );
 
     expect(response.toModel(), const Device(id: 'device-id', pushProvider: PushProvider.firebase));

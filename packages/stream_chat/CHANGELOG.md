@@ -50,9 +50,12 @@
 - `Device`, `Role`, `ListDevicesResponse` and `SearchRolesResponse` no longer decode from or encode to JSON.
 - `PushProvider` is an extension type over its wire string instead of an enum, and `Device.pushProvider` is typed `PushProvider` instead of `String`.
 - `ListDevicesResponse` and `SearchRolesResponse` are immutable, built through a const constructor, and their `duration` is a non-nullable `String`.
-- `Device`, `ListDevicesResponse` and `SearchRolesResponse` compare by value and gain `copyWith`.
+- `Device`, `ListDevicesResponse`, `SearchRolesResponse` and `OGAttachmentResponse` compare by value and gain `copyWith`.
 - `Role` no longer extends `Equatable`, so `props` is removed; it still compares by value and gains `copyWith`.
 - `StreamChatApi.device` is renamed `StreamChatApi.pushPreferences` and handles only `setPushPreferences`.
+- `StreamChatClient.enrichUrl` returns a `Result<OGAttachmentResponse>` instead of throwing.
+- `OGAttachmentResponse` no longer decodes from JSON, is built through a const constructor, and its `duration` is a non-nullable `String`.
+- `StreamChatApi.general.enrichUrl` is removed; call `StreamChatClient.enrichUrl` instead.
 
 🐞 Fixed
 

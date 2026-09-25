@@ -58,6 +58,7 @@ import '../core/models/poll_vote.dart';
 import '../core/models/push_preference.dart';
 import '../core/models/push_provider.dart';
 import '../core/models/reaction.dart';
+import '../core/models/response/og_attachment_response.dart';
 import '../core/models/role_type.dart';
 import '../core/models/search_roles_response.dart';
 import '../core/models/thread.dart';
@@ -69,6 +70,7 @@ import '../core/util/utils.dart';
 import '../db/chat_persistence_client.dart';
 import '../event_type.dart';
 import '../repository/devices_repository.dart';
+import '../repository/general_repository.dart';
 import '../repository/roles_repository.dart';
 import '../ws/connect_request.dart';
 import '../ws/connection_manager.dart';
@@ -167,6 +169,7 @@ class StreamChatClient {
     final api = defaultApi ?? DefaultApi(httpClient);
     _rolesRepository = RolesRepository(api);
     _devicesRepository = DevicesRepository(api);
+    _generalRepository = GeneralRepository(api);
 
     _connection = ConnectionManager(
       request: ConnectRequest.forApi(
@@ -202,6 +205,7 @@ class StreamChatClient {
   late final StreamChatApi _chatApi;
   late final RolesRepository _rolesRepository;
   late final DevicesRepository _devicesRepository;
+  late final GeneralRepository _generalRepository;
   late final ConnectionManager _connection;
   StreamSubscription<WsEvent>? _wsEventSubscription;
 
@@ -2219,8 +2223,11 @@ class StreamChatClient {
     },
   );
 
-  /// Get OpenGraph data of the given [url].
-  Future<OGAttachmentResponse> enrichUrl(String url) => _chatApi.general.enrichUrl(url);
+  /// Scrapes `url` for the OpenGraph metadata a link preview is built from.
+  ///
+  /// The server fetches the page itself, so a URL it cannot scrape comes back
+  /// as a failure.
+  Future<Result<OGAttachmentResponse>> enrichUrl(String url) => _generalRepository.enrichUrl(url);
 
   /// Re-fetches the [AppSettings] and updates [appSettings].
   ///

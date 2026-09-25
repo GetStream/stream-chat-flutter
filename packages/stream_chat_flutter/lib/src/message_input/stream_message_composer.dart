@@ -1401,34 +1401,32 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
         CancelableOperation.fromFuture(
           _enrichUrl(firstMatchedUrl, client),
         ).then(
-          (ogAttachment) {
-            final attachment = Attachment.fromOGAttachment(ogAttachment);
-            _effectiveController.setOGAttachment(attachment);
-          },
-          onError: (error, stackTrace) {
-            // Reset the ogAttachment if there was an error
-            _effectiveController.clearOGAttachment();
-            widget.props.onError?.call(error, stackTrace);
-          },
+          (result) => result.fold(
+            onSuccess: (ogAttachment) {
+              final attachment = Attachment.fromOGAttachment(ogAttachment);
+              _effectiveController.setOGAttachment(attachment);
+            },
+            onFailure: _handleEnrichUrlError,
+          ),
         );
+  }
+
+  void _handleEnrichUrlError(Object error, StackTrace? stackTrace) {
+    // Reset the ogAttachment if there was an error
+    _effectiveController.clearOGAttachment();
+    widget.props.onError?.call(error, stackTrace);
   }
 
   final _ogAttachmentCache = <String, OGAttachmentResponse>{};
 
-  Future<OGAttachmentResponse> _enrichUrl(
+  Future<Result<OGAttachmentResponse>> _enrichUrl(
     String url,
     StreamChatClient client,
   ) async {
-    var response = _ogAttachmentCache[url];
-    if (response == null) {
-      try {
-        response = await client.enrichUrl(url);
-        _ogAttachmentCache[url] = response;
-      } catch (e, stk) {
-        return Future.error(e, stk);
-      }
-    }
-    return response;
+    if (_ogAttachmentCache[url] case final cached?) return Result.success(cached);
+
+    final result = await client.enrichUrl(url);
+    return result.onSuccess((response) => _ogAttachmentCache[url] = response);
   }
 
   // Validates [attachments] and adds the passing ones to the message

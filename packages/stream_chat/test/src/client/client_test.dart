@@ -5071,31 +5071,50 @@ void main() {
       verifyNoMoreInteractions(fakeChatApi.message);
     });
 
-    test('`.enrichUrl`', () async {
+    test('StreamChatClient.enrichUrl returns the scraped metadata of the url', () async {
       const url = 'https://www.techyourchance.com/finite-state-machine-with-unit-tests-real-world-example';
 
-      when(() => fakeChatApi.general.enrichUrl(url)).thenAnswer(
-        (_) async => OGAttachmentResponse()
-          ..type = 'image'
-          ..ogScrapeUrl = url
-          ..authorName = 'TechYourChance'
-          ..title = 'Finite State Machine with Unit Tests: Real World Example',
+      when(() => defaultApi.getOG(url: url)).thenAnswer(
+        (_) async => const Result.success(
+          api.GetOGResponse(
+            duration: '0.01ms',
+            custom: {},
+            type: 'image',
+            ogScrapeUrl: url,
+            authorName: 'TechYourChance',
+            title: 'Finite State Machine with Unit Tests: Real World Example',
+          ),
+        ),
       );
 
       final res = await client.enrichUrl(url);
-
-      expect(res, isNotNull);
-      expect(res.type, 'image');
-      expect(res.ogScrapeUrl, url);
-      expect(res.authorName, 'TechYourChance');
       expect(
-        res.title,
-        'Finite State Machine with Unit Tests: Real World Example',
+        res.getOrNull(),
+        const OGAttachmentResponse(
+          duration: '0.01ms',
+          type: 'image',
+          ogScrapeUrl: url,
+          authorName: 'TechYourChance',
+          title: 'Finite State Machine with Unit Tests: Real World Example',
+        ),
       );
 
-      verify(() => fakeChatApi.general.enrichUrl(url)).called(1);
-      verify(() => fakeChatApi.general.getAppSettings()).called(1);
-      verifyNoMoreInteractions(fakeChatApi.general);
+      verify(() => defaultApi.getOG(url: url)).called(1);
+      verifyNoMoreInteractions(defaultApi);
+    });
+
+    test('StreamChatClient.enrichUrl returns the failure without throwing', () async {
+      const url = 'https://unreachable.example';
+      const error = StreamApiException(
+        code: StreamErrorCode.inputError,
+        message: 'could not find any opengraph data for the given URL',
+        statusCode: 400,
+      );
+      when(() => defaultApi.getOG(url: url)).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await client.enrichUrl(url);
+
+      expect(res.exceptionOrNull(), error);
     });
 
     test(

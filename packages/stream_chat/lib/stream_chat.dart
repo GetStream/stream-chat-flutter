@@ -118,6 +118,7 @@ export 'src/core/models/push_provider.dart';
 export 'src/core/models/reaction.dart';
 export 'src/core/models/reaction_group.dart';
 export 'src/core/models/read.dart';
+export 'src/core/models/response/og_attachment_response.dart';
 export 'src/core/models/role.dart';
 export 'src/core/models/role_type.dart';
 export 'src/core/models/search_roles_response.dart';

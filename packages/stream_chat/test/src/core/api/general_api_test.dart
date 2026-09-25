@@ -296,47 +296,6 @@ void main() {
     });
   });
 
-  test('enrichUrl', () async {
-    const path = '/og';
-    const url = 'https://www.techyourchance.com/finite-state-machine-with-unit-tests-real-world-example';
-
-    when(
-      () => client.get(
-        path,
-        queryParameters: {'url': url},
-      ),
-    ).thenAnswer(
-      (_) async => successResponse(
-        path,
-        data: {
-          'type': 'image',
-          'og_scrape_url': url,
-          'author_name': 'TechYourChance',
-          'title': 'Finite State Machine with Unit Tests: Real World Example',
-        },
-      ),
-    );
-
-    final res = await generalApi.enrichUrl(url);
-
-    expect(res, isNotNull);
-    expect(res.type, 'image');
-    expect(res.ogScrapeUrl, url);
-    expect(res.authorName, 'TechYourChance');
-    expect(
-      res.title,
-      'Finite State Machine with Unit Tests: Real World Example',
-    );
-
-    verify(
-      () => client.get(
-        path,
-        queryParameters: {'url': url},
-      ),
-    ).called(1);
-    verifyNoMoreInteractions(client);
-  });
-
   test('getAppSettings calls GET /app and parses response', () async {
     const path = '/app';
     final fixture = jsonFixture('app_settings.json');
