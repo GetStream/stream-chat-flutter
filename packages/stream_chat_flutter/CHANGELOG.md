@@ -25,6 +25,8 @@
 
 🐞 Fixed
 
+- Fixed the file picker offering file types the Stream Dashboard doesn't allow; it now only offers the allowed file extensions.
+- Fixed `StreamAttachmentValidator` accepting or rejecting a file differently from the server when an extension list holds a compound entry like `.tar.gz`; it now compares only the last extension.
 - Fixed `StreamAttachmentHandler.pickFile` throwing on an empty selection; it now returns `null`.
 - Fixed the package no longer compiling when `stream_core_flutter` adds an avatar size. The three switches mapping `StreamAvatarSize` and `StreamAvatarGroupSize` onto an indicator size, an inner avatar size and the number of initials were exhaustive, so a size added upstream broke the build here. They fall back to the largest size they know now, and `StreamAvatarSize.xlPlus` (64px), `StreamAvatarSize.xxxl` / `StreamAvatarGroupSize.xxxl` (104px) are mapped explicitly.
 - Fixed `StreamAttachmentHandler` throwing `UnimplementedError` on WebAssembly builds.

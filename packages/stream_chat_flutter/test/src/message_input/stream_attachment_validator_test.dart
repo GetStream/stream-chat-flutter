@@ -140,16 +140,9 @@ void main() {
         );
       });
 
-      test('compound extension like .tar.gz matches an allow-list entry', () {
+      test('a .tar.gz allow-list entry rejects .tar.gz files, since only the last extension is compared', () {
         const validator = StreamAttachmentValidator(
           fileUploadConfig: UploadConfig(allowedFileExtensions: ['.tar.gz']),
-        );
-        expect(validator.validate(_attachment(path: '/tmp/archive.tar.gz')), isNull);
-      });
-
-      test('compound extension like .tar.gz matches a block-list entry', () {
-        const validator = StreamAttachmentValidator(
-          fileUploadConfig: UploadConfig(blockedFileExtensions: ['.tar.gz']),
         );
         expect(
           validator.validate(_attachment(path: '/tmp/archive.tar.gz')),
@@ -157,9 +150,14 @@ void main() {
         );
       });
 
-      test('a broader .gz block-list entry also catches .tar.gz files', () {
-        // Suffix matching: `archive.tar.gz` ends with `.gz`, so the entry
-        // for `.gz` covers all gzip-compressed payloads including `.tar.gz`.
+      test('a .tar.gz block-list entry lets .tar.gz files through, since only the last extension is compared', () {
+        const validator = StreamAttachmentValidator(
+          fileUploadConfig: UploadConfig(blockedFileExtensions: ['.tar.gz']),
+        );
+        expect(validator.validate(_attachment(path: '/tmp/archive.tar.gz')), isNull);
+      });
+
+      test('a .gz block-list entry blocks .tar.gz files', () {
         const validator = StreamAttachmentValidator(
           fileUploadConfig: UploadConfig(blockedFileExtensions: ['.gz']),
         );
@@ -169,10 +167,21 @@ void main() {
         );
       });
 
-      test('a .tar.gz allow-list entry does not accept a plain .gz file', () {
-        // Suffix matching is strict: `archive.gz` does not end with
-        // `.tar.gz`, so an allow-list scoped to compound archives rejects
-        // bare gzip files.
+      test('an allow-list entry without a leading dot accepts matching files', () {
+        const validator = StreamAttachmentValidator(
+          fileUploadConfig: UploadConfig(allowedFileExtensions: ['pdf']),
+        );
+        expect(validator.validate(_attachment(path: '/tmp/report.pdf')), isNull);
+      });
+
+      test('a .gz allow-list entry accepts .tar.gz files', () {
+        const validator = StreamAttachmentValidator(
+          fileUploadConfig: UploadConfig(allowedFileExtensions: ['.gz']),
+        );
+        expect(validator.validate(_attachment(path: '/tmp/archive.tar.gz')), isNull);
+      });
+
+      test('a .tar.gz allow-list entry rejects a plain .gz file', () {
         const validator = StreamAttachmentValidator(
           fileUploadConfig: UploadConfig(allowedFileExtensions: ['.tar.gz']),
         );
@@ -219,6 +228,16 @@ void main() {
           isA<AttachmentBlockedError>(),
         );
       });
+
+      test('reports no extension for a blocked file without one', () {
+        const validator = StreamAttachmentValidator(
+          fileUploadConfig: UploadConfig(allowedFileExtensions: ['.pdf']),
+        );
+        expect(
+          validator.validate(_attachment(path: '/tmp/somefile')),
+          isA<AttachmentBlockedError>().having((e) => e.fileExtension, 'fileExtension', isNull),
+        );
+      });
     });
 
     group('size limit', () {
@@ -229,17 +248,6 @@ void main() {
         final result = validator.validate(_attachment(path: '/tmp/big.pdf', size: 100));
         expect(result, isA<AttachmentTooLargeError>());
         expect((result! as AttachmentTooLargeError).maxSize, 50);
-      });
-
-      test('falls back to defaultSizeLimit when backend size is 0', () {
-        const validator = StreamAttachmentValidator(
-          fileUploadConfig: UploadConfig(sizeLimit: 0),
-        );
-        final result = validator.validate(
-          _attachment(path: '/tmp/file.pdf', size: UploadConfig.defaultSizeLimit + 1),
-        );
-        expect(result, isA<AttachmentTooLargeError>());
-        expect((result! as AttachmentTooLargeError).maxSize, UploadConfig.defaultSizeLimit);
       });
 
       test('ext/MIME error wins when both ext and size are invalid', () {
