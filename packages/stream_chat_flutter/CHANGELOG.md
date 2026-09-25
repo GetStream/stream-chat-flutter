@@ -1,3 +1,25 @@
+## Upcoming
+
+✅ Added
+
+- `StreamMessageInput` now rejects attachments blocked by the Stream Dashboard upload configuration, and the file picker only offers the allowed file extensions.
+
+🔄 Changed
+
+- `StreamAttachmentPickerController` now throws an `AttachmentBlockedError`, `AttachmentTooLargeError` or `AttachmentLimitReachedError` instead of an `ArgumentError`.
+- The gallery picker now closes before reporting an error, like the other attachment picker options.
+
+⚠️ Deprecated
+
+- Deprecated `StreamAttachmentPickerController.maxAttachmentSize` and `maxAttachmentCount` in favor of `validator`.
+- Deprecated `StreamMessageInput.maxAttachmentSize`, which has no effect. Set the size limit in the Stream Dashboard instead.
+- Deprecated `kDefaultMaxAttachmentSize` and `kDefaultMaxAttachmentCount`.
+
+🐞 Fixed
+
+- Fixed `StreamMessageInput.attachmentLimit` not being applied to picked attachments.
+- Fixed the `StreamMessageInput` error sheet showing a generic error instead of the actual one.
+
 ## 9.30.0
 
 ✅ Added

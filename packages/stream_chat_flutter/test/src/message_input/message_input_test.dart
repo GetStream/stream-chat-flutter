@@ -528,6 +528,7 @@ MaterialApp buildWidget(StreamMessageInput input) {
   final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
 
   when(() => client.state).thenReturn(clientState);
+  when(() => client.appSettings).thenReturn(const AppSettings());
   when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
   when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
   when(() => channel.state).thenReturn(channelState);

@@ -696,4 +696,13 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get draftLabel => 'ड्राफ्ट';
+
+  @override
+  String fileTypeNotSupportedError(String? extension) {
+    if (extension == null) {
+      return 'यह फ़ाइल प्रकार अपलोड के लिए समर्थित नहीं है।';
+    }
+
+    return "'.$extension' फ़ाइलें अपलोड के लिए समर्थित नहीं हैं।";
+  }
 }

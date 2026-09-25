@@ -70,6 +70,7 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
   PollConfig? pollConfig,
   List<Attachment>? initialAttachments,
   StreamAttachmentPickerController? controller,
+  StreamAttachmentValidator? validator,
   ErrorListener? onError,
   Color? backgroundColor,
   double? elevation,
@@ -113,6 +114,7 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
         controller: controller,
         initialPoll: initialPoll,
         initialAttachments: initialAttachments,
+        validator: validator,
         builder: (context, controller, child) {
           final isWebOrDesktop = switch (CurrentPlatform.type) {
             PlatformType.web ||
@@ -173,6 +175,7 @@ class StreamPlatformAttachmentPickerBottomSheetBuilder extends StatefulWidget {
     this.initialAttachments,
     this.child,
     this.controller,
+    this.validator,
     required this.builder,
   });
 
@@ -198,6 +201,9 @@ class StreamPlatformAttachmentPickerBottomSheetBuilder extends StatefulWidget {
   /// The controller.
   final StreamAttachmentPickerController? controller;
 
+  /// The upload rules used when [controller] is not provided.
+  final StreamAttachmentValidator? validator;
+
   @override
   State<StreamPlatformAttachmentPickerBottomSheetBuilder> createState() =>
       _StreamPlatformAttachmentPickerBottomSheetBuilderState();
@@ -210,11 +216,15 @@ class _StreamPlatformAttachmentPickerBottomSheetBuilderState
   @override
   void initState() {
     super.initState();
-    _controller = widget.controller ??
-        StreamAttachmentPickerController(
-          initialPoll: widget.initialPoll,
-          initialAttachments: widget.initialAttachments,
-        );
+    _controller = widget.controller ?? _createController();
+  }
+
+  StreamAttachmentPickerController _createController() {
+    return StreamAttachmentPickerController(
+      initialPoll: widget.initialPoll,
+      initialAttachments: widget.initialAttachments,
+      validator: widget.validator,
+    );
   }
 
   // Handle a potential change in StreamAttachmentPickerController by properly
@@ -228,10 +238,7 @@ class _StreamPlatformAttachmentPickerBottomSheetBuilderState
       _controller.dispose();
       _controller = current!;
     } else if (current == null) {
-      _controller = StreamAttachmentPickerController(
-        initialPoll: widget.initialPoll,
-        initialAttachments: widget.initialAttachments,
-      );
+      _controller = _createController();
     } else {
       _controller = current;
     }

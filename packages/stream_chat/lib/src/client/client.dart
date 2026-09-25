@@ -15,11 +15,13 @@ import 'package:stream_chat/src/core/api/responses.dart';
 import 'package:stream_chat/src/core/api/sort_order.dart';
 import 'package:stream_chat/src/core/api/stream_chat_api.dart';
 import 'package:stream_chat/src/core/error/error.dart';
+import 'package:stream_chat/src/core/http/app_settings_manager.dart';
 import 'package:stream_chat/src/core/http/connection_id_manager.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/http/system_environment_manager.dart';
 import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
+import 'package:stream_chat/src/core/models/app_settings.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
 import 'package:stream_chat/src/core/models/banned_user.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
@@ -149,6 +151,7 @@ class StreamChatClient {
 
   final _tokenManager = TokenManager();
   final _connectionIdManager = ConnectionIdManager();
+  late final _appSettingsManager = AppSettingsManager(_chatApi.general);
   static final _systemEnvironmentManager = SystemEnvironmentManager();
 
   /// Updates the system environment information used by the client.
@@ -189,6 +192,13 @@ class StreamChatClient {
 
   /// The current package version
   static const packageVersion = PACKAGE_VERSION;
+
+  /// The cached [AppSettings] for this client.
+  ///
+  /// Returns a default instance until the settings loaded by [connectUser]
+  /// arrive. To pick up changes made during a session, consider calling
+  /// [getAppSettings].
+  AppSettings get appSettings => _appSettingsManager.appSettings;
 
   /// Chat persistence client
   ChatPersistenceClient? chatPersistenceClient;
@@ -416,6 +426,8 @@ class StreamChatClient {
         );
         state.currentUser = connectedUser;
       }
+
+      unawaited(_appSettingsManager.loadAppSettings());
 
       return state.currentUser!;
     } catch (e, stk) {
@@ -2206,6 +2218,12 @@ class StreamChatClient {
   Future<OGAttachmentResponse> enrichUrl(String url) =>
       _chatApi.general.enrichUrl(url);
 
+  /// Re-fetches the [AppSettings] and updates [appSettings].
+  ///
+  /// [connectUser] populates [appSettings] automatically, so this is only
+  /// needed to pick up changes made during an active session.
+  Future<AppSettings> getAppSettings() => _appSettingsManager.refresh();
+
   /// Queries threads with the given [options] and [pagination] params.
   ///
   /// Optionally, pass [filter] and [sort] to filter and sort the threads.
@@ -2384,6 +2402,7 @@ class StreamChatClient {
     // resetting credentials.
     _tokenManager.reset();
     _connectionIdManager.reset();
+    _appSettingsManager.clear();
 
     // closing persistence connection.
     return closePersistenceConnection(flush: flushChatPersistence);

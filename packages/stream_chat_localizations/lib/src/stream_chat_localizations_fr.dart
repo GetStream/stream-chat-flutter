@@ -706,4 +706,15 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
 
   @override
   String get draftLabel => 'Brouillon';
+
+  @override
+  String fileTypeNotSupportedError(String? extension) {
+    if (extension == null) {
+      return "Ce type de fichier n'est pas pris en charge pour le "
+          'téléchargement.';
+    }
+
+    return "Les fichiers '.$extension' ne sont pas pris en charge pour le "
+        'téléchargement.';
+  }
 }

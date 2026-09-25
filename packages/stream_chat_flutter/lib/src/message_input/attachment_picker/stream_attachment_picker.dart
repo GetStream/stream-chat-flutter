@@ -1,16 +1,22 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_picker/options/options.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// The default maximum size for media attachments.
-const kDefaultMaxAttachmentSize = 100 * 1024 * 1024; // 100MB in Bytes
+@Deprecated('Use UploadConfig.defaultSizeLimit instead.')
+const kDefaultMaxAttachmentSize = UploadConfig.defaultSizeLimit;
 
 /// The default maximum number of media attachments.
-const kDefaultMaxAttachmentCount = 10;
+@Deprecated('Use StreamAttachmentValidator.maxAttachmentCount instead.')
+const kDefaultMaxAttachmentCount = _defaultMaxAttachmentCount;
+
+// The attachment count limit used when no validator is provided.
+const _defaultMaxAttachmentCount = 10;
 
 /// Value class for [AttachmentPickerController].
 ///
@@ -45,13 +51,29 @@ class StreamAttachmentPickerController
     extends ValueNotifier<AttachmentPickerValue> {
   /// Creates a new instance of [StreamAttachmentPickerController].
   StreamAttachmentPickerController({
+    Poll? initialPoll,
+    List<Attachment>? initialAttachments,
+    @Deprecated('Use validator instead.') int? maxAttachmentSize,
+    @Deprecated('Use validator instead.') int? maxAttachmentCount,
+    StreamAttachmentValidator? validator,
+  }) : this._(
+          initialPoll: initialPoll,
+          initialAttachments: initialAttachments,
+          validator: _resolveValidator(
+            validator,
+            maxAttachmentSize,
+            maxAttachmentCount,
+          ),
+        );
+
+  StreamAttachmentPickerController._({
     this.initialPoll,
     this.initialAttachments,
-    this.maxAttachmentSize = kDefaultMaxAttachmentSize,
-    this.maxAttachmentCount = kDefaultMaxAttachmentCount,
+    required this.validator,
   })  : assert(
-          (initialAttachments?.length ?? 0) <= maxAttachmentCount,
-          '''The initial attachments count must be less than or equal to maxAttachmentCount''',
+          (initialAttachments?.length ?? 0) <= validator.maxAttachmentCount,
+          'The initial attachments count must be less than or equal to '
+          'validator.maxAttachmentCount',
         ),
         super(
           AttachmentPickerValue(
@@ -60,11 +82,50 @@ class StreamAttachmentPickerController
           ),
         );
 
+  // Returns [validator], or builds one from the deprecated size and count
+  // limits when it's not provided.
+  static StreamAttachmentValidator _resolveValidator(
+    StreamAttachmentValidator? validator,
+    int? maxAttachmentSize,
+    int? maxAttachmentCount,
+  ) {
+    assert(
+      maxAttachmentSize == null || validator == null,
+      'Only one of maxAttachmentSize or validator can be provided. '
+      'Prefer validator; maxAttachmentSize is deprecated.',
+    );
+    assert(
+      maxAttachmentCount == null || validator == null,
+      'Only one of maxAttachmentCount or validator can be provided. '
+      'Prefer validator; maxAttachmentCount is deprecated.',
+    );
+
+    if (validator != null) return validator;
+
+    final uploadConfig = UploadConfig(
+      sizeLimit: maxAttachmentSize ?? UploadConfig.defaultSizeLimit,
+    );
+
+    return StreamAttachmentValidator(
+      fileUploadConfig: uploadConfig,
+      imageUploadConfig: uploadConfig,
+      maxAttachmentCount: maxAttachmentCount ?? _defaultMaxAttachmentCount,
+    );
+  }
+
   /// The max attachment size allowed in bytes.
-  final int maxAttachmentSize;
+  @Deprecated('Use validator.fileUploadConfig.sizeLimit instead.')
+  int get maxAttachmentSize => validator.fileUploadConfig.sizeLimit;
 
   /// The max attachment count allowed.
-  final int maxAttachmentCount;
+  @Deprecated('Use validator.maxAttachmentCount instead.')
+  int get maxAttachmentCount => validator.maxAttachmentCount;
+
+  /// The upload rules every added attachment is checked against.
+  ///
+  /// Custom attachment pickers can read the configured rules from here, such
+  /// as to only offer the allowed file extensions.
+  final StreamAttachmentValidator validator;
 
   /// The initial poll.
   final Poll? initialPoll;
@@ -72,13 +133,13 @@ class StreamAttachmentPickerController
   /// The initial attachments.
   final List<Attachment>? initialAttachments;
 
+  /// Throws an [AttachmentLimitReachedError] when [newValue] holds more
+  /// attachments than [StreamAttachmentValidator.maxAttachmentCount].
   @override
   set value(AttachmentPickerValue newValue) {
-    if (newValue.attachments.length > maxAttachmentCount) {
-      throw ArgumentError(
-        'The maximum number of attachments is $maxAttachmentCount.',
-      );
-    }
+    final error = validator.validateCount(newValue.attachments.length);
+    if (error != null) throw error;
+
     super.value = newValue;
   }
 
@@ -102,14 +163,13 @@ class StreamAttachmentPickerController
   }
 
   /// Adds a new attachment to the message.
+  ///
+  /// Throws an [AttachmentBlockedError] or an [AttachmentTooLargeError] when
+  /// [attachment] is rejected by [validator].
   Future<void> addAttachment(Attachment attachment) async {
     assert(attachment.fileSize != null, '');
-    if (attachment.fileSize! > maxAttachmentSize) {
-      throw ArgumentError(
-        'The size of the attachment is ${attachment.fileSize} bytes, '
-        'but the maximum size allowed is $maxAttachmentSize bytes.',
-      );
-    }
+    final error = validator.validate(attachment);
+    if (error != null) throw error;
 
     final file = attachment.file;
     final uploadState = attachment.uploadState;
@@ -789,7 +849,9 @@ Widget mobileAttachmentPickerBuilder({
                   }
                   return await controller.addAssetAttachment(media);
                 } catch (e, stk) {
+                  Navigator.pop(context, controller.value);
                   if (onError != null) return onError.call(e, stk);
+
                   rethrow;
                 }
               },
@@ -801,7 +863,13 @@ Widget mobileAttachmentPickerBuilder({
           icon: const StreamSvgIcon(icon: StreamSvgIcons.files),
           supportedTypes: [AttachmentPickerType.files],
           optionViewBuilder: (context, controller) {
+            final fileConfig = controller.validator.fileUploadConfig;
+            final extensions = _filePickerExtensions(fileConfig);
+            final type = extensions == null ? FileType.any : FileType.custom;
+
             return StreamFilePicker(
+              type: type,
+              allowedExtensions: extensions,
               onFilePicked: (file) async {
                 try {
                   if (file != null) await controller.addAttachment(file);
@@ -946,10 +1014,19 @@ Widget webOrDesktopAttachmentPickerBuilder({
         return Navigator.pop(context, controller.value);
       }
 
+      final fileConfig = controller.validator.fileUploadConfig;
+      final extensions = switch (option.type) {
+        AttachmentPickerType.files => _filePickerExtensions(fileConfig),
+        _ => null,
+      };
+
+      final type = extensions == null ? option.type.fileType : FileType.custom;
+
       // Handle the remaining option types.
       try {
         final attachment = await StreamAttachmentHandler.instance.pickFile(
-          type: option.type.fileType,
+          type: type,
+          allowedExtensions: extensions,
         );
         if (attachment != null) {
           await controller.addAttachment(attachment);
@@ -993,4 +1070,21 @@ extension _AttachmentPickerTypesX on Iterable<AttachmentPickerType> {
 
     return RequestType.fromTypes(mediaTypes);
   }
+}
+
+// The extensions [config] allows, in the format file pickers expect (`pdf` for
+// `.pdf`), or `null` when every extension is allowed.
+//
+// Compound entries like `.tar.gz` are left out: validation only compares a
+// file's last extension, so no file can match them.
+List<String>? _filePickerExtensions(UploadConfig config) {
+  final extensions = <String>[];
+  for (final entry in config.allowedFileExtensions) {
+    final extension = entry.startsWith('.') ? entry.substring(1) : entry;
+    if (extension.isEmpty || extension.contains('.')) continue;
+
+    extensions.add(extension.toLowerCase());
+  }
+
+  return extensions.isEmpty ? null : extensions;
 }

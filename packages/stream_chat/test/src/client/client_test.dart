@@ -1202,6 +1202,10 @@ void main() {
 
     final user = User(id: userId);
     final token = Token.development(user.id).rawValue;
+    const appSettings = AppSettings(
+      name: 'test-app',
+      fileUploadConfig: UploadConfig(blockedFileExtensions: ['.exe']),
+    );
 
     late StreamChatClient client;
 
@@ -1215,6 +1219,15 @@ void main() {
     });
 
     setUp(() async {
+      // Clear the interactions of the previous test so that
+      // `verifyNoMoreInteractions(api.general)` stays accurate.
+      clearInteractions(api.general);
+
+      // Stub the app settings loaded in the background by `connectUser`.
+      when(() => api.general.getAppSettings()).thenAnswer(
+        (_) async => GetAppSettingsResponse()..app = appSettings,
+      );
+
       final ws = FakeWebSocket();
       client = StreamChatClient(apiKey, chatApi: api, ws: ws);
       await client.connectUser(user, token);
@@ -1225,6 +1238,31 @@ void main() {
 
     tearDown(() async {
       await client.dispose();
+    });
+
+    group('`.appSettings`', () {
+      test('should be loaded when the user connects', () {
+        expect(client.appSettings, appSettings);
+      });
+
+      test('should be reset when the user disconnects', () async {
+        await client.disconnectUser();
+
+        expect(client.appSettings, const AppSettings());
+      });
+    });
+
+    test('`.getAppSettings` should re-fetch the app settings', () async {
+      const updated = AppSettings(name: 'updated-app');
+      when(() => api.general.getAppSettings()).thenAnswer(
+        (_) async => GetAppSettingsResponse()..app = updated,
+      );
+
+      final res = await client.getAppSettings();
+
+      expect(res, updated);
+      expect(client.appSettings, updated);
+      verify(() => api.general.getAppSettings()).called(2);
     });
 
     group('`.sync`', () {
@@ -1629,6 +1667,7 @@ void main() {
           sort: any(named: 'sort'),
           pagination: any(named: 'pagination'),
           messageFilters: any(named: 'messageFilters'))).called(1);
+      verify(() => api.general.getAppSettings()).called(1);
       verifyNoMoreInteractions(api.general);
     });
 
@@ -2167,6 +2206,7 @@ void main() {
       expect(res.members.length, members.length);
 
       verify(() => api.general.queryMembers(channelType)).called(1);
+      verify(() => api.general.getAppSettings()).called(1);
       verifyNoMoreInteractions(api.general);
     });
 
@@ -4228,6 +4268,7 @@ void main() {
       );
 
       verify(() => api.general.enrichUrl(url)).called(1);
+      verify(() => api.general.getAppSettings()).called(1);
       verifyNoMoreInteractions(api.general);
     });
 

@@ -696,4 +696,13 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get draftLabel => 'Draft';
+
+  @override
+  String fileTypeNotSupportedError(String? extension) {
+    if (extension == null) {
+      return 'This file type is not supported for upload.';
+    }
+
+    return "'.$extension' files are not supported for upload.";
+  }
 }

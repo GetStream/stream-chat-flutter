@@ -1,8 +1,16 @@
 ## Upcoming
 
+✅ Added
+
+- Added `StreamChatClient.appSettings` and `StreamChatClient.getAppSettings()` to read the upload configuration set in the Stream Dashboard.
+
 🔄 Changed
 
 - Improved the speed of converting models to and from JSON.
+
+🐞 Fixed
+
+- Fixed `AttachmentFile.extension` returning the whole file name when the file has no extension.
 
 ## 9.30.0
 
