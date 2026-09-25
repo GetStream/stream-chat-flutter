@@ -1334,9 +1334,10 @@ bool canEdit(Document document) {
 }
 ```
 
-Named locals are still fine when every value is cheap and all of them are needed anyway. A uniform run
-of comparisons, like the [`operator ==` boilerplate](#common-boilerplates-for-operator--and-hashcode), stays
-one expression.
+Named locals are still fine when every value is cheap and all of them are needed anyway, and for the last
+check alone when a name makes the return easier to read. A uniform run of comparisons or fallbacks, like
+the [`operator ==` boilerplate](#common-boilerplates-for-operator--and-hashcode) or the `??` chain in
+[Theming](#theming), stays one expression.
 
 ### Prefer `+=` over `++`
 
