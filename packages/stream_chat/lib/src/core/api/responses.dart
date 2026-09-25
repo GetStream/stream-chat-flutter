@@ -1,7 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import '../../client/client.dart';
 import '../../ws/events/event.dart';
-import '../models/app_settings.dart';
 import '../models/banned_user.dart';
 import '../models/channel_model.dart';
 import '../models/channel_state.dart';
@@ -866,14 +865,4 @@ class RemoveUserGroupMembersResponse extends _BaseResponse {
   /// Create a new instance from a json
   static RemoveUserGroupMembersResponse fromJson(Map<String, dynamic> json) =>
       _$RemoveUserGroupMembersResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.getAppSettings] api call.
-@JsonSerializable(createToJson: false)
-class GetAppSettingsResponse extends _BaseResponse {
-  /// The app settings.
-  late AppSettings app;
-
-  /// Creates a new instance from a json.
-  static GetAppSettingsResponse fromJson(Map<String, dynamic> json) => _$GetAppSettingsResponseFromJson(json);
 }

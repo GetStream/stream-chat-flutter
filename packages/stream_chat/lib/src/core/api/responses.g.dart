@@ -455,9 +455,3 @@ RemoveUserGroupMembersResponse _$RemoveUserGroupMembersResponseFromJson(
 ) => RemoveUserGroupMembersResponse()
   ..duration = json['duration'] as String?
   ..userGroup = UserGroup.fromJson(json['user_group'] as Map<String, dynamic>);
-
-GetAppSettingsResponse _$GetAppSettingsResponseFromJson(
-  Map<String, dynamic> json,
-) => GetAppSettingsResponse()
-  ..duration = json['duration'] as String?
-  ..app = AppSettings.fromJson(json['app'] as Map<String, dynamic>);
