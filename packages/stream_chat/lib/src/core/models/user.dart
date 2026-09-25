@@ -1,15 +1,16 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_core/stream_core.dart'
+    show Filter, FilterField, Standard, Sort, SortField, normalizeStringForSort;
 
 import '../util/extension.dart';
 import '../util/serializer.dart';
-import 'comparable_field.dart';
 
 part 'user.g.dart';
 
 /// Class that defines a Stream Chat User.
 @JsonSerializable(includeIfNull: false)
-class User extends Equatable implements ComparableFieldProvider {
+class User extends Equatable {
   /// Creates a new user.
   ///
   /// {@template name}
@@ -210,55 +211,257 @@ class User extends Equatable implements ComparableFieldProvider {
     teamsRole,
     avgResponseTime,
   ];
-
-  @override
-  ComparableField? getComparableField(String sortKey) {
-    final value = switch (sortKey) {
-      UserSortKey.id => id,
-      UserSortKey.createdAt => createdAt,
-      UserSortKey.updatedAt => updatedAt,
-      UserSortKey.name => name,
-      UserSortKey.role => role,
-      UserSortKey.banned => banned,
-      UserSortKey.lastActive => lastActive,
-      _ => extraData[sortKey],
-    };
-
-    return ComparableField.fromValue(value);
-  }
 }
 
-/// Extension type representing sortable fields for [User].
+/// A filter for a user query.
 ///
-/// This type provides type-safe keys that can be used for sorting users
-/// in queries. Each constant represents a field that can be sorted on.
-extension type const UserSortKey(String key) implements String {
-  /// Sort users by their ID.
-  static const id = UserSortKey('id');
+/// See [UserFilterField] for the fields that can be filtered on.
+///
+/// ```dart
+/// final filter = UserFilter.or([
+///   UserFilter.autoComplete(UserFilterField.name, 'jo'),
+///   UserFilter.autoComplete(UserFilterField.id, 'jo'),
+/// ]);
+/// ```
+typedef UserFilter = Filter<User>;
 
-  /// Sort users by their creation date.
+/// Represents a field that user queries can be filtered on.
+class UserFilterField extends FilterField<User> {
+  /// Creates a user filter field named [remote] on the wire, reading its value
+  /// off an instance with [value].
+  UserFilterField(super.remote, super.value);
+
+  /// Creates a field the SDK does not model, read from [User.extraData].
+  ///
+  /// A user query compares a custom field for equality only. Anything else is
+  /// rejected.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  factory UserFilterField.custom(String remote) {
+    return UserFilterField(remote, (it) => it.extraData[remote]);
+  }
+
+  /// Filters users by their id.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$autocomplete`
+  static final id = UserFilterField(
+    'id',
+    (it) => it.id,
+  );
+
+  /// Filters users by their name.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$autocomplete`
+  static final name = UserFilterField(
+    'name',
+    (it) => it.name,
+  );
+
+  /// Filters users by their username.
+  ///
+  /// **Supported operators:** `$eq`, `$autocomplete`
+  static final username = UserFilterField(
+    'username',
+    (it) => it.extraData['username'].safeCast<String>(),
+  );
+
+  /// Filters users by their email address.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final email = UserFilterField(
+    'email',
+    (it) => it.extraData['email'].safeCast<String>(),
+  );
+
+  /// Filters users by their role.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final role = UserFilterField(
+    'role',
+    (it) => it.role,
+  );
+
+  /// Filters users by the teams they belong to.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$contains`
+  static final teams = UserFilterField(
+    'teams',
+    (it) => it.teams,
+  );
+
+  /// Filters users by whether they are banned.
+  ///
+  /// **Supported operators:** `$eq`
+  static final banned = UserFilterField(
+    'banned',
+    (it) => it.banned,
+  );
+
+  /// Filters users by whether they are shadow banned.
+  ///
+  /// **Supported operators:** `$eq`
+  static final shadowBanned = UserFilterField(
+    'shadow_banned',
+    (it) => it.extraData['shadow_banned'].safeCast<bool>(),
+  );
+
+  /// Filters users by whether they bypass moderation.
+  ///
+  /// **Supported operators:** `$eq`
+  static final bypassModeration = UserFilterField(
+    'bypass_moderation',
+    (it) => it.extraData['bypass_moderation'].safeCast<bool>(),
+  );
+
+  /// Filters users by when they were last online.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`
+  static final lastActive = UserFilterField(
+    'last_active',
+    (it) => it.lastActive,
+  );
+
+  /// Filters users by their creation date.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`
+  static final createdAt = UserFilterField(
+    'created_at',
+    (it) => it.createdAt,
+  );
+
+  /// Filters users by their last update date.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`
+  static final updatedAt = UserFilterField(
+    'updated_at',
+    (it) => it.updatedAt,
+  );
+
+  /// Filters users by the language they chose.
+  ///
+  /// **Supported operators:** `$eq`
+  static final language = UserFilterField(
+    'language',
+    (it) => it.language,
+  );
+}
+
+/// Represents a sorting operation for users.
+///
+/// See [UserSortField] for the fields that can be sorted on.
+///
+/// ```dart
+/// final sort = [UserSort.asc(UserSortField.name)];
+/// ```
+class UserSort extends Sort<User> {
+  /// Sorts by [field], smallest first.
+  const UserSort.asc(
+    UserSortField super.field, {
+    super.nullOrdering,
+  }) : super.asc();
+
+  /// Sorts by [field], largest first.
+  const UserSort.desc(
+    UserSortField super.field, {
+    super.nullOrdering,
+  }) : super.desc();
+
+  /// An empty sort: the query carries no sort term, and a list keeps the
+  /// order it arrived in.
+  static const List<UserSort> empty = [];
+
+  /// The ordering the API applies to a user query when none is given.
+  ///
+  /// Sorts by when the user was created, newest first.
+  static final List<UserSort> defaultSort = [
+    UserSort.desc(UserSortField.createdAt),
+  ];
+}
+
+/// Represents a field that user queries can be sorted on.
+class UserSortField extends SortField<User> {
+  /// Creates a field named [remote] on the wire, reading its value off an
+  /// instance with `localValue`.
+  ///
+  /// For a name the SDK has not modelled; prefer the fields declared here.
+  UserSortField(super.remote, super.localValue);
+
+  /// Creates a field the SDK does not model, read from [User.extraData].
+  ///
+  /// Declared only where the API accepts a custom sort field.
+  factory UserSortField.custom(String remote) {
+    return UserSortField(remote, (it) => it.extraData[remote]);
+  }
+
+  /// Sorts users by their ID.
+  static final id = UserSortField(
+    'id',
+    (it) => it.id,
+  );
+
+  /// Sorts users by their creation date.
   ///
   /// This is part of the default sort (in descending order).
-  static const createdAt = UserSortKey('created_at');
+  static final createdAt = UserSortField(
+    'created_at',
+    (it) => it.createdAt,
+  );
 
-  /// Sort users by their last update date.
-  static const updatedAt = UserSortKey('updated_at');
+  /// Sorts users by their last update date.
+  static final updatedAt = UserSortField(
+    'updated_at',
+    (it) => it.updatedAt,
+  );
 
-  /// Sort users by their name.
+  /// Sorts users by their name.
   ///
-  /// Useful for alphabetical sorting of users.
-  static const name = UserSortKey('name');
+  /// Compared with case, diacritics and ligatures folded away, so a list
+  /// sorted locally matches the order a query returns.
+  static final name = UserSortField(
+    'name',
+    // Deliberately not `User.name`, which answers the id when a user has no
+    // name — sorting by that locally would scatter unnamed users among the
+    // named ones, where a query keeps them together.
+    (it) => it.extraData['name'].safeCast<String>()?.let(normalizeStringForSort),
+  );
 
-  /// Sort users by their role.
-  static const role = UserSortKey('role');
+  /// Sorts users by their role.
+  static final role = UserSortField(
+    'role',
+    (it) => it.role,
+  );
 
-  /// Sort users by whether they are banned.
+  /// Sorts users by whether they are banned.
   ///
   /// Banned users will appear first when sorting in ascending order.
-  static const banned = UserSortKey('banned');
+  static final banned = UserSortField(
+    'banned',
+    (it) => it.banned,
+  );
 
-  /// Sort users by their last active date.
+  /// Sorts users by their last active date.
   ///
   /// Useful for sorting users by recent activity.
-  static const lastActive = UserSortKey('last_active');
+  static final lastActive = UserSortField(
+    'last_active',
+    (it) => it.lastActive,
+  );
+
+  /// Sorts users by their preferred language.
+  static final language = UserSortField(
+    'language',
+    (it) => it.language,
+  );
+
+  /// Sorts users by the teams they belong to.
+  ///
+  /// A team list has no ordering, so a page re-sorted locally keeps the order
+  /// it arrived in.
+  static final teams = UserSortField(
+    'teams',
+    (it) => it.teams,
+  );
 }

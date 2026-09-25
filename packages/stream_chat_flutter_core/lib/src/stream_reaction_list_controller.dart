@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'paged_value_notifier.dart';
 
@@ -55,17 +54,17 @@ class StreamReactionListController extends PagedValueNotifier<String?, Reaction>
   /// The query filters to use.
   ///
   /// Supported filter fields: `type`, `user_id`, `created_at`.
-  final Filter? filter;
-  Filter? _activeFilter;
+  final ReactionFilter? filter;
+  ReactionFilter? _activeFilter;
 
   /// The sorting used for the reactions matching the filters.
   ///
   /// Sorting is based on field and direction. The only backend-supported sort
-  /// field is `created_at` (see [ReactionSortKey]).
+  /// field is `created_at` (see [ReactionSortField]).
   ///
   /// Direction can be ascending or descending.
-  final SortOrder<Reaction>? sort;
-  SortOrder<Reaction>? _activeSort;
+  final List<ReactionSort>? sort;
+  List<ReactionSort>? _activeSort;
 
   /// The limit to apply to the reaction list.
   ///
@@ -79,7 +78,7 @@ class StreamReactionListController extends PagedValueNotifier<String?, Reaction>
   ///
   /// Note: This will not trigger a new query. Make sure to call
   /// [doInitialLoad] or [refresh] after setting a new filter.
-  set filter(Filter? value) => _activeFilter = value;
+  set filter(ReactionFilter? value) => _activeFilter = value;
 
   /// Allows for the change of the query sort used for reaction queries.
   ///
@@ -88,7 +87,7 @@ class StreamReactionListController extends PagedValueNotifier<String?, Reaction>
   ///
   /// Note: This will not trigger a new query. Make sure to call
   /// [doInitialLoad] or [refresh] after setting a new sort.
-  set sort(SortOrder<Reaction>? value) => _activeSort = value;
+  set sort(List<ReactionSort>? value) => _activeSort = value;
 
   @override
   set value(PagedValue<String?, Reaction> newValue) {
@@ -97,7 +96,7 @@ class StreamReactionListController extends PagedValueNotifier<String?, Reaction>
       final reactionSort => newValue.maybeMap(
         orElse: () => newValue,
         (success) => success.copyWith(
-          items: success.items.sorted(reactionSort.compare),
+          items: success.items.sortedWith(reactionSort.compare),
         ),
       ),
     };
@@ -124,10 +123,10 @@ class StreamReactionListController extends PagedValueNotifier<String?, Reaction>
         items: reactions,
         nextPageKey: nextKey,
       );
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       value = PagedValue.error(error);
     } catch (error) {
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load reactions', cause: error);
       value = PagedValue.error(chatError);
     }
   }
@@ -153,10 +152,10 @@ class StreamReactionListController extends PagedValueNotifier<String?, Reaction>
         items: newItems,
         nextPageKey: nextKey,
       );
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       value = previousValue.copyWith(error: error);
     } catch (error) {
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load more reactions', cause: error);
       value = previousValue.copyWith(error: chatError);
     }
   }

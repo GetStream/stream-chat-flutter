@@ -294,7 +294,7 @@ void main() {
         );
         when(
           () => mocks.client.searchRoles(any()),
-        ).thenAnswer((_) async => SearchRolesResponse()..roles = []);
+        ).thenAnswer((_) async => const Result.success(SearchRolesResponse(duration: '0.01ms', roles: [])));
 
         await _pumpMentionOptions(
           tester,
@@ -313,7 +313,7 @@ void main() {
         final mocks = _setupMocks(ownCapabilities: const []);
         when(
           () => mocks.client.searchRoles(any()),
-        ).thenAnswer((_) async => SearchRolesResponse()..roles = []);
+        ).thenAnswer((_) async => const Result.success(SearchRolesResponse(duration: '0.01ms', roles: [])));
 
         await _pumpMentionOptions(
           tester,
@@ -333,7 +333,7 @@ void main() {
           ownCapabilities: const [ChannelCapability.notifyRole],
         );
         when(() => mocks.client.searchRoles('admin')).thenAnswer(
-          (_) async => SearchRolesResponse()..roles = [buildRole('admin')],
+          (_) async => Result.success(SearchRolesResponse(duration: '0.01ms', roles: [buildRole('admin')])),
         );
 
         await _pumpMentionOptions(
@@ -349,7 +349,7 @@ void main() {
     );
 
     testWidgets(
-      'searchRoles error is swallowed and does not blank the list',
+      'searchRoles failure is swallowed and does not blank the list',
       (tester) async {
         final mocks = _setupMocks(
           ownCapabilities: const [
@@ -357,9 +357,9 @@ void main() {
             ChannelCapability.notifyChannel,
           ],
         );
-        when(
-          () => mocks.client.searchRoles(any()),
-        ).thenThrow(StateError('test error'));
+        when(() => mocks.client.searchRoles(any())).thenAnswer(
+          (_) async => const Result.failure(StreamClientException(message: 'test error')),
+        );
 
         await _pumpMentionOptions(
           tester,
@@ -784,16 +784,20 @@ void main() {
         ],
       );
       when(() => mocks.client.searchRoles('h')).thenAnswer(
-        (_) async => SearchRolesResponse()
-          ..roles = [
-            Role(
-              name: 'host',
-              custom: false,
-              scopes: const [],
-              createdAt: DateTime.utc(2024),
-              updatedAt: DateTime.utc(2024),
-            ),
-          ],
+        (_) async => Result.success(
+          SearchRolesResponse(
+            duration: '0.01ms',
+            roles: [
+              Role(
+                name: 'host',
+                custom: false,
+                scopes: const [],
+                createdAt: DateTime.utc(2024),
+                updatedAt: DateTime.utc(2024),
+              ),
+            ],
+          ),
+        ),
       );
       when(
         () => mocks.client.searchUserGroups('h', teamId: any(named: 'teamId')),
@@ -867,16 +871,20 @@ void main() {
           ],
         );
         when(() => mocks.client.searchRoles('h')).thenAnswer(
-          (_) async => SearchRolesResponse()
-            ..roles = [
-              Role(
-                name: 'host',
-                custom: false,
-                scopes: const [],
-                createdAt: DateTime.utc(2024),
-                updatedAt: DateTime.utc(2024),
-              ),
-            ],
+          (_) async => Result.success(
+            SearchRolesResponse(
+              duration: '0.01ms',
+              roles: [
+                Role(
+                  name: 'host',
+                  custom: false,
+                  scopes: const [],
+                  createdAt: DateTime.utc(2024),
+                  updatedAt: DateTime.utc(2024),
+                ),
+              ],
+            ),
+          ),
         );
         when(
           () => mocks.client.searchUserGroups('h', teamId: any(named: 'teamId')),

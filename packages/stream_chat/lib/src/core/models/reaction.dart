@@ -1,15 +1,15 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_core/stream_core.dart' show Filter, FilterField, Sort, SortField;
 
 import '../util/serializer.dart';
-import 'comparable_field.dart';
 import 'user.dart';
 
 part 'reaction.g.dart';
 
 /// The class that defines a reaction
 @JsonSerializable()
-class Reaction extends Equatable implements ComparableFieldProvider {
+class Reaction extends Equatable {
   /// Constructor used for json serialization
   Reaction({
     this.messageId,
@@ -132,25 +132,94 @@ class Reaction extends Equatable implements ComparableFieldProvider {
     updatedAt,
     extraData,
   ];
-
-  @override
-  ComparableField? getComparableField(String sortKey) {
-    final value = switch (sortKey) {
-      ReactionSortKey.createdAt => createdAt,
-      _ => null,
-    };
-
-    return ComparableField.fromValue(value);
-  }
 }
 
-/// Extension type representing sortable fields for [Reaction].
+/// A filter for a reaction query.
 ///
-/// This type provides type-safe keys that can be used for sorting reactions
-/// in queries. Each constant represents a field that can be sorted on.
-extension type const ReactionSortKey(String key) implements String {
-  /// Sort reactions by their creation date.
+/// See [ReactionFilterField] for the fields that can be filtered on.
+///
+/// ```dart
+/// final filter = ReactionFilter.equal(ReactionFilterField.type, 'like');
+/// ```
+typedef ReactionFilter = Filter<Reaction>;
+
+/// Represents a field that reaction queries can be filtered on.
+class ReactionFilterField extends FilterField<Reaction> {
+  /// Creates a reaction filter field named [remote] on the wire, reading its
+  /// value off an instance with [value].
+  ReactionFilterField(super.remote, super.value);
+
+  /// Filters reactions by their type.
   ///
-  /// This is the default sort field (in ascending order).
-  static const createdAt = ReactionSortKey('created_at');
+  /// **Supported operators:** `$eq`, `$in`
+  static final type = ReactionFilterField(
+    'type',
+    (it) => it.type,
+  );
+
+  /// Filters reactions by the id of the user who sent them.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final userId = ReactionFilterField(
+    'user_id',
+    (it) => it.userId,
+  );
+
+  /// Filters reactions by their creation date.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`
+  static final createdAt = ReactionFilterField(
+    'created_at',
+    (it) => it.createdAt,
+  );
+}
+
+/// Represents a sorting operation for reactions.
+///
+/// See [ReactionSortField] for the fields that can be sorted on.
+///
+/// ```dart
+/// final sort = [ReactionSort.desc(ReactionSortField.createdAt)];
+/// ```
+class ReactionSort extends Sort<Reaction> {
+  /// Sorts by [field], smallest first.
+  const ReactionSort.asc(
+    ReactionSortField super.field, {
+    super.nullOrdering,
+  }) : super.asc();
+
+  /// Sorts by [field], largest first.
+  const ReactionSort.desc(
+    ReactionSortField super.field, {
+    super.nullOrdering,
+  }) : super.desc();
+
+  /// An empty sort: the query carries no sort term, and a list keeps the
+  /// order it arrived in.
+  static const List<ReactionSort> empty = [];
+
+  /// The ordering the API applies to a reaction query when none is given.
+  ///
+  /// Sorts by when the reaction was added, newest first.
+  static final List<ReactionSort> defaultSort = [
+    ReactionSort.desc(ReactionSortField.createdAt),
+  ];
+}
+
+/// Represents a field that reaction queries can be sorted on.
+class ReactionSortField extends SortField<Reaction> {
+  /// Creates a field named [remote] on the wire, reading its value off an
+  /// instance with `localValue`.
+  ///
+  /// For a name the SDK has not modelled; prefer the fields declared here.
+  ReactionSortField(super.remote, super.localValue);
+
+  /// Sorts reactions by their creation date.
+  ///
+  /// This is the default sort field (in descending order).
+  static final createdAt = ReactionSortField(
+    'created_at',
+    (it) => it.createdAt,
+  );
 }

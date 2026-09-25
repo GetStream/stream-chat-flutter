@@ -26,16 +26,16 @@ class PushTokenManager {
   Future<void> _onTokenRefresh(String token, PushProvider provider) async {
     debugPrint('[push] token received (provider=${provider.name})');
 
-    try {
-      await client.addDevice(
-        token,
-        provider.type,
-        pushProviderName: provider.name,
-      );
-      debugPrint('[push] addDevice OK (type=${provider.type.name}, name=${provider.name})');
-    } catch (e, stk) {
-      debugPrint('[push] addDevice failed: $e; $stk');
-    }
+    final result = await client.addDevice(
+      token,
+      provider.type,
+      pushProviderName: provider.name,
+    );
+
+    result.fold(
+      onSuccess: (_) => debugPrint('[push] addDevice OK (type=${provider.type}, name=${provider.name})'),
+      onFailure: (e, stk) => debugPrint('[push] addDevice failed: $e; $stk'),
+    );
   }
 
   PushProvider? get _currentPushProvider {
@@ -71,12 +71,12 @@ class PushTokenManager {
       return;
     }
 
-    try {
-      await client.removeDevice(token);
-      debugPrint('[push] removeDevice OK');
-    } catch (e, stk) {
-      debugPrint('[push] removeDevice failed: $e; $stk');
-    }
+    final result = await client.removeDevice(token);
+
+    result.fold(
+      onSuccess: (_) => debugPrint('[push] removeDevice OK'),
+      onFailure: (e, stk) => debugPrint('[push] removeDevice failed: $e; $stk'),
+    );
   }
 
   /// Cancels the token-refresh subscription. Idempotent.

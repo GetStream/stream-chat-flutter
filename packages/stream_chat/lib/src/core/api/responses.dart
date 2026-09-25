@@ -1,13 +1,11 @@
 import 'package:json_annotation/json_annotation.dart';
 import '../../client/client.dart';
-import '../error/error.dart';
+import '../../ws/events/event.dart';
 import '../models/app_settings.dart';
 import '../models/banned_user.dart';
 import '../models/channel_model.dart';
 import '../models/channel_state.dart';
-import '../models/device.dart';
 import '../models/draft.dart';
-import '../models/event.dart';
 import '../models/location.dart';
 import '../models/member.dart';
 import '../models/message.dart';
@@ -19,7 +17,6 @@ import '../models/predefined_filter.dart';
 import '../models/push_preference.dart';
 import '../models/reaction.dart';
 import '../models/read.dart';
-import '../models/role.dart';
 import '../models/thread.dart';
 import '../models/unread_counts.dart';
 import '../models/user.dart';
@@ -32,7 +29,7 @@ class _BaseResponse {
   String? duration;
 }
 
-/// Model response for [StreamChatNetworkError] data
+/// The error payload the API returns on a failed request.
 @JsonSerializable()
 class ErrorResponse extends _BaseResponse {
   /// The http error code
@@ -167,17 +164,6 @@ class QueryRepliesResponse extends _BaseResponse {
 
   /// Create a new instance from a json
   static QueryRepliesResponse fromJson(Map<String, dynamic> json) => _$QueryRepliesResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.getDevices] api call
-@JsonSerializable(createToJson: false)
-class ListDevicesResponse extends _BaseResponse {
-  /// List of user devices
-  @JsonKey(defaultValue: [])
-  late List<Device> devices;
-
-  /// Create a new instance from a json
-  static ListDevicesResponse fromJson(Map<String, dynamic> json) => _$ListDevicesResponseFromJson(json);
 }
 
 /// Base Model response for [Channel.sendImage] and [Channel.sendFile] api call.
@@ -880,17 +866,6 @@ class RemoveUserGroupMembersResponse extends _BaseResponse {
   /// Create a new instance from a json
   static RemoveUserGroupMembersResponse fromJson(Map<String, dynamic> json) =>
       _$RemoveUserGroupMembersResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.searchRoles] api call
-@JsonSerializable(createToJson: false)
-class SearchRolesResponse extends _BaseResponse {
-  /// List of roles returned by the api call
-  @JsonKey(defaultValue: [])
-  late List<Role> roles;
-
-  /// Create a new instance from a json
-  static SearchRolesResponse fromJson(Map<String, dynamic> json) => _$SearchRolesResponseFromJson(json);
 }
 
 /// Model response for [StreamChatClient.getAppSettings] api call.

@@ -1,42 +1,40 @@
 import 'dart:async';
 
 import 'package:mocktail/mocktail.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/core/api/channel_api.dart';
-import 'package:stream_chat/src/core/api/device_api.dart';
 import 'package:stream_chat/src/core/api/general_api.dart';
 import 'package:stream_chat/src/core/api/guest_api.dart';
 import 'package:stream_chat/src/core/api/message_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
 import 'package:stream_chat/src/core/api/polls_api.dart';
-import 'package:stream_chat/src/core/api/roles_api.dart';
+import 'package:stream_chat/src/core/api/push_preferences_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/src/core/api/user_groups_api.dart';
-import 'package:stream_chat/src/core/http/token.dart';
-import 'package:stream_chat/src/core/http/token_manager.dart';
-import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import 'mocks.dart';
+import 'utils.dart';
 
 class FakeTokenManager extends Fake implements TokenManager {
-  final token = Token.development('test-user-id');
+  final token = testUserToken('test-user-id');
 
   @override
-  bool get isStatic => true;
+  bool get usesStaticProvider => true;
 
   @override
   String? get userId => token.userId;
 
   @override
-  Future<Token> loadToken({bool refresh = false}) async => token;
+  UserToken? peekToken() => token;
 
   @override
-  Future<Token> setTokenOrProvider(
-    String userId, {
-    Token? token,
-    TokenProvider? provider,
-  }) async => this.token;
+  Future<UserToken> getToken() async => token;
+
+  @override
+  void setTokenProvider(String userId, {required TokenProvider tokenProvider}) {}
+
+  @override
+  void expireToken() {}
 
   @override
   void reset() {}
@@ -60,6 +58,9 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
   int connectCallCount = 0;
   int disconnectCallCount = 0;
   int flushCallCount = 0;
+
+  /// The health check last persisted, and `null` until one is.
+  Event? connectionInfo;
 
   @override
   bool get isConnected => _isConnected;
@@ -104,11 +105,11 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
   @override
   Future<void> saveChannelQueries({
     required List<String> cids,
-    Filter? filter,
-    SortOrder<ChannelState>? sort,
+    ChannelFilter? filter,
+    List<ChannelSort>? sort,
     String? predefinedFilter,
-    Filter? resolvedFilter,
-    SortOrder<ChannelState>? resolvedSort,
+    ChannelFilter? resolvedFilter,
+    List<ChannelSort>? resolvedSort,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
     bool clearQueryCache = false,
@@ -116,6 +117,11 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
 
   @override
   Future<void> updateChannelStates(List<ChannelState> channelStates) async {}
+
+  @override
+  Future<void> updateConnectionInfo(Event event) async {
+    connectionInfo = event;
+  }
 }
 
 class FakeChatApi extends Fake implements StreamChatApi {
@@ -144,10 +150,10 @@ class FakeChatApi extends Fake implements StreamChatApi {
   @override
   ChannelApi get channel => _channel ??= MockChannelApi();
 
-  DeviceApi? _device;
+  PushPreferencesApi? _pushPreferences;
 
   @override
-  DeviceApi get device => _device ??= MockDeviceApi();
+  PushPreferencesApi get pushPreferences => _pushPreferences ??= MockPushPreferencesApi();
 
   ModerationApi? _moderation;
 
@@ -158,11 +164,6 @@ class FakeChatApi extends Fake implements StreamChatApi {
 
   @override
   UserGroupsApi get userGroups => _userGroups ??= MockUserGroupsApi();
-
-  RolesApi? _roles;
-
-  @override
-  RolesApi get roles => _roles ??= MockRolesApi();
 
   GeneralApi? _general;
 
@@ -234,93 +235,6 @@ class FakeEvent extends Fake implements Event {}
 class FakeUser extends Fake implements User {}
 
 class FakePollVote extends Fake implements PollVote {}
-
-class FakeWebSocket extends Fake implements WebSocket {
-  late final _connectionStatusController = BehaviorSubject.seeded(
-    ConnectionStatus.disconnected,
-  );
-
-  set connectionStatus(ConnectionStatus value) {
-    _connectionStatusController.add(value);
-  }
-
-  @override
-  ConnectionStatus get connectionStatus => _connectionStatusController.value;
-
-  @override
-  Stream<ConnectionStatus> get connectionStatusStream => _connectionStatusController.stream;
-
-  @override
-  Completer<Event>? connectionCompleter;
-
-  @override
-  Future<Event> connect(
-    User user, {
-    bool? includeUserDetails = true,
-  }) async {
-    connectionStatus = ConnectionStatus.connecting;
-    final event = Event(
-      type: EventType.healthCheck,
-      connectionId: 'fake-connection-id',
-      me: OwnUser.fromUser(user),
-    );
-    connectionCompleter = Completer()..complete(event);
-    connectionStatus = ConnectionStatus.connected;
-    return connectionCompleter!.future;
-  }
-
-  @override
-  void disconnect() {
-    connectionStatus = ConnectionStatus.disconnected;
-    connectionCompleter = null;
-  }
-
-  @override
-  Future<void> dispose() async {
-    await _connectionStatusController.close();
-  }
-}
-
-class FakeWebSocketWithConnectionError extends Fake implements WebSocket {
-  late final _connectionStatusController = BehaviorSubject.seeded(
-    ConnectionStatus.disconnected,
-  );
-
-  set connectionStatus(ConnectionStatus value) {
-    _connectionStatusController.add(value);
-  }
-
-  @override
-  ConnectionStatus get connectionStatus => _connectionStatusController.value;
-
-  @override
-  Stream<ConnectionStatus> get connectionStatusStream => _connectionStatusController.stream;
-
-  @override
-  Completer<Event>? connectionCompleter;
-
-  @override
-  Future<Event> connect(
-    User user, {
-    bool? includeUserDetails = true,
-  }) async {
-    connectionStatus = ConnectionStatus.connecting;
-    const error = StreamWebSocketError('Error Connecting');
-    connectionCompleter = Completer()..completeError(error);
-    return connectionCompleter!.future;
-  }
-
-  @override
-  void disconnect() {
-    connectionStatus = ConnectionStatus.disconnected;
-    connectionCompleter = null;
-  }
-
-  @override
-  Future<void> dispose() async {
-    await _connectionStatusController.close();
-  }
-}
 
 class FakeChannelState extends Fake implements ChannelState {}
 

@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart' hide Key;
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:stream_chat/stream_chat.dart' show StreamChatError;
+import 'package:stream_chat/stream_chat.dart' show StreamChatException;
 
 part 'paged_value_notifier.freezed.dart';
 
@@ -133,7 +133,7 @@ sealed class PagedValue<Key, Value> with _$PagedValue<Key, Value> {
     Key? nextPageKey,
 
     /// The current error, if any.
-    StreamChatError? error,
+    StreamChatException? error,
   }) = Success<Key, Value>;
 
   const PagedValue._();
@@ -142,7 +142,7 @@ sealed class PagedValue<Key, Value> with _$PagedValue<Key, Value> {
   const factory PagedValue.loading() = Loading;
 
   /// Represents the error state of the [PagedValue].
-  const factory PagedValue.error(StreamChatError error) = Error;
+  const factory PagedValue.error(StreamChatException error) = Error;
 
   /// Returns `true` if the [PagedValue] is [Success].
   bool get isSuccess => this is Success<Key, Value>;
@@ -184,11 +184,11 @@ extension PagedValuePatternMatching<Key, Value> on PagedValue<Key, Value> {
     TResult Function(
       List<Value> items,
       Key? nextPageKey,
-      StreamChatError? error,
+      StreamChatException? error,
     )
     success, {
     required TResult Function() loading,
-    required TResult Function(StreamChatError error) error,
+    required TResult Function(StreamChatException error) error,
   }) {
     final pagedValue = this;
     return switch (pagedValue) {
@@ -208,11 +208,11 @@ extension PagedValuePatternMatching<Key, Value> on PagedValue<Key, Value> {
     TResult Function(
       List<Value> items,
       Key? nextPageKey,
-      StreamChatError? error,
+      StreamChatException? error,
     )?
     success, {
     TResult? Function()? loading,
-    TResult? Function(StreamChatError error)? error,
+    TResult? Function(StreamChatException error)? error,
   }) {
     final pagedValue = this;
     return switch (pagedValue) {
@@ -232,11 +232,11 @@ extension PagedValuePatternMatching<Key, Value> on PagedValue<Key, Value> {
     TResult Function(
       List<Value> items,
       Key? nextPageKey,
-      StreamChatError? error,
+      StreamChatException? error,
     )?
     success, {
     TResult Function()? loading,
-    TResult Function(StreamChatError error)? error,
+    TResult Function(StreamChatException error)? error,
     required TResult orElse(),
   }) {
     final pagedValue = this;

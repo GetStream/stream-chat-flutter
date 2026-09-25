@@ -1,13 +1,11 @@
 import 'package:collection/collection.dart';
+import 'package:stream_core/stream_core.dart' show CurrentPlatform;
 import '../core/api/requests.dart';
 import '../core/api/responses.dart';
-import '../core/api/sort_order.dart';
 import '../core/models/attachment_file.dart';
 import '../core/models/channel_model.dart';
 import '../core/models/channel_state.dart';
 import '../core/models/draft.dart';
-import '../core/models/event.dart';
-import '../core/models/filter.dart';
 import '../core/models/location.dart';
 import '../core/models/member.dart';
 import '../core/models/message.dart';
@@ -16,8 +14,8 @@ import '../core/models/poll_vote.dart';
 import '../core/models/reaction.dart';
 import '../core/models/read.dart';
 import '../core/models/user.dart';
-import '../core/platform_detector/platform_detector.dart';
 import '../core/util/extension.dart';
+import '../ws/events/event.dart';
 
 /// A simple client used for persisting chat data locally.
 abstract class ChatPersistenceClient {
@@ -132,8 +130,8 @@ abstract class ChatPersistenceClient {
   /// [paginationParams] to paginate results.
   @Deprecated('Use queryChannelStates instead')
   Future<List<ChannelState>> getChannelStates({
-    Filter? filter,
-    SortOrder<ChannelState>? channelStateSort,
+    ChannelFilter? filter,
+    List<ChannelSort>? channelStateSort,
     int? messageLimit,
     PaginationParams? paginationParams,
   });
@@ -144,7 +142,7 @@ abstract class ChatPersistenceClient {
   /// the list of matching rows will be deleted
   @Deprecated('Use saveChannelQueries instead')
   Future<void> updateChannelQueries(
-    Filter? filter,
+    ChannelFilter? filter,
     List<String> cids, {
     bool clearQueryCache = false,
   });
@@ -172,8 +170,8 @@ abstract class ChatPersistenceClient {
   ///
   /// For standard mode, [QueryChannelsResponse.predefinedFilter] is null.
   Future<QueryChannelsResponse> queryChannelStates({
-    Filter? filter,
-    SortOrder<ChannelState>? sort,
+    ChannelFilter? filter,
+    List<ChannelSort>? sort,
     String? predefinedFilter,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
@@ -215,11 +213,11 @@ abstract class ChatPersistenceClient {
   ///   order. [filter] / [sort] are ignored in this mode.
   Future<void> saveChannelQueries({
     required List<String> cids,
-    Filter? filter,
-    SortOrder<ChannelState>? sort,
+    ChannelFilter? filter,
+    List<ChannelSort>? sort,
     String? predefinedFilter,
-    Filter? resolvedFilter,
-    SortOrder<ChannelState>? resolvedSort,
+    ChannelFilter? resolvedFilter,
+    List<ChannelSort>? resolvedSort,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
     bool clearQueryCache = false,

@@ -129,8 +129,8 @@ class ModerationApi {
 
   /// Queries banned users.
   Future<QueryBannedUsersResponse> queryBannedUsers({
-    Filter? filter,
-    SortOrder<BannedUser>? sort,
+    BannedUserFilter? filter,
+    List<BannedUserSort>? sort,
     PaginationParams? pagination,
   }) async {
     final response = await _client.get(
@@ -138,7 +138,8 @@ class ModerationApi {
       queryParameters: {
         'payload': jsonEncode({
           if (sort != null) 'sort': sort,
-          if (filter != null) 'filter_conditions': filter,
+          // Required by the endpoint, the same way `queryUsers` requires it.
+          'filter_conditions': filter ?? const <String, Object?>{},
           if (pagination != null) ...pagination.toJson(),
         }),
       },

@@ -7,7 +7,6 @@ import 'package:rxdart/rxdart.dart';
 import '../../../stream_chat.dart';
 import '../../core/util/message_merging.dart';
 import '../../core/util/message_predicates.dart';
-import '../../core/util/utils.dart';
 import '../live_location_expiration_scheduler.dart';
 import '../retry_queue.dart';
 import 'channel_event_handler.dart';
@@ -20,12 +19,9 @@ class ChannelClientState {
     this._channel,
     ChannelState channelState,
   ) {
-    _retryQueue = RetryQueue(
-      channel: _channel,
-      logger: _client.detachedLogger(
-        '🔄 (${generateHash([_channel.cid])})',
-      ),
-    );
+    // Tagged with the channel, so a record says which queue reported it while
+    // staying under the `SCh:RetryQueue` prefix for filtering.
+    _retryQueue = RetryQueue(channel: _channel, tag: 'SCh:RetryQueue:${_channel.cid}');
 
     _channelStateController = BehaviorSubject.seeded(channelState);
     // Update the persistence storage with the seeded channel state.
@@ -189,7 +185,7 @@ class ChannelClientState {
 
     updateChannelState(
       channelState.copyWith(
-        read: updatedReads.toList(),
+        read: updatedReads,
       ),
     );
   }
@@ -549,7 +545,7 @@ class ChannelClientState {
 
   /// Update channelState with updated information.
   void updateChannelState(ChannelState updatedState) {
-    final newMessages = messages.mergeSorted(
+    final newMessages = messages.sortedMerge(
       updatedState.messages,
       key: (message) => message.id,
       update: MessageMerging.mergeUpdate,
@@ -571,11 +567,11 @@ class ChannelClientState {
     _channelState = _channelState.copyWith(
       messages: newMessages,
       channel: _channelState.channel?.merge(updatedState.channel),
-      watchers: newWatchers.toList(),
+      watchers: newWatchers,
       watcherCount: updatedState.watcherCount,
       members: updatedState.members,
       membership: updatedState.membership,
-      read: newReads.toList(),
+      read: newReads,
       draft: updatedState.draft,
       pinnedMessages: updatedState.pinnedMessages,
       pendingMessages: updatedState.pendingMessages,

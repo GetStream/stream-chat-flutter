@@ -1,3 +1,92 @@
+## Upcoming Beta
+
+🛑️ Breaking
+
+- Logging is rebuilt. `logLevel` and `logHandlerFunction` become one `logConfig`, `client.logger` is a `StreamLogger`, and `detachedLogger`, `defaultLogHandler` and `LogHandlerFunction` are removed along with the `package:logging` re-export. The default is unchanged: warnings and errors to the console. Supply a `StreamLogHandler` to route records into your own facility.
+- `LoggingInterceptor`, `InterceptStep` and `LogPrint` are no longer exported. The interceptor is installed by default and writes through the configured `StreamLogHandler`, so routing its output is a `logConfig` concern now.
+- The token layer is retyped. `Token` becomes `UserToken`, and `TokenProvider` becomes an interface rather than a `Future<String> Function(String)` typedef — pass `TokenProvider.dynamic(myLoader)` where you passed a closure, and note a loader now returns a `UserToken`. `TokenManager.loadToken` becomes `getToken`, `isStatic` becomes `usesStaticProvider`, and `setTokenOrProvider` becomes `setTokenProvider`.
+- Anonymous connections now identify as `!anon` rather than a client-generated random id, matching every other Stream SDK. The backend pins that id so a client cannot claim to be another user.
+- `StreamChatClient.devToken` is removed. It minted a `devtoken`-signed JWT, which only an app with development tokens enabled accepts; generate tokens on your backend, or build one in your own test helper.
+- A failed request now throws one of four sealed `StreamException` kinds — `StreamApiException`, `StreamNetworkException`, `StreamAuthenticationException` or `StreamClientException` — instead of a `StreamChatNetworkError`. `StreamChatException` aliases the root, so `on StreamChatException catch` handles them all. See the [v11 migration guide](https://github.com/GetStream/stream-chat-flutter/blob/master/migrations/v11-migration.md#error-handling).
+- `StreamChatError`, `StreamChatNetworkError`, `StreamChatNetworkErrorType` and `StreamWebSocketError` are removed rather than deprecated, so a clause catching one fails to compile instead of silently matching nothing. `isRetriable` is now an extension on `StreamChatException`.
+- Misusing the client raises a `StateError` rather than a `StreamChatException`: connecting twice, opening a connection that is already open, `queryChannels` without one, using a persistence client that is not set or belongs to another user, and cancelling an attachment upload that never started or already finished. These say fix the call, not handle the failure, so they are outside the exception hierarchy.
+- A send superseded by a later one, and a pending upload dropped because its message was deleted, now report a `StreamNetworkException` with `isCancelled` set, matching how a cancelled attachment upload has always been reported. They were `StreamClientException`, which tells a caller to report them to a crash tracker.
+- `ChatErrorCode` is removed in favour of `StreamErrorCode`. One value was wrong: `requestTimeout` was `23`, which the API never returns; the real code is `48`.
+- `RetryPolicy.shouldRetry` receives a `StreamChatException?` instead of a `StreamChatError?`.
+- `UploadState`'s variant classes are renamed to `UploadStatePreparing`, `UploadStateInProgress`, `UploadStateSuccess` and `UploadStateFailed`, freeing the names `Success` and `Failed`.
+- `Result` from `package:async` is no longer re-exported. The `Result` this package exports is a different type, with `Success` and `Failure` variants.
+- Sorting is restructured. `SortOption<ChannelState>.desc(ChannelSortKey.lastUpdated)` becomes `ChannelSort.desc(ChannelSortField.lastUpdated)` — one `Sort` subclass and one field registry per model, with the same member names as the old `*SortKey`.
+- `SortOrder<T>` is removed. Signatures take `List<ChannelSort>`, `List<MemberSort>` and so on.
+- `NullOrdering`, `SortDirection` and the `compare` extension keep their names and are still exported from this package.
+- `ComparableField`, `ComparableFieldProvider` and `SortOption.fromJson` are removed. A stored sort is read back with `ChannelSort.fromJson`.
+- `SortOption`'s `comparator` argument is removed. Declare a field whose value projects onto something orderable, or sort the list yourself.
+- `PollVoteSortField.answerText` is removed: the API rejects a sort on `answer_text`.
+- `ChannelSortField.cid` is added, matching the iOS and Android SDKs.
+- `search(sort:)` on the client and channel, and `StreamMessageSearchListController.sort`, are typed `List<MessageSearchSort>` rather than an untyped `SortOrder`. Searching is the only message query the API sorts, so the type is named for it.
+- Filtering is restructured. `Filter.equal('type', 'messaging')` becomes `ChannelFilter.equal(ChannelFilterField.type, 'messaging')` — one `Filter` alias and one field registry per query, matching the sort change. A field the SDK does not model is reached with `ChannelFilterField.custom('my_field')`.
+- `Filter` is sealed and no longer exposes `key`, `value` or `operator`. Read it with `toJson`.
+- `Filter` compares by identity rather than by value. Compare `toJson()` where you compared filters.
+- `FilterOperator` is an extension type over `String` rather than an enum, so `'$eq'` and `FilterOperator.equal` interchange.
+- `Filter.empty()` is removed. Every `filter` argument is nullable; pass `null` to match everything. This matters on `queryThreads`, where the API widens the query for an omitted filter but not for an empty one.
+- `Filter.notEqual`, `Filter.notIn` and `Filter.nor` are removed. `$ne`, `$nin` and `$nor` are deprecated server-side and are being withdrawn. A query that excluded someone — a directory hiding the signed-in user, a member picker hiding existing members — has to do that in the client now, or show them. The sample app shows them.
+- `Filter.notExists(key)` becomes `Filter.exists(field, exists: false)`.
+- `Filter.custom({value, operator, key})` is removed. Use a registry's `custom` factory for an unmodelled field, or `Filter.raw` for a query this package cannot express.
+- `Filter.raw` takes its map positionally: `Filter.raw({...})` rather than `Filter.raw(value: {...})`. It is not validated, and `matches` throws for it.
+- Every query takes its own filter type — `queryChannels` a `ChannelFilter?`, `queryUsers` a `UserFilter?`, and so on — and `PredefinedFilter.filter` is a `ChannelFilter`.
+- `ChannelFilterField.members` and `.memberUserName` are declared, so the standard "channels I am in" query stays typed.
+- `LocationCoordinates` is renamed `LocationCoordinate` — singular. Its `copyWith` is removed, and it gains `distanceTo`, which answers the distance between two points.
+- `CurrentPlatform` and `PlatformType` keep their names; `CurrentPlatform.name` becomes `CurrentPlatform.operatingSystem`, reporting the same string.
+- The list extensions are consolidated into one `SortedListExtensions`. `SortedListX`, `IterableMergeX` and `ListX` are removed: `mergeSorted` becomes `sortedMerge` (and now collapses a repeated key instead of carrying it through, matching `merge`), `updateIf` becomes `updateWhere` (its `update` argument is now named), and `mergeFrom` is dropped in favour of `merge` over a projected list.
+- `DraftSortField` has no `custom` field: the API rejects a custom sort field on drafts.
+- A sort names its model's field type, so `MemberSort.asc` takes a `MemberSortField` and a field from another model does not compile. `XSortField.custom(key)` reads a field from the model's extra data, for the four models whose queries accept one.
+- Added `ChannelSort.empty`, `MemberSort.empty` and one on every other sort — an empty sort, for querying with the ordering the API applies on its own.
+- Default sorts moved onto the sort that owns them: `ChannelSort.defaultSort`, `MemberSort.defaultSort` and so on, reachable now without the Flutter layer.
+- `client.wsConnectionStatus` and `wsConnectionStatusStream` become `connectionStatus` and `connectionStatusStream`. `ConnectionStatus` keeps its three values, and a client that has never connected still reads as `disconnected`.
+- The WebSocket's state — `Connected`, `Connecting`, `Authenticating`, `Disconnected` and the disconnection sources — is no longer exported, and the client no longer reports it. `ConnectionStatus` is the whole connection API, as on the other Stream SDKs.
+- `StreamHttpClient` and `StreamChatApi` take a `ConnectionIdGetter? connectionId` where they took a `ConnectionIdManager?`. The manager only wrapped such a closure, and is removed.
+- `StreamChatClient.searchRoles` returns a `Result<SearchRolesResponse>` instead of throwing.
+- `StreamChatClient.getDevices` returns a `Result<ListDevicesResponse>` instead of throwing.
+- `StreamChatClient.addDevice` and `removeDevice` return a `Result<void>` instead of throwing, and carry no value on success.
+- `Device`, `Role`, `ListDevicesResponse` and `SearchRolesResponse` no longer decode from or encode to JSON.
+- `PushProvider` is an extension type over its wire string instead of an enum, and `Device.pushProvider` is typed `PushProvider` instead of `String`.
+- `ListDevicesResponse` and `SearchRolesResponse` are immutable, built through a const constructor, and their `duration` is a non-nullable `String`.
+- `Device`, `ListDevicesResponse` and `SearchRolesResponse` compare by value and gain `copyWith`.
+- `Role` no longer extends `Equatable`, so `props` is removed; it still compares by value and gains `copyWith`.
+- `StreamChatApi.device` is renamed `StreamChatApi.pushPreferences` and handles only `setPushPreferences`.
+
+🐞 Fixed
+
+- `queryChannels` no longer gives up watching the channels it loads when it is called before the connection is open. Whether they can be watched is read when the request is sent, which is after the query has waited for the connection.
+
+- A message that fails because its attachments did not upload now says which ones and what each reported, instead of `Failed to upload one or more attachments`.
+
+🔄 Changed
+
+- Failed messages now retry on server errors. The retry policy is now explicit: retry a request that never reached the server, a 5xx, a 429 and a 408; never another 4xx, a cancelled request, broken credentials, or anything the server marked unrecoverable. Previously only failures without a parseable error body retried, so a 500 or a 429 did not.
+- `SystemEnvironment` is a different type with the same constructor and fields, so existing usage keeps working.
+- Most SDK logging moved off `info`. It now carries only client and connection lifecycle — client created and disposed, user set and disconnected, connection opening, established and closing — and per-operation, per-event and per-timer records are `debug` or `verbose`. Raising the priority to `info` to debug a problem no longer buries it under a health check every 20 seconds and a line per WebSocket frame.
+
+✅ Added
+
+- Log records from the HTTP and token layers now reach the configured handler.
+- Added `MessageSearchSortField.relevance`, which sorts a message search by match quality.
+- Added `MessageReminderSortField.messageId`, the field the API breaks reminder ties on.
+- Added `ReactionSort.defaultSort` and `PollSort.defaultSort`, each the ordering the API already applies to that query.
+- Added the message sort fields the JS client already exposed: `text`, `type`, `parentId`, `replyCount` and `pinned`.
+- Added `MemberSortField.updatedAt`.
+- Added `UserSortField.language` and `UserSortField.teams`.
+
+🔒 Security
+
+- The WebSocket connect and reconnect URIs are logged with the user token redacted. They carried it in full, so an app that raised the log priority wrote a usable token to the console and to any handler it had installed. The token now travels in query parameters the socket never logs, so nothing has to redact it.
+
+🔄 Internal / Non-breaking
+
+- Added the OpenAPI-generated v2 client under `lib/open_api/`, along with the `melos run gen:openapi` tooling that produces it. No API uses it yet.
+- The WebSocket is now `stream_core`'s `StreamWebSocketClient`. `Event` extends `WsEvent`, the two frames the socket acts on rather than publishes — the health check and the connection error — are their own types under `lib/src/ws/events/`, and `EventType.connectionError` is added. The hand-rolled socket, its reconnection monitor and its timer helper are removed, along with the `web_socket_channel` dependency.
+- The connect URL no longer repeats the user token inside its `json` payload. The server reads the token from the `authorization` query parameter and never looked at `user_token`.
+- Replaced the internal `InFlightCache` and `SystemEnvironmentManager` with shared implementations.
+
 ## Upcoming
 
 ✅ Added

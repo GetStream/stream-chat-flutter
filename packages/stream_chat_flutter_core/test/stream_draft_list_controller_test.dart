@@ -125,10 +125,11 @@ void main() {
       await pumpEventQueue();
 
       expect(controller.value, isA<Error>());
-      expect(
-        (controller.value as Error).error.message,
-        contains('API unavailable'),
-      );
+
+      final error = (controller.value as Error).error;
+      // The message names the load; the throwable survives as `cause`.
+      expect(error.message, 'Failed to load drafts');
+      expect(error.cause, same(exception));
     });
   });
 
@@ -213,11 +214,10 @@ void main() {
 
       expect(controller.value.isSuccess, isTrue);
       expect(controller.value.asSuccess.items, equals(existingDrafts));
-      expect(controller.value.asSuccess.error, isNotNull);
-      expect(
-        controller.value.asSuccess.error!.message,
-        contains('Network error'),
-      );
+      final error = controller.value.asSuccess.error;
+      // The message names the load; the throwable survives as `cause`.
+      expect(error?.message, 'Failed to load more drafts');
+      expect(error?.cause, same(exception));
     });
   });
 
@@ -607,10 +607,83 @@ void main() {
   });
 
   group('Filtering and sorting', () {
+    test('an unset sort queries with the default sort', () async {
+      final sorts = <Object?>[];
+
+      when(
+        () => client.queryDrafts(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer((invocation) async {
+        sorts.add(invocation.namedArguments[const Symbol('sort')]);
+        return QueryDraftsResponse()
+          ..drafts = generateDrafts()
+          ..next = '';
+      });
+
+      final controller = StreamDraftListController(client: client);
+
+      await controller.doInitialLoad();
+      await pumpEventQueue();
+
+      expect(sorts.single, equals(DraftSort.defaultSort));
+    });
+
+    test('an empty sort queries without a sort term', () async {
+      final sorts = <Object?>[];
+
+      when(
+        () => client.queryDrafts(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer((invocation) async {
+        sorts.add(invocation.namedArguments[const Symbol('sort')]);
+        return QueryDraftsResponse()
+          ..drafts = generateDrafts()
+          ..next = '';
+      });
+
+      final controller = StreamDraftListController(client: client, sort: DraftSort.empty);
+
+      await controller.doInitialLoad();
+      await pumpEventQueue();
+
+      expect(sorts.single, isEmpty);
+    });
+
+    test('an empty sort leaves a page in the order it arrived in', () async {
+      // The default sort is newest-first, so an oldest-first page comes back
+      // reordered unless the empty sort is left alone.
+      final oldestFirst = generateDrafts(count: 50).reversed.toList();
+
+      when(
+        () => client.queryDrafts(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer(
+        (_) async => QueryDraftsResponse()
+          ..drafts = oldestFirst
+          ..next = '',
+      );
+
+      final controller = StreamDraftListController(client: client, sort: DraftSort.empty);
+
+      await controller.doInitialLoad();
+      await pumpEventQueue();
+
+      expect(controller.value.asSuccess.items, equals(oldestFirst));
+    });
+
     test('refresh resets filter and sort to initial values', () async {
       final drafts = generateDrafts();
-      final initialFilter = Filter.equal('type', 'messaging');
-      const initialSort = [SortOption<Draft>.desc(DraftSortKey.createdAt)];
+      final initialFilter = DraftFilter.equal(DraftFilterField.channelCid, 'messaging');
+      final initialSort = [DraftSort.desc(DraftSortField.createdAt)];
 
       final apiCalls = <Map<String, dynamic>>[];
 
@@ -640,8 +713,8 @@ void main() {
       await pumpEventQueue();
 
       controller
-        ..filter = Filter.equal('type', 'team')
-        ..sort = const [SortOption<Draft>.asc(DraftSortKey.createdAt)];
+        ..filter = DraftFilter.equal(DraftFilterField.channelCid, 'team')
+        ..sort = [DraftSort.asc(DraftSortField.createdAt)];
 
       await controller.refresh();
       await pumpEventQueue();
@@ -657,10 +730,10 @@ void main() {
       'refresh with resetValue=false preserves current filter and sort',
       () async {
         final drafts = generateDrafts();
-        final initialFilter = Filter.equal('type', 'messaging');
-        const initialSort = [SortOption<Draft>.desc(DraftSortKey.createdAt)];
-        final newFilter = Filter.equal('type', 'team');
-        const newSort = [SortOption<Draft>.asc(DraftSortKey.createdAt)];
+        final initialFilter = DraftFilter.equal(DraftFilterField.channelCid, 'messaging');
+        final initialSort = [DraftSort.desc(DraftSortField.createdAt)];
+        final newFilter = DraftFilter.equal(DraftFilterField.channelCid, 'team');
+        final newSort = [DraftSort.asc(DraftSortField.createdAt)];
 
         final apiCalls = <Map<String, dynamic>>[];
 

@@ -395,8 +395,12 @@ than the CI expects.
 We use dartdoc for public API documentation. All public members in SDK packages must
 have documentation (`public_member_api_docs` lint is enabled).
 
-In general, follow the [Effective Dart documentation guide](https://dart.dev/effective-dart/documentation)
-except where this page contradicts it.
+In general, follow the Effective Dart documentation guide — vendored in this repo as
+[`EFFECTIVE_DART_DOC.md`](EFFECTIVE_DART_DOC.md) so it is readable offline
+(canonical version at [dart.dev](https://dart.dev/effective-dart/documentation)) — except where
+this page contradicts it. Read it before writing or reviewing dartdoc: the rules most often
+missed are single-sentence first paragraphs, "Whether…" for booleans, noun phrases for
+properties, square brackets for in-scope identifiers, and throws documented in prose.
 
 ### Answer your own questions straight away
 
@@ -704,6 +708,40 @@ final label = switch (state) {
   SendingState.failed => 'Failed',
 };
 ```
+
+### Prefer extension types over enums for server-defined values
+
+A set of values the server defines — a push provider, a message type, a channel
+capability — grows over time. Model it as an extension type over its wire string, with
+a `static const` for each value the SDK knows, rather than as an enum:
+
+```dart
+// GOOD:
+extension type const PushProvider(String rawType) implements String {
+  /// Google's Firebase Cloud Messaging.
+  static const firebase = PushProvider('firebase');
+
+  /// Apple's Push Notification service.
+  static const apn = PushProvider('apn');
+}
+
+// BAD:
+enum PushProvider { firebase, apn }
+```
+
+- **Adding a value is not a breaking change.** Callers can't switch over the type
+  exhaustively, so a new constant breaks no one's `switch`.
+- **A value the SDK doesn't name yet still decodes.** `PushProvider('onesignal')` carries
+  it through, instead of failing or collapsing into an `unknown` case.
+- **It interoperates with `String`.** It compares equal to its wire value and passes
+  wherever a `String` is expected, so no conversion is needed at the wire boundary.
+
+The cost is exhaustiveness: there is no `.values` or `.name`, and a `switch` over one
+needs a default. Keep an enum for a closed set the SDK owns, where exhaustiveness is
+the point — `ConnectionStatus`, `QueryDirection`, `SortDirection`.
+
+Existing examples: `MessageType`, `AttachmentType`, `ChannelCapability`, `RoleType`,
+`PushProvider`.
 
 ### Prefer explicit types and avoid `dynamic`
 

@@ -675,7 +675,7 @@ extension AttachmentPlaylistExtension on Iterable<Attachment> {
     return [
       ...map((it) {
         final uri = switch (it.uploadState) {
-          Preparing() || InProgress() || Failed() => () {
+          UploadStatePreparing() || UploadStateInProgress() || UploadStateFailed() => () {
             if (CurrentPlatform.isWeb) {
               final bytes = it.file?.bytes;
               final mimeType = it.file?.mediaType?.mimeType;
@@ -689,7 +689,7 @@ extension AttachmentPlaylistExtension on Iterable<Attachment> {
 
             return Uri.file(path, windows: CurrentPlatform.isWindows);
           }(),
-          Success() => () {
+          UploadStateSuccess() => () {
             final url = it.assetUrl;
             if (url == null) return null;
 
