@@ -57,7 +57,7 @@
 - `UserGroup`, `UserGroupMember` and the user group responses no longer decode from or encode to JSON; `UserGroup` and `UserGroupMember` gain `fromData` and `toData`, which read and write only the format `stream_chat_persistence` stores them in.
 - The user group responses are immutable, built through a const constructor, and their `duration` is a non-nullable `String`.
 - `userGroup` is nullable on `GetUserGroupResponse`, `CreateUserGroupResponse`, `UpdateUserGroupResponse`, `AddUserGroupMembersResponse` and `RemoveUserGroupMembersResponse`.
-- The user group responses compare by value and gain `copyWith`; `UserGroup` and `UserGroupMember` still compare by value and gain `copyWith`, but no longer extend `Equatable`, so `props` is removed.
+- `UserGroup`, `UserGroupMember` and the user group responses gain `copyWith`; the responses now compare by value, and `UserGroup` and `UserGroupMember` no longer extend `Equatable`, so `props` is removed.
 - `StreamChatApi.userGroups` is removed; its endpoints are reached through `StreamChatClient`.
 
 🐞 Fixed
