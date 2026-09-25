@@ -110,11 +110,10 @@ void main() {
           ]),
         );
 
-        try {
-          await client.connectGuestUser(user);
-        } catch (e) {
-          expect(e, isA<StreamApiException>());
-        }
+        await expectLater(
+          client.connectGuestUser(user),
+          throwsA(isA<StreamApiException>()),
+        );
 
         verify(
           () => fakeChatApi.guest.getGuestUser(any(that: isSameUserAs(user))),
@@ -136,11 +135,10 @@ void main() {
     group('`.openConnection`', () {
       test('should throw if state does not contain user', () async {
         expect(client.state.currentUser, isNull);
-        try {
-          await client.openConnection();
-        } catch (e) {
-          expect(e, isA<AssertionError>());
-        }
+        await expectLater(
+          client.openConnection(),
+          throwsA(isA<AssertionError>()),
+        );
       });
 
       test('should answer with the connection already open', () async {
@@ -206,11 +204,10 @@ void main() {
       final user = User(id: 'test-user-id');
       final token = testUserToken(user.id).rawValue;
 
-      try {
-        await client.connectUser(user, token);
-      } catch (e) {
-        expect(e, isA<StreamNetworkException>());
-      }
+      await expectLater(
+        client.connectUser(user, token),
+        throwsA(isA<StreamNetworkException>()),
+      );
     });
 
     test(
@@ -222,11 +219,10 @@ void main() {
           return testUserToken(userId);
         }
 
-        try {
-          await client.connectUserWithProvider(user, TokenProvider.dynamic(tokenProvider));
-        } catch (e) {
-          expect(e, isA<StreamNetworkException>());
-        }
+        await expectLater(
+          client.connectUserWithProvider(user, TokenProvider.dynamic(tokenProvider)),
+          throwsA(isA<StreamNetworkException>()),
+        );
       },
     );
 
@@ -240,11 +236,10 @@ void main() {
           ..accessToken = token,
       );
 
-      try {
-        await client.connectGuestUser(user);
-      } catch (e) {
-        expect(e, isA<StreamNetworkException>());
-      }
+      await expectLater(
+        client.connectGuestUser(user),
+        throwsA(isA<StreamNetworkException>()),
+      );
       verify(
         () => fakeChatApi.guest.getGuestUser(any(that: isSameUserAs(user))),
       ).called(1);
@@ -253,11 +248,10 @@ void main() {
     test(
       '`.connectAnonymousUser` should throw if `ws.connect` fails',
       () async {
-        try {
-          await client.connectAnonymousUser();
-        } catch (e) {
-          expect(e, isA<StreamNetworkException>());
-        }
+        await expectLater(
+          client.connectAnonymousUser(),
+          throwsA(isA<StreamNetworkException>()),
+        );
       },
     );
   });
@@ -5033,14 +5027,15 @@ void main() {
           const messageId = 'test-message-id';
           const timeoutOrExpirationDate = 'invalid-value';
 
-          try {
-            await client.pinMessage(
+          // `pinMessage` validates in an `assert` before its first `await`,
+          // so it throws synchronously and the call must stay in a closure.
+          await expectLater(
+            () => client.pinMessage(
               messageId,
               timeoutOrExpirationDate: timeoutOrExpirationDate,
-            );
-          } catch (e) {
-            expect(e, isA<ArgumentError>());
-          }
+            ),
+            throwsA(isA<ArgumentError>()),
+          );
         },
       );
     });

@@ -16,19 +16,30 @@
 - Added `StreamMessageItem.semanticsLabel`, which replaces the announcement composed for a message row, and `StreamMessageItem.excludeFromSemantics`, which leaves the row unlabeled so the bubble and footer announce their own parts.
 - Added `StreamQuotedMessage.replyMessage`, the message doing the quoting, which lets a quoted preview announce who replied to whom.
 - Added `StreamMessageContent.excludeTextFromSemantics` and `StreamMessageFooter.excludeFromSemantics`, which keep the message text and the metadata out of the semantics tree when an enclosing row already announces them.
+- Added support for inserting images and GIFs from the keyboard (e.g. Gboard) in `StreamMessageComposer`, configurable via `contentInsertionConfiguration`.
 
 ⚠️ Changed
 
+- Bumped `file_picker` to `>=12.0.0 <14.0.0`.
+- `PlatformFileX.toAttachmentFile` and `PlatformFileX.toAttachment` are now async.
 - Video thumbnails now use `stream_thumbnail` on every platform, and the `thumblr`
   dependency is gone.
 - Linux builds now need the FFmpeg and libwebp development packages — on Debian/Ubuntu:
   `libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libwebp-dev`.
 - A deleted message now renders the timestamp and delivery status below the placeholder, matching the design, and no longer shows the "Edited" marker — there is no text left to have been edited.
 - `AccessibleMessagePreviewFormatter.formatMessageSemanticsLabel` must now return the body without a speaker prefix when `channel` is omitted. An implementation that prefixes unconditionally makes a message row announce "You said, You: hello".
+- `StreamImageCDN.resolveUrl` now leaves a URL that already asks for a specific size alone, rather than replacing it with the size the layout computed.
+
+⚠️ Deprecated
+
+- Deprecated `withData` and `withReadStream` on `StreamAttachmentHandler.pickFile` and `StreamFilePicker`; they no longer have any effect.
 
 🐞 Fixed
 
+- Fixed `StreamAttachmentHandler.pickFile` throwing on an empty selection; it now returns `null`.
+- Fixed the package no longer compiling when `stream_core_flutter` adds an avatar size. The three switches mapping `StreamAvatarSize` and `StreamAvatarGroupSize` onto an indicator size, an inner avatar size and the number of initials were exhaustive, so a size added upstream broke the build here. They fall back to the largest size they know now, and `StreamAvatarSize.xlPlus` (64px), `StreamAvatarSize.xxxl` / `StreamAvatarGroupSize.xxxl` (104px) are mapped explicitly.
 - Fixed `StreamAttachmentHandler` throwing `UnimplementedError` on WebAssembly builds.
+- Fixed the gallery tab vanishing from the attachment picker when `allowedAttachmentPickerTypes` allowed images or videos but not both. It now stays available and lists only the allowed media.
 - Improved the screen-reader experience in the message list: each message is announced as a single phrase naming the sender, the body, the time, the edited marker and the delivery status, while the attachments, reaction chips, quoted message and replies row stay reachable one level deeper.
 - Fixed the message body being announced as its markdown source, so link and emphasis syntax is no longer read aloud.
 - Fixed a quoted message announcing only the quoted author's name, saying nothing about who replied to whom.
@@ -36,6 +47,10 @@
 - Fixed a date divider announcing a clock time it never showed instead of the date it displays, and exposed it as a header so days can be jumped between.
 - Fixed the attachment upload progress on an outgoing message counting its link preview, which inflated the total against an attachment the sender never picked.
 - Fixed a message the moderation system bounced showing a read receipt once other members had read past it. It now shows only the error badge, matching what a screen reader announces for it.
+- Fixed image attachments being requested from the CDN at more pixels than the original holds.
+- Fixed one image rendition yielding two cache entries when its resize parameters arrived in a different order, or a crop on the URL survived a resize that does not crop.
+- Fixed image attachments not being resized at all when the URL carried a crop or a resize mode but no dimensions.
+- Fixed a URL whose host merely contains `stream-io-cdn.com` being treated as Stream's CDN.
 
 ## 10.4.0
 
