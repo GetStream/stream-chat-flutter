@@ -23,7 +23,9 @@ class UserGroup with _$UserGroup {
     required this.updatedAt,
   });
 
-  /// Creates a [UserGroup] from data stored by [toData].
+  /// Creates a [UserGroup] from the offline-database format written by [toData].
+  ///
+  /// It is not a codec for API payloads.
   factory UserGroup.fromData(Map<String, dynamic> json) => _$UserGroupFromJson(json);
 
   /// The date when the group was created.
@@ -60,7 +62,9 @@ class UserGroup with _$UserGroup {
   @override
   final DateTime updatedAt;
 
-  /// Serializes this group for local storage.
+  /// Serializes this group to the format `stream_chat_persistence` stores.
+  ///
+  /// It is not a codec for API payloads.
   Map<String, dynamic> toData() => _$UserGroupToJson(this);
 }
 

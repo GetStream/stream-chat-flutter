@@ -55,7 +55,7 @@
 - `StreamChatApi.device` is renamed `StreamChatApi.pushPreferences` and handles only `setPushPreferences`.
 - `StreamChatClient.listUserGroups`, `searchUserGroups`, `getUserGroup`, `createUserGroup`, `updateUserGroup`, `addUserGroupMembers` and `removeUserGroupMembers` return a `Result` instead of throwing.
 - `StreamChatClient.deleteUserGroup` returns a `Result<void>` instead of throwing, and carries no value on success.
-- `UserGroup`, `UserGroupMember` and the user group responses no longer decode from or encode to JSON.
+- `UserGroup`, `UserGroupMember` and the user group responses no longer decode from or encode to JSON; `UserGroup` and `UserGroupMember` gain `fromData` and `toData`, which read and write only the format `stream_chat_persistence` stores them in.
 - The user group responses are immutable, built through a const constructor, and their `duration` is a non-nullable `String`.
 - `userGroup` is nullable on `GetUserGroupResponse`, `CreateUserGroupResponse`, `UpdateUserGroupResponse`, `AddUserGroupMembersResponse` and `RemoveUserGroupMembersResponse`.
 - `UserGroup` and `UserGroupMember` no longer extend `Equatable`, so `props` is removed; they still compare by value and gain `copyWith`.

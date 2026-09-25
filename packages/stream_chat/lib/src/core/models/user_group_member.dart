@@ -18,7 +18,9 @@ class UserGroupMember with _$UserGroupMember {
     required this.userId,
   });
 
-  /// Creates a [UserGroupMember] from data stored by [toData].
+  /// Creates a [UserGroupMember] from the offline-database format written by [toData].
+  ///
+  /// It is not a codec for API payloads.
   factory UserGroupMember.fromData(Map<String, dynamic> json) => _$UserGroupMemberFromJson(json);
 
   /// The date when the member was added to the group.
@@ -37,6 +39,8 @@ class UserGroupMember with _$UserGroupMember {
   @override
   final String userId;
 
-  /// Serializes this member for local storage.
+  /// Serializes this member to the format `stream_chat_persistence` stores.
+  ///
+  /// It is not a codec for API payloads.
   Map<String, dynamic> toData() => _$UserGroupMemberToJson(this);
 }

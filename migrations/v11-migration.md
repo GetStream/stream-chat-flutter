@@ -165,7 +165,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamChatApi.device` | `StreamChatApi.pushPreferences` | `renamed` | The class handles only `setPushPreferences` now; device calls moved to the generated client |
 | `StreamChatClient.listUserGroups` / `searchUserGroups` / `getUserGroup` / `createUserGroup` / `updateUserGroup` / `addUserGroupMembers` / `removeUserGroupMembers` → `Future<XResponse>` | `Future<Result<XResponse>>` | `retyped` | Returns a `Result` instead of throwing |
 | `StreamChatClient.deleteUserGroup` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing, and carries no value on success |
-| `UserGroup.fromJson` / `toJson`, `UserGroupMember.fromJson` / `toJson`, the user group responses' `fromJson` | — | `removed` | The models are plain classes; construct them directly |
+| `UserGroup.fromJson` / `toJson`, `UserGroupMember.fromJson` / `toJson`, the user group responses' `fromJson` | — | `removed` | The models are plain classes; construct them directly. `fromData` / `toData` are the offline database's format, not API JSON |
 | `ListUserGroupsResponse()..userGroups = …` and the other user group responses' `late` setters | `ListUserGroupsResponse(duration: …, userGroups: …)` | `retyped` | The responses are plain classes with a const constructor and final fields |
 | The user group responses' `duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
 | `GetUserGroupResponse` / `CreateUserGroupResponse` / `UpdateUserGroupResponse` / `AddUserGroupMembersResponse` / `RemoveUserGroupMembersResponse`.`userGroup` (`UserGroup`) | `UserGroup?` | `retyped` | The API does not guarantee the group in the response; handle `null` |
@@ -527,6 +527,8 @@ if (group == null) return;
 **`UserGroup`, `UserGroupMember` and the responses no longer decode JSON.** They are plain classes; build them with
 their constructors — `ListUserGroupsResponse(duration: '0ms', userGroups: [group])` where v10 wrote
 `ListUserGroupsResponse()..userGroups = [group]`. `Message.mentionedGroups` still decodes from the same keys.
+`UserGroup.fromData` and `toData` read and write the format the offline database stores; they are not a way to
+decode API responses.
 
 **The responses' `duration` is a non-nullable `String`**, where v10 typed it `String?`.
 
