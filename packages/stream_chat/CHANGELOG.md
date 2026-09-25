@@ -3,6 +3,7 @@
 ✅ Added
 
 - Added a getter for `StreamChatClient.recoverStateOnReconnect`, which was previously write-only.
+- Added the translations of polls sent to channels with automatic translation enabled: `Poll.nameI18n`, `Poll.descriptionI18n`, `PollOption.textI18n` and `PollVote.answerTextI18n`. They share the shape of `Message.i18n` and are read-only.
 
 🔄 Changed
 

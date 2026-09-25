@@ -13,6 +13,7 @@ import '../theme/poll_option_votes_style.dart';
 import '../utils/date_formatter.dart';
 import '../utils/extensions.dart';
 import 'interactor/poll_add_comment_dialog.dart';
+import 'poll_translation.dart';
 
 /// {@template showStreamPollCommentsSheet}
 /// Displays an interactive bottom sheet to show all the comments for a poll.
@@ -25,6 +26,10 @@ Future<T?> showStreamPollCommentsSheet<T extends Object?>({
   required BuildContext context,
   required ValueListenable<Message> messageNotifier,
 }) {
+  // Resolved from the caller's context, as the sheet's own may not be below
+  // [StreamChat]; see [pollTranslationLanguageOf].
+  final language = pollTranslationLanguageOf(context, messageNotifier.value);
+
   return showStreamSheet<T>(
     context: context,
     builder: (_, scrollController) => StreamChannel.value(
@@ -50,7 +55,8 @@ Future<T?> showStreamPollCommentsSheet<T extends Object?>({
           }
 
           return StreamPollCommentsSheet(
-            poll: poll,
+            poll: poll.translate(language),
+            language: language,
             scrollController: scrollController,
             onUpdateComment: onUpdateComment,
           );
@@ -72,12 +78,19 @@ class StreamPollCommentsSheet extends StatefulWidget {
   const StreamPollCommentsSheet({
     super.key,
     required this.poll,
+    this.language,
     this.scrollController,
     this.onUpdateComment,
   });
 
   /// The poll to display the comments for.
   final Poll poll;
+
+  /// The language to display the comments in, when they have a translation
+  /// into it.
+  ///
+  /// Defaults to `null`, which displays every comment as it was written.
+  final String? language;
 
   /// Scroll controller attached to the bottom sheet's scrollable content.
   ///
@@ -168,7 +181,7 @@ class _StreamPollCommentsSheetState extends State<StreamPollCommentsSheet> {
               padding: effectiveTheme.contentPadding,
               separatorBuilder: (_, __, ___) => SizedBox(height: itemSpacing),
               itemBuilder: (context, comments, index, _) {
-                final comment = comments[index];
+                final comment = comments[index].translate(widget.language);
 
                 return _PollCommentCard(
                   poll: widget.poll,

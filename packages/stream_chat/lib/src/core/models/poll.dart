@@ -39,7 +39,9 @@ class Poll extends Equatable implements ComparableFieldProvider {
   Poll({
     String? id,
     required this.name,
+    this.nameI18n,
     this.description,
+    this.descriptionI18n,
     required this.options,
     this.votingVisibility = VotingVisibility.public,
     this.enforceUniqueVote = true,
@@ -72,8 +74,20 @@ class Poll extends Equatable implements ComparableFieldProvider {
   /// The name of the poll.
   final String name;
 
+  /// The translations of [name], keyed as `<language>_text`, plus the
+  /// `language` [name] was written in.
+  ///
+  /// Filled in by the server when the poll is sent to a channel with
+  /// automatic translation enabled.
+  @JsonKey(includeToJson: false)
+  final Map<String, String>? nameI18n;
+
   /// The description of the poll.
   final String? description;
+
+  /// The translations of [description], in the same shape as [nameI18n].
+  @JsonKey(includeToJson: false)
+  final Map<String, String>? descriptionI18n;
 
   /// The list of options available for the poll.
   final List<PollOption> options;
@@ -174,7 +188,9 @@ class Poll extends Equatable implements ComparableFieldProvider {
   Poll copyWith({
     String? id,
     String? name,
+    Map<String, String>? nameI18n,
     String? description,
+    Map<String, String>? descriptionI18n,
     List<PollOption>? options,
     VotingVisibility? votingVisibility,
     bool? enforceUniqueVote,
@@ -196,7 +212,9 @@ class Poll extends Equatable implements ComparableFieldProvider {
   }) => Poll(
     id: id ?? this.id,
     name: name ?? this.name,
+    nameI18n: nameI18n ?? this.nameI18n,
     description: description ?? this.description,
+    descriptionI18n: descriptionI18n ?? this.descriptionI18n,
     options: options ?? this.options,
     votingVisibility: votingVisibility ?? this.votingVisibility,
     enforceUniqueVote: enforceUniqueVote ?? this.enforceUniqueVote,
@@ -223,7 +241,9 @@ class Poll extends Equatable implements ComparableFieldProvider {
   static const topLevelFields = [
     'id',
     'name',
+    'name_i18n',
     'description',
+    'description_i18n',
     'options',
     'voting_visibility',
     'enforce_unique_vote',
@@ -248,7 +268,9 @@ class Poll extends Equatable implements ComparableFieldProvider {
   List<Object?> get props => [
     id,
     name,
+    nameI18n,
     description,
+    descriptionI18n,
     options,
     votingVisibility,
     enforceUniqueVote,

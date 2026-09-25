@@ -1,5 +1,9 @@
 ## Upcoming
 
+✅ Added
+
+- Poll translations (`Poll.nameI18n`, `Poll.descriptionI18n`, `PollOption.textI18n`, `PollVote.answerTextI18n`) are now stored in the offline cache. The database schema version is bumped, so the cache is rebuilt once on upgrade.
+
 🐞 Fixed
 
 - Fixed storing `lastSyncAt` silently doing nothing after the database was reset, which lost the events missed while offline.

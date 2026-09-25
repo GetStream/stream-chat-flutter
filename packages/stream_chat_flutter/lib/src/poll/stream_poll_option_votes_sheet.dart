@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -9,6 +10,7 @@ import '../theme/poll_card_style.dart';
 import '../theme/poll_option_votes_sheet_theme.dart';
 import '../theme/poll_option_votes_style.dart';
 import '../utils/extensions.dart';
+import 'poll_translation.dart';
 import 'stream_poll_results_sheet.dart';
 
 /// {@template showStreamPollOptionVotesSheet}
@@ -22,6 +24,10 @@ Future<T?> showStreamPollOptionVotesSheet<T extends Object?>({
   required ValueListenable<Message> messageNotifier,
   required PollOption option,
 }) {
+  // Resolved from the caller's context, as the sheet's own may not be below
+  // [StreamChat]; see [pollTranslationLanguageOf].
+  final language = pollTranslationLanguageOf(context, messageNotifier.value);
+
   return showStreamSheet<T>(
     context: context,
     builder: (_, scrollController) => StreamChannel.value(
@@ -33,9 +39,14 @@ Future<T?> showStreamPollOptionVotesSheet<T extends Object?>({
           if (poll == null) return const Empty();
           if (option.id == null) return const Empty();
 
+          final translatedPoll = poll.translate(language);
+          // Looked up again so the option follows its poll being updated
+          // while the sheet is open.
+          final translatedOption = translatedPoll.options.firstWhereOrNull((it) => it.id == option.id);
+
           return StreamPollOptionVotesSheet(
-            poll: poll,
-            option: option,
+            poll: translatedPoll,
+            option: translatedOption ?? option,
             scrollController: scrollController,
           );
         },

@@ -786,6 +786,21 @@ void main() {
   });
 
   group('Translations', () {
+    testWidgets('translates the name of a poll', (tester) async {
+      final message = Message(
+        user: User(id: 'other-user-id', name: 'Poll Creator'),
+        poll: Poll(
+          name: 'Favorite Color?',
+          nameI18n: const {'language': 'en', 'fr_text': 'Couleur préférée ?'},
+          options: const [PollOption(id: 'option-1', text: 'Red')],
+        ),
+      );
+
+      await pumpMessagePreview(tester, message, language: 'fr');
+
+      expect(_extractText(tester), 'Couleur préférée ?');
+    });
+
     testWidgets('uses explicit language parameter for translation', (tester) async {
       final message = Message(
         text: 'Hello, world!',

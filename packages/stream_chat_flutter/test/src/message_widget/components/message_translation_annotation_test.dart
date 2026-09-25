@@ -62,6 +62,40 @@ void main() {
       },
     );
 
+    final translatedPoll = Message(
+      id: 'translated-poll',
+      createdAt: DateTime(2026),
+      user: User(id: 'other-user'),
+      poll: Poll(
+        name: '¿Color favorito?',
+        nameI18n: const {'language': 'es', 'en_text': 'Favourite colour?'},
+        options: const [PollOption(id: 'option-1', text: 'Rojo')],
+      ),
+    );
+
+    testWidgets('is shown for a poll message whose poll is translated', (tester) async {
+      await pumpHeader(
+        tester,
+        message: translatedPoll,
+        userLanguage: 'en',
+        translationConfig: const StreamMessageTranslationConfiguration(annotationEnabled: true),
+      );
+
+      expect(find.text('Translated from Spanish ·'), findsOneWidget);
+      expect(find.text('Show original'), findsOneWidget);
+    });
+
+    testWidgets('stays hidden for a poll message read in the language it was written in', (tester) async {
+      await pumpHeader(
+        tester,
+        message: translatedPoll,
+        userLanguage: 'es',
+        translationConfig: const StreamMessageTranslationConfiguration(annotationEnabled: true),
+      );
+
+      expect(find.textContaining('Translated'), findsNothing);
+    });
+
     testWidgets('is hidden by default, matching the SDK behaviour before it existed', (tester) async {
       await pumpHeader(tester, message: translated, userLanguage: 'en');
 

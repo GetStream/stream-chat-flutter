@@ -11,6 +11,9 @@ PollVote _$PollVoteFromJson(Map<String, dynamic> json) => PollVote(
   pollId: json['poll_id'] as String?,
   optionId: json['option_id'] as String?,
   answerText: json['answer_text'] as String?,
+  answerTextI18n: (json['answer_text_i18n'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, e as String),
+  ),
   createdAt: json['created_at'] == null ? null : DateTime.parse(json['created_at'] as String),
   updatedAt: json['updated_at'] == null ? null : DateTime.parse(json['updated_at'] as String),
   userId: json['user_id'] as String?,

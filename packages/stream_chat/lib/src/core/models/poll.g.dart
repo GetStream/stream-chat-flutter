@@ -9,7 +9,13 @@ part of 'poll.dart';
 Poll _$PollFromJson(Map<String, dynamic> json) => Poll(
   id: json['id'] as String?,
   name: json['name'] as String,
+  nameI18n: (json['name_i18n'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, e as String),
+  ),
   description: json['description'] as String?,
+  descriptionI18n: (json['description_i18n'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, e as String),
+  ),
   options: (json['options'] as List<dynamic>).map((e) => PollOption.fromJson(e as Map<String, dynamic>)).toList(),
   votingVisibility:
       $enumDecodeNullable(
