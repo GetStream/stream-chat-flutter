@@ -1839,7 +1839,7 @@ void main() {
       verifyNoMoreInteractions(fakeChatApi.channel);
     });
 
-    test('StreamChatClient.addDevice returns a success once the device is registered', () async {
+    test('StreamChatClient.addDevice sends the device and returns a success', () async {
       const id = 'test-device-id';
       const request = api.CreateDeviceRequest(
         id: id,
@@ -1916,7 +1916,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.removeDevice returns a success once the device is removed', () async {
+    test('StreamChatClient.removeDevice sends the device id and returns a success', () async {
       const deviceId = 'test-device-id';
 
       when(() => defaultApi.deleteDevice(id: deviceId)).thenAnswer(
@@ -2198,7 +2198,7 @@ void main() {
       expect(res.exceptionOrNull(), error);
     });
 
-    test('StreamChatClient.searchRoles returns the roles matching the query', () async {
+    test('StreamChatClient.searchRoles sends the query and returns the mapped response', () async {
       const query = 'adm';
       const limit = 10;
       const nameGt = 'admin';
