@@ -5,5 +5,5 @@ extension ResultMapper<T> on Result<T> {
   /// Converts this result into a [Result] with no value.
   ///
   /// A failure is returned as it is, with its error and stack trace.
-  Result<void> ignoreResult() => map((_) {});
+  Result<void> ignoreValue() => map((_) {});
 }

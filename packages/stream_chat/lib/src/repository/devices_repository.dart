@@ -35,7 +35,7 @@ class DevicesRepository {
       ),
     );
 
-    return result.ignoreResult();
+    return result.ignoreValue();
   }
 
   /// Lists the devices registered for the current user.
@@ -47,6 +47,6 @@ class DevicesRepository {
   /// Removes a registered device, stopping push notifications to it.
   Future<Result<void>> removeDevice(String id) async {
     final result = await _api.deleteDevice(id: id);
-    return result.ignoreResult();
+    return result.ignoreValue();
   }
 }
