@@ -2398,8 +2398,8 @@ class StreamChatClient {
 
   /// Lists user groups with cursor-based pagination.
   ///
-  /// [idGt] and [createdAtGt] are cursors: each returns only the groups
-  /// ordering after the value given.
+  /// [createdAtGt] and [idGt] form one cursor: pass the `createdAt` and `id` of
+  /// the last group on the previous page to get the next one. Either alone is ignored.
   Future<Result<ListUserGroupsResponse>> listUserGroups({
     int? limit,
     String? idGt,
@@ -2413,6 +2413,9 @@ class StreamChatClient {
   );
 
   /// Searches user groups by name prefix (autocomplete).
+  ///
+  /// [nameGt] and [idGt] form one cursor: pass the `name` and `id` of the last
+  /// group on the previous page to get the next one. Either alone is ignored.
   Future<Result<SearchUserGroupsResponse>> searchUserGroups(
     String query, {
     int? limit,
@@ -2475,8 +2478,9 @@ class StreamChatClient {
     String? teamId,
   }) => _userGroupsRepository.deleteUserGroup(id, teamId: teamId);
 
-  /// Adds members to a user group. All user IDs must exist
-  /// (operation is all-or-nothing).
+  /// Adds members to a user group.
+  ///
+  /// All user IDs must exist; if any does not, no member is added.
   ///
   /// [asAdmin] defaults to `false` — a regular member — when not given.
   Future<Result<AddUserGroupMembersResponse>> addUserGroupMembers(
@@ -2491,8 +2495,9 @@ class StreamChatClient {
     teamId: teamId,
   );
 
-  /// Removes members from a user group. User IDs not currently members
-  /// are silently ignored.
+  /// Removes members from a user group.
+  ///
+  /// User IDs that are not members of the group are ignored.
   Future<Result<RemoveUserGroupMembersResponse>> removeUserGroupMembers(
     String id,
     List<String> memberIds, {
