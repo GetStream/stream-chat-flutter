@@ -7,9 +7,12 @@
 Run from the repo root. Prose sections (goal, decisions, risks) live in GROUPS
 below; the tables are always derived from the code, so they cannot drift.
 
-The report asserts two invariants:
+The report asserts these invariants:
   * every public method in the hand-written api layer belongs to exactly one group
   * every operation in the generated client is claimed by exactly one group
+  * the stream_chat barrel exports nothing from the generated client
+  * no other package or the sample app imports the generated client
+  * no temporary adapter outlives the group that removes it
 
 A non-zero unclaimed count after a regeneration means the plan needs a new group
 or a wider path prefix — treat it as a plan bug, not a script bug.
@@ -24,6 +27,15 @@ PKG = pathlib.Path('packages/stream_chat')
 API_DIR = PKG / 'lib/src/core/api'
 GENERATED_API = PKG / 'lib/open_api/api/default_api.dart'
 OUT = pathlib.Path('openapi-migration')
+BARREL = PKG / 'lib/stream_chat.dart'
+CONSUMERS = [
+    pathlib.Path('packages/stream_chat_flutter_core/lib'),
+    pathlib.Path('packages/stream_chat_flutter/lib'),
+    pathlib.Path('packages/stream_chat_persistence/lib'),
+    pathlib.Path('packages/stream_chat_localizations/lib'),
+    pathlib.Path('sample_app/lib'),
+]
+ADAPTER_TODO = re.compile(r'TODO\(openapi-migration\): remove in group (\d+)')
 
 
 def read_handwritten():
@@ -85,40 +97,29 @@ GROUPS = [
              'no channel scope.',
         decisions=[],
         taken=textwrap.dedent("""\
-            - **`Device` → generated `DeviceResponse`, adopted.** Our two fields dropped seven the server sends
-              (`user_id`, `created_at`, `disabled`, `disabled_reason`, `hardware_id`, `push_provider_name`,
-              `voip`), and the spec makes `OwnUserResponse.devices` a `List<DeviceResponse>` regardless, so
-              keeping ours meant a lossy copy of one shape maintained forever. `created_at` and `user_id` are
-              required, and both are always sent: `user_id` is part of the devices table's composite primary
-              key, and neither field carries `omitempty` on the response struct.
-            - **`ListDevicesResponse` → the generated one, adopted.** Same-name shadow with nothing of ours to keep.
-            - **`PushProvider` is deleted; the generated `CreateDeviceRequestPushProvider` is the public type.**
-              **This is the enum precedent for every later group,** and it is deliberately *not* the same answer
-              as `RoleType` in group 04. The two cases differ in the generated code, not in taste: `role_type` is
-              a bare `String?` in the generated signature, so a hand-written `RoleType` adds a type where none
-              existed; `push_provider` already has a complete generated extension type with the same four values,
-              so hand-writing one would be a second copy that silently misses a fifth provider the spec adds
-              later.
+            Revisited after landing: the group first adopted the generated `DeviceResponse`,
+            `ListDevicesResponse` and `CreateDeviceRequestPushProvider` as public types. It now follows the
+            [domain-model rules](README.md#domain-models), and the decisions below are the ones in force.
 
-              This started as a typedef aliasing the generated type to a better name, and that was reverted in
-              review. The rule for later groups is therefore: **adopt the generated type when one exists and is
-              complete, including its name, and hand-write only when the generated side has no type at all.**
-              Do not alias a generated type merely to rename it — an alias is a second name for one concept, and
-              it hides from the reader that the spec is what needs fixing.
-
-              The name really is wrong: `CreateDeviceRequestPushProvider` is named for the request it hangs off,
-              not for the concept, and it is what a consumer writes and what hovers show. That is accepted as
-              temporary, because a spec change is prepared that renames these types. When it lands the fix is a
-              rename in one place rather than the unwinding of an alias.
-
-              Costs, recorded in the migration guide: `.name` and `.values` are gone (v10 shipped an enum).
-              The `.values` loss also costs the test that asserted every provider was covered; an extension type
-              cannot enumerate itself, so a fifth provider is caught by the spec, not by this package's suite.
-            - **The write calls answer nothing.** `addDevice` and `removeDevice` return `Result<void>`
-              rather than the generated `DurationResponse`, whose only field is a server-timing string no
-              integrator acts on. `stream_feeds` already does this, and it keeps `DurationResponse` off the
-              public surface entirely. **The precedent for every later group: a write that returns only an
-              envelope returns `Result<void>`.**
+            - **`Device` stays our public type, in its v10 shape** (`id`, `pushProvider`), as a plain class with
+              no JSON. The repository maps the generated `DeviceResponse` into it. The seven further fields the
+              server sends (`user_id`, `created_at`, `disabled`, `disabled_reason`, `hardware_id`,
+              `push_provider_name`, `voip`) are not exposed; adding any of them later is non-breaking.
+            - **`ListDevicesResponse` is hand-written,** under its v10 name, as a plain class carrying `duration`
+              and `devices`. An envelope rather than a bare list, so a field the server adds to the response can
+              be exposed without changing the method's signature.
+            - **`PushProvider` becomes an extension type over its wire string,** where v10 declared an enum, and
+              `Device.pushProvider` is typed with it rather than `String`. The server answers the provider as a
+              free-form string, so a device registered with a provider the SDK does not name still decodes, and a
+              provider added later is a new constant rather than a breaking enum value. The repository maps it to
+              the generated `CreateDeviceRequestPushProvider` by its wire value. **This is the enum precedent for
+              every later group:** a generated request enum gets a hand-written public type, so the generator's
+              naming never reaches a signature.
+            - **The write calls answer nothing.** `addDevice` and `removeDevice` return `Result<void>`: the
+              generated `DurationResponse` carries only a server-timing string no integrator acts on, and v10's
+              `EmptyResponse` is a json_serializable, mutable envelope the domain-model rules retire. **The
+              precedent for every later group: a write whose response carries only `duration` returns
+              `Result<void>`.**
             - **`hardwareId` and `voipToken` are left unset.** `voipToken` is typed `bool?` — a flag meaning "this
               id is a VoIP token", not the token — and surfacing it would imply a VoIP-push story the SDK does not
               have. Neither has an in-tree consumer. Adding them later is non-breaking.
@@ -127,9 +128,13 @@ GROUPS = [
               means no new wire value ships untested. Note the server does configure providers under the empty
               name — omitting the key resolves to that default — so `''` is normalized because it always was,
               not because the server would reject it.
-            - **Mapping lives in the repository,** not in extension methods on generated types and not in a
-              separate mapper file. Here that is only request construction, which keeps `StreamChatClient` a pure
-              delegate.
+            - **Mapping happens in the repository,** on the `Result` the generated call returns, through the
+              extensions in `lib/src/repository/mapper/devices_mapper.dart`. `StreamChatClient` stays a pure
+              delegate and never names a generated type.
+            - **`OwnUser.devices` decodes through `DeviceV1JsonConverter`,** a temporary converter that reads and
+              writes the v1 keys `id` and `push_provider`. `OwnUser` still decodes the v1 `me` payload with
+              json_serializable and is persisted whole in `connection_events.own_user`, so its `devices` field
+              needs JSON that `Device` no longer carries. The converter is removed by [group 09](09-users.md).
             - **The wire contract is generator-owned, and deliberately not re-pinned here.** The deleted
               `device_api_test.dart` asserted verb, path and body-versus-query placement, because the
               hand-written api owned them. They now come from the spec through retrofit annotations, so
@@ -137,9 +142,8 @@ GROUPS = [
               covered: a regeneration that moved a parameter between query and body would pass CI. **This is
               the testing precedent for every later group** — mock at the `DefaultApi` seam, and let the
               generated client own the transport.
-            - **Generated response models are not given `fromJson` tests,** following group 04. Decoding is
-              exercised where the SDK owns the surface: `OwnUser.fromJson` pins every field of a device entry
-              and pins that a device missing one the server always sends fails to decode.
+            - **Mapping is tested from a fully populated generated response,** so a field the mapper drops shows
+              up as a failing assertion rather than a silent loss.
             - **`setPushPreferences` did not come along,** so `device_api.dart` was renamed
               `push_preferences_api.dart` (`DeviceApi` → `PushPreferencesApi`, `StreamChatApi.device` →
               `StreamChatApi.pushPreferences`) rather than deleted — the file split rather than migrating whole.
@@ -154,13 +158,9 @@ GROUPS = [
             '*body* through the generated client, so it applies to **every** group from here on; a live '
             '`createDevice` accepted it. Recorded rather than fixed — if a later endpoint does mind, the fix '
             "is the generator's model template, never a hand-rolled request builder.",
-            'Devices are **not** persisted — no entity, DAO or mapper. `OwnUser` *is*, inside '
-            "`connection_events.own_user`, but v11's schema bump drops and recreates every table, so no v10 "
-            'row survives to be read back against the new shape. A device registered by the published v10 '
-            'SDK was read back through both `getDevices` and `me.devices` on connect.',
-            '`pushProviderName` is re-derived from the app\'s configured providers on `GET /devices` but not '
-            'on the `me` payload, so the same device can carry a name from `getDevices()` and `null` from '
-            '`OwnUser.devices`. New surface rather than a regression — v10 did not expose the field at all.',
+            'Devices are **not** persisted on their own — no entity, DAO or mapper. `OwnUser` *is*, inside '
+            '`connection_events.own_user`, and its devices are written by `DeviceV1JsonConverter` under the '
+            'same two keys v10 wrote.',
         ],
         done=DONE.replace('- [ ]', '- [x]'),
     ),
@@ -171,12 +171,15 @@ GROUPS = [
         goal='A clean 1:1 group — eight methods against eight generated operations, no client state, '
              'no persistence.',
         decisions=[
-            'Several generated responses (`AddUserGroupMembersResponse`, `CreateUserGroupResponse`, …) wrap the '
-            'same `UserGroupResponse`; decide whether our public API keeps distinct types or collapses them.',
+            'Follows the [domain-model rules](README.md#domain-models): `UserGroup`, `UserGroupMember` and the '
+            'seven v10 response envelopes stay public in their v10 shapes, as plain classes, mapped from the '
+            'generated types in the repository.',
+            '`Message.mentionedGroups` still decodes v1 JSON, so it needs a temporary `UserGroupV1JsonConverter` '
+            '(removed by group 10), and the persistence mapper serializes `mentioned_groups` itself.',
         ],
         risks=[
-            '`UserGroup` and `UserGroupMember` collide by name with generated types — the export decision lands '
-            'here first.',
+            '`UserGroup` and `UserGroupMember` collide by name with generated types. Import the generated code '
+            'with a prefix; the generated types are never exported.',
         ],
     ),
     dict(
@@ -190,8 +193,10 @@ GROUPS = [
             'ours unless the generated one is genuinely better.',
         ],
         taken=textwrap.dedent("""\
-            - **`Role` and `SearchRolesResponse` are the generated types.** They were field-for-field identical to
-              ours, so keeping ours meant maintaining two copies of one shape forever.
+            - **`Role` and `SearchRolesResponse` stay our public types, in their v10 shapes,** as plain classes
+              with no JSON, mapped from the generated types in `lib/src/repository/mapper/roles_mapper.dart`. The
+              group first adopted the generated types; it now follows the
+              [domain-model rules](README.md#domain-models).
             - **`RoleType` stays hand-written.** `searchRoles(roleType:)` accepts exactly `'user'` or `'channel'`
               and the server rejects anything else with a 400, but the v2 spec models `role_type` as an open
               string, so there is nothing generated to adopt. It is an `extension type const RoleType(String)
@@ -295,6 +300,10 @@ GROUPS = [
             'Every other group depends on the `User` decision.',
             'User data arrives over the WebSocket on nearly every event.',
         ],
+        done=DONE + (
+            '- [ ] Temporary adapters owned by this group (`DeviceV1JsonConverter`) are deleted and removed from\n'
+            '      the table in `README.md`.\n'
+        ),
     ),
     dict(
         num='10', slug='messages', title='Messages & Search',
@@ -457,6 +466,38 @@ def render(g, hand, ops):
     return '\n'.join(L)
 
 
+def generated_exports():
+    """Barrel lines that export the generated client."""
+    return [
+        line.strip()
+        for line in BARREL.read_text().splitlines()
+        if re.match(r"export\s+'open_api/", line.strip())
+    ]
+
+
+def generated_imports():
+    """(file, line) for every consumer file importing the generated client."""
+    out = []
+    for root in CONSUMERS:
+        for f in sorted(root.rglob('*.dart')):
+            for line in f.read_text().splitlines():
+                if 'package:stream_chat/open_api/' in line:
+                    out.append((f, line.strip()))
+    return out
+
+
+def stale_adapters():
+    """(file, group) for every temporary adapter whose removing group is done."""
+    readme = (OUT / 'README.md').read_text()
+    done = set(re.findall(r'^\| \[(\d+)\]\([^)]*\) \|.*\| ☑ \|$', readme, re.MULTILINE))
+    out = []
+    for f in sorted(PKG.glob('lib/**/*.dart')):
+        for m in ADAPTER_TODO.finditer(f.read_text()):
+            if m.group(1) in done:
+                out.append((f, m.group(1)))
+    return out
+
+
 def main():
     check_only = '--check' in sys.argv
     if not GENERATED_API.exists():
@@ -489,6 +530,12 @@ def main():
             problems.append(f'method claimed by {v}: {k[0]}::{k[1]}')
     for k in sorted(all_methods - set(claimed_methods)):
         problems.append(f'method unclaimed: {k[0]}::{k[1]}')
+    for line in generated_exports():
+        problems.append(f'barrel exports the generated client: {line}')
+    for f, line in generated_imports():
+        problems.append(f'{f} imports the generated client: {line}')
+    for f, group in stale_adapters():
+        problems.append(f'{f} keeps an adapter group {group} was meant to remove')
 
     print(f'groups: {len(GROUPS)}')
     print(f'hand-written methods: {len(all_methods)} across {len(hand)} files')

@@ -44,12 +44,14 @@
 - `client.wsConnectionStatus` and `wsConnectionStatusStream` become `connectionStatus` and `connectionStatusStream`. `ConnectionStatus` keeps its three values, and a client that has never connected still reads as `disconnected`.
 - The WebSocket's state — `Connected`, `Connecting`, `Authenticating`, `Disconnected` and the disconnection sources — is no longer exported, and the client no longer reports it. `ConnectionStatus` is the whole connection API, as on the other Stream SDKs.
 - `StreamHttpClient` and `StreamChatApi` take a `ConnectionIdGetter? connectionId` where they took a `ConnectionIdManager?`. The manager only wrapped such a closure, and is removed.
-- `Role` and `SearchRolesResponse` are the OpenAPI-generated types. `Role` gains `copyWith` and `toJson`, and a response missing `duration` or `roles` now fails to decode instead of defaulting.
 - `StreamChatClient.searchRoles` returns a `Result<SearchRolesResponse>` instead of throwing.
-- `StreamChatClient.addDevice`, `getDevices` and `removeDevice` return a `Result` instead of throwing; `addDevice` and `removeDevice` answer nothing, `getDevices` a `ListDevicesResponse`.
-- `Device` is replaced by the generated `DeviceResponse`, including in `OwnUser.devices`. It carries seven more fields, and `userId` and `createdAt` are required, so a device entry missing either now fails to decode.
-- `ListDevicesResponse` is the generated type; `devices` and `duration` are required, so a response omitting either fails to decode instead of defaulting.
-- `PushProvider` is removed in favour of the generated `CreateDeviceRequestPushProvider`, which `addDevice` now takes. It is an extension type over `String` rather than an enum, so the four values and their wire strings are unchanged, but `.name` and `.values` are gone — a provider is its own string.
+- `StreamChatClient.getDevices` returns a `Result<ListDevicesResponse>` instead of throwing.
+- `StreamChatClient.addDevice` and `removeDevice` return a `Result<void>` instead of throwing, and carry no value on success.
+- `Device`, `Role`, `ListDevicesResponse` and `SearchRolesResponse` no longer decode from or encode to JSON.
+- `PushProvider` is an extension type over its wire string instead of an enum, and `Device.pushProvider` is typed `PushProvider` instead of `String`.
+- `ListDevicesResponse` and `SearchRolesResponse` are immutable, built through a const constructor, and their `duration` is a non-nullable `String`.
+- `Device`, `ListDevicesResponse` and `SearchRolesResponse` compare by value and gain `copyWith`.
+- `Role` no longer extends `Equatable`, so `props` is removed; it still compares by value and gains `copyWith`.
 - `StreamChatApi.device` is renamed `StreamChatApi.pushPreferences` and handles only `setPushPreferences`.
 
 🐞 Fixed

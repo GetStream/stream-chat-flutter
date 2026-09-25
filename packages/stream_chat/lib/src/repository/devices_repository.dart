@@ -1,14 +1,17 @@
-import 'package:stream_core/stream_core.dart' show Result;
+import 'package:stream_core/stream_core.dart' show PatternMatching, Result;
 
-import '../../open_api/api.dart' show DefaultApi;
-import '../../open_api/models.dart' show CreateDeviceRequest, CreateDeviceRequestPushProvider, ListDevicesResponse;
+import '../../open_api/api.dart' as api;
+import '../core/models/list_devices_response.dart';
+import '../core/models/push_provider.dart';
+import 'mapper/devices_mapper.dart';
+import 'mapper/result_mapper.dart';
 
 /// Repository dedicated to device operations.
 class DevicesRepository {
   /// Initialize a new devices repository.
   const DevicesRepository(this._api);
 
-  final DefaultApi _api;
+  final api.DefaultApi _api;
 
   /// Registers a device to receive push notifications.
   ///
@@ -18,22 +21,32 @@ class DevicesRepository {
   /// [pushProvider] to use, for apps that have more than one.
   Future<Result<void>> addDevice(
     String id,
-    CreateDeviceRequestPushProvider pushProvider, {
+    PushProvider pushProvider, {
     String? pushProviderName,
-  }) => _api.createDevice(
-    createDeviceRequest: CreateDeviceRequest(
-      id: id,
-      pushProvider: pushProvider,
-      pushProviderName: switch (pushProviderName) {
-        final name? when name.isNotEmpty => name,
-        _ => null,
-      },
-    ),
-  );
+  }) async {
+    final result = await _api.createDevice(
+      createDeviceRequest: api.CreateDeviceRequest(
+        id: id,
+        pushProvider: pushProvider.toRequest(),
+        pushProviderName: switch (pushProviderName) {
+          final name? when name.isNotEmpty => name,
+          _ => null,
+        },
+      ),
+    );
+
+    return result.ignoreValue();
+  }
 
   /// Lists the devices registered for the current user.
-  Future<Result<ListDevicesResponse>> getDevices() => _api.listDevices();
+  Future<Result<ListDevicesResponse>> getDevices() async {
+    final result = await _api.listDevices();
+    return result.map((response) => response.toModel());
+  }
 
   /// Removes a registered device, stopping push notifications to it.
-  Future<Result<void>> removeDevice(String id) => _api.deleteDevice(id: id);
+  Future<Result<void>> removeDevice(String id) async {
+    final result = await _api.deleteDevice(id: id);
+    return result.ignoreValue();
+  }
 }

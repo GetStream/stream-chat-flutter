@@ -117,20 +117,35 @@ silently — which is exactly why fixes belong in the generator or in your own c
 
 ## Phase 2 — decide the shape of each symbol
 
-For every type in the inventory, one decision: keep our shape and map at the boundary, or adopt the generated one.
+The generated models stay private. Follow the domain-model rules in
+[`openapi-migration/README.md`](../../../openapi-migration/README.md#domain-models): the public API keeps the v10
+models, names and response envelopes as plain classes without JSON, and the repository maps generated → ours.
+Phase 2 is therefore not "keep or adopt" but, per type:
 
-**Default to keeping our shape.** Generated types are wire shapes — nullable wherever the spec is loose, with
-`_unknown` enum sentinels and per-operation extension types instead of shared enums (`CreateDeviceRequestPushProvider`
-rather than one `PushProvider`). That is usually a worse public API than what we hand-wrote.
+- **Which v10 type it maps to**, and whether that type is embedded in a model that still decodes v1 JSON with
+  json_serializable. If it is, the parent's field needs a temporary converter (README rule 7) — add it to the
+  adapters table with the group that removes it.
+- **Whether persistence stores it as JSON text.** If so, the Drift mapper gets its own private helpers (rule 8).
+- **Which request enums need a hand-written public type** (rule 6).
 
-**Breaking changes are allowed, but a break needs a reason beyond convenience.** Take it when it buys one of:
+Generated types are wire shapes — nullable wherever the spec is loose, with per-operation extension types instead
+of shared enums (`CreateDeviceRequestPushProvider` rather than one `PushProvider`) — which is why they never reach
+a public signature.
 
-- **Long-term maintainability** — the alternative is maintaining two shapes of the same thing indefinitely, or a
-  mapping layer that needs editing on every spec change.
-- **Consistency with our other products** — the generated name or shape is what our other SDKs expose, so matching
-  it makes Stream's API coherent for people working across them.
+**A migration makes exactly these breaks, and no others:**
 
-Not sufficient on their own: avoiding a small mapping function, cosmetic naming, or "the generated one is newer".
+- **The error contract:** public methods return `Result<T>` instead of throwing (below).
+- **Duration-only writes answer nothing:** a write whose generated response is `DurationResponse` returns
+  `Result<void>`, not `EmptyResponse`.
+- **No JSON on public models or envelopes:** their `fromJson` and `toJson` are removed.
+- **Envelopes are immutable:** they are built through a const constructor with final fields, not a no-argument
+  constructor and `late` setters.
+- **`duration` is a non-nullable `String`** on every envelope; v10 typed it `String?`.
+- **Models and envelopes are `@freezed`:** they compare by value, and one that extended `Equatable` in v10 loses
+  `props`.
+
+Anything else a migration would change about what the caller holds needs its own reason. A server field our v10
+model lacks is exposed later, as an additive change, not by swapping in the generated type.
 
 When you do break, four things ship in the same PR: a `refactor(scope)!:` commit/PR title, a `🛑️ Breaking`
 CHANGELOG entry naming the old and new symbol, a Symbol Map row plus feature section in
@@ -203,11 +218,12 @@ Moving the WebSocket to v2 is its own project — v2 sends different event shape
 ## Phase 4 — implement
 
 ```dart
-import '../../open_api/models.dart' as api;   // prefix while both shapes exist
+import '../../open_api/api.dart' as api;       // the generated names collide with ours
+import 'mapper/devices_mapper.dart';
 
 Future<Result<ListDevicesResponse>> getDevices() async {
-  final result = await _api.listDevices();     // Future<Result<api.ListDevicesResponse>>
-  return result.map(_toListDevicesResponse);   // transforms Success, passes Failure through untouched
+  final result = await _api.listDevices();                 // Future<Result<api.ListDevicesResponse>>
+  return result.map((response) => response.toModel());    // transforms Success, passes Failure through untouched
 }
 ```
 
@@ -234,12 +250,9 @@ Two data-shape traps while mapping:
   `StreamDateTimeConverter` (epoch nanoseconds *or* RFC3339); hand-written models use `DateTime.parse`. A model fed
   by both REST v2 and WS events must tolerate both.
 
-Where a generated type shadows one of ours the prefix is temporary: if phase 2 chose the generated type, delete
-ours in the same PR. Current overlaps with types exported from `lib/stream_chat.dart` include `Action`,
-`Attachment`, `ChannelMute`, `ChatPreferences`, `Command`, `Reaction`, `Role`, `ThreadParticipant`, `User`,
-`UserGroup`, `UserGroupMember`, plus same-name response DTOs (`ListDevicesResponse`,
-`UpsertPushPreferencesResponse`) and `PushPreferenceInput`. Regenerate rather than trusting that list — it prints
-file names, so `channel_mute` means the generated `ChannelMute` shadows ours:
+Many generated types shadow ours by name, which is why repositories and mappers import the generated code with a
+prefix. The prefix is permanent: the generated types are never exported. List the current overlaps with (it prints
+file names, so `channel_mute` means the generated `ChannelMute` shadows ours):
 
 ```bash
 comm -12 \
@@ -258,8 +271,8 @@ wrong on top of that:
 
 - **Scope is the surface the group touches**, not just the new repository. The `StreamChatClient` delegates
   duplicate its docs verbatim, so a fix belongs in both.
-- **Retyping a field leaves its doc describing the old type**, and that line is not in the diff. `OwnUser.devices`
-  still reads `/// List of user devices.` after becoming a `DeviceResponse`. Re-read the docs on what you retyped.
+- **Retyping a field leaves its doc describing the old type**, and that line is not in the diff. Re-read the docs
+  on everything you retyped, including fields that only gained a converter.
 - **Describe behaviour, and every non-obvious parameter** — a bare `nameGt` cursor tells a reader nothing. Why a
   shape was adopted belongs in the plan file and the PR body, not in a doc comment.
 
@@ -273,10 +286,11 @@ Budget for this: on a typical feature it is most of the diff, and none of it is 
   `MockHttpClient`. Routing through `DefaultApi` moves the mock seam to `Dio`/`DefaultApi`; the old assertions
   cannot survive.
 - `test/src/client/client_test.dart` builds fixtures in the `late`-mutable style the hand-written DTOs allow
-  (`ListDevicesResponse()..devices = …`). Generated freezed classes have final fields and required named
-  arguments, so any fixture switching to a generated type must be rewritten.
-- `test/src/core/api/responses_test.dart` round-trips the DTO from JSON — keep it passing while the DTO exists,
-  delete it with the DTO.
+  (`ListDevicesResponse()..devices = …`). Stubs of `DefaultApi` now answer generated types, and the restored
+  envelopes are plain classes with const constructors, so those fixtures must be rewritten.
+- `test/src/core/api/responses_test.dart` round-trips the DTO from JSON — delete those cases with the DTO's JSON.
+- **Test each mapper from a fully populated generated response,** so a field the mapper drops fails an assertion.
+- **Test each temporary converter,** both on its own and wired through its parent's `fromJson`/`toJson`.
 
 Rewrite onto `TESTING.md` rather than carrying the old file's habits across. What breaks most often:
 

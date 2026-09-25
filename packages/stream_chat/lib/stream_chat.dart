@@ -63,11 +63,7 @@ export 'package:stream_core/stream_core.dart'
         UserToken,
         UserTokenLoader,
         WsEvent;
-
 export 'package:uuid/uuid.dart';
-
-export 'open_api/models.dart'
-    show CreateDeviceRequestPushProvider, DeviceResponse, ListDevicesResponse, Role, SearchRolesResponse;
 
 export 'src/client/channel/channel.dart';
 export 'src/client/channel/channel_capability_check.dart';
@@ -96,8 +92,10 @@ export 'src/core/models/channel_mute.dart';
 export 'src/core/models/channel_state.dart';
 export 'src/core/models/chat_preferences.dart';
 export 'src/core/models/command.dart';
+export 'src/core/models/device.dart';
 export 'src/core/models/draft.dart';
 export 'src/core/models/draft_message.dart';
+export 'src/core/models/list_devices_response.dart';
 export 'src/core/models/location.dart';
 export 'src/core/models/member.dart';
 export 'src/core/models/message.dart';
@@ -116,10 +114,13 @@ export 'src/core/models/predefined_filter.dart';
 export 'src/core/models/privacy_settings.dart';
 export 'src/core/models/push_level.dart';
 export 'src/core/models/push_preference.dart';
+export 'src/core/models/push_provider.dart';
 export 'src/core/models/reaction.dart';
 export 'src/core/models/reaction_group.dart';
 export 'src/core/models/read.dart';
+export 'src/core/models/role.dart';
 export 'src/core/models/role_type.dart';
+export 'src/core/models/search_roles_response.dart';
 export 'src/core/models/thread.dart';
 export 'src/core/models/thread_participant.dart';
 export 'src/core/models/unread_counts.dart';

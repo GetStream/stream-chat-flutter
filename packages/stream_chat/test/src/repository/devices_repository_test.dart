@@ -1,5 +1,8 @@
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/open_api/api.dart';
+import 'package:stream_chat/open_api/api.dart' as api;
+import 'package:stream_chat/src/core/models/device.dart';
+import 'package:stream_chat/src/core/models/list_devices_response.dart';
+import 'package:stream_chat/src/core/models/push_provider.dart';
 import 'package:stream_chat/src/repository/devices_repository.dart';
 import 'package:stream_core/stream_core.dart';
 import 'package:test/test.dart';
@@ -7,173 +10,149 @@ import 'package:test/test.dart';
 import '../mocks.dart';
 
 void main() {
-  late MockDefaultApi api;
-  late DevicesRepository repository;
+  test('DevicesRepository.addDevice forwards the id and provider without a name', () async {
+    final defaultApi = MockDefaultApi();
+    const request = api.CreateDeviceRequest(
+      id: 'device-id',
+      pushProvider: api.CreateDeviceRequestPushProvider.firebase,
+    );
+    _stubCreateDevice(defaultApi, request);
 
-  setUp(() {
-    api = MockDefaultApi();
-    repository = DevicesRepository(api);
+    await DevicesRepository(defaultApi).addDevice('device-id', PushProvider.firebase);
+
+    verify(() => defaultApi.createDevice(createDeviceRequest: request)).called(1);
+    verifyNoMoreInteractions(defaultApi);
   });
 
-  group('addDevice', () {
-    test('should forward the id and provider without a name', () async {
-      const request = CreateDeviceRequest(
-        id: 'device-id',
-        pushProvider: CreateDeviceRequestPushProvider.firebase,
-      );
+  test('DevicesRepository.addDevice forwards the provider name when given', () async {
+    final defaultApi = MockDefaultApi();
+    const request = api.CreateDeviceRequest(
+      id: 'device-id',
+      pushProvider: api.CreateDeviceRequestPushProvider.apn,
+      pushProviderName: 'staging',
+    );
+    _stubCreateDevice(defaultApi, request);
 
-      when(() => api.createDevice(createDeviceRequest: request)).thenAnswer(
-        (_) async => const Result.success(DurationResponse(duration: '0.01ms')),
-      );
+    await DevicesRepository(defaultApi).addDevice('device-id', PushProvider.apn, pushProviderName: 'staging');
 
-      final res = await repository.addDevice(
-        'device-id',
-        CreateDeviceRequestPushProvider.firebase,
-      );
-
-      expect(res.isSuccess, isTrue);
-      verify(() => api.createDevice(createDeviceRequest: request)).called(1);
-      verifyNoMoreInteractions(api);
-    });
-
-    test('should forward the provider name when given', () async {
-      const request = CreateDeviceRequest(
-        id: 'device-id',
-        pushProvider: CreateDeviceRequestPushProvider.apn,
-        pushProviderName: 'staging',
-      );
-
-      when(() => api.createDevice(createDeviceRequest: request)).thenAnswer(
-        (_) async => const Result.success(DurationResponse(duration: '0.01ms')),
-      );
-
-      await repository.addDevice(
-        'device-id',
-        CreateDeviceRequestPushProvider.apn,
-        pushProviderName: 'staging',
-      );
-
-      verify(() => api.createDevice(createDeviceRequest: request)).called(1);
-      verifyNoMoreInteractions(api);
-    });
-
-    test('should send an empty provider name as no name', () async {
-      const request = CreateDeviceRequest(
-        id: 'device-id',
-        pushProvider: CreateDeviceRequestPushProvider.apn,
-      );
-
-      when(() => api.createDevice(createDeviceRequest: request)).thenAnswer(
-        (_) async => const Result.success(DurationResponse(duration: '0.01ms')),
-      );
-
-      await repository.addDevice(
-        'device-id',
-        CreateDeviceRequestPushProvider.apn,
-        pushProviderName: '',
-      );
-
-      verify(() => api.createDevice(createDeviceRequest: request)).called(1);
-      verifyNoMoreInteractions(api);
-    });
-
-    test('should send every provider under its wire value', () async {
-      const providers = {
-        CreateDeviceRequestPushProvider.apn: 'apn',
-        CreateDeviceRequestPushProvider.firebase: 'firebase',
-        CreateDeviceRequestPushProvider.huawei: 'huawei',
-        CreateDeviceRequestPushProvider.xiaomi: 'xiaomi',
-      };
-
-      for (final MapEntry(key: provider, value: wireValue) in providers.entries) {
-        final request = CreateDeviceRequest(id: 'device-id', pushProvider: provider);
-
-        when(() => api.createDevice(createDeviceRequest: request)).thenAnswer(
-          (_) async => const Result.success(DurationResponse(duration: '0.01ms')),
-        );
-
-        await repository.addDevice('device-id', provider);
-
-        expect(provider, wireValue);
-        verify(() => api.createDevice(createDeviceRequest: request)).called(1);
-      }
-
-      verifyNoMoreInteractions(api);
-    });
-
-    test('should return the failure without throwing', () async {
-      const error = StreamClientException(message: 'boom');
-      const request = CreateDeviceRequest(
-        id: 'device-id',
-        pushProvider: CreateDeviceRequestPushProvider.firebase,
-      );
-
-      when(() => api.createDevice(createDeviceRequest: request)).thenAnswer(
-        (_) async => const Result.failure(error),
-      );
-
-      final res = await repository.addDevice(
-        'device-id',
-        CreateDeviceRequestPushProvider.firebase,
-      );
-
-      expect(res.isFailure, isTrue);
-      expect(res.exceptionOrNull(), error);
-    });
+    verify(() => defaultApi.createDevice(createDeviceRequest: request)).called(1);
+    verifyNoMoreInteractions(defaultApi);
   });
 
-  group('getDevices', () {
-    test('should pass the response through untouched', () async {
-      final device = DeviceResponse(
-        id: 'device-id',
-        pushProvider: 'firebase',
-        createdAt: DateTime.utc(2024),
-        userId: 'user-id',
-      );
+  test('DevicesRepository.addDevice sends an empty provider name as no name', () async {
+    final defaultApi = MockDefaultApi();
+    const request = api.CreateDeviceRequest(
+      id: 'device-id',
+      pushProvider: api.CreateDeviceRequestPushProvider.apn,
+    );
+    _stubCreateDevice(defaultApi, request);
 
-      when(api.listDevices).thenAnswer(
-        (_) async => Result.success(ListDevicesResponse(duration: '0.01ms', devices: [device])),
-      );
+    await DevicesRepository(defaultApi).addDevice('device-id', PushProvider.apn, pushProviderName: '');
 
-      final res = await repository.getDevices();
-
-      expect(res.getOrNull()?.devices.single, device);
-      verify(api.listDevices).called(1);
-      verifyNoMoreInteractions(api);
-    });
-
-    test('should return the failure without throwing', () async {
-      const error = StreamClientException(message: 'boom');
-      when(api.listDevices).thenAnswer((_) async => const Result.failure(error));
-
-      final res = await repository.getDevices();
-
-      expect(res.isFailure, isTrue);
-      expect(res.exceptionOrNull(), error);
-    });
+    verify(() => defaultApi.createDevice(createDeviceRequest: request)).called(1);
+    verifyNoMoreInteractions(defaultApi);
   });
 
-  group('removeDevice', () {
-    test('should forward the id', () async {
-      when(() => api.deleteDevice(id: 'device-id')).thenAnswer(
-        (_) async => const Result.success(DurationResponse(duration: '0.01ms')),
-      );
+  test('DevicesRepository.addDevice returns a success with no value when the server accepts the device', () async {
+    final defaultApi = MockDefaultApi();
+    const request = api.CreateDeviceRequest(
+      id: 'device-id',
+      pushProvider: api.CreateDeviceRequestPushProvider.firebase,
+    );
+    _stubCreateDevice(defaultApi, request);
 
-      final res = await repository.removeDevice('device-id');
+    final res = await DevicesRepository(defaultApi).addDevice('device-id', PushProvider.firebase);
 
-      expect(res.isSuccess, isTrue);
-      verify(() => api.deleteDevice(id: 'device-id')).called(1);
-      verifyNoMoreInteractions(api);
-    });
-
-    test('should return the failure without throwing', () async {
-      const error = StreamClientException(message: 'boom');
-      when(() => api.deleteDevice(id: 'device-id')).thenAnswer((_) async => const Result.failure(error));
-
-      final res = await repository.removeDevice('device-id');
-
-      expect(res.isFailure, isTrue);
-      expect(res.exceptionOrNull(), error);
-    });
+    expect(res, const Result<void>.success(null));
   });
+
+  test('DevicesRepository.addDevice returns the failure without throwing', () async {
+    final defaultApi = MockDefaultApi();
+    const error = StreamClientException(message: 'boom');
+    const request = api.CreateDeviceRequest(
+      id: 'device-id',
+      pushProvider: api.CreateDeviceRequestPushProvider.firebase,
+    );
+    when(
+      () => defaultApi.createDevice(createDeviceRequest: request),
+    ).thenAnswer((_) async => const Result.failure(error));
+
+    final res = await DevicesRepository(defaultApi).addDevice('device-id', PushProvider.firebase);
+
+    expect(res.exceptionOrNull(), error);
+  });
+
+  test('DevicesRepository.getDevices returns the mapped response', () async {
+    final defaultApi = MockDefaultApi();
+    final device = api.DeviceResponse(
+      id: 'device-id',
+      pushProvider: 'firebase',
+      createdAt: DateTime.utc(2024),
+      userId: 'user-id',
+    );
+    when(defaultApi.listDevices).thenAnswer(
+      (_) async => Result.success(api.ListDevicesResponse(duration: '0.02ms', devices: [device])),
+    );
+
+    final res = await DevicesRepository(defaultApi).getDevices();
+
+    expect(
+      res.getOrNull(),
+      const ListDevicesResponse(
+        duration: '0.02ms',
+        devices: [Device(id: 'device-id', pushProvider: PushProvider.firebase)],
+      ),
+    );
+  });
+
+  test('DevicesRepository.getDevices returns the failure without throwing', () async {
+    final defaultApi = MockDefaultApi();
+    const error = StreamClientException(message: 'boom');
+    when(defaultApi.listDevices).thenAnswer((_) async => const Result.failure(error));
+
+    final res = await DevicesRepository(defaultApi).getDevices();
+
+    expect(res.exceptionOrNull(), error);
+  });
+
+  test('DevicesRepository.removeDevice forwards the id', () async {
+    final defaultApi = MockDefaultApi();
+    _stubDeleteDevice(defaultApi, 'device-id');
+
+    await DevicesRepository(defaultApi).removeDevice('device-id');
+
+    verify(() => defaultApi.deleteDevice(id: 'device-id')).called(1);
+    verifyNoMoreInteractions(defaultApi);
+  });
+
+  test('DevicesRepository.removeDevice returns a success with no value when the server removes the device', () async {
+    final defaultApi = MockDefaultApi();
+    _stubDeleteDevice(defaultApi, 'device-id');
+
+    final res = await DevicesRepository(defaultApi).removeDevice('device-id');
+
+    expect(res, const Result<void>.success(null));
+  });
+
+  test('DevicesRepository.removeDevice returns the failure without throwing', () async {
+    final defaultApi = MockDefaultApi();
+    const error = StreamClientException(message: 'boom');
+    when(() => defaultApi.deleteDevice(id: 'device-id')).thenAnswer((_) async => const Result.failure(error));
+
+    final res = await DevicesRepository(defaultApi).removeDevice('device-id');
+
+    expect(res.exceptionOrNull(), error);
+  });
+}
+
+void _stubCreateDevice(MockDefaultApi defaultApi, api.CreateDeviceRequest request) {
+  when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
+    (_) async => const Result.success(api.DurationResponse(duration: '0.01ms')),
+  );
+}
+
+void _stubDeleteDevice(MockDefaultApi defaultApi, String id) {
+  when(() => defaultApi.deleteDevice(id: id)).thenAnswer(
+    (_) async => const Result.success(api.DurationResponse(duration: '0.01ms')),
+  );
 }

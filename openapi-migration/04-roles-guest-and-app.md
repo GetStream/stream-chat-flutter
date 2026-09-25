@@ -32,8 +32,10 @@
 
 ## Decisions taken
 
-- **`Role` and `SearchRolesResponse` are the generated types.** They were field-for-field identical to
-  ours, so keeping ours meant maintaining two copies of one shape forever.
+- **`Role` and `SearchRolesResponse` stay our public types, in their v10 shapes,** as plain classes
+  with no JSON, mapped from the generated types in `lib/src/repository/mapper/roles_mapper.dart`. The
+  group first adopted the generated types; it now follows the
+  [domain-model rules](README.md#domain-models).
 - **`RoleType` stays hand-written.** `searchRoles(roleType:)` accepts exactly `'user'` or `'channel'`
   and the server rejects anything else with a 400, but the v2 spec models `role_type` as an open
   string, so there is nothing generated to adopt. It is an `extension type const RoleType(String)

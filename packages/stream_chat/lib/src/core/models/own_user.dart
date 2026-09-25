@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 import '../../../stream_chat.dart';
 import '../util/serializer.dart';
+import 'converters/v1_json_converters.dart';
 
 part 'own_user.g.dart';
 
@@ -63,7 +64,7 @@ class OwnUser extends User {
     DateTime? banExpires,
     List<String>? teams,
     List<ChannelMute>? channelMutes,
-    List<DeviceResponse>? devices,
+    List<Device>? devices,
     List<Mute>? mutes,
     List<String>? blockedUserIds,
     int? totalUnreadCount,
@@ -140,8 +141,9 @@ class OwnUser extends User {
     );
   }
 
-  /// List of user devices.
-  final List<DeviceResponse> devices;
+  /// The devices registered for this user to receive push notifications.
+  @DeviceV1JsonConverter()
+  final List<Device> devices;
 
   /// List of users muted by the user.
   final List<Mute> mutes;

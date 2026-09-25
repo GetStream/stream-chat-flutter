@@ -36,11 +36,12 @@
 
 ## Decisions to make
 
-- Several generated responses (`AddUserGroupMembersResponse`, `CreateUserGroupResponse`, …) wrap the same `UserGroupResponse`; decide whether our public API keeps distinct types or collapses them.
+- Follows the [domain-model rules](README.md#domain-models): `UserGroup`, `UserGroupMember` and the seven v10 response envelopes stay public in their v10 shapes, as plain classes, mapped from the generated types in the repository.
+- `Message.mentionedGroups` still decodes v1 JSON, so it needs a temporary `UserGroupV1JsonConverter` (removed by group 10), and the persistence mapper serializes `mentioned_groups` itself.
 
 ## Risks
 
-- `UserGroup` and `UserGroupMember` collide by name with generated types — the export decision lands here first.
+- `UserGroup` and `UserGroupMember` collide by name with generated types. Import the generated code with a prefix; the generated types are never exported.
 
 ## Definition of done
 

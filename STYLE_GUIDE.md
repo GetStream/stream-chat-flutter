@@ -709,6 +709,40 @@ final label = switch (state) {
 };
 ```
 
+### Prefer extension types over enums for server-defined values
+
+A set of values the server defines — a push provider, a message type, a channel
+capability — grows over time. Model it as an extension type over its wire string, with
+a `static const` for each value the SDK knows, rather than as an enum:
+
+```dart
+// GOOD:
+extension type const PushProvider(String rawType) implements String {
+  /// Google's Firebase Cloud Messaging.
+  static const firebase = PushProvider('firebase');
+
+  /// Apple's Push Notification service.
+  static const apn = PushProvider('apn');
+}
+
+// BAD:
+enum PushProvider { firebase, apn }
+```
+
+- **Adding a value is not a breaking change.** Callers can't switch over the type
+  exhaustively, so a new constant breaks no one's `switch`.
+- **A value the SDK doesn't name yet still decodes.** `PushProvider('onesignal')` carries
+  it through, instead of failing or collapsing into an `unknown` case.
+- **It interoperates with `String`.** It compares equal to its wire value and passes
+  wherever a `String` is expected, so no conversion is needed at the wire boundary.
+
+The cost is exhaustiveness: there is no `.values` or `.name`, and a `switch` over one
+needs a default. Keep an enum for a closed set the SDK owns, where exhaustiveness is
+the point — `ConnectionStatus`, `QueryDirection`, `SortDirection`.
+
+Existing examples: `MessageType`, `AttachmentType`, `ChannelCapability`, `RoleType`,
+`PushProvider`.
+
 ### Prefer explicit types and avoid `dynamic`
 
 All public API members must have explicit type annotations — parameters, fields, and

@@ -29,8 +29,7 @@ import 'package:stream_core/stream_core.dart'
         WsEvent;
 import 'package:synchronized/synchronized.dart';
 
-import '../../open_api/api.dart'
-    show CreateDeviceRequestPushProvider, DefaultApi, ListDevicesResponse, SearchRolesResponse;
+import '../../open_api/api.dart' show DefaultApi;
 import '../../version.dart';
 import '../core/api/attachment_file_uploader.dart';
 import '../core/api/requests.dart';
@@ -46,6 +45,7 @@ import '../core/models/banned_user.dart';
 import '../core/models/channel_state.dart';
 import '../core/models/draft.dart';
 import '../core/models/draft_message.dart';
+import '../core/models/list_devices_response.dart';
 import '../core/models/location.dart';
 import '../core/models/member.dart';
 import '../core/models/message.dart';
@@ -56,8 +56,10 @@ import '../core/models/poll.dart';
 import '../core/models/poll_option.dart';
 import '../core/models/poll_vote.dart';
 import '../core/models/push_preference.dart';
+import '../core/models/push_provider.dart';
 import '../core/models/reaction.dart';
 import '../core/models/role_type.dart';
+import '../core/models/search_roles_response.dart';
 import '../core/models/thread.dart';
 import '../core/models/user.dart';
 import '../core/util/event_controller.dart';
@@ -107,7 +109,7 @@ class StreamChatClient {
     Duration connectTimeout = kDefaultConnectTimeout,
     Duration receiveTimeout = kDefaultReceiveTimeout,
     StreamChatApi? chatApi,
-    DefaultApi? defaultApi,
+    @internal DefaultApi? defaultApi,
     @visibleForTesting WebSocketProvider? wsProvider,
     AttachmentFileUploaderProvider attachmentFileUploaderProvider = StreamAttachmentFileUploader.new,
     Iterable<Interceptor>? chatApiInterceptors,
@@ -1210,7 +1212,7 @@ class StreamChatClient {
   /// [pushProvider] to use, for apps that have more than one.
   Future<Result<void>> addDevice(
     String id,
-    CreateDeviceRequestPushProvider pushProvider, {
+    PushProvider pushProvider, {
     String? pushProviderName,
   }) => _devicesRepository.addDevice(
     id,
@@ -2479,6 +2481,11 @@ class StreamChatClient {
   );
 
   /// Searches roles by name prefix (autocomplete).
+  ///
+  /// [limit] caps how many roles come back in one page.
+  ///
+  /// [nameGt] is a cursor: only roles ordering after this name are returned.
+  /// Pass the last name of the previous page to read the next one.
   ///
   /// [roleType] filters to user-assignable ([RoleType.user]) or
   /// channel-assignable ([RoleType.channel]) roles when set; both kinds are
