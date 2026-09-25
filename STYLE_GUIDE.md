@@ -936,7 +936,7 @@ If the post-processing is expensive enough that duplicating it hurts readability
 extract a helper method — don't reintroduce the shared-variable pattern.
 
 The same applies to a chain of `||`, `&&` or `??` checks: return at each check rather than wrapping the
-chain or hoisting it into locals. → [Use braces for long function bodies](#use-braces-for-long-function-bodies)
+chain. → [Use braces for long function bodies](#use-braces-for-long-function-bodies)
 
 ### Use streams for real-time data
 
@@ -1306,7 +1306,9 @@ Use a block (with braces) when a body would wrap onto more than one line — do 
 
 When that body is a chain of `||`, `&&` or `??` over separate checks, write one early return per
 check, in order, so evaluation stops at the first check that decides the result. Wrapping the chain
-in braces still reads badly, and hoisting every check into a local evaluates all of them.
+in braces still reads badly, and hoisting every check into a local evaluates all of them. For `&&`, return
+`false` at each failing check. Return the last check directly, letting it wrap if it is long;
+`if (…) return true; return false;` only restates it.
 
 ```dart
 // BAD:
