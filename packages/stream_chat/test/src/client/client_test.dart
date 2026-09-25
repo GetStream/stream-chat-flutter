@@ -2084,7 +2084,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.createUserGroup returns the group created from the arguments', () async {
+    test('StreamChatClient.createUserGroup sends the arguments and returns the mapped group', () async {
       const name = 'Engineering';
       const id = 'test-group-id';
       const description = 'The engineers';
@@ -2116,7 +2116,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.updateUserGroup returns the group updated with the arguments', () async {
+    test('StreamChatClient.updateUserGroup sends the arguments and returns the mapped group', () async {
       const id = 'test-group-id';
       const name = 'Engineering';
       const description = 'The engineers';
@@ -2150,7 +2150,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.addUserGroupMembers returns the group with the added members', () async {
+    test('StreamChatClient.addUserGroupMembers sends the members and returns the mapped group', () async {
       const id = 'test-group-id';
       const memberIds = ['test-user-id'];
       const teamId = 'test-team-id';
@@ -2168,7 +2168,7 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.removeUserGroupMembers returns the group without the removed members', () async {
+    test('StreamChatClient.removeUserGroupMembers sends the members and returns the mapped group', () async {
       const id = 'test-group-id';
       const memberIds = ['test-user-id'];
       const teamId = 'test-team-id';
@@ -2184,6 +2184,18 @@ void main() {
 
       verify(() => defaultApi.removeUserGroupMembers(id: id, removeUserGroupMembersRequest: request)).called(1);
       verifyNoMoreInteractions(defaultApi);
+    });
+
+    test('StreamChatClient.searchUserGroups returns the failure without throwing', () async {
+      const error = StreamClientException(message: 'boom');
+
+      when(
+        () => defaultApi.searchUserGroups(query: 'eng'),
+      ).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await client.searchUserGroups('eng');
+
+      expect(res.exceptionOrNull(), error);
     });
 
     test('StreamChatClient.searchRoles returns the roles matching the query', () async {
