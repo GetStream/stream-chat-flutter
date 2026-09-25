@@ -52,10 +52,11 @@ one group. Verified mechanically — see [Keeping this plan honest](#keeping-thi
 
 - **One feature group per PR.** A group is a set of endpoints a caller thinks of together, and it moves across
   completely — half-migrated features are worse than unmigrated ones.
-- **Keep our shape.** The public API keeps the v10 models, names and envelopes. Beyond `Result`, the only
+- **Keep our shape.** The public API keeps the v10 models and envelopes, and their names by default. The only
   sanctioned breaks are the ones [Domain models](#domain-models) lists.
-- **Every break ships four artifacts**: `refactor(llc)!:` title, `🛑️ Breaking` CHANGELOG entry, a Symbol Map row
-  plus feature section in `migrations/v11-migration.md`, and the reason in the PR body.
+- **Every break ships four artifacts**: `refactor(<scope>)!:` title (usually `llc`), `🛑️ Breaking` CHANGELOG
+  entry, the edits `migrations/v11-migration.md` asks for (Symbol Map row, Quick Reference row, feature section),
+  and the reason in the PR body.
 - **Decide once, at the right level.** The `User` shape is decided in [01-foundation](01-foundation.md), not
   re-argued per group. Errors and `Result` are decided in
   [`core-migration/03-errors.md`](../core-migration/03-errors.md).
@@ -66,32 +67,54 @@ The generated client is an implementation detail. Every group follows these rule
 breaks against v10:
 
 - public methods return `Result<T>` instead of throwing;
-- a write whose response carries only `duration` returns `Result<void>` rather than `EmptyResponse`;
+- a write whose generated response is `DurationResponse` returns `Result<void>` rather than `EmptyResponse`;
+- a read returns its envelope, even where v10 returned the bare payload (`getAppSettings` now answers
+  `GetAppSettingsResponse`, not `AppSettings`); a new envelope's name is proposed case by case;
+- a write whose generated response is a named `*Response` returns that envelope, even where v10 returned
+  `EmptyResponse` or a bare model (`hideChannel` answers `HideChannelResponse`);
+- a field the spec marks optional is nullable, even where v10 typed it non-null (`OGAttachmentResponse.ogScrapeUrl`,
+  `CreateUserGroupResponse.userGroup`);
 - public models and envelopes lose `fromJson` and `toJson`;
 - envelopes are immutable, built through a const constructor rather than `late` setters;
 - `duration` is a non-nullable `String` on every envelope, where v10 typed it `String?`;
 - public models and envelopes are `@freezed`, so they compare by value; one that extended `Equatable` in v10 no
   longer does, and loses `props`.
 
-Each ships with a CHANGELOG entry and a Symbol Map row like any other break.
+Each ships the four artifacts listed under [Principles](#principles), like any other break.
 
+**Why `DurationResponse` becomes `void`, and nothing else does.** `DurationResponse` is the spec's shared response
+for writes that return nothing, and the backend cannot add fields to it, so dropping it loses nothing now or later.
+Every other response can gain fields, so the caller gets its envelope and a field the server adds later is an
+additive change. That includes a named response that carries only `duration` today, such as `HideChannelResponse`
+or `DeleteReminderResponse`.
 
 1. **No generated type in a public signature.** `lib/stream_chat.dart` exports nothing from `open_api/`, and no
    other package or the sample app imports it. `generate_plan.py --check` enforces both.
-2. **Public models keep their v10 names, fields, nullability and defaults,** as `@freezed` classes (value
-   equality, `copyWith`, `toString`) with no `fromJson`, `toJson` or json_serializable. A field the server adds is exposed later, as an additive
-   change. The one exception is the temporary `@DataSerializable` storage codec in rule 8.
+2. **Public models keep their v10 fields and defaults,** as `@freezed` classes (value equality, `copyWith`,
+   `toString`) with no `fromJson`, `toJson` or json_serializable. Nullability follows v10 unless the spec is looser
+   (see the breaks above). A field the server adds is exposed later, as an additive change. The one exception to
+   "no JSON" is the temporary `@DataSerializable` storage codec in rule 8.
+
+   **Names default to v10's,** even where the generated name differs: `OGAttachmentResponse` rather than
+   `GetOGResponse`, `AppSettings` rather than `AppResponseFields`, `UploadConfig` rather than `FileUploadConfig`.
+   That is a default, not a requirement. The user may ask for another name, or a migration may propose one that
+   fits clearly better; renaming a v10 type is a break, so it needs approval and a Symbol Map row.
 3. **Responses keep their v10 envelopes,** as `@freezed` classes carrying a non-nullable `duration` and the
-   payload, one file per class under `lib/src/core/models/`. A write whose response carries only
-   `duration` returns `Result<void>`: `EmptyResponse` stays behind for the unmigrated APIs.
+   payload. Every class suffixed `Response` lives in `lib/src/core/models/response/`, and every public class
+   suffixed `Request` in `lib/src/core/models/request/`, one file per class. Every other model stays in
+   `lib/src/core/models/`, whatever it is used for (`PaginationParams`, `ThreadOptions`). `EmptyResponse` stays
+   behind for the unmigrated APIs.
 4. **Public methods return `Result<T>`,** per [`core-migration/03-errors.md`](../core-migration/03-errors.md).
 5. **Mapping happens in the repository,** on the `Result` the generated call returns
-   (`result.map((response) => response.toModel())`), through extensions in
-   `lib/src/repository/mapper/<feature>_mapper.dart`. The mappers are package-internal so later groups can compose
-   them. Repositories import the generated code with a prefix (`as api`), which keeps its names from colliding
-   with ours.
-6. **Request enums are hand-written** and mapped to the generated enum in the repository (`PushProvider` →
-   `CreateDeviceRequestPushProvider`).
+   (`result.map((response) => response.toModel())`, or `result.ignoreValue()` from
+   `lib/src/repository/mapper/result_mapper.dart` for `Result<void>`), through extensions in
+   `lib/src/repository/mapper/<feature>_mapper.dart`: `toModel()` from a generated type to ours, `toRequest()`
+   from ours to a generated request. The mappers are package-internal so later groups can compose them.
+   Repositories import the generated code with a prefix (`as api`), which keeps its names from colliding with
+   ours.
+6. **Request enums are hand-written extension types** over the wire string, per `STYLE_GUIDE.md` § Prefer
+   extension types over enums for server-defined values, and mapped to the generated type in the repository
+   (`PushProvider` → `CreateDeviceRequestPushProvider`).
 7. **A plain model embedded in a json_serializable parent gets a temporary converter.** Some parents still decode
    v1 REST or WebSocket JSON with json_serializable; their field gets a `JsonConverter` — or a decode-only
    `fromJson` function when the parent never writes the field — in
@@ -103,9 +126,11 @@ Each ships with a CHANGELOG entry and a Symbol Map row like any other break.
    annotation a public model may carry. The model exposes the generated code as `fromData` and `toData`, which only
    `stream_chat_persistence` calls; it never gains `fromJson` or `toJson`. A field holding another plain model
    needs `@JsonKey(fromJson: ..., toJson: ...)` functions that call the nested `fromData` and `toData`, because
-   json_serializable only looks for `fromJson` and `toJson` on nested types. The codec is temporary: every use is
-   marked `// TODO(openapi-migration): remove in group 10` and listed below, and group 10 decides what replaces
-   it. The cache is disposable, so the stored format is ours to choose.
+   json_serializable only looks for `fromJson` and `toJson` on nested types; the parent then carries
+   `@DataSerializable` too. A plain model nested in a parent that is still json_serializable needs no codec: the
+   parent's rule-7 converter writes it. The codec is temporary: every use is marked
+   `// TODO(openapi-migration): remove in group 10` and listed below, and group 10 replaces every use and deletes
+   the typedef, so no later group adds one. The cache is disposable, so the stored format is ours to choose.
 
 ### Temporary adapters
 
@@ -134,7 +159,8 @@ surfaces before it reaches `Message` and `ChannelState`:
 - **09** freezes the `User` mapping that everything else already depends on (the *decision* is made in 01; this
   group executes it).
 - **10–11** are the core of the SDK, and carry the `custom` / `extraData` promotion problem.
-- **12** is last because it needs its own hand-written multipart client and is the highest-traffic path in the SDK.
+- **12** comes late because it needs its own hand-written multipart client and is the highest-traffic path in the
+  SDK.
 
 ## Prerequisites
 
@@ -150,9 +176,9 @@ tests → verify). Use **`openapi-codegen`** when a type or operation is missing
 Consumer-facing changes go in `migrations/v11-migration.md` in the same PR that makes them.
 
 A migration follows [`STYLE_GUIDE.md`](../STYLE_GUIDE.md), [`EFFECTIVE_DART_DOC.md`](../EFFECTIVE_DART_DOC.md)
-and [`TESTING.md`](../TESTING.md) like any other change. Nothing in CI checks either — `dart analyze --fatal-infos` checks a public member *has* a doc, never what
-it says or how a test is named — so the last two boxes of every definition of done stand for reading the diff
-against them.
+and [`TESTING.md`](../TESTING.md) like any other change. Nothing in CI checks them — `dart analyze --fatal-infos`
+checks a public member *has* a doc, never what it says or how a test is named — so the last two boxes of every
+definition of done stand for reading the diff against them.
 
 ## Keeping this plan honest
 

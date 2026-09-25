@@ -48,6 +48,7 @@
 
 - `Poll`, `PollOption` and `PollVote` are public and persisted; adopting generated shapes means touching `stream_chat_persistence` in the same PR.
 - `VotingVisibility` is ours; the generated equivalent is an inline per-operation enum.
+- One generated `PollResponse` answers `createPoll`, `getPoll`, `updatePoll` and `updatePollPartial`, where v10 has `CreatePollResponse`, `GetPollResponse` and `UpdatePollResponse`. The v10 envelopes stay; decide with the user how the mapper names its conversions, since one `toModel()` cannot return three types. `PollOptionResponse` (create, get, update an option) and `PollVoteResponse` (cast, remove a vote) have the same shape.
 
 ## Risks
 
