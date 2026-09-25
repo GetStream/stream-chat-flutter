@@ -1,6 +1,6 @@
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/open_api/api.dart' as api;
-import 'package:stream_chat/src/core/models/og_attachment_response.dart';
+import 'package:stream_chat/src/core/models/response/og_attachment_response.dart';
 import 'package:stream_chat/src/repository/general_repository.dart';
 import 'package:stream_core/stream_core.dart';
 import 'package:test/test.dart';

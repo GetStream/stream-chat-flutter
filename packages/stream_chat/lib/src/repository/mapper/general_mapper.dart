@@ -1,5 +1,5 @@
 import '../../../open_api/api.dart' as api;
-import '../../core/models/og_attachment_response.dart';
+import '../../core/models/response/og_attachment_response.dart';
 
 /// Maps a generated [api.GetOGResponse] to an [OGAttachmentResponse].
 extension GetOGResponseMapper on api.GetOGResponse {

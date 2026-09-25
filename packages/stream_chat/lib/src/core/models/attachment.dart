@@ -7,7 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../util/serializer.dart';
 import 'action.dart';
 import 'attachment_file.dart';
-import 'og_attachment_response.dart';
+import 'response/og_attachment_response.dart';
 
 part 'attachment.g.dart';
 

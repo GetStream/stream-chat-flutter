@@ -1,5 +1,5 @@
 import 'package:stream_chat/open_api/api.dart' as api;
-import 'package:stream_chat/src/core/models/og_attachment_response.dart';
+import 'package:stream_chat/src/core/models/response/og_attachment_response.dart';
 import 'package:stream_chat/src/repository/mapper/general_mapper.dart';
 import 'package:test/test.dart';
 
