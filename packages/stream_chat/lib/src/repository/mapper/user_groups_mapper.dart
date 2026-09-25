@@ -1,11 +1,11 @@
 import '../../../open_api/api.dart' as api;
-import '../../core/models/add_user_group_members_response.dart';
-import '../../core/models/create_user_group_response.dart';
-import '../../core/models/get_user_group_response.dart';
-import '../../core/models/list_user_groups_response.dart';
-import '../../core/models/remove_user_group_members_response.dart';
-import '../../core/models/search_user_groups_response.dart';
-import '../../core/models/update_user_group_response.dart';
+import '../../core/models/response/add_user_group_members_response.dart';
+import '../../core/models/response/create_user_group_response.dart';
+import '../../core/models/response/get_user_group_response.dart';
+import '../../core/models/response/list_user_groups_response.dart';
+import '../../core/models/response/remove_user_group_members_response.dart';
+import '../../core/models/response/search_user_groups_response.dart';
+import '../../core/models/response/update_user_group_response.dart';
 import '../../core/models/user_group.dart';
 import '../../core/models/user_group_member.dart';
 

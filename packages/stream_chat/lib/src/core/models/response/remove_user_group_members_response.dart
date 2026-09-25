@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import 'user_group.dart';
+import '../user_group.dart';
 
 part 'remove_user_group_members_response.freezed.dart';
 
