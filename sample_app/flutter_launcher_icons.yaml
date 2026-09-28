@@ -1,12 +1,10 @@
 # flutter pub run flutter_launcher_icons
 flutter_launcher_icons:
   image_path: "assets/ic_launcher.png"
-  adaptive_icon_background: "assets/ic_launcher_background.png"
-  adaptive_icon_foreground: "assets/ic_launcher_foreground.png"
-  adaptive_icon_monochrome: "assets/ic_launcher_monochrome.png"
-  adaptive_icon_foreground_inset: 8 # Optional, default is 16
 
-  android: true # Generate Android launcher icon
+  # The Android adaptive icon uses a gradient background drawable, which the
+  # generator cannot produce, so it is maintained by hand.
+  android: false
   ios: true # Generate iOS launcher icon
   remove_alpha_ios: true # Apple App Store requires no transparency
   web:

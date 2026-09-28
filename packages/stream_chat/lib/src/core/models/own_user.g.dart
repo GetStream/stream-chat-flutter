@@ -8,7 +8,9 @@ part of 'own_user.dart';
 
 OwnUser _$OwnUserFromJson(Map<String, dynamic> json) => OwnUser(
   devices:
-      (json['devices'] as List<dynamic>?)?.map((e) => DeviceResponse.fromJson(e as Map<String, dynamic>)).toList() ??
+      (json['devices'] as List<dynamic>?)
+          ?.map((e) => const DeviceV1JsonConverter().fromJson(e as Map<String, dynamic>))
+          .toList() ??
       const [],
   mutes: (json['mutes'] as List<dynamic>?)?.map((e) => Mute.fromJson(e as Map<String, dynamic>)).toList() ?? const [],
   totalUnreadCount: (json['total_unread_count'] as num?)?.toInt() ?? 0,
@@ -20,14 +22,10 @@ OwnUser _$OwnUserFromJson(Map<String, dynamic> json) => OwnUser(
   blockedUserIds: (json['blocked_user_ids'] as List<dynamic>?)?.map((e) => e as String).toList() ?? const [],
   pushPreferences: json['push_preferences'] == null
       ? null
-      : PushPreference.fromJson(
-          json['push_preferences'] as Map<String, dynamic>,
-        ),
+      : PushPreference.fromJson(json['push_preferences'] as Map<String, dynamic>),
   privacySettings: json['privacy_settings'] == null
       ? null
-      : PrivacySettings.fromJson(
-          json['privacy_settings'] as Map<String, dynamic>,
-        ),
+      : PrivacySettings.fromJson(json['privacy_settings'] as Map<String, dynamic>),
   id: json['id'] as String,
   role: json['role'] as String?,
   createdAt: json['created_at'] == null ? null : DateTime.parse(json['created_at'] as String),
@@ -40,9 +38,7 @@ OwnUser _$OwnUserFromJson(Map<String, dynamic> json) => OwnUser(
   teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toList() ?? const [],
   language: json['language'] as String?,
   invisible: json['invisible'] as bool?,
-  teamsRole: (json['teams_role'] as Map<String, dynamic>?)?.map(
-    (k, e) => MapEntry(k, e as String),
-  ),
+  teamsRole: (json['teams_role'] as Map<String, dynamic>?)?.map((k, e) => MapEntry(k, e as String)),
   avgResponseTime: (json['avg_response_time'] as num?)?.toInt(),
 );
 
@@ -61,7 +57,7 @@ Map<String, dynamic> _$OwnUserToJson(OwnUser instance) => <String, dynamic>{
   'teams_role': ?instance.teamsRole,
   'avg_response_time': ?instance.avgResponseTime,
   'extra_data': instance.extraData,
-  'devices': instance.devices.map((e) => e.toJson()).toList(),
+  'devices': instance.devices.map(const DeviceV1JsonConverter().toJson).toList(),
   'mutes': instance.mutes.map((e) => e.toJson()).toList(),
   'channel_mutes': instance.channelMutes.map((e) => e.toJson()).toList(),
   'total_unread_count': instance.totalUnreadCount,

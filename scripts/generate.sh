@@ -80,6 +80,8 @@ git_stamp() {
 
 # ---------- validation ----------
 [[ -d "$CHAT_BACKEND_DIR" ]] || { echo "❌ CHAT_BACKEND_DIR not found: $CHAT_BACKEND_DIR"; exit 1; }
+GENERATOR_DIR="$CHAT_BACKEND_DIR/tools/openapi"
+[[ -d "$GENERATOR_DIR" ]] || { echo "❌ Generator not found: $GENERATOR_DIR (pull GetStream/chat)"; exit 1; }
 command -v go   >/dev/null || { echo "❌ 'go' is required in PATH"; exit 1; }
 command -v dart >/dev/null || { echo "❌ 'dart' is required in PATH"; exit 1; }
 command -v python3 >/dev/null || { echo "❌ 'python3' is required in PATH"; exit 1; }
@@ -210,9 +212,9 @@ else
   # Generate a fresh spec (YAML + JSON) from the backend monolith
   (
     set -o pipefail
-    cd "$CHAT_BACKEND_DIR/projects/chat-manager"
+    cd "$GENERATOR_DIR"
 
-    go run . openapi generate-spec \
+    go run . generate-spec \
       -products "$PRODUCTS" \
       -version "$API_VERSION" \
       --clientside \
@@ -250,9 +252,9 @@ mkdir -p "$OUTPUT_DIR"
 # Generate the Dart client into the package's lib/open_api directory
 (
   set -o pipefail
-  cd "$CHAT_BACKEND_DIR/projects/chat-manager"
+  cd "$GENERATOR_DIR"
 
-  go run . openapi generate-client \
+  go run . generate-client \
     --language dart \
     --spec "$SPEC_FILE" \
     --output "$OUTPUT_DIR"

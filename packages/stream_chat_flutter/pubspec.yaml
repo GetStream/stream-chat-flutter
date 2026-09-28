@@ -30,7 +30,7 @@ dependencies:
   diacritic: ^0.1.6
   dio: ^5.11.0
   ezanimation: ^0.6.0
-  file_picker: ^11.0.0
+  file_picker: '>=12.0.0 <14.0.0'
   file_selector: ^1.1.0
   flutter:
     sdk: flutter
@@ -67,7 +67,7 @@ dependencies:
     # ignore: invalid_dependency
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
-      ref: 04e0d1cb3a6893cf70cb6636a261deb11beff81c
+      ref: 2daa0a641519abe9ab637bcb41c69ed3ea4273b7
       path: packages/stream_core_flutter
   stream_thumbnail:
     # The ignore below silences `invalid_dependency` because we occasionally

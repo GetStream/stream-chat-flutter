@@ -63,18 +63,9 @@ export 'package:stream_core/stream_core.dart'
         UserToken,
         UserTokenLoader,
         WsEvent;
-
 export 'package:uuid/uuid.dart';
 
-export 'open_api/models.dart'
-    show
-        BanRequestDeleteMessages,
-        CreateDeviceRequestPushProvider,
-        DeviceResponse,
-        ListDevicesResponse,
-        Role,
-        SearchRolesResponse;
-
+export 'open_api/models.dart' show BanRequestDeleteMessages;
 export 'src/client/channel/channel.dart';
 export 'src/client/channel/channel_capability_check.dart';
 export 'src/client/channel/channel_client_state.dart';
@@ -103,6 +94,7 @@ export 'src/core/models/channel_mute.dart';
 export 'src/core/models/channel_state.dart';
 export 'src/core/models/chat_preferences.dart';
 export 'src/core/models/command.dart';
+export 'src/core/models/device.dart';
 export 'src/core/models/draft.dart';
 export 'src/core/models/draft_message.dart';
 export 'src/core/models/location.dart';
@@ -123,9 +115,21 @@ export 'src/core/models/predefined_filter.dart';
 export 'src/core/models/privacy_settings.dart';
 export 'src/core/models/push_level.dart';
 export 'src/core/models/push_preference.dart';
+export 'src/core/models/push_provider.dart';
 export 'src/core/models/reaction.dart';
 export 'src/core/models/reaction_group.dart';
 export 'src/core/models/read.dart';
+export 'src/core/models/response/add_user_group_members_response.dart';
+export 'src/core/models/response/create_user_group_response.dart';
+export 'src/core/models/response/get_user_group_response.dart';
+export 'src/core/models/response/list_devices_response.dart';
+export 'src/core/models/response/list_user_groups_response.dart';
+export 'src/core/models/response/og_attachment_response.dart';
+export 'src/core/models/response/remove_user_group_members_response.dart';
+export 'src/core/models/response/search_roles_response.dart';
+export 'src/core/models/response/search_user_groups_response.dart';
+export 'src/core/models/response/update_user_group_response.dart';
+export 'src/core/models/role.dart';
 export 'src/core/models/role_type.dart';
 export 'src/core/models/thread.dart';
 export 'src/core/models/thread_participant.dart';

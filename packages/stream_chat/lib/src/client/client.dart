@@ -29,8 +29,7 @@ import 'package:stream_core/stream_core.dart'
         WsEvent;
 import 'package:synchronized/synchronized.dart';
 
-import '../../open_api/api.dart'
-    show CreateDeviceRequestPushProvider, DefaultApi, ListDevicesResponse, SearchRolesResponse;
+import '../../open_api/api.dart' show DefaultApi;
 import '../../version.dart';
 import '../core/api/attachment_file_uploader.dart';
 import '../core/api/requests.dart';
@@ -56,7 +55,18 @@ import '../core/models/poll.dart';
 import '../core/models/poll_option.dart';
 import '../core/models/poll_vote.dart';
 import '../core/models/push_preference.dart';
+import '../core/models/push_provider.dart';
 import '../core/models/reaction.dart';
+import '../core/models/response/add_user_group_members_response.dart';
+import '../core/models/response/create_user_group_response.dart';
+import '../core/models/response/get_user_group_response.dart';
+import '../core/models/response/list_devices_response.dart';
+import '../core/models/response/list_user_groups_response.dart';
+import '../core/models/response/og_attachment_response.dart';
+import '../core/models/response/remove_user_group_members_response.dart';
+import '../core/models/response/search_roles_response.dart';
+import '../core/models/response/search_user_groups_response.dart';
+import '../core/models/response/update_user_group_response.dart';
 import '../core/models/role_type.dart';
 import '../core/models/thread.dart';
 import '../core/models/user.dart';
@@ -67,8 +77,10 @@ import '../core/util/utils.dart';
 import '../db/chat_persistence_client.dart';
 import '../event_type.dart';
 import '../repository/devices_repository.dart';
+import '../repository/general_repository.dart';
 import '../repository/moderation_repository.dart';
 import '../repository/roles_repository.dart';
+import '../repository/user_groups_repository.dart';
 import '../ws/connect_request.dart';
 import '../ws/connection_manager.dart';
 import '../ws/connection_status.dart';
@@ -109,7 +121,7 @@ class StreamChatClient {
     Duration connectTimeout = kDefaultConnectTimeout,
     Duration receiveTimeout = kDefaultReceiveTimeout,
     StreamChatApi? chatApi,
-    DefaultApi? defaultApi,
+    @internal DefaultApi? defaultApi,
     @visibleForTesting WebSocketProvider? wsProvider,
     AttachmentFileUploaderProvider attachmentFileUploaderProvider = StreamAttachmentFileUploader.new,
     Iterable<Interceptor>? chatApiInterceptors,
@@ -168,6 +180,8 @@ class StreamChatClient {
 
     _rolesRepository = RolesRepository(api);
     _devicesRepository = DevicesRepository(api);
+    _userGroupsRepository = UserGroupsRepository(api);
+    _generalRepository = GeneralRepository(api);
     _moderationRepository = ModerationRepository(api);
 
     moderation = ModerationClient(_moderationRepository);
@@ -207,6 +221,8 @@ class StreamChatClient {
 
   late final RolesRepository _rolesRepository;
   late final DevicesRepository _devicesRepository;
+  late final UserGroupsRepository _userGroupsRepository;
+  late final GeneralRepository _generalRepository;
   late final ModerationRepository _moderationRepository;
 
   /// Muting, banning and flagging, for the connected user.
@@ -1222,7 +1238,7 @@ class StreamChatClient {
   /// [pushProvider] to use, for apps that have more than one.
   Future<Result<void>> addDevice(
     String id,
-    CreateDeviceRequestPushProvider pushProvider, {
+    PushProvider pushProvider, {
     String? pushProviderName,
   }) => _devicesRepository.addDevice(
     id,
@@ -2147,8 +2163,11 @@ class StreamChatClient {
     },
   );
 
-  /// Get OpenGraph data of the given [url].
-  Future<OGAttachmentResponse> enrichUrl(String url) => _chatApi.general.enrichUrl(url);
+  /// Scrapes `url` for the OpenGraph metadata a link preview is built from.
+  ///
+  /// The server fetches the page itself, so a URL it cannot scrape comes back
+  /// as a failure.
+  Future<Result<OGAttachmentResponse>> enrichUrl(String url) => _generalRepository.enrichUrl(url);
 
   /// Re-fetches the [AppSettings] and updates [appSettings].
   ///
@@ -2315,12 +2334,15 @@ class StreamChatClient {
   }
 
   /// Lists user groups with cursor-based pagination.
-  Future<ListUserGroupsResponse> listUserGroups({
+  ///
+  /// [createdAtGt] and [idGt] form one cursor: pass the `createdAt` and `id` of
+  /// the last group on the previous page to get the next one. Either alone is ignored.
+  Future<Result<ListUserGroupsResponse>> listUserGroups({
     int? limit,
     String? idGt,
     DateTime? createdAtGt,
     String? teamId,
-  }) => _chatApi.userGroups.listUserGroups(
+  }) => _userGroupsRepository.listUserGroups(
     limit: limit,
     idGt: idGt,
     createdAtGt: createdAtGt,
@@ -2328,13 +2350,16 @@ class StreamChatClient {
   );
 
   /// Searches user groups by name prefix (autocomplete).
-  Future<SearchUserGroupsResponse> searchUserGroups(
+  ///
+  /// [nameGt] and [idGt] form one cursor: pass the `name` and `id` of the last
+  /// group on the previous page to get the next one. Either alone is ignored.
+  Future<Result<SearchUserGroupsResponse>> searchUserGroups(
     String query, {
     int? limit,
     String? nameGt,
     String? idGt,
     String? teamId,
-  }) => _chatApi.userGroups.searchUserGroups(
+  }) => _userGroupsRepository.searchUserGroups(
     query,
     limit: limit,
     nameGt: nameGt,
@@ -2343,19 +2368,21 @@ class StreamChatClient {
   );
 
   /// Gets a user group by ID, including its members.
-  Future<GetUserGroupResponse> getUserGroup(
+  Future<Result<GetUserGroupResponse>> getUserGroup(
     String id, {
     String? teamId,
-  }) => _chatApi.userGroups.getUserGroup(id, teamId: teamId);
+  }) => _userGroupsRepository.getUserGroup(id, teamId: teamId);
 
   /// Creates a new user group, optionally with initial members.
-  Future<CreateUserGroupResponse> createUserGroup(
+  ///
+  /// [id] is generated by the server when omitted.
+  Future<Result<CreateUserGroupResponse>> createUserGroup(
     String name, {
     String? id,
     String? description,
     String? teamId,
     List<String>? memberIds,
-  }) => _chatApi.userGroups.createUserGroup(
+  }) => _userGroupsRepository.createUserGroup(
     name,
     id: id,
     description: description,
@@ -2365,13 +2392,17 @@ class StreamChatClient {
 
   /// Updates a user group's name and/or description.
   ///
+  /// At least one of [name] / [description] must be provided. Passing
+  /// `description: ''` clears the description; passing `null` (or omitting)
+  /// leaves it unchanged.
+  ///
   /// [teamId] scopes the lookup; a group's team cannot be changed.
-  Future<UpdateUserGroupResponse> updateUserGroup(
+  Future<Result<UpdateUserGroupResponse>> updateUserGroup(
     String id, {
     String? name,
     String? description,
     String? teamId,
-  }) => _chatApi.userGroups.updateUserGroup(
+  }) => _userGroupsRepository.updateUserGroup(
     id,
     name: name,
     description: description,
@@ -2379,18 +2410,22 @@ class StreamChatClient {
   );
 
   /// Deletes a user group and all its memberships.
-  Future<EmptyResponse> deleteUserGroup(
+  Future<Result<void>> deleteUserGroup(
     String id, {
     String? teamId,
-  }) => _chatApi.userGroups.deleteUserGroup(id, teamId: teamId);
+  }) => _userGroupsRepository.deleteUserGroup(id, teamId: teamId);
 
   /// Adds members to a user group.
-  Future<AddUserGroupMembersResponse> addUserGroupMembers(
+  ///
+  /// All user IDs must exist; if any does not, no member is added.
+  ///
+  /// [asAdmin] defaults to `false` — a regular member — when not given.
+  Future<Result<AddUserGroupMembersResponse>> addUserGroupMembers(
     String id,
     List<String> memberIds, {
     bool? asAdmin,
     String? teamId,
-  }) => _chatApi.userGroups.addUserGroupMembers(
+  }) => _userGroupsRepository.addUserGroupMembers(
     id,
     memberIds,
     asAdmin: asAdmin,
@@ -2398,17 +2433,24 @@ class StreamChatClient {
   );
 
   /// Removes members from a user group.
-  Future<RemoveUserGroupMembersResponse> removeUserGroupMembers(
+  ///
+  /// User IDs that are not members of the group are ignored.
+  Future<Result<RemoveUserGroupMembersResponse>> removeUserGroupMembers(
     String id,
     List<String> memberIds, {
     String? teamId,
-  }) => _chatApi.userGroups.removeUserGroupMembers(
+  }) => _userGroupsRepository.removeUserGroupMembers(
     id,
     memberIds,
     teamId: teamId,
   );
 
   /// Searches roles by name prefix (autocomplete).
+  ///
+  /// [limit] caps how many roles come back in one page.
+  ///
+  /// [nameGt] is a cursor: only roles ordering after this name are returned.
+  /// Pass the last name of the previous page to read the next one.
   ///
   /// [roleType] filters to user-assignable ([RoleType.user]) or
   /// channel-assignable ([RoleType.channel]) roles when set; both kinds are

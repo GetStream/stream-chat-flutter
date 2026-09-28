@@ -72,14 +72,16 @@ void main() {
       mentionedChannel: true,
       mentionedGroupIds: const ['testGroupId1', 'testGroupId2'],
       mentionedGroups: [
-        jsonEncode(
-          UserGroup(
-            id: 'testGroupId1',
-            name: 'Engineering',
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
-          ),
-        ),
+        jsonEncode({
+          'created_at': '2024-01-02T00:00:00.000Z',
+          'description': 'The engineers',
+          'id': 'testGroupId1',
+          'members': [
+            {'created_at': '2024-01-03T00:00:00.000Z', 'group_id': 'testGroupId1', 'is_admin': true, 'user_id': 'u1'},
+          ],
+          'name': 'Engineering',
+          'updated_at': '2024-01-04T00:00:00.000Z',
+        }),
       ],
       mentionedHere: false,
       mentionedRoles: const ['admin', 'moderator'],
@@ -130,11 +132,18 @@ void main() {
     expect(message.showInChannel, entity.showInChannel);
     expect(message.mentionedChannel, entity.mentionedChannel);
     expect(message.mentionedGroupIds, entity.mentionedGroupIds);
-    for (var i = 0; i < (message.mentionedGroups?.length ?? 0); i++) {
-      final entityMentionedGroup = UserGroup.fromJson(jsonDecode(entity.mentionedGroups![i]));
-      expect(message.mentionedGroups![i].id, entityMentionedGroup.id);
-      expect(message.mentionedGroups![i].name, entityMentionedGroup.name);
-    }
+    expect(message.mentionedGroups, [
+      UserGroup(
+        createdAt: DateTime.utc(2024, 1, 2),
+        description: 'The engineers',
+        id: 'testGroupId1',
+        members: [
+          UserGroupMember(createdAt: DateTime.utc(2024, 1, 3), groupId: 'testGroupId1', isAdmin: true, userId: 'u1'),
+        ],
+        name: 'Engineering',
+        updatedAt: DateTime.utc(2024, 1, 4),
+      ),
+    ]);
     expect(message.mentionedHere, entity.mentionedHere);
     expect(message.mentionedRoles, entity.mentionedRoles);
     for (var i = 0; i < message.mentionedUsers.length; i++) {
@@ -223,10 +232,14 @@ void main() {
       mentionedGroupIds: const ['testGroupId1', 'testGroupId2'],
       mentionedGroups: [
         UserGroup(
+          createdAt: DateTime.utc(2024, 1, 2),
+          description: 'The engineers',
           id: 'testGroupId1',
+          members: [
+            UserGroupMember(createdAt: DateTime.utc(2024, 1, 3), groupId: 'testGroupId1', isAdmin: true, userId: 'u1'),
+          ],
           name: 'Engineering',
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
+          updatedAt: DateTime.utc(2024, 1, 4),
         ),
       ],
       mentionedHere: false,
@@ -285,7 +298,18 @@ void main() {
     expect(entity.replyCount, message.replyCount);
     expect(entity.mentionedChannel, message.mentionedChannel);
     expect(entity.mentionedGroupIds, message.mentionedGroupIds);
-    expect(entity.mentionedGroups, message.mentionedGroups?.map(jsonEncode).toList());
+    expect(entity.mentionedGroups?.map(jsonDecode), [
+      {
+        'created_at': '2024-01-02T00:00:00.000Z',
+        'description': 'The engineers',
+        'id': 'testGroupId1',
+        'members': [
+          {'created_at': '2024-01-03T00:00:00.000Z', 'group_id': 'testGroupId1', 'is_admin': true, 'user_id': 'u1'},
+        ],
+        'name': 'Engineering',
+        'updated_at': '2024-01-04T00:00:00.000Z',
+      },
+    ]);
     expect(entity.mentionedHere, message.mentionedHere);
     expect(entity.mentionedRoles, message.mentionedRoles);
     expect(entity.mentionedUsers, message.mentionedUsers.map(jsonEncode).toList());

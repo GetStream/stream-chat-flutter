@@ -116,37 +116,10 @@ extension IterableExtension<T> on Iterable<T> {
 /// Useful extension for [PlatformFile]
 extension PlatformFileX on PlatformFile {
   /// Converts the [PlatformFile] into [AttachmentFile]
-  AttachmentFile get toAttachmentFile {
-    return AttachmentFile(
-      // Path is not supported on web.
-      path: CurrentPlatform.isWeb ? null : path,
-      name: name,
-      bytes: bytes,
-      size: size,
-    );
-  }
+  Future<AttachmentFile> get toAttachmentFile => xFile.toAttachmentFile;
 
   /// Converts the [PlatformFile] to a [Attachment].
-  Attachment toAttachment({required String type}) {
-    final file = toAttachmentFile;
-    final extraDataMap = <String, Object>{};
-
-    final mimeType = file.mediaType?.mimeType;
-
-    if (mimeType != null) {
-      extraDataMap['mime_type'] = mimeType;
-    }
-
-    extraDataMap['file_size'] = file.size!;
-
-    final attachment = Attachment(
-      file: file,
-      type: type,
-      extraData: extraDataMap,
-    );
-
-    return attachment;
-  }
+  Future<Attachment> toAttachment({required String type}) => xFile.toAttachment(type: type);
 }
 
 /// Useful extension for [XFile]

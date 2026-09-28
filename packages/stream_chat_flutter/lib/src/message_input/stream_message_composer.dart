@@ -1038,6 +1038,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
               autofocus: widget.props.autofocus,
               autocorrect: widget.props.autoCorrect,
               isFloating: isFloating,
+              contentInsertionConfiguration: _buildContentInsertionConfiguration(),
             ),
           ),
         );
@@ -1400,34 +1401,32 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
         CancelableOperation.fromFuture(
           _enrichUrl(firstMatchedUrl, client),
         ).then(
-          (ogAttachment) {
-            final attachment = Attachment.fromOGAttachment(ogAttachment);
-            _effectiveController.setOGAttachment(attachment);
-          },
-          onError: (error, stackTrace) {
-            // Reset the ogAttachment if there was an error
-            _effectiveController.clearOGAttachment();
-            widget.props.onError?.call(error, stackTrace);
-          },
+          (result) => result.fold(
+            onSuccess: (ogAttachment) {
+              final attachment = Attachment.fromOGAttachment(ogAttachment);
+              _effectiveController.setOGAttachment(attachment);
+            },
+            onFailure: _handleEnrichUrlError,
+          ),
         );
+  }
+
+  void _handleEnrichUrlError(Object error, StackTrace? stackTrace) {
+    // Reset the ogAttachment if there was an error
+    _effectiveController.clearOGAttachment();
+    widget.props.onError?.call(error, stackTrace);
   }
 
   final _ogAttachmentCache = <String, OGAttachmentResponse>{};
 
-  Future<OGAttachmentResponse> _enrichUrl(
+  Future<Result<OGAttachmentResponse>> _enrichUrl(
     String url,
     StreamChatClient client,
   ) async {
-    var response = _ogAttachmentCache[url];
-    if (response == null) {
-      try {
-        response = await client.enrichUrl(url);
-        _ogAttachmentCache[url] = response;
-      } catch (e, stk) {
-        return Future.error(e, stk);
-      }
-    }
-    return response;
+    if (_ogAttachmentCache[url] case final cached?) return Result.success(cached);
+
+    final result = await client.enrichUrl(url);
+    return result.onSuccess((response) => _ogAttachmentCache[url] = response);
   }
 
   // Validates [attachments] and adds the passing ones to the message
@@ -1460,6 +1459,48 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     }
 
     if (validationErrors.firstOrNull case final error?) _handleAttachmentError(error);
+  }
+
+  // Lets keyboards such as Gboard insert images and GIFs. Accepted only where
+  // the picker would accept an image, and validated the same way. Off while a
+  // command is active, as commands carry no attachments.
+  ContentInsertionConfiguration? _buildContentInsertionConfiguration() {
+    if (widget.props.disableAttachments) return null;
+    if (_commandEnabled) return null;
+    if (!StreamChannel.of(context).channel.canUploadFile) return null;
+    if (!_getAllowedAttachmentPickerTypes().contains(AttachmentPickerType.images)) return null;
+
+    return ContentInsertionConfiguration(onContentInserted: _onContentInserted);
+  }
+
+  void _onContentInserted(KeyboardInsertedContent content) {
+    // The platform reads the content before handing it over, and a failed read
+    // can arrive as no data or as empty data; either way there is nothing to
+    // attach.
+    final bytes = content.data;
+    if (bytes == null || bytes.isEmpty) return;
+
+    final file = AttachmentFile(
+      size: bytes.length,
+      bytes: bytes,
+      name: _insertedContentFileName(content),
+    );
+
+    _addAttachments([Attachment(type: AttachmentType.image, file: file)]);
+  }
+
+  // The name must carry an extension matching the keyboard's MIME type: the
+  // attachment's MIME type, and so its upload validation, is derived from it.
+  String _insertedContentFileName(KeyboardInsertedContent content) {
+    final extension = content.mimeType.split('/').last;
+    // Resolved from a name rather than compared to content.mimeType directly,
+    // so a non-standard type such as image/jpg still matches a .jpg name.
+    final expected = 'file.$extension'.mediaType?.mimeType;
+
+    final lastSegment = Uri.tryParse(content.uri)?.pathSegments.lastOrNull;
+    if (lastSegment != null && lastSegment.mediaType?.mimeType == expected) return lastSegment;
+
+    return 'keyboard_${DateTime.now().millisecondsSinceEpoch}.$extension';
   }
 
   StreamAttachmentValidator _buildAttachmentValidator() {

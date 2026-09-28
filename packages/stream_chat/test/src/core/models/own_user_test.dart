@@ -10,7 +10,7 @@ class MockMute extends Mock implements Mute {}
 
 class ChannelMockMute extends Mock implements ChannelMute {}
 
-class MockDevice extends Mock implements DeviceResponse {}
+class MockDevice extends Mock implements Device {}
 
 void main() {
   final devices = [MockDevice(), MockDevice()];
@@ -35,13 +35,6 @@ void main() {
       final device = ownUser.devices.single;
       expect(device.id, startsWith('cRS8elU4Q-qqdCAvHR2kSa:'));
       expect(device.pushProvider, 'firebase');
-      expect(device.userId, 'super-band-9');
-      expect(device.createdAt, DateTime.parse('2020-04-23T14:36:21.838196Z'));
-      expect(device.pushProviderName, isNull);
-      expect(device.hardwareId, isNull);
-      expect(device.voip, isNull);
-      expect(device.disabled, isNull);
-      expect(device.disabledReason, isNull);
       expect(ownUser.mutes.length, 0);
       expect(ownUser.channelMutes.length, 1);
       expect(ownUser.totalUnreadCount, 0);
@@ -52,11 +45,39 @@ void main() {
       expect(ownUser.extraData['username'], 'Rioland');
     });
 
-    test('should fail to decode a device missing a field the server always sends', () {
+    test('OwnUser.toJson writes each device under its id and push_provider keys', () {
+      final ownUser = OwnUser(
+        id: 'user-id',
+        devices: const [
+          Device(id: 'device-1', pushProvider: PushProvider.firebase),
+          Device(id: 'device-2', pushProvider: PushProvider.apn),
+        ],
+      );
+
+      final json = ownUser.toJson();
+
+      expect(json['devices'], [
+        {'id': 'device-1', 'push_provider': 'firebase'},
+        {'id': 'device-2', 'push_provider': 'apn'},
+      ]);
+    });
+
+    test('OwnUser.fromJson reads back the devices OwnUser.toJson wrote', () {
+      final json = OwnUser(
+        id: 'user-id',
+        devices: const [Device(id: 'device-1', pushProvider: PushProvider.firebase)],
+      ).toJson();
+
+      final decoded = OwnUser.fromJson(json);
+
+      expect(decoded.devices.map((it) => (it.id, it.pushProvider)), [('device-1', 'firebase')]);
+    });
+
+    test('OwnUser.fromJson fails on a device missing its id or push provider', () {
       final json = jsonFixture('own_user.json');
       final device = Map<String, dynamic>.from((json['devices']! as List).single as Map);
 
-      for (final field in ['id', 'push_provider', 'created_at', 'user_id']) {
+      for (final field in ['id', 'push_provider']) {
         final incomplete = Map<String, dynamic>.from(device)..remove(field);
 
         expect(
@@ -451,12 +472,10 @@ void main() {
           'department': 'Engineering',
           'custom_field': 'custom_value',
         },
-        devices: [
-          DeviceResponse(
+        devices: const [
+          Device(
             id: 'device-1',
-            pushProvider: 'firebase',
-            createdAt: DateTime.utc(2024),
-            userId: 'test-user-id',
+            pushProvider: PushProvider.firebase,
           ),
         ],
         totalUnreadCount: 10,
@@ -512,18 +531,14 @@ void main() {
             'location': 'Amsterdam',
             'is_verified': true,
           },
-          devices: [
-            DeviceResponse(
+          devices: const [
+            Device(
               id: 'device-1',
-              pushProvider: 'firebase',
-              createdAt: DateTime.utc(2024),
-              userId: 'test-user-id',
+              pushProvider: PushProvider.firebase,
             ),
-            DeviceResponse(
+            Device(
               id: 'device-2',
-              pushProvider: 'apn',
-              createdAt: DateTime.utc(2024),
-              userId: 'test-user-id',
+              pushProvider: PushProvider.apn,
             ),
           ],
           totalUnreadCount: 25,

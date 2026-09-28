@@ -148,9 +148,10 @@ void main() {
 
       final client = StreamHttpClient('api-key');
 
-      try {
-        await client.get('path');
-      } catch (_) {}
+      await expectLater(
+        client.get('path'),
+        throwsA(isA<StreamNetworkException>()),
+      );
 
       // The request is logged, and so is the failure to reach the server.
       expect(records.map((it) => it.tag), everyElement('SCh:Http'));

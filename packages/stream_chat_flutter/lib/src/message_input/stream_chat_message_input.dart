@@ -36,6 +36,7 @@ class StreamChatMessageInput extends StatefulWidget {
     this.autofocus = false,
     this.autocorrect = true,
     this.isFloating = false,
+    this.contentInsertionConfiguration,
   });
 
   /// The controller for the message composer.
@@ -100,6 +101,11 @@ class StreamChatMessageInput extends StatefulWidget {
   ///
   /// Defaults to false.
   final bool isFloating;
+
+  /// {@macro flutter.widgets.editableText.contentInsertionConfiguration}
+  ///
+  /// Set this to accept images and GIFs sent from keyboards such as Gboard.
+  final ContentInsertionConfiguration? contentInsertionConfiguration;
 
   @override
   State<StreamChatMessageInput> createState() => _StreamChatMessageInputState();
@@ -264,6 +270,7 @@ class _StreamChatMessageInputContent extends StatelessWidget {
           audioRecorderController: widget.audioRecorderController,
           feedback: widget.feedback,
           sendVoiceRecordingAutomatically: widget.sendVoiceRecordingAutomatically,
+          contentInsertionConfiguration: widget.contentInsertionConfiguration,
         );
 
         return Container(

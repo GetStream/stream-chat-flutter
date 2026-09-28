@@ -14,8 +14,8 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | --- | --- | --- | --- | --- |
 | [01](01-foundation.md) | Foundation — `DefaultApi` wiring, `User` shape | — | — | ☐ |
 | [02](02-devices.md) | Devices | 0 | 3 | ☑ |
-| [03](03-user-groups.md) | User Groups | 8 | 8 | ☐ |
-| [04](04-roles-guest-and-app.md) | Roles, Guest & App Settings | 3 | 5 | ☐ |
+| [03](03-user-groups.md) | User Groups | 0 | 8 | ☑ |
+| [04](04-roles-guest-and-app.md) | Roles, Guest & App Settings | 2 | 5 | ☐ |
 | [05](05-polls.md) | Polls | 13 | 13 | ☐ |
 | [06](06-reminders.md) | Message Reminders | 4 | 4 | ☐ |
 | [07](07-threads-and-drafts.md) | Threads & Drafts | 7 | 7 | ☐ |
@@ -27,7 +27,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [13](13-push-preferences.md) | Push Preferences | 1 | 1 | ☐ |
 | [14](14-banned-users.md) | Banned Users — split out of 08 | 1 | 1 | ☐ |
 
-**Coverage:** 95 hand-written methods across 12 files, and all 129 generated operations, each claimed by exactly
+**Coverage:** 104 hand-written methods across 12 files, and all 129 generated operations, each claimed by exactly
 one group. Verified mechanically — see [Keeping this plan honest](#keeping-this-plan-honest).
 
 
@@ -46,21 +46,80 @@ one group. Verified mechanically — see [Keeping this plan honest](#keeping-thi
 
 - **Moving the WebSocket to v2.** It sends different event shapes and is its own project. Never fold it into a
   feature group.
-- **Rewriting our public models wholesale.** Generated types are wire shapes; ours are often the better public
-  API. The default is to keep ours and map at the boundary.
+- **Exposing the generated models.** Generated types are wire shapes, named after the requests they hang off.
+  They stay private, and the public API keeps our models — see [Domain models](#domain-models).
 - **Regenerating the client.** That is `openapi-codegen`, and it lands as its own PR.
 
 ## Principles
 
 - **One feature group per PR.** A group is a set of endpoints a caller thinks of together, and it moves across
   completely — half-migrated features are worse than unmigrated ones.
-- **Default to keeping our shape.** Break only when it buys long-term maintainability (the alternative is
-  maintaining two shapes forever) or consistency with our other products. Not for cosmetics.
+- **Keep our shape.** The public API keeps the v10 models, names and envelopes. Beyond `Result`, the only
+  sanctioned breaks are the ones [Domain models](#domain-models) lists.
 - **Every break ships four artifacts**: `refactor(llc)!:` title, `🛑️ Breaking` CHANGELOG entry, a Symbol Map row
   plus feature section in `migrations/v11-migration.md`, and the reason in the PR body.
 - **Decide once, at the right level.** The `User` shape is decided in [01-foundation](01-foundation.md), not
   re-argued per group. Errors and `Result` are decided in
   [`core-migration/03-errors.md`](../core-migration/03-errors.md).
+
+## Domain models
+
+The generated client is an implementation detail. Every group follows these rules, and makes exactly these
+breaks against v10:
+
+- public methods return `Result<T>` instead of throwing;
+- a write whose response carries only `duration` returns `Result<void>` rather than `EmptyResponse`;
+- public models and envelopes lose `fromJson` and `toJson`;
+- envelopes are immutable, built through a const constructor rather than `late` setters;
+- `duration` is a non-nullable `String` on every envelope, where v10 typed it `String?`;
+- public models and envelopes are `@freezed`, so they compare by value; one that extended `Equatable` in v10 no
+  longer does, and loses `props`.
+
+Each ships with a CHANGELOG entry and a Symbol Map row like any other break.
+
+
+1. **No generated type in a public signature.** `lib/stream_chat.dart` exports nothing from `open_api/`, and no
+   other package or the sample app imports it. `generate_plan.py --check` enforces both.
+2. **Public models keep their v10 names, fields, nullability and defaults,** as `@freezed` classes (value
+   equality, `copyWith`, `toString`) with no `fromJson`, `toJson` or json_serializable. A field the server adds is exposed later, as an additive
+   change. The one exception is the temporary `@DataSerializable` storage codec in rule 8.
+3. **Responses keep their v10 envelopes,** as `@freezed` classes carrying a non-nullable `duration` and the
+   payload, one file per class under `lib/src/core/models/`. A write whose response carries only
+   `duration` returns `Result<void>`: `EmptyResponse` stays behind for the unmigrated APIs.
+4. **Public methods return `Result<T>`,** per [`core-migration/03-errors.md`](../core-migration/03-errors.md).
+5. **Mapping happens in the repository,** on the `Result` the generated call returns
+   (`result.map((response) => response.toModel())`), through extensions in
+   `lib/src/repository/mapper/<feature>_mapper.dart`. The mappers are package-internal so later groups can compose
+   them. Repositories import the generated code with a prefix (`as api`), which keeps its names from colliding
+   with ours.
+6. **Request enums are hand-written** and mapped to the generated enum in the repository (`PushProvider` →
+   `CreateDeviceRequestPushProvider`).
+7. **A plain model embedded in a json_serializable parent gets a temporary converter.** Some parents still decode
+   v1 REST or WebSocket JSON with json_serializable; their field gets a `JsonConverter` — or a decode-only
+   `fromJson` function when the parent never writes the field — in
+   `lib/src/core/models/converters/v1_json_converters.dart`, marked
+   `// TODO(openapi-migration): remove in group NN` and listed below. The group that migrates the parent deletes
+   it, and `generate_plan.py --check` fails if a ticked group leaves one behind.
+8. **Persistence stores a model as JSON text through its `@DataSerializable` codec.** `DataSerializable`
+   (`lib/src/db/data_serializable.dart`) is a typedef for `JsonSerializable`, and the only class-level json_serializable
+   annotation a public model may carry. The model exposes the generated code as `fromData` and `toData`, which only
+   `stream_chat_persistence` calls; it never gains `fromJson` or `toJson`. A field holding another plain model
+   needs `@JsonKey(fromJson: ..., toJson: ...)` functions that call the nested `fromData` and `toData`, because
+   json_serializable only looks for `fromJson` and `toJson` on nested types. The codec is temporary: every use is
+   marked `// TODO(openapi-migration): remove in group 10` and listed below, and group 10 decides what replaces
+   it. The cache is disposable, so the stored format is ours to choose.
+
+### Temporary adapters
+
+| Adapter | Field | Removed by |
+| --- | --- | --- |
+| `DeviceV1JsonConverter` | `OwnUser.devices` | [09](09-users.md) |
+| `userGroupsFromV1Json` | `Message.mentionedGroups` | [10](10-messages.md) |
+| `DataSerializable` | `UserGroup`, `UserGroupMember` (`fromData`, `toData`) | [10](10-messages.md) |
+
+Before group 09 starts, decide how v1 events decode a parent once it becomes a plain model: through the
+generated types plus a shim that rebuilds `custom` from the flattened v1 keys, or through a private v1 decoder in
+the WebSocket layer. Record the answer in [01-foundation](01-foundation.md).
 
 ## Order, and why
 
@@ -70,7 +129,8 @@ one group. Verified mechanically — see [Keeping this plan honest](#keeping-thi
 The order runs from smallest and most isolated to largest and most entangled, so the pattern is proven on cheap
 surfaces before it reaches `Message` and `ChannelState`:
 
-- **02–04** have no persistence and almost no public model surface. Group 02 is the pattern-proving slice.
+- **02–04** have almost no persistence (03 stores mentioned groups) and almost no public model surface. Group 02
+  is the pattern-proving slice.
 - **05–07** introduce persisted models and WebSocket-delivered updates, one at a time.
 - **08** is where we decide what *not* to expose: 34 generated operations against 10 hand-written methods.
 - **14** is `queryBannedUsers`, split out of 08 because it is the only moderation call that answers with a

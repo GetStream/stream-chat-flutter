@@ -63,11 +63,10 @@ void main() {
       'should throw if `query` and `messageFilters` is not provided',
       () async {
         final filter = ChannelFilter.in_(ChannelFilterField.cid, const ['test-cid-1', 'test-cid-2']);
-        try {
-          await generalApi.searchMessages(filter);
-        } catch (e) {
-          expect(e, isA<ArgumentError>());
-        }
+        await expectLater(
+          generalApi.searchMessages(filter),
+          throwsA(isA<ArgumentError>()),
+        );
       },
     );
 
@@ -77,15 +76,14 @@ void main() {
         final filter = ChannelFilter.in_(ChannelFilterField.cid, const ['test-cid-1', 'test-cid-2']);
         const query = 'test-query';
         final messageFilter = MessageSearchFilter.query(MessageSearchFilterField.text, 'text');
-        try {
-          await generalApi.searchMessages(
+        await expectLater(
+          generalApi.searchMessages(
             filter,
             query: query,
             messageFilters: messageFilter,
-          );
-        } catch (e) {
-          expect(e, isA<ArgumentError>());
-        }
+          ),
+          throwsA(isA<ArgumentError>()),
+        );
       },
     );
 
@@ -95,15 +93,14 @@ void main() {
         final filter = ChannelFilter.in_(ChannelFilterField.cid, const ['test-cid-1', 'test-cid-2']);
         final sort = [MessageSearchSort.desc(MessageSearchSortField.custom('test-field'))];
         const pagination = PaginationParams(offset: 10);
-        try {
-          await generalApi.searchMessages(
+        await expectLater(
+          generalApi.searchMessages(
             filter,
             sort: sort,
             pagination: pagination,
-          );
-        } catch (e) {
-          expect(e, isA<AssertionError>());
-        }
+          ),
+          throwsA(isA<AssertionError>()),
+        );
       },
     );
 
@@ -297,47 +294,6 @@ void main() {
       ).called(1);
       verifyNoMoreInteractions(client);
     });
-  });
-
-  test('enrichUrl', () async {
-    const path = '/og';
-    const url = 'https://www.techyourchance.com/finite-state-machine-with-unit-tests-real-world-example';
-
-    when(
-      () => client.get(
-        path,
-        queryParameters: {'url': url},
-      ),
-    ).thenAnswer(
-      (_) async => successResponse(
-        path,
-        data: {
-          'type': 'image',
-          'og_scrape_url': url,
-          'author_name': 'TechYourChance',
-          'title': 'Finite State Machine with Unit Tests: Real World Example',
-        },
-      ),
-    );
-
-    final res = await generalApi.enrichUrl(url);
-
-    expect(res, isNotNull);
-    expect(res.type, 'image');
-    expect(res.ogScrapeUrl, url);
-    expect(res.authorName, 'TechYourChance');
-    expect(
-      res.title,
-      'Finite State Machine with Unit Tests: Real World Example',
-    );
-
-    verify(
-      () => client.get(
-        path,
-        queryParameters: {'url': url},
-      ),
-    ).called(1);
-    verifyNoMoreInteractions(client);
   });
 
   test('getAppSettings calls GET /app and parses response', () async {

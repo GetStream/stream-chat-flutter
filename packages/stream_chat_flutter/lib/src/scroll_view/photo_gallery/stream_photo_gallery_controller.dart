@@ -7,10 +7,16 @@ class StreamPhotoGalleryController extends PagedValueNotifier<int, AssetEntity> 
   ///
   StreamPhotoGalleryController({
     this.limit = 50,
+    this.mediaType = RequestType.common,
   }) : super(const PagedValue.loading());
 
   /// The maximum number of items to load at once.
   final int limit;
+
+  /// The type of media to load from the device gallery.
+  ///
+  /// Defaults to [RequestType.common], which loads both images and videos.
+  final RequestType mediaType;
 
   Future<AssetPathEntity?> _getRecentAssetPathList({
     RequestType type = RequestType.common,
@@ -26,7 +32,7 @@ class StreamPhotoGalleryController extends PagedValueNotifier<int, AssetEntity> 
   @override
   Future<void> doInitialLoad() async {
     try {
-      final assets = await _getRecentAssetPathList();
+      final assets = await _getRecentAssetPathList(type: mediaType);
 
       if (assets == null) {
         value = const PagedValue(items: []);
@@ -56,7 +62,7 @@ class StreamPhotoGalleryController extends PagedValueNotifier<int, AssetEntity> 
     final previousValue = value.asSuccess;
 
     try {
-      final assets = await _getRecentAssetPathList();
+      final assets = await _getRecentAssetPathList(type: mediaType);
 
       if (assets == null) {
         const chatError = StreamClientException(message: 'No media found');

@@ -112,15 +112,29 @@ class StreamImageCDN {
   /// Creates a new [StreamImageCDN] instance.
   const StreamImageCDN();
 
+  // Placeholder for an unset dimension; not a size the client chose.
+  static const _wildcard = '*';
+
   // The host suffix for Stream's image CDN.
   static const _streamCDNHost = 'stream-io-cdn.com';
 
-  // Query parameter names that are preserved in cache keys.
+  // Whether [uri] is served from Stream's image CDN.
   //
-  // These are the image-transformation parameters that affect
-  // which rendition of the image is returned. All other parameters
-  // (e.g. signed URL tokens) are stripped.
-  static const _persistedParameters = {'w', 'h', 'resize', 'crop'};
+  // Matched whole or as a dot-separated suffix, so a lookalike such as
+  // `evilstream-io-cdn.com` is not mistaken for ours.
+  static bool _isStreamCDN(Uri uri) {
+    // A trailing dot is the absolute form of the same host.
+    var host = uri.host;
+    if (host.endsWith('.')) host = host.substring(0, host.length - 1);
+
+    return host == _streamCDNHost || host.endsWith('.$_streamCDNHost');
+  }
+
+  // Parameters that identify a rendition, in cache-key order.
+  //
+  // These are the image-transformation parameters that affect which rendition
+  // is returned; everything else is stripped from the cache key.
+  static const _persistedParameters = ['crop', 'h', 'resize', 'w'];
 
   /// Resolves the [sourceUrl] by appending resize/transform parameters
   /// appropriate for the CDN.
@@ -129,43 +143,63 @@ class StreamImageCDN {
   /// [sourceUrl] is returned unchanged.
   ///
   /// For non-Stream CDN URLs, returns [sourceUrl] unchanged regardless
-  /// of [resize].
+  /// of [resize]. A URL that already requests a specific size is also
+  /// returned unchanged, so [resize] never replaces a size already on it.
   ///
   /// Override this to customize URL rewriting for a custom CDN.
   String resolveUrl(String sourceUrl, {ImageResize? resize}) {
     final uri = Uri.tryParse(sourceUrl);
-    if (uri == null || !uri.host.contains(_streamCDNHost)) return sourceUrl;
-    if (resize == null) return sourceUrl;
+    if (uri == null || !_isStreamCDN(uri)) return sourceUrl;
+    if (resize == null || _isAlreadySized(uri)) return sourceUrl;
 
     final queryParameters = {
       ...uri.queryParameters,
-      'w': resize.width == 0 ? '*' : resize.width.floor().toString(),
-      'h': resize.height == 0 ? '*' : resize.height.floor().toString(),
+      'w': resize.width == 0 ? _wildcard : resize.width.floor().toString(),
+      'h': resize.height == 0 ? _wildcard : resize.height.floor().toString(),
       'resize': resize.mode.value,
       'ro': '0',
-      if (resize.mode == ResizeMode.crop) 'crop': resize.crop.value,
     };
 
+    // Only meaningful with a crop resize, and it reaches the cache key, so a
+    // crop left over from the source URL would split one rendition in two.
+    if (resize.mode == ResizeMode.crop) {
+      queryParameters['crop'] = resize.crop.value;
+    } else {
+      queryParameters.remove('crop');
+    }
+
     return uri.replace(queryParameters: queryParameters).toString();
+  }
+
+  // Whether [uri] already asks the CDN for a specific size. A crop or a
+  // resize mode alone does not select one.
+  static bool _isAlreadySized(Uri uri) {
+    final params = uri.queryParameters;
+    return const ['w', 'h'].any((name) {
+      final value = params[name];
+      return value != null && value != _wildcard;
+    });
   }
 
   /// Returns a stable cache key for [imageUrl], stripping volatile
   /// authentication parameters (e.g. CloudFront signed URL tokens)
   /// while preserving those that identify distinct image renditions.
   ///
-  /// This uses an allowlist approach, keeping only the parameters in
-  /// [_persistedParameters] for Stream CDN URLs.
+  /// Only the parameters that identify a rendition (`crop`, `h`, `resize`,
+  /// `w`) are kept, always in the same order, so one rendition yields one key
+  /// however the source URL ordered them.
   ///
   /// For non-Stream CDN URLs, returns the full URL string unchanged.
   ///
   /// Override this to customize cache key generation for a custom CDN.
   String cacheKey(String imageUrl) {
     final uri = Uri.tryParse(imageUrl);
-    if (uri == null || !uri.host.contains(_streamCDNHost)) return imageUrl;
+    if (uri == null || !_isStreamCDN(uri)) return imageUrl;
 
-    final filteredParams = <String, String>{
-      for (final MapEntry(:key, :value) in uri.queryParameters.entries)
-        if (_persistedParameters.contains(key)) key: value,
+    final params = uri.queryParameters;
+    final filteredParams = {
+      for (final name in _persistedParameters)
+        if (params[name] case final value?) name: value,
     };
 
     return uri.replace(queryParameters: filteredParams).toString();

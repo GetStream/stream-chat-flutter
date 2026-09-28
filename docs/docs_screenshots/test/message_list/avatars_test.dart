@@ -139,6 +139,7 @@ void main() {
                 StreamAvatarGroupSize.lg => StreamAvatarSize.sm,
                 StreamAvatarGroupSize.xl => StreamAvatarSize.md,
                 StreamAvatarGroupSize.xxl => StreamAvatarSize.xl,
+                StreamAvatarGroupSize.xxxl => StreamAvatarSize.xlPlus,
               };
               return StreamAvatarTheme(
                 data: StreamAvatarThemeData(size: themeSize),

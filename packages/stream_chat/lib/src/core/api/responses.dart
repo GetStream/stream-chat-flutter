@@ -21,7 +21,6 @@ import '../models/thread.dart';
 import '../models/unread_counts.dart';
 import '../models/user.dart';
 import '../models/user_block.dart';
-import '../models/user_group.dart';
 
 part 'responses.g.dart';
 
@@ -454,45 +453,6 @@ class ChannelStateResponse extends _BaseResponse {
   static ChannelStateResponse fromJson(Map<String, dynamic> json) => _$ChannelStateResponseFromJson(json);
 }
 
-/// Model response for [Client.enrichUrl] api call.
-@JsonSerializable(createToJson: false)
-class OGAttachmentResponse extends _BaseResponse {
-  /// The URL of the page that was scraped.
-  late String ogScrapeUrl;
-
-  /// The URL of the asset.
-  String? assetUrl;
-
-  /// The URL of the author.
-  String? authorLink;
-
-  /// The name of the author.
-  String? authorName;
-
-  /// The URL of the image.
-  String? imageUrl;
-
-  /// The text of the attachment.
-  String? text;
-
-  /// The URL of the thumbnail.
-  String? thumbUrl;
-
-  /// The title of the attachment.
-  String? title;
-
-  /// The URL of the title.
-  String? titleLink;
-
-  /// The type of the attachment.
-  ///
-  /// 'video' | 'audio' | 'image'
-  String? type;
-
-  /// Create a new instance from a [json].
-  static OGAttachmentResponse fromJson(Map<String, dynamic> json) => _$OGAttachmentResponseFromJson(json);
-}
-
 /// Contains information about a [User] that was banned from a [Channel] or App.
 @JsonSerializable(createToJson: false)
 class UserBlockResponse extends _BaseResponse {
@@ -793,79 +753,6 @@ class GetActiveLiveLocationsResponse extends _BaseResponse {
   /// Create a new instance from a json
   static GetActiveLiveLocationsResponse fromJson(Map<String, dynamic> json) =>
       _$GetActiveLiveLocationsResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.listUserGroups] api call
-@JsonSerializable(createToJson: false)
-class ListUserGroupsResponse extends _BaseResponse {
-  /// List of user groups returned by the api call
-  @JsonKey(defaultValue: [])
-  late List<UserGroup> userGroups;
-
-  /// Create a new instance from a json
-  static ListUserGroupsResponse fromJson(Map<String, dynamic> json) => _$ListUserGroupsResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.searchUserGroups] api call
-@JsonSerializable(createToJson: false)
-class SearchUserGroupsResponse extends _BaseResponse {
-  /// List of user groups returned by the api call
-  @JsonKey(defaultValue: [])
-  late List<UserGroup> userGroups;
-
-  /// Create a new instance from a json
-  static SearchUserGroupsResponse fromJson(Map<String, dynamic> json) => _$SearchUserGroupsResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.createUserGroup] api call
-@JsonSerializable(createToJson: false)
-class CreateUserGroupResponse extends _BaseResponse {
-  /// Created user group
-  late UserGroup userGroup;
-
-  /// Create a new instance from a json
-  static CreateUserGroupResponse fromJson(Map<String, dynamic> json) => _$CreateUserGroupResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.getUserGroup] api call
-@JsonSerializable(createToJson: false)
-class GetUserGroupResponse extends _BaseResponse {
-  /// Fetched user group
-  late UserGroup userGroup;
-
-  /// Create a new instance from a json
-  static GetUserGroupResponse fromJson(Map<String, dynamic> json) => _$GetUserGroupResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.updateUserGroup] api call
-@JsonSerializable(createToJson: false)
-class UpdateUserGroupResponse extends _BaseResponse {
-  /// Fetched user group
-  late UserGroup userGroup;
-
-  /// Create a new instance from a json
-  static UpdateUserGroupResponse fromJson(Map<String, dynamic> json) => _$UpdateUserGroupResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.addUserGroupMembers] api call
-@JsonSerializable(createToJson: false)
-class AddUserGroupMembersResponse extends _BaseResponse {
-  /// Fetched user group
-  late UserGroup userGroup;
-
-  /// Create a new instance from a json
-  static AddUserGroupMembersResponse fromJson(Map<String, dynamic> json) => _$AddUserGroupMembersResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.removeUserGroupMembers] api call
-@JsonSerializable(createToJson: false)
-class RemoveUserGroupMembersResponse extends _BaseResponse {
-  /// Fetched user group
-  late UserGroup userGroup;
-
-  /// Create a new instance from a json
-  static RemoveUserGroupMembersResponse fromJson(Map<String, dynamic> json) =>
-      _$RemoveUserGroupMembersResponseFromJson(json);
 }
 
 /// Model response for [StreamChatClient.getAppSettings] api call.

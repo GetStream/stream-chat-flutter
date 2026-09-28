@@ -159,6 +159,9 @@ class StreamChannelAvatar extends StatelessWidget {
     .lg => StreamAvatarSize.lg,
     .xl => StreamAvatarSize.xl,
     .xxl => StreamAvatarSize.xxl,
+    .xxxl => StreamAvatarSize.xxxl,
+    // ignore: unreachable_switch_case, for forward compatibility
+    _ => StreamAvatarSize.xxxl,
   };
 }
 

@@ -12,6 +12,7 @@ import '../../../scroll_view/photo_gallery/stream_photo_gallery_controller.dart'
 import '../../../utils/utils.dart';
 import '../stream_attachment_picker.dart';
 import '../stream_attachment_picker_controller.dart';
+import '../stream_attachment_picker_option.dart';
 
 /// Max image resolution which can be resized by the CDN.
 /// Taken from https://getstream.io/chat/docs/flutter-dart/file_uploads/?language=dart#image-resizing
@@ -23,13 +24,25 @@ class StreamGalleryPicker extends StatefulWidget {
   const StreamGalleryPicker({
     super.key,
     this.limit = 50,
+    this.mediaType = RequestType.common,
     GalleryPickerConfig? config,
     required this.selectedMediaItems,
     required this.onMediaItemSelected,
   }) : config = config ?? const GalleryPickerConfig();
 
+  /// The attachment picker types a device gallery can show.
+  static const supportedTypes = [
+    AttachmentPickerType.images,
+    AttachmentPickerType.videos,
+  ];
+
   /// Maximum number of media items that can be selected.
   final int limit;
+
+  /// The type of media to show in the gallery.
+  ///
+  /// Defaults to [RequestType.common], which shows both images and videos.
+  final RequestType mediaType;
 
   /// Configuration for the gallery picker.
   final GalleryPickerConfig config;
@@ -51,17 +64,24 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
   @override
   void initState() {
     super.initState();
-    _controller = StreamPhotoGalleryController(limit: widget.limit);
+    _controller = _createController();
     requestPermission = runInPermissionRequestLock(PhotoManager.requestPermissionExtend);
   }
 
   @override
   void didUpdateWidget(StreamGalleryPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.limit != oldWidget.limit) {
+    if (widget.limit != oldWidget.limit || widget.mediaType != oldWidget.mediaType) {
       _controller.dispose();
-      _controller = StreamPhotoGalleryController(limit: widget.limit);
+      _controller = _createController();
     }
+  }
+
+  StreamPhotoGalleryController _createController() {
+    return StreamPhotoGalleryController(
+      limit: widget.limit,
+      mediaType: widget.mediaType,
+    );
   }
 
   @override

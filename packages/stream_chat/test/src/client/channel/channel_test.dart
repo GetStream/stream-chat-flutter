@@ -233,27 +233,15 @@ void main() {
     });
 
     test('should throw if trying to set `extraData`', () {
-      try {
-        channel.extraData = {'name': 'test-channel-name'};
-      } catch (e) {
-        expect(e, isA<StateError>());
-      }
+      expect(() => channel.extraData = {'name': 'test-channel-name'}, throwsA(isA<StateError>()));
     });
 
     test('should throw if trying to set `image`', () {
-      try {
-        channel.image = 'https://stream.io/some-image';
-      } catch (e) {
-        expect(e, isA<StateError>());
-      }
+      expect(() => channel.image = 'https://stream.io/some-image', throwsA(isA<StateError>()));
     });
 
     test('should throw if trying to set `name`', () {
-      try {
-        channel.name = 'New name';
-      } catch (e) {
-        expect(e, isA<StateError>());
-      }
+      expect(() => channel.name = 'New name', throwsA(isA<StateError>()));
     });
 
     group('`.sendMessage`', () {
@@ -382,17 +370,15 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.sendMessage(
+          await expectLater(
+            channel.sendMessage(
               message,
               skipPush: true,
-            );
-          } catch (e) {
-            expect(e, isA<StreamApiException>());
-
-            final networkError = e as StreamApiException;
-            expect(networkError.code, equals(StreamErrorCode.notAllowed));
-          }
+            ),
+            throwsA(
+              isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
+            ),
+          );
         },
       );
 
@@ -439,18 +425,16 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.sendMessage(
+          await expectLater(
+            channel.sendMessage(
               message,
               skipPush: true,
               skipEnrichUrl: true,
-            );
-          } catch (e) {
-            expect(e, isA<StreamApiException>());
-
-            final networkError = e as StreamApiException;
-            expect(networkError.code, equals(StreamErrorCode.notAllowed));
-          }
+            ),
+            throwsA(
+              isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
+            ),
+          );
         },
       );
 
@@ -496,17 +480,15 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.sendMessage(
+          await expectLater(
+            channel.sendMessage(
               message,
               skipEnrichUrl: true,
-            );
-          } catch (e) {
-            expect(e, isA<StreamApiException>());
-
-            final networkError = e as StreamApiException;
-            expect(networkError.code, equals(StreamErrorCode.notAllowed));
-          }
+            ),
+            throwsA(
+              isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
+            ),
+          );
         },
       );
 
@@ -551,16 +533,14 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.sendMessage(
+          await expectLater(
+            channel.sendMessage(
               message,
-            );
-          } catch (e) {
-            expect(e, isA<StreamApiException>());
-
-            final networkError = e as StreamApiException;
-            expect(networkError.code, equals(StreamErrorCode.notAllowed));
-          }
+            ),
+            throwsA(
+              isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
+            ),
+          );
         },
       );
 
@@ -660,11 +640,10 @@ void main() {
           ]),
         );
 
-        try {
-          await channel.sendMessage(message);
-        } catch (e) {
-          expect(e, isA<StreamApiException>());
-        }
+        await expectLater(
+          channel.sendMessage(message),
+          throwsA(isA<StreamApiException>()),
+        );
       });
 
       test('with attachments should work just fine', () async {
@@ -1750,11 +1729,10 @@ void main() {
           ]),
         );
 
-        try {
-          await channel.updateMessage(message, skipEnrichUrl: true);
-        } catch (e) {
-          expect(e, isA<ArgumentError>());
-        }
+        await expectLater(
+          channel.updateMessage(message, skipEnrichUrl: true),
+          throwsA(isA<ArgumentError>()),
+        );
       });
 
       test(
@@ -1799,15 +1777,14 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.updateMessage(message, skipEnrichUrl: true);
-          } catch (e) {
-            expect(e, isA<StreamApiException>());
-
-            final networkError = e as StreamApiException;
-            expect(networkError.code, equals(StreamErrorCode.requestTimeout));
-            expect(networkError.isRetriable, isTrue);
-          }
+          await expectLater(
+            channel.updateMessage(message, skipEnrichUrl: true),
+            throwsA(
+              isA<StreamApiException>()
+                  .having((it) => it.code, 'code', StreamErrorCode.requestTimeout)
+                  .having((it) => it.isRetriable, 'isRetriable', isTrue),
+            ),
+          );
         },
       );
 
@@ -1853,15 +1830,14 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.updateMessage(message, skipPush: true);
-          } catch (e) {
-            expect(e, isA<StreamApiException>());
-
-            final networkError = e as StreamApiException;
-            expect(networkError.code, equals(StreamErrorCode.internalError));
-            expect(networkError.isRetriable, isTrue);
-          }
+          await expectLater(
+            channel.updateMessage(message, skipPush: true),
+            throwsA(
+              isA<StreamApiException>()
+                  .having((it) => it.code, 'code', StreamErrorCode.internalError)
+                  .having((it) => it.isRetriable, 'isRetriable', isTrue),
+            ),
+          );
         },
       );
 
@@ -1903,18 +1879,16 @@ void main() {
           ]),
         );
 
-        try {
-          await channel.updateMessage(
+        await expectLater(
+          channel.updateMessage(
             message,
             skipPush: true,
             skipEnrichUrl: true,
-          );
-        } catch (e) {
-          expect(e, isA<StreamApiException>());
-
-          final networkError = e as StreamApiException;
-          expect(networkError.code, equals(StreamErrorCode.notAllowed));
-        }
+          ),
+          throwsA(
+            isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
+          ),
+        );
       });
 
       test('should handle a non-retriable failure with skipPush: false, skipEnrichUrl: false', () async {
@@ -1953,14 +1927,12 @@ void main() {
           ]),
         );
 
-        try {
-          await channel.updateMessage(message);
-        } catch (e) {
-          expect(e, isA<StreamApiException>());
-
-          final networkError = e as StreamApiException;
-          expect(networkError.code, equals(StreamErrorCode.notAllowed));
-        }
+        await expectLater(
+          channel.updateMessage(message),
+          throwsA(
+            isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
+          ),
+        );
       });
     });
 
@@ -2126,15 +2098,14 @@ void main() {
           ]),
         );
 
-        try {
-          await channel.partialUpdateMessage(
+        await expectLater(
+          channel.partialUpdateMessage(
             message,
             set: set,
             unset: unset,
-          );
-        } catch (e) {
-          expect(e, isA<ArgumentError>());
-        }
+          ),
+          throwsA(isA<ArgumentError>()),
+        );
       });
 
       test(
@@ -2192,20 +2163,19 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.partialUpdateMessage(
+          await expectLater(
+            channel.partialUpdateMessage(
               message,
               set: set,
               unset: unset,
               skipEnrichUrl: true,
-            );
-          } catch (e) {
-            expect(e, isA<StreamApiException>());
-
-            final networkError = e as StreamApiException;
-            expect(networkError.code, equals(StreamErrorCode.requestTimeout));
-            expect(networkError.isRetriable, isTrue);
-          }
+            ),
+            throwsA(
+              isA<StreamApiException>()
+                  .having((it) => it.code, 'code', StreamErrorCode.requestTimeout)
+                  .having((it) => it.isRetriable, 'isRetriable', isTrue),
+            ),
+          );
         },
       );
 
@@ -2263,19 +2233,18 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.partialUpdateMessage(
+          await expectLater(
+            channel.partialUpdateMessage(
               message,
               set: set,
               unset: unset,
-            );
-          } catch (e) {
-            expect(e, isA<StreamApiException>());
-
-            final networkError = e as StreamApiException;
-            expect(networkError.code, equals(StreamErrorCode.internalError));
-            expect(networkError.isRetriable, isTrue);
-          }
+            ),
+            throwsA(
+              isA<StreamApiException>()
+                  .having((it) => it.code, 'code', StreamErrorCode.internalError)
+                  .having((it) => it.isRetriable, 'isRetriable', isTrue),
+            ),
+          );
         },
       );
 
@@ -2329,19 +2298,17 @@ void main() {
           ]),
         );
 
-        try {
-          await channel.partialUpdateMessage(
+        await expectLater(
+          channel.partialUpdateMessage(
             message,
             set: set,
             unset: unset,
             skipEnrichUrl: true,
-          );
-        } catch (e) {
-          expect(e, isA<StreamApiException>());
-
-          final networkError = e as StreamApiException;
-          expect(networkError.code, equals(StreamErrorCode.notAllowed));
-        }
+          ),
+          throwsA(
+            isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
+          ),
+        );
       });
 
       test('should handle a non-retriable failure with skipEnrichUrl: false', () async {
@@ -2393,18 +2360,16 @@ void main() {
           ]),
         );
 
-        try {
-          await channel.partialUpdateMessage(
+        await expectLater(
+          channel.partialUpdateMessage(
             message,
             set: set,
             unset: unset,
-          );
-        } catch (e) {
-          expect(e, isA<StreamApiException>());
-
-          final networkError = e as StreamApiException;
-          expect(networkError.code, equals(StreamErrorCode.notAllowed));
-        }
+          ),
+          throwsA(
+            isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
+          ),
+        );
       });
     });
 
@@ -2780,14 +2745,15 @@ void main() {
           final message = Message(id: 'test-message-id');
           const timeoutOrExpirationDate = 'invalid-value';
 
-          try {
-            await channel.pinMessage(
+          // `pinMessage` validates in an `assert` before its first `await`, so
+          // it throws synchronously and the call must stay in a closure.
+          await expectLater(
+            () => channel.pinMessage(
               message,
               timeoutOrExpirationDate: timeoutOrExpirationDate,
-            );
-          } catch (e) {
-            expect(e, isA<ArgumentError>());
-          }
+            ),
+            throwsA(isA<ArgumentError>()),
+          );
         },
       );
     });
@@ -3081,11 +3047,10 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.sendReaction(message, reaction);
-          } catch (e) {
-            expect(e, isA<StreamApiException>());
-          }
+          await expectLater(
+            channel.sendReaction(message, reaction),
+            throwsA(isA<StreamApiException>()),
+          );
 
           verify(() => client.sendReaction(message.id, reaction)).called(1);
         },
@@ -3287,11 +3252,10 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.sendReaction(message, reaction);
-          } catch (e) {
-            expect(e, isA<StreamApiException>());
-          }
+          await expectLater(
+            channel.sendReaction(message, reaction),
+            throwsA(isA<StreamApiException>()),
+          );
 
           verify(() => client.sendReaction(message.id, reaction)).called(1);
         },
@@ -3486,11 +3450,10 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.deleteReaction(message, reaction);
-          } catch (e) {
-            expect(e, isA<StreamApiException>());
-          }
+          await expectLater(
+            channel.deleteReaction(message, reaction),
+            throwsA(isA<StreamApiException>()),
+          );
 
           verify(() => client.deleteReaction(messageId, type)).called(1);
         },
@@ -3614,11 +3577,10 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.deleteReaction(message, reaction);
-          } catch (e) {
-            expect(e, isA<StreamApiException>());
-          }
+          await expectLater(
+            channel.deleteReaction(message, reaction),
+            throwsA(isA<StreamApiException>()),
+          );
 
           verify(() => client.deleteReaction(messageId, type)).called(1);
         },
@@ -4111,11 +4073,10 @@ void main() {
           ),
         ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
-        try {
-          await channel.watch();
-        } catch (e) {
-          expect(e, isA<StreamApiException>());
-        }
+        await expectLater(
+          channel.watch(),
+          throwsA(isA<StreamApiException>()),
+        );
 
         verify(
           () => client.queryChannel(
@@ -4309,11 +4270,10 @@ void main() {
           ),
         ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
-        try {
-          await channel.query();
-        } catch (e) {
-          expect(e, isA<StreamApiException>());
-        }
+        await expectLater(
+          channel.query(),
+          throwsA(isA<StreamApiException>()),
+        );
 
         verify(
           () => client.queryChannel(

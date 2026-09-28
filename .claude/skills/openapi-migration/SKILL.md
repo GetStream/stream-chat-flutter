@@ -165,20 +165,40 @@ silently — which is exactly why fixes belong in the generator or in your own c
 
 ## Phase 2 — decide the shape of each symbol
 
-For every type in the inventory, one decision: keep our shape and map at the boundary, or adopt the generated one.
+The generated models stay private. Follow the domain-model rules in
+[`openapi-migration/README.md`](../../../openapi-migration/README.md#domain-models): the public API keeps the v10
+models, names and response envelopes as plain classes without JSON, and the repository maps generated → ours.
+Phase 2 is therefore not "keep or adopt" but, per type:
 
-**Default to keeping our shape.** Generated types are wire shapes — nullable wherever the spec is loose, with
-`_unknown` enum sentinels and per-operation extension types instead of shared enums (`CreateDeviceRequestPushProvider`
-rather than one `PushProvider`). That is usually a worse public API than what we hand-wrote.
+- **Which v10 type it maps to**, and whether that type is embedded in a model that still decodes v1 JSON with
+  json_serializable. If it is, the parent's field needs a temporary converter (README rule 7) — add it to the
+  adapters table with the group that removes it.
+- **Whether persistence stores it as JSON text,** alone or nested inside another persisted model. Look for
+  `jsonEncode`, `fromJson`, `toJson` or `toData` on the type in
+  `stream_chat_persistence/lib/src/{mapper,converter,dao}`. If it is, the model gets the temporary
+  `@DataSerializable` codec (rule 8; see [Persisted models](#persisted-models-the-dataserializable-codec)). A model
+  stored as a table row, mapped column by column like `User` in `users`, needs no codec.
+- **Which request enums need a hand-written public type** (rule 6).
 
-**Breaking changes are allowed, but a break needs a reason beyond convenience.** Take it when it buys one of:
+Generated types are wire shapes — nullable wherever the spec is loose, with per-operation extension types instead
+of shared enums (`CreateDeviceRequestPushProvider` rather than one `PushProvider`) — which is why they never reach
+a public signature.
 
-- **Long-term maintainability** — the alternative is maintaining two shapes of the same thing indefinitely, or a
-  mapping layer that needs editing on every spec change.
-- **Consistency with our other products** — the generated name or shape is what our other SDKs expose, so matching
-  it makes Stream's API coherent for people working across them.
+**A migration makes exactly these breaks, and no others:**
 
-Not sufficient on their own: avoiding a small mapping function, cosmetic naming, or "the generated one is newer".
+- **The error contract:** public methods return `Result<T>` instead of throwing (below).
+- **Duration-only writes answer nothing:** a write whose generated response is `DurationResponse` returns
+  `Result<void>`, not `EmptyResponse`.
+- **No JSON on public models or envelopes:** their `fromJson` and `toJson` are removed. A model persistence stores
+  as JSON text gains `fromData` and `toData` instead; that is additive, not a break.
+- **Envelopes are immutable:** they are built through a const constructor with final fields, not a no-argument
+  constructor and `late` setters.
+- **`duration` is a non-nullable `String`** on every envelope; v10 typed it `String?`.
+- **Models and envelopes are `@freezed`:** they compare by value, and one that extended `Equatable` in v10 loses
+  `props`.
+
+Anything else a migration would change about what the caller holds needs its own reason. A server field our v10
+model lacks is exposed later, as an additive change, not by swapping in the generated type.
 
 **Establish a claim before you rely on it, and know which source answers which question.**
 
@@ -265,11 +285,12 @@ Moving the WebSocket to v2 is its own project — v2 sends different event shape
 ## Phase 4 — implement
 
 ```dart
-import '../../open_api/models.dart' as api;   // prefix while both shapes exist
+import '../../open_api/api.dart' as api;       // the generated names collide with ours
+import 'mapper/devices_mapper.dart';
 
 Future<Result<ListDevicesResponse>> getDevices() async {
-  final result = await _api.listDevices();     // Future<Result<api.ListDevicesResponse>>
-  return result.map(_toListDevicesResponse);   // transforms Success, passes Failure through untouched
+  final result = await _api.listDevices();                 // Future<Result<api.ListDevicesResponse>>
+  return result.map((response) => response.toModel());    // transforms Success, passes Failure through untouched
 }
 ```
 
@@ -302,12 +323,9 @@ Three data-shape traps while mapping:
   `StreamDateTimeConverter` (epoch nanoseconds *or* RFC3339); hand-written models use `DateTime.parse`. A model fed
   by both REST v2 and WS events must tolerate both.
 
-Where a generated type shadows one of ours the prefix is temporary: if phase 2 chose the generated type, delete
-ours in the same PR. Current overlaps with types exported from `lib/stream_chat.dart` include `Action`,
-`Attachment`, `ChannelMute`, `ChatPreferences`, `Command`, `Reaction`, `Role`, `ThreadParticipant`, `User`,
-`UserGroup`, `UserGroupMember`, plus same-name response DTOs (`ListDevicesResponse`,
-`UpsertPushPreferencesResponse`) and `PushPreferenceInput`. Regenerate rather than trusting that list — it prints
-file names, so `channel_mute` means the generated `ChannelMute` shadows ours:
+Many generated types shadow ours by name, which is why repositories and mappers import the generated code with a
+prefix. The prefix is permanent: the generated types are never exported. List the current overlaps with (it prints
+file names, so `channel_mute` means the generated `ChannelMute` shadows ours):
 
 ```bash
 comm -12 \
@@ -315,6 +333,83 @@ comm -12 \
   <(grep -oE "^export 'src/core/(models|api)/[a-z_]+\.dart';" packages/stream_chat/lib/stream_chat.dart \
     | sed "s|.*/\([a-z_]*\)\.dart';|\1|" | sort)
 ```
+
+### Persisted models: the `@DataSerializable` codec
+
+`DataSerializable` (`packages/stream_chat/lib/src/db/data_serializable.dart`) is a typedef for `JsonSerializable`,
+so json_serializable generates the storage codec and the model exposes it as `fromData`/`toData`. It is the only
+JSON annotation a migrated model may carry, and it is temporary: group 10 decides what replaces it.
+
+**Use it** when `stream_chat_persistence` stores the model in a JSON text column, or nests it inside a model that
+is. Today that covers `messages.mentioned_groups` (`UserGroup`); the remaining JSON columns belong to later groups
+(`mentioned_users`, `attachments`, `reaction_groups`, `channels.config`, `polls.options`,
+`connection_events.own_user`).
+
+**Don't use it** for:
+
+- envelopes, which are never persisted;
+- a model persistence stores as a table row;
+- decoding the wire, which goes through the repository mappers or a rule-7 converter.
+
+**Where it doesn't fit:**
+
+- **freezed unions** (`MessageState`, `UploadState`, `MessageDeleteScope`). freezed only generates union JSON from
+  a factory named `fromJson`, so a union whose factory is renamed to `fromData` gets no JSON at all. These
+  local-only unions keep their freezed `fromJson`/`toJson` until the user decides how to handle them. This comes
+  from freezed's documented behaviour and hasn't been tried in this repo, so test it before relying on it.
+- **Deeply nested models get expensive.** json_serializable hardcodes the names `fromJson`/`toJson` for nested
+  types (`json_serializable/lib/src/type_helpers/json_helper.dart`), so every field holding a plain model needs a
+  hand-written `@JsonKey(fromJson: ..., toJson: ...)` pair, and every nested model needs its own annotation. The
+  cost grows with the depth of the graph. `OwnUser` is the worst case: `Device`, `Mute` (two `User`s),
+  `ChannelMute` (a `User` and a full `ChannelModel`), `PushPreference` and `PrivacySettings`. Before annotating a
+  graph like that, raise the alternative of storing less with the user: rows in existing tables plus ids.
+
+The pattern, from `UserGroup`:
+
+```dart
+@freezed
+// TODO(openapi-migration): remove in group 10
+@DataSerializable(includeIfNull: false)
+class UserGroup with _$UserGroup {
+  const UserGroup({...});
+
+  /// Creates a [UserGroup] from data stored by [toData].
+  factory UserGroup.fromData(Map<String, dynamic> json) => _$UserGroupFromJson(json);
+
+  @override
+  @JsonKey(fromJson: _membersFromData, toJson: _membersToData)
+  final List<UserGroupMember>? members;
+
+  /// Serializes this group for local storage.
+  Map<String, dynamic> toData() => _$UserGroupToJson(this);
+}
+
+List<UserGroupMember>? _membersFromData(List<dynamic>? data) =>
+    data?.map((it) => UserGroupMember.fromData(it as Map<String, dynamic>)).toList();
+
+List<Map<String, dynamic>>? _membersToData(List<UserGroupMember>? members) =>
+    members?.map((it) => it.toData()).toList();
+```
+
+- **Tag every use** with `// TODO(openapi-migration): remove in group 10` and add the models to the adapters table.
+  The typedef carries the same tag, so `generate_plan.py --check` fails while it outlives group 10, and deleting it
+  breaks every remaining use at compile time.
+- **A field holding another plain model needs a `@JsonKey(fromJson: ..., toJson: ...)` pair** calling the nested
+  model's `fromData`/`toData`, as `members` does above, and the nested model needs its own annotation. Without the
+  pair the generated code calls a `fromJson`/`toJson` that doesn't exist and fails to compile.
+- **`stream_chat`'s `build.yaml` already sets `field_rename: snake` and `explicit_to_json: true`,** and
+  `includeIfNull: false` leaves out null keys. Extension-type fields such as `PushLevel` pass through as their
+  representation, and `DateTime` is stored as an ISO-8601 string.
+- **Decide whether the stored format changes.** The generated codec stores `extraData` nested under `extra_data`,
+  where v10 flattened custom fields into the root. If the bytes differ from what the column holds today, bump
+  `schemaVersion` in `drift_chat_database.dart` in the same PR; the upgrade is destructive, so the cache is simply
+  rebuilt. If they are identical, prove it with a test against the old format and leave the version alone.
+- **A model that already has storage methods** (`Attachment.fromData`/`toData`) switches them to the generated
+  functions rather than adding a second pair.
+- **In persistence,** replace the model's `fromJson`/`toJson` calls, including an implicit `jsonEncode(model)`,
+  with `fromData`/`toData`.
+- **Generate with a full `dart run build_runner build`** in `packages/stream_chat`, then `dart format`, and commit
+  only the new `.g.dart` files. `--build-filter` deletes every generated output outside the filter.
 
 ### Documenting the public surface
 
@@ -326,8 +421,8 @@ wrong on top of that:
 
 - **Scope is the surface the group touches**, not just the new repository. The `StreamChatClient` delegates
   duplicate its docs verbatim, so a fix belongs in both.
-- **Retyping a field leaves its doc describing the old type**, and that line is not in the diff. `OwnUser.devices`
-  still reads `/// List of user devices.` after becoming a `DeviceResponse`. Re-read the docs on what you retyped.
+- **Retyping a field leaves its doc describing the old type**, and that line is not in the diff. Re-read the docs
+  on everything you retyped, including fields that only gained a converter.
 - **Describe behaviour, and every non-obvious parameter** — a bare `nameGt` cursor tells a reader nothing. Why a
   shape was adopted belongs in the plan file and the PR body, not in a doc comment.
 
@@ -341,10 +436,14 @@ Budget for this: on a typical feature it is most of the diff, and none of it is 
   `MockHttpClient`. Routing through `DefaultApi` moves the mock seam to `Dio`/`DefaultApi`; the old assertions
   cannot survive.
 - `test/src/client/client_test.dart` builds fixtures in the `late`-mutable style the hand-written DTOs allow
-  (`ListDevicesResponse()..devices = …`). Generated freezed classes have final fields and required named
-  arguments, so any fixture switching to a generated type must be rewritten.
-- `test/src/core/api/responses_test.dart` round-trips the DTO from JSON — keep it passing while the DTO exists,
-  delete it with the DTO.
+  (`ListDevicesResponse()..devices = …`). Stubs of `DefaultApi` now answer generated types, and the restored
+  envelopes are plain classes with const constructors, so those fixtures must be rewritten.
+- `test/src/core/api/responses_test.dart` round-trips the DTO from JSON — delete those cases with the DTO's JSON.
+- **Test each mapper from a fully populated generated response,** so a field the mapper drops fails an assertion.
+- **Test each temporary converter,** both on its own and wired through its parent's `fromJson`/`toJson`.
+- **Test each `@DataSerializable` model's stored format:** pin `toData()` to a literal map, so a rename that changes
+  the stored keys fails; round-trip `fromData(toData())`; cover null versus empty for nullable lists. Extend the
+  existing persistence mapper and DAO tests with the field rather than writing tests scoped to it.
 
 Rewrite onto `TESTING.md` rather than carrying the old file's habits across. What breaks most often:
 

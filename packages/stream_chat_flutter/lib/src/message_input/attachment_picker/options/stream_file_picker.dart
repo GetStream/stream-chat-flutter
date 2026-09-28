@@ -19,8 +19,8 @@ class StreamFilePicker extends StatelessWidget {
     this.allowedExtensions,
     this.onFileLoading,
     this.compressionQuality = 0,
-    this.withData = false,
-    this.withReadStream = false,
+    @Deprecated('Content is read on demand; this no longer has any effect.') this.withData = false,
+    @Deprecated('Content is read on demand; this no longer has any effect.') this.withReadStream = false,
     this.lockParentWindow = false,
   });
 
@@ -46,9 +46,11 @@ class StreamFilePicker extends StatelessWidget {
   final int compressionQuality;
 
   /// Whether to include the file data in the [Attachment].
+  @Deprecated('Content is read on demand; this no longer has any effect.')
   final bool withData;
 
   /// Whether to include the file read stream in the [Attachment].
+  @Deprecated('Content is read on demand; this no longer has any effect.')
   final bool withReadStream;
 
   /// Whether to lock the parent window when the file picker is open.
@@ -69,8 +71,6 @@ class StreamFilePicker extends StatelessWidget {
           allowedExtensions: allowedExtensions,
           onFileLoading: onFileLoading,
           compressionQuality: compressionQuality,
-          withData: withData,
-          withReadStream: withReadStream,
           lockParentWindow: lockParentWindow,
         );
       });

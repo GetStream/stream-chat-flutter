@@ -62,3 +62,5 @@
       retyped but whose docs it left alone.
 - [ ] Tests follow [`TESTING.md`](../TESTING.md): no `group` organizing a file by method, each
       name states its subject and behaviour.
+- [ ] Temporary adapters owned by this group (`DeviceV1JsonConverter`) are deleted and removed from
+      the table in `README.md`.
