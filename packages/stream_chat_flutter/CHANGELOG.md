@@ -27,6 +27,7 @@
 🐞 Fixed
 
 - Fixed `StreamMessageComposer` and its attachment picker running under the left and right safe-area insets while the picker is open.
+- Fixed the `StreamMessageListView` scroll-to-bottom button ignoring the side safe-area inset when `enableSafeArea` is on.
 - Fixed the file picker offering file types the Stream Dashboard doesn't allow; it now only offers the allowed file extensions.
 - Fixed `StreamAttachmentValidator` accepting or rejecting a file differently from the server when an extension list holds a compound entry like `.tar.gz`; it now compares only the last extension.
 - Fixed `StreamAttachmentHandler.pickFile` throwing on an empty selection; it now returns `null`.

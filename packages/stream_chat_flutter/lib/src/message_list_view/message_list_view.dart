@@ -1164,9 +1164,15 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           );
         }
 
+        final insets = _scaffoldInsets;
+        final endInset = switch (Directionality.of(context)) {
+          .ltr => insets.right,
+          .rtl => insets.left,
+        };
+
         return PositionedDirectional(
-          bottom: math.max(_scaffoldInsets.bottom, context.streamSpacing.md),
-          end: context.streamSpacing.md,
+          bottom: math.max(insets.bottom, context.streamSpacing.md),
+          end: endInset + context.streamSpacing.md,
           child: button,
         );
       },
