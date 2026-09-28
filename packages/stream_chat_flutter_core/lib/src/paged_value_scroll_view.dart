@@ -293,7 +293,7 @@ class _PagedValueListViewState<K, V> extends State<PagedValueListView<K, V>> {
     builder: (context, value, _) => value.when(
       (items, nextPageKey, error) {
         if (items.isEmpty) {
-          return widget.emptyBuilder(context);
+          return _insetState(widget.emptyBuilder(context));
         }
 
         return ListView.separated(
@@ -342,10 +342,16 @@ class _PagedValueListViewState<K, V> extends State<PagedValueListView<K, V>> {
           },
         );
       },
-      loading: () => widget.loadingBuilder(context),
-      error: (error) => widget.errorBuilder(context, error),
+      loading: () => _insetState(widget.loadingBuilder(context)),
+      error: (error) => _insetState(widget.errorBuilder(context, error)),
     ),
   );
+
+  // Without a padding, a non-scrolling state clears every safe-area inset.
+  Widget _insetState(Widget child) {
+    if (widget.padding != null) return child;
+    return SafeArea(child: child);
+  }
 }
 
 /// A [GridView] that loads more pages when the user scrolls to the end of the
@@ -654,7 +660,7 @@ class _PagedValueGridViewState<K, V> extends State<PagedValueGridView<K, V>> {
     builder: (context, value, _) => value.when(
       (items, nextPageKey, error) {
         if (items.isEmpty) {
-          return widget.emptyBuilder(context);
+          return _insetState(widget.emptyBuilder(context));
         }
 
         return GridView.builder(
@@ -709,8 +715,14 @@ class _PagedValueGridViewState<K, V> extends State<PagedValueGridView<K, V>> {
           },
         );
       },
-      loading: () => widget.loadingBuilder(context),
-      error: (error) => widget.errorBuilder(context, error),
+      loading: () => _insetState(widget.loadingBuilder(context)),
+      error: (error) => _insetState(widget.errorBuilder(context, error)),
     ),
   );
+
+  // Without a padding, a non-scrolling state clears every safe-area inset.
+  Widget _insetState(Widget child) {
+    if (widget.padding != null) return child;
+    return SafeArea(child: child);
+  }
 }

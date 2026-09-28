@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `PagedValueListView` and `PagedValueGridView` drawing their empty, loading and error states under the safe area when no `padding` is given.
+
 ## 10.4.0
 
 🔄 Changed
