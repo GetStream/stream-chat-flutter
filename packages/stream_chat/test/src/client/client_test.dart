@@ -5103,6 +5103,83 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
+    test('StreamChatClient.enrichUrl maps every field of a fully populated response', () async {
+      const url = 'https://getstream.io/chat';
+      const image = api.ImageData(
+        frames: '1',
+        height: '200',
+        size: '1024',
+        url: 'https://giphy.com/1.gif',
+        width: '200',
+      );
+      when(() => defaultApi.getOG(url: url)).thenAnswer(
+        (_) async => const Result.success(
+          api.GetOGResponse(
+            duration: '0.01ms',
+            ogScrapeUrl: 'https://getstream.io/chat/',
+            assetUrl: 'https://getstream.io/chat/intro.mp4',
+            authorIcon: 'https://getstream.io/favicon.ico',
+            authorLink: 'https://getstream.io',
+            authorName: 'Stream',
+            color: '#005fff',
+            custom: {'campaign': 'launch'},
+            fallback: 'Stream Chat link preview',
+            footer: 'getstream.io',
+            footerIcon: 'https://getstream.io/footer.png',
+            imageUrl: 'https://getstream.io/chat/og.png',
+            originalHeight: 630,
+            originalWidth: 1200,
+            pretext: 'Stream Chat',
+            text: 'Build real-time chat in less time.',
+            thumbUrl: 'https://getstream.io/chat/og-thumb.png',
+            title: 'Chat API & SDKs',
+            titleLink: 'https://getstream.io/chat/?utm_source=og',
+            type: 'video',
+            actions: [api.Action(name: 'image_action', text: 'Send', type: 'button', style: 'primary', value: 'send')],
+            fields: [api.Field(short: true, title: 'Plan', value: 'Free')],
+            giphy: api.Images(
+              fixedHeight: image,
+              fixedHeightDownsampled: image,
+              fixedHeightStill: image,
+              fixedWidth: image,
+              fixedWidthDownsampled: image,
+              fixedWidthStill: image,
+              original: image,
+            ),
+          ),
+        ),
+      );
+
+      final res = await client.enrichUrl(url);
+      expect(
+        res.getOrNull(),
+        const OGAttachmentResponse(
+          duration: '0.01ms',
+          ogScrapeUrl: 'https://getstream.io/chat/',
+          assetUrl: 'https://getstream.io/chat/intro.mp4',
+          authorLink: 'https://getstream.io',
+          authorName: 'Stream',
+          imageUrl: 'https://getstream.io/chat/og.png',
+          text: 'Build real-time chat in less time.',
+          thumbUrl: 'https://getstream.io/chat/og-thumb.png',
+          title: 'Chat API & SDKs',
+          titleLink: 'https://getstream.io/chat/?utm_source=og',
+          type: 'video',
+        ),
+      );
+    });
+
+    test('StreamChatClient.enrichUrl falls back to the requested url when the response has no scraped url', () async {
+      const url = 'https://getstream.io/chat/';
+      when(() => defaultApi.getOG(url: url)).thenAnswer(
+        (_) async => const Result.success(api.GetOGResponse(duration: '0.01ms', custom: {}, title: 'Chat API & SDKs')),
+      );
+
+      final res = await client.enrichUrl(url);
+
+      expect(res.getOrNull()?.ogScrapeUrl, url);
+    });
+
     test('StreamChatClient.enrichUrl returns the failure without throwing', () async {
       const url = 'https://unreachable.example';
       const error = StreamApiException(

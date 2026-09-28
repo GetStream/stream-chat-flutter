@@ -5,7 +5,7 @@ import '../../core/models/response/og_attachment_response.dart';
 extension GetOGResponseMapper on api.GetOGResponse {
   /// Converts this response into an [OGAttachmentResponse].
   ///
-  /// The `requestedUrl` stands in for `og_scrape_url` if the response leaves it out.
+  /// The [requestedUrl] stands in for `og_scrape_url` if the response leaves it out.
   OGAttachmentResponse toModel({required String requestedUrl}) => OGAttachmentResponse(
     duration: duration,
     ogScrapeUrl: ogScrapeUrl ?? requestedUrl,
