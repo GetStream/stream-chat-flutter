@@ -352,6 +352,14 @@ GROUPS = [
               — and the `User` shape is group 01's to decide, not this group's. No `UserResponse` mapper
               exists yet, so nothing here could have been mapped without pre-empting that decision.
 
+            - **`removeShadowBan` is removed outright, without a deprecation cycle.** Unlike the unflag
+              pair, neither this package nor the backend ever deprecated it: v10.4.0 shipped it as plain
+              public API, and `unflag` is the only moderation route the server marks `Deprecated: true`
+              (`lib/chat/controller/v1/unflag.go:23`). Keeping it as a deprecated alias was tried and
+              rejected — it does nothing `unbanUser` does not, so a cycle would only prolong the suggestion
+              that shadow bans are lifted differently. A v10 caller gets a compile error and one Symbol Map
+              row rather than a release of ambiguity.
+
             - **`unflagMessage` and `unflagUser` are removed, not migrated.** `POST /moderation/unflag` has no v2
               operation and is a chat-v1-only route the server no longer acts on: it validates the request,
               answers successfully, and leaves the flag in place. Both were already deprecated here for that

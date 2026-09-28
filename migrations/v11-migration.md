@@ -169,7 +169,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamChatClient.banUser(id, Map options)` | `banUser(id, {channelCid, timeout, reason, shadow, ipBan, deleteMessages})` | `retyped` | Named parameters mirroring the endpoint's options. `timeout` is a `Duration` applied with minute granularity |
 | `StreamChatClient.unbanUser(id, Map options)` | `unbanUser(id, {channelCid})` | `retyped` | `remove_future_channels_ban` and `reason` are gone — the moderation v2 unban endpoint has neither |
 | `StreamChatClient.shadowBan(id, Map options)` | `shadowBan(id, {channelCid, timeout, reason, ipBan, deleteMessages})` | `retyped` | Same options as `banUser`, minus `shadow` |
-| `StreamChatClient.removeShadowBan` / `Channel.removeShadowBan` | `unbanUser` / `Channel.unbanMember` | `removed` | It sent `shadow: true` to unban, which no version of that endpoint reads |
+| `StreamChatClient.removeShadowBan` / `Channel.removeShadowBan` | `moderation.unbanUser` / `Channel.unbanMember` | `removed` | It sent `shadow: true` to unban, which no version of that endpoint reads, so it always did what `unbanUser` does |
 | `StreamChatClient.unflagMessage` / `unflagUser` | — | `removed` | `POST /moderation/unflag` has no v2 endpoint and the v1 one removed no flag |
 | `Channel.banMember(id, Map options)` / `shadowBan(id, Map options)` | `banMember(id, {timeout, reason, shadow, ipBan, deleteMessages})` / `shadowBan(id, {…})` | `retyped` | The channel supplies its own `channelCid`; the `type` + `id` pair it used to send is deprecated server-side |
 | `Channel.mute` / `unmute` / `unbanMember` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing |
@@ -626,7 +626,7 @@ methods used to send is gone, and with it a pair the API deprecated in favour of
 the v1 endpoint and are not by its replacement. If you passed either through the options map, they no
 longer reach the server.
 
-**`removeShadowBan` is removed** from both `StreamChatClient` and `Channel`. It passed
+**`removeShadowBan` is removed** from both `StreamChatClient.moderation` and `Channel`. It passed
 `shadow: true` to unban, which no version of that endpoint has ever read, so it did exactly what
 `unbanUser` and `Channel.unbanMember` do. Call those — they lift a shadow ban like any other.
 

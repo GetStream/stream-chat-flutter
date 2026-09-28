@@ -7,7 +7,7 @@
 - `muteUser`, `unmuteUser`, `banUser`, `unbanUser` and the flag methods move to the moderation v2 API, which is in beta and refuses an app pinned to the v1 moderation flow. Muting a *channel* is unaffected.
 - `banUser`'s options map becomes named parameters: `channelCid`, `timeout`, `reason`, `shadow`, `ipBan`, `deleteMessages` (a `DeleteType`). `Channel.banMember` and `shadowBan` take the same, minus `channelCid`.
 - `unbanUser` takes `channelCid` and no longer accepts `remove_future_channels_ban` or `reason`, which its replacement has neither of.
-- `removeShadowBan` is removed. It was an alias of `unbanUser` and `Channel.unbanMember` — use those.
+- `removeShadowBan` is removed from `StreamChatClient.moderation` and `Channel`. It was an alias of `unbanUser` and `Channel.unbanMember` — use those.
 - `unflagMessage` and `unflagUser` are removed. They removed no flag, which is why both were already deprecated.
 - `StreamChatApi.moderation` handles only `queryBannedUsers`; the other ten methods moved off it.
 
