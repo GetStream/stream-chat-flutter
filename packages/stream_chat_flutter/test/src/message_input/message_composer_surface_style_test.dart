@@ -59,8 +59,7 @@ void main() {
     expect(_backgroundFillFinder(tester), findsOneWidget);
   });
 
-  testWidgets('the regular composer runs its top divider under the side insets', (tester) async {
-    // The line spans the full width while the input stays inside the safe area.
+  testWidgets('StreamMessageComposer runs the regular top divider under the side insets', (tester) async {
     const rightInset = 84.0;
     await _pumpComposer(tester, surfaceStyle: StreamSurfaceStyle.regular, rightPadding: rightInset);
 
@@ -160,9 +159,7 @@ void main() {
     expect(insetBottom(), moreOrLessEquals(0));
   });
 
-  testWidgets('the composer keeps its side insets while the attachment picker opens', (tester) async {
-    // Only the bottom inset gives way to the picker. Devices with a side inset,
-    // like a notched phone in landscape, keep the input and the picker clear of it.
+  testWidgets('StreamMessageComposer keeps its side insets while the attachment picker opens', (tester) async {
     const rightInset = 84.0;
     await _pumpComposer(
       tester,

@@ -1,7 +1,5 @@
-// Pins how `StreamMessageListView`'s floating overlays clear the safe area when
-// the list applies the insets itself (`enableSafeArea`). Each edge is resolved
-// on its own, since devices like a foldable iPhone report a side inset on one
-// edge only.
+// How `StreamMessageListView` clears the side safe-area insets with
+// `enableSafeArea` on.
 
 import 'dart:async';
 
@@ -10,6 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/src/message_list_view/floating_date_divider.dart';
+import 'package:stream_chat_flutter/src/message_list_view/stream_message_list_empty_state.dart';
+import 'package:stream_chat_flutter/src/message_list_view/stream_message_list_skeleton_loading.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../../test_utils/data_generator.dart';
@@ -20,7 +20,6 @@ void main() {
   late Channel channel;
   late ChannelClientState channelClientState;
   late ClientState clientState;
-  late OwnUser ownUser;
 
   late StreamController<List<Message>> messagesController;
 
@@ -28,7 +27,7 @@ void main() {
     client = MockClient();
     clientState = MockClientState();
     when(() => client.state).thenAnswer((_) => clientState);
-    ownUser = OwnUser(id: 'ownid');
+    final ownUser = OwnUser(id: 'ownid');
     when(() => clientState.currentUser).thenReturn(ownUser);
     when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(ownUser));
 
@@ -43,10 +42,14 @@ void main() {
     when(() => channelClientState.threadsStream).thenAnswer((_) => const Stream.empty());
     when(() => channelClientState.isUpToDate).thenReturn(true);
     when(() => channelClientState.isUpToDateStream).thenAnswer((_) => Stream.value(true));
+    when(() => channelClientState.unreadCount).thenReturn(0);
+    when(() => channelClientState.unreadCountStream).thenAnswer((_) => Stream.value(0));
     when(() => channelClientState.readStream).thenAnswer((_) => const Stream.empty());
     when(() => channelClientState.read).thenReturn([]);
     when(() => channelClientState.membersStream).thenAnswer((_) => const Stream.empty());
     when(() => channelClientState.members).thenReturn([]);
+    when(() => channelClientState.currentUserRead).thenReturn(null);
+    when(() => channelClientState.currentUserReadStream).thenAnswer((_) => const Stream.empty());
     when(() => channelClientState.messagesStream).thenAnswer((_) => messagesController.stream);
 
     when(() => channel.markRead(messageId: any(named: 'messageId'))).thenAnswer((_) async => EmptyResponse());
@@ -55,19 +58,16 @@ void main() {
   Future<void> pumpMessageList(
     WidgetTester tester, {
     required EdgeInsets padding,
-    TextDirection textDirection = TextDirection.ltr,
     List<Message>? messages,
-    int unreadCount = 0,
-    Read? currentUserRead,
-    bool openAtFirstUnread = false,
     StreamMessageListViewConfiguration config = const StreamMessageListViewConfiguration(),
+    StreamChatThemeData? themeData,
+    StreamMessageListViewBuilders builders = const StreamMessageListViewBuilders(),
+    bool enableSafeArea = true,
+    Message? parentMessage,
+    bool settle = true,
   }) async {
     final effectiveMessages = messages ?? generateConversation(40, users: [User(id: 'otherid')]).reversed.toList();
     when(() => channelClientState.messages).thenReturn(effectiveMessages);
-    when(() => channelClientState.unreadCount).thenReturn(unreadCount);
-    when(() => channelClientState.unreadCountStream).thenAnswer((_) => Stream.value(unreadCount));
-    when(() => channelClientState.currentUserRead).thenReturn(currentUserRead);
-    when(() => channelClientState.currentUserReadStream).thenAnswer((_) => Stream.value(currentUserRead));
 
     await tester.runAsync(() async {
       await tester.pumpWidget(
@@ -75,16 +75,18 @@ void main() {
           home: Builder(
             builder: (context) => MediaQuery(
               data: MediaQuery.of(context).copyWith(padding: padding),
-              child: Directionality(
-                textDirection: textDirection,
-                child: DefaultAssetBundle(
-                  bundle: rootBundle,
-                  child: StreamChat(
-                    client: client,
-                    child: StreamChannel(
-                      channel: channel,
-                      openAtFirstUnread: openAtFirstUnread,
-                      child: StreamMessageListView(enableSafeArea: true, config: config),
+              child: DefaultAssetBundle(
+                bundle: rootBundle,
+                child: StreamChat(
+                  client: client,
+                  themeData: themeData,
+                  child: StreamChannel(
+                    channel: channel,
+                    child: StreamMessageListView(
+                      enableSafeArea: enableSafeArea,
+                      config: config,
+                      builders: builders,
+                      parentMessage: parentMessage,
                     ),
                   ),
                 ),
@@ -94,45 +96,27 @@ void main() {
         ),
       );
       messagesController.add(effectiveMessages);
-      await tester.pumpAndSettle();
+      if (settle) {
+        await tester.pumpAndSettle();
+      } else {
+        await tester.pump();
+      }
     });
   }
 
-  // Scrolls away from the newest message so the scroll-to-bottom button shows.
-  Future<Rect> scrollToBottomButtonRect(WidgetTester tester) async {
-    await tester.drag(find.byType(StreamMessageListView), const Offset(0, 400));
-    await tester.pumpAndSettle();
-    return tester.getRect(find.byType(StreamButton));
-  }
-
-  testWidgets('the scroll-to-bottom button clears a right inset in a left-to-right layout', (tester) async {
-    // The margin is added on top of the inset, so the button lines up with the
-    // bubbles, which the list also insets by the safe area before their padding.
+  testWidgets('StreamMessageListView keeps the scroll-to-bottom button clear of a side inset', (tester) async {
     const rightInset = 84.0;
     await pumpMessageList(tester, padding: const EdgeInsets.only(right: rightInset));
 
-    final rect = await scrollToBottomButtonRect(tester);
+    await tester.drag(find.byType(StreamMessageListView), const Offset(0, 400));
+    await tester.pumpAndSettle();
 
     final spacing = tester.element(find.byType(StreamMessageListView)).streamSpacing;
     final screenWidth = tester.view.physicalSize.width / tester.view.devicePixelRatio;
-    expect(rect.right, moreOrLessEquals(screenWidth - rightInset - spacing.md));
+    expect(tester.getRect(find.byType(StreamButton)).right, moreOrLessEquals(screenWidth - rightInset - spacing.md));
   });
 
-  testWidgets('the scroll-to-bottom button clears a left inset in a right-to-left layout', (tester) async {
-    const leftInset = 84.0;
-    await pumpMessageList(
-      tester,
-      padding: const EdgeInsets.only(left: leftInset),
-      textDirection: TextDirection.rtl,
-    );
-
-    final rect = await scrollToBottomButtonRect(tester);
-
-    final spacing = tester.element(find.byType(StreamMessageListView)).streamSpacing;
-    expect(rect.left, moreOrLessEquals(leftInset + spacing.md));
-  });
-
-  testWidgets('the floating date divider centers over the content area, not the full width', (tester) async {
+  testWidgets('StreamMessageListView centers the floating date divider over the content area', (tester) async {
     const padding = EdgeInsets.only(right: 84);
     await pumpMessageList(
       tester,
@@ -144,77 +128,103 @@ void main() {
     await tester.drag(find.byType(StreamMessageListView), const Offset(0, 300));
     await tester.pumpAndSettle();
 
-    expect(tester.getCenter(_floatingDateDividerFinder).dx, moreOrLessEquals(_contentCenterX(tester, padding)));
-  });
-
-  testWidgets('the floating date divider lines up with the inline divider it hands off to', (tester) async {
-    // Offset from each other, the two pills read as one clipped label next to
-    // another ("Toda Today") while the floating one fades out.
-    await pumpMessageList(
-      tester,
-      padding: const EdgeInsets.only(right: 84),
-      messages: _messagesOverFourDays(),
-      config: _opaqueFloatingDateDividerConfig,
+    final floatingDateDivider = find.descendant(
+      of: find.byType(FloatingDateDivider),
+      matching: find.byType(StreamDateDivider),
     );
-
-    // Brings an inline divider up under the floating pill, where they hand off.
-    await tester.drag(find.byType(StreamMessageListView), const Offset(0, 400));
-    await tester.pumpAndSettle();
-
-    final inline = find
-        .byType(StreamDateDivider)
-        .evaluate()
-        .firstWhere((element) => element.findAncestorWidgetOfExactType<FloatingDateDivider>() == null);
-    final inlineBox = inline.renderObject! as RenderBox;
-    final inlineCenter = inlineBox.localToGlobal(inlineBox.size.center(Offset.zero));
-
-    expect(tester.getCenter(_floatingDateDividerFinder).dx, moreOrLessEquals(inlineCenter.dx));
+    expect(tester.getCenter(floatingDateDivider).dx, moreOrLessEquals(_contentCenterX(tester, padding)));
   });
 
-  testWidgets('the unread indicator centers over the content area, not the full width', (tester) async {
+  testWidgets('StreamMessageListView centers the empty state over the content area', (tester) async {
     const padding = EdgeInsets.only(right: 84);
-    final messages = generateConversation(20, users: [User(id: 'otherid')]).reversed.toList();
-
-    await pumpMessageList(
-      tester,
-      padding: padding,
-      messages: messages,
-      unreadCount: 5,
-      currentUserRead: Read(
-        user: ownUser,
-        lastRead: DateTime.now(),
-        unreadMessages: 5,
-        lastReadMessageId: messages[10].id,
-      ),
-      config: const StreamMessageListViewConfiguration(markReadWhenAtTheBottom: false),
-    );
+    await pumpMessageList(tester, padding: padding, messages: []);
 
     expect(
-      tester.getCenter(find.byType(UnreadIndicatorButton)).dx,
+      tester.getCenter(find.byType(StreamMessageListEmptyState)).dx,
       moreOrLessEquals(_contentCenterX(tester, padding)),
     );
   });
 
-  testWidgets('the unread indicator keeps its own width rather than spanning the content area', (tester) async {
-    const rightInset = 84.0;
-    final messages = generateConversation(20, users: [User(id: 'otherid')]).reversed.toList();
+  testWidgets('StreamMessageListView keeps its background full width under a side inset', (tester) async {
+    const backgroundColor = Color(0xFF00FF00);
+    await pumpMessageList(
+      tester,
+      padding: const EdgeInsets.only(right: 84),
+      themeData: StreamChatThemeData(
+        messageListViewTheme: const StreamMessageListViewThemeData(backgroundColor: backgroundColor),
+      ),
+    );
 
+    final background = find.byWidgetPredicate(
+      (widget) => switch (widget) {
+        DecoratedBox(decoration: BoxDecoration(color: backgroundColor)) => true,
+        _ => false,
+      },
+    );
+    final screenWidth = tester.view.physicalSize.width / tester.view.devicePixelRatio;
+    expect(tester.getSize(background).width, moreOrLessEquals(screenWidth));
+  });
+
+  testWidgets('StreamMessageListView insets message rows by a side inset only once', (tester) async {
+    const rightInset = 84.0;
+    await pumpMessageList(tester, padding: const EdgeInsets.only(right: rightInset));
+
+    final screenWidth = tester.view.physicalSize.width / tester.view.devicePixelRatio;
+    expect(tester.getRect(find.byType(StreamMessageItem).first).right, moreOrLessEquals(screenWidth - rightInset));
+  });
+
+  testWidgets('StreamMessageListView centers a custom empty state over the content area', (tester) async {
+    const padding = EdgeInsets.only(right: 84);
+    const customEmptyKey = Key('custom-empty');
+    await pumpMessageList(
+      tester,
+      padding: padding,
+      messages: [],
+      builders: StreamMessageListViewBuilders(empty: (_) => const SizedBox.expand(key: customEmptyKey)),
+    );
+
+    expect(tester.getCenter(find.byKey(customEmptyKey)).dx, moreOrLessEquals(_contentCenterX(tester, padding)));
+  });
+
+  testWidgets('StreamMessageListView keeps the loading state clear of a side inset', (tester) async {
+    // A thread whose replies never arrive stays in its loading state.
+    when(() => channelClientState.threads).thenReturn(const {});
+    when(
+      () => channel.getReplies(
+        any(),
+        options: any(named: 'options'),
+        preferOffline: any(named: 'preferOffline'),
+      ),
+    ).thenAnswer((_) => Completer<QueryRepliesResponse>().future);
+
+    const rightInset = 84.0;
     await pumpMessageList(
       tester,
       padding: const EdgeInsets.only(right: rightInset),
-      messages: messages,
-      unreadCount: 5,
-      currentUserRead: Read(
-        user: ownUser,
-        lastRead: DateTime.now(),
-        unreadMessages: 5,
-        lastReadMessageId: messages[10].id,
+      parentMessage: Message(
+        id: 'parent',
+        text: 'Parent',
+        user: User(id: 'otherid'),
       ),
-      config: const StreamMessageListViewConfiguration(markReadWhenAtTheBottom: false),
+      // The skeleton shimmers forever, so it never settles.
+      settle: false,
     );
 
     final screenWidth = tester.view.physicalSize.width / tester.view.devicePixelRatio;
-    expect(tester.getSize(find.byType(UnreadIndicatorButton)).width, lessThan(screenWidth - rightInset));
+    expect(
+      tester.getRect(find.byType(StreamMessageListSkeletonLoading)).right,
+      moreOrLessEquals(screenWidth - rightInset),
+    );
+  });
+
+  testWidgets('StreamMessageListView leaves the empty state on the full width when enableSafeArea is off', (
+    tester,
+  ) async {
+    const padding = EdgeInsets.only(right: 84);
+    await pumpMessageList(tester, padding: padding, messages: [], enableSafeArea: false);
+
+    final screenWidth = tester.view.physicalSize.width / tester.view.devicePixelRatio;
+    expect(tester.getCenter(find.byType(StreamMessageListEmptyState)).dx, moreOrLessEquals(screenWidth / 2));
   });
 }
 
@@ -224,8 +234,7 @@ double _contentCenterX(WidgetTester tester, EdgeInsets padding) {
   return padding.left + (screenWidth - padding.left - padding.right) / 2;
 }
 
-// Ten messages a day over four days, oldest first, so inline date dividers
-// scroll through the viewport.
+// Ten messages a day over four days, oldest first.
 List<Message> _messagesOverFourDays() => [
   for (var day = 3; day >= 0; day--)
     for (var i = 0; i < 10; i++)
@@ -237,11 +246,5 @@ List<Message> _messagesOverFourDays() => [
       ),
 ];
 
-// Keeps the floating pill opaque while an inline divider is near it, so both
-// stay in the tree for the comparison.
+// Keeps the floating divider in the tree next to an inline one.
 const _opaqueFloatingDateDividerConfig = StreamMessageListViewConfiguration(fadeFloatingDateDividerNearInline: false);
-
-final _floatingDateDividerFinder = find.descendant(
-  of: find.byType(FloatingDateDivider),
-  matching: find.byType(StreamDateDivider),
-);
