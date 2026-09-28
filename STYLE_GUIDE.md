@@ -472,7 +472,7 @@ Weave parameters into sentences about what happens, the way `dart:core` does —
 
 /// Bans [userID] from this channel.
 ///
-/// [timeout] expires the ban, rounded down to whole minutes.
+/// [timeout] expires the ban, applied in whole minutes.
 ///
 /// [shadow] hides their messages without telling them, [ipBan] also bans their
 /// address, and [deleteMessages] handles the messages they sent.
@@ -482,7 +482,7 @@ Weave parameters into sentences about what happens, the way `dart:core` does —
 /// Bans [userID] from this channel.
 ///
 /// The ban lasts until it is removed. A [timeout] expires it after that long,
-/// rounded down to whole minutes, so a shorter one never expires it.
+/// applied in whole minutes and never less than one.
 ///
 /// If [shadow] is true, their messages stop reaching anyone else and they are
 /// not told.
@@ -528,8 +528,7 @@ they can observe what their own call does:
 // GOOD:
 
 /// [timeout] lifts the ban once it elapses; the ban lasts until it is removed
-/// when omitted. It is rounded down to whole minutes, so a value under a minute
-/// never lifts the ban.
+/// when omitted. It is applied in whole minutes and never less than one.
 ```
 
 Two things this does **not** forbid:

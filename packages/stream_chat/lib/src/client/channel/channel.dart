@@ -2270,7 +2270,7 @@ class Channel {
   /// Mutes this channel for the current user.
   ///
   /// The mute lasts until it is removed. An [expiration] expires it after
-  /// that long.
+  /// that long, and a zero one removes it straight away.
   Future<Result<void>> mute({Duration? expiration}) {
     _checkInitialized();
 
@@ -2313,7 +2313,7 @@ class Channel {
     String? reason,
     bool? shadow,
     bool? ipBan,
-    BanRequestDeleteMessages? deleteMessages,
+    DeleteType? deleteMessages,
   }) {
     _checkInitialized();
     return _client.moderation.banUser(
@@ -2346,7 +2346,7 @@ class Channel {
     Duration? timeout,
     String? reason,
     bool? ipBan,
-    BanRequestDeleteMessages? deleteMessages,
+    DeleteType? deleteMessages,
   }) {
     _checkInitialized();
     return _client.moderation.shadowBan(

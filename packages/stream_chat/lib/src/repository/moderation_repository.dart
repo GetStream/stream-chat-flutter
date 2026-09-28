@@ -1,46 +1,64 @@
 import 'dart:math' as math;
 
-import 'package:stream_core/stream_core.dart' show Result;
+import 'package:stream_core/stream_core.dart' show PatternMatching, Result;
 
 import '../../open_api/api.dart' as api;
+import '../core/models/delete_type.dart';
+import '../core/models/response/flag_response.dart';
+import '../core/models/response/mute_response.dart';
+import '../core/models/response/unmute_response.dart';
+import 'mapper/moderation_mapper.dart';
 
-int? _inMinutesAtLeastOne(Duration? timeout) =>
-    timeout == null ? null : math.max(timeout.inMinutes, 1);
+int? _inMinutesAtLeastOne(
+  Duration? timeout,
+) => timeout == null ? null : math.max(timeout.inMinutes, 1);
 
 /// Repository dedicated to moderation operations.
 class ModerationRepository {
-  /// Initialize a new moderation repository.
+  /// Creates a new moderation repository.
   const ModerationRepository(this._api);
 
   final api.DefaultApi _api;
 
-  /// Mutes [userId] for the current user.
+  /// Mutes every id in [userIds] for the current user.
   ///
   /// The mute lasts until it is removed. A [timeout] expires it after that
   /// long, applied in whole minutes and never less than one.
-  Future<Result<void>> muteUser(
-    String userId, {
+  ///
+  /// At least one id is required.
+  Future<Result<MuteResponse>> muteUsers(
+    List<String> userIds, {
     Duration? timeout,
-  }) => _api.mute(
-    muteRequest: api.MuteRequest(
-      targetIds: [userId],
-      timeout: _inMinutesAtLeastOne(timeout),
-    ),
-  );
+  }) async {
+    final result = await _api.mute(
+      muteRequest: api.MuteRequest(
+        targetIds: userIds,
+        timeout: _inMinutesAtLeastOne(timeout),
+      ),
+    );
 
-  /// Removes the current user's mute on [userId].
-  Future<Result<void>> unmuteUser(
-    String userId,
-  ) => _api.unmute(
-    unmuteRequest: api.UnmuteRequest(
-      targetIds: [userId],
-    ),
-  );
+    return result.map((response) => response.toModel());
+  }
+
+  /// Removes the current user's mute on every id in [userIds].
+  ///
+  /// At least one id is required.
+  Future<Result<UnmuteResponse>> unmuteUsers(
+    List<String> userIds,
+  ) async {
+    final result = await _api.unmute(
+      unmuteRequest: api.UnmuteRequest(
+        targetIds: userIds,
+      ),
+    );
+
+    return result.map((response) => response.toModel());
+  }
 
   /// Mutes the channel [channelCid] for the current user.
   ///
   /// The mute lasts until it is removed. An [expiration] expires it after
-  /// that long.
+  /// that long, and a zero one removes it straight away.
   Future<Result<void>> muteChannel(
     String channelCid, {
     Duration? expiration,
@@ -81,7 +99,7 @@ class ModerationRepository {
     String? reason,
     bool? shadow,
     bool? ipBan,
-    api.BanRequestDeleteMessages? deleteMessages,
+    DeleteType? deleteMessages,
   }) => _api.ban(
     banRequest: api.BanRequest(
       targetUserId: targetUserId,
@@ -90,7 +108,7 @@ class ModerationRepository {
       reason: reason,
       shadow: shadow,
       ipBan: ipBan,
-      deleteMessages: deleteMessages,
+      deleteMessages: deleteMessages?.toRequest(),
     ),
   );
 
@@ -110,32 +128,40 @@ class ModerationRepository {
   /// Flags [messageId] for moderator review.
   ///
   /// [reason] and [custom] are recorded with the flag.
-  Future<Result<void>> flagMessage(
+  Future<Result<FlagResponse>> flagMessage(
     String messageId, {
     String? reason,
     Map<String, Object?>? custom,
-  }) => _api.flag(
-    flagRequest: api.FlagRequest(
-      entityType: 'stream:chat:v1:message',
-      entityId: messageId,
-      reason: reason,
-      custom: custom,
-    ),
-  );
+  }) async {
+    final result = await _api.flag(
+      flagRequest: api.FlagRequest(
+        entityType: 'stream:chat:v1:message',
+        entityId: messageId,
+        reason: reason,
+        custom: custom,
+      ),
+    );
+
+    return result.map((response) => response.toModel());
+  }
 
   /// Flags [userId] for moderator review.
   ///
   /// [reason] and [custom] are recorded with the flag.
-  Future<Result<void>> flagUser(
+  Future<Result<FlagResponse>> flagUser(
     String userId, {
     String? reason,
     Map<String, Object?>? custom,
-  }) => _api.flag(
-    flagRequest: api.FlagRequest(
-      entityType: 'stream:user',
-      entityId: userId,
-      reason: reason,
-      custom: custom,
-    ),
-  );
+  }) async {
+    final result = await _api.flag(
+      flagRequest: api.FlagRequest(
+        entityType: 'stream:user',
+        entityId: userId,
+        reason: reason,
+        custom: custom,
+      ),
+    );
+
+    return result.map((response) => response.toModel());
+  }
 }

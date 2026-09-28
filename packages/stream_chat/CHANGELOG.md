@@ -3,9 +3,9 @@
 🛑️ Breaking
 
 - The moderation methods move from `StreamChatClient` to `StreamChatClient.moderation`: `client.muteUser(id)` becomes `client.moderation.muteUser(id)`. `Channel`'s own moderation methods are unchanged.
-- Muting, banning and flagging return a `Result<void>` instead of throwing, on both `StreamChatClient.moderation` and `Channel`. `OwnUser.mutes` and `channelMutes` still arrive over `notification.mutes_updated`.
+- Moderation calls return a `Result` instead of throwing, on both `client.moderation` and `Channel`.
 - `muteUser`, `unmuteUser`, `banUser`, `unbanUser` and the flag methods move to the moderation v2 API, which is in beta and refuses an app pinned to the v1 moderation flow. Muting a *channel* is unaffected.
-- `banUser`'s options map becomes named parameters: `channelCid`, `timeout`, `reason`, `shadow`, `ipBan`, `deleteMessages`. `Channel.banMember` and `shadowBan` take the same, minus `channelCid`.
+- `banUser`'s options map becomes named parameters: `channelCid`, `timeout`, `reason`, `shadow`, `ipBan`, `deleteMessages` (a `DeleteType`). `Channel.banMember` and `shadowBan` take the same, minus `channelCid`.
 - `unbanUser` takes `channelCid` and no longer accepts `remove_future_channels_ban` or `reason`, which its replacement has neither of.
 - `removeShadowBan` is removed. It was an alias of `unbanUser` and `Channel.unbanMember` — use those.
 - `unflagMessage` and `unflagUser` are removed. They removed no flag, which is why both were already deprecated.
@@ -94,6 +94,8 @@
 - Added `MemberSortField.updatedAt`.
 - Added `UserSortField.language` and `UserSortField.teams`.
 - Added optional `reason` and `custom` arguments to `flagMessage` and `flagUser`, recorded with the flag.
+- Added an optional `timeout` to `StreamChatClient.moderation.muteUser` that expires the mute.
+- Added `StreamChatClient.moderation.muteUsers` and `unmuteUsers`, which mute and unmute several users in one call.
 
 🔒 Security
 

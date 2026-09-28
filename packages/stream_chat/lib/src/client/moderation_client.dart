@@ -1,7 +1,10 @@
 import 'package:meta/meta.dart';
 import 'package:stream_core/stream_core.dart' show Result;
 
-import '../../open_api/models.dart' show BanRequestDeleteMessages;
+import '../core/models/delete_type.dart';
+import '../core/models/response/flag_response.dart';
+import '../core/models/response/mute_response.dart';
+import '../core/models/response/unmute_response.dart';
 import '../repository/moderation_repository.dart';
 
 /// Muting, banning and flagging, for the connected user.
@@ -14,7 +17,7 @@ import '../repository/moderation_repository.dart';
 ///  * [Channel.banMember], which bans someone from one channel.
 ///  * [StreamChatClient.queryBannedUsers], which lists who is banned.
 class ModerationClient {
-  /// Initialize a new moderation client.
+  /// Creates a new moderation client.
   @internal
   const ModerationClient(this._repository);
 
@@ -24,20 +27,38 @@ class ModerationClient {
   ///
   /// The mute lasts until it is removed. A [timeout] expires it after that
   /// long, applied in whole minutes and never less than one.
-  Future<Result<void>> muteUser(
+  Future<Result<MuteResponse>> muteUser(
     String userId, {
     Duration? timeout,
-  }) => _repository.muteUser(userId, timeout: timeout);
+  }) => muteUsers([userId], timeout: timeout);
+
+  /// Mutes every id in [userIds] for the current user.
+  ///
+  /// The mute lasts until it is removed. A [timeout] expires it after that
+  /// long, applied in whole minutes and never less than one.
+  ///
+  /// At least one id is required.
+  Future<Result<MuteResponse>> muteUsers(
+    List<String> userIds, {
+    Duration? timeout,
+  }) => _repository.muteUsers(userIds, timeout: timeout);
 
   /// Removes the current user's mute on [userId].
-  Future<Result<void>> unmuteUser(
+  Future<Result<UnmuteResponse>> unmuteUser(
     String userId,
-  ) => _repository.unmuteUser(userId);
+  ) => unmuteUsers([userId]);
+
+  /// Removes the current user's mute on every id in [userIds].
+  ///
+  /// At least one id is required.
+  Future<Result<UnmuteResponse>> unmuteUsers(
+    List<String> userIds,
+  ) => _repository.unmuteUsers(userIds);
 
   /// Mutes the channel [channelCid] for the current user.
   ///
   /// The mute lasts until it is removed. An [expiration] expires it after
-  /// that long.
+  /// that long, and a zero one removes it straight away.
   Future<Result<void>> muteChannel(
     String channelCid, {
     Duration? expiration,
@@ -69,7 +90,7 @@ class ModerationClient {
     String? reason,
     bool? shadow,
     bool? ipBan,
-    BanRequestDeleteMessages? deleteMessages,
+    DeleteType? deleteMessages,
   }) => _repository.banUser(
     targetUserId,
     channelCid: channelCid,
@@ -88,7 +109,10 @@ class ModerationClient {
   Future<Result<void>> unbanUser(
     String targetUserId, {
     String? channelCid,
-  }) => _repository.unbanUser(targetUserId, channelCid: channelCid);
+  }) => _repository.unbanUser(
+    targetUserId,
+    channelCid: channelCid,
+  );
 
   /// Bans [targetUserId] without telling them, hiding their messages.
   ///
@@ -102,7 +126,7 @@ class ModerationClient {
     Duration? timeout,
     String? reason,
     bool? ipBan,
-    BanRequestDeleteMessages? deleteMessages,
+    DeleteType? deleteMessages,
   }) => banUser(
     targetUserId,
     channelCid: channelCid,
@@ -116,7 +140,7 @@ class ModerationClient {
   /// Flags [messageId] for moderator review.
   ///
   /// [reason] and [custom] are recorded with the flag.
-  Future<Result<void>> flagMessage(
+  Future<Result<FlagResponse>> flagMessage(
     String messageId, {
     String? reason,
     Map<String, Object?>? custom,
@@ -125,7 +149,7 @@ class ModerationClient {
   /// Flags [userId] for moderator review.
   ///
   /// [reason] and [custom] are recorded with the flag.
-  Future<Result<void>> flagUser(
+  Future<Result<FlagResponse>> flagUser(
     String userId, {
     String? reason,
     Map<String, Object?>? custom,

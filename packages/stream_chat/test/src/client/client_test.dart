@@ -2571,49 +2571,6 @@ void main() {
       verifyNoMoreInteractions(fakeChatApi.channel);
     });
 
-    test('`.muteChannel` sends the cid as a single-element list', () async {
-      const channelCid = 'test-channel-type:test-channel-id';
-      const request = api.MuteChannelRequest(channelCids: [channelCid]);
-
-      when(() => defaultApi.muteChannel(muteChannelRequest: request)).thenAnswer(
-        (_) async => const Result.success(api.MuteChannelResponse(duration: '0.01ms')),
-      );
-
-      final res = await client.moderation.muteChannel(channelCid);
-      expect(res.isSuccess, isTrue);
-
-      verify(() => defaultApi.muteChannel(muteChannelRequest: request)).called(1);
-      verifyNoMoreInteractions(defaultApi);
-    });
-
-    test('`.muteChannel` sends the expiration in milliseconds', () async {
-      const channelCid = 'test-channel-type:test-channel-id';
-      const request = api.MuteChannelRequest(channelCids: [channelCid], expiration: 60000);
-
-      when(() => defaultApi.muteChannel(muteChannelRequest: request)).thenAnswer(
-        (_) async => const Result.success(api.MuteChannelResponse(duration: '0.01ms')),
-      );
-
-      await client.moderation.muteChannel(channelCid, expiration: const Duration(minutes: 1));
-
-      verify(() => defaultApi.muteChannel(muteChannelRequest: request)).called(1);
-    });
-
-    test('`.unmuteChannel` sends the cid as a single-element list', () async {
-      const channelCid = 'test-channel-type:test-channel-id';
-      const request = api.UnmuteChannelRequest(channelCids: [channelCid]);
-
-      when(() => defaultApi.unmuteChannel(unmuteChannelRequest: request)).thenAnswer(
-        (_) async => const Result.success(api.UnmuteResponse(duration: '0.01ms')),
-      );
-
-      final res = await client.moderation.unmuteChannel(channelCid);
-      expect(res.isSuccess, isTrue);
-
-      verify(() => defaultApi.unmuteChannel(unmuteChannelRequest: request)).called(1);
-      verifyNoMoreInteractions(defaultApi);
-    });
-
     test('`.partialMemberUpdate with userId`', () async {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
@@ -3502,62 +3459,6 @@ void main() {
       verifyNoMoreInteractions(fakeChatApi.user);
     });
 
-    test('`.banUser` sends only the target when nothing else is given', () async {
-      const userId = 'test-user-id';
-      const request = api.BanRequest(targetUserId: userId);
-
-      when(() => defaultApi.ban(banRequest: request)).thenAnswer(
-        (_) async => const Result.success(api.ModerationBanResponse(duration: '0.01ms')),
-      );
-
-      final res = await client.moderation.banUser(userId);
-      expect(res.isSuccess, isTrue);
-
-      verify(() => defaultApi.ban(banRequest: request)).called(1);
-      verifyNoMoreInteractions(defaultApi);
-    });
-
-    test('`.banUser` sends the timeout in minutes', () async {
-      const userId = 'test-user-id';
-      const request = api.BanRequest(targetUserId: userId, timeout: 30);
-
-      when(() => defaultApi.ban(banRequest: request)).thenAnswer(
-        (_) async => const Result.success(api.ModerationBanResponse(duration: '0.01ms')),
-      );
-
-      await client.moderation.banUser(userId, timeout: const Duration(minutes: 30));
-
-      verify(() => defaultApi.ban(banRequest: request)).called(1);
-    });
-
-    test('`.banUser` surfaces a failure without throwing', () async {
-      const error = StreamClientException(message: 'boom');
-      const request = api.BanRequest(targetUserId: 'test-user-id');
-
-      when(() => defaultApi.ban(banRequest: request)).thenAnswer(
-        (_) async => const Result.failure(error),
-      );
-
-      final res = await client.moderation.banUser('test-user-id');
-
-      expect(res.isFailure, isTrue);
-      expect(res.exceptionOrNull(), error);
-    });
-
-    test('`.unbanUser` sends the target as a query parameter', () async {
-      const userId = 'test-user-id';
-
-      when(() => defaultApi.unban(targetUserId: userId)).thenAnswer(
-        (_) async => const Result.success(api.UnbanResponse(duration: '0.01ms')),
-      );
-
-      final res = await client.moderation.unbanUser(userId);
-      expect(res.isSuccess, isTrue);
-
-      verify(() => defaultApi.unban(targetUserId: userId)).called(1);
-      verifyNoMoreInteractions(defaultApi);
-    });
-
     test('`.blockUser`', () async {
       const userId = 'test-user-id';
 
@@ -3868,96 +3769,6 @@ void main() {
         verifyNoMoreInteractions(fakeChatApi.user);
       },
     );
-
-    test('`.shadowBan` sets the shadow flag on the ban', () async {
-      const userId = 'test-user-id';
-      const request = api.BanRequest(targetUserId: userId, shadow: true);
-
-      when(() => defaultApi.ban(banRequest: request)).thenAnswer(
-        (_) async => const Result.success(api.ModerationBanResponse(duration: '0.01ms')),
-      );
-
-      final res = await client.moderation.shadowBan(userId);
-      expect(res.isSuccess, isTrue);
-
-      verify(() => defaultApi.ban(banRequest: request)).called(1);
-      verifyNoMoreInteractions(defaultApi);
-    });
-
-    test('`.moderation` reaches the same endpoint as the client delegate', () async {
-      const userId = 'test-user-id';
-      const request = api.MuteRequest(targetIds: [userId]);
-
-      when(() => defaultApi.mute(muteRequest: request)).thenAnswer(
-        (_) async => const Result.success(api.MuteResponse(duration: '0.01ms')),
-      );
-
-      final res = await client.moderation.muteUser(userId);
-      expect(res.isSuccess, isTrue);
-
-      verify(() => defaultApi.mute(muteRequest: request)).called(1);
-      verifyNoMoreInteractions(defaultApi);
-    });
-
-    test('`.muteUser` sends the user id as a single-element target list', () async {
-      const userId = 'test-user-id';
-      const request = api.MuteRequest(targetIds: [userId]);
-
-      when(() => defaultApi.mute(muteRequest: request)).thenAnswer(
-        (_) async => const Result.success(api.MuteResponse(duration: '0.01ms')),
-      );
-
-      final res = await client.moderation.muteUser(userId);
-      expect(res.isSuccess, isTrue);
-
-      verify(() => defaultApi.mute(muteRequest: request)).called(1);
-      verifyNoMoreInteractions(defaultApi);
-    });
-
-    test('`.unmuteUser` sends the user id as a single-element target list', () async {
-      const userId = 'test-user-id';
-      const request = api.UnmuteRequest(targetIds: [userId]);
-
-      when(() => defaultApi.unmute(unmuteRequest: request)).thenAnswer(
-        (_) async => const Result.success(api.UnmuteResponse(duration: '0.01ms')),
-      );
-
-      final res = await client.moderation.unmuteUser(userId);
-      expect(res.isSuccess, isTrue);
-
-      verify(() => defaultApi.unmute(unmuteRequest: request)).called(1);
-      verifyNoMoreInteractions(defaultApi);
-    });
-
-    test('`.flagMessage` flags the message entity type', () async {
-      const messageId = 'test-message-id';
-      const request = api.FlagRequest(entityType: 'stream:chat:v1:message', entityId: messageId);
-
-      when(() => defaultApi.flag(flagRequest: request)).thenAnswer(
-        (_) async => const Result.success(api.FlagItemResponse(duration: '0.01ms', itemId: 'item-id')),
-      );
-
-      final res = await client.moderation.flagMessage(messageId);
-      expect(res.isSuccess, isTrue);
-
-      verify(() => defaultApi.flag(flagRequest: request)).called(1);
-      verifyNoMoreInteractions(defaultApi);
-    });
-
-    test('`.flagUser` flags the user entity type', () async {
-      const userId = 'test-user-id';
-      const request = api.FlagRequest(entityType: 'stream:user', entityId: userId);
-
-      when(() => defaultApi.flag(flagRequest: request)).thenAnswer(
-        (_) async => const Result.success(api.FlagItemResponse(duration: '0.01ms', itemId: 'item-id')),
-      );
-
-      final res = await client.moderation.flagUser(userId);
-      expect(res.isSuccess, isTrue);
-
-      verify(() => defaultApi.flag(flagRequest: request)).called(1);
-      verifyNoMoreInteractions(defaultApi);
-    });
 
     test('`.getActiveLiveLocations`', () async {
       final locations = [

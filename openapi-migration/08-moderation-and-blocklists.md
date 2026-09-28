@@ -74,13 +74,20 @@
   on (`moderation_enabled` unset means enabled); an app explicitly pinned to the v1 flow gets
   `"this endpoint needs a feature flag"`.
 
-- **Every migrated method returns `Result<void>`, discarding the response body.** `ban`, `unban` and
-  `unmute*` answer with only `duration`. `mute` and `muteChannel` answer with `MuteResponse` /
-  `MuteChannelResponse`, and `flag` with a review-queue `itemId` — but `OwnUser.mutes` and
-  `channelMutes` are fed by `notification.mutes_updated` and the connect payload, not by these
-  responses, and returning them would put `OwnUserResponse`, `UserMuteResponse` and the generated
-  `ChannelMute` in the barrel ahead of groups 09 and 11. The `itemId` is only usable with
-  `submitAction` and `queryReviewQueue`, which this group does not expose.
+- **A method answers with whatever the call actually carries.** `muteUser` and `unmuteUser` return
+  the ids that matched no user; the flag methods return the review-queue item the flag created.
+  Three hand-written models in `core/models/response/` carry them, exported from the barrel, and
+  `ModerationClient` returns them unchanged rather than discarding them. Widening a `Result<void>`
+  this way is not a source break, because `void` is a top type and `Result` is covariant: every
+  existing call site in this repo compiled untouched.
+
+- **The rest answer with nothing worth returning, and stay `Result<void>`.** `ban` and `unban`
+  answer with only `duration`, which is group 02's envelope-only precedent. `unmuteChannel` reuses the same
+  response type as `unmuteUser` but the handler never fills it in, so it is an envelope too. The
+  rest is blocked rather than unwanted: `mute.mutes`, `mute.ownUser` and everything on
+  `muteChannel` need `UserResponse` and `ChannelResponse` mapped first, which is groups 09 and 11
+  — and the `User` shape is group 01's to decide, not this group's. No `UserResponse` mapper
+  exists yet, so nothing here could have been mapped without pre-empting that decision.
 
 - **`unflagMessage` and `unflagUser` are removed, not migrated.** `POST /moderation/unflag` has no v2
   operation and is a chat-v1-only route the server no longer acts on: it validates the request,
@@ -91,13 +98,68 @@
   `BanRequest`. This drops `remove_future_channels_ban` and `reason` on *unban*, which chat v1
   accepted and the moderation v2 `UnbanRequest` does not, and it fixes `Channel.banMember` /
   `unbanMember`, which sent the `type` + `id` pair chat v1 deprecates in favour of `channel_cid`.
-  `timeout` is a `Duration` converted with `inMinutes`; `DurationInMinutes.ToTime()` treats `0` as no
-  expiry, so a sub-minute value never expires the ban.
+  `timeout` is a `Duration` raised to at least one minute, because the value the conversion would
+  otherwise truncate to means no expiry at all.
 
-- **None of the other 23 generated operations are exposed.** Blocklists, review queues, moderation
-  configs, appeals, action configs and `submitAction` are dashboard and server-side surfaces with no
-  hand-written counterpart; migrating 11 methods is not a reason to publish 23 new ones. They stay
-  reachable through `DefaultApi` for anyone who needs them.
+- **`deleteMessages` is a hand-written `DeleteType`, not the generated enum.** The generated
+  `BanRequestDeleteMessages` is already a correct extension type over `String` with the same three
+  values, so this is not about quality — it is about the name. A caller writing
+  `BanRequestDeleteMessages.hard` is naming our request DTO rather than the concept, and the type
+  is what hovers show. This follows `PushProvider`, which group 02 first adopted from the
+  generated side and [#3004](https://github.com/GetStream/stream-chat-flutter/pull/3004) replaced
+  with a hand-written one for exactly that reason, and it settles the rule group 02 left open:
+  **adopt a generated type only when its name names the concept.** It also leaves the barrel with
+  no generated exports, which is what `--check` asserts.
+
+- **`ipBan` is kept although the endpoint discards it.** `lib/chat/controller/v1/ban_user.go:198`
+  passed it through; the v2 handler at `lib/moderation/controller/ban.go:87-94` builds its action
+  from `Timeout`, `Reason`, `Shadow` and `DeleteMessages` only, so the flag is accepted and
+  dropped. The parameter and the dartdoc that describes it are kept by decision, so that the day
+  the handler wires it through nothing here changes. A channel-scoped ban never honoured it
+  either — `ban_user.go:107-108` rejects `ip_ban` together with a channel outright.
+
+- **`StreamChannelListController.muteChannel` and `unmuteChannel` return `Result<void>`.** They
+  were `Future<void>` awaiting a call that now answers with a `Result`, so a caller's `try`/`catch`
+  stopped firing with no compile error. Returning the `Result` makes the failure reachable again.
+  It is breaking rather than a fix: the controller is subclassable, and an override declared
+  `Future<void>` no longer satisfies the base.
+
+- **Users are batched, channels are not.** `muteUsers` and `unmuteUsers` take a list, because
+  the endpoints have always been batch endpoints — `target_ids` is a list validated
+  `required,max=1000` — and because the response names the ids that matched no user, which is only
+  worth reading when more than one was sent. The singular methods stay as they are. Swift exposes
+  the same pair and no channel equivalent, and `muteChannel` answers with nothing we keep, so a
+  plural there would return `Result<void>` and be sugar for a loop. Do not add one for symmetry.
+
+- **The type is named `DeleteType`, not for the ban parameter that first needed it.** Soft,
+  pruning and hard are how thoroughly anything is deleted, not something about bans: the backend
+  declares them once as `DeleteType` in `lib/core/event/delete_type.go` and reuses them for user
+  deletion, message deletion and the `user.deleted` event, and the JS client exports the same
+  `DeleteType` union. The generated client already carries four copies of the same three values —
+  on `BanRequest`, `BanOptions`, `BanActionRequestPayload` and `DeleteUserMessagesRequestPayload`
+  — each named after the request it hangs off. One hand-written type covers all four, so the
+  later groups that migrate message and user deletion reuse it instead of adding their own.
+
+- **None of the other generated operations are exposed, and not because they are server-side.**
+  That was the original reason recorded here and it is wrong: the spec this client is generated
+  from is built with `-clientside`, which drops every route the backend marks `ServerSideOnly`.
+  Moderation's genuinely server-side surfaces — moderation logs, queue and moderator stats, flag
+  counts, rules and tasks — are filtered out before generation, so nothing reachable through
+  `DefaultApi` needs a secret. The remaining 28 are callable from an app; a caller without the
+  permission gets refused at runtime, per user, which is a different gate from this one.
+
+  **This group ships the nine methods it migrated and nothing more**, pending agreement with the
+  other SDK teams on what a chat client should carry. The surfaces disagree today: two of them
+  publish the whole generated moderation API, one publishes part of it, and two publish none of
+  it, so there is no shared answer to copy. That conversation decides the scope, and it has not
+  happened yet.
+
+  The cost is not the method count either. Each operation needs its own hand-written model here —
+  queues, moderation configs and action configs alone are around a dozen model families — and
+  eight of the operations embed `UserResponse`, `ChannelResponse` or `MessageResponse`, so they
+  wait on groups 09, 10 and 11 exactly as [14](14-banned-users.md) does. Whether that cost applies
+  at all depends on whether this package keeps mapping generated responses to its own models;
+  settle that before sizing a group around these operations.
 
 ## Risks
 

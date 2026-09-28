@@ -71,7 +71,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | Feature Area | Key Changes |
 | --- | --- |
 | [**Error Handling**](#error-handling) | Failures carry `stream_core`'s sealed `StreamException` family instead of `StreamChatNetworkError`; `ChatErrorCode` → `StreamErrorCode`. API calls will return `Result<T>` rather than throwing, endpoint by endpoint |
-| [**Moderation**](#moderation) | Muting, banning and flagging return `Result<void>` and call the moderation v2 API; `banUser`'s options map becomes named parameters; `unflagMessage`, `unflagUser` and `removeShadowBan` are removed |
+| [**Moderation**](#moderation) | Muting, banning and flagging return a `Result` and call the moderation v2 API; `banUser`'s options map becomes named parameters; `unflagMessage`, `unflagUser` and `removeShadowBan` are removed |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -95,6 +95,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `RetryPolicy.shouldRetry`'s `StreamChatError?` | `StreamChatException?` | `retyped` | |
 | `UploadState`'s `Preparing` / `InProgress` / `Success` / `Failed` | `UploadStatePreparing` / `UploadStateInProgress` / `UploadStateSuccess` / `UploadStateFailed` | `renamed` | Frees `Success` for `Result` |
 | `PagedValue.error(StreamChatError)` (`stream_chat_flutter_core`) | `PagedValue.error(StreamChatException)` | `retyped` | |
+| `StreamChannelListController.muteChannel` / `unmuteChannel` → `Future<void>` (`stream_chat_flutter_core`) | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing, so a `try`/`catch` around either no longer catches a failed call. A subclass overriding one needs the new return type |
 | `errorBuilder: Function(BuildContext, StreamChatError)` (scroll views) | `Function(BuildContext, StreamChatException)` | `retyped` | |
 | `StreamAttachmentValidator.validate()` / `.validateCount()` returning `StreamChatError?` | returning `AttachmentValidationError?` | `retyped` | `stream_chat_flutter`. They always returned rather than threw; the return type now says so |
 | `AttachmentLimitReachedError` / `AttachmentTooLargeError` / `AttachmentBlockedError` extending `StreamChatError` | extending `sealed AttachmentValidationError` | `retyped` | A refused attachment is not a failed call, so it is no longer one of the `StreamException` kinds. `switch` over them is exhaustive |
@@ -159,16 +160,21 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamChatClient.searchRoles` → `Future<SearchRolesResponse>` | `Future<Result<SearchRolesResponse>>` | `retyped` | Returns a `Result` instead of throwing |
 | `StreamChatClient.addDevice` / `removeDevice` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing, and carries no value on success |
 | `StreamChatClient.getDevices` → `Future<ListDevicesResponse>` | `Future<Result<ListDevicesResponse>>` | `retyped` | Returns a `Result` instead of throwing |
-| `StreamChatClient.muteUser` / `unmuteUser` / `muteChannel` / `unmuteChannel` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing, and carries no value on success |
-| `StreamChatClient.flagMessage` / `flagUser` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Same, plus optional `reason` and `custom` arguments |
-| `StreamChatClient.banUser(id, Map options)` | `banUser(id, {channelCid, timeout, reason, shadow, ipBan, deleteMessages})` | `retyped` | Named parameters mirroring the generated `BanRequest`. `timeout` is a `Duration` applied with minute granularity |
+| `StreamChatClient.muteUser` → `Future<EmptyResponse>` | `Future<Result<MuteResponse>>` | `retyped` | Returns a `Result` instead of throwing. `MuteResponse.nonExistingUsers` names the ids that matched no user |
+| — | `muteUser(timeout:)` | `added` | Expires the mute after that long. v10 took only the user id |
+| — | `moderation.muteUsers` / `unmuteUsers` | `added` | Mute or unmute several users in one call. The response names the ids that matched no user |
+| `StreamChatClient.unmuteUser` → `Future<EmptyResponse>` | `Future<Result<UnmuteResponse>>` | `retyped` | Same, with the same `nonExistingUsers` |
+| `StreamChatClient.muteChannel` / `unmuteChannel` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing, and carries no value on success |
+| `StreamChatClient.flagMessage` / `flagUser` → `Future<EmptyResponse>` | `Future<Result<FlagResponse>>` | `retyped` | Plus optional `reason` and `custom` arguments. `FlagResponse.itemId` identifies the review queue item |
+| `StreamChatClient.banUser(id, Map options)` | `banUser(id, {channelCid, timeout, reason, shadow, ipBan, deleteMessages})` | `retyped` | Named parameters mirroring the endpoint's options. `timeout` is a `Duration` applied with minute granularity |
 | `StreamChatClient.unbanUser(id, Map options)` | `unbanUser(id, {channelCid})` | `retyped` | `remove_future_channels_ban` and `reason` are gone — the moderation v2 unban endpoint has neither |
 | `StreamChatClient.shadowBan(id, Map options)` | `shadowBan(id, {channelCid, timeout, reason, ipBan, deleteMessages})` | `retyped` | Same options as `banUser`, minus `shadow` |
 | `StreamChatClient.removeShadowBan` / `Channel.removeShadowBan` | `unbanUser` / `Channel.unbanMember` | `removed` | It sent `shadow: true` to unban, which no version of that endpoint reads |
 | `StreamChatClient.unflagMessage` / `unflagUser` | — | `removed` | `POST /moderation/unflag` has no v2 endpoint and the v1 one removed no flag |
 | `Channel.banMember(id, Map options)` / `shadowBan(id, Map options)` | `banMember(id, {timeout, reason, shadow, ipBan, deleteMessages})` / `shadowBan(id, {…})` | `retyped` | The channel supplies its own `channelCid`; the `type` + `id` pair it used to send is deprecated server-side |
 | `Channel.mute` / `unmute` / `unbanMember` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing |
-| — | `BanRequestDeleteMessages` | `added` | `soft` / `pruning` / `hard`, for `banUser(deleteMessages:)` |
+| — | `MuteResponse` / `UnmuteResponse` / `FlagResponse` | `added` | What the mute, unmute and flag calls answer with |
+| — | `DeleteType` | `added` | Extension type over `String` with `soft` / `pruning` / `hard`, for `banUser(deleteMessages:)`. A value it does not name still carries: `DeleteType('...')` |
 | `StreamChatClient.muteUser` / `unmuteUser` / `muteChannel` / `unmuteChannel` / `banUser` / `unbanUser` / `shadowBan` / `flagMessage` / `flagUser` | `StreamChatClient.moderation.<same name>` | `moved` | Grouped onto a `ModerationClient`. `Channel`'s moderation methods keep their place |
 | `Device.fromJson` / `toJson`, `Role.fromJson` | — | `removed` | The models are plain classes; construct them directly |
 | `PushProvider` (enum), `Device.pushProvider` (`String`) | `PushProvider` (extension type over `String`), `Device.pushProvider` (`PushProvider`) | `retyped` | Same four constants and wire values, and still usable as a `String`. `.name` and `.values` are gone and a `switch` over it needs a default; wrap a raw value as `PushProvider('firebase')` |
@@ -584,8 +590,10 @@ result.fold(
 ### Moderation
 
 **Muting, banning and flagging return a `Result` instead of throwing**, on both `StreamChatClient`
-and `Channel`. They carry no value: `OwnUser.mutes` and `OwnUser.channelMutes` are updated by the
-`notification.mutes_updated` event, as they always were.
+and `Channel`. `muteUser` and `unmuteUser` answer with the ids that matched no user, and the flag
+methods with the review queue item the flag created; the rest carry no value. `OwnUser.mutes` follows
+the `notification.mutes_updated` event and `OwnUser.channelMutes` the
+`notification.channel_mutes_updated` event, as they always did.
 
 ```dart
 // v10
@@ -637,9 +645,8 @@ endpoints are in beta and are refused for an app explicitly pinned to the v1 mod
 Muting and unmuting a *channel* are unaffected: they were already the endpoint the generated client
 calls.
 
-**The client's moderation methods moved to `client.moderation`.** `StreamChatClient` carried
-148 async members; the moderation ones are now grouped on a `ModerationClient`, reached
-through one field:
+**The client's moderation methods moved to `client.moderation`.** They are now grouped on a
+`ModerationClient`, reached through one field:
 
 ```dart
 // v10

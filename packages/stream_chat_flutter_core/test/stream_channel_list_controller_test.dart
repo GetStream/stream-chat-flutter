@@ -446,4 +446,28 @@ void main() {
 
     expect(controller.value.isSuccess, isTrue);
   });
+
+  test('muteChannel passes on the failure instead of throwing', () async {
+    const error = StreamClientException(message: 'boom');
+    final channel = MockChannel();
+    when(channel.mute).thenAnswer((_) async => const Result.failure(error));
+
+    final controller = StreamChannelListController(client: client);
+    final res = await controller.muteChannel(channel);
+
+    expect(res.isFailure, isTrue);
+    expect(res.exceptionOrNull(), error);
+  });
+
+  test('unmuteChannel passes on the failure instead of throwing', () async {
+    const error = StreamClientException(message: 'boom');
+    final channel = MockChannel();
+    when(channel.unmute).thenAnswer((_) async => const Result.failure(error));
+
+    final controller = StreamChannelListController(client: client);
+    final res = await controller.unmuteChannel(channel);
+
+    expect(res.isFailure, isTrue);
+    expect(res.exceptionOrNull(), error);
+  });
 }

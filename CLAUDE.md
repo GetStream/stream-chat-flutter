@@ -148,14 +148,14 @@ replaced by [to]"*), using "If [x] …" for conditions and "The [x] …" for con
 // BAD:
 /// Mutes the user with the given [userId] for the current user.
 ///
-/// [timeout] expires the mute, rounded down to whole minutes. Under a minute or
-/// omitted, it lasts until removed.
+/// [timeout] expires the mute, applied in whole minutes. Omitted, it lasts until
+/// removed.
 
 // GOOD:
 /// Mutes [userId] for the current user.
 ///
 /// The mute lasts until it is removed. A [timeout] expires it after that long,
-/// rounded down to whole minutes, so a shorter one never expires it.
+/// applied in whole minutes and never less than one.
 ```
 
 One paragraph per distinct concern — avoiding the roll call is not a reason to merge

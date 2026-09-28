@@ -4661,6 +4661,43 @@ void main() {
       ).called(1);
     });
 
+    test('`.banMember` forwards every option to the client', () async {
+      const userId = 'test-user-id';
+      const timeout = Duration(minutes: 30);
+
+      when(
+        () => moderationClient.banUser(
+          userId,
+          channelCid: channelCid,
+          timeout: timeout,
+          reason: 'spam',
+          shadow: true,
+          deleteMessages: DeleteType.hard,
+        ),
+      ).thenAnswer((_) async => const Result.success(null));
+
+      final res = await channel.banMember(
+        userId,
+        timeout: timeout,
+        reason: 'spam',
+        shadow: true,
+        deleteMessages: DeleteType.hard,
+      );
+
+      expect(res.isSuccess, isTrue);
+
+      verify(
+        () => moderationClient.banUser(
+          userId,
+          channelCid: channelCid,
+          timeout: timeout,
+          reason: 'spam',
+          shadow: true,
+          deleteMessages: DeleteType.hard,
+        ),
+      ).called(1);
+    });
+
     test('`.unbanMember` scopes the unban to the channel cid', () async {
       const userId = 'test-user-id';
 

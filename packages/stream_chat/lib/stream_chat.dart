@@ -39,8 +39,6 @@ export 'package:stream_core/stream_core.dart'
         PlatformType,
         PatternMatching,
         Result,
-        runSafely,
-        runSafelySync,
         Sort,
         SortDirection,
         SortField,
@@ -67,7 +65,6 @@ export 'package:stream_core/stream_core.dart'
         WsEvent;
 export 'package:uuid/uuid.dart';
 
-export 'open_api/models.dart' show BanRequestDeleteMessages;
 export 'src/client/channel/channel.dart';
 export 'src/client/channel/channel_capability_check.dart';
 export 'src/client/channel/channel_client_state.dart';
@@ -96,6 +93,7 @@ export 'src/core/models/channel_mute.dart';
 export 'src/core/models/channel_state.dart';
 export 'src/core/models/chat_preferences.dart';
 export 'src/core/models/command.dart';
+export 'src/core/models/delete_type.dart';
 export 'src/core/models/device.dart';
 export 'src/core/models/draft.dart';
 export 'src/core/models/draft_message.dart';
@@ -123,13 +121,16 @@ export 'src/core/models/reaction_group.dart';
 export 'src/core/models/read.dart';
 export 'src/core/models/response/add_user_group_members_response.dart';
 export 'src/core/models/response/create_user_group_response.dart';
+export 'src/core/models/response/flag_response.dart';
 export 'src/core/models/response/get_user_group_response.dart';
 export 'src/core/models/response/list_devices_response.dart';
 export 'src/core/models/response/list_user_groups_response.dart';
+export 'src/core/models/response/mute_response.dart';
 export 'src/core/models/response/og_attachment_response.dart';
 export 'src/core/models/response/remove_user_group_members_response.dart';
 export 'src/core/models/response/search_roles_response.dart';
 export 'src/core/models/response/search_user_groups_response.dart';
+export 'src/core/models/response/unmute_response.dart';
 export 'src/core/models/response/update_user_group_response.dart';
 export 'src/core/models/role.dart';
 export 'src/core/models/role_type.dart';
