@@ -29,7 +29,7 @@ class SampleAppConfigScreen extends StatelessWidget {
       body: Builder(
         builder: (context) {
           final topInset = MediaQuery.paddingOf(context).top;
-          return SingleChildScrollView(
+          final content = SingleChildScrollView(
             padding: EdgeInsets.symmetric(horizontal: spacing.md) + EdgeInsets.only(top: topInset),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -182,6 +182,8 @@ class SampleAppConfigScreen extends StatelessWidget {
               ],
             ),
           );
+
+          return SafeArea(top: false, bottom: false, child: content);
         },
       ),
     );
@@ -544,7 +546,6 @@ class _LocaleRow extends StatelessWidget {
     final colorScheme = context.streamColorScheme;
     final textTheme = context.streamTextTheme;
     final spacing = context.streamSpacing;
-    final radius = context.streamRadius;
 
     final items = [
       const _LocaleOption(label: 'System', code: null),
@@ -556,94 +557,61 @@ class _LocaleRow extends StatelessWidget {
       ),
     ];
 
-    showModalBottomSheet<void>(
+    showStreamSheet<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: colorScheme.backgroundSurfaceCard,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: radius.xxl),
-      ),
-      builder: (sheetContext) {
-        return DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: 0.5,
-          maxChildSize: 0.8,
-          minChildSize: 0.3,
-          builder: (context, scrollController) => SafeArea(
-            child: Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(top: spacing.md, bottom: spacing.sm),
-                  child: Container(
-                    width: 32,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: colorScheme.borderDefault,
-                      borderRadius: BorderRadius.all(radius.max),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(bottom: spacing.sm),
-                  child: Text(
-                    'Select Language',
-                    style: textTheme.headingSm.copyWith(color: colorScheme.textPrimary),
-                  ),
-                ),
-                Divider(height: 1, color: colorScheme.borderSubtle),
-                Expanded(
-                  child: ListView.separated(
-                    controller: scrollController,
-                    padding: EdgeInsets.symmetric(vertical: spacing.xs),
-                    itemCount: items.length,
-                    separatorBuilder: (_, __) => Divider(
-                      height: 1,
-                      indent: spacing.lg,
-                      endIndent: spacing.lg,
-                      color: colorScheme.borderSubtle,
-                    ),
-                    itemBuilder: (context, index) {
-                      final item = items[index];
-                      final isSelected = item.code == config.locale?.languageCode;
+      isDismissible: true,
+      builder: (sheetContext, scrollController) => Column(
+        children: [
+          StreamSheetHeader(title: const Text('Select Language')),
+          Expanded(
+            child: ListView.separated(
+              controller: scrollController,
+              itemCount: items.length,
+              separatorBuilder: (_, __) => Divider(
+                height: 1,
+                indent: spacing.lg,
+                endIndent: spacing.lg,
+                color: colorScheme.borderSubtle,
+              ),
+              itemBuilder: (context, index) {
+                final item = items[index];
+                final isSelected = item.code == config.locale?.languageCode;
 
-                      return StreamListTile(
-                        title: Text(
-                          item.label,
-                          style: textTheme.bodyDefault.copyWith(
-                            color: isSelected ? colorScheme.accentPrimary : colorScheme.textPrimary,
-                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                          ),
-                        ),
-                        subtitle: switch (item.code) {
-                          final code? => Text(
-                            code,
-                            style: textTheme.captionDefault.copyWith(color: colorScheme.textTertiary),
-                          ),
-                          null => null,
-                        },
-                        trailing: StreamCheckbox.circular(
-                          value: isSelected,
-                          size: StreamCheckboxSize.sm,
-                          onChanged: (_) {
-                            final locale = item.code != null ? Locale(item.code!) : null;
-                            SampleAppConfig.update(context, config.copyWith(locale: locale));
-                            Navigator.of(sheetContext).pop();
-                          },
-                        ),
-                        onTap: () {
-                          final locale = item.code != null ? Locale(item.code!) : null;
-                          SampleAppConfig.update(context, config.copyWith(locale: locale));
-                          Navigator.of(sheetContext).pop();
-                        },
-                      );
+                return StreamListTile(
+                  title: Text(
+                    item.label,
+                    style: textTheme.bodyDefault.copyWith(
+                      color: isSelected ? colorScheme.accentPrimary : colorScheme.textPrimary,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    ),
+                  ),
+                  subtitle: switch (item.code) {
+                    final code? => Text(
+                      code,
+                      style: textTheme.captionDefault.copyWith(color: colorScheme.textTertiary),
+                    ),
+                    null => null,
+                  },
+                  trailing: StreamCheckbox.circular(
+                    value: isSelected,
+                    size: StreamCheckboxSize.sm,
+                    onChanged: (_) {
+                      final locale = item.code != null ? Locale(item.code!) : null;
+                      SampleAppConfig.update(context, config.copyWith(locale: locale));
+                      Navigator.of(sheetContext).pop();
                     },
                   ),
-                ),
-              ],
+                  onTap: () {
+                    final locale = item.code != null ? Locale(item.code!) : null;
+                    SampleAppConfig.update(context, config.copyWith(locale: locale));
+                    Navigator.of(sheetContext).pop();
+                  },
+                );
+              },
             ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }
