@@ -867,18 +867,23 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           },
         ),
         if (_config.showFloatingDateDivider)
+          // Padded by the side insets, so the stack centers the pill over the
+          // list's content, where the inline divider it hands off to sits.
           Positioned(
             top: math.max(_scaffoldInsets.top, context.streamSpacing.sm),
-            child: FloatingDateDivider(
-              itemCount: itemCount,
-              reverse: _config.reverse,
-              fadeNearInlineDivider: _config.fadeFloatingDateDividerNearInline,
-              itemPositionListener: _itemPositionListener.itemPositions,
-              messages: messages,
-              dateDividerBuilder: switch (widget.builders.floatingDateDivider) {
-                final builder? => builder,
-                _ => widget.builders.dateDivider,
-              },
+            child: Padding(
+              padding: .only(left: _scaffoldInsets.left, right: _scaffoldInsets.right),
+              child: FloatingDateDivider(
+                itemCount: itemCount,
+                reverse: _config.reverse,
+                fadeNearInlineDivider: _config.fadeFloatingDateDividerNearInline,
+                itemPositionListener: _itemPositionListener.itemPositions,
+                messages: messages,
+                dateDividerBuilder: switch (widget.builders.floatingDateDivider) {
+                  final builder? => builder,
+                  _ => widget.builders.dateDivider,
+                },
+              ),
             ),
           ),
         if (_config.showScrollToBottom)
@@ -907,41 +912,44 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         if (_config.showUnreadIndicator && !_isThreadConversation)
           Positioned(
             top: math.max(_scaffoldInsets.top, context.streamSpacing.sm),
-            child: ValueListenableBuilder(
-              valueListenable: _unreadController.unreadDivider,
-              builder: (context, unread, _) {
-                // Gated on the frozen count, not the anchor: the count is
-                // known immediately from the baseline `Read`, while the
-                // anchor can take a while longer to resolve if top
-                // pagination hasn't loaded that far back yet. Waiting for
-                // the anchor would mean the pill — the whole point of
-                // which is to point at unread content the user hasn't
-                // scrolled to — only appeared once they'd already
-                // scrolled most of the way there themselves.
-                if (unread.count <= 0) return const Empty();
-                return ValueListenableBuilder<bool>(
-                  valueListenable: _unreadController.hasLaidOut,
-                  builder: (context, laidOut, ___) {
-                    // Item positions decide whether the boundary is already
-                    // on screen, and they only arrive after the first frame
-                    // is laid out. Painting before then would flash the pill
-                    // for a frame on every channel opened at its first
-                    // unread message — which is the default.
-                    if (!laidOut) return const Empty();
-                    return ValueListenableBuilder<bool>(
-                      valueListenable: _unreadController.hasSeenFirstUnread,
-                      builder: (context, seen, __) {
-                        if (seen) return const Empty();
-                        return UnreadIndicatorButton(
-                          unreadCount: unread.count,
-                          onJumpTap: (_) => _unreadController.onPillJumpTapped(),
-                          onDismissTap: _unreadController.onPillDismissTapped,
-                        );
-                      },
-                    );
-                  },
-                );
-              },
+            child: Padding(
+              padding: .only(left: _scaffoldInsets.left, right: _scaffoldInsets.right),
+              child: ValueListenableBuilder(
+                valueListenable: _unreadController.unreadDivider,
+                builder: (context, unread, _) {
+                  // Gated on the frozen count, not the anchor: the count is
+                  // known immediately from the baseline `Read`, while the
+                  // anchor can take a while longer to resolve if top
+                  // pagination hasn't loaded that far back yet. Waiting for
+                  // the anchor would mean the pill — the whole point of
+                  // which is to point at unread content the user hasn't
+                  // scrolled to — only appeared once they'd already
+                  // scrolled most of the way there themselves.
+                  if (unread.count <= 0) return const Empty();
+                  return ValueListenableBuilder<bool>(
+                    valueListenable: _unreadController.hasLaidOut,
+                    builder: (context, laidOut, ___) {
+                      // Item positions decide whether the boundary is already
+                      // on screen, and they only arrive after the first frame
+                      // is laid out. Painting before then would flash the pill
+                      // for a frame on every channel opened at its first
+                      // unread message — which is the default.
+                      if (!laidOut) return const Empty();
+                      return ValueListenableBuilder<bool>(
+                        valueListenable: _unreadController.hasSeenFirstUnread,
+                        builder: (context, seen, __) {
+                          if (seen) return const Empty();
+                          return UnreadIndicatorButton(
+                            unreadCount: unread.count,
+                            onJumpTap: (_) => _unreadController.onPillJumpTapped(),
+                            onDismissTap: _unreadController.onPillDismissTapped,
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ),
       ],
