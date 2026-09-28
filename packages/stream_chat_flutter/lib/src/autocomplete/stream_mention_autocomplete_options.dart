@@ -227,15 +227,8 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
 
   Future<List<UserGroup>> _fetchUserGroups(String query) async {
     if (query.isEmpty || !widget.channel.canNotifyGroup) return const [];
-    try {
-      final response = await widget.channel.client.searchUserGroups(
-        query,
-        teamId: widget.channel.team,
-      );
-      return response.userGroups;
-    } catch (_) {
-      return const [];
-    }
+    final result = await widget.channel.client.searchUserGroups(query, teamId: widget.channel.team);
+    return result.map((it) => it.userGroups).getOrDefault(const []);
   }
 
   Future<List<User>> _fetchUsers(String query) async {

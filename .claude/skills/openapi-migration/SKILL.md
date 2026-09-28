@@ -125,7 +125,11 @@ Phase 2 is therefore not "keep or adopt" but, per type:
 - **Which v10 type it maps to**, and whether that type is embedded in a model that still decodes v1 JSON with
   json_serializable. If it is, the parent's field needs a temporary converter (README rule 7) — add it to the
   adapters table with the group that removes it.
-- **Whether persistence stores it as JSON text.** If so, the Drift mapper gets its own private helpers (rule 8).
+- **Whether persistence stores it as JSON text,** alone or nested inside another persisted model. Look for
+  `jsonEncode`, `fromJson`, `toJson` or `toData` on the type in
+  `stream_chat_persistence/lib/src/{mapper,converter,dao}`. If it is, the model gets the temporary
+  `@DataSerializable` codec (rule 8; see [Persisted models](#persisted-models-the-dataserializable-codec)). A model
+  stored as a table row, mapped column by column like `User` in `users`, needs no codec.
 - **Which request enums need a hand-written public type** (rule 6).
 
 Generated types are wire shapes — nullable wherever the spec is loose, with per-operation extension types instead
@@ -137,7 +141,8 @@ a public signature.
 - **The error contract:** public methods return `Result<T>` instead of throwing (below).
 - **Duration-only writes answer nothing:** a write whose generated response is `DurationResponse` returns
   `Result<void>`, not `EmptyResponse`.
-- **No JSON on public models or envelopes:** their `fromJson` and `toJson` are removed.
+- **No JSON on public models or envelopes:** their `fromJson` and `toJson` are removed. A model persistence stores
+  as JSON text gains `fromData` and `toData` instead; that is additive, not a break.
 - **Envelopes are immutable:** they are built through a const constructor with final fields, not a no-argument
   constructor and `late` setters.
 - **`duration` is a non-nullable `String`** on every envelope; v10 typed it `String?`.
@@ -261,6 +266,83 @@ comm -12 \
     | sed "s|.*/\([a-z_]*\)\.dart';|\1|" | sort)
 ```
 
+### Persisted models: the `@DataSerializable` codec
+
+`DataSerializable` (`packages/stream_chat/lib/src/db/data_serializable.dart`) is a typedef for `JsonSerializable`,
+so json_serializable generates the storage codec and the model exposes it as `fromData`/`toData`. It is the only
+JSON annotation a migrated model may carry, and it is temporary: group 10 decides what replaces it.
+
+**Use it** when `stream_chat_persistence` stores the model in a JSON text column, or nests it inside a model that
+is. Today that covers `messages.mentioned_groups` (`UserGroup`); the remaining JSON columns belong to later groups
+(`mentioned_users`, `attachments`, `reaction_groups`, `channels.config`, `polls.options`,
+`connection_events.own_user`).
+
+**Don't use it** for:
+
+- envelopes, which are never persisted;
+- a model persistence stores as a table row;
+- decoding the wire, which goes through the repository mappers or a rule-7 converter.
+
+**Where it doesn't fit:**
+
+- **freezed unions** (`MessageState`, `UploadState`, `MessageDeleteScope`). freezed only generates union JSON from
+  a factory named `fromJson`, so a union whose factory is renamed to `fromData` gets no JSON at all. These
+  local-only unions keep their freezed `fromJson`/`toJson` until the user decides how to handle them. This comes
+  from freezed's documented behaviour and hasn't been tried in this repo, so test it before relying on it.
+- **Deeply nested models get expensive.** json_serializable hardcodes the names `fromJson`/`toJson` for nested
+  types (`json_serializable/lib/src/type_helpers/json_helper.dart`), so every field holding a plain model needs a
+  hand-written `@JsonKey(fromJson: ..., toJson: ...)` pair, and every nested model needs its own annotation. The
+  cost grows with the depth of the graph. `OwnUser` is the worst case: `Device`, `Mute` (two `User`s),
+  `ChannelMute` (a `User` and a full `ChannelModel`), `PushPreference` and `PrivacySettings`. Before annotating a
+  graph like that, raise the alternative of storing less with the user: rows in existing tables plus ids.
+
+The pattern, from `UserGroup`:
+
+```dart
+@freezed
+// TODO(openapi-migration): remove in group 10
+@DataSerializable(includeIfNull: false)
+class UserGroup with _$UserGroup {
+  const UserGroup({...});
+
+  /// Creates a [UserGroup] from data stored by [toData].
+  factory UserGroup.fromData(Map<String, dynamic> json) => _$UserGroupFromJson(json);
+
+  @override
+  @JsonKey(fromJson: _membersFromData, toJson: _membersToData)
+  final List<UserGroupMember>? members;
+
+  /// Serializes this group for local storage.
+  Map<String, dynamic> toData() => _$UserGroupToJson(this);
+}
+
+List<UserGroupMember>? _membersFromData(List<dynamic>? data) =>
+    data?.map((it) => UserGroupMember.fromData(it as Map<String, dynamic>)).toList();
+
+List<Map<String, dynamic>>? _membersToData(List<UserGroupMember>? members) =>
+    members?.map((it) => it.toData()).toList();
+```
+
+- **Tag every use** with `// TODO(openapi-migration): remove in group 10` and add the models to the adapters table.
+  The typedef carries the same tag, so `generate_plan.py --check` fails while it outlives group 10, and deleting it
+  breaks every remaining use at compile time.
+- **A field holding another plain model needs a `@JsonKey(fromJson: ..., toJson: ...)` pair** calling the nested
+  model's `fromData`/`toData`, as `members` does above, and the nested model needs its own annotation. Without the
+  pair the generated code calls a `fromJson`/`toJson` that doesn't exist and fails to compile.
+- **`stream_chat`'s `build.yaml` already sets `field_rename: snake` and `explicit_to_json: true`,** and
+  `includeIfNull: false` leaves out null keys. Extension-type fields such as `PushLevel` pass through as their
+  representation, and `DateTime` is stored as an ISO-8601 string.
+- **Decide whether the stored format changes.** The generated codec stores `extraData` nested under `extra_data`,
+  where v10 flattened custom fields into the root. If the bytes differ from what the column holds today, bump
+  `schemaVersion` in `drift_chat_database.dart` in the same PR; the upgrade is destructive, so the cache is simply
+  rebuilt. If they are identical, prove it with a test against the old format and leave the version alone.
+- **A model that already has storage methods** (`Attachment.fromData`/`toData`) switches them to the generated
+  functions rather than adding a second pair.
+- **In persistence,** replace the model's `fromJson`/`toJson` calls, including an implicit `jsonEncode(model)`,
+  with `fromData`/`toData`.
+- **Generate with a full `dart run build_runner build`** in `packages/stream_chat`, then `dart format`, and commit
+  only the new `.g.dart` files. `--build-filter` deletes every generated output outside the filter.
+
 ### Documenting the public surface
 
 Write these as you write the code. `public_member_api_docs` only checks a doc *exists*, so a placeholder survives
@@ -291,6 +373,9 @@ Budget for this: on a typical feature it is most of the diff, and none of it is 
 - `test/src/core/api/responses_test.dart` round-trips the DTO from JSON — delete those cases with the DTO's JSON.
 - **Test each mapper from a fully populated generated response,** so a field the mapper drops fails an assertion.
 - **Test each temporary converter,** both on its own and wired through its parent's `fromJson`/`toJson`.
+- **Test each `@DataSerializable` model's stored format:** pin `toData()` to a literal map, so a rename that changes
+  the stored keys fails; round-trip `fromData(toData())`; cover null versus empty for nullable lists. Extend the
+  existing persistence mapper and DAO tests with the field rather than writing tests scoped to it.
 
 Rewrite onto `TESTING.md` rather than carrying the old file's habits across. What breaks most often:
 

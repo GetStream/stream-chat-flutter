@@ -1,8 +1,8 @@
 import 'package:stream_core/stream_core.dart' show PatternMatching, Result;
 
 import '../../open_api/api.dart' as api;
+import '../core/models/response/search_roles_response.dart';
 import '../core/models/role_type.dart';
-import '../core/models/search_roles_response.dart';
 import 'mapper/roles_mapper.dart';
 
 /// Repository dedicated to roles operations.

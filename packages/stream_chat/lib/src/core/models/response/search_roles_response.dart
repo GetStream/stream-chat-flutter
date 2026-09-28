@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import 'role.dart';
+import '../role.dart';
 
 part 'search_roles_response.freezed.dart';
 
