@@ -80,8 +80,6 @@ git_stamp() {
 
 # ---------- validation ----------
 [[ -d "$CHAT_BACKEND_DIR" ]] || { echo "❌ CHAT_BACKEND_DIR not found: $CHAT_BACKEND_DIR"; exit 1; }
-# The generator moved here from projects/chat-manager in GetStream/chat#17426.
-# Checked up front so a stale checkout fails before the output is cleaned.
 GENERATOR_DIR="$CHAT_BACKEND_DIR/tools/openapi"
 [[ -d "$GENERATOR_DIR" ]] || { echo "❌ Generator not found: $GENERATOR_DIR (pull GetStream/chat)"; exit 1; }
 command -v go   >/dev/null || { echo "❌ 'go' is required in PATH"; exit 1; }
