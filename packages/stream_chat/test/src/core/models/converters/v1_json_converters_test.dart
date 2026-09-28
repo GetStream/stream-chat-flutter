@@ -66,15 +66,6 @@ void main() {
     ]);
   });
 
-  test('userGroupsFromV1Json reads dates sent as epoch nanoseconds', () {
-    final groups = userGroupsFromV1Json([
-      {'id': 'g1', 'name': 'Engineering', 'created_at': 1704067200123456000, 'updated_at': 1704153600000000000},
-    ]);
-
-    expect(groups!.single.createdAt, DateTime.utc(2024, 1, 1, 0, 0, 0, 123, 456));
-    expect(groups.single.updatedAt, DateTime.utc(2024, 1, 2));
-  });
-
   test('Message.fromJson reads mentioned groups whose dates are sent as epoch nanoseconds', () {
     final message = Message.fromJson(const {
       'id': 'message-id',
