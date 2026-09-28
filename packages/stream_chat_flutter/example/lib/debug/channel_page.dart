@@ -7,7 +7,6 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'actions/add_user.dart';
 import 'actions/ban_user.dart';
 import 'actions/mute_user.dart';
-import 'actions/remove_shadow_ban.dart';
 import 'actions/remove_user.dart';
 import 'actions/shadow_ban.dart';
 import 'actions/unban_user.dart';
@@ -79,8 +78,6 @@ class _DebugChannelPageState extends State<DebugChannelPage> {
             DebugUnbanUser(client: _channel.client),
             const SizedBox(height: 8),
             DebugShadowBan(client: _channel.client),
-            const SizedBox(height: 8),
-            DebugRemoveShadowBan(client: _channel.client),
             const SizedBox(height: 8),
             DebugAddUser(client: _channel.client, channel: _channel),
             const SizedBox(height: 8),
