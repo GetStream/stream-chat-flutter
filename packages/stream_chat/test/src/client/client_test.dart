@@ -2255,7 +2255,7 @@ void main() {
       expect(res.exceptionOrNull(), error);
     });
 
-    test('StreamChatClient.getAppSettings returns the mapped settings', () async {
+    test('StreamChatClient.getAppSettings returns the app settings', () async {
       when(defaultApi.getApp).thenAnswer(
         (_) async => const Result.success(
           api.GetApplicationResponse(
