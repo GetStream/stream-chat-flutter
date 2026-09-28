@@ -122,6 +122,7 @@ export 'src/core/models/response/create_user_group_response.dart';
 export 'src/core/models/response/get_user_group_response.dart';
 export 'src/core/models/response/list_devices_response.dart';
 export 'src/core/models/response/list_user_groups_response.dart';
+export 'src/core/models/response/og_attachment_response.dart';
 export 'src/core/models/response/remove_user_group_members_response.dart';
 export 'src/core/models/response/search_roles_response.dart';
 export 'src/core/models/response/search_user_groups_response.dart';

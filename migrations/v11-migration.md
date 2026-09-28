@@ -28,6 +28,7 @@ onto Stream's OpenAPI-generated API client.
     - [Roles](#roles)
     - [Devices](#devices)
     - [User Groups](#user-groups)
+    - [Link Previews](#link-previews)
 - [Migration Checklist](#migration-checklist)
 - [For AI Agents](#for-ai-agents)
 - [Contributing to this guide](#contributing-to-this-guide)
@@ -172,6 +173,12 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `UserGroup` / `UserGroupMember extends Equatable`, `.props` | value `==`, plus `copyWith` | `removed` | Equality is unchanged; `props` is gone |
 | The user group responses' identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
 | `StreamChatApi.userGroups` | `StreamChatClient` user group methods | `removed` | The endpoints moved to the generated client |
+| `StreamChatClient.enrichUrl` → `Future<OGAttachmentResponse>` | `Future<Result<OGAttachmentResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `OGAttachmentResponse.fromJson` | — | `removed` | The response is a plain class; construct it directly |
+| `OGAttachmentResponse()..ogScrapeUrl = …` and its other setters | `OGAttachmentResponse(duration: …, ogScrapeUrl: …)` | `retyped` | A plain class with a const constructor and final fields |
+| `OGAttachmentResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| `OGAttachmentResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
+| `StreamChatApi.general.enrichUrl` | `StreamChatClient.enrichUrl` | `removed` | The endpoint moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -533,6 +540,33 @@ decode API responses.
 **The responses' `duration` is a non-nullable `String`**, where v10 typed it `String?`.
 
 **`StreamChatApi.userGroups` is removed.** Call the user group methods on `StreamChatClient` instead.
+
+### Link Previews
+
+**`enrichUrl` returns a `Result` instead of throwing.** `OGAttachmentResponse` keeps its name and fields, and
+`Attachment.fromOGAttachment` still takes it.
+
+```dart
+// v10
+try {
+  final og = await client.enrichUrl(url);
+  showPreview(Attachment.fromOGAttachment(og));
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await client.enrichUrl(url);
+result.fold(
+  onSuccess: (og) => showPreview(Attachment.fromOGAttachment(og)),
+  onFailure: (error, _) => report(error),
+);
+```
+
+**`OGAttachmentResponse` no longer decodes JSON.** It is a plain class; build it with its constructor —
+`OGAttachmentResponse(duration: '0ms', ogScrapeUrl: url)` where v10 wrote `OGAttachmentResponse()..ogScrapeUrl = url`.
+
+**`duration` is a non-nullable `String`**, where v10 typed it `String?`.
 
 ---
 
