@@ -39,6 +39,8 @@ export 'package:stream_core/stream_core.dart'
         PlatformType,
         PatternMatching,
         Result,
+        runSafely,
+        runSafelySync,
         Sort,
         SortDirection,
         SortField,
