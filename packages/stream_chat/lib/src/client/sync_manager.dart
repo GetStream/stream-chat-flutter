@@ -29,7 +29,8 @@ class SyncManager {
     String tag = 'SCh:Sync',
   }) : _logger = StreamLogger(tag);
 
-  // The endpoint rejects more than 255, counted before duplicates collapse.
+  // A sync over more than 255 channels is refused, counted before duplicates
+  // collapse.
   //
   // Capped rather than left to the refusal: unlike one refused for its age or
   // its events, a window refused for its size is refused again next time, and
@@ -39,7 +40,7 @@ class SyncManager {
   // them as they were.
   static const _maxSyncCids = 255;
 
-  // The endpoint returns up to 2000 events. Replaying that many runs a state
+  // A sync returns up to 2000 events. Replaying that many runs a state
   // update and a persistence write for each, on the reconnect path, while the
   // app is trying to render.
   static const _defaultMaxReplayEvents = 250;
@@ -50,8 +51,8 @@ class SyncManager {
   /// The client this manager catches up.
   final StreamChatClient client;
 
-  /// Fetches the missed events, passed separately because the client does not
-  /// expose the endpoint itself.
+  /// Fetches the missed events, passed separately because the client has no
+  /// method for it.
   final FetchMissedEvents fetchMissedEvents;
 
   /// How many events may be replayed from one window before it is given up on
@@ -98,9 +99,9 @@ class SyncManager {
   /// Replays the events missed since [lastSyncAt] for [cids], both falling back
   /// to the values held by the persistence client.
   ///
-  /// A window that cannot be replayed — too many events, or refused by the
-  /// server — is given up on, and the channels it covered are refreshed in its
-  /// place. Does nothing when there are no channels to catch up on.
+  /// A window that cannot be replayed — too many events, or refused — is given
+  /// up on, and the channels it covered are refreshed in its place. Does
+  /// nothing when there are no channels to catch up on.
   ///
   /// Those channels are returned so a caller doing its own recovery can skip
   /// them; the set is empty when the events were replayed normally.
@@ -186,7 +187,7 @@ class SyncManager {
   // covered in full rather than truncated.
   //
   // Every page is attempted: one failing says nothing about the others. Returns
-  // the channels the server answered with — fewer when one is deleted or no
+  // the channels that came back — fewer when one is deleted or no
   // longer visible, which is not a failure — and the first request that failed.
   Future<(Set<String>, (Object, StackTrace)?)> _refreshPages(List<String> cids) async {
     final refreshed = <String>{};
@@ -216,8 +217,8 @@ class SyncManager {
   // back. [sync] has already decided there is a window worth asking for, and
   // holds the lock while this runs.
   Future<Set<String>> _performSync(List<String> cids, DateTime lastSyncAt) async {
-    // Deduplicated before capping: the endpoint counts duplicates against its
-    // own limit, so leaving them in would spend slots on nothing.
+    // Deduplicated before capping: duplicates count against the limit, so
+    // leaving them in would spend slots on nothing.
     final cappedCids = cids.toSet().take(_maxSyncCids).toList();
     _logger
       ..i(() => 'Syncing events since $lastSyncAt for ${cappedCids.length} channels')
@@ -230,8 +231,8 @@ class SyncManager {
       events = res.events.sortedBy((it) => it.createdAt);
     } catch (error, stk) {
       // A 400 means the window is too old, or held too many events to return.
-      // The two are indistinguishable, and either way the server refusing it is
-      // the signal that local state is too far behind to reconcile — so the
+      // The two are indistinguishable, and either way the refusal is the
+      // signal that local state is too far behind to reconcile — so the
       // store is dropped and repopulated rather than reconciled.
       if (error is StreamApiException && error.statusCode == 400) {
         _logger.w(
@@ -303,7 +304,7 @@ class SyncManager {
     return refreshed;
   }
 
-  // Gives up on a window the server would not serve.
+  // Gives up on a window that was refused.
   //
   // The store is dropped and repopulated from the refresh, as it is for an
   // oversized window. Only the checkpoint differs: it has nowhere to go back

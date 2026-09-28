@@ -4,7 +4,7 @@ import '../user_group.dart';
 
 part 'list_user_groups_response.freezed.dart';
 
-/// The user groups of the app, returned by [StreamChatClient.listUserGroups].
+/// The user groups of the app.
 @freezed
 class ListUserGroupsResponse with _$ListUserGroupsResponse {
   /// Creates a new [ListUserGroupsResponse].
@@ -13,7 +13,7 @@ class ListUserGroupsResponse with _$ListUserGroupsResponse {
     this.userGroups = const [],
   });
 
-  /// How long the server took to handle the request, such as `4.21ms`.
+  /// How long the request took to handle, such as `4.21ms`.
   @override
   final String duration;
 

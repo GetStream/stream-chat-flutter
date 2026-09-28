@@ -13,8 +13,8 @@ class GeneralRepository {
 
   /// Scrapes `url` for the OpenGraph metadata a link preview is built from.
   ///
-  /// The server fetches the page itself, so a URL it cannot scrape comes back
-  /// as a failure.
+  /// The page is fetched remotely rather than from this device, so a URL only
+  /// this device can reach comes back as a failure.
   Future<Result<OGAttachmentResponse>> enrichUrl(String url) async {
     final result = await _api.getOG(url: url);
 

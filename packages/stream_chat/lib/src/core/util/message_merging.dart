@@ -95,7 +95,7 @@ class MessageMerging {
     final existingList = existing is List<Message> ? existing : existing.toList();
     var toMergeList = toMerge is List<Message> ? toMerge : toMerge.toList();
 
-    // Single-message fast path. The hot ingest path (server echoes, edits,
+    // Single-message fast path. The hot ingest path (sent-message echoes, edits,
     // reactions, read receipts) always lands here, and `lastIndexWhere` +
     // `sortedUpsertAt` skips the O(N) keymap build that the two-pointer
     // merge would otherwise do up front.

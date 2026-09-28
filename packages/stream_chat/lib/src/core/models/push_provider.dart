@@ -1,7 +1,7 @@
 /// A service that delivers push notifications to a device.
 ///
-/// Any provider the server supports can be named, including one without a
-/// constant here, by wrapping its wire value: `PushProvider('firebase')`.
+/// A provider without a constant here can still be named by wrapping its
+/// value: `PushProvider('firebase')`.
 extension type const PushProvider(String rawType) implements String {
   /// Google's Firebase Cloud Messaging.
   static const firebase = PushProvider('firebase');

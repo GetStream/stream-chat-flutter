@@ -821,7 +821,7 @@ class Channel {
         }
       }
 
-      // Validate the final message before sending it to the server.
+      // Validate the final message before sending it.
       if (MessageRules.canUpload(message) != true) {
         _logger.w(() => 'Message is not valid for sending, removing it');
 
@@ -1033,9 +1033,9 @@ class Channel {
 
   /// Deletes the [message] for everyone.
   ///
-  /// If [hard] is true, the message is permanently deleted from the server
-  /// and cannot be recovered. In this case, any attachments associated with the
-  /// message are also deleted from the server.
+  /// If [hard] is true, the message is permanently deleted and cannot be
+  /// recovered. In this case, any attachments associated with the message are
+  /// deleted as well.
   Future<EmptyResponse> deleteMessage(Message message, {bool hard = false}) {
     final deletionScope = MessageDeleteScope.deleteForAll(hard: hard);
 
@@ -1057,13 +1057,12 @@ class Channel {
   // The [scope] defines whether to delete the message for everyone or just
   // for the current user.
   //
-  // If the message is a local message (not yet sent to the server) or a bounced
+  // If the message is a local message (not yet sent) or a bounced
   // error message, it is deleted locally without making an API call.
   //
   // If the message is deleted for everyone and [scope.hard] is true, the
-  // message is permanently deleted from the server and cannot be recovered.
-  // In this case, any attachments associated with the message are also deleted
-  // from the server.
+  // message is permanently deleted and cannot be recovered. In this case, any
+  // attachments associated with the message are deleted as well.
   Future<EmptyResponse> _deleteMessage(
     Message message, {
     required MessageDeleteScope scope,
@@ -1071,7 +1070,7 @@ class Channel {
     _checkInitialized();
 
     // Directly deleting the local messages and bounced error messages as they
-    // are not available on the server.
+    // were never sent.
     if (message.remoteCreatedAt == null || message.isBouncedWithError) {
       _deleteLocalMessage(message);
       // Returning empty response to mark the api call as success.
@@ -1104,7 +1103,7 @@ class Channel {
       );
 
       state?.deleteMessage(deletedMessage, hardDelete: scope.hard);
-      // If hard delete, also delete the attachments from the server.
+      // If hard delete, also delete the uploaded attachments.
       if (scope.hard) _deleteMessageAttachments(deletedMessage);
 
       return response;
@@ -1124,7 +1123,7 @@ class Channel {
     }
   }
 
-  // Deletes a local [message] that is not yet sent to the server.
+  // Deletes a local [message] that is not yet sent.
   //
   // This is typically called when a user wants to delete a message that they
   // have composed but not yet sent, or if a message failed to send and the user
@@ -1147,8 +1146,8 @@ class Channel {
     );
   }
 
-  // Deletes all the attachments associated with the given [message]
-  // from the server. This is typically called when a message is hard deleted.
+  // Deletes all the uploaded attachments associated with the given [message].
+  // This is typically called when a message is hard deleted.
   Future<void> _deleteMessageAttachments(Message message) async {
     final attachments = message.attachments;
     final deleteFutures = attachments.map((it) async {

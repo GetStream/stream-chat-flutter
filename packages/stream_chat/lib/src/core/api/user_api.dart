@@ -28,8 +28,8 @@ class UserApi {
         'payload': jsonEncode({
           'presence': presence,
           if (sort != null) 'sort': sort,
-          // Sent even when empty: the endpoint declares `filter_conditions`
-          // required, and an omitted key is rejected where `{}` is accepted.
+          // Sent even when empty: a query without it is rejected, where `{}`
+          // is accepted.
           'filter_conditions': filter ?? const <String, Object?>{},
           if (pagination != null) ...pagination.toJson(),
         }),

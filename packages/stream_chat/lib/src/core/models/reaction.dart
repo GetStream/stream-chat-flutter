@@ -145,7 +145,7 @@ typedef ReactionFilter = Filter<Reaction>;
 
 /// Represents a field that reaction queries can be filtered on.
 class ReactionFilterField extends FilterField<Reaction> {
-  /// Creates a reaction filter field named [remote] on the wire, reading its
+  /// Creates a reaction filter field named [remote] in queries, reading its
   /// value off an instance with [value].
   ReactionFilterField(super.remote, super.value);
 
@@ -209,7 +209,7 @@ class ReactionSort extends Sort<Reaction> {
 
 /// Represents a field that reaction queries can be sorted on.
 class ReactionSortField extends SortField<Reaction> {
-  /// Creates a field named [remote] on the wire, reading its value off an
+  /// Creates a field named [remote] in queries, reading its value off an
   /// instance with `localValue`.
   ///
   /// For a name the SDK has not modelled; prefer the fields declared here.

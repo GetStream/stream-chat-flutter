@@ -2,9 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'og_attachment_response.freezed.dart';
 
-/// The OpenGraph metadata scraped for a URL, returned by [StreamChatClient.enrichUrl].
-///
-/// [Attachment.fromOGAttachment] builds a link preview attachment from it.
+/// The OpenGraph metadata scraped from a URL.
 @freezed
 class OGAttachmentResponse with _$OGAttachmentResponse {
   /// Creates a new [OGAttachmentResponse].
@@ -22,7 +20,7 @@ class OGAttachmentResponse with _$OGAttachmentResponse {
     this.type,
   });
 
-  /// How long the server took to handle the request, such as `4.21ms`.
+  /// How long the request took to handle, such as `4.21ms`.
   @override
   final String duration;
 
