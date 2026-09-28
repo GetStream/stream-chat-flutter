@@ -221,21 +221,6 @@ ChannelStateResponse _$ChannelStateResponseFromJson(
   ..watcherCount = (json['watcher_count'] as num?)?.toInt() ?? 0
   ..read = (json['read'] as List<dynamic>?)?.map((e) => Read.fromJson(e as Map<String, dynamic>)).toList() ?? [];
 
-OGAttachmentResponse _$OGAttachmentResponseFromJson(
-  Map<String, dynamic> json,
-) => OGAttachmentResponse()
-  ..duration = json['duration'] as String?
-  ..ogScrapeUrl = json['og_scrape_url'] as String
-  ..assetUrl = json['asset_url'] as String?
-  ..authorLink = json['author_link'] as String?
-  ..authorName = json['author_name'] as String?
-  ..imageUrl = json['image_url'] as String?
-  ..text = json['text'] as String?
-  ..thumbUrl = json['thumb_url'] as String?
-  ..title = json['title'] as String?
-  ..titleLink = json['title_link'] as String?
-  ..type = json['type'] as String?;
-
 UserBlockResponse _$UserBlockResponseFromJson(Map<String, dynamic> json) => UserBlockResponse()
   ..duration = json['duration'] as String?
   ..blockedByUserId = json['blocked_by_user_id'] as String? ?? ''
@@ -411,47 +396,3 @@ GetActiveLiveLocationsResponse _$GetActiveLiveLocationsResponseFromJson(
   ..activeLiveLocations = (json['active_live_locations'] as List<dynamic>)
       .map((e) => Location.fromJson(e as Map<String, dynamic>))
       .toList();
-
-ListUserGroupsResponse _$ListUserGroupsResponseFromJson(
-  Map<String, dynamic> json,
-) => ListUserGroupsResponse()
-  ..duration = json['duration'] as String?
-  ..userGroups =
-      (json['user_groups'] as List<dynamic>?)?.map((e) => UserGroup.fromJson(e as Map<String, dynamic>)).toList() ?? [];
-
-SearchUserGroupsResponse _$SearchUserGroupsResponseFromJson(
-  Map<String, dynamic> json,
-) => SearchUserGroupsResponse()
-  ..duration = json['duration'] as String?
-  ..userGroups =
-      (json['user_groups'] as List<dynamic>?)?.map((e) => UserGroup.fromJson(e as Map<String, dynamic>)).toList() ?? [];
-
-CreateUserGroupResponse _$CreateUserGroupResponseFromJson(
-  Map<String, dynamic> json,
-) => CreateUserGroupResponse()
-  ..duration = json['duration'] as String?
-  ..userGroup = UserGroup.fromJson(json['user_group'] as Map<String, dynamic>);
-
-GetUserGroupResponse _$GetUserGroupResponseFromJson(
-  Map<String, dynamic> json,
-) => GetUserGroupResponse()
-  ..duration = json['duration'] as String?
-  ..userGroup = UserGroup.fromJson(json['user_group'] as Map<String, dynamic>);
-
-UpdateUserGroupResponse _$UpdateUserGroupResponseFromJson(
-  Map<String, dynamic> json,
-) => UpdateUserGroupResponse()
-  ..duration = json['duration'] as String?
-  ..userGroup = UserGroup.fromJson(json['user_group'] as Map<String, dynamic>);
-
-AddUserGroupMembersResponse _$AddUserGroupMembersResponseFromJson(
-  Map<String, dynamic> json,
-) => AddUserGroupMembersResponse()
-  ..duration = json['duration'] as String?
-  ..userGroup = UserGroup.fromJson(json['user_group'] as Map<String, dynamic>);
-
-RemoveUserGroupMembersResponse _$RemoveUserGroupMembersResponseFromJson(
-  Map<String, dynamic> json,
-) => RemoveUserGroupMembersResponse()
-  ..duration = json['duration'] as String?
-  ..userGroup = UserGroup.fromJson(json['user_group'] as Map<String, dynamic>);

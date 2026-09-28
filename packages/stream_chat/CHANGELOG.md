@@ -50,9 +50,18 @@
 - `Device`, `Role`, `ListDevicesResponse` and `SearchRolesResponse` no longer decode from or encode to JSON.
 - `PushProvider` is an extension type over its wire string instead of an enum, and `Device.pushProvider` is typed `PushProvider` instead of `String`.
 - `ListDevicesResponse` and `SearchRolesResponse` are immutable, built through a const constructor, and their `duration` is a non-nullable `String`.
-- `Device`, `ListDevicesResponse` and `SearchRolesResponse` compare by value and gain `copyWith`.
+- `Device`, `ListDevicesResponse`, `SearchRolesResponse` and `OGAttachmentResponse` compare by value and gain `copyWith`.
 - `Role` no longer extends `Equatable`, so `props` is removed; it still compares by value and gains `copyWith`.
 - `StreamChatApi.device` is renamed `StreamChatApi.pushPreferences` and handles only `setPushPreferences`.
+- `StreamChatClient`'s user group methods return a `Result` instead of throwing; `deleteUserGroup` returns a `Result<void>`.
+- `UserGroup`, `UserGroupMember` and the user group responses no longer decode from or encode to JSON; `UserGroup` and `UserGroupMember` gain `fromData` and `toData`, which read and write only the format `stream_chat_persistence` stores them in.
+- The user group responses are immutable, built through a const constructor, and their `duration` is a non-nullable `String`.
+- `userGroup` is nullable on `GetUserGroupResponse`, `CreateUserGroupResponse`, `UpdateUserGroupResponse`, `AddUserGroupMembersResponse` and `RemoveUserGroupMembersResponse`.
+- `UserGroup`, `UserGroupMember` and the user group responses gain `copyWith`; the responses now compare by value, and `UserGroup` and `UserGroupMember` no longer extend `Equatable`, so `props` is removed.
+- `StreamChatApi.userGroups` is removed; its endpoints are reached through `StreamChatClient`.
+- `StreamChatClient.enrichUrl` returns a `Result<OGAttachmentResponse>` instead of throwing.
+- `OGAttachmentResponse` no longer decodes from JSON, is built through a const constructor, and its `duration` is a non-nullable `String`.
+- `StreamChatApi.general.enrichUrl` is removed; call `StreamChatClient.enrichUrl` instead.
 - `StreamChatClient.getAppSettings` returns a `Result<GetAppSettingsResponse>` instead of an `AppSettings`, and no longer throws.
 - `AppSettings`, `UploadConfig` and `GetAppSettingsResponse` no longer decode from JSON.
 - `GetAppSettingsResponse` is immutable, built through a const constructor, and its `duration` is a non-nullable `String`.
