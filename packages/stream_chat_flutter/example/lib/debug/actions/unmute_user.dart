@@ -30,6 +30,9 @@ class DebugUnmuteUser extends StatelessWidget {
             debugPrint('[unmuteUser] userId: $userId');
             final result = await client.moderation.unmuteUser(userId);
             debugPrint('[unmuteUser] completed: $result');
+            if (result.exceptionOrNull() case final error?) {
+              showErrorDialog(context, error, 'Unmute User');
+            }
           } catch (e) {
             debugPrint('[unmuteUser] failed: $e');
             showErrorDialog(context, e, 'Unmute User');

@@ -596,7 +596,7 @@ try {
 }
 
 // v11
-final result = await client.banUser(
+final result = await client.moderation.banUser(
   userId,
   timeout: const Duration(minutes: 30),
   reason: 'spam',
@@ -608,8 +608,9 @@ result.fold(
 ```
 
 **`banUser`'s options map becomes named parameters**, mirroring the endpoint: `channelCid`,
-`timeout`, `reason`, `shadow`, `ipBan` and `deleteMessages`. `timeout` is a `Duration` that the
-server applies with minute granularity. On `Channel`, `banMember` and `shadowBan` take the same set
+`timeout`, `reason`, `shadow`, `ipBan` and `deleteMessages`. `timeout` is a `Duration` applied with
+minute granularity, and never as less than one minute — a shorter one would mean no expiry at all.
+On `Channel`, `banMember` and `shadowBan` take the same set
 minus `channelCid`, which the channel supplies itself — so the `{'type': ..., 'id': ...}` pair those
 methods used to send is gone, and with it a pair the API deprecated in favour of `channel_cid`.
 

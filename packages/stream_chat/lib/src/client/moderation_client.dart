@@ -23,7 +23,7 @@ class ModerationClient {
   /// Mutes [userId] for the current user.
   ///
   /// The mute lasts until it is removed. A [timeout] expires it after that
-  /// long, rounded down to whole minutes, so a shorter one never expires it.
+  /// long, applied in whole minutes and never less than one.
   Future<Result<void>> muteUser(
     String userId, {
     Duration? timeout,
@@ -53,7 +53,7 @@ class ModerationClient {
   /// The ban covers the whole app, or only [channelCid] if one is given.
   ///
   /// It lasts until it is removed. A [timeout] expires it after that long,
-  /// rounded down to whole minutes, so a shorter one never expires it.
+  /// applied in whole minutes and never less than one.
   ///
   /// If [shadow] is true, their messages stop reaching anyone else and they
   /// are not told.

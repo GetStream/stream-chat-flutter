@@ -19,7 +19,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [05](05-polls.md) | Polls | 13 | 13 | ☐ |
 | [06](06-reminders.md) | Message Reminders | 4 | 4 | ☐ |
 | [07](07-threads-and-drafts.md) | Threads & Drafts | 7 | 7 | ☐ |
-| [08](08-moderation-and-blocklists.md) | Moderation & Blocklists | 10 | 34 | ☑ |
+| [08](08-moderation-and-blocklists.md) | Moderation & Blocklists | 0 | 34 | ☑ |
 | [09](09-users.md) | Users | 9 | 9 | ☐ |
 | [10](10-messages.md) | Messages & Search | 14 | 12 | ☐ |
 | [11](11-channels-and-members.md) | Channels, Members & Sync | 27 | 24 | ☐ |
@@ -27,7 +27,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [13](13-push-preferences.md) | Push Preferences | 1 | 1 | ☐ |
 | [14](14-banned-users.md) | Banned Users — split out of 08 | 1 | 1 | ☐ |
 
-**Coverage:** 104 hand-written methods across 12 files, and all 129 generated operations, each claimed by exactly
+**Coverage:** 86 hand-written methods across 11 files, and all 129 generated operations, each claimed by exactly
 one group. Verified mechanically — see [Keeping this plan honest](#keeping-this-plan-honest).
 
 

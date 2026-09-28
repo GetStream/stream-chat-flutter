@@ -1,34 +1,30 @@
+import 'dart:math' as math;
+
 import 'package:stream_core/stream_core.dart' show Result;
 
-import '../../open_api/api.dart' show DefaultApi;
-import '../../open_api/models.dart'
-    show
-        BanRequest,
-        BanRequestDeleteMessages,
-        FlagRequest,
-        MuteChannelRequest,
-        MuteRequest,
-        UnmuteChannelRequest,
-        UnmuteRequest;
+import '../../open_api/api.dart' as api;
+
+int? _inMinutesAtLeastOne(Duration? timeout) =>
+    timeout == null ? null : math.max(timeout.inMinutes, 1);
 
 /// Repository dedicated to moderation operations.
 class ModerationRepository {
   /// Initialize a new moderation repository.
   const ModerationRepository(this._api);
 
-  final DefaultApi _api;
+  final api.DefaultApi _api;
 
   /// Mutes [userId] for the current user.
   ///
   /// The mute lasts until it is removed. A [timeout] expires it after that
-  /// long, rounded down to whole minutes, so a shorter one never expires it.
+  /// long, applied in whole minutes and never less than one.
   Future<Result<void>> muteUser(
     String userId, {
     Duration? timeout,
   }) => _api.mute(
-    muteRequest: MuteRequest(
+    muteRequest: api.MuteRequest(
       targetIds: [userId],
-      timeout: timeout?.inMinutes,
+      timeout: _inMinutesAtLeastOne(timeout),
     ),
   );
 
@@ -36,7 +32,7 @@ class ModerationRepository {
   Future<Result<void>> unmuteUser(
     String userId,
   ) => _api.unmute(
-    unmuteRequest: UnmuteRequest(
+    unmuteRequest: api.UnmuteRequest(
       targetIds: [userId],
     ),
   );
@@ -49,7 +45,7 @@ class ModerationRepository {
     String channelCid, {
     Duration? expiration,
   }) => _api.muteChannel(
-    muteChannelRequest: MuteChannelRequest(
+    muteChannelRequest: api.MuteChannelRequest(
       channelCids: [channelCid],
       expiration: expiration?.inMilliseconds,
     ),
@@ -59,7 +55,7 @@ class ModerationRepository {
   Future<Result<void>> unmuteChannel(
     String channelCid,
   ) => _api.unmuteChannel(
-    unmuteChannelRequest: UnmuteChannelRequest(
+    unmuteChannelRequest: api.UnmuteChannelRequest(
       channelCids: [channelCid],
     ),
   );
@@ -69,7 +65,7 @@ class ModerationRepository {
   /// The ban covers the whole app, or only [channelCid] if one is given.
   ///
   /// It lasts until it is removed. A [timeout] expires it after that long,
-  /// rounded down to whole minutes, so a shorter one never expires it.
+  /// applied in whole minutes and never less than one.
   ///
   /// If [shadow] is true, their messages stop reaching anyone else and they
   /// are not told.
@@ -85,12 +81,12 @@ class ModerationRepository {
     String? reason,
     bool? shadow,
     bool? ipBan,
-    BanRequestDeleteMessages? deleteMessages,
+    api.BanRequestDeleteMessages? deleteMessages,
   }) => _api.ban(
-    banRequest: BanRequest(
+    banRequest: api.BanRequest(
       targetUserId: targetUserId,
       channelCid: channelCid,
-      timeout: timeout?.inMinutes,
+      timeout: _inMinutesAtLeastOne(timeout),
       reason: reason,
       shadow: shadow,
       ipBan: ipBan,
@@ -119,7 +115,7 @@ class ModerationRepository {
     String? reason,
     Map<String, Object?>? custom,
   }) => _api.flag(
-    flagRequest: FlagRequest(
+    flagRequest: api.FlagRequest(
       entityType: 'stream:chat:v1:message',
       entityId: messageId,
       reason: reason,
@@ -135,7 +131,7 @@ class ModerationRepository {
     String? reason,
     Map<String, Object?>? custom,
   }) => _api.flag(
-    flagRequest: FlagRequest(
+    flagRequest: api.FlagRequest(
       entityType: 'stream:user',
       entityId: userId,
       reason: reason,

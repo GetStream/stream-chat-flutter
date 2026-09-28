@@ -57,13 +57,24 @@ void main() {
     verify(() => api.mute(muteRequest: request)).called(1);
   });
 
-  test('muteUser sends a sub-minute timeout as no expiry', () async {
-    const request = MuteRequest(targetIds: ['jane'], timeout: 0);
+  test('muteUser raises a sub-minute timeout to one minute', () async {
+    const request = MuteRequest(targetIds: ['jane'], timeout: 1);
     when(() => api.mute(muteRequest: request)).thenAnswer(
       (_) async => const Result.success(MuteResponse(duration: '0.01ms')),
     );
 
     await repository.muteUser('jane', timeout: const Duration(seconds: 30));
+
+    verify(() => api.mute(muteRequest: request)).called(1);
+  });
+
+  test('muteUser raises a zero timeout to one minute', () async {
+    const request = MuteRequest(targetIds: ['jane'], timeout: 1);
+    when(() => api.mute(muteRequest: request)).thenAnswer(
+      (_) async => const Result.success(MuteResponse(duration: '0.01ms')),
+    );
+
+    await repository.muteUser('jane', timeout: Duration.zero);
 
     verify(() => api.mute(muteRequest: request)).called(1);
   });
@@ -184,8 +195,8 @@ void main() {
     verify(() => api.ban(banRequest: request)).called(1);
   });
 
-  test('banUser sends a sub-minute timeout as no expiry', () async {
-    const request = BanRequest(targetUserId: 'jane', timeout: 0);
+  test('banUser raises a sub-minute timeout to one minute', () async {
+    const request = BanRequest(targetUserId: 'jane', timeout: 1);
     when(() => api.ban(banRequest: request)).thenAnswer(
       (_) async => const Result.success(ModerationBanResponse(duration: '0.01ms')),
     );
