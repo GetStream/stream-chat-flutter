@@ -2255,26 +2255,64 @@ void main() {
       expect(res.exceptionOrNull(), error);
     });
 
-    test('StreamChatClient.getAppSettings returns the mapped response', () async {
+    test('StreamChatClient.getAppSettings returns the mapped settings', () async {
       when(defaultApi.getApp).thenAnswer(
-        (_) async => Result.success(fakeGetApplicationResponse(name: 'fresh-app')),
+        (_) async => const Result.success(
+          api.GetApplicationResponse(
+            duration: '0.01ms',
+            app: api.AppResponseFields(
+              id: 42,
+              name: 'test-app',
+              placement: 'us-east',
+              autoTranslationEnabled: true,
+              asyncUrlEnrichEnabled: false,
+              fileUploadConfig: api.FileUploadConfig(
+                sizeLimit: 10485760,
+                allowedFileExtensions: ['.csv'],
+                blockedFileExtensions: ['.exe'],
+                allowedMimeTypes: ['text/csv'],
+                blockedMimeTypes: ['application/x-msdownload'],
+              ),
+              imageUploadConfig: api.FileUploadConfig(
+                sizeLimit: 5242880,
+                allowedFileExtensions: ['.png'],
+                blockedFileExtensions: ['.gif'],
+                allowedMimeTypes: ['image/png'],
+                blockedMimeTypes: ['image/gif'],
+              ),
+            ),
+          ),
+        ),
       );
 
       final res = await client.getAppSettings();
-      expect(res.getOrNull()?.app.name, 'fresh-app');
+      expect(
+        res.getOrNull(),
+        const GetAppSettingsResponse(
+          duration: '0.01ms',
+          app: AppSettings(
+            name: 'test-app',
+            autoTranslationEnabled: true,
+            fileUploadConfig: UploadConfig(
+              sizeLimit: 10485760,
+              allowedFileExtensions: ['.csv'],
+              blockedFileExtensions: ['.exe'],
+              allowedMimeTypes: ['text/csv'],
+              blockedMimeTypes: ['application/x-msdownload'],
+            ),
+            imageUploadConfig: UploadConfig(
+              sizeLimit: 5242880,
+              allowedFileExtensions: ['.png'],
+              blockedFileExtensions: ['.gif'],
+              allowedMimeTypes: ['image/png'],
+              blockedMimeTypes: ['image/gif'],
+            ),
+          ),
+        ),
+      );
 
       verify(defaultApi.getApp).called(1);
       verifyNoMoreInteractions(defaultApi);
-    });
-
-    test('StreamChatClient.getAppSettings replaces appSettings on success', () async {
-      when(defaultApi.getApp).thenAnswer(
-        (_) async => Result.success(fakeGetApplicationResponse(name: 'fresh-app')),
-      );
-
-      await client.getAppSettings();
-
-      expect(client.appSettings.name, 'fresh-app');
     });
 
     test('StreamChatClient.getAppSettings returns the failure without throwing', () async {

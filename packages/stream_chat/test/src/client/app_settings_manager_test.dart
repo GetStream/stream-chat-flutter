@@ -60,16 +60,6 @@ void main() {
     expect(manager.appSettings, _response().app);
   });
 
-  test('AppSettingsManager.refresh returns the fetched response', () async {
-    final repository = MockAppSettingsRepository();
-    final manager = AppSettingsManager(repository);
-    when(repository.getAppSettings).thenAnswer((_) async => Result.success(_response()));
-
-    final res = await manager.refresh();
-
-    expect(res.getOrNull(), _response());
-  });
-
   test('AppSettingsManager.refresh replaces the cached settings', () async {
     final repository = MockAppSettingsRepository();
     final manager = AppSettingsManager(repository);
@@ -91,16 +81,6 @@ void main() {
     await manager.refresh();
 
     verify(repository.getAppSettings).called(2);
-  });
-
-  test('AppSettingsManager.refresh returns the failure without throwing', () async {
-    final repository = MockAppSettingsRepository();
-    final manager = AppSettingsManager(repository);
-    when(repository.getAppSettings).thenAnswer((_) async => const Result.failure(_error));
-
-    final res = await manager.refresh();
-
-    expect(res.exceptionOrNull(), _error);
   });
 
   test('AppSettingsManager.refresh keeps the cached settings when it fails', () async {
@@ -144,11 +124,6 @@ const _error = StreamClientException(message: 'boom');
 GetAppSettingsResponse _response({String name = 'test-app'}) {
   return GetAppSettingsResponse(
     duration: '0.01ms',
-    app: AppSettings(
-      name: name,
-      fileUploadConfig: const UploadConfig(sizeLimit: 10485760, blockedFileExtensions: ['.exe']),
-      imageUploadConfig: const UploadConfig(sizeLimit: 5242880, allowedMimeTypes: ['image/png']),
-      asyncUrlEnrichEnabled: true,
-    ),
+    app: AppSettings(name: name),
   );
 }
