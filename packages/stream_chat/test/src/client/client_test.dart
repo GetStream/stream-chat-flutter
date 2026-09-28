@@ -5071,31 +5071,127 @@ void main() {
       verifyNoMoreInteractions(fakeChatApi.message);
     });
 
-    test('`.enrichUrl`', () async {
+    test('StreamChatClient.enrichUrl returns the scraped metadata of the url', () async {
       const url = 'https://www.techyourchance.com/finite-state-machine-with-unit-tests-real-world-example';
 
-      when(() => fakeChatApi.general.enrichUrl(url)).thenAnswer(
-        (_) async => OGAttachmentResponse()
-          ..type = 'image'
-          ..ogScrapeUrl = url
-          ..authorName = 'TechYourChance'
-          ..title = 'Finite State Machine with Unit Tests: Real World Example',
+      when(() => defaultApi.getOG(url: url)).thenAnswer(
+        (_) async => const Result.success(
+          api.GetOGResponse(
+            duration: '0.01ms',
+            custom: {},
+            type: 'image',
+            ogScrapeUrl: url,
+            authorName: 'TechYourChance',
+            title: 'Finite State Machine with Unit Tests: Real World Example',
+          ),
+        ),
+      );
+
+      final res = await client.enrichUrl(url);
+      expect(
+        res.getOrNull(),
+        const OGAttachmentResponse(
+          duration: '0.01ms',
+          type: 'image',
+          ogScrapeUrl: url,
+          authorName: 'TechYourChance',
+          title: 'Finite State Machine with Unit Tests: Real World Example',
+        ),
+      );
+
+      verify(() => defaultApi.getOG(url: url)).called(1);
+      verifyNoMoreInteractions(defaultApi);
+    });
+
+    test('StreamChatClient.enrichUrl maps every field of a fully populated response', () async {
+      const url = 'https://getstream.io/chat';
+      const image = api.ImageData(
+        frames: '1',
+        height: '200',
+        size: '1024',
+        url: 'https://giphy.com/1.gif',
+        width: '200',
+      );
+      when(() => defaultApi.getOG(url: url)).thenAnswer(
+        (_) async => const Result.success(
+          api.GetOGResponse(
+            duration: '0.01ms',
+            ogScrapeUrl: 'https://getstream.io/chat/',
+            assetUrl: 'https://getstream.io/chat/intro.mp4',
+            authorIcon: 'https://getstream.io/favicon.ico',
+            authorLink: 'https://getstream.io',
+            authorName: 'Stream',
+            color: '#005fff',
+            custom: {'campaign': 'launch'},
+            fallback: 'Stream Chat link preview',
+            footer: 'getstream.io',
+            footerIcon: 'https://getstream.io/footer.png',
+            imageUrl: 'https://getstream.io/chat/og.png',
+            originalHeight: 630,
+            originalWidth: 1200,
+            pretext: 'Stream Chat',
+            text: 'Build real-time chat in less time.',
+            thumbUrl: 'https://getstream.io/chat/og-thumb.png',
+            title: 'Chat API & SDKs',
+            titleLink: 'https://getstream.io/chat/?utm_source=og',
+            type: 'video',
+            actions: [api.Action(name: 'image_action', text: 'Send', type: 'button', style: 'primary', value: 'send')],
+            fields: [api.Field(short: true, title: 'Plan', value: 'Free')],
+            giphy: api.Images(
+              fixedHeight: image,
+              fixedHeightDownsampled: image,
+              fixedHeightStill: image,
+              fixedWidth: image,
+              fixedWidthDownsampled: image,
+              fixedWidthStill: image,
+              original: image,
+            ),
+          ),
+        ),
+      );
+
+      final res = await client.enrichUrl(url);
+      expect(
+        res.getOrNull(),
+        const OGAttachmentResponse(
+          duration: '0.01ms',
+          ogScrapeUrl: 'https://getstream.io/chat/',
+          assetUrl: 'https://getstream.io/chat/intro.mp4',
+          authorLink: 'https://getstream.io',
+          authorName: 'Stream',
+          imageUrl: 'https://getstream.io/chat/og.png',
+          text: 'Build real-time chat in less time.',
+          thumbUrl: 'https://getstream.io/chat/og-thumb.png',
+          title: 'Chat API & SDKs',
+          titleLink: 'https://getstream.io/chat/?utm_source=og',
+          type: 'video',
+        ),
+      );
+    });
+
+    test('StreamChatClient.enrichUrl falls back to the requested url when the response has no scraped url', () async {
+      const url = 'https://getstream.io/chat/';
+      when(() => defaultApi.getOG(url: url)).thenAnswer(
+        (_) async => const Result.success(api.GetOGResponse(duration: '0.01ms', custom: {}, title: 'Chat API & SDKs')),
       );
 
       final res = await client.enrichUrl(url);
 
-      expect(res, isNotNull);
-      expect(res.type, 'image');
-      expect(res.ogScrapeUrl, url);
-      expect(res.authorName, 'TechYourChance');
-      expect(
-        res.title,
-        'Finite State Machine with Unit Tests: Real World Example',
-      );
+      expect(res.getOrNull()?.ogScrapeUrl, url);
+    });
 
-      verify(() => fakeChatApi.general.enrichUrl(url)).called(1);
-      verify(() => fakeChatApi.general.getAppSettings()).called(1);
-      verifyNoMoreInteractions(fakeChatApi.general);
+    test('StreamChatClient.enrichUrl returns the failure without throwing', () async {
+      const url = 'https://unreachable.example';
+      const error = StreamApiException(
+        code: StreamErrorCode.inputError,
+        message: 'could not find any opengraph data for the given URL',
+        statusCode: 400,
+      );
+      when(() => defaultApi.getOG(url: url)).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await client.enrichUrl(url);
+
+      expect(res.exceptionOrNull(), error);
     });
 
     test(

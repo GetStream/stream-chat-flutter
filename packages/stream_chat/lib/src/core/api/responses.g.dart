@@ -221,21 +221,6 @@ ChannelStateResponse _$ChannelStateResponseFromJson(
   ..watcherCount = (json['watcher_count'] as num?)?.toInt() ?? 0
   ..read = (json['read'] as List<dynamic>?)?.map((e) => Read.fromJson(e as Map<String, dynamic>)).toList() ?? [];
 
-OGAttachmentResponse _$OGAttachmentResponseFromJson(
-  Map<String, dynamic> json,
-) => OGAttachmentResponse()
-  ..duration = json['duration'] as String?
-  ..ogScrapeUrl = json['og_scrape_url'] as String
-  ..assetUrl = json['asset_url'] as String?
-  ..authorLink = json['author_link'] as String?
-  ..authorName = json['author_name'] as String?
-  ..imageUrl = json['image_url'] as String?
-  ..text = json['text'] as String?
-  ..thumbUrl = json['thumb_url'] as String?
-  ..title = json['title'] as String?
-  ..titleLink = json['title_link'] as String?
-  ..type = json['type'] as String?;
-
 UserBlockResponse _$UserBlockResponseFromJson(Map<String, dynamic> json) => UserBlockResponse()
   ..duration = json['duration'] as String?
   ..blockedByUserId = json['blocked_by_user_id'] as String? ?? ''

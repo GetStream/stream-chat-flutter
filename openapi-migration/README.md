@@ -15,7 +15,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [01](01-foundation.md) | Foundation — `DefaultApi` wiring, `User` shape | — | — | ☐ |
 | [02](02-devices.md) | Devices | 0 | 3 | ☑ |
 | [03](03-user-groups.md) | User Groups | 8 | 8 | ☐ |
-| [04](04-roles-guest-and-app.md) | Roles, Guest & App Settings | 3 | 5 | ☐ |
+| [04](04-roles-guest-and-app.md) | Roles, Guest & App Settings | 2 | 5 | ☐ |
 | [05](05-polls.md) | Polls | 13 | 13 | ☐ |
 | [06](06-reminders.md) | Message Reminders | 4 | 4 | ☐ |
 | [07](07-threads-and-drafts.md) | Threads & Drafts | 7 | 7 | ☐ |
@@ -26,7 +26,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [12](12-uploads-cdn.md) | Uploads (CDN) | 8 | 8 | ☐ |
 | [13](13-push-preferences.md) | Push Preferences | 1 | 1 | ☐ |
 
-**Coverage:** 105 hand-written methods across 12 files, and all 128 generated operations, each claimed by exactly
+**Coverage:** 104 hand-written methods across 12 files, and all 129 generated operations, each claimed by exactly
 one group. Verified mechanically — see [Keeping this plan honest](#keeping-this-plan-honest).
 
 ## Goals
