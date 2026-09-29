@@ -20,6 +20,7 @@
 - `StreamImageCDN.resolveUrl` now leaves a URL that already asks for a specific size alone, rather than replacing it with the size the layout computed.
 - Removed the unused `shimmer` dependency; the skeleton loading widgets already use `stream_core_flutter`'s `StreamSkeletonLoading` and never depended on the `shimmer` package.
 - `StreamMessageComposer`'s top border now spans the full width, including under the side safe-area insets, and also shows above the no-permission message.
+- Custom `customAutocompleteTriggers` suggestions now span the composer's full width, so their content has to keep clear of the side safe-area insets itself.
 
 ⚠️ Deprecated
 
@@ -31,6 +32,7 @@
 - Fixed `StreamMessageListView`'s scroll-to-bottom button, floating date divider, unread indicator and empty, loading and error states ignoring the safe-area insets when `enableSafeArea` is on.
 - Fixed the attachment picker overflowing short screens, such as a phone in landscape; there it now takes the keyboard's height.
 - Fixed `StreamMessageListView`'s default loading, empty and error states overflowing when the list has little room, such as in landscape with the attachment picker open.
+- Fixed the composer's autocomplete suggestions stopping short of the screen edge under a side safe-area inset.
 - Fixed the file picker offering file types the Stream Dashboard doesn't allow; it now only offers the allowed file extensions.
 - Fixed `StreamAttachmentValidator` accepting or rejecting a file differently from the server when an extension list holds a compound entry like `.tar.gz`; it now compares only the last extension.
 - Fixed `StreamAttachmentHandler.pickFile` throwing on an empty selection; it now returns `null`.
