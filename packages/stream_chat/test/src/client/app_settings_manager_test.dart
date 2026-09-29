@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/client/app_settings_manager.dart';
 import 'package:stream_chat/src/repository/app_settings_repository.dart';
@@ -116,6 +118,23 @@ void main() {
     await manager.loadAppSettings();
 
     verify(repository.getAppSettings).called(2);
+  });
+
+  test('AppSettingsManager.loadAppSettings does not overwrite a refresh that finished first', () async {
+    final repository = MockAppSettingsRepository();
+    final manager = AppSettingsManager(repository);
+    final pendingLoad = Completer<Result<AppSettingsResponse>>();
+
+    when(repository.getAppSettings).thenAnswer((_) => pendingLoad.future);
+    final load = manager.loadAppSettings();
+
+    when(repository.getAppSettings).thenAnswer((_) async => Result.success(_response(name: 'refreshed')));
+    await manager.refresh();
+
+    pendingLoad.complete(Result.success(_response(name: 'stale')));
+    await load;
+
+    expect(manager.appSettings, _response(name: 'refreshed').app);
   });
 }
 

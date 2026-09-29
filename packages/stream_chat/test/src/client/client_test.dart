@@ -2690,12 +2690,12 @@ void main() {
       expect(client.appSettings.name, 'test-app');
     });
 
-    test('StreamChatClient.getAppSettings passes an unset size limit through as 0', () async {
+    test('StreamChatClient.getAppSettings uses the default size limit when none is configured', () async {
       when(defaultApi.getApp).thenAnswer((_) async => Result.success(fakeGetApplicationResponse()));
 
       final res = await client.getAppSettings();
 
-      expect(res.getOrNull()?.app.fileUploadConfig.sizeLimit, 0);
+      expect(res.getOrNull()?.app.fileUploadConfig.sizeLimit, UploadConfig.defaultSizeLimit);
     });
 
     group('`.channel`', () {

@@ -31,33 +31,25 @@ class _ChannelList extends State<ChannelList> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Created once: recreating them would refetch the list on every unrelated
+    // dependency change, such as a focus change when switching tabs.
+    if (_controllersAreInitialized) return;
     _streamChat = StreamChat.of(context);
     _initControllers();
     _controllersAreInitialized = true;
   }
 
   void _initControllers() {
-    // Preserve any active search query so recreating the controllers (e.g. on a
-    // dependency change) keeps the visible results in sync with the search field
-    // instead of leaving the UI in active-search mode with an empty query.
-    final searchQuery = _controller.text;
-
-    if (_controllersAreInitialized) {
-      _messageSearchListController.dispose();
-      _channelListController.dispose();
-    }
-
     _messageSearchListController = StreamMessageSearchListController(
       client: _streamChat.client,
       filter: .in_(ChannelFilterField.members, [_streamChat.currentUser!.id]),
       limit: 5,
-      searchQuery: searchQuery,
+      searchQuery: '',
       sort: [
         MessageSearchSort.desc(MessageSearchSortField.pinned),
         MessageSearchSort.asc(MessageSearchSortField.createdAt),
       ],
     );
-    if (searchQuery.isNotEmpty) _messageSearchListController.search(searchQuery);
     // The predefined filter is a saved query living on the demo Stream app, so
     // it 404s against any other backend. Anyone who pointed the app elsewhere
     // gets the equivalent client-side filter instead.

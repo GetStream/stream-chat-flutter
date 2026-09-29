@@ -7,7 +7,8 @@ import '../../core/models/upload_config.dart';
 extension FileUploadConfigMapper on api.FileUploadConfig {
   /// Converts this config into an [UploadConfig].
   UploadConfig toModel() => UploadConfig(
-    sizeLimit: sizeLimit,
+    // The backend sends `0` when no size limit is configured.
+    sizeLimit: sizeLimit > 0 ? sizeLimit : UploadConfig.defaultSizeLimit,
     allowedFileExtensions: allowedFileExtensions,
     blockedFileExtensions: blockedFileExtensions,
     allowedMimeTypes: allowedMimeTypes,
