@@ -49,7 +49,7 @@ class StreamThreadPage extends StatefulWidget {
 
   /// Whether the header shows a back button.
   ///
-  /// Defaults to `true`.
+  /// When `false`, [onBackPressed] is never called. Defaults to `true`.
   final bool automaticallyImplyLeading;
 
   /// Called when the header's back button is pressed.
