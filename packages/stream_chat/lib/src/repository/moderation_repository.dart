@@ -8,6 +8,7 @@ import '../core/models/response/flag_response.dart';
 import '../core/models/response/mute_response.dart';
 import '../core/models/response/unmute_response.dart';
 import 'mapper/moderation_mapper.dart';
+import 'mapper/result_mapper.dart';
 
 int? _inMinutesAtLeastOne(
   Duration? timeout,
@@ -62,21 +63,29 @@ class ModerationRepository {
   Future<Result<void>> muteChannel(
     String channelCid, {
     Duration? expiration,
-  }) => _api.muteChannel(
-    muteChannelRequest: api.MuteChannelRequest(
-      channelCids: [channelCid],
-      expiration: expiration?.inMilliseconds,
-    ),
-  );
+  }) async {
+    final result = await _api.muteChannel(
+      muteChannelRequest: api.MuteChannelRequest(
+        channelCids: [channelCid],
+        expiration: expiration?.inMilliseconds,
+      ),
+    );
+
+    return result.ignoreValue();
+  }
 
   /// Removes the current user's mute on the channel [channelCid].
   Future<Result<void>> unmuteChannel(
     String channelCid,
-  ) => _api.unmuteChannel(
-    unmuteChannelRequest: api.UnmuteChannelRequest(
-      channelCids: [channelCid],
-    ),
-  );
+  ) async {
+    final result = await _api.unmuteChannel(
+      unmuteChannelRequest: api.UnmuteChannelRequest(
+        channelCids: [channelCid],
+      ),
+    );
+
+    return result.ignoreValue();
+  }
 
   /// Bans [targetUserId].
   ///
@@ -91,7 +100,8 @@ class ModerationRepository {
   /// If [ipBan] is true, the address they connected from is banned as well.
   ///
   /// [deleteMessages] decides what happens to the messages they already
-  /// sent, and [reason] is recorded with the ban.
+  /// sent, which are left alone when it is omitted. [reason] is recorded
+  /// with the ban.
   Future<Result<void>> banUser(
     String targetUserId, {
     String? channelCid,
@@ -100,17 +110,21 @@ class ModerationRepository {
     bool? shadow,
     bool? ipBan,
     DeleteType? deleteMessages,
-  }) => _api.ban(
-    banRequest: api.BanRequest(
-      targetUserId: targetUserId,
-      channelCid: channelCid,
-      timeout: _inMinutesAtLeastOne(timeout),
-      reason: reason,
-      shadow: shadow,
-      ipBan: ipBan,
-      deleteMessages: deleteMessages?.toRequest(),
-    ),
-  );
+  }) async {
+    final result = await _api.ban(
+      banRequest: api.BanRequest(
+        targetUserId: targetUserId,
+        channelCid: channelCid,
+        timeout: _inMinutesAtLeastOne(timeout),
+        reason: reason,
+        shadow: shadow,
+        ipBan: ipBan,
+        deleteMessages: deleteMessages?.toRequest(),
+      ),
+    );
+
+    return result.ignoreValue();
+  }
 
   /// Removes the ban on [targetUserId].
   ///
@@ -120,10 +134,14 @@ class ModerationRepository {
   Future<Result<void>> unbanUser(
     String targetUserId, {
     String? channelCid,
-  }) => _api.unban(
-    targetUserId: targetUserId,
-    channelCid: channelCid,
-  );
+  }) async {
+    final result = await _api.unban(
+      targetUserId: targetUserId,
+      channelCid: channelCid,
+    );
+
+    return result.ignoreValue();
+  }
 
   /// Flags [messageId] for moderator review.
   ///

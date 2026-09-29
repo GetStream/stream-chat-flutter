@@ -82,7 +82,8 @@ class ModerationClient {
   /// If [ipBan] is true, the address they connected from is banned as well.
   ///
   /// [deleteMessages] decides what happens to the messages they already
-  /// sent, and [reason] is recorded with the ban.
+  /// sent, which are left alone when it is omitted. [reason] is recorded
+  /// with the ban.
   Future<Result<void>> banUser(
     String targetUserId, {
     String? channelCid,
