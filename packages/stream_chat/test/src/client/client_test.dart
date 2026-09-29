@@ -1159,7 +1159,6 @@ void main() {
     test('`.disconnectUser` should reset state and user', () async {
       expect(client.state.currentUser, isNotNull);
       expect(client.connectionStatus, ConnectionStatus.connected);
-      expect(client.appSettings.name, 'test-app');
 
       expectLater(
         // skipping initial connected value
@@ -1171,6 +1170,13 @@ void main() {
 
       expect(client.state.currentUser, isNull);
       expect(client.connectionStatus, ConnectionStatus.disconnected);
+    });
+
+    test('`.disconnectUser` resets appSettings to the default', () async {
+      expect(client.appSettings.name, 'test-app');
+
+      await client.disconnectUser(flushChatPersistence: true);
+
       expect(client.appSettings, const AppSettings());
     });
   });
@@ -2288,7 +2294,7 @@ void main() {
       final res = await client.getAppSettings();
       expect(
         res.getOrNull(),
-        const GetAppSettingsResponse(
+        const AppSettingsResponse(
           duration: '0.01ms',
           app: AppSettings(
             name: 'test-app',
@@ -2322,6 +2328,30 @@ void main() {
       final res = await client.getAppSettings();
 
       expect(res.exceptionOrNull(), error);
+    });
+
+    test('StreamChatClient.getAppSettings replaces appSettings on success', () async {
+      when(defaultApi.getApp).thenAnswer((_) async => Result.success(fakeGetApplicationResponse(name: 'fresh')));
+
+      await client.getAppSettings();
+
+      expect(client.appSettings.name, 'fresh');
+    });
+
+    test('StreamChatClient.getAppSettings keeps appSettings when it fails', () async {
+      when(defaultApi.getApp).thenAnswer((_) async => const Result.failure(StreamClientException(message: 'boom')));
+
+      await client.getAppSettings();
+
+      expect(client.appSettings.name, 'test-app');
+    });
+
+    test('StreamChatClient.getAppSettings passes an unset size limit through as 0', () async {
+      when(defaultApi.getApp).thenAnswer((_) async => Result.success(fakeGetApplicationResponse()));
+
+      final res = await client.getAppSettings();
+
+      expect(res.getOrNull()?.app.fileUploadConfig.sizeLimit, 0);
     });
 
     group('`.channel`', () {

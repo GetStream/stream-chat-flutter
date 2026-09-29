@@ -121,8 +121,8 @@ void main() {
 
 const _error = StreamClientException(message: 'boom');
 
-GetAppSettingsResponse _response({String name = 'test-app'}) {
-  return GetAppSettingsResponse(
+AppSettingsResponse _response({String name = 'test-app'}) {
+  return AppSettingsResponse(
     duration: '0.01ms',
     app: AppSettings(name: name),
   );

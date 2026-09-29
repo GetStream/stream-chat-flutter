@@ -251,18 +251,19 @@ GROUPS = [
               `pretext`). Adding them later is non-breaking. `Attachment.fromOGAttachment` is unchanged.
             - **`Action` is left alone.** `OGAttachmentResponse` carries no actions, so nothing here needs it; it is
               converted with its parent `Attachment` in [group 10](10-messages.md).
-            - **`AppSettings`, `UploadConfig` and `GetAppSettingsResponse` stay our public types, in their v10
-              shapes,** as plain classes with no JSON, mapped from the generated `AppResponseFields`,
-              `FileUploadConfig` and `GetApplicationResponse` in `lib/src/repository/mapper/app_settings_mapper.dart`.
-              `AppResponseFields.id` and `placement` are not exposed. This settles the group's open question.
-            - **`getAppSettings` answers the envelope,** `Result<GetAppSettingsResponse>`, where v10 answered the
+            - **`AppSettings` and `UploadConfig` stay our public types, in their v10 shapes,** as plain classes with
+              no JSON, and the envelope is `AppSettingsResponse`, renamed from v10's `GetAppSettingsResponse`. They
+              are mapped from the generated `AppResponseFields`, `FileUploadConfig` and `GetApplicationResponse` in
+              `lib/src/repository/mapper/app_settings_mapper.dart`. `AppResponseFields.id` and `placement` are not
+              exposed. This settles the group's open question.
+            - **`getAppSettings` answers the envelope,** `Result<AppSettingsResponse>`, where v10 answered the
               bare `AppSettings`. This is a break beyond the [sanctioned ones](README.md#domain-models), approved for
               this group so that every migrated read answers its envelope. `client.appSettings` stays a
               non-nullable `AppSettings` that reads `const AppSettings()` until the load `connectUser` starts
               succeeds.
-            - **The public names stay v10's.** Renaming them to the generated `getApp`, `GetApplicationResponse`
-              and `FileUploadConfig` was considered and rejected: each would be a rename break with no change in
-              behaviour.
+            - **The other public names stay v10's.** Renaming them to the generated `getApp`,
+              `GetApplicationResponse` and `FileUploadConfig` was considered and rejected: each would be a rename
+              break with no change in behaviour. Only the envelope drops its `Get` prefix.
             - **An unset size limit stays `0`.** The server reports one as `size_limit: 0`, and
               `UploadConfig.sizeLimit` passes it through as v10 did; `StreamAttachmentValidator` applies
               `UploadConfig.defaultSizeLimit` in that case. No `effectiveSizeLimit` getter was added.

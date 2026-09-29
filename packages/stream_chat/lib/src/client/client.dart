@@ -57,8 +57,8 @@ import '../core/models/push_preference.dart';
 import '../core/models/push_provider.dart';
 import '../core/models/reaction.dart';
 import '../core/models/response/add_user_group_members_response.dart';
+import '../core/models/response/app_settings_response.dart';
 import '../core/models/response/create_user_group_response.dart';
-import '../core/models/response/get_app_settings_response.dart';
 import '../core/models/response/get_user_group_response.dart';
 import '../core/models/response/list_devices_response.dart';
 import '../core/models/response/list_user_groups_response.dart';
@@ -2248,7 +2248,7 @@ class StreamChatClient {
   ///
   /// [connectUser] populates the cache automatically, so calling this is
   /// only needed to pick up changes made during an active session.
-  Future<Result<GetAppSettingsResponse>> getAppSettings() => _appSettingsManager.refresh();
+  Future<Result<AppSettingsResponse>> getAppSettings() => _appSettingsManager.refresh();
 
   /// Queries threads with the given [options] and [pagination] params.
   ///

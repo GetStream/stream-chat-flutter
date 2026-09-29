@@ -1,7 +1,7 @@
 import 'package:stream_core/stream_core.dart' show Failure, Result, StreamLogger, Success;
 
 import '../core/models/app_settings.dart';
-import '../core/models/response/get_app_settings_response.dart';
+import '../core/models/response/app_settings_response.dart';
 import '../repository/app_settings_repository.dart';
 
 /// {@template appSettingsManager}
@@ -52,7 +52,7 @@ class AppSettingsManager {
   ///
   /// The cached value is replaced only on success, so a failed refresh
   /// leaves it as it was.
-  Future<Result<GetAppSettingsResponse>> refresh() async {
+  Future<Result<AppSettingsResponse>> refresh() async {
     final result = await _repository.getAppSettings();
     if (result case Success(:final data)) _appSettings = data.app;
     return result;

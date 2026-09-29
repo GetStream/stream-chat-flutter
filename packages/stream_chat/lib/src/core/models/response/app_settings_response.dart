@@ -2,13 +2,13 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../app_settings.dart';
 
-part 'get_app_settings_response.freezed.dart';
+part 'app_settings_response.freezed.dart';
 
 /// The settings of the application, returned by [StreamChatClient.getAppSettings].
 @freezed
-class GetAppSettingsResponse with _$GetAppSettingsResponse {
-  /// Creates a new [GetAppSettingsResponse].
-  const GetAppSettingsResponse({
+class AppSettingsResponse with _$AppSettingsResponse {
+  /// Creates a new [AppSettingsResponse].
+  const AppSettingsResponse({
     required this.duration,
     required this.app,
   });

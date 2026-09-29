@@ -1,6 +1,6 @@
 import '../../../open_api/api.dart' as api;
 import '../../core/models/app_settings.dart';
-import '../../core/models/response/get_app_settings_response.dart';
+import '../../core/models/response/app_settings_response.dart';
 import '../../core/models/upload_config.dart';
 
 /// Maps a generated [api.FileUploadConfig] to an [UploadConfig].
@@ -27,10 +27,10 @@ extension AppResponseFieldsMapper on api.AppResponseFields {
   );
 }
 
-/// Maps a generated [api.GetApplicationResponse] to a [GetAppSettingsResponse].
+/// Maps a generated [api.GetApplicationResponse] to a [AppSettingsResponse].
 extension GetApplicationResponseMapper on api.GetApplicationResponse {
-  /// Converts this response into a [GetAppSettingsResponse].
-  GetAppSettingsResponse toModel() => GetAppSettingsResponse(
+  /// Converts this response into a [AppSettingsResponse].
+  AppSettingsResponse toModel() => AppSettingsResponse(
     duration: duration,
     app: app.toModel(),
   );

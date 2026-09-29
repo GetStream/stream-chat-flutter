@@ -62,10 +62,10 @@
 - `StreamChatClient.enrichUrl` returns a `Result<OGAttachmentResponse>` instead of throwing.
 - `OGAttachmentResponse` no longer decodes from JSON, is built through a const constructor, and its `duration` is a non-nullable `String`.
 - `StreamChatApi.general.enrichUrl` is removed; call `StreamChatClient.enrichUrl` instead.
-- `StreamChatClient.getAppSettings` returns a `Result<GetAppSettingsResponse>` instead of an `AppSettings`, and no longer throws.
-- `AppSettings`, `UploadConfig` and `GetAppSettingsResponse` no longer decode from JSON.
-- `GetAppSettingsResponse` is immutable, built through a const constructor, and its `duration` is a non-nullable `String`.
-- `GetAppSettingsResponse` compares by value and gains `copyWith`.
+- `StreamChatClient.getAppSettings` returns a `Result<AppSettingsResponse>` instead of an `AppSettings`, and no longer throws.
+- `GetAppSettingsResponse` is renamed `AppSettingsResponse`.
+- `AppSettings`, `UploadConfig` and `AppSettingsResponse` no longer decode from JSON.
+- `AppSettingsResponse` is immutable, built through a const constructor, compares by value, gains `copyWith`, and its `duration` is a non-nullable `String`.
 - `AppSettings` and `UploadConfig` no longer extend `Equatable`, so `props` is removed; they still compare by value and gain `copyWith`.
 - `StreamChatApi.general.getAppSettings` is removed; call `StreamChatClient.getAppSettings` instead.
 

@@ -180,9 +180,10 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `OGAttachmentResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
 | `OGAttachmentResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
 | `StreamChatApi.general.enrichUrl` | `StreamChatClient.enrichUrl` | `removed` | The endpoint moved to the generated client |
-| `StreamChatClient.getAppSettings` → `Future<AppSettings>` | `Future<Result<GetAppSettingsResponse>>` | `retyped` | Returns a `Result` instead of throwing, and answers the whole response: read the settings off `.app`. `client.appSettings` is unchanged |
+| `StreamChatClient.getAppSettings` → `Future<AppSettings>` | `Future<Result<AppSettingsResponse>>` | `retyped` | Returns a `Result` instead of throwing, and answers the whole response: read the settings off `.app`. `client.appSettings` is unchanged |
+| `GetAppSettingsResponse` | `AppSettingsResponse` | `renamed` | Same fields: `duration` and `app` |
 | `AppSettings.fromJson`, `UploadConfig.fromJson` | — | `removed` | The models are plain classes; construct them directly |
-| `GetAppSettingsResponse.fromJson`, `GetAppSettingsResponse()..app = …` | `GetAppSettingsResponse(duration: …, app: …)` | `retyped` | The response is a plain class with a const constructor and final fields |
+| `GetAppSettingsResponse.fromJson`, `GetAppSettingsResponse()..app = …` | `AppSettingsResponse(duration: …, app: …)` | `retyped` | The response is a plain class with a const constructor and final fields |
 | `GetAppSettingsResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
 | `GetAppSettingsResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
 | `AppSettings extends Equatable` / `UploadConfig extends Equatable`, `props` | `AppSettings` / `UploadConfig` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and neither is an `Equatable` any more |
@@ -599,12 +600,14 @@ result.fold(
 );
 ```
 
-**`AppSettings`, `UploadConfig` and `GetAppSettingsResponse` no longer decode JSON.** All three are plain classes;
-build them with their constructors — `GetAppSettingsResponse(duration: '0ms', app: settings)` where v10 wrote
+**`GetAppSettingsResponse` is renamed `AppSettingsResponse`,** with the same `duration` and `app` fields.
+
+**`AppSettings`, `UploadConfig` and `AppSettingsResponse` no longer decode JSON.** All three are plain classes;
+build them with their constructors — `AppSettingsResponse(duration: '0ms', app: settings)` where v10 wrote
 `GetAppSettingsResponse()..app = settings`. `const AppSettings()`, `const UploadConfig()` and
 `UploadConfig.defaultSizeLimit` are unchanged.
 
-**`GetAppSettingsResponse.duration` is a non-nullable `String`**, where v10 typed it `String?`.
+**`AppSettingsResponse.duration` is a non-nullable `String`**, where v10 typed it `String?`.
 
 **`AppSettings` and `UploadConfig` no longer extend `Equatable`.** They still compare by value, `props` is
 gone, and both gain `copyWith`.
