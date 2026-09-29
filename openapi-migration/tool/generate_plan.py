@@ -217,13 +217,10 @@ GROUPS = [
     ),
     dict(
         num='04', slug='roles-guest-and-app', title='Roles, Guest & App Settings',
-        hand=['guest_api.dart', 'general_api.dart::getAppSettings'],
+        hand=['guest_api.dart'],
         match=owns('/api/v2/roles', '/api/v2/guest', '/api/v2/app', '/api/v2/og', '/api/v2/longpoll'),
         goal='Sweep up the singletons — one-method families that share no state and can land in one PR.',
-        decisions=[
-            '`AppSettings` is public and hand-shaped; the generated `AppResponseFields` is the wire shape. Keep '
-            'ours unless the generated one is genuinely better.',
-        ],
+        decisions=[],
         taken=textwrap.dedent("""\
             - **`Role` and `SearchRolesResponse` stay our public types, in their v10 shapes,** as plain classes
               with no JSON, mapped from the generated types in `lib/src/repository/mapper/roles_mapper.dart`. The
@@ -255,11 +252,26 @@ GROUPS = [
               `pretext`). Adding them later is non-breaking. `Attachment.fromOGAttachment` is unchanged.
             - **`Action` is left alone.** `OGAttachmentResponse` carries no actions, so nothing here needs it; it is
               converted with its parent `Attachment` in [group 10](10-messages.md).
+            - **`AppSettings` and `UploadConfig` stay our public types, in their v10 shapes,** as plain classes with
+              no JSON, and the envelope is `AppSettingsResponse`, renamed from v10's `GetAppSettingsResponse`. They
+              are mapped from the generated `AppResponseFields`, `FileUploadConfig` and `GetApplicationResponse` in
+              `lib/src/repository/mapper/app_settings_mapper.dart`. `AppResponseFields.id` and `placement` are not
+              exposed. This settles the group's open question.
+            - **`getAppSettings` answers the envelope,** `Result<AppSettingsResponse>`, where v10 answered the
+              bare `AppSettings`. This is a break beyond the [sanctioned ones](README.md#domain-models), approved for
+              this group so that every migrated read answers its envelope. `client.appSettings` stays a
+              non-nullable `AppSettings` that reads `const AppSettings()` until the load `connectUser` starts
+              succeeds.
+            - **The other public names stay v10's.** Renaming them to the generated `getApp`,
+              `GetApplicationResponse` and `FileUploadConfig` was considered and rejected: each would be a rename
+              break with no change in behaviour. Only the envelope drops its `Get` prefix.
+            - **An unset size limit stays `0`.** The server reports one as `size_limit: 0`, and
+              `UploadConfig.sizeLimit` passes it through as v10 did; `StreamAttachmentValidator` applies
+              `UploadConfig.defaultSizeLimit` in that case. No `effectiveSizeLimit` getter was added.
             """),
         risks=[
-            '`general_api.dart` is split across three groups — only `getAppSettings` is left here. '
-            '`sync` and `queryMembers` go to group 11, `searchMessages` to group 10. Do not migrate the file as a '
-            'unit.',
+            '`general_api.dart` has no methods left in this group — `sync` and `queryMembers` go to group 11, '
+            '`searchMessages` to group 10. Do not migrate the file as a unit.',
         ],
     ),
     dict(

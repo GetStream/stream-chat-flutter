@@ -28,6 +28,7 @@ onto Stream's OpenAPI-generated API client.
     - [Roles](#roles)
     - [Devices](#devices)
     - [Moderation](#moderation)
+    - [App Settings](#app-settings)
     - [User Groups](#user-groups)
     - [Link Previews](#link-previews)
 - [Migration Checklist](#migration-checklist)
@@ -72,6 +73,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | --- | --- |
 | [**Error Handling**](#error-handling) | Failures carry `stream_core`'s sealed `StreamException` family instead of `StreamChatNetworkError`; `ChatErrorCode` → `StreamErrorCode`. API calls will return `Result<T>` rather than throwing, endpoint by endpoint |
 | [**Moderation**](#moderation) | Muting, banning and flagging return a `Result` and call the moderation v2 API; `banUser`'s options map becomes named parameters; `unflagMessage`, `unflagUser` and `removeShadowBan` are removed |
+| [**App Settings**](#app-settings) | `getAppSettings` returns a `Result<AppSettingsResponse>` instead of throwing; `GetAppSettingsResponse` is renamed `AppSettingsResponse` |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -198,6 +200,14 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `OGAttachmentResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
 | `OGAttachmentResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
 | `StreamChatApi.general.enrichUrl` | `StreamChatClient.enrichUrl` | `removed` | The endpoint moved to the generated client |
+| `StreamChatClient.getAppSettings` → `Future<AppSettings>` | `Future<Result<AppSettingsResponse>>` | `retyped` | Returns a `Result` instead of throwing, and answers the whole response: read the settings off `.app`. `client.appSettings` is unchanged |
+| `GetAppSettingsResponse` | `AppSettingsResponse` | `renamed` | Same fields: `duration` and `app` |
+| `AppSettings.fromJson`, `UploadConfig.fromJson` | — | `removed` | The models are plain classes; construct them directly |
+| `GetAppSettingsResponse.fromJson`, `GetAppSettingsResponse()..app = …` | `AppSettingsResponse(duration: …, app: …)` | `retyped` | The response is a plain class with a const constructor and final fields |
+| `GetAppSettingsResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| `GetAppSettingsResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
+| `AppSettings extends Equatable` / `UploadConfig extends Equatable`, `props` | `AppSettings` / `UploadConfig` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and neither is an `Equatable` any more |
+| `StreamChatApi.general.getAppSettings()` | `StreamChatClient.getAppSettings()` | `removed` | The call moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -664,6 +674,41 @@ and `queryBannedUsers` — keep their place, because they are scoped to that cha
 only moderation call that answers with a model, and the `User` and `ChannelModel` shapes it embeds
 are decided by later groups in this migration; it moves when they do. See
 [Endpoints that still throw](#endpoints-that-still-throw).
+
+### App Settings
+
+**`getAppSettings` returns a `Result` instead of throwing, and answers the whole response** rather than the
+settings alone, so read them off `.app`. `AppSettings` and `UploadConfig` keep their fields and defaults, and
+`client.appSettings` — the copy `connectUser` loads — is unchanged.
+
+```dart
+// v10
+try {
+  final settings = await client.getAppSettings();
+  useSettings(settings);
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await client.getAppSettings();
+result.fold(
+  onSuccess: (response) => useSettings(response.app),
+  onFailure: (error, _) => report(error),
+);
+```
+
+**`GetAppSettingsResponse` is renamed `AppSettingsResponse`,** with the same `duration` and `app` fields.
+
+**`AppSettings`, `UploadConfig` and `AppSettingsResponse` no longer decode JSON.** All three are plain classes;
+build them with their constructors — `AppSettingsResponse(duration: '0ms', app: settings)` where v10 wrote
+`GetAppSettingsResponse()..app = settings`. `const AppSettings()`, `const UploadConfig()` and
+`UploadConfig.defaultSizeLimit` are unchanged.
+
+**`AppSettingsResponse.duration` is a non-nullable `String`**, where v10 typed it `String?`.
+
+**`AppSettings` and `UploadConfig` no longer extend `Equatable`.** They still compare by value, `props` is
+gone, and both gain `copyWith`.
 
 ---
 

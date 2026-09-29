@@ -36,7 +36,6 @@ import '../core/api/requests.dart';
 import '../core/api/responses.dart';
 import '../core/api/stream_chat_api.dart';
 import '../core/error/stream_chat_exception.dart';
-import '../core/http/app_settings_manager.dart';
 import '../core/http/interceptor/additional_headers_interceptor.dart';
 import '../core/http/stream_http_client.dart';
 import '../core/models/app_settings.dart';
@@ -58,6 +57,7 @@ import '../core/models/push_preference.dart';
 import '../core/models/push_provider.dart';
 import '../core/models/reaction.dart';
 import '../core/models/response/add_user_group_members_response.dart';
+import '../core/models/response/app_settings_response.dart';
 import '../core/models/response/create_user_group_response.dart';
 import '../core/models/response/get_user_group_response.dart';
 import '../core/models/response/list_devices_response.dart';
@@ -76,6 +76,7 @@ import '../core/util/immutable_collection_subjects.dart';
 import '../core/util/utils.dart';
 import '../db/chat_persistence_client.dart';
 import '../event_type.dart';
+import '../repository/app_settings_repository.dart';
 import '../repository/devices_repository.dart';
 import '../repository/general_repository.dart';
 import '../repository/moderation_repository.dart';
@@ -87,6 +88,7 @@ import '../ws/connection_status.dart';
 import '../ws/events/event.dart';
 import '../ws/events/event_resolvers.dart' as event_resolvers;
 import '../ws/events/events.dart';
+import 'app_settings_manager.dart';
 import 'channel/channel.dart';
 import 'channel_delivery_reporter.dart';
 import 'live_location_expiration_scheduler.dart';
@@ -183,6 +185,7 @@ class StreamChatClient {
     _userGroupsRepository = UserGroupsRepository(api);
     _generalRepository = GeneralRepository(api);
     _moderationRepository = ModerationRepository(api);
+    _appSettingsManager = AppSettingsManager(AppSettingsRepository(api));
 
     moderation = ModerationClient(_moderationRepository);
 
@@ -224,6 +227,7 @@ class StreamChatClient {
   late final UserGroupsRepository _userGroupsRepository;
   late final GeneralRepository _generalRepository;
   late final ModerationRepository _moderationRepository;
+  late final AppSettingsManager _appSettingsManager;
 
   /// Muting, banning and flagging, for the connected user.
   late final ModerationClient moderation;
@@ -243,7 +247,6 @@ class StreamChatClient {
   late ClientState state;
 
   final _tokenManager = TokenManager.unconfigured();
-  late final _appSettingsManager = AppSettingsManager(_chatApi.general);
   static final _systemEnvironmentManager = SystemEnvironmentManager(
     environment: SystemEnvironment(
       sdkName: 'stream-chat',
@@ -2168,13 +2171,13 @@ class StreamChatClient {
   /// as a failure.
   Future<Result<OGAttachmentResponse>> enrichUrl(String url) => _generalRepository.enrichUrl(url);
 
-  /// Re-fetches the [AppSettings] and updates [appSettings].
+  /// Re-fetches the [AppSettings].
+  ///
+  /// [appSettings] is replaced on success and left as it was on failure.
   ///
   /// [connectUser] populates the cache automatically, so calling this is
   /// only needed to pick up changes made during an active session.
-  ///
-  /// Returns the newly fetched value, or throws when the request fails.
-  Future<AppSettings> getAppSettings() => _appSettingsManager.refresh();
+  Future<Result<AppSettingsResponse>> getAppSettings() => _appSettingsManager.refresh();
 
   /// Queries threads with the given [options] and [pagination] params.
   ///
