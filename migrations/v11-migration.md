@@ -160,10 +160,10 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamChatClient.searchRoles` → `Future<SearchRolesResponse>` | `Future<Result<SearchRolesResponse>>` | `retyped` | Returns a `Result` instead of throwing |
 | `StreamChatClient.addDevice` / `removeDevice` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing, and carries no value on success |
 | `StreamChatClient.getDevices` → `Future<ListDevicesResponse>` | `Future<Result<ListDevicesResponse>>` | `retyped` | Returns a `Result` instead of throwing |
-| `StreamChatClient.muteUser` → `Future<EmptyResponse>` | `Future<Result<MuteResponse>>` | `retyped` | Returns a `Result` instead of throwing. `MuteResponse.nonExistingUsers` names the ids that matched no user |
+| `StreamChatClient.muteUser` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing, and carries no value |
 | — | `muteUser(timeout:)` | `added` | Expires the mute after that long. v10 took only the user id |
-| — | `moderation.muteUsers` / `unmuteUsers` | `added` | Mute or unmute several users in one call. The response names the ids that matched no user |
-| `StreamChatClient.unmuteUser` → `Future<EmptyResponse>` | `Future<Result<UnmuteResponse>>` | `retyped` | Same, with the same `nonExistingUsers` |
+| — | `moderation.muteUsers` / `unmuteUsers` | `added` | Mute or unmute several users in one call. `MuteUsersResponse.nonExistingUsers` names the ids that matched no user; the single-id methods carry no value, because a call where no id matches fails instead |
+| `StreamChatClient.unmuteUser` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Same |
 | `StreamChatClient.muteChannel` / `unmuteChannel` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing, and carries no value on success |
 | `StreamChatClient.flagMessage` / `flagUser` → `Future<EmptyResponse>` | `Future<Result<FlagResponse>>` | `retyped` | Plus optional `reason` and `custom` arguments. `FlagResponse.itemId` identifies the review queue item |
 | `StreamChatClient.banUser(id, Map options)` | `banUser(id, {channelCid, timeout, reason, shadow, ipBan, deleteMessages})` | `retyped` | Named parameters mirroring the endpoint's options. `timeout` is a `Duration` applied with minute granularity |
@@ -173,7 +173,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamChatClient.unflagMessage` / `unflagUser` | — | `removed` | `POST /moderation/unflag` has no v2 endpoint and the v1 one removed no flag |
 | `Channel.banMember(id, Map options)` / `shadowBan(id, Map options)` | `banMember(id, {timeout, reason, shadow, ipBan, deleteMessages})` / `shadowBan(id, {…})` | `retyped` | The channel supplies its own `channelCid`; the `type` + `id` pair it used to send is deprecated server-side |
 | `Channel.mute` / `unmute` / `unbanMember` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing |
-| — | `MuteResponse` / `UnmuteResponse` / `FlagResponse` | `added` | What the mute, unmute and flag calls answer with |
+| — | `MuteUsersResponse` / `UnmuteUsersResponse` / `FlagResponse` | `added` | What the mute, unmute and flag calls answer with |
 | — | `DeleteType` | `added` | Extension type over `String` with `soft` / `pruning` / `hard`, for `banUser(deleteMessages:)`. A value it does not name still carries: `DeleteType('...')` |
 | `StreamChatClient.muteUser` / `unmuteUser` / `muteChannel` / `unmuteChannel` / `banUser` / `unbanUser` / `shadowBan` / `flagMessage` / `flagUser` | `StreamChatClient.moderation.<same name>` | `moved` | Grouped onto a `ModerationClient`. `Channel`'s moderation methods keep their place |
 | `Device.fromJson` / `toJson`, `Role.fromJson` | — | `removed` | The models are plain classes; construct them directly |

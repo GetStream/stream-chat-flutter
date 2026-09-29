@@ -46,6 +46,7 @@
 
 - Every other group depends on the `User` decision.
 - User data arrives over the WebSocket on nearly every event.
+- Landing `UserResponse` -> `User` unblocks the two fields [08](08-moderation-and-blocklists.md) had to drop from `MuteUsersResponse`: the `mutes` the call created and the `ownUser` it left behind. Adding them is additive for anyone reading the response, so revisit them here rather than leaving them dropped for good.
 
 ## Definition of done
 

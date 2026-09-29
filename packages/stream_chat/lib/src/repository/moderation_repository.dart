@@ -5,8 +5,8 @@ import 'package:stream_core/stream_core.dart' show PatternMatching, Result;
 import '../../open_api/api.dart' as api;
 import '../core/models/delete_type.dart';
 import '../core/models/response/flag_response.dart';
-import '../core/models/response/mute_response.dart';
-import '../core/models/response/unmute_response.dart';
+import '../core/models/response/mute_users_response.dart';
+import '../core/models/response/unmute_users_response.dart';
 import 'mapper/moderation_mapper.dart';
 import 'mapper/result_mapper.dart';
 
@@ -27,7 +27,9 @@ class ModerationRepository {
   /// long, applied in whole minutes and never less than one.
   ///
   /// At least one id is required.
-  Future<Result<MuteResponse>> muteUsers(
+  ///
+  /// Returns the ids among [userIds] that matched no user.
+  Future<Result<MuteUsersResponse>> muteUsers(
     List<String> userIds, {
     Duration? timeout,
   }) async {
@@ -44,7 +46,9 @@ class ModerationRepository {
   /// Removes the current user's mute on every id in [userIds].
   ///
   /// At least one id is required.
-  Future<Result<UnmuteResponse>> unmuteUsers(
+  ///
+  /// Returns the ids among [userIds] that matched no user.
+  Future<Result<UnmuteUsersResponse>> unmuteUsers(
     List<String> userIds,
   ) async {
     final result = await _api.unmute(
@@ -146,6 +150,8 @@ class ModerationRepository {
   /// Flags [messageId] for moderator review.
   ///
   /// [reason] and [custom] are recorded with the flag.
+  ///
+  /// Returns the review item the flag created.
   Future<Result<FlagResponse>> flagMessage(
     String messageId, {
     String? reason,
@@ -166,6 +172,8 @@ class ModerationRepository {
   /// Flags [userId] for moderator review.
   ///
   /// [reason] and [custom] are recorded with the flag.
+  ///
+  /// Returns the review item the flag created.
   Future<Result<FlagResponse>> flagUser(
     String userId, {
     String? reason,

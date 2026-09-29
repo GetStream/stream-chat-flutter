@@ -23,18 +23,16 @@ void main() {
     client = StreamChatClient('test-api-key', defaultApi: defaultApi);
   });
 
-  test('StreamChatClient.moderation.muteUser sends the user id and returns the mute', () async {
+  test('StreamChatClient.moderation.muteUser sends the user id and returns a success', () async {
     const request = api.MuteRequest(targetIds: ['test-user-id']);
 
     when(() => defaultApi.mute(muteRequest: request)).thenAnswer(
-      (_) async => const Result.success(
-        api.MuteResponse(duration: '0.01ms', nonExistingUsers: ['ghost']),
-      ),
+      (_) async => const Result.success(api.MuteResponse(duration: '0.01ms')),
     );
 
     final res = await client.moderation.muteUser('test-user-id');
 
-    expect(res.getOrNull(), const MuteResponse(duration: '0.01ms', nonExistingUsers: ['ghost']));
+    expect(res.isSuccess, isTrue);
     verify(() => defaultApi.mute(muteRequest: request)).called(1);
     verifyNoMoreInteractions(defaultApi);
   });
@@ -130,18 +128,16 @@ void main() {
     expect(res.exceptionOrNull(), error);
   });
 
-  test('StreamChatClient.moderation.unmuteUser sends the user id and returns the unmute', () async {
+  test('StreamChatClient.moderation.unmuteUser sends the user id and returns a success', () async {
     const request = api.UnmuteRequest(targetIds: ['test-user-id']);
 
     when(() => defaultApi.unmute(unmuteRequest: request)).thenAnswer(
-      (_) async => const Result.success(
-        api.UnmuteResponse(duration: '0.01ms', nonExistingUsers: ['ghost']),
-      ),
+      (_) async => const Result.success(api.UnmuteResponse(duration: '0.01ms')),
     );
 
     final res = await client.moderation.unmuteUser('test-user-id');
 
-    expect(res.getOrNull(), const UnmuteResponse(duration: '0.01ms', nonExistingUsers: ['ghost']));
+    expect(res.isSuccess, isTrue);
     verify(() => defaultApi.unmute(unmuteRequest: request)).called(1);
     verifyNoMoreInteractions(defaultApi);
   });
@@ -162,12 +158,14 @@ void main() {
     const request = api.UnmuteRequest(targetIds: ['jane', 'john']);
 
     when(() => defaultApi.unmute(unmuteRequest: request)).thenAnswer(
-      (_) async => const Result.success(api.UnmuteResponse(duration: '0.01ms')),
+      (_) async => const Result.success(
+        api.UnmuteResponse(duration: '0.01ms', nonExistingUsers: ['john']),
+      ),
     );
 
     final res = await client.moderation.unmuteUsers(['jane', 'john']);
 
-    expect(res.isSuccess, isTrue);
+    expect(res.getOrNull()?.nonExistingUsers, ['john']);
     verify(() => defaultApi.unmute(unmuteRequest: request)).called(1);
     verifyNoMoreInteractions(defaultApi);
   });

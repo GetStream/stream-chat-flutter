@@ -1,22 +1,22 @@
 import '../../../open_api/api.dart' as api;
 import '../../core/models/delete_type.dart';
 import '../../core/models/response/flag_response.dart';
-import '../../core/models/response/mute_response.dart';
-import '../../core/models/response/unmute_response.dart';
+import '../../core/models/response/mute_users_response.dart';
+import '../../core/models/response/unmute_users_response.dart';
 
-/// Maps a generated [api.MuteResponse] to a [MuteResponse].
+/// Maps a generated [api.MuteResponse] to a [MuteUsersResponse].
 extension MuteResponseMapper on api.MuteResponse {
-  /// Converts this response into a [MuteResponse].
-  MuteResponse toModel() => MuteResponse(
+  /// Converts this response into a [MuteUsersResponse].
+  MuteUsersResponse toModel() => MuteUsersResponse(
     duration: duration,
     nonExistingUsers: nonExistingUsers ?? const [],
   );
 }
 
-/// Maps a generated [api.UnmuteResponse] to an [UnmuteResponse].
+/// Maps a generated [api.UnmuteResponse] to an [UnmuteUsersResponse].
 extension UnmuteResponseMapper on api.UnmuteResponse {
-  /// Converts this response into an [UnmuteResponse].
-  UnmuteResponse toModel() => UnmuteResponse(
+  /// Converts this response into an [UnmuteUsersResponse].
+  UnmuteUsersResponse toModel() => UnmuteUsersResponse(
     duration: duration,
     nonExistingUsers: nonExistingUsers ?? const [],
   );

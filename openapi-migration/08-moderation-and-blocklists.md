@@ -132,6 +132,14 @@
   It is breaking rather than a fix: the controller is subclassable, and an override declared
   `Future<void>` no longer satisfies the base.
 
+- **`nonExistingUsers` is on the plural methods only.** The handler answers with the ids that
+  matched no user, but only ever some of them: if none match it fails instead
+  (`lib/moderation/controller/mute.go:106`). A single-id call therefore either succeeds with an
+  empty list or fails, so `muteUser` and `unmuteUser` return `Result<void>` and only `muteUsers`
+  and `unmuteUsers` answer with the model. Swift draws the same line — its singular calls return
+  nothing and its plural ones return a response — and its demo app renders the field after a
+  batch mute, so this is a field with a demonstrated consumer rather than one exposed on spec.
+
 - **Users are batched, channels are not.** `muteUsers` and `unmuteUsers` take a list, because
   the endpoints have always been batch endpoints — `target_ids` is a list validated
   `required,max=1000` — and because the response names the ids that matched no user, which is only

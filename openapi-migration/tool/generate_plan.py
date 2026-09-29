@@ -395,6 +395,14 @@ GROUPS = [
               It is breaking rather than a fix: the controller is subclassable, and an override declared
               `Future<void>` no longer satisfies the base.
 
+            - **`nonExistingUsers` is on the plural methods only.** The handler answers with the ids that
+              matched no user, but only ever some of them: if none match it fails instead
+              (`lib/moderation/controller/mute.go:106`). A single-id call therefore either succeeds with an
+              empty list or fails, so `muteUser` and `unmuteUser` return `Result<void>` and only `muteUsers`
+              and `unmuteUsers` answer with the model. Swift draws the same line — its singular calls return
+              nothing and its plural ones return a response — and its demo app renders the field after a
+              batch mute, so this is a field with a demonstrated consumer rather than one exposed on spec.
+
             - **Users are batched, channels are not.** `muteUsers` and `unmuteUsers` take a list, because
               the endpoints have always been batch endpoints — `target_ids` is a list validated
               `required,max=1000` — and because the response names the ids that matched no user, which is only
@@ -455,6 +463,10 @@ GROUPS = [
         risks=[
             'Every other group depends on the `User` decision.',
             'User data arrives over the WebSocket on nearly every event.',
+            'Landing `UserResponse` -> `User` unblocks the two fields [08](08-moderation-and-blocklists.md) '
+            'had to drop from `MuteUsersResponse`: the `mutes` the call created and the `ownUser` it left '
+            'behind. Adding them is additive for anyone reading the response, so revisit them here rather '
+            'than leaving them dropped for good.',
         ],
         done=DONE + (
             '- [ ] Temporary adapters owned by this group (`DeviceV1JsonConverter`) are deleted and removed from\n'
@@ -515,6 +527,12 @@ GROUPS = [
             '`queryChannels` drives the channel list controllers and the offline cache; a shape change here is '
             'felt everywhere.',
             'Channel `custom`/`extraData` promotion, same class of problem as messages.',
+            'Landing `ChannelResponse` -> `ChannelModel` is the last thing blocking '
+            '[08](08-moderation-and-blocklists.md)\'s `muteChannel`, which drops `channelMute`, `channelMutes` '
+            'and `ownUser` because the generated `ChannelMute` carries a `ChannelResponse?` and a '
+            '`UserResponse?` where ours needs a non-nullable `ChannelModel` and `User`. It needs 09 as well. '
+            'Decide the null case there too — ours are non-nullable, the generated ones are not, the same '
+            'question [14](14-banned-users.md) records for `BanResponse.user`.',
         ],
     ),
     dict(

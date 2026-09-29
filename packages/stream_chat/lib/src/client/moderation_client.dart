@@ -3,8 +3,9 @@ import 'package:stream_core/stream_core.dart' show Result;
 
 import '../core/models/delete_type.dart';
 import '../core/models/response/flag_response.dart';
-import '../core/models/response/mute_response.dart';
-import '../core/models/response/unmute_response.dart';
+import '../core/models/response/mute_users_response.dart';
+import '../core/models/response/unmute_users_response.dart';
+import '../repository/mapper/result_mapper.dart';
 import '../repository/moderation_repository.dart';
 
 /// Muting, banning and flagging, for the connected user.
@@ -27,10 +28,13 @@ class ModerationClient {
   ///
   /// The mute lasts until it is removed. A [timeout] expires it after that
   /// long, applied in whole minutes and never less than one.
-  Future<Result<MuteResponse>> muteUser(
+  Future<Result<void>> muteUser(
     String userId, {
     Duration? timeout,
-  }) => muteUsers([userId], timeout: timeout);
+  }) async {
+    final result = await muteUsers([userId], timeout: timeout);
+    return result.ignoreValue();
+  }
 
   /// Mutes every id in [userIds] for the current user.
   ///
@@ -38,20 +42,27 @@ class ModerationClient {
   /// long, applied in whole minutes and never less than one.
   ///
   /// At least one id is required.
-  Future<Result<MuteResponse>> muteUsers(
+  ///
+  /// Returns the ids among [userIds] that matched no user.
+  Future<Result<MuteUsersResponse>> muteUsers(
     List<String> userIds, {
     Duration? timeout,
   }) => _repository.muteUsers(userIds, timeout: timeout);
 
   /// Removes the current user's mute on [userId].
-  Future<Result<UnmuteResponse>> unmuteUser(
+  Future<Result<void>> unmuteUser(
     String userId,
-  ) => unmuteUsers([userId]);
+  ) async {
+    final result = await unmuteUsers([userId]);
+    return result.ignoreValue();
+  }
 
   /// Removes the current user's mute on every id in [userIds].
   ///
   /// At least one id is required.
-  Future<Result<UnmuteResponse>> unmuteUsers(
+  ///
+  /// Returns the ids among [userIds] that matched no user.
+  Future<Result<UnmuteUsersResponse>> unmuteUsers(
     List<String> userIds,
   ) => _repository.unmuteUsers(userIds);
 
@@ -141,6 +152,8 @@ class ModerationClient {
   /// Flags [messageId] for moderator review.
   ///
   /// [reason] and [custom] are recorded with the flag.
+  ///
+  /// Returns the review item the flag created.
   Future<Result<FlagResponse>> flagMessage(
     String messageId, {
     String? reason,
@@ -150,6 +163,8 @@ class ModerationClient {
   /// Flags [userId] for moderator review.
   ///
   /// [reason] and [custom] are recorded with the flag.
+  ///
+  /// Returns the review item the flag created.
   Future<Result<FlagResponse>> flagUser(
     String userId, {
     String? reason,
