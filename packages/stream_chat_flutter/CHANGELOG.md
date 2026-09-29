@@ -31,6 +31,7 @@
 🐞 Fixed
 
 - Fixed `StreamThreadListTile` overflowing when narrow; its timestamp now truncates instead.
+- Fixed `StreamMessageItem`'s actions modal throwing when the message leaves the screen while the modal is open.
 - Fixed `StreamMessageComposer` and its attachment picker running under the left and right safe-area insets while the picker is open.
 - Fixed `StreamMessageListView`'s scroll-to-bottom button, floating date divider, unread indicator and empty, loading and error states ignoring the safe-area insets when `enableSafeArea` is on.
 - Fixed the attachment picker overflowing short screens, such as a phone in landscape.
