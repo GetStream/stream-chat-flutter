@@ -48,6 +48,9 @@ final appRoutes = [
               }
 
               return StreamChannel(
+                // Opening another channel or thread in place builds a fresh
+                // page, so no state such as the composer's text carries over.
+                key: ValueKey((channel.cid, parentMessage?.id)),
                 channel: channel,
                 initialMessageId: messageId,
                 openAtFirstUnread: false,
