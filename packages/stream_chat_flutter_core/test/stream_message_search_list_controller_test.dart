@@ -12,7 +12,7 @@ void main() {
   final client = MockClient();
 
   setUpAll(() {
-    registerFallbackValue(Filter.equal('cid', 'messaging:123'));
+    registerFallbackValue(ChannelFilter.equal(ChannelFilterField.cid, 'messaging:123'));
   });
 
   tearDown(() {
@@ -28,7 +28,7 @@ void main() {
   StreamMessageSearchListController buildController() {
     return StreamMessageSearchListController(
       client: client,
-      filter: Filter.in_('members', const ['user-id']),
+      filter: ChannelFilter.in_(ChannelFilterField.members, const ['user-id']),
       searchQuery: '',
     );
   }
@@ -60,7 +60,7 @@ void main() {
         expect(usedFilter, isNull);
 
         async.elapse(const Duration(milliseconds: 1));
-        expect(usedFilter, Filter.autoComplete('text', 'abc'));
+        expect(usedFilter?.toJson(), MessageSearchFilter.autoComplete(MessageSearchFilterField.text, 'abc').toJson());
       });
     });
 
@@ -121,7 +121,7 @@ void main() {
         final controller = buildController();
         addTearDown(controller.dispose);
 
-        final filter = Filter.autoComplete('text', 'abc');
+        final filter = MessageSearchFilter.autoComplete(MessageSearchFilterField.text, 'abc');
         controller.searchWithFilter(filter);
         async.elapse(const Duration(milliseconds: 300));
 

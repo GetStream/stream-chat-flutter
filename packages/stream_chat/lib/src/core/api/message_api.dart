@@ -3,12 +3,10 @@ import 'dart:convert';
 import '../http/stream_http_client.dart';
 import '../models/draft.dart';
 import '../models/draft_message.dart';
-import '../models/filter.dart';
 import '../models/message.dart';
 import '../models/reaction.dart';
 import 'requests.dart';
 import 'responses.dart';
-import 'sort_order.dart';
 
 /// Defines the api dedicated to messages operations
 class MessageApi {
@@ -97,8 +95,8 @@ class MessageApi {
   ///
   /// Returns a [QueryDraftsResponse] containing the list of draft.
   Future<QueryDraftsResponse> queryDrafts({
-    Filter? filter,
-    SortOrder<Draft>? sort,
+    DraftFilter? filter,
+    List<DraftSort>? sort,
     PaginationParams? pagination,
   }) async {
     final response = await _client.post(
@@ -264,8 +262,8 @@ class MessageApi {
   /// user ID, or creation date, sorting, and cursor-based pagination.
   Future<QueryReactionsResponse> queryReactions(
     String messageId, {
-    Filter? filter,
-    SortOrder<Reaction>? sort,
+    ReactionFilter? filter,
+    List<ReactionSort>? sort,
     PaginationParams? pagination,
   }) async {
     final response = await _client.post(

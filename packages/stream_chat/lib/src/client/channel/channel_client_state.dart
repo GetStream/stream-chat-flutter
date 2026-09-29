@@ -7,7 +7,6 @@ import 'package:rxdart/rxdart.dart';
 import '../../../stream_chat.dart';
 import '../../core/util/message_merging.dart';
 import '../../core/util/message_predicates.dart';
-import '../../core/util/utils.dart';
 import '../live_location_expiration_scheduler.dart';
 import '../retry_queue.dart';
 import 'channel_event_handler.dart';
@@ -20,12 +19,9 @@ class ChannelClientState {
     this._channel,
     ChannelState channelState,
   ) {
-    _retryQueue = RetryQueue(
-      channel: _channel,
-      logger: _client.detachedLogger(
-        '🔄 (${generateHash([_channel.cid])})',
-      ),
-    );
+    // Tagged with the channel, so a record says which queue reported it while
+    // staying under the `SCh:RetryQueue` prefix for filtering.
+    _retryQueue = RetryQueue(channel: _channel, tag: 'SCh:RetryQueue:${_channel.cid}');
 
     _channelStateController = BehaviorSubject.seeded(channelState);
     // Update the persistence storage with the seeded channel state.
@@ -189,7 +185,7 @@ class ChannelClientState {
 
     updateChannelState(
       channelState.copyWith(
-        read: updatedReads.toList(),
+        read: updatedReads,
       ),
     );
   }
@@ -414,8 +410,8 @@ class ChannelClientState {
 
   /// Records whether the current user has an outstanding manual mark-unread.
   ///
-  /// Only meant for [ChannelEventHandler], which applies the read events the
-  /// server sends for the current user.
+  /// Only meant for [ChannelEventHandler], which applies the current user's
+  /// read events.
   @internal
   set isMarkedAsUnread(bool markedAsUnread) => _isMarkedAsUnread = markedAsUnread;
 
@@ -424,14 +420,15 @@ class ChannelClientState {
   /// Marks the channel as read locally, without making a network request.
   ///
   /// Used for channels that track unread counts locally (see
-  /// [Channel.usesLocalUnreadCount]), since the server rejects the mark-read
-  /// endpoint for channels that have read events disabled.
+  /// [Channel.usesLocalUnreadCount]), since marking read fails for channels
+  /// that have read events disabled.
   ///
   /// [messageId] only sets the resulting [Read.lastReadMessageId]; it does not
   /// narrow which messages stay unread. The count always drops to zero and
   /// [Read.lastRead] is always `now`, so messages newer than [messageId] are
-  /// marked read as well. This differs from the server, which recomputes the
-  /// count as the number of messages after [messageId], and from
+  /// marked read as well. This differs from [Channel.markRead] on a channel
+  /// with read events enabled, which recomputes the count as the number of
+  /// messages after [messageId], and from
   /// [markUnreadLocally], which does recompute from the locally-known
   /// messages. Callers that need a partial boundary should use
   /// [markUnreadLocally] instead.
@@ -457,7 +454,7 @@ class ChannelClientState {
     // new read boundary just made ineligible. `delivery_events` is configured
     // independently of `read_events`, so a channel tracking unread counts
     // locally can still have delivery receipts enabled. Mirrors what the
-    // `message.read` event listener does for server-driven channels.
+    // `message.read` event listener does for channels with read events enabled.
     _client.channelDeliveryReporter.reconcileDelivery([_channel]);
 
     _isMarkedAsUnread = false;
@@ -471,8 +468,8 @@ class ChannelClientState {
   /// as unread.
   ///
   /// Used for channels that track unread counts locally (see
-  /// [Channel.usesLocalUnreadCount]), since the server rejects the
-  /// mark-unread endpoint for channels that have read events disabled.
+  /// [Channel.usesLocalUnreadCount]), since marking unread fails for channels
+  /// that have read events disabled.
   void markUnreadLocally({
     required DateTime lastRead,
     String? lastReadMessageId,
@@ -549,7 +546,7 @@ class ChannelClientState {
 
   /// Update channelState with updated information.
   void updateChannelState(ChannelState updatedState) {
-    final newMessages = messages.mergeSorted(
+    final newMessages = messages.sortedMerge(
       updatedState.messages,
       key: (message) => message.id,
       update: MessageMerging.mergeUpdate,
@@ -571,11 +568,11 @@ class ChannelClientState {
     _channelState = _channelState.copyWith(
       messages: newMessages,
       channel: _channelState.channel?.merge(updatedState.channel),
-      watchers: newWatchers.toList(),
+      watchers: newWatchers,
       watcherCount: updatedState.watcherCount,
       members: updatedState.members,
       membership: updatedState.membership,
-      read: newReads.toList(),
+      read: newReads,
       draft: updatedState.draft,
       pinnedMessages: updatedState.pinnedMessages,
       pendingMessages: updatedState.pendingMessages,
@@ -584,8 +581,8 @@ class ChannelClientState {
     );
   }
 
-  /// Applies a [remoteState] received from the server or offline storage
-  /// (e.g. a `query`/`watch` response), merging it into local state.
+  /// Applies a [remoteState] from a `query`/`watch` response or offline
+  /// storage, merging it into local state.
   ///
   /// Unlike [updateChannelState], this preserves the current user's
   /// locally-tracked read state for channels that track unread counts

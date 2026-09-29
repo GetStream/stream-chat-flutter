@@ -393,8 +393,8 @@ Future<void> _onContactDetailAction(
   ContactDetailAction action,
 ) async => switch (action) {
   SendDirectMessage(:final user) => _openDirectChannel(context, user),
-  MuteUser(:final user) => StreamChat.of(context).client.muteUser(user.id),
-  UnmuteUser(:final user) => StreamChat.of(context).client.unmuteUser(user.id),
+  MuteUser(:final user) => StreamChat.of(context).client.moderation.muteUser(user.id),
+  UnmuteUser(:final user) => StreamChat.of(context).client.moderation.unmuteUser(user.id),
   BlockUser(:final user) => StreamChat.of(context).client.blockUser(user.id),
 };
 
@@ -411,12 +411,10 @@ Future<void> _openDirectChannel(BuildContext context, User user) async {
   final existing = await chat.client.queryChannelsOnline(
     state: false,
     watch: false,
-    filter: Filter.raw(
-      value: {
-        'members': [currentUser.id, user.id],
-        'distinct': true,
-      },
-    ),
+    filter: .raw({
+      'members': [currentUser.id, user.id],
+      'distinct': true,
+    }),
     messageLimit: 0,
     paginationParams: const PaginationParams(limit: 1),
   );

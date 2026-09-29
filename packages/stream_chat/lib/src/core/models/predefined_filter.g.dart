@@ -11,9 +11,5 @@ PredefinedFilter _$PredefinedFilterFromJson(Map<String, dynamic> json) => Predef
   filter: PredefinedFilter._filterFromJson(
     json['filter'] as Map<String, dynamic>,
   ),
-  sort: (json['sort'] as List<dynamic>?)
-      ?.map(
-        (e) => SortOption<ChannelState>.fromJson(e as Map<String, dynamic>),
-      )
-      .toList(),
+  sort: (json['sort'] as List<dynamic>?)?.map((e) => ChannelSort.fromJson(e as Map<String, dynamic>)).toList(),
 );

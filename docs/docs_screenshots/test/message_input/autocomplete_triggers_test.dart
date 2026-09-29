@@ -170,16 +170,20 @@ void main() {
       when(() => channelState.watchers).thenReturn([]);
 
       when(() => client.searchRoles('c')).thenAnswer(
-        (_) async => SearchRolesResponse()
-          ..roles = [
-            Role(
-              name: 'customer-success',
-              custom: false,
-              scopes: const [],
-              createdAt: DateTime.utc(2024),
-              updatedAt: DateTime.utc(2024),
-            ),
-          ],
+        (_) async => Result.success(
+          SearchRolesResponse(
+            duration: '0.01ms',
+            roles: [
+              Role(
+                name: 'customer-success',
+                custom: false,
+                scopes: const [],
+                createdAt: DateTime.utc(2024),
+                updatedAt: DateTime.utc(2024),
+              ),
+            ],
+          ),
+        ),
       );
 
       final messageComposerController = StreamMessageComposerController()..message = Message(text: 'Hello @c');

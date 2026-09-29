@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'paged_value_notifier.dart';
 import 'search_debounce_mixin.dart';
@@ -9,11 +8,6 @@ import 'search_debouncer.dart';
 
 /// The default channel page limit to load.
 const defaultMemberPagedLimit = 10;
-
-/// The default sort used for the member list.
-const defaultMemberListSort = [
-  SortOption<Member>.asc(MemberSortKey.createdAt),
-];
 
 const _kDefaultBackendPaginationLimit = 30;
 
@@ -37,10 +31,10 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
   StreamMemberListController({
     required this.channel,
     this.filter,
-    this.sort = defaultMemberListSort,
+    List<MemberSort>? sort,
     this.limit = defaultMemberPagedLimit,
   }) : _activeFilter = filter,
-       _activeSort = sort,
+       sort = sort ?? MemberSort.defaultSort,
        super(const PagedValue.loading());
 
   /// Creates a [StreamMemberListController] from the passed [value].
@@ -48,10 +42,10 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
     super.value, {
     required this.channel,
     this.filter,
-    this.sort = defaultMemberListSort,
+    List<MemberSort>? sort,
     this.limit = defaultMemberPagedLimit,
   }) : _activeFilter = filter,
-       _activeSort = sort;
+       sort = sort ?? MemberSort.defaultSort;
 
   /// The client to use for the channels list.
   final Channel channel;
@@ -61,8 +55,8 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
   /// You can query on any of the custom fields you've defined on the [Member].
   ///
   /// You can also filter other built-in channel fields.
-  final Filter? filter;
-  Filter? _activeFilter;
+  final MemberFilter? filter;
+  MemberFilter? _activeFilter;
 
   /// The sorting used for the members matching the filters.
   ///
@@ -70,8 +64,11 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final SortOrder<Member>? sort;
-  SortOrder<Member>? _activeSort;
+  ///
+  /// Defaults to [MemberSort.defaultSort]; pass [MemberSort.empty] to leave the ordering
+  /// to the API.
+  final List<MemberSort> sort;
+  late List<MemberSort> _activeSort = sort;
 
   /// The limit to apply to the member list. The default is set to
   /// [defaultMemberPagedLimit].
@@ -84,7 +81,7 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new filter.
-  set filter(Filter? value) => _activeFilter = value;
+  set filter(MemberFilter? value) => _activeFilter = value;
 
   /// Allows for the change of the query sort used for member queries.
   ///
@@ -93,7 +90,7 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new sort.
-  set sort(SortOrder<Member>? value) => _activeSort = value;
+  set sort(List<MemberSort> value) => _activeSort = value;
 
   /// Searches members whose name matches [query], debounced by its length.
   ///
@@ -108,7 +105,7 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
     final trimmed = query.trim();
     if (trimmed.isEmpty) return searchWithFilter(filter);
 
-    final searchFilter = Filter.autoComplete('name', trimmed);
+    final searchFilter = MemberFilter.autoComplete(MemberFilterField.name, trimmed);
 
     return searchWithFilter(searchFilter);
   }
@@ -120,22 +117,19 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
   /// the reload is debounced by that text's length; otherwise it reloads
   /// immediately. Rapidly superseded searches are dropped, so only the latest
   /// query's results are applied.
-  void searchWithFilter(Filter? filter) {
+  void searchWithFilter(MemberFilter? filter) {
     _activeFilter = filter;
     debouncedSearch(searchQueryLength(filter));
   }
 
   @override
   set value(PagedValue<int, Member> newValue) {
-    super.value = switch (_activeSort) {
-      null => newValue,
-      final memberSort => newValue.maybeMap(
-        orElse: () => newValue,
-        (success) => success.copyWith(
-          items: success.items.sorted(memberSort.compare),
-        ),
+    super.value = newValue.maybeMap(
+      orElse: () => newValue,
+      (success) => success.copyWith(
+        items: success.items.sortedWith(_activeSort.compare),
       ),
-    };
+    );
   }
 
   @override
@@ -163,12 +157,12 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
         items: members.where((it) => it.user != null).toList(),
         nextPageKey: nextKey,
       );
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       if (isStale(generation)) return;
       value = PagedValue.error(error);
     } catch (error) {
       if (isStale(generation)) return;
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load members', cause: error);
       value = PagedValue.error(chatError);
     }
   }
@@ -196,12 +190,12 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
         items: newItems.where((it) => it.user != null).toList(),
         nextPageKey: nextKey,
       );
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       if (isStale(generation)) return;
       value = previousValue.copyWith(error: error);
     } catch (error) {
       if (isStale(generation)) return;
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load more members', cause: error);
       value = previousValue.copyWith(error: chatError);
     }
   }

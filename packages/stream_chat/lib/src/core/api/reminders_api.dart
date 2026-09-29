@@ -1,11 +1,9 @@
 import 'dart:convert';
 
 import '../http/stream_http_client.dart';
-import '../models/filter.dart';
 import '../models/message_reminder.dart';
 import 'requests.dart';
 import 'responses.dart';
-import 'sort_order.dart';
 
 /// Defines the api dedicated to message reminders operations
 class RemindersApi {
@@ -22,8 +20,8 @@ class RemindersApi {
   ///
   /// Returns a [QueryRemindersResponse] containing the list of reminders.
   Future<QueryRemindersResponse> queryReminders({
-    Filter? filter,
-    SortOrder<MessageReminder>? sort,
+    MessageReminderFilter? filter,
+    List<MessageReminderSort>? sort,
     PaginationParams? pagination,
   }) async {
     final response = await _client.post(

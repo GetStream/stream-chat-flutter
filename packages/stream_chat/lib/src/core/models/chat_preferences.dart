@@ -19,8 +19,7 @@ extension type const ChatPreferenceLevel(String rawType) implements String {
 ///
 /// Set on a [ChannelConfig], a user-level push preference, or a per-channel
 /// push preference. Mutually exclusive with the coarse `chatLevel` /
-/// `pushLevel` field at the same tier — setting one clears the other on the
-/// backend.
+/// `pushLevel` field at the same tier — setting one clears the other.
 @JsonSerializable(includeIfNull: false)
 class ChatPreferences extends Equatable {
   /// Creates a new chat preferences instance.

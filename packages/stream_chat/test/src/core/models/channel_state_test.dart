@@ -100,173 +100,75 @@ void main() {
       expect(channelState.draft, equals(draft));
     });
 
-    group('ComparableFieldProvider', () {
-      test('should return ComparableField for channel.lastMessageAt', () {
-        final channelState = createChannelState(
-          id: 'test-channel',
-          lastMessageAt: DateTime(2023, 6, 15),
+    group('ChannelSortField', () {
+      test('lastMessageAt orders older messages first', () {
+        expectOrders(
+          ChannelSortField.lastMessageAt,
+          createChannelState(id: 'older', lastMessageAt: DateTime(2023, 6, 10)),
+          createChannelState(id: 'newer', lastMessageAt: DateTime(2023, 6, 15)),
         );
-
-        final field = channelState.getComparableField(
-          ChannelSortKey.lastMessageAt,
-        );
-
-        expect(field, isNotNull);
-        expect(field!.value, equals(DateTime(2023, 6, 15)));
       });
 
-      test('should return ComparableField for channel.lastUpdatedAt', () {
-        final channelState = createChannelState(
-          id: 'test-channel',
-          createdAt: DateTime(2023, 6, 10),
-          lastMessageAt: DateTime(2023, 6, 15),
+      test('lastUpdated orders by the last message', () {
+        expectOrders(
+          ChannelSortField.lastUpdated,
+          createChannelState(id: 'older', createdAt: DateTime(2023, 6, 1), lastMessageAt: DateTime(2023, 6, 10)),
+          createChannelState(id: 'newer', createdAt: DateTime(2023, 6, 1), lastMessageAt: DateTime(2023, 6, 15)),
         );
-
-        final field = channelState.getComparableField(
-          ChannelSortKey.lastUpdated,
-        );
-
-        expect(field, isNotNull);
-        expect(field!.value, equals(DateTime(2023, 6, 15)));
       });
 
-      test('should fall back to createdAt for a truncated channel.lastUpdatedAt', () {
-        final channelState = createChannelState(
-          id: 'test-channel',
-          createdAt: DateTime(2023, 6, 10),
-          // Truncating a channel moves lastMessageAt back instead of clearing
-          // it, so the channel must not sink below never-used channels.
-          lastMessageAt: DateTime(1970),
+      test('lastUpdated falls back to createdAt for a truncated channel', () {
+        // Truncating a channel moves lastMessageAt back instead of clearing
+        // it, so the channel must not sink below never-used channels.
+        expectOrders(
+          ChannelSortField.lastUpdated,
+          createChannelState(id: 'truncated', createdAt: DateTime(2023, 6, 10), lastMessageAt: DateTime(1970)),
+          createChannelState(id: 'active', createdAt: DateTime(2023, 6, 1), lastMessageAt: DateTime(2023, 6, 15)),
         );
-
-        final field = channelState.getComparableField(
-          ChannelSortKey.lastUpdated,
-        );
-
-        expect(field, isNotNull);
-        expect(field!.value, equals(DateTime(2023, 6, 10)));
       });
 
-      test('should return ComparableField for channel.createdAt', () {
-        final channelState = createChannelState(
-          id: 'test-channel',
-          createdAt: DateTime(2023, 6, 10),
+      test('createdAt orders older channels first', () {
+        expectOrders(
+          ChannelSortField.createdAt,
+          createChannelState(id: 'older', createdAt: DateTime(2023, 6, 10)),
+          createChannelState(id: 'newer', createdAt: DateTime(2023, 6, 15)),
         );
-
-        final field = channelState.getComparableField(ChannelSortKey.createdAt);
-        expect(field, isNotNull);
-        expect(field!.value, equals(DateTime(2023, 6, 10)));
       });
 
-      test('should return ComparableField for channel.updatedAt', () {
-        final channelState = createChannelState(
-          id: 'test-channel',
-          updatedAt: DateTime(2023, 6, 12),
+      test('updatedAt orders older channels first', () {
+        expectOrders(
+          ChannelSortField.updatedAt,
+          createChannelState(id: 'older', updatedAt: DateTime(2023, 6, 10)),
+          createChannelState(id: 'newer', updatedAt: DateTime(2023, 6, 12)),
         );
-
-        final field = channelState.getComparableField(ChannelSortKey.updatedAt);
-        expect(field, isNotNull);
-        expect(field!.value, equals(DateTime(2023, 6, 12)));
       });
 
-      test('should return ComparableField for channel.memberCount', () {
-        final channelState = createChannelState(
-          id: 'test-channel',
-          memberCount: 42,
+      test('memberCount orders smaller channels first', () {
+        expectOrders(
+          ChannelSortField.memberCount,
+          createChannelState(id: 'smaller', memberCount: 50),
+          createChannelState(id: 'larger', memberCount: 100),
         );
-
-        final field = channelState.getComparableField(ChannelSortKey.memberCount);
-        expect(field, isNotNull);
-        expect(field!.value, equals(42));
       });
 
-      test('should return ComparableField for channel.extraData', () {
-        final channelState = createChannelState(
-          id: 'test-channel',
-          extraData: {'priority': 5},
+      test('a custom field orders by the channel extra data', () {
+        expectOrders(
+          ChannelSortField.custom('priority'),
+          createChannelState(id: 'low', extraData: const {'priority': 1}),
+          createChannelState(id: 'high', extraData: const {'priority': 10}),
         );
-
-        final field = channelState.getComparableField('priority');
-        expect(field, isNotNull);
-        expect(field!.value, equals(5));
       });
 
-      test('should return null for non-existent extraData keys', () {
-        final channelState = createChannelState(
-          id: 'test-channel',
+      test('a custom field the channel does not carry orders nothing', () {
+        expectOrdersNothing(
+          ChannelSortField.custom('non_existent_key'),
+          createChannelState(id: 'plain'),
         );
-
-        final field = channelState.getComparableField('non_existent_key');
-        expect(field, isNull);
       });
 
-      test('should compare two channel states correctly using createdAt', () {
-        final newerChannel = createChannelState(
-          id: 'newer',
-          createdAt: DateTime(2023, 6, 15),
-        );
-
-        final olderChannel = createChannelState(
-          id: 'older',
-          createdAt: DateTime(2023, 6, 10),
-        );
-
-        final newerField = newerChannel.getComparableField(
-          ChannelSortKey.createdAt,
-        );
-
-        final olderField = olderChannel.getComparableField(
-          ChannelSortKey.createdAt,
-        );
-
-        expect(newerField!.compareTo(olderField!), greaterThan(0));
-        expect(olderField.compareTo(newerField), lessThan(0));
-      });
-
-      test('should compare two channel states correctly using memberCount', () {
-        final largerChannel = createChannelState(
-          id: 'larger',
-          memberCount: 100,
-        );
-
-        final smallerChannel = createChannelState(
-          id: 'smaller',
-          memberCount: 50,
-        );
-
-        final largerField = largerChannel.getComparableField(
-          ChannelSortKey.memberCount,
-        );
-
-        final smallerField = smallerChannel.getComparableField(
-          ChannelSortKey.memberCount,
-        );
-
-        expect(largerField!.compareTo(smallerField!), greaterThan(0));
-        expect(smallerField.compareTo(largerField), lessThan(0));
-      });
-
-      test('should compare two channel states correctly using extraData', () {
-        final highPriorityChannel = createChannelState(
-          id: 'high-priority',
-          extraData: {'priority': 10},
-        );
-
-        final lowPriorityChannel = createChannelState(
-          id: 'low-priority',
-          extraData: {'priority': 1},
-        );
-
-        final highPriorityField = highPriorityChannel.getComparableField(
-          'priority',
-        );
-
-        final lowPriorityField = lowPriorityChannel.getComparableField(
-          'priority',
-        );
-
-        expect(highPriorityField!.compareTo(lowPriorityField!), greaterThan(0));
-        expect(lowPriorityField.compareTo(highPriorityField), lessThan(0));
+      test('hasUnread and unreadCount are server-side only', () {
+        expectOrdersNothing(ChannelSortField.hasUnread, createChannelState(id: 'plain'));
+        expectOrdersNothing(ChannelSortField.unreadCount, createChannelState(id: 'plain'));
       });
     });
   });

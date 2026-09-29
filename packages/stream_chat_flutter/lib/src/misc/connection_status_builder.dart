@@ -7,7 +7,7 @@ import 'empty_widget.dart';
 /// A widget that builds itself based on the latest snapshot of interaction with
 /// a [Stream] of type [ConnectionStatus].
 ///
-/// The widget will use the closest [StreamChatClient.wsConnectionStatusStream]
+/// The widget will use the closest [StreamChatClient.connectionStatusStream]
 /// in case no stream is provided.
 /// {@endtemplate}
 class StreamConnectionStatusBuilder extends StatelessWidget {
@@ -34,10 +34,10 @@ class StreamConnectionStatusBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stream = connectionStatusStream ?? StreamChat.of(context).client.wsConnectionStatusStream;
+    final stream = connectionStatusStream ?? StreamChat.of(context).client.connectionStatusStream;
     final client = StreamChat.of(context).client;
     return BetterStreamBuilder<ConnectionStatus>(
-      initialData: client.wsConnectionStatus,
+      initialData: client.connectionStatus,
       stream: stream,
       noDataBuilder: loadingBuilder,
       errorBuilder: (context, error) {

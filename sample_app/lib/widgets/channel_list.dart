@@ -42,12 +42,12 @@ class _ChannelList extends State<ChannelList> {
   void _initControllers() {
     _messageSearchListController = StreamMessageSearchListController(
       client: _streamChat.client,
-      filter: Filter.in_('members', [_streamChat.currentUser!.id]),
+      filter: .in_(ChannelFilterField.members, [_streamChat.currentUser!.id]),
       limit: 5,
       searchQuery: '',
       sort: [
-        const SortOption.desc(ChannelSortKey.pinnedAt),
-        const SortOption.asc(ChannelSortKey.createdAt),
+        MessageSearchSort.desc(MessageSearchSortField.pinned),
+        MessageSearchSort.asc(MessageSearchSortField.createdAt),
       ],
     );
     // The predefined filter is a saved query living on the demo Stream app, so
@@ -57,7 +57,7 @@ class _ChannelList extends State<ChannelList> {
     final predefinedFilter = authController.usingCustomBackend ? null : kChannelListPredefinedFilter;
     _channelListController = StreamChannelListController(
       client: _streamChat.client,
-      filter: predefinedFilter == null ? Filter.in_('members', [userId]) : null,
+      filter: predefinedFilter == null ? ChannelFilter.in_(ChannelFilterField.members, [userId]) : null,
       predefinedFilter: predefinedFilter,
       filterValues: predefinedFilter == null ? null : {'user_id': userId},
       limit: 30,
@@ -220,8 +220,8 @@ Future<void> _onChannelDetailAction(
     ViewChannelInfo(:final user) => _pushChannelInfo(context, channel, user),
     PinChannel() => channel.pin(),
     UnpinChannel() => channel.unpin(),
-    MuteChannelMember(:final user) => client.muteUser(user.id),
-    UnmuteChannelMember(:final user) => client.unmuteUser(user.id),
+    MuteChannelMember(:final user) => client.moderation.muteUser(user.id),
+    UnmuteChannelMember(:final user) => client.moderation.unmuteUser(user.id),
     BlockChannelMember(:final user) => client.blockUser(user.id),
     LeaveChannel() => _maybeLeaveChannel(context, channel),
     DeleteChannel() => _maybeDeleteChannel(context, channel),

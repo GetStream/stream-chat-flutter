@@ -80,7 +80,7 @@ typedef _Harness = ({
 void main() {
   registerFallbackValue(FakeEvent());
   registerFallbackValue(const PaginationParams());
-  registerFallbackValue(const Filter.empty());
+  registerFallbackValue(const ChannelFilter.raw({}));
 
   final t0 = DateTime.utc(2026, 3, 1, 12);
   final anHourAgo = t0.subtract(const Duration(hours: 1));
@@ -91,8 +91,8 @@ void main() {
     return List.generate(count, (i) => eventAt(anHourAgo.add(Duration(seconds: i + 1))));
   }
 
-  StreamChatNetworkError badRequest() {
-    return StreamChatNetworkError.raw(code: 4, message: 'too many events', statusCode: 400);
+  StreamApiException badRequest() {
+    return const StreamApiException(code: StreamErrorCode.inputError, message: 'too many events', statusCode: 400);
   }
 
   // [onQueryPage] decides what a page of `queryChannels` does: returning an
@@ -130,8 +130,10 @@ void main() {
         waitForConnect: any(named: 'waitForConnect'),
       ),
     ).thenAnswer((invocation) async {
-      final filter = invocation.namedArguments[#filter] as Filter;
-      final page = (filter.value as List).cast<String>();
+      // `Filter` is read with `toJson`: `in_` renders as `{cid: {$in: [...]}}`.
+      final filter = invocation.namedArguments[#filter] as ChannelFilter;
+      final cid = filter.toJson()['cid']! as Map<String, Object?>;
+      final page = (cid[r'$in']! as List).cast<String>();
       queriedPages.add(page);
 
       final outcome = onQueryPage?.call(page);
@@ -480,7 +482,7 @@ void main() {
       final persistence = FakePersistenceClient(lastSyncAt: anHourAgo);
       final harness = buildHarness(
         api: _FakeSyncEndpoint(
-          error: StreamChatNetworkError.raw(code: 0, message: 'boom', statusCode: 500),
+          error: const StreamApiException(code: StreamErrorCode(0), message: 'boom', statusCode: 500),
         ),
         persistence: persistence,
       );

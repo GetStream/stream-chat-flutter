@@ -1,3 +1,20 @@
+## Upcoming Beta
+
+🛑️ Breaking
+
+- `StreamChatPersistenceClient` no longer takes `logLevel` or `logHandlerFunction`. Logging is configured once, on `StreamChatClient`, with `logConfig`.
+- The sort arguments on `getChannelStates`, `queryChannelStates` and `saveChannelQueries` are typed `List<ChannelSort>` rather than `SortOrder<ChannelState>`.
+- The filter arguments on `getChannelStates`, `queryChannelStates`, `updateChannelQueries` and `saveChannelQueries` are typed `ChannelFilter?` rather than an untyped `Filter`.
+- A predefined-filter query whose resolved filter is absent now stores no filter, rather than an empty one. The schema version is bumped for it, so the local cache is rebuilt once on upgrade.
+
+🔄 Changed
+
+- Every persistence call logged its own name at `info`; that call trace is `verbose` now.
+
+🐞 Fixed
+
+- A cached channel query given no sort came back in whatever order the lookup returned; it now applies `ChannelSort.defaultSort`, the ordering the API would have.
+
 ## Upcoming
 
 🐞 Fixed

@@ -509,12 +509,6 @@ void main() {
 
 // region Test Helpers
 
-Logger _createLogger(String name) {
-  final logger = Logger.detached(name)..level = Level.ALL;
-  logger.onRecord.listen(print);
-  return logger;
-}
-
 StreamChatClient _createMockClient() {
   final client = MockStreamChatClient();
   final clientState = FakeClientState(
@@ -522,10 +516,6 @@ StreamChatClient _createMockClient() {
   );
 
   when(() => client.state).thenReturn(clientState);
-  when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-    return _createLogger(invocation.positionalArguments.first as String);
-  });
-  when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
   when(() => client.retryPolicy).thenReturn(
     RetryPolicy(shouldRetry: (_, __, ___) => false),
   );

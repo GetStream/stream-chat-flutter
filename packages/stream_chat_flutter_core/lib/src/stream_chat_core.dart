@@ -212,7 +212,7 @@ class StreamChatCoreState extends State<StreamChatCore> with WidgetsBindingObser
       sdkVersion: StreamChatClient.packageVersion,
       appName: appName,
       appVersion: appVersion,
-      osName: CurrentPlatform.name,
+      osName: CurrentPlatform.operatingSystem,
       osVersion: osVersion,
       deviceModel: deviceModel,
     );
@@ -349,7 +349,7 @@ final class _ChatLifecycleManager {
 
     _backgroundTimer = Timer(backgroundKeepAlive, () {
       _cancelEventSubscription();
-      client.maybeDisconnect();
+      client.maybeDisconnect().ignore();
     });
   }
 
@@ -359,7 +359,7 @@ final class _ChatLifecycleManager {
     final hasConnectivity = !results.contains(ConnectivityResult.none);
 
     if (hasConnectivity) return client.maybeReconnect().ignore();
-    return client.maybeDisconnect();
+    return client.maybeDisconnect().ignore();
   }
 
   void _cancelBackgroundTimer() {
@@ -378,33 +378,25 @@ final class _ChatLifecycleManager {
   }
 }
 
-/// Extension on [StreamChatClient] to provide a convenient method for
-/// conditionally reconnecting the client if the user is logged in and
-/// the connection is not yet established.
+/// Opens and closes the client's connection as the app and the network come and
+/// go.
 ///
-/// This helps ensure the client attempts to reconnect immediately
-/// (bypassing any retry delays) when the app returns to the foreground
-/// or when connectivity is restored.
+/// Neither reopens a connection that dropped: the socket retries that one.
 extension MaybeReconnect on StreamChatClient {
   /// Optionally trigger a reconnect if the user is already logged in and the
   /// client is not yet connected.
   Future<void> maybeReconnect() async {
     if (state.currentUser == null) return;
-    if (wsConnectionStatus == ConnectionStatus.connected) return;
+    if (connectionStatus == ConnectionStatus.connected) return;
 
-    // Force immediate reconnection by resetting any ongoing retry delays
-    // This ensures we don't wait up to 25s when user foregrounds the app
-    closeConnection();
     await openConnection();
   }
 
-  /// Optionally disconnect the client if the user is logged in and the
-  /// connection is currently established.
-  void maybeDisconnect() {
+  /// Optionally disconnect the client if the user is logged in.
+  Future<void> maybeDisconnect() async {
     if (state.currentUser == null) return;
-    if (wsConnectionStatus == ConnectionStatus.disconnected) return;
+    if (connectionStatus == ConnectionStatus.disconnected) return;
 
-    // Close the connection immediately
     return closeConnection();
   }
 }

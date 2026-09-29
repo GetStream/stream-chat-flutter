@@ -1,6 +1,8 @@
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
+import '../../utils.dart';
+
 void main() {
   group('Thread', () {
     test('should create a valid instance', () {
@@ -209,6 +211,53 @@ void main() {
       // Test text equality instead of object identity
       expect(thread1.draft?.message.text, equals(thread2.draft?.message.text));
       expect(thread1.draft?.message.text, isNot(equals(thread3.draft?.message.text)));
+    });
+
+    group('ThreadSortField', () {
+      Thread threadWith({
+        DateTime? lastMessageAt,
+        int replyCount = 0,
+        int participantCount = 0,
+        String parentMessageId = 'p1',
+      }) => Thread(
+        channelCid: 'messaging:123',
+        parentMessageId: parentMessageId,
+        createdByUserId: 'u1',
+        replyCount: replyCount,
+        participantCount: participantCount,
+        lastMessageAt: lastMessageAt,
+      );
+
+      test('lastMessageAt orders the older thread first', () {
+        expectOrders(
+          ThreadSortField.lastMessageAt,
+          threadWith(lastMessageAt: DateTime.utc(2024, 1, 1)),
+          threadWith(lastMessageAt: DateTime.utc(2024, 6, 1)),
+        );
+      });
+
+      test('replyCount and participantCount order numerically', () {
+        expectOrders(ThreadSortField.replyCount, threadWith(replyCount: 1), threadWith(replyCount: 9));
+        expectOrders(
+          ThreadSortField.participantCount,
+          threadWith(participantCount: 1),
+          threadWith(participantCount: 9),
+        );
+      });
+
+      // `lastMessageAt` is nullable and `defaultSort` sorts it descending, so
+      // without the nulls-last pin a thread with no replies would lead the list
+      // instead of trailing it.
+      test('a thread with no replies sorts last in either direction', () {
+        final silent = threadWith();
+        final active = threadWith(lastMessageAt: DateTime.utc(2024, 1, 1));
+
+        final desc = [ThreadSort.desc(ThreadSortField.lastMessageAt)];
+        expect(desc.compare(silent, active), greaterThan(0));
+
+        final asc = [ThreadSort.asc(ThreadSortField.lastMessageAt)];
+        expect(asc.compare(silent, active), greaterThan(0));
+      });
     });
   });
 }

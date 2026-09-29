@@ -9,20 +9,21 @@ class RetryQueue {
   /// Instantiate a new RetryQueue object.
   RetryQueue({
     required this.channel,
-    this.logger,
-  }) : client = channel.client {
+    String tag = 'SCh:RetryQueue',
+  }) : client = channel.client,
+       logger = StreamLogger(tag) {
     _retryPolicy = client.retryPolicy;
     _listenConnectionRecovered();
   }
+
+  /// Writes this queue's records.
+  final StreamLogger logger;
 
   /// The channel of this queue.
   final Channel channel;
 
   /// The client associated with this [channel].
   final StreamChatClient client;
-
-  /// The logger associated to this queue.
-  final Logger? logger;
 
   late final RetryPolicy _retryPolicy;
 
@@ -36,7 +37,7 @@ class RetryQueue {
         .distinct()
         .listen((event) {
           if (event.online == true) {
-            logger?.info('Connection recovered, retrying failed messages');
+            logger.d(() => 'Connection recovered, retrying failed messages');
             channel.state?.retryFailedMessages();
           }
         })
@@ -56,7 +57,7 @@ class RetryQueue {
     // If there are no messages to add, return.
     if (messagesToAdd.isEmpty) return;
 
-    logger?.info('Adding ${messagesToAdd.length} messages to the queue');
+    logger.d(() => 'Adding ${messagesToAdd.length} messages to the queue');
     _messageQueue.addAll(messagesToAdd);
 
     _processQueue();
@@ -68,9 +69,9 @@ class RetryQueue {
     if (_isProcessing) return;
     _isProcessing = true;
 
-    logger?.info('Started retrying failed messages');
+    logger.d(() => 'Started retrying failed messages');
     while (_messageQueue.isNotEmpty) {
-      logger?.info('${_messageQueue.length} messages remaining in the queue');
+      logger.v(() => '${_messageQueue.length} messages remaining in the queue');
 
       final message = _messageQueue.first;
       final retryPolicy = _retryPolicy;
@@ -82,12 +83,12 @@ class RetryQueue {
           maxDelay: retryPolicy.maxDelay,
           maxAttempts: retryPolicy.maxRetryAttempts,
           retryIf: (error, attempt) {
-            if (error is! StreamChatError) return false;
+            if (error is! StreamChatException) return false;
             return retryPolicy.shouldRetry(client, attempt, error);
           },
         );
       } catch (error) {
-        logger?.severe('Error while retrying message ${message.id}', error);
+        logger.e(() => 'Error while retrying message ${message.id}', error: error);
         // If we are unable to successfully retry the message, update the state
         // with the failed state.
         channel.state?.updateMessage(message);

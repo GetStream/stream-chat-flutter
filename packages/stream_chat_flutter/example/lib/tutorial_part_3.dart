@@ -33,7 +33,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 Future<void> main() async {
   final client = StreamChatClient(
     'b67pax5b2wdq',
-    logLevel: Level.INFO,
+    logConfig: const StreamLogConfig(priority: StreamLogPriority.info),
   );
 
   await client.connectUser(
@@ -83,11 +83,11 @@ class ChannelListPage extends StatefulWidget {
 class _ChannelListPageState extends State<ChannelListPage> {
   late final _listController = StreamChannelListController(
     client: StreamChat.of(context).client,
-    filter: Filter.in_(
-      'members',
+    filter: .in_(
+      ChannelFilterField.members,
       [StreamChat.of(context).currentUser!.id],
     ),
-    channelStateSort: const [SortOption.desc('last_message_at')],
+    channelStateSort: [ChannelSort.desc(ChannelSortField.lastMessageAt)],
     limit: 20,
   );
 
