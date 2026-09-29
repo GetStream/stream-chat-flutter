@@ -60,6 +60,7 @@ class StreamChannelPage extends StatefulWidget {
     super.key,
     this.initialScrollIndex,
     this.initialAlignment,
+    this.automaticallyImplyLeading = true,
     this.onBackPressed,
     this.onChannelAvatarPressed,
   });
@@ -69,6 +70,11 @@ class StreamChannelPage extends StatefulWidget {
 
   /// Initial scroll alignment for the message list.
   final double? initialAlignment;
+
+  /// Whether the header shows a back button.
+  ///
+  /// Defaults to `true`.
+  final bool automaticallyImplyLeading;
 
   /// Called when the header's back button is pressed.
   ///
@@ -113,6 +119,7 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
   @override
   Widget build(BuildContext context) {
     final appBar = StreamChannelHeader(
+      automaticallyImplyLeading: widget.automaticallyImplyLeading,
       // Leaving this null keeps the header's default back button, which pops
       // the route.
       onBackPressed: widget.onBackPressed,
