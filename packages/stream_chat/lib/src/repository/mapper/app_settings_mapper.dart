@@ -27,9 +27,9 @@ extension AppResponseFieldsMapper on api.AppResponseFields {
   );
 }
 
-/// Maps a generated [api.GetApplicationResponse] to a [AppSettingsResponse].
+/// Maps a generated [api.GetApplicationResponse] to an [AppSettingsResponse].
 extension GetApplicationResponseMapper on api.GetApplicationResponse {
-  /// Converts this response into a [AppSettingsResponse].
+  /// Converts this response into an [AppSettingsResponse].
   AppSettingsResponse toModel() => AppSettingsResponse(
     duration: duration,
     app: app.toModel(),
