@@ -38,6 +38,18 @@ real fields is a break worth making in v11 if it is made at all, and it belongs 
 whichever group happens to touch `User` first. Raised on
 [#2957](https://github.com/GetStream/stream-chat-flutter/pull/2957).
 
+**Decided: map now, restructure last.**
+
+- **`User` and `OwnUser` are not restructured until group 09, which runs last.** They keep their v10 shape,
+  including their JSON, until every parent that embeds them has moved.
+- **The mappers land with the first group that needs them.** `lib/src/repository/mapper/user_mapper.dart`
+  (`UserResponse.toModel()`, `User.toRequest()`) arrived with group 04 and maps the generated types onto today's
+  class. Later groups reuse it; they never write their own `User` mapping. It is kept, not deleted: group 09 points
+  it at the restructured class.
+- **v1 JSON keeps decoding through `User.fromJson`** until then, including in a parent's rule-7 converter, with no
+  wrapper in between. Group 09 replaces those calls when it removes `fromJson`, and the compiler finds every one.
+- **`name` and `image` stay open.** Promoting them to real fields changes only `user_mapper.dart`.
+
 ## Prerequisites
 
 - **The generator's `client.tpl` calls `runApiSafely`, not `runSafely`.** Until it does, a regenerated client

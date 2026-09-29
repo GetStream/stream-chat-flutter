@@ -217,7 +217,7 @@ GROUPS = [
     ),
     dict(
         num='04', slug='roles-guest-and-app', title='Roles, Guest & App Settings',
-        hand=['guest_api.dart'],
+        hand=[],
         match=owns('/api/v2/roles', '/api/v2/guest', '/api/v2/app', '/api/v2/og', '/api/v2/longpoll'),
         goal='Sweep up the singletons — one-method families that share no state and can land in one PR.',
         decisions=[],
@@ -268,7 +268,36 @@ GROUPS = [
             - **An unset size limit stays `0`.** The server reports one as `size_limit: 0`, and
               `UploadConfig.sizeLimit` passes it through as v10 did; `StreamAttachmentValidator` applies
               `UploadConfig.defaultSizeLimit` in that case. No `effectiveSizeLimit` getter was added.
+            - **`connectGuestUser` keeps its v10 signature and keeps throwing.** It returns `Future<OwnUser>` and
+              throws a `StreamException`, like `connectUser`, `connectUserWithProvider` and `connectAnonymousUser`.
+              It unwraps `GeneralRepository.createGuest`'s `Result` with `getOrElse`, the one sanctioned unwrap
+              inside the SDK: a `Result` on a connect call could be ignored and hide a failed sign-in.
+            - **`createGuest` lives in `GeneralRepository`**, next to `enrichUrl`. Its mappers are in
+              `lib/src/repository/mapper/user_mapper.dart`, with the `User` mappers they use.
+            - **`ConnectGuestUserResponse` is internal:** a freezed envelope that only `createGuest` returns. Its
+              only public reach in v10 was `StreamChatApi.guest`, removed together with `GuestApi`.
+            - **The request carries every field the backend honours for a client-side guest:** id, name, image,
+              custom data, language, `invisible` and, for an `OwnUser`, privacy settings. `role`, `teams` and
+              `teams_role` are ignored for client-side calls and are not sent.
+            - **The rest of the user is no longer sent.** v10 sent the whole flattened user, and v1 filed every key
+              the request does not declare (`online`, `banned`, devices, unread counts, push preferences and so on)
+              into the guest's custom data, where some were echoed back: `pushPreferences` on the returned
+              `OwnUser` and in `queryUsers`' `extraData`, the unread counts when the socket is off, and `ban_expires`
+              in the raw `me`. None was ever applied. Verified live against the demo app and in the backend source;
+              recorded as a 🐞 Fixed entry.
+            - **`UserResponse.toModel()` leaves custom keys named like `OwnUser` fields (`OwnUser.topLevelFields`),
+              plus `deleted_at`, `deactivated_at` and `revoke_tokens_issued_before`, out of `extraData`.** v1's flat user JSON shadowed them; v2 nests custom data, and without the guard a
+              custom `online` string crashed `OwnUser.fromUser`.
+            - **The three extra names are guarded because the socket connect refuses them.** A custom
+              `deleted_at`, `deactivated_at` or `revoke_tokens_issued_before` left in `extraData` is re-sent in the
+              connect's user details, and the backend answers 400 ("reserved field", or "expected date" for a
+              non-date value). v10's flat response shadowed them, so the same guest connected; confirmed live.
+            - **Not a regression: a custom `ban_expires` that isn't a date** fails the connect in v10 and now alike,
+              because the socket's `me` lets it through into `OwnUser.fromJson`.
+            - **`User` is not restructured here.** `user_mapper.dart` maps the generated types onto today's `User`,
+              following [01-foundation](01-foundation.md).
             """),
+        done=DONE.replace('- [ ]', '- [x]'),
         risks=[
             '`general_api.dart` has no methods left in this group — `sync` and `queryMembers` go to group 11, '
             '`searchMessages` to group 10. Do not migrate the file as a unit.',
@@ -469,9 +498,22 @@ GROUPS = [
         goal='`User` is the most widely referenced public model in the SDK; this is where keep-vs-adopt costs the '
              'most.',
         decisions=[
-            '`User` and `OwnUser` are public, persisted, and embedded in nearly every other response. The '
-            'decision is made in 01-foundation and frozen there; this group executes it.',
+            '`User` and `OwnUser` are public, persisted, and embedded in nearly every other response. This group '
+            'restructures them, last: the mappers in `user_mapper.dart` already map the generated types onto the '
+            'current class for every group before it, and stay. See [01-foundation](01-foundation.md).',
             '`PrivacySettings` and the push-preference sub-shapes — decide per type.',
+            '`UserResponse.toModel()` leaves `OwnUser.topLevelFields`, `deleted_at`, `deactivated_at` and '
+            '`revoke_tokens_issued_before` out of every user\'s `extraData` (`_shadowedCustomKeys`), where v1 kept the '
+            '`OwnUser`-only keys in a plain user\'s `extraData`. Revisit once the mapper serves plain users.',
+            '`UserFilterField.shadowBanned` and `.bypassModeration` read `extraData`, which the generated '
+            '`UserResponse` has no field to fill.',
+            '`updateUsers` reuses `User.toRequest()`. It is a full upsert, and v10\'s flattened body filed the '
+            'user\'s client state (`online`, `banned`, `created_at` and similar) into the stored custom data on '
+            'every call, as it did for guests in [04](04-roles-guest-and-app.md). Decide the same way here, for real '
+            'users rather than fresh guests, and record it in the CHANGELOG.',
+            'The generated `UserRequest` sends explicit `null` for an unset `language` or `invisible`, where v10 '
+            'left the key out. For a guest create that made no difference; for an upsert of an existing user, '
+            'confirm live that a `null` does not reset a stored value differently from an omitted key.',
         ],
         risks=[
             'Every other group depends on the `User` decision.',
@@ -484,6 +526,8 @@ GROUPS = [
         done=DONE + (
             '- [ ] Temporary adapters owned by this group (`DeviceV1JsonConverter`) are deleted and removed from\n'
             '      the table in `README.md`.\n'
+            '- [ ] `user_mapper.dart` maps onto the restructured `User`, and its `TODO(openapi-migration)` note is\n'
+            '      gone.\n'
         ),
     ),
     dict(

@@ -68,59 +68,6 @@ void main() {
       expect(res, isSameUserAs(user));
     });
 
-    group('`.connectGuestUser`', () {
-      test('should work fine', () async {
-        final user = User(id: 'test-user-id');
-        final token = testUserToken(user.id).rawValue;
-
-        when(() => fakeChatApi.guest.getGuestUser(any(that: isSameUserAs(user)))).thenAnswer(
-          (_) async => ConnectGuestUserResponse()
-            ..user = user
-            ..accessToken = token,
-        );
-
-        expectLater(
-          // skipping first seed status -> ConnectionStatus.disconnected
-          client.connectionStatusStream.skip(1),
-          emitsInOrder([ConnectionStatus.connecting, ConnectionStatus.connected]),
-        );
-
-        final res = await client.connectGuestUser(user);
-        expect(res, isNotNull);
-        expect(res, isSameUserAs(user));
-
-        verify(
-          () => fakeChatApi.guest.getGuestUser(any(that: isSameUserAs(user))),
-        ).called(1);
-      });
-
-      test('should throw if `.getGuestUser` fails', () async {
-        final user = User(id: 'test-user-id');
-
-        when(
-          () => fakeChatApi.guest.getGuestUser(any(that: isSameUserAs(user))),
-        ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
-
-        expectLater(
-          client.connectionStatusStream,
-          emitsInOrder([
-            // only emits the seed -> disconnected status
-            // as the call never reaches `ws.connect`
-            ConnectionStatus.disconnected,
-          ]),
-        );
-
-        await expectLater(
-          client.connectGuestUser(user),
-          throwsA(isA<StreamApiException>()),
-        );
-
-        verify(
-          () => fakeChatApi.guest.getGuestUser(any(that: isSameUserAs(user))),
-        ).called(1);
-      });
-    });
-
     test('`.connectAnonymousUser` should work fine', () async {
       expectLater(
         // skipping first seed status -> ConnectionStatus.disconnected
@@ -226,25 +173,6 @@ void main() {
       },
     );
 
-    test('`.connectGuestUser` should throw if `ws.connect` fails', () async {
-      final user = User(id: 'test-user-id');
-      final token = testUserToken(user.id).rawValue;
-
-      when(() => fakeChatApi.guest.getGuestUser(any(that: isSameUserAs(user)))).thenAnswer(
-        (_) async => ConnectGuestUserResponse()
-          ..user = user
-          ..accessToken = token,
-      );
-
-      await expectLater(
-        client.connectGuestUser(user),
-        throwsA(isA<StreamNetworkException>()),
-      );
-      verify(
-        () => fakeChatApi.guest.getGuestUser(any(that: isSameUserAs(user))),
-      ).called(1);
-    });
-
     test(
       '`.connectAnonymousUser` should throw if `ws.connect` fails',
       () async {
@@ -306,28 +234,6 @@ void main() {
         expect(client.connectionStatus, ConnectionStatus.disconnected);
       },
     );
-
-    test('`.connectGuestUser` should succeed without connecting', () async {
-      final user = User(id: 'test-user-id');
-      final token = testUserToken(user.id).rawValue;
-
-      when(() => fakeChatApi.guest.getGuestUser(any(that: isSameUserAs(user)))).thenAnswer(
-        (_) async => ConnectGuestUserResponse()
-          ..user = user
-          ..accessToken = token,
-      );
-
-      final res = await client.connectGuestUser(
-        user,
-        connectWebSocket: false,
-      );
-
-      expect(res, isSameUserAs(user));
-      expect(client.connectionStatus, ConnectionStatus.disconnected);
-      verify(
-        () => fakeChatApi.guest.getGuestUser(any(that: isSameUserAs(user))),
-      ).called(1);
-    });
 
     test(
       '`.connectAnonymousUser` should succeed without connecting',
@@ -408,36 +314,6 @@ void main() {
 
         verify(persistence.getConnectionInfo).called(1);
         verifyNoMoreInteractions(persistence);
-      },
-    );
-
-    test(
-      '''`.connectGuestUser` should connect successfully if persistence contains event''',
-      () async {
-        final user = User(id: 'test-user-id');
-        final token = testUserToken(user.id).rawValue;
-
-        final event = Event(
-          type: EventType.healthCheck,
-          connectionId: 'test-connection-id',
-          me: OwnUser.fromUser(user),
-        );
-        when(persistence.getConnectionInfo).thenAnswer((_) async => event);
-
-        when(() => fakeChatApi.guest.getGuestUser(any(that: isSameUserAs(user)))).thenAnswer(
-          (_) async => ConnectGuestUserResponse()
-            ..user = user
-            ..accessToken = token,
-        );
-
-        final res = await client.connectGuestUser(user);
-        expect(res, isNotNull);
-        expect(res, isSameUserAs(user));
-
-        verify(persistence.getConnectionInfo).called(1);
-        verifyNoMoreInteractions(persistence);
-        verify(() => fakeChatApi.guest.getGuestUser(any(that: isSameUserAs(user)))).called(1);
-        verifyNoMoreInteractions(fakeChatApi.guest);
       },
     );
 

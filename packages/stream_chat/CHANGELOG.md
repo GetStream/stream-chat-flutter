@@ -77,8 +77,12 @@
 - `AppSettingsResponse` is immutable, built through a const constructor, compares by value, gains `copyWith`, and its `duration` is a non-nullable `String`.
 - `AppSettings` and `UploadConfig` no longer extend `Equatable`, so `props` is removed; they still compare by value and gain `copyWith`.
 - `StreamChatApi.general.getAppSettings` is removed; call `StreamChatClient.getAppSettings` instead.
+- `StreamChatApi.guest` is removed; call `StreamChatClient.connectGuestUser` instead.
+- `ConnectGuestUserResponse` is removed from the public API.
 
 🐞 Fixed
+
+- `connectGuestUser` no longer saves the user's client state (online, banned, unread counts, devices, push preferences and similar) as custom data on the created guest.
 
 - `queryChannels` no longer gives up watching the channels it loads when it is called before the connection is open. Whether they can be watched is read when the request is sent, which is after the query has waited for the connection.
 
