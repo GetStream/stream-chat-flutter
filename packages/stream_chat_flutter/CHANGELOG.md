@@ -19,6 +19,7 @@
 - `AccessibleMessagePreviewFormatter.formatMessageSemanticsLabel` must now return the body without a speaker prefix when `channel` is omitted. An implementation that prefixes unconditionally makes a message row announce "You said, You: hello".
 - `StreamImageCDN.resolveUrl` now leaves a URL that already asks for a specific size alone, rather than replacing it with the size the layout computed.
 - Removed the unused `shimmer` dependency; the skeleton loading widgets already use `stream_core_flutter`'s `StreamSkeletonLoading` and never depended on the `shimmer` package.
+- `StreamMessageComposer`'s top border now spans the full width, including under the side safe-area insets, and also shows above the no-permission message.
 
 ⚠️ Deprecated
 
