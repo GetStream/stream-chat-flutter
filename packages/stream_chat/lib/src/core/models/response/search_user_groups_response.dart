@@ -4,7 +4,7 @@ import '../user_group.dart';
 
 part 'search_user_groups_response.freezed.dart';
 
-/// The user groups matching a search, returned by [StreamChatClient.searchUserGroups].
+/// The user groups matching a search.
 @freezed
 class SearchUserGroupsResponse with _$SearchUserGroupsResponse {
   /// Creates a new [SearchUserGroupsResponse].
@@ -13,7 +13,7 @@ class SearchUserGroupsResponse with _$SearchUserGroupsResponse {
     this.userGroups = const [],
   });
 
-  /// How long the server took to handle the request, such as `4.21ms`.
+  /// How long the request took to handle, such as `4.21ms`.
   @override
   final String duration;
 

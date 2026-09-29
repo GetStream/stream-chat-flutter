@@ -187,7 +187,7 @@ typedef MemberFilter = Filter<Member>;
 
 /// Represents a field that member queries can be filtered on.
 class MemberFilterField extends FilterField<Member> {
-  /// Creates a member filter field named [remote] on the wire, reading its
+  /// Creates a member filter field named [remote] in queries, reading its
   /// value off an instance with [value].
   MemberFilterField(super.remote, super.value);
 
@@ -352,7 +352,7 @@ class MemberSort extends Sort<Member> {
 
 /// Represents a field that member queries can be sorted on.
 class MemberSortField extends SortField<Member> {
-  /// Creates a field named [remote] on the wire, reading its value off an
+  /// Creates a field named [remote] in queries, reading its value off an
   /// instance with `localValue`.
   ///
   /// For a name the SDK has not modelled; prefer the fields declared here.

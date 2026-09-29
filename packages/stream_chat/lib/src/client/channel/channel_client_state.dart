@@ -410,8 +410,8 @@ class ChannelClientState {
 
   /// Records whether the current user has an outstanding manual mark-unread.
   ///
-  /// Only meant for [ChannelEventHandler], which applies the read events the
-  /// server sends for the current user.
+  /// Only meant for [ChannelEventHandler], which applies the current user's
+  /// read events.
   @internal
   set isMarkedAsUnread(bool markedAsUnread) => _isMarkedAsUnread = markedAsUnread;
 
@@ -420,14 +420,15 @@ class ChannelClientState {
   /// Marks the channel as read locally, without making a network request.
   ///
   /// Used for channels that track unread counts locally (see
-  /// [Channel.usesLocalUnreadCount]), since the server rejects the mark-read
-  /// endpoint for channels that have read events disabled.
+  /// [Channel.usesLocalUnreadCount]), since marking read fails for channels
+  /// that have read events disabled.
   ///
   /// [messageId] only sets the resulting [Read.lastReadMessageId]; it does not
   /// narrow which messages stay unread. The count always drops to zero and
   /// [Read.lastRead] is always `now`, so messages newer than [messageId] are
-  /// marked read as well. This differs from the server, which recomputes the
-  /// count as the number of messages after [messageId], and from
+  /// marked read as well. This differs from [Channel.markRead] on a channel
+  /// with read events enabled, which recomputes the count as the number of
+  /// messages after [messageId], and from
   /// [markUnreadLocally], which does recompute from the locally-known
   /// messages. Callers that need a partial boundary should use
   /// [markUnreadLocally] instead.
@@ -453,7 +454,7 @@ class ChannelClientState {
     // new read boundary just made ineligible. `delivery_events` is configured
     // independently of `read_events`, so a channel tracking unread counts
     // locally can still have delivery receipts enabled. Mirrors what the
-    // `message.read` event listener does for server-driven channels.
+    // `message.read` event listener does for channels with read events enabled.
     _client.channelDeliveryReporter.reconcileDelivery([_channel]);
 
     _isMarkedAsUnread = false;
@@ -467,8 +468,8 @@ class ChannelClientState {
   /// as unread.
   ///
   /// Used for channels that track unread counts locally (see
-  /// [Channel.usesLocalUnreadCount]), since the server rejects the
-  /// mark-unread endpoint for channels that have read events disabled.
+  /// [Channel.usesLocalUnreadCount]), since marking unread fails for channels
+  /// that have read events disabled.
   void markUnreadLocally({
     required DateTime lastRead,
     String? lastReadMessageId,
@@ -580,8 +581,8 @@ class ChannelClientState {
     );
   }
 
-  /// Applies a [remoteState] received from the server or offline storage
-  /// (e.g. a `query`/`watch` response), merging it into local state.
+  /// Applies a [remoteState] from a `query`/`watch` response or offline
+  /// storage, merging it into local state.
   ///
   /// Unlike [updateChannelState], this preserves the current user's
   /// locally-tracked read state for channels that track unread counts

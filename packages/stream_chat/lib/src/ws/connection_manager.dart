@@ -10,12 +10,12 @@ import 'stream_chat_ws_event.dart';
 
 /// The connection a `StreamChatClient` works over.
 ///
-/// Opens and closes the connection, answers for the id the server issues it, and reopens one that
+/// Opens and closes the connection, answers for the connection id it is issued, and reopens one that
 /// drops. Obtained via `StreamChatClient`; not constructed directly.
 class ConnectionManager with Disposable {
   /// Creates a [ConnectionManager] that connects with [request].
   ///
-  /// [wsProvider] stands in for the socket, for tests that drive one without a server.
+  /// [wsProvider] stands in for the socket, for tests that drive one without a real connection.
   ///
   /// Reports under [tag], and the socket and recovery handler it owns under `<tag>:Ws` and
   /// `<tag>:Recovery`, so one prefix selects the whole family.
@@ -55,7 +55,7 @@ class ConnectionManager with Disposable {
   // The attempt everyone opening a connection waits on, while one is under way.
   final _opening = InFlightCache<String, HealthCheckEvent>();
 
-  /// Every frame the server has sent, as it arrives.
+  /// Every frame received on the connection, as it arrives.
   EventEmitter<WsEvent> get events => _ws.events;
 
   /// The state of the connection, reported on listen and again on every change.
@@ -99,13 +99,12 @@ class ConnectionManager with Disposable {
 
   /// Opens a connection for [user], completing with the health check that established it.
   ///
-  /// Set [includeUserDetails] to send the user's full details, which creates or updates them
-  /// server-side.
+  /// Set [includeUserDetails] to send the user's full details, which creates or updates the user.
   ///
   /// Completes with the attempt already under way when there is one for [user].
   ///
   /// Throws a [StateError] when a connection is already open, or one is being opened for another
-  /// user, and a [StreamChatException] when the server refuses the connection.
+  /// user, and a [StreamChatException] when the connection is refused.
   Future<HealthCheckEvent> connect(
     OwnUser user, {
     bool includeUserDetails = false,
@@ -123,8 +122,7 @@ class ConnectionManager with Disposable {
       );
     }
 
-    // Answered with the frame that opened the connection, the only one naming the user the server
-    // signed in.
+    // Answered with the frame that opened the connection, the only one naming the signed-in user.
     if (connectionState.value case Connected()) {
       if (_session case final open? when open.user.id == user.id) {
         if (open.established case final established?) return established;
@@ -166,7 +164,7 @@ class ConnectionManager with Disposable {
       final session = _session;
 
       // Subscribed before connecting: the frame that establishes the connection is the first health
-      // check, and the only one carrying the user the server signed in.
+      // check, and the only one carrying the signed-in user.
       final established = events.waitFor<HealthCheckEvent>();
 
       // Not awaited: the state has moved on by the time this returns, so the closure waited on
@@ -189,7 +187,7 @@ class ConnectionManager with Disposable {
     },
   );
 
-  // Raises why the server would not open a connection, the way a rejected request is raised.
+  // Raises why a connection was refused, the way a rejected request is raised.
   Never _refuse(OwnUser user, DisconnectionSource source) {
     _logger.w(() => 'connect ${user.id} failed: ${source.closeReason}', error: source.cause);
 
@@ -204,7 +202,7 @@ class ConnectionManager with Disposable {
     final session = _session;
     if (session == null) throw StateError('No user is connected.');
 
-    // Drop the token the server refused, so the load below asks for another. A provider with no
+    // Drop the refused token, so the load below asks for another. A provider with no
     // other to give ends the session instead of presenting the same one forever.
     if (previousError case final refused? when refused.isTokenExpired) {
       _tokenManager.expireToken();
@@ -249,7 +247,7 @@ class _Session {
   HealthCheckEvent? get established => _established;
   HealthCheckEvent? _established;
 
-  // Whether an attempt names the user in full, which creates or updates them server-side.
+  // Whether an attempt names the user in full, which creates or updates the user.
   bool get includeUserDetails => _includeUserDetails;
   bool _includeUserDetails;
 

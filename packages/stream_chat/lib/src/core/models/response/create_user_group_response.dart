@@ -4,7 +4,7 @@ import '../user_group.dart';
 
 part 'create_user_group_response.freezed.dart';
 
-/// The user group created by [StreamChatClient.createUserGroup].
+/// A newly created user group.
 @freezed
 class CreateUserGroupResponse with _$CreateUserGroupResponse {
   /// Creates a new [CreateUserGroupResponse].
@@ -13,7 +13,7 @@ class CreateUserGroupResponse with _$CreateUserGroupResponse {
     this.userGroup,
   });
 
-  /// How long the server took to handle the request, such as `4.21ms`.
+  /// How long the request took to handle, such as `4.21ms`.
   @override
   final String duration;
 
