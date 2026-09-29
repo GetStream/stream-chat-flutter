@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../routes/routes.dart';
+import '../widgets/split_view.dart';
 import '../widgets/stream_draft_list_view.dart';
 
 class DraftListPage extends StatefulWidget {
@@ -26,6 +27,13 @@ class _DraftListPageState extends State<DraftListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final openRoute = switch (AdaptiveSplitView.isExpandedOf(context)) {
+      true => GoRouterState.of(context),
+      false => null,
+    };
+    final openCid = openRoute?.pathParameters['cid'];
+    final openThreadId = openRoute?.uri.queryParameters['pid'];
+
     return RefreshIndicator(
       onRefresh: controller.refresh,
       child: StreamDraftListView(
@@ -56,7 +64,9 @@ class _DraftListPageState extends State<DraftListPage> {
                 ),
               ],
             ),
-            child: defaultWidget,
+            child: defaultWidget.copyWith(
+              selected: draft.channelCid == openCid && draft.parentId == openThreadId,
+            ),
           );
         },
         onDraftTap: (draft) {

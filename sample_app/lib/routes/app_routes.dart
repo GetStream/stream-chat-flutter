@@ -63,36 +63,55 @@ final appRoutes = [
                     // Both panes are visible in a split, so there is nothing to go back to.
                     final showBackButton = !AdaptiveSplitView.isExpandedOf(context);
 
-                    return (parentMessage != null)
-                        ? StreamThreadPage(parent: parentMessage, automaticallyImplyLeading: showBackButton)
-                        : StreamChannelPage(
-                            automaticallyImplyLeading: showBackButton,
-                            onChannelAvatarPressed: (context, channel) {
-                              final isOneToOne = channel.isOneToOne;
-                              final currentUserId = StreamChat.of(context).currentUser?.id;
+                    if (parentMessage case final parent?) {
+                      return BetterStreamBuilder<Message>(
+                        initialData: parent,
+                        // Keeps the last known parent while it is not among the loaded messages.
+                        stream: channel.state?.messagesStream
+                            .map((messages) => messages.firstWhereOrNull((it) => it.id == parent.id))
+                            .where((it) => it != null),
+                        builder: (context, parent) => StreamThreadPage(
+                          parent: parent,
+                          automaticallyImplyLeading: showBackButton,
+                          onViewInChannelTap: (message) {
+                            GoRouter.of(context).goNamed(
+                              Routes.CHANNEL_PAGE.name,
+                              pathParameters: Routes.CHANNEL_PAGE.params(channel),
+                              queryParameters: {'mid': message.id},
+                            );
+                          },
+                        ),
+                      );
+                    }
 
-                              final channelMembers = channel.state?.members ?? [];
-                              final otherUser = (isOneToOne && currentUserId != null)
-                                  ? channelMembers.firstWhereOrNull((m) => m.userId != currentUserId)?.user
-                                  : null;
+                    return StreamChannelPage(
+                      automaticallyImplyLeading: showBackButton,
+                      onChannelAvatarPressed: (context, channel) {
+                        final isOneToOne = channel.isOneToOne;
+                        final currentUserId = StreamChat.of(context).currentUser?.id;
 
-                              final router = GoRouter.of(context);
+                        final channelMembers = channel.state?.members ?? [];
+                        final otherUser = (isOneToOne && currentUserId != null)
+                            ? channelMembers.firstWhereOrNull((m) => m.userId != currentUserId)?.user
+                            : null;
 
-                              if (otherUser != null) {
-                                router.pushNamed(
-                                  Routes.CHAT_INFO_SCREEN.name,
-                                  pathParameters: Routes.CHAT_INFO_SCREEN.params(channel),
-                                  extra: otherUser,
-                                );
-                                return;
-                              }
+                        final router = GoRouter.of(context);
 
-                              router.pushNamed(
-                                Routes.GROUP_INFO_SCREEN.name,
-                                pathParameters: Routes.GROUP_INFO_SCREEN.params(channel),
-                              );
-                            },
+                        if (otherUser != null) {
+                          router.pushNamed(
+                            Routes.CHAT_INFO_SCREEN.name,
+                            pathParameters: Routes.CHAT_INFO_SCREEN.params(channel),
+                            extra: otherUser,
                           );
+                          return;
+                        }
+
+                        router.pushNamed(
+                          Routes.GROUP_INFO_SCREEN.name,
+                          pathParameters: Routes.GROUP_INFO_SCREEN.params(channel),
+                        );
+                      },
+                    );
                   },
                 ),
               );
