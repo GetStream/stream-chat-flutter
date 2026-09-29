@@ -30,6 +30,7 @@
 - Fixed `StreamMessageComposer` and its attachment picker running under the left and right safe-area insets while the picker is open.
 - Fixed `StreamMessageListView`'s scroll-to-bottom button, floating date divider, unread indicator and empty, loading and error states ignoring the safe-area insets when `enableSafeArea` is on.
 - Fixed the attachment picker overflowing short screens, such as a phone in landscape; there it now takes the keyboard's height.
+- Fixed `StreamMessageListView`'s default loading, empty and error states overflowing when the list has little room, such as in landscape with the attachment picker open.
 - Fixed the file picker offering file types the Stream Dashboard doesn't allow; it now only offers the allowed file extensions.
 - Fixed `StreamAttachmentValidator` accepting or rejecting a file differently from the server when an extension list holds a compound entry like `.tar.gz`; it now compares only the last extension.
 - Fixed `StreamAttachmentHandler.pickFile` throwing on an empty selection; it now returns `null`.
