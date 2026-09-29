@@ -1857,12 +1857,29 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.addDevice sends a provider without a constant by its wire value, with its name', () async {
+    test('StreamChatClient.addDevice sends a provider without a constant by its wire value', () async {
       const id = 'test-device-id';
-      const pushProviderName = 'my-custom-config';
       final request = api.CreateDeviceRequest(
         id: id,
         pushProvider: api.CreateDeviceRequestPushProvider.fromJson('onesignal'),
+      );
+
+      when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
+        (_) async => const Result.success(api.DurationResponse(duration: '0.01ms')),
+      );
+
+      await client.addDevice(id, const PushProvider('onesignal'));
+
+      verify(() => defaultApi.createDevice(createDeviceRequest: request)).called(1);
+      verifyNoMoreInteractions(defaultApi);
+    });
+
+    test('StreamChatClient.addDevice sends the push provider name', () async {
+      const id = 'test-device-id';
+      const pushProviderName = 'my-custom-config';
+      const request = api.CreateDeviceRequest(
+        id: id,
+        pushProvider: api.CreateDeviceRequestPushProvider.firebase,
         pushProviderName: pushProviderName,
       );
 
@@ -1870,8 +1887,7 @@ void main() {
         (_) async => const Result.success(api.DurationResponse(duration: '0.01ms')),
       );
 
-      final res = await client.addDevice(id, const PushProvider('onesignal'), pushProviderName: pushProviderName);
-      expect(res, const Result<void>.success(null));
+      await client.addDevice(id, PushProvider.firebase, pushProviderName: pushProviderName);
 
       verify(() => defaultApi.createDevice(createDeviceRequest: request)).called(1);
       verifyNoMoreInteractions(defaultApi);
@@ -2225,6 +2241,28 @@ void main() {
       expect(res.getOrNull()!.userGroup!.members, isNull);
     });
 
+    test('StreamChatClient.getUserGroup keeps an empty member list empty', () async {
+      const id = 'test-group-id';
+      when(() => defaultApi.getUserGroup(id: id)).thenAnswer(
+        (_) async => Result.success(
+          api.GetUserGroupResponse(
+            duration: '0.01ms',
+            userGroup: api.UserGroupResponse(
+              createdAt: DateTime.utc(2024),
+              id: id,
+              members: const [],
+              name: 'name-$id',
+              updatedAt: DateTime.utc(2024),
+            ),
+          ),
+        ),
+      );
+
+      final res = await client.getUserGroup(id);
+
+      expect(res.getOrNull()!.userGroup!.members, isEmpty);
+    });
+
     test('StreamChatClient.getUserGroup returns a null group when the response has none', () async {
       const id = 'test-group-id';
       when(() => defaultApi.getUserGroup(id: id)).thenAnswer(
@@ -2544,6 +2582,19 @@ void main() {
       final res = await client.searchRoles(query);
 
       expect(res.exceptionOrNull(), error);
+    });
+
+    test('StreamChatClient.searchRoles sends only the query when nothing else is given', () async {
+      const query = 'adm';
+
+      when(
+        () => defaultApi.searchRoles(query: query),
+      ).thenAnswer((_) async => const Result.success(api.SearchRolesResponse(duration: '0.01ms', roles: [])));
+
+      await client.searchRoles(query);
+
+      verify(() => defaultApi.searchRoles(query: query)).called(1);
+      verifyNoMoreInteractions(defaultApi);
     });
 
     group('`.channel`', () {
