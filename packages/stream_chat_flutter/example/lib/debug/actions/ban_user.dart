@@ -28,8 +28,11 @@ class DebugBanUser extends StatelessWidget {
           final userId = value.trim();
           try {
             debugPrint('[banUser] userId: $userId');
-            final result = await client.banUser(userId);
+            final result = await client.moderation.banUser(userId);
             debugPrint('[banUser] completed: $result');
+            if (result.exceptionOrNull() case final error?) {
+              showErrorDialog(context, error, 'Ban User');
+            }
           } catch (e) {
             debugPrint('[banUser] failed: $e');
             showErrorDialog(context, e, 'Ban User');

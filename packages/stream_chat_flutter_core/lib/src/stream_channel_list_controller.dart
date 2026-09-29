@@ -286,15 +286,13 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     await channel.delete();
   }
 
-  /// Mutes the [channel] and updates the list.
-  Future<void> muteChannel(Channel channel) async {
-    await channel.mute();
-  }
+  /// Mutes the [channel] for the current user.
+  ///
+  /// The mute lasts until it is removed.
+  Future<Result<void>> muteChannel(Channel channel) => channel.mute();
 
-  /// Un-mutes the [channel] and updates the list.
-  Future<void> unmuteChannel(Channel channel) async {
-    await channel.unmute();
-  }
+  /// Removes the current user's mute on the [channel].
+  Future<Result<void>> unmuteChannel(Channel channel) => channel.unmute();
 
   /// Event listener, which can be set in order to listen
   /// [client] web-socket events.

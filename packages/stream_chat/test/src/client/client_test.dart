@@ -2571,36 +2571,6 @@ void main() {
       verifyNoMoreInteractions(fakeChatApi.channel);
     });
 
-    test('`.muteChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelCid = '$channelType:$channelId';
-
-      when(() => fakeChatApi.moderation.muteChannel(channelCid)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.muteChannel(channelCid);
-
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.moderation.muteChannel(channelCid)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
-
-    test('`.unmuteChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelCid = '$channelType:$channelId';
-
-      when(() => fakeChatApi.moderation.unmuteChannel(channelCid)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.unmuteChannel(channelCid);
-
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.moderation.unmuteChannel(channelCid)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
-
     test('`.partialMemberUpdate with userId`', () async {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
@@ -3489,40 +3459,6 @@ void main() {
       verifyNoMoreInteractions(fakeChatApi.user);
     });
 
-    test('`.banUser`', () async {
-      const userId = 'test-user-id';
-
-      when(
-        () => fakeChatApi.moderation.banUser(userId, options: any(named: 'options')),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.banUser(userId);
-
-      expect(res, isNotNull);
-
-      verify(
-        () => fakeChatApi.moderation.banUser(userId, options: any(named: 'options')),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
-
-    test('`.unbanUser`', () async {
-      const userId = 'test-user-id';
-
-      when(
-        () => fakeChatApi.moderation.unbanUser(userId, options: any(named: 'options')),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.unbanUser(userId);
-
-      expect(res, isNotNull);
-
-      verify(
-        () => fakeChatApi.moderation.unbanUser(userId, options: any(named: 'options')),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
-
     test('`.blockUser`', () async {
       const userId = 'test-user-id';
 
@@ -3833,118 +3769,6 @@ void main() {
         verifyNoMoreInteractions(fakeChatApi.user);
       },
     );
-
-    test('`.shadowBan`', () async {
-      const userId = 'test-user-id';
-
-      when(
-        () => fakeChatApi.moderation.banUser(userId, options: {'shadow': true}),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.shadowBan(userId);
-
-      expect(res, isNotNull);
-
-      verify(
-        () => fakeChatApi.moderation.banUser(userId, options: {'shadow': true}),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
-
-    test('`.removeShadowBan`', () async {
-      const userId = 'test-user-id';
-
-      when(
-        () => fakeChatApi.moderation.unbanUser(userId, options: {'shadow': true}),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.removeShadowBan(userId);
-
-      expect(res, isNotNull);
-
-      verify(
-        () => fakeChatApi.moderation.unbanUser(userId, options: {'shadow': true}),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
-
-    test('`.muteUser`', () async {
-      const userId = 'test-user-id';
-
-      when(() => fakeChatApi.moderation.muteUser(userId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.muteUser(userId);
-
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.moderation.muteUser(userId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
-
-    test('`.unmuteUser`', () async {
-      const userId = 'test-user-id';
-
-      when(() => fakeChatApi.moderation.unmuteUser(userId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.unmuteUser(userId);
-
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.moderation.unmuteUser(userId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
-
-    test('`.flagMessage`', () async {
-      const messageId = 'test-message-id';
-
-      when(() => fakeChatApi.moderation.flagMessage(messageId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.flagMessage(messageId);
-
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.moderation.flagMessage(messageId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
-
-    test('`.unflagMessage`', () async {
-      const messageId = 'test-message-id';
-
-      when(() => fakeChatApi.moderation.unflagMessage(messageId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.unflagMessage(messageId);
-
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.moderation.unflagMessage(messageId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
-
-    test('`.flagUser`', () async {
-      const userId = 'test-message-id';
-
-      when(() => fakeChatApi.moderation.flagUser(userId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.flagUser(userId);
-
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.moderation.flagUser(userId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
-
-    test('`.unflagUser`', () async {
-      const userId = 'test-message-id';
-
-      when(() => fakeChatApi.moderation.unflagUser(userId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.unflagUser(userId);
-
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.moderation.unflagUser(userId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
 
     test('`.getActiveLiveLocations`', () async {
       final locations = [
