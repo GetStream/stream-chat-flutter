@@ -74,6 +74,14 @@ void main() {
     );
   }
 
+  testWidgets('truncates the timestamp instead of overflowing on a narrow width', (tester) async {
+    final tile = StreamThreadListTile(thread: thread, currentUser: user2);
+
+    await tester.pumpWidget(_wrapWithMaterialApp(SizedBox(width: 240, child: tile)));
+
+    expect(tester.takeException(), isNull);
+  });
+
   group('StreamThreadListTile a11y', () {
     testWidgets(
       'merges children into a single accessible node with the composed label',

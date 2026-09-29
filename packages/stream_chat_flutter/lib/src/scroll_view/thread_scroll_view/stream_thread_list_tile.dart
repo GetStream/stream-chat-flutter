@@ -353,10 +353,12 @@ class ThreadFooter extends StatelessWidget {
           context.translations.threadReplyCountText(replyCount),
           style: replyCountStyle,
         ),
-        StreamTimestamp(
-          date: latestActivityAt.toLocal(),
-          style: timestampStyle,
-          formatter: timestampFormatter ?? formatRecentDateTime,
+        Flexible(
+          child: StreamTimestamp(
+            date: latestActivityAt.toLocal(),
+            style: timestampStyle,
+            formatter: timestampFormatter ?? formatRecentDateTime,
+          ),
         ),
       ],
     );
