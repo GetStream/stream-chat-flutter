@@ -18,11 +18,13 @@ class StreamThreadListTile extends StatelessWidget {
     User? currentUser,
     GestureTapCallback? onTap,
     GestureLongPressCallback? onLongPress,
+    bool selected = false,
   }) : props = StreamThreadListTileProps(
          thread: thread,
          currentUser: currentUser,
          onTap: onTap,
          onLongPress: onLongPress,
+         selected: selected,
        );
 
   /// Creates a thread list tile from pre-built [props].
@@ -33,6 +35,26 @@ class StreamThreadListTile extends StatelessWidget {
 
   /// The properties configuring this thread list tile.
   final StreamThreadListTileProps props;
+
+  /// Creates a copy of this tile but with the given fields replaced with
+  /// the new values.
+  StreamThreadListTile copyWith({
+    Key? key,
+    Thread? thread,
+    User? currentUser,
+    GestureTapCallback? onTap,
+    GestureLongPressCallback? onLongPress,
+    bool? selected,
+  }) {
+    return StreamThreadListTile(
+      key: key ?? this.key,
+      thread: thread ?? props.thread,
+      currentUser: currentUser ?? props.currentUser,
+      onTap: onTap ?? props.onTap,
+      onLongPress: onLongPress ?? props.onLongPress,
+      selected: selected ?? props.selected,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +71,7 @@ class StreamThreadListTileProps {
     this.currentUser,
     this.onTap,
     this.onLongPress,
+    this.selected = false,
   });
 
   /// The thread displayed by the tile.
@@ -62,6 +85,11 @@ class StreamThreadListTileProps {
 
   /// Called when the tile is long pressed.
   final GestureLongPressCallback? onLongPress;
+
+  /// Whether the tile is highlighted as the current selection.
+  ///
+  /// Defaults to `false`.
+  final bool selected;
 }
 
 class _DefaultStreamThreadListTile extends StatelessWidget {
@@ -74,6 +102,7 @@ class _DefaultStreamThreadListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
+    final colorScheme = context.streamColorScheme;
 
     final theme = StreamThreadListTileTheme.of(context);
     final defaults = _StreamThreadListTileThemeDefaults(context);
@@ -110,11 +139,15 @@ class _DefaultStreamThreadListTile extends StatelessWidget {
       child: StreamListTileTheme(
         data: StreamListTileThemeData(
           contentPadding: effectivePadding,
-          backgroundColor: .all(effectiveBackgroundColor),
+          backgroundColor: .resolveWith((states) {
+            if (!states.contains(WidgetState.selected)) return effectiveBackgroundColor;
+            return .alphaBlend(colorScheme.backgroundSelected, effectiveBackgroundColor);
+          }),
         ),
         child: StreamListTileContainer(
           onTap: props.onTap,
           onLongPress: props.onLongPress,
+          selected: props.selected,
           child: Row(
             spacing: spacing.sm,
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -6,6 +6,7 @@
 - Added `StreamQuotedMessage.replyMessage`, the message doing the quoting, which lets a quoted preview announce who replied to whom.
 - Added `StreamMessageContent.excludeTextFromSemantics` and `StreamMessageFooter.excludeFromSemantics`, which keep the message text and the metadata out of the semantics tree when an enclosing row already announces them.
 - Added `automaticallyImplyLeading` to `StreamChannelPage` and `StreamThreadPage`, which hides the header's back button when `false`.
+- Added a `selected` parameter to `StreamThreadListTile`, which highlights the tile, and `StreamThreadListTile.copyWith`.
 - Added support for inserting images and GIFs from the keyboard (e.g. Gboard) in `StreamMessageComposer`, configurable via `contentInsertionConfiguration`.
 
 ⚠️ Changed

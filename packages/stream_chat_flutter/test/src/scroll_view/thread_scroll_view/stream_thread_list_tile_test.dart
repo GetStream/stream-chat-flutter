@@ -82,6 +82,44 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('tints the background when selected', (tester) async {
+    final tile = StreamThreadListTile(thread: thread, currentUser: user2, selected: true);
+
+    await tester.pumpWidget(_wrapWithMaterialApp(tile));
+
+    final colorScheme = tester.element(find.byType(StreamThreadListTile)).streamColorScheme;
+    expect(_tileBackground(tester), Color.alphaBlend(colorScheme.backgroundSelected, colorScheme.backgroundApp));
+  });
+
+  testWidgets('does not tint the background by default', (tester) async {
+    final tile = StreamThreadListTile(thread: thread, currentUser: user2);
+
+    await tester.pumpWidget(_wrapWithMaterialApp(tile));
+
+    final colorScheme = tester.element(find.byType(StreamThreadListTile)).streamColorScheme;
+    expect(_tileBackground(tester), colorScheme.backgroundApp);
+  });
+
+  testWidgets('announces itself as selected when selected', (tester) async {
+    final handle = tester.ensureSemantics();
+    final tile = StreamThreadListTile(thread: thread, currentUser: user2, selected: true);
+
+    await tester.pumpWidget(_wrapWithMaterialApp(tile));
+
+    expect(tester.getSemantics(find.byType(StreamThreadListTile)), isSemantics(isSelected: true));
+    handle.dispose();
+  });
+
+  test('copyWith replaces selected and keeps the other fields', () {
+    final tile = StreamThreadListTile(thread: thread, currentUser: user2);
+
+    final copy = tile.copyWith(selected: true);
+
+    expect(copy.props.selected, isTrue);
+    expect(copy.props.thread, thread);
+    expect(copy.props.currentUser, user2);
+  });
+
   group('StreamThreadListTile a11y', () {
     testWidgets(
       'merges children into a single accessible node with the composed label',
@@ -200,6 +238,12 @@ void main() {
       },
     );
   });
+}
+
+// The background color the tile paints behind its content.
+Color? _tileBackground(WidgetTester tester) {
+  final ink = find.descendant(of: find.byType(StreamThreadListTile), matching: find.byType(Ink));
+  return (tester.widget<Ink>(ink).decoration! as ShapeDecoration).color;
 }
 
 Widget _wrapWithMaterialApp(
