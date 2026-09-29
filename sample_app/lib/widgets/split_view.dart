@@ -112,6 +112,7 @@ class AdaptiveSplitView extends StatefulWidget {
     super.key,
     required this.primary,
     required this.secondary,
+    this.drawer,
   });
 
   /// The leading pane, such as a list.
@@ -119,6 +120,12 @@ class AdaptiveSplitView extends StatefulWidget {
 
   /// The navigator for the trailing pane.
   final Widget secondary;
+
+  /// A panel that slides in over both panes while they are shown side by side.
+  ///
+  /// Typically a [Drawer], opened with [openDrawerOf]. A compact window shows
+  /// only the navigator, so the pages in it can host a drawer of their own.
+  final Widget? drawer;
 
   /// Whether the nearest [AdaptiveSplitView] shows both panes.
   ///
@@ -130,6 +137,14 @@ class AdaptiveSplitView extends StatefulWidget {
     return scope?.isExpanded ?? false;
   }
 
+  /// Opens the [drawer] of the nearest [AdaptiveSplitView] above [context].
+  ///
+  /// Does nothing when that split view shows one pane or has no [drawer].
+  static void openDrawerOf(BuildContext context) {
+    final state = context.findAncestorStateOfType<_AdaptiveSplitViewState>();
+    state?._drawerKey.currentState?.open();
+  }
+
   @override
   State<AdaptiveSplitView> createState() => _AdaptiveSplitViewState();
 }
@@ -137,6 +152,9 @@ class AdaptiveSplitView extends StatefulWidget {
 class _AdaptiveSplitViewState extends State<AdaptiveSplitView> {
   // Moves the primary pane between the leading pane and the root page.
   final _primaryKey = GlobalKey(debugLabel: 'AdaptiveSplitView.primary');
+
+  // Opens and closes the drawer that spans both panes.
+  final _drawerKey = GlobalKey<DrawerControllerState>(debugLabel: 'AdaptiveSplitView.drawer');
 
   @override
   Widget build(BuildContext context) {
@@ -147,12 +165,39 @@ class _AdaptiveSplitViewState extends State<AdaptiveSplitView> {
       primaryKey: _primaryKey,
       primary: widget.primary,
       child: switch (isExpanded) {
-        true => SplitView(
-          primary: KeyedSubtree(key: _primaryKey, child: widget.primary),
-          secondary: widget.secondary,
-        ),
+        true => _buildSplit(),
         false => widget.secondary,
       },
+    );
+  }
+
+  Widget _buildSplit() {
+    final split = SplitView(
+      primary: KeyedSubtree(key: _primaryKey, child: widget.primary),
+      secondary: widget.secondary,
+    );
+
+    final drawer = widget.drawer;
+    if (drawer == null) return split;
+
+    final isLtr = Directionality.of(context) == TextDirection.ltr;
+
+    return Stack(
+      fit: .expand,
+      children: [
+        split,
+        // The drawer only reaches the leading edge, so it keeps only that edge's inset.
+        MediaQuery.removePadding(
+          context: context,
+          removeLeft: !isLtr,
+          removeRight: isLtr,
+          child: DrawerController(
+            key: _drawerKey,
+            alignment: .start,
+            child: drawer,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -19,7 +19,11 @@ import 'routes.dart';
 final appRoutes = [
   ShellRoute(
     builder: (BuildContext context, GoRouterState state, Widget child) {
-      return AdaptiveSplitView(primary: const ChannelListPage(), secondary: child);
+      return AdaptiveSplitView(
+        primary: const ChannelListPage(),
+        secondary: child,
+        drawer: const LeftDrawer(),
+      );
     },
     routes: [
       GoRoute(
