@@ -102,7 +102,7 @@ class EventType {
   /// Event sent when the connection is recovered
   static const String connectionRecovered = 'connection.recovered';
 
-  /// Event sent when the server refuses or ends the connection
+  /// Event sent when the connection is refused, or closed with an error.
   static const String connectionError = 'connection.error';
 
   /// Event sent when the user is accepts an invite

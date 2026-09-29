@@ -150,7 +150,7 @@ typedef MessageReminderFilter = Filter<MessageReminder>;
 
 /// Represents a field that reminder queries can be filtered on.
 class MessageReminderFilterField extends FilterField<MessageReminder> {
-  /// Creates a reminder filter field named [remote] on the wire, reading its
+  /// Creates a reminder filter field named [remote] in queries, reading its
   /// value off an instance with [value].
   MessageReminderFilterField(super.remote, super.value);
 
@@ -226,7 +226,7 @@ class MessageReminderSort extends Sort<MessageReminder> {
 
 /// Represents a field that reminder queries can be sorted on.
 class MessageReminderSortField extends SortField<MessageReminder> {
-  /// Creates a field named [remote] on the wire, reading its value off an
+  /// Creates a field named [remote] in queries, reading its value off an
   /// instance with `localValue`.
   ///
   /// For a name the SDK has not modelled; prefer the fields declared here.

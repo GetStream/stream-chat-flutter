@@ -60,7 +60,7 @@ class ConnectRequest {
   /// The options that open a connection for [user], presenting [token].
   ///
   /// Set [includeUserDetails] to send the user's full details rather than their id alone, which
-  /// creates or updates them server-side.
+  /// creates or updates the user.
   WebSocketOptions build({
     required OwnUser user,
     required UserToken token,

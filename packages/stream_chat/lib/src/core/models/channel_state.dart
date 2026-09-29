@@ -142,15 +142,15 @@ typedef ChannelFilter = Filter<ChannelState>;
 
 /// Represents a field that channel queries can be filtered on.
 class ChannelFilterField extends FilterField<ChannelState> {
-  /// Creates a channel filter field named [remote] on the wire, reading its
+  /// Creates a channel filter field named [remote] in queries, reading its
   /// value off an instance with [value].
   ChannelFilterField(super.remote, super.value);
 
   /// Creates a field the SDK does not model, read from [ChannelModel.extraData].
   ///
-  /// The fields the server computes per request — `joined`, `has_unread`,
-  /// `invite`, `distinct` and `app_banned` — are reached this way. The server
-  /// resolves them against the caller; a local match cannot.
+  /// The fields that depend on the calling user — `joined`, `has_unread`,
+  /// `invite`, `distinct` and `app_banned` — are reached this way. They are
+  /// resolved for the caller, so a local match cannot reproduce them.
   ///
   /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`, `$exists`,
   /// `$contains`, `$q`, `$autocomplete`
@@ -433,7 +433,7 @@ class ChannelSort extends Sort<ChannelState> {
 
 /// Represents a field that channel queries can be sorted on.
 class ChannelSortField extends SortField<ChannelState> {
-  /// Creates a field named [remote] on the wire, reading its value off an
+  /// Creates a field named [remote] in queries, reading its value off an
   /// instance with `localValue`.
   ///
   /// For a name the SDK has not modelled; prefer the fields declared here.

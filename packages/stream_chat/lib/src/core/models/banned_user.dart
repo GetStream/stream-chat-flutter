@@ -93,7 +93,7 @@ typedef BannedUserFilter = Filter<BannedUser>;
 
 /// Represents a field that banned-user queries can be filtered on.
 class BannedUserFilterField extends FilterField<BannedUser> {
-  /// Creates a banned-user filter field named [remote] on the wire, reading
+  /// Creates a banned-user filter field named [remote] in queries, reading
   /// its value off an instance with [value].
   BannedUserFilterField(super.remote, super.value);
 
@@ -166,7 +166,7 @@ class BannedUserSort extends Sort<BannedUser> {
 
 /// Represents a field that banned-user queries can be sorted on.
 class BannedUserSortField extends SortField<BannedUser> {
-  /// Creates a field named [remote] on the wire, reading its value off an
+  /// Creates a field named [remote] in queries, reading its value off an
   /// instance with `localValue`.
   ///
   /// For a name the SDK has not modelled; prefer the fields declared here.

@@ -281,7 +281,7 @@ typedef PollFilter = Filter<Poll>;
 
 /// Represents a field that poll queries can be filtered on.
 class PollFilterField extends FilterField<Poll> {
-  /// Creates a poll filter field named [remote] on the wire, reading its value
+  /// Creates a poll filter field named [remote] in queries, reading its value
   /// off an instance with [value].
   PollFilterField(super.remote, super.value);
 
@@ -411,7 +411,7 @@ class PollSort extends Sort<Poll> {
 
 /// Represents a field that poll queries can be sorted on.
 class PollSortField extends SortField<Poll> {
-  /// Creates a field named [remote] on the wire, reading its value off an
+  /// Creates a field named [remote] in queries, reading its value off an
   /// instance with `localValue`.
   ///
   /// For a name the SDK has not modelled; prefer the fields declared here.

@@ -4,7 +4,7 @@ import '../user_group.dart';
 
 part 'update_user_group_response.freezed.dart';
 
-/// The user group updated by [StreamChatClient.updateUserGroup].
+/// A user group after it was updated.
 @freezed
 class UpdateUserGroupResponse with _$UpdateUserGroupResponse {
   /// Creates a new [UpdateUserGroupResponse].
@@ -13,7 +13,7 @@ class UpdateUserGroupResponse with _$UpdateUserGroupResponse {
     this.userGroup,
   });
 
-  /// How long the server took to handle the request, such as `4.21ms`.
+  /// How long the request took to handle, such as `4.21ms`.
   @override
   final String duration;
 

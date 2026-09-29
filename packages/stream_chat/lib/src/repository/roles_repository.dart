@@ -24,7 +24,7 @@ class RolesRepository {
   /// returned when omitted.
   ///
   /// [includeGlobalRoles] includes roles prefixed `global_` when set to
-  /// `true`. Defaults to `false` on the server.
+  /// `true`, and leaves them out when omitted.
   Future<Result<SearchRolesResponse>> searchRoles(
     String query, {
     int? limit,

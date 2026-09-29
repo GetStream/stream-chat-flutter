@@ -26,10 +26,10 @@ extension StreamChatExceptionRetries on StreamChatException {
   /// is idempotent here, since the id is client-generated.
   ///
   /// A `true` says nothing about *when*. Honour
-  /// [StreamApiException.retryAfter] where the server named a wait, and back
+  /// [StreamApiException.retryAfter] where the failure names a wait, and back
   /// off otherwise.
   bool get isRetriable => switch (this) {
-    // The server said retrying will not help, and it is authoritative.
+    // The failure is marked unrecoverable, and that verdict is authoritative.
     StreamApiException(unrecoverable: true) => false,
 
     // About the moment rather than the request: the wait heals it.

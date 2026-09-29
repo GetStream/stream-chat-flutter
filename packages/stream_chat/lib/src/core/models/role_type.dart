@@ -1,8 +1,8 @@
 /// The type of role used to filter results in
 /// [StreamChatClient.searchRoles].
 ///
-/// The server accepts only [user] or [channel]; any other value
-/// returns a validation error.
+/// Only [user] and [channel] are accepted; any other value fails the
+/// search.
 extension type const RoleType(String rawType) implements String {
   /// Restricts results to roles valid as a user-level assignment
   /// (e.g. `user`, `admin`, `anonymous`).

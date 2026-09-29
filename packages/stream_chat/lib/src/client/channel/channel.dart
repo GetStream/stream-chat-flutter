@@ -821,7 +821,7 @@ class Channel {
         }
       }
 
-      // Validate the final message before sending it to the server.
+      // Validate the final message before sending it.
       if (MessageRules.canUpload(message) != true) {
         _logger.w(() => 'Message is not valid for sending, removing it');
 
@@ -1033,9 +1033,9 @@ class Channel {
 
   /// Deletes the [message] for everyone.
   ///
-  /// If [hard] is true, the message is permanently deleted from the server
-  /// and cannot be recovered. In this case, any attachments associated with the
-  /// message are also deleted from the server.
+  /// If [hard] is true, the message is permanently deleted and cannot be
+  /// recovered. In this case, any attachments associated with the message are
+  /// deleted as well.
   Future<EmptyResponse> deleteMessage(Message message, {bool hard = false}) {
     final deletionScope = MessageDeleteScope.deleteForAll(hard: hard);
 
@@ -1057,13 +1057,12 @@ class Channel {
   // The [scope] defines whether to delete the message for everyone or just
   // for the current user.
   //
-  // If the message is a local message (not yet sent to the server) or a bounced
+  // If the message is a local message (not yet sent) or a bounced
   // error message, it is deleted locally without making an API call.
   //
   // If the message is deleted for everyone and [scope.hard] is true, the
-  // message is permanently deleted from the server and cannot be recovered.
-  // In this case, any attachments associated with the message are also deleted
-  // from the server.
+  // message is permanently deleted and cannot be recovered. In this case, any
+  // attachments associated with the message are deleted as well.
   Future<EmptyResponse> _deleteMessage(
     Message message, {
     required MessageDeleteScope scope,
@@ -1071,7 +1070,7 @@ class Channel {
     _checkInitialized();
 
     // Directly deleting the local messages and bounced error messages as they
-    // are not available on the server.
+    // were never sent.
     if (message.remoteCreatedAt == null || message.isBouncedWithError) {
       _deleteLocalMessage(message);
       // Returning empty response to mark the api call as success.
@@ -1104,7 +1103,7 @@ class Channel {
       );
 
       state?.deleteMessage(deletedMessage, hardDelete: scope.hard);
-      // If hard delete, also delete the attachments from the server.
+      // If hard delete, also delete the uploaded attachments.
       if (scope.hard) _deleteMessageAttachments(deletedMessage);
 
       return response;
@@ -1124,7 +1123,7 @@ class Channel {
     }
   }
 
-  // Deletes a local [message] that is not yet sent to the server.
+  // Deletes a local [message] that is not yet sent.
   //
   // This is typically called when a user wants to delete a message that they
   // have composed but not yet sent, or if a message failed to send and the user
@@ -1147,8 +1146,8 @@ class Channel {
     );
   }
 
-  // Deletes all the attachments associated with the given [message]
-  // from the server. This is typically called when a message is hard deleted.
+  // Deletes all the uploaded attachments associated with the given [message].
+  // This is typically called when a message is hard deleted.
   Future<void> _deleteMessageAttachments(Message message) async {
     final attachments = message.attachments;
     final deleteFutures = attachments.map((it) async {
@@ -2267,8 +2266,11 @@ class Channel {
   // state when the mute expires.
   Timer? _muteExpirationTimer;
 
-  /// Mutes the channel.
-  Future<EmptyResponse> mute({Duration? expiration}) {
+  /// Mutes this channel for the current user.
+  ///
+  /// The mute lasts until it is removed. An [expiration] expires it after
+  /// that long, and a zero one removes it straight away.
+  Future<Result<void>> mute({Duration? expiration}) {
     _checkInitialized();
 
     // If there is a expiration set, we will set a timer to automatically unmute
@@ -2278,64 +2280,83 @@ class Channel {
       _muteExpirationTimer = Timer(expiration, unmute);
     }
 
-    return _client.muteChannel(cid!, expiration: expiration);
+    return _client.moderation.muteChannel(cid!, expiration: expiration);
   }
 
-  /// Unmute the channel.
-  Future<EmptyResponse> unmute() {
+  /// Removes the current user's mute on this channel.
+  Future<Result<void>> unmute() {
     _checkInitialized();
 
     // Cancel the mute expiration timer if it is set.
     _muteExpirationTimer?.cancel();
     _muteExpirationTimer = null;
 
-    return _client.unmuteChannel(cid!);
+    return _client.moderation.unmuteChannel(cid!);
   }
 
-  /// Bans the member with given [userID] from the channel.
-  Future<EmptyResponse> banMember(
-    String userID,
-    Map<String, dynamic> options,
-  ) async {
+  /// Bans [userID] from this channel.
+  ///
+  /// The ban lasts until it is removed. A [timeout] expires it after that
+  /// long, applied in whole minutes and never less than one.
+  ///
+  /// If [shadow] is true, their messages stop reaching anyone else and they
+  /// are not told.
+  ///
+  /// If [ipBan] is true, the address they connected from is banned as well.
+  ///
+  /// [deleteMessages] decides what happens to the messages they already
+  /// sent, which are left alone when it is omitted. [reason] is recorded
+  /// with the ban.
+  Future<Result<void>> banMember(
+    String userID, {
+    Duration? timeout,
+    String? reason,
+    bool? shadow,
+    bool? ipBan,
+    DeleteType? deleteMessages,
+  }) {
     _checkInitialized();
-    final opts = Map<String, dynamic>.from(options)
-      ..addAll({
-        'type': type,
-        'id': id,
-      });
-    return _client.banUser(userID, opts);
+    return _client.moderation.banUser(
+      userID,
+      channelCid: cid,
+      timeout: timeout,
+      reason: reason,
+      shadow: shadow,
+      ipBan: ipBan,
+      deleteMessages: deleteMessages,
+    );
   }
 
-  /// Remove the ban for the member with given [userID] in the channel.
-  Future<EmptyResponse> unbanMember(String userID) async {
+  /// Removes the ban on [userID] in this channel.
+  ///
+  /// A shadow ban lifts the same way as any other.
+  Future<Result<void>> unbanMember(String userID) {
     _checkInitialized();
-    return _client.unbanUser(userID, {
-      'type': type,
-      'id': id,
-    });
+    return _client.moderation.unbanUser(userID, channelCid: cid);
   }
 
-  /// Shadow bans the user with the given [userID] from the channel.
-  Future<EmptyResponse> shadowBan(
-    String userID,
-    Map<String, dynamic> options,
-  ) async {
+  /// Bans [userID] without telling them, hiding their messages.
+  ///
+  /// The same as [banMember] with `shadow` set, and the other arguments
+  /// behave the same way.
+  ///
+  /// Remove it with [unbanMember].
+  Future<Result<void>> shadowBan(
+    String userID, {
+    Duration? timeout,
+    String? reason,
+    bool? ipBan,
+    DeleteType? deleteMessages,
+  }) {
     _checkInitialized();
-    final opts = Map<String, dynamic>.from(options)
-      ..addAll({
-        'type': type,
-        'id': id,
-      });
-    return _client.shadowBan(userID, opts);
-  }
-
-  /// Remove the shadow ban for the user with the given [userID] in the channel.
-  Future<EmptyResponse> removeShadowBan(String userID) async {
-    _checkInitialized();
-    return _client.removeShadowBan(userID, {
-      'type': type,
-      'id': id,
-    });
+    return _client.moderation.shadowBan(
+      userID,
+      channelCid: cid,
+      timeout: timeout,
+      reason: reason,
+      ipBan: ipBan,
+      deleteMessages: deleteMessages,
+    );
   }
 
   /// Hides the channel from [StreamChatClient.queryChannels] for the user

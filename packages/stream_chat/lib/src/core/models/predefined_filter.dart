@@ -3,12 +3,11 @@ import 'channel_state.dart';
 
 part 'predefined_filter.g.dart';
 
-/// The resolved predefined filter spec returned by the server.
+/// A predefined filter, resolved for one channel query.
 ///
-/// When `predefined_filter` is provided on a `queryChannels` request, the
-/// server resolves the template (interpolating any `filter_values` and
-/// `sort_values`) and echoes the materialized `filter` and `sort` on the
-/// response under this key.
+/// When a channel query names a predefined filter, its template is filled in
+/// with the filter and sort values the query supplies, and the filter and sort
+/// it resolves to come back with the channels.
 @JsonSerializable(createToJson: false)
 class PredefinedFilter {
   /// Creates a new instance.
@@ -21,32 +20,32 @@ class PredefinedFilter {
   /// Create a new instance from a json.
   factory PredefinedFilter.fromJson(Map<String, dynamic> json) => _$PredefinedFilterFromJson(json);
 
-  /// Identifier of the predefined filter on the server.
+  /// The name of the predefined filter.
   final String name;
 
-  /// Filter conditions as resolved by the server.
+  /// The filter conditions the predefined filter resolved to.
   ///
-  /// Wrapped in [ChannelFilter.raw], since the server authors it and may use an
+  /// Wrapped in [ChannelFilter.raw], since it is not authored here and may use an
   /// operator this package does not model. Read it with [ChannelFilter.toJson];
   /// [ChannelFilter.matches] throws for it.
   @JsonKey(fromJson: _filterFromJson)
   final ChannelFilter filter;
 
-  /// Sort specification as resolved by the server.
+  /// The sort the predefined filter resolved to, if it names one.
   final List<ChannelSort>? sort;
 
-  /// Sort to apply locally, matching what the server applies for this
-  /// predefined filter — the echoed [sort], or a default derived from
-  /// [filter] when [sort] is null.
+  /// The sort that reproduces this predefined filter's ordering locally.
+  ///
+  /// This is [sort], or a default derived from [filter] when [sort] is null.
   List<ChannelSort> get effectiveSort => sort ?? _defaultSortFor(filter);
 
   static ChannelFilter _filterFromJson(Map<String, dynamic> json) => ChannelFilter.raw(json);
 }
 
-// Mirrors the server's fallback for a channel query that carries no sort, so
-// the field is written out rather than taken from [ChannelSort.defaultSort]:
-// the two agree today, but one is the ordering this SDK picks and the other is
-// the ordering the server falls back to, and either may change alone.
+// Mirrors the ordering a channel query with no sort falls back to, so the field
+// is written out rather than taken from [ChannelSort.defaultSort]: the two agree
+// today, but one is the ordering this SDK picks and the other is the query's
+// fallback, and either may change alone.
 List<ChannelSort> _defaultSortFor(ChannelFilter filter) {
   final lastMessageAt = ChannelSortField.lastMessageAt;
   if (_mapTouchesField(filter.toJson(), lastMessageAt.remote)) {

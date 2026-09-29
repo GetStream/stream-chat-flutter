@@ -50,8 +50,9 @@ class ChannelApi {
   ///
   /// Either an inline [filter]/[sort] pair or a [predefinedFilter] identifier
   /// (optionally interpolated with [filterValues] and [sortValues]) can be
-  /// provided. When a predefined filter is used, the server resolves it and
-  /// returns the materialized filter/sort on [QueryChannelsResponse].
+  /// provided. When a predefined filter is used,
+  /// [QueryChannelsResponse.predefinedFilter] carries the filter and sort it
+  /// resolved to.
   Future<QueryChannelsResponse> queryChannels({
     ChannelFilter? filter,
     List<ChannelSort>? sort,

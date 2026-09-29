@@ -28,7 +28,7 @@ void main() {
 
     setUp(() {
       final ws = FakeChatServer();
-      client = StreamChatClient(apiKey, wsProvider: ws.connect, chatApi: fakeChatApi);
+      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), wsProvider: ws.connect, chatApi: fakeChatApi);
     });
 
     tearDown(() {
@@ -193,7 +193,7 @@ void main() {
 
     setUp(() {
       final ws = FakeChatServer()..handshakeFails = true;
-      client = StreamChatClient(apiKey, chatApi: fakeChatApi, wsProvider: ws.connect);
+      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), chatApi: fakeChatApi, wsProvider: ws.connect);
     });
 
     tearDown(() {
@@ -268,7 +268,7 @@ void main() {
     });
 
     setUp(() {
-      client = StreamChatClient(apiKey, chatApi: fakeChatApi);
+      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), chatApi: fakeChatApi);
     });
 
     tearDown(() {
@@ -356,7 +356,7 @@ void main() {
 
     setUp(() {
       final ws = FakeChatServer()..handshakeFails = true;
-      client = StreamChatClient(apiKey, chatApi: fakeChatApi, wsProvider: ws.connect)
+      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), chatApi: fakeChatApi, wsProvider: ws.connect)
         ..chatPersistenceClient = persistence;
     });
 
@@ -488,7 +488,7 @@ void main() {
       // connection info before any test has had a chance to stub it.
       when(() => persistence.updateConnectionInfo(any())).thenAnswer((_) => Future.value());
       final ws = FakeChatServer();
-      client = StreamChatClient(apiKey, chatApi: fakeChatApi, wsProvider: ws.connect)
+      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), chatApi: fakeChatApi, wsProvider: ws.connect)
         ..chatPersistenceClient = persistence;
       await client.connectUser(user, token);
       await delay(300);
@@ -1171,6 +1171,14 @@ void main() {
       expect(client.state.currentUser, isNull);
       expect(client.connectionStatus, ConnectionStatus.disconnected);
     });
+
+    test('`.disconnectUser` resets appSettings to the default', () async {
+      expect(client.appSettings.name, 'test-app');
+
+      await client.disconnectUser(flushChatPersistence: true);
+
+      expect(client.appSettings, const AppSettings());
+    });
   });
 
   group('Client with connected user without persistence', () {
@@ -1197,18 +1205,19 @@ void main() {
       // Clear any accumulated interactions from a previous test so that
       // verifyNoMoreInteractions on fakeChatApi.general stays accurate.
       clearInteractions(fakeChatApi.general);
-      clearInteractions(defaultApi);
 
       final ws = FakeChatServer();
       client = StreamChatClient(apiKey, chatApi: fakeChatApi, defaultApi: defaultApi, wsProvider: ws.connect);
-      // Stub getAppSettings so the background fetch after connectUser succeeds.
-      when(() => fakeChatApi.general.getAppSettings()).thenAnswer(
-        (_) async => GetAppSettingsResponse()..app = const AppSettings(name: 'test'),
-      );
+      // Stub getApp so the background fetch after connectUser succeeds.
+      when(defaultApi.getApp).thenAnswer((_) async => Result.success(fakeGetApplicationResponse()));
       await client.connectUser(user, token);
       await delay(300);
       expect(client.persistenceEnabled, isFalse);
       expect(client.connectionStatus, ConnectionStatus.connected);
+
+      // Cleared after connecting, so the background getApp does not trip the
+      // verifyNoMoreInteractions(defaultApi) checks below.
+      clearInteractions(defaultApi);
     });
 
     tearDown(() async {
@@ -1652,7 +1661,6 @@ void main() {
           messageFilters: any(named: 'messageFilters'),
         ),
       ).called(1);
-      verify(() => fakeChatApi.general.getAppSettings()).called(1);
       verifyNoMoreInteractions(fakeChatApi.general);
     });
 
@@ -1851,13 +1859,30 @@ void main() {
       );
 
       final res = await client.addDevice(id, PushProvider.firebase);
-      expect(res.isSuccess, isTrue);
+      expect(res, const Result<void>.success(null));
 
       verify(() => defaultApi.createDevice(createDeviceRequest: request)).called(1);
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.addDevice forwards the push provider name', () async {
+    test('StreamChatClient.addDevice sends a provider without a constant by its wire value', () async {
+      const id = 'test-device-id';
+      final request = api.CreateDeviceRequest(
+        id: id,
+        pushProvider: api.CreateDeviceRequestPushProvider.fromJson('onesignal'),
+      );
+
+      when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
+        (_) async => const Result.success(api.DurationResponse(duration: '0.01ms')),
+      );
+
+      await client.addDevice(id, const PushProvider('onesignal'));
+
+      verify(() => defaultApi.createDevice(createDeviceRequest: request)).called(1);
+      verifyNoMoreInteractions(defaultApi);
+    });
+
+    test('StreamChatClient.addDevice sends the push provider name', () async {
       const id = 'test-device-id';
       const pushProviderName = 'my-custom-config';
       const request = api.CreateDeviceRequest(
@@ -1870,8 +1895,24 @@ void main() {
         (_) async => const Result.success(api.DurationResponse(duration: '0.01ms')),
       );
 
-      final res = await client.addDevice(id, PushProvider.firebase, pushProviderName: pushProviderName);
-      expect(res.isSuccess, isTrue);
+      await client.addDevice(id, PushProvider.firebase, pushProviderName: pushProviderName);
+
+      verify(() => defaultApi.createDevice(createDeviceRequest: request)).called(1);
+      verifyNoMoreInteractions(defaultApi);
+    });
+
+    test('StreamChatClient.addDevice sends an empty provider name as no name', () async {
+      const id = 'test-device-id';
+      const request = api.CreateDeviceRequest(
+        id: id,
+        pushProvider: api.CreateDeviceRequestPushProvider.apn,
+      );
+
+      when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
+        (_) async => const Result.success(api.DurationResponse(duration: '0.01ms')),
+      );
+
+      await client.addDevice(id, PushProvider.apn, pushProviderName: '');
 
       verify(() => defaultApi.createDevice(createDeviceRequest: request)).called(1);
       verifyNoMoreInteractions(defaultApi);
@@ -1890,30 +1931,47 @@ void main() {
 
       final res = await client.addDevice('test-device-id', PushProvider.firebase);
 
-      expect(res.isFailure, isTrue);
       expect(res.exceptionOrNull(), error);
     });
 
     test('StreamChatClient.getDevices returns the registered devices', () async {
-      final devices = List.generate(
-        3,
-        (index) => api.DeviceResponse(
-          id: 'test-device-id-$index',
-          pushProvider: api.CreateDeviceRequestPushProvider.firebase,
-          createdAt: DateTime.utc(2024),
-          userId: userId,
+      when(defaultApi.listDevices).thenAnswer(
+        (_) async => Result.success(
+          api.ListDevicesResponse(
+            duration: '0.01ms',
+            devices: [
+              _generatedDevice(id: 'device-1', pushProvider: 'firebase'),
+              _generatedDevice(id: 'device-2', pushProvider: 'apn'),
+              _generatedDevice(id: 'device-3', pushProvider: 'huawei'),
+            ],
+          ),
         ),
       );
 
-      when(defaultApi.listDevices).thenAnswer(
-        (_) async => Result.success(api.ListDevicesResponse(duration: '0.01ms', devices: devices)),
-      );
-
       final res = await client.getDevices();
-      expect(res.getOrNull()?.devices.map((it) => it.id), [for (final device in devices) device.id]);
+      expect(
+        res.getOrNull(),
+        const ListDevicesResponse(
+          duration: '0.01ms',
+          devices: [
+            Device(id: 'device-1', pushProvider: PushProvider.firebase),
+            Device(id: 'device-2', pushProvider: PushProvider.apn),
+            Device(id: 'device-3', pushProvider: PushProvider.huawei),
+          ],
+        ),
+      );
 
       verify(defaultApi.listDevices).called(1);
       verifyNoMoreInteractions(defaultApi);
+    });
+
+    test('StreamChatClient.getDevices returns the failure without throwing', () async {
+      const error = StreamClientException(message: 'boom');
+      when(defaultApi.listDevices).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await client.getDevices();
+
+      expect(res.exceptionOrNull(), error);
     });
 
     test('StreamChatClient.removeDevice sends the device id and returns a success', () async {
@@ -1924,10 +1982,19 @@ void main() {
       );
 
       final res = await client.removeDevice(deviceId);
-      expect(res.isSuccess, isTrue);
+      expect(res, const Result<void>.success(null));
 
       verify(() => defaultApi.deleteDevice(id: deviceId)).called(1);
       verifyNoMoreInteractions(defaultApi);
+    });
+
+    test('StreamChatClient.removeDevice returns the failure without throwing', () async {
+      const error = StreamClientException(message: 'boom');
+      when(() => defaultApi.deleteDevice(id: 'test-device-id')).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await client.removeDevice('test-device-id');
+
+      expect(res.exceptionOrNull(), error);
     });
 
     test('`.setPushPreferences`', () async {
@@ -2012,10 +2079,10 @@ void main() {
       expect(pushPreferences?.disabledUntil, pushPreference.disabledUntil);
     });
 
-    test('StreamChatClient.listUserGroups sends the pagination arguments and returns the mapped groups', () async {
+    test('StreamChatClient.listUserGroups sends the pagination arguments and returns the listed groups', () async {
       const limit = 10;
       const idGt = 'cursor-group-id';
-      final createdAtGt = DateTime.utc(2024, 6, 15, 12);
+      final createdAtGt = DateTime.utc(2024, 6, 15, 12).toLocal();
       const teamId = 'test-team-id';
 
       when(
@@ -2027,12 +2094,18 @@ void main() {
         ),
       ).thenAnswer(
         (_) async => Result.success(
-          api.ListUserGroupsResponse(duration: '0.01ms', userGroups: [_generatedUserGroup('group-id')]),
+          api.ListUserGroupsResponse(
+            duration: '0.01ms',
+            userGroups: [_generatedUserGroup('group-1'), _generatedUserGroup('group-2')],
+          ),
         ),
       );
 
       final res = await client.listUserGroups(limit: limit, idGt: idGt, createdAtGt: createdAtGt, teamId: teamId);
-      expect(res.getOrNull()?.userGroups, [_userGroup('group-id')]);
+      expect(
+        res.getOrNull(),
+        ListUserGroupsResponse(duration: '0.01ms', userGroups: [_userGroup('group-1'), _userGroup('group-2')]),
+      );
 
       verify(
         () => defaultApi.listUserGroups(
@@ -2045,7 +2118,16 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.searchUserGroups sends the query and returns the mapped groups', () async {
+    test('StreamChatClient.listUserGroups returns the failure without throwing', () async {
+      const error = StreamClientException(message: 'boom');
+      when(() => defaultApi.listUserGroups()).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await client.listUserGroups();
+
+      expect(res.exceptionOrNull(), error);
+    });
+
+    test('StreamChatClient.searchUserGroups sends the query and returns the matching groups', () async {
       const query = 'eng';
       const limit = 10;
       const nameGt = 'engineering';
@@ -2056,12 +2138,18 @@ void main() {
         () => defaultApi.searchUserGroups(query: query, limit: limit, nameGt: nameGt, idGt: idGt, teamId: teamId),
       ).thenAnswer(
         (_) async => Result.success(
-          api.SearchUserGroupsResponse(duration: '0.01ms', userGroups: [_generatedUserGroup('group-id')]),
+          api.SearchUserGroupsResponse(
+            duration: '0.01ms',
+            userGroups: [_generatedUserGroup('group-1'), _generatedUserGroup('group-2')],
+          ),
         ),
       );
 
       final res = await client.searchUserGroups(query, limit: limit, nameGt: nameGt, idGt: idGt, teamId: teamId);
-      expect(res.getOrNull()?.userGroups, [_userGroup('group-id')]);
+      expect(
+        res.getOrNull(),
+        SearchUserGroupsResponse(duration: '0.01ms', userGroups: [_userGroup('group-1'), _userGroup('group-2')]),
+      );
 
       verify(
         () => defaultApi.searchUserGroups(query: query, limit: limit, nameGt: nameGt, idGt: idGt, teamId: teamId),
@@ -2069,22 +2157,141 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.getUserGroup sends the id and team and returns the mapped group', () async {
+    test('StreamChatClient.searchUserGroups returns the failure without throwing', () async {
+      const error = StreamClientException(message: 'boom');
+      when(() => defaultApi.searchUserGroups(query: 'eng')).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await client.searchUserGroups('eng');
+
+      expect(res.exceptionOrNull(), error);
+    });
+
+    test('StreamChatClient.getUserGroup sends the id and team and returns the group', () async {
       const id = 'test-group-id';
       const teamId = 'test-team-id';
 
       when(() => defaultApi.getUserGroup(id: id, teamId: teamId)).thenAnswer(
-        (_) async => Result.success(api.GetUserGroupResponse(duration: '0.01ms', userGroup: _generatedUserGroup(id))),
+        (_) async => Result.success(
+          api.GetUserGroupResponse(
+            duration: '0.01ms',
+            userGroup: api.UserGroupResponse(
+              createdAt: DateTime.utc(2024, 1, 2),
+              createdBy: 'test-creator-id',
+              description: 'Everyone on call this week',
+              id: id,
+              members: [
+                api.UserGroupMember(
+                  appPk: 42,
+                  createdAt: DateTime.utc(2024, 5, 6),
+                  groupId: id,
+                  isAdmin: true,
+                  userId: 'test-user-1',
+                ),
+                api.UserGroupMember(
+                  appPk: 42,
+                  createdAt: DateTime.utc(2024, 7, 8),
+                  groupId: id,
+                  isAdmin: false,
+                  userId: 'test-user-2',
+                ),
+              ],
+              name: 'on-call',
+              teamId: teamId,
+              updatedAt: DateTime.utc(2024, 3, 4),
+            ),
+          ),
+        ),
       );
 
       final res = await client.getUserGroup(id, teamId: teamId);
-      expect(res.getOrNull()?.userGroup, _userGroup(id));
+      expect(
+        res.getOrNull(),
+        GetUserGroupResponse(
+          duration: '0.01ms',
+          userGroup: UserGroup(
+            createdAt: DateTime.utc(2024, 1, 2),
+            createdBy: 'test-creator-id',
+            description: 'Everyone on call this week',
+            id: id,
+            members: [
+              UserGroupMember(
+                createdAt: DateTime.utc(2024, 5, 6),
+                groupId: id,
+                isAdmin: true,
+                userId: 'test-user-1',
+              ),
+              UserGroupMember(
+                createdAt: DateTime.utc(2024, 7, 8),
+                groupId: id,
+                isAdmin: false,
+                userId: 'test-user-2',
+              ),
+            ],
+            name: 'on-call',
+            teamId: teamId,
+            updatedAt: DateTime.utc(2024, 3, 4),
+          ),
+        ),
+      );
 
       verify(() => defaultApi.getUserGroup(id: id, teamId: teamId)).called(1);
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.createUserGroup sends the arguments and returns the mapped group', () async {
+    test('StreamChatClient.getUserGroup keeps the members null when the response leaves them out', () async {
+      const id = 'test-group-id';
+      when(() => defaultApi.getUserGroup(id: id)).thenAnswer(
+        (_) async => Result.success(api.GetUserGroupResponse(duration: '0.01ms', userGroup: _generatedUserGroup(id))),
+      );
+
+      final res = await client.getUserGroup(id);
+
+      expect(res.getOrNull()!.userGroup!.members, isNull);
+    });
+
+    test('StreamChatClient.getUserGroup keeps an empty member list empty', () async {
+      const id = 'test-group-id';
+      when(() => defaultApi.getUserGroup(id: id)).thenAnswer(
+        (_) async => Result.success(
+          api.GetUserGroupResponse(
+            duration: '0.01ms',
+            userGroup: api.UserGroupResponse(
+              createdAt: DateTime.utc(2024),
+              id: id,
+              members: const [],
+              name: 'name-$id',
+              updatedAt: DateTime.utc(2024),
+            ),
+          ),
+        ),
+      );
+
+      final res = await client.getUserGroup(id);
+
+      expect(res.getOrNull()!.userGroup!.members, isEmpty);
+    });
+
+    test('StreamChatClient.getUserGroup returns a null group when the response has none', () async {
+      const id = 'test-group-id';
+      when(() => defaultApi.getUserGroup(id: id)).thenAnswer(
+        (_) async => const Result.success(api.GetUserGroupResponse(duration: '0.01ms')),
+      );
+
+      final res = await client.getUserGroup(id);
+
+      expect(res, const Result.success(GetUserGroupResponse(duration: '0.01ms')));
+    });
+
+    test('StreamChatClient.getUserGroup returns the failure without throwing', () async {
+      const error = StreamClientException(message: 'boom');
+      when(() => defaultApi.getUserGroup(id: 'test-group-id')).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await client.getUserGroup('test-group-id');
+
+      expect(res.exceptionOrNull(), error);
+    });
+
+    test('StreamChatClient.createUserGroup sends the arguments and returns the created group', () async {
       const name = 'Engineering';
       const id = 'test-group-id';
       const description = 'The engineers';
@@ -2110,13 +2317,36 @@ void main() {
         teamId: teamId,
         memberIds: memberIds,
       );
-      expect(res.getOrNull()?.userGroup, _userGroup(id));
+      expect(res.getOrNull(), CreateUserGroupResponse(duration: '0.01ms', userGroup: _userGroup(id)));
 
       verify(() => defaultApi.createUserGroup(createUserGroupRequest: request)).called(1);
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.updateUserGroup sends the arguments and returns the mapped group', () async {
+    test('StreamChatClient.createUserGroup returns a null group when the response has none', () async {
+      const request = api.CreateUserGroupRequest(name: 'Engineering');
+      when(() => defaultApi.createUserGroup(createUserGroupRequest: request)).thenAnswer(
+        (_) async => const Result.success(api.CreateUserGroupResponse(duration: '0.01ms')),
+      );
+
+      final res = await client.createUserGroup('Engineering');
+
+      expect(res, const Result.success(CreateUserGroupResponse(duration: '0.01ms')));
+    });
+
+    test('StreamChatClient.createUserGroup returns the failure without throwing', () async {
+      const error = StreamClientException(message: 'boom');
+      const request = api.CreateUserGroupRequest(name: 'Engineering');
+      when(
+        () => defaultApi.createUserGroup(createUserGroupRequest: request),
+      ).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await client.createUserGroup('Engineering');
+
+      expect(res.exceptionOrNull(), error);
+    });
+
+    test('StreamChatClient.updateUserGroup sends the arguments and returns the updated group', () async {
       const id = 'test-group-id';
       const name = 'Engineering';
       const description = 'The engineers';
@@ -2129,13 +2359,36 @@ void main() {
       );
 
       final res = await client.updateUserGroup(id, name: name, description: description, teamId: teamId);
-      expect(res.getOrNull()?.userGroup, _userGroup(id));
+      expect(res.getOrNull(), UpdateUserGroupResponse(duration: '0.01ms', userGroup: _userGroup(id)));
 
       verify(() => defaultApi.updateUserGroup(id: id, updateUserGroupRequest: request)).called(1);
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.deleteUserGroup sends the id and team and returns a success with no value', () async {
+    test('StreamChatClient.updateUserGroup returns a null group when the response has none', () async {
+      const id = 'test-group-id';
+      when(
+        () => defaultApi.updateUserGroup(id: id, updateUserGroupRequest: const api.UpdateUserGroupRequest()),
+      ).thenAnswer((_) async => const Result.success(api.UpdateUserGroupResponse(duration: '0.01ms')));
+
+      final res = await client.updateUserGroup(id);
+
+      expect(res, const Result.success(UpdateUserGroupResponse(duration: '0.01ms')));
+    });
+
+    test('StreamChatClient.updateUserGroup returns the failure without throwing', () async {
+      const id = 'test-group-id';
+      const error = StreamClientException(message: 'boom');
+      when(
+        () => defaultApi.updateUserGroup(id: id, updateUserGroupRequest: const api.UpdateUserGroupRequest()),
+      ).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await client.updateUserGroup(id);
+
+      expect(res.exceptionOrNull(), error);
+    });
+
+    test('StreamChatClient.deleteUserGroup sends the id and team and returns a success', () async {
       const id = 'test-group-id';
       const teamId = 'test-team-id';
 
@@ -2150,7 +2403,16 @@ void main() {
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.addUserGroupMembers sends the members and returns the mapped group', () async {
+    test('StreamChatClient.deleteUserGroup returns the failure without throwing', () async {
+      const error = StreamClientException(message: 'boom');
+      when(() => defaultApi.deleteUserGroup(id: 'test-group-id')).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await client.deleteUserGroup('test-group-id');
+
+      expect(res.exceptionOrNull(), error);
+    });
+
+    test('StreamChatClient.addUserGroupMembers sends the members and returns the updated group', () async {
       const id = 'test-group-id';
       const memberIds = ['test-user-id'];
       const teamId = 'test-team-id';
@@ -2162,13 +2424,38 @@ void main() {
       );
 
       final res = await client.addUserGroupMembers(id, memberIds, asAdmin: true, teamId: teamId);
-      expect(res.getOrNull()?.userGroup, _userGroup(id));
+      expect(res.getOrNull(), AddUserGroupMembersResponse(duration: '0.01ms', userGroup: _userGroup(id)));
 
       verify(() => defaultApi.addUserGroupMembers(id: id, addUserGroupMembersRequest: request)).called(1);
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.removeUserGroupMembers sends the members and returns the mapped group', () async {
+    test('StreamChatClient.addUserGroupMembers returns a null group when the response has none', () async {
+      const id = 'test-group-id';
+      const request = api.AddUserGroupMembersRequest(memberIds: ['test-user-id']);
+      when(() => defaultApi.addUserGroupMembers(id: id, addUserGroupMembersRequest: request)).thenAnswer(
+        (_) async => const Result.success(api.AddUserGroupMembersResponse(duration: '0.01ms')),
+      );
+
+      final res = await client.addUserGroupMembers(id, const ['test-user-id']);
+
+      expect(res, const Result.success(AddUserGroupMembersResponse(duration: '0.01ms')));
+    });
+
+    test('StreamChatClient.addUserGroupMembers returns the failure without throwing', () async {
+      const id = 'test-group-id';
+      const error = StreamClientException(message: 'boom');
+      const request = api.AddUserGroupMembersRequest(memberIds: ['test-user-id']);
+      when(
+        () => defaultApi.addUserGroupMembers(id: id, addUserGroupMembersRequest: request),
+      ).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await client.addUserGroupMembers(id, const ['test-user-id']);
+
+      expect(res.exceptionOrNull(), error);
+    });
+
+    test('StreamChatClient.removeUserGroupMembers sends the members and returns the updated group', () async {
       const id = 'test-group-id';
       const memberIds = ['test-user-id'];
       const teamId = 'test-team-id';
@@ -2180,25 +2467,38 @@ void main() {
       );
 
       final res = await client.removeUserGroupMembers(id, memberIds, teamId: teamId);
-      expect(res.getOrNull()?.userGroup, _userGroup(id));
+      expect(res.getOrNull(), RemoveUserGroupMembersResponse(duration: '0.01ms', userGroup: _userGroup(id)));
 
       verify(() => defaultApi.removeUserGroupMembers(id: id, removeUserGroupMembersRequest: request)).called(1);
       verifyNoMoreInteractions(defaultApi);
     });
 
-    test('StreamChatClient.searchUserGroups returns the failure without throwing', () async {
-      const error = StreamClientException(message: 'boom');
+    test('StreamChatClient.removeUserGroupMembers returns a null group when the response has none', () async {
+      const id = 'test-group-id';
+      const request = api.RemoveUserGroupMembersRequest(memberIds: ['test-user-id']);
+      when(() => defaultApi.removeUserGroupMembers(id: id, removeUserGroupMembersRequest: request)).thenAnswer(
+        (_) async => const Result.success(api.RemoveUserGroupMembersResponse(duration: '0.01ms')),
+      );
 
+      final res = await client.removeUserGroupMembers(id, const ['test-user-id']);
+
+      expect(res, const Result.success(RemoveUserGroupMembersResponse(duration: '0.01ms')));
+    });
+
+    test('StreamChatClient.removeUserGroupMembers returns the failure without throwing', () async {
+      const id = 'test-group-id';
+      const error = StreamClientException(message: 'boom');
+      const request = api.RemoveUserGroupMembersRequest(memberIds: ['test-user-id']);
       when(
-        () => defaultApi.searchUserGroups(query: 'eng'),
+        () => defaultApi.removeUserGroupMembers(id: id, removeUserGroupMembersRequest: request),
       ).thenAnswer((_) async => const Result.failure(error));
 
-      final res = await client.searchUserGroups('eng');
+      final res = await client.removeUserGroupMembers(id, const ['test-user-id']);
 
       expect(res.exceptionOrNull(), error);
     });
 
-    test('StreamChatClient.searchRoles sends the query and returns the mapped response', () async {
+    test('StreamChatClient.searchRoles sends the query and returns the matching roles', () async {
       const query = 'adm';
       const limit = 10;
       const nameGt = 'admin';
@@ -2214,7 +2514,27 @@ void main() {
           includeGlobalRoles: includeGlobalRoles,
         ),
       ).thenAnswer(
-        (_) async => const Result.success(api.SearchRolesResponse(duration: '0.01ms', roles: [])),
+        (_) async => Result.success(
+          api.SearchRolesResponse(
+            duration: '0.01ms',
+            roles: [
+              api.Role(
+                name: 'admin',
+                custom: false,
+                scopes: const ['.app'],
+                createdAt: DateTime.utc(2024, 1, 2),
+                updatedAt: DateTime.utc(2024, 3, 4),
+              ),
+              api.Role(
+                name: 'admin_lite',
+                custom: true,
+                scopes: const ['messaging'],
+                createdAt: DateTime.utc(2024, 5, 6),
+                updatedAt: DateTime.utc(2024, 7, 8),
+              ),
+            ],
+          ),
+        ),
       );
 
       final res = await client.searchRoles(
@@ -2224,8 +2544,28 @@ void main() {
         roleType: roleType,
         includeGlobalRoles: includeGlobalRoles,
       );
-      expect(res.getOrNull()?.duration, '0.01ms');
-      expect(res.getOrNull()?.roles, isEmpty);
+      expect(
+        res.getOrNull(),
+        SearchRolesResponse(
+          duration: '0.01ms',
+          roles: [
+            Role(
+              name: 'admin',
+              custom: false,
+              scopes: const ['.app'],
+              createdAt: DateTime.utc(2024, 1, 2),
+              updatedAt: DateTime.utc(2024, 3, 4),
+            ),
+            Role(
+              name: 'admin_lite',
+              custom: true,
+              scopes: const ['messaging'],
+              createdAt: DateTime.utc(2024, 5, 6),
+              updatedAt: DateTime.utc(2024, 7, 8),
+            ),
+          ],
+        ),
+      );
 
       verify(
         () => defaultApi.searchRoles(
@@ -2249,8 +2589,113 @@ void main() {
 
       final res = await client.searchRoles(query);
 
-      expect(res.isFailure, isTrue);
       expect(res.exceptionOrNull(), error);
+    });
+
+    test('StreamChatClient.searchRoles sends only the query when nothing else is given', () async {
+      const query = 'adm';
+
+      when(
+        () => defaultApi.searchRoles(query: query),
+      ).thenAnswer((_) async => const Result.success(api.SearchRolesResponse(duration: '0.01ms', roles: [])));
+
+      await client.searchRoles(query);
+
+      verify(() => defaultApi.searchRoles(query: query)).called(1);
+      verifyNoMoreInteractions(defaultApi);
+    });
+
+    test('StreamChatClient.getAppSettings returns the app settings', () async {
+      when(defaultApi.getApp).thenAnswer(
+        (_) async => const Result.success(
+          api.GetApplicationResponse(
+            duration: '0.01ms',
+            app: api.AppResponseFields(
+              id: 42,
+              name: 'test-app',
+              placement: 'us-east',
+              autoTranslationEnabled: true,
+              asyncUrlEnrichEnabled: false,
+              fileUploadConfig: api.FileUploadConfig(
+                sizeLimit: 10485760,
+                allowedFileExtensions: ['.csv'],
+                blockedFileExtensions: ['.exe'],
+                allowedMimeTypes: ['text/csv'],
+                blockedMimeTypes: ['application/x-msdownload'],
+              ),
+              imageUploadConfig: api.FileUploadConfig(
+                sizeLimit: 5242880,
+                allowedFileExtensions: ['.png'],
+                blockedFileExtensions: ['.gif'],
+                allowedMimeTypes: ['image/png'],
+                blockedMimeTypes: ['image/gif'],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final res = await client.getAppSettings();
+      expect(
+        res.getOrNull(),
+        const AppSettingsResponse(
+          duration: '0.01ms',
+          app: AppSettings(
+            name: 'test-app',
+            autoTranslationEnabled: true,
+            fileUploadConfig: UploadConfig(
+              sizeLimit: 10485760,
+              allowedFileExtensions: ['.csv'],
+              blockedFileExtensions: ['.exe'],
+              allowedMimeTypes: ['text/csv'],
+              blockedMimeTypes: ['application/x-msdownload'],
+            ),
+            imageUploadConfig: UploadConfig(
+              sizeLimit: 5242880,
+              allowedFileExtensions: ['.png'],
+              blockedFileExtensions: ['.gif'],
+              allowedMimeTypes: ['image/png'],
+              blockedMimeTypes: ['image/gif'],
+            ),
+          ),
+        ),
+      );
+
+      verify(defaultApi.getApp).called(1);
+      verifyNoMoreInteractions(defaultApi);
+    });
+
+    test('StreamChatClient.getAppSettings returns the failure without throwing', () async {
+      const error = StreamClientException(message: 'boom');
+      when(defaultApi.getApp).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await client.getAppSettings();
+
+      expect(res.exceptionOrNull(), error);
+    });
+
+    test('StreamChatClient.getAppSettings replaces appSettings on success', () async {
+      when(defaultApi.getApp).thenAnswer((_) async => Result.success(fakeGetApplicationResponse(name: 'fresh')));
+
+      await client.getAppSettings();
+
+      expect(client.appSettings.name, 'fresh');
+    });
+
+    test('StreamChatClient.getAppSettings keeps appSettings when it fails', () async {
+      when(defaultApi.getApp).thenAnswer((_) async => const Result.failure(StreamClientException(message: 'boom')));
+
+      await client.getAppSettings();
+
+      expect(client.appSettings.name, 'test-app');
+    });
+
+    test('StreamChatClient.getAppSettings passes an unset size limit through as 0', () async {
+      when(defaultApi.getApp).thenAnswer((_) async => Result.success(fakeGetApplicationResponse()));
+
+      final res = await client.getAppSettings();
+
+      expect(res.getOrNull()?.app.fileUploadConfig.sizeLimit, 0);
     });
 
     group('`.channel`', () {
@@ -2509,7 +2954,6 @@ void main() {
       expect(res.members.length, members.length);
 
       verify(() => fakeChatApi.general.queryMembers(channelType)).called(1);
-      verify(() => fakeChatApi.general.getAppSettings()).called(1);
       verifyNoMoreInteractions(fakeChatApi.general);
     });
 
@@ -2569,36 +3013,6 @@ void main() {
         () => fakeChatApi.channel.truncateChannel(channelId, channelType),
       ).called(1);
       verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.muteChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelCid = '$channelType:$channelId';
-
-      when(() => fakeChatApi.moderation.muteChannel(channelCid)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.muteChannel(channelCid);
-
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.moderation.muteChannel(channelCid)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
-
-    test('`.unmuteChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelCid = '$channelType:$channelId';
-
-      when(() => fakeChatApi.moderation.unmuteChannel(channelCid)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.unmuteChannel(channelCid);
-
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.moderation.unmuteChannel(channelCid)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
     });
 
     test('`.partialMemberUpdate with userId`', () async {
@@ -3489,40 +3903,6 @@ void main() {
       verifyNoMoreInteractions(fakeChatApi.user);
     });
 
-    test('`.banUser`', () async {
-      const userId = 'test-user-id';
-
-      when(
-        () => fakeChatApi.moderation.banUser(userId, options: any(named: 'options')),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.banUser(userId);
-
-      expect(res, isNotNull);
-
-      verify(
-        () => fakeChatApi.moderation.banUser(userId, options: any(named: 'options')),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
-
-    test('`.unbanUser`', () async {
-      const userId = 'test-user-id';
-
-      when(
-        () => fakeChatApi.moderation.unbanUser(userId, options: any(named: 'options')),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.unbanUser(userId);
-
-      expect(res, isNotNull);
-
-      verify(
-        () => fakeChatApi.moderation.unbanUser(userId, options: any(named: 'options')),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
-
     test('`.blockUser`', () async {
       const userId = 'test-user-id';
 
@@ -3833,118 +4213,6 @@ void main() {
         verifyNoMoreInteractions(fakeChatApi.user);
       },
     );
-
-    test('`.shadowBan`', () async {
-      const userId = 'test-user-id';
-
-      when(
-        () => fakeChatApi.moderation.banUser(userId, options: {'shadow': true}),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.shadowBan(userId);
-
-      expect(res, isNotNull);
-
-      verify(
-        () => fakeChatApi.moderation.banUser(userId, options: {'shadow': true}),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
-
-    test('`.removeShadowBan`', () async {
-      const userId = 'test-user-id';
-
-      when(
-        () => fakeChatApi.moderation.unbanUser(userId, options: {'shadow': true}),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.removeShadowBan(userId);
-
-      expect(res, isNotNull);
-
-      verify(
-        () => fakeChatApi.moderation.unbanUser(userId, options: {'shadow': true}),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
-
-    test('`.muteUser`', () async {
-      const userId = 'test-user-id';
-
-      when(() => fakeChatApi.moderation.muteUser(userId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.muteUser(userId);
-
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.moderation.muteUser(userId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
-
-    test('`.unmuteUser`', () async {
-      const userId = 'test-user-id';
-
-      when(() => fakeChatApi.moderation.unmuteUser(userId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.unmuteUser(userId);
-
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.moderation.unmuteUser(userId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
-
-    test('`.flagMessage`', () async {
-      const messageId = 'test-message-id';
-
-      when(() => fakeChatApi.moderation.flagMessage(messageId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.flagMessage(messageId);
-
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.moderation.flagMessage(messageId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
-
-    test('`.unflagMessage`', () async {
-      const messageId = 'test-message-id';
-
-      when(() => fakeChatApi.moderation.unflagMessage(messageId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.unflagMessage(messageId);
-
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.moderation.unflagMessage(messageId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
-
-    test('`.flagUser`', () async {
-      const userId = 'test-message-id';
-
-      when(() => fakeChatApi.moderation.flagUser(userId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.flagUser(userId);
-
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.moderation.flagUser(userId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
-
-    test('`.unflagUser`', () async {
-      const userId = 'test-message-id';
-
-      when(() => fakeChatApi.moderation.unflagUser(userId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.unflagUser(userId);
-
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.moderation.unflagUser(userId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
 
     test('`.getActiveLiveLocations`', () async {
       final locations = [
@@ -4974,81 +5242,24 @@ void main() {
       verifyNoMoreInteractions(fakeChatApi.message);
     });
 
-    test('StreamChatClient.enrichUrl returns the scraped metadata of the url', () async {
-      const url = 'https://www.techyourchance.com/finite-state-machine-with-unit-tests-real-world-example';
+    test('StreamChatClient.enrichUrl sends the url and returns the scraped metadata', () async {
+      const url = 'https://getstream.io/chat';
 
       when(() => defaultApi.getOG(url: url)).thenAnswer(
         (_) async => const Result.success(
           api.GetOGResponse(
             duration: '0.01ms',
             custom: {},
-            type: 'image',
-            ogScrapeUrl: url,
-            authorName: 'TechYourChance',
-            title: 'Finite State Machine with Unit Tests: Real World Example',
-          ),
-        ),
-      );
-
-      final res = await client.enrichUrl(url);
-      expect(
-        res.getOrNull(),
-        const OGAttachmentResponse(
-          duration: '0.01ms',
-          type: 'image',
-          ogScrapeUrl: url,
-          authorName: 'TechYourChance',
-          title: 'Finite State Machine with Unit Tests: Real World Example',
-        ),
-      );
-
-      verify(() => defaultApi.getOG(url: url)).called(1);
-      verifyNoMoreInteractions(defaultApi);
-    });
-
-    test('StreamChatClient.enrichUrl maps every field of a fully populated response', () async {
-      const url = 'https://getstream.io/chat';
-      const image = api.ImageData(
-        frames: '1',
-        height: '200',
-        size: '1024',
-        url: 'https://giphy.com/1.gif',
-        width: '200',
-      );
-      when(() => defaultApi.getOG(url: url)).thenAnswer(
-        (_) async => const Result.success(
-          api.GetOGResponse(
-            duration: '0.01ms',
             ogScrapeUrl: 'https://getstream.io/chat/',
             assetUrl: 'https://getstream.io/chat/intro.mp4',
-            authorIcon: 'https://getstream.io/favicon.ico',
             authorLink: 'https://getstream.io',
             authorName: 'Stream',
-            color: '#005fff',
-            custom: {'campaign': 'launch'},
-            fallback: 'Stream Chat link preview',
-            footer: 'getstream.io',
-            footerIcon: 'https://getstream.io/footer.png',
             imageUrl: 'https://getstream.io/chat/og.png',
-            originalHeight: 630,
-            originalWidth: 1200,
-            pretext: 'Stream Chat',
             text: 'Build real-time chat in less time.',
             thumbUrl: 'https://getstream.io/chat/og-thumb.png',
             title: 'Chat API & SDKs',
             titleLink: 'https://getstream.io/chat/?utm_source=og',
             type: 'video',
-            actions: [api.Action(name: 'image_action', text: 'Send', type: 'button', style: 'primary', value: 'send')],
-            fields: [api.Field(short: true, title: 'Plan', value: 'Free')],
-            giphy: api.Images(
-              fixedHeight: image,
-              fixedHeightDownsampled: image,
-              fixedHeightStill: image,
-              fixedWidth: image,
-              fixedWidthDownsampled: image,
-              fixedWidthStill: image,
-              original: image,
-            ),
           ),
         ),
       );
@@ -5070,6 +5281,9 @@ void main() {
           type: 'video',
         ),
       );
+
+      verify(() => defaultApi.getOG(url: url)).called(1);
+      verifyNoMoreInteractions(defaultApi);
     });
 
     test('StreamChatClient.enrichUrl falls back to the requested url when the response has no scraped url', () async {
@@ -5131,7 +5345,7 @@ void main() {
 
     setUp(() async {
       final ws = FakeChatServer();
-      client = StreamChatClient(apiKey, chatApi: fakeChatApi, wsProvider: ws.connect);
+      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), chatApi: fakeChatApi, wsProvider: ws.connect);
       expect(client.persistenceEnabled, isFalse);
     });
 
@@ -5478,7 +5692,7 @@ void main() {
 
     test('should re-query active channels on reconnect when enabled (default)', () async {
       // Setup: connect with default flag, register two channels.
-      client = StreamChatClient(apiKey, chatApi: fakeChatApi, wsProvider: ws.connect);
+      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), chatApi: fakeChatApi, wsProvider: ws.connect);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5513,7 +5727,13 @@ void main() {
     });
 
     test('should skip the re-query on reconnect when disabled', () async {
-      client = StreamChatClient(apiKey, chatApi: fakeChatApi, wsProvider: ws.connect, recoverStateOnReconnect: false);
+      client = StreamChatClient(
+        apiKey,
+        defaultApi: FakeDefaultApi(),
+        chatApi: fakeChatApi,
+        wsProvider: ws.connect,
+        recoverStateOnReconnect: false,
+      );
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5538,7 +5758,13 @@ void main() {
     });
 
     test('should still emit `connectionRecovered` when disabled', () async {
-      client = StreamChatClient(apiKey, chatApi: fakeChatApi, wsProvider: ws.connect, recoverStateOnReconnect: false);
+      client = StreamChatClient(
+        apiKey,
+        defaultApi: FakeDefaultApi(),
+        chatApi: fakeChatApi,
+        wsProvider: ws.connect,
+        recoverStateOnReconnect: false,
+      );
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5573,7 +5799,7 @@ void main() {
         ),
       ).thenThrow(StateError('queryChannels needs an active connection. Call `connectUser` first.'));
 
-      client = StreamChatClient(apiKey, chatApi: fakeChatApi, wsProvider: ws.connect);
+      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), chatApi: fakeChatApi, wsProvider: ws.connect);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5592,7 +5818,7 @@ void main() {
     });
 
     test('should skip the re-query when no active channels are tracked', () async {
-      client = StreamChatClient(apiKey, chatApi: fakeChatApi, wsProvider: ws.connect);
+      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), chatApi: fakeChatApi, wsProvider: ws.connect);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5618,7 +5844,13 @@ void main() {
     // Skipping event replay leaves the state of the synced channels behind, so
     // the skip refreshes them itself, whatever this flag is set to.
     test('should re-query active channels when the sync skipped event replay', () async {
-      client = StreamChatClient(apiKey, chatApi: fakeChatApi, wsProvider: ws.connect, recoverStateOnReconnect: false);
+      client = StreamChatClient(
+        apiKey,
+        defaultApi: FakeDefaultApi(),
+        chatApi: fakeChatApi,
+        wsProvider: ws.connect,
+        recoverStateOnReconnect: false,
+      );
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5671,7 +5903,7 @@ void main() {
     // A failed sync applied nothing and moved nothing, so the configured
     // recovery still runs and the window stays outstanding for the next sync.
     test('should re-query active channels when the sync fails, keeping lastSyncAt', () async {
-      client = StreamChatClient(apiKey, chatApi: fakeChatApi, wsProvider: ws.connect);
+      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), chatApi: fakeChatApi, wsProvider: ws.connect);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5729,7 +5961,13 @@ void main() {
         ),
       ).thenThrow(StateError('queryChannels needs an active connection. Call `connectUser` first.'));
 
-      client = StreamChatClient(apiKey, chatApi: fakeChatApi, wsProvider: ws.connect, recoverStateOnReconnect: false);
+      client = StreamChatClient(
+        apiKey,
+        defaultApi: FakeDefaultApi(),
+        chatApi: fakeChatApi,
+        wsProvider: ws.connect,
+        recoverStateOnReconnect: false,
+      );
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5763,7 +6001,13 @@ void main() {
     });
 
     test('should re-query in batches when more channels are active than fit in one page', () async {
-      client = StreamChatClient(apiKey, chatApi: fakeChatApi, wsProvider: ws.connect, recoverStateOnReconnect: false);
+      client = StreamChatClient(
+        apiKey,
+        defaultApi: FakeDefaultApi(),
+        chatApi: fakeChatApi,
+        wsProvider: ws.connect,
+        recoverStateOnReconnect: false,
+      );
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5835,7 +6079,7 @@ void main() {
     // it fires. Emitting it before the catch-up finishes would have them act
     // on state the sync has not written yet.
     test('should finish recovering before `connectionRecovered` fires', () async {
-      client = StreamChatClient(apiKey, chatApi: fakeChatApi, wsProvider: ws.connect);
+      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), chatApi: fakeChatApi, wsProvider: ws.connect);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5881,7 +6125,13 @@ void main() {
     // One page failing says nothing about the others, so the rest are still
     // attempted — the channels that can be refreshed are.
     test('should attempt every page when one of them fails', () async {
-      client = StreamChatClient(apiKey, chatApi: fakeChatApi, wsProvider: ws.connect, recoverStateOnReconnect: false);
+      client = StreamChatClient(
+        apiKey,
+        defaultApi: FakeDefaultApi(),
+        chatApi: fakeChatApi,
+        wsProvider: ws.connect,
+        recoverStateOnReconnect: false,
+      );
       await client.connectUser(user, token);
       await delay(300);
 
@@ -5955,7 +6205,7 @@ void main() {
     });
 
     test('should respect runtime toggling via the setter', () async {
-      client = StreamChatClient(apiKey, chatApi: fakeChatApi, wsProvider: ws.connect);
+      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), chatApi: fakeChatApi, wsProvider: ws.connect);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -6043,7 +6293,7 @@ void main() {
         ),
       ).thenAnswer((_) => pendingQuery.future);
 
-      client = StreamChatClient(apiKey, chatApi: fakeChatApi, wsProvider: ws.connect);
+      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), chatApi: fakeChatApi, wsProvider: ws.connect);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -6079,7 +6329,7 @@ void main() {
 
     setUp(() async {
       final ws = FakeChatServer();
-      client = StreamChatClient('test-api-key', wsProvider: ws.connect);
+      client = StreamChatClient('test-api-key', defaultApi: FakeDefaultApi(), wsProvider: ws.connect);
 
       final user = User(id: 'test-user-id');
       final token = testUserToken(user.id).rawValue;
@@ -6239,7 +6489,7 @@ void main() {
 
     setUp(() {
       final ws = FakeChatServer();
-      client = StreamChatClient(apiKey, wsProvider: ws.connect, chatApi: fakeChatApi);
+      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), wsProvider: ws.connect, chatApi: fakeChatApi);
     });
 
     tearDown(() {
@@ -6354,7 +6604,12 @@ void main() {
     // Recovering after an outage replays the events missed over `/sync`, not over the socket, so
     // one carrying a poll has to be reported the same way as one that arrived live.
     test('should report a poll message recovered after an outage as a poll created event', () async {
-      final client = StreamChatClient('test-api-key', chatApi: FakeChatApi(), wsProvider: FakeChatServer().connect);
+      final client = StreamChatClient(
+        'test-api-key',
+        defaultApi: FakeDefaultApi(),
+        chatApi: FakeChatApi(),
+        wsProvider: FakeChatServer().connect,
+      );
       addTearDown(client.dispose);
 
       final poll = Poll(
@@ -6379,7 +6634,12 @@ void main() {
 
     Future<(StreamChatClient, FakeChatServer)> connectedClient() async {
       final server = FakeChatServer(user: OwnUser.fromUser(user));
-      final client = StreamChatClient(apiKey, chatApi: FakeChatApi(), wsProvider: server.connect);
+      final client = StreamChatClient(
+        apiKey,
+        defaultApi: FakeDefaultApi(),
+        chatApi: FakeChatApi(),
+        wsProvider: server.connect,
+      );
       addTearDown(client.dispose);
 
       await client.connectUser(user, token);
@@ -6425,7 +6685,12 @@ void main() {
 
     test('should report a first attempt that failed as disconnected', () async {
       final server = FakeChatServer(user: OwnUser.fromUser(user))..handshakeFails = true;
-      final client = StreamChatClient(apiKey, chatApi: FakeChatApi(), wsProvider: server.connect);
+      final client = StreamChatClient(
+        apiKey,
+        defaultApi: FakeDefaultApi(),
+        chatApi: FakeChatApi(),
+        wsProvider: server.connect,
+      );
       addTearDown(client.dispose);
 
       await expectLater(client.connectUser(user, token), throwsA(isA<StreamException>()));
@@ -6475,7 +6740,12 @@ void main() {
 
     test('should wait on the attempt in flight rather than open a second connection', () async {
       final server = FakeChatServer(user: OwnUser.fromUser(user));
-      final client = StreamChatClient(apiKey, chatApi: FakeChatApi(), wsProvider: server.connect);
+      final client = StreamChatClient(
+        apiKey,
+        defaultApi: FakeDefaultApi(),
+        chatApi: FakeChatApi(),
+        wsProvider: server.connect,
+      );
       addTearDown(client.dispose);
 
       // Reported the same way as a connection waiting out a delay, which is what makes asking to
@@ -6534,9 +6804,15 @@ void main() {
     });
 
     test('should answer both callers connecting the same user at once with one connection', () async {
-      final fakeChatApi = FakeChatApi();
+      final defaultApi = MockDefaultApi();
+      when(defaultApi.getApp).thenAnswer((_) async => Result.success(fakeGetApplicationResponse()));
       final server = FakeChatServer(user: OwnUser.fromUser(user));
-      final client = StreamChatClient(apiKey, chatApi: fakeChatApi, wsProvider: server.connect);
+      final client = StreamChatClient(
+        apiKey,
+        defaultApi: defaultApi,
+        chatApi: FakeChatApi(),
+        wsProvider: server.connect,
+      );
       addTearDown(client.dispose);
 
       // The second lands while the first is still opening, which is where the status cannot tell a
@@ -6551,12 +6827,17 @@ void main() {
       // One sign-in, not two alongside each other: what it does for the user behind the connection
       // is done for the pair rather than once each.
       await pumpEventQueue();
-      verify(() => fakeChatApi.general.getAppSettings()).called(1);
+      verify(defaultApi.getApp).called(1);
     });
 
     test('should leave nobody signed in when connecting a user fails', () async {
       final server = FakeChatServer()..handshakeFails = true;
-      final client = StreamChatClient(apiKey, chatApi: FakeChatApi(), wsProvider: server.connect);
+      final client = StreamChatClient(
+        apiKey,
+        defaultApi: FakeDefaultApi(),
+        chatApi: FakeChatApi(),
+        wsProvider: server.connect,
+      );
       addTearDown(client.dispose);
 
       await expectLater(client.connectUser(user, token), throwsA(isA<StreamException>()));
@@ -6566,7 +6847,12 @@ void main() {
 
     test('should connect another user after connecting one failed', () async {
       final server = FakeChatServer()..handshakeFails = true;
-      final client = StreamChatClient(apiKey, chatApi: FakeChatApi(), wsProvider: server.connect);
+      final client = StreamChatClient(
+        apiKey,
+        defaultApi: FakeDefaultApi(),
+        chatApi: FakeChatApi(),
+        wsProvider: server.connect,
+      );
       addTearDown(client.dispose);
 
       await expectLater(client.connectUser(user, token), throwsA(isA<StreamException>()));
@@ -6631,7 +6917,12 @@ void main() {
     // A client that never connected has nothing to wait for, so the query says so rather than
     // waiting on a connection nobody asked for.
     test('should throw when no connection was ever opened', () async {
-      final client = StreamChatClient(apiKey, chatApi: FakeChatApi(), wsProvider: FakeChatServer().connect);
+      final client = StreamChatClient(
+        apiKey,
+        defaultApi: FakeDefaultApi(),
+        chatApi: FakeChatApi(),
+        wsProvider: FakeChatServer().connect,
+      );
       addTearDown(client.dispose);
 
       expect(client.connectionStatus, ConnectionStatus.disconnected);
@@ -6643,7 +6934,12 @@ void main() {
     test('should watch the channels it loads when the connection lands mid-query', () async {
       final fakeChatApi = FakeChatApi();
       final ws = FakeChatServer(user: OwnUser.fromUser(user));
-      final client = StreamChatClient(apiKey, chatApi: fakeChatApi, wsProvider: ws.connect);
+      final client = StreamChatClient(
+        apiKey,
+        defaultApi: FakeDefaultApi(),
+        chatApi: fakeChatApi,
+        wsProvider: ws.connect,
+      );
       addTearDown(client.dispose);
 
       when(
@@ -6686,7 +6982,12 @@ void main() {
     // leave the caller waiting on a connection nothing is opening any more.
     test('should throw rather than hang when the connection being opened fails', () async {
       final ws = FakeChatServer()..handshakeFails = true;
-      final client = StreamChatClient(apiKey, chatApi: FakeChatApi(), wsProvider: ws.connect);
+      final client = StreamChatClient(
+        apiKey,
+        defaultApi: FakeDefaultApi(),
+        chatApi: FakeChatApi(),
+        wsProvider: ws.connect,
+      );
       addTearDown(client.dispose);
 
       // Not awaited: the query below has to arrive while the attempt is still in flight.
@@ -6714,4 +7015,8 @@ UserGroup _userGroup(String id) {
     name: 'name-$id',
     updatedAt: DateTime.utc(2024),
   );
+}
+
+api.DeviceResponse _generatedDevice({required String id, required String pushProvider}) {
+  return api.DeviceResponse(id: id, pushProvider: pushProvider, createdAt: DateTime.utc(2024), userId: 'test-user-id');
 }

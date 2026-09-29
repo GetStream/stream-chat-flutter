@@ -242,14 +242,14 @@ typedef ThreadFilter = Filter<Thread>;
 
 /// Represents a field that thread queries can be filtered on.
 class ThreadFilterField extends FilterField<Thread> {
-  /// Creates a thread filter field named [remote] on the wire, reading its
+  /// Creates a thread filter field named [remote] in queries, reading its
   /// value off an instance with [value].
   ThreadFilterField(super.remote, super.value);
 
   /// Creates a field the SDK does not model, read from [Thread.extraData].
   ///
-  /// `has_unread` is reached this way. The server resolves it against the
-  /// caller's read state; a local match cannot.
+  /// `has_unread` is reached this way. It depends on the caller's read state,
+  /// so a local match cannot reproduce it.
   ///
   /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
   /// `$exists`, `$contains`, `$q`, `$autocomplete`
@@ -391,7 +391,7 @@ class ThreadSort extends Sort<Thread> {
 
 /// Represents a field that thread queries can be sorted on.
 class ThreadSortField extends SortField<Thread> {
-  /// Creates a field named [remote] on the wire, reading its value off an
+  /// Creates a field named [remote] in queries, reading its value off an
   /// instance with `localValue`.
   ///
   /// For a name the SDK has not modelled; prefer the fields declared here.
