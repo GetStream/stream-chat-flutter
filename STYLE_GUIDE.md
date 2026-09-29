@@ -531,7 +531,7 @@ they can observe what their own call does:
 /// when omitted. It is applied in whole minutes and never less than one.
 ```
 
-Two things this does **not** forbid:
+Three things this does **not** forbid:
 
 - **Naming a concept the API owns and the caller works in** — a channel `cid`, a
   user's `role`, a `team`. Those are domain vocabulary, not transport details.
@@ -539,6 +539,11 @@ Two things this does **not** forbid:
   endpoint moved, what is in beta, and what a feature flag gates belong in
   `CHANGELOG.md`, `migrations/*.md` and the PR body — those are read once, alongside
   a version, and are expected to date.
+- **Where the work happens, when the caller can see the difference.** *"The server
+  fetches the page itself, so a URL it cannot scrape comes back as a failure"* is why
+  an intranet URL fails — checkable in one call, and no change to the endpoint makes
+  it untrue. Apply the rule's own reasoning as the test: if the caller cannot observe
+  the difference, or an API redesign would falsify the sentence, this is not it.
 
 When the wire shape genuinely explains a piece of code, put it in the plan or the PR,
 and leave the code saying what it does.

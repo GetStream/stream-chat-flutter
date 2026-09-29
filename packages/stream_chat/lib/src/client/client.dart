@@ -447,7 +447,7 @@ class StreamChatClient {
     bool connectWebSocket = true,
   }) async {
     // The exchange itself is authenticated anonymously: the guest has no token
-    // yet, and the identity it is given comes back in the answer.
+    // yet, and the server assigns the identity it answers with.
     final anonymousToken = UserToken.anonymous();
     _tokenManager.setTokenProvider(
       anonymousToken.userId,
