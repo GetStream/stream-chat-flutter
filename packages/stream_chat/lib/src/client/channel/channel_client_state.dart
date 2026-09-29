@@ -454,7 +454,7 @@ class ChannelClientState {
     // new read boundary just made ineligible. `delivery_events` is configured
     // independently of `read_events`, so a channel tracking unread counts
     // locally can still have delivery receipts enabled. Mirrors what the
-    // `message.read` event listener does for channels with read events.
+    // `message.read` event listener does for channels with read events enabled.
     _client.channelDeliveryReporter.reconcileDelivery([_channel]);
 
     _isMarkedAsUnread = false;
