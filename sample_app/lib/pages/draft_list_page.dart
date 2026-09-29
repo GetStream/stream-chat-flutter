@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../routes/routes.dart';
 import '../widgets/stream_draft_list_view.dart';
 
 class DraftListPage extends StatefulWidget {
@@ -63,21 +65,15 @@ class _DraftListPageState extends State<DraftListPage> {
           final [channelType, channelId] = draft.channelCid.split(':');
           final channel = client.channel(channelType, id: channelId);
 
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) {
-                return StreamChannel(
-                  channel: channel,
-                  initialMessageId: draft.parentId,
-                  child: switch (draft.parentMessage) {
-                    final parent? => StreamThreadPage(
-                      parent: parent.copyWith(draft: draft),
-                    ),
-                    _ => const StreamChannelPage(),
-                  },
-                );
-              },
-            ),
+          GoRouter.of(context).goNamed(
+            Routes.CHANNEL_PAGE.name,
+            pathParameters: Routes.CHANNEL_PAGE.params(channel),
+            queryParameters: switch (draft.parentId) {
+              final parentId? => {'mid': parentId, 'pid': parentId},
+              _ => const <String, String>{},
+            },
+            // The thread's parent may not be loaded in the channel yet.
+            extra: draft.parentMessage?.copyWith(draft: draft),
           );
         },
       ),

@@ -38,13 +38,17 @@ final appRoutes = [
               final parentId = state.uri.queryParameters['pid'];
 
               // Thread deep-links require the parent message to already be in
-              // channel state. On cold cids (e.g. notification-tap into an
-              // unwatched channel) the state is null and we fall through to
-              // ChannelPage; the user lands on the channel rather than the
-              // thread, which is a degraded but functional UX.
+              // channel state, unless the caller passes it as `extra`. On cold
+              // cids (e.g. notification-tap into an unwatched channel) the
+              // state is null and we fall through to ChannelPage; the user
+              // lands on the channel rather than the thread, which is a
+              // degraded but functional UX.
               Message? parentMessage;
               if (parentId != null) {
-                parentMessage = channel.state?.messages.firstWhereOrNull((it) => it.id == parentId);
+                parentMessage = switch (state.extra) {
+                  final Message parent when parent.id == parentId => parent,
+                  _ => channel.state?.messages.firstWhereOrNull((it) => it.id == parentId),
+                };
               }
 
               return StreamChannel(
