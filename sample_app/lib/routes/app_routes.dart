@@ -53,9 +53,13 @@ final appRoutes = [
                 openAtFirstUnread: false,
                 child: Builder(
                   builder: (context) {
+                    // Both panes are visible in a split, so there is nothing to go back to.
+                    final showBackButton = !AdaptiveSplitView.isExpandedOf(context);
+
                     return (parentMessage != null)
-                        ? StreamThreadPage(parent: parentMessage)
+                        ? StreamThreadPage(parent: parentMessage, automaticallyImplyLeading: showBackButton)
                         : StreamChannelPage(
+                            automaticallyImplyLeading: showBackButton,
                             onChannelAvatarPressed: (context, channel) {
                               final isOneToOne = channel.isOneToOne;
                               final currentUserId = StreamChat.of(context).currentUser?.id;

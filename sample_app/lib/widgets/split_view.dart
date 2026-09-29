@@ -101,6 +101,14 @@ class AdaptiveSplitView extends StatefulWidget {
   /// The navigator for the trailing pane.
   final Widget secondary;
 
+  /// Whether the nearest [AdaptiveSplitView] shows both panes.
+  ///
+  /// Returns `false` when there is no [AdaptiveSplitView] above [context].
+  static bool isExpandedOf(BuildContext context) {
+    final scope = context.dependOnInheritedWidgetOfExactType<_AdaptiveSplitViewScope>();
+    return scope?.isExpanded ?? false;
+  }
+
   @override
   State<AdaptiveSplitView> createState() => _AdaptiveSplitViewState();
 }
