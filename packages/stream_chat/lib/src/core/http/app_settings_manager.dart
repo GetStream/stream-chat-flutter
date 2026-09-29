@@ -1,7 +1,7 @@
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
-import 'package:stream_chat/src/core/api/general_api.dart';
-import 'package:stream_chat/src/core/models/app_settings.dart';
+import '../api/general_api.dart';
+import '../models/app_settings.dart';
 
 /// {@template appSettingsManager}
 /// Holds the [AppSettings] for the current connection.
@@ -38,7 +38,7 @@ class AppSettingsManager {
     if (_appSettings != null) return;
     try {
       final response = await _api.getAppSettings();
-      _appSettings = response.app;
+      _appSettings ??= response.app;
     } catch (e, stk) {
       _logger.warning('Failed to load app settings', e, stk);
     }

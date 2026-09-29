@@ -7,11 +7,12 @@ import 'package:flutter/material.dart';
 // Assertiveness comes from, which is why flutter/semantics.dart isn't imported.
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recorder_announcer.dart';
-import 'package:stream_chat_flutter/src/message_input/composer_attachment_announcer.dart';
-import 'package:stream_chat_flutter/src/message_input/error_alert_sheet.dart';
-import 'package:stream_chat_flutter/src/message_input/stream_chat_message_input.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../stream_chat_flutter.dart';
+import 'audio_recorder/audio_recorder_announcer.dart';
+import 'composer_attachment_announcer.dart';
+import 'error_alert_sheet.dart';
+import 'stream_chat_message_input.dart';
 
 const _kCommandTrigger = '/';
 const _kMentionTrigger = '@';
@@ -686,7 +687,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
         _ => channel.state?.draftStream,
       };
 
-      _draftStreamSubscription = draftStream?.distinct().listen(_onDraftUpdate);
+      _draftStreamSubscription = draftStream?.listen(_onDraftUpdate);
     }
 
     // Keeps the composer in sync with remote message changes.
@@ -1037,6 +1038,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
               autofocus: widget.props.autofocus,
               autocorrect: widget.props.autoCorrect,
               isFloating: isFloating,
+              contentInsertionConfiguration: _buildContentInsertionConfiguration(),
             ),
           ),
         );
@@ -1459,6 +1461,48 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     }
 
     if (validationErrors.firstOrNull case final error?) _handleAttachmentError(error);
+  }
+
+  // Lets keyboards such as Gboard insert images and GIFs. Accepted only where
+  // the picker would accept an image, and validated the same way. Off while a
+  // command is active, as commands carry no attachments.
+  ContentInsertionConfiguration? _buildContentInsertionConfiguration() {
+    if (widget.props.disableAttachments) return null;
+    if (_commandEnabled) return null;
+    if (!StreamChannel.of(context).channel.canUploadFile) return null;
+    if (!_getAllowedAttachmentPickerTypes().contains(AttachmentPickerType.images)) return null;
+
+    return ContentInsertionConfiguration(onContentInserted: _onContentInserted);
+  }
+
+  void _onContentInserted(KeyboardInsertedContent content) {
+    // The platform reads the content before handing it over, and a failed read
+    // can arrive as no data or as empty data; either way there is nothing to
+    // attach.
+    final bytes = content.data;
+    if (bytes == null || bytes.isEmpty) return;
+
+    final file = AttachmentFile(
+      size: bytes.length,
+      bytes: bytes,
+      name: _insertedContentFileName(content),
+    );
+
+    _addAttachments([Attachment(type: AttachmentType.image, file: file)]);
+  }
+
+  // The name must carry an extension matching the keyboard's MIME type: the
+  // attachment's MIME type, and so its upload validation, is derived from it.
+  String _insertedContentFileName(KeyboardInsertedContent content) {
+    final extension = content.mimeType.split('/').last;
+    // Resolved from a name rather than compared to content.mimeType directly,
+    // so a non-standard type such as image/jpg still matches a .jpg name.
+    final expected = 'file.$extension'.mediaType?.mimeType;
+
+    final lastSegment = Uri.tryParse(content.uri)?.pathSegments.lastOrNull;
+    if (lastSegment != null && lastSegment.mediaType?.mimeType == expected) return lastSegment;
+
+    return 'keyboard_${DateTime.now().millisecondsSinceEpoch}.$extension';
   }
 
   StreamAttachmentValidator _buildAttachmentValidator() {

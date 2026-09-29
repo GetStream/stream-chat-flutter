@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sample_app/widgets/location/location_picker_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import 'location_picker_dialog.dart';
 
 final class LocationPickerType extends CustomAttachmentPickerType {
   const LocationPickerType();

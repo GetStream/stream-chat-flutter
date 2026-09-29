@@ -2,9 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/src/utils/network_error_text.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../stream_chat_flutter.dart';
+import 'misc/empty_widget.dart';
+import 'utils/network_error_text.dart';
 
 /// Provides chat state and configuration to the descendant widget tree.
 ///
@@ -183,9 +184,18 @@ class StreamChatState extends State<StreamChat> {
   /// Gets configuration options from widget
   StreamChatConfigurationData get configData => widget.configData ?? StreamChatConfigurationData();
 
+  /// Tracks which messages the user has switched back to their original text.
+  ///
+  /// Owned here so the toggle is shared by every message list in the app — a
+  /// channel and its open thread render the same parent message, and both
+  /// should agree on which text it shows. Matches the Swift and Android SDKs,
+  /// which key this state by message id above the individual list.
+  final _translationStore = StreamMessageTranslationStore();
+
   @override
-  void initState() {
-    super.initState();
+  void dispose() {
+    _translationStore.dispose();
+    super.dispose();
   }
 
   @override
@@ -201,6 +211,8 @@ class StreamChatState extends State<StreamChat> {
         child: StreamSnackbarScope(child: widget.child ?? const Empty()),
       ),
     );
+
+    child = StreamMessageTranslations(store: _translationStore, child: child);
 
     final theme = widget.themeData ?? StreamChatThemeData();
     child = StreamChatTheme(data: theme, child: child);

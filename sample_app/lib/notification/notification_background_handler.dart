@@ -2,10 +2,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide Message;
-import 'package:sample_app/firebase_options.dart';
-import 'package:sample_app/notification/notification.dart';
-import 'package:sample_app/notification/notification_service.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../firebase_options.dart';
+import 'notification.dart';
+import 'notification_service.dart';
 
 /// Top-level FCM background handler (Android only).
 ///

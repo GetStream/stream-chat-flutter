@@ -1,8 +1,8 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/models/own_user.dart';
-import 'package:stream_chat/src/core/models/privacy_settings.dart';
-import 'package:stream_chat/src/core/util/extension.dart';
-import 'package:stream_chat/src/core/util/serializer.dart';
+import '../core/models/own_user.dart';
+import '../core/models/privacy_settings.dart';
+import '../core/util/extension.dart';
+import '../core/util/serializer.dart';
 
 part 'connect_user_details.g.dart';
 

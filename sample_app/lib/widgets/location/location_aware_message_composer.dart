@@ -1,10 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:sample_app/config/sample_app_config.dart';
-import 'package:sample_app/widgets/location/location_picker_dialog.dart';
-import 'package:sample_app/widgets/location/location_picker_option.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../config/sample_app_config.dart';
+import 'location_picker_dialog.dart';
+import 'location_picker_option.dart';
 
 /// Builds the composer, adding the location picker when location sharing is
 /// available on the surrounding channel.

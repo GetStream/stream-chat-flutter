@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/poll/interactor/poll_footer.dart';
-import 'package:stream_chat_flutter/src/poll/interactor/poll_header.dart';
-import 'package:stream_chat_flutter/src/poll/interactor/poll_options_list_view.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+
+import 'poll_footer.dart';
+import 'poll_header.dart';
+import 'poll_options_list_view.dart';
 
 /// {@template streamPollInteractor}
 /// A widget that allows users to interact with a poll.

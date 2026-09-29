@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/message_list_view/auto_scroll_policy.dart';
+import 'auto_scroll_policy.dart';
 
 /// {@template streamMessageListConfiguration}
 /// Holds all behavior flags and non-theme, non-builder configuration for
@@ -61,6 +61,14 @@ class StreamMessageListViewConfiguration {
 
   /// Whether to show the jump-to-unread indicator when there are unread
   /// messages.
+  ///
+  /// The indicator's dismiss button is the user-facing way to clear an unread
+  /// boundary the user will never scroll back to. Turning this off while
+  /// [StreamChannel.openAtFirstUnread] is also false leaves a channel that
+  /// neither opens at the boundary nor offers a way to dismiss it, so with
+  /// [markReadWhenAtTheBottom] on it will not be marked read until the user
+  /// scrolls back to that boundary themselves. Call
+  /// [Channel.markRead] directly if you disable both.
   ///
   /// Defaults to true.
   final bool showUnreadIndicator;

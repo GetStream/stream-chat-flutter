@@ -1,7 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/chat.dart' as core;
+
+import '../../scrollable_positioned_list/scrollable_positioned_list.dart';
+import '../../stream_chat_flutter.dart';
 
 /// Determines at which point in the [MessageListView] the initial index should
 /// be.
@@ -31,13 +33,16 @@ int getInitialIndex(
     if (targetMessageIndex != -1) return targetMessageIndex + 2;
   }
 
-  // Otherwise, return the first unread message index if available.
-  if (channelState.getFirstUnreadMessage() case final firstUnreadMessage?) {
-    final firstUnreadMessageIndex = messages.indexWhere(
-      (it) => it.id == firstUnreadMessage.id,
-    );
+  // Otherwise, return the first unread message index if available — unless
+  // the caller opted out via [StreamChannel.openAtFirstUnread].
+  if (channelState.widget.openAtFirstUnread) {
+    if (channelState.getFirstUnreadMessage() case final firstUnreadMessage?) {
+      final firstUnreadMessageIndex = messages.indexWhere(
+        (it) => it.id == firstUnreadMessage.id,
+      );
 
-    if (firstUnreadMessageIndex != -1) return firstUnreadMessageIndex + 2;
+      if (firstUnreadMessageIndex != -1) return firstUnreadMessageIndex + 2;
+    }
   }
 
   return 0;
@@ -161,7 +166,7 @@ StreamMessageContentKind resolveContentKind(Message message) {
   }
 
   if (!hasQuote && attachmentCount == 0) {
-    final emojiCount = StreamMessageText.emojiCount(message.text);
+    final emojiCount = core.StreamMessageText.emojiCount(message.text);
     if (emojiCount != null && emojiCount <= 3) return .jumbomoji;
   }
 

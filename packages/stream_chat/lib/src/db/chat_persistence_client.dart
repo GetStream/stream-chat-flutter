@@ -1,23 +1,23 @@
 import 'package:collection/collection.dart';
-import 'package:stream_chat/src/core/api/requests.dart';
-import 'package:stream_chat/src/core/api/responses.dart';
-import 'package:stream_chat/src/core/api/sort_order.dart';
-import 'package:stream_chat/src/core/models/attachment_file.dart';
-import 'package:stream_chat/src/core/models/channel_model.dart';
-import 'package:stream_chat/src/core/models/channel_state.dart';
-import 'package:stream_chat/src/core/models/draft.dart';
-import 'package:stream_chat/src/core/models/event.dart';
-import 'package:stream_chat/src/core/models/filter.dart';
-import 'package:stream_chat/src/core/models/location.dart';
-import 'package:stream_chat/src/core/models/member.dart';
-import 'package:stream_chat/src/core/models/message.dart';
-import 'package:stream_chat/src/core/models/poll.dart';
-import 'package:stream_chat/src/core/models/poll_vote.dart';
-import 'package:stream_chat/src/core/models/reaction.dart';
-import 'package:stream_chat/src/core/models/read.dart';
-import 'package:stream_chat/src/core/models/user.dart';
-import 'package:stream_chat/src/core/platform_detector/platform_detector.dart';
-import 'package:stream_chat/src/core/util/extension.dart';
+import '../core/api/requests.dart';
+import '../core/api/responses.dart';
+import '../core/api/sort_order.dart';
+import '../core/models/attachment_file.dart';
+import '../core/models/channel_model.dart';
+import '../core/models/channel_state.dart';
+import '../core/models/draft.dart';
+import '../core/models/event.dart';
+import '../core/models/filter.dart';
+import '../core/models/location.dart';
+import '../core/models/member.dart';
+import '../core/models/message.dart';
+import '../core/models/poll.dart';
+import '../core/models/poll_vote.dart';
+import '../core/models/reaction.dart';
+import '../core/models/read.dart';
+import '../core/models/user.dart';
+import '../core/platform_detector/platform_detector.dart';
+import '../core/util/extension.dart';
 
 /// A simple client used for persisting chat data locally.
 abstract class ChatPersistenceClient {

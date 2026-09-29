@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_content.dart';
+import 'package:stream_chat_flutter/src/message_widget/components/stream_message_deleted.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 // A deterministic attachment renderer so the post-frame width measurement
@@ -22,6 +22,38 @@ class _FixedSizeAttachmentBuilder extends StreamAttachmentWidgetBuilder {
     Map<String, List<Attachment>> attachments,
   ) {
     return const SizedBox(width: 200, height: 50);
+  }
+}
+
+// Records the width the attachment subtree is given on every layout pass, so
+// a test can assert the measured width is not changed by feeding it back.
+class _RecordingAttachmentBuilder extends StreamAttachmentWidgetBuilder {
+  _RecordingAttachmentBuilder({required this.widths});
+
+  // Width passed to the leaf on each layout pass, in order.
+  final List<double> widths;
+
+  @override
+  bool canHandle(Message message, Map<String, List<Attachment>> attachments) {
+    return attachments.isNotEmpty;
+  }
+
+  @override
+  Widget build(BuildContext context, Message message, Map<String, List<Attachment>> attachments) {
+    return Container(
+      constraints: const BoxConstraints(minWidth: 170, maxWidth: 256, minHeight: 100, maxHeight: 300),
+      child: AspectRatio(
+        // A 3:4 portrait photo, so the tile is narrower than its box and the
+        // measured width is the photo's rather than the box's.
+        aspectRatio: 0.75,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            widths.add(constraints.biggest.width);
+            return const SizedBox.expand();
+          },
+        ),
+      ),
+    );
   }
 }
 
@@ -62,12 +94,15 @@ Future<void> pumpContent(
   WidgetTester tester, {
   required Message message,
   required Key layoutKey,
+  Widget? header,
+  Widget? footer,
+  StreamAttachmentWidgetBuilder attachmentBuilder = const _FixedSizeAttachmentBuilder(),
 }) {
   return tester.pumpWidget(
     MaterialApp(
       home: StreamChatConfiguration(
         data: StreamChatConfigurationData(
-          attachmentBuilders: const [_FixedSizeAttachmentBuilder()],
+          attachmentBuilders: [attachmentBuilder],
         ),
         child: StreamChatTheme(
           data: StreamChatThemeData(),
@@ -77,7 +112,11 @@ Future<void> pumpContent(
               body: Center(
                 child: SizedBox(
                   width: 300,
-                  child: StreamMessageContent(message: message),
+                  child: StreamMessageContent(
+                    message: message,
+                    header: header,
+                    footer: footer,
+                  ),
                 ),
               ),
             ),
@@ -171,4 +210,58 @@ void main() {
       );
     },
   );
+
+  // Regression test for #2983, fixed on v9 and structurally correct here.
+  //
+  // The measured attachment width is fed back as the bubble's constraint, so
+  // anything that narrows the box in between — a border, an inset — hands the
+  // attachment a smaller box on the second pass. The thumbnail then asks the
+  // CDN for a second, near-identical rendition of the same image.
+  testWidgets('lays the attachment out at the same width across both passes', (tester) async {
+    final widths = <double>[];
+
+    await pumpContent(
+      tester,
+      message: Message(
+        attachments: [Attachment(type: 'image', imageUrl: 'https://example.com/x.png')],
+        user: User(id: 'u1', name: 'Alice'),
+      ),
+      layoutKey: GlobalKey<_LayoutHolderState>(),
+      attachmentBuilder: _RecordingAttachmentBuilder(widths: widths),
+    );
+
+    // Let the post-frame callback apply the measured width limit and lay the
+    // subtree out a second time.
+    await tester.pump();
+
+    // Measured once, then laid out again with the limit applied. Without the
+    // count the equality below stays green if the second pass stops running.
+    expect(widths, hasLength(2), reason: 'saw widths: $widths');
+    expect(widths.toSet(), hasLength(1), reason: 'saw widths: $widths');
+  });
+
+  // The design shows a deleted message with its timestamp and delivery status
+  // below the placeholder, same as any other message. The deleted branch used
+  // to return the bare bubble and drop both slots.
+  testWidgets('keeps the header and footer slots for a deleted message', (tester) async {
+    final message = Message(
+      id: 'deleted-message',
+      type: MessageType.deleted,
+      state: MessageState.softDeleted,
+      user: User(id: 'u1', name: 'Alice'),
+    );
+
+    await pumpContent(
+      tester,
+      message: message,
+      layoutKey: GlobalKey<_LayoutHolderState>(),
+      header: const Text('HEADER'),
+      footer: const Text('FOOTER'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(StreamMessageDeleted), findsOneWidget);
+    expect(find.text('FOOTER'), findsOneWidget);
+    expect(find.text('HEADER'), findsOneWidget);
+  });
 }

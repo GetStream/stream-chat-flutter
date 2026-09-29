@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:meta/meta.dart';
-import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recorder_controller.dart';
-import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recorder_state.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_core_flutter/core.dart';
+
+import '../../utils/extensions.dart';
+import 'audio_recorder_controller.dart';
+import 'audio_recorder_state.dart';
 
 /// Returns the screen-reader announcement string for a recording state
 /// transition.

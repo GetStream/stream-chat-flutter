@@ -4,9 +4,10 @@ import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart' show FileType;
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
-import 'package:stream_chat_flutter/src/message_input/attachment_picker/options/options.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../../stream_chat_flutter.dart';
+import '../../misc/empty_widget.dart';
+import 'options/options.dart';
 
 /// {@template streamAttachmentPickerOptionsBuilder}
 /// Signature for a function that creates a list of [AttachmentPickerOption]s
@@ -398,15 +399,15 @@ Widget tabbedAttachmentPickerBuilder({
       key: 'gallery-picker',
       icon: context.streamIcons.image,
       title: context.translations.photosAndVideosLabel,
-      supportedTypes: [
-        AttachmentPickerType.images,
-        AttachmentPickerType.videos,
-      ],
+      supportedTypes: StreamGalleryPicker.supportedTypes,
       optionViewBuilder: (context, controller) {
         final attachment = controller.value.attachments;
         final selectedIds = attachment.map((it) => it.id);
+        final galleryTypes = StreamGalleryPicker.supportedTypes.where(allowedTypes.contains);
+
         return StreamGalleryPicker(
           config: galleryPickerConfig,
+          mediaType: galleryTypes.toRequestType(),
           selectedMediaItems: selectedIds,
           onMediaItemSelected: (media) async {
             try {
@@ -462,17 +463,25 @@ Widget tabbedAttachmentPickerBuilder({
       icon: context.streamIcons.file,
       title: context.translations.uploadAFileLabel,
       supportedTypes: [AttachmentPickerType.files],
-      optionViewBuilder: (context, controller) => StreamFilePicker(
-        onFilePicked: (file) async {
-          try {
-            if (file != null) await controller.addAttachment(file);
-          } catch (e, stk) {
-            onError?.call(
-              AttachmentPickerError(error: e, stackTrace: stk),
-            );
-          }
-        },
-      ),
+      optionViewBuilder: (context, controller) {
+        final fileConfig = controller.validator.fileUploadConfig;
+        final extensions = _filePickerExtensions(fileConfig);
+        final type = extensions == null ? FileType.any : FileType.custom;
+
+        return StreamFilePicker(
+          type: type,
+          allowedExtensions: extensions,
+          onFilePicked: (file) async {
+            try {
+              if (file != null) await controller.addAttachment(file);
+            } catch (e, stk) {
+              onError?.call(
+                AttachmentPickerError(error: e, stackTrace: stk),
+              );
+            }
+          },
+        );
+      },
     ),
     TabbedAttachmentPickerOption(
       key: 'poll-creator',
@@ -522,7 +531,7 @@ Widget tabbedAttachmentPickerBuilder({
     controller: controller,
     options: {
       ...validOptions.where(
-        (option) => option.supportedTypes.every(allowedTypes.contains),
+        (option) => option.supportedTypes.isAllowedBy(allowedTypes),
       ),
     },
   );
@@ -552,10 +561,14 @@ Widget systemAttachmentPickerBuilder({
 }) {
   Future<void> pickSystemFile(
     StreamAttachmentPickerController controller,
-    FileType type,
-  ) async {
+    FileType type, {
+    List<String>? allowedExtensions,
+  }) async {
     try {
-      final file = await StreamAttachmentHandler.instance.pickFile(type: type);
+      final file = await StreamAttachmentHandler.instance.pickFile(
+        type: type,
+        allowedExtensions: allowedExtensions,
+      );
       if (file != null) await controller.addAttachment(file);
     } catch (e, stk) {
       onError?.call(AttachmentPickerError(error: e, stackTrace: stk));
@@ -587,7 +600,11 @@ Widget systemAttachmentPickerBuilder({
       icon: context.streamIcons.file,
       title: context.translations.uploadAFileLabel,
       onTap: (context, controller) async {
-        await pickSystemFile(controller, FileType.any);
+        final fileConfig = controller.validator.fileUploadConfig;
+        final extensions = _filePickerExtensions(fileConfig);
+        final type = extensions == null ? FileType.any : FileType.custom;
+
+        await pickSystemFile(controller, type, allowedExtensions: extensions);
       },
     ),
     SystemAttachmentPickerOption(
@@ -628,8 +645,55 @@ Widget systemAttachmentPickerBuilder({
     controller: controller,
     options: {
       ...validOptions.where(
-        (option) => option.supportedTypes.every(allowedTypes.contains),
+        (option) => option.supportedTypes.isAllowedBy(allowedTypes),
       ),
     },
   );
+}
+
+extension _AttachmentPickerTypesX on Iterable<AttachmentPickerType> {
+  // Whether these types pass the allowedTypes filter.
+  //
+  // An option can declare no supported type at all, in which case there is
+  // nothing to gate and it always passes.
+  bool isAllowedBy(List<AttachmentPickerType> allowedTypes) {
+    if (isEmpty) return true;
+    return any(allowedTypes.contains);
+  }
+
+  // Converts these picker types to the equivalent media RequestType.
+  //
+  // Types without media, such as files and polls, are ignored.
+  RequestType toRequestType() {
+    final mediaTypes = <RequestType>[];
+    for (final type in this) {
+      final mediaType = switch (type) {
+        ImagesPickerType() => RequestType.image,
+        VideosPickerType() => RequestType.video,
+        AudiosPickerType() => RequestType.audio,
+        _ => null,
+      };
+
+      if (mediaType != null) mediaTypes.add(mediaType);
+    }
+
+    return RequestType.fromTypes(mediaTypes);
+  }
+}
+
+// The extensions [config] allows, in the format file pickers expect (`pdf` for
+// `.pdf`), or `null` when every extension is allowed.
+//
+// Compound entries like `.tar.gz` are left out: validation only compares a
+// file's last extension, so no file can match them.
+List<String>? _filePickerExtensions(UploadConfig config) {
+  final extensions = <String>[];
+  for (final entry in config.allowedFileExtensions) {
+    final extension = entry.startsWith('.') ? entry.substring(1) : entry;
+    if (extension.isEmpty || extension.contains('.')) continue;
+
+    extensions.add(extension.toLowerCase());
+  }
+
+  return extensions.isEmpty ? null : extensions;
 }

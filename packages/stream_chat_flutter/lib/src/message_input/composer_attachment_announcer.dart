@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:meta/meta.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import '../../stream_chat_flutter.dart';
 
 /// Returns the screen-reader announcement string for an attachment
 /// transition.

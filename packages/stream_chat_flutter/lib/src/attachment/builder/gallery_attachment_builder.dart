@@ -100,25 +100,33 @@ class GalleryAttachmentBuilder extends StreamAttachmentWidgetBuilder {
             style: .from(padding: .zero),
             child: InkWell(
               onTap: onTap,
-              child: Stack(
-                fit: .expand,
-                alignment: .center,
-                children: [
-                  StreamMediaAttachmentThumbnail(
-                    media: attachment,
-                    fit: BoxFit.cover,
-                  ),
-                  if (attachment.type == .video && attachment.uploadState.isSuccess) ...[
-                    const Center(child: StreamVideoPlayIndicator(size: .lg)),
-                  ] else ...[
-                    Positioned.fill(
-                      child: StreamAttachmentUploadStateBuilder(
-                        message: message,
-                        attachment: attachment,
-                      ),
+              child: Semantics(
+                label: _mediaAttachmentSemanticsLabel(
+                  context,
+                  attachment,
+                  index: index,
+                  total: galleryAttachments.length,
+                ),
+                child: Stack(
+                  fit: .expand,
+                  alignment: .center,
+                  children: [
+                    StreamMediaAttachmentThumbnail(
+                      media: attachment,
+                      fit: BoxFit.cover,
                     ),
+                    if (attachment.type == .video && attachment.uploadState.isSuccess) ...[
+                      const Center(child: StreamVideoPlayIndicator(size: .lg)),
+                    ] else ...[
+                      Positioned.fill(
+                        child: StreamAttachmentUploadStateBuilder(
+                          message: message,
+                          attachment: attachment,
+                        ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           );

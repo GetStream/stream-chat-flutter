@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+
+import 'extensions.dart';
 
 /// Resolves a title and description for [error] based on its transport-level
 /// [StreamChatNetworkError.type].

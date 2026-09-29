@@ -1,10 +1,11 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/attachment/handler/stream_attachment_handler.dart';
-import 'package:stream_chat_flutter/src/message_input/attachment_picker/stream_attachment_picker.dart';
-import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
+
+import '../../../attachment/handler/stream_attachment_handler.dart';
+import '../../../utils/utils.dart';
+import '../stream_attachment_picker.dart';
 
 /// Widget used to pick files from the device
 class StreamFilePicker extends StatelessWidget {
@@ -18,8 +19,8 @@ class StreamFilePicker extends StatelessWidget {
     this.allowedExtensions,
     this.onFileLoading,
     this.compressionQuality = 0,
-    this.withData = false,
-    this.withReadStream = false,
+    @Deprecated('Content is read on demand; this no longer has any effect.') this.withData = false,
+    @Deprecated('Content is read on demand; this no longer has any effect.') this.withReadStream = false,
     this.lockParentWindow = false,
   });
 
@@ -45,9 +46,11 @@ class StreamFilePicker extends StatelessWidget {
   final int compressionQuality;
 
   /// Whether to include the file data in the [Attachment].
+  @Deprecated('Content is read on demand; this no longer has any effect.')
   final bool withData;
 
   /// Whether to include the file read stream in the [Attachment].
+  @Deprecated('Content is read on demand; this no longer has any effect.')
   final bool withReadStream;
 
   /// Whether to lock the parent window when the file picker is open.
@@ -68,8 +71,6 @@ class StreamFilePicker extends StatelessWidget {
           allowedExtensions: allowedExtensions,
           onFileLoading: onFileLoading,
           compressionQuality: compressionQuality,
-          withData: withData,
-          withReadStream: withReadStream,
           lockParentWindow: lockParentWindow,
         );
       });

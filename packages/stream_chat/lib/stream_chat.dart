@@ -16,7 +16,10 @@ export 'package:logging/logging.dart' show Logger, Level, LogRecord;
 export 'package:rate_limiter/rate_limiter.dart';
 export 'package:uuid/uuid.dart';
 
-export 'src/client/channel.dart';
+export 'src/client/channel/channel.dart';
+export 'src/client/channel/channel_capability_check.dart';
+export 'src/client/channel/channel_client_state.dart';
+export 'src/client/channel/channel_read_helper.dart';
 export 'src/client/channel_delivery_reporter.dart';
 export 'src/client/client.dart';
 export 'src/client/key_stroke_handler.dart';

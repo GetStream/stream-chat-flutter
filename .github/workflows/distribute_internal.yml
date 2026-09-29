@@ -92,7 +92,7 @@ jobs:
   ios:
     needs: determine_platforms
     if: ${{ needs.determine_platforms.outputs.run_ios == 'true' }}
-    runs-on: macos-15 # Requires xcode 15 or later
+    runs-on: xcode-27
     timeout-minutes: 30
     steps:
       - name: Connect Bot
@@ -105,14 +105,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '26.3'
+      - uses: ./.github/actions/setup-xcode
 
       - uses: ./.github/actions/setup-flutter
-
-      - name: "Disable Swift Package Manager"
-        run: flutter config --no-enable-swift-package-manager
 
       - name: "Install Tools"
         run: flutter pub global activate melos
@@ -136,7 +131,7 @@ jobs:
   ios_testflight:
     needs: determine_platforms
     if: ${{ needs.determine_platforms.outputs.run_ios == 'true' }}
-    runs-on: macos-15 # Requires xcode 15 or later
+    runs-on: xcode-27
     timeout-minutes: 30
     steps:
       - name: Connect Bot
@@ -149,14 +144,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '26.3'
+      - uses: ./.github/actions/setup-xcode
 
       - uses: ./.github/actions/setup-flutter
-
-      - name: "Disable Swift Package Manager"
-        run: flutter config --no-enable-swift-package-manager
 
       - name: "Install Tools"
         run: flutter pub global activate melos

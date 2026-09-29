@@ -1,22 +1,23 @@
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
-import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
-import 'package:stream_chat/src/core/api/channel_api.dart';
-import 'package:stream_chat/src/core/api/device_api.dart';
-import 'package:stream_chat/src/core/api/general_api.dart';
-import 'package:stream_chat/src/core/api/guest_api.dart';
-import 'package:stream_chat/src/core/api/message_api.dart';
-import 'package:stream_chat/src/core/api/moderation_api.dart';
-import 'package:stream_chat/src/core/api/polls_api.dart';
-import 'package:stream_chat/src/core/api/reminders_api.dart';
-import 'package:stream_chat/src/core/api/roles_api.dart';
-import 'package:stream_chat/src/core/api/threads_api.dart';
-import 'package:stream_chat/src/core/api/user_api.dart';
-import 'package:stream_chat/src/core/api/user_groups_api.dart';
-import 'package:stream_chat/src/core/http/connection_id_manager.dart';
-import 'package:stream_chat/src/core/http/stream_http_client.dart';
-import 'package:stream_chat/src/core/http/system_environment_manager.dart';
-import 'package:stream_chat/src/core/http/token_manager.dart';
+
+import '../http/connection_id_manager.dart';
+import '../http/stream_http_client.dart';
+import '../http/system_environment_manager.dart';
+import '../http/token_manager.dart';
+import 'attachment_file_uploader.dart';
+import 'channel_api.dart';
+import 'device_api.dart';
+import 'general_api.dart';
+import 'guest_api.dart';
+import 'message_api.dart';
+import 'moderation_api.dart';
+import 'polls_api.dart';
+import 'reminders_api.dart';
+import 'roles_api.dart';
+import 'threads_api.dart';
+import 'user_api.dart';
+import 'user_groups_api.dart';
 
 export 'device_api.dart' show PushProvider;
 

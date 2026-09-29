@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart' show MultipartFile;
-import 'package:stream_chat/src/client/channel.dart';
+import 'package:stream_chat/src/client/channel/channel.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/draft_message.dart';

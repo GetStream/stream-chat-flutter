@@ -1,15 +1,16 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/scroll_view/poll_vote_scroll_view/stream_poll_vote_list_tile.dart';
-import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_empty_widget.dart';
-import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_error_widget.dart';
-import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_indexed_widget_builder.dart';
-import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_error.dart';
-import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_loading_widget.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
-import 'package:stream_chat_flutter/src/utils/network_error_text.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
+
+import '../../utils/extensions.dart';
+import '../../utils/network_error_text.dart';
+import '../stream_scroll_view_empty_widget.dart';
+import '../stream_scroll_view_error_widget.dart';
+import '../stream_scroll_view_indexed_widget_builder.dart';
+import '../stream_scroll_view_load_more_error.dart';
+import '../stream_scroll_view_loading_widget.dart';
+import 'stream_poll_vote_list_tile.dart';
 
 /// Default separator builder for [StreamPollVoteListView].
 Widget defaultPollVoteListViewSeparatorBuilder(

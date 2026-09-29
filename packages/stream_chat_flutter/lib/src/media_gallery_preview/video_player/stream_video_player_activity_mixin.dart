@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import '../../../stream_chat_flutter.dart';
 
 /// State mixin for playback controllers (video / audio) that want to
 /// behave well inside a [StreamMediaGalleryPreview].

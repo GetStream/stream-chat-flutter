@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_chat/src/core/models/event.dart';
+import '../models/event.dart';
 
 /// A function that inspects an event and optionally resolves it into a
 /// more specific or refined version of the same type.

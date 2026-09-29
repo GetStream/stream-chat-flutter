@@ -1,7 +1,7 @@
 // coverage:ignore-file
 import 'package:drift/drift.dart';
-import 'package:stream_chat_persistence/src/entity/pinned_messages.dart';
-import 'package:stream_chat_persistence/src/entity/reactions.dart';
+import 'pinned_messages.dart';
+import 'reactions.dart';
 
 /// Represents a [PinnedMessageReactions] table in [DriftChatDatabase].
 @DataClassName('PinnedMessageReactionEntity')

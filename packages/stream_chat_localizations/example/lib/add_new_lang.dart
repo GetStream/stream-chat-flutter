@@ -511,6 +511,12 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String unreadMessagesSeparatorText() => 'New messages';
 
   @override
+  String unreadMessagesSeparatorLabel({required int count}) {
+    if (count == 1) return '1 unread message';
+    return '$count unread messages';
+  }
+
+  @override
   String get enableFileAccessMessage => 'Enable file access to continue';
 
   @override
@@ -814,6 +820,21 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String reminderAtText(String time) => 'Today at $time';
+
+  @override
+  String get translatedLabel => 'Translated';
+
+  @override
+  String get originalLabel => 'Original';
+
+  @override
+  String get showOriginalLabel => 'Show original';
+
+  @override
+  String get showTranslationLabel => 'Show translation';
+
+  @override
+  String translatedFromLanguageText(String languageCode) => 'Translated from ${languageCode.toUpperCase()}';
 
   @override
   String get createPollPromptLabel => 'Create a poll and let everyone vote!';

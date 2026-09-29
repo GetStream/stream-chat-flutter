@@ -1,10 +1,10 @@
 import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
-import 'package:stream_chat_persistence/src/db/query_utils.dart';
-import 'package:stream_chat_persistence/src/entity/pinned_message_reactions.dart';
-import 'package:stream_chat_persistence/src/entity/users.dart';
-import 'package:stream_chat_persistence/src/mapper/mapper.dart';
+import '../db/drift_chat_database.dart';
+import '../db/query_utils.dart';
+import '../entity/pinned_message_reactions.dart';
+import '../entity/users.dart';
+import '../mapper/mapper.dart';
 
 part 'pinned_message_reaction_dao.g.dart';
 

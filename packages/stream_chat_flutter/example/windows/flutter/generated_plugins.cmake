@@ -10,7 +10,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   record_windows
   share_plus
   sqlite3_flutter_libs
-  thumblr_windows
+  stream_thumbnail
   url_launcher_windows
 )
 

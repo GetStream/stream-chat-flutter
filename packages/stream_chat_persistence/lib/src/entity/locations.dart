@@ -1,7 +1,7 @@
 // coverage:ignore-file
 import 'package:drift/drift.dart';
-import 'package:stream_chat_persistence/src/entity/channels.dart';
-import 'package:stream_chat_persistence/src/entity/messages.dart';
+import 'channels.dart';
+import 'messages.dart';
 
 /// Represents a [Locations] table in [DriftChatDatabase].
 @DataClassName('LocationEntity')

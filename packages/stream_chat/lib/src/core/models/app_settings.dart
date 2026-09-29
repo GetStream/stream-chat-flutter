@@ -91,9 +91,14 @@ class UploadConfig extends Equatable {
 
   /// The maximum upload size, in bytes.
   ///
-  /// Defaults to [defaultSizeLimit].
-  @JsonKey(defaultValue: defaultSizeLimit)
+  /// Defaults to [defaultSizeLimit] when no limit is configured.
+  @JsonKey(defaultValue: defaultSizeLimit, fromJson: _sizeLimitFromJson)
   final int sizeLimit;
+
+  // The backend sends `0` when no size limit is configured.
+  static int _sizeLimitFromJson(int sizeLimit) {
+    return sizeLimit > 0 ? sizeLimit : defaultSizeLimit;
+  }
 
   /// The file extensions explicitly permitted, e.g. `['.pdf', '.csv']`.
   ///

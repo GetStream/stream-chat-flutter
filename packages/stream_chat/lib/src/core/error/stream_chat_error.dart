@@ -1,8 +1,9 @@
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
-import 'package:stream_chat/stream_chat.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+
+import '../../../stream_chat.dart';
 
 /// Base class for all errors surfaced by the Stream Chat SDK.
 ///

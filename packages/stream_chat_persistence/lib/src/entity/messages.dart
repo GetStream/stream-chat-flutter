@@ -1,9 +1,9 @@
 // coverage:ignore-file
 import 'package:drift/drift.dart';
-import 'package:stream_chat_persistence/src/converter/list_converter.dart';
-import 'package:stream_chat_persistence/src/converter/map_converter.dart';
-import 'package:stream_chat_persistence/src/converter/reaction_groups_converter.dart';
-import 'package:stream_chat_persistence/src/entity/channels.dart';
+import '../converter/list_converter.dart';
+import '../converter/map_converter.dart';
+import '../converter/reaction_groups_converter.dart';
+import 'channels.dart';
 
 /// Represents a [Messages] table in [DriftChatDatabase].
 @DataClassName('MessageEntity')

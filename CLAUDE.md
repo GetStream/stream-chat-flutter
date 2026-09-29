@@ -4,8 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Before writing or reviewing code, read [`STYLE_GUIDE.md`](STYLE_GUIDE.md).** It is
 > the source of truth for coding conventions, documentation style, testing, changelog
-> policy, and repo-specific rules that diverge from the Flutter / Dart defaults. This
-> file is a repo overview; the style guide is the rulebook.
+> policy, and repo-specific rules that diverge from the Flutter / Dart defaults. See
+> [`TESTING.md`](TESTING.md) for guidance on writing effective tests, and
+> [`EFFECTIVE_DART_DOC.md`](EFFECTIVE_DART_DOC.md) — a vendored copy of Effective Dart's
+> documentation guide — before writing any dartdoc; the style guide wins where they
+> disagree. This file is a repo overview; the style guide is the rulebook.
 
 ## Overview
 
@@ -118,12 +121,50 @@ Optional local persistence using Drift (SQLite). Implements `ChatPersistenceClie
 ## Code Style
 
 - Line length: **120 characters** (configured in `analysis_options.yaml`)
-- Imports: always use package imports (`always_use_package_imports`), not relative imports
+- Imports: inside a package's own `lib/`, use relative imports (`prefer_relative_imports`); use
+  `package:` imports for anything from another package
 - All public APIs **must** have doc comments (`public_member_api_docs`)
 - Sort constructors first, unnamed constructors before named
 - Prefer `const` constructors, `final` locals, single quotes
 - Trailing commas: `preserve` (formatter setting)
 - Generated files (`.g.dart`, `.freezed.dart`) are excluded from analysis
+
+## Breaking Changes
+
+This is a published SDK: every symbol exported from a package's barrel
+(`lib/<package>.dart`) is public API that customers may already depend on.
+
+**Always ask the user for explicit permission before making a change that could break
+customer code.** Propose the change, name what breaks and who it affects, offer a
+non-breaking alternative if one exists, and wait for a decision. Do not assume a change
+is acceptable because it is small, "unlikely to be used", or internally more correct.
+
+Treat all of the following as potentially breaking, even when the diff looks trivial:
+
+- Removing, renaming, or moving a public class, method, getter, typedef, or extension
+- Changing a constructor parameter's type, name, or nullability — including changing a
+  callback signature (e.g. `void Function(String?)` → `void Function()`)
+- Adding a `required` parameter to an existing public constructor or method
+- Adding a member to, or changing a member's signature on, an interface customers
+  implement or subclass (e.g. `Translations`, `ChatPersistenceClient`, theme data classes)
+- Changing a default value, or changing which widget/behaviour a public widget renders
+- Making a public widget stop reading state it used to read (a customer's override or
+  wrapper may silently stop taking effect — a *behavioural* break with no compile error)
+- Changing the semantics of an existing field without changing its type
+
+Behavioural breaks deserve the same scrutiny as compile breaks; they are worse, because
+customers get no compiler warning.
+
+When a breaking change is approved:
+
+- Prefer the non-breaking path where it exists: add the new API alongside the old one,
+  `@Deprecated('Use X instead.')` the old one, and keep it for at least one minor release.
+- Make new parameters optional with a default that preserves the previous behaviour.
+- Use `refactor(scope)!:` / `feat(scope)!:` in the commit and PR title.
+- Record it in the package's `CHANGELOG.md` under `🔄 Changed` (or `⚠️ Deprecated`),
+  spelling out the migration for customers.
+- If a translation key or theme property stops being used, deprecate it rather than
+  leaving it silently dead.
 
 ## PR & Commit Conventions
 
@@ -138,6 +179,12 @@ After modifying any package, update its `CHANGELOG.md`.
 ## Figma Designs
 
 UI designs for this SDK are in the [Chat SDK Design System](https://www.figma.com/design/Us73erK1xFNcB5EH3hyq6Y/Chat-SDK-Design-System) Figma project. Use the Figma MCP server to look up designs when implementing or updating UI components.
+
+## Sibling SDK Alignment
+
+Stream ships the same product on other platforms — **stream-chat-swift**, **stream-chat-android**, **stream-chat-react-native**. Check how they name and shape an equivalent API before inventing one here, and prefer their vocabulary over a name derived only from Flutter code or design tokens.
+
+That alignment belongs in the **PR description**, never in the SDK's own docs or code comments. A comment that justifies a decision with "the SwiftUI and React Native SDKs do it this way" tells a reader nothing about what this code guarantees, and goes stale the moment those SDKs change — an integrator reading the dartdoc cannot verify it and has no reason to care. Describe the behavior and the trade-off directly; put the cross-platform argument, where it is genuinely persuasive, in the PR. See [`STYLE_GUIDE.md`](STYLE_GUIDE.md#no-cross-framework-justification-in-comments).
 
 ## `stream_core_flutter` (external sibling repo)
 

@@ -63,16 +63,22 @@ void main() {
 
       authInterceptor.onRequest(options, handler);
 
+      // The handler rejects with a private dio type, so capture the error and
+      // assert outside the `try`: a missing rejection leaves `caught` null.
+      Object? caught;
       try {
         await handler.future;
       } catch (e) {
-        // need to cast it as the type is private in dio
-        var error = (e as dynamic).data;
-        expect(error, isA<StreamChatDioError>());
-        error = (error as StreamChatDioError).error;
-        expect(error.code, ChatErrorCode.undefinedToken.code);
-        expect(error.message, ChatErrorCode.undefinedToken.message);
+        caught = e;
       }
+
+      // need to cast it as the type is private in dio
+      final dioError = (caught as dynamic)?.data;
+      expect(dioError, isA<StreamChatDioError>());
+
+      final error = (dioError as StreamChatDioError).error;
+      expect(error.code, ChatErrorCode.undefinedToken.code);
+      expect(error.message, ChatErrorCode.undefinedToken.message);
     },
   );
 
@@ -147,13 +153,15 @@ void main() {
 
       authInterceptor.onError(err, handler);
 
+      Object? caught;
       try {
         await handler.future;
       } catch (e) {
-        // need to cast it as the type is private in dio
-        final error = (e as dynamic).data;
-        expect(error, isA<DioException>());
+        caught = e;
       }
+
+      // need to cast it as the type is private in dio
+      expect((caught as dynamic)?.data, isA<DioException>());
 
       verify(() => tokenManager.isStatic).called(1);
 
@@ -185,15 +193,20 @@ void main() {
 
       authInterceptor.onError(err, handler);
 
+      Object? caught;
       try {
         await handler.future;
       } catch (e) {
-        // need to cast it as the type is private in dio
-        final error = (e as dynamic).data;
-        expect(error, isA<DioException>());
-        final response = StreamChatNetworkError.fromDioException(error);
-        expect(response.errorCode, code);
+        caught = e;
       }
+
+      // need to cast it as the type is private in dio
+      final error = (caught as dynamic)?.data;
+      expect(error, isA<DioException>());
+      expect(
+        StreamChatNetworkError.fromDioException(error as DioException).errorCode,
+        code,
+      );
 
       verify(() => tokenManager.isStatic).called(1);
       verifyNoMoreInteractions(tokenManager);
@@ -211,13 +224,15 @@ void main() {
 
       authInterceptor.onError(err, handler);
 
+      Object? caught;
       try {
         await handler.future;
       } catch (e) {
-        // need to cast it as the type is private in dio
-        final error = (e as dynamic).data;
-        expect(error, isA<DioException>());
+        caught = e;
       }
+
+      // need to cast it as the type is private in dio
+      expect((caught as dynamic)?.data, isA<DioException>());
     },
   );
 }

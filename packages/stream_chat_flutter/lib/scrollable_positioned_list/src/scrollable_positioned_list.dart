@@ -9,10 +9,10 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/scrollable_positioned_list/src/item_positions_listener.dart';
-import 'package:stream_chat_flutter/scrollable_positioned_list/src/item_positions_notifier.dart';
-import 'package:stream_chat_flutter/scrollable_positioned_list/src/positioned_list.dart';
-import 'package:stream_chat_flutter/scrollable_positioned_list/src/post_mount_callback.dart';
+import 'item_positions_listener.dart';
+import 'item_positions_notifier.dart';
+import 'positioned_list.dart';
+import 'post_mount_callback.dart';
 
 /// Number of screens to scroll when scrolling a long distance.
 const int _screenScrollCount = 2;

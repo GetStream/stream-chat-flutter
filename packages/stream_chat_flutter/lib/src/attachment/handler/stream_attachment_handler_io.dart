@@ -5,10 +5,11 @@ import 'package:file_selector/file_selector.dart';
 import 'package:gal/gal.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:stream_chat_flutter/src/attachment/handler/common.dart';
-import 'package:stream_chat_flutter/src/attachment/handler/stream_attachment_handler_base.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
+
+import '../../../stream_chat_flutter.dart';
+import 'common.dart';
+import 'stream_attachment_handler_base.dart';
 
 /// StreamAttachmentHandler implementation for desktop.
 class StreamAttachmentHandlerDesktop extends StreamAttachmentHandler {
@@ -130,23 +131,22 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
     List<String>? allowedExtensions,
     Function(FilePickerStatus)? onFileLoading,
     int compressionQuality = 0,
-    bool withData = true,
-    bool withReadStream = false,
+    @Deprecated('Content is read on demand; this no longer has any effect.') bool withData = true,
+    @Deprecated('Content is read on demand; this no longer has any effect.') bool withReadStream = false,
     bool lockParentWindow = true,
   }) async {
-    final result = await FilePicker.pickFiles(
+    final result = await FilePicker.pickFile(
       dialogTitle: dialogTitle,
       initialDirectory: initialDirectory,
       type: type,
       allowedExtensions: allowedExtensions,
       onFileLoading: onFileLoading,
       compressionQuality: compressionQuality,
-      withData: withData,
-      withReadStream: withReadStream,
-      lockParentWindow: lockParentWindow,
+      windowsOptions: WindowsOptions(lockParentWindow: lockParentWindow),
+      linuxOptions: LinuxOptions(lockParentWindow: lockParentWindow),
     );
 
-    return result?.files.first.toAttachment(type: type.toAttachmentType());
+    return await result?.xFile.toAttachment(type: type.toAttachmentType());
   }
 
   @override

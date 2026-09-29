@@ -2,11 +2,12 @@
 
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/api/responses.dart';
-import 'package:stream_chat/src/core/models/action.dart';
-import 'package:stream_chat/src/core/models/attachment_file.dart';
-import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:uuid/uuid.dart';
+
+import '../api/responses.dart';
+import '../util/serializer.dart';
+import 'action.dart';
+import 'attachment_file.dart';
 
 part 'attachment.g.dart';
 
@@ -61,10 +62,7 @@ class Attachment extends Equatable {
 
   /// Create a new instance from a db data
   factory Attachment.fromData(Map<String, dynamic> json) => _$AttachmentFromJson(
-    Serializer.moveToExtraDataFromRoot(
-      json,
-      topLevelFields + dbSpecificTopLevelFields,
-    ),
+    Serializer.moveToExtraDataFromRoot(json, _dataTopLevelFields),
   );
 
   factory Attachment.fromOGAttachment(OGAttachmentResponse ogAttachment) => Attachment(
@@ -210,6 +208,11 @@ class Attachment extends Equatable {
     'id',
     'upload_state',
     'file',
+  ];
+
+  static const _dataTopLevelFields = [
+    ...topLevelFields,
+    ...dbSpecificTopLevelFields,
   ];
 
   /// Serialize to json

@@ -53,10 +53,13 @@ class GiphyAttachmentBuilder extends StreamAttachmentWidgetBuilder {
       style: style,
       child: InkWell(
         onTap: onTap,
-        child: StreamGiphyAttachment(
-          message: message,
-          constraints: constraints,
-          giphy: giphy,
+        child: Semantics(
+          label: _mediaAttachmentSemanticsLabel(context, giphy),
+          child: StreamGiphyAttachment(
+            message: message,
+            constraints: constraints,
+            giphy: giphy,
+          ),
         ),
       ),
     );

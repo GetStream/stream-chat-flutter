@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import '../../stream_chat_flutter.dart';
 
 /// A channel page with optional floating composer support.
 ///

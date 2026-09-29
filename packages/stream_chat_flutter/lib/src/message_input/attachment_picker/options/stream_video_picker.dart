@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import '../../../../stream_chat_flutter.dart';
 
 /// Widget used to capture video using the device camera.
 class StreamVideoPicker extends StatelessWidget {

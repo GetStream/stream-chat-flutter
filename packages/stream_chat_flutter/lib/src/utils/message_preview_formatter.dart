@@ -1,8 +1,9 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/localization/translations.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
+
+import '../localization/translations.dart';
+import 'extensions.dart';
 
 /// Formats a [Message] or [DraftMessage] into a preview [TextSpan] suitable
 /// for channel lists, quoted replies, and similar compact contexts.
@@ -132,6 +133,11 @@ abstract interface class AccessibleMessagePreviewFormatter implements MessagePre
   /// [showCaption] mirrors [formatMessage]: when `true` (the default),
   /// attachment and location labels include the message text as a caption;
   /// when `false` they fall back to a type-only label.
+  ///
+  /// Omitting [channel] returns the body on its own, without a speaker prefix —
+  /// callers that compose their own prefix rely on this, so implementations
+  /// must honor it. An implementation that prefixes unconditionally makes a
+  /// message row announce "You said, You: hello".
   String formatMessageSemanticsLabel(
     BuildContext context,
     Message message, {

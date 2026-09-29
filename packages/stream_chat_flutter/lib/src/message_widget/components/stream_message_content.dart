@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:stream_chat_flutter/src/attachment/builder/attachment_widget_builder.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_deleted.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_reactions.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_text.dart';
-import 'package:stream_chat_flutter/src/message_widget/stream_message_attachments.dart';
-import 'package:stream_chat_flutter/src/message_widget/stream_quoted_message.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
+
+import '../../attachment/builder/attachment_widget_builder.dart';
+import '../stream_message_attachments.dart';
+import '../stream_message_item.dart';
+import '../stream_quoted_message.dart';
+import 'stream_message_deleted.dart';
+import 'stream_message_reactions.dart';
+import 'stream_message_text.dart';
 
 /// Composes the main message content including the bubble, attachments, text,
 /// and reactions.
@@ -44,10 +46,25 @@ class StreamMessageContent extends StatefulWidget {
     this.onReactionLongPress,
     this.onQuotedMessageTap,
     this.reactionSorting,
+    this.showTranslatedText = true,
+    this.excludeTextFromSemantics = false,
   });
 
   /// The message to display.
   final Message message;
+
+  /// Whether the rendered message text stays out of the semantics tree.
+  ///
+  /// Set this when an enclosing row already announces the text as part of a
+  /// composed phrase — [StreamMessageItem] passes `true` whenever it labels the
+  /// row — so a screen reader hears the message once instead of once per
+  /// inline span. It covers the text and the deleted placeholder only: the
+  /// attachments, the poll, the quoted message and the reaction chips stay
+  /// reachable either way.
+  ///
+  /// Left `false` (the default) the text announces itself, which is what a
+  /// bubble outside such a row needs.
+  final bool excludeTextFromSemantics;
 
   /// Optional header widget displayed above the message content column.
   ///
@@ -128,6 +145,12 @@ class StreamMessageContent extends StatefulWidget {
   /// Passed through to [StreamMessageReactions.sorting].
   final Comparator<ReactionGroup>? reactionSorting;
 
+  /// Whether [message] should display its translation when [Message.i18n]
+  /// has one for the current user's language.
+  ///
+  /// Passed through to [StreamMessageText.showTranslatedText].
+  final bool showTranslatedText;
+
   @override
   State<StreamMessageContent> createState() => _StreamMessageContentState();
 }
@@ -165,7 +188,21 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
     final spacing = context.streamSpacing;
     final crossAxisAlignment = core.StreamMessageLayout.crossAxisAlignmentOf(context);
 
-    if (widget.message.isDeleted) return const StreamMessageDeleted();
+    // Only a row that speaks its own composed label has already said what the
+    // bubble contains; without one the bubble is all a reader has.
+    final excluding = widget.excludeTextFromSemantics;
+
+    // A deleted message keeps its metadata: the design shows the timestamp and
+    // the delivery status below the placeholder, same as any other message.
+    if (widget.message.isDeleted) {
+      return core.StreamMessageContent(
+        header: widget.header,
+        footer: widget.footer,
+        // The composed row label already speaks the placeholder, so announcing
+        // it here as well would repeat it.
+        child: ExcludeSemantics(excluding: excluding, child: const StreamMessageDeleted()),
+      );
+    }
 
     return core.StreamMessageContent(
       header: widget.header,
@@ -191,6 +228,7 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                       if (widget.message.quotedMessage case final quotedMessage?)
                         StreamQuotedMessage(
                           quotedMessage: quotedMessage,
+                          replyMessage: widget.message,
                           onTap: switch (widget.onQuotedMessageTap) {
                             final onTap? => () => onTap(quotedMessage),
                             _ => null,
@@ -202,11 +240,28 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                         attachmentBuilders: widget.attachmentBuilders,
                       ),
                       if (widget.message.text case final text? when text.isNotEmpty)
-                        StreamMessageText(
-                          message: widget.message,
-                          onLinkTap: widget.onLinkTap,
-                          onMentionTap: widget.onMentionTap,
-                          onAnyMentionTap: widget.onAnyMentionTap,
+                        // The composed row label speaks the message text, so
+                        // the rendered markdown stays out of the semantics tree
+                        // and the row is announced as one phrase.
+                        //
+                        // This deliberately costs the inline link and mention
+                        // spans their own semantics nodes, so a screen reader
+                        // can read a link but not focus or activate it. The
+                        // alternative — a focus stop per span, each repeating
+                        // text the row just spoke — makes every message far
+                        // more tedious to move through than it makes the rare
+                        // link easier to reach. `explicitChildNodes` keeps the
+                        // parts worth a stop of their own — polls, quotes and
+                        // attachments — reachable.
+                        ExcludeSemantics(
+                          excluding: excluding,
+                          child: StreamMessageText(
+                            message: widget.message,
+                            onLinkTap: widget.onLinkTap,
+                            onMentionTap: widget.onMentionTap,
+                            onAnyMentionTap: widget.onAnyMentionTap,
+                            showTranslatedText: widget.showTranslatedText,
+                          ),
                         ),
                     ],
                   ),

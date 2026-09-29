@@ -1,8 +1,8 @@
 // coverage:ignore-file
 import 'package:drift/drift.dart';
-import 'package:stream_chat_persistence/src/converter/list_converter.dart';
-import 'package:stream_chat_persistence/src/converter/map_converter.dart';
-import 'package:stream_chat_persistence/src/converter/voting_visibility_converter.dart';
+import '../converter/list_converter.dart';
+import '../converter/map_converter.dart';
+import '../converter/voting_visibility_converter.dart';
 
 /// Represents a [Polls] table in [DriftChatDatabase].
 @DataClassName('PollEntity')

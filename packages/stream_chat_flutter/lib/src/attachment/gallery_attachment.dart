@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/misc/flex_grid.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../stream_chat_flutter.dart';
+import '../misc/flex_grid.dart';
 
 /// A responsive grid layout for multiple media attachments.
 ///
@@ -288,15 +289,20 @@ class DefaultStreamGalleryAttachment extends StatelessWidget {
       children: children,
       overlayBuilder: (context, remaining) {
         return IgnorePointer(
-          child: Material(
-            clipBehavior: .hardEdge,
-            color: colorScheme.backgroundOverlayDark,
-            shape: RoundedSuperellipseBorder(borderRadius: .all(radius.md)),
-            child: Center(
-              child: Text(
-                '+$remaining',
-                style: textTheme.headingLg.copyWith(
-                  color: colorScheme.textOnAccent,
+          // Each tile announces its position ("4 of 6"), which already tells a
+          // screen-reader user that the gallery holds more than it shows. The
+          // badge would only add a second stop reading "plus 2".
+          child: ExcludeSemantics(
+            child: Material(
+              clipBehavior: .hardEdge,
+              color: colorScheme.backgroundOverlayDark,
+              shape: RoundedSuperellipseBorder(borderRadius: .all(radius.md)),
+              child: Center(
+                child: Text(
+                  '+$remaining',
+                  style: textTheme.headingLg.copyWith(
+                    color: colorScheme.textOnAccent,
+                  ),
                 ),
               ),
             ),

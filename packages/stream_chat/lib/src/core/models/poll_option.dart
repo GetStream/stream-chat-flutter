@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/util/serializer.dart';
+import '../util/serializer.dart';
 
 part 'poll_option.g.dart';
 

@@ -128,9 +128,10 @@ void main() {
       final logger = MockLogger();
       final client = StreamHttpClient(apiKey, logger: logger);
 
-      try {
-        await client.get('path');
-      } catch (_) {}
+      await expectLater(
+        client.get('path'),
+        throwsA(isA<StreamChatNetworkError>()),
+      );
 
       verify(() => logger.info(any())).called(greaterThan(0));
     });
@@ -140,9 +141,10 @@ void main() {
       final logger = MockLogger();
       final client = StreamHttpClient(apiKey, logger: logger);
 
-      try {
-        await client.get('path');
-      } catch (_) {}
+      await expectLater(
+        client.get('path'),
+        throwsA(isA<StreamChatNetworkError>()),
+      );
 
       verify(() => logger.severe(any())).called(greaterThan(0));
     });
@@ -150,17 +152,18 @@ void main() {
 
   test('`.close` should close the dio client', () async {
     final client = StreamHttpClient('api-key')..close(force: true);
-    try {
-      await client.get('path');
-    } on StreamChatNetworkError catch (e) {
-      expect(e, isA<StreamChatNetworkError>());
-      expect(
-        e.message,
-        "The connection errored: Dio can't establish a new connection"
-        ' after it was closed. This indicates an error which most likely'
-        ' cannot be solved by the library.',
-      );
-    }
+    await expectLater(
+      client.get('path'),
+      throwsA(
+        isA<StreamChatNetworkError>().having(
+          (it) => it.message,
+          'message',
+          "The connection errored: Dio can't establish a new connection"
+              ' after it was closed. This indicates an error which most likely'
+              ' cannot be solved by the library.',
+        ),
+      ),
+    );
   });
 
   test('`.get` should return response successfully', () async {
@@ -206,12 +209,15 @@ void main() {
       ),
     ).thenThrow(error);
 
-    try {
-      await client.get(path);
-    } catch (e) {
-      expect(e, isA<StreamChatNetworkError>());
-      expect(e, StreamChatNetworkError.fromDioException(error));
-    }
+    await expectLater(
+      client.get(path),
+      throwsA(
+        allOf(
+          isA<StreamChatNetworkError>(),
+          equals(StreamChatNetworkError.fromDioException(error)),
+        ),
+      ),
+    );
 
     verify(
       () => dio.get(
@@ -267,12 +273,15 @@ void main() {
         ),
       ).thenThrow(error);
 
-      try {
-        await client.post(path);
-      } catch (e) {
-        expect(e, isA<StreamChatNetworkError>());
-        expect(e, StreamChatNetworkError.fromDioException(error));
-      }
+      await expectLater(
+        client.post(path),
+        throwsA(
+          allOf(
+            isA<StreamChatNetworkError>(),
+            equals(StreamChatNetworkError.fromDioException(error)),
+          ),
+        ),
+      );
 
       verify(
         () => dio.post(
@@ -329,12 +338,15 @@ void main() {
         ),
       ).thenThrow(error);
 
-      try {
-        await client.delete(path);
-      } catch (e) {
-        expect(e, isA<StreamChatNetworkError>());
-        expect(e, StreamChatNetworkError.fromDioException(error));
-      }
+      await expectLater(
+        client.delete(path),
+        throwsA(
+          allOf(
+            isA<StreamChatNetworkError>(),
+            equals(StreamChatNetworkError.fromDioException(error)),
+          ),
+        ),
+      );
 
       verify(
         () => dio.delete(
@@ -391,12 +403,15 @@ void main() {
         ),
       ).thenThrow(error);
 
-      try {
-        await client.patch(path);
-      } catch (e) {
-        expect(e, isA<StreamChatNetworkError>());
-        expect(e, StreamChatNetworkError.fromDioException(error));
-      }
+      await expectLater(
+        client.patch(path),
+        throwsA(
+          allOf(
+            isA<StreamChatNetworkError>(),
+            equals(StreamChatNetworkError.fromDioException(error)),
+          ),
+        ),
+      );
 
       verify(
         () => dio.patch(
@@ -453,12 +468,15 @@ void main() {
         ),
       ).thenThrow(error);
 
-      try {
-        await client.put(path);
-      } catch (e) {
-        expect(e, isA<StreamChatNetworkError>());
-        expect(e, StreamChatNetworkError.fromDioException(error));
-      }
+      await expectLater(
+        client.put(path),
+        throwsA(
+          allOf(
+            isA<StreamChatNetworkError>(),
+            equals(StreamChatNetworkError.fromDioException(error)),
+          ),
+        ),
+      );
 
       verify(
         () => dio.put(
@@ -522,12 +540,15 @@ void main() {
         ),
       ).thenThrow(error);
 
-      try {
-        await client.postFile(path, file);
-      } catch (e) {
-        expect(e, isA<StreamChatNetworkError>());
-        expect(e, StreamChatNetworkError.fromDioException(error));
-      }
+      await expectLater(
+        client.postFile(path, file),
+        throwsA(
+          allOf(
+            isA<StreamChatNetworkError>(),
+            equals(StreamChatNetworkError.fromDioException(error)),
+          ),
+        ),
+      );
 
       verify(
         () => dio.post(
@@ -586,12 +607,12 @@ void main() {
         ),
       ).thenThrow(error);
 
-      try {
-        await client.request(path);
-      } catch (e) {
-        expect(e, isA<StreamChatNetworkError>());
-        expect(e, error.error);
-      }
+      await expectLater(
+        client.request(path),
+        throwsA(
+          allOf(isA<StreamChatNetworkError>(), equals(error.error)),
+        ),
+      );
 
       verify(
         () => dio.request(

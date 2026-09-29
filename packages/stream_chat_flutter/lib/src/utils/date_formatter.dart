@@ -1,7 +1,7 @@
 import 'package:clock/clock.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:jiffy/jiffy.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
+import 'extensions.dart';
 
 /// Represents a function type that formats a date.
 typedef DateFormatter = String Function(BuildContext context, DateTime date);

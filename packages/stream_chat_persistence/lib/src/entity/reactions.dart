@@ -1,7 +1,7 @@
 // coverage:ignore-file
 import 'package:drift/drift.dart';
-import 'package:stream_chat_persistence/src/converter/map_converter.dart';
-import 'package:stream_chat_persistence/src/entity/messages.dart';
+import '../converter/map_converter.dart';
+import 'messages.dart';
 
 /// Represents a [Reactions] table in [DriftChatDatabase].
 @DataClassName('ReactionEntity')

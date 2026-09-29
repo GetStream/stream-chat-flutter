@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/keyboard_shortcuts/intents.dart';
-import 'package:stream_chat_flutter/src/keyboard_shortcuts/keysets.dart';
+import 'intents.dart';
+import 'keysets.dart';
 
 /// A widget that executes functions when specific physical keyboard shortcuts
 /// are performed.

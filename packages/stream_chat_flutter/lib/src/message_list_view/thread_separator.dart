@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
+
+import '../../stream_chat_flutter.dart';
 
 /// {@template threadSeparator}
 /// A full-width banner that separates the parent message from its thread

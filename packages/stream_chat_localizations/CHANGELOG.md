@@ -1,5 +1,15 @@
 ## Upcoming
 
+✅ Added
+
+- Added the message-list accessibility strings for all supported locales, each with a native-language implementation.
+
+## 10.4.0
+
+✅ Added
+
+- Added message-translation strings for all supported locales: `translatedLabel`, `originalLabel`, `showOriginalLabel`, `showTranslationLabel`, and `translatedFromLanguageText(String languageCode)`, which names the source language of a translated message in the current locale.
+
 🔄 Changed
 
 - Raised minimum Flutter to `>=3.44.0` and Dart SDK to `^3.12.0`.
@@ -9,6 +19,7 @@
 ✅ Added
 
 - Added connection-error translations (`connectionErrorTitle`/`Description`, `slowConnectionErrorTitle`/`Description`, `genericErrorTitle`/`Description`) for all supported locales.
+- Added `unreadMessagesSeparatorLabel` for all supported locales, showing a count (e.g. "5 unread messages"). `GlobalStreamChatLocalizations` falls back to the deprecated count-less `unreadMessagesSeparatorText`, so a subclass that extends it keeps showing any custom text it already overrides. A class that `implements StreamChatLocalizations` directly has to add the member itself.
 
 ## 10.2.0
 

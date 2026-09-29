@@ -62,13 +62,16 @@ document; the section link is provided.
 
 - Line width: **120 characters** (configured in `analysis_options.yaml`). Comments and
   docs follow the same limit.
-- Single quotes, package imports (never relative), trailing commas preserved, `const`
+- Single quotes, relative imports within a package's own `lib/`, trailing commas preserved, `const`
   wherever possible, `final` for locals that aren't reassigned. These are enforced by
   the linter — do not disable them.
 - Prefer named parameters for booleans (`avoid_positional_boolean_parameters`). A
   positional `bool` at a call site tells the reader nothing.
 - File names are `snake_case.dart` (`file_names`). Imports follow the standard order:
   `dart:` → `package:` → relative — one blank line between groups (`directives_ordering`).
+- Web conditional imports select the web file with `dart.library.js_interop`, never
+  `dart.library.html`, which does not exist under `dart2wasm`.
+  → [Web conditional imports use `js_interop`, not `html`](#web-conditional-imports-use-js_interop-not-html)
 - Public API members require dartdoc (`///`). Private members (`_`-prefixed) use `//`
   block comments, not `///`. → [Private members use `//`](#private-members-use--not-)
 - Default to zero inline `//` comments in implementation. Prefer well-named locals and
@@ -77,7 +80,8 @@ document; the section link is provided.
   `didChangeDependencies` or `didUpdateWidget` instead.
   → [No InheritedWidget lookup in initState](#no-inheritedwidget-lookup-in-initstate)
 - Prefer early returns inside each conditional branch over reassigning a shared
-  `child`/`result` variable. → [Prefer early returns](#prefer-early-returns)
+  `child`/`result` variable, and one early return per check over a wrapped `||`/`&&`/`??` chain.
+  → [Prefer early returns](#prefer-early-returns)
 - `// ignore: ...` directives do **not** require an explanatory comment in this repo.
   This intentionally diverges from Flutter's style guide.
   → [Bare ignore directives are fine](#bare-ignore-directives-are-fine)
@@ -96,7 +100,9 @@ document; the section link is provided.
   `BehaviorSubject`, "unmodifiable", "Stream emits X", or which internal type is used.
   → [Public docs describe the contract, not implementation](#public-docs-describe-the-contract-not-implementation)
 - Comments must not justify code via cross-references to Flutter framework internals
-  (e.g. "matching Flutter's AppBar"). → [No Flutter internals in comments](#no-flutter-internals-in-comments)
+  (e.g. "matching Flutter's AppBar") or to Stream's SDKs on other platforms (e.g. "the
+  SwiftUI SDK does it this way") — that argument goes in the PR description.
+  → [No cross-framework justification in comments](#no-cross-framework-justification-in-comments)
 
 **Process**
 
@@ -390,8 +396,12 @@ than the CI expects.
 We use dartdoc for public API documentation. All public members in SDK packages must
 have documentation (`public_member_api_docs` lint is enabled).
 
-In general, follow the [Effective Dart documentation guide](https://dart.dev/effective-dart/documentation)
-except where this page contradicts it.
+In general, follow the Effective Dart documentation guide — vendored in this repo as
+[`EFFECTIVE_DART_DOC.md`](EFFECTIVE_DART_DOC.md) so it is readable offline
+(canonical version at [dart.dev](https://dart.dev/effective-dart/documentation)) — except where
+this page contradicts it. Read it before writing or reviewing dartdoc: the rules most often
+missed are single-sentence first paragraphs, "Whether…" for booleans, noun phrases for
+properties, square brackets for in-scope identifiers, and throws documented in prose.
 
 ### Answer your own questions straight away
 
@@ -447,13 +457,34 @@ Stream<List<Member>> get membersStream;
 Stream<List<Member>> get membersStream;
 ```
 
-### No Flutter internals in comments
+### No cross-framework justification in comments
 
 Do not justify code by cross-referencing Flutter framework internals ("matching
 Flutter's `AppBar`", "same behavior as `MaterialButton`"). Public dartdoc describes
 the observable contract, not which internal widget tree we happen to mirror. If a
 behavior only makes sense in the context of another Flutter widget, describe the
 behavior directly; if that's impossible, the abstraction may be wrong.
+
+The same holds for Stream's SDKs on other platforms. Aligning with
+stream-chat-swift, stream-chat-android or stream-chat-react-native is a real
+argument for a decision — but it belongs in the PR description, not in a comment.
+An integrator reading the dartdoc cannot verify it, and it goes stale the moment
+those SDKs change:
+
+```dart
+// BAD:
+
+// Plain text is collapsed into the row label. The SwiftUI and React Native
+// SDKs collapse plain text the same way, and reserve per-child focus for
+// polls, quotes and attachments.
+
+// GOOD:
+
+// Plain text is collapsed into the row label, so the message is announced as
+// one phrase. This costs the inline link spans their own focus stops, in
+// exchange for not repeating the row phrase once per span; `explicitChildNodes`
+// keeps polls, quotes and attachments reachable.
+```
 
 ### Writing prompts for good documentation
 
@@ -904,6 +935,9 @@ Widget build(BuildContext context) {
 If the post-processing is expensive enough that duplicating it hurts readability,
 extract a helper method — don't reintroduce the shared-variable pattern.
 
+The same applies to a chain of `||`, `&&` or `??` checks: return at each check rather than wrapping the
+chain. → [Use braces for long function bodies](#use-braces-for-long-function-bodies)
+
 ### Use streams for real-time data
 
 This repo builds a real-time chat SDK. `Stream` is the primary reactive primitive for
@@ -925,6 +959,33 @@ Consuming streams in widgets:
   when the stream has a synchronously-available initial value. `BetterStreamBuilder`
   only rebuilds when the value changes.
 - Always cancel `StreamSubscription`s in `dispose()`.
+
+### Web conditional imports use `js_interop`, not `html`
+
+Conditional imports that swap in a web implementation key on `dart.library.js_interop`:
+
+```dart
+// GOOD
+import 'foo_stub.dart'
+    if (dart.library.js_interop) 'foo_web.dart'
+    if (dart.library.io) 'foo_io.dart';
+
+// BAD
+import 'foo_stub.dart'
+    if (dart.library.html) 'foo_web.dart'
+    if (dart.library.io) 'foo_io.dart';
+```
+
+`dart:html` does not exist under `dart2wasm`, and neither does `dart:io`. On a
+WebAssembly build the bad form therefore matches no condition and silently resolves to
+the stub. It still compiles cleanly; the failure appears only at runtime, when the stub
+throws `UnimplementedError`. `dart2js` supports both constants, so `js_interop` covers
+JS and Wasm alike.
+
+Nothing in the analyzer catches this. `avoid_web_libraries_in_flutter` inspects import
+URIs, and a condition is not a URI — so the bad form produces no warning.
+
+The same applies to `export` directives.
 
 
 ## Testing
@@ -1242,6 +1303,41 @@ that uses it.
 
 Use a block (with braces) when a body would wrap onto more than one line — do not force
 `=>` onto a multi-line expression.
+
+When that body is a chain of `||`, `&&` or `??` over separate checks, write one early return per
+check, in order, so evaluation stops at the first check that decides the result. Wrapping the chain
+in braces still reads badly, and hoisting every check into a local evaluates all of them. For `&&`, return
+`false` at each failing check. Return the last check directly, letting it wrap if it is long;
+`if (…) return true; return false;` only restates it.
+
+```dart
+// BAD:
+bool canEdit(Document document) {
+  return document.ownerId == userId ||
+      permissions.contains(Permission.editAny) ||
+      editors.any((editor) => editor.id == userId);
+}
+
+// BAD:
+bool canEdit(Document document) {
+  final isOwner = document.ownerId == userId;
+  final canEditAny = permissions.contains(Permission.editAny);
+  final isEditor = editors.any((editor) => editor.id == userId); // Scans even for the owner.
+  return isOwner || canEditAny || isEditor;
+}
+
+// GOOD:
+bool canEdit(Document document) {
+  if (document.ownerId == userId) return true;
+  if (permissions.contains(Permission.editAny)) return true;
+  return editors.any((editor) => editor.id == userId);
+}
+```
+
+Named locals are still fine when every value is cheap and all of them are needed anyway, and for the last
+check alone when a name makes the return easier to read. A uniform run of comparisons or fallbacks, like
+the [`operator ==` boilerplate](#common-boilerplates-for-operator--and-hashcode) or the `??` chain in
+[Theming](#theming), stays one expression.
 
 ### Prefer `+=` over `++`
 

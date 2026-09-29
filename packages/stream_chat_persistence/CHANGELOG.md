@@ -1,5 +1,11 @@
 ## Upcoming
 
+🐞 Fixed
+
+- Fixed storing `lastSyncAt` silently doing nothing after the database was reset, which lost the events missed while offline.
+
+## 10.4.0
+
 🔄 Changed
 
 - Raised minimum Flutter to `>=3.44.0` and Dart SDK to `^3.12.0`.

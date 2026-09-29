@@ -10,3 +10,14 @@ dependency_overrides:
     path: e2e_stubs/firebase_crashlytics
   firebase_messaging:
     path: e2e_stubs/firebase_messaging
+
+  # TODO(e2e): temporary — remove this pin once the e2e suite no longer depends
+  # on animation frame timing.
+  #
+  # lottie 3.6.1 schedules frames at the composition frame rate instead of every
+  # vsync, which changes when the widget tree goes quiescent. The harness settles
+  # the tree between acting on it, so the splash screen's animation shifted when
+  # settling completed and the suite began failing across every branch. The SDK
+  # itself is compatible with 3.6.1, so this is pinned for e2e only rather than
+  # capped in melos.yaml, which would constrain integrators.
+  lottie: 3.5.1

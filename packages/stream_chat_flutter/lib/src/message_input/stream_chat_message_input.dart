@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_leading.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_trailing.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../stream_chat_flutter.dart';
+import '../components/message_composer/message_composer_input.dart';
+import '../components/message_composer/message_composer_leading.dart';
+import '../components/message_composer/message_composer_trailing.dart';
 
 /// A widget that shows the message composer.
 /// Uses the factory to show custom components or the default implementation.
@@ -35,6 +36,7 @@ class StreamChatMessageInput extends StatefulWidget {
     this.autofocus = false,
     this.autocorrect = true,
     this.isFloating = false,
+    this.contentInsertionConfiguration,
   });
 
   /// The controller for the message composer.
@@ -99,6 +101,11 @@ class StreamChatMessageInput extends StatefulWidget {
   ///
   /// Defaults to false.
   final bool isFloating;
+
+  /// {@macro flutter.widgets.editableText.contentInsertionConfiguration}
+  ///
+  /// Set this to accept images and GIFs sent from keyboards such as Gboard.
+  final ContentInsertionConfiguration? contentInsertionConfiguration;
 
   @override
   State<StreamChatMessageInput> createState() => _StreamChatMessageInputState();
@@ -263,6 +270,7 @@ class _StreamChatMessageInputContent extends StatelessWidget {
           audioRecorderController: widget.audioRecorderController,
           feedback: widget.feedback,
           sendVoiceRecordingAutomatically: widget.sendVoiceRecordingAutomatically,
+          contentInsertionConfiguration: widget.contentInsertionConfiguration,
         );
 
         return Container(

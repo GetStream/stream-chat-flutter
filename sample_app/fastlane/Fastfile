@@ -264,8 +264,10 @@ lane :run_e2e_test do |options|
             break
           end
 
-          only = E2ELog.failed_test_names(attempt_log)
-          only = phantom if only.empty?
+          # Both sets, not just the attributable ones: an attempt that reports a
+          # failure *and* phantoms would otherwise retry the failure alone, and a
+          # green retry of that one test would bury the tests still owed a result.
+          only = (E2ELog.failed_test_names(attempt_log) + phantom).uniq
           if only.empty?
             only = nil
             UI.important("#{target} failed (attempt #{attempt}/#{retries + 1}); retrying whole file…")

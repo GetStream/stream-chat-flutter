@@ -2,8 +2,9 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:sample_app/config/sample_app_config.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import 'sample_app_config.dart';
 
 /// Whether dynamic color extraction is supported on the current platform.
 ///
@@ -105,6 +106,13 @@ class SampleAppConfigScreen extends StatelessWidget {
                       subtitle: 'Show delivery info sheet',
                       value: config.enableMessageInfo,
                       onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableMessageInfo: v)),
+                    ),
+                    _SwitchRow(
+                      icon: icons.translate,
+                      title: 'Message Translation',
+                      subtitle: 'Show translations, annotate them, and translate on request',
+                      value: config.enableMessageTranslation,
+                      onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableMessageTranslation: v)),
                     ),
                     _SwitchRow(
                       icon: icons.location,

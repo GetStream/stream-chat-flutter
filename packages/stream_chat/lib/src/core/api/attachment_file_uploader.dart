@@ -1,7 +1,8 @@
 import 'package:dio/dio.dart';
-import 'package:stream_chat/src/core/api/responses.dart';
-import 'package:stream_chat/src/core/http/stream_http_client.dart';
-import 'package:stream_chat/src/core/models/attachment_file.dart';
+
+import '../http/stream_http_client.dart';
+import '../models/attachment_file.dart';
+import 'responses.dart';
 
 /// Signature for a function which provides instance of [AttachmentFileUploader]
 typedef AttachmentFileUploaderProvider =

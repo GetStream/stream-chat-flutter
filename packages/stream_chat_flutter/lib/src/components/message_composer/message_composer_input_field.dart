@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
+
+import '../../../stream_chat_flutter.dart';
 
 /// A widget that represents the actual text input field for the message
 /// composer.
@@ -22,6 +23,7 @@ class StreamMessageComposerInputField extends StatelessWidget {
     this.autofocus = false,
     this.autocorrect = true,
     this.enabled = true,
+    this.contentInsertionConfiguration,
   });
 
   /// The controller for the text field.
@@ -63,6 +65,9 @@ class StreamMessageComposerInputField extends StatelessWidget {
   /// Defaults to true.
   final bool enabled;
 
+  /// {@macro flutter.widgets.editableText.contentInsertionConfiguration}
+  final ContentInsertionConfiguration? contentInsertionConfiguration;
+
   @override
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
@@ -101,6 +106,7 @@ class StreamMessageComposerInputField extends StatelessWidget {
                 textCapitalization: textCapitalization,
                 autofocus: autofocus,
                 autocorrect: autocorrect,
+                contentInsertionConfiguration: contentInsertionConfiguration,
                 style: effectiveStyle,
                 cursorColor: effectiveCursorColor,
                 cursorWidth: effectiveCursorWidth,

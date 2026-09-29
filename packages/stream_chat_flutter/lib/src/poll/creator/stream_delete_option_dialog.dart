@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_core_flutter/chat.dart';
+
+import '../../utils/extensions.dart';
 
 /// {@template showPollDeleteOptionDialog}
 /// Shows a dialog that allows the user to confirm deletion of a poll option.
