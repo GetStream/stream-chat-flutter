@@ -17,9 +17,7 @@ class MuteUsersResponse with _$MuteUsersResponse {
 
   /// The ids that matched no user, so nothing was muted for them.
   ///
-  /// Only ever some of the ids given: a call where none of them match a user
-  /// fails instead. It is therefore always empty when one id was given, and an
-  /// id repeated in the call appears here once per occurrence.
+  /// Never all of them: a call where no id matches fails instead.
   @override
   final List<String> nonExistingUsers;
 }

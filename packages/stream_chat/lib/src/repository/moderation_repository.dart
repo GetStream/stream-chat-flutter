@@ -151,7 +151,7 @@ class ModerationRepository {
   ///
   /// [reason] and [custom] are recorded with the flag.
   ///
-  /// Returns the review item the flag created.
+  /// Returns the id of the flagged item in the review queue.
   Future<Result<FlagResponse>> flagMessage(
     String messageId, {
     String? reason,
@@ -173,7 +173,7 @@ class ModerationRepository {
   ///
   /// [reason] and [custom] are recorded with the flag.
   ///
-  /// Returns the review item the flag created.
+  /// Returns the id of the flagged item in the review queue.
   Future<Result<FlagResponse>> flagUser(
     String userId, {
     String? reason,
