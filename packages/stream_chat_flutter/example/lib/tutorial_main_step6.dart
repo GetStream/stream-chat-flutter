@@ -1,9 +1,10 @@
 // ignore_for_file: public_member_api_docs
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_flutter_example/tutorial_channel_list_page.dart';
-import 'package:stream_chat_flutter_example/tutorial_client.dart';
-import 'package:stream_chat_flutter_example/tutorial_rounded_avatar.dart';
+
+import 'tutorial_channel_list_page.dart';
+import 'tutorial_client.dart';
+import 'tutorial_rounded_avatar.dart';
 
 /// Step 6 of the
 /// [Flutter Chat tutorial](https://getstream.io/chat/sdk/flutter/tutorial/) -
