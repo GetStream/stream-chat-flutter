@@ -29,14 +29,18 @@ final appRoutes = [
       GoRoute(
         name: Routes.CHANNEL_LIST_PAGE.name,
         path: Routes.CHANNEL_LIST_PAGE.path,
-        builder: (BuildContext context, GoRouterState state) {
-          return const AdaptiveSplitViewRoot(placeholder: ChannelPlaceholderPage());
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          return AdaptiveSplitViewPage<void>(
+            key: state.pageKey,
+            name: state.name,
+            child: const AdaptiveSplitViewRoot(placeholder: ChannelPlaceholderPage()),
+          );
         },
         routes: [
           GoRoute(
             name: Routes.CHANNEL_PAGE.name,
             path: Routes.CHANNEL_PAGE.path,
-            builder: (context, state) {
+            pageBuilder: (context, state) {
               final channel = _resolveChannel(context, state);
               final messageId = state.uri.queryParameters['mid'];
               final parentId = state.uri.queryParameters['pid'];
@@ -55,10 +59,7 @@ final appRoutes = [
                 };
               }
 
-              return StreamChannel(
-                // Opening another channel or thread in place builds a fresh
-                // page, so no state such as the composer's text carries over.
-                key: ValueKey((channel.cid, parentMessage?.id)),
+              final page = StreamChannel(
                 channel: channel,
                 initialMessageId: messageId,
                 openAtFirstUnread: false,
@@ -118,6 +119,15 @@ final appRoutes = [
                     );
                   },
                 ),
+              );
+
+              // Opening another channel or thread in place replaces the page, so
+              // nothing carries over from the last one: neither its state, such
+              // as the composer's text, nor the menus open on it.
+              return AdaptiveSplitViewPage<void>(
+                key: ValueKey((channel.cid, parentMessage?.id)),
+                name: state.name,
+                child: page,
               );
             },
             routes: [

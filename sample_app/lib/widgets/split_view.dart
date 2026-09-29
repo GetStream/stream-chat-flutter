@@ -89,7 +89,8 @@ Rect? _verticalFold(MediaQueryData mediaQuery) {
 ///
 /// [secondary] is the navigator for the trailing pane, and its root page is an
 /// [AdaptiveSplitViewRoot]. On a compact window that root page shows
-/// [primary], so both panes keep their state as the window changes size.
+/// [primary], so both panes keep their state as the window changes size. Its
+/// pages are [AdaptiveSplitViewPage]s, which swap in place beside [primary].
 ///
 /// ```dart
 /// ShellRoute(
@@ -99,8 +100,11 @@ Rect? _verticalFold(MediaQueryData mediaQuery) {
 ///   routes: [
 ///     GoRoute(
 ///       path: '/channels',
-///       builder: (context, state) {
-///         return const AdaptiveSplitViewRoot(placeholder: ChannelPlaceholderPage());
+///       pageBuilder: (context, state) {
+///         return AdaptiveSplitViewPage<void>(
+///           key: state.pageKey,
+///           child: const AdaptiveSplitViewRoot(placeholder: ChannelPlaceholderPage()),
+///         );
 ///       },
 ///       routes: [/* The routes that open in the trailing pane. */],
 ///     ),
@@ -245,5 +249,52 @@ class AdaptiveSplitViewRoot extends StatelessWidget {
     if (scope.isExpanded) return placeholder;
 
     return KeyedSubtree(key: scope.primaryKey, child: scope.primary);
+  }
+}
+
+/// A page for the navigator of an [AdaptiveSplitView]'s trailing pane.
+///
+/// Swaps in without a transition while both panes are shown, and uses the
+/// platform's page transition when only the navigator is.
+class AdaptiveSplitViewPage<T> extends Page<T> {
+  const AdaptiveSplitViewPage({
+    super.key,
+    super.name,
+    required this.child,
+  });
+
+  /// The content of the page.
+  final Widget child;
+
+  @override
+  Route<T> createRoute(BuildContext context) => _AdaptiveSplitViewPageRoute<T>(page: this);
+}
+
+class _AdaptiveSplitViewPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T> {
+  _AdaptiveSplitViewPageRoute({required AdaptiveSplitViewPage<T> page}) : super(settings: page);
+
+  AdaptiveSplitViewPage<T> get _page => settings as AdaptiveSplitViewPage<T>;
+
+  @override
+  Widget buildContent(BuildContext context) => _page.child;
+
+  @override
+  bool get maintainState => true;
+
+  @override
+  bool get fullscreenDialog => false;
+
+  @override
+  String get debugLabel => '${super.debugLabel}(${_page.name})';
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (AdaptiveSplitView.isExpandedOf(context)) return child;
+    return super.buildTransitions(context, animation, secondaryAnimation, child);
   }
 }
