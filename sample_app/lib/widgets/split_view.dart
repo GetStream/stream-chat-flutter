@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -5,7 +8,9 @@ import '../utils/window_size_class.dart';
 
 /// Lays out [primary] and [secondary] side by side, separated by a divider.
 ///
-/// Each pane keeps only the safe-area insets on its outer edges.
+/// When a fold or hinge divides the window into a left and a right side, each
+/// pane fills one side. Each pane keeps only the safe-area insets on its outer
+/// edges. Assumes it fills the window.
 class SplitView extends StatelessWidget {
   const SplitView({
     super.key,
@@ -20,37 +25,61 @@ class SplitView extends StatelessWidget {
   /// The trailing pane, which fills the width [primary] leaves.
   final Widget secondary;
 
-  /// The width of [primary].
+  /// The width of [primary] while no fold or hinge divides the window.
   final double primaryWidth;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.streamColorScheme;
+    final mediaQuery = MediaQuery.of(context);
+    final Size(:width, :height) = mediaQuery.size;
     final isLtr = Directionality.of(context) == TextDirection.ltr;
 
+    // The band between the panes, from the left edge of the window.
+    final (dividerLeft, dividerRight) = switch (_verticalFold(mediaQuery)) {
+      Rect(:final left, :final right) => (left, math.max(right, left + _kDividerWidth)),
+      null when isLtr => (primaryWidth, primaryWidth + _kDividerWidth),
+      null => (width - primaryWidth - _kDividerWidth, width - primaryWidth),
+    };
+
+    final leftPane = Rect.fromLTRB(0, 0, dividerLeft, height);
+    final rightPane = Rect.fromLTRB(dividerRight, 0, width, height);
+
     return Row(
+      textDirection: TextDirection.ltr,
       children: [
         SizedBox(
-          width: primaryWidth,
-          child: MediaQuery.removePadding(
-            context: context,
-            removeLeft: !isLtr,
-            removeRight: isLtr,
-            child: primary,
+          width: leftPane.width,
+          child: MediaQuery(
+            data: mediaQuery.removeDisplayFeatures(leftPane),
+            child: isLtr ? primary : secondary,
           ),
         ),
-        VerticalDivider(width: 1, thickness: 1, color: colorScheme.borderSubtle),
+        VerticalDivider(
+          width: dividerRight - dividerLeft,
+          thickness: _kDividerWidth,
+          color: colorScheme.borderSubtle,
+        ),
         Expanded(
-          child: MediaQuery.removePadding(
-            context: context,
-            removeLeft: isLtr,
-            removeRight: !isLtr,
-            child: secondary,
+          child: MediaQuery(
+            data: mediaQuery.removeDisplayFeatures(rightPane),
+            child: isLtr ? secondary : primary,
           ),
         ),
       ],
     );
   }
+}
+
+// The width of the line between the panes.
+const _kDividerWidth = 1.0;
+
+// The fold or hinge that divides the window into a left and a right side, if any.
+Rect? _verticalFold(MediaQueryData mediaQuery) {
+  final Size(:width, :height) = mediaQuery.size;
+  return DisplayFeatureSubScreen.avoidBounds(mediaQuery).firstWhereOrNull(
+    (it) => it.top <= 0 && it.bottom >= height && it.left > 0 && it.right < width,
+  );
 }
 
 /// Shows [primary] beside [secondary] on a regular window, and only
