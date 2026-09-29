@@ -41,7 +41,7 @@ class Location extends Equatable {
 
   /// The channel CID where the message exists.
   ///
-  /// This is only available if the location is coming from server response.
+  /// Only set on a location that has been received, not on one built locally.
   @JsonKey(includeToJson: false)
   final String? channelCid;
 

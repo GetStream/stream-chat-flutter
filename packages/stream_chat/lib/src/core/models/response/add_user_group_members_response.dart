@@ -4,7 +4,7 @@ import '../user_group.dart';
 
 part 'add_user_group_members_response.freezed.dart';
 
-/// The user group returned by [StreamChatClient.addUserGroupMembers].
+/// A user group after members were added to it.
 @freezed
 class AddUserGroupMembersResponse with _$AddUserGroupMembersResponse {
   /// Creates a new [AddUserGroupMembersResponse].
@@ -13,7 +13,7 @@ class AddUserGroupMembersResponse with _$AddUserGroupMembersResponse {
     this.userGroup,
   });
 
-  /// How long the server took to handle the request, such as `4.21ms`.
+  /// How long the request took to handle, such as `4.21ms`.
   @override
   final String duration;
 

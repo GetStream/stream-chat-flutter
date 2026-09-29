@@ -98,7 +98,7 @@ typedef DraftFilter = Filter<Draft>;
 
 /// Represents a field that draft queries can be filtered on.
 class DraftFilterField extends FilterField<Draft> {
-  /// Creates a draft filter field named [remote] on the wire, reading its
+  /// Creates a draft filter field named [remote] in queries, reading its
   /// value off an instance with [value].
   DraftFilterField(super.remote, super.value);
 
@@ -164,7 +164,7 @@ class DraftSort extends Sort<Draft> {
 
 /// Represents a field that draft queries can be sorted on.
 class DraftSortField extends SortField<Draft> {
-  /// Creates a field named [remote] on the wire, reading its value off an
+  /// Creates a field named [remote] in queries, reading its value off an
   /// instance with `localValue`.
   ///
   /// For a name the SDK has not modelled; prefer the fields declared here.

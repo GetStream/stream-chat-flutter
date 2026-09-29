@@ -30,13 +30,13 @@ class _BaseResponse {
 /// The error payload the API returns on a failed request.
 @JsonSerializable()
 class ErrorResponse extends _BaseResponse {
-  /// The http error code
+  /// The error code identifying why the request failed.
   int? code;
 
   /// The message associated to the error code
   String? message;
 
-  /// The backend error code
+  /// The HTTP status of the failed request.
   @JsonKey(name: 'StatusCode')
   int? statusCode;
 
@@ -75,10 +75,9 @@ class QueryChannelsResponse extends _BaseResponse {
   @JsonKey(defaultValue: [])
   late List<ChannelState> channels;
 
-  /// Predefined filter spec as resolved by the server.
+  /// The predefined filter the query named, as resolved for it.
   ///
-  /// Populated when the request used `predefined_filter`. Contains the
-  /// preset name and the materialized `filter`/`sort` that were applied.
+  /// Null when the query named no predefined filter.
   @JsonKey(name: 'predefined_filter')
   PredefinedFilter? predefinedFilter;
 
@@ -722,7 +721,7 @@ class UpsertPushPreferencesResponse extends _BaseResponse {
   /// Mapping of user IDs to their push preferences.
   ///
   /// Users whose user-global preferences were not touched by the upsert call
-  /// (the server returns `null` for them) are omitted from this map.
+  /// are omitted from this map.
   @JsonKey(fromJson: _userPreferencesFromJson)
   late Map<String, PushPreference> userPreferences;
 

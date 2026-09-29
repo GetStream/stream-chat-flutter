@@ -157,12 +157,12 @@ abstract class ChatPersistenceClient {
   /// - [sort] — the sort order applied to the cached channel states.
   ///
   /// **Predefined filter mode** (`predefinedFilter != null`):
-  /// - [predefinedFilter] — the server-side filter template name.
+  /// - [predefinedFilter] — the name of the predefined filter.
   /// - [filterValues] / [sortValues] — interpolation maps that, together
   ///   with the template name, identify the cached query.
   /// - The returned [QueryChannelsResponse.predefinedFilter] carries the
-  ///   server-resolved filter + sort spec persisted on the last online
-  ///   query, so the caller can apply the same order the server applied.
+  ///   filter and sort the predefined filter resolved to on the last online
+  ///   query, so the caller can apply the same order.
   ///
   /// Both modes:
   /// - [messageLimit] limits messages per channel.
@@ -204,11 +204,11 @@ abstract class ChatPersistenceClient {
   /// are ignored in this mode.
   ///
   /// **Predefined filter mode** (`predefinedFilter != null`):
-  /// - [predefinedFilter] — the server-side filter template name.
+  /// - [predefinedFilter] — the name of the predefined filter.
   /// - [filterValues] / [sortValues] — interpolation maps used together
   ///   with the template name to key the cache.
-  /// - [resolvedFilter] / [resolvedSort] — the server-resolved spec
-  ///   returned in the query response. Persisted alongside [cids] so
+  /// - [resolvedFilter] / [resolvedSort] — the filter and sort the
+  ///   predefined filter resolved to. Persisted alongside [cids] so
   ///   subsequent offline reads can reconstruct the same filter and
   ///   order. [filter] / [sort] are ignored in this mode.
   Future<void> saveChannelQueries({

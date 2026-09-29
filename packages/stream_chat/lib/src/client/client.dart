@@ -79,6 +79,7 @@ import '../event_type.dart';
 import '../repository/app_settings_repository.dart';
 import '../repository/devices_repository.dart';
 import '../repository/general_repository.dart';
+import '../repository/moderation_repository.dart';
 import '../repository/roles_repository.dart';
 import '../repository/user_groups_repository.dart';
 import '../ws/connect_request.dart';
@@ -91,6 +92,7 @@ import 'app_settings_manager.dart';
 import 'channel/channel.dart';
 import 'channel_delivery_reporter.dart';
 import 'live_location_expiration_scheduler.dart';
+import 'moderation_client.dart';
 import 'query_channels_result.dart';
 import 'retry_policy.dart';
 import 'sync_manager.dart';
@@ -103,7 +105,7 @@ import 'sync_manager.dart';
 /// You can sign up for a Stream account at https://getstream.io/chat/
 ///
 /// The Chat client will manage API call, event handling and manage the
-/// websocket connection to Stream Chat servers.
+/// WebSocket connection to Stream Chat.
 ///
 /// ```dart
 /// final client = StreamChatClient("stream-chat-api-key");
@@ -177,11 +179,15 @@ class StreamChatClient {
         );
 
     final api = defaultApi ?? DefaultApi(httpClient);
+
     _rolesRepository = RolesRepository(api);
     _devicesRepository = DevicesRepository(api);
     _userGroupsRepository = UserGroupsRepository(api);
     _generalRepository = GeneralRepository(api);
+    _moderationRepository = ModerationRepository(api);
     _appSettingsManager = AppSettingsManager(AppSettingsRepository(api));
+
+    moderation = ModerationClient(_moderationRepository);
 
     _connection = ConnectionManager(
       request: ConnectRequest.forApi(
@@ -215,11 +221,17 @@ class StreamChatClient {
   }
 
   late final StreamChatApi _chatApi;
+
   late final RolesRepository _rolesRepository;
   late final DevicesRepository _devicesRepository;
   late final UserGroupsRepository _userGroupsRepository;
   late final GeneralRepository _generalRepository;
+  late final ModerationRepository _moderationRepository;
   late final AppSettingsManager _appSettingsManager;
+
+  /// Muting, banning and flagging, for the connected user.
+  late final ModerationClient moderation;
+
   late final ConnectionManager _connection;
   StreamSubscription<WsEvent>? _wsEventSubscription;
 
@@ -297,14 +309,13 @@ class StreamChatClient {
   /// types).
   ///
   /// Channels with read events disabled never receive `message.read` /
-  /// `notification.mark_*` events from the server, and reject the mark-read
-  /// endpoint, so their unread count is always `0` by default.
+  /// `notification.mark_*` events, and marking them read fails, so their
+  /// unread count is always `0` by default.
   ///
   /// When this is `true`, [Channel.unreadCount] is instead incremented
   /// locally as new messages arrive and reset locally (with no network
   /// request) when [Channel.markRead] is called, for those channels only.
-  /// Channels with read events enabled are unaffected and keep relying on
-  /// server-driven unread counts.
+  /// Channels with read events enabled are unaffected.
   final bool isLocalUnreadCountEnabled;
 
   /// Returns `True` if the [chatPersistenceClient] is available and connected.
@@ -319,8 +330,8 @@ class StreamChatClient {
   /// The retry policy options getter
   RetryPolicy get retryPolicy => _retryPolicy;
 
-  /// Whether the client should automatically refresh local state from the
-  /// server when the WebSocket connection recovers.
+  /// Whether the client should automatically refresh local state when the
+  /// WebSocket connection recovers.
   ///
   /// When `true` (default), the client re-queries the channels that were
   /// active before the connection was lost.
@@ -697,8 +708,8 @@ class StreamChatClient {
   /// identifier (optionally interpolated with [filterValues] and [sortValues])
   /// can be supplied.
   ///
-  /// Use [queryChannelsWithResult] if you also need the server-resolved
-  /// [PredefinedFilter] spec.
+  /// Use [queryChannelsWithResult] if you also need the resolved
+  /// [PredefinedFilter].
   Stream<List<Channel>> queryChannels({
     ChannelFilter? filter,
     List<ChannelSort>? channelStateSort,
@@ -728,8 +739,8 @@ class StreamChatClient {
   ).map((result) => result.channels);
 
   /// Requests channels with a given query, yielding a [QueryChannelsResult]
-  /// that carries both the live channel list and the server-resolved
-  /// [PredefinedFilter] spec (when one is associated with the query).
+  /// that carries both the live channel list and the resolved
+  /// [PredefinedFilter] (when the query names one).
   ///
   /// Yields the offline-cached result first (when available), followed by
   /// the online result. Concurrent identical online queries are coalesced
@@ -1449,18 +1460,6 @@ class StreamChatClient {
     truncatedAt: truncatedAt,
   );
 
-  /// Mutes the channel
-  Future<EmptyResponse> muteChannel(
-    String channelCid, {
-    Duration? expiration,
-  }) => _chatApi.moderation.muteChannel(
-    channelCid,
-    expiration: expiration,
-  );
-
-  /// Unmutes the channel
-  Future<EmptyResponse> unmuteChannel(String channelCid) => _chatApi.moderation.unmuteChannel(channelCid);
-
   /// Accept invitation to the channel
   Future<AcceptInviteResponse> acceptChannelInvite(
     String channelId,
@@ -1750,42 +1749,6 @@ class StreamChatClient {
     List<PartialUpdateUserRequest> users,
   ) => _chatApi.user.partialUpdateUsers(users);
 
-  /// Bans a user from all channels
-  Future<EmptyResponse> banUser(
-    String targetUserId, [
-    Map<String, dynamic> options = const {},
-  ]) => _chatApi.moderation.banUser(
-    targetUserId,
-    options: options,
-  );
-
-  /// Remove global ban for a user
-  Future<EmptyResponse> unbanUser(
-    String targetUserId, [
-    Map<String, dynamic> options = const {},
-  ]) => _chatApi.moderation.unbanUser(
-    targetUserId,
-    options: options,
-  );
-
-  /// Shadow bans a user
-  Future<EmptyResponse> shadowBan(
-    String targetID, [
-    Map<String, dynamic> options = const {},
-  ]) => banUser(targetID, {
-    'shadow': true,
-    ...options,
-  });
-
-  /// Removes shadow ban from a user
-  Future<EmptyResponse> removeShadowBan(
-    String targetID, [
-    Map<String, dynamic> options = const {},
-  ]) => unbanUser(targetID, {
-    'shadow': true,
-    ...options,
-  });
-
   final _userBlockLock = Lock();
 
   /// Blocks a user with the provided [userId].
@@ -1864,40 +1827,6 @@ class StreamChatClient {
 
     return response;
   }
-
-  /// Mutes a user
-  Future<EmptyResponse> muteUser(String userId) => _chatApi.moderation.muteUser(userId);
-
-  /// Unmutes a user
-  Future<EmptyResponse> unmuteUser(String userId) => _chatApi.moderation.unmuteUser(userId);
-
-  /// Flag a message
-  Future<EmptyResponse> flagMessage(String messageId) => _chatApi.moderation.flagMessage(messageId);
-
-  /// Unflag a message.
-  ///
-  /// The `/moderation/unflag` endpoint is no longer processed by the server:
-  /// the request is validated and an empty response is returned, but no flag
-  /// is removed.
-  @Deprecated(
-    'The /moderation/unflag endpoint is no longer supported by the server. '
-    'This will be removed in a future major release',
-  )
-  Future<EmptyResponse> unflagMessage(String messageId) => _chatApi.moderation.unflagMessage(messageId);
-
-  /// Flag a user
-  Future<EmptyResponse> flagUser(String userId) => _chatApi.moderation.flagUser(userId);
-
-  /// Unflag a user.
-  ///
-  /// The `/moderation/unflag` endpoint is no longer processed by the server:
-  /// the request is validated and an empty response is returned, but no flag
-  /// is removed.
-  @Deprecated(
-    'The /moderation/unflag endpoint is no longer supported by the server. '
-    'This will be removed in a future major release',
-  )
-  Future<EmptyResponse> unflagUser(String userId) => _chatApi.moderation.unflagUser(userId);
 
   /// Mark all channels for this user as read
   Future<EmptyResponse> markAllRead() => _chatApi.channel.markAllRead();
@@ -2448,7 +2377,7 @@ class StreamChatClient {
 
   /// Creates a new user group, optionally with initial members.
   ///
-  /// [id] is generated by the server when omitted.
+  /// An [id] is generated when omitted.
   Future<Result<CreateUserGroupResponse>> createUserGroup(
     String name, {
     String? id,

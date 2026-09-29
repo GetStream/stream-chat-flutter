@@ -154,12 +154,12 @@ extension ChannelCapabilityCheck on Channel {
   }
 
   /// True, if unread counts for this channel should be tracked locally,
-  /// on-device, rather than relying on the server.
+  /// on-device.
   ///
   /// This is the case when [StreamChatClient.isLocalUnreadCountEnabled] is
   /// enabled and the channel doesn't support read receipts (for example,
   /// livestream channel types that disable read events). Channels that
-  /// support read receipts always rely on server-driven unread counts.
+  /// support read receipts never track them locally.
   bool get usesLocalUnreadCount {
     return client.isLocalUnreadCountEnabled && !canUseReadReceipts;
   }

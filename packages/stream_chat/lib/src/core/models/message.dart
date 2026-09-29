@@ -136,8 +136,7 @@ class Message extends Equatable {
   @JsonKey(includeIfNull: false)
   final List<String>? mentionedGroupIds;
 
-  /// The list of groups mentioned in the message, hydrated by the server from
-  /// [mentionedGroupIds].
+  /// The groups mentioned in the message, resolved from [mentionedGroupIds].
   @JsonKey(includeToJson: false, fromJson: userGroupsFromV1Json)
   final List<UserGroup>? mentionedGroups;
 
@@ -633,8 +632,7 @@ class Message extends Equatable {
     final shouldPromoteDeletedForMe = preservedDeletedForMe == true && other.deletedForMe != true;
 
     return other.copyWith(
-      // Local-only timestamps — the server cannot know about these,
-      // so they are always taken from this instance.
+      // Local-only timestamps, so they are always taken from this instance.
       localCreatedAt: localCreatedAt,
       localUpdatedAt: localUpdatedAt,
       localDeletedAt: localDeletedAt,
@@ -642,7 +640,7 @@ class Message extends Equatable {
       type: shouldPromoteDeletedForMe ? MessageType.deleted : null,
       state: shouldPromoteDeletedForMe ? MessageState.deletedForMe : null,
       // Preserve enrichment from this instance when [other] omits these
-      // fields, as the backend may strip them on partial payloads.
+      // fields, as a partial payload may leave them out.
       poll: other.poll ?? poll,
       sharedLocation: other.sharedLocation ?? sharedLocation,
       ownReactions: other.ownReactions ?? ownReactions,
@@ -652,7 +650,7 @@ class Message extends Equatable {
         (final incoming?, final local?) when incoming.id == local.id => local.updateWith(incoming),
         // Different target — trust the new payload.
         (final incoming?, _) => incoming,
-        // Server omitted the nested quote — keep the locally-known copy.
+        // The payload omitted the nested quote — keep the locally-known copy.
         (_, final local) => local,
       },
     );
@@ -662,7 +660,7 @@ class Message extends Equatable {
   /// changes from [other].
   ///
   /// The argument convention is the inverse of [updateWith]: here `this` is
-  /// the server payload and [other] is the locally-known message.
+  /// the incoming payload and [other] is the locally-known message.
   /// `serverResponse.syncWith(localMessage)` is equivalent to
   /// `localMessage.updateWith(serverResponse)`.
   ///
@@ -741,7 +739,7 @@ typedef MessageSearchFilter = Filter<Message>;
 
 /// Represents a field that a message search can be filtered on.
 class MessageSearchFilterField extends FilterField<Message> {
-  /// Creates a message filter field named [remote] on the wire, reading its
+  /// Creates a message filter field named [remote] in queries, reading its
   /// value off an instance with [value].
   MessageSearchFilterField(super.remote, super.value);
 
@@ -882,7 +880,7 @@ class MessageSearchSort extends Sort<Message> {
 
 /// Represents a field that message queries can be sorted on.
 class MessageSearchSortField extends SortField<Message> {
-  /// Creates a field named [remote] on the wire, reading its value off an
+  /// Creates a field named [remote] in queries, reading its value off an
   /// instance with `localValue`.
   ///
   /// For a name the SDK has not modelled; prefer the fields declared here.

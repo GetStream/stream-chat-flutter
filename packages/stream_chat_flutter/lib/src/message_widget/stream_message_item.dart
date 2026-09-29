@@ -967,8 +967,8 @@ class DefaultStreamMessageItem extends StatelessWidget {
     EditMessage() => props.onEditMessageTap?.call(action.message),
     FlagMessage() => _maybeFlagMessage(context, action.message, channel),
     MarkUnread() => channel.markUnread(action.message.id),
-    MuteUser() => channel.client.muteUser(action.user.id),
-    UnmuteUser() => channel.client.unmuteUser(action.user.id),
+    MuteUser() => channel.client.moderation.muteUser(action.user.id),
+    UnmuteUser() => channel.client.moderation.unmuteUser(action.user.id),
     BlockUser() => channel.client.blockUser(action.user.id),
     UnblockUser() => channel.client.unblockUser(action.user.id),
     PinMessage() => channel.pinMessage(action.message),
@@ -1014,7 +1014,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
   }
 
   // Shows a confirmation dialog before flagging the message.
-  Future<EmptyResponse?> _maybeFlagMessage(
+  Future<Result<void>?> _maybeFlagMessage(
     BuildContext context,
     Message message,
     Channel channel,
@@ -1033,7 +1033,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
     if (confirmFlag != true) return null;
 
     final messageId = message.id;
-    return channel.client.flagMessage(messageId);
+    return channel.client.moderation.flagMessage(messageId);
   }
 
   // Toggles a reaction: removes it if already present, otherwise sends it.

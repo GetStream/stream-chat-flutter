@@ -32,8 +32,7 @@ class UserGroup with _$UserGroup {
   @override
   final DateTime createdAt;
 
-  /// The id of the user that created the group
-  /// (null when group is created server-side).
+  /// The id of the user that created the group, or null when no user did.
   @override
   final String? createdBy;
 

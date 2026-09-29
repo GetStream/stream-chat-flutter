@@ -227,7 +227,7 @@ typedef UserFilter = Filter<User>;
 
 /// Represents a field that user queries can be filtered on.
 class UserFilterField extends FilterField<User> {
-  /// Creates a user filter field named [remote] on the wire, reading its value
+  /// Creates a user filter field named [remote] in queries, reading its value
   /// off an instance with [value].
   UserFilterField(super.remote, super.value);
 
@@ -383,7 +383,7 @@ class UserSort extends Sort<User> {
 
 /// Represents a field that user queries can be sorted on.
 class UserSortField extends SortField<User> {
-  /// Creates a field named [remote] on the wire, reading its value off an
+  /// Creates a field named [remote] in queries, reading its value off an
   /// instance with `localValue`.
   ///
   /// For a name the SDK has not modelled; prefer the fields declared here.

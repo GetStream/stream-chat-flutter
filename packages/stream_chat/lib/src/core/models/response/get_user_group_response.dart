@@ -4,7 +4,7 @@ import '../user_group.dart';
 
 part 'get_user_group_response.freezed.dart';
 
-/// The user group fetched by [StreamChatClient.getUserGroup].
+/// The result of looking up a single user group.
 @freezed
 class GetUserGroupResponse with _$GetUserGroupResponse {
   /// Creates a new [GetUserGroupResponse].
@@ -13,7 +13,7 @@ class GetUserGroupResponse with _$GetUserGroupResponse {
     this.userGroup,
   });
 
-  /// How long the server took to handle the request, such as `4.21ms`.
+  /// How long the request took to handle, such as `4.21ms`.
   @override
   final String duration;
 

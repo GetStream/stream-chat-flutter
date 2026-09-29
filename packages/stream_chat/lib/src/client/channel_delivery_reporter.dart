@@ -18,13 +18,13 @@ typedef MarkChannelsDelivered =
 
 /// Manages the delivery reporting for channel messages.
 ///
-/// Collects channels that need delivery acknowledgments and efficiently
-/// reports them to the server.
+/// Collects channels that need delivery acknowledgments and reports them in
+/// batches.
 class ChannelDeliveryReporter {
   /// Creates a new channel delivery reporter.
   ///
   /// The [onMarkChannelsDelivered] callback is invoked when delivery receipts
-  /// are ready to be sent to the server.
+  /// are ready to be sent.
   ///
   /// The [throttleDuration] controls how frequently delivery receipts are sent.
   ///
