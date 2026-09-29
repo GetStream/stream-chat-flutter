@@ -6,7 +6,8 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../utils/window_size_class.dart';
 
-/// Lays out [primary] and [secondary] side by side, separated by a divider.
+/// A layout that places [primary] and [secondary] side by side, separated by a
+/// divider.
 ///
 /// When a fold or hinge divides the window into a left and a right side, each
 /// pane fills one side. Each pane keeps only the safe-area insets on its outer
@@ -16,7 +17,7 @@ class SplitView extends StatelessWidget {
     super.key,
     required this.primary,
     required this.secondary,
-    this.primaryWidth = 320,
+    this.primaryWidth = 320.0,
   });
 
   /// The leading pane.
@@ -28,6 +29,9 @@ class SplitView extends StatelessWidget {
   /// The width of [primary] while no fold or hinge divides the window.
   final double primaryWidth;
 
+  // The width of the line between the panes.
+  static const _dividerWidth = 1.0;
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.streamColorScheme;
@@ -37,9 +41,9 @@ class SplitView extends StatelessWidget {
 
     // The band between the panes, from the left edge of the window.
     final (dividerLeft, dividerRight) = switch (_verticalFold(mediaQuery)) {
-      Rect(:final left, :final right) => (left, math.max(right, left + _kDividerWidth)),
-      null when isLtr => (primaryWidth, primaryWidth + _kDividerWidth),
-      null => (width - primaryWidth - _kDividerWidth, width - primaryWidth),
+      Rect(:final left, :final right) => (left, math.max(right, left + _dividerWidth)),
+      null when isLtr => (primaryWidth, primaryWidth + _dividerWidth),
+      null => (width - primaryWidth - _dividerWidth, width - primaryWidth),
     };
 
     final leftPane = Rect.fromLTRB(0, 0, dividerLeft, height);
@@ -57,7 +61,7 @@ class SplitView extends StatelessWidget {
         ),
         VerticalDivider(
           width: dividerRight - dividerLeft,
-          thickness: _kDividerWidth,
+          thickness: _dividerWidth,
           color: colorScheme.borderSubtle,
         ),
         Expanded(
@@ -71,9 +75,6 @@ class SplitView extends StatelessWidget {
   }
 }
 
-// The width of the line between the panes.
-const _kDividerWidth = 1.0;
-
 // The fold or hinge that divides the window into a left and a right side, if any.
 Rect? _verticalFold(MediaQueryData mediaQuery) {
   final Size(:width, :height) = mediaQuery.size;
@@ -82,12 +83,30 @@ Rect? _verticalFold(MediaQueryData mediaQuery) {
   );
 }
 
-/// Shows [primary] beside [secondary] on a regular window, and only
-/// [secondary] on a compact one.
+/// A split view that shows [primary] beside [secondary] on a
+/// [WindowSizeClass.regular] window, and only [secondary] on a
+/// [WindowSizeClass.compact] one.
 ///
 /// [secondary] is the navigator for the trailing pane, and its root page is an
 /// [AdaptiveSplitViewRoot]. On a compact window that root page shows
 /// [primary], so both panes keep their state as the window changes size.
+///
+/// ```dart
+/// ShellRoute(
+///   builder: (context, state, child) {
+///     return AdaptiveSplitView(primary: const ChannelListPage(), secondary: child);
+///   },
+///   routes: [
+///     GoRoute(
+///       path: '/channels',
+///       builder: (context, state) {
+///         return const AdaptiveSplitViewRoot(placeholder: ChannelPlaceholderPage());
+///       },
+///       routes: [/* The routes that open in the trailing pane. */],
+///     ),
+///   ],
+/// )
+/// ```
 class AdaptiveSplitView extends StatefulWidget {
   const AdaptiveSplitView({
     super.key,
@@ -103,7 +122,9 @@ class AdaptiveSplitView extends StatefulWidget {
 
   /// Whether the nearest [AdaptiveSplitView] shows both panes.
   ///
-  /// Returns `false` when there is no [AdaptiveSplitView] above [context].
+  /// Returns `false` when there is no [AdaptiveSplitView] above [context]. The
+  /// widget that owns [context] rebuilds only when the split view expands or
+  /// collapses.
   static bool isExpandedOf(BuildContext context) {
     final scope = context.dependOnInheritedWidgetOfExactType<_AdaptiveSplitViewScope>();
     return scope?.isExpanded ?? false;
@@ -170,7 +191,7 @@ class AdaptiveSplitViewRoot extends StatelessWidget {
     required this.placeholder,
   });
 
-  /// Fills the trailing pane while nothing is open in it.
+  /// The widget that fills the trailing pane while nothing is open in it.
   final Widget placeholder;
 
   @override

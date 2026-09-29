@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Fills the channel pane while no channel is open.
+/// A page that fills the channel pane while no channel is open.
 class ChannelPlaceholderPage extends StatelessWidget {
   const ChannelPlaceholderPage({super.key});
 

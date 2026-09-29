@@ -138,7 +138,6 @@ class _ChannelListDefault extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Highlights the open channel while it is shown beside the list.
     final selectedCid = switch (AdaptiveSplitView.isExpandedOf(context)) {
       true => GoRouterState.of(context).pathParameters['cid'],
       false => null,
