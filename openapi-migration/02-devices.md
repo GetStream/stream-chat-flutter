@@ -68,8 +68,9 @@ Revisited after landing: the group first adopted the generated `DeviceResponse`,
   covered: a regeneration that moved a parameter between query and body would pass CI. **This is
   the testing precedent for every later group** — mock at the `DefaultApi` seam, and let the
   generated client own the transport.
-- **Mapping is tested from a fully populated generated response,** so a field the mapper drops shows
-  up as a failing assertion rather than a silent loss.
+- **Test mapping through the public client method,** from a generated response that sets every field the
+  model carries with a distinct value, so a field the mapper drops or swaps fails an assertion. No separate
+  repository or mapper tests.
 - **`setPushPreferences` did not come along,** so `device_api.dart` was renamed
   `push_preferences_api.dart` (`DeviceApi` → `PushPreferencesApi`, `StreamChatApi.device` →
   `StreamChatApi.pushPreferences`) rather than deleted — the file split rather than migrating whole.

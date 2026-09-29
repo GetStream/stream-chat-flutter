@@ -371,7 +371,9 @@ Budget for this: on a typical feature it is most of the diff, and none of it is 
   (`ListDevicesResponse()..devices = …`). Stubs of `DefaultApi` now answer generated types, and the restored
   envelopes are plain classes with const constructors, so those fixtures must be rewritten.
 - `test/src/core/api/responses_test.dart` round-trips the DTO from JSON — delete those cases with the DTO's JSON.
-- **Test each mapper from a fully populated generated response,** so a field the mapper drops fails an assertion.
+- **Test mapping through the public client method,** from a generated response that sets every field the model
+  carries with a distinct value, so a field the mapper drops or swaps fails an assertion. No separate repository or
+  mapper tests.
 - **Test each temporary converter,** both on its own and wired through its parent's `fromJson`/`toJson`.
 - **Test each `@DataSerializable` model's stored format:** pin `toData()` to a literal map, so a rename that changes
   the stored keys fails; round-trip `fromData(toData())`; cover null versus empty for nullable lists. Extend the
