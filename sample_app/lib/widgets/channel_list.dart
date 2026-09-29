@@ -99,7 +99,7 @@ class _ChannelList extends State<ChannelList> {
           if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
             FocusScope.of(context).unfocus();
           }
-          return true;
+          return false;
         },
         child: NestedScrollView(
           controller: _scrollController,
