@@ -72,8 +72,9 @@ breaks against v10:
   `GetAppSettingsResponse`, not `AppSettings`); a new envelope's name is proposed case by case;
 - a write whose generated response is a named `*Response` returns that envelope, even where v10 returned
   `EmptyResponse` or a bare model (`hideChannel` answers `HideChannelResponse`);
-- a field the spec marks optional is nullable, even where v10 typed it non-null (`OGAttachmentResponse.ogScrapeUrl`,
-  `CreateUserGroupResponse.userGroup`);
+- a field the spec marks optional is nullable by default, even where v10 typed it non-null
+  (`CreateUserGroupResponse.userGroup`); keeping one non-null needs a recorded reason and a mapper fallback, as
+  group 04 does for `OGAttachmentResponse.ogScrapeUrl`;
 - public models and envelopes lose `fromJson` and `toJson`;
 - envelopes are immutable, built through a const constructor rather than `late` setters;
 - `duration` is a non-nullable `String` on every envelope, where v10 typed it `String?`;
@@ -82,11 +83,12 @@ breaks against v10:
 
 Each ships the four artifacts listed under [Principles](#principles), like any other break.
 
-**Why `DurationResponse` becomes `void`, and nothing else does.** `DurationResponse` is the spec's shared response
-for writes that return nothing, and the backend cannot add fields to it, so dropping it loses nothing now or later.
-Every other response can gain fields, so the caller gets its envelope and a field the server adds later is an
-additive change. That includes a named response that carries only `duration` today, such as `HideChannelResponse`
-or `DeleteReminderResponse`.
+**Why `DurationResponse` becomes `void`, and nothing else does.** `DurationResponse` is the base response every
+other response embeds, so no field is ever added to it and dropping it loses nothing. An endpoint that later needs
+to return data moves to its own named response: a spec change, and a break taken then. Every other response can
+gain fields, so the caller gets its envelope and a field the server adds later is an additive change. That
+includes a named response that carries only `duration` today, such as `HideChannelResponse` or
+`DeleteReminderResponse`.
 
 1. **No generated type in a public signature.** `lib/stream_chat.dart` exports nothing from `open_api/`, and no
    other package or the sample app imports it. `generate_plan.py --check` enforces both.
@@ -100,10 +102,10 @@ or `DeleteReminderResponse`.
    That is a default, not a requirement. The user may ask for another name, or a migration may propose one that
    fits clearly better; renaming a v10 type is a break, so it needs approval and a Symbol Map row.
 3. **Responses keep their v10 envelopes,** as `@freezed` classes carrying a non-nullable `duration` and the
-   payload. Every class suffixed `Response` lives in `lib/src/core/models/response/`, and every public class
-   suffixed `Request` in `lib/src/core/models/request/`, one file per class. Every other model stays in
-   `lib/src/core/models/`, whatever it is used for (`PaginationParams`, `ThreadOptions`). `EmptyResponse` stays
-   behind for the unmigrated APIs.
+   payload. Every envelope lives in `lib/src/core/models/response/`, and every public type a caller passes in to
+   shape a request — a `*Request` class, or a parameter type such as `PaginationParams` or `ThreadOptions` — in
+   `lib/src/core/models/request/`, one file per class. Every other model stays in `lib/src/core/models/`.
+   `EmptyResponse` stays behind for the unmigrated APIs.
 4. **Public methods return `Result<T>`,** per [`core-migration/03-errors.md`](../core-migration/03-errors.md).
 5. **Mapping happens in the repository,** on the `Result` the generated call returns
    (`result.map((response) => response.toModel())`, or `result.ignoreValue()` from

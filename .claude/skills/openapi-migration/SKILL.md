@@ -38,9 +38,10 @@ Dart's documentation guide vendored into the repo; the style guide wins where th
 win over this skill. Phases 4 and 5 name the rules migrations keep breaking; that is a shortlist, not a substitute
 for the guides.
 
-**The code already migrated is the best example.** Devices (group 02), user groups (03) and every part of group
-04 but the guest user are done; copy their repositories, mappers, envelopes and tests (paths in
-[Where each piece lives](#where-each-piece-lives)) rather than working from prose alone.
+**The code already migrated shows the layout.** Devices (group 02), user groups (03) and every part of group 04
+but the guest user are done; copy the file structure of their repositories, mappers and envelopes (paths in
+[Where each piece lives](#where-each-piece-lives)). Check docs and tests against the guides rather than copying
+them from these files: precedent is what drifts.
 
 Work the phases in order. Most of the cost is in phases 1–2 — the code is mechanical once the inventory and the
 shape decisions exist.
@@ -143,7 +144,8 @@ a public signature.
   v10 type is a break, so propose it with the reason and wait for approval.
 - **Which fields it exposes.** v10's fields, with v10's defaults. A field only the generated type has
   (`AppResponseFields.id`, the twelve extra fields on `GetOGResponse`) stays out; exposing it later is additive. A
-  field is nullable where the spec marks it optional, even if v10 typed it non-null.
+  field the spec marks optional is nullable by default, even if v10 typed it non-null; keeping it non-null needs a
+  recorded reason and a mapper fallback, as `OGAttachmentResponse.ogScrapeUrl` has in group 04.
 - **Whether it is embedded in a model that still decodes v1 JSON** with json_serializable. If it is, the parent's
   field needs a temporary converter (README rule 7) — add it to the adapters table with the group that removes it.
 - **Whether persistence stores it as JSON text,** alone, as the elements of a list column, or nested inside
@@ -174,7 +176,7 @@ wait for approval.
 packages/stream_chat/lib/src/
 ├── core/models/<model>.dart                  plain model, one class per file, file named after the class
 ├── core/models/response/<name>_response.dart envelope — every class suffixed Response
-├── core/models/request/<name>_request.dart   public request type — every class suffixed Request
+├── core/models/request/<name>.dart           public request type or request parameter
 └── repository/
     ├── <feature>_repository.dart             one per feature; GeneralRepository for endpoints with no feature
     └── mapper/
@@ -182,14 +184,15 @@ packages/stream_chat/lib/src/
         └── result_mapper.dart                ignoreValue(), for Result<void>
 ```
 
-- **The suffix decides the folder, nothing else.** `CreateUserGroupResponse` goes in `response/`; `UserGroup` and
-  `PaginationParams` stay in `models/`. No `request/` class exists yet: the first arrives when a group migrates a
-  public `*Request` such as `PartialUpdateUserRequest`.
+- **The role decides the folder.** An envelope goes in `response/` (`CreateUserGroupResponse`). A type the caller
+  passes in to shape a request goes in `request/`, whatever its name: `PartialUpdateUserRequest`, and also
+  `PaginationParams`, `ThreadOptions` and `MemberUpdatePayload`. Every other model stays in `models/`
+  (`UserGroup`). No `request/` type exists yet: the first arrives when a group migrates one out of
+  `lib/src/core/api/requests.dart`.
 - **Models and envelopes** are `@freezed` classes with a const constructor and `@override final` fields. Copy
   `lib/src/core/models/user_group.dart` and `lib/src/core/models/response/create_user_group_response.dart`.
-  Envelopes carry `required this.duration`, documented as "How long the server took to handle the request, such as
-  `4.21ms`.", plus one field per payload, nullable when the spec doesn't guarantee it
-  (`final UserGroup? userGroup`).
+  Envelopes carry `required this.duration`, documented with an example value such as `4.21ms`, plus one field per
+  payload, nullable when the spec doesn't guarantee it (`final UserGroup? userGroup`).
 - **The barrel** (`lib/stream_chat.dart`) exports the models and envelopes. It never exports a repository, a
   mapper or anything under `open_api/`.
 - **A repository** is `const <Feature>Repository(this._api)` over a `final api.DefaultApi _api`, one method per
@@ -305,7 +308,8 @@ Today that covers `messages.mentioned_groups` (`UserGroup`). The group that make
 codec: `PollOption` in `polls.options` (05); `User` in the `mentioned_users` columns of `messages`,
 `pinned_messages` and `draft_messages`, and `OwnUser` in `connection_events.own_user` (09). `Attachment` and the
 reaction groups (`attachments`, `reaction_groups`) become plain in group 10 itself, and `channels.config` (11)
-lands after it, so those use whatever group 10 puts in the codec's place.
+lands after it, so those use whatever group 10 puts in the codec's place. `channel_queries_metadata.filter` and
+`.sort` store `ChannelFilter` and `ChannelSort`, which are query objects rather than models, so they need no codec.
 
 A plain model nested in a parent that is **still json_serializable** needs no codec: the parent's rule-7 converter
 already writes it, in both directions if the parent is stored. `Device` inside `OwnUser` is stored this way,
@@ -405,16 +409,17 @@ Stop at docs the migration neither touched nor invalidated; one feature group pe
 Budget for this: on a typical feature it is most of the diff, and none of it is mechanical.
 
 - `test/src/core/api/<feature>_api_test.dart` asserts on `client.post('/polls', data: …)` against a
-  `MockHttpClient`. Routing through `DefaultApi` moves the mock seam: repository tests stub `MockDefaultApi`
-  (`test/src/mocks.dart`), and client tests pass one to `StreamChatClient` through `defaultApi:`. The old
-  assertions cannot survive.
+  `MockHttpClient`. Routing through `DefaultApi` moves the mock seam to `MockDefaultApi` (`test/src/mocks.dart`),
+  passed to `StreamChatClient` through `defaultApi:`. Test every behaviour through the public client; don't add
+  repository or mapper tests. The old assertions cannot survive.
 - `test/src/client/client_test.dart` builds fixtures in the `late`-mutable style the hand-written DTOs allow
   (`CreatePollResponse()..poll = …`). Stubs of `DefaultApi` now answer generated types, and the envelopes are
   const-constructed `@freezed` classes, so those fixtures must be rewritten.
 - `test/src/core/api/responses_test.dart` round-trips the DTO from JSON — delete those cases with the DTO's JSON.
-- **Test each mapper from a fully populated generated response,** so a field the mapper drops fails an assertion.
-  Give fields of the same type distinct values, so a swapped field fails too.
-- **Test each temporary converter,** both on its own and wired through its parent's `fromJson`/`toJson`.
+- **Stub each generated response with every field our model carries,** each with a distinct value, and compare
+  the whole returned envelope, so a field the mapper drops or swaps fails an assertion. Give every method a
+  failure test too.
+- **Test each temporary converter through its parent's `fromJson`/`toJson`.**
 - **Test each `@DataSerializable` model's stored format:** pin `toData()` to a literal map, so a rename that changes
   the stored keys fails; round-trip `fromData(toData())`; cover null versus empty for nullable lists. Extend the
   existing persistence mapper and DAO tests with the field rather than writing tests scoped to it.
@@ -422,10 +427,10 @@ Budget for this: on a typical feature it is most of the diff, and none of it is 
 Rewrite onto `TESTING.md` rather than carrying the old file's habits across. What breaks most often:
 
 - **No `group` organizing a file by method.** `group('addDevice')`, `group('getDevices')` is the shape a migrated
-  repository test falls into, and `TESTING.md` names it an anti-pattern. A `group` states a shared precondition;
+  test falls into, and `TESTING.md` names it an anti-pattern. A `group` states a shared precondition;
   anything else belongs in a separate file.
 - **Each name states subject and behaviour**, so `dart test` output says what broke:
-  `searchRoles forwards only the query when nothing else is given`.
+  `StreamChatClient.searchRoles sends only the query when nothing else is given`.
 - **No two tests share a name**, which dropping the groups is what exposes — three identical
   `returns the failure without throwing`.
 - **One behaviour per test.**
