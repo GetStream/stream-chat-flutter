@@ -120,10 +120,15 @@ class _ChannelList extends State<ChannelList> {
           body: MediaQuery.removePadding(
             context: context,
             removeTop: true,
-            child: switch (_isSearchActive) {
-              true => _ChannelListSearch(_messageSearchListController),
-              false => _ChannelListDefault(_channelListController),
-            },
+            // Tiles paint their selection on the nearest Material; this one
+            // keeps it inside the list instead of behind the search field.
+            child: Material(
+              type: MaterialType.transparency,
+              child: switch (_isSearchActive) {
+                true => _ChannelListSearch(_messageSearchListController),
+                false => _ChannelListDefault(_channelListController),
+              },
+            ),
           ),
         ),
       ),
