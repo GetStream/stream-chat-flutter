@@ -1,11 +1,8 @@
-## Upcoming
-
-✅ Added
-
-- `StreamMessageInput` now rejects attachments blocked by the Stream Dashboard upload configuration, and the file picker only offers the allowed file extensions.
+## 9.31.0
 
 🔄 Changed
 
+- `StreamMessageInput` now rejects attachments blocked by the Stream Dashboard upload configuration, and the file picker only offers the allowed file extensions.
 - `StreamAttachmentPickerController` now throws an `AttachmentBlockedError`, `AttachmentTooLargeError` or `AttachmentLimitReachedError` instead of an `ArgumentError`.
 - The gallery picker now closes before reporting an error, like the other attachment picker options.
 
