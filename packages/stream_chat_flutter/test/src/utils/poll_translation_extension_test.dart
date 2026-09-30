@@ -70,33 +70,29 @@ void main() {
     expect(answersOnly.hasTranslation('nl'), isFalse);
   });
 
-  test('Poll.translate replaces the name, description, options and answers with their translations', () {
-    final translated = poll.translate('nl');
+  test('Message.translate replaces the poll name, description and options, but not its answers', () {
+    final translated = Message(poll: poll).translate('nl').poll!;
 
     expect(translated.name, 'Favoriete kleur?');
     expect(translated.description, 'Kies er een');
     expect(translated.options.map((it) => it.text), ['Rood', 'Blue']);
-    expect(translated.latestAnswers.single.answerText, 'Ik hou van geel');
-    expect(translated.ownAnswers.single.answerText, 'Ik hou van geel');
+    expect(translated.latestAnswers.single.answerText, answer.answerText);
+    expect(translated.ownAnswers.single.answerText, answer.answerText);
   });
 
-  test('Poll.translate keeps the ids the poll is acted on by', () {
-    final translated = poll.translate('nl');
+  test('Message.translate keeps the ids the poll is acted on by', () {
+    final translated = Message(poll: poll).translate('nl').poll!;
 
     expect(translated.id, poll.id);
     expect(translated.options.map((it) => it.id), ['option-1', 'option-2']);
     expect(translated.latestAnswers.single.id, answer.id);
   });
 
-  test('Poll.translate returns the same poll for a null or empty language', () {
-    expect(poll.translate(null), same(poll));
-    expect(poll.translate(''), same(poll));
-  });
+  test('Message.translate keeps the poll for a null or empty language', () {
+    final message = Message(poll: poll);
 
-  test('PollOption.translate returns the same option when it has no translation', () {
-    const option = PollOption(id: 'option-2', text: 'Blue');
-
-    expect(option.translate('nl'), same(option));
+    expect(message.translate(null), same(message));
+    expect(message.translate(''), same(message));
   });
 
   test('PollVote.translatedAnswerText returns the translation into the given language', () {

@@ -85,6 +85,22 @@ void main() {
       expect(find.text('Show original'), findsOneWidget);
     });
 
+    testWidgets('is generic when the text and the poll were written in different languages', (tester) async {
+      final mixed = translatedPoll.copyWith(
+        text: 'Bonjour',
+        i18n: const {'language': 'fr', 'en_text': 'Hello'},
+      );
+
+      await pumpHeader(
+        tester,
+        message: mixed,
+        userLanguage: 'en',
+        translationConfig: const StreamMessageTranslationConfiguration(annotationEnabled: true),
+      );
+
+      expect(find.text('Translated ·'), findsOneWidget);
+    });
+
     testWidgets('stays hidden for a poll message read in the language it was written in', (tester) async {
       await pumpHeader(
         tester,

@@ -4,6 +4,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
 
 import '../components/avatar/stream_user_avatar.dart';
+import '../message_widget/message_translation_language.dart';
 import '../misc/empty_widget.dart';
 import '../misc/timestamp.dart';
 import '../scroll_view/poll_vote_scroll_view/stream_poll_vote_list_view.dart';
@@ -13,7 +14,6 @@ import '../theme/poll_option_votes_style.dart';
 import '../utils/date_formatter.dart';
 import '../utils/extensions.dart';
 import 'interactor/poll_add_comment_dialog.dart';
-import 'poll_translation.dart';
 
 /// {@template showStreamPollCommentsSheet}
 /// Displays an interactive bottom sheet to show all the comments for a poll.
@@ -27,8 +27,8 @@ Future<T?> showStreamPollCommentsSheet<T extends Object?>({
   required ValueListenable<Message> messageNotifier,
 }) {
   // Resolved from the caller's context, as the sheet's own may not be below
-  // [StreamChat]; see [pollTranslationLanguageOf].
-  final language = pollTranslationLanguageOf(context, messageNotifier.value);
+  // [StreamChat]; see [messageTranslationLanguageOf].
+  final language = messageTranslationLanguageOf(context, messageNotifier.value);
 
   return showStreamSheet<T>(
     context: context,
@@ -55,7 +55,7 @@ Future<T?> showStreamPollCommentsSheet<T extends Object?>({
           }
 
           return StreamPollCommentsSheet(
-            poll: poll.translate(language),
+            poll: poll,
             language: language,
             scrollController: scrollController,
             onUpdateComment: onUpdateComment,

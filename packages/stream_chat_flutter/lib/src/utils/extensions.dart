@@ -486,8 +486,10 @@ extension MessageX on Message {
   ///
   /// Follows the same rules as [translatedText]: `false` when [language] is
   /// `null`, empty, or the language the message was written in.
-  bool hasTranslation(String? language) =>
-      translatedText(language) != null || (poll?.hasTranslation(language) ?? false);
+  bool hasTranslation(String? language) {
+    if (translatedText(language) != null) return true;
+    return poll?.hasTranslation(language) ?? false;
+  }
 
   /// It returns the message with the translated text, and the translated
   /// [poll] (see [PollTranslationX.translate]), if available locally.
@@ -496,8 +498,8 @@ extension MessageX on Message {
   /// translation into [language].
   Message translate(String? language) {
     final translatedText = this.translatedText(language);
-    final translatedPoll = poll?.translate(language);
-    if (translatedText == null && translatedPoll == poll) return this;
+    final translatedPoll = poll?._translate(language);
+    if (translatedText == null && identical(translatedPoll, poll)) return this;
 
     return copyWith(text: translatedText, poll: translatedPoll);
   }
@@ -572,22 +574,17 @@ extension PollTranslationX on Poll {
       translatedDescription(language) != null ||
       options.any((it) => it.translatedText(language) != null);
 
-  /// It returns a copy of the poll to display, with its name, description,
-  /// options and answers replaced by their translations into [language]
-  /// where available locally.
-  ///
-  /// Everything else, ids included, is left as is, but the copy is meant for
-  /// display only: pass the original poll to API calls, and use its texts to
-  /// prefill anything the user edits.
-  Poll translate(String? language) {
-    if (language == null || language.isEmpty) return this;
+  // A copy of this poll with its name, description and options translated
+  // into [language], or this poll when none of them has a translation.
+  //
+  // Answers are left as written, as in [hasTranslation].
+  Poll _translate(String? language) {
+    if (!hasTranslation(language)) return this;
 
     return copyWith(
       name: translatedName(language),
       description: translatedDescription(language),
-      options: [for (final option in options) option.translate(language)],
-      latestAnswers: [for (final answer in latestAnswers) answer.translate(language)],
-      ownVotesAndAnswers: [for (final vote in ownVotesAndAnswers) vote.translate(language)],
+      options: [for (final option in options) option._translate(language)],
     );
   }
 }
@@ -601,9 +598,9 @@ extension PollOptionTranslationX on PollOption {
   /// Follows the same rules as [MessageX.translatedText].
   String? translatedText(String? language) => _translationOf(textI18n, language);
 
-  /// It returns the option with its text replaced by its translation into
-  /// [language], or unchanged when there is none available locally.
-  PollOption translate(String? language) => switch (translatedText(language)) {
+  // The option with its text replaced by its translation into [language], or
+  // unchanged when there is none available locally.
+  PollOption _translate(String? language) => switch (translatedText(language)) {
     null => this,
     final translatedText => copyWith(text: translatedText),
   };

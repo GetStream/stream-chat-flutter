@@ -34,7 +34,7 @@ void main() {
     WidgetTester tester, {
     String? userLanguage = 'nl',
     StreamMessageTranslationConfiguration translationConfig = const StreamMessageTranslationConfiguration(),
-    StreamMessageTranslationStore? translationStore,
+    bool showTranslatedText = true,
   }) {
     final currentUser = OwnUser(id: 'current-user', language: userLanguage);
 
@@ -64,15 +64,12 @@ void main() {
         ..next = null,
     );
 
-    Widget child = Scaffold(
+    final child = Scaffold(
       body: StreamChannel.value(
         channel: channel,
-        child: StreamPollAttachment(message: message),
+        child: StreamMessageContent(message: message, showTranslatedText: showTranslatedText),
       ),
     );
-    if (translationStore != null) {
-      child = StreamMessageTranslations(store: translationStore, child: child);
-    }
 
     return tester.pumpWidget(
       MaterialApp(
@@ -85,7 +82,7 @@ void main() {
     );
   }
 
-  testWidgets('StreamPollAttachment shows the poll translated into the current user language', (tester) async {
+  testWidgets('StreamMessageContent shows the poll translated into the current user language', (tester) async {
     await pumpPollAttachment(tester);
 
     expect(find.text('Favoriete kleur?'), findsOneWidget);
@@ -94,7 +91,7 @@ void main() {
     expect(find.text('Favourite colour?'), findsNothing);
   });
 
-  testWidgets('StreamPollAttachment shows the original poll when translations are disabled', (tester) async {
+  testWidgets('StreamMessageContent shows the original poll when translations are disabled', (tester) async {
     await pumpPollAttachment(
       tester,
       translationConfig: const StreamMessageTranslationConfiguration(enabled: false),
@@ -105,7 +102,7 @@ void main() {
     expect(find.text('Favoriete kleur?'), findsNothing);
   });
 
-  testWidgets('StreamPollAttachment shows the original poll for a reader of the language it was written in', (
+  testWidgets('StreamMessageContent shows the original poll for a reader of the language it was written in', (
     tester,
   ) async {
     await pumpPollAttachment(tester, userLanguage: 'en');
@@ -114,17 +111,10 @@ void main() {
     expect(find.text('Red'), findsOneWidget);
   });
 
-  testWidgets('StreamPollAttachment switches to the original poll when its message is toggled to its original text', (
+  testWidgets('StreamMessageContent shows the original poll when the message is shown in its original text', (
     tester,
   ) async {
-    final translationStore = StreamMessageTranslationStore();
-    addTearDown(translationStore.dispose);
-
-    await pumpPollAttachment(tester, translationStore: translationStore);
-    expect(find.text('Favoriete kleur?'), findsOneWidget);
-
-    translationStore.toggleOriginalText(message.id);
-    await tester.pump();
+    await pumpPollAttachment(tester, showTranslatedText: false);
 
     expect(find.text('Favourite colour?'), findsOneWidget);
     expect(find.text('Red'), findsOneWidget);
