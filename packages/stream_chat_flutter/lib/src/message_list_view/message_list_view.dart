@@ -349,12 +349,18 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   List<Message> messages = <Message>[];
 
-  // Rows built by [buildMessage], keyed by message id. A row is reused while
-  // the inputs it was built from are unchanged, so a new message rebuilds only
-  // its own row and its neighbour's instead of every visible row. Cleared
-  // whenever the widget or its dependencies change, since any callback,
-  // builder or configuration the rows capture may have changed with them.
+  // Rows built by [buildMessage], keyed by message id and ordered from least
+  // to most recently used. A row is reused while the inputs it was built from
+  // are unchanged, so a new message rebuilds only its own row and its
+  // neighbour's instead of every visible row. Cleared whenever the widget or
+  // its dependencies change, since any callback, builder or configuration the
+  // rows capture may have changed with them.
   final _messageRowCache = <String, _CachedMessageRow>{};
+
+  // Only rows that are still mounted benefit from the cache — a row scrolled
+  // out of the list is built again when it returns — so the cache only needs
+  // to cover a few screens' worth of rows, however long the list grows.
+  static const _maxCachedMessageRows = 64;
 
   // `generation` bumps on each highlight call so a re-highlight of the
   // same message restarts the fade animation.
@@ -669,7 +675,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   Widget _buildListView(List<Message> data) {
     messages = data;
-    _evictStaleMessageRows();
 
     // Top pagination may not have finished loading the unread boundary when
     // the baseline was first captured; retry once this frame's layout
@@ -1213,25 +1218,19 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     );
   }
 
-  // Drops cached rows for messages that are no longer in the list, so the
-  // cache stays bounded by the number of loaded messages.
-  void _evictStaleMessageRows() {
-    if (_messageRowCache.length <= messages.length) return;
-    final ids = {for (final message in messages) message.id};
-    _messageRowCache.removeWhere((id, _) => !ids.contains(id));
-  }
-
   Widget buildMessage(Message message, List<Message> messages, int index) {
     final nextMessage = index - 1 >= 0 ? messages[index - 1] : null;
     final prevMessage = index + 1 < messages.length ? messages[index + 1] : null;
     final currentUserId = StreamChat.of(context).currentUser?.id;
 
-    final cached = _messageRowCache[message.id];
+    // Removed and re-inserted so the entry moves to the most recently used end.
+    final cached = _messageRowCache.remove(message.id);
     if (cached != null &&
         cached.message == message &&
         cached.previous == prevMessage &&
         cached.next == nextMessage &&
         cached.currentUserId == currentUserId) {
+      _messageRowCache[message.id] = cached;
       return cached.row;
     }
 
@@ -1243,6 +1242,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       currentUserId: currentUserId,
       row: row,
     );
+    if (_messageRowCache.length > _maxCachedMessageRows) {
+      _messageRowCache.remove(_messageRowCache.keys.first);
+    }
     return row;
   }
 
