@@ -43,6 +43,7 @@
 - Fixed one image rendition yielding two cache entries when its resize parameters arrived in a different order, or a crop on the URL survived a resize that does not crop.
 - Fixed image attachments not being resized at all when the URL carried a crop or a resize mode but no dimensions.
 - Fixed a URL whose host merely contains `stream-io-cdn.com` being treated as Stream's CDN.
+- Fixed a tap on the unread badge of `StreamBackButton` (the channel header's back button) doing nothing; it now presses the button.
 
 ## 10.4.0
 
