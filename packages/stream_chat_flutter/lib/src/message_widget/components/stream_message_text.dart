@@ -81,39 +81,45 @@ class StreamMessageText extends StatelessWidget {
     final streamChat = StreamChat.of(context);
     final translationConfig = StreamChatConfiguration.of(context).messageTranslation;
 
-    // An unset language arrives from the API as `''` anyway, and `translate`
-    // treats it the same as null, so it stands in for "no language" here —
-    // `BetterStreamBuilder`'s type parameter can't be nullable.
-    return BetterStreamBuilder<String>(
-      initialData: streamChat.currentUser?.language ?? '',
-      stream: streamChat.currentUserStream.map((it) => it?.language ?? ''),
-      builder: (context, language) {
-        final translated = (showTranslatedText && translationConfig.enabled) ? message.translate(language) : message;
-        final messageText = translated.replaceMentions().text?.replaceAll('\n', '\n\n').trim();
+    final translationEnabled = showTranslatedText && translationConfig.enabled;
 
-        if (messageText == null || messageText.trim().isEmpty) return const Empty();
-
-        final streamMessageText = core.StreamMessageText(
-          messageText,
-          selectable: false,
-          onTapLink: onLinkTap,
-          onTapMention: onMentionTap,
-          onTapAnyMention: onAnyMentionTap,
-        );
-
-        if (isDesktopDeviceOrWeb) {
-          return SelectionArea(
-            // Rebuilding a live selection area after the browser context menu
-            // toggles throws on web; the key replaces it instead.
-            // TODO(flutter): Remove once the minimum Flutter has flutter/flutter#186459.
-            key: ValueKey(BrowserContextMenu.enabled),
-            onSelectionChanged: onSelectionChanged,
-            child: streamMessageText,
-          );
-        }
-
-        return streamMessageText;
-      },
+    // The user stream is passed unmapped: a mapped stream is a new object on
+    // every build, which makes the builder cancel and resubscribe each time
+    // this widget rebuilds.
+    return BetterStreamBuilder<User>(
+      initialData: streamChat.currentUser,
+      stream: streamChat.currentUserStream,
+      comparator: (previous, next) => previous?.language == next?.language,
+      noDataBuilder: (context) => _buildText(language: null, translationEnabled: translationEnabled),
+      builder: (context, user) => _buildText(language: user.language, translationEnabled: translationEnabled),
     );
+  }
+
+  Widget _buildText({required String? language, required bool translationEnabled}) {
+    final translated = translationEnabled ? message.translate(language) : message;
+    final messageText = translated.replaceMentions().text?.replaceAll('\n', '\n\n').trim();
+
+    if (messageText == null || messageText.trim().isEmpty) return const Empty();
+
+    final streamMessageText = core.StreamMessageText(
+      messageText,
+      selectable: false,
+      onTapLink: onLinkTap,
+      onTapMention: onMentionTap,
+      onTapAnyMention: onAnyMentionTap,
+    );
+
+    if (isDesktopDeviceOrWeb) {
+      return SelectionArea(
+        // Rebuilding a live selection area after the browser context menu
+        // toggles throws on web; the key replaces it instead.
+        // TODO(flutter): Remove once the minimum Flutter has flutter/flutter#186459.
+        key: ValueKey(BrowserContextMenu.enabled),
+        onSelectionChanged: onSelectionChanged,
+        child: streamMessageText,
+      );
+    }
+
+    return streamMessageText;
   }
 }

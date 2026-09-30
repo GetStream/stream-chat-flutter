@@ -349,6 +349,13 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   List<Message> messages = <Message>[];
 
+  // Rows built by [buildMessage], keyed by message id. A row is reused while
+  // the inputs it was built from are unchanged, so a new message rebuilds only
+  // its own row and its neighbour's instead of every visible row. Cleared
+  // whenever the widget or its dependencies change, since any callback,
+  // builder or configuration the rows capture may have changed with them.
+  final _messageRowCache = <String, _CachedMessageRow>{};
+
   // `generation` bumps on each highlight call so a re-highlight of the
   // same message restarts the fade animation.
   final _highlightState = ValueNotifier<({String? id, int generation})>((id: null, generation: 0));
@@ -392,6 +399,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     super.didChangeDependencies();
     // Before anything else — the branches below read `_config`.
     _config = _resolveConfig();
+    _messageRowCache.clear();
 
     final newStreamChannel = StreamChannel.of(context);
 
@@ -482,6 +490,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     // `config` can change without dependencies changing, so re-resolve here as
     // well as in `didChangeDependencies`.
     if (widget.config != oldWidget.config) _config = _resolveConfig();
+    _messageRowCache.clear();
   }
 
   @override
@@ -660,6 +669,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   Widget _buildListView(List<Message> data) {
     messages = data;
+    _evictStaleMessageRows();
 
     // Top pagination may not have finished loading the unread boundary when
     // the baseline was first captured; retry once this frame's layout
@@ -1203,7 +1213,40 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     );
   }
 
+  // Drops cached rows for messages that are no longer in the list, so the
+  // cache stays bounded by the number of loaded messages.
+  void _evictStaleMessageRows() {
+    if (_messageRowCache.length <= messages.length) return;
+    final ids = {for (final message in messages) message.id};
+    _messageRowCache.removeWhere((id, _) => !ids.contains(id));
+  }
+
   Widget buildMessage(Message message, List<Message> messages, int index) {
+    final nextMessage = index - 1 >= 0 ? messages[index - 1] : null;
+    final prevMessage = index + 1 < messages.length ? messages[index + 1] : null;
+    final currentUserId = StreamChat.of(context).currentUser?.id;
+
+    final cached = _messageRowCache[message.id];
+    if (cached != null &&
+        cached.message == message &&
+        cached.previous == prevMessage &&
+        cached.next == nextMessage &&
+        cached.currentUserId == currentUserId) {
+      return cached.row;
+    }
+
+    final row = _buildMessageRow(message, prevMessage: prevMessage, nextMessage: nextMessage);
+    _messageRowCache[message.id] = _CachedMessageRow(
+      message: message,
+      previous: prevMessage,
+      next: nextMessage,
+      currentUserId: currentUserId,
+      row: row,
+    );
+    return row;
+  }
+
+  Widget _buildMessageRow(Message message, {Message? prevMessage, Message? nextMessage}) {
     if (message.isSystem) {
       return buildSystemMessage(message);
     }
@@ -1242,8 +1285,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
     final userId = StreamChat.of(context).currentUser!.id;
     final isMyMessage = message.user?.id == userId;
-    final nextMessage = index - 1 >= 0 ? messages[index - 1] : null;
-    final prevMessage = index + 1 < messages.length ? messages[index + 1] : null;
 
     final contentKind = resolveContentKind(message);
     final isInThread = widget.parentMessage != null;
@@ -1349,6 +1390,23 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       _ => null,
     };
   }
+}
+
+// A row built by `buildMessage`, with the inputs it was built from.
+class _CachedMessageRow {
+  const _CachedMessageRow({
+    required this.message,
+    required this.previous,
+    required this.next,
+    required this.currentUserId,
+    required this.row,
+  });
+
+  final Message message;
+  final Message? previous;
+  final Message? next;
+  final String? currentUserId;
+  final Widget row;
 }
 
 // Inherits the message id that an opening thread page should highlight on first render.
