@@ -98,6 +98,15 @@ void main() {
       expect(poll.descriptionI18n, {'language': 'en', 'nl_text': 'omschrijving'});
       expect(poll.options.single.textI18n, {'language': 'en', 'nl_text': 'optie1 tekst'});
       expect(poll.latestAnswers.single.answerTextI18n, {'language': 'en', 'nl_text': 'geweldig'});
+    });
+
+    test('keeps the server translations out of the extra data', () {
+      final poll = Poll.fromJson({
+        ...jsonFixture('poll.json'),
+        'name_i18n': const {'language': 'en', 'nl_text': 'toets'},
+        'description_i18n': const {'language': 'en', 'nl_text': 'omschrijving'},
+      });
+
       expect(poll.extraData, isNot(contains('name_i18n')));
       expect(poll.extraData, isNot(contains('description_i18n')));
     });

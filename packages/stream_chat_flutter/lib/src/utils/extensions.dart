@@ -546,15 +546,16 @@ String? _translationOf(Map<String, String>? i18n, String? language) {
 /// translation enabled.
 ///
 /// Every lookup follows the same rules as [MessageX.translatedText]: `null`
-/// when [language] is `null` or empty, or when it is the language the text
+/// when `language` is `null` or empty, or when it is the language the text
 /// was written in.
 extension PollTranslationX on Poll {
   /// The language this poll was written in, as reported by Stream's
   /// auto-translation API, or `null` when it is unknown.
-  String? get originalLanguage =>
-      _sourceLanguageOf(nameI18n) ??
-      _sourceLanguageOf(descriptionI18n) ??
-      options.map((it) => _sourceLanguageOf(it.textI18n)).nonNulls.firstOrNull;
+  String? get originalLanguage {
+    if (_sourceLanguageOf(nameI18n) case final language?) return language;
+    if (_sourceLanguageOf(descriptionI18n) case final language?) return language;
+    return options.map((it) => _sourceLanguageOf(it.textI18n)).nonNulls.firstOrNull;
+  }
 
   /// The translation of [Poll.name] into [language], or `null` when there is
   /// none available locally.
@@ -569,10 +570,11 @@ extension PollTranslationX on Poll {
   ///
   /// Answers are not included: each is written by a different user, often in
   /// a different language than the poll itself.
-  bool hasTranslation(String? language) =>
-      translatedName(language) != null ||
-      translatedDescription(language) != null ||
-      options.any((it) => it.translatedText(language) != null);
+  bool hasTranslation(String? language) {
+    if (translatedName(language) != null) return true;
+    if (translatedDescription(language) != null) return true;
+    return options.any((it) => it.translatedText(language) != null);
+  }
 
   // A copy of this poll with its name, description and options translated
   // into [language], or this poll when none of them has a translation.
