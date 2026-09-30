@@ -19,6 +19,7 @@
 - `AccessibleMessagePreviewFormatter.formatMessageSemanticsLabel` must now return the body without a speaker prefix when `channel` is omitted. An implementation that prefixes unconditionally makes a message row announce "You said, You: hello".
 - `StreamImageCDN.resolveUrl` now leaves a URL that already asks for a specific size alone, rather than replacing it with the size the layout computed.
 - Removed the unused `shimmer` dependency; the skeleton loading widgets already use `stream_core_flutter`'s `StreamSkeletonLoading` and never depended on the `shimmer` package.
+- `StreamMessageListView` now only rebuilds message rows whose message or neighbouring messages changed. A custom `messageBuilder` that reads state from outside the list no longer refreshes on every new message; rebuild the `StreamMessageListView` when that state changes.
 
 ⚠️ Deprecated
 
@@ -26,6 +27,7 @@
 
 🐞 Fixed
 
+- Fixed `StreamMessageListView` dropping frames on each new message in busy channels.
 - Fixed the file picker offering file types the Stream Dashboard doesn't allow; it now only offers the allowed file extensions.
 - Fixed `StreamAttachmentValidator` accepting or rejecting a file differently from the server when an extension list holds a compound entry like `.tar.gz`; it now compares only the last extension.
 - Fixed `StreamAttachmentHandler.pickFile` throwing on an empty selection; it now returns `null`.
