@@ -1,3 +1,9 @@
+## 10.5.0
+
+✅ Added
+
+- Added `StreamChannel.openAtFirstUnread`; set it to `false` to open a channel at the latest message instead of the first unread.
+
 ## 10.4.0
 
 🔄 Changed
@@ -10,7 +16,6 @@
 
 - Added `StreamChannelState.retry()` to re-run a failed channel initialization, for use as the retry action in `StreamChannel.errorBuilder`.
 - Added `DefaultStreamChannelBuilders`, an inherited widget that supplies default loading and error builders to descendant `StreamChannel`s (resolved via `loadingBuilderOf`/`errorBuilderOf`).
-- Added `StreamChannel.openAtFirstUnread`, defaulting to `true` (preserving existing behavior). Set to `false` to always open a channel at the latest message, instead of scrolling to the first pre-existing unread message.
 - Added `search()`, `searchWithFilter()`, and `clearResults()` to `StreamMessageSearchListController`, `StreamUserListController`, and `StreamMemberListController`. `search()`/`searchWithFilter()` debounce reloads by the search-text length (a filter with no search text reloads immediately) and drop superseded results; `clearResults()` cancels any pending search and clears the results.
 
 🐞 Fixed
