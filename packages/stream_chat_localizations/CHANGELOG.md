@@ -1,4 +1,6 @@
-## Upcoming
+## 9.31.0
+
+✅ Added
 
 - Added translations for `fileTypeNotSupportedError`.
 
