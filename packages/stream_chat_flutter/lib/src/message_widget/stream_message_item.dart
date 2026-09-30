@@ -74,7 +74,7 @@ class StreamMessageItem extends StatelessWidget {
     EdgeInsetsGeometry? padding,
     double? spacing,
     Color? backgroundColor,
-    double maxWidth = 264,
+    double maxWidth = 272,
     bool swipeToReply = false,
     void Function(Message)? onMessageTap,
     void Function(Message)? onMessageLongPress,
@@ -228,7 +228,7 @@ class StreamMessageItemProps {
   ///
   /// The content uses at most this width while still respecting the parent
   /// [Flex] constraints. Use [double.infinity] to impose no cap from this
-  /// widget. Defaults to `264` when not specified.
+  /// widget. Defaults to `272` when not specified.
   final double maxWidth;
 
   /// Whether swiping the message triggers a quoted-reply action.

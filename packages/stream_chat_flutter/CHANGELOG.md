@@ -1,3 +1,9 @@
+## Upcoming
+
+🔄 Changed
+
+- `StreamMessageItem` now defaults `maxWidth` to `272`, the width the message list already uses, so messages built with it are no longer 8 pixels narrower.
+
 ## 10.5.0
 
 ✅ Added
