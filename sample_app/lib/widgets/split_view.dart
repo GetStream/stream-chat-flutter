@@ -10,8 +10,9 @@ import '../utils/window_size_class.dart';
 /// divider.
 ///
 /// When a fold or hinge divides the window into a left and a right side, each
-/// pane fills one side. Each pane keeps only the safe-area insets on its outer
-/// edges. Assumes it fills the window.
+/// pane fills one side, easing into place as the fold appears or disappears.
+/// Each pane keeps only the safe-area insets on its outer edges. Assumes it
+/// fills the window.
 class SplitView extends StatelessWidget {
   const SplitView({
     super.key,
@@ -32,42 +33,66 @@ class SplitView extends StatelessWidget {
   // The width of the line between the panes.
   static const _dividerWidth = 1.0;
 
+  // How long the panes take to settle when a fold starts or stops dividing
+  // the window.
+  static const _foldTransitionDuration = Duration(milliseconds: 200);
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.streamColorScheme;
     final mediaQuery = MediaQuery.of(context);
+    final isLtr = Directionality.of(context) == TextDirection.ltr;
+
+    final (targetPrimaryWidth, dividerWidth) = switch (_verticalFold(mediaQuery)) {
+      final fold? => (isLtr ? fold.left : mediaQuery.size.width - fold.right, math.max(fold.width, _dividerWidth)),
+      null => (primaryWidth, _dividerWidth),
+    };
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween(end: targetPrimaryWidth),
+      duration: mediaQuery.disableAnimations ? Duration.zero : _foldTransitionDuration,
+      curve: Curves.easeInOut,
+      builder: (context, primaryPaneWidth, _) => _buildPanes(
+        context,
+        mediaQuery: mediaQuery,
+        primaryPaneWidth: primaryPaneWidth,
+        dividerWidth: dividerWidth,
+      ),
+    );
+  }
+
+  Widget _buildPanes(
+    BuildContext context, {
+    required MediaQueryData mediaQuery,
+    required double primaryPaneWidth,
+    required double dividerWidth,
+  }) {
+    final colorScheme = context.streamColorScheme;
     final Size(:width, :height) = mediaQuery.size;
     final isLtr = Directionality.of(context) == TextDirection.ltr;
 
-    // The band between the panes, from the left edge of the window.
-    final (dividerLeft, dividerRight) = switch (_verticalFold(mediaQuery)) {
-      Rect(:final left, :final right) => (left, math.max(right, left + _dividerWidth)),
-      null when isLtr => (primaryWidth, primaryWidth + _dividerWidth),
-      null => (width - primaryWidth - _dividerWidth, width - primaryWidth),
-    };
-
-    final leftPane = Rect.fromLTRB(0, 0, dividerLeft, height);
-    final rightPane = Rect.fromLTRB(dividerRight, 0, width, height);
+    // Each pane's area on the window, which the insets and folds are relative to.
+    final secondaryPaneWidth = width - primaryPaneWidth - dividerWidth;
+    final primaryPane = Rect.fromLTWH(isLtr ? 0 : width - primaryPaneWidth, 0, primaryPaneWidth, height);
+    final secondaryPane = Rect.fromLTWH(isLtr ? width - secondaryPaneWidth : 0, 0, secondaryPaneWidth, height);
 
     return Row(
-      textDirection: TextDirection.ltr,
       children: [
         SizedBox(
-          width: leftPane.width,
+          width: primaryPaneWidth,
           child: MediaQuery(
-            data: mediaQuery.removeDisplayFeatures(leftPane),
-            child: isLtr ? primary : secondary,
+            data: mediaQuery.removeDisplayFeatures(primaryPane),
+            child: primary,
           ),
         ),
         VerticalDivider(
-          width: dividerRight - dividerLeft,
+          width: dividerWidth,
           thickness: _dividerWidth,
           color: colorScheme.borderSubtle,
         ),
         Expanded(
           child: MediaQuery(
-            data: mediaQuery.removeDisplayFeatures(rightPane),
-            child: isLtr ? secondary : primary,
+            data: mediaQuery.removeDisplayFeatures(secondaryPane),
+            child: secondary,
           ),
         ),
       ],
