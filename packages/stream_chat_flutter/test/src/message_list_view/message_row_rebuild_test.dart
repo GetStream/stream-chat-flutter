@@ -141,4 +141,46 @@ void main() {
 
     expect(find.text('replaced ${messages.last.id}'), findsOneWidget);
   });
+
+  testWidgets('rebuilding the list without changing what its rows use keeps every row', (tester) async {
+    final messages = generateConversation(20, users: [other]).reversed.toList();
+    final builtIds = <String>[];
+    Widget messageBuilder(BuildContext context, Message message, StreamMessageItemProps props) =>
+        recordingBuilder(builtIds, context, message, props);
+    late StateSetter rebuildParent;
+
+    when(() => channelClientState.messages).thenReturn(messages);
+    await tester.runAsync(() async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DefaultAssetBundle(
+            bundle: rootBundle,
+            child: StreamChat(
+              client: client,
+              child: StatefulBuilder(
+                builder: (context, setState) {
+                  rebuildParent = setState;
+                  return StreamChannel(
+                    channel: channel,
+                    child: StreamMessageListView(
+                      messageBuilder: messageBuilder,
+                      builders: StreamMessageListViewBuilders(empty: (_) => const Text('No messages')),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      messagesController.add(messages);
+      await tester.pumpAndSettle();
+    });
+    builtIds.clear();
+
+    rebuildParent(() {});
+    await tester.pump();
+
+    expect(builtIds, isEmpty);
+  });
 }

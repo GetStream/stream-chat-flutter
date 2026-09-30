@@ -352,9 +352,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   // Rows built by [buildMessage], keyed by message id and ordered from least
   // to most recently used. A row is reused while the inputs it was built from
   // are unchanged, so a new message rebuilds only its own row and its
-  // neighbour's instead of every visible row. Cleared whenever the widget or
-  // its dependencies change, since any callback, builder or configuration the
-  // rows capture may have changed with them.
+  // neighbour's instead of every visible row. Cleared when the dependencies
+  // change, or when the widget changes any of [_rowInputsOf].
   final _messageRowCache = <String, _CachedMessageRow>{};
 
   // Only rows that are still mounted benefit from the cache — a row scrolled
@@ -496,8 +495,36 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     // `config` can change without dependencies changing, so re-resolve here as
     // well as in `didChangeDependencies`.
     if (widget.config != oldWidget.config) _config = _resolveConfig();
-    _messageRowCache.clear();
+    if (_rowInputsOf(widget) != _rowInputsOf(oldWidget)) _messageRowCache.clear();
   }
+
+  // Everything on the widget that [buildMessage] passes into a row. A parent
+  // that rebuilds the list without changing any of these keeps the cached
+  // rows; callbacks created inline on every build do change them.
+  static Object _rowInputsOf(StreamMessageListView widget) => (
+    widget.config,
+    widget.parentMessage,
+    widget.messageBuilder,
+    widget.builders.systemMessage,
+    widget.builders.moderatedMessage,
+    widget.builders.ephemeralMessage,
+    widget.onSystemMessageTap,
+    widget.onModeratedMessageTap,
+    widget.onEphemeralMessageTap,
+    widget.onViewInChannelTap,
+    widget.onMessageTap,
+    widget.onMessageLongPress,
+    widget.onEditMessageTap,
+    widget.onReplyTap,
+    widget.onUserAvatarTap,
+    widget.onReactionsTap,
+    widget.onReactionTap,
+    widget.onReactionLongPress,
+    widget.onMessageLinkTap,
+    widget.onUserMentionTap,
+    widget.onMentionTap,
+    widget.onQuotedMessageTap,
+  );
 
   @override
   void dispose() {
