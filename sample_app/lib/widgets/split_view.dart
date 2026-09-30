@@ -83,13 +83,15 @@ Rect? _verticalFold(MediaQueryData mediaQuery) {
   );
 }
 
-/// A split view that shows [primary] beside [secondary] on a
-/// [WindowSizeClass.regular] window, and only [secondary] on a
-/// [WindowSizeClass.compact] one.
+/// A split view that shows [primary] beside [secondary] on a wide
+/// [WindowSizeClass.regular] window, and only [secondary] otherwise.
+///
+/// Both panes need a regular window at least 840 wide, so a narrower regular
+/// window, such as a tablet in portrait, shows one pane at a time.
 ///
 /// [secondary] is the navigator for the trailing pane, and its root page is an
-/// [AdaptiveSplitViewRoot]. On a compact window that root page shows
-/// [primary], so both panes keep their state as the window changes size. Its
+/// [AdaptiveSplitViewRoot]. While only [secondary] is shown, that root page
+/// shows [primary], so both panes keep their state as the window changes size. Its
 /// pages are [AdaptiveSplitViewPage]s, which swap in place beside [primary].
 ///
 /// ```dart
@@ -127,8 +129,8 @@ class AdaptiveSplitView extends StatefulWidget {
 
   /// A panel that slides in over both panes while they are shown side by side.
   ///
-  /// Typically a [Drawer], opened with [openDrawerOf]. A compact window shows
-  /// only the navigator, so the pages in it can host a drawer of their own.
+  /// Typically a [Drawer], opened with [openDrawerOf]. While only the navigator
+  /// is shown, the pages in it can host a drawer of their own.
   final Widget? drawer;
 
   /// Whether the nearest [AdaptiveSplitView] shows both panes.
@@ -160,9 +162,13 @@ class _AdaptiveSplitViewState extends State<AdaptiveSplitView> {
   // Opens and closes the drawer that spans both panes.
   final _drawerKey = GlobalKey<DrawerControllerState>(debugLabel: 'AdaptiveSplitView.drawer');
 
+  // The narrowest window that shows both panes.
+  static const _minimumSplitWidth = 840.0;
+
   @override
   Widget build(BuildContext context) {
-    final isExpanded = WindowSizeClass.of(context) == .regular;
+    final size = MediaQuery.sizeOf(context);
+    final isExpanded = WindowSizeClass.fromSize(size) == .regular && size.width >= _minimumSplitWidth;
 
     return _AdaptiveSplitViewScope(
       isExpanded: isExpanded,
@@ -232,8 +238,8 @@ class _AdaptiveSplitViewScope extends InheritedWidget {
 
 /// The root page of an [AdaptiveSplitView]'s navigator.
 ///
-/// Shows the split view's primary pane on a compact window, and [placeholder]
-/// while both panes are shown.
+/// Shows the split view's primary pane while only the navigator is shown, and
+/// [placeholder] while both panes are shown.
 class AdaptiveSplitViewRoot extends StatelessWidget {
   const AdaptiveSplitViewRoot({
     super.key,
