@@ -1,8 +1,9 @@
-## Upcoming
+## 10.5.0
 
 ✅ Added
 
 - Added the message-list accessibility strings for all supported locales, each with a native-language implementation.
+- Added `unreadMessagesSeparatorLabel` for all supported locales, showing an unread count. A class that `implements StreamChatLocalizations` must add it.
 
 ## 10.4.0
 
@@ -19,7 +20,6 @@
 ✅ Added
 
 - Added connection-error translations (`connectionErrorTitle`/`Description`, `slowConnectionErrorTitle`/`Description`, `genericErrorTitle`/`Description`) for all supported locales.
-- Added `unreadMessagesSeparatorLabel` for all supported locales, showing a count (e.g. "5 unread messages"). `GlobalStreamChatLocalizations` falls back to the deprecated count-less `unreadMessagesSeparatorText`, so a subclass that extends it keeps showing any custom text it already overrides. A class that `implements StreamChatLocalizations` directly has to add the member itself.
 
 ## 10.2.0
 
