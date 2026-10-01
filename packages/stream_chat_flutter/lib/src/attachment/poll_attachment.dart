@@ -72,6 +72,9 @@ class StreamPollAttachmentProps {
   });
 
   /// The message containing the poll.
+  ///
+  /// Within a message list, this is the message as displayed: its poll may
+  /// carry translated texts, so it is acted on by id only.
   final Message message;
 
   /// The constraints to use when displaying the poll.

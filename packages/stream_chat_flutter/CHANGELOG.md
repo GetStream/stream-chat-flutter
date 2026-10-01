@@ -3,6 +3,7 @@
 ✅ Added
 
 - Polls are now shown translated into the current user's language, following `StreamMessageTranslationConfiguration` like the message text.
+- Added `PollTranslationX`, `PollOptionTranslationX` and `PollVoteTranslationX`, to read the translations of a poll, its options and its answers.
 - Added `StreamPollCommentsSheet.language`, to show its comments translated.
 - Added `StreamMessageItem.semanticsLabel`, which replaces the announcement composed for a message row, and `StreamMessageItem.excludeFromSemantics`, which leaves the row unlabeled so the bubble and footer announce their own parts.
 - Added `StreamQuotedMessage.replyMessage`, the message doing the quoting, which lets a quoted preview announce who replied to whom.
@@ -16,7 +17,8 @@
   `libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libwebp-dev`.
 - A deleted message now renders the timestamp and delivery status below the placeholder, matching the design, and no longer shows the "Edited" marker — there is no text left to have been edited.
 - `AccessibleMessagePreviewFormatter.formatMessageSemanticsLabel` must now return the body without a speaker prefix when `channel` is omitted. An implementation that prefixes unconditionally makes a message row announce "You said, You: hello".
-- `Message.translate` now also translates the message's poll, and attachment builders receive the message as displayed, translated when a translation is shown.
+- `Message.translate` now also translates the name, description and options of the message's poll; its answers are left as written.
+- Attachment builders receive the message as displayed, translated when a translation is shown. Act on its poll by id only: passing it to `Channel.updatePoll` would save the translation.
 - `StreamImageCDN.resolveUrl` now leaves a URL that already asks for a specific size alone, rather than replacing it with the size the layout computed.
 
 🐞 Fixed

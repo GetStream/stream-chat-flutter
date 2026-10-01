@@ -47,8 +47,8 @@ class PollVote extends Equatable implements ComparableFieldProvider {
   /// The translations of [answerText], keyed as `<language>_text`, plus the
   /// `language` [answerText] was written in.
   ///
-  /// Filled in by the server when the poll is sent to a channel with
-  /// automatic translation enabled.
+  /// Filled in by the server when the answer is added to a poll in a channel
+  /// with automatic translation enabled.
   @JsonKey(includeToJson: false)
   final Map<String, String>? answerTextI18n;
 

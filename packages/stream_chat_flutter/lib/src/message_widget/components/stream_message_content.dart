@@ -7,6 +7,7 @@ import '../../attachment/builder/attachment_widget_builder.dart';
 import '../../stream_chat.dart';
 import '../../stream_chat_configuration.dart';
 import '../../utils/extensions.dart';
+import '../message_translation_language.dart';
 import '../stream_message_attachments.dart';
 import '../stream_message_item.dart';
 import '../stream_quoted_message.dart';
@@ -148,13 +149,15 @@ class StreamMessageContent extends StatefulWidget {
   /// Passed through to [StreamMessageReactions.sorting].
   final Comparator<ReactionGroup>? reactionSorting;
 
-  /// Whether [message] should display its translation when [Message.i18n]
-  /// has one for the current user's language.
+  /// Whether [message] is displayed translated when it, or its poll, has a
+  /// translation for the current user's language (see
+  /// [MessageX.hasTranslation]).
   ///
   /// Decides for the whole message, text and poll alike, whether it is shown
   /// translated: [StreamMessageAttachments] and [StreamMessageText] both
   /// receive the message as displayed, which is also what attachment builders
-  /// see.
+  /// see. The comments of a poll, which its comments sheet loads itself,
+  /// follow the same decision.
   final bool showTranslatedText;
 
   @override
@@ -248,7 +251,7 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                           message: displayed,
                           attachmentBuilders: widget.attachmentBuilders,
                         ),
-                        if (widget.message.text case final text? when text.isNotEmpty)
+                        if (displayed.text case final text? when text.isNotEmpty)
                           // The composed row label speaks the message text, so
                           // the rendered markdown stays out of the semantics tree
                           // and the row is announced as one phrase.
@@ -264,6 +267,8 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                           // attachments — reachable.
                           ExcludeSemantics(
                             excluding: excluding,
+                            // Already translated; `showTranslatedText` is still
+                            // passed so the text behaves the same as on its own.
                             child: StreamMessageText(
                               message: displayed,
                               onLinkTap: widget.onLinkTap,
@@ -301,7 +306,8 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
 }
 
 // Resolves the message to display once, so its text and its attachments, a
-// poll included, are always shown in the same language.
+// poll included, are always shown in the same language, and provides that
+// language to them through [MessageTranslationLanguage].
 //
 // Follows the current user's language like [StreamMessageText] does.
 class _DisplayedMessage extends StatelessWidget {
@@ -317,19 +323,30 @@ class _DisplayedMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Nothing to translate for, without the chat and its configuration above.
+    // Without a StreamChat and its configuration above, there is no user
+    // language to translate into.
     final streamChat = StreamChat.maybeOf(context);
     final translationConfig = StreamChatConfiguration.maybeOf(context)?.messageTranslation;
     if (streamChat == null || translationConfig == null) return builder(context, message);
-    if (!showTranslatedText || !translationConfig.enabled) return builder(context, message);
 
-    // An unset language arrives from the API as `''`, which `translate`
-    // treats like null; `BetterStreamBuilder`'s type parameter can't be
-    // nullable.
+    final translates = showTranslatedText && translationConfig.enabled;
+
+    // Always built through the stream builder, so switching between the
+    // translation and the original keeps the bubble's subtree in place.
+    //
+    // An unset language arrives from the API as `''`; `BetterStreamBuilder`'s
+    // type parameter can't be nullable.
     return BetterStreamBuilder<String>(
       initialData: streamChat.currentUser?.language ?? '',
       stream: streamChat.currentUserStream.map((it) => it?.language ?? ''),
-      builder: (context, language) => builder(context, message.translate(language)),
+      builder: (context, language) {
+        final displayLanguage = translates && language.isNotEmpty ? language : null;
+
+        return MessageTranslationLanguage(
+          language: displayLanguage,
+          child: builder(context, message.translate(displayLanguage)),
+        );
+      },
     );
   }
 }

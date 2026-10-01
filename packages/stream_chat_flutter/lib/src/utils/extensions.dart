@@ -491,11 +491,12 @@ extension MessageX on Message {
     return poll?.hasTranslation(language) ?? false;
   }
 
-  /// It returns the message with the translated text, and the translated
-  /// [poll] (see [PollTranslationX.translate]), if available locally.
+  /// It returns the message with its text, and its [poll]'s name,
+  /// description and options, translated into [language] where available
+  /// locally.
   ///
-  /// Returns the message unchanged when neither its text nor its poll has a
-  /// translation into [language].
+  /// The poll's answers are left as written. Returns the message unchanged
+  /// when neither its text nor its poll has a translation into [language].
   Message translate(String? language) {
     final translatedText = this.translatedText(language);
     final translatedPoll = poll?._translate(language);
@@ -579,7 +580,9 @@ extension PollTranslationX on Poll {
   // A copy of this poll with its name, description and options translated
   // into [language], or this poll when none of them has a translation.
   //
-  // Answers are left as written, as in [hasTranslation].
+  // Answers are left as written: the comments sheet translates the answers it
+  // loads itself, and `ownAnswers` prefills the dialog that edits the current
+  // user's comment, which must show what the user wrote.
   Poll _translate(String? language) {
     if (!hasTranslation(language)) return this;
 

@@ -186,7 +186,7 @@ class ChannelStateMutations {
       ownVotesAndAnswers: ownVotesAndAnswers,
     );
 
-    final message = pollMessage.copyWith(poll: poll);
+    final message = pollMessage.copyWith(poll: poll._withTranslationsOf(oldPoll));
     _state.updateMessage(message);
   }
 
@@ -226,7 +226,7 @@ class ChannelStateMutations {
       ownVotesAndAnswers: [...ownVotesAndAnswers.values],
     );
 
-    final message = pollMessage.copyWith(poll: poll);
+    final message = pollMessage.copyWith(poll: poll._withTranslationsOf(oldPoll));
     _state.updateMessage(message);
   }
 
@@ -249,7 +249,7 @@ class ChannelStateMutations {
       ownVotesAndAnswers: [...ownVotesAndAnswers.values],
     );
 
-    final message = pollMessage.copyWith(poll: poll);
+    final message = pollMessage.copyWith(poll: poll._withTranslationsOf(oldPoll));
     _state.updateMessage(message);
   }
 
@@ -272,7 +272,7 @@ class ChannelStateMutations {
       ownVotesAndAnswers: [...ownVotesAndAnswers.values],
     );
 
-    final message = pollMessage.copyWith(poll: poll);
+    final message = pollMessage.copyWith(poll: poll._withTranslationsOf(oldPoll));
     _state.updateMessage(message);
   }
 
@@ -296,7 +296,7 @@ class ChannelStateMutations {
       ownVotesAndAnswers: [...ownVotesAndAnswers.values],
     );
 
-    final message = pollMessage.copyWith(poll: poll);
+    final message = pollMessage.copyWith(poll: poll._withTranslationsOf(oldPoll));
     _state.updateMessage(message);
   }
 
@@ -317,7 +317,7 @@ class ChannelStateMutations {
       ownVotesAndAnswers: [...ownVotesAndAnswers.values],
     );
 
-    final message = pollMessage.copyWith(poll: poll);
+    final message = pollMessage.copyWith(poll: poll._withTranslationsOf(oldPoll));
     _state.updateMessage(message);
   }
 
@@ -572,6 +572,34 @@ class ChannelStateMutations {
       _state.channelState.copyWith(
         pushPreferences: pushPreferences,
       ),
+    );
+  }
+}
+
+extension on Poll {
+  // This poll with the translations of [oldPoll] filled in where this one
+  // has none, so an event that leaves them out doesn't switch a translated
+  // poll back to its original text.
+  //
+  // A translation is only kept for text that is unchanged: a renamed poll or
+  // option must not show the translation of what it used to say.
+  Poll _withTranslationsOf(Poll? oldPoll) {
+    if (oldPoll == null) return this;
+
+    final oldOptions = {for (final option in oldPoll.options) option.id: option};
+
+    return copyWith(
+      nameI18n: nameI18n ?? (name == oldPoll.name ? oldPoll.nameI18n : null),
+      descriptionI18n: descriptionI18n ?? (description == oldPoll.description ? oldPoll.descriptionI18n : null),
+      options: [
+        for (final option in options)
+          switch (oldOptions[option.id]) {
+            final old? when option.textI18n == null && option.text == old.text => option.copyWith(
+              textI18n: old.textI18n,
+            ),
+            _ => option,
+          },
+      ],
     );
   }
 }

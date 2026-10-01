@@ -130,6 +130,26 @@ void main() {
       ]);
     });
 
+    test('keeps the server translation of an option out of its extra data', () {
+      final option = PollOption.fromJson(const {
+        'id': 'option1',
+        'text': 'option1 text',
+        'text_i18n': {'language': 'en', 'nl_text': 'optie1 tekst'},
+      });
+
+      expect(option.extraData, isNot(contains('text_i18n')));
+    });
+
+    test('does not send the server translation of a parsed option back', () {
+      final option = PollOption.fromJson(const {
+        'id': 'option1',
+        'text': 'option1 text',
+        'text_i18n': {'language': 'en', 'nl_text': 'optie1 tekst'},
+      });
+
+      expect(option.toJson(), isNot(contains('text_i18n')));
+    });
+
     group('ComparableFieldProvider', () {
       test('should return ComparableField for poll.id', () {
         final poll = createTestPoll(

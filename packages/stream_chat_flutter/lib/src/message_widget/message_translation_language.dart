@@ -1,29 +1,39 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-import '../stream_chat.dart';
-import '../stream_chat_configuration.dart';
-import 'stream_message_translation_configuration.dart';
-import 'stream_message_translation_store.dart';
+import 'components/stream_message_content.dart';
 
-/// The language to display [message]'s translatable content in, or `null` to
-/// display its original text.
+/// The language a message is displayed translated into, for the widgets that
+/// display parts of it.
 ///
-/// Translations are shown in the current user's language unless they are turned off SDK-wide
-/// ([StreamMessageTranslationConfiguration.enabled]) or the user switched
-/// this message back to its original text through its translation
-/// annotation.
-///
-/// Returns `null` when [context] is not below a [StreamChat]. Sheets are
-/// pushed on the nearest navigator, which an app may have placed above its
-/// [StreamChat]: resolve the language from the context that opens a sheet,
-/// not from the sheet's own context.
-String? messageTranslationLanguageOf(BuildContext context, Message message) {
-  final translationConfig = StreamChatConfiguration.maybeOf(context)?.messageTranslation;
-  if (translationConfig == null || !translationConfig.enabled) return null;
+/// Provided by [StreamMessageContent], which decides once whether a message is
+/// shown translated. Content that the message does not carry itself, such as
+/// the comments a poll sheet pages in, reads it to be shown in the same
+/// language as the rest of the message.
+class MessageTranslationLanguage extends InheritedWidget {
+  /// Creates a scope displaying its message in [language].
+  const MessageTranslationLanguage({
+    super.key,
+    required this.language,
+    required super.child,
+  });
 
-  final translationStore = StreamMessageTranslations.maybeOf(context, messageId: message.id);
-  if (translationStore?.isShowingOriginalText(message.id) ?? false) return null;
+  /// The language the message is displayed in, or `null` when it is displayed
+  /// as written.
+  final String? language;
 
-  return StreamChat.maybeOf(context)?.currentUser?.language;
+  /// The language the message enclosing [context] is displayed in, or `null`
+  /// when it is displayed as written or [context] is not below a
+  /// [StreamMessageContent].
+  ///
+  /// Meant for the moment a sheet is opened, so [context] does not come to
+  /// depend on the scope. Sheets are pushed on the nearest navigator, outside
+  /// of the message: read the language from the context that opens a sheet,
+  /// not from the sheet's own context. The value read is not updated while
+  /// the sheet is open.
+  static String? of(BuildContext context) {
+    return context.getInheritedWidgetOfExactType<MessageTranslationLanguage>()?.language;
+  }
+
+  @override
+  bool updateShouldNotify(MessageTranslationLanguage oldWidget) => language != oldWidget.language;
 }

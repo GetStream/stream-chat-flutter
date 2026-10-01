@@ -7,6 +7,7 @@
 
 🔄 Changed
 
+- The server's `name_i18n`, `description_i18n` and `text_i18n` of a poll and its options are no longer kept in `Poll.extraData` and `PollOption.extraData`, nor sent back when the poll is updated; read `Poll.nameI18n`, `Poll.descriptionI18n` and `PollOption.textI18n` instead.
 - Reconnecting no longer replays very large event backlogs; the offline cache is reset and the affected channels are re-queried instead, so a long spell offline does not stall the app on reconnect.
 
 🐞 Fixed

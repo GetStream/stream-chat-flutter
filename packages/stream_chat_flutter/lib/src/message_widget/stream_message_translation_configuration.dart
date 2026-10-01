@@ -26,13 +26,14 @@ class StreamMessageTranslationConfiguration {
   });
 
   /// Whether a message displays its translation in place of its original
-  /// text when [Message.i18n] has one for the current user's [User.language].
+  /// text when it, or its poll, has one for the current user's
+  /// [User.language].
   ///
-  /// Applies to full messages ([StreamMessageText]) as well as to the
-  /// previews shown in the channel and thread lists
-  /// ([StreamMessagePreviewText]). A poll displays the translations of its
-  /// name, description, options and comments the same way, in the poll
-  /// attachment and in its options, results and comments sheets.
+  /// Applies to full messages ([StreamMessageContent]), including the poll
+  /// attachment and the poll sheets it opens, and to the previews shown in
+  /// the channel and thread lists ([StreamMessagePreviewText]). A poll shows
+  /// its name, description and options translated, and its comments sheet
+  /// the comments translated.
   ///
   /// Defaults to `true`, which is what the SDK has always done. Set it to
   /// `false` to always show a message's original text, regardless of the

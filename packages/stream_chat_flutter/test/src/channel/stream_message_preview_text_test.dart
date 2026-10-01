@@ -801,6 +801,28 @@ void main() {
       expect(_extractText(tester), 'Couleur préférée ?');
     });
 
+    testWidgets('shows the original name of a poll when translations are disabled', (tester) async {
+      final message = Message(
+        user: User(id: 'other-user-id', name: 'Poll Creator'),
+        poll: Poll(
+          name: 'Favorite Color?',
+          nameI18n: const {'language': 'en', 'fr_text': 'Couleur préférée ?'},
+          options: const [PollOption(id: 'option-1', text: 'Red')],
+        ),
+      );
+
+      await pumpMessagePreview(
+        tester,
+        message,
+        language: 'fr',
+        configData: StreamChatConfigurationData(
+          messageTranslation: const StreamMessageTranslationConfiguration(enabled: false),
+        ),
+      );
+
+      expect(_extractText(tester), 'Favorite Color?');
+    });
+
     testWidgets('uses explicit language parameter for translation', (tester) async {
       final message = Message(
         text: 'Hello, world!',

@@ -117,8 +117,10 @@ class StreamMessageHeaderProps {
 ///  5. **Translated** — when the message, or its poll, has a translation
 ///     for the current user's language ([MessageX.hasTranslation]) and
 ///     [StreamMessageTranslationConfiguration.annotationEnabled] is set.
-///     Reads "Translated from {language}" when the original language is
-///     known, otherwise plain "Translated". Includes a "Show original"/"Show
+///     Reads "Translated from {language}" when everything shown translated
+///     was written in one known language, otherwise plain "Translated" — for
+///     example when the text and the poll were written in different
+///     languages. Includes a "Show original"/"Show
 ///     translation" link that invokes
 ///     [StreamMessageHeaderProps.onToggleTranslatedText].
 ///
@@ -235,13 +237,9 @@ class _DefaultStreamMessageHeaderState extends core.NullableState<DefaultStreamM
       if (message.hasTranslation(_language)) {
         final label = switch (props.showTranslatedText) {
           false => translations.originalLabel,
-          true => switch ((
-            message.translatedText(_language) == null ? null : message.originalLanguage,
-            (message.poll?.hasTranslation(_language) ?? false) ? message.poll?.originalLanguage : null,
-          )) {
-            (final text?, final poll?) when text.toLowerCase() != poll.toLowerCase() => translations.translatedLabel,
-            (final source?, _) || (null, final source?) => translations.translatedFromLanguageText(source),
-            (null, null) => translations.translatedLabel,
+          true => switch (_translatedFromLanguage(message, _language)) {
+            null => translations.translatedLabel,
+            final sourceLanguage => translations.translatedFromLanguageText(sourceLanguage),
           },
         };
         final trailing = props.showTranslatedText ? translations.showOriginalLabel : translations.showTranslationLabel;
@@ -272,4 +270,21 @@ class _DefaultStreamMessageHeaderState extends core.NullableState<DefaultStreamM
       children: children,
     );
   }
+}
+
+// The one language everything [message] shows translated into [language] was
+// written in: its text, its poll, or both.
+//
+// `null` when the language of a translated part is unknown, or when the text
+// and the poll were written in different languages, so the label never names
+// a language that only part of the translation came from.
+String? _translatedFromLanguage(Message message, String? language) {
+  final sourceLanguages = [
+    if (message.translatedText(language) != null) message.originalLanguage,
+    if (message.poll?.hasTranslation(language) ?? false) message.poll?.originalLanguage,
+  ];
+  if (sourceLanguages.isEmpty || sourceLanguages.contains(null)) return null;
+
+  final distinct = {for (final it in sourceLanguages.nonNulls) it.toLowerCase()};
+  return distinct.length == 1 ? sourceLanguages.first : null;
 }
