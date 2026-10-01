@@ -219,7 +219,11 @@ class StreamChatState extends State<StreamChat> {
 
     // Only when the app has not registered a StreamTheme itself: dialogs and
     // sheets opened below this point copy the Theme once and would stop
-    // following the app's brightness.
+    // following the app's brightness (flutter/flutter#106642).
+    //
+    // The key keeps the subtree's state when the Theme comes or goes, such as
+    // when only one of the app's light and dark themes registers a StreamTheme.
+    child = KeyedSubtree(key: GlobalObjectKey(this), child: child);
     final materialTheme = Theme.of(context);
     if (materialTheme.extension<StreamTheme>() == null) {
       final streamTheme = StreamTheme.of(context);
