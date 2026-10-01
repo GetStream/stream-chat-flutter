@@ -62,10 +62,7 @@ class Attachment extends Equatable {
 
   /// Create a new instance from a db data
   factory Attachment.fromData(Map<String, dynamic> json) => _$AttachmentFromJson(
-    Serializer.moveToExtraDataFromRoot(
-      json,
-      topLevelFields + dbSpecificTopLevelFields,
-    ),
+    Serializer.moveToExtraDataFromRoot(json, _dataTopLevelFields),
   );
 
   factory Attachment.fromOGAttachment(OGAttachmentResponse ogAttachment) => Attachment(
@@ -211,6 +208,11 @@ class Attachment extends Equatable {
     'id',
     'upload_state',
     'file',
+  ];
+
+  static const _dataTopLevelFields = [
+    ...topLevelFields,
+    ...dbSpecificTopLevelFields,
   ];
 
   /// Serialize to json

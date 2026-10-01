@@ -176,7 +176,7 @@ class OwnUser extends User {
   /// Known top level fields.
   ///
   /// Useful for [Serializer] methods.
-  static final topLevelFields = [
+  static const topLevelFields = [
     'devices',
     'mutes',
     'total_unread_count',

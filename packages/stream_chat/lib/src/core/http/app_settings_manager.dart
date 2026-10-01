@@ -38,7 +38,7 @@ class AppSettingsManager {
     if (_appSettings != null) return;
     try {
       final response = await _api.getAppSettings();
-      _appSettings = response.app;
+      _appSettings ??= response.app;
     } catch (e, stk) {
       _logger.warning('Failed to load app settings', e, stk);
     }
