@@ -28,6 +28,7 @@
 🐞 Fixed
 
 - Fixed `StreamMessageListView` dropping frames on each new message in busy channels.
+- Fixed `StreamMessageComposer` polling the audio recorder ten times a second while no recording is in progress, including when voice recording is disabled.
 - Fixed the file picker offering file types the Stream Dashboard doesn't allow; it now only offers the allowed file extensions.
 - Fixed `StreamAttachmentValidator` accepting or rejecting a file differently from the server when an extension list holds a compound entry like `.tar.gz`; it now compares only the last extension.
 - Fixed `StreamAttachmentHandler.pickFile` throwing on an empty selection; it now returns `null`.
