@@ -16,7 +16,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [02](02-devices.md) | Devices | 0 | 3 | ☑ |
 | [03](03-user-groups.md) | User Groups | 0 | 8 | ☑ |
 | [04](04-roles-guest-and-app.md) | Roles, Guest & App Settings | 0 | 5 | ☑ |
-| [05](05-polls.md) | Polls | 13 | 13 | ☐ |
+| [05](05-polls.md) | Polls | 0 | 13 | ☑ |
 | [06](06-reminders.md) | Message Reminders | 4 | 4 | ☐ |
 | [07](07-threads-and-drafts.md) | Threads & Drafts | 7 | 7 | ☐ |
 | [08](08-moderation-and-blocklists.md) | Moderation & Blocklists | 0 | 34 | ☑ |
@@ -26,8 +26,9 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [12](12-uploads-cdn.md) | Uploads (CDN) | 8 | 8 | ☐ |
 | [13](13-push-preferences.md) | Push Preferences | 1 | 1 | ☐ |
 | [14](14-banned-users.md) | Banned Users — split out of 08 | 1 | 1 | ☐ |
+| [15](15-custom-data-rename.md) | `extraData` → `custom`, every model at once | — | — | ☐ |
 
-**Coverage:** 85 hand-written methods across 11 files, and all 129 generated operations, each claimed by exactly
+**Coverage:** 71 hand-written methods across 9 files, and all 129 generated operations, each claimed by exactly
 one group. Verified mechanically — see [Keeping this plan honest](#keeping-this-plan-honest).
 
 
@@ -142,7 +143,9 @@ includes a named response that carries only `duration` today, such as `HideChann
 | --- | --- | --- |
 | `DeviceV1JsonConverter` | `OwnUser.devices` | [09](09-users.md) |
 | `userGroupsFromV1Json` | `Message.mentionedGroups` | [10](10-messages.md) |
-| `DataSerializable` | `UserGroup`, `UserGroupMember` (`fromData`, `toData`) | [10](10-messages.md) |
+| `DataSerializable` | `UserGroup`, `UserGroupMember`, `PollOption` (`fromData`, `toData`) | [10](10-messages.md) |
+| `PollV1JsonConverter` | `Message.poll`, `DraftMessage.poll`, `Event.poll` | WebSocket v2 (no group) |
+| `PollVoteV1JsonConverter` | `Event.pollVote` | WebSocket v2 (no group) |
 | `user_mapper.dart` (kept, re-pointed) | today's `User`, which still reads and writes JSON | [09](09-users.md) |
 
 How v1 JSON decodes `User` once it becomes a plain model is decided in [01-foundation](01-foundation.md): until
@@ -167,6 +170,8 @@ surfaces before it reaches `Message` and `ChannelState`:
   SDK.
 - **09** is last. Every group before it maps users through `user_mapper.dart` onto today's `User`; 09 migrates the
   user endpoints and restructures `User` and `OwnUser` themselves, when every parent that embeds them has moved.
+- **15** renames `extraData` to `custom` on every model at once. The groups keep `extraData`, so the SDK stays
+  consistent until then; it runs after 09.
 
 ## Prerequisites
 

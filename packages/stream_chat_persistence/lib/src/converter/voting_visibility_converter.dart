@@ -7,26 +7,8 @@ class VotingVisibilityConverter extends TypeConverter<VotingVisibility, String> 
   const VotingVisibilityConverter();
 
   @override
-  VotingVisibility fromSql(String fromDb) {
-    for (final entry in _votingVisibilityEnumMap.entries) {
-      if (entry.value == fromDb) {
-        return entry.key;
-      }
-    }
-
-    throw ArgumentError(
-      '`$fromDb` is not one of the supported values: '
-      '${_votingVisibilityEnumMap.values.join(', ')}',
-    );
-  }
+  VotingVisibility fromSql(String fromDb) => VotingVisibility(fromDb);
 
   @override
-  String toSql(VotingVisibility value) {
-    return _votingVisibilityEnumMap[value]!;
-  }
+  String toSql(VotingVisibility value) => value.value;
 }
-
-const _votingVisibilityEnumMap = {
-  VotingVisibility.anonymous: 'anonymous',
-  VotingVisibility.public: 'public',
-};

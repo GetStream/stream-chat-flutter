@@ -1,121 +1,116 @@
-// ignore_for_file: avoid_redundant_argument_values
-
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/poll_option.dart';
+import 'package:stream_chat/src/core/models/poll_vote.dart';
+import 'package:stream_chat/src/core/models/voting_visibility.dart';
 import 'package:test/test.dart';
 
 import '../../utils.dart';
 
 void main() {
-  group('src/models/message', () {
-    test('should parse json correctly', () {
-      final poll = Poll.fromJson(jsonFixture('poll.json'));
+  test('Poll generates an id when none is given', () {
+    final first = Poll(name: 'Lunch?', options: const []);
+    final second = Poll(name: 'Lunch?', options: const []);
 
-      expect(poll.id, '7fd88eb3-fc05-4e89-89af-36c6d8995dda');
-      expect(poll.name, 'test');
-      expect(poll.description, '');
-      expect(poll.votingVisibility, VotingVisibility.public);
-      expect(poll.enforceUniqueVote, false);
-      expect(poll.maxVotesAllowed, isNull);
-      expect(poll.allowUserSuggestedOptions, false);
-      expect(poll.allowAnswers, false);
-      expect(poll.isClosed, false);
-      expect(poll.voteCount, 0);
-      expect(poll.answersCount, 0);
+    expect(first.id, isNotEmpty);
+    expect(first.id, isNot(second.id));
+  });
 
-      expect(poll.createdAt.toIso8601String(), '2024-04-17T14:46:23.001349Z');
-      expect(poll.updatedAt.toIso8601String(), '2024-04-17T14:46:23.001349Z');
+  test('Poll compares its custom data for equality', () {
+    final poll = createTestPoll(id: 'poll-id', name: 'Lunch?', extraData: const {'topic': 'food'});
 
-      expect(poll.options.length, 1);
-      final option = poll.options[0];
-      expect(option.id, 'option1');
-      expect(option.text, 'option1 text');
+    expect(poll, poll.copyWith(extraData: const {'topic': 'food'}));
+    expect(poll, isNot(poll.copyWith(extraData: const {'topic': 'drinks'})));
+  });
 
-      expect(poll.latestVotesByOption, isEmpty);
+  test('Poll.copyWith can clear the vote limit', () {
+    final poll = createTestPoll(name: 'Lunch?', maxVotesAllowed: 2);
 
-      expect(poll.ownVotesAndAnswers.length, 1);
-      final vote = poll.ownVotesAndAnswers[0];
-      expect(vote.id, 'luke_skywalker');
-      expect(vote.optionId, 'option1');
-      expect(vote.pollId, '7fd88eb3-fc05-4e89-89af-36c6d8995dda');
-      expect(vote.createdAt.toIso8601String(), '2022-02-03T15:47:10.148169Z');
-      expect(vote.updatedAt.toIso8601String(), '2024-03-18T16:44:45.749718Z');
+    expect(poll.copyWith(maxVotesAllowed: null).maxVotesAllowed, isNull);
+  });
 
-      // Check createdBy fields
-      expect(poll.createdById, 'luke_skywalker');
-      expect(poll.createdBy, isNotNull);
-    });
+  test('Poll.latestVotes holds the latest votes of every option', () {
+    final pizza = _vote(id: 'v1', optionId: 'pizza');
+    final sushi = _vote(id: 'v2', optionId: 'sushi');
+    final poll = createTestPoll(name: 'Lunch?').copyWith(
+      latestVotesByOption: {
+        'pizza': [pizza],
+        'sushi': [sushi],
+      },
+    );
 
-    test('should serialize to json correctly', () {
-      final poll = Poll(
-        id: '7fd88eb3-fc05-4e89-89af-36c6d8995dda',
-        name: 'test',
-        options: const [
-          PollOption(
-            text: 'option1 text',
-          ),
-        ],
-      );
+    expect(poll.latestVotes, unorderedEquals([pizza, sushi]));
+  });
 
-      final json = poll.toJson();
+  test('Poll.ownVotes leaves out the answers of the current user', () {
+    final vote = _vote(id: 'v1', optionId: 'pizza');
+    final answer = _vote(id: 'a1', answerText: 'Anything');
+    final poll = createTestPoll(name: 'Lunch?').copyWith(ownVotesAndAnswers: [vote, answer]);
 
-      expect(json['id'], '7fd88eb3-fc05-4e89-89af-36c6d8995dda');
-      expect(json['name'], 'test');
-      expect(json['description'], isNull);
-      expect(json['options'], [
-        {'text': 'option1 text'},
-      ]);
-      expect(json['voting_visibility'], 'public');
-      expect(json['enforce_unique_vote'], true);
-      expect(json['max_votes_allowed'], isNull);
-      expect(json['allow_user_suggested_options'], false);
-      expect(json['allow_answers'], false);
-      expect(json['is_closed'], false);
-    });
+    expect(poll.ownVotes, [vote]);
+  });
 
-    group('PollSortField', () {
-      test('id orders alphabetically', () {
-        expectOrders(
-          PollSortField.id,
-          createTestPoll(id: 'a-poll', name: 'A'),
-          createTestPoll(id: 'b-poll', name: 'B'),
-        );
-      });
+  test('Poll.ownAnswers leaves out the votes of the current user', () {
+    final vote = _vote(id: 'v1', optionId: 'pizza');
+    final answer = _vote(id: 'a1', answerText: 'Anything');
+    final poll = createTestPoll(name: 'Lunch?').copyWith(ownVotesAndAnswers: [vote, answer]);
 
-      test('name orders alphabetically, folded', () {
-        expectOrders(
-          PollSortField.name,
-          createTestPoll(name: 'apples'),
-          createTestPoll(name: 'Bananas'),
-        );
-      });
+    expect(poll.ownAnswers, [answer]);
+  });
 
-      test('createdAt orders older polls first', () {
-        expectOrders(
-          PollSortField.createdAt,
-          createTestPoll(name: 'older', createdAt: DateTime(2023, 6, 10)),
-          createTestPoll(name: 'newer', createdAt: DateTime(2023, 6, 15)),
-        );
-      });
+  test('PollFilterField.votingVisibility reads the visibility value', () {
+    final poll = createTestPoll(name: 'Lunch?', votingVisibility: VotingVisibility.anonymous);
 
-      test('updatedAt orders older polls first', () {
-        expectOrders(
-          PollSortField.updatedAt,
-          createTestPoll(name: 'older', updatedAt: DateTime(2023, 6, 10)),
-          createTestPoll(name: 'newer', updatedAt: DateTime(2023, 6, 15)),
-        );
-      });
+    expect(PollFilterField.votingVisibility.value(poll), 'anonymous');
+  });
 
-      test('isClosed orders open polls first', () {
-        expectOrders(
-          PollSortField.isClosed,
-          createTestPoll(name: 'open', isClosed: false),
-          createTestPoll(name: 'closed', isClosed: true),
-        );
-      });
-    });
+  test('PollSortField.id orders alphabetically', () {
+    expectOrders(
+      PollSortField.id,
+      createTestPoll(id: 'a-poll', name: 'A'),
+      createTestPoll(id: 'b-poll', name: 'B'),
+    );
+  });
+
+  test('PollSortField.name orders alphabetically, folded', () {
+    expectOrders(
+      PollSortField.name,
+      createTestPoll(name: 'apples'),
+      createTestPoll(name: 'Bananas'),
+    );
+  });
+
+  test('PollSortField.createdAt orders older polls first', () {
+    expectOrders(
+      PollSortField.createdAt,
+      createTestPoll(name: 'older', createdAt: DateTime(2023, 6, 10)),
+      createTestPoll(name: 'newer', createdAt: DateTime(2023, 6, 15)),
+    );
+  });
+
+  test('PollSortField.updatedAt orders older polls first', () {
+    expectOrders(
+      PollSortField.updatedAt,
+      createTestPoll(name: 'older', updatedAt: DateTime(2023, 6, 10)),
+      createTestPoll(name: 'newer', updatedAt: DateTime(2023, 6, 15)),
+    );
+  });
+
+  test('PollSortField.isClosed orders open polls first', () {
+    expectOrders(
+      PollSortField.isClosed,
+      createTestPoll(name: 'open'),
+      createTestPoll(name: 'closed', isClosed: true),
+    );
   });
 }
+
+PollVote _vote({required String id, String? optionId, String? answerText}) => PollVote(
+  id: id,
+  optionId: optionId,
+  answerText: answerText,
+  createdAt: DateTime.utc(2024),
+  updatedAt: DateTime.utc(2024),
+);
 
 /// Helper function to create a Poll for testing
 Poll createTestPoll({

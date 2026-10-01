@@ -1444,44 +1444,60 @@ class Channel {
 
   final _pollLock = Lock();
 
-  /// Send a message with a poll to this channel.
+  /// Creates [poll] and sends it to this channel in a new message.
   ///
-  /// Optionally provide a [messageText] to send a message along with the poll.
-  Future<SendMessageResponse> sendPoll(
+  /// The message carries [messageText] as its text, if given. If the poll cannot be created, no message is sent and
+  /// the failure is returned; if the message cannot be sent, the poll stays created and the failure is returned.
+  Future<Result<SendMessageResponse>> sendPoll(
     Poll poll, {
     String? messageText,
   }) async {
     _checkInitialized();
-    final res = await _pollLock.synchronized(() => _client.createPoll(poll));
-    return sendMessage(
-      Message(
-        text: messageText,
-        poll: res.poll,
-        pollId: res.poll.id,
-      ),
-    );
+    final created = await _pollLock.synchronized(() => _client.createPoll(poll));
+
+    return switch (created) {
+      Success(data: PollResponse(poll: final createdPoll)) => _sendPollMessage(createdPoll, messageText),
+      Failure(:final error, :final stackTrace) => Result.failure(error, stackTrace),
+    };
   }
 
-  /// Updates the [poll] in this channel.
-  Future<UpdatePollResponse> updatePoll(Poll poll) {
+  Future<Result<SendMessageResponse>> _sendPollMessage(Poll poll, String? messageText) async {
+    try {
+      final message = Message(text: messageText, poll: poll, pollId: poll.id);
+      return Result.success(await sendMessage(message));
+    } on StreamException catch (error, stackTrace) {
+      return Result.failure(error, stackTrace);
+    } catch (error, stackTrace) {
+      final exception = StreamClientException(message: 'Failed to send the poll message', cause: error);
+      return Result.failure(exception, stackTrace);
+    }
+  }
+
+  /// Replaces the settings and options of [poll] with the ones it carries.
+  ///
+  /// An option left out of [poll] is removed from it. Every option must already exist and carry its id; if one does
+  /// not, the call returns a failure without updating the poll. New options are added with [createPollOption].
+  Future<Result<PollResponse>> updatePoll(Poll poll) {
     _checkInitialized();
     return _pollLock.synchronized(() => _client.updatePoll(poll));
   }
 
-  /// Deletes the given [poll] from this channel.
-  Future<EmptyResponse> deletePoll(Poll poll) {
+  /// Deletes [poll].
+  Future<Result<void>> deletePoll(Poll poll) {
     _checkInitialized();
     return _pollLock.synchronized(() => _client.deletePoll(poll.id));
   }
 
-  /// Close the given [poll].
-  Future<UpdatePollResponse> closePoll(Poll poll) {
+  /// Closes [poll], so it accepts no more votes or answers.
+  Future<Result<PollResponse>> closePoll(Poll poll) {
     _checkInitialized();
     return _pollLock.synchronized(() => _client.closePoll(poll.id));
   }
 
-  /// Create a new poll option for the given [poll].
-  Future<CreatePollOptionResponse> createPollOption(
+  /// Adds [option] to [poll].
+  ///
+  /// The option gets a new id, which the returned option carries.
+  Future<Result<PollOptionResponse>> createPollOption(
     Poll poll,
     PollOption option,
   ) {
@@ -1493,8 +1509,11 @@ class Channel {
 
   final _pollVoteLock = Lock();
 
-  /// Cast a vote on the given [poll] with the given [option].
-  Future<CastPollVoteResponse> castPollVote(
+  /// Votes for [option] of [poll], which was sent in [message].
+  ///
+  /// If the poll allows only one vote per user, the vote replaces the previous one. The [option] must carry its id;
+  /// if it does not, the call returns a failure without voting.
+  Future<Result<PollVoteResponse>> castPollVote(
     Message message,
     Poll poll,
     PollOption option,
@@ -1503,7 +1522,9 @@ class Channel {
 
     final optionId = option.id;
     if (optionId == null) {
-      throw ArgumentError('Option id cannot be null');
+      return const Result.failure(
+        StreamClientException(message: 'The poll option has no id, so it cannot be voted for.'),
+      );
     }
 
     return _pollVoteLock.synchronized(
@@ -1515,8 +1536,10 @@ class Channel {
     );
   }
 
-  /// Add a new answer to the given [poll].
-  Future<CastPollVoteResponse> addPollAnswer(
+  /// Leaves [answerText] as an answer on [poll], which was sent in [message].
+  ///
+  /// Each user has one answer per poll; a new one replaces the previous one.
+  Future<Result<PollVoteResponse>> addPollAnswer(
     Message message,
     Poll poll, {
     required String answerText,
@@ -1531,17 +1554,19 @@ class Channel {
     );
   }
 
-  /// Remove a vote on the given [poll] with the given [vote].
-  Future<RemovePollVoteResponse> removePollVote(
+  /// Removes [vote], a vote or answer on [poll], which was sent in [message].
+  ///
+  /// The [vote] must carry its id; if it does not, the call returns a failure without removing anything.
+  Future<Result<PollVoteResponse>> removePollVote(
     Message message,
     Poll poll,
     PollVote vote,
-  ) {
+  ) async {
     _checkInitialized();
 
     final voteId = vote.id;
     if (voteId == null) {
-      throw ArgumentError('Vote id cannot be null');
+      return const Result.failure(StreamClientException(message: 'The poll vote has no id, so it cannot be removed.'));
     }
 
     return _pollVoteLock.synchronized(
@@ -1553,20 +1578,26 @@ class Channel {
     );
   }
 
-  /// Query the poll votes for the given [pollId] with the given [filter] and
-  /// [sort] options.
-  Future<QueryPollVotesResponse> queryPollVotes(
+  /// Fetches one page of the votes and answers of the poll [pollId] matching [filter], ordered by [sort].
+  ///
+  /// Up to [limit] votes are returned. The next page is fetched by passing the `next` cursor of a response as [next],
+  /// and the previous page by passing its `prev` cursor as [prev]; pass at most one of the two.
+  Future<Result<QueryPollVotesResponse>> queryPollVotes(
     String pollId, {
     PollVoteFilter? filter,
     List<PollVoteSort>? sort,
-    PaginationParams pagination = const PaginationParams(),
+    int limit = 10,
+    String? next,
+    String? prev,
   }) {
     _checkInitialized();
     return _client.queryPollVotes(
       pollId,
       filter: filter,
       sort: sort,
-      pagination: pagination,
+      limit: limit,
+      next: next,
+      prev: prev,
     );
   }
 

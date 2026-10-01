@@ -79,6 +79,16 @@
 - `StreamChatApi.general.getAppSettings` is removed; call `StreamChatClient.getAppSettings` instead.
 - `StreamChatApi.guest` is removed; call `StreamChatClient.connectGuestUser` instead.
 - `ConnectGuestUserResponse` is removed from the public API.
+- `StreamChatClient`'s poll methods and `Channel.sendPoll`, `updatePoll`, `deletePoll`, `closePoll`, `createPollOption`, `castPollVote`, `addPollAnswer`, `removePollVote` and `queryPollVotes` return a `Result` instead of throwing; `deletePoll` and `deletePollOption` return a `Result<void>`.
+- `CreatePollResponse`, `GetPollResponse` and `UpdatePollResponse` are replaced by `PollResponse`; `CreatePollOptionResponse`, `GetPollOptionResponse` and `UpdatePollOptionResponse` by `PollOptionResponse`; and `CastPollVoteResponse` and `RemovePollVoteResponse` by `PollVoteResponse`.
+- `queryPolls` and `queryPollVotes` take `limit` (10 when omitted), `next` and `prev` instead of `PaginationParams`, and their responses carry a `prev` cursor.
+- `Channel.castPollVote` and `removePollVote` return a failure instead of throwing an `ArgumentError` for an option or vote without an id; `updatePoll` and `updatePollOption` do the same for an option without one.
+- `VotingVisibility` is an extension type over its wire string instead of an enum.
+- `Poll`, `PollOption`, `PollVote` and the poll responses no longer decode from or encode to JSON; `PollOption` gains `fromData` and `toData`, which read and write only the format `stream_chat_persistence` stores it in.
+- The poll responses are immutable, built through a const constructor, and their `duration` is a non-nullable `String`; `PollVoteResponse.vote` is nullable.
+- `Poll`, `PollOption` and `PollVote` no longer extend `Equatable`, so `props` is removed; they still compare by value, now including `extraData`.
+- `copyWith` on `Poll`, `PollOption` and `PollVote` sets a field passed as `null` instead of keeping it; on `Poll` a `null` `id` generates a new one, and a `null` `createdAt` or `updatedAt` on `Poll` and `PollVote` becomes the current time.
+- `StreamChatApi.polls` is removed; its endpoints are reached through `StreamChatClient`.
 
 🐞 Fixed
 
