@@ -109,6 +109,15 @@ void main() {
       expect(capturedChannelState().watcherCount, 7);
     });
 
+    test('onMessageNew skips a watcher count the state already holds', () {
+      stubChannelState(ChannelState(channel: ChannelModel(cid: 'messaging:test'), watcherCount: 7));
+
+      mutations.onMessageNew(message, watcherCount: 7);
+
+      verify(() => state.addNewMessage(message)).called(1);
+      verifyNever(() => state.updateChannelState(any()));
+    });
+
     test('onMessageDeleted soft-deletes without touching the unread count', () {
       mutations.onMessageDeleted(message);
 
@@ -562,6 +571,16 @@ void main() {
       expect(updated.channel?.messageCount, 43);
     });
 
+    test('onChannelCounts skips counts the state already holds', () {
+      stubChannelState(
+        ChannelState(channel: ChannelModel(cid: 'messaging:test', memberCount: 7, messageCount: 42)),
+      );
+
+      mutations.onChannelCounts(memberCount: 7, messageCount: 42);
+
+      verifyNever(() => state.updateChannelState(any()));
+    });
+
     test('onChannelPushPreferenceUpdated applies the preferences', () {
       const pushPreference = ChannelPushPreference(chatLevel: ChatLevel.mentions);
       stubChannelState(ChannelState(channel: ChannelModel(cid: 'messaging:test')));
@@ -599,6 +618,23 @@ void main() {
       final updated = capturedChannelState();
       expect(updated.members?.single.user, updatedUser);
       expect(updated.membership?.user, updatedUser);
+    });
+
+    test('onMemberUserUpdated skips a user the member already holds', () {
+      stubChannelState(ChannelState(members: [member], membership: member));
+
+      mutations.onMemberUserUpdated(member.user!.copyWith());
+
+      verifyNever(() => state.updateChannelState(any()));
+    });
+
+    test('onMemberUserUpdated applies a user that only changed its updatedAt', () {
+      stubChannelState(ChannelState(members: [member]));
+      final updatedUser = member.user!.copyWith(updatedAt: DateTime(2026, 10, 1));
+
+      mutations.onMemberUserUpdated(updatedUser);
+
+      expect(capturedChannelState().members?.single.user?.updatedAt, DateTime(2026, 10, 1));
     });
 
     test('onMemberUserUpdated ignores users that are not members', () {

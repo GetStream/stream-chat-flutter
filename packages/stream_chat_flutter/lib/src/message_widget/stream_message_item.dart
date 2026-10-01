@@ -1301,23 +1301,28 @@ class _MessageRowSemanticsState extends State<_MessageRowSemantics> {
 
     final channel = StreamChannel.maybeOf(context)?.channel;
 
-    return BetterStreamBuilder<List<Read>>(
-      stream: channel?.state?.readStream,
-      initialData: channel?.state?.read,
-      // Read state is null until the channel is watched, and a channel can be
-      // rendered before then. Without this the row itself — not just the
-      // status it would have carried — would drop out of the tree.
+    // The channel state stream is the same object on every build, unlike a
+    // stream mapped from it, so a rebuild keeps its subscription; the
+    // comparator skips read events that leave this message's status as is.
+    return BetterStreamBuilder<ChannelState>(
+      stream: channel?.state?.channelStateStream,
+      initialData: channel?.state?.channelState,
+      comparator: (previous, next) => _readStatusOf(previous) == _readStatusOf(next),
       noDataBuilder: (_) => _annotate(_label),
-      builder: (context, data) => _annotate(
-        [
-          _label,
-          ?_statusLabel(
-            context,
-            isMessageRead: data.readsOf(message: message).isNotEmpty,
-            isMessageDelivered: data.deliveriesOf(message: message).isNotEmpty,
-          ),
-        ].join(', '),
-      ),
+      builder: (context, channelState) {
+        // Read state is null until the channel is watched, and a channel can
+        // be rendered before then. Without this the row itself — not just the
+        // status it would have carried — would drop out of the tree.
+        if (channelState.read == null) return _annotate(_label);
+        final (:isMessageRead, :isMessageDelivered) = _readStatusOf(channelState);
+
+        return _annotate(
+          [
+            _label,
+            ?_statusLabel(context, isMessageRead: isMessageRead, isMessageDelivered: isMessageDelivered),
+          ].join(', '),
+        );
+      },
     );
   }
 
@@ -1338,6 +1343,14 @@ class _MessageRowSemanticsState extends State<_MessageRowSemantics> {
   // Mirrors what the message shows for the same state — the footer's
   // [StreamMessageSendingStatus], or the error badge on the bubble — so the
   // announcement and the visible state never disagree.
+  ({bool isMessageRead, bool isMessageDelivered}) _readStatusOf(ChannelState? channelState) {
+    final reads = channelState?.read ?? const <Read>[];
+    return (
+      isMessageRead: reads.readsOf(message: widget.message).isNotEmpty,
+      isMessageDelivered: reads.deliveriesOf(message: widget.message).isNotEmpty,
+    );
+  }
+
   String? _statusLabel(
     BuildContext context, {
     required bool isMessageRead,

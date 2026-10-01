@@ -6207,6 +6207,37 @@ void main() {
       expect(() => client.state.users.clear(), throwsUnsupportedError);
     });
 
+    test('`updateUser` does not emit for a null user', () async {
+      final emissions = <Map<String, User>>[];
+      final subscription = client.state.usersStream.skip(1).listen(emissions.add);
+      addTearDown(subscription.cancel);
+
+      client.state.updateUser(null);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(emissions, isEmpty);
+    });
+
+    test('`updateUser` does not emit for a user the state already holds', () async {
+      client.state.updateUser(User(id: 'u1', name: 'One'));
+      final emissions = <Map<String, User>>[];
+      final subscription = client.state.usersStream.skip(1).listen(emissions.add);
+      addTearDown(subscription.cancel);
+
+      client.state.updateUser(User(id: 'u1', name: 'One'));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(emissions, isEmpty);
+    });
+
+    test('`updateUser` applies a user that only changed its updatedAt', () {
+      client.state.updateUser(User(id: 'u1'));
+
+      client.state.updateUser(User(id: 'u1', updatedAt: DateTime(2026, 10, 1)));
+
+      expect(client.state.users['u1']?.updatedAt, DateTime(2026, 10, 1));
+    });
+
     test('`state.activeLiveLocations` returns an unmodifiable view', () {
       expect(() => client.state.activeLiveLocations.clear(), throwsUnsupportedError);
     });

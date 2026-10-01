@@ -312,6 +312,8 @@ Future<void> _pumpChannelPage(
   when(() => channelState.unreadCount).thenReturn(0);
   when(() => channelState.unreadCountStream).thenAnswer((_) => Stream.value(0));
   when(() => channelState.readStream).thenAnswer((_) => Stream.value([]));
+  when(() => channelState.channelStateStream).thenAnswer((_) => Stream.value(const ChannelState(read: [])));
+  when(() => channelState.channelState).thenReturn(const ChannelState(read: []));
   when(() => channelState.currentUserRead).thenReturn(null);
   when(() => channelState.currentUserReadStream).thenAnswer((_) => const Stream.empty());
 

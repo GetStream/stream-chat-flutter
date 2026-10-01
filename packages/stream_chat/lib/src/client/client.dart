@@ -47,6 +47,7 @@ import '../core/util/extension.dart';
 import '../core/util/immutable_collection_subjects.dart';
 import '../core/util/in_flight_cache.dart';
 import '../core/util/list_extensions.dart';
+import '../core/util/user_equality.dart';
 import '../core/util/utils.dart';
 import '../db/chat_persistence_client.dart';
 import '../event_type.dart';
@@ -2809,10 +2810,17 @@ class ClientState {
   /// Update all the [users] with the provided [userList]
   @internal
   void updateUsers(List<User?> userList) {
+    // Most events carry a user the state already holds; skipping those avoids
+    // copying the whole map and notifying every listener for no change.
+    final changed = [
+      for (final user in userList)
+        if (user != null && !isSameUser(users[user.id], user)) user,
+    ];
+    if (changed.isEmpty) return;
+
     final newUsers = {
       ...users,
-      for (final user in userList)
-        if (user != null) user.id: user,
+      for (final user in changed) user.id: user,
     };
     _usersController.safeAdd(newUsers);
   }

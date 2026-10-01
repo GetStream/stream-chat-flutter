@@ -46,15 +46,17 @@ class StreamMessageSendingStatus extends StatelessWidget {
       .standard => null,
     };
 
-    return BetterStreamBuilder<List<Read>>(
-      stream: channel?.state?.readStream,
-      initialData: channel?.state?.read,
-      builder: (context, data) {
-        final readList = data.readsOf(message: message);
-        final isMessageRead = readList.isNotEmpty;
-
-        final deliveriesList = data.deliveriesOf(message: message);
-        final isMessageDelivered = deliveriesList.isNotEmpty;
+    // The channel state stream is the same object on every build, unlike a
+    // stream mapped from it, so a rebuild keeps its subscription; the
+    // comparator skips read events that leave this message's status as is.
+    return BetterStreamBuilder<ChannelState>(
+      stream: channel?.state?.channelStateStream,
+      initialData: channel?.state?.channelState,
+      comparator: (previous, next) => _statusOf(previous) == _statusOf(next),
+      builder: (context, channelState) {
+        // Read state is null until the channel is watched.
+        if (channelState.read == null) return const SizedBox.shrink();
+        final (:isMessageRead, :isMessageDelivered) = _statusOf(channelState);
 
         return StreamSendingIndicator(
           message: message,
@@ -63,6 +65,14 @@ class StreamMessageSendingStatus extends StatelessWidget {
           color: iconColor,
         );
       },
+    );
+  }
+
+  ({bool isMessageRead, bool isMessageDelivered}) _statusOf(ChannelState? channelState) {
+    final reads = channelState?.read ?? const <Read>[];
+    return (
+      isMessageRead: reads.readsOf(message: message).isNotEmpty,
+      isMessageDelivered: reads.deliveriesOf(message: message).isNotEmpty,
     );
   }
 }

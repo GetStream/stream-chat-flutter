@@ -269,6 +269,8 @@ Future<void> _pumpThreadPage(
   when(() => channelState.isUpToDateStream).thenAnswer((_) => Stream.value(true));
   when(() => channelState.unreadCountStream).thenAnswer((_) => Stream.value(0));
   when(() => channelState.readStream).thenAnswer((_) => Stream.value([]));
+  when(() => channelState.channelStateStream).thenAnswer((_) => Stream.value(const ChannelState(read: [])));
+  when(() => channelState.channelState).thenReturn(const ChannelState(read: []));
   when(() => channelState.currentUserRead).thenReturn(null);
   when(() => channelState.currentUserReadStream).thenAnswer((_) => const Stream.empty());
 

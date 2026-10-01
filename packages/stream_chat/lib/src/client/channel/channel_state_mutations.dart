@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 
 import '../../../stream_chat.dart';
+import '../../core/util/user_equality.dart';
 
 /// Applies channel event payloads as [ChannelClientState] mutations.
 ///
@@ -48,7 +49,7 @@ class ChannelStateMutations {
   void onMessageNew(Message message, {int? watcherCount}) {
     _state.addNewMessage(message);
 
-    if (watcherCount != null) {
+    if (watcherCount != null && watcherCount != _state.channelState.watcherCount) {
       _state.updateChannelState(
         _state.channelState.copyWith(watcherCount: watcherCount),
       );
@@ -410,6 +411,11 @@ class ChannelStateMutations {
   ///
   /// A null count leaves the currently stored value unchanged.
   void onChannelCounts({int? memberCount, int? messageCount}) {
+    final channel = _state.channelState.channel;
+    final memberCountChanged = memberCount != null && memberCount != channel?.memberCount;
+    final messageCountChanged = messageCount != null && messageCount != channel?.messageCount;
+    if (!memberCountChanged && !messageCountChanged) return;
+
     _state.updateChannelState(
       _state.channelState.copyWith(
         channel: _state.channelState.channel?.copyWith(
@@ -441,8 +447,10 @@ class ChannelStateMutations {
     final existingMembers = [...?_state.channelState.members];
     final existingMembership = _state.channelState.membership;
 
-    // Return if the user is not a existing member of the channel.
-    if (!existingMembers.any((m) => m.userId == user.id)) return;
+    // Return if the user is not a existing member of the channel, or the
+    // member already holds this exact user.
+    final existingMember = existingMembers.firstWhereOrNull((m) => m.userId == user.id);
+    if (existingMember == null || isSameUser(existingMember.user, user)) return;
 
     Member? maybeUpdateMemberUser(Member? existingMember) {
       if (existingMember == null) return null;
