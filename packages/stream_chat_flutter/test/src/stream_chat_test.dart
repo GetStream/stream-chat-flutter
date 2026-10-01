@@ -262,6 +262,35 @@ void main() {
         expect(captured, same(dark));
       },
     );
+
+    testWidgets(
+      'keeps the state below StreamChat when only one of the app themes '
+      'registers a StreamTheme',
+      (tester) async {
+        tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
+        addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+
+        final mockClient = MockClient();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(extensions: [StreamTheme.light()]),
+            darkTheme: ThemeData(brightness: Brightness.dark),
+            home: StreamChat(
+              client: mockClient,
+              child: const Material(child: TextField()),
+            ),
+          ),
+        );
+
+        await tester.enterText(find.byType(TextField), 'draft');
+
+        tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+        await tester.pumpAndSettle();
+
+        expect(find.text('draft'), findsOneWidget);
+      },
+    );
   });
 }
 
