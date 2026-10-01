@@ -228,7 +228,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `CreatePollResponse()..poll = …` and the other response setters | `PollResponse(duration: …, poll: …)` | `retyped` | The responses are plain classes with a const constructor and final fields |
 | poll responses' `duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
 | `Poll` / `PollOption` / `PollVote extends Equatable`, `props` | value `==` | `removed` | `Poll` and `PollOption` now compare `extraData` too |
-| `Poll.ownVotes` / `.ownAnswers` / `.latestVotes` (late fields), `PollVote.isAnswer` (a field set in the constructor) | the same names, as getters | `retyped` | Computed on each read |
+| `PollVote.isAnswer` (a field set in the constructor) | the same name, as a getter | `retyped` | Computed from `answerText` on each read |
 | `StreamChatApi.polls` (`PollsApi`) | `StreamChatClient`'s poll methods | `removed` | The endpoints moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
 
