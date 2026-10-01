@@ -619,13 +619,6 @@ extension PollVoteTranslationX on PollVote {
   ///
   /// Follows the same rules as [MessageX.translatedText].
   String? translatedAnswerText(String? language) => _translationOf(answerTextI18n, language);
-
-  /// It returns the vote with its answer text replaced by its translation
-  /// into [language], or unchanged when there is none available locally.
-  PollVote translate(String? language) => switch (translatedAnswerText(language)) {
-    null => this,
-    final translatedAnswerText => copyWith(answerText: translatedAnswerText),
-  };
 }
 
 /// Extensions on [Uri]

@@ -181,7 +181,10 @@ class _StreamPollCommentsSheetState extends State<StreamPollCommentsSheet> {
               padding: effectiveTheme.contentPadding,
               separatorBuilder: (_, __, ___) => SizedBox(height: itemSpacing),
               itemBuilder: (context, comments, index, _) {
-                final comment = comments[index].translate(widget.language);
+                final comment = switch (comments[index].translatedAnswerText(widget.language)) {
+                  null => comments[index],
+                  final answerText => comments[index].copyWith(answerText: answerText),
+                };
 
                 return _PollCommentCard(
                   poll: widget.poll,
