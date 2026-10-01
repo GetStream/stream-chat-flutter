@@ -1454,11 +1454,7 @@ class Channel {
   }) async {
     _checkInitialized();
     final created = await _pollLock.synchronized(() => _client.createPoll(poll));
-
-    return switch (created) {
-      Success(data: PollResponse(poll: final createdPoll)) => _sendPollMessage(createdPoll, messageText),
-      Failure(:final error, :final stackTrace) => Result.failure(error, stackTrace),
-    };
+    return created.flatMapAsync((response) => _sendPollMessage(response.poll, messageText));
   }
 
   Future<Result<SendMessageResponse>> _sendPollMessage(Poll poll, String? messageText) async {
@@ -1473,10 +1469,10 @@ class Channel {
     }
   }
 
-  /// Replaces the settings and options of [poll] with the ones it carries.
+  /// Updates [poll] to match the settings and options it carries.
   ///
-  /// An option left out of [poll] is removed from it. Every option must already exist and carry its id; if one does
-  /// not, the call returns a failure without updating the poll. New options are added with [createPollOption].
+  /// [Poll.options] becomes the poll's full list of options, each matched by its id, so an existing option missing
+  /// from it is deleted. New options are added through [createPollOption].
   Future<Result<PollResponse>> updatePoll(Poll poll) {
     _checkInitialized();
     return _pollLock.synchronized(() => _client.updatePoll(poll));
@@ -1536,7 +1532,7 @@ class Channel {
     );
   }
 
-  /// Leaves [answerText] as an answer on [poll], which was sent in [message].
+  /// Adds [answerText] as an answer to [poll], which was sent in [message].
   ///
   /// Each user has one answer per poll; a new one replaces the previous one.
   Future<Result<PollVoteResponse>> addPollAnswer(
@@ -1578,7 +1574,7 @@ class Channel {
     );
   }
 
-  /// Fetches one page of the votes and answers of the poll [pollId] matching [filter], ordered by [sort].
+  /// Fetches one page of the votes and answers matching [filter] on the poll with the id [pollId], ordered by [sort].
   ///
   /// Up to [limit] votes are returned. The next page is fetched by passing the `next` cursor of a response as [next],
   /// and the previous page by passing its `prev` cursor as [prev]. At most one of [next] and [prev] may be given.

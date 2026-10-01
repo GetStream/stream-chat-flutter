@@ -1649,16 +1649,16 @@ class StreamChatClient {
   /// shown to the members of a channel once it is sent in a message; [Channel.sendPoll] does both.
   Future<Result<PollResponse>> createPoll(Poll poll) => _pollsRepository.createPoll(poll);
 
-  /// Fetches the poll [pollId].
+  /// Fetches the poll with the id [pollId].
   Future<Result<PollResponse>> getPoll(String pollId) => _pollsRepository.getPoll(pollId);
 
-  /// Replaces the settings and options of [poll] with the ones it carries.
+  /// Updates [poll] to match the settings and options it carries.
   ///
-  /// An option left out of [poll] is removed from it. Every option must already exist and carry its id; if one does
-  /// not, the call returns a failure without updating the poll. New options are added with [createPollOption].
+  /// [Poll.options] becomes the poll's full list of options, each matched by its id, so an existing option missing
+  /// from it is deleted. New options are added through [createPollOption].
   Future<Result<PollResponse>> updatePoll(Poll poll) => _pollsRepository.updatePoll(poll);
 
-  /// Changes some of the settings of the poll [pollId], leaving the others as they are.
+  /// Changes some of the settings of the poll with the id [pollId], leaving the others as they are.
   ///
   /// The fields in [set] take their new values and the fields named in [unset] are cleared. A key that is not a
   /// setting of the poll is stored in its custom data.
@@ -1668,13 +1668,13 @@ class StreamChatClient {
     List<String>? unset,
   }) => _pollsRepository.partialUpdatePoll(pollId, set: set, unset: unset);
 
-  /// Deletes the poll [pollId].
+  /// Deletes the poll with the id [pollId].
   Future<Result<void>> deletePoll(String pollId) => _pollsRepository.deletePoll(pollId);
 
-  /// Closes the poll [pollId], so it accepts no more votes or answers.
+  /// Closes the poll with the id [pollId], so it accepts no more votes or answers.
   Future<Result<PollResponse>> closePoll(String pollId) => partialUpdatePoll(pollId, set: {'is_closed': true});
 
-  /// Adds [option] to the poll [pollId].
+  /// Adds [option] to the poll with the id [pollId].
   ///
   /// The option gets a new id, which the returned option carries.
   Future<Result<PollOptionResponse>> createPollOption(
@@ -1682,27 +1682,27 @@ class StreamChatClient {
     PollOption option,
   ) => _pollsRepository.createPollOption(pollId, option);
 
-  /// Fetches the option [optionId] of the poll [pollId].
+  /// Fetches an option of a poll, identified by [optionId] and [pollId].
   Future<Result<PollOptionResponse>> getPollOption(
     String pollId,
     String optionId,
   ) => _pollsRepository.getPollOption(pollId, optionId);
 
-  /// Replaces the text and custom data of [option], an existing option of the poll [pollId].
+  /// Replaces the text and custom data of [option], an existing option of the poll with the id [pollId].
   ///
-  /// The [option] is found by its id; if it has none, the call returns a failure without updating anything.
+  /// The [option] is found by its id.
   Future<Result<PollOptionResponse>> updatePollOption(
     String pollId,
     PollOption option,
   ) => _pollsRepository.updatePollOption(pollId, option);
 
-  /// Removes the option [optionId] from the poll [pollId].
+  /// Removes an option from a poll, identified by [optionId] and [pollId].
   Future<Result<void>> deletePollOption(
     String pollId,
     String optionId,
   ) => _pollsRepository.deletePollOption(pollId, optionId);
 
-  /// Votes for the option [optionId] of the poll [pollId], which was sent in the message [messageId].
+  /// Votes for an option of a poll sent in a message, identified by [optionId], [pollId] and [messageId].
   ///
   /// If the poll allows only one vote per user, the vote replaces the previous one.
   Future<Result<PollVoteResponse>> castPollVote(
@@ -1711,7 +1711,7 @@ class StreamChatClient {
     required String optionId,
   }) => _pollsRepository.castPollVote(messageId, pollId, optionId: optionId);
 
-  /// Leaves [answerText] as an answer on the poll [pollId], which was sent in the message [messageId].
+  /// Adds [answerText] as an answer to a poll sent in a message, identified by [pollId] and [messageId].
   ///
   /// Each user has one answer per poll; a new one replaces the previous one.
   Future<Result<PollVoteResponse>> addPollAnswer(
@@ -1720,7 +1720,7 @@ class StreamChatClient {
     required String answerText,
   }) => _pollsRepository.addPollAnswer(messageId, pollId, answerText: answerText);
 
-  /// Removes the vote or answer [voteId] from the poll [pollId], which was sent in the message [messageId].
+  /// Removes a vote or answer from a poll sent in a message, identified by [voteId], [pollId] and [messageId].
   Future<Result<PollVoteResponse>> removePollVote(
     String messageId,
     String pollId,
@@ -1739,7 +1739,7 @@ class StreamChatClient {
     String? prev,
   }) => _pollsRepository.queryPolls(filter: filter, sort: sort, limit: limit, next: next, prev: prev);
 
-  /// Fetches one page of the votes and answers of the poll [pollId] matching [filter], ordered by [sort].
+  /// Fetches one page of the votes and answers matching [filter] on the poll with the id [pollId], ordered by [sort].
   ///
   /// Up to [limit] votes are returned. The next page is fetched by passing the `next` cursor of a response as [next],
   /// and the previous page by passing its `prev` cursor as [prev]. At most one of [next] and [prev] may be given.

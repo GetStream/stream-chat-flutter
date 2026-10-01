@@ -1,4 +1,4 @@
-import 'package:stream_core/stream_core.dart' show PatternMatching, Result, Sort, StreamClientException;
+import 'package:stream_core/stream_core.dart' show PatternMatching, Result, Sort;
 
 import '../../open_api/api.dart' as api;
 import '../core/models/poll.dart';
@@ -26,26 +26,23 @@ class PollsRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Fetches the poll [pollId].
+  /// Fetches the poll with the id [pollId].
   Future<Result<PollResponse>> getPoll(String pollId) async {
     final result = await _api.getPoll(pollId: pollId);
 
     return result.map((response) => response.toModel());
   }
 
-  /// Replaces the settings and options of [poll].
+  /// Updates [poll] to match the settings and options it carries.
   ///
-  /// Every option must have an id; without one the call fails without a request.
+  /// [Poll.options] becomes the poll's full list of options, each matched by its id.
   Future<Result<PollResponse>> updatePoll(Poll poll) async {
-    final request = poll.toUpdatePollRequest();
-    if (request == null) return const Result.failure(StreamClientException(message: _optionsWithoutIdMessage));
-
-    final result = await _api.updatePoll(updatePollRequest: request);
+    final result = await _api.updatePoll(updatePollRequest: poll.toUpdatePollRequest());
 
     return result.map((response) => response.toModel());
   }
 
-  /// Sets the fields in [set] and removes the fields named in [unset] on the poll [pollId].
+  /// Sets the fields in [set] and removes the fields named in [unset] on the poll with the id [pollId].
   Future<Result<PollResponse>> partialUpdatePoll(
     String pollId, {
     Map<String, Object?>? set,
@@ -59,14 +56,14 @@ class PollsRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Deletes the poll [pollId].
+  /// Deletes the poll with the id [pollId].
   Future<Result<void>> deletePoll(String pollId) async {
     final result = await _api.deletePoll(pollId: pollId);
 
     return result.ignoreValue();
   }
 
-  /// Adds [option] to the poll [pollId].
+  /// Adds [option] to the poll with the id [pollId].
   Future<Result<PollOptionResponse>> createPollOption(String pollId, PollOption option) async {
     final result = await _api.createPollOption(
       pollId: pollId,
@@ -76,40 +73,40 @@ class PollsRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Fetches the option [optionId] of the poll [pollId].
+  /// Fetches an option of a poll, identified by [optionId] and [pollId].
   Future<Result<PollOptionResponse>> getPollOption(String pollId, String optionId) async {
     final result = await _api.getPollOption(pollId: pollId, optionId: optionId);
 
     return result.map((response) => response.toModel());
   }
 
-  /// Replaces the text and custom data of [option] in the poll [pollId].
+  /// Replaces the text and custom data of [option] in the poll with the id [pollId].
   ///
-  /// The [option] must have an id; without one the call fails without a request.
+  /// The [option] is matched by its id.
   Future<Result<PollOptionResponse>> updatePollOption(String pollId, PollOption option) async {
-    final request = option.toUpdatePollOptionRequest();
-    if (request == null) return const Result.failure(StreamClientException(message: _optionWithoutIdMessage));
-
-    final result = await _api.updatePollOption(pollId: pollId, updatePollOptionRequest: request);
+    final result = await _api.updatePollOption(
+      pollId: pollId,
+      updatePollOptionRequest: option.toUpdatePollOptionRequest(),
+    );
 
     return result.map((response) => response.toModel());
   }
 
-  /// Removes the option [optionId] from the poll [pollId].
+  /// Removes an option from a poll, identified by [optionId] and [pollId].
   Future<Result<void>> deletePollOption(String pollId, String optionId) async {
     final result = await _api.deletePollOption(pollId: pollId, optionId: optionId);
 
     return result.ignoreValue();
   }
 
-  /// Casts a vote for the option [optionId] of the poll [pollId], sent in the message [messageId].
+  /// Casts a vote for an option of a poll sent in a message, identified by [optionId], [pollId] and [messageId].
   Future<Result<PollVoteResponse>> castPollVote(
     String messageId,
     String pollId, {
     required String optionId,
   }) => _castPollVote(messageId, pollId, api.VoteData(optionId: optionId));
 
-  /// Leaves [answerText] as an answer on the poll [pollId], sent in the message [messageId].
+  /// Adds [answerText] as an answer to a poll sent in a message, identified by [pollId] and [messageId].
   Future<Result<PollVoteResponse>> addPollAnswer(
     String messageId,
     String pollId, {
@@ -126,7 +123,7 @@ class PollsRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Removes the vote or answer [voteId] from the poll [pollId], sent in the message [messageId].
+  /// Removes a vote or answer from a poll sent in a message, identified by [voteId], [pollId] and [messageId].
   Future<Result<PollVoteResponse>> removePollVote(String messageId, String pollId, String voteId) async {
     final result = await _api.deletePollVote(messageId: messageId, pollId: pollId, voteId: voteId);
 
@@ -156,7 +153,7 @@ class PollsRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Fetches one page of the votes and answers of the poll [pollId] matching [filter], ordered by [sort].
+  /// Fetches one page of the votes and answers matching [filter] on the poll with the id [pollId], ordered by [sort].
   ///
   /// [next] and [prev] are the cursors a previous page returned; at most one of them may be given.
   Future<Result<QueryPollVotesResponse>> queryPollVotes(
@@ -186,9 +183,3 @@ api.SortParamRequest _sortParam(Sort<Object?> sort) {
   final json = sort.toJson();
   return api.SortParamRequest(field: json['field'] as String?, direction: json['direction'] as int?);
 }
-
-const _optionWithoutIdMessage = 'The poll option has no id. Only an option that was already created can be updated.';
-
-const _optionsWithoutIdMessage =
-    'An option of the poll has no id. Every option of an updated poll must already exist; add new options with '
-    '`createPollOption`.';

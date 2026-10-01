@@ -132,25 +132,20 @@ extension PollRequestMapper on Poll {
     custom: extraData,
   );
 
-  /// Converts this poll into an [api.UpdatePollRequest], or null when one of its [options] has no id.
-  api.UpdatePollRequest? toUpdatePollRequest() {
-    final options = [for (final option in this.options) option.toPollOptionRequest()];
-    if (options.contains(null)) return null;
-
-    return api.UpdatePollRequest(
-      id: id,
-      name: name,
-      description: description,
-      options: options.nonNulls.toList(),
-      votingVisibility: api.UpdatePollRequestVotingVisibility.fromJson(votingVisibility),
-      enforceUniqueVote: enforceUniqueVote,
-      maxVotesAllowed: maxVotesAllowed,
-      allowAnswers: allowAnswers,
-      allowUserSuggestedOptions: allowUserSuggestedOptions,
-      isClosed: isClosed,
-      custom: extraData,
-    );
-  }
+  /// Converts this poll into an [api.UpdatePollRequest].
+  api.UpdatePollRequest toUpdatePollRequest() => api.UpdatePollRequest(
+    id: id,
+    name: name,
+    description: description,
+    options: [for (final option in options) option.toPollOptionRequest()],
+    votingVisibility: api.UpdatePollRequestVotingVisibility.fromJson(votingVisibility),
+    enforceUniqueVote: enforceUniqueVote,
+    maxVotesAllowed: maxVotesAllowed,
+    allowAnswers: allowAnswers,
+    allowUserSuggestedOptions: allowUserSuggestedOptions,
+    isClosed: isClosed,
+    custom: extraData,
+  );
 }
 
 /// Maps a [PollOption] to the generated requests that create and update it.
@@ -158,12 +153,10 @@ extension PollOptionRequestMapper on PollOption {
   /// Converts this option into an [api.PollOptionInput], an option of a poll being created.
   api.PollOptionInput toPollOptionInput() => api.PollOptionInput(text: text, custom: extraData);
 
-  /// Converts this option into an [api.PollOptionRequest], an option of a poll being updated, or null when it has
-  /// no [id].
-  api.PollOptionRequest? toPollOptionRequest() => switch (id) {
-    final id? => api.PollOptionRequest(id: id, text: text, custom: extraData),
-    null => null,
-  };
+  /// Converts this option into an [api.PollOptionRequest], an option of a poll being updated.
+  ///
+  /// An option without an [id] is sent with an empty one.
+  api.PollOptionRequest toPollOptionRequest() => api.PollOptionRequest(id: id ?? '', text: text, custom: extraData);
 
   /// Converts this option into an [api.CreatePollOptionRequest].
   api.CreatePollOptionRequest toCreatePollOptionRequest() => api.CreatePollOptionRequest(
@@ -171,11 +164,11 @@ extension PollOptionRequestMapper on PollOption {
     custom: extraData,
   );
 
-  /// Converts this option into an [api.UpdatePollOptionRequest], or null when it has no [id].
-  api.UpdatePollOptionRequest? toUpdatePollOptionRequest() => switch (id) {
-    final id? => api.UpdatePollOptionRequest(id: id, text: text, custom: extraData),
-    null => null,
-  };
+  /// Converts this option into an [api.UpdatePollOptionRequest].
+  ///
+  /// An option without an [id] is sent with an empty one.
+  api.UpdatePollOptionRequest toUpdatePollOptionRequest() =>
+      api.UpdatePollOptionRequest(id: id ?? '', text: text, custom: extraData);
 }
 
 Map<String, Object?> _withoutKeys(Map<String, Object?> custom, List<String> keys) =>

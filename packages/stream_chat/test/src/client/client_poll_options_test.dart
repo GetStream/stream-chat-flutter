@@ -104,14 +104,19 @@ void main() {
     expect(result, const Result.success(_pizzaResponse));
   });
 
-  test('StreamChatClient.updatePollOption returns a failure without a request when the option has no id', () async {
+  test('StreamChatClient.updatePollOption sends an option without an id with an empty id', () async {
     final defaultApi = pollsDefaultApi();
+    when(
+      () => defaultApi.updatePollOption(
+        pollId: 'poll-id',
+        updatePollOptionRequest: const api.UpdatePollOptionRequest(id: '', text: 'Pizza', custom: {}),
+      ),
+    ).thenAnswer((_) async => const Result.success(_generatedPizzaResponse));
     final client = pollsClient(defaultApi);
 
     final result = await client.updatePollOption('poll-id', const PollOption(text: 'Pizza'));
 
-    expect(result.exceptionOrNull(), isA<StreamClientException>());
-    verifyZeroInteractions(defaultApi);
+    expect(result, const Result.success(_pizzaResponse));
   });
 
   test('StreamChatClient.updatePollOption returns the failure without throwing', () async {

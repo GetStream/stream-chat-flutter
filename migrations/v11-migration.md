@@ -221,7 +221,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `CreatePollOptionResponse` / `GetPollOptionResponse` / `UpdatePollOptionResponse` | `PollOptionResponse` | `renamed` | Same fields: `duration` and `pollOption` |
 | `CastPollVoteResponse` / `RemovePollVoteResponse` | `PollVoteResponse` | `renamed` | `vote` is nullable |
 | `queryPolls(pagination: PaginationParams(limit: l, next: n))` / `queryPollVotes(…)` | `queryPolls(limit: l, next: n)` / `queryPollVotes(…)` | `retyped` | `limit` is still 10 when omitted. Pass a response's `prev` as `prev` to page backwards. The other `PaginationParams` fields never had an effect on these queries |
-| `Channel.castPollVote` / `.removePollVote` throwing `ArgumentError` | a `Failure` carrying a `StreamClientException` | `retyped` | For an option or vote without an id. `updatePoll` and `updatePollOption` fail the same way for an option without one |
+| `Channel.castPollVote` / `.removePollVote` throwing `ArgumentError` | a `Failure` carrying a `StreamClientException` | `retyped` | For an option or vote without an id |
 | `VotingVisibility` (enum) | `VotingVisibility` (extension type over `String`) | `retyped` | `VotingVisibility.public` and `.anonymous` are unchanged; a `switch` needs a default arm, and `.name` / `.values` are gone — read `.rawType` |
 | `Poll.fromJson` / `.toJson`, `PollOption.fromJson` / `.toJson`, `PollVote.fromJson` / `.toJson` | — | `removed` | The models are plain classes; construct them directly. `Message.poll` and the poll events still decode from the same keys |
 | — | `PollOption.fromData` / `.toData` | `added` | Read and write only the format the offline database stores; not a codec for API payloads |
@@ -798,8 +798,7 @@ await channel.queryPollVotes(pollId, limit: 10, next: cursor);
 ```
 
 **A missing id is a failure, not an `ArgumentError`.** `Channel.castPollVote` with an option that has no id, and
-`removePollVote` with a vote that has none, return a `Failure` carrying a `StreamClientException`. `updatePoll` and
-`updatePollOption` do the same for an option without an id, without sending anything.
+`removePollVote` with a vote that has none, return a `Failure` carrying a `StreamClientException`.
 
 **`VotingVisibility` is an extension type over its wire string.** `VotingVisibility.public` and
 `VotingVisibility.anonymous` read the same, and a visibility the SDK does not name is kept rather than rejected.
