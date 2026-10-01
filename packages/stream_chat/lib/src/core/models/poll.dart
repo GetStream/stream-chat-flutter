@@ -11,12 +11,18 @@ import 'voting_visibility.dart';
 
 part 'poll.freezed.dart';
 
+class _NullConst {
+  const _NullConst();
+}
+
+const _nullConst = _NullConst();
+
 /// A question with a set of options that the members of a channel vote on.
 ///
 /// A poll is sent in a message. Besides its settings it carries a summary of
 /// the votes so far: the counts per option, the latest votes and answers, and
 /// the votes of the current user.
-@freezed
+@Freezed(copyWith: false)
 class Poll with _$Poll {
   /// Creates a new [Poll].
   ///
@@ -114,6 +120,7 @@ class Poll with _$Poll {
   /// The most recent votes across all options.
   ///
   /// Answers are not included; see [latestAnswers] for those.
+  @override
   late final List<PollVote> latestVotes = [...latestVotesByOption.values.flattened];
 
   /// The most recent answers left on this poll.
@@ -131,11 +138,13 @@ class Poll with _$Poll {
   /// The votes of the current user.
   ///
   /// Answers are not included; see [ownAnswers] for those.
+  @override
   late final List<PollVote> ownVotes = [...ownVotesAndAnswers.where((it) => !it.isAnswer)];
 
   /// The answers of the current user.
   ///
   /// Votes are not included; see [ownVotes] for those.
+  @override
   late final List<PollVote> ownAnswers = [...ownVotesAndAnswers.where((it) => it.isAnswer)];
 
   /// The unique identifier of the user who created this poll.
@@ -157,6 +166,53 @@ class Poll with _$Poll {
   /// Custom data attached to this poll.
   @override
   final Map<String, Object?> extraData;
+
+  /// Creates a copy of [Poll] with specified attributes overridden.
+  Poll copyWith({
+    String? id,
+    String? name,
+    String? description,
+    List<PollOption>? options,
+    VotingVisibility? votingVisibility,
+    bool? enforceUniqueVote,
+    Object? maxVotesAllowed = _nullConst,
+    bool? allowUserSuggestedOptions,
+    bool? allowAnswers,
+    bool? isClosed,
+    Map<String, int>? voteCountsByOption,
+    List<PollVote>? ownVotesAndAnswers,
+    int? voteCount,
+    int? answersCount,
+    Map<String, List<PollVote>>? latestVotesByOption,
+    List<PollVote>? latestAnswers,
+    String? createdById,
+    User? createdBy,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Map<String, Object?>? extraData,
+  }) => Poll(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    description: description ?? this.description,
+    options: options ?? this.options,
+    votingVisibility: votingVisibility ?? this.votingVisibility,
+    enforceUniqueVote: enforceUniqueVote ?? this.enforceUniqueVote,
+    maxVotesAllowed: maxVotesAllowed == _nullConst ? this.maxVotesAllowed : maxVotesAllowed as int?,
+    allowUserSuggestedOptions: allowUserSuggestedOptions ?? this.allowUserSuggestedOptions,
+    allowAnswers: allowAnswers ?? this.allowAnswers,
+    isClosed: isClosed ?? this.isClosed,
+    voteCountsByOption: voteCountsByOption ?? this.voteCountsByOption,
+    ownVotesAndAnswers: ownVotesAndAnswers ?? this.ownVotesAndAnswers,
+    voteCount: voteCount ?? this.voteCount,
+    answersCount: answersCount ?? this.answersCount,
+    latestVotesByOption: latestVotesByOption ?? this.latestVotesByOption,
+    latestAnswers: latestAnswers ?? this.latestAnswers,
+    createdById: createdById ?? this.createdById,
+    createdBy: createdBy ?? this.createdBy,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    extraData: extraData ?? this.extraData,
+  );
 
   /// The keys a poll carries besides its custom data.
   static const topLevelFields = [

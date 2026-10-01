@@ -227,7 +227,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | — | `PollOption.fromData` / `.toData` | `added` | Read and write only the format the offline database stores; not a codec for API payloads |
 | `CreatePollResponse()..poll = …` and the other response setters | `PollResponse(duration: …, poll: …)` | `retyped` | The responses are plain classes with a const constructor and final fields |
 | poll responses' `duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
-| `Poll` / `PollOption` / `PollVote extends Equatable`, `props` | value `==`, plus `copyWith` | `removed` | `Poll` and `PollOption` now compare `extraData` too. `copyWith` sets a field passed as `null`: a `null` `Poll.id` generates a new id, and a `null` `createdAt` / `updatedAt` becomes the current time |
+| `Poll` / `PollOption` / `PollVote extends Equatable`, `props` | value `==` | `removed` | `Poll` and `PollOption` now compare `extraData` too |
 | `Poll.ownVotes` / `.ownAnswers` / `.latestVotes` (late fields), `PollVote.isAnswer` (a field set in the constructor) | the same names, as getters | `retyped` | Computed on each read |
 | `StreamChatApi.polls` (`PollsApi`) | `StreamChatClient`'s poll methods | `removed` | The endpoints moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
@@ -809,15 +809,10 @@ A `switch` over it needs a default arm, and `.name` / `.values` are gone — rea
 the poll events still decode from the same keys. `PollOption.fromData` and `toData` read and write the format the
 offline database stores; they are not a way to decode API responses.
 
-**`Poll`, `PollOption` and `PollVote` no longer extend `Equatable`.** They still compare by value, `props` is gone,
-and two changes follow:
-
-- `Poll` and `PollOption` now include `extraData` in `==`. Two polls that differ only in custom data are no longer
-  equal, so neither are the messages that carry them; a widget comparing them rebuilds when only custom data
-  changes.
-- `copyWith` sets a field passed as `null` instead of keeping it — `poll.copyWith(description: null)` clears the
-  description. Fields with a default take it again: a `null` `Poll.id` generates a new id, and a `null` `createdAt` or
-  `updatedAt` becomes the current time.
+**`Poll`, `PollOption` and `PollVote` no longer extend `Equatable`.** They still compare by value and `props` is gone.
+`Poll` and `PollOption` now include `extraData` in `==`: two polls that differ only in custom data are no longer
+equal, so neither are the messages that carry them, and a widget comparing them rebuilds when only custom data
+changes.
 
 **`StreamChatApi.polls` is removed.** Call the poll methods on `StreamChatClient` or `Channel` instead.
 

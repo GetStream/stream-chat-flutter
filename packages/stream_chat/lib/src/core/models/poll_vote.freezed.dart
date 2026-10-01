@@ -22,12 +22,6 @@ mixin _$PollVote {
   String? get userId;
   User? get user;
 
-  /// Create a copy of PollVote
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  $PollVoteCopyWith<PollVote> get copyWith => _$PollVoteCopyWithImpl<PollVote>(this as PollVote, _$identity);
-
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
@@ -49,81 +43,5 @@ mixin _$PollVote {
   @override
   String toString() {
     return 'PollVote(id: $id, pollId: $pollId, optionId: $optionId, answerText: $answerText, createdAt: $createdAt, updatedAt: $updatedAt, userId: $userId, user: $user)';
-  }
-}
-
-/// @nodoc
-abstract mixin class $PollVoteCopyWith<$Res> {
-  factory $PollVoteCopyWith(PollVote value, $Res Function(PollVote) _then) = _$PollVoteCopyWithImpl;
-  @useResult
-  $Res call({
-    String? id,
-    String? pollId,
-    String? optionId,
-    String? answerText,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    String? userId,
-    User? user,
-  });
-}
-
-/// @nodoc
-class _$PollVoteCopyWithImpl<$Res> implements $PollVoteCopyWith<$Res> {
-  _$PollVoteCopyWithImpl(this._self, this._then);
-
-  final PollVote _self;
-  final $Res Function(PollVote) _then;
-
-  /// Create a copy of PollVote
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = freezed,
-    Object? pollId = freezed,
-    Object? optionId = freezed,
-    Object? answerText = freezed,
-    Object? createdAt = freezed,
-    Object? updatedAt = freezed,
-    Object? userId = freezed,
-    Object? user = freezed,
-  }) {
-    return _then(
-      PollVote(
-        id: freezed == id
-            ? _self.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        pollId: freezed == pollId
-            ? _self.pollId
-            : pollId // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        optionId: freezed == optionId
-            ? _self.optionId
-            : optionId // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        answerText: freezed == answerText
-            ? _self.answerText
-            : answerText // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        createdAt: freezed == createdAt
-            ? _self.createdAt!
-            : createdAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-        updatedAt: freezed == updatedAt
-            ? _self.updatedAt!
-            : updatedAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-        userId: freezed == userId
-            ? _self.userId
-            : userId // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        user: freezed == user
-            ? _self.user
-            : user // ignore: cast_nullable_to_non_nullable
-                  as User?,
-      ),
-    );
   }
 }

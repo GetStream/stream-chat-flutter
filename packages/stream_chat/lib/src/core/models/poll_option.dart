@@ -5,8 +5,14 @@ import '../../db/data_serializable.dart';
 part 'poll_option.freezed.dart';
 part 'poll_option.g.dart';
 
+class _NullConst {
+  const _NullConst();
+}
+
+const _nullConst = _NullConst();
+
 /// One of the choices a poll offers to vote on.
-@freezed
+@Freezed(copyWith: false)
 // TODO(openapi-migration): remove in group 10
 @DataSerializable(includeIfNull: false)
 class PollOption with _$PollOption {
@@ -36,6 +42,17 @@ class PollOption with _$PollOption {
   /// Custom data attached to this option.
   @override
   final Map<String, Object?> extraData;
+
+  /// Creates a copy of [PollOption] with specified attributes overridden.
+  PollOption copyWith({
+    Object? id = _nullConst,
+    String? text,
+    Map<String, Object?>? extraData,
+  }) => PollOption(
+    id: id == _nullConst ? this.id : id as String?,
+    text: text ?? this.text,
+    extraData: extraData ?? this.extraData,
+  );
 
   /// The keys an option carries besides its custom data.
   static const topLevelFields = [

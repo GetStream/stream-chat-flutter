@@ -29,4 +29,16 @@ void main() {
 
     expect(option, isNot(option.copyWith(extraData: const {'color': 'green'})));
   });
+
+  test('PollOption.copyWith clears an id passed as null', () {
+    const option = PollOption(id: 'pizza', text: 'Pizza');
+
+    expect(option.copyWith(id: null).id, isNull);
+  });
+
+  test('PollOption.copyWith keeps the text and custom data passed as null', () {
+    const option = PollOption(id: 'pizza', text: 'Pizza', extraData: {'color': 'red'});
+
+    expect(option.copyWith(text: null, extraData: null), option);
+  });
 }

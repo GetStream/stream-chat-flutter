@@ -9,7 +9,7 @@ part 'poll_vote.freezed.dart';
 ///
 /// A vote carries an [optionId] and an answer carries [answerText]; [isAnswer]
 /// tells the two apart.
-@freezed
+@Freezed(copyWith: false)
 class PollVote with _$PollVote {
   /// Creates a new [PollVote].
   ///
@@ -68,6 +68,27 @@ class PollVote with _$PollVote {
   /// Null on someone else's vote in an anonymous poll.
   @override
   final User? user;
+
+  /// Creates a copy of [PollVote] with specified attributes overridden.
+  PollVote copyWith({
+    String? id,
+    String? pollId,
+    String? optionId,
+    String? answerText,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? userId,
+    User? user,
+  }) => PollVote(
+    id: id ?? this.id,
+    pollId: pollId ?? this.pollId,
+    optionId: optionId ?? this.optionId,
+    answerText: answerText ?? this.answerText,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    userId: userId ?? this.userId,
+    user: user ?? this.user,
+  );
 
   /// Whether this is a free-form answer rather than a vote for an option.
   bool get isAnswer => answerText != null;

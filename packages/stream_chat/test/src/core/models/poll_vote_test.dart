@@ -17,14 +17,12 @@ void main() {
     expect(vote.isAnswer, isFalse);
   });
 
-  test('PollVote.copyWith sets a timestamp set to null to the current time', () {
-    final vote = createTestPollVote(optionId: 'pizza', createdAt: DateTime.utc(2023), updatedAt: DateTime.utc(2023));
-    final before = DateTime.now();
+  test('PollVote.copyWith keeps a field passed as null', () {
+    final vote = createTestPollVote(id: 'vote-id', optionId: 'pizza', userId: 'user-id');
 
-    final copy = vote.copyWith(createdAt: null, updatedAt: null);
+    final copy = vote.copyWith(id: null, optionId: null, userId: null, createdAt: null);
 
-    expect(copy.createdAt.isBefore(before), isFalse);
-    expect(copy.updatedAt.isBefore(before), isFalse);
+    expect(copy, vote);
   });
 
   test('PollVoteSortField.id orders alphabetically', () {

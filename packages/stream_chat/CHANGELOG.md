@@ -87,7 +87,6 @@
 - `Poll`, `PollOption`, `PollVote` and the poll responses no longer decode from or encode to JSON; `PollOption` gains `fromData` and `toData`, which read and write only the format `stream_chat_persistence` stores it in.
 - The poll responses are immutable, built through a const constructor, and their `duration` is a non-nullable `String`; `PollVoteResponse.vote` is nullable.
 - `Poll`, `PollOption` and `PollVote` no longer extend `Equatable`, so `props` is removed; they still compare by value, now including `extraData`.
-- `copyWith` on `Poll`, `PollOption` and `PollVote` sets a field passed as `null` instead of keeping it; on `Poll` a `null` `id` generates a new one, and a `null` `createdAt` or `updatedAt` on `Poll` and `PollVote` becomes the current time.
 - `StreamChatApi.polls` is removed; its endpoints are reached through `StreamChatClient`.
 
 🐞 Fixed
