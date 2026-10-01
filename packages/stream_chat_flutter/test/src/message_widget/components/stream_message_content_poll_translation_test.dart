@@ -70,7 +70,23 @@ void main() {
     expect(find.text('Favoriete kleur?'), findsNothing);
   });
 
-  testWidgets('StreamMessageContent passes the message as displayed to the attachment builders', (tester) async {
+  testWidgets('StreamMessageContent shows the original poll after switching to the original text', (tester) async {
+    final currentUser = StreamController<OwnUser?>.broadcast();
+    addTearDown(currentUser.close);
+
+    await _pumpMessageContent(tester, currentUserStream: currentUser.stream);
+    expect(find.text('Favoriete kleur?'), findsOneWidget);
+
+    await _pumpMessageContent(tester, currentUserStream: currentUser.stream, showTranslatedText: false);
+    // Settled, as the attachment picks the new message up a frame later.
+    await tester.pumpAndSettle();
+
+    expect(find.text('Favourite colour?'), findsOneWidget);
+    expect(find.text('Red'), findsOneWidget);
+    expect(find.text('Favoriete kleur?'), findsNothing);
+  });
+
+  testWidgets('StreamMessageContent passes the poll as displayed to the attachment builders', (tester) async {
     Message? builtMessage;
 
     await _pumpMessageContent(
@@ -79,6 +95,23 @@ void main() {
     );
 
     expect(builtMessage?.poll?.name, 'Favoriete kleur?');
+  });
+
+  testWidgets('StreamMessageContent passes the text as written to the attachment builders', (tester) async {
+    Message? builtMessage;
+    final message = _pollMessage().copyWith(
+      text: 'Vote please',
+      i18n: const {'language': 'en', 'nl_text': 'Stem alsjeblieft'},
+    );
+
+    await _pumpMessageContent(
+      tester,
+      message: message,
+      attachmentBuilders: [_CapturingPollBuilder((message) => builtMessage = message)],
+    );
+
+    expect(find.text('Stem alsjeblieft'), findsOneWidget);
+    expect(builtMessage?.text, 'Vote please');
   });
 
   testWidgets('voting on a translated option sends the ids of the poll and the option', (tester) async {
@@ -133,6 +166,27 @@ void main() {
 
     final sheet = find.byType(StreamPollOptionVotesSheet);
     expect(find.descendant(of: sheet, matching: find.text('Rood')), findsOneWidget);
+  });
+
+  testWidgets('the poll option votes sheet follows a change of the current user language while open', (tester) async {
+    final currentUser = StreamController<OwnUser?>.broadcast();
+    addTearDown(currentUser.close);
+
+    await _pumpMessageContent(
+      tester,
+      message: _pollMessage(votesForFirstOption: 6),
+      currentUserStream: currentUser.stream,
+    );
+    await tester.tap(find.text('View Results'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('View all'));
+    await tester.pumpAndSettle();
+
+    currentUser.add(OwnUser(id: _currentUserId, language: 'fr'));
+    await tester.pumpAndSettle();
+
+    final sheet = find.byType(StreamPollOptionVotesSheet);
+    expect(find.descendant(of: sheet, matching: find.text('Rouge')), findsOneWidget);
   });
 
   testWidgets('the poll options sheet shows the options translated into the current user language', (tester) async {

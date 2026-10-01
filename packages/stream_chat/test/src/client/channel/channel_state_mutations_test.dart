@@ -266,6 +266,8 @@ void main() {
     Poll createPoll({
       String name = 'Favorite color?',
       Map<String, String>? nameI18n,
+      String? description,
+      Map<String, String>? descriptionI18n,
       List<PollOption> options = const [PollOption(id: 'option-a', text: 'A')],
       List<PollVote> latestAnswers = const [],
       List<PollVote> ownVotesAndAnswers = const [],
@@ -275,6 +277,8 @@ void main() {
         id: pollId,
         name: name,
         nameI18n: nameI18n,
+        description: description,
+        descriptionI18n: descriptionI18n,
         options: options,
         latestAnswers: latestAnswers,
         ownVotesAndAnswers: ownVotesAndAnswers,
@@ -429,6 +433,55 @@ void main() {
 
       expect(capturedMessage().poll!.options.single.textI18n, isNull);
     });
+
+    test('onPollUpdated keeps the translation of an unchanged description', () {
+      seedPollMessage(
+        createPoll(description: 'Pick one', descriptionI18n: const {'language': 'en', 'nl_text': 'Kies er een'}),
+      );
+
+      mutations.onPollUpdated(createPoll(description: 'Pick one'));
+
+      expect(capturedMessage().poll!.descriptionI18n, {'language': 'en', 'nl_text': 'Kies er een'});
+    });
+
+    test('onPollUpdated drops the translation of a changed description', () {
+      seedPollMessage(
+        createPoll(description: 'Pick one', descriptionI18n: const {'language': 'en', 'nl_text': 'Kies er een'}),
+      );
+
+      mutations.onPollUpdated(createPoll(description: 'Pick two'));
+
+      expect(capturedMessage().poll!.descriptionI18n, isNull);
+    });
+
+    final translationKeepingEvents = <String, void Function(PollVote vote)>{
+      'onPollAnswerCasted': (vote) => mutations.onPollAnswerCasted(createPoll(), vote),
+      'onPollVoteChanged': (vote) => mutations.onPollVoteChanged(createPoll(), vote),
+      'onPollAnswerRemoved': (vote) => mutations.onPollAnswerRemoved(createPoll(), vote),
+      'onPollVoteRemoved': (vote) => mutations.onPollVoteRemoved(createPoll(), vote),
+    };
+
+    for (final MapEntry(key: event, value: dispatch) in translationKeepingEvents.entries) {
+      test('$event keeps the translations of a poll whose event leaves them out', () {
+        final vote = createVote('vote-1');
+        seedPollMessage(
+          createPoll(
+            nameI18n: const {'language': 'en', 'nl_text': 'Favoriete kleur?'},
+            options: const [
+              PollOption(id: 'option-a', text: 'A', textI18n: {'language': 'en', 'nl_text': 'Een'}),
+            ],
+            latestAnswers: [vote],
+            ownVotesAndAnswers: [vote],
+          ),
+        );
+
+        dispatch(vote);
+
+        final poll = capturedMessage().poll!;
+        expect(poll.nameI18n, {'language': 'en', 'nl_text': 'Favoriete kleur?'});
+        expect(poll.options.single.textI18n, {'language': 'en', 'nl_text': 'Een'});
+      });
+    }
 
     test('onPollVoteChanged replaces the own vote with the same id', () {
       final oldVote = createVote('vote-1');

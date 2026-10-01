@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 
 import '../util/serializer.dart';
@@ -234,6 +235,34 @@ class Poll extends Equatable implements ComparableFieldProvider {
     updatedAt: updatedAt ?? this.updatedAt,
     extraData: extraData ?? this.extraData,
   );
+
+  /// This poll with the translations of [oldPoll] filled in where this one
+  /// has none, so an update that leaves them out doesn't switch a translated
+  /// poll back to its original text.
+  ///
+  /// A translation is only kept for text that is unchanged: a renamed poll or
+  /// option must not show the translation of what it used to say. Returns this
+  /// poll as is when [oldPoll] is `null` or a different poll.
+  @internal
+  Poll withTranslationsOf(Poll? oldPoll) {
+    if (oldPoll == null || oldPoll.id != id) return this;
+
+    final oldOptions = {for (final option in oldPoll.options) option.id: option};
+
+    return copyWith(
+      nameI18n: nameI18n ?? (name == oldPoll.name ? oldPoll.nameI18n : null),
+      descriptionI18n: descriptionI18n ?? (description == oldPoll.description ? oldPoll.descriptionI18n : null),
+      options: [
+        for (final option in options)
+          switch (oldOptions[option.id]) {
+            final old? when option.textI18n == null && option.text == old.text => option.copyWith(
+              textI18n: old.textI18n,
+            ),
+            _ => option,
+          },
+      ],
+    );
+  }
 
   /// Known top level fields.
   ///

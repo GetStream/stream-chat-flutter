@@ -233,7 +233,8 @@ class _DefaultStreamMessageHeaderState extends core.NullableState<DefaultStreamM
     if (translationConfig.enabled && translationConfig.annotationEnabled) {
       // A translation into the reader's own language is what there is to
       // toggle; `hasTranslation` is false when there is nothing to show,
-      // including for a reader of the language the message was written in.
+      // including for a reader of the language the text and the poll were
+      // written in.
       if (message.hasTranslation(_language)) {
         final label = switch (props.showTranslatedText) {
           false => translations.originalLabel,
@@ -275,9 +276,10 @@ class _DefaultStreamMessageHeaderState extends core.NullableState<DefaultStreamM
 // The one language everything [message] shows translated into [language] was
 // written in: its text, its poll, or both.
 //
-// `null` when the language of a translated part is unknown, or when the text
-// and the poll were written in different languages, so the label never names
-// a language that only part of the translation came from.
+// `null` when the source language of the text or the poll is unknown, or when
+// they differ, so the label never names a language that only part of the
+// translation came from. A poll's language is the first one its name,
+// description or options report.
 String? _translatedFromLanguage(Message message, String? language) {
   final sourceLanguages = [
     if (message.translatedText(language) != null) message.originalLanguage,

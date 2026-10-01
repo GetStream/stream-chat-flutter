@@ -18,7 +18,7 @@
 - A deleted message now renders the timestamp and delivery status below the placeholder, matching the design, and no longer shows the "Edited" marker — there is no text left to have been edited.
 - `AccessibleMessagePreviewFormatter.formatMessageSemanticsLabel` must now return the body without a speaker prefix when `channel` is omitted. An implementation that prefixes unconditionally makes a message row announce "You said, You: hello".
 - `Message.translate` now also translates the name, description and options of the message's poll; its answers are left as written.
-- Attachment builders receive the message as displayed, translated when a translation is shown. Act on its poll by id only: passing it to `Channel.updatePoll` would save the translation.
+- Attachment builders receive the message with its poll as displayed, translated when a translation is shown; the message text stays as written. Act on the poll by id only: passing it to `Channel.updatePoll` would save the translation.
 - `StreamImageCDN.resolveUrl` now leaves a URL that already asks for a specific size alone, rather than replacing it with the size the layout computed.
 
 🐞 Fixed

@@ -154,10 +154,11 @@ class StreamMessageContent extends StatefulWidget {
   /// [MessageX.hasTranslation]).
   ///
   /// Decides for the whole message, text and poll alike, whether it is shown
-  /// translated: [StreamMessageAttachments] and [StreamMessageText] both
-  /// receive the message as displayed, which is also what attachment builders
-  /// see. The comments of a poll, which its comments sheet loads itself,
-  /// follow the same decision.
+  /// translated: [StreamMessageText] receives the message as displayed, and
+  /// [StreamMessageAttachments], and so the attachment builders, receive the
+  /// message with its poll as displayed and its text as written. The comments
+  /// of a poll, which its comments sheet loads itself, follow the same
+  /// decision.
   final bool showTranslatedText;
 
   @override
@@ -248,7 +249,15 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                           ),
                         StreamMessageAttachments(
                           key: attachmentsKey,
-                          message: displayed,
+                          // Only the poll is shown translated: a builder that
+                          // writes its message back must not save the
+                          // translated text, and the poll is never sent.
+                          message: switch (displayed.poll) {
+                            final poll? when !identical(poll, widget.message.poll) => widget.message.copyWith(
+                              poll: poll,
+                            ),
+                            _ => widget.message,
+                          },
                           attachmentBuilders: widget.attachmentBuilders,
                         ),
                         if (displayed.text case final text? when text.isNotEmpty)
@@ -267,8 +276,9 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                           // attachments — reachable.
                           ExcludeSemantics(
                             excluding: excluding,
-                            // Already translated; `showTranslatedText` is still
-                            // passed so the text behaves the same as on its own.
+                            // `displayed` is already translated, so translating
+                            // it again is a no-op; the flag is passed through so
+                            // the widget is configured as it would be on its own.
                             child: StreamMessageText(
                               message: displayed,
                               onLinkTap: widget.onLinkTap,
@@ -305,9 +315,9 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
   }
 }
 
-// Resolves the message to display once, so its text and its attachments, a
-// poll included, are always shown in the same language, and provides that
-// language to them through [MessageTranslationLanguage].
+// Resolves the message to display once, so its text and its poll are always
+// shown in the same language, and provides that language to them through
+// [MessageTranslationLanguage].
 //
 // Follows the current user's language like [StreamMessageText] does.
 class _DisplayedMessage extends StatelessWidget {
@@ -323,8 +333,9 @@ class _DisplayedMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Without a StreamChat and its configuration above, there is no user
-    // language to translate into.
+    // Without a StreamChat above there is no user language, and without a
+    // StreamChatConfiguration no translation setting: show the message as
+    // written. Only trees without them, such as tests, take this path.
     final streamChat = StreamChat.maybeOf(context);
     final translationConfig = StreamChatConfiguration.maybeOf(context)?.messageTranslation;
     if (streamChat == null || translationConfig == null) return builder(context, message);

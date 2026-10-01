@@ -484,8 +484,9 @@ extension MessageX on Message {
   /// locally, either of its own text ([translatedText]) or of its [poll]
   /// ([PollTranslationX.hasTranslation]).
   ///
-  /// Follows the same rules as [translatedText]: `false` when [language] is
-  /// `null`, empty, or the language the message was written in.
+  /// Follows the same rules as [translatedText] for the text and the poll
+  /// each: a part has no translation into [language] when [language] is
+  /// `null`, empty, or the language that part was written in.
   bool hasTranslation(String? language) {
     if (translatedText(language) != null) return true;
     return poll?.hasTranslation(language) ?? false;

@@ -3,8 +3,8 @@ import '../../stream_chat_flutter.dart';
 
 /// A widget that renders a preview of the message text.
 ///
-/// The preview is translated into the current user's language when
-/// [Message.i18n] has one, unless disabled SDK-wide via
+/// The preview is translated into the current user's language when the
+/// message, or its poll, has a translation into it, unless disabled SDK-wide via
 /// [StreamMessageTranslationConfiguration.enabled] — matching the same
 /// opt-out [StreamMessageText] respects for the full message bubble.
 class StreamMessagePreviewText extends StatelessWidget {

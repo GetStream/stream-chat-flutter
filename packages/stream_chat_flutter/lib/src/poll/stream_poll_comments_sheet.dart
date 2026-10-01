@@ -26,8 +26,8 @@ Future<T?> showStreamPollCommentsSheet<T extends Object?>({
   required BuildContext context,
   required ValueListenable<Message> messageNotifier,
 }) {
-  // Resolved from the caller's context, as the sheet's own may not be below
-  // message; see [MessageTranslationLanguage.of].
+  // Read from the caller's context: the sheet is pushed on the navigator,
+  // outside the message. See [MessageTranslationLanguage.of].
   final language = MessageTranslationLanguage.of(context);
 
   return showStreamSheet<T>(

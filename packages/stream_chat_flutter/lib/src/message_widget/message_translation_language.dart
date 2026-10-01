@@ -17,13 +17,17 @@ class MessageTranslationLanguage extends InheritedWidget {
     required super.child,
   });
 
-  /// The language the message is displayed in, or `null` when it is displayed
-  /// as written.
+  /// The language the message is translated into where it has translations,
+  /// or `null` when translation is off for it.
+  ///
+  /// Set whenever translation is on, even when the message itself has no
+  /// translation, so content it does not carry, such as poll comments, is
+  /// still shown in the reader's language.
   final String? language;
 
-  /// The language the message enclosing [context] is displayed in, or `null`
-  /// when it is displayed as written or [context] is not below a
-  /// [StreamMessageContent].
+  /// The [language] of the message enclosing [context], or `null` when
+  /// translation is off for it or no [StreamMessageContent] above [context]
+  /// provides one.
   ///
   /// Meant for the moment a sheet is opened, so [context] does not come to
   /// depend on the scope. Sheets are pushed on the nearest navigator, outside
