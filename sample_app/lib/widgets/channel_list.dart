@@ -11,6 +11,7 @@ import '../routes/routes.dart';
 import '../utils/app_config.dart';
 import 'channel_detail_sheet.dart';
 import 'search_text_field.dart';
+import 'split_view.dart';
 
 class ChannelList extends StatefulWidget {
   const ChannelList({super.key});
@@ -98,7 +99,7 @@ class _ChannelList extends State<ChannelList> {
           if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
             FocusScope.of(context).unfocus();
           }
-          return true;
+          return false;
         },
         child: NestedScrollView(
           controller: _scrollController,
@@ -119,10 +120,15 @@ class _ChannelList extends State<ChannelList> {
           body: MediaQuery.removePadding(
             context: context,
             removeTop: true,
-            child: switch (_isSearchActive) {
-              true => _ChannelListSearch(_messageSearchListController),
-              false => _ChannelListDefault(_channelListController),
-            },
+            // Tiles paint their selection on the nearest Material; this one
+            // keeps it inside the list instead of behind the search field.
+            child: Material(
+              type: MaterialType.transparency,
+              child: switch (_isSearchActive) {
+                true => _ChannelListSearch(_messageSearchListController),
+                false => _ChannelListDefault(_channelListController),
+              },
+            ),
           ),
         ),
       ),
@@ -137,6 +143,11 @@ class _ChannelListDefault extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final selectedCid = switch (AdaptiveSplitView.isExpandedOf(context)) {
+      true => GoRouterState.of(context).pathParameters['cid'],
+      false => null,
+    };
+
     return SlidableAutoCloseBehavior(
       child: RefreshIndicator(
         onRefresh: channelListController.refresh,
@@ -175,7 +186,7 @@ class _ChannelListDefault extends StatelessWidget {
                   ),
                 ],
               ),
-              child: defaultWidget,
+              child: defaultWidget.copyWith(selected: channel.cid == selectedCid),
             );
           },
           onChannelTap: (channel) => _openChannelPage(context, channel),
@@ -186,9 +197,9 @@ class _ChannelListDefault extends StatelessWidget {
   }
 }
 
-// Pushes the channel page for [channel] via [GoRouter].
-Future<void> _openChannelPage(BuildContext context, Channel channel) {
-  return GoRouter.of(context).pushNamed(
+// Opens the channel page for [channel], replacing any channel already open.
+void _openChannelPage(BuildContext context, Channel channel) {
+  GoRouter.of(context).goNamed(
     Routes.CHANNEL_PAGE.name,
     pathParameters: Routes.CHANNEL_PAGE.params(channel),
   );
@@ -342,7 +353,7 @@ class _ChannelListSearch extends StatelessWidget {
             if (channel.state == null) {
               await channel.watch();
             }
-            router.pushNamed(
+            router.goNamed(
               Routes.CHANNEL_PAGE.name,
               pathParameters: Routes.CHANNEL_PAGE.params(channel),
               queryParameters: Routes.CHANNEL_PAGE.queryParams(message),

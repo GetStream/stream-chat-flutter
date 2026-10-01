@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../routes/routes.dart';
+import '../widgets/split_view.dart';
 import '../widgets/stream_draft_list_view.dart';
 
 class DraftListPage extends StatefulWidget {
@@ -24,6 +27,13 @@ class _DraftListPageState extends State<DraftListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final openRoute = switch (AdaptiveSplitView.isExpandedOf(context)) {
+      true => GoRouterState.of(context),
+      false => null,
+    };
+    final openCid = openRoute?.pathParameters['cid'];
+    final openThreadId = openRoute?.uri.queryParameters['pid'];
+
     return RefreshIndicator(
       onRefresh: controller.refresh,
       child: StreamDraftListView(
@@ -54,7 +64,9 @@ class _DraftListPageState extends State<DraftListPage> {
                 ),
               ],
             ),
-            child: defaultWidget,
+            child: defaultWidget.copyWith(
+              selected: draft.channelCid == openCid && draft.parentId == openThreadId,
+            ),
           );
         },
         onDraftTap: (draft) {
@@ -63,21 +75,15 @@ class _DraftListPageState extends State<DraftListPage> {
           final [channelType, channelId] = draft.channelCid.split(':');
           final channel = client.channel(channelType, id: channelId);
 
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) {
-                return StreamChannel(
-                  channel: channel,
-                  initialMessageId: draft.parentId,
-                  child: switch (draft.parentMessage) {
-                    final parent? => StreamThreadPage(
-                      parent: parent.copyWith(draft: draft),
-                    ),
-                    _ => const StreamChannelPage(),
-                  },
-                );
-              },
-            ),
+          GoRouter.of(context).goNamed(
+            Routes.CHANNEL_PAGE.name,
+            pathParameters: Routes.CHANNEL_PAGE.params(channel),
+            queryParameters: switch (draft.parentId) {
+              final parentId? => {'mid': parentId, 'pid': parentId},
+              _ => const <String, String>{},
+            },
+            // The thread's parent may not be loaded in the channel yet.
+            extra: draft.parentMessage?.copyWith(draft: draft),
           );
         },
       ),

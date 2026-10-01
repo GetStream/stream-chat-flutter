@@ -7,6 +7,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../routes/routes.dart';
 import '../widgets/reminder_dialog.dart';
+import '../widgets/split_view.dart';
 
 class RemindersPage extends StatefulWidget {
   const RemindersPage({super.key});
@@ -48,6 +49,13 @@ class _RemindersPageState extends State<RemindersPage> {
 
   @override
   Widget build(BuildContext context) {
+    final openRoute = switch (AdaptiveSplitView.isExpandedOf(context)) {
+      true => GoRouterState.of(context),
+      false => null,
+    };
+    final openCid = openRoute?.pathParameters['cid'];
+    final openMessageId = openRoute?.uri.queryParameters['mid'];
+
     return NestedScrollView(
       headerSliverBuilder: (_, __) => [
         SliverPadding(
@@ -118,6 +126,7 @@ class _RemindersPageState extends State<RemindersPage> {
               ),
               child: MessageReminderListTile(
                 reminder: reminder,
+                selected: reminder.channelCid == openCid && reminder.messageId == openMessageId,
                 onReminderTap: () {
                   final client = StreamChat.of(context).client;
 
@@ -307,34 +316,41 @@ class MessageReminderListTile extends StatelessWidget {
     super.key,
     required this.reminder,
     this.onReminderTap,
+    this.selected = false,
   });
 
   final MessageReminder reminder;
   final VoidCallback? onReminderTap;
+
+  /// Whether this tile is highlighted as the open reminder.
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
     final channel = reminder.channel;
     final channelName = channel?.formatName(currentUser: reminder.user);
 
-    return InkWell(
-      onTap: onReminderTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-        child: Column(
-          spacing: 4,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                MessageReminderChannelName(channelName: channelName),
-                MessageReminderStatus(remindAt: reminder.remindAt),
-              ],
-            ),
-            MessageReminderMessageText(message: reminder.message),
-          ],
+    return Material(
+      color: selected ? context.streamColorScheme.backgroundSelected : Colors.transparent,
+      child: InkWell(
+        onTap: onReminderTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+          child: Column(
+            spacing: 4,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  MessageReminderChannelName(channelName: channelName),
+                  MessageReminderStatus(remindAt: reminder.remindAt),
+                ],
+              ),
+              MessageReminderMessageText(message: reminder.message),
+            ],
+          ),
         ),
       ),
     );

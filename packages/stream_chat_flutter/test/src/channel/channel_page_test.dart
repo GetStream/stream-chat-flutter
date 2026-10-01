@@ -36,6 +36,18 @@ void main() {
     expect(pressedChannel, isNotNull);
   });
 
+  testWidgets('shows a back button by default', (tester) async {
+    await _pumpChannelPage(tester);
+
+    expect(find.byType(StreamBackButton), findsOneWidget);
+  });
+
+  testWidgets('hides the back button when automaticallyImplyLeading is false', (tester) async {
+    await _pumpChannelPage(tester, automaticallyImplyLeading: false);
+
+    expect(find.byType(StreamBackButton), findsNothing);
+  });
+
   testWidgets('tapping back invokes onBackPressed', (tester) async {
     var backPressed = 0;
     await _pumpChannelPage(tester, onBackPressed: () => backPressed++);
@@ -267,6 +279,7 @@ Future<void> _pumpChannelPage(
   StreamSurfaceStyle? composerSurfaceStyle,
   StreamSurfaceStyle? headerSurfaceStyle,
   void Function(BuildContext context, Channel channel)? onChannelAvatarPressed,
+  bool automaticallyImplyLeading = true,
   VoidCallback? onBackPressed,
   bool pushOntoARoute = false,
 }) async {
@@ -317,6 +330,7 @@ Future<void> _pumpChannelPage(
 
   final page = StreamChannelPage(
     onChannelAvatarPressed: onChannelAvatarPressed,
+    automaticallyImplyLeading: automaticallyImplyLeading,
     onBackPressed: onBackPressed,
   );
 

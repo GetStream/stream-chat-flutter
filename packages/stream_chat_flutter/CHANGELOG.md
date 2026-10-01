@@ -1,8 +1,25 @@
 ## Upcoming
 
+✅ Added
+
+- Added `automaticallyImplyLeading` to `StreamChannelPage` and `StreamThreadPage`, which hides the header's back button when `false`.
+- Added a `selected` parameter to `StreamThreadListTile`, which highlights the tile, and `StreamThreadListTile.copyWith`.
+
 🔄 Changed
 
+- `StreamMessageComposer`'s top border now spans the full width, including under the side safe-area insets, and also shows above the no-permission message.
+- Suggestions from `customAutocompleteTriggers` now span the composer's full width, so their content has to keep clear of the side safe-area insets itself.
 - `StreamMessageItem` now defaults `maxWidth` to `272`, the width the message list already uses, so messages built with it are no longer 8 pixels narrower.
+
+🐞 Fixed
+
+- Fixed `StreamMessageComposer` and its attachment picker running under the left and right safe-area insets while the picker is open.
+- Fixed `StreamMessageListView`'s scroll-to-bottom button, floating date divider, unread indicator and empty, loading and error states ignoring the safe-area insets when `enableSafeArea` is on.
+- Fixed the attachment picker overflowing short screens, such as a phone in landscape.
+- Fixed `StreamMessageListView`'s default loading, empty and error states overflowing when the list has little room, such as in landscape with the attachment picker open.
+- Fixed the composer's autocomplete suggestions stopping short of the screen edge under a side safe-area inset.
+- Fixed `StreamThreadListTile` overflowing when narrow; its timestamp now truncates instead.
+- Fixed `StreamMessageItem`'s actions modal throwing when the message leaves the screen while the modal is open.
 
 ## 10.5.0
 
