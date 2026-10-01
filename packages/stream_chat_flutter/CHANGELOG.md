@@ -4,12 +4,18 @@
 
 - Added `automaticallyImplyLeading` to `StreamChannelPage` and `StreamThreadPage`, which hides the header's back button when `false`.
 - Added a `selected` parameter to `StreamThreadListTile`, which highlights the tile, and `StreamThreadListTile.copyWith`.
+- Added `StreamMediaGallery.gridDelegate` to change how the gallery lays out its tiles.
 
 🔄 Changed
 
 - `StreamMessageComposer`'s top border now spans the full width, including under the side safe-area insets, and also shows above the no-permission message.
 - Suggestions from `customAutocompleteTriggers` now span the composer's full width, so their content has to keep clear of the side safe-area insets itself.
 - `StreamMessageItem` now defaults `maxWidth` to `272`, the width the message list already uses, so messages built with it are no longer 8 pixels narrower.
+- `StreamMediaGallery` and `StreamPhotoGallery` now show 3, 4 or 6 tiles per row depending on their width, instead of always 3.
+
+⚠️ Deprecated
+
+- Deprecated `StreamMediaGallery.crossAxisCount` and `defaultStreamPhotoGalleryDelegate`; pass a `gridDelegate` instead.
 
 🐞 Fixed
 
