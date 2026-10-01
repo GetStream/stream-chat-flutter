@@ -4,8 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Before writing or reviewing code, read [`STYLE_GUIDE.md`](STYLE_GUIDE.md).** It is
 > the source of truth for coding conventions, documentation style, testing, changelog
-> policy, and repo-specific rules that diverge from the Flutter / Dart defaults. This
-> file is a repo overview; the style guide is the rulebook.
+> policy, and repo-specific rules that diverge from the Flutter / Dart defaults. See
+> [`TESTING.md`](TESTING.md) for guidance on writing effective tests, and
+> [`EFFECTIVE_DART_DOC.md`](EFFECTIVE_DART_DOC.md) — a vendored copy of Effective Dart's
+> documentation guide — before writing any dartdoc; the style guide wins where they
+> disagree. This file is a repo overview; the style guide is the rulebook.
 
 ## Overview
 
