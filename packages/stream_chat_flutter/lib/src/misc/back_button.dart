@@ -43,6 +43,9 @@ class StreamBackButton extends StatelessWidget {
   ///
   /// Typically a [StreamUnreadIndicator]. The badge hides itself when its
   /// count is zero. Null when not explicitly set.
+  ///
+  /// The indicator ignores pointer events, so it never blocks taps on the
+  /// button.
   Widget? get unreadIndicator => identical(_unreadIndicator, _unset) ? null : _unreadIndicator;
 
   final Widget? _unreadIndicator;
@@ -87,10 +90,12 @@ class StreamBackButton extends StatelessWidget {
         children: [
           button,
           Positioned.fill(
-            child: FittedBox(
-              fit: BoxFit.none,
-              alignment: AlignmentDirectional.topEnd,
-              child: indicator,
+            child: IgnorePointer(
+              child: FittedBox(
+                fit: BoxFit.none,
+                alignment: AlignmentDirectional.topEnd,
+                child: indicator,
+              ),
             ),
           ),
         ],
