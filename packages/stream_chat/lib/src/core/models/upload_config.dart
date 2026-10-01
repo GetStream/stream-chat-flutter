@@ -36,7 +36,7 @@ class UploadConfig with _$UploadConfig {
 
   /// The maximum upload size, in bytes.
   ///
-  /// Defaults to [defaultSizeLimit].
+  /// Defaults to [defaultSizeLimit] when no limit is configured.
   @override
   final int sizeLimit;
 

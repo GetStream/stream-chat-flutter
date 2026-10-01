@@ -63,6 +63,11 @@ ConfigResponse _$ConfigResponseFromJson(
     json['created_at'] as Object,
   ),
   floodConfig: json['flood_config'] == null ? null : FloodConfig.fromJson(json['flood_config'] as Map<String, dynamic>),
+  intentConfig: json['intent_config'] == null
+      ? null
+      : IntentConfigResponse.fromJson(
+          json['intent_config'] as Map<String, dynamic>,
+        ),
   key: json['key'] as String,
   llmConfig: json['llm_config'] == null ? null : LLMConfig.fromJson(json['llm_config'] as Map<String, dynamic>),
   supportedVideoCallHarmTypes: (json['supported_video_call_harm_types'] as List<dynamic>)
@@ -99,6 +104,7 @@ Map<String, dynamic> _$ConfigResponseToJson(ConfigResponse instance) => <String,
   'block_list_config': instance.blockListConfig?.toJson(),
   'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'flood_config': instance.floodConfig?.toJson(),
+  'intent_config': instance.intentConfig?.toJson(),
   'key': instance.key,
   'llm_config': instance.llmConfig?.toJson(),
   'supported_video_call_harm_types': instance.supportedVideoCallHarmTypes,

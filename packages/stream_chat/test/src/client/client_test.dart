@@ -2566,12 +2566,12 @@ void main() {
       expect(client.appSettings.name, 'test-app');
     });
 
-    test('StreamChatClient.getAppSettings passes an unset size limit through as 0', () async {
+    test('StreamChatClient.getAppSettings uses the default size limit when none is configured', () async {
       when(defaultApi.getApp).thenAnswer((_) async => Result.success(fakeGetApplicationResponse()));
 
       final res = await client.getAppSettings();
 
-      expect(res.getOrNull()?.app.fileUploadConfig.sizeLimit, 0);
+      expect(res.getOrNull()?.app.fileUploadConfig.sizeLimit, UploadConfig.defaultSizeLimit);
     });
 
     group('`.channel`', () {
@@ -6780,6 +6780,94 @@ void main() {
       );
 
       expect(server.sockets, hasLength(attempts));
+    });
+  });
+
+  group('when a user is signed in', () {
+    const apiKey = 'test-api-key';
+    final user = User(id: 'test-user-id');
+    final token = testUserToken(user.id).rawValue;
+
+    // A client with [user] signed in, whose guest exchange for [requested] answers the way a real
+    // one does: with an id of the guest's own.
+    Future<(StreamChatClient, MockDefaultApi)> signedInClient({required User requested}) async {
+      registerFallbackValue(const api.CreateGuestRequest(user: api.UserRequest(id: 'fallback')));
+
+      final defaultApi = MockDefaultApi();
+      when(defaultApi.getApp).thenAnswer((_) async => Result.success(fakeGetApplicationResponse()));
+      final client = StreamChatClient(
+        apiKey,
+        defaultApi: defaultApi,
+        chatApi: FakeChatApi(),
+        wsProvider: FakeChatServer(user: OwnUser.fromUser(user)).connect,
+      );
+      addTearDown(client.dispose);
+      await client.connectUser(user, token);
+
+      final guestId = 'guest-1234-${requested.id}';
+      when(() => defaultApi.createGuest(createGuestRequest: any(named: 'createGuestRequest'))).thenAnswer(
+        (_) async => Result.success(
+          api.CreateGuestResponse(
+            duration: '3.20ms',
+            accessToken: testUserToken(guestId).rawValue,
+            user: api.UserResponse(
+              id: guestId,
+              role: 'guest',
+              language: 'en',
+              online: false,
+              banned: false,
+              teams: const [],
+              custom: const {},
+              blockedUserIds: const [],
+              createdAt: DateTime.utc(2026),
+              updatedAt: DateTime.utc(2026),
+            ),
+          ),
+        ),
+      );
+
+      return (client, defaultApi);
+    }
+
+    test('should refuse a connectGuestUser without asking for a guest', () async {
+      final requested = User(id: 'someone-else');
+      final (client, defaultApi) = await signedInClient(requested: requested);
+
+      await expectLater(
+        client.connectGuestUser(requested, connectWebSocket: false),
+        throwsA(
+          isA<StateError>().having(
+            (it) => it.message,
+            'message',
+            allOf(contains(requested.id), contains('${user.id} is signed in'), contains('disconnectUser')),
+          ),
+        ),
+      );
+      verifyNever(() => defaultApi.createGuest(createGuestRequest: any(named: 'createGuestRequest')));
+    });
+
+    test('should refuse a connectGuestUser under the id of the user signed in', () async {
+      // The guest would still be another user, so this is refused like any other.
+      final requested = User(id: user.id);
+      final (client, defaultApi) = await signedInClient(requested: requested);
+
+      await expectLater(
+        client.connectGuestUser(requested, connectWebSocket: false),
+        throwsA(isA<StateError>().having((it) => it.message, 'message', contains('${user.id} is signed in'))),
+      );
+      verifyNever(() => defaultApi.createGuest(createGuestRequest: any(named: 'createGuestRequest')));
+    });
+
+    test('should leave the signed-in user authenticated after refusing a connectGuestUser', () async {
+      final requested = User(id: 'someone-else');
+      final (client, _) = await signedInClient(requested: requested);
+      await expectLater(client.connectGuestUser(requested, connectWebSocket: false), throwsA(isA<StateError>()));
+
+      // Reopening authenticates with the token the signed-in user connected with.
+      await client.closeConnection();
+      await client.openConnection();
+
+      expect(client.connectionStatus, ConnectionStatus.connected);
     });
   });
 

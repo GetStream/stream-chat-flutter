@@ -10,6 +10,7 @@ FloodSimilarRuleParameters _$FloodSimilarRuleParametersFromJson(
   Map<String, dynamic> json,
 ) => FloodSimilarRuleParameters(
   allowlist: (json['allowlist'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  minTextLength: (json['min_text_length'] as num?)?.toInt(),
   similarityDistance: (json['similarity_distance'] as num?)?.toInt(),
   threshold: (json['threshold'] as num?)?.toInt(),
   timeWindow: json['time_window'] as String?,
@@ -19,6 +20,7 @@ Map<String, dynamic> _$FloodSimilarRuleParametersToJson(
   FloodSimilarRuleParameters instance,
 ) => <String, dynamic>{
   'allowlist': instance.allowlist,
+  'min_text_length': instance.minTextLength,
   'similarity_distance': instance.similarityDistance,
   'threshold': instance.threshold,
   'time_window': instance.timeWindow,

@@ -14,6 +14,10 @@ ReminderResponseData _$ReminderResponseDataFromJson(
   createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
+  expiresAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['expires_at'],
+    const StreamDateTimeConverter().fromJson,
+  ),
   message: json['message'] == null ? null : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),
   messageId: json['message_id'] as String,
   remindAt: _$JsonConverterFromJson<Object, DateTime>(
@@ -33,6 +37,10 @@ Map<String, dynamic> _$ReminderResponseDataToJson(
   'channel': instance.channel?.toJson(),
   'channel_cid': instance.channelCid,
   'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
+  'expires_at': _$JsonConverterToJson<Object, DateTime>(
+    instance.expiresAt,
+    const StreamDateTimeConverter().toJson,
+  ),
   'message': instance.message?.toJson(),
   'message_id': instance.messageId,
   'remind_at': _$JsonConverterToJson<Object, DateTime>(

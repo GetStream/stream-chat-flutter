@@ -65,7 +65,7 @@ and generates [beautiful doc pages][docs] from them.
 A doc comment is any comment that appears before a declaration 
 and uses the special `///` syntax that `dart doc` looks for.
 
-[`dart doc`]: /tools/dart-doc
+[`dart doc`]: https://dart.dev/tools/dart-doc
 [docs]: https://api.dart.dev
 
 ### DO use `///` doc comments to document members and types
@@ -316,7 +316,7 @@ bool contains(Object? element);
 > _For example `Iterable.take` can be described as
 > "The first \[count\] elements of ..."._
 
-[parameterized_property_name]: design#prefer-a-noun-phrase-or-non-imperative-verb-phrase-for-a-function-or-method-if-returning-a-value-is-its-primary-purpose
+[parameterized_property_name]: https://dart.dev/effective-dart/design#prefer-a-noun-phrase-or-non-imperative-verb-phrase-for-a-function-or-method-if-returning-a-value-is-its-primary-purpose
 
 ### DON'T write documentation for both the getter and setter of a property
 
@@ -421,7 +421,7 @@ To learn more about the references that
 the analyzer and `dart doc` support in doc comments,
 check out [Documentation comment references][].
 
-[Documentation comment references]: /tools/doc-comments/references
+[Documentation comment references]: https://dart.dev/tools/doc-comments/references
 
 ### DO use prose to explain parameters, return values, and exceptions
 
