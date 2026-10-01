@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `StreamMessageInput` polling the audio recorder ten times a second while no recording is in progress, including when voice recording is disabled.
+
 ## 9.31.0
 
 🔄 Changed
