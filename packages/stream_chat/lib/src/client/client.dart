@@ -445,10 +445,21 @@ class StreamChatClient {
 
   /// Connects the current user as guest, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
+  ///
+  /// Throws a [StateError] if a user is already signed in; call [disconnectUser] first.
   Future<OwnUser> connectGuestUser(
     User user, {
     bool connectWebSocket = true,
   }) async {
+    // A guest is always given an id of its own, so whoever is signed in is another user, and the
+    // exchange below would authenticate in their place.
+    if (state.currentUser case final signedIn?) {
+      throw StateError(
+        'Cannot connect guest ${user.id} while ${signedIn.id} is signed in. '
+        'Call `disconnectUser` before connecting a different user.',
+      );
+    }
+
     // The exchange itself is authenticated anonymously: the guest has no token
     // yet, and the server assigns the identity it answers with.
     final anonymousToken = UserToken.anonymous();

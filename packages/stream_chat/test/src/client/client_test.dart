@@ -6907,6 +6907,76 @@ void main() {
     });
   });
 
+  group('when a user is signed in', () {
+    const apiKey = 'test-api-key';
+    final user = User(id: 'test-user-id');
+    final token = testUserToken(user.id).rawValue;
+
+    // A client with [user] signed in, whose guest exchange for [requested] answers the way a real
+    // one does: with an id of the guest's own.
+    Future<(StreamChatClient, FakeChatApi)> signedInClient({required User requested}) async {
+      final chatApi = FakeChatApi();
+      final client = StreamChatClient(
+        apiKey,
+        defaultApi: FakeDefaultApi(),
+        chatApi: chatApi,
+        wsProvider: FakeChatServer(user: OwnUser.fromUser(user)).connect,
+      );
+      addTearDown(client.dispose);
+      await client.connectUser(user, token);
+
+      final guest = User(id: 'guest-1234-${requested.id}');
+      when(() => chatApi.guest.getGuestUser(requested)).thenAnswer(
+        (_) async => ConnectGuestUserResponse()
+          ..user = guest
+          ..accessToken = testUserToken(guest.id).rawValue,
+      );
+
+      return (client, chatApi);
+    }
+
+    test('should refuse a connectGuestUser without asking for a guest', () async {
+      final requested = User(id: 'someone-else');
+      final (client, chatApi) = await signedInClient(requested: requested);
+
+      await expectLater(
+        client.connectGuestUser(requested, connectWebSocket: false),
+        throwsA(
+          isA<StateError>().having(
+            (it) => it.message,
+            'message',
+            allOf(contains(requested.id), contains('${user.id} is signed in'), contains('disconnectUser')),
+          ),
+        ),
+      );
+      verifyNever(() => chatApi.guest.getGuestUser(requested));
+    });
+
+    test('should refuse a connectGuestUser under the id of the user signed in', () async {
+      // The guest would still be another user, so this is refused like any other.
+      final requested = User(id: user.id);
+      final (client, chatApi) = await signedInClient(requested: requested);
+
+      await expectLater(
+        client.connectGuestUser(requested, connectWebSocket: false),
+        throwsA(isA<StateError>().having((it) => it.message, 'message', contains('${user.id} is signed in'))),
+      );
+      verifyNever(() => chatApi.guest.getGuestUser(requested));
+    });
+
+    test('should leave the signed-in user authenticated after refusing a connectGuestUser', () async {
+      final requested = User(id: 'someone-else');
+      final (client, _) = await signedInClient(requested: requested);
+      await expectLater(client.connectGuestUser(requested, connectWebSocket: false), throwsA(isA<StateError>()));
+
+      // Reopening authenticates with the token the signed-in user connected with.
+      await client.closeConnection();
+      await client.openConnection();
+
+      expect(client.connectionStatus, ConnectionStatus.connected);
+    });
+  });
+
   group('`queryChannels` with `waitForConnect`', () {
     const apiKey = 'test-api-key';
     final user = User(id: 'test-user-id');
