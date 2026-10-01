@@ -98,6 +98,8 @@
 
 - A message that fails because its attachments did not upload now says which ones and what each reported, instead of `Failed to upload one or more attachments`.
 
+- `connectGuestUser` no longer leaves the signed-in user unauthenticated when it refuses to connect a guest over them.
+
 🔄 Changed
 
 - Failed messages now retry on server errors. The retry policy is now explicit: retry a request that never reached the server, a 5xx, a 429 and a 408; never another 4xx, a cancelled request, broken credentials, or anything the server marked unrecoverable. Previously only failures without a parseable error body retried, so a 500 or a 429 did not.
@@ -147,6 +149,9 @@
 - Fixed `CurrentPlatform` throwing `UnimplementedError` on WebAssembly builds.
 - Fixed live location expiry emitting repeated `location.expired` events for the same expired location.
 - Fixed members removed from a channel keeping their read state in the channel state.
+- Fixed `AttachmentFile.extension` returning the whole file name when the file has no extension.
+- Fixed `UploadConfig.sizeLimit` being `0` when no size limit is set in the Stream Dashboard; it now falls back to `UploadConfig.defaultSizeLimit`.
+- Fixed a slow first app settings load replacing a newer `StreamChatClient.getAppSettings()` result.
 
 🔄 Internal / Non-breaking
 

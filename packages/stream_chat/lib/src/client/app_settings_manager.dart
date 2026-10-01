@@ -42,7 +42,7 @@ class AppSettingsManager {
 
     switch (await _repository.getAppSettings()) {
       case Success(:final data):
-        _appSettings = data.app;
+        _appSettings ??= data.app;
       case Failure(:final error, :final stackTrace):
         _logger.w(() => 'Failed to load app settings', error: error, stackTrace: stackTrace);
     }
