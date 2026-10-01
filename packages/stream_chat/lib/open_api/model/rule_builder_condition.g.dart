@@ -111,6 +111,11 @@ RuleBuilderCondition _$RuleBuilderConditionFromJson(
           json['text_rule_params'] as Map<String, dynamic>,
         ),
   type: json['type'] as String?,
+  userChannelCountParams: json['user_channel_count_params'] == null
+      ? null
+      : UserChannelCountRuleParameters.fromJson(
+          json['user_channel_count_params'] as Map<String, dynamic>,
+        ),
   userCreatedWithinParams: json['user_created_within_params'] == null
       ? null
       : UserCreatedWithinParameters.fromJson(
@@ -188,6 +193,7 @@ Map<String, dynamic> _$RuleBuilderConditionToJson(
   'text_content_params': instance.textContentParams?.toJson(),
   'text_rule_params': instance.textRuleParams?.toJson(),
   'type': instance.type,
+  'user_channel_count_params': instance.userChannelCountParams?.toJson(),
   'user_created_within_params': instance.userCreatedWithinParams?.toJson(),
   'user_custom_property_params': instance.userCustomPropertyParams?.toJson(),
   'user_flag_count_rule_params': instance.userFlagCountRuleParams?.toJson(),

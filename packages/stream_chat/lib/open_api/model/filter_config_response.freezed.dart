@@ -14,6 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FilterConfigResponse {
   List<String>? get aiImageLabels;
+  List<String>? get aiImageOcrLabels;
   Map<String, List<String>>? get aiImageTaxonomy;
   List<String>? get aiTextLabels;
   List<String>? get configKeys;
@@ -41,6 +42,10 @@ mixin _$FilterConfigResponse {
               aiImageLabels,
             ) &&
             const DeepCollectionEquality().equals(
+              other.aiImageOcrLabels,
+              aiImageOcrLabels,
+            ) &&
+            const DeepCollectionEquality().equals(
               other.aiImageTaxonomy,
               aiImageTaxonomy,
             ) &&
@@ -64,6 +69,7 @@ mixin _$FilterConfigResponse {
   int get hashCode => Object.hash(
     runtimeType,
     const DeepCollectionEquality().hash(aiImageLabels),
+    const DeepCollectionEquality().hash(aiImageOcrLabels),
     const DeepCollectionEquality().hash(aiImageTaxonomy),
     const DeepCollectionEquality().hash(aiTextLabels),
     const DeepCollectionEquality().hash(configKeys),
@@ -74,7 +80,7 @@ mixin _$FilterConfigResponse {
 
   @override
   String toString() {
-    return 'FilterConfigResponse(aiImageLabels: $aiImageLabels, aiImageTaxonomy: $aiImageTaxonomy, aiTextLabels: $aiTextLabels, configKeys: $configKeys, filterableCustomKeys: $filterableCustomKeys, llmLabels: $llmLabels, ruleNames: $ruleNames)';
+    return 'FilterConfigResponse(aiImageLabels: $aiImageLabels, aiImageOcrLabels: $aiImageOcrLabels, aiImageTaxonomy: $aiImageTaxonomy, aiTextLabels: $aiTextLabels, configKeys: $configKeys, filterableCustomKeys: $filterableCustomKeys, llmLabels: $llmLabels, ruleNames: $ruleNames)';
   }
 }
 
@@ -87,6 +93,7 @@ abstract mixin class $FilterConfigResponseCopyWith<$Res> {
   @useResult
   $Res call({
     List<String>? aiImageLabels,
+    List<String>? aiImageOcrLabels,
     Map<String, List<String>>? aiImageTaxonomy,
     List<String>? aiTextLabels,
     List<String>? configKeys,
@@ -109,6 +116,7 @@ class _$FilterConfigResponseCopyWithImpl<$Res> implements $FilterConfigResponseC
   @override
   $Res call({
     Object? aiImageLabels = freezed,
+    Object? aiImageOcrLabels = freezed,
     Object? aiImageTaxonomy = freezed,
     Object? aiTextLabels = freezed,
     Object? configKeys = freezed,
@@ -121,6 +129,10 @@ class _$FilterConfigResponseCopyWithImpl<$Res> implements $FilterConfigResponseC
         aiImageLabels: freezed == aiImageLabels
             ? _self.aiImageLabels
             : aiImageLabels // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
+        aiImageOcrLabels: freezed == aiImageOcrLabels
+            ? _self.aiImageOcrLabels
+            : aiImageOcrLabels // ignore: cast_nullable_to_non_nullable
                   as List<String>?,
         aiImageTaxonomy: freezed == aiImageTaxonomy
             ? _self.aiImageTaxonomy

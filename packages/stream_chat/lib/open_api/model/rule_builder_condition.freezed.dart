@@ -35,6 +35,7 @@ mixin _$RuleBuilderCondition {
   TextContentParameters? get textContentParams;
   TextRuleParameters? get textRuleParams;
   String? get type;
+  UserChannelCountRuleParameters? get userChannelCountParams;
   UserCreatedWithinParameters? get userCreatedWithinParams;
   UserCustomPropertyParameters? get userCustomPropertyParams;
   FlagCountRuleParameters? get userFlagCountRuleParams;
@@ -123,6 +124,8 @@ mixin _$RuleBuilderCondition {
             (identical(other.textContentParams, textContentParams) || other.textContentParams == textContentParams) &&
             (identical(other.textRuleParams, textRuleParams) || other.textRuleParams == textRuleParams) &&
             (identical(other.type, type) || other.type == type) &&
+            (identical(other.userChannelCountParams, userChannelCountParams) ||
+                other.userChannelCountParams == userChannelCountParams) &&
             (identical(
                   other.userCreatedWithinParams,
                   userCreatedWithinParams,
@@ -185,6 +188,7 @@ mixin _$RuleBuilderCondition {
     textContentParams,
     textRuleParams,
     type,
+    userChannelCountParams,
     userCreatedWithinParams,
     userCustomPropertyParams,
     userFlagCountRuleParams,
@@ -199,7 +203,7 @@ mixin _$RuleBuilderCondition {
 
   @override
   String toString() {
-    return 'RuleBuilderCondition(callCustomPropertyParams: $callCustomPropertyParams, callTypeRuleParams: $callTypeRuleParams, callViolationCountParams: $callViolationCountParams, channelMessageCountRuleParams: $channelMessageCountRuleParams, closedCaptionRuleParams: $closedCaptionRuleParams, confidence: $confidence, contentCountRuleParams: $contentCountRuleParams, contentCustomPropertyCountParams: $contentCustomPropertyCountParams, contentCustomPropertyParams: $contentCustomPropertyParams, contentFlagCountRuleParams: $contentFlagCountRuleParams, floodIdenticalParams: $floodIdenticalParams, floodSimilarParams: $floodSimilarParams, imageContentParams: $imageContentParams, imageRuleParams: $imageRuleParams, ipContentCountRuleParams: $ipContentCountRuleParams, ipFlagCountRuleParams: $ipFlagCountRuleParams, keyframeOcrRuleParams: $keyframeOcrRuleParams, keyframeRuleParams: $keyframeRuleParams, ocrContentParams: $ocrContentParams, textContentParams: $textContentParams, textRuleParams: $textRuleParams, type: $type, userCreatedWithinParams: $userCreatedWithinParams, userCustomPropertyParams: $userCustomPropertyParams, userFlagCountRuleParams: $userFlagCountRuleParams, userIdenticalContentCountParams: $userIdenticalContentCountParams, userIdenticalImageCountParams: $userIdenticalImageCountParams, userReactionCountParams: $userReactionCountParams, userRoleParams: $userRoleParams, userRuleParams: $userRuleParams, videoContentParams: $videoContentParams, videoRuleParams: $videoRuleParams)';
+    return 'RuleBuilderCondition(callCustomPropertyParams: $callCustomPropertyParams, callTypeRuleParams: $callTypeRuleParams, callViolationCountParams: $callViolationCountParams, channelMessageCountRuleParams: $channelMessageCountRuleParams, closedCaptionRuleParams: $closedCaptionRuleParams, confidence: $confidence, contentCountRuleParams: $contentCountRuleParams, contentCustomPropertyCountParams: $contentCustomPropertyCountParams, contentCustomPropertyParams: $contentCustomPropertyParams, contentFlagCountRuleParams: $contentFlagCountRuleParams, floodIdenticalParams: $floodIdenticalParams, floodSimilarParams: $floodSimilarParams, imageContentParams: $imageContentParams, imageRuleParams: $imageRuleParams, ipContentCountRuleParams: $ipContentCountRuleParams, ipFlagCountRuleParams: $ipFlagCountRuleParams, keyframeOcrRuleParams: $keyframeOcrRuleParams, keyframeRuleParams: $keyframeRuleParams, ocrContentParams: $ocrContentParams, textContentParams: $textContentParams, textRuleParams: $textRuleParams, type: $type, userChannelCountParams: $userChannelCountParams, userCreatedWithinParams: $userCreatedWithinParams, userCustomPropertyParams: $userCustomPropertyParams, userFlagCountRuleParams: $userFlagCountRuleParams, userIdenticalContentCountParams: $userIdenticalContentCountParams, userIdenticalImageCountParams: $userIdenticalImageCountParams, userReactionCountParams: $userReactionCountParams, userRoleParams: $userRoleParams, userRuleParams: $userRuleParams, videoContentParams: $videoContentParams, videoRuleParams: $videoRuleParams)';
   }
 }
 
@@ -233,6 +237,7 @@ abstract mixin class $RuleBuilderConditionCopyWith<$Res> {
     TextContentParameters? textContentParams,
     TextRuleParameters? textRuleParams,
     String? type,
+    UserChannelCountRuleParameters? userChannelCountParams,
     UserCreatedWithinParameters? userCreatedWithinParams,
     UserCustomPropertyParameters? userCustomPropertyParams,
     FlagCountRuleParameters? userFlagCountRuleParams,
@@ -280,6 +285,7 @@ class _$RuleBuilderConditionCopyWithImpl<$Res> implements $RuleBuilderConditionC
     Object? textContentParams = freezed,
     Object? textRuleParams = freezed,
     Object? type = freezed,
+    Object? userChannelCountParams = freezed,
     Object? userCreatedWithinParams = freezed,
     Object? userCustomPropertyParams = freezed,
     Object? userFlagCountRuleParams = freezed,
@@ -381,6 +387,10 @@ class _$RuleBuilderConditionCopyWithImpl<$Res> implements $RuleBuilderConditionC
             ? _self.type
             : type // ignore: cast_nullable_to_non_nullable
                   as String?,
+        userChannelCountParams: freezed == userChannelCountParams
+            ? _self.userChannelCountParams
+            : userChannelCountParams // ignore: cast_nullable_to_non_nullable
+                  as UserChannelCountRuleParameters?,
         userCreatedWithinParams: freezed == userCreatedWithinParams
             ? _self.userCreatedWithinParams
             : userCreatedWithinParams // ignore: cast_nullable_to_non_nullable

@@ -13,6 +13,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$UpdateReminderRequest {
+  DateTime? get expiresAt;
   DateTime? get remindAt;
 
   /// Create a copy of UpdateReminderRequest
@@ -30,15 +31,16 @@ mixin _$UpdateReminderRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UpdateReminderRequest &&
+            (identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt) &&
             (identical(other.remindAt, remindAt) || other.remindAt == remindAt));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, remindAt);
+  int get hashCode => Object.hash(runtimeType, expiresAt, remindAt);
 
   @override
   String toString() {
-    return 'UpdateReminderRequest(remindAt: $remindAt)';
+    return 'UpdateReminderRequest(expiresAt: $expiresAt, remindAt: $remindAt)';
   }
 }
 
@@ -49,7 +51,7 @@ abstract mixin class $UpdateReminderRequestCopyWith<$Res> {
     $Res Function(UpdateReminderRequest) _then,
   ) = _$UpdateReminderRequestCopyWithImpl;
   @useResult
-  $Res call({DateTime? remindAt});
+  $Res call({DateTime? expiresAt, DateTime? remindAt});
 }
 
 /// @nodoc
@@ -63,9 +65,13 @@ class _$UpdateReminderRequestCopyWithImpl<$Res> implements $UpdateReminderReques
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? remindAt = freezed}) {
+  $Res call({Object? expiresAt = freezed, Object? remindAt = freezed}) {
     return _then(
       UpdateReminderRequest(
+        expiresAt: freezed == expiresAt
+            ? _self.expiresAt
+            : expiresAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
         remindAt: freezed == remindAt
             ? _self.remindAt
             : remindAt // ignore: cast_nullable_to_non_nullable

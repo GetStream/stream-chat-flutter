@@ -14,6 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FloodSimilarRuleParameters {
   List<String>? get allowlist;
+  int? get minTextLength;
   int? get similarityDistance;
   int? get threshold;
   String? get timeWindow;
@@ -34,6 +35,7 @@ mixin _$FloodSimilarRuleParameters {
         (other.runtimeType == runtimeType &&
             other is FloodSimilarRuleParameters &&
             const DeepCollectionEquality().equals(other.allowlist, allowlist) &&
+            (identical(other.minTextLength, minTextLength) || other.minTextLength == minTextLength) &&
             (identical(other.similarityDistance, similarityDistance) ||
                 other.similarityDistance == similarityDistance) &&
             (identical(other.threshold, threshold) || other.threshold == threshold) &&
@@ -44,6 +46,7 @@ mixin _$FloodSimilarRuleParameters {
   int get hashCode => Object.hash(
     runtimeType,
     const DeepCollectionEquality().hash(allowlist),
+    minTextLength,
     similarityDistance,
     threshold,
     timeWindow,
@@ -51,7 +54,7 @@ mixin _$FloodSimilarRuleParameters {
 
   @override
   String toString() {
-    return 'FloodSimilarRuleParameters(allowlist: $allowlist, similarityDistance: $similarityDistance, threshold: $threshold, timeWindow: $timeWindow)';
+    return 'FloodSimilarRuleParameters(allowlist: $allowlist, minTextLength: $minTextLength, similarityDistance: $similarityDistance, threshold: $threshold, timeWindow: $timeWindow)';
   }
 }
 
@@ -64,6 +67,7 @@ abstract mixin class $FloodSimilarRuleParametersCopyWith<$Res> {
   @useResult
   $Res call({
     List<String>? allowlist,
+    int? minTextLength,
     int? similarityDistance,
     int? threshold,
     String? timeWindow,
@@ -83,6 +87,7 @@ class _$FloodSimilarRuleParametersCopyWithImpl<$Res> implements $FloodSimilarRul
   @override
   $Res call({
     Object? allowlist = freezed,
+    Object? minTextLength = freezed,
     Object? similarityDistance = freezed,
     Object? threshold = freezed,
     Object? timeWindow = freezed,
@@ -93,6 +98,10 @@ class _$FloodSimilarRuleParametersCopyWithImpl<$Res> implements $FloodSimilarRul
             ? _self.allowlist
             : allowlist // ignore: cast_nullable_to_non_nullable
                   as List<String>?,
+        minTextLength: freezed == minTextLength
+            ? _self.minTextLength
+            : minTextLength // ignore: cast_nullable_to_non_nullable
+                  as int?,
         similarityDistance: freezed == similarityDistance
             ? _self.similarityDistance
             : similarityDistance // ignore: cast_nullable_to_non_nullable
