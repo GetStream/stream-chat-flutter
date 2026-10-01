@@ -4,12 +4,7 @@
 
 - Polls are now shown translated into the current user's language, following `StreamMessageTranslationConfiguration` like the message text.
 - Added `PollTranslationX`, `PollOptionTranslationX` and `PollVoteTranslationX`, to read the translations of a poll, its options and its answers.
-- Added `StreamPollCommentsSheet.language`, to show its comments translated.
-
-🔄 Changed
-
-- `Message.translate` now also translates the name, description and options of the message's poll; its answers are left as written.
-- Attachment builders receive the message with its poll as displayed, translated when a translation is shown; the message text stays as written. Act on the poll by id only: passing it to `Channel.updatePoll` would save the translation.
+- Added `MessageTranslationLanguage`, the language `StreamMessageContent` shows a message translated into, for custom attachments to show translations too.
 
 ## 10.5.0
 

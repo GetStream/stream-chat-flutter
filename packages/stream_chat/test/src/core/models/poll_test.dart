@@ -73,11 +73,20 @@ void main() {
       expect(json['is_closed'], false);
     });
 
-    test('parses the server translations of the poll, its options and answers', () {
+    test('parses the server translations of the name and description', () {
       final poll = Poll.fromJson({
         ...jsonFixture('poll.json'),
         'name_i18n': const {'language': 'en', 'nl_text': 'toets'},
         'description_i18n': const {'language': 'en', 'nl_text': 'omschrijving'},
+      });
+
+      expect(poll.nameI18n, {'language': 'en', 'nl_text': 'toets'});
+      expect(poll.descriptionI18n, {'language': 'en', 'nl_text': 'omschrijving'});
+    });
+
+    test('parses the server translation of an option', () {
+      final poll = Poll.fromJson({
+        ...jsonFixture('poll.json'),
         'options': const [
           {
             'id': 'option1',
@@ -85,6 +94,14 @@ void main() {
             'text_i18n': {'language': 'en', 'nl_text': 'optie1 tekst'},
           },
         ],
+      });
+
+      expect(poll.options.single.textI18n, {'language': 'en', 'nl_text': 'optie1 tekst'});
+    });
+
+    test('parses the server translation of an answer', () {
+      final poll = Poll.fromJson({
+        ...jsonFixture('poll.json'),
         'latest_answers': const [
           {
             'id': 'answer1',
@@ -94,9 +111,6 @@ void main() {
         ],
       });
 
-      expect(poll.nameI18n, {'language': 'en', 'nl_text': 'toets'});
-      expect(poll.descriptionI18n, {'language': 'en', 'nl_text': 'omschrijving'});
-      expect(poll.options.single.textI18n, {'language': 'en', 'nl_text': 'optie1 tekst'});
       expect(poll.latestAnswers.single.answerTextI18n, {'language': 'en', 'nl_text': 'geweldig'});
     });
 
@@ -125,9 +139,6 @@ void main() {
 
       expect(json, isNot(contains('name_i18n')));
       expect(json, isNot(contains('description_i18n')));
-      expect(json['options'], [
-        {'text': 'option1 text'},
-      ]);
     });
 
     test('keeps the server translation of an option out of its extra data', () {
@@ -140,12 +151,12 @@ void main() {
       expect(option.extraData, isNot(contains('text_i18n')));
     });
 
-    test('does not send the server translation of a parsed option back', () {
-      final option = PollOption.fromJson(const {
-        'id': 'option1',
-        'text': 'option1 text',
-        'text_i18n': {'language': 'en', 'nl_text': 'optie1 tekst'},
-      });
+    test('PollOption.toJson leaves out the server translation', () {
+      const option = PollOption(
+        id: 'option1',
+        text: 'option1 text',
+        textI18n: {'language': 'en', 'nl_text': 'optie1 tekst'},
+      );
 
       expect(option.toJson(), isNot(contains('text_i18n')));
     });

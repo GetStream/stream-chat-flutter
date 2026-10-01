@@ -465,19 +465,14 @@ extension MessageX on Message {
     return poll?.hasTranslation(language) ?? false;
   }
 
-  /// It returns the message with its text, and its [poll]'s name,
-  /// description and options, translated into [language] where available
-  /// locally.
+  /// It returns the message with the translated text if available locally.
   ///
-  /// The poll's answers are left as written. Returns the message unchanged
-  /// when neither its text nor its poll has a translation into [language].
-  Message translate(String? language) {
-    final translatedText = this.translatedText(language);
-    final translatedPoll = poll?._translate(language);
-    if (translatedText == null && identical(translatedPoll, poll)) return this;
-
-    return copyWith(text: translatedText, poll: translatedPoll);
-  }
+  /// Returns the message unchanged when [translatedText] has no translation
+  /// into [language].
+  Message translate(String? language) => switch (translatedText(language)) {
+    null => this,
+    final translatedText => copyWith(text: translatedText),
+  };
 
   /// It returns the message replacing the mentioned user names with
   ///  the respective user ids
@@ -540,8 +535,8 @@ extension PollTranslationX on Poll {
   /// there is none available locally.
   String? translatedDescription(String? language) => _translationOf(descriptionI18n, language);
 
-  /// Whether the poll's own content — its name, description or any of its
-  /// options — has a translation into [language].
+  /// Whether this poll's name, description or any of its options has a
+  /// translation into [language].
   ///
   /// Answers are not included: each is written by a different user, often in
   /// a different language than the poll itself.
@@ -549,22 +544,6 @@ extension PollTranslationX on Poll {
     if (translatedName(language) != null) return true;
     if (translatedDescription(language) != null) return true;
     return options.any((it) => it.translatedText(language) != null);
-  }
-
-  // A copy of this poll with its name, description and options translated
-  // into [language], or this poll when none of them has a translation.
-  //
-  // Answers are left as written: the comments sheet translates the answers it
-  // loads itself, and `ownAnswers` prefills the dialog that edits the current
-  // user's comment, which must show what the user wrote.
-  Poll _translate(String? language) {
-    if (!hasTranslation(language)) return this;
-
-    return copyWith(
-      name: translatedName(language),
-      description: translatedDescription(language),
-      options: [for (final option in options) option._translate(language)],
-    );
   }
 }
 
@@ -576,13 +555,6 @@ extension PollOptionTranslationX on PollOption {
   ///
   /// Follows the same rules as [MessageX.translatedText].
   String? translatedText(String? language) => _translationOf(textI18n, language);
-
-  // The option with its text replaced by its translation into [language], or
-  // unchanged when there is none available locally.
-  PollOption _translate(String? language) => switch (translatedText(language)) {
-    null => this,
-    final translatedText => copyWith(text: translatedText),
-  };
 }
 
 /// Translation helpers for a [PollVote] of a poll sent to a channel with

@@ -32,8 +32,8 @@ class StreamMessageTranslationConfiguration {
   /// Applies to full messages ([StreamMessageContent]), including the poll
   /// attachment and the poll sheets it opens, and to the previews shown in
   /// the channel and thread lists ([StreamMessagePreviewText]). A poll shows
-  /// its name, description and options translated, and its comments sheet
-  /// the comments translated.
+  /// its name and options translated, and its comments sheet the comments
+  /// translated.
   ///
   /// Defaults to `true`, which is what the SDK has always done. Set it to
   /// `false` to always show a message's original text, regardless of the

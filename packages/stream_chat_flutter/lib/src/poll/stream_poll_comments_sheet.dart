@@ -26,41 +26,42 @@ Future<T?> showStreamPollCommentsSheet<T extends Object?>({
   required BuildContext context,
   required ValueListenable<Message> messageNotifier,
 }) {
-  // Read from the caller's context: the sheet is pushed on the navigator,
-  // outside the message. See [MessageTranslationLanguage.of].
+  // Read from the caller's context: the sheet is pushed outside the message.
   final language = MessageTranslationLanguage.of(context);
 
   return showStreamSheet<T>(
     context: context,
-    builder: (_, scrollController) => StreamChannel.value(
-      channel: StreamChannel.of(context).channel,
-      child: ValueListenableBuilder(
-        valueListenable: messageNotifier,
-        builder: (context, message, _) {
-          final poll = message.poll;
-          if (poll == null) return const Empty();
+    builder: (_, scrollController) => MessageTranslationLanguage(
+      language: language,
+      child: StreamChannel.value(
+        channel: StreamChannel.of(context).channel,
+        child: ValueListenableBuilder(
+          valueListenable: messageNotifier,
+          builder: (context, message, _) {
+            final poll = message.poll;
+            if (poll == null) return const Empty();
 
-          final channel = StreamChannel.of(context).channel;
+            final channel = StreamChannel.of(context).channel;
 
-          Future<void> onUpdateComment() async {
-            final commentText = await showPollAddCommentDialog(
-              context: context,
-              // We use the first answer as the initial value because the
-              // user can only add one comment per poll.
-              initialValue: poll.ownAnswers.firstOrNull?.answerText ?? '',
+            Future<void> onUpdateComment() async {
+              final commentText = await showPollAddCommentDialog(
+                context: context,
+                // We use the first answer as the initial value because the
+                // user can only add one comment per poll.
+                initialValue: poll.ownAnswers.firstOrNull?.answerText ?? '',
+              );
+
+              if (commentText == null) return;
+              channel.addPollAnswer(message, poll, answerText: commentText);
+            }
+
+            return StreamPollCommentsSheet(
+              poll: poll,
+              scrollController: scrollController,
+              onUpdateComment: onUpdateComment,
             );
-
-            if (commentText == null) return;
-            channel.addPollAnswer(message, poll, answerText: commentText);
-          }
-
-          return StreamPollCommentsSheet(
-            poll: poll,
-            language: language,
-            scrollController: scrollController,
-            onUpdateComment: onUpdateComment,
-          );
-        },
+          },
+        ),
       ),
     ),
   );
@@ -78,19 +79,12 @@ class StreamPollCommentsSheet extends StatefulWidget {
   const StreamPollCommentsSheet({
     super.key,
     required this.poll,
-    this.language,
     this.scrollController,
     this.onUpdateComment,
   });
 
   /// The poll to display the comments for.
   final Poll poll;
-
-  /// The language to display the comments in, when they have a translation
-  /// into it.
-  ///
-  /// Defaults to `null`, which displays every comment as it was written.
-  final String? language;
 
   /// Scroll controller attached to the bottom sheet's scrollable content.
   ///
@@ -181,7 +175,8 @@ class _StreamPollCommentsSheetState extends State<StreamPollCommentsSheet> {
               padding: effectiveTheme.contentPadding,
               separatorBuilder: (_, __, ___) => SizedBox(height: itemSpacing),
               itemBuilder: (context, comments, index, _) {
-                final comment = switch (comments[index].translatedAnswerText(widget.language)) {
+                final language = MessageTranslationLanguage.of(context);
+                final comment = switch (comments[index].translatedAnswerText(language)) {
                   null => comments[index],
                   final answerText => comments[index].copyWith(answerText: answerText),
                 };

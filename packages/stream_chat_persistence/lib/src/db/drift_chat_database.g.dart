@@ -6751,13 +6751,14 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
   /// The name of the poll.
   final String name;
 
-  /// A Map of [name] translations.
+  /// The translations of [name], keyed as `<language>_text`, plus the
+  /// `language` it was written in.
   final Map<String, String>? nameI18n;
 
   /// The description of the poll.
   final String? description;
 
-  /// A Map of [description] translations.
+  /// The translations of [description], in the same shape as [nameI18n].
   final Map<String, String>? descriptionI18n;
 
   /// The list of options available for the poll.
@@ -7589,7 +7590,8 @@ class PollVoteEntity extends DataClass implements Insertable<PollVoteEntity> {
   /// Nullable if the user selected an option.
   final String? answerText;
 
-  /// A Map of [answerText] translations.
+  /// The translations of [answerText], keyed as `<language>_text`, plus the
+  /// `language` it was written in.
   final Map<String, String>? answerTextI18n;
 
   /// The date when the poll vote was created.

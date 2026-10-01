@@ -6,7 +6,6 @@ import 'package:stream_core_flutter/chat.dart' as core;
 import '../../attachment/builder/attachment_widget_builder.dart';
 import '../../stream_chat.dart';
 import '../../stream_chat_configuration.dart';
-import '../../utils/extensions.dart';
 import '../message_translation_language.dart';
 import '../stream_message_attachments.dart';
 import '../stream_message_item.dart';
@@ -149,16 +148,12 @@ class StreamMessageContent extends StatefulWidget {
   /// Passed through to [StreamMessageReactions.sorting].
   final Comparator<ReactionGroup>? reactionSorting;
 
-  /// Whether [message] is displayed translated when it, or its poll, has a
-  /// translation for the current user's language (see
-  /// [MessageX.hasTranslation]).
+  /// Whether [message] should display its translation when it, or its poll,
+  /// has one for the current user's language.
   ///
-  /// Decides for the whole message, text and poll alike, whether it is shown
-  /// translated: [StreamMessageText] receives the message as displayed, and
-  /// [StreamMessageAttachments], and so the attachment builders, receive the
-  /// message with its poll as displayed and its text as written. The comments
-  /// of a poll, which its comments sheet loads itself, follow the same
-  /// decision.
+  /// Passed through to [StreamMessageText.showTranslatedText], and provided to
+  /// the attachments, a poll and its sheets included, through
+  /// [MessageTranslationLanguage].
   final bool showTranslatedText;
 
   @override
@@ -230,10 +225,9 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
               builder: (context) {
                 final bubbleContent = ConstrainedBox(
                   constraints: const BoxConstraints().copyWith(maxWidth: widthLimit),
-                  child: _DisplayedMessage(
-                    message: widget.message,
+                  child: _MessageTranslationScope(
                     showTranslatedText: widget.showTranslatedText,
-                    builder: (context, displayed) => core.StreamColumn(
+                    child: core.StreamColumn(
                       mainAxisSize: .min,
                       spacing: spacing.xs,
                       crossAxisAlignment: .start,
@@ -249,18 +243,10 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                           ),
                         StreamMessageAttachments(
                           key: attachmentsKey,
-                          // Only the poll is shown translated: a builder that
-                          // writes its message back must not save the
-                          // translated text, and the poll is never sent.
-                          message: switch (displayed.poll) {
-                            final poll? when !identical(poll, widget.message.poll) => widget.message.copyWith(
-                              poll: poll,
-                            ),
-                            _ => widget.message,
-                          },
+                          message: widget.message,
                           attachmentBuilders: widget.attachmentBuilders,
                         ),
-                        if (displayed.text case final text? when text.isNotEmpty)
+                        if (widget.message.text case final text? when text.isNotEmpty)
                           // The composed row label speaks the message text, so
                           // the rendered markdown stays out of the semantics tree
                           // and the row is announced as one phrase.
@@ -276,11 +262,8 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                           // attachments — reachable.
                           ExcludeSemantics(
                             excluding: excluding,
-                            // `displayed` is already translated, so translating
-                            // it again is a no-op; the flag is passed through so
-                            // the widget is configured as it would be on its own.
                             child: StreamMessageText(
-                              message: displayed,
+                              message: widget.message,
                               onLinkTap: widget.onLinkTap,
                               onMentionTap: widget.onMentionTap,
                               onAnyMentionTap: widget.onAnyMentionTap,
@@ -315,30 +298,26 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
   }
 }
 
-// Resolves the message to display once, so its text and its poll are always
-// shown in the same language, and provides that language to them through
-// [MessageTranslationLanguage].
-//
-// Follows the current user's language like [StreamMessageText] does.
-class _DisplayedMessage extends StatelessWidget {
-  const _DisplayedMessage({
-    required this.message,
+// Provides the language the message is shown translated into to its
+// attachments through [MessageTranslationLanguage], following the current
+// user's language like [StreamMessageText] does.
+class _MessageTranslationScope extends StatelessWidget {
+  const _MessageTranslationScope({
     required this.showTranslatedText,
-    required this.builder,
+    required this.child,
   });
 
-  final Message message;
   final bool showTranslatedText;
-  final Widget Function(BuildContext context, Message displayed) builder;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
     // Without a StreamChat above there is no user language, and without a
-    // StreamChatConfiguration no translation setting: show the message as
-    // written. Only trees without them, such as tests, take this path.
+    // StreamChatConfiguration no translation setting. Only trees without
+    // them, such as tests, take this path.
     final streamChat = StreamChat.maybeOf(context);
     final translationConfig = StreamChatConfiguration.maybeOf(context)?.messageTranslation;
-    if (streamChat == null || translationConfig == null) return builder(context, message);
+    if (streamChat == null || translationConfig == null) return child;
 
     final translates = showTranslatedText && translationConfig.enabled;
 
@@ -350,14 +329,10 @@ class _DisplayedMessage extends StatelessWidget {
     return BetterStreamBuilder<String>(
       initialData: streamChat.currentUser?.language ?? '',
       stream: streamChat.currentUserStream.map((it) => it?.language ?? ''),
-      builder: (context, language) {
-        final displayLanguage = translates && language.isNotEmpty ? language : null;
-
-        return MessageTranslationLanguage(
-          language: displayLanguage,
-          child: builder(context, message.translate(displayLanguage)),
-        );
-      },
+      builder: (context, language) => MessageTranslationLanguage(
+        language: translates && language.isNotEmpty ? language : null,
+        child: child,
+      ),
     );
   }
 }

@@ -2,11 +2,11 @@
 
 ✅ Added
 
-- Added the translations of polls sent to channels with automatic translation enabled: `Poll.nameI18n`, `Poll.descriptionI18n`, `PollOption.textI18n` and `PollVote.answerTextI18n`. They share the shape of `Message.i18n`, are never sent back to the server, and are kept when a later event or message update carries the poll without them.
+- Added `Poll.nameI18n`, `Poll.descriptionI18n`, `PollOption.textI18n` and `PollVote.answerTextI18n`, holding the server's translations of a poll.
 
 🔄 Changed
 
-- The server's `name_i18n`, `description_i18n` and `text_i18n` of a poll and its options are no longer kept in `Poll.extraData` and `PollOption.extraData`, nor sent back when the poll is updated; read `Poll.nameI18n`, `Poll.descriptionI18n` and `PollOption.textI18n` instead.
+- `name_i18n`, `description_i18n` and `text_i18n` are no longer kept in `Poll.extraData` and `PollOption.extraData`; read the new `*I18n` fields instead.
 
 ## 10.5.0
 

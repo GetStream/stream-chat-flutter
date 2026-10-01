@@ -22,7 +22,8 @@ class PollVotes extends Table {
   /// Nullable if the user selected an option.
   TextColumn get answerText => text().nullable()();
 
-  /// A Map of [answerText] translations.
+  /// The translations of [answerText], keyed as `<language>_text`, plus the
+  /// `language` it was written in.
   TextColumn get answerTextI18n => text().nullable().map(NullableMapConverter<String>())();
 
   /// The date when the poll vote was created.

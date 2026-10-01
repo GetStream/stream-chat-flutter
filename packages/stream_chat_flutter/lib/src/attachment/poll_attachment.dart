@@ -72,10 +72,6 @@ class StreamPollAttachmentProps {
   });
 
   /// The message containing the poll.
-  ///
-  /// When built by [StreamMessageContent], its poll is the poll as displayed
-  /// and may carry translated texts: act on the poll by id only, as passing it
-  /// to [Channel.updatePoll] would save the translation.
   final Message message;
 
   /// The constraints to use when displaying the poll.

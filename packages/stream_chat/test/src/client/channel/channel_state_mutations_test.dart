@@ -454,6 +454,38 @@ void main() {
       expect(capturedMessage().poll!.descriptionI18n, isNull);
     });
 
+    test('onPollUpdated uses the option translation the event carries', () {
+      seedPollMessage(
+        createPoll(
+          options: const [
+            PollOption(id: 'option-a', text: 'A', textI18n: {'language': 'en', 'nl_text': 'Oud'}),
+          ],
+        ),
+      );
+
+      mutations.onPollUpdated(
+        createPoll(
+          options: const [
+            PollOption(id: 'option-a', text: 'A', textI18n: {'language': 'en', 'nl_text': 'Een'}),
+          ],
+        ),
+      );
+
+      expect(capturedMessage().poll!.options.single.textI18n, {'language': 'en', 'nl_text': 'Een'});
+    });
+
+    test('onPollUpdated uses the description translation the event carries', () {
+      seedPollMessage(
+        createPoll(description: 'Pick one', descriptionI18n: const {'language': 'en', 'nl_text': 'Oud'}),
+      );
+
+      mutations.onPollUpdated(
+        createPoll(description: 'Pick one', descriptionI18n: const {'language': 'en', 'nl_text': 'Kies er een'}),
+      );
+
+      expect(capturedMessage().poll!.descriptionI18n, {'language': 'en', 'nl_text': 'Kies er een'});
+    });
+
     final translationKeepingEvents = <String, void Function(PollVote vote)>{
       'onPollAnswerCasted': (vote) => mutations.onPollAnswerCasted(createPoll(), vote),
       'onPollVoteChanged': (vote) => mutations.onPollVoteChanged(createPoll(), vote),

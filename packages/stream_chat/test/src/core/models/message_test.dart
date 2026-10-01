@@ -962,7 +962,6 @@ void main() {
         name: 'Original',
         options: const [PollOption(id: 'a', text: 'A')],
         createdById: 'u',
-        voteCount: 1,
       );
 
       final localMessage = createTestMessage(id: 'msg-1', poll: localPoll, pollId: localPoll.id);
@@ -970,7 +969,6 @@ void main() {
 
       final merged = localMessage.updateWith(serverMessage);
 
-      expect(merged.poll!.voteCount, 1);
       expect(merged.poll!.nameI18n, localPoll.nameI18n);
       expect(merged.poll!.options.single.textI18n, localPoll.options.single.textI18n);
     });

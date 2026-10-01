@@ -44,7 +44,7 @@ class StreamMessagePreviewText extends StatelessWidget {
     final config = StreamChatConfiguration.of(context);
     final translationConfig = config.messageTranslation;
     final translationLanguage = language ?? currentUser?.language;
-    final translatedMessage = translationConfig.enabled ? message.translate(translationLanguage) : message;
+    final translatedMessage = translationConfig.enabled ? _translate(message, translationLanguage) : message;
     final previewMessage = translatedMessage.replaceMentions(linkify: false);
 
     final formatter = config.messagePreviewFormatter;
@@ -82,4 +82,16 @@ class StreamMessagePreviewText extends StatelessWidget {
       semanticsLabel: a11yLabel,
     );
   }
+}
+
+// The message with its text and its poll's name translated into [language],
+// for the formatter to preview. Only ever displayed, never sent.
+Message _translate(Message message, String? language) {
+  final translated = message.translate(language);
+  return switch (message.poll) {
+    final poll? when poll.translatedName(language) != null => translated.copyWith(
+      poll: poll.copyWith(name: poll.translatedName(language)),
+    ),
+    _ => translated,
+  };
 }

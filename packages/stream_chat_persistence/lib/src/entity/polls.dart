@@ -13,13 +13,14 @@ class Polls extends Table {
   /// The name of the poll.
   TextColumn get name => text()();
 
-  /// A Map of [name] translations.
+  /// The translations of [name], keyed as `<language>_text`, plus the
+  /// `language` it was written in.
   TextColumn get nameI18n => text().nullable().map(NullableMapConverter<String>())();
 
   /// The description of the poll.
   TextColumn get description => text().nullable()();
 
-  /// A Map of [description] translations.
+  /// The translations of [description], in the same shape as [nameI18n].
   TextColumn get descriptionI18n => text().nullable().map(NullableMapConverter<String>())();
 
   /// The list of options available for the poll.

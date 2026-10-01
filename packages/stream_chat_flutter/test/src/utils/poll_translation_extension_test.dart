@@ -54,6 +54,19 @@ void main() {
     expect(poll.originalLanguage, 'en');
   });
 
+  test('Poll.originalLanguage falls back to the language of the description', () {
+    final poll = Poll(
+      name: 'Lieblingsfarbe?',
+      description: 'Wähle eine',
+      descriptionI18n: const {'language': 'de', 'nl_text': 'Kies er een'},
+      options: const [
+        PollOption(text: 'Red', textI18n: {'language': 'en', 'nl_text': 'Rood'}),
+      ],
+    );
+
+    expect(poll.originalLanguage, 'de');
+  });
+
   test('Poll.hasTranslation is true when only an option is translated', () {
     final poll = Poll(
       name: 'Favourite colour?',
@@ -75,61 +88,14 @@ void main() {
     expect(poll.hasTranslation('nl'), isFalse);
   });
 
-  test('Message.translate translates the name, description and options of its poll', () {
-    final translated = Message(poll: _translatedPoll()).translate('nl').poll!;
-
-    expect(translated.name, 'Favoriete kleur?');
-    expect(translated.description, 'Kies er een');
-    expect(translated.options.map((it) => it.text), ['Rood', 'Blue']);
-  });
-
-  test('Message.translate leaves the answers of its poll as written', () {
-    final translated = Message(poll: _translatedPoll()).translate('nl').poll!;
-
-    expect(translated.latestAnswers.single.answerText, 'I like yellow');
-  });
-
-  test('Message.translate leaves the own answers of its poll as written', () {
-    final translated = Message(poll: _translatedPoll()).translate('nl').poll!;
-
-    expect(translated.ownAnswers.single.answerText, 'I like yellow');
-  });
-
-  test('Message.translate keeps the ids the poll is acted on by', () {
-    final translated = Message(poll: _translatedPoll()).translate('nl').poll!;
-
-    expect(translated.id, 'poll-1');
-    expect(translated.options.map((it) => it.id), ['option-1', 'option-2']);
-    expect(translated.latestAnswers.single.id, 'answer-1');
-  });
-
-  test('Message.translate returns the same message for a null language', () {
-    final message = Message(poll: _translatedPoll());
-
-    expect(message.translate(null), same(message));
-  });
-
-  test('Message.translate returns the same message for an empty language', () {
-    final message = Message(poll: _translatedPoll());
-
-    expect(message.translate(''), same(message));
-  });
-
-  test('Message.translate translates the poll of a message without text', () {
-    final message = Message(poll: _translatedPoll());
-
-    expect(message.translate('nl').poll?.name, 'Favoriete kleur?');
-  });
-
-  test('Message.translate returns the same message when its poll has no translation', () {
+  test('Message.translate leaves its poll as written', () {
     final message = Message(
-      poll: Poll(
-        name: 'Favourite colour?',
-        options: const [PollOption(text: 'Red')],
-      ),
+      text: 'Hello',
+      i18n: const {'language': 'en', 'nl_text': 'Hallo'},
+      poll: _translatedPoll(),
     );
 
-    expect(message.translate('nl'), same(message));
+    expect(message.translate('nl').poll, same(message.poll));
   });
 
   test('PollVote.translatedAnswerText returns the translation into the given language', () {
@@ -166,17 +132,14 @@ PollVote _translatedAnswer() => PollVote(
 );
 
 // A poll written in English, translated into Dutch except for its second
-// option, with one answer that is the current user's own.
+// option.
 Poll _translatedPoll() => Poll(
-  id: 'poll-1',
   name: 'Favourite colour?',
   nameI18n: const {'language': 'en', 'nl_text': 'Favoriete kleur?'},
   description: 'Pick one',
   descriptionI18n: const {'language': 'en', 'nl_text': 'Kies er een'},
   options: const [
-    PollOption(id: 'option-1', text: 'Red', textI18n: {'language': 'en', 'nl_text': 'Rood'}),
-    PollOption(id: 'option-2', text: 'Blue'),
+    PollOption(text: 'Red', textI18n: {'language': 'en', 'nl_text': 'Rood'}),
+    PollOption(text: 'Blue'),
   ],
-  latestAnswers: [_translatedAnswer()],
-  ownVotesAndAnswers: [_translatedAnswer()],
 );

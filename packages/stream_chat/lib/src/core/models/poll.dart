@@ -237,12 +237,11 @@ class Poll extends Equatable implements ComparableFieldProvider {
   );
 
   /// This poll with the translations of [oldPoll] filled in where this one
-  /// has none, so an update that leaves them out doesn't switch a translated
-  /// poll back to its original text.
+  /// has none.
   ///
-  /// A translation is only kept for text that is unchanged: a renamed poll or
-  /// option must not show the translation of what it used to say. Returns this
-  /// poll as is when [oldPoll] is `null` or a different poll.
+  /// A translation is kept only for unchanged text, so a renamed poll or
+  /// option never carries the translation of its old text. Returns this poll
+  /// as is when [oldPoll] is `null` or a different poll.
   @internal
   Poll withTranslationsOf(Poll? oldPoll) {
     if (oldPoll == null || oldPoll.id != id) return this;
