@@ -100,6 +100,34 @@ void main() {
 
     expect(controller.value, PagedValue<String, PollVote>(items: [_vote('v1')], nextPageKey: 'cursor', error: error));
   });
+
+  test(
+    'StreamPollVoteListController.loadMore keeps the loaded votes and records an error the channel throws',
+    () async {
+      final channel = _channelAnswering([
+        Result.success(_page([_vote('v1')], next: 'cursor')),
+      ]);
+      final controller = _controller(channel);
+      await controller.doInitialLoad();
+      final thrown = StateError('Channel is not initialized');
+      when(
+        () => channel.queryPollVotes(
+          any(),
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
+          prev: any(named: 'prev'),
+        ),
+      ).thenThrow(thrown);
+
+      await controller.loadMore('cursor');
+
+      final success = controller.value.asSuccess;
+      expect(success.items, [_vote('v1')]);
+      expect(success.error, isA<StreamClientException>().having((it) => it.cause, 'cause', thrown));
+    },
+  );
 }
 
 PollVote _vote(String id) => PollVote(

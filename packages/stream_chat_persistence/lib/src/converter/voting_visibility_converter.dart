@@ -10,5 +10,5 @@ class VotingVisibilityConverter extends TypeConverter<VotingVisibility, String> 
   VotingVisibility fromSql(String fromDb) => VotingVisibility(fromDb);
 
   @override
-  String toSql(VotingVisibility value) => value.value;
+  String toSql(VotingVisibility value) => value.rawType;
 }

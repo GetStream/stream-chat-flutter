@@ -114,7 +114,7 @@ class Poll with _$Poll {
   /// The most recent votes across all options.
   ///
   /// Answers are not included; see [latestAnswers] for those.
-  List<PollVote> get latestVotes => [...latestVotesByOption.values.flattened];
+  late final List<PollVote> latestVotes = [...latestVotesByOption.values.flattened];
 
   /// The most recent answers left on this poll.
   @override
@@ -131,12 +131,12 @@ class Poll with _$Poll {
   /// The votes of the current user.
   ///
   /// Answers are not included; see [ownAnswers] for those.
-  List<PollVote> get ownVotes => [...ownVotesAndAnswers.where((it) => !it.isAnswer)];
+  late final List<PollVote> ownVotes = [...ownVotesAndAnswers.where((it) => !it.isAnswer)];
 
   /// The answers of the current user.
   ///
   /// Votes are not included; see [ownVotes] for those.
-  List<PollVote> get ownAnswers => [...ownVotesAndAnswers.where((it) => it.isAnswer)];
+  late final List<PollVote> ownAnswers = [...ownVotesAndAnswers.where((it) => it.isAnswer)];
 
   /// The unique identifier of the user who created this poll.
   @override
@@ -270,7 +270,7 @@ class PollFilterField extends FilterField<Poll> {
   /// **Supported operators:** `$eq`
   static final votingVisibility = PollFilterField(
     'voting_visibility',
-    (it) => it.votingVisibility.value,
+    (it) => it.votingVisibility.rawType,
   );
 
   /// Filters polls by their creation date.

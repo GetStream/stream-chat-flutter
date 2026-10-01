@@ -130,7 +130,7 @@ class PollV1JsonConverter implements JsonConverter<Poll, Map<String, dynamic>> {
     'name': poll.name,
     'description': poll.description,
     'options': poll.options.map(_pollOptionToV1Json).toList(),
-    'voting_visibility': poll.votingVisibility.value,
+    'voting_visibility': poll.votingVisibility.rawType,
     'enforce_unique_vote': poll.enforceUniqueVote,
     'max_votes_allowed': poll.maxVotesAllowed,
     'allow_user_suggested_options': poll.allowUserSuggestedOptions,

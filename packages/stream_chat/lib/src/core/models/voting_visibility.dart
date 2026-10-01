@@ -2,7 +2,7 @@
 ///
 /// A visibility without a constant here can still be named by wrapping its
 /// value: `VotingVisibility('public')`.
-extension type const VotingVisibility(String value) implements String {
+extension type const VotingVisibility(String rawType) implements String {
   /// Votes are counted, but who cast them is hidden from other users.
   static const anonymous = VotingVisibility('anonymous');
 

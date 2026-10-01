@@ -1581,7 +1581,7 @@ class Channel {
   /// Fetches one page of the votes and answers of the poll [pollId] matching [filter], ordered by [sort].
   ///
   /// Up to [limit] votes are returned. The next page is fetched by passing the `next` cursor of a response as [next],
-  /// and the previous page by passing its `prev` cursor as [prev]; pass at most one of the two.
+  /// and the previous page by passing its `prev` cursor as [prev]. At most one of [next] and [prev] may be given.
   Future<Result<QueryPollVotesResponse>> queryPollVotes(
     String pollId, {
     PollVoteFilter? filter,

@@ -28,6 +28,25 @@ void main() {
     expect(poll.copyWith(maxVotesAllowed: null).maxVotesAllowed, isNull);
   });
 
+  test('Poll.copyWith generates a new id when the id is set to null', () {
+    final poll = createTestPoll(id: 'poll-id', name: 'Lunch?');
+
+    final copy = poll.copyWith(id: null);
+
+    expect(copy.id, isNotEmpty);
+    expect(copy.id, isNot('poll-id'));
+  });
+
+  test('Poll.copyWith sets a timestamp set to null to the current time', () {
+    final poll = createTestPoll(name: 'Lunch?', createdAt: DateTime.utc(2023), updatedAt: DateTime.utc(2023));
+    final before = DateTime.now();
+
+    final copy = poll.copyWith(createdAt: null, updatedAt: null);
+
+    expect(copy.createdAt.isBefore(before), isFalse);
+    expect(copy.updatedAt.isBefore(before), isFalse);
+  });
+
   test('Poll.latestVotes holds the latest votes of every option', () {
     final pizza = _vote(id: 'v1', optionId: 'pizza');
     final sushi = _vote(id: 'v2', optionId: 'sushi');

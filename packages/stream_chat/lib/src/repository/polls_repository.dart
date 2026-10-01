@@ -135,7 +135,7 @@ class PollsRepository {
 
   /// Fetches one page of the polls matching [filter], ordered by [sort].
   ///
-  /// [next] and [prev] are the cursors a previous page returned; pass at most one of them.
+  /// [next] and [prev] are the cursors a previous page returned; at most one of them may be given.
   Future<Result<QueryPollsResponse>> queryPolls({
     PollFilter? filter,
     List<PollSort>? sort,
@@ -158,7 +158,7 @@ class PollsRepository {
 
   /// Fetches one page of the votes and answers of the poll [pollId] matching [filter], ordered by [sort].
   ///
-  /// [next] and [prev] are the cursors a previous page returned; pass at most one of them.
+  /// [next] and [prev] are the cursors a previous page returned; at most one of them may be given.
   Future<Result<QueryPollVotesResponse>> queryPollVotes(
     String pollId, {
     PollVoteFilter? filter,
