@@ -10,13 +10,11 @@
 
 - `StreamMessageComposer`'s top border now spans the full width, including under the side safe-area insets, and also shows above the no-permission message.
 - Suggestions from `customAutocompleteTriggers` now span the composer's full width, so their content has to keep clear of the side safe-area insets itself.
-- `StreamMessageItem` now defaults `maxWidth` to `272`, the width the message list already uses, so messages built with it are no longer 8 pixels narrower.
-- `StreamMediaGallery` and `StreamPhotoGallery` now show more tiles per row on wider screens, instead of always 3.
-- `defaultStreamPhotoGalleryDelegate` now shows more tiles per row on wider grids, so it no longer has a `crossAxisCount`; use a `SliverGridDelegateWithFixedCrossAxisCount` for a fixed count.
+- `StreamMediaGallery` and `StreamPhotoGallery`, including `defaultStreamPhotoGalleryDelegate`, now show more tiles per row on wider screens instead of always 3. Pass a `SliverGridDelegateWithFixedCrossAxisCount` as `gridDelegate` to keep a fixed count.
 
 ⚠️ Deprecated
 
-- Deprecated `StreamMediaGallery.crossAxisCount`; pass a `gridDelegate` instead.
+- Deprecated `StreamMediaGallery.crossAxisCount` in favour of `gridDelegate`.
 
 🐞 Fixed
 
