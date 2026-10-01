@@ -10,6 +10,7 @@ FilterConfigResponse _$FilterConfigResponseFromJson(
   Map<String, dynamic> json,
 ) => FilterConfigResponse(
   aiImageLabels: (json['ai_image_labels'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  aiImageOcrLabels: (json['ai_image_ocr_labels'] as List<dynamic>?)?.map((e) => e as String).toList(),
   aiImageTaxonomy: (json['ai_image_taxonomy'] as Map<String, dynamic>?)?.map(
     (k, e) => MapEntry(k, (e as List<dynamic>).map((e) => e as String).toList()),
   ),
@@ -24,6 +25,7 @@ Map<String, dynamic> _$FilterConfigResponseToJson(
   FilterConfigResponse instance,
 ) => <String, dynamic>{
   'ai_image_labels': instance.aiImageLabels,
+  'ai_image_ocr_labels': instance.aiImageOcrLabels,
   'ai_image_taxonomy': instance.aiImageTaxonomy,
   'ai_text_labels': instance.aiTextLabels,
   'config_keys': instance.configKeys,

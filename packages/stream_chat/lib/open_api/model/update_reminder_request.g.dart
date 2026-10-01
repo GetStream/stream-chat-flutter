@@ -9,6 +9,10 @@ part of 'update_reminder_request.dart';
 UpdateReminderRequest _$UpdateReminderRequestFromJson(
   Map<String, dynamic> json,
 ) => UpdateReminderRequest(
+  expiresAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['expires_at'],
+    const StreamDateTimeConverter().fromJson,
+  ),
   remindAt: _$JsonConverterFromJson<Object, DateTime>(
     json['remind_at'],
     const StreamDateTimeConverter().fromJson,
@@ -18,6 +22,10 @@ UpdateReminderRequest _$UpdateReminderRequestFromJson(
 Map<String, dynamic> _$UpdateReminderRequestToJson(
   UpdateReminderRequest instance,
 ) => <String, dynamic>{
+  'expires_at': _$JsonConverterToJson<Object, DateTime>(
+    instance.expiresAt,
+    const StreamDateTimeConverter().toJson,
+  ),
   'remind_at': _$JsonConverterToJson<Object, DateTime>(
     instance.remindAt,
     const StreamDateTimeConverter().toJson,
