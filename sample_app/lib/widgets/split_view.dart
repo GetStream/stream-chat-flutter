@@ -108,11 +108,11 @@ Rect? _verticalFold(MediaQueryData mediaQuery) {
   );
 }
 
-/// A split view that shows [primary] beside [secondary] on a wide
-/// [WindowSizeClass.regular] window, and only [secondary] otherwise.
+/// A split view that shows [primary] beside [secondary] on a
+/// [WindowWidthClass.expanded] window, and only [secondary] otherwise.
 ///
-/// Both panes need a regular window at least 840 wide, so a narrower regular
-/// window, such as a tablet in portrait, shows one pane at a time.
+/// Both panes also need a window that is at least [WindowHeightClass.medium],
+/// so a phone in landscape shows one pane at a time.
 ///
 /// [secondary] is the navigator for the trailing pane, and its root page is an
 /// [AdaptiveSplitViewRoot]. While only [secondary] is shown, that root page
@@ -187,13 +187,10 @@ class _AdaptiveSplitViewState extends State<AdaptiveSplitView> {
   // Opens and closes the drawer that spans both panes.
   final _drawerKey = GlobalKey<DrawerControllerState>(debugLabel: 'AdaptiveSplitView.drawer');
 
-  // The narrowest window that shows both panes.
-  static const _minimumSplitWidth = 840.0;
-
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
-    final isExpanded = WindowSizeClass.fromSize(size) == .regular && size.width >= _minimumSplitWidth;
+    final sizeClass = WindowSizeClass.of(context);
+    final isExpanded = sizeClass.width.isAtLeast(.expanded) && sizeClass.height.isAtLeast(.medium);
 
     return _AdaptiveSplitViewScope(
       isExpanded: isExpanded,
