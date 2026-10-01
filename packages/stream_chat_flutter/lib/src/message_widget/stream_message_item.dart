@@ -8,6 +8,7 @@ import 'package:stream_core_flutter/chat.dart' as core;
 
 import '../../platform_widget_builder/src/platform_widget_builder.dart';
 import '../../stream_chat_flutter.dart';
+import '../channel/stream_message_preview_text.dart';
 import '../context_menu/context_menu.dart';
 import '../context_menu/context_menu_region.dart';
 import 'message_status_labels.dart';
@@ -1433,10 +1434,11 @@ class _MessageRowSemanticsState extends State<_MessageRowSemantics> {
     final translationEnabled = StreamChatConfiguration.of(context).messageTranslation.enabled;
     final showsOriginalText = StreamMessageTranslations.isShowingOriginalTextOf(context, message.id);
 
-    // No default language: `translate` returns the message unchanged when the
-    // reader has none set, which is what should be announced.
+    // No default language: `translateForPreview` returns the message
+    // unchanged when the reader has none set, which is what should be
+    // announced. It translates the poll name too, as the bubble shows it.
     final shown = switch (translationEnabled && !showsOriginalText) {
-      true => message.translate(currentUser?.language),
+      true => translateForPreview(message, currentUser?.language),
       false => message,
     };
 

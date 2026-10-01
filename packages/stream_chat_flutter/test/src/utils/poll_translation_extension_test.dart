@@ -78,6 +78,17 @@ void main() {
     expect(poll.hasTranslation('nl'), isTrue);
   });
 
+  test('Poll.hasTranslation ignores a translated description', () {
+    final poll = Poll(
+      name: 'Favourite colour?',
+      description: 'Pick one',
+      descriptionI18n: const {'language': 'en', 'nl_text': 'Kies er een'},
+      options: const [PollOption(text: 'Red')],
+    );
+
+    expect(poll.hasTranslation('nl'), isFalse);
+  });
+
   test('Poll.hasTranslation ignores translated answers', () {
     final poll = Poll(
       name: 'Favourite colour?',

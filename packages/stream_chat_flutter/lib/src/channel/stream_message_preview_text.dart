@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
+
 import '../../stream_chat_flutter.dart';
 
 /// A widget that renders a preview of the message text.
@@ -44,7 +46,7 @@ class StreamMessagePreviewText extends StatelessWidget {
     final config = StreamChatConfiguration.of(context);
     final translationConfig = config.messageTranslation;
     final translationLanguage = language ?? currentUser?.language;
-    final translatedMessage = translationConfig.enabled ? _translate(message, translationLanguage) : message;
+    final translatedMessage = translationConfig.enabled ? translateForPreview(message, translationLanguage) : message;
     final previewMessage = translatedMessage.replaceMentions(linkify: false);
 
     final formatter = config.messagePreviewFormatter;
@@ -84,9 +86,10 @@ class StreamMessagePreviewText extends StatelessWidget {
   }
 }
 
-// The message with its text and its poll's name translated into [language],
-// for the formatter to preview. Only ever displayed, never sent.
-Message _translate(Message message, String? language) {
+/// The message with its text and its poll's name translated into [language],
+/// for a [MessagePreviewFormatter] to format. Only ever displayed, never sent.
+@internal
+Message translateForPreview(Message message, String? language) {
   final translated = message.translate(language);
   return switch (message.poll) {
     final poll? when poll.translatedName(language) != null => translated.copyWith(

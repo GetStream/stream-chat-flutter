@@ -535,14 +535,14 @@ extension PollTranslationX on Poll {
   /// there is none available locally.
   String? translatedDescription(String? language) => _translationOf(descriptionI18n, language);
 
-  /// Whether this poll's name, description or any of its options has a
-  /// translation into [language].
+  /// Whether this poll's name or any of its options has a translation into
+  /// [language].
   ///
-  /// Answers are not included: each is written by a different user, often in
-  /// a different language than the poll itself.
+  /// The description and the answers are not included: the poll attachment
+  /// doesn't show the description, and each answer is written by a different
+  /// user, often in a different language than the poll itself.
   bool hasTranslation(String? language) {
     if (translatedName(language) != null) return true;
-    if (translatedDescription(language) != null) return true;
     return options.any((it) => it.translatedText(language) != null);
   }
 }
