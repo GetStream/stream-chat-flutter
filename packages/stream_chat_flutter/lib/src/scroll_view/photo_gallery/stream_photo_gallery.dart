@@ -6,10 +6,8 @@ import '../../../stream_chat_flutter.dart';
 import '../../media_gallery/stream_media_grid_delegate.dart';
 import '../../utils/network_error_text.dart';
 
-/// A grid delegate with 3 tiles per row, whatever the grid's width.
-@Deprecated('StreamPhotoGallery now picks its tiles per row from its width. Pass a gridDelegate to change it.')
-const defaultStreamPhotoGalleryDelegate = SliverGridDelegateWithFixedCrossAxisCount(
-  crossAxisCount: 3,
+/// Default grid delegate  for [StreamPhotoGallery].
+const defaultStreamPhotoGalleryDelegate = StreamMediaGridDelegate(
   mainAxisSpacing: 2,
   crossAxisSpacing: 2,
 );
@@ -25,7 +23,7 @@ class StreamPhotoGallery extends StatelessWidget {
   const StreamPhotoGallery({
     super.key,
     required this.controller,
-    this.gridDelegate = const StreamMediaGridDelegate(mainAxisSpacing: 2, crossAxisSpacing: 2),
+    this.gridDelegate = defaultStreamPhotoGalleryDelegate,
     this.itemBuilder,
     this.emptyBuilder,
     this.loadMoreErrorBuilder,
@@ -63,8 +61,6 @@ class StreamPhotoGallery extends StatelessWidget {
 
   /// A delegate that controls the layout of the children within
   /// the [PagedValueGridView].
-  ///
-  /// Defaults to 3, 4 or 6 square tiles per row, depending on the grid's width.
   final SliverGridDelegate gridDelegate;
 
   /// A builder that is called to build items in the [PagedValueGridView].

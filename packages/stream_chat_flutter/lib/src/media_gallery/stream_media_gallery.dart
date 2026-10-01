@@ -107,10 +107,10 @@ class StreamMediaGalleryProps {
   int get crossAxisCount => _crossAxisCount ?? 3;
   final int? _crossAxisCount;
 
-  /// How the grid lays out its tiles.
+  /// The delegate that lays out the grid's tiles.
   ///
-  /// When null, the grid shows 3, 4 or 6 square tiles per row, depending on
-  /// its width.
+  /// When null, the grid shows square tiles, with more tiles per row as it gets
+  /// wider.
   final SliverGridDelegate? gridDelegate;
 
   /// The padding around this grid.

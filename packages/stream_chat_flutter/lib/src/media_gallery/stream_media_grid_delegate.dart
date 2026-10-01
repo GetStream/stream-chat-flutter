@@ -1,10 +1,10 @@
 import 'package:flutter/rendering.dart';
 
-/// Lays out a media grid's square tiles, with more tiles per row as the grid
-/// gets wider.
+/// A grid delegate that lays out a media grid's square tiles, with more tiles
+/// per row as the grid gets wider.
 ///
-/// The grid has 3 tiles per row when narrower than 600, 4 when narrower than
-/// 840, and 6 otherwise, and the tiles share the width between them.
+/// The tiles share the grid's width between them, so a wider grid gets more
+/// tiles rather than larger ones.
 class StreamMediaGridDelegate extends SliverGridDelegate {
   /// Creates a delegate for a media grid with the given spacing between tiles.
   const StreamMediaGridDelegate({
