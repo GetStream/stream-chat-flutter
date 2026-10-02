@@ -78,8 +78,9 @@
   inside the SDK: a `Result` on a connect call could be ignored and hide a failed sign-in.
 - **`createGuest` lives in `GeneralRepository`**, next to `enrichUrl`. Its mappers are in
   `lib/src/repository/mapper/user_mapper.dart`, with the `User` mappers they use.
-- **`ConnectGuestUserResponse` is internal:** a freezed envelope that only `createGuest` returns. Its
-  only public reach in v10 was `StreamChatApi.guest`, removed together with `GuestApi`.
+- **The envelope is the internal `CreateGuestUserResponse`:** a freezed envelope that only
+  `createGuest` returns. It replaces v10's public `ConnectGuestUserResponse`, whose only public reach was
+  `StreamChatApi.guest`, removed together with `GuestApi`.
 - **The request carries every field the backend honours for a client-side guest:** id, name, image,
   custom data, language, `invisible` and, for an `OwnUser`, privacy settings. `role`, `teams` and
   `teams_role` are ignored for client-side calls and are not sent.

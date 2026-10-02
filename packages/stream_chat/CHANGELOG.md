@@ -77,8 +77,7 @@
 - `AppSettingsResponse` is immutable, built through a const constructor, compares by value, gains `copyWith`, and its `duration` is a non-nullable `String`.
 - `AppSettings` and `UploadConfig` no longer extend `Equatable`, so `props` is removed; they still compare by value and gain `copyWith`.
 - `StreamChatApi.general.getAppSettings` is removed; call `StreamChatClient.getAppSettings` instead.
-- `StreamChatApi.guest` is removed; call `StreamChatClient.connectGuestUser` instead.
-- `ConnectGuestUserResponse` is removed from the public API.
+- `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed; call `StreamChatClient.connectGuestUser` instead.
 - The poll calls on `StreamChatClient` and `Channel` return a `Result` instead of throwing.
 - `CreatePollResponse`, `GetPollResponse` and `UpdatePollResponse` are replaced by `PollResponse`; `CreatePollOptionResponse`, `GetPollOptionResponse` and `UpdatePollOptionResponse` by `PollOptionResponse`; and `CastPollVoteResponse` and `RemovePollVoteResponse` by `PollVoteResponse`.
 - `queryPolls` and `queryPollVotes` take `limit` (10 when omitted), `next` and `prev` instead of `PaginationParams`, and their responses carry a `prev` cursor.
