@@ -1,7 +1,7 @@
 import '../../../open_api/api.dart' as api;
 import '../../core/models/own_user.dart';
 import '../../core/models/privacy_settings.dart';
-import '../../core/models/response/connect_guest_user_response.dart';
+import '../../core/models/response/create_guest_user_response.dart';
 import '../../core/models/user.dart';
 import '../../core/util/extension.dart';
 
@@ -82,10 +82,10 @@ extension PrivacySettingsRequestMapper on PrivacySettings {
   );
 }
 
-/// Maps a generated [api.CreateGuestResponse] to a [ConnectGuestUserResponse].
+/// Maps a generated [api.CreateGuestResponse] to a [CreateGuestUserResponse].
 extension CreateGuestResponseMapper on api.CreateGuestResponse {
-  /// Converts this response into a [ConnectGuestUserResponse].
-  ConnectGuestUserResponse toModel() => ConnectGuestUserResponse(
+  /// Converts this response into a [CreateGuestUserResponse].
+  CreateGuestUserResponse toModel() => CreateGuestUserResponse(
     duration: duration,
     accessToken: accessToken,
     user: user.toModel(),

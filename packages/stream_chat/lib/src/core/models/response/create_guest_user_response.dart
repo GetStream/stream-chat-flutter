@@ -2,13 +2,13 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../user.dart';
 
-part 'connect_guest_user_response.freezed.dart';
+part 'create_guest_user_response.freezed.dart';
 
 /// A newly created guest and the token that authenticates it.
 @freezed
-class ConnectGuestUserResponse with _$ConnectGuestUserResponse {
-  /// Creates a new [ConnectGuestUserResponse].
-  const ConnectGuestUserResponse({
+class CreateGuestUserResponse with _$CreateGuestUserResponse {
+  /// Creates a new [CreateGuestUserResponse].
+  const CreateGuestUserResponse({
     required this.duration,
     required this.accessToken,
     required this.user,
