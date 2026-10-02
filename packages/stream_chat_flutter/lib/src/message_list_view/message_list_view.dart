@@ -9,12 +9,12 @@ import 'package:rxdart/rxdart.dart';
 import '../../scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../stream_chat_flutter.dart';
 import '../misc/empty_widget.dart';
-import '../utils/network_error_text.dart';
 import 'floating_date_divider.dart';
 import 'loading_indicator.dart';
 import 'message_list_unread_controller.dart';
 import 'mlv_utils.dart';
 import 'stream_message_list_empty_state.dart';
+import 'stream_message_list_error_state.dart';
 import 'stream_message_list_skeleton_loading.dart';
 import 'thread_separator.dart';
 
@@ -603,10 +603,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     return MediaQuery.paddingOf(context).copyWith(left: 0, right: 0);
   }
 
-  // A SafeArea, only while [StreamMessageListView.enableSafeArea] is on.
+  // A StreamSafeArea, only while [StreamMessageListView.enableSafeArea] is on.
   Widget _safeArea({bool top = true, bool bottom = true, required Widget child}) {
     if (!widget.enableSafeArea) return child;
-    return SafeArea(top: top, bottom: bottom, child: child);
+    return StreamSafeArea(top: top, bottom: bottom, child: child);
   }
 
   @override
@@ -624,19 +624,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     Widget defaultErrorBuilder(BuildContext context, Object error) {
       if (widget.builders.error case final builder?) return _safeArea(child: builder(context, error));
 
-      final translations = context.translations;
-      final text = resolveNetworkErrorText(context, error, fallbackTitle: translations.loadingMessagesError);
-
-      final errorWidget = Center(
-        child: StreamScrollViewErrorWidget(
-          errorTitle: Text(text.title),
-          errorSubtitle: Text(text.description),
-          retryButtonText: Text(translations.tryAgainLabel),
-          onRetryPressed: () => streamChannel?.reloadChannel(),
-        ),
+      final errorState = StreamMessageListErrorState(
+        error: error,
+        onRetryPressed: () => streamChannel?.reloadChannel(),
       );
 
-      return _safeArea(child: errorWidget);
+      return _safeArea(child: errorState);
     }
 
     Widget defaultMessageListBuilder(BuildContext context, List<Message> list) {

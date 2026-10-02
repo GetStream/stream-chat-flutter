@@ -843,38 +843,13 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
           if (enabled) return messageInput;
 
           // Otherwise, show the no permission message.
-          return _buildNoPermissionMessage(context);
+          return _insetContent(context, _buildNoPermissionMessage(context));
         },
       ),
       final messageInput => messageInput,
     };
 
-    final spacing = context.streamSpacing;
-    final platform = Theme.of(context).platform;
-    final padding = MediaQuery.paddingOf(context);
-    final hasBottomInset = padding.bottom > 0;
-
-    // Apple platforms rest on the bottom inset; elsewhere a margin clears it,
-    // and stands in when there is none.
-    final bottomSafeAreaMargin = switch (platform) {
-      .iOS || .macOS when hasBottomInset => spacing.none,
-      _ => spacing.md,
-    };
-
-    final content = Material(
-      type: .transparency,
-      child: switch (widget.props.enableSafeArea) {
-        false => Center(heightFactor: 1, child: messageInput),
-        _ => StreamSafeArea.driven(
-          top: false,
-          listenable: _pickerAnimation,
-          // Only the bottom inset gives way to the picker; the side insets stay.
-          to: .only(left: padding.left, right: padding.right),
-          margin: .only(bottom: bottomSafeAreaMargin),
-          child: Center(heightFactor: 1, child: messageInput),
-        ),
-      },
-    );
+    final content = Material(type: .transparency, child: messageInput);
 
     final colorScheme = context.streamColorScheme;
     final effectiveSurfaceStyle = _resolveSurfaceStyle(context);
@@ -908,11 +883,41 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     );
   }
 
+  Widget _insetContent(BuildContext context, Widget child) {
+    final spacing = context.streamSpacing;
+    final platform = Theme.of(context).platform;
+    final padding = MediaQuery.paddingOf(context);
+    final hasBottomInset = padding.bottom > 0;
+
+    // Apple platforms rest on the bottom inset; elsewhere a margin clears it,
+    // and stands in when there is none.
+    final bottomSafeAreaMargin = switch (platform) {
+      .iOS || .macOS when hasBottomInset => spacing.none,
+      _ => spacing.md,
+    };
+
+    return switch (widget.props.enableSafeArea) {
+      false => Center(heightFactor: 1, child: child),
+      _ => StreamSafeArea.driven(
+        top: false,
+        listenable: _pickerAnimation,
+        // Only the bottom inset gives way to the picker; the side insets stay.
+        to: .only(left: padding.left, right: padding.right),
+        margin: .only(bottom: bottomSafeAreaMargin),
+        child: Center(heightFactor: 1, child: child),
+      ),
+    };
+  }
+
   Widget _buildAutocompleteMessageInput(BuildContext context) {
     return StreamAutocomplete(
       focusNode: _effectiveFocusNode,
       messageComposerController: _effectiveController,
-      fieldViewBuilder: _buildMessageInput,
+      // Inset inside the autocomplete so its suggestions span the full width.
+      fieldViewBuilder: (context, controller, focusNode) {
+        final messageInput = _buildMessageInput(context, controller, focusNode);
+        return _insetContent(context, messageInput);
+      },
       autocompleteTriggers: [
         ...widget.props.customAutocompleteTriggers,
         StreamAutocompleteTrigger(

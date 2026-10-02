@@ -77,6 +77,13 @@ class StreamSystemAttachmentPicker extends StatelessWidget {
 // The height of the attachment picker when using the tabbed interface.
 const _kTabbedAttachmentPickerHeight = 260.0;
 
+// The height of the attachment picker when using the tabbed interface on
+// compact-height screens.
+const _kCompactTabbedAttachmentPickerHeight = 158.0;
+
+// Screens shorter than this have a compact height, such as a phone in landscape.
+const _kCompactHeightBreakpoint = 480.0;
+
 /// Inline widget for the tabbed attachment picker interface.
 ///
 /// Displays a tabbed interface with horizontal tabs for different attachment
@@ -128,6 +135,11 @@ class _StreamTabbedAttachmentPickerState extends State<StreamTabbedAttachmentPic
     return ValueListenableBuilder<AttachmentPickerValue>(
       valueListenable: widget.controller,
       builder: (context, value, _) {
+        final pickerHeight = switch (MediaQuery.sizeOf(context)) {
+          Size(height: < _kCompactHeightBreakpoint) => _kCompactTabbedAttachmentPickerHeight,
+          _ => _kTabbedAttachmentPickerHeight,
+        };
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -143,7 +155,7 @@ class _StreamTabbedAttachmentPickerState extends State<StreamTabbedAttachmentPic
             Semantics(
               role: SemanticsRole.tabPanel,
               child: SizedBox(
-                height: _kTabbedAttachmentPickerHeight,
+                height: pickerHeight,
                 child: _currentOption.optionViewBuilder(
                   context,
                   widget.controller,
