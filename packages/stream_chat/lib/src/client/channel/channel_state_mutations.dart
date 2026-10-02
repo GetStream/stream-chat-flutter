@@ -442,15 +442,17 @@ class ChannelStateMutations {
 
   /// Merges the updated [user] into the matching member and membership.
   ///
-  /// Does nothing if the user is not an existing member of the channel.
+  /// Does nothing if the user is not an existing member of the channel, or if
+  /// the member and membership already hold this exact [user].
   void onMemberUserUpdated(User user) {
     final existingMembers = [...?_state.channelState.members];
     final existingMembership = _state.channelState.membership;
 
-    // Return if the user is not a existing member of the channel, or the
-    // member already holds this exact user.
+    // Return if the user is not a existing member of the channel.
     final existingMember = existingMembers.firstWhereOrNull((m) => m.userId == user.id);
-    if (existingMember == null || isSameUser(existingMember.user, user)) return;
+    if (existingMember == null) return;
+
+    if (_isUserMergeNoOp(existingMember, user) && _isUserMergeNoOp(existingMembership, user)) return;
 
     Member? maybeUpdateMemberUser(Member? existingMember) {
       if (existingMember == null) return null;
@@ -466,6 +468,14 @@ class ChannelStateMutations {
         members: [...existingMembers.map(maybeUpdateMemberUser).nonNulls],
       ),
     );
+  }
+
+  // Whether merging the given user into the given member would leave it
+  // unchanged: the member belongs to another user, or already holds this
+  // exact user.
+  bool _isUserMergeNoOp(Member? member, User user) {
+    if (member == null || member.userId != user.id) return true;
+    return isSameUser(member.user, user);
   }
 
   /// Replaces the matching [member] and membership.

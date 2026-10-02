@@ -628,6 +628,20 @@ void main() {
       verifyNever(() => state.updateChannelState(any()));
     });
 
+    test('onMemberUserUpdated updates a membership that holds an outdated user', () {
+      final updatedUser = User(id: otherUser.id, name: 'Updated');
+      stubChannelState(
+        ChannelState(
+          members: [Member(user: updatedUser)],
+          membership: member,
+        ),
+      );
+
+      mutations.onMemberUserUpdated(updatedUser);
+
+      expect(capturedChannelState().membership?.user, updatedUser);
+    });
+
     test('onMemberUserUpdated applies a user that only changed its updatedAt', () {
       stubChannelState(ChannelState(members: [member]));
       final updatedUser = member.user!.copyWith(updatedAt: DateTime(2026, 10, 1));
