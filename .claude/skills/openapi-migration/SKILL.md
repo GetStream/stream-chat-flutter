@@ -137,8 +137,9 @@ Work the ladder in order — the answer changes depending on *where* it's missin
    ```
 2. **Present in the spec, but the generated form is unusable.** Multipart uploads are the known case: the spec says
    `multipart/form-data`, but the generated `uploadFile` / `uploadChannelFile` take a JSON `@Body()` with no
-   progress or cancellation. Hand-write that call with retrofit over the generated *response* models, keep
-   `AttachmentFileUploader` off `DefaultApi`, and open a generator fix upstream — see the `openapi-codegen` skill.
+   progress or cancellation. Group 12 hand-wrote them as `lib/src/cdn/cdn_api.dart`, mirroring the generated
+   operations over their *response* models; a new multipart endpoint belongs there, not on `DefaultApi`. Open a
+   generator fix upstream too — see the `openapi-codegen` skill.
    Don't contort the call site around a broken signature.
 3. **In a newer spec than the one our tree was generated from.** Regenerate — its own PR, never folded into a
    feature slice. Also `openapi-codegen`.

@@ -60,6 +60,7 @@ export 'package:stream_core/stream_core.dart'
         SystemEnvironment,
         TokenManager,
         TokenProvider,
+        UploadedFile,
         UserToken,
         UserTokenLoader,
         WsEvent;

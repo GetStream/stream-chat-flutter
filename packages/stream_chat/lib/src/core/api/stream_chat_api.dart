@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:stream_core/stream_core.dart' show ConnectionIdGetter, SystemEnvironmentManager, TokenManager;
 
 import '../http/stream_http_client.dart';
-import 'attachment_file_uploader.dart';
 import 'channel_api.dart';
 import 'general_api.dart';
 import 'message_api.dart';
@@ -22,11 +21,9 @@ class StreamChatApi {
     TokenManager? tokenManager,
     ConnectionIdGetter? connectionId,
     SystemEnvironmentManager? systemEnvironmentManager,
-    AttachmentFileUploaderProvider attachmentFileUploaderProvider = StreamAttachmentFileUploader.new,
     Iterable<Interceptor>? interceptors,
     HttpClientAdapter? httpClientAdapter,
-  }) : _fileUploaderProvider = attachmentFileUploaderProvider,
-       _client =
+  }) : _client =
            client ??
            StreamHttpClient(
              apiKey,
@@ -39,7 +36,6 @@ class StreamChatApi {
            );
 
   final StreamHttpClient _client;
-  final AttachmentFileUploaderProvider _fileUploaderProvider;
 
   /// Api dedicated to users operations
   UserApi get user => _user ??= UserApi(_client);
@@ -72,8 +68,4 @@ class StreamChatApi {
   /// Api dedicated to general operations
   GeneralApi get general => _general ??= GeneralApi(_client);
   GeneralApi? _general;
-
-  /// Class responsible for uploading images and files to a given channel
-  AttachmentFileUploader get fileUploader => _fileUploader ??= _fileUploaderProvider.call(_client);
-  AttachmentFileUploader? _fileUploader;
 }

@@ -31,6 +31,7 @@ onto Stream's OpenAPI-generated API client.
     - [App Settings](#app-settings)
     - [Guest Users](#guest-users)
     - [Polls](#polls)
+    - [File Upload](#file-upload)
     - [User Groups](#user-groups)
     - [Link Previews](#link-previews)
 - [Migration Checklist](#migration-checklist)
@@ -78,6 +79,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**App Settings**](#app-settings) | `getAppSettings` returns a `Result<AppSettingsResponse>` instead of throwing; `GetAppSettingsResponse` is renamed `AppSettingsResponse` |
 | [**Guest Users**](#guest-users) | `connectGuestUser` is unchanged; `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed |
 | [**Polls**](#polls) | Poll calls return a `Result`; eight responses become `PollResponse`, `PollOptionResponse` and `PollVoteResponse`; queries take `limit`/`next`/`prev`; `VotingVisibility` is an extension type |
+| [**File Upload**](#file-upload) | Uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -230,6 +232,11 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `Poll` / `PollOption` / `PollVote extends Equatable`, `props` | value `==` | `removed` | `Poll` and `PollOption` now compare `extraData` too |
 | `PollVote.isAnswer` (a field set in the constructor) | the same name, as a getter | `retyped` | Computed from `answerText` on each read |
 | `StreamChatApi.polls` (`PollsApi`) | `StreamChatClient`'s poll methods | `removed` | The endpoints moved to the generated client |
+| `sendImage` / `sendFile` / `uploadImage` / `uploadFile` → `Future<SendImageResponse>` and siblings | `Future<Result<UploadedFile>>` | `retyped` | On `StreamChatClient`, `Channel` and `AttachmentFileUploader`. Returns a `Result` instead of throwing |
+| `deleteImage` / `deleteFile` / `removeImage` / `removeFile` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | On `StreamChatClient`, `Channel` and `AttachmentFileUploader`. Returns a `Result` instead of throwing |
+| `SendAttachmentResponse`, `SendFileResponse`, `SendImageResponse`, `UploadImageResponse`, `UploadFileResponse` | `UploadedFile` (`stream_core`) | `removed` | `.file` becomes `.fileUrl`; `.thumbUrl` is unchanged; `duration` is gone |
+| `AttachmentFileUploaderProvider` = `AttachmentFileUploader Function(StreamHttpClient)` | `AttachmentFileUploader Function(Dio)` | `retyped` | Receives the client's `Dio`; `StreamAttachmentFileUploader(dio)` builds the default |
+| `StreamChatApi.fileUploader`, `StreamChatApi(attachmentFileUploaderProvider:)` | `StreamChatClient(attachmentFileUploaderProvider:)` | `removed` | The uploader belongs to `StreamChatClient` |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -815,6 +822,46 @@ equal, so neither are the messages that carry them, and a widget comparing them 
 changes.
 
 **`StreamChatApi.polls` is removed.** Call the poll methods on `StreamChatClient` or `Channel` instead.
+
+### File Upload
+
+**Uploads and deletes return a `Result` instead of throwing.** `sendImage`, `sendFile`, `uploadImage` and
+`uploadFile` answer an `UploadedFile`, and the deletes carry no value on success. That holds on `Channel` and on
+`AttachmentFileUploader`. A canceled upload is a failure whose error is a `StreamNetworkException` with
+`isCancelled` set.
+
+```dart
+// v10
+try {
+  final response = await channel.sendImage(file);
+  setImage(response.file);
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await channel.sendImage(file);
+result.fold(
+  onSuccess: (uploaded) => setImage(uploaded.fileUrl),
+  onFailure: (error, _) => report(error),
+);
+```
+
+**The response types are replaced by `UploadedFile`**, from `stream_core` and exported by this package.
+`file` becomes `fileUrl`; `thumbUrl`, set for a video, is unchanged; `duration` is gone. Build one with
+`UploadedFile(fileUrl: url)` where v10 wrote `SendFileResponse()..file = url`.
+
+**A custom uploader returns a `Result`, and its provider receives a `Dio`.** Implement the same eight methods,
+returning `Result`s, and build the uploader from the `Dio` the provider hands it — the client's own, with its
+authentication and error handling.
+
+```dart
+// v10
+StreamChatClient(apiKey, attachmentFileUploaderProvider: (httpClient) => MyUploader(httpClient));
+
+// v11
+StreamChatClient(apiKey, attachmentFileUploaderProvider: (dio) => MyUploader(dio));
+```
 
 ---
 

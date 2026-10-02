@@ -38,8 +38,4 @@ void main() {
   test('`.general`', () {
     expect(streamChatApi.general, isNotNull);
   });
-
-  test('`.fileUploader`', () {
-    expect(streamChatApi.fileUploader, isNotNull);
-  });
 }

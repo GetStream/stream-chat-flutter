@@ -3415,24 +3415,6 @@ void main() {
       expect(response.results, isA<List<GetMessageResponse>>());
     });
 
-    test('SendFileResponse', () {
-      const jsonExample = '''{"file": "file-url","duration":"0.35ms"}''';
-      final response = SendFileResponse.fromJson(json.decode(jsonExample));
-      expect(response.file, isA<String>());
-    });
-
-    test('SendImageResponse', () {
-      const jsonExample = '''{"file": "file-url","duration":"0.35ms"}''';
-      final response = SendImageResponse.fromJson(json.decode(jsonExample));
-      expect(response.file, isA<String>());
-    });
-
-    test('SendImageResponse', () {
-      const jsonExample = '''{"file": "file-url","duration":"0.35ms"}''';
-      final response = SendImageResponse.fromJson(json.decode(jsonExample));
-      expect(response.file, isA<String>());
-    });
-
     test('EmptyResponse', () {
       const jsonExample = '''{"file": "file-url","duration":"0.35ms"}''';
       final response = EmptyResponse.fromJson(json.decode(jsonExample));
