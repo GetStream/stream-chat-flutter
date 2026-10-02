@@ -21,6 +21,10 @@ import '../core/util/extension.dart';
 
 /// A simple client used for persisting chat data locally.
 abstract class ChatPersistenceClient {
+  /// The number of messages per channel read back when no message limit is
+  /// given.
+  static const defaultMessageLimit = 25;
+
   /// Whether the connection is established.
   bool get isConnected;
 

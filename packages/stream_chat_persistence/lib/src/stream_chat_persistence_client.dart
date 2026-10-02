@@ -401,8 +401,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
 
     // 5) Hydrate ONLY the page.
     final messagePagination = PaginationParams(
-      // Default limit is set to 25 in backend.
-      limit: messageLimit ?? 25,
+      limit: messageLimit ?? ChatPersistenceClient.defaultMessageLimit,
     );
     return Future.wait(pagedCids.map((cid) => getChannelStateByCid(cid, messagePagination: messagePagination)));
   }
