@@ -44,7 +44,7 @@ command:
       diacritic: ^0.1.6
       dio: ^5.11.0
       drift: ^2.33.0
-      equatable: ^2.0.8
+      equatable: ^3.0.0
       ezanimation: ^0.6.0
       firebase_core: ^4.0.0
       # Capped below 5.2.5 / 16.4.2: those releases import `FirebasePlugin` from
