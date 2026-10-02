@@ -7,6 +7,7 @@
 🔄 Changed
 
 - `name_i18n`, `description_i18n` and `text_i18n` are no longer kept in `Poll.extraData` and `PollOption.extraData`; read the new `*I18n` fields instead.
+- Reduced the channel state updates emitted for message updates in channels without active live locations.
 
 ## 10.5.0
 
