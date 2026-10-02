@@ -80,7 +80,9 @@ void main() {
     when(() => channelClientState.isUpToDateStream).thenAnswer((_) => isUpToDateController.stream);
     when(() => channelClientState.unreadCountStream).thenAnswer((_) => unreadCountController.stream);
     when(() => channelClientState.readStream).thenAnswer((_) => const Stream.empty());
+    when(() => channelClientState.channelStateStream).thenAnswer((_) => const Stream.empty());
     when(() => channelClientState.read).thenReturn([]);
+    when(() => channelClientState.channelState).thenReturn(const ChannelState(read: []));
     when(() => channelClientState.membersStream).thenAnswer((_) => const Stream.empty());
     when(() => channelClientState.members).thenReturn([]);
     when(() => channelClientState.currentUserReadStream).thenAnswer((_) => currentUserReadController.stream);

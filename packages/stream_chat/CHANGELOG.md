@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed channel and client state notifying listeners for events that change nothing, such as a message from a user the state already holds or an unchanged watcher count.
+
 ## 10.5.0
 
 ✅ Added

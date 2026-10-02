@@ -166,7 +166,9 @@ void main() {
       when(() => channel.client).thenReturn(client);
       when(() => channel.state).thenReturn(channelState);
       when(() => channelState.read).thenReturn(reads);
+      when(() => channelState.channelState).thenReturn(ChannelState(read: reads));
       when(() => channelState.readStream).thenAnswer((_) => Stream.value(reads));
+      when(() => channelState.channelStateStream).thenAnswer((_) => Stream.value(ChannelState(read: reads)));
 
       final isPreview = presentation == core.StreamMessagePresentation.preview;
 

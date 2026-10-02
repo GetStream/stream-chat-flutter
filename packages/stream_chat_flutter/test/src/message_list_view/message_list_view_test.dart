@@ -31,7 +31,9 @@ void main() {
     when(() => channelClientState.unreadCountStream).thenAnswer((_) => Stream.value(0));
     when(() => channelClientState.unreadCount).thenReturn(0);
     when(() => channelClientState.readStream).thenAnswer((_) => const Stream.empty());
+    when(() => channelClientState.channelStateStream).thenAnswer((_) => const Stream.empty());
     when(() => channelClientState.read).thenReturn([]);
+    when(() => channelClientState.channelState).thenReturn(const ChannelState(read: []));
     when(() => channelClientState.membersStream).thenAnswer((_) => const Stream.empty());
     when(() => channelClientState.members).thenReturn([]);
     when(() => channelClientState.currentUserRead).thenReturn(null);
@@ -139,6 +141,11 @@ void main() {
     );
 
     when(() => channelClientState.read).thenReturn([Read(lastRead: DateTime.now(), user: user)]);
+    when(() => channelClientState.channelState).thenReturn(
+      ChannelState(
+        read: [Read(lastRead: DateTime.now(), user: user)],
+      ),
+    );
 
     when(() => channelClientState.messagesStream).thenAnswer(
       (_) => Stream.value([message]),

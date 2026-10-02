@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 
 import '../../../stream_chat.dart';
+import '../../core/util/user_equality.dart';
 
 /// Applies channel event payloads as [ChannelClientState] mutations.
 ///
@@ -48,7 +49,7 @@ class ChannelStateMutations {
   void onMessageNew(Message message, {int? watcherCount}) {
     _state.addNewMessage(message);
 
-    if (watcherCount != null) {
+    if (watcherCount != null && watcherCount != _state.channelState.watcherCount) {
       _state.updateChannelState(
         _state.channelState.copyWith(watcherCount: watcherCount),
       );
@@ -410,6 +411,11 @@ class ChannelStateMutations {
   ///
   /// A null count leaves the currently stored value unchanged.
   void onChannelCounts({int? memberCount, int? messageCount}) {
+    final channel = _state.channelState.channel;
+    final memberCountChanged = memberCount != null && memberCount != channel?.memberCount;
+    final messageCountChanged = messageCount != null && messageCount != channel?.messageCount;
+    if (!memberCountChanged && !messageCountChanged) return;
+
     _state.updateChannelState(
       _state.channelState.copyWith(
         channel: _state.channelState.channel?.copyWith(
@@ -436,13 +442,17 @@ class ChannelStateMutations {
 
   /// Merges the updated [user] into the matching member and membership.
   ///
-  /// Does nothing if the user is not an existing member of the channel.
+  /// Does nothing if the user is not an existing member of the channel, or if
+  /// the member and membership already hold this exact [user].
   void onMemberUserUpdated(User user) {
     final existingMembers = [...?_state.channelState.members];
     final existingMembership = _state.channelState.membership;
 
     // Return if the user is not a existing member of the channel.
-    if (!existingMembers.any((m) => m.userId == user.id)) return;
+    final existingMember = existingMembers.firstWhereOrNull((m) => m.userId == user.id);
+    if (existingMember == null) return;
+
+    if (_isUserMergeNoOp(existingMember, user) && _isUserMergeNoOp(existingMembership, user)) return;
 
     Member? maybeUpdateMemberUser(Member? existingMember) {
       if (existingMember == null) return null;
@@ -458,6 +468,14 @@ class ChannelStateMutations {
         members: [...existingMembers.map(maybeUpdateMemberUser).nonNulls],
       ),
     );
+  }
+
+  // Whether merging the given user into the given member would leave it
+  // unchanged: the member belongs to another user, or already holds this
+  // exact user.
+  bool _isUserMergeNoOp(Member? member, User user) {
+    if (member == null || member.userId != user.id) return true;
+    return isSameUser(member.user, user);
   }
 
   /// Replaces the matching [member] and membership.
