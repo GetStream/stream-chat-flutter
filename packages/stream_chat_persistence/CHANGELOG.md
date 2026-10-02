@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Poll translations are now stored in the offline cache.
+
 ## 10.5.0
 
 🐞 Fixed
