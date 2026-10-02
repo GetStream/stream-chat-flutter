@@ -1,24 +1,27 @@
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart' show objectRuntimeType;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../utils/window_size_class.dart';
 
 /// A layout that places [primary] and [secondary] side by side, separated by a
-/// divider.
+/// divider that people can drag to resize the panes.
 ///
 /// When a fold or hinge divides the window into a left and a right side, each
-/// pane fills one side, easing into place as the fold appears or disappears.
-/// Each pane keeps only the safe-area insets on its outer edges. Assumes it
-/// fills the window.
-class SplitView extends StatelessWidget {
+/// pane fills one side, easing into place as the fold appears or disappears,
+/// and the divider can't be dragged. Each pane keeps only the safe-area insets
+/// on its outer edges. Assumes it fills the window.
+class SplitView extends StatefulWidget {
   const SplitView({
     super.key,
     required this.primary,
     required this.secondary,
-    this.primaryWidth = 320.0,
+    this.primaryConstraints = const SplitPaneConstraints(minWidth: 280, initialWidth: 320, maxWidth: 420),
+    this.secondaryConstraints = const SplitPaneConstraints(minWidth: 360),
   });
 
   /// The leading pane.
@@ -27,29 +30,154 @@ class SplitView extends StatelessWidget {
   /// The trailing pane, which fills the width [primary] leaves.
   final Widget secondary;
 
-  /// The width of [primary] while no fold or hinge divides the window.
-  final double primaryWidth;
+  /// The widths [primary] starts at and can be resized within.
+  final SplitPaneConstraints primaryConstraints;
 
+  /// The widths [secondary] starts at and can be resized within.
+  ///
+  /// Its [SplitPaneConstraints.minWidth] wins over [primaryConstraints] on a
+  /// window too narrow for both.
+  final SplitPaneConstraints secondaryConstraints;
+
+  @override
+  State<SplitView> createState() => _SplitViewState();
+}
+
+/// The widths a [SplitView] pane starts at and can be resized within.
+@immutable
+class SplitPaneConstraints {
+  const SplitPaneConstraints({
+    this.minWidth = 0.0,
+    this.initialWidth,
+    this.maxWidth = double.infinity,
+  }) : assert(0 <= minWidth && minWidth <= maxWidth, 'minWidth must be between 0 and maxWidth.'),
+       assert(
+         initialWidth == null || (minWidth <= initialWidth && initialWidth <= maxWidth),
+         'initialWidth must be between minWidth and maxWidth.',
+       );
+
+  /// The narrowest people can make the pane.
+  final double minWidth;
+
+  /// The width of the pane until people resize it.
+  ///
+  /// When both panes have one, the leading pane's wins. When neither does,
+  /// the leading pane starts at its narrowest.
+  final double? initialWidth;
+
+  /// The widest people can make the pane.
+  final double maxWidth;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(other, this)) return true;
+    return other is SplitPaneConstraints &&
+        other.minWidth == minWidth &&
+        other.initialWidth == initialWidth &&
+        other.maxWidth == maxWidth;
+  }
+
+  @override
+  int get hashCode => Object.hash(minWidth, initialWidth, maxWidth);
+
+  @override
+  String toString() {
+    return '${objectRuntimeType(this, 'SplitPaneConstraints')}'
+        '(minWidth: $minWidth, initialWidth: $initialWidth, maxWidth: $maxWidth)';
+  }
+}
+
+class _SplitViewState extends State<SplitView> {
   // The width of the line between the panes.
   static const _dividerWidth = 1.0;
 
+  // How far one keyboard or screen reader step resizes the panes.
+  static const _resizeStep = 20.0;
+
   // How long the panes take to settle when a fold starts or stops dividing
-  // the window.
-  static const _foldTransitionDuration = Duration(milliseconds: 200);
+  // the window, or a keyboard or screen reader step resizes them.
+  static const _transitionDuration = Duration(milliseconds: 200);
+
+  // The width people resized [SplitView.primary] to, if they have.
+  double? _resizedPrimaryWidth;
+
+  // Whether people are dragging the divider, which the panes follow without easing.
+  var _isDragging = false;
+
+  // The range people can resize [SplitView.primary] within on a window [width]
+  // wide, where both panes' constraints hold.
+  ({double min, double max}) _primaryWidthRange(double width) {
+    final SplitView(:primaryConstraints, :secondaryConstraints) = widget;
+    final available = width - _dividerWidth;
+    final max = math.min(primaryConstraints.maxWidth, available - secondaryConstraints.minWidth);
+    final min = math.max(primaryConstraints.minWidth, available - secondaryConstraints.maxWidth);
+    return (min: math.min(min, max), max: max);
+  }
+
+  // The width of [SplitView.primary] on a window [width] wide.
+  double _primaryWidth(double width) {
+    final SplitView(:primaryConstraints, :secondaryConstraints) = widget;
+    final range = _primaryWidthRange(width);
+    final initialWidth = switch ((primaryConstraints.initialWidth, secondaryConstraints.initialWidth)) {
+      (final primary?, _) => primary,
+      (null, final secondary?) => width - _dividerWidth - secondary,
+      (null, null) => range.min,
+    };
+    return (_resizedPrimaryWidth ?? initialWidth).clamp(range.min, range.max);
+  }
+
+  void _resizeBy(double delta, double width) {
+    final range = _primaryWidthRange(width);
+    setState(() => _resizedPrimaryWidth = (_primaryWidth(width) + delta).clamp(range.min, range.max));
+  }
 
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
+    final width = mediaQuery.size.width;
     final isLtr = Directionality.of(context) == TextDirection.ltr;
 
-    final (targetPrimaryWidth, dividerWidth) = switch (_verticalFold(mediaQuery)) {
-      final fold? => (isLtr ? fold.left : mediaQuery.size.width - fold.right, math.max(fold.width, _dividerWidth)),
-      null => (primaryWidth, _dividerWidth),
+    final fold = _verticalFold(mediaQuery);
+    final range = _primaryWidthRange(width);
+    final primaryWidth = switch (fold) {
+      final fold? => isLtr ? fold.left : width - fold.right,
+      null => _primaryWidth(width),
     };
+    final dividerWidth = math.max(fold?.width ?? 0, _dividerWidth);
+
+    // Builds the same tree with or without a fold, so the panes ease between the two.
+    return Stack(
+      fit: .expand,
+      children: [
+        _buildAnimatedPanes(mediaQuery, primaryWidth, dividerWidth),
+        if (fold == null)
+          PositionedDirectional(
+            top: 0,
+            bottom: 0,
+            start: primaryWidth + (_dividerWidth - _SplitViewDivider.hitWidth) / 2,
+            width: _SplitViewDivider.hitWidth,
+            child: _SplitViewDivider(
+              primaryWidth: primaryWidth,
+              minPrimaryWidth: range.min,
+              maxPrimaryWidth: range.max,
+              windowWidth: width,
+              step: _resizeStep,
+              onResizeStart: () => setState(() => _isDragging = true),
+              onResize: (delta) => _resizeBy(delta, width),
+              onResizeEnd: () => setState(() => _isDragging = false),
+              onStep: (delta) => _resizeBy(delta, width),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildAnimatedPanes(MediaQueryData mediaQuery, double primaryWidth, double dividerWidth) {
+    final animate = !_isDragging && !mediaQuery.disableAnimations;
 
     return TweenAnimationBuilder<double>(
-      tween: Tween(end: targetPrimaryWidth),
-      duration: mediaQuery.disableAnimations ? Duration.zero : _foldTransitionDuration,
+      tween: Tween(end: primaryWidth),
+      duration: animate ? _transitionDuration : Duration.zero,
       curve: Curves.easeInOut,
       builder: (context, primaryPaneWidth, _) => _buildPanes(
         context,
@@ -81,7 +209,7 @@ class SplitView extends StatelessWidget {
           width: primaryPaneWidth,
           child: MediaQuery(
             data: mediaQuery.removeDisplayFeatures(primaryPane),
-            child: primary,
+            child: widget.primary,
           ),
         ),
         VerticalDivider(
@@ -92,10 +220,113 @@ class SplitView extends StatelessWidget {
         Expanded(
           child: MediaQuery(
             data: mediaQuery.removeDisplayFeatures(secondaryPane),
-            child: secondary,
+            child: widget.secondary,
           ),
         ),
       ],
+    );
+  }
+}
+
+// The area around the line between a split view's panes that people drag, or
+// step with the arrow keys or a screen reader, to resize them.
+class _SplitViewDivider extends StatefulWidget {
+  const _SplitViewDivider({
+    required this.primaryWidth,
+    required this.minPrimaryWidth,
+    required this.maxPrimaryWidth,
+    required this.windowWidth,
+    required this.step,
+    required this.onResizeStart,
+    required this.onResize,
+    required this.onResizeEnd,
+    required this.onStep,
+  });
+
+  // The width of the area, centered on the line, that responds to a drag.
+  static const hitWidth = 44.0;
+
+  final double primaryWidth;
+  final double minPrimaryWidth;
+  final double maxPrimaryWidth;
+  final double windowWidth;
+  final double step;
+
+  final VoidCallback onResizeStart;
+
+  // Called with how far the primary pane grows, negative when it shrinks.
+  final ValueChanged<double> onResize;
+  final VoidCallback onResizeEnd;
+
+  // Called with how far one step grows the primary pane, negative when it shrinks.
+  final ValueChanged<double> onStep;
+
+  @override
+  State<_SplitViewDivider> createState() => _SplitViewDividerState();
+}
+
+class _SplitViewDividerState extends State<_SplitViewDivider> {
+  var _isFocused = false;
+
+  bool get _canGrow => widget.primaryWidth < widget.maxPrimaryWidth;
+  bool get _canShrink => widget.primaryWidth > widget.minPrimaryWidth;
+
+  String _describe(double primaryWidth) => '${(primaryWidth / widget.windowWidth * 100).round()}%';
+
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event, bool isLtr) {
+    if (event is KeyUpEvent) return KeyEventResult.ignored;
+
+    final direction = switch (event.logicalKey) {
+      LogicalKeyboardKey.arrowRight => isLtr ? 1 : -1,
+      LogicalKeyboardKey.arrowLeft => isLtr ? -1 : 1,
+      _ => null,
+    };
+    if (direction == null) return KeyEventResult.ignored;
+
+    widget.onStep(direction * widget.step);
+    return KeyEventResult.handled;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.streamColorScheme;
+    final isLtr = Directionality.of(context) == TextDirection.ltr;
+    final direction = isLtr ? 1.0 : -1.0;
+
+    final grown = math.min(widget.primaryWidth + widget.step, widget.maxPrimaryWidth);
+    final shrunk = math.max(widget.primaryWidth - widget.step, widget.minPrimaryWidth);
+
+    return Semantics(
+      slider: true,
+      label: 'Channel list width',
+      value: _describe(widget.primaryWidth),
+      increasedValue: _canGrow ? _describe(grown) : null,
+      decreasedValue: _canShrink ? _describe(shrunk) : null,
+      onIncrease: _canGrow ? () => widget.onStep(widget.step) : null,
+      onDecrease: _canShrink ? () => widget.onStep(-widget.step) : null,
+      child: Focus(
+        onFocusChange: (focused) => setState(() => _isFocused = focused),
+        onKeyEvent: (node, event) => _handleKeyEvent(node, event, isLtr),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.resizeColumn,
+          // Leaves taps near the line to the panes beneath it.
+          hitTestBehavior: HitTestBehavior.translucent,
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onHorizontalDragStart: (_) => widget.onResizeStart(),
+            onHorizontalDragUpdate: (details) => widget.onResize(details.primaryDelta! * direction),
+            onHorizontalDragEnd: (_) => widget.onResizeEnd(),
+            onHorizontalDragCancel: widget.onResizeEnd,
+            // Marks the line while it has keyboard focus.
+            child: Center(
+              child: SizedBox(
+                width: 2,
+                child: ColoredBox(color: _isFocused ? colorScheme.borderFocus : Colors.transparent),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
