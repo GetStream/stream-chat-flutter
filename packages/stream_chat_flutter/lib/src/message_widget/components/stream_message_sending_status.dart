@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
 
 import '../../../stream_chat_flutter.dart';
+import '../message_read_status_builder.dart';
 import '../message_status_labels.dart';
 
 /// Displays the sending status of a message, including attachment upload
@@ -46,33 +47,15 @@ class StreamMessageSendingStatus extends StatelessWidget {
       .standard => null,
     };
 
-    // The channel state stream is the same object on every build, unlike a
-    // stream mapped from it, so a rebuild keeps its subscription; the
-    // comparator skips read events that leave this message's status as is.
-    return BetterStreamBuilder<ChannelState>(
-      stream: channel?.state?.channelStateStream,
-      initialData: channel?.state?.channelState,
-      comparator: (previous, next) => _statusOf(previous) == _statusOf(next),
-      builder: (context, channelState) {
-        // Read state is null until the channel is watched.
-        if (channelState.read == null) return const SizedBox.shrink();
-        final (:isMessageRead, :isMessageDelivered) = _statusOf(channelState);
-
-        return StreamSendingIndicator(
-          message: message,
-          isMessageRead: isMessageRead,
-          isMessageDelivered: isMessageDelivered,
-          color: iconColor,
-        );
-      },
-    );
-  }
-
-  ({bool isMessageRead, bool isMessageDelivered}) _statusOf(ChannelState? channelState) {
-    final reads = channelState?.read ?? const <Read>[];
-    return (
-      isMessageRead: reads.readsOf(message: message).isNotEmpty,
-      isMessageDelivered: reads.deliveriesOf(message: message).isNotEmpty,
+    return MessageReadStatusBuilder(
+      channel: channel,
+      message: message,
+      builder: (context, status) => StreamSendingIndicator(
+        message: message,
+        isMessageRead: status.isMessageRead,
+        isMessageDelivered: status.isMessageDelivered,
+        color: iconColor,
+      ),
     );
   }
 }
