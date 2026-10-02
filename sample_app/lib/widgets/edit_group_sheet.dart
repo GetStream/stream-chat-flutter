@@ -27,7 +27,7 @@ Future<bool?> showEditGroupSheet(BuildContext context, Channel channel) {
 /// The avatar tap (or _Upload_ link) opens [_AvatarPickerSheet], which
 /// surfaces _Take Photo_, _Choose Image_, and _Reset Picture_ as the
 /// three quick actions. Picked images are uploaded immediately via
-/// [AttachmentFileUploader.sendImage] so the URL is settled by the time the user
+/// [StreamChatClient.sendImage] so the URL is settled by the time the user
 /// taps the save checkmark.
 /// {@endtemplate}
 class EditGroupSheet extends StatefulWidget {
@@ -111,7 +111,7 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
   // API. Failure to delete just leaks one orphan, which the user can
   // survive.
   void _deleteOrphan(String url) {
-    _client.fileUploader.deleteImage(url, _channel.id!, _channel.type).ignore();
+    _client.deleteImage(url, _channel.id!, _channel.type).ignore();
   }
 
   @override
@@ -204,7 +204,7 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
     try {
       // Standalone upload — returns a CDN URL we can persist on the
       // channel without creating a message.
-      final response = await _client.fileUploader.sendImage(
+      final response = await _client.sendImage(
         attachmentFile,
         _channel.id!,
         _channel.type,

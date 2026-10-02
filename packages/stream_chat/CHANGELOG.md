@@ -77,12 +77,11 @@
 - `AppSettingsResponse` is immutable, built through a const constructor, compares by value, gains `copyWith`, and its `duration` is a non-nullable `String`.
 - `AppSettings` and `UploadConfig` no longer extend `Equatable`, so `props` is removed; they still compare by value and gain `copyWith`.
 - `StreamChatApi.general.getAppSettings` is removed; call `StreamChatClient.getAppSettings` instead.
-- `StreamChatClient`'s upload and delete methods moved to `StreamChatClient.fileUploader`; `uploadImage` and `uploadFile` take `onSendProgress` instead of `onUploadProgress`.
-- `sendImage`, `sendFile`, `uploadImage` and `uploadFile`, on `Channel` and `AttachmentFileUploader`, return a `Result<UploadedFile>` instead of throwing; read the URL from `fileUrl` and a video's thumbnail from `thumbUrl`.
+- `sendImage`, `sendFile`, `uploadImage` and `uploadFile`, on `StreamChatClient`, `Channel` and `AttachmentFileUploader`, return a `Result<UploadedFile>` instead of throwing; read the URL from `fileUrl` and a video's thumbnail from `thumbUrl`.
 - `deleteImage`, `deleteFile`, `removeImage` and `removeFile` return a `Result<void>` instead of throwing, and carry no value on success.
 - `SendAttachmentResponse`, `SendFileResponse`, `SendImageResponse`, `UploadImageResponse` and `UploadFileResponse` are removed in favor of `UploadedFile`.
 - `AttachmentFileUploaderProvider` receives the client's `Dio` instead of a `StreamHttpClient`, and `StreamAttachmentFileUploader` is built from one.
-- `StreamChatApi.fileUploader` and `StreamChatApi`'s `attachmentFileUploaderProvider` are removed; use `StreamChatClient.fileUploader` and `StreamChatClient`'s `attachmentFileUploaderProvider`.
+- `StreamChatApi.fileUploader` and `StreamChatApi`'s `attachmentFileUploaderProvider` are removed; pass `attachmentFileUploaderProvider` to `StreamChatClient` instead.
 
 🐞 Fixed
 

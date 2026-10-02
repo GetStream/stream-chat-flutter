@@ -75,7 +75,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Error Handling**](#error-handling) | Failures carry `stream_core`'s sealed `StreamException` family instead of `StreamChatNetworkError`; `ChatErrorCode` → `StreamErrorCode`. API calls will return `Result<T>` rather than throwing, endpoint by endpoint |
 | [**Moderation**](#moderation) | Muting, banning and flagging return a `Result` and call the moderation v2 API; `banUser`'s options map becomes named parameters; `unflagMessage`, `unflagUser` and `removeShadowBan` are removed |
 | [**App Settings**](#app-settings) | `getAppSettings` returns a `Result<AppSettingsResponse>` instead of throwing; `GetAppSettingsResponse` is renamed `AppSettingsResponse` |
-| [**File Upload**](#file-upload) | The client's upload methods moved to `client.fileUploader`; uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
+| [**File Upload**](#file-upload) | Uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -210,9 +210,8 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `GetAppSettingsResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
 | `AppSettings extends Equatable` / `UploadConfig extends Equatable`, `props` | `AppSettings` / `UploadConfig` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and neither is an `Equatable` any more |
 | `StreamChatApi.general.getAppSettings()` | `StreamChatClient.getAppSettings()` | `removed` | The call moved to the generated client |
-| `sendImage` / `sendFile` / `uploadImage` / `uploadFile` → `Future<SendImageResponse>` and siblings | `Future<Result<UploadedFile>>` | `retyped` | On `Channel` and `AttachmentFileUploader`. Returns a `Result` instead of throwing |
-| `deleteImage` / `deleteFile` / `removeImage` / `removeFile` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | On `Channel` and `AttachmentFileUploader`. Returns a `Result` instead of throwing |
-| `StreamChatClient.sendImage` / `sendFile` / `deleteImage` / `deleteFile` / `uploadImage` / `uploadFile` / `removeImage` / `removeFile` | `StreamChatClient.fileUploader.<same name>` | `moved` | Reached through the `AttachmentFileUploader` the client builds. `uploadImage` and `uploadFile` take `onSendProgress` instead of `onUploadProgress`. `Channel`'s upload methods keep their place |
+| `sendImage` / `sendFile` / `uploadImage` / `uploadFile` → `Future<SendImageResponse>` and siblings | `Future<Result<UploadedFile>>` | `retyped` | On `StreamChatClient`, `Channel` and `AttachmentFileUploader`. Returns a `Result` instead of throwing |
+| `deleteImage` / `deleteFile` / `removeImage` / `removeFile` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | On `StreamChatClient`, `Channel` and `AttachmentFileUploader`. Returns a `Result` instead of throwing |
 | `SendAttachmentResponse`, `SendFileResponse`, `SendImageResponse`, `UploadImageResponse`, `UploadFileResponse` | `UploadedFile` (`stream_core`) | `removed` | `.file` becomes `.fileUrl`; `.thumbUrl` is unchanged; `duration` is gone |
 | `AttachmentFileUploaderProvider` = `AttachmentFileUploader Function(StreamHttpClient)` | `AttachmentFileUploader Function(Dio)` | `retyped` | Receives the client's `Dio`; `StreamAttachmentFileUploader(dio)` builds the default |
 | `StreamChatApi.fileUploader`, `StreamChatApi(attachmentFileUploaderProvider:)` | `StreamChatClient(attachmentFileUploaderProvider:)` | `removed` | The uploader belongs to `StreamChatClient` |
@@ -740,19 +739,6 @@ result.fold(
   onSuccess: (uploaded) => setImage(uploaded.fileUrl),
   onFailure: (error, _) => report(error),
 );
-```
-
-**The client's upload methods moved to `client.fileUploader`.** The client's eight upload and delete methods are
-reached through the `AttachmentFileUploader` it builds, the same way moderation moved to `client.moderation`.
-`uploadImage` and `uploadFile` take `onSendProgress` there, as the channel uploads already did. `Channel`'s
-`sendImage`, `sendFile`, `deleteImage` and `deleteFile` keep their place.
-
-```dart
-// v10
-await client.uploadImage(file, onUploadProgress: onProgress);
-
-// v11
-await client.fileUploader.uploadImage(file, onSendProgress: onProgress);
 ```
 
 **The response types are replaced by `UploadedFile`**, from `stream_core` and exported by this package.

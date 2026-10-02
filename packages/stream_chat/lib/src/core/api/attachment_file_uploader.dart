@@ -13,8 +13,8 @@ typedef AttachmentFileUploaderProvider = AttachmentFileUploader Function(Dio dio
 
 /// Uploads and deletes of files and images, in a channel or standalone.
 ///
-/// Obtained via [StreamChatClient.fileUploader]. To replace it, consider implementing this class and
-/// returning it from the `attachmentFileUploaderProvider` passed to [StreamChatClient.new].
+/// [StreamChatClient] builds one and calls it from its upload methods. To replace it, consider implementing
+/// this class and returning it from the `attachmentFileUploaderProvider` passed to [StreamChatClient.new].
 abstract class AttachmentFileUploader {
   /// Uploads [image] to the channel [channelId] of type [channelType].
   ///

@@ -103,9 +103,8 @@ phase that acts on it. A generator fix is worth filing upstream (see the `openap
 but is not a prerequisite.
 
 **Group 12 landed it** as `lib/src/cdn/cdn_api.dart`, used by `StreamAttachmentFileUploader`. The
-public changes: uploads return `Result<UploadedFile>` and deletes `Result<void>`; the client's upload
-methods moved to `client.fileUploader`; the provider receives a `Dio`; `StreamChatApi.fileUploader`
-is gone. The [Symbol Map](../migrations/v11-migration.md#symbol-map) lists them. This phase builds on
+public changes: uploads return `Result<UploadedFile>` and deletes `Result<void>`; the provider
+receives a `Dio`; `StreamChatApi.fileUploader` is gone. The [Symbol Map](../migrations/v11-migration.md#symbol-map) lists them. This phase builds on
 that client rather than writing another.
 
 ## Design worked out for a later PR

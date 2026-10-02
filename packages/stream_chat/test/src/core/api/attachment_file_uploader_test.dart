@@ -24,18 +24,18 @@ void main() {
     client = _client(cdnApi);
   });
 
-  test('StreamChatClient.fileUploader.sendImage answers with the URL the channel upload returns', () async {
+  test('StreamChatClient.sendImage answers with the URL the channel upload returns', () async {
     _stubChannelImageUpload(cdnApi, const Result.success(api.UploadChannelResponse(duration: '1ms', file: 'url')));
 
-    final result = await client.fileUploader.sendImage(_file(), channelId, channelType);
+    final result = await client.sendImage(_file(), channelId, channelType);
 
     expect(result.getOrNull()?.fileUrl, 'url');
   });
 
-  test('StreamChatClient.fileUploader.sendImage uploads to the channel it is given', () async {
+  test('StreamChatClient.sendImage uploads to the channel it is given', () async {
     _stubChannelImageUpload(cdnApi, const Result.success(api.UploadChannelResponse(duration: '1ms')));
 
-    await client.fileUploader.sendImage(_file(), channelId, channelType);
+    await client.sendImage(_file(), channelId, channelType);
 
     verify(
       () => cdnApi.uploadChannelImage(
@@ -48,7 +48,7 @@ void main() {
     ).called(1);
   });
 
-  test('StreamChatClient.fileUploader.sendImage reports upload progress to onSendProgress', () async {
+  test('StreamChatClient.sendImage reports upload progress to onSendProgress', () async {
     when(
       () => cdnApi.uploadChannelImage(
         type: any(named: 'type'),
@@ -64,7 +64,7 @@ void main() {
     });
 
     final progress = <(int, int)>[];
-    await client.fileUploader.sendImage(
+    await client.sendImage(
       _file(),
       channelId,
       channelType,
@@ -74,11 +74,11 @@ void main() {
     expect(progress, [(5, 10)]);
   });
 
-  test('StreamChatClient.fileUploader.sendImage passes the cancelToken it is given to the upload', () async {
+  test('StreamChatClient.sendImage passes the cancelToken it is given to the upload', () async {
     _stubChannelImageUpload(cdnApi, const Result.success(api.UploadChannelResponse(duration: '1ms')));
     final cancelToken = CancelToken();
 
-    await client.fileUploader.sendImage(_file(), channelId, channelType, cancelToken: cancelToken);
+    await client.sendImage(_file(), channelId, channelType, cancelToken: cancelToken);
 
     verify(
       () => cdnApi.uploadChannelImage(
@@ -91,24 +91,24 @@ void main() {
     ).called(1);
   });
 
-  test('StreamChatClient.fileUploader.sendImage returns the failure without throwing', () async {
+  test('StreamChatClient.sendImage returns the failure without throwing', () async {
     _stubChannelImageUpload(cdnApi, const Result.failure(error));
 
-    final result = await client.fileUploader.sendImage(_file(), channelId, channelType);
+    final result = await client.sendImage(_file(), channelId, channelType);
 
     expect(result.exceptionOrNull(), error);
   });
 
-  test('StreamChatClient.fileUploader.sendImage answers with a failure when the file cannot be read', () async {
+  test('StreamChatClient.sendImage answers with a failure when the file cannot be read', () async {
     final missing = AttachmentFile(size: 3, path: '/does/not/exist/photo.jpg');
 
-    final result = await client.fileUploader.sendImage(missing, channelId, channelType);
+    final result = await client.sendImage(missing, channelId, channelType);
 
     expect(result.exceptionOrNull(), isA<StateError>());
   });
 
   test(
-    'StreamChatClient.fileUploader.sendFile answers with the URL and thumbnail the channel upload returns',
+    'StreamChatClient.sendFile answers with the URL and thumbnail the channel upload returns',
     () async {
       when(
         () => cdnApi.uploadChannelFile(
@@ -124,7 +124,7 @@ void main() {
         ),
       );
 
-      final result = await client.fileUploader.sendFile(_file(name: 'clip.mp4'), channelId, channelType);
+      final result = await client.sendFile(_file(name: 'clip.mp4'), channelId, channelType);
 
       expect(
         result.getOrNull(),
@@ -135,7 +135,7 @@ void main() {
     },
   );
 
-  test('StreamChatClient.fileUploader.deleteImage deletes the image from the channel it is given', () async {
+  test('StreamChatClient.deleteImage deletes the image from the channel it is given', () async {
     when(
       () => cdnApi.deleteChannelImage(
         type: channelType,
@@ -145,12 +145,12 @@ void main() {
       ),
     ).thenAnswer((_) async => const Result.success(api.DurationResponse(duration: '1ms')));
 
-    final result = await client.fileUploader.deleteImage('url', channelId, channelType);
+    final result = await client.deleteImage('url', channelId, channelType);
 
     expect(result.isSuccess, isTrue);
   });
 
-  test('StreamChatClient.fileUploader.deleteFile deletes the file from the channel it is given', () async {
+  test('StreamChatClient.deleteFile deletes the file from the channel it is given', () async {
     when(
       () => cdnApi.deleteChannelFile(
         type: channelType,
@@ -160,12 +160,12 @@ void main() {
       ),
     ).thenAnswer((_) async => const Result.success(api.DurationResponse(duration: '1ms')));
 
-    final result = await client.fileUploader.deleteFile('url', channelId, channelType);
+    final result = await client.deleteFile('url', channelId, channelType);
 
     expect(result.isSuccess, isTrue);
   });
 
-  test('StreamChatClient.fileUploader.deleteFile returns the failure without throwing', () async {
+  test('StreamChatClient.deleteFile returns the failure without throwing', () async {
     when(
       () => cdnApi.deleteChannelFile(
         type: any(named: 'type'),
@@ -175,12 +175,12 @@ void main() {
       ),
     ).thenAnswer((_) async => const Result.failure(error));
 
-    final result = await client.fileUploader.deleteFile('url', channelId, channelType);
+    final result = await client.deleteFile('url', channelId, channelType);
 
     expect(result.exceptionOrNull(), error);
   });
 
-  test('StreamChatClient.fileUploader.uploadImage answers with the URL the standalone upload returns', () async {
+  test('StreamChatClient.uploadImage answers with the URL the standalone upload returns', () async {
     when(
       () => cdnApi.uploadImage(
         file: any(named: 'file'),
@@ -189,12 +189,12 @@ void main() {
       ),
     ).thenAnswer((_) async => const Result.success(api.ImageUploadResponse(duration: '1ms', file: 'avatar-url')));
 
-    final result = await client.fileUploader.uploadImage(_file());
+    final result = await client.uploadImage(_file());
 
     expect(result.getOrNull()?.fileUrl, 'avatar-url');
   });
 
-  test('StreamChatClient.fileUploader.uploadFile answers with the URL the standalone upload returns', () async {
+  test('StreamChatClient.uploadFile answers with the URL the standalone upload returns', () async {
     when(
       () => cdnApi.uploadFile(
         file: any(named: 'file'),
@@ -203,12 +203,12 @@ void main() {
       ),
     ).thenAnswer((_) async => const Result.success(api.FileUploadResponse(duration: '1ms', file: 'doc-url')));
 
-    final result = await client.fileUploader.uploadFile(_file(name: 'doc.pdf'));
+    final result = await client.uploadFile(_file(name: 'doc.pdf'));
 
     expect(result.getOrNull()?.fileUrl, 'doc-url');
   });
 
-  test('StreamChatClient.fileUploader.removeImage deletes an image uploaded outside of any channel', () async {
+  test('StreamChatClient.removeImage deletes an image uploaded outside of any channel', () async {
     when(
       () => cdnApi.deleteImage(
         url: 'url',
@@ -216,12 +216,12 @@ void main() {
       ),
     ).thenAnswer((_) async => const Result.success(api.DurationResponse(duration: '1ms')));
 
-    final result = await client.fileUploader.removeImage('url');
+    final result = await client.removeImage('url');
 
     expect(result.isSuccess, isTrue);
   });
 
-  test('StreamChatClient.fileUploader.removeFile deletes a file uploaded outside of any channel', () async {
+  test('StreamChatClient.removeFile deletes a file uploaded outside of any channel', () async {
     when(
       () => cdnApi.deleteFile(
         url: 'url',
@@ -229,13 +229,17 @@ void main() {
       ),
     ).thenAnswer((_) async => const Result.success(api.DurationResponse(duration: '1ms')));
 
-    final result = await client.fileUploader.removeFile('url');
+    final result = await client.removeFile('url');
 
     expect(result.isSuccess, isTrue);
   });
 
-  test('StreamChatClient.fileUploader is the uploader its provider builds', () {
+  test('StreamChatClient uploads through the uploader its provider builds', () async {
     final uploader = MockAttachmentFileUploader();
+    final file = _file();
+    when(
+      () => uploader.uploadImage(file),
+    ).thenAnswer((_) async => const Result.success(UploadedFile(fileUrl: 'custom-url')));
 
     final client = StreamChatClient(
       'test-api-key',
@@ -243,8 +247,9 @@ void main() {
       defaultApi: FakeDefaultApi(),
       attachmentFileUploaderProvider: (_) => uploader,
     );
+    final result = await client.uploadImage(file);
 
-    expect(client.fileUploader, same(uploader));
+    expect(result.getOrNull()?.fileUrl, 'custom-url');
   });
 }
 

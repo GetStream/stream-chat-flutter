@@ -1344,7 +1344,7 @@ class Channel {
     Map<String, Object?>? extraData,
   }) {
     _checkInitialized();
-    return _client.fileUploader.sendFile(
+    return _client.sendFile(
       file,
       id!,
       type,
@@ -1362,7 +1362,7 @@ class Channel {
     Map<String, Object?>? extraData,
   }) {
     _checkInitialized();
-    return _client.fileUploader.sendImage(
+    return _client.sendImage(
       file,
       id!,
       type,
@@ -1396,7 +1396,7 @@ class Channel {
     Map<String, Object?>? extraData,
   }) {
     _checkInitialized();
-    return _client.fileUploader.deleteFile(
+    return _client.deleteFile(
       url,
       id!,
       type,
@@ -1412,7 +1412,7 @@ class Channel {
     Map<String, Object?>? extraData,
   }) {
     _checkInitialized();
-    return _client.fileUploader.deleteImage(
+    return _client.deleteImage(
       url,
       id!,
       type,

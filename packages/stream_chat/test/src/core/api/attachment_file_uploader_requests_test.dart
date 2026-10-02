@@ -12,11 +12,11 @@ import '../../ws/fake_chat_server.dart';
 void main() {
   setUpAll(() => registerFallbackValue(RequestOptions()));
 
-  test('StreamChatClient.fileUploader.sendImage posts the image to the channel it is given', () async {
+  test('StreamChatClient.sendImage posts the image to the channel it is given', () async {
     final adapter = _adapterAnswering('{"duration":"1ms","file":"image-url"}');
     final client = await _connectedClient(adapter);
 
-    final result = await client.fileUploader.sendImage(_file(), 'general', 'messaging');
+    final result = await client.sendImage(_file(), 'general', 'messaging');
 
     expect(result.getOrNull()?.fileUrl, 'image-url');
     final request = _lastRequest(adapter);
@@ -25,11 +25,11 @@ void main() {
     expect((request.data as FormData).files.single.key, 'file');
   });
 
-  test('StreamChatClient.fileUploader.removeFile deletes the file at the url it is given', () async {
+  test('StreamChatClient.removeFile deletes the file at the url it is given', () async {
     final adapter = _adapterAnswering('{"duration":"1ms"}');
     final client = await _connectedClient(adapter);
 
-    final result = await client.fileUploader.removeFile('file-url');
+    final result = await client.removeFile('file-url');
 
     expect(result.isSuccess, isTrue);
     final request = _lastRequest(adapter);
@@ -38,12 +38,12 @@ void main() {
     expect(request.queryParameters, containsPair('url', 'file-url'));
   });
 
-  test('StreamChatClient.fileUploader.sendFile answers a canceled upload with a cancellation', () async {
+  test('StreamChatClient.sendFile answers a canceled upload with a cancellation', () async {
     final adapter = _adapterAnswering('{"duration":"1ms","file":"file-url"}');
     final client = await _connectedClient(adapter);
     final cancelToken = CancelToken()..cancel();
 
-    final result = await client.fileUploader.sendFile(
+    final result = await client.sendFile(
       _file(),
       'general',
       'messaging',

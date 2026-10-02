@@ -24,6 +24,7 @@ import 'package:stream_core/stream_core.dart'
         SystemEnvironmentManager,
         TokenManager,
         TokenProvider,
+        UploadedFile,
         UserToken,
         WebSocketProvider,
         WsEvent;
@@ -39,6 +40,7 @@ import '../core/error/stream_chat_exception.dart';
 import '../core/http/interceptor/additional_headers_interceptor.dart';
 import '../core/http/stream_http_client.dart';
 import '../core/models/app_settings.dart';
+import '../core/models/attachment_file.dart';
 import '../core/models/banned_user.dart';
 import '../core/models/channel_state.dart';
 import '../core/models/draft.dart';
@@ -177,7 +179,7 @@ class StreamChatClient {
         );
 
     final api = defaultApi ?? DefaultApi(httpClient);
-    fileUploader = attachmentFileUploaderProvider(httpClient);
+    _fileUploader = attachmentFileUploaderProvider(httpClient);
 
     _rolesRepository = RolesRepository(api);
     _devicesRepository = DevicesRepository(api);
@@ -220,6 +222,7 @@ class StreamChatClient {
   }
 
   late final StreamChatApi _chatApi;
+  late final AttachmentFileUploader _fileUploader;
 
   late final RolesRepository _rolesRepository;
   late final DevicesRepository _devicesRepository;
@@ -230,11 +233,6 @@ class StreamChatClient {
 
   /// Muting, banning and flagging, for the connected user.
   late final ModerationClient moderation;
-
-  /// Uploads and deletes of files and images, in a channel or standalone.
-  ///
-  /// Built by the `attachmentFileUploaderProvider` passed to the constructor.
-  late final AttachmentFileUploader fileUploader;
 
   late final ConnectionManager _connection;
   StreamSubscription<WsEvent>? _wsEventSubscription;
@@ -1092,6 +1090,118 @@ class StreamChatClient {
     sort: sort,
     pagination: paginationParams,
     messageFilters: messageFilters,
+  );
+
+  /// Uploads [file] to the channel [channelId] of type [channelType].
+  ///
+  /// Progress is reported to [onSendProgress], and a [cancelToken] cancels the upload.
+  Future<Result<UploadedFile>> sendFile(
+    AttachmentFile file,
+    String channelId,
+    String channelType, {
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
+  }) => _fileUploader.sendFile(
+    file,
+    channelId,
+    channelType,
+    onSendProgress: onSendProgress,
+    cancelToken: cancelToken,
+    extraData: extraData,
+  );
+
+  /// Uploads [image] to the channel [channelId] of type [channelType].
+  ///
+  /// Progress is reported to [onSendProgress], and a [cancelToken] cancels the upload.
+  Future<Result<UploadedFile>> sendImage(
+    AttachmentFile image,
+    String channelId,
+    String channelType, {
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
+  }) => _fileUploader.sendImage(
+    image,
+    channelId,
+    channelType,
+    onSendProgress: onSendProgress,
+    cancelToken: cancelToken,
+    extraData: extraData,
+  );
+
+  /// Deletes the file at [url] from the channel [channelId] of type [channelType].
+  Future<Result<void>> deleteFile(
+    String url,
+    String channelId,
+    String channelType, {
+    CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
+  }) => _fileUploader.deleteFile(
+    url,
+    channelId,
+    channelType,
+    cancelToken: cancelToken,
+    extraData: extraData,
+  );
+
+  /// Deletes the image at [url] from the channel [channelId] of type [channelType].
+  Future<Result<void>> deleteImage(
+    String url,
+    String channelId,
+    String channelType, {
+    CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
+  }) => _fileUploader.deleteImage(
+    url,
+    channelId,
+    channelType,
+    cancelToken: cancelToken,
+    extraData: extraData,
+  );
+
+  /// Uploads [image] outside of any channel.
+  ///
+  /// Progress is reported to [onUploadProgress], and a [cancelToken] cancels the upload.
+  Future<Result<UploadedFile>> uploadImage(
+    AttachmentFile image, {
+    ProgressCallback? onUploadProgress,
+    CancelToken? cancelToken,
+  }) => _fileUploader.uploadImage(
+    image,
+    onSendProgress: onUploadProgress,
+    cancelToken: cancelToken,
+  );
+
+  /// Uploads [file] outside of any channel.
+  ///
+  /// Progress is reported to [onUploadProgress], and a [cancelToken] cancels the upload.
+  Future<Result<UploadedFile>> uploadFile(
+    AttachmentFile file, {
+    ProgressCallback? onUploadProgress,
+    CancelToken? cancelToken,
+  }) => _fileUploader.uploadFile(
+    file,
+    onSendProgress: onUploadProgress,
+    cancelToken: cancelToken,
+  );
+
+  /// Deletes the image at [url], uploaded outside of any channel.
+  Future<Result<void>> removeImage(
+    String url, {
+    CancelToken? cancelToken,
+  }) => _fileUploader.removeImage(
+    url,
+    cancelToken: cancelToken,
+  );
+
+  /// Deletes the file at [url], uploaded outside of any channel.
+  Future<Result<void>> removeFile(
+    String url, {
+    CancelToken? cancelToken,
+  }) => _fileUploader.removeFile(
+    url,
+    cancelToken: cancelToken,
   );
 
   /// Replaces the [channelId] of type [ChannelType] data with [data].

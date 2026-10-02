@@ -21,7 +21,6 @@ abstract interface class CdnApi {
   @POST('/api/v2/uploads/file')
   Future<Result<FileUploadResponse>> uploadFile({
     @Part(name: 'file') MultipartFile? file,
-    @Part(name: 'user') OnlyUserID? user,
     @SendProgress() ProgressCallback? onUploadProgress,
     @CancelRequest() CancelToken? cancelToken,
   });
@@ -37,7 +36,6 @@ abstract interface class CdnApi {
   Future<Result<ImageUploadResponse>> uploadImage({
     @Part(name: 'file') MultipartFile? file,
     @Part(name: 'upload_sizes') List<ImageSize>? uploadSizes,
-    @Part(name: 'user') OnlyUserID? user,
     @SendProgress() ProgressCallback? onUploadProgress,
     @CancelRequest() CancelToken? cancelToken,
   });
@@ -54,7 +52,6 @@ abstract interface class CdnApi {
     @Path('type') required String type,
     @Path('id') required String id,
     @Part(name: 'file') MultipartFile? file,
-    @Part(name: 'user') OnlyUserID? user,
     @SendProgress() ProgressCallback? onUploadProgress,
     @CancelRequest() CancelToken? cancelToken,
   });
@@ -74,7 +71,6 @@ abstract interface class CdnApi {
     @Path('id') required String id,
     @Part(name: 'file') MultipartFile? file,
     @Part(name: 'upload_sizes') List<ImageSize>? uploadSizes,
-    @Part(name: 'user') OnlyUserID? user,
     @SendProgress() ProgressCallback? onUploadProgress,
     @CancelRequest() CancelToken? cancelToken,
   });

@@ -21,7 +21,6 @@ class _CdnApi implements CdnApi {
 
   Future<FileUploadResponse> _uploadFile({
     MultipartFile? file,
-    OnlyUserID? user,
     void Function(int, int)? onUploadProgress,
     CancelToken? cancelToken,
   }) async {
@@ -33,7 +32,6 @@ class _CdnApi implements CdnApi {
     if (file != null) {
       _data.files.add(MapEntry('file', file));
     }
-    _data.fields.add(MapEntry('user', jsonEncode(user ?? <String, dynamic>{})));
     final _options = _setStreamType<Result<FileUploadResponse>>(
       Options(
             method: 'POST',
@@ -65,14 +63,12 @@ class _CdnApi implements CdnApi {
   @override
   Future<Result<FileUploadResponse>> uploadFile({
     MultipartFile? file,
-    OnlyUserID? user,
     void Function(int, int)? onUploadProgress,
     CancelToken? cancelToken,
   }) {
     return _ResultCallAdapter<FileUploadResponse>().adapt(
       () => _uploadFile(
         file: file,
-        user: user,
         onUploadProgress: onUploadProgress,
         cancelToken: cancelToken,
       ),
@@ -123,7 +119,6 @@ class _CdnApi implements CdnApi {
   Future<ImageUploadResponse> _uploadImage({
     MultipartFile? file,
     List<ImageSize>? uploadSizes,
-    OnlyUserID? user,
     void Function(int, int)? onUploadProgress,
     CancelToken? cancelToken,
   }) async {
@@ -136,7 +131,6 @@ class _CdnApi implements CdnApi {
       _data.files.add(MapEntry('file', file));
     }
     _data.fields.add(MapEntry('upload_sizes', jsonEncode(uploadSizes)));
-    _data.fields.add(MapEntry('user', jsonEncode(user ?? <String, dynamic>{})));
     final _options = _setStreamType<Result<ImageUploadResponse>>(
       Options(
             method: 'POST',
@@ -169,7 +163,6 @@ class _CdnApi implements CdnApi {
   Future<Result<ImageUploadResponse>> uploadImage({
     MultipartFile? file,
     List<ImageSize>? uploadSizes,
-    OnlyUserID? user,
     void Function(int, int)? onUploadProgress,
     CancelToken? cancelToken,
   }) {
@@ -177,7 +170,6 @@ class _CdnApi implements CdnApi {
       () => _uploadImage(
         file: file,
         uploadSizes: uploadSizes,
-        user: user,
         onUploadProgress: onUploadProgress,
         cancelToken: cancelToken,
       ),
@@ -229,7 +221,6 @@ class _CdnApi implements CdnApi {
     required String type,
     required String id,
     MultipartFile? file,
-    OnlyUserID? user,
     void Function(int, int)? onUploadProgress,
     CancelToken? cancelToken,
   }) async {
@@ -241,7 +232,6 @@ class _CdnApi implements CdnApi {
     if (file != null) {
       _data.files.add(MapEntry('file', file));
     }
-    _data.fields.add(MapEntry('user', jsonEncode(user ?? <String, dynamic>{})));
     final _options = _setStreamType<Result<UploadChannelFileResponse>>(
       Options(
             method: 'POST',
@@ -275,7 +265,6 @@ class _CdnApi implements CdnApi {
     required String type,
     required String id,
     MultipartFile? file,
-    OnlyUserID? user,
     void Function(int, int)? onUploadProgress,
     CancelToken? cancelToken,
   }) {
@@ -284,7 +273,6 @@ class _CdnApi implements CdnApi {
         type: type,
         id: id,
         file: file,
-        user: user,
         onUploadProgress: onUploadProgress,
         cancelToken: cancelToken,
       ),
@@ -346,7 +334,6 @@ class _CdnApi implements CdnApi {
     required String id,
     MultipartFile? file,
     List<ImageSize>? uploadSizes,
-    OnlyUserID? user,
     void Function(int, int)? onUploadProgress,
     CancelToken? cancelToken,
   }) async {
@@ -359,7 +346,6 @@ class _CdnApi implements CdnApi {
       _data.files.add(MapEntry('file', file));
     }
     _data.fields.add(MapEntry('upload_sizes', jsonEncode(uploadSizes)));
-    _data.fields.add(MapEntry('user', jsonEncode(user ?? <String, dynamic>{})));
     final _options = _setStreamType<Result<UploadChannelResponse>>(
       Options(
             method: 'POST',
@@ -394,7 +380,6 @@ class _CdnApi implements CdnApi {
     required String id,
     MultipartFile? file,
     List<ImageSize>? uploadSizes,
-    OnlyUserID? user,
     void Function(int, int)? onUploadProgress,
     CancelToken? cancelToken,
   }) {
@@ -404,7 +389,6 @@ class _CdnApi implements CdnApi {
         id: id,
         file: file,
         uploadSizes: uploadSizes,
-        user: user,
         onUploadProgress: onUploadProgress,
         cancelToken: cancelToken,
       ),

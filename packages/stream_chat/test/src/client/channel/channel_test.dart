@@ -188,7 +188,6 @@ void main() {
   group('Initialized Channel', () {
     late final client = MockStreamChatClient();
     late final moderationClient = MockModerationClient();
-    late final fileUploader = MockAttachmentFileUploader();
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
     const channelCid = '$channelType:$channelId';
@@ -219,7 +218,6 @@ void main() {
     // Setting up a initialized channel
     setUp(() {
       when(() => client.moderation).thenReturn(moderationClient);
-      when(() => client.fileUploader).thenReturn(fileUploader);
       final channelState = _generateChannelState(
         channelId,
         channelType,
@@ -232,7 +230,6 @@ void main() {
     tearDown(() {
       channel.dispose();
       clearInteractions(client);
-      clearInteractions(fileUploader);
     });
 
     test('should throw if trying to set `extraData`', () {
@@ -672,7 +669,7 @@ void main() {
         );
 
         when(
-          () => fileUploader.sendImage(
+          () => client.sendImage(
             any(),
             channelId,
             channelType,
@@ -683,7 +680,7 @@ void main() {
         ).thenAnswer((_) async => sendImageResult);
 
         when(
-          () => fileUploader.sendFile(
+          () => client.sendFile(
             any(),
             channelId,
             channelType,
@@ -799,7 +796,7 @@ void main() {
         );
 
         verify(
-          () => fileUploader.sendImage(
+          () => client.sendImage(
             any(),
             channelId,
             channelType,
@@ -810,7 +807,7 @@ void main() {
         ).called(2);
 
         verify(
-          () => fileUploader.sendFile(
+          () => client.sendFile(
             any(),
             channelId,
             channelType,
@@ -838,7 +835,7 @@ void main() {
         final message = Message(id: 'test-message-id', attachments: [attachment]);
 
         when(
-          () => fileUploader.sendImage(
+          () => client.sendImage(
             any(),
             channelId,
             channelType,
@@ -866,7 +863,7 @@ void main() {
         final message = Message(id: 'test-message-id', attachments: [attachment]);
 
         when(
-          () => fileUploader.sendFile(
+          () => client.sendFile(
             any(),
             channelId,
             channelType,
@@ -901,7 +898,7 @@ void main() {
         final message = Message(id: 'test-message-id', attachments: [attachment]);
 
         when(
-          () => fileUploader.sendImage(
+          () => client.sendImage(
             any(),
             channelId,
             channelType,
@@ -943,7 +940,7 @@ void main() {
         // arrives while it is still in flight.
         final upload = Completer<Result<UploadedFile>>();
         when(
-          () => fileUploader.sendImage(
+          () => client.sendImage(
             any(),
             channelId,
             channelType,
@@ -985,7 +982,7 @@ void main() {
           );
 
           when(
-            () => fileUploader.sendImage(
+            () => client.sendImage(
               any(),
               channelId,
               channelType,
@@ -1003,7 +1000,7 @@ void main() {
           );
 
           verify(
-            () => fileUploader.sendImage(
+            () => client.sendImage(
               any(),
               channelId,
               channelType,
@@ -1035,7 +1032,7 @@ void main() {
           );
 
           when(
-            () => fileUploader.sendImage(
+            () => client.sendImage(
               any(),
               channelId,
               channelType,
@@ -1067,7 +1064,7 @@ void main() {
           expect(res.message.text, 'Hello world!');
 
           verify(
-            () => fileUploader.sendImage(
+            () => client.sendImage(
               any(),
               channelId,
               channelType,
@@ -1108,7 +1105,7 @@ void main() {
           );
 
           when(
-            () => fileUploader.sendImage(
+            () => client.sendImage(
               any(),
               channelId,
               channelType,
@@ -1140,7 +1137,7 @@ void main() {
           expect(res.message.quotedMessageId, quotedMessage.id);
 
           verify(
-            () => fileUploader.sendImage(
+            () => client.sendImage(
               any(),
               channelId,
               channelType,
@@ -1176,7 +1173,7 @@ void main() {
           );
 
           when(
-            () => fileUploader.sendImage(
+            () => client.sendImage(
               any(),
               channelId,
               channelType,
@@ -1208,7 +1205,7 @@ void main() {
           expect(res.message.pollId, 'poll-123');
 
           verify(
-            () => fileUploader.sendImage(
+            () => client.sendImage(
               any(),
               channelId,
               channelType,
@@ -1640,7 +1637,7 @@ void main() {
         );
 
         when(
-          () => fileUploader.sendImage(
+          () => client.sendImage(
             any(),
             channelId,
             channelType,
@@ -1651,7 +1648,7 @@ void main() {
         ).thenAnswer((_) async => sendImageResult);
 
         when(
-          () => fileUploader.sendFile(
+          () => client.sendFile(
             any(),
             channelId,
             channelType,
@@ -1765,7 +1762,7 @@ void main() {
         );
 
         verify(
-          () => fileUploader.sendImage(
+          () => client.sendImage(
             any(),
             channelId,
             channelType,
@@ -1776,7 +1773,7 @@ void main() {
         ).called(2);
 
         verify(
-          () => fileUploader.sendFile(
+          () => client.sendFile(
             any(),
             channelId,
             channelType,
@@ -2541,11 +2538,11 @@ void main() {
         ).thenAnswer((_) async => EmptyResponse());
 
         when(
-          () => fileUploader.deleteImage(any(), channelId, channelType),
+          () => client.deleteImage(any(), channelId, channelType),
         ).thenAnswer((_) async => const Result.success(null));
 
         when(
-          () => fileUploader.deleteFile(any(), channelId, channelType),
+          () => client.deleteFile(any(), channelId, channelType),
         ).thenAnswer((_) async => const Result.success(null));
 
         final res = await channel.deleteMessage(message, hard: true);
@@ -2553,9 +2550,9 @@ void main() {
 
         verify(() => client.deleteMessage(messageId, hard: true)).called(1);
 
-        verify(() => fileUploader.deleteImage(any(), channelId, channelType)).called(2);
+        verify(() => client.deleteImage(any(), channelId, channelType)).called(2);
 
-        verify(() => fileUploader.deleteFile(any(), channelId, channelType)).called(1);
+        verify(() => client.deleteFile(any(), channelId, channelType)).called(1);
       });
 
       test(
@@ -2983,7 +2980,7 @@ void main() {
       const url = 'test-file-url';
 
       when(
-        () => fileUploader.deleteFile(url, channelId, channelType, cancelToken: any(named: 'cancelToken')),
+        () => client.deleteFile(url, channelId, channelType, cancelToken: any(named: 'cancelToken')),
       ).thenAnswer((_) async => const Result.success(null));
 
       final res = await channel.deleteFile(url);
@@ -2991,7 +2988,7 @@ void main() {
       expect(res, isNotNull);
 
       verify(
-        () => fileUploader.deleteFile(url, channelId, channelType, cancelToken: any(named: 'cancelToken')),
+        () => client.deleteFile(url, channelId, channelType, cancelToken: any(named: 'cancelToken')),
       ).called(1);
     });
 
@@ -2999,7 +2996,7 @@ void main() {
       const url = 'test-image-url';
 
       when(
-        () => fileUploader.deleteImage(url, channelId, channelType, cancelToken: any(named: 'cancelToken')),
+        () => client.deleteImage(url, channelId, channelType, cancelToken: any(named: 'cancelToken')),
       ).thenAnswer((_) async => const Result.success(null));
 
       final res = await channel.deleteImage(url);
@@ -3007,7 +3004,7 @@ void main() {
       expect(res, isNotNull);
 
       verify(
-        () => fileUploader.deleteImage(url, channelId, channelType, cancelToken: any(named: 'cancelToken')),
+        () => client.deleteImage(url, channelId, channelType, cancelToken: any(named: 'cancelToken')),
       ).called(1);
     });
 

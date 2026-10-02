@@ -566,7 +566,8 @@ GROUPS = [
               with no progress or cancellation, because the Dart `operation.tpl` ignores
               `Operation.RequestContentType`. `lib/src/cdn/cdn_api.dart` mirrors the generated operations —
               names, paths, parameters, and each request model's fields as parts — adding only the file part,
-              progress and cancellation, so a template that emits multipart can replace it as is.
+              progress and cancellation, so a template that emits multipart can replace it as is. It leaves
+              out the `user` part, which only a server-side request sets.
               `StreamAttachmentFileUploader` calls it instead of `StreamHttpClient.postFile`.
             - **The v2 routes are the v1 handlers.** `lib/chat/routes.go` mounts the channel routes in the shared
               `coreRoutes` under both surfaces, and `lib/core/api/routes_saas.go` does the same for `/uploads`;
@@ -578,9 +579,6 @@ GROUPS = [
             - **The provider receives the client's `Dio`.** `StreamHttpClient`'s `Dio` is `@visibleForTesting`
               and is not the one `DefaultApi` uses, so `AttachmentFileUploaderProvider` takes the `Dio` the
               generated client runs on, and the uploader moves from `StreamChatApi` to `StreamChatClient`.
-            - **The client exposes the uploader as `client.fileUploader`** instead of forwarding its eight
-              methods, the way group 08 moved moderation to `client.moderation`. `Channel` keeps its four
-              upload methods.
             - **Uploads answer `stream_core`'s `UploadedFile`** (`fileUrl`, `thumbUrl`) instead of v10's five
               response types. A break beyond the domain-model list, taken here because every upload call site
               already changes for `Result` — replacing the types later would break the same lines twice — and
