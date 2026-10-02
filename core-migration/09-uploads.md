@@ -111,8 +111,7 @@ that client rather than writing another.
 
 Group 12 (FLU-885) first went further than the endpoints: it adopted `stream_core`'s upload types
 end to end. That was pulled out to keep the endpoint migration small, and is recorded here so this
-phase can pick it up. The code is parked on the local branch `sahil/flu-885-core-design-wip`
-(`51ba38dbb`), not pushed.
+phase can pick it up.
 
 ### What the backend does, which shaped everything else
 
