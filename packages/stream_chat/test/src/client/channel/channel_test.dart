@@ -188,6 +188,7 @@ void main() {
   group('Initialized Channel', () {
     late final client = MockStreamChatClient();
     late final moderationClient = MockModerationClient();
+    late final fileUploader = MockAttachmentFileUploader();
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
     const channelCid = '$channelType:$channelId';
@@ -218,6 +219,7 @@ void main() {
     // Setting up a initialized channel
     setUp(() {
       when(() => client.moderation).thenReturn(moderationClient);
+      when(() => client.fileUploader).thenReturn(fileUploader);
       final channelState = _generateChannelState(
         channelId,
         channelType,
@@ -230,6 +232,7 @@ void main() {
     tearDown(() {
       channel.dispose();
       clearInteractions(client);
+      clearInteractions(fileUploader);
     });
 
     test('should throw if trying to set `extraData`', () {
@@ -661,11 +664,15 @@ void main() {
           attachments: attachments,
         );
 
-        final sendImageResponse = SendImageResponse()..file = 'test-image-url';
-        final sendFileResponse = SendFileResponse()..file = 'test-file-url';
+        const sendImageResult = Result<UploadedFile>.success(
+          UploadedFile(fileUrl: 'test-image-url'),
+        );
+        const sendFileResult = Result<UploadedFile>.success(
+          UploadedFile(fileUrl: 'test-file-url'),
+        );
 
         when(
-          () => client.sendImage(
+          () => fileUploader.sendImage(
             any(),
             channelId,
             channelType,
@@ -673,10 +680,10 @@ void main() {
             cancelToken: any(named: 'cancelToken'),
             extraData: any(named: 'extraData'),
           ),
-        ).thenAnswer((_) async => sendImageResponse);
+        ).thenAnswer((_) async => sendImageResult);
 
         when(
-          () => client.sendFile(
+          () => fileUploader.sendFile(
             any(),
             channelId,
             channelType,
@@ -684,7 +691,7 @@ void main() {
             cancelToken: any(named: 'cancelToken'),
             extraData: any(named: 'extraData'),
           ),
-        ).thenAnswer((_) async => sendFileResponse);
+        ).thenAnswer((_) async => sendFileResult);
 
         when(
           () => client.sendMessage(
@@ -792,7 +799,7 @@ void main() {
         );
 
         verify(
-          () => client.sendImage(
+          () => fileUploader.sendImage(
             any(),
             channelId,
             channelType,
@@ -803,7 +810,7 @@ void main() {
         ).called(2);
 
         verify(
-          () => client.sendFile(
+          () => fileUploader.sendFile(
             any(),
             channelId,
             channelType,
@@ -820,6 +827,94 @@ void main() {
             channelType,
           ),
         ).called(1);
+      });
+
+      test('Channel.sendMessage sends an uploaded image with its URL as the imageUrl', () async {
+        final attachment = Attachment(
+          id: 'test-attachment-id',
+          type: 'image',
+          file: AttachmentFile(size: 100, path: 'test-file-path'),
+        );
+        final message = Message(id: 'test-message-id', attachments: [attachment]);
+
+        when(
+          () => fileUploader.sendImage(
+            any(),
+            channelId,
+            channelType,
+            onSendProgress: any(named: 'onSendProgress'),
+            cancelToken: any(named: 'cancelToken'),
+            extraData: any(named: 'extraData'),
+          ),
+        ).thenAnswer((_) async => const Result.success(UploadedFile(fileUrl: 'image-url')));
+        when(() => client.sendMessage(any(), channelId, channelType)).thenAnswer(
+          (_) async => SendMessageResponse()..message = message.copyWith(state: MessageState.sent),
+        );
+
+        await channel.sendMessage(message);
+
+        final sent = verify(() => client.sendMessage(captureAny(), channelId, channelType)).captured.single as Message;
+        expect(sent.attachments.single.imageUrl, 'image-url');
+      });
+
+      test('Channel.sendMessage sends an uploaded file with its URL and thumbnail', () async {
+        final attachment = Attachment(
+          id: 'test-attachment-id',
+          type: 'video',
+          file: AttachmentFile(size: 100, path: 'test-file-path'),
+        );
+        final message = Message(id: 'test-message-id', attachments: [attachment]);
+
+        when(
+          () => fileUploader.sendFile(
+            any(),
+            channelId,
+            channelType,
+            onSendProgress: any(named: 'onSendProgress'),
+            cancelToken: any(named: 'cancelToken'),
+            extraData: any(named: 'extraData'),
+          ),
+        ).thenAnswer(
+          (_) async => const Result.success(UploadedFile(fileUrl: 'clip-url', thumbUrl: 'thumb-url')),
+        );
+        when(() => client.sendMessage(any(), channelId, channelType)).thenAnswer(
+          (_) async => SendMessageResponse()..message = message.copyWith(state: MessageState.sent),
+        );
+
+        await channel.sendMessage(message);
+
+        final sent = verify(() => client.sendMessage(captureAny(), channelId, channelType)).captured.single as Message;
+        expect(
+          sent.attachments.single,
+          isA<Attachment>()
+              .having((it) => it.assetUrl, 'assetUrl', 'clip-url')
+              .having((it) => it.thumbUrl, 'thumbUrl', 'thumb-url'),
+        );
+      });
+
+      test('Channel.sendMessage marks an attachment failed when its upload fails', () async {
+        final attachment = Attachment(
+          id: 'test-attachment-id',
+          type: 'image',
+          file: AttachmentFile(size: 100, path: 'test-file-path'),
+        );
+        final message = Message(id: 'test-message-id', attachments: [attachment]);
+
+        when(
+          () => fileUploader.sendImage(
+            any(),
+            channelId,
+            channelType,
+            onSendProgress: any(named: 'onSendProgress'),
+            cancelToken: any(named: 'cancelToken'),
+            extraData: any(named: 'extraData'),
+          ),
+        ).thenAnswer((_) async => const Result.failure(StreamClientException(message: 'boom')));
+
+        await expectLater(channel.sendMessage(message), throwsA(isA<StreamClientException>()));
+
+        final stored = channel.state!.messages.single.attachments.single;
+        expect(stored.uploadState, isA<UploadStateFailed>());
       });
 
       test('should not send if the message is invalid', () async {
@@ -846,9 +941,9 @@ void main() {
 
         // Holds the first send inside its attachment upload, so the second one
         // arrives while it is still in flight.
-        final upload = Completer<SendImageResponse>();
+        final upload = Completer<Result<UploadedFile>>();
         when(
-          () => client.sendImage(
+          () => fileUploader.sendImage(
             any(),
             channelId,
             channelType,
@@ -857,7 +952,9 @@ void main() {
             extraData: any(named: 'extraData'),
           ),
         ).thenAnswer((_) => upload.future);
-        addTearDown(() => upload.complete(SendImageResponse()..file = 'url'));
+        addTearDown(
+          () => upload.complete(const Result<UploadedFile>.success(UploadedFile(fileUrl: 'url'))),
+        );
 
         final superseded = channel.sendMessage(message);
         await pumpEventQueue();
@@ -888,7 +985,7 @@ void main() {
           );
 
           when(
-            () => client.sendImage(
+            () => fileUploader.sendImage(
               any(),
               channelId,
               channelType,
@@ -897,7 +994,7 @@ void main() {
               extraData: any(named: 'extraData'),
             ),
           ).thenAnswer(
-            (_) async => throw const StreamNetworkException(message: 'Request cancelled', isCancelled: true),
+            (_) async => const Result.failure(StreamNetworkException(message: 'Request cancelled', isCancelled: true)),
           );
 
           expect(
@@ -906,7 +1003,7 @@ void main() {
           );
 
           verify(
-            () => client.sendImage(
+            () => fileUploader.sendImage(
               any(),
               channelId,
               channelType,
@@ -938,7 +1035,7 @@ void main() {
           );
 
           when(
-            () => client.sendImage(
+            () => fileUploader.sendImage(
               any(),
               channelId,
               channelType,
@@ -947,7 +1044,7 @@ void main() {
               extraData: any(named: 'extraData'),
             ),
           ).thenAnswer(
-            (_) async => throw const StreamNetworkException(message: 'Request cancelled', isCancelled: true),
+            (_) async => const Result.failure(StreamNetworkException(message: 'Request cancelled', isCancelled: true)),
           );
 
           when(
@@ -970,7 +1067,7 @@ void main() {
           expect(res.message.text, 'Hello world!');
 
           verify(
-            () => client.sendImage(
+            () => fileUploader.sendImage(
               any(),
               channelId,
               channelType,
@@ -1011,7 +1108,7 @@ void main() {
           );
 
           when(
-            () => client.sendImage(
+            () => fileUploader.sendImage(
               any(),
               channelId,
               channelType,
@@ -1020,7 +1117,7 @@ void main() {
               extraData: any(named: 'extraData'),
             ),
           ).thenAnswer(
-            (_) async => throw const StreamNetworkException(message: 'Request cancelled', isCancelled: true),
+            (_) async => const Result.failure(StreamNetworkException(message: 'Request cancelled', isCancelled: true)),
           );
 
           when(
@@ -1043,7 +1140,7 @@ void main() {
           expect(res.message.quotedMessageId, quotedMessage.id);
 
           verify(
-            () => client.sendImage(
+            () => fileUploader.sendImage(
               any(),
               channelId,
               channelType,
@@ -1079,7 +1176,7 @@ void main() {
           );
 
           when(
-            () => client.sendImage(
+            () => fileUploader.sendImage(
               any(),
               channelId,
               channelType,
@@ -1088,7 +1185,7 @@ void main() {
               extraData: any(named: 'extraData'),
             ),
           ).thenAnswer(
-            (_) async => throw const StreamNetworkException(message: 'Request cancelled', isCancelled: true),
+            (_) async => const Result.failure(StreamNetworkException(message: 'Request cancelled', isCancelled: true)),
           );
 
           when(
@@ -1111,7 +1208,7 @@ void main() {
           expect(res.message.pollId, 'poll-123');
 
           verify(
-            () => client.sendImage(
+            () => fileUploader.sendImage(
               any(),
               channelId,
               channelType,
@@ -1535,11 +1632,15 @@ void main() {
           attachments: attachments,
         );
 
-        final sendImageResponse = SendImageResponse()..file = 'test-image-url';
-        final sendFileResponse = SendFileResponse()..file = 'test-file-url';
+        const sendImageResult = Result<UploadedFile>.success(
+          UploadedFile(fileUrl: 'test-image-url'),
+        );
+        const sendFileResult = Result<UploadedFile>.success(
+          UploadedFile(fileUrl: 'test-file-url'),
+        );
 
         when(
-          () => client.sendImage(
+          () => fileUploader.sendImage(
             any(),
             channelId,
             channelType,
@@ -1547,10 +1648,10 @@ void main() {
             cancelToken: any(named: 'cancelToken'),
             extraData: any(named: 'extraData'),
           ),
-        ).thenAnswer((_) async => sendImageResponse);
+        ).thenAnswer((_) async => sendImageResult);
 
         when(
-          () => client.sendFile(
+          () => fileUploader.sendFile(
             any(),
             channelId,
             channelType,
@@ -1558,7 +1659,7 @@ void main() {
             cancelToken: any(named: 'cancelToken'),
             extraData: any(named: 'extraData'),
           ),
-        ).thenAnswer((_) async => sendFileResponse);
+        ).thenAnswer((_) async => sendFileResult);
 
         when(
           () => client.updateMessage(
@@ -1664,7 +1765,7 @@ void main() {
         );
 
         verify(
-          () => client.sendImage(
+          () => fileUploader.sendImage(
             any(),
             channelId,
             channelType,
@@ -1675,7 +1776,7 @@ void main() {
         ).called(2);
 
         verify(
-          () => client.sendFile(
+          () => fileUploader.sendFile(
             any(),
             channelId,
             channelType,
@@ -2440,21 +2541,21 @@ void main() {
         ).thenAnswer((_) async => EmptyResponse());
 
         when(
-          () => client.deleteImage(any(), channelId, channelType),
-        ).thenAnswer((_) async => EmptyResponse());
+          () => fileUploader.deleteImage(any(), channelId, channelType),
+        ).thenAnswer((_) async => const Result.success(null));
 
         when(
-          () => client.deleteFile(any(), channelId, channelType),
-        ).thenAnswer((_) async => EmptyResponse());
+          () => fileUploader.deleteFile(any(), channelId, channelType),
+        ).thenAnswer((_) async => const Result.success(null));
 
         final res = await channel.deleteMessage(message, hard: true);
         expect(res, isNotNull);
 
         verify(() => client.deleteMessage(messageId, hard: true)).called(1);
 
-        verify(() => client.deleteImage(any(), channelId, channelType)).called(2);
+        verify(() => fileUploader.deleteImage(any(), channelId, channelType)).called(2);
 
-        verify(() => client.deleteFile(any(), channelId, channelType)).called(1);
+        verify(() => fileUploader.deleteFile(any(), channelId, channelType)).called(1);
       });
 
       test(
@@ -2882,28 +2983,32 @@ void main() {
       const url = 'test-file-url';
 
       when(
-        () => client.deleteFile(url, channelId, channelType, cancelToken: any(named: 'cancelToken')),
-      ).thenAnswer((_) async => EmptyResponse());
+        () => fileUploader.deleteFile(url, channelId, channelType, cancelToken: any(named: 'cancelToken')),
+      ).thenAnswer((_) async => const Result.success(null));
 
       final res = await channel.deleteFile(url);
 
       expect(res, isNotNull);
 
-      verify(() => client.deleteFile(url, channelId, channelType, cancelToken: any(named: 'cancelToken'))).called(1);
+      verify(
+        () => fileUploader.deleteFile(url, channelId, channelType, cancelToken: any(named: 'cancelToken')),
+      ).called(1);
     });
 
     test('`.deleteImage`', () async {
       const url = 'test-image-url';
 
       when(
-        () => client.deleteImage(url, channelId, channelType, cancelToken: any(named: 'cancelToken')),
-      ).thenAnswer((_) async => EmptyResponse());
+        () => fileUploader.deleteImage(url, channelId, channelType, cancelToken: any(named: 'cancelToken')),
+      ).thenAnswer((_) async => const Result.success(null));
 
       final res = await channel.deleteImage(url);
 
       expect(res, isNotNull);
 
-      verify(() => client.deleteImage(url, channelId, channelType, cancelToken: any(named: 'cancelToken'))).called(1);
+      verify(
+        () => fileUploader.deleteImage(url, channelId, channelType, cancelToken: any(named: 'cancelToken')),
+      ).called(1);
     });
 
     test('`.stopAIResponse`', () async {

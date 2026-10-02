@@ -1,23 +1,25 @@
 import 'package:dio/dio.dart';
+import 'package:meta/meta.dart';
+import 'package:stream_core/stream_core.dart' show PatternMatching, Result, UploadedFile, runSafely;
 
-import '../http/stream_http_client.dart';
+import '../../cdn/cdn_api.dart';
+import '../../client/client.dart';
+import '../../repository/mapper/result_mapper.dart';
+import '../../repository/mapper/uploads_mapper.dart';
 import '../models/attachment_file.dart';
-import 'responses.dart';
 
-/// Signature for a function which provides instance of [AttachmentFileUploader]
-typedef AttachmentFileUploaderProvider =
-    AttachmentFileUploader Function(
-      StreamHttpClient httpClient,
-    );
+/// Signature for a function that builds an [AttachmentFileUploader] from the client's [Dio].
+typedef AttachmentFileUploaderProvider = AttachmentFileUploader Function(Dio dio);
 
-/// Class responsible for uploading images and files to a given channel
+/// Uploads and deletes of files and images, in a channel or standalone.
+///
+/// Obtained via [StreamChatClient.fileUploader]. To replace it, consider implementing this class and
+/// returning it from the `attachmentFileUploaderProvider` passed to [StreamChatClient.new].
 abstract class AttachmentFileUploader {
-  /// Uploads a [image] to the given channel.
-  /// Returns [SendImageResponse] once sent successfully.
+  /// Uploads [image] to the channel [channelId] of type [channelType].
   ///
-  /// Optionally, access upload progress using [onSendProgress]
-  /// and cancel the request using [cancelToken]
-  Future<SendImageResponse> sendImage(
+  /// Progress is reported to [onSendProgress], and a [cancelToken] cancels the upload.
+  Future<Result<UploadedFile>> sendImage(
     AttachmentFile image,
     String channelId,
     String channelType, {
@@ -26,12 +28,10 @@ abstract class AttachmentFileUploader {
     Map<String, Object?>? extraData,
   });
 
-  /// Uploads a [file] to the given channel.
-  /// Returns [SendFileResponse] once sent successfully.
+  /// Uploads [file] to the channel [channelId] of type [channelType].
   ///
-  /// Optionally, access upload progress using [onSendProgress]
-  /// and cancel the request using [cancelToken]
-  Future<SendFileResponse> sendFile(
+  /// Progress is reported to [onSendProgress], and a [cancelToken] cancels the upload.
+  Future<Result<UploadedFile>> sendFile(
     AttachmentFile file,
     String channelId,
     String channelType, {
@@ -40,11 +40,9 @@ abstract class AttachmentFileUploader {
     Map<String, Object?>? extraData,
   });
 
-  /// Deletes a image using its [url] from the given channel.
-  /// Returns [EmptyResponse] once deleted successfully.
-  ///
-  /// Optionally, cancel the request using [cancelToken]
-  Future<EmptyResponse> deleteImage(
+  /// Deletes the image at [url] from the channel [channelId] of type
+  /// [channelType].
+  Future<Result<void>> deleteImage(
     String url,
     String channelId,
     String channelType, {
@@ -52,11 +50,9 @@ abstract class AttachmentFileUploader {
     Map<String, Object?>? extraData,
   });
 
-  /// Deletes a file using its [url] from the given channel.
-  /// Returns [EmptyResponse] once deleted successfully.
-  ///
-  /// Optionally, cancel the request using [cancelToken]
-  Future<EmptyResponse> deleteFile(
+  /// Deletes the file at [url] from the channel [channelId] of type
+  /// [channelType].
+  Future<Result<void>> deleteFile(
     String url,
     String channelId,
     String channelType, {
@@ -66,46 +62,32 @@ abstract class AttachmentFileUploader {
 
   // region Standalone upload methods
 
-  /// Uploads an image file to the CDN.
+  /// Uploads [image] outside of any channel.
   ///
-  /// Upload progress can be tracked using [onSendProgress], and the operation
-  /// can be cancelled using [cancelToken].
-  ///
-  /// Returns a [UploadImageResponse] once uploaded successfully.
-  Future<UploadImageResponse> uploadImage(
+  /// Progress is reported to [onSendProgress], and a [cancelToken] cancels the upload.
+  Future<Result<UploadedFile>> uploadImage(
     AttachmentFile image, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
   });
 
-  /// Uploads a file to the CDN.
+  /// Uploads [file] outside of any channel.
   ///
-  /// Upload progress can be tracked using [onSendProgress], and the operation
-  /// can be cancelled using [cancelToken].
-  ///
-  /// Returns a [UploadFileResponse] once uploaded successfully.
-  Future<UploadFileResponse> uploadFile(
+  /// Progress is reported to [onSendProgress], and a [cancelToken] cancels the upload.
+  Future<Result<UploadedFile>> uploadFile(
     AttachmentFile file, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
   });
 
-  /// Removes an image from the CDN using its [url].
-  ///
-  /// The operation can be cancelled using [cancelToken] if needed.
-  ///
-  /// Returns a [EmptyResponse] once removed successfully.
-  Future<EmptyResponse> removeImage(
+  /// Deletes the image at [url], uploaded outside of any channel.
+  Future<Result<void>> removeImage(
     String url, {
     CancelToken? cancelToken,
   });
 
-  /// Removes a file from the CDN using its [url].
-  ///
-  /// The operation can be cancelled using [cancelToken] if needed.
-  ///
-  /// Returns a [EmptyResponse] once removed successfully.
-  Future<EmptyResponse> removeFile(
+  /// Deletes the file at [url], uploaded outside of any channel.
+  Future<Result<void>> removeFile(
     String url, {
     CancelToken? cancelToken,
   });
@@ -113,15 +95,42 @@ abstract class AttachmentFileUploader {
   // endregion
 }
 
-/// Stream's default implementation of [AttachmentFileUploader]
+/// The default [AttachmentFileUploader], which uploads to Stream's CDN.
 class StreamAttachmentFileUploader implements AttachmentFileUploader {
-  /// Creates a new [StreamAttachmentFileUploader] instance.
-  const StreamAttachmentFileUploader(this._client);
+  /// Creates an uploader that sends its requests through [dio].
+  StreamAttachmentFileUploader(Dio dio) : this.fromApi(CdnApi(dio));
 
-  final StreamHttpClient _client;
+  /// Creates an uploader that sends its requests through an existing [CdnApi].
+  @internal
+  const StreamAttachmentFileUploader.fromApi(this._api);
+
+  final CdnApi _api;
 
   @override
-  Future<SendImageResponse> sendImage(
+  Future<Result<UploadedFile>> sendImage(
+    AttachmentFile image,
+    String channelId,
+    String channelType, {
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
+    Map<String, Object?>? extraData,
+  }) async {
+    final multipart = await runSafely(image.toMultipartFile);
+    return multipart.flatMapAsync((multipartFile) async {
+      final result = await _api.uploadChannelImage(
+        type: channelType,
+        id: channelId,
+        file: multipartFile,
+        onUploadProgress: onSendProgress,
+        cancelToken: cancelToken,
+      );
+
+      return result.map((it) => it.toModel());
+    });
+  }
+
+  @override
+  Future<Result<UploadedFile>> sendFile(
     AttachmentFile file,
     String channelId,
     String channelType, {
@@ -129,122 +138,115 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
     CancelToken? cancelToken,
     Map<String, Object?>? extraData,
   }) async {
-    final multiPartFile = await file.toMultipartFile();
-    final response = await _client.postFile(
-      '/channels/$channelType/$channelId/image',
-      multiPartFile,
-      onSendProgress: onSendProgress,
-      cancelToken: cancelToken,
-    );
-    return SendImageResponse.fromJson(response.data);
+    final multipart = await runSafely(file.toMultipartFile);
+    return multipart.flatMapAsync((multipartFile) async {
+      final result = await _api.uploadChannelFile(
+        type: channelType,
+        id: channelId,
+        file: multipartFile,
+        onUploadProgress: onSendProgress,
+        cancelToken: cancelToken,
+      );
+
+      return result.map((it) => it.toModel());
+    });
   }
 
   @override
-  Future<SendFileResponse> sendFile(
-    AttachmentFile file,
-    String channelId,
-    String channelType, {
-    ProgressCallback? onSendProgress,
-    CancelToken? cancelToken,
-    Map<String, Object?>? extraData,
-  }) async {
-    final multiPartFile = await file.toMultipartFile();
-    final response = await _client.postFile(
-      '/channels/$channelType/$channelId/file',
-      multiPartFile,
-      onSendProgress: onSendProgress,
-      cancelToken: cancelToken,
-    );
-    return SendFileResponse.fromJson(response.data);
-  }
-
-  @override
-  Future<EmptyResponse> deleteImage(
+  Future<Result<void>> deleteImage(
     String url,
     String channelId,
     String channelType, {
     CancelToken? cancelToken,
     Map<String, Object?>? extraData,
   }) async {
-    final response = await _client.delete(
-      '/channels/$channelType/$channelId/image',
-      queryParameters: {'url': url},
+    final result = await _api.deleteChannelImage(
+      type: channelType,
+      id: channelId,
+      url: url,
       cancelToken: cancelToken,
     );
-    return EmptyResponse.fromJson(response.data);
+
+    return result.ignoreValue();
   }
 
   @override
-  Future<EmptyResponse> deleteFile(
+  Future<Result<void>> deleteFile(
     String url,
     String channelId,
     String channelType, {
     CancelToken? cancelToken,
     Map<String, Object?>? extraData,
   }) async {
-    final response = await _client.delete(
-      '/channels/$channelType/$channelId/file',
-      queryParameters: {'url': url},
+    final result = await _api.deleteChannelFile(
+      type: channelType,
+      id: channelId,
+      url: url,
       cancelToken: cancelToken,
     );
-    return EmptyResponse.fromJson(response.data);
+
+    return result.ignoreValue();
   }
 
   @override
-  Future<UploadImageResponse> uploadImage(
+  Future<Result<UploadedFile>> uploadImage(
     AttachmentFile image, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
   }) async {
-    final multiPartFile = await image.toMultipartFile();
-    final response = await _client.postFile(
-      '/uploads/image',
-      multiPartFile,
-      onSendProgress: onSendProgress,
-      cancelToken: cancelToken,
-    );
-    return UploadImageResponse.fromJson(response.data);
+    final multipart = await runSafely(image.toMultipartFile);
+    return multipart.flatMapAsync((multipartFile) async {
+      final result = await _api.uploadImage(
+        file: multipartFile,
+        onUploadProgress: onSendProgress,
+        cancelToken: cancelToken,
+      );
+
+      return result.map((it) => it.toModel());
+    });
   }
 
   @override
-  Future<UploadFileResponse> uploadFile(
+  Future<Result<UploadedFile>> uploadFile(
     AttachmentFile file, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
   }) async {
-    final multiPartFile = await file.toMultipartFile();
-    final response = await _client.postFile(
-      '/uploads/file',
-      multiPartFile,
-      onSendProgress: onSendProgress,
-      cancelToken: cancelToken,
-    );
-    return UploadFileResponse.fromJson(response.data);
+    final multipart = await runSafely(file.toMultipartFile);
+    return multipart.flatMapAsync((multipartFile) async {
+      final result = await _api.uploadFile(
+        file: multipartFile,
+        onUploadProgress: onSendProgress,
+        cancelToken: cancelToken,
+      );
+
+      return result.map((it) => it.toModel());
+    });
   }
 
   @override
-  Future<EmptyResponse> removeImage(
+  Future<Result<void>> removeImage(
     String url, {
     CancelToken? cancelToken,
   }) async {
-    final response = await _client.delete(
-      '/uploads/image',
-      queryParameters: {'url': url},
+    final result = await _api.deleteImage(
+      url: url,
       cancelToken: cancelToken,
     );
-    return EmptyResponse.fromJson(response.data);
+
+    return result.ignoreValue();
   }
 
   @override
-  Future<EmptyResponse> removeFile(
+  Future<Result<void>> removeFile(
     String url, {
     CancelToken? cancelToken,
   }) async {
-    final response = await _client.delete(
-      '/uploads/file',
-      queryParameters: {'url': url},
+    final result = await _api.deleteFile(
+      url: url,
       cancelToken: cancelToken,
     );
-    return EmptyResponse.fromJson(response.data);
+
+    return result.ignoreValue();
   }
 }

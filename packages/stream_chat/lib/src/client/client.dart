@@ -39,7 +39,6 @@ import '../core/error/stream_chat_exception.dart';
 import '../core/http/interceptor/additional_headers_interceptor.dart';
 import '../core/http/stream_http_client.dart';
 import '../core/models/app_settings.dart';
-import '../core/models/attachment_file.dart';
 import '../core/models/banned_user.dart';
 import '../core/models/channel_state.dart';
 import '../core/models/draft.dart';
@@ -149,7 +148,6 @@ class StreamChatClient {
           tokenManager: _tokenManager,
           connectionId: () => _connection.connectionId,
           systemEnvironmentManager: _systemEnvironmentManager,
-          attachmentFileUploaderProvider: attachmentFileUploaderProvider,
           interceptors: chatApiInterceptors,
           httpClientAdapter: httpClientAdapter,
         );
@@ -179,6 +177,7 @@ class StreamChatClient {
         );
 
     final api = defaultApi ?? DefaultApi(httpClient);
+    fileUploader = attachmentFileUploaderProvider(httpClient);
 
     _rolesRepository = RolesRepository(api);
     _devicesRepository = DevicesRepository(api);
@@ -231,6 +230,11 @@ class StreamChatClient {
 
   /// Muting, banning and flagging, for the connected user.
   late final ModerationClient moderation;
+
+  /// Uploads and deletes of files and images, in a channel or standalone.
+  ///
+  /// Built by the `attachmentFileUploaderProvider` passed to the constructor.
+  late final AttachmentFileUploader fileUploader;
 
   late final ConnectionManager _connection;
   StreamSubscription<WsEvent>? _wsEventSubscription;
@@ -1088,128 +1092,6 @@ class StreamChatClient {
     sort: sort,
     pagination: paginationParams,
     messageFilters: messageFilters,
-  );
-
-  /// Send a [file] to the [channelId] of type [channelType]
-  Future<SendFileResponse> sendFile(
-    AttachmentFile file,
-    String channelId,
-    String channelType, {
-    ProgressCallback? onSendProgress,
-    CancelToken? cancelToken,
-    Map<String, Object?>? extraData,
-  }) => _chatApi.fileUploader.sendFile(
-    file,
-    channelId,
-    channelType,
-    onSendProgress: onSendProgress,
-    cancelToken: cancelToken,
-    extraData: extraData,
-  );
-
-  /// Send a [image] to the [channelId] of type [channelType]
-  Future<SendImageResponse> sendImage(
-    AttachmentFile image,
-    String channelId,
-    String channelType, {
-    ProgressCallback? onSendProgress,
-    CancelToken? cancelToken,
-    Map<String, Object?>? extraData,
-  }) => _chatApi.fileUploader.sendImage(
-    image,
-    channelId,
-    channelType,
-    onSendProgress: onSendProgress,
-    cancelToken: cancelToken,
-    extraData: extraData,
-  );
-
-  /// Delete a file from this channel
-  Future<EmptyResponse> deleteFile(
-    String url,
-    String channelId,
-    String channelType, {
-    CancelToken? cancelToken,
-    Map<String, Object?>? extraData,
-  }) => _chatApi.fileUploader.deleteFile(
-    url,
-    channelId,
-    channelType,
-    cancelToken: cancelToken,
-    extraData: extraData,
-  );
-
-  /// Delete an image from this channel
-  Future<EmptyResponse> deleteImage(
-    String url,
-    String channelId,
-    String channelType, {
-    CancelToken? cancelToken,
-    Map<String, Object?>? extraData,
-  }) => _chatApi.fileUploader.deleteImage(
-    url,
-    channelId,
-    channelType,
-    cancelToken: cancelToken,
-    extraData: extraData,
-  );
-
-  /// Upload an image to the Stream CDN
-  ///
-  /// Upload progress can be tracked using [onProgress], and the operation can
-  /// be cancelled using [cancelToken].
-  ///
-  /// Returns a [UploadImageResponse] once uploaded successfully.
-  Future<UploadImageResponse> uploadImage(
-    AttachmentFile image, {
-    ProgressCallback? onUploadProgress,
-    CancelToken? cancelToken,
-  }) => _chatApi.fileUploader.uploadImage(
-    image,
-    onSendProgress: onUploadProgress,
-    cancelToken: cancelToken,
-  );
-
-  /// Upload a file to the Stream CDN
-  ///
-  /// Upload progress can be tracked using [onProgress], and the operation can
-  /// be cancelled using [cancelToken].
-  ///
-  /// Returns a [UploadFileResponse] once uploaded successfully.
-  Future<UploadFileResponse> uploadFile(
-    AttachmentFile file, {
-    ProgressCallback? onUploadProgress,
-    CancelToken? cancelToken,
-  }) => _chatApi.fileUploader.uploadFile(
-    file,
-    onSendProgress: onUploadProgress,
-    cancelToken: cancelToken,
-  );
-
-  /// Remove an image from the Stream CDN using its [url].
-  ///
-  /// The operation can be cancelled using [cancelToken] if needed.
-  ///
-  /// Returns an [EmptyResponse] once removed successfully.
-  Future<EmptyResponse> removeImage(
-    String url, {
-    CancelToken? cancelToken,
-  }) => _chatApi.fileUploader.removeImage(
-    url,
-    cancelToken: cancelToken,
-  );
-
-  /// Remove a file from the Stream CDN using its [url].
-  ///
-  /// The operation can be cancelled using [cancelToken] if needed.
-  ///
-  /// Returns an [EmptyResponse] once removed successfully.
-  Future<EmptyResponse> removeFile(
-    String url, {
-    CancelToken? cancelToken,
-  }) => _chatApi.fileUploader.removeFile(
-    url,
-    cancelToken: cancelToken,
   );
 
   /// Replaces the [channelId] of type [ChannelType] data with [data].

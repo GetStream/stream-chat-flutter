@@ -29,6 +29,7 @@ onto Stream's OpenAPI-generated API client.
     - [Devices](#devices)
     - [Moderation](#moderation)
     - [App Settings](#app-settings)
+    - [File Upload](#file-upload)
     - [User Groups](#user-groups)
     - [Link Previews](#link-previews)
 - [Migration Checklist](#migration-checklist)
@@ -74,6 +75,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Error Handling**](#error-handling) | Failures carry `stream_core`'s sealed `StreamException` family instead of `StreamChatNetworkError`; `ChatErrorCode` → `StreamErrorCode`. API calls will return `Result<T>` rather than throwing, endpoint by endpoint |
 | [**Moderation**](#moderation) | Muting, banning and flagging return a `Result` and call the moderation v2 API; `banUser`'s options map becomes named parameters; `unflagMessage`, `unflagUser` and `removeShadowBan` are removed |
 | [**App Settings**](#app-settings) | `getAppSettings` returns a `Result<AppSettingsResponse>` instead of throwing; `GetAppSettingsResponse` is renamed `AppSettingsResponse` |
+| [**File Upload**](#file-upload) | The client's upload methods moved to `client.fileUploader`; uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -208,6 +210,12 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `GetAppSettingsResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
 | `AppSettings extends Equatable` / `UploadConfig extends Equatable`, `props` | `AppSettings` / `UploadConfig` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and neither is an `Equatable` any more |
 | `StreamChatApi.general.getAppSettings()` | `StreamChatClient.getAppSettings()` | `removed` | The call moved to the generated client |
+| `sendImage` / `sendFile` / `uploadImage` / `uploadFile` → `Future<SendImageResponse>` and siblings | `Future<Result<UploadedFile>>` | `retyped` | On `Channel` and `AttachmentFileUploader`. Returns a `Result` instead of throwing |
+| `deleteImage` / `deleteFile` / `removeImage` / `removeFile` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | On `Channel` and `AttachmentFileUploader`. Returns a `Result` instead of throwing |
+| `StreamChatClient.sendImage` / `sendFile` / `deleteImage` / `deleteFile` / `uploadImage` / `uploadFile` / `removeImage` / `removeFile` | `StreamChatClient.fileUploader.<same name>` | `moved` | Reached through the `AttachmentFileUploader` the client builds. `uploadImage` and `uploadFile` take `onSendProgress` instead of `onUploadProgress`. `Channel`'s upload methods keep their place |
+| `SendAttachmentResponse`, `SendFileResponse`, `SendImageResponse`, `UploadImageResponse`, `UploadFileResponse` | `UploadedFile` (`stream_core`) | `removed` | `.file` becomes `.fileUrl`; `.thumbUrl` is unchanged; `duration` is gone |
+| `AttachmentFileUploaderProvider` = `AttachmentFileUploader Function(StreamHttpClient)` | `AttachmentFileUploader Function(Dio)` | `retyped` | Receives the client's `Dio`; `StreamAttachmentFileUploader(dio)` builds the default |
+| `StreamChatApi.fileUploader`, `StreamChatApi(attachmentFileUploaderProvider:)` | `StreamChatClient(attachmentFileUploaderProvider:)` | `removed` | The uploader belongs to `StreamChatClient` |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -710,6 +718,59 @@ build them with their constructors — `AppSettingsResponse(duration: '0ms', app
 **`AppSettings` and `UploadConfig` no longer extend `Equatable`.** They still compare by value, `props` is
 gone, and both gain `copyWith`.
 
+### File Upload
+
+**Uploads and deletes return a `Result` instead of throwing.** `sendImage`, `sendFile`, `uploadImage` and
+`uploadFile` answer an `UploadedFile`, and the deletes carry no value on success. That holds on `Channel` and on
+`AttachmentFileUploader`. A cancelled upload is a failure whose error is a `StreamNetworkException` with
+`isCancelled` set.
+
+```dart
+// v10
+try {
+  final response = await channel.sendImage(file);
+  setImage(response.file);
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await channel.sendImage(file);
+result.fold(
+  onSuccess: (uploaded) => setImage(uploaded.fileUrl),
+  onFailure: (error, _) => report(error),
+);
+```
+
+**The client's upload methods moved to `client.fileUploader`.** The client's eight upload and delete methods are
+reached through the `AttachmentFileUploader` it builds, the same way moderation moved to `client.moderation`.
+`uploadImage` and `uploadFile` take `onSendProgress` there, as the channel uploads already did. `Channel`'s
+`sendImage`, `sendFile`, `deleteImage` and `deleteFile` keep their place.
+
+```dart
+// v10
+await client.uploadImage(file, onUploadProgress: onProgress);
+
+// v11
+await client.fileUploader.uploadImage(file, onSendProgress: onProgress);
+```
+
+**The response types are replaced by `UploadedFile`**, from `stream_core` and exported by this package.
+`file` becomes `fileUrl`; `thumbUrl`, set for a video, is unchanged; `duration` is gone. Build one with
+`UploadedFile(fileUrl: url)` where v10 wrote `SendFileResponse()..file = url`.
+
+**A custom uploader returns a `Result`, and its provider receives a `Dio`.** Implement the same eight methods,
+returning `Result`s, and build the uploader from the `Dio` the provider hands it — the client's own, with its
+authentication and error handling.
+
+```dart
+// v10
+StreamChatClient(apiKey, attachmentFileUploaderProvider: (httpClient) => MyUploader(httpClient));
+
+// v11
+StreamChatClient(apiKey, attachmentFileUploaderProvider: (dio) => MyUploader(dio));
+```
+
 ---
 
 ## Migration Checklist
@@ -724,7 +785,7 @@ Work top to bottom; each item is independently verifiable.
 - [ ] Replace `ChatErrorCode` comparisons with `StreamErrorCode` constants
 - [ ] Apply every row of the [Symbol Map](#symbol-map)
 - [ ] Re-check custom data access: fields that used to arrive in `extraData` may now be typed properties
-- [ ] If you implement `AttachmentFileUploader`, review its section under [Feature Areas](#feature-areas)
+- [ ] If you implement `AttachmentFileUploader`, return a `Result` from it — see [File Upload](#file-upload)
 - [ ] If you persist models yourself, re-check nullability as endpoints move to the generated types, which are nullable wherever the API allows it
 - [ ] Replace `sort: null` on any list controller with `XSort.empty` if you relied on server ordering — see
       [Sorting](#sorting)
