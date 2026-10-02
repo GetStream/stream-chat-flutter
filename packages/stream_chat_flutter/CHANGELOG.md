@@ -1,7 +1,12 @@
 ## Upcoming
 
+🔄 Changed
+
+- `StreamMessageListView` now only rebuilds message rows whose message or neighbouring messages changed. A custom `messageBuilder` that reads state from outside the list no longer refreshes on every new message; rebuild the `StreamMessageListView` when that state changes.
+
 🐞 Fixed
 
+- Fixed `StreamMessageListView` dropping frames on each new message in busy channels.
 - Fixed `StreamMessageComposer` polling the audio recorder ten times a second while no recording is in progress, including when voice recording is disabled.
 
 ## 10.5.0

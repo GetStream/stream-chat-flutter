@@ -349,6 +349,18 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   List<Message> messages = <Message>[];
 
+  // Rows built by [buildMessage], keyed by message id and ordered from least
+  // to most recently used. A row is reused while the inputs it was built from
+  // are unchanged, so a new message rebuilds only its own row and its
+  // neighbour's instead of every visible row. Cleared when the dependencies
+  // change, or when the widget changes any of [_rowInputsOf].
+  final _messageRowCache = <String, _CachedMessageRow>{};
+
+  // Only rows that are still mounted benefit from the cache — a row scrolled
+  // out of the list is built again when it returns — so the cache only needs
+  // to cover a few screens' worth of rows, however long the list grows.
+  static const _maxCachedMessageRows = 64;
+
   // `generation` bumps on each highlight call so a re-highlight of the
   // same message restarts the fade animation.
   final _highlightState = ValueNotifier<({String? id, int generation})>((id: null, generation: 0));
@@ -392,6 +404,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     super.didChangeDependencies();
     // Before anything else — the branches below read `_config`.
     _config = _resolveConfig();
+    _messageRowCache.clear();
 
     final newStreamChannel = StreamChannel.of(context);
 
@@ -482,7 +495,36 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     // `config` can change without dependencies changing, so re-resolve here as
     // well as in `didChangeDependencies`.
     if (widget.config != oldWidget.config) _config = _resolveConfig();
+    if (_rowInputsOf(widget) != _rowInputsOf(oldWidget)) _messageRowCache.clear();
   }
+
+  // Everything on the widget that [buildMessage] passes into a row. A parent
+  // that rebuilds the list without changing any of these keeps the cached
+  // rows; callbacks created inline on every build do change them.
+  static Object _rowInputsOf(StreamMessageListView widget) => (
+    widget.config,
+    widget.parentMessage,
+    widget.messageBuilder,
+    widget.builders.systemMessage,
+    widget.builders.moderatedMessage,
+    widget.builders.ephemeralMessage,
+    widget.onSystemMessageTap,
+    widget.onModeratedMessageTap,
+    widget.onEphemeralMessageTap,
+    widget.onViewInChannelTap,
+    widget.onMessageTap,
+    widget.onMessageLongPress,
+    widget.onEditMessageTap,
+    widget.onReplyTap,
+    widget.onUserAvatarTap,
+    widget.onReactionsTap,
+    widget.onReactionTap,
+    widget.onReactionLongPress,
+    widget.onMessageLinkTap,
+    widget.onUserMentionTap,
+    widget.onMentionTap,
+    widget.onQuotedMessageTap,
+  );
 
   @override
   void dispose() {
@@ -1204,6 +1246,36 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }
 
   Widget buildMessage(Message message, List<Message> messages, int index) {
+    final nextMessage = index - 1 >= 0 ? messages[index - 1] : null;
+    final prevMessage = index + 1 < messages.length ? messages[index + 1] : null;
+    final currentUserId = StreamChat.of(context).currentUser?.id;
+
+    // Removed and re-inserted so the entry moves to the most recently used end.
+    final cached = _messageRowCache.remove(message.id);
+    if (cached != null &&
+        cached.message == message &&
+        cached.previous == prevMessage &&
+        cached.next == nextMessage &&
+        cached.currentUserId == currentUserId) {
+      _messageRowCache[message.id] = cached;
+      return cached.row;
+    }
+
+    final row = _buildMessageRow(message, prevMessage: prevMessage, nextMessage: nextMessage);
+    _messageRowCache[message.id] = _CachedMessageRow(
+      message: message,
+      previous: prevMessage,
+      next: nextMessage,
+      currentUserId: currentUserId,
+      row: row,
+    );
+    if (_messageRowCache.length > _maxCachedMessageRows) {
+      _messageRowCache.remove(_messageRowCache.keys.first);
+    }
+    return row;
+  }
+
+  Widget _buildMessageRow(Message message, {Message? prevMessage, Message? nextMessage}) {
     if (message.isSystem) {
       return buildSystemMessage(message);
     }
@@ -1242,8 +1314,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
     final userId = StreamChat.of(context).currentUser!.id;
     final isMyMessage = message.user?.id == userId;
-    final nextMessage = index - 1 >= 0 ? messages[index - 1] : null;
-    final prevMessage = index + 1 < messages.length ? messages[index + 1] : null;
 
     final contentKind = resolveContentKind(message);
     final isInThread = widget.parentMessage != null;
@@ -1349,6 +1419,23 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       _ => null,
     };
   }
+}
+
+// A row built by `buildMessage`, with the inputs it was built from.
+class _CachedMessageRow {
+  const _CachedMessageRow({
+    required this.message,
+    required this.previous,
+    required this.next,
+    required this.currentUserId,
+    required this.row,
+  });
+
+  final Message message;
+  final Message? previous;
+  final Message? next;
+  final String? currentUserId;
+  final Widget row;
 }
 
 // Inherits the message id that an opening thread page should highlight on first render.
