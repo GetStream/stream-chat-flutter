@@ -400,9 +400,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     final pagedCids = envelopes.skip(offset).take(limit).map((s) => s.channel!.cid).toList();
 
     // 5) Hydrate ONLY the page.
-    final messagePagination = PaginationParams(
-      limit: messageLimit ?? ChatPersistenceClient.defaultMessageLimit,
-    );
+    final messagePagination = PaginationParams(limit: messageLimit ?? ChatPersistenceClient.defaultMessageLimit);
     return Future.wait(pagedCids.map((cid) => getChannelStateByCid(cid, messagePagination: messagePagination)));
   }
 
