@@ -642,7 +642,7 @@ class Message extends Equatable implements ComparableFieldProvider {
       state: shouldPromoteDeletedForMe ? MessageState.deletedForMe : null,
       // Preserve enrichment from this instance when [other] omits these
       // fields, as the backend may strip them on partial payloads.
-      poll: other.poll ?? poll,
+      poll: other.poll?.withTranslationsOf(poll) ?? poll,
       sharedLocation: other.sharedLocation ?? sharedLocation,
       ownReactions: other.ownReactions ?? ownReactions,
       // Recursively merge so nested enrichment survives a stripped payload.

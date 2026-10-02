@@ -1,5 +1,11 @@
 ## Upcoming
 
+✅ Added
+
+- Polls are now shown translated into the current user's language, following `StreamMessageTranslationConfiguration` like the message text.
+- Added `PollTranslationX`, `PollOptionTranslationX` and `PollVoteTranslationX`, to read the translations of a poll, its options and its answers.
+- Added `MessageTranslationLanguage`, the language `StreamMessageContent` shows a message translated into, for custom attachments to show translations too.
+
 🔄 Changed
 
 - `StreamMessageComposer`'s top border now spans the full width, including under the side safe-area insets, and also shows above the no-permission message.
