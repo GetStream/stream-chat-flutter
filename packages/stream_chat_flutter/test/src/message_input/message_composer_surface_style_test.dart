@@ -59,6 +59,14 @@ void main() {
     expect(_backgroundFillFinder(tester), findsOneWidget);
   });
 
+  testWidgets('StreamMessageComposer runs the regular top divider under the side insets', (tester) async {
+    const rightInset = 84.0;
+    await _pumpComposer(tester, surfaceStyle: StreamSurfaceStyle.regular, rightPadding: rightInset);
+
+    final screenWidth = tester.view.physicalSize.width / tester.view.devicePixelRatio;
+    expect(tester.getRect(_backgroundFillFinder(tester)).width, moreOrLessEquals(screenWidth));
+  });
+
   testWidgets('the floating composer does not fill its background', (tester) async {
     // Floating paints a fading backdrop instead of an opaque fill, so the
     // message list stays visible behind the composer.
@@ -150,6 +158,33 @@ void main() {
     // Open: the inset has collapsed.
     expect(insetBottom(), moreOrLessEquals(0));
   });
+
+  testWidgets('StreamMessageComposer keeps its side insets while the attachment picker opens', (tester) async {
+    const rightInset = 84.0;
+    await _pumpComposer(
+      tester,
+      surfaceStyle: StreamSurfaceStyle.floating,
+      bottomPadding: 34,
+      rightPadding: rightInset,
+    );
+
+    final screenWidth = tester.view.physicalSize.width / tester.view.devicePixelRatio;
+    double inputRight() => tester.getRect(find.byType(StreamChatMessageInput)).right;
+
+    final closedRight = inputRight();
+    expect(closedRight, lessThanOrEqualTo(screenWidth - rightInset));
+
+    await tester.tap(_attachmentButtonFinder);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Mid-animation: the width doesn't change.
+    expect(inputRight(), moreOrLessEquals(closedRight));
+
+    await tester.pumpAndSettle();
+
+    expect(inputRight(), moreOrLessEquals(closedRight));
+  });
 }
 
 // The composer's attachment (picker) button, in the leading slot.
@@ -167,7 +202,11 @@ StreamSurfaceStyle _resolvedSurfaceStyle(WidgetTester tester) {
 // Finds the opaque background fill the regular composer paints behind itself.
 Finder _backgroundFillFinder(WidgetTester tester) {
   final context = tester.element(find.byType(StreamChatMessageInput));
-  final fill = BoxDecoration(color: context.streamColorScheme.backgroundElevation1);
+  final colorScheme = context.streamColorScheme;
+  final fill = BoxDecoration(
+    color: colorScheme.backgroundElevation1,
+    border: Border(top: BorderSide(color: colorScheme.borderDefault)),
+  );
 
   return find.descendant(
     of: find.byType(StreamMessageComposer),
@@ -196,6 +235,7 @@ Future<void> _pumpComposer(
   StreamSurfaceStyle? composerSurfaceStyle,
   bool? enableSafeArea,
   double bottomPadding = 0,
+  double rightPadding = 0,
   TargetPlatform? platform,
 }) async {
   final originalRecordPlatform = RecordPlatform.instance;
@@ -241,7 +281,9 @@ Future<void> _pumpComposer(
       // brightness the test binding provides are preserved.
       home: Builder(
         builder: (context) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(padding: EdgeInsets.only(bottom: bottomPadding)),
+          data: MediaQuery.of(context).copyWith(
+            padding: EdgeInsets.only(right: rightPadding, bottom: bottomPadding),
+          ),
           child: StreamChat(
             client: client,
             themeData: StreamChatThemeData(messageComposerTheme: globalTheme),

@@ -293,11 +293,12 @@ class StreamMessageListView extends StatefulWidget {
   /// Defaults to [StreamMessageListViewBuilders] with no overrides.
   final StreamMessageListViewBuilders builders;
 
-  /// Whether this list pads its scrollable to avoid partial obstructions
+  /// Whether this list keeps its content clear of partial obstructions
   /// indicated by [MediaQuery]'s padding.
   ///
-  /// Content still scrolls through the obstructed area; only the scrollable's
-  /// limits are inset, so the first and last items come to rest clear of it.
+  /// Messages scroll under the top and bottom obstructions but come to rest
+  /// clear of them, and stay clear of the side ones. The loading, empty and
+  /// error states, including those from [builders], clear every obstruction.
   ///
   /// Defaults to false.
   final bool enableSafeArea;
@@ -596,30 +597,37 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     );
   }
 
-  // Safe-area insets injected into MediaQuery by the enclosing scaffold (a
-  // floating app bar / composer, or the system safe area). Read directly so the
-  // list self-insets without the caller threading padding in.
-  EdgeInsets get _scaffoldInsets => widget.enableSafeArea ? MediaQuery.paddingOf(context) : EdgeInsets.zero;
+  // The top and bottom insets, applied as scroll padding. [_safeArea] handles the sides.
+  EdgeInsets get _scaffoldInsets {
+    if (!widget.enableSafeArea) return .zero;
+    return MediaQuery.paddingOf(context).copyWith(left: 0, right: 0);
+  }
+
+  // A SafeArea, only while [StreamMessageListView.enableSafeArea] is on.
+  Widget _safeArea({bool top = true, bool bottom = true, required Widget child}) {
+    if (!widget.enableSafeArea) return child;
+    return SafeArea(top: top, bottom: bottom, child: child);
+  }
 
   @override
   Widget build(BuildContext context) {
     Widget defaultLoadingBuilder(BuildContext context) {
-      if (widget.builders.loading case final builder?) return builder(context);
-      return const StreamMessageListSkeletonLoading();
+      if (widget.builders.loading case final builder?) return _safeArea(child: builder(context));
+      return _safeArea(child: const StreamMessageListSkeletonLoading());
     }
 
     Widget defaultEmptyBuilder(BuildContext context) {
-      if (widget.builders.empty case final builder?) return builder(context);
-      return const StreamMessageListEmptyState();
+      if (widget.builders.empty case final builder?) return _safeArea(child: builder(context));
+      return _safeArea(child: const StreamMessageListEmptyState());
     }
 
     Widget defaultErrorBuilder(BuildContext context, Object error) {
-      if (widget.builders.error case final builder?) return builder(context, error);
+      if (widget.builders.error case final builder?) return _safeArea(child: builder(context, error));
 
       final translations = context.translations;
       final text = resolveNetworkErrorText(context, error, fallbackTitle: translations.loadingMessagesError);
 
-      return Center(
+      final errorWidget = Center(
         child: StreamScrollViewErrorWidget(
           errorTitle: Text(text.title),
           errorSubtitle: Text(text.description),
@@ -627,6 +635,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           onRetryPressed: () => streamChannel?.reloadChannel(),
         ),
       );
+
+      return _safeArea(child: errorWidget);
     }
 
     Widget defaultMessageListBuilder(BuildContext context, List<Message> list) {
@@ -947,6 +957,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       ],
     );
 
+    final content = _safeArea(top: false, bottom: false, child: child);
+
     final backgroundColor = StreamMessageListViewTheme.of(context).backgroundColor;
     final backgroundImage = StreamMessageListViewTheme.of(context).backgroundImage;
 
@@ -956,11 +968,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           color: backgroundColor,
           image: backgroundImage,
         ),
-        child: child,
+        child: content,
       );
     }
 
-    return child;
+    return content;
   }
 
   // Default spacing widget between adjacent messages — mirrors the old
