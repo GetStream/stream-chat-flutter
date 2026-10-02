@@ -688,8 +688,8 @@ class StreamChatClient {
   /// [PredefinedFilter] spec (when one is associated with the query).
   ///
   /// Yields the offline-cached result first (when available), followed by
-  /// the online result. Concurrent identical online queries are coalesced
-  /// via [_queryChannelsCache].
+  /// the online result. Concurrent identical online queries share a single
+  /// request.
   Stream<QueryChannelsResult> queryChannelsWithResult({
     Filter? filter,
     SortOrder<ChannelState>? channelStateSort,
@@ -853,8 +853,9 @@ class StreamChatClient {
       watch: watch,
       presence: presence,
       memberLimit: memberLimit,
-      // Default limit is set to 25 in backend.
-      messageLimit: messageLimit ?? 25,
+      // Channels read back from persistence use a limit of 25, so the online
+      // query pins the same limit to keep both results consistent.
+      messageLimit: messageLimit ?? (persistenceEnabled ? 25 : null),
       paginationParams: paginationParams,
     );
 
