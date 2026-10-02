@@ -100,6 +100,10 @@ includes a named response that carries only `duration` today, such as `HideChann
    (see the breaks above). A field the server adds is exposed later, as an additive change. The one exception to
    "no JSON" is the temporary `@DataSerializable` storage codec in rule 8.
 
+   **A model that had a `copyWith` in v10 keeps that exact method,** `_nullConst` sentinels included, under
+   `@Freezed(copyWith: false)`. freezed's own `copyWith` sets a field passed as `null`, where v10's keeps it, and
+   the SDK's state handling depends on the difference. Only a model with no v10 `copyWith` uses freezed's.
+
    **Names default to v10's,** even where the generated name differs: `OGAttachmentResponse` rather than
    `GetOGResponse`, `AppSettings` rather than `AppResponseFields`, `UploadConfig` rather than `FileUploadConfig`.
    That is a default, not a requirement. The user may ask for another name, or a migration may propose one that
