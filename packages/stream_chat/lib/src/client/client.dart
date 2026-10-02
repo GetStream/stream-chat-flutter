@@ -446,11 +446,14 @@ class StreamChatClient {
     );
   }
 
-  /// Connects a guest created from [user], which triggers a connection to the API.
+  /// Signs in a new guest created from [user] and returns it.
   ///
-  /// Returns a [Future] that resolves when the connection is set up. Throws a [StateError] if a user is already
-  /// signed in, so [disconnectUser] comes first, and a [StreamException] if the guest cannot be created or the
-  /// connection fails.
+  /// The guest gets an id of its own and the guest role, so the returned user is not [user]. If [connectWebSocket]
+  /// is false, the guest is signed in without opening a connection.
+  ///
+  /// Throws a [StateError] if a user is already signed in; call [disconnectUser] first.
+  ///
+  /// Throws a [StreamException] if the guest cannot be created or the connection fails.
   Future<OwnUser> connectGuestUser(
     User user, {
     bool connectWebSocket = true,
@@ -474,7 +477,7 @@ class StreamChatClient {
 
     final result = await _generalRepository.createGuest(user);
 
-    // Unlike the endpoint methods, connecting reports a failure by throwing.
+    // A failed sign-in throws, like the other connect methods.
     final guestUser = result.getOrElse((error, stackTrace) {
       final exception =
           StreamException.tryFrom(error) ??

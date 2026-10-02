@@ -82,7 +82,7 @@
 
 🐞 Fixed
 
-- `connectGuestUser` no longer saves the user's client state (online, banned, unread counts, devices, push preferences and similar) as custom data on the created guest.
+- `connectGuestUser` no longer copies the user's online status, ban, unread counts, devices and push preferences into the created guest's `extraData`.
 
 - `queryChannels` no longer gives up watching the channels it loads when it is called before the connection is open. Whether they can be watched is read when the request is sent, which is after the query has waited for the connection.
 

@@ -5,16 +5,21 @@ import '../../core/models/response/connect_guest_user_response.dart';
 import '../../core/models/user.dart';
 import '../../core/util/extension.dart';
 
-// The user and privacy settings mappers in this file build today's `User` class, which has not been restructured
-// for the generated client yet and still reads and writes JSON.
-// TODO(openapi-migration): Update these mappers when `User` is restructured.
+// TODO(openapi-migration): re-point these mappers in group 09.
 
 /// Maps a generated [api.UserResponse] to a [User].
 extension UserResponseMapper on api.UserResponse {
+  // Custom keys named like one of the user's own fields, including the ones [User] does not model.
+  static const _shadowedCustomKeys = {
+    ...OwnUser.topLevelFields,
+    'deleted_at',
+    'deactivated_at',
+    'revoke_tokens_issued_before',
+  };
+
   /// Converts this response into a [User].
   ///
-  /// [custom] becomes [User.extraData], without the keys named after a field of the user's own, so a custom field
-  /// never stands in for one of them.
+  /// Custom data named like one of the user's own fields is left out of [User.extraData].
   User toModel() => User(
     id: id,
     role: role,
@@ -33,18 +38,14 @@ extension UserResponseMapper on api.UserResponse {
   );
 }
 
-// Custom keys a user's own fields hide: every field of an [OwnUser], and three the socket connect refuses to take
-// back from its user details.
-const _shadowedCustomKeys = {...OwnUser.topLevelFields, 'deleted_at', 'deactivated_at', 'revoke_tokens_issued_before'};
-
 /// Maps a [User] to the generated [api.UserRequest].
 extension UserRequestMapper on User {
   /// Converts this user into an [api.UserRequest].
   ///
-  /// The `name` and `image` keys of [extraData] become their own fields and the rest becomes
-  /// [api.UserRequest.custom]. The name is read from [extraData] rather than [name], which falls back to [id].
+  /// A user without a name or image converts to a request without one, rather than one named after [id]. The
+  /// privacy settings of an [OwnUser] are carried over.
   ///
-  /// The privacy settings of an [OwnUser] are carried over as well.
+  /// Custom data named like one of the user's own fields is left out.
   api.UserRequest toRequest() => api.UserRequest(
     id: id,
     name: extraData['name'].safeCast<String>(),
@@ -57,7 +58,8 @@ extension UserRequestMapper on User {
     },
     custom: {...extraData}
       ..remove('name')
-      ..remove('image'),
+      ..remove('image')
+      ..removeWhere((key, _) => UserResponseMapper._shadowedCustomKeys.contains(key)),
   );
 }
 

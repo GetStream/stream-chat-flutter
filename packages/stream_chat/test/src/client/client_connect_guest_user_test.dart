@@ -11,11 +11,11 @@ import '../ws/fake_chat_server.dart';
 const _guestId = 'guest-1b2c3d4e-requested-id';
 
 void main() {
-  test('StreamChatClient.connectGuestUser sends the user and returns the created guest', () async {
+  test('StreamChatClient.connectGuestUser sends only the fields a guest takes from the user', () async {
     final defaultApi = _defaultApiAnswering(Result.success(_createGuestResponse()));
     final client = _client(defaultApi);
 
-    final guest = await client.connectGuestUser(_fullyPopulatedUser(), connectWebSocket: false);
+    await client.connectGuestUser(_fullyPopulatedUser(), connectWebSocket: false);
 
     final request = verify(
       () => defaultApi.createGuest(createGuestRequest: captureAny(named: 'createGuestRequest')),
@@ -38,11 +38,41 @@ void main() {
         ),
       ),
     );
+  });
+
+  test('StreamChatClient.connectGuestUser returns the created guest', () async {
+    final client = _client(_defaultApiAnswering(Result.success(_createGuestResponse())));
+
+    final guest = await client.connectGuestUser(_fullyPopulatedUser(), connectWebSocket: false);
+
     expect(guest, OwnUser.fromUser(_createdGuest()));
     // `User` equality leaves these two out.
     expect(guest.createdAt, DateTime.utc(2026, 9, 1));
     expect(guest.updatedAt, DateTime.utc(2026, 9, 2));
   });
+
+  test(
+    "StreamChatClient.connectGuestUser sends no custom data named like one of the user's own fields",
+    () async {
+      final defaultApi = _defaultApiAnswering(Result.success(_createGuestResponse()));
+      final client = _client(defaultApi);
+      final user = User.fromJson(const {
+        'id': 'requested-id',
+        'deleted_at': '2026-01-01T00:00:00Z',
+        'devices': <Object?>[],
+        'color': 'blue',
+      });
+
+      await client.connectGuestUser(user, connectWebSocket: false);
+
+      final request =
+          verify(
+                () => defaultApi.createGuest(createGuestRequest: captureAny(named: 'createGuestRequest')),
+              ).captured.single
+              as api.CreateGuestRequest;
+      expect(request.user.custom, {'color': 'blue'});
+    },
+  );
 
   test('StreamChatClient.connectGuestUser sends neither a name nor an image for a user without them', () async {
     final defaultApi = _defaultApiAnswering(Result.success(_createGuestResponse()));
@@ -108,6 +138,39 @@ void main() {
       client.connectGuestUser(_fullyPopulatedUser()),
       throwsA(isA<StreamApiException>().having((it) => it.statusCode, 'statusCode', 403)),
     );
+  });
+
+  test(
+    'StreamChatClient.connectGuestUser throws a StreamClientException when the guest cannot be created for a reason '
+    'other than a StreamException',
+    () async {
+      final client = _client(_defaultApiAnswering(const Result.failure(FormatException('Unexpected response'))));
+
+      await expectLater(
+        client.connectGuestUser(_fullyPopulatedUser()),
+        throwsA(isA<StreamClientException>().having((it) => it.cause, 'cause', isA<FormatException>())),
+      );
+    },
+  );
+
+  test('StreamChatClient.connectGuestUser throws when the connection fails', () async {
+    final client = _client(
+      _defaultApiAnswering(Result.success(_createGuestResponse())),
+      server: FakeChatServer()..handshakeFails = true,
+    );
+
+    await expectLater(
+      client.connectGuestUser(_fullyPopulatedUser()),
+      throwsA(isA<StreamNetworkException>()),
+    );
+  });
+
+  test('StreamChatClient.connectGuestUser leaves the connection closed when connectWebSocket is false', () async {
+    final client = _client(_defaultApiAnswering(Result.success(_createGuestResponse())));
+
+    await client.connectGuestUser(_fullyPopulatedUser(), connectWebSocket: false);
+
+    expect(client.connectionStatus, ConnectionStatus.disconnected);
   });
 }
 
