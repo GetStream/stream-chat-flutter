@@ -1,28 +1,8 @@
-import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/open_api/api.dart' as api;
 import 'package:stream_chat/stream_chat.dart';
-import 'package:test/test.dart';
-
-import '../mocks.dart';
 
 // Fixtures shared by the poll client tests. Every generated object carries a value in every field, including the
 // ones the SDK models leave out, so a field the mapping drops or swaps changes the compared object.
-
-/// A [StreamChatClient] whose generated API is [defaultApi], disposed when the test ends.
-StreamChatClient pollsClient(api.DefaultApi defaultApi) {
-  final client = StreamChatClient('test-api-key', defaultApi: defaultApi);
-  addTearDown(client.dispose);
-  return client;
-}
-
-/// A [MockDefaultApi] with the fallback values the poll requests need.
-MockDefaultApi pollsDefaultApi() {
-  registerFallbackValue(const api.CreatePollRequest(name: 'fallback'));
-  registerFallbackValue(const api.UpdatePollRequest(id: 'fallback', name: 'fallback'));
-  registerFallbackValue(const api.CreatePollOptionRequest(text: 'fallback'));
-  registerFallbackValue(const api.UpdatePollOptionRequest(id: 'fallback', text: 'fallback'));
-  return MockDefaultApi();
-}
 
 /// A failure the generated API answers with.
 const pollsApiError = StreamClientException(message: 'boom');

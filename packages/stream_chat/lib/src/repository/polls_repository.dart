@@ -1,4 +1,4 @@
-import 'package:stream_core/stream_core.dart' show PatternMatching, Result, Sort;
+import 'package:stream_core/stream_core.dart' show PatternMatching, Result;
 
 import '../../open_api/api.dart' as api;
 import '../core/models/poll.dart';
@@ -11,6 +11,7 @@ import '../core/models/response/query_poll_votes_response.dart';
 import '../core/models/response/query_polls_response.dart';
 import 'mapper/polls_mapper.dart';
 import 'mapper/result_mapper.dart';
+import 'mapper/sort_mapper.dart';
 
 /// Repository dedicated to poll operations.
 class PollsRepository {
@@ -143,7 +144,7 @@ class PollsRepository {
     final result = await _api.queryPolls(
       queryPollsRequest: api.QueryPollsRequest(
         filter: filter?.toJson(),
-        sort: sort?.map(_sortParam).toList(),
+        sort: sort?.map((it) => it.toRequest()).toList(),
         limit: limit,
         next: next,
         prev: prev,
@@ -168,7 +169,7 @@ class PollsRepository {
       pollId: pollId,
       queryPollVotesRequest: api.QueryPollVotesRequest(
         filter: filter?.toJson(),
-        sort: sort?.map(_sortParam).toList(),
+        sort: sort?.map((it) => it.toRequest()).toList(),
         limit: limit,
         next: next,
         prev: prev,
@@ -177,9 +178,4 @@ class PollsRepository {
 
     return result.map((response) => response.toModel());
   }
-}
-
-api.SortParamRequest _sortParam(Sort<Object?> sort) {
-  final json = sort.toJson();
-  return api.SortParamRequest(field: json['field'] as String?, direction: json['direction'] as int?);
 }
