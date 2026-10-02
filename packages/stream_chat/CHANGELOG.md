@@ -1,3 +1,13 @@
+## Upcoming
+
+✅ Added
+
+- Added `Poll.nameI18n`, `Poll.descriptionI18n`, `PollOption.textI18n` and `PollVote.answerTextI18n`, holding the server's translations of a poll.
+
+🔄 Changed
+
+- `name_i18n`, `description_i18n` and `text_i18n` are no longer kept in `Poll.extraData` and `PollOption.extraData`; read the new `*I18n` fields instead.
+
 ## 10.5.0
 
 ✅ Added

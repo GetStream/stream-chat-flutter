@@ -1,8 +1,8 @@
 import '../../stream_chat_flutter.dart';
 
 /// {@template streamMessageTranslationConfiguration}
-/// Configures how messages that carry a translation in [Message.i18n] are
-/// displayed.
+/// Configures how messages that carry a translation in [Message.i18n], or
+/// whose [Message.poll] carries one (see [PollTranslationX]), are displayed.
 ///
 /// Pass an instance to [StreamChatConfigurationData.messageTranslation]:
 ///
@@ -26,11 +26,14 @@ class StreamMessageTranslationConfiguration {
   });
 
   /// Whether a message displays its translation in place of its original
-  /// text when [Message.i18n] has one for the current user's [User.language].
+  /// text when it, or its poll, has one for the current user's
+  /// [User.language].
   ///
-  /// Applies to full messages ([StreamMessageText]) as well as to the
-  /// previews shown in the channel and thread lists
-  /// ([StreamMessagePreviewText]).
+  /// Applies to full messages ([StreamMessageContent]), including the poll
+  /// attachment and the poll sheets it opens, and to the previews shown in
+  /// the channel and thread lists ([StreamMessagePreviewText]). A poll shows
+  /// its name and options translated, and its comments sheet the comments
+  /// translated.
   ///
   /// Defaults to `true`, which is what the SDK has always done. Set it to
   /// `false` to always show a message's original text, regardless of the
