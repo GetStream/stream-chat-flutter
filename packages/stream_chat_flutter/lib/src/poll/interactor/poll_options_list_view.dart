@@ -3,7 +3,9 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
 
 import '../../components/avatar/stream_user_avatar_stack.dart';
+import '../../message_widget/message_translation_language.dart';
 import '../../theme/poll_interactor_theme.dart';
+import '../../utils/extensions.dart';
 import '../../utils/utils.dart';
 
 /// {@template pollOptionsListView}
@@ -235,7 +237,7 @@ class PollOptionItem extends StatelessWidget {
                     children: <Widget>[
                       Expanded(
                         child: Text(
-                          option.text,
+                          option.translatedText(MessageTranslationLanguage.of(context)) ?? option.text,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: effectiveTextStyle,

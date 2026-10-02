@@ -4,6 +4,15 @@ import 'package:test/test.dart';
 
 void main() {
   group('src/models/poll_vote', () {
+    test('does not send the server translation of the answer back when serialized', () {
+      final pollVote = PollVote(
+        answerText: 'great',
+        answerTextI18n: const {'language': 'en', 'nl_text': 'geweldig'},
+      );
+
+      expect(pollVote.toJson(), isNot(contains('answer_text_i18n')));
+    });
+
     group('ComparableFieldProvider', () {
       test('should return ComparableField for poll_vote.id', () {
         final pollVote = createTestPollVote(
