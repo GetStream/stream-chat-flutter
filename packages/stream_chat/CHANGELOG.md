@@ -1,3 +1,9 @@
+## Upcoming
+
+🔄 Changed
+
+- Reduced the channel state updates emitted for message events in channels without active live locations.
+
 ## 10.5.0
 
 ✅ Added

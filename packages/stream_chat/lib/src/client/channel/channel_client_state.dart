@@ -960,6 +960,11 @@ class ChannelClientState {
   void _updateActiveLiveLocations(Iterable<Message> messages) {
     if (messages.isEmpty) return;
 
+    // No-op fast path: no live location is active, and nothing in the batch
+    // shares one — skip the merge/copyWith churn that would otherwise land
+    // right back on an empty `activeLiveLocations` list.
+    if (this.activeLiveLocations.isEmpty && messages.every((m) => m.sharedLocation == null)) return;
+
     final activeLiveLocations = [...this.activeLiveLocations];
     final updatedActiveLiveLocations = MessageMerging.mergeActiveLocations(
       existing: activeLiveLocations,
