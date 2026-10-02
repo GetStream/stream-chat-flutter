@@ -671,7 +671,7 @@ class Channel {
     }
 
     return Future.wait(
-      attachments.map((it) {
+      attachments.map((it) async {
         _logger.d(() => 'Uploading ${it.id} attachment...');
 
         final throttledUpdateAttachment = updateAttachment.throttled(
@@ -686,67 +686,45 @@ class Channel {
           ]);
         }
 
-        final isImage = it.type == AttachmentType.image;
         final cancelToken = CancelToken();
-        Future<SendAttachmentResponse> future;
-        if (isImage) {
-          future = sendImage(
-            it.file!,
-            onSendProgress: onSendProgress,
-            cancelToken: cancelToken,
-            extraData: it.extraData,
-          );
-        } else {
-          future = sendFile(
-            it.file!,
-            onSendProgress: onSendProgress,
-            cancelToken: cancelToken,
-            extraData: it.extraData,
-          );
-        }
         _cancelableAttachmentUploadRequest[it.id] = cancelToken;
-        return future
-            .then((response) {
-              _logger.d(() => 'Attachment ${it.id} uploaded successfully...');
 
-              // If the response is SendFileResponse, then we might also be getting
-              // thumbUrl in case of video. So we need to update the attachment with
-              // both the assetUrl and thumbUrl.
-              if (response is SendFileResponse) {
-                updateAttachment(
-                  it.copyWith(
-                    assetUrl: response.file,
-                    thumbUrl: response.thumbUrl,
-                    uploadState: const UploadState.success(),
-                  ),
-                );
-              } else {
-                updateAttachment(
-                  it.copyWith(
-                    imageUrl: response.file,
-                    uploadState: const UploadState.success(),
-                  ),
-                );
-              }
-            })
-            .catchError((e, stk) {
-              if (e is StreamNetworkException && e.isCancelled) {
-                _logger.d(() => 'Attachment ${it.id} upload cancelled');
+        final isImage = it.type == AttachmentType.image;
+        final upload = isImage ? sendImage : sendFile;
 
-                // remove attachment from message if cancelled.
-                updateAttachment(it, remove: true);
-                return;
-              }
+        final result = await upload(
+          it.file!,
+          onSendProgress: onSendProgress,
+          cancelToken: cancelToken,
+          extraData: it.extraData,
+        );
 
-              _logger.e(() => 'error uploading the attachment', error: e, stackTrace: stk);
-              updateAttachment(
-                it.copyWith(uploadState: UploadState.failed(error: e.toString())),
-              );
-            })
-            .whenComplete(() {
-              throttledUpdateAttachment.cancel();
-              _cancelableAttachmentUploadRequest.remove(it.id);
-            });
+        throttledUpdateAttachment.cancel();
+        _cancelableAttachmentUploadRequest.remove(it.id);
+
+        if (result case Success(data: final uploaded)) {
+          _logger.d(() => 'Attachment ${it.id} uploaded successfully...');
+          updateAttachment(
+            it.copyWith(
+              imageUrl: isImage ? uploaded.fileUrl : null,
+              assetUrl: isImage ? null : uploaded.fileUrl,
+              thumbUrl: uploaded.thumbUrl,
+              uploadState: const UploadState.success(),
+            ),
+          );
+          return;
+        }
+
+        if (result case Failure(error: StreamNetworkException(isCancelled: true))) {
+          _logger.d(() => 'Attachment ${it.id} upload cancelled');
+          updateAttachment(it, remove: true);
+          return;
+        }
+
+        if (result case Failure(:final error, :final stackTrace)) {
+          _logger.e(() => 'error uploading the attachment', error: error, stackTrace: stackTrace);
+          updateAttachment(it.copyWith(uploadState: UploadState.failed(error: error.toString())));
+        }
       }),
     ).whenComplete(() {
       final completer = _messageAttachmentsUploadCompleter.remove(messageId);
@@ -1149,16 +1127,23 @@ class Channel {
   // Deletes all the uploaded attachments associated with the given [message].
   // This is typically called when a message is hard deleted.
   Future<void> _deleteMessageAttachments(Message message) async {
+    if (!_isInitialized) return;
+
     final attachments = message.attachments;
     final deleteFutures = attachments.map((it) async {
       if (it.imageUrl case final url?) return deleteImage(url);
       if (it.assetUrl case final url?) return deleteFile(url);
     });
 
-    try {
-      await Future.wait(deleteFutures);
-    } catch (e, stk) {
-      _logger.w(() => 'Error deleting message attachments', error: e, stackTrace: stk);
+    final results = await Future.wait(deleteFutures);
+    for (final result in results) {
+      if (result case Failure(:final error, :final stackTrace)) {
+        _logger.w(
+          () => 'Error deleting message attachments',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
     }
   }
 
@@ -1351,8 +1336,8 @@ class Channel {
     return sendMessage(locationMessage);
   }
 
-  /// Send a file to this channel.
-  Future<SendFileResponse> sendFile(
+  /// Uploads [file] to this channel.
+  Future<Result<UploadedFile>> sendFile(
     AttachmentFile file, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
@@ -1369,8 +1354,8 @@ class Channel {
     );
   }
 
-  /// Send an image to this channel.
-  Future<SendImageResponse> sendImage(
+  /// Uploads [file] as an image to this channel.
+  Future<Result<UploadedFile>> sendImage(
     AttachmentFile file, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
@@ -1404,8 +1389,8 @@ class Channel {
     );
   }
 
-  /// Delete a file from this channel.
-  Future<EmptyResponse> deleteFile(
+  /// Deletes the file at [url] from this channel.
+  Future<Result<void>> deleteFile(
     String url, {
     CancelToken? cancelToken,
     Map<String, Object?>? extraData,
@@ -1420,8 +1405,8 @@ class Channel {
     );
   }
 
-  /// Delete an image from this channel.
-  Future<EmptyResponse> deleteImage(
+  /// Deletes the image at [url] from this channel.
+  Future<Result<void>> deleteImage(
     String url, {
     CancelToken? cancelToken,
     Map<String, Object?>? extraData,

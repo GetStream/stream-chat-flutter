@@ -158,11 +158,6 @@ class FakeChatApi extends Fake implements StreamChatApi {
 
   @override
   GeneralApi get general => _general ??= MockGeneralApi();
-
-  AttachmentFileUploader? _fileUploader;
-
-  @override
-  AttachmentFileUploader get fileUploader => _fileUploader ??= MockAttachmentFileUploader();
 }
 
 /// Answers the `getApp` call `connectUser` makes on the generated client.
