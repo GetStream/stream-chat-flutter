@@ -163,37 +163,6 @@ class QueryRepliesResponse extends _BaseResponse {
   static QueryRepliesResponse fromJson(Map<String, dynamic> json) => _$QueryRepliesResponseFromJson(json);
 }
 
-/// Base Model response for [Channel.sendImage] and [Channel.sendFile] api call.
-@JsonSerializable(createToJson: false)
-class SendAttachmentResponse extends _BaseResponse {
-  /// The url of the uploaded attachment.
-  late String? file;
-
-  /// Create a new instance from a json
-  static SendAttachmentResponse fromJson(Map<String, dynamic> json) => _$SendAttachmentResponseFromJson(json);
-}
-
-/// Model response for [Channel.sendFile] api call
-@JsonSerializable(createToJson: false)
-class SendFileResponse extends SendAttachmentResponse {
-  /// The url of the uploaded video file.
-  ///
-  /// This is only present if the file is a video.
-  String? thumbUrl;
-
-  /// Create a new instance from a json
-  static SendFileResponse fromJson(Map<String, dynamic> json) => _$SendFileResponseFromJson(json);
-}
-
-/// Model response for [Channel.sendImage] api call
-typedef SendImageResponse = SendAttachmentResponse;
-
-/// Model response for [StreamChatClient.uploadImage] api call
-typedef UploadImageResponse = SendAttachmentResponse;
-
-/// Model response for [StreamChatClient.uploadFile] api call
-typedef UploadFileResponse = SendAttachmentResponse;
-
 /// Model response for [Channel.sendReaction] api call
 @JsonSerializable(createToJson: false)
 class SendReactionResponse extends MessageResponse {

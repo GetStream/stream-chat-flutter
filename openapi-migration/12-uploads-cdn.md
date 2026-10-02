@@ -13,14 +13,14 @@
 
 | File | Method | Returns |
 | --- | --- | --- |
-| `attachment_file_uploader.dart` | `sendImage` | `SendImageResponse` |
-| `attachment_file_uploader.dart` | `sendFile` | `SendFileResponse` |
-| `attachment_file_uploader.dart` | `deleteImage` | `EmptyResponse` |
-| `attachment_file_uploader.dart` | `deleteFile` | `EmptyResponse` |
-| `attachment_file_uploader.dart` | `uploadImage` | `UploadImageResponse` |
-| `attachment_file_uploader.dart` | `uploadFile` | `UploadFileResponse` |
-| `attachment_file_uploader.dart` | `removeImage` | `EmptyResponse` |
-| `attachment_file_uploader.dart` | `removeFile` | `EmptyResponse` |
+| `attachment_file_uploader.dart` | `sendImage` | `Result<UploadedFile>` |
+| `attachment_file_uploader.dart` | `sendFile` | `Result<UploadedFile>` |
+| `attachment_file_uploader.dart` | `deleteImage` | `Result<void>` |
+| `attachment_file_uploader.dart` | `deleteFile` | `Result<void>` |
+| `attachment_file_uploader.dart` | `uploadImage` | `Result<UploadedFile>` |
+| `attachment_file_uploader.dart` | `uploadFile` | `Result<UploadedFile>` |
+| `attachment_file_uploader.dart` | `removeImage` | `Result<void>` |
+| `attachment_file_uploader.dart` | `removeFile` | `Result<void>` |
 
 ### Generated operations that cover it
 
@@ -35,32 +35,52 @@
 | `POST` | `/api/v2/uploads/file` | `uploadFile` | `FileUploadResponse` |
 | `POST` | `/api/v2/uploads/image` | `uploadImage` | `ImageUploadResponse` |
 
-## Decisions to make
+## Decisions taken
 
-- **Adopt core's uploader, or keep ours?** `stream_core` is reworking uploads around `StreamAttachmentUploader`, which takes a `CdnClient` and returns an `AttachmentUploadTask` — a lifecycle `state` stream, a `cancel()`, and a `result` that never throws ([core#170](https://github.com/GetStream/stream-core-flutter/pull/170)). Our `AttachmentFileUploader` spreads the same three things across a `Future`, a `ProgressCallback` and a `CancelToken`. Adopting it is a bigger break than migrating the endpoints, and the strongest cross-product-consistency case in the whole plan.
-- Whichever shape wins, the hand-written `CdnApi` should implement core's `CdnClient` (`uploadFile` / `uploadImage` -> `Future<Result<UploadedFile>>`, `deleteFile` / `deleteImage` -> `Future<Result<void>>`) so it plugs into `StreamAttachmentUploader` — that is exactly how `stream_feeds` wires `FeedsCdnClient`.
-- `AttachmentFileUploader` is public and pluggable through `attachmentFileUploaderProvider`; changing its signature is a break that needs the usual justification.
-- The v2 multipart schema defines only `file`, `upload_sizes` and `user`, but our public `sendImage` / `sendFile` accept `extraData`. Decide: drop the parameter, or keep those two calls on v1.
+- **The eight methods stay hand-written, over a hand-written multipart client.** The generated
+  `uploadFile`, `uploadImage`, `uploadChannelFile` and `uploadChannelImage` take a JSON `@Body()`
+  with no progress or cancellation, because the Dart `operation.tpl` ignores
+  `Operation.RequestContentType`. `lib/src/cdn/cdn_api.dart` mirrors the generated operations —
+  names, paths, parameters, and each request model's fields as parts — adding only the file part,
+  progress and cancellation, so a template that emits multipart can replace it as is. It leaves
+  out the `user` part, which only a server-side request sets.
+  `StreamAttachmentFileUploader` calls it instead of `StreamHttpClient.postFile`.
+- **The v2 routes are the v1 handlers.** `lib/chat/routes.go` mounts the channel routes in the shared
+  `coreRoutes` under both surfaces, and `lib/core/api/routes_saas.go` does the same for `/uploads`;
+  only the JSON encoder differs. None is gated, in beta or deprecated.
+- **The public shape stays v10's.** `AttachmentFileUploader` keeps its eight methods, chat's
+  `AttachmentFile` and its parameters, including the `extraData` neither surface reads; only the
+  return types change, to `Result`. Taking `stream_core`'s `CdnClient` and `AttachmentFile` is
+  deliberately left out; see [`core-migration/09`](../core-migration/09-uploads.md#design-worked-out-for-a-later-pr).
+- **The provider receives the client's `Dio`.** `StreamHttpClient`'s `Dio` is `@visibleForTesting`
+  and is not the one `DefaultApi` uses, so `AttachmentFileUploaderProvider` takes the `Dio` the
+  generated client runs on, and the uploader moves from `StreamChatApi` to `StreamChatClient`.
+- **Uploads answer `stream_core`'s `UploadedFile`** (`fileUrl`, `thumbUrl`) instead of v10's five
+  response types. A break beyond the domain-model list, taken here because every upload call site
+  already changes for `Result` — replacing the types later would break the same lines twice — and
+  because it is what core's `CdnClient` and feeds' `FeedsCdnClient` answer. `duration` goes with
+  them; it is server timing no integrator acts on, the reasoning behind `Result<void>` for
+  duration-only writes.
+- **A file that cannot be read answers a `Failure`,** through `runSafely` around the multipart
+  conversion.
 
 ## Risks
 
-- Core's `CdnClient` has no channel-scoped operations — it is `uploadFile` / `uploadImage` only — while half of chat's uploads are `/chat/channels/{type}/{id}/file`. Either our implementation closes over the channel, or core's interface needs a variant. Settle this before writing the client.
 - Attachment upload is the highest-traffic path in the SDK; a regression is immediately visible to end users.
-- The generated `uploadFile` / `uploadChannelFile` take a JSON body with no progress or cancellation, so this group cannot use them — it needs its own `CdnApi`.
 
 ## Definition of done
 
-- [ ] Every method above either routes through `DefaultApi` or is listed here as deliberately left
+- [x] Every method above either routes through `DefaultApi` or is listed here as deliberately left
       hand-written, with the reason.
-- [ ] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
-- [ ] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
-- [ ] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
+- [x] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
+- [x] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
+- [x] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
       persists anything.
-- [ ] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.
-- [ ] CHANGELOG entry under `🛑️ Breaking` for each break; PR title `refactor(llc)!:`.
-- [ ] Decisions recorded in this file, and the status box ticked in `README.md`.
-- [ ] Public dartdoc follows [`STYLE_GUIDE.md` § Documentation](../STYLE_GUIDE.md#documentation)
+- [x] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.
+- [x] CHANGELOG entry under `🛑️ Breaking` for each break; PR title `refactor(llc)!:`.
+- [x] Decisions recorded in this file, and the status box ticked in `README.md`.
+- [x] Public dartdoc follows [`STYLE_GUIDE.md` § Documentation](../STYLE_GUIDE.md#documentation)
       and [`EFFECTIVE_DART_DOC.md`](../EFFECTIVE_DART_DOC.md), including on symbols this group
       retyped but whose docs it left alone.
-- [ ] Tests follow [`TESTING.md`](../TESTING.md): no `group` organizing a file by method, each
+- [x] Tests follow [`TESTING.md`](../TESTING.md): no `group` organizing a file by method, each
       name states its subject and behaviour.

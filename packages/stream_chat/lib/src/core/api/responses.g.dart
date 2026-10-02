@@ -83,17 +83,6 @@ QueryRepliesResponse _$QueryRepliesResponseFromJson(
   ..messages =
       (json['messages'] as List<dynamic>?)?.map((e) => Message.fromJson(e as Map<String, dynamic>)).toList() ?? [];
 
-SendAttachmentResponse _$SendAttachmentResponseFromJson(
-  Map<String, dynamic> json,
-) => SendAttachmentResponse()
-  ..duration = json['duration'] as String?
-  ..file = json['file'] as String?;
-
-SendFileResponse _$SendFileResponseFromJson(Map<String, dynamic> json) => SendFileResponse()
-  ..duration = json['duration'] as String?
-  ..file = json['file'] as String?
-  ..thumbUrl = json['thumb_url'] as String?;
-
 SendReactionResponse _$SendReactionResponseFromJson(
   Map<String, dynamic> json,
 ) => SendReactionResponse()
