@@ -13,6 +13,7 @@ class StreamDraftListTile extends StatelessWidget {
     this.currentUser,
     this.onTap,
     this.onLongPress,
+    this.selected = false,
   });
 
   /// The draft to display.
@@ -27,10 +28,36 @@ class StreamDraftListTile extends StatelessWidget {
   /// Called when the user long-presses on this list tile.
   final GestureLongPressCallback? onLongPress;
 
+  /// Whether this tile is highlighted as the open draft.
+  final bool selected;
+
+  /// Creates a copy of this tile but with the given fields replaced with
+  /// the new values.
+  StreamDraftListTile copyWith({
+    Key? key,
+    Draft? draft,
+    User? currentUser,
+    GestureTapCallback? onTap,
+    GestureLongPressCallback? onLongPress,
+    bool? selected,
+  }) {
+    return StreamDraftListTile(
+      key: key ?? this.key,
+      draft: draft ?? this.draft,
+      currentUser: currentUser ?? this.currentUser,
+      onTap: onTap ?? this.onTap,
+      onLongPress: onLongPress ?? this.onLongPress,
+      selected: selected ?? this.selected,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final colorScheme = context.streamColorScheme;
+    final background = colorScheme.backgroundElevation1;
+
     return Material(
-      color: context.streamColorScheme.backgroundElevation1,
+      color: selected ? Color.alphaBlend(colorScheme.backgroundSelected, background) : background,
       child: InkWell(
         onTap: onTap,
         onLongPress: onLongPress,

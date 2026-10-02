@@ -143,6 +143,18 @@ void main() {
     expect(_backButtonIsFloating(tester), isFalse);
   });
 
+  testWidgets('shows a back button by default', (tester) async {
+    await _pumpThreadPage(tester);
+
+    expect(find.byType(StreamBackButton), findsOneWidget);
+  });
+
+  testWidgets('hides the back button when automaticallyImplyLeading is false', (tester) async {
+    await _pumpThreadPage(tester, automaticallyImplyLeading: false);
+
+    expect(find.byType(StreamBackButton), findsNothing);
+  });
+
   testWidgets('tapping back invokes onBackPressed', (tester) async {
     var backPressed = 0;
     await _pumpThreadPage(tester, onBackPressed: () => backPressed++);
@@ -209,6 +221,7 @@ Future<void> _pumpThreadPage(
   StreamSurfaceStyle surfaceStyle = StreamSurfaceStyle.regular,
   StreamSurfaceStyle? headerSurfaceStyle,
   void Function(Message message)? onViewInChannelTap,
+  bool automaticallyImplyLeading = true,
   VoidCallback? onBackPressed,
   bool pushOntoARoute = false,
 }) async {
@@ -275,6 +288,7 @@ Future<void> _pumpThreadPage(
   final page = StreamThreadPage(
     parent: parentMessage,
     onViewInChannelTap: onViewInChannelTap,
+    automaticallyImplyLeading: automaticallyImplyLeading,
     onBackPressed: onBackPressed,
   );
 
