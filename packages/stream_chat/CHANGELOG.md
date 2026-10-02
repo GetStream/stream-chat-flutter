@@ -2,7 +2,7 @@
 
 🔄 Changed
 
-- Reduced the channel state updates emitted for message events in channels without active live locations.
+- Reduced the channel state updates emitted for message updates in channels without active live locations.
 
 ## 10.5.0
 
