@@ -29,6 +29,7 @@ dependencies:
   desktop_drop: ^0.7.1
   diacritic: ^0.1.6
   dio: ^5.11.0
+  equatable: ^2.0.8
   ezanimation: ^0.6.0
   file_picker: '>=12.0.0 <14.0.0'
   file_selector: ^1.1.0
@@ -66,7 +67,7 @@ dependencies:
     # ignore: invalid_dependency
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
-      ref: b6f5e1cc64b73a4e6f8cad7d53280dcc87efcf8d
+      ref: 1546087d1a3dac29e824853fb2a9f05dcd2d41e6
       path: packages/stream_core_flutter
   stream_thumbnail: ^0.2.0
   svg_icon_widget: ^0.0.1

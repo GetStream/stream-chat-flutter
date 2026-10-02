@@ -1,6 +1,6 @@
 // Pins which message rows `StreamMessageListView` rebuilds when its message
-// list changes: only rows whose message or neighbours changed, so the cost of
-// a new message doesn't grow with the number of rows on screen.
+// list changes: only rows whose message or place in a run of messages changed,
+// so the cost of a new message doesn't grow with the number of rows on screen.
 
 import 'dart:async';
 
@@ -125,6 +125,23 @@ void main() {
 
     expect(builtIds, contains(edited.id));
     expect(find.text('Edited'), findsOneWidget);
+  });
+
+  testWidgets('an edited message does not rebuild the rows next to it', (tester) async {
+    final messages = generateConversation(20, users: [other]).reversed.toList();
+    final builtIds = <String>[];
+    await pumpMessageList(
+      tester,
+      messages: messages,
+      messageBuilder: (context, message, props) => recordingBuilder(builtIds, context, message, props),
+    );
+    builtIds.clear();
+
+    final editedIndex = messages.length - 3;
+    final edited = messages[editedIndex].copyWith(text: 'Edited');
+    await emitMessages(tester, [...messages]..[editedIndex] = edited);
+
+    expect(builtIds.toSet(), {edited.id});
   });
 
   testWidgets('rebuilding the list with a new message builder rebuilds every visible row', (tester) async {

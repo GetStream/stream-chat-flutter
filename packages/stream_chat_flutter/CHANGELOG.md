@@ -2,7 +2,7 @@
 
 🔄 Changed
 
-- `StreamMessageListView` now only rebuilds message rows whose message or neighbouring messages changed. A custom `messageBuilder` that reads state from outside the list no longer refreshes on every new message; rebuild the `StreamMessageListView` when that state changes.
+- `StreamMessageListView` now rebuilds only the message rows that changed; a custom row builder should read changing outside state through an inherited widget.
 
 🐞 Fixed
 
