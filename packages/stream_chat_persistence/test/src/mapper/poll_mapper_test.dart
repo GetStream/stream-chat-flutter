@@ -190,4 +190,33 @@ void main() {
     expect(entity.createdById, poll.createdById);
     expect(entity.extraData, poll.extraData);
   });
+
+  test('a poll keeps the translations of its name, description and options through the cache', () {
+    final poll = Poll(
+      name: 'Favourite colour?',
+      nameI18n: const {'language': 'en', 'nl_text': 'Favoriete kleur?'},
+      description: 'Pick one',
+      descriptionI18n: const {'language': 'en', 'nl_text': 'Kies er een'},
+      options: const [
+        PollOption(id: 'option-1', text: 'Red', textI18n: {'language': 'en', 'nl_text': 'Rood'}),
+      ],
+    );
+
+    final cached = poll.toEntity().toPoll();
+
+    expect(cached.nameI18n, poll.nameI18n);
+    expect(cached.descriptionI18n, poll.descriptionI18n);
+    expect(cached.options.single.textI18n, poll.options.single.textI18n);
+  });
+
+  test('a poll option without translations is cached without a text_i18n entry', () {
+    final poll = Poll(
+      name: 'Favourite colour?',
+      options: const [PollOption(id: 'option-1', text: 'Red')],
+    );
+
+    final entity = poll.toEntity();
+
+    expect(jsonDecode(entity.options.single), isNot(contains('text_i18n')));
+  });
 }
