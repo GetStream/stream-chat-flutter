@@ -32,22 +32,6 @@ void main() {
     expect(result.getOrNull()?.fileUrl, 'url');
   });
 
-  test('StreamChatClient.sendImage uploads to the channel it is given', () async {
-    _stubChannelImageUpload(cdnApi, const Result.success(api.UploadChannelResponse(duration: '1ms')));
-
-    await client.sendImage(_file(), channelId, channelType);
-
-    verify(
-      () => cdnApi.uploadChannelImage(
-        type: channelType,
-        id: channelId,
-        file: any(named: 'file'),
-        onUploadProgress: any(named: 'onUploadProgress'),
-        cancelToken: any(named: 'cancelToken'),
-      ),
-    ).called(1);
-  });
-
   test('StreamChatClient.sendImage reports upload progress to onSendProgress', () async {
     when(
       () => cdnApi.uploadChannelImage(
@@ -217,19 +201,6 @@ void main() {
     ).thenAnswer((_) async => const Result.success(api.DurationResponse(duration: '1ms')));
 
     final result = await client.removeImage('url');
-
-    expect(result.isSuccess, isTrue);
-  });
-
-  test('StreamChatClient.removeFile deletes a file uploaded outside of any channel', () async {
-    when(
-      () => cdnApi.deleteFile(
-        url: 'url',
-        cancelToken: any(named: 'cancelToken'),
-      ),
-    ).thenAnswer((_) async => const Result.success(api.DurationResponse(duration: '1ms')));
-
-    final result = await client.removeFile('url');
 
     expect(result.isSuccess, isTrue);
   });

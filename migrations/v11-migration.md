@@ -721,7 +721,7 @@ gone, and both gain `copyWith`.
 
 **Uploads and deletes return a `Result` instead of throwing.** `sendImage`, `sendFile`, `uploadImage` and
 `uploadFile` answer an `UploadedFile`, and the deletes carry no value on success. That holds on `Channel` and on
-`AttachmentFileUploader`. A cancelled upload is a failure whose error is a `StreamNetworkException` with
+`AttachmentFileUploader`. A canceled upload is a failure whose error is a `StreamNetworkException` with
 `isCancelled` set.
 
 ```dart

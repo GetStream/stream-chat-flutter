@@ -95,12 +95,12 @@ abstract class AttachmentFileUploader {
   // endregion
 }
 
-/// The default [AttachmentFileUploader], which uploads to Stream's CDN.
+/// The default [AttachmentFileUploader], used unless an `attachmentFileUploaderProvider` builds another.
 class StreamAttachmentFileUploader implements AttachmentFileUploader {
   /// Creates an uploader that sends its requests through [dio].
   StreamAttachmentFileUploader(Dio dio) : this.fromApi(CdnApi(dio));
 
-  /// Creates an uploader that sends its requests through an existing [CdnApi].
+  /// Creates an uploader that sends its requests through an existing API client.
   @internal
   const StreamAttachmentFileUploader.fromApi(this._api);
 
