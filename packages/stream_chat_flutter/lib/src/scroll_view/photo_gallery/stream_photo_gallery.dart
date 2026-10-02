@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart' show AssetEntity, ThumbnailFormat, ThumbnailSize;
 
 import '../../../stream_chat_flutter.dart';
+import '../../media_gallery/stream_media_grid_delegate.dart';
 import '../../utils/network_error_text.dart';
 
 /// Default grid delegate  for [StreamPhotoGallery].
-const defaultStreamPhotoGalleryDelegate = SliverGridDelegateWithFixedCrossAxisCount(
-  crossAxisCount: 3,
+const defaultStreamPhotoGalleryDelegate = StreamMediaGridDelegate(
   mainAxisSpacing: 2,
   crossAxisSpacing: 2,
 );

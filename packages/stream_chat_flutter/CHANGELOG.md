@@ -7,11 +7,17 @@
 - Added `MessageTranslationLanguage`, the language `StreamMessageContent` shows a message translated into, for custom attachments to show translations too.
 - Added `automaticallyImplyLeading` to `StreamChannelPage` and `StreamThreadPage`, which hides the header's back button when `false`.
 - Added a `selected` parameter to `StreamThreadListTile`, which highlights the tile, and `StreamThreadListTile.copyWith`.
+- Added `StreamMediaGallery.gridDelegate` to change how the gallery lays out its tiles.
 
 🔄 Changed
 
 - `StreamMessageComposer`'s top border now spans the full width, including under the side safe-area insets, and also shows above the no-permission message.
 - Suggestions from `customAutocompleteTriggers` now span the composer's full width, so their content has to keep clear of the side safe-area insets itself.
+- `StreamMediaGallery` and `StreamPhotoGallery`, including `defaultStreamPhotoGalleryDelegate`, now show more tiles per row on wider screens instead of always 3. Pass a `SliverGridDelegateWithFixedCrossAxisCount` as `gridDelegate` to keep a fixed count.
+
+⚠️ Deprecated
+
+- Deprecated `StreamMediaGallery.crossAxisCount` in favour of `gridDelegate`.
 
 🐞 Fixed
 
