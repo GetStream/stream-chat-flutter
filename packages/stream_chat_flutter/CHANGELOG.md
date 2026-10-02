@@ -2,6 +2,7 @@
 
 🐞 Fixed
 
+- Fixed dialogs and bottom sheets opened below `StreamChat` keeping the old colors after a light/dark switch, when the app registers its own `StreamTheme`.
 - Fixed `StreamMessageComposer` polling the audio recorder ten times a second while no recording is in progress, including when voice recording is disabled.
 
 ## 10.5.0
