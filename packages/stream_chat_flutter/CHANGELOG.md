@@ -6,8 +6,13 @@
 - Added `PollTranslationX`, `PollOptionTranslationX` and `PollVoteTranslationX`, to read the translations of a poll, its options and its answers.
 - Added `MessageTranslationLanguage`, the language `StreamMessageContent` shows a message translated into, for custom attachments to show translations too.
 
+🔄 Changed
+
+- `StreamMessageListView` now rebuilds only the message rows that changed; a custom row builder should read changing outside state through an inherited widget.
+
 🐞 Fixed
 
+- Fixed `StreamMessageListView` dropping frames on each new message in busy channels.
 - Fixed `StreamMessageComposer` polling the audio recorder ten times a second while no recording is in progress, including when voice recording is disabled.
 
 ## 10.5.0

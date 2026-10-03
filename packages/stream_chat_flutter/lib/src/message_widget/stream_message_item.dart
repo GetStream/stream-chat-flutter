@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:markdown/markdown.dart' as md;
@@ -162,7 +163,7 @@ class StreamMessageItem extends StatelessWidget {
 ///
 ///  * [StreamMessageItem], which uses these properties.
 ///  * [DefaultStreamMessageItem], the default implementation.
-class StreamMessageItemProps {
+class StreamMessageItemProps extends Equatable {
   /// Creates properties for a chat message widget.
   const StreamMessageItemProps({
     required this.message,
@@ -472,6 +473,38 @@ class StreamMessageItemProps {
       excludeFromSemantics: excludeFromSemantics ?? this.excludeFromSemantics,
     );
   }
+
+  @override
+  List<Object?> get props => [
+    // Every field must be listed: a row is reused while its props are equal.
+    message,
+    padding,
+    spacing,
+    backgroundColor,
+    maxWidth,
+    swipeToReply,
+    onMessageTap,
+    onMessageLongPress,
+    onUserAvatarTap,
+    onMessageLinkTap,
+    onUserMentionTap,
+    onMentionTap,
+    onThreadTap,
+    onViewInChannelTap,
+    onReplyTap,
+    onReactionsTap,
+    onReactionTap,
+    onReactionLongPress,
+    onQuotedMessageTap,
+    reactionSorting,
+    actionsBuilder,
+    onMessageActions,
+    onBouncedErrorMessageActions,
+    onEditMessageTap,
+    attachmentBuilders,
+    semanticsLabel,
+    excludeFromSemantics,
+  ];
 }
 
 /// The default implementation of [StreamMessageItem].
