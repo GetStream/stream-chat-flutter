@@ -39,8 +39,12 @@
 
 ## Decisions to make
 
-- `User` and `OwnUser` are public, persisted, and embedded in nearly every other response. The decision is made in 01-foundation and frozen there; this group executes it.
+- `User` and `OwnUser` are public, persisted, and embedded in nearly every other response. This group restructures them, last: the mappers in `user_mapper.dart` already map the generated types onto the current class for every group before it, and stay. See [01-foundation](01-foundation.md).
 - `PrivacySettings` and the push-preference sub-shapes — decide per type.
+- `UserResponse.toModel()` leaves `OwnUser.topLevelFields`, `deleted_at`, `deactivated_at` and `revoke_tokens_issued_before` out of every user's `extraData` (`_shadowedCustomKeys`), where v1 kept the `OwnUser`-only keys in a plain user's `extraData`. Revisit once the mapper serves plain users.
+- `UserFilterField.shadowBanned` and `.bypassModeration` read `extraData`, which the generated `UserResponse` has no field to fill.
+- `updateUsers` reuses `User.toRequest()`. It is a full upsert, and v10's flattened body filed the user's client state (`online`, `banned`, `created_at` and similar) into the stored custom data on every call, as it did for guests in [04](04-roles-guest-and-app.md). Decide the same way here, for real users rather than fresh guests, and record it in the CHANGELOG.
+- The generated `UserRequest` sends explicit `null` for an unset `language` or `invisible`, where v10 left the key out. For a guest create that made no difference; for an upsert of an existing user, confirm live that a `null` does not reset a stored value differently from an omitted key.
 
 ## Risks
 
@@ -66,3 +70,5 @@
       name states its subject and behaviour.
 - [ ] Temporary adapters owned by this group (`DeviceV1JsonConverter`) are deleted and removed from
       the table in `README.md`.
+- [ ] `user_mapper.dart` maps onto the restructured `User`, and its `TODO(openapi-migration)` note is
+      gone.

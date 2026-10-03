@@ -15,7 +15,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [01](01-foundation.md) | Foundation — `DefaultApi` wiring, `User` shape | — | — | ☐ |
 | [02](02-devices.md) | Devices | 0 | 3 | ☑ |
 | [03](03-user-groups.md) | User Groups | 0 | 8 | ☑ |
-| [04](04-roles-guest-and-app.md) | Roles, Guest & App Settings | 1 | 5 | ☐ |
+| [04](04-roles-guest-and-app.md) | Roles, Guest & App Settings | 0 | 5 | ☑ |
 | [05](05-polls.md) | Polls | 13 | 13 | ☐ |
 | [06](06-reminders.md) | Message Reminders | 4 | 4 | ☐ |
 | [07](07-threads-and-drafts.md) | Threads & Drafts | 7 | 7 | ☐ |
@@ -143,10 +143,10 @@ includes a named response that carries only `duration` today, such as `HideChann
 | `DeviceV1JsonConverter` | `OwnUser.devices` | [09](09-users.md) |
 | `userGroupsFromV1Json` | `Message.mentionedGroups` | [10](10-messages.md) |
 | `DataSerializable` | `UserGroup`, `UserGroupMember` (`fromData`, `toData`) | [10](10-messages.md) |
+| `user_mapper.dart` (kept, re-pointed) | today's `User`, which still reads and writes JSON | [09](09-users.md) |
 
-Before group 09 starts, decide how v1 events decode a parent once it becomes a plain model: through the
-generated types plus a shim that rebuilds `custom` from the flattened v1 keys, or through a private v1 decoder in
-the WebSocket layer. Record the answer in [01-foundation](01-foundation.md).
+How v1 JSON decodes `User` once it becomes a plain model is decided in [01-foundation](01-foundation.md): until
+group 09 restructures it, v1 payloads keep decoding through `User.fromJson`.
 
 ## Order, and why
 
@@ -161,12 +161,12 @@ surfaces before it reaches `Message` and `ChannelState`:
 - **05–07** introduce persisted models and WebSocket-delivered updates, one at a time.
 - **08** is where we decide what *not* to expose: 34 generated operations against 10 hand-written methods.
 - **14** is `queryBannedUsers`, split out of 08 because it is the only moderation call that answers with a
-  model. It waits on 09, so it sorts after the groups that decide the shapes it embeds.
-- **09** freezes the `User` mapping that everything else already depends on (the *decision* is made in 01; this
-  group executes it).
+  model. The `User` mappers it needs landed with group 04.
 - **10–11** are the core of the SDK, and carry the `custom` / `extraData` promotion problem.
 - **12** comes late because it needs its own hand-written multipart client and is the highest-traffic path in the
   SDK.
+- **09** is last. Every group before it maps users through `user_mapper.dart` onto today's `User`; 09 migrates the
+  user endpoints and restructures `User` and `OwnUser` themselves, when every parent that embeds them has moved.
 
 ## Prerequisites
 

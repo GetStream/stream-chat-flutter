@@ -68,59 +68,6 @@ void main() {
       expect(res, isSameUserAs(user));
     });
 
-    group('`.connectGuestUser`', () {
-      test('should work fine', () async {
-        final user = User(id: 'test-user-id');
-        final token = testUserToken(user.id).rawValue;
-
-        when(() => fakeChatApi.guest.getGuestUser(any(that: isSameUserAs(user)))).thenAnswer(
-          (_) async => ConnectGuestUserResponse()
-            ..user = user
-            ..accessToken = token,
-        );
-
-        expectLater(
-          // skipping first seed status -> ConnectionStatus.disconnected
-          client.connectionStatusStream.skip(1),
-          emitsInOrder([ConnectionStatus.connecting, ConnectionStatus.connected]),
-        );
-
-        final res = await client.connectGuestUser(user);
-        expect(res, isNotNull);
-        expect(res, isSameUserAs(user));
-
-        verify(
-          () => fakeChatApi.guest.getGuestUser(any(that: isSameUserAs(user))),
-        ).called(1);
-      });
-
-      test('should throw if `.getGuestUser` fails', () async {
-        final user = User(id: 'test-user-id');
-
-        when(
-          () => fakeChatApi.guest.getGuestUser(any(that: isSameUserAs(user))),
-        ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
-
-        expectLater(
-          client.connectionStatusStream,
-          emitsInOrder([
-            // only emits the seed -> disconnected status
-            // as the call never reaches `ws.connect`
-            ConnectionStatus.disconnected,
-          ]),
-        );
-
-        await expectLater(
-          client.connectGuestUser(user),
-          throwsA(isA<StreamApiException>()),
-        );
-
-        verify(
-          () => fakeChatApi.guest.getGuestUser(any(that: isSameUserAs(user))),
-        ).called(1);
-      });
-    });
-
     test('`.connectAnonymousUser` should work fine', () async {
       expectLater(
         // skipping first seed status -> ConnectionStatus.disconnected
@@ -226,25 +173,6 @@ void main() {
       },
     );
 
-    test('`.connectGuestUser` should throw if `ws.connect` fails', () async {
-      final user = User(id: 'test-user-id');
-      final token = testUserToken(user.id).rawValue;
-
-      when(() => fakeChatApi.guest.getGuestUser(any(that: isSameUserAs(user)))).thenAnswer(
-        (_) async => ConnectGuestUserResponse()
-          ..user = user
-          ..accessToken = token,
-      );
-
-      await expectLater(
-        client.connectGuestUser(user),
-        throwsA(isA<StreamNetworkException>()),
-      );
-      verify(
-        () => fakeChatApi.guest.getGuestUser(any(that: isSameUserAs(user))),
-      ).called(1);
-    });
-
     test(
       '`.connectAnonymousUser` should throw if `ws.connect` fails',
       () async {
@@ -306,28 +234,6 @@ void main() {
         expect(client.connectionStatus, ConnectionStatus.disconnected);
       },
     );
-
-    test('`.connectGuestUser` should succeed without connecting', () async {
-      final user = User(id: 'test-user-id');
-      final token = testUserToken(user.id).rawValue;
-
-      when(() => fakeChatApi.guest.getGuestUser(any(that: isSameUserAs(user)))).thenAnswer(
-        (_) async => ConnectGuestUserResponse()
-          ..user = user
-          ..accessToken = token,
-      );
-
-      final res = await client.connectGuestUser(
-        user,
-        connectWebSocket: false,
-      );
-
-      expect(res, isSameUserAs(user));
-      expect(client.connectionStatus, ConnectionStatus.disconnected);
-      verify(
-        () => fakeChatApi.guest.getGuestUser(any(that: isSameUserAs(user))),
-      ).called(1);
-    });
 
     test(
       '`.connectAnonymousUser` should succeed without connecting',
@@ -408,36 +314,6 @@ void main() {
 
         verify(persistence.getConnectionInfo).called(1);
         verifyNoMoreInteractions(persistence);
-      },
-    );
-
-    test(
-      '''`.connectGuestUser` should connect successfully if persistence contains event''',
-      () async {
-        final user = User(id: 'test-user-id');
-        final token = testUserToken(user.id).rawValue;
-
-        final event = Event(
-          type: EventType.healthCheck,
-          connectionId: 'test-connection-id',
-          me: OwnUser.fromUser(user),
-        );
-        when(persistence.getConnectionInfo).thenAnswer((_) async => event);
-
-        when(() => fakeChatApi.guest.getGuestUser(any(that: isSameUserAs(user)))).thenAnswer(
-          (_) async => ConnectGuestUserResponse()
-            ..user = user
-            ..accessToken = token,
-        );
-
-        final res = await client.connectGuestUser(user);
-        expect(res, isNotNull);
-        expect(res, isSameUserAs(user));
-
-        verify(persistence.getConnectionInfo).called(1);
-        verifyNoMoreInteractions(persistence);
-        verify(() => fakeChatApi.guest.getGuestUser(any(that: isSameUserAs(user)))).called(1);
-        verifyNoMoreInteractions(fakeChatApi.guest);
       },
     );
 
@@ -6786,30 +6662,48 @@ void main() {
 
     // A client with [user] signed in, whose guest exchange for [requested] answers the way a real
     // one does: with an id of the guest's own.
-    Future<(StreamChatClient, FakeChatApi)> signedInClient({required User requested}) async {
-      final chatApi = FakeChatApi();
+    Future<(StreamChatClient, MockDefaultApi)> signedInClient({required User requested}) async {
+      registerFallbackValue(const api.CreateGuestRequest(user: api.UserRequest(id: 'fallback')));
+
+      final defaultApi = MockDefaultApi();
+      when(defaultApi.getApp).thenAnswer((_) async => Result.success(fakeGetApplicationResponse()));
       final client = StreamChatClient(
         apiKey,
-        defaultApi: FakeDefaultApi(),
-        chatApi: chatApi,
+        defaultApi: defaultApi,
+        chatApi: FakeChatApi(),
         wsProvider: FakeChatServer(user: OwnUser.fromUser(user)).connect,
       );
       addTearDown(client.dispose);
       await client.connectUser(user, token);
 
-      final guest = User(id: 'guest-1234-${requested.id}');
-      when(() => chatApi.guest.getGuestUser(requested)).thenAnswer(
-        (_) async => ConnectGuestUserResponse()
-          ..user = guest
-          ..accessToken = testUserToken(guest.id).rawValue,
+      final guestId = 'guest-1234-${requested.id}';
+      when(() => defaultApi.createGuest(createGuestRequest: any(named: 'createGuestRequest'))).thenAnswer(
+        (_) async => Result.success(
+          api.CreateGuestResponse(
+            duration: '3.20ms',
+            accessToken: testUserToken(guestId).rawValue,
+            user: api.UserResponse(
+              id: guestId,
+              role: 'guest',
+              language: 'en',
+              online: false,
+              banned: false,
+              teams: const [],
+              custom: const {},
+              blockedUserIds: const [],
+              createdAt: DateTime.utc(2026),
+              updatedAt: DateTime.utc(2026),
+            ),
+          ),
+        ),
       );
 
-      return (client, chatApi);
+      return (client, defaultApi);
     }
 
     test('should refuse a connectGuestUser without asking for a guest', () async {
       final requested = User(id: 'someone-else');
-      final (client, chatApi) = await signedInClient(requested: requested);
+      final (client, defaultApi) = await signedInClient(requested: requested);
 
       await expectLater(
         client.connectGuestUser(requested, connectWebSocket: false),
@@ -6821,19 +6715,19 @@ void main() {
           ),
         ),
       );
-      verifyNever(() => chatApi.guest.getGuestUser(requested));
+      verifyNever(() => defaultApi.createGuest(createGuestRequest: any(named: 'createGuestRequest')));
     });
 
     test('should refuse a connectGuestUser under the id of the user signed in', () async {
       // The guest would still be another user, so this is refused like any other.
       final requested = User(id: user.id);
-      final (client, chatApi) = await signedInClient(requested: requested);
+      final (client, defaultApi) = await signedInClient(requested: requested);
 
       await expectLater(
         client.connectGuestUser(requested, connectWebSocket: false),
         throwsA(isA<StateError>().having((it) => it.message, 'message', contains('${user.id} is signed in'))),
       );
-      verifyNever(() => chatApi.guest.getGuestUser(requested));
+      verifyNever(() => defaultApi.createGuest(createGuestRequest: any(named: 'createGuestRequest')));
     });
 
     test('should leave the signed-in user authenticated after refusing a connectGuestUser', () async {

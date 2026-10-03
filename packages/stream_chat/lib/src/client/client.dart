@@ -14,10 +14,13 @@ import 'package:stream_core/stream_core.dart'
         InFlightCache,
         LocationCoordinate,
         LoggingInterceptor,
+        PatternMatching,
         Result,
         SortedListExtensions,
         Standard,
+        StreamClientException,
         StreamCoreHttpClient,
+        StreamException,
         StreamLogConfig,
         StreamLogger,
         SystemEnvironment,
@@ -445,10 +448,14 @@ class StreamChatClient {
     );
   }
 
-  /// Connects the current user as guest, this triggers a connection to the API.
-  /// It returns a [Future] that resolves when the connection is setup.
+  /// Signs in a new guest created from [user] and returns it.
+  ///
+  /// The guest gets an id of its own and the guest role, so the returned user is not [user]. If [connectWebSocket]
+  /// is false, the guest is signed in without opening a connection.
   ///
   /// Throws a [StateError] if a user is already signed in; call [disconnectUser] first.
+  ///
+  /// Throws a [StreamException] if the guest cannot be created or the connection fails.
   Future<OwnUser> connectGuestUser(
     User user, {
     bool connectWebSocket = true,
@@ -470,7 +477,15 @@ class StreamChatClient {
       tokenProvider: .static(anonymousToken),
     );
 
-    final guestUser = await _chatApi.guest.getGuestUser(user);
+    final result = await _generalRepository.createGuest(user);
+
+    // A failed sign-in throws, like the other connect methods.
+    final guestUser = result.getOrElse((error, stackTrace) {
+      final exception =
+          StreamException.tryFrom(error) ??
+          StreamClientException(message: 'Failed to create a guest user', cause: error);
+      Error.throwWithStackTrace(exception, stackTrace ?? StackTrace.current);
+    });
 
     // resetting tokenManager after successful request
     _tokenManager.reset();

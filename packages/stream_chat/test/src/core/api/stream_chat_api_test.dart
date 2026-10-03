@@ -19,10 +19,6 @@ void main() {
     expect(streamChatApi.user, isNotNull);
   });
 
-  test('`.guest`', () {
-    expect(streamChatApi.guest, isNotNull);
-  });
-
   test('`.message`', () {
     expect(streamChatApi.message, isNotNull);
   });

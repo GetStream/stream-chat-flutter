@@ -90,13 +90,6 @@ SendReactionResponse _$SendReactionResponseFromJson(
   ..message = Message.fromJson(json['message'] as Map<String, dynamic>)
   ..reaction = Reaction.fromJson(json['reaction'] as Map<String, dynamic>);
 
-ConnectGuestUserResponse _$ConnectGuestUserResponseFromJson(
-  Map<String, dynamic> json,
-) => ConnectGuestUserResponse()
-  ..duration = json['duration'] as String?
-  ..accessToken = json['access_token'] as String
-  ..user = User.fromJson(json['user'] as Map<String, dynamic>);
-
 UpdateUsersResponse _$UpdateUsersResponseFromJson(Map<String, dynamic> json) => UpdateUsersResponse()
   ..duration = json['duration'] as String?
   ..users =

@@ -29,6 +29,7 @@ onto Stream's OpenAPI-generated API client.
     - [Devices](#devices)
     - [Moderation](#moderation)
     - [App Settings](#app-settings)
+    - [Guest Users](#guest-users)
     - [File Upload](#file-upload)
     - [User Groups](#user-groups)
     - [Link Previews](#link-previews)
@@ -75,6 +76,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Error Handling**](#error-handling) | Failures carry `stream_core`'s sealed `StreamException` family instead of `StreamChatNetworkError`; `ChatErrorCode` → `StreamErrorCode`. API calls will return `Result<T>` rather than throwing, endpoint by endpoint |
 | [**Moderation**](#moderation) | Muting, banning and flagging return a `Result` and call the moderation v2 API; `banUser`'s options map becomes named parameters; `unflagMessage`, `unflagUser` and `removeShadowBan` are removed |
 | [**App Settings**](#app-settings) | `getAppSettings` returns a `Result<AppSettingsResponse>` instead of throwing; `GetAppSettingsResponse` is renamed `AppSettingsResponse` |
+| [**Guest Users**](#guest-users) | `connectGuestUser` is unchanged; `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed |
 | [**File Upload**](#file-upload) | Uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
 | _(filled in per feature as PRs land)_ | |
 
@@ -210,6 +212,8 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `GetAppSettingsResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
 | `AppSettings extends Equatable` / `UploadConfig extends Equatable`, `props` | `AppSettings` / `UploadConfig` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and neither is an `Equatable` any more |
 | `StreamChatApi.general.getAppSettings()` | `StreamChatClient.getAppSettings()` | `removed` | The call moved to the generated client |
+| `StreamChatApi.guest` (`GuestApi.getGuestUser`) | `StreamChatClient.connectGuestUser` | `removed` | The call moved to the generated client; `connectGuestUser` keeps its signature and still throws |
+| `ConnectGuestUserResponse` | — | `removed` | Only `StreamChatApi.guest` returned it; `connectGuestUser` still returns the connected `OwnUser` |
 | `sendImage` / `sendFile` / `uploadImage` / `uploadFile` → `Future<SendImageResponse>` and siblings | `Future<Result<UploadedFile>>` | `retyped` | On `StreamChatClient`, `Channel` and `AttachmentFileUploader`. Returns a `Result` instead of throwing |
 | `deleteImage` / `deleteFile` / `removeImage` / `removeFile` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | On `StreamChatClient`, `Channel` and `AttachmentFileUploader`. Returns a `Result` instead of throwing |
 | `SendAttachmentResponse`, `SendFileResponse`, `SendImageResponse`, `UploadImageResponse`, `UploadFileResponse` | `UploadedFile` (`stream_core`) | `removed` | `.file` becomes `.fileUrl`; `.thumbUrl` is unchanged; `duration` is gone |
@@ -716,6 +720,21 @@ build them with their constructors — `AppSettingsResponse(duration: '0ms', app
 
 **`AppSettings` and `UploadConfig` no longer extend `Equatable`.** They still compare by value, `props` is
 gone, and both gain `copyWith`.
+
+### Guest Users
+
+**`connectGuestUser` is unchanged.** It still returns the connected `OwnUser`, and still throws a
+`StreamException` when the guest cannot be created or the connection fails.
+
+**`StreamChatApi.guest` and `ConnectGuestUserResponse` are removed.** `connectGuestUser` creates the guest and
+connects it in one call; there is no separate call that only creates one.
+
+**The guest no longer stores your client state as custom data.** v10 sent the whole user, so fields such as
+`online`, `banned`, the unread counts, devices and push preferences were saved on the new guest as custom data, and
+some came back: an `OwnUser`'s `pushPreferences` on the returned user and in `extraData` when the guest was
+queried, and the unread counts when connecting with `connectWebSocket: false`. None of them was ever applied to the
+guest. v11 sends its id, name, image, language, `invisible`, an `OwnUser`'s privacy settings, and your own
+`extraData`. If you read one of those values back, store it as a custom field of your own instead.
 
 ### File Upload
 
