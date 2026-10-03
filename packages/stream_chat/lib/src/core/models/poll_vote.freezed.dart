@@ -1,0 +1,47 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
+// ignore_for_file: type=lint
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+
+part of 'poll_vote.dart';
+
+// **************************************************************************
+// FreezedGenerator
+// **************************************************************************
+
+T _$identity<T>(T value) => value;
+
+/// @nodoc
+mixin _$PollVote {
+  String? get id;
+  String? get pollId;
+  String? get optionId;
+  String? get answerText;
+  DateTime get createdAt;
+  DateTime get updatedAt;
+  String? get userId;
+  User? get user;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is PollVote &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.pollId, pollId) || other.pollId == pollId) &&
+            (identical(other.optionId, optionId) || other.optionId == optionId) &&
+            (identical(other.answerText, answerText) || other.answerText == answerText) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
+            (identical(other.userId, userId) || other.userId == userId) &&
+            (identical(other.user, user) || other.user == user));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, id, pollId, optionId, answerText, createdAt, updatedAt, userId, user);
+
+  @override
+  String toString() {
+    return 'PollVote(id: $id, pollId: $pollId, optionId: $optionId, answerText: $answerText, createdAt: $createdAt, updatedAt: $updatedAt, userId: $userId, user: $user)';
+  }
+}

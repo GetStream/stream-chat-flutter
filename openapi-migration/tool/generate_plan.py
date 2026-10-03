@@ -76,6 +76,8 @@ DONE = textwrap.dedent("""\
           hand-written, with the reason.
     - [ ] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
     - [ ] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
+    - [ ] Every model that had a `copyWith` in v10 keeps that exact method, `_nullConst` sentinels
+          included ([README rule 2](README.md#domain-models)).
     - [ ] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
           persists anything.
     - [ ] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.
@@ -307,19 +309,65 @@ GROUPS = [
     ),
     dict(
         num='05', slug='polls', title='Polls',
-        hand=['polls_api.dart'],
+        hand=[],
         match=owns('/api/v2/polls', '/api/v2/chat/messages/{message_id}/polls'),
         goal='First group with real domain models and persistence behind it.',
-        decisions=[
-            '`Poll`, `PollOption` and `PollVote` are public and persisted; adopting generated shapes means '
-            'touching `stream_chat_persistence` in the same PR.',
-            '`VotingVisibility` is ours; the generated equivalent is an inline per-operation enum.',
-            'One generated `PollResponse` answers `createPoll`, `getPoll`, `updatePoll` and `updatePollPartial`, '
-            'where v10 has `CreatePollResponse`, `GetPollResponse` and `UpdatePollResponse`. The v10 envelopes '
-            'stay; decide with the user how the mapper names its conversions, since one `toModel()` cannot return '
-            'three types. `PollOptionResponse` (create, get, update an option) and `PollVoteResponse` (cast, remove '
-            'a vote) have the same shape.',
-        ],
+        decisions=[],
+        taken=textwrap.dedent("""\
+            - **`Poll`, `PollOption` and `PollVote` keep their v10 names, fields and defaults,** as `@freezed`
+              classes with no JSON, mapped from `PollResponseData`, `PollOptionResponseData` and
+              `PollVoteResponseData` in `lib/src/repository/mapper/polls_mapper.dart`. The uuid default `id` and the
+              `DateTime.now()` timestamps stay; `latestVotes`, `ownVotes`, `ownAnswers` and `PollVote.isAnswer`
+              become getters.
+            - **Equality now includes `extraData`.** v10's `Equatable` props left it out of `Poll` and `PollOption`;
+              freezed compares every field, and so does `Message`, whose props include its poll. Accepted as a
+              behavioural break and flagged for review.
+            - **The eight v10 envelopes collapse to the three the server returns:** `PollResponse` (create, get,
+              update, partial update), `PollOptionResponse` (create, get, update an option) and `PollVoteResponse`
+              (cast, remove a vote), each with one `toModel()`. `QueryPollsResponse` and `QueryPollVotesResponse`
+              keep their names. A rename break beyond the [sanctioned ones](README.md#domain-models), approved for
+              this group and flagged for review. `PollVoteResponse.vote` is nullable, as the spec marks it.
+            - **The fields only the generated types carry stay out:** the `*_i18n` maps, `is_answer` (derived from
+              `answerText`) and `PollVoteResponse.poll`. Adding them is additive. The i18n keys are known fields
+              (`topLevelFields`), so neither the mapper nor the v1 decoder puts them in `extraData`, and a poll
+              compares equal whichever path delivered it.
+            - **Write methods keep taking `Poll` and `PollOption`.** The mapper sends only the writable settings;
+              the vote summary, `createdBy` and timestamps are not sent. Dedicated request types were considered
+              and rejected: the draft a caller builds must stay a `Poll`, because a message carries one. Flagged
+              for review.
+            - **Option ids are not sent on create.** `PollOptionInput` has none; the server assigns them and
+              rejects a client id as reserved (confirmed live: v10 answered 400). **`updatePoll` and
+              `updatePollOption` fail without a request when an option has no id,** since the server requires one.
+            - **`queryPolls` and `queryPollVotes` take `limit`, `next` and `prev`** instead of `PaginationParams`.
+              The generated requests carry only those, and the backend never read the offset or id/date cursors on
+              these queries. `limit` defaults to 10, `PaginationParams`' default, so an omitted limit pages as in
+              v10. The responses expose `prev`, so the parameter is usable. Flagged for review.
+            - **`VotingVisibility` becomes an extension type over its wire string,** following `PushProvider`. An
+              unknown value is kept rather than rejected, in the mapper, the v1 decoder and persistence.
+            - **An answer's `optionId` stays `""`,** as the server sends it and v10 decoded it.
+            - **`custom` becomes `extraData` without the keys named after the model's own fields**
+              (`Poll.topLevelFields`, `PollOption.topLevelFields`), matching v1's flat JSON, which shadowed them.
+            - **Every public poll method returns a `Result`,** on `StreamChatClient` and `Channel`. `deletePoll` and
+              `deletePollOption` answer `DurationResponse` and return `Result<void>`. `closePoll` stays a
+              `partialUpdatePoll` that sets `is_closed`.
+            - **`Channel.sendPoll` returns `Result<SendMessageResponse>`.** A `createPoll` failure passes through
+              and no message is sent; a `StreamException` thrown by `sendMessage` (still v1) is caught into a
+              `Failure`.
+            - **A missing option or vote id is a `Failure(StreamClientException)`, not an `ArgumentError`,** in
+              `Channel.castPollVote` and `removePollVote`, matching the migrated never-throws contract.
+            - **v1 JSON keeps decoding through hand-written converters** (`PollV1JsonConverter`,
+              `PollVoteV1JsonConverter`) on `Message.poll`, `DraftMessage.poll`, `Event.poll` and `Event.pollVote`.
+              The WebSocket is v1-only and sends custom data flat, with no `custom` key, so the generated
+              `fromJson` would throw on it; the converters mirror v10's `fromJson` and tolerate missing keys.
+              `Event` writes these fields too, so its converters run both ways.
+            - **`PollOption` gets the `@DataSerializable` codec** for `polls.options`. The stored format nests
+              custom data under `extra_data` where v10 flattened it, so `schemaVersion` is bumped.
+            - **`extraData` keeps its name.** Renaming it to `custom` is a migration-wide step for every model at
+              once — [group 15](15-custom-data-rename.md).
+            - **Verified live** against the demo app with a before/after harness covering every endpoint, the
+              error cases and the WebSocket events, and in the sample app on web.
+            """),
+        done=DONE.replace('- [ ]', '- [x]'),
         risks=[
             'Vote operations live under `/chat/messages/{message_id}/polls/...`, not `/polls` — easy to miss when '
             'grepping by path.',
@@ -529,12 +577,17 @@ GROUPS = [
             'had to drop from `MuteUsersResponse`: the `mutes` the call created and the `ownUser` it left '
             'behind. Adding them is additive for anyone reading the response, so revisit them here rather '
             'than leaving them dropped for good.',
+            'Until then, a user mapped from `UserResponse` and the same user decoded from v1 JSON carry different '
+            '`extraData`: the v1 path keeps `blocked_user_ids`, `deleted_at`, `deactivated_at` and '
+            '`revoke_tokens_issued_before`, the mapper drops them. Equality includes `extraData`, so a `Poll` from a '
+            'REST call (its `createdBy`, its votes\' `user`) and the same poll from an event compare unequal.',
         ],
         done=DONE + (
             '- [ ] Temporary adapters owned by this group (`DeviceV1JsonConverter`) are deleted and removed from\n'
             '      the table in `README.md`.\n'
             '- [ ] `user_mapper.dart` maps onto the restructured `User`, and its `TODO(openapi-migration)` note is\n'
             '      gone.\n'
+            '- [ ] A user mapped from `UserResponse` and the same user decoded from v1 / WebSocket JSON compare equal.\n'
         ),
     ),
     dict(
@@ -697,6 +750,30 @@ GROUPS = [
             'id, and passes any test that does not assert on `.name`.',
             'It is the last method in `moderation_api.dart`. Closing this group deletes that file and the '
             '`StreamChatApi.moderation` getter.',
+        ],
+    ),
+    dict(
+        num='15', slug='custom-data-rename', title='`extraData` → `custom`',
+        hand=[],
+        match=owns(),
+        goal='Rename `extraData` to `custom` on every public model at once, matching the generated client.',
+        decisions=[
+            '**Whether to rename at all.** Every model names its custom data `extraData` today; the generated '
+            'client calls it `custom`. Renaming one model at a time would leave the SDK inconsistent, so the '
+            'groups keep `extraData` and this step decides for every model together.',
+            '**How to stage it.** Add `custom` beside a deprecated `extraData`, or rename in one break.',
+        ],
+        done=textwrap.dedent("""\
+            - [ ] Every public model names its custom data the same way.
+            - [ ] The mappers and the v1 decoders read and write the renamed field.
+            - [ ] `migrations/v11-migration.md`: Symbol Map rows plus a feature section.
+            - [ ] CHANGELOG entry under `🛑️ Breaking` for each break; PR title `refactor(llc)!:`.
+            - [ ] Decisions recorded in this file, and the status box ticked in `README.md`.
+            """),
+        risks=[
+            '`Serializer`, the models\' `topLevelFields` and the persistence `extra_data` columns name the '
+            'concept too.',
+            'Runs after group 09 at the earliest, once `User` is restructured.',
         ],
     ),
 ]

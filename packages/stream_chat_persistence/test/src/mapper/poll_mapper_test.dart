@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
@@ -56,10 +54,10 @@ void main() {
       votingVisibility: VotingVisibility.public,
       allowUserSuggestedOptions: true,
       options: const [
-        PollOption(id: 'option-1', text: 'Red'),
-        PollOption(id: 'option-2', text: 'Blue'),
-        PollOption(id: 'option-3', text: 'Green'),
-      ].map(jsonEncode).toList(),
+        '{"id":"option-1","text":"Red","extra_data":{"hex":"#f00"}}',
+        '{"id":"option-2","text":"Blue","extra_data":{}}',
+        '{"id":"option-3","text":"Green","extra_data":{}}',
+      ],
       voteCount: voteCountsByOption.values.reduce((a, b) => a + b),
       voteCountsByOption: voteCountsByOption,
       createdAt: DateTime.now(),
@@ -88,14 +86,11 @@ void main() {
     expect(poll.enforceUniqueVote, entity.enforceUniqueVote);
     expect(poll.maxVotesAllowed, entity.maxVotesAllowed);
     expect(poll.allowUserSuggestedOptions, entity.allowUserSuggestedOptions);
-    for (var i = 0; i < poll.options.length; i++) {
-      final pollOption = poll.options[i];
-      final entityOptionJson = jsonDecode(entity.options[i]);
-      final entityOption = PollOption.fromJson(entityOptionJson);
-      expect(pollOption.id, entityOption.id);
-      expect(pollOption.text, entityOption.text);
-      expect(pollOption.extraData, entityOption.extraData);
-    }
+    expect(poll.options, const [
+      PollOption(id: 'option-1', text: 'Red', extraData: {'hex': '#f00'}),
+      PollOption(id: 'option-2', text: 'Blue'),
+      PollOption(id: 'option-3', text: 'Green'),
+    ]);
     expect(poll.allowAnswers, entity.allowAnswers);
     expect(poll.answersCount, entity.answersCount);
     expect(poll.isClosed, entity.isClosed);
@@ -154,7 +149,7 @@ void main() {
       createdById: currentUser.id,
       allowUserSuggestedOptions: true,
       options: const [
-        PollOption(id: 'option-1', text: 'Red'),
+        PollOption(id: 'option-1', text: 'Red', extraData: {'hex': '#f00'}),
         PollOption(id: 'option-2', text: 'Blue'),
         PollOption(id: 'option-3', text: 'Green'),
       ],
@@ -176,10 +171,11 @@ void main() {
     expect(entity.enforceUniqueVote, poll.enforceUniqueVote);
     expect(entity.maxVotesAllowed, poll.maxVotesAllowed);
     expect(entity.allowUserSuggestedOptions, poll.allowUserSuggestedOptions);
-    expect(
-      entity.options,
-      poll.options.map((it) => jsonEncode(it.toJson())).toList(),
-    );
+    expect(entity.options, const [
+      '{"id":"option-1","text":"Red","extra_data":{"hex":"#f00"}}',
+      '{"id":"option-2","text":"Blue","extra_data":{}}',
+      '{"id":"option-3","text":"Green","extra_data":{}}',
+    ]);
     expect(entity.allowAnswers, poll.allowAnswers);
     expect(entity.answersCount, poll.answersCount);
     expect(entity.isClosed, poll.isClosed);

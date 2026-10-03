@@ -1,7 +1,8 @@
-import 'package:equatable/equatable.dart';
-import 'package:json_annotation/json_annotation.dart';
-import '../util/serializer.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../db/data_serializable.dart';
+
+part 'poll_option.freezed.dart';
 part 'poll_option.g.dart';
 
 class _NullConst {
@@ -10,35 +11,37 @@ class _NullConst {
 
 const _nullConst = _NullConst();
 
-/// {@template streamPollOption}
-/// A model class representing a poll option.
-/// {@endtemplate}
-@JsonSerializable()
-class PollOption extends Equatable {
-  /// {@macro streamPollOption}
+/// One of the choices a poll offers to vote on.
+@Freezed(copyWith: false)
+// TODO(openapi-migration): remove in group 10
+@DataSerializable(includeIfNull: false)
+class PollOption with _$PollOption {
+  /// Creates a new [PollOption].
+  ///
+  /// An option that is about to be added to a poll has no [id] yet; one is
+  /// assigned when the poll or the option is created.
   const PollOption({
     this.id,
     required this.text,
     this.extraData = const {},
   });
 
-  /// Create a new instance from a json
-  factory PollOption.fromJson(Map<String, dynamic> json) => _$PollOptionFromJson(
-    Serializer.moveToExtraDataFromRoot(json, topLevelFields),
-  );
+  /// Creates a [PollOption] from the offline-database format written by [toData].
+  ///
+  /// It is not a codec for API payloads.
+  factory PollOption.fromData(Map<String, dynamic> json) => _$PollOptionFromJson(json);
 
-  /// The unique identifier of the poll option.
-  @JsonKey(includeIfNull: false)
+  /// The unique identifier of this option, or null before it is created.
+  @override
   final String? id;
 
-  /// The text describing the poll option.
+  /// The text shown for this option.
+  @override
   final String text;
 
-  /// Map of custom poll option extraData
+  /// Custom data attached to this option.
+  @override
   final Map<String, Object?> extraData;
-
-  /// Serialize to json
-  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(_$PollOptionToJson(this));
 
   /// Creates a copy of [PollOption] with specified attributes overridden.
   PollOption copyWith({
@@ -51,14 +54,15 @@ class PollOption extends Equatable {
     extraData: extraData ?? this.extraData,
   );
 
-  /// Known top level fields.
-  ///
-  /// Useful for [Serializer] methods.
+  /// The keys an option carries besides its custom data.
   static const topLevelFields = [
     'id',
     'text',
+    'text_i18n',
   ];
 
-  @override
-  List<Object?> get props => [id, text];
+  /// Serializes this option to the format `stream_chat_persistence` stores.
+  ///
+  /// It is not a codec for API payloads.
+  Map<String, dynamic> toData() => _$PollOptionToJson(this);
 }

@@ -5,32 +5,48 @@ import 'package:test/test.dart';
 import '../../utils.dart';
 
 void main() {
-  group('src/models/poll_vote', () {
-    group('PollVoteSortField', () {
-      test('id orders alphabetically', () {
-        expectOrders(
-          PollVoteSortField.id,
-          createTestPollVote(id: 'a-vote', optionId: 'o'),
-          createTestPollVote(id: 'b-vote', optionId: 'o'),
-        );
-      });
+  test('PollVote.isAnswer is true for a vote that carries answer text', () {
+    final answer = createTestPollVote(answerText: 'Anything');
 
-      test('createdAt orders older votes first', () {
-        expectOrders(
-          PollVoteSortField.createdAt,
-          createTestPollVote(optionId: 'o', createdAt: DateTime(2023, 6, 10)),
-          createTestPollVote(optionId: 'o', createdAt: DateTime(2023, 6, 15)),
-        );
-      });
+    expect(answer.isAnswer, isTrue);
+  });
 
-      test('updatedAt orders older votes first', () {
-        expectOrders(
-          PollVoteSortField.updatedAt,
-          createTestPollVote(optionId: 'o', updatedAt: DateTime(2023, 6, 10)),
-          createTestPollVote(optionId: 'o', updatedAt: DateTime(2023, 6, 15)),
-        );
-      });
-    });
+  test('PollVote.isAnswer is false for a vote for an option', () {
+    final vote = createTestPollVote(optionId: 'pizza');
+
+    expect(vote.isAnswer, isFalse);
+  });
+
+  test('PollVote.copyWith keeps a field passed as null', () {
+    final vote = createTestPollVote(id: 'vote-id', optionId: 'pizza', userId: 'user-id');
+
+    final copy = vote.copyWith(id: null, optionId: null, userId: null, createdAt: null);
+
+    expect(copy, vote);
+  });
+
+  test('PollVoteSortField.id orders alphabetically', () {
+    expectOrders(
+      PollVoteSortField.id,
+      createTestPollVote(id: 'a-vote', optionId: 'o'),
+      createTestPollVote(id: 'b-vote', optionId: 'o'),
+    );
+  });
+
+  test('PollVoteSortField.createdAt orders older votes first', () {
+    expectOrders(
+      PollVoteSortField.createdAt,
+      createTestPollVote(optionId: 'o', createdAt: DateTime(2023, 6, 10)),
+      createTestPollVote(optionId: 'o', createdAt: DateTime(2023, 6, 15)),
+    );
+  });
+
+  test('PollVoteSortField.updatedAt orders older votes first', () {
+    expectOrders(
+      PollVoteSortField.updatedAt,
+      createTestPollVote(optionId: 'o', updatedAt: DateTime(2023, 6, 10)),
+      createTestPollVote(optionId: 'o', updatedAt: DateTime(2023, 6, 15)),
+    );
   });
 }
 

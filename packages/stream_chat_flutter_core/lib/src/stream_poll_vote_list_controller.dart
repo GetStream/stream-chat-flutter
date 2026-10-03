@@ -113,60 +113,57 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
       this.limit * defaultInitialPagedLimitMultiplier,
       _kDefaultBackendPaginationLimit,
     );
-    try {
-      final response = await channel.queryPollVotes(
-        pollId,
-        sort: _activeSort,
-        filter: _activeFilter,
-        pagination: PaginationParams(limit: limit),
-      );
+    final result = await _queryPollVotes(limit: limit);
 
-      final results = response.votes;
-      final nextKey = response.next;
-      value = PagedValue(
-        items: results,
-        nextPageKey: nextKey,
-      );
+    result.fold(
+      onSuccess: (response) {
+        value = PagedValue(
+          items: response.votes,
+          nextPageKey: response.next,
+        );
 
-      // start listening to events
-      if (disposed) return;
-      _subscribeToPollVoteEvents();
-    } on StreamChatException catch (error) {
-      value = PagedValue.error(error);
-    } catch (error) {
-      final chatError = StreamClientException(message: 'Failed to load poll votes', cause: error);
-      value = PagedValue.error(chatError);
-    }
+        // start listening to events
+        if (disposed) return;
+        _subscribeToPollVoteEvents();
+      },
+      onFailure: (error, _) => value = PagedValue.error(_chatException(error, 'Failed to load poll votes')),
+    );
   }
 
   @override
   Future<void> loadMore(String nextPageKey) async {
     final previousValue = value.asSuccess;
 
-    try {
-      final response = await channel.queryPollVotes(
-        pollId,
-        sort: _activeSort,
-        filter: _activeFilter,
-        pagination: PaginationParams(limit: limit, next: nextPageKey),
-      );
+    final result = await _queryPollVotes(limit: limit, next: nextPageKey);
 
-      final results = response.votes;
-      final previousItems = previousValue.items;
-      final newItems = previousItems + results;
-      final next = response.next;
-      final nextKey = next != null && next.isNotEmpty ? next : null;
-      value = PagedValue(
-        items: newItems,
-        nextPageKey: nextKey,
-      );
-    } on StreamChatException catch (error) {
-      value = previousValue.copyWith(error: error);
-    } catch (error) {
-      final chatError = StreamClientException(message: 'Failed to load more poll votes', cause: error);
-      value = previousValue.copyWith(error: chatError);
+    result.fold(
+      onSuccess: (response) {
+        final next = response.next;
+        value = PagedValue(
+          items: previousValue.items + response.votes,
+          nextPageKey: next != null && next.isNotEmpty ? next : null,
+        );
+      },
+      onFailure: (error, _) {
+        value = previousValue.copyWith(error: _chatException(error, 'Failed to load more poll votes'));
+      },
+    );
+  }
+
+  // Queries the next page of votes, turning an error the channel throws (for one that is not initialized, say) into a
+  // failure, so every outcome reaches the controller's value.
+  Future<Result<QueryPollVotesResponse>> _queryPollVotes({required int limit, String? next}) async {
+    try {
+      return await channel.queryPollVotes(pollId, sort: _activeSort, filter: _activeFilter, limit: limit, next: next);
+    } catch (error, stackTrace) {
+      return Result.failure(error, stackTrace);
     }
   }
+
+  StreamChatException _chatException(Object error, String message) => switch (error) {
+    final StreamChatException error => error,
+    _ => StreamClientException(message: message, cause: error),
+  };
 
   @override
   Future<void> refresh({bool resetValue = true}) {

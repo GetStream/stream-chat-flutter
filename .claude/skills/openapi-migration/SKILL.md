@@ -205,6 +205,9 @@ a public signature.
   [Persisted models](#persisted-models-the-dataserializable-codec)). A model stored only as a table row, mapped
   column by column like `Poll` in `polls`, needs no codec.
 - **Which request enums need a hand-written public type** (rule 6).
+- **Whether v10 has a `copyWith`, and how it treats `null`.** If it has one, the migrated model keeps that exact
+  method, `_nullConst` sentinels included. freezed's `copyWith` behaves differently, so read
+  [Keeping a v10 `copyWith`](#keeping-a-v10-copywith) before relying on it.
 
 **Per method, decide what it returns:**
 
@@ -457,6 +460,39 @@ List<Map<String, dynamic>>? _membersToData(List<UserGroupMember>? members) =>
   `.g.dart` and `.freezed.dart` files of the models you changed; `--build-filter` deletes every generated output
   outside the filter, so never use it.
 
+### Keeping a v10 `copyWith`
+
+**freezed's `copyWith` is not v10's, and swapping one for the other changes behaviour without a compile error.**
+
+- **v10:** `null` means "keep the current value" (`name: name ?? this.name`). A field opts into clearing through
+  the `_nullConst` sentinel: `Object? maxVotesAllowed = _nullConst`, read back as
+  `maxVotesAllowed == _nullConst ? this.maxVotesAllowed : maxVotesAllowed as int?`. Every non-nullable field also
+  takes a nullable parameter.
+- **freezed:** `null` passed for a nullable field sets it to `null`, and a non-nullable field's parameter is
+  non-nullable. A field whose constructor turns `null` into a default (`id ?? Uuid().v4()`,
+  `createdAt ?? DateTime.now()`) gets a new value instead of keeping the old one.
+
+The SDK's state handling relies on exactly which fields keep and which clear. `ChannelClientState` clears expired
+pins with `message.copyWith(pinExpires: null)` and a deleted draft with `channelState.copyWith(draft: null)`, and
+`StreamMessageComposerController.clearQuotedMessage` clears the quote the same way. Each of those works only
+because the field has a sentinel. Elsewhere, a value that happens to be `null` passed to a `??` field keeps what
+was there. So:
+
+- **If the v10 class has a `copyWith`, keep it verbatim.** Annotate the class `@Freezed(copyWith: false)` and copy
+  v10's method from `git show <base>:<path>`. Copy the whole signature, every `??`, every `_nullConst` parameter,
+  and the file's `_NullConst` class. freezed still generates `==`, `hashCode` and `toString`. Copy
+  `lib/src/core/models/poll.dart` (sentinel on `maxVotesAllowed`) and `poll_option.dart` (sentinel on `id`).
+- **Only a class with no v10 `copyWith` uses freezed's.** A `copyWith` it gains that way is new API, so its
+  semantics are not a break.
+- **Diff the two methods parameter by parameter** against the base before moving on: the defaults, the `??`
+  fallbacks and the sentinels.
+- **Mind what freezed counts as data.** For a class with a hand-written constructor, it puts every instance field
+  in `==`, `hashCode` and `toString`, private fields and `late final` caches included.
+  - A cache derived only from fields already compared (`Poll.ownVotes`, from `ownVotesAndAnswers`) changes no
+    result, so it can stay `late final`.
+  - A field v10 set in the constructor's initializer list from another field (`PollVote.isAnswer`) becomes a
+    getter.
+
 ### Documenting the public surface
 
 Write these as you write the code. `public_member_api_docs` only checks a doc *exists*, so a placeholder survives
@@ -488,6 +524,8 @@ Budget for this: on a typical feature it is most of the diff, and none of it is 
 - **Stub each generated response with every field our model carries,** each with a distinct value, and compare
   the whole returned envelope, so a field the mapper drops or swaps fails an assertion. Give every method a
   failure test too.
+- **Pin each kept `copyWith`'s `null` handling:** one test that `null` keeps the `??` fields, and one per
+  `_nullConst` field that `null` clears it (`poll_test.dart`, `poll_option_test.dart`).
 - **Test each temporary converter through its parent's `fromJson`/`toJson`.**
 - **Test each `@DataSerializable` model's stored format:** pin `toData()` to a literal map, so a rename that changes
   the stored keys fails; round-trip `fromData(toData())`; cover null versus empty for nullable lists. Extend the
