@@ -828,6 +828,50 @@ void main() {
         },
       );
 
+      test('queryChannelsOnline sends a message limit of 25 when none is given', () async {
+        when(
+          () => fakeChatApi.channel.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: any(named: 'paginationParams'),
+          ),
+        ).thenAnswer((_) async => QueryChannelsResponse()..channels = const []);
+        when(
+          () => persistence.saveChannelQueries(
+            cids: any(named: 'cids'),
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            predefinedFilter: any(named: 'predefinedFilter'),
+            resolvedFilter: any(named: 'resolvedFilter'),
+            resolvedSort: any(named: 'resolvedSort'),
+            filterValues: any(named: 'filterValues'),
+            sortValues: any(named: 'sortValues'),
+            clearQueryCache: any(named: 'clearQueryCache'),
+          ),
+        ).thenAnswer((_) => Future.value());
+        clearInteractions(fakeChatApi.channel);
+
+        await client.queryChannelsOnline();
+
+        verify(
+          () => fakeChatApi.channel.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: 25,
+            paginationParams: any(named: 'paginationParams'),
+          ),
+        ).called(1);
+      });
+
       test(
         'queryChannelsOffline with predefined filter reads via queryChannelStates',
         () async {
@@ -1229,6 +1273,37 @@ void main() {
           ).called(1);
         },
       );
+
+      test('queryChannelsOnline omits the message limit when none is given', () async {
+        when(
+          () => fakeChatApi.channel.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: any(named: 'paginationParams'),
+          ),
+        ).thenAnswer((_) async => QueryChannelsResponse()..channels = const []);
+        clearInteractions(fakeChatApi.channel);
+
+        await client.queryChannelsOnline();
+
+        verify(
+          () => fakeChatApi.channel.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: null,
+            paginationParams: any(named: 'paginationParams'),
+          ),
+        ).called(1);
+      });
 
       test(
         'should coalesce concurrent identical calls into a single HTTP request',

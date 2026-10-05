@@ -19,7 +19,9 @@ extension PollResponseDataMapper on api.PollResponseData {
   Poll toModel() => Poll(
     id: id,
     name: name,
+    nameI18n: nameI18n,
     description: description,
+    descriptionI18n: descriptionI18n,
     options: [for (final option in options) option.toModel()],
     votingVisibility: VotingVisibility(votingVisibility),
     enforceUniqueVote: enforceUniqueVote,
@@ -52,6 +54,7 @@ extension PollOptionResponseDataMapper on api.PollOptionResponseData {
   PollOption toModel() => PollOption(
     id: id,
     text: text,
+    textI18n: textI18n,
     extraData: _withoutKeys(custom, PollOption.topLevelFields),
   );
 }
@@ -64,6 +67,7 @@ extension PollVoteResponseDataMapper on api.PollVoteResponseData {
     pollId: pollId,
     optionId: optionId,
     answerText: answerText,
+    answerTextI18n: answerTextI18n,
     createdAt: createdAt,
     updatedAt: updatedAt,
     userId: userId,

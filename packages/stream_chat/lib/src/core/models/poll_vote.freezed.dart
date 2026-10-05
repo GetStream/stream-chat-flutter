@@ -17,6 +17,7 @@ mixin _$PollVote {
   String? get pollId;
   String? get optionId;
   String? get answerText;
+  Map<String, String>? get answerTextI18n;
   DateTime get createdAt;
   DateTime get updatedAt;
   String? get userId;
@@ -31,6 +32,7 @@ mixin _$PollVote {
             (identical(other.pollId, pollId) || other.pollId == pollId) &&
             (identical(other.optionId, optionId) || other.optionId == optionId) &&
             (identical(other.answerText, answerText) || other.answerText == answerText) &&
+            const DeepCollectionEquality().equals(other.answerTextI18n, answerTextI18n) &&
             (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
             (identical(other.userId, userId) || other.userId == userId) &&
@@ -38,10 +40,21 @@ mixin _$PollVote {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, pollId, optionId, answerText, createdAt, updatedAt, userId, user);
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    pollId,
+    optionId,
+    answerText,
+    const DeepCollectionEquality().hash(answerTextI18n),
+    createdAt,
+    updatedAt,
+    userId,
+    user,
+  );
 
   @override
   String toString() {
-    return 'PollVote(id: $id, pollId: $pollId, optionId: $optionId, answerText: $answerText, createdAt: $createdAt, updatedAt: $updatedAt, userId: $userId, user: $user)';
+    return 'PollVote(id: $id, pollId: $pollId, optionId: $optionId, answerText: $answerText, answerTextI18n: $answerTextI18n, createdAt: $createdAt, updatedAt: $updatedAt, userId: $userId, user: $user)';
   }
 }

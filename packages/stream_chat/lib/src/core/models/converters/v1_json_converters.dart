@@ -85,7 +85,9 @@ class PollV1JsonConverter implements JsonConverter<Poll, Map<String, dynamic>> {
   Poll fromJson(Map<String, dynamic> json) => Poll(
     id: json['id'] as String?,
     name: json['name'] as String,
+    nameI18n: _translations(json['name_i18n']),
     description: json['description'] as String?,
+    descriptionI18n: _translations(json['description_i18n']),
     options: (json['options'] as List<dynamic>)
         .map((option) => _pollOptionFromV1Json(option as Map<String, dynamic>))
         .toList(),
@@ -122,7 +124,8 @@ class PollV1JsonConverter implements JsonConverter<Poll, Map<String, dynamic>> {
     extraData: _customData(json, Poll.topLevelFields),
   );
 
-  // Writes the keys the poll settings use, with custom data at the root; the vote summary is not written.
+  // Writes the keys the poll settings use, with custom data at the root; the vote summary and the server's
+  // translations are not written.
   @override
   Map<String, dynamic> toJson(Poll poll) => {
     ...poll.extraData,
@@ -161,6 +164,7 @@ class PollVoteV1JsonConverter implements JsonConverter<PollVote, Map<String, dyn
 PollOption _pollOptionFromV1Json(Map<String, dynamic> json) => PollOption(
   id: json['id'] as String?,
   text: json['text'] as String,
+  textI18n: _translations(json['text_i18n']),
   extraData: _customData(json, PollOption.topLevelFields),
 );
 
@@ -178,6 +182,7 @@ PollVote _pollVoteFromV1Json(Map<String, dynamic> json) => PollVote(
   pollId: json['poll_id'] as String?,
   optionId: json['option_id'] as String?,
   answerText: json['answer_text'] as String?,
+  answerTextI18n: _translations(json['answer_text_i18n']),
   createdAt: _optionalDateTime(json['created_at']),
   updatedAt: _optionalDateTime(json['updated_at']),
   userId: json['user_id'] as String?,
@@ -186,6 +191,11 @@ PollVote _pollVoteFromV1Json(Map<String, dynamic> json) => PollVote(
     _ => null,
   },
 );
+
+Map<String, String>? _translations(Object? json) => switch (json) {
+  final Map<String, dynamic> translations => Map<String, String>.from(translations),
+  _ => null,
+};
 
 DateTime? _optionalDateTime(Object? json) => json == null ? null : _dateTime.fromJson(json);
 

@@ -15,7 +15,9 @@ T _$identity<T>(T value) => value;
 mixin _$Poll {
   String get id;
   String get name;
+  Map<String, String>? get nameI18n;
   String? get description;
+  Map<String, String>? get descriptionI18n;
   List<PollOption> get options;
   VotingVisibility get votingVisibility;
   bool get enforceUniqueVote;
@@ -45,7 +47,9 @@ mixin _$Poll {
             other is Poll &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
+            const DeepCollectionEquality().equals(other.nameI18n, nameI18n) &&
             (identical(other.description, description) || other.description == description) &&
+            const DeepCollectionEquality().equals(other.descriptionI18n, descriptionI18n) &&
             const DeepCollectionEquality().equals(other.options, options) &&
             (identical(other.votingVisibility, votingVisibility) || other.votingVisibility == votingVisibility) &&
             (identical(other.enforceUniqueVote, enforceUniqueVote) || other.enforceUniqueVote == enforceUniqueVote) &&
@@ -75,7 +79,9 @@ mixin _$Poll {
     runtimeType,
     id,
     name,
+    const DeepCollectionEquality().hash(nameI18n),
     description,
+    const DeepCollectionEquality().hash(descriptionI18n),
     const DeepCollectionEquality().hash(options),
     votingVisibility,
     enforceUniqueVote,
@@ -101,6 +107,6 @@ mixin _$Poll {
 
   @override
   String toString() {
-    return 'Poll(id: $id, name: $name, description: $description, options: $options, votingVisibility: $votingVisibility, enforceUniqueVote: $enforceUniqueVote, maxVotesAllowed: $maxVotesAllowed, allowUserSuggestedOptions: $allowUserSuggestedOptions, allowAnswers: $allowAnswers, isClosed: $isClosed, answersCount: $answersCount, voteCountsByOption: $voteCountsByOption, latestVotesByOption: $latestVotesByOption, latestVotes: $latestVotes, latestAnswers: $latestAnswers, ownVotesAndAnswers: $ownVotesAndAnswers, voteCount: $voteCount, ownVotes: $ownVotes, ownAnswers: $ownAnswers, createdById: $createdById, createdBy: $createdBy, createdAt: $createdAt, updatedAt: $updatedAt, extraData: $extraData)';
+    return 'Poll(id: $id, name: $name, nameI18n: $nameI18n, description: $description, descriptionI18n: $descriptionI18n, options: $options, votingVisibility: $votingVisibility, enforceUniqueVote: $enforceUniqueVote, maxVotesAllowed: $maxVotesAllowed, allowUserSuggestedOptions: $allowUserSuggestedOptions, allowAnswers: $allowAnswers, isClosed: $isClosed, answersCount: $answersCount, voteCountsByOption: $voteCountsByOption, latestVotesByOption: $latestVotesByOption, latestVotes: $latestVotes, latestAnswers: $latestAnswers, ownVotesAndAnswers: $ownVotesAndAnswers, voteCount: $voteCount, ownVotes: $ownVotes, ownAnswers: $ownAnswers, createdById: $createdById, createdBy: $createdBy, createdAt: $createdAt, updatedAt: $updatedAt, extraData: $extraData)';
   }
 }

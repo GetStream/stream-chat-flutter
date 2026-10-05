@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
 
+import '../../message_widget/message_translation_language.dart';
 import '../../theme/poll_interactor_theme.dart';
 import '../../utils/extensions.dart';
 
@@ -45,7 +46,10 @@ class PollHeader extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(poll.name, style: effectiveTitleTextStyle),
+          Text(
+            poll.translatedName(MessageTranslationLanguage.of(context)) ?? poll.name,
+            style: effectiveTitleTextStyle,
+          ),
           Text(context.translations.pollVotingModeLabel(poll.votingMode), style: effectiveSubtitleTextStyle),
         ],
       ),

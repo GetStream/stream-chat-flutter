@@ -882,6 +882,56 @@ void main() {
       expect(merged.poll!.name, 'Edited');
     });
 
+    test('keeps the poll translations when the server `poll` leaves them out', () {
+      final localPoll = Poll(
+        id: 'poll-1',
+        name: 'Original',
+        nameI18n: const {'language': 'en', 'nl_text': 'Origineel'},
+        options: const [
+          PollOption(id: 'a', text: 'A', textI18n: {'language': 'en', 'nl_text': 'Een'}),
+        ],
+        createdById: 'u',
+      );
+      // A reaction or message update carrying the poll without its translations.
+      final serverPoll = Poll(
+        id: 'poll-1',
+        name: 'Original',
+        options: const [PollOption(id: 'a', text: 'A')],
+        createdById: 'u',
+      );
+
+      final localMessage = createTestMessage(id: 'msg-1', poll: localPoll, pollId: localPoll.id);
+      final serverMessage = createTestMessage(id: 'msg-1', poll: serverPoll, pollId: serverPoll.id);
+
+      final merged = localMessage.updateWith(serverMessage);
+
+      expect(merged.poll!.nameI18n, localPoll.nameI18n);
+      expect(merged.poll!.options.single.textI18n, localPoll.options.single.textI18n);
+    });
+
+    test('does not carry poll translations over to a different poll', () {
+      final localPoll = Poll(
+        id: 'poll-1',
+        name: 'Original',
+        nameI18n: const {'language': 'en', 'nl_text': 'Origineel'},
+        options: const [PollOption(id: 'a', text: 'A')],
+        createdById: 'u',
+      );
+      final otherPoll = Poll(
+        id: 'poll-2',
+        name: 'Original',
+        options: const [PollOption(id: 'a', text: 'A')],
+        createdById: 'u',
+      );
+
+      final localMessage = createTestMessage(id: 'msg-1', poll: localPoll, pollId: localPoll.id);
+      final serverMessage = createTestMessage(id: 'msg-1', poll: otherPoll, pollId: otherPoll.id);
+
+      final merged = localMessage.updateWith(serverMessage);
+
+      expect(merged.poll!.nameI18n, isNull);
+    });
+
     test(
       'recursively preserves the embedded quotedMessage poll when the '
       'server returns a stripped nested `quoted_message` (regression #59)',

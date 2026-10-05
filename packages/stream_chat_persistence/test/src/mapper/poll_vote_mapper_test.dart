@@ -49,4 +49,17 @@ void main() {
     expect(entity.updatedAt, isSameDateAs(pollVote.updatedAt));
     expect(entity.userId, pollVote.userId);
   });
+
+  test('an answer keeps its translations through the cache', () {
+    final pollVote = PollVote(
+      id: 'vote-1',
+      pollId: 'poll-1',
+      answerText: 'I also like yellow',
+      answerTextI18n: const {'language': 'en', 'nl_text': 'Ik hou ook van geel'},
+    );
+
+    final cached = pollVote.toEntity().toPollVote();
+
+    expect(cached.answerTextI18n, pollVote.answerTextI18n);
+  });
 }

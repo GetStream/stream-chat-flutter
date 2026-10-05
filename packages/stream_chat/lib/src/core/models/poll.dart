@@ -31,7 +31,9 @@ class Poll with _$Poll {
   Poll({
     String? id,
     required this.name,
+    this.nameI18n,
     this.description,
+    this.descriptionI18n,
     required this.options,
     this.votingVisibility = VotingVisibility.public,
     this.enforceUniqueVote = true,
@@ -62,9 +64,21 @@ class Poll with _$Poll {
   @override
   final String name;
 
+  /// The translations of [name], keyed as `<language>_text`, plus the
+  /// `language` [name] was written in.
+  ///
+  /// Filled in by the server when the poll is sent to a channel with
+  /// automatic translation enabled.
+  @override
+  final Map<String, String>? nameI18n;
+
   /// A longer explanation of the question.
   @override
   final String? description;
+
+  /// The translations of [description], in the same shape as [nameI18n].
+  @override
+  final Map<String, String>? descriptionI18n;
 
   /// The options that can be voted for.
   @override
@@ -171,7 +185,9 @@ class Poll with _$Poll {
   Poll copyWith({
     String? id,
     String? name,
+    Map<String, String>? nameI18n,
     String? description,
+    Map<String, String>? descriptionI18n,
     List<PollOption>? options,
     VotingVisibility? votingVisibility,
     bool? enforceUniqueVote,
@@ -193,7 +209,9 @@ class Poll with _$Poll {
   }) => Poll(
     id: id ?? this.id,
     name: name ?? this.name,
+    nameI18n: nameI18n ?? this.nameI18n,
     description: description ?? this.description,
+    descriptionI18n: descriptionI18n ?? this.descriptionI18n,
     options: options ?? this.options,
     votingVisibility: votingVisibility ?? this.votingVisibility,
     enforceUniqueVote: enforceUniqueVote ?? this.enforceUniqueVote,
@@ -214,11 +232,40 @@ class Poll with _$Poll {
     extraData: extraData ?? this.extraData,
   );
 
+  /// This poll with the translations of [oldPoll] filled in where this one
+  /// has none.
+  ///
+  /// A translation is kept only for unchanged text, so a renamed poll or
+  /// option never carries the translation of its old text. Returns this poll
+  /// as is when [oldPoll] is `null` or a different poll.
+  @internal
+  Poll withTranslationsOf(Poll? oldPoll) {
+    if (oldPoll == null || oldPoll.id != id) return this;
+
+    final oldOptions = {for (final option in oldPoll.options) option.id: option};
+
+    return copyWith(
+      nameI18n: nameI18n ?? (name == oldPoll.name ? oldPoll.nameI18n : null),
+      descriptionI18n: descriptionI18n ?? (description == oldPoll.description ? oldPoll.descriptionI18n : null),
+      options: [
+        for (final option in options)
+          switch (oldOptions[option.id]) {
+            final old? when option.textI18n == null && option.text == old.text => option.copyWith(
+              textI18n: old.textI18n,
+            ),
+            _ => option,
+          },
+      ],
+    );
+  }
+
   /// The keys a poll carries besides its custom data.
   static const topLevelFields = [
     'id',
     'name',
+    'name_i18n',
     'description',
+    'description_i18n',
     'options',
     'voting_visibility',
     'enforce_unique_vote',
@@ -237,8 +284,6 @@ class Poll with _$Poll {
     'latest_answers',
     'created_by_id',
     'created_by',
-    'name_i18n',
-    'description_i18n',
   ];
 }
 

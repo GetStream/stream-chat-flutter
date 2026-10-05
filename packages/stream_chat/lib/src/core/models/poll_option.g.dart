@@ -9,11 +9,13 @@ part of 'poll_option.dart';
 PollOption _$PollOptionFromJson(Map<String, dynamic> json) => PollOption(
   id: json['id'] as String?,
   text: json['text'] as String,
+  textI18n: (json['text_i18n'] as Map<String, dynamic>?)?.map((k, e) => MapEntry(k, e as String)),
   extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
 );
 
 Map<String, dynamic> _$PollOptionToJson(PollOption instance) => <String, dynamic>{
   'id': ?instance.id,
   'text': instance.text,
+  'text_i18n': ?instance.textI18n,
   'extra_data': instance.extraData,
 };

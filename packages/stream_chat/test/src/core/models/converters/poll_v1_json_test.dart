@@ -10,9 +10,11 @@ void main() {
       Poll(
         id: 'poll-id',
         name: 'Lunch?',
+        nameI18n: const {'it': 'Pranzo?'},
         description: 'Pick one',
+        descriptionI18n: const {'it': 'Scegline uno'},
         options: const [
-          PollOption(id: 'pizza', text: 'Pizza', extraData: {'color': 'red'}),
+          PollOption(id: 'pizza', text: 'Pizza', textI18n: {'it': 'Pizza'}, extraData: {'color': 'red'}),
           PollOption(id: 'sushi', text: 'Sushi'),
         ],
         votingVisibility: VotingVisibility.public,
@@ -134,15 +136,17 @@ void main() {
     expect(event.pollVote, _vote);
   });
 
-  test('Event.toJson writes the poll settings with the custom data beside them', () {
+  test('Event.toJson writes the poll settings with the custom data beside them, without the translations', () {
     final event = Event(
       type: EventType.pollUpdated,
       poll: Poll(
         id: 'poll-id',
         name: 'Lunch?',
+        nameI18n: const {'it': 'Pranzo?'},
         description: 'Pick one',
+        descriptionI18n: const {'it': 'Scegline uno'},
         options: const [
-          PollOption(id: 'pizza', text: 'Pizza', extraData: {'color': 'red'}),
+          PollOption(id: 'pizza', text: 'Pizza', textI18n: {'it': 'Pizza'}, extraData: {'color': 'red'}),
         ],
         voteCount: 3,
         extraData: const {'topic': 'food'},
@@ -215,6 +219,7 @@ final _answer = PollVote(
   pollId: 'poll-id',
   optionId: '',
   answerText: 'Anything',
+  answerTextI18n: const {'fr': "N'importe quoi"},
   createdAt: DateTime.utc(2024, 4, 18),
   updatedAt: DateTime.utc(2024, 4, 18),
   userId: 'luke',
@@ -225,6 +230,7 @@ const _answerJson = {
   'poll_id': 'poll-id',
   'option_id': '',
   'answer_text': 'Anything',
+  'answer_text_i18n': {'fr': "N'importe quoi"},
   'is_answer': true,
   'created_at': '2024-04-18T00:00:00Z',
   'updated_at': '2024-04-18T00:00:00Z',
@@ -234,9 +240,16 @@ const _answerJson = {
 Map<String, Object?> _fullPollJson() => {
   'id': 'poll-id',
   'name': 'Lunch?',
+  'name_i18n': {'it': 'Pranzo?'},
   'description': 'Pick one',
+  'description_i18n': {'it': 'Scegline uno'},
   'options': [
-    {'id': 'pizza', 'text': 'Pizza', 'color': 'red'},
+    {
+      'id': 'pizza',
+      'text': 'Pizza',
+      'text_i18n': {'it': 'Pizza'},
+      'color': 'red',
+    },
     {'id': 'sushi', 'text': 'Sushi'},
   ],
   'voting_visibility': 'public',

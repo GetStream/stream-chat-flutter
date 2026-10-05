@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
 
+import '../message_widget/message_translation_language.dart';
 import '../misc/empty_widget.dart';
 import '../scroll_view/poll_vote_scroll_view/stream_poll_vote_list_view.dart';
 import '../theme/poll_card_style.dart';
@@ -22,23 +23,29 @@ Future<T?> showStreamPollOptionVotesSheet<T extends Object?>({
   required ValueListenable<Message> messageNotifier,
   required PollOption option,
 }) {
+  // Read from the caller's context: the sheet is pushed outside the message.
+  final language = MessageTranslationLanguage.of(context);
+
   return showStreamSheet<T>(
     context: context,
-    builder: (_, scrollController) => StreamChannel.value(
-      channel: StreamChannel.of(context).channel,
-      child: ValueListenableBuilder(
-        valueListenable: messageNotifier,
-        builder: (context, message, _) {
-          final poll = message.poll;
-          if (poll == null) return const Empty();
-          if (option.id == null) return const Empty();
+    builder: (_, scrollController) => MessageTranslationLanguage(
+      language: language,
+      child: StreamChannel.value(
+        channel: StreamChannel.of(context).channel,
+        child: ValueListenableBuilder(
+          valueListenable: messageNotifier,
+          builder: (context, message, _) {
+            final poll = message.poll;
+            if (poll == null) return const Empty();
+            if (option.id == null) return const Empty();
 
-          return StreamPollOptionVotesSheet(
-            poll: poll,
-            option: option,
-            scrollController: scrollController,
-          );
-        },
+            return StreamPollOptionVotesSheet(
+              poll: poll,
+              option: option,
+              scrollController: scrollController,
+            );
+          },
+        ),
       ),
     ),
   );

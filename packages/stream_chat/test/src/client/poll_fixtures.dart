@@ -42,7 +42,7 @@ final voter = User(
 );
 
 final generatedVote = api.PollVoteResponseData(
-  answerTextI18n: const {'fr': 'ignored'},
+  answerTextI18n: const {'language': 'en'},
   createdAt: DateTime.utc(2024, 4, 17, 10),
   id: 'vote-id',
   isAnswer: false,
@@ -57,6 +57,7 @@ final vote = PollVote(
   id: 'vote-id',
   pollId: 'poll-id',
   optionId: 'pizza',
+  answerTextI18n: const {'language': 'en'},
   createdAt: DateTime.utc(2024, 4, 17, 10),
   updatedAt: DateTime.utc(2024, 4, 17, 11),
   userId: 'luke',
@@ -82,6 +83,7 @@ final answer = PollVote(
   pollId: 'poll-id',
   optionId: '',
   answerText: 'Anything',
+  answerTextI18n: const {'fr': "N'importe quoi"},
   createdAt: DateTime.utc(2024, 4, 18, 10),
   updatedAt: DateTime.utc(2024, 4, 18, 11),
   userId: 'luke',
@@ -95,7 +97,7 @@ const generatedPizza = api.PollOptionResponseData(
   textI18n: {'it': 'Pizza'},
 );
 
-const pizza = PollOption(id: 'pizza', text: 'Pizza', extraData: {'color': 'red'});
+const pizza = PollOption(id: 'pizza', text: 'Pizza', textI18n: {'it': 'Pizza'}, extraData: {'color': 'red'});
 
 final generatedPoll = api.PollResponseData(
   allowAnswers: true,
@@ -128,7 +130,9 @@ final generatedPoll = api.PollResponseData(
 final poll = Poll(
   id: 'poll-id',
   name: 'Lunch?',
+  nameI18n: const {'it': 'Pranzo?'},
   description: 'Pick one',
+  descriptionI18n: const {'it': 'Scegline uno'},
   options: const [pizza],
   votingVisibility: VotingVisibility.anonymous,
   enforceUniqueVote: false,

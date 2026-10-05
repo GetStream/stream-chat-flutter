@@ -23,6 +23,7 @@ class PollOption with _$PollOption {
   const PollOption({
     this.id,
     required this.text,
+    this.textI18n,
     this.extraData = const {},
   });
 
@@ -39,6 +40,14 @@ class PollOption with _$PollOption {
   @override
   final String text;
 
+  /// The translations of [text], keyed as `<language>_text`, plus the
+  /// `language` [text] was written in.
+  ///
+  /// Filled in by the server when the poll is sent to a channel with
+  /// automatic translation enabled.
+  @override
+  final Map<String, String>? textI18n;
+
   /// Custom data attached to this option.
   @override
   final Map<String, Object?> extraData;
@@ -47,10 +56,12 @@ class PollOption with _$PollOption {
   PollOption copyWith({
     Object? id = _nullConst,
     String? text,
+    Map<String, String>? textI18n,
     Map<String, Object?>? extraData,
   }) => PollOption(
     id: id == _nullConst ? this.id : id as String?,
     text: text ?? this.text,
+    textI18n: textI18n ?? this.textI18n,
     extraData: extraData ?? this.extraData,
   );
 

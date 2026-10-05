@@ -15,7 +15,9 @@ extension PollEntityX on PollEntity {
     return Poll(
       id: id,
       name: name,
+      nameI18n: nameI18n,
       description: description,
+      descriptionI18n: descriptionI18n,
       options: options.map((it) => PollOption.fromData(jsonDecode(it))).toList(),
       votingVisibility: votingVisibility,
       enforceUniqueVote: enforceUniqueVote,
@@ -44,7 +46,9 @@ extension PollX on Poll {
   PollEntity toEntity() => PollEntity(
     id: id,
     name: name,
+    nameI18n: nameI18n,
     description: description,
+    descriptionI18n: descriptionI18n,
     options: options.map((it) => jsonEncode(it.toData())).toList(),
     votingVisibility: votingVisibility,
     enforceUniqueVote: enforceUniqueVote,

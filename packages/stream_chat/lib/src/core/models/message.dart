@@ -642,7 +642,7 @@ class Message extends Equatable {
       state: shouldPromoteDeletedForMe ? MessageState.deletedForMe : null,
       // Preserve enrichment from this instance when [other] omits these
       // fields, as a partial payload may leave them out.
-      poll: other.poll ?? poll,
+      poll: other.poll?.withTranslationsOf(poll) ?? poll,
       sharedLocation: other.sharedLocation ?? sharedLocation,
       ownReactions: other.ownReactions ?? ownReactions,
       // Recursively merge so nested enrichment survives a stripped payload.

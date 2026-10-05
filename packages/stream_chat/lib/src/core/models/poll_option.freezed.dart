@@ -15,6 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$PollOption {
   String? get id;
   String get text;
+  Map<String, String>? get textI18n;
   Map<String, Object?> get extraData;
 
   @override
@@ -24,14 +25,21 @@ mixin _$PollOption {
             other is PollOption &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.text, text) || other.text == text) &&
+            const DeepCollectionEquality().equals(other.textI18n, textI18n) &&
             const DeepCollectionEquality().equals(other.extraData, extraData));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, text, const DeepCollectionEquality().hash(extraData));
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    text,
+    const DeepCollectionEquality().hash(textI18n),
+    const DeepCollectionEquality().hash(extraData),
+  );
 
   @override
   String toString() {
-    return 'PollOption(id: $id, text: $text, extraData: $extraData)';
+    return 'PollOption(id: $id, text: $text, textI18n: $textI18n, extraData: $extraData)';
   }
 }
