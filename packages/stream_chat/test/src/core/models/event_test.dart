@@ -45,6 +45,35 @@ void main() {
       expect(eventWithDraft.draft?.message.pollId, equals('poll-123'));
     });
 
+    group('aiState', () {
+      AITypingState? parse(Object? aiState) => Event.fromJson({
+        'type': EventType.aiIndicatorUpdate,
+        'ai_state': ?aiState,
+      }).aiState;
+
+      test('should parse both spellings of the checking sources state', () {
+        expect(parse('AI_STATE_CHECKING_SOURCES'), AITypingState.checkingSources);
+        expect(parse('AI_STATE_EXTERNAL_SOURCES'), AITypingState.checkingSources);
+      });
+
+      test('should fall back to idle for an unknown state', () {
+        expect(parse('AI_STATE_SOMETHING_NEW'), AITypingState.idle);
+      });
+
+      test('should be null when the state is missing', () {
+        expect(parse(null), isNull);
+      });
+
+      test('should serialize checking sources with its canonical spelling', () {
+        final event = Event.fromJson({
+          'type': EventType.aiIndicatorUpdate,
+          'ai_state': 'AI_STATE_EXTERNAL_SOURCES',
+        });
+
+        expect(event.toJson()['ai_state'], 'AI_STATE_CHECKING_SOURCES');
+      });
+    });
+
     test('should serialize to json correctly', () {
       final event = Event(
         user: User(id: 'id'),
