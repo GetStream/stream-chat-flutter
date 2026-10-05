@@ -54,7 +54,8 @@ class ChannelModel {
        updatedAt = updatedAt ?? DateTime.now(),
        ownCapabilities = ownCapabilities?.map(ChannelCapability.new).toList(),
 
-       // These fields live in [extraData], where [ChannelModel.fromJson] leaves them, rather than in fields of their own.
+       // For backwards compatibility, set 'disabled', 'hidden', 'muted', 'blocked', 'truncated_at', 'truncated_by',
+       // 'auto_translation_enabled' and 'auto_translation_language' in [extraData].
        extraData = {
          ...extraData,
          if (disabled != null) 'disabled': disabled,

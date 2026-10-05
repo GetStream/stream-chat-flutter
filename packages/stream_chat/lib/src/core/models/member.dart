@@ -42,7 +42,8 @@ class Member extends Equatable {
   }) : userId = userId ?? user?.id,
        createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now(),
-       // These fields live in [extraData], where [Member.fromJson] leaves them, rather than in fields of their own.
+       // For backwards compatibility, set 'notifications_muted', 'status', 'ban_from_future_channels',
+       // 'future_channel_ban_expires' and 'deleted_at' in [extraData].
        extraData = {
          ...extraData,
          if (notificationsMuted != null) 'notifications_muted': notificationsMuted,
