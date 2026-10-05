@@ -4699,7 +4699,7 @@ void main() {
       ).called(1);
     });
 
-    test("Channel.enableSlowMode returns the client's enableSlowdown response", () async {
+    test("Channel.enableSlowMode returns the client's enableSlowMode response", () async {
       const cooldown = 10;
 
       final channelModel = ChannelModel(
@@ -4708,7 +4708,7 @@ void main() {
       );
 
       when(
-        () => client.enableSlowdown(
+        () => client.enableSlowMode(
           channelId,
           channelType,
           cooldown,
@@ -4722,7 +4722,7 @@ void main() {
       expect(res.getOrNull(), UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel));
 
       verify(
-        () => client.enableSlowdown(
+        () => client.enableSlowMode(
           channelId,
           channelType,
           cooldown,
@@ -4730,13 +4730,13 @@ void main() {
       ).called(1);
     });
 
-    test("Channel.disableSlowMode returns the client's disableSlowdown response", () async {
+    test("Channel.disableSlowMode returns the client's disableSlowMode response", () async {
       final channelModel = ChannelModel(
         cid: channelCid,
       );
 
       when(
-        () => client.disableSlowdown(
+        () => client.disableSlowMode(
           channelId,
           channelType,
         ),
@@ -4748,7 +4748,7 @@ void main() {
 
       expect(res.getOrNull(), UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel));
 
-      verify(() => client.disableSlowdown(channelId, channelType)).called(1);
+      verify(() => client.disableSlowMode(channelId, channelType)).called(1);
     });
 
     test('`.banMember` scopes the ban to the channel cid', () async {

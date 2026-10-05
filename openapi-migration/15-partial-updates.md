@@ -34,8 +34,10 @@
   `migrations/v11-migration.md` says so.
 - **Moved off `ChannelApi`:** `updateChannelPartial`, `enableSlowdown`, `disableSlowdown` and
   `updateMemberPartial`, each now a `StreamChatClient` method over `ChannelsRepository`.
-- **`enableSlowdown` and `disableSlowdown` move with it.** Both are `updateChannelPartial` with a
-  fixed `cooldown`, so they call the repository's one method rather than an operation of their own.
+- **`enableSlowdown` and `disableSlowdown` move with it, renamed `enableSlowMode` and
+  `disableSlowMode`** to match the `Channel` helpers and `ChannelCapability.slowMode`. Both are
+  `updateChannelPartial` with a fixed `cooldown`, so they call the repository's one method rather than
+  an operation of their own.
 - **The v2 route is the v1 handler.** `lib/chat/routes.go` mounts `UpdateChannelPartial` in the
   shared `coreRoutes`; it is neither gated nor in beta. On v2 it also accepts `custom.<field>` paths
   in `set` and `unset`, and still takes flat keys, so `{'name': …}` updates the same field.
@@ -44,8 +46,8 @@
   and `StreamChatClient.partialMemberUpdate` becomes `updateMemberPartial`. Hard renames, as
   `GetAppSettingsResponse` → `AppSettingsResponse` was: every call site changes for `Result` anyway,
   and the channel and member calls now share one naming scheme.
-  The helpers with no spec counterpart keep their names (`pinChannel`, `archiveChannel`,
-  `enableSlowdown`, `Channel.pin` and the rest).
+  The other helpers with no spec counterpart keep their names (`pinChannel`, `archiveChannel`,
+  `Channel.pin` and the rest); the slow-mode pair is renamed above.
 - **The envelopes are freezed, in `models/response/`.** `UpdateChannelPartialResponse.channel` and
   `UpdateMemberPartialResponse.channelMember` are nullable, as the spec declares them, where v10 typed
   them non-null. `UpdateChannelPartialResponse.members` is non-nullable, as the spec requires it, where
@@ -64,7 +66,7 @@
 
 ## Risks
 
-- `disableSlowdown` unsets `cooldown`, which the server rejects on both v1 and v2 as a reserved field. It fails before and after this group; the fix is tracked separately, so the request is unchanged.
+- `disableSlowMode` unsets `cooldown`, which the server rejects on both v1 and v2 as a reserved field. It fails before and after this group; the fix is tracked separately, so the request is unchanged.
 
 ## Definition of done
 

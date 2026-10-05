@@ -224,7 +224,8 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `PartialUpdateChannelResponse` | `UpdateChannelPartialResponse` | `renamed` | The name of the API's response. Same fields: `duration`, `channel` and `members` |
 | `PartialUpdateMemberResponse` | `UpdateMemberPartialResponse` | `renamed` | The name of the API's response. Same fields: `duration` and `channelMember` |
 | `StreamChatClient.partialMemberUpdate` | `StreamChatClient.updateMemberPartial` | `renamed` | The name of the API's operation, matching `updateChannelPartial` |
-| `StreamChatClient.updateChannelPartial` / `enableSlowdown` / `disableSlowdown` → `Future<PartialUpdateChannelResponse>` | `Future<Result<UpdateChannelPartialResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `StreamChatClient.enableSlowdown` / `disableSlowdown` | `StreamChatClient.enableSlowMode` / `disableSlowMode` | `renamed` | Matches `Channel.enableSlowMode` / `disableSlowMode` and `ChannelCapability.slowMode` |
+| `StreamChatClient.updateChannelPartial` / `enableSlowdown` / `disableSlowdown` → `Future<PartialUpdateChannelResponse>` | `updateChannelPartial` / `enableSlowMode` / `disableSlowMode` → `Future<Result<UpdateChannelPartialResponse>>` | `retyped` | Returns a `Result` instead of throwing |
 | `Channel.updatePartial` / `updateName` / `updateImage` / `enableSlowMode` / `disableSlowMode` → `Future<PartialUpdateChannelResponse>` | `Future<Result<UpdateChannelPartialResponse>>` | `retyped` | Returns a `Result` instead of throwing. Calling one before the channel is initialized still throws a `StateError` |
 | `StreamChatClient.partialMemberUpdate` / `pinChannel` / `unpinChannel` / `archiveChannel` / `unarchiveChannel` → `Future<PartialUpdateMemberResponse>` | `Future<Result<UpdateMemberPartialResponse>>` | `retyped` | Returns a `Result` instead of throwing |
 | `Channel.pin` → `Future<Member>`, `unpin` / `archive` / `unarchive` → `Future<Member?>` | `Future<Result<UpdateMemberPartialResponse>>` | `retyped` | Returns a `Result` instead of throwing, and answers the whole response: read the member off `.channelMember`. Calling one before the channel is initialized still throws a `StateError` |
@@ -629,7 +630,8 @@ result.fold(
 ### Partial Updates
 
 **Channel and member partial updates return a `Result` instead of throwing.** On the channel side that covers
-`StreamChatClient.updateChannelPartial`, `enableSlowdown` and `disableSlowdown`, and `Channel.updatePartial`,
+`StreamChatClient.updateChannelPartial`, `enableSlowMode` and `disableSlowMode` (v10's `enableSlowdown` and
+`disableSlowdown`), and `Channel.updatePartial`,
 `updateName`, `updateImage`, `enableSlowMode` and `disableSlowMode`. On the member side it covers
 `StreamChatClient.updateMemberPartial` (v10's `partialMemberUpdate`), `pinChannel`, `unpinChannel`,
 `archiveChannel` and `unarchiveChannel`, and `Channel.pin`, `unpin`, `archive` and `unarchive`. The full update,
@@ -655,6 +657,9 @@ result.fold(
 
 **The responses take the API's names.** `PartialUpdateChannelResponse` is now `UpdateChannelPartialResponse`, and
 `PartialUpdateMemberResponse` is now `UpdateMemberPartialResponse`. Their fields keep their names.
+
+**`StreamChatClient.enableSlowdown` and `disableSlowdown` are renamed `enableSlowMode` and `disableSlowMode`,** the
+names `Channel` already used.
 
 **`Channel.pin`, `unpin`, `archive` and `unarchive` answer the whole response**, where v10 returned the member:
 

@@ -1722,13 +1722,13 @@ class Channel {
     required int cooldownInterval,
   }) async {
     _checkInitialized();
-    return _client.enableSlowdown(id!, type, cooldownInterval);
+    return _client.enableSlowMode(id!, type, cooldownInterval);
   }
 
   /// Turns off slow mode for this channel.
   Future<Result<UpdateChannelPartialResponse>> disableSlowMode() async {
     _checkInitialized();
-    return _client.disableSlowdown(id!, type);
+    return _client.disableSlowMode(id!, type);
   }
 
   /// Delete this channel. Messages are permanently removed.

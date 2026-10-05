@@ -202,11 +202,11 @@ void main() {
     expect(res.exceptionOrNull(), error);
   });
 
-  test('StreamChatClient.enableSlowdown sends the cooldown and returns a success', () async {
+  test('StreamChatClient.enableSlowMode sends the cooldown and returns a success', () async {
     final defaultApi = _defaultApiAnswering(Result.success(_updateChannelPartialResponse()));
     final client = _client(defaultApi);
 
-    final res = await client.enableSlowdown('general', 'messaging', 30);
+    final res = await client.enableSlowMode('general', 'messaging', 30);
 
     expect(res.isSuccess, isTrue);
 
@@ -220,20 +220,20 @@ void main() {
     verifyNoMoreInteractions(defaultApi);
   });
 
-  test('StreamChatClient.enableSlowdown returns the failure without throwing', () async {
+  test('StreamChatClient.enableSlowMode returns the failure without throwing', () async {
     const error = StreamClientException(message: 'boom');
     final client = _client(_defaultApiAnswering(const Result.failure(error)));
 
-    final res = await client.enableSlowdown('general', 'messaging', 30);
+    final res = await client.enableSlowMode('general', 'messaging', 30);
 
     expect(res.exceptionOrNull(), error);
   });
 
-  test('StreamChatClient.disableSlowdown sends the cooldown unset and returns a success', () async {
+  test('StreamChatClient.disableSlowMode sends the cooldown unset and returns a success', () async {
     final defaultApi = _defaultApiAnswering(Result.success(_updateChannelPartialResponse()));
     final client = _client(defaultApi);
 
-    final res = await client.disableSlowdown('general', 'messaging');
+    final res = await client.disableSlowMode('general', 'messaging');
 
     expect(res.isSuccess, isTrue);
 
@@ -247,11 +247,11 @@ void main() {
     verifyNoMoreInteractions(defaultApi);
   });
 
-  test('StreamChatClient.disableSlowdown returns the failure without throwing', () async {
+  test('StreamChatClient.disableSlowMode returns the failure without throwing', () async {
     const error = StreamClientException(message: 'boom');
     final client = _client(_defaultApiAnswering(const Result.failure(error)));
 
-    final res = await client.disableSlowdown('general', 'messaging');
+    final res = await client.disableSlowMode('general', 'messaging');
 
     expect(res.exceptionOrNull(), error);
   });

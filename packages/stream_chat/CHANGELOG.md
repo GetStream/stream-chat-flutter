@@ -83,9 +83,9 @@
 - `SendAttachmentResponse`, `SendFileResponse`, `SendImageResponse`, `UploadImageResponse` and `UploadFileResponse` are removed in favor of `UploadedFile`.
 - `AttachmentFileUploaderProvider` receives the client's `Dio` instead of a `StreamHttpClient`, and `StreamAttachmentFileUploader` is built from one.
 - `StreamChatApi.fileUploader` and `StreamChatApi`'s `attachmentFileUploaderProvider` are removed; pass `attachmentFileUploaderProvider` to `StreamChatClient` instead.
-- `updateChannelPartial`, `enableSlowdown` and `disableSlowdown` on `StreamChatClient`, and `updatePartial`, `updateName`, `updateImage`, `enableSlowMode` and `disableSlowMode` on `Channel`, return a `Result<UpdateChannelPartialResponse>` instead of throwing.
+- `updateChannelPartial`, `enableSlowMode` and `disableSlowMode` on `StreamChatClient`, and `updatePartial`, `updateName`, `updateImage`, `enableSlowMode` and `disableSlowMode` on `Channel`, return a `Result<UpdateChannelPartialResponse>` instead of throwing.
 - `PartialUpdateChannelResponse` is renamed `UpdateChannelPartialResponse`, and `PartialUpdateMemberResponse` is renamed `UpdateMemberPartialResponse`.
-- `StreamChatClient.partialMemberUpdate` is renamed `updateMemberPartial`.
+- `StreamChatClient.partialMemberUpdate` is renamed `updateMemberPartial`, and `enableSlowdown` and `disableSlowdown` are renamed `enableSlowMode` and `disableSlowMode`.
 - `updateMemberPartial`, `pinChannel`, `unpinChannel`, `archiveChannel` and `unarchiveChannel` on `StreamChatClient`, and `pin`, `unpin`, `archive` and `unarchive` on `Channel`, return a `Result<UpdateMemberPartialResponse>` instead of throwing; the `Channel` methods no longer return the bare `Member`.
 - `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse` no longer decode from JSON, are immutable, built through a const constructor, compare by value, gain `copyWith`, and their `duration` is a non-nullable `String`.
 - `UpdateChannelPartialResponse.channel` and `UpdateMemberPartialResponse.channelMember` are nullable, and `UpdateChannelPartialResponse.members` is a non-nullable list.

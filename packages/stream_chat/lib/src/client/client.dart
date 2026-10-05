@@ -2137,7 +2137,7 @@ class StreamChatClient {
 
   /// Turns on slow mode for the channel [channelId] of type [channelType], so each member waits [cooldown] seconds
   /// between messages.
-  Future<Result<UpdateChannelPartialResponse>> enableSlowdown(
+  Future<Result<UpdateChannelPartialResponse>> enableSlowMode(
     String channelId,
     String channelType,
     int cooldown,
@@ -2148,7 +2148,7 @@ class StreamChatClient {
   );
 
   /// Turns off slow mode for the channel [channelId] of type [channelType].
-  Future<Result<UpdateChannelPartialResponse>> disableSlowdown(
+  Future<Result<UpdateChannelPartialResponse>> disableSlowMode(
     String channelId,
     String channelType,
   ) => _channelsRepository.updateChannelPartial(
