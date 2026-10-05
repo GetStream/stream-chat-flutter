@@ -28,6 +28,11 @@ class Members extends Table {
   /// True if the member is banned from the channel
   BoolColumn get banned => boolean().withDefault(const Constant(false))();
 
+  /// The date at which the ban will expire.
+  ///
+  /// Null when the ban has no expiry.
+  DateTimeColumn get banExpires => dateTime().nullable()();
+
   /// True if the member is shadow banned from the channel
   BoolColumn get shadowBanned => boolean().withDefault(const Constant(false))();
 

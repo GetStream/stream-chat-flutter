@@ -112,6 +112,7 @@
 - Added optional `reason` and `custom` arguments to `flagMessage` and `flagUser`, recorded with the flag.
 - Added an optional `timeout` to `StreamChatClient.moderation.muteUser` that expires the mute.
 - Added `StreamChatClient.moderation.muteUsers` and `unmuteUsers`, which mute and unmute several users in one call and report the ids that matched no user.
+- Added `ChannelModel.truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires`, `deletedAt` and `topLevelFields`; the constructors accept the new fields.
 
 🔒 Security
 

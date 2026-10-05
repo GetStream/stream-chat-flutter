@@ -2,6 +2,15 @@
   "id": "test",
   "type": "livestream",
   "cid": "livestream:test",
+  "truncated_by": {
+    "id": "truncator",
+    "name": "Truncator"
+  },
+  "auto_translation_enabled": true,
+  "auto_translation_language": "fr",
   "cats": true,
-  "fruit": ["bananas", "apples"]
+  "fruit": [
+    "bananas",
+    "apples"
+  ]
 }

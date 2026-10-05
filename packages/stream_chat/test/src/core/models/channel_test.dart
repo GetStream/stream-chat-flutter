@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'package:stream_chat/src/core/models/channel_model.dart';
+import 'package:stream_chat/src/core/models/user.dart';
 import 'package:test/test.dart';
 
 import '../../utils.dart';
@@ -15,6 +16,10 @@ void main() {
       expect(channel.extraData['cats'], equals(true));
       expect(channel.extraData['fruit'], equals(['bananas', 'apples']));
       expect(channel.cooldown, equals(0));
+      expect(channel.truncatedBy?.id, 'truncator');
+      expect(channel.truncatedBy?.name, 'Truncator');
+      expect(channel.autoTranslationEnabled, isTrue);
+      expect(channel.autoTranslationLanguage, 'fr');
     });
 
     test('should serialize to json correctly', () {
@@ -202,6 +207,65 @@ void main() {
 
     expect(newChannel.extraData['truncated_at'], dateThree.toIso8601String());
     expect(newChannel.truncatedAt, dateThree);
+  });
+
+  test('ChannelModel keeps truncatedBy and the auto-translation settings in extraData', () {
+    final channel = ChannelModel(
+      cid: 'test:cid',
+      truncatedBy: User(id: 'truncator'),
+      autoTranslationEnabled: true,
+      autoTranslationLanguage: 'fr',
+    );
+
+    expect(channel.extraData, {
+      'truncated_by': User(id: 'truncator').toJson(),
+      'auto_translation_enabled': true,
+      'auto_translation_language': 'fr',
+    });
+  });
+
+  test(
+    'ChannelModel.copyWith drops truncatedBy and the auto-translation settings the replacement extraData leaves out',
+    () {
+      final channel = ChannelModel(
+        cid: 'test:cid',
+        truncatedBy: User(id: 'truncator'),
+        autoTranslationEnabled: true,
+        autoTranslationLanguage: 'fr',
+      );
+
+      final newChannel = channel.copyWith(extraData: const {'color': 'red'});
+
+      expect(newChannel.truncatedBy, isNull);
+      expect(newChannel.autoTranslationEnabled, isNull);
+      expect(newChannel.autoTranslationLanguage, isNull);
+    },
+  );
+
+  test('ChannelModel.merge drops truncatedBy and the auto-translation settings the other channel leaves out', () {
+    final channel = ChannelModel(
+      cid: 'test:cid',
+      truncatedBy: User(id: 'truncator'),
+      autoTranslationEnabled: true,
+      autoTranslationLanguage: 'fr',
+    );
+
+    final merged = channel.merge(ChannelModel(cid: 'test:cid'));
+
+    expect(merged.truncatedBy, isNull);
+    expect(merged.autoTranslationEnabled, isNull);
+    expect(merged.autoTranslationLanguage, isNull);
+  });
+
+  test('.truncatedBy should return null if the extraData user has no id', () {
+    final channel = ChannelModel(
+      cid: 'test:channel',
+      extraData: const {
+        'truncated_by': {'name': 'No id'},
+      },
+    );
+
+    expect(channel.truncatedBy, isNull);
   });
 
   test('.name should fetch from extraData if available', () {

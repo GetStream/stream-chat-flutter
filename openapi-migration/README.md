@@ -144,6 +144,7 @@ includes a named response that carries only `duration` today, such as `HideChann
 | `userGroupsFromV1Json` | `Message.mentionedGroups` | [10](10-messages.md) |
 | `DataSerializable` | `UserGroup`, `UserGroupMember` (`fromData`, `toData`) | [10](10-messages.md) |
 | `user_mapper.dart` (kept, re-pointed) | today's `User`, which still reads and writes JSON | [09](09-users.md) |
+| `channel_mapper.dart` (kept, re-pointed) | today's `ChannelModel`, `ChannelConfig` and `Member`, which still read and write JSON | [11](11-channels-and-members.md) |
 
 How v1 JSON decodes `User` once it becomes a plain model is decided in [01-foundation](01-foundation.md): until
 group 09 restructures it, v1 payloads keep decoding through `User.fromJson`.

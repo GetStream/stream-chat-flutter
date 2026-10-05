@@ -13,7 +13,10 @@ part 'member.g.dart';
 /// in a channel
 @JsonSerializable()
 class Member extends Equatable {
-  /// Constructor used for json serialization
+  /// Creates a member.
+  ///
+  /// The [notificationsMuted], [status], [banFromFutureChannels], [futureChannelBanExpires] and [deletedAt] arguments,
+  /// when given, are stored in [extraData], replacing the entry each one reads.
   Member({
     this.user,
     this.inviteAcceptedAt,
@@ -30,20 +33,33 @@ class Member extends Equatable {
     this.pinnedAt,
     this.archivedAt,
     this.deletedMessages = const [],
-    this.extraData = const {},
+    Map<String, Object?> extraData = const {},
+    bool? notificationsMuted,
+    String? status,
+    bool? banFromFutureChannels,
+    DateTime? futureChannelBanExpires,
+    DateTime? deletedAt,
   }) : userId = userId ?? user?.id,
        createdAt = createdAt ?? DateTime.now(),
-       updatedAt = updatedAt ?? DateTime.now();
+       updatedAt = updatedAt ?? DateTime.now(),
+       // These fields live in [extraData], where [Member.fromJson] leaves them, rather than in fields of their own.
+       extraData = {
+         ...extraData,
+         if (notificationsMuted != null) 'notifications_muted': notificationsMuted,
+         if (status != null) 'status': status,
+         if (banFromFutureChannels != null) 'ban_from_future_channels': banFromFutureChannels,
+         if (futureChannelBanExpires != null)
+           'future_channel_ban_expires': futureChannelBanExpires.toUtc().toIso8601String(),
+         if (deletedAt != null) 'deleted_at': deletedAt.toUtc().toIso8601String(),
+       };
 
   /// Create a new instance from a json
   factory Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(
-    Serializer.moveToExtraDataFromRoot(json, _topLevelFields),
+    Serializer.moveToExtraDataFromRoot(json, topLevelFields),
   );
 
-  /// Known top level fields.
-  ///
-  /// Useful for [Serializer] methods.
-  static const _topLevelFields = [
+  /// The JSON keys [Member.fromJson] reads into named fields; every other key is kept in [extraData].
+  static const topLevelFields = [
     'user',
     'invite_accepted_at',
     'invite_rejected_at',
@@ -111,6 +127,35 @@ class Member extends Equatable {
 
   /// Map of custom member extraData.
   final Map<String, Object?> extraData;
+
+  /// Whether this member muted notifications for the channel.
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  bool? get notificationsMuted => extraData['notifications_muted'].safeCast<bool>();
+
+  /// The status of this membership, such as `member`, or `pending` while an invite is outstanding.
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  String? get status => extraData['status'].safeCast<String>();
+
+  /// Whether this member is banned from future channels.
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  bool? get banFromFutureChannels => extraData['ban_from_future_channels'].safeCast<bool>();
+
+  /// The date at which this member's ban from future channels expires.
+  ///
+  /// Null when that ban has no expiry.
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  DateTime? get futureChannelBanExpires => _date('future_channel_ban_expires');
+
+  /// The date at which the membership was deleted.
+  ///
+  /// Null while the member belongs to the channel.
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  DateTime? get deletedAt => _date('deleted_at');
+
+  DateTime? _date(String key) => switch (extraData[key]) {
+    final String value => DateTime.tryParse(value),
+    _ => null,
+  };
 
   /// Creates a copy of [Member] with specified attributes overridden.
   Member copyWith({
@@ -296,7 +341,7 @@ class MemberFilterField extends FilterField<Member> {
   /// **Supported operators:** `$eq`
   static final notificationsMuted = MemberFilterField(
     'notifications_muted',
-    (it) => it.extraData['notifications_muted'].safeCast<bool>(),
+    (it) => it.notificationsMuted,
   );
 
   /// Filters members by when they joined the channel.
