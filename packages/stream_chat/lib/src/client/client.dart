@@ -1243,8 +1243,8 @@ class StreamChatClient {
     message: message,
   );
 
-  /// Sets the fields in [set] and removes the fields named in [unset] on the channel [channelId] of type
-  /// [channelType], leaving every other field as it is.
+  /// Partially updates a channel: sets the fields in [set] and removes the fields named in [unset], leaving every
+  /// other field as it is.
   ///
   /// At least one of [set] and [unset] is required.
   ///
@@ -2135,8 +2135,7 @@ class StreamChatClient {
     );
   }
 
-  /// Turns on slow mode for the channel [channelId] of type [channelType], so each member waits [cooldown] seconds
-  /// between messages.
+  /// Enables slow mode on a channel, so members wait [cooldown] seconds between messages.
   Future<Result<UpdateChannelPartialResponse>> enableSlowMode(
     String channelId,
     String channelType,
@@ -2147,7 +2146,7 @@ class StreamChatClient {
     set: {'cooldown': cooldown},
   );
 
-  /// Turns off slow mode for the channel [channelId] of type [channelType].
+  /// Disables slow mode on a channel.
   Future<Result<UpdateChannelPartialResponse>> disableSlowMode(
     String channelId,
     String channelType,
@@ -2250,7 +2249,7 @@ class StreamChatClient {
     unset: unset,
   );
 
-  /// Pins the channel [channelId] of type [channelType] for the current user.
+  /// Pins the channel for the current user.
   Future<Result<UpdateMemberPartialResponse>> pinChannel({
     required String channelId,
     required String channelType,
@@ -2262,7 +2261,7 @@ class StreamChatClient {
     );
   }
 
-  /// Unpins the channel [channelId] of type [channelType] for the current user.
+  /// Unpins the channel for the current user.
   Future<Result<UpdateMemberPartialResponse>> unpinChannel({
     required String channelId,
     required String channelType,
@@ -2274,7 +2273,7 @@ class StreamChatClient {
     );
   }
 
-  /// Archives the channel [channelId] of type [channelType] for the current user.
+  /// Archives the channel for the current user.
   Future<Result<UpdateMemberPartialResponse>> archiveChannel({
     required String channelId,
     required String channelType,
@@ -2286,7 +2285,7 @@ class StreamChatClient {
     );
   }
 
-  /// Unarchives the channel [channelId] of type [channelType] for the current user.
+  /// Unarchives the channel for the current user.
   Future<Result<UpdateMemberPartialResponse>> unarchiveChannel({
     required String channelId,
     required String channelType,
@@ -2298,17 +2297,10 @@ class StreamChatClient {
     );
   }
 
-  /// Sets the fields in [set] and removes the fields named in [unset] on the current user's membership of the
-  /// channel [channelId] of type [channelType], leaving every other field as it is.
+  /// Partially updates the current user's membership of a channel: sets the fields in [set] and removes the fields
+  /// named in [unset], leaving every other field as it is.
   ///
-  /// `pinned` and `archived` pin and archive the channel for the current user, as in `set: {'pinned': true}` or
-  /// `unset: ['archived']`; other keys set custom data on the membership. At least one of [set] and
-  /// [unset] is required.
-  ///
-  /// See also:
-  ///
-  ///  * [pinChannel] and [unpinChannel], which pin and unpin the channel.
-  ///  * [archiveChannel] and [unarchiveChannel], which archive and unarchive it.
+  /// At least one of [set] and [unset] is required.
   Future<Result<UpdateMemberPartialResponse>> updateMemberPartial({
     required String channelId,
     required String channelType,

@@ -1717,7 +1717,7 @@ class Channel {
     return _client.updateChannelPartial(id!, type, set: set, unset: unset);
   }
 
-  /// Turns on slow mode for this channel, so each member waits [cooldownInterval] seconds between messages.
+  /// Enables slow mode on this channel, so members wait [cooldownInterval] seconds between messages.
   Future<Result<UpdateChannelPartialResponse>> enableSlowMode({
     required int cooldownInterval,
   }) async {
@@ -1725,7 +1725,7 @@ class Channel {
     return _client.enableSlowMode(id!, type, cooldownInterval);
   }
 
-  /// Turns off slow mode for this channel.
+  /// Disables slow mode on this channel.
   Future<Result<UpdateChannelPartialResponse>> disableSlowMode() async {
     _checkInitialized();
     return _client.disableSlowMode(id!, type);
