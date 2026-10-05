@@ -5,7 +5,6 @@ import 'package:test/test.dart';
 
 import '../fakes.dart';
 import '../mocks.dart';
-import '../ws/fake_chat_server.dart';
 
 void main() {
   setUpAll(() => registerFallbackValue(const api.UpdateChannelPartialRequest()));
@@ -13,7 +12,12 @@ void main() {
   test(
     'StreamChatClient.updateChannelPartial sends the set and unset fields and returns the updated members',
     () async {
-      final defaultApi = _defaultApiAnswering(Result.success(_updateChannelPartialResponse()));
+      const request = api.UpdateChannelPartialRequest(set: {'name': 'General'}, unset: ['topic']);
+
+      final defaultApi = MockDefaultApi();
+      when(
+        () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
+      ).thenAnswer((_) async => Result.success(_updateChannelPartialResponse()));
       final client = _client(defaultApi);
 
       final res = await client.updateChannelPartial(
@@ -26,21 +30,20 @@ void main() {
       expect(res.getOrNull()!.duration, '0.01ms');
       expect(res.getOrNull()!.members, [fakeChannelMember()]);
       verify(
-        () => defaultApi.updateChannelPartial(
-          type: 'messaging',
-          id: 'general',
-          updateChannelPartialRequest: const api.UpdateChannelPartialRequest(
-            set: {'name': 'General'},
-            unset: ['topic'],
-          ),
-        ),
+        () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
       ).called(1);
       verifyNoMoreInteractions(defaultApi);
     },
   );
 
   test('StreamChatClient.updateChannelPartial returns the channel with every field it models', () async {
-    final client = _client(_defaultApiAnswering(Result.success(_updateChannelPartialResponse())));
+    const request = api.UpdateChannelPartialRequest(set: {'name': 'General'});
+
+    final defaultApi = MockDefaultApi();
+    when(
+      () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
+    ).thenAnswer((_) async => Result.success(_updateChannelPartialResponse()));
+    final client = _client(defaultApi);
 
     final res = await client.updateChannelPartial('general', 'messaging', set: const {'name': 'General'});
 
@@ -72,7 +75,13 @@ void main() {
   });
 
   test('StreamChatClient.updateChannelPartial returns the channel name and image from its custom data', () async {
-    final client = _client(_defaultApiAnswering(Result.success(_updateChannelPartialResponse())));
+    const request = api.UpdateChannelPartialRequest(set: {'name': 'General'});
+
+    final defaultApi = MockDefaultApi();
+    when(
+      () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
+    ).thenAnswer((_) async => Result.success(_updateChannelPartialResponse()));
+    final client = _client(defaultApi);
 
     final res = await client.updateChannelPartial('general', 'messaging', set: const {'name': 'General'});
 
@@ -82,7 +91,13 @@ void main() {
   });
 
   test('StreamChatClient.updateChannelPartial keeps the custom data and the server fields in extraData', () async {
-    final client = _client(_defaultApiAnswering(Result.success(_updateChannelPartialResponse())));
+    const request = api.UpdateChannelPartialRequest(set: {'name': 'General'});
+
+    final defaultApi = MockDefaultApi();
+    when(
+      () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
+    ).thenAnswer((_) async => Result.success(_updateChannelPartialResponse()));
+    final client = _client(defaultApi);
 
     final res = await client.updateChannelPartial('general', 'messaging', set: const {'name': 'General'});
 
@@ -105,7 +120,13 @@ void main() {
     final response = _updateChannelPartialResponse(
       channel: _channelResponse(custom: const {'hidden': 'shadowed', 'cid': 'shadowed'}),
     );
-    final client = _client(_defaultApiAnswering(Result.success(response)));
+    const request = api.UpdateChannelPartialRequest(set: {'name': 'General'});
+
+    final defaultApi = MockDefaultApi();
+    when(
+      () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
+    ).thenAnswer((_) async => Result.success(response));
+    final client = _client(defaultApi);
 
     final res = await client.updateChannelPartial('general', 'messaging', set: const {'name': 'General'});
 
@@ -127,7 +148,13 @@ void main() {
         frozen: false,
       ),
     );
-    final client = _client(_defaultApiAnswering(Result.success(response)));
+    const request = api.UpdateChannelPartialRequest(set: {'name': 'General'});
+
+    final defaultApi = MockDefaultApi();
+    when(
+      () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
+    ).thenAnswer((_) async => Result.success(response));
+    final client = _client(defaultApi);
 
     final res = await client.updateChannelPartial('general', 'messaging', set: const {'name': 'General'});
 
@@ -139,7 +166,13 @@ void main() {
   });
 
   test('StreamChatClient.updateChannelPartial returns the channel config with every field it models', () async {
-    final client = _client(_defaultApiAnswering(Result.success(_updateChannelPartialResponse())));
+    const request = api.UpdateChannelPartialRequest(set: {'name': 'General'});
+
+    final defaultApi = MockDefaultApi();
+    when(
+      () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
+    ).thenAnswer((_) async => Result.success(_updateChannelPartialResponse()));
+    final client = _client(defaultApi);
 
     final res = await client.updateChannelPartial('general', 'messaging', set: const {'name': 'General'});
 
@@ -186,7 +219,13 @@ void main() {
 
   test('StreamChatClient.updateChannelPartial returns a null channel when the response has none', () async {
     const response = api.UpdateChannelPartialResponse(duration: '0.01ms', members: []);
-    final client = _client(_defaultApiAnswering(const Result.success(response)));
+    const request = api.UpdateChannelPartialRequest(set: {'name': 'General'});
+
+    final defaultApi = MockDefaultApi();
+    when(
+      () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
+    ).thenAnswer((_) async => const Result.success(response));
+    final client = _client(defaultApi);
 
     final res = await client.updateChannelPartial('general', 'messaging', set: const {'name': 'General'});
 
@@ -195,7 +234,15 @@ void main() {
 
   test('StreamChatClient.updateChannelPartial returns the failure without throwing', () async {
     const error = StreamClientException(message: 'boom');
-    final client = _client(_defaultApiAnswering(const Result.failure(error)));
+    final defaultApi = MockDefaultApi();
+    when(
+      () => defaultApi.updateChannelPartial(
+        type: any(named: 'type'),
+        id: any(named: 'id'),
+        updateChannelPartialRequest: any(named: 'updateChannelPartialRequest'),
+      ),
+    ).thenAnswer((_) async => const Result.failure(error));
+    final client = _client(defaultApi);
 
     final res = await client.updateChannelPartial('general', 'messaging', set: const {'name': 'General'});
 
@@ -203,7 +250,12 @@ void main() {
   });
 
   test('StreamChatClient.enableSlowMode sends the cooldown and returns a success', () async {
-    final defaultApi = _defaultApiAnswering(Result.success(_updateChannelPartialResponse()));
+    const request = api.UpdateChannelPartialRequest(set: {'cooldown': 30});
+
+    final defaultApi = MockDefaultApi();
+    when(
+      () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
+    ).thenAnswer((_) async => Result.success(_updateChannelPartialResponse()));
     final client = _client(defaultApi);
 
     final res = await client.enableSlowMode('general', 'messaging', 30);
@@ -211,18 +263,22 @@ void main() {
     expect(res.isSuccess, isTrue);
 
     verify(
-      () => defaultApi.updateChannelPartial(
-        type: 'messaging',
-        id: 'general',
-        updateChannelPartialRequest: const api.UpdateChannelPartialRequest(set: {'cooldown': 30}),
-      ),
+      () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
     ).called(1);
     verifyNoMoreInteractions(defaultApi);
   });
 
   test('StreamChatClient.enableSlowMode returns the failure without throwing', () async {
     const error = StreamClientException(message: 'boom');
-    final client = _client(_defaultApiAnswering(const Result.failure(error)));
+    final defaultApi = MockDefaultApi();
+    when(
+      () => defaultApi.updateChannelPartial(
+        type: any(named: 'type'),
+        id: any(named: 'id'),
+        updateChannelPartialRequest: any(named: 'updateChannelPartialRequest'),
+      ),
+    ).thenAnswer((_) async => const Result.failure(error));
+    final client = _client(defaultApi);
 
     final res = await client.enableSlowMode('general', 'messaging', 30);
 
@@ -230,7 +286,12 @@ void main() {
   });
 
   test('StreamChatClient.disableSlowMode sends the cooldown unset and returns a success', () async {
-    final defaultApi = _defaultApiAnswering(Result.success(_updateChannelPartialResponse()));
+    const request = api.UpdateChannelPartialRequest(unset: ['cooldown']);
+
+    final defaultApi = MockDefaultApi();
+    when(
+      () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
+    ).thenAnswer((_) async => Result.success(_updateChannelPartialResponse()));
     final client = _client(defaultApi);
 
     final res = await client.disableSlowMode('general', 'messaging');
@@ -238,18 +299,22 @@ void main() {
     expect(res.isSuccess, isTrue);
 
     verify(
-      () => defaultApi.updateChannelPartial(
-        type: 'messaging',
-        id: 'general',
-        updateChannelPartialRequest: const api.UpdateChannelPartialRequest(unset: ['cooldown']),
-      ),
+      () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
     ).called(1);
     verifyNoMoreInteractions(defaultApi);
   });
 
   test('StreamChatClient.disableSlowMode returns the failure without throwing', () async {
     const error = StreamClientException(message: 'boom');
-    final client = _client(_defaultApiAnswering(const Result.failure(error)));
+    final defaultApi = MockDefaultApi();
+    when(
+      () => defaultApi.updateChannelPartial(
+        type: any(named: 'type'),
+        id: any(named: 'id'),
+        updateChannelPartialRequest: any(named: 'updateChannelPartialRequest'),
+      ),
+    ).thenAnswer((_) async => const Result.failure(error));
+    final client = _client(defaultApi);
 
     final res = await client.disableSlowMode('general', 'messaging');
 
@@ -258,21 +323,9 @@ void main() {
 }
 
 StreamChatClient _client(api.DefaultApi defaultApi) {
-  final client = StreamChatClient('test-api-key', defaultApi: defaultApi, wsProvider: FakeChatServer().connect);
+  final client = StreamChatClient('test-api-key', defaultApi: defaultApi);
   addTearDown(client.dispose);
   return client;
-}
-
-MockDefaultApi _defaultApiAnswering(Result<api.UpdateChannelPartialResponse> result) {
-  final defaultApi = MockDefaultApi();
-  when(
-    () => defaultApi.updateChannelPartial(
-      type: any(named: 'type'),
-      id: any(named: 'id'),
-      updateChannelPartialRequest: any(named: 'updateChannelPartialRequest'),
-    ),
-  ).thenAnswer((_) async => result);
-  return defaultApi;
 }
 
 // A response with every field set.
