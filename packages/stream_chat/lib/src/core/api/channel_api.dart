@@ -159,7 +159,9 @@ class ChannelApi {
     final response = await updateChannelPartial(
       channelId,
       channelType,
-      unset: ['cooldown'],
+      set: {
+        'cooldown': 0,
+      },
     );
     return response;
   }
