@@ -70,6 +70,8 @@ import '../core/models/response/og_attachment_response.dart';
 import '../core/models/response/remove_user_group_members_response.dart';
 import '../core/models/response/search_roles_response.dart';
 import '../core/models/response/search_user_groups_response.dart';
+import '../core/models/response/update_channel_partial_response.dart';
+import '../core/models/response/update_member_partial_response.dart';
 import '../core/models/response/update_user_group_response.dart';
 import '../core/models/role_type.dart';
 import '../core/models/thread.dart';
@@ -81,6 +83,7 @@ import '../core/util/utils.dart';
 import '../db/chat_persistence_client.dart';
 import '../event_type.dart';
 import '../repository/app_settings_repository.dart';
+import '../repository/channels_repository.dart';
 import '../repository/devices_repository.dart';
 import '../repository/general_repository.dart';
 import '../repository/moderation_repository.dart';
@@ -189,6 +192,7 @@ class StreamChatClient {
     _userGroupsRepository = UserGroupsRepository(api);
     _generalRepository = GeneralRepository(api);
     _moderationRepository = ModerationRepository(api);
+    _channelsRepository = ChannelsRepository(api);
     _appSettingsManager = AppSettingsManager(AppSettingsRepository(api));
 
     moderation = ModerationClient(_moderationRepository);
@@ -232,6 +236,7 @@ class StreamChatClient {
   late final UserGroupsRepository _userGroupsRepository;
   late final GeneralRepository _generalRepository;
   late final ModerationRepository _moderationRepository;
+  late final ChannelsRepository _channelsRepository;
   late final AppSettingsManager _appSettingsManager;
 
   /// Muting, banning and flagging, for the connected user.
@@ -1238,16 +1243,18 @@ class StreamChatClient {
     message: message,
   );
 
-  /// Partial update for the [channelId] of type [ChannelType]. Sets the
-  /// data provided in [set], and removes the attributes given in [unset].
+  /// Sets the fields in [set] and removes the fields named in [unset] on the channel [channelId] of type
+  /// [channelType], leaving every other field as it is.
+  ///
+  /// At least one of [set] and [unset] is required.
   ///
   /// Use [updateChannel] for a full update.
-  Future<PartialUpdateChannelResponse> updateChannelPartial(
+  Future<Result<UpdateChannelPartialResponse>> updateChannelPartial(
     String channelId,
     String channelType, {
     Map<String, Object?>? set,
     List<String>? unset,
-  }) => _chatApi.channel.updateChannelPartial(
+  }) => _channelsRepository.updateChannelPartial(
     channelId,
     channelType,
     set: set,
@@ -2128,24 +2135,26 @@ class StreamChatClient {
     );
   }
 
-  /// Enables slow mode
-  Future<PartialUpdateChannelResponse> enableSlowdown(
+  /// Turns on slow mode for the channel [channelId] of type [channelType], so each member waits [cooldown] seconds
+  /// between messages.
+  Future<Result<UpdateChannelPartialResponse>> enableSlowdown(
     String channelId,
     String channelType,
     int cooldown,
-  ) async => _chatApi.channel.enableSlowdown(
+  ) => _channelsRepository.updateChannelPartial(
     channelId,
     channelType,
-    cooldown,
+    set: {'cooldown': cooldown},
   );
 
-  /// Disables slow mode
-  Future<PartialUpdateChannelResponse> disableSlowdown(
+  /// Turns off slow mode for the channel [channelId] of type [channelType].
+  Future<Result<UpdateChannelPartialResponse>> disableSlowdown(
     String channelId,
     String channelType,
-  ) async => _chatApi.channel.disableSlowdown(
+  ) => _channelsRepository.updateChannelPartial(
     channelId,
     channelType,
+    unset: ['cooldown'],
   );
 
   /// Pins provided message
@@ -2241,60 +2250,66 @@ class StreamChatClient {
     unset: unset,
   );
 
-  /// Pins the channel for the current user.
-  Future<PartialUpdateMemberResponse> pinChannel({
+  /// Pins the channel [channelId] of type [channelType] for the current user.
+  Future<Result<UpdateMemberPartialResponse>> pinChannel({
     required String channelId,
     required String channelType,
   }) {
-    return partialMemberUpdate(
+    return updateMemberPartial(
       channelId: channelId,
       channelType: channelType,
-      set: const MemberUpdatePayload(pinned: true).toJson(),
+      set: const {'pinned': true},
     );
   }
 
-  /// Unpins the channel for the current user.
-  Future<PartialUpdateMemberResponse> unpinChannel({
+  /// Unpins the channel [channelId] of type [channelType] for the current user.
+  Future<Result<UpdateMemberPartialResponse>> unpinChannel({
     required String channelId,
     required String channelType,
   }) {
-    return partialMemberUpdate(
+    return updateMemberPartial(
       channelId: channelId,
       channelType: channelType,
-      unset: [MemberUpdateType.pinned.name],
+      unset: const ['pinned'],
     );
   }
 
-  /// Archives the channel for the current user.
-  Future<PartialUpdateMemberResponse> archiveChannel({
+  /// Archives the channel [channelId] of type [channelType] for the current user.
+  Future<Result<UpdateMemberPartialResponse>> archiveChannel({
     required String channelId,
     required String channelType,
   }) {
-    return partialMemberUpdate(
+    return updateMemberPartial(
       channelId: channelId,
       channelType: channelType,
-      set: const MemberUpdatePayload(archived: true).toJson(),
+      set: const {'archived': true},
     );
   }
 
-  /// Unarchives the channel for the current user.
-  Future<PartialUpdateMemberResponse> unarchiveChannel({
+  /// Unarchives the channel [channelId] of type [channelType] for the current user.
+  Future<Result<UpdateMemberPartialResponse>> unarchiveChannel({
     required String channelId,
     required String channelType,
   }) {
-    return partialMemberUpdate(
+    return updateMemberPartial(
       channelId: channelId,
       channelType: channelType,
-      unset: [MemberUpdateType.archived.name],
+      unset: const ['archived'],
     );
   }
 
-  /// Partially updates the member of the given channel.
+  /// Sets the fields in [set] and removes the fields named in [unset] on the current user's membership of the
+  /// channel [channelId] of type [channelType], leaving every other field as it is.
   ///
-  /// Use [set] to define values to be set.
-  /// Use [unset] to define values to be unset.
-  /// When [userId] is not provided, the current user will be used.
-  Future<PartialUpdateMemberResponse> partialMemberUpdate({
+  /// `pinned` and `archived` pin and archive the channel for the current user, as in `set: {'pinned': true}` or
+  /// `unset: ['archived']`; other keys set custom data on the membership. At least one of [set] and
+  /// [unset] is required.
+  ///
+  /// See also:
+  ///
+  ///  * [pinChannel] and [unpinChannel], which pin and unpin the channel.
+  ///  * [archiveChannel] and [unarchiveChannel], which archive and unarchive it.
+  Future<Result<UpdateMemberPartialResponse>> updateMemberPartial({
     required String channelId,
     required String channelType,
     Map<String, Object?>? set,
@@ -2302,9 +2317,9 @@ class StreamChatClient {
   }) {
     assert(set != null || unset != null, 'Set or unset must be provided.');
 
-    return _chatApi.channel.updateMemberPartial(
-      channelId: channelId,
-      channelType: channelType,
+    return _channelsRepository.updateMemberPartial(
+      channelId,
+      channelType,
       set: set,
       unset: unset,
     );

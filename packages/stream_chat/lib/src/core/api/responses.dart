@@ -103,17 +103,6 @@ class QueryMembersResponse extends _BaseResponse {
   static QueryMembersResponse fromJson(Map<String, dynamic> json) => _$QueryMembersResponseFromJson(json);
 }
 
-/// Model response for update member API calls, such as
-/// [StreamChatClient.updateMemberPartial]
-@JsonSerializable(createToJson: false)
-class PartialUpdateMemberResponse extends _BaseResponse {
-  /// The updated member state
-  late Member channelMember;
-
-  /// Create a new instance from a json
-  static PartialUpdateMemberResponse fromJson(Map<String, dynamic> json) => _$PartialUpdateMemberResponseFromJson(json);
-}
-
 /// Model response for [StreamChatClient.queryUsers] api call
 @JsonSerializable(createToJson: false)
 class QueryUsersResponse extends _BaseResponse {
@@ -263,20 +252,6 @@ class UpdateChannelResponse extends _BaseResponse {
 
   /// Create a new instance from a json
   static UpdateChannelResponse fromJson(Map<String, dynamic> json) => _$UpdateChannelResponseFromJson(json);
-}
-
-/// Model response for [Channel.updatePartial] api call
-@JsonSerializable(createToJson: false)
-class PartialUpdateChannelResponse extends _BaseResponse {
-  /// Updated channel
-  late ChannelModel channel;
-
-  /// Channel members
-  List<Member>? members;
-
-  /// Create a new instance from a json
-  static PartialUpdateChannelResponse fromJson(Map<String, dynamic> json) =>
-      _$PartialUpdateChannelResponseFromJson(json);
 }
 
 /// Model response for [Channel.inviteMembers] api call

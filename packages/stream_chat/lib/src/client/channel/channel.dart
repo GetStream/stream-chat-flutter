@@ -1673,39 +1673,15 @@ class Channel {
     );
   }
 
-  /// Update the channel's [name].
+  /// Sets this channel's [name], leaving every other field as it is.
   ///
-  /// This is the same as calling [updatePartial] and providing a map with a
-  /// 'name' key:
-  ///
-  /// ```dart
-  /// channel.updatePartial(
-  ///   set: {'name': 'Updated channel name'}
-  /// );
-  /// ```
-  ///
-  /// Instead do:
-  /// ```dart
-  /// channel.updateName('Updated channel name');
-  /// ```
-  Future<PartialUpdateChannelResponse> updateName(String name) => updatePartial(set: {'name': name});
+  /// The same as [updatePartial] with `set: {'name': name}`.
+  Future<Result<UpdateChannelPartialResponse>> updateName(String name) => updatePartial(set: {'name': name});
 
-  /// Update the channel's [image].
+  /// Sets this channel's [image] URL, leaving every other field as it is.
   ///
-  /// This is the same as calling [updatePartial] and providing a map with an
-  /// 'image' key:
-  ///
-  /// ```dart
-  /// channel.updatePartial(
-  ///   set: {'image': 'https://getstream.io/new-image'}
-  /// );
-  /// ```
-  ///
-  /// Instead do:
-  /// ```dart
-  /// channel.updateImage('https://getstream.io/new-image');
-  /// ```
-  Future<PartialUpdateChannelResponse> updateImage(String image) => updatePartial(set: {'image': image});
+  /// The same as [updatePartial] with `set: {'image': image}`.
+  Future<Result<UpdateChannelPartialResponse>> updateImage(String image) => updatePartial(set: {'image': image});
 
   /// Update the channel custom data. This replaces all of the channel data
   /// with the given [channelData].
@@ -1727,19 +1703,13 @@ class Channel {
     );
   }
 
-  /// A partial update can be used to set and unset specific custom data fields
-  /// when it is necessary to retain additional custom data fields on the
-  /// object.
+  /// Sets the fields in [set] and removes the fields named in [unset] on this channel, leaving every other field
+  /// as it is.
   ///
-  /// - [set] will add, or update existing attributes.
-  /// - [unset] will remove the attributes with the provided list of
-  /// values (keys).
+  /// At least one of [set] and [unset] is required.
   ///
-  /// If you want to do a full update/replacement, use [update] instead.
-  ///
-  /// See, https://getstream.io/chat/docs/other-rest/channel_update/?language=dart
-  /// for more information.
-  Future<PartialUpdateChannelResponse> updatePartial({
+  /// Use [update] to replace every field.
+  Future<Result<UpdateChannelPartialResponse>> updatePartial({
     Map<String, Object?>? set,
     List<String>? unset,
   }) async {
@@ -1747,16 +1717,16 @@ class Channel {
     return _client.updateChannelPartial(id!, type, set: set, unset: unset);
   }
 
-  /// Enable slow mode
-  Future<PartialUpdateChannelResponse> enableSlowMode({
+  /// Turns on slow mode for this channel, so each member waits [cooldownInterval] seconds between messages.
+  Future<Result<UpdateChannelPartialResponse>> enableSlowMode({
     required int cooldownInterval,
   }) async {
     _checkInitialized();
     return _client.enableSlowdown(id!, type, cooldownInterval);
   }
 
-  /// Disable slow mode
-  Future<PartialUpdateChannelResponse> disableSlowMode() async {
+  /// Turns off slow mode for this channel.
+  Future<Result<UpdateChannelPartialResponse>> disableSlowMode() async {
     _checkInitialized();
     return _client.disableSlowdown(id!, type);
   }
@@ -2364,52 +2334,28 @@ class Channel {
     return _client.showChannel(id!, type);
   }
 
-  /// Pins the channel for the current user.
-  Future<Member> pin() async {
+  /// Pins this channel for the current user.
+  Future<Result<UpdateMemberPartialResponse>> pin() async {
     _checkInitialized();
-
-    final response = await _client.pinChannel(
-      channelId: id!,
-      channelType: type,
-    );
-
-    return response.channelMember;
+    return _client.pinChannel(channelId: id!, channelType: type);
   }
 
-  /// Unpins the channel.
-  Future<Member?> unpin() async {
+  /// Unpins this channel for the current user.
+  Future<Result<UpdateMemberPartialResponse>> unpin() async {
     _checkInitialized();
-
-    final response = await _client.unpinChannel(
-      channelId: id!,
-      channelType: type,
-    );
-
-    return response.channelMember;
+    return _client.unpinChannel(channelId: id!, channelType: type);
   }
 
-  /// Archives the channel.
-  Future<Member?> archive() async {
+  /// Archives this channel for the current user.
+  Future<Result<UpdateMemberPartialResponse>> archive() async {
     _checkInitialized();
-
-    final response = await _client.archiveChannel(
-      channelId: id!,
-      channelType: type,
-    );
-
-    return response.channelMember;
+    return _client.archiveChannel(channelId: id!, channelType: type);
   }
 
-  /// Unarchives the channel for the current user.
-  Future<Member?> unarchive() async {
+  /// Unarchives this channel for the current user.
+  Future<Result<UpdateMemberPartialResponse>> unarchive() async {
     _checkInitialized();
-
-    final response = await _client.unarchiveChannel(
-      channelId: id!,
-      channelType: type,
-    );
-
-    return response.channelMember;
+    return _client.unarchiveChannel(channelId: id!, channelType: type);
   }
 
   /// Stream of [Event] coming from websocket connection specific for the

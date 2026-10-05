@@ -33,6 +33,7 @@ onto Stream's OpenAPI-generated API client.
     - [File Upload](#file-upload)
     - [User Groups](#user-groups)
     - [Link Previews](#link-previews)
+    - [Partial Updates](#partial-updates)
 - [Migration Checklist](#migration-checklist)
 - [For AI Agents](#for-ai-agents)
 - [Contributing to this guide](#contributing-to-this-guide)
@@ -78,6 +79,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**App Settings**](#app-settings) | `getAppSettings` returns a `Result<AppSettingsResponse>` instead of throwing; `GetAppSettingsResponse` is renamed `AppSettingsResponse` |
 | [**Guest Users**](#guest-users) | `connectGuestUser` is unchanged; `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed |
 | [**File Upload**](#file-upload) | Uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
+| [**Partial Updates**](#partial-updates) | Channel and member partial updates — `updatePartial`, `updateName`, `updateImage`, slow mode, pin and archive — return a `Result` instead of throwing; their responses take the API's names, `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse`, and `partialMemberUpdate` becomes `updateMemberPartial` |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -219,6 +221,22 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `SendAttachmentResponse`, `SendFileResponse`, `SendImageResponse`, `UploadImageResponse`, `UploadFileResponse` | `UploadedFile` (`stream_core`) | `removed` | `.file` becomes `.fileUrl`; `.thumbUrl` is unchanged; `duration` is gone |
 | `AttachmentFileUploaderProvider` = `AttachmentFileUploader Function(StreamHttpClient)` | `AttachmentFileUploader Function(Dio)` | `retyped` | Receives the client's `Dio`; `StreamAttachmentFileUploader(dio)` builds the default |
 | `StreamChatApi.fileUploader`, `StreamChatApi(attachmentFileUploaderProvider:)` | `StreamChatClient(attachmentFileUploaderProvider:)` | `removed` | The uploader belongs to `StreamChatClient` |
+| `PartialUpdateChannelResponse` | `UpdateChannelPartialResponse` | `renamed` | The name of the API's response. Same fields: `duration`, `channel` and `members` |
+| `PartialUpdateMemberResponse` | `UpdateMemberPartialResponse` | `renamed` | The name of the API's response. Same fields: `duration` and `channelMember` |
+| `StreamChatClient.partialMemberUpdate` | `StreamChatClient.updateMemberPartial` | `renamed` | The name of the API's operation, matching `updateChannelPartial` |
+| `StreamChatClient.updateChannelPartial` / `enableSlowdown` / `disableSlowdown` → `Future<PartialUpdateChannelResponse>` | `Future<Result<UpdateChannelPartialResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `Channel.updatePartial` / `updateName` / `updateImage` / `enableSlowMode` / `disableSlowMode` → `Future<PartialUpdateChannelResponse>` | `Future<Result<UpdateChannelPartialResponse>>` | `retyped` | Returns a `Result` instead of throwing. Calling one before the channel is initialized still throws a `StateError` |
+| `StreamChatClient.partialMemberUpdate` / `pinChannel` / `unpinChannel` / `archiveChannel` / `unarchiveChannel` → `Future<PartialUpdateMemberResponse>` | `Future<Result<UpdateMemberPartialResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `Channel.pin` → `Future<Member>`, `unpin` / `archive` / `unarchive` → `Future<Member?>` | `Future<Result<UpdateMemberPartialResponse>>` | `retyped` | Returns a `Result` instead of throwing, and answers the whole response: read the member off `.channelMember`. Calling one before the channel is initialized still throws a `StateError` |
+| `PartialUpdateChannelResponse.channel` (`ChannelModel`) | `UpdateChannelPartialResponse.channel` (`ChannelModel?`) | `retyped` | Nullable, as the API declares it |
+| `PartialUpdateChannelResponse.members` (`List<Member>?`) | `UpdateChannelPartialResponse.members` (`List<Member>`) | `retyped` | Always present, empty when the channel has no members; drop any `?.` or `?? []` |
+| `PartialUpdateMemberResponse.channelMember` (`Member`) | `UpdateMemberPartialResponse.channelMember` (`Member?`) | `retyped` | Nullable, as the API declares it |
+| `PartialUpdateChannelResponse.duration` / `PartialUpdateMemberResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| `PartialUpdateChannelResponse.fromJson` / `PartialUpdateMemberResponse.fromJson` | — | `removed` | The responses are plain classes; construct them directly |
+| `PartialUpdateChannelResponse()..channel = …`, `PartialUpdateMemberResponse()..channelMember = …` and their other setters | `UpdateChannelPartialResponse(duration: …, channel: …)` / `UpdateMemberPartialResponse(duration: …, channelMember: …)` | `retyped` | Plain classes with a const constructor and final fields |
+| `PartialUpdateChannelResponse` / `PartialUpdateMemberResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
+| `StreamChatApi.channel.updateChannelPartial` / `enableSlowdown` / `disableSlowdown` / `updateMemberPartial` | the `StreamChatClient` methods | `removed` | The endpoints moved to the generated client |
+| `MemberUpdatePayload(pinned: true).toJson()` / `MemberUpdateType.pinned.name` | `{'pinned': true}` / `'pinned'` | `removed` | Same for `archived`. Or call `pinChannel` / `unpinChannel` / `archiveChannel` / `unarchiveChannel` |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -607,6 +625,68 @@ result.fold(
 `OGAttachmentResponse(duration: '0ms', ogScrapeUrl: url)` where v10 wrote `OGAttachmentResponse()..ogScrapeUrl = url`.
 
 **`duration` is a non-nullable `String`**, where v10 typed it `String?`.
+
+### Partial Updates
+
+**Channel and member partial updates return a `Result` instead of throwing.** On the channel side that covers
+`StreamChatClient.updateChannelPartial`, `enableSlowdown` and `disableSlowdown`, and `Channel.updatePartial`,
+`updateName`, `updateImage`, `enableSlowMode` and `disableSlowMode`. On the member side it covers
+`StreamChatClient.updateMemberPartial` (v10's `partialMemberUpdate`), `pinChannel`, `unpinChannel`,
+`archiveChannel` and `unarchiveChannel`, and `Channel.pin`, `unpin`, `archive` and `unarchive`. The full update,
+`updateChannel` and `Channel.update`, still throws. A `try`/`catch` around a partial update still compiles, but
+no longer catches a failed call: read the returned `Result` instead.
+
+```dart
+// v10
+try {
+  final response = await channel.updatePartial(set: {'name': 'Support'});
+  print(response.channel.name);
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await channel.updatePartial(set: {'name': 'Support'});
+result.fold(
+  onSuccess: (response) => print(response.channel?.name),
+  onFailure: (error, _) => report(error),
+);
+```
+
+**The responses take the API's names.** `PartialUpdateChannelResponse` is now `UpdateChannelPartialResponse`, and
+`PartialUpdateMemberResponse` is now `UpdateMemberPartialResponse`. Their fields keep their names.
+
+**`Channel.pin`, `unpin`, `archive` and `unarchive` answer the whole response**, where v10 returned the member:
+
+```dart
+// v10
+final member = await channel.pin();
+
+// v11
+final result = await channel.pin();
+final member = result.getOrThrow().channelMember;
+```
+
+**`UpdateChannelPartialResponse.channel` and `UpdateMemberPartialResponse.channelMember` are nullable**, where v10
+typed them non-null. `UpdateChannelPartialResponse.members` goes the other way: it is a `List<Member>`, empty when
+the channel has none, where v10 typed it `List<Member>?`.
+
+**The responses no longer decode JSON.** They are plain classes; build them with their constructors —
+`UpdateChannelPartialResponse(duration: '0ms', channel: channel)` where v10 wrote
+`PartialUpdateChannelResponse()..channel = channel`. `duration` is a non-nullable `String`.
+
+**`StreamChatApi.channel.updateChannelPartial`, `enableSlowdown`, `disableSlowdown` and `updateMemberPartial` are
+removed.** Call them on `StreamChatClient`.
+
+**`MemberUpdatePayload` and `MemberUpdateType` are removed.** They only named `pinned` and `archived`; pass the map
+directly — `updateMemberPartial(channelId: …, channelType: …, set: {'pinned': true})` — or call `pinChannel`,
+`archiveChannel` and their counterparts.
+
+> **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call; the field types
+> follow what the API declares, and the names follow the API's so the channel and member updates share one scheme.
+> `Channel.pin` and its siblings answer the whole response because every migrated write returns its envelope, so a
+> field the API adds later reaches you without another break. `MemberUpdatePayload` and `MemberUpdateType` named
+> only two of the keys a membership accepts, so a plain map replaces them.
 
 ### Moderation
 

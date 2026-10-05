@@ -22,12 +22,13 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [08](08-moderation-and-blocklists.md) | Moderation & Blocklists | 0 | 34 | ☑ |
 | [09](09-users.md) | Users | 9 | 9 | ☐ |
 | [10](10-messages.md) | Messages & Search | 14 | 12 | ☐ |
-| [11](11-channels-and-members.md) | Channels, Members & Sync | 27 | 24 | ☐ |
+| [11](11-channels-and-members.md) | Channels, Members & Sync | 23 | 22 | ☐ |
 | [12](12-uploads-cdn.md) | Uploads (CDN) | 8 | 8 | ☑ |
 | [13](13-push-preferences.md) | Push Preferences | 1 | 1 | ☐ |
 | [14](14-banned-users.md) | Banned Users — split out of 08 | 1 | 1 | ☐ |
+| [15](15-partial-updates.md) | Partial Updates — split out of 11 | 0 | 2 | ☑ |
 
-**Coverage:** 85 hand-written methods across 11 files, and all 129 generated operations, each claimed by exactly
+**Coverage:** 80 hand-written methods across 10 files, and all 129 generated operations, each claimed by exactly
 one group. Verified mechanically — see [Keeping this plan honest](#keeping-this-plan-honest).
 
 
@@ -99,10 +100,13 @@ includes a named response that carries only `duration` today, such as `HideChann
    (see the breaks above). A field the server adds is exposed later, as an additive change. The one exception to
    "no JSON" is the temporary `@DataSerializable` storage codec in rule 8.
 
-   **Names default to v10's,** even where the generated name differs: `OGAttachmentResponse` rather than
-   `GetOGResponse`, `AppSettings` rather than `AppResponseFields`, `UploadConfig` rather than `FileUploadConfig`.
-   That is a default, not a requirement. The user may ask for another name, or a migration may propose one that
-   fits clearly better; renaming a v10 type is a break, so it needs approval and a Symbol Map row.
+   **Names follow the spec's, unless the spec's name is awkward or describes something else,** and calls the
+   caller sees as siblings share one scheme: `updateChannelPartial` and `updateMemberPartial` answer
+   `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse`, where v10 had `PartialUpdateChannelResponse`,
+   `partialMemberUpdate` and `PartialUpdateMemberResponse`. v10's name stays where the generated one does not fit:
+   `OGAttachmentResponse` rather than `GetOGResponse`, `AppSettings` rather than `AppResponseFields`. Names an
+   earlier group settled stand, such as group 04's `getAppSettings` and `UploadConfig`. Renaming a v10 type or
+   method is a break, so it needs approval, a Symbol Map row, and a line in the PR description.
 3. **Responses keep their v10 envelopes,** as `@freezed` classes carrying a non-nullable `duration` and the
    payload. Every envelope lives in `lib/src/core/models/response/`, and every public type a caller passes in to
    shape a request — a `*Request` class, or a parameter type such as `PaginationParams` or `ThreadOptions` — in
@@ -164,6 +168,8 @@ surfaces before it reaches `Message` and `ChannelState`:
 - **14** is `queryBannedUsers`, split out of 08 because it is the only moderation call that answers with a
   model. The `User` mappers it needs landed with group 04.
 - **10–11** are the core of the SDK, and carry the `custom` / `extraData` promotion problem.
+- **15** is the partial channel and member updates, split out of 11 so `channel_mapper.dart` lands on calls that
+  read nothing into `ChannelState`. It landed first; the full update waits in 11 for group 10's message mappers.
 - **12** comes late because it needs its own hand-written multipart client and is the highest-traffic path in the
   SDK.
 - **09** is last. Every group before it maps users through `user_mapper.dart` onto today's `User`; 09 migrates the

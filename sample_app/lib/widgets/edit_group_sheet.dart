@@ -268,7 +268,12 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
       }
 
       if (set.isNotEmpty || unset.isNotEmpty) {
-        await _channel.updatePartial(set: set, unset: unset);
+        final result = await _channel.updatePartial(set: set, unset: unset);
+        if (result case Failure(:final error)) {
+          messenger.showSnackBar(SnackBar(content: Text('Failed to save: $error')));
+          if (mounted) setState(() => _saving = false);
+          return;
+        }
       }
 
       // Strip the saved URL from the orphan list so dispose() doesn't

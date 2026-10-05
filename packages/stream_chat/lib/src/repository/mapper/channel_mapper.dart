@@ -7,6 +7,8 @@ import '../../core/models/chat_preferences.dart';
 import '../../core/models/command.dart';
 import '../../core/models/member.dart';
 import '../../core/models/push_level.dart';
+import '../../core/models/response/update_channel_partial_response.dart';
+import '../../core/models/response/update_member_partial_response.dart';
 import 'user_mapper.dart';
 
 // TODO(openapi-migration): re-point these mappers in group 11.
@@ -162,5 +164,24 @@ extension ChannelMemberResponseMapper on api.ChannelMemberResponse {
     banFromFutureChannels: banFromFutureChannels,
     futureChannelBanExpires: futureChannelBanExpires,
     deletedAt: deletedAt,
+  );
+}
+
+/// Maps a generated [api.UpdateChannelPartialResponse] to an [UpdateChannelPartialResponse].
+extension UpdateChannelPartialResponseMapper on api.UpdateChannelPartialResponse {
+  /// Converts this response into an [UpdateChannelPartialResponse].
+  UpdateChannelPartialResponse toModel() => UpdateChannelPartialResponse(
+    duration: duration,
+    channel: channel?.toModel(),
+    members: [for (final member in members) member.toModel()],
+  );
+}
+
+/// Maps a generated [api.UpdateMemberPartialResponse] to an [UpdateMemberPartialResponse].
+extension UpdateMemberPartialResponseMapper on api.UpdateMemberPartialResponse {
+  /// Converts this response into an [UpdateMemberPartialResponse].
+  UpdateMemberPartialResponse toModel() => UpdateMemberPartialResponse(
+    duration: duration,
+    channelMember: channelMember?.toModel(),
   );
 }
