@@ -1,8 +1,14 @@
 ## Upcoming
 
+✅ Added
+
+- Polls are now shown translated into the current user's language, following `StreamMessageTranslationConfiguration` like the message text.
+- Added `PollTranslationX`, `PollOptionTranslationX` and `PollVoteTranslationX`, to read the translations of a poll, its options and its answers.
+- Added `MessageTranslationLanguage`, the language `StreamMessageContent` shows a message translated into, for custom attachments to show translations too.
+
 🔄 Changed
 
-- `StreamMessageListView` now only rebuilds message rows whose message or neighbouring messages changed. A custom `messageBuilder` that reads state from outside the list no longer refreshes on every new message; rebuild the `StreamMessageListView` when that state changes.
+- `StreamMessageListView` now rebuilds only the message rows that changed; a custom row builder should read changing outside state through an inherited widget.
 
 🐞 Fixed
 

@@ -187,7 +187,7 @@ class ChannelStateMutations {
       ownVotesAndAnswers: ownVotesAndAnswers,
     );
 
-    final message = pollMessage.copyWith(poll: poll);
+    final message = pollMessage.copyWith(poll: poll.withTranslationsOf(oldPoll));
     _state.updateMessage(message);
   }
 
@@ -227,7 +227,7 @@ class ChannelStateMutations {
       ownVotesAndAnswers: [...ownVotesAndAnswers.values],
     );
 
-    final message = pollMessage.copyWith(poll: poll);
+    final message = pollMessage.copyWith(poll: poll.withTranslationsOf(oldPoll));
     _state.updateMessage(message);
   }
 
@@ -250,7 +250,7 @@ class ChannelStateMutations {
       ownVotesAndAnswers: [...ownVotesAndAnswers.values],
     );
 
-    final message = pollMessage.copyWith(poll: poll);
+    final message = pollMessage.copyWith(poll: poll.withTranslationsOf(oldPoll));
     _state.updateMessage(message);
   }
 
@@ -273,7 +273,7 @@ class ChannelStateMutations {
       ownVotesAndAnswers: [...ownVotesAndAnswers.values],
     );
 
-    final message = pollMessage.copyWith(poll: poll);
+    final message = pollMessage.copyWith(poll: poll.withTranslationsOf(oldPoll));
     _state.updateMessage(message);
   }
 
@@ -297,7 +297,7 @@ class ChannelStateMutations {
       ownVotesAndAnswers: [...ownVotesAndAnswers.values],
     );
 
-    final message = pollMessage.copyWith(poll: poll);
+    final message = pollMessage.copyWith(poll: poll.withTranslationsOf(oldPoll));
     _state.updateMessage(message);
   }
 
@@ -318,7 +318,7 @@ class ChannelStateMutations {
       ownVotesAndAnswers: [...ownVotesAndAnswers.values],
     );
 
-    final message = pollMessage.copyWith(poll: poll);
+    final message = pollMessage.copyWith(poll: poll.withTranslationsOf(oldPoll));
     _state.updateMessage(message);
   }
 
