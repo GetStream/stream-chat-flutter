@@ -960,6 +960,8 @@ class ChannelClientState {
   void _updateActiveLiveLocations(Iterable<Message> messages) {
     if (messages.isEmpty) return;
 
+    if (this.activeLiveLocations.isEmpty && messages.every((m) => m.sharedLocation == null)) return;
+
     final activeLiveLocations = [...this.activeLiveLocations];
     final updatedActiveLiveLocations = MessageMerging.mergeActiveLocations(
       existing: activeLiveLocations,

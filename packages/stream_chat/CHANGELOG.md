@@ -2,18 +2,30 @@
 
 ✅ Added
 
-- Added a getter for `StreamChatClient.recoverStateOnReconnect`, which was previously write-only.
+- Added `Poll.nameI18n`, `Poll.descriptionI18n`, `PollOption.textI18n` and `PollVote.answerTextI18n`, holding the server's translations of a poll.
 
 🔄 Changed
 
-- Reconnecting no longer replays very large event backlogs; the offline cache is reset and the affected channels are re-queried instead, so a long spell offline does not stall the app on reconnect.
+- `name_i18n`, `description_i18n` and `text_i18n` are no longer kept in `Poll.extraData` and `PollOption.extraData`; read the new `*I18n` fields instead.
+- Reduced the channel state updates emitted for message updates in channels without active live locations.
+
+## 10.5.0
+
+✅ Added
+
+- Added a getter for `StreamChatClient.recoverStateOnReconnect`, which was previously write-only.
+- Added `ChannelClientState.isMarkedAsUnread`, which reports whether the current user marked the channel unread and hasn't read past that point since.
+
+🔄 Changed
+
+- Reconnecting after a long spell offline now resets the offline cache and re-queries channels instead of replaying a large event backlog.
 - Improved the speed of converting models to and from JSON.
 
 🐞 Fixed
 
 - Fixed reconnecting with more than 255 channels clearing the offline cache and skipping the events missed while offline.
 - Fixed reconnect recovery refreshing only the first 30 active channels.
-- Fixed reconnect catch-up covering an arbitrary subset of channels when more are active than one request holds; the most recently active are now covered first.
+- Fixed reconnect catch-up covering an arbitrary subset of channels when many are active; the most recently active now come first.
 - Fixed `CurrentPlatform` throwing `UnimplementedError` on WebAssembly builds.
 - Fixed live location expiry emitting repeated `location.expired` events for the same expired location.
 - Fixed members removed from a channel keeping their read state in the channel state.
@@ -23,7 +35,7 @@
 
 🔄 Internal / Non-breaking
 
-- Errors thrown synchronously while handling a channel event are now logged as warnings instead of reaching the root zone, where crash reporters report them as fatal.
+- Errors thrown while handling a channel event are now logged as warnings instead of surfacing as fatal crashes.
 
 ## 10.4.0
 
@@ -54,7 +66,6 @@
 - Added `StreamChatClient.isLocalUnreadCountEnabled` (default `false`). When enabled, channels that have read events disabled (e.g. livestream channel types) track their unread count locally, on-device: incoming messages increment it, hard-deleted messages decrement it, and `Channel.markRead` / `markUnread` / `markUnreadByTimestamp` update it locally without a network request — including `Read.lastReadMessageId`, so the unread divider and jump-to-unread button anchor to the right message. Channels that support read receipts are unaffected and keep relying on server-driven unread counts.
 - Added `Event.watcherCount`, exposing the server-provided `watcher_count` field on events (e.g. `user.watching.start`, `user.watching.stop`, `message.new`).
 - Added `StreamChatNetworkError.type` (a `StreamChatNetworkErrorType` capturing the transport failure kind — connection error, timeout, cancellation, etc.).
-- Added `ChannelClientState.isMarkedAsUnread`, reporting whether the current user has an active manual mark-unread on the channel that hasn't been read past yet. Set by `markUnreadLocally` and by a `notification.mark_unread` event for the current user; cleared by `markReadLocally` and by a `message.read` event for the current user.
 - Exported `FilterOperator` alongside `Filter`.
 
 ⚠️ Deprecated
