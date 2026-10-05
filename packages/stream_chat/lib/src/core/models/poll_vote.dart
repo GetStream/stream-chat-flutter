@@ -17,6 +17,7 @@ class PollVote extends Equatable {
     this.pollId,
     this.optionId,
     this.answerText,
+    this.answerTextI18n,
     DateTime? createdAt,
     DateTime? updatedAt,
     this.userId,
@@ -43,6 +44,14 @@ class PollVote extends Equatable {
   /// The text of the answer provided in the poll.
   @JsonKey(includeIfNull: false)
   final String? answerText;
+
+  /// The translations of [answerText], keyed as `<language>_text`, plus the
+  /// `language` [answerText] was written in.
+  ///
+  /// Filled in by the server when the answer is added to a poll in a channel
+  /// with automatic translation enabled.
+  @JsonKey(includeToJson: false)
+  final Map<String, String>? answerTextI18n;
 
   /// If true, the vote is an answer.
   @JsonKey(includeToJson: false)
@@ -77,6 +86,7 @@ class PollVote extends Equatable {
     String? pollId,
     String? optionId,
     String? answerText,
+    Map<String, String>? answerTextI18n,
     DateTime? createdAt,
     DateTime? updatedAt,
     String? userId,
@@ -86,6 +96,7 @@ class PollVote extends Equatable {
     pollId: pollId ?? this.pollId,
     optionId: optionId ?? this.optionId,
     answerText: answerText ?? this.answerText,
+    answerTextI18n: answerTextI18n ?? this.answerTextI18n,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     userId: userId ?? this.userId,
@@ -99,6 +110,7 @@ class PollVote extends Equatable {
     optionId,
     isAnswer,
     answerText,
+    answerTextI18n,
     createdAt,
     updatedAt,
     userId,

@@ -21,31 +21,37 @@ Future<T?> showStreamPollResultsSheet<T extends Object?>({
   required BuildContext context,
   required ValueListenable<Message> messageNotifier,
 }) {
+  // Read from the caller's context: the sheet is pushed outside the message.
+  final language = MessageTranslationLanguage.of(context);
+
   return showStreamSheet<T>(
     context: context,
-    builder: (_, scrollController) => StreamChannel.value(
-      channel: StreamChannel.of(context).channel,
-      child: ValueListenableBuilder(
-        valueListenable: messageNotifier,
-        builder: (context, message, _) {
-          final poll = message.poll;
-          if (poll == null) return const Empty();
+    builder: (_, scrollController) => MessageTranslationLanguage(
+      language: language,
+      child: StreamChannel.value(
+        channel: StreamChannel.of(context).channel,
+        child: ValueListenableBuilder(
+          valueListenable: messageNotifier,
+          builder: (context, message, _) {
+            final poll = message.poll;
+            if (poll == null) return const Empty();
 
-          void onShowAllVotesPressed(PollOption option) {
-            showStreamPollOptionVotesSheet(
-              context: context,
-              messageNotifier: messageNotifier,
-              option: option,
+            void onShowAllVotesPressed(PollOption option) {
+              showStreamPollOptionVotesSheet(
+                context: context,
+                messageNotifier: messageNotifier,
+                option: option,
+              );
+            }
+
+            return StreamPollResultsSheet(
+              poll: poll,
+              visibleVotesCount: 5,
+              scrollController: scrollController,
+              onShowAllVotesPressed: onShowAllVotesPressed,
             );
-          }
-
-          return StreamPollResultsSheet(
-            poll: poll,
-            visibleVotesCount: 5,
-            scrollController: scrollController,
-            onShowAllVotesPressed: onShowAllVotesPressed,
-          );
-        },
+          },
+        ),
       ),
     ),
   );
@@ -106,7 +112,9 @@ class StreamPollResultsSheet extends StatelessWidget {
             controller: scrollController,
             padding: effectiveTheme.contentPadding,
             children: <Widget>[
-              PollResultsQuestion(question: poll.name),
+              PollResultsQuestion(
+                question: poll.translatedName(MessageTranslationLanguage.of(context)) ?? poll.name,
+              ),
               MediaQuery.removePadding(
                 context: context,
                 removeTop: true,
@@ -457,7 +465,7 @@ class PollVotesByOptionHeader extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                option.text,
+                option.translatedText(MessageTranslationLanguage.of(context)) ?? option.text,
                 style: style?.textStyle,
               ),
             ),

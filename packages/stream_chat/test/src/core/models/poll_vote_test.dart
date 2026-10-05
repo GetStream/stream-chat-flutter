@@ -6,6 +6,15 @@ import '../../utils.dart';
 
 void main() {
   group('src/models/poll_vote', () {
+    test('does not send the server translation of the answer back when serialized', () {
+      final pollVote = PollVote(
+        answerText: 'great',
+        answerTextI18n: const {'language': 'en', 'nl_text': 'geweldig'},
+      );
+
+      expect(pollVote.toJson(), isNot(contains('answer_text_i18n')));
+    });
+
     group('PollVoteSortField', () {
       test('id orders alphabetically', () {
         expectOrders(

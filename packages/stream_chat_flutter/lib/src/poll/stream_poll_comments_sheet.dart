@@ -4,6 +4,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
 
 import '../components/avatar/stream_user_avatar.dart';
+import '../message_widget/message_translation_language.dart';
 import '../misc/empty_widget.dart';
 import '../misc/timestamp.dart';
 import '../scroll_view/poll_vote_scroll_view/stream_poll_vote_list_view.dart';
@@ -25,36 +26,42 @@ Future<T?> showStreamPollCommentsSheet<T extends Object?>({
   required BuildContext context,
   required ValueListenable<Message> messageNotifier,
 }) {
+  // Read from the caller's context: the sheet is pushed outside the message.
+  final language = MessageTranslationLanguage.of(context);
+
   return showStreamSheet<T>(
     context: context,
-    builder: (_, scrollController) => StreamChannel.value(
-      channel: StreamChannel.of(context).channel,
-      child: ValueListenableBuilder(
-        valueListenable: messageNotifier,
-        builder: (context, message, _) {
-          final poll = message.poll;
-          if (poll == null) return const Empty();
+    builder: (_, scrollController) => MessageTranslationLanguage(
+      language: language,
+      child: StreamChannel.value(
+        channel: StreamChannel.of(context).channel,
+        child: ValueListenableBuilder(
+          valueListenable: messageNotifier,
+          builder: (context, message, _) {
+            final poll = message.poll;
+            if (poll == null) return const Empty();
 
-          final channel = StreamChannel.of(context).channel;
+            final channel = StreamChannel.of(context).channel;
 
-          Future<void> onUpdateComment() async {
-            final commentText = await showPollAddCommentDialog(
-              context: context,
-              // We use the first answer as the initial value because the
-              // user can only add one comment per poll.
-              initialValue: poll.ownAnswers.firstOrNull?.answerText ?? '',
+            Future<void> onUpdateComment() async {
+              final commentText = await showPollAddCommentDialog(
+                context: context,
+                // We use the first answer as the initial value because the
+                // user can only add one comment per poll.
+                initialValue: poll.ownAnswers.firstOrNull?.answerText ?? '',
+              );
+
+              if (commentText == null) return;
+              channel.addPollAnswer(message, poll, answerText: commentText);
+            }
+
+            return StreamPollCommentsSheet(
+              poll: poll,
+              scrollController: scrollController,
+              onUpdateComment: onUpdateComment,
             );
-
-            if (commentText == null) return;
-            channel.addPollAnswer(message, poll, answerText: commentText);
-          }
-
-          return StreamPollCommentsSheet(
-            poll: poll,
-            scrollController: scrollController,
-            onUpdateComment: onUpdateComment,
-          );
-        },
+          },
+        ),
       ),
     ),
   );
@@ -168,7 +175,11 @@ class _StreamPollCommentsSheetState extends State<StreamPollCommentsSheet> {
               padding: effectiveTheme.contentPadding,
               separatorBuilder: (_, __, ___) => SizedBox(height: itemSpacing),
               itemBuilder: (context, comments, index, _) {
-                final comment = comments[index];
+                final language = MessageTranslationLanguage.of(context);
+                final comment = switch (comments[index].translatedAnswerText(language)) {
+                  null => comments[index],
+                  final answerText => comments[index].copyWith(answerText: answerText),
+                };
 
                 return _PollCommentCard(
                   poll: widget.poll,
