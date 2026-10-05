@@ -13,6 +13,7 @@
 🐞 Fixed
 
 - Fixed `StreamMessageListView` dropping frames on each new message in busy channels.
+- Fixed every own message's delivery status rebuilding on each read event, including events that don't change it.
 - Fixed `StreamMessageComposer` polling the audio recorder ten times a second while no recording is in progress, including when voice recording is disabled.
 
 ## 10.5.0

@@ -135,6 +135,8 @@ Widget buildMessageScene(
   when(() => channel.client).thenReturn(client);
   when(() => channel.state).thenReturn(unwatchedChannel ? null : channelState);
   when(() => channelState.readStream).thenAnswer((_) => Stream.value(const []));
+  when(() => channelState.channelStateStream).thenAnswer((_) => Stream.value(const ChannelState(read: [])));
+  when(() => channelState.channelState).thenReturn(const ChannelState(read: []));
 
   return MaterialApp(
     localizationsDelegates: switch (fakeTranslations) {

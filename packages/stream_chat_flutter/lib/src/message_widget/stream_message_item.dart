@@ -12,6 +12,7 @@ import '../../stream_chat_flutter.dart';
 import '../channel/stream_message_preview_text.dart';
 import '../context_menu/context_menu.dart';
 import '../context_menu/context_menu_region.dart';
+import 'message_read_status_builder.dart';
 import 'message_status_labels.dart';
 
 /// A chat message widget that renders a single message with its attachments,
@@ -1335,20 +1336,17 @@ class _MessageRowSemanticsState extends State<_MessageRowSemantics> {
 
     final channel = StreamChannel.maybeOf(context)?.channel;
 
-    return BetterStreamBuilder<List<Read>>(
-      stream: channel?.state?.readStream,
-      initialData: channel?.state?.read,
-      // Read state is null until the channel is watched, and a channel can be
-      // rendered before then. Without this the row itself — not just the
-      // status it would have carried — would drop out of the tree.
+    return MessageReadStatusBuilder(
+      channel: channel,
+      message: message,
       noDataBuilder: (_) => _annotate(_label),
-      builder: (context, data) => _annotate(
+      builder: (context, status) => _annotate(
         [
           _label,
           ?_statusLabel(
             context,
-            isMessageRead: data.readsOf(message: message).isNotEmpty,
-            isMessageDelivered: data.deliveriesOf(message: message).isNotEmpty,
+            isMessageRead: status.isMessageRead,
+            isMessageDelivered: status.isMessageDelivered,
           ),
         ].join(', '),
       ),
