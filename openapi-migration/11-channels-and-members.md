@@ -97,7 +97,6 @@
 
 ## Risks
 
-- **The generated `stopWatchingChannel` cannot be called as generated.** It sends no body, while the spec declares a required empty-object one and the handler refuses a missing body with `400 invalid json data`. Fix the generator to send `{}` for a required empty body and regenerate before moving it; [16](16-channel-lifecycle.md) left it here for that reason.
 - `sync` and `queryMembers` live in `general_api.dart`, not `channel_api.dart` — this group reaches into that file.
 - `queryChannels` drives the channel list controllers and the offline cache; a shape change here is felt everywhere.
 - Channel `custom`/`extraData` promotion, same class of problem as messages.

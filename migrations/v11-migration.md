@@ -704,8 +704,7 @@ directly — `updateMemberPartial(channelId: …, channelType: …, set: {'pinne
 **Hiding, showing and deleting a channel return a `Result` instead of throwing.** That covers
 `StreamChatClient.hideChannel`, `showChannel` and `deleteChannel`, `Channel.hide`, `show` and `delete`, and
 `StreamChannelListController.deleteChannel` in `stream_chat_flutter_core`. A `try`/`catch` around one still
-compiles, but no longer catches a failed call: read the returned `Result` instead. Stopping watching —
-`StreamChatClient.stopChannelWatching` and `Channel.stopWatching` — has not moved yet and still throws.
+compiles, but no longer catches a failed call: read the returned `Result` instead.
 
 ```dart
 // v10

@@ -172,8 +172,7 @@ surfaces before it reaches `Message` and `ChannelState`:
 - **15** is the partial channel and member updates, split out of 11 so `channel_mapper.dart` lands on calls that
   read nothing into `ChannelState`. It landed first; the full update waits in 11 for group 10's message mappers.
 - **16** is hiding, showing and deleting a channel, split out of 11 after 15 because they answer nothing
-  `channel_mapper.dart` cannot map. Stopping watching waits in 11 for a generator fix, and the read and delivery
-  receipts for a slice of their own.
+  `channel_mapper.dart` cannot map; the read and delivery receipts stay in 11 for a slice of their own.
 - **12** comes late because it needs its own hand-written multipart client and is the highest-traffic path in the
   SDK.
 - **09** is last. Every group before it maps users through `user_mapper.dart` onto today's `User`; 09 migrates the

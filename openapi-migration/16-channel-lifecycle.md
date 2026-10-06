@@ -37,10 +37,6 @@
   and `delete` keep their names.
 - **`StreamChannelListController.deleteChannel` returns the `Result`,** as `muteChannel` does.
 - **`hard_delete` is not exposed.** The server refuses it from a client-side token, and v10 never sent it.
-- **Stopping watching stays in 11, hand-written.** The spec declares a required, empty-object body for
-  `stop-watching`, but the generated `stopWatchingChannel` sends none, and the handler's
-  `ParseAndValidateRequest` refuses a missing body with `400 invalid json data` on v1 and v2 alike.
-  It moves once the generator emits the body; it is not paired with the other three, so they move now.
 - **Show sends no body,** where v1 sent `{}`; the server accepts both. Hide still sends `clear_history`.
 - **The read and delivery receipts stay in 11 for now.** `markRead` and its siblings share endpoints
   with the thread read calls, fabricate a response on the local-unread path, and feed
@@ -49,7 +45,6 @@
 
 ## Risks
 
-- Until stopping watching moves, `stopChannelWatching` and `Channel.stopWatching` still throw while the other channel writes here return a `Result`; `migrations/v11-migration.md` says so.
 
 ## Definition of done
 
