@@ -285,8 +285,8 @@ void main() {
     expect(res.exceptionOrNull(), error);
   });
 
-  test('StreamChatClient.disableSlowMode sends the cooldown unset and returns a success', () async {
-    const request = api.UpdateChannelPartialRequest(unset: ['cooldown']);
+  test('StreamChatClient.disableSlowMode sends the cooldown set to 0 and returns a success', () async {
+    const request = api.UpdateChannelPartialRequest(set: {'cooldown': 0});
 
     final defaultApi = MockDefaultApi();
     when(

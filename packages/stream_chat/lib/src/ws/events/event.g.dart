@@ -33,7 +33,7 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
   deletedForMe: json['deleted_for_me'] as bool?,
   aiState: $enumDecodeNullable(
     _$AITypingStateEnumMap,
-    json['ai_state'],
+    Event._aiStateReadValue(json, 'ai_state'),
     unknownValue: AITypingState.idle,
   ),
   aiMessage: json['ai_message'] as String?,
