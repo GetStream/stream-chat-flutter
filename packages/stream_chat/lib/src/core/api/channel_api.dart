@@ -4,7 +4,6 @@ import '../../ws/events/event.dart';
 import '../http/stream_http_client.dart';
 import '../models/channel_state.dart';
 import '../models/message.dart';
-import '../models/message_delivery.dart';
 import 'requests.dart';
 import 'responses.dart';
 
@@ -90,12 +89,6 @@ class ChannelApi {
       },
     );
     return QueryChannelsResponse.fromJson(response.data);
-  }
-
-  /// Mark all channels for this user as read
-  Future<EmptyResponse> markAllRead() async {
-    final response = await _client.post('/channels/read', data: {});
-    return EmptyResponse.fromJson(response.data);
   }
 
   /// Replaces the [channelId] of type [ChannelType] data with [data]
@@ -237,77 +230,6 @@ class ChannelApi {
     return EmptyResponse.fromJson(response.data);
   }
 
-  /// Mark [channelId] of type [channelType] all messages as read
-  /// Optionally provide a [messageId] if you want to mark channel as
-  /// read from particular message onwards
-  Future<EmptyResponse> markRead(
-    String channelId,
-    String channelType, {
-    String? messageId,
-  }) async {
-    final response = await _client.post(
-      '${_getChannelUrl(channelId, channelType)}/read',
-      data: {if (messageId != null) 'message_id': messageId},
-    );
-    return EmptyResponse.fromJson(response.data);
-  }
-
-  /// Marks the channel as unread by a given [messageId].
-  ///
-  /// All messages from the provided message onwards will be marked as unread.
-  Future<EmptyResponse> markUnread(
-    String channelId,
-    String channelType,
-    String messageId,
-  ) async {
-    final response = await _client.post(
-      '${_getChannelUrl(channelId, channelType)}/unread',
-      data: {'message_id': messageId},
-    );
-    return EmptyResponse.fromJson(response.data);
-  }
-
-  /// Marks the channel as unread by a given [timestamp].
-  ///
-  /// All messages after the provided timestamp will be marked as unread.
-  Future<EmptyResponse> markUnreadByTimestamp(
-    String channelId,
-    String channelType,
-    DateTime timestamp,
-  ) async {
-    final response = await _client.post(
-      '${_getChannelUrl(channelId, channelType)}/unread',
-      data: {'message_timestamp': timestamp.toUtc().toIso8601String()},
-    );
-    return EmptyResponse.fromJson(response.data);
-  }
-
-  /// Mark the provided [threadId] of the channel as read.
-  Future<EmptyResponse> markThreadRead(
-    String channelId,
-    String channelType,
-    String threadId,
-  ) async {
-    final response = await _client.post(
-      '${_getChannelUrl(channelId, channelType)}/read',
-      data: {'thread_id': threadId},
-    );
-    return EmptyResponse.fromJson(response.data);
-  }
-
-  /// Mark the provided [threadId] of the channel as unread.
-  Future<EmptyResponse> markThreadUnread(
-    String channelId,
-    String channelType,
-    String threadId,
-  ) async {
-    final response = await _client.post(
-      '${_getChannelUrl(channelId, channelType)}/unread',
-      data: {'thread_id': threadId},
-    );
-    return EmptyResponse.fromJson(response.data);
-  }
-
   /// Stop watching the channel
   Future<EmptyResponse> stopWatching(
     String channelId,
@@ -316,21 +238,6 @@ class ChannelApi {
     final response = await _client.post(
       '${_getChannelUrl(channelId, channelType)}/stop-watching',
       data: {},
-    );
-    return EmptyResponse.fromJson(response.data);
-  }
-
-  /// Sends delivery receipts for the latest messages in multiple channels.
-  ///
-  /// Accepts up to 100 channels per call.
-  Future<EmptyResponse> markChannelsDelivered(
-    List<MessageDelivery> deliveries,
-  ) async {
-    final response = await _client.post(
-      '/channels/delivered',
-      data: jsonEncode({
-        'latest_delivered_messages': deliveries,
-      }),
     );
     return EmptyResponse.fromJson(response.data);
   }

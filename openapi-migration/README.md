@@ -22,14 +22,15 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [08](08-moderation-and-blocklists.md) | Moderation & Blocklists | 0 | 34 | ☑ |
 | [09](09-users.md) | Users | 9 | 9 | ☐ |
 | [10](10-messages.md) | Messages & Search | 14 | 12 | ☐ |
-| [11](11-channels-and-members.md) | Channels, Members & Sync | 20 | 19 | ☐ |
+| [11](11-channels-and-members.md) | Channels, Members & Sync | 13 | 15 | ☐ |
 | [12](12-uploads-cdn.md) | Uploads (CDN) | 8 | 8 | ☑ |
 | [13](13-push-preferences.md) | Push Preferences | 1 | 1 | ☐ |
 | [14](14-banned-users.md) | Banned Users — split out of 08 | 1 | 1 | ☐ |
 | [15](15-partial-updates.md) | Partial Updates — split out of 11 | 0 | 2 | ☑ |
 | [16](16-channel-lifecycle.md) | Channel Lifecycle — split out of 11 | 0 | 3 | ☑ |
+| [17](17-read-receipts.md) | Read Receipts — split out of 11 | 0 | 4 | ☑ |
 
-**Coverage:** 77 hand-written methods across 10 files, and all 129 generated operations, each claimed by exactly
+**Coverage:** 70 hand-written methods across 10 files, and all 129 generated operations, each claimed by exactly
 one group. Verified mechanically — see [Keeping this plan honest](#keeping-this-plan-honest).
 
 
@@ -172,7 +173,9 @@ surfaces before it reaches `Message` and `ChannelState`:
 - **15** is the partial channel and member updates, split out of 11 so `channel_mapper.dart` lands on calls that
   read nothing into `ChannelState`. It landed first; the full update waits in 11 for group 10's message mappers.
 - **16** is hiding, showing and deleting a channel, split out of 11 after 15 because they answer nothing
-  `channel_mapper.dart` cannot map; the read and delivery receipts stay in 11 for a slice of their own.
+  `channel_mapper.dart` cannot map.
+- **17** is the read and delivery receipts, split out of 11 after 16. They answer only a `duration` and a read
+  event, which waits for group 10's message mappers.
 - **12** comes late because it needs its own hand-written multipart client and is the highest-traffic path in the
   SDK.
 - **09** is last. Every group before it maps users through `user_mapper.dart` onto today's `User`; 09 migrates the

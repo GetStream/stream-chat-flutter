@@ -35,6 +35,7 @@ onto Stream's OpenAPI-generated API client.
     - [Link Previews](#link-previews)
     - [Partial Updates](#partial-updates)
     - [Channel Lifecycle](#channel-lifecycle)
+    - [Read Receipts](#read-receipts)
 - [Migration Checklist](#migration-checklist)
 - [For AI Agents](#for-ai-agents)
 - [Contributing to this guide](#contributing-to-this-guide)
@@ -82,6 +83,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**File Upload**](#file-upload) | Uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
 | [**Partial Updates**](#partial-updates) | Channel and member partial updates — `updatePartial`, `updateName`, `updateImage`, slow mode, pin and archive — return a `Result` instead of throwing; their responses take the API's names, `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse`, and `partialMemberUpdate` becomes `updateMemberPartial` |
 | [**Channel Lifecycle**](#channel-lifecycle) | Hiding, showing and deleting a channel return a `Result` instead of throwing; stopping watching still throws |
+| [**Read Receipts**](#read-receipts) | Marking read, unread and delivered return a `Result` instead of throwing; `ChannelDeliveryReporter`'s callback returns a `Result` |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -244,6 +246,15 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `Channel.hide` / `show` / `delete` → `Future<EmptyResponse>` | `Future<Result<HideChannelResponse>>` / `Future<Result<ShowChannelResponse>>` / `Future<Result<DeleteChannelResponse>>` | `retyped` | Returns a `Result` instead of throwing. Calling one before the channel is initialized still throws a `StateError` |
 | `StreamChatApi.channel.hideChannel` / `showChannel` / `deleteChannel` | the `StreamChatClient` methods | `removed` | The endpoints moved to the generated client |
 | `MemberUpdatePayload(pinned: true).toJson()` / `MemberUpdateType.pinned.name` | `{'pinned': true}` / `'pinned'` | `removed` | Same for `archived`. Or call `pinChannel` / `unpinChannel` / `archiveChannel` / `unarchiveChannel` |
+| `StreamChatClient.markChannelRead` / `markThreadRead` / `markAllRead` → `Future<EmptyResponse>` | `Future<Result<MarkReadResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `StreamChatClient.markChannelUnread` / `markChannelUnreadByTimestamp` / `markThreadUnread` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing, and carries no value on success |
+| `StreamChatClient.markChannelsDelivered` → `Future<EmptyResponse>` | `Future<Result<MarkDeliveredResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `Channel.markRead` / `markThreadRead` → `Future<EmptyResponse>` | `Future<Result<MarkReadResponse>>` | `retyped` | Returns a `Result` instead of throwing, including when the current user cannot send read events. Calling one before the channel is initialized still throws a `StateError` |
+| `Channel.markUnread` / `markUnreadByTimestamp` / `markThreadUnread` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing, including when the current user cannot send read events, and when `markUnread` counts locally and the message is not among the loaded ones. Calling one before the channel is initialized still throws a `StateError` |
+| `MarkChannelsDelivered` = `Future<void> Function(Iterable<MessageDelivery>)` | `Future<Result<void>> Function(Iterable<MessageDelivery>)` | `retyped` | The callback `ChannelDeliveryReporter` takes. Return a failure rather than throwing; the reporter keeps the receipts and sends them with a later batch |
+| `MessageDelivery.toJson` | — | `removed` | `MessageDelivery` is a plain class |
+| `MessageDelivery` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
+| `StreamChatApi.channel.markRead` / `markUnread` / `markUnreadByTimestamp` / `markThreadRead` / `markThreadUnread` / `markAllRead` / `markChannelsDelivered` | the `StreamChatClient` methods | `removed` | The endpoints moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -731,6 +742,59 @@ result.fold(
 
 > **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call. Each write
 > answers its own envelope so a field the API adds later reaches you without another break.
+
+### Read Receipts
+
+**Marking a channel or thread read or unread, and sending delivery receipts, return a `Result` instead of
+throwing.** That covers `StreamChatClient.markChannelRead`, `markChannelUnread`, `markChannelUnreadByTimestamp`,
+`markThreadRead`, `markThreadUnread`, `markAllRead` and `markChannelsDelivered`, and `Channel.markRead`,
+`markUnread`, `markUnreadByTimestamp`, `markThreadRead` and `markThreadUnread`. A `try`/`catch` around one still
+compiles, but no longer catches a failed call: read the returned `Result` instead. That includes the
+`StreamClientException`s the `Channel` methods raised when the current user cannot send read events in the
+channel, and the one `markUnread` raised when it counts unread messages locally and the message is not among the
+loaded ones. Both now arrive as failures.
+
+```dart
+// v10
+try {
+  await channel.markRead();
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await channel.markRead();
+if (result case Failure(:final error)) report(error);
+```
+
+**Marking read answers a `MarkReadResponse`, and sending delivery receipts a `MarkDeliveredResponse`**, where v10
+answered `EmptyResponse`. Marking unread carries no value on success.
+
+**`MarkChannelsDelivered` returns a `Result`.** It is the callback `ChannelDeliveryReporter` takes. A custom one
+returns a failure rather than throwing, and the reporter keeps the receipts and sends them with a later batch:
+
+```dart
+// v10
+ChannelDeliveryReporter(
+  onMarkChannelsDelivered: (deliveries) async {
+    await client.markChannelsDelivered(deliveries);
+  },
+);
+
+// v11
+ChannelDeliveryReporter(
+  onMarkChannelsDelivered: client.markChannelsDelivered,
+);
+```
+
+**`MessageDelivery` no longer encodes to JSON.** It is a plain class that compares by value and gains `copyWith`.
+
+**`StreamChatApi.channel.markRead`, `markUnread`, `markUnreadByTimestamp`, `markThreadRead`, `markThreadUnread`,
+`markAllRead` and `markChannelsDelivered` are removed.** Call them on `StreamChatClient`.
+
+> **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call. Marking read
+> and sending receipts answer their own envelope, so a field the API adds later reaches you without another
+> break. Marking unread answers nothing the API could extend, so it carries no value.
 
 ### Moderation
 

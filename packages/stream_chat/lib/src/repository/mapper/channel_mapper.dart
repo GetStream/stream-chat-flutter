@@ -7,8 +7,11 @@ import '../../core/models/chat_preferences.dart';
 import '../../core/models/command.dart';
 import '../../core/models/member.dart';
 import '../../core/models/push_level.dart';
+import '../../core/models/request/message_delivery.dart';
 import '../../core/models/response/delete_channel_response.dart';
 import '../../core/models/response/hide_channel_response.dart';
+import '../../core/models/response/mark_delivered_response.dart';
+import '../../core/models/response/mark_read_response.dart';
 import '../../core/models/response/show_channel_response.dart';
 import '../../core/models/response/update_channel_partial_response.dart';
 import '../../core/models/response/update_member_partial_response.dart';
@@ -208,4 +211,24 @@ extension DeleteChannelResponseMapper on api.DeleteChannelResponse {
     duration: duration,
     channel: channel?.toModel(),
   );
+}
+
+/// Maps a generated [api.MarkReadResponse] to a [MarkReadResponse].
+extension MarkReadResponseMapper on api.MarkReadResponse {
+  // TODO(openapi-migration): map `event` in group 10; its thread carries a `MessageResponse`.
+
+  /// Converts this response into a [MarkReadResponse].
+  MarkReadResponse toModel() => MarkReadResponse(duration: duration);
+}
+
+/// Maps a generated [api.MarkDeliveredResponse] to a [MarkDeliveredResponse].
+extension MarkDeliveredResponseMapper on api.MarkDeliveredResponse {
+  /// Converts this response into a [MarkDeliveredResponse].
+  MarkDeliveredResponse toModel() => MarkDeliveredResponse(duration: duration);
+}
+
+/// Maps a [MessageDelivery] to a generated [api.DeliveredMessagePayload].
+extension MessageDeliveryMapper on MessageDelivery {
+  /// Converts this receipt into an [api.DeliveredMessagePayload].
+  api.DeliveredMessagePayload toRequest() => api.DeliveredMessagePayload(cid: channelCid, id: messageId);
 }
