@@ -42,8 +42,8 @@ class ChannelDeliveryReporter {
   /// The callback invoked to send delivery receipts.
   ///
   /// Receives delivery receipts acknowledging that messages were received.
-  /// When it returns a failure, or throws, the receipts are kept and sent
-  /// with a later batch.
+  /// When it returns a failure, or throws, the receipts are kept for a later
+  /// batch.
   final MarkChannelsDelivered onMarkChannelsDelivered;
 
   final _deliveryCandidatesLock = Lock();
@@ -169,40 +169,34 @@ class ChannelDeliveryReporter {
 
     _logger.d(() => 'Marking ${messageDeliveries.length} channels as delivered');
 
-    final result = await _markDelivered(messageDeliveries);
-    if (result case Failure(:final error, :final stackTrace)) {
-      _logger.w(() => 'Failed to mark channels as delivered', error: error, stackTrace: stackTrace);
-      return;
-    }
-
-    // Clear the successfully delivered candidates. If a channel's message ID
-    // has changed since we started delivery, keep it for the next batch.
-    await _deliveryCandidatesLock.synchronized(() {
-      for (final delivery in messageDeliveries) {
-        final deliveredChannelCid = delivery.channelCid;
-        final deliveredMessageId = delivery.messageId;
-
-        final currentMessage = _deliveryCandidates[deliveredChannelCid];
-        // Skip removal if a newer message has been added while we were
-        // processing the current batch.
-        if (currentMessage?.id != deliveredMessageId) continue;
-        _deliveryCandidates.remove(deliveredChannelCid);
-      }
-
-      // Schedule the next batch if there are remaining candidates.
-      if (_deliveryCandidates.isNotEmpty) {
-        _throttledMarkCandidatesAsDelivered.call();
-      }
-    });
-  }
-
-  // Calls [onMarkChannelsDelivered], reporting an error it throws as a
-  // failure so the receipts are kept for a later batch.
-  Future<Result<void>> _markDelivered(Iterable<MessageDelivery> deliveries) async {
     try {
-      return await onMarkChannelsDelivered(deliveries);
-    } catch (error, stackTrace) {
-      return Result.failure(error, stackTrace);
+      final result = await onMarkChannelsDelivered(messageDeliveries);
+      if (result case Failure(:final error, :final stackTrace)) {
+        _logger.w(() => 'Failed to mark channels as delivered', error: error, stackTrace: stackTrace);
+        return;
+      }
+
+      // Clear the successfully delivered candidates. If a channel's message ID
+      // has changed since we started delivery, keep it for the next batch.
+      await _deliveryCandidatesLock.synchronized(() {
+        for (final delivery in messageDeliveries) {
+          final deliveredChannelCid = delivery.channelCid;
+          final deliveredMessageId = delivery.messageId;
+
+          final currentMessage = _deliveryCandidates[deliveredChannelCid];
+          // Skip removal if a newer message has been added while we were
+          // processing the current batch.
+          if (currentMessage?.id != deliveredMessageId) continue;
+          _deliveryCandidates.remove(deliveredChannelCid);
+        }
+
+        // Schedule the next batch if there are remaining candidates.
+        if (_deliveryCandidates.isNotEmpty) {
+          _throttledMarkCandidatesAsDelivered.call();
+        }
+      });
+    } catch (e, stk) {
+      _logger.w(() => 'Failed to mark channels as delivered', error: e, stackTrace: stk);
     }
   }
 

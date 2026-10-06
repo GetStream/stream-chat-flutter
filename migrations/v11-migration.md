@@ -251,7 +251,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamChatClient.markChannelsDelivered` → `Future<EmptyResponse>` | `Future<Result<MarkDeliveredResponse>>` | `retyped` | Returns a `Result` instead of throwing |
 | `Channel.markRead` / `markThreadRead` → `Future<EmptyResponse>` | `Future<Result<MarkReadResponse>>` | `retyped` | Returns a `Result` instead of throwing, including when the current user cannot send read events. Calling one before the channel is initialized still throws a `StateError` |
 | `Channel.markUnread` / `markUnreadByTimestamp` / `markThreadUnread` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing, including when the current user cannot send read events, and when `markUnread` counts locally and the message is not among the loaded ones. Calling one before the channel is initialized still throws a `StateError` |
-| `MarkChannelsDelivered` = `Future<void> Function(Iterable<MessageDelivery>)` | `Future<Result<void>> Function(Iterable<MessageDelivery>)` | `retyped` | The callback `ChannelDeliveryReporter` takes. Return a failure rather than throwing; the reporter keeps the receipts and sends them with a later batch |
+| `MarkChannelsDelivered` = `Future<void> Function(Iterable<MessageDelivery>)` | `Future<Result<void>> Function(Iterable<MessageDelivery>)` | `retyped` | The callback `ChannelDeliveryReporter` takes. Return a failure rather than throwing; the reporter keeps the receipts for a later batch |
 | `MessageDelivery.toJson` | — | `removed` | `MessageDelivery` is a plain class |
 | `MessageDelivery` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
 | `StreamChatApi.channel.markRead` / `markUnread` / `markUnreadByTimestamp` / `markThreadRead` / `markThreadUnread` / `markAllRead` / `markChannelsDelivered` | the `StreamChatClient` methods | `removed` | The endpoints moved to the generated client |
@@ -771,7 +771,7 @@ if (result case Failure(:final error)) report(error);
 answered `EmptyResponse`. Marking unread carries no value on success.
 
 **`MarkChannelsDelivered` returns a `Result`.** It is the callback `ChannelDeliveryReporter` takes. A custom one
-returns a failure rather than throwing, and the reporter keeps the receipts and sends them with a later batch:
+returns a failure rather than throwing, and the reporter keeps the receipts for a later batch:
 
 ```dart
 // v10
