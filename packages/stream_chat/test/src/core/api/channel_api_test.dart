@@ -997,7 +997,9 @@ void main() {
   test('disableSlowdown', () async {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
-    const unset = ['cooldown'];
+    const set = {
+      'cooldown': 0,
+    };
 
     final path = _getChannelUrl(channelId, channelType);
 
@@ -1007,7 +1009,7 @@ void main() {
     );
 
     when(() => client.patch(path, data: {
-          'unset': unset,
+          'set': set,
         })).thenAnswer((_) async => successResponse(path, data: {
           'channel': channelModel.toJson(),
         }));
@@ -1017,7 +1019,7 @@ void main() {
     expect(res, isNotNull);
 
     verify(() => client.patch(path, data: {
-          'unset': unset,
+          'set': set,
         })).called(1);
     verifyNoMoreInteractions(client);
   });

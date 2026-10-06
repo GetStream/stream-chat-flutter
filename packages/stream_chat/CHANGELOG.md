@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `Channel.disableSlowMode` and `StreamChatClient.disableSlowdown` always failing.
+
 ## 9.31.0
 
 ✅ Added
