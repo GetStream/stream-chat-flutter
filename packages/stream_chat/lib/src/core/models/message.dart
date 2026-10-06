@@ -186,7 +186,7 @@ class Message extends Equatable {
   }
 
   /// A map of reaction types and their corresponding reaction groups.
-  @JsonKey(includeToJson: false, readValue: _reactionGroupsReadValue)
+  @JsonKey(includeToJson: false, readValue: _reactionGroupsReadValue, fromJson: reactionGroupsFromV1Json)
   final Map<String, ReactionGroup>? reactionGroups;
 
   /// The latest reactions to the message created by any user.

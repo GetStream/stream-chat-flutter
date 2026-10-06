@@ -79,7 +79,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**App Settings**](#app-settings) | `getAppSettings` returns a `Result<AppSettingsResponse>` instead of throwing; `GetAppSettingsResponse` is renamed `AppSettingsResponse` |
 | [**Guest Users**](#guest-users) | `connectGuestUser` is unchanged; `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed |
 | [**File Upload**](#file-upload) | Uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
-| [**Messages**](#messages) | `Moderation` no longer decodes from or encodes to JSON, and is no longer an `Equatable` |
+| [**Messages**](#messages) | `Moderation` and `ReactionGroup` no longer decode from or encode to JSON, and are no longer `Equatable`s |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -223,6 +223,8 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamChatApi.fileUploader`, `StreamChatApi(attachmentFileUploaderProvider:)` | `StreamChatClient(attachmentFileUploaderProvider:)` | `removed` | The uploader belongs to `StreamChatClient` |
 | `Moderation.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. `Message.fromJson` still reads a message's moderation |
 | `Moderation extends Equatable`, `Moderation.props` | `Moderation` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and `Moderation` is no longer an `Equatable` |
+| `ReactionGroup.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. `Message.fromJson` still reads a message's reaction groups. `fromData` / `toData` are the offline database's format, not API JSON |
+| `ReactionGroup extends Equatable`, `ReactionGroup.props` | `ReactionGroup` (value `==`) | `removed` | Equality and `copyWith` are unchanged; `props` is gone and `ReactionGroup` is no longer an `Equatable` |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -782,9 +784,11 @@ StreamChatClient(apiKey, attachmentFileUploaderProvider: (dio) => MyUploader(dio
 
 ### Messages
 
-**`Moderation` is a plain class.** It no longer decodes from or encodes to JSON, and it is no longer an
-`Equatable`: equality is unchanged, `props` is gone, and it gains `copyWith`. A message still carries its
-moderation outcome in `Message.moderation`, read from the API as before.
+**`Moderation` and `ReactionGroup` are plain classes.** Neither decodes from or encodes to JSON any more, and
+neither is an `Equatable`: equality is unchanged and `props` is gone. `Moderation` gains `copyWith`. A message
+still carries them in `Message.moderation` and `Message.reactionGroups`, read from the API as before.
+`ReactionGroup.fromData` and `toData` read and write the offline database's format; they are not a codec for API
+JSON.
 
 ```dart
 // v10

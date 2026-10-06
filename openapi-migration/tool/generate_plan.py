@@ -549,7 +549,7 @@ GROUPS = [
             'ours; treat the generated `MessageResponse` as a mapping source only.',
             '`Attachment`: the generated model defines fields our `extraData` currently absorbs. Decide the '
             'promotion rules before writing the mapper.',
-            'Replace the temporary `@DataSerializable` storage codec (`UserGroup`, `UserGroupMember`): decide '
+            'Replace the temporary `@DataSerializable` storage codec (`UserGroup`, `UserGroupMember`, `ReactionGroup`): decide '
             'between dedicated tables and codecs owned by `stream_chat_persistence` before `Message` and '
             '`Attachment` become plain models, then delete the typedef and every `fromData`/`toData` it generates.',
             '`Action` is still the v10 json_serializable class, embedded in `Attachment.actions`, which '
@@ -575,6 +575,15 @@ GROUPS = [
               is needed. `ModerationAction` keeps its `fromJson`/`toJson` statics, as `MessageType` does, until
               `Message` stops decoding v1 JSON. The `ModerationV2Response` mapper waits for the first endpoint
               that answers a message.
+            - **`ReactionGroup` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`;
+              equality is unchanged. Its constructor stays non-const, defaulting both dates to now, and it keeps
+              v10's hand-written `copyWith` (`@Freezed(copyWith: false)`): freezed's would read a `null` date as
+              "now" instead of "keep". `Message.reactionGroups` decodes through `reactionGroupsFromV1Json`,
+              decode-only; `_reactionGroupsReadValue` still builds the groups from `reaction_counts` and
+              `reaction_scores` when `reaction_groups` is missing. Dates go through `StreamDateTimeConverter`.
+              `messages.reaction_groups` and `pinned_messages.reaction_groups` store the groups through the
+              temporary `@DataSerializable` codec, whose output is byte-identical to v10's `toJson`, so no
+              `schemaVersion` bump.
             """),
     ),
     dict(

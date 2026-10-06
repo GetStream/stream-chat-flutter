@@ -5,6 +5,7 @@ import 'package:stream_core/stream_core.dart' show StreamDateTimeConverter;
 import '../device.dart';
 import '../moderation.dart';
 import '../push_provider.dart';
+import '../reaction_group.dart';
 import '../user_group.dart';
 import '../user_group_member.dart';
 
@@ -59,6 +60,28 @@ Moderation? moderationFromV1Json(Map<String, dynamic>? json) {
     platformCircumvented: json['platform_circumvented'] as bool? ?? false,
   );
 }
+
+/// Reads the reaction groups of a message from their v1 keys.
+///
+/// Decode-only: [Message.reactionGroups] is never written back to JSON.
+// TODO(openapi-migration): remove in group 10
+@internal
+Map<String, ReactionGroup>? reactionGroupsFromV1Json(Map<String, dynamic>? json) {
+  return json?.map((type, group) => MapEntry(type, _reactionGroupFromV1Json(group as Map<String, dynamic>)));
+}
+
+ReactionGroup _reactionGroupFromV1Json(Map<String, dynamic> json) => ReactionGroup(
+  count: (json['count'] as num?)?.toInt() ?? 0,
+  sumScores: (json['sum_scores'] as num?)?.toInt() ?? 0,
+  firstReactionAt: switch (json['first_reaction_at']) {
+    final Object it => _dateTime.fromJson(it),
+    null => null,
+  },
+  lastReactionAt: switch (json['last_reaction_at']) {
+    final Object it => _dateTime.fromJson(it),
+    null => null,
+  },
+);
 
 // Dates arrive as ISO-8601 strings on v1 and as epoch nanoseconds on v2; the converter reads both.
 const _dateTime = StreamDateTimeConverter();

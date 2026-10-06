@@ -3,6 +3,7 @@ import 'package:stream_chat/src/core/models/device.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/moderation.dart';
 import 'package:stream_chat/src/core/models/push_provider.dart';
+import 'package:stream_chat/src/core/models/reaction_group.dart';
 import 'package:stream_chat/src/core/models/user_group.dart';
 import 'package:stream_chat/src/core/models/user_group_member.dart';
 import 'package:test/test.dart';
@@ -167,5 +168,51 @@ void main() {
     final message = Message.fromJson(const {'id': 'message-id'});
 
     expect(message.moderation, isNull);
+  });
+
+  test('Message.fromJson reads every reaction group field from its v1 keys', () {
+    final message = Message.fromJson(const {
+      'id': 'message-id',
+      'reaction_groups': {
+        'love': {
+          'count': 2,
+          'sum_scores': 5,
+          'first_reaction_at': '2024-01-01T00:00:00.000Z',
+          'last_reaction_at': '2024-01-02T00:00:00.000Z',
+        },
+      },
+    });
+
+    expect(message.reactionGroups, {
+      'love': ReactionGroup(
+        count: 2,
+        sumScores: 5,
+        firstReactionAt: DateTime.utc(2024, 1, 1),
+        lastReactionAt: DateTime.utc(2024, 1, 2),
+      ),
+    });
+  });
+
+  test('Message.fromJson reads reaction group dates sent as epoch nanoseconds', () {
+    final message = Message.fromJson(const {
+      'id': 'message-id',
+      'reaction_groups': {
+        'love': {
+          'count': 1,
+          'sum_scores': 1,
+          'first_reaction_at': 1704067200123456000,
+          'last_reaction_at': 1704153600000000000,
+        },
+      },
+    });
+
+    expect(message.reactionGroups!['love']!.firstReactionAt, DateTime.utc(2024, 1, 1, 0, 0, 0, 123, 456));
+    expect(message.reactionGroups!['love']!.lastReactionAt, DateTime.utc(2024, 1, 2));
+  });
+
+  test('Message.fromJson leaves reaction groups null when the message carries no reactions', () {
+    final message = Message.fromJson(const {'id': 'message-id'});
+
+    expect(message.reactionGroups, isNull);
   });
 }

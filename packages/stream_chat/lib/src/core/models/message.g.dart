@@ -23,8 +23,8 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       const [],
   silent: json['silent'] as bool? ?? false,
   shadowed: json['shadowed'] as bool? ?? false,
-  reactionGroups: (Message._reactionGroupsReadValue(json, 'reaction_groups') as Map<String, dynamic>?)?.map(
-    (k, e) => MapEntry(k, ReactionGroup.fromJson(e as Map<String, dynamic>)),
+  reactionGroups: reactionGroupsFromV1Json(
+    Message._reactionGroupsReadValue(json, 'reaction_groups') as Map<String, dynamic>?,
   ),
   latestReactions: (json['latest_reactions'] as List<dynamic>?)
       ?.map((e) => Reaction.fromJson(e as Map<String, dynamic>))
