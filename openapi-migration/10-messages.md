@@ -50,7 +50,6 @@
 - `Message` is public, persisted, WebSocket-delivered and the most customised type in the SDK. Keep ours; treat the generated `MessageResponse` as a mapping source only.
 - `Attachment`: the generated model defines fields our `extraData` currently absorbs. Decide the promotion rules before writing the mapper.
 - Replace the temporary `@DataSerializable` storage codec (`UserGroup`, `UserGroupMember`, `ReactionGroup`): decide between dedicated tables and codecs owned by `stream_chat_persistence` before `Message` and `Attachment` become plain models, then delete the typedef and every `fromData`/`toData` it generates.
-- `Action` is still the v10 json_serializable class, embedded in `Attachment.actions`, which `Attachment.toJson` writes when sending and `toData` writes to persistence. It becomes a plain model with `Attachment`; group 04 left it alone.
 
 ## Decisions taken
 
@@ -74,6 +73,12 @@ an endpoint, so the definition of done below stays open.
   `messages.reaction_groups` and `pinned_messages.reaction_groups` store the groups through the
   temporary `@DataSerializable` codec, whose output is byte-identical to v10's `toJson`, so no
   `schemaVersion` bump.
+- **`Action` is a plain `@freezed` model,** ahead of `Attachment` rather than with it. It loses
+  `fromJson` and `toJson`, gains `copyWith` and `const`, and compares by value where v10 compared by
+  identity, so attachments holding equal actions now compare equal. `Attachment.actions` reads and
+  writes through `ActionV1JsonConverter`: `Attachment.toJson` sends the actions and `toData` stores
+  them, and the converter writes the same keys v10 did, `value` included when null, so requests and
+  the stored `attachments` columns are unchanged. `Action` needs no codec of its own.
 
 ## Risks
 

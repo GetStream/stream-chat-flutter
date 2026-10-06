@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_core/stream_core.dart' show StreamDateTimeConverter;
 
+import '../action.dart';
 import '../device.dart';
 import '../moderation.dart';
 import '../push_provider.dart';
@@ -11,6 +12,33 @@ import '../user_group_member.dart';
 
 // Converters for plain models embedded in json_serializable models that still decode v1 JSON. Each one is deleted
 // by the migration group that turns its parent into a plain model.
+
+/// Converts an [Action] to and from its v1 keys.
+// TODO(openapi-migration): remove in group 10
+@internal
+class ActionV1JsonConverter implements JsonConverter<Action, Map<String, dynamic>> {
+  /// Creates a new [ActionV1JsonConverter].
+  const ActionV1JsonConverter();
+
+  @override
+  Action fromJson(Map<String, dynamic> json) => Action(
+    name: json['name'] as String,
+    style: json['style'] as String? ?? 'default',
+    text: json['text'] as String,
+    type: json['type'] as String,
+    value: json['value'] as String?,
+  );
+
+  // Writes `value` even when it is null, as v10 did, so sent attachments and the stored ones keep their format.
+  @override
+  Map<String, dynamic> toJson(Action action) => {
+    'name': action.name,
+    'style': action.style,
+    'text': action.text,
+    'type': action.type,
+    'value': action.value,
+  };
+}
 
 /// Converts a [Device] to and from its v1 `id` and `push_provider` keys.
 // TODO(openapi-migration): remove in group 09

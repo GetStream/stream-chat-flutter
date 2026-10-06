@@ -1,3 +1,5 @@
+import 'package:stream_chat/src/core/models/action.dart';
+import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/converters/v1_json_converters.dart';
 import 'package:stream_chat/src/core/models/device.dart';
 import 'package:stream_chat/src/core/models/message.dart';
@@ -214,5 +216,49 @@ void main() {
     final message = Message.fromJson(const {'id': 'message-id'});
 
     expect(message.reactionGroups, isNull);
+  });
+
+  test('Attachment.fromJson reads every action field from its v1 keys', () {
+    final attachment = Attachment.fromJson(const {
+      'type': 'giphy',
+      'actions': [
+        {'name': 'image_action', 'style': 'primary', 'text': 'Send', 'type': 'button', 'value': 'send'},
+      ],
+    });
+
+    expect(attachment.actions, [
+      const Action(name: 'image_action', style: 'primary', text: 'Send', type: 'button', value: 'send'),
+    ]);
+  });
+
+  test('Attachment.fromJson reads an action without a style as the default style', () {
+    final attachment = Attachment.fromJson(const {
+      'type': 'giphy',
+      'actions': [
+        {'name': 'image_action', 'text': 'Cancel', 'type': 'button'},
+      ],
+    });
+
+    expect(attachment.actions, [const Action(name: 'image_action', text: 'Cancel', type: 'button')]);
+  });
+
+  test('Attachment.toJson writes every action key, including a null value', () {
+    final attachment = Attachment(
+      type: 'giphy',
+      actions: const [Action(name: 'image_action', text: 'Cancel', type: 'button')],
+    );
+
+    expect(attachment.toJson()['actions'], [
+      {'name': 'image_action', 'style': 'default', 'text': 'Cancel', 'type': 'button', 'value': null},
+    ]);
+  });
+
+  test('Attachment.fromJson reads back the actions written by toJson', () {
+    final attachment = Attachment(
+      type: 'giphy',
+      actions: const [Action(name: 'image_action', style: 'primary', text: 'Send', type: 'button', value: 'send')],
+    );
+
+    expect(Attachment.fromJson(attachment.toJson()).actions, attachment.actions);
   });
 }

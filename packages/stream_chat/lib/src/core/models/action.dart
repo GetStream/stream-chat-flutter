@@ -1,12 +1,12 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'action.g.dart';
+part 'action.freezed.dart';
 
-/// The class that contains the information about an action
-@JsonSerializable()
-class Action {
-  /// Constructor used for json serialization
-  Action({
+/// An interactive control attached to a message, such as the Send, Shuffle and Cancel buttons of a giphy preview.
+@freezed
+class Action with _$Action {
+  /// Creates a new [Action].
+  const Action({
     required this.name,
     this.style = 'default',
     required this.text,
@@ -14,24 +14,23 @@ class Action {
     this.value,
   });
 
-  /// Create a new instance from a json
-  factory Action.fromJson(Map<String, dynamic> json) => _$ActionFromJson(json);
-
-  /// The name of the action
+  /// The name the action is submitted under.
+  @override
   final String name;
 
-  /// The style of the action
+  /// The visual style of the action, such as `primary` or `default`.
+  @override
   final String style;
 
-  /// The test of the action
+  /// The label shown for the action.
+  @override
   final String text;
 
-  /// The type of the action
+  /// The kind of control, such as `button`.
+  @override
   final String type;
 
-  /// The value of the action
+  /// The value the action submits, or null if it submits none.
+  @override
   final String? value;
-
-  /// Serialize to json
-  Map<String, dynamic> toJson() => _$ActionToJson(this);
 }

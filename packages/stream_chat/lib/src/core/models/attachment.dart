@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../util/serializer.dart';
 import 'action.dart';
 import 'attachment_file.dart';
+import 'converters/v1_json_converters.dart';
 import 'response/og_attachment_response.dart';
 
 part 'attachment.g.dart';
@@ -140,6 +141,7 @@ class Attachment extends Equatable {
   final String? assetUrl;
 
   /// Actions from a command
+  @ActionV1JsonConverter()
   final List<Action>? actions;
 
   /// The original width of the attached image.

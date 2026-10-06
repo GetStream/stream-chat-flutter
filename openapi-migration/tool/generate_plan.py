@@ -552,9 +552,6 @@ GROUPS = [
             'Replace the temporary `@DataSerializable` storage codec (`UserGroup`, `UserGroupMember`, `ReactionGroup`): decide '
             'between dedicated tables and codecs owned by `stream_chat_persistence` before `Message` and '
             '`Attachment` become plain models, then delete the typedef and every `fromData`/`toData` it generates.',
-            '`Action` is still the v10 json_serializable class, embedded in `Attachment.actions`, which '
-            '`Attachment.toJson` writes when sending and `toData` writes to persistence. It becomes a plain model '
-            'with `Attachment`; group 04 left it alone.',
         ],
         risks=[
             '`message_api.dart` also holds the four draft methods, which belong to group 07 — leave them alone '
@@ -584,6 +581,12 @@ GROUPS = [
               `messages.reaction_groups` and `pinned_messages.reaction_groups` store the groups through the
               temporary `@DataSerializable` codec, whose output is byte-identical to v10's `toJson`, so no
               `schemaVersion` bump.
+            - **`Action` is a plain `@freezed` model,** ahead of `Attachment` rather than with it. It loses
+              `fromJson` and `toJson`, gains `copyWith` and `const`, and compares by value where v10 compared by
+              identity, so attachments holding equal actions now compare equal. `Attachment.actions` reads and
+              writes through `ActionV1JsonConverter`: `Attachment.toJson` sends the actions and `toData` stores
+              them, and the converter writes the same keys v10 did, `value` included when null, so requests and
+              the stored `attachments` columns are unchanged. `Action` needs no codec of its own.
             """),
     ),
     dict(

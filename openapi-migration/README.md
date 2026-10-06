@@ -144,6 +144,7 @@ includes a named response that carries only `duration` today, such as `HideChann
 | `userGroupsFromV1Json` | `Message.mentionedGroups` | [10](10-messages.md) |
 | `moderationFromV1Json` | `Message.moderation` | [10](10-messages.md) |
 | `reactionGroupsFromV1Json` | `Message.reactionGroups` | [10](10-messages.md) |
+| `ActionV1JsonConverter` | `Attachment.actions` | [10](10-messages.md) |
 | `DataSerializable` | `UserGroup`, `UserGroupMember`, `ReactionGroup` (`fromData`, `toData`) | [10](10-messages.md) |
 | `user_mapper.dart` (kept, re-pointed) | today's `User`, which still reads and writes JSON | [09](09-users.md) |
 

@@ -79,7 +79,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**App Settings**](#app-settings) | `getAppSettings` returns a `Result<AppSettingsResponse>` instead of throwing; `GetAppSettingsResponse` is renamed `AppSettingsResponse` |
 | [**Guest Users**](#guest-users) | `connectGuestUser` is unchanged; `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed |
 | [**File Upload**](#file-upload) | Uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
-| [**Messages**](#messages) | `Moderation` and `ReactionGroup` no longer decode from or encode to JSON, and are no longer `Equatable`s |
+| [**Messages**](#messages) | `Moderation`, `ReactionGroup` and `Action` no longer decode from or encode to JSON; `Action` compares by value |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -225,6 +225,8 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `Moderation extends Equatable`, `Moderation.props` | `Moderation` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and `Moderation` is no longer an `Equatable` |
 | `ReactionGroup.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. `Message.fromJson` still reads a message's reaction groups. `fromData` / `toData` are the offline database's format, not API JSON |
 | `ReactionGroup extends Equatable`, `ReactionGroup.props` | `ReactionGroup` (value `==`) | `removed` | Equality and `copyWith` are unchanged; `props` is gone and `ReactionGroup` is no longer an `Equatable` |
+| `Action.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. `Attachment.fromJson` and `toJson` still read and write an attachment's actions |
+| `Action` identity `==` | value `==`, plus `copyWith` | `retyped` | Two actions with the same fields are now equal, and so are attachments that differ only in holding separate copies of them |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -789,6 +791,10 @@ neither is an `Equatable`: equality is unchanged and `props` is gone. `Moderatio
 still carries them in `Message.moderation` and `Message.reactionGroups`, read from the API as before.
 `ReactionGroup.fromData` and `toData` read and write the offline database's format; they are not a codec for API
 JSON.
+
+**`Action` is a plain class too, and compares by value.** It no longer decodes from or encodes to JSON, and it gains
+`copyWith`. Two actions with the same fields are now equal, where v10 compared them by identity; an `Attachment`
+holding them follows suit.
 
 ```dart
 // v10
