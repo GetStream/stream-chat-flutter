@@ -142,6 +142,7 @@ includes a named response that carries only `duration` today, such as `HideChann
 | --- | --- | --- |
 | `DeviceV1JsonConverter` | `OwnUser.devices` | [09](09-users.md) |
 | `userGroupsFromV1Json` | `Message.mentionedGroups` | [10](10-messages.md) |
+| `moderationFromV1Json` | `Message.moderation` | [10](10-messages.md) |
 | `DataSerializable` | `UserGroup`, `UserGroupMember` (`fromData`, `toData`) | [10](10-messages.md) |
 | `user_mapper.dart` (kept, re-pointed) | today's `User`, which still reads and writes JSON | [09](09-users.md) |
 

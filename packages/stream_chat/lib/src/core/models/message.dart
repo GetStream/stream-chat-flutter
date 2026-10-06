@@ -322,7 +322,7 @@ class Message extends Equatable {
   }
 
   /// The moderation details for this message.
-  @JsonKey(includeToJson: false, readValue: _moderationReadValue)
+  @JsonKey(includeToJson: false, readValue: _moderationReadValue, fromJson: moderationFromV1Json)
   final Moderation? moderation;
 
   /// Optional draft message linked to this message.

@@ -52,6 +52,20 @@
 - Replace the temporary `@DataSerializable` storage codec (`UserGroup`, `UserGroupMember`): decide between dedicated tables and codecs owned by `stream_chat_persistence` before `Message` and `Attachment` become plain models, then delete the typedef and every `fromData`/`toData` it generates.
 - `Action` is still the v10 json_serializable class, embedded in `Attachment.actions`, which `Attachment.toJson` writes when sending and `toData` writes to persistence. It becomes a plain model with `Attachment`; group 04 left it alone.
 
+## Decisions taken
+
+The models `Message` embeds become plain ahead of the endpoints, one PR each, leaves first. None routes
+an endpoint, so the definition of done below stays open.
+
+- **`Moderation` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`; equality
+  is unchanged. `Message.moderation` decodes through `moderationFromV1Json`, a temporary decode-only
+  function in `v1_json_converters.dart`: `Message.toJson` never writes the field. It keeps the
+  `moderation_details` fallback and the legacy `MESSAGE_RESPONSE_ACTION_*` names, and reads a missing
+  `platform_circumvented` as `false`. `stream_chat_persistence` does not store moderation, so no codec
+  is needed. `ModerationAction` keeps its `fromJson`/`toJson` statics, as `MessageType` does, until
+  `Message` stops decoding v1 JSON. The `ModerationV2Response` mapper waits for the first endpoint
+  that answers a message.
+
 ## Risks
 
 - `message_api.dart` also holds the four draft methods, which belong to group 07 — leave them alone here.

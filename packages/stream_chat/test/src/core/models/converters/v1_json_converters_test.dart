@@ -1,6 +1,7 @@
 import 'package:stream_chat/src/core/models/converters/v1_json_converters.dart';
 import 'package:stream_chat/src/core/models/device.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/moderation.dart';
 import 'package:stream_chat/src/core/models/push_provider.dart';
 import 'package:stream_chat/src/core/models/user_group.dart';
 import 'package:stream_chat/src/core/models/user_group_member.dart';
@@ -111,5 +112,60 @@ void main() {
 
   test('userGroupsFromV1Json returns null when the message carries no groups', () {
     expect(userGroupsFromV1Json(null), isNull);
+  });
+
+  test('Message.fromJson reads every moderation field from its v1 keys', () {
+    final message = Message.fromJson(const {
+      'id': 'message-id',
+      'moderation': {
+        'action': 'shadow',
+        'original_text': 'original message text',
+        'text_harms': ['hate', 'profanity'],
+        'image_harms': ['explicit'],
+        'blocklist_matched': 'profanity',
+        'semantic_filter_matched': 'harassment',
+        'platform_circumvented': true,
+      },
+    });
+
+    expect(
+      message.moderation,
+      const Moderation(
+        action: ModerationAction.shadow,
+        originalText: 'original message text',
+        textHarms: ['hate', 'profanity'],
+        imageHarms: ['explicit'],
+        blocklistMatched: 'profanity',
+        semanticFilterMatched: 'harassment',
+        platformCircumvented: true,
+      ),
+    );
+  });
+
+  test('Message.fromJson reads a legacy moderation action as its current name', () {
+    final message = Message.fromJson(const {
+      'id': 'message-id',
+      'moderation': {'action': 'MESSAGE_RESPONSE_ACTION_BLOCK', 'original_text': 'original message text'},
+    });
+
+    expect(message.moderation!.action, ModerationAction.remove);
+  });
+
+  test('Message.fromJson reads a moderation without platform_circumvented as not circumvented', () {
+    final message = Message.fromJson(const {
+      'id': 'message-id',
+      'moderation': {'action': 'flag', 'original_text': 'original message text'},
+    });
+
+    expect(
+      message.moderation,
+      const Moderation(action: ModerationAction.flag, originalText: 'original message text'),
+    );
+  });
+
+  test('Message.fromJson leaves moderation null when the message carries none', () {
+    final message = Message.fromJson(const {'id': 'message-id'});
+
+    expect(message.moderation, isNull);
   });
 }

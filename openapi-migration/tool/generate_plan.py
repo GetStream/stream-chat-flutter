@@ -563,6 +563,19 @@ GROUPS = [
             'Message send has offline and retry paths through `stream_chat_persistence` that must keep working.',
             '`MessageDeleteScope` has to be reconciled with `DeleteType`, which [08](08-moderation-and-blocklists.md) added. It is named for the scope of a delete — `deleteForMe` vs `deleteForAll` — but carries a `hard` bool, which is the same axis `DeleteType` models, in the same words, minus `pruning`. `deleteMessage(hard: true)` therefore cannot express a pruning delete at all, and `softDeleteForAll` / `hardDeleteForAll` read as two spellings of `DeleteType.soft` / `DeleteType.hard`. Decide whether the scope keeps a `DeleteType` field or the two stay separate arguments; either way the public type changes, so it belongs in this group rather than a later fix.',
         ],
+        taken=textwrap.dedent("""\
+            The models `Message` embeds become plain ahead of the endpoints, one PR each, leaves first. None routes
+            an endpoint, so the definition of done below stays open.
+
+            - **`Moderation` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`; equality
+              is unchanged. `Message.moderation` decodes through `moderationFromV1Json`, a temporary decode-only
+              function in `v1_json_converters.dart`: `Message.toJson` never writes the field. It keeps the
+              `moderation_details` fallback and the legacy `MESSAGE_RESPONSE_ACTION_*` names, and reads a missing
+              `platform_circumvented` as `false`. `stream_chat_persistence` does not store moderation, so no codec
+              is needed. `ModerationAction` keeps its `fromJson`/`toJson` statics, as `MessageType` does, until
+              `Message` stops decoding v1 JSON. The `ModerationV2Response` mapper waits for the first endpoint
+              that answers a message.
+            """),
     ),
     dict(
         num='11', slug='channels-and-members', title='Channels, Members & Sync',

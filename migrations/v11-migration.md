@@ -31,6 +31,7 @@ onto Stream's OpenAPI-generated API client.
     - [App Settings](#app-settings)
     - [Guest Users](#guest-users)
     - [File Upload](#file-upload)
+    - [Messages](#messages)
     - [User Groups](#user-groups)
     - [Link Previews](#link-previews)
 - [Migration Checklist](#migration-checklist)
@@ -78,6 +79,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**App Settings**](#app-settings) | `getAppSettings` returns a `Result<AppSettingsResponse>` instead of throwing; `GetAppSettingsResponse` is renamed `AppSettingsResponse` |
 | [**Guest Users**](#guest-users) | `connectGuestUser` is unchanged; `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed |
 | [**File Upload**](#file-upload) | Uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
+| [**Messages**](#messages) | `Moderation` no longer decodes from or encodes to JSON, and is no longer an `Equatable` |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -219,6 +221,8 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `SendAttachmentResponse`, `SendFileResponse`, `SendImageResponse`, `UploadImageResponse`, `UploadFileResponse` | `UploadedFile` (`stream_core`) | `removed` | `.file` becomes `.fileUrl`; `.thumbUrl` is unchanged; `duration` is gone |
 | `AttachmentFileUploaderProvider` = `AttachmentFileUploader Function(StreamHttpClient)` | `AttachmentFileUploader Function(Dio)` | `retyped` | Receives the client's `Dio`; `StreamAttachmentFileUploader(dio)` builds the default |
 | `StreamChatApi.fileUploader`, `StreamChatApi(attachmentFileUploaderProvider:)` | `StreamChatClient(attachmentFileUploaderProvider:)` | `removed` | The uploader belongs to `StreamChatClient` |
+| `Moderation.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. `Message.fromJson` still reads a message's moderation |
+| `Moderation extends Equatable`, `Moderation.props` | `Moderation` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and `Moderation` is no longer an `Equatable` |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -775,6 +779,23 @@ StreamChatClient(apiKey, attachmentFileUploaderProvider: (httpClient) => MyUploa
 // v11
 StreamChatClient(apiKey, attachmentFileUploaderProvider: (dio) => MyUploader(dio));
 ```
+
+### Messages
+
+**`Moderation` is a plain class.** It no longer decodes from or encodes to JSON, and it is no longer an
+`Equatable`: equality is unchanged, `props` is gone, and it gains `copyWith`. A message still carries its
+moderation outcome in `Message.moderation`, read from the API as before.
+
+```dart
+// v10
+final moderation = Moderation.fromJson(json);
+
+// v11
+const moderation = Moderation(action: ModerationAction.flag, originalText: 'original text');
+```
+
+> **Why:** the public models stop being wire shapes, so the API payload can change without changing the type a
+> caller holds.
 
 ---
 

@@ -58,15 +58,9 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
   poll: json['poll'] == null ? null : Poll.fromJson(json['poll'] as Map<String, dynamic>),
   pollId: json['poll_id'] as String?,
   extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
-  i18n: (json['i18n'] as Map<String, dynamic>?)?.map(
-    (k, e) => MapEntry(k, e as String),
-  ),
+  i18n: (json['i18n'] as Map<String, dynamic>?)?.map((k, e) => MapEntry(k, e as String)),
   restrictedVisibility: (json['restricted_visibility'] as List<dynamic>?)?.map((e) => e as String).toList(),
-  moderation: Message._moderationReadValue(json, 'moderation') == null
-      ? null
-      : Moderation.fromJson(
-          Message._moderationReadValue(json, 'moderation') as Map<String, dynamic>,
-        ),
+  moderation: moderationFromV1Json(Message._moderationReadValue(json, 'moderation') as Map<String, dynamic>?),
   draft: json['draft'] == null ? null : Draft.fromJson(json['draft'] as Map<String, dynamic>),
   reminder: json['reminder'] == null ? null : MessageReminder.fromJson(json['reminder'] as Map<String, dynamic>),
   channelRole: Message._channelRoleReadValue(json, 'channel_role') as String?,

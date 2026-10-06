@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import 'package:stream_core/stream_core.dart' show StreamDateTimeConverter;
 
 import '../device.dart';
+import '../moderation.dart';
 import '../push_provider.dart';
 import '../user_group.dart';
 import '../user_group_member.dart';
@@ -39,6 +40,24 @@ class DeviceV1JsonConverter implements JsonConverter<Device, Map<String, dynamic
 @internal
 List<UserGroup>? userGroupsFromV1Json(List<dynamic>? json) {
   return json?.map((group) => _userGroupFromV1Json(group as Map<String, dynamic>)).toList();
+}
+
+/// Reads the moderation outcome of a message from its v1 keys.
+///
+/// Decode-only: [Message.moderation] is never written back to JSON.
+// TODO(openapi-migration): remove in group 10
+@internal
+Moderation? moderationFromV1Json(Map<String, dynamic>? json) {
+  if (json == null) return null;
+  return Moderation(
+    action: ModerationAction.fromJson(json['action'] as String),
+    originalText: json['original_text'] as String,
+    textHarms: (json['text_harms'] as List<dynamic>?)?.cast<String>(),
+    imageHarms: (json['image_harms'] as List<dynamic>?)?.cast<String>(),
+    blocklistMatched: json['blocklist_matched'] as String?,
+    semanticFilterMatched: json['semantic_filter_matched'] as String?,
+    platformCircumvented: json['platform_circumvented'] as bool? ?? false,
+  );
 }
 
 // Dates arrive as ISO-8601 strings on v1 and as epoch nanoseconds on v2; the converter reads both.
