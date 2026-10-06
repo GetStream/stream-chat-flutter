@@ -11,6 +11,7 @@
 
 🐞 Fixed
 
+- Fixed `Event.aiState` reading `AI_STATE_EXTERNAL_SOURCES` as `idle` instead of `checkingSources`.
 - Fixed `Channel.disableSlowMode` and `StreamChatClient.disableSlowdown` always failing.
 
 ## 10.5.0
