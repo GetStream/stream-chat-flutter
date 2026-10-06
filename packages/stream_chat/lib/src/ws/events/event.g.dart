@@ -34,7 +34,11 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
   parentId: json['parent_id'] as String?,
   hardDelete: json['hard_delete'] as bool?,
   deletedForMe: json['deleted_for_me'] as bool?,
-  aiState: $enumDecodeNullable(_$AITypingStateEnumMap, json['ai_state'], unknownValue: AITypingState.idle),
+  aiState: $enumDecodeNullable(
+    _$AITypingStateEnumMap,
+    Event._aiStateReadValue(json, 'ai_state'),
+    unknownValue: AITypingState.idle,
+  ),
   aiMessage: json['ai_message'] as String?,
   messageId: json['message_id'] as String?,
   thread: json['thread'] == null ? null : Thread.fromJson(json['thread'] as Map<String, dynamic>),
