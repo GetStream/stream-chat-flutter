@@ -73,7 +73,14 @@ QueryReactionsResponse _$QueryReactionsResponseFromJson(
 ) => QueryReactionsResponse()
   ..duration = json['duration'] as String?
   ..reactions =
-      (json['reactions'] as List<dynamic>?)?.map((e) => Reaction.fromJson(e as Map<String, dynamic>)).toList() ?? []
+      (json['reactions'] as List<dynamic>?)
+          ?.map(
+            (e) => const ReactionV1JsonConverter().fromJson(
+              e as Map<String, dynamic>,
+            ),
+          )
+          .toList() ??
+      []
   ..next = json['next'] as String?;
 
 QueryRepliesResponse _$QueryRepliesResponseFromJson(
@@ -88,7 +95,9 @@ SendReactionResponse _$SendReactionResponseFromJson(
 ) => SendReactionResponse()
   ..duration = json['duration'] as String?
   ..message = Message.fromJson(json['message'] as Map<String, dynamic>)
-  ..reaction = Reaction.fromJson(json['reaction'] as Map<String, dynamic>);
+  ..reaction = const ReactionV1JsonConverter().fromJson(
+    json['reaction'] as Map<String, dynamic>,
+  );
 
 UpdateUsersResponse _$UpdateUsersResponseFromJson(Map<String, dynamic> json) => UpdateUsersResponse()
   ..duration = json['duration'] as String?

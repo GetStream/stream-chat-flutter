@@ -291,7 +291,7 @@ void main() {
       () => client.post(
         path,
         data: jsonEncode({
-          'reaction': reaction.toJson(),
+          'reaction': {'type': reactionType, 'score': 1},
           'skip_push': false,
           'enforce_unique': false,
         }),
@@ -301,7 +301,7 @@ void main() {
         path,
         data: {
           'message': message.toJson(),
-          'reaction': {...reaction.toJson(), 'message_id': messageId},
+          'reaction': {'type': reactionType, 'score': 1, 'message_id': messageId},
         },
       ),
     );
@@ -330,7 +330,7 @@ void main() {
       () => client.post(
         path,
         data: jsonEncode({
-          'reaction': reaction.toJson(),
+          'reaction': {'type': reactionType, 'score': 1},
           'skip_push': false,
           'enforce_unique': true,
         }),
@@ -340,7 +340,7 @@ void main() {
         path,
         data: {
           'message': message.toJson(),
-          'reaction': {...reaction.toJson(), 'message_id': messageId},
+          'reaction': {'type': reactionType, 'score': 1, 'message_id': messageId},
         },
       ),
     );
@@ -403,7 +403,7 @@ void main() {
         data: {
           'reactions': [
             ...reactions.map(
-              (it) => {...it.toJson(), 'message_id': messageId},
+              (it) => {'type': it.type, 'score': it.score, 'message_id': messageId},
             ),
           ],
         },
@@ -709,7 +709,7 @@ void main() {
         data: {
           'reactions': [
             ...reactions.map(
-              (it) => {...it.toJson(), 'message_id': messageId},
+              (it) => {'type': it.type, 'score': it.score, 'message_id': messageId},
             ),
           ],
           'next': null,
@@ -749,7 +749,7 @@ void main() {
         data: {
           'reactions': [
             ...reactions.map(
-              (it) => {...it.toJson(), 'message_id': messageId},
+              (it) => {'type': it.type, 'score': it.score, 'message_id': messageId},
             ),
           ],
           'next': nextCursor,

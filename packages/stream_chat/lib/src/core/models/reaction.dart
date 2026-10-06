@@ -1,16 +1,16 @@
-import 'package:equatable/equatable.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:stream_core/stream_core.dart' show Filter, FilterField, Sort, SortField;
 
-import '../util/serializer.dart';
 import 'user.dart';
 
-part 'reaction.g.dart';
+part 'reaction.freezed.dart';
 
-/// The class that defines a reaction
-@JsonSerializable()
-class Reaction extends Equatable {
-  /// Constructor used for json serialization
+/// A reaction a user added to a message.
+@Freezed(copyWith: false)
+class Reaction with _$Reaction {
+  /// Creates a new [Reaction].
+  ///
+  /// [userId] defaults to the id of [user], and [createdAt] and [updatedAt] default to now.
   Reaction({
     this.messageId,
     required this.type,
@@ -25,45 +25,40 @@ class Reaction extends Equatable {
        createdAt = createdAt ?? DateTime.timestamp(),
        updatedAt = updatedAt ?? DateTime.timestamp();
 
-  /// Create a new instance from a json
-  factory Reaction.fromJson(Map<String, dynamic> json) => _$ReactionFromJson(
-    Serializer.moveToExtraDataFromRoot(
-      json,
-      topLevelFields,
-    ),
-  );
-
   /// The messageId to which the reaction belongs
-  @JsonKey(includeToJson: false)
+  @override
   final String? messageId;
 
   /// The type of the reaction
+  @override
   final String type;
 
   /// The score of the reaction (ie. number of reactions sent)
+  @override
   final int score;
 
   /// The emoji code of the reaction (used for notifications)
-  @JsonKey(includeIfNull: false)
+  @override
   final String? emojiCode;
 
   /// The user that sent the reaction
-  @JsonKey(includeToJson: false)
+  @override
   final User? user;
 
   /// The userId that sent the reaction
-  @JsonKey(includeToJson: false)
+  @override
   final String? userId;
 
   /// The date of the reaction
-  @JsonKey(includeToJson: false)
+  @override
   final DateTime createdAt;
 
   /// The date of the reaction update
-  @JsonKey(includeToJson: false)
+  @override
   final DateTime updatedAt;
 
   /// Reaction custom extraData
+  @override
   final Map<String, Object?> extraData;
 
   /// Map of custom user extraData
@@ -77,11 +72,6 @@ class Reaction extends Equatable {
     'created_at',
     'updated_at',
   ];
-
-  /// Serialize to json
-  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
-    _$ReactionToJson(this),
-  );
 
   /// Creates a copy of [Reaction] with specified attributes overridden.
   Reaction copyWith({
@@ -119,19 +109,6 @@ class Reaction extends Equatable {
     updatedAt: other.updatedAt,
     extraData: other.extraData,
   );
-
-  @override
-  List<Object?> get props => [
-    messageId,
-    type,
-    user,
-    userId,
-    score,
-    emojiCode,
-    createdAt,
-    updatedAt,
-    extraData,
-  ];
 }
 
 /// A filter for a reaction query.

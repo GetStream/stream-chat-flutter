@@ -19,7 +19,10 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
   pollVote: json['poll_vote'] == null ? null : PollVote.fromJson(json['poll_vote'] as Map<String, dynamic>),
   totalUnreadCount: (json['total_unread_count'] as num?)?.toInt(),
   unreadChannels: (json['unread_channels'] as num?)?.toInt(),
-  reaction: json['reaction'] == null ? null : Reaction.fromJson(json['reaction'] as Map<String, dynamic>),
+  reaction: _$JsonConverterFromJson<Map<String, dynamic>, Reaction>(
+    json['reaction'],
+    const ReactionV1JsonConverter().fromJson,
+  ),
   online: json['online'] as bool?,
   channel: json['channel'] == null ? null : ChannelModel.fromJson(json['channel'] as Map<String, dynamic>),
   member: json['member'] == null ? null : Member.fromJson(json['member'] as Map<String, dynamic>),
@@ -81,7 +84,10 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
   'poll_vote': ?instance.pollVote?.toJson(),
   'channel': ?instance.channel?.toJson(),
   'member': ?instance.member?.toJson(),
-  'reaction': ?instance.reaction?.toJson(),
+  'reaction': ?_$JsonConverterToJson<Map<String, dynamic>, Reaction>(
+    instance.reaction,
+    const ReactionV1JsonConverter().toJson,
+  ),
   'total_unread_count': ?instance.totalUnreadCount,
   'unread_channels': ?instance.unreadChannels,
   'online': ?instance.online,
@@ -110,6 +116,11 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
   'extra_data': instance.extraData,
 };
 
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
+
 const _$AITypingStateEnumMap = {
   AITypingState.idle: 'AI_STATE_IDLE',
   AITypingState.error: 'AI_STATE_ERROR',
@@ -117,3 +128,8 @@ const _$AITypingStateEnumMap = {
   AITypingState.thinking: 'AI_STATE_THINKING',
   AITypingState.generating: 'AI_STATE_GENERATING',
 };
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);

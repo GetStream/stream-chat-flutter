@@ -27,10 +27,10 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
     Message._reactionGroupsReadValue(json, 'reaction_groups') as Map<String, dynamic>?,
   ),
   latestReactions: (json['latest_reactions'] as List<dynamic>?)
-      ?.map((e) => Reaction.fromJson(e as Map<String, dynamic>))
+      ?.map((e) => const ReactionV1JsonConverter().fromJson(e as Map<String, dynamic>))
       .toList(),
   ownReactions: (json['own_reactions'] as List<dynamic>?)
-      ?.map((e) => Reaction.fromJson(e as Map<String, dynamic>))
+      ?.map((e) => const ReactionV1JsonConverter().fromJson(e as Map<String, dynamic>))
       .toList(),
   parentId: json['parent_id'] as String?,
   quotedMessage: json['quoted_message'] == null

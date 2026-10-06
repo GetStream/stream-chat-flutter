@@ -191,10 +191,12 @@ class Message extends Equatable {
 
   /// The latest reactions to the message created by any user.
   @JsonKey(includeToJson: false)
+  @ReactionV1JsonConverter()
   final List<Reaction>? latestReactions;
 
   /// The reactions added to the message by the current user.
   @JsonKey(includeToJson: false)
+  @ReactionV1JsonConverter()
   final List<Reaction>? ownReactions;
 
   /// The ID of the parent message, if the message is a thread reply.

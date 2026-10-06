@@ -79,6 +79,13 @@ an endpoint, so the definition of done below stays open.
   writes through `ActionV1JsonConverter`: `Attachment.toJson` sends the actions and `toData` stores
   them, and the converter writes the same keys v10 did, `value` included when null, so requests and
   the stored `attachments` columns are unchanged. `Action` needs no codec of its own.
+- **`Reaction` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`; equality
+  is unchanged. Its constructor stays non-const (`userId` from `user`, dates default to now) and it
+  keeps v10's hand-written `copyWith` and `merge` (`@Freezed(copyWith: false)`). `Reaction.topLevelFields`
+  stays public. `ReactionV1JsonConverter` reads and writes it everywhere v1 JSON carries one: the
+  message's latest and own reactions, `Event.reaction`, the two hand-written reaction responses, and
+  the `sendReaction` body, which keeps v10's request shape (type, score, emoji code, custom data at the
+  root). `stream_chat_persistence` stores reactions as table rows, so no codec is needed.
 
 ## Risks
 

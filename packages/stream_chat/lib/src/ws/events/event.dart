@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import '../../../stream_chat.dart';
+import '../../core/models/converters/v1_json_converters.dart';
 import '../../core/util/serializer.dart';
 
 part 'event.g.dart';
@@ -109,6 +110,7 @@ class Event extends WsEvent {
   final Member? member;
 
   /// The reaction sent with the event
+  @ReactionV1JsonConverter()
   final Reaction? reaction;
 
   /// The number of unread messages for current user

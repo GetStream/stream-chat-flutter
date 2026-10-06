@@ -79,7 +79,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**App Settings**](#app-settings) | `getAppSettings` returns a `Result<AppSettingsResponse>` instead of throwing; `GetAppSettingsResponse` is renamed `AppSettingsResponse` |
 | [**Guest Users**](#guest-users) | `connectGuestUser` is unchanged; `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed |
 | [**File Upload**](#file-upload) | Uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
-| [**Messages**](#messages) | `Moderation`, `ReactionGroup` and `Action` no longer decode from or encode to JSON; `Action` compares by value |
+| [**Messages**](#messages) | `Moderation`, `ReactionGroup`, `Action` and `Reaction` no longer decode from or encode to JSON; `Action` compares by value |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -227,6 +227,8 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `ReactionGroup extends Equatable`, `ReactionGroup.props` | `ReactionGroup` (value `==`) | `removed` | Equality and `copyWith` are unchanged; `props` is gone and `ReactionGroup` is no longer an `Equatable` |
 | `Action.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. `Attachment.fromJson` and `toJson` still read and write an attachment's actions |
 | `Action` identity `==` | value `==`, plus `copyWith` | `retyped` | Two actions with the same fields are now equal, and so are attachments that differ only in holding separate copies of them |
+| `Reaction.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. Messages, events and `sendReaction` still read and write reactions |
+| `Reaction extends Equatable`, `Reaction.props` | `Reaction` (value `==`) | `removed` | Equality, `copyWith` and `merge` are unchanged; `props` is gone and `Reaction` is no longer an `Equatable` |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -795,6 +797,9 @@ JSON.
 **`Action` is a plain class too, and compares by value.** It no longer decodes from or encodes to JSON, and it gains
 `copyWith`. Two actions with the same fields are now equal, where v10 compared them by identity; an `Attachment`
 holding them follows suit.
+
+**`Reaction` is a plain class.** It no longer decodes from or encodes to JSON and is no longer an `Equatable`;
+equality, `copyWith` and `merge` are unchanged. Messages, events and `sendReaction` still carry reactions as before.
 
 ```dart
 // v10

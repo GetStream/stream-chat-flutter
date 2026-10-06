@@ -2,11 +2,14 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_core/stream_core.dart' show StreamDateTimeConverter;
 
+import '../../util/serializer.dart';
 import '../action.dart';
 import '../device.dart';
 import '../moderation.dart';
 import '../push_provider.dart';
+import '../reaction.dart';
 import '../reaction_group.dart';
+import '../user.dart';
 import '../user_group.dart';
 import '../user_group_member.dart';
 
@@ -38,6 +41,50 @@ class ActionV1JsonConverter implements JsonConverter<Action, Map<String, dynamic
     'type': action.type,
     'value': action.value,
   };
+}
+
+/// Converts a [Reaction] to and from its v1 keys.
+///
+/// Custom data sits at the root of the v1 map, beside the known keys. [toJson] writes the request shape: the type,
+/// score, emoji code and custom data, without the message, user or dates.
+// TODO(openapi-migration): remove in group 10
+@internal
+class ReactionV1JsonConverter implements JsonConverter<Reaction, Map<String, dynamic>> {
+  /// Creates a new [ReactionV1JsonConverter].
+  const ReactionV1JsonConverter();
+
+  @override
+  Reaction fromJson(Map<String, dynamic> json) {
+    final data = Serializer.moveToExtraDataFromRoot(json, Reaction.topLevelFields);
+    return Reaction(
+      messageId: data['message_id'] as String?,
+      type: data['type'] as String,
+      user: switch (data['user']) {
+        final Map<String, dynamic> user => User.fromJson(user),
+        _ => null,
+      },
+      userId: data['user_id'] as String?,
+      score: (data['score'] as num?)?.toInt() ?? 1,
+      emojiCode: data['emoji_code'] as String?,
+      createdAt: switch (data['created_at']) {
+        final Object it => _dateTime.fromJson(it),
+        null => null,
+      },
+      updatedAt: switch (data['updated_at']) {
+        final Object it => _dateTime.fromJson(it),
+        null => null,
+      },
+      extraData: data['extra_data'] as Map<String, dynamic>,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson(Reaction reaction) => Serializer.moveFromExtraDataToRoot({
+    'type': reaction.type,
+    'score': reaction.score,
+    if (reaction.emojiCode case final emojiCode?) 'emoji_code': emojiCode,
+    'extra_data': reaction.extraData,
+  });
 }
 
 /// Converts a [Device] to and from its v1 `id` and `push_provider` keys.

@@ -4,6 +4,7 @@ import '../../ws/events/event.dart';
 import '../models/banned_user.dart';
 import '../models/channel_model.dart';
 import '../models/channel_state.dart';
+import '../models/converters/v1_json_converters.dart';
 import '../models/draft.dart';
 import '../models/location.dart';
 import '../models/member.dart';
@@ -141,6 +142,7 @@ class QueryBannedUsersResponse extends _BaseResponse {
 class QueryReactionsResponse extends _BaseResponse {
   /// List of reactions returned by the query
   @JsonKey(defaultValue: [])
+  @ReactionV1JsonConverter()
   late List<Reaction> reactions;
 
   /// The cursor for the next page of results.
@@ -167,6 +169,7 @@ class QueryRepliesResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class SendReactionResponse extends MessageResponse {
   /// The reaction created by the api call
+  @ReactionV1JsonConverter()
   late Reaction reaction;
 
   /// Create a new instance from a json

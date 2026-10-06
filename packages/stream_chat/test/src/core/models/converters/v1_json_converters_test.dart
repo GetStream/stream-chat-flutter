@@ -5,10 +5,15 @@ import 'package:stream_chat/src/core/models/device.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/moderation.dart';
 import 'package:stream_chat/src/core/models/push_provider.dart';
+import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/reaction_group.dart';
+import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/models/user_group.dart';
 import 'package:stream_chat/src/core/models/user_group_member.dart';
+import 'package:stream_chat/src/ws/events/event.dart';
 import 'package:test/test.dart';
+
+import '../../../utils.dart';
 
 void main() {
   test('DeviceV1JsonConverter.fromJson reads a v1 device, ignoring the fields a Device does not carry', () {
@@ -260,5 +265,98 @@ void main() {
     );
 
     expect(Attachment.fromJson(attachment.toJson()).actions, attachment.actions);
+  });
+
+  test('Event.fromJson reads every reaction field from its v1 keys, with custom data in extraData', () {
+    final json = jsonFixture('reaction.json');
+
+    final event = Event.fromJson({
+      'type': 'reaction.new',
+      'reaction': {...json, 'bananas': 'yes'},
+    });
+
+    expect(
+      event.reaction,
+      Reaction(
+        messageId: '76cd8c82-b557-4e48-9d12-87995d3a0e04',
+        type: 'wow',
+        user: User.fromJson(json['user'] as Map<String, dynamic>),
+        userId: '2de0297c-f3f2-489d-b930-ef77342edccf',
+        emojiCode: '😮',
+        createdAt: DateTime.parse('2020-01-28T22:17:31.108742Z'),
+        updatedAt: DateTime.parse('2020-01-28T22:17:31.108742Z'),
+        extraData: const {'bananas': 'yes'},
+      ),
+    );
+  });
+
+  test('Event.fromJson reads a reaction without a score as scoring one', () {
+    final event = Event.fromJson(const {
+      'type': 'reaction.new',
+      'reaction': {
+        'type': 'like',
+        'created_at': '2020-01-28T22:17:31.108742Z',
+        'updated_at': '2020-01-28T22:17:31.108742Z',
+      },
+    });
+
+    expect(event.reaction!.score, 1);
+  });
+
+  test('Event.toJson writes the reaction in the request shape, with custom data at the root', () {
+    final event = Event(
+      type: 'reaction.new',
+      reaction: Reaction(
+        messageId: 'message-id',
+        type: 'wow',
+        user: User(id: 'user-id'),
+        score: 2,
+        emojiCode: '😮',
+        extraData: const {'bananas': 'yes'},
+      ),
+    );
+
+    expect(event.toJson()['reaction'], {'type': 'wow', 'score': 2, 'emoji_code': '😮', 'bananas': 'yes'});
+  });
+
+  test('Message.fromJson reads the latest and own reactions', () {
+    final message = Message.fromJson(const {
+      'id': 'message-id',
+      'latest_reactions': [
+        {
+          'type': 'like',
+          'user_id': 'user-1',
+          'created_at': '2024-01-01T00:00:00.000Z',
+          'updated_at': '2024-01-01T00:00:00.000Z',
+        },
+      ],
+      'own_reactions': [
+        {
+          'type': 'love',
+          'score': 3,
+          'user_id': 'user-2',
+          'created_at': '2024-01-02T00:00:00.000Z',
+          'updated_at': '2024-01-02T00:00:00.000Z',
+        },
+      ],
+    });
+
+    expect(message.latestReactions, [
+      Reaction(
+        type: 'like',
+        userId: 'user-1',
+        createdAt: DateTime.utc(2024, 1, 1),
+        updatedAt: DateTime.utc(2024, 1, 1),
+      ),
+    ]);
+    expect(message.ownReactions, [
+      Reaction(
+        type: 'love',
+        score: 3,
+        userId: 'user-2',
+        createdAt: DateTime.utc(2024, 1, 2),
+        updatedAt: DateTime.utc(2024, 1, 2),
+      ),
+    ]);
   });
 }

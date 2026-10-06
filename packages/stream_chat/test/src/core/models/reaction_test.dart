@@ -4,62 +4,25 @@ import 'package:test/test.dart';
 
 import '../../utils.dart';
 
+// The reaction in fixtures/reaction.json, built directly.
+Reaction _fixtureReaction() {
+  final json = jsonFixture('reaction.json');
+  return Reaction(
+    messageId: json['message_id'] as String,
+    type: json['type'] as String,
+    user: User.fromJson(json['user'] as Map<String, dynamic>),
+    userId: json['user_id'] as String,
+    score: json['score'] as int,
+    emojiCode: json['emoji_code'] as String,
+    createdAt: DateTime.parse(json['created_at'] as String),
+    updatedAt: DateTime.parse(json['updated_at'] as String),
+  );
+}
+
 void main() {
   group('src/models/reaction', () {
-    test('should parse json correctly', () {
-      final reaction = Reaction.fromJson(jsonFixture('reaction.json'));
-      expect(reaction.messageId, '76cd8c82-b557-4e48-9d12-87995d3a0e04');
-      expect(reaction.createdAt, DateTime.parse('2020-01-28T22:17:31.108742Z'));
-      expect(reaction.updatedAt, DateTime.parse('2020-01-28T22:17:31.108742Z'));
-      expect(reaction.type, 'wow');
-      expect(
-        reaction.user?.toJson(),
-        {
-          'id': '2de0297c-f3f2-489d-b930-ef77342edccf',
-          'role': 'user',
-          'teams': [],
-          'created_at': '2020-01-28T22:17:30.810011Z',
-          'updated_at': '2020-01-28T22:17:31.077195Z',
-          'online': false,
-          'banned': false,
-          'image': 'https://randomuser.me/api/portraits/women/45.jpg',
-          'name': 'Daisy Morgan',
-        },
-      );
-      expect(reaction.score, 1);
-      expect(reaction.userId, '2de0297c-f3f2-489d-b930-ef77342edccf');
-      expect(reaction.emojiCode, '😮');
-    });
-
-    test('should serialize to json correctly', () {
-      final reaction = Reaction(
-        messageId: '76cd8c82-b557-4e48-9d12-87995d3a0e04',
-        createdAt: DateTime.parse('2020-01-28T22:17:31.108742Z'),
-        updatedAt: DateTime.parse('2020-01-28T22:17:31.108742Z'),
-        type: 'wow',
-        user: User(
-          id: '2de0297c-f3f2-489d-b930-ef77342edccf',
-          image: 'https://randomuser.me/api/portraits/women/45.jpg',
-          name: 'Daisy Morgan',
-        ),
-        userId: '2de0297c-f3f2-489d-b930-ef77342edccf',
-        extraData: const {'bananas': 'yes'},
-        emojiCode: '😮',
-      );
-
-      expect(
-        reaction.toJson(),
-        {
-          'type': 'wow',
-          'score': 1,
-          'emoji_code': '😮',
-          'bananas': 'yes',
-        },
-      );
-    });
-
     test('copyWith', () {
-      final reaction = Reaction.fromJson(jsonFixture('reaction.json'));
+      final reaction = _fixtureReaction();
       var newReaction = reaction.copyWith();
       expect(newReaction.messageId, '76cd8c82-b557-4e48-9d12-87995d3a0e04');
       expect(newReaction.createdAt, DateTime.parse('2020-01-28T22:17:31.108742Z'));
@@ -136,7 +99,7 @@ void main() {
     });
 
     test('merge', () {
-      final reaction = Reaction.fromJson(jsonFixture('reaction.json'));
+      final reaction = _fixtureReaction();
       final newUserCreateTime = DateTime.now();
 
       final newReaction = reaction.merge(
