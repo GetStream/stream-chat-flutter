@@ -272,7 +272,6 @@ Future<void> _maybeLeaveChannel(BuildContext context, Channel channel) async {
 // channel route).
 Future<void> _maybeDeleteChannel(BuildContext context, Channel channel) async {
   final router = GoRouter.of(context);
-  final messenger = ScaffoldMessenger.of(context);
   final subject = channel.isOneToOne ? 'conversation' : 'group';
 
   final confirmed = await _showConfirmationDialog(
@@ -285,10 +284,7 @@ Future<void> _maybeDeleteChannel(BuildContext context, Channel channel) async {
   if (confirmed != true) return;
 
   final result = await channel.delete();
-  if (result case Failure(:final error)) {
-    messenger.showSnackBar(SnackBar(content: Text('Failed to delete: $error')));
-    return;
-  }
+  if (result.isFailure) return;
 
   if (router.canPop()) router.pop();
 }
