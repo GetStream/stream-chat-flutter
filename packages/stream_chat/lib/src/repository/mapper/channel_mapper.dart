@@ -7,6 +7,9 @@ import '../../core/models/chat_preferences.dart';
 import '../../core/models/command.dart';
 import '../../core/models/member.dart';
 import '../../core/models/push_level.dart';
+import '../../core/models/response/delete_channel_response.dart';
+import '../../core/models/response/hide_channel_response.dart';
+import '../../core/models/response/show_channel_response.dart';
 import '../../core/models/response/update_channel_partial_response.dart';
 import '../../core/models/response/update_member_partial_response.dart';
 import 'user_mapper.dart';
@@ -183,5 +186,26 @@ extension UpdateMemberPartialResponseMapper on api.UpdateMemberPartialResponse {
   UpdateMemberPartialResponse toModel() => UpdateMemberPartialResponse(
     duration: duration,
     channelMember: channelMember?.toModel(),
+  );
+}
+
+/// Maps a generated [api.HideChannelResponse] to a [HideChannelResponse].
+extension HideChannelResponseMapper on api.HideChannelResponse {
+  /// Converts this response into a [HideChannelResponse].
+  HideChannelResponse toModel() => HideChannelResponse(duration: duration);
+}
+
+/// Maps a generated [api.ShowChannelResponse] to a [ShowChannelResponse].
+extension ShowChannelResponseMapper on api.ShowChannelResponse {
+  /// Converts this response into a [ShowChannelResponse].
+  ShowChannelResponse toModel() => ShowChannelResponse(duration: duration);
+}
+
+/// Maps a generated [api.DeleteChannelResponse] to a [DeleteChannelResponse].
+extension DeleteChannelResponseMapper on api.DeleteChannelResponse {
+  /// Converts this response into a [DeleteChannelResponse].
+  DeleteChannelResponse toModel() => DeleteChannelResponse(
+    duration: duration,
+    channel: channel?.toModel(),
   );
 }

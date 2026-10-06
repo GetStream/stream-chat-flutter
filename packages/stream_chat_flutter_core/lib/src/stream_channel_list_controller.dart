@@ -282,9 +282,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   }
 
   /// Deletes the [channel] and updates the list.
-  Future<void> deleteChannel(Channel channel) async {
-    await channel.delete();
-  }
+  Future<Result<DeleteChannelResponse>> deleteChannel(Channel channel) => channel.delete();
 
   /// Mutes the [channel] for the current user.
   ///

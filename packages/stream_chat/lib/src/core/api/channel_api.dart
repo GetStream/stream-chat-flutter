@@ -218,17 +218,6 @@ class ChannelApi {
     return EmptyResponse.fromJson(response.data);
   }
 
-  /// Delete this channel. Messages are permanently removed.
-  Future<EmptyResponse> deleteChannel(
-    String channelId,
-    String channelType,
-  ) async {
-    final response = await _client.delete(
-      _getChannelUrl(channelId, channelType),
-    );
-    return EmptyResponse.fromJson(response.data);
-  }
-
   /// Removes all messages from the channel
   Future<EmptyResponse> truncateChannel(
     String channelId,
@@ -244,33 +233,6 @@ class ChannelApi {
         if (skipPush != null) 'skip_push': skipPush,
         if (truncatedAt != null) 'truncated_at': truncatedAt,
       },
-    );
-    return EmptyResponse.fromJson(response.data);
-  }
-
-  /// Hides the channel from [StreamChatClient.queryChannels] for the user
-  /// until a message is added If [clearHistory] is set to true - all messages
-  /// will be removed for the user
-  Future<EmptyResponse> hideChannel(
-    String channelId,
-    String channelType, {
-    bool clearHistory = false,
-  }) async {
-    final response = await _client.post(
-      '${_getChannelUrl(channelId, channelType)}/hide',
-      data: {'clear_history': clearHistory},
-    );
-    return EmptyResponse.fromJson(response.data);
-  }
-
-  /// Removes the hidden status for the channel
-  Future<EmptyResponse> showChannel(
-    String channelId,
-    String channelType,
-  ) async {
-    final response = await _client.post(
-      '${_getChannelUrl(channelId, channelType)}/show',
-      data: {},
     );
     return EmptyResponse.fromJson(response.data);
   }

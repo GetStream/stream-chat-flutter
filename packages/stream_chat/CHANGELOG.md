@@ -91,6 +91,8 @@
 - `UpdateChannelPartialResponse.channel` and `UpdateMemberPartialResponse.channelMember` are nullable, and `UpdateChannelPartialResponse.members` is a non-nullable list.
 - `StreamChatApi.channel.updateChannelPartial`, `enableSlowdown`, `disableSlowdown` and `updateMemberPartial` are removed; call them on `StreamChatClient` instead.
 - `MemberUpdatePayload` and `MemberUpdateType` are removed; pass `set: {'pinned': true}` or `unset: ['pinned']` (and `archived`) to `updateMemberPartial`, or call `pinChannel`, `archiveChannel` and their counterparts.
+- `hideChannel`, `showChannel` and `deleteChannel` on `StreamChatClient`, and `hide`, `show` and `delete` on `Channel`, return a `Result<HideChannelResponse>`, `Result<ShowChannelResponse>` and `Result<DeleteChannelResponse>` instead of throwing.
+- `StreamChatApi.channel.hideChannel`, `showChannel` and `deleteChannel` are removed; call them on `StreamChatClient` instead.
 
 🐞 Fixed
 

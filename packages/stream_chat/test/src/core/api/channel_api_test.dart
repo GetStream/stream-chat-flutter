@@ -646,22 +646,6 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
-  test('deleteChannel', () async {
-    const channelId = 'test-channel-id';
-    const channelType = 'test-channel-type';
-
-    final path = _getChannelUrl(channelId, channelType);
-
-    when(() => client.delete(path)).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
-
-    final res = await channelApi.deleteChannel(channelId, channelType);
-
-    expect(res, isNotNull);
-
-    verify(() => client.delete(path)).called(1);
-    verifyNoMoreInteractions(client);
-  });
-
   test('truncateChannel', () async {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
@@ -676,82 +660,6 @@ void main() {
     ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await channelApi.truncateChannel(channelId, channelType);
-
-    expect(res, isNotNull);
-
-    verify(
-      () => client.post(
-        path,
-        data: {},
-      ),
-    ).called(1);
-    verifyNoMoreInteractions(client);
-  });
-
-  test('hideChannel', () async {
-    const channelId = 'test-channel-id';
-    const channelType = 'test-channel-type';
-
-    final path = '${_getChannelUrl(channelId, channelType)}/hide';
-
-    when(
-      () => client.post(
-        path,
-        data: {
-          'clear_history': false,
-        },
-      ),
-    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
-
-    final res = await channelApi.hideChannel(channelId, channelType);
-
-    expect(res, isNotNull);
-
-    verify(() => client.post(path, data: any(named: 'data'))).called(1);
-    verifyNoMoreInteractions(client);
-  });
-
-  test('hideChannel with clear_history: true', () async {
-    const channelId = 'test-channel-id';
-    const channelType = 'test-channel-type';
-
-    final path = '${_getChannelUrl(channelId, channelType)}/hide';
-
-    when(
-      () => client.post(
-        path,
-        data: {
-          'clear_history': true,
-        },
-      ),
-    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
-
-    final res = await channelApi.hideChannel(
-      channelId,
-      channelType,
-      clearHistory: true,
-    );
-
-    expect(res, isNotNull);
-
-    verify(() => client.post(path, data: any(named: 'data'))).called(1);
-    verifyNoMoreInteractions(client);
-  });
-
-  test('showChannel', () async {
-    const channelId = 'test-channel-id';
-    const channelType = 'test-channel-type';
-
-    final path = '${_getChannelUrl(channelId, channelType)}/show';
-
-    when(
-      () => client.post(
-        path,
-        data: {},
-      ),
-    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
-
-    final res = await channelApi.showChannel(channelId, channelType);
 
     expect(res, isNotNull);
 

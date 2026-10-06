@@ -587,9 +587,13 @@ GROUPS = [
                            '/api/v2/chat/channels/{type}/{id}/file',
                            '/api/v2/chat/channels/{type}/{id}/image'),
                    unless_ops=('PATCH /api/v2/chat/channels/{type}/{id}',
-                               'PATCH /api/v2/chat/channels/{type}/{id}/member')),
+                               'PATCH /api/v2/chat/channels/{type}/{id}/member',
+                               'POST /api/v2/chat/channels/{type}/{id}/hide',
+                               'POST /api/v2/chat/channels/{type}/{id}/show',
+                               'DELETE /api/v2/chat/channels/{type}/{id}')),
         goal='The biggest group, and the one every controller above it reads through `ChannelState`. '
-             '[15](15-partial-updates.md) split the partial channel and member updates out of it.',
+             '[15](15-partial-updates.md) split the partial channel and member updates out of it, and '
+             '[16](16-channel-lifecycle.md) hiding, showing and deleting a channel.',
         decisions=[
             '`ChannelState`, `ChannelModel` and `Member` are public, persisted, and rebuilt from WebSocket '
             'events. Keep ours and map.',
@@ -622,6 +626,10 @@ GROUPS = [
             'Verify it decodes before relying on it.',
         ],
         risks=[
+            '**The generated `stopWatchingChannel` cannot be called as generated.** It sends no body, while the '
+            'spec declares a required empty-object one and the handler refuses a missing body with `400 invalid '
+            'json data`. Fix the generator to send `{}` for a required empty body and regenerate before moving it; '
+            '[16](16-channel-lifecycle.md) left it here for that reason.',
             '`sync` and `queryMembers` live in `general_api.dart`, not `channel_api.dart` — this group reaches '
             'into that file.',
             '`queryChannels` drives the channel list controllers and the offline cache; a shape change here is '
@@ -829,6 +837,46 @@ GROUPS = [
         risks=[
             '`disableSlowMode` unsets `cooldown`, which the server rejects on both v1 and v2 as a reserved field. '
             'It fails before and after this group; the fix is tracked separately, so the request is unchanged.',
+        ],
+        done=DONE.replace('- [ ]', '- [x]'),
+    ),
+    dict(
+        num='16', slug='channel-lifecycle', title='Channel Lifecycle',
+        hand=[],
+        match=only_ops('POST /api/v2/chat/channels/{type}/{id}/hide',
+                       'POST /api/v2/chat/channels/{type}/{id}/show',
+                       'DELETE /api/v2/chat/channels/{type}/{id}'),
+        goal='Move hiding, showing and deleting a channel ahead of '
+             '[11](11-channels-and-members.md): they answer only a `duration` or a channel '
+             '[15](15-partial-updates.md) already maps, so they need none of the message mappers.',
+        decisions=[],
+        taken=textwrap.dedent("""\
+            - **Split out of [11](11-channels-and-members.md), ahead of it.** None of the three reads anything
+              into client state — the `channel.hidden`, `channel.visible` and `channel.deleted` events do that —
+              and the one channel they answer goes through `channel_mapper.dart`.
+            - **The v2 routes are the v1 handlers.** `lib/chat/routes.go` mounts hide, show and delete in the
+              shared `coreRoutes`; none is gated, in beta or deprecated.
+            - **Moved off `ChannelApi`:** `hideChannel`, `showChannel` and `deleteChannel`, each now a
+              `StreamChatClient` method over `ChannelsRepository`.
+            - **Each write answers its own envelope,** where v10 answered `EmptyResponse`: `HideChannelResponse`,
+              `ShowChannelResponse` and `DeleteChannelResponse`, freezed, in `models/response/`, with the spec's
+              names. `DeleteChannelResponse.channel` is nullable, as the spec declares it. `Channel.hide`, `show`
+              and `delete` keep their names.
+            - **`StreamChannelListController.deleteChannel` returns the `Result`,** as `muteChannel` does.
+            - **`hard_delete` is not exposed.** The server refuses it from a client-side token, and v10 never sent it.
+            - **Stopping watching stays in 11, hand-written.** The spec declares a required, empty-object body for
+              `stop-watching`, but the generated `stopWatchingChannel` sends none, and the handler's
+              `ParseAndValidateRequest` refuses a missing body with `400 invalid json data` on v1 and v2 alike.
+              It moves once the generator emits the body; it is not paired with the other three, so they move now.
+            - **Show sends no body,** where v1 sent `{}`; the server accepts both. Hide still sends `clear_history`.
+            - **The read and delivery receipts stay in 11 for now.** `markRead` and its siblings share endpoints
+              with the thread read calls, fabricate a response on the local-unread path, and feed
+              `MessageListUnreadController` and the public `ChannelDeliveryReporter`, which rely on a throw; they
+              move in a slice of their own.
+            """),
+        risks=[
+            'Until stopping watching moves, `stopChannelWatching` and `Channel.stopWatching` still throw while the '
+            'other channel writes here return a `Result`; `migrations/v11-migration.md` says so.',
         ],
         done=DONE.replace('- [ ]', '- [x]'),
     ),

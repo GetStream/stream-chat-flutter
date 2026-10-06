@@ -447,6 +447,18 @@ void main() {
     expect(controller.value.isSuccess, isTrue);
   });
 
+  test('deleteChannel passes on the failure instead of throwing', () async {
+    const error = StreamClientException(message: 'boom');
+    final channel = MockChannel();
+    when(channel.delete).thenAnswer((_) async => const Result.failure(error));
+
+    final controller = StreamChannelListController(client: client);
+    final res = await controller.deleteChannel(channel);
+
+    expect(res.isFailure, isTrue);
+    expect(res.exceptionOrNull(), error);
+  });
+
   test('muteChannel passes on the failure instead of throwing', () async {
     const error = StreamClientException(message: 'boom');
     final channel = MockChannel();
