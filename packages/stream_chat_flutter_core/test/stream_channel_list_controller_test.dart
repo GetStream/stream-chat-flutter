@@ -447,7 +447,7 @@ void main() {
     expect(controller.value.isSuccess, isTrue);
   });
 
-  test('deleteChannel passes on the failure instead of throwing', () async {
+  test('deleteChannel returns the failure from Channel.delete', () async {
     const error = StreamClientException(message: 'boom');
     final channel = MockChannel();
     when(channel.delete).thenAnswer((_) async => const Result.failure(error));
@@ -459,7 +459,7 @@ void main() {
     expect(res.exceptionOrNull(), error);
   });
 
-  test('muteChannel passes on the failure instead of throwing', () async {
+  test('muteChannel returns the failure from Channel.mute', () async {
     const error = StreamClientException(message: 'boom');
     final channel = MockChannel();
     when(channel.mute).thenAnswer((_) async => const Result.failure(error));
@@ -471,7 +471,7 @@ void main() {
     expect(res.exceptionOrNull(), error);
   });
 
-  test('unmuteChannel passes on the failure instead of throwing', () async {
+  test('unmuteChannel returns the failure from Channel.unmute', () async {
     const error = StreamClientException(message: 'boom');
     final channel = MockChannel();
     when(channel.unmute).thenAnswer((_) async => const Result.failure(error));
