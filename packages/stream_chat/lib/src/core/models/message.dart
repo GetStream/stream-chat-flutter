@@ -357,6 +357,7 @@ class Message extends Equatable {
   /// This is used to share a location in a message, allowing users to view the
   /// location on a map.
   @JsonKey(includeIfNull: false)
+  @LocationV1JsonConverter()
   final Location? sharedLocation;
 
   /// Whether the message was deleted only for the current user.

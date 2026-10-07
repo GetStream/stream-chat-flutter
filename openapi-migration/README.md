@@ -145,6 +145,7 @@ includes a named response that carries only `duration` today, such as `HideChann
 | `moderationFromV1Json` | `Message.moderation` | [10](10-messages.md) |
 | `reactionGroupsFromV1Json` | `Message.reactionGroups` | [10](10-messages.md) |
 | `ActionV1JsonConverter` | `Attachment.actions` | [10](10-messages.md) |
+| `LocationV1JsonConverter` | `Message.sharedLocation`, `ChannelState.activeLiveLocations`, `GetActiveLiveLocationsResponse.activeLiveLocations`, `updateLiveLocation`'s response | [10](10-messages.md) |
 | `ReactionV1JsonConverter` | `Message.latestReactions` / `ownReactions`, `Event.reaction`, `QueryReactionsResponse.reactions`, `SendReactionResponse.reaction`, the `sendReaction` body | [10](10-messages.md) |
 | `DataSerializable` | `UserGroup`, `UserGroupMember`, `ReactionGroup` (`fromData`, `toData`) | [10](10-messages.md) |
 | `user_mapper.dart` (kept, re-pointed) | today's `User`, which still reads and writes JSON | [09](09-users.md) |

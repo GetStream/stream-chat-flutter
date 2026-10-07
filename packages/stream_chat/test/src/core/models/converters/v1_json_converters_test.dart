@@ -1,7 +1,10 @@
 import 'package:stream_chat/src/core/models/action.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
+import 'package:stream_chat/src/core/models/channel_model.dart';
+import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/converters/v1_json_converters.dart';
 import 'package:stream_chat/src/core/models/device.dart';
+import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/moderation.dart';
 import 'package:stream_chat/src/core/models/push_provider.dart';
@@ -358,5 +361,89 @@ void main() {
         updatedAt: DateTime.utc(2024, 1, 2),
       ),
     ]);
+  });
+
+  test('Message.fromJson reads every shared location field from its v1 keys', () {
+    final message = Message.fromJson(const {
+      'id': 'message-id',
+      'shared_location': {
+        'channel_cid': 'messaging:general',
+        'message_id': 'message-id',
+        'user_id': 'user-id',
+        'latitude': 37.7749,
+        'longitude': -122.4194,
+        'created_by_device_id': 'device-id',
+        'end_at': '2024-12-31T23:59:59.999Z',
+        'created_at': '2024-01-01T00:00:00.000Z',
+        'updated_at': '2024-01-02T00:00:00.000Z',
+      },
+    });
+
+    expect(
+      message.sharedLocation,
+      Location(
+        channelCid: 'messaging:general',
+        messageId: 'message-id',
+        userId: 'user-id',
+        latitude: 37.7749,
+        longitude: -122.4194,
+        createdByDeviceId: 'device-id',
+        endAt: DateTime.utc(2024, 12, 31, 23, 59, 59, 999),
+        createdAt: DateTime.utc(2024),
+        updatedAt: DateTime.utc(2024, 1, 2),
+      ),
+    );
+  });
+
+  test('ChannelState.fromJson reads active live locations with their channel and message', () {
+    final state = ChannelState.fromJson(const {
+      'active_live_locations': [
+        {
+          'channel_cid': 'messaging:general',
+          'channel': {'id': 'general', 'type': 'messaging', 'cid': 'messaging:general'},
+          'message_id': 'message-id',
+          'message': {'id': 'message-id', 'text': 'Live location'},
+          'latitude': 1,
+          'longitude': 2,
+          'end_at': '2024-12-31T23:59:59.999Z',
+          'created_at': '2024-01-01T00:00:00.000Z',
+          'updated_at': '2024-01-01T00:00:00.000Z',
+        },
+      ],
+    });
+
+    final location = state.activeLiveLocations!.single;
+    expect(location.channel, isA<ChannelModel>().having((it) => it.cid, 'cid', 'messaging:general'));
+    expect(location.message, isA<Message>().having((it) => it.text, 'text', 'Live location'));
+    expect(location.coordinates.latitude, 1.0);
+    expect(location.coordinates.longitude, 2.0);
+  });
+
+  test('Message.toJson writes the shared location in the request shape, with the end date in UTC', () {
+    final message = Message(
+      id: 'message-id',
+      sharedLocation: Location(
+        channelCid: 'messaging:general',
+        messageId: 'message-id',
+        userId: 'user-id',
+        latitude: 37.7749,
+        longitude: -122.4194,
+        createdByDeviceId: 'device-id',
+        endAt: DateTime.utc(2024, 12, 31, 23, 59, 59, 999),
+      ),
+    );
+
+    expect(message.toJson()['shared_location'], {
+      'latitude': 37.7749,
+      'longitude': -122.4194,
+      'created_by_device_id': 'device-id',
+      'end_at': '2024-12-31T23:59:59.999Z',
+    });
+  });
+
+  test('Message.toJson leaves the device and end date out of a static location without them', () {
+    final message = Message(id: 'message-id', sharedLocation: Location(latitude: 1, longitude: 2));
+
+    expect(message.toJson()['shared_location'], {'latitude': 1.0, 'longitude': 2.0});
   });
 }

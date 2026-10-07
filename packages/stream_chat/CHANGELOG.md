@@ -87,6 +87,7 @@
 - `ReactionGroup` no longer decodes from or encodes to JSON and no longer extends `Equatable`, so `props` is removed; it still compares by value. It gains `fromData` and `toData`, which read and write only the format `stream_chat_persistence` stores it in.
 - `Action` no longer decodes from or encodes to JSON, compares by value instead of by identity, and gains `copyWith`.
 - `Reaction` no longer decodes from or encodes to JSON and no longer extends `Equatable`, so `props` is removed; it still compares by value.
+- `Location` no longer decodes from or encodes to JSON and no longer extends `Equatable`, so `props` is removed; it still compares by value.
 
 🐞 Fixed
 

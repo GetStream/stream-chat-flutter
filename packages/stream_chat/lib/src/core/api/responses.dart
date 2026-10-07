@@ -705,6 +705,7 @@ Map<String, PushPreference> _userPreferencesFromJson(Map<String, dynamic>? json)
 @JsonSerializable(createToJson: false)
 class GetActiveLiveLocationsResponse extends _BaseResponse {
   /// List of active live locations returned by the api call
+  @LocationV1JsonConverter()
   late List<Location> activeLiveLocations;
 
   /// Create a new instance from a json

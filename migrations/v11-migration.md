@@ -79,7 +79,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**App Settings**](#app-settings) | `getAppSettings` returns a `Result<AppSettingsResponse>` instead of throwing; `GetAppSettingsResponse` is renamed `AppSettingsResponse` |
 | [**Guest Users**](#guest-users) | `connectGuestUser` is unchanged; `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed |
 | [**File Upload**](#file-upload) | Uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
-| [**Messages**](#messages) | `Moderation`, `ReactionGroup`, `Action` and `Reaction` no longer decode from or encode to JSON; `Action` compares by value |
+| [**Messages**](#messages) | `Moderation`, `ReactionGroup`, `Action`, `Reaction` and `Location` no longer decode from or encode to JSON; `Action` compares by value |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -229,6 +229,8 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `Action` identity `==` | value `==`, plus `copyWith` | `retyped` | Two actions with the same fields are now equal, and so are attachments that differ only in holding separate copies of them |
 | `Reaction.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. Messages, events and `sendReaction` still read and write reactions |
 | `Reaction extends Equatable`, `Reaction.props` | `Reaction` (value `==`) | `removed` | Equality, `copyWith` and `merge` are unchanged; `props` is gone and `Reaction` is no longer an `Equatable` |
+| `Location.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. Messages, channel states and the live location calls still read and write locations |
+| `Location extends Equatable`, `Location.props` | `Location` (value `==`) | `removed` | Equality and `copyWith` are unchanged; `props` is gone and `Location` is no longer an `Equatable` |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -798,8 +800,9 @@ JSON.
 `copyWith`. Two actions with the same fields are now equal, where v10 compared them by identity; an `Attachment`
 holding them follows suit.
 
-**`Reaction` is a plain class.** It no longer decodes from or encodes to JSON and is no longer an `Equatable`;
-equality, `copyWith` and `merge` are unchanged. Messages, events and `sendReaction` still carry reactions as before.
+**`Reaction` and `Location` are plain classes.** Neither decodes from or encodes to JSON any more, and neither is an
+`Equatable`; equality and `copyWith` are unchanged, as is `Reaction.merge`. Messages, events, channel states,
+`sendReaction` and the live location calls still carry them as before.
 
 ```dart
 // v10

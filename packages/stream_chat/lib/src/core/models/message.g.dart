@@ -64,9 +64,10 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
   draft: json['draft'] == null ? null : Draft.fromJson(json['draft'] as Map<String, dynamic>),
   reminder: json['reminder'] == null ? null : MessageReminder.fromJson(json['reminder'] as Map<String, dynamic>),
   channelRole: Message._channelRoleReadValue(json, 'channel_role') as String?,
-  sharedLocation: json['shared_location'] == null
-      ? null
-      : Location.fromJson(json['shared_location'] as Map<String, dynamic>),
+  sharedLocation: _$JsonConverterFromJson<Map<String, dynamic>, Location>(
+    json['shared_location'],
+    const LocationV1JsonConverter().fromJson,
+  ),
 );
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
@@ -87,6 +88,15 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
   'pin_expires': instance.pinExpires?.toIso8601String(),
   'poll_id': instance.pollId,
   'restricted_visibility': ?instance.restrictedVisibility,
-  'shared_location': ?instance.sharedLocation?.toJson(),
+  'shared_location': ?_$JsonConverterToJson<Map<String, dynamic>, Location>(
+    instance.sharedLocation,
+    const LocationV1JsonConverter().toJson,
+  ),
   'extra_data': instance.extraData,
 };
+
+Value? _$JsonConverterFromJson<Json, Value>(Object? json, Value? Function(Json json) fromJson) =>
+    json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(Value? value, Json? Function(Value value) toJson) =>
+    value == null ? null : toJson(value);

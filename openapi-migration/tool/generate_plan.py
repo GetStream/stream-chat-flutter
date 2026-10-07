@@ -594,6 +594,15 @@ GROUPS = [
               message's latest and own reactions, `Event.reaction`, the two hand-written reaction responses, and
               the `sendReaction` body, which keeps v10's request shape (type, score, emoji code, custom data at the
               root). `stream_chat_persistence` stores reactions as table rows, so no codec is needed.
+            - **`Location` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`; equality
+              is unchanged. Its constructor stays non-const (`endAt` normalised to UTC, dates default to now) and
+              it keeps v10's hand-written `copyWith` (`@Freezed(copyWith: false)`). Its `channel` and `message`
+              stay json_serializable `ChannelModel` and `Message`, which `LocationV1JsonConverter` decodes through
+              their own `fromJson`; the API nests them only in active live locations, one level deep, so the
+              message-location cycle ends there. The converter reads and writes `Message.sharedLocation` (the write
+              keeps v10's request shape: coordinates, device and end date), `ChannelState.activeLiveLocations`,
+              `GetActiveLiveLocationsResponse` and `updateLiveLocation`'s response. `stream_chat_persistence` stores
+              locations as table rows, so no codec is needed.
             """),
     ),
     dict(

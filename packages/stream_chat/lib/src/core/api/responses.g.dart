@@ -385,5 +385,7 @@ GetActiveLiveLocationsResponse _$GetActiveLiveLocationsResponseFromJson(
 ) => GetActiveLiveLocationsResponse()
   ..duration = json['duration'] as String?
   ..activeLiveLocations = (json['active_live_locations'] as List<dynamic>)
-      .map((e) => Location.fromJson(e as Map<String, dynamic>))
+      .map(
+        (e) => const LocationV1JsonConverter().fromJson(e as Map<String, dynamic>),
+      )
       .toList();

@@ -1,10 +1,9 @@
-import 'package:equatable/equatable.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:stream_core/stream_core.dart' show LocationCoordinate;
 import 'channel_model.dart';
 import 'message.dart';
 
-part 'location.g.dart';
+part 'location.freezed.dart';
 
 /// {@template location}
 /// A model class representing a shared location.
@@ -17,8 +16,8 @@ part 'location.g.dart';
 /// 2. **Live Location**: A location that updates in real-time and has an
 /// end time.
 /// {@endtemplate}
-@JsonSerializable()
-class Location extends Equatable {
+@Freezed(copyWith: false)
+class Location with _$Location {
   /// {@macro location}
   Location({
     this.channelCid,
@@ -36,54 +35,53 @@ class Location extends Equatable {
        createdAt = createdAt ?? DateTime.timestamp(),
        updatedAt = updatedAt ?? DateTime.timestamp();
 
-  /// Create a new instance from a json
-  factory Location.fromJson(Map<String, dynamic> json) => _$LocationFromJson(json);
-
   /// The channel CID where the message exists.
   ///
   /// Only set on a location that has been received, not on one built locally.
-  @JsonKey(includeToJson: false)
+  @override
   final String? channelCid;
 
   /// The channel where the message exists.
-  @JsonKey(includeToJson: false)
+  @override
   final ChannelModel? channel;
 
   /// The ID of the message that contains the shared location.
-  @JsonKey(includeToJson: false)
+  @override
   final String? messageId;
 
   /// The message that contains the shared location.
-  @JsonKey(includeToJson: false)
+  @override
   final Message? message;
 
   /// The ID of the user who shared the location.
-  @JsonKey(includeToJson: false)
+  @override
   final String? userId;
 
   /// The latitude of the shared location.
+  @override
   final double latitude;
 
   /// The longitude of the shared location.
+  @override
   final double longitude;
 
-  /// The ID of the device that created the reminder.
-  @JsonKey(includeIfNull: false)
+  /// The ID of the device that shared the location.
+  @override
   final String? createdByDeviceId;
 
   /// The date at which the shared location will end.
-  @JsonKey(includeIfNull: false)
+  @override
   final DateTime? endAt;
 
-  /// The date at which the reminder was created.
-  @JsonKey(includeToJson: false)
+  /// The date at which the location was shared.
+  @override
   final DateTime createdAt;
 
-  /// The date at which the reminder was last updated.
-  @JsonKey(includeToJson: false)
+  /// The date at which the location was last updated.
+  @override
   final DateTime updatedAt;
 
-  /// Returns true if the live location is still active (end_at > now)
+  /// Whether this is a live location whose [endAt] is still in the future.
   bool get isActive {
     final endAt = this.endAt;
     if (endAt == null) return false;
@@ -91,20 +89,17 @@ class Location extends Equatable {
     return endAt.isAfter(DateTime.now());
   }
 
-  /// Returns true if the live location is expired (end_at <= now)
+  /// Whether this location is not [isActive]: a static location, or a live one whose [endAt] has passed.
   bool get isExpired => !isActive;
 
-  /// Returns true if this is a live location (has end_at)
+  /// Whether this is a live location, one with an [endAt].
   bool get isLive => endAt != null;
 
-  /// Returns true if this is a static location (no end_at)
+  /// Whether this is a static location, one without an [endAt].
   bool get isStatic => endAt == null;
 
   /// Returns the coordinates of the shared location.
   LocationCoordinate get coordinates => .new(latitude: latitude, longitude: longitude);
-
-  /// Serialize to json
-  Map<String, dynamic> toJson() => _$LocationToJson(this);
 
   /// Creates a copy of [Location] with specified attributes overridden.
   Location copyWith({
@@ -134,19 +129,4 @@ class Location extends Equatable {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
-
-  @override
-  List<Object?> get props => [
-    channelCid,
-    channel,
-    messageId,
-    message,
-    userId,
-    latitude,
-    longitude,
-    createdByDeviceId,
-    endAt,
-    createdAt,
-    updatedAt,
-  ];
 }

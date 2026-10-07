@@ -4,7 +4,10 @@ import 'package:stream_core/stream_core.dart' show StreamDateTimeConverter;
 
 import '../../util/serializer.dart';
 import '../action.dart';
+import '../channel_model.dart';
 import '../device.dart';
+import '../location.dart';
+import '../message.dart';
 import '../moderation.dart';
 import '../push_provider.dart';
 import '../reaction.dart';
@@ -40,6 +43,46 @@ class ActionV1JsonConverter implements JsonConverter<Action, Map<String, dynamic
     'text': action.text,
     'type': action.type,
     'value': action.value,
+  };
+}
+
+/// Converts a [Location] to and from its v1 keys.
+///
+/// [toJson] writes the request shape: the coordinates, the device and the end date, without the channel, message,
+/// user or the other dates.
+// TODO(openapi-migration): remove in group 10
+@internal
+class LocationV1JsonConverter implements JsonConverter<Location, Map<String, dynamic>> {
+  /// Creates a new [LocationV1JsonConverter].
+  const LocationV1JsonConverter();
+
+  @override
+  Location fromJson(Map<String, dynamic> json) => Location(
+    channelCid: json['channel_cid'] as String?,
+    channel: switch (json['channel']) {
+      final Map<String, dynamic> channel => ChannelModel.fromJson(channel),
+      _ => null,
+    },
+    messageId: json['message_id'] as String?,
+    message: switch (json['message']) {
+      final Map<String, dynamic> message => Message.fromJson(message),
+      _ => null,
+    },
+    userId: json['user_id'] as String?,
+    latitude: (json['latitude'] as num).toDouble(),
+    longitude: (json['longitude'] as num).toDouble(),
+    createdByDeviceId: json['created_by_device_id'] as String?,
+    endAt: _dateTimeOrNull(json['end_at']),
+    createdAt: _dateTimeOrNull(json['created_at']),
+    updatedAt: _dateTimeOrNull(json['updated_at']),
+  );
+
+  @override
+  Map<String, dynamic> toJson(Location location) => {
+    'latitude': location.latitude,
+    'longitude': location.longitude,
+    if (location.createdByDeviceId case final createdByDeviceId?) 'created_by_device_id': createdByDeviceId,
+    if (location.endAt case final endAt?) 'end_at': endAt.toIso8601String(),
   };
 }
 
@@ -160,6 +203,8 @@ ReactionGroup _reactionGroupFromV1Json(Map<String, dynamic> json) => ReactionGro
 
 // Dates arrive as ISO-8601 strings on v1 and as epoch nanoseconds on v2; the converter reads both.
 const _dateTime = StreamDateTimeConverter();
+
+DateTime? _dateTimeOrNull(Object? json) => json == null ? null : _dateTime.fromJson(json);
 
 // Reads the keys directly rather than through the generated group type, whose members require `app_pk`: a payload
 // without it should not fail the whole message.
