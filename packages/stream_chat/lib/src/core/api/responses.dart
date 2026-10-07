@@ -18,9 +18,7 @@ import '../models/push_preference.dart';
 import '../models/reaction.dart';
 import '../models/read.dart';
 import '../models/thread.dart';
-import '../models/unread_counts.dart';
 import '../models/user.dart';
-import '../models/user_block.dart';
 
 part 'responses.g.dart';
 
@@ -102,17 +100,6 @@ class QueryMembersResponse extends _BaseResponse {
 
   /// Create a new instance from a json
   static QueryMembersResponse fromJson(Map<String, dynamic> json) => _$QueryMembersResponseFromJson(json);
-}
-
-/// Model response for update member API calls, such as
-/// [StreamChatClient.updateMemberPartial]
-@JsonSerializable(createToJson: false)
-class PartialUpdateMemberResponse extends _BaseResponse {
-  /// The updated member state
-  late Member channelMember;
-
-  /// Create a new instance from a json
-  static PartialUpdateMemberResponse fromJson(Map<String, dynamic> json) => _$PartialUpdateMemberResponseFromJson(json);
 }
 
 /// Model response for [StreamChatClient.queryUsers] api call
@@ -268,20 +255,6 @@ class UpdateChannelResponse extends _BaseResponse {
   static UpdateChannelResponse fromJson(Map<String, dynamic> json) => _$UpdateChannelResponseFromJson(json);
 }
 
-/// Model response for [Channel.updatePartial] api call
-@JsonSerializable(createToJson: false)
-class PartialUpdateChannelResponse extends _BaseResponse {
-  /// Updated channel
-  late ChannelModel channel;
-
-  /// Channel members
-  List<Member>? members;
-
-  /// Create a new instance from a json
-  static PartialUpdateChannelResponse fromJson(Map<String, dynamic> json) =>
-      _$PartialUpdateChannelResponseFromJson(json);
-}
-
 /// Model response for [Channel.inviteMembers] api call
 @JsonSerializable(createToJson: false)
 class InviteMembersResponse extends _BaseResponse {
@@ -408,35 +381,6 @@ class ChannelStateResponse extends _BaseResponse {
 
   /// Create a new instance from a json
   static ChannelStateResponse fromJson(Map<String, dynamic> json) => _$ChannelStateResponseFromJson(json);
-}
-
-/// Contains information about a [User] that was banned from a [Channel] or App.
-@JsonSerializable(createToJson: false)
-class UserBlockResponse extends _BaseResponse {
-  /// User that banned the [user].
-  @JsonKey(defaultValue: '')
-  late String blockedByUserId;
-
-  /// Reason for the ban.
-  @JsonKey(defaultValue: '')
-  late String blockedUserId;
-
-  /// Timestamp when the [user] was banned.
-  late DateTime createdAt;
-
-  /// Create a new instance from a json
-  static UserBlockResponse fromJson(Map<String, dynamic> json) => _$UserBlockResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.queryBlockedUsers] api call
-@JsonSerializable(createToJson: false)
-class BlockedUsersResponse extends _BaseResponse {
-  /// Updated users
-  @JsonKey(defaultValue: [])
-  late List<UserBlock> blocks;
-
-  /// Create a new instance from a json
-  static BlockedUsersResponse fromJson(Map<String, dynamic> json) => _$BlockedUsersResponseFromJson(json);
 }
 
 /// Model response for [StreamChatClient.createPoll] api call
@@ -647,31 +591,6 @@ class QueryRemindersResponse extends _BaseResponse {
 
   /// Create a new instance from a json
   static QueryRemindersResponse fromJson(Map<String, dynamic> json) => _$QueryRemindersResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.getUnreadCount] api call
-@JsonSerializable(createToJson: false)
-class GetUnreadCountResponse extends _BaseResponse {
-  /// Total number of unread messages across all channels
-  late int totalUnreadCount;
-
-  /// Total number of threads with unread replies
-  late int totalUnreadThreadsCount;
-
-  /// Total number of unread messages grouped by team
-  late Map<String, int>? totalUnreadCountByTeam;
-
-  /// List of channels with unread messages
-  late List<UnreadCountsChannel> channels;
-
-  /// Summary of unread counts grouped by channel type
-  late List<UnreadCountsChannelType> channelType;
-
-  /// List of threads with unread replies
-  late List<UnreadCountsThread> threads;
-
-  /// Create a new instance from a json
-  static GetUnreadCountResponse fromJson(Map<String, dynamic> json) => _$GetUnreadCountResponseFromJson(json);
 }
 
 /// Model response for [StreamChatClient.setPushPreferences] api call

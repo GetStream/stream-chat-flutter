@@ -26,6 +26,7 @@ void main() {
       isModerator: math.Random().nextBool(),
       deletedMessages: ['msg1', 'msg2', 'msg3'],
       extraData: {'test_extra_data': 'testData'},
+      banExpires: DateTime.now(),
     );
     final member = entity.toMember(user: user);
     expect(member, isA<Member>());
@@ -43,6 +44,7 @@ void main() {
     expect(member.isModerator, entity.isModerator);
     expect(member.deletedMessages, entity.deletedMessages);
     expect(member.extraData, entity.extraData);
+    expect(member.banExpires, isSameDateAs(entity.banExpires));
   });
 
   test('toEntity show map member into MemberEntity', () {
@@ -63,6 +65,7 @@ void main() {
       isModerator: math.Random().nextBool(),
       deletedMessages: const ['msg1', 'msg2', 'msg3'],
       extraData: const {'test_extra_data': 'testData'},
+      banExpires: DateTime.now(),
     );
     final entity = member.toEntity(cid: cid);
     expect(entity, isA<MemberEntity>());
@@ -81,5 +84,6 @@ void main() {
     expect(entity.isModerator, member.isModerator);
     expect(entity.deletedMessages, member.deletedMessages);
     expect(entity.extraData, member.extraData);
+    expect(entity.banExpires, isSameDateAs(member.banExpires));
   });
 }

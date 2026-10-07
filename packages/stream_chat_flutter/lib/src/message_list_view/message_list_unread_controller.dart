@@ -308,15 +308,17 @@ class MessageListUnreadController {
   // transient failure (offline, a 5xx) would block every later attempt for
   // that state until a new message arrived or the channel was reopened.
   //
-  // The error itself is swallowed rather than rethrown: the request is a
-  // best-effort background action with no user-facing surface, and the future
-  // is discarded by the debouncer, so rethrowing would only raise an
-  // unhandled async error.
-  Future<EmptyResponse>? _retryableMarkRead(Future<EmptyResponse>? request) {
-    return request?.onError((_, __) {
-      _lastMarkReadAttempt = null;
-      return EmptyResponse();
-    });
+  // The failure itself is swallowed: the request is a best-effort background
+  // action with no user-facing surface, and the future is discarded by the
+  // debouncer, so an error escaping it would only raise an unhandled async
+  // error.
+  Future<void>? _retryableMarkRead(Future<Result<MarkReadResponse>>? request) {
+    return request?.then(
+      (result) {
+        if (result.isFailure) _lastMarkReadAttempt = null;
+      },
+      onError: (_, __) => _lastMarkReadAttempt = null,
+    );
   }
 
   /// Resets every piece of unread state for a newly attached channel.

@@ -17,5 +17,10 @@
     "msg-2",
     "msg-3"
   ],
+  "notifications_muted": true,
+  "status": "member",
+  "ban_from_future_channels": true,
+  "future_channel_ban_expires": "2020-02-28T22:17:30.95443Z",
+  "deleted_at": "2020-01-29T22:17:30.95443Z",
   "some_custom_field": "with_custom_data"
 }

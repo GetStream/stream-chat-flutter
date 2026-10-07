@@ -34,6 +34,11 @@ onto Stream's OpenAPI-generated API client.
     - [Messages](#messages)
     - [User Groups](#user-groups)
     - [Link Previews](#link-previews)
+    - [Partial Updates](#partial-updates)
+    - [Channel Lifecycle](#channel-lifecycle)
+    - [Read Receipts](#read-receipts)
+    - [Unread Counts](#unread-counts)
+    - [User Blocking](#user-blocking)
 - [Migration Checklist](#migration-checklist)
 - [For AI Agents](#for-ai-agents)
 - [Contributing to this guide](#contributing-to-this-guide)
@@ -79,6 +84,11 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**App Settings**](#app-settings) | `getAppSettings` returns a `Result<AppSettingsResponse>` instead of throwing; `GetAppSettingsResponse` is renamed `AppSettingsResponse` |
 | [**Guest Users**](#guest-users) | `connectGuestUser` is unchanged; `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed |
 | [**File Upload**](#file-upload) | Uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
+| [**Partial Updates**](#partial-updates) | Channel and member partial updates — `updatePartial`, `updateName`, `updateImage`, slow mode, pin and archive — return a `Result` instead of throwing; their responses take the API's names, `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse`, and `partialMemberUpdate` becomes `updateMemberPartial` |
+| [**Channel Lifecycle**](#channel-lifecycle) | Hiding, showing and deleting a channel return a `Result` instead of throwing; stopping watching still throws |
+| [**Read Receipts**](#read-receipts) | Marking read, unread and delivered return a `Result` instead of throwing; `ChannelDeliveryReporter`'s callback returns a `Result` |
+| [**Unread Counts**](#unread-counts) | `getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing; the response and its `UnreadCounts*` models no longer decode JSON and compare by value |
+| [**User Blocking**](#user-blocking) | `blockUser`, `unblockUser` and `getBlockedUsers` (was `queryBlockedUsers`) return a `Result` instead of throwing; their responses are renamed `BlockUsersResponse` and `GetBlockedUsersResponse`, `unblockUser` answers a new `UnblockUsersResponse`, and `UserBlock`'s fields are all non-nullable |
 | [**Messages**](#messages) | `Moderation`, `ReactionGroup`, `Action`, `Reaction` and `Location` no longer decode from or encode to JSON; `Action` compares by value |
 | _(filled in per feature as PRs land)_ | |
 
@@ -104,6 +114,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `UploadState`'s `Preparing` / `InProgress` / `Success` / `Failed` | `UploadStatePreparing` / `UploadStateInProgress` / `UploadStateSuccess` / `UploadStateFailed` | `renamed` | Frees `Success` for `Result` |
 | `PagedValue.error(StreamChatError)` (`stream_chat_flutter_core`) | `PagedValue.error(StreamChatException)` | `retyped` | |
 | `StreamChannelListController.muteChannel` / `unmuteChannel` → `Future<void>` (`stream_chat_flutter_core`) | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing, so a `try`/`catch` around either no longer catches a failed call. A subclass overriding one needs the new return type |
+| `StreamChannelListController.deleteChannel` → `Future<void>` (`stream_chat_flutter_core`) | `Future<Result<DeleteChannelResponse>>` | `retyped` | Returns a `Result` instead of throwing, so a `try`/`catch` around it no longer catches a failed call. A subclass overriding it needs the new return type |
 | `errorBuilder: Function(BuildContext, StreamChatError)` (scroll views) | `Function(BuildContext, StreamChatException)` | `retyped` | |
 | `StreamAttachmentValidator.validate()` / `.validateCount()` returning `StreamChatError?` | returning `AttachmentValidationError?` | `retyped` | `stream_chat_flutter`. They always returned rather than threw; the return type now says so |
 | `AttachmentLimitReachedError` / `AttachmentTooLargeError` / `AttachmentBlockedError` extending `StreamChatError` | extending `sealed AttachmentValidationError` | `retyped` | A refused attachment is not a failed call, so it is no longer one of the `StreamException` kinds. `switch` over them is exhaustive |
@@ -221,6 +232,54 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `SendAttachmentResponse`, `SendFileResponse`, `SendImageResponse`, `UploadImageResponse`, `UploadFileResponse` | `UploadedFile` (`stream_core`) | `removed` | `.file` becomes `.fileUrl`; `.thumbUrl` is unchanged; `duration` is gone |
 | `AttachmentFileUploaderProvider` = `AttachmentFileUploader Function(StreamHttpClient)` | `AttachmentFileUploader Function(Dio)` | `retyped` | Receives the client's `Dio`; `StreamAttachmentFileUploader(dio)` builds the default |
 | `StreamChatApi.fileUploader`, `StreamChatApi(attachmentFileUploaderProvider:)` | `StreamChatClient(attachmentFileUploaderProvider:)` | `removed` | The uploader belongs to `StreamChatClient` |
+| `PartialUpdateChannelResponse` | `UpdateChannelPartialResponse` | `renamed` | The name of the API's response. Same fields: `duration`, `channel` and `members` |
+| `PartialUpdateMemberResponse` | `UpdateMemberPartialResponse` | `renamed` | The name of the API's response. Same fields: `duration` and `channelMember` |
+| `StreamChatClient.partialMemberUpdate` | `StreamChatClient.updateMemberPartial` | `renamed` | The name of the API's operation, matching `updateChannelPartial` |
+| `StreamChatClient.enableSlowdown` / `disableSlowdown` | `StreamChatClient.enableSlowMode` / `disableSlowMode` | `renamed` | Matches `Channel.enableSlowMode` / `disableSlowMode` and `ChannelCapability.slowMode` |
+| `StreamChatClient.updateChannelPartial` / `enableSlowdown` / `disableSlowdown` → `Future<PartialUpdateChannelResponse>` | `updateChannelPartial` / `enableSlowMode` / `disableSlowMode` → `Future<Result<UpdateChannelPartialResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `Channel.updatePartial` / `updateName` / `updateImage` / `enableSlowMode` / `disableSlowMode` → `Future<PartialUpdateChannelResponse>` | `Future<Result<UpdateChannelPartialResponse>>` | `retyped` | Returns a `Result` instead of throwing. Calling one before the channel is initialized still throws a `StateError` |
+| `StreamChatClient.partialMemberUpdate` / `pinChannel` / `unpinChannel` / `archiveChannel` / `unarchiveChannel` → `Future<PartialUpdateMemberResponse>` | `Future<Result<UpdateMemberPartialResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `Channel.pin` → `Future<Member>`, `unpin` / `archive` / `unarchive` → `Future<Member?>` | `Future<Result<UpdateMemberPartialResponse>>` | `retyped` | Returns a `Result` instead of throwing, and answers the whole response: read the member off `.channelMember`. Calling one before the channel is initialized still throws a `StateError` |
+| `PartialUpdateChannelResponse.channel` (`ChannelModel`) | `UpdateChannelPartialResponse.channel` (`ChannelModel?`) | `retyped` | Nullable, as the API declares it |
+| `PartialUpdateChannelResponse.members` (`List<Member>?`) | `UpdateChannelPartialResponse.members` (`List<Member>`) | `retyped` | Always present, empty when the channel has no members; drop any `?.` or `?? []` |
+| `PartialUpdateMemberResponse.channelMember` (`Member`) | `UpdateMemberPartialResponse.channelMember` (`Member?`) | `retyped` | Nullable, as the API declares it |
+| `PartialUpdateChannelResponse.duration` / `PartialUpdateMemberResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| `PartialUpdateChannelResponse.fromJson` / `PartialUpdateMemberResponse.fromJson` | — | `removed` | The responses are plain classes; construct them directly |
+| `PartialUpdateChannelResponse()..channel = …`, `PartialUpdateMemberResponse()..channelMember = …` and their other setters | `UpdateChannelPartialResponse(duration: …, channel: …)` / `UpdateMemberPartialResponse(duration: …, channelMember: …)` | `retyped` | Plain classes with a const constructor and final fields |
+| `PartialUpdateChannelResponse` / `PartialUpdateMemberResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
+| `StreamChatApi.channel.updateChannelPartial` / `enableSlowdown` / `disableSlowdown` / `updateMemberPartial` | the `StreamChatClient` methods | `removed` | The endpoints moved to the generated client |
+| `StreamChatClient.hideChannel` / `showChannel` / `deleteChannel` → `Future<EmptyResponse>` | `Future<Result<HideChannelResponse>>` / `Future<Result<ShowChannelResponse>>` / `Future<Result<DeleteChannelResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `Channel.hide` / `show` / `delete` → `Future<EmptyResponse>` | `Future<Result<HideChannelResponse>>` / `Future<Result<ShowChannelResponse>>` / `Future<Result<DeleteChannelResponse>>` | `retyped` | Returns a `Result` instead of throwing. Calling one before the channel is initialized still throws a `StateError` |
+| `StreamChatApi.channel.hideChannel` / `showChannel` / `deleteChannel` | the `StreamChatClient` methods | `removed` | The endpoints moved to the generated client |
+| `MemberUpdatePayload(pinned: true).toJson()` / `MemberUpdateType.pinned.name` | `{'pinned': true}` / `'pinned'` | `removed` | Same for `archived`. Or call `pinChannel` / `unpinChannel` / `archiveChannel` / `unarchiveChannel` |
+| `StreamChatClient.markChannelRead` / `markThreadRead` / `markAllRead` → `Future<EmptyResponse>` | `Future<Result<MarkReadResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `StreamChatClient.markChannelUnread` / `markChannelUnreadByTimestamp` / `markThreadUnread` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing, and carries no value on success |
+| `StreamChatClient.markChannelsDelivered` → `Future<EmptyResponse>` | `Future<Result<MarkDeliveredResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `Channel.markRead` / `markThreadRead` → `Future<EmptyResponse>` | `Future<Result<MarkReadResponse>>` | `retyped` | Returns a `Result` instead of throwing, including when the current user cannot send read events. Calling one before the channel is initialized still throws a `StateError` |
+| `Channel.markUnread` / `markUnreadByTimestamp` / `markThreadUnread` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing, including when the current user cannot send read events, and when `markUnread` counts locally and the message is not among the loaded ones. Calling one before the channel is initialized still throws a `StateError` |
+| `MarkChannelsDelivered` = `Future<void> Function(Iterable<MessageDelivery>)` | `Future<Result<void>> Function(Iterable<MessageDelivery>)` | `retyped` | The callback `ChannelDeliveryReporter` takes. Return a failure rather than throwing; the reporter keeps the receipts for a later batch |
+| `MessageDelivery.toJson` | — | `removed` | `MessageDelivery` is a plain class |
+| `MessageDelivery` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
+| `StreamChatApi.channel.markRead` / `markUnread` / `markUnreadByTimestamp` / `markThreadRead` / `markThreadUnread` / `markAllRead` / `markChannelsDelivered` | the `StreamChatClient` methods | `removed` | The endpoints moved to the generated client |
+| `StreamChatClient.getUnreadCount` → `Future<GetUnreadCountResponse>` | `Future<Result<GetUnreadCountResponse>>` | `retyped` | Returns a `Result` instead of throwing. The current user's unread counts are still updated on success |
+| `GetUnreadCountResponse.fromJson`, `UnreadCountsChannel.fromJson` / `toJson`, `UnreadCountsThread.fromJson` / `toJson`, `UnreadCountsChannelType.fromJson` / `toJson` | — | `removed` | The response and models are plain classes; construct them directly |
+| `GetUnreadCountResponse()..totalUnreadCount = …` and its other setters | `GetUnreadCountResponse(duration: …, totalUnreadCount: …, …)` | `retyped` | A plain class with a const constructor and final fields |
+| `GetUnreadCountResponse`, `UnreadCountsChannel`, `UnreadCountsThread`, `UnreadCountsChannelType` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
+| `GetUnreadCountResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| `StreamChatApi.user.getUnreadCount` | `StreamChatClient.getUnreadCount` | `removed` | The endpoint moved to the generated client |
+| `StreamChatClient.blockUser` → `Future<UserBlockResponse>` | `Future<Result<BlockUsersResponse>>` | `retyped` | Returns a `Result` instead of throwing. The blocked user is still added to `OwnUser.blockedUserIds` on success |
+| `StreamChatClient.unblockUser` → `Future<EmptyResponse>` | `Future<Result<UnblockUsersResponse>>` | `retyped` | Returns a `Result` instead of throwing. The user is still removed from `OwnUser.blockedUserIds` on success |
+| `StreamChatClient.queryBlockedUsers` | `StreamChatClient.getBlockedUsers` | `renamed` | Same call, the API's name |
+| `StreamChatClient.queryBlockedUsers` → `Future<BlockedUsersResponse>` | `Future<Result<GetBlockedUsersResponse>>` | `retyped` | Returns a `Result` instead of throwing. `OwnUser.blockedUserIds` is still replaced on success |
+| `UserBlockResponse` | `BlockUsersResponse` | `renamed` | Same fields |
+| `BlockedUsersResponse` | `GetBlockedUsersResponse` | `renamed` | Same fields |
+| `UserBlockResponse.fromJson`, `BlockedUsersResponse.fromJson`, `UserBlock.fromJson` / `toJson` | — | `removed` | The responses and model are plain classes; construct them directly |
+| `UserBlockResponse()..blockedUserId = …`, `BlockedUsersResponse()..blocks = …` and their other setters | `BlockUsersResponse(duration: …, blockedUserId: …, …)`, `GetBlockedUsersResponse(duration: …, blocks: …)` | `retyped` | Plain classes with a const constructor and final fields |
+| `UserBlockResponse`, `BlockedUsersResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
+| `UserBlockResponse.duration`, `BlockedUsersResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| `UserBlock extends Equatable`, `UserBlock.props` | `UserBlock` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and `UserBlock` is no longer an `Equatable` |
+| `UserBlock.blockedUser` (`User?`), `.userId` / `.blockedUserId` (`String?`), `.createdAt` (`DateTime?`) | `User`, `String`, `DateTime` — required in the constructor | `retyped` | The server always sends them; drop any `!`, `?.` or `?? …` |
+| `StreamChatApi.user.blockUser` / `unblockUser` / `queryBlockedUsers` | `StreamChatClient.blockUser` / `unblockUser` / `getBlockedUsers` | `removed` | The endpoints moved to the generated client |
 | `Moderation.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. `Message.fromJson` still reads a message's moderation |
 | `Moderation extends Equatable`, `Moderation.props` | `Moderation` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and `Moderation` is no longer an `Equatable` |
 | `ReactionGroup.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. `Message.fromJson` still reads a message's reaction groups. `fromData` / `toData` are the offline database's format, not API JSON |
@@ -423,7 +482,7 @@ counterpart: `code` is now a `StreamErrorCode` (an extension type over `int`, wi
 ## Offline Cache
 
 If you use `stream_chat_persistence`, the local database is **rebuilt from empty** the first time your app runs
-on v11. The Drift schema version moves from `1035` to `1102`, and the upgrade strategy drops and recreates every
+on v11. The Drift schema version moves from `1036` to `1104`, and the upgrade strategy drops and recreates every
 table rather than migrating rows.
 
 Everything held on disk is discarded: channels, messages, members, reads, drafts, locations, polls, poll votes
@@ -619,6 +678,233 @@ result.fold(
 `OGAttachmentResponse(duration: '0ms', ogScrapeUrl: url)` where v10 wrote `OGAttachmentResponse()..ogScrapeUrl = url`.
 
 **`duration` is a non-nullable `String`**, where v10 typed it `String?`.
+
+### Partial Updates
+
+**Channel and member partial updates return a `Result` instead of throwing.** On the channel side that covers
+`StreamChatClient.updateChannelPartial`, `enableSlowMode` and `disableSlowMode` (v10's `enableSlowdown` and
+`disableSlowdown`), and `Channel.updatePartial`,
+`updateName`, `updateImage`, `enableSlowMode` and `disableSlowMode`. On the member side it covers
+`StreamChatClient.updateMemberPartial` (v10's `partialMemberUpdate`), `pinChannel`, `unpinChannel`,
+`archiveChannel` and `unarchiveChannel`, and `Channel.pin`, `unpin`, `archive` and `unarchive`. The full update,
+`updateChannel` and `Channel.update`, still throws. A `try`/`catch` around a partial update still compiles, but
+no longer catches a failed call: read the returned `Result` instead.
+
+```dart
+// v10
+try {
+  final response = await channel.updatePartial(set: {'name': 'Support'});
+  print(response.channel.name);
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await channel.updatePartial(set: {'name': 'Support'});
+result.fold(
+  onSuccess: (response) => print(response.channel?.name),
+  onFailure: (error, _) => report(error),
+);
+```
+
+**The responses take the API's names.** `PartialUpdateChannelResponse` is now `UpdateChannelPartialResponse`, and
+`PartialUpdateMemberResponse` is now `UpdateMemberPartialResponse`. Their fields keep their names.
+
+**`StreamChatClient.enableSlowdown` and `disableSlowdown` are renamed `enableSlowMode` and `disableSlowMode`,** the
+names `Channel` already used.
+
+**`Channel.pin`, `unpin`, `archive` and `unarchive` answer the whole response**, where v10 returned the member:
+
+```dart
+// v10
+final member = await channel.pin();
+
+// v11
+final result = await channel.pin();
+final member = result.getOrThrow().channelMember;
+```
+
+**`UpdateChannelPartialResponse.channel` and `UpdateMemberPartialResponse.channelMember` are nullable**, where v10
+typed them non-null. `UpdateChannelPartialResponse.members` goes the other way: it is a `List<Member>`, empty when
+the channel has none, where v10 typed it `List<Member>?`.
+
+**The responses no longer decode JSON.** They are plain classes; build them with their constructors —
+`UpdateChannelPartialResponse(duration: '0ms', channel: channel)` where v10 wrote
+`PartialUpdateChannelResponse()..channel = channel`. `duration` is a non-nullable `String`.
+
+**`StreamChatApi.channel.updateChannelPartial`, `enableSlowdown`, `disableSlowdown` and `updateMemberPartial` are
+removed.** Call them on `StreamChatClient`.
+
+**`MemberUpdatePayload` and `MemberUpdateType` are removed.** They only named `pinned` and `archived`; pass the map
+directly — `updateMemberPartial(channelId: …, channelType: …, set: {'pinned': true})` — or call `pinChannel`,
+`archiveChannel` and their counterparts.
+
+> **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call; the field types
+> follow what the API declares, and the names follow the API's so the channel and member updates share one scheme.
+> `Channel.pin` and its siblings answer the whole response because every migrated write returns its envelope, so a
+> field the API adds later reaches you without another break. `MemberUpdatePayload` and `MemberUpdateType` named
+> only two of the keys a membership accepts, so a plain map replaces them.
+
+### Channel Lifecycle
+
+**Hiding, showing and deleting a channel return a `Result` instead of throwing.** That covers
+`StreamChatClient.hideChannel`, `showChannel` and `deleteChannel`, `Channel.hide`, `show` and `delete`, and
+`StreamChannelListController.deleteChannel` in `stream_chat_flutter_core`. A `try`/`catch` around one still
+compiles, but no longer catches a failed call: read the returned `Result` instead.
+
+```dart
+// v10
+try {
+  await channel.delete();
+  Navigator.of(context).pop();
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await channel.delete();
+result.fold(
+  onSuccess: (_) => Navigator.of(context).pop(),
+  onFailure: (error, _) => report(error),
+);
+```
+
+**Each call answers its own response** where v10 answered `EmptyResponse`: `HideChannelResponse`,
+`ShowChannelResponse` and `DeleteChannelResponse`, which carries the deleted channel in a nullable `channel`.
+
+**`StreamChatApi.channel.hideChannel`, `showChannel` and `deleteChannel` are removed.** Call them on
+`StreamChatClient`.
+
+> **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call. Each write
+> answers its own envelope so a field the API adds later reaches you without another break.
+
+### Read Receipts
+
+**Marking a channel or thread read or unread, and sending delivery receipts, return a `Result` instead of
+throwing.** That covers `StreamChatClient.markChannelRead`, `markChannelUnread`, `markChannelUnreadByTimestamp`,
+`markThreadRead`, `markThreadUnread`, `markAllRead` and `markChannelsDelivered`, and `Channel.markRead`,
+`markUnread`, `markUnreadByTimestamp`, `markThreadRead` and `markThreadUnread`. A `try`/`catch` around one still
+compiles, but no longer catches a failed call: read the returned `Result` instead. That includes the
+`StreamClientException`s the `Channel` methods raised when the current user cannot send read events in the
+channel, and the one `markUnread` raised when it counts unread messages locally and the message is not among the
+loaded ones. Both now arrive as failures.
+
+```dart
+// v10
+try {
+  await channel.markRead();
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await channel.markRead();
+if (result case Failure(:final error)) report(error);
+```
+
+**Marking read answers a `MarkReadResponse`, and sending delivery receipts a `MarkDeliveredResponse`**, where v10
+answered `EmptyResponse`. Marking unread carries no value on success.
+
+**`MarkChannelsDelivered` returns a `Result`.** It is the callback `ChannelDeliveryReporter` takes. A custom one
+returns a failure rather than throwing, and the reporter keeps the receipts for a later batch:
+
+```dart
+// v10
+ChannelDeliveryReporter(
+  onMarkChannelsDelivered: (deliveries) async {
+    await client.markChannelsDelivered(deliveries);
+  },
+);
+
+// v11
+ChannelDeliveryReporter(
+  onMarkChannelsDelivered: client.markChannelsDelivered,
+);
+```
+
+**`MessageDelivery` no longer encodes to JSON.** It is a plain class that compares by value and gains `copyWith`.
+
+**`StreamChatApi.channel.markRead`, `markUnread`, `markUnreadByTimestamp`, `markThreadRead`, `markThreadUnread`,
+`markAllRead` and `markChannelsDelivered` are removed.** Call them on `StreamChatClient`.
+
+> **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call. Marking read
+> and sending receipts answer their own envelope, so a field the API adds later reaches you without another
+> break. Marking unread answers nothing the API could extend, so it carries no value.
+
+### Unread Counts
+
+**`StreamChatClient.getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing.** A
+`try`/`catch` around it still compiles, but no longer catches a failed call: read the returned `Result` instead.
+On success it still updates the current user's `totalUnreadCount`, `unreadChannels` and `unreadThreads`; a
+failure leaves them as they were.
+
+```dart
+// v10
+try {
+  final counts = await client.getUnreadCount();
+  showBadge(counts.totalUnreadCount);
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await client.getUnreadCount();
+switch (result) {
+  case Success(:final data): showBadge(data.totalUnreadCount);
+  case Failure(:final error): report(error);
+}
+```
+
+**`UnreadCountsChannel`, `UnreadCountsThread` and `UnreadCountsChannelType` no longer decode from or encode to
+JSON, and `GetUnreadCountResponse` no longer decodes from it.** All four compare by value and gain `copyWith`.
+`GetUnreadCountResponse` is now a plain class with a const constructor and final fields, and its `duration` is
+always present.
+
+**`StreamChatApi.user.getUnreadCount` is removed.** Call `StreamChatClient.getUnreadCount`.
+
+> **Why:** the endpoint moved onto the generated client, which returns a `Result` for every call. The response
+> keeps its v10 name and fields; what changes is the error handling, the JSON codecs and value equality.
+
+### User Blocking
+
+**`blockUser`, `unblockUser` and `getBlockedUsers` return a `Result` instead of throwing, and `queryBlockedUsers`
+is renamed `getBlockedUsers`.** They answer `BlockUsersResponse` (renamed from `UserBlockResponse`),
+`UnblockUsersResponse` (new; `unblockUser` returned an `EmptyResponse`) and `GetBlockedUsersResponse` (renamed from
+`BlockedUsersResponse`). A `try`/`catch` around them still compiles, but no longer catches a failed call: read the
+returned `Result` instead. On success they still update the current user's `blockedUserIds`; a failure leaves it as
+it was.
+
+```dart
+// v10
+try {
+  final response = await client.queryBlockedUsers();
+  showBlocked(response.blocks.map((block) => block.blockedUser!));
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await client.getBlockedUsers();
+switch (result) {
+  case Success(:final data): showBlocked(data.blocks.map((block) => block.blockedUser));
+  case Failure(:final error): report(error);
+}
+```
+
+**`UserBlock.blockedUser`, `userId`, `blockedUserId` and `createdAt` are non-nullable** and required in the
+constructor; drop any `!`, `?.` or `?? …` on them. `UserBlock` no longer decodes from or encodes to JSON and no
+longer extends `Equatable`; it still compares by value and keeps `copyWith`. `BlockUsersResponse` and
+`GetBlockedUsersResponse` no longer decode from JSON, are plain classes with a const constructor, compare by value
+and gain `copyWith`, and their `duration` is always present.
+
+**`StreamChatApi.user.blockUser`, `unblockUser` and `queryBlockedUsers` are removed.** Call `blockUser`,
+`unblockUser` and `getBlockedUsers` on `StreamChatClient`.
+
+> **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call. `blockUser` and
+> `unblockUser` keep their names, because each takes one user id, and answer the API's responses under the API's
+> names. `queryBlockedUsers` becomes `getBlockedUsers`, the API's name, because the call takes no filter, sort or
+> pagination. The server always sends every `UserBlock` field, so the model no longer makes callers handle nulls
+> that never arrive.
 
 ### Moderation
 

@@ -88,8 +88,12 @@ void main() {
     when(() => channelClientState.isMarkedAsUnread).thenReturn(false);
 
     // Mark-read mocks return immediately.
-    when(() => channel.markRead(messageId: any(named: 'messageId'))).thenAnswer((_) async => EmptyResponse());
-    when(() => channel.markThreadRead(any())).thenAnswer((_) async => EmptyResponse());
+    when(
+      () => channel.markRead(messageId: any(named: 'messageId')),
+    ).thenAnswer((_) async => const Result.success(MarkReadResponse(duration: '0ms')));
+    when(
+      () => channel.markThreadRead(any()),
+    ).thenAnswer((_) async => const Result.success(MarkReadResponse(duration: '0ms')));
     // Thread reply loader called by MessageListCore when parentMessage is set.
     when(
       () => channel.getReplies(

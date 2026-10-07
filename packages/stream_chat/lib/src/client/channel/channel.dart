@@ -1673,39 +1673,15 @@ class Channel {
     );
   }
 
-  /// Update the channel's [name].
+  /// Sets this channel's [name], leaving every other field as it is.
   ///
-  /// This is the same as calling [updatePartial] and providing a map with a
-  /// 'name' key:
-  ///
-  /// ```dart
-  /// channel.updatePartial(
-  ///   set: {'name': 'Updated channel name'}
-  /// );
-  /// ```
-  ///
-  /// Instead do:
-  /// ```dart
-  /// channel.updateName('Updated channel name');
-  /// ```
-  Future<PartialUpdateChannelResponse> updateName(String name) => updatePartial(set: {'name': name});
+  /// The same as [updatePartial] with `set: {'name': name}`.
+  Future<Result<UpdateChannelPartialResponse>> updateName(String name) => updatePartial(set: {'name': name});
 
-  /// Update the channel's [image].
+  /// Sets this channel's [image] URL, leaving every other field as it is.
   ///
-  /// This is the same as calling [updatePartial] and providing a map with an
-  /// 'image' key:
-  ///
-  /// ```dart
-  /// channel.updatePartial(
-  ///   set: {'image': 'https://getstream.io/new-image'}
-  /// );
-  /// ```
-  ///
-  /// Instead do:
-  /// ```dart
-  /// channel.updateImage('https://getstream.io/new-image');
-  /// ```
-  Future<PartialUpdateChannelResponse> updateImage(String image) => updatePartial(set: {'image': image});
+  /// The same as [updatePartial] with `set: {'image': image}`.
+  Future<Result<UpdateChannelPartialResponse>> updateImage(String image) => updatePartial(set: {'image': image});
 
   /// Update the channel custom data. This replaces all of the channel data
   /// with the given [channelData].
@@ -1727,19 +1703,13 @@ class Channel {
     );
   }
 
-  /// A partial update can be used to set and unset specific custom data fields
-  /// when it is necessary to retain additional custom data fields on the
-  /// object.
+  /// Sets the fields in [set] and removes the fields named in [unset] on this channel, leaving every other field
+  /// as it is.
   ///
-  /// - [set] will add, or update existing attributes.
-  /// - [unset] will remove the attributes with the provided list of
-  /// values (keys).
+  /// At least one of [set] and [unset] is required.
   ///
-  /// If you want to do a full update/replacement, use [update] instead.
-  ///
-  /// See, https://getstream.io/chat/docs/other-rest/channel_update/?language=dart
-  /// for more information.
-  Future<PartialUpdateChannelResponse> updatePartial({
+  /// Use [update] to replace every field.
+  Future<Result<UpdateChannelPartialResponse>> updatePartial({
     Map<String, Object?>? set,
     List<String>? unset,
   }) async {
@@ -1747,22 +1717,22 @@ class Channel {
     return _client.updateChannelPartial(id!, type, set: set, unset: unset);
   }
 
-  /// Enable slow mode
-  Future<PartialUpdateChannelResponse> enableSlowMode({
+  /// Enables slow mode on this channel, so members wait [cooldownInterval] seconds between messages.
+  Future<Result<UpdateChannelPartialResponse>> enableSlowMode({
     required int cooldownInterval,
   }) async {
     _checkInitialized();
-    return _client.enableSlowdown(id!, type, cooldownInterval);
+    return _client.enableSlowMode(id!, type, cooldownInterval);
   }
 
-  /// Disable slow mode
-  Future<PartialUpdateChannelResponse> disableSlowMode() async {
+  /// Disables slow mode on this channel.
+  Future<Result<UpdateChannelPartialResponse>> disableSlowMode() async {
     _checkInitialized();
-    return _client.disableSlowdown(id!, type);
+    return _client.disableSlowMode(id!, type);
   }
 
-  /// Delete this channel. Messages are permanently removed.
-  Future<EmptyResponse> delete() async {
+  /// Deletes this channel and its messages.
+  Future<Result<DeleteChannelResponse>> delete() async {
     _checkInitialized();
     return _client.deleteChannel(id!, type);
   }
@@ -1854,36 +1824,42 @@ class Channel {
     return res;
   }
 
-  /// Mark all messages as read.
+  /// Marks this channel as read for the current user.
   ///
-  /// Optionally provide a [messageId] if you want to mark channel as
-  /// read from a particular message onwards.
+  /// Messages up to and including the one with [messageId] are marked as
+  /// read, or all of them when [messageId] is null.
   ///
   /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
-  /// unread count locally, on-device, without making a network request. In
-  /// that case [messageId] is recorded as the read boundary but does **not**
-  /// narrow the count: the channel is always treated as fully read and the
-  /// count drops to zero. See [ChannelClientState.markReadLocally].
-  Future<EmptyResponse> markRead({String? messageId}) async {
+  /// unread count locally, on-device, without making a network request, and
+  /// returns a [MarkReadResponse] whose `duration` is `0ms`. In that case
+  /// [messageId] is recorded as the read boundary but does **not** narrow the
+  /// count: the channel is always treated as fully read and the count drops
+  /// to zero. See [ChannelClientState.markReadLocally].
+  ///
+  /// Returns a failure if [canUseReadReceipts] is `false`, unless [usesLocalUnreadCount] is `true`.
+  Future<Result<MarkReadResponse>> markRead({String? messageId}) async {
     _checkInitialized();
 
     if (usesLocalUnreadCount) {
       state!.markReadLocally(messageId: messageId);
-      return EmptyResponse();
+      return const Result.success(MarkReadResponse(duration: '0ms'));
     }
 
     if (!canUseReadReceipts) {
-      throw const StreamClientException(
-        message: '''
+      return const Result.failure(
+        StreamClientException(
+          message: '''
         Cannot mark as read: Channel does not support read events.
         Enable read_events in your channel type configuration.''',
+        ),
       );
     }
 
     return _client.markChannelRead(id!, type, messageId: messageId);
   }
 
-  /// Marks the channel as unread by a given [messageId].
+  /// Marks this channel as unread for the current user, from the message
+  /// with [messageId] onwards.
   ///
   /// All messages from the provided message onwards will be marked as unread,
   /// **including** the message itself. Contrast with
@@ -1893,8 +1869,10 @@ class Channel {
   /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
   /// unread count locally, on-device, without making a network request. The
   /// message must be part of the locally-known messages ([Channel.messages])
-  /// for the count to be recomputed.
-  Future<EmptyResponse> markUnread(String messageId) async {
+  /// for the count to be recomputed; otherwise this returns a failure.
+  ///
+  /// Returns a failure if [canUseReadReceipts] is `false`, unless [usesLocalUnreadCount] is `true`.
+  Future<Result<void>> markUnread(String messageId) async {
     _checkInitialized();
 
     if (usesLocalUnreadCount) {
@@ -1903,11 +1881,13 @@ class Channel {
       final messages = state!.messages;
       final anchorIndex = messages.indexWhere((it) => it.id == messageId);
       if (anchorIndex < 0) {
-        throw StreamClientException(
-          message:
-              '''
+        return Result.failure(
+          StreamClientException(
+            message:
+                '''
         Cannot mark as unread: Message "$messageId" was not found in the
         locally-known messages for this channel.''',
+          ),
         );
       }
 
@@ -1921,32 +1901,36 @@ class Channel {
       // back into the read set if the two share an identical `createdAt`.
       final lastRead = anchor.createdAt.subtract(const Duration(microseconds: 1));
       state!.markUnreadLocally(lastRead: lastRead, lastReadMessageId: previous?.id);
-      return EmptyResponse();
+      return const Result.success(null);
     }
 
     if (!canUseReadReceipts) {
-      throw const StreamClientException(
-        message: '''
+      return const Result.failure(
+        StreamClientException(
+          message: '''
         Cannot mark as unread: Channel does not support read events.
         Enable read_events in your channel type configuration.''',
+        ),
       );
     }
 
     return _client.markChannelUnread(id!, type, messageId);
   }
 
-  /// Marks the channel as unread by a given [timestamp].
+  /// Marks the messages of this channel created after [timestamp] as unread
+  /// for the current user.
   ///
-  /// All messages after the provided timestamp will be marked as unread. This
-  /// boundary is **exclusive**: a message created at exactly [timestamp] stays
-  /// read. Contrast with [markUnread], which is inclusive of the message it is
-  /// given — `markUnread(m.id)` is equivalent to
+  /// The boundary is **exclusive**: a message created at exactly [timestamp]
+  /// stays read. Contrast with [markUnread], which is inclusive of the message
+  /// it is given — `markUnread(m.id)` is equivalent to
   /// `markUnreadByTimestamp(m.createdAt - 1µs)`, not to
   /// `markUnreadByTimestamp(m.createdAt)`.
   ///
   /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
   /// unread count locally, on-device, without making a network request.
-  Future<EmptyResponse> markUnreadByTimestamp(DateTime timestamp) async {
+  ///
+  /// Returns a failure if [canUseReadReceipts] is `false`, unless [usesLocalUnreadCount] is `true`.
+  Future<Result<void>> markUnreadByTimestamp(DateTime timestamp) async {
     _checkInitialized();
 
     if (usesLocalUnreadCount) {
@@ -1960,44 +1944,56 @@ class Channel {
         lastRead: timestamp,
         lastReadMessageId: lastReadMessage?.id,
       );
-      return EmptyResponse();
+      return const Result.success(null);
     }
 
     if (!canUseReadReceipts) {
-      throw const StreamClientException(
-        message: '''
+      return const Result.failure(
+        StreamClientException(
+          message: '''
         Cannot mark as unread: Channel does not support read events.
         Enable read_events in your channel type configuration.''',
+        ),
       );
     }
 
     return _client.markChannelUnreadByTimestamp(id!, type, timestamp);
   }
 
-  /// Mark the thread with [threadId] in the channel as read.
-  Future<EmptyResponse> markThreadRead(String threadId) async {
+  /// Marks a thread in this channel as read for the current user.
+  ///
+  /// [threadId] is the id of the thread's parent message. Returns a failure
+  /// if [canUseReadReceipts] is `false`.
+  Future<Result<MarkReadResponse>> markThreadRead(String threadId) async {
     _checkInitialized();
 
     if (!canUseReadReceipts) {
-      throw const StreamClientException(
-        message: '''
+      return const Result.failure(
+        StreamClientException(
+          message: '''
         Cannot mark thread as read: Channel does not support read events.
         Enable read_events in your channel type configuration.''',
+        ),
       );
     }
 
     return _client.markThreadRead(id!, type, threadId);
   }
 
-  /// Mark the thread with [threadId] in the channel as unread.
-  Future<EmptyResponse> markThreadUnread(String threadId) async {
+  /// Marks a thread in this channel as unread for the current user.
+  ///
+  /// [threadId] is the id of the thread's parent message. Returns a failure
+  /// if [canUseReadReceipts] is `false`.
+  Future<Result<void>> markThreadUnread(String threadId) async {
     _checkInitialized();
 
     if (!canUseReadReceipts) {
-      throw const StreamClientException(
-        message: '''
+      return const Result.failure(
+        StreamClientException(
+          message: '''
         Cannot mark thread as unread: Channel does not support read events.
         Enable read_events in your channel type configuration.''',
+        ),
       );
     }
 
@@ -2344,12 +2340,10 @@ class Channel {
     );
   }
 
-  /// Hides the channel from [StreamChatClient.queryChannels] for the user
-  /// until a message is added.
+  /// Hides this channel from the current user's channel list until a new message is added to it.
   ///
-  /// If [clearHistory] is set to true - all messages
-  /// will be removed for the user.
-  Future<EmptyResponse> hide({bool clearHistory = false}) async {
+  /// If [clearHistory] is true, the channel's messages are also cleared for the current user.
+  Future<Result<HideChannelResponse>> hide({bool clearHistory = false}) async {
     _checkInitialized();
     return _client.hideChannel(
       id!,
@@ -2358,58 +2352,34 @@ class Channel {
     );
   }
 
-  /// Removes the hidden status for the channel.
-  Future<EmptyResponse> show() async {
+  /// Shows this channel after the current user hid it.
+  Future<Result<ShowChannelResponse>> show() async {
     _checkInitialized();
     return _client.showChannel(id!, type);
   }
 
-  /// Pins the channel for the current user.
-  Future<Member> pin() async {
+  /// Pins this channel for the current user.
+  Future<Result<UpdateMemberPartialResponse>> pin() async {
     _checkInitialized();
-
-    final response = await _client.pinChannel(
-      channelId: id!,
-      channelType: type,
-    );
-
-    return response.channelMember;
+    return _client.pinChannel(channelId: id!, channelType: type);
   }
 
-  /// Unpins the channel.
-  Future<Member?> unpin() async {
+  /// Unpins this channel for the current user.
+  Future<Result<UpdateMemberPartialResponse>> unpin() async {
     _checkInitialized();
-
-    final response = await _client.unpinChannel(
-      channelId: id!,
-      channelType: type,
-    );
-
-    return response.channelMember;
+    return _client.unpinChannel(channelId: id!, channelType: type);
   }
 
-  /// Archives the channel.
-  Future<Member?> archive() async {
+  /// Archives this channel for the current user.
+  Future<Result<UpdateMemberPartialResponse>> archive() async {
     _checkInitialized();
-
-    final response = await _client.archiveChannel(
-      channelId: id!,
-      channelType: type,
-    );
-
-    return response.channelMember;
+    return _client.archiveChannel(channelId: id!, channelType: type);
   }
 
-  /// Unarchives the channel for the current user.
-  Future<Member?> unarchive() async {
+  /// Unarchives this channel for the current user.
+  Future<Result<UpdateMemberPartialResponse>> unarchive() async {
     _checkInitialized();
-
-    final response = await _client.unarchiveChannel(
-      channelId: id!,
-      channelType: type,
-    );
-
-    return response.channelMember;
+    return _client.unarchiveChannel(channelId: id!, channelType: type);
   }
 
   /// Stream of [Event] coming from websocket connection specific for the

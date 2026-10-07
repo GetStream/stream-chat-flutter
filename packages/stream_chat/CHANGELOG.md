@@ -83,6 +83,34 @@
 - `SendAttachmentResponse`, `SendFileResponse`, `SendImageResponse`, `UploadImageResponse` and `UploadFileResponse` are removed in favor of `UploadedFile`.
 - `AttachmentFileUploaderProvider` receives the client's `Dio` instead of a `StreamHttpClient`, and `StreamAttachmentFileUploader` is built from one.
 - `StreamChatApi.fileUploader` and `StreamChatApi`'s `attachmentFileUploaderProvider` are removed; pass `attachmentFileUploaderProvider` to `StreamChatClient` instead.
+- `updateChannelPartial`, `enableSlowMode` and `disableSlowMode` on `StreamChatClient`, and `updatePartial`, `updateName`, `updateImage`, `enableSlowMode` and `disableSlowMode` on `Channel`, return a `Result<UpdateChannelPartialResponse>` instead of throwing.
+- `PartialUpdateChannelResponse` is renamed `UpdateChannelPartialResponse`, and `PartialUpdateMemberResponse` is renamed `UpdateMemberPartialResponse`.
+- `StreamChatClient.partialMemberUpdate` is renamed `updateMemberPartial`, and `enableSlowdown` and `disableSlowdown` are renamed `enableSlowMode` and `disableSlowMode`.
+- `updateMemberPartial`, `pinChannel`, `unpinChannel`, `archiveChannel` and `unarchiveChannel` on `StreamChatClient`, and `pin`, `unpin`, `archive` and `unarchive` on `Channel`, return a `Result<UpdateMemberPartialResponse>` instead of throwing; the `Channel` methods no longer return the bare `Member`.
+- `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse` no longer decode from JSON, are immutable, built through a const constructor, compare by value, gain `copyWith`, and their `duration` is a non-nullable `String`.
+- `UpdateChannelPartialResponse.channel` and `UpdateMemberPartialResponse.channelMember` are nullable, and `UpdateChannelPartialResponse.members` is a non-nullable list.
+- `StreamChatApi.channel.updateChannelPartial`, `enableSlowdown`, `disableSlowdown` and `updateMemberPartial` are removed; call them on `StreamChatClient` instead.
+- `MemberUpdatePayload` and `MemberUpdateType` are removed; pass `set: {'pinned': true}` or `unset: ['pinned']` (and `archived`) to `updateMemberPartial`, or call `pinChannel`, `archiveChannel` and their counterparts.
+- `hideChannel`, `showChannel` and `deleteChannel` on `StreamChatClient`, and `hide`, `show` and `delete` on `Channel`, return a `Result<HideChannelResponse>`, `Result<ShowChannelResponse>` and `Result<DeleteChannelResponse>` instead of throwing.
+- `StreamChatApi.channel.hideChannel`, `showChannel` and `deleteChannel` are removed; call them on `StreamChatClient` instead.
+- `markChannelRead`, `markThreadRead` and `markAllRead` on `StreamChatClient`, and `markRead` and `markThreadRead` on `Channel`, return a `Result<MarkReadResponse>` instead of throwing.
+- `markChannelUnread`, `markChannelUnreadByTimestamp` and `markThreadUnread` on `StreamChatClient`, and `markUnread`, `markUnreadByTimestamp` and `markThreadUnread` on `Channel`, return a `Result<void>` instead of throwing.
+- `StreamChatClient.markChannelsDelivered` returns a `Result<MarkDeliveredResponse>` instead of throwing, and `MarkChannelsDelivered`, the callback `ChannelDeliveryReporter` takes, returns a `Future<Result<void>>`.
+- `MessageDelivery` no longer encodes to JSON, compares by value and gains `copyWith`.
+- `StreamChatApi.channel.markRead`, `markUnread`, `markUnreadByTimestamp`, `markThreadRead`, `markThreadUnread`, `markAllRead` and `markChannelsDelivered` are removed; call them on `StreamChatClient` instead.
+- `StreamChatClient.getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing.
+- `GetUnreadCountResponse` no longer decodes from JSON, is immutable, built through a const constructor, and its `duration` is a non-nullable `String`.
+- `UnreadCountsChannel`, `UnreadCountsThread` and `UnreadCountsChannelType` no longer decode from or encode to JSON.
+- `GetUnreadCountResponse`, `UnreadCountsChannel`, `UnreadCountsThread` and `UnreadCountsChannelType` compare by value and gain `copyWith`.
+- `StreamChatApi.user.getUnreadCount` is removed; call `StreamChatClient.getUnreadCount` instead.
+- `StreamChatClient.blockUser` returns a `Result<BlockUsersResponse>` and `unblockUser` a `Result<UnblockUsersResponse>` instead of throwing.
+- `StreamChatClient.queryBlockedUsers` is renamed `getBlockedUsers` and returns a `Result<GetBlockedUsersResponse>` instead of throwing.
+- `UserBlockResponse` is renamed `BlockUsersResponse`, and `BlockedUsersResponse` is renamed `GetBlockedUsersResponse`.
+- `BlockUsersResponse` and `GetBlockedUsersResponse` no longer decode from JSON, are immutable, built through a const constructor, and their `duration` is a non-nullable `String`.
+- `BlockUsersResponse` and `GetBlockedUsersResponse` compare by value and gain `copyWith`.
+- `UserBlock` no longer decodes from or encodes to JSON and no longer extends `Equatable`.
+- `UserBlock.blockedUser`, `userId`, `blockedUserId` and `createdAt` are required and non-nullable.
+- `StreamChatApi.user.blockUser`, `unblockUser` and `queryBlockedUsers` are removed; call `blockUser`, `unblockUser` and `getBlockedUsers` on `StreamChatClient` instead.
 - `Moderation` no longer decodes from or encodes to JSON and no longer extends `Equatable`, so `props` is removed; it still compares by value and gains `copyWith`.
 - `ReactionGroup` no longer decodes from or encodes to JSON and no longer extends `Equatable`, so `props` is removed; it still compares by value. It gains `fromData` and `toData`, which read and write only the format `stream_chat_persistence` stores it in.
 - `Action` no longer decodes from or encodes to JSON, compares by value instead of by identity, and gains `copyWith`.
@@ -117,6 +145,7 @@
 - Added optional `reason` and `custom` arguments to `flagMessage` and `flagUser`, recorded with the flag.
 - Added an optional `timeout` to `StreamChatClient.moderation.muteUser` that expires the mute.
 - Added `StreamChatClient.moderation.muteUsers` and `unmuteUsers`, which mute and unmute several users in one call and report the ids that matched no user.
+- Added `ChannelModel.truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires`, `deletedAt` and `topLevelFields`; the constructors accept the new fields.
 
 🔒 Security
 
@@ -139,6 +168,11 @@
 
 - `name_i18n`, `description_i18n` and `text_i18n` are no longer kept in `Poll.extraData` and `PollOption.extraData`; read the new `*I18n` fields instead.
 - Reduced the channel state updates emitted for message updates in channels without active live locations.
+
+🐞 Fixed
+
+- Fixed `Event.aiState` reading `AI_STATE_EXTERNAL_SOURCES` as `idle` instead of `checkingSources`.
+- Fixed `Channel.disableSlowMode` and `StreamChatClient.disableSlowdown` always failing.
 
 ## 10.5.0
 

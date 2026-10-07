@@ -3723,7 +3723,7 @@ void main() {
       verify(() => client.updateChannel(channelId, channelType, channelData, message: any(named: 'message'))).called(1);
     });
 
-    test('`.updateImage`', () async {
+    test('Channel.updateImage sets the image through a partial update', () async {
       const image = 'https://getstream.io/new-image';
 
       final channelModel = ChannelModel(
@@ -3738,13 +3738,13 @@ void main() {
           set: {'image': image},
         ),
       ).thenAnswer(
-        (_) async => PartialUpdateChannelResponse()..channel = channelModel,
+        (_) async => Result.success(UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel)),
       );
 
       final res = await channel.updateImage(image);
 
-      expect(res, isNotNull);
-      expect(res.channel.extraData['image'], image);
+      expect(res.isSuccess, isTrue);
+      expect(res.getOrNull()!.channel!.extraData['image'], image);
 
       verify(
         () => client.updateChannelPartial(
@@ -3755,7 +3755,7 @@ void main() {
       ).called(1);
     });
 
-    test('`.updateName`', () async {
+    test('Channel.updateName sets the name through a partial update', () async {
       const name = 'Name';
 
       final channelModel = ChannelModel(
@@ -3770,13 +3770,13 @@ void main() {
           set: {'name': name},
         ),
       ).thenAnswer(
-        (_) async => PartialUpdateChannelResponse()..channel = channelModel,
+        (_) async => Result.success(UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel)),
       );
 
       final res = await channel.updateName(name);
 
-      expect(res, isNotNull);
-      expect(res.channel.extraData['name'], name);
+      expect(res.isSuccess, isTrue);
+      expect(res.getOrNull()!.channel!.extraData['name'], name);
 
       verify(
         () => client.updateChannelPartial(
@@ -3787,7 +3787,7 @@ void main() {
       ).called(1);
     });
 
-    test('`.updatePartial`', () async {
+    test('Channel.updatePartial sends the set and unset fields for this channel', () async {
       const set = {
         'name': 'Stream Team',
         'profile_image': 'test-profile-image',
@@ -3811,15 +3811,15 @@ void main() {
           unset: unset,
         ),
       ).thenAnswer(
-        (_) async => PartialUpdateChannelResponse()..channel = channelModel,
+        (_) async => Result.success(UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel)),
       );
 
       final res = await channel.updatePartial(set: set, unset: unset);
 
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelModel.cid);
+      expect(res.isSuccess, isTrue);
+      expect(res.getOrNull()!.channel!.cid, channelModel.cid);
       expect(
-        res.channel.extraData,
+        res.getOrNull()!.channel!.extraData,
         {'coolness': 999, ...set},
       );
 
@@ -3833,12 +3833,16 @@ void main() {
       ).called(1);
     });
 
-    test('`.delete`', () async {
-      when(() => client.deleteChannel(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
+    test("Channel.delete returns the client's deleteChannel response", () async {
+      final response = DeleteChannelResponse(
+        duration: '0.01ms',
+        channel: ChannelModel(cid: channelCid),
+      );
+      when(() => client.deleteChannel(channelId, channelType)).thenAnswer((_) async => Result.success(response));
 
       final res = await channel.delete();
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), response);
 
       verify(() => client.deleteChannel(channelId, channelType)).called(1);
     });
@@ -4699,7 +4703,7 @@ void main() {
       ).called(1);
     });
 
-    test('`.enableSlowMode`', () async {
+    test("Channel.enableSlowMode returns the client's enableSlowMode response", () async {
       const cooldown = 10;
 
       final channelModel = ChannelModel(
@@ -4708,19 +4712,21 @@ void main() {
       );
 
       when(
-        () => client.enableSlowdown(
+        () => client.enableSlowMode(
           channelId,
           channelType,
           cooldown,
         ),
-      ).thenAnswer((_) async => PartialUpdateChannelResponse()..channel = channelModel);
+      ).thenAnswer(
+        (_) async => Result.success(UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel)),
+      );
 
       final res = await channel.enableSlowMode(cooldownInterval: 10);
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel));
 
       verify(
-        () => client.enableSlowdown(
+        () => client.enableSlowMode(
           channelId,
           channelType,
           cooldown,
@@ -4728,23 +4734,25 @@ void main() {
       ).called(1);
     });
 
-    test('`.disableSlowMode`', () async {
+    test("Channel.disableSlowMode returns the client's disableSlowMode response", () async {
       final channelModel = ChannelModel(
         cid: channelCid,
       );
 
       when(
-        () => client.disableSlowdown(
+        () => client.disableSlowMode(
           channelId,
           channelType,
         ),
-      ).thenAnswer((_) async => PartialUpdateChannelResponse()..channel = channelModel);
+      ).thenAnswer(
+        (_) async => Result.success(UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel)),
+      );
 
       final res = await channel.disableSlowMode();
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel));
 
-      verify(() => client.disableSlowdown(channelId, channelType)).called(1);
+      verify(() => client.disableSlowMode(channelId, channelType)).called(1);
     });
 
     test('`.banMember` scopes the ban to the channel cid', () async {
@@ -4828,8 +4836,9 @@ void main() {
       verify(() => moderationClient.shadowBan(userId, channelCid: channelCid)).called(1);
     });
 
-    test('`.hide`', () async {
+    test("Channel.hide returns the client's hideChannel response", () async {
       const clearHistory = true;
+      const response = HideChannelResponse(duration: '0.01ms');
 
       when(
         () => client.hideChannel(
@@ -4837,11 +4846,11 @@ void main() {
           channelType,
           clearHistory: clearHistory,
         ),
-      ).thenAnswer((_) async => EmptyResponse());
+      ).thenAnswer((_) async => const Result.success(response));
 
       final res = await channel.hide(clearHistory: clearHistory);
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), response);
 
       verify(
         () => client.hideChannel(
@@ -4852,62 +4861,82 @@ void main() {
       ).called(1);
     });
 
-    test('`.show`', () async {
-      when(() => client.showChannel(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
+    test("Channel.show returns the client's showChannel response", () async {
+      const response = ShowChannelResponse(duration: '0.01ms');
+      when(() => client.showChannel(channelId, channelType)).thenAnswer((_) async => const Result.success(response));
 
       final res = await channel.show();
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), response);
 
       verify(() => client.showChannel(channelId, channelType)).called(1);
     });
 
     // testing archiving
-    test('`.archive`', () async {
+    test("Channel.archive returns the client's archiveChannel response", () async {
+      final response = UpdateMemberPartialResponse(
+        duration: '0.01ms',
+        channelMember: Member(userId: 'test-user-id'),
+      );
       when(() => client.archiveChannel(channelId: channelId, channelType: channelType)).thenAnswer(
-        (_) async => FakePartialUpdateMemberResponse(),
+        (_) async => Result.success(response),
       );
 
       final res = await channel.archive();
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), response);
 
       verify(() => client.archiveChannel(channelId: channelId, channelType: channelType)).called(1);
     });
 
-    test('`.unarchive`', () async {
+    test("Channel.unarchive returns the client's unarchiveChannel response", () async {
+      final response = UpdateMemberPartialResponse(
+        duration: '0.01ms',
+        channelMember: Member(userId: 'test-user-id'),
+      );
       when(() => client.unarchiveChannel(channelId: channelId, channelType: channelType)).thenAnswer(
-        (_) async => FakePartialUpdateMemberResponse(),
+        (_) async => Result.success(response),
       );
 
       final res = await channel.unarchive();
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), response);
 
       verify(() => client.unarchiveChannel(channelId: channelId, channelType: channelType)).called(1);
     });
 
-    // testing pinning
-    test('`.pin`', () async {
+    test("Channel.pin returns the client's pinChannel response", () async {
+      final response = UpdateMemberPartialResponse(
+        duration: '0.01ms',
+        channelMember: Member(userId: 'test-user-id'),
+      );
       when(
         () => client.pinChannel(channelId: channelId, channelType: channelType),
-      ).thenAnswer((_) async => FakePartialUpdateMemberResponse());
+      ).thenAnswer(
+        (_) async => Result.success(response),
+      );
 
       final res = await channel.pin();
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), response);
 
       verify(() => client.pinChannel(channelId: channelId, channelType: channelType)).called(1);
     });
 
-    test('`.unpin`', () async {
+    test("Channel.unpin returns the client's unpinChannel response", () async {
+      final response = UpdateMemberPartialResponse(
+        duration: '0.01ms',
+        channelMember: Member(userId: 'test-user-id'),
+      );
       when(
         () => client.unpinChannel(channelId: channelId, channelType: channelType),
-      ).thenAnswer((_) async => FakePartialUpdateMemberResponse());
+      ).thenAnswer(
+        (_) async => Result.success(response),
+      );
 
       final res = await channel.unpin();
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), response);
 
       verify(() => client.unpinChannel(channelId: channelId, channelType: channelType)).called(1);
     });
@@ -6190,279 +6219,123 @@ void main() {
       when(() => client.state).thenReturn(clientState);
     });
 
-    test(
-      ".markRead should throw if we don't have the capability",
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [], // no readEvents capability
-        );
+    Channel channelWith(List<ChannelCapability> ownCapabilities) {
+      final channel = Channel.fromState(
+        client,
+        _generateChannelState(channelId, channelType, ownCapabilities: ownCapabilities),
+      );
+      addTearDown(channel.dispose);
+      return channel;
+    }
 
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
+    test('Channel.markRead returns a failure when the current user cannot send read events', () async {
+      final channel = channelWith([]);
 
-        await expectLater(
-          channel.markRead(messageId: 'message-id-123'),
-          throwsA(isA<StreamClientException>()),
-        );
-      },
-    );
+      final res = await channel.markRead(messageId: 'message-id-123');
 
-    test(
-      '.markRead should succeed if we have the capability',
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [ChannelCapability.readEvents],
-        );
+      expect(res.exceptionOrNull(), isA<StreamClientException>());
+      verifyNever(() => client.markChannelRead(channelId, channelType, messageId: 'message-id-123'));
+    });
 
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
+    test("Channel.markRead returns the client's markChannelRead response", () async {
+      const response = MarkReadResponse(duration: '0.01ms');
+      final channel = channelWith([ChannelCapability.readEvents]);
+      when(
+        () => client.markChannelRead(channelId, channelType, messageId: 'message-id-123'),
+      ).thenAnswer((_) async => const Result.success(response));
 
-        when(
-          () => client.markChannelRead(
-            channelId,
-            channelType,
-            messageId: 'message-id-123',
-          ),
-        ).thenAnswer((_) async => EmptyResponse());
+      final res = await channel.markRead(messageId: 'message-id-123');
 
-        await expectLater(
-          channel.markRead(messageId: 'message-id-123'),
-          completes,
-        );
+      expect(res.getOrNull(), response);
+      verify(() => client.markChannelRead(channelId, channelType, messageId: 'message-id-123')).called(1);
+    });
 
-        verify(
-          () => client.markChannelRead(
-            channelId,
-            channelType,
-            messageId: 'message-id-123',
-          ),
-        ).called(1);
-      },
-    );
+    test('Channel.markUnread returns a failure when the current user cannot send read events', () async {
+      final channel = channelWith([]);
 
-    test(
-      ".markUnread should throw if we don't have the capability",
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [], // no readEvents capability
-        );
+      final res = await channel.markUnread('message-id-123');
 
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
+      expect(res.exceptionOrNull(), isA<StreamClientException>());
+      verifyNever(() => client.markChannelUnread(channelId, channelType, 'message-id-123'));
+    });
 
-        await expectLater(
-          channel.markUnread('message-id-123'),
-          throwsA(isA<StreamClientException>()),
-        );
-      },
-    );
+    test("Channel.markUnread returns the client's markChannelUnread result", () async {
+      final channel = channelWith([ChannelCapability.readEvents]);
+      when(
+        () => client.markChannelUnread(channelId, channelType, 'message-id-123'),
+      ).thenAnswer((_) async => const Result.success(null));
 
-    test(
-      '.markUnread should succeed if we have the capability',
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [ChannelCapability.readEvents],
-        );
+      final res = await channel.markUnread('message-id-123');
 
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
+      expect(res, const Result<void>.success(null));
+      verify(() => client.markChannelUnread(channelId, channelType, 'message-id-123')).called(1);
+    });
 
-        when(
-          () => client.markChannelUnread(
-            channelId,
-            channelType,
-            'message-id-123',
-          ),
-        ).thenAnswer((_) async => EmptyResponse());
+    test('Channel.markUnreadByTimestamp returns a failure when the current user cannot send read events', () async {
+      final timestamp = DateTime.utc(2024);
+      final channel = channelWith([]);
 
-        await expectLater(
-          channel.markUnread('message-id-123'),
-          completes,
-        );
+      final res = await channel.markUnreadByTimestamp(timestamp);
 
-        verify(
-          () => client.markChannelUnread(
-            channelId,
-            channelType,
-            'message-id-123',
-          ),
-        ).called(1);
-      },
-    );
+      expect(res.exceptionOrNull(), isA<StreamClientException>());
+      verifyNever(() => client.markChannelUnreadByTimestamp(channelId, channelType, timestamp));
+    });
 
-    test(
-      ".markUnreadByTimestamp should throw if we don't have the capability",
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [], // no readEvents capability
-        );
+    test("Channel.markUnreadByTimestamp returns the client's markChannelUnreadByTimestamp result", () async {
+      final timestamp = DateTime.utc(2024);
+      final channel = channelWith([ChannelCapability.readEvents]);
+      when(
+        () => client.markChannelUnreadByTimestamp(channelId, channelType, timestamp),
+      ).thenAnswer((_) async => const Result.success(null));
 
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
+      final res = await channel.markUnreadByTimestamp(timestamp);
 
-        final timestamp = DateTime.parse('2024-01-01T00:00:00Z');
+      expect(res, const Result<void>.success(null));
+      verify(() => client.markChannelUnreadByTimestamp(channelId, channelType, timestamp)).called(1);
+    });
 
-        await expectLater(
-          channel.markUnreadByTimestamp(timestamp),
-          throwsA(isA<StreamClientException>()),
-        );
-      },
-    );
+    test('Channel.markThreadRead returns a failure when the current user cannot send read events', () async {
+      final channel = channelWith([]);
 
-    test(
-      '.markUnreadByTimestamp should succeed if we have the capability',
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [ChannelCapability.readEvents],
-        );
+      final res = await channel.markThreadRead('thread-id-123');
 
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
+      expect(res.exceptionOrNull(), isA<StreamClientException>());
+      verifyNever(() => client.markThreadRead(channelId, channelType, 'thread-id-123'));
+    });
 
-        final timestamp = DateTime.parse('2024-01-01T00:00:00Z');
+    test("Channel.markThreadRead returns the client's markThreadRead response", () async {
+      const response = MarkReadResponse(duration: '0.01ms');
+      final channel = channelWith([ChannelCapability.readEvents]);
+      when(
+        () => client.markThreadRead(channelId, channelType, 'thread-id-123'),
+      ).thenAnswer((_) async => const Result.success(response));
 
-        when(
-          () => client.markChannelUnreadByTimestamp(
-            channelId,
-            channelType,
-            timestamp,
-          ),
-        ).thenAnswer((_) async => EmptyResponse());
+      final res = await channel.markThreadRead('thread-id-123');
 
-        await expectLater(
-          channel.markUnreadByTimestamp(timestamp),
-          completes,
-        );
+      expect(res.getOrNull(), response);
+      verify(() => client.markThreadRead(channelId, channelType, 'thread-id-123')).called(1);
+    });
 
-        verify(
-          () => client.markChannelUnreadByTimestamp(
-            channelId,
-            channelType,
-            timestamp,
-          ),
-        ).called(1);
-      },
-    );
+    test('Channel.markThreadUnread returns a failure when the current user cannot send read events', () async {
+      final channel = channelWith([]);
 
-    test(
-      ".markThreadRead should throw if we don't have the capability",
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [], // no readEvents capability
-        );
+      final res = await channel.markThreadUnread('thread-id-123');
 
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
+      expect(res.exceptionOrNull(), isA<StreamClientException>());
+      verifyNever(() => client.markThreadUnread(channelId, channelType, 'thread-id-123'));
+    });
 
-        await expectLater(
-          channel.markThreadRead('thread-id-123'),
-          throwsA(isA<StreamClientException>()),
-        );
-      },
-    );
+    test("Channel.markThreadUnread returns the client's markThreadUnread result", () async {
+      final channel = channelWith([ChannelCapability.readEvents]);
+      when(
+        () => client.markThreadUnread(channelId, channelType, 'thread-id-123'),
+      ).thenAnswer((_) async => const Result.success(null));
 
-    test(
-      '.markThreadRead should succeed if we have the capability',
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [ChannelCapability.readEvents],
-        );
+      final res = await channel.markThreadUnread('thread-id-123');
 
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
-
-        when(
-          () => client.markThreadRead(
-            channelId,
-            channelType,
-            'thread-id-123',
-          ),
-        ).thenAnswer((_) async => EmptyResponse());
-
-        await expectLater(
-          channel.markThreadRead('thread-id-123'),
-          completes,
-        );
-
-        verify(
-          () => client.markThreadRead(
-            channelId,
-            channelType,
-            'thread-id-123',
-          ),
-        ).called(1);
-      },
-    );
-
-    test(
-      ".markThreadUnread should throw if we don't have the capability",
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [], // no readEvents capability
-        );
-
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
-
-        await expectLater(
-          channel.markThreadUnread('thread-id-123'),
-          throwsA(isA<StreamClientException>()),
-        );
-      },
-    );
-
-    test(
-      '.markThreadUnread should succeed if we have the capability',
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [ChannelCapability.readEvents],
-        );
-
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
-
-        when(
-          () => client.markThreadUnread(
-            channelId,
-            channelType,
-            'thread-id-123',
-          ),
-        ).thenAnswer((_) async => EmptyResponse());
-
-        await expectLater(
-          channel.markThreadUnread('thread-id-123'),
-          completes,
-        );
-
-        verify(
-          () => client.markThreadUnread(
-            channelId,
-            channelType,
-            'thread-id-123',
-          ),
-        ).called(1);
-      },
-    );
+      expect(res, const Result<void>.success(null));
+      verify(() => client.markThreadUnread(channelId, channelType, 'thread-id-123')).called(1);
+    });
   });
 
   group('Retry functionality with parameter preservation', () {

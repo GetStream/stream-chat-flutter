@@ -1,18 +1,19 @@
 import 'package:rate_limiter/rate_limiter.dart';
-import 'package:stream_core/stream_core.dart' show StreamLogger;
+import 'package:stream_core/stream_core.dart' show Failure, Result, StreamLogger;
 import 'package:synchronized/synchronized.dart';
 
 import '../core/models/message.dart';
-import '../core/models/message_delivery.dart';
+import '../core/models/request/message_delivery.dart';
 import '../core/util/message_rules.dart';
 import 'channel/channel.dart';
 
-/// A callback that sends delivery receipts for multiple channels.
+/// Signature for a callback that sends delivery receipts for multiple channels.
 ///
-/// Each [MessageDeliveryInfo] represents an acknowledgment that the current
-/// user has received a message.
+/// Each [MessageDelivery] represents an acknowledgment that the current
+/// user has received a message. The returned [Result] reports whether the
+/// receipts were sent.
 typedef MarkChannelsDelivered =
-    Future<void> Function(
+    Future<Result<void>> Function(
       Iterable<MessageDelivery> deliveries,
     );
 
@@ -41,6 +42,8 @@ class ChannelDeliveryReporter {
   /// The callback invoked to send delivery receipts.
   ///
   /// Receives delivery receipts acknowledging that messages were received.
+  /// When it returns a failure, or throws, the receipts are kept for a later
+  /// batch.
   final MarkChannelsDelivered onMarkChannelsDelivered;
 
   final _deliveryCandidatesLock = Lock();
@@ -167,7 +170,11 @@ class ChannelDeliveryReporter {
     _logger.d(() => 'Marking ${messageDeliveries.length} channels as delivered');
 
     try {
-      await onMarkChannelsDelivered(messageDeliveries);
+      final result = await onMarkChannelsDelivered(messageDeliveries);
+      if (result case Failure(:final error, :final stackTrace)) {
+        _logger.w(() => 'Failed to mark channels as delivered', error: error, stackTrace: stackTrace);
+        return;
+      }
 
       // Clear the successfully delivered candidates. If a channel's message ID
       // has changed since we started delivery, keep it for the next batch.

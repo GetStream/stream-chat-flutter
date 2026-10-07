@@ -120,9 +120,13 @@ void main() {
     when(() => channel.client).thenReturn(client);
     when(() => channel.state).thenReturn(channelState);
     when(() => client.isLocalUnreadCountEnabled).thenReturn(false);
-    when(() => channel.markRead()).thenAnswer((_) async => EmptyResponse());
-    when(() => channel.markRead(messageId: any(named: 'messageId'))).thenAnswer((_) async => EmptyResponse());
-    when(() => channel.markThreadRead(any())).thenAnswer((_) async => EmptyResponse());
+    when(() => channel.markRead()).thenAnswer((_) async => const Result.success(MarkReadResponse(duration: '0ms')));
+    when(
+      () => channel.markRead(messageId: any(named: 'messageId')),
+    ).thenAnswer((_) async => const Result.success(MarkReadResponse(duration: '0ms')));
+    when(
+      () => channel.markThreadRead(any()),
+    ).thenAnswer((_) async => const Result.success(MarkReadResponse(duration: '0ms')));
     when(() => channelState.currentUserRead).thenReturn(null);
 
     messages = <Message>[];
@@ -518,7 +522,9 @@ void main() {
     test('a failed mark-read can be retried for the same state', () {
       when(() => channelState.unreadCount).thenReturn(3);
       when(() => channelState.currentUserRead).thenReturn(read(unreadMessages: 3));
-      when(() => channel.markRead()).thenAnswer((_) => Future.error(Exception('offline')));
+      when(() => channel.markRead()).thenAnswer(
+        (_) async => const Result.failure(StreamNetworkException(message: 'offline')),
+      );
       messages = [message(id: 'newest')];
 
       fakeAsync((async) {

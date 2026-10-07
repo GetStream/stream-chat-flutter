@@ -6,6 +6,12 @@ import '../../core/util/serializer.dart';
 
 part 'event.g.dart';
 
+// The two spellings of the "checking sources" state. The backend constant is
+// AI_STATE_CHECKING_SOURCES; the reference agents send AI_STATE_EXTERNAL_SOURCES,
+// and the backend relays ai_state verbatim.
+const _kAiStateCheckingSources = 'AI_STATE_CHECKING_SOURCES';
+const _kAiStateExternalSources = 'AI_STATE_EXTERNAL_SOURCES';
+
 /// The class that contains the information about an event
 @JsonSerializable(includeIfNull: false)
 class Event extends WsEvent {
@@ -135,8 +141,15 @@ class Event extends WsEvent {
   /// Whether the message was deleted only for the current user.
   final bool? deletedForMe;
 
+  // Accept both spellings of the "checking sources" state.
+  static Object? _aiStateReadValue(Map<Object?, Object?> json, String key) {
+    final value = json[key];
+    if (value == _kAiStateExternalSources) return _kAiStateCheckingSources;
+    return value;
+  }
+
   /// The current state of the AI assistant.
-  @JsonKey(unknownEnumValue: AITypingState.idle)
+  @JsonKey(readValue: _aiStateReadValue, unknownEnumValue: AITypingState.idle)
   final AITypingState? aiState;
 
   /// Additional message from the AI assistant.
@@ -356,7 +369,10 @@ enum AITypingState {
   error,
 
   /// The AI assistant is checking external sources.
-  @JsonValue('AI_STATE_CHECKING_SOURCES')
+  ///
+  /// Decoded from both `AI_STATE_CHECKING_SOURCES` and
+  /// `AI_STATE_EXTERNAL_SOURCES`.
+  @JsonValue(_kAiStateCheckingSources)
   checkingSources,
 
   /// The AI assistant is thinking.

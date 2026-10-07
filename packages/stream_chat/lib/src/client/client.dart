@@ -51,7 +51,6 @@ import '../core/models/draft_message.dart';
 import '../core/models/location.dart';
 import '../core/models/member.dart';
 import '../core/models/message.dart';
-import '../core/models/message_delivery.dart';
 import '../core/models/message_reminder.dart';
 import '../core/models/own_user.dart';
 import '../core/models/poll.dart';
@@ -60,16 +59,28 @@ import '../core/models/poll_vote.dart';
 import '../core/models/push_preference.dart';
 import '../core/models/push_provider.dart';
 import '../core/models/reaction.dart';
+import '../core/models/request/message_delivery.dart';
 import '../core/models/response/add_user_group_members_response.dart';
 import '../core/models/response/app_settings_response.dart';
+import '../core/models/response/block_users_response.dart';
 import '../core/models/response/create_user_group_response.dart';
+import '../core/models/response/delete_channel_response.dart';
+import '../core/models/response/get_blocked_users_response.dart';
+import '../core/models/response/get_unread_count_response.dart';
 import '../core/models/response/get_user_group_response.dart';
+import '../core/models/response/hide_channel_response.dart';
 import '../core/models/response/list_devices_response.dart';
 import '../core/models/response/list_user_groups_response.dart';
+import '../core/models/response/mark_delivered_response.dart';
+import '../core/models/response/mark_read_response.dart';
 import '../core/models/response/og_attachment_response.dart';
 import '../core/models/response/remove_user_group_members_response.dart';
 import '../core/models/response/search_roles_response.dart';
 import '../core/models/response/search_user_groups_response.dart';
+import '../core/models/response/show_channel_response.dart';
+import '../core/models/response/unblock_users_response.dart';
+import '../core/models/response/update_channel_partial_response.dart';
+import '../core/models/response/update_member_partial_response.dart';
 import '../core/models/response/update_user_group_response.dart';
 import '../core/models/role_type.dart';
 import '../core/models/thread.dart';
@@ -81,11 +92,13 @@ import '../core/util/utils.dart';
 import '../db/chat_persistence_client.dart';
 import '../event_type.dart';
 import '../repository/app_settings_repository.dart';
+import '../repository/channels_repository.dart';
 import '../repository/devices_repository.dart';
 import '../repository/general_repository.dart';
 import '../repository/moderation_repository.dart';
 import '../repository/roles_repository.dart';
 import '../repository/user_groups_repository.dart';
+import '../repository/users_repository.dart';
 import '../ws/connect_request.dart';
 import '../ws/connection_manager.dart';
 import '../ws/connection_status.dart';
@@ -187,8 +200,10 @@ class StreamChatClient {
     _rolesRepository = RolesRepository(api);
     _devicesRepository = DevicesRepository(api);
     _userGroupsRepository = UserGroupsRepository(api);
+    _usersRepository = UsersRepository(api);
     _generalRepository = GeneralRepository(api);
     _moderationRepository = ModerationRepository(api);
+    _channelsRepository = ChannelsRepository(api);
     _appSettingsManager = AppSettingsManager(AppSettingsRepository(api));
 
     moderation = ModerationClient(_moderationRepository);
@@ -230,8 +245,10 @@ class StreamChatClient {
   late final RolesRepository _rolesRepository;
   late final DevicesRepository _devicesRepository;
   late final UserGroupsRepository _userGroupsRepository;
+  late final UsersRepository _usersRepository;
   late final GeneralRepository _generalRepository;
   late final ModerationRepository _moderationRepository;
+  late final ChannelsRepository _channelsRepository;
   late final AppSettingsManager _appSettingsManager;
 
   /// Muting, banning and flagging, for the connected user.
@@ -1238,16 +1255,18 @@ class StreamChatClient {
     message: message,
   );
 
-  /// Partial update for the [channelId] of type [ChannelType]. Sets the
-  /// data provided in [set], and removes the attributes given in [unset].
+  /// Partially updates a channel: sets the fields in [set] and removes the fields named in [unset], leaving every
+  /// other field as it is.
+  ///
+  /// At least one of [set] and [unset] is required.
   ///
   /// Use [updateChannel] for a full update.
-  Future<PartialUpdateChannelResponse> updateChannelPartial(
+  Future<Result<UpdateChannelPartialResponse>> updateChannelPartial(
     String channelId,
     String channelType, {
     Map<String, Object?>? set,
     List<String>? unset,
-  }) => _chatApi.channel.updateChannelPartial(
+  }) => _channelsRepository.updateChannelPartial(
     channelId,
     channelType,
     set: set,
@@ -1433,33 +1452,33 @@ class StreamChatClient {
     pagination: pagination,
   );
 
-  /// Hides the channel from [queryChannels] for the user
-  /// until a message is added If [clearHistory] is set to true - all messages
-  /// will be removed for the user
-  Future<EmptyResponse> hideChannel(
+  /// Hides a channel from the current user's channel list until a new message is added to it.
+  ///
+  /// If [clearHistory] is true, the channel's messages are also cleared for the current user.
+  Future<Result<HideChannelResponse>> hideChannel(
     String channelId,
     String channelType, {
     bool clearHistory = false,
-  }) => _chatApi.channel.hideChannel(
+  }) => _channelsRepository.hideChannel(
     channelId,
     channelType,
     clearHistory: clearHistory,
   );
 
-  /// Removes the hidden status for the channel
-  Future<EmptyResponse> showChannel(
+  /// Shows a channel the current user hid.
+  Future<Result<ShowChannelResponse>> showChannel(
     String channelId,
     String channelType,
-  ) => _chatApi.channel.showChannel(
+  ) => _channelsRepository.showChannel(
     channelId,
     channelType,
   );
 
-  /// Delete this channel. Messages are permanently removed.
-  Future<EmptyResponse> deleteChannel(
+  /// Deletes a channel and its messages.
+  Future<Result<DeleteChannelResponse>> deleteChannel(
     String channelId,
     String channelType,
-  ) => _chatApi.channel.deleteChannel(
+  ) => _channelsRepository.deleteChannel(
     channelId,
     channelType,
   );
@@ -1569,69 +1588,70 @@ class StreamChatClient {
     formData,
   );
 
-  /// Mark [channelId] of type [channelType] all messages as read
-  /// Optionally provide a [messageId] if you want to mark a
-  /// particular message as read
-  Future<EmptyResponse> markChannelRead(
+  /// Marks a channel as read for the current user.
+  ///
+  /// Messages up to and including the one with [messageId] are marked as read, or all of them when [messageId] is
+  /// null.
+  Future<Result<MarkReadResponse>> markChannelRead(
     String channelId,
     String channelType, {
     String? messageId,
-  }) => _chatApi.channel.markRead(
+  }) => _channelsRepository.markRead(
     channelId,
     channelType,
     messageId: messageId,
   );
 
-  /// Marks the [channelId] of type [channelType] as unread
-  /// by a given [messageId].
+  /// Marks a channel as unread for the current user, from the message with [messageId] onwards.
   ///
-  /// All messages from the provided message onwards will be marked as unread.
-  Future<EmptyResponse> markChannelUnread(
+  /// That message and every later one are marked as unread.
+  Future<Result<void>> markChannelUnread(
     String channelId,
     String channelType,
     String messageId,
-  ) => _chatApi.channel.markUnread(
+  ) => _channelsRepository.markUnread(
     channelId,
     channelType,
-    messageId,
+    messageId: messageId,
   );
 
-  /// Marks the [channelId] of type [channelType] as unread
-  /// by a given [timestamp].
+  /// Marks the messages of a channel created after [timestamp] as unread for the current user.
   ///
-  /// All messages after the provided timestamp will be marked as unread.
-  Future<EmptyResponse> markChannelUnreadByTimestamp(
+  /// A message created at exactly [timestamp] stays read.
+  Future<Result<void>> markChannelUnreadByTimestamp(
     String channelId,
     String channelType,
     DateTime timestamp,
-  ) => _chatApi.channel.markUnreadByTimestamp(
+  ) => _channelsRepository.markUnread(
     channelId,
     channelType,
-    timestamp,
+    messageTimestamp: timestamp,
   );
 
-  /// Mark the thread with [threadId] in the channel with [channelId] of type
-  /// [channelType] as read.
-  Future<EmptyResponse> markThreadRead(
+  /// Marks a thread in a channel as read for the current user.
+  ///
+  /// [threadId] is the id of the thread's parent message.
+  Future<Result<MarkReadResponse>> markThreadRead(
     String channelId,
     String channelType,
     String threadId,
-  ) => _chatApi.channel.markThreadRead(
+  ) => _channelsRepository.markRead(
     channelId,
     channelType,
-    threadId,
+    threadId: threadId,
   );
 
-  /// Mark the thread with [threadId] in the channel with [channelId] of type
-  /// [channelType] as unread.
-  Future<EmptyResponse> markThreadUnread(
+  /// Marks a thread in a channel as unread for the current user.
+  ///
+  /// [threadId] is the id of the thread's parent message.
+  Future<Result<void>> markThreadUnread(
     String channelId,
     String channelType,
     String threadId,
-  ) => _chatApi.channel.markThreadUnread(
+  ) => _channelsRepository.markUnread(
     channelId,
     channelType,
-    threadId,
+    threadId: threadId,
   );
 
   /// Creates a new Poll
@@ -1773,85 +1793,67 @@ class StreamChatClient {
 
   final _userBlockLock = Lock();
 
-  /// Blocks a user with the provided [userId].
-  Future<UserBlockResponse> blockUser(String userId) async {
-    try {
-      final response = await _userBlockLock.synchronized(
-        () => _chatApi.user.blockUser(userId),
-      );
-
-      final blockedUserId = response.blockedUserId;
-      final currentBlockedUserIds = [...?state.currentUser?.blockedUserIds];
-      if (!currentBlockedUserIds.contains(blockedUserId)) {
-        // Add the new blocked user to the blocked user list.
-        state.blockedUserIds = [...currentBlockedUserIds, blockedUserId];
-      }
-
-      return response;
-    } catch (e, stk) {
-      logger.e(() => 'Error blocking user', error: e, stackTrace: stk);
-      rethrow;
-    }
+  /// Blocks the user with the given [userId] for the current user.
+  ///
+  /// On success, the blocked user's id is added to [OwnUser.blockedUserIds] on [ClientState.currentUser]. A failure
+  /// leaves it unchanged.
+  Future<Result<BlockUsersResponse>> blockUser(String userId) async {
+    final result = await _userBlockLock.synchronized(() => _usersRepository.blockUser(userId));
+    return result
+        .onSuccess((response) => _addBlockedUserId(response.blockedUserId))
+        .onFailure((e, stk) => logger.e(() => 'Error blocking user', error: e, stackTrace: stk));
   }
 
-  /// Unblocks a previously blocked user with the provided [userId].
-  Future<EmptyResponse> unblockUser(String userId) async {
-    try {
-      final response = await _userBlockLock.synchronized(
-        () => _chatApi.user.unblockUser(userId),
-      );
-
-      final unblockedUserId = userId;
-      final currentBlockedUserIds = [...?state.currentUser?.blockedUserIds];
-      if (currentBlockedUserIds.contains(unblockedUserId)) {
-        // Remove the unblocked user from the blocked user list.
-        state.blockedUserIds = currentBlockedUserIds..remove(unblockedUserId);
-      }
-
-      return response;
-    } catch (e, stk) {
-      logger.e(() => 'Error unblocking user', error: e, stackTrace: stk);
-      rethrow;
-    }
+  /// Unblocks the user with the given [userId] for the current user.
+  ///
+  /// On success, [userId] is removed from [OwnUser.blockedUserIds] on [ClientState.currentUser]. A failure leaves it
+  /// unchanged.
+  Future<Result<UnblockUsersResponse>> unblockUser(String userId) async {
+    final result = await _userBlockLock.synchronized(() => _usersRepository.unblockUser(userId));
+    return result
+        .onSuccess((_) => _removeBlockedUserId(userId))
+        .onFailure((e, stk) => logger.e(() => 'Error unblocking user', error: e, stackTrace: stk));
   }
 
-  /// Retrieves a list of all users that the current user has blocked.
-  Future<BlockedUsersResponse> queryBlockedUsers() async {
-    try {
-      final response = await _userBlockLock.synchronized(
-        () => _chatApi.user.queryBlockedUsers(),
-      );
-
-      // Update the blocked user IDs with the latest data.
-      final blockedUserIds = response.blocks.map((it) => it.blockedUserId);
-      state.blockedUserIds = [...blockedUserIds.nonNulls];
-
-      return response;
-    } catch (e, stk) {
-      logger.e(() => 'Error querying blocked users', error: e, stackTrace: stk);
-      rethrow;
-    }
+  /// Gets the users the current user has blocked.
+  ///
+  /// On success, [OwnUser.blockedUserIds] on [ClientState.currentUser] is replaced with the ids of the returned
+  /// users. A failure leaves it unchanged.
+  Future<Result<GetBlockedUsersResponse>> getBlockedUsers() async {
+    final result = await _userBlockLock.synchronized(_usersRepository.getBlockedUsers);
+    return result
+        .onSuccess((response) => state.blockedUserIds = [for (final block in response.blocks) block.blockedUserId])
+        .onFailure((e, stk) => logger.e(() => 'Error getting blocked users', error: e, stackTrace: stk));
   }
 
-  /// Returns the unread count information for the current user.
-  Future<GetUnreadCountResponse> getUnreadCount() async {
-    final response = await _chatApi.user.getUnreadCount();
+  void _addBlockedUserId(String userId) {
+    final blockedUserIds = [...?state.currentUser?.blockedUserIds];
+    if (blockedUserIds.contains(userId)) return;
+    state.blockedUserIds = [...blockedUserIds, userId];
+  }
 
-    // Emit an local event with the unread count information as a side effect
-    // in order to update the current user state.
-    handleEvent(
-      Event(
-        totalUnreadCount: response.totalUnreadCount,
-        unreadChannels: response.channels.length,
-        unreadThreads: response.threads.length,
+  void _removeBlockedUserId(String userId) {
+    final blockedUserIds = [...?state.currentUser?.blockedUserIds];
+    if (!blockedUserIds.remove(userId)) return;
+    state.blockedUserIds = blockedUserIds;
+  }
+
+  /// Gets how many unread messages and threads the current user has.
+  Future<Result<GetUnreadCountResponse>> getUnreadCount() async {
+    final result = await _usersRepository.getUnreadCount();
+    return result.onSuccess(
+      (response) => handleEvent(
+        Event(
+          totalUnreadCount: response.totalUnreadCount,
+          unreadChannels: response.channels.length,
+          unreadThreads: response.threads.length,
+        ),
       ),
     );
-
-    return response;
   }
 
-  /// Mark all channels for this user as read
-  Future<EmptyResponse> markAllRead() => _chatApi.channel.markAllRead();
+  /// Marks all of the current user's channels as read.
+  Future<Result<MarkReadResponse>> markAllRead() => _channelsRepository.markChannelsRead();
 
   /// Sends delivery receipts for the latest messages in multiple channels.
   ///
@@ -1862,19 +1864,17 @@ class StreamChatClient {
   ///
   /// ```dart
   /// // From notification payload
-  /// final receipt = MessageDeliveryInfo(
-  ///   channelCid: notificationData['channel_id'],
+  /// final receipt = MessageDelivery(
+  ///   channelCid: notificationData['cid'],
   ///   messageId: notificationData['message_id'],
   /// );
   /// await client.markChannelsDelivered([receipt]);
   /// ```
   ///
   /// Accepts up to 100 channels per call.
-  Future<EmptyResponse> markChannelsDelivered(
+  Future<Result<MarkDeliveredResponse>> markChannelsDelivered(
     Iterable<MessageDelivery> deliveries,
-  ) {
-    return _chatApi.channel.markChannelsDelivered([...deliveries]);
-  }
+  ) => _channelsRepository.markDelivered(deliveries);
 
   /// Send an event to a particular channel
   Future<EmptyResponse> sendEvent(
@@ -2128,24 +2128,25 @@ class StreamChatClient {
     );
   }
 
-  /// Enables slow mode
-  Future<PartialUpdateChannelResponse> enableSlowdown(
+  /// Enables slow mode on a channel, so members wait [cooldown] seconds between messages.
+  Future<Result<UpdateChannelPartialResponse>> enableSlowMode(
     String channelId,
     String channelType,
     int cooldown,
-  ) async => _chatApi.channel.enableSlowdown(
+  ) => _channelsRepository.updateChannelPartial(
     channelId,
     channelType,
-    cooldown,
+    set: {'cooldown': cooldown},
   );
 
-  /// Disables slow mode
-  Future<PartialUpdateChannelResponse> disableSlowdown(
+  /// Disables slow mode on a channel.
+  Future<Result<UpdateChannelPartialResponse>> disableSlowMode(
     String channelId,
     String channelType,
-  ) async => _chatApi.channel.disableSlowdown(
+  ) => _channelsRepository.updateChannelPartial(
     channelId,
     channelType,
+    set: {'cooldown': 0},
   );
 
   /// Pins provided message
@@ -2242,59 +2243,58 @@ class StreamChatClient {
   );
 
   /// Pins the channel for the current user.
-  Future<PartialUpdateMemberResponse> pinChannel({
+  Future<Result<UpdateMemberPartialResponse>> pinChannel({
     required String channelId,
     required String channelType,
   }) {
-    return partialMemberUpdate(
+    return updateMemberPartial(
       channelId: channelId,
       channelType: channelType,
-      set: const MemberUpdatePayload(pinned: true).toJson(),
+      set: const {'pinned': true},
     );
   }
 
   /// Unpins the channel for the current user.
-  Future<PartialUpdateMemberResponse> unpinChannel({
+  Future<Result<UpdateMemberPartialResponse>> unpinChannel({
     required String channelId,
     required String channelType,
   }) {
-    return partialMemberUpdate(
+    return updateMemberPartial(
       channelId: channelId,
       channelType: channelType,
-      unset: [MemberUpdateType.pinned.name],
+      unset: const ['pinned'],
     );
   }
 
   /// Archives the channel for the current user.
-  Future<PartialUpdateMemberResponse> archiveChannel({
+  Future<Result<UpdateMemberPartialResponse>> archiveChannel({
     required String channelId,
     required String channelType,
   }) {
-    return partialMemberUpdate(
+    return updateMemberPartial(
       channelId: channelId,
       channelType: channelType,
-      set: const MemberUpdatePayload(archived: true).toJson(),
+      set: const {'archived': true},
     );
   }
 
   /// Unarchives the channel for the current user.
-  Future<PartialUpdateMemberResponse> unarchiveChannel({
+  Future<Result<UpdateMemberPartialResponse>> unarchiveChannel({
     required String channelId,
     required String channelType,
   }) {
-    return partialMemberUpdate(
+    return updateMemberPartial(
       channelId: channelId,
       channelType: channelType,
-      unset: [MemberUpdateType.archived.name],
+      unset: const ['archived'],
     );
   }
 
-  /// Partially updates the member of the given channel.
+  /// Partially updates the current user's membership of a channel: sets the fields in [set] and removes the fields
+  /// named in [unset], leaving every other field as it is.
   ///
-  /// Use [set] to define values to be set.
-  /// Use [unset] to define values to be unset.
-  /// When [userId] is not provided, the current user will be used.
-  Future<PartialUpdateMemberResponse> partialMemberUpdate({
+  /// At least one of [set] and [unset] is required.
+  Future<Result<UpdateMemberPartialResponse>> updateMemberPartial({
     required String channelId,
     required String channelType,
     Map<String, Object?>? set,
@@ -2302,9 +2302,9 @@ class StreamChatClient {
   }) {
     assert(set != null || unset != null, 'Set or unset must be provided.');
 
-    return _chatApi.channel.updateMemberPartial(
-      channelId: channelId,
-      channelType: channelType,
+    return _channelsRepository.updateMemberPartial(
+      channelId,
+      channelType,
       set: set,
       unset: unset,
     );

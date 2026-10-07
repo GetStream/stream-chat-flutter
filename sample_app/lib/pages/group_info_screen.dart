@@ -357,7 +357,9 @@ class _ActionsSection extends StatelessWidget {
     );
     if (confirmed != true) return;
 
-    await channel.delete();
+    final result = await channel.delete();
+    if (result.isFailure) return;
+
     // Pop every screen until we land on the channel list — going back to
     // the channel page would crash trying to read state from the now
     // deleted channel.

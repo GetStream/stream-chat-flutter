@@ -252,12 +252,80 @@ class FakePollVote extends Fake implements PollVote {}
 
 class FakeChannelState extends Fake implements ChannelState {}
 
-class FakePartialUpdateMemberResponse extends Fake implements PartialUpdateMemberResponse {
-  FakePartialUpdateMemberResponse({
-    Member? channelMember,
-  }) : _channelMember = channelMember ?? Member();
+/// A generated channel member with every field set.
+api.ChannelMemberResponse fakeChannelMemberResponse({Map<String, Object?> custom = const {'nickname': 'Mo'}}) =>
+    api.ChannelMemberResponse(
+      archivedAt: DateTime.utc(2026, 1, 5),
+      banExpires: DateTime.utc(2026, 6),
+      banFromFutureChannels: true,
+      banned: true,
+      channelRole: 'channel_moderator',
+      createdAt: DateTime.utc(2026),
+      custom: custom,
+      deletedAt: DateTime.utc(2026, 8),
+      deletedMessages: const ['message-1'],
+      futureChannelBanExpires: DateTime.utc(2026, 7),
+      inviteAcceptedAt: DateTime.utc(2026, 1, 2),
+      inviteRejectedAt: DateTime.utc(2026, 1, 3),
+      invited: true,
+      isModerator: true,
+      notificationsMuted: true,
+      pinnedAt: DateTime.utc(2026, 1, 4),
+      role: 'user',
+      shadowBanned: true,
+      status: 'member',
+      updatedAt: DateTime.utc(2026, 2),
+      user: fakeUserResponse('member'),
+      userId: 'member',
+    );
 
-  final Member _channelMember;
-  @override
-  Member get channelMember => _channelMember;
-}
+/// A generated [api.UserResponse] with the id [id] and only the fields it requires.
+api.UserResponse fakeUserResponse(String id) => api.UserResponse(
+  banned: false,
+  blockedUserIds: const [],
+  createdAt: DateTime.utc(2025),
+  custom: const {},
+  id: id,
+  language: 'en',
+  online: false,
+  role: 'user',
+  teams: const [],
+  updatedAt: DateTime.utc(2025),
+);
+
+/// The [Member] that [fakeChannelMemberResponse] maps to, with its default custom data.
+Member fakeChannelMember() => Member(
+  user: fakeUser('member'),
+  userId: 'member',
+  inviteAcceptedAt: DateTime.utc(2026, 1, 2),
+  inviteRejectedAt: DateTime.utc(2026, 1, 3),
+  invited: true,
+  channelRole: 'channel_moderator',
+  isModerator: true,
+  createdAt: DateTime.utc(2026),
+  updatedAt: DateTime.utc(2026, 2),
+  banned: true,
+  banExpires: DateTime.utc(2026, 6),
+  shadowBanned: true,
+  pinnedAt: DateTime.utc(2026, 1, 4),
+  archivedAt: DateTime.utc(2026, 1, 5),
+  deletedMessages: const ['message-1'],
+  extraData: const {'nickname': 'Mo', 'role': 'user'},
+  notificationsMuted: true,
+  status: 'member',
+  banFromFutureChannels: true,
+  futureChannelBanExpires: DateTime.utc(2026, 7),
+  deletedAt: DateTime.utc(2026, 8),
+);
+
+/// The [User] that [fakeUserResponse] maps to.
+User fakeUser(String id) => User(
+  id: id,
+  role: 'user',
+  createdAt: DateTime.utc(2025),
+  updatedAt: DateTime.utc(2025),
+  online: false,
+  banned: false,
+  teams: const [],
+  language: 'en',
+);
