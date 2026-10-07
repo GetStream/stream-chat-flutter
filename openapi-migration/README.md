@@ -16,7 +16,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [02](02-devices.md) | Devices | 0 | 3 | ☑ |
 | [03](03-user-groups.md) | User Groups | 0 | 8 | ☑ |
 | [04](04-roles-guest-and-app.md) | Roles, Guest & App Settings | 0 | 5 | ☑ |
-| [05](05-polls.md) | Polls | 13 | 13 | ☐ |
+| [05](05-polls.md) | Polls | 0 | 13 | ☑ |
 | [06](06-reminders.md) | Message Reminders | 4 | 4 | ☐ |
 | [07](07-threads-and-drafts.md) | Threads & Drafts | 7 | 7 | ☐ |
 | [08](08-moderation-and-blocklists.md) | Moderation & Blocklists | 0 | 34 | ☑ |
@@ -31,8 +31,9 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [17](17-read-receipts.md) | Read Receipts — split out of 11 | 0 | 4 | ☑ |
 | [18](18-unread-counts.md) | Unread Counts — split out of 09 | 0 | 1 | ☑ |
 | [19](19-user-blocking.md) | User Blocking — split out of 09 | 0 | 3 | ☑ |
+| [20](20-custom-data-rename.md) | `extraData` → `custom`, every model at once | — | — | ☐ |
 
-**Coverage:** 66 hand-written methods across 10 files, and all 129 generated operations, each claimed by exactly
+**Coverage:** 53 hand-written methods across 9 files, and all 129 generated operations, each claimed by exactly
 one group. Verified mechanically — see [Keeping this plan honest](#keeping-this-plan-honest).
 
 
@@ -104,6 +105,10 @@ includes a named response that carries only `duration` today, such as `HideChann
    (see the breaks above). A field the server adds is exposed later, as an additive change. The one exception to
    "no JSON" is the temporary `@DataSerializable` storage codec in rule 8.
 
+   **A model that had a `copyWith` in v10 keeps that exact method,** `_nullConst` sentinels included, under
+   `@Freezed(copyWith: false)`. freezed's own `copyWith` sets a field passed as `null`, where v10's keeps it, and
+   the SDK's state handling depends on the difference. Only a model with no v10 `copyWith` uses freezed's.
+
    **Names follow the spec's, unless the spec's name is awkward or describes something else,** and calls the
    caller sees as siblings share one scheme: `updateChannelPartial` and `updateMemberPartial` answer
    `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse`, where v10 had `PartialUpdateChannelResponse`,
@@ -155,7 +160,9 @@ includes a named response that carries only `duration` today, such as `HideChann
 | `ActionV1JsonConverter` | `Attachment.actions` | [10](10-messages.md) |
 | `LocationV1JsonConverter` | `Message.sharedLocation`, `ChannelState.activeLiveLocations`, `GetActiveLiveLocationsResponse.activeLiveLocations`, `updateLiveLocation`'s response | [10](10-messages.md) |
 | `ReactionV1JsonConverter` | `Message.latestReactions` / `ownReactions`, `Event.reaction`, `QueryReactionsResponse.reactions`, `SendReactionResponse.reaction`, the `sendReaction` body | [10](10-messages.md) |
-| `DataSerializable` | `UserGroup`, `UserGroupMember`, `ReactionGroup` (`fromData`, `toData`) | [10](10-messages.md) |
+| `DataSerializable` | `UserGroup`, `UserGroupMember`, `ReactionGroup`, `PollOption` (`fromData`, `toData`) | [10](10-messages.md) |
+| `PollV1JsonConverter` | `Message.poll`, `DraftMessage.poll`, `Event.poll` | WebSocket v2 (no group) |
+| `PollVoteV1JsonConverter` | `Event.pollVote` | WebSocket v2 (no group) |
 | `user_mapper.dart` (kept, re-pointed) | today's `User`, which still reads and writes JSON | [09](09-users.md) |
 | `channel_mapper.dart` (kept, re-pointed) | today's `ChannelModel`, `ChannelConfig` and `Member`, which still read and write JSON | [11](11-channels-and-members.md) |
 
@@ -190,6 +197,8 @@ surfaces before it reaches `Message` and `ChannelState`:
   SDK.
 - **09** is last. Every group before it maps users through `user_mapper.dart` onto today's `User`; 09 migrates the
   user endpoints and restructures `User` and `OwnUser` themselves, when every parent that embeds them has moved.
+- **15** renames `extraData` to `custom` on every model at once. The groups keep `extraData`, so the SDK stays
+  consistent until then; it runs after 09.
 
 ## Prerequisites
 

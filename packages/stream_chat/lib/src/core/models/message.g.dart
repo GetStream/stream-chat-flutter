@@ -55,7 +55,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
   pinnedAt: json['pinned_at'] == null ? null : DateTime.parse(json['pinned_at'] as String),
   pinExpires: json['pin_expires'] == null ? null : DateTime.parse(json['pin_expires'] as String),
   pinnedBy: json['pinned_by'] == null ? null : User.fromJson(json['pinned_by'] as Map<String, dynamic>),
-  poll: json['poll'] == null ? null : Poll.fromJson(json['poll'] as Map<String, dynamic>),
+  poll: _$JsonConverterFromJson<Map<String, dynamic>, Poll>(json['poll'], const PollV1JsonConverter().fromJson),
   pollId: json['poll_id'] as String?,
   extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
   i18n: (json['i18n'] as Map<String, dynamic>?)?.map((k, e) => MapEntry(k, e as String)),

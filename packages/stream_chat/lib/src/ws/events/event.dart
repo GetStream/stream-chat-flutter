@@ -104,9 +104,11 @@ class Event extends WsEvent {
   final Message? message;
 
   /// The poll sent with the event
+  @PollV1JsonConverter()
   final Poll? poll;
 
   /// The poll vote sent with the event
+  @PollVoteV1JsonConverter()
   final PollVote? pollVote;
 
   /// The channel sent with the event

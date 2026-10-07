@@ -10,7 +10,6 @@ import 'package:stream_chat/src/core/api/channel_api.dart';
 import 'package:stream_chat/src/core/api/general_api.dart';
 import 'package:stream_chat/src/core/api/message_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
-import 'package:stream_chat/src/core/api/polls_api.dart';
 import 'package:stream_chat/src/core/api/push_preferences_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
@@ -45,8 +44,6 @@ class MockTokenManager extends Mock implements TokenManager {}
 class MockUserApi extends Mock implements UserApi {}
 
 class MockMessageApi extends Mock implements MessageApi {}
-
-class MockPollsApi extends Mock implements PollsApi {}
 
 class MockChannelApi extends Mock implements ChannelApi {}
 

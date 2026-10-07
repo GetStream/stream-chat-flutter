@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 
 import '../util/serializer.dart';
 import 'attachment.dart';
+import 'converters/v1_json_converters.dart';
 import 'message.dart';
 import 'poll.dart';
 import 'user.dart';
@@ -84,6 +85,7 @@ class DraftMessage extends Equatable {
 
   /// The poll associated with the message.
   @JsonKey(includeToJson: false)
+  @PollV1JsonConverter()
   final Poll? poll;
 
   /// The ID of the poll, if a poll is associated with the message.
