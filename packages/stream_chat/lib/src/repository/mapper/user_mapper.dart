@@ -2,6 +2,10 @@ import '../../../open_api/api.dart' as api;
 import '../../core/models/own_user.dart';
 import '../../core/models/privacy_settings.dart';
 import '../../core/models/response/create_guest_user_response.dart';
+import '../../core/models/response/get_unread_count_response.dart';
+import '../../core/models/unread_counts_channel.dart';
+import '../../core/models/unread_counts_channel_type.dart';
+import '../../core/models/unread_counts_thread.dart';
 import '../../core/models/user.dart';
 import '../../core/util/extension.dart';
 
@@ -89,5 +93,50 @@ extension CreateGuestResponseMapper on api.CreateGuestResponse {
     duration: duration,
     accessToken: accessToken,
     user: user.toModel(),
+  );
+}
+
+/// Maps a generated [api.WrappedUnreadCountsResponse] to a [GetUnreadCountResponse].
+extension WrappedUnreadCountsResponseMapper on api.WrappedUnreadCountsResponse {
+  /// Converts this response into a [GetUnreadCountResponse].
+  GetUnreadCountResponse toModel() => GetUnreadCountResponse(
+    duration: duration,
+    totalUnreadCount: totalUnreadCount,
+    totalUnreadThreadsCount: totalUnreadThreadsCount,
+    totalUnreadCountByTeam: totalUnreadCountByTeam,
+    channels: channels.map((channel) => channel.toModel()).toList(),
+    channelType: channelType.map((type) => type.toModel()).toList(),
+    threads: threads.map((thread) => thread.toModel()).toList(),
+  );
+}
+
+/// Maps a generated [api.UnreadCountsChannel] to an [UnreadCountsChannel].
+extension UnreadCountsChannelMapper on api.UnreadCountsChannel {
+  /// Converts these counts into an [UnreadCountsChannel].
+  UnreadCountsChannel toModel() => UnreadCountsChannel(
+    channelId: channelId,
+    unreadCount: unreadCount,
+    lastRead: lastRead,
+  );
+}
+
+/// Maps a generated [api.UnreadCountsThread] to an [UnreadCountsThread].
+extension UnreadCountsThreadMapper on api.UnreadCountsThread {
+  /// Converts these counts into an [UnreadCountsThread].
+  UnreadCountsThread toModel() => UnreadCountsThread(
+    unreadCount: unreadCount,
+    lastRead: lastRead,
+    lastReadMessageId: lastReadMessageId,
+    parentMessageId: parentMessageId,
+  );
+}
+
+/// Maps a generated [api.UnreadCountsChannelType] to an [UnreadCountsChannelType].
+extension UnreadCountsChannelTypeMapper on api.UnreadCountsChannelType {
+  /// Converts these counts into an [UnreadCountsChannelType].
+  UnreadCountsChannelType toModel() => UnreadCountsChannelType(
+    channelType: channelType,
+    channelCount: channelCount,
+    unreadCount: unreadCount,
   );
 }

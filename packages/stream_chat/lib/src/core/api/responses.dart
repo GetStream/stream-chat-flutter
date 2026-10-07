@@ -17,7 +17,6 @@ import '../models/push_preference.dart';
 import '../models/reaction.dart';
 import '../models/read.dart';
 import '../models/thread.dart';
-import '../models/unread_counts.dart';
 import '../models/user.dart';
 import '../models/user_block.dart';
 
@@ -619,31 +618,6 @@ class QueryRemindersResponse extends _BaseResponse {
 
   /// Create a new instance from a json
   static QueryRemindersResponse fromJson(Map<String, dynamic> json) => _$QueryRemindersResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.getUnreadCount] api call
-@JsonSerializable(createToJson: false)
-class GetUnreadCountResponse extends _BaseResponse {
-  /// Total number of unread messages across all channels
-  late int totalUnreadCount;
-
-  /// Total number of threads with unread replies
-  late int totalUnreadThreadsCount;
-
-  /// Total number of unread messages grouped by team
-  late Map<String, int>? totalUnreadCountByTeam;
-
-  /// List of channels with unread messages
-  late List<UnreadCountsChannel> channels;
-
-  /// Summary of unread counts grouped by channel type
-  late List<UnreadCountsChannelType> channelType;
-
-  /// List of threads with unread replies
-  late List<UnreadCountsThread> threads;
-
-  /// Create a new instance from a json
-  static GetUnreadCountResponse fromJson(Map<String, dynamic> json) => _$GetUnreadCountResponseFromJson(json);
 }
 
 /// Model response for [StreamChatClient.setPushPreferences] api call
