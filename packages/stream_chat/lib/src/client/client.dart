@@ -62,7 +62,7 @@ import '../core/models/reaction.dart';
 import '../core/models/request/message_delivery.dart';
 import '../core/models/response/add_user_group_members_response.dart';
 import '../core/models/response/app_settings_response.dart';
-import '../core/models/response/block_user_response.dart';
+import '../core/models/response/block_users_response.dart';
 import '../core/models/response/create_user_group_response.dart';
 import '../core/models/response/delete_channel_response.dart';
 import '../core/models/response/get_blocked_users_response.dart';
@@ -78,7 +78,7 @@ import '../core/models/response/remove_user_group_members_response.dart';
 import '../core/models/response/search_roles_response.dart';
 import '../core/models/response/search_user_groups_response.dart';
 import '../core/models/response/show_channel_response.dart';
-import '../core/models/response/unblock_user_response.dart';
+import '../core/models/response/unblock_users_response.dart';
 import '../core/models/response/update_channel_partial_response.dart';
 import '../core/models/response/update_member_partial_response.dart';
 import '../core/models/response/update_user_group_response.dart';
@@ -1797,7 +1797,7 @@ class StreamChatClient {
   ///
   /// On success, the blocked user's id is added to [OwnUser.blockedUserIds] on [ClientState.currentUser]. A failure
   /// leaves it unchanged.
-  Future<Result<BlockUserResponse>> blockUser(String userId) async {
+  Future<Result<BlockUsersResponse>> blockUser(String userId) async {
     final result = await _userBlockLock.synchronized(() => _usersRepository.blockUser(userId));
     return result
         .onSuccess((response) => _addBlockedUserId(response.blockedUserId))
@@ -1808,7 +1808,7 @@ class StreamChatClient {
   ///
   /// On success, [userId] is removed from [OwnUser.blockedUserIds] on [ClientState.currentUser]. A failure leaves it
   /// unchanged.
-  Future<Result<UnblockUserResponse>> unblockUser(String userId) async {
+  Future<Result<UnblockUsersResponse>> unblockUser(String userId) async {
     final result = await _userBlockLock.synchronized(() => _usersRepository.unblockUser(userId));
     return result
         .onSuccess((_) => _removeBlockedUserId(userId))

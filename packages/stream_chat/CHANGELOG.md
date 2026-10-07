@@ -103,11 +103,11 @@
 - `UnreadCountsChannel`, `UnreadCountsThread` and `UnreadCountsChannelType` no longer decode from or encode to JSON.
 - `GetUnreadCountResponse`, `UnreadCountsChannel`, `UnreadCountsThread` and `UnreadCountsChannelType` compare by value and gain `copyWith`.
 - `StreamChatApi.user.getUnreadCount` is removed; call `StreamChatClient.getUnreadCount` instead.
-- `StreamChatClient.blockUser` returns a `Result<BlockUserResponse>` and `unblockUser` a `Result<UnblockUserResponse>` instead of throwing.
+- `StreamChatClient.blockUser` returns a `Result<BlockUsersResponse>` and `unblockUser` a `Result<UnblockUsersResponse>` instead of throwing.
 - `StreamChatClient.queryBlockedUsers` is renamed `getBlockedUsers` and returns a `Result<GetBlockedUsersResponse>` instead of throwing.
-- `UserBlockResponse` is renamed `BlockUserResponse`, and `BlockedUsersResponse` is renamed `GetBlockedUsersResponse`.
-- `BlockUserResponse` and `GetBlockedUsersResponse` no longer decode from JSON, are immutable, built through a const constructor, and their `duration` is a non-nullable `String`.
-- `BlockUserResponse` and `GetBlockedUsersResponse` compare by value and gain `copyWith`.
+- `UserBlockResponse` is renamed `BlockUsersResponse`, and `BlockedUsersResponse` is renamed `GetBlockedUsersResponse`.
+- `BlockUsersResponse` and `GetBlockedUsersResponse` no longer decode from JSON, are immutable, built through a const constructor, and their `duration` is a non-nullable `String`.
+- `BlockUsersResponse` and `GetBlockedUsersResponse` compare by value and gain `copyWith`.
 - `UserBlock` no longer decodes from or encodes to JSON and no longer extends `Equatable`.
 - `UserBlock.blockedUser`, `userId`, `blockedUserId` and `createdAt` are required and non-nullable.
 - `StreamChatApi.user.blockUser`, `unblockUser` and `queryBlockedUsers` are removed; call `blockUser`, `unblockUser` and `getBlockedUsers` on `StreamChatClient` instead.

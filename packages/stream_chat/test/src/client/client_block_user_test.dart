@@ -17,7 +17,7 @@ void main() {
 
     expect(
       res.getOrNull(),
-      BlockUserResponse(
+      BlockUsersResponse(
         duration: '4.21ms',
         blockedByUserId: 'user-id',
         blockedUserId: _blockedUserId,

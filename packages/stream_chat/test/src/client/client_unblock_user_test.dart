@@ -15,7 +15,7 @@ void main() {
 
     final res = await client.unblockUser(_blockedUserId);
 
-    expect(res.getOrNull(), const UnblockUserResponse(duration: '4.21ms'));
+    expect(res.getOrNull(), const UnblockUsersResponse(duration: '4.21ms'));
     verify(() => defaultApi.unblockUsers(unblockUsersRequest: _request)).called(1);
     verifyNoMoreInteractions(defaultApi);
   });

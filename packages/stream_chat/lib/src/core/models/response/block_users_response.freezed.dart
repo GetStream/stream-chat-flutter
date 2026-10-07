@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'block_user_response.dart';
+part of 'block_users_response.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -12,18 +12,18 @@ part of 'block_user_response.dart';
 T _$identity<T>(T value) => value;
 
 /// @nodoc
-mixin _$BlockUserResponse {
+mixin _$BlockUsersResponse {
   String get duration;
   String get blockedByUserId;
   String get blockedUserId;
   DateTime get createdAt;
 
-  /// Create a copy of BlockUserResponse
+  /// Create a copy of BlockUsersResponse
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $BlockUserResponseCopyWith<BlockUserResponse> get copyWith => _$BlockUserResponseCopyWithImpl<BlockUserResponse>(
-    this as BlockUserResponse,
+  $BlockUsersResponseCopyWith<BlockUsersResponse> get copyWith => _$BlockUsersResponseCopyWithImpl<BlockUsersResponse>(
+    this as BlockUsersResponse,
     _$identity,
   );
 
@@ -31,7 +31,7 @@ mixin _$BlockUserResponse {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is BlockUserResponse &&
+            other is BlockUsersResponse &&
             (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.blockedByUserId, blockedByUserId) || other.blockedByUserId == blockedByUserId) &&
             (identical(other.blockedUserId, blockedUserId) || other.blockedUserId == blockedUserId) &&
@@ -49,16 +49,16 @@ mixin _$BlockUserResponse {
 
   @override
   String toString() {
-    return 'BlockUserResponse(duration: $duration, blockedByUserId: $blockedByUserId, blockedUserId: $blockedUserId, createdAt: $createdAt)';
+    return 'BlockUsersResponse(duration: $duration, blockedByUserId: $blockedByUserId, blockedUserId: $blockedUserId, createdAt: $createdAt)';
   }
 }
 
 /// @nodoc
-abstract mixin class $BlockUserResponseCopyWith<$Res> {
-  factory $BlockUserResponseCopyWith(
-    BlockUserResponse value,
-    $Res Function(BlockUserResponse) _then,
-  ) = _$BlockUserResponseCopyWithImpl;
+abstract mixin class $BlockUsersResponseCopyWith<$Res> {
+  factory $BlockUsersResponseCopyWith(
+    BlockUsersResponse value,
+    $Res Function(BlockUsersResponse) _then,
+  ) = _$BlockUsersResponseCopyWithImpl;
   @useResult
   $Res call({
     String duration,
@@ -69,13 +69,13 @@ abstract mixin class $BlockUserResponseCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$BlockUserResponseCopyWithImpl<$Res> implements $BlockUserResponseCopyWith<$Res> {
-  _$BlockUserResponseCopyWithImpl(this._self, this._then);
+class _$BlockUsersResponseCopyWithImpl<$Res> implements $BlockUsersResponseCopyWith<$Res> {
+  _$BlockUsersResponseCopyWithImpl(this._self, this._then);
 
-  final BlockUserResponse _self;
-  final $Res Function(BlockUserResponse) _then;
+  final BlockUsersResponse _self;
+  final $Res Function(BlockUsersResponse) _then;
 
-  /// Create a copy of BlockUserResponse
+  /// Create a copy of BlockUsersResponse
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -86,7 +86,7 @@ class _$BlockUserResponseCopyWithImpl<$Res> implements $BlockUserResponseCopyWit
     Object? createdAt = null,
   }) {
     return _then(
-      BlockUserResponse(
+      BlockUsersResponse(
         duration: null == duration
             ? _self.duration
             : duration // ignore: cast_nullable_to_non_nullable
