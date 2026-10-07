@@ -1,63 +1,40 @@
-import 'package:equatable/equatable.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
 import 'user.dart';
 
-part 'user_block.g.dart';
+part 'user_block.freezed.dart';
 
-/// Contains information about a [User] blocked from a [Channel] or App.
-@JsonSerializable()
-class UserBlock extends Equatable {
-  /// Creates a new instance of [UserBlock]
+/// A block one [User] placed on another.
+///
+/// Listed in [GetBlockedUsersResponse.blocks].
+@freezed
+class UserBlock with _$UserBlock {
+  /// Creates a new [UserBlock].
   const UserBlock({
     required this.user,
-    this.blockedUser,
-    this.userId,
-    this.blockedUserId,
-    this.createdAt,
+    required this.blockedUser,
+    required this.userId,
+    required this.blockedUserId,
+    required this.createdAt,
   });
 
-  /// Create a new instance from a json
-  factory UserBlock.fromJson(Map<String, dynamic> json) => _$UserBlockFromJson(json);
-
-  /// User that blocked the [blockedUser].
+  /// The user who placed the block.
+  @override
   final User user;
 
-  /// User that was blocked by the [user].
-  final User? blockedUser;
-
-  /// ID of the [user].
-  final String? userId;
-
-  /// ID of the [blockedUser].
-  final String? blockedUserId;
-
-  /// Timestamp when the [user] was blocked.
-  final DateTime? createdAt;
-
-  /// Serialize to json
-  Map<String, dynamic> toJson() => _$UserBlockToJson(this);
-
-  /// Returns a copy of this object with the given fields updated.
-  UserBlock copyWith({
-    User? user,
-    User? blockedUser,
-    String? userId,
-    String? blockedUserId,
-    DateTime? createdAt,
-  }) => UserBlock(
-    user: user ?? this.user,
-    blockedUser: blockedUser ?? this.blockedUser,
-    userId: userId ?? this.userId,
-    blockedUserId: blockedUserId ?? this.blockedUserId,
-    createdAt: createdAt ?? this.createdAt,
-  );
-
+  /// The user [user] blocked.
   @override
-  List<Object?> get props => [
-    user,
-    blockedUser,
-    userId,
-    blockedUserId,
-    createdAt,
-  ];
+  final User blockedUser;
+
+  /// The id of [user].
+  @override
+  final String userId;
+
+  /// The id of [blockedUser].
+  @override
+  final String blockedUserId;
+
+  /// The time [user] blocked [blockedUser].
+  @override
+  final DateTime createdAt;
 }
