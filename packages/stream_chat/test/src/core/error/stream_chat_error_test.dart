@@ -215,6 +215,36 @@ void main() {
       expect(error.isRetriable, isTrue);
     });
 
+    test('`.isMessageAlreadyExistsError` should return true for a duplicate message id rejection', () {
+      final error = StreamChatNetworkError.raw(
+        code: ChatErrorCode.inputError.code,
+        statusCode: 400,
+        message: 'SendMessage failed with error: "a message with ID abc already exists"',
+      );
+
+      expect(error.isMessageAlreadyExistsError, isTrue);
+    });
+
+    test('`.isMessageAlreadyExistsError` should return false for a poll option that already exists', () {
+      final error = StreamChatNetworkError.raw(
+        code: ChatErrorCode.inputError.code,
+        statusCode: 400,
+        message: 'poll option with text A already exists',
+      );
+
+      expect(error.isMessageAlreadyExistsError, isFalse);
+    });
+
+    test('`.isMessageAlreadyExistsError` should return false for the same text with another error code', () {
+      final error = StreamChatNetworkError.raw(
+        code: ChatErrorCode.notAllowed.code,
+        statusCode: 403,
+        message: 'SendMessage failed with error: "a message with ID abc already exists"',
+      );
+
+      expect(error.isMessageAlreadyExistsError, isFalse);
+    });
+
     test('`.toString`', () {
       const errorCode = ChatErrorCode.tokenExpired;
       final error = StreamChatNetworkError(errorCode);
