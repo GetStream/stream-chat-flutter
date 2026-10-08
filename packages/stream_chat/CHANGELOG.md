@@ -125,10 +125,20 @@
 - `Action` no longer decodes from or encodes to JSON, compares by value instead of by identity, and gains `copyWith`.
 - `Reaction` no longer decodes from or encodes to JSON and no longer extends `Equatable`, so `props` is removed; it still compares by value.
 - `Location` no longer decodes from or encodes to JSON and no longer extends `Equatable`, so `props` is removed; it still compares by value.
+- `StreamChatClient.updateUser` and `updateUsers` return a `Result<UpdateUsersResponse>` instead of throwing.
+- `StreamChatClient.partialUpdateUser` and `partialUpdateUsers` are renamed `updateUserPartial` and `updateUsersPartial`, and return a `Result<UpdateUsersResponse>` instead of throwing.
+- `PartialUpdateUserRequest` is renamed `UpdateUserPartialRequest`.
+- `UpdateUserPartialRequest` no longer encodes to JSON or extends `Equatable`, so `props` is removed; it still compares by value and gains `copyWith`.
+- `UpdateUsersResponse` no longer decodes from JSON, is immutable, built through a const constructor, compares by value, gains `copyWith`, and its `duration` is a non-nullable `String`.
+- The users in an `UpdateUsersResponse` no longer carry their devices, mutes, channel mutes, privacy settings, unread counts, blocked user ids, hidden channels or token revocation time in `extraData`.
+- `updateUser` and `updateUsers` no longer send the user's `role`, `teams` and `teamsRole`.
+- `StreamChatApi.user.updateUsers` and `partialUpdateUsers` are removed; call `updateUsers` and `updateUsersPartial` on `StreamChatClient` instead.
 
 🐞 Fixed
 
 - `connectGuestUser` no longer copies the user's online status, ban, unread counts, devices and push preferences into the created guest's `extraData`.
+
+- `updateUser` and `updateUsers` no longer store the user's online status, ban and timestamps, or an own user's devices, mutes and unread counts, as custom data.
 
 - `queryChannels` no longer gives up watching the channels it loads when it is called before the connection is open. Whether they can be watched is read when the request is sent, which is after the query has waited for the connection.
 
@@ -155,6 +165,7 @@
 - Added an optional `timeout` to `StreamChatClient.moderation.muteUser` that expires the mute.
 - Added `StreamChatClient.moderation.muteUsers` and `unmuteUsers`, which mute and unmute several users in one call and report the ids that matched no user.
 - Added `ChannelModel.truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires`, `deletedAt` and `topLevelFields`; the constructors accept the new fields.
+- Added `User.deactivatedAt`, `deletedAt` and `shadowBanned`; the constructors accept the new fields.
 
 🔒 Security
 

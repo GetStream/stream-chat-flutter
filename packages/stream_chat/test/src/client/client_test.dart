@@ -3558,64 +3558,6 @@ void main() {
       verifyNoMoreInteractions(fakeChatApi.message);
     });
 
-    test('`.updateUser`', () async {
-      final user = User(
-        id: 'test-user-id',
-        extraData: const {'name': 'test-user'},
-      );
-
-      when(
-        () => fakeChatApi.user.updateUsers([user]),
-      ).thenAnswer((_) async => UpdateUsersResponse()..users = {user.id: user});
-
-      final res = await client.updateUser(user);
-
-      expect(res, isNotNull);
-      expect(res.users, {user.id: user});
-
-      verify(() => fakeChatApi.user.updateUsers([user])).called(1);
-      verifyNoMoreInteractions(fakeChatApi.user);
-    });
-
-    test('`.partialUpdateUser`', () async {
-      const userId = 'test-user-id';
-
-      final set = {'color': 'yellow'};
-      final unset = <String>[];
-
-      final partialUpdateRequest = PartialUpdateUserRequest(
-        id: userId,
-        set: set,
-        unset: unset,
-      );
-
-      final updatedUser = User(
-        id: userId,
-        extraData: {'color': set['color']},
-      );
-
-      when(() => fakeChatApi.user.partialUpdateUsers([partialUpdateRequest])).thenAnswer(
-        (_) async => UpdateUsersResponse()
-          ..users = {
-            updatedUser.id: updatedUser,
-          },
-      );
-
-      final res = await client.partialUpdateUser(
-        userId,
-        set: set,
-        unset: unset,
-      );
-
-      expect(res, isNotNull);
-      expect(res.users, {updatedUser.id: updatedUser});
-
-      verify(
-        () => fakeChatApi.user.partialUpdateUsers([partialUpdateRequest]),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.user);
-    });
-
     test('`.getActiveLiveLocations`', () async {
       final locations = [
         Location(

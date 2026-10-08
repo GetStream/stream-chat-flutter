@@ -83,7 +83,7 @@
 - **`PollOption` gets the `@DataSerializable` codec** for `polls.options`. The stored format nests
   custom data under `extra_data` where v10 flattened it, so `schemaVersion` is bumped.
 - **`extraData` keeps its name.** Renaming it to `custom` is a migration-wide step for every model at
-  once — [group 20](20-custom-data-rename.md).
+  once — [group 21](21-custom-data-rename.md).
 - **Verified live** against the demo app with a before/after harness covering every endpoint, the
   error cases and the WebSocket events, and in the sample app on web.
 

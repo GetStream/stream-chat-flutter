@@ -39,32 +39,6 @@ class UserApi {
     return QueryUsersResponse.fromJson(response.data);
   }
 
-  /// Batch update a list of users
-  Future<UpdateUsersResponse> updateUsers(
-    List<User> users,
-  ) async {
-    final response = await _client.post(
-      '/users',
-      data: {
-        'users': {for (final user in users) user.id: user},
-      },
-    );
-    return UpdateUsersResponse.fromJson(response.data);
-  }
-
-  /// Batch partial update of [users].
-  Future<UpdateUsersResponse> partialUpdateUsers(
-    List<PartialUpdateUserRequest> users,
-  ) async {
-    final response = await _client.patch(
-      '/users',
-      data: {
-        'users': users,
-      },
-    );
-    return UpdateUsersResponse.fromJson(response.data);
-  }
-
   /// Retrieves all the active live locations of the current user.
   Future<GetActiveLiveLocationsResponse> getActiveLiveLocations() async {
     final response = await _client.get(

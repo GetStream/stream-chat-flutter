@@ -378,7 +378,7 @@ GROUPS = [
             - **`PollOption` gets the `@DataSerializable` codec** for `polls.options`. The stored format nests
               custom data under `extra_data` where v10 flattened it, so `schemaVersion` is bumped.
             - **`extraData` keeps its name.** Renaming it to `custom` is a migration-wide step for every model at
-              once — [group 20](20-custom-data-rename.md).
+              once — [group 21](21-custom-data-rename.md).
             - **Verified live** against the demo app with a before/after harness covering every endpoint, the
               error cases and the WebSocket events, and in the sample app on web.
             """),
@@ -564,31 +564,42 @@ GROUPS = [
     dict(
         num='09', slug='users', title='Users',
         hand=['user_api.dart'],
-        match=owns('/api/v2/users', unless=('/api/v2/users/block', '/api/v2/users/unblock')),
+        match=owns('/api/v2/users', unless=('/api/v2/users/block', '/api/v2/users/unblock'),
+                   unless_ops=('POST /api/v2/users', 'PATCH /api/v2/users')),
         goal='`User` is the most widely referenced public model in the SDK; this is where keep-vs-adopt costs the '
-             'most. [18](18-unread-counts.md) split the current user\'s unread counts out of it, and '
-             '[19](19-user-blocking.md) blocking users.',
+             'most. [18](18-unread-counts.md) split the current user\'s unread counts out of it, '
+             '[19](19-user-blocking.md) blocking users, and [20](20-user-updates.md) updating users.',
         decisions=[
             '`User` and `OwnUser` are public, persisted, and embedded in nearly every other response. This group '
             'restructures them, last: the mappers in `user_mapper.dart` already map the generated types onto the '
             'current class for every group before it, and stay. See [01-foundation](01-foundation.md).',
             '`PrivacySettings` and the push-preference sub-shapes — decide per type.',
-            '`UserResponse.toModel()` leaves `OwnUser.topLevelFields`, `deleted_at`, `deactivated_at` and '
-            '`revoke_tokens_issued_before` out of every user\'s `extraData` (`_shadowedCustomKeys`), where v1 kept the '
-            '`OwnUser`-only keys in a plain user\'s `extraData`. Revisit once the mapper serves plain users.',
-            '`UserFilterField.shadowBanned` and `.bypassModeration` read `extraData`, which the generated '
-            '`UserResponse` has no field to fill.',
-            '`updateUsers` reuses `User.toRequest()`. It is a full upsert, and v10\'s flattened body filed the '
-            'user\'s client state (`online`, `banned`, `created_at` and similar) into the stored custom data on '
-            'every call, as it did for guests in [04](04-roles-guest-and-app.md). Decide the same way here, for real '
-            'users rather than fresh guests, and record it in the CHANGELOG.',
-            'The generated `UserRequest` sends explicit `null` for an unset `language` or `invisible`, where v10 '
-            'left the key out. For a guest create that made no difference; for an upsert of an existing user, '
-            'confirm live that a `null` does not reset a stored value differently from an omitted key.',
+            '`UserResponse.toModel()` and `FullUserResponse.toModel()` drop custom data named like one of the user\'s '
+            'own fields (`_shadowedCustomKeys`): `deactivated_at`, `deleted_at` and `shadow_banned` are refilled from '
+            'the typed fields, and the `OwnUser`-only keys and `revoke_tokens_issued_before` are left out, where v1 '
+            'kept them in a plain user\'s `extraData`. Revisit once the mapper serves plain users.',
+            '**Whether `User` promotes its `extraData`-backed getters to real fields.** `User.deactivatedAt`, '
+            '`deletedAt` and `shadowBanned`, added in [20](20-user-updates.md) the way `Member` promoted its fields, '
+            'arrive as root fields but live in `extraData` and are read back through getters; the constructors write '
+            'them there. Promoting them is a break: their keys leave `extraData`, a key set in `extraData` no longer '
+            'sets the field, and a `custom` filter or sort field naming one reads null locally. When promoting: '
+            '(1) decide each field\'s `merge` rule (`OwnUser.merge` takes the other user\'s `extraData` whole today); '
+            '(2) make `toJson` leave out `extraData` keys named like a field; (3) keep the constructor copying '
+            '`extraData`; (4) add persistence columns; (5) point `UserFilterField.shadowBanned` at the field. Decide '
+            'together with [11](11-channels-and-members.md)\'s `ChannelModel` and `Member` promotions. '
+            '`revokeTokensIssuedBefore` stays out of `User`.',
+            '`UserFilterField.bypassModeration` reads `extraData`, which no generated user has a field to fill.',
+            '`queryUsers` answers `FullUserResponse`, which [20](20-user-updates.md) already maps to `User`; the '
+            'caller\'s own entry could map to `OwnUser` once `Mute`, `ChannelMute` and `PrivacySettings` have '
+            'response mappers.',
         ],
         risks=[
             'Every other group depends on the `User` decision.',
             'User data arrives over the WebSocket on nearly every event.',
+            '`ConnectUserDetails.fromOwnUser` flattens the whole `extraData` into the connect payload, so the '
+            '`deactivated_at`, `deleted_at` and `shadow_banned` entries the [20](20-user-updates.md) getters read go '
+            'back to the server as custom data (v10 already did this for `shadow_banned`). Strip the user\'s own '
+            'keys there when the WebSocket moves to v2.',
             'Landing `UserResponse` -> `User` unblocks the two fields [08](08-moderation-and-blocklists.md) '
             'had to drop from `MuteUsersResponse`: the `mutes` the call created and the `ownUser` it left '
             'behind. Adding them is additive for anyone reading the response, so revisit them here rather '
@@ -1073,7 +1084,48 @@ GROUPS = [
         done=DONE.replace('- [ ]', '- [x]'),
     ),
     dict(
-        num='20', slug='custom-data-rename', title='`extraData` → `custom`',
+        num='20', slug='user-updates', title='User Updates',
+        hand=[],
+        match=only_ops('POST /api/v2/users', 'PATCH /api/v2/users'),
+        goal='Move creating, updating and partially updating users ahead of [09](09-users.md): the response maps '
+             'onto the current `User`, and nothing persists it.',
+        decisions=[],
+        taken=textwrap.dedent("""\
+            - **Split out of [09](09-users.md), ahead of it.** `updateUser`, `updateUsers`, `partialUpdateUser` and
+              `partialUpdateUsers` read nothing into client state, as in v10; the `user.updated` event does.
+            - **The v2 routes are the v1 handlers.** `lib/core/api/users/routes.go` mounts `UpdateUsers` and
+              `UpdateUsersPartial` in the common routes, at the root and under `/api/v2/`; only the JSON encoding
+              differs. Neither is gated, in beta or deprecated.
+            - **The upsert sends `User.toRequest()`.** v10 sent the whole user flattened, and v1 stored every key
+              its request does not declare as custom data: the user's `online`, `banned` and timestamps, and an own
+              user's devices, mutes and unread counts. v2 drops unknown keys, so that stops, as it did for guests
+              in [04](04-roles-guest-and-app.md). `User.toRequest()` also leaves out the own-user keys an `OwnUser`
+              decoded from the connection keeps in `extraData` (`unread_count`, `total_unread_count_by_team`,
+              `latest_hidden_channels`), which v2 would otherwise store as custom data. `role`, `teams` and
+              `teams_role` are no longer sent: a client-side token never stores them, and a different role was
+              refused.
+            - **Moved off `UserApi`:** `updateUsers` and `partialUpdateUsers`, now `StreamChatClient` methods over
+              `UsersRepository`.
+            - **Explicit `null`s are not a regression.** The generated request sends `language: null` and
+              `invisible: null` where v10 left the keys out; the server reads a null or missing language as empty,
+              and a null or missing `invisible` as unchanged.
+            - **The partial updates take the API's names,** `updateUserPartial` and `updateUsersPartial`, with
+              `UpdateUserPartialRequest` (renamed from `PartialUpdateUserRequest`, freezed, without `toJson`), as
+              the channel and member partial updates already do. `updateUserPartial` keeps v10's arguments.
+            - **`UpdateUsersResponse` keeps its name** and maps each `FullUserResponse` to a `User`. No public
+              full-user type: a client-side caller can only update itself, the server blanks the private fields
+              for anyone else, and the caller's own are on `currentUser`. `membership_deletion_task_id` is always
+              empty and stays out.
+            - **`User` gains `deactivatedAt`, `deletedAt` and `shadowBanned`** as getters over `extraData`, the
+              way `Member` promoted its fields. Each generated user mapper fills the ones its response carries
+              (`UserResponse` has no `shadowBanned`), so the values v1 left raw in `extraData` are no longer lost;
+              persistence needs no change.
+            """),
+        risks=[],
+        done=DONE.replace('- [ ]', '- [x]'),
+    ),
+    dict(
+        num='21', slug='custom-data-rename', title='`extraData` → `custom`',
         hand=[],
         match=owns(),
         goal='Rename `extraData` to `custom` on every public model at once, matching the generated client.',
