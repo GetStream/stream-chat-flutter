@@ -34,6 +34,9 @@ class User extends Equatable {
   /// print(user.image == user.extraData['image']); // true
   /// ```
   /// {@endtemplate}
+  ///
+  /// The [deactivatedAt], [deletedAt] and [shadowBanned] arguments, when given, are stored in [extraData], replacing
+  /// the entry each one reads.
   User({
     required this.id,
     this.role,
@@ -51,11 +54,18 @@ class User extends Equatable {
     this.teamsRole,
     this.avgResponseTime,
     Map<String, Object?> extraData = const {},
-  }) : // For backwards compatibility, set 'name', 'image' in [extraData].
+    DateTime? deactivatedAt,
+    DateTime? deletedAt,
+    bool? shadowBanned,
+  }) : // 'name' and 'image' are set in [extraData] for backwards compatibility; the others so they round-trip through
+       // toJson and fromJson without fields of their own.
        extraData = {
          ...extraData,
          if (name != null) 'name': name,
          if (image != null) 'image': image,
+         if (deactivatedAt != null) 'deactivated_at': deactivatedAt.toUtc().toIso8601String(),
+         if (deletedAt != null) 'deleted_at': deletedAt.toUtc().toIso8601String(),
+         if (shadowBanned != null) 'shadow_banned': shadowBanned,
        };
 
   /// Create a new instance from json.
@@ -146,6 +156,29 @@ class User extends Equatable {
 
   /// Map of custom user extraData.
   final Map<String, Object?> extraData;
+
+  /// The date at which the user was deactivated.
+  ///
+  /// Null while the user is active, or when not known.
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  DateTime? get deactivatedAt => _date('deactivated_at');
+
+  /// The date at which the user was deleted.
+  ///
+  /// Null while the user exists, or when not known.
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  DateTime? get deletedAt => _date('deleted_at');
+
+  /// Whether the user is shadow banned, so that their messages reach no one else without them being told.
+  ///
+  /// Null when not known.
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  bool? get shadowBanned => extraData['shadow_banned'].safeCast<bool>();
+
+  DateTime? _date(String key) => switch (extraData[key]) {
+    final String value => DateTime.tryParse(value),
+    _ => null,
+  };
 
   /// List of users to list of userIds.
   static List<String>? toIds(List<User>? users) => users?.map((u) => u.id).toList();
@@ -302,7 +335,7 @@ class UserFilterField extends FilterField<User> {
   /// **Supported operators:** `$eq`
   static final shadowBanned = UserFilterField(
     'shadow_banned',
-    (it) => it.extraData['shadow_banned'].safeCast<bool>(),
+    (it) => it.shadowBanned,
   );
 
   /// Filters users by whether they bypass moderation.

@@ -102,6 +102,7 @@ void main() {
           'privacy_settings': 'custom-privacy-settings',
           'deleted_at': 'custom-deleted-at',
           'deactivated_at': 'custom-deactivated-at',
+          'shadow_banned': 'custom-shadow-banned',
           'revoke_tokens_issued_before': 'custom-revoke-tokens-issued-before',
         },
       );
@@ -113,6 +114,8 @@ void main() {
         'favorite_color': 'green',
         'name': 'Created Name',
         'image': 'https://example.com/created.png',
+        'deactivated_at': '2026-09-04T00:00:00.000Z',
+        'deleted_at': '2026-09-05T00:00:00.000Z',
       });
     },
   );
@@ -287,4 +290,6 @@ User _createdGuest() => User(
   createdAt: DateTime.utc(2026, 9, 1),
   updatedAt: DateTime.utc(2026, 9, 2),
   lastActive: DateTime.utc(2026, 9, 3),
+  deactivatedAt: DateTime.utc(2026, 9, 4),
+  deletedAt: DateTime.utc(2026, 9, 5),
 );

@@ -60,6 +60,7 @@ import '../core/models/push_preference.dart';
 import '../core/models/push_provider.dart';
 import '../core/models/reaction.dart';
 import '../core/models/request/message_delivery.dart';
+import '../core/models/request/update_user_partial_request.dart';
 import '../core/models/response/add_user_group_members_response.dart';
 import '../core/models/response/app_settings_response.dart';
 import '../core/models/response/block_users_response.dart';
@@ -82,6 +83,7 @@ import '../core/models/response/unblock_users_response.dart';
 import '../core/models/response/update_channel_partial_response.dart';
 import '../core/models/response/update_member_partial_response.dart';
 import '../core/models/response/update_user_group_response.dart';
+import '../core/models/response/update_users_response.dart';
 import '../core/models/role_type.dart';
 import '../core/models/thread.dart';
 import '../core/models/user.dart';
@@ -1764,32 +1766,26 @@ class StreamChatClient {
     pagination: pagination,
   );
 
-  /// Update or Create the given user object.
-  Future<UpdateUsersResponse> updateUser(User user) => updateUsers([user]);
+  /// Creates [user], or replaces the data of the existing user with the same id.
+  ///
+  /// This cannot change the user's role, teams or team roles. To change only some fields, consider
+  /// [updateUserPartial].
+  Future<Result<UpdateUsersResponse>> updateUser(User user) => updateUsers([user]);
 
-  /// Batch update a list of users
-  Future<UpdateUsersResponse> updateUsers(List<User> users) => _chatApi.user.updateUsers(users);
+  /// Creates or replaces each of [users], as [updateUser] does for one.
+  Future<Result<UpdateUsersResponse>> updateUsers(List<User> users) => _usersRepository.updateUsers(users);
 
-  /// Partially update the given user with [id].
-  /// Use [set] to define values to be set.
-  /// Use [unset] to define values to be unset.
-  Future<UpdateUsersResponse> partialUpdateUser(
+  /// Partially updates the user with [id]: sets the fields in [set] and removes the fields named in [unset], leaving
+  /// every other field as it is.
+  Future<Result<UpdateUsersResponse>> updateUserPartial(
     String id, {
     Map<String, Object?>? set,
     List<String>? unset,
-  }) {
-    final user = PartialUpdateUserRequest(
-      id: id,
-      set: set,
-      unset: unset,
-    );
-    return partialUpdateUsers([user]);
-  }
+  }) => updateUsersPartial([UpdateUserPartialRequest(id: id, set: set, unset: unset)]);
 
-  /// Batch partial updates the [users].
-  Future<UpdateUsersResponse> partialUpdateUsers(
-    List<PartialUpdateUserRequest> users,
-  ) => _chatApi.user.partialUpdateUsers(users);
+  /// Partially updates several users at once, applying each of [updates] to the user it names.
+  Future<Result<UpdateUsersResponse>> updateUsersPartial(List<UpdateUserPartialRequest> updates) =>
+      _usersRepository.updateUsersPartial(updates);
 
   final _userBlockLock = Lock();
 

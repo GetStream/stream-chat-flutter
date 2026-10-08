@@ -141,32 +141,6 @@ class PaginationParams extends Equatable {
   ];
 }
 
-/// Request model for the [client.partialUpdateUser] api call.
-@JsonSerializable(createFactory: false)
-class PartialUpdateUserRequest extends Equatable {
-  /// Creates a new PartialUpdateUserRequest instance.
-  const PartialUpdateUserRequest({
-    required this.id,
-    this.set,
-    this.unset,
-  });
-
-  /// User ID.
-  final String id;
-
-  /// Fields to set.
-  final Map<String, Object?>? set;
-
-  /// Fields to unset.
-  final List<String>? unset;
-
-  /// Serialize model to json
-  Map<String, dynamic> toJson() => _$PartialUpdateUserRequestToJson(this);
-
-  @override
-  List<Object?> get props => [id, set, unset];
-}
-
 /// {@template threadOptions}
 /// Options for querying threads.
 /// {@endtemplate}

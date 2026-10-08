@@ -16,5 +16,8 @@
   "language": "en",
   "invisible": false,
   "teams_role": {"team-1": "admin", "team-2": "member"},
-  "avg_response_time": 120
+  "avg_response_time": 120,
+  "deactivated_at": "2021-08-06T10:39:21.817646Z",
+  "deleted_at": "2021-08-07T10:39:21.817646Z",
+  "shadow_banned": true
 }

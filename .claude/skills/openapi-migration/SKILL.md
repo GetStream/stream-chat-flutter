@@ -251,9 +251,9 @@ packages/stream_chat/lib/src/
 ```
 
 - **The role decides the folder.** An envelope goes in `response/` (`CreateUserGroupResponse`). A type the caller
-  passes in to shape a request goes in `request/`, whatever its name: `MessageDelivery`, and also
-  `PartialUpdateUserRequest`, `PaginationParams` and `ThreadOptions` when their groups migrate them. Every other
-  model stays in `models/` (`UserGroup`). Copy `lib/src/core/models/request/message_delivery.dart`.
+  passes in to shape a request goes in `request/`, whatever its name: `MessageDelivery`, `UpdateUserPartialRequest`,
+  and also `PaginationParams` and `ThreadOptions` when their groups migrate them. Every other model stays in
+  `models/` (`UserGroup`). Copy `lib/src/core/models/request/message_delivery.dart`.
 - **Models and envelopes** are `@freezed` classes with a const constructor and `@override final` fields. Copy
   `lib/src/core/models/user_group.dart` and `lib/src/core/models/response/create_user_group_response.dart`.
   Envelopes carry `required this.duration`, documented with an example value such as `4.21ms`, plus one field per

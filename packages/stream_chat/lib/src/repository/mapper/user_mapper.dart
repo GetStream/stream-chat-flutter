@@ -1,11 +1,13 @@
 import '../../../open_api/api.dart' as api;
 import '../../core/models/own_user.dart';
 import '../../core/models/privacy_settings.dart';
+import '../../core/models/request/update_user_partial_request.dart';
 import '../../core/models/response/block_users_response.dart';
 import '../../core/models/response/create_guest_user_response.dart';
 import '../../core/models/response/get_blocked_users_response.dart';
 import '../../core/models/response/get_unread_count_response.dart';
 import '../../core/models/response/unblock_users_response.dart';
+import '../../core/models/response/update_users_response.dart';
 import '../../core/models/unread_counts_channel.dart';
 import '../../core/models/unread_counts_channel_type.dart';
 import '../../core/models/unread_counts_thread.dart';
@@ -22,7 +24,11 @@ extension UserResponseMapper on api.UserResponse {
     ...OwnUser.topLevelFields,
     'deleted_at',
     'deactivated_at',
+    'shadow_banned',
     'revoke_tokens_issued_before',
+    'unread_count',
+    'total_unread_count_by_team',
+    'latest_hidden_channels',
   };
 
   /// Converts this response into a [User].
@@ -43,6 +49,36 @@ extension UserResponseMapper on api.UserResponse {
     teamsRole: teamsRole,
     avgResponseTime: avgResponseTime,
     extraData: {...custom}..removeWhere((key, _) => _shadowedCustomKeys.contains(key)),
+    deactivatedAt: deactivatedAt,
+    deletedAt: deletedAt,
+  );
+}
+
+/// Maps a generated [api.FullUserResponse] to a [User].
+extension FullUserResponseMapper on api.FullUserResponse {
+  /// Converts this response into a [User].
+  ///
+  /// Custom data named like one of the user's own fields is left out of [User.extraData].
+  User toModel() => User(
+    id: id,
+    role: role,
+    name: name,
+    image: image,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    lastActive: lastActive,
+    online: online,
+    banned: banned,
+    banExpires: banExpires,
+    teams: teams,
+    language: language,
+    invisible: invisible,
+    teamsRole: teamsRole,
+    avgResponseTime: avgResponseTime,
+    extraData: {...custom}..removeWhere((key, _) => UserResponseMapper._shadowedCustomKeys.contains(key)),
+    deactivatedAt: deactivatedAt,
+    deletedAt: deletedAt,
+    shadowBanned: shadowBanned,
   );
 }
 
@@ -181,4 +217,19 @@ extension BlockedUserResponseMapper on api.BlockedUserResponse {
     blockedUserId: blockedUserId,
     createdAt: createdAt,
   );
+}
+
+/// Maps a generated [api.UpdateUsersResponse] to an [UpdateUsersResponse].
+extension UpdateUsersResponseMapper on api.UpdateUsersResponse {
+  /// Converts this response into an [UpdateUsersResponse].
+  UpdateUsersResponse toModel() => UpdateUsersResponse(
+    duration: duration,
+    users: users.map((id, user) => MapEntry(id, user.toModel())),
+  );
+}
+
+/// Maps an [UpdateUserPartialRequest] to the generated [api.UpdateUserPartialRequest].
+extension UpdateUserPartialRequestMapper on UpdateUserPartialRequest {
+  /// Converts this update into an [api.UpdateUserPartialRequest].
+  api.UpdateUserPartialRequest toRequest() => api.UpdateUserPartialRequest(id: id, set: set, unset: unset);
 }

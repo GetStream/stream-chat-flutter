@@ -38,6 +38,7 @@ onto Stream's OpenAPI-generated API client.
     - [Read Receipts](#read-receipts)
     - [Unread Counts](#unread-counts)
     - [User Blocking](#user-blocking)
+    - [User Updates](#user-updates)
 - [Migration Checklist](#migration-checklist)
 - [For AI Agents](#for-ai-agents)
 - [Contributing to this guide](#contributing-to-this-guide)
@@ -88,6 +89,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Read Receipts**](#read-receipts) | Marking read, unread and delivered return a `Result` instead of throwing; `ChannelDeliveryReporter`'s callback returns a `Result` |
 | [**Unread Counts**](#unread-counts) | `getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing; the response and its `UnreadCounts*` models no longer decode JSON and compare by value |
 | [**User Blocking**](#user-blocking) | `blockUser`, `unblockUser` and `getBlockedUsers` (was `queryBlockedUsers`) return a `Result` instead of throwing; their responses are renamed `BlockUsersResponse` and `GetBlockedUsersResponse`, `unblockUser` answers a new `UnblockUsersResponse`, and `UserBlock`'s fields are all non-nullable |
+| [**User Updates**](#user-updates) | `updateUser` and `updateUsers` return a `Result<UpdateUsersResponse>` instead of throwing; `partialUpdateUser(s)` becomes `updateUserPartial` / `updateUsersPartial` and `PartialUpdateUserRequest` becomes `UpdateUserPartialRequest`; `updateUser` no longer sends `role`, `teams` or `teamsRole`, and the returned users no longer carry their private fields in `extraData` |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -278,6 +280,19 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `UserBlock extends Equatable`, `UserBlock.props` | `UserBlock` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and `UserBlock` is no longer an `Equatable` |
 | `UserBlock.blockedUser` (`User?`), `.userId` / `.blockedUserId` (`String?`), `.createdAt` (`DateTime?`) | `User`, `String`, `DateTime` — required in the constructor | `retyped` | The server always sends them; drop any `!`, `?.` or `?? …` |
 | `StreamChatApi.user.blockUser` / `unblockUser` / `queryBlockedUsers` | `StreamChatClient.blockUser` / `unblockUser` / `getBlockedUsers` | `removed` | The endpoints moved to the generated client |
+| `StreamChatClient.updateUser` / `updateUsers` → `Future<UpdateUsersResponse>` | `Future<Result<UpdateUsersResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `StreamChatClient.partialUpdateUser` | `StreamChatClient.updateUserPartial` | `renamed` | Same arguments |
+| `StreamChatClient.partialUpdateUser` → `Future<UpdateUsersResponse>` | `updateUserPartial` → `Future<Result<UpdateUsersResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `StreamChatClient.partialUpdateUsers` | `StreamChatClient.updateUsersPartial` | `renamed` | Takes `List<UpdateUserPartialRequest>` |
+| `StreamChatClient.partialUpdateUsers` → `Future<UpdateUsersResponse>` | `updateUsersPartial` → `Future<Result<UpdateUsersResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `PartialUpdateUserRequest` | `UpdateUserPartialRequest` | `renamed` | Same fields |
+| `PartialUpdateUserRequest.toJson` | — | `removed` | `UpdateUserPartialRequest` is a plain class |
+| `UpdateUsersResponse.fromJson` | — | `removed` | The response is a plain class; construct it directly |
+| `PartialUpdateUserRequest.props` | — | `removed` | No longer an `Equatable`; still compares by value, and gains `copyWith` |
+| `UpdateUsersResponse()..users = …` | `UpdateUsersResponse(duration: …, users: …)` | `retyped` | A plain class with a const constructor and final fields |
+| `UpdateUsersResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
+| `UpdateUsersResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| `StreamChatApi.user.updateUsers` / `partialUpdateUsers` | `StreamChatClient.updateUsers` / `updateUsersPartial` | `removed` | The endpoints moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -893,6 +908,49 @@ and gain `copyWith`, and their `duration` is always present.
 > names. `queryBlockedUsers` becomes `getBlockedUsers`, the API's name, because the call takes no filter, sort or
 > pagination. The server always sends every `UserBlock` field, so the model no longer makes callers handle nulls
 > that never arrive.
+
+### User Updates
+
+**`updateUser` and `updateUsers` return a `Result<UpdateUsersResponse>` instead of throwing, and
+`partialUpdateUser` and `partialUpdateUsers` are renamed `updateUserPartial` and `updateUsersPartial`.**
+`updateUserPartial` keeps its arguments; `updateUsersPartial` takes `UpdateUserPartialRequest`, renamed from
+`PartialUpdateUserRequest`. A `try`/`catch` around them still compiles, but no longer catches a failed call: read
+the returned `Result` instead. None of them changes `currentUser`; the `user.updated` event still does.
+
+```dart
+// v10
+try {
+  await client.partialUpdateUser(userId, set: {'favorite_color': 'green'});
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await client.updateUserPartial(userId, set: {'favorite_color': 'green'});
+if (result case Failure(:final error)) report(error);
+```
+
+**`updateUser` sends the user's name, image, language, visibility and custom data, and nothing else.** v10 sent
+the whole user, so the user's online status, ban and timestamps, and an own user's devices, mutes and unread counts,
+were stored as custom data on every call; that no longer happens. `role`, `teams` and `teamsRole` are no longer
+sent, so these calls cannot change them.
+
+**The returned users no longer carry the fields only they can see in `extraData`.** v10 left every field `User`
+does not model in `extraData` as raw JSON; now their devices, mutes, channel mutes, privacy settings, unread counts, blocked
+user ids, hidden channels and token revocation time are left out. Read them from `currentUser`. `deactivatedAt`,
+`deletedAt` and `shadowBanned` stay in `extraData` and gain typed getters on `User`; each one is filled whenever the
+response carries it.
+
+**`UpdateUsersResponse` no longer decodes from JSON.** It is a plain class with a const constructor and final
+fields, compares by value and gains `copyWith`, and its `duration` is always present. `UpdateUserPartialRequest`
+no longer encodes to JSON or extends `Equatable`; it still compares by value and gains `copyWith`.
+
+**`StreamChatApi.user.updateUsers` and `partialUpdateUsers` are removed.** Call `updateUsers` and
+`updateUsersPartial` on `StreamChatClient`.
+
+> **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call. The partial
+> updates take the API's names, as the channel and member partial updates already do. The request carries only
+> what the user can change, so nothing of the client's state ends up stored as custom data.
 
 ### Moderation
 

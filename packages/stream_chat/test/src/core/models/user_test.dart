@@ -45,6 +45,46 @@ void main() {
       expect(user.invisible, false);
       expect(user.teamsRole, teamsRole);
       expect(user.avgResponseTime, avgResponseTime);
+      expect(user.deactivatedAt, DateTime.parse('2021-08-06T10:39:21.817646Z'));
+      expect(user.deletedAt, DateTime.parse('2021-08-07T10:39:21.817646Z'));
+      expect(user.shadowBanned, isTrue);
+    });
+
+    test('User keeps deactivatedAt, deletedAt and shadowBanned in extraData', () {
+      final user = User(
+        id: id,
+        deactivatedAt: DateTime.utc(2021),
+        deletedAt: DateTime.utc(2020),
+        shadowBanned: true,
+        extraData: const {'color': 'red'},
+      );
+
+      expect(user.extraData, {
+        'color': 'red',
+        'deactivated_at': DateTime.utc(2021).toIso8601String(),
+        'deleted_at': DateTime.utc(2020).toIso8601String(),
+        'shadow_banned': true,
+      });
+    });
+
+    test('User replaces the extraData entries that deactivatedAt, deletedAt and shadowBanned read', () {
+      final user = User(
+        id: id,
+        deactivatedAt: DateTime.utc(2021),
+        deletedAt: DateTime.utc(2020),
+        shadowBanned: true,
+        extraData: const {'deactivated_at': 'stale', 'deleted_at': 'stale', 'shadow_banned': false},
+      );
+
+      expect(user.deactivatedAt, DateTime.utc(2021));
+      expect(user.deletedAt, DateTime.utc(2020));
+      expect(user.shadowBanned, isTrue);
+    });
+
+    test('User.deletedAt returns null for an extraData value that is not a date', () {
+      final user = User(id: id, extraData: const {'deleted_at': 'yesterday'});
+
+      expect(user.deletedAt, isNull);
     });
 
     test('should serialize to json correctly', () {

@@ -12,6 +12,9 @@ part 'own_user.g.dart';
 @JsonSerializable(includeIfNull: false)
 class OwnUser extends User {
   /// Constructor used for json serialization.
+  ///
+  /// The [deactivatedAt], [deletedAt] and [shadowBanned] arguments, when given, are stored in [extraData], replacing
+  /// the entry each one reads.
   OwnUser({
     this.devices = const [],
     this.mutes = const [],
@@ -38,6 +41,9 @@ class OwnUser extends User {
     super.invisible,
     super.teamsRole,
     super.avgResponseTime,
+    super.deactivatedAt,
+    super.deletedAt,
+    super.shadowBanned,
   });
 
   /// Create a new instance from json.
