@@ -12,10 +12,12 @@ import 'users_mapper.dart';
 
 /// Maps a generated [api.PollResponseData] to a [Poll].
 extension PollResponseDataMapper on api.PollResponseData {
+  // Custom keys named like one of the poll's own fields.
+  static const _shadowedCustomKeys = {...Poll.topLevelFields};
+
   /// Converts this poll into a [Poll].
   ///
-  /// [custom] becomes [Poll.extraData], without the keys named after a field of the poll's own, so a custom field
-  /// never stands in for one of them.
+  /// Custom data named like one of the poll's own fields is left out of [Poll.extraData].
   Poll toModel() => Poll(
     id: id,
     name: name,
@@ -42,20 +44,23 @@ extension PollResponseDataMapper on api.PollResponseData {
     createdById: createdById,
     createdBy: createdBy?.toModel(),
     ownVotesAndAnswers: [for (final vote in ownVotes) vote.toModel()],
-    extraData: _withoutKeys(custom, Poll.topLevelFields),
+    extraData: {...custom}..removeWhere((key, _) => _shadowedCustomKeys.contains(key)),
   );
 }
 
 /// Maps a generated [api.PollOptionResponseData] to a [PollOption].
 extension PollOptionResponseDataMapper on api.PollOptionResponseData {
+  // Custom keys named like one of the option's own fields.
+  static const _shadowedCustomKeys = {...PollOption.topLevelFields};
+
   /// Converts this option into a [PollOption].
   ///
-  /// [custom] becomes [PollOption.extraData], without the keys named after a field of the option's own.
+  /// Custom data named like one of the option's own fields is left out of [PollOption.extraData].
   PollOption toModel() => PollOption(
     id: id,
     text: text,
     textI18n: textI18n,
-    extraData: _withoutKeys(custom, PollOption.topLevelFields),
+    extraData: {...custom}..removeWhere((key, _) => _shadowedCustomKeys.contains(key)),
   );
 }
 
@@ -117,7 +122,8 @@ extension PollVotesResponseMapper on api.PollVotesResponse {
 
 /// Maps a [Poll] to the generated requests that create and update it.
 ///
-/// Only the settings of the poll are sent; the vote summary is not.
+/// Only the settings of the poll are sent; the vote summary is not. Custom data named like one of the poll's own fields
+/// is left out.
 extension PollRequestMapper on Poll {
   /// Converts this poll into an [api.CreatePollRequest].
   ///
@@ -133,7 +139,7 @@ extension PollRequestMapper on Poll {
     allowAnswers: allowAnswers,
     allowUserSuggestedOptions: allowUserSuggestedOptions,
     isClosed: isClosed,
-    custom: extraData,
+    custom: _customData,
   );
 
   /// Converts this poll into an [api.UpdatePollRequest].
@@ -148,32 +154,37 @@ extension PollRequestMapper on Poll {
     allowAnswers: allowAnswers,
     allowUserSuggestedOptions: allowUserSuggestedOptions,
     isClosed: isClosed,
-    custom: extraData,
+    custom: _customData,
   );
+
+  Map<String, Object?> get _customData =>
+      {...extraData}..removeWhere((key, _) => PollResponseDataMapper._shadowedCustomKeys.contains(key));
 }
 
 /// Maps a [PollOption] to the generated requests that create and update it.
+///
+/// Custom data named like one of the option's own fields is left out.
 extension PollOptionRequestMapper on PollOption {
   /// Converts this option into an [api.PollOptionInput], an option of a poll being created.
-  api.PollOptionInput toPollOptionInput() => api.PollOptionInput(text: text, custom: extraData);
+  api.PollOptionInput toPollOptionInput() => api.PollOptionInput(text: text, custom: _customData);
 
   /// Converts this option into an [api.PollOptionRequest], an option of a poll being updated.
   ///
   /// An option without an [id] is sent with an empty one.
-  api.PollOptionRequest toPollOptionRequest() => api.PollOptionRequest(id: id ?? '', text: text, custom: extraData);
+  api.PollOptionRequest toPollOptionRequest() => api.PollOptionRequest(id: id ?? '', text: text, custom: _customData);
 
   /// Converts this option into an [api.CreatePollOptionRequest].
   api.CreatePollOptionRequest toCreatePollOptionRequest() => api.CreatePollOptionRequest(
     text: text,
-    custom: extraData,
+    custom: _customData,
   );
 
   /// Converts this option into an [api.UpdatePollOptionRequest].
   ///
   /// An option without an [id] is sent with an empty one.
   api.UpdatePollOptionRequest toUpdatePollOptionRequest() =>
-      api.UpdatePollOptionRequest(id: id ?? '', text: text, custom: extraData);
-}
+      api.UpdatePollOptionRequest(id: id ?? '', text: text, custom: _customData);
 
-Map<String, Object?> _withoutKeys(Map<String, Object?> custom, List<String> keys) =>
-    {...custom}..removeWhere((key, _) => keys.contains(key));
+  Map<String, Object?> get _customData =>
+      {...extraData}..removeWhere((key, _) => PollOptionResponseDataMapper._shadowedCustomKeys.contains(key));
+}

@@ -2596,7 +2596,7 @@ void main() {
       final result = await client.updatePoll(
         _newPoll().copyWith(
           options: const [
-            PollOption(id: 'pizza', text: 'Pizza', extraData: {'color': 'red'}),
+            PollOption(id: 'pizza', text: 'Pizza', extraData: {'color': 'red', 'id': 'pasta'}),
             PollOption(id: 'sushi', text: 'Sushi'),
           ],
           isClosed: true,
@@ -2789,7 +2789,7 @@ void main() {
 
         final result = await client.createPollOption(
           'poll-id',
-          const PollOption(text: 'Pizza', extraData: {'color': 'red'}),
+          const PollOption(text: 'Pizza', extraData: {'color': 'red', 'text': 'Pasta'}),
         );
 
         expect(result, const Result.success(_pizzaResponse));
@@ -6428,7 +6428,7 @@ Poll _newPoll() => Poll(
   name: 'Lunch?',
   description: 'Pick one',
   options: const [
-    PollOption(text: 'Pizza', extraData: {'color': 'red'}),
+    PollOption(text: 'Pizza', extraData: {'color': 'red', 'text': 'Pasta'}),
     PollOption(text: 'Sushi'),
   ],
   votingVisibility: VotingVisibility.anonymous,
@@ -6437,7 +6437,8 @@ Poll _newPoll() => Poll(
   allowAnswers: true,
   allowUserSuggestedOptions: true,
   voteCount: 7,
-  extraData: const {'topic': 'food'},
+  // Custom data named like one of the poll's own fields is left out of the requests.
+  extraData: const {'topic': 'food', 'name': 'Dinner?'},
 );
 
 const _generatedPizzaResponse = api.PollOptionResponse(duration: '4.21ms', pollOption: generatedPizza);
