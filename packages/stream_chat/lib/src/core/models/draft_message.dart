@@ -148,7 +148,7 @@ class DraftMessage extends Equatable {
   /// Removes mentions from the message if they are not included in the text.
   ///
   /// This is useful for cleaning up the list of mentioned users before
-  /// sending the message.
+  /// saving the draft.
   @internal
   DraftMessage removeMentionsIfNotIncluded() {
     if (mentionedUsers.isEmpty) return this;

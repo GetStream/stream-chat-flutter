@@ -96,12 +96,12 @@ void main() {
       await controller.doInitialLoad();
       await pumpEventQueue();
 
+      // The first page is three pages of the controller's limit, and has no cursor.
       verify(
         () => client.queryDrafts(
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          limit: any(named: 'limit'),
-          next: any(named: 'next'),
+          limit: 30,
         ),
       ).called(1);
 
@@ -166,6 +166,15 @@ void main() {
       await controller.loadMore(nextKey);
       await pumpEventQueue();
 
+      verify(
+        () => client.queryDrafts(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          limit: 10,
+          next: nextKey,
+        ),
+      ).called(1);
+
       // We need to verify that all the drafts are there, but not necessarily in
       // the same order since the controller might sort them differently
       final mergedDrafts = [...existingDrafts, ...additionalDrafts];
@@ -188,10 +197,10 @@ void main() {
       expect(controller.value.asSuccess.nextPageKey, isNull);
     });
 
-    test('loadMore preserves existing items when API throws exception', () async {
+    test('loadMore keeps the loaded drafts and reports the failure of the query as it is', () async {
       const nextKey = 'next_page_token';
       final existingDrafts = generateDrafts();
-      final exception = Exception('Network error');
+      const exception = StreamNetworkException(message: 'Network error');
 
       when(
         () => client.queryDrafts(
@@ -200,7 +209,7 @@ void main() {
           limit: any(named: 'limit'),
           next: any(named: 'next'),
         ),
-      ).thenAnswer((_) async => Result.failure(exception));
+      ).thenAnswer((_) async => const Result.failure(exception));
 
       final controller = StreamDraftListController.fromValue(
         PagedValue<String, Draft>(
@@ -215,10 +224,7 @@ void main() {
 
       expect(controller.value.isSuccess, isTrue);
       expect(controller.value.asSuccess.items, equals(existingDrafts));
-      final error = controller.value.asSuccess.error;
-      // The message names the load; the throwable survives as `cause`.
-      expect(error?.message, 'Failed to load more drafts');
-      expect(error?.cause, same(exception));
+      expect(controller.value.asSuccess.error, same(exception));
     });
   });
 

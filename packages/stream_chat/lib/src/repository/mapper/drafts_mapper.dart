@@ -87,7 +87,7 @@ extension DraftMessageRequestMapper on DraftMessage {
   /// such as [DraftMessage.html] and [DraftMessage.mml]; the markup is sent as a field of its own.
   api.MessageRequest toRequest() {
     final message = removeMentionsIfNotIncluded();
-    final custom = {...message.extraData}..removeWhere((key, _) => messageExtraDataFields.contains(key));
+    final custom = {...message.extraData}..removeWhere((key, _) => kMessageExtraDataFields.contains(key));
 
     return api.MessageRequest(
       id: message.id,

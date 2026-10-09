@@ -2091,8 +2091,8 @@ class StreamChatClient {
 
   /// Fetches one page of the current user's drafts matching [filter], ordered by [sort].
   ///
-  /// A page holds up to [limit] drafts, 25 when it is omitted. [next] and [prev] are the cursors a previous page
-  /// returned; at most one of them may be given.
+  /// A page holds up to [limit] drafts. [next] and [prev] are the cursors a previous page returned; at most one of
+  /// them may be given.
   Future<Result<QueryDraftsResponse>> queryDrafts({
     DraftFilter? filter,
     List<DraftSort>? sort,

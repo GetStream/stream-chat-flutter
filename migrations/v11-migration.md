@@ -350,7 +350,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | thread and draft responses' identity `==` | value `==`, plus `copyWith` | `retyped` | Two responses with the same fields are now equal |
 | `DraftResponse` | — | `removed` | The shared base class of the create and get draft responses |
 | `Thread.fromJson` / `toJson`, `ThreadParticipant.fromJson` / `toJson` | — | `removed` | Plain classes; construct them directly. Events still read threads |
-| `Thread extends Equatable`, `ThreadParticipant extends Equatable`, their `props` | `Thread`, `ThreadParticipant` (value `==`) | `removed` | `copyWith` and `merge` are unchanged; `Thread` equality now includes `extraData` |
+| `Thread extends Equatable`, `ThreadParticipant extends Equatable`, their `props` | `Thread`, `ThreadParticipant` (value `==`) | `removed` | `copyWith`, and `Thread.merge`, are unchanged; `Thread` equality now includes `extraData` |
 | `ThreadOptions.toJson`, `ThreadOptions extends Equatable`, `ThreadOptions.props` | `ThreadOptions` (value `==`, plus `copyWith`) | `removed` | Only the client reads the options |
 | `StreamChatApi.threads` (`ThreadsApi`), `StreamChatApi.message.createDraft` / `.getDraft` / `.deleteDraft` / `.queryDrafts` | `StreamChatClient` thread and draft methods | `removed` | The endpoints moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
@@ -1300,12 +1300,13 @@ await client.queryDrafts(limit: 20, next: cursor);
 **`Thread`, `ThreadParticipant` and the thread and draft responses no longer decode JSON.** Build them with their
 constructors — `GetDraftResponse(duration: '0ms', draft: draft)` where v10 wrote `GetDraftResponse()..draft = draft`.
 Thread events still decode from the same keys. `Thread` and `ThreadParticipant` are no longer `Equatable`s:
-`copyWith` and `merge` are unchanged and `props` is gone, and two threads that differ only in `extraData` are no
-longer equal. `ThreadOptions` loses `toJson` and `props` and gains `copyWith`. `DraftResponse`, the base class of
+`copyWith`, and `Thread.merge`, are unchanged and `props` is gone, and two threads that differ only in `extraData`
+are no longer equal. `ThreadOptions` loses `toJson` and `props` and gains `copyWith`. `DraftResponse`, the base class of
 the create and get draft responses, is removed.
 
-**`createDraft` saves only custom data.** The message fields a draft made from a received message carries in its
-extra data — `image_labels`, `cid` and the like — are no longer saved as custom data of the draft.
+**`createDraft` no longer saves received-message fields as custom data.** The message fields a draft made from a
+received message carries in its extra data — `image_labels`, `cid` and the like — are left out of the draft's custom
+data.
 
 **`StreamChatApi.threads` is removed, and `StreamChatApi.message` loses the draft methods.** Call them on
 `StreamChatClient` or `Channel` instead.

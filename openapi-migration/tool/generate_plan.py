@@ -477,7 +477,9 @@ GROUPS = [
               (`file_size` and `mime_type` included, the local id, upload state and file dropped), mentions the text
               no longer has are dropped, a command is written into the text, and the markup is sent as its own
               field. The Giphy renditions and the fields and actions map to their typed fields; a key missing from
-              them is sent empty, which the backend stores the same as absent. One divergence, approved: the fields a
+              them is sent empty, which the backend stores the same as absent. Extra data named like an attachment
+              field, `custom` included, never becomes attachment custom data: the backend rejects such a custom key
+              with a 400. One divergence, approved: the fields a
               received message keeps in its extra data (`cid`, `html`, `image_labels`, `deleted_reply_count`,
               `mentioned_channel_members`) are no longer stored as draft custom data.
             - **`DraftMessage.html` and `mml` are promoted** as constructor arguments stored in `extraData` and read
@@ -724,13 +726,11 @@ GROUPS = [
             'Replace the temporary `@DataSerializable` storage codec (`UserGroup`, `UserGroupMember`, `ReactionGroup`): decide '
             'between dedicated tables and codecs owned by `stream_chat_persistence` before `Message` and '
             '`Attachment` become plain models, then delete the typedef and every `fromData`/`toData` it generates.',
-            'Give `Attachment` a typed Giphy field, and decide whether its renditions are required. Today they are an '
-            'untyped `extraData[\'giphy\']` map, which `AttachmentRequestMapper` fills out with empty values '
+            'Type the Giphy renditions, and decide whether they are all required. `Attachment.giphy` still reads them '
+            'as an untyped map, which `AttachmentRequestMapper` fills out with empty values '
             '([07](07-threads-and-drafts.md)).',
         ],
         risks=[
-            '`message_api.dart` also holds the four draft methods, which belong to group 07 — leave them alone '
-            'here.',
             'Attachment `custom`/`extraData` promotion is the known hard part of the whole migration.',
             'Message send has offline and retry paths through `stream_chat_persistence` that must keep working.',
             '`MessageDeleteScope` has to be reconciled with `DeleteType`, which [08](08-moderation-and-blocklists.md) added. It is named for the scope of a delete — `deleteForMe` vs `deleteForAll` — but carries a `hard` bool, which is the same axis `DeleteType` models, in the same words, minus `pruning`. `deleteMessage(hard: true)` therefore cannot express a pruning delete at all, and `softDeleteForAll` / `hardDeleteForAll` read as two spellings of `DeleteType.soft` / `DeleteType.hard`. Decide whether the scope keeps a `DeleteType` field or the two stay separate arguments; either way the public type changes, so it belongs in this group rather than a later fix.',

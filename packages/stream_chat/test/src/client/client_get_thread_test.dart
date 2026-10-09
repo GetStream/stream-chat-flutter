@@ -47,33 +47,53 @@ void main() {
     verifyNoMoreInteractions(defaultApi);
   });
 
-  test('StreamChatClient.getThread sends the default options when none are given', () async {
-    final defaultApi = MockDefaultApi();
-    when(
-      () => defaultApi.getThread(
-        messageId: 'parent-id',
-        watch: true,
-        replyLimit: 2,
-        participantLimit: 10,
-        memberLimit: 10,
-      ),
-    ).thenAnswer((_) async => Result.success(api.GetThreadResponse(duration: '0.01ms', thread: generatedThread)));
-    final client = _client(defaultApi);
+  test(
+    'StreamChatClient.getThread sends the default options and returns a thread without reads or participants',
+    () async {
+      final defaultApi = MockDefaultApi();
+      when(
+        () => defaultApi.getThread(
+          messageId: 'parent-id',
+          watch: true,
+          replyLimit: 2,
+          participantLimit: 10,
+          memberLimit: 10,
+        ),
+      ).thenAnswer((_) async => Result.success(api.GetThreadResponse(duration: '0.01ms', thread: _generatedNewThread)));
+      final client = _client(defaultApi);
 
-    final res = await client.getThread('parent-id');
+      final res = await client.getThread('parent-id');
 
-    expect(res.isSuccess, isTrue);
-    verify(
-      () => defaultApi.getThread(
-        messageId: 'parent-id',
-        watch: true,
-        replyLimit: 2,
-        participantLimit: 10,
-        memberLimit: 10,
-      ),
-    ).called(1);
-    verifyNoMoreInteractions(defaultApi);
-  });
+      expect(
+        res.getOrNull(),
+        GetThreadResponse(
+          duration: '0.01ms',
+          thread: Thread(
+            activeParticipantCount: 0,
+            channelCid: 'messaging:general',
+            createdAt: DateTime.utc(2026, 2, 1),
+            createdByUserId: 'creator',
+            lastMessageAt: DateTime.utc(2026, 2, 1),
+            parentMessageId: 'parent-id',
+            participantCount: 0,
+            replyCount: 0,
+            title: '',
+            updatedAt: DateTime.utc(2026, 2, 1),
+          ),
+        ),
+      );
+      verify(
+        () => defaultApi.getThread(
+          messageId: 'parent-id',
+          watch: true,
+          replyLimit: 2,
+          participantLimit: 10,
+          memberLimit: 10,
+        ),
+      ).called(1);
+      verifyNoMoreInteractions(defaultApi);
+    },
+  );
 
   test('StreamChatClient.getThread returns the failure without throwing', () async {
     const error = StreamClientException(message: 'boom');
@@ -94,6 +114,22 @@ void main() {
     expect(res.exceptionOrNull(), error);
   });
 }
+
+// A thread whose reads, participants and replies are all empty: the empty lists the API may leave out are left out.
+final _generatedNewThread = api.ThreadStateResponse(
+  activeParticipantCount: 0,
+  channelCid: 'messaging:general',
+  createdAt: DateTime.utc(2026, 2, 1),
+  createdByUserId: 'creator',
+  custom: const {},
+  lastMessageAt: DateTime.utc(2026, 2, 1),
+  latestReplies: const [],
+  parentMessageId: 'parent-id',
+  participantCount: 0,
+  replyCount: 0,
+  title: '',
+  updatedAt: DateTime.utc(2026, 2, 1),
+);
 
 StreamChatClient _client(api.DefaultApi defaultApi) {
   final client = StreamChatClient('test-api-key', defaultApi: defaultApi);

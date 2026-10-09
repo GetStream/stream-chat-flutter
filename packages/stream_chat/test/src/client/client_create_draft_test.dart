@@ -15,7 +15,16 @@ void main() {
         id: 'draft-id',
         text: 'Meet @mentioned at noon',
         type: api.MessageRequestType.regular,
-        attachments: [api.Attachment(type: 'file', title: 'notes.pdf', actions: [], custom: {})],
+        attachments: [
+          api.Attachment(
+            type: 'url_preview',
+            title: 'An article',
+            titleLink: 'https://example.com/article',
+            ogScrapeUrl: 'https://example.com/article?utm=chat',
+            actions: [],
+            custom: {},
+          ),
+        ],
         parentId: 'parent-id',
         showInChannel: true,
         mentionedUsers: ['mentioned'],
@@ -33,7 +42,15 @@ void main() {
       DraftMessage(
         id: 'draft-id',
         text: 'Meet @mentioned at noon',
-        attachments: [Attachment(type: 'file', title: 'notes.pdf', uploadState: const UploadState.success())],
+        attachments: [
+          Attachment(
+            type: 'url_preview',
+            title: 'An article',
+            titleLink: 'https://example.com/article',
+            ogScrapeUrl: 'https://example.com/article?utm=chat',
+            uploadState: const UploadState.success(),
+          ),
+        ],
         parentId: 'parent-id',
         showInChannel: true,
         mentionedUsers: [User(id: 'mentioned')],
@@ -159,7 +176,7 @@ void main() {
   );
 
   test(
-    "StreamChatClient.createDraft sends a received attachment's Giphy renditions, fields and actions as their own fields",
+    'StreamChatClient.createDraft sends every field of a received attachment, its Giphy renditions included',
     () async {
       final request = api.CreateDraftRequest(
         message: api.MessageRequest(
@@ -171,6 +188,19 @@ void main() {
               type: 'giphy',
               title: 'Cat',
               thumbUrl: 'https://example.com/thumb.gif',
+              text: 'Attachment text',
+              pretext: 'Pretext',
+              imageUrl: 'https://example.com/image.gif',
+              footerIcon: 'https://example.com/footer.png',
+              footer: 'Footer',
+              fallback: 'A cat gif',
+              color: '#ff0000',
+              authorName: 'Author',
+              authorLink: 'https://example.com/author',
+              authorIcon: 'https://example.com/author.png',
+              assetUrl: 'https://example.com/asset.gif',
+              originalWidth: 400,
+              originalHeight: 300,
               fields: const [api.Field(short: true, title: 'Size', value: 'L')],
               actions: const [api.Action(name: 'answer', style: 'primary', text: 'Send', type: 'button', value: 'yes')],
               giphy: api.Images(
@@ -202,24 +232,34 @@ void main() {
               type: 'giphy',
               title: 'Cat',
               thumbUrl: 'https://example.com/thumb.gif',
+              text: 'Attachment text',
+              pretext: 'Pretext',
+              imageUrl: 'https://example.com/image.gif',
+              footerIcon: 'https://example.com/footer.png',
+              footer: 'Footer',
+              fallback: 'A cat gif',
+              color: '#ff0000',
+              authorName: 'Author',
+              authorLink: 'https://example.com/author',
+              authorIcon: 'https://example.com/author.png',
+              assetUrl: 'https://example.com/asset.gif',
+              originalWidth: 400,
+              originalHeight: 300,
               fields: const [
                 {'short': true, 'title': 'Size', 'value': 'L'},
               ],
               actions: const [Action(name: 'answer', style: 'primary', text: 'Send', type: 'button', value: 'yes')],
-              // The id it was received with stays in the extra data, beside the custom data and the renditions.
-              extraData: {
-                'id': 'received-id',
-                'caption': 'A cat',
-                'giphy': {
-                  for (final rendition in _renditions)
-                    rendition: {
-                      'frames': '12',
-                      'height': '200',
-                      'size': '1024',
-                      'url': 'https://example.com/$rendition.gif',
-                      'width': '300',
-                    },
-                },
+              // The id it was received with stays in the extra data, beside the custom data.
+              extraData: const {'id': 'received-id', 'caption': 'A cat'},
+              giphy: {
+                for (final rendition in _renditions)
+                  rendition: {
+                    'frames': '12',
+                    'height': '200',
+                    'size': '1024',
+                    'url': 'https://example.com/$rendition.gif',
+                    'width': '300',
+                  },
               },
               uploadState: const UploadState.success(),
             ),
@@ -234,13 +274,13 @@ void main() {
   );
 
   test(
-    'StreamChatClient.createDraft sends the markup in its own field and leaves the fields of a received message out of the custom data',
+    'StreamChatClient.createDraft sends a draft made from a received reply without its type or message fields, and its '
+    'markup as a field of its own',
     () async {
       const request = api.CreateDraftRequest(
         message: api.MessageRequest(
           id: 'draft-id',
           text: 'Draft',
-          type: api.MessageRequestType.regular,
           attachments: [],
           mentionedUsers: [],
           silent: false,
@@ -252,11 +292,12 @@ void main() {
       final defaultApi = _defaultApiAnswering(request);
       final client = _client(defaultApi);
 
-      // The extra data a draft message carries when it is made from a received message.
+      // The type and extra data a draft message carries when it is made from a received reply.
       await client.createDraft(
         DraftMessage(
           id: 'draft-id',
           text: 'Draft',
+          type: MessageType.reply,
           extraData: const {
             'mood': 'busy',
             'cid': 'messaging:general',

@@ -50,7 +50,7 @@
 - `Message` is public, persisted, WebSocket-delivered and the most customised type in the SDK. Keep ours; treat the generated `MessageResponse` as a mapping source only.
 - `Attachment`: the generated model defines fields our `extraData` currently absorbs. Decide the promotion rules before writing the mapper.
 - Replace the temporary `@DataSerializable` storage codec (`UserGroup`, `UserGroupMember`, `ReactionGroup`): decide between dedicated tables and codecs owned by `stream_chat_persistence` before `Message` and `Attachment` become plain models, then delete the typedef and every `fromData`/`toData` it generates.
-- Give `Attachment` a typed Giphy field, and decide whether its renditions are required. Today they are an untyped `extraData['giphy']` map, which `AttachmentRequestMapper` fills out with empty values ([07](07-threads-and-drafts.md)).
+- Type the Giphy renditions, and decide whether they are all required. `Attachment.giphy` still reads them as an untyped map, which `AttachmentRequestMapper` fills out with empty values ([07](07-threads-and-drafts.md)).
 
 ## Decisions taken
 
@@ -127,7 +127,6 @@ an endpoint, so the definition of done below stays open.
 
 ## Risks
 
-- `message_api.dart` also holds the four draft methods, which belong to group 07 — leave them alone here.
 - Attachment `custom`/`extraData` promotion is the known hard part of the whole migration.
 - Message send has offline and retry paths through `stream_chat_persistence` that must keep working.
 - `MessageDeleteScope` has to be reconciled with `DeleteType`, which [08](08-moderation-and-blocklists.md) added. It is named for the scope of a delete — `deleteForMe` vs `deleteForAll` — but carries a `hard` bool, which is the same axis `DeleteType` models, in the same words, minus `pruning`. `deleteMessage(hard: true)` therefore cannot express a pruning delete at all, and `softDeleteForAll` / `hardDeleteForAll` read as two spellings of `DeleteType.soft` / `DeleteType.hard`. Decide whether the scope keeps a `DeleteType` field or the two stay separate arguments; either way the public type changes, so it belongs in this group rather than a later fix.

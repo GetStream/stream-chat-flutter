@@ -17,8 +17,7 @@ class _NullConst {
 const _nullConst = _NullConst();
 
 /// {@template streamThread}
-/// A model class representing a thread. Threads are a way to group replies
-/// to a message in a channel.
+/// A thread of replies to a message in a channel.
 /// {@endtemplate}
 @Freezed(copyWith: false)
 class Thread with _$Thread {
@@ -118,7 +117,7 @@ class Thread with _$Thread {
   @override
   final Draft? draft;
 
-  /// Map of custom thread extraData
+  /// The custom data of this thread.
   @override
   final Map<String, Object?> extraData;
 
@@ -165,7 +164,10 @@ class Thread with _$Thread {
     extraData: extraData ?? this.extraData,
   );
 
-  /// Merge this thread with the [other] thread.
+  /// Returns a copy of this thread updated with the fields of [other].
+  ///
+  /// A field [other] leaves null keeps this thread's value, except [draft], which is always taken from [other].
+  /// Returns this thread when [other] is null.
   Thread merge(Thread? other) {
     if (other == null) return this;
     return copyWith(
@@ -191,7 +193,7 @@ class Thread with _$Thread {
     );
   }
 
-  /// The names of a thread's own fields, which [extraData] never holds.
+  /// The keys of a thread's own fields, which are left out of [extraData] when a thread is read.
   static const topLevelFields = [
     'active_participant_count',
     'channel_cid',

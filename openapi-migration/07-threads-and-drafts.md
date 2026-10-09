@@ -65,7 +65,9 @@
   (`file_size` and `mime_type` included, the local id, upload state and file dropped), mentions the text
   no longer has are dropped, a command is written into the text, and the markup is sent as its own
   field. The Giphy renditions and the fields and actions map to their typed fields; a key missing from
-  them is sent empty, which the backend stores the same as absent. One divergence, approved: the fields a
+  them is sent empty, which the backend stores the same as absent. Extra data named like an attachment
+  field, `custom` included, never becomes attachment custom data: the backend rejects such a custom key
+  with a 400. One divergence, approved: the fields a
   received message keeps in its extra data (`cid`, `html`, `image_labels`, `deleted_reply_count`,
   `mentioned_channel_members`) are no longer stored as draft custom data.
 - **`DraftMessage.html` and `mml` are promoted** as constructor arguments stored in `extraData` and read
