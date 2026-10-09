@@ -219,14 +219,7 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
     final currentDrafts = [
       ...currentItems.merge(
         [draft],
-        key: (draft) {
-          var predicate = draft.channelCid;
-          if (draft.parentId case final parentId?) {
-            predicate += parentId;
-          }
-
-          return predicate;
-        },
+        key: _draftKey,
         update: (original, updated) => updated,
       ),
     ];
@@ -235,22 +228,17 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
     return true;
   }
 
-  /// Deletes the draft with the given [channelCid] and optional [parentId]
+  /// Deletes the draft with the same channel and parent message as [draft]
   /// from the list.
+  ///
+  /// A channel draft (one without a parent message) never matches a thread
+  /// draft of the same channel.
   ///
   /// Returns `true` if the draft is deleted successfully. Otherwise, `false`.
   bool deleteDraft(Draft draft) {
     final currentDrafts = [...currentItems];
-    final removeIndex = currentDrafts.indexWhere(
-      (it) {
-        var predicate = it.channelCid == draft.channelCid;
-        if (draft.parentId case final parentId?) {
-          predicate &= it.parentId == parentId;
-        }
-
-        return predicate;
-      },
-    );
+    final draftKey = _draftKey(draft);
+    final removeIndex = currentDrafts.indexWhere((it) => _draftKey(it) == draftKey);
 
     if (removeIndex < 0) return false;
     currentDrafts.removeAt(removeIndex);
@@ -258,6 +246,10 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
     drafts = currentDrafts;
     return true;
   }
+
+  // Identifies a draft by its channel and parent message: a channel holds at
+  // most one channel draft and one draft per thread.
+  static (String, String?) _draftKey(Draft draft) => (draft.channelCid, draft.parentId);
 
   // Unsubscribes from all draft list events.
   void _unsubscribeFromDraftListEvents() {
