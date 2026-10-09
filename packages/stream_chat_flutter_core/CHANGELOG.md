@@ -17,6 +17,12 @@
 
 - `StreamPollVoteListController` pages with the poll vote query's `limit` and `next` cursor rather than `PaginationParams`.
 
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `StreamDraftListController.deleteDraft` removing the wrong draft.
+
 ## 10.5.0
 
 ✅ Added
