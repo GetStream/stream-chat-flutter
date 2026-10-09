@@ -108,6 +108,8 @@ extension UserRequestMapper on User {
 }
 
 /// Maps [PrivacySettings] to the generated [api.PrivacySettingsResponse].
+///
+/// The generated client names the settings a request sends [api.PrivacySettingsResponse], too.
 extension PrivacySettingsRequestMapper on PrivacySettings {
   /// Converts these settings into an [api.PrivacySettingsResponse].
   api.PrivacySettingsResponse toRequest() => api.PrivacySettingsResponse(
