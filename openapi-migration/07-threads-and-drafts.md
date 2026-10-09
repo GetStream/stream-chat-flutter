@@ -53,7 +53,7 @@
   never read.
 - **v1 JSON keeps decoding through `ThreadV1JsonConverter`** on `Event.thread`, both ways, with custom
   data at the root and v10's keys.
-- **The channel inside a thread maps through `channel_mapper.dart` now,** onto today's `ChannelModel`, as
+- **The channel inside a thread maps through `channels_mapper.dart` now,** onto today's `ChannelModel`, as
   the draft's channel already did; group [11](11-channels-and-members.md) re-points both. A thread's
   reads map through a new `ReadStateResponseMapper` in the same file.
 - **`Draft` and `DraftMessage` stay json_serializable** until group [10](10-messages.md), as the adapters
@@ -74,18 +74,18 @@
 - **`DraftMessage.html` and `mml` are promoted** as constructor arguments stored in `extraData` and read
   back through getters, as `Message.html` and `mml` are; `DraftMessageRequestMapper` sends `mml` as the
   request's own field, so re-saving a draft keeps it. The keys a received message keeps in its extra data
-  are one internal set, `MessageResponseMapper.extraDataFields` in `message_mapper.dart`, shared by the
+  are one internal set, `MessageResponseMapper.extraDataFields` in `messages_mapper.dart`, shared by the
   message and draft mappers.
 - **Verified live** against the demo app, each call against v10's v1 request decoded the v10 way: query
   threads with defaults and with a filter, sort, `next` and `prev` (both cursors rejected), get a thread,
   set and unset a custom field on one, and create, get, query and delete three drafts (one with every
   field and attachment kind, one with a command, one carrying a received message's extra data). Every
-  thread maps as v10 decoded it, except the nested users' `blocked_user_ids`, which `user_mapper.dart`
+  thread maps as v10 decoded it, except the nested users' `blocked_user_ids`, which `users_mapper.dart`
   drops for every migrated endpoint (decided in [09](09-users.md)). Every draft v2 saves is stored byte for
   byte as v10's, except the received message's `image_labels`. Deleting or fetching a missing draft
   returns a 404 failure.
 - **`MarkReadResponse.event` stays unexposed,** now waiting on group [09](09-users.md): its `user` is a
-  `UserResponseCommonFields`, which `user_mapper.dart` has no mapper for.
+  `UserResponseCommonFields`, which `users_mapper.dart` has no mapper for.
 
 ## Risks
 

@@ -25,7 +25,7 @@
 
 - **Split out of [11](11-channels-and-members.md), ahead of it.** The partial updates read nothing
   into client state — the `channel.updated` and `member.updated` events do that — so they can move
-  before the queries and prove `channel_mapper.dart` on real calls.
+  before the queries and prove `channels_mapper.dart` on real calls.
 - **The full update stays in 11, so the pair is split on purpose.** `updateChannel` takes and
   answers a `Message`, and the generated `UpdateChannelRequest.message` / `UpdateChannelResponse.message`
   need the `MessageRequest` and `MessageResponse` mappers [10](10-messages.md) writes; its `data` is

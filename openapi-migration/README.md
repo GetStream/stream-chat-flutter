@@ -166,9 +166,9 @@ includes a named response that carries only `duration` today, such as `HideChann
 | `PollV1JsonConverter` | `Message.poll`, `DraftMessage.poll`, `Event.poll` | WebSocket v2 (no group) |
 | `PollVoteV1JsonConverter` | `Event.pollVote` | WebSocket v2 (no group) |
 | `ThreadV1JsonConverter` | `Event.thread` | WebSocket v2 (no group) |
-| `user_mapper.dart` (kept, re-pointed) | today's `User`, which still reads and writes JSON | [09](09-users.md) |
-| `channel_mapper.dart` (kept, re-pointed) | today's `ChannelModel`, `ChannelConfig` and `Member`, which still read and write JSON | [11](11-channels-and-members.md) |
-| `message_mapper.dart`, `attachment_mapper.dart`, `reaction_mapper.dart`, `location_mapper.dart`, `drafts_mapper.dart` (kept, re-pointed) | today's `Message`, `Attachment`, `Reaction`, `Location`, `Draft` and `DraftMessage`, which still read and write JSON | [10](10-messages.md) |
+| `users_mapper.dart` (kept, re-pointed) | today's `User`, which still reads and writes JSON | [09](09-users.md) |
+| `channels_mapper.dart` (kept, re-pointed) | today's `ChannelModel`, `ChannelConfig` and `Member`, which still read and write JSON | [11](11-channels-and-members.md) |
+| `messages_mapper.dart`, `attachments_mapper.dart`, `reactions_mapper.dart`, `locations_mapper.dart`, `drafts_mapper.dart` (kept, re-pointed) | today's `Message`, `Attachment`, `Reaction`, `Location`, `Draft` and `DraftMessage`, which still read and write JSON | [10](10-messages.md) |
 
 How v1 JSON decodes `User` once it becomes a plain model is decided in [01-foundation](01-foundation.md): until
 group 09 restructures it, v1 payloads keep decoding through `User.fromJson`.
@@ -188,10 +188,10 @@ surfaces before it reaches `Message` and `ChannelState`:
 - **14** is `queryBannedUsers`, split out of 08 because it is the only moderation call that answers with a
   model. The `User` mappers it needs landed with group 04.
 - **10–11** are the core of the SDK, and carry the `custom` / `extraData` promotion problem.
-- **15** is the partial channel and member updates, split out of 11 so `channel_mapper.dart` lands on calls that
+- **15** is the partial channel and member updates, split out of 11 so `channels_mapper.dart` lands on calls that
   read nothing into `ChannelState`. It landed first; the full update waits in 11 for group 10's message mappers.
 - **16** is hiding, showing and deleting a channel, split out of 11 after 15 because they answer nothing
-  `channel_mapper.dart` cannot map.
+  `channels_mapper.dart` cannot map.
 - **17** is the read and delivery receipts, split out of 11 after 16. They answer only a `duration` and a read
   event, which waits for group 10's message mappers.
 - **18** is the current user's unread counts, split out of 09 because it embeds no `User` and nothing persists it.
@@ -202,7 +202,7 @@ surfaces before it reaches `Message` and `ChannelState`:
   `User` as getters over `extraData`.
 - **12** comes late because it needs its own hand-written multipart client and is the highest-traffic path in the
   SDK.
-- **09** is last. Every group before it maps users through `user_mapper.dart` onto today's `User`; 09 migrates the
+- **09** is last. Every group before it maps users through `users_mapper.dart` onto today's `User`; 09 migrates the
   user endpoints and restructures `User` and `OwnUser` themselves, when every parent that embeds them has moved.
 - **21** renames `extraData` to `custom` on every model at once. The groups keep `extraData`, so the SDK stays
   consistent until then; it runs after 09.

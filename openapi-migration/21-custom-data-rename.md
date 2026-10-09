@@ -23,6 +23,16 @@
 
 - **Whether to rename at all.** Every model names its custom data `extraData` today; the generated client calls it `custom`. Renaming one model at a time would leave the SDK inconsistent, so the groups keep `extraData` and this step decides for every model together.
 - **How to stage it.** Add `custom` beside a deprecated `extraData`, or rename in one break.
+- **How a request treats custom data named like one of the model's own fields.** Every request mapper drops it today, for consistency, not because it matches v10. v10 flattened `extraData` into the body after the fields, so a key named like a field set that field, failed with a 400 for a wrong type or a reserved name, was dropped, or was stored as custom data, depending on the key and the endpoint. v2 never rejects it: it stores it as custom data, drops it, or lets it override the field (a draft's `id`, `text`, `type`, `html` and `mml`, an attachment's single-word string fields, a user's `image`). Measured live on drafts, attachments, polls, poll options and users. The options:
+  1. Drop it (today). Simple, but silently loses what v10 stored as custom data or used to set a field.
+  2. Send everything as custom data. Nothing is dropped, but a key v10 set a field with becomes custom data, and v2 overrides some fields with it.
+  3. Reproduce v10: a key named like a request field sets that field, over the model's value; the rest is sent as custom data.
+  4. Like 3, but the model's value wins: the key only fills a field the model leaves unset.
+  5. Drop it, and log the dropped keys in debug builds.
+  6. Assert in debug builds that `extraData` holds no key named like a field.
+  7. Keep such keys out of `extraData` when a model is built, so no mapper sees them.
+  8. Ask the backend to reject or strip such custom keys consistently; v2 overriding a field with custom data looks like a server bug.
+  9. Settle it as part of this rename's break.
 
 ## Risks
 
@@ -31,6 +41,9 @@
 
 ## Definition of done
 
+- [ ] Re-run the live probe of custom data named like a model field for every request that sends custom
+      data: each key flattened over v1 and nested in `custom` over v2, comparing what the server stores.
+- [ ] One rule for custom data named like a model field, applied by every request mapper.
 - [ ] Every public model names its custom data the same way.
 - [ ] The mappers and the v1 decoders read and write the renamed field.
 - [ ] `migrations/v11-migration.md`: Symbol Map rows plus a feature section.

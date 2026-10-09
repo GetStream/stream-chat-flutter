@@ -4,9 +4,9 @@ import '../../core/models/response/create_reminder_response.dart';
 import '../../core/models/response/delete_reminder_response.dart';
 import '../../core/models/response/query_reminders_response.dart';
 import '../../core/models/response/update_reminder_response.dart';
-import 'channel_mapper.dart';
-import 'message_mapper.dart';
-import 'user_mapper.dart';
+import 'channels_mapper.dart';
+import 'messages_mapper.dart';
+import 'users_mapper.dart';
 
 /// Maps a generated [api.CreateReminderResponse] to a [CreateReminderResponse].
 extension CreateReminderResponseMapper on api.CreateReminderResponse {

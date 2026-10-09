@@ -96,11 +96,11 @@ an endpoint, so the definition of done below stays open.
   keeps v10's request shape: coordinates, device and end date), `ChannelState.activeLiveLocations`,
   `GetActiveLiveLocationsResponse` and `updateLiveLocation`'s response. `stream_chat_persistence` stores
   locations as table rows, so no codec is needed.
-- **`message_mapper.dart` maps `MessageResponse` onto today's json_serializable `Message`** through
+- **`messages_mapper.dart` maps `MessageResponse` onto today's json_serializable `Message`** through
   its constructor, with the generated attachment, reaction,
   reaction group, moderation, shared location, reminder, draft and draft payload types, each mapped in
-  its own file (`attachment_mapper.dart`, `reaction_mapper.dart`, `moderation_mapper.dart`,
-  `location_mapper.dart`, `drafts_mapper.dart`, `reminders_mapper.dart`). Its first
+  its own file (`attachments_mapper.dart`, `reactions_mapper.dart`, `locations_mapper.dart`,
+  `drafts_mapper.dart`, `reminders_mapper.dart`), the moderation beside the message itself. Its first
   consumer is [06](06-reminders.md). `Message.fromJson` and the mapper share the type and state
   derivation and the reaction groups built from counts and scores when a payload has none
   (`lib/src/core/util/message_decoding.dart`, internal).
@@ -128,6 +128,7 @@ an endpoint, so the definition of done below stays open.
 ## Risks
 
 - Attachment `custom`/`extraData` promotion is the known hard part of the whole migration.
+- Requests that send custom data drop the keys named like one of the model's own fields, as every request mapper does until [21](21-custom-data-rename.md) revisits it.
 - Message send has offline and retry paths through `stream_chat_persistence` that must keep working.
 - `MessageDeleteScope` has to be reconciled with `DeleteType`, which [08](08-moderation-and-blocklists.md) added. It is named for the scope of a delete — `deleteForMe` vs `deleteForAll` — but carries a `hard` bool, which is the same axis `DeleteType` models, in the same words, minus `pruning`. `deleteMessage(hard: true)` therefore cannot express a pruning delete at all, and `softDeleteForAll` / `hardDeleteForAll` read as two spellings of `DeleteType.soft` / `DeleteType.hard`. Decide whether the scope keeps a `DeleteType` field or the two stay separate arguments; either way the public type changes, so it belongs in this group rather than a later fix.
 

@@ -6,10 +6,10 @@ import '../../core/models/response/create_draft_response.dart';
 import '../../core/models/response/get_draft_response.dart';
 import '../../core/models/response/query_drafts_response.dart';
 import '../../core/models/user.dart';
-import 'attachment_mapper.dart';
-import 'channel_mapper.dart';
-import 'message_mapper.dart';
-import 'user_mapper.dart';
+import 'attachments_mapper.dart';
+import 'channels_mapper.dart';
+import 'messages_mapper.dart';
+import 'users_mapper.dart';
 
 /// Maps a generated [api.CreateDraftResponse] to a [CreateDraftResponse].
 extension CreateDraftResponseMapper on api.CreateDraftResponse {

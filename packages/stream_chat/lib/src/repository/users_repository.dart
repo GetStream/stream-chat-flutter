@@ -8,7 +8,7 @@ import '../core/models/response/get_unread_count_response.dart';
 import '../core/models/response/unblock_users_response.dart';
 import '../core/models/response/update_users_response.dart';
 import '../core/models/user.dart';
-import 'mapper/user_mapper.dart';
+import 'mapper/users_mapper.dart';
 
 /// Repository dedicated to user operations.
 class UsersRepository {

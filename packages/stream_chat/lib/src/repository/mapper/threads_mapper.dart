@@ -4,10 +4,10 @@ import '../../core/models/response/query_threads_response.dart';
 import '../../core/models/response/update_thread_partial_response.dart';
 import '../../core/models/thread.dart';
 import '../../core/models/thread_participant.dart';
-import 'channel_mapper.dart';
+import 'channels_mapper.dart';
 import 'drafts_mapper.dart';
-import 'message_mapper.dart';
-import 'user_mapper.dart';
+import 'messages_mapper.dart';
+import 'users_mapper.dart';
 
 /// Maps a generated [api.QueryThreadsResponse] to a [QueryThreadsResponse].
 extension QueryThreadsResponseMapper on api.QueryThreadsResponse {
