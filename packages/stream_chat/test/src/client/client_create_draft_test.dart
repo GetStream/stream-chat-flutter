@@ -212,7 +212,10 @@ void main() {
                 fixedWidthStill: _imageData('fixed_width_still'),
                 fixedWidthDownsampled: _imageData('fixed_width_downsampled'),
               ),
-              custom: const {'caption': 'A cat'},
+              custom: const {
+                'caption': 'A cat',
+                'custom': {'mood': 'happy'},
+              },
             ),
           ],
           mentionedUsers: const [],
@@ -250,7 +253,11 @@ void main() {
               ],
               actions: const [Action(name: 'answer', style: 'primary', text: 'Send', type: 'button', value: 'yes')],
               // The id it was received with stays in the extra data, beside the custom data.
-              extraData: const {'id': 'received-id', 'caption': 'A cat'},
+              extraData: const {
+                'id': 'received-id',
+                'caption': 'A cat',
+                'custom': {'mood': 'happy'},
+              },
               giphy: {
                 for (final rendition in _renditions)
                   rendition: {

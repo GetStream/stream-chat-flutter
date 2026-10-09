@@ -77,13 +77,13 @@ void main() {
 
     final defaultApi = MockDefaultApi();
     when(() => defaultApi.queryDrafts(queryDraftsRequest: request)).thenAnswer(
-      (_) async => const Result.success(api.QueryDraftsResponse(duration: '0.01ms', drafts: [], next: 'prev-cursor')),
+      (_) async => const Result.success(api.QueryDraftsResponse(duration: '0.01ms', drafts: [], next: 'later-cursor')),
     );
     final client = _client(defaultApi);
 
     final res = await client.queryDrafts(prev: 'prev-cursor');
 
-    expect(res.getOrNull(), const QueryDraftsResponse(duration: '0.01ms', drafts: [], next: 'prev-cursor'));
+    expect(res.getOrNull(), const QueryDraftsResponse(duration: '0.01ms', drafts: [], next: 'later-cursor'));
     verify(() => defaultApi.queryDrafts(queryDraftsRequest: request)).called(1);
     verifyNoMoreInteractions(defaultApi);
   });

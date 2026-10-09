@@ -66,15 +66,16 @@
   no longer has are dropped, a command is written into the text, and the markup is sent as its own
   field. The Giphy renditions and the fields and actions map to their typed fields; a key missing from
   them is sent empty, which the backend stores the same as absent. Extra data named like an attachment
-  field, `custom` included, never becomes attachment custom data: the backend rejects such a custom key
-  with a 400. One divergence, approved: the fields a
-  received message keeps in its extra data (`cid`, `html`, `image_labels`, `deleted_reply_count`,
-  `mentioned_channel_members`) are no longer stored as draft custom data.
+  field never becomes attachment custom data: v1 bound such a key to the field, and v2 rejects the
+  multi-word ones (`title_link`, `image_url`, …) with a 400. An entry named `custom` is sent as custom data
+  like any other, as v1 stored it. One divergence, approved: the fields a received message keeps in its
+  extra data (`cid`, `html`, `image_labels`, `deleted_reply_count`, `mentioned_channel_members`) are no
+  longer stored as draft custom data.
 - **`DraftMessage.html` and `mml` are promoted** as constructor arguments stored in `extraData` and read
   back through getters, as `Message.html` and `mml` are; `DraftMessageRequestMapper` sends `mml` as the
   request's own field, so re-saving a draft keeps it. The keys a received message keeps in its extra data
-  are one internal set, `messageExtraDataFields` in `message_mapper.dart`, shared by the message and draft
-  mappers.
+  are one internal set, `MessageResponseMapper.extraDataFields` in `message_mapper.dart`, shared by the
+  message and draft mappers.
 - **Verified live** against the demo app, each call against v10's v1 request decoded the v10 way: query
   threads with defaults and with a filter, sort, `next` and `prev` (both cursors rejected), get a thread,
   set and unset a custom field on one, and create, get, query and delete three drafts (one with every

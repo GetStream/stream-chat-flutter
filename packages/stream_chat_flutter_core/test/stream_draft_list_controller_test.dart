@@ -226,6 +226,38 @@ void main() {
       expect(controller.value.asSuccess.items, equals(existingDrafts));
       expect(controller.value.asSuccess.error, same(exception));
     });
+
+    test('loadMore keeps the loaded drafts and reports any other failure as a client error', () async {
+      const nextKey = 'next_page_token';
+      final existingDrafts = generateDrafts();
+      final cause = Exception('boom');
+
+      when(
+        () => client.queryDrafts(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
+        ),
+      ).thenAnswer((_) async => Result.failure(cause));
+
+      final controller = StreamDraftListController.fromValue(
+        PagedValue<String, Draft>(
+          items: existingDrafts,
+          nextPageKey: nextKey,
+        ),
+        client: client,
+      );
+
+      await controller.loadMore(nextKey);
+      await pumpEventQueue();
+
+      expect(controller.value.asSuccess.items, equals(existingDrafts));
+      expect(
+        controller.value.asSuccess.error,
+        isA<StreamClientException>().having((it) => it.cause, 'cause', same(cause)),
+      );
+    });
   });
 
   group('Draft CRUD operations', () {

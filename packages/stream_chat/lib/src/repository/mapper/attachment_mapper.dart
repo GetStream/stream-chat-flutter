@@ -68,7 +68,6 @@ extension AttachmentRequestMapper on Attachment {
     ...Attachment.topLevelFields,
     ...Attachment.dbSpecificTopLevelFields,
     'giphy',
-    'custom',
   };
 
   /// Converts this attachment into the shape a request sends.

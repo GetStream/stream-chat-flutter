@@ -5,6 +5,7 @@ import '../../core/models/message.dart';
 import '../../core/models/response/create_draft_response.dart';
 import '../../core/models/response/get_draft_response.dart';
 import '../../core/models/response/query_drafts_response.dart';
+import '../../core/models/user.dart';
 import 'attachment_mapper.dart';
 import 'channel_mapper.dart';
 import 'message_mapper.dart';
@@ -86,28 +87,41 @@ extension DraftMessageRequestMapper on DraftMessage {
   /// `/command text`. The extra data becomes the custom data, except the fields a received message keeps there,
   /// such as [DraftMessage.html] and [DraftMessage.mml]; the markup is sent as a field of its own.
   api.MessageRequest toRequest() {
-    final message = removeMentionsIfNotIncluded();
-    final custom = {...message.extraData}..removeWhere((key, _) => kMessageExtraDataFields.contains(key));
+    final custom = {...extraData}..removeWhere((key, _) => MessageResponseMapper.extraDataFields.contains(key));
 
     return api.MessageRequest(
-      id: message.id,
-      text: switch ((message.text, message.command)) {
+      id: id,
+      text: switch ((text, command)) {
         (final text?, final command?) when command.isNotEmpty => '/$command $text',
         (final text, _) => text,
       },
-      type: switch (MessageType.toJson(message.type)) {
+      type: switch (MessageType.toJson(type)) {
         final type? => api.MessageRequestType.fromJson(type),
         null => null,
       },
-      attachments: [for (final attachment in message.attachments) attachment.toRequest()],
-      parentId: message.parentId,
-      showInChannel: message.showInChannel,
-      mentionedUsers: [for (final user in message.mentionedUsers) user.id],
-      quotedMessageId: message.quotedMessageId,
-      silent: message.silent,
-      pollId: message.pollId,
-      mml: message.mml,
+      attachments: [for (final attachment in attachments) attachment.toRequest()],
+      parentId: parentId,
+      showInChannel: showInChannel,
+      mentionedUsers: [for (final user in _mentionedUsersInText()) user.id],
+      quotedMessageId: quotedMessageId,
+      silent: silent,
+      pollId: pollId,
+      mml: mml,
       custom: custom.isEmpty ? null : custom,
     );
+  }
+
+  // The mentioned users the text still mentions by id or name; all of them when there is no text.
+  List<User> _mentionedUsersInText() {
+    final text = this.text;
+    if (text == null) return mentionedUsers;
+
+    final mentioned = [...mentionedUsers];
+    for (final user in mentionedUsers.toSet()) {
+      if (text.contains('@${user.id}') || text.contains('@${user.name}')) continue;
+      mentioned.remove(user);
+    }
+
+    return mentioned;
   }
 }

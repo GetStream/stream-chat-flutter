@@ -55,6 +55,25 @@ void main() {
     expect(controller.value, const PagedValue<String, Thread>.error(error));
   });
 
+  test('StreamThreadListController.doInitialLoad reports any other failure as a client error', () async {
+    final client = _client();
+    final cause = Exception('boom');
+    when(() => client.queryThreads(limit: 30)).thenAnswer((_) async => Result.failure(cause));
+
+    final controller = StreamThreadListController(client: client);
+    addTearDown(controller.dispose);
+    await controller.doInitialLoad();
+
+    expect(
+      controller.value,
+      isA<Error<String, Thread>>().having(
+        (it) => it.error,
+        'error',
+        isA<StreamClientException>().having((it) => it.cause, 'cause', same(cause)),
+      ),
+    );
+  });
+
   test('StreamThreadListController.loadMore keeps the loaded threads and reports any other failure as a client '
       'error', () async {
     final client = _client();

@@ -100,14 +100,14 @@ void main() {
     final defaultApi = MockDefaultApi();
     when(() => defaultApi.queryThreads(queryThreadsRequest: request)).thenAnswer(
       (_) async => const Result.success(
-        api.QueryThreadsResponse(duration: '0.01ms', next: 'prev-cursor', threads: []),
+        api.QueryThreadsResponse(duration: '0.01ms', next: 'later-cursor', threads: []),
       ),
     );
     final client = _client(defaultApi);
 
     final res = await client.queryThreads(sort: [ThreadSort.asc(ThreadSortField.createdAt)], prev: 'prev-cursor');
 
-    expect(res.getOrNull(), const QueryThreadsResponse(duration: '0.01ms', threads: [], next: 'prev-cursor'));
+    expect(res.getOrNull(), const QueryThreadsResponse(duration: '0.01ms', threads: [], next: 'later-cursor'));
     verify(() => defaultApi.queryThreads(queryThreadsRequest: request)).called(1);
     verifyNoMoreInteractions(defaultApi);
   });

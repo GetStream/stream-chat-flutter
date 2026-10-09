@@ -62,7 +62,7 @@ extension ThreadStateResponseMapper on api.ThreadStateResponse {
 
 /// Maps a generated [api.ThreadResponse] to a [Thread].
 extension ThreadResponseMapper on api.ThreadResponse {
-  /// Converts this response into a [Thread] without latest replies, reads or a draft.
+  /// Converts this response into a [Thread] with no latest replies, reads or draft.
   ///
   /// Custom data named like one of the thread's own fields is left out of [Thread.extraData].
   Thread toModel() => Thread(

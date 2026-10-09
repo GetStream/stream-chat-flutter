@@ -17,6 +17,7 @@
 🔄 Changed
 
 - `StreamPollVoteListController` pages with the poll vote query's `limit` and `next` cursor rather than `PaginationParams`.
+- `StreamThreadListController` and `StreamDraftListController` page with the query's `limit` and `next` cursor rather than `PaginationParams`.
 
 ## Upcoming
 

@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 
 import '../util/extension.dart';
@@ -145,28 +144,6 @@ class DraftMessage extends Equatable {
     return json;
   }
 
-  /// Removes mentions from the message if they are not included in the text.
-  ///
-  /// This is useful for cleaning up the list of mentioned users before
-  /// saving the draft.
-  @internal
-  DraftMessage removeMentionsIfNotIncluded() {
-    if (mentionedUsers.isEmpty) return this;
-
-    final messageTextToSend = text;
-    if (messageTextToSend == null) return this;
-
-    final updatedMentionedUsers = [...mentionedUsers];
-    for (final user in mentionedUsers.toSet()) {
-      if (messageTextToSend.contains('@${user.id}')) continue;
-      if (messageTextToSend.contains('@${user.name}')) continue;
-
-      updatedMentionedUsers.remove(user);
-    }
-
-    return copyWith(mentionedUsers: updatedMentionedUsers);
-  }
-
   /// Create a copy of this message with the provided values.
   DraftMessage copyWith({
     String? id,
@@ -273,5 +250,28 @@ extension DraftMessageToMessage on DraftMessage {
       pollId: pollId,
       extraData: extraData,
     );
+  }
+}
+
+extension on DraftMessage {
+  /// Removes mentions from the message if they are not included in the text.
+  ///
+  /// This is useful for cleaning up the list of mentioned users before
+  /// sending the message.
+  DraftMessage removeMentionsIfNotIncluded() {
+    if (mentionedUsers.isEmpty) return this;
+
+    final messageTextToSend = text;
+    if (messageTextToSend == null) return this;
+
+    final updatedMentionedUsers = [...mentionedUsers];
+    for (final user in mentionedUsers.toSet()) {
+      if (messageTextToSend.contains('@${user.id}')) continue;
+      if (messageTextToSend.contains('@${user.name}')) continue;
+
+      updatedMentionedUsers.remove(user);
+    }
+
+    return copyWith(mentionedUsers: updatedMentionedUsers);
   }
 }
