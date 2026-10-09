@@ -1,17 +1,20 @@
-import 'package:equatable/equatable.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:stream_core/stream_core.dart' show Filter, FilterField, Sort, SortField;
 
 import 'user.dart';
 
-part 'poll_vote.g.dart';
+part 'poll_vote.freezed.dart';
 
-/// {@template streamPollVote}
-/// A model class representing a poll vote.
-/// {@endtemplate}
-@JsonSerializable()
-class PollVote extends Equatable {
-  /// {@macro streamPollVote}
+/// A user's vote for an option of a poll, or their free-form answer to it.
+///
+/// A vote carries an [optionId] and an answer carries [answerText]; [isAnswer]
+/// tells the two apart.
+@Freezed(copyWith: false)
+class PollVote with _$PollVote {
+  /// Creates a new [PollVote].
+  ///
+  /// Either [optionId] or [answerText] must be given. [createdAt] and
+  /// [updatedAt] default to the current time.
   PollVote({
     this.id,
     this.pollId,
@@ -26,23 +29,25 @@ class PollVote extends Equatable {
          optionId != null || answerText != null,
          'Either optionId or answerText must be provided',
        ),
-       isAnswer = answerText != null,
        createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
-  /// Create a new instance from a json
-  factory PollVote.fromJson(Map<String, dynamic> json) => _$PollVoteFromJson(json);
-
-  /// The unique identifier of the poll vote.
-  @JsonKey(includeIfNull: false)
+  /// The unique identifier of this vote, or null before it is cast.
+  @override
   final String? id;
 
-  /// The unique identifier of the option selected in the poll.
-  @JsonKey(includeIfNull: false)
+  /// The unique identifier of the poll this vote belongs to.
+  @override
+  final String? pollId;
+
+  /// The unique identifier of the option this vote selects.
+  ///
+  /// An answer selects no option.
+  @override
   final String? optionId;
 
-  /// The text of the answer provided in the poll.
-  @JsonKey(includeIfNull: false)
+  /// The text of this answer, or null for a vote.
+  @override
   final String? answerText;
 
   /// The translations of [answerText], keyed as `<language>_text`, plus the
@@ -50,35 +55,28 @@ class PollVote extends Equatable {
   ///
   /// Filled in by the server when the answer is added to a poll in a channel
   /// with automatic translation enabled.
-  @JsonKey(includeToJson: false)
+  @override
   final Map<String, String>? answerTextI18n;
 
-  /// If true, the vote is an answer.
-  @JsonKey(includeToJson: false)
-  final bool isAnswer;
-
-  /// The unique identifier of the poll the vote belongs to.
-  @JsonKey(includeToJson: false)
-  final String? pollId;
-
-  /// The date when the poll vote was created.
-  @JsonKey(includeToJson: false)
+  /// The date this vote was cast.
+  @override
   final DateTime createdAt;
 
-  /// The date when the poll vote was last updated.
-  @JsonKey(includeToJson: false)
+  /// The date this vote was last changed.
+  @override
   final DateTime updatedAt;
 
-  /// The unique identifier of the user who voted.
-  @JsonKey(includeToJson: false)
+  /// The unique identifier of the user who cast this vote.
+  ///
+  /// Null on someone else's vote in an anonymous poll.
+  @override
   final String? userId;
 
-  /// The user who casted the vote.
-  @JsonKey(includeToJson: false)
+  /// The user who cast this vote.
+  ///
+  /// Null on someone else's vote in an anonymous poll.
+  @override
   final User? user;
-
-  /// Serialize to json
-  Map<String, dynamic> toJson() => _$PollVoteToJson(this);
 
   /// Creates a copy of [PollVote] with specified attributes overridden.
   PollVote copyWith({
@@ -103,19 +101,8 @@ class PollVote extends Equatable {
     user: user ?? this.user,
   );
 
-  @override
-  List<Object?> get props => [
-    id,
-    pollId,
-    optionId,
-    isAnswer,
-    answerText,
-    answerTextI18n,
-    createdAt,
-    updatedAt,
-    userId,
-    user,
-  ];
+  /// Whether this is a free-form answer rather than a vote for an option.
+  bool get isAnswer => answerText != null;
 }
 
 /// A filter for a poll vote query.

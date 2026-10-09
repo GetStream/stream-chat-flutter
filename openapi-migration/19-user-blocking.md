@@ -1,6 +1,6 @@
 # 19 — User Blocking
 
-**Goal:** Move blocking and unblocking a user, and listing the blocked users, ahead of [09](09-users.md): they embed `User` only through the existing `user_mapper.dart`, and nothing persists them.
+**Goal:** Move blocking and unblocking a user, and listing the blocked users, ahead of [09](09-users.md): they embed `User` only through the existing `users_mapper.dart`, and nothing persists them.
 
 **Size:** 0 hand-written method(s) across 0 file(s) → 3 generated operation(s).
 
@@ -55,6 +55,8 @@
       hand-written, with the reason.
 - [x] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
 - [x] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
+- [x] Every model that had a `copyWith` in v10 keeps that exact method, `_nullConst` sentinels
+      included ([README rule 2](README.md#domain-models)).
 - [x] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
       persists anything.
 - [x] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.

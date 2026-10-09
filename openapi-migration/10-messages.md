@@ -49,14 +49,87 @@
 
 - `Message` is public, persisted, WebSocket-delivered and the most customised type in the SDK. Keep ours; treat the generated `MessageResponse` as a mapping source only.
 - `Attachment`: the generated model defines fields our `extraData` currently absorbs. Decide the promotion rules before writing the mapper.
-- Replace the temporary `@DataSerializable` storage codec (`UserGroup`, `UserGroupMember`): decide between dedicated tables and codecs owned by `stream_chat_persistence` before `Message` and `Attachment` become plain models, then delete the typedef and every `fromData`/`toData` it generates.
-- `Action` is still the v10 json_serializable class, embedded in `Attachment.actions`, which `Attachment.toJson` writes when sending and `toData` writes to persistence. It becomes a plain model with `Attachment`; group 04 left it alone.
+- Replace the temporary `@DataSerializable` storage codec (`UserGroup`, `UserGroupMember`, `ReactionGroup`): decide between dedicated tables and codecs owned by `stream_chat_persistence` before `Message` and `Attachment` become plain models, then delete the typedef and every `fromData`/`toData` it generates.
 - Expose `MarkReadResponse.event`. [17](17-read-receipts.md) dropped it because its thread carries a `MessageResponse`; the mapper marks it with a TODO.
+
+## Decisions taken
+
+The models `Message` embeds become plain ahead of the endpoints, one PR each, leaves first. None routes
+an endpoint, so the definition of done below stays open.
+
+- **`Moderation` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`; equality
+  is unchanged. `Message.moderation` decodes through `moderationFromV1Json`, a temporary decode-only
+  function in `v1_json_converters.dart`: `Message.toJson` never writes the field. It keeps the
+  `moderation_details` fallback and the legacy `MESSAGE_RESPONSE_ACTION_*` names, and reads a missing
+  `platform_circumvented` as `false`. `stream_chat_persistence` does not store moderation, so no codec
+  is needed. `ModerationAction` keeps its `fromJson`/`toJson` statics, as `MessageType` does, until
+  `Message` stops decoding v1 JSON. The `ModerationV2Response` mapper waits for the first endpoint
+  that answers a message.
+- **`ReactionGroup` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`;
+  equality is unchanged. Its constructor stays non-const, defaulting both dates to now, and it keeps
+  v10's hand-written `copyWith` (`@Freezed(copyWith: false)`): freezed's would read a `null` date as
+  "now" instead of "keep". `Message.reactionGroups` decodes through `reactionGroupsFromV1Json`,
+  decode-only; `_reactionGroupsReadValue` still builds the groups from `reaction_counts` and
+  `reaction_scores` when `reaction_groups` is missing. Dates go through `StreamDateTimeConverter`.
+  `messages.reaction_groups` and `pinned_messages.reaction_groups` store the groups through the
+  temporary `@DataSerializable` codec, whose output is byte-identical to v10's `toJson`, so no
+  `schemaVersion` bump.
+- **`Action` is a plain `@freezed` model,** ahead of `Attachment` rather than with it. It loses
+  `fromJson` and `toJson`, gains `copyWith` and `const`, and compares by value where v10 compared by
+  identity, so attachments holding equal actions now compare equal. `Attachment.actions` reads and
+  writes through `ActionV1JsonConverter`: `Attachment.toJson` sends the actions and `toData` stores
+  them, and the converter writes the same keys v10 did, `value` included when null, so requests and
+  the stored `attachments` columns are unchanged. `Action` needs no codec of its own.
+- **`Reaction` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`; equality
+  is unchanged. Its constructor stays non-const (`userId` from `user`, dates default to now) and it
+  keeps v10's hand-written `copyWith` and `merge` (`@Freezed(copyWith: false)`). `Reaction.topLevelFields`
+  stays public. `ReactionV1JsonConverter` reads and writes it everywhere v1 JSON carries one: the
+  message's latest and own reactions, `Event.reaction`, the two hand-written reaction responses, and
+  the `sendReaction` body, which keeps v10's request shape (type, score, emoji code, custom data at the
+  root). `stream_chat_persistence` stores reactions as table rows, so no codec is needed.
+- **`Location` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`; equality
+  is unchanged. Its constructor stays non-const (`endAt` normalised to UTC, dates default to now) and
+  it keeps v10's hand-written `copyWith` (`@Freezed(copyWith: false)`). Its `channel` and `message`
+  stay json_serializable `ChannelModel` and `Message`, which `LocationV1JsonConverter` decodes through
+  their own `fromJson`; the API nests them only in active live locations, one level deep, so the
+  message-location cycle ends there. The converter reads and writes `Message.sharedLocation` (the write
+  keeps v10's request shape: coordinates, device and end date), `ChannelState.activeLiveLocations`,
+  `GetActiveLiveLocationsResponse` and `updateLiveLocation`'s response. `stream_chat_persistence` stores
+  locations as table rows, so no codec is needed.
+- **`messages_mapper.dart` maps `MessageResponse` onto today's json_serializable `Message`** through
+  its constructor, with the generated attachment, reaction,
+  reaction group, moderation, shared location, reminder, draft and draft payload types, each mapped in
+  its own file (`attachments_mapper.dart`, `reactions_mapper.dart`, `locations_mapper.dart`,
+  `drafts_mapper.dart`, `reminders_mapper.dart`), the moderation beside the message itself. Its first
+  consumer is [06](06-reminders.md). `Message.fromJson` and the mapper share the type and state
+  derivation and the reaction groups built from counts and scores when a payload has none
+  (`lib/src/core/util/message_decoding.dart`, internal).
+- **The keys v1 lands in `Message.extraData` stay there:** `cid` as a plain entry, and `html`, `mml`,
+  `image_labels` and `deleted_reply_count` behind new constructor parameters and typed getters
+  (`Message.html`, `mml`, `imageLabels`, `deletedReplyCount`), the pattern `ChannelModel.disabled` uses.
+  Dropping them would be a silent behavioural break. `DraftMessage` keeps the `html` and `mml` it is
+  sent as plain `extraData` entries, without getters.
+- **`mentioned_channel_members` is dropped:** the SDK has no feature built on it, so the mapper leaves
+  it out of `extraData`, and drops a custom key of that name. `Message.fromJson` still lands it there
+  from v1 JSON.
+- **`custom` becomes `extraData` without the keys named like the model's own fields,** for messages,
+  attachments, reactions and draft messages. A reaction's emoji code arrives in `custom` and maps to
+  `Reaction.emojiCode`.
+- **Moderation actions go through `ModerationAction.fromJson`,** so legacy names read as current ones.
+- **Attachments map at parity with `Attachment.fromJson`:** each gets a new local `id`, and the id the
+  attachment was sent with stays in `extraData`; `giphy` and `fields` are written in their v1 JSON
+  shape, which `GiphyInfo` and the UI read. The Giphy renditions are promoted like `Message.html`: a
+  `giphy` constructor argument stored in `extraData`, read back through `Attachment.giphy`, a map in
+  that shape. Making `Attachment` plain, and typing the renditions and `fields`, is left to this group.
+- **A reminder or location nests its message one level deep,** so the recursion ends there.
+- **`MessageWithChannelResponse` gets its mapper with its first consumer** (getMessage, search), not
+  ahead of it.
 
 ## Risks
 
 - `message_api.dart` also holds the four draft methods, which belong to group 07 — leave them alone here.
 - Attachment `custom`/`extraData` promotion is the known hard part of the whole migration.
+- Requests that send custom data drop the keys named like one of the model's own fields, as every request mapper does until [21](21-custom-data-rename.md) revisits it.
 - Message send has offline and retry paths through `stream_chat_persistence` that must keep working.
 - `MessageDeleteScope` has to be reconciled with `DeleteType`, which [08](08-moderation-and-blocklists.md) added. It is named for the scope of a delete — `deleteForMe` vs `deleteForAll` — but carries a `hard` bool, which is the same axis `DeleteType` models, in the same words, minus `pruning`. `deleteMessage(hard: true)` therefore cannot express a pruning delete at all, and `softDeleteForAll` / `hardDeleteForAll` read as two spellings of `DeleteType.soft` / `DeleteType.hard`. Decide whether the scope keeps a `DeleteType` field or the two stay separate arguments; either way the public type changes, so it belongs in this group rather than a later fix.
 
@@ -66,6 +139,8 @@
       hand-written, with the reason.
 - [ ] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
 - [ ] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
+- [ ] Every model that had a `copyWith` in v10 keeps that exact method, `_nullConst` sentinels
+      included ([README rule 2](README.md#domain-models)).
 - [ ] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
       persists anything.
 - [ ] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.

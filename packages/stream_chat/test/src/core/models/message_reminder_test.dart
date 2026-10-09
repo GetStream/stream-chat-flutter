@@ -81,42 +81,6 @@ void main() {
       expect(bookmarkReminder.userId, equals(userId));
     });
 
-    test('should correctly serialize to JSON', () {
-      final json = messageReminder.toJson();
-
-      expect(json['channel_cid'], equals(channelCid));
-      expect(json['message_id'], equals(messageId));
-      expect(json['user_id'], equals(userId));
-      expect(json['remind_at'], isA<String>());
-      expect(json['created_at'], isA<String>());
-      expect(json['updated_at'], isA<String>());
-
-      // These fields should not be included in JSON
-      expect(json.containsKey('channel'), isFalse);
-      expect(json.containsKey('message'), isFalse);
-      expect(json.containsKey('user'), isFalse);
-    });
-
-    test('should correctly deserialize from JSON', () {
-      final json = {
-        'channel_cid': channelCid,
-        'message_id': messageId,
-        'user_id': userId,
-        'remind_at': remindAt.toIso8601String(),
-        'created_at': now.toIso8601String(),
-        'updated_at': now.toIso8601String(),
-      };
-
-      final deserializedReminder = MessageReminder.fromJson(json);
-
-      expect(deserializedReminder.channelCid, equals(channelCid));
-      expect(deserializedReminder.messageId, equals(messageId));
-      expect(deserializedReminder.userId, equals(userId));
-      expect(deserializedReminder.remindAt, equals(remindAt));
-      expect(deserializedReminder.createdAt, equals(now));
-      expect(deserializedReminder.updatedAt, equals(now));
-    });
-
     test('should implement equality correctly', () {
       final reminder1 = MessageReminder(
         channelCid: channelCid,
@@ -257,6 +221,19 @@ void main() {
       expect(mergedReminder.remindAt, equals(newRemindAt));
       expect(mergedReminder.createdAt, equals(now));
       expect(mergedReminder.updatedAt, equals(newUpdatedAt));
+    });
+
+    test('MessageReminder.merge keeps the channel, message and user the other reminder lacks', () {
+      final channel = ChannelModel(cid: channelCid);
+      final message = Message(id: messageId, text: 'Remember me');
+      final user = User(id: userId);
+      final listedReminder = messageReminder.copyWith(channel: channel, message: message, user: user);
+      // The server fills in a reminder's channel, message and user only on some paths, so an update can lack them.
+      final eventReminder = messageReminder.copyWith(updatedAt: now.add(const Duration(hours: 1)));
+
+      final mergedReminder = listedReminder.merge(eventReminder);
+
+      expect((mergedReminder.channel, mergedReminder.message, mergedReminder.user), (channel, message, user));
     });
 
     test('should return original instance when merging with null', () {

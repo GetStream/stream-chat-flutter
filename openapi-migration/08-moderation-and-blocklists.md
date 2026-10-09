@@ -187,6 +187,8 @@
       hand-written, with the reason.
 - [x] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
 - [x] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
+- [x] Every model that had a `copyWith` in v10 keeps that exact method, `_nullConst` sentinels
+      included ([README rule 2](README.md#domain-models)).
 - [x] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
       persists anything.
 - [x] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.

@@ -5,6 +5,7 @@ import 'package:stream_core/stream_core.dart' show Filter, FilterField, Standard
 import 'package:uuid/uuid.dart';
 
 import '../util/extension.dart';
+import '../util/message_decoding.dart';
 import '../util/serializer.dart';
 import 'attachment.dart';
 import 'converters/v1_json_converters.dart';
@@ -31,6 +32,9 @@ const _nullConst = _NullConst();
 @JsonSerializable()
 class Message extends Equatable {
   /// Constructor used for json serialization.
+  ///
+  /// The [html], [mml], [imageLabels] and [deletedReplyCount] arguments, when given, are stored in [extraData],
+  /// replacing the entry each one reads.
   Message({
     String? id,
     this.text,
@@ -69,7 +73,7 @@ class Message extends Equatable {
     this.pinnedBy,
     this.poll,
     this._pollId,
-    this.extraData = const {},
+    Map<String, Object?> extraData = const {},
     this.state = const MessageState.initial(),
     this.i18n,
     this.restrictedVisibility,
@@ -78,31 +82,53 @@ class Message extends Equatable {
     this.reminder,
     this.channelRole,
     this.sharedLocation,
+    String? html,
+    String? mml,
+    Map<String, List<String>>? imageLabels,
+    int? deletedReplyCount,
   }) : id = id ?? const Uuid().v4(),
        type = MessageType(type),
        pinExpires = pinExpires?.toUtc(),
        remoteCreatedAt = createdAt,
        remoteUpdatedAt = updatedAt,
-       remoteDeletedAt = deletedAt;
+       remoteDeletedAt = deletedAt,
+       // For backwards compatibility, set 'html', 'mml', 'image_labels' and 'deleted_reply_count' in [extraData].
+       // Only copied when one is given, as messages are rebuilt on every change.
+       extraData = html == null && mml == null && imageLabels == null && deletedReplyCount == null
+           ? extraData
+           : {
+               ...extraData,
+               'html': ?html,
+               'mml': ?mml,
+               'image_labels': ?imageLabels,
+               'deleted_reply_count': ?deletedReplyCount,
+             };
 
   /// Create a new instance from JSON.
   factory Message.fromJson(Map<String, dynamic> json) {
-    final message = _$MessageFromJson(
-      Serializer.moveToExtraDataFromRoot(json, topLevelFields),
-    );
+    final data = Serializer.moveToExtraDataFromRoot(json, topLevelFields);
+    final message = _$MessageFromJson(data);
 
-    final isDeletedForMe = message.deletedForMe ?? false;
-    // TODO: Remove this override once type is properly enriched on the backend.
-    final type = isDeletedForMe ? MessageType.deleted : message.type;
-    final state = switch (message) {
-      _ when isDeletedForMe => MessageState.deletedForMe,
-      _ when message.deletedAt != null => MessageState.softDeleted,
-      _ when message.updatedAt.isAfter(message.createdAt) => MessageState.updated,
-      _ => MessageState.sent,
-    };
-
-    return message.copyWith(type: type, state: state);
+    return message
+        .copyWith(
+          reactionGroups:
+              message.reactionGroups ??
+              reactionGroupsFromCounts(
+                _countsFromJson(data['reaction_counts']),
+                _countsFromJson(data['reaction_scores']),
+              ),
+        )
+        .withDerivedState();
   }
+
+  // Reads a map of reaction type to count or score, whatever kind of number each value is.
+  static Map<String, int>? _countsFromJson(Object? json) => switch (json) {
+    final Map<String, dynamic> counts => {
+      for (final MapEntry(:key, :value) in counts.entries)
+        if (value is num) key: value.toInt(),
+    },
+    _ => null,
+  };
 
   /// The message ID. This is either created by Stream or set client side when
   /// the message is added.
@@ -152,49 +178,18 @@ class Message extends Equatable {
   @JsonKey(toJson: User.toIds)
   final List<User> mentionedUsers;
 
-  static Object? _reactionGroupsReadValue(
-    Map<Object?, Object?> json,
-    String key,
-  ) {
-    final reactionGroups = json[key] as Map<String, dynamic>?;
-    if (reactionGroups != null) return reactionGroups;
-
-    final reactionCounts = json['reaction_counts'] as Map<String, dynamic>?;
-    final reactionScores = json['reaction_scores'] as Map<String, dynamic>?;
-    if (reactionCounts == null && reactionScores == null) return null;
-
-    final reactionTypes = {...?reactionCounts?.keys, ...?reactionScores?.keys};
-    if (reactionTypes.isEmpty) return null;
-
-    final groups = <String, dynamic>{};
-    for (final type in reactionTypes) {
-      final count = reactionCounts?[type] ?? 0;
-      final sumScores = reactionScores?[type] ?? 0;
-
-      // Keep the group while count is positive; score may be zero or negative.
-      if (count <= 0) continue;
-      final now = DateTime.timestamp();
-      groups[type] = {
-        'count': count,
-        'sum_scores': sumScores,
-        'first_reaction_at': now.toIso8601String(),
-        'last_reaction_at': now.toIso8601String(),
-      };
-    }
-
-    return groups;
-  }
-
   /// A map of reaction types and their corresponding reaction groups.
-  @JsonKey(includeToJson: false, readValue: _reactionGroupsReadValue)
+  @JsonKey(includeToJson: false, fromJson: reactionGroupsFromV1Json)
   final Map<String, ReactionGroup>? reactionGroups;
 
   /// The latest reactions to the message created by any user.
   @JsonKey(includeToJson: false)
+  @ReactionV1JsonConverter()
   final List<Reaction>? latestReactions;
 
   /// The reactions added to the message by the current user.
   @JsonKey(includeToJson: false)
+  @ReactionV1JsonConverter()
   final List<Reaction>? ownReactions;
 
   /// The ID of the parent message, if the message is a thread reply.
@@ -301,6 +296,7 @@ class Message extends Equatable {
 
   /// The poll associated with this message.
   @JsonKey(includeToJson: false)
+  @PollV1JsonConverter()
   final Poll? poll;
 
   /// The ID of the [poll] associated with this message.
@@ -322,7 +318,7 @@ class Message extends Equatable {
   }
 
   /// The moderation details for this message.
-  @JsonKey(includeToJson: false, readValue: _moderationReadValue)
+  @JsonKey(includeToJson: false, readValue: _moderationReadValue, fromJson: moderationFromV1Json)
   final Moderation? moderation;
 
   /// Optional draft message linked to this message.
@@ -335,6 +331,7 @@ class Message extends Equatable {
   ///
   /// This is present when a user has set a reminder for this message.
   @JsonKey(includeToJson: false)
+  @MessageReminderV1JsonConverter()
   final MessageReminder? reminder;
 
   static Object? _channelRoleReadValue(Map<Object?, Object?> json, String key) {
@@ -355,6 +352,7 @@ class Message extends Equatable {
   /// This is used to share a location in a message, allowing users to view the
   /// location on a map.
   @JsonKey(includeIfNull: false)
+  @LocationV1JsonConverter()
   final Location? sharedLocation;
 
   /// Whether the message was deleted only for the current user.
@@ -363,6 +361,28 @@ class Message extends Equatable {
 
   /// Message custom extraData.
   final Map<String, Object?> extraData;
+
+  /// The text of this message rendered as HTML.
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  String? get html => extraData['html'].safeCast<String>();
+
+  /// The message markup language (MML) source of this message.
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  String? get mml => extraData['mml'].safeCast<String>();
+
+  /// The labels image moderation assigned to the images attached to this message, grouped by image.
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  Map<String, List<String>>? get imageLabels => switch (extraData['image_labels']) {
+    final Map<String, Object?> labels => {
+      for (final MapEntry(:key, :value) in labels.entries)
+        if (value case final List<Object?> imageLabels) key: imageLabels.whereType<String>().toList(),
+    },
+    _ => null,
+  };
+
+  /// The number of replies to this message that were deleted.
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  int? get deletedReplyCount => extraData['deleted_reply_count'].safeCast<int>();
 
   /// A Map of translations.
   @JsonKey(includeToJson: false)

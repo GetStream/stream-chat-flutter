@@ -30,7 +30,10 @@ onto Stream's OpenAPI-generated API client.
     - [Moderation](#moderation)
     - [App Settings](#app-settings)
     - [Guest Users](#guest-users)
+    - [Polls](#polls)
+    - [Message Reminders](#message-reminders)
     - [File Upload](#file-upload)
+    - [Messages](#messages)
     - [User Groups](#user-groups)
     - [Link Previews](#link-previews)
     - [Partial Updates](#partial-updates)
@@ -83,12 +86,15 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Moderation**](#moderation) | Muting, banning and flagging return a `Result` and call the moderation v2 API; `banUser`'s options map becomes named parameters; `unflagMessage`, `unflagUser` and `removeShadowBan` are removed |
 | [**App Settings**](#app-settings) | `getAppSettings` returns a `Result<AppSettingsResponse>` instead of throwing; `GetAppSettingsResponse` is renamed `AppSettingsResponse` |
 | [**Guest Users**](#guest-users) | `connectGuestUser` is unchanged; `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed |
+| [**Polls**](#polls) | Poll calls return a `Result`; eight responses become `PollResponse`, `PollOptionResponse` and `PollVoteResponse`; queries take `limit`/`next`/`prev`; `VotingVisibility` is an extension type |
+| [**Message Reminders**](#message-reminders) | Reminder calls return a `Result`; `deleteReminder` answers a new `DeleteReminderResponse`; `queryReminders` takes `limit`/`next`/`prev`; `MessageReminder` no longer decodes JSON |
 | [**File Upload**](#file-upload) | Uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
 | [**Partial Updates**](#partial-updates) | Channel and member partial updates — `updatePartial`, `updateName`, `updateImage`, slow mode, pin and archive — return a `Result` instead of throwing; their responses take the API's names, `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse`, and `partialMemberUpdate` becomes `updateMemberPartial` |
 | [**Channel Lifecycle**](#channel-lifecycle) | Hiding, showing and deleting a channel return a `Result` instead of throwing; stopping watching still throws |
 | [**Read Receipts**](#read-receipts) | Marking read, unread and delivered return a `Result` instead of throwing; `ChannelDeliveryReporter`'s callback returns a `Result` |
 | [**Unread Counts**](#unread-counts) | `getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing; the response and its `UnreadCounts*` models no longer decode JSON and compare by value |
 | [**User Blocking**](#user-blocking) | `blockUser`, `unblockUser` and `getBlockedUsers` (was `queryBlockedUsers`) return a `Result` instead of throwing; their responses are renamed `BlockUsersResponse` and `GetBlockedUsersResponse`, `unblockUser` answers a new `UnblockUsersResponse`, and `UserBlock`'s fields are all non-nullable |
+| [**Messages**](#messages) | `Moderation`, `ReactionGroup`, `Action`, `Reaction` and `Location` no longer decode from or encode to JSON; `Action` compares by value |
 | [**User Updates**](#user-updates) | `updateUser` and `updateUsers` return a `Result<UpdateUsersResponse>` instead of throwing; `partialUpdateUser(s)` becomes `updateUserPartial` / `updateUsersPartial` and `PartialUpdateUserRequest` becomes `UpdateUserPartialRequest`; `updateUser` no longer sends `role`, `teams` or `teamsRole`, and the returned users no longer carry their private fields in `extraData` |
 | _(filled in per feature as PRs land)_ | |
 
@@ -227,6 +233,22 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamChatApi.general.getAppSettings()` | `StreamChatClient.getAppSettings()` | `removed` | The call moved to the generated client |
 | `StreamChatApi.guest` (`GuestApi.getGuestUser`) | `StreamChatClient.connectGuestUser` | `removed` | The call moved to the generated client; `connectGuestUser` keeps its signature and still throws |
 | `ConnectGuestUserResponse` | — | `removed` | Only `StreamChatApi.guest` returned it; `connectGuestUser` still returns the connected `OwnUser` |
+| `StreamChatClient` poll methods → `Future<CreatePollResponse>` and the like | `Future<Result<PollResponse>>` and the like | `retyped` | `createPoll`, `getPoll`, `updatePoll`, `partialUpdatePoll`, `closePoll`, `createPollOption`, `getPollOption`, `updatePollOption`, `castPollVote`, `addPollAnswer`, `removePollVote`, `queryPolls` and `queryPollVotes` return a `Result` instead of throwing |
+| `StreamChatClient.deletePoll` / `.deletePollOption` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | No value on success |
+| `Channel.sendPoll` / `.updatePoll` / `.deletePoll` / `.closePoll` / `.createPollOption` / `.castPollVote` / `.addPollAnswer` / `.removePollVote` / `.queryPollVotes` | the same names, returning a `Result` | `retyped` | `sendPoll` also returns a failure when the message cannot be sent, rather than throwing |
+| `CreatePollResponse` / `GetPollResponse` / `UpdatePollResponse` | `PollResponse` | `renamed` | Same fields: `duration` and `poll` |
+| `CreatePollOptionResponse` / `GetPollOptionResponse` / `UpdatePollOptionResponse` | `PollOptionResponse` | `renamed` | Same fields: `duration` and `pollOption` |
+| `CastPollVoteResponse` / `RemovePollVoteResponse` | `PollVoteResponse` | `renamed` | `vote` is nullable |
+| `queryPolls(pagination: PaginationParams(limit: l, next: n))` / `queryPollVotes(…)` | `queryPolls(limit: l, next: n)` / `queryPollVotes(…)` | `retyped` | `limit` is still 10 when omitted. Pass a response's `prev` as `prev` to page backwards. The other `PaginationParams` fields never had an effect on these queries |
+| `Channel.castPollVote` / `.removePollVote` throwing `ArgumentError` | a `Failure` carrying a `StreamClientException` | `retyped` | For an option or vote without an id |
+| `VotingVisibility` (enum) | `VotingVisibility` (extension type over `String`) | `retyped` | `VotingVisibility.public` and `.anonymous` are unchanged; a `switch` needs a default arm, and `.name` / `.values` are gone — read `.rawType` |
+| `Poll.fromJson` / `.toJson`, `PollOption.fromJson` / `.toJson`, `PollVote.fromJson` / `.toJson` | — | `removed` | The models are plain classes; construct them directly. `Message.poll` and the poll events still decode from the same keys |
+| — | `PollOption.fromData` / `.toData` | `added` | Read and write only the format the offline database stores; not a codec for API payloads |
+| `CreatePollResponse()..poll = …` and the other response setters | `PollResponse(duration: …, poll: …)` | `retyped` | The responses are plain classes with a const constructor and final fields |
+| poll responses' `duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| `Poll` / `PollOption` / `PollVote extends Equatable`, `props` | value `==` | `removed` | `Poll` and `PollOption` now compare `extraData` too |
+| `PollVote.isAnswer` (a field set in the constructor) | the same name, as a getter | `retyped` | Computed from `answerText` on each read |
+| `StreamChatApi.polls` (`PollsApi`) | `StreamChatClient`'s poll methods | `removed` | The endpoints moved to the generated client |
 | `sendImage` / `sendFile` / `uploadImage` / `uploadFile` → `Future<SendImageResponse>` and siblings | `Future<Result<UploadedFile>>` | `retyped` | On `StreamChatClient`, `Channel` and `AttachmentFileUploader`. Returns a `Result` instead of throwing |
 | `deleteImage` / `deleteFile` / `removeImage` / `removeFile` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | On `StreamChatClient`, `Channel` and `AttachmentFileUploader`. Returns a `Result` instead of throwing |
 | `SendAttachmentResponse`, `SendFileResponse`, `SendImageResponse`, `UploadImageResponse`, `UploadFileResponse` | `UploadedFile` (`stream_core`) | `removed` | `.file` becomes `.fileUrl`; `.thumbUrl` is unchanged; `duration` is gone |
@@ -280,6 +302,16 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `UserBlock extends Equatable`, `UserBlock.props` | `UserBlock` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and `UserBlock` is no longer an `Equatable` |
 | `UserBlock.blockedUser` (`User?`), `.userId` / `.blockedUserId` (`String?`), `.createdAt` (`DateTime?`) | `User`, `String`, `DateTime` — required in the constructor | `retyped` | The server always sends them; drop any `!`, `?.` or `?? …` |
 | `StreamChatApi.user.blockUser` / `unblockUser` / `queryBlockedUsers` | `StreamChatClient.blockUser` / `unblockUser` / `getBlockedUsers` | `removed` | The endpoints moved to the generated client |
+| `Moderation.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. `Message.fromJson` still reads a message's moderation |
+| `Moderation extends Equatable`, `Moderation.props` | `Moderation` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and `Moderation` is no longer an `Equatable` |
+| `ReactionGroup.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. `Message.fromJson` still reads a message's reaction groups. `fromData` / `toData` are the offline database's format, not API JSON |
+| `ReactionGroup extends Equatable`, `ReactionGroup.props` | `ReactionGroup` (value `==`) | `removed` | Equality and `copyWith` are unchanged; `props` is gone and `ReactionGroup` is no longer an `Equatable` |
+| `Action.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. `Attachment.fromJson` and `toJson` still read and write an attachment's actions |
+| `Action` identity `==` | value `==`, plus `copyWith` | `retyped` | Two actions with the same fields are now equal, and so are attachments that differ only in holding separate copies of them |
+| `Reaction.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. Messages, events and `sendReaction` still read and write reactions |
+| `Reaction extends Equatable`, `Reaction.props` | `Reaction` (value `==`) | `removed` | Equality, `copyWith` and `merge` are unchanged; `props` is gone and `Reaction` is no longer an `Equatable` |
+| `Location.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. Messages, channel states and the live location calls still read and write locations |
+| `Location extends Equatable`, `Location.props` | `Location` (value `==`) | `removed` | Equality and `copyWith` are unchanged; `props` is gone and `Location` is no longer an `Equatable` |
 | `StreamChatClient.updateUser` / `updateUsers` → `Future<UpdateUsersResponse>` | `Future<Result<UpdateUsersResponse>>` | `retyped` | Returns a `Result` instead of throwing |
 | `StreamChatClient.partialUpdateUser` | `StreamChatClient.updateUserPartial` | `renamed` | Same arguments |
 | `StreamChatClient.partialUpdateUser` → `Future<UpdateUsersResponse>` | `updateUserPartial` → `Future<Result<UpdateUsersResponse>>` | `retyped` | Returns a `Result` instead of throwing |
@@ -293,6 +325,17 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `UpdateUsersResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
 | `UpdateUsersResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
 | `StreamChatApi.user.updateUsers` / `partialUpdateUsers` | `StreamChatClient.updateUsers` / `updateUsersPartial` | `removed` | The endpoints moved to the generated client |
+| `StreamChatClient.createReminder` / `.updateReminder` / `.queryReminders` → `Future<CreateReminderResponse>` and the like | `Future<Result<CreateReminderResponse>>` and the like | `retyped` | Return a `Result` instead of throwing; the same holds for `Channel.createReminder` and `.updateReminder` |
+| `StreamChatClient.deleteReminder` / `Channel.deleteReminder` → `Future<EmptyResponse>` | `Future<Result<DeleteReminderResponse>>` | `retyped` | A new response carrying `duration` |
+| `queryReminders(pagination: PaginationParams(limit: l, next: n))` | `queryReminders(limit: l, next: n)` | `retyped` | `limit` is still 10 when omitted. Pass a response's `prev` as `prev` to page backwards. The other `PaginationParams` fields never had an effect on this query |
+| `CreateReminderResponse()..reminder = …`, `UpdateReminderResponse()..reminder = …`, `QueryRemindersResponse()..reminders = …` and their other setters | `CreateReminderResponse(duration: …, reminder: …)` and the like | `retyped` | The responses are plain classes with a const constructor and final fields |
+| `CreateReminderResponse.fromJson`, `UpdateReminderResponse.fromJson`, `QueryRemindersResponse.fromJson` | — | `removed` | Construct the responses directly |
+| reminder responses' `duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| reminder responses' identity `==` | value `==`, plus `copyWith` | `retyped` | Two responses with the same fields are now equal |
+| `MessageReminderResponse` | — | `removed` | The shared base class of the create and update responses |
+| `MessageReminder.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. Messages and events still read reminders |
+| `MessageReminder extends Equatable`, `MessageReminder.props` | `MessageReminder` (value `==`) | `removed` | Equality, `copyWith` and `merge` are unchanged; `props` is gone and `MessageReminder` is no longer an `Equatable` |
+| `StreamChatApi.reminders` (`RemindersApi`) | `StreamChatClient` reminder methods | `removed` | The endpoints moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -1080,6 +1123,123 @@ queried, and the unread counts when connecting with `connectWebSocket: false`. N
 guest. v11 sends its id, name, image, language, `invisible`, an `OwnUser`'s privacy settings, and your own
 `extraData`. If you read one of those values back, store it as a custom field of your own instead.
 
+### Polls
+
+**Every poll call returns a `Result` instead of throwing,** on `StreamChatClient` and on `Channel`.
+`deletePoll` and `deletePollOption` carry no value on success. Calling a `Channel` method on a channel that is not
+initialized still throws a `StateError`, as in v10.
+
+```dart
+// v10
+try {
+  final response = await client.getPoll(pollId);
+  showPoll(response.poll);
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await client.getPoll(pollId);
+result.fold(
+  onSuccess: (response) => showPoll(response.poll),
+  onFailure: (error, _) => report(error),
+);
+```
+
+**`Channel.sendPoll` reports both of its steps through the `Result`.** It creates the poll and then sends it in a
+message; a failure in either comes back as a `Failure`, where v10 threw. If the message fails, the poll stays created.
+
+**Eight responses become three.** Creating, fetching and updating a poll all answer a `PollResponse`; the same calls
+on an option answer a `PollOptionResponse`; casting and removing a vote answer a `PollVoteResponse`. The fields are
+unchanged, except that `PollVoteResponse.vote` is nullable.
+
+```dart
+// v10
+final CreatePollResponse created = await client.createPoll(poll);
+
+// v11
+final Result<PollResponse> created = await client.createPoll(poll);
+```
+
+**`queryPolls` and `queryPollVotes` take `limit`, `next` and `prev`** instead of a `PaginationParams`. `limit` is still
+10 when omitted. The offset and id-based fields of `PaginationParams` never had an effect on these queries. The
+responses now carry a `prev` cursor next to `next`; pass it as `prev` to fetch the page before.
+
+```dart
+// v10
+await channel.queryPollVotes(pollId, pagination: PaginationParams(limit: 10, next: cursor));
+
+// v11
+await channel.queryPollVotes(pollId, limit: 10, next: cursor);
+```
+
+**A missing id is a failure, not an `ArgumentError`.** `Channel.castPollVote` with an option that has no id, and
+`removePollVote` with a vote that has none, return a `Failure` carrying a `StreamClientException`.
+
+**`VotingVisibility` is an extension type over its wire string.** `VotingVisibility.public` and
+`VotingVisibility.anonymous` read the same, and a visibility the SDK does not name is kept rather than rejected.
+A `switch` over it needs a default arm, and `.name` / `.values` are gone — read `.rawType`.
+
+**`Poll`, `PollOption`, `PollVote` and the responses no longer decode JSON.** Build them with their constructors —
+`PollResponse(duration: '0ms', poll: poll)` where v10 wrote `CreatePollResponse()..poll = poll`. `Message.poll` and
+the poll events still decode from the same keys. `PollOption.fromData` and `toData` read and write the format the
+offline database stores; they are not a way to decode API responses.
+
+**`Poll`, `PollOption` and `PollVote` no longer extend `Equatable`.** They still compare by value and `props` is gone.
+`Poll` and `PollOption` now include `extraData` in `==`: two polls that differ only in custom data are no longer
+equal, so neither are the messages that carry them, and a widget comparing them rebuilds when only custom data
+changes.
+
+**`StreamChatApi.polls` is removed.** Call the poll methods on `StreamChatClient` or `Channel` instead.
+
+### Message Reminders
+
+**Every reminder call returns a `Result` instead of throwing,** on `StreamChatClient` and on `Channel`. Calling a
+`Channel` method on a channel that is not initialized still throws a `StateError`, as in v10.
+
+```dart
+// v10
+try {
+  final response = await client.createReminder(messageId, remindAt: remindAt);
+  showReminder(response.reminder);
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await client.createReminder(messageId, remindAt: remindAt);
+result.fold(
+  onSuccess: (response) => showReminder(response.reminder),
+  onFailure: (error, _) => report(error),
+);
+```
+
+**`deleteReminder` answers a `DeleteReminderResponse`** where v10 answered an `EmptyResponse`. It carries only
+`duration` today.
+
+**`queryReminders` takes `limit`, `next` and `prev`** instead of a `PaginationParams`. `limit` is still 10 when
+omitted. The offset and id-based fields of `PaginationParams` never had an effect on this query. The response now
+carries a `prev` cursor next to `next`; pass it as `prev` to fetch the page before.
+
+```dart
+// v10
+await client.queryReminders(pagination: PaginationParams(limit: 10, next: cursor));
+
+// v11
+await client.queryReminders(limit: 10, next: cursor);
+```
+
+**`MessageReminder` and the reminder responses no longer decode JSON.** Build them with their constructors —
+`CreateReminderResponse(duration: '0ms', reminder: reminder)` where v10 wrote
+`CreateReminderResponse()..reminder = reminder`. `Message.reminder` and the reminder events still decode from the
+same keys. `MessageReminder` is no longer an `Equatable`: equality, `copyWith` and `merge` are unchanged, and
+`props` is gone.
+
+**`StreamChatApi.reminders` is removed.** Call the reminder methods on `StreamChatClient` or `Channel` instead.
+
+> **Why:** a failure is a value the caller handles where it happens, and the public models stop being wire shapes,
+> so the API payload can change without changing the type a caller holds.
+
 ### File Upload
 
 **Uploads and deletes return a `Result` instead of throwing.** `sendImage`, `sendFile`, `uploadImage` and
@@ -1120,6 +1280,33 @@ StreamChatClient(apiKey, attachmentFileUploaderProvider: (httpClient) => MyUploa
 StreamChatClient(apiKey, attachmentFileUploaderProvider: (dio) => MyUploader(dio));
 ```
 
+### Messages
+
+**`Moderation` and `ReactionGroup` are plain classes.** Neither decodes from or encodes to JSON any more, and
+neither is an `Equatable`: equality is unchanged and `props` is gone. `Moderation` gains `copyWith`. A message
+still carries them in `Message.moderation` and `Message.reactionGroups`, read from the API as before.
+`ReactionGroup.fromData` and `toData` read and write the offline database's format; they are not a codec for API
+JSON.
+
+**`Action` is a plain class too, and compares by value.** It no longer decodes from or encodes to JSON, and it gains
+`copyWith`. Two actions with the same fields are now equal, where v10 compared them by identity; an `Attachment`
+holding them follows suit.
+
+**`Reaction` and `Location` are plain classes.** Neither decodes from or encodes to JSON any more, and neither is an
+`Equatable`; equality and `copyWith` are unchanged, as is `Reaction.merge`. Messages, events, channel states,
+`sendReaction` and the live location calls still carry them as before.
+
+```dart
+// v10
+final moderation = Moderation.fromJson(json);
+
+// v11
+const moderation = Moderation(action: ModerationAction.flag, originalText: 'original text');
+```
+
+> **Why:** the public models stop being wire shapes, so the API payload can change without changing the type a
+> caller holds.
+
 ---
 
 ## Migration Checklist
@@ -1134,7 +1321,7 @@ Work top to bottom; each item is independently verifiable.
 - [ ] Replace `ChatErrorCode` comparisons with `StreamErrorCode` constants
 - [ ] Apply every row of the [Symbol Map](#symbol-map)
 - [ ] Re-check custom data access: fields that used to arrive in `extraData` may now be typed properties
-- [ ] If you implement `AttachmentFileUploader`, return a `Result` from it — see [File Upload](#file-upload)
+- [ ] If you implement `AttachmentFileUploader`, review its section under [Feature Areas](#feature-areas)
 - [ ] If you persist models yourself, re-check nullability as endpoints move to the generated types, which are nullable wherever the API allows it
 - [ ] Replace `sort: null` on any list controller with `XSort.empty` if you relied on server ordering — see
       [Sorting](#sorting)

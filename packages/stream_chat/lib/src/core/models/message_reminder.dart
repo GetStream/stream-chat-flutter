@@ -1,12 +1,11 @@
-import 'package:equatable/equatable.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:stream_core/stream_core.dart' show Filter, FilterField, Sort, SortField;
 
 import 'channel_model.dart';
 import 'message.dart';
 import 'user.dart';
 
-part 'message_reminder.g.dart';
+part 'message_reminder.freezed.dart';
 
 class _NullConst {
   const _NullConst();
@@ -15,19 +14,13 @@ class _NullConst {
 const _nullConst = _NullConst();
 
 /// {@template messageReminder}
-/// A model class representing a message reminder.
+/// A reminder a user set on a message.
 ///
-/// The [MessageReminder] class represents a marked message that is important
-/// to the user.
-///
-/// It can be of two types:
-/// 1. **Scheduled Reminder**: (`remindAt != null`) - Used to notify the user
-/// about a message after a certain time.
-/// 2. **Bookmarks**: (`remindAt == null`) - Used to mark a message for later
-/// reference without notification.
+/// A reminder with a [remindAt] is scheduled: the user is notified about the message at that time. One without it
+/// is a bookmark, which keeps the message for later without a notification.
 /// {@endtemplate}
-@JsonSerializable()
-class MessageReminder extends Equatable {
+@Freezed(copyWith: false)
+class MessageReminder with _$MessageReminder {
   /// {@macro messageReminder}
   MessageReminder({
     required this.channelCid,
@@ -42,45 +35,47 @@ class MessageReminder extends Equatable {
   }) : createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
-  /// Create a new instance from a json
-  factory MessageReminder.fromJson(Map<String, dynamic> json) => _$MessageReminderFromJson(json);
-
-  /// The channel CID where the message exists.
+  /// The full id of the channel holding the message, in the form `type:id`.
+  @override
   final String channelCid;
 
-  /// The channel where the message exists.
-  @JsonKey(includeToJson: false)
+  /// The channel holding the message.
+  @override
   final ChannelModel? channel;
 
-  /// The ID of the message that is marked as important.
+  /// The id of the message the reminder is set on.
+  @override
   final String messageId;
 
-  /// The message that is marked as important.
-  @JsonKey(includeToJson: false)
+  /// The message the reminder is set on.
+  @override
   final Message? message;
 
-  /// The ID of the user who marked the message as important.
+  /// The id of the user who set the reminder.
+  @override
   final String userId;
 
-  /// The user who marked the message as important.
-  @JsonKey(includeToJson: false)
+  /// The user who set the reminder.
+  @override
   final User? user;
 
   /// The time at which the user wants to be reminded about the message.
   ///
-  /// If `null`, the reminder is a bookmark and no notification will be sent.
+  /// If `null`, the reminder is a bookmark and no notification is sent.
+  @override
   final DateTime? remindAt;
 
   /// The date at which the reminder was created.
+  @override
   final DateTime createdAt;
 
   /// The date at which the reminder was last updated.
+  @override
   final DateTime updatedAt;
 
-  /// Convert the object to JSON
-  Map<String, dynamic> toJson() => _$MessageReminderToJson(this);
-
-  /// Creates a copy of this [Draft] with specified attributes overridden.
+  /// Creates a copy of this reminder with the given fields replaced.
+  ///
+  /// A field passed as null keeps its current value, except [remindAt], which a null clears.
   MessageReminder copyWith({
     String? channelCid,
     ChannelModel? channel,
@@ -105,8 +100,10 @@ class MessageReminder extends Equatable {
     );
   }
 
-  /// Returns a new [MessageReminder] instance that merges the current
-  /// instance with another [MessageReminder] instance.
+  /// Returns this reminder with the fields [other] sets.
+  ///
+  /// A field [other] leaves null keeps its current value, except [remindAt]: a null one clears it. If [other] is
+  /// null, this reminder is returned unchanged.
   MessageReminder merge(MessageReminder? other) {
     if (other == null) return this;
     return copyWith(
@@ -121,19 +118,6 @@ class MessageReminder extends Equatable {
       updatedAt: other.updatedAt,
     );
   }
-
-  @override
-  List<Object?> get props => [
-    channelCid,
-    channel,
-    messageId,
-    message,
-    userId,
-    user,
-    remindAt,
-    createdAt,
-    updatedAt,
-  ];
 }
 
 /// A filter for a reminder query.

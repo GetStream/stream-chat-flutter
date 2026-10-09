@@ -6,9 +6,7 @@ import 'channel_api.dart';
 import 'general_api.dart';
 import 'message_api.dart';
 import 'moderation_api.dart';
-import 'polls_api.dart';
 import 'push_preferences_api.dart';
-import 'reminders_api.dart';
 import 'threads_api.dart';
 import 'user_api.dart';
 
@@ -46,10 +44,6 @@ class StreamChatApi {
   MessageApi get message => _message ??= MessageApi(_client);
   MessageApi? _message;
 
-  /// Api dedicated to polls operations
-  PollsApi get polls => _polls ??= PollsApi(_client);
-  PollsApi? _polls;
-
   /// Api dedicated to threads operations
   ThreadsApi get threads => _threads ??= ThreadsApi(_client);
   ThreadsApi? _threads;
@@ -65,10 +59,6 @@ class StreamChatApi {
   /// Api dedicated to moderation operations
   ModerationApi get moderation => _moderation ??= ModerationApi(_client);
   ModerationApi? _moderation;
-
-  /// Api dedicated to message reminders operations
-  RemindersApi get reminders => _reminders ??= RemindersApi(_client);
-  RemindersApi? _reminders;
 
   /// Api dedicated to general operations
   GeneralApi get general => _general ??= GeneralApi(_client);

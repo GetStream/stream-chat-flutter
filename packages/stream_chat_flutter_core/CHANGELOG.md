@@ -14,6 +14,10 @@
 
 - A list controller sorted each loaded page with an unstable sort, so rows it called equal — members sharing a `created_at`, say — were reordered on every page append. They keep the order they arrived in now.
 
+🔄 Changed
+
+- `StreamPollVoteListController` pages with the poll vote query's `limit` and `next` cursor rather than `PaginationParams`.
+
 ## Upcoming
 
 🐞 Fixed

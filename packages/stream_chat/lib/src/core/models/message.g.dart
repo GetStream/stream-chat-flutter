@@ -23,14 +23,12 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       const [],
   silent: json['silent'] as bool? ?? false,
   shadowed: json['shadowed'] as bool? ?? false,
-  reactionGroups: (Message._reactionGroupsReadValue(json, 'reaction_groups') as Map<String, dynamic>?)?.map(
-    (k, e) => MapEntry(k, ReactionGroup.fromJson(e as Map<String, dynamic>)),
-  ),
+  reactionGroups: reactionGroupsFromV1Json(json['reaction_groups'] as Map<String, dynamic>?),
   latestReactions: (json['latest_reactions'] as List<dynamic>?)
-      ?.map((e) => Reaction.fromJson(e as Map<String, dynamic>))
+      ?.map((e) => const ReactionV1JsonConverter().fromJson(e as Map<String, dynamic>))
       .toList(),
   ownReactions: (json['own_reactions'] as List<dynamic>?)
-      ?.map((e) => Reaction.fromJson(e as Map<String, dynamic>))
+      ?.map((e) => const ReactionV1JsonConverter().fromJson(e as Map<String, dynamic>))
       .toList(),
   parentId: json['parent_id'] as String?,
   quotedMessage: json['quoted_message'] == null
@@ -55,24 +53,22 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
   pinnedAt: json['pinned_at'] == null ? null : DateTime.parse(json['pinned_at'] as String),
   pinExpires: json['pin_expires'] == null ? null : DateTime.parse(json['pin_expires'] as String),
   pinnedBy: json['pinned_by'] == null ? null : User.fromJson(json['pinned_by'] as Map<String, dynamic>),
-  poll: json['poll'] == null ? null : Poll.fromJson(json['poll'] as Map<String, dynamic>),
+  poll: _$JsonConverterFromJson<Map<String, dynamic>, Poll>(json['poll'], const PollV1JsonConverter().fromJson),
   pollId: json['poll_id'] as String?,
   extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
-  i18n: (json['i18n'] as Map<String, dynamic>?)?.map(
-    (k, e) => MapEntry(k, e as String),
-  ),
+  i18n: (json['i18n'] as Map<String, dynamic>?)?.map((k, e) => MapEntry(k, e as String)),
   restrictedVisibility: (json['restricted_visibility'] as List<dynamic>?)?.map((e) => e as String).toList(),
-  moderation: Message._moderationReadValue(json, 'moderation') == null
-      ? null
-      : Moderation.fromJson(
-          Message._moderationReadValue(json, 'moderation') as Map<String, dynamic>,
-        ),
+  moderation: moderationFromV1Json(Message._moderationReadValue(json, 'moderation') as Map<String, dynamic>?),
   draft: json['draft'] == null ? null : Draft.fromJson(json['draft'] as Map<String, dynamic>),
-  reminder: json['reminder'] == null ? null : MessageReminder.fromJson(json['reminder'] as Map<String, dynamic>),
+  reminder: _$JsonConverterFromJson<Map<String, dynamic>, MessageReminder>(
+    json['reminder'],
+    const MessageReminderV1JsonConverter().fromJson,
+  ),
   channelRole: Message._channelRoleReadValue(json, 'channel_role') as String?,
-  sharedLocation: json['shared_location'] == null
-      ? null
-      : Location.fromJson(json['shared_location'] as Map<String, dynamic>),
+  sharedLocation: _$JsonConverterFromJson<Map<String, dynamic>, Location>(
+    json['shared_location'],
+    const LocationV1JsonConverter().fromJson,
+  ),
 );
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
@@ -93,6 +89,15 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
   'pin_expires': instance.pinExpires?.toIso8601String(),
   'poll_id': instance.pollId,
   'restricted_visibility': ?instance.restrictedVisibility,
-  'shared_location': ?instance.sharedLocation?.toJson(),
+  'shared_location': ?_$JsonConverterToJson<Map<String, dynamic>, Location>(
+    instance.sharedLocation,
+    const LocationV1JsonConverter().toJson,
+  ),
   'extra_data': instance.extraData,
 };
+
+Value? _$JsonConverterFromJson<Json, Value>(Object? json, Value? Function(Json json) fromJson) =>
+    json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(Value? value, Json? Function(Value value) toJson) =>
+    value == null ? null : toJson(value);

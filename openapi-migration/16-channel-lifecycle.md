@@ -26,7 +26,7 @@
 
 - **Split out of [11](11-channels-and-members.md), ahead of it.** None of the three reads anything
   into client state — the `channel.hidden`, `channel.visible` and `channel.deleted` events do that —
-  and the one channel they answer goes through `channel_mapper.dart`.
+  and the one channel they answer goes through `channels_mapper.dart`.
 - **The v2 routes are the v1 handlers.** `lib/chat/routes.go` mounts hide, show and delete in the
   shared `coreRoutes`; none is gated, in beta or deprecated.
 - **Moved off `ChannelApi`:** `hideChannel`, `showChannel` and `deleteChannel`, each now a
@@ -52,6 +52,8 @@
       hand-written, with the reason.
 - [x] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
 - [x] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
+- [x] Every model that had a `copyWith` in v10 keeps that exact method, `_nullConst` sentinels
+      included ([README rule 2](README.md#domain-models)).
 - [x] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
       persists anything.
 - [x] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.

@@ -39,50 +39,6 @@ void main() {
         expect(moderation.platformCircumvented, isTrue);
       });
 
-      test('should create from JSON correctly', () {
-        final json = {
-          'action': 'shadow',
-          'original_text': 'original message text',
-          'text_harms': ['hate', 'profanity'],
-          'image_harms': ['explicit'],
-          'blocklist_matched': 'profanity',
-          'semantic_filter_matched': 'harassment',
-          'platform_circumvented': true,
-        };
-
-        final moderation = Moderation.fromJson(json);
-
-        expect(moderation.action, ModerationAction.shadow);
-        expect(moderation.originalText, 'original message text');
-        expect(moderation.textHarms, ['hate', 'profanity']);
-        expect(moderation.imageHarms, ['explicit']);
-        expect(moderation.blocklistMatched, 'profanity');
-        expect(moderation.semanticFilterMatched, 'harassment');
-        expect(moderation.platformCircumvented, isTrue);
-      });
-
-      test('should serialize to JSON correctly', () {
-        const moderation = Moderation(
-          action: ModerationAction.bounce,
-          originalText: 'original message text',
-          textHarms: ['hate', 'profanity'],
-          imageHarms: ['explicit'],
-          blocklistMatched: 'profanity',
-          semanticFilterMatched: 'harassment',
-          platformCircumvented: true,
-        );
-
-        final json = moderation.toJson();
-
-        expect(json['action'], 'bounce');
-        expect(json['original_text'], 'original message text');
-        expect(json['text_harms'], ['hate', 'profanity']);
-        expect(json['image_harms'], ['explicit']);
-        expect(json['blocklist_matched'], 'profanity');
-        expect(json['semantic_filter_matched'], 'harassment');
-        expect(json['platform_circumvented'], isTrue);
-      });
-
       test('equals & hashCode should work correctly', () {
         const moderation1 = Moderation(
           action: ModerationAction.remove,

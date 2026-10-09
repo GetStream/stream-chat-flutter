@@ -15,11 +15,17 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
   me: json['me'] == null ? null : OwnUser.fromJson(json['me'] as Map<String, dynamic>),
   user: json['user'] == null ? null : User.fromJson(json['user'] as Map<String, dynamic>),
   message: json['message'] == null ? null : Message.fromJson(json['message'] as Map<String, dynamic>),
-  poll: json['poll'] == null ? null : Poll.fromJson(json['poll'] as Map<String, dynamic>),
-  pollVote: json['poll_vote'] == null ? null : PollVote.fromJson(json['poll_vote'] as Map<String, dynamic>),
+  poll: _$JsonConverterFromJson<Map<String, dynamic>, Poll>(json['poll'], const PollV1JsonConverter().fromJson),
+  pollVote: _$JsonConverterFromJson<Map<String, dynamic>, PollVote>(
+    json['poll_vote'],
+    const PollVoteV1JsonConverter().fromJson,
+  ),
   totalUnreadCount: (json['total_unread_count'] as num?)?.toInt(),
   unreadChannels: (json['unread_channels'] as num?)?.toInt(),
-  reaction: json['reaction'] == null ? null : Reaction.fromJson(json['reaction'] as Map<String, dynamic>),
+  reaction: _$JsonConverterFromJson<Map<String, dynamic>, Reaction>(
+    json['reaction'],
+    const ReactionV1JsonConverter().fromJson,
+  ),
   online: json['online'] as bool?,
   channel: json['channel'] == null ? null : ChannelModel.fromJson(json['channel'] as Map<String, dynamic>),
   member: json['member'] == null ? null : Member.fromJson(json['member'] as Map<String, dynamic>),
@@ -45,17 +51,16 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
   unreadMessages: (json['unread_messages'] as num?)?.toInt(),
   lastReadMessageId: json['last_read_message_id'] as String?,
   draft: json['draft'] == null ? null : Draft.fromJson(json['draft'] as Map<String, dynamic>),
-  reminder: json['reminder'] == null ? null : MessageReminder.fromJson(json['reminder'] as Map<String, dynamic>),
+  reminder: _$JsonConverterFromJson<Map<String, dynamic>, MessageReminder>(
+    json['reminder'],
+    const MessageReminderV1JsonConverter().fromJson,
+  ),
   pushPreference: json['push_preference'] == null
       ? null
-      : PushPreference.fromJson(
-          json['push_preference'] as Map<String, dynamic>,
-        ),
+      : PushPreference.fromJson(json['push_preference'] as Map<String, dynamic>),
   channelPushPreference: json['channel_push_preference'] == null
       ? null
-      : ChannelPushPreference.fromJson(
-          json['channel_push_preference'] as Map<String, dynamic>,
-        ),
+      : ChannelPushPreference.fromJson(json['channel_push_preference'] as Map<String, dynamic>),
   channelMemberCount: (json['channel_member_count'] as num?)?.toInt(),
   channelMessageCount: (json['channel_message_count'] as num?)?.toInt(),
   watcherCount: (json['watcher_count'] as num?)?.toInt(),
@@ -77,11 +82,17 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
   'me': ?instance.me?.toJson(),
   'user': ?instance.user?.toJson(),
   'message': ?instance.message?.toJson(),
-  'poll': ?instance.poll?.toJson(),
-  'poll_vote': ?instance.pollVote?.toJson(),
+  'poll': ?_$JsonConverterToJson<Map<String, dynamic>, Poll>(instance.poll, const PollV1JsonConverter().toJson),
+  'poll_vote': ?_$JsonConverterToJson<Map<String, dynamic>, PollVote>(
+    instance.pollVote,
+    const PollVoteV1JsonConverter().toJson,
+  ),
   'channel': ?instance.channel?.toJson(),
   'member': ?instance.member?.toJson(),
-  'reaction': ?instance.reaction?.toJson(),
+  'reaction': ?_$JsonConverterToJson<Map<String, dynamic>, Reaction>(
+    instance.reaction,
+    const ReactionV1JsonConverter().toJson,
+  ),
   'total_unread_count': ?instance.totalUnreadCount,
   'unread_channels': ?instance.unreadChannels,
   'online': ?instance.online,
@@ -99,7 +110,10 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
   'unread_messages': ?instance.unreadMessages,
   'last_read_message_id': ?instance.lastReadMessageId,
   'draft': ?instance.draft?.toJson(),
-  'reminder': ?instance.reminder?.toJson(),
+  'reminder': ?_$JsonConverterToJson<Map<String, dynamic>, MessageReminder>(
+    instance.reminder,
+    const MessageReminderV1JsonConverter().toJson,
+  ),
   'push_preference': ?instance.pushPreference?.toJson(),
   'channel_push_preference': ?instance.channelPushPreference?.toJson(),
   'channel_member_count': ?instance.channelMemberCount,
@@ -110,6 +124,9 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
   'extra_data': instance.extraData,
 };
 
+Value? _$JsonConverterFromJson<Json, Value>(Object? json, Value? Function(Json json) fromJson) =>
+    json == null ? null : fromJson(json as Json);
+
 const _$AITypingStateEnumMap = {
   AITypingState.idle: 'AI_STATE_IDLE',
   AITypingState.error: 'AI_STATE_ERROR',
@@ -117,3 +134,6 @@ const _$AITypingStateEnumMap = {
   AITypingState.thinking: 'AI_STATE_THINKING',
   AITypingState.generating: 'AI_STATE_GENERATING',
 };
+
+Json? _$JsonConverterToJson<Json, Value>(Value? value, Json? Function(Value value) toJson) =>
+    value == null ? null : toJson(value);

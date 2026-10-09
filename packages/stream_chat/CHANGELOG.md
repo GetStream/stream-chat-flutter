@@ -78,6 +78,16 @@
 - `AppSettings` and `UploadConfig` no longer extend `Equatable`, so `props` is removed; they still compare by value and gain `copyWith`.
 - `StreamChatApi.general.getAppSettings` is removed; call `StreamChatClient.getAppSettings` instead.
 - `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed; call `StreamChatClient.connectGuestUser` instead.
+- The poll calls on `StreamChatClient` and `Channel` return a `Result` instead of throwing.
+- `CreatePollResponse`, `GetPollResponse` and `UpdatePollResponse` are replaced by `PollResponse`; `CreatePollOptionResponse`, `GetPollOptionResponse` and `UpdatePollOptionResponse` by `PollOptionResponse`; and `CastPollVoteResponse` and `RemovePollVoteResponse` by `PollVoteResponse`.
+- `queryPolls` and `queryPollVotes` take `limit` (10 when omitted), `next` and `prev` instead of `PaginationParams`, and their responses carry a `prev` cursor.
+- `Channel.castPollVote` and `removePollVote` return a failure instead of throwing an `ArgumentError` for an option or vote without an id.
+- `VotingVisibility` is an extension type over its wire string instead of an enum.
+- `Poll`, `PollOption`, `PollVote` and the poll responses no longer decode from or encode to JSON; `PollOption` gains `fromData` and `toData`, which read and write only the format `stream_chat_persistence` stores it in.
+- The poll responses are immutable, built through a const constructor, and their `duration` is a non-nullable `String`; `PollVoteResponse.vote` is nullable.
+- `Poll`, `PollOption` and `PollVote` no longer extend `Equatable`, so `props` is removed; they still compare by value, now including `extraData`.
+- `StreamChatApi.polls` is removed; its endpoints are reached through `StreamChatClient`.
+- The poll and poll option requests no longer send `extraData` entries named like one of the poll's or option's own fields.
 - `sendImage`, `sendFile`, `uploadImage` and `uploadFile`, on `StreamChatClient`, `Channel` and `AttachmentFileUploader`, return a `Result<UploadedFile>` instead of throwing; read the URL from `fileUrl` and a video's thumbnail from `thumbUrl`.
 - `deleteImage`, `deleteFile`, `removeImage` and `removeFile` return a `Result<void>` instead of throwing, and carry no value on success.
 - `SendAttachmentResponse`, `SendFileResponse`, `SendImageResponse`, `UploadImageResponse` and `UploadFileResponse` are removed in favor of `UploadedFile`.
@@ -111,6 +121,11 @@
 - `UserBlock` no longer decodes from or encodes to JSON and no longer extends `Equatable`.
 - `UserBlock.blockedUser`, `userId`, `blockedUserId` and `createdAt` are required and non-nullable.
 - `StreamChatApi.user.blockUser`, `unblockUser` and `queryBlockedUsers` are removed; call `blockUser`, `unblockUser` and `getBlockedUsers` on `StreamChatClient` instead.
+- `Moderation` no longer decodes from or encodes to JSON and no longer extends `Equatable`, so `props` is removed; it still compares by value and gains `copyWith`.
+- `ReactionGroup` no longer decodes from or encodes to JSON and no longer extends `Equatable`, so `props` is removed; it still compares by value. It gains `fromData` and `toData`, which read and write only the format `stream_chat_persistence` stores it in.
+- `Action` no longer decodes from or encodes to JSON, compares by value instead of by identity, and gains `copyWith`.
+- `Reaction` no longer decodes from or encodes to JSON and no longer extends `Equatable`, so `props` is removed; it still compares by value.
+- `Location` no longer decodes from or encodes to JSON and no longer extends `Equatable`, so `props` is removed; it still compares by value.
 - `StreamChatClient.updateUser` and `updateUsers` return a `Result<UpdateUsersResponse>` instead of throwing.
 - `StreamChatClient.partialUpdateUser` and `partialUpdateUsers` are renamed `updateUserPartial` and `updateUsersPartial`, and return a `Result<UpdateUsersResponse>` instead of throwing.
 - `PartialUpdateUserRequest` is renamed `UpdateUserPartialRequest`.
@@ -119,6 +134,11 @@
 - The users in an `UpdateUsersResponse` no longer carry their devices, mutes, channel mutes, privacy settings, unread counts, blocked user ids, hidden channels or token revocation time in `extraData`.
 - `updateUser` and `updateUsers` no longer send the user's `role`, `teams` and `teamsRole`.
 - `StreamChatApi.user.updateUsers` and `partialUpdateUsers` are removed; call `updateUsers` and `updateUsersPartial` on `StreamChatClient` instead.
+- The reminder calls on `StreamChatClient` and `Channel` return a `Result` instead of throwing, and `deleteReminder` returns a `Result<DeleteReminderResponse>` instead of an `EmptyResponse`; a `Channel` that is not initialized still throws a `StateError`.
+- `queryReminders` takes `limit` (10 when omitted), `next` and `prev` instead of `PaginationParams`, and its response carries a `prev` cursor.
+- `CreateReminderResponse`, `UpdateReminderResponse` and `QueryRemindersResponse` no longer decode from JSON, are immutable, built through a const constructor, compare by value, and their `duration` is a non-nullable `String`; `MessageReminderResponse` is removed.
+- `MessageReminder` no longer decodes from or encodes to JSON and no longer extends `Equatable`, so `props` is removed; it still compares by value.
+- `StreamChatApi.reminders` is removed; its endpoints are reached through `StreamChatClient`.
 
 🐞 Fixed
 
@@ -152,6 +172,8 @@
 - Added `StreamChatClient.moderation.muteUsers` and `unmuteUsers`, which mute and unmute several users in one call and report the ids that matched no user.
 - Added `ChannelModel.truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires`, `deletedAt` and `topLevelFields`; the constructors accept the new fields.
 - Added `User.deactivatedAt`, `deletedAt` and `shadowBanned`; the constructors accept the new fields.
+- Added `Message.html`, `mml`, `imageLabels` and `deletedReplyCount`, read from the message's `extraData`; the constructor accepts them.
+- Added `Attachment.giphy`, the Giphy renditions read from the attachment's `extraData`; the constructor accepts them.
 
 🔒 Security
 

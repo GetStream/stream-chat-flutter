@@ -1456,118 +1456,77 @@ void main() {
       });
     });
 
-    group('`.createReminder`', () {
+    test("Channel.createReminder sends the due date and returns the client's createReminder response", () async {
       const messageId = 'test-message-id';
+      final remindAt = DateTime.utc(2024, 6, 15, 14, 30);
+      final response = CreateReminderResponse(
+        duration: '0.01ms',
+        reminder: MessageReminder(channelCid: channelCid, messageId: messageId, userId: 'test-user-id'),
+      );
+      when(
+        () => client.createReminder(messageId, remindAt: remindAt),
+      ).thenAnswer((_) async => Result.success(response));
 
-      setUp(() {
-        when(
-          () => client.createReminder(
-            messageId,
-            remindAt: any(named: 'remindAt'),
-          ),
-        ).thenAnswer(
-          (_) async => CreateReminderResponse()
-            ..reminder = MessageReminder(
-              messageId: messageId,
-              channelCid: channelCid,
-              userId: 'test-user-id',
-              remindAt: DateTime(2024, 6, 15, 14, 30),
-              createdAt: DateTime.now(),
-              updatedAt: DateTime.now(),
-            ),
-        );
-      });
+      final res = await channel.createReminder(messageId, remindAt: remindAt);
 
-      test('should call client.createReminder', () async {
-        final res = await channel.createReminder(messageId);
-
-        expect(res, isNotNull);
-        expect(res.reminder.messageId, messageId);
-
-        verify(() => channel.client.createReminder(messageId)).called(1);
-      });
-
-      test('with remindAt should pass remindAt to client', () async {
-        final remindAt = DateTime(2024, 6, 15, 14, 30);
-        final res = await channel.createReminder(messageId, remindAt: remindAt);
-
-        expect(res, isNotNull);
-        expect(res.reminder.messageId, messageId);
-        expect(res.reminder.remindAt, remindAt);
-
-        verify(
-          () => channel.client.createReminder(
-            messageId,
-            remindAt: remindAt,
-          ),
-        ).called(1);
-      });
+      expect(res.getOrNull(), response);
+      verify(() => client.createReminder(messageId, remindAt: remindAt)).called(1);
     });
 
-    group('`.updateReminder`', () {
+    test("Channel.createReminder sends no due date and returns the client's createReminder response", () async {
       const messageId = 'test-message-id';
+      final response = CreateReminderResponse(
+        duration: '0.01ms',
+        reminder: MessageReminder(channelCid: channelCid, messageId: messageId, userId: 'test-user-id'),
+      );
+      when(() => client.createReminder(messageId)).thenAnswer((_) async => Result.success(response));
 
-      setUp(() {
-        when(
-          () => client.updateReminder(
-            messageId,
-            remindAt: any(named: 'remindAt'),
-          ),
-        ).thenAnswer(
-          (_) async => UpdateReminderResponse()
-            ..reminder = MessageReminder(
-              messageId: messageId,
-              channelCid: channelCid,
-              userId: 'test-user-id',
-              remindAt: DateTime(2024, 8, 20, 16, 45),
-              createdAt: DateTime.now(),
-              updatedAt: DateTime.now(),
-            ),
-        );
-      });
+      final res = await channel.createReminder(messageId);
 
-      test('should call client.updateReminder', () async {
-        final res = await channel.updateReminder(messageId);
-
-        expect(res, isNotNull);
-        expect(res.reminder.messageId, messageId);
-
-        verify(() => channel.client.updateReminder(messageId)).called(1);
-      });
-
-      test('with remindAt should pass remindAt to client', () async {
-        final remindAt = DateTime(2024, 8, 20, 16, 45);
-        final res = await channel.updateReminder(messageId, remindAt: remindAt);
-
-        expect(res, isNotNull);
-        expect(res.reminder.messageId, messageId);
-        expect(res.reminder.remindAt, remindAt);
-
-        verify(
-          () => channel.client.updateReminder(
-            messageId,
-            remindAt: remindAt,
-          ),
-        ).called(1);
-      });
+      expect(res.getOrNull(), response);
+      verify(() => client.createReminder(messageId)).called(1);
     });
 
-    group('`.deleteReminder`', () {
+    test("Channel.updateReminder sends the due date and returns the client's updateReminder response", () async {
       const messageId = 'test-message-id';
+      final remindAt = DateTime.utc(2024, 8, 20, 16, 45);
+      final response = UpdateReminderResponse(
+        duration: '0.01ms',
+        reminder: MessageReminder(channelCid: channelCid, messageId: messageId, userId: 'test-user-id'),
+      );
+      when(
+        () => client.updateReminder(messageId, remindAt: remindAt),
+      ).thenAnswer((_) async => Result.success(response));
 
-      setUp(() {
-        when(() => client.deleteReminder(messageId)).thenAnswer(
-          (_) async => EmptyResponse(),
-        );
-      });
+      final res = await channel.updateReminder(messageId, remindAt: remindAt);
 
-      test('should call client.deleteReminder', () async {
-        final res = await channel.deleteReminder(messageId);
+      expect(res.getOrNull(), response);
+      verify(() => client.updateReminder(messageId, remindAt: remindAt)).called(1);
+    });
 
-        expect(res, isNotNull);
+    test("Channel.updateReminder sends no due date and returns the client's updateReminder response", () async {
+      const messageId = 'test-message-id';
+      final response = UpdateReminderResponse(
+        duration: '0.01ms',
+        reminder: MessageReminder(channelCid: channelCid, messageId: messageId, userId: 'test-user-id'),
+      );
+      when(() => client.updateReminder(messageId)).thenAnswer((_) async => Result.success(response));
 
-        verify(() => channel.client.deleteReminder(messageId)).called(1);
-      });
+      final res = await channel.updateReminder(messageId);
+
+      expect(res.getOrNull(), response);
+      verify(() => client.updateReminder(messageId)).called(1);
+    });
+
+    test("Channel.deleteReminder returns the client's deleteReminder response", () async {
+      const messageId = 'test-message-id';
+      const response = DeleteReminderResponse(duration: '0.01ms');
+      when(() => client.deleteReminder(messageId)).thenAnswer((_) async => const Result.success(response));
+
+      final res = await channel.deleteReminder(messageId);
+
+      expect(res.getOrNull(), response);
+      verify(() => client.deleteReminder(messageId)).called(1);
     });
 
     group('`.updateMessage`', () {

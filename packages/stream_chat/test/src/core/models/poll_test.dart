@@ -1,209 +1,130 @@
-// ignore_for_file: avoid_redundant_argument_values
-
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/poll_option.dart';
+import 'package:stream_chat/src/core/models/poll_vote.dart';
+import 'package:stream_chat/src/core/models/voting_visibility.dart';
 import 'package:test/test.dart';
 
 import '../../utils.dart';
 
 void main() {
-  group('src/models/message', () {
-    test('should parse json correctly', () {
-      final poll = Poll.fromJson(jsonFixture('poll.json'));
+  test('Poll generates an id when none is given', () {
+    final first = Poll(name: 'Lunch?', options: const []);
+    final second = Poll(name: 'Lunch?', options: const []);
 
-      expect(poll.id, '7fd88eb3-fc05-4e89-89af-36c6d8995dda');
-      expect(poll.name, 'test');
-      expect(poll.description, '');
-      expect(poll.votingVisibility, VotingVisibility.public);
-      expect(poll.enforceUniqueVote, false);
-      expect(poll.maxVotesAllowed, isNull);
-      expect(poll.allowUserSuggestedOptions, false);
-      expect(poll.allowAnswers, false);
-      expect(poll.isClosed, false);
-      expect(poll.voteCount, 0);
-      expect(poll.answersCount, 0);
+    expect(first.id, isNotEmpty);
+    expect(first.id, isNot(second.id));
+  });
 
-      expect(poll.createdAt.toIso8601String(), '2024-04-17T14:46:23.001349Z');
-      expect(poll.updatedAt.toIso8601String(), '2024-04-17T14:46:23.001349Z');
+  test('Poll compares its custom data for equality', () {
+    final poll = createTestPoll(id: 'poll-id', name: 'Lunch?', extraData: const {'topic': 'food'});
 
-      expect(poll.options.length, 1);
-      final option = poll.options[0];
-      expect(option.id, 'option1');
-      expect(option.text, 'option1 text');
+    expect(poll, poll.copyWith(extraData: const {'topic': 'food'}));
+    expect(poll, isNot(poll.copyWith(extraData: const {'topic': 'drinks'})));
+  });
 
-      expect(poll.latestVotesByOption, isEmpty);
+  test('Poll.copyWith can clear the vote limit', () {
+    final poll = createTestPoll(name: 'Lunch?', maxVotesAllowed: 2);
 
-      expect(poll.ownVotesAndAnswers.length, 1);
-      final vote = poll.ownVotesAndAnswers[0];
-      expect(vote.id, 'luke_skywalker');
-      expect(vote.optionId, 'option1');
-      expect(vote.pollId, '7fd88eb3-fc05-4e89-89af-36c6d8995dda');
-      expect(vote.createdAt.toIso8601String(), '2022-02-03T15:47:10.148169Z');
-      expect(vote.updatedAt.toIso8601String(), '2024-03-18T16:44:45.749718Z');
+    expect(poll.copyWith(maxVotesAllowed: null).maxVotesAllowed, isNull);
+  });
 
-      // Check createdBy fields
-      expect(poll.createdById, 'luke_skywalker');
-      expect(poll.createdBy, isNotNull);
-    });
+  test('Poll.copyWith keeps a field passed as null', () {
+    final poll = createTestPoll(
+      id: 'poll-id',
+      name: 'Lunch?',
+      description: 'Pick one',
+      createdAt: DateTime.utc(2023),
+      updatedAt: DateTime.utc(2023),
+    );
 
-    test('should serialize to json correctly', () {
-      final poll = Poll(
-        id: '7fd88eb3-fc05-4e89-89af-36c6d8995dda',
-        name: 'test',
-        options: const [
-          PollOption(
-            text: 'option1 text',
-          ),
-        ],
-      );
+    final copy = poll.copyWith(id: null, description: null, createdAt: null, updatedAt: null);
 
-      final json = poll.toJson();
+    expect(copy, poll);
+  });
 
-      expect(json['id'], '7fd88eb3-fc05-4e89-89af-36c6d8995dda');
-      expect(json['name'], 'test');
-      expect(json['description'], isNull);
-      expect(json['options'], [
-        {'text': 'option1 text'},
-      ]);
-      expect(json['voting_visibility'], 'public');
-      expect(json['enforce_unique_vote'], true);
-      expect(json['max_votes_allowed'], isNull);
-      expect(json['allow_user_suggested_options'], false);
-      expect(json['allow_answers'], false);
-      expect(json['is_closed'], false);
-    });
+  test('Poll.latestVotes holds the latest votes of every option', () {
+    final pizza = _vote(id: 'v1', optionId: 'pizza');
+    final sushi = _vote(id: 'v2', optionId: 'sushi');
+    final poll = createTestPoll(name: 'Lunch?').copyWith(
+      latestVotesByOption: {
+        'pizza': [pizza],
+        'sushi': [sushi],
+      },
+    );
 
-    test('parses the server translations of the name and description', () {
-      final poll = Poll.fromJson({
-        ...jsonFixture('poll.json'),
-        'name_i18n': const {'language': 'en', 'nl_text': 'toets'},
-        'description_i18n': const {'language': 'en', 'nl_text': 'omschrijving'},
-      });
+    expect(poll.latestVotes, unorderedEquals([pizza, sushi]));
+  });
 
-      expect(poll.nameI18n, {'language': 'en', 'nl_text': 'toets'});
-      expect(poll.descriptionI18n, {'language': 'en', 'nl_text': 'omschrijving'});
-    });
+  test('Poll.ownVotes leaves out the answers of the current user', () {
+    final vote = _vote(id: 'v1', optionId: 'pizza');
+    final answer = _vote(id: 'a1', answerText: 'Anything');
+    final poll = createTestPoll(name: 'Lunch?').copyWith(ownVotesAndAnswers: [vote, answer]);
 
-    test('parses the server translation of an option', () {
-      final poll = Poll.fromJson({
-        ...jsonFixture('poll.json'),
-        'options': const [
-          {
-            'id': 'option1',
-            'text': 'option1 text',
-            'text_i18n': {'language': 'en', 'nl_text': 'optie1 tekst'},
-          },
-        ],
-      });
+    expect(poll.ownVotes, [vote]);
+  });
 
-      expect(poll.options.single.textI18n, {'language': 'en', 'nl_text': 'optie1 tekst'});
-    });
+  test('Poll.ownAnswers leaves out the votes of the current user', () {
+    final vote = _vote(id: 'v1', optionId: 'pizza');
+    final answer = _vote(id: 'a1', answerText: 'Anything');
+    final poll = createTestPoll(name: 'Lunch?').copyWith(ownVotesAndAnswers: [vote, answer]);
 
-    test('parses the server translation of an answer', () {
-      final poll = Poll.fromJson({
-        ...jsonFixture('poll.json'),
-        'latest_answers': const [
-          {
-            'id': 'answer1',
-            'answer_text': 'great',
-            'answer_text_i18n': {'language': 'en', 'nl_text': 'geweldig'},
-          },
-        ],
-      });
+    expect(poll.ownAnswers, [answer]);
+  });
 
-      expect(poll.latestAnswers.single.answerTextI18n, {'language': 'en', 'nl_text': 'geweldig'});
-    });
+  test('PollFilterField.votingVisibility reads the visibility value', () {
+    final poll = createTestPoll(name: 'Lunch?', votingVisibility: VotingVisibility.anonymous);
 
-    test('keeps the server translations out of the extra data', () {
-      final poll = Poll.fromJson({
-        ...jsonFixture('poll.json'),
-        'name_i18n': const {'language': 'en', 'nl_text': 'toets'},
-        'description_i18n': const {'language': 'en', 'nl_text': 'omschrijving'},
-      });
+    expect(PollFilterField.votingVisibility.value(poll), 'anonymous');
+  });
 
-      expect(poll.extraData, isNot(contains('name_i18n')));
-      expect(poll.extraData, isNot(contains('description_i18n')));
-    });
+  test('PollSortField.id orders alphabetically', () {
+    expectOrders(
+      PollSortField.id,
+      createTestPoll(id: 'a-poll', name: 'A'),
+      createTestPoll(id: 'b-poll', name: 'B'),
+    );
+  });
 
-    test('does not send the server translations back when serialized', () {
-      final poll = Poll(
-        name: 'test',
-        nameI18n: const {'language': 'en', 'nl_text': 'toets'},
-        descriptionI18n: const {'language': 'en', 'nl_text': 'omschrijving'},
-        options: const [
-          PollOption(text: 'option1 text', textI18n: {'language': 'en', 'nl_text': 'optie1 tekst'}),
-        ],
-      );
+  test('PollSortField.name orders alphabetically, folded', () {
+    expectOrders(
+      PollSortField.name,
+      createTestPoll(name: 'apples'),
+      createTestPoll(name: 'Bananas'),
+    );
+  });
 
-      final json = poll.toJson();
+  test('PollSortField.createdAt orders older polls first', () {
+    expectOrders(
+      PollSortField.createdAt,
+      createTestPoll(name: 'older', createdAt: DateTime(2023, 6, 10)),
+      createTestPoll(name: 'newer', createdAt: DateTime(2023, 6, 15)),
+    );
+  });
 
-      expect(json, isNot(contains('name_i18n')));
-      expect(json, isNot(contains('description_i18n')));
-    });
+  test('PollSortField.updatedAt orders older polls first', () {
+    expectOrders(
+      PollSortField.updatedAt,
+      createTestPoll(name: 'older', updatedAt: DateTime(2023, 6, 10)),
+      createTestPoll(name: 'newer', updatedAt: DateTime(2023, 6, 15)),
+    );
+  });
 
-    test('keeps the server translation of an option out of its extra data', () {
-      final option = PollOption.fromJson(const {
-        'id': 'option1',
-        'text': 'option1 text',
-        'text_i18n': {'language': 'en', 'nl_text': 'optie1 tekst'},
-      });
-
-      expect(option.extraData, isNot(contains('text_i18n')));
-    });
-
-    test('PollOption.toJson leaves out the server translation', () {
-      const option = PollOption(
-        id: 'option1',
-        text: 'option1 text',
-        textI18n: {'language': 'en', 'nl_text': 'optie1 tekst'},
-      );
-
-      expect(option.toJson(), isNot(contains('text_i18n')));
-    });
-
-    group('PollSortField', () {
-      test('id orders alphabetically', () {
-        expectOrders(
-          PollSortField.id,
-          createTestPoll(id: 'a-poll', name: 'A'),
-          createTestPoll(id: 'b-poll', name: 'B'),
-        );
-      });
-
-      test('name orders alphabetically, folded', () {
-        expectOrders(
-          PollSortField.name,
-          createTestPoll(name: 'apples'),
-          createTestPoll(name: 'Bananas'),
-        );
-      });
-
-      test('createdAt orders older polls first', () {
-        expectOrders(
-          PollSortField.createdAt,
-          createTestPoll(name: 'older', createdAt: DateTime(2023, 6, 10)),
-          createTestPoll(name: 'newer', createdAt: DateTime(2023, 6, 15)),
-        );
-      });
-
-      test('updatedAt orders older polls first', () {
-        expectOrders(
-          PollSortField.updatedAt,
-          createTestPoll(name: 'older', updatedAt: DateTime(2023, 6, 10)),
-          createTestPoll(name: 'newer', updatedAt: DateTime(2023, 6, 15)),
-        );
-      });
-
-      test('isClosed orders open polls first', () {
-        expectOrders(
-          PollSortField.isClosed,
-          createTestPoll(name: 'open', isClosed: false),
-          createTestPoll(name: 'closed', isClosed: true),
-        );
-      });
-    });
+  test('PollSortField.isClosed orders open polls first', () {
+    expectOrders(
+      PollSortField.isClosed,
+      createTestPoll(name: 'open'),
+      createTestPoll(name: 'closed', isClosed: true),
+    );
   });
 }
+
+PollVote _vote({required String id, String? optionId, String? answerText}) => PollVote(
+  id: id,
+  optionId: optionId,
+  answerText: answerText,
+  createdAt: DateTime.utc(2024),
+  updatedAt: DateTime.utc(2024),
+);
 
 /// Helper function to create a Poll for testing
 Poll createTestPoll({
