@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `StreamDraftListController.deleteDraft` removing the wrong draft.
+
 ## 9.31.0
 
 - Updated `stream_chat` dependency to [`9.31.0`](https://pub.dev/packages/stream_chat/changelog).

@@ -338,6 +338,26 @@ void main() {
       expect(remainingDraftTexts, contains('Thread Draft 2'));
       expect(remainingDraftTexts, isNot(contains('Thread Draft 1')));
     });
+
+    test(
+        'deleteDraft removes only the channel draft when a thread draft '
+        'of the same channel precedes it', () {
+      final threadDraft = generateDraft(
+        channelCid: 'messaging:123',
+        text: 'Thread Draft',
+        parentId: 'parent1',
+      );
+      final channelDraft = generateDraft(
+        channelCid: 'messaging:123',
+        text: 'Channel Draft',
+      );
+      final controller = StreamDraftListController.fromValue(
+        PagedValue<String, Draft>(items: [threadDraft, channelDraft]),
+        client: client,
+      )..deleteDraft(channelDraft);
+
+      expect(controller.value.asSuccess.items, equals([threadDraft]));
+    });
   });
 
   group('Order preservation', () {
