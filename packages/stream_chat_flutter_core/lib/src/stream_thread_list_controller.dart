@@ -143,59 +143,58 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
       this.limit * defaultInitialPagedLimitMultiplier,
       _kDefaultBackendPaginationLimit,
     );
-    try {
-      final response = await client.queryThreads(
-        filter: _activeFilter,
-        sort: _activeSort,
-        options: _activeOptions,
-        pagination: PaginationParams(limit: limit),
-      );
+    final result = await client.queryThreads(
+      filter: _activeFilter,
+      sort: _activeSort,
+      options: _activeOptions,
+      limit: limit,
+    );
 
-      final results = response.threads;
-      final nextKey = response.next;
-      value = PagedValue(
-        items: results,
-        nextPageKey: nextKey,
-      );
-      // Start listening to events
-      if (disposed) return;
-      _subscribeToThreadListEvents();
-    } on StreamChatException catch (error) {
-      value = PagedValue.error(error);
-    } catch (error) {
-      final chatError = StreamClientException(message: 'Failed to load threads', cause: error);
-      value = PagedValue.error(chatError);
-    }
+    result.fold(
+      onSuccess: (response) {
+        value = PagedValue(
+          items: response.threads,
+          nextPageKey: response.next,
+        );
+
+        // Start listening to events
+        if (disposed) return;
+        _subscribeToThreadListEvents();
+      },
+      onFailure: (error, _) => value = PagedValue.error(_chatException(error, 'Failed to load threads')),
+    );
   }
 
   @override
   Future<void> loadMore(String nextPageKey) async {
     final previousValue = value.asSuccess;
 
-    try {
-      final response = await client.queryThreads(
-        filter: _activeFilter,
-        sort: _activeSort,
-        options: _activeOptions,
-        pagination: PaginationParams(limit: limit, next: nextPageKey),
-      );
+    final result = await client.queryThreads(
+      filter: _activeFilter,
+      sort: _activeSort,
+      options: _activeOptions,
+      limit: limit,
+      next: nextPageKey,
+    );
 
-      final results = response.threads;
-      final previousItems = previousValue.items;
-      final newItems = previousItems + results;
-      final next = response.next;
-      final nextKey = next != null && next.isNotEmpty ? next : null;
-      value = PagedValue(
-        items: newItems,
-        nextPageKey: nextKey,
-      );
-    } on StreamChatException catch (error) {
-      value = previousValue.copyWith(error: error);
-    } catch (error) {
-      final chatError = StreamClientException(message: 'Failed to load more threads', cause: error);
-      value = previousValue.copyWith(error: chatError);
-    }
+    result.fold(
+      onSuccess: (response) {
+        final next = response.next;
+        value = PagedValue(
+          items: previousValue.items + response.threads,
+          nextPageKey: next != null && next.isNotEmpty ? next : null,
+        );
+      },
+      onFailure: (error, _) {
+        value = previousValue.copyWith(error: _chatException(error, 'Failed to load more threads'));
+      },
+    );
   }
+
+  StreamChatException _chatException(Object error, String message) => switch (error) {
+    final StreamChatException error => error,
+    _ => StreamClientException(message: message, cause: error),
+  };
 
   @override
   Future<void> refresh({bool resetValue = true}) {

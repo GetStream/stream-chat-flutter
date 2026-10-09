@@ -50,7 +50,7 @@
 - `Message` is public, persisted, WebSocket-delivered and the most customised type in the SDK. Keep ours; treat the generated `MessageResponse` as a mapping source only.
 - `Attachment`: the generated model defines fields our `extraData` currently absorbs. Decide the promotion rules before writing the mapper.
 - Replace the temporary `@DataSerializable` storage codec (`UserGroup`, `UserGroupMember`, `ReactionGroup`): decide between dedicated tables and codecs owned by `stream_chat_persistence` before `Message` and `Attachment` become plain models, then delete the typedef and every `fromData`/`toData` it generates.
-- Expose `MarkReadResponse.event`. [17](17-read-receipts.md) dropped it because its thread carries a `MessageResponse`; the mapper marks it with a TODO.
+- Give `Attachment` a typed Giphy field, and decide whether its renditions are required. Today they are an untyped `extraData['giphy']` map, which `AttachmentRequestMapper` fills out with empty values ([07](07-threads-and-drafts.md)).
 
 ## Decisions taken
 
@@ -108,7 +108,7 @@ an endpoint, so the definition of done below stays open.
   `image_labels` and `deleted_reply_count` behind new constructor parameters and typed getters
   (`Message.html`, `mml`, `imageLabels`, `deletedReplyCount`), the pattern `ChannelModel.disabled` uses.
   Dropping them would be a silent behavioural break. `DraftMessage` keeps the `html` and `mml` it is
-  sent as plain `extraData` entries, without getters.
+  sent in `extraData` too, read through getters since [07](07-threads-and-drafts.md).
 - **`mentioned_channel_members` is dropped:** the SDK has no feature built on it, so the mapper leaves
   it out of `extraData`, and drops a custom key of that name. `Message.fromJson` still lands it there
   from v1 JSON.

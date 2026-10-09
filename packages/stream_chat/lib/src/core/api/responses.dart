@@ -5,7 +5,6 @@ import '../models/banned_user.dart';
 import '../models/channel_model.dart';
 import '../models/channel_state.dart';
 import '../models/converters/v1_json_converters.dart';
-import '../models/draft.dart';
 import '../models/location.dart';
 import '../models/member.dart';
 import '../models/message.dart';
@@ -13,7 +12,6 @@ import '../models/predefined_filter.dart';
 import '../models/push_preference.dart';
 import '../models/reaction.dart';
 import '../models/read.dart';
-import '../models/thread.dart';
 import '../models/user.dart';
 
 part 'responses.g.dart';
@@ -366,74 +364,6 @@ class ChannelStateResponse extends _BaseResponse {
 
   /// Create a new instance from a json
   static ChannelStateResponse fromJson(Map<String, dynamic> json) => _$ChannelStateResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.getThread] api call
-@JsonSerializable(createToJson: false)
-class GetThreadResponse extends _BaseResponse {
-  /// The thread returned by the api call
-  late Thread thread;
-
-  /// Create a new instance from a json
-  static GetThreadResponse fromJson(Map<String, dynamic> json) => _$GetThreadResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.updateThread] api call
-@JsonSerializable(createToJson: false)
-class UpdateThreadResponse extends _BaseResponse {
-  /// The thread returned by the api call
-  late Thread thread;
-
-  /// Create a new instance from a json
-  static UpdateThreadResponse fromJson(Map<String, dynamic> json) => _$UpdateThreadResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.queryThreads] api call
-@JsonSerializable(createToJson: false)
-class QueryThreadsResponse extends _BaseResponse {
-  /// List of threads returned by the query
-  @JsonKey(defaultValue: [])
-  late List<Thread> threads;
-
-  /// The next page token
-  late String? next;
-
-  /// Create a new instance from a json
-  static QueryThreadsResponse fromJson(Map<String, dynamic> json) => _$QueryThreadsResponseFromJson(json);
-}
-
-/// Base Model response for draft based api calls.
-class DraftResponse extends _BaseResponse {
-  /// Draft returned by the api call
-  late Draft draft;
-}
-
-/// Model response for [StreamChatClient.createDraft] api call
-@JsonSerializable(createToJson: false)
-class CreateDraftResponse extends DraftResponse {
-  /// Create a new instance from a json
-  static CreateDraftResponse fromJson(Map<String, dynamic> json) => _$CreateDraftResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.getDraft] api call
-@JsonSerializable(createToJson: false)
-class GetDraftResponse extends DraftResponse {
-  /// Create a new instance from a json
-  static GetDraftResponse fromJson(Map<String, dynamic> json) => _$GetDraftResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.queryDrafts] api call
-@JsonSerializable(createToJson: false)
-class QueryDraftsResponse extends _BaseResponse {
-  /// List of draft messages returned by the query
-  @JsonKey(defaultValue: [])
-  late List<Draft> drafts;
-
-  /// The next page token
-  late String? next;
-
-  /// Create a new instance from a json
-  static QueryDraftsResponse fromJson(Map<String, dynamic> json) => _$QueryDraftsResponseFromJson(json);
 }
 
 /// Model response for [StreamChatClient.setPushPreferences] api call

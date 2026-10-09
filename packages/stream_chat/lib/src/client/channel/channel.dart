@@ -1241,29 +1241,37 @@ class Channel {
     },
   );
 
-  /// Creates or updates a new [draft] for this channel.
-  Future<CreateDraftResponse> createDraft(
+  /// Saves [draft] as the current user's draft in this channel.
+  ///
+  /// It replaces the draft the user already has here, or in the thread of the message [DraftMessage.parentId]
+  /// names.
+  ///
+  /// Throws a [StateError] if the channel is not initialized.
+  Future<Result<CreateDraftResponse>> createDraft(
     DraftMessage draft,
   ) {
     _checkInitialized();
     return _client.createDraft(draft, id!, type);
   }
 
-  /// Retrieves the draft for this channel.
+  /// Fetches the current user's draft in this channel, or in the thread of the message with the id [parentId].
   ///
-  /// Optionally, provide a [parentId] to get the draft for a specific thread.
-  Future<GetDraftResponse> getDraft({
+  /// A channel or thread without a draft comes back as a failure.
+  ///
+  /// Throws a [StateError] if the channel is not initialized.
+  Future<Result<GetDraftResponse>> getDraft({
     String? parentId,
   }) {
     _checkInitialized();
     return _client.getDraft(id!, type, parentId: parentId);
   }
 
-  /// Deletes the draft for this channel.
+  /// Deletes the current user's draft in this channel, or in the thread of the message with the id [parentId].
   ///
-  /// Optionally, provide a [parentId] to delete the draft for a specific
-  /// thread.
-  Future<EmptyResponse> deleteDraft({
+  /// A channel or thread without a draft comes back as a failure.
+  ///
+  /// Throws a [StateError] if the channel is not initialized.
+  Future<Result<void>> deleteDraft({
     String? parentId,
   }) {
     _checkInitialized();

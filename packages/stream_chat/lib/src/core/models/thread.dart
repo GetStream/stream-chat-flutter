@@ -1,8 +1,6 @@
-import 'package:equatable/equatable.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:stream_core/stream_core.dart' show Filter, FilterField, NullOrdering, Sort, SortField;
 
-import '../util/serializer.dart';
 import 'channel_model.dart';
 import 'draft.dart';
 import 'message.dart';
@@ -10,7 +8,7 @@ import 'read.dart';
 import 'thread_participant.dart';
 import 'user.dart';
 
-part 'thread.g.dart';
+part 'thread.freezed.dart';
 
 class _NullConst {
   const _NullConst();
@@ -22,8 +20,8 @@ const _nullConst = _NullConst();
 /// A model class representing a thread. Threads are a way to group replies
 /// to a message in a channel.
 /// {@endtemplate}
-@JsonSerializable()
-class Thread extends Equatable {
+@Freezed(copyWith: false)
+class Thread with _$Thread {
   /// {@macro streamThread}
   Thread({
     this.activeParticipantCount,
@@ -48,69 +46,81 @@ class Thread extends Equatable {
   }) : createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
-  /// Create a new instance from a json
-  factory Thread.fromJson(Map<String, dynamic> json) =>
-      _$ThreadFromJson(Serializer.moveToExtraDataFromRoot(json, topLevelFields));
-
   /// The active participant count in the thread.
+  @override
   final int? activeParticipantCount;
 
   /// The channel cid this thread belongs to.
+  @override
   final String channelCid;
 
   /// The channel this thread belongs to.
+  @override
   final ChannelModel? channel;
 
   /// The date at which the thread was created.
+  @override
   final DateTime createdAt;
 
   /// The date at which the thread was last updated.
+  @override
   final DateTime updatedAt;
 
   /// The date at which the thread was deleted.
+  @override
   final DateTime? deletedAt;
 
   /// The id of the user who created the thread.
+  @override
   final String createdByUserId;
 
   /// The user who created the thread.
+  @override
   final User? createdBy;
 
   /// An optional title for the thread.
+  @override
   final String? title;
 
   /// The id of the parent message of the thread.
+  @override
   final String parentMessageId;
 
   /// The parent message of the thread.
+  @override
   final Message? parentMessage;
 
   /// The number of replies in the thread.
+  @override
   final int replyCount;
 
   /// The number of users participating in the thread.
+  @override
   final int participantCount;
 
   /// The list of participants in the thread.
+  @override
   final List<ThreadParticipant> threadParticipants;
 
   /// The date of the last message in the thread.
+  @override
   final DateTime? lastMessageAt;
 
   /// The list of latest replies in the thread.
+  @override
   final List<Message> latestReplies;
 
   /// The list of reads in the thread.
+  @override
   final List<Read>? read;
 
   /// The draft message in the thread.
+  @override
   final Draft? draft;
 
   /// Map of custom thread extraData
+  @override
   final Map<String, Object?> extraData;
-
-  /// Serialize to json
-  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(_$ThreadToJson(this));
 
   /// Creates a copy of [Thread] with specified attributes overridden.
   Thread copyWith({
@@ -181,9 +191,7 @@ class Thread extends Equatable {
     );
   }
 
-  /// Known top level fields.
-  ///
-  /// Useful for [Serializer] methods.
+  /// The names of a thread's own fields, which [extraData] never holds.
   static const topLevelFields = [
     'active_participant_count',
     'channel_cid',
@@ -203,28 +211,6 @@ class Thread extends Equatable {
     'latest_replies',
     'read',
     'draft',
-  ];
-
-  @override
-  List<Object?> get props => [
-    activeParticipantCount,
-    channelCid,
-    channel,
-    createdAt,
-    updatedAt,
-    deletedAt,
-    createdByUserId,
-    createdBy,
-    title,
-    parentMessageId,
-    parentMessage,
-    replyCount,
-    participantCount,
-    threadParticipants,
-    lastMessageAt,
-    latestReplies,
-    read,
-    draft,
   ];
 }
 

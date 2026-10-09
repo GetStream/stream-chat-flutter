@@ -1329,131 +1329,79 @@ void main() {
       );
     });
 
-    group('`.createDraft`', () {
-      final draftMessage = DraftMessage(text: 'Draft message text');
+    test("Channel.createDraft sends the draft message and returns the client's createDraft response", () async {
+      final draftMessage = DraftMessage(id: 'draft-id', text: 'Draft message text');
+      final response = CreateDraftResponse(
+        duration: '0.01ms',
+        draft: Draft(channelCid: channelCid, createdAt: DateTime.utc(2024, 6, 1), message: draftMessage),
+      );
+      when(
+        () => client.createDraft(draftMessage, channelId, channelType),
+      ).thenAnswer((_) async => Result.success(response));
 
-      setUp(() {
-        when(
-          () => client.createDraft(
-            draftMessage,
-            channelId,
-            channelType,
-          ),
-        ).thenAnswer(
-          (_) async => CreateDraftResponse()
-            ..draft = Draft(
-              channelCid: channelCid,
-              createdAt: DateTime.now(),
-              message: draftMessage,
-            ),
-        );
-      });
+      final res = await channel.createDraft(draftMessage);
 
-      test('should call client.createDraft', () async {
-        final res = await channel.createDraft(draftMessage);
-
-        expect(res, isNotNull);
-        expect(res.draft.message, draftMessage);
-
-        verify(
-          () => channel.client.createDraft(
-            draftMessage,
-            channelId,
-            channelType,
-          ),
-        ).called(1);
-      });
+      expect(res.getOrNull(), response);
+      verify(() => client.createDraft(draftMessage, channelId, channelType)).called(1);
     });
 
-    group('`.getDraft`', () {
-      final draftMessage = DraftMessage(text: 'Draft message text');
+    test("Channel.getDraft sends no parent id and returns the client's getDraft response", () async {
+      final response = GetDraftResponse(
+        duration: '0.01ms',
+        draft: Draft(
+          channelCid: channelCid,
+          createdAt: DateTime.utc(2024, 6, 1),
+          message: DraftMessage(id: 'draft-id', text: 'Draft message text'),
+        ),
+      );
+      when(() => client.getDraft(channelId, channelType)).thenAnswer((_) async => Result.success(response));
 
-      setUp(() {
-        when(
-          () => client.getDraft(
-            channelId,
-            channelType,
-            parentId: any(named: 'parentId'),
-          ),
-        ).thenAnswer(
-          (_) async => GetDraftResponse()
-            ..draft = Draft(
-              channelCid: channelCid,
-              createdAt: DateTime.now(),
-              message: draftMessage,
-            ),
-        );
-      });
+      final res = await channel.getDraft();
 
-      test('should call client.getDraft', () async {
-        final res = await channel.getDraft();
-
-        expect(res, isNotNull);
-        expect(res.draft.message, draftMessage);
-
-        verify(
-          () => channel.client.getDraft(
-            channelId,
-            channelType,
-          ),
-        ).called(1);
-      });
-
-      test('with parentId should pass parentId to client', () async {
-        const parentId = 'parent-123';
-        final res = await channel.getDraft(parentId: parentId);
-
-        expect(res, isNotNull);
-        expect(res.draft.message, draftMessage);
-
-        verify(
-          () => channel.client.getDraft(
-            channelId,
-            channelType,
-            parentId: parentId,
-          ),
-        ).called(1);
-      });
+      expect(res.getOrNull(), response);
+      verify(() => client.getDraft(channelId, channelType)).called(1);
     });
 
-    group('`.deleteDraft`', () {
-      setUp(() {
-        when(
-          () => client.deleteDraft(
-            channelId,
-            channelType,
-            parentId: any(named: 'parentId'),
-          ),
-        ).thenAnswer((_) async => EmptyResponse());
-      });
+    test("Channel.getDraft sends the parent id and returns the client's getDraft response", () async {
+      const parentId = 'parent-123';
+      final response = GetDraftResponse(
+        duration: '0.01ms',
+        draft: Draft(
+          channelCid: channelCid,
+          createdAt: DateTime.utc(2024, 6, 1),
+          message: DraftMessage(id: 'draft-id', text: 'Draft message text', parentId: parentId),
+          parentId: parentId,
+        ),
+      );
+      when(
+        () => client.getDraft(channelId, channelType, parentId: parentId),
+      ).thenAnswer((_) async => Result.success(response));
 
-      test('should call client.deleteDraft', () async {
-        final res = await channel.deleteDraft();
+      final res = await channel.getDraft(parentId: parentId);
 
-        expect(res, isNotNull);
+      expect(res.getOrNull(), response);
+      verify(() => client.getDraft(channelId, channelType, parentId: parentId)).called(1);
+    });
 
-        verify(
-          () => channel.client.deleteDraft(
-            channelId,
-            channelType,
-          ),
-        ).called(1);
-      });
+    test("Channel.deleteDraft sends no parent id and returns the client's deleteDraft result", () async {
+      when(() => client.deleteDraft(channelId, channelType)).thenAnswer((_) async => const Result.success(null));
 
-      test('with parentId should pass parentId to client', () async {
-        const parentId = 'parent-123';
-        final res = await channel.deleteDraft(parentId: parentId);
+      final res = await channel.deleteDraft();
 
-        expect(res, isNotNull);
+      expect(res.isSuccess, isTrue);
+      verify(() => client.deleteDraft(channelId, channelType)).called(1);
+    });
 
-        verify(
-          () => channel.client.deleteDraft(
-            channelId,
-            channelType,
-            parentId: parentId,
-          ),
-        ).called(1);
-      });
+    test("Channel.deleteDraft sends the parent id and returns the client's deleteDraft result", () async {
+      const parentId = 'parent-123';
+      when(
+        () => client.deleteDraft(channelId, channelType, parentId: parentId),
+      ).thenAnswer((_) async => const Result.success(null));
+
+      final res = await channel.deleteDraft(parentId: parentId);
+
+      expect(res.isSuccess, isTrue);
+      verify(() => client.deleteDraft(channelId, channelType, parentId: parentId)).called(1);
     });
 
     test("Channel.createReminder sends the due date and returns the client's createReminder response", () async {

@@ -438,16 +438,68 @@ GROUPS = [
               'message_api.dart::getDraft', 'message_api.dart::queryDrafts'],
         match=owns('/api/v2/chat/threads', '/api/v2/chat/drafts', '/api/v2/chat/channels/{type}/{id}/draft'),
         goal='Two related families that share the `Draft` model and the list controllers above them.',
-        decisions=[
-            'The generated thread response embeds a full `ChannelResponse`. Decide whether the channel inside a '
-            'thread adopts the generated shape now, or waits for the channels group — and write the answer down, '
-            'because the two groups can otherwise disagree.',
-        ],
+        decisions=[],
+        taken=textwrap.dedent("""\
+            - **The v2 routes are the v1 handlers.** `lib/chat/routes.go` mounts all seven in the shared `coreRoutes`;
+              none is gated or deprecated. `queryDrafts` is in beta on both routes, so the switch changes nothing
+              about who may call it.
+            - **Moved off `ThreadsApi` and `MessageApi`:** `queryThreads`, `getThread`, `partialUpdateThread`,
+              `createDraft`, `getDraft`, `deleteDraft` and `queryDrafts`, each a `StreamChatClient` method over a new
+              `ThreadsRepository` or `MessagesRepository` (named after `message_api.dart`, which group 10 empties
+              into it). `threads_api.dart` and `StreamChatApi.threads` are deleted; `Channel`'s three draft methods
+              return a `Result` too, and still throw a `StateError` on an uninitialized channel.
+            - **`partialUpdateThread` becomes `updateThreadPartial`, answering `UpdateThreadPartialResponse`**
+              (approved), after the spec and `updateChannelPartial`. The other envelopes keep their v10 names;
+              `deleteDraft` answers `DurationResponse`, so it returns `Result<void>`. The shared base class
+              `DraftResponse` is removed (approved).
+            - **`queryThreads` and `queryDrafts` take `limit`, `next` and `prev`** instead of `PaginationParams`
+              (approved). The backend reads only those (both cursors together rejected); `queryThreads` keeps v10's
+              limit of 10, `queryDrafts` sends none, so the backend's 25 still applies. Both responses gain `prev`.
+            - **`ThreadOptions` moves to `models/request/`** as a freezed class without `toJson`. All four values are
+              always sent: `getThread` has no backend defaults (an absent `reply_limit` returns no replies).
+            - **`Thread` and `ThreadParticipant` are plain `@freezed` models,** keeping v10's hand-written `copyWith`
+              and `merge` (`@Freezed(copyWith: false)`). They lose `fromJson`, `toJson` and `Equatable`; `Thread`
+              equality now includes `extraData`, which v10's `props` left out. One `Thread` serves both the full
+              (`ThreadStateResponse`) and the partial (`ThreadResponse`) shape, as in v10: the partial one maps
+              without latest replies, reads or a draft. `ThreadParticipant` drops the generated `custom`, which v10
+              never read.
+            - **v1 JSON keeps decoding through `ThreadV1JsonConverter`** on `Event.thread`, both ways, with custom
+              data at the root and v10's keys.
+            - **The channel inside a thread maps through `channel_mapper.dart` now,** onto today's `ChannelModel`, as
+              the draft's channel already did; group [11](11-channels-and-members.md) re-points both. A thread's
+              reads map through a new `ReadStateResponseMapper` in the same file.
+            - **`Draft` and `DraftMessage` stay json_serializable** until group [10](10-messages.md), as the adapters
+              table records. Persistence stores drafts as rows in `draft_messages`, column by column, so nothing
+              about the stored format changes.
+            - **`createDraft` stores exactly what v10 stored.** The backend stores a draft alike from either route,
+              so the request mapper (`DraftMessageRequestMapper`, `AttachmentRequestMapper`) reproduces what v1 bound
+              from v10's flattened body: extra data becomes `custom` on the message and on each attachment
+              (`file_size` and `mime_type` included, the local id, upload state and file dropped), mentions the text
+              no longer has are dropped, a command is written into the text, and the markup is sent as its own
+              field. The Giphy renditions and the fields and actions map to their typed fields; a key missing from
+              them is sent empty, which the backend stores the same as absent. One divergence, approved: the fields a
+              received message keeps in its extra data (`cid`, `html`, `image_labels`, `deleted_reply_count`,
+              `mentioned_channel_members`) are no longer stored as draft custom data.
+            - **`DraftMessage.html` and `mml` are promoted** as constructor arguments stored in `extraData` and read
+              back through getters, as `Message.html` and `mml` are; `DraftMessageRequestMapper` sends `mml` as the
+              request's own field, so re-saving a draft keeps it. The keys a received message keeps in its extra data
+              are one internal set, `messageExtraDataFields` in `message_mapper.dart`, shared by the message and draft
+              mappers.
+            - **Verified live** against the demo app, each call against v10's v1 request decoded the v10 way: query
+              threads with defaults and with a filter, sort, `next` and `prev` (both cursors rejected), get a thread,
+              set and unset a custom field on one, and create, get, query and delete three drafts (one with every
+              field and attachment kind, one with a command, one carrying a received message's extra data). Every
+              thread maps as v10 decoded it, except the nested users' `blocked_user_ids`, which `user_mapper.dart`
+              drops for every migrated endpoint (decided in [09](09-users.md)). Every draft v2 saves is stored byte for
+              byte as v10's, except the received message's `image_labels`. Deleting or fetching a missing draft
+              returns a 404 failure.
+            - **`MarkReadResponse.event` stays unexposed,** now waiting on group [09](09-users.md): its `user` is a
+              `UserResponseCommonFields`, which `user_mapper.dart` has no mapper for.
+            """),
+        done=DONE.replace('- [ ]', '- [x]'),
         risks=[
-            'The four draft methods live in `message_api.dart`, not `threads_api.dart` — this group reaches into '
-            'that file, and group 10 must leave those four alone.',
-            '`Draft` and `DraftMessage` are public, persisted, and read by `StreamDraftListController` in '
-            '`stream_chat_flutter_core`.',
+            '`createDraft` must keep storing exactly what v10 stored, so v1 readers of the draft — channel queries, '
+            'WebSocket events, the offline cache — see no change.',
         ],
     ),
     dict(
@@ -601,6 +653,9 @@ GROUPS = [
             'restructures them, last: the mappers in `user_mapper.dart` already map the generated types onto the '
             'current class for every group before it, and stay. See [01-foundation](01-foundation.md).',
             '`PrivacySettings` and the push-preference sub-shapes — decide per type.',
+            'Expose `MarkReadResponse.event`, and decide its public type. [17](17-read-receipts.md) dropped it, and '
+            'since [07](07-threads-and-drafts.md) maps threads the only missing piece is its `user`, a '
+            '`UserResponseCommonFields` that `user_mapper.dart` has no mapper for; the mapper marks it with a TODO.',
             '`UserResponse.toModel()` and `FullUserResponse.toModel()` drop custom data named like one of the user\'s '
             'own fields (`_shadowedCustomKeys`): `deactivated_at`, `deleted_at` and `shadow_banned` are refilled from '
             'the typed fields, and the `OwnUser`-only keys and `revoke_tokens_issued_before` are left out, where v1 '
@@ -669,8 +724,9 @@ GROUPS = [
             'Replace the temporary `@DataSerializable` storage codec (`UserGroup`, `UserGroupMember`, `ReactionGroup`): decide '
             'between dedicated tables and codecs owned by `stream_chat_persistence` before `Message` and '
             '`Attachment` become plain models, then delete the typedef and every `fromData`/`toData` it generates.',
-            'Expose `MarkReadResponse.event`. [17](17-read-receipts.md) dropped it because its thread carries a '
-            '`MessageResponse`; the mapper marks it with a TODO.',
+            'Give `Attachment` a typed Giphy field, and decide whether its renditions are required. Today they are an '
+            'untyped `extraData[\'giphy\']` map, which `AttachmentRequestMapper` fills out with empty values '
+            '([07](07-threads-and-drafts.md)).',
         ],
         risks=[
             '`message_api.dart` also holds the four draft methods, which belong to group 07 — leave them alone '
@@ -734,7 +790,7 @@ GROUPS = [
               `image_labels` and `deleted_reply_count` behind new constructor parameters and typed getters
               (`Message.html`, `mml`, `imageLabels`, `deletedReplyCount`), the pattern `ChannelModel.disabled` uses.
               Dropping them would be a silent behavioural break. `DraftMessage` keeps the `html` and `mml` it is
-              sent as plain `extraData` entries, without getters.
+              sent in `extraData` too, read through getters since [07](07-threads-and-drafts.md).
             - **`mentioned_channel_members` is dropped:** the SDK has no feature built on it, so the mapper leaves
               it out of `extraData`, and drops a custom key of that name. `Message.fromJson` still lands it there
               from v1 JSON.

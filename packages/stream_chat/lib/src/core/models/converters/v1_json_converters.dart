@@ -6,6 +6,7 @@ import '../../util/serializer.dart';
 import '../action.dart';
 import '../channel_model.dart';
 import '../device.dart';
+import '../draft.dart';
 import '../location.dart';
 import '../message.dart';
 import '../message_reminder.dart';
@@ -16,6 +17,9 @@ import '../poll_vote.dart';
 import '../push_provider.dart';
 import '../reaction.dart';
 import '../reaction_group.dart';
+import '../read.dart';
+import '../thread.dart';
+import '../thread_participant.dart';
 import '../user.dart';
 import '../user_group.dart';
 import '../user_group_member.dart';
@@ -176,6 +180,110 @@ class MessageReminderV1JsonConverter implements JsonConverter<MessageReminder, M
     'updated_at': reminder.updatedAt.toIso8601String(),
   };
 }
+
+/// Converts a [Thread] to and from its v1 keys, with its custom data at the root.
+// TODO(openapi-migration): remove once WebSocket events decode v2 payloads
+@internal
+class ThreadV1JsonConverter implements JsonConverter<Thread, Map<String, dynamic>> {
+  /// Creates a new [ThreadV1JsonConverter].
+  const ThreadV1JsonConverter();
+
+  @override
+  Thread fromJson(Map<String, dynamic> json) => Thread(
+    activeParticipantCount: (json['active_participant_count'] as num?)?.toInt(),
+    channel: switch (json['channel']) {
+      final Map<String, dynamic> channel => ChannelModel.fromJson(channel),
+      _ => null,
+    },
+    channelCid: json['channel_cid'] as String,
+    parentMessageId: json['parent_message_id'] as String,
+    parentMessage: switch (json['parent_message']) {
+      final Map<String, dynamic> message => Message.fromJson(message),
+      _ => null,
+    },
+    createdByUserId: json['created_by_user_id'] as String,
+    createdBy: switch (json['created_by']) {
+      final Map<String, dynamic> user => User.fromJson(user),
+      _ => null,
+    },
+    replyCount: (json['reply_count'] as num).toInt(),
+    participantCount: (json['participant_count'] as num).toInt(),
+    threadParticipants: [
+      for (final participant in json['thread_participants'] as List<dynamic>? ?? const [])
+        _threadParticipantFromV1Json(participant as Map<String, dynamic>),
+    ],
+    lastMessageAt: _dateTimeOrNull(json['last_message_at']),
+    createdAt: _dateTimeOrNull(json['created_at']),
+    updatedAt: _dateTimeOrNull(json['updated_at']),
+    deletedAt: _dateTimeOrNull(json['deleted_at']),
+    title: json['title'] as String?,
+    latestReplies: [
+      for (final reply in json['latest_replies'] as List<dynamic>? ?? const [])
+        Message.fromJson(reply as Map<String, dynamic>),
+    ],
+    read: [
+      for (final read in json['read'] as List<dynamic>? ?? const []) Read.fromJson(read as Map<String, dynamic>),
+    ],
+    draft: switch (json['draft']) {
+      final Map<String, dynamic> draft => Draft.fromJson(draft),
+      _ => null,
+    },
+    extraData: {
+      for (final MapEntry(:key, :value) in json.entries)
+        if (!Thread.topLevelFields.contains(key)) key: value,
+    },
+  );
+
+  @override
+  Map<String, dynamic> toJson(Thread thread) => {
+    'active_participant_count': thread.activeParticipantCount,
+    'channel_cid': thread.channelCid,
+    'channel': thread.channel?.toJson(),
+    'created_at': thread.createdAt.toIso8601String(),
+    'updated_at': thread.updatedAt.toIso8601String(),
+    'deleted_at': thread.deletedAt?.toIso8601String(),
+    'created_by_user_id': thread.createdByUserId,
+    'created_by': thread.createdBy?.toJson(),
+    'title': thread.title,
+    'parent_message_id': thread.parentMessageId,
+    'parent_message': thread.parentMessage?.toJson(),
+    'reply_count': thread.replyCount,
+    'participant_count': thread.participantCount,
+    'thread_participants': [
+      for (final participant in thread.threadParticipants) _threadParticipantToV1Json(participant),
+    ],
+    'last_message_at': thread.lastMessageAt?.toIso8601String(),
+    'latest_replies': [for (final reply in thread.latestReplies) reply.toJson()],
+    'read': thread.read?.map((read) => read.toJson()).toList(),
+    'draft': thread.draft?.toJson(),
+    ...thread.extraData,
+  };
+}
+
+ThreadParticipant _threadParticipantFromV1Json(Map<String, dynamic> json) => ThreadParticipant(
+  channelCid: json['channel_cid'] as String,
+  createdAt: _dateTime.fromJson(json['created_at'] as Object),
+  lastReadAt: _dateTime.fromJson(json['last_read_at'] as Object),
+  lastThreadMessageAt: _dateTimeOrNull(json['last_thread_message_at']),
+  leftThreadAt: _dateTimeOrNull(json['left_thread_at']),
+  threadId: json['thread_id'] as String?,
+  userId: json['user_id'] as String?,
+  user: switch (json['user']) {
+    final Map<String, dynamic> user => User.fromJson(user),
+    _ => null,
+  },
+);
+
+Map<String, dynamic> _threadParticipantToV1Json(ThreadParticipant participant) => {
+  'channel_cid': participant.channelCid,
+  'created_at': participant.createdAt.toIso8601String(),
+  'last_read_at': participant.lastReadAt.toIso8601String(),
+  'last_thread_message_at': participant.lastThreadMessageAt?.toIso8601String(),
+  'left_thread_at': participant.leftThreadAt?.toIso8601String(),
+  'thread_id': participant.threadId,
+  'user_id': participant.userId,
+  'user': participant.user?.toJson(),
+};
 
 /// Converts a [Device] to and from its v1 `id` and `push_provider` keys.
 // TODO(openapi-migration): remove in group 09

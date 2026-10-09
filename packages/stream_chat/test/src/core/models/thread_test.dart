@@ -31,33 +31,6 @@ void main() {
       expect(thread.draft, isNull);
     });
 
-    test('should serialize to and deserialize from JSON correctly', () {
-      final now = DateTime.now();
-      const channelCid = 'messaging:123';
-      const parentId = 'parent-message-id';
-      const userIdCreator = 'creator-user-id';
-
-      final thread = Thread(
-        channelCid: channelCid,
-        parentMessageId: parentId,
-        createdByUserId: userIdCreator,
-        replyCount: 5,
-        participantCount: 3,
-        createdAt: now,
-        updatedAt: now,
-      );
-
-      final json = thread.toJson();
-      final threadFromJson = Thread.fromJson(json);
-
-      expect(threadFromJson.channelCid, equals(thread.channelCid));
-      expect(threadFromJson.parentMessageId, equals(thread.parentMessageId));
-      expect(threadFromJson.createdByUserId, equals(thread.createdByUserId));
-      expect(threadFromJson.replyCount, equals(thread.replyCount));
-      expect(threadFromJson.participantCount, equals(thread.participantCount));
-      expect(threadFromJson.draft, isNull);
-    });
-
     test('should handle draft field correctly', () {
       final now = DateTime.now();
       const channelCid = 'messaging:123';

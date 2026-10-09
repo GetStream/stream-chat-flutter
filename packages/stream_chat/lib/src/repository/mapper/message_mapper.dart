@@ -13,18 +13,20 @@ import 'user_mapper.dart';
 
 // TODO(openapi-migration): re-point these mappers in group 10.
 
+/// The fields a received [Message] keeps in its extra data, which are not custom data.
+const messageExtraDataFields = {
+  'cid',
+  'html',
+  'mml',
+  'image_labels',
+  'deleted_reply_count',
+  'mentioned_channel_members',
+};
+
 /// Maps a generated [api.MessageResponse] to a [Message].
 extension MessageResponseMapper on api.MessageResponse {
   // Custom keys named like one of the message's own fields, including the ones it keeps in its extra data.
-  static final _shadowedCustomKeys = {
-    ...Message.topLevelFields,
-    'cid',
-    'html',
-    'mml',
-    'image_labels',
-    'deleted_reply_count',
-    'mentioned_channel_members',
-  };
+  static final _shadowedCustomKeys = {...Message.topLevelFields, ...messageExtraDataFields};
 
   /// Converts this response into a [Message].
   ///

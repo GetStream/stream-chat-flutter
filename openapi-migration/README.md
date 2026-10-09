@@ -18,7 +18,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [04](04-roles-guest-and-app.md) | Roles, Guest & App Settings | 0 | 5 | ☑ |
 | [05](05-polls.md) | Polls | 0 | 13 | ☑ |
 | [06](06-reminders.md) | Message Reminders | 0 | 4 | ☑ |
-| [07](07-threads-and-drafts.md) | Threads & Drafts | 7 | 7 | ☐ |
+| [07](07-threads-and-drafts.md) | Threads & Drafts | 0 | 7 | ☑ |
 | [08](08-moderation-and-blocklists.md) | Moderation & Blocklists | 0 | 34 | ☑ |
 | [09](09-users.md) | Users | 3 | 3 | ☐ |
 | [10](10-messages.md) | Messages & Search | 14 | 12 | ☐ |
@@ -165,6 +165,7 @@ includes a named response that carries only `duration` today, such as `HideChann
 | `DataSerializable` | `UserGroup`, `UserGroupMember`, `ReactionGroup`, `PollOption` (`fromData`, `toData`) | [10](10-messages.md) |
 | `PollV1JsonConverter` | `Message.poll`, `DraftMessage.poll`, `Event.poll` | WebSocket v2 (no group) |
 | `PollVoteV1JsonConverter` | `Event.pollVote` | WebSocket v2 (no group) |
+| `ThreadV1JsonConverter` | `Event.thread` | WebSocket v2 (no group) |
 | `user_mapper.dart` (kept, re-pointed) | today's `User`, which still reads and writes JSON | [09](09-users.md) |
 | `channel_mapper.dart` (kept, re-pointed) | today's `ChannelModel`, `ChannelConfig` and `Member`, which still read and write JSON | [11](11-channels-and-members.md) |
 | `message_mapper.dart`, `attachment_mapper.dart`, `reaction_mapper.dart`, `location_mapper.dart`, `drafts_mapper.dart` (kept, re-pointed) | today's `Message`, `Attachment`, `Reaction`, `Location`, `Draft` and `DraftMessage`, which still read and write JSON | [10](10-messages.md) |

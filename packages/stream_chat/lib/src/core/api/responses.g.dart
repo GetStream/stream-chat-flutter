@@ -149,32 +149,6 @@ ChannelStateResponse _$ChannelStateResponseFromJson(Map<String, dynamic> json) =
   ..watcherCount = (json['watcher_count'] as num?)?.toInt() ?? 0
   ..read = (json['read'] as List<dynamic>?)?.map((e) => Read.fromJson(e as Map<String, dynamic>)).toList() ?? [];
 
-GetThreadResponse _$GetThreadResponseFromJson(Map<String, dynamic> json) => GetThreadResponse()
-  ..duration = json['duration'] as String?
-  ..thread = Thread.fromJson(json['thread'] as Map<String, dynamic>);
-
-UpdateThreadResponse _$UpdateThreadResponseFromJson(Map<String, dynamic> json) => UpdateThreadResponse()
-  ..duration = json['duration'] as String?
-  ..thread = Thread.fromJson(json['thread'] as Map<String, dynamic>);
-
-QueryThreadsResponse _$QueryThreadsResponseFromJson(Map<String, dynamic> json) => QueryThreadsResponse()
-  ..duration = json['duration'] as String?
-  ..threads = (json['threads'] as List<dynamic>?)?.map((e) => Thread.fromJson(e as Map<String, dynamic>)).toList() ?? []
-  ..next = json['next'] as String?;
-
-CreateDraftResponse _$CreateDraftResponseFromJson(Map<String, dynamic> json) => CreateDraftResponse()
-  ..duration = json['duration'] as String?
-  ..draft = Draft.fromJson(json['draft'] as Map<String, dynamic>);
-
-GetDraftResponse _$GetDraftResponseFromJson(Map<String, dynamic> json) => GetDraftResponse()
-  ..duration = json['duration'] as String?
-  ..draft = Draft.fromJson(json['draft'] as Map<String, dynamic>);
-
-QueryDraftsResponse _$QueryDraftsResponseFromJson(Map<String, dynamic> json) => QueryDraftsResponse()
-  ..duration = json['duration'] as String?
-  ..drafts = (json['drafts'] as List<dynamic>?)?.map((e) => Draft.fromJson(e as Map<String, dynamic>)).toList() ?? []
-  ..next = json['next'] as String?;
-
 UpsertPushPreferencesResponse _$UpsertPushPreferencesResponseFromJson(Map<String, dynamic> json) =>
     UpsertPushPreferencesResponse()
       ..duration = json['duration'] as String?

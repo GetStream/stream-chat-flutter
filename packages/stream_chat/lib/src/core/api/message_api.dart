@@ -2,8 +2,6 @@ import 'dart:convert';
 
 import '../http/stream_http_client.dart';
 import '../models/converters/v1_json_converters.dart';
-import '../models/draft.dart';
-import '../models/draft_message.dart';
 import '../models/message.dart';
 import '../models/reaction.dart';
 import 'requests.dart';
@@ -33,82 +31,6 @@ class MessageApi {
       },
     );
     return SendMessageResponse.fromJson(response.data);
-  }
-
-  /// Creates a draft for the given [channelId] of type [channelType].
-  ///
-  /// Returns a [CreateDraftResponse] containing the draft.
-  Future<CreateDraftResponse> createDraft(
-    String channelId,
-    String channelType,
-    DraftMessage message,
-  ) async {
-    final response = await _client.post(
-      '/channels/$channelType/$channelId/draft',
-      data: jsonEncode({'message': message}),
-    );
-    return CreateDraftResponse.fromJson(response.data);
-  }
-
-  /// Deletes the draft for the given [channelId] of type [channelType].
-  ///
-  /// Optionally, you can provide a [parentId] if the draft is in a thread.
-  ///
-  /// Returns an [EmptyResponse] on success.
-  Future<EmptyResponse> deleteDraft(
-    String channelId,
-    String channelType, {
-    String? parentId,
-  }) async {
-    final response = await _client.delete(
-      '/channels/$channelType/$channelId/draft',
-      queryParameters: {
-        if (parentId != null) 'parent_id': parentId,
-      },
-    );
-    return EmptyResponse.fromJson(response.data);
-  }
-
-  /// Retrieves a draft from the given [channelId] of type [channelType]
-  ///
-  /// Optionally, you can provide a [parentId] if the draft is in a thread.
-  ///
-  /// Returns a [GetDraftResponse] containing the draft message.
-  Future<GetDraftResponse> getDraft(
-    String channelId,
-    String channelType, {
-    String? parentId,
-  }) async {
-    final response = await _client.get(
-      '/channels/$channelType/$channelId/draft',
-      queryParameters: {
-        if (parentId != null) 'parent_id': parentId,
-      },
-    );
-    return GetDraftResponse.fromJson(response.data);
-  }
-
-  /// Retrieves a list of draft for the current user.
-  ///
-  /// Optionally, you can provide a [filter] to filter the drafts,
-  /// a [sort] order to sort the drafts, and [pagination] parameters to paginate
-  /// the results.
-  ///
-  /// Returns a [QueryDraftsResponse] containing the list of draft.
-  Future<QueryDraftsResponse> queryDrafts({
-    DraftFilter? filter,
-    List<DraftSort>? sort,
-    PaginationParams? pagination,
-  }) async {
-    final response = await _client.post(
-      '/drafts/query',
-      data: jsonEncode({
-        if (filter != null) 'filter': filter,
-        if (sort != null) 'sort': sort,
-        if (pagination != null) ...pagination.toJson(),
-      }),
-    );
-    return QueryDraftsResponse.fromJson(response.data);
   }
 
   /// Retrieves a list of messages by [messageIDs]

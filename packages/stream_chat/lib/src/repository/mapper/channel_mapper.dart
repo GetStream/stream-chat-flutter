@@ -7,6 +7,7 @@ import '../../core/models/chat_preferences.dart';
 import '../../core/models/command.dart';
 import '../../core/models/member.dart';
 import '../../core/models/push_level.dart';
+import '../../core/models/read.dart';
 import '../../core/models/request/message_delivery.dart';
 import '../../core/models/response/delete_channel_response.dart';
 import '../../core/models/response/hide_channel_response.dart';
@@ -173,6 +174,19 @@ extension ChannelMemberResponseMapper on api.ChannelMemberResponse {
   );
 }
 
+/// Maps a generated [api.ReadStateResponse] to a [Read].
+extension ReadStateResponseMapper on api.ReadStateResponse {
+  /// Converts this read state into a [Read].
+  Read toModel() => Read(
+    lastRead: lastRead,
+    user: user.toModel(),
+    lastReadMessageId: lastReadMessageId,
+    unreadMessages: unreadMessages,
+    lastDeliveredAt: lastDeliveredAt,
+    lastDeliveredMessageId: lastDeliveredMessageId,
+  );
+}
+
 /// Maps a generated [api.UpdateChannelPartialResponse] to an [UpdateChannelPartialResponse].
 extension UpdateChannelPartialResponseMapper on api.UpdateChannelPartialResponse {
   /// Converts this response into an [UpdateChannelPartialResponse].
@@ -215,7 +229,7 @@ extension DeleteChannelResponseMapper on api.DeleteChannelResponse {
 
 /// Maps a generated [api.MarkReadResponse] to a [MarkReadResponse].
 extension MarkReadResponseMapper on api.MarkReadResponse {
-  // TODO(openapi-migration): map `event` in group 10; its thread carries a `MessageResponse`.
+  // TODO(openapi-migration): map `event` in group 09; its user is a `UserResponseCommonFields`.
 
   /// Converts this response into a [MarkReadResponse].
   MarkReadResponse toModel() => MarkReadResponse(duration: duration);

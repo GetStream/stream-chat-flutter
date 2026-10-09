@@ -1,7 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 
+import '../util/extension.dart';
 import '../util/serializer.dart';
 import 'attachment.dart';
 import 'converters/v1_json_converters.dart';
@@ -15,6 +17,8 @@ part 'draft_message.g.dart';
 @JsonSerializable(includeIfNull: false)
 class DraftMessage extends Equatable {
   /// Creates a new draft message.
+  ///
+  /// The [html] and [mml] arguments, when given, are stored in [extraData], replacing the entry each one reads.
   DraftMessage({
     String? id,
     this.text,
@@ -29,9 +33,12 @@ class DraftMessage extends Equatable {
     this.command,
     this.poll,
     this._pollId,
-    this.extraData = const {},
+    Map<String, Object?> extraData = const {},
+    String? html,
+    String? mml,
   }) : id = id ?? const Uuid().v4(),
-       type = MessageType(type);
+       type = MessageType(type),
+       extraData = html == null && mml == null ? extraData : {...extraData, 'html': ?html, 'mml': ?mml};
 
   /// Create a new instance from JSON.
   factory DraftMessage.fromJson(Map<String, dynamic> json) => _$DraftMessageFromJson(
@@ -95,6 +102,14 @@ class DraftMessage extends Equatable {
   /// Message custom extraData.
   final Map<String, Object?> extraData;
 
+  /// The text of this draft message rendered as HTML.
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  String? get html => extraData['html'].safeCast<String>();
+
+  /// The message markup language (MML) source of this draft message.
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  String? get mml => extraData['mml'].safeCast<String>();
+
   /// Known top level fields.
   ///
   /// Useful for [Serializer] methods.
@@ -128,6 +143,28 @@ class DraftMessage extends Equatable {
     }
 
     return json;
+  }
+
+  /// Removes mentions from the message if they are not included in the text.
+  ///
+  /// This is useful for cleaning up the list of mentioned users before
+  /// sending the message.
+  @internal
+  DraftMessage removeMentionsIfNotIncluded() {
+    if (mentionedUsers.isEmpty) return this;
+
+    final messageTextToSend = text;
+    if (messageTextToSend == null) return this;
+
+    final updatedMentionedUsers = [...mentionedUsers];
+    for (final user in mentionedUsers.toSet()) {
+      if (messageTextToSend.contains('@${user.id}')) continue;
+      if (messageTextToSend.contains('@${user.name}')) continue;
+
+      updatedMentionedUsers.remove(user);
+    }
+
+    return copyWith(mentionedUsers: updatedMentionedUsers);
   }
 
   /// Create a copy of this message with the provided values.
@@ -236,28 +273,5 @@ extension DraftMessageToMessage on DraftMessage {
       pollId: pollId,
       extraData: extraData,
     );
-  }
-}
-
-extension on DraftMessage {
-  /// Removes mentions from the message if they are not included in the text.
-  ///
-  /// This is useful for cleaning up the list of mentioned users before
-  /// sending the message.
-  DraftMessage removeMentionsIfNotIncluded() {
-    if (mentionedUsers.isEmpty) return this;
-
-    final messageTextToSend = text;
-    if (messageTextToSend == null) return this;
-
-    final updatedMentionedUsers = [...mentionedUsers];
-    for (final user in mentionedUsers.toSet()) {
-      if (messageTextToSend.contains('@${user.id}')) continue;
-      if (messageTextToSend.contains('@${user.name}')) continue;
-
-      updatedMentionedUsers.remove(user);
-    }
-
-    return copyWith(mentionedUsers: updatedMentionedUsers);
   }
 }

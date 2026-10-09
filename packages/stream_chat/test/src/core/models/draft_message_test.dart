@@ -449,4 +449,40 @@ void main() {
       });
     });
   });
+
+  test('DraftMessage stores in extraData only the HTML and markup it is given', () {
+    const extraData = {'mood': 'busy'};
+
+    final messages = [
+      DraftMessage(extraData: extraData, html: '<p>Hi</p>'),
+      DraftMessage(extraData: extraData, mml: '<mml>Hi</mml>'),
+    ];
+
+    expect(messages.map((message) => message.extraData), [
+      {'mood': 'busy', 'html': '<p>Hi</p>'},
+      {'mood': 'busy', 'mml': '<mml>Hi</mml>'},
+    ]);
+  });
+
+  test('DraftMessage replaces the extraData entries of the HTML and markup it is given', () {
+    final message = DraftMessage(
+      extraData: const {'mood': 'busy', 'html': '<p>Old</p>', 'mml': '<mml>Old</mml>'},
+      html: '<p>Hi</p>',
+      mml: '<mml>Hi</mml>',
+    );
+
+    expect(message.extraData, {'mood': 'busy', 'html': '<p>Hi</p>', 'mml': '<mml>Hi</mml>'});
+  });
+
+  test('DraftMessage.fromJson reads the HTML and markup from extraData', () {
+    final message = DraftMessage.fromJson(const {'id': 'draft-id', 'html': '<p>Hi</p>', 'mml': '<mml>Hi</mml>'});
+
+    expect((message.html, message.mml), ('<p>Hi</p>', '<mml>Hi</mml>'));
+  });
+
+  test('DraftMessage reads no HTML or markup when extraData has none', () {
+    final message = DraftMessage();
+
+    expect((message.html, message.mml), (null, null));
+  });
 }

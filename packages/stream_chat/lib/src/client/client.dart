@@ -60,15 +60,19 @@ import '../core/models/push_preference.dart';
 import '../core/models/push_provider.dart';
 import '../core/models/reaction.dart';
 import '../core/models/request/message_delivery.dart';
+import '../core/models/request/thread_options.dart';
 import '../core/models/request/update_user_partial_request.dart';
 import '../core/models/response/add_user_group_members_response.dart';
 import '../core/models/response/app_settings_response.dart';
 import '../core/models/response/block_users_response.dart';
+import '../core/models/response/create_draft_response.dart';
 import '../core/models/response/create_reminder_response.dart';
 import '../core/models/response/create_user_group_response.dart';
 import '../core/models/response/delete_channel_response.dart';
 import '../core/models/response/delete_reminder_response.dart';
 import '../core/models/response/get_blocked_users_response.dart';
+import '../core/models/response/get_draft_response.dart';
+import '../core/models/response/get_thread_response.dart';
 import '../core/models/response/get_unread_count_response.dart';
 import '../core/models/response/get_user_group_response.dart';
 import '../core/models/response/hide_channel_response.dart';
@@ -80,9 +84,11 @@ import '../core/models/response/og_attachment_response.dart';
 import '../core/models/response/poll_option_response.dart';
 import '../core/models/response/poll_response.dart';
 import '../core/models/response/poll_vote_response.dart';
+import '../core/models/response/query_drafts_response.dart';
 import '../core/models/response/query_poll_votes_response.dart';
 import '../core/models/response/query_polls_response.dart';
 import '../core/models/response/query_reminders_response.dart';
+import '../core/models/response/query_threads_response.dart';
 import '../core/models/response/remove_user_group_members_response.dart';
 import '../core/models/response/search_roles_response.dart';
 import '../core/models/response/search_user_groups_response.dart';
@@ -91,6 +97,7 @@ import '../core/models/response/unblock_users_response.dart';
 import '../core/models/response/update_channel_partial_response.dart';
 import '../core/models/response/update_member_partial_response.dart';
 import '../core/models/response/update_reminder_response.dart';
+import '../core/models/response/update_thread_partial_response.dart';
 import '../core/models/response/update_user_group_response.dart';
 import '../core/models/response/update_users_response.dart';
 import '../core/models/role_type.dart';
@@ -106,10 +113,12 @@ import '../repository/app_settings_repository.dart';
 import '../repository/channels_repository.dart';
 import '../repository/devices_repository.dart';
 import '../repository/general_repository.dart';
+import '../repository/messages_repository.dart';
 import '../repository/moderation_repository.dart';
 import '../repository/polls_repository.dart';
 import '../repository/reminders_repository.dart';
 import '../repository/roles_repository.dart';
+import '../repository/threads_repository.dart';
 import '../repository/user_groups_repository.dart';
 import '../repository/users_repository.dart';
 import '../ws/connect_request.dart';
@@ -216,6 +225,8 @@ class StreamChatClient {
     _usersRepository = UsersRepository(api);
     _pollsRepository = PollsRepository(api);
     _remindersRepository = RemindersRepository(api);
+    _threadsRepository = ThreadsRepository(api);
+    _messagesRepository = MessagesRepository(api);
     _generalRepository = GeneralRepository(api);
     _moderationRepository = ModerationRepository(api);
     _channelsRepository = ChannelsRepository(api);
@@ -263,6 +274,8 @@ class StreamChatClient {
   late final UsersRepository _usersRepository;
   late final PollsRepository _pollsRepository;
   late final RemindersRepository _remindersRepository;
+  late final ThreadsRepository _threadsRepository;
+  late final MessagesRepository _messagesRepository;
   late final GeneralRepository _generalRepository;
   late final ModerationRepository _moderationRepository;
   late final ChannelsRepository _channelsRepository;
@@ -2045,53 +2058,48 @@ class StreamChatClient {
     language,
   );
 
-  /// Creates a draft for the given [channelId] of type [channelType].
-  Future<CreateDraftResponse> createDraft(
+  /// Saves [draft] as the current user's draft in the channel with the id [channelId] and type [channelType].
+  ///
+  /// It replaces the draft the user already has there, or in the thread of the message [DraftMessage.parentId]
+  /// names. Mentioned users the text no longer mentions are left out, and a [DraftMessage.command] is kept as
+  /// `/command text`.
+  Future<Result<CreateDraftResponse>> createDraft(
     DraftMessage draft,
     String channelId,
     String channelType,
-  ) => _chatApi.message.createDraft(
-    channelId,
-    channelType,
-    draft,
-  );
+  ) => _messagesRepository.createDraft(channelId, channelType, draft);
 
-  /// Retrieves a draft for the given [channelId] of type [channelType].
+  /// Fetches the current user's draft in the channel with the id [channelId] and type [channelType].
   ///
-  /// Optionally, pass [parentId] to get the draft for a thread.
-  Future<GetDraftResponse> getDraft(
+  /// With a [parentId], it fetches the draft in the thread of that message instead. A channel or thread without a
+  /// draft comes back as a failure.
+  Future<Result<GetDraftResponse>> getDraft(
     String channelId,
     String channelType, {
     String? parentId,
-  }) => _chatApi.message.getDraft(
-    channelId,
-    channelType,
-    parentId: parentId,
-  );
+  }) => _messagesRepository.getDraft(channelId, channelType, parentId: parentId);
 
-  /// Deletes a draft for the given [channelId] of type [channelType].
+  /// Deletes the current user's draft in the channel with the id [channelId] and type [channelType].
   ///
-  /// Optionally, pass [parentId] to delete the draft for a thread.
-  Future<EmptyResponse> deleteDraft(
+  /// With a [parentId], it deletes the draft in the thread of that message instead. A channel or thread without a
+  /// draft comes back as a failure.
+  Future<Result<void>> deleteDraft(
     String channelId,
     String channelType, {
     String? parentId,
-  }) => _chatApi.message.deleteDraft(
-    channelId,
-    channelType,
-    parentId: parentId,
-  );
+  }) => _messagesRepository.deleteDraft(channelId, channelType, parentId: parentId);
 
-  /// Queries drafts for the current user.
-  Future<QueryDraftsResponse> queryDrafts({
+  /// Fetches one page of the current user's drafts matching [filter], ordered by [sort].
+  ///
+  /// A page holds up to [limit] drafts, 25 when it is omitted. [next] and [prev] are the cursors a previous page
+  /// returned; at most one of them may be given.
+  Future<Result<QueryDraftsResponse>> queryDrafts({
     DraftFilter? filter,
     List<DraftSort>? sort,
-    PaginationParams? pagination,
-  }) => _chatApi.message.queryDrafts(
-    filter: filter,
-    sort: sort,
-    pagination: pagination,
-  );
+    int? limit,
+    String? next,
+    String? prev,
+  }) => _messagesRepository.queryDrafts(filter: filter, sort: sort, limit: limit, next: next, prev: prev);
 
   /// Retrieves all the active live locations of the current user.
   Future<GetActiveLiveLocationsResponse> getActiveLiveLocations() async {
@@ -2212,45 +2220,44 @@ class StreamChatClient {
   /// only needed to pick up changes made during an active session.
   Future<Result<AppSettingsResponse>> getAppSettings() => _appSettingsManager.refresh();
 
-  /// Queries threads with the given [options] and [pagination] params.
+  /// Fetches one page of the current user's threads matching [filter], ordered by [sort].
   ///
-  /// Optionally, pass [filter] and [sort] to filter and sort the threads.
-  Future<QueryThreadsResponse> queryThreads({
+  /// A page holds up to [limit] threads, and [options] decides how much of each thread it carries and whether the
+  /// current user starts watching them. [next] and [prev] are the cursors a previous page returned; at most one of
+  /// them may be given.
+  Future<Result<QueryThreadsResponse>> queryThreads({
     ThreadFilter? filter,
     List<ThreadSort>? sort,
     ThreadOptions options = const ThreadOptions(),
-    PaginationParams pagination = const PaginationParams(),
-  }) => _chatApi.threads.queryThreads(
+    int limit = 10,
+    String? next,
+    String? prev,
+  }) => _threadsRepository.queryThreads(
     filter: filter,
     sort: sort,
     options: options,
-    pagination: pagination,
+    limit: limit,
+    next: next,
+    prev: prev,
   );
 
-  /// Retrieves a thread with the given [messageId].
+  /// Fetches the thread of the message with the id [messageId].
   ///
-  /// Optionally pass [options] to limit the response.
-  Future<GetThreadResponse> getThread(
+  /// [options] decides how much of the thread it carries and whether the current user starts watching it.
+  Future<Result<GetThreadResponse>> getThread(
     String messageId, {
     ThreadOptions options = const ThreadOptions(),
-  }) => _chatApi.threads.getThread(
-    messageId,
-    options: options,
-  );
+  }) => _threadsRepository.getThread(messageId, options: options);
 
-  /// Partially updates the thread with the given [messageId].
+  /// Partially updates the thread of the message with the id [messageId].
   ///
-  /// Use [set] to define values to be set.
-  /// Use [unset] to define values to be unset.
-  Future<UpdateThreadResponse> partialUpdateThread(
+  /// The fields in [set] are given their new values and the fields in [unset] are removed; fields in neither keep
+  /// their current values.
+  Future<Result<UpdateThreadPartialResponse>> updateThreadPartial(
     String messageId, {
     Map<String, Object?>? set,
     List<String>? unset,
-  }) => _chatApi.threads.partialUpdateThread(
-    messageId,
-    set: set,
-    unset: unset,
-  );
+  }) => _threadsRepository.updateThreadPartial(messageId, set: set, unset: unset);
 
   /// Pins the channel for the current user.
   Future<Result<UpdateMemberPartialResponse>> pinChannel({

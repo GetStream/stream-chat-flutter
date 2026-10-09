@@ -161,6 +161,7 @@ class Event extends WsEvent {
   final String? messageId;
 
   /// The thread object sent with the event.
+  @ThreadV1JsonConverter()
   final Thread? thread;
 
   /// The number of unread thread messages.

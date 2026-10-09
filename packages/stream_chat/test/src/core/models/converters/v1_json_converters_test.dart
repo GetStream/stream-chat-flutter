@@ -4,6 +4,8 @@ import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/converters/v1_json_converters.dart';
 import 'package:stream_chat/src/core/models/device.dart';
+import 'package:stream_chat/src/core/models/draft.dart';
+import 'package:stream_chat/src/core/models/draft_message.dart';
 import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/message_reminder.dart';
@@ -11,6 +13,9 @@ import 'package:stream_chat/src/core/models/moderation.dart';
 import 'package:stream_chat/src/core/models/push_provider.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/reaction_group.dart';
+import 'package:stream_chat/src/core/models/read.dart';
+import 'package:stream_chat/src/core/models/thread.dart';
+import 'package:stream_chat/src/core/models/thread_participant.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/models/user_group.dart';
 import 'package:stream_chat/src/core/models/user_group_member.dart';
@@ -543,5 +548,238 @@ void main() {
     final event = Event.fromJson(Event(type: 'reminder.updated', reminder: reminder).toJson());
 
     expect(event.reminder, reminder);
+  });
+
+  test('Event.fromJson reads every thread field from its v1 keys, with custom data in extraData', () {
+    const channelJson = {'id': 'general', 'type': 'messaging', 'cid': 'messaging:general'};
+    const parentJson = {'id': 'parent-id', 'text': 'Where do we meet?'};
+    const replyJson = {'id': 'reply-id', 'text': 'At the station', 'parent_id': 'parent-id'};
+    const creatorJson = {'id': 'creator-id'};
+    const participantJson = {'id': 'participant-id'};
+    const readerJson = {'id': 'reader-id'};
+    const draftJson = {
+      'channel_cid': 'messaging:general',
+      'created_at': '2024-06-05T10:00:00.000Z',
+      'parent_id': 'parent-id',
+      'message': {'id': 'draft-id', 'text': 'Maybe at noon'},
+    };
+
+    final event = Event.fromJson(const {
+      'type': 'thread.updated',
+      'thread': {
+        'active_participant_count': 2,
+        'channel_cid': 'messaging:general',
+        'channel': channelJson,
+        'created_at': '2024-06-01T10:00:00.000Z',
+        'updated_at': '2024-06-02T10:00:00.000Z',
+        'deleted_at': '2024-06-03T10:00:00.000Z',
+        'created_by_user_id': 'creator-id',
+        'created_by': creatorJson,
+        'title': 'Meeting point',
+        'parent_message_id': 'parent-id',
+        'parent_message': parentJson,
+        'reply_count': 4,
+        'participant_count': 3,
+        'thread_participants': [
+          {
+            'channel_cid': 'messaging:general',
+            'created_at': '2024-06-01T11:00:00.000Z',
+            'last_read_at': '2024-06-02T11:00:00.000Z',
+            'last_thread_message_at': '2024-06-02T12:00:00.000Z',
+            'left_thread_at': '2024-06-03T12:00:00.000Z',
+            'thread_id': 'parent-id',
+            'user_id': 'participant-id',
+            'user': participantJson,
+          },
+        ],
+        'last_message_at': '2024-06-02T09:00:00.000Z',
+        'latest_replies': [replyJson],
+        'read': [
+          {
+            'user': readerJson,
+            'last_read': '2024-06-02T13:00:00.000Z',
+            'unread_messages': 1,
+            'last_read_message_id': 'reply-id',
+          },
+        ],
+        'draft': draftJson,
+        'priority': 'high',
+      },
+    });
+
+    final thread = event.thread!;
+    // A channel compares by identity, so it is checked on its own.
+    expect(thread.channel?.cid, 'messaging:general');
+    expect(
+      thread,
+      Thread(
+        activeParticipantCount: 2,
+        channelCid: 'messaging:general',
+        channel: thread.channel,
+        createdAt: DateTime.utc(2024, 6, 1, 10),
+        updatedAt: DateTime.utc(2024, 6, 2, 10),
+        deletedAt: DateTime.utc(2024, 6, 3, 10),
+        createdByUserId: 'creator-id',
+        createdBy: User.fromJson(const {...creatorJson}),
+        title: 'Meeting point',
+        parentMessageId: 'parent-id',
+        parentMessage: Message.fromJson(const {...parentJson}),
+        replyCount: 4,
+        participantCount: 3,
+        threadParticipants: [
+          ThreadParticipant(
+            channelCid: 'messaging:general',
+            createdAt: DateTime.utc(2024, 6, 1, 11),
+            lastReadAt: DateTime.utc(2024, 6, 2, 11),
+            lastThreadMessageAt: DateTime.utc(2024, 6, 2, 12),
+            leftThreadAt: DateTime.utc(2024, 6, 3, 12),
+            threadId: 'parent-id',
+            userId: 'participant-id',
+            user: User.fromJson(const {...participantJson}),
+          ),
+        ],
+        lastMessageAt: DateTime.utc(2024, 6, 2, 9),
+        latestReplies: [
+          Message.fromJson(const {...replyJson}),
+        ],
+        read: [
+          Read(
+            user: User.fromJson(const {...readerJson}),
+            lastRead: DateTime.utc(2024, 6, 2, 13),
+            unreadMessages: 1,
+            lastReadMessageId: 'reply-id',
+          ),
+        ],
+        draft: Draft.fromJson(const {...draftJson}),
+        extraData: const {'priority': 'high'},
+      ),
+    );
+  });
+
+  test('Event.fromJson reads a thread sent without participants, replies, reads or a draft', () {
+    final event = Event.fromJson(const {
+      'type': 'message.read',
+      'thread': {
+        'active_participant_count': 0,
+        'channel_cid': 'messaging:general',
+        'created_at': '2024-06-01T10:00:00.000Z',
+        'updated_at': '2024-06-02T10:00:00.000Z',
+        'created_by_user_id': 'creator-id',
+        'title': '',
+        'parent_message_id': 'parent-id',
+        'reply_count': 0,
+        'participant_count': 1,
+        'last_message_at': '2024-06-02T09:00:00.000Z',
+      },
+    });
+
+    expect(
+      event.thread,
+      Thread(
+        activeParticipantCount: 0,
+        channelCid: 'messaging:general',
+        createdAt: DateTime.utc(2024, 6, 1, 10),
+        updatedAt: DateTime.utc(2024, 6, 2, 10),
+        createdByUserId: 'creator-id',
+        title: '',
+        parentMessageId: 'parent-id',
+        replyCount: 0,
+        participantCount: 1,
+        lastMessageAt: DateTime.utc(2024, 6, 2, 9),
+      ),
+    );
+  });
+
+  test('Event.toJson writes the thread under its v1 keys, with custom data at the root', () {
+    final event = Event(
+      type: 'thread.updated',
+      thread: Thread(
+        activeParticipantCount: 2,
+        channelCid: 'messaging:general',
+        createdAt: DateTime.utc(2024, 6, 1, 10),
+        updatedAt: DateTime.utc(2024, 6, 2, 10),
+        createdByUserId: 'creator-id',
+        title: 'Meeting point',
+        parentMessageId: 'parent-id',
+        replyCount: 4,
+        participantCount: 3,
+        threadParticipants: [
+          ThreadParticipant(
+            channelCid: 'messaging:general',
+            createdAt: DateTime.utc(2024, 6, 1, 11),
+            lastReadAt: DateTime.utc(2024, 6, 2, 11),
+            threadId: 'parent-id',
+            userId: 'participant-id',
+          ),
+        ],
+        lastMessageAt: DateTime.utc(2024, 6, 2, 9),
+        extraData: const {'priority': 'high'},
+      ),
+    );
+
+    expect(event.toJson()['thread'], {
+      'active_participant_count': 2,
+      'channel_cid': 'messaging:general',
+      'channel': null,
+      'created_at': '2024-06-01T10:00:00.000Z',
+      'updated_at': '2024-06-02T10:00:00.000Z',
+      'deleted_at': null,
+      'created_by_user_id': 'creator-id',
+      'created_by': null,
+      'title': 'Meeting point',
+      'parent_message_id': 'parent-id',
+      'parent_message': null,
+      'reply_count': 4,
+      'participant_count': 3,
+      'thread_participants': [
+        {
+          'channel_cid': 'messaging:general',
+          'created_at': '2024-06-01T11:00:00.000Z',
+          'last_read_at': '2024-06-02T11:00:00.000Z',
+          'last_thread_message_at': null,
+          'left_thread_at': null,
+          'thread_id': 'parent-id',
+          'user_id': 'participant-id',
+          'user': null,
+        },
+      ],
+      'last_message_at': '2024-06-02T09:00:00.000Z',
+      'latest_replies': <Object?>[],
+      'read': <Object?>[],
+      'draft': null,
+      'priority': 'high',
+    });
+  });
+
+  test('Event.fromJson reads back a thread written by toJson', () {
+    final thread = Thread(
+      activeParticipantCount: 2,
+      channelCid: 'messaging:general',
+      createdAt: DateTime.utc(2024, 6, 1, 10),
+      updatedAt: DateTime.utc(2024, 6, 2, 10),
+      createdByUserId: 'creator-id',
+      createdBy: User(id: 'creator-id'),
+      title: 'Meeting point',
+      parentMessageId: 'parent-id',
+      replyCount: 4,
+      participantCount: 3,
+      lastMessageAt: DateTime.utc(2024, 6, 2, 9),
+      read: [
+        Read(
+          user: User(id: 'reader-id'),
+          lastRead: DateTime.utc(2024, 6, 2, 13),
+        ),
+      ],
+      draft: Draft(
+        channelCid: 'messaging:general',
+        createdAt: DateTime.utc(2024, 6, 5, 10),
+        message: DraftMessage(id: 'draft-id', text: 'Maybe at noon'),
+      ),
+      extraData: const {'priority': 'high'},
+    );
+
+    final event = Event.fromJson(Event(type: 'thread.updated', thread: thread).toJson());
+
+    expect(event.thread, thread);
   });
 }

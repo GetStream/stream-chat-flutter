@@ -138,6 +138,14 @@
 - `CreateReminderResponse`, `UpdateReminderResponse` and `QueryRemindersResponse` no longer decode from JSON, are immutable, built through a const constructor, compare by value, and their `duration` is a non-nullable `String`; `MessageReminderResponse` is removed.
 - `MessageReminder` no longer decodes from or encodes to JSON and no longer extends `Equatable`, so `props` is removed; it still compares by value.
 - `StreamChatApi.reminders` is removed; its endpoints are reached through `StreamChatClient`.
+- The thread and draft calls on `StreamChatClient` and `Channel` return a `Result` instead of throwing, and `deleteDraft` returns a `Result<void>` instead of an `EmptyResponse`; a `Channel` that is not initialized still throws a `StateError`.
+- `partialUpdateThread` is renamed `updateThreadPartial`, and `UpdateThreadResponse` is renamed `UpdateThreadPartialResponse`.
+- `queryThreads` and `queryDrafts` take `limit`, `next` and `prev` instead of `PaginationParams`, and their responses carry a `prev` cursor; `queryThreads` still pages by 10 when `limit` is omitted.
+- `QueryThreadsResponse`, `GetThreadResponse`, `UpdateThreadPartialResponse`, `CreateDraftResponse`, `GetDraftResponse` and `QueryDraftsResponse` no longer decode from JSON, are immutable, built through a const constructor, compare by value, and their `duration` is a non-nullable `String`; `DraftResponse` is removed.
+- `Thread` and `ThreadParticipant` no longer decode from or encode to JSON and no longer extend `Equatable`, so `props` is removed; they still compare by value, and two threads now differ when their `extraData` does.
+- `ThreadOptions` no longer encodes to JSON or extends `Equatable`, so `props` is removed; it still compares by value and gains `copyWith`.
+- `createDraft` no longer saves the message fields a draft made from a received message carries in its extra data, such as `image_labels` or `cid`, as custom data of the draft.
+- `StreamChatApi.threads` is removed, and `StreamChatApi.message` loses the draft methods; their endpoints are reached through `StreamChatClient`.
 
 🐞 Fixed
 
@@ -172,6 +180,7 @@
 - Added `ChannelModel.truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires`, `deletedAt` and `topLevelFields`; the constructors accept the new fields.
 - Added `User.deactivatedAt`, `deletedAt` and `shadowBanned`; the constructors accept the new fields.
 - Added `Message.html`, `mml`, `imageLabels` and `deletedReplyCount`, read from the message's `extraData`; the constructor accepts them.
+- Added `DraftMessage.html` and `mml`, read from the draft message's `extraData`; the constructor accepts them.
 
 🔒 Security
 
