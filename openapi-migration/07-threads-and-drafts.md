@@ -65,12 +65,13 @@
   (`file_size` and `mime_type` included, the local id, upload state and file dropped), mentions the text
   no longer has are dropped, a command is written into the text, and the markup is sent as its own
   field. The Giphy renditions and the fields and actions map to their typed fields; a key missing from
-  them is sent empty, which the backend stores the same as absent. Extra data named like an attachment
-  field never becomes attachment custom data: v1 bound such a key to the field, and v2 rejects the
-  multi-word ones (`title_link`, `image_url`, …) with a 400. An entry named `custom` is sent as custom data
-  like any other, as v1 stored it. One divergence, approved: the fields a received message keeps in its
-  extra data (`cid`, `html`, `image_labels`, `deleted_reply_count`, `mentioned_channel_members`) are no
-  longer stored as draft custom data.
+  them is sent empty, which the backend stores the same as absent. An entry named `custom` is sent as
+  custom data like any other, as v1 stored it. Two divergences, approved: the fields a received message
+  keeps in its extra data (`cid`, `html`, `image_labels`, `deleted_reply_count`,
+  `mentioned_channel_members`) are no longer stored as draft custom data; and extra data named like one of
+  the draft message's or an attachment's own fields is left out, as every request mapper does until
+  [21](21-custom-data-rename.md) revisits it, where v10's flattened body set the field or stored it as
+  custom data.
 - **`DraftMessage.html` and `mml` are promoted** as constructor arguments stored in `extraData` and read
   back through getters, as `Message.html` and `mml` are; `DraftMessageRequestMapper` sends `mml` as the
   request's own field, so re-saving a draft keeps it. The keys a received message keeps in its extra data

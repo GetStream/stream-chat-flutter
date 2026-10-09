@@ -62,13 +62,9 @@ extension ActionMapper on api.Action {
 
 /// Maps an [Attachment] to the generated [api.Attachment] a request sends.
 extension AttachmentRequestMapper on Attachment {
-  // Extra data keys that never become custom data: the attachment's own fields, the ones it only stores offline, and
-  // the Giphy renditions, which the request carries in a field of their own.
-  static const _nonCustomKeys = {
-    ...Attachment.topLevelFields,
-    ...Attachment.dbSpecificTopLevelFields,
-    'giphy',
-  };
+  // Extra data keys that never become custom data: the keys named like one of the attachment's own fields, including
+  // the Giphy renditions, which the request carries in a field of their own, and the local id.
+  static const _nonCustomKeys = {...AttachmentMapper._shadowedCustomKeys, 'id'};
 
   /// Converts this attachment into the shape a request sends.
   ///

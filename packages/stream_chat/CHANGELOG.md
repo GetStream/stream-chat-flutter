@@ -146,6 +146,7 @@
 - `Thread` and `ThreadParticipant` no longer decode from or encode to JSON and no longer extend `Equatable`, so `props` is removed; they still compare by value, and two threads now differ when their `extraData` does.
 - `ThreadOptions` no longer encodes to JSON or extends `Equatable`, so `props` is removed; it still compares by value and gains `copyWith`.
 - `createDraft` no longer saves the message fields a draft made from a received message carries in its extra data, such as `image_labels` or `cid`, as custom data of the draft.
+- `createDraft` no longer sends `extraData` entries named like one of the draft message's or an attachment's own fields.
 - `StreamChatApi.threads` is removed, and `StreamChatApi.message` loses the draft methods; their endpoints are reached through `StreamChatClient`.
 
 🐞 Fixed

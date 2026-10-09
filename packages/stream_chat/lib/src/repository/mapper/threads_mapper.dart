@@ -34,6 +34,9 @@ extension UpdateThreadPartialResponseMapper on api.UpdateThreadPartialResponse {
 
 /// Maps a generated [api.ThreadStateResponse] to a [Thread].
 extension ThreadStateResponseMapper on api.ThreadStateResponse {
+  // Custom keys named like one of the thread's own fields.
+  static const _shadowedCustomKeys = {...Thread.topLevelFields};
+
   /// Converts this response into a [Thread].
   ///
   /// Custom data named like one of the thread's own fields is left out of [Thread.extraData].
@@ -56,7 +59,7 @@ extension ThreadStateResponseMapper on api.ThreadStateResponse {
     latestReplies: [for (final reply in latestReplies) reply.toModel()],
     read: read?.map((read) => read.toModel()).toList() ?? const [],
     draft: draft?.toModel(),
-    extraData: _threadExtraData(custom),
+    extraData: {...custom}..removeWhere((key, _) => _shadowedCustomKeys.contains(key)),
   );
 }
 
@@ -81,7 +84,7 @@ extension ThreadResponseMapper on api.ThreadResponse {
     updatedAt: updatedAt,
     deletedAt: deletedAt,
     title: title,
-    extraData: _threadExtraData(custom),
+    extraData: {...custom}..removeWhere((key, _) => ThreadStateResponseMapper._shadowedCustomKeys.contains(key)),
   );
 }
 
@@ -99,6 +102,3 @@ extension ThreadParticipantMapper on api.ThreadParticipant {
     user: user?.toModel(),
   );
 }
-
-Map<String, Object?> _threadExtraData(Map<String, Object?> custom) =>
-    {...custom}..removeWhere((key, _) => Thread.topLevelFields.contains(key));

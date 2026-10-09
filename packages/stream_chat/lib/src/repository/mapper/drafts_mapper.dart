@@ -81,13 +81,21 @@ extension DraftPayloadResponseMapper on api.DraftPayloadResponse {
 
 /// Maps a [DraftMessage] to the generated [api.MessageRequest] that saves it.
 extension DraftMessageRequestMapper on DraftMessage {
+  // Extra data keys that never become custom data: the draft message's own fields and the ones a received message
+  // keeps in its extra data.
+  static final _nonCustomKeys = {
+    ...DraftPayloadResponseMapper._shadowedCustomKeys,
+    ...MessageResponseMapper.extraDataFields,
+  };
+
   /// Converts this draft message into the request that saves it.
   ///
   /// Mentioned users the text no longer mentions are left out, and a [command] is written into the text as
-  /// `/command text`. The extra data becomes the custom data, except the fields a received message keeps there,
-  /// such as [DraftMessage.html] and [DraftMessage.mml]; the markup is sent as a field of its own.
+  /// `/command text`. The extra data becomes the custom data, except keys named like one of the draft message's own
+  /// fields and the fields a received message keeps there, such as [DraftMessage.html] and [DraftMessage.mml]; the
+  /// markup is sent as a field of its own.
   api.MessageRequest toRequest() {
-    final custom = {...extraData}..removeWhere((key, _) => MessageResponseMapper.extraDataFields.contains(key));
+    final custom = {...extraData}..removeWhere((key, _) => _nonCustomKeys.contains(key));
 
     return api.MessageRequest(
       id: id,

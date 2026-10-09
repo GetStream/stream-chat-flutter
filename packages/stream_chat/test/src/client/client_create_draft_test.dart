@@ -57,7 +57,8 @@ void main() {
         quotedMessageId: 'quoted-id',
         silent: true,
         pollId: 'poll-id',
-        extraData: const {'mood': 'busy'},
+        // Extra data named like one of the draft message's own fields is not sent.
+        extraData: const {'mood': 'busy', 'quoted_message_id': 'other-id', 'text': 'Other text'},
       ),
       'general',
       'messaging',
