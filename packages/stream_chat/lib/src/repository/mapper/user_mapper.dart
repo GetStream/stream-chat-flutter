@@ -108,9 +108,9 @@ extension WrappedUnreadCountsResponseMapper on api.WrappedUnreadCountsResponse {
     totalUnreadCount: totalUnreadCount,
     totalUnreadThreadsCount: totalUnreadThreadsCount,
     totalUnreadCountByTeam: totalUnreadCountByTeam,
-    channels: channels.map((channel) => channel.toModel()).toList(),
-    channelType: channelType.map((type) => type.toModel()).toList(),
-    threads: threads.map((thread) => thread.toModel()).toList(),
+    channels: [for (final channel in channels) channel.toModel()],
+    channelType: [for (final type in channelType) type.toModel()],
+    threads: [for (final thread in threads) thread.toModel()],
   );
 }
 
