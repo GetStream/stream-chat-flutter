@@ -106,7 +106,9 @@ void main() {
     );
     builtIds.clear();
 
-    final newMessage = Message(id: 'new-message', text: 'Hello', user: other, createdAt: DateTime.now());
+    // Same timestamp as the previous last message, so both always fall in the
+    // same calendar minute and group together, whenever the test runs.
+    final newMessage = Message(id: 'new-message', text: 'Hello', user: other, createdAt: messages.last.createdAt);
     await emitMessages(tester, [...messages, newMessage]);
 
     expect(builtIds.toSet(), {newMessage.id, messages.last.id});
