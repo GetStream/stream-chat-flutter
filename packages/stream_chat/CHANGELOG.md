@@ -180,6 +180,7 @@
 - Added `ChannelModel.truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires`, `deletedAt` and `topLevelFields`; the constructors accept the new fields.
 - Added `User.deactivatedAt`, `deletedAt` and `shadowBanned`; the constructors accept the new fields.
 - Added `Message.html`, `mml`, `imageLabels` and `deletedReplyCount`, read from the message's `extraData`; the constructor accepts them.
+- Added `Attachment.giphy`, the Giphy renditions read from the attachment's `extraData`; the constructor accepts them.
 - Added `DraftMessage.html` and `mml`, read from the draft message's `extraData`; the constructor accepts them.
 
 🔒 Security

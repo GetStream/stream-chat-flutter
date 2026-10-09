@@ -800,8 +800,9 @@ GROUPS = [
             - **Moderation actions go through `ModerationAction.fromJson`,** so legacy names read as current ones.
             - **Attachments map at parity with `Attachment.fromJson`:** each gets a new local `id`, and the id the
               attachment was sent with stays in `extraData`; `giphy` and `fields` are written in their v1 JSON
-              shape, which `GiphyInfo` and the UI read. Making `Attachment` plain, and promoting those fields, is
-              left to this group.
+              shape, which `GiphyInfo` and the UI read. The Giphy renditions are promoted like `Message.html`: a
+              `giphy` constructor argument stored in `extraData`, read back through `Attachment.giphy`, a map in
+              that shape. Making `Attachment` plain, and typing the renditions and `fields`, is left to this group.
             - **A reminder or location nests its message one level deep,** so the recursion ends there.
             - **`MessageWithChannelResponse` gets its mapper with its first consumer** (getMessage, search), not
               ahead of it.

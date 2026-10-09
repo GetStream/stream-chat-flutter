@@ -314,27 +314,24 @@ Attachment _expectedAttachment(String id) => Attachment(
   actions: const [Action(name: 'answer', style: 'primary', text: 'Send', type: 'button', value: 'yes')],
   originalWidth: 400,
   originalHeight: 300,
-  extraData: {
-    'id': 'attachment-id',
-    'caption': 'A cat',
-    'giphy': {
-      for (final rendition in const [
-        'fixed_height',
-        'fixed_height_downsampled',
-        'fixed_height_still',
-        'fixed_width',
-        'fixed_width_downsampled',
-        'fixed_width_still',
-        'original',
-      ])
-        rendition: {
-          'frames': '12',
-          'height': '200',
-          'size': '1024',
-          'url': 'https://example.com/$rendition.gif',
-          'width': '300',
-        },
-    },
+  extraData: const {'id': 'attachment-id', 'caption': 'A cat'},
+  giphy: {
+    for (final rendition in const [
+      'fixed_height',
+      'fixed_height_downsampled',
+      'fixed_height_still',
+      'fixed_width',
+      'fixed_width_downsampled',
+      'fixed_width_still',
+      'original',
+    ])
+      rendition: {
+        'frames': '12',
+        'height': '200',
+        'size': '1024',
+        'url': 'https://example.com/$rendition.gif',
+        'width': '300',
+      },
   },
   uploadState: const UploadState.success(),
 );

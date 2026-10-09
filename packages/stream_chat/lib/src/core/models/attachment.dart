@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:uuid/uuid.dart';
 
+import '../util/extension.dart';
 import '../util/serializer.dart';
 import 'action.dart';
 import 'attachment_file.dart';
@@ -16,6 +17,8 @@ part 'attachment.g.dart';
 @JsonSerializable(includeIfNull: false)
 class Attachment extends Equatable {
   /// Constructor used for json serialization
+  ///
+  /// The [giphy] argument, when given, is stored in [extraData], replacing the entry it reads.
   Attachment({
     String? id,
     String? type,
@@ -41,6 +44,7 @@ class Attachment extends Equatable {
     Map<String, Object?> extraData = const {},
     this.file,
     this.uploadState = const UploadState.preparing(),
+    Map<String, Object?>? giphy,
   }) : id = id ?? const Uuid().v4(),
        _type = switch (type) {
          String() => AttachmentType(type),
@@ -54,6 +58,7 @@ class Attachment extends Equatable {
          ...extraData,
          if (file?.size != null) 'file_size': file?.size,
          if (file?.mediaType != null) 'mime_type': file?.mediaType?.mimeType,
+         'giphy': ?giphy,
        };
 
   /// Create a new instance from a json
@@ -178,6 +183,12 @@ class Attachment extends Equatable {
   /// {@macro mimeType}
   @JsonKey(includeToJson: false, includeFromJson: false)
   String? get mimeType => extraData['mime_type'] as String?;
+
+  /// The renditions of this Giphy attachment, keyed by name, such as `original` or `fixed_height`.
+  ///
+  /// Each rendition holds its `url`, `width`, `height`, `size` and `frames`, as strings.
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  Map<String, Object?>? get giphy => extraData['giphy'].safeCast<Map<String, Object?>>();
 
   /// Known top level fields.
   /// Useful for [Serializer] methods.
