@@ -167,7 +167,7 @@ extension GetBlockedUsersResponseMapper on api.GetBlockedUsersResponse {
   /// Converts this response into a [GetBlockedUsersResponse].
   GetBlockedUsersResponse toModel() => GetBlockedUsersResponse(
     duration: duration,
-    blocks: blocks.map((block) => block.toModel()).toList(),
+    blocks: [for (final block in blocks) block.toModel()],
   );
 }
 
