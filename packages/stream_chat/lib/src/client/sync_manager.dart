@@ -1,15 +1,14 @@
 import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
-import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
+import 'package:stream_core/stream_core.dart' show StreamApiException, StreamLogger;
 import 'package:synchronized/synchronized.dart';
 
 import '../core/api/requests.dart';
 import '../core/api/responses.dart';
-import '../core/error/error.dart';
-import '../core/models/event.dart';
-import '../core/models/filter.dart';
+import '../core/models/channel_state.dart';
 import '../db/chat_persistence_client.dart';
+import '../ws/events/event.dart';
 import 'client.dart';
 
 /// Fetches the events missed on [cids] since [lastSyncAt].
@@ -21,14 +20,17 @@ typedef FetchMissedEvents = Future<SyncResponse> Function(List<String> cids, Dat
 /// directly.
 class SyncManager {
   /// Instantiate a new SyncManager object.
+  ///
+  /// Reports under [tag], so one prefix selects every record a catch-up wrote.
   SyncManager({
     required this.client,
     required this.fetchMissedEvents,
-    this.logger,
     @visibleForTesting this.maxReplayEvents = _defaultMaxReplayEvents,
-  });
+    String tag = 'SCh:Sync',
+  }) : _logger = StreamLogger(tag);
 
-  // The endpoint rejects more than 255, counted before duplicates collapse.
+  // A sync over more than 255 channels is refused, counted before duplicates
+  // collapse.
   //
   // Capped rather than left to the refusal: unlike one refused for its age or
   // its events, a window refused for its size is refused again next time, and
@@ -38,7 +40,7 @@ class SyncManager {
   // them as they were.
   static const _maxSyncCids = 255;
 
-  // The endpoint returns up to 2000 events. Replaying that many runs a state
+  // A sync returns up to 2000 events. Replaying that many runs a state
   // update and a persistence write for each, on the reconnect path, while the
   // app is trying to render.
   static const _defaultMaxReplayEvents = 250;
@@ -49,16 +51,15 @@ class SyncManager {
   /// The client this manager catches up.
   final StreamChatClient client;
 
-  /// Fetches the missed events, passed separately because the client does not
-  /// expose the endpoint itself.
+  /// Fetches the missed events, passed separately because the client has no
+  /// method for it.
   final FetchMissedEvents fetchMissedEvents;
-
-  /// The logger associated to this manager.
-  final Logger? logger;
 
   /// How many events may be replayed from one window before it is given up on
   /// and its channels refreshed instead.
   final int maxReplayEvents;
+
+  final StreamLogger _logger;
 
   // Only one catch-up runs at a time.
   final _syncLock = Lock();
@@ -74,7 +75,7 @@ class SyncManager {
     try {
       await _store?.updateLastSyncAt(to);
     } catch (error, stk) {
-      logger?.warning('Failed to record lastSyncAt as $to', error, stk);
+      _logger.w(() => 'Failed to record how far this catch-up got', error: error, stackTrace: stk);
     }
   }
 
@@ -90,7 +91,7 @@ class SyncManager {
       await _store?.flush();
       return true;
     } catch (error, stk) {
-      logger?.warning('Failed to reset the persistence client', error, stk);
+      _logger.w(() => 'Failed to reset the persistence client', error: error, stackTrace: stk);
       return false;
     }
   }
@@ -98,9 +99,9 @@ class SyncManager {
   /// Replays the events missed since [lastSyncAt] for [cids], both falling back
   /// to the values held by the persistence client.
   ///
-  /// A window that cannot be replayed — too many events, or refused by the
-  /// server — is given up on, and the channels it covered are refreshed in its
-  /// place. Does nothing when there are no channels to catch up on.
+  /// A window that cannot be replayed — too many events, or refused — is given
+  /// up on, and the channels it covered are refreshed in its place. Does
+  /// nothing when there are no channels to catch up on.
   ///
   /// Those channels are returned so a caller doing its own recovery can skip
   /// them; the set is empty when the events were replayed normally.
@@ -116,7 +117,7 @@ class SyncManager {
       } catch (error, stk) {
         // Not treated as "never synced": seeding lastSyncAt off an unreadable
         // store would discard a history that is still there.
-        logger?.warning('Could not read where the last catch-up left off', error, stk);
+        _logger.w(() => 'Could not read where the last catch-up left off', error: error, stackTrace: stk);
         return const <String>{};
       }
 
@@ -124,7 +125,7 @@ class SyncManager {
 
       if (syncAt == null) {
         final now = clock.now();
-        logger?.info('Fresh sync start: lastSyncAt initialized to $now.');
+        _logger.i(() => 'First catch-up for this user, starting from now');
         await _recordLastSyncAt(now);
         return const <String>{};
       }
@@ -156,7 +157,7 @@ class SyncManager {
         if (stale.isNotEmpty) await _refreshPages(stale);
       }
     } catch (error, stk) {
-      logger?.warning('Error recovering state on reconnect', error, stk);
+      _logger.w(() => 'Error recovering state on reconnect', error: error, stackTrace: stk);
     }
   }
 
@@ -186,7 +187,7 @@ class SyncManager {
   // covered in full rather than truncated.
   //
   // Every page is attempted: one failing says nothing about the others. Returns
-  // the channels the server answered with — fewer when one is deleted or no
+  // the channels that came back — fewer when one is deleted or no
   // longer visible, which is not a failure — and the first request that failed.
   Future<(Set<String>, (Object, StackTrace)?)> _refreshPages(List<String> cids) async {
     final refreshed = <String>{};
@@ -195,7 +196,7 @@ class SyncManager {
     for (final page in cids.slices(_channelPageSize)) {
       try {
         final channels = await client.queryChannelsOnline(
-          filter: Filter.in_('cid', page),
+          filter: ChannelFilter.in_(ChannelFilterField.cid, page),
           paginationParams: PaginationParams(limit: page.length),
           // Fail fast if the connection dropped again: the reconnect handler is
           // waiting to announce recovery, and a sync would hold its lock.
@@ -204,7 +205,7 @@ class SyncManager {
 
         refreshed.addAll(channels.map((it) => it.cid).nonNulls);
       } catch (error, stk) {
-        logger?.warning('Failed to refresh ${page.length} channels', error, stk);
+        _logger.w(() => 'Failed to refresh ${page.length} channels', error: error, stackTrace: stk);
         failure ??= (error, stk);
       }
     }
@@ -216,10 +217,12 @@ class SyncManager {
   // back. [sync] has already decided there is a window worth asking for, and
   // holds the lock while this runs.
   Future<Set<String>> _performSync(List<String> cids, DateTime lastSyncAt) async {
-    // Deduplicated before capping: the endpoint counts duplicates against its
-    // own limit, so leaving them in would spend slots on nothing.
+    // Deduplicated before capping: duplicates count against the limit, so
+    // leaving them in would spend slots on nothing.
     final cappedCids = cids.toSet().take(_maxSyncCids).toList();
-    logger?.info('Syncing events since $lastSyncAt for channels: $cappedCids');
+    _logger
+      ..i(() => 'Syncing events since $lastSyncAt for ${cappedCids.length} channels')
+      ..d(() => 'Syncing channels: $cappedCids');
 
     final List<Event> events;
     try {
@@ -228,22 +231,26 @@ class SyncManager {
       events = res.events.sortedBy((it) => it.createdAt);
     } catch (error, stk) {
       // A 400 means the window is too old, or held too many events to return.
-      // The two are indistinguishable, and either way the server refusing it is
-      // the signal that local state is too far behind to reconcile — so the
+      // The two are indistinguishable, and either way the refusal is the
+      // signal that local state is too far behind to reconcile — so the
       // store is dropped and repopulated rather than reconciled.
-      if (error is StreamChatNetworkError && error.statusCode == 400) {
-        logger?.warning('Resetting local state after a refused window', error, stk);
+      if (error is StreamApiException && error.statusCode == 400) {
+        _logger.w(
+          () => 'Resetting local state: the server would not serve the missed events',
+          error: error,
+          stackTrace: stk,
+        );
         return _discardRefusedWindow(cappedCids, to: clock.now());
       }
 
       // Anything else could succeed next time, so lastSyncAt stays put.
-      logger?.warning('Error syncing events', error, stk);
+      _logger.w(() => 'Error syncing events', error: error, stackTrace: stk);
       return const <String>{};
     }
 
     final nextSyncAt = events.lastOrNull?.createdAt ?? clock.now();
     if (events.length > maxReplayEvents) {
-      logger?.warning('Skipping replay of ${events.length} events, over the $maxReplayEvents limit.');
+      _logger.w(() => 'Skipping replay of ${events.length} events, over the $maxReplayEvents limit');
       return _discardOversizedWindow(cappedCids, from: lastSyncAt, to: nextSyncAt);
     }
 
@@ -252,11 +259,15 @@ class SyncManager {
     // catch-up should ask for it again.
     try {
       for (final event in events) {
-        logger?.fine('Syncing event: ${event.type}');
+        _logger.d(() => 'Syncing event: ${event.type}');
         client.handleEvent(event);
       }
     } catch (error, stk) {
-      logger?.warning('Stopped replaying the missed events, keeping lastSyncAt', error, stk);
+      _logger.w(
+        () => 'Stopped replaying the missed events; they will be asked for again',
+        error: error,
+        stackTrace: stk,
+      );
       return const <String>{};
     }
 
@@ -278,9 +289,12 @@ class SyncManager {
     // Refreshed channels are reported even on failure, so the caller does not
     // query them again.
     if (!flushed || failure != null) {
-      logger?.warning(
-        'Putting lastSyncAt back: store dropped: $flushed, '
-        'refreshed ${refreshed.length} of ${cids.length} channels',
+      _logger.w(
+        () =>
+            '''
+        Putting lastSyncAt back: store dropped: $flushed,
+        refreshed ${refreshed.length} of ${cids.length} channels
+        ''',
       );
       await _recordLastSyncAt(from);
       return refreshed;
@@ -290,7 +304,7 @@ class SyncManager {
     return refreshed;
   }
 
-  // Gives up on a window the server would not serve.
+  // Gives up on a window that was refused.
   //
   // The store is dropped and repopulated from the refresh, as it is for an
   // oversized window. Only the checkpoint differs: it has nowhere to go back

@@ -81,8 +81,8 @@ class ChannelConfig {
 
   /// The push level for this channel.
   ///
-  /// Mutually exclusive with [chatPreferences] — when [chatPreferences] is set
-  /// on the backend, the coarse level is cleared and vice versa.
+  /// Mutually exclusive with [chatPreferences] — when [chatPreferences] is set,
+  /// the coarse level is cleared and vice versa.
   final PushLevel? pushLevel;
 
   /// True if this channel type supports push notifications.

@@ -31,7 +31,10 @@ void main() {
       expect(ownUser.lastActive, DateTime.parse('2021-06-16T11:59:59.003453014Z'));
       expect(ownUser.banned, false);
       expect(ownUser.online, true);
-      expect(ownUser.devices.length, 1);
+      expect(ownUser.devices, hasLength(1));
+      final device = ownUser.devices.single;
+      expect(device.id, startsWith('cRS8elU4Q-qqdCAvHR2kSa:'));
+      expect(device.pushProvider, 'firebase');
       expect(ownUser.mutes.length, 0);
       expect(ownUser.channelMutes.length, 1);
       expect(ownUser.totalUnreadCount, 0);
@@ -40,6 +43,52 @@ void main() {
       expect(ownUser.extraData['image'], 'https://placehold.jp/150x150.png');
       expect(ownUser.extraData['name'], 'Proud darkness');
       expect(ownUser.extraData['username'], 'Rioland');
+    });
+
+    test('OwnUser.toJson writes each device under its id and push_provider keys', () {
+      final ownUser = OwnUser(
+        id: 'user-id',
+        devices: const [
+          Device(id: 'device-1', pushProvider: PushProvider.firebase),
+          Device(id: 'device-2', pushProvider: PushProvider.apn),
+        ],
+      );
+
+      final json = ownUser.toJson();
+
+      expect(json['devices'], [
+        {'id': 'device-1', 'push_provider': 'firebase'},
+        {'id': 'device-2', 'push_provider': 'apn'},
+      ]);
+    });
+
+    test('OwnUser.fromJson reads back the devices OwnUser.toJson wrote', () {
+      final json = OwnUser(
+        id: 'user-id',
+        devices: const [Device(id: 'device-1', pushProvider: PushProvider.firebase)],
+      ).toJson();
+
+      final decoded = OwnUser.fromJson(json);
+
+      expect(decoded.devices.map((it) => (it.id, it.pushProvider)), [('device-1', 'firebase')]);
+    });
+
+    test('OwnUser.fromJson fails on a device missing its id or push provider', () {
+      final json = jsonFixture('own_user.json');
+      final device = Map<String, dynamic>.from((json['devices']! as List).single as Map);
+
+      for (final field in ['id', 'push_provider']) {
+        final incomplete = Map<String, dynamic>.from(device)..remove(field);
+
+        expect(
+          () => OwnUser.fromJson({
+            ...json,
+            'devices': [incomplete],
+          }),
+          throwsA(isA<TypeError>()),
+          reason: 'a device without $field should not decode',
+        );
+      }
     });
 
     test('should initialize a OwnUser from a User correctly', () {
@@ -298,6 +347,7 @@ void main() {
             'id': 'device-1',
             'push_provider': 'firebase',
             'created_at': '2023-01-01T00:00:00.000Z',
+            'user_id': 'test-user',
           },
         ],
       };
@@ -422,10 +472,10 @@ void main() {
           'department': 'Engineering',
           'custom_field': 'custom_value',
         },
-        devices: [
+        devices: const [
           Device(
             id: 'device-1',
-            pushProvider: 'firebase',
+            pushProvider: PushProvider.firebase,
           ),
         ],
         totalUnreadCount: 10,
@@ -481,14 +531,14 @@ void main() {
             'location': 'Amsterdam',
             'is_verified': true,
           },
-          devices: [
+          devices: const [
             Device(
               id: 'device-1',
-              pushProvider: 'firebase',
+              pushProvider: PushProvider.firebase,
             ),
             Device(
               id: 'device-2',
-              pushProvider: 'apn',
+              pushProvider: PushProvider.apn,
             ),
           ],
           totalUnreadCount: 25,

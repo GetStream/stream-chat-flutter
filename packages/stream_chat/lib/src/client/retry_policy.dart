@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import '../core/error/error.dart';
+import '../core/error/stream_chat_exception.dart';
 import 'client.dart';
 
 /// The retry policy associated to a client.
@@ -50,7 +50,7 @@ class RetryPolicy {
   final FutureOr<bool> Function(
     StreamChatClient client,
     int attempt,
-    StreamChatError? error,
+    StreamChatException? error,
   )
   shouldRetry;
 }

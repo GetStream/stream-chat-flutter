@@ -1,11 +1,12 @@
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'package:stream_chat/src/core/models/channel_model.dart';
-import 'package:stream_chat/src/core/models/comparable_field.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/message_reminder.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:test/test.dart';
+
+import '../../utils.dart';
 
 void main() {
   group('MessageReminder', () {
@@ -265,37 +266,57 @@ void main() {
       expect(identical(mergedReminder, messageReminder), isTrue);
     });
 
-    test('should implement ComparableFieldProvider interface', () {
-      // Test channelCid field
-      final channelCidField = messageReminder.getComparableField(
-        MessageReminderSortKey.channelCid,
-      );
-      expect(channelCidField, isA<ComparableField>());
-      expect(channelCidField?.value, equals(channelCid));
-
-      // Test remindAt field
-      final remindAtField = messageReminder.getComparableField(
-        MessageReminderSortKey.remindAt,
-      );
-      expect(remindAtField, isA<ComparableField>());
-      expect(remindAtField?.value, equals(remindAt));
-
-      // Test createdAt field
-      final createdAtField = messageReminder.getComparableField(
-        MessageReminderSortKey.createdAt,
-      );
-      expect(createdAtField, isA<ComparableField>());
-      expect(createdAtField?.value, equals(now));
-
-      // Test non-existent field
-      final nonExistentField = messageReminder.getComparableField('unknown');
-      expect(nonExistentField?.value, isNull);
+    test('MessageReminderSortField should name its remote fields', () {
+      expect(MessageReminderSortField.channelCid.remote, equals('channel_cid'));
+      expect(MessageReminderSortField.remindAt.remote, equals('remind_at'));
+      expect(MessageReminderSortField.createdAt.remote, equals('created_at'));
     });
 
-    test('MessageReminderSortKey should have defined constants', () {
-      expect(MessageReminderSortKey.channelCid, equals('channel_cid'));
-      expect(MessageReminderSortKey.remindAt, equals('remind_at'));
-      expect(MessageReminderSortKey.createdAt, equals('created_at'));
+    // Each field reads a different property off the model, and a wrong one
+    // sorts plausibly while ordering by something else entirely. These pin the
+    // getter, not just the remote name.
+    group('MessageReminderSortField ordering', () {
+      MessageReminder reminderWith({
+        String cid = channelCid,
+        String messageId = 'm1',
+        DateTime? remindAt,
+        DateTime? createdAt,
+      }) => MessageReminder(
+        channelCid: cid,
+        messageId: messageId,
+        userId: 'u1',
+        remindAt: remindAt,
+        createdAt: createdAt,
+      );
+
+      test('remindAt orders the sooner reminder first', () {
+        expectOrders(
+          MessageReminderSortField.remindAt,
+          reminderWith(remindAt: DateTime.utc(2024, 1, 1)),
+          reminderWith(remindAt: DateTime.utc(2024, 6, 1)),
+        );
+      });
+
+      test('createdAt orders the older reminder first', () {
+        expectOrders(
+          MessageReminderSortField.createdAt,
+          reminderWith(createdAt: DateTime.utc(2024, 1, 1)),
+          reminderWith(createdAt: DateTime.utc(2024, 6, 1)),
+        );
+      });
+
+      test('channelCid and messageId order lexically', () {
+        expectOrders(
+          MessageReminderSortField.channelCid,
+          reminderWith(cid: 'messaging:aaa'),
+          reminderWith(cid: 'messaging:bbb'),
+        );
+        expectOrders(
+          MessageReminderSortField.messageId,
+          reminderWith(messageId: 'a'),
+          reminderWith(messageId: 'b'),
+        );
+      });
     });
   });
 }

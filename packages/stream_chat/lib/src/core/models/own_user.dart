@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 import '../../../stream_chat.dart';
 import '../util/serializer.dart';
+import 'converters/v1_json_converters.dart';
 
 part 'own_user.g.dart';
 
@@ -140,7 +141,8 @@ class OwnUser extends User {
     );
   }
 
-  /// List of user devices.
+  /// The devices registered for this user to receive push notifications.
+  @DeviceV1JsonConverter()
   final List<Device> devices;
 
   /// List of users muted by the user.

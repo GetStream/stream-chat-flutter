@@ -60,8 +60,8 @@ class ChannelStateMutations {
     // Decrement the locally-tracked unread count for hard-deleted
     // messages that would have counted as unread. Soft-deleted messages
     // keep their slot. Only applies to channels that track unread counts
-    // locally (see [Channel.usesLocalUnreadCount]) — server-driven
-    // channels get corrected counts from server read events instead.
+    // locally (see [Channel.usesLocalUnreadCount]) — other channels get
+    // corrected counts from read events instead.
     if (hardDelete && _channel.usesLocalUnreadCount && MessageRules.canCountAsUnread(message, _channel)) {
       _state.unreadCount = math.max(0, _state.unreadCount - 1);
     }

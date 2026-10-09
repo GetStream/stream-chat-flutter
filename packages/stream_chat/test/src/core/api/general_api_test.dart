@@ -7,7 +7,6 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
 import '../../mocks.dart';
-import '../../utils.dart';
 
 void main() {
   Response successResponse(String path, {Object? data}) => Response(
@@ -62,7 +61,7 @@ void main() {
     test(
       'should throw if `query` and `messageFilters` is not provided',
       () async {
-        final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
+        final filter = ChannelFilter.in_(ChannelFilterField.cid, const ['test-cid-1', 'test-cid-2']);
         await expectLater(
           generalApi.searchMessages(filter),
           throwsA(isA<ArgumentError>()),
@@ -73,9 +72,9 @@ void main() {
     test(
       'should throw if `query` and `messageFilters` both are provided',
       () async {
-        final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
+        final filter = ChannelFilter.in_(ChannelFilterField.cid, const ['test-cid-1', 'test-cid-2']);
         const query = 'test-query';
-        final messageFilter = Filter.query('key', 'text');
+        final messageFilter = MessageSearchFilter.query(MessageSearchFilterField.text, 'text');
         await expectLater(
           generalApi.searchMessages(
             filter,
@@ -90,8 +89,8 @@ void main() {
     test(
       'should throw if `pagination.offset` and `sort` both are provided',
       () async {
-        final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
-        const sort = [SortOption.desc('test-field')];
+        final filter = ChannelFilter.in_(ChannelFilterField.cid, const ['test-cid-1', 'test-cid-2']);
+        final sort = [MessageSearchSort.desc(MessageSearchSortField.custom('test-field'))];
         const pagination = PaginationParams(offset: 10);
         await expectLater(
           generalApi.searchMessages(
@@ -105,9 +104,9 @@ void main() {
     );
 
     test('should run successfully with `query`', () async {
-      final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
+      final filter = ChannelFilter.in_(ChannelFilterField.cid, const ['test-cid-1', 'test-cid-2']);
       const query = 'test-query';
-      const sort = [SortOption.desc('test-field')];
+      final sort = [MessageSearchSort.desc(MessageSearchSortField.custom('test-field'))];
       const pagination = PaginationParams();
 
       const path = '/search';
@@ -145,9 +144,9 @@ void main() {
     });
 
     test('should run successfully with `messageFilter`', () async {
-      final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
-      const sort = [SortOption.desc('test-field')];
-      final messageFilter = Filter.query('key', 'text');
+      final filter = ChannelFilter.in_(ChannelFilterField.cid, const ['test-cid-1', 'test-cid-2']);
+      final sort = [MessageSearchSort.desc(MessageSearchSortField.custom('test-field'))];
+      final messageFilter = MessageSearchFilter.query(MessageSearchFilterField.text, 'text');
       const pagination = PaginationParams();
 
       const path = '/search';
@@ -189,9 +188,9 @@ void main() {
     test('with `channelId`', () async {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
-      final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
+      final filter = MemberFilter.in_(MemberFilterField.userId, const ['u1', 'u2']);
       const pagination = PaginationParams();
-      const sort = [SortOption<Member>.desc('test-field')];
+      final sort = [MemberSort.desc(MemberSortField.custom('test-field'))];
 
       const path = '/members';
 
@@ -243,9 +242,9 @@ void main() {
 
     test('with `members`', () async {
       const channelType = 'test-channel-type';
-      final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
+      final filter = MemberFilter.in_(MemberFilterField.userId, const ['u1', 'u2']);
       const pagination = PaginationParams();
-      const sort = [SortOption<Member>.desc('test-field')];
+      final sort = [MemberSort.desc(MemberSortField.custom('test-field'))];
 
       const path = '/members';
 
@@ -294,66 +293,5 @@ void main() {
       ).called(1);
       verifyNoMoreInteractions(client);
     });
-  });
-
-  test('enrichUrl', () async {
-    const path = '/og';
-    const url = 'https://www.techyourchance.com/finite-state-machine-with-unit-tests-real-world-example';
-
-    when(
-      () => client.get(
-        path,
-        queryParameters: {'url': url},
-      ),
-    ).thenAnswer(
-      (_) async => successResponse(
-        path,
-        data: {
-          'type': 'image',
-          'og_scrape_url': url,
-          'author_name': 'TechYourChance',
-          'title': 'Finite State Machine with Unit Tests: Real World Example',
-        },
-      ),
-    );
-
-    final res = await generalApi.enrichUrl(url);
-
-    expect(res, isNotNull);
-    expect(res.type, 'image');
-    expect(res.ogScrapeUrl, url);
-    expect(res.authorName, 'TechYourChance');
-    expect(
-      res.title,
-      'Finite State Machine with Unit Tests: Real World Example',
-    );
-
-    verify(
-      () => client.get(
-        path,
-        queryParameters: {'url': url},
-      ),
-    ).called(1);
-    verifyNoMoreInteractions(client);
-  });
-
-  test('getAppSettings calls GET /app and parses response', () async {
-    const path = '/app';
-    final fixture = jsonFixture('app_settings.json');
-
-    when(() => client.get(path)).thenAnswer(
-      (_) async => successResponse(path, data: fixture),
-    );
-
-    final res = await generalApi.getAppSettings();
-
-    expect(res, isNotNull);
-    expect(res.app.name, 'test-app');
-    expect(res.app.fileUploadConfig.sizeLimit, 10485760);
-    expect(res.app.imageUploadConfig.sizeLimit, 5242880);
-    expect(res.app.fileUploadConfig.allowedFileExtensions, ['.csv', '.pdf']);
-
-    verify(() => client.get(path)).called(1);
-    verifyNoMoreInteractions(client);
   });
 }

@@ -17,7 +17,7 @@ typedef PagedValueScrollViewIndexedWidgetBuilder<T> =
 typedef PagedValueScrollViewLoadMoreErrorBuilder =
     Widget Function(
       BuildContext context,
-      StreamChatError error,
+      StreamChatException error,
     );
 
 /// A [ListView] that loads more pages when the user scrolls to the end of the
@@ -79,7 +79,7 @@ class PagedValueListView<K, V> extends StatefulWidget {
   final WidgetBuilder loadingBuilder;
 
   /// A builder that is called to build the error state of the list.
-  final Widget Function(BuildContext, StreamChatError) errorBuilder;
+  final Widget Function(BuildContext, StreamChatException) errorBuilder;
 
   /// The index to take into account when triggering [controller.loadMore].
   final int loadMoreTriggerIndex;
@@ -410,7 +410,7 @@ class PagedValueGridView<K, V> extends StatefulWidget {
   final WidgetBuilder loadingBuilder;
 
   /// A builder that is called to build the error state of the list.
-  final Widget Function(BuildContext, StreamChatError) errorBuilder;
+  final Widget Function(BuildContext, StreamChatException) errorBuilder;
 
   /// The index to take into account when triggering [controller.loadMore].
   final int loadMoreTriggerIndex;

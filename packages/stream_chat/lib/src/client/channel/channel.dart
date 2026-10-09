@@ -80,7 +80,7 @@ class Channel {
          if (name != null) 'name': name,
          if (image != null) 'image': image,
        } {
-    _client.logger.info('New Channel instance created, not yet initialized');
+    _logger.d(() => 'New Channel instance created, not yet initialized');
   }
 
   /// Create a channel client instance from a [ChannelState] object.
@@ -95,6 +95,8 @@ class Channel {
       _extraData = channelState.channel!.extraData {
     _initState(channelState); // Initialize the state immediately.
   }
+
+  late final _logger = StreamLogger('SCh:Channel:$cid');
 
   /// This client state
   ChannelClientState? state;
@@ -264,6 +266,20 @@ class Channel {
   Stream<bool> get hiddenStream {
     _checkInitialized();
     return state!.channelStateStream.map((cs) => cs.channel?.hidden == true).distinct();
+  }
+
+  /// Channel blocked status.
+  /// Status is specific to the current user.
+  bool get blocked {
+    _checkInitialized();
+    return state!.channelState.channel?.blocked == true;
+  }
+
+  /// Channel blocked status as a stream.
+  /// Status is specific to the current user.
+  Stream<bool> get blockedStream {
+    _checkInitialized();
+    return state!.channelStateStream.map((cs) => cs.channel?.blocked == true).distinct();
   }
 
   /// Channel pinned status.
@@ -592,13 +608,12 @@ class Channel {
   }) {
     final cancelToken = _cancelableAttachmentUploadRequest[attachmentId];
     if (cancelToken == null) {
-      throw const StreamChatError(
-        "Upload request for this Attachment hasn't started yet or maybe "
-        'Already completed',
+      throw StateError(
+        "Upload request for attachment '$attachmentId' hasn't started yet, or has already completed.",
       );
     }
     if (cancelToken.isCancelled) {
-      throw const StreamChatError('Upload request already cancelled');
+      throw StateError("Upload request for attachment '$attachmentId' was already cancelled.");
     }
     cancelToken.cancel(reason);
   }
@@ -617,7 +632,7 @@ class Channel {
     ].firstWhereOrNull((it) => it.id == messageId);
 
     if (message == null) {
-      throw const StreamChatError('Error, Message not found');
+      throw const StreamClientException(message: 'Error, Message not found');
     }
 
     final attachments = message.attachments.where((it) {
@@ -626,14 +641,14 @@ class Channel {
     });
 
     if (attachments.isEmpty) {
-      client.logger.info('No attachments available to upload');
+      _logger.d(() => 'No attachments available to upload');
       if (message.attachments.every((it) => it.uploadState.isSuccess)) {
         _messageAttachmentsUploadCompleter.remove(messageId)?.complete(message);
       }
       return Future.value();
     }
 
-    client.logger.info('Found ${attachments.length} attachments');
+    _logger.d(() => 'Found ${attachments.length} attachments');
 
     void updateAttachment(Attachment attachment, {bool remove = false}) {
       final index = message!.attachments.indexWhere(
@@ -656,8 +671,8 @@ class Channel {
     }
 
     return Future.wait(
-      attachments.map((it) {
-        client.logger.info('Uploading ${it.id} attachment...');
+      attachments.map((it) async {
+        _logger.d(() => 'Uploading ${it.id} attachment...');
 
         final throttledUpdateAttachment = updateAttachment.throttled(
           const Duration(milliseconds: 500),
@@ -671,67 +686,45 @@ class Channel {
           ]);
         }
 
-        final isImage = it.type == AttachmentType.image;
         final cancelToken = CancelToken();
-        Future<SendAttachmentResponse> future;
-        if (isImage) {
-          future = sendImage(
-            it.file!,
-            onSendProgress: onSendProgress,
-            cancelToken: cancelToken,
-            extraData: it.extraData,
-          );
-        } else {
-          future = sendFile(
-            it.file!,
-            onSendProgress: onSendProgress,
-            cancelToken: cancelToken,
-            extraData: it.extraData,
-          );
-        }
         _cancelableAttachmentUploadRequest[it.id] = cancelToken;
-        return future
-            .then((response) {
-              client.logger.info('Attachment ${it.id} uploaded successfully...');
 
-              // If the response is SendFileResponse, then we might also be getting
-              // thumbUrl in case of video. So we need to update the attachment with
-              // both the assetUrl and thumbUrl.
-              if (response is SendFileResponse) {
-                updateAttachment(
-                  it.copyWith(
-                    assetUrl: response.file,
-                    thumbUrl: response.thumbUrl,
-                    uploadState: const UploadState.success(),
-                  ),
-                );
-              } else {
-                updateAttachment(
-                  it.copyWith(
-                    imageUrl: response.file,
-                    uploadState: const UploadState.success(),
-                  ),
-                );
-              }
-            })
-            .catchError((e, stk) {
-              if (e is StreamChatNetworkError && e.type == .cancel) {
-                client.logger.info('Attachment ${it.id} upload cancelled');
+        final isImage = it.type == AttachmentType.image;
+        final upload = isImage ? sendImage : sendFile;
 
-                // remove attachment from message if cancelled.
-                updateAttachment(it, remove: true);
-                return;
-              }
+        final result = await upload(
+          it.file!,
+          onSendProgress: onSendProgress,
+          cancelToken: cancelToken,
+          extraData: it.extraData,
+        );
 
-              client.logger.severe('error uploading the attachment', e, stk);
-              updateAttachment(
-                it.copyWith(uploadState: UploadState.failed(error: e.toString())),
-              );
-            })
-            .whenComplete(() {
-              throttledUpdateAttachment.cancel();
-              _cancelableAttachmentUploadRequest.remove(it.id);
-            });
+        throttledUpdateAttachment.cancel();
+        _cancelableAttachmentUploadRequest.remove(it.id);
+
+        if (result case Success(data: final uploaded)) {
+          _logger.d(() => 'Attachment ${it.id} uploaded successfully...');
+          updateAttachment(
+            it.copyWith(
+              imageUrl: isImage ? uploaded.fileUrl : null,
+              assetUrl: isImage ? null : uploaded.fileUrl,
+              thumbUrl: uploaded.thumbUrl,
+              uploadState: const UploadState.success(),
+            ),
+          );
+          return;
+        }
+
+        if (result case Failure(error: StreamNetworkException(isCancelled: true))) {
+          _logger.d(() => 'Attachment ${it.id} upload cancelled');
+          updateAttachment(it, remove: true);
+          return;
+        }
+
+        if (result case Failure(:final error, :final stackTrace)) {
+          _logger.e(() => 'error uploading the attachment', error: error, stackTrace: stackTrace);
+          updateAttachment(it.copyWith(uploadState: UploadState.failed(error: error.toString())));
+        }
       }),
     ).whenComplete(() {
       final completer = _messageAttachmentsUploadCompleter.remove(messageId);
@@ -765,7 +758,8 @@ class Channel {
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
-    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(const StreamChatError('Message cancelled'));
+    const cancelled = StreamNetworkException(message: 'Message cancelled', isCancelled: true);
+    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(cancelled);
 
     final quotedMessage = state!.messages.firstWhereOrNull(
       (m) => m.id == message.quotedMessageId,
@@ -800,18 +794,18 @@ class Channel {
         message = await attachmentsUploadCompleter.future;
 
         // Fail the whole message if any attachment failed to upload
-        if (message.attachments.any((it) => it.uploadState.isFailed)) {
-          throw const StreamChatError('Failed to upload one or more attachments');
+        if (message.attachments.where((it) => it.uploadState.isFailed) case final failed when failed.isNotEmpty) {
+          throw StreamClientException(message: _uploadFailureMessage(failed));
         }
       }
 
-      // Validate the final message before sending it to the server.
+      // Validate the final message before sending it.
       if (MessageRules.canUpload(message) != true) {
-        client.logger.warning('Message is not valid for sending, removing it');
+        _logger.w(() => 'Message is not valid for sending, removing it');
 
         // Remove the message from state as it is invalid.
         state!.deleteMessage(message, hardDelete: true);
-        throw const StreamChatError('Message is not valid for sending');
+        throw const StreamClientException(message: 'Message is not valid for sending');
       }
 
       // Wait for the previous sendMessage call to finish. Otherwise, the order
@@ -847,7 +841,7 @@ class Channel {
 
       state?.updateMessage(failedMessage);
       // If the error is retriable, add it to the retry queue.
-      if (e is StreamChatNetworkError && e.isRetriable) {
+      if (e is StreamChatException && e.isRetriable) {
         state?.scheduleRetry(failedMessage);
       }
 
@@ -870,7 +864,8 @@ class Channel {
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
-    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(const StreamChatError('Message cancelled'));
+    const cancelled = StreamNetworkException(message: 'Message cancelled', isCancelled: true);
+    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(cancelled);
 
     // ignore: parameter_assignments
     message = message.copyWith(
@@ -900,8 +895,8 @@ class Channel {
         message = await attachmentsUploadCompleter.future;
 
         // Fail the whole message if any attachment failed to upload
-        if (message.attachments.any((it) => it.uploadState.isFailed)) {
-          throw const StreamChatError('Failed to upload one or more attachments');
+        if (message.attachments.where((it) => it.uploadState.isFailed) case final failed when failed.isNotEmpty) {
+          throw StreamClientException(message: _uploadFailureMessage(failed));
         }
       }
 
@@ -936,7 +931,7 @@ class Channel {
 
       state?.updateMessage(failedMessage);
       // If the error is retriable, add it to the retry queue.
-      if (e is StreamChatNetworkError && e.isRetriable) {
+      if (e is StreamChatException && e.isRetriable) {
         state?.scheduleRetry(failedMessage);
       }
 
@@ -959,7 +954,8 @@ class Channel {
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
-    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(const StreamChatError('Message cancelled'));
+    const cancelled = StreamNetworkException(message: 'Message cancelled', isCancelled: true);
+    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(cancelled);
 
     // ignore: parameter_assignments
     message = message.copyWith(
@@ -1003,7 +999,7 @@ class Channel {
 
       state?.updateMessage(failedMessage);
       // If the error is retriable, add it to the retry queue.
-      if (e is StreamChatNetworkError && e.isRetriable) {
+      if (e is StreamChatException && e.isRetriable) {
         state?.scheduleRetry(failedMessage);
       }
 
@@ -1015,9 +1011,9 @@ class Channel {
 
   /// Deletes the [message] for everyone.
   ///
-  /// If [hard] is true, the message is permanently deleted from the server
-  /// and cannot be recovered. In this case, any attachments associated with the
-  /// message are also deleted from the server.
+  /// If [hard] is true, the message is permanently deleted and cannot be
+  /// recovered. In this case, any attachments associated with the message are
+  /// deleted as well.
   Future<EmptyResponse> deleteMessage(Message message, {bool hard = false}) {
     final deletionScope = MessageDeleteScope.deleteForAll(hard: hard);
 
@@ -1039,13 +1035,12 @@ class Channel {
   // The [scope] defines whether to delete the message for everyone or just
   // for the current user.
   //
-  // If the message is a local message (not yet sent to the server) or a bounced
+  // If the message is a local message (not yet sent) or a bounced
   // error message, it is deleted locally without making an API call.
   //
   // If the message is deleted for everyone and [scope.hard] is true, the
-  // message is permanently deleted from the server and cannot be recovered.
-  // In this case, any attachments associated with the message are also deleted
-  // from the server.
+  // message is permanently deleted and cannot be recovered. In this case, any
+  // attachments associated with the message are deleted as well.
   Future<EmptyResponse> _deleteMessage(
     Message message, {
     required MessageDeleteScope scope,
@@ -1053,7 +1048,7 @@ class Channel {
     _checkInitialized();
 
     // Directly deleting the local messages and bounced error messages as they
-    // are not available on the server.
+    // were never sent.
     if (message.remoteCreatedAt == null || message.isBouncedWithError) {
       _deleteLocalMessage(message);
       // Returning empty response to mark the api call as success.
@@ -1086,7 +1081,7 @@ class Channel {
       );
 
       state?.deleteMessage(deletedMessage, hardDelete: scope.hard);
-      // If hard delete, also delete the attachments from the server.
+      // If hard delete, also delete the uploaded attachments.
       if (scope.hard) _deleteMessageAttachments(deletedMessage);
 
       return response;
@@ -1098,7 +1093,7 @@ class Channel {
 
       state?.deleteMessage(failedMessage, hardDelete: scope.hard);
       // If the error is retriable, add it to the retry queue.
-      if (e is StreamChatNetworkError && e.isRetriable) {
+      if (e is StreamChatException && e.isRetriable) {
         state?.scheduleRetry(failedMessage);
       }
 
@@ -1106,7 +1101,7 @@ class Channel {
     }
   }
 
-  // Deletes a local [message] that is not yet sent to the server.
+  // Deletes a local [message] that is not yet sent.
   //
   // This is typically called when a user wants to delete a message that they
   // have composed but not yet sent, or if a message failed to send and the user
@@ -1124,22 +1119,31 @@ class Channel {
     // Removing the attachments upload completer to stop the `sendMessage`
     // waiting for attachments to complete.
     final completer = _messageAttachmentsUploadCompleter.remove(message.id);
-    completer?.completeError(const StreamChatError('Message deleted'));
+    completer?.completeError(
+      const StreamNetworkException(message: 'Message deleted', isCancelled: true),
+    );
   }
 
-  // Deletes all the attachments associated with the given [message]
-  // from the server. This is typically called when a message is hard deleted.
+  // Deletes all the uploaded attachments associated with the given [message].
+  // This is typically called when a message is hard deleted.
   Future<void> _deleteMessageAttachments(Message message) async {
+    if (!_isInitialized) return;
+
     final attachments = message.attachments;
     final deleteFutures = attachments.map((it) async {
       if (it.imageUrl case final url?) return deleteImage(url);
       if (it.assetUrl case final url?) return deleteFile(url);
     });
 
-    try {
-      await Future.wait(deleteFutures);
-    } catch (e, stk) {
-      _client.logger.warning('Error deleting message attachments', e, stk);
+    final results = await Future.wait(deleteFutures);
+    for (final result in results) {
+      if (result case Failure(:final error, :final stackTrace)) {
+        _logger.w(
+          () => 'Error deleting message attachments',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
     }
   }
 
@@ -1274,7 +1278,7 @@ class Channel {
     String? id,
     String? messageText,
     String? createdByDeviceId,
-    required LocationCoordinates location,
+    required LocationCoordinate location,
     Map<String, Object?> extraData = const {},
   }) {
     final message = Message(
@@ -1307,7 +1311,7 @@ class Channel {
     String? messageText,
     String? createdByDeviceId,
     required DateTime endSharingAt,
-    required LocationCoordinates location,
+    required LocationCoordinate location,
     Map<String, Object?> extraData = const {},
   }) {
     final message = Message(
@@ -1332,8 +1336,8 @@ class Channel {
     return sendMessage(locationMessage);
   }
 
-  /// Send a file to this channel.
-  Future<SendFileResponse> sendFile(
+  /// Uploads [file] to this channel.
+  Future<Result<UploadedFile>> sendFile(
     AttachmentFile file, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
@@ -1350,8 +1354,8 @@ class Channel {
     );
   }
 
-  /// Send an image to this channel.
-  Future<SendImageResponse> sendImage(
+  /// Uploads [file] as an image to this channel.
+  Future<Result<UploadedFile>> sendImage(
     AttachmentFile file, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
@@ -1371,13 +1375,13 @@ class Channel {
   /// Search for a message with the given options.
   Future<SearchMessagesResponse> search({
     String? query,
-    Filter? messageFilters,
-    List<SortOption>? sort,
+    MessageSearchFilter? messageFilters,
+    List<MessageSearchSort>? sort,
     PaginationParams? paginationParams,
   }) {
     _checkInitialized();
     return _client.search(
-      Filter.in_('cid', [cid!]),
+      .in_(ChannelFilterField.cid, [cid]),
       sort: sort,
       query: query,
       paginationParams: paginationParams,
@@ -1385,8 +1389,8 @@ class Channel {
     );
   }
 
-  /// Delete a file from this channel.
-  Future<EmptyResponse> deleteFile(
+  /// Deletes the file at [url] from this channel.
+  Future<Result<void>> deleteFile(
     String url, {
     CancelToken? cancelToken,
     Map<String, Object?>? extraData,
@@ -1401,8 +1405,8 @@ class Channel {
     );
   }
 
-  /// Delete an image from this channel.
-  Future<EmptyResponse> deleteImage(
+  /// Deletes the image at [url] from this channel.
+  Future<Result<void>> deleteImage(
     String url, {
     CancelToken? cancelToken,
     Map<String, Object?>? extraData,
@@ -1538,8 +1542,8 @@ class Channel {
   /// [sort] options.
   Future<QueryPollVotesResponse> queryPollVotes(
     String pollId, {
-    Filter? filter,
-    SortOrder<PollVote>? sort,
+    PollVoteFilter? filter,
+    List<PollVoteSort>? sort,
     PaginationParams pagination = const PaginationParams(),
   }) {
     _checkInitialized();
@@ -1869,9 +1873,10 @@ class Channel {
     }
 
     if (!canUseReadReceipts) {
-      throw const StreamChatError(
-        'Cannot mark as read: Channel does not support read events. '
-        'Enable read_events in your channel type configuration.',
+      throw const StreamClientException(
+        message: '''
+        Cannot mark as read: Channel does not support read events.
+        Enable read_events in your channel type configuration.''',
       );
     }
 
@@ -1898,9 +1903,11 @@ class Channel {
       final messages = state!.messages;
       final anchorIndex = messages.indexWhere((it) => it.id == messageId);
       if (anchorIndex < 0) {
-        throw StreamChatError(
-          'Cannot mark as unread: Message "$messageId" was not found in the '
-          'locally-known messages for this channel.',
+        throw StreamClientException(
+          message:
+              '''
+        Cannot mark as unread: Message "$messageId" was not found in the
+        locally-known messages for this channel.''',
         );
       }
 
@@ -1918,9 +1925,10 @@ class Channel {
     }
 
     if (!canUseReadReceipts) {
-      throw const StreamChatError(
-        'Cannot mark as unread: Channel does not support read events. '
-        'Enable read_events in your channel type configuration.',
+      throw const StreamClientException(
+        message: '''
+        Cannot mark as unread: Channel does not support read events.
+        Enable read_events in your channel type configuration.''',
       );
     }
 
@@ -1956,9 +1964,10 @@ class Channel {
     }
 
     if (!canUseReadReceipts) {
-      throw const StreamChatError(
-        'Cannot mark as unread: Channel does not support read events. '
-        'Enable read_events in your channel type configuration.',
+      throw const StreamClientException(
+        message: '''
+        Cannot mark as unread: Channel does not support read events.
+        Enable read_events in your channel type configuration.''',
       );
     }
 
@@ -1970,9 +1979,10 @@ class Channel {
     _checkInitialized();
 
     if (!canUseReadReceipts) {
-      throw const StreamChatError(
-        'Cannot mark thread as read: Channel does not support read events. '
-        'Enable read_events in your channel type configuration.',
+      throw const StreamClientException(
+        message: '''
+        Cannot mark thread as read: Channel does not support read events.
+        Enable read_events in your channel type configuration.''',
       );
     }
 
@@ -1984,9 +1994,10 @@ class Channel {
     _checkInitialized();
 
     if (!canUseReadReceipts) {
-      throw const StreamChatError(
-        'Cannot mark thread as unread: Channel does not support read events. '
-        'Enable read_events in your channel type configuration.',
+      throw const StreamClientException(
+        message: '''
+        Cannot mark thread as unread: Channel does not support read events.
+        Enable read_events in your channel type configuration.''',
       );
     }
 
@@ -1998,7 +2009,7 @@ class Channel {
     _initializedCompleter.safeComplete(true);
 
     if (cid case final cid?) client.state.addChannels({cid: this});
-    _client.logger.info('Channel ${channelState.channel?.cid} initialized');
+    _logger.v(() => 'State initialized');
   }
 
   /// Loads the initial channel state and watches for changes.
@@ -2209,8 +2220,8 @@ class Channel {
 
   /// Query channel members.
   Future<QueryMembersResponse> queryMembers({
-    Filter? filter,
-    SortOrder<Member>? sort,
+    MemberFilter? filter,
+    List<MemberSort>? sort,
     PaginationParams? pagination,
   }) => _client.queryMembers(
     type,
@@ -2223,12 +2234,12 @@ class Channel {
 
   /// Query channel banned users.
   Future<QueryBannedUsersResponse> queryBannedUsers({
-    Filter? filter,
-    SortOrder<BannedUser>? sort,
+    BannedUserFilter? filter,
+    List<BannedUserSort>? sort,
     PaginationParams? pagination,
   }) {
     _checkInitialized();
-    filter ??= Filter.equal('channel_cid', cid!);
+    filter ??= .equal(BannedUserFilterField.channelCid, cid);
     return _client.queryBannedUsers(
       filter: filter,
       sort: sort,
@@ -2240,8 +2251,11 @@ class Channel {
   // state when the mute expires.
   Timer? _muteExpirationTimer;
 
-  /// Mutes the channel.
-  Future<EmptyResponse> mute({Duration? expiration}) {
+  /// Mutes this channel for the current user.
+  ///
+  /// The mute lasts until it is removed. An [expiration] expires it after
+  /// that long, and a zero one removes it straight away.
+  Future<Result<void>> mute({Duration? expiration}) {
     _checkInitialized();
 
     // If there is a expiration set, we will set a timer to automatically unmute
@@ -2251,64 +2265,83 @@ class Channel {
       _muteExpirationTimer = Timer(expiration, unmute);
     }
 
-    return _client.muteChannel(cid!, expiration: expiration);
+    return _client.moderation.muteChannel(cid!, expiration: expiration);
   }
 
-  /// Unmute the channel.
-  Future<EmptyResponse> unmute() {
+  /// Removes the current user's mute on this channel.
+  Future<Result<void>> unmute() {
     _checkInitialized();
 
     // Cancel the mute expiration timer if it is set.
     _muteExpirationTimer?.cancel();
     _muteExpirationTimer = null;
 
-    return _client.unmuteChannel(cid!);
+    return _client.moderation.unmuteChannel(cid!);
   }
 
-  /// Bans the member with given [userID] from the channel.
-  Future<EmptyResponse> banMember(
-    String userID,
-    Map<String, dynamic> options,
-  ) async {
+  /// Bans [userID] from this channel.
+  ///
+  /// The ban lasts until it is removed. A [timeout] expires it after that
+  /// long, applied in whole minutes and never less than one.
+  ///
+  /// If [shadow] is true, their messages stop reaching anyone else and they
+  /// are not told.
+  ///
+  /// If [ipBan] is true, the address they connected from is banned as well.
+  ///
+  /// [deleteMessages] decides what happens to the messages they already
+  /// sent, which are left alone when it is omitted. [reason] is recorded
+  /// with the ban.
+  Future<Result<void>> banMember(
+    String userID, {
+    Duration? timeout,
+    String? reason,
+    bool? shadow,
+    bool? ipBan,
+    DeleteType? deleteMessages,
+  }) {
     _checkInitialized();
-    final opts = Map<String, dynamic>.from(options)
-      ..addAll({
-        'type': type,
-        'id': id,
-      });
-    return _client.banUser(userID, opts);
+    return _client.moderation.banUser(
+      userID,
+      channelCid: cid,
+      timeout: timeout,
+      reason: reason,
+      shadow: shadow,
+      ipBan: ipBan,
+      deleteMessages: deleteMessages,
+    );
   }
 
-  /// Remove the ban for the member with given [userID] in the channel.
-  Future<EmptyResponse> unbanMember(String userID) async {
+  /// Removes the ban on [userID] in this channel.
+  ///
+  /// A shadow ban lifts the same way as any other.
+  Future<Result<void>> unbanMember(String userID) {
     _checkInitialized();
-    return _client.unbanUser(userID, {
-      'type': type,
-      'id': id,
-    });
+    return _client.moderation.unbanUser(userID, channelCid: cid);
   }
 
-  /// Shadow bans the user with the given [userID] from the channel.
-  Future<EmptyResponse> shadowBan(
-    String userID,
-    Map<String, dynamic> options,
-  ) async {
+  /// Bans [userID] without telling them, hiding their messages.
+  ///
+  /// The same as [banMember] with `shadow` set, and the other arguments
+  /// behave the same way.
+  ///
+  /// Remove it with [unbanMember].
+  Future<Result<void>> shadowBan(
+    String userID, {
+    Duration? timeout,
+    String? reason,
+    bool? ipBan,
+    DeleteType? deleteMessages,
+  }) {
     _checkInitialized();
-    final opts = Map<String, dynamic>.from(options)
-      ..addAll({
-        'type': type,
-        'id': id,
-      });
-    return _client.shadowBan(userID, opts);
-  }
-
-  /// Remove the shadow ban for the user with the given [userID] in the channel.
-  Future<EmptyResponse> removeShadowBan(String userID) async {
-    _checkInitialized();
-    return _client.removeShadowBan(userID, {
-      'type': type,
-      'id': id,
-    });
+    return _client.moderation.shadowBan(
+      userID,
+      channelCid: cid,
+      timeout: timeout,
+      reason: reason,
+      ipBan: ipBan,
+      deleteMessages: deleteMessages,
+    );
   }
 
   /// Hides the channel from [StreamChatClient.queryChannels] for the user
@@ -2417,7 +2450,7 @@ class Channel {
   Future<void> keyStroke([String? parentId]) async {
     if (!_canSendTypingEvents) return;
 
-    client.logger.info('KeyStroke received');
+    _logger.v(() => 'KeyStroke received');
     return _keyStrokeHandler(parentId);
   }
 
@@ -2425,7 +2458,7 @@ class Channel {
   Future<void> startTyping([String? parentId]) async {
     if (!_canSendTypingEvents) return;
 
-    client.logger.info('start typing');
+    _logger.d(() => 'start typing');
     await sendEvent(
       Event(
         type: EventType.typingStart,
@@ -2438,7 +2471,7 @@ class Channel {
   Future<void> stopTyping([String? parentId]) async {
     if (!_canSendTypingEvents) return;
 
-    client.logger.info('stop typing');
+    _logger.d(() => 'stop typing');
     await sendEvent(
       Event(
         type: EventType.typingStop,
@@ -2465,4 +2498,23 @@ class Channel {
       '[Channel.fromState]',
     );
   }
+}
+
+// Names which attachments failed and what each reported, so the caller is not
+// left with "one or more".
+//
+// The reasons are strings because `UploadStateFailed.error` is one: whatever
+// each upload threw was stringified when its state was recorded, so there is no
+// throwable left to carry as a `cause`.
+String _uploadFailureMessage(Iterable<Attachment> failed) {
+  final reasons = failed.map((it) {
+    final reason = switch (it.uploadState) {
+      UploadStateFailed(:final error) => error,
+      _ => 'unknown error',
+    };
+
+    return '${it.id}: $reason';
+  });
+
+  return 'Failed to upload ${failed.length} attachment(s) — ${reasons.join('; ')}';
 }

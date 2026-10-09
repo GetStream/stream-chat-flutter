@@ -6,7 +6,7 @@ Future<void> main() async {
   /// by passing the apikey obtained from your project dashboard.
   final client = StreamChatClient(
     'b67pax5b2wdq',
-    logLevel: Level.INFO,
+    logConfig: const StreamLogConfig(priority: StreamLogPriority.info),
   );
 
   /// Set the current user. In a production scenario, this should be done using

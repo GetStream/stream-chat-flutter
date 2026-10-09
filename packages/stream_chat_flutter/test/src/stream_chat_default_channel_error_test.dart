@@ -16,12 +16,8 @@ void main() {
     when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
   });
 
-  StreamChatNetworkError dioError(DioExceptionType type) => StreamChatNetworkError.fromDioException(
-    DioException(
-      requestOptions: RequestOptions(path: '/'),
-      type: type,
-    ),
-  );
+  StreamNetworkException transportFailure({bool isTimeout = false}) =>
+      StreamNetworkException(message: 'the request failed', isTimeout: isTimeout);
 
   // Pumps StreamChat and renders the default error state it installs for the
   // given [error], via DefaultStreamChannelBuilders.errorBuilderOf.
@@ -45,7 +41,7 @@ void main() {
 
   group('default channel error builder installed by StreamChat', () {
     testWidgets('shows the no-internet copy for connection errors', (tester) async {
-      await pumpDefaultError(tester, dioError(DioExceptionType.connectionError));
+      await pumpDefaultError(tester, transportFailure());
 
       expect(find.byType(StreamScrollViewErrorWidget), findsOneWidget);
       expect(find.text('No Internet Connection'), findsOneWidget);
@@ -54,7 +50,7 @@ void main() {
     });
 
     testWidgets('shows the slow-connection copy for timeouts', (tester) async {
-      await pumpDefaultError(tester, dioError(DioExceptionType.receiveTimeout));
+      await pumpDefaultError(tester, transportFailure(isTimeout: true));
 
       expect(find.text('Slow Internet Connection'), findsOneWidget);
       expect(
@@ -64,8 +60,8 @@ void main() {
     });
 
     testWidgets('shows a generic message and never the raw error', (tester) async {
-      final error = StreamChatNetworkError.raw(
-        code: -1,
+      const error = StreamApiException(
+        code: StreamErrorCode.internalError,
         message: 'super secret internal failure',
         statusCode: 500,
       );
