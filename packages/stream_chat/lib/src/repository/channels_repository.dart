@@ -3,7 +3,7 @@ import 'package:stream_core/stream_core.dart' show PatternMatching, Result;
 import '../../open_api/api.dart' as api;
 import '../core/models/response/update_channel_partial_response.dart';
 import '../core/models/response/update_member_partial_response.dart';
-import 'mapper/channel_mapper.dart';
+import 'mapper/channels_mapper.dart';
 
 /// Repository dedicated to channel operations.
 class ChannelsRepository {
