@@ -6,7 +6,7 @@ import '../core/models/response/hide_channel_response.dart';
 import '../core/models/response/show_channel_response.dart';
 import '../core/models/response/update_channel_partial_response.dart';
 import '../core/models/response/update_member_partial_response.dart';
-import 'mapper/channel_mapper.dart';
+import 'mapper/channels_mapper.dart';
 
 /// Repository dedicated to channel operations.
 class ChannelsRepository {
