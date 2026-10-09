@@ -20,7 +20,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [06](06-reminders.md) | Message Reminders | 4 | 4 | ☐ |
 | [07](07-threads-and-drafts.md) | Threads & Drafts | 7 | 7 | ☐ |
 | [08](08-moderation-and-blocklists.md) | Moderation & Blocklists | 0 | 34 | ☑ |
-| [09](09-users.md) | Users | 8 | 8 | ☐ |
+| [09](09-users.md) | Users | 5 | 5 | ☐ |
 | [10](10-messages.md) | Messages & Search | 14 | 12 | ☐ |
 | [11](11-channels-and-members.md) | Channels, Members & Sync | 13 | 15 | ☐ |
 | [12](12-uploads-cdn.md) | Uploads (CDN) | 8 | 8 | ☑ |
@@ -30,8 +30,9 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [16](16-channel-lifecycle.md) | Channel Lifecycle — split out of 11 | 0 | 3 | ☑ |
 | [17](17-read-receipts.md) | Read Receipts — split out of 11 | 0 | 4 | ☑ |
 | [18](18-unread-counts.md) | Unread Counts — split out of 09 | 0 | 1 | ☑ |
+| [19](19-user-blocking.md) | User Blocking — split out of 09 | 0 | 3 | ☑ |
 
-**Coverage:** 69 hand-written methods across 10 files, and all 129 generated operations, each claimed by exactly
+**Coverage:** 66 hand-written methods across 10 files, and all 129 generated operations, each claimed by exactly
 one group. Verified mechanically — see [Keeping this plan honest](#keeping-this-plan-honest).
 
 
@@ -178,6 +179,8 @@ surfaces before it reaches `Message` and `ChannelState`:
 - **17** is the read and delivery receipts, split out of 11 after 16. They answer only a `duration` and a read
   event, which waits for group 10's message mappers.
 - **18** is the current user's unread counts, split out of 09 because it embeds no `User` and nothing persists it.
+- **19** is blocking and unblocking users and listing the blocked ones, split out of 09 because it embeds `User`
+  only through the existing mappers and nothing persists it.
 - **12** comes late because it needs its own hand-written multipart client and is the highest-traffic path in the
   SDK.
 - **09** is last. Every group before it maps users through `user_mapper.dart` onto today's `User`; 09 migrates the

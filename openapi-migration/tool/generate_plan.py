@@ -516,9 +516,10 @@ GROUPS = [
     dict(
         num='09', slug='users', title='Users',
         hand=['user_api.dart'],
-        match=owns('/api/v2/users'),
+        match=owns('/api/v2/users', unless=('/api/v2/users/block', '/api/v2/users/unblock')),
         goal='`User` is the most widely referenced public model in the SDK; this is where keep-vs-adopt costs the '
-             'most. [18](18-unread-counts.md) split the current user\'s unread counts out of it.',
+             'most. [18](18-unread-counts.md) split the current user\'s unread counts out of it, and '
+             '[19](19-user-blocking.md) blocking users.',
         decisions=[
             '`User` and `OwnUser` are public, persisted, and embedded in nearly every other response. This group '
             'restructures them, last: the mappers in `user_mapper.dart` already map the generated types onto the '
@@ -940,6 +941,39 @@ GROUPS = [
               fields and nullability; the generated types match them field for field. `duration` is non-null.
             - **The current user's counts are updated only on success,** through `Result.onSuccess`, as v10 did
               by throwing before it reached the update.
+            """),
+        risks=[],
+        done=DONE.replace('- [ ]', '- [x]'),
+    ),
+    dict(
+        num='19', slug='user-blocking', title='User Blocking',
+        hand=[],
+        match=only_ops('POST /api/v2/users/block', 'GET /api/v2/users/block', 'POST /api/v2/users/unblock'),
+        goal='Move blocking and unblocking a user, and listing the blocked users, ahead of [09](09-users.md): they '
+             'embed `User` only through the existing `user_mapper.dart`, and nothing persists them.',
+        decisions=[],
+        taken=textwrap.dedent("""\
+            - **Split out of [09](09-users.md), ahead of it, as one slice.** Blocking and unblocking are a pair,
+              and the list refreshes the same `OwnUser.blockedUserIds`. No WebSocket or persisted model embeds
+              `UserBlock`, so it needs no converter and no storage codec.
+            - **The v2 routes are the v1 handlers.** `lib/chat/routes.go` mounts one `userBlockRoutes` table
+              (`v1.BlockUsers`, `v1.UnblockUsers`, `v1.GetBlockedUsers`) both at the root and under `/api/v2/`;
+              only the JSON encoding differs. None is gated, in beta or deprecated.
+            - **Moved off `UserApi`:** `blockUser`, `unblockUser` and `queryBlockedUsers`, now `StreamChatClient`
+              methods over `UsersRepository`.
+            - **`blockUser` and `unblockUser` keep their names,** rather than the spec's `blockUsers` and
+              `unblockUsers`: each takes one user id, and a method that takes several would be added beside them.
+            - **Their envelopes take the spec's plural names,** `BlockUsersResponse` (renamed from
+              `UserBlockResponse`) and `UnblockUsersResponse` (new; v10 returned `EmptyResponse`, but the generated
+              response is a named one). If the API starts blocking several users in one call, these responses gain
+              fields without a rename, and a batch method can return the same envelope.
+            - **`queryBlockedUsers` is renamed `getBlockedUsers`,** answering `GetBlockedUsersResponse` (renamed
+              from `BlockedUsersResponse`), as the spec names them: the call takes no filter, sort or pagination.
+            - **`UserBlock` is a freezed plain model with every field non-nullable,** following the wire rather
+              than v10, which typed `blockedUser`, `userId`, `blockedUserId` and `createdAt` nullable. The
+              server always sends them; the break is approved for this group.
+            - **`OwnUser.blockedUserIds` is updated only on success,** through `Result.onSuccess`, as v10 did by
+              throwing before it reached the update. Failures are still logged, through `Result.onFailure`.
             """),
         risks=[],
         done=DONE.replace('- [ ]', '- [x]'),

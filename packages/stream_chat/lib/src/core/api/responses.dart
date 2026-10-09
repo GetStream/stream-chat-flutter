@@ -18,7 +18,6 @@ import '../models/reaction.dart';
 import '../models/read.dart';
 import '../models/thread.dart';
 import '../models/user.dart';
-import '../models/user_block.dart';
 
 part 'responses.g.dart';
 
@@ -379,35 +378,6 @@ class ChannelStateResponse extends _BaseResponse {
 
   /// Create a new instance from a json
   static ChannelStateResponse fromJson(Map<String, dynamic> json) => _$ChannelStateResponseFromJson(json);
-}
-
-/// Contains information about a [User] that was banned from a [Channel] or App.
-@JsonSerializable(createToJson: false)
-class UserBlockResponse extends _BaseResponse {
-  /// User that banned the [user].
-  @JsonKey(defaultValue: '')
-  late String blockedByUserId;
-
-  /// Reason for the ban.
-  @JsonKey(defaultValue: '')
-  late String blockedUserId;
-
-  /// Timestamp when the [user] was banned.
-  late DateTime createdAt;
-
-  /// Create a new instance from a json
-  static UserBlockResponse fromJson(Map<String, dynamic> json) => _$UserBlockResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.queryBlockedUsers] api call
-@JsonSerializable(createToJson: false)
-class BlockedUsersResponse extends _BaseResponse {
-  /// Updated users
-  @JsonKey(defaultValue: [])
-  late List<UserBlock> blocks;
-
-  /// Create a new instance from a json
-  static BlockedUsersResponse fromJson(Map<String, dynamic> json) => _$BlockedUsersResponseFromJson(json);
 }
 
 /// Model response for [StreamChatClient.createPoll] api call

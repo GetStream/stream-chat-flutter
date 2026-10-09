@@ -1,12 +1,16 @@
 import '../../../open_api/api.dart' as api;
 import '../../core/models/own_user.dart';
 import '../../core/models/privacy_settings.dart';
+import '../../core/models/response/block_users_response.dart';
 import '../../core/models/response/create_guest_user_response.dart';
+import '../../core/models/response/get_blocked_users_response.dart';
 import '../../core/models/response/get_unread_count_response.dart';
+import '../../core/models/response/unblock_users_response.dart';
 import '../../core/models/unread_counts_channel.dart';
 import '../../core/models/unread_counts_channel_type.dart';
 import '../../core/models/unread_counts_thread.dart';
 import '../../core/models/user.dart';
+import '../../core/models/user_block.dart';
 import '../../core/util/extension.dart';
 
 // TODO(openapi-migration): re-point these mappers in group 09.
@@ -138,5 +142,43 @@ extension UnreadCountsChannelTypeMapper on api.UnreadCountsChannelType {
     channelType: channelType,
     channelCount: channelCount,
     unreadCount: unreadCount,
+  );
+}
+
+/// Maps a generated [api.BlockUsersResponse] to a [BlockUsersResponse].
+extension BlockUsersResponseMapper on api.BlockUsersResponse {
+  /// Converts this response into a [BlockUsersResponse].
+  BlockUsersResponse toModel() => BlockUsersResponse(
+    duration: duration,
+    blockedByUserId: blockedByUserId,
+    blockedUserId: blockedUserId,
+    createdAt: createdAt,
+  );
+}
+
+/// Maps a generated [api.UnblockUsersResponse] to an [UnblockUsersResponse].
+extension UnblockUsersResponseMapper on api.UnblockUsersResponse {
+  /// Converts this response into an [UnblockUsersResponse].
+  UnblockUsersResponse toModel() => UnblockUsersResponse(duration: duration);
+}
+
+/// Maps a generated [api.GetBlockedUsersResponse] to a [GetBlockedUsersResponse].
+extension GetBlockedUsersResponseMapper on api.GetBlockedUsersResponse {
+  /// Converts this response into a [GetBlockedUsersResponse].
+  GetBlockedUsersResponse toModel() => GetBlockedUsersResponse(
+    duration: duration,
+    blocks: [for (final block in blocks) block.toModel()],
+  );
+}
+
+/// Maps a generated [api.BlockedUserResponse] to a [UserBlock].
+extension BlockedUserResponseMapper on api.BlockedUserResponse {
+  /// Converts this block into a [UserBlock].
+  UserBlock toModel() => UserBlock(
+    user: user.toModel(),
+    blockedUser: blockedUser.toModel(),
+    userId: userId,
+    blockedUserId: blockedUserId,
+    createdAt: createdAt,
   );
 }
