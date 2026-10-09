@@ -187,10 +187,13 @@ a public signature.
 
 **Per type, decide:**
 
-- **Which v10 type it maps to, and under what name.** The v10 name is the default, even where the generated one
-  differs (`OGAttachmentResponse` for `GetOGResponse`, `AppSettings` for `AppResponseFields`). It is not a
-  requirement: the user may ask for another name, and you may propose one that fits clearly better. Renaming a
-  v10 type is a break, so propose it with the reason and wait for approval.
+- **Which v10 type it maps to, and under what name.** The spec's name is the default, unless it is awkward or
+  describes something else, and sibling calls share one scheme: `UpdateChannelPartialResponse` and
+  `UpdateMemberPartialResponse` replaced v10's `PartialUpdateChannelResponse` and `PartialUpdateMemberResponse`,
+  and `updateMemberPartial` replaced `partialMemberUpdate`. v10's name stays where the generated one does not fit
+  (`OGAttachmentResponse` for `GetOGResponse`, `AppSettings` for `AppResponseFields`), and names an earlier group
+  settled stand. Renaming a v10 type or method is a break: list it with the reason, wait for approval, and call it
+  out in the PR description.
 - **Which fields it exposes.** v10's fields, with v10's defaults. A field only the generated type has
   (`AppResponseFields.id`, the twelve extra fields on `GetOGResponse`) stays out; exposing it later is additive. A
   field the spec marks optional is nullable by default, even if v10 typed it non-null; keeping it non-null needs a
@@ -249,7 +252,7 @@ packages/stream_chat/lib/src/
 
 - **The role decides the folder.** An envelope goes in `response/` (`CreateUserGroupResponse`). A type the caller
   passes in to shape a request goes in `request/`, whatever its name: `PartialUpdateUserRequest`, and also
-  `PaginationParams`, `ThreadOptions` and `MemberUpdatePayload`. Every other model stays in `models/`
+  `PaginationParams` and `ThreadOptions`. Every other model stays in `models/`
   (`UserGroup`). No `request/` type exists yet: the first arrives when a group migrates one out of
   `lib/src/core/api/requests.dart`.
 - **Models and envelopes** are `@freezed` classes with a const constructor and `@override final` fields. Copy

@@ -11,7 +11,10 @@ part 'channel_model.g.dart';
 /// The class that contains the information about a channel
 @JsonSerializable()
 class ChannelModel {
-  /// Constructor used for json serialization
+  /// Creates a channel model.
+  ///
+  /// The [disabled], [hidden], [muted], [blocked], [truncatedAt], [truncatedBy], [autoTranslationEnabled] and
+  /// [autoTranslationLanguage] arguments, when given, are stored in [extraData], replacing the entry each one reads.
   ChannelModel({
     String? id,
     String? type,
@@ -36,6 +39,9 @@ class ChannelModel {
     DateTime? truncatedAt,
     this.messageCount,
     this.filterTags,
+    User? truncatedBy,
+    bool? autoTranslationEnabled,
+    String? autoTranslationLanguage,
   }) : assert(
          (cid != null && cid.contains(':')) || (id != null && type != null),
          'provide either a cid or an id and type',
@@ -48,8 +54,8 @@ class ChannelModel {
        updatedAt = updatedAt ?? DateTime.now(),
        ownCapabilities = ownCapabilities?.map(ChannelCapability.new).toList(),
 
-       // For backwards compatibility, set 'disabled', 'hidden', 'muted',
-       // 'blocked' and 'truncated_at' in [extraData].
+       // For backwards compatibility, set 'disabled', 'hidden', 'muted', 'blocked', 'truncated_at', 'truncated_by',
+       // 'auto_translation_enabled' and 'auto_translation_language' in [extraData].
        extraData = {
          ...extraData,
          if (disabled != null) 'disabled': disabled,
@@ -57,6 +63,9 @@ class ChannelModel {
          if (muted != null) 'muted': muted,
          if (blocked != null) 'blocked': blocked,
          if (truncatedAt != null) 'truncated_at': truncatedAt.toIso8601String(),
+         if (truncatedBy != null) 'truncated_by': truncatedBy.toJson(),
+         if (autoTranslationEnabled != null) 'auto_translation_enabled': autoTranslationEnabled,
+         if (autoTranslationLanguage != null) 'auto_translation_language': autoTranslationLanguage,
        };
 
   /// Create a new instance from a json
@@ -158,6 +167,21 @@ class ChannelModel {
 
     return null;
   }
+
+  /// The user that last truncated this channel.
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  User? get truncatedBy => switch (extraData['truncated_by']) {
+    final Map<String, dynamic> json when json['id'] is String => User.fromJson(json),
+    _ => null,
+  };
+
+  /// Whether messages in this channel are translated automatically.
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  bool? get autoTranslationEnabled => extraData['auto_translation_enabled'].safeCast<bool>();
+
+  /// The language messages in this channel are translated into automatically.
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  String? get autoTranslationLanguage => extraData['auto_translation_language'].safeCast<String>();
 
   /// Map of custom channel extraData
   final Map<String, Object?> extraData;

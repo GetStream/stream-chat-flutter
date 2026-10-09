@@ -3723,7 +3723,7 @@ void main() {
       verify(() => client.updateChannel(channelId, channelType, channelData, message: any(named: 'message'))).called(1);
     });
 
-    test('`.updateImage`', () async {
+    test('Channel.updateImage sets the image through a partial update', () async {
       const image = 'https://getstream.io/new-image';
 
       final channelModel = ChannelModel(
@@ -3738,13 +3738,13 @@ void main() {
           set: {'image': image},
         ),
       ).thenAnswer(
-        (_) async => PartialUpdateChannelResponse()..channel = channelModel,
+        (_) async => Result.success(UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel)),
       );
 
       final res = await channel.updateImage(image);
 
-      expect(res, isNotNull);
-      expect(res.channel.extraData['image'], image);
+      expect(res.isSuccess, isTrue);
+      expect(res.getOrNull()!.channel!.extraData['image'], image);
 
       verify(
         () => client.updateChannelPartial(
@@ -3755,7 +3755,7 @@ void main() {
       ).called(1);
     });
 
-    test('`.updateName`', () async {
+    test('Channel.updateName sets the name through a partial update', () async {
       const name = 'Name';
 
       final channelModel = ChannelModel(
@@ -3770,13 +3770,13 @@ void main() {
           set: {'name': name},
         ),
       ).thenAnswer(
-        (_) async => PartialUpdateChannelResponse()..channel = channelModel,
+        (_) async => Result.success(UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel)),
       );
 
       final res = await channel.updateName(name);
 
-      expect(res, isNotNull);
-      expect(res.channel.extraData['name'], name);
+      expect(res.isSuccess, isTrue);
+      expect(res.getOrNull()!.channel!.extraData['name'], name);
 
       verify(
         () => client.updateChannelPartial(
@@ -3787,7 +3787,7 @@ void main() {
       ).called(1);
     });
 
-    test('`.updatePartial`', () async {
+    test('Channel.updatePartial sends the set and unset fields for this channel', () async {
       const set = {
         'name': 'Stream Team',
         'profile_image': 'test-profile-image',
@@ -3811,15 +3811,15 @@ void main() {
           unset: unset,
         ),
       ).thenAnswer(
-        (_) async => PartialUpdateChannelResponse()..channel = channelModel,
+        (_) async => Result.success(UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel)),
       );
 
       final res = await channel.updatePartial(set: set, unset: unset);
 
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelModel.cid);
+      expect(res.isSuccess, isTrue);
+      expect(res.getOrNull()!.channel!.cid, channelModel.cid);
       expect(
-        res.channel.extraData,
+        res.getOrNull()!.channel!.extraData,
         {'coolness': 999, ...set},
       );
 
@@ -4699,7 +4699,7 @@ void main() {
       ).called(1);
     });
 
-    test('`.enableSlowMode`', () async {
+    test("Channel.enableSlowMode returns the client's enableSlowMode response", () async {
       const cooldown = 10;
 
       final channelModel = ChannelModel(
@@ -4708,19 +4708,21 @@ void main() {
       );
 
       when(
-        () => client.enableSlowdown(
+        () => client.enableSlowMode(
           channelId,
           channelType,
           cooldown,
         ),
-      ).thenAnswer((_) async => PartialUpdateChannelResponse()..channel = channelModel);
+      ).thenAnswer(
+        (_) async => Result.success(UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel)),
+      );
 
       final res = await channel.enableSlowMode(cooldownInterval: 10);
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel));
 
       verify(
-        () => client.enableSlowdown(
+        () => client.enableSlowMode(
           channelId,
           channelType,
           cooldown,
@@ -4728,23 +4730,25 @@ void main() {
       ).called(1);
     });
 
-    test('`.disableSlowMode`', () async {
+    test("Channel.disableSlowMode returns the client's disableSlowMode response", () async {
       final channelModel = ChannelModel(
         cid: channelCid,
       );
 
       when(
-        () => client.disableSlowdown(
+        () => client.disableSlowMode(
           channelId,
           channelType,
         ),
-      ).thenAnswer((_) async => PartialUpdateChannelResponse()..channel = channelModel);
+      ).thenAnswer(
+        (_) async => Result.success(UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel)),
+      );
 
       final res = await channel.disableSlowMode();
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel));
 
-      verify(() => client.disableSlowdown(channelId, channelType)).called(1);
+      verify(() => client.disableSlowMode(channelId, channelType)).called(1);
     });
 
     test('`.banMember` scopes the ban to the channel cid', () async {
@@ -4863,51 +4867,70 @@ void main() {
     });
 
     // testing archiving
-    test('`.archive`', () async {
+    test("Channel.archive returns the client's archiveChannel response", () async {
+      final response = UpdateMemberPartialResponse(
+        duration: '0.01ms',
+        channelMember: Member(userId: 'test-user-id'),
+      );
       when(() => client.archiveChannel(channelId: channelId, channelType: channelType)).thenAnswer(
-        (_) async => FakePartialUpdateMemberResponse(),
+        (_) async => Result.success(response),
       );
 
       final res = await channel.archive();
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), response);
 
       verify(() => client.archiveChannel(channelId: channelId, channelType: channelType)).called(1);
     });
 
-    test('`.unarchive`', () async {
+    test("Channel.unarchive returns the client's unarchiveChannel response", () async {
+      final response = UpdateMemberPartialResponse(
+        duration: '0.01ms',
+        channelMember: Member(userId: 'test-user-id'),
+      );
       when(() => client.unarchiveChannel(channelId: channelId, channelType: channelType)).thenAnswer(
-        (_) async => FakePartialUpdateMemberResponse(),
+        (_) async => Result.success(response),
       );
 
       final res = await channel.unarchive();
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), response);
 
       verify(() => client.unarchiveChannel(channelId: channelId, channelType: channelType)).called(1);
     });
 
-    // testing pinning
-    test('`.pin`', () async {
+    test("Channel.pin returns the client's pinChannel response", () async {
+      final response = UpdateMemberPartialResponse(
+        duration: '0.01ms',
+        channelMember: Member(userId: 'test-user-id'),
+      );
       when(
         () => client.pinChannel(channelId: channelId, channelType: channelType),
-      ).thenAnswer((_) async => FakePartialUpdateMemberResponse());
+      ).thenAnswer(
+        (_) async => Result.success(response),
+      );
 
       final res = await channel.pin();
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), response);
 
       verify(() => client.pinChannel(channelId: channelId, channelType: channelType)).called(1);
     });
 
-    test('`.unpin`', () async {
+    test("Channel.unpin returns the client's unpinChannel response", () async {
+      final response = UpdateMemberPartialResponse(
+        duration: '0.01ms',
+        channelMember: Member(userId: 'test-user-id'),
+      );
       when(
         () => client.unpinChannel(channelId: channelId, channelType: channelType),
-      ).thenAnswer((_) async => FakePartialUpdateMemberResponse());
+      ).thenAnswer(
+        (_) async => Result.success(response),
+      );
 
       final res = await channel.unpin();
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), response);
 
       verify(() => client.unpinChannel(channelId: channelId, channelType: channelType)).called(1);
     });

@@ -50,14 +50,6 @@ QueryMembersResponse _$QueryMembersResponseFromJson(
   ..members =
       (json['members'] as List<dynamic>?)?.map((e) => Member.fromJson(e as Map<String, dynamic>)).toList() ?? [];
 
-PartialUpdateMemberResponse _$PartialUpdateMemberResponseFromJson(
-  Map<String, dynamic> json,
-) => PartialUpdateMemberResponse()
-  ..duration = json['duration'] as String?
-  ..channelMember = Member.fromJson(
-    json['channel_member'] as Map<String, dynamic>,
-  );
-
 QueryUsersResponse _$QueryUsersResponseFromJson(Map<String, dynamic> json) => QueryUsersResponse()
   ..duration = json['duration'] as String?
   ..users = (json['users'] as List<dynamic>?)?.map((e) => User.fromJson(e as Map<String, dynamic>)).toList() ?? [];
@@ -139,13 +131,6 @@ UpdateChannelResponse _$UpdateChannelResponseFromJson(
   ..channel = ChannelModel.fromJson(json['channel'] as Map<String, dynamic>)
   ..members = (json['members'] as List<dynamic>?)?.map((e) => Member.fromJson(e as Map<String, dynamic>)).toList()
   ..message = json['message'] == null ? null : Message.fromJson(json['message'] as Map<String, dynamic>);
-
-PartialUpdateChannelResponse _$PartialUpdateChannelResponseFromJson(
-  Map<String, dynamic> json,
-) => PartialUpdateChannelResponse()
-  ..duration = json['duration'] as String?
-  ..channel = ChannelModel.fromJson(json['channel'] as Map<String, dynamic>)
-  ..members = (json['members'] as List<dynamic>?)?.map((e) => Member.fromJson(e as Map<String, dynamic>)).toList();
 
 InviteMembersResponse _$InviteMembersResponseFromJson(
   Map<String, dynamic> json,

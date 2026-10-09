@@ -8,6 +8,7 @@ extension MemberEntityX on MemberEntity {
     user: user,
     userId: userId,
     banned: banned,
+    banExpires: banExpires,
     shadowBanned: shadowBanned,
     updatedAt: updatedAt,
     createdAt: createdAt,
@@ -29,6 +30,7 @@ extension MemberX on Member {
   MemberEntity toEntity({required String cid}) => MemberEntity(
     userId: user!.id,
     banned: banned,
+    banExpires: banExpires,
     shadowBanned: shadowBanned,
     channelCid: cid,
     createdAt: createdAt,

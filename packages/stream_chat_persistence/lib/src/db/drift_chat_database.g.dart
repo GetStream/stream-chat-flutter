@@ -9647,6 +9647,17 @@ class $MembersTable extends Members with TableInfo<$MembersTable, MemberEntity> 
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _banExpiresMeta = const VerificationMeta(
+    'banExpires',
+  );
+  @override
+  late final GeneratedColumn<DateTime> banExpires = GeneratedColumn<DateTime>(
+    'ban_expires',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _shadowBannedMeta = const VerificationMeta(
     'shadowBanned',
   );
@@ -9750,6 +9761,7 @@ class $MembersTable extends Members with TableInfo<$MembersTable, MemberEntity> 
     inviteRejectedAt,
     invited,
     banned,
+    banExpires,
     shadowBanned,
     pinnedAt,
     archivedAt,
@@ -9824,6 +9836,12 @@ class $MembersTable extends Members with TableInfo<$MembersTable, MemberEntity> 
       context.handle(
         _bannedMeta,
         banned.isAcceptableOrUnknown(data['banned']!, _bannedMeta),
+      );
+    }
+    if (data.containsKey('ban_expires')) {
+      context.handle(
+        _banExpiresMeta,
+        banExpires.isAcceptableOrUnknown(data['ban_expires']!, _banExpiresMeta),
       );
     }
     if (data.containsKey('shadow_banned')) {
@@ -9905,6 +9923,10 @@ class $MembersTable extends Members with TableInfo<$MembersTable, MemberEntity> 
         DriftSqlType.bool,
         data['${effectivePrefix}banned'],
       )!,
+      banExpires: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}ban_expires'],
+      ),
       shadowBanned: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}shadow_banned'],
@@ -9978,6 +10000,9 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
   /// True if the member is banned from the channel
   final bool banned;
 
+  /// The date at which the ban will expire.
+  final DateTime? banExpires;
+
   /// True if the member is shadow banned from the channel
   final bool shadowBanned;
 
@@ -10012,6 +10037,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
     this.inviteRejectedAt,
     required this.invited,
     required this.banned,
+    this.banExpires,
     required this.shadowBanned,
     this.pinnedAt,
     this.archivedAt,
@@ -10037,6 +10063,9 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
     }
     map['invited'] = Variable<bool>(invited);
     map['banned'] = Variable<bool>(banned);
+    if (!nullToAbsent || banExpires != null) {
+      map['ban_expires'] = Variable<DateTime>(banExpires);
+    }
     map['shadow_banned'] = Variable<bool>(shadowBanned);
     if (!nullToAbsent || pinnedAt != null) {
       map['pinned_at'] = Variable<DateTime>(pinnedAt);
@@ -10077,6 +10106,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       ),
       invited: serializer.fromJson<bool>(json['invited']),
       banned: serializer.fromJson<bool>(json['banned']),
+      banExpires: serializer.fromJson<DateTime?>(json['banExpires']),
       shadowBanned: serializer.fromJson<bool>(json['shadowBanned']),
       pinnedAt: serializer.fromJson<DateTime?>(json['pinnedAt']),
       archivedAt: serializer.fromJson<DateTime?>(json['archivedAt']),
@@ -10100,6 +10130,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       'inviteRejectedAt': serializer.toJson<DateTime?>(inviteRejectedAt),
       'invited': serializer.toJson<bool>(invited),
       'banned': serializer.toJson<bool>(banned),
+      'banExpires': serializer.toJson<DateTime?>(banExpires),
       'shadowBanned': serializer.toJson<bool>(shadowBanned),
       'pinnedAt': serializer.toJson<DateTime?>(pinnedAt),
       'archivedAt': serializer.toJson<DateTime?>(archivedAt),
@@ -10119,6 +10150,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
     Value<DateTime?> inviteRejectedAt = const Value.absent(),
     bool? invited,
     bool? banned,
+    Value<DateTime?> banExpires = const Value.absent(),
     bool? shadowBanned,
     Value<DateTime?> pinnedAt = const Value.absent(),
     Value<DateTime?> archivedAt = const Value.absent(),
@@ -10135,6 +10167,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
     inviteRejectedAt: inviteRejectedAt.present ? inviteRejectedAt.value : this.inviteRejectedAt,
     invited: invited ?? this.invited,
     banned: banned ?? this.banned,
+    banExpires: banExpires.present ? banExpires.value : this.banExpires,
     shadowBanned: shadowBanned ?? this.shadowBanned,
     pinnedAt: pinnedAt.present ? pinnedAt.value : this.pinnedAt,
     archivedAt: archivedAt.present ? archivedAt.value : this.archivedAt,
@@ -10153,6 +10186,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       inviteRejectedAt: data.inviteRejectedAt.present ? data.inviteRejectedAt.value : this.inviteRejectedAt,
       invited: data.invited.present ? data.invited.value : this.invited,
       banned: data.banned.present ? data.banned.value : this.banned,
+      banExpires: data.banExpires.present ? data.banExpires.value : this.banExpires,
       shadowBanned: data.shadowBanned.present ? data.shadowBanned.value : this.shadowBanned,
       pinnedAt: data.pinnedAt.present ? data.pinnedAt.value : this.pinnedAt,
       archivedAt: data.archivedAt.present ? data.archivedAt.value : this.archivedAt,
@@ -10174,6 +10208,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
           ..write('inviteRejectedAt: $inviteRejectedAt, ')
           ..write('invited: $invited, ')
           ..write('banned: $banned, ')
+          ..write('banExpires: $banExpires, ')
           ..write('shadowBanned: $shadowBanned, ')
           ..write('pinnedAt: $pinnedAt, ')
           ..write('archivedAt: $archivedAt, ')
@@ -10195,6 +10230,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
     inviteRejectedAt,
     invited,
     banned,
+    banExpires,
     shadowBanned,
     pinnedAt,
     archivedAt,
@@ -10215,6 +10251,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
           other.inviteRejectedAt == this.inviteRejectedAt &&
           other.invited == this.invited &&
           other.banned == this.banned &&
+          other.banExpires == this.banExpires &&
           other.shadowBanned == this.shadowBanned &&
           other.pinnedAt == this.pinnedAt &&
           other.archivedAt == this.archivedAt &&
@@ -10233,6 +10270,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
   final Value<DateTime?> inviteRejectedAt;
   final Value<bool> invited;
   final Value<bool> banned;
+  final Value<DateTime?> banExpires;
   final Value<bool> shadowBanned;
   final Value<DateTime?> pinnedAt;
   final Value<DateTime?> archivedAt;
@@ -10250,6 +10288,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     this.inviteRejectedAt = const Value.absent(),
     this.invited = const Value.absent(),
     this.banned = const Value.absent(),
+    this.banExpires = const Value.absent(),
     this.shadowBanned = const Value.absent(),
     this.pinnedAt = const Value.absent(),
     this.archivedAt = const Value.absent(),
@@ -10268,6 +10307,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     this.inviteRejectedAt = const Value.absent(),
     this.invited = const Value.absent(),
     this.banned = const Value.absent(),
+    this.banExpires = const Value.absent(),
     this.shadowBanned = const Value.absent(),
     this.pinnedAt = const Value.absent(),
     this.archivedAt = const Value.absent(),
@@ -10288,6 +10328,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     Expression<DateTime>? inviteRejectedAt,
     Expression<bool>? invited,
     Expression<bool>? banned,
+    Expression<DateTime>? banExpires,
     Expression<bool>? shadowBanned,
     Expression<DateTime>? pinnedAt,
     Expression<DateTime>? archivedAt,
@@ -10306,6 +10347,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
       if (inviteRejectedAt != null) 'invite_rejected_at': inviteRejectedAt,
       if (invited != null) 'invited': invited,
       if (banned != null) 'banned': banned,
+      if (banExpires != null) 'ban_expires': banExpires,
       if (shadowBanned != null) 'shadow_banned': shadowBanned,
       if (pinnedAt != null) 'pinned_at': pinnedAt,
       if (archivedAt != null) 'archived_at': archivedAt,
@@ -10326,6 +10368,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     Value<DateTime?>? inviteRejectedAt,
     Value<bool>? invited,
     Value<bool>? banned,
+    Value<DateTime?>? banExpires,
     Value<bool>? shadowBanned,
     Value<DateTime?>? pinnedAt,
     Value<DateTime?>? archivedAt,
@@ -10344,6 +10387,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
       inviteRejectedAt: inviteRejectedAt ?? this.inviteRejectedAt,
       invited: invited ?? this.invited,
       banned: banned ?? this.banned,
+      banExpires: banExpires ?? this.banExpires,
       shadowBanned: shadowBanned ?? this.shadowBanned,
       pinnedAt: pinnedAt ?? this.pinnedAt,
       archivedAt: archivedAt ?? this.archivedAt,
@@ -10379,6 +10423,9 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     }
     if (banned.present) {
       map['banned'] = Variable<bool>(banned.value);
+    }
+    if (banExpires.present) {
+      map['ban_expires'] = Variable<DateTime>(banExpires.value);
     }
     if (shadowBanned.present) {
       map['shadow_banned'] = Variable<bool>(shadowBanned.value);
@@ -10424,6 +10471,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
           ..write('inviteRejectedAt: $inviteRejectedAt, ')
           ..write('invited: $invited, ')
           ..write('banned: $banned, ')
+          ..write('banExpires: $banExpires, ')
           ..write('shadowBanned: $shadowBanned, ')
           ..write('pinnedAt: $pinnedAt, ')
           ..write('archivedAt: $archivedAt, ')
@@ -12078,7 +12126,7 @@ final class $$ChannelsTableReferences extends BaseReferences<_$DriftChatDatabase
   static MultiTypedResultKey<$MessagesTable, List<MessageEntity>> _messagesRefsTable(_$DriftChatDatabase db) =>
       MultiTypedResultKey.fromTable(
         db.messages,
-        aliasName: $_aliasNameGenerator(db.channels.cid, db.messages.channelCid),
+        aliasName: 'channels__cid__messages__channel_cid',
       );
 
   $$MessagesTableProcessedTableManager get messagesRefs {
@@ -12097,10 +12145,7 @@ final class $$ChannelsTableReferences extends BaseReferences<_$DriftChatDatabase
     _$DriftChatDatabase db,
   ) => MultiTypedResultKey.fromTable(
     db.draftMessages,
-    aliasName: $_aliasNameGenerator(
-      db.channels.cid,
-      db.draftMessages.channelCid,
-    ),
+    aliasName: 'channels__cid__draft_messages__channel_cid',
   );
 
   $$DraftMessagesTableProcessedTableManager get draftMessagesRefs {
@@ -12118,7 +12163,7 @@ final class $$ChannelsTableReferences extends BaseReferences<_$DriftChatDatabase
   static MultiTypedResultKey<$LocationsTable, List<LocationEntity>> _locationsRefsTable(_$DriftChatDatabase db) =>
       MultiTypedResultKey.fromTable(
         db.locations,
-        aliasName: $_aliasNameGenerator(db.channels.cid, db.locations.channelCid),
+        aliasName: 'channels__cid__locations__channel_cid',
       );
 
   $$LocationsTableProcessedTableManager get locationsRefs {
@@ -12136,7 +12181,7 @@ final class $$ChannelsTableReferences extends BaseReferences<_$DriftChatDatabase
   static MultiTypedResultKey<$MembersTable, List<MemberEntity>> _membersRefsTable(_$DriftChatDatabase db) =>
       MultiTypedResultKey.fromTable(
         db.members,
-        aliasName: $_aliasNameGenerator(db.channels.cid, db.members.channelCid),
+        aliasName: 'channels__cid__members__channel_cid',
       );
 
   $$MembersTableProcessedTableManager get membersRefs {
@@ -12155,7 +12200,7 @@ final class $$ChannelsTableReferences extends BaseReferences<_$DriftChatDatabase
     _$DriftChatDatabase db,
   ) => MultiTypedResultKey.fromTable(
     db.reads,
-    aliasName: $_aliasNameGenerator(db.channels.cid, db.reads.channelCid),
+    aliasName: 'channels__cid__reads__channel_cid',
   );
 
   $$ReadsTableProcessedTableManager get readsRefs {
@@ -12759,7 +12804,7 @@ class $$ChannelsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$ChannelsTable, ChannelEntity>(table),
                   $$ChannelsTableReferences(db, table, e),
                 ),
               )
@@ -12968,9 +13013,8 @@ typedef $$MessagesTableUpdateCompanionBuilder =
 final class $$MessagesTableReferences extends BaseReferences<_$DriftChatDatabase, $MessagesTable, MessageEntity> {
   $$MessagesTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $ChannelsTable _channelCidTable(_$DriftChatDatabase db) => db.channels.createAlias(
-    $_aliasNameGenerator(db.messages.channelCid, db.channels.cid),
-  );
+  static $ChannelsTable _channelCidTable(_$DriftChatDatabase db) =>
+      db.channels.createAlias('messages__channel_cid__channels__cid');
 
   $$ChannelsTableProcessedTableManager get channelCid {
     final $_column = $_itemColumn<String>('channel_cid')!;
@@ -12990,10 +13034,7 @@ final class $$MessagesTableReferences extends BaseReferences<_$DriftChatDatabase
     _$DriftChatDatabase db,
   ) => MultiTypedResultKey.fromTable(
     db.draftMessages,
-    aliasName: $_aliasNameGenerator(
-      db.messages.id,
-      db.draftMessages.parentId,
-    ),
+    aliasName: 'messages__id__draft_messages__parent_id',
   );
 
   $$DraftMessagesTableProcessedTableManager get draftMessagesRefs {
@@ -13011,7 +13052,7 @@ final class $$MessagesTableReferences extends BaseReferences<_$DriftChatDatabase
   static MultiTypedResultKey<$LocationsTable, List<LocationEntity>> _locationsRefsTable(_$DriftChatDatabase db) =>
       MultiTypedResultKey.fromTable(
         db.locations,
-        aliasName: $_aliasNameGenerator(db.messages.id, db.locations.messageId),
+        aliasName: 'messages__id__locations__message_id',
       );
 
   $$LocationsTableProcessedTableManager get locationsRefs {
@@ -13029,7 +13070,7 @@ final class $$MessagesTableReferences extends BaseReferences<_$DriftChatDatabase
   static MultiTypedResultKey<$ReactionsTable, List<ReactionEntity>> _reactionsRefsTable(_$DriftChatDatabase db) =>
       MultiTypedResultKey.fromTable(
         db.reactions,
-        aliasName: $_aliasNameGenerator(db.messages.id, db.reactions.messageId),
+        aliasName: 'messages__id__reactions__message_id',
       );
 
   $$ReactionsTableProcessedTableManager get reactionsRefs {
@@ -13981,7 +14022,7 @@ class $$MessagesTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$MessagesTable, MessageEntity>(table),
                   $$MessagesTableReferences(db, table, e),
                 ),
               )
@@ -14145,9 +14186,8 @@ final class $$DraftMessagesTableReferences
     super.$_typedResult,
   );
 
-  static $MessagesTable _parentIdTable(_$DriftChatDatabase db) => db.messages.createAlias(
-    $_aliasNameGenerator(db.draftMessages.parentId, db.messages.id),
-  );
+  static $MessagesTable _parentIdTable(_$DriftChatDatabase db) =>
+      db.messages.createAlias('draft_messages__parent_id__messages__id');
 
   $$MessagesTableProcessedTableManager? get parentId {
     final $_column = $_itemColumn<String>('parent_id');
@@ -14163,9 +14203,8 @@ final class $$DraftMessagesTableReferences
     );
   }
 
-  static $ChannelsTable _channelCidTable(_$DriftChatDatabase db) => db.channels.createAlias(
-    $_aliasNameGenerator(db.draftMessages.channelCid, db.channels.cid),
-  );
+  static $ChannelsTable _channelCidTable(_$DriftChatDatabase db) =>
+      db.channels.createAlias('draft_messages__channel_cid__channels__cid');
 
   $$ChannelsTableProcessedTableManager get channelCid {
     final $_column = $_itemColumn<String>('channel_cid')!;
@@ -14598,7 +14637,7 @@ class $$DraftMessagesTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$DraftMessagesTable, DraftMessageEntity>(table),
                   $$DraftMessagesTableReferences(db, table, e),
                 ),
               )
@@ -14699,9 +14738,8 @@ typedef $$LocationsTableUpdateCompanionBuilder =
 final class $$LocationsTableReferences extends BaseReferences<_$DriftChatDatabase, $LocationsTable, LocationEntity> {
   $$LocationsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $ChannelsTable _channelCidTable(_$DriftChatDatabase db) => db.channels.createAlias(
-    $_aliasNameGenerator(db.locations.channelCid, db.channels.cid),
-  );
+  static $ChannelsTable _channelCidTable(_$DriftChatDatabase db) =>
+      db.channels.createAlias('locations__channel_cid__channels__cid');
 
   $$ChannelsTableProcessedTableManager? get channelCid {
     final $_column = $_itemColumn<String>('channel_cid');
@@ -14717,9 +14755,8 @@ final class $$LocationsTableReferences extends BaseReferences<_$DriftChatDatabas
     );
   }
 
-  static $MessagesTable _messageIdTable(_$DriftChatDatabase db) => db.messages.createAlias(
-    $_aliasNameGenerator(db.locations.messageId, db.messages.id),
-  );
+  static $MessagesTable _messageIdTable(_$DriftChatDatabase db) =>
+      db.messages.createAlias('locations__message_id__messages__id');
 
   $$MessagesTableProcessedTableManager? get messageId {
     final $_column = $_itemColumn<String>('message_id');
@@ -15056,7 +15093,7 @@ class $$LocationsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$LocationsTable, LocationEntity>(table),
                   $$LocationsTableReferences(db, table, e),
                 ),
               )
@@ -15221,10 +15258,7 @@ final class $$PinnedMessagesTableReferences
   static MultiTypedResultKey<$PinnedMessageReactionsTable, List<PinnedMessageReactionEntity>>
   _pinnedMessageReactionsRefsTable(_$DriftChatDatabase db) => MultiTypedResultKey.fromTable(
     db.pinnedMessageReactions,
-    aliasName: $_aliasNameGenerator(
-      db.pinnedMessages.id,
-      db.pinnedMessageReactions.messageId,
-    ),
+    aliasName: 'pinned_messages__id__pinned_message_reactions__message_id',
   );
 
   $$PinnedMessageReactionsTableProcessedTableManager get pinnedMessageReactionsRefs {
@@ -16028,7 +16062,7 @@ class $$PinnedMessagesTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$PinnedMessagesTable, PinnedMessageEntity>(table),
                   $$PinnedMessagesTableReferences(db, table, e),
                 ),
               )
@@ -16130,7 +16164,7 @@ final class $$PollsTableReferences extends BaseReferences<_$DriftChatDatabase, $
   static MultiTypedResultKey<$PollVotesTable, List<PollVoteEntity>> _pollVotesRefsTable(_$DriftChatDatabase db) =>
       MultiTypedResultKey.fromTable(
         db.pollVotes,
-        aliasName: $_aliasNameGenerator(db.polls.id, db.pollVotes.pollId),
+        aliasName: 'polls__id__poll_votes__poll_id',
       );
 
   $$PollVotesTableProcessedTableManager get pollVotesRefs {
@@ -16598,7 +16632,10 @@ class $$PollsTableTableManager
               ),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) => (e.readTable(table), $$PollsTableReferences(db, table, e)),
+                (e) => (
+                  e.readTable<$PollsTable, PollEntity>(table),
+                  $$PollsTableReferences(db, table, e),
+                ),
               )
               .toList(),
           prefetchHooksCallback: ({pollVotesRefs = false}) {
@@ -16667,8 +16704,7 @@ typedef $$PollVotesTableUpdateCompanionBuilder =
 final class $$PollVotesTableReferences extends BaseReferences<_$DriftChatDatabase, $PollVotesTable, PollVoteEntity> {
   $$PollVotesTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $PollsTable _pollIdTable(_$DriftChatDatabase db) =>
-      db.polls.createAlias($_aliasNameGenerator(db.pollVotes.pollId, db.polls.id));
+  static $PollsTable _pollIdTable(_$DriftChatDatabase db) => db.polls.createAlias('poll_votes__poll_id__polls__id');
 
   $$PollsTableProcessedTableManager? get pollId {
     final $_column = $_itemColumn<String>('poll_id');
@@ -16939,7 +16975,7 @@ class $$PollVotesTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$PollVotesTable, PollVoteEntity>(table),
                   $$PollVotesTableReferences(db, table, e),
                 ),
               )
@@ -17033,12 +17069,8 @@ final class $$PinnedMessageReactionsTableReferences
     super.$_typedResult,
   );
 
-  static $PinnedMessagesTable _messageIdTable(_$DriftChatDatabase db) => db.pinnedMessages.createAlias(
-    $_aliasNameGenerator(
-      db.pinnedMessageReactions.messageId,
-      db.pinnedMessages.id,
-    ),
-  );
+  static $PinnedMessagesTable _messageIdTable(_$DriftChatDatabase db) =>
+      db.pinnedMessages.createAlias('pinned_message_reactions__message_id__pinned_messages__id');
 
   $$PinnedMessagesTableProcessedTableManager? get messageId {
     final $_column = $_itemColumn<String>('message_id');
@@ -17320,7 +17352,7 @@ class $$PinnedMessageReactionsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$PinnedMessageReactionsTable, PinnedMessageReactionEntity>(table),
                   $$PinnedMessageReactionsTableReferences(db, table, e),
                 ),
               )
@@ -17409,9 +17441,8 @@ typedef $$ReactionsTableUpdateCompanionBuilder =
 final class $$ReactionsTableReferences extends BaseReferences<_$DriftChatDatabase, $ReactionsTable, ReactionEntity> {
   $$ReactionsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $MessagesTable _messageIdTable(_$DriftChatDatabase db) => db.messages.createAlias(
-    $_aliasNameGenerator(db.reactions.messageId, db.messages.id),
-  );
+  static $MessagesTable _messageIdTable(_$DriftChatDatabase db) =>
+      db.messages.createAlias('reactions__message_id__messages__id');
 
   $$MessagesTableProcessedTableManager? get messageId {
     final $_column = $_itemColumn<String>('message_id');
@@ -17677,7 +17708,7 @@ class $$ReactionsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$ReactionsTable, ReactionEntity>(table),
                   $$ReactionsTableReferences(db, table, e),
                 ),
               )
@@ -18019,7 +18050,18 @@ class $$UsersTableTableManager
                 extraData: extraData,
                 rowid: rowid,
               ),
-          withReferenceMapper: (p0) => p0.map((e) => (e.readTable(table), BaseReferences(db, table, e))).toList(),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$UsersTable, UserEntity>(table),
+                  BaseReferences<_$DriftChatDatabase, $UsersTable, UserEntity>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -18051,6 +18093,7 @@ typedef $$MembersTableCreateCompanionBuilder =
       Value<DateTime?> inviteRejectedAt,
       Value<bool> invited,
       Value<bool> banned,
+      Value<DateTime?> banExpires,
       Value<bool> shadowBanned,
       Value<DateTime?> pinnedAt,
       Value<DateTime?> archivedAt,
@@ -18070,6 +18113,7 @@ typedef $$MembersTableUpdateCompanionBuilder =
       Value<DateTime?> inviteRejectedAt,
       Value<bool> invited,
       Value<bool> banned,
+      Value<DateTime?> banExpires,
       Value<bool> shadowBanned,
       Value<DateTime?> pinnedAt,
       Value<DateTime?> archivedAt,
@@ -18084,9 +18128,8 @@ typedef $$MembersTableUpdateCompanionBuilder =
 final class $$MembersTableReferences extends BaseReferences<_$DriftChatDatabase, $MembersTable, MemberEntity> {
   $$MembersTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $ChannelsTable _channelCidTable(_$DriftChatDatabase db) => db.channels.createAlias(
-    $_aliasNameGenerator(db.members.channelCid, db.channels.cid),
-  );
+  static $ChannelsTable _channelCidTable(_$DriftChatDatabase db) =>
+      db.channels.createAlias('members__channel_cid__channels__cid');
 
   $$ChannelsTableProcessedTableManager get channelCid {
     final $_column = $_itemColumn<String>('channel_cid')!;
@@ -18138,6 +18181,11 @@ class $$MembersTableFilterComposer extends Composer<_$DriftChatDatabase, $Member
 
   ColumnFilters<bool> get banned => $composableBuilder(
     column: $table.banned,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get banExpires => $composableBuilder(
+    column: $table.banExpires,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -18243,6 +18291,11 @@ class $$MembersTableOrderingComposer extends Composer<_$DriftChatDatabase, $Memb
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get banExpires => $composableBuilder(
+    column: $table.banExpires,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get shadowBanned => $composableBuilder(
     column: $table.shadowBanned,
     builder: (column) => ColumnOrderings(column),
@@ -18335,6 +18388,11 @@ class $$MembersTableAnnotationComposer extends Composer<_$DriftChatDatabase, $Me
 
   GeneratedColumn<bool> get banned => $composableBuilder(column: $table.banned, builder: (column) => column);
 
+  GeneratedColumn<DateTime> get banExpires => $composableBuilder(
+    column: $table.banExpires,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<bool> get shadowBanned => $composableBuilder(
     column: $table.shadowBanned,
     builder: (column) => column,
@@ -18419,6 +18477,7 @@ class $$MembersTableTableManager
                 Value<DateTime?> inviteRejectedAt = const Value.absent(),
                 Value<bool> invited = const Value.absent(),
                 Value<bool> banned = const Value.absent(),
+                Value<DateTime?> banExpires = const Value.absent(),
                 Value<bool> shadowBanned = const Value.absent(),
                 Value<DateTime?> pinnedAt = const Value.absent(),
                 Value<DateTime?> archivedAt = const Value.absent(),
@@ -18436,6 +18495,7 @@ class $$MembersTableTableManager
                 inviteRejectedAt: inviteRejectedAt,
                 invited: invited,
                 banned: banned,
+                banExpires: banExpires,
                 shadowBanned: shadowBanned,
                 pinnedAt: pinnedAt,
                 archivedAt: archivedAt,
@@ -18455,6 +18515,7 @@ class $$MembersTableTableManager
                 Value<DateTime?> inviteRejectedAt = const Value.absent(),
                 Value<bool> invited = const Value.absent(),
                 Value<bool> banned = const Value.absent(),
+                Value<DateTime?> banExpires = const Value.absent(),
                 Value<bool> shadowBanned = const Value.absent(),
                 Value<DateTime?> pinnedAt = const Value.absent(),
                 Value<DateTime?> archivedAt = const Value.absent(),
@@ -18472,6 +18533,7 @@ class $$MembersTableTableManager
                 inviteRejectedAt: inviteRejectedAt,
                 invited: invited,
                 banned: banned,
+                banExpires: banExpires,
                 shadowBanned: shadowBanned,
                 pinnedAt: pinnedAt,
                 archivedAt: archivedAt,
@@ -18485,7 +18547,7 @@ class $$MembersTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$MembersTable, MemberEntity>(table),
                   $$MembersTableReferences(db, table, e),
                 ),
               )
@@ -18573,7 +18635,7 @@ final class $$ReadsTableReferences extends BaseReferences<_$DriftChatDatabase, $
   $$ReadsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $ChannelsTable _channelCidTable(_$DriftChatDatabase db) =>
-      db.channels.createAlias($_aliasNameGenerator(db.reads.channelCid, db.channels.cid));
+      db.channels.createAlias('reads__channel_cid__channels__cid');
 
   $$ChannelsTableProcessedTableManager get channelCid {
     final $_column = $_itemColumn<String>('channel_cid')!;
@@ -18832,7 +18894,10 @@ class $$ReadsTableTableManager
               ),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) => (e.readTable(table), $$ReadsTableReferences(db, table, e)),
+                (e) => (
+                  e.readTable<$ReadsTable, ReadEntity>(table),
+                  $$ReadsTableReferences(db, table, e),
+                ),
               )
               .toList(),
           prefetchHooksCallback: ({channelCid = false}) {
@@ -19006,7 +19071,14 @@ class $$ChannelQueriesTableTableManager
                 channelCid: channelCid,
                 rowid: rowid,
               ),
-          withReferenceMapper: (p0) => p0.map((e) => (e.readTable(table), BaseReferences(db, table, e))).toList(),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ChannelQueriesTable, ChannelQueryEntity>(table),
+                  BaseReferences<_$DriftChatDatabase, $ChannelQueriesTable, ChannelQueryEntity>(db, table, e),
+                ),
+              )
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -19172,7 +19244,18 @@ class $$ChannelQueriesMetadataTableTableManager
                 sort: sort,
                 rowid: rowid,
               ),
-          withReferenceMapper: (p0) => p0.map((e) => (e.readTable(table), BaseReferences(db, table, e))).toList(),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ChannelQueriesMetadataTable, ChannelQueryMetadataEntity>(table),
+                  BaseReferences<_$DriftChatDatabase, $ChannelQueriesMetadataTable, ChannelQueryMetadataEntity>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -19404,7 +19487,16 @@ class $$ConnectionEventsTableTableManager
                 lastEventAt: lastEventAt,
                 lastSyncAt: lastSyncAt,
               ),
-          withReferenceMapper: (p0) => p0.map((e) => (e.readTable(table), BaseReferences(db, table, e))).toList(),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ConnectionEventsTable, ConnectionEventEntity>(
+                    table,
+                  ),
+                  BaseReferences<_$DriftChatDatabase, $ConnectionEventsTable, ConnectionEventEntity>(db, table, e),
+                ),
+              )
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );

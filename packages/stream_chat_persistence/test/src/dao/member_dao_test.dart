@@ -25,6 +25,7 @@ void main() {
       (index) => Member(
         user: users[index],
         banned: math.Random().nextBool(),
+        banExpires: DateTime.now(),
         shadowBanned: math.Random().nextBool(),
         createdAt: DateTime.now(),
         pinnedAt: DateTime.now(),
@@ -61,6 +62,7 @@ void main() {
       final fetchedMember = fetchedMembers[i];
       expect(fetchedMember.user!.id, member.user!.id);
       expect(fetchedMember.banned, member.banned);
+      expect(fetchedMember.banExpires, isSameDateAs(member.banExpires));
       expect(fetchedMember.shadowBanned, member.shadowBanned);
       expect(fetchedMember.createdAt, isSameDateAs(member.createdAt));
       expect(fetchedMember.pinnedAt, isSameDateAs(member.pinnedAt));

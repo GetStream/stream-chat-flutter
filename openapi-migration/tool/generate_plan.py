@@ -63,11 +63,26 @@ def read_generated():
     )
 
 
-def owns(*prefixes, unless=()):
-    def match(path):
-        if any(path.startswith(x) for x in unless):
+# Every 'VERB /path' named by only_ops or unless_ops, so the report can flag one that matches no operation.
+EXACT_OPS = set()
+
+
+def owns(*prefixes, unless=(), unless_ops=()):
+    """Claims every operation under one of the path prefixes, except those under an `unless` prefix and the
+    'VERB /path' operations in `unless_ops`."""
+    EXACT_OPS.update(unless_ops)
+    def match(verb, path):
+        if any(path.startswith(x) for x in unless) or f'{verb} {path}' in unless_ops:
             return False
         return any(path.startswith(x) for x in prefixes)
+    return match
+
+
+def only_ops(*operations):
+    """Claims exactly the given 'VERB /path' operations, for a group split out of another one's path."""
+    EXACT_OPS.update(operations)
+    def match(verb, path):
+        return f'{verb} {path}' in operations
     return match
 
 
@@ -570,18 +585,39 @@ GROUPS = [
         match=owns('/api/v2/chat/channels', '/api/v2/chat/members', '/api/v2/chat/sync',
                    unless=('/api/v2/chat/channels/{type}/{id}/draft',
                            '/api/v2/chat/channels/{type}/{id}/file',
-                           '/api/v2/chat/channels/{type}/{id}/image')),
-        goal='The biggest group, and the one every controller above it reads through `ChannelState`.',
+                           '/api/v2/chat/channels/{type}/{id}/image'),
+                   unless_ops=('PATCH /api/v2/chat/channels/{type}/{id}',
+                               'PATCH /api/v2/chat/channels/{type}/{id}/member')),
+        goal='The biggest group, and the one every controller above it reads through `ChannelState`. '
+             '[15](15-partial-updates.md) split the partial channel and member updates out of it.',
         decisions=[
             '`ChannelState`, `ChannelModel` and `Member` are public, persisted, and rebuilt from WebSocket '
             'events. Keep ours and map.',
-            '**Whether `ChannelModel` promotes its `extraData`-backed flags to real fields.** `disabled`, '
-            '`hidden`, `muted`, `blocked` and `truncatedAt` all arrive as root fields on `ChannelResponse` but '
-            'are pushed into `extraData` and read back through getters, which the constructor comment calls '
-            '"for backwards compatibility". Promoting them is a break worth making in v11 if it is made at '
-            'all, and it belongs with this group\'s model shape rather than with whichever phase happens to '
-            'add the next flag. Raised on '
+            '**Whether `ChannelModel` and `Member` promote their `extraData`-backed getters to real fields.** '
+            '`ChannelModel.disabled`, `hidden`, `muted`, `blocked`, `truncatedAt`, `truncatedBy`, '
+            '`autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, '
+            '`status`, `banFromFutureChannels`, `futureChannelBanExpires` and `deletedAt`, all arrive as root fields '
+            'but live in `extraData` and are read back through getters; the constructors write them there. '
+            'Promoting them is a break: their keys leave `extraData`, a key set in `extraData` no longer sets the '
+            'field, and a `custom` filter or sort field naming one reads null locally. When promoting: '
+            '(1) decide each field\'s `merge` rule. Today `ChannelModel.merge` keeps the flags and `truncatedAt` '
+            'when a payload leaves them out and drops the other three, as on v11; `Member` has no `merge`. The '
+            'server always sends `disabled`, omits `hidden` and `blocked` from every event, clears `truncated_by` '
+            'only through a server-side update (and may leave it out where it does not load the user), never sends '
+            '`muted` or `mute_expires_at` on the channel, and omits `auto_translation_*` when false or empty. '
+            '(2) Make `toJson` leave out `extraData` keys named like a field, or a same-named `extraData` key '
+            'overwrites the field in the output. (3) Keep the constructor copying `extraData`. (4) Add persistence columns; '
+            '`truncatedBy` is a user, so it needs the users table or a stored map. Raised on '
             '[#2958](https://github.com/GetStream/stream-chat-flutter/pull/2958).',
+            '**Whether `ChannelConfig` exposes the generated-only config fields.** `ChannelConfigWithInfo` '
+            'carries `allowedFlagReasons`, `automodBehavior`, `automodThresholds`, `blocklist`, '
+            '`blocklistBehavior`, `blocklists`, `countMessages`, `customEvents`, `grants`, `name`, '
+            '`partitionSize`, `partitionTtl`, `quotes` and `reminders`, which `ChannelConfig` does not model and '
+            'v1 drops as well. `blocklists` and `automodThresholds` would need hand-written models. The mapper '
+            'marks the drop with a TODO.',
+            '**Expose `hide_messages_before` on `ChannelState`.** `clear_history` writes it on the caller\'s '
+            'member row, and the server returns it next to `channel` in each channel-state entry '
+            '(`ChannelStateResponse.hideMessagesBefore`), never on the channel itself. v1 drops it today.',
             '`sync` returns `SyncResponse` — one of the two models that needed the WSEvent generator patch. '
             'Verify it decodes before relying on it.',
         ],
@@ -591,13 +627,54 @@ GROUPS = [
             '`queryChannels` drives the channel list controllers and the offline cache; a shape change here is '
             'felt everywhere.',
             'Channel `custom`/`extraData` promotion, same class of problem as messages.',
-            'Landing `ChannelResponse` -> `ChannelModel` is the last thing blocking '
-            '[08](08-moderation-and-blocklists.md)\'s `muteChannel`, which drops `channelMute`, `channelMutes` '
-            'and `ownUser` because the generated `ChannelMute` carries a `ChannelResponse?` and a '
-            '`UserResponse?` where ours needs a non-nullable `ChannelModel` and `User`. It needs 09 as well. '
+            '**A zero timestamp decodes differently on v2.** v1 sends Go\'s zero time as '
+            '`0001-01-01T00:00:00Z`; v2 encodes timestamps as epoch nanoseconds and sends `0`, which decodes as '
+            '1970-01-01. A truncated channel shows it: its `last_message_at` is zero time, so the same channel '
+            'answers year 1 from a v1 query or WebSocket event and 1970 from `/api/v2/chat/channels`. Nothing '
+            'in the SDK behaves differently today, since both precede `createdAt` (`lastUpdatedAt` falls back '
+            'to it, and the read fallback and the `max` against new messages agree), but the two sources disagree on '
+            'the value. Normalize it deliberately when `queryChannels` moves, and check the other '
+            'timestamps the server can send as zero.',
+            '**Dates the mapper writes into `extraData` are formatted differently from v1.** v1 keeps the '
+            'server\'s string (`2020-01-29T03:22:47.63613Z`); the mapper writes `toIso8601String()` '
+            '(`2020-01-29T03:22:47.636130Z`). The getters return the same `DateTime`, but `Member` compares '
+            '`extraData`, so the same member from a v1 payload and from the mapper compares unequal. Promoting '
+            'the fields removes it.',
+            '[08](08-moderation-and-blocklists.md)\'s `muteChannel` drops `channelMute`, `channelMutes` and '
+            '`ownUser` because the generated `ChannelMute` carries a `ChannelResponse?` and a `UserResponse?` '
+            'where ours needs a non-nullable `ChannelModel` and `User`. `channel_mapper.dart` covers the '
+            'channel side now; it needs 09 as well. '
             'Decide the null case there too — ours are non-nullable, the generated ones are not, the same '
             'question [14](14-banned-users.md) records for `BanResponse.user`.',
         ],
+        taken=textwrap.dedent("""\
+            - **The generated channel and member types map onto today's classes.**
+              `lib/src/repository/mapper/channel_mapper.dart` maps `ChannelResponse`, `ChannelConfigWithInfo`,
+              `ChannelMemberResponse`, `Command` and `ChatPreferences` onto the json_serializable `ChannelModel`,
+              `ChannelConfig`, `Member`, `Command` and `ChatPreferences`, the way `user_mapper.dart` does for
+              `User`. [15](15-partial-updates.md) uses it first; groups 06, 07 and 14 will reuse it. This group
+              restructures those classes and re-points the mapper.
+            - **Every field `ChannelResponse` and `ChannelMemberResponse` declare is reachable on ours.** The
+              ones `ChannelModel` and `Member` did not read get a typed getter over `extraData`, the pattern `muted`
+              and `blocked` already used: `ChannelModel.truncatedBy`, `autoTranslationEnabled` and
+              `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`,
+              `futureChannelBanExpires` and `deletedAt`. Their keys stay in `extraData`, so nothing breaks and the
+              offline cache keeps them without new columns. Promoting them to stored fields is the decision above.
+              Three get no getter: the channel's `hide_messages_before` and `mute_expires_at`, which the server
+              never fills on the channel (a mute's expiry is `ChannelMute.expires`), and the member's deprecated
+              `role`. The nested config types drop `ChatPreferences.distinctChannelMessages` and `Command`'s
+              `createdAt` / `updatedAt`, which ours do not model.
+            - **The mapper writes the server fields where v1 JSON puts them,** into `extraData` under their wire
+              keys. Custom data named like one of those fields or a top-level field is dropped, as
+              `user_mapper.dart` does. A mapped channel or member still differs from a v1 decode in three ways,
+              all for group 09 or this group to settle: dates in `extraData` are formatted by the client rather
+              than kept as the server sent them (see the risk below); `truncatedBy`, `createdBy` and each member's
+              user go through `user_mapper.dart`, which drops the user fields `User` does not model; and
+              `mute_expires_at` and `hide_messages_before` are left out, where v1 would keep them in `extraData` if
+              the server sent them on the channel.
+            - **The mapper is tested through the client,** by [15](15-partial-updates.md)'s
+              `updateChannelPartial` tests: the first call that returns a channel through the generated client.
+        """),
     ),
     dict(
         num='12', slug='uploads-cdn', title='Uploads (CDN)',
@@ -699,6 +776,62 @@ GROUPS = [
             '`StreamChatApi.moderation` getter.',
         ],
     ),
+    dict(
+        num='15', slug='partial-updates', title='Partial Updates',
+        hand=[],
+        match=only_ops('PATCH /api/v2/chat/channels/{type}/{id}', 'PATCH /api/v2/chat/channels/{type}/{id}/member'),
+        goal='Move the partial channel and member updates ahead of [11](11-channels-and-members.md): they answer a '
+             'channel and its members through the mappers group 11 needs, without touching `ChannelState`, the '
+             'channel list or the offline cache.',
+        decisions=[],
+        taken=textwrap.dedent("""\
+            - **Split out of [11](11-channels-and-members.md), ahead of it.** The partial updates read nothing
+              into client state — the `channel.updated` and `member.updated` events do that — so they can move
+              before the queries and prove `channel_mapper.dart` on real calls.
+            - **The full update stays in 11, so the pair is split on purpose.** `updateChannel` takes and
+              answers a `Message`, and the generated `UpdateChannelRequest.message` / `UpdateChannelResponse.message`
+              need the `MessageRequest` and `MessageResponse` mappers [10](10-messages.md) writes; its `data` is
+              a typed `ChannelInputRequest` rather than a map, too. Until then `updateChannel` and
+              `Channel.update` still throw while the partial update returns a `Result`, and
+              `migrations/v11-migration.md` says so.
+            - **Moved off `ChannelApi`:** `updateChannelPartial`, `enableSlowdown`, `disableSlowdown` and
+              `updateMemberPartial`, each now a `StreamChatClient` method over `ChannelsRepository`.
+            - **`enableSlowdown` and `disableSlowdown` move with it, renamed `enableSlowMode` and
+              `disableSlowMode`** to match the `Channel` helpers and `ChannelCapability.slowMode`. Both are
+              `updateChannelPartial` with a fixed `cooldown`, so they call the repository's one method rather than
+              an operation of their own.
+            - **The v2 route is the v1 handler.** `lib/chat/routes.go` mounts `UpdateChannelPartial` in the
+              shared `coreRoutes`; it is neither gated nor in beta. On v2 it also accepts `custom.<field>` paths
+              in `set` and `unset`, and still takes flat keys, so `{'name': …}` updates the same field.
+            - **The envelopes and the member method take the spec's names:** `PartialUpdateChannelResponse` becomes
+              `UpdateChannelPartialResponse`, `PartialUpdateMemberResponse` becomes `UpdateMemberPartialResponse`,
+              and `StreamChatClient.partialMemberUpdate` becomes `updateMemberPartial`. Hard renames, as
+              `GetAppSettingsResponse` → `AppSettingsResponse` was: every call site changes for `Result` anyway,
+              and the channel and member calls now share one naming scheme.
+              The other helpers with no spec counterpart keep their names (`pinChannel`, `archiveChannel`,
+              `Channel.pin` and the rest); the slow-mode pair is renamed above.
+            - **The envelopes are freezed, in `models/response/`.** `UpdateChannelPartialResponse.channel` and
+              `UpdateMemberPartialResponse.channelMember` are nullable, as the spec declares them, where v10 typed
+              them non-null. `UpdateChannelPartialResponse.members` is non-nullable, as the spec requires it, where
+              v10 typed it nullable: the server answers `[]` for a channel with no members.
+            - **`Channel.pin`, `unpin`, `archive` and `unarchive` answer the envelope,** where v10 returned the
+              bare `Member`: a write returns its envelope.
+            - **The v2 member route is a different handler from v1's, with the same behaviour.** v1 calls
+              `/member/{user_id}` (`UpdateMemberPartialDeprecated`), v2 calls `/member` (`UpdateMemberPartial`).
+              For a client-side request both take the user from the token, refuse `channel_role`, and run the same
+              update; checked live for pin, unpin, archive, unarchive and a custom field.
+            - **`MemberUpdatePayload` and `MemberUpdateType` are removed.** They only built the `set` and `unset`
+              values for pin and archive, named two of the fields the server accepts, and carried a public
+              `toJson` and an enum the model rules retire. The client writes `{'pinned': true}` / `['pinned']`.
+            - **The request always sends `set` and `unset`, `null` when not given,** where v1 left the key out.
+              The server reads both the same, and still rejects a call with neither.
+            """),
+        risks=[
+            '`disableSlowMode` unsets `cooldown`, which the server rejects on both v1 and v2 as a reserved field. '
+            'It fails before and after this group; the fix is tracked separately, so the request is unchanged.',
+        ],
+        done=DONE.replace('- [ ]', '- [x]'),
+    ),
 ]
 
 
@@ -719,7 +852,7 @@ def hand_for(group, hand):
 
 def render(g, hand, ops):
     hand_methods = hand_for(g, hand)
-    gops = [o for o in ops if g['match'](o[1])]
+    gops = [o for o in ops if g['match'](o[0], o[1])]
     L = [
         f"# {g['num']} — {g['title']}\n",
         f"**Goal:** {g['goal']}\n",
@@ -796,7 +929,7 @@ def main():
     claimed_ops = {}
     claimed_methods = {}
     for g in GROUPS:
-        for o in [o for o in ops if g['match'](o[1])]:
+        for o in [o for o in ops if g['match'](o[0], o[1])]:
             claimed_ops.setdefault((o[0], o[1]), []).append(g['num'])
         for f, n, _ in hand_for(g, hand):
             claimed_methods.setdefault((f, n), []).append(g['num'])
@@ -814,6 +947,8 @@ def main():
             problems.append(f'method claimed by {v}: {k[0]}::{k[1]}')
     for k in sorted(all_methods - set(claimed_methods)):
         problems.append(f'method unclaimed: {k[0]}::{k[1]}')
+    for spec in sorted(EXACT_OPS - {f'{o[0]} {o[1]}' for o in ops}):
+        problems.append(f'exact operation matches nothing in the generated client: {spec}')
     for line in generated_exports():
         problems.append(f'barrel exports the generated client: {line}')
     for f, line in generated_imports():

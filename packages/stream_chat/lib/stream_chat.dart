@@ -133,6 +133,8 @@ export 'src/core/models/response/remove_user_group_members_response.dart';
 export 'src/core/models/response/search_roles_response.dart';
 export 'src/core/models/response/search_user_groups_response.dart';
 export 'src/core/models/response/unmute_users_response.dart';
+export 'src/core/models/response/update_channel_partial_response.dart';
+export 'src/core/models/response/update_member_partial_response.dart';
 export 'src/core/models/response/update_user_group_response.dart';
 export 'src/core/models/role.dart';
 export 'src/core/models/role_type.dart';

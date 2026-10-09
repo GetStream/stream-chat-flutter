@@ -14,6 +14,47 @@ void main() {
       expect(member.updatedAt, DateTime.parse('2020-01-28T22:17:30.95443Z'));
       expect(member.deletedMessages, ['msg-1', 'msg-2', 'msg-3']);
       expect(member.extraData['some_custom_field'], 'with_custom_data');
+      expect(member.notificationsMuted, isTrue);
+      expect(member.status, 'member');
+      expect(member.banFromFutureChannels, isTrue);
+      expect(member.futureChannelBanExpires, DateTime.parse('2020-02-28T22:17:30.95443Z'));
+      expect(member.deletedAt, DateTime.parse('2020-01-29T22:17:30.95443Z'));
+    });
+
+    test(
+      'Member keeps notificationsMuted, status, banFromFutureChannels, futureChannelBanExpires and deletedAt in extraData',
+      () {
+        final member = Member(
+          userId: 'user',
+          notificationsMuted: true,
+          status: 'member',
+          banFromFutureChannels: true,
+          futureChannelBanExpires: DateTime.utc(2021),
+          deletedAt: DateTime.utc(2020),
+          extraData: const {'color': 'red'},
+        );
+
+        expect(member.extraData, {
+          'color': 'red',
+          'notifications_muted': true,
+          'status': 'member',
+          'ban_from_future_channels': true,
+          'future_channel_ban_expires': DateTime.utc(2021).toIso8601String(),
+          'deleted_at': DateTime.utc(2020).toIso8601String(),
+        });
+      },
+    );
+
+    test('Member.deletedAt returns null for an extraData value that is not a date', () {
+      final member = Member(userId: 'user', extraData: const {'deleted_at': 'yesterday'});
+
+      expect(member.deletedAt, isNull);
+    });
+
+    test('Member.futureChannelBanExpires returns null for an empty extraData value', () {
+      final member = Member(userId: 'user', extraData: const {'future_channel_ban_expires': ''});
+
+      expect(member.futureChannelBanExpires, isNull);
     });
 
     group('MemberSortField', () {
