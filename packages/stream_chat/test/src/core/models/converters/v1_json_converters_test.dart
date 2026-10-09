@@ -6,6 +6,7 @@ import 'package:stream_chat/src/core/models/converters/v1_json_converters.dart';
 import 'package:stream_chat/src/core/models/device.dart';
 import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/message_reminder.dart';
 import 'package:stream_chat/src/core/models/moderation.dart';
 import 'package:stream_chat/src/core/models/push_provider.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
@@ -445,5 +446,102 @@ void main() {
     final message = Message(id: 'message-id', sharedLocation: Location(latitude: 1, longitude: 2));
 
     expect(message.toJson()['shared_location'], {'latitude': 1.0, 'longitude': 2.0});
+  });
+
+  test('Message.fromJson reads every reminder field from its v1 keys', () {
+    const channelJson = {'id': 'general', 'type': 'messaging', 'cid': 'messaging:general'};
+    const messageJson = {'id': 'message-id', 'text': 'Remember me'};
+    const userJson = {'id': 'user-id'};
+
+    final message = Message.fromJson(const {
+      'id': 'message-id',
+      'reminder': {
+        'channel_cid': 'messaging:general',
+        'channel': channelJson,
+        'message_id': 'message-id',
+        'message': messageJson,
+        'user_id': 'user-id',
+        'user': userJson,
+        'remind_at': '2024-06-15T14:30:00.000Z',
+        'created_at': '2024-06-01T10:00:00.000Z',
+        'updated_at': '2024-06-02T10:00:00.000Z',
+      },
+    });
+
+    final reminder = message.reminder!;
+    // A channel compares by identity, so it is checked on its own.
+    expect(reminder.channel?.cid, 'messaging:general');
+    expect(
+      reminder,
+      MessageReminder(
+        channelCid: 'messaging:general',
+        channel: reminder.channel,
+        messageId: 'message-id',
+        message: Message.fromJson(const {...messageJson}),
+        userId: 'user-id',
+        user: User.fromJson(const {...userJson}),
+        remindAt: DateTime.utc(2024, 6, 15, 14, 30),
+        createdAt: DateTime.utc(2024, 6, 1, 10),
+        updatedAt: DateTime.utc(2024, 6, 2, 10),
+      ),
+    );
+  });
+
+  test('Event.fromJson reads reminder dates sent as epoch nanoseconds', () {
+    final event = Event.fromJson(const {
+      'type': 'reminder.created',
+      'reminder': {
+        'channel_cid': 'messaging:general',
+        'message_id': 'message-id',
+        'user_id': 'user-id',
+        'remind_at': 1718461800000000000,
+        'created_at': 1717236000000000000,
+        'updated_at': 1717322400000000000,
+      },
+    });
+
+    expect(event.reminder?.remindAt, DateTime.utc(2024, 6, 15, 14, 30));
+    expect(event.reminder?.createdAt, DateTime.utc(2024, 6, 1, 10));
+    expect(event.reminder?.updatedAt, DateTime.utc(2024, 6, 2, 10));
+  });
+
+  test("Event.toJson writes the reminder's ids and dates, without its channel, message or user", () {
+    final event = Event(
+      type: 'reminder.created',
+      reminder: MessageReminder(
+        channelCid: 'messaging:general',
+        channel: ChannelModel(cid: 'messaging:general'),
+        messageId: 'message-id',
+        message: Message(id: 'message-id'),
+        userId: 'user-id',
+        user: User(id: 'user-id'),
+        remindAt: DateTime.utc(2024, 6, 15, 14, 30),
+        createdAt: DateTime.utc(2024, 6, 1, 10),
+        updatedAt: DateTime.utc(2024, 6, 2, 10),
+      ),
+    );
+
+    expect(event.toJson()['reminder'], {
+      'channel_cid': 'messaging:general',
+      'message_id': 'message-id',
+      'user_id': 'user-id',
+      'remind_at': '2024-06-15T14:30:00.000Z',
+      'created_at': '2024-06-01T10:00:00.000Z',
+      'updated_at': '2024-06-02T10:00:00.000Z',
+    });
+  });
+
+  test('Event.fromJson reads back a reminder without a due date written by toJson', () {
+    final reminder = MessageReminder(
+      channelCid: 'messaging:general',
+      messageId: 'message-id',
+      userId: 'user-id',
+      createdAt: DateTime.utc(2024, 6, 1, 10),
+      updatedAt: DateTime.utc(2024, 6, 2, 10),
+    );
+
+    final event = Event.fromJson(Event(type: 'reminder.updated', reminder: reminder).toJson());
+
+    expect(event.reminder, reminder);
   });
 }

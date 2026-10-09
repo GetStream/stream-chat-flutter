@@ -96,6 +96,33 @@ an endpoint, so the definition of done below stays open.
   keeps v10's request shape: coordinates, device and end date), `ChannelState.activeLiveLocations`,
   `GetActiveLiveLocationsResponse` and `updateLiveLocation`'s response. `stream_chat_persistence` stores
   locations as table rows, so no codec is needed.
+- **`message_mapper.dart` maps `MessageResponse` onto today's json_serializable `Message`** through
+  its constructor, with the generated attachment, reaction,
+  reaction group, moderation, shared location, reminder, draft and draft payload types, each mapped in
+  its own file (`attachment_mapper.dart`, `reaction_mapper.dart`, `moderation_mapper.dart`,
+  `location_mapper.dart`, `drafts_mapper.dart`, `reminders_mapper.dart`). Its first
+  consumer is [06](06-reminders.md). `Message.fromJson` and the mapper share the type and state
+  derivation and the reaction groups built from counts and scores when a payload has none
+  (`lib/src/core/util/message_decoding.dart`, internal).
+- **The keys v1 lands in `Message.extraData` stay there:** `cid` as a plain entry, and `html`, `mml`,
+  `image_labels` and `deleted_reply_count` behind new constructor parameters and typed getters
+  (`Message.html`, `mml`, `imageLabels`, `deletedReplyCount`), the pattern `ChannelModel.disabled` uses.
+  Dropping them would be a silent behavioural break. `DraftMessage` keeps the `html` and `mml` it is
+  sent as plain `extraData` entries, without getters.
+- **`mentioned_channel_members` is dropped:** the SDK has no feature built on it, so the mapper leaves
+  it out of `extraData`, and drops a custom key of that name. `Message.fromJson` still lands it there
+  from v1 JSON.
+- **`custom` becomes `extraData` without the keys named like the model's own fields,** for messages,
+  attachments, reactions and draft messages. A reaction's emoji code arrives in `custom` and maps to
+  `Reaction.emojiCode`.
+- **Moderation actions go through `ModerationAction.fromJson`,** so legacy names read as current ones.
+- **Attachments map at parity with `Attachment.fromJson`:** each gets a new local `id`, and the id the
+  attachment was sent with stays in `extraData`; `giphy` and `fields` are written in their v1 JSON
+  shape, which `GiphyInfo` and the UI read. Making `Attachment` plain, and promoting those fields, is
+  left to this group.
+- **A reminder or location nests its message one level deep,** so the recursion ends there.
+- **`MessageWithChannelResponse` gets its mapper with its first consumer** (getMessage, search), not
+  ahead of it.
 
 ## Risks
 

@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_redundant_argument_values, lines_longer_than_80_chars, deprecated_member_use_from_same_package
 
+import 'dart:convert';
+
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/message_state.dart';
@@ -458,24 +460,193 @@ void main() {
       );
 
       test(
-        'synthesizes groups from legacy reaction_counts/reaction_scores '
-        'even when the score total is zero or negative',
+        'Message.fromJson synthesizes groups from legacy reaction_counts/reaction_scores '
+        'for the types with a positive count, whatever their score',
         () {
           final message = Message.fromJson(const {
-            'reaction_counts': {'like': 2, 'dislike': 3},
-            'reaction_scores': {'like': 0, 'dislike': -3},
+            'reaction_counts': {'like': 2, 'dislike': 3, 'wow': 0},
+            'reaction_scores': {'like': 0, 'dislike': -3, 'wow': 0},
           });
 
-          // Both groups must be retained because their count is positive, even
-          // though the summed scores are zero and negative respectively.
-          expect(message.reactionGroups, isNotNull);
+          // 'like' and 'dislike' are retained because their count is positive,
+          // even though the summed scores are zero and negative respectively;
+          // 'wow' has no reaction left.
+          expect(message.reactionGroups!.keys, unorderedEquals(['like', 'dislike']));
           expect(message.reactionGroups!['like']!.count, 2);
           expect(message.reactionGroups!['like']!.sumScores, 0);
           expect(message.reactionGroups!['dislike']!.count, 3);
           expect(message.reactionGroups!['dislike']!.sumScores, -3);
         },
       );
+
+      test('Message.fromJson prefers reaction_groups over legacy reaction_counts/reaction_scores', () {
+        final message = Message.fromJson(const {
+          'reaction_groups': {
+            'like': {
+              'count': 1,
+              'sum_scores': 2,
+              'first_reaction_at': '2026-01-05T00:00:00.000Z',
+              'last_reaction_at': '2026-01-06T00:00:00.000Z',
+            },
+          },
+          // The groups' dates tell them apart from groups built from these.
+          'reaction_counts': {'like': 1},
+          'reaction_scores': {'like': 2},
+        });
+
+        expect(message.reactionGroups, {
+          'like': ReactionGroup(
+            count: 1,
+            sumScores: 2,
+            firstReactionAt: DateTime.utc(2026, 1, 5),
+            lastReactionAt: DateTime.utc(2026, 1, 6),
+          ),
+        });
+      });
     });
+  });
+
+  test('Message stores in extraData only the HTML, markup, image labels and deleted reply count it is given', () {
+    const extraData = {'priority': 'high'};
+
+    final messages = [
+      Message(extraData: extraData, html: '<p>Hi</p>'),
+      Message(extraData: extraData, mml: '<mml>Hi</mml>'),
+      Message(
+        extraData: extraData,
+        imageLabels: const {
+          'cat.png': ['cat'],
+        },
+      ),
+      Message(extraData: extraData, deletedReplyCount: 2),
+    ];
+
+    expect(messages.map((message) => message.extraData), [
+      {'priority': 'high', 'html': '<p>Hi</p>'},
+      {'priority': 'high', 'mml': '<mml>Hi</mml>'},
+      {
+        'priority': 'high',
+        'image_labels': {
+          'cat.png': ['cat'],
+        },
+      },
+      {'priority': 'high', 'deleted_reply_count': 2},
+    ]);
+  });
+
+  test(
+    'Message replaces the extraData entries of the HTML, markup, image labels and deleted reply count it is given',
+    () {
+      final message = Message(
+        extraData: const {
+          'priority': 'high',
+          'html': '<p>Old</p>',
+          'mml': '<mml>Old</mml>',
+          'image_labels': {
+            'dog.png': ['dog'],
+          },
+          'deleted_reply_count': 1,
+        },
+        html: '<p>Hi</p>',
+        mml: '<mml>Hi</mml>',
+        imageLabels: const {
+          'cat.png': ['cat'],
+        },
+        deletedReplyCount: 2,
+      );
+
+      expect(message.extraData, {
+        'priority': 'high',
+        'html': '<p>Hi</p>',
+        'mml': '<mml>Hi</mml>',
+        'image_labels': {
+          'cat.png': ['cat'],
+        },
+        'deleted_reply_count': 2,
+      });
+    },
+  );
+
+  test('Message.fromJson reads the HTML, markup, image labels and deleted reply count from extraData', () {
+    // Decoded JSON, as events and the offline cache deliver it, so the labels arrive as a List<dynamic>.
+    final message = Message.fromJson(
+      jsonDecode('''
+        {
+          "id": "message-id",
+          "html": "<p>Hi</p>",
+          "mml": "<mml>Hi</mml>",
+          "image_labels": {"cat.png": ["cat", "animal"]},
+          "deleted_reply_count": 2
+        }
+      ''')
+          as Map<String, dynamic>,
+    );
+
+    expect(message.html, '<p>Hi</p>');
+    expect(message.mml, '<mml>Hi</mml>');
+    expect(message.imageLabels, {
+      'cat.png': ['cat', 'animal'],
+    });
+    expect(message.deletedReplyCount, 2);
+  });
+
+  test(
+    'Message.fromJson reads a message deleted only for the current user as deleted, even when it is soft-deleted',
+    () {
+      final message = Message.fromJson(const {
+        'id': 'message-id',
+        'type': 'regular',
+        'deleted_for_me': true,
+        'deleted_at': '2026-01-03T00:00:00.000Z',
+        'created_at': '2026-01-01T00:00:00.000Z',
+        'updated_at': '2026-01-02T00:00:00.000Z',
+      });
+
+      expect((message.type, message.state), (MessageType.deleted, MessageState.deletedForMe));
+    },
+  );
+
+  test('Message.fromJson reads a deleted message as soft-deleted', () {
+    final message = Message.fromJson(const {
+      'id': 'message-id',
+      'type': 'deleted',
+      'deleted_at': '2026-01-03T00:00:00.000Z',
+      'created_at': '2026-01-01T00:00:00.000Z',
+      'updated_at': '2026-01-02T00:00:00.000Z',
+    });
+
+    expect((message.type, message.state), (MessageType.deleted, MessageState.softDeleted));
+  });
+
+  test('Message.fromJson reads a message updated after it was created as updated', () {
+    final message = Message.fromJson(const {
+      'id': 'message-id',
+      'type': 'regular',
+      'created_at': '2026-01-01T00:00:00.000Z',
+      'updated_at': '2026-01-02T00:00:00.000Z',
+    });
+
+    expect((message.type, message.state), (MessageType.regular, MessageState.updated));
+  });
+
+  test('Message.fromJson reads a message never updated as sent', () {
+    final message = Message.fromJson(const {
+      'id': 'message-id',
+      'type': 'regular',
+      'created_at': '2026-01-01T00:00:00.000Z',
+      'updated_at': '2026-01-01T00:00:00.000Z',
+    });
+
+    expect((message.type, message.state), (MessageType.regular, MessageState.sent));
+  });
+
+  test('Message reads no HTML, markup, image labels or deleted reply count when extraData has none', () {
+    final message = Message();
+
+    expect(message.html, isNull);
+    expect(message.mml, isNull);
+    expect(message.imageLabels, isNull);
+    expect(message.deletedReplyCount, isNull);
   });
 
   group('MessageVisibility Extension Tests', () {

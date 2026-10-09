@@ -64,8 +64,10 @@ import '../core/models/request/update_user_partial_request.dart';
 import '../core/models/response/add_user_group_members_response.dart';
 import '../core/models/response/app_settings_response.dart';
 import '../core/models/response/block_users_response.dart';
+import '../core/models/response/create_reminder_response.dart';
 import '../core/models/response/create_user_group_response.dart';
 import '../core/models/response/delete_channel_response.dart';
+import '../core/models/response/delete_reminder_response.dart';
 import '../core/models/response/get_blocked_users_response.dart';
 import '../core/models/response/get_unread_count_response.dart';
 import '../core/models/response/get_user_group_response.dart';
@@ -80,6 +82,7 @@ import '../core/models/response/poll_response.dart';
 import '../core/models/response/poll_vote_response.dart';
 import '../core/models/response/query_poll_votes_response.dart';
 import '../core/models/response/query_polls_response.dart';
+import '../core/models/response/query_reminders_response.dart';
 import '../core/models/response/remove_user_group_members_response.dart';
 import '../core/models/response/search_roles_response.dart';
 import '../core/models/response/search_user_groups_response.dart';
@@ -87,6 +90,7 @@ import '../core/models/response/show_channel_response.dart';
 import '../core/models/response/unblock_users_response.dart';
 import '../core/models/response/update_channel_partial_response.dart';
 import '../core/models/response/update_member_partial_response.dart';
+import '../core/models/response/update_reminder_response.dart';
 import '../core/models/response/update_user_group_response.dart';
 import '../core/models/response/update_users_response.dart';
 import '../core/models/role_type.dart';
@@ -104,6 +108,7 @@ import '../repository/devices_repository.dart';
 import '../repository/general_repository.dart';
 import '../repository/moderation_repository.dart';
 import '../repository/polls_repository.dart';
+import '../repository/reminders_repository.dart';
 import '../repository/roles_repository.dart';
 import '../repository/user_groups_repository.dart';
 import '../repository/users_repository.dart';
@@ -210,6 +215,7 @@ class StreamChatClient {
     _userGroupsRepository = UserGroupsRepository(api);
     _usersRepository = UsersRepository(api);
     _pollsRepository = PollsRepository(api);
+    _remindersRepository = RemindersRepository(api);
     _generalRepository = GeneralRepository(api);
     _moderationRepository = ModerationRepository(api);
     _channelsRepository = ChannelsRepository(api);
@@ -256,6 +262,7 @@ class StreamChatClient {
   late final UserGroupsRepository _userGroupsRepository;
   late final UsersRepository _usersRepository;
   late final PollsRepository _pollsRepository;
+  late final RemindersRepository _remindersRepository;
   late final GeneralRepository _generalRepository;
   late final ModerationRepository _moderationRepository;
   late final ChannelsRepository _channelsRepository;
@@ -2313,52 +2320,38 @@ class StreamChatClient {
     );
   }
 
-  /// Queries reminders for the current user.
+  /// Fetches one page of the current user's reminders matching [filter], ordered by [sort].
   ///
-  /// Optionally, pass [filter], [sort] and [pagination] to filter, sort and
-  /// paginate the reminders.
-  Future<QueryRemindersResponse> queryReminders({
+  /// Up to [limit] reminders are returned. The next page is fetched by passing the `next` cursor of a response as
+  /// [next], and the previous page by passing its `prev` cursor as [prev]. At most one of [next] and [prev] may be
+  /// given.
+  Future<Result<QueryRemindersResponse>> queryReminders({
     MessageReminderFilter? filter,
     List<MessageReminderSort>? sort,
-    PaginationParams pagination = const PaginationParams(),
-  }) {
-    return _chatApi.reminders.queryReminders(
-      filter: filter,
-      sort: sort,
-      pagination: pagination,
-    );
-  }
+    int limit = 10,
+    String? next,
+    String? prev,
+  }) => _remindersRepository.queryReminders(filter: filter, sort: sort, limit: limit, next: next, prev: prev);
 
-  /// Creates a reminder for the given [messageId].
+  /// Creates a reminder on the message with the id [messageId].
   ///
-  /// Optionally, pass [remindAt] to set the reminder time.
-  Future<CreateReminderResponse> createReminder(
+  /// The reminder is due at [remindAt]. Without it, the reminder is a bookmark, which is never due.
+  Future<Result<CreateReminderResponse>> createReminder(
     String messageId, {
     DateTime? remindAt,
-  }) {
-    return _chatApi.reminders.createReminder(
-      messageId,
-      remindAt: remindAt,
-    );
-  }
+  }) => _remindersRepository.createReminder(messageId, remindAt: remindAt);
 
-  /// Updates a reminder for the given [messageId].
+  /// Updates the reminder on the message with the id [messageId].
   ///
-  /// Optionally, pass [remindAt] to set the new reminder time.
-  Future<UpdateReminderResponse> updateReminder(
+  /// The reminder becomes due at [remindAt]. Without it, the reminder becomes a bookmark, which is never due.
+  Future<Result<UpdateReminderResponse>> updateReminder(
     String messageId, {
     DateTime? remindAt,
-  }) {
-    return _chatApi.reminders.updateReminder(
-      messageId,
-      remindAt: remindAt,
-    );
-  }
+  }) => _remindersRepository.updateReminder(messageId, remindAt: remindAt);
 
-  /// Deletes a reminder for the given [messageId].
-  Future<EmptyResponse> deleteReminder(String messageId) {
-    return _chatApi.reminders.deleteReminder(messageId);
-  }
+  /// Deletes the reminder on the message with the id [messageId].
+  Future<Result<DeleteReminderResponse>> deleteReminder(String messageId) =>
+      _remindersRepository.deleteReminder(messageId);
 
   /// Lists user groups with cursor-based pagination.
   ///

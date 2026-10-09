@@ -182,6 +182,7 @@ class Event extends WsEvent {
   final Draft? draft;
 
   /// The message reminder sent with the event.
+  @MessageReminderV1JsonConverter()
   final MessageReminder? reminder;
 
   /// Push notification preferences for the current user.

@@ -395,13 +395,40 @@ GROUPS = [
     ),
     dict(
         num='06', slug='reminders', title='Message Reminders',
-        hand=['reminders_api.dart'],
+        hand=[],
         match=owns('/api/v2/chat/messages/{message_id}/reminders', '/api/v2/chat/reminders'),
         goal='Small and self-contained, and it exercises the `PATCH` shape our hand-written layer expresses '
              'differently.',
-        decisions=[
-            '`MessageReminder` is public and persisted; decide keep-vs-adopt with persistence in the same PR.',
-        ],
+        decisions=[],
+        taken=textwrap.dedent("""\
+            - **`MessageReminder` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`;
+              equality is unchanged. Its constructor stays non-const (dates default to now) and it keeps v10's
+              hand-written `copyWith` and `merge` (`@Freezed(copyWith: false)`). `expiresAt` stays out; adding it
+              is additive. It is not persisted after all: `Message.reminder` is never written to JSON and
+              `stream_chat_persistence` has no reminder column, so no codec is needed.
+            - **v1 JSON keeps decoding through `MessageReminderV1JsonConverter`** on `Message.reminder` and
+              `Event.reminder`. `Event` writes the field too, so the converter runs both ways and writes the keys
+              v10 did (ids and dates, without the channel, message or user).
+            - **The four methods return a `Result`,** on `StreamChatClient` and `Channel`. `deleteReminder`
+              answers the named `DeleteReminderResponse`, so it returns a new `DeleteReminderResponse` envelope
+              rather than `Result<void>`. `CreateReminderResponse`, `UpdateReminderResponse` and
+              `QueryRemindersResponse` keep their names; `reminder` is non-null, as the spec requires it. Their
+              shared base class `MessageReminderResponse` is removed (approved).
+            - **`queryReminders` takes `limit`, `next` and `prev`** instead of `PaginationParams` (approved). The
+              backend reads only those (default limit 10, at most 100, both cursors together rejected), so
+              the other `PaginationParams` fields were never honoured. `limit` defaults to 10, and the response
+              gains `prev`.
+            - **A null `remindAt` on `updateReminder` clears the due date,** as in v10: the backend treats an
+              absent and an explicit null `remind_at` alike, and the update is not a partial patch.
+            - **The v1 and v2 routes reach the same controllers** (`lib/chat/routes.go` mounts `coreRoutes` under
+              both), with no feature flag or beta gate; create still checks the channel's
+              `user_message_reminders` setting.
+            - **The reminder's message maps through the message mapper** of [10](10-messages.md), its first
+              consumer. Create and update answer without the channel; a query includes it.
+            - **Verified live** against the demo app: create, bookmark, update (set and clear), query with
+              `next`/`prev`, both cursors rejected, delete and a second delete (404).
+            """),
+        done=DONE.replace('- [ ]', '- [x]'),
         risks=['Reminder events also arrive over the WebSocket.'],
     ),
     dict(
@@ -578,6 +605,14 @@ GROUPS = [
             'own fields (`_shadowedCustomKeys`): `deactivated_at`, `deleted_at` and `shadow_banned` are refilled from '
             'the typed fields, and the `OwnUser`-only keys and `revoke_tokens_issued_before` are left out, where v1 '
             'kept them in a plain user\'s `extraData`. Revisit once the mapper serves plain users.',
+            '**Decide `User`, `FullUserResponse` and `OwnUser` together, here:** which private fields a plain user '
+            'exposes, whether the caller\'s own entry maps to `OwnUser`, and what is kept in `extraData` once `User` '
+            'drops `fromJson` and `toJson`. One input, verified live while migrating [06](06-reminders.md): '
+            '`blocked_user_ids`, which v1 left in every nested user\'s `extraData`, arrives as `[]` on every user '
+            'nested in a message or reminder, on v1 and v2 alike and even for the caller with real blocks; only '
+            'connect and `queryUsers` return the caller\'s real list. Writing it back into `extraData` in '
+            '`UserResponse.toModel()` restores v10 parity for nested users at no information cost, but changes every '
+            'group\'s mapped users, so it was deferred to this decision.',
             '**Whether `User` promotes its `extraData`-backed getters to real fields.** `User.deactivatedAt`, '
             '`deletedAt` and `shadowBanned`, added in [20](20-user-updates.md) the way `Member` promoted its fields, '
             'arrive as root fields but live in `extraData` and are read back through getters; the constructors write '
@@ -606,8 +641,10 @@ GROUPS = [
             'than leaving them dropped for good.',
             'Until then, a user mapped from `UserResponse` and the same user decoded from v1 JSON carry different '
             '`extraData`: the v1 path keeps `blocked_user_ids`, `deleted_at`, `deactivated_at` and '
-            '`revoke_tokens_issued_before`, the mapper drops them. Equality includes `extraData`, so a `Poll` from a '
-            'REST call (its `createdBy`, its votes\' `user`) and the same poll from an event compare unequal.',
+            '`revoke_tokens_issued_before`; the mapper drops `blocked_user_ids` and `revoke_tokens_issued_before`, and '
+            'writes the two dates back as UTC ISO-8601 strings where v1 keeps the server\'s own string. Equality '
+            'includes `extraData`, so a `Poll` from a REST call (its `createdBy`, its votes\' `user`), a reminder\'s '
+            '`Message` (its sender, mentions, reactions) and the same objects from an event compare unequal.',
         ],
         done=DONE + (
             '- [ ] Temporary adapters owned by this group (`DeviceV1JsonConverter`) are deleted and removed from\n'
@@ -685,6 +722,33 @@ GROUPS = [
               keeps v10's request shape: coordinates, device and end date), `ChannelState.activeLiveLocations`,
               `GetActiveLiveLocationsResponse` and `updateLiveLocation`'s response. `stream_chat_persistence` stores
               locations as table rows, so no codec is needed.
+            - **`message_mapper.dart` maps `MessageResponse` onto today's json_serializable `Message`** through
+              its constructor, with the generated attachment, reaction,
+              reaction group, moderation, shared location, reminder, draft and draft payload types, each mapped in
+              its own file (`attachment_mapper.dart`, `reaction_mapper.dart`, `moderation_mapper.dart`,
+              `location_mapper.dart`, `drafts_mapper.dart`, `reminders_mapper.dart`). Its first
+              consumer is [06](06-reminders.md). `Message.fromJson` and the mapper share the type and state
+              derivation and the reaction groups built from counts and scores when a payload has none
+              (`lib/src/core/util/message_decoding.dart`, internal).
+            - **The keys v1 lands in `Message.extraData` stay there:** `cid` as a plain entry, and `html`, `mml`,
+              `image_labels` and `deleted_reply_count` behind new constructor parameters and typed getters
+              (`Message.html`, `mml`, `imageLabels`, `deletedReplyCount`), the pattern `ChannelModel.disabled` uses.
+              Dropping them would be a silent behavioural break. `DraftMessage` keeps the `html` and `mml` it is
+              sent as plain `extraData` entries, without getters.
+            - **`mentioned_channel_members` is dropped:** the SDK has no feature built on it, so the mapper leaves
+              it out of `extraData`, and drops a custom key of that name. `Message.fromJson` still lands it there
+              from v1 JSON.
+            - **`custom` becomes `extraData` without the keys named like the model's own fields,** for messages,
+              attachments, reactions and draft messages. A reaction's emoji code arrives in `custom` and maps to
+              `Reaction.emojiCode`.
+            - **Moderation actions go through `ModerationAction.fromJson`,** so legacy names read as current ones.
+            - **Attachments map at parity with `Attachment.fromJson`:** each gets a new local `id`, and the id the
+              attachment was sent with stays in `extraData`; `giphy` and `fields` are written in their v1 JSON
+              shape, which `GiphyInfo` and the UI read. Making `Attachment` plain, and promoting those fields, is
+              left to this group.
+            - **A reminder or location nests its message one level deep,** so the recursion ends there.
+            - **`MessageWithChannelResponse` gets its mapper with its first consumer** (getMessage, search), not
+              ahead of it.
             """),
     ),
     dict(

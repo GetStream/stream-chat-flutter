@@ -23,9 +23,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       const [],
   silent: json['silent'] as bool? ?? false,
   shadowed: json['shadowed'] as bool? ?? false,
-  reactionGroups: reactionGroupsFromV1Json(
-    Message._reactionGroupsReadValue(json, 'reaction_groups') as Map<String, dynamic>?,
-  ),
+  reactionGroups: reactionGroupsFromV1Json(json['reaction_groups'] as Map<String, dynamic>?),
   latestReactions: (json['latest_reactions'] as List<dynamic>?)
       ?.map((e) => const ReactionV1JsonConverter().fromJson(e as Map<String, dynamic>))
       .toList(),
@@ -62,7 +60,10 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
   restrictedVisibility: (json['restricted_visibility'] as List<dynamic>?)?.map((e) => e as String).toList(),
   moderation: moderationFromV1Json(Message._moderationReadValue(json, 'moderation') as Map<String, dynamic>?),
   draft: json['draft'] == null ? null : Draft.fromJson(json['draft'] as Map<String, dynamic>),
-  reminder: json['reminder'] == null ? null : MessageReminder.fromJson(json['reminder'] as Map<String, dynamic>),
+  reminder: _$JsonConverterFromJson<Map<String, dynamic>, MessageReminder>(
+    json['reminder'],
+    const MessageReminderV1JsonConverter().fromJson,
+  ),
   channelRole: Message._channelRoleReadValue(json, 'channel_role') as String?,
   sharedLocation: _$JsonConverterFromJson<Map<String, dynamic>, Location>(
     json['shared_location'],

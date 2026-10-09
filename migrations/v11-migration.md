@@ -31,6 +31,7 @@ onto Stream's OpenAPI-generated API client.
     - [App Settings](#app-settings)
     - [Guest Users](#guest-users)
     - [Polls](#polls)
+    - [Message Reminders](#message-reminders)
     - [File Upload](#file-upload)
     - [Messages](#messages)
     - [User Groups](#user-groups)
@@ -86,6 +87,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**App Settings**](#app-settings) | `getAppSettings` returns a `Result<AppSettingsResponse>` instead of throwing; `GetAppSettingsResponse` is renamed `AppSettingsResponse` |
 | [**Guest Users**](#guest-users) | `connectGuestUser` is unchanged; `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed |
 | [**Polls**](#polls) | Poll calls return a `Result`; eight responses become `PollResponse`, `PollOptionResponse` and `PollVoteResponse`; queries take `limit`/`next`/`prev`; `VotingVisibility` is an extension type |
+| [**Message Reminders**](#message-reminders) | Reminder calls return a `Result`; `deleteReminder` answers a new `DeleteReminderResponse`; `queryReminders` takes `limit`/`next`/`prev`; `MessageReminder` no longer decodes JSON |
 | [**File Upload**](#file-upload) | Uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
 | [**Partial Updates**](#partial-updates) | Channel and member partial updates — `updatePartial`, `updateName`, `updateImage`, slow mode, pin and archive — return a `Result` instead of throwing; their responses take the API's names, `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse`, and `partialMemberUpdate` becomes `updateMemberPartial` |
 | [**Channel Lifecycle**](#channel-lifecycle) | Hiding, showing and deleting a channel return a `Result` instead of throwing; stopping watching still throws |
@@ -323,6 +325,17 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `UpdateUsersResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
 | `UpdateUsersResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
 | `StreamChatApi.user.updateUsers` / `partialUpdateUsers` | `StreamChatClient.updateUsers` / `updateUsersPartial` | `removed` | The endpoints moved to the generated client |
+| `StreamChatClient.createReminder` / `.updateReminder` / `.queryReminders` → `Future<CreateReminderResponse>` and the like | `Future<Result<CreateReminderResponse>>` and the like | `retyped` | Return a `Result` instead of throwing; the same holds for `Channel.createReminder` and `.updateReminder` |
+| `StreamChatClient.deleteReminder` / `Channel.deleteReminder` → `Future<EmptyResponse>` | `Future<Result<DeleteReminderResponse>>` | `retyped` | A new response carrying `duration` |
+| `queryReminders(pagination: PaginationParams(limit: l, next: n))` | `queryReminders(limit: l, next: n)` | `retyped` | `limit` is still 10 when omitted. Pass a response's `prev` as `prev` to page backwards. The other `PaginationParams` fields never had an effect on this query |
+| `CreateReminderResponse()..reminder = …`, `UpdateReminderResponse()..reminder = …`, `QueryRemindersResponse()..reminders = …` and their other setters | `CreateReminderResponse(duration: …, reminder: …)` and the like | `retyped` | The responses are plain classes with a const constructor and final fields |
+| `CreateReminderResponse.fromJson`, `UpdateReminderResponse.fromJson`, `QueryRemindersResponse.fromJson` | — | `removed` | Construct the responses directly |
+| reminder responses' `duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| reminder responses' identity `==` | value `==`, plus `copyWith` | `retyped` | Two responses with the same fields are now equal |
+| `MessageReminderResponse` | — | `removed` | The shared base class of the create and update responses |
+| `MessageReminder.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. Messages and events still read reminders |
+| `MessageReminder extends Equatable`, `MessageReminder.props` | `MessageReminder` (value `==`) | `removed` | Equality, `copyWith` and `merge` are unchanged; `props` is gone and `MessageReminder` is no longer an `Equatable` |
+| `StreamChatApi.reminders` (`RemindersApi`) | `StreamChatClient` reminder methods | `removed` | The endpoints moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -1178,6 +1191,54 @@ equal, so neither are the messages that carry them, and a widget comparing them 
 changes.
 
 **`StreamChatApi.polls` is removed.** Call the poll methods on `StreamChatClient` or `Channel` instead.
+
+### Message Reminders
+
+**Every reminder call returns a `Result` instead of throwing,** on `StreamChatClient` and on `Channel`. Calling a
+`Channel` method on a channel that is not initialized still throws a `StateError`, as in v10.
+
+```dart
+// v10
+try {
+  final response = await client.createReminder(messageId, remindAt: remindAt);
+  showReminder(response.reminder);
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await client.createReminder(messageId, remindAt: remindAt);
+result.fold(
+  onSuccess: (response) => showReminder(response.reminder),
+  onFailure: (error, _) => report(error),
+);
+```
+
+**`deleteReminder` answers a `DeleteReminderResponse`** where v10 answered an `EmptyResponse`. It carries only
+`duration` today.
+
+**`queryReminders` takes `limit`, `next` and `prev`** instead of a `PaginationParams`. `limit` is still 10 when
+omitted. The offset and id-based fields of `PaginationParams` never had an effect on this query. The response now
+carries a `prev` cursor next to `next`; pass it as `prev` to fetch the page before.
+
+```dart
+// v10
+await client.queryReminders(pagination: PaginationParams(limit: 10, next: cursor));
+
+// v11
+await client.queryReminders(limit: 10, next: cursor);
+```
+
+**`MessageReminder` and the reminder responses no longer decode JSON.** Build them with their constructors —
+`CreateReminderResponse(duration: '0ms', reminder: reminder)` where v10 wrote
+`CreateReminderResponse()..reminder = reminder`. `Message.reminder` and the reminder events still decode from the
+same keys. `MessageReminder` is no longer an `Equatable`: equality, `copyWith` and `merge` are unchanged, and
+`props` is gone.
+
+**`StreamChatApi.reminders` is removed.** Call the reminder methods on `StreamChatClient` or `Channel` instead.
+
+> **Why:** a failure is a value the caller handles where it happens, and the public models stop being wire shapes,
+> so the API payload can change without changing the type a caller holds.
 
 ### File Upload
 

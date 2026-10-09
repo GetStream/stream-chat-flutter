@@ -17,7 +17,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [03](03-user-groups.md) | User Groups | 0 | 8 | ☑ |
 | [04](04-roles-guest-and-app.md) | Roles, Guest & App Settings | 0 | 5 | ☑ |
 | [05](05-polls.md) | Polls | 0 | 13 | ☑ |
-| [06](06-reminders.md) | Message Reminders | 4 | 4 | ☐ |
+| [06](06-reminders.md) | Message Reminders | 0 | 4 | ☑ |
 | [07](07-threads-and-drafts.md) | Threads & Drafts | 7 | 7 | ☐ |
 | [08](08-moderation-and-blocklists.md) | Moderation & Blocklists | 0 | 34 | ☑ |
 | [09](09-users.md) | Users | 3 | 3 | ☐ |
@@ -34,7 +34,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [20](20-user-updates.md) | User Updates — split out of 09 | 0 | 2 | ☑ |
 | [21](21-custom-data-rename.md) | `extraData` → `custom`, every model at once | — | — | ☐ |
 
-**Coverage:** 51 hand-written methods across 9 files, and all 129 generated operations, each claimed by exactly
+**Coverage:** 47 hand-written methods across 8 files, and all 129 generated operations, each claimed by exactly
 one group. Verified mechanically — see [Keeping this plan honest](#keeping-this-plan-honest).
 
 
@@ -160,12 +160,14 @@ includes a named response that carries only `duration` today, such as `HideChann
 | `reactionGroupsFromV1Json` | `Message.reactionGroups` | [10](10-messages.md) |
 | `ActionV1JsonConverter` | `Attachment.actions` | [10](10-messages.md) |
 | `LocationV1JsonConverter` | `Message.sharedLocation`, `ChannelState.activeLiveLocations`, `GetActiveLiveLocationsResponse.activeLiveLocations`, `updateLiveLocation`'s response | [10](10-messages.md) |
-| `ReactionV1JsonConverter` | `Message.latestReactions` / `ownReactions`, `Event.reaction`, `QueryReactionsResponse.reactions`, `SendReactionResponse.reaction`, the `sendReaction` body | [10](10-messages.md) |
+| `MessageReminderV1JsonConverter` | `Message.reminder`, `Event.reminder` | WebSocket v2 (no group) |
+| `ReactionV1JsonConverter` | `Message.latestReactions` / `ownReactions`, `Event.reaction`, `QueryReactionsResponse.reactions`, `SendReactionResponse.reaction`, the `sendReaction` body | WebSocket v2 (no group) |
 | `DataSerializable` | `UserGroup`, `UserGroupMember`, `ReactionGroup`, `PollOption` (`fromData`, `toData`) | [10](10-messages.md) |
 | `PollV1JsonConverter` | `Message.poll`, `DraftMessage.poll`, `Event.poll` | WebSocket v2 (no group) |
 | `PollVoteV1JsonConverter` | `Event.pollVote` | WebSocket v2 (no group) |
 | `user_mapper.dart` (kept, re-pointed) | today's `User`, which still reads and writes JSON | [09](09-users.md) |
 | `channel_mapper.dart` (kept, re-pointed) | today's `ChannelModel`, `ChannelConfig` and `Member`, which still read and write JSON | [11](11-channels-and-members.md) |
+| `message_mapper.dart`, `attachment_mapper.dart`, `reaction_mapper.dart`, `location_mapper.dart`, `drafts_mapper.dart` (kept, re-pointed) | today's `Message`, `Attachment`, `Reaction`, `Location`, `Draft` and `DraftMessage`, which still read and write JSON | [10](10-messages.md) |
 
 How v1 JSON decodes `User` once it becomes a plain model is decided in [01-foundation](01-foundation.md): until
 group 09 restructures it, v1 payloads keep decoding through `User.fromJson`.
@@ -201,7 +203,7 @@ surfaces before it reaches `Message` and `ChannelState`:
   SDK.
 - **09** is last. Every group before it maps users through `user_mapper.dart` onto today's `User`; 09 migrates the
   user endpoints and restructures `User` and `OwnUser` themselves, when every parent that embeds them has moved.
-- **15** renames `extraData` to `custom` on every model at once. The groups keep `extraData`, so the SDK stays
+- **21** renames `extraData` to `custom` on every model at once. The groups keep `extraData`, so the SDK stays
   consistent until then; it runs after 09.
 
 ## Prerequisites

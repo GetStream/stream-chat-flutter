@@ -8,6 +8,7 @@ import '../channel_model.dart';
 import '../device.dart';
 import '../location.dart';
 import '../message.dart';
+import '../message_reminder.dart';
 import '../moderation.dart';
 import '../poll.dart';
 import '../poll_option.dart';
@@ -94,7 +95,7 @@ class LocationV1JsonConverter implements JsonConverter<Location, Map<String, dyn
 ///
 /// Custom data sits at the root of the v1 map, beside the known keys. [toJson] writes the request shape: the type,
 /// score, emoji code and custom data, without the message, user or dates.
-// TODO(openapi-migration): remove in group 10
+// TODO(openapi-migration): remove once WebSocket events and messages decode v2 payloads
 @internal
 class ReactionV1JsonConverter implements JsonConverter<Reaction, Map<String, dynamic>> {
   /// Creates a new [ReactionV1JsonConverter].
@@ -132,6 +133,48 @@ class ReactionV1JsonConverter implements JsonConverter<Reaction, Map<String, dyn
     if (reaction.emojiCode case final emojiCode?) 'emoji_code': emojiCode,
     'extra_data': reaction.extraData,
   });
+}
+
+/// Converts a [MessageReminder] to and from its v1 keys.
+///
+/// [toJson] writes the ids and the dates, without the channel, message or user.
+// TODO(openapi-migration): remove once WebSocket events and messages decode v2 payloads
+@internal
+class MessageReminderV1JsonConverter implements JsonConverter<MessageReminder, Map<String, dynamic>> {
+  /// Creates a new [MessageReminderV1JsonConverter].
+  const MessageReminderV1JsonConverter();
+
+  @override
+  MessageReminder fromJson(Map<String, dynamic> json) => MessageReminder(
+    channelCid: json['channel_cid'] as String,
+    channel: switch (json['channel']) {
+      final Map<String, dynamic> channel => ChannelModel.fromJson(channel),
+      _ => null,
+    },
+    messageId: json['message_id'] as String,
+    message: switch (json['message']) {
+      final Map<String, dynamic> message => Message.fromJson(message),
+      _ => null,
+    },
+    userId: json['user_id'] as String,
+    user: switch (json['user']) {
+      final Map<String, dynamic> user => User.fromJson(user),
+      _ => null,
+    },
+    remindAt: _dateTimeOrNull(json['remind_at']),
+    createdAt: _dateTimeOrNull(json['created_at']),
+    updatedAt: _dateTimeOrNull(json['updated_at']),
+  );
+
+  @override
+  Map<String, dynamic> toJson(MessageReminder reminder) => {
+    'channel_cid': reminder.channelCid,
+    'message_id': reminder.messageId,
+    'user_id': reminder.userId,
+    'remind_at': reminder.remindAt?.toIso8601String(),
+    'created_at': reminder.createdAt.toIso8601String(),
+    'updated_at': reminder.updatedAt.toIso8601String(),
+  };
 }
 
 /// Converts a [Device] to and from its v1 `id` and `push_provider` keys.

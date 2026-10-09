@@ -133,6 +133,11 @@
 - The users in an `UpdateUsersResponse` no longer carry their devices, mutes, channel mutes, privacy settings, unread counts, blocked user ids, hidden channels or token revocation time in `extraData`.
 - `updateUser` and `updateUsers` no longer send the user's `role`, `teams` and `teamsRole`.
 - `StreamChatApi.user.updateUsers` and `partialUpdateUsers` are removed; call `updateUsers` and `updateUsersPartial` on `StreamChatClient` instead.
+- The reminder calls on `StreamChatClient` and `Channel` return a `Result` instead of throwing, and `deleteReminder` returns a `Result<DeleteReminderResponse>` instead of an `EmptyResponse`; a `Channel` that is not initialized still throws a `StateError`.
+- `queryReminders` takes `limit` (10 when omitted), `next` and `prev` instead of `PaginationParams`, and its response carries a `prev` cursor.
+- `CreateReminderResponse`, `UpdateReminderResponse` and `QueryRemindersResponse` no longer decode from JSON, are immutable, built through a const constructor, compare by value, and their `duration` is a non-nullable `String`; `MessageReminderResponse` is removed.
+- `MessageReminder` no longer decodes from or encodes to JSON and no longer extends `Equatable`, so `props` is removed; it still compares by value.
+- `StreamChatApi.reminders` is removed; its endpoints are reached through `StreamChatClient`.
 
 🐞 Fixed
 
@@ -166,6 +171,7 @@
 - Added `StreamChatClient.moderation.muteUsers` and `unmuteUsers`, which mute and unmute several users in one call and report the ids that matched no user.
 - Added `ChannelModel.truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires`, `deletedAt` and `topLevelFields`; the constructors accept the new fields.
 - Added `User.deactivatedAt`, `deletedAt` and `shadowBanned`; the constructors accept the new fields.
+- Added `Message.html`, `mml`, `imageLabels` and `deletedReplyCount`, read from the message's `extraData`; the constructor accepts them.
 
 🔒 Security
 

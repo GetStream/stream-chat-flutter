@@ -66,10 +66,6 @@ List<MessageReminder> generateMessageReminders({
 void main() {
   final client = MockClient();
 
-  setUpAll(() {
-    registerFallbackValue(const PaginationParams());
-  });
-
   setUp(() {
     when(client.on).thenAnswer((_) => const Stream.empty());
   });
@@ -98,17 +94,18 @@ void main() {
   });
 
   group('Initial loading', () {
-    test('successfully loads message reminders from API', () async {
+    test('StreamMessageReminderListController.doInitialLoad loads the first page and the cursor of the next', () async {
       final reminders = generateMessageReminders();
-      final response = QueryRemindersResponse()
-        ..reminders = reminders
-        ..next = null;
+      final response = Result.success(
+        QueryRemindersResponse(duration: '0.01ms', reminders: reminders, next: 'next-cursor'),
+      );
 
       when(
         () => client.queryReminders(
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer((_) async => response);
 
@@ -121,12 +118,13 @@ void main() {
         () => client.queryReminders(
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: 30,
         ),
       ).called(1);
 
       expect(controller.value, isA<Success<String, MessageReminder>>());
       expect(controller.value.asSuccess.items, equals(reminders));
+      expect(controller.value.asSuccess.nextPageKey, 'next-cursor');
     });
 
     test('an empty sort queries without a sort term', () async {
@@ -136,13 +134,12 @@ void main() {
         () => client.queryReminders(
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer((invocation) async {
         sorts.add(invocation.namedArguments[const Symbol('sort')]);
-        return QueryRemindersResponse()
-          ..reminders = generateMessageReminders()
-          ..next = null;
+        return Result.success(QueryRemindersResponse(duration: '0.01ms', reminders: generateMessageReminders()));
       });
 
       final controller = StreamMessageReminderListController(
@@ -156,15 +153,16 @@ void main() {
       expect(sorts.single, isEmpty);
     });
 
-    test('handles a Stream failure properly', () async {
+    test('StreamMessageReminderListController.doInitialLoad reports a failed query as an error', () async {
       const chatError = StreamNetworkException(message: 'Network error');
       when(
         () => client.queryReminders(
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
-      ).thenThrow(chatError);
+      ).thenAnswer((_) async => const Result.failure(chatError));
 
       final controller = StreamMessageReminderListController(client: client);
 
@@ -177,27 +175,28 @@ void main() {
   });
 
   group('Pagination', () {
-    test('loadMore appends new reminders to existing items', () async {
+    test('StreamMessageReminderListController.loadMore appends the last page and stops paging', () async {
       const nextKey = 'next_page_token';
       final existingReminders = generateMessageReminders();
-      final additionalReminders = generateMessageReminders(
-        count: 1,
-        startId: 789,
-        texts: ['Reminder 3'],
-        channelCids: ['messaging:789'],
-        messageIds: ['message_789'],
-        userIds: ['user_789'],
-      );
+      // Due after the existing ones, which come first in the default sort.
+      final additionalReminders = [
+        generateMessageReminder(
+          channelCid: 'messaging:789',
+          messageId: 'message_789',
+          userId: 'user_789',
+          text: 'Reminder 3',
+          remindAt: DateTime.now().add(const Duration(hours: 3)),
+        ),
+      ];
 
-      final response = QueryRemindersResponse()
-        ..reminders = additionalReminders
-        ..next = null;
+      final response = Result.success(QueryRemindersResponse(duration: '0.01ms', reminders: additionalReminders));
 
       when(
         () => client.queryReminders(
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer((_) async => response);
 
@@ -212,44 +211,79 @@ void main() {
       await controller.loadMore(nextKey);
       await pumpEventQueue();
 
+      verify(
+        () => client.queryReminders(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          limit: 10,
+          next: nextKey,
+        ),
+      ).called(1);
+
       final mergedReminders = [...existingReminders, ...additionalReminders];
 
-      expect(
-        controller.value.asSuccess.items.length,
-        equals(mergedReminders.length),
-      );
+      expect(controller.value.asSuccess.items, equals(mergedReminders));
 
       expect(controller.value.asSuccess.nextPageKey, isNull);
     });
 
-    test('loadMore handles a Stream failure properly', () async {
+    test('StreamMessageReminderListController.loadMore keeps the cursor of the following page', () async {
       const nextKey = 'next_page_token';
-      final existingReminders = generateMessageReminders();
-      const chatError = StreamNetworkException(message: 'Network error');
-
+      const page = Result.success(
+        QueryRemindersResponse(duration: '0.01ms', reminders: [], next: 'later-cursor'),
+      );
       when(
         () => client.queryReminders(
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
-      ).thenThrow(chatError);
+      ).thenAnswer((_) async => page);
 
       final controller = StreamMessageReminderListController.fromValue(
-        PagedValue<String, MessageReminder>(
-          items: existingReminders,
-          nextPageKey: nextKey,
-        ),
+        PagedValue<String, MessageReminder>(items: generateMessageReminders(), nextPageKey: nextKey),
         client: client,
       );
 
       await controller.loadMore(nextKey);
       await pumpEventQueue();
 
-      expect(controller.value.isSuccess, isTrue);
-      expect(controller.value.asSuccess.items, equals(existingReminders));
-      expect(controller.value.asSuccess.error, equals(chatError));
+      expect(controller.value.asSuccess.nextPageKey, 'later-cursor');
     });
+
+    test(
+      'StreamMessageReminderListController.loadMore keeps the loaded reminders and reports a failed query',
+      () async {
+        const nextKey = 'next_page_token';
+        final existingReminders = generateMessageReminders();
+        const chatError = StreamNetworkException(message: 'Network error');
+
+        when(
+          () => client.queryReminders(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            limit: any(named: 'limit'),
+            next: any(named: 'next'),
+          ),
+        ).thenAnswer((_) async => const Result.failure(chatError));
+
+        final controller = StreamMessageReminderListController.fromValue(
+          PagedValue<String, MessageReminder>(
+            items: existingReminders,
+            nextPageKey: nextKey,
+          ),
+          client: client,
+        );
+
+        await controller.loadMore(nextKey);
+        await pumpEventQueue();
+
+        expect(controller.value.isSuccess, isTrue);
+        expect(controller.value.asSuccess.items, equals(existingReminders));
+        expect(controller.value.asSuccess.error, equals(chatError));
+      },
+    );
   });
 
   group('Message Reminder CRUD operations', () {
@@ -361,12 +395,11 @@ void main() {
         () => client.queryReminders(
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer(
-        (_) async => QueryRemindersResponse()
-          ..reminders = initialReminders
-          ..next = null,
+        (_) async => Result.success(QueryRemindersResponse(duration: '0.01ms', reminders: initialReminders)),
       );
     });
 
