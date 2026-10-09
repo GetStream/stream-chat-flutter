@@ -2,7 +2,7 @@
 
 🐞 Fixed
 
-- Fixed `StreamDraftListController.deleteDraft` removing a thread draft instead of the deleted channel draft of the same channel.
+- Fixed `StreamDraftListController.deleteDraft` removing the wrong draft.
 
 ## 10.5.0
 
