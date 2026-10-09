@@ -1,11 +1,14 @@
 import 'package:stream_core/stream_core.dart' show PatternMatching, Result;
 
 import '../../open_api/api.dart' as api;
+import '../core/models/request/update_user_partial_request.dart';
 import '../core/models/response/block_users_response.dart';
 import '../core/models/response/get_blocked_users_response.dart';
 import '../core/models/response/get_unread_count_response.dart';
 import '../core/models/response/unblock_users_response.dart';
-import 'mapper/user_mapper.dart';
+import '../core/models/response/update_users_response.dart';
+import '../core/models/user.dart';
+import 'mapper/users_mapper.dart';
 
 /// Repository dedicated to user operations.
 class UsersRepository {
@@ -35,6 +38,24 @@ class UsersRepository {
   /// Gets the users the current user has blocked.
   Future<Result<GetBlockedUsersResponse>> getBlockedUsers() async {
     final result = await _api.getBlockedUsers();
+    return result.map((response) => response.toModel());
+  }
+
+  /// Creates or replaces each of [users], as [StreamChatClient.updateUser] does for one.
+  Future<Result<UpdateUsersResponse>> updateUsers(List<User> users) async {
+    final result = await _api.updateUsers(
+      updateUsersRequest: api.UpdateUsersRequest(users: {for (final user in users) user.id: user.toRequest()}),
+    );
+
+    return result.map((response) => response.toModel());
+  }
+
+  /// Partially updates several users at once, applying each of [updates] to the user it names.
+  Future<Result<UpdateUsersResponse>> updateUsersPartial(List<UpdateUserPartialRequest> updates) async {
+    final result = await _api.updateUsersPartial(
+      updateUsersPartialRequest: api.UpdateUsersPartialRequest(users: [for (final it in updates) it.toRequest()]),
+    );
+
     return result.map((response) => response.toModel());
   }
 }

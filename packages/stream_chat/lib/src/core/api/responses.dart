@@ -160,17 +160,6 @@ class SendReactionResponse extends MessageResponse {
   static SendReactionResponse fromJson(Map<String, dynamic> json) => _$SendReactionResponseFromJson(json);
 }
 
-/// Model response for [StreamChatClient.updateUser] api call
-@JsonSerializable(createToJson: false)
-class UpdateUsersResponse extends _BaseResponse {
-  /// Updated users
-  @JsonKey(defaultValue: {})
-  late Map<String, User> users;
-
-  /// Create a new instance from a json
-  static UpdateUsersResponse fromJson(Map<String, dynamic> json) => _$UpdateUsersResponseFromJson(json);
-}
-
 /// Base Model response for message based api calls.
 class MessageResponse extends _BaseResponse {
   /// Message returned by the api call

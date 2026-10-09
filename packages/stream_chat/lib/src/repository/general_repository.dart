@@ -5,7 +5,7 @@ import '../core/models/response/create_guest_user_response.dart';
 import '../core/models/response/og_attachment_response.dart';
 import '../core/models/user.dart';
 import 'mapper/general_mapper.dart';
-import 'mapper/user_mapper.dart';
+import 'mapper/users_mapper.dart';
 
 /// Repository dedicated to operations that belong to no single feature.
 class GeneralRepository {

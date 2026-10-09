@@ -82,14 +82,6 @@ SendReactionResponse _$SendReactionResponseFromJson(
   ..message = Message.fromJson(json['message'] as Map<String, dynamic>)
   ..reaction = Reaction.fromJson(json['reaction'] as Map<String, dynamic>);
 
-UpdateUsersResponse _$UpdateUsersResponseFromJson(Map<String, dynamic> json) => UpdateUsersResponse()
-  ..duration = json['duration'] as String?
-  ..users =
-      (json['users'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, User.fromJson(e as Map<String, dynamic>)),
-      ) ??
-      {};
-
 UpdateMessageResponse _$UpdateMessageResponseFromJson(
   Map<String, dynamic> json,
 ) => UpdateMessageResponse()
