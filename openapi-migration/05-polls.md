@@ -67,6 +67,8 @@
 - **An answer's `optionId` stays `""`,** as the server sends it and v10 decoded it.
 - **`custom` becomes `extraData` without the keys named after the model's own fields**
   (`Poll.topLevelFields`, `PollOption.topLevelFields`), matching v1's flat JSON, which shadowed them.
+  The requests leave the same keys out of `custom`, as every request mapper does: v2 stores them as
+  custom data, or drops them on update, where v10's flattened body set the field.
 - **Every public poll method returns a `Result`,** on `StreamChatClient` and `Channel`. `deletePoll` and
   `deletePollOption` answer `DurationResponse` and return `Result<void>`. `closePoll` stays a
   `partialUpdatePoll` that sets `is_closed`.
