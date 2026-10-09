@@ -13,6 +13,7 @@ import '../matchers.dart';
 import '../mocks.dart';
 import '../utils.dart';
 import '../ws/fake_chat_server.dart';
+import 'poll_fixtures.dart';
 
 void main() {
   group('Fake web-socket connection functions', () {
@@ -1119,6 +1120,10 @@ void main() {
       registerFallbackValue(FakeDraftMessage());
       registerFallbackValue(FakePollVote());
       registerFallbackValue(const PaginationParams());
+      registerFallbackValue(const api.CreatePollRequest(name: 'fallback'));
+      registerFallbackValue(const api.UpdatePollRequest(id: 'fallback', name: 'fallback'));
+      registerFallbackValue(const api.CreatePollOptionRequest(text: 'fallback'));
+      registerFallbackValue(const api.UpdatePollOptionRequest(id: 'fallback', text: 'fallback'));
     });
 
     setUp(() async {
@@ -2521,6 +2526,577 @@ void main() {
       expect(res.getOrNull()?.app.fileUploadConfig.sizeLimit, UploadConfig.defaultSizeLimit);
     });
 
+    test('StreamChatClient.createPoll sends the poll settings and returns the created poll', () async {
+      when(
+        () => defaultApi.createPoll(createPollRequest: any(named: 'createPollRequest')),
+      ).thenAnswer((_) async => Result.success(generatedPollResponse));
+
+      final result = await client.createPoll(_newPoll());
+
+      final request = verify(
+        () => defaultApi.createPoll(createPollRequest: captureAny(named: 'createPollRequest')),
+      ).captured.single;
+      expect(
+        request,
+        const api.CreatePollRequest(
+          id: 'poll-id',
+          name: 'Lunch?',
+          description: 'Pick one',
+          options: [
+            api.PollOptionInput(text: 'Pizza', custom: {'color': 'red'}),
+            api.PollOptionInput(text: 'Sushi', custom: {}),
+          ],
+          votingVisibility: api.CreatePollRequestVotingVisibility.anonymous,
+          enforceUniqueVote: false,
+          maxVotesAllowed: 2,
+          allowAnswers: true,
+          allowUserSuggestedOptions: true,
+          isClosed: false,
+          custom: {'topic': 'food'},
+        ),
+      );
+      expect(result, Result.success(pollResponse));
+    });
+
+    test('StreamChatClient.createPoll returns the failure without throwing', () async {
+      when(
+        () => defaultApi.createPoll(createPollRequest: any(named: 'createPollRequest')),
+      ).thenAnswer((_) async => const Result.failure(pollsApiError));
+
+      final result = await client.createPoll(_newPoll());
+
+      expect(result.exceptionOrNull(), pollsApiError);
+    });
+
+    test('StreamChatClient.getPoll sends the poll id and returns the poll', () async {
+      when(() => defaultApi.getPoll(pollId: 'poll-id')).thenAnswer((_) async => Result.success(generatedPollResponse));
+
+      final result = await client.getPoll('poll-id');
+
+      expect(result, Result.success(pollResponse));
+    });
+
+    test('StreamChatClient.getPoll returns the failure without throwing', () async {
+      when(() => defaultApi.getPoll(pollId: 'poll-id')).thenAnswer((_) async => const Result.failure(pollsApiError));
+
+      final result = await client.getPoll('poll-id');
+
+      expect(result.exceptionOrNull(), pollsApiError);
+    });
+
+    test(
+      "StreamChatClient.getPoll keeps custom fields named like the poll's own fields out of its custom data",
+      () async {
+        final response = api.PollResponse(
+          duration: '4.21ms',
+          poll: generatedPoll.copyWith(custom: const {'topic': 'food', 'name': 'custom-name', 'own_votes': 'custom'}),
+        );
+        when(() => defaultApi.getPoll(pollId: 'poll-id')).thenAnswer((_) async => Result.success(response));
+
+        final result = await client.getPoll('poll-id');
+
+        expect(result.getOrNull()?.poll.extraData, const {'topic': 'food'});
+      },
+    );
+
+    test('StreamChatClient.getPoll keeps a voting visibility the SDK does not name', () async {
+      final response = api.PollResponse(
+        duration: '4.21ms',
+        poll: generatedPoll.copyWith(votingVisibility: api.PollResponseDataVotingVisibility.fromJson('members_only')),
+      );
+      when(() => defaultApi.getPoll(pollId: 'poll-id')).thenAnswer((_) async => Result.success(response));
+
+      final result = await client.getPoll('poll-id');
+
+      expect(result.getOrNull()?.poll.votingVisibility, const VotingVisibility('members_only'));
+    });
+
+    test('StreamChatClient.getPoll reads a poll that does not say whether it is closed as open', () async {
+      final response = api.PollResponse(duration: '4.21ms', poll: generatedPoll.copyWith(isClosed: null));
+      when(() => defaultApi.getPoll(pollId: 'poll-id')).thenAnswer((_) async => Result.success(response));
+
+      final result = await client.getPoll('poll-id');
+
+      expect(result.getOrNull()?.poll.isClosed, isFalse);
+    });
+
+    test('StreamChatClient.updatePoll sends the poll settings and options and returns the updated poll', () async {
+      when(
+        () => defaultApi.updatePoll(updatePollRequest: any(named: 'updatePollRequest')),
+      ).thenAnswer((_) async => Result.success(generatedPollResponse));
+
+      final result = await client.updatePoll(
+        _newPoll().copyWith(
+          options: const [
+            PollOption(id: 'pizza', text: 'Pizza', extraData: {'color': 'red', 'id': 'pasta'}),
+            PollOption(id: 'sushi', text: 'Sushi'),
+          ],
+          isClosed: true,
+        ),
+      );
+
+      final request = verify(
+        () => defaultApi.updatePoll(updatePollRequest: captureAny(named: 'updatePollRequest')),
+      ).captured.single;
+      expect(
+        request,
+        const api.UpdatePollRequest(
+          id: 'poll-id',
+          name: 'Lunch?',
+          description: 'Pick one',
+          options: [
+            api.PollOptionRequest(id: 'pizza', text: 'Pizza', custom: {'color': 'red'}),
+            api.PollOptionRequest(id: 'sushi', text: 'Sushi', custom: {}),
+          ],
+          votingVisibility: api.UpdatePollRequestVotingVisibility.anonymous,
+          enforceUniqueVote: false,
+          maxVotesAllowed: 2,
+          allowAnswers: true,
+          allowUserSuggestedOptions: true,
+          isClosed: true,
+          custom: {'topic': 'food'},
+        ),
+      );
+      expect(result, Result.success(pollResponse));
+    });
+
+    test('StreamChatClient.updatePoll sends an option without an id with an empty id', () async {
+      when(
+        () => defaultApi.updatePoll(updatePollRequest: any(named: 'updatePollRequest')),
+      ).thenAnswer((_) async => Result.success(generatedPollResponse));
+
+      await client.updatePoll(_newPoll().copyWith(options: const [PollOption(text: 'Pizza')]));
+
+      final request =
+          verify(
+                () => defaultApi.updatePoll(updatePollRequest: captureAny(named: 'updatePollRequest')),
+              ).captured.single
+              as api.UpdatePollRequest;
+      expect(request.options, const [api.PollOptionRequest(id: '', text: 'Pizza', custom: {})]);
+    });
+
+    test('StreamChatClient.updatePoll returns the failure without throwing', () async {
+      when(
+        () => defaultApi.updatePoll(updatePollRequest: any(named: 'updatePollRequest')),
+      ).thenAnswer((_) async => const Result.failure(pollsApiError));
+
+      final result = await client.updatePoll(poll);
+
+      expect(result.exceptionOrNull(), pollsApiError);
+    });
+
+    test('StreamChatClient.partialUpdatePoll sends the fields to set and unset and returns the updated poll', () async {
+      when(
+        () => defaultApi.updatePollPartial(
+          pollId: 'poll-id',
+          updatePollPartialRequest: const api.UpdatePollPartialRequest(
+            set: {'name': 'Dinner?'},
+            unset: ['description'],
+          ),
+        ),
+      ).thenAnswer((_) async => Result.success(generatedPollResponse));
+
+      final result = await client.partialUpdatePoll('poll-id', set: {'name': 'Dinner?'}, unset: ['description']);
+
+      expect(result, Result.success(pollResponse));
+    });
+
+    test('StreamChatClient.partialUpdatePoll returns the failure without throwing', () async {
+      when(
+        () => defaultApi.updatePollPartial(
+          pollId: 'poll-id',
+          updatePollPartialRequest: const api.UpdatePollPartialRequest(set: {'name': 'Dinner?'}),
+        ),
+      ).thenAnswer((_) async => const Result.failure(pollsApiError));
+
+      final result = await client.partialUpdatePoll('poll-id', set: {'name': 'Dinner?'});
+
+      expect(result.exceptionOrNull(), pollsApiError);
+    });
+
+    test('StreamChatClient.closePoll marks the poll closed and returns the closed poll', () async {
+      when(
+        () => defaultApi.updatePollPartial(
+          pollId: 'poll-id',
+          updatePollPartialRequest: const api.UpdatePollPartialRequest(set: {'is_closed': true}),
+        ),
+      ).thenAnswer((_) async => Result.success(generatedPollResponse));
+
+      final result = await client.closePoll('poll-id');
+
+      expect(result, Result.success(pollResponse));
+    });
+
+    test('StreamChatClient.closePoll returns the failure without throwing', () async {
+      when(
+        () => defaultApi.updatePollPartial(
+          pollId: 'poll-id',
+          updatePollPartialRequest: const api.UpdatePollPartialRequest(set: {'is_closed': true}),
+        ),
+      ).thenAnswer((_) async => const Result.failure(pollsApiError));
+
+      final result = await client.closePoll('poll-id');
+
+      expect(result.exceptionOrNull(), pollsApiError);
+    });
+
+    test('StreamChatClient.deletePoll sends the poll id and returns a success', () async {
+      when(
+        () => defaultApi.deletePoll(pollId: 'poll-id'),
+      ).thenAnswer((_) async => const Result.success(api.DurationResponse(duration: '4.21ms')));
+
+      final result = await client.deletePoll('poll-id');
+
+      expect(result, const Result<void>.success(null));
+    });
+
+    test('StreamChatClient.deletePoll returns the failure without throwing', () async {
+      when(() => defaultApi.deletePoll(pollId: 'poll-id')).thenAnswer((_) async => const Result.failure(pollsApiError));
+
+      final result = await client.deletePoll('poll-id');
+
+      expect(result.exceptionOrNull(), pollsApiError);
+    });
+
+    test('StreamChatClient.queryPolls sends the filter, sort and cursor and returns the matching polls', () async {
+      when(
+        () => defaultApi.queryPolls(
+          queryPollsRequest: const api.QueryPollsRequest(
+            filter: {
+              'is_closed': {r'$eq': true},
+            },
+            sort: [api.SortParamRequest(field: 'created_at', direction: -1)],
+            limit: 10,
+            next: 'next-cursor',
+          ),
+        ),
+      ).thenAnswer(
+        (_) async => Result.success(
+          api.QueryPollsResponse(duration: '4.21ms', polls: [generatedPoll], next: 'after', prev: 'before'),
+        ),
+      );
+
+      final result = await client.queryPolls(
+        filter: Filter.equal(PollFilterField.isClosed, true),
+        sort: [PollSort.desc(PollSortField.createdAt)],
+        limit: 10,
+        next: 'next-cursor',
+      );
+
+      expect(
+        result,
+        Result.success(QueryPollsResponse(duration: '4.21ms', polls: [poll], next: 'after', prev: 'before')),
+      );
+    });
+
+    test('StreamChatClient.queryPolls sends the previous-page cursor and ten as the default limit', () async {
+      when(
+        () => defaultApi.queryPolls(queryPollsRequest: const api.QueryPollsRequest(limit: 10, prev: 'prev-cursor')),
+      ).thenAnswer((_) async => const Result.success(api.QueryPollsResponse(duration: '4.21ms', polls: [])));
+
+      final result = await client.queryPolls(prev: 'prev-cursor');
+
+      expect(result, const Result.success(QueryPollsResponse(duration: '4.21ms', polls: [])));
+    });
+
+    test('StreamChatClient.queryPolls returns the failure without throwing', () async {
+      when(
+        () => defaultApi.queryPolls(queryPollsRequest: const api.QueryPollsRequest(limit: 10)),
+      ).thenAnswer((_) async => const Result.failure(pollsApiError));
+
+      final result = await client.queryPolls();
+
+      expect(result.exceptionOrNull(), pollsApiError);
+    });
+
+    test(
+      'StreamChatClient.createPollOption sends the option text and custom data and returns the created option',
+      () async {
+        when(
+          () => defaultApi.createPollOption(
+            pollId: 'poll-id',
+            createPollOptionRequest: const api.CreatePollOptionRequest(text: 'Pizza', custom: {'color': 'red'}),
+          ),
+        ).thenAnswer((_) async => const Result.success(_generatedPizzaResponse));
+
+        final result = await client.createPollOption(
+          'poll-id',
+          const PollOption(text: 'Pizza', extraData: {'color': 'red', 'text': 'Pasta'}),
+        );
+
+        expect(result, const Result.success(_pizzaResponse));
+      },
+    );
+
+    test('StreamChatClient.createPollOption returns the failure without throwing', () async {
+      when(
+        () => defaultApi.createPollOption(
+          pollId: 'poll-id',
+          createPollOptionRequest: any(named: 'createPollOptionRequest'),
+        ),
+      ).thenAnswer((_) async => const Result.failure(pollsApiError));
+
+      final result = await client.createPollOption('poll-id', const PollOption(text: 'Pizza'));
+
+      expect(result.exceptionOrNull(), pollsApiError);
+    });
+
+    test('StreamChatClient.getPollOption sends the poll and option ids and returns the option', () async {
+      when(
+        () => defaultApi.getPollOption(pollId: 'poll-id', optionId: 'pizza'),
+      ).thenAnswer((_) async => const Result.success(_generatedPizzaResponse));
+
+      final result = await client.getPollOption('poll-id', 'pizza');
+
+      expect(result, const Result.success(_pizzaResponse));
+    });
+
+    test('StreamChatClient.getPollOption returns the failure without throwing', () async {
+      when(
+        () => defaultApi.getPollOption(pollId: 'poll-id', optionId: 'pizza'),
+      ).thenAnswer((_) async => const Result.failure(pollsApiError));
+
+      final result = await client.getPollOption('poll-id', 'pizza');
+
+      expect(result.exceptionOrNull(), pollsApiError);
+    });
+
+    test(
+      "StreamChatClient.getPollOption keeps custom fields named like the option's own fields out of its custom data",
+      () async {
+        final response = api.PollOptionResponse(
+          duration: '4.21ms',
+          pollOption: generatedPizza.copyWith(custom: const {'color': 'red', 'text': 'custom-text'}),
+        );
+        when(
+          () => defaultApi.getPollOption(pollId: 'poll-id', optionId: 'pizza'),
+        ).thenAnswer((_) async => Result.success(response));
+
+        final result = await client.getPollOption('poll-id', 'pizza');
+
+        expect(result.getOrNull()?.pollOption.extraData, const {'color': 'red'});
+      },
+    );
+
+    test('StreamChatClient.updatePollOption sends the option and returns the updated option', () async {
+      when(
+        () => defaultApi.updatePollOption(
+          pollId: 'poll-id',
+          updatePollOptionRequest: const api.UpdatePollOptionRequest(
+            id: 'pizza',
+            text: 'Pizza',
+            custom: {'color': 'red'},
+          ),
+        ),
+      ).thenAnswer((_) async => const Result.success(_generatedPizzaResponse));
+
+      final result = await client.updatePollOption('poll-id', pizza);
+
+      expect(result, const Result.success(_pizzaResponse));
+    });
+
+    test('StreamChatClient.updatePollOption sends an option without an id with an empty id', () async {
+      when(
+        () => defaultApi.updatePollOption(
+          pollId: 'poll-id',
+          updatePollOptionRequest: const api.UpdatePollOptionRequest(id: '', text: 'Pizza', custom: {}),
+        ),
+      ).thenAnswer((_) async => const Result.success(_generatedPizzaResponse));
+
+      final result = await client.updatePollOption('poll-id', const PollOption(text: 'Pizza'));
+
+      expect(result, const Result.success(_pizzaResponse));
+    });
+
+    test('StreamChatClient.updatePollOption returns the failure without throwing', () async {
+      when(
+        () => defaultApi.updatePollOption(
+          pollId: 'poll-id',
+          updatePollOptionRequest: any(named: 'updatePollOptionRequest'),
+        ),
+      ).thenAnswer((_) async => const Result.failure(pollsApiError));
+
+      final result = await client.updatePollOption('poll-id', pizza);
+
+      expect(result.exceptionOrNull(), pollsApiError);
+    });
+
+    test('StreamChatClient.deletePollOption sends the poll and option ids and returns a success', () async {
+      when(
+        () => defaultApi.deletePollOption(pollId: 'poll-id', optionId: 'pizza'),
+      ).thenAnswer((_) async => const Result.success(api.DurationResponse(duration: '4.21ms')));
+
+      final result = await client.deletePollOption('poll-id', 'pizza');
+
+      expect(result, const Result<void>.success(null));
+    });
+
+    test('StreamChatClient.deletePollOption returns the failure without throwing', () async {
+      when(
+        () => defaultApi.deletePollOption(pollId: 'poll-id', optionId: 'pizza'),
+      ).thenAnswer((_) async => const Result.failure(pollsApiError));
+
+      final result = await client.deletePollOption('poll-id', 'pizza');
+
+      expect(result.exceptionOrNull(), pollsApiError);
+    });
+
+    test('StreamChatClient.castPollVote sends the selected option and returns the cast vote', () async {
+      when(
+        () => defaultApi.castPollVote(
+          messageId: 'message-id',
+          pollId: 'poll-id',
+          castPollVoteRequest: const api.CastPollVoteRequest(vote: api.VoteData(optionId: 'pizza')),
+        ),
+      ).thenAnswer(
+        (_) async => Result.success(api.PollVoteResponse(duration: '4.21ms', poll: generatedPoll, vote: generatedVote)),
+      );
+
+      final result = await client.castPollVote('message-id', 'poll-id', optionId: 'pizza');
+
+      expect(result, Result.success(PollVoteResponse(duration: '4.21ms', vote: vote)));
+    });
+
+    test('StreamChatClient.castPollVote returns the failure without throwing', () async {
+      when(
+        () => defaultApi.castPollVote(
+          messageId: 'message-id',
+          pollId: 'poll-id',
+          castPollVoteRequest: const api.CastPollVoteRequest(vote: api.VoteData(optionId: 'pizza')),
+        ),
+      ).thenAnswer((_) async => const Result.failure(pollsApiError));
+
+      final result = await client.castPollVote('message-id', 'poll-id', optionId: 'pizza');
+
+      expect(result.exceptionOrNull(), pollsApiError);
+    });
+
+    test('StreamChatClient.castPollVote returns no vote when the response carries none', () async {
+      when(
+        () => defaultApi.castPollVote(
+          messageId: 'message-id',
+          pollId: 'poll-id',
+          castPollVoteRequest: const api.CastPollVoteRequest(vote: api.VoteData(optionId: 'pizza')),
+        ),
+      ).thenAnswer((_) async => const Result.success(api.PollVoteResponse(duration: '4.21ms')));
+
+      final result = await client.castPollVote('message-id', 'poll-id', optionId: 'pizza');
+
+      expect(result, const Result.success(PollVoteResponse(duration: '4.21ms')));
+    });
+
+    test('StreamChatClient.addPollAnswer sends the answer text and returns the answer', () async {
+      when(
+        () => defaultApi.castPollVote(
+          messageId: 'message-id',
+          pollId: 'poll-id',
+          castPollVoteRequest: const api.CastPollVoteRequest(vote: api.VoteData(answerText: 'Anything')),
+        ),
+      ).thenAnswer(
+        (_) async =>
+            Result.success(api.PollVoteResponse(duration: '4.21ms', poll: generatedPoll, vote: generatedAnswer)),
+      );
+
+      final result = await client.addPollAnswer('message-id', 'poll-id', answerText: 'Anything');
+
+      expect(result, Result.success(PollVoteResponse(duration: '4.21ms', vote: answer)));
+    });
+
+    test('StreamChatClient.addPollAnswer returns the failure without throwing', () async {
+      when(
+        () => defaultApi.castPollVote(
+          messageId: 'message-id',
+          pollId: 'poll-id',
+          castPollVoteRequest: const api.CastPollVoteRequest(vote: api.VoteData(answerText: 'Anything')),
+        ),
+      ).thenAnswer((_) async => const Result.failure(pollsApiError));
+
+      final result = await client.addPollAnswer('message-id', 'poll-id', answerText: 'Anything');
+
+      expect(result.exceptionOrNull(), pollsApiError);
+    });
+
+    test('StreamChatClient.removePollVote sends the vote id and returns the removed vote', () async {
+      when(
+        () => defaultApi.deletePollVote(messageId: 'message-id', pollId: 'poll-id', voteId: 'vote-id'),
+      ).thenAnswer(
+        (_) async => Result.success(api.PollVoteResponse(duration: '4.21ms', poll: generatedPoll, vote: generatedVote)),
+      );
+
+      final result = await client.removePollVote('message-id', 'poll-id', 'vote-id');
+
+      expect(result, Result.success(PollVoteResponse(duration: '4.21ms', vote: vote)));
+    });
+
+    test('StreamChatClient.removePollVote returns the failure without throwing', () async {
+      when(
+        () => defaultApi.deletePollVote(messageId: 'message-id', pollId: 'poll-id', voteId: 'vote-id'),
+      ).thenAnswer((_) async => const Result.failure(pollsApiError));
+
+      final result = await client.removePollVote('message-id', 'poll-id', 'vote-id');
+
+      expect(result.exceptionOrNull(), pollsApiError);
+    });
+
+    test('StreamChatClient.queryPollVotes sends the filter, sort and cursor and returns the matching votes', () async {
+      when(
+        () => defaultApi.queryPollVotes(
+          pollId: 'poll-id',
+          queryPollVotesRequest: const api.QueryPollVotesRequest(
+            filter: {
+              'is_answer': {r'$eq': true},
+            },
+            sort: [api.SortParamRequest(field: 'created_at', direction: 1)],
+            limit: 25,
+            prev: 'prev-cursor',
+          ),
+        ),
+      ).thenAnswer(
+        (_) async => Result.success(
+          api.PollVotesResponse(duration: '4.21ms', votes: [generatedVote, generatedAnswer], next: 'after', prev: 'x'),
+        ),
+      );
+
+      final result = await client.queryPollVotes(
+        'poll-id',
+        filter: Filter.equal(PollVoteFilterField.isAnswer, true),
+        sort: [PollVoteSort.asc(PollVoteSortField.createdAt)],
+        limit: 25,
+        prev: 'prev-cursor',
+      );
+
+      expect(
+        result,
+        Result.success(QueryPollVotesResponse(duration: '4.21ms', votes: [vote, answer], next: 'after', prev: 'x')),
+      );
+    });
+
+    test('StreamChatClient.queryPollVotes returns the failure without throwing', () async {
+      when(
+        () => defaultApi.queryPollVotes(
+          pollId: 'poll-id',
+          queryPollVotesRequest: const api.QueryPollVotesRequest(limit: 10),
+        ),
+      ).thenAnswer((_) async => const Result.failure(pollsApiError));
+
+      final result = await client.queryPollVotes('poll-id');
+
+      expect(result.exceptionOrNull(), pollsApiError);
+    });
+
+    test('StreamChatClient.queryPollVotes sends ten as the default limit', () async {
+      when(
+        () => defaultApi.queryPollVotes(
+          pollId: 'poll-id',
+          queryPollVotesRequest: const api.QueryPollVotesRequest(limit: 10),
+        ),
+      ).thenAnswer((_) async => const Result.success(api.PollVotesResponse(duration: '4.21ms', votes: [])));
+
+      final result = await client.queryPollVotes('poll-id');
+
+      expect(result, const Result.success(QueryPollVotesResponse(duration: '4.21ms', votes: [])));
+    });
+
     group('`.channel`', () {
       test('should return back a new channel instance', () {
         const channelType = 'test-channel-type';
@@ -3332,340 +3908,6 @@ void main() {
         ),
       ).called(1);
       verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.createPoll`', () async {
-      final poll = Poll(
-        name: 'What is your favorite color?',
-        options: const [
-          PollOption(text: 'Red'),
-          PollOption(text: 'Blue'),
-        ],
-      );
-
-      when(() => fakeChatApi.polls.createPoll(poll)).thenAnswer(
-        (_) async => CreatePollResponse()..poll = poll,
-      );
-
-      final res = await client.createPoll(poll);
-      expect(res, isNotNull);
-      expect(res.poll, poll);
-
-      verify(() => fakeChatApi.polls.createPoll(poll)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.polls);
-    });
-
-    test('`.getPoll`', () async {
-      const pollId = 'test-poll-id';
-      final poll = Poll(
-        id: pollId,
-        name: 'What is your favorite color?',
-        options: const [
-          PollOption(text: 'Red'),
-          PollOption(text: 'Blue'),
-        ],
-      );
-
-      when(() => fakeChatApi.polls.getPoll(pollId)).thenAnswer(
-        (_) async => GetPollResponse()..poll = poll,
-      );
-
-      final res = await client.getPoll(pollId);
-      expect(res, isNotNull);
-      expect(res.poll, poll);
-
-      verify(() => fakeChatApi.polls.getPoll(pollId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.polls);
-    });
-
-    test('`.updatePoll`', () async {
-      final poll = Poll(
-        id: 'test-poll-id',
-        name: 'What is your favorite color?',
-        options: const [
-          PollOption(text: 'Red'),
-          PollOption(text: 'Blue'),
-        ],
-      );
-
-      when(() => fakeChatApi.polls.updatePoll(poll)).thenAnswer(
-        (_) async => UpdatePollResponse()..poll = poll,
-      );
-
-      final res = await client.updatePoll(poll);
-      expect(res, isNotNull);
-      expect(res.poll, poll);
-
-      verify(() => fakeChatApi.polls.updatePoll(poll)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.polls);
-    });
-
-    test('`.partialUpdatePoll`', () async {
-      const pollId = 'test-poll-id';
-      final set = {'name': 'What is your favorite color?'};
-      final unset = <String>[];
-
-      final poll = Poll(
-        id: pollId,
-        name: set['name']!,
-        options: const [
-          PollOption(text: 'Red'),
-          PollOption(text: 'Blue'),
-        ],
-      );
-
-      when(
-        () => fakeChatApi.polls.partialUpdatePoll(pollId, set: set, unset: unset),
-      ).thenAnswer((_) async => UpdatePollResponse()..poll = poll);
-
-      final res = await client.partialUpdatePoll(pollId, set: set, unset: unset);
-      expect(res, isNotNull);
-      expect(res.poll.id, pollId);
-      expect(res.poll.name, set['name']);
-
-      verify(() => fakeChatApi.polls.partialUpdatePoll(pollId, set: set, unset: unset)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.polls);
-    });
-
-    test('`.deletePoll`', () async {
-      const pollId = 'test-poll-id';
-
-      when(() => fakeChatApi.polls.deletePoll(pollId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.deletePoll(pollId);
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.polls.deletePoll(pollId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.polls);
-    });
-
-    test('`.closePoll`', () async {
-      const pollId = 'test-poll-id';
-
-      when(
-        () => fakeChatApi.polls.partialUpdatePoll(pollId, set: {'is_closed': true}),
-      ).thenAnswer((_) async => UpdatePollResponse());
-
-      final res = await client.closePoll(pollId);
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.polls.partialUpdatePoll(pollId, set: {'is_closed': true})).called(1);
-      verifyNoMoreInteractions(fakeChatApi.polls);
-    });
-
-    test('`.createPollOption`', () async {
-      const pollId = 'test-poll-id';
-      const option = PollOption(text: 'Red');
-
-      when(
-        () => fakeChatApi.polls.createPollOption(pollId, option),
-      ).thenAnswer((_) async => CreatePollOptionResponse()..pollOption = option);
-
-      final res = await client.createPollOption(pollId, option);
-      expect(res, isNotNull);
-      expect(res.pollOption, option);
-
-      verify(() => fakeChatApi.polls.createPollOption(pollId, option)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.polls);
-    });
-
-    test('`.getPollOption`', () async {
-      const pollId = 'test-poll-id';
-      const optionId = 'test-option-id';
-      const option = PollOption(id: optionId, text: 'Red');
-
-      when(
-        () => fakeChatApi.polls.getPollOption(pollId, optionId),
-      ).thenAnswer((_) async => GetPollOptionResponse()..pollOption = option);
-
-      final res = await client.getPollOption(pollId, optionId);
-      expect(res, isNotNull);
-      expect(res.pollOption, option);
-
-      verify(() => fakeChatApi.polls.getPollOption(pollId, optionId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.polls);
-    });
-
-    test('`.updatePollOption`', () async {
-      const pollId = 'test-poll-id';
-      const option = PollOption(id: 'test-option-id', text: 'Red');
-
-      when(
-        () => fakeChatApi.polls.updatePollOption(pollId, option),
-      ).thenAnswer((_) async => UpdatePollOptionResponse()..pollOption = option);
-
-      final res = await client.updatePollOption(pollId, option);
-      expect(res, isNotNull);
-      expect(res.pollOption, option);
-
-      verify(() => fakeChatApi.polls.updatePollOption(pollId, option)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.polls);
-    });
-
-    test('`.deletePollOption`', () async {
-      const pollId = 'test-poll-id';
-      const optionId = 'test-option-id';
-
-      when(() => fakeChatApi.polls.deletePollOption(pollId, optionId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.deletePollOption(pollId, optionId);
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.polls.deletePollOption(pollId, optionId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.polls);
-    });
-
-    test('`.castPollVote`', () async {
-      const messageId = 'test-message-id';
-      const pollId = 'test-poll-id';
-      const optionId = 'test-option-id';
-      final vote = PollVote(optionId: optionId);
-
-      // Custom matcher to check if the Vote object has the specified id
-      Matcher matchesVoteOption(String expected) => predicate<PollVote>(
-        (vote) => vote.optionId == expected,
-        'Vote with option $expected',
-      );
-
-      when(
-        () => fakeChatApi.polls.castPollVote(messageId, pollId, any(that: matchesVoteOption(optionId))),
-      ).thenAnswer((_) async => CastPollVoteResponse()..vote = vote);
-
-      final res = await client.castPollVote(messageId, pollId, optionId: optionId);
-      expect(res, isNotNull);
-      expect(res.vote, vote);
-
-      verify(() => fakeChatApi.polls.castPollVote(messageId, pollId, any(that: matchesVoteOption(optionId)))).called(1);
-      verifyNoMoreInteractions(fakeChatApi.polls);
-    });
-
-    test('`.addPollAnswer`', () async {
-      const messageId = 'test-message-id';
-      const pollId = 'test-poll-id';
-      const answerText = 'Red';
-      final vote = PollVote(answerText: answerText);
-
-      // Custom matcher to check if the Vote object has the specified id
-      Matcher matchesVoteAnswer(String expected) => predicate<PollVote>(
-        (vote) => vote.answerText == expected,
-        'Vote with answer $expected',
-      );
-
-      when(
-        () => fakeChatApi.polls.castPollVote(messageId, pollId, any(that: matchesVoteAnswer(answerText))),
-      ).thenAnswer((_) async => CastPollVoteResponse()..vote = vote);
-
-      final res = await client.addPollAnswer(messageId, pollId, answerText: answerText);
-      expect(res, isNotNull);
-      expect(res.vote, vote);
-
-      verify(
-        () => fakeChatApi.polls.castPollVote(messageId, pollId, any(that: matchesVoteAnswer(answerText))),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.polls);
-    });
-
-    test('`.removePollVote`', () async {
-      const messageId = 'test-message-id';
-      const pollId = 'test-poll-id';
-      const voteId = 'test-vote-id';
-
-      when(
-        () => fakeChatApi.polls.removePollVote(messageId, pollId, voteId),
-      ).thenAnswer((_) async => RemovePollVoteResponse());
-
-      final res = await client.removePollVote(messageId, pollId, voteId);
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.polls.removePollVote(messageId, pollId, voteId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.polls);
-    });
-
-    test('`.queryPolls`', () async {
-      final filter = PollFilter.in_(PollFilterField.id, const ['test-poll-id']);
-      final sort = [PollSort.desc(PollSortField.createdAt)];
-      const pagination = PaginationParams(limit: 20);
-
-      final polls = List.generate(
-        pagination.limit,
-        (index) => Poll(
-          id: 'test-poll-id-$index',
-          name: 'What is your favorite color?',
-          options: const [
-            PollOption(text: 'Red'),
-            PollOption(text: 'Blue'),
-          ],
-        ),
-      );
-
-      when(
-        () => fakeChatApi.polls.queryPolls(
-          filter: filter,
-          sort: sort,
-          pagination: pagination,
-        ),
-      ).thenAnswer(
-        (_) async => QueryPollsResponse()..polls = polls,
-      );
-
-      final res = await client.queryPolls(
-        filter: filter,
-        sort: sort,
-        pagination: pagination,
-      );
-      expect(res, isNotNull);
-      expect(res.polls.length, polls.length);
-
-      verify(
-        () => fakeChatApi.polls.queryPolls(
-          filter: filter,
-          sort: sort,
-          pagination: pagination,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.polls);
-    });
-
-    test('`.queryPollVotes`', () async {
-      const pollId = 'test-poll-id';
-      final filter = PollVoteFilter.in_(PollVoteFilterField.id, const ['test-vote-id']);
-      final sort = [PollVoteSort.desc(PollVoteSortField.createdAt)];
-      const pagination = PaginationParams(limit: 20);
-
-      final votes = List.generate(
-        pagination.limit,
-        (index) => PollVote(id: 'test-vote-id-$index', answerText: 'Red'),
-      );
-
-      when(
-        () => fakeChatApi.polls.queryPollVotes(
-          pollId,
-          filter: filter,
-          sort: sort,
-          pagination: pagination,
-        ),
-      ).thenAnswer(
-        (_) async => QueryPollVotesResponse()..votes = votes,
-      );
-
-      final res = await client.queryPollVotes(
-        pollId,
-        filter: filter,
-        sort: sort,
-        pagination: pagination,
-      );
-      expect(res, isNotNull);
-      expect(res.votes.length, votes.length);
-
-      verify(
-        () => fakeChatApi.polls.queryPollVotes(
-          pollId,
-          filter: filter,
-          sort: sort,
-          pagination: pagination,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.polls);
     });
 
     test('`.updateUser`', () async {
@@ -6931,3 +7173,26 @@ UserGroup _userGroup(String id) {
 api.DeviceResponse _generatedDevice({required String id, required String pushProvider}) {
   return api.DeviceResponse(id: id, pushProvider: pushProvider, createdAt: DateTime.utc(2024), userId: 'test-user-id');
 }
+
+// A poll as a caller builds it: options without ids and the vote summary at its defaults.
+Poll _newPoll() => Poll(
+  id: 'poll-id',
+  name: 'Lunch?',
+  description: 'Pick one',
+  options: const [
+    PollOption(text: 'Pizza', extraData: {'color': 'red', 'text': 'Pasta'}),
+    PollOption(text: 'Sushi'),
+  ],
+  votingVisibility: VotingVisibility.anonymous,
+  enforceUniqueVote: false,
+  maxVotesAllowed: 2,
+  allowAnswers: true,
+  allowUserSuggestedOptions: true,
+  voteCount: 7,
+  // Custom data named like one of the poll's own fields is left out of the requests.
+  extraData: const {'topic': 'food', 'name': 'Dinner?'},
+);
+
+const _generatedPizzaResponse = api.PollOptionResponse(duration: '4.21ms', pollOption: generatedPizza);
+
+const _pizzaResponse = PollOptionResponse(duration: '4.21ms', pollOption: pizza);

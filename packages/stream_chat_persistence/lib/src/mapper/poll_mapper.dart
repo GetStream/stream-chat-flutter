@@ -18,10 +18,7 @@ extension PollEntityX on PollEntity {
       nameI18n: nameI18n,
       description: description,
       descriptionI18n: descriptionI18n,
-      options: options.map((it) {
-        final json = jsonDecode(it);
-        return PollOption.fromJson(json);
-      }).toList(),
+      options: options.map((it) => PollOption.fromData(jsonDecode(it))).toList(),
       votingVisibility: votingVisibility,
       enforceUniqueVote: enforceUniqueVote,
       maxVotesAllowed: maxVotesAllowed,
@@ -52,9 +49,7 @@ extension PollX on Poll {
     nameI18n: nameI18n,
     description: description,
     descriptionI18n: descriptionI18n,
-    // `PollOption.toJson` leaves out the server-owned `text_i18n`, as it is
-    // also the payload sent to the API; the cache has to keep it.
-    options: options.map((it) => jsonEncode({...it.toJson(), 'text_i18n': ?it.textI18n})).toList(),
+    options: options.map((it) => jsonEncode(it.toData())).toList(),
     votingVisibility: votingVisibility,
     enforceUniqueVote: enforceUniqueVote,
     maxVotesAllowed: maxVotesAllowed,

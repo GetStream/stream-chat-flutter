@@ -67,6 +67,11 @@ import '../core/models/response/get_user_group_response.dart';
 import '../core/models/response/list_devices_response.dart';
 import '../core/models/response/list_user_groups_response.dart';
 import '../core/models/response/og_attachment_response.dart';
+import '../core/models/response/poll_option_response.dart';
+import '../core/models/response/poll_response.dart';
+import '../core/models/response/poll_vote_response.dart';
+import '../core/models/response/query_poll_votes_response.dart';
+import '../core/models/response/query_polls_response.dart';
 import '../core/models/response/remove_user_group_members_response.dart';
 import '../core/models/response/search_roles_response.dart';
 import '../core/models/response/search_user_groups_response.dart';
@@ -84,6 +89,7 @@ import '../repository/app_settings_repository.dart';
 import '../repository/devices_repository.dart';
 import '../repository/general_repository.dart';
 import '../repository/moderation_repository.dart';
+import '../repository/polls_repository.dart';
 import '../repository/roles_repository.dart';
 import '../repository/user_groups_repository.dart';
 import '../ws/connect_request.dart';
@@ -187,6 +193,7 @@ class StreamChatClient {
     _rolesRepository = RolesRepository(api);
     _devicesRepository = DevicesRepository(api);
     _userGroupsRepository = UserGroupsRepository(api);
+    _pollsRepository = PollsRepository(api);
     _generalRepository = GeneralRepository(api);
     _moderationRepository = ModerationRepository(api);
     _appSettingsManager = AppSettingsManager(AppSettingsRepository(api));
@@ -230,6 +237,7 @@ class StreamChatClient {
   late final RolesRepository _rolesRepository;
   late final DevicesRepository _devicesRepository;
   late final UserGroupsRepository _userGroupsRepository;
+  late final PollsRepository _pollsRepository;
   late final GeneralRepository _generalRepository;
   late final ModerationRepository _moderationRepository;
   late final AppSettingsManager _appSettingsManager;
@@ -1634,115 +1642,114 @@ class StreamChatClient {
     threadId,
   );
 
-  /// Creates a new Poll
-  Future<CreatePollResponse> createPoll(Poll poll) => _chatApi.polls.createPoll(poll);
-
-  /// Retrieves a Poll by [pollId]
-  Future<GetPollResponse> getPoll(String pollId) => _chatApi.polls.getPoll(pollId);
-
-  /// Updates a Poll
-  Future<UpdatePollResponse> updatePoll(Poll poll) => _chatApi.polls.updatePoll(poll);
-
-  /// Partially updates a Poll by [pollId].
+  /// Creates [poll] with its settings and options.
   ///
-  /// Use [set] to define values to be set.
-  /// Use [unset] to define values to be unset.
-  Future<UpdatePollResponse> partialUpdatePoll(
+  /// The ids of the options are left out: every option gets a new one, which the returned poll carries. A poll is
+  /// shown to the members of a channel once it is sent in a message; [Channel.sendPoll] does both.
+  Future<Result<PollResponse>> createPoll(Poll poll) => _pollsRepository.createPoll(poll);
+
+  /// Fetches the poll with the id [pollId].
+  Future<Result<PollResponse>> getPoll(String pollId) => _pollsRepository.getPoll(pollId);
+
+  /// Updates [poll] to match the settings and options it carries.
+  ///
+  /// [Poll.options] becomes the poll's full list of options, each matched by its id, so an existing option missing
+  /// from it is deleted. New options are added through [createPollOption].
+  Future<Result<PollResponse>> updatePoll(Poll poll) => _pollsRepository.updatePoll(poll);
+
+  /// Changes some of the settings of the poll with the id [pollId], leaving the others as they are.
+  ///
+  /// The fields in [set] take their new values and the fields named in [unset] are cleared. A key that is not a
+  /// setting of the poll is stored in its custom data.
+  Future<Result<PollResponse>> partialUpdatePoll(
     String pollId, {
     Map<String, Object?>? set,
     List<String>? unset,
-  }) => _chatApi.polls.partialUpdatePoll(
-    pollId,
-    set: set,
-    unset: unset,
-  );
+  }) => _pollsRepository.partialUpdatePoll(pollId, set: set, unset: unset);
 
-  /// Deletes the Poll by [pollId].
-  Future<EmptyResponse> deletePoll(String pollId) => _chatApi.polls.deletePoll(pollId);
+  /// Deletes the poll with the id [pollId].
+  Future<Result<void>> deletePoll(String pollId) => _pollsRepository.deletePoll(pollId);
 
-  /// Marks the Poll [pollId] as closed.
-  Future<UpdatePollResponse> closePoll(String pollId) => partialUpdatePoll(
-    pollId,
-    set: {
-      'is_closed': true,
-    },
-  );
+  /// Closes the poll with the id [pollId], so it accepts no more votes or answers.
+  Future<Result<PollResponse>> closePoll(String pollId) => partialUpdatePoll(pollId, set: {'is_closed': true});
 
-  /// Creates a new Poll Option for the Poll [pollId].
-  Future<CreatePollOptionResponse> createPollOption(
+  /// Adds [option] to the poll with the id [pollId].
+  ///
+  /// The option gets a new id, which the returned option carries.
+  Future<Result<PollOptionResponse>> createPollOption(
     String pollId,
     PollOption option,
-  ) => _chatApi.polls.createPollOption(pollId, option);
+  ) => _pollsRepository.createPollOption(pollId, option);
 
-  /// Retrieves a Poll Option by [optionId] for the Poll [pollId].
-  Future<GetPollOptionResponse> getPollOption(
+  /// Fetches an option of a poll, identified by [optionId] and [pollId].
+  Future<Result<PollOptionResponse>> getPollOption(
     String pollId,
     String optionId,
-  ) => _chatApi.polls.getPollOption(pollId, optionId);
+  ) => _pollsRepository.getPollOption(pollId, optionId);
 
-  /// Updates a Poll Option for the Poll [pollId].
-  Future<UpdatePollOptionResponse> updatePollOption(
+  /// Replaces the text and custom data of [option], an existing option of the poll with the id [pollId].
+  ///
+  /// The [option] is found by its id.
+  Future<Result<PollOptionResponse>> updatePollOption(
     String pollId,
     PollOption option,
-  ) => _chatApi.polls.updatePollOption(pollId, option);
+  ) => _pollsRepository.updatePollOption(pollId, option);
 
-  /// Deletes a Poll Option by [optionId] for the Poll [pollId].
-  Future<EmptyResponse> deletePollOption(
+  /// Removes an option from a poll, identified by [optionId] and [pollId].
+  Future<Result<void>> deletePollOption(
     String pollId,
     String optionId,
-  ) => _chatApi.polls.deletePollOption(pollId, optionId);
+  ) => _pollsRepository.deletePollOption(pollId, optionId);
 
-  /// Cast a [vote] for the Poll [pollId].
-  Future<CastPollVoteResponse> castPollVote(
+  /// Votes for an option of a poll sent in a message, identified by [optionId], [pollId] and [messageId].
+  ///
+  /// If the poll allows only one vote per user, the vote replaces the previous one.
+  Future<Result<PollVoteResponse>> castPollVote(
     String messageId,
     String pollId, {
     required String optionId,
-  }) {
-    final vote = PollVote(optionId: optionId);
-    return _chatApi.polls.castPollVote(messageId, pollId, vote);
-  }
+  }) => _pollsRepository.castPollVote(messageId, pollId, optionId: optionId);
 
-  /// Adds a answer with [answerText] for the Poll [pollId].
-  Future<CastPollVoteResponse> addPollAnswer(
+  /// Adds [answerText] as an answer to a poll sent in a message, identified by [pollId] and [messageId].
+  ///
+  /// Each user has one answer per poll; a new one replaces the previous one.
+  Future<Result<PollVoteResponse>> addPollAnswer(
     String messageId,
     String pollId, {
     required String answerText,
-  }) {
-    final vote = PollVote(answerText: answerText);
-    return _chatApi.polls.castPollVote(messageId, pollId, vote);
-  }
+  }) => _pollsRepository.addPollAnswer(messageId, pollId, answerText: answerText);
 
-  /// Removes a vote by [voteId] for the Poll [pollId].
-  Future<RemovePollVoteResponse> removePollVote(
+  /// Removes a vote or answer from a poll sent in a message, identified by [voteId], [pollId] and [messageId].
+  Future<Result<PollVoteResponse>> removePollVote(
     String messageId,
     String pollId,
     String voteId,
-  ) => _chatApi.polls.removePollVote(messageId, pollId, voteId);
+  ) => _pollsRepository.removePollVote(messageId, pollId, voteId);
 
-  /// Queries Polls with the given [filter] and [sort] options.
-  Future<QueryPollsResponse> queryPolls({
+  /// Fetches one page of the polls matching [filter], ordered by [sort].
+  ///
+  /// Up to [limit] polls are returned. The next page is fetched by passing the `next` cursor of a response as [next],
+  /// and the previous page by passing its `prev` cursor as [prev]. At most one of [next] and [prev] may be given.
+  Future<Result<QueryPollsResponse>> queryPolls({
     PollFilter? filter,
     List<PollSort>? sort,
-    PaginationParams pagination = const PaginationParams(),
-  }) => _chatApi.polls.queryPolls(
-    filter: filter,
-    sort: sort,
-    pagination: pagination,
-  );
+    int limit = 10,
+    String? next,
+    String? prev,
+  }) => _pollsRepository.queryPolls(filter: filter, sort: sort, limit: limit, next: next, prev: prev);
 
-  /// Queries Poll Votes for the Poll [pollId] with the given [filter]
-  /// and [sort] options.
-  Future<QueryPollVotesResponse> queryPollVotes(
+  /// Fetches one page of the votes and answers matching [filter] on the poll with the id [pollId], ordered by [sort].
+  ///
+  /// Up to [limit] votes are returned. The next page is fetched by passing the `next` cursor of a response as [next],
+  /// and the previous page by passing its `prev` cursor as [prev]. At most one of [next] and [prev] may be given.
+  Future<Result<QueryPollVotesResponse>> queryPollVotes(
     String pollId, {
     PollVoteFilter? filter,
     List<PollVoteSort>? sort,
-    PaginationParams pagination = const PaginationParams(),
-  }) => _chatApi.polls.queryPollVotes(
-    pollId,
-    filter: filter,
-    sort: sort,
-    pagination: pagination,
-  );
+    int limit = 10,
+    String? next,
+    String? prev,
+  }) => _pollsRepository.queryPollVotes(pollId, filter: filter, sort: sort, limit: limit, next: next, prev: prev);
 
   /// Update or Create the given user object.
   Future<UpdateUsersResponse> updateUser(User user) => updateUsers([user]);

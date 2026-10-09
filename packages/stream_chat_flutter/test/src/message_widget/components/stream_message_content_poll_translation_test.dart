@@ -307,22 +307,28 @@ MockChannel _mockChannel({List<PollVote>? comments}) {
       any(),
       filter: any(named: 'filter'),
       sort: any(named: 'sort'),
-      pagination: any(named: 'pagination'),
+      limit: any(named: 'limit'),
+      next: any(named: 'next'),
     ),
   ).thenAnswer(
-    (_) async => QueryPollVotesResponse()
-      ..votes =
-          comments ??
-          [
-            PollVote(
-              id: 'answer-1',
-              answerText: 'I like yellow',
-              answerTextI18n: const {'language': 'en', 'nl_text': 'Ik hou van geel'},
-            ),
-          ]
-      ..next = null,
+    (_) async => Result.success(
+      QueryPollVotesResponse(
+        duration: '4.21ms',
+        votes:
+            comments ??
+            [
+              PollVote(
+                id: 'answer-1',
+                answerText: 'I like yellow',
+                answerTextI18n: const {'language': 'en', 'nl_text': 'Ik hou van geel'},
+              ),
+            ],
+      ),
+    ),
   );
-  when(() => channel.castPollVote(any(), any(), any())).thenAnswer((_) async => CastPollVoteResponse());
+  when(
+    () => channel.castPollVote(any(), any(), any()),
+  ).thenAnswer((_) async => const Result.success(PollVoteResponse(duration: '4.21ms')));
   return channel;
 }
 
