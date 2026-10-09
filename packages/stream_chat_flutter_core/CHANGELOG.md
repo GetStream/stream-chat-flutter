@@ -8,6 +8,7 @@
 - The sort argument on every list controller is typed `List<ChannelSort>`, `List<MemberSort>` and so on, rather than `SortOrder<T>`. On the controllers that have a default, the `sort` property is non-nullable: leaving it unset selects that default, and `ChannelSort.empty` / `MemberSort.empty` / … query with the ordering the API applies on its own.
 - `defaultChannelListSort`, `defaultMemberListSort`, `defaultUserListSort`, `defaultDraftListSort`, `defaultMessageReminderListSort` and `defaultPollVoteListSort` are removed. Use `ChannelSort.defaultSort`, `MemberSort.defaultSort` and so on from `stream_chat`. Leaving a controller's sort unset still applies the same ordering.
 - `StreamChannelListController.muteChannel` and `unmuteChannel` return a `Result` instead of throwing.
+- `StreamChannelListController.deleteChannel` returns a `Result<DeleteChannelResponse>` instead of throwing.
 
 🐞 Fixed
 

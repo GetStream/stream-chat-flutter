@@ -63,13 +63,16 @@ import '../core/models/reaction.dart';
 import '../core/models/response/add_user_group_members_response.dart';
 import '../core/models/response/app_settings_response.dart';
 import '../core/models/response/create_user_group_response.dart';
+import '../core/models/response/delete_channel_response.dart';
 import '../core/models/response/get_user_group_response.dart';
+import '../core/models/response/hide_channel_response.dart';
 import '../core/models/response/list_devices_response.dart';
 import '../core/models/response/list_user_groups_response.dart';
 import '../core/models/response/og_attachment_response.dart';
 import '../core/models/response/remove_user_group_members_response.dart';
 import '../core/models/response/search_roles_response.dart';
 import '../core/models/response/search_user_groups_response.dart';
+import '../core/models/response/show_channel_response.dart';
 import '../core/models/response/update_channel_partial_response.dart';
 import '../core/models/response/update_member_partial_response.dart';
 import '../core/models/response/update_user_group_response.dart';
@@ -1440,33 +1443,33 @@ class StreamChatClient {
     pagination: pagination,
   );
 
-  /// Hides the channel from [queryChannels] for the user
-  /// until a message is added If [clearHistory] is set to true - all messages
-  /// will be removed for the user
-  Future<EmptyResponse> hideChannel(
+  /// Hides a channel from the current user's channel list until a new message is added to it.
+  ///
+  /// If [clearHistory] is true, the channel's messages are also cleared for the current user.
+  Future<Result<HideChannelResponse>> hideChannel(
     String channelId,
     String channelType, {
     bool clearHistory = false,
-  }) => _chatApi.channel.hideChannel(
+  }) => _channelsRepository.hideChannel(
     channelId,
     channelType,
     clearHistory: clearHistory,
   );
 
-  /// Removes the hidden status for the channel
-  Future<EmptyResponse> showChannel(
+  /// Shows a channel the current user hid.
+  Future<Result<ShowChannelResponse>> showChannel(
     String channelId,
     String channelType,
-  ) => _chatApi.channel.showChannel(
+  ) => _channelsRepository.showChannel(
     channelId,
     channelType,
   );
 
-  /// Delete this channel. Messages are permanently removed.
-  Future<EmptyResponse> deleteChannel(
+  /// Deletes a channel and its messages.
+  Future<Result<DeleteChannelResponse>> deleteChannel(
     String channelId,
     String channelType,
-  ) => _chatApi.channel.deleteChannel(
+  ) => _channelsRepository.deleteChannel(
     channelId,
     channelType,
   );

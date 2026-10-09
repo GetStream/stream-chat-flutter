@@ -1731,8 +1731,8 @@ class Channel {
     return _client.disableSlowMode(id!, type);
   }
 
-  /// Delete this channel. Messages are permanently removed.
-  Future<EmptyResponse> delete() async {
+  /// Deletes this channel and its messages.
+  Future<Result<DeleteChannelResponse>> delete() async {
     _checkInitialized();
     return _client.deleteChannel(id!, type);
   }
@@ -2314,12 +2314,10 @@ class Channel {
     );
   }
 
-  /// Hides the channel from [StreamChatClient.queryChannels] for the user
-  /// until a message is added.
+  /// Hides this channel from the current user's channel list until a new message is added to it.
   ///
-  /// If [clearHistory] is set to true - all messages
-  /// will be removed for the user.
-  Future<EmptyResponse> hide({bool clearHistory = false}) async {
+  /// If [clearHistory] is true, the channel's messages are also cleared for the current user.
+  Future<Result<HideChannelResponse>> hide({bool clearHistory = false}) async {
     _checkInitialized();
     return _client.hideChannel(
       id!,
@@ -2328,8 +2326,8 @@ class Channel {
     );
   }
 
-  /// Removes the hidden status for the channel.
-  Future<EmptyResponse> show() async {
+  /// Shows this channel after the current user hid it.
+  Future<Result<ShowChannelResponse>> show() async {
     _checkInitialized();
     return _client.showChannel(id!, type);
   }

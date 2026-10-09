@@ -34,6 +34,7 @@ onto Stream's OpenAPI-generated API client.
     - [User Groups](#user-groups)
     - [Link Previews](#link-previews)
     - [Partial Updates](#partial-updates)
+    - [Channel Lifecycle](#channel-lifecycle)
 - [Migration Checklist](#migration-checklist)
 - [For AI Agents](#for-ai-agents)
 - [Contributing to this guide](#contributing-to-this-guide)
@@ -80,6 +81,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Guest Users**](#guest-users) | `connectGuestUser` is unchanged; `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed |
 | [**File Upload**](#file-upload) | Uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
 | [**Partial Updates**](#partial-updates) | Channel and member partial updates — `updatePartial`, `updateName`, `updateImage`, slow mode, pin and archive — return a `Result` instead of throwing; their responses take the API's names, `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse`, and `partialMemberUpdate` becomes `updateMemberPartial` |
+| [**Channel Lifecycle**](#channel-lifecycle) | Hiding, showing and deleting a channel return a `Result` instead of throwing; stopping watching still throws |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -104,6 +106,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `UploadState`'s `Preparing` / `InProgress` / `Success` / `Failed` | `UploadStatePreparing` / `UploadStateInProgress` / `UploadStateSuccess` / `UploadStateFailed` | `renamed` | Frees `Success` for `Result` |
 | `PagedValue.error(StreamChatError)` (`stream_chat_flutter_core`) | `PagedValue.error(StreamChatException)` | `retyped` | |
 | `StreamChannelListController.muteChannel` / `unmuteChannel` → `Future<void>` (`stream_chat_flutter_core`) | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing, so a `try`/`catch` around either no longer catches a failed call. A subclass overriding one needs the new return type |
+| `StreamChannelListController.deleteChannel` → `Future<void>` (`stream_chat_flutter_core`) | `Future<Result<DeleteChannelResponse>>` | `retyped` | Returns a `Result` instead of throwing, so a `try`/`catch` around it no longer catches a failed call. A subclass overriding it needs the new return type |
 | `errorBuilder: Function(BuildContext, StreamChatError)` (scroll views) | `Function(BuildContext, StreamChatException)` | `retyped` | |
 | `StreamAttachmentValidator.validate()` / `.validateCount()` returning `StreamChatError?` | returning `AttachmentValidationError?` | `retyped` | `stream_chat_flutter`. They always returned rather than threw; the return type now says so |
 | `AttachmentLimitReachedError` / `AttachmentTooLargeError` / `AttachmentBlockedError` extending `StreamChatError` | extending `sealed AttachmentValidationError` | `retyped` | A refused attachment is not a failed call, so it is no longer one of the `StreamException` kinds. `switch` over them is exhaustive |
@@ -237,6 +240,9 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `PartialUpdateChannelResponse()..channel = …`, `PartialUpdateMemberResponse()..channelMember = …` and their other setters | `UpdateChannelPartialResponse(duration: …, channel: …)` / `UpdateMemberPartialResponse(duration: …, channelMember: …)` | `retyped` | Plain classes with a const constructor and final fields |
 | `PartialUpdateChannelResponse` / `PartialUpdateMemberResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
 | `StreamChatApi.channel.updateChannelPartial` / `enableSlowdown` / `disableSlowdown` / `updateMemberPartial` | the `StreamChatClient` methods | `removed` | The endpoints moved to the generated client |
+| `StreamChatClient.hideChannel` / `showChannel` / `deleteChannel` → `Future<EmptyResponse>` | `Future<Result<HideChannelResponse>>` / `Future<Result<ShowChannelResponse>>` / `Future<Result<DeleteChannelResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `Channel.hide` / `show` / `delete` → `Future<EmptyResponse>` | `Future<Result<HideChannelResponse>>` / `Future<Result<ShowChannelResponse>>` / `Future<Result<DeleteChannelResponse>>` | `retyped` | Returns a `Result` instead of throwing. Calling one before the channel is initialized still throws a `StateError` |
+| `StreamChatApi.channel.hideChannel` / `showChannel` / `deleteChannel` | the `StreamChatClient` methods | `removed` | The endpoints moved to the generated client |
 | `MemberUpdatePayload(pinned: true).toJson()` / `MemberUpdateType.pinned.name` | `{'pinned': true}` / `'pinned'` | `removed` | Same for `archived`. Or call `pinChannel` / `unpinChannel` / `archiveChannel` / `unarchiveChannel` |
 | _(more added per feature as PRs land)_ | | | |
 
@@ -692,6 +698,39 @@ directly — `updateMemberPartial(channelId: …, channelType: …, set: {'pinne
 > `Channel.pin` and its siblings answer the whole response because every migrated write returns its envelope, so a
 > field the API adds later reaches you without another break. `MemberUpdatePayload` and `MemberUpdateType` named
 > only two of the keys a membership accepts, so a plain map replaces them.
+
+### Channel Lifecycle
+
+**Hiding, showing and deleting a channel return a `Result` instead of throwing.** That covers
+`StreamChatClient.hideChannel`, `showChannel` and `deleteChannel`, `Channel.hide`, `show` and `delete`, and
+`StreamChannelListController.deleteChannel` in `stream_chat_flutter_core`. A `try`/`catch` around one still
+compiles, but no longer catches a failed call: read the returned `Result` instead.
+
+```dart
+// v10
+try {
+  await channel.delete();
+  Navigator.of(context).pop();
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await channel.delete();
+result.fold(
+  onSuccess: (_) => Navigator.of(context).pop(),
+  onFailure: (error, _) => report(error),
+);
+```
+
+**Each call answers its own response** where v10 answered `EmptyResponse`: `HideChannelResponse`,
+`ShowChannelResponse` and `DeleteChannelResponse`, which carries the deleted channel in a nullable `channel`.
+
+**`StreamChatApi.channel.hideChannel`, `showChannel` and `deleteChannel` are removed.** Call them on
+`StreamChatClient`.
+
+> **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call. Each write
+> answers its own envelope so a field the API adds later reaches you without another break.
 
 ### Moderation
 
