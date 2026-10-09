@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `StreamDraftListController.deleteDraft` removing the wrong draft.
+
 ## 10.5.0
 
 ✅ Added
