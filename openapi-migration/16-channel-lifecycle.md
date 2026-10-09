@@ -38,10 +38,10 @@
 - **`StreamChannelListController.deleteChannel` returns the `Result`,** as `muteChannel` does.
 - **`hard_delete` is not exposed.** The server refuses it from a client-side token, and v10 never sent it.
 - **Show sends no body,** where v1 sent `{}`; the server accepts both. Hide still sends `clear_history`.
-- **The read and delivery receipts stay in 11 for now.** `markRead` and its siblings share endpoints
-  with the thread read calls, fabricate a response on the local-unread path, and feed
-  `MessageListUnreadController` and the public `ChannelDeliveryReporter`, which rely on a throw; they
-  move in a slice of their own.
+- **The read and delivery receipts are left to their own slice,
+  [17](17-read-receipts.md).** `markRead` and its siblings share endpoints with the thread read calls,
+  fabricate a response on the local-unread path, and feed `MessageListUnreadController` and the public
+  `ChannelDeliveryReporter`, which relied on a throw.
 
 ## Risks
 

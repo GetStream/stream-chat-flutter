@@ -51,7 +51,6 @@ import '../core/models/draft_message.dart';
 import '../core/models/location.dart';
 import '../core/models/member.dart';
 import '../core/models/message.dart';
-import '../core/models/message_delivery.dart';
 import '../core/models/message_reminder.dart';
 import '../core/models/own_user.dart';
 import '../core/models/poll.dart';
@@ -60,6 +59,7 @@ import '../core/models/poll_vote.dart';
 import '../core/models/push_preference.dart';
 import '../core/models/push_provider.dart';
 import '../core/models/reaction.dart';
+import '../core/models/request/message_delivery.dart';
 import '../core/models/response/add_user_group_members_response.dart';
 import '../core/models/response/app_settings_response.dart';
 import '../core/models/response/create_user_group_response.dart';
@@ -68,6 +68,8 @@ import '../core/models/response/get_user_group_response.dart';
 import '../core/models/response/hide_channel_response.dart';
 import '../core/models/response/list_devices_response.dart';
 import '../core/models/response/list_user_groups_response.dart';
+import '../core/models/response/mark_delivered_response.dart';
+import '../core/models/response/mark_read_response.dart';
 import '../core/models/response/og_attachment_response.dart';
 import '../core/models/response/remove_user_group_members_response.dart';
 import '../core/models/response/search_roles_response.dart';
@@ -1579,69 +1581,70 @@ class StreamChatClient {
     formData,
   );
 
-  /// Mark [channelId] of type [channelType] all messages as read
-  /// Optionally provide a [messageId] if you want to mark a
-  /// particular message as read
-  Future<EmptyResponse> markChannelRead(
+  /// Marks a channel as read for the current user.
+  ///
+  /// Messages up to and including the one with [messageId] are marked as read, or all of them when [messageId] is
+  /// null.
+  Future<Result<MarkReadResponse>> markChannelRead(
     String channelId,
     String channelType, {
     String? messageId,
-  }) => _chatApi.channel.markRead(
+  }) => _channelsRepository.markRead(
     channelId,
     channelType,
     messageId: messageId,
   );
 
-  /// Marks the [channelId] of type [channelType] as unread
-  /// by a given [messageId].
+  /// Marks a channel as unread for the current user, from the message with [messageId] onwards.
   ///
-  /// All messages from the provided message onwards will be marked as unread.
-  Future<EmptyResponse> markChannelUnread(
+  /// That message and every later one are marked as unread.
+  Future<Result<void>> markChannelUnread(
     String channelId,
     String channelType,
     String messageId,
-  ) => _chatApi.channel.markUnread(
+  ) => _channelsRepository.markUnread(
     channelId,
     channelType,
-    messageId,
+    messageId: messageId,
   );
 
-  /// Marks the [channelId] of type [channelType] as unread
-  /// by a given [timestamp].
+  /// Marks the messages of a channel created after [timestamp] as unread for the current user.
   ///
-  /// All messages after the provided timestamp will be marked as unread.
-  Future<EmptyResponse> markChannelUnreadByTimestamp(
+  /// A message created at exactly [timestamp] stays read.
+  Future<Result<void>> markChannelUnreadByTimestamp(
     String channelId,
     String channelType,
     DateTime timestamp,
-  ) => _chatApi.channel.markUnreadByTimestamp(
+  ) => _channelsRepository.markUnread(
     channelId,
     channelType,
-    timestamp,
+    messageTimestamp: timestamp,
   );
 
-  /// Mark the thread with [threadId] in the channel with [channelId] of type
-  /// [channelType] as read.
-  Future<EmptyResponse> markThreadRead(
+  /// Marks a thread in a channel as read for the current user.
+  ///
+  /// [threadId] is the id of the thread's parent message.
+  Future<Result<MarkReadResponse>> markThreadRead(
     String channelId,
     String channelType,
     String threadId,
-  ) => _chatApi.channel.markThreadRead(
+  ) => _channelsRepository.markRead(
     channelId,
     channelType,
-    threadId,
+    threadId: threadId,
   );
 
-  /// Mark the thread with [threadId] in the channel with [channelId] of type
-  /// [channelType] as unread.
-  Future<EmptyResponse> markThreadUnread(
+  /// Marks a thread in a channel as unread for the current user.
+  ///
+  /// [threadId] is the id of the thread's parent message.
+  Future<Result<void>> markThreadUnread(
     String channelId,
     String channelType,
     String threadId,
-  ) => _chatApi.channel.markThreadUnread(
+  ) => _channelsRepository.markUnread(
     channelId,
     channelType,
-    threadId,
+    threadId: threadId,
   );
 
   /// Creates a new Poll
@@ -1860,8 +1863,8 @@ class StreamChatClient {
     return response;
   }
 
-  /// Mark all channels for this user as read
-  Future<EmptyResponse> markAllRead() => _chatApi.channel.markAllRead();
+  /// Marks all of the current user's channels as read.
+  Future<Result<MarkReadResponse>> markAllRead() => _channelsRepository.markChannelsRead();
 
   /// Sends delivery receipts for the latest messages in multiple channels.
   ///
@@ -1872,19 +1875,17 @@ class StreamChatClient {
   ///
   /// ```dart
   /// // From notification payload
-  /// final receipt = MessageDeliveryInfo(
-  ///   channelCid: notificationData['channel_id'],
+  /// final receipt = MessageDelivery(
+  ///   channelCid: notificationData['cid'],
   ///   messageId: notificationData['message_id'],
   /// );
   /// await client.markChannelsDelivered([receipt]);
   /// ```
   ///
   /// Accepts up to 100 channels per call.
-  Future<EmptyResponse> markChannelsDelivered(
+  Future<Result<MarkDeliveredResponse>> markChannelsDelivered(
     Iterable<MessageDelivery> deliveries,
-  ) {
-    return _chatApi.channel.markChannelsDelivered([...deliveries]);
-  }
+  ) => _channelsRepository.markDelivered(deliveries);
 
   /// Send an event to a particular channel
   Future<EmptyResponse> sendEvent(

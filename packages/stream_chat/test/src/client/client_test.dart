@@ -2982,72 +2982,6 @@ void main() {
       verifyNoMoreInteractions(fakeChatApi.message);
     });
 
-    test('`.markChannelRead`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-
-      when(() => fakeChatApi.channel.markRead(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.markChannelRead(channelId, channelType);
-
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.channel.markRead(channelId, channelType)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.markChannelUnread`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const messageId = 'test-message-id';
-
-      when(
-        () => fakeChatApi.channel.markUnread(channelId, channelType, messageId),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.markChannelUnread(
-        channelId,
-        channelType,
-        messageId,
-      );
-
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.channel.markUnread(channelId, channelType, messageId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.markChannelUnreadByTimestamp`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      final timestamp = DateTime.parse('2024-01-01T00:00:00Z');
-
-      when(
-        () => fakeChatApi.channel.markUnreadByTimestamp(
-          channelId,
-          channelType,
-          timestamp,
-        ),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.markChannelUnreadByTimestamp(
-        channelId,
-        channelType,
-        timestamp,
-      );
-
-      expect(res, isNotNull);
-
-      verify(
-        () => fakeChatApi.channel.markUnreadByTimestamp(
-          channelId,
-          channelType,
-          timestamp,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
     test('`.createPoll`', () async {
       final poll = Poll(
         name: 'What is your favorite color?',
@@ -4139,37 +4073,6 @@ void main() {
         expect(activeLiveLocations2, hasLength(1));
         expect(activeLiveLocations2.first.messageId, equals('message-456'));
       });
-    });
-
-    test('`.markAllRead`', () async {
-      when(() => fakeChatApi.channel.markAllRead()).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.markAllRead();
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.channel.markAllRead()).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.markChannelsDelivered`', () async {
-      final deliveries = [
-        const MessageDelivery(
-          channelCid: 'messaging:test-channel-1',
-          messageId: 'test-message-id-1',
-        ),
-        const MessageDelivery(
-          channelCid: 'messaging:test-channel-2',
-          messageId: 'test-message-id-2',
-        ),
-      ];
-
-      when(() => fakeChatApi.channel.markChannelsDelivered(deliveries)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.markChannelsDelivered(deliveries);
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.channel.markChannelsDelivered(deliveries)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
     });
 
     test('`.sendEvent`', () async {

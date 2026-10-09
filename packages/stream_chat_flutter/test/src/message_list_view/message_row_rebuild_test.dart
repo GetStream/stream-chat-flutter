@@ -50,7 +50,9 @@ void main() {
     when(() => channelClientState.currentUserReadStream).thenAnswer((_) => const Stream.empty());
     when(() => channelClientState.messagesStream).thenAnswer((_) => messagesController.stream);
 
-    when(() => channel.markRead(messageId: any(named: 'messageId'))).thenAnswer((_) async => EmptyResponse());
+    when(
+      () => channel.markRead(messageId: any(named: 'messageId')),
+    ).thenAnswer((_) async => const Result.success(MarkReadResponse(duration: '0ms')));
   });
 
   Widget buildApp({required StreamMessageItemBuilder messageBuilder}) {

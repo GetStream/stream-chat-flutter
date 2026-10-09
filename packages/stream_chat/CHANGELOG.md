@@ -93,6 +93,11 @@
 - `MemberUpdatePayload` and `MemberUpdateType` are removed; pass `set: {'pinned': true}` or `unset: ['pinned']` (and `archived`) to `updateMemberPartial`, or call `pinChannel`, `archiveChannel` and their counterparts.
 - `hideChannel`, `showChannel` and `deleteChannel` on `StreamChatClient`, and `hide`, `show` and `delete` on `Channel`, return a `Result<HideChannelResponse>`, `Result<ShowChannelResponse>` and `Result<DeleteChannelResponse>` instead of throwing.
 - `StreamChatApi.channel.hideChannel`, `showChannel` and `deleteChannel` are removed; call them on `StreamChatClient` instead.
+- `markChannelRead`, `markThreadRead` and `markAllRead` on `StreamChatClient`, and `markRead` and `markThreadRead` on `Channel`, return a `Result<MarkReadResponse>` instead of throwing.
+- `markChannelUnread`, `markChannelUnreadByTimestamp` and `markThreadUnread` on `StreamChatClient`, and `markUnread`, `markUnreadByTimestamp` and `markThreadUnread` on `Channel`, return a `Result<void>` instead of throwing.
+- `StreamChatClient.markChannelsDelivered` returns a `Result<MarkDeliveredResponse>` instead of throwing, and `MarkChannelsDelivered`, the callback `ChannelDeliveryReporter` takes, returns a `Future<Result<void>>`.
+- `MessageDelivery` no longer encodes to JSON, compares by value and gains `copyWith`.
+- `StreamChatApi.channel.markRead`, `markUnread`, `markUnreadByTimestamp`, `markThreadRead`, `markThreadUnread`, `markAllRead` and `markChannelsDelivered` are removed; call them on `StreamChatClient` instead.
 
 🐞 Fixed
 

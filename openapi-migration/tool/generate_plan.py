@@ -570,6 +570,8 @@ GROUPS = [
             '`Action` is still the v10 json_serializable class, embedded in `Attachment.actions`, which '
             '`Attachment.toJson` writes when sending and `toData` writes to persistence. It becomes a plain model '
             'with `Attachment`; group 04 left it alone.',
+            'Expose `MarkReadResponse.event`. [17](17-read-receipts.md) dropped it because its thread carries a '
+            '`MessageResponse`; the mapper marks it with a TODO.',
         ],
         risks=[
             '`message_api.dart` also holds the four draft methods, which belong to group 07 — leave them alone '
@@ -590,10 +592,15 @@ GROUPS = [
                                'PATCH /api/v2/chat/channels/{type}/{id}/member',
                                'POST /api/v2/chat/channels/{type}/{id}/hide',
                                'POST /api/v2/chat/channels/{type}/{id}/show',
-                               'DELETE /api/v2/chat/channels/{type}/{id}')),
+                               'DELETE /api/v2/chat/channels/{type}/{id}',
+                               'POST /api/v2/chat/channels/{type}/{id}/read',
+                               'POST /api/v2/chat/channels/{type}/{id}/unread',
+                               'POST /api/v2/chat/channels/read',
+                               'POST /api/v2/chat/channels/delivered')),
         goal='The biggest group, and the one every controller above it reads through `ChannelState`. '
-             '[15](15-partial-updates.md) split the partial channel and member updates out of it, and '
-             '[16](16-channel-lifecycle.md) hiding, showing and deleting a channel.',
+             '[15](15-partial-updates.md) split the partial channel and member updates out of it, '
+             '[16](16-channel-lifecycle.md) hiding, showing and deleting a channel, and '
+             '[17](17-read-receipts.md) the read and delivery receipts.',
         decisions=[
             '`ChannelState`, `ChannelModel` and `Member` are public, persisted, and rebuilt from WebSocket '
             'events. Keep ours and map.',
@@ -861,10 +868,52 @@ GROUPS = [
             - **`StreamChannelListController.deleteChannel` returns the `Result`,** as `muteChannel` does.
             - **`hard_delete` is not exposed.** The server refuses it from a client-side token, and v10 never sent it.
             - **Show sends no body,** where v1 sent `{}`; the server accepts both. Hide still sends `clear_history`.
-            - **The read and delivery receipts stay in 11 for now.** `markRead` and its siblings share endpoints
-              with the thread read calls, fabricate a response on the local-unread path, and feed
-              `MessageListUnreadController` and the public `ChannelDeliveryReporter`, which rely on a throw; they
-              move in a slice of their own.
+            - **The read and delivery receipts are left to their own slice,
+              [17](17-read-receipts.md).** `markRead` and its siblings share endpoints with the thread read calls,
+              fabricate a response on the local-unread path, and feed `MessageListUnreadController` and the public
+              `ChannelDeliveryReporter`, which relied on a throw.
+            """),
+        risks=[],
+        done=DONE.replace('- [ ]', '- [x]'),
+    ),
+    dict(
+        num='17', slug='read-receipts', title='Read Receipts',
+        hand=[],
+        match=only_ops('POST /api/v2/chat/channels/{type}/{id}/read',
+                       'POST /api/v2/chat/channels/{type}/{id}/unread',
+                       'POST /api/v2/chat/channels/read',
+                       'POST /api/v2/chat/channels/delivered'),
+        goal='Move marking channels and threads read and unread, and the delivery receipts, ahead of '
+             '[11](11-channels-and-members.md): they answer only a `duration` and a read event, and the event can '
+             'wait for [10](10-messages.md).',
+        decisions=[],
+        taken=textwrap.dedent("""\
+            - **Split out of [11](11-channels-and-members.md), ahead of it.** None of the calls reads anything into
+              client state — the `message.read`, `notification.mark_unread` and `message.delivered` events do that.
+            - **The v2 routes are the v1 handlers.** `lib/chat/routes.go` mounts all four in the shared
+              `coreRoutes`; none is gated, in beta or deprecated. A live run answered the same on v1 and v2 for
+              every call, with the generated requests' explicit `null`s.
+            - **Moved off `ChannelApi`:** `markRead`, `markUnread`, `markUnreadByTimestamp`, `markThreadRead`,
+              `markThreadUnread`, `markAllRead` and `markChannelsDelivered`, each now a `StreamChatClient` method
+              over `ChannelsRepository`. The v10 names stay: seven calls share four operations, so the spec's
+              names cannot tell most of them apart.
+            - **Marking read answers `MarkReadResponse`, carrying only `duration`.** The spec's `event` holds a
+              `ThreadResponse` whose `parentMessage` is a `MessageResponse`, which needs group 10's mappers.
+              Exposing it later is additive; the mapper marks it with a TODO.
+            - **Marking unread answers `DurationResponse`, so it returns `Result<void>`.** The delivery receipts
+              answer `MarkDeliveredResponse`.
+            - **`markAllRead` sends an empty `MarkChannelsReadRequest`.** `read_by_channel: null` marks every channel
+              read, as v1's `{}` did. The handler refuses a request with no body (400 "invalid json data"), but
+              the generated operation always sends one: it writes `{}` when given no request.
+            - **`Channel`'s guards return a failure.** A missing read-events capability, and on the local-unread
+              path a message `markUnread` cannot find, were thrown `StreamClientException`s; they are failures
+              now. An uninitialized channel still throws a `StateError`.
+            - **The local-unread path answers `MarkReadResponse(duration: '0ms')`** from `Channel.markRead`, where
+              v10 built an empty `EmptyResponse`, so it keeps the type of the remote path.
+            - **`MarkChannelsDelivered` returns `Future<Result<void>>`.** `ChannelDeliveryReporter` relied on a
+              throw to keep the receipts of a failed send; it now reads the failure. Changing the public typedef
+              is a break, approved for this group.
+            - **`MessageDelivery` moves to `models/request/`** as a freezed class without `toJson`.
             """),
         risks=[],
         done=DONE.replace('- [ ]', '- [x]'),
