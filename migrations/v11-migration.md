@@ -36,6 +36,7 @@ onto Stream's OpenAPI-generated API client.
     - [Partial Updates](#partial-updates)
     - [Channel Lifecycle](#channel-lifecycle)
     - [Read Receipts](#read-receipts)
+    - [Unread Counts](#unread-counts)
 - [Migration Checklist](#migration-checklist)
 - [For AI Agents](#for-ai-agents)
 - [Contributing to this guide](#contributing-to-this-guide)
@@ -84,6 +85,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Partial Updates**](#partial-updates) | Channel and member partial updates — `updatePartial`, `updateName`, `updateImage`, slow mode, pin and archive — return a `Result` instead of throwing; their responses take the API's names, `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse`, and `partialMemberUpdate` becomes `updateMemberPartial` |
 | [**Channel Lifecycle**](#channel-lifecycle) | Hiding, showing and deleting a channel return a `Result` instead of throwing; stopping watching still throws |
 | [**Read Receipts**](#read-receipts) | Marking read, unread and delivered return a `Result` instead of throwing; `ChannelDeliveryReporter`'s callback returns a `Result` |
+| [**Unread Counts**](#unread-counts) | `getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing; the response and its `UnreadCounts*` models no longer decode JSON and compare by value |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -255,6 +257,12 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `MessageDelivery.toJson` | — | `removed` | `MessageDelivery` is a plain class |
 | `MessageDelivery` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
 | `StreamChatApi.channel.markRead` / `markUnread` / `markUnreadByTimestamp` / `markThreadRead` / `markThreadUnread` / `markAllRead` / `markChannelsDelivered` | the `StreamChatClient` methods | `removed` | The endpoints moved to the generated client |
+| `StreamChatClient.getUnreadCount` → `Future<GetUnreadCountResponse>` | `Future<Result<GetUnreadCountResponse>>` | `retyped` | Returns a `Result` instead of throwing. The current user's unread counts are still updated on success |
+| `GetUnreadCountResponse.fromJson`, `UnreadCountsChannel.fromJson` / `toJson`, `UnreadCountsThread.fromJson` / `toJson`, `UnreadCountsChannelType.fromJson` / `toJson` | — | `removed` | The response and models are plain classes; construct them directly |
+| `GetUnreadCountResponse()..totalUnreadCount = …` and its other setters | `GetUnreadCountResponse(duration: …, totalUnreadCount: …, …)` | `retyped` | A plain class with a const constructor and final fields |
+| `GetUnreadCountResponse`, `UnreadCountsChannel`, `UnreadCountsThread`, `UnreadCountsChannelType` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
+| `GetUnreadCountResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| `StreamChatApi.user.getUnreadCount` | `StreamChatClient.getUnreadCount` | `removed` | The endpoint moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -795,6 +803,40 @@ ChannelDeliveryReporter(
 > **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call. Marking read
 > and sending receipts answer their own envelope, so a field the API adds later reaches you without another
 > break. Marking unread answers nothing the API could extend, so it carries no value.
+
+### Unread Counts
+
+**`StreamChatClient.getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing.** A
+`try`/`catch` around it still compiles, but no longer catches a failed call: read the returned `Result` instead.
+On success it still updates the current user's `totalUnreadCount`, `unreadChannels` and `unreadThreads`; a
+failure leaves them as they were.
+
+```dart
+// v10
+try {
+  final counts = await client.getUnreadCount();
+  showBadge(counts.totalUnreadCount);
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await client.getUnreadCount();
+switch (result) {
+  case Success(:final data): showBadge(data.totalUnreadCount);
+  case Failure(:final error): report(error);
+}
+```
+
+**`UnreadCountsChannel`, `UnreadCountsThread` and `UnreadCountsChannelType` no longer decode from or encode to
+JSON, and `GetUnreadCountResponse` no longer decodes from it.** All four compare by value and gain `copyWith`.
+`GetUnreadCountResponse` is now a plain class with a const constructor and final fields, and its `duration` is
+always present.
+
+**`StreamChatApi.user.getUnreadCount` is removed.** Call `StreamChatClient.getUnreadCount`.
+
+> **Why:** the endpoint moved onto the generated client, which returns a `Result` for every call. The response
+> keeps its v10 name and fields; what changes is the error handling, the JSON codecs and value equality.
 
 ### Moderation
 

@@ -64,6 +64,7 @@ import '../core/models/response/add_user_group_members_response.dart';
 import '../core/models/response/app_settings_response.dart';
 import '../core/models/response/create_user_group_response.dart';
 import '../core/models/response/delete_channel_response.dart';
+import '../core/models/response/get_unread_count_response.dart';
 import '../core/models/response/get_user_group_response.dart';
 import '../core/models/response/hide_channel_response.dart';
 import '../core/models/response/list_devices_response.dart';
@@ -94,6 +95,7 @@ import '../repository/general_repository.dart';
 import '../repository/moderation_repository.dart';
 import '../repository/roles_repository.dart';
 import '../repository/user_groups_repository.dart';
+import '../repository/users_repository.dart';
 import '../ws/connect_request.dart';
 import '../ws/connection_manager.dart';
 import '../ws/connection_status.dart';
@@ -195,6 +197,7 @@ class StreamChatClient {
     _rolesRepository = RolesRepository(api);
     _devicesRepository = DevicesRepository(api);
     _userGroupsRepository = UserGroupsRepository(api);
+    _usersRepository = UsersRepository(api);
     _generalRepository = GeneralRepository(api);
     _moderationRepository = ModerationRepository(api);
     _channelsRepository = ChannelsRepository(api);
@@ -239,6 +242,7 @@ class StreamChatClient {
   late final RolesRepository _rolesRepository;
   late final DevicesRepository _devicesRepository;
   late final UserGroupsRepository _userGroupsRepository;
+  late final UsersRepository _usersRepository;
   late final GeneralRepository _generalRepository;
   late final ModerationRepository _moderationRepository;
   late final ChannelsRepository _channelsRepository;
@@ -1846,21 +1850,18 @@ class StreamChatClient {
     }
   }
 
-  /// Returns the unread count information for the current user.
-  Future<GetUnreadCountResponse> getUnreadCount() async {
-    final response = await _chatApi.user.getUnreadCount();
-
-    // Emit an local event with the unread count information as a side effect
-    // in order to update the current user state.
-    handleEvent(
-      Event(
-        totalUnreadCount: response.totalUnreadCount,
-        unreadChannels: response.channels.length,
-        unreadThreads: response.threads.length,
+  /// Gets how many unread messages and threads the current user has.
+  Future<Result<GetUnreadCountResponse>> getUnreadCount() async {
+    final result = await _usersRepository.getUnreadCount();
+    return result.onSuccess(
+      (response) => handleEvent(
+        Event(
+          totalUnreadCount: response.totalUnreadCount,
+          unreadChannels: response.channels.length,
+          unreadThreads: response.threads.length,
+        ),
       ),
     );
-
-    return response;
   }
 
   /// Marks all of the current user's channels as read.

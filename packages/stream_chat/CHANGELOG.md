@@ -98,6 +98,11 @@
 - `StreamChatClient.markChannelsDelivered` returns a `Result<MarkDeliveredResponse>` instead of throwing, and `MarkChannelsDelivered`, the callback `ChannelDeliveryReporter` takes, returns a `Future<Result<void>>`.
 - `MessageDelivery` no longer encodes to JSON, compares by value and gains `copyWith`.
 - `StreamChatApi.channel.markRead`, `markUnread`, `markUnreadByTimestamp`, `markThreadRead`, `markThreadUnread`, `markAllRead` and `markChannelsDelivered` are removed; call them on `StreamChatClient` instead.
+- `StreamChatClient.getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing.
+- `GetUnreadCountResponse` no longer decodes from JSON, is immutable, built through a const constructor, and its `duration` is a non-nullable `String`.
+- `UnreadCountsChannel`, `UnreadCountsThread` and `UnreadCountsChannelType` no longer decode from or encode to JSON.
+- `GetUnreadCountResponse`, `UnreadCountsChannel`, `UnreadCountsThread` and `UnreadCountsChannelType` compare by value and gain `copyWith`.
+- `StreamChatApi.user.getUnreadCount` is removed; call `StreamChatClient.getUnreadCount` instead.
 
 🐞 Fixed
 
