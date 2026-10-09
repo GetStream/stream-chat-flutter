@@ -9,7 +9,7 @@ import '../core/models/response/mark_read_response.dart';
 import '../core/models/response/show_channel_response.dart';
 import '../core/models/response/update_channel_partial_response.dart';
 import '../core/models/response/update_member_partial_response.dart';
-import 'mapper/channel_mapper.dart';
+import 'mapper/channels_mapper.dart';
 import 'mapper/result_mapper.dart';
 
 /// Repository dedicated to channel operations.

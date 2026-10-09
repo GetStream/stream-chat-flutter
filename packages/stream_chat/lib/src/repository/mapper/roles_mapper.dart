@@ -4,7 +4,7 @@ import '../../core/models/role.dart';
 
 /// Maps a generated [api.Role] to a [Role].
 extension RoleMapper on api.Role {
-  /// Converts this generated role into a [Role].
+  /// Converts this role into a [Role].
   Role toModel() => Role(
     createdAt: createdAt,
     custom: custom,
