@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:stream_chat/src/core/models/action.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
@@ -162,5 +164,56 @@ void main() {
         expect(autoUrlAttachment.isUrlPreview, isTrue);
       });
     });
+  });
+
+  test('Attachment stores the Giphy renditions it is given in extraData', () {
+    final attachment = Attachment(
+      extraData: const {'caption': 'A cat'},
+      giphy: const {
+        'original': {'url': 'https://example.com/original.gif'},
+      },
+    );
+
+    expect(attachment.extraData, {
+      'caption': 'A cat',
+      'giphy': {
+        'original': {'url': 'https://example.com/original.gif'},
+      },
+    });
+  });
+
+  test('Attachment replaces the extraData entry of the Giphy renditions it is given', () {
+    final attachment = Attachment(
+      extraData: const {
+        'giphy': {
+          'original': {'url': 'https://example.com/old.gif'},
+        },
+      },
+      giphy: const {
+        'original': {'url': 'https://example.com/new.gif'},
+      },
+    );
+
+    expect(attachment.extraData, {
+      'giphy': {
+        'original': {'url': 'https://example.com/new.gif'},
+      },
+    });
+  });
+
+  test('Attachment.fromJson reads the Giphy renditions from extraData', () {
+    // Decoded JSON, as events and the offline cache deliver it.
+    final attachment = Attachment.fromJson(
+      jsonDecode('{"type": "giphy", "giphy": {"original": {"url": "https://example.com/original.gif"}}}')
+          as Map<String, dynamic>,
+    );
+
+    expect(attachment.giphy, {
+      'original': {'url': 'https://example.com/original.gif'},
+    });
+  });
+
+  test('Attachment reads no Giphy renditions when extraData has none', () {
+    expect(Attachment().giphy, isNull);
   });
 }

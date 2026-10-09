@@ -19,8 +19,8 @@ extension AttachmentMapper on api.Attachment {
   /// Converts this attachment into an [Attachment].
   ///
   /// The attachment gets a new local [Attachment.id]; an id it was sent with is kept in [Attachment.extraData], beside
-  /// the custom data and the Giphy renditions, with custom data named like one of the attachment's own fields left
-  /// out.
+  /// the custom data and the [Attachment.giphy] renditions, with custom data named like one of the attachment's own
+  /// fields left out.
   Attachment toModel() => Attachment(
     type: type,
     titleLink: titleLink,
@@ -42,10 +42,8 @@ extension AttachmentMapper on api.Attachment {
     actions: actions?.map((action) => action.toModel()).toList() ?? const [],
     originalWidth: originalWidth,
     originalHeight: originalHeight,
-    extraData: {
-      ...{...custom}..removeWhere((key, _) => _shadowedCustomKeys.contains(key)),
-      if (giphy case final giphy?) 'giphy': giphy.toJson(),
-    },
+    extraData: {...custom}..removeWhere((key, _) => _shadowedCustomKeys.contains(key)),
+    giphy: giphy?.toJson(),
     uploadState: const UploadState.success(),
   );
 }
