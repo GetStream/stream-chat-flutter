@@ -611,10 +611,7 @@ class Channel {
     String messageId,
     Iterable<String> attachmentIds,
   ) {
-    var message = [
-      ...state!.messages,
-      ...state!.threads.values.expand((messages) => messages),
-    ].firstWhereOrNull((it) => it.id == messageId);
+    var message = _findMessageInLocalState(messageId);
 
     if (message == null) {
       throw const StreamChatError('Error, Message not found');
@@ -745,6 +742,11 @@ class Channel {
     });
   }
 
+  Message? _findMessageInLocalState(String messageId) => [
+    ...state!.messages,
+    ...state!.threads.values.expand((messages) => messages),
+  ].firstWhereOrNull((it) => it.id == messageId);
+
   final _sendMessageLock = Lock();
 
   /// Send a [message] to this channel.
@@ -837,6 +839,10 @@ class Channel {
 
       return response;
     } catch (e) {
+      if (e is StreamChatNetworkError && e.isMessageAlreadyExistsError) {
+        _markMessageAsSent(message);
+        rethrow;
+      }
       final failedMessage = message.copyWith(
         // Update the message state to failed.
         state: MessageState.sendingFailed(
@@ -853,6 +859,16 @@ class Channel {
 
       rethrow;
     }
+  }
+
+  void _markMessageAsSent(Message message) {
+    if (state == null) return;
+    final localStateMessage = _findMessageInLocalState(message.id) ?? message;
+    final sentMessage = localStateMessage.copyWith(
+      createdAt: localStateMessage.remoteCreatedAt ?? localStateMessage.localCreatedAt,
+      state: MessageState.sent,
+    );
+    state?.updateMessage(sentMessage);
   }
 
   final _updateMessageLock = Lock();

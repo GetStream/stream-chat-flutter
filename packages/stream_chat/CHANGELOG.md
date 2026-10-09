@@ -13,6 +13,7 @@
 
 - Fixed `Event.aiState` reading `AI_STATE_EXTERNAL_SOURCES` as `idle` instead of `checkingSources`.
 - Fixed `Channel.disableSlowMode` and `StreamChatClient.disableSlowdown` always failing.
+- Fixed a message the server had already stored being shown as failed after a lost response or a retried send.
 
 ## 10.5.0
 

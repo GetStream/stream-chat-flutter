@@ -89,8 +89,9 @@ class RetryQueue {
       } catch (error) {
         logger?.severe('Error while retrying message ${message.id}', error);
         // If we are unable to successfully retry the message, update the state
-        // with the failed state.
-        channel.state?.updateMessage(message);
+        // with the failed state, unless an earlier attempt was stored by the
+        // server and the message is already marked as sent.
+        if (!_isAlreadySent(error)) channel.state?.updateMessage(message);
       } finally {
         // remove the message from the queue after it's handled.
         _messageQueue.removeMessage(message);
@@ -99,6 +100,8 @@ class RetryQueue {
 
     _isProcessing = false;
   }
+
+  static bool _isAlreadySent(Object error) => error is StreamChatNetworkError && error.isMessageAlreadyExistsError;
 
   /// Whether our [_messageQueue] has messages or not.
   bool get hasMessages => _messageQueue.isNotEmpty;
