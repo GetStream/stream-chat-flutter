@@ -227,8 +227,8 @@ extension MarkDeliveredResponseMapper on api.MarkDeliveredResponse {
   MarkDeliveredResponse toModel() => MarkDeliveredResponse(duration: duration);
 }
 
-/// Maps a [MessageDelivery] to a generated [api.DeliveredMessagePayload].
-extension MessageDeliveryMapper on MessageDelivery {
+/// Maps a [MessageDelivery] to the generated [api.DeliveredMessagePayload].
+extension MessageDeliveryRequestMapper on MessageDelivery {
   /// Converts this receipt into an [api.DeliveredMessagePayload].
   api.DeliveredMessagePayload toRequest() => api.DeliveredMessagePayload(cid: channelCid, id: messageId);
 }
