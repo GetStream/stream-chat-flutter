@@ -15,7 +15,7 @@ import '../../core/models/response/mark_read_response.dart';
 import '../../core/models/response/show_channel_response.dart';
 import '../../core/models/response/update_channel_partial_response.dart';
 import '../../core/models/response/update_member_partial_response.dart';
-import 'user_mapper.dart';
+import 'users_mapper.dart';
 
 // TODO(openapi-migration): re-point these mappers in group 11.
 
@@ -227,8 +227,8 @@ extension MarkDeliveredResponseMapper on api.MarkDeliveredResponse {
   MarkDeliveredResponse toModel() => MarkDeliveredResponse(duration: duration);
 }
 
-/// Maps a [MessageDelivery] to a generated [api.DeliveredMessagePayload].
-extension MessageDeliveryMapper on MessageDelivery {
+/// Maps a [MessageDelivery] to the generated [api.DeliveredMessagePayload].
+extension MessageDeliveryRequestMapper on MessageDelivery {
   /// Converts this receipt into an [api.DeliveredMessagePayload].
   api.DeliveredMessagePayload toRequest() => api.DeliveredMessagePayload(cid: channelCid, id: messageId);
 }

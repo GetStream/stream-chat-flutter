@@ -108,6 +108,8 @@ extension UserRequestMapper on User {
 }
 
 /// Maps [PrivacySettings] to the generated [api.PrivacySettingsResponse].
+///
+/// The generated client names the settings a request sends [api.PrivacySettingsResponse], too.
 extension PrivacySettingsRequestMapper on PrivacySettings {
   /// Converts these settings into an [api.PrivacySettingsResponse].
   api.PrivacySettingsResponse toRequest() => api.PrivacySettingsResponse(
@@ -144,9 +146,9 @@ extension WrappedUnreadCountsResponseMapper on api.WrappedUnreadCountsResponse {
     totalUnreadCount: totalUnreadCount,
     totalUnreadThreadsCount: totalUnreadThreadsCount,
     totalUnreadCountByTeam: totalUnreadCountByTeam,
-    channels: channels.map((channel) => channel.toModel()).toList(),
-    channelType: channelType.map((type) => type.toModel()).toList(),
-    threads: threads.map((thread) => thread.toModel()).toList(),
+    channels: [for (final channel in channels) channel.toModel()],
+    channelType: [for (final type in channelType) type.toModel()],
+    threads: [for (final thread in threads) thread.toModel()],
   );
 }
 
@@ -203,7 +205,7 @@ extension GetBlockedUsersResponseMapper on api.GetBlockedUsersResponse {
   /// Converts this response into a [GetBlockedUsersResponse].
   GetBlockedUsersResponse toModel() => GetBlockedUsersResponse(
     duration: duration,
-    blocks: blocks.map((block) => block.toModel()).toList(),
+    blocks: [for (final block in blocks) block.toModel()],
   );
 }
 

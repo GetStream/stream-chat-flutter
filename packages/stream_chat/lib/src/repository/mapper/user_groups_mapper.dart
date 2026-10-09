@@ -28,7 +28,7 @@ extension UserGroupResponseMapper on api.UserGroupResponse {
 
 /// Maps a generated [api.UserGroupMember] to a [UserGroupMember].
 extension UserGroupMemberMapper on api.UserGroupMember {
-  /// Converts this generated member into a [UserGroupMember].
+  /// Converts this member into a [UserGroupMember].
   UserGroupMember toModel() => UserGroupMember(
     createdAt: createdAt,
     groupId: groupId,

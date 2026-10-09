@@ -9,7 +9,7 @@ import 'polls_mapper.dart';
 import 'reaction_mapper.dart';
 import 'reminders_mapper.dart';
 import 'user_groups_mapper.dart';
-import 'user_mapper.dart';
+import 'users_mapper.dart';
 
 // TODO(openapi-migration): re-point these mappers in group 10.
 

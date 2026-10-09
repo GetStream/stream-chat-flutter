@@ -1,6 +1,6 @@
 import '../../../open_api/api.dart' as api;
 import '../../core/models/location.dart';
-import 'channel_mapper.dart';
+import 'channels_mapper.dart';
 import 'message_mapper.dart';
 
 // TODO(openapi-migration): re-point this mapper in group 10.

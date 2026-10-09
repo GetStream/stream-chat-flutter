@@ -2,7 +2,7 @@ import '../../../open_api/api.dart' as api;
 import '../../core/models/reaction.dart';
 import '../../core/models/reaction_group.dart';
 import '../../core/util/extension.dart';
-import 'user_mapper.dart';
+import 'users_mapper.dart';
 
 // TODO(openapi-migration): re-point these mappers in group 10.
 
