@@ -73,8 +73,8 @@ extension AttachmentRequestMapper on Attachment {
 
   /// Converts this attachment into the shape a request sends.
   ///
-  /// The extra data becomes the custom data, except the Giphy renditions and keys named like one of the attachment's
-  /// own fields. The local [id], [uploadState] and [file] are left out.
+  /// The extra data becomes the custom data, except the [giphy] renditions and keys named like one of the
+  /// attachment's own fields. The local [id], [uploadState] and [file] are left out.
   api.Attachment toRequest() => api.Attachment(
     type: type,
     titleLink: titleLink,
@@ -96,9 +96,9 @@ extension AttachmentRequestMapper on Attachment {
     actions: actions?.map((action) => action.toRequest()).toList(),
     originalWidth: originalWidth,
     originalHeight: originalHeight,
-    giphy: switch (extraData['giphy']) {
-      final Map<String, Object?> giphy => _imagesToRequest(giphy),
-      _ => null,
+    giphy: switch (giphy) {
+      final giphy? => _imagesToRequest(giphy),
+      null => null,
     },
     custom: {...extraData}..removeWhere((key, _) => _nonCustomKeys.contains(key)),
   );
