@@ -1,12 +1,12 @@
 import '../../../open_api/api.dart' as api;
 import '../../core/models/message.dart';
+import '../../core/models/moderation.dart';
 import '../../core/util/message_decoding.dart';
-import 'attachment_mapper.dart';
+import 'attachments_mapper.dart';
 import 'drafts_mapper.dart';
-import 'location_mapper.dart';
-import 'moderation_mapper.dart';
+import 'locations_mapper.dart';
 import 'polls_mapper.dart';
-import 'reaction_mapper.dart';
+import 'reactions_mapper.dart';
 import 'reminders_mapper.dart';
 import 'user_groups_mapper.dart';
 import 'users_mapper.dart';
@@ -86,4 +86,18 @@ extension MessageResponseMapper on api.MessageResponse {
     imageLabels: imageLabels,
     deletedReplyCount: deletedReplyCount,
   ).withDerivedState();
+}
+
+/// Maps a generated [api.ModerationV2Response] to a [Moderation].
+extension ModerationV2ResponseMapper on api.ModerationV2Response {
+  /// Converts this response into a [Moderation].
+  Moderation toModel() => Moderation(
+    action: ModerationAction.fromJson(action),
+    originalText: originalText,
+    textHarms: textHarms,
+    imageHarms: imageHarms,
+    blocklistMatched: blocklistMatched,
+    semanticFilterMatched: semanticFilterMatched,
+    platformCircumvented: platformCircumvented ?? false,
+  );
 }

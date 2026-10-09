@@ -26,7 +26,7 @@
 
 - **Split out of [11](11-channels-and-members.md), ahead of it.** None of the three reads anything
   into client state — the `channel.hidden`, `channel.visible` and `channel.deleted` events do that —
-  and the one channel they answer goes through `channel_mapper.dart`.
+  and the one channel they answer goes through `channels_mapper.dart`.
 - **The v2 routes are the v1 handlers.** `lib/chat/routes.go` mounts hide, show and delete in the
   shared `coreRoutes`; none is gated, in beta or deprecated.
 - **Moved off `ChannelApi`:** `hideChannel`, `showChannel` and `deleteChannel`, each now a

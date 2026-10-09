@@ -27,7 +27,7 @@
 
 ## Decisions to make
 
-- `User` and `OwnUser` are public, persisted, and embedded in nearly every other response. This group restructures them, last: the mappers in `user_mapper.dart` already map the generated types onto the current class for every group before it, and stay. See [01-foundation](01-foundation.md).
+- `User` and `OwnUser` are public, persisted, and embedded in nearly every other response. This group restructures them, last: the mappers in `users_mapper.dart` already map the generated types onto the current class for every group before it, and stay. See [01-foundation](01-foundation.md).
 - `PrivacySettings` and the push-preference sub-shapes — decide per type.
 - `UserResponse.toModel()` and `FullUserResponse.toModel()` drop custom data named like one of the user's own fields (`_shadowedCustomKeys`): `deactivated_at`, `deleted_at` and `shadow_banned` are refilled from the typed fields, and the `OwnUser`-only keys and `revoke_tokens_issued_before` are left out, where v1 kept them in a plain user's `extraData`. Revisit once the mapper serves plain users.
 - **Decide `User`, `FullUserResponse` and `OwnUser` together, here:** which private fields a plain user exposes, whether the caller's own entry maps to `OwnUser`, and what is kept in `extraData` once `User` drops `fromJson` and `toJson`. One input, verified live while migrating [06](06-reminders.md): `blocked_user_ids`, which v1 left in every nested user's `extraData`, arrives as `[]` on every user nested in a message or reminder, on v1 and v2 alike and even for the caller with real blocks; only connect and `queryUsers` return the caller's real list. Writing it back into `extraData` in `UserResponse.toModel()` restores v10 parity for nested users at no information cost, but changes every group's mapped users, so it was deferred to this decision.
@@ -63,6 +63,6 @@
       name states its subject and behaviour.
 - [ ] Temporary adapters owned by this group (`DeviceV1JsonConverter`) are deleted and removed from
       the table in `README.md`.
-- [ ] `user_mapper.dart` maps onto the restructured `User`, and its `TODO(openapi-migration)` note is
+- [ ] `users_mapper.dart` maps onto the restructured `User`, and its `TODO(openapi-migration)` note is
       gone.
 - [ ] A user mapped from `UserResponse` and the same user decoded from v1 / WebSocket JSON compare equal.

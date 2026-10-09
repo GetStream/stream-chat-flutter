@@ -2,9 +2,9 @@ import '../../../open_api/api.dart' as api;
 import '../../core/models/draft.dart';
 import '../../core/models/draft_message.dart';
 import '../../core/models/message.dart';
-import 'attachment_mapper.dart';
+import 'attachments_mapper.dart';
 import 'channels_mapper.dart';
-import 'message_mapper.dart';
+import 'messages_mapper.dart';
 import 'users_mapper.dart';
 
 // TODO(openapi-migration): re-point these mappers in group 10.

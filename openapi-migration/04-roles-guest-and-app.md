@@ -100,7 +100,7 @@
   non-date value). v10's flat response shadowed them, so the same guest connected; confirmed live.
 - **Not a regression: a custom `ban_expires` that isn't a date** fails the connect in v10 and now alike,
   because the socket's `me` lets it through into `OwnUser.fromJson`.
-- **`User` is not restructured here.** `user_mapper.dart` maps the generated types onto today's `User`,
+- **`User` is not restructured here.** `users_mapper.dart` maps the generated types onto today's `User`,
   following [01-foundation](01-foundation.md).
 
 ## Risks

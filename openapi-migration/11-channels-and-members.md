@@ -60,7 +60,7 @@
 - **The generated channel and member types map onto today's classes.**
   `lib/src/repository/mapper/channel_mapper.dart` maps `ChannelResponse`, `ChannelConfigWithInfo`,
   `ChannelMemberResponse`, `Command` and `ChatPreferences` onto the json_serializable `ChannelModel`,
-  `ChannelConfig`, `Member`, `Command` and `ChatPreferences`, the way `user_mapper.dart` does for
+  `ChannelConfig`, `Member`, `Command` and `ChatPreferences`, the way `users_mapper.dart` does for
   `User`. [15](15-partial-updates.md) uses it first; groups 06, 07 and 14 will reuse it. This group
   restructures those classes and re-points the mapper.
 - **Every field `ChannelResponse` and `ChannelMemberResponse` declare is reachable on ours.** The
@@ -75,10 +75,10 @@
   `createdAt` / `updatedAt`, which ours do not model.
 - **The mapper writes the server fields where v1 JSON puts them,** into `extraData` under their wire
   keys. Custom data named like one of those fields or a top-level field is dropped, as
-  `user_mapper.dart` does. A mapped channel or member still differs from a v1 decode in three ways,
+  `users_mapper.dart` does. A mapped channel or member still differs from a v1 decode in three ways,
   all for group 09 or this group to settle: dates in `extraData` are formatted by the client rather
   than kept as the server sent them (see the risk below); `truncatedBy`, `createdBy` and each member's
-  user go through `user_mapper.dart`, which drops the user fields `User` does not model; and
+  user go through `users_mapper.dart`, which drops the user fields `User` does not model; and
   `mute_expires_at` and `hide_messages_before` are left out, where v1 would keep them in `extraData` if
   the server sent them on the channel.
 - **The mapper is tested through the client,** by [15](15-partial-updates.md)'s
@@ -89,9 +89,10 @@
 - `sync` and `queryMembers` live in `general_api.dart`, not `channel_api.dart` — this group reaches into that file.
 - `queryChannels` drives the channel list controllers and the offline cache; a shape change here is felt everywhere.
 - Channel `custom`/`extraData` promotion, same class of problem as messages.
+- Requests that send custom data drop the keys named like one of the model's own fields, as every request mapper does until [21](21-custom-data-rename.md) revisits it.
 - **A zero timestamp decodes differently on v2.** v1 sends Go's zero time as `0001-01-01T00:00:00Z`; v2 encodes timestamps as epoch nanoseconds and sends `0`, which decodes as 1970-01-01. A truncated channel shows it: its `last_message_at` is zero time, so the same channel answers year 1 from a v1 query or WebSocket event and 1970 from `/api/v2/chat/channels`. Nothing in the SDK behaves differently today, since both precede `createdAt` (`lastUpdatedAt` falls back to it, and the read fallback and the `max` against new messages agree), but the two sources disagree on the value. Normalize it deliberately when `queryChannels` moves, and check the other timestamps the server can send as zero.
 - **Dates the mapper writes into `extraData` are formatted differently from v1.** v1 keeps the server's string (`2020-01-29T03:22:47.63613Z`); the mapper writes `toIso8601String()` (`2020-01-29T03:22:47.636130Z`). The getters return the same `DateTime`, but `Member` compares `extraData`, so the same member from a v1 payload and from the mapper compares unequal. Promoting the fields removes it.
-- [08](08-moderation-and-blocklists.md)'s `muteChannel` drops `channelMute`, `channelMutes` and `ownUser` because the generated `ChannelMute` carries a `ChannelResponse?` and a `UserResponse?` where ours needs a non-nullable `ChannelModel` and `User`. `channel_mapper.dart` covers the channel side now; it needs 09 as well. Decide the null case there too — ours are non-nullable, the generated ones are not, the same question [14](14-banned-users.md) records for `BanResponse.user`.
+- [08](08-moderation-and-blocklists.md)'s `muteChannel` drops `channelMute`, `channelMutes` and `ownUser` because the generated `ChannelMute` carries a `ChannelResponse?` and a `UserResponse?` where ours needs a non-nullable `ChannelModel` and `User`. `channels_mapper.dart` covers the channel side now; it needs 09 as well. Decide the null case there too — ours are non-nullable, the generated ones are not, the same question [14](14-banned-users.md) records for `BanResponse.user`.
 
 ## Definition of done
 
