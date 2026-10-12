@@ -4531,6 +4531,22 @@ void main() {
         expect(activeLiveLocations?.first.latitude, equals(40.7500));
         expect(activeLiveLocations?.first.longitude, equals(-74.1000));
       });
+
+      test('a message without a shared location leaves the empty active live locations untouched', () async {
+        final before = channel.state!.channelState.activeLiveLocations;
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.messageNew,
+            message: Message(id: 'msg1', text: 'Hello'),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.messages, hasLength(1));
+        expect(identical(channel.state!.channelState.activeLiveLocations, before), isTrue);
+      });
     });
 
     group('Channel push preference events', () {
