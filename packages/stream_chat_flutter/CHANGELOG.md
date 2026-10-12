@@ -18,7 +18,7 @@
 - A deleted message now renders the timestamp and delivery status below the placeholder, matching the design, and no longer shows the "Edited" marker — there is no text left to have been edited.
 - `AccessibleMessagePreviewFormatter.formatMessageSemanticsLabel` must now return the body without a speaker prefix when `channel` is omitted. An implementation that prefixes unconditionally makes a message row announce "You said, You: hello".
 - `StreamImageCDN.resolveUrl` now leaves a URL that already asks for a specific size alone, rather than replacing it with the size the layout computed.
-- `StreamMessageComposer` now hides the attachment button and voice recording, and ignores dropped files and keyboard images, when the user lacks the `upload-file` capability in the channel. The backend rejected those uploads anyway, so the message used to fail only on send. A channel that isn't created yet still offers uploads.
+- `StreamMessageComposer` now hides upload options, voice recording included, when the user lacks the `upload-file` capability in the channel.
 
 ⚠️ Deprecated
 
@@ -41,6 +41,8 @@
 - Fixed one image rendition yielding two cache entries when its resize parameters arrived in a different order, or a crop on the URL survived a resize that does not crop.
 - Fixed image attachments not being resized at all when the URL carried a crop or a resize mode but no dimensions.
 - Fixed a URL whose host merely contains `stream-io-cdn.com` being treated as Stream's CDN.
+- Fixed `StreamMessageComposer` accepting dropped files when `disableAttachments` is set or files aren't in `allowedAttachmentPickerTypes`.
+- Fixed the attachment picker showing an empty commands tab in channels without commands.
 
 ## 10.4.0
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,16 +13,189 @@ import '../mocks.dart';
 
 const _canUpload = [ChannelCapability.sendMessage, ChannelCapability.uploadFile];
 const _cannotUpload = [ChannelCapability.sendMessage];
+const _cannotUploadButCanSendPoll = [ChannelCapability.sendMessage, ChannelCapability.sendPoll];
+final _giphy = Command(name: 'giphy', args: '[text]');
+
+void main() {
+  final originalRecordPlatform = RecordPlatform.instance;
+  setUp(() => RecordPlatform.instance = FakeRecordPlatform());
+  tearDown(() => RecordPlatform.instance = originalRecordPlatform);
+
+  late StreamMessageComposerController controller;
+  setUp(() => controller = StreamMessageComposerController());
+  tearDown(() => controller.dispose());
+
+  group('with the upload-file capability', () {
+    testWidgets('shows the attachment button', (tester) async {
+      await _pumpComposer(tester, controller: controller);
+
+      expect(_attachmentButton, findsOneWidget);
+    });
+
+    testWidgets('shows voice recording', (tester) async {
+      await _pumpComposer(tester, controller: controller);
+
+      expect(_micButton, findsOneWidget);
+    });
+
+    testWidgets('accepts dropped files', (tester) async {
+      await _pumpComposer(tester, controller: controller);
+
+      await _dropFile(tester);
+
+      expect(controller.attachments, hasLength(1));
+    });
+
+    testWidgets('accepts keyboard images', (tester) async {
+      await _pumpComposer(tester, controller: controller);
+
+      expect(_keyboardConfig(tester), isNotNull);
+    });
+  });
+
+  group('without the upload-file capability', () {
+    testWidgets('offers only the system picker options that upload nothing', (tester) async {
+      await _pumpComposer(tester, controller: controller, ownCapabilities: _cannotUploadButCanSendPoll);
+
+      expect(await _openSystemPicker(tester), {'poll-creator'});
+    });
+
+    testWidgets('offers only the tabbed picker tabs that upload nothing', (tester) async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+      addTearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+
+      await _pumpComposer(
+        tester,
+        controller: controller,
+        ownCapabilities: _cannotUploadButCanSendPoll,
+        commands: [_giphy],
+        useSystemAttachmentPicker: false,
+      );
+
+      expect(await _openTabbedPicker(tester), {'poll-creator', 'command-picker'});
+    });
+
+    testWidgets('hides the attachment button when the channel has no polls or commands', (tester) async {
+      await _pumpComposer(tester, controller: controller, ownCapabilities: _cannotUpload);
+
+      expect(_attachmentButton, findsNothing);
+    });
+
+    testWidgets('hides the attachment button when every allowed option uploads', (tester) async {
+      await _pumpComposer(
+        tester,
+        controller: controller,
+        ownCapabilities: _cannotUpload,
+        allowedAttachmentPickerTypes: const [AttachmentPickerType.images, AttachmentPickerType.files],
+      );
+
+      expect(_attachmentButton, findsNothing);
+    });
+
+    testWidgets('hides voice recording', (tester) async {
+      await _pumpComposer(tester, controller: controller, ownCapabilities: _cannotUpload);
+
+      expect(_micButton, findsNothing);
+    });
+
+    testWidgets('ignores dropped files', (tester) async {
+      await _pumpComposer(tester, controller: controller, ownCapabilities: _cannotUpload);
+
+      await _dropFile(tester);
+
+      expect(controller.attachments, isEmpty);
+    });
+
+    testWidgets('does not accept keyboard images', (tester) async {
+      await _pumpComposer(tester, controller: controller, ownCapabilities: _cannotUpload);
+
+      expect(_keyboardConfig(tester), isNull);
+    });
+  });
+
+  group('on a channel that is not created yet', () {
+    testWidgets('shows the attachment button', (tester) async {
+      await _pumpComposer(tester, controller: controller, ownCapabilities: const [], initialized: false);
+
+      expect(_attachmentButton, findsOneWidget);
+    });
+
+    testWidgets('shows voice recording', (tester) async {
+      await _pumpComposer(tester, controller: controller, ownCapabilities: const [], initialized: false);
+
+      expect(_micButton, findsOneWidget);
+    });
+
+    testWidgets('accepts keyboard images', (tester) async {
+      await _pumpComposer(tester, controller: controller, ownCapabilities: const [], initialized: false);
+
+      expect(_keyboardConfig(tester), isNotNull);
+    });
+  });
+
+  testWidgets('hides voice recording once the upload-file capability is revoked', (tester) async {
+    final capabilities = StreamController<List<ChannelCapability>>.broadcast();
+    addTearDown(capabilities.close);
+
+    await _pumpComposer(tester, controller: controller, ownCapabilitiesStream: capabilities.stream);
+    capabilities.add(_cannotUpload);
+    await tester.pumpAndSettle();
+
+    expect(_micButton, findsNothing);
+  });
+
+  testWidgets('leaves out the command tab when the channel has no commands', (tester) async {
+    CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+    addTearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+
+    await _pumpComposer(
+      tester,
+      controller: controller,
+      ownCapabilities: _cannotUploadButCanSendPoll,
+      useSystemAttachmentPicker: false,
+    );
+
+    expect(await _openTabbedPicker(tester), {'poll-creator'});
+  });
+
+  testWidgets('hides polls and commands too when attachments are disabled', (tester) async {
+    await _pumpComposer(
+      tester,
+      controller: controller,
+      ownCapabilities: const [..._canUpload, ChannelCapability.sendPoll],
+      commands: [_giphy],
+      disableAttachments: true,
+    );
+
+    expect(_attachmentButton, findsNothing);
+  });
+
+  testWidgets('ignores dropped files when attachments are disabled', (tester) async {
+    await _pumpComposer(tester, controller: controller, disableAttachments: true);
+
+    await _dropFile(tester);
+
+    expect(controller.attachments, isEmpty);
+  });
+}
 
 Future<void> _pumpComposer(
   WidgetTester tester, {
   required StreamMessageComposerController controller,
   List<ChannelCapability> ownCapabilities = _canUpload,
+  Stream<List<ChannelCapability>>? ownCapabilitiesStream,
+  List<AttachmentPickerType> allowedAttachmentPickerTypes = AttachmentPickerType.values,
+  List<Command> commands = const [],
+  bool disableAttachments = false,
+  bool useSystemAttachmentPicker = true,
   bool initialized = true,
 }) async {
   final client = MockClient();
   final clientState = MockClientState();
-  final channel = MockChannel(ownCapabilities: ownCapabilities);
+  final channel = switch (ownCapabilitiesStream) {
+    final stream? => _ChannelWithCapabilitiesStream(ownCapabilities: ownCapabilities, capabilitiesStream: stream),
+    _ => MockChannel(ownCapabilities: ownCapabilities),
+  };
   final channelState = MockChannelState();
   final member = Member(
     userId: 'user-id',
@@ -41,6 +216,11 @@ Future<void> _pumpComposer(
   );
   when(() => channel.state).thenReturn(initialized ? channelState : null);
   when(() => channel.client).thenReturn(client);
+  if (initialized) {
+    when(() => channel.config).thenReturn(ChannelConfig(polls: true, commands: commands));
+  } else {
+    when(() => channel.config).thenThrow(StateError('Channel has not been initialized'));
+  }
   when(channel.getRemainingCooldown).thenReturn(0);
   when(() => channel.lastMessageAt).thenReturn(DateTime.parse('2020-06-22 12:00:00'));
   when(() => channel.extraData).thenReturn({'name': 'test'});
@@ -61,6 +241,9 @@ Future<void> _pumpComposer(
           child: Scaffold(
             body: StreamMessageComposer(
               messageComposerController: controller,
+              allowedAttachmentPickerTypes: allowedAttachmentPickerTypes,
+              disableAttachments: disableAttachments,
+              useSystemAttachmentPicker: useSystemAttachmentPicker,
             ),
           ),
         ),
@@ -89,67 +272,34 @@ Future<void> _dropFile(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
+Future<Set<String?>> _openSystemPicker(WidgetTester tester) async {
+  await tester.tap(_attachmentButton);
+  await tester.pumpAndSettle();
+
+  final picker = tester.widget<StreamSystemAttachmentPicker>(find.byType(StreamSystemAttachmentPicker));
+  return {...picker.options.map((it) => it.key)};
+}
+
+Future<Set<String?>> _openTabbedPicker(WidgetTester tester) async {
+  await tester.tap(_attachmentButton);
+  await tester.pumpAndSettle();
+
+  final picker = tester.widget<StreamTabbedAttachmentPicker>(find.byType(StreamTabbedAttachmentPicker));
+  return {...picker.options.map((it) => it.key)};
+}
+
 ContentInsertionConfiguration? _keyboardConfig(WidgetTester tester) {
   return tester.widget<EditableText>(find.byType(EditableText)).contentInsertionConfiguration;
 }
 
-void main() {
-  final originalRecordPlatform = RecordPlatform.instance;
-  setUp(() => RecordPlatform.instance = FakeRecordPlatform());
-  tearDown(() => RecordPlatform.instance = originalRecordPlatform);
-
-  late StreamMessageComposerController controller;
-  setUp(() => controller = StreamMessageComposerController());
-  tearDown(() => controller.dispose());
-
-  group('StreamMessageComposer with the upload-file capability', () {
-    testWidgets('offers every way to add an upload', (tester) async {
-      await _pumpComposer(tester, controller: controller);
-
-      expect(_attachmentButton, findsOneWidget);
-      expect(_micButton, findsOneWidget);
-      expect(_keyboardConfig(tester), isNotNull);
-
-      await _dropFile(tester);
-      expect(controller.attachments, hasLength(1));
-    });
+class _ChannelWithCapabilitiesStream extends MockChannel {
+  _ChannelWithCapabilitiesStream({
+    super.ownCapabilities,
+    required this.capabilitiesStream,
   });
 
-  group('StreamMessageComposer without the upload-file capability', () {
-    testWidgets('hides the attachment button', (tester) async {
-      await _pumpComposer(tester, controller: controller, ownCapabilities: _cannotUpload);
+  final Stream<List<ChannelCapability>> capabilitiesStream;
 
-      expect(_attachmentButton, findsNothing);
-    });
-
-    testWidgets('hides voice recording', (tester) async {
-      await _pumpComposer(tester, controller: controller, ownCapabilities: _cannotUpload);
-
-      expect(_micButton, findsNothing);
-    });
-
-    testWidgets('ignores dropped files', (tester) async {
-      await _pumpComposer(tester, controller: controller, ownCapabilities: _cannotUpload);
-
-      await _dropFile(tester);
-
-      expect(controller.attachments, isEmpty);
-    });
-
-    testWidgets('does not accept keyboard images', (tester) async {
-      await _pumpComposer(tester, controller: controller, ownCapabilities: _cannotUpload);
-
-      expect(_keyboardConfig(tester), isNull);
-    });
-  });
-
-  group('StreamMessageComposer on a channel that is not created yet', () {
-    testWidgets('keeps uploads available, as there are no capabilities to check', (tester) async {
-      await _pumpComposer(tester, controller: controller, ownCapabilities: const [], initialized: false);
-
-      expect(_attachmentButton, findsOneWidget);
-      expect(_micButton, findsOneWidget);
-      expect(_keyboardConfig(tester), isNotNull);
-    });
-  });
+  @override
+  Stream<List<ChannelCapability>> get ownCapabilitiesStream => capabilitiesStream;
 }

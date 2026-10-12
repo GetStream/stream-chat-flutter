@@ -187,13 +187,24 @@ void main() {
       expect(_editableText(tester).contentInsertionConfiguration, isNull);
     });
 
-    testWidgets('is off while a command is active', (tester) async {
+    testWidgets('stays on while a command is active', (tester) async {
       await _pumpComposer(tester, controller: controller);
 
       controller.setCommand(Command(name: 'giphy'));
       await tester.pumpAndSettle();
 
-      expect(_editableText(tester).contentInsertionConfiguration, isNull);
+      expect(_editableText(tester).contentInsertionConfiguration, isNotNull);
+    });
+
+    testWidgets('ignores an image inserted while a command is active', (tester) async {
+      await _pumpComposer(tester, controller: controller);
+      controller.setCommand(Command(name: 'giphy'));
+      await tester.pumpAndSettle();
+
+      _insert(tester, _content());
+      await tester.pumpAndSettle();
+
+      expect(controller.attachments, isEmpty);
     });
 
     testWidgets('is off when the user cannot upload files', (tester) async {

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 // Needed for RenderProxyBox; it also re-exports the semantics library that
@@ -990,10 +991,8 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     );
   }
 
-  // Without the upload-file capability every upload is rejected, so the
-  // composer offers no way to add one: no attachment button, voice recording,
-  // dropped files or keyboard images. A channel that isn't created yet has no
-  // capabilities to check, so uploads stay available until it is.
+  // Without the upload-file capability the composer offers no way to add an
+  // upload. A channel that isn't created yet allows uploads.
   Widget _buildMessageInput(
     BuildContext context,
     StreamMessageComposerController controller,
@@ -1001,14 +1000,16 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   ) {
     final channel = StreamChannel.of(context).channel;
     if (channel.state == null) {
-      return _buildMessageInputContent(context, controller, focusNode, canUploadFile: true);
+      const capabilities = [ChannelCapability.uploadFile];
+      return _buildMessageInputContent(context, controller, focusNode, capabilities);
     }
 
-    return BetterStreamBuilder<bool>(
-      stream: channel.ownCapabilitiesStream.map((it) => it.contains(ChannelCapability.uploadFile)),
-      initialData: channel.canUploadFile,
-      builder: (context, canUploadFile) {
-        return _buildMessageInputContent(context, controller, focusNode, canUploadFile: canUploadFile);
+    return BetterStreamBuilder<List<ChannelCapability>>(
+      initialData: channel.ownCapabilities,
+      stream: channel.ownCapabilitiesStream,
+      comparator: const ListEquality<ChannelCapability>().equals,
+      builder: (context, capabilities) {
+        return _buildMessageInputContent(context, controller, focusNode, capabilities);
       },
     );
   }
@@ -1016,20 +1017,25 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   Widget _buildMessageInputContent(
     BuildContext context,
     StreamMessageComposerController controller,
-    FocusNode focusNode, {
-    required bool canUploadFile,
-  }) {
+    FocusNode focusNode,
+    List<ChannelCapability> capabilities,
+  ) {
     final currentUserId = StreamChat.of(context).currentUser?.id;
     final isFloating = _resolveSurfaceStyle(context).isFloating;
 
     return StreamMessageValueListenableBuilder(
       valueListenable: controller,
       builder: (context, value, _) {
+        final canUploadFile = capabilities.contains(ChannelCapability.uploadFile);
+        final canRecordVoice = widget.props.enableVoiceRecording && canUploadFile;
+        final allowedTypes = _getAllowedAttachmentPickerTypes(capabilities);
+        final canOpenPicker = allowedTypes.isNotEmpty;
+
         // Extracted so the floating gradient can wrap just the pill, keeping
         // gradient height stable when the picker (a sibling) opens.
         final pill = DropTarget(
           onDragDone: (details) async {
-            if (!canUploadFile) return;
+            if (!allowedTypes.contains(AttachmentPickerType.files)) return;
 
             final attachments = <Attachment>[];
             for (final file in details.files) {
@@ -1045,17 +1051,13 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
             child: StreamChatMessageInput(
               controller: controller,
               currentUserId: currentUserId,
-              onAttachmentButtonPressed: widget.props.disableAttachments || !canUploadFile
-                  ? null
-                  : _onAttachmentButtonPressed,
+              onAttachmentButtonPressed: canOpenPicker ? _onAttachmentButtonPressed : null,
               isPickerOpen: _isPickerVisible,
               placeholder: _buildPlaceholder(context),
               focusNode: focusNode,
               onSendPressed: sendMessage,
               canAlsoSendToChannel: _shouldShowSendToChannelCheckbox(),
-              audioRecorderController: widget.props.enableVoiceRecording && canUploadFile
-                  ? _audioRecorderController
-                  : null,
+              audioRecorderController: canRecordVoice ? _audioRecorderController : null,
               sendVoiceRecordingAutomatically: widget.props.sendVoiceRecordingAutomatically,
               feedback: widget.props.voiceRecordingFeedback,
               onQuotedMessageCleared: () {
@@ -1068,7 +1070,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
               autofocus: widget.props.autofocus,
               autocorrect: widget.props.autoCorrect,
               isFloating: isFloating,
-              contentInsertionConfiguration: canUploadFile ? _buildContentInsertionConfiguration() : null,
+              contentInsertionConfiguration: _buildContentInsertionConfiguration(allowedTypes),
             ),
           ),
         );
@@ -1096,7 +1098,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
                 sizeFactor: _pickerAnimation,
                 // ignore: deprecated_member_use, alternative is only available since Flutter 3.44
                 axisAlignment: -1,
-                child: _buildInlineAttachmentPicker(context),
+                child: _buildInlineAttachmentPicker(context, allowedTypes),
               ),
             ],
           ),
@@ -1105,16 +1107,17 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     );
   }
 
-  Widget _buildInlineAttachmentPicker(BuildContext context) {
+  Widget _buildInlineAttachmentPicker(
+    BuildContext context,
+    List<AttachmentPickerType> allowedTypes,
+  ) {
     if (!_isPickerVisible) return const SizedBox.shrink();
 
-    final allowedTypes = _getAllowedAttachmentPickerTypes();
-
-    final isWebOrDesktop = switch (CurrentPlatform.type) {
+    final useSystemPicker = switch (CurrentPlatform.type) {
+      _ when widget.props.useSystemAttachmentPicker => true,
       PlatformType.android || PlatformType.ios => false,
       _ => true,
     };
-    final useSystemPicker = widget.props.useSystemAttachmentPicker || isWebOrDesktop;
 
     if (useSystemPicker) {
       return systemAttachmentPickerBuilder(
@@ -1207,23 +1210,40 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     return channel.sendPoll(poll).ignore();
   }
 
-  // Returns the list of allowed attachment picker types based on the
-  // current channel configuration and context.
-  List<AttachmentPickerType> _getAllowedAttachmentPickerTypes() {
-    final allowedTypes = widget.props.allowedAttachmentPickerTypes.where((type) {
-      if (type != AttachmentPickerType.poll) return true;
+  // Returns the list of allowed attachment picker types based on the user's
+  // capabilities, the current channel configuration and context.
+  List<AttachmentPickerType> _getAllowedAttachmentPickerTypes(
+    List<ChannelCapability> capabilities,
+  ) {
+    if (widget.props.disableAttachments) return const [];
 
-      // We don't allow editing polls.
-      if (_isEditing) return false;
-      // We don't allow creating polls in threads.
-      if (_effectiveController.message.parentId != null) return false;
-
-      // Otherwise, check if the user has the permission to send polls.
-      final channel = StreamChannel.of(context).channel;
-      return channel.config?.polls == true && channel.canSendPoll;
-    });
+    final canUploadFile = capabilities.contains(ChannelCapability.uploadFile);
+    final channel = StreamChannel.of(context).channel;
+    final channelConfig = channel.state != null ? channel.config : null;
+    final pickerTypes = widget.props.allowedAttachmentPickerTypes;
+    final allowedTypes = pickerTypes.where(
+      (type) => switch (type) {
+        ImagesPickerType() || VideosPickerType() || AudiosPickerType() || FilesPickerType() => canUploadFile,
+        PollPickerType() => _canCreatePoll(capabilities, channelConfig),
+        CommandPickerType() => channelConfig?.commands.isNotEmpty ?? false,
+        CustomAttachmentPickerType() => true,
+      },
+    );
 
     return allowedTypes.toList(growable: false);
+  }
+
+  bool _canCreatePoll(
+    List<ChannelCapability> capabilities,
+    ChannelConfig? channelConfig,
+  ) {
+    // We don't allow editing polls.
+    if (_isEditing) return false;
+    // We don't allow creating polls in threads.
+    if (_effectiveController.message.parentId != null) return false;
+
+    // Otherwise, check if the user has the permission to send polls.
+    return channelConfig?.polls == true && capabilities.contains(ChannelCapability.sendPoll);
   }
 
   /// Toggles the inline attachment picker visibility.
@@ -1494,20 +1514,18 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   }
 
   // Lets keyboards such as Gboard insert images and GIFs. Accepted only where
-  // the picker would accept an image, and validated the same way. Off while a
-  // command is active, as commands carry no attachments.
-  ContentInsertionConfiguration? _buildContentInsertionConfiguration() {
-    if (widget.props.disableAttachments) return null;
-    if (_commandEnabled) return null;
-    if (!_getAllowedAttachmentPickerTypes().contains(AttachmentPickerType.images)) return null;
-
+  // the picker would accept an image, and validated the same way.
+  ContentInsertionConfiguration? _buildContentInsertionConfiguration(
+    List<AttachmentPickerType> allowedTypes,
+  ) {
+    if (!allowedTypes.contains(AttachmentPickerType.images)) return null;
     return ContentInsertionConfiguration(onContentInserted: _onContentInserted);
   }
 
   void _onContentInserted(KeyboardInsertedContent content) {
-    // The platform reads the content before handing it over, and a failed read
-    // can arrive as no data or as empty data; either way there is nothing to
-    // attach.
+    // Commands carry no attachments.
+    if (_commandEnabled) return;
+
     final bytes = content.data;
     if (bytes == null || bytes.isEmpty) return;
 
