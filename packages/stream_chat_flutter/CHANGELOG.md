@@ -6,6 +6,10 @@
 - Added `PollTranslationX`, `PollOptionTranslationX` and `PollVoteTranslationX`, to read the translations of a poll, its options and its answers.
 - Added `MessageTranslationLanguage`, the language `StreamMessageContent` shows a message translated into, for custom attachments to show translations too.
 
+⚠️ Deprecated
+
+- Deprecated `MessageComposerProps.validator` and `StreamMessageComposer.validator`; pass a `StreamMessageComposerController(validator: …)` as `messageComposerController` instead.
+
 🔄 Changed
 
 - Allowed `equatable` 3.x alongside 2.x.
@@ -15,6 +19,7 @@
 
 - Fixed `StreamMessageListView` dropping frames on each new message in busy channels.
 - Fixed `StreamMessageComposer` polling the audio recorder ten times a second while no recording is in progress, including when voice recording is disabled.
+- Fixed the composer's send button looking enabled on an empty message when voice recording is off, and showing the microphone instead of send for a staged poll.
 
 ## 10.5.0
 

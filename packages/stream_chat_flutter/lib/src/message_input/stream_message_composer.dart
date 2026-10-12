@@ -84,7 +84,8 @@ class StreamMessageComposer extends StatelessWidget {
     Iterable<StreamAutocompleteTrigger> customAutocompleteTriggers = const [],
     bool mentionAllAppUsers = false,
     bool? shouldKeepFocusAfterMessage,
-    MessageValidator validator = MessageComposerProps._defaultValidator,
+    @Deprecated('Use StreamMessageComposerController.validator instead.')
+    MessageValidator validator = StreamMessageComposerController.defaultValidator,
     String? restorationId,
     bool? enableSafeArea,
     bool enableMentionsOverlay = true,
@@ -197,7 +198,8 @@ class MessageComposerProps {
     this.customAutocompleteTriggers = const [],
     this.mentionAllAppUsers = false,
     this.shouldKeepFocusAfterMessage,
-    this.validator = _defaultValidator,
+    @Deprecated('Use StreamMessageComposerController.validator instead.')
+    this.validator = StreamMessageComposerController.defaultValidator,
     this.restorationId,
     this.enableSafeArea,
     this.enableMentionsOverlay = true,
@@ -330,7 +332,11 @@ class MessageComposerProps {
   /// The default behaviour keeps focus until a command is enabled.
   final bool? shouldKeepFocusAfterMessage;
 
-  /// A callback function that validates the message.
+  /// The function that decides whether the message being composed can be
+  /// sent.
+  ///
+  /// A message is sent only when both this and the controller's validator
+  /// accept it. Defaults to [StreamMessageComposerController.defaultValidator].
   final MessageValidator validator;
 
   /// Restoration ID to save and restore the state of the MessageInput.
@@ -454,7 +460,7 @@ class MessageComposerProps {
     Iterable<StreamAutocompleteTrigger>? customAutocompleteTriggers,
     bool? mentionAllAppUsers,
     bool? shouldKeepFocusAfterMessage,
-    MessageValidator? validator,
+    @Deprecated('Use StreamMessageComposerController.validator instead.') MessageValidator? validator,
     String? restorationId,
     bool? enableSafeArea,
     bool? enableMentionsOverlay,
@@ -542,14 +548,6 @@ class MessageComposerProps {
     return true;
   }
 
-  static bool _defaultValidator(Message message) {
-    final hasText = message.text?.trim().isNotEmpty == true;
-    final hasAttachments = message.attachments.isNotEmpty;
-    final hasPoll = message.pollId != null;
-
-    return hasText || hasAttachments || hasPoll;
-  }
-
   static String? _defaultPlaceholderBuilder(
     BuildContext context,
     MessageInputPlaceholder placeholder,
@@ -606,7 +604,10 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
 
   void _createLocalController([Message? message]) {
     assert(_controller == null, '');
-    _controller = StreamRestorableMessageComposerController(message: message);
+    _controller = StreamRestorableMessageComposerController(
+      message: message,
+      validator: widget.props.validator,
+    );
   }
 
   void _registerController() {
@@ -1534,6 +1535,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   /// Sends the current message
   Future<void> sendMessage() async {
     if (_effectiveController.isSlowModeActive) return;
+    if (!_effectiveController.canSend) return;
     if (!widget.props.validator(_effectiveController.message)) return;
 
     _hidePicker();
@@ -1648,7 +1650,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     if (channel == null) return;
 
     final message = _effectiveController.message;
-    final isMessageValid = widget.props.validator.call(message);
+    final isMessageValid = _effectiveController.validator.call(message);
 
     // If the message is valid, we need to create or update it as a draft
     // message for the channel or thread.
@@ -1667,7 +1669,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     final draftMessage = message.toDraftMessage();
 
     // If the draft message is not valid, we don't need to update it.
-    final isDraftValid = widget.props.validator.call(draftMessage.toMessage());
+    final isDraftValid = _effectiveController.validator.call(draftMessage.toMessage());
     if (!isDraftValid) return;
 
     // If the draft message didn't change, we don't need to update it.
