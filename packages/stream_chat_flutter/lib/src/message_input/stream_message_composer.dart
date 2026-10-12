@@ -84,8 +84,7 @@ class StreamMessageComposer extends StatelessWidget {
     Iterable<StreamAutocompleteTrigger> customAutocompleteTriggers = const [],
     bool mentionAllAppUsers = false,
     bool? shouldKeepFocusAfterMessage,
-    @Deprecated('Use StreamMessageComposerController.validator instead.')
-    MessageValidator validator = StreamMessageComposerController.defaultValidator,
+    @Deprecated('Use StreamMessageComposerController.validator instead.') MessageValidator? validator,
     String? restorationId,
     bool? enableSafeArea,
     bool enableMentionsOverlay = true,
@@ -198,8 +197,7 @@ class MessageComposerProps {
     this.customAutocompleteTriggers = const [],
     this.mentionAllAppUsers = false,
     this.shouldKeepFocusAfterMessage,
-    @Deprecated('Use StreamMessageComposerController.validator instead.')
-    this.validator = StreamMessageComposerController.defaultValidator,
+    @Deprecated('Use StreamMessageComposerController.validator instead.') MessageValidator? validator,
     this.restorationId,
     this.enableSafeArea,
     this.enableMentionsOverlay = true,
@@ -218,7 +216,7 @@ class MessageComposerProps {
     this.autofocus = false,
     this.autoCorrect = true,
     this.surfaceStyle,
-  });
+  }) : _customValidator = validator;
 
   /// Function called after sending the message.
   final void Function(Message)? onMessageSent;
@@ -335,9 +333,11 @@ class MessageComposerProps {
   /// The function that decides whether the message being composed can be
   /// sent.
   ///
-  /// A message is sent only when both this and the controller's validator
-  /// accept it. Defaults to [StreamMessageComposerController.defaultValidator].
-  final MessageValidator validator;
+  /// When set, a message is sent only when both this and the controller's
+  /// validator accept it. Defaults to
+  /// [StreamMessageComposerController.defaultValidator].
+  MessageValidator get validator => _customValidator ?? StreamMessageComposerController.defaultValidator;
+  final MessageValidator? _customValidator;
 
   /// Restoration ID to save and restore the state of the MessageInput.
   final String? restorationId;
@@ -498,7 +498,7 @@ class MessageComposerProps {
       customAutocompleteTriggers: customAutocompleteTriggers ?? this.customAutocompleteTriggers,
       mentionAllAppUsers: mentionAllAppUsers ?? this.mentionAllAppUsers,
       shouldKeepFocusAfterMessage: shouldKeepFocusAfterMessage ?? this.shouldKeepFocusAfterMessage,
-      validator: validator ?? this.validator,
+      validator: validator ?? _customValidator,
       restorationId: restorationId ?? this.restorationId,
       enableSafeArea: enableSafeArea ?? this.enableSafeArea,
       enableMentionsOverlay: enableMentionsOverlay ?? this.enableMentionsOverlay,
@@ -1536,7 +1536,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   Future<void> sendMessage() async {
     if (_effectiveController.isSlowModeActive) return;
     if (!_effectiveController.canSend) return;
-    if (!widget.props.validator(_effectiveController.message)) return;
+    if (widget.props._customValidator case final validator? when !validator(_effectiveController.message)) return;
 
     _hidePicker();
 

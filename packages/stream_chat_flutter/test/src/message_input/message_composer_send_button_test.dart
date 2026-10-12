@@ -59,6 +59,22 @@ void main() {
 
     expect(_sendButton(tester).props.onPressed, isNull);
   });
+
+  testWidgets("sends what the app's own controller accepts", (tester) async {
+    final originalRecordPlatform = RecordPlatform.instance;
+    RecordPlatform.instance = FakeRecordPlatform();
+    addTearDown(() => RecordPlatform.instance = originalRecordPlatform);
+    final controller = _controller(validator: (_) => true);
+
+    final channel = await _pumpComposer(
+      tester,
+      composer: StreamMessageComposer(messageComposerController: controller, enableVoiceRecording: false),
+    );
+    await tester.tap(find.byKey(const ValueKey('send_key')));
+    await tester.pump();
+
+    verify(() => channel.sendMessage(any())).called(1);
+  });
 }
 
 StreamMessageComposerController _controller({
@@ -99,7 +115,7 @@ Future<void> _pumpTrailing(
   );
 }
 
-Future<void> _pumpComposer(WidgetTester tester, {required Widget composer}) async {
+Future<MockChannel> _pumpComposer(WidgetTester tester, {required Widget composer}) async {
   final client = MockClient();
   final clientState = MockClientState();
   final channel = MockChannel();
@@ -124,6 +140,8 @@ Future<void> _pumpComposer(WidgetTester tester, {required Widget composer}) asyn
   when(() => channelState.messagesStream).thenAnswer((_) => Stream.value([]));
   when(() => channelState.draft).thenReturn(null);
   when(() => channelState.draftStream).thenAnswer((_) => Stream.value(null));
+  registerFallbackValue(Message());
+  when(() => channel.sendMessage(any())).thenAnswer((_) async => SendMessageResponse());
 
   await tester.pumpWidget(
     MaterialApp(
@@ -138,6 +156,8 @@ Future<void> _pumpComposer(WidgetTester tester, {required Widget composer}) asyn
   );
 
   await tester.pumpAndSettle();
+
+  return channel;
 }
 
 StreamButton _sendButton(WidgetTester tester) {
