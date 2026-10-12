@@ -8,6 +8,7 @@
 
 🔄 Changed
 
+- Allowed `equatable` 3.x alongside 2.x.
 - `StreamMessageListView` now rebuilds only the message rows that changed; a custom row builder should read changing outside state through an inherited widget.
 
 🐞 Fixed
