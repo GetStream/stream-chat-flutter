@@ -117,6 +117,60 @@ void main() {
     expect(poll, isNull);
   });
 
+  test('getPollById keeps the server translations of the poll and its options', () async {
+    final user = User(id: 'testUserId');
+    await database.userDao.updateUsers([user]);
+    await pollDao.updatePolls([
+      Poll(
+        id: 'poll-translated',
+        name: 'Favourite colour?',
+        nameI18n: const {'language': 'en', 'nl_text': 'Favoriete kleur?'},
+        description: 'Pick one',
+        descriptionI18n: const {'language': 'en', 'nl_text': 'Kies er een'},
+        options: const [
+          PollOption(id: 'option-1', text: 'Red', textI18n: {'language': 'en', 'nl_text': 'Rood'}),
+        ],
+        createdBy: user,
+        createdById: user.id,
+      ),
+    ]);
+
+    final fetched = await pollDao.getPollById('poll-translated');
+
+    expect(fetched!.nameI18n, {'language': 'en', 'nl_text': 'Favoriete kleur?'});
+    expect(fetched.descriptionI18n, {'language': 'en', 'nl_text': 'Kies er een'});
+    expect(fetched.options.single.textI18n, {'language': 'en', 'nl_text': 'Rood'});
+  });
+
+  test('getPollById keeps the server translation of an answer', () async {
+    final user = User(id: 'testUserId');
+    await database.userDao.updateUsers([user]);
+    await pollDao.updatePolls([
+      Poll(
+        id: 'poll-answered',
+        name: 'Why?',
+        options: const [PollOption(id: 'option-1', text: 'Because')],
+        createdBy: user,
+        createdById: user.id,
+      ),
+    ]);
+    await database.pollVoteDao.updatePollVotes([
+      PollVote(
+        id: 'answer-1',
+        pollId: 'poll-answered',
+        userId: user.id,
+        user: user,
+        answerText: 'I like yellow',
+        answerTextI18n: const {'language': 'en', 'nl_text': 'Ik hou van geel'},
+        createdAt: DateTime.now(),
+      ),
+    ]);
+
+    final fetched = await pollDao.getPollById('poll-answered');
+
+    expect(fetched!.latestAnswers.single.answerTextI18n, {'language': 'en', 'nl_text': 'Ik hou van geel'});
+  });
+
   test('getPollById hydrates ownVotesAndAnswers + latestVotesByOption + '
       'latestAnswers from mixed-user/mixed-option votes', () async {
     const pollId = 'poll-mixed';

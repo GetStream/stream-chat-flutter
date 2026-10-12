@@ -25,6 +25,38 @@ class _FixedSizeAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   }
 }
 
+// Records the width the attachment subtree is given on every layout pass, so
+// a test can assert the measured width is not changed by feeding it back.
+class _RecordingAttachmentBuilder extends StreamAttachmentWidgetBuilder {
+  _RecordingAttachmentBuilder({required this.widths});
+
+  // Width passed to the leaf on each layout pass, in order.
+  final List<double> widths;
+
+  @override
+  bool canHandle(Message message, Map<String, List<Attachment>> attachments) {
+    return attachments.isNotEmpty;
+  }
+
+  @override
+  Widget build(BuildContext context, Message message, Map<String, List<Attachment>> attachments) {
+    return Container(
+      constraints: const BoxConstraints(minWidth: 170, maxWidth: 256, minHeight: 100, maxHeight: 300),
+      child: AspectRatio(
+        // A 3:4 portrait photo, so the tile is narrower than its box and the
+        // measured width is the photo's rather than the box's.
+        aspectRatio: 0.75,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            widths.add(constraints.biggest.width);
+            return const SizedBox.expand();
+          },
+        ),
+      ),
+    );
+  }
+}
+
 // Hosts a mutable [StreamMessageLayout] so the test can flip an inherited
 // dependency that the message content already listens to. Acts as a stand-in
 // for the production triggers (theme swap, MediaQuery insets from a
@@ -64,12 +96,13 @@ Future<void> pumpContent(
   required Key layoutKey,
   Widget? header,
   Widget? footer,
+  StreamAttachmentWidgetBuilder attachmentBuilder = const _FixedSizeAttachmentBuilder(),
 }) {
   return tester.pumpWidget(
     MaterialApp(
       home: StreamChatConfiguration(
         data: StreamChatConfigurationData(
-          attachmentBuilders: const [_FixedSizeAttachmentBuilder()],
+          attachmentBuilders: [attachmentBuilder],
         ),
         child: StreamChatTheme(
           data: StreamChatThemeData(),
@@ -177,6 +210,35 @@ void main() {
       );
     },
   );
+
+  // Regression test for #2983, fixed on v9 and structurally correct here.
+  //
+  // The measured attachment width is fed back as the bubble's constraint, so
+  // anything that narrows the box in between — a border, an inset — hands the
+  // attachment a smaller box on the second pass. The thumbnail then asks the
+  // CDN for a second, near-identical rendition of the same image.
+  testWidgets('lays the attachment out at the same width across both passes', (tester) async {
+    final widths = <double>[];
+
+    await pumpContent(
+      tester,
+      message: Message(
+        attachments: [Attachment(type: 'image', imageUrl: 'https://example.com/x.png')],
+        user: User(id: 'u1', name: 'Alice'),
+      ),
+      layoutKey: GlobalKey<_LayoutHolderState>(),
+      attachmentBuilder: _RecordingAttachmentBuilder(widths: widths),
+    );
+
+    // Let the post-frame callback apply the measured width limit and lay the
+    // subtree out a second time.
+    await tester.pump();
+
+    // Measured once, then laid out again with the limit applied. Without the
+    // count the equality below stays green if the second pass stops running.
+    expect(widths, hasLength(2), reason: 'saw widths: $widths');
+    expect(widths.toSet(), hasLength(1), reason: 'saw widths: $widths');
+  });
 
   // The design shows a deleted message with its timestamp and delivery status
   // below the placeholder, same as any other message. The deleted branch used

@@ -196,6 +196,7 @@ class MessageComposerInputProps extends MessageComposerComponentProps {
     this.audioRecorderController,
     this.feedback = const AudioRecorderFeedback(),
     this.sendVoiceRecordingAutomatically = false,
+    this.contentInsertionConfiguration,
   }) : super();
 
   /// Creates a new instance of [MessageComposerInputProps] from a
@@ -212,6 +213,7 @@ class MessageComposerInputProps extends MessageComposerComponentProps {
     StreamAudioRecorderController? audioRecorderController,
     AudioRecorderFeedback feedback = const AudioRecorderFeedback(),
     bool sendVoiceRecordingAutomatically = false,
+    ContentInsertionConfiguration? contentInsertionConfiguration,
   }) {
     return MessageComposerInputProps._(
       controller: props.controller,
@@ -235,6 +237,7 @@ class MessageComposerInputProps extends MessageComposerComponentProps {
       audioRecorderController: audioRecorderController,
       feedback: feedback,
       sendVoiceRecordingAutomatically: sendVoiceRecordingAutomatically,
+      contentInsertionConfiguration: contentInsertionConfiguration,
     );
   }
 
@@ -267,6 +270,9 @@ class MessageComposerInputProps extends MessageComposerComponentProps {
 
   /// Whether to send the voice recording automatically when recording stops.
   final bool sendVoiceRecordingAutomatically;
+
+  /// {@macro flutter.widgets.editableText.contentInsertionConfiguration}
+  final ContentInsertionConfiguration? contentInsertionConfiguration;
 }
 
 /// Properties for building the center content of the message composer input.
@@ -293,6 +299,7 @@ class MessageComposerInputCenterProps extends MessageComposerComponentProps {
     this.audioRecorderController,
     this.feedback = const AudioRecorderFeedback(),
     this.sendVoiceRecordingAutomatically = false,
+    this.contentInsertionConfiguration,
   }) : super();
 
   /// Creates a new instance of [MessageComposerInputCenterProps] from a
@@ -320,6 +327,7 @@ class MessageComposerInputCenterProps extends MessageComposerComponentProps {
       audioRecorderController: inputProps.audioRecorderController,
       feedback: inputProps.feedback,
       sendVoiceRecordingAutomatically: inputProps.sendVoiceRecordingAutomatically,
+      contentInsertionConfiguration: inputProps.contentInsertionConfiguration,
     );
   }
 
@@ -352,6 +360,9 @@ class MessageComposerInputCenterProps extends MessageComposerComponentProps {
 
   /// Whether to send the voice recording automatically when recording stops.
   final bool sendVoiceRecordingAutomatically;
+
+  /// {@macro flutter.widgets.editableText.contentInsertionConfiguration}
+  final ContentInsertionConfiguration? contentInsertionConfiguration;
 }
 
 /// Properties for building the input leading component of the message composer.

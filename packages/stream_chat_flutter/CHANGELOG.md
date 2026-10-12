@@ -2,29 +2,80 @@
 
 ✅ Added
 
-- Added `StreamMessageItem.semanticsLabel`, which replaces the announcement composed for a message row, and `StreamMessageItem.excludeFromSemantics`, which leaves the row unlabeled so the bubble and footer announce their own parts.
-- Added `StreamQuotedMessage.replyMessage`, the message doing the quoting, which lets a quoted preview announce who replied to whom.
-- Added `StreamMessageContent.excludeTextFromSemantics` and `StreamMessageFooter.excludeFromSemantics`, which keep the message text and the metadata out of the semantics tree when an enclosing row already announces them.
+- Polls are now shown translated into the current user's language, following `StreamMessageTranslationConfiguration` like the message text.
+- Added `PollTranslationX`, `PollOptionTranslationX` and `PollVoteTranslationX`, to read the translations of a poll, its options and its answers.
+- Added `MessageTranslationLanguage`, the language `StreamMessageContent` shows a message translated into, for custom attachments to show translations too.
 
-⚠️ Changed
+🔄 Changed
 
-- Video thumbnails now use `stream_thumbnail` on every platform, and the `thumblr`
-  dependency is gone.
-- Linux builds now need the FFmpeg and libwebp development packages — on Debian/Ubuntu:
-  `libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libwebp-dev`.
-- A deleted message now renders the timestamp and delivery status below the placeholder, matching the design, and no longer shows the "Edited" marker — there is no text left to have been edited.
-- `AccessibleMessagePreviewFormatter.formatMessageSemanticsLabel` must now return the body without a speaker prefix when `channel` is omitted. An implementation that prefixes unconditionally makes a message row announce "You said, You: hello".
+- `StreamMessageListView` now rebuilds only the message rows that changed; a custom row builder should read changing outside state through an inherited widget.
 
 🐞 Fixed
 
+- Fixed `StreamMessageListView` dropping frames on each new message in busy channels.
+- Fixed `StreamMessageComposer` polling the audio recorder ten times a second while no recording is in progress, including when voice recording is disabled.
+
+## 10.5.0
+
+✅ Added
+
+- Added `StreamMessageItem.semanticsLabel` and `StreamMessageItem.excludeFromSemantics` to override or remove a message row's screen-reader announcement.
+- Added `StreamQuotedMessage.replyMessage`, the message doing the quoting, which lets a quoted preview announce who replied to whom.
+- Added `StreamMessageContent.excludeTextFromSemantics` and `StreamMessageFooter.excludeFromSemantics` to keep the text and metadata out of the semantics tree.
+- Added inserting images and GIFs from the keyboard in `StreamMessageComposer`, via `contentInsertionConfiguration`.
+- Added `Translations.unreadMessagesSeparatorLabel`, which shows an unread count in the divider.
+- Exported `UnreadMessagesSeparator`, the divider widget `StreamMessageListView` renders at the unread boundary.
+- Added an optional `unreadCount` to `UnreadIndicatorButton` to show a count the caller controls.
+
+🔄 Changed
+
+- Bumped `file_picker` to `>=12.0.0 <14.0.0`.
+- `PlatformFileX.toAttachmentFile` and `PlatformFileX.toAttachment` are now async.
+- Video thumbnails now use `stream_thumbnail` on every platform, and the `thumblr` dependency is gone.
+- Linux builds now need the FFmpeg and libwebp development packages — on Debian/Ubuntu: `libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libwebp-dev`.
+- A deleted message now shows its timestamp and delivery status, and no longer shows the "Edited" marker.
+- `AccessibleMessagePreviewFormatter.formatMessageSemanticsLabel` must now omit the speaker prefix when `channel` is omitted.
+- `StreamImageCDN.resolveUrl` no longer overrides a size already set on the URL.
+- Removed the unused `shimmer` dependency.
+- A class that `implements Translations` must add `unreadMessagesSeparatorLabel`; forward it to `unreadMessagesSeparatorText()` to keep the old copy.
+- The jump-to-unread pill now shows the unread count from when the channel opened, and stays dismissed for the session once tapped, closed or scrolled past.
+- The scroll-to-bottom badge now counts only messages that arrive while scrolled away, and resets at the bottom.
+- The unread messages divider now shows a count.
+- `StreamMessageListView` no longer marks a channel read until the unread boundary has been seen, or while it is manually marked unread.
+- Screen readers now announce each message as one phrase: sender, body, time and status.
+
+⚠️ Deprecated
+
+- Deprecated `withData` and `withReadStream` on `StreamAttachmentHandler.pickFile` and `StreamFilePicker`; they no longer have any effect.
+- Deprecated `Translations.unreadMessagesSeparatorText` in favor of `unreadMessagesSeparatorLabel`.
+- Deprecated `AITypingIndicatorView`, `AnimatedDots`, `StreamingMessageView`, `StreamTypewriterBuilder`, `TypewriterController`, `TypewriterValue`, `TypewriterState` and `TypewriterWidgetBuilder`; they moved to `stream_chat_flutter_ai`, where `StreamTypewriterBuilder` is `TypewriterBuilder`. Add that package and update your imports.
+
+🐞 Fixed
+
+- Fixed the file picker offering file types the Stream Dashboard doesn't allow; it now only offers the allowed file extensions.
+- Fixed `StreamAttachmentValidator` disagreeing with the server on compound extensions like `.tar.gz`.
+- Fixed `StreamAttachmentHandler.pickFile` throwing on an empty selection; it now returns `null`.
+- Fixed the package failing to compile when `stream_core_flutter` adds an avatar size.
 - Fixed `StreamAttachmentHandler` throwing `UnimplementedError` on WebAssembly builds.
-- Improved the screen-reader experience in the message list: each message is announced as a single phrase naming the sender, the body, the time, the edited marker and the delivery status, while the attachments, reaction chips, quoted message and replies row stay reachable one level deeper.
+- Fixed the gallery tab vanishing from the attachment picker when only images or only videos are allowed.
 - Fixed the message body being announced as its markdown source, so link and emphasis syntax is no longer read aloud.
 - Fixed a quoted message announcing only the quoted author's name, saying nothing about who replied to whom.
 - Fixed an attachment tile announcing nothing about its type or its position in a gallery.
-- Fixed a date divider announcing a clock time it never showed instead of the date it displays, and exposed it as a header so days can be jumped between.
-- Fixed the attachment upload progress on an outgoing message counting its link preview, which inflated the total against an attachment the sender never picked.
-- Fixed a message the moderation system bounced showing a read receipt once other members had read past it. It now shows only the error badge, matching what a screen reader announces for it.
+- Fixed a date divider announcing a time instead of its date to screen readers.
+- Fixed attachment upload progress counting the link preview.
+- Fixed a bounced message showing a read receipt.
+- Fixed image attachments being requested from the CDN at more pixels than the original holds.
+- Fixed one image rendition being cached twice.
+- Fixed image attachments not being resized at all when the URL carried a crop or a resize mode but no dimensions.
+- Fixed a URL whose host merely contains `stream-io-cdn.com` being treated as Stream's CDN.
+- Fixed a tap on the unread badge of `StreamBackButton` (the channel header's back button) doing nothing; it now presses the button.
+- Fixed message annotations wrapping mid-sentence when they don't fit on one line; the action now moves below the label.
+- Fixed messages arriving while the user was mid-drag or mid-fling being dropped from the scroll-to-bottom badge and the unread divider's count.
+- Fixed the scroll-to-bottom badge and unread divider counting messages the channel's unread count ignores.
+- Fixed thread reads being blocked whenever the parent channel wasn't up to date.
+- Fixed the jump-to-unread pill being dismissed by the slightest scroll after marking a message unread.
+- Fixed the jump-to-unread pill flickering back in and straight out on every new message after being dismissed.
+- Fixed tapping the jump-to-unread pill doing nothing on a channel the user has never opened.
 
 ## 10.4.0
 
@@ -39,10 +90,6 @@
 
 - Long-pressing a reaction chip no longer opens the message actions modal; the chips always claim the long press. Left unset, `onReactionLongPress` defaults to opening the `ReactionDetailSheet`.
 - Tapping or long-pressing a reaction chip now opens the `ReactionDetailSheet` pre-filtered to that reaction; it previously opened unfiltered. Clustered and overflow chips map to no single reaction, so they still open unfiltered.
-
-🐞 Fixed
-
-- Message annotations no longer wrap their label mid-sentence when they don't fit on one line, leaving the action stranded beside the label's last line. The action now moves below the label as a whole — `Replied to a thread · View` becomes `Replied to a thread` above `View` — and the `·` is dropped, since it no longer sits between anything.
 
 🔄 Changed
 

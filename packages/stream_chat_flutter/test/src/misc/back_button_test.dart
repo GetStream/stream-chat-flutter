@@ -114,6 +114,29 @@ void main() {
   );
 
   testWidgets(
+    'tapping the unread badge presses the button',
+    (WidgetTester tester) async {
+      var pressed = false;
+
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          StreamBackButton(
+            unreadIndicator: const StreamUnreadIndicator(),
+            onPressed: () => pressed = true,
+          ),
+          client: _clientWithTotalUnread(5),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      await tester.tapAt(tester.getCenter(find.byType(StreamBadgeNotification)));
+
+      expect(pressed, isTrue);
+    },
+  );
+
+  testWidgets(
     'it should show unread count',
     (WidgetTester tester) async {
       final client = MockClient();

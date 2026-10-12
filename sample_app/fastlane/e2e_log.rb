@@ -17,6 +17,11 @@ module E2ELog
   # is deliberately not matched — a skipped body never runs, so it owes no result.
   REPORTED_TEST = /^(?:::group::)?[✅❌] (.+)$/
 
+  # The `github` reporter suffixes a failing test's line with this; the result
+  # marker carries the bare name, so it has to come off before the two are
+  # compared or every failure looks like a test that never ran.
+  FAILED_SUFFIX = ' (failed)'
+
   # package:test's own wording when a test leaks async work that throws after the
   # body has already finished. Comes from the framework rather than the reporter,
   # so it shows up under both `github` (CI) and `expanded` (local).
@@ -39,7 +44,8 @@ module E2ELog
     # nothing to compare against and this returns [] rather than crying wolf.
     def phantom_test_names(log)
       accounted = read(log).scan(REPORTED_TEST).flatten
-                           .map { |name| name.delete_suffix(POST_COMPLETION_SUFFIX).strip }.uniq
+                           .map { |name| name.delete_suffix(POST_COMPLETION_SUFFIX).delete_suffix(FAILED_SUFFIX).strip }
+                           .uniq
       return [] if accounted.empty?
 
       # Sets, not counts: a post-completion failure prints the same name twice and

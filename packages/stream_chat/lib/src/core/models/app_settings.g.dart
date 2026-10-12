@@ -23,7 +23,9 @@ AppSettings _$AppSettingsFromJson(Map<String, dynamic> json) => AppSettings(
 );
 
 UploadConfig _$UploadConfigFromJson(Map<String, dynamic> json) => UploadConfig(
-  sizeLimit: (json['size_limit'] as num?)?.toInt() ?? 104857600,
+  sizeLimit: json['size_limit'] == null
+      ? 104857600
+      : UploadConfig._sizeLimitFromJson((json['size_limit'] as num).toInt()),
   allowedFileExtensions: (json['allowed_file_extensions'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
   blockedFileExtensions: (json['blocked_file_extensions'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
   allowedMimeTypes: (json['allowed_mime_types'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],

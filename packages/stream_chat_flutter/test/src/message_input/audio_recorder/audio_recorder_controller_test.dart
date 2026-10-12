@@ -50,6 +50,10 @@ void main() {
     expect(controller.value, isA<RecordStateIdle>());
   });
 
+  test('does not listen for amplitude before a recording starts', () {
+    verifyNever(() => mockRecorder.onAmplitudeChanged(any()));
+  });
+
   group('startRecord', () {
     setUp(() {
       when(() => mockRecorder.start(config, path: any(named: 'path'))).thenAnswer((_) async {});
@@ -77,6 +81,23 @@ void main() {
 
       expect(controller.value, isA<RecordStateIdle>());
       verifyNever(() => mockRecorder.start(config, path: any(named: 'path')));
+    });
+
+    test('listens for amplitude once the recording starts', () async {
+      when(() => mockRecorder.hasPermission(request: false)).thenAnswer((_) async => true);
+
+      await controller.startRecord();
+
+      expect(amplitudeController.hasListener, isTrue);
+    });
+
+    test('does not listen for amplitude when permission is denied', () async {
+      when(() => mockRecorder.hasPermission(request: false)).thenAnswer((_) async => false);
+      when(() => mockRecorder.hasPermission(request: true)).thenAnswer((_) async => false);
+
+      await controller.startRecord();
+
+      verifyNever(() => mockRecorder.onAmplitudeChanged(any()));
     });
 
     test('requests permission when not pre-granted', () async {
@@ -107,6 +128,28 @@ void main() {
 
       expect(controller.value, isA<RecordStateStopped>());
       verify(() => mockRecorder.stop()).called(1);
+    });
+
+    test('stops listening for amplitude', () async {
+      await controller.startRecord();
+      await controller.stopRecord();
+
+      expect(amplitudeController.hasListener, isFalse);
+    });
+
+    test('updates the waveform on the next recording', () async {
+      when(() => mockRecorder.cancel()).thenAnswer((_) async {});
+      final amplitude = MockAmplitude();
+      when(() => amplitude.current).thenReturn(-30);
+
+      await controller.startRecord();
+      await controller.stopRecord();
+      await controller.cancelRecord();
+      await controller.startRecord();
+      amplitudeController.add(amplitude);
+      await Future<void>.delayed(Duration.zero);
+
+      expect((controller.value as RecordStateRecording).waveform, isNotEmpty);
     });
 
     test('includes duration and waveform in stopped state', () async {
@@ -143,6 +186,24 @@ void main() {
       expect(controller.value, isA<RecordStateIdle>());
       verify(() => mockRecorder.cancel()).called(1);
     });
+
+    test('stops listening for amplitude', () async {
+      await controller.startRecord();
+      await controller.cancelRecord();
+
+      expect(amplitudeController.hasListener, isFalse);
+    });
+  });
+
+  test('finishRecord stops listening for amplitude', () async {
+    when(() => mockRecorder.hasPermission(request: false)).thenAnswer((_) async => true);
+    when(() => mockRecorder.start(config, path: any(named: 'path'))).thenAnswer((_) async {});
+    when(() => mockRecorder.stop()).thenAnswer((_) async => './test/src/message_input/audio_recorder/assets/audio.m4a');
+
+    await controller.startRecord();
+    await controller.finishRecord();
+
+    expect(amplitudeController.hasListener, isFalse);
   });
 
   group('lockRecord', () {

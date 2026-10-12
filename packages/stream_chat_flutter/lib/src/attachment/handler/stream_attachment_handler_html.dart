@@ -22,23 +22,22 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
     List<String>? allowedExtensions,
     Function(FilePickerStatus)? onFileLoading,
     int compressionQuality = 0,
-    bool withData = true,
-    bool withReadStream = false,
+    @Deprecated('Content is read on demand; this no longer has any effect.') bool withData = true,
+    @Deprecated('Content is read on demand; this no longer has any effect.') bool withReadStream = false,
     bool lockParentWindow = true,
   }) async {
-    final result = await FilePicker.pickFiles(
+    final result = await FilePicker.pickFile(
       dialogTitle: dialogTitle,
       initialDirectory: initialDirectory,
       type: type,
       allowedExtensions: allowedExtensions,
       onFileLoading: onFileLoading,
       compressionQuality: compressionQuality,
-      withData: withData,
-      withReadStream: withReadStream,
-      lockParentWindow: lockParentWindow,
+      windowsOptions: WindowsOptions(lockParentWindow: lockParentWindow),
+      linuxOptions: LinuxOptions(lockParentWindow: lockParentWindow),
     );
 
-    return result?.files.first.toAttachment(type: type.toAttachmentType());
+    return await result?.xFile.toAttachment(type: type.toAttachmentType());
   }
 
   @override

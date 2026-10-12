@@ -1,3 +1,15 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `StreamDraftListController.deleteDraft` removing the wrong draft.
+
+## 10.5.0
+
+✅ Added
+
+- Added `StreamChannel.openAtFirstUnread`; set it to `false` to open a channel at the latest message instead of the first unread.
+
 ## 10.4.0
 
 🔄 Changed

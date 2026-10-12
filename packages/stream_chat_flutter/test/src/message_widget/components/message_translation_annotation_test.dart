@@ -62,6 +62,113 @@ void main() {
       },
     );
 
+    final translatedPoll = Message(
+      id: 'translated-poll',
+      createdAt: DateTime(2026),
+      user: User(id: 'other-user'),
+      poll: Poll(
+        name: '¿Color favorito?',
+        nameI18n: const {'language': 'es', 'en_text': 'Favourite colour?'},
+        options: const [PollOption(id: 'option-1', text: 'Rojo')],
+      ),
+    );
+
+    testWidgets('is shown for a poll message whose poll is translated', (tester) async {
+      await pumpHeader(
+        tester,
+        message: translatedPoll,
+        userLanguage: 'en',
+        translationConfig: const StreamMessageTranslationConfiguration(annotationEnabled: true),
+      );
+
+      expect(find.text('Translated from Spanish ·'), findsOneWidget);
+      expect(find.text('Show original'), findsOneWidget);
+    });
+
+    testWidgets('is generic when the text and the poll were written in different languages', (tester) async {
+      final mixed = translatedPoll.copyWith(
+        text: 'Bonjour',
+        i18n: const {'language': 'fr', 'en_text': 'Hello'},
+      );
+
+      await pumpHeader(
+        tester,
+        message: mixed,
+        userLanguage: 'en',
+        translationConfig: const StreamMessageTranslationConfiguration(annotationEnabled: true),
+      );
+
+      expect(find.text('Translated ·'), findsOneWidget);
+    });
+
+    testWidgets('names the language when the text and the poll differ only in its case', (tester) async {
+      final sameLanguage = translatedPoll.copyWith(
+        text: 'Hola',
+        i18n: const {'language': 'es', 'en_text': 'Hello'},
+        poll: translatedPoll.poll!.copyWith(nameI18n: const {'language': 'ES', 'en_text': 'Favourite colour?'}),
+      );
+
+      await pumpHeader(
+        tester,
+        message: sameLanguage,
+        userLanguage: 'en',
+        translationConfig: const StreamMessageTranslationConfiguration(annotationEnabled: true),
+      );
+
+      expect(find.text('Translated from Spanish ·'), findsOneWidget);
+    });
+
+    testWidgets('is generic when the translated text has no known language', (tester) async {
+      final unknownTextLanguage = translatedPoll.copyWith(
+        text: 'Hola',
+        i18n: const {'en_text': 'Hello'},
+      );
+
+      await pumpHeader(
+        tester,
+        message: unknownTextLanguage,
+        userLanguage: 'en',
+        translationConfig: const StreamMessageTranslationConfiguration(annotationEnabled: true),
+      );
+
+      expect(find.text('Translated ·'), findsOneWidget);
+    });
+
+    testWidgets('names the language of the text when only the text is translated', (tester) async {
+      final textOnly = Message(
+        id: 'translated-text',
+        createdAt: DateTime(2026),
+        user: User(id: 'other-user'),
+        text: 'Bonjour',
+        i18n: const {'language': 'fr', 'en_text': 'Hello'},
+        poll: Poll(
+          name: 'Favourite colour?',
+          nameI18n: const {'language': 'en', 'es_text': '¿Color favorito?'},
+          options: const [PollOption(id: 'option-1', text: 'Red')],
+        ),
+      );
+
+      await pumpHeader(
+        tester,
+        message: textOnly,
+        userLanguage: 'en',
+        translationConfig: const StreamMessageTranslationConfiguration(annotationEnabled: true),
+      );
+
+      expect(find.text('Translated from French ·'), findsOneWidget);
+    });
+
+    testWidgets('stays hidden for a poll message read in the language it was written in', (tester) async {
+      await pumpHeader(
+        tester,
+        message: translatedPoll,
+        userLanguage: 'es',
+        translationConfig: const StreamMessageTranslationConfiguration(annotationEnabled: true),
+      );
+
+      expect(find.textContaining('Translated'), findsNothing);
+    });
+
     testWidgets('is hidden by default, matching the SDK behaviour before it existed', (tester) async {
       await pumpHeader(tester, message: translated, userLanguage: 'en');
 

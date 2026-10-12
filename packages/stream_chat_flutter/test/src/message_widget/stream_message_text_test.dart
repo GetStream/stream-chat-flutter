@@ -230,4 +230,19 @@ void main() {
 
     await userStreamController.close();
   });
+
+  testWidgets('StreamMessageText keeps its user subscription when it rebuilds', (tester) async {
+    final user = OwnUser(id: 'test-user', language: 'en');
+    var listenCount = 0;
+    final userStreamController = StreamController<OwnUser?>.broadcast(onListen: () => listenCount += 1);
+    addTearDown(userStreamController.close);
+    when(() => clientState.currentUser).thenReturn(user);
+    when(() => clientState.currentUserStream).thenAnswer((_) => userStreamController.stream);
+
+    await tester.pumpWidget(wrap(StreamMessageText(message: Message(text: 'Hello world'))));
+    await tester.pumpWidget(wrap(StreamMessageText(message: Message(text: 'Hello again'))));
+
+    expect(find.text('Hello again'), findsOneWidget);
+    expect(listenCount, 1);
+  });
 }

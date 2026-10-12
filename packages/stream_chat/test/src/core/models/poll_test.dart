@@ -73,6 +73,94 @@ void main() {
       expect(json['is_closed'], false);
     });
 
+    test('parses the server translations of the name and description', () {
+      final poll = Poll.fromJson({
+        ...jsonFixture('poll.json'),
+        'name_i18n': const {'language': 'en', 'nl_text': 'toets'},
+        'description_i18n': const {'language': 'en', 'nl_text': 'omschrijving'},
+      });
+
+      expect(poll.nameI18n, {'language': 'en', 'nl_text': 'toets'});
+      expect(poll.descriptionI18n, {'language': 'en', 'nl_text': 'omschrijving'});
+    });
+
+    test('parses the server translation of an option', () {
+      final poll = Poll.fromJson({
+        ...jsonFixture('poll.json'),
+        'options': const [
+          {
+            'id': 'option1',
+            'text': 'option1 text',
+            'text_i18n': {'language': 'en', 'nl_text': 'optie1 tekst'},
+          },
+        ],
+      });
+
+      expect(poll.options.single.textI18n, {'language': 'en', 'nl_text': 'optie1 tekst'});
+    });
+
+    test('parses the server translation of an answer', () {
+      final poll = Poll.fromJson({
+        ...jsonFixture('poll.json'),
+        'latest_answers': const [
+          {
+            'id': 'answer1',
+            'answer_text': 'great',
+            'answer_text_i18n': {'language': 'en', 'nl_text': 'geweldig'},
+          },
+        ],
+      });
+
+      expect(poll.latestAnswers.single.answerTextI18n, {'language': 'en', 'nl_text': 'geweldig'});
+    });
+
+    test('keeps the server translations out of the extra data', () {
+      final poll = Poll.fromJson({
+        ...jsonFixture('poll.json'),
+        'name_i18n': const {'language': 'en', 'nl_text': 'toets'},
+        'description_i18n': const {'language': 'en', 'nl_text': 'omschrijving'},
+      });
+
+      expect(poll.extraData, isNot(contains('name_i18n')));
+      expect(poll.extraData, isNot(contains('description_i18n')));
+    });
+
+    test('does not send the server translations back when serialized', () {
+      final poll = Poll(
+        name: 'test',
+        nameI18n: const {'language': 'en', 'nl_text': 'toets'},
+        descriptionI18n: const {'language': 'en', 'nl_text': 'omschrijving'},
+        options: const [
+          PollOption(text: 'option1 text', textI18n: {'language': 'en', 'nl_text': 'optie1 tekst'}),
+        ],
+      );
+
+      final json = poll.toJson();
+
+      expect(json, isNot(contains('name_i18n')));
+      expect(json, isNot(contains('description_i18n')));
+    });
+
+    test('keeps the server translation of an option out of its extra data', () {
+      final option = PollOption.fromJson(const {
+        'id': 'option1',
+        'text': 'option1 text',
+        'text_i18n': {'language': 'en', 'nl_text': 'optie1 tekst'},
+      });
+
+      expect(option.extraData, isNot(contains('text_i18n')));
+    });
+
+    test('PollOption.toJson leaves out the server translation', () {
+      const option = PollOption(
+        id: 'option1',
+        text: 'option1 text',
+        textI18n: {'language': 'en', 'nl_text': 'optie1 tekst'},
+      );
+
+      expect(option.toJson(), isNot(contains('text_i18n')));
+    });
+
     group('ComparableFieldProvider', () {
       test('should return ComparableField for poll.id', () {
         final poll = createTestPoll(

@@ -153,7 +153,7 @@ These parameters have been removed. The composer layout is now fully owned by `S
 | `elevation`                     | No direct replacement. Visual styling is controlled by the design system theme.                 |
 | `shadow`                        | No direct replacement.                                                                          |
 | `enableActionAnimation`         | Removed. Actions no longer animate in/out.                                                      |
-| `contentInsertionConfiguration` | Removed.                                                                                        |
+| `contentInsertionConfiguration` | Handled by default: keyboard images and GIFs are added as image attachments. Pass `contentInsertionConfiguration` to a custom input builder's `StreamMessageComposerInputField` to customise it. |
 | `sendButtonLocation`            | Removed. The send button is always placed in the trailing position by the design system layout. |
 
 #### Action and button parameters
@@ -690,7 +690,7 @@ There is no one-to-one replacement — most fields on the old `StreamMessageInpu
 - [ ] Review usages of `attachmentLimit` — it is now a non-nullable `int` defaulting to `StreamAttachmentValidator.defaultMaxAttachmentCount` (`30`, the backend cap); set an explicit smaller value to tighten the limit
 - [ ] Remove `maxAttachmentSize` from any `StreamMessageComposer` call — size limits now come from `StreamChatClient.appSettings` (configured in the Stream Dashboard); the SDK falls back to `UploadConfig.defaultSizeLimit` (100 MB) when the app-configured value is `0`
 - [ ] Remove `onAttachmentLimitExceed` from any `StreamMessageComposer` call — the default error sheet now handles all validator failures, or pass `onError: (error, stackTrace) { … }` to render a custom UI (the callback short-circuits the default sheet and receives the typed `AttachmentLimitReachedError` / `AttachmentTooLargeError` / `AttachmentBlockedError`)
-- [ ] Remove any usage of `maxHeight`, `maxLines`, `minLines`, `padding`, `textInputMargin`, `elevation`, `shadow`, `enableActionAnimation`, `contentInsertionConfiguration`, `sendButtonLocation`
+- [ ] Remove any usage of `maxHeight`, `maxLines`, `minLines`, `padding`, `textInputMargin`, `elevation`, `shadow`, `enableActionAnimation`, `sendButtonLocation`
 - [ ] Replace `actionsBuilder` / `actionsLocation` / button builder params (`attachmentButtonBuilder`, `commandButtonBuilder`, `sendButtonBuilder`, `idleSendIcon`, `activeSendIcon`, `showCommandsButton`) with sub-component overrides via `StreamComponentFactory`
 - [ ] Replace attachment list builder params (`attachmentListBuilder`, `fileAttachmentListBuilder`, `mediaAttachmentListBuilder`, `voiceRecordingAttachmentListBuilder`) with the `messageComposerAttachmentList` builder in `StreamComponentFactory`
 - [ ] Replace attachment item builder params (`fileAttachmentBuilder`, `mediaAttachmentBuilder`, `voiceRecordingAttachmentBuilder`) with the `messageComposerAttachment` builder in `StreamComponentFactory`

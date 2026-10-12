@@ -257,27 +257,15 @@ void main() {
     });
 
     test('should throw if trying to set `extraData`', () {
-      try {
-        channel.extraData = {'name': 'test-channel-name'};
-      } catch (e) {
-        expect(e, isA<StateError>());
-      }
+      expect(() => channel.extraData = {'name': 'test-channel-name'}, throwsA(isA<StateError>()));
     });
 
     test('should throw if trying to set `image`', () {
-      try {
-        channel.image = 'https://stream.io/some-image';
-      } catch (e) {
-        expect(e, isA<StateError>());
-      }
+      expect(() => channel.image = 'https://stream.io/some-image', throwsA(isA<StateError>()));
     });
 
     test('should throw if trying to set `name`', () {
-      try {
-        channel.name = 'New name';
-      } catch (e) {
-        expect(e, isA<StateError>());
-      }
+      expect(() => channel.name = 'New name', throwsA(isA<StateError>()));
     });
 
     group('`.sendMessage`', () {
@@ -373,17 +361,15 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.sendMessage(
+          await expectLater(
+            channel.sendMessage(
               message,
               skipPush: true,
-            );
-          } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
-
-            final networkError = e as StreamChatNetworkError;
-            expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
-          }
+            ),
+            throwsA(
+              isA<StreamChatNetworkError>().having((it) => it.code, 'code', ChatErrorCode.notAllowed.code),
+            ),
+          );
         },
       );
 
@@ -430,18 +416,16 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.sendMessage(
+          await expectLater(
+            channel.sendMessage(
               message,
               skipPush: true,
               skipEnrichUrl: true,
-            );
-          } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
-
-            final networkError = e as StreamChatNetworkError;
-            expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
-          }
+            ),
+            throwsA(
+              isA<StreamChatNetworkError>().having((it) => it.code, 'code', ChatErrorCode.notAllowed.code),
+            ),
+          );
         },
       );
 
@@ -487,17 +471,15 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.sendMessage(
+          await expectLater(
+            channel.sendMessage(
               message,
               skipEnrichUrl: true,
-            );
-          } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
-
-            final networkError = e as StreamChatNetworkError;
-            expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
-          }
+            ),
+            throwsA(
+              isA<StreamChatNetworkError>().having((it) => it.code, 'code', ChatErrorCode.notAllowed.code),
+            ),
+          );
         },
       );
 
@@ -542,16 +524,14 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.sendMessage(
+          await expectLater(
+            channel.sendMessage(
               message,
-            );
-          } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
-
-            final networkError = e as StreamChatNetworkError;
-            expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
-          }
+            ),
+            throwsA(
+              isA<StreamChatNetworkError>().having((it) => it.code, 'code', ChatErrorCode.notAllowed.code),
+            ),
+          );
         },
       );
 
@@ -603,11 +583,10 @@ void main() {
           ]),
         );
 
-        try {
-          await channel.sendMessage(message);
-        } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
-        }
+        await expectLater(
+          channel.sendMessage(message),
+          throwsA(isA<StreamChatNetworkError>()),
+        );
       });
 
       test('with attachments should work just fine', () async {
@@ -1671,11 +1650,10 @@ void main() {
           ]),
         );
 
-        try {
-          await channel.updateMessage(message, skipEnrichUrl: true);
-        } catch (e) {
-          expect(e, isA<ArgumentError>());
-        }
+        await expectLater(
+          channel.updateMessage(message, skipEnrichUrl: true),
+          throwsA(isA<ArgumentError>()),
+        );
       });
 
       test(
@@ -1723,15 +1701,14 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.updateMessage(message, skipEnrichUrl: true);
-          } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
-
-            final networkError = e as StreamChatNetworkError;
-            expect(networkError.code, equals(ChatErrorCode.requestTimeout.code));
-            expect(networkError.isRetriable, isTrue);
-          }
+          await expectLater(
+            channel.updateMessage(message, skipEnrichUrl: true),
+            throwsA(
+              isA<StreamChatNetworkError>()
+                  .having((it) => it.code, 'code', ChatErrorCode.requestTimeout.code)
+                  .having((it) => it.isRetriable, 'isRetriable', isTrue),
+            ),
+          );
         },
       );
 
@@ -1780,15 +1757,14 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.updateMessage(message, skipPush: true);
-          } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
-
-            final networkError = e as StreamChatNetworkError;
-            expect(networkError.code, equals(ChatErrorCode.internalSystemError.code));
-            expect(networkError.isRetriable, isTrue);
-          }
+          await expectLater(
+            channel.updateMessage(message, skipPush: true),
+            throwsA(
+              isA<StreamChatNetworkError>()
+                  .having((it) => it.code, 'code', ChatErrorCode.internalSystemError.code)
+                  .having((it) => it.isRetriable, 'isRetriable', isTrue),
+            ),
+          );
         },
       );
 
@@ -1830,18 +1806,16 @@ void main() {
           ]),
         );
 
-        try {
-          await channel.updateMessage(
+        await expectLater(
+          channel.updateMessage(
             message,
             skipPush: true,
             skipEnrichUrl: true,
-          );
-        } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
-
-          final networkError = e as StreamChatNetworkError;
-          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
-        }
+          ),
+          throwsA(
+            isA<StreamChatNetworkError>().having((it) => it.code, 'code', ChatErrorCode.notAllowed.code),
+          ),
+        );
       });
 
       test('should handle non-retriable StreamChatNetworkError with skipPush: false, skipEnrichUrl: false', () async {
@@ -1880,14 +1854,12 @@ void main() {
           ]),
         );
 
-        try {
-          await channel.updateMessage(message);
-        } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
-
-          final networkError = e as StreamChatNetworkError;
-          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
-        }
+        await expectLater(
+          channel.updateMessage(message),
+          throwsA(
+            isA<StreamChatNetworkError>().having((it) => it.code, 'code', ChatErrorCode.notAllowed.code),
+          ),
+        );
       });
     });
 
@@ -2053,15 +2025,14 @@ void main() {
           ]),
         );
 
-        try {
-          await channel.partialUpdateMessage(
+        await expectLater(
+          channel.partialUpdateMessage(
             message,
             set: set,
             unset: unset,
-          );
-        } catch (e) {
-          expect(e, isA<ArgumentError>());
-        }
+          ),
+          throwsA(isA<ArgumentError>()),
+        );
       });
 
       test(
@@ -2122,20 +2093,19 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.partialUpdateMessage(
+          await expectLater(
+            channel.partialUpdateMessage(
               message,
               set: set,
               unset: unset,
               skipEnrichUrl: true,
-            );
-          } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
-
-            final networkError = e as StreamChatNetworkError;
-            expect(networkError.code, equals(ChatErrorCode.requestTimeout.code));
-            expect(networkError.isRetriable, isTrue);
-          }
+            ),
+            throwsA(
+              isA<StreamChatNetworkError>()
+                  .having((it) => it.code, 'code', ChatErrorCode.requestTimeout.code)
+                  .having((it) => it.isRetriable, 'isRetriable', isTrue),
+            ),
+          );
         },
       );
 
@@ -2196,19 +2166,18 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.partialUpdateMessage(
+          await expectLater(
+            channel.partialUpdateMessage(
               message,
               set: set,
               unset: unset,
-            );
-          } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
-
-            final networkError = e as StreamChatNetworkError;
-            expect(networkError.code, equals(ChatErrorCode.internalSystemError.code));
-            expect(networkError.isRetriable, isTrue);
-          }
+            ),
+            throwsA(
+              isA<StreamChatNetworkError>()
+                  .having((it) => it.code, 'code', ChatErrorCode.internalSystemError.code)
+                  .having((it) => it.isRetriable, 'isRetriable', isTrue),
+            ),
+          );
         },
       );
 
@@ -2262,19 +2231,17 @@ void main() {
           ]),
         );
 
-        try {
-          await channel.partialUpdateMessage(
+        await expectLater(
+          channel.partialUpdateMessage(
             message,
             set: set,
             unset: unset,
             skipEnrichUrl: true,
-          );
-        } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
-
-          final networkError = e as StreamChatNetworkError;
-          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
-        }
+          ),
+          throwsA(
+            isA<StreamChatNetworkError>().having((it) => it.code, 'code', ChatErrorCode.notAllowed.code),
+          ),
+        );
       });
 
       test('should handle non-retriable StreamChatNetworkError with skipEnrichUrl: false', () async {
@@ -2326,18 +2293,16 @@ void main() {
           ]),
         );
 
-        try {
-          await channel.partialUpdateMessage(
+        await expectLater(
+          channel.partialUpdateMessage(
             message,
             set: set,
             unset: unset,
-          );
-        } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
-
-          final networkError = e as StreamChatNetworkError;
-          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
-        }
+          ),
+          throwsA(
+            isA<StreamChatNetworkError>().having((it) => it.code, 'code', ChatErrorCode.notAllowed.code),
+          ),
+        );
       });
     });
 
@@ -2713,14 +2678,15 @@ void main() {
           final message = Message(id: 'test-message-id');
           const timeoutOrExpirationDate = 'invalid-value';
 
-          try {
-            await channel.pinMessage(
+          // `pinMessage` validates in an `assert` before its first `await`, so
+          // it throws synchronously and the call must stay in a closure.
+          await expectLater(
+            () => channel.pinMessage(
               message,
               timeoutOrExpirationDate: timeoutOrExpirationDate,
-            );
-          } catch (e) {
-            expect(e, isA<ArgumentError>());
-          }
+            ),
+            throwsA(isA<ArgumentError>()),
+          );
         },
       );
     });
@@ -3014,11 +2980,10 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.sendReaction(message, reaction);
-          } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
-          }
+          await expectLater(
+            channel.sendReaction(message, reaction),
+            throwsA(isA<StreamChatNetworkError>()),
+          );
 
           verify(() => client.sendReaction(message.id, reaction)).called(1);
         },
@@ -3220,11 +3185,10 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.sendReaction(message, reaction);
-          } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
-          }
+          await expectLater(
+            channel.sendReaction(message, reaction),
+            throwsA(isA<StreamChatNetworkError>()),
+          );
 
           verify(() => client.sendReaction(message.id, reaction)).called(1);
         },
@@ -3419,11 +3383,10 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.deleteReaction(message, reaction);
-          } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
-          }
+          await expectLater(
+            channel.deleteReaction(message, reaction),
+            throwsA(isA<StreamChatNetworkError>()),
+          );
 
           verify(() => client.deleteReaction(messageId, type)).called(1);
         },
@@ -3547,11 +3510,10 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.deleteReaction(message, reaction);
-          } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
-          }
+          await expectLater(
+            channel.deleteReaction(message, reaction),
+            throwsA(isA<StreamChatNetworkError>()),
+          );
 
           verify(() => client.deleteReaction(messageId, type)).called(1);
         },
@@ -4044,11 +4006,10 @@ void main() {
           ),
         ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
 
-        try {
-          await channel.watch();
-        } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
-        }
+        await expectLater(
+          channel.watch(),
+          throwsA(isA<StreamChatNetworkError>()),
+        );
 
         verify(
           () => client.queryChannel(
@@ -4242,11 +4203,10 @@ void main() {
           ),
         ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
 
-        try {
-          await channel.query();
-        } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
-        }
+        await expectLater(
+          channel.query(),
+          throwsA(isA<StreamChatNetworkError>()),
+        );
 
         verify(
           () => client.queryChannel(

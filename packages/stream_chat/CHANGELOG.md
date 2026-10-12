@@ -2,23 +2,45 @@
 
 ✅ Added
 
-- Added a getter for `StreamChatClient.recoverStateOnReconnect`, which was previously write-only.
+- Added `Poll.nameI18n`, `Poll.descriptionI18n`, `PollOption.textI18n` and `PollVote.answerTextI18n`, holding the server's translations of a poll.
 
 🔄 Changed
 
-- Reconnecting no longer replays very large event backlogs; the offline cache is reset and the affected channels are re-queried instead, so a long spell offline does not stall the app on reconnect.
+- `name_i18n`, `description_i18n` and `text_i18n` are no longer kept in `Poll.extraData` and `PollOption.extraData`; read the new `*I18n` fields instead.
+- Reduced the channel state updates emitted for message updates in channels without active live locations.
+
+🐞 Fixed
+
+- Fixed `Event.aiState` reading `AI_STATE_EXTERNAL_SOURCES` as `idle` instead of `checkingSources`.
+- Fixed `Channel.disableSlowMode` and `StreamChatClient.disableSlowdown` always failing.
+
+## 10.5.0
+
+✅ Added
+
+- Added a getter for `StreamChatClient.recoverStateOnReconnect`, which was previously write-only.
+- Added `ChannelClientState.isMarkedAsUnread`, which reports whether the current user marked the channel unread and hasn't read past that point since.
+
+🔄 Changed
+
+- Reconnecting after a long spell offline now resets the offline cache and re-queries channels instead of replaying a large event backlog.
+- Improved the speed of converting models to and from JSON.
 
 🐞 Fixed
 
 - Fixed reconnecting with more than 255 channels clearing the offline cache and skipping the events missed while offline.
 - Fixed reconnect recovery refreshing only the first 30 active channels.
-- Fixed reconnect catch-up covering an arbitrary subset of channels when more are active than one request holds; the most recently active are now covered first.
+- Fixed reconnect catch-up covering an arbitrary subset of channels when many are active; the most recently active now come first.
 - Fixed `CurrentPlatform` throwing `UnimplementedError` on WebAssembly builds.
 - Fixed live location expiry emitting repeated `location.expired` events for the same expired location.
+- Fixed members removed from a channel keeping their read state in the channel state.
+- Fixed `AttachmentFile.extension` returning the whole file name when the file has no extension.
+- Fixed `UploadConfig.sizeLimit` being `0` when no size limit is set in the Stream Dashboard; it now falls back to `UploadConfig.defaultSizeLimit`.
+- Fixed a slow first app settings load replacing a newer `StreamChatClient.getAppSettings()` result.
 
 🔄 Internal / Non-breaking
 
-- Errors thrown synchronously while handling a channel event are now logged as warnings instead of reaching the root zone, where crash reporters report them as fatal.
+- Errors thrown while handling a channel event are now logged as warnings instead of surfacing as fatal crashes.
 
 ## 10.4.0
 

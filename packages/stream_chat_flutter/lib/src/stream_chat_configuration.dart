@@ -277,7 +277,8 @@ class StreamChatConfigurationData {
   /// defaults.
   final StreamMessageListViewConfiguration messageListViewConfiguration;
 
-  /// How messages that carry a translation in [Message.i18n] are displayed.
+  /// How messages that carry a translation in [Message.i18n], or whose poll
+  /// carries one, are displayed.
   ///
   /// Defaults to [StreamMessageTranslationConfiguration]'s own defaults:
   /// translations are displayed automatically, without an annotation.

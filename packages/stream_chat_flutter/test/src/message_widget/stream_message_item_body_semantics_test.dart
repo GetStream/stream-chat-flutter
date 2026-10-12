@@ -105,6 +105,29 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('announces the poll name the bubble shows translated', (tester) async {
+    final handle = tester.ensureSemantics();
+
+    final pollMessage = testMessage(text: null).copyWith(
+      poll: Poll(
+        name: 'Lieblingsfarbe?',
+        nameI18n: const {'language': 'de', 'en_text': 'Favourite colour?'},
+        options: const [PollOption(text: 'Rot')],
+      ),
+    );
+
+    // The shipped strings, as the poll attachment needs more than the fakes.
+    await tester.pumpWidget(buildMessageScene(pollMessage, fakeTranslations: false));
+    await tester.pumpAndSettle();
+
+    final labels = labelsOf(tester);
+    final rowLabel = labels.firstWhere((it) => it.contains('Han Solo'));
+    expect(rowLabel, contains('Favourite colour?'));
+    expect(labels, isNot(contains(contains('Lieblingsfarbe?'))));
+
+    handle.dispose();
+  });
+
   testWidgets('announces the original text to a reader with no language set', (tester) async {
     final handle = tester.ensureSemantics();
 

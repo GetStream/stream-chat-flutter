@@ -511,6 +511,12 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String unreadMessagesSeparatorText() => 'New messages';
 
   @override
+  String unreadMessagesSeparatorLabel({required int count}) {
+    if (count == 1) return '1 unread message';
+    return '$count unread messages';
+  }
+
+  @override
   String get enableFileAccessMessage => 'Enable file access to continue';
 
   @override

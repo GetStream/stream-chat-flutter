@@ -23,6 +23,7 @@ class StreamMessageComposerInputField extends StatelessWidget {
     this.autofocus = false,
     this.autocorrect = true,
     this.enabled = true,
+    this.contentInsertionConfiguration,
   });
 
   /// The controller for the text field.
@@ -64,6 +65,9 @@ class StreamMessageComposerInputField extends StatelessWidget {
   /// Defaults to true.
   final bool enabled;
 
+  /// {@macro flutter.widgets.editableText.contentInsertionConfiguration}
+  final ContentInsertionConfiguration? contentInsertionConfiguration;
+
   @override
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
@@ -102,6 +106,7 @@ class StreamMessageComposerInputField extends StatelessWidget {
                 textCapitalization: textCapitalization,
                 autofocus: autofocus,
                 autocorrect: autocorrect,
+                contentInsertionConfiguration: contentInsertionConfiguration,
                 style: effectiveStyle,
                 cursorColor: effectiveCursorColor,
                 cursorWidth: effectiveCursorWidth,

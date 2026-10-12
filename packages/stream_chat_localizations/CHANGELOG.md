@@ -1,8 +1,9 @@
-## Upcoming
+## 10.5.0
 
 ✅ Added
 
 - Added the message-list accessibility strings for all supported locales, each with a native-language implementation.
+- Added `unreadMessagesSeparatorLabel` for all supported locales, showing an unread count. A class that `implements StreamChatLocalizations` must add it.
 
 ## 10.4.0
 

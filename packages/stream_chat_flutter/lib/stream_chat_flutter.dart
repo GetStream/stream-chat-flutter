@@ -1,5 +1,5 @@
 export 'package:jiffy/jiffy.dart';
-export 'package:photo_manager/photo_manager.dart' show ThumbnailSize, ThumbnailFormat;
+export 'package:photo_manager/photo_manager.dart' show RequestType, ThumbnailSize, ThumbnailFormat;
 export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 export 'package:stream_core_flutter/chat.dart'
     hide
@@ -41,7 +41,7 @@ export 'src/channel/channel_list_header.dart';
 export 'src/channel/channel_name.dart';
 export 'src/channel/stream_channel_name.dart';
 export 'src/channel/stream_draft_message_preview_text.dart';
-export 'src/channel/stream_message_preview_text.dart';
+export 'src/channel/stream_message_preview_text.dart' hide translateForPreview;
 // region SDK Design Refresh Components
 export 'src/components/avatar/stream_channel_avatar.dart';
 export 'src/components/avatar/stream_user_avatar.dart';
@@ -90,6 +90,7 @@ export 'src/message_list_view/message_list_view.dart';
 export 'src/message_list_view/stream_message_list_view_builders.dart';
 export 'src/message_list_view/stream_message_list_view_configuration.dart';
 export 'src/message_list_view/unread_indicator_button.dart';
+export 'src/message_list_view/unread_messages_separator.dart';
 export 'src/message_modal/message_action_confirmation_modal.dart';
 export 'src/message_modal/message_actions_modal.dart';
 export 'src/message_modal/message_modal.dart';
@@ -98,6 +99,7 @@ export 'src/message_widget/components/stream_message_content.dart';
 export 'src/message_widget/components/stream_message_footer.dart';
 export 'src/message_widget/components/stream_message_header.dart';
 export 'src/message_widget/components/stream_message_leading.dart';
+export 'src/message_widget/message_translation_language.dart';
 export 'src/message_widget/stream_ephemeral_message.dart';
 export 'src/message_widget/stream_message_item.dart';
 export 'src/message_widget/stream_message_translation_configuration.dart';

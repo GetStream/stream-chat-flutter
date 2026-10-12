@@ -499,6 +499,16 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String unreadMessagesSeparatorText() => 'Nouveaux messages';
 
   @override
+  String unreadMessagesSeparatorLabel({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count message non lu',
+      other: '$count messages non lus',
+      locale: localeName,
+    );
+  }
+
+  @override
   String get enableFileAccessMessage =>
       "Veuillez autoriser l'accès aux fichiers afin de pouvoir les partager avec des amis.";
 

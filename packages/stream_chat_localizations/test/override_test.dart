@@ -37,6 +37,22 @@ class FooStreamChatLocalizationsDelegate extends LocalizationsDelegate<StreamCha
   bool shouldReload(FooStreamChatLocalizationsDelegate old) => false;
 }
 
+/// A subclass written before [StreamChatLocalizations.unreadMessagesSeparatorLabel]
+/// existed: it overrides only the deprecated count-less method.
+///
+/// Every other member is left to `noSuchMethod` forwarding, so the class stays
+/// focused on the one inherited behaviour under test.
+class LegacyStreamChatLocalizations extends GlobalStreamChatLocalizations {
+  const LegacyStreamChatLocalizations() : super(localeName: 'en');
+
+  @override
+  // ignore: deprecated_member_use
+  String unreadMessagesSeparatorText() => 'custom new messages';
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 Widget buildFrame({
   Locale? locale,
   Iterable<LocalizationsDelegate> delegates = GlobalStreamChatLocalizations.delegates,
@@ -271,6 +287,25 @@ void main() {
       await tester.binding.setLocale('de', 'DE');
       await tester.pump();
       expect(find.text('foo'), findsOneWidget);
+    },
+  );
+
+  test(
+    'a subclass predating unreadMessagesSeparatorLabel keeps its custom text',
+    () {
+      const localizations = LegacyStreamChatLocalizations();
+
+      // The inherited fallback forwards to the deprecated method, so a
+      // subclass that only overrides the old one keeps rendering its own
+      // copy instead of reverting to the built-in count-aware string.
+      expect(
+        localizations.unreadMessagesSeparatorLabel(count: 1),
+        'custom new messages',
+      );
+      expect(
+        localizations.unreadMessagesSeparatorLabel(count: 5),
+        'custom new messages',
+      );
     },
   );
 }
