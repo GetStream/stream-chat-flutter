@@ -59,7 +59,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   StreamMessageComposerController._({
     required Message initialMessage,
     Map<RegExp, TextStyleBuilder>? textPatternStyle,
-    required this.validator,
+    required this._validator,
   }) : assert(
          initialMessage.state.isInitial,
          'Controllers must be created with an initial (draft) message. '
@@ -77,8 +77,14 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   /// The function that decides whether the message being composed can be
   /// sent.
   ///
-  /// Defaults to [defaultValidator].
-  final MessageValidator validator;
+  /// Listeners are notified when it changes. Defaults to [defaultValidator].
+  MessageValidator get validator => _validator;
+  MessageValidator _validator;
+  set validator(MessageValidator value) {
+    if (_validator == value) return;
+    _validator = value;
+    notifyListeners();
+  }
 
   /// Returns whether [message] has text, an attachment or a poll.
   ///

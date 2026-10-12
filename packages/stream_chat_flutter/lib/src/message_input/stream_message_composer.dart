@@ -84,7 +84,8 @@ class StreamMessageComposer extends StatelessWidget {
     Iterable<StreamAutocompleteTrigger> customAutocompleteTriggers = const [],
     bool mentionAllAppUsers = false,
     bool? shouldKeepFocusAfterMessage,
-    @Deprecated('Use StreamMessageComposerController.validator instead.') MessageValidator? validator,
+    @Deprecated('Use StreamMessageComposerController.validator instead.')
+    MessageValidator validator = StreamMessageComposerController.defaultValidator,
     String? restorationId,
     bool? enableSafeArea,
     bool enableMentionsOverlay = true,
@@ -197,7 +198,8 @@ class MessageComposerProps {
     this.customAutocompleteTriggers = const [],
     this.mentionAllAppUsers = false,
     this.shouldKeepFocusAfterMessage,
-    @Deprecated('Use StreamMessageComposerController.validator instead.') MessageValidator? validator,
+    @Deprecated('Use StreamMessageComposerController.validator instead.')
+    this.validator = StreamMessageComposerController.defaultValidator,
     this.restorationId,
     this.enableSafeArea,
     this.enableMentionsOverlay = true,
@@ -216,7 +218,7 @@ class MessageComposerProps {
     this.autofocus = false,
     this.autoCorrect = true,
     this.surfaceStyle,
-  }) : _customValidator = validator;
+  });
 
   /// Function called after sending the message.
   final void Function(Message)? onMessageSent;
@@ -333,11 +335,9 @@ class MessageComposerProps {
   /// The function that decides whether the message being composed can be
   /// sent.
   ///
-  /// When set, a message is sent only when both this and the controller's
-  /// validator accept it. Defaults to
-  /// [StreamMessageComposerController.defaultValidator].
-  MessageValidator get validator => _customValidator ?? StreamMessageComposerController.defaultValidator;
-  final MessageValidator? _customValidator;
+  /// When set, it becomes the validator of the composer's controller. Defaults
+  /// to [StreamMessageComposerController.defaultValidator].
+  final MessageValidator validator;
 
   /// Restoration ID to save and restore the state of the MessageInput.
   final String? restorationId;
@@ -498,7 +498,7 @@ class MessageComposerProps {
       customAutocompleteTriggers: customAutocompleteTriggers ?? this.customAutocompleteTriggers,
       mentionAllAppUsers: mentionAllAppUsers ?? this.mentionAllAppUsers,
       shouldKeepFocusAfterMessage: shouldKeepFocusAfterMessage ?? this.shouldKeepFocusAfterMessage,
-      validator: validator ?? _customValidator,
+      validator: validator ?? this.validator,
       restorationId: restorationId ?? this.restorationId,
       enableSafeArea: enableSafeArea ?? this.enableSafeArea,
       enableMentionsOverlay: enableMentionsOverlay ?? this.enableMentionsOverlay,
@@ -623,6 +623,17 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       ..removeListener(_onChangedDebounced)
       ..addListener(_onChangedThrottled)
       ..addListener(_onChangedDebounced);
+
+    _applyDeprecatedValidator();
+  }
+
+  // Applies the deprecated [MessageComposerProps.validator], when set, to the
+  // controller in use.
+  void _applyDeprecatedValidator() {
+    final validator = widget.props.validator;
+    if (validator == StreamMessageComposerController.defaultValidator) return;
+
+    _effectiveController.validator = validator;
   }
 
   StreamSubscription<DateTime?>? _lastSentAtSubscription;
@@ -774,6 +785,8 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
         ..removeListener(_syncMessageToPicker);
       _initialiseEffectiveController();
     }
+
+    if (widget.props.validator != oldWidget.props.validator) _applyDeprecatedValidator();
 
     // Update _focusNode
     if (widget.props.focusNode != oldWidget.props.focusNode) {
@@ -1536,7 +1549,6 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   Future<void> sendMessage() async {
     if (_effectiveController.isSlowModeActive) return;
     if (!_effectiveController.canSend) return;
-    if (widget.props._customValidator case final validator? when !validator(_effectiveController.message)) return;
 
     _hidePicker();
 

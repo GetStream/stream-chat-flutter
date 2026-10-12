@@ -60,6 +60,25 @@ void main() {
     expect(_sendButton(tester).props.onPressed, isNull);
   });
 
+  testWidgets("applies the deprecated composer validator to the app's own controller", (tester) async {
+    final originalRecordPlatform = RecordPlatform.instance;
+    RecordPlatform.instance = FakeRecordPlatform();
+    addTearDown(() => RecordPlatform.instance = originalRecordPlatform);
+    final controller = _controller()..text = 'Hello';
+
+    await _pumpComposer(
+      tester,
+      composer: StreamMessageComposer(
+        messageComposerController: controller,
+        // ignore: deprecated_member_use_from_same_package
+        validator: (_) => false,
+        enableVoiceRecording: false,
+      ),
+    );
+
+    expect(_sendButton(tester).props.onPressed, isNull);
+  });
+
   testWidgets("sends what the app's own controller accepts", (tester) async {
     final originalRecordPlatform = RecordPlatform.instance;
     RecordPlatform.instance = FakeRecordPlatform();

@@ -53,6 +53,22 @@ void main() {
     expect(controller.canSend, isTrue);
   });
 
+  test('follows a validator set after creation', () {
+    final controller = _controller()..validator = (_) => true;
+
+    expect(controller.canSend, isTrue);
+  });
+
+  test('notifies listeners when the validator changes', () {
+    var notified = false;
+    final controller = _controller()..addListener(() => notified = true);
+
+    // ignore: cascade_invocations
+    controller.validator = (_) => true;
+
+    expect(notified, isTrue);
+  });
+
   test('restorable controller value uses the given validator', () {
     final restorable = StreamRestorableMessageComposerController(validator: (_) => true);
 
