@@ -133,15 +133,83 @@ void main() {
     });
   });
 
-  testWidgets('hides voice recording once the upload-file capability is revoked', (tester) async {
-    final capabilities = StreamController<List<ChannelCapability>>.broadcast();
-    addTearDown(capabilities.close);
+  group('once the upload-file capability is revoked', () {
+    testWidgets('hides voice recording', (tester) async {
+      final capabilities = StreamController<List<ChannelCapability>>.broadcast();
+      addTearDown(capabilities.close);
 
-    await _pumpComposer(tester, controller: controller, ownCapabilitiesStream: capabilities.stream);
-    capabilities.add(_cannotUpload);
-    await tester.pumpAndSettle();
+      await _pumpComposer(tester, controller: controller, ownCapabilitiesStream: capabilities.stream);
+      capabilities.add(_cannotUpload);
+      await tester.pumpAndSettle();
 
-    expect(_micButton, findsNothing);
+      expect(_micButton, findsNothing);
+    });
+
+    testWidgets('hides the attachment button when nothing is left to offer', (tester) async {
+      final capabilities = StreamController<List<ChannelCapability>>.broadcast();
+      addTearDown(capabilities.close);
+
+      await _pumpComposer(tester, controller: controller, ownCapabilitiesStream: capabilities.stream);
+      capabilities.add(_cannotUpload);
+      await tester.pumpAndSettle();
+
+      expect(_attachmentButton, findsNothing);
+    });
+
+    testWidgets('stops accepting keyboard images', (tester) async {
+      final capabilities = StreamController<List<ChannelCapability>>.broadcast();
+      addTearDown(capabilities.close);
+
+      await _pumpComposer(tester, controller: controller, ownCapabilitiesStream: capabilities.stream);
+      capabilities.add(_cannotUpload);
+      await tester.pumpAndSettle();
+
+      expect(_keyboardConfig(tester), isNull);
+    });
+
+    testWidgets('moves an open tabbed picker off a tab that uploads', (tester) async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+      addTearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+      final capabilities = StreamController<List<ChannelCapability>>.broadcast();
+      addTearDown(capabilities.close);
+
+      await _pumpComposer(
+        tester,
+        controller: controller,
+        ownCapabilities: const [..._canUpload, ChannelCapability.sendPoll],
+        ownCapabilitiesStream: capabilities.stream,
+        useSystemAttachmentPicker: false,
+        attachmentPickerOptionsBuilder: (context, defaultOptions) => [
+          TabbedAttachmentPickerOption(
+            key: 'upload-tab',
+            icon: Icons.upload,
+            supportedTypes: const [AttachmentPickerType.files],
+            optionViewBuilder: (context, controller) => const Text('Upload tab'),
+          ),
+          ...defaultOptions.where((option) => option.key == 'poll-creator'),
+        ],
+      );
+      await tester.tap(_attachmentButton);
+      await tester.pumpAndSettle();
+      capabilities.add(_cannotUploadButCanSendPoll);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Upload tab'), findsNothing);
+      expect(find.text('Create a poll and let everyone vote!'), findsOneWidget);
+    });
+
+    testWidgets('closes an open picker when nothing is left to offer', (tester) async {
+      final capabilities = StreamController<List<ChannelCapability>>.broadcast();
+      addTearDown(capabilities.close);
+
+      await _pumpComposer(tester, controller: controller, ownCapabilitiesStream: capabilities.stream);
+      await tester.tap(_attachmentButton);
+      await tester.pumpAndSettle();
+      capabilities.add(_cannotUpload);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(StreamSystemAttachmentPicker), findsNothing);
+    });
   });
 
   testWidgets('leaves out the command tab when the channel has no commands', (tester) async {
@@ -188,6 +256,7 @@ Future<void> _pumpComposer(
   List<Command> commands = const [],
   bool disableAttachments = false,
   bool useSystemAttachmentPicker = true,
+  AttachmentPickerOptionsBuilder? attachmentPickerOptionsBuilder,
   bool initialized = true,
 }) async {
   final client = MockClient();
@@ -244,6 +313,7 @@ Future<void> _pumpComposer(
               allowedAttachmentPickerTypes: allowedAttachmentPickerTypes,
               disableAttachments: disableAttachments,
               useSystemAttachmentPicker: useSystemAttachmentPicker,
+              attachmentPickerOptionsBuilder: attachmentPickerOptionsBuilder,
             ),
           ),
         ),

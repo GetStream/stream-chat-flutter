@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import '../../stream_chat_flutter.dart';
+import '../misc/empty_widget.dart';
 import 'audio_recorder/audio_recorder_announcer.dart';
 import 'composer_attachment_announcer.dart';
 import 'error_alert_sheet.dart';
@@ -1111,7 +1112,16 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     BuildContext context,
     List<AttachmentPickerType> allowedTypes,
   ) {
-    if (!_isPickerVisible) return const SizedBox.shrink();
+    if (!_isPickerVisible) return const Empty();
+
+    // Nothing is left to offer, for example after uploads are revoked while
+    // the picker is open.
+    if (allowedTypes.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _hidePicker();
+      });
+      return const Empty();
+    }
 
     final useSystemPicker = switch (CurrentPlatform.type) {
       _ when widget.props.useSystemAttachmentPicker => true,
@@ -1217,9 +1227,10 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   ) {
     if (widget.props.disableAttachments) return const [];
 
-    final canUploadFile = capabilities.contains(ChannelCapability.uploadFile);
     final channel = StreamChannel.of(context).channel;
     final channelConfig = channel.state != null ? channel.config : null;
+    final canUploadFile = capabilities.contains(ChannelCapability.uploadFile);
+
     final pickerTypes = widget.props.allowedAttachmentPickerTypes;
     final allowedTypes = pickerTypes.where(
       (type) => switch (type) {
