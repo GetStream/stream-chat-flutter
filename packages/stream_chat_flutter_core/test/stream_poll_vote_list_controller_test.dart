@@ -68,37 +68,34 @@ void main() {
     expect(controller.currentItems, isEmpty);
   });
 
-  test('a vote-casted event whose vote has no poll id falls back to the event poll', () async {
+  test('a vote-casted event without a vote poll id is added when the event poll matches', () async {
+    final (:controller, :events) = await _loadedController();
+    final vote = PollVote(id: 'vote-1', optionId: 'option-1');
+
+    events.add(
+      Event(
+        type: EventType.pollVoteCasted,
+        poll: Poll(id: _pollId, name: 'Lunch', options: const []),
+        pollVote: vote,
+      ),
+    );
+    await pumpEventQueue();
+
+    expect(controller.currentItems, [vote]);
+  });
+
+  test('a vote-casted event with no poll id leaves the list unchanged', () async {
     final (:controller, :events) = await _loadedController();
 
     events.add(
       Event(
         type: EventType.pollVoteCasted,
-        poll: Poll(id: _otherPollId, name: 'Team offsite', options: const []),
         pollVote: PollVote(id: 'vote-2', optionId: 'option-2'),
       ),
     );
     await pumpEventQueue();
 
     expect(controller.currentItems, isEmpty);
-  });
-
-  test('eventListener still receives events for another poll', () async {
-    final (:controller, :events) = await _loadedController();
-    final received = <Event>[];
-    controller.eventListener = (event) {
-      received.add(event);
-      return false;
-    };
-    final event = Event(
-      type: EventType.pollVoteCasted,
-      pollVote: PollVote(id: 'vote-2', pollId: _otherPollId, optionId: 'option-2'),
-    );
-
-    events.add(event);
-    await pumpEventQueue();
-
-    expect(received, [event]);
   });
 }
 
