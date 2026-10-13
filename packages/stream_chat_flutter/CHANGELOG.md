@@ -44,7 +44,8 @@
 - The unread messages divider now shows a count.
 - `StreamMessageListView` no longer marks a channel read until the unread boundary has been seen, or while it is manually marked unread.
 - Screen readers now announce each message as one phrase: sender, body, time and status.
-- `StreamMessageComposer` now hides upload options, voice recording included, when the user lacks the `upload-file` capability in the channel.
+- `StreamMessageComposer` now hides the picker's upload options and voice recording, and refuses dropped files, when the user lacks the `upload-file` capability. The attachment button is hidden when nothing else is left to offer.
+- `StreamMessageComposer` now refuses dropped files when `disableAttachments` is set or `allowedAttachmentPickerTypes` leaves out `AttachmentPickerType.files`.
 
 ⚠️ Deprecated
 
@@ -78,7 +79,6 @@
 - Fixed the jump-to-unread pill being dismissed by the slightest scroll after marking a message unread.
 - Fixed the jump-to-unread pill flickering back in and straight out on every new message after being dismissed.
 - Fixed tapping the jump-to-unread pill doing nothing on a channel the user has never opened.
-- Fixed `StreamMessageComposer` accepting dropped files when `disableAttachments` is set or files aren't in `allowedAttachmentPickerTypes`.
 - Fixed the attachment picker showing an empty commands tab in channels without commands.
 
 ## 10.4.0

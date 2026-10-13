@@ -98,12 +98,10 @@ void main() {
       expect(_micButton, findsNothing);
     });
 
-    testWidgets('ignores dropped files', (tester) async {
+    testWidgets('does not accept dropped files', (tester) async {
       await _pumpComposer(tester, controller: controller, ownCapabilities: _cannotUpload);
 
-      await _dropFile(tester);
-
-      expect(controller.attachments, isEmpty);
+      expect(_acceptsDroppedFiles(tester), isFalse);
     });
 
     testWidgets('does not accept keyboard images', (tester) async {
@@ -130,6 +128,46 @@ void main() {
       await _pumpComposer(tester, controller: controller, ownCapabilities: const [], initialized: false);
 
       expect(_keyboardConfig(tester), isNotNull);
+    });
+
+    testWidgets('does not offer polls', (tester) async {
+      await _pumpComposer(tester, controller: controller, ownCapabilities: const [], initialized: false);
+
+      expect(await _openSystemPicker(tester), isNot(contains('poll-creator')));
+    });
+  });
+
+  group('once the upload-file capability is granted', () {
+    testWidgets('shows voice recording', (tester) async {
+      final capabilities = StreamController<List<ChannelCapability>>.broadcast();
+      addTearDown(capabilities.close);
+
+      await _pumpComposer(
+        tester,
+        controller: controller,
+        ownCapabilities: _cannotUpload,
+        ownCapabilitiesStream: capabilities.stream,
+      );
+      capabilities.add(_canUpload);
+      await tester.pumpAndSettle();
+
+      expect(_micButton, findsOneWidget);
+    });
+
+    testWidgets('shows the attachment button', (tester) async {
+      final capabilities = StreamController<List<ChannelCapability>>.broadcast();
+      addTearDown(capabilities.close);
+
+      await _pumpComposer(
+        tester,
+        controller: controller,
+        ownCapabilities: _cannotUpload,
+        ownCapabilitiesStream: capabilities.stream,
+      );
+      capabilities.add(_canUpload);
+      await tester.pumpAndSettle();
+
+      expect(_attachmentButton, findsOneWidget);
     });
   });
 
@@ -191,6 +229,8 @@ void main() {
       );
       await tester.tap(_attachmentButton);
       await tester.pumpAndSettle();
+      expect(find.text('Upload tab'), findsOneWidget);
+
       capabilities.add(_cannotUploadButCanSendPoll);
       await tester.pumpAndSettle();
 
@@ -206,6 +246,8 @@ void main() {
       await tester.tap(_attachmentButton);
       await tester.pumpAndSettle();
       capabilities.add(_cannotUpload);
+      await tester.pumpAndSettle();
+      capabilities.add(_canUpload);
       await tester.pumpAndSettle();
 
       expect(find.byType(StreamSystemAttachmentPicker), findsNothing);
@@ -238,12 +280,20 @@ void main() {
     expect(_attachmentButton, findsNothing);
   });
 
-  testWidgets('ignores dropped files when attachments are disabled', (tester) async {
+  testWidgets('does not accept dropped files when files are not an allowed type', (tester) async {
+    await _pumpComposer(
+      tester,
+      controller: controller,
+      allowedAttachmentPickerTypes: const [AttachmentPickerType.images],
+    );
+
+    expect(_acceptsDroppedFiles(tester), isFalse);
+  });
+
+  testWidgets('does not accept dropped files when attachments are disabled', (tester) async {
     await _pumpComposer(tester, controller: controller, disableAttachments: true);
 
-    await _dropFile(tester);
-
-    expect(controller.attachments, isEmpty);
+    expect(_acceptsDroppedFiles(tester), isFalse);
   });
 }
 
@@ -330,6 +380,8 @@ final _attachmentButton = find.descendant(
 );
 
 final _micButton = find.byKey(const ValueKey('microphone_key'));
+
+bool _acceptsDroppedFiles(WidgetTester tester) => tester.widget<DropTarget>(find.byType(DropTarget)).enable;
 
 Future<void> _dropFile(WidgetTester tester) async {
   tester.widget<DropTarget>(find.byType(DropTarget)).onDragDone!(

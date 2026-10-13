@@ -234,7 +234,10 @@ class MessageComposerProps {
   /// The focus node associated to the TextField.
   final FocusNode? focusNode;
 
-  /// If true the attachments button will not be displayed.
+  /// Whether the user is prevented from adding attachments.
+  ///
+  /// When true, the attachment button is hidden, and dropped files and
+  /// keyboard images are refused.
   ///
   /// Defaults to false.
   final bool disableAttachments;
@@ -244,7 +247,9 @@ class MessageComposerProps {
   /// Defaults to true.
   final bool canAlsoSendToChannelFromThread;
 
-  /// If true the voice recording button will be displayed.
+  /// Whether the voice recording button is shown.
+  ///
+  /// The button is only shown when the channel allows uploads.
   ///
   /// Defaults to false.
   final bool enableVoiceRecording;
@@ -314,10 +319,12 @@ class MessageComposerProps {
   /// Defaults to [StreamAttachmentValidator.defaultMaxAttachmentCount].
   final int attachmentLimit;
 
-  /// The list of allowed attachment types which can be picked using the
-  /// attachment button.
+  /// The attachment types the user can add.
   ///
-  /// By default, all the attachment types are allowed.
+  /// Applies to the attachment picker, dropped files and images inserted from
+  /// the keyboard. A type is only offered when the channel allows it.
+  ///
+  /// Defaults to [AttachmentPickerType.values].
   final List<AttachmentPickerType> allowedAttachmentPickerTypes;
 
   /// List of triggers for showing autocomplete.
@@ -1031,13 +1038,13 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
         final canRecordVoice = widget.props.enableVoiceRecording && canUploadFile;
         final allowedTypes = _getAllowedAttachmentPickerTypes(capabilities);
         final canOpenPicker = allowedTypes.isNotEmpty;
+        final canDropFiles = allowedTypes.contains(AttachmentPickerType.files);
 
         // Extracted so the floating gradient can wrap just the pill, keeping
         // gradient height stable when the picker (a sibling) opens.
         final pill = DropTarget(
+          enable: canDropFiles,
           onDragDone: (details) async {
-            if (!allowedTypes.contains(AttachmentPickerType.files)) return;
-
             final attachments = <Attachment>[];
             for (final file in details.files) {
               attachments.add(await file.toAttachment(type: AttachmentType.file));

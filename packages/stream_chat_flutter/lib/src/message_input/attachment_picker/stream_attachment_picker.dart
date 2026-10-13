@@ -97,7 +97,10 @@ class StreamTabbedAttachmentPicker extends StatefulWidget {
   /// The list of options.
   final Set<TabbedAttachmentPickerOption> options;
 
-  /// The initial option to be selected.
+  /// The option selected when the picker opens.
+  ///
+  /// Ignored when it isn't one of the [options]; the first enabled option is
+  /// selected instead.
   final TabbedAttachmentPickerOption? initialOption;
 
   /// The controller of the attachment picker.
