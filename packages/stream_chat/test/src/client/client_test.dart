@@ -2543,7 +2543,7 @@ void main() {
           name: 'Lunch?',
           description: 'Pick one',
           options: [
-            api.PollOptionInput(text: 'Pizza', custom: {'color': 'red'}),
+            api.PollOptionInput(text: 'Pizza', custom: {'color': 'red', 'text': 'Pasta'}),
             api.PollOptionInput(text: 'Sushi', custom: {}),
           ],
           votingVisibility: api.CreatePollRequestVotingVisibility.anonymous,
@@ -2552,7 +2552,7 @@ void main() {
           allowAnswers: true,
           allowUserSuggestedOptions: true,
           isClosed: false,
-          custom: {'topic': 'food'},
+          custom: {'topic': 'food', 'name': 'Dinner?'},
         ),
       );
       expect(result, Result.success(pollResponse));
@@ -2585,7 +2585,7 @@ void main() {
     });
 
     test(
-      "StreamChatClient.getPoll keeps custom fields named like the poll's own fields out of its custom data",
+      "StreamChatClient.getPoll keeps a custom field named like one of the poll's own fields",
       () async {
         final response = api.PollResponse(
           duration: '4.21ms',
@@ -2595,7 +2595,11 @@ void main() {
 
         final result = await client.getPoll('poll-id');
 
-        expect(result.getOrNull()?.poll.extraData, const {'topic': 'food'});
+        expect(result.getOrNull()?.poll.custom, const {
+          'topic': 'food',
+          'name': 'custom-name',
+          'own_votes': 'custom',
+        });
       },
     );
 
@@ -2645,7 +2649,7 @@ void main() {
       final result = await client.updatePoll(
         _newPoll().copyWith(
           options: const [
-            PollOption(id: 'pizza', text: 'Pizza', extraData: {'color': 'red', 'id': 'pasta'}),
+            PollOption(id: 'pizza', text: 'Pizza', custom: {'color': 'red', 'id': 'pasta'}),
             PollOption(id: 'sushi', text: 'Sushi'),
           ],
           votingVisibility: const VotingVisibility('members_only'),
@@ -2663,7 +2667,7 @@ void main() {
           name: 'Lunch?',
           description: 'Pick one',
           options: const [
-            api.PollOptionRequest(id: 'pizza', text: 'Pizza', custom: {'color': 'red'}),
+            api.PollOptionRequest(id: 'pizza', text: 'Pizza', custom: {'color': 'red', 'id': 'pasta'}),
             api.PollOptionRequest(id: 'sushi', text: 'Sushi', custom: {}),
           ],
           votingVisibility: api.UpdatePollRequestVotingVisibility.fromJson('members_only'),
@@ -2672,7 +2676,7 @@ void main() {
           allowAnswers: true,
           allowUserSuggestedOptions: true,
           isClosed: true,
-          custom: const {'topic': 'food'},
+          custom: const {'topic': 'food', 'name': 'Dinner?'},
         ),
       );
       expect(result, Result.success(pollResponse));
@@ -2833,13 +2837,16 @@ void main() {
         when(
           () => defaultApi.createPollOption(
             pollId: 'poll-id',
-            createPollOptionRequest: const api.CreatePollOptionRequest(text: 'Pizza', custom: {'color': 'red'}),
+            createPollOptionRequest: const api.CreatePollOptionRequest(
+              text: 'Pizza',
+              custom: {'color': 'red', 'text': 'Pasta'},
+            ),
           ),
         ).thenAnswer((_) async => const Result.success(_generatedPizzaResponse));
 
         final result = await client.createPollOption(
           'poll-id',
-          const PollOption(text: 'Pizza', extraData: {'color': 'red', 'text': 'Pasta'}),
+          const PollOption(text: 'Pizza', custom: {'color': 'red', 'text': 'Pasta'}),
         );
 
         expect(result, const Result.success(_pizzaResponse));
@@ -2880,7 +2887,7 @@ void main() {
     });
 
     test(
-      "StreamChatClient.getPollOption keeps custom fields named like the option's own fields out of its custom data",
+      "StreamChatClient.getPollOption keeps a custom field named like one of the option's own fields",
       () async {
         final response = api.PollOptionResponse(
           duration: '4.21ms',
@@ -2892,7 +2899,7 @@ void main() {
 
         final result = await client.getPollOption('poll-id', 'pizza');
 
-        expect(result.getOrNull()?.pollOption.extraData, const {'color': 'red'});
+        expect(result.getOrNull()?.pollOption.custom, const {'color': 'red', 'text': 'custom-text'});
       },
     );
 
@@ -7198,7 +7205,7 @@ Poll _newPoll() => Poll(
   name: 'Lunch?',
   description: 'Pick one',
   options: const [
-    PollOption(text: 'Pizza', extraData: {'color': 'red', 'text': 'Pasta'}),
+    PollOption(text: 'Pizza', custom: {'color': 'red', 'text': 'Pasta'}),
     PollOption(text: 'Sushi'),
   ],
   votingVisibility: VotingVisibility.anonymous,
@@ -7207,8 +7214,8 @@ Poll _newPoll() => Poll(
   allowAnswers: true,
   allowUserSuggestedOptions: true,
   voteCount: 7,
-  // Custom data named like one of the poll's own fields is left out of the requests.
-  extraData: const {'topic': 'food', 'name': 'Dinner?'},
+  // Custom data named like one of the poll's own fields is sent as custom data.
+  custom: const {'topic': 'food', 'name': 'Dinner?'},
 );
 
 const _generatedPizzaResponse = api.PollOptionResponse(duration: '4.21ms', pollOption: generatedPizza);

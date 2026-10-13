@@ -85,10 +85,12 @@
 - `VotingVisibility` is an extension type over its wire string instead of an enum.
 - `Poll`, `PollOption`, `PollVote` and the poll responses no longer decode from or encode to JSON; `PollOption` gains `fromData` and `toData`, which read and write only the format `stream_chat_persistence` stores it in.
 - The poll responses are immutable, built through a const constructor, and their `duration` is a non-nullable `String`; `PollVoteResponse.vote` is nullable.
-- `Poll`, `PollOption` and `PollVote` no longer extend `Equatable`, so `props` is removed; they still compare by value, now including `extraData`.
+- `Poll`, `PollOption` and `PollVote` no longer extend `Equatable`, so `props` is removed; they still compare by value, now including `custom`.
 - `Poll.copyWith`, `PollOption.copyWith` and `PollVote.copyWith` set a nullable field passed as `null` to `null` instead of keeping its value, and give `Poll.id` and the `createdAt` and `updatedAt` timestamps a fresh default when passed `null`.
 - `StreamChatApi.polls` is removed; its endpoints are reached through `StreamChatClient`.
-- The poll and poll option requests no longer send `extraData` entries named like one of the poll's or option's own fields.
+- `Poll.topLevelFields` and `PollOption.topLevelFields` are removed.
+- `Poll.extraData` and `PollOption.extraData` are renamed `custom`.
+- `Poll.custom` and `PollOption.custom` hold the custom data exactly as the API returns it, and the poll and poll option requests send it back as custom data, so an entry named like one of the poll's or option's own fields no longer sets that field.
 - `sendImage`, `sendFile`, `uploadImage` and `uploadFile`, on `StreamChatClient`, `Channel` and `AttachmentFileUploader`, return a `Result<UploadedFile>` instead of throwing; read the URL from `fileUrl` and a video's thumbnail from `thumbUrl`.
 - `deleteImage`, `deleteFile`, `removeImage` and `removeFile` return a `Result<void>` instead of throwing, and carry no value on success.
 - `SendAttachmentResponse`, `SendFileResponse`, `SendImageResponse`, `UploadImageResponse` and `UploadFileResponse` are removed in favor of `UploadedFile`.

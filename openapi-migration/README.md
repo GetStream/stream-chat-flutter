@@ -26,7 +26,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [12](12-uploads-cdn.md) | Uploads (CDN) | 8 | 8 | ☑ |
 | [13](13-push-preferences.md) | Push Preferences | 1 | 1 | ☐ |
 | [14](14-banned-users.md) | Banned Users — split out of 08 | 1 | 1 | ☐ |
-| [15](15-custom-data-rename.md) | `extraData` → `custom`, every model at once | — | — | ☐ |
+| [15](15-custom-data.md) | Custom Data — `extraData` is the wire's `custom`, then renamed | — | — | ☐ |
 
 **Coverage:** 71 hand-written methods across 9 files, and all 129 generated operations, each claimed by exactly
 one group. Verified mechanically — see [Keeping this plan honest](#keeping-this-plan-honest).
@@ -82,7 +82,8 @@ breaks against v10:
 - envelopes are immutable, built through a const constructor rather than `late` setters;
 - `duration` is a non-nullable `String` on every envelope, where v10 typed it `String?`;
 - public models and envelopes are `@freezed`, so they compare by value; one that extended `Equatable` in v10 no
-  longer does, and loses `props`.
+  longer does, and loses `props`;
+- a model's `extraData` is renamed `custom`, the wire's name for it (rule 9).
 
 Each ships the four artifacts listed under [Principles](#principles), like any other break.
 
@@ -148,6 +149,14 @@ includes a named response that carries only `duration` today, such as `HideChann
    parent's rule-7 converter writes it. The codec is temporary: every use is marked
    `// TODO(openapi-migration): remove in group 10` and listed below, and group 10 replaces every use and deletes
    the typedef, so no later group adds one. The cache is disposable, so the stored format is ours to choose.
+9. **A migrated model names its custom data `custom`, and it is the wire's `custom`, verbatim, in both
+   directions.** A response mapper copies the generated `custom` map into it and a request mapper sends it back as
+   `custom`; neither filters it. A model whose group has not run still says `extraData`. A field the
+   generated response types is never parked in `extraData` behind a getter: it becomes a field on the model, as
+   the owning group's break, or stays out. `ChannelModel.hidden` and `User.name` are parked today, and groups 11
+   and 09 promote them. `topLevelFields` and `Serializer` serve only the v1 decoders, which still split flat JSON
+   by a key list, and go with the WebSocket v2 move; a model that loses its JSON drops `topLevelFields` and its
+   converter owns the list. A v1 writer leaves a custom entry named like a key out so it cannot overwrite the key.
 
 ### Temporary adapters
 
@@ -177,13 +186,15 @@ surfaces before it reaches `Message` and `ChannelState`:
 - **08** is where we decide what *not* to expose: 34 generated operations against 10 hand-written methods.
 - **14** is `queryBannedUsers`, split out of 08 because it is the only moderation call that answers with a
   model. The `User` mappers it needs landed with group 04.
-- **10–11** are the core of the SDK, and carry the `custom` / `extraData` promotion problem.
+- **10–11** are the core of the SDK; 11 promotes the channel flags parked in `extraData` (rule 9).
 - **12** comes late because it needs its own hand-written multipart client and is the highest-traffic path in the
   SDK.
 - **09** is last. Every group before it maps users through `user_mapper.dart` onto today's `User`; 09 migrates the
   user endpoints and restructures `User` and `OwnUser` themselves, when every parent that embeds them has moved.
-- **15** renames `extraData` to `custom` on every model at once. The groups keep `extraData`, so the SDK stays
-  consistent until then; it runs after 09.
+- **15** is the custom-data pass: every model's custom data is named `custom` and is the wire's `custom`, with no
+  mapper filtering it and no typed field parked in it. Each group renames the models it migrates (polls went
+  first); 15 renames whatever is left and the persistence columns, and runs after 09 and 11, which promote their
+  parked fields.
 
 ## Prerequisites
 

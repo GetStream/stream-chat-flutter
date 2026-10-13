@@ -11,7 +11,7 @@
 
 - Every persistence call logged its own name at `info`; that call trace is `verbose` now.
 - A cached poll with a voting visibility the SDK does not name is read back instead of failing.
-- A poll option's custom data is stored under its own key rather than beside the option's fields, and the schema version is bumped for it, so the local cache is rebuilt once on upgrade.
+- A poll's custom data is stored in a `custom` column, and a poll option's under a `custom` key rather than beside the option's fields; the schema version is bumped for it, so the local cache is rebuilt once on upgrade.
 
 🐞 Fixed
 

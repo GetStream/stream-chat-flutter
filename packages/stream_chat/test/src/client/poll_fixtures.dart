@@ -100,7 +100,7 @@ const generatedPizza = api.PollOptionResponseData(
   textI18n: {'it': 'Pizza'},
 );
 
-const pizza = PollOption(id: 'pizza', text: 'Pizza', textI18n: {'it': 'Pizza'}, extraData: {'color': 'red'});
+const pizza = PollOption(id: 'pizza', text: 'Pizza', textI18n: {'it': 'Pizza'}, custom: {'color': 'red'});
 
 final generatedPoll = api.PollResponseData(
   allowAnswers: true,
@@ -155,7 +155,7 @@ final poll = Poll(
   createdById: 'luke',
   createdBy: voter,
   ownVotesAndAnswers: [vote, answer],
-  extraData: const {'topic': 'food'},
+  custom: const {'topic': 'food'},
 );
 
 final generatedPollResponse = api.PollResponse(duration: '4.21ms', poll: generatedPoll);

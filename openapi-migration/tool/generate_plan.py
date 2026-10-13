@@ -346,10 +346,12 @@ GROUPS = [
             - **`VotingVisibility` becomes an extension type over its wire string,** following `PushProvider`. An
               unknown value is kept rather than rejected, in the mapper, the v1 decoder and persistence.
             - **An answer's `optionId` stays `""`,** as the server sends it and v10 decoded it.
-            - **`custom` becomes `extraData` without the keys named after the model's own fields**
-              (`Poll.topLevelFields`, `PollOption.topLevelFields`), matching v1's flat JSON, which shadowed them.
-              The requests leave the same keys out of `custom`, as every request mapper does: v2 stores them as
-              custom data, or drops them on update, where v10's flattened body set the field.
+            - **`custom` is `extraData`, verbatim, in both directions** (README rule 9). The response mappers copy the
+              generated `custom` map as is and the request mappers send `extraData` as `custom`; an entry named like
+              one of the model's own fields is custom data on v2, where v10's flattened body let it set the field.
+              The v1 converters own the key lists that split the flat JSON on read (`Poll.topLevelFields` and
+              `PollOption.topLevelFields` are removed), and leave such an entry out on write so it cannot overwrite
+              a key.
             - **Every public poll method returns a `Result`,** on `StreamChatClient` and `Channel`. `deletePoll` and
               `deletePollOption` answer `DurationResponse` and return `Result<void>`. `closePoll` stays a
               `partialUpdatePoll` that sets `is_closed`.
@@ -370,8 +372,10 @@ GROUPS = [
               merging of poll events in `channel_state_mutations.dart` and `Poll.withTranslationsOf` passes no
               argument that is null while the field is set, so it is unchanged. `null` now clears a nullable field
               and re-applies the `id` and timestamp defaults, recorded as a break.
-            - **`extraData` keeps its name.** Renaming it to `custom` is a migration-wide step for every model at
-              once — [group 15](15-custom-data-rename.md).
+            - **`extraData` is renamed `custom` on `Poll` and `PollOption`,** the wire's name, with no deprecated
+              alias; `StreamPollController.addOption` and `updateOption` and the `polls.custom` column follow.
+              Every migrated model takes the name from here on (README rule 9); [group 15](15-custom-data.md)
+              renames whatever no group migrates.
             - **Verified live** against the demo app with a before/after harness covering every endpoint, the
               error cases and the WebSocket events, and in the sample app on web.
             """),
@@ -568,9 +572,12 @@ GROUPS = [
             'restructures them, last: the mappers in `user_mapper.dart` already map the generated types onto the '
             'current class for every group before it, and stay. See [01-foundation](01-foundation.md).',
             '`PrivacySettings` and the push-preference sub-shapes — decide per type.',
-            '`UserResponse.toModel()` leaves `OwnUser.topLevelFields`, `deleted_at`, `deactivated_at` and '
-            '`revoke_tokens_issued_before` out of every user\'s `extraData` (`_shadowedCustomKeys`), where v1 kept the '
-            '`OwnUser`-only keys in a plain user\'s `extraData`. Revisit once the mapper serves plain users.',
+            '**`User.name` and `image` become fields** (README rule 9): `UserResponse` types them, and the constructor '
+            'stops writing them into `extraData`; decide whether `name` keeps its fallback to `id`. `deleted_at`, '
+            '`deactivated_at`, `revoke_tokens_issued_before` and `blocked_user_ids`, which `UserResponse` types and v1 '
+            'kept in a plain user\'s `extraData`, become fields or are dropped, never `extraData`. '
+            '`UserResponse.toModel()` then copies `custom` verbatim into the field, renamed `custom`, and '
+            '`UserRequestMapper` stops reading `extraData[\'name\']` and `[\'image\']`.',
             '`UserFilterField.shadowBanned` and `.bypassModeration` read `extraData`, which the generated '
             '`UserResponse` has no field to fill.',
             '`updateUsers` reuses `User.toRequest()`. It is a full upsert, and v10\'s flattened body filed the '
@@ -599,6 +606,8 @@ GROUPS = [
             '- [ ] `user_mapper.dart` maps onto the restructured `User`, and its `TODO(openapi-migration)` note is\n'
             '      gone.\n'
             '- [ ] A user mapped from `UserResponse` and the same user decoded from v1 / WebSocket JSON compare equal.\n'
+            '- [ ] `user_mapper.dart` has no `_shadowedCustomKeys`: `User.custom` is the wire\'s `custom`, verbatim, and\n'
+            '      no typed field is written into it.\n'
         ),
     ),
     dict(
@@ -639,13 +648,13 @@ GROUPS = [
         decisions=[
             '`ChannelState`, `ChannelModel` and `Member` are public, persisted, and rebuilt from WebSocket '
             'events. Keep ours and map.',
-            '**Whether `ChannelModel` promotes its `extraData`-backed flags to real fields.** `disabled`, '
-            '`hidden`, `muted`, `blocked` and `truncatedAt` all arrive as root fields on `ChannelResponse` but '
-            'are pushed into `extraData` and read back through getters, which the constructor comment calls '
-            '"for backwards compatibility". Promoting them is a break worth making in v11 if it is made at '
-            'all, and it belongs with this group\'s model shape rather than with whichever phase happens to '
-            'add the next flag. Raised on '
-            '[#2958](https://github.com/GetStream/stream-chat-flutter/pull/2958).',
+            '**`ChannelModel` promotes its `extraData`-backed flags to fields** (README rule 9). `disabled`, '
+            '`hidden`, `muted`, `blocked` and `truncatedAt`, plus the keys the channel mapper parks today — '
+            '`truncatedBy`, `muteExpiresAt`, `hideMessagesBefore`, `autoTranslationEnabled` and '
+            '`autoTranslationLanguage` — become fields with persistence columns, and the constructor stops writing '
+            'them into the custom data, which is renamed `custom`. `name` and `image` stay in it: `ChannelResponse` '
+            'has no such fields. '
+            'Raised on [#2958](https://github.com/GetStream/stream-chat-flutter/pull/2958).',
             '`sync` returns `SyncResponse` — one of the two models that needed the WSEvent generator patch. '
             'Verify it decodes before relying on it.',
         ],
@@ -654,7 +663,8 @@ GROUPS = [
             'into that file.',
             '`queryChannels` drives the channel list controllers and the offline cache; a shape change here is '
             'felt everywhere.',
-            'Channel `custom`/`extraData` promotion, same class of problem as messages.',
+            'A consumer reading `channel.extraData[\'hidden\']` and friends loses the key once the flags are fields; '
+            'none in this repo.',
             'Landing `ChannelResponse` -> `ChannelModel` is the last thing blocking '
             '[08](08-moderation-and-blocklists.md)\'s `muteChannel`, which drops `channelMute`, `channelMutes` '
             'and `ownUser` because the generated `ChannelMute` carries a `ChannelResponse?` and a '
@@ -662,6 +672,10 @@ GROUPS = [
             'Decide the null case there too — ours are non-nullable, the generated ones are not, the same '
             'question [14](14-banned-users.md) records for `BanResponse.user`.',
         ],
+        done=DONE + (
+            '- [ ] `channel_mapper.dart` has no `_shadowedCustomKeys`: `ChannelModel.custom` is the wire\'s `custom`,\n'
+            '      verbatim, and no flag is written into it.\n'
+        ),
     ),
     dict(
         num='12', slug='uploads-cdn', title='Uploads (CDN)',
@@ -764,19 +778,25 @@ GROUPS = [
         ],
     ),
     dict(
-        num='15', slug='custom-data-rename', title='`extraData` → `custom`',
+        num='15', slug='custom-data', title='Custom Data',
         hand=[],
         match=owns(),
-        goal='Rename `extraData` to `custom` on every public model at once, matching the generated client.',
+        goal='Every public model\'s custom data is named `custom` and is exactly the wire\'s `custom`.',
         decisions=[
-            '**Whether to rename at all.** Every model names its custom data `extraData` today; the generated '
-            'client calls it `custom`. Renaming one model at a time would leave the SDK inconsistent, so the '
-            'groups keep `extraData` and this step decides for every model together.',
-            '**How to stage it.** Add `custom` beside a deprecated `extraData`, or rename in one break.',
+            '**Which models are left.** Each group renames the models it migrates, polls first; this pass renames '
+            'whatever remains, and the persistence `extra_data` columns with them.',
+            '**How to stage the remaining renames.** Polls did a hard rename; decide whether the widely used models '
+            '(`Message`, `ChannelModel`, `User`) get a deprecated `extraData` alias for a release.',
+            '**What replaces `topLevelFields` and `Serializer`.** The v1 decoders still split flat JSON by a key '
+            'list until the WebSocket moves to v2. A model that loses its JSON drops `topLevelFields` and its '
+            'converter owns the list, as polls did; decide where `Serializer` goes once the last decoder does.',
         ],
         done=textwrap.dedent("""\
-            - [ ] Every public model names its custom data the same way.
-            - [ ] The mappers and the v1 decoders read and write the renamed field.
+            - [ ] No mapper under `lib/src/repository/mapper/` filters `custom`: `grep -rn _shadowedCustomKeys` is empty.
+            - [ ] No model writes a typed field into `extraData`, and no getter reads a typed field out of it.
+            - [ ] No public model exposes `topLevelFields`; each v1 decoder owns its key list.
+            - [ ] Every public model names its custom data the same way, in the models, the mappers, the v1
+                  decoders and the persistence columns.
             - [ ] `migrations/v11-migration.md`: Symbol Map rows plus a feature section.
             - [ ] CHANGELOG entry under `🛑️ Breaking` for each break; PR title `refactor(llc)!:`.
             - [ ] Decisions recorded in this file, and the status box ticked in `README.md`.
@@ -784,7 +804,10 @@ GROUPS = [
         risks=[
             '`Serializer`, the models\' `topLevelFields` and the persistence `extra_data` columns name the '
             'concept too.',
-            'Runs after group 09 at the earliest, once `User` is restructured.',
+            'A consumer reading `channel.extraData[\'hidden\']` or `user.extraData[\'name\']` loses the key; none in '
+            'this repo. Filter fields over custom keys (`UserFilterField.email`) are unaffected.',
+            'Runs after groups 09 and 11 at the earliest, once `User` and `ChannelModel` promote their parked '
+            'fields.',
         ],
     ),
 ]

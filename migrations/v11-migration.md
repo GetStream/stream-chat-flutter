@@ -78,7 +78,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Moderation**](#moderation) | Muting, banning and flagging return a `Result` and call the moderation v2 API; `banUser`'s options map becomes named parameters; `unflagMessage`, `unflagUser` and `removeShadowBan` are removed |
 | [**App Settings**](#app-settings) | `getAppSettings` returns a `Result<AppSettingsResponse>` instead of throwing; `GetAppSettingsResponse` is renamed `AppSettingsResponse` |
 | [**Guest Users**](#guest-users) | `connectGuestUser` is unchanged; `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed |
-| [**Polls**](#polls) | Poll calls return a `Result`; eight responses become `PollResponse`, `PollOptionResponse` and `PollVoteResponse`; queries take `limit`/`next`/`prev`; `VotingVisibility` is an extension type |
+| [**Polls**](#polls) | Poll calls return a `Result`; eight responses become `PollResponse`, `PollOptionResponse` and `PollVoteResponse`; queries take `limit`/`next`/`prev`; `VotingVisibility` is an extension type; `extraData` is `custom` |
 | [**File Upload**](#file-upload) | Uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
 | _(filled in per feature as PRs land)_ | |
 
@@ -225,12 +225,16 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `queryPolls(pagination: PaginationParams(limit: l, next: n))` / `queryPollVotes(…)` | `queryPolls(limit: l, next: n)` / `queryPollVotes(…)` | `retyped` | `limit` is still 10 when omitted. Pass a response's `prev` as `prev` to page backwards. The other `PaginationParams` fields never had an effect on these queries |
 | `Channel.castPollVote` / `.removePollVote` throwing `ArgumentError` | a `Failure` carrying a `StreamClientException` | `retyped` | For an option or vote without an id |
 | `Poll.copyWith` / `PollOption.copyWith` / `PollVote.copyWith` keeping a field passed as `null` | freezed's `copyWith` | `retyped` | `null` clears a nullable field and re-applies the constructor default of `Poll.id`, `createdAt` and `updatedAt`; `Poll.maxVotesAllowed` and `PollOption.id` already cleared |
+| `Poll.extraData` / `PollOption.extraData` | `Poll.custom` / `PollOption.custom` | `renamed` | The wire's name for it; the first models to take it |
+| `Poll.custom` / `PollOption.custom` entry named like one of the model's own fields | the same entry, as custom data | `retyped` | Sent and returned as custom data; v10's request body let it overwrite the field |
+| `StreamPollController.addOption(extraData:)` / `.updateOption(extraData:)` (`stream_chat_flutter_core`) | `custom:` | `renamed` | Follows `PollOption.custom` |
+| `Poll.topLevelFields` / `PollOption.topLevelFields` | — | `removed` | They listed the JSON keys of models that no longer have JSON |
 | `VotingVisibility` (enum) | `VotingVisibility` (extension type over `String`) | `retyped` | `VotingVisibility.public` and `.anonymous` are unchanged; a `switch` needs a default arm, and `.name` / `.values` are gone — read `.rawType` |
 | `Poll.fromJson` / `.toJson`, `PollOption.fromJson` / `.toJson`, `PollVote.fromJson` / `.toJson` | — | `removed` | The models are plain classes; construct them directly. `Message.poll` and the poll events still decode from the same keys |
 | — | `PollOption.fromData` / `.toData` | `added` | Read and write only the format the offline database stores; not a codec for API payloads |
 | `CreatePollResponse()..poll = …` and the other response setters | `PollResponse(duration: …, poll: …)` | `retyped` | The responses are plain classes with a const constructor and final fields |
 | poll responses' `duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
-| `Poll` / `PollOption` / `PollVote extends Equatable`, `props` | value `==` | `removed` | `Poll` and `PollOption` now compare `extraData` too |
+| `Poll` / `PollOption` / `PollVote extends Equatable`, `props` | value `==` | `removed` | `Poll` and `PollOption` now compare `custom` too |
 | `StreamChatApi.polls` (`PollsApi`) | `StreamChatClient`'s poll methods | `removed` | The endpoints moved to the generated client |
 | `sendImage` / `sendFile` / `uploadImage` / `uploadFile` → `Future<SendImageResponse>` and siblings | `Future<Result<UploadedFile>>` | `retyped` | On `StreamChatClient`, `Channel` and `AttachmentFileUploader`. Returns a `Result` instead of throwing |
 | `deleteImage` / `deleteFile` / `removeImage` / `removeFile` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | On `StreamChatClient`, `Channel` and `AttachmentFileUploader`. Returns a `Result` instead of throwing |
@@ -814,12 +818,29 @@ A `switch` over it needs a default arm, and `.name` / `.values` are gone — rea
 **`Poll`, `PollOption`, `PollVote` and the responses no longer decode JSON.** Build them with their constructors —
 `PollResponse(duration: '0ms', poll: poll)` where v10 wrote `CreatePollResponse()..poll = poll`. `Message.poll` and
 the poll events still decode from the same keys. `PollOption.fromData` and `toData` read and write the format the
-offline database stores; they are not a way to decode API responses.
+offline database stores; they are not a way to decode API responses. `Poll.topLevelFields` and
+`PollOption.topLevelFields`, which listed their JSON keys, are gone with the JSON.
 
 **`Poll`, `PollOption` and `PollVote` no longer extend `Equatable`.** They still compare by value and `props` is gone.
-`Poll` and `PollOption` now include `extraData` in `==`: two polls that differ only in custom data are no longer
-equal, so neither are the messages that carry them, and a widget comparing them rebuilds when only custom data
-changes.
+`Poll` and `PollOption` now include their custom data in `==`: two polls that differ only in custom data are no
+longer equal, so neither are the messages that carry them, and a widget comparing them rebuilds when only custom
+data changes.
+
+**`extraData` is renamed `custom`, and holds the poll's custom data verbatim.** `Poll.custom` and
+`PollOption.custom` hold what the API returns as custom data, and the requests send it back as custom data; the
+same rename applies to `StreamPollController.addOption` and `updateOption`. In v10 an entry named like one of the
+poll's own fields — `name`, `is_closed`, an option's `text` — overwrote that field in the request body; it is now
+stored as custom data under that name.
+
+```dart
+// v10
+final topic = poll.extraData['topic'];
+Poll(name: 'Lunch?', options: options, extraData: {'topic': 'food'});
+
+// v11
+final topic = poll.custom['topic'];
+Poll(name: 'Lunch?', options: options, custom: {'topic': 'food'});
+```
 
 **`copyWith` on `Poll`, `PollOption` and `PollVote` is freezed's.** Passing `null` for a nullable field clears it,
 where v10 kept the value: `description`, `nameI18n`, `descriptionI18n`, `createdById` and `createdBy` on `Poll`,

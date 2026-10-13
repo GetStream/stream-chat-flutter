@@ -38,7 +38,7 @@ mixin _$Poll {
   User? get createdBy;
   DateTime get createdAt;
   DateTime get updatedAt;
-  Map<String, Object?> get extraData;
+  Map<String, Object?> get custom;
 
   /// Create a copy of Poll
   /// with the given fields replaced by the non-null parameter values.
@@ -101,7 +101,7 @@ mixin _$Poll {
             (identical(other.createdBy, createdBy) || other.createdBy == createdBy) &&
             (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
-            const DeepCollectionEquality().equals(other.extraData, extraData));
+            const DeepCollectionEquality().equals(other.custom, custom));
   }
 
   @override
@@ -132,12 +132,12 @@ mixin _$Poll {
     createdBy,
     createdAt,
     updatedAt,
-    const DeepCollectionEquality().hash(extraData),
+    const DeepCollectionEquality().hash(custom),
   ]);
 
   @override
   String toString() {
-    return 'Poll(id: $id, name: $name, nameI18n: $nameI18n, description: $description, descriptionI18n: $descriptionI18n, options: $options, votingVisibility: $votingVisibility, enforceUniqueVote: $enforceUniqueVote, maxVotesAllowed: $maxVotesAllowed, allowUserSuggestedOptions: $allowUserSuggestedOptions, allowAnswers: $allowAnswers, isClosed: $isClosed, answersCount: $answersCount, voteCountsByOption: $voteCountsByOption, latestVotesByOption: $latestVotesByOption, latestVotes: $latestVotes, latestAnswers: $latestAnswers, ownVotesAndAnswers: $ownVotesAndAnswers, voteCount: $voteCount, ownVotes: $ownVotes, ownAnswers: $ownAnswers, createdById: $createdById, createdBy: $createdBy, createdAt: $createdAt, updatedAt: $updatedAt, extraData: $extraData)';
+    return 'Poll(id: $id, name: $name, nameI18n: $nameI18n, description: $description, descriptionI18n: $descriptionI18n, options: $options, votingVisibility: $votingVisibility, enforceUniqueVote: $enforceUniqueVote, maxVotesAllowed: $maxVotesAllowed, allowUserSuggestedOptions: $allowUserSuggestedOptions, allowAnswers: $allowAnswers, isClosed: $isClosed, answersCount: $answersCount, voteCountsByOption: $voteCountsByOption, latestVotesByOption: $latestVotesByOption, latestVotes: $latestVotes, latestAnswers: $latestAnswers, ownVotesAndAnswers: $ownVotesAndAnswers, voteCount: $voteCount, ownVotes: $ownVotes, ownAnswers: $ownAnswers, createdById: $createdById, createdBy: $createdBy, createdAt: $createdAt, updatedAt: $updatedAt, custom: $custom)';
   }
 }
 
@@ -168,7 +168,7 @@ abstract mixin class $PollCopyWith<$Res> {
     String? createdById,
     User? createdBy,
     List<PollVote> ownVotesAndAnswers,
-    Map<String, Object?> extraData,
+    Map<String, Object?> custom,
   });
 }
 
@@ -206,7 +206,7 @@ class _$PollCopyWithImpl<$Res> implements $PollCopyWith<$Res> {
     Object? createdById = freezed,
     Object? createdBy = freezed,
     Object? ownVotesAndAnswers = null,
-    Object? extraData = null,
+    Object? custom = null,
   }) {
     return _then(
       Poll(
@@ -298,9 +298,9 @@ class _$PollCopyWithImpl<$Res> implements $PollCopyWith<$Res> {
             ? _self.ownVotesAndAnswers
             : ownVotesAndAnswers // ignore: cast_nullable_to_non_nullable
                   as List<PollVote>,
-        extraData: null == extraData
-            ? _self.extraData
-            : extraData // ignore: cast_nullable_to_non_nullable
+        custom: null == custom
+            ? _self.custom
+            : custom // ignore: cast_nullable_to_non_nullable
                   as Map<String, Object?>,
       ),
     );

@@ -66,10 +66,12 @@
 - **`VotingVisibility` becomes an extension type over its wire string,** following `PushProvider`. An
   unknown value is kept rather than rejected, in the mapper, the v1 decoder and persistence.
 - **An answer's `optionId` stays `""`,** as the server sends it and v10 decoded it.
-- **`custom` becomes `extraData` without the keys named after the model's own fields**
-  (`Poll.topLevelFields`, `PollOption.topLevelFields`), matching v1's flat JSON, which shadowed them.
-  The requests leave the same keys out of `custom`, as every request mapper does: v2 stores them as
-  custom data, or drops them on update, where v10's flattened body set the field.
+- **`custom` is `extraData`, verbatim, in both directions** (README rule 9). The response mappers copy the
+  generated `custom` map as is and the request mappers send `extraData` as `custom`; an entry named like
+  one of the model's own fields is custom data on v2, where v10's flattened body let it set the field.
+  The v1 converters own the key lists that split the flat JSON on read (`Poll.topLevelFields` and
+  `PollOption.topLevelFields` are removed), and leave such an entry out on write so it cannot overwrite
+  a key.
 - **Every public poll method returns a `Result`,** on `StreamChatClient` and `Channel`. `deletePoll` and
   `deletePollOption` answer `DurationResponse` and return `Result<void>`. `closePoll` stays a
   `partialUpdatePoll` that sets `is_closed`.
@@ -90,8 +92,10 @@
   merging of poll events in `channel_state_mutations.dart` and `Poll.withTranslationsOf` passes no
   argument that is null while the field is set, so it is unchanged. `null` now clears a nullable field
   and re-applies the `id` and timestamp defaults, recorded as a break.
-- **`extraData` keeps its name.** Renaming it to `custom` is a migration-wide step for every model at
-  once — [group 15](15-custom-data-rename.md).
+- **`extraData` is renamed `custom` on `Poll` and `PollOption`,** the wire's name, with no deprecated
+  alias; `StreamPollController.addOption` and `updateOption` and the `polls.custom` column follow.
+  Every migrated model takes the name from here on (README rule 9); [group 15](15-custom-data.md)
+  renames whatever no group migrates.
 - **Verified live** against the demo app with a before/after harness covering every endpoint, the
   error cases and the WebSocket events, and in the sample app on web.
 

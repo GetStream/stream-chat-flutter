@@ -73,14 +73,14 @@
 ## Decisions to make
 
 - `ChannelState`, `ChannelModel` and `Member` are public, persisted, and rebuilt from WebSocket events. Keep ours and map.
-- **Whether `ChannelModel` promotes its `extraData`-backed flags to real fields.** `disabled`, `hidden`, `muted`, `blocked` and `truncatedAt` all arrive as root fields on `ChannelResponse` but are pushed into `extraData` and read back through getters, which the constructor comment calls "for backwards compatibility". Promoting them is a break worth making in v11 if it is made at all, and it belongs with this group's model shape rather than with whichever phase happens to add the next flag. Raised on [#2958](https://github.com/GetStream/stream-chat-flutter/pull/2958).
+- **`ChannelModel` promotes its `extraData`-backed flags to fields** (README rule 9). `disabled`, `hidden`, `muted`, `blocked` and `truncatedAt`, plus the keys the channel mapper parks today — `truncatedBy`, `muteExpiresAt`, `hideMessagesBefore`, `autoTranslationEnabled` and `autoTranslationLanguage` — become fields with persistence columns, and the constructor stops writing them into the custom data, which is renamed `custom`. `name` and `image` stay in it: `ChannelResponse` has no such fields. Raised on [#2958](https://github.com/GetStream/stream-chat-flutter/pull/2958).
 - `sync` returns `SyncResponse` — one of the two models that needed the WSEvent generator patch. Verify it decodes before relying on it.
 
 ## Risks
 
 - `sync` and `queryMembers` live in `general_api.dart`, not `channel_api.dart` — this group reaches into that file.
 - `queryChannels` drives the channel list controllers and the offline cache; a shape change here is felt everywhere.
-- Channel `custom`/`extraData` promotion, same class of problem as messages.
+- A consumer reading `channel.extraData['hidden']` and friends loses the key once the flags are fields; none in this repo.
 - Landing `ChannelResponse` -> `ChannelModel` is the last thing blocking [08](08-moderation-and-blocklists.md)'s `muteChannel`, which drops `channelMute`, `channelMutes` and `ownUser` because the generated `ChannelMute` carries a `ChannelResponse?` and a `UserResponse?` where ours needs a non-nullable `ChannelModel` and `User`. It needs 09 as well. Decide the null case there too — ours are non-nullable, the generated ones are not, the same question [14](14-banned-users.md) records for `BanResponse.user`.
 
 ## Definition of done
@@ -101,3 +101,5 @@
       retyped but whose docs it left alone.
 - [ ] Tests follow [`TESTING.md`](../TESTING.md): no `group` organizing a file by method, each
       name states its subject and behaviour.
+- [ ] `channel_mapper.dart` has no `_shadowedCustomKeys`: `ChannelModel.custom` is the wire's `custom`,
+      verbatim, and no flag is written into it.

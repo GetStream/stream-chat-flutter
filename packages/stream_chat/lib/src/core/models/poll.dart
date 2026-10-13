@@ -45,7 +45,7 @@ class Poll with _$Poll {
     this.createdById,
     this.createdBy,
     this.ownVotesAndAnswers = const [],
-    this.extraData = const {},
+    this.custom = const {},
   }) : id = id ?? const Uuid().v4(),
        createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
@@ -173,7 +173,7 @@ class Poll with _$Poll {
 
   /// Custom data attached to this poll.
   @override
-  final Map<String, Object?> extraData;
+  final Map<String, Object?> custom;
 
   /// This poll with the translations of [oldPoll] filled in where this one
   /// has none.
@@ -201,33 +201,6 @@ class Poll with _$Poll {
       ],
     );
   }
-
-  /// The keys a poll carries besides its custom data.
-  static const topLevelFields = [
-    'id',
-    'name',
-    'name_i18n',
-    'description',
-    'description_i18n',
-    'options',
-    'voting_visibility',
-    'enforce_unique_vote',
-    'max_votes_allowed',
-    'allow_user_suggested_options',
-    'allow_answers',
-    'is_closed',
-    'created_at',
-    'updated_at',
-    'vote_counts_by_option',
-    'votes',
-    'own_votes',
-    'vote_count',
-    'answers_count',
-    'latest_votes_by_option',
-    'latest_answers',
-    'created_by_id',
-    'created_by',
-  ];
 }
 
 /// A filter for a poll query.
@@ -245,12 +218,12 @@ class PollFilterField extends FilterField<Poll> {
   /// off an instance with [value].
   PollFilterField(super.remote, super.value);
 
-  /// Creates a field the SDK does not model, read from [Poll.extraData].
+  /// Creates a field the SDK does not model, read from [Poll.custom].
   ///
   /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
   /// `$exists`, `$contains`, `$q`, `$autocomplete`
   factory PollFilterField.custom(String remote) {
-    return PollFilterField(remote, (it) => it.extraData[remote]);
+    return PollFilterField(remote, (it) => it.custom[remote]);
   }
 
   /// Filters polls by their id.

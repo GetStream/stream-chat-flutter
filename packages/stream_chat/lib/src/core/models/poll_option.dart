@@ -18,7 +18,7 @@ class PollOption with _$PollOption {
     this.id,
     required this.text,
     this.textI18n,
-    this.extraData = const {},
+    this.custom = const {},
   });
 
   /// Creates a [PollOption] from the offline-database format written by [toData].
@@ -44,14 +44,7 @@ class PollOption with _$PollOption {
 
   /// Custom data attached to this option.
   @override
-  final Map<String, Object?> extraData;
-
-  /// The keys an option carries besides its custom data.
-  static const topLevelFields = [
-    'id',
-    'text',
-    'text_i18n',
-  ];
+  final Map<String, Object?> custom;
 
   /// Serializes this option to the format `stream_chat_persistence` stores.
   ///

@@ -16,7 +16,7 @@ mixin _$PollOption {
   String? get id;
   String get text;
   Map<String, String>? get textI18n;
-  Map<String, Object?> get extraData;
+  Map<String, Object?> get custom;
 
   /// Create a copy of PollOption
   /// with the given fields replaced by the non-null parameter values.
@@ -32,7 +32,7 @@ mixin _$PollOption {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.text, text) || other.text == text) &&
             const DeepCollectionEquality().equals(other.textI18n, textI18n) &&
-            const DeepCollectionEquality().equals(other.extraData, extraData));
+            const DeepCollectionEquality().equals(other.custom, custom));
   }
 
   @override
@@ -41,12 +41,12 @@ mixin _$PollOption {
     id,
     text,
     const DeepCollectionEquality().hash(textI18n),
-    const DeepCollectionEquality().hash(extraData),
+    const DeepCollectionEquality().hash(custom),
   );
 
   @override
   String toString() {
-    return 'PollOption(id: $id, text: $text, textI18n: $textI18n, extraData: $extraData)';
+    return 'PollOption(id: $id, text: $text, textI18n: $textI18n, custom: $custom)';
   }
 }
 
@@ -61,7 +61,7 @@ abstract mixin class $PollOptionCopyWith<$Res> {
     String? id,
     String text,
     Map<String, String>? textI18n,
-    Map<String, Object?> extraData,
+    Map<String, Object?> custom,
   });
 }
 
@@ -80,7 +80,7 @@ class _$PollOptionCopyWithImpl<$Res> implements $PollOptionCopyWith<$Res> {
     Object? id = freezed,
     Object? text = null,
     Object? textI18n = freezed,
-    Object? extraData = null,
+    Object? custom = null,
   }) {
     return _then(
       PollOption(
@@ -96,9 +96,9 @@ class _$PollOptionCopyWithImpl<$Res> implements $PollOptionCopyWith<$Res> {
             ? _self.textI18n
             : textI18n // ignore: cast_nullable_to_non_nullable
                   as Map<String, String>?,
-        extraData: null == extraData
-            ? _self.extraData
-            : extraData // ignore: cast_nullable_to_non_nullable
+        custom: null == custom
+            ? _self.custom
+            : custom // ignore: cast_nullable_to_non_nullable
                   as Map<String, Object?>,
       ),
     );

@@ -17,10 +17,10 @@ void main() {
   });
 
   test('Poll compares its custom data for equality', () {
-    final poll = createTestPoll(id: 'poll-id', name: 'Lunch?', extraData: const {'topic': 'food'});
+    final poll = createTestPoll(id: 'poll-id', name: 'Lunch?', custom: const {'topic': 'food'});
 
-    expect(poll, poll.copyWith(extraData: const {'topic': 'food'}));
-    expect(poll, isNot(poll.copyWith(extraData: const {'topic': 'drinks'})));
+    expect(poll, poll.copyWith(custom: const {'topic': 'food'}));
+    expect(poll, isNot(poll.copyWith(custom: const {'topic': 'drinks'})));
   });
 
   test('Poll.copyWith can clear the vote limit', () {
@@ -136,7 +136,7 @@ Poll createTestPoll({
   bool isClosed = false,
   DateTime? createdAt,
   DateTime? updatedAt,
-  Map<String, Object?>? extraData,
+  Map<String, Object?>? custom,
 }) {
   return Poll(
     id: id,
@@ -151,6 +151,6 @@ Poll createTestPoll({
     isClosed: isClosed,
     createdAt: createdAt ?? DateTime(2023),
     updatedAt: updatedAt ?? DateTime(2023),
-    extraData: extraData ?? {},
+    custom: custom ?? {},
   );
 }
