@@ -124,8 +124,8 @@ class PollV1JsonConverter implements JsonConverter<Poll, Map<String, dynamic>> {
     extraData: _customData(json, Poll.topLevelFields),
   );
 
-  // Writes the keys the poll settings use, with custom data at the root; the vote summary and the server's
-  // translations are not written.
+  // Writes the keys the poll settings use, with custom data at the root; the vote summary and the translations
+  // are not written.
   @override
   Map<String, dynamic> toJson(Poll poll) => {
     ...poll.extraData,

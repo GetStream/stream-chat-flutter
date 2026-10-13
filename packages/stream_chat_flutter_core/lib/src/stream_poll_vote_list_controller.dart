@@ -122,7 +122,6 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
           nextPageKey: response.next,
         );
 
-        // Start listening to events.
         if (disposed) return;
         _subscribeToPollVoteEvents();
       },

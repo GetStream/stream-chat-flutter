@@ -37,8 +37,8 @@
 - **`Poll`, `PollOption` and `PollVote` keep their v10 names, fields and defaults,** as `@freezed`
   classes with no JSON, mapped from `PollResponseData`, `PollOptionResponseData` and
   `PollVoteResponseData` in `lib/src/repository/mapper/polls_mapper.dart`. The uuid default `id` and the
-  `DateTime.now()` timestamps stay; `latestVotes`, `ownVotes`, `ownAnswers` and `PollVote.isAnswer`
-  become getters.
+  `DateTime.now()` timestamps stay; `PollVote.isAnswer` becomes a getter, and `latestVotes`, `ownVotes` and
+  `ownAnswers` stay `late final` caches.
 - **Equality now includes `extraData`.** v10's `Equatable` props left it out of `Poll` and `PollOption`;
   freezed compares every field, and so does `Message`, whose props include its poll. Accepted as a
   behavioural break and flagged for review.
@@ -57,7 +57,8 @@
   for review.
 - **Option ids are not sent on create.** `PollOptionInput` has none; the server assigns them and
   rejects a client id as reserved (confirmed live: v10 answered 400). **`updatePoll` and
-  `updatePollOption` fail without a request when an option has no id,** since the server requires one.
+  `updatePollOption` send an option without an id with an empty one** and return the server's failure;
+  the SDK does not pre-check a rule the backend owns.
 - **`queryPolls` and `queryPollVotes` take `limit`, `next` and `prev`** instead of `PaginationParams`.
   The generated requests carry only those, and the backend never read the offset or id/date cursors on
   these queries. `limit` defaults to 10, `PaginationParams`' default, so an omitted limit pages as in

@@ -42,7 +42,7 @@ class PollVote with _$PollVote {
 
   /// The unique identifier of the option this vote selects.
   ///
-  /// An answer selects no option.
+  /// Empty for an answer, which selects no option.
   @override
   final String? optionId;
 

@@ -105,7 +105,7 @@ includes a named response that carries only `duration` today, such as `HideChann
    with no field of the same name and type is not generated. Before deleting the v10 method, run the audit in
    [`.claude/skills/openapi-migration/copywith-audit.md`](../.claude/skills/openapi-migration/copywith-audit.md)
    and handle every site it reports: a compile break gets a local or a `?? model.field`; a "kept on null; check"
-   site is rewritten as an explicit merge (`?? this.x` at the caller, or an `@internal` merge method such as
+   site is rewritten as an explicit merge (`?? this.x` at the caller, or an `@internal` merge method in the shape of
    `Poll.withTranslationsOf`) unless the clear is the intended behaviour. When the audit's verdict says freezed
    cannot replace the method — a parameter backed by a getter, a private field or a different type, as on
    `Message` — keep `@Freezed(copyWith: false)` with the hand-written method, or reshape the constructor as a

@@ -6,13 +6,6 @@ compiles cleanly. Run this audit per model before deleting the old method. It li
 tests, whose behaviour or compilation changes, and tells you when freezed's `copyWith` can't replace the model's
 at all.
 
-## Install
-
-Two files, meant to live in the openapi-migration skill:
-
-* `.claude/skills/openapi-migration/copywith-audit.md`: this doc (everything above the Script section)
-* `.claude/skills/openapi-migration/scripts/copywith_audit.py`: the script at the bottom
-
 ## What changes
 
 | Parameter | v10 hand-written | freezed | How it shows up |
