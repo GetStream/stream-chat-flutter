@@ -1708,7 +1708,7 @@ class Channel {
   ///
   /// At least one of [set] and [unset] is required.
   ///
-  /// Use [update] to replace every field.
+  /// To replace every field, consider [update].
   Future<Result<UpdateChannelPartialResponse>> updatePartial({
     Map<String, Object?>? set,
     List<String>? unset,
@@ -1831,10 +1831,10 @@ class Channel {
   ///
   /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
   /// unread count locally, on-device, without making a network request, and
-  /// returns a [MarkReadResponse] whose `duration` is `0ms`. In that case
-  /// [messageId] is recorded as the read boundary but does **not** narrow the
-  /// count: the channel is always treated as fully read and the count drops
-  /// to zero. See [ChannelClientState.markReadLocally].
+  /// returns a [MarkReadResponse] whose [MarkReadResponse.duration] is `0ms`.
+  /// In that case [messageId] is recorded as the read boundary but does
+  /// **not** narrow the count: the channel is always treated as fully read and
+  /// the count drops to zero. See [ChannelClientState.markReadLocally].
   ///
   /// Returns a failure if [canUseReadReceipts] is `false`, unless [usesLocalUnreadCount] is `true`.
   Future<Result<MarkReadResponse>> markRead({String? messageId}) async {
@@ -1962,8 +1962,9 @@ class Channel {
 
   /// Marks a thread in this channel as read for the current user.
   ///
-  /// [threadId] is the id of the thread's parent message. Returns a failure
-  /// if [canUseReadReceipts] is `false`.
+  /// [threadId] is the id of the thread's parent message.
+  ///
+  /// Returns a failure if [canUseReadReceipts] is `false`.
   Future<Result<MarkReadResponse>> markThreadRead(String threadId) async {
     _checkInitialized();
 
@@ -1982,8 +1983,9 @@ class Channel {
 
   /// Marks a thread in this channel as unread for the current user.
   ///
-  /// [threadId] is the id of the thread's parent message. Returns a failure
-  /// if [canUseReadReceipts] is `false`.
+  /// [threadId] is the id of the thread's parent message.
+  ///
+  /// Returns a failure if [canUseReadReceipts] is `false`.
   Future<Result<void>> markThreadUnread(String threadId) async {
     _checkInitialized();
 
