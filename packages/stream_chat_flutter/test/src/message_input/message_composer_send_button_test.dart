@@ -51,7 +51,6 @@ void main() {
 
     await _pumpComposer(
       tester,
-      // ignore: deprecated_member_use_from_same_package
       composer: StreamMessageComposer(validator: (_) => false, enableVoiceRecording: false),
     );
     await tester.enterText(find.byType(EditableText), 'Hello');
@@ -60,23 +59,28 @@ void main() {
     expect(_sendButton(tester).props.onPressed, isNull);
   });
 
-  testWidgets("applies the deprecated composer validator to the app's own controller", (tester) async {
+  testWidgets('re-enables send when the deprecated validator goes back to the default', (tester) async {
     final originalRecordPlatform = RecordPlatform.instance;
     RecordPlatform.instance = FakeRecordPlatform();
     addTearDown(() => RecordPlatform.instance = originalRecordPlatform);
-    final controller = _controller()..text = 'Hello';
 
-    await _pumpComposer(
+    final channel = await _pumpComposer(
       tester,
-      composer: StreamMessageComposer(
-        messageComposerController: controller,
-        // ignore: deprecated_member_use_from_same_package
-        validator: (_) => false,
-        enableVoiceRecording: false,
-      ),
+      composer: StreamMessageComposer(validator: (_) => false, enableVoiceRecording: false),
     );
+    await tester.enterText(find.byType(EditableText), 'Hello');
+    await _pumpComposer(tester, channel: channel, composer: StreamMessageComposer(enableVoiceRecording: false));
 
-    expect(_sendButton(tester).props.onPressed, isNull);
+    expect(_sendButton(tester).props.onPressed, isNotNull);
+  });
+
+  test('rejects the deprecated validator when the app passes its own controller', () {
+    final controller = _controller();
+
+    expect(
+      () => StreamMessageComposer(messageComposerController: controller, validator: (_) => false),
+      throwsAssertionError,
+    );
   });
 
   testWidgets("sends what the app's own controller accepts", (tester) async {
@@ -134,7 +138,27 @@ Future<void> _pumpTrailing(
   );
 }
 
-Future<MockChannel> _pumpComposer(WidgetTester tester, {required Widget composer}) async {
+Future<MockChannel> _pumpComposer(WidgetTester tester, {required Widget composer, MockChannel? channel}) async {
+  channel ??= _channel();
+
+  await tester.pumpWidget(
+    MaterialApp(
+      home: StreamChat(
+        client: channel.client,
+        child: StreamChannel(
+          channel: channel,
+          child: Scaffold(body: composer),
+        ),
+      ),
+    ),
+  );
+
+  await tester.pumpAndSettle();
+
+  return channel;
+}
+
+MockChannel _channel() {
   final client = MockClient();
   final clientState = MockClientState();
   final channel = MockChannel();
@@ -161,20 +185,6 @@ Future<MockChannel> _pumpComposer(WidgetTester tester, {required Widget composer
   when(() => channelState.draftStream).thenAnswer((_) => Stream.value(null));
   registerFallbackValue(Message());
   when(() => channel.sendMessage(any())).thenAnswer((_) async => SendMessageResponse());
-
-  await tester.pumpWidget(
-    MaterialApp(
-      home: StreamChat(
-        client: client,
-        child: StreamChannel(
-          channel: channel,
-          child: Scaffold(body: composer),
-        ),
-      ),
-    ),
-  );
-
-  await tester.pumpAndSettle();
 
   return channel;
 }

@@ -8,18 +8,19 @@
 
 ⚠️ Deprecated
 
-- Deprecated `MessageComposerProps.validator` and `StreamMessageComposer.validator`; pass a `StreamMessageComposerController(validator: …)` as `messageComposerController` instead.
+- Deprecated `MessageComposerProps.validator` and the `validator` parameter of `StreamMessageComposer`; pass a `StreamMessageComposerController(validator: …)` as `messageComposerController` instead. It has no effect when a `messageComposerController` is given.
 
 🔄 Changed
 
 - Allowed `equatable` 3.x alongside 2.x.
+- `StreamMessageComposer`'s send button now follows the message validator, so a custom validator can enable or disable it, including when editing or with a command.
 - `StreamMessageListView` now rebuilds only the message rows that changed; a custom row builder should read changing outside state through an inherited widget.
 
 🐞 Fixed
 
 - Fixed `StreamMessageListView` dropping frames on each new message in busy channels.
 - Fixed `StreamMessageComposer` polling the audio recorder ten times a second while no recording is in progress, including when voice recording is disabled.
-- Fixed the composer's send button looking enabled on an empty message when voice recording is off, and showing the microphone instead of send for a staged poll.
+- Fixed `StreamMessageComposer`'s send button looking enabled on an empty message when voice recording is off, and showing the microphone instead of send for a staged poll.
 
 ## 10.5.0
 

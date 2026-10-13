@@ -218,7 +218,10 @@ class MessageComposerProps {
     this.autofocus = false,
     this.autoCorrect = true,
     this.surfaceStyle,
-  });
+  }) : assert(
+         messageComposerController == null || validator == StreamMessageComposerController.defaultValidator,
+         'validator has no effect with a messageComposerController; set it on that controller.',
+       );
 
   /// Function called after sending the message.
   final void Function(Message)? onMessageSent;
@@ -335,8 +338,12 @@ class MessageComposerProps {
   /// The function that decides whether the message being composed can be
   /// sent.
   ///
-  /// When set, it becomes the validator of the composer's controller. Defaults
-  /// to [StreamMessageComposerController.defaultValidator].
+  /// It also decides whether drafts are saved. It has no effect when
+  /// [messageComposerController] is given; set [StreamMessageComposerController.validator] on
+  /// that controller instead.
+  ///
+  /// Defaults to [StreamMessageComposerController.defaultValidator].
+  @Deprecated('Use StreamMessageComposerController.validator instead.')
   final MessageValidator validator;
 
   /// Restoration ID to save and restore the state of the MessageInput.
@@ -606,7 +613,8 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     assert(_controller == null, '');
     _controller = StreamRestorableMessageComposerController(
       message: message,
-      validator: widget.props.validator,
+      // A validator changed on rebuild takes effect.
+      validator: (message) => widget.props.validator(message),
     );
   }
 
@@ -623,17 +631,6 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       ..removeListener(_onChangedDebounced)
       ..addListener(_onChangedThrottled)
       ..addListener(_onChangedDebounced);
-
-    _applyDeprecatedValidator();
-  }
-
-  // Applies the deprecated [MessageComposerProps.validator], when set, to the
-  // controller in use.
-  void _applyDeprecatedValidator() {
-    final validator = widget.props.validator;
-    if (validator == StreamMessageComposerController.defaultValidator) return;
-
-    _effectiveController.validator = validator;
   }
 
   StreamSubscription<DateTime?>? _lastSentAtSubscription;
@@ -785,8 +782,6 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
         ..removeListener(_syncMessageToPicker);
       _initialiseEffectiveController();
     }
-
-    if (widget.props.validator != oldWidget.props.validator) _applyDeprecatedValidator();
 
     // Update _focusNode
     if (widget.props.focusNode != oldWidget.props.focusNode) {
