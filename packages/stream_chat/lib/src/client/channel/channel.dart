@@ -1708,7 +1708,7 @@ class Channel {
   ///
   /// At least one of [set] and [unset] is required.
   ///
-  /// Use [update] to replace every field.
+  /// To replace every field, consider [update].
   Future<Result<UpdateChannelPartialResponse>> updatePartial({
     Map<String, Object?>? set,
     List<String>? unset,
