@@ -1544,6 +1544,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     // Commands carry no attachments.
     if (_commandEnabled) return;
 
+    // A failed read arrives as no data or empty data.
     final bytes = content.data;
     if (bytes == null || bytes.isEmpty) return;
 
