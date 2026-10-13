@@ -171,20 +171,26 @@ void main() {
       expect(controller.attachments, isEmpty);
     });
 
-    testWidgets('is off when attachments are disabled', (tester) async {
+    testWidgets('ignores an image inserted when attachments are disabled', (tester) async {
       await _pumpComposer(tester, controller: controller, disableAttachments: true);
 
-      expect(_editableText(tester).contentInsertionConfiguration, isNull);
+      _insert(tester, _content());
+      await tester.pumpAndSettle();
+
+      expect(controller.attachments, isEmpty);
     });
 
-    testWidgets('is off when images are not an allowed picker type', (tester) async {
+    testWidgets('ignores an image inserted when images are not an allowed picker type', (tester) async {
       await _pumpComposer(
         tester,
         controller: controller,
         allowedAttachmentPickerTypes: [AttachmentPickerType.files],
       );
 
-      expect(_editableText(tester).contentInsertionConfiguration, isNull);
+      _insert(tester, _content());
+      await tester.pumpAndSettle();
+
+      expect(controller.attachments, isEmpty);
     });
 
     testWidgets('stays on while a command is active', (tester) async {
@@ -207,14 +213,17 @@ void main() {
       expect(controller.attachments, isEmpty);
     });
 
-    testWidgets('is off when the user cannot upload files', (tester) async {
+    testWidgets('ignores an image inserted when the user cannot upload files', (tester) async {
       await _pumpComposer(
         tester,
         controller: controller,
         ownCapabilities: [ChannelCapability.sendMessage],
       );
 
-      expect(_editableText(tester).contentInsertionConfiguration, isNull);
+      _insert(tester, _content());
+      await tester.pumpAndSettle();
+
+      expect(controller.attachments, isEmpty);
     });
 
     testWidgets('names the file from the MIME type when the URI extension disagrees', (tester) async {

@@ -49,7 +49,10 @@ void main() {
     testWidgets('accepts keyboard images', (tester) async {
       await _pumpComposer(tester, controller: controller);
 
-      expect(_keyboardConfig(tester), isNotNull);
+      _insertImage(tester);
+      await tester.pumpAndSettle();
+
+      expect(controller.attachments, hasLength(1));
     });
   });
 
@@ -104,10 +107,13 @@ void main() {
       expect(_acceptsDroppedFiles(tester), isFalse);
     });
 
-    testWidgets('does not accept keyboard images', (tester) async {
+    testWidgets('ignores keyboard images', (tester) async {
       await _pumpComposer(tester, controller: controller, ownCapabilities: _cannotUpload);
 
-      expect(_keyboardConfig(tester), isNull);
+      _insertImage(tester);
+      await tester.pumpAndSettle();
+
+      expect(controller.attachments, isEmpty);
     });
   });
 
@@ -127,7 +133,10 @@ void main() {
     testWidgets('accepts keyboard images', (tester) async {
       await _pumpComposer(tester, controller: controller, ownCapabilities: const [], initialized: false);
 
-      expect(_keyboardConfig(tester), isNotNull);
+      _insertImage(tester);
+      await tester.pumpAndSettle();
+
+      expect(controller.attachments, hasLength(1));
     });
 
     testWidgets('does not offer polls', (tester) async {
@@ -194,7 +203,7 @@ void main() {
       expect(_attachmentButton, findsNothing);
     });
 
-    testWidgets('stops accepting keyboard images', (tester) async {
+    testWidgets('ignores keyboard images', (tester) async {
       final capabilities = StreamController<List<ChannelCapability>>.broadcast();
       addTearDown(capabilities.close);
 
@@ -202,7 +211,10 @@ void main() {
       capabilities.add(_cannotUpload);
       await tester.pumpAndSettle();
 
-      expect(_keyboardConfig(tester), isNull);
+      _insertImage(tester);
+      await tester.pumpAndSettle();
+
+      expect(controller.attachments, isEmpty);
     });
 
     testWidgets('moves an open tabbed picker off a tab that uploads', (tester) async {
@@ -410,8 +422,12 @@ Future<Set<String?>> _openTabbedPicker(WidgetTester tester) async {
   return {...picker.options.map((it) => it.key)};
 }
 
-ContentInsertionConfiguration? _keyboardConfig(WidgetTester tester) {
-  return tester.widget<EditableText>(find.byType(EditableText)).contentInsertionConfiguration;
+void _insertImage(WidgetTester tester) {
+  tester
+      .state<EditableTextState>(find.byType(EditableText))
+      .insertContent(
+        KeyboardInsertedContent(mimeType: 'image/gif', uri: 'content://keyboard/cat.gif', data: Uint8List(100)),
+      );
 }
 
 class _ChannelWithCapabilitiesStream extends MockChannel {

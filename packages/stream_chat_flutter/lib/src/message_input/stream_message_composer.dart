@@ -322,7 +322,7 @@ class MessageComposerProps {
   /// The attachment types the user can add.
   ///
   /// Applies to the attachment picker, dropped files and images inserted from
-  /// the keyboard. A type is only offered when the channel allows it.
+  /// the keyboard. A type is only accepted when the channel allows it.
   ///
   /// Defaults to [AttachmentPickerType.values].
   final List<AttachmentPickerType> allowedAttachmentPickerTypes;
@@ -1078,7 +1078,9 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
               autofocus: widget.props.autofocus,
               autocorrect: widget.props.autoCorrect,
               isFloating: isFloating,
-              contentInsertionConfiguration: _buildContentInsertionConfiguration(allowedTypes),
+              contentInsertionConfiguration: ContentInsertionConfiguration(
+                onContentInserted: (content) => _onContentInserted(content, allowedTypes),
+              ),
             ),
           ),
         );
@@ -1531,18 +1533,15 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     if (validationErrors.firstOrNull case final error?) _handleAttachmentError(error);
   }
 
-  // Lets keyboards such as Gboard insert images and GIFs. Accepted only where
-  // the picker would accept an image, and validated the same way.
-  ContentInsertionConfiguration? _buildContentInsertionConfiguration(
+  // Adds an image or GIF inserted from a keyboard such as Gboard. Accepted only
+  // where the picker would accept an image, and validated the same way.
+  void _onContentInserted(
+    KeyboardInsertedContent content,
     List<AttachmentPickerType> allowedTypes,
   ) {
-    if (!allowedTypes.contains(AttachmentPickerType.images)) return null;
-    return ContentInsertionConfiguration(onContentInserted: _onContentInserted);
-  }
-
-  void _onContentInserted(KeyboardInsertedContent content) {
     // Commands carry no attachments.
     if (_commandEnabled) return;
+    if (!allowedTypes.contains(AttachmentPickerType.images)) return;
 
     // A failed read arrives as no data or empty data.
     final bytes = content.data;
