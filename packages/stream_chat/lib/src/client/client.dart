@@ -1246,8 +1246,8 @@ class StreamChatClient {
     message: message,
   );
 
-  /// Partially updates the channel [channelId] of type [channelType]: sets the fields in [set] and removes the fields
-  /// named in [unset], leaving every other field as it is.
+  /// Partially updates a channel: sets the fields in [set] and removes the fields named in [unset], leaving every
+  /// other field as it is.
   ///
   /// At least one of [set] and [unset] is required.
   ///
@@ -2138,8 +2138,7 @@ class StreamChatClient {
     );
   }
 
-  /// Enables slow mode on the channel [channelId] of type [channelType], so members wait [cooldown] seconds between
-  /// messages.
+  /// Enables slow mode on a channel, so members wait [cooldown] seconds between messages.
   Future<Result<UpdateChannelPartialResponse>> enableSlowMode(
     String channelId,
     String channelType,
@@ -2150,7 +2149,7 @@ class StreamChatClient {
     set: {'cooldown': cooldown},
   );
 
-  /// Disables slow mode on the channel [channelId] of type [channelType].
+  /// Disables slow mode on a channel.
   Future<Result<UpdateChannelPartialResponse>> disableSlowMode(
     String channelId,
     String channelType,
@@ -2301,8 +2300,8 @@ class StreamChatClient {
     );
   }
 
-  /// Partially updates the current user's membership of the channel [channelId] of type [channelType]: sets the
-  /// fields in [set] and removes the fields named in [unset], leaving every other field as it is.
+  /// Partially updates the current user's membership of a channel: sets the fields in [set] and removes the fields
+  /// named in [unset], leaving every other field as it is.
   ///
   /// At least one of [set] and [unset] is required.
   Future<Result<UpdateMemberPartialResponse>> updateMemberPartial({

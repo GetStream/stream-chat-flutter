@@ -15,8 +15,8 @@ class ChannelsRepository {
 
   final api.DefaultApi _api;
 
-  /// Partially updates the channel [channelId] of type [channelType]: sets the fields in [set] and removes the fields
-  /// named in [unset], leaving every other field as it is.
+  /// Partially updates a channel: sets the fields in [set] and removes the fields named in [unset], leaving every
+  /// other field as it is.
   ///
   /// At least one of [set] and [unset] is required.
   Future<Result<UpdateChannelPartialResponse>> updateChannelPartial(
@@ -34,8 +34,8 @@ class ChannelsRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Partially updates the current user's membership of the channel [channelId] of type [channelType]: sets the
-  /// fields in [set] and removes the fields named in [unset], leaving every other field as it is.
+  /// Partially updates the current user's membership of a channel: sets the fields in [set] and removes the fields
+  /// named in [unset], leaving every other field as it is.
   ///
   /// At least one of [set] and [unset] is required.
   Future<Result<UpdateMemberPartialResponse>> updateMemberPartial(
