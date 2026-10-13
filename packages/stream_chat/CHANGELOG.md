@@ -80,7 +80,7 @@
 - `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed; call `StreamChatClient.connectGuestUser` instead.
 - The poll calls on `StreamChatClient` and `Channel` return a `Result` instead of throwing.
 - `CreatePollResponse`, `GetPollResponse` and `UpdatePollResponse` are replaced by `PollResponse`; `CreatePollOptionResponse`, `GetPollOptionResponse` and `UpdatePollOptionResponse` by `PollOptionResponse`; and `CastPollVoteResponse` and `RemovePollVoteResponse` by `PollVoteResponse`.
-- `queryPolls` and `queryPollVotes` take `limit` (10 when omitted), `next` and `prev` instead of `PaginationParams`, and their responses carry a `prev` cursor.
+- `queryPolls` and `queryPollVotes` take `limit` (10 when omitted) and `next` instead of `PaginationParams`.
 - `Channel.castPollVote` and `removePollVote` return a failure instead of throwing an `ArgumentError` for an option or vote without an id.
 - `VotingVisibility` is an extension type over its wire string instead of an enum.
 - `Poll`, `PollOption`, `PollVote` and the poll responses no longer decode from or encode to JSON; `PollOption` gains `fromData` and `toData`, which read and write only the format `stream_chat_persistence` stores it in.
@@ -122,6 +122,7 @@
 - Added optional `reason` and `custom` arguments to `flagMessage` and `flagUser`, recorded with the flag.
 - Added an optional `timeout` to `StreamChatClient.moderation.muteUser` that expires the mute.
 - Added `StreamChatClient.moderation.muteUsers` and `unmuteUsers`, which mute and unmute several users in one call and report the ids that matched no user.
+- Added a `prev` argument to `queryPolls` and `queryPollVotes`, and a `prev` cursor on their responses, for paging backwards.
 
 🔒 Security
 

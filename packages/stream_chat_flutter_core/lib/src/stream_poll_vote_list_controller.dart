@@ -122,7 +122,7 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
           nextPageKey: response.next,
         );
 
-        // start listening to events
+        // Start listening to events.
         if (disposed) return;
         _subscribeToPollVoteEvents();
       },
@@ -150,8 +150,8 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
     );
   }
 
-  // Queries the next page of votes, turning an error the channel throws (for one that is not initialized, say) into a
-  // failure, so every outcome reaches the controller's value.
+  // Queries a page of votes, after [next] when given, turning an error the channel throws (when it is not initialized,
+  // for example) into a failure, so every outcome reaches the controller's value.
   Future<Result<QueryPollVotesResponse>> _queryPollVotes({required int limit, String? next}) async {
     try {
       return await channel.queryPollVotes(pollId, sort: _activeSort, filter: _activeFilter, limit: limit, next: next);

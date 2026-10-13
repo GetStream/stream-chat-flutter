@@ -18,8 +18,6 @@ class PollVoteResponse with _$PollVoteResponse {
   final String duration;
 
   /// The vote that was cast or removed.
-  ///
-  /// Every vote on a message is returned; this is null only for a response that carries no vote.
   @override
   final PollVote? vote;
 }

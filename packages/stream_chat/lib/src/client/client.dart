@@ -1644,8 +1644,9 @@ class StreamChatClient {
 
   /// Creates [poll] with its settings and options.
   ///
-  /// The ids of the options are left out: every option gets a new one, which the returned poll carries. A poll is
-  /// shown to the members of a channel once it is sent in a message; [Channel.sendPoll] does both.
+  /// Any ids already set on the options are ignored; every option gets a new one, which the returned poll carries.
+  ///
+  /// A poll is shown to the members of a channel once it is sent in a message; [Channel.sendPoll] does both.
   Future<Result<PollResponse>> createPoll(Poll poll) => _pollsRepository.createPoll(poll);
 
   /// Fetches the poll with the id [pollId].

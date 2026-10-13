@@ -78,6 +78,9 @@ class PollVote with _$PollVote {
   @override
   final User? user;
 
+  /// Whether this is a free-form answer rather than a vote for an option.
+  bool get isAnswer => answerText != null;
+
   /// Creates a copy of [PollVote] with specified attributes overridden.
   PollVote copyWith({
     String? id,
@@ -100,9 +103,6 @@ class PollVote with _$PollVote {
     userId: userId ?? this.userId,
     user: user ?? this.user,
   );
-
-  /// Whether this is a free-form answer rather than a vote for an option.
-  bool get isAnswer => answerText != null;
 }
 
 /// A filter for a poll vote query.

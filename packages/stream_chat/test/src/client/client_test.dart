@@ -2611,6 +2611,23 @@ void main() {
       expect(result.getOrNull()?.poll.votingVisibility, const VotingVisibility('members_only'));
     });
 
+    test("StreamChatClient.getPoll reads someone else's vote in an anonymous poll without a user", () async {
+      final response = api.PollResponse(
+        duration: '4.21ms',
+        poll: generatedPoll.copyWith(
+          latestVotesByOption: {
+            'pizza': [generatedVote.copyWith(userId: null, user: null)],
+          },
+        ),
+      );
+      when(() => defaultApi.getPoll(pollId: 'poll-id')).thenAnswer((_) async => Result.success(response));
+
+      final result = await client.getPoll('poll-id');
+
+      final pizzaVote = result.getOrNull()?.poll.latestVotesByOption['pizza']?.single;
+      expect((pizzaVote?.userId, pizzaVote?.user), (null, null));
+    });
+
     test('StreamChatClient.getPoll reads a poll that does not say whether it is closed as open', () async {
       final response = api.PollResponse(duration: '4.21ms', poll: generatedPoll.copyWith(isClosed: null));
       when(() => defaultApi.getPoll(pollId: 'poll-id')).thenAnswer((_) async => Result.success(response));
@@ -2631,6 +2648,7 @@ void main() {
             PollOption(id: 'pizza', text: 'Pizza', extraData: {'color': 'red', 'id': 'pasta'}),
             PollOption(id: 'sushi', text: 'Sushi'),
           ],
+          votingVisibility: const VotingVisibility('members_only'),
           isClosed: true,
         ),
       );
@@ -2640,21 +2658,21 @@ void main() {
       ).captured.single;
       expect(
         request,
-        const api.UpdatePollRequest(
+        api.UpdatePollRequest(
           id: 'poll-id',
           name: 'Lunch?',
           description: 'Pick one',
-          options: [
+          options: const [
             api.PollOptionRequest(id: 'pizza', text: 'Pizza', custom: {'color': 'red'}),
             api.PollOptionRequest(id: 'sushi', text: 'Sushi', custom: {}),
           ],
-          votingVisibility: api.UpdatePollRequestVotingVisibility.anonymous,
+          votingVisibility: api.UpdatePollRequestVotingVisibility.fromJson('members_only'),
           enforceUniqueVote: false,
           maxVotesAllowed: 2,
           allowAnswers: true,
           allowUserSuggestedOptions: true,
           isClosed: true,
-          custom: {'topic': 'food'},
+          custom: const {'topic': 'food'},
         ),
       );
       expect(result, Result.success(pollResponse));
@@ -3048,7 +3066,7 @@ void main() {
             },
             sort: [api.SortParamRequest(field: 'created_at', direction: 1)],
             limit: 25,
-            prev: 'prev-cursor',
+            next: 'next-cursor',
           ),
         ),
       ).thenAnswer(
@@ -3062,7 +3080,7 @@ void main() {
         filter: Filter.equal(PollVoteFilterField.isAnswer, true),
         sort: [PollVoteSort.asc(PollVoteSortField.createdAt)],
         limit: 25,
-        prev: 'prev-cursor',
+        next: 'next-cursor',
       );
 
       expect(
@@ -3084,15 +3102,15 @@ void main() {
       expect(result.exceptionOrNull(), pollsApiError);
     });
 
-    test('StreamChatClient.queryPollVotes sends ten as the default limit', () async {
+    test('StreamChatClient.queryPollVotes sends the previous-page cursor and ten as the default limit', () async {
       when(
         () => defaultApi.queryPollVotes(
           pollId: 'poll-id',
-          queryPollVotesRequest: const api.QueryPollVotesRequest(limit: 10),
+          queryPollVotesRequest: const api.QueryPollVotesRequest(limit: 10, prev: 'prev-cursor'),
         ),
       ).thenAnswer((_) async => const Result.success(api.PollVotesResponse(duration: '4.21ms', votes: [])));
 
-      final result = await client.queryPollVotes('poll-id');
+      final result = await client.queryPollVotes('poll-id', prev: 'prev-cursor');
 
       expect(result, const Result.success(QueryPollVotesResponse(duration: '4.21ms', votes: [])));
     });

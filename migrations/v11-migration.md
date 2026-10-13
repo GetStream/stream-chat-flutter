@@ -230,7 +230,6 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `CreatePollResponse()..poll = …` and the other response setters | `PollResponse(duration: …, poll: …)` | `retyped` | The responses are plain classes with a const constructor and final fields |
 | poll responses' `duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
 | `Poll` / `PollOption` / `PollVote extends Equatable`, `props` | value `==` | `removed` | `Poll` and `PollOption` now compare `extraData` too |
-| `PollVote.isAnswer` (a field set in the constructor) | the same name, as a getter | `retyped` | Computed from `answerText` on each read |
 | `StreamChatApi.polls` (`PollsApi`) | `StreamChatClient`'s poll methods | `removed` | The endpoints moved to the generated client |
 | `sendImage` / `sendFile` / `uploadImage` / `uploadFile` → `Future<SendImageResponse>` and siblings | `Future<Result<UploadedFile>>` | `retyped` | On `StreamChatClient`, `Channel` and `AttachmentFileUploader`. Returns a `Result` instead of throwing |
 | `deleteImage` / `deleteFile` / `removeImage` / `removeFile` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | On `StreamChatClient`, `Channel` and `AttachmentFileUploader`. Returns a `Result` instead of throwing |
@@ -877,7 +876,7 @@ Work top to bottom; each item is independently verifiable.
 - [ ] Replace `ChatErrorCode` comparisons with `StreamErrorCode` constants
 - [ ] Apply every row of the [Symbol Map](#symbol-map)
 - [ ] Re-check custom data access: fields that used to arrive in `extraData` may now be typed properties
-- [ ] If you implement `AttachmentFileUploader`, review its section under [Feature Areas](#feature-areas)
+- [ ] If you implement `AttachmentFileUploader`, return a `Result` from it — see [File Upload](#file-upload)
 - [ ] If you persist models yourself, re-check nullability as endpoints move to the generated types, which are nullable wherever the API allows it
 - [ ] Replace `sort: null` on any list controller with `XSort.empty` if you relied on server ordering — see
       [Sorting](#sorting)

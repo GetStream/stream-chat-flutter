@@ -1431,8 +1431,10 @@ class Channel {
 
   /// Creates [poll] and sends it to this channel in a new message.
   ///
-  /// The message carries [messageText] as its text, if given. If the poll cannot be created, no message is sent and
-  /// the failure is returned; if the message cannot be sent, the poll stays created and the failure is returned.
+  /// The message carries [messageText] as its text, if given.
+  ///
+  /// If the poll cannot be created, no message is sent and the failure is returned. If the message cannot be sent, the
+  /// poll stays created and the failure is returned.
   Future<Result<SendMessageResponse>> sendPoll(
     Poll poll, {
     String? messageText,

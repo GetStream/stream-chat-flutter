@@ -75,7 +75,7 @@ void main() {
     expect(poll.extraData, isEmpty);
   });
 
-  test('Message.fromJson keeps the translations of a poll and its options out of their custom data', () {
+  test('Message.fromJson keeps the translations of a poll out of its custom data', () {
     final message = Message.fromJson(const {
       'id': 'message-id',
       'poll': {
@@ -83,6 +83,20 @@ void main() {
         'name': 'Lunch?',
         'name_i18n': {'it': 'Pranzo?'},
         'description_i18n': {'it': 'Scegline uno'},
+        'options': <Object?>[],
+        'topic': 'food',
+      },
+    });
+
+    expect(message.poll!.extraData, {'topic': 'food'});
+  });
+
+  test('Message.fromJson keeps the translations of a poll option out of its custom data', () {
+    final message = Message.fromJson(const {
+      'id': 'message-id',
+      'poll': {
+        'id': 'poll-id',
+        'name': 'Lunch?',
         'options': [
           {
             'id': 'pizza',
@@ -91,11 +105,9 @@ void main() {
             'color': 'red',
           },
         ],
-        'topic': 'food',
       },
     });
 
-    expect(message.poll!.extraData, {'topic': 'food'});
     expect(message.poll!.options.single.extraData, {'color': 'red'});
   });
 
@@ -170,10 +182,10 @@ void main() {
     });
   });
 
-  test('Event.toJson writes only the id, the option and the answer of a vote', () {
-    final event = Event(type: EventType.pollVoteCasted, pollVote: _vote);
+  test('Event.toJson writes only the id, the option and the answer text of a vote', () {
+    final event = Event(type: EventType.pollAnswerCasted, pollVote: _answer);
 
-    expect(event.toJson()['poll_vote'], {'id': 'vote-id', 'option_id': 'pizza'});
+    expect(event.toJson()['poll_vote'], {'id': 'answer-id', 'option_id': '', 'answer_text': 'Anything'});
   });
 
   test('Event.fromJson reads back the poll settings written by toJson', () {

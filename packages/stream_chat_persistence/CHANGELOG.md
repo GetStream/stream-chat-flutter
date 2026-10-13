@@ -6,11 +6,11 @@
 - The sort arguments on `getChannelStates`, `queryChannelStates` and `saveChannelQueries` are typed `List<ChannelSort>` rather than `SortOrder<ChannelState>`.
 - The filter arguments on `getChannelStates`, `queryChannelStates`, `updateChannelQueries` and `saveChannelQueries` are typed `ChannelFilter?` rather than an untyped `Filter`.
 - A predefined-filter query whose resolved filter is absent now stores no filter, rather than an empty one. The schema version is bumped for it, so the local cache is rebuilt once on upgrade.
-- Poll options are stored in a new format, and a voting visibility the SDK does not name is read back instead of failing.
 
 🔄 Changed
 
 - Every persistence call logged its own name at `info`; that call trace is `verbose` now.
+- A cached poll with a voting visibility the SDK does not name is read back instead of failing.
 
 🐞 Fixed
 

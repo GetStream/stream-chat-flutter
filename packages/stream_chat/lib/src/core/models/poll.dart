@@ -113,7 +113,7 @@ class Poll with _$Poll {
   @override
   final bool allowAnswers;
 
-  /// Whether this poll no longer accepts votes.
+  /// Whether this poll no longer accepts votes or answers.
   @override
   final bool isClosed;
 
