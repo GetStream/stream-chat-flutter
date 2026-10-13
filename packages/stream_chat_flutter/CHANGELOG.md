@@ -10,11 +10,14 @@
 
 - Allowed `equatable` 3.x alongside 2.x.
 - `StreamMessageListView` now rebuilds only the message rows that changed; a custom row builder should read changing outside state through an inherited widget.
+- `StreamMessageComposer` now hides the picker's upload options and voice recording, and refuses dropped files, when the user lacks the `upload-file` capability. The attachment button is hidden when nothing else is left to offer.
+- `StreamMessageComposer` now refuses dropped files when `disableAttachments` is set or `allowedAttachmentPickerTypes` leaves out `AttachmentPickerType.files`.
 
 🐞 Fixed
 
 - Fixed `StreamMessageListView` dropping frames on each new message in busy channels.
 - Fixed `StreamMessageComposer` polling the audio recorder ten times a second while no recording is in progress, including when voice recording is disabled.
+- Fixed the attachment picker showing an empty commands tab in channels without commands.
 
 ## 10.5.0
 
@@ -44,8 +47,6 @@
 - The unread messages divider now shows a count.
 - `StreamMessageListView` no longer marks a channel read until the unread boundary has been seen, or while it is manually marked unread.
 - Screen readers now announce each message as one phrase: sender, body, time and status.
-- `StreamMessageComposer` now hides the picker's upload options and voice recording, and refuses dropped files, when the user lacks the `upload-file` capability. The attachment button is hidden when nothing else is left to offer.
-- `StreamMessageComposer` now refuses dropped files when `disableAttachments` is set or `allowedAttachmentPickerTypes` leaves out `AttachmentPickerType.files`.
 
 ⚠️ Deprecated
 
@@ -79,7 +80,6 @@
 - Fixed the jump-to-unread pill being dismissed by the slightest scroll after marking a message unread.
 - Fixed the jump-to-unread pill flickering back in and straight out on every new message after being dismissed.
 - Fixed tapping the jump-to-unread pill doing nothing on a channel the user has never opened.
-- Fixed the attachment picker showing an empty commands tab in channels without commands.
 
 ## 10.4.0
 
