@@ -8,7 +8,7 @@
 
 ⚠️ Deprecated
 
-- Deprecated `MessageComposerProps.validator` and the `validator` parameter of `StreamMessageComposer`; pass a `StreamMessageComposerController(validator: …)` as `messageComposerController` instead. It has no effect when a `messageComposerController` is given.
+- Deprecated `MessageComposerProps.validator` and the `validator` parameter of `StreamMessageComposer`; pass a `StreamMessageComposerController(validator: …)` as `messageComposerController` instead. Passing a custom one together with a `messageComposerController` fails an assert.
 
 🔄 Changed
 
