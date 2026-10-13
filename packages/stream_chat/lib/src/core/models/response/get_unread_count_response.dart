@@ -45,7 +45,7 @@ class GetUnreadCountResponse with _$GetUnreadCountResponse {
   @override
   final List<UnreadCountsChannel> channels;
 
-  /// The unread messages of each channel type that has any.
+  /// The channel types that have unread messages.
   @override
   final List<UnreadCountsChannelType> channelType;
 
