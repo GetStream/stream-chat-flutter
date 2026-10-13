@@ -10,6 +10,10 @@ import 'stream_typewriter_builder.dart';
 /// A widget that displays a message in a streaming fashion. The message is
 /// displayed as if it is being typed out by a typewriter.
 /// {@endtemplate}
+@Deprecated(
+  'Moved to package:stream_chat_flutter_ai. '
+  'Will be removed in a future release.',
+)
 class StreamingMessageView extends StatefulWidget {
   /// {@macro streamingMessageView}
   const StreamingMessageView({

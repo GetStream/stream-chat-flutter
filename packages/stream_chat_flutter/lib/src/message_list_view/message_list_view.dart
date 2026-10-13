@@ -9,6 +9,7 @@ import 'package:rxdart/rxdart.dart';
 import '../../scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../stream_chat_flutter.dart';
 import '../misc/empty_widget.dart';
+import '../misc/memoized_builder.dart';
 import '../utils/network_error_text.dart';
 import 'floating_date_divider.dart';
 import 'loading_indicator.dart';
@@ -141,6 +142,12 @@ class StreamMessageListView extends StatefulWidget {
   /// callbacks already wired in. Use [StreamMessageItemProps.copyWith]
   /// to modify properties, and [DefaultStreamMessageItem] to build the default
   /// widget.
+  ///
+  /// The builder is called again only when its message, the message's place in
+  /// a run of consecutive messages, or the values the list passes into it
+  /// change. Consider reading other changing state from an inherited widget, or
+  /// listening to it with a widget such as [ValueListenableBuilder], so the
+  /// message updates when that state does.
   final StreamMessageItemBuilder? messageBuilder;
 
   /// Parent message in case of a thread.
@@ -1093,7 +1100,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }
 
   Widget buildParentMessage(Message message) {
-    final parentMessageProps = StreamMessageItemProps(
+    final props = StreamMessageItemProps(
       message: message,
       swipeToReply: _config.swipeToReply,
       onThreadTap: _onThreadTap,
@@ -1112,27 +1119,28 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     );
 
     final userId = StreamChat.of(context).currentUser!.id;
-    final isMyMessage = message.user?.id == userId;
 
-    final contentKind = resolveContentKind(message);
-    final isInThread = widget.parentMessage != null;
-
-    final layout = StreamMessageLayout(
-      data: StreamMessageLayoutData(
-        stackPosition: .single,
-        alignment: isMyMessage ? .end : .start,
-        listKind: isInThread ? .thread : .channel,
-        contentKind: contentKind,
-      ),
-      child: Builder(
-        builder: (context) => switch (widget.builders.parentMessage) {
-          final builder? => builder.call(context, message, parentMessageProps),
-          _ => StreamMessageItem.fromProps(props: parentMessageProps),
-        },
-      ),
+    final layout = StreamMessageLayoutData(
+      stackPosition: .single,
+      alignment: message.user?.id == userId ? .end : .start,
+      listKind: _isThreadConversation ? .thread : .channel,
     );
 
-    return _maybeWrapWithHighlight(message: message, child: layout);
+    return MemoizedBuilder(
+      dependencies: (props, layout, widget.builders.parentMessage),
+      builder: (context) => _maybeWrapWithHighlight(
+        message: message,
+        child: StreamMessageLayout(
+          data: layout.copyWith(contentKind: resolveContentKind(message)),
+          child: Builder(
+            builder: (context) => switch (widget.builders.parentMessage) {
+              final builder? => builder.call(context, message, props),
+              _ => StreamMessageItem.fromProps(props: props),
+            },
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildScrollToBottom() {
@@ -1216,13 +1224,15 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       return buildModeratedMessage(message);
     }
 
-    final messageItemProps = StreamMessageItemProps(
+    final nextMessage = index - 1 >= 0 ? messages[index - 1] : null;
+    final prevMessage = index + 1 < messages.length ? messages[index + 1] : null;
+    final userId = StreamChat.of(context).currentUser!.id;
+
+    final props = StreamMessageItemProps(
       message: message,
       swipeToReply: _config.swipeToReply,
       onThreadTap: _onThreadTap,
-      onViewInChannelTap: _isThreadConversation
-          ? widget.onViewInChannelTap ?? (message) => Navigator.of(context).pop(message.id)
-          : null,
+      onViewInChannelTap: _isThreadConversation ? widget.onViewInChannelTap ?? _popToMessage : null,
       onMessageTap: widget.onMessageTap,
       onMessageLongPress: widget.onMessageLongPress,
       onEditMessageTap: widget.onEditMessageTap,
@@ -1234,43 +1244,42 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       onMessageLinkTap: widget.onMessageLinkTap,
       onUserMentionTap: widget.onUserMentionTap,
       onMentionTap: widget.onMentionTap,
-      onQuotedMessageTap: switch (widget.onQuotedMessageTap) {
-        final onTap? => onTap,
-        _ => (quotedMessage) => _scrollToMessage(messageId: quotedMessage.id),
-      },
+      onQuotedMessageTap: widget.onQuotedMessageTap ?? _scrollToQuotedMessage,
     );
 
-    final userId = StreamChat.of(context).currentUser!.id;
-    final isMyMessage = message.user?.id == userId;
-    final nextMessage = index - 1 >= 0 ? messages[index - 1] : null;
-    final prevMessage = index + 1 < messages.length ? messages[index + 1] : null;
-
-    final contentKind = resolveContentKind(message);
-    final isInThread = widget.parentMessage != null;
-    final stackPosition = computeStackPosition(message: message, previous: prevMessage, next: nextMessage);
-
-    final layout = StreamMessageLayout(
-      data: StreamMessageLayoutData(
-        stackPosition: stackPosition,
-        alignment: isMyMessage ? .end : .start,
-        listKind: isInThread ? .thread : .channel,
-        contentKind: contentKind,
-      ),
-      child: Builder(
-        builder: (context) => switch (widget.messageBuilder) {
-          final builder? => builder.call(context, message, messageItemProps),
-          // Keyed by message id so per-message local state (e.g. in the
-          // content/attachments/leading widgets) stays attached to the
-          // correct message when pagination prepends older messages and
-          // shifts every already-rendered item's index, rather than leaking
-          // onto whatever message next occupies the same position.
-          _ => StreamMessageItem.fromProps(key: ValueKey(message.id), props: messageItemProps),
-        },
-      ),
+    // The content kind follows from the message in [props], so it is resolved
+    // only when the row rebuilds.
+    final layout = StreamMessageLayoutData(
+      stackPosition: computeStackPosition(message: message, previous: prevMessage, next: nextMessage),
+      alignment: message.user?.id == userId ? .end : .start,
+      listKind: _isThreadConversation ? .thread : .channel,
     );
 
-    return _maybeWrapWithHighlight(message: message, child: layout);
+    return MemoizedBuilder(
+      dependencies: (props, layout, widget.messageBuilder),
+      builder: (context) => _maybeWrapWithHighlight(
+        message: message,
+        child: StreamMessageLayout(
+          data: layout.copyWith(contentKind: resolveContentKind(message)),
+          child: Builder(
+            builder: (context) => switch (widget.messageBuilder) {
+              final builder? => builder.call(context, message, props),
+              // Keyed by message id so per-message local state (e.g. in the
+              // content/attachments/leading widgets) stays attached to the
+              // correct message when pagination prepends older messages and
+              // shifts every already-rendered item's index, rather than leaking
+              // onto whatever message next occupies the same position.
+              _ => StreamMessageItem.fromProps(key: ValueKey(message.id), props: props),
+            },
+          ),
+        ),
+      ),
+    );
   }
+
+  // Methods rather than closures, so rows built from them compare equal.
+  void _popToMessage(Message message) => Navigator.of(context).pop(message.id);
+  void _scrollToQuotedMessage(Message quoted) => _scrollToMessage(messageId: quoted.id).ignore();
 
   void _handleItemPositionsChanged() {
     if (!mounted) return;

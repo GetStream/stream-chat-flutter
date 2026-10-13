@@ -41,7 +41,7 @@ export 'src/channel/channel_list_header.dart';
 export 'src/channel/channel_name.dart';
 export 'src/channel/stream_channel_name.dart';
 export 'src/channel/stream_draft_message_preview_text.dart';
-export 'src/channel/stream_message_preview_text.dart';
+export 'src/channel/stream_message_preview_text.dart' hide translateForPreview;
 // region SDK Design Refresh Components
 export 'src/components/avatar/stream_channel_avatar.dart';
 export 'src/components/avatar/stream_user_avatar.dart';
@@ -99,6 +99,7 @@ export 'src/message_widget/components/stream_message_content.dart';
 export 'src/message_widget/components/stream_message_footer.dart';
 export 'src/message_widget/components/stream_message_header.dart';
 export 'src/message_widget/components/stream_message_leading.dart';
+export 'src/message_widget/message_translation_language.dart';
 export 'src/message_widget/stream_ephemeral_message.dart';
 export 'src/message_widget/stream_message_item.dart';
 export 'src/message_widget/stream_message_translation_configuration.dart';

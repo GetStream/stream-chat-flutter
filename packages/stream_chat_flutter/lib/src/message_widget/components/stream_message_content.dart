@@ -4,6 +4,9 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
 
 import '../../attachment/builder/attachment_widget_builder.dart';
+import '../../stream_chat.dart';
+import '../../stream_chat_configuration.dart';
+import '../message_translation_language.dart';
 import '../stream_message_attachments.dart';
 import '../stream_message_item.dart';
 import '../stream_quoted_message.dart';
@@ -145,10 +148,12 @@ class StreamMessageContent extends StatefulWidget {
   /// Passed through to [StreamMessageReactions.sorting].
   final Comparator<ReactionGroup>? reactionSorting;
 
-  /// Whether [message] should display its translation when [Message.i18n]
+  /// Whether [message] should display its translation when it, or its poll,
   /// has one for the current user's language.
   ///
-  /// Passed through to [StreamMessageText.showTranslatedText].
+  /// Passed through to [StreamMessageText.showTranslatedText], and provided to
+  /// the attachments, a poll and its sheets included, through
+  /// [MessageTranslationLanguage].
   final bool showTranslatedText;
 
   @override
@@ -220,50 +225,53 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
               builder: (context) {
                 final bubbleContent = ConstrainedBox(
                   constraints: const BoxConstraints().copyWith(maxWidth: widthLimit),
-                  child: core.StreamColumn(
-                    mainAxisSize: .min,
-                    spacing: spacing.xs,
-                    crossAxisAlignment: .start,
-                    children: [
-                      if (widget.message.quotedMessage case final quotedMessage?)
-                        StreamQuotedMessage(
-                          quotedMessage: quotedMessage,
-                          replyMessage: widget.message,
-                          onTap: switch (widget.onQuotedMessageTap) {
-                            final onTap? => () => onTap(quotedMessage),
-                            _ => null,
-                          },
-                        ),
-                      StreamMessageAttachments(
-                        key: attachmentsKey,
-                        message: widget.message,
-                        attachmentBuilders: widget.attachmentBuilders,
-                      ),
-                      if (widget.message.text case final text? when text.isNotEmpty)
-                        // The composed row label speaks the message text, so
-                        // the rendered markdown stays out of the semantics tree
-                        // and the row is announced as one phrase.
-                        //
-                        // This deliberately costs the inline link and mention
-                        // spans their own semantics nodes, so a screen reader
-                        // can read a link but not focus or activate it. The
-                        // alternative — a focus stop per span, each repeating
-                        // text the row just spoke — makes every message far
-                        // more tedious to move through than it makes the rare
-                        // link easier to reach. `explicitChildNodes` keeps the
-                        // parts worth a stop of their own — polls, quotes and
-                        // attachments — reachable.
-                        ExcludeSemantics(
-                          excluding: excluding,
-                          child: StreamMessageText(
-                            message: widget.message,
-                            onLinkTap: widget.onLinkTap,
-                            onMentionTap: widget.onMentionTap,
-                            onAnyMentionTap: widget.onAnyMentionTap,
-                            showTranslatedText: widget.showTranslatedText,
+                  child: _MessageTranslationScope(
+                    showTranslatedText: widget.showTranslatedText,
+                    child: core.StreamColumn(
+                      mainAxisSize: .min,
+                      spacing: spacing.xs,
+                      crossAxisAlignment: .start,
+                      children: [
+                        if (widget.message.quotedMessage case final quotedMessage?)
+                          StreamQuotedMessage(
+                            quotedMessage: quotedMessage,
+                            replyMessage: widget.message,
+                            onTap: switch (widget.onQuotedMessageTap) {
+                              final onTap? => () => onTap(quotedMessage),
+                              _ => null,
+                            },
                           ),
+                        StreamMessageAttachments(
+                          key: attachmentsKey,
+                          message: widget.message,
+                          attachmentBuilders: widget.attachmentBuilders,
                         ),
-                    ],
+                        if (widget.message.text case final text? when text.isNotEmpty)
+                          // The composed row label speaks the message text, so
+                          // the rendered markdown stays out of the semantics tree
+                          // and the row is announced as one phrase.
+                          //
+                          // This deliberately costs the inline link and mention
+                          // spans their own semantics nodes, so a screen reader
+                          // can read a link but not focus or activate it. The
+                          // alternative — a focus stop per span, each repeating
+                          // text the row just spoke — makes every message far
+                          // more tedious to move through than it makes the rare
+                          // link easier to reach. `explicitChildNodes` keeps the
+                          // parts worth a stop of their own — polls, quotes and
+                          // attachments — reachable.
+                          ExcludeSemantics(
+                            excluding: excluding,
+                            child: StreamMessageText(
+                              message: widget.message,
+                              onLinkTap: widget.onLinkTap,
+                              onMentionTap: widget.onMentionTap,
+                              onAnyMentionTap: widget.onAnyMentionTap,
+                              showTranslatedText: widget.showTranslatedText,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 );
 
@@ -285,6 +293,45 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
           ),
           if (widget.replies case final replies?) replies,
         ],
+      ),
+    );
+  }
+}
+
+// Provides the language the message is shown translated into to its
+// attachments through [MessageTranslationLanguage], following the current
+// user's language like [StreamMessageText] does.
+class _MessageTranslationScope extends StatelessWidget {
+  const _MessageTranslationScope({
+    required this.showTranslatedText,
+    required this.child,
+  });
+
+  final bool showTranslatedText;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    // Without a StreamChat above there is no user language, and without a
+    // StreamChatConfiguration no translation setting. Only trees without
+    // them, such as tests, take this path.
+    final streamChat = StreamChat.maybeOf(context);
+    final translationConfig = StreamChatConfiguration.maybeOf(context)?.messageTranslation;
+    if (streamChat == null || translationConfig == null) return child;
+
+    final translates = showTranslatedText && translationConfig.enabled;
+
+    // Always built through the stream builder, so switching between the
+    // translation and the original keeps the bubble's subtree in place.
+    //
+    // An unset language arrives from the API as `''`; `BetterStreamBuilder`'s
+    // type parameter can't be nullable.
+    return BetterStreamBuilder<String>(
+      initialData: streamChat.currentUser?.language ?? '',
+      stream: streamChat.currentUserStream.map((it) => it?.language ?? ''),
+      builder: (context, language) => MessageTranslationLanguage(
+        language: translates && language.isNotEmpty ? language : null,
+        child: child,
       ),
     );
   }

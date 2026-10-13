@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:markdown/markdown.dart' as md;
@@ -8,6 +9,7 @@ import 'package:stream_core_flutter/chat.dart' as core;
 
 import '../../platform_widget_builder/src/platform_widget_builder.dart';
 import '../../stream_chat_flutter.dart';
+import '../channel/stream_message_preview_text.dart';
 import '../context_menu/context_menu.dart';
 import '../context_menu/context_menu_region.dart';
 import 'message_status_labels.dart';
@@ -161,7 +163,7 @@ class StreamMessageItem extends StatelessWidget {
 ///
 ///  * [StreamMessageItem], which uses these properties.
 ///  * [DefaultStreamMessageItem], the default implementation.
-class StreamMessageItemProps {
+class StreamMessageItemProps extends Equatable {
   /// Creates properties for a chat message widget.
   const StreamMessageItemProps({
     required this.message,
@@ -471,6 +473,38 @@ class StreamMessageItemProps {
       excludeFromSemantics: excludeFromSemantics ?? this.excludeFromSemantics,
     );
   }
+
+  @override
+  List<Object?> get props => [
+    // Every field must be listed: a row is reused while its props are equal.
+    message,
+    padding,
+    spacing,
+    backgroundColor,
+    maxWidth,
+    swipeToReply,
+    onMessageTap,
+    onMessageLongPress,
+    onUserAvatarTap,
+    onMessageLinkTap,
+    onUserMentionTap,
+    onMentionTap,
+    onThreadTap,
+    onViewInChannelTap,
+    onReplyTap,
+    onReactionsTap,
+    onReactionTap,
+    onReactionLongPress,
+    onQuotedMessageTap,
+    reactionSorting,
+    actionsBuilder,
+    onMessageActions,
+    onBouncedErrorMessageActions,
+    onEditMessageTap,
+    attachmentBuilders,
+    semanticsLabel,
+    excludeFromSemantics,
+  ];
 }
 
 /// The default implementation of [StreamMessageItem].
@@ -1433,10 +1467,11 @@ class _MessageRowSemanticsState extends State<_MessageRowSemantics> {
     final translationEnabled = StreamChatConfiguration.of(context).messageTranslation.enabled;
     final showsOriginalText = StreamMessageTranslations.isShowingOriginalTextOf(context, message.id);
 
-    // No default language: `translate` returns the message unchanged when the
-    // reader has none set, which is what should be announced.
+    // No default language: `translateForPreview` returns the message
+    // unchanged when the reader has none set, which is what should be
+    // announced. It translates the poll name too, as the bubble shows it.
     final shown = switch (translationEnabled && !showsOriginalText) {
-      true => message.translate(currentUser?.language),
+      true => translateForPreview(message, currentUser?.language),
       false => message,
     };
 

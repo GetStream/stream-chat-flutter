@@ -118,6 +118,10 @@ class StreamMessageListViewBuilders {
   /// Receives the [BuildContext], the parent [Message], and the
   /// pre-configured [StreamMessageItemProps] with all list-level callbacks
   /// wired in.
+  ///
+  /// Called again only when its message or the values the list passes into it
+  /// change. Consider reading other changing state from an inherited widget, or
+  /// listening to it with a widget such as [ValueListenableBuilder].
   final StreamMessageItemBuilder? parentMessage;
 
   /// Returns a copy of this object with the given fields replaced.

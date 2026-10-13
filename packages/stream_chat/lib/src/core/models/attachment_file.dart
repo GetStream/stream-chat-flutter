@@ -59,8 +59,18 @@ class AttachmentFile {
   /// The file size in bytes.
   final int? size;
 
-  /// File extension for this file.
-  String? get extension => name?.split('.').last;
+  /// The extension of this file's name, such as `pdf` for `report.pdf`.
+  ///
+  /// Returns `null` when the file name has no extension.
+  String? get extension {
+    final name = this.name;
+    if (name == null) return null;
+
+    final dot = name.lastIndexOf('.');
+    if (dot < 0 || dot == name.length - 1) return null;
+
+    return name.substring(dot + 1);
+  }
 
   /// The mime type of this file.
   MediaType? get mediaType => name?.mediaType;

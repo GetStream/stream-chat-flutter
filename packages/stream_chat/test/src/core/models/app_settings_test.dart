@@ -56,5 +56,10 @@ void main() {
       final config = UploadConfig.fromJson(const {});
       expect(config.sizeLimit, UploadConfig.defaultSizeLimit);
     });
+
+    test('uses the default size limit when none is configured', () {
+      final config = UploadConfig.fromJson(const {'size_limit': 0});
+      expect(config.sizeLimit, UploadConfig.defaultSizeLimit);
+    });
   });
 }
