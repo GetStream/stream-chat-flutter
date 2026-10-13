@@ -45,10 +45,24 @@ void main() {
       },
     );
 
-    test('Member.deletedAt returns null for an extraData value that is not a date', () {
-      final member = Member(userId: 'user', extraData: const {'deleted_at': 'yesterday'});
+    test('Member arguments override the same keys in extraData', () {
+      final member = Member(
+        userId: 'user',
+        status: 'member',
+        notificationsMuted: true,
+        extraData: const {'status': 'pending', 'notifications_muted': false},
+      );
 
-      expect(member.deletedAt, isNull);
+      expect(member.status, 'member');
+      expect(member.notificationsMuted, isTrue);
+    });
+
+    test('Member.deletedAt returns null for an extraData value that is not a date', () {
+      final textMember = Member(userId: 'user', extraData: const {'deleted_at': 'yesterday'});
+      final numberMember = Member(userId: 'user', extraData: const {'deleted_at': 42});
+
+      expect(textMember.deletedAt, isNull);
+      expect(numberMember.deletedAt, isNull);
     });
 
     test('Member.futureChannelBanExpires returns null for an empty extraData value', () {

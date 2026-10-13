@@ -224,25 +224,7 @@ void main() {
     });
   });
 
-  test(
-    'ChannelModel.copyWith drops truncatedBy and the auto-translation settings the replacement extraData leaves out',
-    () {
-      final channel = ChannelModel(
-        cid: 'test:cid',
-        truncatedBy: User(id: 'truncator'),
-        autoTranslationEnabled: true,
-        autoTranslationLanguage: 'fr',
-      );
-
-      final newChannel = channel.copyWith(extraData: const {'color': 'red'});
-
-      expect(newChannel.truncatedBy, isNull);
-      expect(newChannel.autoTranslationEnabled, isNull);
-      expect(newChannel.autoTranslationLanguage, isNull);
-    },
-  );
-
-  test('ChannelModel.merge drops truncatedBy and the auto-translation settings the other channel leaves out', () {
+  test('ChannelModel.copyWith keeps truncatedBy and the auto-translation settings the new extraData leaves out', () {
     final channel = ChannelModel(
       cid: 'test:cid',
       truncatedBy: User(id: 'truncator'),
@@ -250,22 +232,74 @@ void main() {
       autoTranslationLanguage: 'fr',
     );
 
-    final merged = channel.merge(ChannelModel(cid: 'test:cid'));
+    final newChannel = channel.copyWith(extraData: const {'color': 'red'});
 
-    expect(merged.truncatedBy, isNull);
-    expect(merged.autoTranslationEnabled, isNull);
-    expect(merged.autoTranslationLanguage, isNull);
+    expect(newChannel.truncatedBy?.id, 'truncator');
+    expect(newChannel.autoTranslationEnabled, isTrue);
+    expect(newChannel.autoTranslationLanguage, 'fr');
   });
 
-  test('.truncatedBy should return null if the extraData user has no id', () {
+  test('ChannelModel.copyWith replaces truncatedBy and the auto-translation settings', () {
     final channel = ChannelModel(
+      cid: 'test:cid',
+      truncatedBy: User(id: 'truncator'),
+      autoTranslationEnabled: true,
+      autoTranslationLanguage: 'fr',
+    );
+
+    final newChannel = channel.copyWith(
+      truncatedBy: User(id: 'other'),
+      autoTranslationEnabled: false,
+      autoTranslationLanguage: 'de',
+    );
+
+    expect(newChannel.truncatedBy?.id, 'other');
+    expect(newChannel.autoTranslationEnabled, isFalse);
+    expect(newChannel.autoTranslationLanguage, 'de');
+  });
+
+  test('ChannelModel.merge keeps truncatedBy when the other channel leaves it out', () {
+    final channel = ChannelModel(
+      cid: 'test:cid',
+      truncatedBy: User(id: 'truncator'),
+    );
+
+    final merged = channel.merge(ChannelModel(cid: 'test:cid'));
+
+    expect(merged.truncatedBy?.id, 'truncator');
+  });
+
+  test('ChannelModel.merge turns auto translation off when the other channel leaves it out', () {
+    final channel = ChannelModel(cid: 'test:cid', autoTranslationEnabled: true, autoTranslationLanguage: 'fr');
+
+    final merged = channel.merge(ChannelModel(cid: 'test:cid'));
+
+    expect(merged.autoTranslationEnabled, isFalse);
+  });
+
+  test('ChannelModel arguments override the same keys in extraData', () {
+    final channel = ChannelModel(
+      cid: 'test:cid',
+      autoTranslationEnabled: true,
+      autoTranslationLanguage: 'fr',
+      extraData: const {'auto_translation_enabled': false, 'auto_translation_language': 'de'},
+    );
+
+    expect(channel.autoTranslationEnabled, isTrue);
+    expect(channel.autoTranslationLanguage, 'fr');
+  });
+
+  test('ChannelModel.truncatedBy returns null when the extraData value is not a user with an id', () {
+    final noIdChannel = ChannelModel(
       cid: 'test:channel',
       extraData: const {
         'truncated_by': {'name': 'No id'},
       },
     );
+    final textChannel = ChannelModel(cid: 'test:channel', extraData: const {'truncated_by': 'someone'});
 
-    expect(channel.truncatedBy, isNull);
+    expect(noIdChannel.truncatedBy, isNull);
+    expect(textChannel.truncatedBy, isNull);
   });
 
   test('.name should fetch from extraData if available', () {

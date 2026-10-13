@@ -16,7 +16,7 @@ class Member extends Equatable {
   /// Creates a member.
   ///
   /// The [notificationsMuted], [status], [banFromFutureChannels], [futureChannelBanExpires] and [deletedAt] arguments,
-  /// when given, are stored in [extraData], replacing the entry each one reads.
+  /// when given, are stored in [extraData], overriding an entry of the same name.
   Member({
     this.user,
     this.inviteAcceptedAt,
@@ -147,7 +147,7 @@ class Member extends Equatable {
   @JsonKey(includeToJson: false, includeFromJson: false)
   DateTime? get futureChannelBanExpires => _date('future_channel_ban_expires');
 
-  /// The date at which the membership was deleted.
+  /// The date at which this membership was deleted.
   ///
   /// Null while the member belongs to the channel.
   @JsonKey(includeToJson: false, includeFromJson: false)

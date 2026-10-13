@@ -3726,9 +3726,9 @@ void main() {
     test('Channel.updateImage sets the image through a partial update', () async {
       const image = 'https://getstream.io/new-image';
 
-      final channelModel = ChannelModel(
-        cid: channelCid,
-        extraData: {'image': image},
+      final response = UpdateChannelPartialResponse(
+        duration: '0.01ms',
+        channel: ChannelModel(cid: channelCid),
       );
 
       when(
@@ -3737,14 +3737,11 @@ void main() {
           channelType,
           set: {'image': image},
         ),
-      ).thenAnswer(
-        (_) async => Result.success(UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel)),
-      );
+      ).thenAnswer((_) async => Result.success(response));
 
       final res = await channel.updateImage(image);
 
-      expect(res.isSuccess, isTrue);
-      expect(res.getOrNull()!.channel!.extraData['image'], image);
+      expect(res.getOrNull(), response);
 
       verify(
         () => client.updateChannelPartial(
@@ -3758,9 +3755,9 @@ void main() {
     test('Channel.updateName sets the name through a partial update', () async {
       const name = 'Name';
 
-      final channelModel = ChannelModel(
-        cid: channelCid,
-        extraData: {'name': name},
+      final response = UpdateChannelPartialResponse(
+        duration: '0.01ms',
+        channel: ChannelModel(cid: channelCid),
       );
 
       when(
@@ -3769,14 +3766,11 @@ void main() {
           channelType,
           set: {'name': name},
         ),
-      ).thenAnswer(
-        (_) async => Result.success(UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel)),
-      );
+      ).thenAnswer((_) async => Result.success(response));
 
       final res = await channel.updateName(name);
 
-      expect(res.isSuccess, isTrue);
-      expect(res.getOrNull()!.channel!.extraData['name'], name);
+      expect(res.getOrNull(), response);
 
       verify(
         () => client.updateChannelPartial(
@@ -3795,12 +3789,9 @@ void main() {
 
       const unset = ['tag', 'last_name'];
 
-      final channelModel = ChannelModel(
-        cid: channelCid,
-        extraData: {
-          'coolness': 999,
-          ...set,
-        },
+      final response = UpdateChannelPartialResponse(
+        duration: '0.01ms',
+        channel: ChannelModel(cid: channelCid),
       );
 
       when(
@@ -3810,18 +3801,11 @@ void main() {
           set: set,
           unset: unset,
         ),
-      ).thenAnswer(
-        (_) async => Result.success(UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel)),
-      );
+      ).thenAnswer((_) async => Result.success(response));
 
       final res = await channel.updatePartial(set: set, unset: unset);
 
-      expect(res.isSuccess, isTrue);
-      expect(res.getOrNull()!.channel!.cid, channelModel.cid);
-      expect(
-        res.getOrNull()!.channel!.extraData,
-        {'coolness': 999, ...set},
-      );
+      expect(res.getOrNull(), response);
 
       verify(
         () => client.updateChannelPartial(
@@ -4872,7 +4856,6 @@ void main() {
       verify(() => client.showChannel(channelId, channelType)).called(1);
     });
 
-    // testing archiving
     test("Channel.archive returns the client's archiveChannel response", () async {
       final response = UpdateMemberPartialResponse(
         duration: '0.01ms',

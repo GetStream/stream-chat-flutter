@@ -2157,7 +2157,7 @@ class StreamChatClient {
   ) => _channelsRepository.updateChannelPartial(
     channelId,
     channelType,
-    set: {'cooldown': 0},
+    set: const {'cooldown': 0},
   );
 
   /// Pins provided message
