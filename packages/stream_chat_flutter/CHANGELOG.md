@@ -15,12 +15,15 @@
 - Allowed `equatable` 3.x alongside 2.x.
 - `StreamMessageComposer`'s send button now follows the message validator, so a custom validator can enable or disable it, including when editing or with a command.
 - `StreamMessageListView` now rebuilds only the message rows that changed; a custom row builder should read changing outside state through an inherited widget.
+- `StreamMessageComposer` now hides the picker's upload options and voice recording, and refuses dropped files, when the user lacks the `upload-file` capability. The attachment button is hidden when nothing else is left to offer.
+- `StreamMessageComposer` now refuses dropped files when `disableAttachments` is set or `allowedAttachmentPickerTypes` leaves out `AttachmentPickerType.files`.
 
 🐞 Fixed
 
 - Fixed `StreamMessageListView` dropping frames on each new message in busy channels.
 - Fixed `StreamMessageComposer` polling the audio recorder ten times a second while no recording is in progress, including when voice recording is disabled.
 - Fixed `StreamMessageComposer`'s send button looking enabled on an empty message when voice recording is off, and showing the microphone instead of send for a staged poll.
+- Fixed the attachment picker showing an empty commands tab in channels without commands.
 
 ## 10.5.0
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 // Needed for RenderProxyBox; it also re-exports the semantics library that
@@ -9,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import '../../stream_chat_flutter.dart';
+import '../misc/empty_widget.dart';
 import 'audio_recorder/audio_recorder_announcer.dart';
 import 'composer_attachment_announcer.dart';
 import 'error_alert_sheet.dart';
@@ -237,7 +239,10 @@ class MessageComposerProps {
   /// The focus node associated to the TextField.
   final FocusNode? focusNode;
 
-  /// If true the attachments button will not be displayed.
+  /// Whether the user is prevented from adding attachments.
+  ///
+  /// When true, the attachment button is hidden, and dropped files and
+  /// keyboard images are refused.
   ///
   /// Defaults to false.
   final bool disableAttachments;
@@ -247,7 +252,9 @@ class MessageComposerProps {
   /// Defaults to true.
   final bool canAlsoSendToChannelFromThread;
 
-  /// If true the voice recording button will be displayed.
+  /// Whether the voice recording button is shown.
+  ///
+  /// The button is only shown when the channel allows uploads.
   ///
   /// Defaults to false.
   final bool enableVoiceRecording;
@@ -317,10 +324,12 @@ class MessageComposerProps {
   /// Defaults to [StreamAttachmentValidator.defaultMaxAttachmentCount].
   final int attachmentLimit;
 
-  /// The list of allowed attachment types which can be picked using the
-  /// attachment button.
+  /// The attachment types the user can add.
   ///
-  /// By default, all the attachment types are allowed.
+  /// Applies to the attachment picker, dropped files and images inserted from
+  /// the keyboard. A type is only accepted when the channel allows it.
+  ///
+  /// Defaults to [AttachmentPickerType.values].
   final List<AttachmentPickerType> allowedAttachmentPickerTypes;
 
   /// List of triggers for showing autocomplete.
@@ -999,10 +1008,34 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     );
   }
 
+  // Without the upload-file capability the composer offers no way to add an
+  // upload. A channel that isn't created yet allows uploads.
   Widget _buildMessageInput(
     BuildContext context,
     StreamMessageComposerController controller,
     FocusNode focusNode,
+  ) {
+    final channel = StreamChannel.of(context).channel;
+    if (channel.state == null) {
+      const capabilities = [ChannelCapability.uploadFile];
+      return _buildMessageInputContent(context, controller, focusNode, capabilities);
+    }
+
+    return BetterStreamBuilder<List<ChannelCapability>>(
+      initialData: channel.ownCapabilities,
+      stream: channel.ownCapabilitiesStream,
+      comparator: const ListEquality<ChannelCapability>().equals,
+      builder: (context, capabilities) {
+        return _buildMessageInputContent(context, controller, focusNode, capabilities);
+      },
+    );
+  }
+
+  Widget _buildMessageInputContent(
+    BuildContext context,
+    StreamMessageComposerController controller,
+    FocusNode focusNode,
+    List<ChannelCapability> capabilities,
   ) {
     final currentUserId = StreamChat.of(context).currentUser?.id;
     final isFloating = _resolveSurfaceStyle(context).isFloating;
@@ -1010,9 +1043,16 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     return StreamMessageValueListenableBuilder(
       valueListenable: controller,
       builder: (context, value, _) {
+        final canUploadFile = capabilities.contains(ChannelCapability.uploadFile);
+        final canRecordVoice = widget.props.enableVoiceRecording && canUploadFile;
+        final allowedTypes = _getAllowedAttachmentPickerTypes(capabilities);
+        final canOpenPicker = allowedTypes.isNotEmpty;
+        final canDropFiles = allowedTypes.contains(AttachmentPickerType.files);
+
         // Extracted so the floating gradient can wrap just the pill, keeping
         // gradient height stable when the picker (a sibling) opens.
         final pill = DropTarget(
+          enable: canDropFiles,
           onDragDone: (details) async {
             final attachments = <Attachment>[];
             for (final file in details.files) {
@@ -1028,13 +1068,13 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
             child: StreamChatMessageInput(
               controller: controller,
               currentUserId: currentUserId,
-              onAttachmentButtonPressed: widget.props.disableAttachments ? null : _onAttachmentButtonPressed,
+              onAttachmentButtonPressed: canOpenPicker ? _onAttachmentButtonPressed : null,
               isPickerOpen: _isPickerVisible,
               placeholder: _buildPlaceholder(context),
               focusNode: focusNode,
               onSendPressed: sendMessage,
               canAlsoSendToChannel: _shouldShowSendToChannelCheckbox(),
-              audioRecorderController: widget.props.enableVoiceRecording ? _audioRecorderController : null,
+              audioRecorderController: canRecordVoice ? _audioRecorderController : null,
               sendVoiceRecordingAutomatically: widget.props.sendVoiceRecordingAutomatically,
               feedback: widget.props.voiceRecordingFeedback,
               onQuotedMessageCleared: () {
@@ -1047,7 +1087,9 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
               autofocus: widget.props.autofocus,
               autocorrect: widget.props.autoCorrect,
               isFloating: isFloating,
-              contentInsertionConfiguration: _buildContentInsertionConfiguration(),
+              contentInsertionConfiguration: ContentInsertionConfiguration(
+                onContentInserted: (content) => _onContentInserted(content, allowedTypes),
+              ),
             ),
           ),
         );
@@ -1075,7 +1117,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
                 sizeFactor: _pickerAnimation,
                 // ignore: deprecated_member_use, alternative is only available since Flutter 3.44
                 axisAlignment: -1,
-                child: _buildInlineAttachmentPicker(context),
+                child: _buildInlineAttachmentPicker(context, allowedTypes),
               ),
             ],
           ),
@@ -1084,16 +1126,26 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     );
   }
 
-  Widget _buildInlineAttachmentPicker(BuildContext context) {
-    if (!_isPickerVisible) return const SizedBox.shrink();
+  Widget _buildInlineAttachmentPicker(
+    BuildContext context,
+    List<AttachmentPickerType> allowedTypes,
+  ) {
+    if (!_isPickerVisible) return const Empty();
 
-    final allowedTypes = _getAllowedAttachmentPickerTypes();
+    // Nothing is left to offer, for example after uploads are revoked while
+    // the picker is open.
+    if (allowedTypes.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _hidePicker();
+      });
+      return const Empty();
+    }
 
-    final isWebOrDesktop = switch (CurrentPlatform.type) {
+    final useSystemPicker = switch (CurrentPlatform.type) {
+      _ when widget.props.useSystemAttachmentPicker => true,
       PlatformType.android || PlatformType.ios => false,
       _ => true,
     };
-    final useSystemPicker = widget.props.useSystemAttachmentPicker || isWebOrDesktop;
 
     if (useSystemPicker) {
       return systemAttachmentPickerBuilder(
@@ -1186,23 +1238,41 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     return channel.sendPoll(poll).ignore();
   }
 
-  // Returns the list of allowed attachment picker types based on the
-  // current channel configuration and context.
-  List<AttachmentPickerType> _getAllowedAttachmentPickerTypes() {
-    final allowedTypes = widget.props.allowedAttachmentPickerTypes.where((type) {
-      if (type != AttachmentPickerType.poll) return true;
+  // Returns the list of allowed attachment picker types based on the user's
+  // capabilities, the current channel configuration and context.
+  List<AttachmentPickerType> _getAllowedAttachmentPickerTypes(
+    List<ChannelCapability> capabilities,
+  ) {
+    if (widget.props.disableAttachments) return const [];
 
-      // We don't allow editing polls.
-      if (_isEditing) return false;
-      // We don't allow creating polls in threads.
-      if (_effectiveController.message.parentId != null) return false;
+    final channel = StreamChannel.of(context).channel;
+    final channelConfig = channel.state != null ? channel.config : null;
+    final canUploadFile = capabilities.contains(ChannelCapability.uploadFile);
 
-      // Otherwise, check if the user has the permission to send polls.
-      final channel = StreamChannel.of(context).channel;
-      return channel.config?.polls == true && channel.canSendPoll;
-    });
+    final pickerTypes = widget.props.allowedAttachmentPickerTypes;
+    final allowedTypes = pickerTypes.where(
+      (type) => switch (type) {
+        ImagesPickerType() || VideosPickerType() || AudiosPickerType() || FilesPickerType() => canUploadFile,
+        PollPickerType() => _canCreatePoll(capabilities, channelConfig),
+        CommandPickerType() => channelConfig?.commands.isNotEmpty ?? false,
+        CustomAttachmentPickerType() => true,
+      },
+    );
 
     return allowedTypes.toList(growable: false);
+  }
+
+  bool _canCreatePoll(
+    List<ChannelCapability> capabilities,
+    ChannelConfig? channelConfig,
+  ) {
+    // We don't allow editing polls.
+    if (_isEditing) return false;
+    // We don't allow creating polls in threads.
+    if (_effectiveController.message.parentId != null) return false;
+
+    // Otherwise, check if the user has the permission to send polls.
+    return channelConfig?.polls == true && capabilities.contains(ChannelCapability.sendPoll);
   }
 
   /// Toggles the inline attachment picker visibility.
@@ -1472,22 +1542,17 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     if (validationErrors.firstOrNull case final error?) _handleAttachmentError(error);
   }
 
-  // Lets keyboards such as Gboard insert images and GIFs. Accepted only where
-  // the picker would accept an image, and validated the same way. Off while a
-  // command is active, as commands carry no attachments.
-  ContentInsertionConfiguration? _buildContentInsertionConfiguration() {
-    if (widget.props.disableAttachments) return null;
-    if (_commandEnabled) return null;
-    if (!StreamChannel.of(context).channel.canUploadFile) return null;
-    if (!_getAllowedAttachmentPickerTypes().contains(AttachmentPickerType.images)) return null;
+  // Adds an image or GIF inserted from a keyboard such as Gboard. Accepted only
+  // where the picker would accept an image, and validated the same way.
+  void _onContentInserted(
+    KeyboardInsertedContent content,
+    List<AttachmentPickerType> allowedTypes,
+  ) {
+    // Commands carry no attachments.
+    if (_commandEnabled) return;
+    if (!allowedTypes.contains(AttachmentPickerType.images)) return;
 
-    return ContentInsertionConfiguration(onContentInserted: _onContentInserted);
-  }
-
-  void _onContentInserted(KeyboardInsertedContent content) {
-    // The platform reads the content before handing it over, and a failed read
-    // can arrive as no data or as empty data; either way there is nothing to
-    // attach.
+    // A failed read arrives as no data or empty data.
     final bytes = content.data;
     if (bytes == null || bytes.isEmpty) return;
 
