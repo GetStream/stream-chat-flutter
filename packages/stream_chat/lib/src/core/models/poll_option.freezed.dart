@@ -18,6 +18,12 @@ mixin _$PollOption {
   Map<String, String>? get textI18n;
   Map<String, Object?> get extraData;
 
+  /// Create a copy of PollOption
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $PollOptionCopyWith<PollOption> get copyWith => _$PollOptionCopyWithImpl<PollOption>(this as PollOption, _$identity);
+
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
@@ -41,5 +47,60 @@ mixin _$PollOption {
   @override
   String toString() {
     return 'PollOption(id: $id, text: $text, textI18n: $textI18n, extraData: $extraData)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $PollOptionCopyWith<$Res> {
+  factory $PollOptionCopyWith(
+    PollOption value,
+    $Res Function(PollOption) _then,
+  ) = _$PollOptionCopyWithImpl;
+  @useResult
+  $Res call({
+    String? id,
+    String text,
+    Map<String, String>? textI18n,
+    Map<String, Object?> extraData,
+  });
+}
+
+/// @nodoc
+class _$PollOptionCopyWithImpl<$Res> implements $PollOptionCopyWith<$Res> {
+  _$PollOptionCopyWithImpl(this._self, this._then);
+
+  final PollOption _self;
+  final $Res Function(PollOption) _then;
+
+  /// Create a copy of PollOption
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = freezed,
+    Object? text = null,
+    Object? textI18n = freezed,
+    Object? extraData = null,
+  }) {
+    return _then(
+      PollOption(
+        id: freezed == id
+            ? _self.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        text: null == text
+            ? _self.text
+            : text // ignore: cast_nullable_to_non_nullable
+                  as String,
+        textI18n: freezed == textI18n
+            ? _self.textI18n
+            : textI18n // ignore: cast_nullable_to_non_nullable
+                  as Map<String, String>?,
+        extraData: null == extraData
+            ? _self.extraData
+            : extraData // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>,
+      ),
+    );
   }
 }

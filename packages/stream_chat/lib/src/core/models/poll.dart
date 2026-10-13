@@ -11,18 +11,12 @@ import 'voting_visibility.dart';
 
 part 'poll.freezed.dart';
 
-class _NullConst {
-  const _NullConst();
-}
-
-const _nullConst = _NullConst();
-
 /// A question with a set of options that the members of a channel vote on.
 ///
 /// A poll is sent in a message. Besides its settings it carries a summary of
 /// the votes so far: the counts per option, the latest votes and answers, and
 /// the votes of the current user.
-@Freezed(copyWith: false)
+@freezed
 class Poll with _$Poll {
   /// Creates a new [Poll].
   ///
@@ -180,57 +174,6 @@ class Poll with _$Poll {
   /// Custom data attached to this poll.
   @override
   final Map<String, Object?> extraData;
-
-  /// Creates a copy of [Poll] with specified attributes overridden.
-  Poll copyWith({
-    String? id,
-    String? name,
-    Map<String, String>? nameI18n,
-    String? description,
-    Map<String, String>? descriptionI18n,
-    List<PollOption>? options,
-    VotingVisibility? votingVisibility,
-    bool? enforceUniqueVote,
-    Object? maxVotesAllowed = _nullConst,
-    bool? allowUserSuggestedOptions,
-    bool? allowAnswers,
-    bool? isClosed,
-    Map<String, int>? voteCountsByOption,
-    List<PollVote>? ownVotesAndAnswers,
-    int? voteCount,
-    int? answersCount,
-    Map<String, List<PollVote>>? latestVotesByOption,
-    List<PollVote>? latestAnswers,
-    String? createdById,
-    User? createdBy,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    Map<String, Object?>? extraData,
-  }) => Poll(
-    id: id ?? this.id,
-    name: name ?? this.name,
-    nameI18n: nameI18n ?? this.nameI18n,
-    description: description ?? this.description,
-    descriptionI18n: descriptionI18n ?? this.descriptionI18n,
-    options: options ?? this.options,
-    votingVisibility: votingVisibility ?? this.votingVisibility,
-    enforceUniqueVote: enforceUniqueVote ?? this.enforceUniqueVote,
-    maxVotesAllowed: maxVotesAllowed == _nullConst ? this.maxVotesAllowed : maxVotesAllowed as int?,
-    allowUserSuggestedOptions: allowUserSuggestedOptions ?? this.allowUserSuggestedOptions,
-    allowAnswers: allowAnswers ?? this.allowAnswers,
-    isClosed: isClosed ?? this.isClosed,
-    voteCountsByOption: voteCountsByOption ?? this.voteCountsByOption,
-    ownVotesAndAnswers: ownVotesAndAnswers ?? this.ownVotesAndAnswers,
-    voteCount: voteCount ?? this.voteCount,
-    answersCount: answersCount ?? this.answersCount,
-    latestVotesByOption: latestVotesByOption ?? this.latestVotesByOption,
-    latestAnswers: latestAnswers ?? this.latestAnswers,
-    createdById: createdById ?? this.createdById,
-    createdBy: createdBy ?? this.createdBy,
-    createdAt: createdAt ?? this.createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
-    extraData: extraData ?? this.extraData,
-  );
 
   /// This poll with the translations of [oldPoll] filled in where this one
   /// has none.

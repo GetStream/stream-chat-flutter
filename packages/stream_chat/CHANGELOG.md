@@ -86,6 +86,7 @@
 - `Poll`, `PollOption`, `PollVote` and the poll responses no longer decode from or encode to JSON; `PollOption` gains `fromData` and `toData`, which read and write only the format `stream_chat_persistence` stores it in.
 - The poll responses are immutable, built through a const constructor, and their `duration` is a non-nullable `String`; `PollVoteResponse.vote` is nullable.
 - `Poll`, `PollOption` and `PollVote` no longer extend `Equatable`, so `props` is removed; they still compare by value, now including `extraData`.
+- `Poll.copyWith`, `PollOption.copyWith` and `PollVote.copyWith` set a nullable field passed as `null` to `null` instead of keeping its value, and give `id`, `createdAt` and `updatedAt` a fresh default when passed `null`.
 - `StreamChatApi.polls` is removed; its endpoints are reached through `StreamChatClient`.
 - The poll and poll option requests no longer send `extraData` entries named like one of the poll's or option's own fields.
 - `sendImage`, `sendFile`, `uploadImage` and `uploadFile`, on `StreamChatClient`, `Channel` and `AttachmentFileUploader`, return a `Result<UploadedFile>` instead of throwing; read the URL from `fileUrl` and a video's thumbnail from `thumbUrl`.

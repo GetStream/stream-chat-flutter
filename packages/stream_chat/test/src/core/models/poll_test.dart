@@ -1,6 +1,7 @@
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:stream_chat/src/core/models/poll_vote.dart';
+import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/models/voting_visibility.dart';
 import 'package:test/test.dart';
 
@@ -28,18 +29,13 @@ void main() {
     expect(poll.copyWith(maxVotesAllowed: null).maxVotesAllowed, isNull);
   });
 
-  test('Poll.copyWith keeps a field passed as null', () {
-    final poll = createTestPoll(
-      id: 'poll-id',
-      name: 'Lunch?',
-      description: 'Pick one',
-      createdAt: DateTime.utc(2023),
-      updatedAt: DateTime.utc(2023),
-    );
+  test('Poll.copyWith clears a nullable field passed as null', () {
+    final poll = createTestPoll(name: 'Lunch?', description: 'Pick one').copyWith(createdBy: User(id: 'user-id'));
 
-    final copy = poll.copyWith(id: null, description: null, createdAt: null, updatedAt: null);
+    final copy = poll.copyWith(description: null, createdBy: null);
 
-    expect(copy, poll);
+    expect(copy.description, isNull);
+    expect(copy.createdBy, isNull);
   });
 
   test('Poll.latestVotes holds the latest votes of every option', () {

@@ -37,9 +37,9 @@ void main() {
     expect(option.copyWith(id: null).id, isNull);
   });
 
-  test('PollOption.copyWith keeps the text and custom data passed as null', () {
-    const option = PollOption(id: 'pizza', text: 'Pizza', extraData: {'color': 'red'});
+  test('PollOption.copyWith clears the translations passed as null', () {
+    const option = PollOption(id: 'pizza', text: 'Pizza', textI18n: {'it': 'Pizza'});
 
-    expect(option.copyWith(text: null, extraData: null), option);
+    expect(option.copyWith(textI18n: null).textI18n, isNull);
   });
 }

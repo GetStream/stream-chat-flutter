@@ -76,8 +76,8 @@ DONE = textwrap.dedent("""\
           hand-written, with the reason.
     - [ ] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
     - [ ] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
-    - [ ] Every model that had a `copyWith` in v10 keeps that exact method, `_nullConst` sentinels
-          included ([README rule 2](README.md#domain-models)).
+    - [ ] `copywith_audit.py` was run for every model that loses a v10 `copyWith`, every site it reports is
+          handled, and the semantics change is in the CHANGELOG and the guide ([README rule 2](README.md#domain-models)).
     - [ ] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
           persists anything.
     - [ ] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.
@@ -364,6 +364,11 @@ GROUPS = [
               `Event` writes these fields too, so its converters run both ways.
             - **`PollOption` gets the `@DataSerializable` codec** for `polls.options`. The stored format nests
               custom data under `extra_data` where v10 flattened it, so `schemaVersion` is bumped.
+            - **`Poll`, `PollOption` and `PollVote` use freezed's `copyWith`.** The audit found one lib site
+              (`stream_message_preview_text.dart`, a `String?` passed for `name`) and one test per model; the
+              merging of poll events in `channel_state_mutations.dart` and `Poll.withTranslationsOf` passes no
+              argument that is null while the field is set, so it is unchanged. `null` now clears a nullable field
+              and re-applies the `id` and timestamp defaults, recorded as a break.
             - **`extraData` keeps its name.** Renaming it to `custom` is a migration-wide step for every model at
               once — [group 15](15-custom-data-rename.md).
             - **Verified live** against the demo app with a before/after harness covering every endpoint, the

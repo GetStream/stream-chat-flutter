@@ -224,6 +224,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `CastPollVoteResponse` / `RemovePollVoteResponse` | `PollVoteResponse` | `renamed` | `vote` is nullable |
 | `queryPolls(pagination: PaginationParams(limit: l, next: n))` / `queryPollVotes(…)` | `queryPolls(limit: l, next: n)` / `queryPollVotes(…)` | `retyped` | `limit` is still 10 when omitted. Pass a response's `prev` as `prev` to page backwards. The other `PaginationParams` fields never had an effect on these queries |
 | `Channel.castPollVote` / `.removePollVote` throwing `ArgumentError` | a `Failure` carrying a `StreamClientException` | `retyped` | For an option or vote without an id |
+| `Poll.copyWith` / `PollOption.copyWith` / `PollVote.copyWith` keeping a field passed as `null` | freezed's `copyWith` | `retyped` | `null` clears a nullable field and re-applies the constructor default of `Poll.id`, `createdAt` and `updatedAt`; `Poll.maxVotesAllowed` and `PollOption.id` already cleared |
 | `VotingVisibility` (enum) | `VotingVisibility` (extension type over `String`) | `retyped` | `VotingVisibility.public` and `.anonymous` are unchanged; a `switch` needs a default arm, and `.name` / `.values` are gone — read `.rawType` |
 | `Poll.fromJson` / `.toJson`, `PollOption.fromJson` / `.toJson`, `PollVote.fromJson` / `.toJson` | — | `removed` | The models are plain classes; construct them directly. `Message.poll` and the poll events still decode from the same keys |
 | — | `PollOption.fromData` / `.toData` | `added` | Read and write only the format the offline database stores; not a codec for API payloads |
@@ -819,6 +820,22 @@ offline database stores; they are not a way to decode API responses.
 `Poll` and `PollOption` now include `extraData` in `==`: two polls that differ only in custom data are no longer
 equal, so neither are the messages that carry them, and a widget comparing them rebuilds when only custom data
 changes.
+
+**`copyWith` on `Poll`, `PollOption` and `PollVote` is freezed's.** Passing `null` for a nullable field clears it,
+where v10 kept the value: `description`, `nameI18n`, `descriptionI18n`, `createdById` and `createdBy` on `Poll`,
+`textI18n` on `PollOption`, and every nullable field of `PollVote`. `Poll.maxVotesAllowed` and `PollOption.id`
+already cleared. Passing `null` for `Poll.id`, `createdAt` or `updatedAt`, or a vote's `createdAt` or
+`updatedAt`, applies the constructor default — a new id or the current time — instead of keeping the value. Omit
+the argument to keep a value.
+
+```dart
+// v10: description stays 'Pick one'
+poll.copyWith(description: null);
+
+// v11: description is null; omit it to keep it
+poll.copyWith(description: null);
+poll.copyWith(name: 'Dinner?');
+```
 
 **`StreamChatApi.polls` is removed.** Call the poll methods on `StreamChatClient` or `Channel` instead.
 

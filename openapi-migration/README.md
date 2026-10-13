@@ -100,9 +100,17 @@ includes a named response that carries only `duration` today, such as `HideChann
    (see the breaks above). A field the server adds is exposed later, as an additive change. The one exception to
    "no JSON" is the temporary `@DataSerializable` storage codec in rule 8.
 
-   **A model that had a `copyWith` in v10 keeps that exact method,** `_nullConst` sentinels included, under
-   `@Freezed(copyWith: false)`. freezed's own `copyWith` sets a field passed as `null`, where v10's keeps it, and
-   the SDK's state handling depends on the difference. Only a model with no v10 `copyWith` uses freezed's.
+   **A model uses freezed's `copyWith`.** It differs from a v10 hand-written one: `null` clears a nullable field
+   instead of keeping it, `null` re-runs a constructor default (`id ?? Uuid().v4()`), and a constructor parameter
+   with no field of the same name and type is not generated. Before deleting the v10 method, run the audit in
+   [`.claude/skills/openapi-migration/copywith-audit.md`](../.claude/skills/openapi-migration/copywith-audit.md)
+   and handle every site it reports: a compile break gets a local or a `?? model.field`; a "kept on null; check"
+   site is rewritten as an explicit merge (`?? this.x` at the caller, or an `@internal` merge method such as
+   `Poll.withTranslationsOf`) unless the clear is the intended behaviour. When the audit's verdict says freezed
+   cannot replace the method — a parameter backed by a getter, a private field or a different type, as on
+   `Message` — keep `@Freezed(copyWith: false)` with the hand-written method, or reshape the constructor as a
+   public API change of its own. The semantics change goes in the CHANGELOG and the guide, listed per field under
+   the rows of the audit's table.
 
    **Names default to v10's,** even where the generated name differs: `OGAttachmentResponse` rather than
    `GetOGResponse`, `AppSettings` rather than `AppResponseFields`, `UploadConfig` rather than `FileUploadConfig`.
