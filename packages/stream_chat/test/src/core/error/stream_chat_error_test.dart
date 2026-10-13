@@ -216,30 +216,45 @@ void main() {
     });
 
     test('`.isMessageAlreadyExistsError` should return true for a duplicate message id rejection', () {
+      const message = 'SendMessage failed with error: "a message with ID abc already exists"';
       final error = StreamChatNetworkError.raw(
         code: ChatErrorCode.inputError.code,
         statusCode: 400,
-        message: 'SendMessage failed with error: "a message with ID abc already exists"',
+        message: message,
+        data: ErrorResponse()
+          ..code = ChatErrorCode.inputError.code
+          ..message = message
+          ..statusCode = 400,
       );
 
       expect(error.isMessageAlreadyExistsError, isTrue);
     });
 
     test('`.isMessageAlreadyExistsError` should return false for a poll option that already exists', () {
+      const message = 'poll option with text A already exists';
       final error = StreamChatNetworkError.raw(
         code: ChatErrorCode.inputError.code,
         statusCode: 400,
-        message: 'poll option with text A already exists',
+        message: message,
+        data: ErrorResponse()
+          ..code = ChatErrorCode.inputError.code
+          ..message = message
+          ..statusCode = 400,
       );
 
       expect(error.isMessageAlreadyExistsError, isFalse);
     });
 
     test('`.isMessageAlreadyExistsError` should return false for the same text with another error code', () {
+      const message = 'SendMessage failed with error: "a message with ID abc already exists"';
       final error = StreamChatNetworkError.raw(
         code: ChatErrorCode.notAllowed.code,
         statusCode: 403,
-        message: 'SendMessage failed with error: "a message with ID abc already exists"',
+        message: message,
+        data: ErrorResponse()
+          ..code = ChatErrorCode.notAllowed.code
+          ..message = message
+          ..statusCode = 403,
       );
 
       expect(error.isMessageAlreadyExistsError, isFalse);

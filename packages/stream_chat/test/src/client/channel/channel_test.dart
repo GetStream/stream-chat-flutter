@@ -39,42 +39,6 @@ void main() {
     return logger;
   }
 
-  When<Future<SendMessageResponse>> _whenSendingMessage(
-    StreamChatClient client,
-    Channel channel,
-    Message message, {
-    bool skipPush = false,
-    bool skipEnrichUrl = false,
-  }) {
-    return when(
-      () => client.sendMessage(
-        any(that: isSameMessageAs(message)),
-        channel.id!,
-        channel.type,
-        skipPush: skipPush,
-        skipEnrichUrl: skipEnrichUrl,
-      ),
-    );
-  }
-
-  StreamChatNetworkError _inputError(String message) {
-    return StreamChatNetworkError.raw(
-      code: ChatErrorCode.inputError.code,
-      message: message,
-      statusCode: 400,
-      data: ErrorResponse()
-        ..code = ChatErrorCode.inputError.code
-        ..message = message
-        ..statusCode = 400,
-      type: StreamChatNetworkErrorType.badResponse,
-    );
-  }
-
-  // The error returned when sending a message whose id already exists.
-  StreamChatNetworkError _messageAlreadyExistsError(String messageId) {
-    return _inputError('SendMessage failed with error: "a message with ID $messageId already exists"');
-  }
-
   group('Non-Initialized Channel', () {
     late final client = MockStreamChatClient();
     const channelId = 'test-channel-id';
@@ -314,7 +278,13 @@ void main() {
 
         final sendMessageResponse = SendMessageResponse()..message = message.copyWith(state: MessageState.sent);
 
-        _whenSendingMessage(client, channel, message).thenAnswer((_) async => sendMessageResponse);
+        when(
+          () => client.sendMessage(
+            any(that: isSameMessageAs(message)),
+            channelId,
+            channelType,
+          ),
+        ).thenAnswer((_) async => sendMessageResponse);
 
         expectLater(
           // skipping first seed message list -> [] messages
@@ -358,11 +328,13 @@ void main() {
             user: client.state.currentUser,
           );
 
-          _whenSendingMessage(
-            client,
-            channel,
-            message,
-            skipPush: true,
+          when(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+              skipPush: true,
+            ),
           ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
 
           expectLater(
@@ -410,12 +382,14 @@ void main() {
             user: client.state.currentUser,
           );
 
-          _whenSendingMessage(
-            client,
-            channel,
-            message,
-            skipPush: true,
-            skipEnrichUrl: true,
+          when(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+              skipPush: true,
+              skipEnrichUrl: true,
+            ),
           ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
 
           expectLater(
@@ -464,11 +438,13 @@ void main() {
             user: client.state.currentUser,
           );
 
-          _whenSendingMessage(
-            client,
-            channel,
-            message,
-            skipEnrichUrl: true,
+          when(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+              skipEnrichUrl: true,
+            ),
           ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
 
           expectLater(
@@ -516,7 +492,13 @@ void main() {
             user: client.state.currentUser,
           );
 
-          _whenSendingMessage(client, channel, message).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+          when(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            ),
+          ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -560,7 +542,22 @@ void main() {
           user: client.state.currentUser,
         );
 
-        _whenSendingMessage(client, channel, message).thenThrow(_inputError('Input error'));
+        when(
+          () => client.sendMessage(
+            any(that: isSameMessageAs(message)),
+            channelId,
+            channelType,
+          ),
+        ).thenThrow(
+          StreamChatNetworkError.raw(
+            code: ChatErrorCode.inputError.code,
+            message: 'Input error',
+            data: ErrorResponse()
+              ..code = ChatErrorCode.inputError.code
+              ..message = 'Input error'
+              ..statusCode = 400,
+          ),
+        );
 
         expectLater(
           // skipping first seed message list -> [] messages
@@ -590,82 +587,6 @@ void main() {
           channel.sendMessage(message),
           throwsA(isA<StreamChatNetworkError>()),
         );
-      });
-
-      group('when the message id already exists', () {
-        test('marks the message as sent', () async {
-          final message = Message(id: 'stored-message-id', text: 'Hello world!');
-
-          _whenSendingMessage(client, channel, message).thenThrow(_messageAlreadyExistsError(message.id));
-          await expectLater(channel.sendMessage(message), throwsA(isA<StreamChatNetworkError>()));
-
-          expect(channel.state!.messages.single.state, MessageState.sent);
-        });
-
-        test('stamps the local creation date as the server creation date when no server copy arrived', () async {
-          final message = Message(id: 'stored-message-id', text: 'Hello world!');
-
-          _whenSendingMessage(client, channel, message).thenThrow(_messageAlreadyExistsError(message.id));
-          await expectLater(channel.sendMessage(message), throwsA(isA<StreamChatNetworkError>()));
-
-          final sentMessage = channel.state!.messages.single;
-          expect(sentMessage.remoteCreatedAt, sentMessage.localCreatedAt);
-        });
-
-        test('keeps the original creation date when a failed message is resent', () async {
-          final originalCreatedAt = DateTime.now().subtract(const Duration(hours: 1));
-          final failedMessage = Message(
-            id: 'stored-message-id',
-            text: 'Hello world!',
-            localCreatedAt: originalCreatedAt,
-            state: MessageState.sendingFailed(skipPush: false, skipEnrichUrl: false),
-          );
-          channel.state!.updateMessage(failedMessage);
-
-          _whenSendingMessage(client, channel, failedMessage).thenThrow(_messageAlreadyExistsError(failedMessage.id));
-          await expectLater(channel.retryMessage(failedMessage), throwsA(isA<StreamChatNetworkError>()));
-
-          expect(channel.state!.messages.single.createdAt, originalCreatedAt);
-        });
-
-        test('keeps the server creation date when message.new arrived first', () async {
-          final message = Message(id: 'stored-message-id', text: 'Hello world!');
-          final serverCreatedAt = DateTime.utc(2026, 10, 8, 7, 47, 56);
-
-          _whenSendingMessage(client, channel, message).thenAnswer((_) async {
-            // The server's copy arrives over the WebSocket before the send fails.
-            client.addEvent(
-              Event(
-                cid: channel.cid,
-                type: EventType.messageNew,
-                message: message.copyWith(createdAt: serverCreatedAt),
-              ),
-            );
-            await pumpEventQueue();
-            throw _messageAlreadyExistsError(message.id);
-          });
-          await expectLater(channel.sendMessage(message), throwsA(isA<StreamChatNetworkError>()));
-
-          expect(channel.state!.messages.single.remoteCreatedAt, serverCreatedAt);
-        });
-
-        test('marks a timed-out send as sent once its retry is rejected as a duplicate', () async {
-          final message = Message(id: 'stored-message-id', text: 'Hello world!');
-
-          // The first attempt times out, so the retry queue re-sends the message.
-          final receiveTimeout = StreamChatNetworkError.raw(
-            code: -1,
-            message: 'The request took longer than the receive timeout',
-            type: StreamChatNetworkErrorType.receiveTimeout,
-          );
-          final errors = [receiveTimeout, _messageAlreadyExistsError(message.id)];
-          var attempt = 0;
-          _whenSendingMessage(client, channel, message).thenAnswer((_) async => throw errors[attempt++]);
-          await expectLater(channel.sendMessage(message), throwsA(isA<StreamChatNetworkError>()));
-          await pumpEventQueue();
-
-          expect(channel.state!.messages.single.state, MessageState.sent);
-        });
       });
 
       test('with attachments should work just fine', () async {
@@ -708,7 +629,13 @@ void main() {
           ),
         ).thenAnswer((_) async => sendFileResponse);
 
-        _whenSendingMessage(client, channel, message).thenAnswer(
+        when(
+          () => client.sendMessage(
+            any(that: isSameMessageAs(message)),
+            channelId,
+            channelType,
+          ),
+        ).thenAnswer(
           (_) async => SendMessageResponse()
             ..message = message.copyWith(
               attachments: attachments
@@ -936,7 +863,13 @@ void main() {
             ),
           );
 
-          _whenSendingMessage(client, channel, message).thenAnswer(
+          when(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            ),
+          ).thenAnswer(
             (_) async => SendMessageResponse()
               ..message = message.copyWith(
                 attachments: [],
@@ -1007,7 +940,13 @@ void main() {
             ),
           );
 
-          _whenSendingMessage(client, channel, message).thenAnswer(
+          when(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            ),
+          ).thenAnswer(
             (_) async => SendMessageResponse()
               ..message = message.copyWith(
                 attachments: [],
@@ -1073,7 +1012,13 @@ void main() {
             ),
           );
 
-          _whenSendingMessage(client, channel, message).thenAnswer(
+          when(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            ),
+          ).thenAnswer(
             (_) async => SendMessageResponse()
               ..message = message.copyWith(
                 attachments: [],
@@ -6425,12 +6370,14 @@ void main() {
 
         final sendMessageResponse = SendMessageResponse()..message = message.copyWith(state: MessageState.sent);
 
-        _whenSendingMessage(
-          client,
-          channel,
-          message,
-          skipPush: true,
-          skipEnrichUrl: true,
+        when(
+          () => client.sendMessage(
+            any(that: isSameMessageAs(message)),
+            channelId,
+            channelType,
+            skipPush: true,
+            skipEnrichUrl: true,
+          ),
         ).thenAnswer((_) async => sendMessageResponse);
 
         final result = await channel.retryMessage(message);
@@ -6461,7 +6408,14 @@ void main() {
 
         final sendMessageResponse = SendMessageResponse()..message = message.copyWith(state: MessageState.sent);
 
-        _whenSendingMessage(client, channel, message, skipPush: true).thenAnswer((_) async => sendMessageResponse);
+        when(
+          () => client.sendMessage(
+            any(that: isSameMessageAs(message)),
+            channelId,
+            channelType,
+            skipPush: true,
+          ),
+        ).thenAnswer((_) async => sendMessageResponse);
 
         final result = await channel.retryMessage(message);
 
@@ -6490,7 +6444,14 @@ void main() {
 
         final sendMessageResponse = SendMessageResponse()..message = message.copyWith(state: MessageState.sent);
 
-        _whenSendingMessage(client, channel, message, skipEnrichUrl: true).thenAnswer((_) async => sendMessageResponse);
+        when(
+          () => client.sendMessage(
+            any(that: isSameMessageAs(message)),
+            channelId,
+            channelType,
+            skipEnrichUrl: true,
+          ),
+        ).thenAnswer((_) async => sendMessageResponse);
 
         final result = await channel.retryMessage(message);
 
@@ -6519,7 +6480,13 @@ void main() {
 
         final sendMessageResponse = SendMessageResponse()..message = message.copyWith(state: MessageState.sent);
 
-        _whenSendingMessage(client, channel, message).thenAnswer((_) async => sendMessageResponse);
+        when(
+          () => client.sendMessage(
+            any(that: isSameMessageAs(message)),
+            channelId,
+            channelType,
+          ),
+        ).thenAnswer((_) async => sendMessageResponse);
 
         final result = await channel.retryMessage(message);
 

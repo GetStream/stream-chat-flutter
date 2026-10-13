@@ -167,10 +167,11 @@ class StreamChatNetworkError extends StreamChatError {
   /// Whether the server rejected a send because it already stored a message
   /// with the same id.
   @internal
-  bool get isMessageAlreadyExistsError =>
-      errorCode == ChatErrorCode.inputError &&
-      message.contains('a message with ID') &&
-      message.contains('already exists');
+  bool get isMessageAlreadyExistsError {
+    if (errorCode != ChatErrorCode.inputError) return false;
+    if (!message.contains('a message with ID')) return false;
+    return message.contains('already exists');
+  }
 
   @override
   List<Object?> get props => [...super.props, code, statusCode, type];

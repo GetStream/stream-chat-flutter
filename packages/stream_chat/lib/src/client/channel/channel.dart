@@ -742,10 +742,10 @@ class Channel {
     });
   }
 
-  Message? _findMessageInLocalState(String messageId) => [
-    ...state!.messages,
-    ...state!.threads.values.expand((messages) => messages),
-  ].firstWhereOrNull((it) => it.id == messageId);
+  Message? _findMessageInLocalState(String messageId) {
+    final threadMessages = state!.threads.values.expand((messages) => messages);
+    return state!.messages.followedBy(threadMessages).firstWhereOrNull((it) => it.id == messageId);
+  }
 
   final _sendMessageLock = Lock();
 
@@ -840,8 +840,7 @@ class Channel {
       return response;
     } catch (e) {
       if (e is StreamChatNetworkError && e.isMessageAlreadyExistsError) {
-        _markMessageAsSent(message);
-        rethrow;
+        return SendMessageResponse()..message = _markMessageAsSent(message);
       }
       final failedMessage = message.copyWith(
         // Update the message state to failed.
@@ -861,14 +860,17 @@ class Channel {
     }
   }
 
-  void _markMessageAsSent(Message message) {
-    if (state == null) return;
+  Message _markMessageAsSent(Message message) {
+    if (state == null) return message.copyWith(state: MessageState.sent);
+
     final localStateMessage = _findMessageInLocalState(message.id) ?? message;
     final sentMessage = localStateMessage.copyWith(
       createdAt: localStateMessage.remoteCreatedAt ?? localStateMessage.localCreatedAt,
       state: MessageState.sent,
     );
-    state?.updateMessage(sentMessage);
+
+    state!.updateMessage(sentMessage);
+    return sentMessage;
   }
 
   final _updateMessageLock = Lock();
