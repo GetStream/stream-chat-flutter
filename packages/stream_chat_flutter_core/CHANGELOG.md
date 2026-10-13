@@ -1,5 +1,13 @@
 ## Upcoming
 
+✅ Added
+
+- Added `StreamMessageComposerController.validator` and `canSend`, which decide whether the message being composed can be sent, and `StreamMessageComposerController.defaultValidator`.
+
+🔄 Changed
+
+- A mocked `StreamMessageComposerController` passed to the composer must now stub `canSend`.
+
 🐞 Fixed
 
 - Fixed `StreamDraftListController.deleteDraft` removing the wrong draft.
