@@ -14,7 +14,7 @@ class ChannelModel {
   /// Creates a channel model.
   ///
   /// The [disabled], [hidden], [muted], [blocked], [truncatedAt], [truncatedBy], [autoTranslationEnabled] and
-  /// [autoTranslationLanguage] arguments, when given, are stored in [extraData], replacing the entry each one reads.
+  /// [autoTranslationLanguage] arguments, when given, are stored in [extraData], overriding an entry of the same name.
   ChannelModel({
     String? id,
     String? type,
@@ -170,7 +170,9 @@ class ChannelModel {
 
   /// The user that last truncated this channel.
   @JsonKey(includeToJson: false, includeFromJson: false)
-  User? get truncatedBy => switch (extraData['truncated_by']) {
+  User? get truncatedBy => _userFrom(extraData['truncated_by']);
+
+  static User? _userFrom(Object? value) => switch (value) {
     final Map<String, dynamic> json when json['id'] is String => User.fromJson(json),
     _ => null,
   };
@@ -263,6 +265,9 @@ class ChannelModel {
     DateTime? truncatedAt,
     int? messageCount,
     List<String>? filterTags,
+    User? truncatedBy,
+    bool? autoTranslationEnabled,
+    String? autoTranslationLanguage,
   }) => ChannelModel(
     id: id ?? this.id,
     type: type ?? this.type,
@@ -293,6 +298,15 @@ class ChannelModel {
         this.truncatedAt,
     messageCount: messageCount ?? this.messageCount,
     filterTags: filterTags ?? this.filterTags,
+    truncatedBy: truncatedBy ?? _userFrom(extraData?['truncated_by']) ?? this.truncatedBy,
+    autoTranslationEnabled:
+        autoTranslationEnabled ??
+        extraData?['auto_translation_enabled'].safeCast<bool>() ??
+        this.autoTranslationEnabled,
+    autoTranslationLanguage:
+        autoTranslationLanguage ??
+        extraData?['auto_translation_language'].safeCast<String>() ??
+        this.autoTranslationLanguage,
   );
 
   /// Returns a new [ChannelModel] that is a combination of this channelModel
@@ -323,6 +337,10 @@ class ChannelModel {
       truncatedAt: other.truncatedAt,
       messageCount: other.messageCount,
       filterTags: other.filterTags,
+      truncatedBy: other.truncatedBy,
+      // A channel only carries its auto-translation flag while auto translation is on, so its absence turns it off.
+      autoTranslationEnabled: other.autoTranslationEnabled ?? false,
+      autoTranslationLanguage: other.autoTranslationLanguage,
     );
   }
 }
