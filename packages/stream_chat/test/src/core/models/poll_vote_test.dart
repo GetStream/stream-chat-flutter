@@ -18,7 +18,12 @@ void main() {
   });
 
   test('PollVote.copyWith clears a nullable field passed as null', () {
-    final vote = createTestPollVote(id: 'vote-id', optionId: 'pizza', userId: 'user-id', user: User(id: 'user-id'));
+    final vote = createTestPollVote(
+      id: 'vote-id',
+      optionId: 'pizza',
+      userId: 'user-id',
+      user: User(id: 'user-id'),
+    );
 
     final copy = vote.copyWith(userId: null, user: null);
 
