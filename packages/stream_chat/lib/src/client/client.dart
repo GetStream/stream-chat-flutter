@@ -1864,7 +1864,7 @@ class StreamChatClient {
   }
 
   /// Marks all of the current user's channels as read.
-  Future<Result<MarkReadResponse>> markAllRead() => _channelsRepository.markChannelsRead();
+  Future<Result<MarkReadResponse>> markAllRead() => _channelsRepository.markAllRead();
 
   /// Sends delivery receipts for the latest messages in multiple channels.
   ///
@@ -1885,7 +1885,7 @@ class StreamChatClient {
   /// Accepts up to 100 channels per call.
   Future<Result<MarkDeliveredResponse>> markChannelsDelivered(
     Iterable<MessageDelivery> deliveries,
-  ) => _channelsRepository.markDelivered(deliveries);
+  ) => _channelsRepository.markChannelsDelivered(deliveries);
 
   /// Send an event to a particular channel
   Future<EmptyResponse> sendEvent(

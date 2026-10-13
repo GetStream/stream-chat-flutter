@@ -979,6 +979,8 @@ Work top to bottom; each item is independently verifiable.
 - [ ] Apply every row of the [Symbol Map](#symbol-map)
 - [ ] Re-check custom data access: fields that used to arrive in `extraData` may now be typed properties
 - [ ] If you implement `AttachmentFileUploader`, return a `Result` from it — see [File Upload](#file-upload)
+- [ ] If you pass a custom `onMarkChannelsDelivered` to `ChannelDeliveryReporter`, return a `Result` from it — see
+      [Read Receipts](#read-receipts)
 - [ ] If you persist models yourself, re-check nullability as endpoints move to the generated types, which are nullable wherever the API allows it
 - [ ] Replace `sort: null` on any list controller with `XSort.empty` if you relied on server ordering — see
       [Sorting](#sorting)
