@@ -1,5 +1,9 @@
 ## Upcoming
 
+✅ Added
+
+- Added `StreamPollVoteListController.option` and `StreamPollVoteListController.answers`, which list only a poll's votes for one option or only its answers.
+
 🐞 Fixed
 
 - Fixed `StreamDraftListController.deleteDraft` removing the wrong draft.

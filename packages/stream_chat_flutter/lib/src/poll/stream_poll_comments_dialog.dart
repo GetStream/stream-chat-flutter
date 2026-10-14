@@ -100,10 +100,9 @@ class _StreamPollCommentsDialogState extends State<StreamPollCommentsDialog> {
   }
 
   void _initializeController() {
-    _controller = StreamPollVoteListController(
+    _controller = StreamPollVoteListController.answers(
       pollId: widget.poll.id,
       channel: StreamChannel.of(context).channel,
-      filter: Filter.equal('is_answer', true),
     );
   }
 

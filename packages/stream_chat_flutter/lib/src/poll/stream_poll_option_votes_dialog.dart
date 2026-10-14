@@ -91,10 +91,10 @@ class _StreamPollOptionVotesDialogState
   }
 
   void _initializeController() {
-    _controller = StreamPollVoteListController(
+    _controller = StreamPollVoteListController.option(
       pollId: widget.poll.id,
       channel: StreamChannel.of(context).channel,
-      filter: Filter.equal('option_id', widget.option.id!),
+      optionId: widget.option.id!,
     );
   }
 
