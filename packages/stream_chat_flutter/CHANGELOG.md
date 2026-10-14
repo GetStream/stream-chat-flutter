@@ -24,6 +24,8 @@
 - Fixed `StreamMessageComposer` polling the audio recorder ten times a second while no recording is in progress, including when voice recording is disabled.
 - Fixed `StreamMessageComposer`'s send button looking enabled on an empty message when voice recording is off, and showing the microphone instead of send for a staged poll.
 - Fixed the attachment picker showing an empty commands tab in channels without commands.
+- Fixed `StreamPollOptionVotesSheet` listing votes for other options and answers.
+- Fixed `StreamPollCommentsSheet` listing votes for poll options as comments.
 
 ## 10.5.0
 
