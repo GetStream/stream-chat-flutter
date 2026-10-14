@@ -14,6 +14,7 @@
 
 - Fixed `Event.aiState` reading `AI_STATE_EXTERNAL_SOURCES` as `idle` instead of `checkingSources`.
 - Fixed `Channel.disableSlowMode` and `StreamChatClient.disableSlowdown` always failing.
+- Fixed users still showing as typing after sending or editing a message, or after switching between a thread and the channel.
 
 ## 10.5.0
 
