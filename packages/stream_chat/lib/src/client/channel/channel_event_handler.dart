@@ -211,7 +211,7 @@ class ChannelEventHandler {
     final message = event.message;
     if (message == null) return;
 
-    return _mutations.onMessageUpdated(message);
+    return _mutations.onMessageUpdated(message, editor: event.user);
   }
 
   void _onDraftUpdated(Event event) {

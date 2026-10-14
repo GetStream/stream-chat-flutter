@@ -45,7 +45,6 @@ dependencies:
   intl: ^0.20.2
   jiffy: ^6.4.5
   just_audio: ^0.10.5
-  lottie: ^3.3.3
   markdown: ^7.3.0
   meta: ^1.9.1
   path_provider: ^2.1.5
@@ -67,7 +66,7 @@ dependencies:
     # ignore: invalid_dependency
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
-      ref: 1546087d1a3dac29e824853fb2a9f05dcd2d41e6
+      ref: bd6e2546fa25e2b605cefef4494e0be056d8a0dc
       path: packages/stream_core_flutter
   stream_thumbnail: ^0.2.0
   svg_icon_widget: ^0.0.1
@@ -92,7 +91,6 @@ dev_dependencies:
 
 flutter:
   assets:
-    - lib/assets/animations/
     - lib/assets/icons/
     - lib/assets/icons/colored/
     - lib/assets/images/

@@ -81,7 +81,14 @@ class KeyStrokeHandler {
   ///
   /// This is meant to be called every time the user presses a key. The method
   /// will manage requests and timer as needed.
+  ///
+  /// Switching [parentId] stops typing under the previous one.
   Future<void> call([String? parentId]) async {
+    if (_lastTypingEvent != null && parentId != _currentParentId) {
+      // ignore: no-empty-block
+      _stopTyping(_currentParentId).catchError((_) {});
+    }
+
     final completer = _resetKeyStrokeCompleter();
 
     _cancelKeyStrokeTimer();
