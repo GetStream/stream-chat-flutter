@@ -2,7 +2,7 @@
 
 ✅ Added
 
-- Added `StreamPollVoteListController.option` and `StreamPollVoteListController.answers`, which list only a poll's votes for one option or only its answers.
+- Added `StreamPollVoteListController.forOption` and `StreamPollVoteListController.forAnswers`, which list only a poll's votes for one option or only its answers.
 
 🐞 Fixed
 

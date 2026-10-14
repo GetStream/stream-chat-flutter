@@ -113,7 +113,7 @@ void main() {
   group('when the list is scoped to an option', () {
     test('queries only the votes for the scoped option', () async {
       final filter = await _queriedFilter(
-        (channel) => StreamPollVoteListController.option(
+        (channel) => StreamPollVoteListController.forOption(
             channel: channel, pollId: _pollId, optionId: _pizza),
       );
 
@@ -195,7 +195,7 @@ void main() {
   group('when the list is scoped to answers', () {
     test('queries only the answers', () async {
       final filter = await _queriedFilter(
-        (channel) => StreamPollVoteListController.answers(
+        (channel) => StreamPollVoteListController.forAnswers(
             channel: channel, pollId: _pollId),
       );
 
@@ -315,7 +315,7 @@ Future<
 }) {
   return _loadedController(
     votes: votes,
-    create: (channel) => StreamPollVoteListController.option(
+    create: (channel) => StreamPollVoteListController.forOption(
       channel: channel,
       pollId: _pollId,
       optionId: optionId,
@@ -330,7 +330,7 @@ Future<
       StreamController<Event> events
     })> _loadedAnswersController() {
   return _loadedController(
-    create: (channel) => StreamPollVoteListController.answers(
+    create: (channel) => StreamPollVoteListController.forAnswers(
       channel: channel,
       pollId: _pollId,
     ),
