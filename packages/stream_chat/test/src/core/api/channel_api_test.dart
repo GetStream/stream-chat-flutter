@@ -276,7 +276,7 @@ void main() {
     final channelModel = ChannelModel(
       id: channelId,
       type: channelType,
-      extraData: data,
+      custom: data,
     );
 
     when(

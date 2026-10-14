@@ -143,8 +143,11 @@ class TestPersistenceClient extends ChatPersistenceClient {
   @override
   Future<void> updatePollVotes(List<PollVote> pollVotes) => Future.value();
 
+  // The users passed to every [updateUsers] call, in order.
+  final updatedUsers = <User>[];
+
   @override
-  Future<void> updateUsers(List<User> users) => Future.value();
+  Future<void> updateUsers(List<User> users) async => updatedUsers.addAll(users);
 
   @override
   Future<void> bulkUpdateMembers(Map<String, List<Member>?> members) => Future.value();
@@ -289,6 +292,20 @@ void main() {
         members: [Member(user: user)],
       );
       persistenceClient.updateChannelStates([channelState]);
+    });
+
+    test('updateChannelStates stores the users who created and last truncated the channel', () async {
+      final client = TestPersistenceClient();
+      final creator = User(id: 'creator');
+      final truncator = User(id: 'truncator');
+
+      await client.updateChannelStates([
+        ChannelState(
+          channel: ChannelModel(cid: 'test:cid', createdBy: creator, truncatedBy: truncator),
+        ),
+      ]);
+
+      expect(client.updatedUsers, containsAll([creator, truncator]));
     });
   });
 }

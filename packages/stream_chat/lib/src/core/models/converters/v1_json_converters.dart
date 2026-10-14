@@ -2,10 +2,16 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_core/stream_core.dart' show StreamDateTimeConverter;
 
+import '../../util/serializer.dart';
 import '../device.dart';
+import '../poll.dart';
+import '../poll_option.dart';
+import '../poll_vote.dart';
 import '../push_provider.dart';
+import '../user.dart';
 import '../user_group.dart';
 import '../user_group_member.dart';
+import '../voting_visibility.dart';
 
 // Converters for plain models embedded in json_serializable models that still decode v1 JSON. Each one is deleted
 // by the migration group that turns its parent into a plain model.
@@ -65,3 +71,172 @@ UserGroupMember _userGroupMemberFromV1Json(Map<String, dynamic> json) => UserGro
   isAdmin: json['is_admin'] as bool,
   userId: json['user_id'] as String,
 );
+
+/// Converts a [Poll] to and from its v1 keys.
+///
+/// Custom data sits at the root of the v1 map, beside the known keys.
+// TODO(openapi-migration): remove once WebSocket events and messages decode v2 payloads
+@internal
+class PollV1JsonConverter implements JsonConverter<Poll, Map<String, dynamic>> {
+  /// Creates a new [PollV1JsonConverter].
+  const PollV1JsonConverter();
+
+  @override
+  Poll fromJson(Map<String, dynamic> json) => Poll(
+    id: json['id'] as String?,
+    name: json['name'] as String,
+    nameI18n: _translations(json['name_i18n']),
+    description: json['description'] as String?,
+    descriptionI18n: _translations(json['description_i18n']),
+    options: (json['options'] as List<dynamic>)
+        .map((option) => _pollOptionFromV1Json(option as Map<String, dynamic>))
+        .toList(),
+    votingVisibility: switch (json['voting_visibility']) {
+      final String value => VotingVisibility(value),
+      _ => VotingVisibility.public,
+    },
+    enforceUniqueVote: json['enforce_unique_vote'] as bool? ?? true,
+    maxVotesAllowed: (json['max_votes_allowed'] as num?)?.toInt(),
+    allowAnswers: json['allow_answers'] as bool? ?? false,
+    latestAnswers: _pollVotesFromV1Json(json['latest_answers']) ?? const [],
+    answersCount: (json['answers_count'] as num?)?.toInt() ?? 0,
+    allowUserSuggestedOptions: json['allow_user_suggested_options'] as bool? ?? false,
+    isClosed: json['is_closed'] as bool? ?? false,
+    createdAt: _optionalDateTime(json['created_at']),
+    updatedAt: _optionalDateTime(json['updated_at']),
+    voteCountsByOption:
+        (json['vote_counts_by_option'] as Map<String, dynamic>?)?.map(
+          (optionId, count) => MapEntry(optionId, (count as num).toInt()),
+        ) ??
+        const {},
+    voteCount: (json['vote_count'] as num?)?.toInt() ?? 0,
+    latestVotesByOption:
+        (json['latest_votes_by_option'] as Map<String, dynamic>?)?.map(
+          (optionId, votes) => MapEntry(optionId, _pollVotesFromV1Json(votes)!),
+        ) ??
+        const {},
+    createdById: json['created_by_id'] as String?,
+    createdBy: switch (json['created_by']) {
+      final Map<String, dynamic> user => User.fromJson(user),
+      _ => null,
+    },
+    ownVotesAndAnswers: _pollVotesFromV1Json(json['own_votes']) ?? const [],
+    custom: _customData(json, _pollV1Keys),
+  );
+
+  // Writes the keys the poll settings use, with custom data at the root; the vote summary, the translations and a
+  // custom entry named like one of the keys are not written.
+  @override
+  Map<String, dynamic> toJson(Poll poll) => {
+    ..._customDataAtRoot(poll.custom, _pollV1Keys),
+    'id': poll.id,
+    'name': poll.name,
+    'description': poll.description,
+    'options': poll.options.map(_pollOptionToV1Json).toList(),
+    'voting_visibility': poll.votingVisibility.rawType,
+    'enforce_unique_vote': poll.enforceUniqueVote,
+    'max_votes_allowed': poll.maxVotesAllowed,
+    'allow_user_suggested_options': poll.allowUserSuggestedOptions,
+    'allow_answers': poll.allowAnswers,
+    'is_closed': poll.isClosed,
+  };
+}
+
+/// Converts a [PollVote] to and from its v1 keys.
+// TODO(openapi-migration): remove once WebSocket events decode v2 payloads
+@internal
+class PollVoteV1JsonConverter implements JsonConverter<PollVote, Map<String, dynamic>> {
+  /// Creates a new [PollVoteV1JsonConverter].
+  const PollVoteV1JsonConverter();
+
+  @override
+  PollVote fromJson(Map<String, dynamic> json) => _pollVoteFromV1Json(json);
+
+  // Writes only the keys that identify the vote and what it selects.
+  @override
+  Map<String, dynamic> toJson(PollVote vote) => {
+    'id': ?vote.id,
+    'option_id': ?vote.optionId,
+    'answer_text': ?vote.answerText,
+  };
+}
+
+PollOption _pollOptionFromV1Json(Map<String, dynamic> json) => PollOption(
+  id: json['id'] as String?,
+  text: json['text'] as String,
+  textI18n: _translations(json['text_i18n']),
+  custom: _customData(json, _pollOptionV1Keys),
+);
+
+Map<String, dynamic> _pollOptionToV1Json(PollOption option) => {
+  ..._customDataAtRoot(option.custom, _pollOptionV1Keys),
+  'id': ?option.id,
+  'text': option.text,
+};
+
+List<PollVote>? _pollVotesFromV1Json(Object? json) =>
+    (json as List<dynamic>?)?.map((vote) => _pollVoteFromV1Json(vote as Map<String, dynamic>)).toList();
+
+PollVote _pollVoteFromV1Json(Map<String, dynamic> json) => PollVote(
+  id: json['id'] as String?,
+  pollId: json['poll_id'] as String?,
+  optionId: json['option_id'] as String?,
+  answerText: json['answer_text'] as String?,
+  answerTextI18n: _translations(json['answer_text_i18n']),
+  createdAt: _optionalDateTime(json['created_at']),
+  updatedAt: _optionalDateTime(json['updated_at']),
+  userId: json['user_id'] as String?,
+  user: switch (json['user']) {
+    final Map<String, dynamic> user => User.fromJson(user),
+    _ => null,
+  },
+);
+
+Map<String, String>? _translations(Object? json) => switch (json) {
+  final Map<String, dynamic> translations => Map<String, String>.from(translations),
+  _ => null,
+};
+
+DateTime? _optionalDateTime(Object? json) => json == null ? null : _dateTime.fromJson(json);
+
+// The keys a v1 poll carries besides its custom data.
+const _pollV1Keys = [
+  'id',
+  'name',
+  'name_i18n',
+  'description',
+  'description_i18n',
+  'options',
+  'voting_visibility',
+  'enforce_unique_vote',
+  'max_votes_allowed',
+  'allow_user_suggested_options',
+  'allow_answers',
+  'is_closed',
+  'created_at',
+  'updated_at',
+  'vote_counts_by_option',
+  'votes',
+  'own_votes',
+  'vote_count',
+  'answers_count',
+  'latest_votes_by_option',
+  'latest_answers',
+  'created_by_id',
+  'created_by',
+];
+
+// The keys a v1 poll option carries besides its custom data.
+const _pollOptionV1Keys = [
+  'id',
+  'text',
+  'text_i18n',
+];
+
+Map<String, Object?> _customData(Map<String, dynamic> json, List<String> knownKeys) =>
+    Serializer.moveToExtraDataFromRoot(json, knownKeys)['extra_data'] as Map<String, Object?>;
+
+// The custom data a v1 map carries at its root: an entry named like one of the known keys would overwrite the key,
+// so it is left out.
+Map<String, Object?> _customDataAtRoot(Map<String, Object?> custom, List<String> knownKeys) =>
+    {...custom}..removeWhere((key, _) => knownKeys.contains(key));

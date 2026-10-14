@@ -55,18 +55,14 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
   pinnedAt: json['pinned_at'] == null ? null : DateTime.parse(json['pinned_at'] as String),
   pinExpires: json['pin_expires'] == null ? null : DateTime.parse(json['pin_expires'] as String),
   pinnedBy: json['pinned_by'] == null ? null : User.fromJson(json['pinned_by'] as Map<String, dynamic>),
-  poll: json['poll'] == null ? null : Poll.fromJson(json['poll'] as Map<String, dynamic>),
+  poll: _$JsonConverterFromJson<Map<String, dynamic>, Poll>(json['poll'], const PollV1JsonConverter().fromJson),
   pollId: json['poll_id'] as String?,
   extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
-  i18n: (json['i18n'] as Map<String, dynamic>?)?.map(
-    (k, e) => MapEntry(k, e as String),
-  ),
+  i18n: (json['i18n'] as Map<String, dynamic>?)?.map((k, e) => MapEntry(k, e as String)),
   restrictedVisibility: (json['restricted_visibility'] as List<dynamic>?)?.map((e) => e as String).toList(),
   moderation: Message._moderationReadValue(json, 'moderation') == null
       ? null
-      : Moderation.fromJson(
-          Message._moderationReadValue(json, 'moderation') as Map<String, dynamic>,
-        ),
+      : Moderation.fromJson(Message._moderationReadValue(json, 'moderation') as Map<String, dynamic>),
   draft: json['draft'] == null ? null : Draft.fromJson(json['draft'] as Map<String, dynamic>),
   reminder: json['reminder'] == null ? null : MessageReminder.fromJson(json['reminder'] as Map<String, dynamic>),
   channelRole: Message._channelRoleReadValue(json, 'channel_role') as String?,
@@ -96,3 +92,6 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
   'shared_location': ?instance.sharedLocation?.toJson(),
   'extra_data': instance.extraData,
 };
+
+Value? _$JsonConverterFromJson<Json, Value>(Object? json, Value? Function(Json json) fromJson) =>
+    json == null ? null : fromJson(json as Json);

@@ -9,6 +9,7 @@
 - `defaultChannelListSort`, `defaultMemberListSort`, `defaultUserListSort`, `defaultDraftListSort`, `defaultMessageReminderListSort` and `defaultPollVoteListSort` are removed. Use `ChannelSort.defaultSort`, `MemberSort.defaultSort` and so on from `stream_chat`. Leaving a controller's sort unset still applies the same ordering.
 - `StreamChannelListController.muteChannel` and `unmuteChannel` return a `Result` instead of throwing.
 - `StreamChannelListController.deleteChannel` returns a `Result<DeleteChannelResponse>` instead of throwing.
+- `StreamPollController.addOption` and `updateOption` take the option's custom data as `custom` instead of `extraData`.
 
 🐞 Fixed
 

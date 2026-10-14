@@ -98,7 +98,7 @@ void main() {
           ),
         }),
       );
-      when(() => channel.extraData).thenReturn({
+      when(() => channel.custom).thenReturn({
         'name': 'test',
       });
 

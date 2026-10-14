@@ -10,6 +10,7 @@ import '../utils/date_matcher.dart';
 void main() {
   group('ChannelEntity', () {
     final user = User(id: 'testUserId');
+    final truncatedBy = User(id: 'truncatorId');
     final entity = ChannelEntity(
       id: 'testId',
       type: 'testType',
@@ -33,12 +34,20 @@ void main() {
       messageCount: 42,
       createdById: user.id,
       filterTags: ['tag1', 'tag2'],
-      extraData: {'test_extra_data': 'testData'},
+      custom: {'test_extra_data': 'testData'},
       team: 'testTeam',
+      disabled: false,
+      hidden: true,
+      muted: true,
+      blocked: false,
+      truncatedAt: DateTime.now(),
+      truncatedById: truncatedBy.id,
+      autoTranslationEnabled: true,
+      autoTranslationLanguage: 'fr',
     );
 
     test('toChannelModel should map entity into ChannelModel', () {
-      final channelModel = entity.toChannelModel(createdBy: user);
+      final channelModel = entity.toChannelModel(createdBy: user, truncatedBy: truncatedBy);
       expect(channelModel, isA<ChannelModel>());
       expect(channelModel.id, entity.id);
       expect(channelModel.ownCapabilities, entity.ownCapabilities);
@@ -57,8 +66,16 @@ void main() {
       expect(channelModel.deletedAt, isSameDateAs(entity.deletedAt));
       expect(channelModel.createdBy!.id, entity.createdById);
       expect(channelModel.filterTags, entity.filterTags);
-      expect(channelModel.extraData, entity.extraData);
+      expect(channelModel.custom, entity.custom);
       expect(channelModel.team, entity.team);
+      expect(channelModel.disabled, entity.disabled);
+      expect(channelModel.hidden, entity.hidden);
+      expect(channelModel.muted, entity.muted);
+      expect(channelModel.blocked, entity.blocked);
+      expect(channelModel.truncatedAt, isSameDateAs(entity.truncatedAt));
+      expect(channelModel.truncatedBy!.id, entity.truncatedById);
+      expect(channelModel.autoTranslationEnabled, entity.autoTranslationEnabled);
+      expect(channelModel.autoTranslationLanguage, entity.autoTranslationLanguage);
     });
 
     test('toChannelState should map entity into ChannelState ', () {
@@ -75,6 +92,7 @@ void main() {
 
       final channelState = entity.toChannelState(
         createdBy: user,
+        truncatedBy: truncatedBy,
         members: members,
         reads: reads,
         messages: messages,
@@ -104,8 +122,16 @@ void main() {
       expect(channelModel.lastMessageAt, isSameDateAs(entity.lastMessageAt));
       expect(channelModel.deletedAt, isSameDateAs(entity.deletedAt));
       expect(channelModel.filterTags, entity.filterTags);
-      expect(channelModel.extraData, entity.extraData);
+      expect(channelModel.custom, entity.custom);
       expect(channelModel.createdBy!.id, entity.createdById);
+      expect(channelModel.disabled, entity.disabled);
+      expect(channelModel.hidden, entity.hidden);
+      expect(channelModel.muted, entity.muted);
+      expect(channelModel.blocked, entity.blocked);
+      expect(channelModel.truncatedAt, isSameDateAs(entity.truncatedAt));
+      expect(channelModel.truncatedBy!.id, entity.truncatedById);
+      expect(channelModel.autoTranslationEnabled, entity.autoTranslationEnabled);
+      expect(channelModel.autoTranslationLanguage, entity.autoTranslationLanguage);
     });
   });
 
@@ -134,8 +160,16 @@ void main() {
       messageCount: 75,
       createdBy: createdBy,
       filterTags: ['tag1', 'tag2'],
-      extraData: {'test_extra_data': 'testData'},
+      custom: {'test_extra_data': 'testData'},
       team: 'testTeam',
+      disabled: false,
+      hidden: true,
+      muted: true,
+      blocked: false,
+      truncatedAt: DateTime.now(),
+      truncatedBy: User(id: 'truncatorId'),
+      autoTranslationEnabled: true,
+      autoTranslationLanguage: 'fr',
     );
 
     final channelEntity = model.toEntity();
@@ -164,8 +198,16 @@ void main() {
     expect(channelEntity.lastMessageAt, isSameDateAs(model.lastMessageAt));
     expect(channelEntity.deletedAt, isSameDateAs(model.deletedAt));
     expect(channelEntity.filterTags, model.filterTags);
-    expect(channelEntity.extraData, model.extraData);
+    expect(channelEntity.custom, model.custom);
     expect(channelEntity.createdById, model.createdBy!.id);
     expect(channelEntity.team, model.team);
+    expect(channelEntity.disabled, model.disabled);
+    expect(channelEntity.hidden, model.hidden);
+    expect(channelEntity.muted, model.muted);
+    expect(channelEntity.blocked, model.blocked);
+    expect(channelEntity.truncatedAt, isSameDateAs(model.truncatedAt));
+    expect(channelEntity.truncatedById, model.truncatedBy!.id);
+    expect(channelEntity.autoTranslationEnabled, model.autoTranslationEnabled);
+    expect(channelEntity.autoTranslationLanguage, model.autoTranslationLanguage);
   });
 }
