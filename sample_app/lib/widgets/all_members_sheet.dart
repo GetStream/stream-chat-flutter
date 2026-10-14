@@ -426,7 +426,7 @@ Future<void> _openDirectChannel(BuildContext context, User user) async {
   } else {
     channel = chat.client.channel(
       'messaging',
-      extraData: {
+      custom: {
         'members': [currentUser.id, user.id],
       },
     );

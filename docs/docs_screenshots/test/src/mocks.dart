@@ -155,8 +155,8 @@ void setupMockChannel({
   when(() => channel.isMutedStream).thenAnswer((_) => Stream.value(false));
   when(() => channel.isPinned).thenReturn(false);
   when(() => channel.isPinnedStream).thenAnswer((_) => Stream.value(false));
-  when(() => channel.extraDataStream).thenAnswer((_) => Stream.value({'name': channelName}));
-  when(() => channel.extraData).thenReturn({'name': channelName});
+  when(() => channel.customStream).thenAnswer((_) => Stream.value({'name': channelName}));
+  when(() => channel.custom).thenReturn({'name': channelName});
   when(() => channel.name).thenReturn(channelName);
   when(() => channel.nameStream).thenAnswer((_) => Stream.value(channelName));
   when(() => channel.image).thenReturn(null);

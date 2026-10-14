@@ -58,49 +58,49 @@ void main() {
       channel.dispose();
     });
 
-    test('should be able to set `extraData`', () {
-      expect(channel.extraData.isEmpty, isTrue);
+    test('should be able to set `custom`', () {
+      expect(channel.custom.isEmpty, isTrue);
 
       expect(
-        () => channel.extraData = {'name': 'test-channel-name'},
+        () => channel.custom = {'name': 'test-channel-name'},
         returnsNormally,
       );
 
-      expect(channel.extraData.isEmpty, isFalse);
-      expect(channel.extraData.containsKey('name'), isTrue);
-      expect(channel.extraData['name'], 'test-channel-name');
+      expect(channel.custom.isEmpty, isFalse);
+      expect(channel.custom.containsKey('name'), isTrue);
+      expect(channel.custom['name'], 'test-channel-name');
     });
 
     test('should be able to get and set `image`', () {
-      expect(channel.extraData.isEmpty, isTrue);
+      expect(channel.custom.isEmpty, isTrue);
 
       const imageUrl = 'https://getstream.io/some-image';
       channel.image = imageUrl;
 
       expect(channel.image, imageUrl);
-      expect(channel.extraData['image'], imageUrl);
+      expect(channel.custom['image'], imageUrl);
 
       const newImage = 'https://getstream.io/new-image';
       final newChannelInstance = Channel(client, channelType, channelId, image: newImage);
 
       expect(newChannelInstance.image, newImage);
-      expect(newChannelInstance.extraData['image'], newImage);
+      expect(newChannelInstance.custom['image'], newImage);
     });
 
     test('should be able to get and set `name`', () {
-      expect(channel.extraData.isEmpty, isTrue);
+      expect(channel.custom.isEmpty, isTrue);
 
       const name = 'Channel name';
       channel.name = name;
 
       expect(channel.name, name);
-      expect(channel.extraData['name'], name);
+      expect(channel.custom['name'], name);
 
       const newName = 'New channel name';
       final newChannelInstance = Channel(client, channelType, channelId, name: newName);
 
       expect(newChannelInstance.name, newName);
-      expect(newChannelInstance.extraData['name'], newName);
+      expect(newChannelInstance.custom['name'], newName);
     });
 
     test('setters remain usable after a failed watch()', () async {
@@ -232,8 +232,8 @@ void main() {
       clearInteractions(client);
     });
 
-    test('should throw if trying to set `extraData`', () {
-      expect(() => channel.extraData = {'name': 'test-channel-name'}, throwsA(isA<StateError>()));
+    test('should throw if trying to set `custom`', () {
+      expect(() => channel.custom = {'name': 'test-channel-name'}, throwsA(isA<StateError>()));
     });
 
     test('should throw if trying to set `image`', () {
@@ -3701,7 +3701,7 @@ void main() {
 
       final channelModel = ChannelModel(
         cid: channelCid,
-        extraData: channelData,
+        custom: channelData,
       );
 
       when(() => client.updateChannel(channelId, channelType, channelData, message: any(named: 'message'))).thenAnswer(
@@ -3717,7 +3717,7 @@ void main() {
 
       expect(res, isNotNull);
       expect(res.channel.cid, channelModel.cid);
-      expect(res.channel.extraData, channelData);
+      expect(res.channel.custom, channelData);
       expect(res.message?.id, updateMessage.id);
 
       verify(() => client.updateChannel(channelId, channelType, channelData, message: any(named: 'message'))).called(1);
@@ -5536,7 +5536,7 @@ void main() {
         () async {
           // Set initial channel state with some properties
           final initialChannel = channel.state?.channelState.channel?.copyWith(
-            extraData: {'name': 'Test Channel'},
+            custom: {'name': 'Test Channel'},
             memberCount: 5,
             frozen: true,
           );
@@ -5703,7 +5703,7 @@ void main() {
         () async {
           // Set initial channel state with some properties
           final initialChannel = channel.state?.channelState.channel?.copyWith(
-            extraData: {'name': 'Test Channel'},
+            custom: {'name': 'Test Channel'},
             messageCount: 7,
             frozen: true,
           );

@@ -91,10 +91,8 @@ class StreamMessagePreviewText extends StatelessWidget {
 @internal
 Message translateForPreview(Message message, String? language) {
   final translated = message.translate(language);
-  return switch (message.poll) {
-    final poll? when poll.translatedName(language) != null => translated.copyWith(
-      poll: poll.copyWith(name: poll.translatedName(language)),
-    ),
+  return switch ((message.poll, message.poll?.translatedName(language))) {
+    (final poll?, final name?) => translated.copyWith(poll: poll.copyWith(name: name)),
     _ => translated,
   };
 }

@@ -20,10 +20,10 @@ void main() {
       expect(channelState.channel?.updatedAt, DateTime.parse('2019-04-03T18:43:33.213374Z'));
       expect(channelState.channel?.createdBy, isA<User>());
       expect(channelState.channel?.frozen, true);
-      expect(channelState.channel?.extraData['example'], 1);
-      expect(channelState.channel?.extraData['name'], '#dev');
+      expect(channelState.channel?.custom['example'], 1);
+      expect(channelState.channel?.custom['name'], '#dev');
       expect(
-        channelState.channel?.extraData['image'],
+        channelState.channel?.custom['image'],
         'https://cdn.chrisshort.net/testing-certificate-chains-in-go/GOPHER_MIC_DROP.png',
       );
       expect(channelState.messages, isNotNull);
@@ -151,11 +151,11 @@ void main() {
         );
       });
 
-      test('a custom field orders by the channel extra data', () {
+      test('a custom field orders by the channel custom data', () {
         expectOrders(
           ChannelSortField.custom('priority'),
-          createChannelState(id: 'low', extraData: const {'priority': 1}),
-          createChannelState(id: 'high', extraData: const {'priority': 10}),
+          createChannelState(id: 'low', custom: const {'priority': 1}),
+          createChannelState(id: 'high', custom: const {'priority': 10}),
         );
       });
 
@@ -182,7 +182,7 @@ ChannelState createChannelState({
   DateTime? updatedAt,
   DateTime? lastMessageAt,
   int? memberCount,
-  Map<String, Object?>? extraData,
+  Map<String, Object?>? custom,
   Draft? draft,
 }) {
   return ChannelState(
@@ -194,7 +194,7 @@ ChannelState createChannelState({
       createdAt: createdAt ?? DateTime(2023),
       updatedAt: updatedAt ?? DateTime(2023),
       memberCount: memberCount ?? 0,
-      extraData: extraData ?? {},
+      custom: custom ?? {},
     ),
     membership: Member(userId: 'user1'),
     draft: draft,

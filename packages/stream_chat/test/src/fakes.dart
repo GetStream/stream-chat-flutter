@@ -6,7 +6,6 @@ import 'package:stream_chat/src/core/api/channel_api.dart';
 import 'package:stream_chat/src/core/api/general_api.dart';
 import 'package:stream_chat/src/core/api/message_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
-import 'package:stream_chat/src/core/api/polls_api.dart';
 import 'package:stream_chat/src/core/api/push_preferences_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -133,11 +132,6 @@ class FakeChatApi extends Fake implements StreamChatApi {
 
   @override
   MessageApi get message => _message ??= MockMessageApi();
-
-  @override
-  PollsApi get polls => _polls ??= MockPollsApi();
-
-  PollsApi? _polls;
 
   ChannelApi? _channel;
 
@@ -310,7 +304,7 @@ Member fakeChannelMember() => Member(
   pinnedAt: DateTime.utc(2026, 1, 4),
   archivedAt: DateTime.utc(2026, 1, 5),
   deletedMessages: const ['message-1'],
-  extraData: const {'nickname': 'Mo', 'role': 'user'},
+  custom: const {'nickname': 'Mo'},
   notificationsMuted: true,
   status: 'member',
   banFromFutureChannels: true,

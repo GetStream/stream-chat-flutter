@@ -71,8 +71,8 @@ class Polls extends Table {
   /// The date when the poll was last updated.
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
-  /// Map of custom poll extraData
-  TextColumn get extraData => text().nullable().map(MapConverter())();
+  /// Custom data attached to the poll.
+  TextColumn get custom => text().nullable().map(MapConverter())();
 
   @override
   Set<Column> get primaryKey => {id};

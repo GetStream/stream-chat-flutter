@@ -177,29 +177,29 @@ class StreamPollController extends ValueNotifier<Poll> {
     return invalidErrors;
   }
 
-  /// Adds a new option with the provided [text] and [extraData].
+  /// Adds a new option with the provided [text] and [custom].
   ///
   /// The new option will be added to the end of the list of options.
   void addOption(
     String text, {
-    Map<String, Object?> extraData = const {},
+    Map<String, Object?> custom = const {},
   }) {
     final options = [...value.options];
-    final newOption = PollOption(text: text, extraData: extraData);
+    final newOption = PollOption(text: text, custom: custom);
     value = value.copyWith(options: [...options, newOption]);
   }
 
   /// Updates the option at the provided [index] with the provided [text] and
-  /// [extraData].
+  /// [custom].
   void updateOption(
     String text, {
     required int index,
-    Map<String, Object?> extraData = const {},
+    Map<String, Object?> custom = const {},
   }) {
     final options = [...value.options];
     options[index] = options[index].copyWith(
       text: text,
-      extraData: extraData,
+      custom: custom,
     );
 
     value = value.copyWith(options: options);

@@ -208,6 +208,8 @@ a public signature.
   [Persisted models](#persisted-models-the-dataserializable-codec)). A model stored only as a table row, mapped
   column by column like `Poll` in `polls`, needs no codec.
 - **Which request enums need a hand-written public type** (rule 6).
+- **Whether v10 has a `copyWith`.** If it has one, run `scripts/copywith_audit.py <Model>` before deleting it;
+  [Replacing a v10 `copyWith`](#replacing-a-v10-copywith) says what to do with the report.
 
 **Per method, decide what it returns:**
 
@@ -342,9 +344,13 @@ incrementally, not for us.
 
 Three data-shape traps while mapping:
 
-- **`custom` vs `extraData`** (channel / message / user features). The wire puts extra fields in `custom`;
-  hand-written models flatten them into `extraData`. Write that promotion explicitly, including which keys are
-  excluded.
+- **The model's `custom` is the wire's `custom`, verbatim** (README rule 9). A migrated model names it `custom`
+  — `extraData` on one whose group has not run — and the mapper copies the generated map into it and sends it
+  back as `custom`; never filter either. A typed wire field our model lacks is added as a field, with
+  approval, or left out — never parked in `extraData` behind a getter, as `User.name` still is until group 09
+  promotes it. A v1 decoder splits flat JSON by a key list — `topLevelFields` while the model still has JSON, a
+  private list beside the converter once it does not — and a v1 writer leaves a custom entry named like a key out
+  so it cannot overwrite the key.
 - **Units on anything that takes a `Duration`.** The wire carries a bare integer and the field name rarely says
   in what. Read the Go payload type: `commonpayloads.DurationInMinutes` and `DurationMilliseconds` sit on sibling
   endpoints in the same feature — `ban.timeout` and `mute.timeout` are minutes, `muteChannel.expiration` is
@@ -460,6 +466,31 @@ List<Map<String, dynamic>>? _membersToData(List<UserGroupMember>? members) =>
   `.g.dart` and `.freezed.dart` files of the models you changed; `--build-filter` deletes every generated output
   outside the filter, so never use it.
 
+### Replacing a v10 `copyWith`
+
+A model moving onto `@freezed` gives up its hand-written `copyWith` for the generated one, and most of the
+difference compiles cleanly: `null` clears a nullable field where v10 kept it, `null` re-runs a constructor default
+(`id ?? Uuid().v4()`, `createdAt ?? DateTime.now()`), and a constructor parameter with no field of the same name
+and type is not generated at all. [`copywith-audit.md`](copywith-audit.md) has the full table and the procedure;
+`scripts/copywith_audit.py <Model>` runs it, on a clean tree, and lists every call site in lib and tests whose
+behaviour or compilation changes.
+
+- **Handle every site the report lists** (README rule 2): a compile break gets a local to carry flow analysis, or
+  a `?? model.field`; a site tagged "v10 kept on null; check" is rewritten as an explicit merge unless the value
+  is only ever null when the field already is (`Poll.withTranslationsOf`) or the clear is intended; a site tagged
+  "v10 sentinel, same result" needs nothing.
+- **A verdict line means freezed cannot replace this method as it stands.** Keep `@Freezed(copyWith: false)` with
+  the hand-written method, or reshape the constructor so every parameter is a field of the same name and type,
+  which is a public API change of its own. `Message` is the known case.
+- **Record the semantics change** in the CHANGELOG and the guide, listing the model's fields under the rows of the
+  audit's table that apply. A model with no v10 `copyWith` gains new API, which is not a break.
+- **Mind what freezed counts as data.** For a class with a hand-written constructor, it puts every instance field
+  in `==`, `hashCode` and `toString`, private fields and `late final` caches included.
+  - A cache derived only from fields already compared (`Poll.ownVotes`, from `ownVotesAndAnswers`) changes no
+    result, so it can stay `late final`.
+  - A field v10 set in the constructor's initializer list from another field (`PollVote.isAnswer`) becomes a
+    getter.
+
 ### Documenting the public surface
 
 Write these as you write the code. `public_member_api_docs` only checks a doc *exists*, so a placeholder survives
@@ -491,6 +522,7 @@ Budget for this: on a typical feature it is most of the diff, and none of it is 
 - **Stub each generated response with every field our model carries,** each with a distinct value, and compare
   the whole returned envelope, so a field the mapper drops or swaps fails an assertion. Give every method a
   failure test too.
+- **Flip the tests that pinned a v10 `copyWith`'s `null` handling** to freezed's behaviour; the audit lists them.
 - **Test each temporary converter through its parent's `fromJson`/`toJson`.**
 - **Test each `@DataSerializable` model's stored format:** pin `toData()` to a literal map, so a rename that changes
   the stored keys fails; round-trip `fromData(toData())`; cover null versus empty for nullable lists. Extend the

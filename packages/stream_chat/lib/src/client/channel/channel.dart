@@ -19,11 +19,11 @@ const incomingTypingStartEventTimeout = 7;
 ///
 /// {@template name}
 /// If an optional [name] argument is provided in the constructor then it
-/// will be set on [extraData] with a key of 'name'.
+/// will be set on [custom] with a key of 'name'.
 ///
 /// ```dart
 /// final channel = Channel(client, type, id, name: 'Channel name');
-/// print(channel.name == channel.extraData['name']); // true
+/// print(channel.name == channel.custom['name']); // true
 /// ```
 ///
 /// Before the channel is initialized the name can be set directly:
@@ -43,11 +43,11 @@ const incomingTypingStartEventTimeout = 7;
 ///
 /// {@template image}
 /// If an optional [image] argument is provided in the constructor then it
-/// will be set on [extraData] with a key of 'image'.
+/// will be set on [custom] with a key of 'image'.
 ///
 /// ```dart
 /// final channel = Channel(client, type, id, image: 'https://getstream.io/image.png');
-/// print(channel.image == channel.extraData['image']); // true
+/// print(channel.image == channel.custom['image']); // true
 /// ```
 ///
 /// Before the channel is initialized the image can be set directly:
@@ -65,18 +65,18 @@ const incomingTypingStartEventTimeout = 7;
 class Channel {
   /// Class that manages a specific channel.
   ///
-  /// Optional [extraData] and [image] properties can be provided. The [image]
-  /// is exposed to easily set a key of 'image' on [extraData].
+  /// Optional [custom] and [image] properties can be provided. The [image]
+  /// is exposed to easily set a key of 'image' on [custom].
   Channel(
     this._client,
     this._type,
     this._id, {
     String? name,
     String? image,
-    Map<String, Object?>? extraData,
+    Map<String, Object?>? custom,
   }) : _cid = _id != null ? '$_type:$_id' : null,
-       _extraData = {
-         ...?extraData,
+       _custom = {
+         ...?custom,
          if (name != null) 'name': name,
          if (image != null) 'image': image,
        } {
@@ -92,7 +92,7 @@ class Channel {
       _id = channelState.channel!.id,
       _type = channelState.channel!.type,
       _cid = channelState.channel!.cid,
-      _extraData = channelState.channel!.extraData {
+      _custom = channelState.channel!.custom {
     _initState(channelState); // Initialize the state immediately.
   }
 
@@ -106,7 +106,7 @@ class Channel {
 
   String? _id;
   String? _cid;
-  final Map<String, Object?> _extraData;
+  final Map<String, Object?> _custom;
 
   /// Shortcut to set channel name.
   ///
@@ -118,7 +118,7 @@ class Channel {
         'to update the channel name',
       );
     }
-    _extraData.addAll({'name': name});
+    _custom.addAll({'name': name});
   }
 
   /// Shortcut to set channel image.
@@ -131,17 +131,17 @@ class Channel {
         'to update the channel image',
       );
     }
-    _extraData.addAll({'image': image});
+    _custom.addAll({'image': image});
   }
 
-  set extraData(Map<String, Object?> extraData) {
+  set custom(Map<String, Object?> custom) {
     if (_isInitialized) {
       throw StateError(
         'Once the channel is initialized you should use `channel.update` '
         'to update channel data',
       );
     }
-    _extraData.addAll(extraData);
+    _custom.addAll(custom);
   }
 
   /// Whether this channel is identified by its member set rather than an
@@ -524,11 +524,11 @@ class Channel {
     return state!.channelState.channel?.team;
   }
 
-  /// Channel extra data.
-  Map<String, Object?> get extraData {
-    var data = state?.channelState.channel?.extraData;
+  /// Channel custom data.
+  Map<String, Object?> get custom {
+    var data = state?.channelState.channel?.custom;
     if (data == null || data.isEmpty) {
-      data = _extraData;
+      data = _custom;
     }
     return data;
   }
@@ -542,18 +542,18 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.ownCapabilities ?? []).distinct();
   }
 
-  /// Channel extra data as a stream.
-  Stream<Map<String, Object?>> get extraDataStream {
+  /// Channel custom data as a stream.
+  Stream<Map<String, Object?>> get customStream {
     _checkInitialized();
     return state!.channelStateStream.map(
-      (cs) => cs.channel?.extraData ?? _extraData,
+      (cs) => cs.channel?.custom ?? _custom,
     );
   }
 
   /// Shortcut to get channel name.
   ///
   /// {@macro name}
-  String? get name => extraData['name'] as String?;
+  String? get name => custom['name'] as String?;
 
   /// Channel [name] as a stream.
   ///
@@ -562,13 +562,13 @@ class Channel {
   /// {@macro name}
   Stream<String?> get nameStream {
     _checkInitialized();
-    return extraDataStream.map((it) => it['name'] as String?).distinct();
+    return customStream.map((it) => it['name'] as String?).distinct();
   }
 
   /// Shortcut to get channel image.
   ///
   /// {@macro image}
-  String? get image => extraData['image'] as String?;
+  String? get image => custom['image'] as String?;
 
   /// Channel [image] as a stream.
   ///
@@ -577,7 +577,7 @@ class Channel {
   /// {@macro image}
   Stream<String?> get imageStream {
     _checkInitialized();
-    return extraDataStream.map((it) => it['image'] as String?).distinct();
+    return customStream.map((it) => it['image'] as String?).distinct();
   }
 
   /// The main Stream chat client.
@@ -1429,44 +1429,58 @@ class Channel {
 
   final _pollLock = Lock();
 
-  /// Send a message with a poll to this channel.
+  /// Creates [poll] and sends it to this channel in a new message.
   ///
-  /// Optionally provide a [messageText] to send a message along with the poll.
-  Future<SendMessageResponse> sendPoll(
+  /// The message carries [messageText] as its text, if given.
+  ///
+  /// If the poll cannot be created, no message is sent and the failure is returned. If the message cannot be sent, the
+  /// poll stays created and the failure is returned.
+  Future<Result<SendMessageResponse>> sendPoll(
     Poll poll, {
     String? messageText,
   }) async {
     _checkInitialized();
-    final res = await _pollLock.synchronized(() => _client.createPoll(poll));
-    return sendMessage(
-      Message(
-        text: messageText,
-        poll: res.poll,
-        pollId: res.poll.id,
-      ),
-    );
+    final created = await _pollLock.synchronized(() => _client.createPoll(poll));
+    return created.flatMapAsync((response) => _sendPollMessage(response.poll, messageText));
   }
 
-  /// Updates the [poll] in this channel.
-  Future<UpdatePollResponse> updatePoll(Poll poll) {
+  Future<Result<SendMessageResponse>> _sendPollMessage(Poll poll, String? messageText) async {
+    try {
+      final message = Message(text: messageText, poll: poll, pollId: poll.id);
+      return Result.success(await sendMessage(message));
+    } on StreamException catch (error, stackTrace) {
+      return Result.failure(error, stackTrace);
+    } catch (error, stackTrace) {
+      final exception = StreamClientException(message: 'Failed to send the poll message', cause: error);
+      return Result.failure(exception, stackTrace);
+    }
+  }
+
+  /// Updates [poll] to match the settings and options it carries.
+  ///
+  /// [Poll.options] becomes the poll's full list of options, each matched by its id, so an existing option missing
+  /// from it is deleted. New options are added through [createPollOption].
+  Future<Result<PollResponse>> updatePoll(Poll poll) {
     _checkInitialized();
     return _pollLock.synchronized(() => _client.updatePoll(poll));
   }
 
-  /// Deletes the given [poll] from this channel.
-  Future<EmptyResponse> deletePoll(Poll poll) {
+  /// Deletes [poll].
+  Future<Result<void>> deletePoll(Poll poll) {
     _checkInitialized();
     return _pollLock.synchronized(() => _client.deletePoll(poll.id));
   }
 
-  /// Close the given [poll].
-  Future<UpdatePollResponse> closePoll(Poll poll) {
+  /// Closes [poll], so it accepts no more votes or answers.
+  Future<Result<PollResponse>> closePoll(Poll poll) {
     _checkInitialized();
     return _pollLock.synchronized(() => _client.closePoll(poll.id));
   }
 
-  /// Create a new poll option for the given [poll].
-  Future<CreatePollOptionResponse> createPollOption(
+  /// Adds [option] to [poll].
+  ///
+  /// The option gets a new id, which the returned option carries.
+  Future<Result<PollOptionResponse>> createPollOption(
     Poll poll,
     PollOption option,
   ) {
@@ -1478,8 +1492,11 @@ class Channel {
 
   final _pollVoteLock = Lock();
 
-  /// Cast a vote on the given [poll] with the given [option].
-  Future<CastPollVoteResponse> castPollVote(
+  /// Votes for [option] of [poll], which was sent in [message].
+  ///
+  /// If the poll allows only one vote per user, the vote replaces the previous one. The [option] must carry its id;
+  /// if it does not, the call returns a failure without voting.
+  Future<Result<PollVoteResponse>> castPollVote(
     Message message,
     Poll poll,
     PollOption option,
@@ -1488,7 +1505,9 @@ class Channel {
 
     final optionId = option.id;
     if (optionId == null) {
-      throw ArgumentError('Option id cannot be null');
+      return const Result.failure(
+        StreamClientException(message: 'The poll option has no id, so it cannot be voted for.'),
+      );
     }
 
     return _pollVoteLock.synchronized(
@@ -1500,8 +1519,10 @@ class Channel {
     );
   }
 
-  /// Add a new answer to the given [poll].
-  Future<CastPollVoteResponse> addPollAnswer(
+  /// Adds [answerText] as an answer to [poll], which was sent in [message].
+  ///
+  /// Each user has one answer per poll; a new one replaces the previous one.
+  Future<Result<PollVoteResponse>> addPollAnswer(
     Message message,
     Poll poll, {
     required String answerText,
@@ -1516,17 +1537,19 @@ class Channel {
     );
   }
 
-  /// Remove a vote on the given [poll] with the given [vote].
-  Future<RemovePollVoteResponse> removePollVote(
+  /// Removes [vote], a vote or answer on [poll], which was sent in [message].
+  ///
+  /// The [vote] must carry its id; if it does not, the call returns a failure without removing anything.
+  Future<Result<PollVoteResponse>> removePollVote(
     Message message,
     Poll poll,
     PollVote vote,
-  ) {
+  ) async {
     _checkInitialized();
 
     final voteId = vote.id;
     if (voteId == null) {
-      throw ArgumentError('Vote id cannot be null');
+      return const Result.failure(StreamClientException(message: 'The poll vote has no id, so it cannot be removed.'));
     }
 
     return _pollVoteLock.synchronized(
@@ -1538,20 +1561,26 @@ class Channel {
     );
   }
 
-  /// Query the poll votes for the given [pollId] with the given [filter] and
-  /// [sort] options.
-  Future<QueryPollVotesResponse> queryPollVotes(
+  /// Fetches one page of the votes and answers matching [filter] on the poll with the id [pollId], ordered by [sort].
+  ///
+  /// Up to [limit] votes are returned. The next page is fetched by passing the `next` cursor of a response as [next],
+  /// and the previous page by passing its `prev` cursor as [prev]. At most one of [next] and [prev] may be given.
+  Future<Result<QueryPollVotesResponse>> queryPollVotes(
     String pollId, {
     PollVoteFilter? filter,
     List<PollVoteSort>? sort,
-    PaginationParams pagination = const PaginationParams(),
+    int limit = 10,
+    String? next,
+    String? prev,
   }) {
     _checkInitialized();
     return _client.queryPollVotes(
       pollId,
       filter: filter,
       sort: sort,
-      pagination: pagination,
+      limit: limit,
+      next: next,
+      prev: prev,
     );
   }
 
@@ -2128,7 +2157,7 @@ class Channel {
       channelState ??= await _client.queryChannel(
         type,
         channelId: id,
-        channelData: _extraData,
+        channelData: _custom,
         state: state,
         watch: watch,
         presence: presence,
