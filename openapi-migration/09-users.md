@@ -27,10 +27,9 @@
 
 ## Decisions to make
 
-- `User` and `OwnUser` are public, persisted, and embedded in nearly every other response. This group restructures them, last: the mappers in `user_mapper.dart` already map the generated types onto the current class for every group before it, and stay. See [01-foundation](01-foundation.md).
+- `User` and `OwnUser` are public, persisted, and embedded in nearly every other response. This group restructures them, last: the mappers in `users_mapper.dart` already map the generated types onto the current class for every group before it, and stay. See [01-foundation](01-foundation.md).
 - `PrivacySettings` and the push-preference sub-shapes — decide per type.
-- `UserResponse.toModel()` and `FullUserResponse.toModel()` drop custom data named like one of the user's own fields (`_shadowedCustomKeys`): `deactivated_at`, `deleted_at` and `shadow_banned` are refilled from the typed fields, and the `OwnUser`-only keys and `revoke_tokens_issued_before` are left out, where v1 kept them in a plain user's `extraData`. Revisit once the mapper serves plain users.
-- **Whether `User` promotes its `extraData`-backed getters to real fields.** `User.deactivatedAt`, `deletedAt` and `shadowBanned`, added in [20](20-user-updates.md) the way `Member` promoted its fields, arrive as root fields but live in `extraData` and are read back through getters; the constructors write them there. Promoting them is a break: their keys leave `extraData`, a key set in `extraData` no longer sets the field, and a `custom` filter or sort field naming one reads null locally. When promoting: (1) decide each field's `merge` rule (`OwnUser.merge` takes the other user's `extraData` whole today); (2) make `toJson` leave out `extraData` keys named like a field; (3) keep the constructor copying `extraData`; (4) add persistence columns; (5) point `UserFilterField.shadowBanned` at the field. Decide together with [11](11-channels-and-members.md)'s `ChannelModel` and `Member` promotions. `revokeTokensIssuedBefore` stays out of `User`.
+- **`User` promotes its `extraData`-backed values to fields** (README rule 9). `name` and `image`, which `UserResponse` types, and `deactivatedAt`, `deletedAt` and `shadowBanned`, which [20](20-user-updates.md) added as getters over `extraData`, become fields, and the constructor stops writing them into `extraData`; decide whether `name` keeps its fallback to `id`. `revoke_tokens_issued_before` and `blocked_user_ids`, which v1 kept in a plain user's `extraData`, become fields or are dropped, never `extraData`. The user mappers then copy `custom` verbatim into the field, renamed `custom`, with no `_shadowedCustomKeys`, and `UserRequestMapper` stops reading `extraData['name']` and `['image']`. When promoting: decide each field's `merge` rule (`OwnUser.merge` takes the other user's `extraData` whole today), make `toJson` leave out custom keys named like a field, add persistence columns, and point `UserFilterField.shadowBanned` at the field.
 - `UserFilterField.bypassModeration` reads `extraData`, which no generated user has a field to fill.
 - `queryUsers` answers `FullUserResponse`, which [20](20-user-updates.md) already maps to `User`; the caller's own entry could map to `OwnUser` once `Mute`, `ChannelMute` and `PrivacySettings` have response mappers.
 
@@ -40,6 +39,7 @@
 - User data arrives over the WebSocket on nearly every event.
 - `ConnectUserDetails.fromOwnUser` flattens the whole `extraData` into the connect payload, so the `deactivated_at`, `deleted_at` and `shadow_banned` entries the [20](20-user-updates.md) getters read go back to the server as custom data (v10 already did this for `shadow_banned`). Strip the user's own keys there when the WebSocket moves to v2.
 - Landing `UserResponse` -> `User` unblocks the two fields [08](08-moderation-and-blocklists.md) had to drop from `MuteUsersResponse`: the `mutes` the call created and the `ownUser` it left behind. Adding them is additive for anyone reading the response, so revisit them here rather than leaving them dropped for good.
+- Until then, a user mapped from `UserResponse` and the same user decoded from v1 JSON carry different `extraData`: the v1 path keeps `blocked_user_ids`, `deleted_at`, `deactivated_at` and `revoke_tokens_issued_before`, the mapper drops them. Equality includes `extraData`, so a `Poll` from a REST call (its `createdBy`, its votes' `user`) and the same poll from an event compare unequal.
 
 ## Definition of done
 
@@ -47,6 +47,8 @@
       hand-written, with the reason.
 - [ ] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
 - [ ] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
+- [ ] `copywith_audit.py` was run for every model that loses a v10 `copyWith`, every site it reports is
+      handled, and the semantics change is in the CHANGELOG and the guide ([README rule 2](README.md#domain-models)).
 - [ ] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
       persists anything.
 - [ ] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.
@@ -59,5 +61,8 @@
       name states its subject and behaviour.
 - [ ] Temporary adapters owned by this group (`DeviceV1JsonConverter`) are deleted and removed from
       the table in `README.md`.
-- [ ] `user_mapper.dart` maps onto the restructured `User`, and its `TODO(openapi-migration)` note is
+- [ ] `users_mapper.dart` maps onto the restructured `User`, and its `TODO(openapi-migration)` note is
       gone.
+- [ ] A user mapped from `UserResponse` and the same user decoded from v1 / WebSocket JSON compare equal.
+- [ ] `users_mapper.dart` has no `_shadowedCustomKeys`: `User.custom` is the wire's `custom`, verbatim, and
+      no typed field is written into it.

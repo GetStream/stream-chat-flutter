@@ -115,9 +115,9 @@ class ChannelsRepository {
 
   /// Marks a channel, or one of its threads, as unread for the current user.
   ///
-  /// Takes exactly one of [messageId], [messageTimestamp] and [threadId]. [messageId] marks that message and every
-  /// later one as unread, [messageTimestamp] every message created after it, and [threadId], the id of a thread's
-  /// parent message, that thread.
+  /// Takes exactly one of [messageId], [messageTimestamp] and [threadId]. With [messageId], marks that message and
+  /// every later one as unread. With [messageTimestamp], marks every message created after it as unread. With
+  /// [threadId], the id of a thread's parent message, marks that thread as unread.
   Future<Result<void>> markUnread(
     String channelId,
     String channelType, {
@@ -139,14 +139,14 @@ class ChannelsRepository {
   }
 
   /// Marks all of the current user's channels as read.
-  Future<Result<MarkReadResponse>> markChannelsRead() async {
+  Future<Result<MarkReadResponse>> markAllRead() async {
     final result = await _api.markChannelsRead(markChannelsReadRequest: const api.MarkChannelsReadRequest());
 
     return result.map((response) => response.toModel());
   }
 
   /// Sends delivery receipts for the messages in [deliveries].
-  Future<Result<MarkDeliveredResponse>> markDelivered(Iterable<MessageDelivery> deliveries) async {
+  Future<Result<MarkDeliveredResponse>> markChannelsDelivered(Iterable<MessageDelivery> deliveries) async {
     final result = await _api.markDelivered(
       markDeliveredRequest: api.MarkDeliveredRequest(
         latestDeliveredMessages: [...deliveries.map((it) => it.toRequest())],

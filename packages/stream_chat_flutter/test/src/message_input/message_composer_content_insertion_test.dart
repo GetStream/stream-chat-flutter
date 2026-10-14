@@ -62,8 +62,8 @@ Future<void> _pumpComposer(
   when(() => channel.client).thenReturn(client);
   when(channel.getRemainingCooldown).thenReturn(0);
   when(() => channel.lastMessageAt).thenReturn(DateTime.parse('2020-06-22 12:00:00'));
-  when(() => channel.extraData).thenReturn({'name': 'test'});
-  when(() => channel.extraDataStream).thenAnswer((_) => Stream.value({'name': 'test'}));
+  when(() => channel.custom).thenReturn({'name': 'test'});
+  when(() => channel.customStream).thenAnswer((_) => Stream.value({'name': 'test'}));
   when(() => channelState.members).thenReturn([member]);
   when(() => channelState.membersStream).thenAnswer((_) => Stream.value([member]));
   when(() => channelState.messages).thenReturn([]);

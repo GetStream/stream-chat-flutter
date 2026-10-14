@@ -74,7 +74,7 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
   final List<String> _trackedUploads = [];
 
   String get _name => _nameController.text.trim();
-  String get _initialName => (_channel.extraData['name'] as String?) ?? '';
+  String get _initialName => (_channel.custom['name'] as String?) ?? '';
 
   bool get _isDirty {
     if (_name != _initialName) return true;

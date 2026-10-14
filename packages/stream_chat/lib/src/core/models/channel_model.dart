@@ -12,9 +12,6 @@ part 'channel_model.g.dart';
 @JsonSerializable()
 class ChannelModel {
   /// Creates a channel model.
-  ///
-  /// The [disabled], [hidden], [muted], [blocked], [truncatedAt], [truncatedBy], [autoTranslationEnabled] and
-  /// [autoTranslationLanguage] arguments, when given, are stored in [extraData], replacing the entry each one reads.
   ChannelModel({
     String? id,
     String? type,
@@ -29,19 +26,19 @@ class ChannelModel {
     this.deletedAt,
     this.memberCount = 0,
     this.members,
-    Map<String, Object?> extraData = const {},
+    Map<String, Object?> custom = const {},
     this.team,
     this.cooldown = 0,
-    bool? disabled,
-    bool? hidden,
-    bool? muted,
-    bool? blocked,
-    DateTime? truncatedAt,
+    this.disabled,
+    this.hidden,
+    this.muted,
+    this.blocked,
+    this.truncatedAt,
     this.messageCount,
     this.filterTags,
-    User? truncatedBy,
-    bool? autoTranslationEnabled,
-    String? autoTranslationLanguage,
+    this.truncatedBy,
+    this.autoTranslationEnabled,
+    this.autoTranslationLanguage,
   }) : assert(
          (cid != null && cid.contains(':')) || (id != null && type != null),
          'provide either a cid or an id and type',
@@ -53,20 +50,7 @@ class ChannelModel {
        createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now(),
        ownCapabilities = ownCapabilities?.map(ChannelCapability.new).toList(),
-
-       // For backwards compatibility, set 'disabled', 'hidden', 'muted', 'blocked', 'truncated_at', 'truncated_by',
-       // 'auto_translation_enabled' and 'auto_translation_language' in [extraData].
-       extraData = {
-         ...extraData,
-         if (disabled != null) 'disabled': disabled,
-         if (hidden != null) 'hidden': hidden,
-         if (muted != null) 'muted': muted,
-         if (blocked != null) 'blocked': blocked,
-         if (truncatedAt != null) 'truncated_at': truncatedAt.toIso8601String(),
-         if (truncatedBy != null) 'truncated_by': truncatedBy.toJson(),
-         if (autoTranslationEnabled != null) 'auto_translation_enabled': autoTranslationEnabled,
-         if (autoTranslationLanguage != null) 'auto_translation_language': autoTranslationLanguage,
-       };
+       custom = {...custom};
 
   /// Create a new instance from a json
   factory ChannelModel.fromJson(Map<String, dynamic> json) => _$ChannelModelFromJson(
@@ -142,49 +126,50 @@ class ChannelModel {
   final int cooldown;
 
   /// True if the channel is disabled
-  @JsonKey(includeToJson: false, includeFromJson: false)
-  bool? get disabled => extraData['disabled'].safeCast<bool>();
+  @JsonKey(includeIfNull: false)
+  final bool? disabled;
 
   /// True if the channel is hidden
-  @JsonKey(includeToJson: false, includeFromJson: false)
-  bool? get hidden => extraData['hidden'].safeCast<bool>();
+  @JsonKey(includeIfNull: false)
+  final bool? hidden;
 
   /// True if the channel is muted by the current user
-  @JsonKey(includeToJson: false, includeFromJson: false)
-  bool? get muted => extraData['muted'].safeCast<bool>();
+  @JsonKey(includeIfNull: false)
+  final bool? muted;
 
   /// True if the channel is blocked by the current user
-  @JsonKey(includeToJson: false, includeFromJson: false)
-  bool? get blocked => extraData['blocked'].safeCast<bool>();
+  @JsonKey(includeIfNull: false)
+  final bool? blocked;
 
   /// The date of the last time channel got truncated
-  @JsonKey(includeToJson: false, includeFromJson: false)
-  DateTime? get truncatedAt {
-    final truncatedAt = extraData['truncated_at'].safeCast<String>();
-    if (truncatedAt != null && truncatedAt.isNotEmpty) {
-      return DateTime.parse(truncatedAt);
-    }
+  @JsonKey(includeIfNull: false, fromJson: _dateFromJson)
+  final DateTime? truncatedAt;
 
-    return null;
-  }
+  static DateTime? _dateFromJson(Object? value) => switch (value) {
+    final String date when date.isNotEmpty => DateTime.parse(date),
+    _ => null,
+  };
 
   /// The user that last truncated this channel.
-  @JsonKey(includeToJson: false, includeFromJson: false)
-  User? get truncatedBy => switch (extraData['truncated_by']) {
+  @JsonKey(includeIfNull: false, fromJson: _userFromJson)
+  final User? truncatedBy;
+
+  static User? _userFromJson(Object? value) => switch (value) {
     final Map<String, dynamic> json when json['id'] is String => User.fromJson(json),
     _ => null,
   };
 
   /// Whether messages in this channel are translated automatically.
-  @JsonKey(includeToJson: false, includeFromJson: false)
-  bool? get autoTranslationEnabled => extraData['auto_translation_enabled'].safeCast<bool>();
+  @JsonKey(includeIfNull: false)
+  final bool? autoTranslationEnabled;
 
   /// The language messages in this channel are translated into automatically.
-  @JsonKey(includeToJson: false, includeFromJson: false)
-  String? get autoTranslationLanguage => extraData['auto_translation_language'].safeCast<String>();
+  @JsonKey(includeIfNull: false)
+  final String? autoTranslationLanguage;
 
-  /// Map of custom channel extraData
-  final Map<String, Object?> extraData;
+  /// This channel's custom data: every key not in [topLevelFields].
+  @JsonKey(name: 'extra_data')
+  final Map<String, Object?> custom;
 
   /// The team the channel belongs to
   @JsonKey(includeToJson: false)
@@ -192,7 +177,7 @@ class ChannelModel {
 
   /// Shortcut for channel name
   String? get name {
-    final name = extraData['name'].safeCast<String>();
+    final name = custom['name'].safeCast<String>();
     if (name != null && name.isNotEmpty) return name;
 
     return null;
@@ -211,8 +196,7 @@ class ChannelModel {
   @JsonKey(includeToJson: false)
   final List<String>? filterTags;
 
-  /// Known top level fields.
-  /// Useful for [Serializer] methods.
+  /// The JSON keys [ChannelModel.fromJson] reads into named fields; every other key is kept in [custom].
   static const topLevelFields = [
     'id',
     'type',
@@ -231,11 +215,22 @@ class ChannelModel {
     'cooldown',
     'message_count',
     'filter_tags',
+    'disabled',
+    'hidden',
+    'muted',
+    'blocked',
+    'truncated_at',
+    'truncated_by',
+    'auto_translation_enabled',
+    'auto_translation_language',
   ];
 
   /// Serialize to json
+  ///
+  /// Writes the entries of [custom] at the root, leaving out any named like one of [topLevelFields].
   Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
     _$ChannelModelToJson(this),
+    topLevelFields: topLevelFields,
   );
 
   /// Creates a copy of [ChannelModel] with specified attributes overridden.
@@ -253,7 +248,7 @@ class ChannelModel {
     DateTime? deletedAt,
     int? memberCount,
     List<Member>? members,
-    Map<String, Object?>? extraData,
+    Map<String, Object?>? custom,
     String? team,
     int? cooldown,
     bool? disabled,
@@ -263,6 +258,9 @@ class ChannelModel {
     DateTime? truncatedAt,
     int? messageCount,
     List<String>? filterTags,
+    User? truncatedBy,
+    bool? autoTranslationEnabled,
+    String? autoTranslationLanguage,
   }) => ChannelModel(
     id: id ?? this.id,
     type: type ?? this.type,
@@ -277,22 +275,19 @@ class ChannelModel {
     deletedAt: deletedAt ?? this.deletedAt,
     memberCount: memberCount ?? this.memberCount,
     members: members ?? this.members,
-    extraData: extraData ?? this.extraData,
+    custom: custom ?? this.custom,
     team: team ?? this.team,
     cooldown: cooldown ?? this.cooldown,
-    disabled: disabled ?? extraData?['disabled'].safeCast<bool>() ?? this.disabled,
-    hidden: hidden ?? extraData?['hidden'].safeCast<bool>() ?? this.hidden,
-    muted: muted ?? extraData?['muted'].safeCast<bool>() ?? this.muted,
-    blocked: blocked ?? extraData?['blocked'].safeCast<bool>() ?? this.blocked,
-    truncatedAt:
-        truncatedAt ??
-        (extraData?['truncated_at'] == null
-            ? null
-            // ignore: cast_nullable_to_non_nullable
-            : DateTime.parse(extraData?['truncated_at'] as String)) ??
-        this.truncatedAt,
+    disabled: disabled ?? this.disabled,
+    hidden: hidden ?? this.hidden,
+    muted: muted ?? this.muted,
+    blocked: blocked ?? this.blocked,
+    truncatedAt: truncatedAt ?? this.truncatedAt,
     messageCount: messageCount ?? this.messageCount,
     filterTags: filterTags ?? this.filterTags,
+    truncatedBy: truncatedBy ?? this.truncatedBy,
+    autoTranslationEnabled: autoTranslationEnabled ?? this.autoTranslationEnabled,
+    autoTranslationLanguage: autoTranslationLanguage ?? this.autoTranslationLanguage,
   );
 
   /// Returns a new [ChannelModel] that is a combination of this channelModel
@@ -313,7 +308,7 @@ class ChannelModel {
       deletedAt: other.deletedAt,
       memberCount: other.memberCount,
       members: other.members,
-      extraData: other.extraData,
+      custom: other.custom,
       team: other.team,
       cooldown: other.cooldown,
       disabled: other.disabled,
@@ -323,6 +318,10 @@ class ChannelModel {
       truncatedAt: other.truncatedAt,
       messageCount: other.messageCount,
       filterTags: other.filterTags,
+      truncatedBy: other.truncatedBy,
+      // A channel only carries its auto-translation flag while auto translation is on, so its absence turns it off.
+      autoTranslationEnabled: other.autoTranslationEnabled ?? false,
+      autoTranslationLanguage: other.autoTranslationLanguage,
     );
   }
 }
