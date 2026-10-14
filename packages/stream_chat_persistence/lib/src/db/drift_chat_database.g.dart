@@ -6487,13 +6487,13 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
     defaultValue: currentDateAndTime,
   );
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String> extraData = GeneratedColumn<String>(
-    'extra_data',
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String> custom = GeneratedColumn<String>(
+    'custom',
     aliasedName,
     true,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-  ).withConverter<Map<String, dynamic>?>($PollsTable.$converterextraDatan);
+  ).withConverter<Map<String, dynamic>?>($PollsTable.$convertercustomn);
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -6514,7 +6514,7 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
     createdById,
     createdAt,
     updatedAt,
-    extraData,
+    custom,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -6719,10 +6719,10 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
-      extraData: $PollsTable.$converterextraDatan.fromSql(
+      custom: $PollsTable.$convertercustomn.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
-          data['${effectivePrefix}extra_data'],
+          data['${effectivePrefix}custom'],
         ),
       ),
     );
@@ -6738,9 +6738,9 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
   static TypeConverter<List<String>, String> $converteroptions = ListConverter<String>();
   static TypeConverter<VotingVisibility, String> $convertervotingVisibility = const VotingVisibilityConverter();
   static TypeConverter<Map<String, int>, String> $convertervoteCountsByOption = MapConverter<int>();
-  static TypeConverter<Map<String, dynamic>, String> $converterextraData = MapConverter();
-  static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan = NullAwareTypeConverter.wrap(
-    $converterextraData,
+  static TypeConverter<Map<String, dynamic>, String> $convertercustom = MapConverter();
+  static TypeConverter<Map<String, dynamic>?, String?> $convertercustomn = NullAwareTypeConverter.wrap(
+    $convertercustom,
   );
 }
 
@@ -6808,8 +6808,8 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
   /// The date when the poll was last updated.
   final DateTime updatedAt;
 
-  /// Map of custom poll extraData
-  final Map<String, dynamic>? extraData;
+  /// Custom data attached to the poll.
+  final Map<String, dynamic>? custom;
   const PollEntity({
     required this.id,
     required this.name,
@@ -6829,7 +6829,7 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
     this.createdById,
     required this.createdAt,
     required this.updatedAt,
-    this.extraData,
+    this.custom,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -6880,9 +6880,9 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
-    if (!nullToAbsent || extraData != null) {
-      map['extra_data'] = Variable<String>(
-        $PollsTable.$converterextraDatan.toSql(extraData),
+    if (!nullToAbsent || custom != null) {
+      map['custom'] = Variable<String>(
+        $PollsTable.$convertercustomn.toSql(custom),
       );
     }
     return map;
@@ -6920,7 +6920,7 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
       createdById: serializer.fromJson<String?>(json['createdById']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
-      extraData: serializer.fromJson<Map<String, dynamic>?>(json['extraData']),
+      custom: serializer.fromJson<Map<String, dynamic>?>(json['custom']),
     );
   }
   @override
@@ -6951,7 +6951,7 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
       'createdById': serializer.toJson<String?>(createdById),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
-      'extraData': serializer.toJson<Map<String, dynamic>?>(extraData),
+      'custom': serializer.toJson<Map<String, dynamic>?>(custom),
     };
   }
 
@@ -6974,7 +6974,7 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
     Value<String?> createdById = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
-    Value<Map<String, dynamic>?> extraData = const Value.absent(),
+    Value<Map<String, dynamic>?> custom = const Value.absent(),
   }) => PollEntity(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -6994,7 +6994,7 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
     createdById: createdById.present ? createdById.value : this.createdById,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
-    extraData: extraData.present ? extraData.value : this.extraData,
+    custom: custom.present ? custom.value : this.custom,
   );
   PollEntity copyWithCompanion(PollsCompanion data) {
     return PollEntity(
@@ -7018,7 +7018,7 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
       createdById: data.createdById.present ? data.createdById.value : this.createdById,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
-      extraData: data.extraData.present ? data.extraData.value : this.extraData,
+      custom: data.custom.present ? data.custom.value : this.custom,
     );
   }
 
@@ -7043,7 +7043,7 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
           ..write('createdById: $createdById, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
-          ..write('extraData: $extraData')
+          ..write('custom: $custom')
           ..write(')'))
         .toString();
   }
@@ -7068,7 +7068,7 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
     createdById,
     createdAt,
     updatedAt,
-    extraData,
+    custom,
   );
   @override
   bool operator ==(Object other) =>
@@ -7092,7 +7092,7 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
           other.createdById == this.createdById &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
-          other.extraData == this.extraData);
+          other.custom == this.custom);
 }
 
 class PollsCompanion extends UpdateCompanion<PollEntity> {
@@ -7114,7 +7114,7 @@ class PollsCompanion extends UpdateCompanion<PollEntity> {
   final Value<String?> createdById;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
-  final Value<Map<String, dynamic>?> extraData;
+  final Value<Map<String, dynamic>?> custom;
   final Value<int> rowid;
   const PollsCompanion({
     this.id = const Value.absent(),
@@ -7135,7 +7135,7 @@ class PollsCompanion extends UpdateCompanion<PollEntity> {
     this.createdById = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
-    this.extraData = const Value.absent(),
+    this.custom = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PollsCompanion.insert({
@@ -7157,13 +7157,13 @@ class PollsCompanion extends UpdateCompanion<PollEntity> {
     this.createdById = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
-    this.extraData = const Value.absent(),
+    this.custom = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name),
        options = Value(options),
        voteCountsByOption = Value(voteCountsByOption);
-  static Insertable<PollEntity> custom({
+  static Insertable<PollEntity> createCustom({
     Expression<String>? id,
     Expression<String>? name,
     Expression<String>? nameI18n,
@@ -7182,7 +7182,7 @@ class PollsCompanion extends UpdateCompanion<PollEntity> {
     Expression<String>? createdById,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
-    Expression<String>? extraData,
+    Expression<String>? custom,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -7204,7 +7204,7 @@ class PollsCompanion extends UpdateCompanion<PollEntity> {
       if (createdById != null) 'created_by_id': createdById,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
-      if (extraData != null) 'extra_data': extraData,
+      if (custom != null) 'custom': custom,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -7228,7 +7228,7 @@ class PollsCompanion extends UpdateCompanion<PollEntity> {
     Value<String?>? createdById,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
-    Value<Map<String, dynamic>?>? extraData,
+    Value<Map<String, dynamic>?>? custom,
     Value<int>? rowid,
   }) {
     return PollsCompanion(
@@ -7250,7 +7250,7 @@ class PollsCompanion extends UpdateCompanion<PollEntity> {
       createdById: createdById ?? this.createdById,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      extraData: extraData ?? this.extraData,
+      custom: custom ?? this.custom,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -7326,9 +7326,9 @@ class PollsCompanion extends UpdateCompanion<PollEntity> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
-    if (extraData.present) {
-      map['extra_data'] = Variable<String>(
-        $PollsTable.$converterextraDatan.toSql(extraData.value),
+    if (custom.present) {
+      map['custom'] = Variable<String>(
+        $PollsTable.$convertercustomn.toSql(custom.value),
       );
     }
     if (rowid.present) {
@@ -7358,7 +7358,7 @@ class PollsCompanion extends UpdateCompanion<PollEntity> {
           ..write('createdById: $createdById, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
-          ..write('extraData: $extraData, ')
+          ..write('custom: $custom, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -10001,6 +10001,8 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
   final bool banned;
 
   /// The date at which the ban will expire.
+  ///
+  /// Null when the ban has no expiry.
   final DateTime? banExpires;
 
   /// True if the member is shadow banned from the channel
@@ -16131,7 +16133,7 @@ typedef $$PollsTableCreateCompanionBuilder =
       Value<String?> createdById,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
-      Value<Map<String, dynamic>?> extraData,
+      Value<Map<String, dynamic>?> custom,
       Value<int> rowid,
     });
 typedef $$PollsTableUpdateCompanionBuilder =
@@ -16154,7 +16156,7 @@ typedef $$PollsTableUpdateCompanionBuilder =
       Value<String?> createdById,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
-      Value<Map<String, dynamic>?> extraData,
+      Value<Map<String, dynamic>?> custom,
       Value<int> rowid,
     });
 
@@ -16280,11 +16282,10 @@ class $$PollsTableFilterComposer extends Composer<_$DriftChatDatabase, $PollsTab
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<Map<String, dynamic>?, Map<String, dynamic>, String> get extraData =>
-      $composableBuilder(
-        column: $table.extraData,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
+  ColumnWithTypeConverterFilters<Map<String, dynamic>?, Map<String, dynamic>, String> get custom => $composableBuilder(
+    column: $table.custom,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
 
   Expression<bool> pollVotesRefs(
     Expression<bool> Function($$PollVotesTableFilterComposer f) f,
@@ -16409,8 +16410,8 @@ class $$PollsTableOrderingComposer extends Composer<_$DriftChatDatabase, $PollsT
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get extraData => $composableBuilder(
-    column: $table.extraData,
+  ColumnOrderings<String> get custom => $composableBuilder(
+    column: $table.custom,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -16491,8 +16492,8 @@ class $$PollsTableAnnotationComposer extends Composer<_$DriftChatDatabase, $Poll
 
   GeneratedColumn<DateTime> get updatedAt => $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String> get extraData =>
-      $composableBuilder(column: $table.extraData, builder: (column) => column);
+  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String> get custom =>
+      $composableBuilder(column: $table.custom, builder: (column) => column);
 
   Expression<T> pollVotesRefs<T extends Object>(
     Expression<T> Function($$PollVotesTableAnnotationComposer a) f,
@@ -16562,7 +16563,7 @@ class $$PollsTableTableManager
                 Value<String?> createdById = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
-                Value<Map<String, dynamic>?> extraData = const Value.absent(),
+                Value<Map<String, dynamic>?> custom = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PollsCompanion(
                 id: id,
@@ -16583,7 +16584,7 @@ class $$PollsTableTableManager
                 createdById: createdById,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
-                extraData: extraData,
+                custom: custom,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -16606,7 +16607,7 @@ class $$PollsTableTableManager
                 Value<String?> createdById = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
-                Value<Map<String, dynamic>?> extraData = const Value.absent(),
+                Value<Map<String, dynamic>?> custom = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PollsCompanion.insert(
                 id: id,
@@ -16627,7 +16628,7 @@ class $$PollsTableTableManager
                 createdById: createdById,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
-                extraData: extraData,
+                custom: custom,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

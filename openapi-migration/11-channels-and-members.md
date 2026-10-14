@@ -67,7 +67,7 @@
 ## Decisions to make
 
 - `ChannelState`, `ChannelModel` and `Member` are public, persisted, and rebuilt from WebSocket events. Keep ours and map.
-- **Whether `ChannelModel` and `Member` promote their `extraData`-backed getters to real fields.** `ChannelModel.disabled`, `hidden`, `muted`, `blocked`, `truncatedAt`, `truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires` and `deletedAt`, all arrive as root fields but live in `extraData` and are read back through getters; the constructors write them there. Promoting them is a break: their keys leave `extraData`, a key set in `extraData` no longer sets the field, and a `custom` filter or sort field naming one reads null locally. When promoting: (1) decide each field's `merge` rule. Today `ChannelModel.merge` keeps the flags and `truncatedAt` when a payload leaves them out and drops the other three, as on v11; `Member` has no `merge`. The server always sends `disabled`, omits `hidden` and `blocked` from every event, clears `truncated_by` only through a server-side update (and may leave it out where it does not load the user), never sends `muted` or `mute_expires_at` on the channel, and omits `auto_translation_*` when false or empty. (2) Make `toJson` leave out `extraData` keys named like a field, or a same-named `extraData` key overwrites the field in the output. (3) Keep the constructor copying `extraData`. (4) Add persistence columns; `truncatedBy` is a user, so it needs the users table or a stored map. Raised on [#2958](https://github.com/GetStream/stream-chat-flutter/pull/2958).
+- **`ChannelModel` and `Member` promote their `extraData`-backed getters to fields** (README rule 9). `ChannelModel.disabled`, `hidden`, `muted`, `blocked`, `truncatedAt`, `truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires` and `deletedAt`, all arrive as root fields but live in `extraData` and are read back through getters; they become fields with persistence columns, and the constructors stop writing them into the custom data, which is renamed `custom`. `name` and `image` stay in it: `ChannelResponse` has no such fields. Their keys leave the custom data, a key set there no longer sets the field, and a `custom` filter or sort field naming one reads null locally. When promoting: (1) decide each field's `merge` rule. Today `ChannelModel.merge` keeps the flags and `truncatedAt` when a payload leaves them out and drops the other three, as on v11; `Member` has no `merge`. The server always sends `disabled`, omits `hidden` and `blocked` from every event, clears `truncated_by` only through a server-side update (and may leave it out where it does not load the user), never sends `muted` or `mute_expires_at` on the channel, and omits `auto_translation_*` when false or empty. (2) Make `toJson` leave out custom keys named like a field, or a same-named key overwrites the field in the output. (3) Add persistence columns; `truncatedBy` is a user, so it needs the users table or a stored map. Raised on [#2958](https://github.com/GetStream/stream-chat-flutter/pull/2958).
 - **Whether `ChannelConfig` exposes the generated-only config fields.** `ChannelConfigWithInfo` carries `allowedFlagReasons`, `automodBehavior`, `automodThresholds`, `blocklist`, `blocklistBehavior`, `blocklists`, `countMessages`, `customEvents`, `grants`, `name`, `partitionSize`, `partitionTtl`, `quotes` and `reminders`, which `ChannelConfig` does not model and v1 drops as well. `blocklists` and `automodThresholds` would need hand-written models. The mapper marks the drop with a TODO.
 - **Expose `hide_messages_before` on `ChannelState`.** `clear_history` writes it on the caller's member row, and the server returns it next to `channel` in each channel-state entry (`ChannelStateResponse.hideMessagesBefore`), never on the channel itself. v1 drops it today.
 - `sync` returns `SyncResponse` — one of the two models that needed the WSEvent generator patch. Verify it decodes before relying on it.
@@ -75,7 +75,7 @@
 ## Decisions taken
 
 - **The generated channel and member types map onto today's classes.**
-  `lib/src/repository/mapper/channel_mapper.dart` maps `ChannelResponse`, `ChannelConfigWithInfo`,
+  `lib/src/repository/mapper/channels_mapper.dart` maps `ChannelResponse`, `ChannelConfigWithInfo`,
   `ChannelMemberResponse`, `Command` and `ChatPreferences` onto the json_serializable `ChannelModel`,
   `ChannelConfig`, `Member`, `Command` and `ChatPreferences`, the way `user_mapper.dart` does for
   `User`. [15](15-partial-updates.md) uses it first; groups 06, 07 and 14 will reuse it. This group
@@ -105,10 +105,10 @@
 
 - `sync` and `queryMembers` live in `general_api.dart`, not `channel_api.dart` — this group reaches into that file.
 - `queryChannels` drives the channel list controllers and the offline cache; a shape change here is felt everywhere.
-- Channel `custom`/`extraData` promotion, same class of problem as messages.
+- A consumer reading `channel.extraData['hidden']` and friends loses the key once the flags are fields; none in this repo.
 - **A zero timestamp decodes differently on v2.** v1 sends Go's zero time as `0001-01-01T00:00:00Z`; v2 encodes timestamps as epoch nanoseconds and sends `0`, which decodes as 1970-01-01. A truncated channel shows it: its `last_message_at` is zero time, so the same channel answers year 1 from a v1 query or WebSocket event and 1970 from `/api/v2/chat/channels`. Nothing in the SDK behaves differently today, since both precede `createdAt` (`lastUpdatedAt` falls back to it, and the read fallback and the `max` against new messages agree), but the two sources disagree on the value. Normalize it deliberately when `queryChannels` moves, and check the other timestamps the server can send as zero.
 - **Dates the mapper writes into `extraData` are formatted differently from v1.** v1 keeps the server's string (`2020-01-29T03:22:47.63613Z`); the mapper writes `toIso8601String()` (`2020-01-29T03:22:47.636130Z`). The getters return the same `DateTime`, but `Member` compares `extraData`, so the same member from a v1 payload and from the mapper compares unequal. Promoting the fields removes it.
-- [08](08-moderation-and-blocklists.md)'s `muteChannel` drops `channelMute`, `channelMutes` and `ownUser` because the generated `ChannelMute` carries a `ChannelResponse?` and a `UserResponse?` where ours needs a non-nullable `ChannelModel` and `User`. `channel_mapper.dart` covers the channel side now; it needs 09 as well. Decide the null case there too — ours are non-nullable, the generated ones are not, the same question [14](14-banned-users.md) records for `BanResponse.user`.
+- [08](08-moderation-and-blocklists.md)'s `muteChannel` drops `channelMute`, `channelMutes` and `ownUser` because the generated `ChannelMute` carries a `ChannelResponse?` and a `UserResponse?` where ours needs a non-nullable `ChannelModel` and `User`. `channels_mapper.dart` covers the channel side now; it needs 09 as well. Decide the null case there too — ours are non-nullable, the generated ones are not, the same question [14](14-banned-users.md) records for `BanResponse.user`.
 
 ## Definition of done
 
@@ -116,6 +116,8 @@
       hand-written, with the reason.
 - [ ] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
 - [ ] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
+- [ ] `copywith_audit.py` was run for every model that loses a v10 `copyWith`, every site it reports is
+      handled, and the semantics change is in the CHANGELOG and the guide ([README rule 2](README.md#domain-models)).
 - [ ] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
       persists anything.
 - [ ] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.
@@ -126,3 +128,5 @@
       retyped but whose docs it left alone.
 - [ ] Tests follow [`TESTING.md`](../TESTING.md): no `group` organizing a file by method, each
       name states its subject and behaviour.
+- [ ] `channels_mapper.dart` has no `_shadowedCustomKeys`: `ChannelModel.custom` is the wire's `custom`,
+      verbatim, and no flag is written into it.

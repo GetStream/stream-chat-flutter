@@ -12,11 +12,12 @@ PollOption _$PollOptionFromJson(Map<String, dynamic> json) => PollOption(
   textI18n: (json['text_i18n'] as Map<String, dynamic>?)?.map(
     (k, e) => MapEntry(k, e as String),
   ),
-  extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
+  custom: json['custom'] as Map<String, dynamic>? ?? const {},
 );
 
 Map<String, dynamic> _$PollOptionToJson(PollOption instance) => <String, dynamic>{
   'id': ?instance.id,
   'text': instance.text,
-  'extra_data': instance.extraData,
+  'text_i18n': ?instance.textI18n,
+  'custom': instance.custom,
 };

@@ -16,11 +16,8 @@ void main() {
       expect(converter.fromSql('public'), VotingVisibility.public);
     });
 
-    test('fromSql throws ArgumentError for invalid String', () {
-      expect(
-        () => converter.fromSql('invalid_value'),
-        throwsA(isA<ArgumentError>()),
-      );
+    test('fromSql keeps a visibility the SDK does not name', () {
+      expect(converter.fromSql('members_only'), const VotingVisibility('members_only'));
     });
   });
 }
