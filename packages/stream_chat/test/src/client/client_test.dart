@@ -1630,14 +1630,14 @@ void main() {
           ..channel = ChannelModel(
             id: channelId,
             type: channelType,
-            extraData: {...data},
+            custom: {...data},
           ),
       );
 
       final res = await client.updateChannel(channelId, channelType, data);
       expect(res, isNotNull);
       expect(res.channel.cid, '$channelType:$channelId');
-      expect(res.channel.extraData['name'], 'test-channel');
+      expect(res.channel.custom['name'], 'test-channel');
 
       verify(() => fakeChatApi.channel.updateChannel(channelId, channelType, data)).called(1);
       verifyNoMoreInteractions(fakeChatApi.channel);
@@ -3099,14 +3099,14 @@ void main() {
         final channel = client.channel(
           channelType,
           id: channelId,
-          extraData: channelData,
+          custom: channelData,
         );
 
         expect(channel, isNotNull);
         expect(channel.type, channelType);
         expect(channel.id, channelId);
         expect(channel.cid, '$channelType:$channelId');
-        expect(channel.extraData, channelData);
+        expect(channel.custom, channelData);
       });
 
       test('should return back in memory channel instance if available', () async {
@@ -3118,7 +3118,7 @@ void main() {
         final channel = client.channel(
           channelType,
           id: channelId,
-          extraData: channelData,
+          custom: channelData,
         );
 
         final channelState = ChannelState(
@@ -3174,7 +3174,7 @@ void main() {
       const channelCid = '$channelType:$channelId';
 
       final channelState = ChannelState(
-        channel: ChannelModel(cid: channelCid, extraData: channelData),
+        channel: ChannelModel(cid: channelCid, custom: channelData),
       );
 
       when(
@@ -3203,7 +3203,7 @@ void main() {
       expect(channel.type, channelType);
       expect(channel.id, channelId);
       expect(channel.cid, '$channelType:$channelId');
-      expect(channel.extraData, channelData);
+      expect(channel.custom, channelData);
 
       verify(
         () => fakeChatApi.channel.queryChannel(
@@ -3228,7 +3228,7 @@ void main() {
       const channelCid = '$channelType:$channelId';
 
       final channelState = ChannelState(
-        channel: ChannelModel(cid: channelCid, extraData: channelData),
+        channel: ChannelModel(cid: channelCid, custom: channelData),
       );
 
       when(
@@ -3257,7 +3257,7 @@ void main() {
       expect(channel.type, channelType);
       expect(channel.id, channelId);
       expect(channel.cid, '$channelType:$channelId');
-      expect(channel.extraData, channelData);
+      expect(channel.custom, channelData);
 
       verify(
         () => fakeChatApi.channel.queryChannel(
@@ -3282,7 +3282,7 @@ void main() {
       const channelCid = '$channelType:$channelId';
 
       final channelState = ChannelState(
-        channel: ChannelModel(cid: channelCid, extraData: channelData),
+        channel: ChannelModel(cid: channelCid, custom: channelData),
       );
 
       when(
@@ -3311,7 +3311,7 @@ void main() {
       expect(channel.type, channelType);
       expect(channel.id, channelId);
       expect(channel.cid, '$channelType:$channelId');
-      expect(channel.extraData, channelData);
+      expect(channel.custom, channelData);
 
       verify(
         () => fakeChatApi.channel.queryChannel(

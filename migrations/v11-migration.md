@@ -35,6 +35,7 @@ onto Stream's OpenAPI-generated API client.
     - [User Groups](#user-groups)
     - [Link Previews](#link-previews)
     - [Partial Updates](#partial-updates)
+    - [Channel and Member Custom Data](#channel-and-member-custom-data)
 - [Migration Checklist](#migration-checklist)
 - [For AI Agents](#for-ai-agents)
 - [Contributing to this guide](#contributing-to-this-guide)
@@ -82,6 +83,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Polls**](#polls) | Poll calls return a `Result`; eight responses become `PollResponse`, `PollOptionResponse` and `PollVoteResponse`; queries take `limit`/`next`/`prev`; `VotingVisibility` is an extension type; `extraData` is `custom` |
 | [**File Upload**](#file-upload) | Uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
 | [**Partial Updates**](#partial-updates) | Channel and member partial updates — `updatePartial`, `updateName`, `updateImage`, slow mode, pin and archive — return a `Result` instead of throwing; their responses take the API's names, `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse`, and `partialMemberUpdate` becomes `updateMemberPartial` |
+| [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`, and holds the custom data verbatim; the channel and member flags it carried are fields |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -123,7 +125,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `SortOption.ASC` / `.DESC` | `SortDirection.asc` / `.desc` | `retyped` | An enum carrying `value` (`1` / `-1`) rather than a bare `int` |
 | `const [SortOption.desc(f)]` | `[ChannelSort.desc(f)]` | `retyped` | **Drop the `const`.** A sort list can no longer be `const`: a `SortField` holds a closure that reads the value off the model, which is not a constant expression. Every v10 example wrote `const`, so expect this on the first line you touch |
 | `ChannelSortKey` / `MessageSortKey` / `UserSortKey` / … (extension types over `String`) | `ChannelSortField` / `MessageSearchSortField` / `UserSortField` / … | `retyped` | Same member names. A field is no longer a `String`: read `field.remote` for the wire name. `MessageSortKey` is named for its one endpoint: searching |
-| `SortOption.desc('my_custom_field')` | `ChannelSort.desc(ChannelSortField.custom('my_custom_field'))` | `retyped` | Only for a field the model does not declare, and only on channel, member, user and message-search sorts — the other queries pin their sort to declared fields and reject a custom one. `custom` reads `extraData`, so pointing it at a declared field sends the right wire name but reads `null` locally — an offline or re-sorted list comes back unordered |
+| `SortOption.desc('my_custom_field')` | `ChannelSort.desc(ChannelSortField.custom('my_custom_field'))` | `retyped` | Only for a field the model does not declare, and only on channel, member, user and message-search sorts — the other queries pin their sort to declared fields and reject a custom one. `custom` reads the model's custom data, so pointing it at a declared field sends the right wire name but reads `null` locally — an offline or re-sorted list comes back unordered |
 | `SortOrder<T extends ComparableFieldProvider>` | `List<ChannelSort>`, `List<MemberSort>`, … | `removed` | The typedef is gone; signatures name the model's sort type |
 | `SortOption.fromJson` | `ChannelSort.fromJson` | `moved` | `Sort` has no `fromJson`: the remote name has to resolve back to a declared field |
 | `SortOption(comparator:)` | — | `removed` | Declare a field whose value projects onto something orderable, or sort the list yourself |
@@ -260,6 +262,12 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `PartialUpdateChannelResponse` / `PartialUpdateMemberResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
 | `StreamChatApi.channel.updateChannelPartial` / `enableSlowdown` / `disableSlowdown` / `updateMemberPartial` | the `StreamChatClient` methods | `removed` | The endpoints moved to the generated client |
 | `MemberUpdatePayload(pinned: true).toJson()` / `MemberUpdateType.pinned.name` | `{'pinned': true}` / `'pinned'` | `removed` | Same for `archived`. Or call `pinChannel` / `unpinChannel` / `archiveChannel` / `unarchiveChannel` |
+| `ChannelModel.extraData` / `Member.extraData` | `ChannelModel.custom` / `Member.custom` | `renamed` | The wire's name for it; also the constructor and `copyWith` arguments |
+| `Channel.extraData` / `Channel.extraDataStream` / `Channel(…, extraData:)` / `StreamChatClient.channel(…, extraData:)` | `Channel.custom` / `Channel.customStream` / `custom:` | `renamed` | Follows `ChannelModel.custom`; the setter is renamed too |
+| `channel.extraData['disabled']` / `['hidden']` / `['muted']` / `['blocked']` / `['truncated_at']` / `['truncated_by']` / `['auto_translation_enabled']` / `['auto_translation_language']` | `ChannelModel.disabled` / `hidden` / `muted` / `blocked` / `truncatedAt` / `truncatedBy` / `autoTranslationEnabled` / `autoTranslationLanguage` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them |
+| `member.extraData['notifications_muted']` / `['status']` / `['ban_from_future_channels']` / `['future_channel_ban_expires']` / `['deleted_at']` | `Member.notificationsMuted` / `status` / `banFromFutureChannels` / `futureChannelBanExpires` / `deletedAt` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them |
+| `ChannelModel.custom` / `Member.custom` entry named like one of the model's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; `toJson` leaves it out so it cannot overwrite the field |
+| `member.extraData['role']` | `Member.channelRole` | `removed` | The server deprecated `role` for `channel_role` |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -452,7 +460,7 @@ counterpart: `code` is now a `StreamErrorCode` (an extension type over `int`, wi
 ## Offline Cache
 
 If you use `stream_chat_persistence`, the local database is **rebuilt from empty** the first time your app runs
-on v11. The Drift schema version moves from v10's `1000 + n` (`1035` in v10.5.0) to `1104`, and the upgrade strategy
+on v11. The Drift schema version moves from v10's `1000 + n` (`1035` in v10.5.0) to `1106`, and the upgrade strategy
 drops and recreates every table rather than migrating rows.
 
 Everything held on disk is discarded: channels, messages, members, reads, drafts, locations, polls, poll votes
@@ -714,6 +722,48 @@ directly — `updateMemberPartial(channelId: …, channelType: …, set: {'pinne
 > `Channel.pin` and its siblings answer the whole response because every migrated write returns its envelope, so a
 > field the API adds later reaches you without another break. `MemberUpdatePayload` and `MemberUpdateType` named
 > only two of the keys a membership accepts, so a plain map replaces them.
+
+### Channel and Member Custom Data
+
+**`extraData` is renamed `custom` on `ChannelModel`, `Member` and `Channel`.** That covers the fields, the
+constructor and `copyWith` arguments, `Channel.extraData`, `Channel.extraDataStream` (now `customStream`), and the
+`extraData` argument of `StreamChatClient.channel`.
+
+```dart
+// v10
+final channel = client.channel('messaging', id: 'general', extraData: {'topic': 'support'});
+final topic = channel.extraData['topic'];
+
+// v11
+final channel = client.channel('messaging', id: 'general', custom: {'topic': 'support'});
+final topic = channel.custom['topic'];
+```
+
+**The channel and member flags are fields, not custom data.** `ChannelModel.disabled`, `hidden` and `truncatedAt`
+read the same, and `muted`, `blocked`, `truncatedBy`, the auto-translation settings and `Member.notificationsMuted`,
+`status`, `banFromFutureChannels`, `futureChannelBanExpires` and `deletedAt` are new fields. `custom` no longer holds
+any of their keys, and an entry with one of those names in `custom` or in `copyWith(custom:)` no longer sets the
+field:
+
+```dart
+// v10
+final hidden = channel.extraData['hidden'] == true;
+final shown = model.copyWith(extraData: {...model.extraData, 'hidden': false});
+
+// v11
+final hidden = channel.hidden;
+final shown = model.copyWith(hidden: false);
+```
+
+**`custom` is the custom data exactly as the API returns it.** An entry named like one of the model's own fields
+stays in `custom` and leaves the field alone; `toJson` leaves it out, so it cannot overwrite the field.
+`Member.custom` no longer holds `role`, which the server deprecated: read `channelRole`.
+
+**Filter and sort on a flag through its declared field,** such as `ChannelFilterField.hidden`, rather than
+`.custom('hidden')`, which reads `custom` locally and finds nothing there.
+
+> **Why:** the API calls it `custom`, and every migrated model takes that name. The flags arrive as fields of their
+> own, so keeping them in the custom data let a custom entry with the same name overwrite them.
 
 ### Moderation
 

@@ -74,7 +74,7 @@ void main() {
     expect(channel.filterTags, ['support']);
   });
 
-  test('StreamChatClient.updateChannelPartial keeps the custom data and the server fields in extraData', () async {
+  test('StreamChatClient.updateChannelPartial returns the channel custom data as the response sends it', () async {
     const request = api.UpdateChannelPartialRequest(set: {'name': 'General'});
 
     final defaultApi = MockDefaultApi();
@@ -85,59 +85,71 @@ void main() {
 
     final res = await client.updateChannelPartial('general', 'messaging', set: const {'name': 'General'});
 
-    expect(res.getOrNull()!.channel!.extraData, {
+    expect(res.getOrNull()!.channel!.custom, {
       'name': 'General',
       'image': 'https://example.com/general.png',
       'topic': 'anything',
-      'disabled': false,
-      'hidden': true,
-      'muted': true,
-      'blocked': false,
-      'truncated_at': DateTime.utc(2026, 3, 2).toIso8601String(),
-      'truncated_by': fakeUser('truncator').toJson(),
-      'auto_translation_enabled': true,
-      'auto_translation_language': 'fr',
     });
   });
 
-  test('StreamChatClient.updateChannelPartial drops channel custom data named like a channel field', () async {
-    final response = _updateChannelPartialResponse(
-      channel: api.ChannelResponse(
-        cid: 'messaging:general',
-        id: 'general',
-        type: 'messaging',
-        createdAt: DateTime.utc(2026),
-        updatedAt: DateTime.utc(2026, 2),
-        custom: const {
-          'topic': 'anything',
-          'cid': 'shadowed',
-          'disabled': 'shadowed',
-          'hidden': 'shadowed',
-          'muted': 'shadowed',
-          'blocked': 'shadowed',
-          'truncated_at': 'shadowed',
-          'truncated_by': 'shadowed',
-          'mute_expires_at': 'shadowed',
-          'auto_translation_enabled': 'shadowed',
-          'auto_translation_language': 'shadowed',
-          'hide_messages_before': 'shadowed',
-        },
-        disabled: false,
-        frozen: false,
-      ),
-    );
-    const request = api.UpdateChannelPartialRequest(set: {'name': 'General'});
+  test(
+    'StreamChatClient.updateChannelPartial keeps channel custom data named like a channel field apart from the field',
+    () async {
+      final response = _updateChannelPartialResponse(
+        channel: api.ChannelResponse(
+          cid: 'messaging:general',
+          id: 'general',
+          type: 'messaging',
+          createdAt: DateTime.utc(2026),
+          updatedAt: DateTime.utc(2026, 2),
+          custom: const {
+            'topic': 'anything',
+            'cid': 'shadowed',
+            'disabled': 'shadowed',
+            'hidden': 'shadowed',
+            'muted': 'shadowed',
+            'blocked': 'shadowed',
+            'truncated_at': 'shadowed',
+            'truncated_by': 'shadowed',
+            'mute_expires_at': 'shadowed',
+            'auto_translation_enabled': 'shadowed',
+            'auto_translation_language': 'shadowed',
+            'hide_messages_before': 'shadowed',
+          },
+          disabled: false,
+          frozen: false,
+        ),
+      );
+      const request = api.UpdateChannelPartialRequest(set: {'name': 'General'});
 
-    final defaultApi = MockDefaultApi();
-    when(
-      () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
-    ).thenAnswer((_) async => Result.success(response));
-    final client = _client(defaultApi);
+      final defaultApi = MockDefaultApi();
+      when(
+        () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
+      ).thenAnswer((_) async => Result.success(response));
+      final client = _client(defaultApi);
 
-    final res = await client.updateChannelPartial('general', 'messaging', set: const {'name': 'General'});
+      final res = await client.updateChannelPartial('general', 'messaging', set: const {'name': 'General'});
 
-    expect(res.getOrNull()!.channel!.extraData, {'topic': 'anything', 'disabled': false});
-  });
+      final channel = res.getOrNull()!.channel!;
+      expect(channel.custom, {
+        'topic': 'anything',
+        'cid': 'shadowed',
+        'disabled': 'shadowed',
+        'hidden': 'shadowed',
+        'muted': 'shadowed',
+        'blocked': 'shadowed',
+        'truncated_at': 'shadowed',
+        'truncated_by': 'shadowed',
+        'mute_expires_at': 'shadowed',
+        'auto_translation_enabled': 'shadowed',
+        'auto_translation_language': 'shadowed',
+        'hide_messages_before': 'shadowed',
+      });
+      expect(channel.cid, 'messaging:general');
+      expect(channel.disabled, isFalse);
+      expect(channel.hidden, isNull);
+    },
+  );
 
   test('StreamChatClient.updateChannelPartial falls back to the defaults for channel fields left out', () async {
     final response = _updateChannelPartialResponse(

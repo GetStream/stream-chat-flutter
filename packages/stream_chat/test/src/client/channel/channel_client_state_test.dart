@@ -1918,14 +1918,14 @@ void main() {
               id: channelId,
               type: channelType,
               memberCount: 42,
-              extraData: const {'name': 'updated-name'},
+              custom: const {'name': 'updated-name'},
             ),
           ),
         );
         await Future.delayed(Duration.zero);
 
         expect(channel.memberCount, 42);
-        expect(channel.extraData['name'], 'updated-name');
+        expect(channel.custom['name'], 'updated-name');
       });
 
       test('replaces the member list with the event members', () async {

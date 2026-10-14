@@ -304,7 +304,7 @@ Member fakeChannelMember() => Member(
   pinnedAt: DateTime.utc(2026, 1, 4),
   archivedAt: DateTime.utc(2026, 1, 5),
   deletedMessages: const ['message-1'],
-  extraData: const {'nickname': 'Mo', 'role': 'user'},
+  custom: const {'nickname': 'Mo'},
   notificationsMuted: true,
   status: 'member',
   banFromFutureChannels: true,

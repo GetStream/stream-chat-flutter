@@ -19,11 +19,11 @@ const incomingTypingStartEventTimeout = 7;
 ///
 /// {@template name}
 /// If an optional [name] argument is provided in the constructor then it
-/// will be set on [extraData] with a key of 'name'.
+/// will be set on [custom] with a key of 'name'.
 ///
 /// ```dart
 /// final channel = Channel(client, type, id, name: 'Channel name');
-/// print(channel.name == channel.extraData['name']); // true
+/// print(channel.name == channel.custom['name']); // true
 /// ```
 ///
 /// Before the channel is initialized the name can be set directly:
@@ -43,11 +43,11 @@ const incomingTypingStartEventTimeout = 7;
 ///
 /// {@template image}
 /// If an optional [image] argument is provided in the constructor then it
-/// will be set on [extraData] with a key of 'image'.
+/// will be set on [custom] with a key of 'image'.
 ///
 /// ```dart
 /// final channel = Channel(client, type, id, image: 'https://getstream.io/image.png');
-/// print(channel.image == channel.extraData['image']); // true
+/// print(channel.image == channel.custom['image']); // true
 /// ```
 ///
 /// Before the channel is initialized the image can be set directly:
@@ -65,18 +65,18 @@ const incomingTypingStartEventTimeout = 7;
 class Channel {
   /// Class that manages a specific channel.
   ///
-  /// Optional [extraData] and [image] properties can be provided. The [image]
-  /// is exposed to easily set a key of 'image' on [extraData].
+  /// Optional [custom] and [image] properties can be provided. The [image]
+  /// is exposed to easily set a key of 'image' on [custom].
   Channel(
     this._client,
     this._type,
     this._id, {
     String? name,
     String? image,
-    Map<String, Object?>? extraData,
+    Map<String, Object?>? custom,
   }) : _cid = _id != null ? '$_type:$_id' : null,
-       _extraData = {
-         ...?extraData,
+       _custom = {
+         ...?custom,
          if (name != null) 'name': name,
          if (image != null) 'image': image,
        } {
@@ -92,7 +92,7 @@ class Channel {
       _id = channelState.channel!.id,
       _type = channelState.channel!.type,
       _cid = channelState.channel!.cid,
-      _extraData = channelState.channel!.extraData {
+      _custom = channelState.channel!.custom {
     _initState(channelState); // Initialize the state immediately.
   }
 
@@ -106,7 +106,7 @@ class Channel {
 
   String? _id;
   String? _cid;
-  final Map<String, Object?> _extraData;
+  final Map<String, Object?> _custom;
 
   /// Shortcut to set channel name.
   ///
@@ -118,7 +118,7 @@ class Channel {
         'to update the channel name',
       );
     }
-    _extraData.addAll({'name': name});
+    _custom.addAll({'name': name});
   }
 
   /// Shortcut to set channel image.
@@ -131,17 +131,17 @@ class Channel {
         'to update the channel image',
       );
     }
-    _extraData.addAll({'image': image});
+    _custom.addAll({'image': image});
   }
 
-  set extraData(Map<String, Object?> extraData) {
+  set custom(Map<String, Object?> custom) {
     if (_isInitialized) {
       throw StateError(
         'Once the channel is initialized you should use `channel.update` '
         'to update channel data',
       );
     }
-    _extraData.addAll(extraData);
+    _custom.addAll(custom);
   }
 
   /// Whether this channel is identified by its member set rather than an
@@ -524,11 +524,11 @@ class Channel {
     return state!.channelState.channel?.team;
   }
 
-  /// Channel extra data.
-  Map<String, Object?> get extraData {
-    var data = state?.channelState.channel?.extraData;
+  /// Channel custom data.
+  Map<String, Object?> get custom {
+    var data = state?.channelState.channel?.custom;
     if (data == null || data.isEmpty) {
-      data = _extraData;
+      data = _custom;
     }
     return data;
   }
@@ -542,18 +542,18 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.ownCapabilities ?? []).distinct();
   }
 
-  /// Channel extra data as a stream.
-  Stream<Map<String, Object?>> get extraDataStream {
+  /// Channel custom data as a stream.
+  Stream<Map<String, Object?>> get customStream {
     _checkInitialized();
     return state!.channelStateStream.map(
-      (cs) => cs.channel?.extraData ?? _extraData,
+      (cs) => cs.channel?.custom ?? _custom,
     );
   }
 
   /// Shortcut to get channel name.
   ///
   /// {@macro name}
-  String? get name => extraData['name'] as String?;
+  String? get name => custom['name'] as String?;
 
   /// Channel [name] as a stream.
   ///
@@ -562,13 +562,13 @@ class Channel {
   /// {@macro name}
   Stream<String?> get nameStream {
     _checkInitialized();
-    return extraDataStream.map((it) => it['name'] as String?).distinct();
+    return customStream.map((it) => it['name'] as String?).distinct();
   }
 
   /// Shortcut to get channel image.
   ///
   /// {@macro image}
-  String? get image => extraData['image'] as String?;
+  String? get image => custom['image'] as String?;
 
   /// Channel [image] as a stream.
   ///
@@ -577,7 +577,7 @@ class Channel {
   /// {@macro image}
   Stream<String?> get imageStream {
     _checkInitialized();
-    return extraDataStream.map((it) => it['image'] as String?).distinct();
+    return customStream.map((it) => it['image'] as String?).distinct();
   }
 
   /// The main Stream chat client.
@@ -2157,7 +2157,7 @@ class Channel {
       channelState ??= await _client.queryChannel(
         type,
         channelId: id,
-        channelData: _extraData,
+        channelData: _custom,
         state: state,
         watch: watch,
         presence: presence,

@@ -15,24 +15,7 @@ import 'user_mapper.dart';
 
 /// Maps a generated [api.ChannelResponse] to a [ChannelModel].
 extension ChannelResponseMapper on api.ChannelResponse {
-  // Custom keys named like one of the channel's own fields, including the ones it keeps in its extra data.
-  static const _shadowedCustomKeys = {
-    ...ChannelModel.topLevelFields,
-    'disabled',
-    'hidden',
-    'muted',
-    'blocked',
-    'truncated_at',
-    'truncated_by',
-    'mute_expires_at',
-    'auto_translation_enabled',
-    'auto_translation_language',
-    'hide_messages_before',
-  };
-
   /// Converts this response into a [ChannelModel].
-  ///
-  /// Custom data named like one of the channel's own fields is left out of [ChannelModel.extraData].
   ChannelModel toModel() => ChannelModel(
     id: id,
     type: type,
@@ -47,7 +30,7 @@ extension ChannelResponseMapper on api.ChannelResponse {
     deletedAt: deletedAt,
     memberCount: memberCount ?? 0,
     members: members?.map((member) => member.toModel()).toList(),
-    extraData: {...custom}..removeWhere((key, _) => _shadowedCustomKeys.contains(key)),
+    custom: custom,
     team: team,
     cooldown: cooldown ?? 0,
     disabled: disabled,
@@ -125,20 +108,7 @@ extension ChatPreferencesMapper on api.ChatPreferences {
 
 /// Maps a generated [api.ChannelMemberResponse] to a [Member].
 extension ChannelMemberResponseMapper on api.ChannelMemberResponse {
-  // Custom keys named like one of the member's own fields, including the ones it keeps in its extra data.
-  static const _shadowedCustomKeys = {
-    ...Member.topLevelFields,
-    'notifications_muted',
-    'status',
-    'role',
-    'ban_from_future_channels',
-    'future_channel_ban_expires',
-    'deleted_at',
-  };
-
   /// Converts this response into a [Member].
-  ///
-  /// Custom data named like one of the member's own fields is left out of [Member.extraData].
   Member toModel() => Member(
     user: user?.toModel(),
     inviteAcceptedAt: inviteAcceptedAt,
@@ -155,10 +125,7 @@ extension ChannelMemberResponseMapper on api.ChannelMemberResponse {
     pinnedAt: pinnedAt,
     archivedAt: archivedAt,
     deletedMessages: deletedMessages ?? const [],
-    extraData: {
-      ...{...custom}..removeWhere((key, _) => _shadowedCustomKeys.contains(key)),
-      if (role case final role?) 'role': role,
-    },
+    custom: custom,
     notificationsMuted: notificationsMuted,
     status: status,
     banFromFutureChannels: banFromFutureChannels,

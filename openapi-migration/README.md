@@ -157,10 +157,10 @@ includes a named response that carries only `duration` today, such as `HideChann
    directions.** A response mapper copies the generated `custom` map into it and a request mapper sends it back as
    `custom`; neither filters it. A model whose group has not run still says `extraData`. A field the
    generated response types is never parked in `extraData` behind a getter: it becomes a field on the model, as
-   the owning group's break, or stays out. `ChannelModel.hidden` and `User.name` are parked today, and groups 11
-   and 09 promote them. `topLevelFields` and `Serializer` serve only the v1 decoders, which still split flat JSON
-   by a key list, and go with the WebSocket v2 move; a model that loses its JSON drops `topLevelFields` and its
-   converter owns the list. A v1 writer leaves a custom entry named like a key out so it cannot overwrite the key.
+   the owning group's break, or stays out. `User.name` is parked today, and group 09 promotes it; group 15
+   promoted `ChannelModel`'s and `Member`'s. `topLevelFields` and `Serializer` serve only the v1 decoders, which
+   still split flat JSON by a key list, and go with the WebSocket v2 move; a model that loses its JSON drops
+   `topLevelFields` and its converter owns the list. A v1 writer leaves a custom entry named like a key out so it cannot overwrite the key.
 
 ### Temporary adapters
 
@@ -191,9 +191,11 @@ surfaces before it reaches `Message` and `ChannelState`:
 - **08** is where we decide what *not* to expose: 34 generated operations against 10 hand-written methods.
 - **14** is `queryBannedUsers`, split out of 08 because it is the only moderation call that answers with a
   model. The `User` mappers it needs landed with group 04.
-- **10–11** are the core of the SDK; 11 promotes the channel flags parked in `extraData` (rule 9).
+- **10–11** are the core of the SDK.
 - **15** is the partial channel and member updates, split out of 11 so `channels_mapper.dart` lands on calls that
   read nothing into `ChannelState`. It landed first; the full update waits in 11 for group 10's message mappers.
+  As the first group to map `ChannelModel` and `Member`, it promoted their parked fields and renamed their custom
+  data `custom` (rule 9).
 - **12** comes late because it needs its own hand-written multipart client and is the highest-traffic path in the
   SDK.
 - **09** is last. Every group before it maps users through `user_mapper.dart` onto today's `User`; 09 migrates the

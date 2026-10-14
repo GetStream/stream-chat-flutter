@@ -347,10 +347,10 @@ Three data-shape traps while mapping:
 - **The model's `custom` is the wire's `custom`, verbatim** (README rule 9). A migrated model names it `custom`
   — `extraData` on one whose group has not run — and the mapper copies the generated map into it and sends it
   back as `custom`; never filter either. A typed wire field our model lacks is added as a field, with
-  approval, or left out — never parked in `extraData` behind a getter, as `ChannelModel.hidden` and `User.name`
-  still are until groups 11 and 09 promote them. A v1 decoder splits flat JSON by a key list — `topLevelFields`
-  while the model still has JSON, a private list beside the converter once it does not — and a v1 writer leaves a
-  custom entry named like a key out so it cannot overwrite the key.
+  approval, or left out — never parked in `extraData` behind a getter, as `User.name` still is until group 09
+  promotes it. A v1 decoder splits flat JSON by a key list — `topLevelFields` while the model still has JSON, a
+  private list beside the converter once it does not — and a v1 writer leaves a custom entry named like a key out
+  so it cannot overwrite the key.
 - **Units on anything that takes a `Duration`.** The wire carries a bare integer and the field name rarely says
   in what. Read the Go payload type: `commonpayloads.DurationInMinutes` and `DurationMilliseconds` sit on sibling
   endpoints in the same feature — `ban.timeout` and `mute.timeout` are minutes, `muteChannel.expiration` is

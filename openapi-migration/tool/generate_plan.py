@@ -666,23 +666,6 @@ GROUPS = [
         decisions=[
             '`ChannelState`, `ChannelModel` and `Member` are public, persisted, and rebuilt from WebSocket '
             'events. Keep ours and map.',
-            '**`ChannelModel` and `Member` promote their `extraData`-backed getters to fields** (README rule 9). '
-            '`ChannelModel.disabled`, `hidden`, `muted`, `blocked`, `truncatedAt`, `truncatedBy`, '
-            '`autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, '
-            '`status`, `banFromFutureChannels`, `futureChannelBanExpires` and `deletedAt`, all arrive as root fields '
-            'but live in `extraData` and are read back through getters; they become fields with persistence '
-            'columns, and the constructors stop writing them into the custom data, which is renamed `custom`. '
-            '`name` and `image` stay in it: `ChannelResponse` has no such fields. Their keys leave the custom data, '
-            'a key set there no longer sets the field, and a `custom` filter or sort field naming one reads null '
-            'locally. When promoting: (1) decide each field\'s `merge` rule. Today `ChannelModel.merge` keeps the '
-            'flags and `truncatedAt` when a payload leaves them out and drops the other three, as on v11; `Member` '
-            'has no `merge`. The server always sends `disabled`, omits `hidden` and `blocked` from every event, '
-            'clears `truncated_by` only through a server-side update (and may leave it out where it does not load '
-            'the user), never sends `muted` or `mute_expires_at` on the channel, and omits `auto_translation_*` when '
-            'false or empty. (2) Make `toJson` leave out custom keys named like a field, or a same-named key '
-            'overwrites the field in the output. (3) Add persistence columns; `truncatedBy` is a user, so it needs '
-            'the users table or a stored map. Raised on '
-            '[#2958](https://github.com/GetStream/stream-chat-flutter/pull/2958).',
             '**Whether `ChannelConfig` exposes the generated-only config fields.** `ChannelConfigWithInfo` '
             'carries `allowedFlagReasons`, `automodBehavior`, `automodThresholds`, `blocklist`, '
             '`blocklistBehavior`, `blocklists`, `countMessages`, `customEvents`, `grants`, `name`, '
@@ -694,14 +677,22 @@ GROUPS = [
             '(`ChannelStateResponse.hideMessagesBefore`), never on the channel itself. v1 drops it today.',
             '`sync` returns `SyncResponse` — one of the two models that needed the WSEvent generator patch. '
             'Verify it decodes before relying on it.',
+            '**How `Channel` hands its creation data to `getOrCreateChannel`.** The `Channel` constructor and '
+            '`StreamChatClient.channel` take one `custom` map, and v1 sends it whole as the request\'s flat `data`, '
+            'so `client.channel(\'messaging\', custom: {\'members\': [...]})` creates the channel with those '
+            'members. v2\'s `ChannelInput` types `members`, `invites`, `team`, `frozen`, `disabled`, `createdBy`, '
+            '`configOverrides` and the auto-translation settings, next to its own `custom`. Either the request '
+            'mapper lifts those keys out of the map into the typed fields and sends the rest as `custom`, or '
+            '`Channel` and `client.channel` take typed arguments such as `members`, a break.',
         ],
         risks=[
             '`sync` and `queryMembers` live in `general_api.dart`, not `channel_api.dart` — this group reaches '
             'into that file.',
             '`queryChannels` drives the channel list controllers and the offline cache; a shape change here is '
             'felt everywhere.',
-            'A consumer reading `channel.extraData[\'hidden\']` and friends loses the key once the flags are fields; '
-            'none in this repo.',
+            'Sending `Channel`\'s `custom` map as `ChannelInput.custom` as it stands turns `members` and the other '
+            'typed keys into custom data, so `client.channel(\'messaging\', custom: {\'members\': [...]})` '
+            'creates a channel without its members, silently.',
             '**A zero timestamp decodes differently on v2.** v1 sends Go\'s zero time as '
             '`0001-01-01T00:00:00Z`; v2 encodes timestamps as epoch nanoseconds and sends `0`, which decodes as '
             '1970-01-01. A truncated channel shows it: its `last_message_at` is zero time, so the same channel '
@@ -710,11 +701,6 @@ GROUPS = [
             'to it, and the read fallback and the `max` against new messages agree), but the two sources disagree on '
             'the value. Normalize it deliberately when `queryChannels` moves, and check the other '
             'timestamps the server can send as zero.',
-            '**Dates the mapper writes into `extraData` are formatted differently from v1.** v1 keeps the '
-            'server\'s string (`2020-01-29T03:22:47.63613Z`); the mapper writes `toIso8601String()` '
-            '(`2020-01-29T03:22:47.636130Z`). The getters return the same `DateTime`, but `Member` compares '
-            '`extraData`, so the same member from a v1 payload and from the mapper compares unequal. Promoting '
-            'the fields removes it.',
             '[08](08-moderation-and-blocklists.md)\'s `muteChannel` drops `channelMute`, `channelMutes` and '
             '`ownUser` because the generated `ChannelMute` carries a `ChannelResponse?` and a `UserResponse?` '
             'where ours needs a non-nullable `ChannelModel` and `User`. `channels_mapper.dart` covers the '
@@ -729,29 +715,20 @@ GROUPS = [
               `ChannelConfig`, `Member`, `Command` and `ChatPreferences`, the way `user_mapper.dart` does for
               `User`. [15](15-partial-updates.md) uses it first; groups 06, 07 and 14 will reuse it. This group
               restructures those classes and re-points the mapper.
-            - **Every field `ChannelResponse` and `ChannelMemberResponse` declare is reachable on ours.** The
-              ones `ChannelModel` and `Member` did not read get a typed getter over `extraData`, the pattern `muted`
-              and `blocked` already used: `ChannelModel.truncatedBy`, `autoTranslationEnabled` and
-              `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`,
-              `futureChannelBanExpires` and `deletedAt`. Their keys stay in `extraData`, so nothing breaks and the
-              offline cache keeps them without new columns. Promoting them to stored fields is the decision above.
-              Three get no getter: the channel's `hide_messages_before` and `mute_expires_at`, which the server
+            - **Every field `ChannelResponse` and `ChannelMemberResponse` declare is reachable on ours,** as a
+              field: [15](15-partial-updates.md) promoted the ones v10 parked in `extraData` and renamed it `custom`.
+              Three are left out: the channel's `hide_messages_before` and `mute_expires_at`, which the server
               never fills on the channel (a mute's expiry is `ChannelMute.expires`), and the member's deprecated
               `role`. The nested config types drop `ChatPreferences.distinctChannelMessages` and `Command`'s
               `createdAt` / `updatedAt`, which ours do not model.
-            - **The mapper writes the server fields where v1 JSON puts them,** into `extraData` under their wire
-              keys. Custom data named like one of those fields or a top-level field is dropped, as
-              `user_mapper.dart` does. A mapped channel or member still differs from a v1 decode in three ways,
-              all for group 09 or this group to settle: dates in `extraData` are formatted by the client rather
-              than kept as the server sent them (see the risk below); `truncatedBy`, `createdBy` and each member's
-              user go through `user_mapper.dart`, which drops the user fields `User` does not model; and
-              `mute_expires_at` and `hide_messages_before` are left out, where v1 would keep them in `extraData` if
-              the server sent them on the channel.
+            - **The mapper copies `custom` verbatim** (README rule 9). A mapped channel or member still differs from
+              a v1 decode in one way, for group 09 to settle: `truncatedBy`, `createdBy` and each member's user go
+              through `user_mapper.dart`, which drops the user fields `User` does not model.
             - **The mapper is tested through the client,** by [15](15-partial-updates.md)'s
               `updateChannelPartial` tests: the first call that returns a channel through the generated client.
         """),
         done=DONE + (
-            '- [ ] `channels_mapper.dart` has no `_shadowedCustomKeys`: `ChannelModel.custom` is the wire\'s `custom`,\n'
+            '- [x] `channels_mapper.dart` has no `_shadowedCustomKeys`: `ChannelModel.custom` is the wire\'s `custom`,\n'
             '      verbatim, and no flag is written into it.\n'
         ),
     ),
@@ -904,6 +881,21 @@ GROUPS = [
               `toJson` and an enum the model rules retire. The client writes `{'pinned': true}` / `['pinned']`.
             - **The request always sends `set` and `unset`, `null` when not given,** where v1 left the key out.
               The server reads both the same, and still rejects a call with neither.
+            - **`ChannelModel` and `Member` promote the fields v10 parked in `extraData`, and rename it `custom`**
+              (README rule 9), since these calls are the first to map them. `ChannelModel.disabled`, `hidden`,
+              `muted`, `blocked`, `truncatedAt`, `truncatedBy`, `autoTranslationEnabled` and
+              `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`,
+              `futureChannelBanExpires` and `deletedAt`, are fields with persistence columns; `truncatedBy` is
+              read back through the users table. `Channel.extraData`, `extraDataStream`, and the `extraData`
+              argument of the `Channel` constructor and of `StreamChatClient.channel` are renamed with it.
+            - **`custom` is the wire's, verbatim,** and the v1 writers leave out a custom entry named like a key,
+              so it cannot overwrite the field. `Member` leaves the deprecated `role` out of `custom`.
+            - **`ChannelModel.merge` keeps a flag the incoming channel leaves out, and turns auto translation off
+              when it is missing,** as before. Checked live on v1 and v2: queries always send `hidden` and
+              `blocked`; events leave them out, except the `channel.hidden` a block sends; `muted` is never sent on
+              a channel; `truncated_at` and `truncated_by` come on every event once the channel is truncated;
+              `disabled` and `frozen` always. A client token cannot set `auto_translation_*`, so that rule rests
+              on the backend leaving the keys out when false or empty.
             """),
         risks=[
             '`disableSlowMode` unsets `cooldown`, which the server rejects on both v1 and v2 as a reserved field. '

@@ -13,8 +13,8 @@ void main() {
       expect(channel.id, equals('test'));
       expect(channel.type, equals('livestream'));
       expect(channel.cid, equals('livestream:test'));
-      expect(channel.extraData['cats'], equals(true));
-      expect(channel.extraData['fruit'], equals(['bananas', 'apples']));
+      expect(channel.custom['cats'], equals(true));
+      expect(channel.custom['fruit'], equals(['bananas', 'apples']));
       expect(channel.cooldown, equals(0));
       expect(channel.truncatedBy?.id, 'truncator');
       expect(channel.truncatedBy?.name, 'Truncator');
@@ -27,7 +27,7 @@ void main() {
         type: 'type',
         id: 'id',
         cid: 'a:a',
-        extraData: {'name': 'cool'},
+        custom: {'name': 'cool'},
       );
 
       expect(
@@ -47,7 +47,7 @@ void main() {
         type: 'type',
         id: 'id',
         cid: 'a:a',
-        extraData: {'name': 'cool'},
+        custom: {'name': 'cool'},
       );
 
       expect(
@@ -63,210 +63,137 @@ void main() {
     });
   });
 
-  test('hidden property and extraData manipulation', () {
-    final channel = ChannelModel(cid: 'test:cid', hidden: false);
-
-    expect(channel.hidden, false);
-    expect(channel.extraData['hidden'], false);
-    expect(channel.toJson(), {
-      'id': 'cid',
-      'type': 'test',
-      'frozen': false,
-      'cooldown': 0,
-      'hidden': false,
-    });
-    expect(ChannelModel.fromJson(channel.toJson()).toJson(), {
-      'id': 'cid',
-      'type': 'test',
-      'frozen': false,
-      'cooldown': 0,
-      'hidden': false,
-    });
-
-    var newChannel = channel.copyWith(
-      extraData: {'hidden': true},
-    );
-
-    expect(newChannel.extraData['hidden'], true);
-    expect(newChannel.hidden, true);
-
-    newChannel = channel.copyWith(
-      hidden: false,
-    );
-
-    expect(newChannel.extraData['hidden'], false);
-    expect(newChannel.hidden, false);
-
-    newChannel = channel.copyWith(
-      hidden: true,
-      extraData: {'hidden': true},
-    );
-
-    expect(newChannel.extraData['hidden'], true);
-    expect(newChannel.hidden, true);
-  });
-
-  test('a non-boolean flag in replacement extraData falls back to the current value', () {
-    // The getters read these with `safeCast`, so `copyWith` has to as well —
-    // extra data is consumer-authored and can hold anything.
-    final channel = ChannelModel(cid: 'test:cid', muted: true, blocked: true);
-
-    final newChannel = channel.copyWith(
-      extraData: {'muted': 'yes', 'blocked': 1},
-    );
-
-    expect(newChannel.muted, true);
-    expect(newChannel.blocked, true);
-  });
-
-  test('disabled property and extraData manipulation', () {
-    final channel = ChannelModel(cid: 'test:cid', disabled: false);
-
-    expect(channel.disabled, false);
-    expect(channel.extraData['disabled'], false);
-    expect(channel.toJson(), {
-      'id': 'cid',
-      'type': 'test',
-      'frozen': false,
-      'cooldown': 0,
-      'disabled': false,
-    });
-    expect(ChannelModel.fromJson(channel.toJson()).toJson(), {
-      'id': 'cid',
-      'type': 'test',
-      'frozen': false,
-      'cooldown': 0,
-      'disabled': false,
-    });
-
-    var newChannel = channel.copyWith(
-      extraData: {'disabled': true},
-    );
-
-    expect(newChannel.extraData['disabled'], true);
-    expect(newChannel.disabled, true);
-
-    newChannel = channel.copyWith(
-      hidden: false,
-    );
-
-    expect(newChannel.extraData['disabled'], false);
-    expect(newChannel.disabled, false);
-
-    newChannel = channel.copyWith(
-      hidden: true,
-      extraData: {'disabled': true},
-    );
-
-    expect(newChannel.extraData['disabled'], true);
-    expect(newChannel.disabled, true);
-  });
-
-  test('truncatedAt property and extraData manipulation', () {
-    final currentDate = DateTime.now();
-    final channel = ChannelModel(cid: 'test:cid', truncatedAt: currentDate);
-
-    expect(channel.truncatedAt, currentDate);
-    expect(channel.extraData['truncated_at'], currentDate.toIso8601String());
-    expect(channel.toJson(), {
-      'id': 'cid',
-      'type': 'test',
-      'frozen': false,
-      'cooldown': 0,
-      'truncated_at': currentDate.toIso8601String(),
-    });
-    expect(ChannelModel.fromJson(channel.toJson()).toJson(), {
-      'id': 'cid',
-      'type': 'test',
-      'frozen': false,
-      'cooldown': 0,
-      'truncated_at': currentDate.toIso8601String(),
-    });
-
-    final dateOne = DateTime.now();
-    var newChannel = channel.copyWith(
-      extraData: {'truncated_at': dateOne.toIso8601String()},
-    );
-
-    expect(newChannel.extraData['truncated_at'], dateOne.toIso8601String());
-    expect(newChannel.truncatedAt, dateOne);
-
-    final dateTwo = DateTime.now();
-    newChannel = channel.copyWith(
-      truncatedAt: dateTwo,
-    );
-
-    expect(newChannel.extraData['truncated_at'], dateTwo.toIso8601String());
-    expect(newChannel.truncatedAt, dateTwo);
-
-    final dateThree = DateTime.now();
-    newChannel = channel.copyWith(
-      truncatedAt: dateThree,
-      extraData: {'truncated_at': dateThree.toIso8601String()},
-    );
-
-    expect(newChannel.extraData['truncated_at'], dateThree.toIso8601String());
-    expect(newChannel.truncatedAt, dateThree);
-  });
-
-  test('ChannelModel keeps truncatedBy and the auto-translation settings in extraData', () {
+  test('ChannelModel writes its flags to JSON and reads them back', () {
+    final truncatedAt = DateTime.utc(2026, 3, 2);
     final channel = ChannelModel(
       cid: 'test:cid',
+      disabled: false,
+      hidden: true,
+      muted: true,
+      blocked: false,
+      truncatedAt: truncatedAt,
       truncatedBy: User(id: 'truncator'),
       autoTranslationEnabled: true,
       autoTranslationLanguage: 'fr',
+      custom: const {'color': 'red'},
     );
-
-    expect(channel.extraData, {
+    final json = {
+      'id': 'cid',
+      'type': 'test',
+      'frozen': false,
+      'cooldown': 0,
+      'disabled': false,
+      'hidden': true,
+      'muted': true,
+      'blocked': false,
+      'truncated_at': truncatedAt.toIso8601String(),
       'truncated_by': User(id: 'truncator').toJson(),
       'auto_translation_enabled': true,
       'auto_translation_language': 'fr',
+      'color': 'red',
+    };
+
+    expect(channel.toJson(), json);
+    expect(ChannelModel.fromJson(channel.toJson()).toJson(), json);
+  });
+
+  test('ChannelModel keeps custom data named like a field apart from the field', () {
+    final channel = ChannelModel(
+      cid: 'test:cid',
+      hidden: true,
+      custom: const {'hidden': 'custom', 'id': 'custom', 'color': 'red'},
+    );
+
+    expect(channel.hidden, isTrue);
+    expect(channel.custom, {'hidden': 'custom', 'id': 'custom', 'color': 'red'});
+  });
+
+  test('ChannelModel.toJson leaves out custom data named like a field', () {
+    final channel = ChannelModel(
+      cid: 'test:cid',
+      hidden: true,
+      custom: const {'hidden': 'custom', 'id': 'custom', 'color': 'red'},
+    );
+
+    expect(channel.toJson(), {
+      'id': 'cid',
+      'type': 'test',
+      'frozen': false,
+      'cooldown': 0,
+      'hidden': true,
+      'color': 'red',
     });
   });
 
-  test('ChannelModel.copyWith keeps truncatedBy and the auto-translation settings the new extraData leaves out', () {
+  test('ChannelModel.copyWith keeps the flags it is not given', () {
     final channel = ChannelModel(
       cid: 'test:cid',
+      hidden: true,
       truncatedBy: User(id: 'truncator'),
       autoTranslationEnabled: true,
       autoTranslationLanguage: 'fr',
     );
 
-    final newChannel = channel.copyWith(extraData: const {'color': 'red'});
+    final newChannel = channel.copyWith(custom: const {'hidden': false});
 
+    expect(newChannel.hidden, isTrue);
     expect(newChannel.truncatedBy?.id, 'truncator');
     expect(newChannel.autoTranslationEnabled, isTrue);
     expect(newChannel.autoTranslationLanguage, 'fr');
   });
 
-  test('ChannelModel.copyWith replaces truncatedBy and the auto-translation settings', () {
+  test('ChannelModel.copyWith replaces the flags it is given', () {
     final channel = ChannelModel(
       cid: 'test:cid',
+      disabled: false,
+      hidden: false,
+      muted: false,
+      blocked: false,
+      truncatedAt: DateTime.utc(2026),
       truncatedBy: User(id: 'truncator'),
       autoTranslationEnabled: true,
       autoTranslationLanguage: 'fr',
     );
 
     final newChannel = channel.copyWith(
+      disabled: true,
+      hidden: true,
+      muted: true,
+      blocked: true,
+      truncatedAt: DateTime.utc(2026, 2),
       truncatedBy: User(id: 'other'),
       autoTranslationEnabled: false,
       autoTranslationLanguage: 'de',
     );
 
+    expect(newChannel.disabled, isTrue);
+    expect(newChannel.hidden, isTrue);
+    expect(newChannel.muted, isTrue);
+    expect(newChannel.blocked, isTrue);
+    expect(newChannel.truncatedAt, DateTime.utc(2026, 2));
     expect(newChannel.truncatedBy?.id, 'other');
     expect(newChannel.autoTranslationEnabled, isFalse);
     expect(newChannel.autoTranslationLanguage, 'de');
   });
 
-  test('ChannelModel.merge keeps truncatedBy when the other channel leaves it out', () {
+  test('ChannelModel.merge keeps the flags the other channel leaves out', () {
     final channel = ChannelModel(
       cid: 'test:cid',
+      hidden: true,
+      muted: true,
+      blocked: true,
+      truncatedAt: DateTime.utc(2026),
       truncatedBy: User(id: 'truncator'),
     );
 
-    final merged = channel.merge(ChannelModel(cid: 'test:cid'));
+    final merged = channel.merge(ChannelModel(cid: 'test:cid', custom: const {'color': 'red'}));
 
+    expect(merged.hidden, isTrue);
+    expect(merged.muted, isTrue);
+    expect(merged.blocked, isTrue);
+    expect(merged.truncatedAt, DateTime.utc(2026));
     expect(merged.truncatedBy?.id, 'truncator');
+    expect(merged.custom, {'color': 'red'});
   });
 
   test('ChannelModel.merge turns auto translation off when the other channel leaves it out', () {
@@ -277,156 +204,58 @@ void main() {
     expect(merged.autoTranslationEnabled, isFalse);
   });
 
-  test('ChannelModel arguments override the same keys in extraData', () {
-    final channel = ChannelModel(
-      cid: 'test:cid',
-      autoTranslationEnabled: true,
-      autoTranslationLanguage: 'fr',
-      extraData: const {'auto_translation_enabled': false, 'auto_translation_language': 'de'},
-    );
-
-    expect(channel.autoTranslationEnabled, isTrue);
-    expect(channel.autoTranslationLanguage, 'fr');
-  });
-
-  test('ChannelModel.truncatedBy returns null when the extraData value is not a user with an id', () {
-    final noIdChannel = ChannelModel(
-      cid: 'test:channel',
-      extraData: const {
-        'truncated_by': {'name': 'No id'},
-      },
-    );
-    final textChannel = ChannelModel(cid: 'test:channel', extraData: const {'truncated_by': 'someone'});
+  test('ChannelModel.fromJson reads no truncatedBy from a value that is not a user with an id', () {
+    final noIdChannel = ChannelModel.fromJson(const {
+      'id': 'channel',
+      'type': 'test',
+      'truncated_by': {'name': 'No id'},
+    });
+    final textChannel = ChannelModel.fromJson(const {'id': 'channel', 'type': 'test', 'truncated_by': 'someone'});
 
     expect(noIdChannel.truncatedBy, isNull);
     expect(textChannel.truncatedBy, isNull);
   });
 
-  test('.name should fetch from extraData if available', () {
+  test('ChannelModel.fromJson reads no truncatedAt from an empty string', () {
+    final channel = ChannelModel.fromJson(const {'id': 'channel', 'type': 'test', 'truncated_at': ''});
+
+    expect(channel.truncatedAt, isNull);
+  });
+
+  test('.name should fetch from custom if available', () {
     final channel = ChannelModel(
       cid: 'test:channel',
-      extraData: const {'name': 'Test Channel'},
+      custom: const {'name': 'Test Channel'},
     );
 
     expect(channel.name, 'Test Channel');
   });
 
-  test('.name should return null if not available in extraData', () {
+  test('.name should return null if not available in custom', () {
     final channel = ChannelModel(
       cid: 'test:channel',
-      extraData: const {},
+      custom: const {},
     );
 
     expect(channel.name, isNull);
   });
 
-  test('.name should return null if extraData value is not String', () {
+  test('.name should return null if custom value is not String', () {
     final channel = ChannelModel(
       cid: 'test:channel',
-      extraData: const {'name': true},
+      custom: const {'name': true},
     );
 
     expect(channel.name, isNull);
   });
 
-  test('.name should return null if extraData value is empty', () {
+  test('.name should return null if custom value is empty', () {
     final channel = ChannelModel(
       cid: 'test:channel',
-      extraData: const {'name': ''},
+      custom: const {'name': ''},
     );
 
     expect(channel.name, isNull);
-  });
-
-  test('.disabled should fetch from extraData if available', () {
-    final channel = ChannelModel(
-      cid: 'test:channel',
-      extraData: const {'disabled': true},
-    );
-
-    expect(channel.disabled, true);
-  });
-
-  test('.disabled should return null if not available in extraData', () {
-    final channel = ChannelModel(
-      cid: 'test:channel',
-      extraData: const {},
-    );
-
-    expect(channel.disabled, isNull);
-  });
-
-  test('.disabled should return null if extraData value is not bool', () {
-    final channel = ChannelModel(
-      cid: 'test:channel',
-      extraData: const {'disabled': 'true'},
-    );
-
-    expect(channel.disabled, isNull);
-  });
-
-  test('.hidden should fetch from extraData if available', () {
-    final channel = ChannelModel(
-      cid: 'test:channel',
-      extraData: const {'hidden': true},
-    );
-
-    expect(channel.hidden, true);
-  });
-
-  test('.hidden should return null if not available in extraData', () {
-    final channel = ChannelModel(
-      cid: 'test:channel',
-      extraData: const {},
-    );
-
-    expect(channel.hidden, isNull);
-  });
-
-  test('.hidden should return null if extraData value is not bool', () {
-    final channel = ChannelModel(
-      cid: 'test:channel',
-      extraData: const {'hidden': 'false'},
-    );
-
-    expect(channel.hidden, isNull);
-  });
-
-  test('.truncatedAt should fetch from extraData if available', () {
-    final testDate = DateTime.now();
-    final channel = ChannelModel(
-      cid: 'test:channel',
-      extraData: {'truncated_at': testDate.toIso8601String()},
-    );
-
-    expect(channel.truncatedAt, testDate);
-  });
-
-  test('.truncatedAt should return null if not available in extraData', () {
-    final channel = ChannelModel(
-      cid: 'test:channel',
-      extraData: const {},
-    );
-
-    expect(channel.truncatedAt, isNull);
-  });
-
-  test('.truncatedAt should return null if extraData value is not String', () {
-    final channel = ChannelModel(
-      cid: 'test:channel',
-      extraData: const {'truncated_at': true},
-    );
-
-    expect(channel.truncatedAt, isNull);
-  });
-
-  test('.truncatedAt should return null if extraData value is empty', () {
-    final channel = ChannelModel(
-      cid: 'test:channel',
-      extraData: const {'truncated_at': ''},
-    );
-
-    expect(channel.truncatedAt, isNull);
   });
 
   test('should parse filterTags from json correctly', () {

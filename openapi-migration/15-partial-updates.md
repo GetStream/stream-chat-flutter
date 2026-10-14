@@ -63,6 +63,21 @@
   `toJson` and an enum the model rules retire. The client writes `{'pinned': true}` / `['pinned']`.
 - **The request always sends `set` and `unset`, `null` when not given,** where v1 left the key out.
   The server reads both the same, and still rejects a call with neither.
+- **`ChannelModel` and `Member` promote the fields v10 parked in `extraData`, and rename it `custom`**
+  (README rule 9), since these calls are the first to map them. `ChannelModel.disabled`, `hidden`,
+  `muted`, `blocked`, `truncatedAt`, `truncatedBy`, `autoTranslationEnabled` and
+  `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`,
+  `futureChannelBanExpires` and `deletedAt`, are fields with persistence columns; `truncatedBy` is
+  read back through the users table. `Channel.extraData`, `extraDataStream`, and the `extraData`
+  argument of the `Channel` constructor and of `StreamChatClient.channel` are renamed with it.
+- **`custom` is the wire's, verbatim,** and the v1 writers leave out a custom entry named like a key,
+  so it cannot overwrite the field. `Member` leaves the deprecated `role` out of `custom`.
+- **`ChannelModel.merge` keeps a flag the incoming channel leaves out, and turns auto translation off
+  when it is missing,** as before. Checked live on v1 and v2: queries always send `hidden` and
+  `blocked`; events leave them out, except the `channel.hidden` a block sends; `muted` is never sent on
+  a channel; `truncated_at` and `truncated_by` come on every event once the channel is truncated;
+  `disabled` and `frozen` always. A client token cannot set `auto_translation_*`, so that rule rests
+  on the backend leaving the keys out when false or empty.
 
 ## Risks
 

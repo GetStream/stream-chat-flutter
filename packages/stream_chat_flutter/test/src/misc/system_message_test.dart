@@ -22,12 +22,12 @@ void main() {
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
-      when(() => channel.extraDataStream).thenAnswer(
+      when(() => channel.customStream).thenAnswer(
         (i) => Stream.value({
           'name': 'test',
         }),
       );
-      when(() => channel.extraData).thenReturn({
+      when(() => channel.custom).thenReturn({
         'name': 'test',
       });
 
@@ -81,12 +81,12 @@ void main() {
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
-      when(() => channel.extraDataStream).thenAnswer(
+      when(() => channel.customStream).thenAnswer(
         (i) => Stream.value({
           'name': 'test',
         }),
       );
-      when(() => channel.extraData).thenReturn({
+      when(() => channel.custom).thenReturn({
         'name': 'test',
       });
 
@@ -130,12 +130,12 @@ void main() {
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
-      when(() => channel.extraDataStream).thenAnswer(
+      when(() => channel.customStream).thenAnswer(
         (i) => Stream.value({
           'name': 'test',
         }),
       );
-      when(() => channel.extraData).thenReturn({
+      when(() => channel.custom).thenReturn({
         'name': 'test',
       });
 

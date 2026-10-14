@@ -4,7 +4,7 @@ import '../db/drift_chat_database.dart';
 /// Useful mapping functions for [ChannelEntity]
 extension ChannelEntityX on ChannelEntity {
   /// Maps a [ChannelEntity] into [ChannelModel]
-  ChannelModel toChannelModel({User? createdBy}) {
+  ChannelModel toChannelModel({User? createdBy, User? truncatedBy}) {
     final config = ChannelConfig.fromJson(this.config);
     return ChannelModel(
       id: id,
@@ -22,13 +22,22 @@ extension ChannelEntityX on ChannelEntity {
       createdBy: createdBy,
       filterTags: filterTags,
       team: team,
-      extraData: extraData ?? {},
+      custom: custom ?? {},
+      disabled: disabled,
+      hidden: hidden,
+      muted: muted,
+      blocked: blocked,
+      truncatedAt: truncatedAt,
+      truncatedBy: truncatedBy,
+      autoTranslationEnabled: autoTranslationEnabled,
+      autoTranslationLanguage: autoTranslationLanguage,
     );
   }
 
   /// Maps a [ChannelEntity] into [ChannelState]
   ChannelState toChannelState({
     User? createdBy,
+    User? truncatedBy,
     List<Member> members = const [],
     List<Read> reads = const [],
     List<Message> messages = const [],
@@ -38,7 +47,7 @@ extension ChannelEntityX on ChannelEntity {
     read: reads,
     messages: messages,
     pinnedMessages: pinnedMessages,
-    channel: toChannelModel(createdBy: createdBy),
+    channel: toChannelModel(createdBy: createdBy, truncatedBy: truncatedBy),
   );
 }
 
@@ -61,6 +70,14 @@ extension ChannelModelX on ChannelModel {
     createdById: createdBy?.id,
     filterTags: filterTags,
     team: team,
-    extraData: extraData,
+    custom: custom,
+    disabled: disabled,
+    hidden: hidden,
+    muted: muted,
+    blocked: blocked,
+    truncatedAt: truncatedAt,
+    truncatedById: truncatedBy?.id,
+    autoTranslationEnabled: autoTranslationEnabled,
+    autoTranslationLanguage: autoTranslationLanguage,
   );
 }

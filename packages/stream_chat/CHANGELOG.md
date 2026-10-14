@@ -104,6 +104,10 @@
 - `UpdateChannelPartialResponse.channel` and `UpdateMemberPartialResponse.channelMember` are nullable, and `UpdateChannelPartialResponse.members` is a non-nullable list.
 - `StreamChatApi.channel.updateChannelPartial`, `enableSlowdown`, `disableSlowdown` and `updateMemberPartial` are removed; call them on `StreamChatClient` instead.
 - `MemberUpdatePayload` and `MemberUpdateType` are removed; pass `set: {'pinned': true}` or `unset: ['pinned']` (and `archived`) to `updateMemberPartial`, or call `pinChannel`, `archiveChannel` and their counterparts.
+- `ChannelModel.extraData` and `Member.extraData` are renamed `custom`, and so are `Channel.extraData`, `Channel.extraDataStream` (now `customStream`), and the `extraData` argument of the `Channel` constructor and of `StreamChatClient.channel`.
+- `ChannelModel.disabled`, `hidden`, `muted`, `blocked`, `truncatedAt`, `truncatedBy` and the auto-translation settings, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires` and `deletedAt`, are fields instead of entries in the custom data, so `custom` no longer holds `hidden`, `status` and the rest, and an entry with that name in `custom` or in `copyWith(custom:)` no longer sets the field.
+- `ChannelModel.custom` and `Member.custom` hold the custom data exactly as the API returns it, and `toJson` leaves out an entry named like one of the model's own fields.
+- `Member.custom` no longer holds `role`; read `channelRole`.
 
 🐞 Fixed
 
@@ -133,7 +137,7 @@
 - Added optional `reason` and `custom` arguments to `flagMessage` and `flagUser`, recorded with the flag.
 - Added an optional `timeout` to `StreamChatClient.moderation.muteUser` that expires the mute.
 - Added `StreamChatClient.moderation.muteUsers` and `unmuteUsers`, which mute and unmute several users in one call and report the ids that matched no user.
-- Added `ChannelModel.truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires`, `deletedAt` and `topLevelFields`; the constructors, and `ChannelModel.copyWith`, accept the new fields.
+- Added `ChannelModel.muted`, `blocked`, `truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires`, `deletedAt` and `topLevelFields`; the constructors and `copyWith` accept the new fields.
 - Added a `prev` argument to `queryPolls` and `queryPollVotes`, and a `prev` cursor on their responses, for paging backwards.
 
 🔒 Security
