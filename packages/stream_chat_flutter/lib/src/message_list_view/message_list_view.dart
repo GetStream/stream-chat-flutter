@@ -1007,7 +1007,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
         final gap = context.streamSpacing.md;
         return Padding(
-          padding: _config.reverse ? EdgeInsets.only(top: gap) : EdgeInsets.only(bottom: gap),
+          padding: _config.reverse ? .only(top: gap) : .only(bottom: gap),
           child: switch (widget.builders.typingIndicator) {
             final builder? => builder(context, users),
             _ => StreamMessageListTypingIndicator(users: users),
