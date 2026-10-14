@@ -15,9 +15,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       const [],
   mentionedChannel: json['mentioned_channel'] as bool?,
   mentionedGroupIds: (json['mentioned_group_ids'] as List<dynamic>?)?.map((e) => e as String).toList(),
-  mentionedGroups: (json['mentioned_groups'] as List<dynamic>?)
-      ?.map((e) => UserGroup.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  mentionedGroups: userGroupsFromV1Json(json['mentioned_groups'] as List?),
   mentionedHere: json['mentioned_here'] as bool?,
   mentionedRoles: (json['mentioned_roles'] as List<dynamic>?)?.map((e) => e as String).toList(),
   mentionedUsers:

@@ -4,8 +4,6 @@ import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/api/polls_api.dart';
 import 'package:stream_chat/src/core/api/requests.dart';
-import 'package:stream_chat/src/core/api/sort_order.dart';
-import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:stream_chat/src/core/models/poll_vote.dart';
@@ -193,7 +191,9 @@ void main() {
 
     const path = '/polls/$pollId';
 
-    when(() => client.delete(path)).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.delete(path),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await pollsApi.deletePoll(pollId);
 
@@ -311,7 +311,9 @@ void main() {
 
     const path = '/polls/$pollId/options/$optionId';
 
-    when(() => client.delete(path)).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.delete(path),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await pollsApi.deletePollOption(pollId, optionId);
 
@@ -386,8 +388,8 @@ void main() {
 
   test('queryPolls', () async {
     const path = '/polls/query';
-    final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
-    const sort = [SortOption<Poll>.desc('test-field')];
+    final filter = PollFilter.in_(PollFilterField.id, const ['p1', 'p2']);
+    final sort = [PollSort.desc(PollSortField.createdAt)];
     const pagination = PaginationParams(limit: 20);
 
     final payload = jsonEncode({
@@ -441,8 +443,8 @@ void main() {
 
   test('queryPollVotes', () async {
     const pollId = 'test-poll-id';
-    final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
-    const sort = [SortOption<PollVote>.desc('test-field')];
+    final filter = PollVoteFilter.in_(PollVoteFilterField.id, const ['v1', 'v2']);
+    final sort = [PollVoteSort.desc(PollVoteSortField.createdAt)];
     const pagination = PaginationParams(limit: 20);
 
     const path = '/polls/$pollId/votes';

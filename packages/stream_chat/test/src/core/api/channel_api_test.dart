@@ -124,8 +124,8 @@ void main() {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
 
-    final filter = Filter.in_('cid', const ['test-cid']);
-    const sort = [SortOption<ChannelState>.desc('test-field')];
+    final filter = ChannelFilter.in_(ChannelFilterField.cid, const ['test-cid']);
+    final sort = [ChannelSort.desc(ChannelSortField.custom('test-field'))];
     const memberLimit = 33;
     const messageLimit = 33;
 
@@ -248,18 +248,16 @@ void main() {
     expect(res.predefinedFilter, isNotNull);
     expect(res.predefinedFilter!.name, predefinedFilter);
     expect(
-      res.predefinedFilter!.filter,
-      const Filter.raw(
-        value: {
-          'members': {
-            r'$in': ['test-user-id'],
-          },
+      res.predefinedFilter!.filter.toJson(),
+      const ChannelFilter.raw({
+        'members': {
+          r'$in': ['test-user-id'],
         },
-      ),
+      }).toJson(),
     );
     expect(res.predefinedFilter!.sort, hasLength(1));
-    expect(res.predefinedFilter!.sort!.first.field, 'last_message_at');
-    expect(res.predefinedFilter!.sort!.first.direction, SortOption.DESC);
+    expect(res.predefinedFilter!.sort!.first.field.remote, 'last_message_at');
+    expect(res.predefinedFilter!.sort!.first.direction, SortDirection.desc);
 
     verify(
       () => client.get(path, queryParameters: {'payload': payload}),

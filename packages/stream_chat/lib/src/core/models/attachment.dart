@@ -4,10 +4,10 @@ import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:uuid/uuid.dart';
 
-import '../api/responses.dart';
 import '../util/serializer.dart';
 import 'action.dart';
 import 'attachment_file.dart';
+import 'response/og_attachment_response.dart';
 
 part 'attachment.g.dart';
 
@@ -337,11 +337,11 @@ class Attachment extends Equatable {
 /// A type of attachment that determines how the attachment is displayed and
 /// handled by the system.
 ///
-/// It can be one of the backend-specified types (image, file, giphy, video,
+/// It can be one of the built-in types (image, file, giphy, video,
 /// audio, voiceRecording) or application custom types like urlPreview.
 /// {@endtemplate}
 extension type const AttachmentType(String rawType) implements String {
-  /// Backend specified types.
+  /// Built-in types.
   static const image = AttachmentType('image');
   static const file = AttachmentType('file');
   static const giphy = AttachmentType('giphy');

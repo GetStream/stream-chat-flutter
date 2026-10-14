@@ -46,12 +46,10 @@ class Command {
   Map<String, dynamic> toJson() => _$CommandToJson(this);
 }
 
-/// Wire identifier for a [Command]'s set, returned by the backend on the
-/// `set` field.
+/// The set a [Command] belongs to.
 ///
-/// Implemented as an extension type over [String] so it serializes for free
-/// and accepts custom values defined per-application, while exposing the
-/// built-in sets as named constants.
+/// The built-in sets are named constants. A set an application defines can
+/// still be named by wrapping its value: `CommandSet('my_set')`.
 extension type const CommandSet(String _) implements String {
   /// Compositional commands (e.g. `/giphy`) that operate on the user's text
   /// and remain valid alongside a quoted message.

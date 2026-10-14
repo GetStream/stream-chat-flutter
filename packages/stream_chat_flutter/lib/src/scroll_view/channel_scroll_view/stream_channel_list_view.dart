@@ -88,7 +88,7 @@ class StreamChannelListView extends StatelessWidget {
   /// A builder that is called to build the error state of the list.
   ///
   /// If not provided, [StreamChannelListErrorWidget] will be used.
-  final Widget Function(BuildContext, StreamChatError)? errorBuilder;
+  final Widget Function(BuildContext, StreamChatException)? errorBuilder;
 
   /// Called when the user taps this list tile.
   final void Function(Channel)? onChannelTap;

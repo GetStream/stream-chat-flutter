@@ -182,10 +182,7 @@ class DraftMessage extends Equatable {
 
 /// Extension on [Message] to convert it to a [DraftMessage].
 extension MessageToDraftMessage on Message {
-  /// Converts this [DraftMessage] to a [Message].
-  ///
-  /// This is useful when you want to convert a message to a draft message
-  /// before sending it to the server.
+  /// Converts this [Message] to a [DraftMessage].
   DraftMessage toDraftMessage() {
     // Only include attachments that have been successfully uploaded.
     final uploadedAttachments = attachments.where((it) {

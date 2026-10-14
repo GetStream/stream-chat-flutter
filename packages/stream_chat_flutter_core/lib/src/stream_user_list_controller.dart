@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'paged_value_notifier.dart';
 import 'search_debounce_mixin.dart';
@@ -9,11 +8,6 @@ import 'search_debouncer.dart';
 
 /// The default channel page limit to load.
 const defaultUserPagedLimit = 10;
-
-/// The default sort used for the user list.
-const defaultUserListSort = [
-  SortOption<User>.desc(UserSortKey.createdAt),
-];
 
 const _kDefaultBackendPaginationLimit = 30;
 
@@ -40,11 +34,11 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
   StreamUserListController({
     required this.client,
     this.filter,
-    this.sort = defaultUserListSort,
+    List<UserSort>? sort,
     this.presence = true,
     this.limit = defaultUserPagedLimit,
   }) : _activeFilter = filter,
-       _activeSort = sort,
+       sort = sort ?? UserSort.defaultSort,
        super(const PagedValue.loading());
 
   /// Creates a [StreamUserListController] from the passed [value].
@@ -52,11 +46,11 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
     super.value, {
     required this.client,
     this.filter,
-    this.sort = defaultUserListSort,
+    List<UserSort>? sort,
     this.presence = true,
     this.limit = defaultUserPagedLimit,
   }) : _activeFilter = filter,
-       _activeSort = sort;
+       sort = sort ?? UserSort.defaultSort;
 
   /// The client to use for the channels list.
   final StreamChatClient client;
@@ -66,8 +60,8 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
   /// You can query on any of the custom fields you've defined on the [User].
   ///
   /// You can also filter other built-in channel fields.
-  final Filter? filter;
-  Filter? _activeFilter;
+  final UserFilter? filter;
+  UserFilter? _activeFilter;
 
   /// The sorting used for the users matching the filters.
   ///
@@ -75,8 +69,11 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final SortOrder<User>? sort;
-  SortOrder<User>? _activeSort;
+  ///
+  /// Defaults to [UserSort.defaultSort]; pass [UserSort.empty] to leave the ordering
+  /// to the API.
+  final List<UserSort> sort;
+  late List<UserSort> _activeSort = sort;
 
   /// If true you’ll receive user presence updates via the websocket events
   final bool presence;
@@ -92,7 +89,7 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new filter.
-  set filter(Filter? value) => _activeFilter = value;
+  set filter(UserFilter? value) => _activeFilter = value;
 
   /// Allows for the change of the query sort used for user queries.
   ///
@@ -101,7 +98,7 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new sort.
-  set sort(SortOrder<User>? value) => _activeSort = value;
+  set sort(List<UserSort> value) => _activeSort = value;
 
   /// Searches users whose name or id matches [query], debounced by its length.
   ///
@@ -116,9 +113,9 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
     final trimmed = query.trim();
     if (trimmed.isEmpty) return searchWithFilter(filter);
 
-    final searchFilter = Filter.or([
-      Filter.autoComplete('name', trimmed),
-      Filter.autoComplete('id', trimmed),
+    final searchFilter = UserFilter.or([
+      UserFilter.autoComplete(UserFilterField.name, trimmed),
+      UserFilter.autoComplete(UserFilterField.id, trimmed),
     ]);
 
     return searchWithFilter(searchFilter);
@@ -131,22 +128,19 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
   /// the reload is debounced by that text's length; otherwise it reloads
   /// immediately. Rapidly superseded searches are dropped, so only the latest
   /// query's results are applied.
-  void searchWithFilter(Filter? filter) {
+  void searchWithFilter(UserFilter? filter) {
     _activeFilter = filter;
     debouncedSearch(searchQueryLength(filter));
   }
 
   @override
   set value(PagedValue<int, User> newValue) {
-    super.value = switch (_activeSort) {
-      null => newValue,
-      final userSort => newValue.maybeMap(
-        orElse: () => newValue,
-        (success) => success.copyWith(
-          items: success.items.sorted(userSort.compare),
-        ),
+    super.value = newValue.maybeMap(
+      orElse: () => newValue,
+      (success) => success.copyWith(
+        items: success.items.sortedWith(_activeSort.compare),
       ),
-    };
+    );
   }
 
   @override
@@ -175,12 +169,12 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
         items: users,
         nextPageKey: nextKey,
       );
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       if (isStale(generation)) return;
       value = PagedValue.error(error);
     } catch (error) {
       if (isStale(generation)) return;
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load users', cause: error);
       value = PagedValue.error(chatError);
     }
   }
@@ -209,12 +203,12 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
         items: newItems,
         nextPageKey: nextKey,
       );
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       if (isStale(generation)) return;
       value = previousValue.copyWith(error: error);
     } catch (error) {
       if (isStale(generation)) return;
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load more users', cause: error);
       value = previousValue.copyWith(error: chatError);
     }
   }

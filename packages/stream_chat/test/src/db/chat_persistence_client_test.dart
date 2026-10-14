@@ -1,11 +1,8 @@
 import 'package:stream_chat/src/core/api/requests.dart';
-import 'package:stream_chat/src/core/api/sort_order.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/draft.dart';
 import 'package:stream_chat/src/core/models/draft_message.dart';
-import 'package:stream_chat/src/core/models/event.dart';
-import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
@@ -15,6 +12,7 @@ import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/read.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
+import 'package:stream_chat/src/ws/events/event.dart';
 import 'package:test/test.dart';
 
 class TestPersistenceClient extends ChatPersistenceClient {
@@ -82,8 +80,8 @@ class TestPersistenceClient extends ChatPersistenceClient {
 
   @override
   Future<List<ChannelState>> getChannelStates({
-    Filter? filter,
-    SortOrder<ChannelState>? channelStateSort,
+    ChannelFilter? filter,
+    List<ChannelSort>? channelStateSort,
     int? messageLimit,
     PaginationParams? paginationParams,
   }) => throw UnimplementedError();
@@ -124,7 +122,7 @@ class TestPersistenceClient extends ChatPersistenceClient {
   Future<List<Message>> getReplies(String parentId, {PaginationParams? options}) => throw UnimplementedError();
 
   @override
-  Future<void> updateChannelQueries(Filter? filter, List<String> cids, {bool clearQueryCache = false}) =>
+  Future<void> updateChannelQueries(ChannelFilter? filter, List<String> cids, {bool clearQueryCache = false}) =>
       throw UnimplementedError();
 
   @override

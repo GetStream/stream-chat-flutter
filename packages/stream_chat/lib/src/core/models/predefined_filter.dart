@@ -1,16 +1,13 @@
 import 'package:json_annotation/json_annotation.dart';
-import '../api/sort_order.dart';
 import 'channel_state.dart';
-import 'filter.dart';
 
 part 'predefined_filter.g.dart';
 
-/// The resolved predefined filter spec returned by the server.
+/// A predefined filter, resolved for one channel query.
 ///
-/// When `predefined_filter` is provided on a `queryChannels` request, the
-/// server resolves the template (interpolating any `filter_values` and
-/// `sort_values`) and echoes the materialized `filter` and `sort` on the
-/// response under this key.
+/// When a channel query names a predefined filter, its template is filled in
+/// with the filter and sort values the query supplies, and the filter and sort
+/// it resolves to come back with the channels.
 @JsonSerializable(createToJson: false)
 class PredefinedFilter {
   /// Creates a new instance.
@@ -23,44 +20,38 @@ class PredefinedFilter {
   /// Create a new instance from a json.
   factory PredefinedFilter.fromJson(Map<String, dynamic> json) => _$PredefinedFilterFromJson(json);
 
-  /// Identifier of the predefined filter on the server.
+  /// The name of the predefined filter.
   final String name;
 
-  /// Filter conditions as resolved by the server.
+  /// The filter conditions the predefined filter resolved to.
   ///
-  /// Wrapped in [Filter.raw] — the SDK does not evaluate filters locally.
-  /// Access the underlying map via [Filter.value] or [Filter.toJson].
+  /// Wrapped in [ChannelFilter.raw], since it is not authored here and may use an
+  /// operator this package does not model. Read it with [ChannelFilter.toJson];
+  /// [ChannelFilter.matches] throws for it.
   @JsonKey(fromJson: _filterFromJson)
-  final Filter filter;
+  final ChannelFilter filter;
 
-  /// Sort specification as resolved by the server.
-  final SortOrder<ChannelState>? sort;
+  /// The sort the predefined filter resolved to, if it names one.
+  final List<ChannelSort>? sort;
 
-  /// Sort to apply locally, matching what the server applies for this
-  /// predefined filter — the echoed [sort], or a default derived from
-  /// [filter] when [sort] is null.
-  SortOrder<ChannelState> get effectiveSort => sort ?? _defaultSortFor(filter);
+  /// The sort that reproduces this predefined filter's ordering locally.
+  ///
+  /// This is [sort], or a default derived from [filter] when [sort] is null.
+  List<ChannelSort> get effectiveSort => sort ?? _defaultSortFor(filter);
 
-  static Filter _filterFromJson(Map<String, dynamic> json) => Filter.raw(value: json);
+  static ChannelFilter _filterFromJson(Map<String, dynamic> json) => ChannelFilter.raw(json);
 }
 
-SortOrder<ChannelState> _defaultSortFor(Filter filter) {
-  if (_touchesField(filter, ChannelSortKey.lastMessageAt)) {
-    return const [SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt)];
+// Mirrors the ordering a channel query with no sort falls back to, so the field
+// is written out rather than taken from [ChannelSort.defaultSort]: the two agree
+// today, but one is the ordering this SDK picks and the other is the query's
+// fallback, and either may change alone.
+List<ChannelSort> _defaultSortFor(ChannelFilter filter) {
+  final lastMessageAt = ChannelSortField.lastMessageAt;
+  if (_mapTouchesField(filter.toJson(), lastMessageAt.remote)) {
+    return [ChannelSort.desc(lastMessageAt)];
   }
-  return const [SortOption<ChannelState>.desc(ChannelSortKey.lastUpdated)];
-}
-
-bool _touchesField(Filter filter, String field) {
-  if (filter.key == field) return true;
-  final value = filter.value;
-  if (value is List<Filter>) {
-    return value.any((sub) => _touchesField(sub, field));
-  }
-  if (value is Map<String, Object?>) {
-    return _mapTouchesField(value, field);
-  }
-  return false;
+  return [ChannelSort.desc(ChannelSortField.lastUpdated)];
 }
 
 bool _mapTouchesField(Map<String, Object?> map, String field) {

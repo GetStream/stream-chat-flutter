@@ -7,6 +7,7 @@ on:
       - synchronize
     branches:
       - master
+      - v11
       - v9
 
 concurrency:

@@ -17,12 +17,6 @@ void main() {
       registerFallbackValue(FakeAttachmentFile());
       registerFallbackValue(FakeEvent());
 
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
         delayFactor: Duration.zero,
@@ -34,7 +28,6 @@ void main() {
       when(() => client.state).thenReturn(clientState);
 
       // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
 
       // mock channel delivery reporter
       when(
@@ -2281,7 +2274,7 @@ void main() {
             () => client.queryMembers(
               channelType,
               channelId: channelId,
-              filter: Filter.equal('id', 'bad-user'),
+              filter: any(named: 'filter'),
               members: any(named: 'members'),
               sort: any(named: 'sort'),
               pagination: any(named: 'pagination'),
@@ -5275,15 +5268,10 @@ void main() {
     late final client = MockStreamChatClient();
 
     setUpAll(() {
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
       when(() => client.retryPolicy).thenReturn(
         RetryPolicy(shouldRetry: (_, __, ___) => false, delayFactor: Duration.zero),
       );
       when(() => client.state).thenReturn(FakeClientState(currentUser: currentUser));
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
       when(
         () => client.channelDeliveryReporter.submitForDelivery(any()),
       ).thenAnswer((_) async {});
@@ -5344,15 +5332,10 @@ void main() {
       'disabled',
       () async {
         final disabledClient = MockStreamChatClient();
-        when(() => disabledClient.detachedLogger(any())).thenAnswer((invocation) {
-          final name = invocation.positionalArguments.first;
-          return _createLogger(name);
-        });
         when(() => disabledClient.retryPolicy).thenReturn(
           RetryPolicy(shouldRetry: (_, __, ___) => false),
         );
         when(() => disabledClient.state).thenReturn(FakeClientState(currentUser: currentUser));
-        when(() => disabledClient.logger).thenReturn(_createLogger('mock-client-logger'));
         when(
           () => disabledClient.channelDeliveryReporter.submitForDelivery(any()),
         ).thenAnswer((_) async {});
@@ -5512,7 +5495,7 @@ void main() {
 
         await expectLater(
           channel.markUnread('unknown-message-id'),
-          throwsA(isA<StreamChatError>()),
+          throwsA(isA<StreamClientException>()),
         );
         verifyNever(
           () => client.markChannelUnread(any(), any(), any()),
@@ -5719,10 +5702,6 @@ void main() {
     late final client = MockStreamChatClient();
 
     setUpAll(() {
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
       when(() => client.retryPolicy).thenReturn(
         RetryPolicy(
           shouldRetry: (_, __, ___) => false,
@@ -5730,7 +5709,6 @@ void main() {
         ),
       );
       when(() => client.state).thenReturn(FakeClientState());
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
       when(
         () => client.channelDeliveryReporter.submitForDelivery(any()),
       ).thenAnswer((_) async {});
@@ -5890,10 +5868,6 @@ void main() {
     late final client = MockStreamChatClient();
 
     setUpAll(() {
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
       when(() => client.retryPolicy).thenReturn(
         RetryPolicy(
           shouldRetry: (_, __, ___) => false,
@@ -5901,7 +5875,6 @@ void main() {
         ),
       );
       when(() => client.state).thenReturn(FakeClientState());
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
       when(
         () => client.channelDeliveryReporter.submitForDelivery(any()),
       ).thenAnswer((_) async {});
@@ -5982,7 +5955,7 @@ void main() {
         );
         channel.state!.updateMessage(deleted);
 
-        // No message quotes `target`, so `updateIf` short-circuits and the
+        // No message quotes `target`, so `updateWhere` short-circuits and the
         // remaining messages keep their identities (only `target` itself was
         // replaced by `sortedUpsert`).
         final unrelatedAfter = channel.state!.messages.firstWhere((m) => m.id == 'u1');
@@ -6013,7 +5986,7 @@ void main() {
         channel.state!.updateMessage(target.copyWith(text: 'edited'));
 
         final quoterAfter = channel.state!.messages.firstWhere((m) => m.id == 'q1');
-        // `updateIf` is gated on `message.isDeleted`, so the quoter must keep
+        // `updateWhere` is gated on `message.isDeleted`, so the quoter must keep
         // its identity (no allocation, no quoted-message overwrite).
         expect(identical(quoterAfter, quoterBefore), isTrue);
       },
@@ -6029,13 +6002,6 @@ void main() {
     setUpAll(() {
       registerFallbackValue(FakeMessage());
       registerFallbackValue(<Message>[]);
-
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
 
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
@@ -6426,12 +6392,6 @@ ChannelState _generateChannelState(
     lastMessageAt: lastMessageAt,
   );
   return ChannelState(channel: channel);
-}
-
-Logger _createLogger(String name) {
-  final logger = Logger.detached(name)..level = Level.ALL;
-  logger.onRecord.listen(print);
-  return logger;
 }
 
 // endregion

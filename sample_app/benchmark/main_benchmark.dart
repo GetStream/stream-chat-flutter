@@ -21,7 +21,7 @@ const _benchmarkChannelId = 'perf-test-5k';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final client = StreamChatClient(_apiKey, logLevel: Level.OFF);
+  final client = StreamChatClient(_apiKey, logConfig: const StreamLogConfig(priority: StreamLogPriority.none));
   await client.connectUser(User(id: _userId), _userToken);
 
   runApp(_BenchmarkApp(client: client));

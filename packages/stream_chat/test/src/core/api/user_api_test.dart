@@ -24,8 +24,8 @@ void main() {
 
   test('queryUsers', () async {
     const presence = true;
-    final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
-    const sort = [SortOption<User>.desc('test-field')];
+    final filter = UserFilter.in_(UserFilterField.id, const ['test-id-1', 'test-id-2']);
+    final sort = [UserSort.desc(UserSortField.custom('test-field'))];
     const pagination = PaginationParams();
 
     const path = '/users';
@@ -314,7 +314,7 @@ void main() {
     const messageId = 'test-message-id';
     const createdByDeviceId = 'test-device-id';
     final endAt = DateTime.timestamp().add(const Duration(hours: 1));
-    const coordinates = LocationCoordinates(
+    const coordinates = LocationCoordinate(
       latitude: 40.7128,
       longitude: -74.0060,
     );

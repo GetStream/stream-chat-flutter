@@ -90,7 +90,7 @@ class StreamMemberGridView extends StatelessWidget {
   final WidgetBuilder? loadingBuilder;
 
   /// A builder that is called to build the error state of the grid.
-  final Widget Function(BuildContext, StreamChatError)? errorBuilder;
+  final Widget Function(BuildContext, StreamChatException)? errorBuilder;
 
   /// Called when the member taps this grid tile.
   final void Function(Member)? onMemberTap;

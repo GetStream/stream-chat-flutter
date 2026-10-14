@@ -218,19 +218,23 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
           });
         },
       );
-      final url = response.file;
-      if (url == null || !mounted) return;
-      _trackedUploads.add(url);
-      setState(() => _imageOverride = url);
-    } catch (e) {
-      if (mounted) {
+      if (!mounted) return;
+
+      if (response case Failure(:final error)) {
         // Drop the local preview so the user sees the channel revert —
         // the snackbar tells them why and they can re-pick.
         setState(() => _pickedPath = null);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload failed: $e')),
+          SnackBar(content: Text('Upload failed: $error')),
         );
+        return;
       }
+
+      final url = response.getOrNull()?.fileUrl;
+      if (url == null) return;
+
+      _trackedUploads.add(url);
+      setState(() => _imageOverride = url);
     } finally {
       if (mounted) setState(() => _uploadProgress = null);
     }

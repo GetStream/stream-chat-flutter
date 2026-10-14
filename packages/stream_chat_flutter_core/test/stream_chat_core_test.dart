@@ -191,7 +191,7 @@ void main() {
       when(
         mockClient.openConnection,
       ).thenAnswer((_) async => OwnUser(id: 'test-user'));
-      when(() => mockClient.wsConnectionStatus).thenReturn(ConnectionStatus.connected);
+      when(() => mockClient.connectionStatus).thenReturn(ConnectionStatus.connected);
     });
 
     tearDown(() {
@@ -251,9 +251,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Reset connection status to disconnected
-        when(
-          () => mockClient.wsConnectionStatus,
-        ).thenReturn(ConnectionStatus.disconnected);
+        when(() => mockClient.connectionStatus).thenReturn(ConnectionStatus.disconnected);
 
         // Act - bring app to foreground
         tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
@@ -279,9 +277,7 @@ void main() {
         verifyNever(mockClient.resumeReconnect);
 
         // Reset connection status so foreground triggers a reconnect.
-        when(
-          () => mockClient.wsConnectionStatus,
-        ).thenReturn(ConnectionStatus.disconnected);
+        when(() => mockClient.connectionStatus).thenReturn(ConnectionStatus.disconnected);
 
         // Act - foreground
         tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
@@ -346,15 +342,36 @@ void main() {
     );
 
     testWidgets(
+      'should close a connection the socket is still waiting to reopen',
+      (tester) async {
+        await tester.runAsync(() async {
+          // What a connection the socket is waiting to reopen reads as. Left open, it would go on
+          // retrying behind an app that has been put away.
+          when(() => mockClient.connectionStatus).thenReturn(ConnectionStatus.connecting);
+
+          await pumpStreamChatCore(
+            tester,
+            backgroundKeepAlive: const Duration(milliseconds: 100),
+          );
+
+          tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+          await tester.pumpAndSettle();
+
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+
+          verify(mockClient.closeConnection).called(1);
+        });
+      },
+    );
+
+    testWidgets(
       'should open connection when connectivity is restored',
       (tester) async {
         // Arrange
         await pumpStreamChatCore(tester);
 
         // Set connection status to disconnected
-        when(
-          () => mockClient.wsConnectionStatus,
-        ).thenReturn(ConnectionStatus.disconnected);
+        when(() => mockClient.connectionStatus).thenReturn(ConnectionStatus.disconnected);
 
         // Act - restore connectivity (pump past the debounce window)
         connectivityController.add([ConnectivityResult.mobile]);
@@ -372,9 +389,7 @@ void main() {
         await pumpStreamChatCore(tester);
 
         // Set connection status to connected
-        when(
-          () => mockClient.wsConnectionStatus,
-        ).thenReturn(ConnectionStatus.connected);
+        when(() => mockClient.connectionStatus).thenReturn(ConnectionStatus.connected);
 
         // Act - lose connectivity (pump past the debounce window)
         connectivityController.add([ConnectivityResult.none]);
@@ -416,7 +431,7 @@ void main() {
         // only the trailing-edge state should drive one reconnect.
         await pumpStreamChatCore(tester);
 
-        when(() => mockClient.wsConnectionStatus).thenReturn(ConnectionStatus.disconnected);
+        when(() => mockClient.connectionStatus).thenReturn(ConnectionStatus.disconnected);
 
         // Fire three events spaced under 1 s — all inside the debounce window.
         connectivityController.add([ConnectivityResult.none]);
@@ -440,7 +455,7 @@ void main() {
       (tester) async {
         await pumpStreamChatCore(tester);
 
-        when(() => mockClient.wsConnectionStatus).thenReturn(ConnectionStatus.disconnected);
+        when(() => mockClient.connectionStatus).thenReturn(ConnectionStatus.disconnected);
 
         connectivityController.add([ConnectivityResult.mobile]);
         await tester.pump(const Duration(seconds: 4));
@@ -461,9 +476,7 @@ void main() {
         );
 
         // Set up for reconnection scenario
-        when(
-          () => mockClient.wsConnectionStatus,
-        ).thenReturn(ConnectionStatus.disconnected);
+        when(() => mockClient.connectionStatus).thenReturn(ConnectionStatus.disconnected);
 
         // Clear any previous calls
         clearInteractions(mockClient);
@@ -491,8 +504,8 @@ void main() {
         testConnectivityController.add([ConnectivityResult.wifi]);
         await tester.pump(const Duration(seconds: 4));
 
-        // Assert - second event should trigger reconnection
-        verify(mockClient.closeConnection).called(1);
+        // Assert - second event opens a connection, without closing one first
+        verifyNever(mockClient.closeConnection);
         verify(mockClient.openConnection).called(1);
 
         testConnectivityController.close();

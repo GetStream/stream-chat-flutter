@@ -1,14 +1,12 @@
 import 'dart:convert';
 
+import '../../ws/events/event.dart';
 import '../http/stream_http_client.dart';
 import '../models/channel_state.dart';
-import '../models/event.dart';
-import '../models/filter.dart';
 import '../models/message.dart';
 import '../models/message_delivery.dart';
 import 'requests.dart';
 import 'responses.dart';
-import 'sort_order.dart';
 
 /// Defines the api dedicated to channel operations
 class ChannelApi {
@@ -52,11 +50,12 @@ class ChannelApi {
   ///
   /// Either an inline [filter]/[sort] pair or a [predefinedFilter] identifier
   /// (optionally interpolated with [filterValues] and [sortValues]) can be
-  /// provided. When a predefined filter is used, the server resolves it and
-  /// returns the materialized filter/sort on [QueryChannelsResponse].
+  /// provided. When a predefined filter is used,
+  /// [QueryChannelsResponse.predefinedFilter] carries the filter and sort it
+  /// resolved to.
   Future<QueryChannelsResponse> queryChannels({
-    Filter? filter,
-    SortOrder<ChannelState>? sort,
+    ChannelFilter? filter,
+    List<ChannelSort>? sort,
     String? predefinedFilter,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
