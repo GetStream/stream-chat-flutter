@@ -25,7 +25,7 @@
 
 - **Split out of [11](11-channels-and-members.md), ahead of it.** The partial updates read nothing
   into client state — the `channel.updated` and `member.updated` events do that — so they can move
-  before the queries and prove `channel_mapper.dart` on real calls.
+  before the queries and prove `channels_mapper.dart` on real calls.
 - **The full update stays in 11, so the pair is split on purpose.** `updateChannel` takes and
   answers a `Message`, and the generated `UpdateChannelRequest.message` / `UpdateChannelResponse.message`
   need the `MessageRequest` and `MessageResponse` mappers [10](10-messages.md) writes; its `data` is
@@ -63,6 +63,21 @@
   `toJson` and an enum the model rules retire. The client writes `{'pinned': true}` / `['pinned']`.
 - **The request always sends `set` and `unset`, `null` when not given,** where v1 left the key out.
   The server reads both the same, and still rejects a call with neither.
+- **`ChannelModel` and `Member` promote the fields v10 parked in `extraData`, and rename it `custom`**
+  (README rule 9), since these calls are the first to map them. `ChannelModel.disabled`, `hidden`,
+  `muted`, `blocked`, `truncatedAt`, `truncatedBy`, `autoTranslationEnabled` and
+  `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`,
+  `futureChannelBanExpires` and `deletedAt`, are fields with persistence columns; `truncatedBy` is
+  read back through the users table. `Channel.extraData`, `extraDataStream`, and the `extraData`
+  argument of the `Channel` constructor and of `StreamChatClient.channel` are renamed with it.
+- **`custom` is the wire's, verbatim,** and the v1 writers leave out a custom entry named like a key,
+  so it cannot overwrite the field. `Member` leaves the deprecated `role` out of `custom`.
+- **`ChannelModel.merge` keeps a flag the incoming channel leaves out, and turns auto translation off
+  when it is missing,** as before. Checked live on v1 and v2: queries always send `hidden` and
+  `blocked`; events leave them out, except the `channel.hidden` a block sends; `muted` is never sent on
+  a channel; `truncated_at` and `truncated_by` come on every event once the channel is truncated;
+  `disabled` and `frozen` always. A client token cannot set `auto_translation_*`, so that rule rests
+  on the backend leaving the keys out when false or empty.
 
 ## Risks
 
@@ -74,6 +89,8 @@
       hand-written, with the reason.
 - [x] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
 - [x] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
+- [x] `copywith_audit.py` was run for every model that loses a v10 `copyWith`, every site it reports is
+      handled, and the semantics change is in the CHANGELOG and the guide ([README rule 2](README.md#domain-models)).
 - [x] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
       persists anything.
 - [x] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.

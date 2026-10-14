@@ -301,6 +301,7 @@ class Message extends Equatable {
 
   /// The poll associated with this message.
   @JsonKey(includeToJson: false)
+  @PollV1JsonConverter()
   final Poll? poll;
 
   /// The ID of the [poll] associated with this message.

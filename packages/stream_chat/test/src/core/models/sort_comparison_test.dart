@@ -207,7 +207,7 @@ void main() {
             id: 'red-team',
             type: 'messaging',
             createdAt: createdAt,
-            extraData: const {'team': 'red'},
+            custom: const {'team': 'red'},
           ),
         ),
       ];
@@ -224,7 +224,7 @@ void main() {
             id: 'red-team',
             type: 'messaging',
             createdAt: createdAt,
-            extraData: const {'team': 'red'},
+            custom: const {'team': 'red'},
           ),
         ),
         ChannelState(

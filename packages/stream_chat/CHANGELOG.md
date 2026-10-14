@@ -78,6 +78,19 @@
 - `AppSettings` and `UploadConfig` no longer extend `Equatable`, so `props` is removed; they still compare by value and gain `copyWith`.
 - `StreamChatApi.general.getAppSettings` is removed; call `StreamChatClient.getAppSettings` instead.
 - `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed; call `StreamChatClient.connectGuestUser` instead.
+- The poll calls on `StreamChatClient` and `Channel` return a `Result` instead of throwing.
+- `CreatePollResponse`, `GetPollResponse` and `UpdatePollResponse` are replaced by `PollResponse`; `CreatePollOptionResponse`, `GetPollOptionResponse` and `UpdatePollOptionResponse` by `PollOptionResponse`; and `CastPollVoteResponse` and `RemovePollVoteResponse` by `PollVoteResponse`.
+- `queryPolls` and `queryPollVotes` take `limit` (10 when omitted) and `next` instead of `PaginationParams`.
+- `Channel.castPollVote` and `removePollVote` return a failure instead of throwing an `ArgumentError` for an option or vote without an id.
+- `VotingVisibility` is an extension type over its wire string instead of an enum.
+- `Poll`, `PollOption`, `PollVote` and the poll responses no longer decode from or encode to JSON; `PollOption` gains `fromData` and `toData`, which read and write only the format `stream_chat_persistence` stores it in.
+- The poll responses are immutable, built through a const constructor, and their `duration` is a non-nullable `String`; `PollVoteResponse.vote` is nullable.
+- `Poll`, `PollOption` and `PollVote` no longer extend `Equatable`, so `props` is removed; they still compare by value, now including `custom`.
+- `Poll.copyWith`, `PollOption.copyWith` and `PollVote.copyWith` set a nullable field passed as `null` to `null` instead of keeping its value, and give `Poll.id` and the `createdAt` and `updatedAt` timestamps a fresh default when passed `null`.
+- `StreamChatApi.polls` is removed; its endpoints are reached through `StreamChatClient`.
+- `Poll.topLevelFields` and `PollOption.topLevelFields` are removed.
+- `Poll.extraData` and `PollOption.extraData` are renamed `custom`.
+- `Poll.custom` and `PollOption.custom` hold the custom data exactly as the API returns it, and the poll and poll option requests send it back as custom data, so an entry named like one of the poll's or option's own fields no longer sets that field.
 - `sendImage`, `sendFile`, `uploadImage` and `uploadFile`, on `StreamChatClient`, `Channel` and `AttachmentFileUploader`, return a `Result<UploadedFile>` instead of throwing; read the URL from `fileUrl` and a video's thumbnail from `thumbUrl`.
 - `deleteImage`, `deleteFile`, `removeImage` and `removeFile` return a `Result<void>` instead of throwing, and carry no value on success.
 - `SendAttachmentResponse`, `SendFileResponse`, `SendImageResponse`, `UploadImageResponse` and `UploadFileResponse` are removed in favor of `UploadedFile`.
@@ -98,6 +111,10 @@
 - `StreamChatClient.markChannelsDelivered` returns a `Result<MarkDeliveredResponse>` instead of throwing, and `MarkChannelsDelivered`, the callback `ChannelDeliveryReporter` takes, returns a `Future<Result<void>>`.
 - `MessageDelivery` no longer encodes to JSON, compares by value and gains `copyWith`.
 - `StreamChatApi.channel.markRead`, `markUnread`, `markUnreadByTimestamp`, `markThreadRead`, `markThreadUnread`, `markAllRead` and `markChannelsDelivered` are removed; call them on `StreamChatClient` instead.
+- `ChannelModel.extraData` and `Member.extraData` are renamed `custom`, and so are `Channel.extraData`, `Channel.extraDataStream` (now `customStream`), and the `extraData` argument of the `Channel` constructor and of `StreamChatClient.channel`.
+- `ChannelModel.disabled`, `hidden`, `muted`, `blocked`, `truncatedAt`, `truncatedBy` and the auto-translation settings, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires` and `deletedAt`, are fields instead of entries in the custom data, so `custom` no longer holds `hidden`, `status` and the rest, and an entry with that name in `custom` or in `copyWith(custom:)` no longer sets the field.
+- `ChannelModel.custom` and `Member.custom` hold the custom data exactly as the API returns it, and `toJson` leaves out an entry named like one of the model's own fields.
+- `Member.custom` no longer holds `role`; read `channelRole`.
 
 🐞 Fixed
 
@@ -127,7 +144,8 @@
 - Added optional `reason` and `custom` arguments to `flagMessage` and `flagUser`, recorded with the flag.
 - Added an optional `timeout` to `StreamChatClient.moderation.muteUser` that expires the mute.
 - Added `StreamChatClient.moderation.muteUsers` and `unmuteUsers`, which mute and unmute several users in one call and report the ids that matched no user.
-- Added `ChannelModel.truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires`, `deletedAt` and `topLevelFields`; the constructors, and `ChannelModel.copyWith`, accept the new fields.
+- Added `ChannelModel.muted`, `blocked`, `truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires`, `deletedAt` and `topLevelFields`; the constructors and `copyWith` accept the new fields.
+- Added a `prev` argument to `queryPolls` and `queryPollVotes`, and a `prev` cursor on their responses, for paging backwards.
 
 🔒 Security
 
