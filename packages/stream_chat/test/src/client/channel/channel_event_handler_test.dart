@@ -241,6 +241,15 @@ void main() {
       verify(() => mutations.onMessageUpdated(message)).called(1);
     });
 
+    test('message.updated passes the user who made the edit', () {
+      final editor = User(id: 'editor');
+      final event = Event(type: EventType.messageUpdated, message: message, user: editor);
+
+      handler.handleEvent(event);
+
+      verify(() => mutations.onMessageUpdated(message, editor: editor)).called(1);
+    });
+
     test('message.updated ignores events without a message', () {
       handler.handleEvent(Event(type: EventType.messageUpdated));
 
