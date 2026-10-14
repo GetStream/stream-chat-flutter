@@ -15,6 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$ChannelStateResponse {
   List<SharedLocationResponseData>? get activeLiveLocations;
   ChannelResponse? get channel;
+  int? get cooldownRemainingMs;
   DraftResponse? get draft;
   String get duration;
   bool? get hidden;
@@ -50,6 +51,8 @@ mixin _$ChannelStateResponse {
               activeLiveLocations,
             ) &&
             (identical(other.channel, channel) || other.channel == channel) &&
+            (identical(other.cooldownRemainingMs, cooldownRemainingMs) ||
+                other.cooldownRemainingMs == cooldownRemainingMs) &&
             (identical(other.draft, draft) || other.draft == draft) &&
             (identical(other.duration, duration) || other.duration == duration) &&
             (identical(other.hidden, hidden) || other.hidden == hidden) &&
@@ -78,6 +81,7 @@ mixin _$ChannelStateResponse {
     runtimeType,
     const DeepCollectionEquality().hash(activeLiveLocations),
     channel,
+    cooldownRemainingMs,
     draft,
     duration,
     hidden,
@@ -96,7 +100,7 @@ mixin _$ChannelStateResponse {
 
   @override
   String toString() {
-    return 'ChannelStateResponse(activeLiveLocations: $activeLiveLocations, channel: $channel, draft: $draft, duration: $duration, hidden: $hidden, hideMessagesBefore: $hideMessagesBefore, members: $members, membership: $membership, messages: $messages, pendingMessages: $pendingMessages, pinnedMessages: $pinnedMessages, pushPreferences: $pushPreferences, read: $read, threads: $threads, watcherCount: $watcherCount, watchers: $watchers)';
+    return 'ChannelStateResponse(activeLiveLocations: $activeLiveLocations, channel: $channel, cooldownRemainingMs: $cooldownRemainingMs, draft: $draft, duration: $duration, hidden: $hidden, hideMessagesBefore: $hideMessagesBefore, members: $members, membership: $membership, messages: $messages, pendingMessages: $pendingMessages, pinnedMessages: $pinnedMessages, pushPreferences: $pushPreferences, read: $read, threads: $threads, watcherCount: $watcherCount, watchers: $watchers)';
   }
 }
 
@@ -110,6 +114,7 @@ abstract mixin class $ChannelStateResponseCopyWith<$Res> {
   $Res call({
     List<SharedLocationResponseData>? activeLiveLocations,
     ChannelResponse? channel,
+    int? cooldownRemainingMs,
     DraftResponse? draft,
     String duration,
     bool? hidden,
@@ -141,6 +146,7 @@ class _$ChannelStateResponseCopyWithImpl<$Res> implements $ChannelStateResponseC
   $Res call({
     Object? activeLiveLocations = freezed,
     Object? channel = freezed,
+    Object? cooldownRemainingMs = freezed,
     Object? draft = freezed,
     Object? duration = null,
     Object? hidden = freezed,
@@ -166,6 +172,10 @@ class _$ChannelStateResponseCopyWithImpl<$Res> implements $ChannelStateResponseC
             ? _self.channel
             : channel // ignore: cast_nullable_to_non_nullable
                   as ChannelResponse?,
+        cooldownRemainingMs: freezed == cooldownRemainingMs
+            ? _self.cooldownRemainingMs
+            : cooldownRemainingMs // ignore: cast_nullable_to_non_nullable
+                  as int?,
         draft: freezed == draft
             ? _self.draft
             : draft // ignore: cast_nullable_to_non_nullable

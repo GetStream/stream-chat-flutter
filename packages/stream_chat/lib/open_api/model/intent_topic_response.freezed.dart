@@ -13,13 +13,8 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$IntentTopicResponse {
-  int get analysisCooldownSeconds;
   String? get description;
-  bool get enabled;
   String get label;
-  int get maxCapturedItems;
-  int? get refireCooldownSeconds;
-  double get scoreThreshold;
 
   /// Create a copy of IntentTopicResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -36,35 +31,16 @@ mixin _$IntentTopicResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is IntentTopicResponse &&
-            (identical(
-                  other.analysisCooldownSeconds,
-                  analysisCooldownSeconds,
-                ) ||
-                other.analysisCooldownSeconds == analysisCooldownSeconds) &&
             (identical(other.description, description) || other.description == description) &&
-            (identical(other.enabled, enabled) || other.enabled == enabled) &&
-            (identical(other.label, label) || other.label == label) &&
-            (identical(other.maxCapturedItems, maxCapturedItems) || other.maxCapturedItems == maxCapturedItems) &&
-            (identical(other.refireCooldownSeconds, refireCooldownSeconds) ||
-                other.refireCooldownSeconds == refireCooldownSeconds) &&
-            (identical(other.scoreThreshold, scoreThreshold) || other.scoreThreshold == scoreThreshold));
+            (identical(other.label, label) || other.label == label));
   }
 
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    analysisCooldownSeconds,
-    description,
-    enabled,
-    label,
-    maxCapturedItems,
-    refireCooldownSeconds,
-    scoreThreshold,
-  );
+  int get hashCode => Object.hash(runtimeType, description, label);
 
   @override
   String toString() {
-    return 'IntentTopicResponse(analysisCooldownSeconds: $analysisCooldownSeconds, description: $description, enabled: $enabled, label: $label, maxCapturedItems: $maxCapturedItems, refireCooldownSeconds: $refireCooldownSeconds, scoreThreshold: $scoreThreshold)';
+    return 'IntentTopicResponse(description: $description, label: $label)';
   }
 }
 
@@ -75,15 +51,7 @@ abstract mixin class $IntentTopicResponseCopyWith<$Res> {
     $Res Function(IntentTopicResponse) _then,
   ) = _$IntentTopicResponseCopyWithImpl;
   @useResult
-  $Res call({
-    int analysisCooldownSeconds,
-    String? description,
-    bool enabled,
-    String label,
-    int maxCapturedItems,
-    int? refireCooldownSeconds,
-    double scoreThreshold,
-  });
+  $Res call({String? description, String label});
 }
 
 /// @nodoc
@@ -97,45 +65,17 @@ class _$IntentTopicResponseCopyWithImpl<$Res> implements $IntentTopicResponseCop
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? analysisCooldownSeconds = null,
-    Object? description = freezed,
-    Object? enabled = null,
-    Object? label = null,
-    Object? maxCapturedItems = null,
-    Object? refireCooldownSeconds = freezed,
-    Object? scoreThreshold = null,
-  }) {
+  $Res call({Object? description = freezed, Object? label = null}) {
     return _then(
       IntentTopicResponse(
-        analysisCooldownSeconds: null == analysisCooldownSeconds
-            ? _self.analysisCooldownSeconds
-            : analysisCooldownSeconds // ignore: cast_nullable_to_non_nullable
-                  as int,
         description: freezed == description
             ? _self.description
             : description // ignore: cast_nullable_to_non_nullable
                   as String?,
-        enabled: null == enabled
-            ? _self.enabled
-            : enabled // ignore: cast_nullable_to_non_nullable
-                  as bool,
         label: null == label
             ? _self.label
             : label // ignore: cast_nullable_to_non_nullable
                   as String,
-        maxCapturedItems: null == maxCapturedItems
-            ? _self.maxCapturedItems
-            : maxCapturedItems // ignore: cast_nullable_to_non_nullable
-                  as int,
-        refireCooldownSeconds: freezed == refireCooldownSeconds
-            ? _self.refireCooldownSeconds
-            : refireCooldownSeconds // ignore: cast_nullable_to_non_nullable
-                  as int?,
-        scoreThreshold: null == scoreThreshold
-            ? _self.scoreThreshold
-            : scoreThreshold // ignore: cast_nullable_to_non_nullable
-                  as double,
       ),
     );
   }

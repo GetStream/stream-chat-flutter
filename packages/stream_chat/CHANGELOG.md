@@ -94,6 +94,8 @@
 
 - `connectGuestUser` no longer leaves the signed-in user unauthenticated when it refuses to connect a guest over them.
 
+- The OpenAPI-generated client's methods that take a `payload` or `sort` argument no longer fail with `invalid json data`.
+
 🔄 Changed
 
 - Failed messages now retry on server errors. The retry policy is now explicit: retry a request that never reached the server, a 5xx, a 429 and a 408; never another 4xx, a cancelled request, broken credentials, or anything the server marked unrecoverable. Previously only failures without a parseable error body retried, so a 500 or a 429 did not.

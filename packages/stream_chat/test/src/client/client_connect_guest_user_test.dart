@@ -267,7 +267,6 @@ api.CreateGuestResponse _createGuestResponse({
     lastActive: DateTime.utc(2026, 9, 3),
     deactivatedAt: DateTime.utc(2026, 9, 4),
     deletedAt: DateTime.utc(2026, 9, 5),
-    revokeTokensIssuedBefore: DateTime.utc(2026, 9, 6),
   ),
 );
 

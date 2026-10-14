@@ -2439,6 +2439,7 @@ void main() {
               placement: 'us-east',
               autoTranslationEnabled: true,
               asyncUrlEnrichEnabled: false,
+              defaults: fakeAppDefaults,
               fileUploadConfig: api.FileUploadConfig(
                 sizeLimit: 10485760,
                 allowedFileExtensions: ['.csv'],

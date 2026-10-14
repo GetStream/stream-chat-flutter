@@ -28,8 +28,10 @@ extension type const BanRequestDeleteMessages._(String _) implements String {
 @JsonSerializable()
 class BanRequest with _$BanRequest {
   const BanRequest({
+    this.banFromFutureChannels,
     this.channelCid,
     this.deleteMessages,
+    this.deleteReactions,
     this.ipBan,
     this.reason,
     this.shadow,
@@ -38,12 +40,20 @@ class BanRequest with _$BanRequest {
   });
 
   @override
+  @JsonKey(name: 'ban_from_future_channels')
+  final bool? banFromFutureChannels;
+
+  @override
   @JsonKey(name: 'channel_cid')
   final String? channelCid;
 
   @override
   @JsonKey(name: 'delete_messages')
   final BanRequestDeleteMessages? deleteMessages;
+
+  @override
+  @JsonKey(name: 'delete_reactions')
+  final bool? deleteReactions;
 
   @override
   @JsonKey(name: 'ip_ban')

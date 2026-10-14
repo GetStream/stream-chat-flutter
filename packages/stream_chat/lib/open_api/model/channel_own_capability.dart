@@ -28,6 +28,7 @@ extension type const ChannelOwnCapability._(String _) implements String {
   static const queryPollVotes = ChannelOwnCapability._('query-poll-votes');
   static const quoteMessage = ChannelOwnCapability._('quote-message');
   static const readEvents = ChannelOwnCapability._('read-events');
+  static const scheduleMessage = ChannelOwnCapability._('schedule-message');
   static const searchMessages = ChannelOwnCapability._('search-messages');
   static const sendCustomEvents = ChannelOwnCapability._('send-custom-events');
   static const sendLinks = ChannelOwnCapability._('send-links');

@@ -18,10 +18,15 @@ part 'grouped_channels_group_request.freezed.dart';
 @JsonSerializable()
 class GroupedChannelsGroupRequest with _$GroupedChannelsGroupRequest {
   const GroupedChannelsGroupRequest({
+    this.filterConditions,
     this.limit,
     this.next,
     this.prev,
   });
+
+  @override
+  @JsonKey(name: 'filter_conditions')
+  final Map<String, Object?>? filterConditions;
 
   @override
   @JsonKey(name: 'limit')

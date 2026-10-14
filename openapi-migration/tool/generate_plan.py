@@ -56,11 +56,18 @@ def read_handwritten():
 
 
 def read_generated():
-    """[(verb, path, operation, responseType)] for the generated client."""
-    return re.findall(
-        r"@(GET|POST|PATCH|PUT|DELETE)\('([^']+)'\)\s*\n\s*Future<Result<(\w+)>>\s+(\w+)\(",
-        GENERATED_API.read_text(),
-    )
+    """[(verb, path, operation, responseType)] for the generated client.
+
+    An operation that sends a query parameter as JSON is annotated on a private `_name` method, which the public
+    `name` forwards to; it is listed under the public name.
+    """
+    return [
+        (verb, path, response, operation.removeprefix('_'))
+        for verb, path, response, operation in re.findall(
+            r"@(GET|POST|PATCH|PUT|DELETE)\('([^']+)'\)\s*\n\s*Future<Result<(\w+)>>\s+(\w+)\(",
+            GENERATED_API.read_text(),
+        )
+    ]
 
 
 def owns(*prefixes, unless=()):
