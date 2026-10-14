@@ -24,7 +24,7 @@ DraftMessage _$DraftMessageFromJson(Map<String, dynamic> json) => DraftMessage(
   quotedMessageId: json['quoted_message_id'] as String?,
   silent: json['silent'] as bool? ?? false,
   command: json['command'] as String?,
-  poll: json['poll'] == null ? null : Poll.fromJson(json['poll'] as Map<String, dynamic>),
+  poll: _$JsonConverterFromJson<Map<String, dynamic>, Poll>(json['poll'], const PollV1JsonConverter().fromJson),
   pollId: json['poll_id'] as String?,
   extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
 );
@@ -42,3 +42,6 @@ Map<String, dynamic> _$DraftMessageToJson(DraftMessage instance) => <String, dyn
   'poll_id': ?instance.pollId,
   'extra_data': instance.extraData,
 };
+
+Value? _$JsonConverterFromJson<Json, Value>(Object? json, Value? Function(Json json) fromJson) =>
+    json == null ? null : fromJson(json as Json);

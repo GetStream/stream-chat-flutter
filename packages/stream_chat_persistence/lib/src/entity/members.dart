@@ -45,8 +45,23 @@ class Members extends Table {
   /// True if the user is a moderator of the channel
   BoolColumn get isModerator => boolean().withDefault(const Constant(false))();
 
-  /// Map of custom member extraData
-  TextColumn get extraData => text().nullable().map(MapConverter())();
+  /// Custom data attached to the member.
+  TextColumn get custom => text().nullable().map(MapConverter())();
+
+  /// Whether the member muted notifications for the channel.
+  BoolColumn get notificationsMuted => boolean().nullable()();
+
+  /// The status of the membership.
+  TextColumn get status => text().nullable()();
+
+  /// Whether the member is banned from future channels.
+  BoolColumn get banFromFutureChannels => boolean().nullable()();
+
+  /// The date at which the member's ban from future channels expires.
+  DateTimeColumn get futureChannelBanExpires => dateTime().nullable()();
+
+  /// The date at which the membership was deleted.
+  DateTimeColumn get deletedAt => dateTime().nullable()();
 
   /// The date of creation
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();

@@ -20,7 +20,12 @@ extension MemberEntityX on MemberEntity {
     archivedAt: archivedAt,
     isModerator: isModerator,
     deletedMessages: deletedMessages,
-    extraData: extraData ?? {},
+    custom: custom ?? {},
+    notificationsMuted: notificationsMuted,
+    status: status,
+    banFromFutureChannels: banFromFutureChannels,
+    futureChannelBanExpires: futureChannelBanExpires,
+    deletedAt: deletedAt,
   );
 }
 
@@ -43,6 +48,11 @@ extension MemberX on Member {
     channelRole: channelRole,
     updatedAt: updatedAt,
     deletedMessages: deletedMessages,
-    extraData: extraData,
+    custom: custom,
+    notificationsMuted: notificationsMuted,
+    status: status,
+    banFromFutureChannels: banFromFutureChannels,
+    futureChannelBanExpires: futureChannelBanExpires,
+    deletedAt: deletedAt,
   );
 }

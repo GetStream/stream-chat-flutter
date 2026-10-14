@@ -59,7 +59,7 @@ void main() {
       updatedAt: DateTime.now(),
       enforceUniqueVote: false,
       allowAnswers: true,
-      extraData: const {'test_extra_data': 'extraData'},
+      custom: const {'test_extra_data': 'extraData'},
     );
 
     final votes = latestVotesByOption.values.expand((it) => it).toList();
