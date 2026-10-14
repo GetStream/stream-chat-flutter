@@ -75,7 +75,7 @@ UserGroupMember _userGroupMemberFromV1Json(Map<String, dynamic> json) => UserGro
 /// Converts a [Poll] to and from its v1 keys.
 ///
 /// Custom data sits at the root of the v1 map, beside the known keys.
-// TODO(openapi-migration): remove once WebSocket events and messages decode v2 payloads
+// TODO(openapi-migration): remove once events and messages decode v2 payloads
 @internal
 class PollV1JsonConverter implements JsonConverter<Poll, Map<String, dynamic>> {
   /// Creates a new [PollV1JsonConverter].
@@ -124,8 +124,9 @@ class PollV1JsonConverter implements JsonConverter<Poll, Map<String, dynamic>> {
     custom: _customData(json, _pollV1Keys),
   );
 
-  // Writes the keys the poll settings use, with custom data at the root; the vote summary, the translations and a
-  // custom entry named like one of the keys are not written.
+  // Writes the keys the poll settings use, with custom data at the root; the
+  // vote summary, the translations and a custom entry named like one of the
+  // keys are not written.
   @override
   Map<String, dynamic> toJson(Poll poll) => {
     ..._customDataAtRoot(poll.custom, _pollV1Keys),
@@ -133,7 +134,7 @@ class PollV1JsonConverter implements JsonConverter<Poll, Map<String, dynamic>> {
     'name': poll.name,
     'description': poll.description,
     'options': poll.options.map(_pollOptionToV1Json).toList(),
-    'voting_visibility': poll.votingVisibility.rawType,
+    'voting_visibility': poll.votingVisibility,
     'enforce_unique_vote': poll.enforceUniqueVote,
     'max_votes_allowed': poll.maxVotesAllowed,
     'allow_user_suggested_options': poll.allowUserSuggestedOptions,
@@ -236,7 +237,7 @@ const _pollOptionV1Keys = [
 Map<String, Object?> _customData(Map<String, dynamic> json, List<String> knownKeys) =>
     Serializer.moveToExtraDataFromRoot(json, knownKeys)['extra_data'] as Map<String, Object?>;
 
-// The custom data a v1 map carries at its root: an entry named like one of the known keys would overwrite the key,
-// so it is left out.
+// The custom data a v1 map carries at its root: an entry named like one of the
+// known keys would overwrite the key, so it is left out.
 Map<String, Object?> _customDataAtRoot(Map<String, Object?> custom, List<String> knownKeys) =>
     {...custom}..removeWhere((key, _) => knownKeys.contains(key));

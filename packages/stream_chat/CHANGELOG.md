@@ -79,7 +79,7 @@
 - `StreamChatApi.general.getAppSettings` is removed; call `StreamChatClient.getAppSettings` instead.
 - `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed; call `StreamChatClient.connectGuestUser` instead.
 - The poll calls on `StreamChatClient` and `Channel` return a `Result` instead of throwing.
-- `CreatePollResponse`, `GetPollResponse` and `UpdatePollResponse` are replaced by `PollResponse`; `CreatePollOptionResponse`, `GetPollOptionResponse` and `UpdatePollOptionResponse` by `PollOptionResponse`; and `CastPollVoteResponse` and `RemovePollVoteResponse` by `PollVoteResponse`.
+- The eight poll response types are replaced by `PollResponse`, `PollOptionResponse` and `PollVoteResponse`.
 - `queryPolls` and `queryPollVotes` take `limit` (10 when omitted) and `next` instead of `PaginationParams`.
 - `Channel.castPollVote` and `removePollVote` return a failure instead of throwing an `ArgumentError` for an option or vote without an id.
 - `VotingVisibility` is an extension type over its wire string instead of an enum.
