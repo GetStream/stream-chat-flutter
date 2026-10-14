@@ -58,10 +58,10 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
   /// Creates a Stream poll vote list controller that lists only the votes for
   /// the poll option with `optionId`.
   ///
-  /// Live votes for other options and answers are ignored, and a vote changed
-  /// to another option is removed. Setting [filter] later changes only the
-  /// query; live votes stay limited to this option.
-  StreamPollVoteListController.option({
+  /// Votes for other options and answers cast while the list is loaded are
+  /// ignored, and a vote changed to another option is removed. Setting [filter]
+  /// later changes only the query; incoming votes stay limited to this option.
+  StreamPollVoteListController.forOption({
     required Channel channel,
     required String pollId,
     required String optionId,
@@ -70,9 +70,9 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
   /// Creates a Stream poll vote list controller that lists only the answers of
   /// the poll.
   ///
-  /// Live votes for poll options are ignored. Setting [filter] later changes
-  /// only the query; live votes stay limited to answers.
-  StreamPollVoteListController.answers({
+  /// Option votes cast while the list is loaded are ignored. Setting [filter]
+  /// later changes only the query; incoming votes stay limited to answers.
+  StreamPollVoteListController.forAnswers({
     required Channel channel,
     required String pollId,
   }) : this._scoped(const _AnswersScope(), channel: channel, pollId: pollId);
@@ -314,8 +314,8 @@ mixin class StreamPollVoteEventHandler {
   /// This event is fired when a new poll vote is casted in a poll.
   ///
   /// By default, this adds or updates the poll vote. A controller created with
-  /// [StreamPollVoteListController.option] or
-  /// [StreamPollVoteListController.answers] ignores votes for other options or
+  /// [StreamPollVoteListController.forOption] or
+  /// [StreamPollVoteListController.forAnswers] ignores votes for other options or
   /// votes that aren't answers, respectively.
   void onPollVoteCasted(
     Event event,
@@ -338,8 +338,8 @@ mixin class StreamPollVoteEventHandler {
   /// This event is fired when a poll vote is changed in a poll.
   ///
   /// By default, this adds or updates the poll vote. A controller created with
-  /// [StreamPollVoteListController.option] or
-  /// [StreamPollVoteListController.answers] instead removes a vote that is no
+  /// [StreamPollVoteListController.forOption] or
+  /// [StreamPollVoteListController.forAnswers] instead removes a vote that is no
   /// longer for that option or isn't an answer, respectively.
   void onPollVoteChanged(
     Event event,

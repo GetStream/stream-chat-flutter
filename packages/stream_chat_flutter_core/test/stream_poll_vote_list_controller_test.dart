@@ -103,7 +103,7 @@ void main() {
   group('when the list is scoped to an option', () {
     test('queries only the votes for the scoped option', () async {
       final filter = await _queriedFilter(
-        (channel) => StreamPollVoteListController.option(channel: channel, pollId: _pollId, optionId: _pizza),
+        (channel) => StreamPollVoteListController.forOption(channel: channel, pollId: _pollId, optionId: _pizza),
       );
 
       expect(filter, Filter.equal('option_id', _pizza));
@@ -177,7 +177,7 @@ void main() {
   group('when the list is scoped to answers', () {
     test('queries only the answers', () async {
       final filter = await _queriedFilter(
-        (channel) => StreamPollVoteListController.answers(channel: channel, pollId: _pollId),
+        (channel) => StreamPollVoteListController.forAnswers(channel: channel, pollId: _pollId),
       );
 
       expect(filter, Filter.equal('is_answer', true));
@@ -283,7 +283,7 @@ Future<({StreamPollVoteListController controller, StreamController<Event> events
 }) {
   return _loadedController(
     votes: votes,
-    create: (channel) => StreamPollVoteListController.option(
+    create: (channel) => StreamPollVoteListController.forOption(
       channel: channel,
       pollId: _pollId,
       optionId: optionId,
@@ -294,7 +294,7 @@ Future<({StreamPollVoteListController controller, StreamController<Event> events
 // Returns a controller scoped to the poll's answers that has loaded nothing.
 Future<({StreamPollVoteListController controller, StreamController<Event> events})> _loadedAnswersController() {
   return _loadedController(
-    create: (channel) => StreamPollVoteListController.answers(
+    create: (channel) => StreamPollVoteListController.forAnswers(
       channel: channel,
       pollId: _pollId,
     ),

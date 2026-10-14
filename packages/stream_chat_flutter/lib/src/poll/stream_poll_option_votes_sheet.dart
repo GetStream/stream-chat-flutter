@@ -100,7 +100,7 @@ class _StreamPollOptionVotesSheetState extends State<StreamPollOptionVotesSheet>
   }
 
   void _initializeController() {
-    _controller = StreamPollVoteListController.option(
+    _controller = StreamPollVoteListController.forOption(
       pollId: widget.poll.id,
       channel: StreamChannel.of(context).channel,
       optionId: widget.option.id!,
