@@ -418,6 +418,9 @@ class _AdaptiveSplitViewState extends State<AdaptiveSplitView> {
   // Opens and closes the drawer that spans both panes.
   final _drawerKey = GlobalKey<DrawerControllerState>(debugLabel: 'AdaptiveSplitView.drawer');
 
+  // Whether the drawer is open.
+  var _isDrawerOpen = false;
+
   @override
   Widget build(BuildContext context) {
     final sizeClass = WindowSizeClass.of(context);
@@ -454,10 +457,19 @@ class _AdaptiveSplitViewState extends State<AdaptiveSplitView> {
           context: context,
           removeLeft: !isLtr,
           removeRight: isLtr,
-          child: DrawerController(
-            key: _drawerKey,
-            alignment: .start,
-            child: drawer,
+          // Back closes the drawer here, ahead of the pane navigators below it.
+          child: BackButtonListener(
+            onBackButtonPressed: () async {
+              if (!_isDrawerOpen) return false;
+              _drawerKey.currentState?.close();
+              return true;
+            },
+            child: DrawerController(
+              key: _drawerKey,
+              alignment: .start,
+              drawerCallback: (isOpen) => _isDrawerOpen = isOpen,
+              child: drawer,
+            ),
           ),
         ),
       ],
