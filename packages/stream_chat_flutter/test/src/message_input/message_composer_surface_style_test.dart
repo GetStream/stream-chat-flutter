@@ -60,11 +60,18 @@ void main() {
   });
 
   testWidgets('StreamMessageComposer runs the regular top divider under the side insets', (tester) async {
-    const rightInset = 84.0;
-    await _pumpComposer(tester, surfaceStyle: StreamSurfaceStyle.regular, rightPadding: rightInset);
+    await _pumpComposer(tester, surfaceStyle: StreamSurfaceStyle.regular, leftPadding: 47, rightPadding: 84);
 
     final screenWidth = tester.view.physicalSize.width / tester.view.devicePixelRatio;
-    expect(tester.getRect(_backgroundFillFinder(tester)).width, moreOrLessEquals(screenWidth));
+    final divider = tester.getRect(_topDividerFinder);
+    expect(divider.left, 0);
+    expect(divider.right, moreOrLessEquals(screenWidth));
+  });
+
+  testWidgets('StreamMessageComposer draws a single regular top divider', (tester) async {
+    await _pumpComposer(tester, surfaceStyle: StreamSurfaceStyle.regular);
+
+    expect(_topDividerFinder, findsOneWidget);
   });
 
   testWidgets('the floating composer does not fill its background', (tester) async {
@@ -160,30 +167,35 @@ void main() {
   });
 
   testWidgets('StreamMessageComposer keeps its side insets while the attachment picker opens', (tester) async {
+    const leftInset = 47.0;
     const rightInset = 84.0;
     await _pumpComposer(
       tester,
       surfaceStyle: StreamSurfaceStyle.floating,
       bottomPadding: 34,
+      leftPadding: leftInset,
       rightPadding: rightInset,
     );
 
     final screenWidth = tester.view.physicalSize.width / tester.view.devicePixelRatio;
-    double inputRight() => tester.getRect(find.byType(StreamChatMessageInput)).right;
+    Rect inputRect() => tester.getRect(find.byType(StreamChatMessageInput));
 
-    final closedRight = inputRight();
-    expect(closedRight, lessThanOrEqualTo(screenWidth - rightInset));
+    final closed = inputRect();
+    expect(closed.left, greaterThanOrEqualTo(leftInset));
+    expect(closed.right, lessThanOrEqualTo(screenWidth - rightInset));
 
     await tester.tap(_attachmentButtonFinder);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // Mid-animation: the width doesn't change.
-    expect(inputRight(), moreOrLessEquals(closedRight));
+    // Mid-animation: neither edge moves.
+    expect(inputRect().left, moreOrLessEquals(closed.left));
+    expect(inputRect().right, moreOrLessEquals(closed.right));
 
     await tester.pumpAndSettle();
 
-    expect(inputRight(), moreOrLessEquals(closedRight));
+    expect(inputRect().left, moreOrLessEquals(closed.left));
+    expect(inputRect().right, moreOrLessEquals(closed.right));
   });
 }
 
@@ -214,6 +226,19 @@ Finder _backgroundFillFinder(WidgetTester tester) {
   );
 }
 
+// Finds every box inside the composer that draws a top border and no bottom
+// border, i.e. a divider rather than an outline.
+final _topDividerFinder = find.descendant(
+  of: find.byType(StreamMessageComposer),
+  matching: find.byWidgetPredicate(
+    (widget) => switch (widget) {
+      DecoratedBox(decoration: BoxDecoration(border: Border(:final top, :final bottom))) =>
+        top != BorderSide.none && bottom == BorderSide.none,
+      _ => false,
+    },
+  ),
+);
+
 // The vertical distance between the bottom of the input pill and the bottom
 // of the composer.
 double _gapBelowInput(WidgetTester tester) {
@@ -235,6 +260,7 @@ Future<void> _pumpComposer(
   StreamSurfaceStyle? composerSurfaceStyle,
   bool? enableSafeArea,
   double bottomPadding = 0,
+  double leftPadding = 0,
   double rightPadding = 0,
   TargetPlatform? platform,
 }) async {
@@ -282,7 +308,7 @@ Future<void> _pumpComposer(
       home: Builder(
         builder: (context) => MediaQuery(
           data: MediaQuery.of(context).copyWith(
-            padding: EdgeInsets.only(right: rightPadding, bottom: bottomPadding),
+            padding: EdgeInsets.only(left: leftPadding, right: rightPadding, bottom: bottomPadding),
           ),
           child: StreamChat(
             client: client,
