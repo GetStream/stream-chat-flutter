@@ -70,7 +70,7 @@ void main() {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
         enforceUniqueVote: false,
-        extraData: const {'test_extra_data': 'extraData'},
+        custom: const {'test_extra_data': 'extraData'},
       );
 
       polls.add(poll);

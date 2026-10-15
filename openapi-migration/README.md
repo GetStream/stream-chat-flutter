@@ -16,7 +16,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [02](02-devices.md) | Devices | 0 | 3 | ☑ |
 | [03](03-user-groups.md) | User Groups | 0 | 8 | ☑ |
 | [04](04-roles-guest-and-app.md) | Roles, Guest & App Settings | 0 | 5 | ☑ |
-| [05](05-polls.md) | Polls | 13 | 13 | ☐ |
+| [05](05-polls.md) | Polls | 0 | 13 | ☑ |
 | [06](06-reminders.md) | Message Reminders | 4 | 4 | ☐ |
 | [07](07-threads-and-drafts.md) | Threads & Drafts | 7 | 7 | ☐ |
 | [08](08-moderation-and-blocklists.md) | Moderation & Blocklists | 0 | 34 | ☑ |
@@ -26,8 +26,9 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [12](12-uploads-cdn.md) | Uploads (CDN) | 8 | 8 | ☑ |
 | [13](13-push-preferences.md) | Push Preferences | 1 | 1 | ☐ |
 | [14](14-banned-users.md) | Banned Users — split out of 08 | 1 | 1 | ☐ |
+| [15](15-custom-data.md) | Custom Data — `extraData` is the wire's `custom`, then renamed | — | — | ☐ |
 
-**Coverage:** 85 hand-written methods across 11 files, and all 129 generated operations, each claimed by exactly
+**Coverage:** 71 hand-written methods across 9 files, and all 129 generated operations, each claimed by exactly
 one group. Verified mechanically — see [Keeping this plan honest](#keeping-this-plan-honest).
 
 
@@ -81,7 +82,8 @@ breaks against v10:
 - envelopes are immutable, built through a const constructor rather than `late` setters;
 - `duration` is a non-nullable `String` on every envelope, where v10 typed it `String?`;
 - public models and envelopes are `@freezed`, so they compare by value; one that extended `Equatable` in v10 no
-  longer does, and loses `props`.
+  longer does, and loses `props`;
+- a model's `extraData` is renamed `custom`, the wire's name for it (rule 9).
 
 Each ships the four artifacts listed under [Principles](#principles), like any other break.
 
@@ -98,6 +100,18 @@ includes a named response that carries only `duration` today, such as `HideChann
    `toString`) with no `fromJson`, `toJson` or json_serializable. Nullability follows v10 unless the spec is looser
    (see the breaks above). A field the server adds is exposed later, as an additive change. The one exception to
    "no JSON" is the temporary `@DataSerializable` storage codec in rule 8.
+
+   **A model uses freezed's `copyWith`.** It differs from a v10 hand-written one: `null` clears a nullable field
+   instead of keeping it, `null` re-runs a constructor default (`id ?? Uuid().v4()`), and a constructor parameter
+   with no field of the same name and type is not generated. Before deleting the v10 method, run the audit in
+   [`.claude/skills/openapi-migration/copywith-audit.md`](../.claude/skills/openapi-migration/copywith-audit.md)
+   and handle every site it reports: a compile break gets a local or a `?? model.field`; a "kept on null; check"
+   site is rewritten as an explicit merge (`?? this.x` at the caller, or an `@internal` merge method in the shape of
+   `Poll.withTranslationsOf`) unless the clear is the intended behaviour. When the audit's verdict says freezed
+   cannot replace the method — a parameter backed by a getter, a private field or a different type, as on
+   `Message` — keep `@Freezed(copyWith: false)` with the hand-written method, or reshape the constructor as a
+   public API change of its own. The semantics change goes in the CHANGELOG and the guide, listed per field under
+   the rows of the audit's table.
 
    **Names default to v10's,** even where the generated name differs: `OGAttachmentResponse` rather than
    `GetOGResponse`, `AppSettings` rather than `AppResponseFields`, `UploadConfig` rather than `FileUploadConfig`.
@@ -135,6 +149,14 @@ includes a named response that carries only `duration` today, such as `HideChann
    parent's rule-7 converter writes it. The codec is temporary: every use is marked
    `// TODO(openapi-migration): remove in group 10` and listed below, and group 10 replaces every use and deletes
    the typedef, so no later group adds one. The cache is disposable, so the stored format is ours to choose.
+9. **A migrated model names its custom data `custom`, and it is the wire's `custom`, verbatim, in both
+   directions.** A response mapper copies the generated `custom` map into it and a request mapper sends it back as
+   `custom`; neither filters it. A model whose group has not run still says `extraData`. A field the
+   generated response types is never parked in `extraData` behind a getter: it becomes a field on the model, as
+   the owning group's break, or stays out. `ChannelModel.hidden` and `User.name` are parked today, and groups 11
+   and 09 promote them. `topLevelFields` and `Serializer` serve only the v1 decoders, which still split flat JSON
+   by a key list, and go with the WebSocket v2 move; a model that loses its JSON drops `topLevelFields` and its
+   converter owns the list. A v1 writer leaves a custom entry named like a key out so it cannot overwrite the key.
 
 ### Temporary adapters
 
@@ -142,7 +164,9 @@ includes a named response that carries only `duration` today, such as `HideChann
 | --- | --- | --- |
 | `DeviceV1JsonConverter` | `OwnUser.devices` | [09](09-users.md) |
 | `userGroupsFromV1Json` | `Message.mentionedGroups` | [10](10-messages.md) |
-| `DataSerializable` | `UserGroup`, `UserGroupMember` (`fromData`, `toData`) | [10](10-messages.md) |
+| `DataSerializable` | `UserGroup`, `UserGroupMember`, `PollOption` (`fromData`, `toData`) | [10](10-messages.md) |
+| `PollV1JsonConverter` | `Message.poll`, `DraftMessage.poll`, `Event.poll` | WebSocket v2 (no group) |
+| `PollVoteV1JsonConverter` | `Event.pollVote` | WebSocket v2 (no group) |
 | `user_mapper.dart` (kept, re-pointed) | today's `User`, which still reads and writes JSON | [09](09-users.md) |
 
 How v1 JSON decodes `User` once it becomes a plain model is decided in [01-foundation](01-foundation.md): until
@@ -162,11 +186,15 @@ surfaces before it reaches `Message` and `ChannelState`:
 - **08** is where we decide what *not* to expose: 34 generated operations against 10 hand-written methods.
 - **14** is `queryBannedUsers`, split out of 08 because it is the only moderation call that answers with a
   model. The `User` mappers it needs landed with group 04.
-- **10–11** are the core of the SDK, and carry the `custom` / `extraData` promotion problem.
+- **10–11** are the core of the SDK; 11 promotes the channel flags parked in `extraData` (rule 9).
 - **12** comes late because it needs its own hand-written multipart client and is the highest-traffic path in the
   SDK.
 - **09** is last. Every group before it maps users through `user_mapper.dart` onto today's `User`; 09 migrates the
   user endpoints and restructures `User` and `OwnUser` themselves, when every parent that embeds them has moved.
+- **15** is the custom-data pass: every model's custom data is named `custom` and is the wire's `custom`, with no
+  mapper filtering it and no typed field parked in it. Each group renames the models it migrates (polls went
+  first); 15 renames whatever is left and the persistence columns, and runs after 09 and 11, which promote their
+  parked fields.
 
 ## Prerequisites
 

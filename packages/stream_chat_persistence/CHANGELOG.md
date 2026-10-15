@@ -10,6 +10,7 @@
 🔄 Changed
 
 - Every persistence call logged its own name at `info`; that call trace is `verbose` now.
+- A cached poll with a voting visibility the SDK does not name is read back instead of failing.
 
 🐞 Fixed
 
