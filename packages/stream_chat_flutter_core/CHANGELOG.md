@@ -11,6 +11,7 @@
 🐞 Fixed
 
 - Fixed `StreamDraftListController.deleteDraft` removing the wrong draft.
+- Fixed `StreamPollVoteListController` adding votes and comments from other polls in the same channel.
 
 ## 10.5.0
 
