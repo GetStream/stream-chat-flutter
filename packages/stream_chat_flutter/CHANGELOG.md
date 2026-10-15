@@ -21,7 +21,7 @@
 - `StreamMessageComposer` now hides the picker's upload options and voice recording, and refuses dropped files, when the user lacks the `upload-file` capability. The attachment button is hidden when nothing else is left to offer.
 - `StreamMessageComposer` now refuses dropped files when `disableAttachments` is set or `allowedAttachmentPickerTypes` leaves out `AttachmentPickerType.files`.
 - `StreamTypingIndicator` now uses the design system's typing dots; the `lottie` dependency is removed.
-- Suggestions from `customAutocompleteTriggers` now span the composer's full width, so their content has to keep clear of the side safe-area insets itself.
+- Suggestions from `customAutocompleteTriggers` now span the composer's full width. `StreamAutocompleteOptions` keeps its options clear of the side safe-area insets; other options views should wrap their content in `StreamSafeArea(top: false, bottom: false)`.
 
 🐞 Fixed
 
