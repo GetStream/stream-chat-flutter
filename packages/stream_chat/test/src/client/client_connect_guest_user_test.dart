@@ -102,7 +102,6 @@ void main() {
           'privacy_settings': 'custom-privacy-settings',
           'deleted_at': 'custom-deleted-at',
           'deactivated_at': 'custom-deactivated-at',
-          'revoke_tokens_issued_before': 'custom-revoke-tokens-issued-before',
         },
       );
       final client = _client(_defaultApiAnswering(Result.success(response)));
