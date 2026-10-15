@@ -184,6 +184,7 @@ void main() {
     final merged = channel.merge(ChannelModel(cid: 'test:cid'));
 
     expect(merged.autoTranslationEnabled, isFalse);
+    expect(merged.autoTranslationLanguage, isNull);
   });
 
   test('.name should fetch from custom if available', () {

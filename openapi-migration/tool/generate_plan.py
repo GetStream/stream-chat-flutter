@@ -717,9 +717,9 @@ GROUPS = [
               restructures those classes and re-points the mapper.
             - **Every field `ChannelResponse` and `ChannelMemberResponse` declare is reachable on ours,** as a
               field: [15](15-partial-updates.md) promoted the ones v10 parked in `extraData` and renamed it `custom`.
-              Three are left out: the channel's `hide_messages_before` and `mute_expires_at`, which the server
-              never fills on the channel (a mute's expiry is `ChannelMute.expires`), and the member's deprecated
-              `role`. The nested config types drop `ChatPreferences.distinctChannelMessages` and `Command`'s
+              Three are left out: the channel's `hide_messages_before`, which the server returns on the
+              channel-state entry rather than on the channel, its `mute_expires_at`, since a mute's expiry is
+              read from `ChannelMute.expires`, and the member's deprecated `role`. The nested config types drop `ChatPreferences.distinctChannelMessages` and `Command`'s
               `createdAt` / `updatedAt`, which ours do not model.
             - **The mapper copies `custom` verbatim** (README rule 9). A mapped channel or member still differs from
               a v1 decode in one way, for group 09 to settle: `truncatedBy`, `createdBy` and each member's user go

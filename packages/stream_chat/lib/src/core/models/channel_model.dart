@@ -285,36 +285,38 @@ class ChannelModel {
     autoTranslationLanguage: autoTranslationLanguage ?? this.autoTranslationLanguage,
   );
 
-  /// Returns a new [ChannelModel] that is a combination of this channelModel
-  /// and the given [other] channelModel.
+  /// Returns a copy of this channel updated with the fields [other] carries.
+  ///
+  /// A field [other] leaves out keeps its value here, except the
+  /// auto-translation settings: when [other] leaves them out, auto translation
+  /// is off.
   ChannelModel merge(ChannelModel? other) {
     if (other == null) return this;
-    return copyWith(
+    return ChannelModel(
       id: other.id,
       type: other.type,
       cid: other.cid,
-      ownCapabilities: other.ownCapabilities,
+      ownCapabilities: other.ownCapabilities ?? ownCapabilities,
       config: other.config,
-      createdBy: other.createdBy,
+      createdBy: other.createdBy ?? createdBy,
       frozen: other.frozen,
-      lastMessageAt: other.lastMessageAt,
+      lastMessageAt: other.lastMessageAt ?? lastMessageAt,
       createdAt: other.createdAt,
       updatedAt: other.updatedAt,
-      deletedAt: other.deletedAt,
+      deletedAt: other.deletedAt ?? deletedAt,
       memberCount: other.memberCount,
-      members: other.members,
+      members: other.members ?? members,
       custom: other.custom,
-      team: other.team,
+      team: other.team ?? team,
       cooldown: other.cooldown,
-      disabled: other.disabled,
-      hidden: other.hidden,
-      muted: other.muted,
-      blocked: other.blocked,
-      truncatedAt: other.truncatedAt,
-      messageCount: other.messageCount,
-      filterTags: other.filterTags,
-      truncatedBy: other.truncatedBy,
-      // Unlike the other flags, a missing auto-translation flag turns it off.
+      disabled: other.disabled ?? disabled,
+      hidden: other.hidden ?? hidden,
+      muted: other.muted ?? muted,
+      blocked: other.blocked ?? blocked,
+      truncatedAt: other.truncatedAt ?? truncatedAt,
+      messageCount: other.messageCount ?? messageCount,
+      filterTags: other.filterTags ?? filterTags,
+      truncatedBy: other.truncatedBy ?? truncatedBy,
       autoTranslationEnabled: other.autoTranslationEnabled ?? false,
       autoTranslationLanguage: other.autoTranslationLanguage,
     );

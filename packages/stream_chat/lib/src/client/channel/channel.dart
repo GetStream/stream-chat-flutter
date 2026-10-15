@@ -65,9 +65,9 @@ const incomingTypingStartEventTimeout = 7;
 class Channel {
   /// Class that manages a specific channel.
   ///
-  /// The channel starts with the custom data [custom]; a [name] or [image]
-  /// is stored in it under the `name` or `image` key, replacing any entry
-  /// [custom] has for that key.
+  /// The channel starts with the custom data [custom]; a [name] or [image] is
+  /// stored in it under the `name` or `image` key, replacing any entry [custom]
+  /// has for that key.
   Channel(
     this._client,
     this._type,

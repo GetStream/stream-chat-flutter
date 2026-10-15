@@ -64,8 +64,8 @@ void main() {
     expect(channel.cooldown, 30);
     expect(channel.disabled, isFalse);
     expect(channel.hidden, isTrue);
-    expect(channel.muted, isTrue);
-    expect(channel.blocked, isFalse);
+    expect(channel.muted, isFalse);
+    expect(channel.blocked, isTrue);
     expect(channel.truncatedAt, DateTime.utc(2026, 3, 2));
     expect(channel.truncatedBy, fakeUser('truncator'));
     expect(channel.autoTranslationEnabled, isTrue);
@@ -203,11 +203,11 @@ void main() {
     expect(config.updatedAt, DateTime.utc(2025, 2));
     expect(config.maxMessageLength, 5000);
     expect(config.messageRetention, 'infinite');
-    expect(config.mutes, isTrue);
+    expect(config.mutes, isFalse);
     expect(config.reactions, isTrue);
-    expect(config.readEvents, isTrue);
+    expect(config.readEvents, isFalse);
     expect(config.replies, isTrue);
-    expect(config.search, isTrue);
+    expect(config.search, isFalse);
     expect(config.polls, isTrue);
     expect(config.pushLevel, PushLevel.directMentions);
     expect(config.pushNotifications, isFalse);
@@ -224,13 +224,13 @@ void main() {
       ),
     );
     expect(config.typingEvents, isTrue);
-    expect(config.uploads, isTrue);
+    expect(config.uploads, isFalse);
     expect(config.urlEnrichment, isTrue);
-    expect(config.skipLastMsgUpdateForSystemMsgs, isTrue);
+    expect(config.skipLastMsgUpdateForSystemMsgs, isFalse);
     expect(config.userMessageReminders, isTrue);
-    expect(config.markMessagesPending, isTrue);
+    expect(config.markMessagesPending, isFalse);
     expect(config.deliveryEvents, isTrue);
-    expect(config.sharedLocations, isTrue);
+    expect(config.sharedLocations, isFalse);
   });
 
   test('StreamChatClient.updateChannelPartial returns a null channel when the response has none', () async {
@@ -363,7 +363,7 @@ api.ChannelResponse _channelResponse({
 }) => api.ChannelResponse(
   autoTranslationEnabled: true,
   autoTranslationLanguage: 'fr',
-  blocked: false,
+  blocked: true,
   cid: 'messaging:general',
   config: api.ChannelConfigWithInfo(
     allowedFlagReasons: const ['spam'],
@@ -399,10 +399,10 @@ api.ChannelResponse _channelResponse({
     grants: const {
       'user': ['read-channel'],
     },
-    markMessagesPending: true,
+    markMessagesPending: false,
     maxMessageLength: 5000,
     messageRetention: 'infinite',
-    mutes: true,
+    mutes: false,
     name: 'messaging',
     partitionSize: 10,
     partitionTtl: '24h',
@@ -411,15 +411,15 @@ api.ChannelResponse _channelResponse({
     pushNotifications: false,
     quotes: true,
     reactions: true,
-    readEvents: true,
+    readEvents: false,
     reminders: true,
     replies: true,
-    search: true,
-    sharedLocations: true,
-    skipLastMsgUpdateForSystemMsgs: true,
+    search: false,
+    sharedLocations: false,
+    skipLastMsgUpdateForSystemMsgs: false,
     typingEvents: true,
     updatedAt: DateTime.utc(2025, 2),
-    uploads: true,
+    uploads: false,
     urlEnrichment: true,
     userMessageReminders: true,
   ),
@@ -439,7 +439,7 @@ api.ChannelResponse _channelResponse({
   members: [fakeChannelMemberResponse()],
   messageCount: 42,
   muteExpiresAt: DateTime.utc(2026, 5),
-  muted: true,
+  muted: false,
   ownCapabilities: const [api.ChannelOwnCapability.sendMessage, api.ChannelOwnCapability.readEvents],
   team: 'blue',
   truncatedAt: DateTime.utc(2026, 3, 2),
