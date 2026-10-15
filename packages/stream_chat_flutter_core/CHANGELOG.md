@@ -3,7 +3,6 @@
 🐞 Fixed
 
 - Fixed `StreamDraftListController.deleteDraft` removing the wrong draft.
-- Fixed `PagedValueListView` and `PagedValueGridView` drawing their empty, loading and error states under the safe area when no `padding` is given.
 
 ## 10.5.0
 
