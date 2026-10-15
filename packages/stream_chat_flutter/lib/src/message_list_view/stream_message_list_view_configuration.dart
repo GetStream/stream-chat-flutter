@@ -28,6 +28,7 @@ class StreamMessageListViewConfiguration {
     this.showConnectionStateTile = false,
     this.showFloatingDateDivider = true,
     this.fadeFloatingDateDividerNearInline = true,
+    this.showTypingIndicator = true,
     this.reverse = true,
     this.shrinkWrap = false,
     this.paginationLimit = 25,
@@ -97,6 +98,11 @@ class StreamMessageListViewConfiguration {
   /// Defaults to true.
   final bool fadeFloatingDateDividerNearInline;
 
+  /// Whether to show who is typing at the newest end of the list.
+  ///
+  /// Defaults to true.
+  final bool showTypingIndicator;
+
   /// Whether the list scrolls in the reverse reading direction (newest message
   /// at the bottom).
   ///
@@ -162,6 +168,7 @@ class StreamMessageListViewConfiguration {
     bool? showConnectionStateTile,
     bool? showFloatingDateDivider,
     bool? fadeFloatingDateDividerNearInline,
+    bool? showTypingIndicator,
     bool? reverse,
     bool? shrinkWrap,
     int? paginationLimit,
@@ -181,6 +188,7 @@ class StreamMessageListViewConfiguration {
       showConnectionStateTile: showConnectionStateTile ?? this.showConnectionStateTile,
       showFloatingDateDivider: showFloatingDateDivider ?? this.showFloatingDateDivider,
       fadeFloatingDateDividerNearInline: fadeFloatingDateDividerNearInline ?? this.fadeFloatingDateDividerNearInline,
+      showTypingIndicator: showTypingIndicator ?? this.showTypingIndicator,
       reverse: reverse ?? this.reverse,
       shrinkWrap: shrinkWrap ?? this.shrinkWrap,
       paginationLimit: paginationLimit ?? this.paginationLimit,
@@ -205,6 +213,7 @@ class StreamMessageListViewConfiguration {
         other.showConnectionStateTile == showConnectionStateTile &&
         other.showFloatingDateDivider == showFloatingDateDivider &&
         other.fadeFloatingDateDividerNearInline == fadeFloatingDateDividerNearInline &&
+        other.showTypingIndicator == showTypingIndicator &&
         other.reverse == reverse &&
         other.shrinkWrap == shrinkWrap &&
         other.paginationLimit == paginationLimit &&
@@ -226,6 +235,7 @@ class StreamMessageListViewConfiguration {
     showConnectionStateTile,
     showFloatingDateDivider,
     fadeFloatingDateDividerNearInline,
+    showTypingIndicator,
     reverse,
     shrinkWrap,
     paginationLimit,

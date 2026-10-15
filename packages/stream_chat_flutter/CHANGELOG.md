@@ -5,15 +5,31 @@
 - Polls are now shown translated into the current user's language, following `StreamMessageTranslationConfiguration` like the message text.
 - Added `PollTranslationX`, `PollOptionTranslationX` and `PollVoteTranslationX`, to read the translations of a poll, its options and its answers.
 - Added `MessageTranslationLanguage`, the language `StreamMessageContent` shows a message translated into, for custom attachments to show translations too.
+- `StreamMessageListView` now shows who is typing at the newest end of the list with `StreamMessageListTypingIndicator`, replacing the indicator above `StreamChannelPage`'s composer. Replace it with `StreamMessageListViewBuilders.typingIndicator`, or hide it with `StreamMessageListViewConfiguration.showTypingIndicator`.
+- Added `StreamTypingUsersBuilder`, to build a widget from the users typing in a channel or thread.
+
+⚠️ Deprecated
+
+- Deprecated `MessageComposerProps.validator` and the `validator` parameter of `StreamMessageComposer`; pass a `StreamMessageComposerController(validator: …)` as `messageComposerController` instead. Passing a custom one together with a `messageComposerController` fails an assert.
 
 🔄 Changed
 
+- Allowed `equatable` 3.x alongside 2.x.
+- `StreamMessageComposer`'s send button now follows the message validator, so a custom validator can enable or disable it, including when editing or with a command.
 - `StreamMessageListView` now rebuilds only the message rows that changed; a custom row builder should read changing outside state through an inherited widget.
+- `StreamMessageComposer` now hides the picker's upload options and voice recording, and refuses dropped files, when the user lacks the `upload-file` capability. The attachment button is hidden when nothing else is left to offer.
+- `StreamMessageComposer` now refuses dropped files when `disableAttachments` is set or `allowedAttachmentPickerTypes` leaves out `AttachmentPickerType.files`.
+- `StreamTypingIndicator` now uses the design system's typing dots; the `lottie` dependency is removed.
 
 🐞 Fixed
 
 - Fixed `StreamMessageListView` dropping frames on each new message in busy channels.
 - Fixed `StreamMessageComposer` polling the audio recorder ten times a second while no recording is in progress, including when voice recording is disabled.
+- Fixed `StreamMessageComposer`'s send button looking enabled on an empty message when voice recording is off, and showing the microphone instead of send for a staged poll.
+- Fixed the attachment picker showing an empty commands tab in channels without commands.
+- Fixed dialogs and bottom sheets opened below `StreamChat` keeping the old colors when the app switched between light and dark mode.
+- Fixed `StreamPollOptionVotesSheet` listing votes for other options and answers.
+- Fixed `StreamPollCommentsSheet` listing votes for poll options as comments.
 
 ## 10.5.0
 
