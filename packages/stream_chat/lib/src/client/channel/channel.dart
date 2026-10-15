@@ -2355,9 +2355,11 @@ class Channel {
     );
   }
 
-  /// Hides this channel from the current user's channel list until a new message is added to it.
+  /// Hides this channel from the current user's channel list until a new
+  /// message is added to it.
   ///
-  /// If [clearHistory] is true, the channel's messages are also cleared for the current user.
+  /// If [clearHistory] is true, the channel's messages are also cleared for the
+  /// current user.
   Future<Result<HideChannelResponse>> hide({bool clearHistory = false}) async {
     _checkInitialized();
     return _client.hideChannel(
