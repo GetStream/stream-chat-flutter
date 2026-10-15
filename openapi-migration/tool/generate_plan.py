@@ -76,6 +76,8 @@ DONE = textwrap.dedent("""\
           hand-written, with the reason.
     - [ ] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
     - [ ] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
+    - [ ] `copywith_audit.py` was run for every model that loses a v10 `copyWith`, every site it reports is
+          handled, and the semantics change is in the CHANGELOG and the guide ([README rule 2](README.md#domain-models)).
     - [ ] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
           persists anything.
     - [ ] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.
@@ -307,19 +309,77 @@ GROUPS = [
     ),
     dict(
         num='05', slug='polls', title='Polls',
-        hand=['polls_api.dart'],
+        hand=[],
         match=owns('/api/v2/polls', '/api/v2/chat/messages/{message_id}/polls'),
         goal='First group with real domain models and persistence behind it.',
-        decisions=[
-            '`Poll`, `PollOption` and `PollVote` are public and persisted; adopting generated shapes means '
-            'touching `stream_chat_persistence` in the same PR.',
-            '`VotingVisibility` is ours; the generated equivalent is an inline per-operation enum.',
-            'One generated `PollResponse` answers `createPoll`, `getPoll`, `updatePoll` and `updatePollPartial`, '
-            'where v10 has `CreatePollResponse`, `GetPollResponse` and `UpdatePollResponse`. The v10 envelopes '
-            'stay; decide with the user how the mapper names its conversions, since one `toModel()` cannot return '
-            'three types. `PollOptionResponse` (create, get, update an option) and `PollVoteResponse` (cast, remove '
-            'a vote) have the same shape.',
-        ],
+        decisions=[],
+        taken=textwrap.dedent("""\
+            - **`Poll`, `PollOption` and `PollVote` keep their v10 names, fields and defaults,** as `@freezed`
+              classes with no JSON, mapped from `PollResponseData`, `PollOptionResponseData` and
+              `PollVoteResponseData` in `lib/src/repository/mapper/polls_mapper.dart`. The uuid default `id` and the
+              `DateTime.now()` timestamps stay; `PollVote.isAnswer` becomes a getter, and `latestVotes`, `ownVotes` and
+              `ownAnswers` stay `late final` caches.
+            - **Equality now includes `extraData`.** v10's `Equatable` props left it out of `Poll` and `PollOption`;
+              freezed compares every field, and so does `Message`, whose props include its poll. Accepted as a
+              behavioural break and flagged for review.
+            - **The eight v10 envelopes collapse to the three the server returns:** `PollResponse` (create, get,
+              update, partial update), `PollOptionResponse` (create, get, update an option) and `PollVoteResponse`
+              (cast, remove a vote), each with one `toModel()`. `QueryPollsResponse` and `QueryPollVotesResponse`
+              keep their names. A rename break beyond the [sanctioned ones](README.md#domain-models), approved for
+              this group and flagged for review. `PollVoteResponse.vote` is nullable, as the spec marks it.
+            - **The fields only the generated types carry stay out:** the `*_i18n` maps, `is_answer` (derived from
+              `answerText`) and `PollVoteResponse.poll`. Adding them is additive. The i18n keys are known fields
+              (`topLevelFields`), so neither the mapper nor the v1 decoder puts them in `extraData`, and a poll
+              compares equal whichever path delivered it.
+            - **Write methods keep taking `Poll` and `PollOption`.** The mapper sends only the writable settings;
+              the vote summary, `createdBy` and timestamps are not sent. Dedicated request types were considered
+              and rejected: the draft a caller builds must stay a `Poll`, because a message carries one. Flagged
+              for review.
+            - **Option ids are not sent on create.** `PollOptionInput` has none; the server assigns them and
+              rejects a client id as reserved (confirmed live: v10 answered 400). **`updatePoll` and
+              `updatePollOption` send an option without an id with an empty one** and return the server's failure;
+              the SDK does not pre-check a rule the backend owns.
+            - **`queryPolls` and `queryPollVotes` take `limit`, `next` and `prev`** instead of `PaginationParams`.
+              The generated requests carry only those, and the backend never read the offset or id/date cursors on
+              these queries. `limit` defaults to 10, `PaginationParams`' default, so an omitted limit pages as in
+              v10. The responses expose `prev`, so the parameter is usable. Flagged for review.
+            - **`VotingVisibility` becomes an extension type over its wire string,** following `PushProvider`. An
+              unknown value is kept rather than rejected, in the mapper, the v1 decoder and persistence.
+            - **An answer's `optionId` stays `""`,** as the server sends it and v10 decoded it.
+            - **`custom` is `extraData`, verbatim, in both directions** (README rule 9). The response mappers copy the
+              generated `custom` map as is and the request mappers send `extraData` as `custom`; an entry named like
+              one of the model's own fields is custom data on v2, where v10's flattened body let it set the field.
+              The v1 converters own the key lists that split the flat JSON on read (`Poll.topLevelFields` and
+              `PollOption.topLevelFields` are removed), and leave such an entry out on write so it cannot overwrite
+              a key.
+            - **Every public poll method returns a `Result`,** on `StreamChatClient` and `Channel`. `deletePoll` and
+              `deletePollOption` answer `DurationResponse` and return `Result<void>`. `closePoll` stays a
+              `partialUpdatePoll` that sets `is_closed`.
+            - **`Channel.sendPoll` returns `Result<SendMessageResponse>`.** A `createPoll` failure passes through
+              and no message is sent; a `StreamException` thrown by `sendMessage` (still v1) is caught into a
+              `Failure`.
+            - **A missing option or vote id is a `Failure(StreamClientException)`, not an `ArgumentError`,** in
+              `Channel.castPollVote` and `removePollVote`, matching the migrated never-throws contract.
+            - **v1 JSON keeps decoding through hand-written converters** (`PollV1JsonConverter`,
+              `PollVoteV1JsonConverter`) on `Message.poll`, `DraftMessage.poll`, `Event.poll` and `Event.pollVote`.
+              The WebSocket is v1-only and sends custom data flat, with no `custom` key, so the generated
+              `fromJson` would throw on it; the converters mirror v10's `fromJson` and tolerate missing keys.
+              `Event` writes these fields too, so its converters run both ways.
+            - **`PollOption` gets the `@DataSerializable` codec** for `polls.options`. The stored format nests
+              custom data under `extra_data` where v10 flattened it, so `schemaVersion` is bumped.
+            - **`Poll`, `PollOption` and `PollVote` use freezed's `copyWith`.** The audit found one lib site
+              (`stream_message_preview_text.dart`, a `String?` passed for `name`) and one test per model; the
+              merging of poll events in `channel_state_mutations.dart` and `Poll.withTranslationsOf` passes no
+              argument that is null while the field is set, so it is unchanged. `null` now clears a nullable field
+              and re-applies the `id` and timestamp defaults, recorded as a break.
+            - **`extraData` is renamed `custom` on `Poll` and `PollOption`,** the wire's name, with no deprecated
+              alias; `StreamPollController.addOption` and `updateOption` and the `polls.custom` column follow.
+              Every migrated model takes the name from here on (README rule 9); [group 15](15-custom-data.md)
+              renames whatever no group migrates.
+            - **Verified live** against the demo app with a before/after harness covering every endpoint, the
+              error cases and the WebSocket events, and in the sample app on web.
+            """),
+        done=DONE.replace('- [ ]', '- [x]'),
         risks=[
             'Vote operations live under `/chat/messages/{message_id}/polls/...`, not `/polls` — easy to miss when '
             'grepping by path.',
@@ -354,6 +414,9 @@ GROUPS = [
             'because the two groups can otherwise disagree.',
         ],
         risks=[
+            '`DraftMessage.poll` is never decoded from JSON: `poll` is not in `DraftMessage.topLevelFields`, so the key '
+            'would land in `extraData`, and the draft payload carries `poll_id` only. Its `PollV1JsonConverter` exists so '
+            'the generated code compiles. Decide here whether the field stays constructor-only or goes.',
             'The four draft methods live in `message_api.dart`, not `threads_api.dart` — this group reaches into '
             'that file, and group 10 must leave those four alone.',
             '`Draft` and `DraftMessage` are public, persisted, and read by `StreamDraftListController` in '
@@ -509,9 +572,12 @@ GROUPS = [
             'restructures them, last: the mappers in `user_mapper.dart` already map the generated types onto the '
             'current class for every group before it, and stay. See [01-foundation](01-foundation.md).',
             '`PrivacySettings` and the push-preference sub-shapes — decide per type.',
-            '`UserResponse.toModel()` leaves `OwnUser.topLevelFields`, `deleted_at`, `deactivated_at` and '
-            '`revoke_tokens_issued_before` out of every user\'s `extraData` (`_shadowedCustomKeys`), where v1 kept the '
-            '`OwnUser`-only keys in a plain user\'s `extraData`. Revisit once the mapper serves plain users.',
+            '**`User.name` and `image` become fields** (README rule 9): `UserResponse` types them, and the constructor '
+            'stops writing them into `extraData`; decide whether `name` keeps its fallback to `id`. `deleted_at`, '
+            '`deactivated_at`, `revoke_tokens_issued_before` and `blocked_user_ids`, which `UserResponse` types and v1 '
+            'kept in a plain user\'s `extraData`, become fields or are dropped, never `extraData`. '
+            '`UserResponse.toModel()` then copies `custom` verbatim into the field, renamed `custom`, and '
+            '`UserRequestMapper` stops reading `extraData[\'name\']` and `[\'image\']`.',
             '`UserFilterField.shadowBanned` and `.bypassModeration` read `extraData`, which the generated '
             '`UserResponse` has no field to fill.',
             '`updateUsers` reuses `User.toRequest()`. It is a full upsert, and v10\'s flattened body filed the '
@@ -529,12 +595,19 @@ GROUPS = [
             'had to drop from `MuteUsersResponse`: the `mutes` the call created and the `ownUser` it left '
             'behind. Adding them is additive for anyone reading the response, so revisit them here rather '
             'than leaving them dropped for good.',
+            'Until then, a user mapped from `UserResponse` and the same user decoded from v1 JSON carry different '
+            '`extraData`: the v1 path keeps `blocked_user_ids`, `deleted_at`, `deactivated_at` and '
+            '`revoke_tokens_issued_before`, the mapper drops them. Equality includes `extraData`, so a `Poll` from a '
+            'REST call (its `createdBy`, its votes\' `user`) and the same poll from an event compare unequal.',
         ],
         done=DONE + (
             '- [ ] Temporary adapters owned by this group (`DeviceV1JsonConverter`) are deleted and removed from\n'
             '      the table in `README.md`.\n'
             '- [ ] `user_mapper.dart` maps onto the restructured `User`, and its `TODO(openapi-migration)` note is\n'
             '      gone.\n'
+            '- [ ] A user mapped from `UserResponse` and the same user decoded from v1 / WebSocket JSON compare equal.\n'
+            '- [ ] `user_mapper.dart` has no `_shadowedCustomKeys`: `User.custom` is the wire\'s `custom`, verbatim, and\n'
+            '      no typed field is written into it.\n'
         ),
     ),
     dict(
@@ -575,13 +648,13 @@ GROUPS = [
         decisions=[
             '`ChannelState`, `ChannelModel` and `Member` are public, persisted, and rebuilt from WebSocket '
             'events. Keep ours and map.',
-            '**Whether `ChannelModel` promotes its `extraData`-backed flags to real fields.** `disabled`, '
-            '`hidden`, `muted`, `blocked` and `truncatedAt` all arrive as root fields on `ChannelResponse` but '
-            'are pushed into `extraData` and read back through getters, which the constructor comment calls '
-            '"for backwards compatibility". Promoting them is a break worth making in v11 if it is made at '
-            'all, and it belongs with this group\'s model shape rather than with whichever phase happens to '
-            'add the next flag. Raised on '
-            '[#2958](https://github.com/GetStream/stream-chat-flutter/pull/2958).',
+            '**`ChannelModel` promotes its `extraData`-backed flags to fields** (README rule 9). `disabled`, '
+            '`hidden`, `muted`, `blocked` and `truncatedAt`, plus the keys the channel mapper parks today — '
+            '`truncatedBy`, `muteExpiresAt`, `hideMessagesBefore`, `autoTranslationEnabled` and '
+            '`autoTranslationLanguage` — become fields with persistence columns, and the constructor stops writing '
+            'them into the custom data, which is renamed `custom`. `name` and `image` stay in it: `ChannelResponse` '
+            'has no such fields. '
+            'Raised on [#2958](https://github.com/GetStream/stream-chat-flutter/pull/2958).',
             '`sync` returns `SyncResponse` — one of the two models that needed the WSEvent generator patch. '
             'Verify it decodes before relying on it.',
         ],
@@ -590,7 +663,8 @@ GROUPS = [
             'into that file.',
             '`queryChannels` drives the channel list controllers and the offline cache; a shape change here is '
             'felt everywhere.',
-            'Channel `custom`/`extraData` promotion, same class of problem as messages.',
+            'A consumer reading `channel.extraData[\'hidden\']` and friends loses the key once the flags are fields; '
+            'none in this repo.',
             'Landing `ChannelResponse` -> `ChannelModel` is the last thing blocking '
             '[08](08-moderation-and-blocklists.md)\'s `muteChannel`, which drops `channelMute`, `channelMutes` '
             'and `ownUser` because the generated `ChannelMute` carries a `ChannelResponse?` and a '
@@ -598,6 +672,10 @@ GROUPS = [
             'Decide the null case there too — ours are non-nullable, the generated ones are not, the same '
             'question [14](14-banned-users.md) records for `BanResponse.user`.',
         ],
+        done=DONE + (
+            '- [ ] `channel_mapper.dart` has no `_shadowedCustomKeys`: `ChannelModel.custom` is the wire\'s `custom`,\n'
+            '      verbatim, and no flag is written into it.\n'
+        ),
     ),
     dict(
         num='12', slug='uploads-cdn', title='Uploads (CDN)',
@@ -697,6 +775,39 @@ GROUPS = [
             'id, and passes any test that does not assert on `.name`.',
             'It is the last method in `moderation_api.dart`. Closing this group deletes that file and the '
             '`StreamChatApi.moderation` getter.',
+        ],
+    ),
+    dict(
+        num='15', slug='custom-data', title='Custom Data',
+        hand=[],
+        match=owns(),
+        goal='Every public model\'s custom data is named `custom` and is exactly the wire\'s `custom`.',
+        decisions=[
+            '**Which models are left.** Each group renames the models it migrates, polls first; this pass renames '
+            'whatever remains, and the persistence `extra_data` columns with them.',
+            '**How to stage the remaining renames.** Polls did a hard rename; decide whether the widely used models '
+            '(`Message`, `ChannelModel`, `User`) get a deprecated `extraData` alias for a release.',
+            '**What replaces `topLevelFields` and `Serializer`.** The v1 decoders still split flat JSON by a key '
+            'list until the WebSocket moves to v2. A model that loses its JSON drops `topLevelFields` and its '
+            'converter owns the list, as polls did; decide where `Serializer` goes once the last decoder does.',
+        ],
+        done=textwrap.dedent("""\
+            - [ ] No mapper under `lib/src/repository/mapper/` filters `custom`: `grep -rn _shadowedCustomKeys` is empty.
+            - [ ] No model writes a typed field into `extraData`, and no getter reads a typed field out of it.
+            - [ ] No public model exposes `topLevelFields`; each v1 decoder owns its key list.
+            - [ ] Every public model names its custom data the same way, in the models, the mappers, the v1
+                  decoders and the persistence columns.
+            - [ ] `migrations/v11-migration.md`: Symbol Map rows plus a feature section.
+            - [ ] CHANGELOG entry under `🛑️ Breaking` for each break; PR title `refactor(llc)!:`.
+            - [ ] Decisions recorded in this file, and the status box ticked in `README.md`.
+            """),
+        risks=[
+            '`Serializer`, the models\' `topLevelFields` and the persistence `extra_data` columns name the '
+            'concept too.',
+            'A consumer reading `channel.extraData[\'hidden\']` or `user.extraData[\'name\']` loses the key; none in '
+            'this repo. Filter fields over custom keys (`UserFilterField.email`) are unaffected.',
+            'Runs after groups 09 and 11 at the earliest, once `User` and `ChannelModel` promote their parked '
+            'fields.',
         ],
     ),
 ]

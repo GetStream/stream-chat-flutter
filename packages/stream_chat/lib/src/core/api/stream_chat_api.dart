@@ -6,7 +6,6 @@ import 'channel_api.dart';
 import 'general_api.dart';
 import 'message_api.dart';
 import 'moderation_api.dart';
-import 'polls_api.dart';
 import 'push_preferences_api.dart';
 import 'reminders_api.dart';
 import 'threads_api.dart';
@@ -45,10 +44,6 @@ class StreamChatApi {
   /// Api dedicated to message operations
   MessageApi get message => _message ??= MessageApi(_client);
   MessageApi? _message;
-
-  /// Api dedicated to polls operations
-  PollsApi get polls => _polls ??= PollsApi(_client);
-  PollsApi? _polls;
 
   /// Api dedicated to threads operations
   ThreadsApi get threads => _threads ??= ThreadsApi(_client);
