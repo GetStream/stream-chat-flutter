@@ -3,6 +3,8 @@
 🐞 Fixed
 
 - Fixed `StreamMessageInput` polling the audio recorder ten times a second while no recording is in progress, including when voice recording is disabled.
+- Fixed `StreamPollOptionVotesDialog` listing votes for other options and answers.
+- Fixed `StreamPollCommentsDialog` listing votes for poll options as comments.
 
 ## 9.31.0
 
