@@ -1,5 +1,4 @@
-import 'package:stream_chat/src/core/models/member.dart';
-import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
 import '../../utils.dart';

@@ -125,39 +125,29 @@ class ChannelModel {
   @JsonKey(includeIfNull: false)
   final int cooldown;
 
-  /// True if the channel is disabled
+  /// Whether this channel is disabled.
   @JsonKey(includeIfNull: false)
   final bool? disabled;
 
-  /// True if the channel is hidden
+  /// Whether this channel is hidden for the current user.
   @JsonKey(includeIfNull: false)
   final bool? hidden;
 
-  /// True if the channel is muted by the current user
+  /// Whether this channel is muted for the current user.
   @JsonKey(includeIfNull: false)
   final bool? muted;
 
-  /// True if the channel is blocked by the current user
+  /// Whether this channel is blocked by the current user.
   @JsonKey(includeIfNull: false)
   final bool? blocked;
 
-  /// The date of the last time channel got truncated
-  @JsonKey(includeIfNull: false, fromJson: _dateFromJson)
+  /// The date this channel was last truncated.
+  @JsonKey(includeIfNull: false)
   final DateTime? truncatedAt;
 
-  static DateTime? _dateFromJson(Object? value) => switch (value) {
-    final String date when date.isNotEmpty => DateTime.parse(date),
-    _ => null,
-  };
-
   /// The user that last truncated this channel.
-  @JsonKey(includeIfNull: false, fromJson: _userFromJson)
+  @JsonKey(includeIfNull: false)
   final User? truncatedBy;
-
-  static User? _userFromJson(Object? value) => switch (value) {
-    final Map<String, dynamic> json when json['id'] is String => User.fromJson(json),
-    _ => null,
-  };
 
   /// Whether messages in this channel are translated automatically.
   @JsonKey(includeIfNull: false)
@@ -324,8 +314,7 @@ class ChannelModel {
       messageCount: other.messageCount,
       filterTags: other.filterTags,
       truncatedBy: other.truncatedBy,
-      // A channel only carries its auto-translation flag while auto translation
-      // is on, so its absence turns it off.
+      // Unlike the other flags, a missing auto-translation flag turns it off.
       autoTranslationEnabled: other.autoTranslationEnabled ?? false,
       autoTranslationLanguage: other.autoTranslationLanguage,
     );

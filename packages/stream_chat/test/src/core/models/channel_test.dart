@@ -186,24 +186,6 @@ void main() {
     expect(merged.autoTranslationEnabled, isFalse);
   });
 
-  test('ChannelModel.fromJson reads no truncatedBy from a value that is not a user with an id', () {
-    final noIdChannel = ChannelModel.fromJson(const {
-      'id': 'channel',
-      'type': 'test',
-      'truncated_by': {'name': 'No id'},
-    });
-    final textChannel = ChannelModel.fromJson(const {'id': 'channel', 'type': 'test', 'truncated_by': 'someone'});
-
-    expect(noIdChannel.truncatedBy, isNull);
-    expect(textChannel.truncatedBy, isNull);
-  });
-
-  test('ChannelModel.fromJson reads no truncatedAt from an empty string', () {
-    final channel = ChannelModel.fromJson(const {'id': 'channel', 'type': 'test', 'truncated_at': ''});
-
-    expect(channel.truncatedAt, isNull);
-  });
-
   test('.name should fetch from custom if available', () {
     final channel = ChannelModel(
       cid: 'test:channel',

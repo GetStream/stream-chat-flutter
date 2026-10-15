@@ -43,12 +43,12 @@ class Member extends Equatable {
 
   /// Create a new instance from a json
   factory Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(
-    Serializer.moveToExtraDataFromRoot(json, topLevelFields),
+    Serializer.moveToExtraDataFromRoot(json, _topLevelFields),
   );
 
-  /// The JSON keys [Member.fromJson] reads into named fields, or leaves out;
-  /// every other key is kept in [custom].
-  static const topLevelFields = [
+  // The JSON keys [Member.fromJson] reads into named fields, or leaves out;
+  // every other key is kept in [custom].
+  static const _topLevelFields = [
     'user',
     'invite_accepted_at',
     'invite_rejected_at',
@@ -124,8 +124,8 @@ class Member extends Equatable {
 
   /// This member's custom data.
   ///
-  /// It may hold a key that is also in [topLevelFields]; [toJson] leaves such
-  /// an entry out so it never overwrites the field.
+  /// It may hold a key named like one of the member's own fields; [toJson]
+  /// leaves such an entry out so it never overwrites the field.
   @JsonKey(name: 'extra_data')
   final Map<String, Object?> custom;
 
@@ -205,10 +205,10 @@ class Member extends Equatable {
   /// Serialize to json
   ///
   /// Writes the entries of [custom] at the root, leaving out any named like one
-  /// of [topLevelFields].
+  /// of the member's own fields.
   Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
     _$MemberToJson(this),
-    topLevelFields: topLevelFields,
+    topLevelFields: _topLevelFields,
   );
 
   @override

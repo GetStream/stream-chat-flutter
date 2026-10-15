@@ -37,7 +37,8 @@
 - **`enableSlowdown` and `disableSlowdown` move with it, renamed `enableSlowMode` and
   `disableSlowMode`** to match the `Channel` helpers and `ChannelCapability.slowMode`. Both are
   `updateChannelPartial` with a fixed `cooldown`, so they call the repository's one method rather than
-  an operation of their own.
+  an operation of their own. `disableSlowMode` sets `cooldown` to 0: unsetting it is refused on v1 and
+  v2, as it is a reserved field.
 - **The v2 route is the v1 handler.** `lib/chat/routes.go` mounts `UpdateChannelPartial` in the
   shared `coreRoutes`; it is neither gated nor in beta. On v2 it also accepts `custom.<field>` paths
   in `set` and `unset`, and still takes flat keys, so `{'name': …}` updates the same field.
@@ -81,7 +82,7 @@
 
 ## Risks
 
-- `disableSlowMode` unsets `cooldown`, which the server rejects on both v1 and v2 as a reserved field. It fails before and after this group; the fix is tracked separately, so the request is unchanged.
+- Until [11](11-channels-and-members.md) moves `updateChannel`, the partial and full updates report failures differently: a caller using both reads a `Result` from one and catches an exception from the other.
 
 ## Definition of done
 

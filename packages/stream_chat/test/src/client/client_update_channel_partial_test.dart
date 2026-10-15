@@ -265,18 +265,18 @@ void main() {
     expect(res.exceptionOrNull(), error);
   });
 
-  test('StreamChatClient.enableSlowMode sends the cooldown and returns a success', () async {
+  test('StreamChatClient.enableSlowMode sends the cooldown and returns the updated channel', () async {
     const request = api.UpdateChannelPartialRequest(set: {'cooldown': 30});
 
     final defaultApi = MockDefaultApi();
     when(
       () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
-    ).thenAnswer((_) async => Result.success(_updateChannelPartialResponse()));
+    ).thenAnswer((_) async => Result.success(_updateChannelPartialResponse(channel: _channelResponse(cooldown: 30))));
     final client = _client(defaultApi);
 
     final res = await client.enableSlowMode('general', 'messaging', 30);
 
-    expect(res.isSuccess, isTrue);
+    expect(res.getOrNull()!.channel!.cooldown, 30);
 
     verify(
       () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
@@ -301,18 +301,18 @@ void main() {
     expect(res.exceptionOrNull(), error);
   });
 
-  test('StreamChatClient.disableSlowMode sends the cooldown set to 0 and returns a success', () async {
+  test('StreamChatClient.disableSlowMode sends the cooldown set to 0 and returns the updated channel', () async {
     const request = api.UpdateChannelPartialRequest(set: {'cooldown': 0});
 
     final defaultApi = MockDefaultApi();
     when(
       () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
-    ).thenAnswer((_) async => Result.success(_updateChannelPartialResponse()));
+    ).thenAnswer((_) async => Result.success(_updateChannelPartialResponse(channel: _channelResponse(cooldown: 0))));
     final client = _client(defaultApi);
 
     final res = await client.disableSlowMode('general', 'messaging');
 
-    expect(res.isSuccess, isTrue);
+    expect(res.getOrNull()!.channel!.cooldown, 0);
 
     verify(
       () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
@@ -354,6 +354,7 @@ api.UpdateChannelPartialResponse _updateChannelPartialResponse({api.ChannelRespo
 
 // A channel with every field set.
 api.ChannelResponse _channelResponse({
+  int cooldown = 30,
   Map<String, Object?> custom = const {
     'name': 'General',
     'image': 'https://example.com/general.png',
@@ -422,7 +423,7 @@ api.ChannelResponse _channelResponse({
     urlEnrichment: true,
     userMessageReminders: true,
   ),
-  cooldown: 30,
+  cooldown: cooldown,
   createdAt: DateTime.utc(2026),
   createdBy: fakeUserResponse('creator'),
   custom: custom,
