@@ -65,8 +65,9 @@ const incomingTypingStartEventTimeout = 7;
 class Channel {
   /// Class that manages a specific channel.
   ///
-  /// Optional [custom] and [image] properties can be provided. The [image]
-  /// is exposed to easily set a key of 'image' on [custom].
+  /// The channel starts with the custom data [custom]; a [name] or [image]
+  /// is stored in it under the `name` or `image` key, replacing any entry
+  /// [custom] has for that key.
   Channel(
     this._client,
     this._type,
@@ -1433,8 +1434,9 @@ class Channel {
   ///
   /// The message carries [messageText] as its text, if given.
   ///
-  /// If the poll cannot be created, no message is sent and the failure is returned. If the message cannot be sent, the
-  /// poll stays created and the failure is returned.
+  /// If the poll cannot be created, no message is sent and the failure is
+  /// returned. If the message cannot be sent, the poll stays created and the
+  /// failure is returned.
   Future<Result<SendMessageResponse>> sendPoll(
     Poll poll, {
     String? messageText,
@@ -1444,6 +1446,7 @@ class Channel {
     return created.flatMapAsync((response) => _sendPollMessage(response.poll, messageText));
   }
 
+  // TODO(openapi-migration): remove once sendMessage returns a Result
   Future<Result<SendMessageResponse>> _sendPollMessage(Poll poll, String? messageText) async {
     try {
       final message = Message(text: messageText, poll: poll, pollId: poll.id);
@@ -1458,8 +1461,11 @@ class Channel {
 
   /// Updates [poll] to match the settings and options it carries.
   ///
-  /// [Poll.options] becomes the poll's full list of options, each matched by its id, so an existing option missing
-  /// from it is deleted. New options are added through [createPollOption].
+  /// [Poll.options] becomes the poll's full list of options, each matched by
+  /// its id, so an existing option missing from it is deleted. New options are
+  /// added through [createPollOption].
+  ///
+  /// [Poll.enforceUniqueVote] is left as the poll was created.
   Future<Result<PollResponse>> updatePoll(Poll poll) {
     _checkInitialized();
     return _pollLock.synchronized(() => _client.updatePoll(poll));
@@ -1494,8 +1500,9 @@ class Channel {
 
   /// Votes for [option] of [poll], which was sent in [message].
   ///
-  /// If the poll allows only one vote per user, the vote replaces the previous one. The [option] must carry its id;
-  /// if it does not, the call returns a failure without voting.
+  /// If the poll allows only one vote per user, the vote replaces the previous
+  /// one. The [option] must carry its id; if it does not, the call returns a
+  /// failure without voting.
   Future<Result<PollVoteResponse>> castPollVote(
     Message message,
     Poll poll,
@@ -1539,7 +1546,8 @@ class Channel {
 
   /// Removes [vote], a vote or answer on [poll], which was sent in [message].
   ///
-  /// The [vote] must carry its id; if it does not, the call returns a failure without removing anything.
+  /// The [vote] must carry its id; if it does not, the call returns a failure
+  /// without removing anything.
   Future<Result<PollVoteResponse>> removePollVote(
     Message message,
     Poll poll,
@@ -1561,10 +1569,13 @@ class Channel {
     );
   }
 
-  /// Fetches one page of the votes and answers matching [filter] on the poll with the id [pollId], ordered by [sort].
+  /// Fetches one page of the votes and answers matching [filter] on the poll
+  /// with the id [pollId], ordered by [sort].
   ///
-  /// Up to [limit] votes are returned. The next page is fetched by passing the `next` cursor of a response as [next],
-  /// and the previous page by passing its `prev` cursor as [prev]. At most one of [next] and [prev] may be given.
+  /// Up to [limit] votes are returned. The next page is fetched by passing a
+  /// response's [QueryPollVotesResponse.next] as [next], and the previous page
+  /// by passing its [QueryPollVotesResponse.prev] as [prev]. At most one of
+  /// [next] and [prev] may be given.
   Future<Result<QueryPollVotesResponse>> queryPollVotes(
     String pollId, {
     PollVoteFilter? filter,
@@ -1732,8 +1743,8 @@ class Channel {
     );
   }
 
-  /// Sets the fields in [set] and removes the fields named in [unset] on this channel, leaving every other field
-  /// as it is.
+  /// Sets the fields in [set] and removes the fields named in [unset] on this
+  /// channel, leaving every other field as it is.
   ///
   /// At least one of [set] and [unset] is required.
   ///
@@ -1746,7 +1757,8 @@ class Channel {
     return _client.updateChannelPartial(id!, type, set: set, unset: unset);
   }
 
-  /// Enables slow mode on this channel, so members wait [cooldownInterval] seconds between messages.
+  /// Enables slow mode on this channel, so members wait [cooldownInterval]
+  /// seconds between messages.
   Future<Result<UpdateChannelPartialResponse>> enableSlowMode({
     required int cooldownInterval,
   }) async {

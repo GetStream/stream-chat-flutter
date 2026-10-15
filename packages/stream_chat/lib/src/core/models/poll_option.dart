@@ -21,7 +21,8 @@ class PollOption with _$PollOption {
     this.custom = const {},
   });
 
-  /// Creates a [PollOption] from the offline-database format written by [toData].
+  /// Creates a [PollOption] from the offline-database format written by
+  /// [toData].
   ///
   /// It is not a codec for API payloads.
   factory PollOption.fromData(Map<String, dynamic> json) => _$PollOptionFromJson(json);

@@ -9,6 +9,7 @@ import '../core/models/response/poll_response.dart';
 import '../core/models/response/poll_vote_response.dart';
 import '../core/models/response/query_poll_votes_response.dart';
 import '../core/models/response/query_polls_response.dart';
+import 'mapper/filter_mapper.dart';
 import 'mapper/polls_mapper.dart';
 import 'mapper/result_mapper.dart';
 import 'mapper/sort_mapper.dart';
@@ -36,14 +37,16 @@ class PollsRepository {
 
   /// Updates [poll] to match the settings and options it carries.
   ///
-  /// [Poll.options] becomes the poll's full list of options, each matched by its id.
+  /// [Poll.options] becomes the poll's full list of options, each matched by
+  /// its id.
   Future<Result<PollResponse>> updatePoll(Poll poll) async {
     final result = await _api.updatePoll(updatePollRequest: poll.toUpdatePollRequest());
 
     return result.map((response) => response.toModel());
   }
 
-  /// Sets the fields in [set] and removes the fields named in [unset] on the poll with the id [pollId].
+  /// Sets the fields in [set] and removes the fields named in [unset] on the
+  /// poll with the id [pollId].
   Future<Result<PollResponse>> partialUpdatePoll(
     String pollId, {
     Map<String, Object?>? set,
@@ -81,7 +84,8 @@ class PollsRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Replaces the text and custom data of [option] in the poll with the id [pollId].
+  /// Replaces the text and custom data of [option] in the poll with the id
+  /// [pollId].
   ///
   /// The [option] is matched by its id.
   Future<Result<PollOptionResponse>> updatePollOption(String pollId, PollOption option) async {
@@ -100,14 +104,16 @@ class PollsRepository {
     return result.ignoreValue();
   }
 
-  /// Casts a vote for an option of a poll sent in a message, identified by [optionId], [pollId] and [messageId].
+  /// Casts a vote for an option of a poll sent in a message, identified by
+  /// [optionId], [pollId] and [messageId].
   Future<Result<PollVoteResponse>> castPollVote(
     String messageId,
     String pollId, {
     required String optionId,
   }) => _castPollVote(messageId, pollId, api.VoteData(optionId: optionId));
 
-  /// Adds [answerText] as an answer to a poll sent in a message, identified by [pollId] and [messageId].
+  /// Adds [answerText] as an answer to a poll sent in a message, identified by
+  /// [pollId] and [messageId].
   Future<Result<PollVoteResponse>> addPollAnswer(
     String messageId,
     String pollId, {
@@ -124,7 +130,8 @@ class PollsRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Removes a vote or answer from a poll sent in a message, identified by [voteId], [pollId] and [messageId].
+  /// Removes a vote or answer from a poll sent in a message, identified by
+  /// [voteId], [pollId] and [messageId].
   Future<Result<PollVoteResponse>> removePollVote(String messageId, String pollId, String voteId) async {
     final result = await _api.deletePollVote(messageId: messageId, pollId: pollId, voteId: voteId);
 
@@ -133,7 +140,8 @@ class PollsRepository {
 
   /// Fetches one page of the polls matching [filter], ordered by [sort].
   ///
-  /// [next] and [prev] are the cursors a previous page returned; at most one of them may be given.
+  /// [next] and [prev] are the cursors a previous page returned; at most one of
+  /// them may be given.
   Future<Result<QueryPollsResponse>> queryPolls({
     PollFilter? filter,
     List<PollSort>? sort,
@@ -143,7 +151,7 @@ class PollsRepository {
   }) async {
     final result = await _api.queryPolls(
       queryPollsRequest: api.QueryPollsRequest(
-        filter: filter?.toJson(),
+        filter: filter?.toRequest(),
         sort: sort?.map((it) => it.toRequest()).toList(),
         limit: limit,
         next: next,
@@ -154,9 +162,11 @@ class PollsRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Fetches one page of the votes and answers matching [filter] on the poll with the id [pollId], ordered by [sort].
+  /// Fetches one page of the votes and answers matching [filter] on the poll
+  /// with the id [pollId], ordered by [sort].
   ///
-  /// [next] and [prev] are the cursors a previous page returned; at most one of them may be given.
+  /// [next] and [prev] are the cursors a previous page returned; at most one of
+  /// them may be given.
   Future<Result<QueryPollVotesResponse>> queryPollVotes(
     String pollId, {
     PollVoteFilter? filter,
@@ -168,7 +178,7 @@ class PollsRepository {
     final result = await _api.queryPollVotes(
       pollId: pollId,
       queryPollVotesRequest: api.QueryPollVotesRequest(
-        filter: filter?.toJson(),
+        filter: filter?.toRequest(),
         sort: sort?.map((it) => it.toRequest()).toList(),
         limit: limit,
         next: next,

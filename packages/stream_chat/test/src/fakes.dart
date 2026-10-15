@@ -273,7 +273,8 @@ api.ChannelMemberResponse fakeChannelMemberResponse({Map<String, Object?> custom
       userId: 'member',
     );
 
-/// A generated [api.UserResponse] with the id [id] and only the fields it requires.
+/// A generated [api.UserResponse] with the id [id] and only the fields it
+/// requires.
 api.UserResponse fakeUserResponse(String id) => api.UserResponse(
   banned: false,
   blockedUserIds: const [],
@@ -287,7 +288,8 @@ api.UserResponse fakeUserResponse(String id) => api.UserResponse(
   updatedAt: DateTime.utc(2025),
 );
 
-/// The [Member] that [fakeChannelMemberResponse] maps to, with its default custom data.
+/// The [Member] that [fakeChannelMemberResponse] maps to, with its default
+/// custom data.
 Member fakeChannelMember() => Member(
   user: fakeUser('member'),
   userId: 'member',

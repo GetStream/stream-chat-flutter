@@ -79,7 +79,7 @@
 - `StreamChatApi.general.getAppSettings` is removed; call `StreamChatClient.getAppSettings` instead.
 - `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed; call `StreamChatClient.connectGuestUser` instead.
 - The poll calls on `StreamChatClient` and `Channel` return a `Result` instead of throwing.
-- `CreatePollResponse`, `GetPollResponse` and `UpdatePollResponse` are replaced by `PollResponse`; `CreatePollOptionResponse`, `GetPollOptionResponse` and `UpdatePollOptionResponse` by `PollOptionResponse`; and `CastPollVoteResponse` and `RemovePollVoteResponse` by `PollVoteResponse`.
+- The eight poll response types are replaced by `PollResponse`, `PollOptionResponse` and `PollVoteResponse`.
 - `queryPolls` and `queryPollVotes` take `limit` (10 when omitted) and `next` instead of `PaginationParams`.
 - `Channel.castPollVote` and `removePollVote` return a failure instead of throwing an `ArgumentError` for an option or vote without an id.
 - `VotingVisibility` is an extension type over its wire string instead of an enum.
@@ -96,10 +96,10 @@
 - `SendAttachmentResponse`, `SendFileResponse`, `SendImageResponse`, `UploadImageResponse` and `UploadFileResponse` are removed in favor of `UploadedFile`.
 - `AttachmentFileUploaderProvider` receives the client's `Dio` instead of a `StreamHttpClient`, and `StreamAttachmentFileUploader` is built from one.
 - `StreamChatApi.fileUploader` and `StreamChatApi`'s `attachmentFileUploaderProvider` are removed; pass `attachmentFileUploaderProvider` to `StreamChatClient` instead.
-- `updateChannelPartial`, `enableSlowMode` and `disableSlowMode` on `StreamChatClient`, and `updatePartial`, `updateName`, `updateImage`, `enableSlowMode` and `disableSlowMode` on `Channel`, return a `Result<UpdateChannelPartialResponse>` instead of throwing.
+- The calls that partially update a channel, on `StreamChatClient` and `Channel` and slow mode included, return a `Result<UpdateChannelPartialResponse>` instead of throwing.
 - `PartialUpdateChannelResponse` is renamed `UpdateChannelPartialResponse`, and `PartialUpdateMemberResponse` is renamed `UpdateMemberPartialResponse`.
 - `StreamChatClient.partialMemberUpdate` is renamed `updateMemberPartial`, and `enableSlowdown` and `disableSlowdown` are renamed `enableSlowMode` and `disableSlowMode`.
-- `updateMemberPartial`, `pinChannel`, `unpinChannel`, `archiveChannel` and `unarchiveChannel` on `StreamChatClient`, and `pin`, `unpin`, `archive` and `unarchive` on `Channel`, return a `Result<UpdateMemberPartialResponse>` instead of throwing; the `Channel` methods no longer return the bare `Member`.
+- The calls that partially update the current user's membership of a channel, on `StreamChatClient` and `Channel` and pinning and archiving included, return a `Result<UpdateMemberPartialResponse>` instead of throwing; the `Channel` ones no longer return the bare `Member`.
 - `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse` no longer decode from JSON, are immutable, built through a const constructor, compare by value, gain `copyWith`, and their `duration` is a non-nullable `String`.
 - `UpdateChannelPartialResponse.channel` and `UpdateMemberPartialResponse.channelMember` are nullable, and `UpdateChannelPartialResponse.members` is a non-nullable list.
 - `StreamChatApi.channel.updateChannelPartial`, `enableSlowdown`, `disableSlowdown` and `updateMemberPartial` are removed; call them on `StreamChatClient` instead.

@@ -60,8 +60,8 @@ document; the section link is provided.
 
 **Code**
 
-- Line width: **120 characters** (configured in `analysis_options.yaml`). Comments and
-  docs follow the same limit.
+- Line width: **120 characters** for code (configured in `analysis_options.yaml`). Wrap
+  comments and docs at **80**.
 - Single quotes, relative imports within a package's own `lib/`, trailing commas preserved, `const`
   wherever possible, `final` for locals that aren't reassigned. These are enforced by
   the linter — do not disable them.
@@ -1377,10 +1377,12 @@ melos run lint:all      # analyze + format, run this before opening a PR
 checked with the same settings. Do not invoke `dart format` on a single file with ad-hoc
 flags — the workspace-level config (line length, trailing commas) applies uniformly.
 
-Line length is **120 characters** for both code and comments, configured in
-`analysis_options.yaml`. Trailing commas are preserved rather than automatically added,
-so include a trailing comma anywhere you want the formatter to break the argument list
-onto multiple lines.
+Line length is **120 characters** for code, configured in `analysis_options.yaml`.
+Comments and docs wrap at **80**: prose that wide is easier to read in IDE hovers and
+side-by-side diffs, and the formatter never reflows it, so wrap it by hand.
+
+Trailing commas are preserved rather than automatically added, so include a trailing
+comma anywhere you want the formatter to break the argument list onto multiple lines.
 
 ### Constructors come first
 

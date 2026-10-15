@@ -163,11 +163,14 @@ class ChannelModel {
   @JsonKey(includeIfNull: false)
   final bool? autoTranslationEnabled;
 
-  /// The language messages in this channel are translated into automatically.
+  /// The language this channel's messages are translated into automatically.
   @JsonKey(includeIfNull: false)
   final String? autoTranslationLanguage;
 
-  /// This channel's custom data: every key not in [topLevelFields].
+  /// This channel's custom data.
+  ///
+  /// It may hold a key that is also in [topLevelFields]; [toJson] leaves such
+  /// an entry out so it never overwrites the field.
   @JsonKey(name: 'extra_data')
   final Map<String, Object?> custom;
 
@@ -196,7 +199,8 @@ class ChannelModel {
   @JsonKey(includeToJson: false)
   final List<String>? filterTags;
 
-  /// The JSON keys [ChannelModel.fromJson] reads into named fields; every other key is kept in [custom].
+  /// The JSON keys [ChannelModel.fromJson] reads into named fields; every other
+  /// key is kept in [custom].
   static const topLevelFields = [
     'id',
     'type',
@@ -227,7 +231,8 @@ class ChannelModel {
 
   /// Serialize to json
   ///
-  /// Writes the entries of [custom] at the root, leaving out any named like one of [topLevelFields].
+  /// Writes the entries of [custom] at the root, leaving out any named like one
+  /// of [topLevelFields].
   Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
     _$ChannelModelToJson(this),
     topLevelFields: topLevelFields,
@@ -319,7 +324,8 @@ class ChannelModel {
       messageCount: other.messageCount,
       filterTags: other.filterTags,
       truncatedBy: other.truncatedBy,
-      // A channel only carries its auto-translation flag while auto translation is on, so its absence turns it off.
+      // A channel only carries its auto-translation flag while auto translation
+      // is on, so its absence turns it off.
       autoTranslationEnabled: other.autoTranslationEnabled ?? false,
       autoTranslationLanguage: other.autoTranslationLanguage,
     );
