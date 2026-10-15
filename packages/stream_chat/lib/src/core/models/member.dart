@@ -46,8 +46,8 @@ class Member extends Equatable {
     Serializer.moveToExtraDataFromRoot(json, _topLevelFields),
   );
 
-  // The JSON keys [Member.fromJson] reads into named fields; every other key
-  // is kept in [custom].
+  // The JSON keys [Member.fromJson] reads into named fields; every other key is
+  // kept in [custom].
   static const _topLevelFields = [
     'user',
     'invite_accepted_at',
