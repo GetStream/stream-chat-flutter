@@ -5834,6 +5834,103 @@ void main() {
       },
     );
 
+    test('.sendMessage stops typing when the user is typing', () async {
+      // The group shares one client mock.
+      addTearDown(() => clearInteractions(client));
+
+      final channelState = _generateChannelState(
+        channelId,
+        channelType,
+        ownCapabilities: [ChannelCapability.typingEvents, ChannelCapability.sendMessage],
+      );
+
+      final channel = Channel.fromState(client, channelState);
+      addTearDown(channel.dispose);
+
+      final startTypingEvent = Event(type: EventType.typingStart);
+      final stopTypingEvent = Event(type: EventType.typingStop);
+      final message = Message(id: 'test-message-id', text: 'Hello world!');
+
+      when(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(startTypingEvent))),
+      ).thenAnswer((_) async => EmptyResponse());
+      when(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+      ).thenAnswer((_) async => EmptyResponse());
+      when(
+        () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
+      ).thenAnswer((_) async => SendMessageResponse()..message = message);
+
+      channel.keyStroke().ignore();
+      await channel.sendMessage(message);
+
+      verify(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+      ).called(1);
+    });
+
+    test('.updateMessage stops typing when the user is typing', () async {
+      // The group shares one client mock.
+      addTearDown(() => clearInteractions(client));
+
+      final channelState = _generateChannelState(
+        channelId,
+        channelType,
+        ownCapabilities: [ChannelCapability.typingEvents, ChannelCapability.updateOwnMessage],
+      );
+
+      final channel = Channel.fromState(client, channelState);
+      addTearDown(channel.dispose);
+
+      final startTypingEvent = Event(type: EventType.typingStart);
+      final stopTypingEvent = Event(type: EventType.typingStop);
+      final message = Message(id: 'test-message-id', text: 'Edited');
+
+      when(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(startTypingEvent))),
+      ).thenAnswer((_) async => EmptyResponse());
+      when(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+      ).thenAnswer((_) async => EmptyResponse());
+      when(
+        () => client.updateMessage(any(that: isSameMessageAs(message))),
+      ).thenAnswer((_) async => UpdateMessageResponse()..message = message);
+
+      channel.keyStroke().ignore();
+      await channel.updateMessage(message);
+
+      verify(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+      ).called(1);
+    });
+
+    test('.sendMessage does not send a typing stop when the user is not typing', () async {
+      // The group shares one client mock.
+      addTearDown(() => clearInteractions(client));
+
+      final channelState = _generateChannelState(
+        channelId,
+        channelType,
+        ownCapabilities: [ChannelCapability.typingEvents, ChannelCapability.sendMessage],
+      );
+
+      final channel = Channel.fromState(client, channelState);
+      addTearDown(channel.dispose);
+
+      final stopTypingEvent = Event(type: EventType.typingStop);
+      final message = Message(id: 'test-message-id', text: 'Hello world!');
+
+      when(
+        () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
+      ).thenAnswer((_) async => SendMessageResponse()..message = message);
+
+      await channel.sendMessage(message);
+
+      verifyNever(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+      );
+    });
+
     test(
       ".startTyping should return if we don't have the capability",
       () async {
