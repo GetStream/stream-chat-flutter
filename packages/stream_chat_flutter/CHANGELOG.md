@@ -28,6 +28,8 @@
 - Fixed `StreamMessageComposer`'s send button looking enabled on an empty message when voice recording is off, and showing the microphone instead of send for a staged poll.
 - Fixed the attachment picker showing an empty commands tab in channels without commands.
 - Fixed dialogs and bottom sheets opened below `StreamChat` keeping the old colors when the app switched between light and dark mode.
+- Fixed `StreamPollOptionVotesSheet` listing votes for other options and answers.
+- Fixed `StreamPollCommentsSheet` listing votes for poll options as comments.
 
 ## 10.5.0
 
