@@ -45,14 +45,32 @@ class ChannelStateMutations {
   void onTypingStop(User user) => _removeTypingEvent(user);
 
   /// Adds the new [message], updating the watcher count when provided.
+  ///
+  /// Also ends the author's typing in the [message]'s channel or thread.
   void onMessageNew(Message message, {int? watcherCount}) {
     _state.addNewMessage(message);
+
+    final author = message.user;
+    if (author != null) _endTypingFor(author, message, at: message.createdAt);
 
     if (watcherCount != null) {
       _state.updateChannelState(
         _state.channelState.copyWith(watcherCount: watcherCount),
       );
     }
+  }
+
+  // Ends [user]'s typing in [message]'s context that started by [at]. Their
+  // `EventType.typingStop` may arrive late, or never.
+  void _endTypingFor(User user, Message message, {required DateTime at}) {
+    // Matched by id: the stored user may be an older snapshot.
+    final typing = _state.typingEvents.entries.firstWhereOrNull((it) => it.key.id == user.id);
+    if (typing == null) return;
+
+    final MapEntry(key: typingUser, value: typingEvent) = typing;
+    final isSameContext = typingEvent.parentId == message.parentId;
+    final startedBefore = !typingEvent.createdAt.isAfter(at);
+    if (isSameContext && startedBefore) onTypingStop(typingUser);
   }
 
   /// Marks the [message] as deleted.
@@ -70,8 +88,19 @@ class ChannelStateMutations {
   }
 
   /// Applies the updated [message] without inserting it when absent.
-  void onMessageUpdated(Message message) {
-    return _state.updateMessage(message, upsert: false);
+  ///
+  /// A text edit also ends the [editor]'s typing in the [message]'s channel or
+  /// thread.
+  void onMessageUpdated(Message message, {User? editor}) {
+    _state.updateMessage(message, upsert: false);
+
+    if (editor == null) return;
+
+    // Not every update is an edit: reply counts, link previews, translations.
+    final editedAt = message.messageTextUpdatedAt;
+    if (editedAt == null) return;
+
+    _endTypingFor(editor, message, at: editedAt);
   }
 
   /// Applies the updated [draft].

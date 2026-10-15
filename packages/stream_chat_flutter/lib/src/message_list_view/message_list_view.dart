@@ -610,7 +610,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     return MediaQuery.paddingOf(context).copyWith(left: 0, right: 0);
   }
 
-  // A StreamSafeArea, only while [StreamMessageListView.enableSafeArea] is on.
   Widget _safeArea({bool top = true, bool bottom = true, required Widget child}) {
     if (!widget.enableSafeArea) return child;
     return StreamSafeArea(top: top, bottom: bottom, child: child);
@@ -850,10 +849,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                     }
 
                     if (i == 1) {
-                      return _buildPaginationLoadingIndicator(
+                      final loader = _buildPaginationLoadingIndicator(
                         context: context,
                         direction: QueryDirection.bottom,
                       );
+                      if (!_config.showTypingIndicator) return loader;
+                      return _buildTypingIndicator(context, otherwise: loader);
                     }
 
                     if (i == 0) {
@@ -992,6 +993,31 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       direction: direction,
       onRetryPressed: () => _paginateData(direction),
       indicatorBuilder: widget.builders.paginationLoadingIndicator,
+    );
+  }
+
+  // Shows [otherwise] while nobody is typing, or until the newest messages
+  // are loaded.
+  Widget _buildTypingIndicator(
+    BuildContext context, {
+    required Widget otherwise,
+  }) {
+    return StreamTypingUsersBuilder(
+      channel: streamChannel!.channel,
+      parentId: widget.parentMessage?.id,
+      builder: (context, users) {
+        if (users.isEmpty) return otherwise;
+        if (!_isThreadConversation && !_upToDate) return otherwise;
+
+        final gap = context.streamSpacing.md;
+        return Padding(
+          padding: _config.reverse ? .only(top: gap) : .only(bottom: gap),
+          child: switch (widget.builders.typingIndicator) {
+            final builder? => builder(context, users),
+            _ => StreamMessageListTypingIndicator(users: users),
+          },
+        );
+      },
     );
   }
 
