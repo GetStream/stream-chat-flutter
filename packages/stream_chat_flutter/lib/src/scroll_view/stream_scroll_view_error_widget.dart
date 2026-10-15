@@ -4,7 +4,8 @@ import '../../stream_chat_flutter.dart';
 /// A widget that is displayed when a [StreamScrollView] encounters an error
 /// while loading the initial items.
 ///
-/// Its content stays clear of the safe area.
+/// Its content stays clear of the display cutouts and system bars reported by
+/// [MediaQuery]'s padding.
 class StreamScrollViewErrorWidget extends StatelessWidget {
   /// Creates a new instance of the [StreamScrollViewErrorWidget].
   const StreamScrollViewErrorWidget({

@@ -9,14 +9,14 @@
 🔄 Changed
 
 - `StreamMessageListView` now rebuilds only the message rows that changed; a custom row builder should read changing outside state through an inherited widget.
-- `StreamMessageComposer`'s top border now spans the full width, including under the side safe-area insets, and also shows above the no-permission message.
+- `StreamMessageComposer`'s top border now spans the full width, including under the side safe-area insets, and also shows above the no-permission message; the composer is 1px shorter as a result.
 
 🐞 Fixed
 
 - Fixed `StreamMessageListView` dropping frames on each new message in busy channels.
 - Fixed `StreamMessageComposer` polling the audio recorder ten times a second while no recording is in progress, including when voice recording is disabled.
 - Fixed `StreamMessageComposer` and its attachment picker running under the left and right safe-area insets while the picker is open.
-- Fixed `StreamScrollViewEmptyWidget`, `StreamScrollViewErrorWidget`, `StreamScrollViewLoadingWidget` and the channel and thread list skeletons running under the safe-area insets.
+- Fixed the default empty, loading and error states of `StreamChannelListView`, `StreamThreadListView` and the other paged list views running under the safe-area insets.
 - Fixed `StreamMessageListView`'s scroll-to-bottom button, floating date divider, unread indicator and empty, loading and error states ignoring the safe-area insets when `enableSafeArea` is on.
 
 ## 10.5.0

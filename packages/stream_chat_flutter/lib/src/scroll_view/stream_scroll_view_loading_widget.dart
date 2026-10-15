@@ -3,7 +3,8 @@ import 'package:stream_core_flutter/chat.dart';
 
 /// A widget that is displayed while the [StreamScrollView] is loading.
 ///
-/// Its content stays clear of the safe area.
+/// Its content stays clear of the display cutouts and system bars reported by
+/// [MediaQuery]'s padding.
 class StreamScrollViewLoadingWidget extends StatelessWidget {
   /// Creates a new instance of [StreamScrollViewLoadingWidget].
   const StreamScrollViewLoadingWidget({

@@ -4,7 +4,8 @@ import '../../stream_chat_flutter.dart';
 /// A widget that shows an empty view when the [StreamScrollView] loads
 /// empty data.
 ///
-/// Its content stays clear of the safe area.
+/// Its content stays clear of the display cutouts and system bars reported by
+/// [MediaQuery]'s padding.
 class StreamScrollViewEmptyWidget extends StatelessWidget {
   /// Creates a new instance of the [StreamScrollViewEmptyWidget].
   const StreamScrollViewEmptyWidget({

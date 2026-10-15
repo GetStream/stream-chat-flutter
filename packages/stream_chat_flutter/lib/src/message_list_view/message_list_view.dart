@@ -610,7 +610,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     return MediaQuery.paddingOf(context).copyWith(left: 0, right: 0);
   }
 
-  // A SafeArea, only while [StreamMessageListView.enableSafeArea] is on.
   Widget _safeArea({bool top = true, bool bottom = true, required Widget child}) {
     if (!widget.enableSafeArea) return child;
     return SafeArea(top: top, bottom: bottom, child: child);
