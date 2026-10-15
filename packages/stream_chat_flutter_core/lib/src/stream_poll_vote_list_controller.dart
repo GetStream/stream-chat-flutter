@@ -215,6 +215,8 @@ class StreamPollVoteListController
       // Returns early if the event is already handled by the listener.
       if (eventListener?.call(event) ?? false) return;
 
+      if (!_belongsToPoll(event)) return;
+
       final eventType = event.type;
       if (eventType == EventType.pollVoteCasted ||
           eventType == EventType.pollAnswerCasted) {
@@ -226,6 +228,15 @@ class StreamPollVoteListController
         _eventHandler.onPollVoteRemoved(event, this);
       }
     });
+  }
+
+  // Whether the vote or answer carried by [event] belongs to [pollId].
+  //
+  // The subscription receives the events of every poll in [channel], not only
+  // the one this controller lists.
+  bool _belongsToPoll(Event event) {
+    final eventPollId = event.pollVote?.pollId ?? event.poll?.id;
+    return eventPollId == pollId;
   }
 
   // Unsubscribes from all poll vote list events.
