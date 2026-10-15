@@ -69,10 +69,11 @@
   `muted`, `blocked`, `truncatedAt`, `truncatedBy`, `autoTranslationEnabled` and
   `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`,
   `futureChannelBanExpires` and `deletedAt`, are fields with persistence columns; `truncatedBy` is
-  read back through the users table. `Channel.extraData`, `extraDataStream`, and the `extraData`
-  argument of the `Channel` constructor and of `StreamChatClient.channel` are renamed with it.
+  read back through the users table. `toJson` leaves them out: nothing in the SDK sends a channel
+  or member as JSON. `Channel.extraData`, `extraDataStream`, and the `extraData` argument of the
+  `Channel` constructor and of `StreamChatClient.channel` are renamed with it.
 - **`custom` is the wire's, verbatim,** and the v1 writers leave out a custom entry named like a key,
-  so it cannot overwrite the field. `Member` leaves the deprecated `role` out of `custom`.
+  so it cannot overwrite the field.
 - **`ChannelModel.merge` keeps a flag the incoming channel leaves out, and turns auto translation off
   when it is missing,** as before. Checked live on v1 and v2: queries always send `hidden` and
   `blocked`; events leave them out, except the `channel.hidden` a block sends; `muted` is never sent on

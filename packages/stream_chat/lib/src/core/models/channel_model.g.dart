@@ -40,13 +40,5 @@ Map<String, dynamic> _$ChannelModelToJson(ChannelModel instance) => <String, dyn
   'type': instance.type,
   'frozen': instance.frozen,
   'cooldown': instance.cooldown,
-  'disabled': ?instance.disabled,
-  'hidden': ?instance.hidden,
-  'muted': ?instance.muted,
-  'blocked': ?instance.blocked,
-  'truncated_at': ?instance.truncatedAt?.toIso8601String(),
-  'truncated_by': ?instance.truncatedBy?.toJson(),
-  'auto_translation_enabled': ?instance.autoTranslationEnabled,
-  'auto_translation_language': ?instance.autoTranslationLanguage,
   'extra_data': instance.custom,
 };

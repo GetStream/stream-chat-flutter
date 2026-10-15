@@ -46,8 +46,8 @@ class Member extends Equatable {
     Serializer.moveToExtraDataFromRoot(json, _topLevelFields),
   );
 
-  // The JSON keys [Member.fromJson] reads into named fields, or leaves out;
-  // every other key is kept in [custom].
+  // The JSON keys [Member.fromJson] reads into named fields; every other key
+  // is kept in [custom].
   static const _topLevelFields = [
     'user',
     'invite_accepted_at',
@@ -69,9 +69,6 @@ class Member extends Equatable {
     'ban_from_future_channels',
     'future_channel_ban_expires',
     'deleted_at',
-    // Listed so a `role` key never lands in [custom]; [channelRole] holds the
-    // member's role.
-    'role',
   ];
 
   /// The interested user
@@ -130,28 +127,28 @@ class Member extends Equatable {
   final Map<String, Object?> custom;
 
   /// Whether this member muted notifications for the channel.
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeToJson: false)
   final bool? notificationsMuted;
 
   /// The status of this membership, such as `member`, or `pending` while an
   /// invite is outstanding.
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeToJson: false)
   final String? status;
 
   /// Whether this member is banned from future channels.
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeToJson: false)
   final bool? banFromFutureChannels;
 
   /// The date at which this member's ban from future channels expires.
   ///
   /// Null when there is no such ban or it has no expiry.
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeToJson: false)
   final DateTime? futureChannelBanExpires;
 
   /// The date at which this membership was deleted.
   ///
   /// Null while the member belongs to the channel.
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeToJson: false)
   final DateTime? deletedAt;
 
   /// Creates a copy of [Member] with specified attributes overridden.

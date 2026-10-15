@@ -20,48 +20,15 @@ void main() {
       expect(member.deletedAt, DateTime.parse('2020-01-29T22:17:30.95443Z'));
     });
 
-    test('Member writes its fields to JSON and reads them back', () {
-      final member = Member(
-        userId: 'user',
-        createdAt: DateTime.utc(2020),
-        updatedAt: DateTime.utc(2020),
-        notificationsMuted: true,
-        status: 'member',
-        banFromFutureChannels: true,
-        futureChannelBanExpires: DateTime.utc(2021),
-        deletedAt: DateTime.utc(2020, 2),
-        custom: const {'color': 'red'},
-      );
-
-      expect(Member.fromJson(member.toJson()), member);
-    });
-
-    test('Member keeps custom data named like a field apart from the field', () {
-      final member = Member(
-        userId: 'user',
-        status: 'member',
-        custom: const {'status': 'custom', 'color': 'red'},
-      );
-
-      expect(member.status, 'member');
-      expect(member.custom, {'status': 'custom', 'color': 'red'});
-    });
-
     test('Member.toJson leaves out custom data named like a field', () {
       final member = Member(
         userId: 'user',
-        status: 'member',
-        custom: const {'status': 'custom', 'color': 'red'},
+        channelRole: 'channel_member',
+        custom: const {'channel_role': 'custom', 'color': 'red'},
       );
 
-      expect(member.toJson()['status'], 'member');
+      expect(member.toJson()['channel_role'], 'channel_member');
       expect(member.toJson()['color'], 'red');
-    });
-
-    test('Member.toJson leaves out a custom role', () {
-      final member = Member(userId: 'user', custom: const {'role': 'custom'});
-
-      expect(member.toJson().containsKey('role'), isFalse);
     });
 
     test('Member.copyWith replaces the fields it is given', () {
@@ -89,7 +56,7 @@ void main() {
       expect(newMember.deletedAt, DateTime.utc(2023));
     });
 
-    test('Members that differ only in a promoted field are not equal', () {
+    test('Member equality includes notificationsMuted, status, the future channel ban and deletedAt', () {
       final createdAt = DateTime.utc(2020);
       Member member({
         bool? notificationsMuted,

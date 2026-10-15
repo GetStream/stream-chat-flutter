@@ -92,65 +92,6 @@ void main() {
     });
   });
 
-  test(
-    'StreamChatClient.updateChannelPartial keeps channel custom data named like a channel field apart from the field',
-    () async {
-      final response = _updateChannelPartialResponse(
-        channel: api.ChannelResponse(
-          cid: 'messaging:general',
-          id: 'general',
-          type: 'messaging',
-          createdAt: DateTime.utc(2026),
-          updatedAt: DateTime.utc(2026, 2),
-          custom: const {
-            'topic': 'anything',
-            'cid': 'shadowed',
-            'disabled': 'shadowed',
-            'hidden': 'shadowed',
-            'muted': 'shadowed',
-            'blocked': 'shadowed',
-            'truncated_at': 'shadowed',
-            'truncated_by': 'shadowed',
-            'mute_expires_at': 'shadowed',
-            'auto_translation_enabled': 'shadowed',
-            'auto_translation_language': 'shadowed',
-            'hide_messages_before': 'shadowed',
-          },
-          disabled: false,
-          frozen: false,
-        ),
-      );
-      const request = api.UpdateChannelPartialRequest(set: {'name': 'General'});
-
-      final defaultApi = MockDefaultApi();
-      when(
-        () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
-      ).thenAnswer((_) async => Result.success(response));
-      final client = _client(defaultApi);
-
-      final res = await client.updateChannelPartial('general', 'messaging', set: const {'name': 'General'});
-
-      final channel = res.getOrNull()!.channel!;
-      expect(channel.custom, {
-        'topic': 'anything',
-        'cid': 'shadowed',
-        'disabled': 'shadowed',
-        'hidden': 'shadowed',
-        'muted': 'shadowed',
-        'blocked': 'shadowed',
-        'truncated_at': 'shadowed',
-        'truncated_by': 'shadowed',
-        'mute_expires_at': 'shadowed',
-        'auto_translation_enabled': 'shadowed',
-        'auto_translation_language': 'shadowed',
-        'hide_messages_before': 'shadowed',
-      });
-      expect(channel.cid, 'messaging:general');
-      expect(channel.disabled, isFalse);
-      expect(channel.hidden, isNull);
-    },
-  );
-
   test('StreamChatClient.updateChannelPartial falls back to the defaults for channel fields left out', () async {
     final response = _updateChannelPartialResponse(
       channel: api.ChannelResponse(

@@ -126,35 +126,35 @@ class ChannelModel {
   final int cooldown;
 
   /// Whether this channel is disabled.
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeToJson: false)
   final bool? disabled;
 
   /// Whether this channel is hidden for the current user.
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeToJson: false)
   final bool? hidden;
 
   /// Whether this channel is muted for the current user.
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeToJson: false)
   final bool? muted;
 
   /// Whether this channel is blocked by the current user.
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeToJson: false)
   final bool? blocked;
 
   /// The date this channel was last truncated.
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeToJson: false)
   final DateTime? truncatedAt;
 
   /// The user that last truncated this channel.
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeToJson: false)
   final User? truncatedBy;
 
   /// Whether messages in this channel are translated automatically.
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeToJson: false)
   final bool? autoTranslationEnabled;
 
   /// The language this channel's messages are translated into automatically.
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeToJson: false)
   final String? autoTranslationLanguage;
 
   /// This channel's custom data.

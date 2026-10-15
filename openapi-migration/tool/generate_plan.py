@@ -719,11 +719,13 @@ GROUPS = [
               field: [15](15-partial-updates.md) promoted the ones v10 parked in `extraData` and renamed it `custom`.
               Three are left out: the channel's `hide_messages_before`, which the server returns on the
               channel-state entry rather than on the channel, its `mute_expires_at`, since a mute's expiry is
-              read from `ChannelMute.expires`, and the member's deprecated `role`. The nested config types drop `ChatPreferences.distinctChannelMessages` and `Command`'s
-              `createdAt` / `updatedAt`, which ours do not model.
+              read from `ChannelMute.expires`, and the member's `role`, which neither the iOS nor the Android
+              SDK models. The nested config types drop `ChatPreferences.distinctChannelMessages` and
+              `Command`'s `createdAt` / `updatedAt`, which ours do not model.
             - **The mapper copies `custom` verbatim** (README rule 9). A mapped channel or member still differs from
-              a v1 decode in one way, for group 09 to settle: `truncatedBy`, `createdBy` and each member's user go
-              through `user_mapper.dart`, which drops the user fields `User` does not model.
+              a v1 decode in two ways. `truncatedBy`, `createdBy` and each member's user go through
+              `user_mapper.dart`, which drops the user fields `User` does not model, for group 09 to settle. And
+              a v1 member keeps the wire's `role` in `custom`, where the mapper leaves the typed `role` out.
             - **The mapper is tested through the client,** by [15](15-partial-updates.md)'s
               `updateChannelPartial` tests: the first call that returns a channel through the generated client.
         """),
@@ -887,10 +889,11 @@ GROUPS = [
               `muted`, `blocked`, `truncatedAt`, `truncatedBy`, `autoTranslationEnabled` and
               `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`,
               `futureChannelBanExpires` and `deletedAt`, are fields with persistence columns; `truncatedBy` is
-              read back through the users table. `Channel.extraData`, `extraDataStream`, and the `extraData`
-              argument of the `Channel` constructor and of `StreamChatClient.channel` are renamed with it.
+              read back through the users table. `toJson` leaves them out: nothing in the SDK sends a channel
+              or member as JSON. `Channel.extraData`, `extraDataStream`, and the `extraData` argument of the
+              `Channel` constructor and of `StreamChatClient.channel` are renamed with it.
             - **`custom` is the wire's, verbatim,** and the v1 writers leave out a custom entry named like a key,
-              so it cannot overwrite the field. `Member` leaves the deprecated `role` out of `custom`.
+              so it cannot overwrite the field.
             - **`ChannelModel.merge` keeps a flag the incoming channel leaves out, and turns auto translation off
               when it is missing,** as before. Checked live on v1 and v2: queries always send `hidden` and
               `blocked`; events leave them out, except the `channel.hidden` a block sends; `muted` is never sent on

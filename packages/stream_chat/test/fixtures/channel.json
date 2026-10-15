@@ -2,6 +2,11 @@
   "id": "test",
   "type": "livestream",
   "cid": "livestream:test",
+  "disabled": false,
+  "hidden": true,
+  "muted": true,
+  "blocked": false,
+  "truncated_at": "2020-01-29T03:22:47.636130Z",
   "truncated_by": {
     "id": "truncator",
     "name": "Truncator"
