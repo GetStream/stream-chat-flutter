@@ -120,16 +120,7 @@ class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase> with _$Channel
     final cachedChannelCids = await getCachedChannelCids(filter);
     final query = select(channels)..where((c) => c.cid.isIn(cachedChannelCids));
 
-    final cachedChannels = await query
-        .join([
-          leftOuterJoin(users, channels.createdById.equalsExp(users.id)),
-        ])
-        .map((row) {
-          final createdByEntity = row.readTableOrNull(users);
-          final channelEntity = row.readTable(channels);
-          return channelEntity.toChannelModel(createdBy: createdByEntity?.toUser());
-        })
-        .get();
+    final cachedChannels = await _withUsers(query).get();
 
     return cachedChannels;
   }
@@ -156,19 +147,27 @@ class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase> with _$Channel
       return (const <ChannelModel>[], metadata?.filter, metadata?.sort);
     }
 
-    final cachedChannels = await (select(channels)..where((c) => c.cid.isIn(cachedCids)))
+    final cachedChannels = await _withUsers(select(channels)..where((c) => c.cid.isIn(cachedCids))).get();
+
+    return (cachedChannels, metadata?.filter, metadata?.sort);
+  }
+
+  // Joins the users who created and last truncated each channel in [query].
+  Selectable<ChannelModel> _withUsers(SimpleSelectStatement<$ChannelsTable, ChannelEntity> query) {
+    final truncatedByUsers = alias(users, 'truncated_by_users');
+    return query
         .join([
           leftOuterJoin(users, channels.createdById.equalsExp(users.id)),
+          leftOuterJoin(truncatedByUsers, channels.truncatedById.equalsExp(truncatedByUsers.id)),
         ])
         .map((row) {
           final createdByEntity = row.readTableOrNull(users);
+          final truncatedByEntity = row.readTableOrNull(truncatedByUsers);
           final channelEntity = row.readTable(channels);
           return channelEntity.toChannelModel(
             createdBy: createdByEntity?.toUser(),
+            truncatedBy: truncatedByEntity?.toUser(),
           );
-        })
-        .get();
-
-    return (cachedChannels, metadata?.filter, metadata?.sort);
+        });
   }
 }

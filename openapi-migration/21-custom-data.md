@@ -1,6 +1,6 @@
-# 15 — Custom Data
+# 21 — Custom Data Check
 
-**Goal:** Every public model's custom data is named `custom` and is exactly the wire's `custom`.
+**Goal:** Check that no model was missed: every public model's custom data is named `custom` and is exactly the wire's `custom`.
 
 **Size:** 0 hand-written method(s) across 0 file(s) → 0 generated operation(s).
 
@@ -21,15 +21,18 @@
 
 ## Decisions to make
 
-- **Which models are left.** Each group renames the models it migrates, polls first; this pass renames whatever remains, and the persistence `extra_data` columns with them.
-- **How to stage the remaining renames.** Polls did a hard rename; decide whether the widely used models (`Message`, `ChannelModel`, `User`) get a deprecated `extraData` alias for a release.
 - **What replaces `topLevelFields` and `Serializer`.** The v1 decoders still split flat JSON by a key list until the WebSocket moves to v2. A model that loses its JSON drops `topLevelFields` and its converter owns the list, as polls did; decide where `Serializer` goes once the last decoder does.
+
+## Decisions taken
+
+- **Renames nothing of its own.** Each group renames the models it maps and their persistence
+  columns, and promotes the fields they park, as it goes (README rule 9); polls went first. A model
+  this check finds still saying `extraData` goes back to the group that maps it.
 
 ## Risks
 
 - `Serializer`, the models' `topLevelFields` and the persistence `extra_data` columns name the concept too.
-- A consumer reading `channel.extraData['hidden']` or `user.extraData['name']` loses the key; none in this repo. Filter fields over custom keys (`UserFilterField.email`) are unaffected.
-- Runs after groups 09 and 11 at the earliest, once `User` and `ChannelModel` promote their parked fields.
+- Runs last, after every group that maps a model.
 
 ## Definition of done
 
@@ -38,6 +41,4 @@
 - [ ] No public model exposes `topLevelFields`; each v1 decoder owns its key list.
 - [ ] Every public model names its custom data the same way, in the models, the mappers, the v1
       decoders and the persistence columns.
-- [ ] `migrations/v11-migration.md`: Symbol Map rows plus a feature section.
-- [ ] CHANGELOG entry under `🛑️ Breaking` for each break; PR title `refactor(llc)!:`.
 - [ ] Decisions recorded in this file, and the status box ticked in `README.md`.

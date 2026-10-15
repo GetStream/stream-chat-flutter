@@ -146,7 +146,7 @@ class ChannelFilterField extends FilterField<ChannelState> {
   /// value off an instance with [value].
   ChannelFilterField(super.remote, super.value);
 
-  /// Creates a field the SDK does not model, read from [ChannelModel.extraData].
+  /// Creates a field the SDK does not model, read from [ChannelModel.custom].
   ///
   /// The fields that depend on the calling user — `joined`, `has_unread`,
   /// `invite`, `distinct` and `app_banned` — are reached this way. They are
@@ -155,7 +155,7 @@ class ChannelFilterField extends FilterField<ChannelState> {
   /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`, `$exists`,
   /// `$contains`, `$q`, `$autocomplete`
   factory ChannelFilterField.custom(String remote) {
-    return ChannelFilterField(remote, (it) => it.channel?.extraData[remote]);
+    return ChannelFilterField(remote, (it) => it.channel?.custom[remote]);
   }
 
   // Creates a channel filter field that declares its [collectionEquality].
@@ -166,7 +166,7 @@ class ChannelFilterField extends FilterField<ChannelState> {
   // ```dart
   // ChannelFilterField._(
   //   'tags',
-  //   (it) => it.channel?.extraData['tags'],
+  //   (it) => it.channel?.custom['tags'],
   //   collectionEquality: .containsExactly,
   // );
   // ```
@@ -439,14 +439,14 @@ class ChannelSortField extends SortField<ChannelState> {
   /// For a name the SDK has not modelled; prefer the fields declared here.
   ChannelSortField(super.remote, super.localValue);
 
-  /// Creates a field the SDK does not model, read from [ChannelModel.extraData].
+  /// Creates a field the SDK does not model, read from [ChannelModel.custom].
   ///
   /// Declared only where the API accepts a custom sort field.
   ///
   /// String values are compared as they are, without the case and diacritic
   /// folding a declared name field applies.
   factory ChannelSortField.custom(String remote) {
-    return ChannelSortField(remote, (it) => it.channel?.extraData[remote]);
+    return ChannelSortField(remote, (it) => it.channel?.custom[remote]);
   }
 
   /// Sorts channels by their last activity.

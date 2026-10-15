@@ -94,8 +94,8 @@
   and re-applies the `id` and timestamp defaults, recorded as a break.
 - **`extraData` is renamed `custom` on `Poll` and `PollOption`,** the wire's name, with no deprecated
   alias; `StreamPollController.addOption` and `updateOption` and the `polls.custom` column follow.
-  Every migrated model takes the name from here on (README rule 9); [group 15](15-custom-data.md)
-  renames whatever no group migrates.
+  Every migrated model takes the name from here on (README rule 9); [group 21](21-custom-data.md)
+  checks that none was missed.
 - **Verified live** against the demo app with a before/after harness covering every endpoint, the
   error cases and the WebSocket events, and in the sample app on web.
 

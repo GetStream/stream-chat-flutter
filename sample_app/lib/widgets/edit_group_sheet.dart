@@ -74,7 +74,7 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
   final List<String> _trackedUploads = [];
 
   String get _name => _nameController.text.trim();
-  String get _initialName => (_channel.extraData['name'] as String?) ?? '';
+  String get _initialName => (_channel.custom['name'] as String?) ?? '';
 
   bool get _isDirty {
     if (_name != _initialName) return true;
@@ -268,7 +268,12 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
       }
 
       if (set.isNotEmpty || unset.isNotEmpty) {
-        await _channel.updatePartial(set: set, unset: unset);
+        final result = await _channel.updatePartial(set: set, unset: unset);
+        if (result case Failure(:final error)) {
+          messenger.showSnackBar(SnackBar(content: Text('Failed to save: $error')));
+          if (mounted) setState(() => _saving = false);
+          return;
+        }
       }
 
       // Strip the saved URL from the orphan list so dispose() doesn't

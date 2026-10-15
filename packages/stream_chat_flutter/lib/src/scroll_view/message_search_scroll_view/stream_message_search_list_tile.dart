@@ -172,7 +172,7 @@ class MessageSearchListTileTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = messageResponse.message.user!;
     final channel = messageResponse.channel;
-    final channelName = channel?.extraData['name'];
+    final channelName = channel?.custom['name'];
 
     return Text.rich(
       TextSpan(

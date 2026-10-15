@@ -491,6 +491,7 @@ abstract class ChatPersistenceClient {
       users.addAll(
         [
           channel.createdBy,
+          channel.truncatedBy,
           ...?messages?.map((it) => it.user),
           ...?pinnedMessages?.map((it) => it.user),
           ...?reads?.map((it) => it.user),

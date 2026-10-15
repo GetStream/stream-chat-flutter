@@ -74,6 +74,7 @@ void main() {
 
     final cids = List.generate(count, (index) => 'testCid$index');
     final users = List.generate(count, (index) => User(id: 'testId$index'));
+    final truncators = List.generate(count, (index) => User(id: 'truncatorId$index'));
     final channels = List.generate(
       count,
       (index) => ChannelModel(
@@ -81,9 +82,10 @@ void main() {
         type: 'testType$index',
         cid: cids[index],
         createdBy: users[index],
+        truncatedBy: truncators[index],
         config: ChannelConfig(),
         filterTags: ['tag$index'],
-        extraData: {'test_custom_field': index + 3},
+        custom: {'test_custom_field': index + 3},
         createdAt: now,
         memberCount: index + 3,
         lastMessageAt: now.add(Duration(hours: index)),
@@ -91,7 +93,7 @@ void main() {
       ),
     ).toList(growable: false);
 
-    await userDao.updateUsers(users);
+    await userDao.updateUsers([...users, ...truncators]);
     await channelDao.updateChannels(channels);
     await channelQueryDao.updateChannelQueries(filter, cids);
 
@@ -126,6 +128,8 @@ void main() {
         expect(updatedChannel.memberCount, insertedChannel.memberCount);
         expect(updatedChannel.filterTags, insertedChannel.filterTags);
         expect(updatedChannel.team, insertedChannel.team);
+        expect(updatedChannel.createdBy?.id, insertedChannel.createdBy?.id);
+        expect(updatedChannel.truncatedBy?.id, insertedChannel.truncatedBy?.id);
 
         // Should match createdAt date
         expect(

@@ -31,8 +31,8 @@ extension FlagItemResponseMapper on api.FlagItemResponse {
   );
 }
 
-/// Maps a [DeleteType] to the generated request type.
-extension DeleteTypeMapper on DeleteType {
-  /// Converts this treatment into an [api.BanRequestDeleteMessages].
+/// Maps a [DeleteType] to the generated [api.BanRequestDeleteMessages].
+extension DeleteTypeRequestMapper on DeleteType {
+  /// Converts this delete type into an [api.BanRequestDeleteMessages].
   api.BanRequestDeleteMessages toRequest() => api.BanRequestDeleteMessages.fromJson(rawType);
 }

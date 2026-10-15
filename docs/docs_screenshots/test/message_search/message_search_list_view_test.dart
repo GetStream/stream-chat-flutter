@@ -23,7 +23,7 @@ GetMessageResponse _makeSearchResult({
     ..channel = ChannelModel(
       id: 'ch-$messageId',
       type: 'messaging',
-      extraData: {'name': channelName},
+      custom: {'name': channelName},
     );
   return response;
 }
