@@ -3,6 +3,7 @@
 ✅ Added
 
 - Added `StreamMessageComposerController.validator` and `canSend`, which decide whether the message being composed can be sent, and `StreamMessageComposerController.defaultValidator`.
+- Added `StreamPollVoteListController.forOption` and `StreamPollVoteListController.forAnswers`, which list only a poll's votes for one option or only its answers.
 
 🔄 Changed
 
