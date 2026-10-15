@@ -282,7 +282,10 @@ Future<void> _maybeDeleteChannel(BuildContext context, Channel channel) async {
   );
 
   if (confirmed != true) return;
-  await channel.delete();
+
+  final result = await channel.delete();
+  if (result.isFailure) return;
+
   if (router.canPop()) router.pop();
 }
 

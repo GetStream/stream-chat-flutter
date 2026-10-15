@@ -2748,48 +2748,6 @@ void main() {
       verifyNoMoreInteractions(fakeChatApi.general);
     });
 
-    test('`.hideChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-
-      when(() => fakeChatApi.channel.hideChannel(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.hideChannel(channelId, channelType);
-
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.channel.hideChannel(channelId, channelType)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.showChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-
-      when(() => fakeChatApi.channel.showChannel(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.showChannel(channelId, channelType);
-
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.channel.showChannel(channelId, channelType)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.deleteChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-
-      when(() => fakeChatApi.channel.deleteChannel(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.deleteChannel(channelId, channelType);
-
-      expect(res, isNotNull);
-
-      verify(() => fakeChatApi.channel.deleteChannel(channelId, channelType)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
     test('`.truncateChannel`', () async {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';

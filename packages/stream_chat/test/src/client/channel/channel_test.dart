@@ -3831,12 +3831,16 @@ void main() {
       ).called(1);
     });
 
-    test('`.delete`', () async {
-      when(() => client.deleteChannel(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
+    test('Channel.delete deletes this channel and returns the deleted channel', () async {
+      final response = DeleteChannelResponse(
+        duration: '0.01ms',
+        channel: ChannelModel(cid: channelCid),
+      );
+      when(() => client.deleteChannel(channelId, channelType)).thenAnswer((_) async => Result.success(response));
 
       final res = await channel.delete();
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), response);
 
       verify(() => client.deleteChannel(channelId, channelType)).called(1);
     });
@@ -4830,8 +4834,9 @@ void main() {
       verify(() => moderationClient.shadowBan(userId, channelCid: channelCid)).called(1);
     });
 
-    test('`.hide`', () async {
+    test('Channel.hide hides this channel and clears its history when asked', () async {
       const clearHistory = true;
+      const response = HideChannelResponse(duration: '0.01ms');
 
       when(
         () => client.hideChannel(
@@ -4839,11 +4844,11 @@ void main() {
           channelType,
           clearHistory: clearHistory,
         ),
-      ).thenAnswer((_) async => EmptyResponse());
+      ).thenAnswer((_) async => const Result.success(response));
 
       final res = await channel.hide(clearHistory: clearHistory);
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), response);
 
       verify(
         () => client.hideChannel(
@@ -4854,12 +4859,13 @@ void main() {
       ).called(1);
     });
 
-    test('`.show`', () async {
-      when(() => client.showChannel(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
+    test('Channel.show shows this channel again', () async {
+      const response = ShowChannelResponse(duration: '0.01ms');
+      when(() => client.showChannel(channelId, channelType)).thenAnswer((_) async => const Result.success(response));
 
       final res = await channel.show();
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), response);
 
       verify(() => client.showChannel(channelId, channelType)).called(1);
     });
