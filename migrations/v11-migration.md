@@ -760,6 +760,7 @@ result.fold(
 
 > **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call. Each write
 > answers its own envelope so a field the API adds later reaches you without another break.
+
 ### Channel and Member Custom Data
 
 **`extraData` is renamed `custom` on `ChannelModel`, `Member` and `Channel`.** That covers the fields, the

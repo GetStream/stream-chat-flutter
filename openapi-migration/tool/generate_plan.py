@@ -942,7 +942,10 @@ GROUPS = [
               `MessageListUnreadController` and the public `ChannelDeliveryReporter`, which rely on a throw; they
               move in a slice of their own.
             """),
-        risks=[],
+        risks=[
+            'A `try`/`catch` around `hideChannel`, `showChannel`, `deleteChannel` or their `Channel` and '
+            '`StreamChannelListController` counterparts still compiles but no longer catches a failed call.',
+        ],
         done=DONE.replace('- [ ]', '- [x]'),
     ),
     dict(

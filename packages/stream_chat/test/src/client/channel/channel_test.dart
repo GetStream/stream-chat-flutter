@@ -3831,7 +3831,7 @@ void main() {
       ).called(1);
     });
 
-    test("Channel.delete returns the client's deleteChannel response", () async {
+    test('Channel.delete deletes this channel and returns the deleted channel', () async {
       final response = DeleteChannelResponse(
         duration: '0.01ms',
         channel: ChannelModel(cid: channelCid),
@@ -4834,7 +4834,7 @@ void main() {
       verify(() => moderationClient.shadowBan(userId, channelCid: channelCid)).called(1);
     });
 
-    test("Channel.hide returns the client's hideChannel response", () async {
+    test('Channel.hide hides this channel and clears its history when asked', () async {
       const clearHistory = true;
       const response = HideChannelResponse(duration: '0.01ms');
 
@@ -4859,7 +4859,7 @@ void main() {
       ).called(1);
     });
 
-    test("Channel.show returns the client's showChannel response", () async {
+    test('Channel.show shows this channel again', () async {
       const response = ShowChannelResponse(duration: '0.01ms');
       when(() => client.showChannel(channelId, channelType)).thenAnswer((_) async => const Result.success(response));
 
