@@ -48,9 +48,11 @@ extension ChannelResponseMapper on api.ChannelResponse {
 
 /// Maps a generated [api.ChannelConfigWithInfo] to a [ChannelConfig].
 extension ChannelConfigWithInfoMapper on api.ChannelConfigWithInfo {
-  // TODO(openapi-migration): revisit exposing the config fields ChannelConfig does not model yet:
-  //  allowedFlagReasons, automodBehavior, automodThresholds, blocklist, blocklistBehavior, blocklists,
-  //  countMessages, customEvents, grants, name, partitionSize, partitionTtl, quotes and reminders.
+  // TODO(openapi-migration): revisit exposing the config fields ChannelConfig
+  //  does not model yet: allowedFlagReasons, automodBehavior,
+  //  automodThresholds, blocklist, blocklistBehavior, blocklists,
+  //  countMessages, customEvents, grants, name, partitionSize, partitionTtl,
+  //  quotes and reminders.
 
   /// Converts this configuration into a [ChannelConfig].
   ChannelConfig toModel() => ChannelConfig(
@@ -134,7 +136,8 @@ extension ChannelMemberResponseMapper on api.ChannelMemberResponse {
   );
 }
 
-/// Maps a generated [api.UpdateChannelPartialResponse] to an [UpdateChannelPartialResponse].
+/// Maps a generated [api.UpdateChannelPartialResponse] to an
+/// [UpdateChannelPartialResponse].
 extension UpdateChannelPartialResponseMapper on api.UpdateChannelPartialResponse {
   /// Converts this response into an [UpdateChannelPartialResponse].
   UpdateChannelPartialResponse toModel() => UpdateChannelPartialResponse(
@@ -144,7 +147,8 @@ extension UpdateChannelPartialResponseMapper on api.UpdateChannelPartialResponse
   );
 }
 
-/// Maps a generated [api.UpdateMemberPartialResponse] to an [UpdateMemberPartialResponse].
+/// Maps a generated [api.UpdateMemberPartialResponse] to an
+/// [UpdateMemberPartialResponse].
 extension UpdateMemberPartialResponseMapper on api.UpdateMemberPartialResponse {
   /// Converts this response into an [UpdateMemberPartialResponse].
   UpdateMemberPartialResponse toModel() => UpdateMemberPartialResponse(

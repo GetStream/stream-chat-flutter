@@ -46,7 +46,8 @@ class Member extends Equatable {
     Serializer.moveToExtraDataFromRoot(json, topLevelFields),
   );
 
-  /// The JSON keys [Member.fromJson] reads into named fields, or leaves out; every other key is kept in [custom].
+  /// The JSON keys [Member.fromJson] reads into named fields, or leaves out;
+  /// every other key is kept in [custom].
   static const topLevelFields = [
     'user',
     'invite_accepted_at',
@@ -68,7 +69,8 @@ class Member extends Equatable {
     'ban_from_future_channels',
     'future_channel_ban_expires',
     'deleted_at',
-    // Listed so a `role` key never lands in [custom]; [channelRole] holds the member's role.
+    // Listed so a `role` key never lands in [custom]; [channelRole] holds the
+    // member's role.
     'role',
   ];
 
@@ -120,7 +122,10 @@ class Member extends Equatable {
   /// visible to other channel members.
   final List<String> deletedMessages;
 
-  /// This member's custom data: every key not in [topLevelFields].
+  /// This member's custom data.
+  ///
+  /// It may hold a key that is also in [topLevelFields]; [toJson] leaves such
+  /// an entry out so it never overwrites the field.
   @JsonKey(name: 'extra_data')
   final Map<String, Object?> custom;
 
@@ -128,7 +133,8 @@ class Member extends Equatable {
   @JsonKey(includeIfNull: false)
   final bool? notificationsMuted;
 
-  /// The status of this membership, such as `member`, or `pending` while an invite is outstanding.
+  /// The status of this membership, such as `member`, or `pending` while an
+  /// invite is outstanding.
   @JsonKey(includeIfNull: false)
   final String? status;
 
@@ -138,7 +144,7 @@ class Member extends Equatable {
 
   /// The date at which this member's ban from future channels expires.
   ///
-  /// Null when that ban has no expiry.
+  /// Null when there is no such ban or it has no expiry.
   @JsonKey(includeIfNull: false)
   final DateTime? futureChannelBanExpires;
 
@@ -198,7 +204,8 @@ class Member extends Equatable {
 
   /// Serialize to json
   ///
-  /// Writes the entries of [custom] at the root, leaving out any named like one of [topLevelFields].
+  /// Writes the entries of [custom] at the root, leaving out any named like one
+  /// of [topLevelFields].
   Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
     _$MemberToJson(this),
     topLevelFields: topLevelFields,

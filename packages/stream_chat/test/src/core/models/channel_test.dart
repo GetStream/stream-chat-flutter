@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_redundant_argument_values
 
-import 'package:stream_chat/src/core/models/channel_model.dart';
-import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
 import '../../utils.dart';
@@ -63,38 +62,14 @@ void main() {
     });
   });
 
-  test('ChannelModel writes its flags to JSON and reads them back', () {
-    final truncatedAt = DateTime.utc(2026, 3, 2);
-    final channel = ChannelModel(
-      cid: 'test:cid',
-      disabled: false,
-      hidden: true,
-      muted: true,
-      blocked: false,
-      truncatedAt: truncatedAt,
-      truncatedBy: User(id: 'truncator'),
-      autoTranslationEnabled: true,
-      autoTranslationLanguage: 'fr',
-      custom: const {'color': 'red'},
-    );
-    final json = {
-      'id': 'cid',
-      'type': 'test',
-      'frozen': false,
-      'cooldown': 0,
-      'disabled': false,
-      'hidden': true,
-      'muted': true,
-      'blocked': false,
-      'truncated_at': truncatedAt.toIso8601String(),
-      'truncated_by': User(id: 'truncator').toJson(),
-      'auto_translation_enabled': true,
-      'auto_translation_language': 'fr',
-      'color': 'red',
-    };
+  test('ChannelModel.toJson writes its flags at the top level', () {
+    expect(_flaggedChannel().toJson(), _flaggedChannelJson());
+  });
 
-    expect(channel.toJson(), json);
-    expect(ChannelModel.fromJson(channel.toJson()).toJson(), json);
+  test('ChannelModel.fromJson reads back the flags toJson writes', () {
+    final json = _flaggedChannel().toJson();
+
+    expect(ChannelModel.fromJson(json).toJson(), _flaggedChannelJson());
   });
 
   test('ChannelModel keeps custom data named like a field apart from the field', () {
@@ -193,6 +168,13 @@ void main() {
     expect(merged.blocked, isTrue);
     expect(merged.truncatedAt, DateTime.utc(2026));
     expect(merged.truncatedBy?.id, 'truncator');
+  });
+
+  test('ChannelModel.merge takes the custom data from the other channel', () {
+    final channel = ChannelModel(cid: 'test:cid', custom: const {'color': 'blue'});
+
+    final merged = channel.merge(ChannelModel(cid: 'test:cid', custom: const {'color': 'red'}));
+
     expect(merged.custom, {'color': 'red'});
   });
 
@@ -298,3 +280,34 @@ void main() {
     expect(channel.lastUpdatedAt, DateTime(2023, 6, 10));
   });
 }
+
+final _truncatedAt = DateTime.utc(2026, 3, 2);
+
+// A channel with every flag set, and no custom data.
+ChannelModel _flaggedChannel() => ChannelModel(
+  cid: 'test:cid',
+  disabled: false,
+  hidden: true,
+  muted: true,
+  blocked: false,
+  truncatedAt: _truncatedAt,
+  truncatedBy: User(id: 'truncator'),
+  autoTranslationEnabled: true,
+  autoTranslationLanguage: 'fr',
+);
+
+// The JSON [_flaggedChannel] writes.
+Map<String, Object?> _flaggedChannelJson() => {
+  'id': 'cid',
+  'type': 'test',
+  'frozen': false,
+  'cooldown': 0,
+  'disabled': false,
+  'hidden': true,
+  'muted': true,
+  'blocked': false,
+  'truncated_at': _truncatedAt.toIso8601String(),
+  'truncated_by': User(id: 'truncator').toJson(),
+  'auto_translation_enabled': true,
+  'auto_translation_language': 'fr',
+};

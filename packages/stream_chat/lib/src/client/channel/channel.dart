@@ -65,8 +65,9 @@ const incomingTypingStartEventTimeout = 7;
 class Channel {
   /// Class that manages a specific channel.
   ///
-  /// Optional [custom] and [image] properties can be provided. The [image]
-  /// is exposed to easily set a key of 'image' on [custom].
+  /// The channel starts with the custom data [custom]; a [name] or [image]
+  /// is stored in it under the `name` or `image` key, replacing any entry
+  /// [custom] has for that key.
   Channel(
     this._client,
     this._type,
@@ -1742,8 +1743,8 @@ class Channel {
     );
   }
 
-  /// Sets the fields in [set] and removes the fields named in [unset] on this channel, leaving every other field
-  /// as it is.
+  /// Sets the fields in [set] and removes the fields named in [unset] on this
+  /// channel, leaving every other field as it is.
   ///
   /// At least one of [set] and [unset] is required.
   ///
@@ -1756,7 +1757,8 @@ class Channel {
     return _client.updateChannelPartial(id!, type, set: set, unset: unset);
   }
 
-  /// Enables slow mode on this channel, so members wait [cooldownInterval] seconds between messages.
+  /// Enables slow mode on this channel, so members wait [cooldownInterval]
+  /// seconds between messages.
   Future<Result<UpdateChannelPartialResponse>> enableSlowMode({
     required int cooldownInterval,
   }) async {
