@@ -49,9 +49,4 @@ Map<String, dynamic> _$MemberToJson(Member instance) => <String, dynamic>{
   'updated_at': instance.updatedAt.toIso8601String(),
   'deleted_messages': instance.deletedMessages,
   'extra_data': instance.custom,
-  'notifications_muted': ?instance.notificationsMuted,
-  'status': ?instance.status,
-  'ban_from_future_channels': ?instance.banFromFutureChannels,
-  'future_channel_ban_expires': ?instance.futureChannelBanExpires?.toIso8601String(),
-  'deleted_at': ?instance.deletedAt?.toIso8601String(),
 };

@@ -236,6 +236,20 @@ void main() {
       expect(() => channel.custom = {'name': 'test-channel-name'}, throwsA(isA<StateError>()));
     });
 
+    test('Channel.custom reads the current channel, even when its custom data is empty', () {
+      final channel = Channel.fromState(
+        client,
+        ChannelState(
+          channel: ChannelModel(cid: channelCid, custom: const {'name': 'Old name'}),
+        ),
+      );
+      addTearDown(channel.dispose);
+
+      channel.state!.updateChannelState(ChannelState(channel: ChannelModel(cid: channelCid)));
+
+      expect(channel.custom, isEmpty);
+    });
+
     test('should throw if trying to set `image`', () {
       expect(() => channel.image = 'https://stream.io/some-image', throwsA(isA<StateError>()));
     });
@@ -4687,7 +4701,7 @@ void main() {
       ).called(1);
     });
 
-    test("Channel.enableSlowMode returns the client's enableSlowMode response", () async {
+    test('Channel.enableSlowMode enables slow mode on this channel and returns the updated channel', () async {
       const cooldown = 10;
 
       final channelModel = ChannelModel(
@@ -4718,7 +4732,7 @@ void main() {
       ).called(1);
     });
 
-    test("Channel.disableSlowMode returns the client's disableSlowMode response", () async {
+    test('Channel.disableSlowMode disables slow mode on this channel and returns the updated channel', () async {
       final channelModel = ChannelModel(
         cid: channelCid,
       );
@@ -4856,7 +4870,7 @@ void main() {
       verify(() => client.showChannel(channelId, channelType)).called(1);
     });
 
-    test("Channel.archive returns the client's archiveChannel response", () async {
+    test('Channel.archive archives this channel and returns the updated membership', () async {
       final response = UpdateMemberPartialResponse(
         duration: '0.01ms',
         channelMember: Member(userId: 'test-user-id'),
@@ -4872,7 +4886,7 @@ void main() {
       verify(() => client.archiveChannel(channelId: channelId, channelType: channelType)).called(1);
     });
 
-    test("Channel.unarchive returns the client's unarchiveChannel response", () async {
+    test('Channel.unarchive unarchives this channel and returns the updated membership', () async {
       final response = UpdateMemberPartialResponse(
         duration: '0.01ms',
         channelMember: Member(userId: 'test-user-id'),
@@ -4888,7 +4902,7 @@ void main() {
       verify(() => client.unarchiveChannel(channelId: channelId, channelType: channelType)).called(1);
     });
 
-    test("Channel.pin returns the client's pinChannel response", () async {
+    test('Channel.pin pins this channel and returns the updated membership', () async {
       final response = UpdateMemberPartialResponse(
         duration: '0.01ms',
         channelMember: Member(userId: 'test-user-id'),
@@ -4906,7 +4920,7 @@ void main() {
       verify(() => client.pinChannel(channelId: channelId, channelType: channelType)).called(1);
     });
 
-    test("Channel.unpin returns the client's unpinChannel response", () async {
+    test('Channel.unpin unpins this channel and returns the updated membership', () async {
       final response = UpdateMemberPartialResponse(
         duration: '0.01ms',
         channelMember: Member(userId: 'test-user-id'),

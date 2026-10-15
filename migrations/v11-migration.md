@@ -270,10 +270,9 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `MemberUpdatePayload(pinned: true).toJson()` / `MemberUpdateType.pinned.name` | `{'pinned': true}` / `'pinned'` | `removed` | Same for `archived`. Or call `pinChannel` / `unpinChannel` / `archiveChannel` / `unarchiveChannel` |
 | `ChannelModel.extraData` / `Member.extraData` | `ChannelModel.custom` / `Member.custom` | `renamed` | The wire's name for it; also the constructor and `copyWith` arguments |
 | `Channel.extraData` / `Channel.extraDataStream` / `Channel(…, extraData:)` / `StreamChatClient.channel(…, extraData:)` | `Channel.custom` / `Channel.customStream` / `custom:` | `renamed` | Follows `ChannelModel.custom`; the setter is renamed too |
-| `channel.extraData['disabled']` / `['hidden']` / `['muted']` / `['blocked']` / `['truncated_at']` / `['truncated_by']` / `['auto_translation_enabled']` / `['auto_translation_language']` | `ChannelModel.disabled` / `hidden` / `muted` / `blocked` / `truncatedAt` / `truncatedBy` / `autoTranslationEnabled` / `autoTranslationLanguage` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them |
-| `member.extraData['notifications_muted']` / `['status']` / `['ban_from_future_channels']` / `['future_channel_ban_expires']` / `['deleted_at']` | `Member.notificationsMuted` / `status` / `banFromFutureChannels` / `futureChannelBanExpires` / `deletedAt` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them |
+| `channel.extraData['disabled']` / `['hidden']` / `['muted']` / `['blocked']` / `['truncated_at']` / `['truncated_by']` / `['auto_translation_enabled']` / `['auto_translation_language']` | `ChannelModel.disabled` / `hidden` / `muted` / `blocked` / `truncatedAt` / `truncatedBy` / `autoTranslationEnabled` / `autoTranslationLanguage` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them, and `toJson` no longer writes them |
+| `member.extraData['notifications_muted']` / `['status']` / `['ban_from_future_channels']` / `['future_channel_ban_expires']` / `['deleted_at']` | `Member.notificationsMuted` / `status` / `banFromFutureChannels` / `futureChannelBanExpires` / `deletedAt` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them, and `toJson` no longer writes them |
 | `ChannelModel.custom` / `Member.custom` entry named like one of the model's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; `toJson` leaves it out so it cannot overwrite the field |
-| `member.extraData['role']` | `Member.channelRole` | `removed` | The server deprecated `role` for `channel_role` |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -793,9 +792,11 @@ final hidden = channel.hidden;
 final shown = model.copyWith(hidden: false);
 ```
 
+**`ChannelModel.toJson` and `Member.toJson` no longer write these fields**, where v10 wrote them at the root with the
+rest of the custom data. Read them from the model rather than from its JSON.
+
 **`custom` is the custom data exactly as the API returns it.** An entry named like one of the model's own fields
 stays in `custom` and leaves the field alone; `toJson` leaves it out, so it cannot overwrite the field.
-`Member.custom` no longer holds `role`, which the server deprecated: read `channelRole`.
 
 **Filter and sort on a flag through its declared field,** such as `ChannelFilterField.hidden`, rather than
 `.custom('hidden')`, which reads `custom` locally and finds nothing there.

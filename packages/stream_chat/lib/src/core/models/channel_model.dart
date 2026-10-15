@@ -125,46 +125,36 @@ class ChannelModel {
   @JsonKey(includeIfNull: false)
   final int cooldown;
 
-  /// True if the channel is disabled
-  @JsonKey(includeIfNull: false)
+  /// Whether this channel is disabled.
+  @JsonKey(includeToJson: false)
   final bool? disabled;
 
-  /// True if the channel is hidden
-  @JsonKey(includeIfNull: false)
+  /// Whether this channel is hidden for the current user.
+  @JsonKey(includeToJson: false)
   final bool? hidden;
 
-  /// True if the channel is muted by the current user
-  @JsonKey(includeIfNull: false)
+  /// Whether this channel is muted for the current user.
+  @JsonKey(includeToJson: false)
   final bool? muted;
 
-  /// True if the channel is blocked by the current user
-  @JsonKey(includeIfNull: false)
+  /// Whether this channel is blocked by the current user.
+  @JsonKey(includeToJson: false)
   final bool? blocked;
 
-  /// The date of the last time channel got truncated
-  @JsonKey(includeIfNull: false, fromJson: _dateFromJson)
+  /// The date this channel was last truncated.
+  @JsonKey(includeToJson: false)
   final DateTime? truncatedAt;
 
-  static DateTime? _dateFromJson(Object? value) => switch (value) {
-    final String date when date.isNotEmpty => DateTime.parse(date),
-    _ => null,
-  };
-
   /// The user that last truncated this channel.
-  @JsonKey(includeIfNull: false, fromJson: _userFromJson)
+  @JsonKey(includeToJson: false)
   final User? truncatedBy;
 
-  static User? _userFromJson(Object? value) => switch (value) {
-    final Map<String, dynamic> json when json['id'] is String => User.fromJson(json),
-    _ => null,
-  };
-
   /// Whether messages in this channel are translated automatically.
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeToJson: false)
   final bool? autoTranslationEnabled;
 
   /// The language this channel's messages are translated into automatically.
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeToJson: false)
   final String? autoTranslationLanguage;
 
   /// This channel's custom data.
@@ -295,37 +285,38 @@ class ChannelModel {
     autoTranslationLanguage: autoTranslationLanguage ?? this.autoTranslationLanguage,
   );
 
-  /// Returns a new [ChannelModel] that is a combination of this channelModel
-  /// and the given [other] channelModel.
+  /// Returns a copy of this channel updated with the fields [other] carries.
+  ///
+  /// A field [other] leaves out keeps its value here, except the
+  /// auto-translation settings: when [other] leaves them out, auto translation
+  /// is off.
   ChannelModel merge(ChannelModel? other) {
     if (other == null) return this;
-    return copyWith(
+    return ChannelModel(
       id: other.id,
       type: other.type,
       cid: other.cid,
-      ownCapabilities: other.ownCapabilities,
+      ownCapabilities: other.ownCapabilities ?? ownCapabilities,
       config: other.config,
-      createdBy: other.createdBy,
+      createdBy: other.createdBy ?? createdBy,
       frozen: other.frozen,
-      lastMessageAt: other.lastMessageAt,
+      lastMessageAt: other.lastMessageAt ?? lastMessageAt,
       createdAt: other.createdAt,
       updatedAt: other.updatedAt,
-      deletedAt: other.deletedAt,
+      deletedAt: other.deletedAt ?? deletedAt,
       memberCount: other.memberCount,
-      members: other.members,
+      members: other.members ?? members,
       custom: other.custom,
-      team: other.team,
+      team: other.team ?? team,
       cooldown: other.cooldown,
-      disabled: other.disabled,
-      hidden: other.hidden,
-      muted: other.muted,
-      blocked: other.blocked,
-      truncatedAt: other.truncatedAt,
-      messageCount: other.messageCount,
-      filterTags: other.filterTags,
-      truncatedBy: other.truncatedBy,
-      // A channel only carries its auto-translation flag while auto translation
-      // is on, so its absence turns it off.
+      disabled: other.disabled ?? disabled,
+      hidden: other.hidden ?? hidden,
+      muted: other.muted ?? muted,
+      blocked: other.blocked ?? blocked,
+      truncatedAt: other.truncatedAt ?? truncatedAt,
+      messageCount: other.messageCount ?? messageCount,
+      filterTags: other.filterTags ?? filterTags,
+      truncatedBy: other.truncatedBy ?? truncatedBy,
       autoTranslationEnabled: other.autoTranslationEnabled ?? false,
       autoTranslationLanguage: other.autoTranslationLanguage,
     );

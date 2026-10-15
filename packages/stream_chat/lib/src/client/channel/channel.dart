@@ -65,9 +65,9 @@ const incomingTypingStartEventTimeout = 7;
 class Channel {
   /// Class that manages a specific channel.
   ///
-  /// The channel starts with the custom data [custom]; a [name] or [image]
-  /// is stored in it under the `name` or `image` key, replacing any entry
-  /// [custom] has for that key.
+  /// The channel starts with the custom data [custom]; a [name] or [image] is
+  /// stored in it under the `name` or `image` key, replacing any entry [custom]
+  /// has for that key.
   Channel(
     this._client,
     this._type,
@@ -525,14 +525,11 @@ class Channel {
     return state!.channelState.channel?.team;
   }
 
-  /// Channel custom data.
-  Map<String, Object?> get custom {
-    var data = state?.channelState.channel?.custom;
-    if (data == null || data.isEmpty) {
-      data = _custom;
-    }
-    return data;
-  }
+  /// This channel's custom data.
+  ///
+  /// Before the channel is initialized, this is the custom data it was created
+  /// with, updated by any assignment to [name], [image] or [custom].
+  Map<String, Object?> get custom => state?.channelState.channel?.custom ?? _custom;
 
   /// List of user permissions on this channel
   List<ChannelCapability> get ownCapabilities => state?.channelState.channel?.ownCapabilities ?? [];

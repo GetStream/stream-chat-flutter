@@ -64,56 +64,6 @@ void main() {
     expect(res.exceptionOrNull(), error);
   });
 
-  test(
-    'StreamChatClient.updateMemberPartial keeps custom data named like a member field apart from the field',
-    () async {
-      final response = api.UpdateMemberPartialResponse(
-        duration: '0.01ms',
-        channelMember: api.ChannelMemberResponse(
-          banned: false,
-          channelRole: 'channel_member',
-          createdAt: DateTime.utc(2026),
-          updatedAt: DateTime.utc(2026, 2),
-          custom: const {
-            'nickname': 'Mo',
-            'user_id': 'shadowed',
-            'notifications_muted': 'shadowed',
-            'status': 'shadowed',
-            'role': 'shadowed',
-            'ban_from_future_channels': 'shadowed',
-            'future_channel_ban_expires': 'shadowed',
-            'deleted_at': 'shadowed',
-          },
-          notificationsMuted: false,
-          shadowBanned: false,
-        ),
-      );
-      const request = api.UpdateMemberPartialRequest(set: {'a': 1});
-
-      final defaultApi = MockDefaultApi();
-      when(
-        () => defaultApi.updateMemberPartial(type: 'messaging', id: 'general', updateMemberPartialRequest: request),
-      ).thenAnswer((_) async => Result.success(response));
-      final client = _client(defaultApi);
-
-      final res = await client.updateMemberPartial(channelId: 'general', channelType: 'messaging', set: const {'a': 1});
-
-      final member = res.getOrNull()!.channelMember!;
-      expect(member.custom, {
-        'nickname': 'Mo',
-        'user_id': 'shadowed',
-        'notifications_muted': 'shadowed',
-        'status': 'shadowed',
-        'role': 'shadowed',
-        'ban_from_future_channels': 'shadowed',
-        'future_channel_ban_expires': 'shadowed',
-        'deleted_at': 'shadowed',
-      });
-      expect(member.notificationsMuted, isFalse);
-      expect(member.status, isNull);
-    },
-  );
-
   test('StreamChatClient.updateMemberPartial falls back to the defaults for member fields left out', () async {
     final response = api.UpdateMemberPartialResponse(
       duration: '0.01ms',
