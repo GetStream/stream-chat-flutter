@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart' show objectRuntimeType;
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -100,8 +101,12 @@ class SplitPaneConstraints {
 }
 
 class _SplitViewState extends State<SplitView> {
-  // The width of the line between the panes.
-  static const _dividerWidth = 1.0;
+  // The width of the line between the panes where a fold divides them.
+  static const _lineWidth = 1.0;
+
+  // The width of the space around the line between the panes, which holds the
+  // resize handle clear of their content.
+  static const _spacerWidth = 24.0;
 
   // How far one keyboard or screen reader step resizes the panes.
   static const _resizeStep = 20.0;
@@ -120,7 +125,7 @@ class _SplitViewState extends State<SplitView> {
   // wide, where both panes' constraints hold.
   ({double min, double max}) _primaryWidthRange(double width) {
     final SplitView(:primaryConstraints, :secondaryConstraints) = widget;
-    final available = width - _dividerWidth;
+    final available = width - _spacerWidth;
     final max = math.min(primaryConstraints.maxWidth, available - secondaryConstraints.minWidth);
     final min = math.max(primaryConstraints.minWidth, available - secondaryConstraints.maxWidth);
     return (min: math.min(min, max), max: max);
@@ -132,7 +137,7 @@ class _SplitViewState extends State<SplitView> {
     final range = _primaryWidthRange(width);
     final initialWidth = switch ((primaryConstraints.initialWidth, secondaryConstraints.initialWidth)) {
       (final primary?, _) => primary,
-      (null, final secondary?) => width - _dividerWidth - secondary,
+      (null, final secondary?) => width - _spacerWidth - secondary,
       (null, null) => range.min,
     };
     return (_resizedPrimaryWidth ?? initialWidth).clamp(range.min, range.max);
@@ -157,7 +162,10 @@ class _SplitViewState extends State<SplitView> {
       final fold? => isLtr ? fold.left : width - fold.right,
       null => _primaryWidth(width),
     };
-    final dividerWidth = math.max(fold?.width ?? 0, _dividerWidth);
+    final dividerWidth = switch (fold) {
+      final fold? => math.max(fold.width, _lineWidth),
+      null => _spacerWidth,
+    };
 
     // Builds the same tree with or without a fold, so the panes ease between the two.
     return Stack(
@@ -168,7 +176,7 @@ class _SplitViewState extends State<SplitView> {
           PositionedDirectional(
             top: 0,
             bottom: 0,
-            start: primaryWidth + (_dividerWidth - _SplitViewDivider.hitWidth) / 2,
+            start: primaryWidth + (_spacerWidth - _SplitViewDivider.hitWidth) / 2,
             width: _SplitViewDivider.hitWidth,
             child: _SplitViewDivider(
               primaryWidth: primaryWidth,
@@ -217,27 +225,32 @@ class _SplitViewState extends State<SplitView> {
     final primaryPane = Rect.fromLTWH(isLtr ? 0 : width - primaryPaneWidth, 0, primaryPaneWidth, height);
     final secondaryPane = Rect.fromLTWH(isLtr ? width - secondaryPaneWidth : 0, 0, secondaryPaneWidth, height);
 
-    return Row(
-      children: [
-        SizedBox(
-          width: primaryPaneWidth,
-          child: MediaQuery(
-            data: mediaQuery.removeDisplayFeatures(primaryPane),
-            child: widget.primary,
+    // Paints behind the panes too, so no gap shows where their edges round to
+    // different pixels.
+    return ColoredBox(
+      color: colorScheme.backgroundApp,
+      child: Row(
+        children: [
+          SizedBox(
+            width: primaryPaneWidth,
+            child: MediaQuery(
+              data: mediaQuery.removeDisplayFeatures(primaryPane),
+              child: widget.primary,
+            ),
           ),
-        ),
-        VerticalDivider(
-          width: dividerWidth,
-          thickness: _dividerWidth,
-          color: colorScheme.borderSubtle,
-        ),
-        Expanded(
-          child: MediaQuery(
-            data: mediaQuery.removeDisplayFeatures(secondaryPane),
-            child: widget.secondary,
+          VerticalDivider(
+            width: dividerWidth,
+            thickness: _lineWidth,
+            color: colorScheme.borderSubtle,
           ),
-        ),
-      ],
+          Expanded(
+            child: MediaQuery(
+              data: mediaQuery.removeDisplayFeatures(secondaryPane),
+              child: widget.secondary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -257,8 +270,15 @@ class _SplitViewDivider extends StatefulWidget {
     required this.onStep,
   });
 
-  // The width of the area, centered on the line, that responds to a drag.
+  // The width of the area, centered on the gap, that responds to a mouse or
+  // trackpad drag along its full height.
   static const hitWidth = 44.0;
+
+  // The handle at the middle of the gap, the only part that responds to touch,
+  // so swipes near the gap reach the panes beneath it. It grows while held.
+  static const _handleSize = Size(4, 48);
+  static const _heldHandleSize = Size(12, 52);
+  static const _handleHitSize = Size(hitWidth, 52);
 
   final double primaryWidth;
   final double minPrimaryWidth;
@@ -281,6 +301,11 @@ class _SplitViewDivider extends StatefulWidget {
 
 class _SplitViewDividerState extends State<_SplitViewDivider> {
   var _isFocused = false;
+  var _isHeld = false;
+
+  void _setHeld(bool isHeld) {
+    if (_isHeld != isHeld) setState(() => _isHeld = isHeld);
+  }
 
   bool get _canGrow => widget.primaryWidth < widget.maxPrimaryWidth;
   bool get _canShrink => widget.primaryWidth > widget.minPrimaryWidth;
@@ -307,6 +332,36 @@ class _SplitViewDividerState extends State<_SplitViewDivider> {
     final isLtr = Directionality.of(context) == TextDirection.ltr;
     final direction = isLtr ? 1.0 : -1.0;
 
+    Widget dragToResize({
+      required HitTestBehavior behavior,
+      Set<PointerDeviceKind>? supportedDevices,
+      required Widget child,
+    }) {
+      return GestureDetector(
+        behavior: behavior,
+        supportedDevices: supportedDevices,
+        onTapDown: (_) => _setHeld(true),
+        onTapUp: (_) => _setHeld(false),
+        onTapCancel: () => _setHeld(false),
+        onHorizontalDragStart: (_) {
+          _setHeld(true);
+          widget.onResizeStart();
+        },
+        onHorizontalDragUpdate: (details) => widget.onResize(details.primaryDelta! * direction),
+        onHorizontalDragEnd: (_) {
+          _setHeld(false);
+          widget.onResizeEnd();
+        },
+        onHorizontalDragCancel: () {
+          _setHeld(false);
+          widget.onResizeEnd();
+        },
+        child: child,
+      );
+    }
+
+    final handleSize = _isHeld ? _SplitViewDivider._heldHandleSize : _SplitViewDivider._handleSize;
+
     final grown = math.min(widget.primaryWidth + widget.step, widget.maxPrimaryWidth);
     final shrunk = math.max(widget.primaryWidth - widget.step, widget.minPrimaryWidth);
 
@@ -325,17 +380,27 @@ class _SplitViewDividerState extends State<_SplitViewDivider> {
           cursor: SystemMouseCursors.resizeColumn,
           // Leaves taps near the line to the panes beneath it.
           hitTestBehavior: HitTestBehavior.translucent,
-          child: GestureDetector(
+          child: dragToResize(
             behavior: HitTestBehavior.translucent,
-            onHorizontalDragStart: (_) => widget.onResizeStart(),
-            onHorizontalDragUpdate: (details) => widget.onResize(details.primaryDelta! * direction),
-            onHorizontalDragEnd: (_) => widget.onResizeEnd(),
-            onHorizontalDragCancel: widget.onResizeEnd,
-            // Marks the line while it has keyboard focus.
+            supportedDevices: const {PointerDeviceKind.mouse, PointerDeviceKind.trackpad},
             child: Center(
-              child: SizedBox(
-                width: 2,
-                child: ColoredBox(color: _isFocused ? colorScheme.borderFocus : Colors.transparent),
+              child: dragToResize(
+                behavior: HitTestBehavior.opaque,
+                child: SizedBox.fromSize(
+                  size: _SplitViewDivider._handleHitSize,
+                  child: Center(
+                    child: AnimatedContainer(
+                      duration: kThemeChangeDuration,
+                      width: handleSize.width,
+                      height: handleSize.height,
+                      decoration: ShapeDecoration(
+                        // Marks the handle while it has keyboard focus.
+                        color: _isFocused ? colorScheme.borderFocus : colorScheme.accentNeutral,
+                        shape: RoundedSuperellipseBorder(borderRadius: .all(context.streamRadius.max)),
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
