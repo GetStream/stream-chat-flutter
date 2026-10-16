@@ -714,8 +714,22 @@ final label = switch (state) {
 
 All public API members must have explicit type annotations — parameters, fields, and
 return types (`type_annotate_public_apis`, `always_declare_return_types`). This
-includes top-level declarations and static members. The linter will reject a public
-member without a declared type.
+includes top-level declarations and static members. The linter rejects a public member
+without a declared type, with one gap described below.
+
+A public constant or field that serves as a default declares the most general type its
+consumers accept, not the class that implements it today: `SliverGridDelegate`,
+`ShapeBorder`, `Widget`. The declared type is the API; the implementation behind it can
+then change without changing it. `type_annotate_public_apis` doesn't flag a top-level
+`const` or `final` whose type is inferred from its initializer, so reviewers check this one.
+
+```dart
+// BAD: the public type is whatever implementation the default uses today.
+const defaultGalleryDelegate = StreamMediaGridDelegate(mainAxisSpacing: 2);
+
+// GOOD:
+const SliverGridDelegate defaultGalleryDelegate = StreamMediaGridDelegate(mainAxisSpacing: 2);
+```
 
 Avoid `dynamic` in public APIs. If the type is unknown, prefer `Object?` and casting;
 `dynamic` disables all static checking.
