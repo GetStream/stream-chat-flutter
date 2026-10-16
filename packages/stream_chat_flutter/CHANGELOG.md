@@ -21,6 +21,7 @@
 - `StreamMessageComposer` now hides the picker's upload options and voice recording, and refuses dropped files, when the user lacks the `upload-file` capability. The attachment button is hidden when nothing else is left to offer.
 - `StreamMessageComposer` now refuses dropped files when `disableAttachments` is set or `allowedAttachmentPickerTypes` leaves out `AttachmentPickerType.files`.
 - `StreamTypingIndicator` now uses the design system's typing dots; the `lottie` dependency is removed.
+- Suggestions from `customAutocompleteTriggers` now span the composer's full width. `StreamAutocompleteOptions` keeps its options clear of the side safe-area insets; other options views should wrap their content in `StreamSafeArea(top: false, bottom: false)`.
 
 🐞 Fixed
 
@@ -34,6 +35,9 @@
 - Fixed dialogs and bottom sheets opened below `StreamChat` keeping the old colors when the app switched between light and dark mode.
 - Fixed `StreamPollOptionVotesSheet` listing votes for other options and answers.
 - Fixed `StreamPollCommentsSheet` listing votes for poll options as comments.
+- Fixed the attachment picker overflowing short screens, such as a phone in landscape.
+- Fixed `StreamMessageListView`'s default loading, empty and error states overflowing when the list has little room, such as in landscape with the attachment picker open.
+- Fixed the composer's autocomplete suggestions stopping short of the screen edge under a side safe-area inset.
 
 ## 10.5.0
 
