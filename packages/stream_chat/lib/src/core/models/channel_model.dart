@@ -306,7 +306,7 @@ class ChannelModel {
 /// {@template channelCapability}
 /// Represents various capabilities that a user can have in a channel.
 /// {@endtemplate}
-extension type const ChannelCapability(String capability) implements String {
+extension type const ChannelCapability(String _) implements String {
   /// Ability to send a message.
   static const sendMessage = ChannelCapability('send-message');
 

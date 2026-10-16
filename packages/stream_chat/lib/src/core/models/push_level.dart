@@ -1,6 +1,6 @@
 /// Defines the push level for a channel,
 /// which determines how notifications are sent to users.
-extension type const PushLevel(String rawType) implements String {
+extension type const PushLevel(String _) implements String {
   /// 'All' (default):
   /// All channel members receive push notifications for every message.
   static const all = PushLevel('all');

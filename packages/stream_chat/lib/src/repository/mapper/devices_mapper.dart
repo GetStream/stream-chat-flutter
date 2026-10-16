@@ -21,5 +21,5 @@ extension ListDevicesResponseMapper on api.ListDevicesResponse {
 /// Maps a [PushProvider] to the generated request enum.
 extension PushProviderMapper on PushProvider {
   /// Converts this provider into an [api.CreateDeviceRequestPushProvider].
-  api.CreateDeviceRequestPushProvider toRequest() => api.CreateDeviceRequestPushProvider.fromJson(rawType);
+  api.CreateDeviceRequestPushProvider toRequest() => api.CreateDeviceRequestPushProvider.fromJson(this);
 }

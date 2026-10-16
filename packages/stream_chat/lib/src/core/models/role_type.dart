@@ -3,7 +3,7 @@
 ///
 /// Only [user] and [channel] are accepted; any other value fails the
 /// search.
-extension type const RoleType(String rawType) implements String {
+extension type const RoleType(String _) implements String {
   /// Restricts results to roles valid as a user-level assignment
   /// (e.g. `user`, `admin`, `anonymous`).
   static const user = RoleType('user');

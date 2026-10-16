@@ -13,7 +13,6 @@ void main() {
     const raw = 'firebase';
 
     expect(PushProvider.firebase, raw);
-    expect(PushProvider.firebase.rawType, raw);
     expect(<String>[PushProvider.firebase, PushProvider.apn], ['firebase', 'apn']);
   });
 

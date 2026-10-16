@@ -111,10 +111,10 @@ void main() {
 
     group('ModerationAction', () {
       test('should create predefined constants correctly', () {
-        expect(ModerationAction.bounce.action, 'bounce');
-        expect(ModerationAction.flag.action, 'flag');
-        expect(ModerationAction.remove.action, 'remove');
-        expect(ModerationAction.shadow.action, 'shadow');
+        expect(ModerationAction.bounce, 'bounce');
+        expect(ModerationAction.flag, 'flag');
+        expect(ModerationAction.remove, 'remove');
+        expect(ModerationAction.shadow, 'shadow');
       });
 
       test('should work with string equality', () {
@@ -126,7 +126,6 @@ void main() {
 
       test('should create custom action correctly', () {
         const customAction = ModerationAction('custom');
-        expect(customAction.action, 'custom');
         expect(customAction == 'custom', isTrue);
       });
 
