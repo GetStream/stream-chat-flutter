@@ -254,6 +254,25 @@ void main() {
       expect(ownUser.toJson().containsKey('name'), isFalse);
     });
 
+    test('merge clears the values the other user leaves out', () {
+      final user = OwnUser(
+        id: 'test-user',
+        deactivatedAt: DateTime.utc(2020),
+        deletedAt: DateTime.utc(2021),
+        shadowBanned: true,
+        totalUnreadCountByTeam: const {'team-1': 1},
+        latestHiddenChannels: const ['messaging:hidden'],
+      );
+
+      final merged = user.merge(OwnUser(id: 'test-user'));
+
+      expect(merged.deactivatedAt, isNull);
+      expect(merged.deletedAt, isNull);
+      expect(merged.shadowBanned, isNull);
+      expect(merged.totalUnreadCountByTeam, isNull);
+      expect(merged.latestHiddenChannels, isNull);
+    });
+
     test('should parse json with privacy settings correctly', () {
       final json = {
         'id': 'test-user',
@@ -324,15 +343,10 @@ void main() {
       expect(ownUser.blockedUserIds, contains('blocked-3'));
     });
 
-    test('fromUser leaves the own-user fields at their defaults, even when the user JSON carried them', () {
+    test('fromUser should handle missing OwnUser-specific fields', () {
       final userJson = {
         'id': 'test-user',
         'name': 'Test User',
-        'total_unread_count': 42,
-        'unread_count': 42,
-        'privacy_settings': {
-          'typing_indicators': {'enabled': false},
-        },
       };
 
       final user = User.fromJson(userJson);

@@ -590,6 +590,14 @@ GROUPS = [
             'current class for every group before it, and stay. See [01-foundation](01-foundation.md).',
             '`PrivacySettings` and the push-preference sub-shapes — decide per type.',
             '`UserFilterField.bypassModeration` reads `custom`, which no generated user has a field to fill.',
+            '**`User` and `OwnUser` move to freezed without changing the current user\'s merge rules.** freezed\'s '
+            '`copyWith` clears a field passed `null` where today\'s keeps it, and it can\'t generate one for '
+            '`OwnUser` while it takes `User`\'s fields through super-parameters. `OwnUser.merge` builds through the '
+            'constructor and states each field\'s rule (keep a nullable value the other user leaves out, except '
+            '`deactivatedAt`, `deletedAt`, `shadowBanned`, `totalUnreadCountByTeam` and `latestHiddenChannels`, '
+            'taken as they are, and `banExpires`, always kept); '
+            'keep those rules in a dedicated merge, and run `copywith_audit.py` on both models for every other '
+            'call site, such as the `user.updated` handler\'s preserve list.',
             '`queryUsers` answers `FullUserResponse`, which [20](20-user-updates.md) already maps to `User`; the '
             'caller\'s own entry could map to `OwnUser` once `Mute`, `ChannelMute` and `PrivacySettings` have '
             'response mappers.',
@@ -597,6 +605,8 @@ GROUPS = [
         risks=[
             'Every other group depends on the `User` decision.',
             'User data arrives over the WebSocket on nearly every event.',
+            'A user mapped from `UserResponse` and the same user decoded from v1 JSON compare unequal: the v1 '
+            'decode keeps `invisible`, `shadowBanned` and `banExpires`, which `UserResponse` does not carry.',
             'Landing `UserResponse` -> `User` unblocks the two fields [08](08-moderation-and-blocklists.md) '
             'had to drop from `MuteUsersResponse`: the `mutes` the call created and the `ownUser` it left '
             'behind. Adding them is additive for anyone reading the response, so revisit them here rather '
@@ -1068,9 +1078,9 @@ GROUPS = [
             - **The upsert sends `User.toRequest()`.** v10 sent the whole user flattened, and v1 stored every key
               its request does not declare as custom data: the user's `online`, `banned` and timestamps, and an own
               user's devices, mutes and unread counts. v2 drops unknown keys, so that stops, as it did for guests
-              in [04](04-roles-guest-and-app.md). `User.toRequest()` also leaves out the own-user keys an `OwnUser`
-              decoded from the connection keeps in `extraData` (`unread_count`, `total_unread_count_by_team`,
-              `latest_hidden_channels`), which v2 would otherwise store as custom data. `role`, `teams` and
+              in [04](04-roles-guest-and-app.md). An `OwnUser` decoded from the connection reads `unread_count`,
+              `total_unread_count_by_team` and `latest_hidden_channels` into fields, so they no longer reach the
+              request as custom data. `role`, `teams` and
               `teams_role` are no longer sent: a client-side token never stores them, and a different role was
               refused.
             - **Moved off `UserApi`:** `updateUsers` and `partialUpdateUsers`, now `StreamChatClient` methods over
@@ -1089,21 +1099,27 @@ GROUPS = [
               (README rule 9), since these calls are the first to map a user. `User.name`, `image`,
               `deactivatedAt`, `deletedAt` and `shadowBanned` are fields with persistence columns;
               `blockedUserIds` moves up from `OwnUser`, and `OwnUser` gains `unreadCount`,
-              `totalUnreadCountByTeam` and `latestHiddenChannels`. `revoke_tokens_issued_before` is left out.
+              `totalUnreadCountByTeam` and `latestHiddenChannels`. The mappers leave `revoke_tokens_issued_before` out; a v1
+              user keeps it in `custom`, as a v1 member keeps `role`.
               Each generated user mapper fills the ones its response carries (`UserResponse` has no
               `shadowBanned`).
             - **`User.name` is nullable and has no fallback to `id`;** `User.nameOrId` has it. A blank name or
               image is stored as null. The UI names a user by `nameOrId` everywhere except avatar initials, which
               show the placeholder icon for an unnamed user, and filters and sorts, which read the raw `name`.
             - **`custom` is the wire's, verbatim,** and the v1 writers leave out a custom entry named like a key,
-              including the keys only an own user carries, so it cannot overwrite the field. `OwnUser.fromUser`
-              copies the user's fields and no longer reads an own user's fields out of the custom data.
+              so it cannot overwrite the field. `OwnUser.fromUser` copies the user's fields and no longer reads an
+              own user's fields out of the custom data.
             - **`OwnUser.merge` takes the other user's fields,** as before; the `user.updated` handler also keeps
               the three new unread fields, which the event leaves out. A `user.updated` event's user is decoded
               again as an `OwnUser`, so the privacy settings it carries for the current user replace theirs, as in
               v10 — a temporary adapter (README) for the WebSocket v2 move to replace.
             """),
-        risks=[],
+        risks=[
+            'A `try`/`catch` around `updateUser`, `updateUsers`, `updateUserPartial` or `updateUsersPartial` still '
+            'compiles but no longer catches a failed call.',
+            'A string interpolation of `User.name` still compiles now that it is nullable, and prints `null` for a '
+            'user with no name; `nameOrId` gives the old output.',
+        ],
         done=DONE.replace('- [ ]', '- [x]'),
     ),
     dict(

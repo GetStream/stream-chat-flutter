@@ -1796,24 +1796,26 @@ class StreamChatClient {
     String? prev,
   }) => _pollsRepository.queryPollVotes(pollId, filter: filter, sort: sort, limit: limit, next: next, prev: prev);
 
-  /// Creates [user], or replaces the data of the existing user with the same id.
+  /// Creates [user], or replaces the data of the existing user with the same
+  /// id.
   ///
-  /// This cannot change the user's role, teams or team roles. To change only some fields, consider
-  /// [updateUserPartial].
+  /// This cannot change the user's role, teams or team roles. To change only
+  /// some fields, consider [updateUserPartial].
   Future<Result<UpdateUsersResponse>> updateUser(User user) => updateUsers([user]);
 
   /// Creates or replaces each of [users], as [updateUser] does for one.
   Future<Result<UpdateUsersResponse>> updateUsers(List<User> users) => _usersRepository.updateUsers(users);
 
-  /// Partially updates the user with [id]: sets the fields in [set] and removes the fields named in [unset], leaving
-  /// every other field as it is.
+  /// Partially updates the user with [id]: sets the fields in [set] and removes
+  /// the fields named in [unset], leaving every other field as it is.
   Future<Result<UpdateUsersResponse>> updateUserPartial(
     String id, {
     Map<String, Object?>? set,
     List<String>? unset,
   }) => updateUsersPartial([UpdateUserPartialRequest(id: id, set: set, unset: unset)]);
 
-  /// Partially updates several users at once, applying each of [updates] to the user it names.
+  /// Partially updates several users at once, applying each of [updates] to the
+  /// user it names.
   Future<Result<UpdateUsersResponse>> updateUsersPartial(List<UpdateUserPartialRequest> updates) =>
       _usersRepository.updateUsersPartial(updates);
 

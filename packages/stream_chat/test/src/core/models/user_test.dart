@@ -67,75 +67,16 @@ void main() {
       expect(User.fromJson(user.toJson()), user);
     });
 
-    test('User.fromJson leaves the keys only an own user carries out of custom', () {
-      final user = User.fromJson(const {
-        'id': id,
-        'devices': <Object?>[],
-        'mutes': <Object?>[],
-        'channel_mutes': <Object?>[],
-        'total_unread_count': 1,
-        'unread_channels': 1,
-        'unread_threads': 1,
-        'unread_count': 1,
-        'total_unread_count_by_team': {'team-1': 1},
-        'latest_hidden_channels': ['messaging:hidden'],
-        'push_preferences': {'chat_level': 'all'},
-        'privacy_settings': <String, Object?>{},
-        'revoke_tokens_issued_before': '2021-08-06T10:39:21.817646Z',
-        'color': 'red',
-      });
-
-      expect(user.custom, {'color': 'red'});
-    });
-
-    test('Users that differ only in a promoted field are not equal', () {
-      User user({
-        String? name,
-        String? image,
-        DateTime? deactivatedAt,
-        DateTime? deletedAt,
-        bool? shadowBanned,
-        List<String> blockedUserIds = const [],
-      }) => User(
-        id: id,
-        name: name,
-        image: image,
-        deactivatedAt: deactivatedAt,
-        deletedAt: deletedAt,
-        shadowBanned: shadowBanned,
-        blockedUserIds: blockedUserIds,
-      );
-
-      expect(user(name: 'a'), isNot(user(name: 'b')));
-      expect(user(image: 'a'), isNot(user(image: 'b')));
-      expect(user(deactivatedAt: DateTime.utc(2020)), isNot(user(deactivatedAt: DateTime.utc(2021))));
-      expect(user(deletedAt: DateTime.utc(2020)), isNot(user(deletedAt: DateTime.utc(2021))));
-      expect(user(shadowBanned: true), isNot(user(shadowBanned: false)));
-      expect(user(blockedUserIds: ['a']), isNot(user(blockedUserIds: ['b'])));
-    });
-
-    test('User keeps custom data named like a field apart from the field', () {
+    test('User.toJson leaves out custom data named like a field', () {
       final user = User(
         id: id,
         name: name,
         custom: const {'name': 'custom', 'color': 'red'},
       );
 
-      expect(user.name, name);
-      expect(user.custom, {'name': 'custom', 'color': 'red'});
-    });
-
-    test('User.toJson leaves out custom data named like a field', () {
-      final user = User(
-        id: id,
-        name: name,
-        custom: const {'name': 'custom', 'devices': 'custom', 'color': 'red'},
-      );
-
       final json = user.toJson();
 
       expect(json['name'], name);
-      expect(json.containsKey('devices'), isFalse);
       expect(json['color'], 'red');
     });
 

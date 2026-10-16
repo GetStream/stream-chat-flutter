@@ -88,7 +88,8 @@ extension UserRequestMapper on User {
 
 /// Maps [PrivacySettings] to the generated [api.PrivacySettingsResponse].
 ///
-/// The generated client names the settings a request sends [api.PrivacySettingsResponse], too.
+/// The generated client names the settings a request sends
+/// [api.PrivacySettingsResponse], too.
 extension PrivacySettingsRequestMapper on PrivacySettings {
   /// Converts these settings into an [api.PrivacySettingsResponse].
   api.PrivacySettingsResponse toRequest() => api.PrivacySettingsResponse(
@@ -212,7 +213,8 @@ extension UpdateUsersResponseMapper on api.UpdateUsersResponse {
   );
 }
 
-/// Maps an [UpdateUserPartialRequest] to the generated [api.UpdateUserPartialRequest].
+/// Maps an [UpdateUserPartialRequest] to the generated
+/// [api.UpdateUserPartialRequest].
 extension UpdateUserPartialRequestMapper on UpdateUserPartialRequest {
   /// Converts this update into an [api.UpdateUserPartialRequest].
   api.UpdateUserPartialRequest toRequest() => api.UpdateUserPartialRequest(id: id, set: set, unset: unset);

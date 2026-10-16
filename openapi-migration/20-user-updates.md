@@ -31,9 +31,9 @@
 - **The upsert sends `User.toRequest()`.** v10 sent the whole user flattened, and v1 stored every key
   its request does not declare as custom data: the user's `online`, `banned` and timestamps, and an own
   user's devices, mutes and unread counts. v2 drops unknown keys, so that stops, as it did for guests
-  in [04](04-roles-guest-and-app.md). `User.toRequest()` also leaves out the own-user keys an `OwnUser`
-  decoded from the connection keeps in `extraData` (`unread_count`, `total_unread_count_by_team`,
-  `latest_hidden_channels`), which v2 would otherwise store as custom data. `role`, `teams` and
+  in [04](04-roles-guest-and-app.md). An `OwnUser` decoded from the connection reads `unread_count`,
+  `total_unread_count_by_team` and `latest_hidden_channels` into fields, so they no longer reach the
+  request as custom data. `role`, `teams` and
   `teams_role` are no longer sent: a client-side token never stores them, and a different role was
   refused.
 - **Moved off `UserApi`:** `updateUsers` and `partialUpdateUsers`, now `StreamChatClient` methods over
@@ -52,15 +52,16 @@
   (README rule 9), since these calls are the first to map a user. `User.name`, `image`,
   `deactivatedAt`, `deletedAt` and `shadowBanned` are fields with persistence columns;
   `blockedUserIds` moves up from `OwnUser`, and `OwnUser` gains `unreadCount`,
-  `totalUnreadCountByTeam` and `latestHiddenChannels`. `revoke_tokens_issued_before` is left out.
+  `totalUnreadCountByTeam` and `latestHiddenChannels`. The mappers leave `revoke_tokens_issued_before` out; a v1
+  user keeps it in `custom`, as a v1 member keeps `role`.
   Each generated user mapper fills the ones its response carries (`UserResponse` has no
   `shadowBanned`).
 - **`User.name` is nullable and has no fallback to `id`;** `User.nameOrId` has it. A blank name or
   image is stored as null. The UI names a user by `nameOrId` everywhere except avatar initials, which
   show the placeholder icon for an unnamed user, and filters and sorts, which read the raw `name`.
 - **`custom` is the wire's, verbatim,** and the v1 writers leave out a custom entry named like a key,
-  including the keys only an own user carries, so it cannot overwrite the field. `OwnUser.fromUser`
-  copies the user's fields and no longer reads an own user's fields out of the custom data.
+  so it cannot overwrite the field. `OwnUser.fromUser` copies the user's fields and no longer reads an
+  own user's fields out of the custom data.
 - **`OwnUser.merge` takes the other user's fields,** as before; the `user.updated` handler also keeps
   the three new unread fields, which the event leaves out. A `user.updated` event's user is decoded
   again as an `OwnUser`, so the privacy settings it carries for the current user replace theirs, as in
@@ -68,6 +69,8 @@
 
 ## Risks
 
+- A `try`/`catch` around `updateUser`, `updateUsers`, `updateUserPartial` or `updateUsersPartial` still compiles but no longer catches a failed call.
+- A string interpolation of `User.name` still compiles now that it is nullable, and prints `null` for a user with no name; `nameOrId` gives the old output.
 
 ## Definition of done
 

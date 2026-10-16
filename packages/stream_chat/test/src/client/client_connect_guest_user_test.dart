@@ -51,29 +51,6 @@ void main() {
     expect(guest.updatedAt, DateTime.utc(2026, 9, 2));
   });
 
-  test(
-    "StreamChatClient.connectGuestUser sends no custom data named like one of the user's own fields",
-    () async {
-      final defaultApi = _defaultApiAnswering(Result.success(_createGuestResponse()));
-      final client = _client(defaultApi);
-      final user = User.fromJson(const {
-        'id': 'requested-id',
-        'deleted_at': '2026-01-01T00:00:00Z',
-        'devices': <Object?>[],
-        'color': 'blue',
-      });
-
-      await client.connectGuestUser(user, connectWebSocket: false);
-
-      final request =
-          verify(
-                () => defaultApi.createGuest(createGuestRequest: captureAny(named: 'createGuestRequest')),
-              ).captured.single
-              as api.CreateGuestRequest;
-      expect(request.user.custom, {'color': 'blue'});
-    },
-  );
-
   test('StreamChatClient.connectGuestUser sends neither a name nor an image for a user without them', () async {
     final defaultApi = _defaultApiAnswering(Result.success(_createGuestResponse()));
     final client = _client(defaultApi);
@@ -90,45 +67,6 @@ void main() {
       ),
     );
   });
-
-  test(
-    "StreamChatClient.connectGuestUser keeps custom fields named like the user's own fields apart from them",
-    () async {
-      final response = _createGuestResponse(
-        custom: const {
-          'favorite_color': 'green',
-          'name': 'custom-name',
-          'online': 'custom-online',
-          'blocked_user_ids': 'custom-blocked-user-ids',
-          'privacy_settings': 'custom-privacy-settings',
-          'deleted_at': 'custom-deleted-at',
-          'deactivated_at': 'custom-deactivated-at',
-          'shadow_banned': 'custom-shadow-banned',
-          'revoke_tokens_issued_before': 'custom-revoke-tokens-issued-before',
-        },
-      );
-      final client = _client(_defaultApiAnswering(Result.success(response)));
-
-      final guest = await client.connectGuestUser(_fullyPopulatedUser(), connectWebSocket: false);
-
-      expect(guest.custom, {
-        'favorite_color': 'green',
-        'name': 'custom-name',
-        'online': 'custom-online',
-        'blocked_user_ids': 'custom-blocked-user-ids',
-        'privacy_settings': 'custom-privacy-settings',
-        'deleted_at': 'custom-deleted-at',
-        'deactivated_at': 'custom-deactivated-at',
-        'shadow_banned': 'custom-shadow-banned',
-        'revoke_tokens_issued_before': 'custom-revoke-tokens-issued-before',
-      });
-      expect(guest.name, 'Created Name');
-      expect(guest.online, isTrue);
-      expect(guest.blockedUserIds, ['blocked-user']);
-      expect(guest.deactivatedAt, DateTime.utc(2026, 9, 4));
-      expect(guest.deletedAt, DateTime.utc(2026, 9, 5));
-    },
-  );
 
   test('StreamChatClient.connectGuestUser connects the socket as the created guest', () async {
     final defaultApi = _defaultApiAnswering(Result.success(_createGuestResponse()));

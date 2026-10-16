@@ -65,21 +65,6 @@ class User extends Equatable {
     'deleted_at',
     'shadow_banned',
     'blocked_user_ids',
-    // Not modelled on a user; listed so it never lands in [custom].
-    'revoke_tokens_issued_before',
-    // Only an own user carries these ([OwnUser] reads them); a plain user
-    // leaves them out.
-    'devices',
-    'mutes',
-    'channel_mutes',
-    'total_unread_count',
-    'unread_channels',
-    'unread_threads',
-    'unread_count',
-    'total_unread_count_by_team',
-    'latest_hidden_channels',
-    'push_preferences',
-    'privacy_settings',
   ];
 
   /// User id.
@@ -140,7 +125,10 @@ class User extends Equatable {
   /// The average response time of the user in seconds.
   final int? avgResponseTime;
 
-  /// This user's custom data: every key not in [topLevelFields].
+  /// This user's custom data.
+  ///
+  /// It may hold a key named like one of the user's own fields; [toJson] leaves
+  /// such an entry out so it never overwrites the field.
   @JsonKey(name: 'extra_data')
   final Map<String, Object?> custom;
 
@@ -154,7 +142,8 @@ class User extends Equatable {
   /// Null while the user exists, or when not known.
   final DateTime? deletedAt;
 
-  /// Whether the user is shadow banned, so that their messages reach no one else without them being told.
+  /// Whether the user is shadow banned, so that their messages reach no one
+  /// else without them being told.
   ///
   /// Null when not known.
   final bool? shadowBanned;

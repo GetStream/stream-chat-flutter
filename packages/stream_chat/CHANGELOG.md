@@ -134,7 +134,7 @@
 - `ChannelModel.custom` and `Member.custom` hold the custom data exactly as the API returns it, and `toJson` leaves out an entry named like one of the model's own fields.
 - `User.extraData` is renamed `custom`, and so is the `extraData` argument of the `User` and `OwnUser` constructors and `copyWith`.
 - `User.name` is nullable and no longer answers the user's id when they have no name; read `User.nameOrId` for that. A blank name or image is stored as null.
-- Several user values the custom data used to hold, such as `User.name`, `User.image` and `User.deactivatedAt`, are fields instead: `custom` no longer holds them or the keys only an own user carries, and an entry with one of their names in `custom` or in `copyWith(custom:)` no longer sets the field.
+- Several user values the custom data used to hold, such as `User.name`, `User.image` and `User.deactivatedAt`, are fields instead: `custom` no longer holds them, and an entry with one of their names in `custom` or in `copyWith(custom:)` no longer sets the field.
 - `User.custom` holds the custom data exactly as the API returns it, and `toJson` leaves out an entry named like one of the user's own fields.
 - `OwnUser.fromUser` no longer reads devices, mutes, unread counts, push preferences or privacy settings out of the user's custom data; they are left at their defaults.
 

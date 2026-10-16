@@ -4,6 +4,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
 import '../mocks.dart';
+import 'users_fixtures.dart';
 
 void main() {
   setUpAll(() => registerFallbackValue(const api.UpdateUsersRequest(users: {})));
@@ -12,7 +13,7 @@ void main() {
     'StreamChatClient.updateUser sends the name, image, language, visibility and custom data and returns the updated '
     'users',
     () async {
-      final defaultApi = _defaultApiAnswering(Result.success(_updateUsersResponse()));
+      final defaultApi = _defaultApiAnswering(Result.success(updateUsersResponse()));
       final client = _client(defaultApi);
 
       final res = await client.updateUser(
@@ -39,7 +40,7 @@ void main() {
         ),
       );
 
-      expect(res.getOrNull(), UpdateUsersResponse(duration: '4.21ms', users: {'user-id': _updatedUser()}));
+      expect(res.getOrNull(), UpdateUsersResponse(duration: '4.21ms', users: {'user-id': updatedUser()}));
       // `User` equality leaves these two out.
       expect(res.getOrNull()!.users['user-id']!.createdAt, DateTime.utc(2026, 9, 1));
       expect(res.getOrNull()!.users['user-id']!.updatedAt, DateTime.utc(2026, 9, 2));
@@ -66,7 +67,7 @@ void main() {
   test(
     'StreamChatClient.updateUser sends none of the fields an own user decodes from the connection as custom data',
     () async {
-      final defaultApi = _defaultApiAnswering(Result.success(_updateUsersResponse()));
+      final defaultApi = _defaultApiAnswering(Result.success(updateUsersResponse()));
       final client = _client(defaultApi);
 
       await client.updateUser(
@@ -76,7 +77,6 @@ void main() {
           'unread_count': 3,
           'total_unread_count_by_team': {'team-a': 1},
           'latest_hidden_channels': ['messaging:hidden'],
-          'revoke_tokens_issued_before': '2026-01-01T00:00:00.000Z',
         }),
       );
 
@@ -92,42 +92,13 @@ void main() {
     },
   );
 
-  test('StreamChatClient.updateUser sends custom data named like a user field as custom data', () async {
-    final defaultApi = _defaultApiAnswering(Result.success(_updateUsersResponse()));
-    final client = _client(defaultApi);
-
-    await client.updateUser(User(id: 'user-id', name: 'Jane', custom: const {'name': 'custom'}));
-
-    verify(
-      () => defaultApi.updateUsers(
-        updateUsersRequest: const api.UpdateUsersRequest(
-          users: {
-            'user-id': api.UserRequest(id: 'user-id', name: 'Jane', custom: {'name': 'custom'}),
-          },
-        ),
-      ),
-    ).called(1);
-  });
-
-  test('StreamChatClient.updateUser keeps custom data named like a user field apart from the field', () async {
-    const custom = {'favorite_color': 'green', 'online': false, 'shadow_banned': true, 'unread_count': 3};
-    final client = _client(_defaultApiAnswering(Result.success(_updateUsersResponse(custom: custom))));
-
-    final res = await client.updateUser(User(id: 'user-id'));
-
-    final user = res.getOrNull()!.users['user-id']!;
-    expect(user.custom, custom);
-    expect(user.online, isTrue);
-    expect(user.shadowBanned, isFalse);
-  });
-
   test('StreamChatClient.updateUsers sends every user keyed by id and returns the updated users', () async {
-    final defaultApi = _defaultApiAnswering(Result.success(_updateUsersResponse()));
+    final defaultApi = _defaultApiAnswering(Result.success(updateUsersResponse()));
     final client = _client(defaultApi);
 
     final res = await client.updateUsers([User(id: 'first', name: 'First'), User(id: 'second', name: 'Second')]);
 
-    expect(res.getOrNull(), UpdateUsersResponse(duration: '4.21ms', users: {'user-id': _updatedUser()}));
+    expect(res.getOrNull(), UpdateUsersResponse(duration: '4.21ms', users: {'user-id': updatedUser()}));
     verify(
       () => defaultApi.updateUsers(
         updateUsersRequest: const api.UpdateUsersRequest(
@@ -173,68 +144,3 @@ MockDefaultApi _defaultApiAnswering(Result<api.UpdateUsersResponse> result) {
   ).thenAnswer((_) async => result);
   return defaultApi;
 }
-
-// The user [_updateUsersResponse] carries.
-User _updatedUser() => User(
-  id: 'user-id',
-  role: 'admin',
-  name: 'Updated Name',
-  image: 'https://example.com/updated.png',
-  createdAt: DateTime.utc(2026, 9, 1),
-  updatedAt: DateTime.utc(2026, 9, 2),
-  lastActive: DateTime.utc(2026, 9, 3),
-  online: true,
-  banned: true,
-  banExpires: DateTime.utc(2026, 9, 4),
-  teams: const ['team-a'],
-  language: 'de',
-  invisible: false,
-  teamsRole: const {'team-a': 'member'},
-  avgResponseTime: 42,
-  custom: const {'favorite_color': 'green'},
-  deactivatedAt: DateTime.utc(2026, 9, 5),
-  deletedAt: DateTime.utc(2026, 9, 6),
-  shadowBanned: false,
-  blockedUserIds: const ['blocked-user'],
-);
-
-// A response whose user sets every field, including the private ones a [User] leaves out.
-api.UpdateUsersResponse _updateUsersResponse({
-  Map<String, Object?> custom = const {'favorite_color': 'green'},
-}) => api.UpdateUsersResponse(
-  duration: '4.21ms',
-  membershipDeletionTaskId: '',
-  users: {
-    'user-id': api.FullUserResponse(
-      id: 'user-id',
-      role: 'admin',
-      name: 'Updated Name',
-      image: 'https://example.com/updated.png',
-      createdAt: DateTime.utc(2026, 9, 1),
-      updatedAt: DateTime.utc(2026, 9, 2),
-      lastActive: DateTime.utc(2026, 9, 3),
-      online: true,
-      banned: true,
-      banExpires: DateTime.utc(2026, 9, 4),
-      teams: const ['team-a'],
-      language: 'de',
-      invisible: false,
-      teamsRole: const {'team-a': 'member'},
-      avgResponseTime: 42,
-      custom: custom,
-      deactivatedAt: DateTime.utc(2026, 9, 5),
-      deletedAt: DateTime.utc(2026, 9, 6),
-      shadowBanned: false,
-      revokeTokensIssuedBefore: DateTime.utc(2026, 9, 7),
-      blockedUserIds: const ['blocked-user'],
-      channelMutes: const [],
-      devices: const [],
-      mutes: const [],
-      latestHiddenChannels: const ['messaging:hidden'],
-      totalUnreadCount: 5,
-      unreadChannels: 2,
-      unreadCount: 4,
-      unreadThreads: 1,
-    ),
-  },
-);

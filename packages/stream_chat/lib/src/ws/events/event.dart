@@ -70,6 +70,7 @@ class Event extends WsEvent {
       ),
     );
 
+    // TODO(openapi-migration): remove once WebSocket events decode v2 payloads.
     return switch ((event.type, json['user'])) {
       (EventType.userUpdated, final Map<String, dynamic> user) => event.copyWith(user: OwnUser.fromJson(user)),
       _ => event,

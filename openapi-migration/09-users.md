@@ -30,12 +30,14 @@
 - `User` and `OwnUser` are public, persisted, and embedded in nearly every other response. This group restructures them, last: the mappers in `users_mapper.dart` already map the generated types onto the current class for every group before it, and stay. See [01-foundation](01-foundation.md).
 - `PrivacySettings` and the push-preference sub-shapes — decide per type.
 - `UserFilterField.bypassModeration` reads `custom`, which no generated user has a field to fill.
+- **`User` and `OwnUser` move to freezed without changing the current user's merge rules.** freezed's `copyWith` clears a field passed `null` where today's keeps it, and it can't generate one for `OwnUser` while it takes `User`'s fields through super-parameters. `OwnUser.merge` builds through the constructor and states each field's rule (keep a nullable value the other user leaves out, except `deactivatedAt`, `deletedAt`, `shadowBanned`, `totalUnreadCountByTeam` and `latestHiddenChannels`, taken as they are, and `banExpires`, always kept); keep those rules in a dedicated merge, and run `copywith_audit.py` on both models for every other call site, such as the `user.updated` handler's preserve list.
 - `queryUsers` answers `FullUserResponse`, which [20](20-user-updates.md) already maps to `User`; the caller's own entry could map to `OwnUser` once `Mute`, `ChannelMute` and `PrivacySettings` have response mappers.
 
 ## Risks
 
 - Every other group depends on the `User` decision.
 - User data arrives over the WebSocket on nearly every event.
+- A user mapped from `UserResponse` and the same user decoded from v1 JSON compare unequal: the v1 decode keeps `invisible`, `shadowBanned` and `banExpires`, which `UserResponse` does not carry.
 - Landing `UserResponse` -> `User` unblocks the two fields [08](08-moderation-and-blocklists.md) had to drop from `MuteUsersResponse`: the `mutes` the call created and the `ownUser` it left behind. Adding them is additive for anyone reading the response, so revisit them here rather than leaving them dropped for good.
 
 ## Definition of done

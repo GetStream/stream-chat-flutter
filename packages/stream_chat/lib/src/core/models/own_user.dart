@@ -151,19 +151,25 @@ class OwnUser extends User {
 
   /// Returns a new [OwnUser] that is a combination of this ownUser
   /// and the given [other] ownUser.
+  ///
+  /// A nullable value [other] leaves out keeps this user's, except
+  /// [deactivatedAt], [deletedAt], [shadowBanned], [totalUnreadCountByTeam] and
+  /// [latestHiddenChannels], which are taken from [other] as they are.
+  /// [banExpires] is always this user's.
   OwnUser merge(OwnUser? other) {
     if (other == null) return this;
-    return copyWith(
+    return OwnUser(
       id: other.id,
-      role: other.role,
-      name: other.name,
-      image: other.image,
+      role: other.role ?? role,
+      name: other.name ?? name,
+      image: other.image ?? image,
       banned: other.banned,
+      banExpires: banExpires,
       channelMutes: other.channelMutes,
-      createdAt: other.createdAt,
+      createdAt: other.createdAt ?? createdAt,
       devices: other.devices,
       custom: other.custom,
-      lastActive: other.lastActive,
+      lastActive: other.lastActive ?? lastActive,
       mutes: other.mutes,
       online: other.online,
       teams: other.teams,
@@ -171,13 +177,13 @@ class OwnUser extends User {
       unreadChannels: other.unreadChannels,
       unreadThreads: other.unreadThreads,
       blockedUserIds: other.blockedUserIds,
-      updatedAt: other.updatedAt,
-      language: other.language,
-      invisible: other.invisible,
-      teamsRole: other.teamsRole,
-      avgResponseTime: other.avgResponseTime,
-      pushPreferences: other.pushPreferences,
-      privacySettings: other.privacySettings,
+      updatedAt: other.updatedAt ?? updatedAt,
+      language: other.language ?? language,
+      invisible: other.invisible ?? invisible,
+      teamsRole: other.teamsRole ?? teamsRole,
+      avgResponseTime: other.avgResponseTime ?? avgResponseTime,
+      pushPreferences: other.pushPreferences ?? pushPreferences,
+      privacySettings: other.privacySettings ?? privacySettings,
       deactivatedAt: other.deactivatedAt,
       deletedAt: other.deletedAt,
       shadowBanned: other.shadowBanned,
@@ -236,7 +242,20 @@ class OwnUser extends User {
 
   /// The JSON keys [OwnUser.fromJson] reads into named fields, or leaves out;
   /// every other key is kept in [custom].
-  static const topLevelFields = User.topLevelFields;
+  static const topLevelFields = [
+    'devices',
+    'mutes',
+    'channel_mutes',
+    'total_unread_count',
+    'unread_channels',
+    'unread_threads',
+    'push_preferences',
+    'privacy_settings',
+    'unread_count',
+    'total_unread_count_by_team',
+    'latest_hidden_channels',
+    ...User.topLevelFields,
+  ];
 }
 
 /// Extension methods for [OwnUser] related to privacy settings.

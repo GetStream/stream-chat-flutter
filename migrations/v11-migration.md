@@ -330,7 +330,6 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `User.name` (`String`, the id when the user has none) | `User.nameOrId` | `retyped` | `User.name` is a `String?` that is null when the user has none. Use `nameOrId` wherever a user is named by text, and `name` where a missing name matters, such as initials |
 | `User.name` / `User.image` blank (`''`) | `null` | `retyped` | A blank name or image is stored as null |
 | `user.extraData['name']` / `['image']` / `['deactivated_at']` / `['deleted_at']` / `['shadow_banned']` | `User.name` / `image` / `deactivatedAt` / `deletedAt` / `shadowBanned` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them |
-| `user.extraData['revoke_tokens_issued_before']` | — | `removed` | Not modelled on a user, and no longer kept in its custom data |
 | `OwnUser.blockedUserIds` | `User.blockedUserIds` | `moved` | Still on `OwnUser`. Empty for anyone but the current user |
 | `ownUser.extraData['unread_count']` / `['total_unread_count_by_team']` / `['latest_hidden_channels']` | `OwnUser.unreadCount` / `totalUnreadCountByTeam` / `latestHiddenChannels` | `added` | Fields now, not custom data |
 | `OwnUser.fromUser(user)` reading devices, mutes, unread counts, push preferences and privacy settings out of `user.extraData` | — | `removed` | A `User` no longer carries them; they are left at their defaults |
@@ -974,10 +973,10 @@ final result = await client.updateUserPartial(userId, set: {'favorite_color': 'g
 if (result case Failure(:final error)) report(error);
 ```
 
-**`updateUser` sends the user's name, image, language, visibility and custom data, and nothing else.** v10 sent
-the whole user, so the user's online status, ban and timestamps, and an own user's devices, mutes and unread counts,
-were stored as custom data on every call; that no longer happens. `role`, `teams` and `teamsRole` are no longer
-sent, so these calls cannot change them.
+**`updateUser` sends the user's name, image, language, visibility and custom data, and for an own user their privacy
+settings, and nothing else.** v10 sent the whole user, so the user's online status, ban and timestamps, and an own
+user's devices, mutes and unread counts, were stored as custom data on every call; that no longer happens. `role`,
+`teams` and `teamsRole` are no longer sent, so these calls cannot change them.
 
 **The returned users no longer carry the fields only they can see in `extraData`.** v10 left every field `User`
 does not model in `extraData` as raw JSON; now their devices, mutes, channel mutes, privacy settings, unread counts, hidden
@@ -1067,13 +1066,13 @@ Text(user.nameOrId);
 
 A string interpolation still compiles with the nullable `name`, so check them by hand: `'${user.name} is typing'`
 prints `null is typing` for a user with no name. That includes a custom `Translations` or `StreamChatLocalizations`
-subclass overriding `typingIndicatorText` or `pinnedByUserText`.
+subclass overriding `userTypingText` or `pinnedByUserText`.
 
 **The user fields are fields, not custom data.** `User.image` reads the same and `name` changes as described above;
 `deactivatedAt`, `deletedAt` and `shadowBanned` are new fields, `blockedUserIds` moves up from `OwnUser` to `User`,
-and `OwnUser.unreadCount`, `totalUnreadCountByTeam` and `latestHiddenChannels` are new fields. `custom` no longer holds any of their keys, nor
-the ones only an own user carries, and an entry with one of those names in `custom` or in `copyWith(custom:)` no
-longer sets the field:
+and `OwnUser.unreadCount`, `totalUnreadCountByTeam` and `latestHiddenChannels` are new fields. `custom` no longer
+holds any of their keys, and an entry with one of those names in `custom` or in `copyWith(custom:)` no longer sets
+the field:
 
 ```dart
 // v10
