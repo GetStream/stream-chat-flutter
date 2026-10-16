@@ -22,6 +22,7 @@ class SendMessageResponse with _$SendMessageResponse {
     required this.duration,
     this.mentionedMembers,
     required this.message,
+    this.scheduledMessage,
   });
 
   @override
@@ -39,6 +40,10 @@ class SendMessageResponse with _$SendMessageResponse {
   @override
   @JsonKey(name: 'message')
   final MessageResponse message;
+
+  @override
+  @JsonKey(name: 'scheduled_message')
+  final ScheduledMessageResponse? scheduledMessage;
 
   Map<String, dynamic> toJson() => _$SendMessageResponseToJson(this);
 

@@ -15,6 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$AppResponseFields {
   bool get asyncUrlEnrichEnabled;
   bool get autoTranslationEnabled;
+  AppDefaults get defaults;
   FileUploadConfig get fileUploadConfig;
   int get id;
   FileUploadConfig get imageUploadConfig;
@@ -39,6 +40,7 @@ mixin _$AppResponseFields {
                 other.asyncUrlEnrichEnabled == asyncUrlEnrichEnabled) &&
             (identical(other.autoTranslationEnabled, autoTranslationEnabled) ||
                 other.autoTranslationEnabled == autoTranslationEnabled) &&
+            (identical(other.defaults, defaults) || other.defaults == defaults) &&
             (identical(other.fileUploadConfig, fileUploadConfig) || other.fileUploadConfig == fileUploadConfig) &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.imageUploadConfig, imageUploadConfig) || other.imageUploadConfig == imageUploadConfig) &&
@@ -51,6 +53,7 @@ mixin _$AppResponseFields {
     runtimeType,
     asyncUrlEnrichEnabled,
     autoTranslationEnabled,
+    defaults,
     fileUploadConfig,
     id,
     imageUploadConfig,
@@ -60,7 +63,7 @@ mixin _$AppResponseFields {
 
   @override
   String toString() {
-    return 'AppResponseFields(asyncUrlEnrichEnabled: $asyncUrlEnrichEnabled, autoTranslationEnabled: $autoTranslationEnabled, fileUploadConfig: $fileUploadConfig, id: $id, imageUploadConfig: $imageUploadConfig, name: $name, placement: $placement)';
+    return 'AppResponseFields(asyncUrlEnrichEnabled: $asyncUrlEnrichEnabled, autoTranslationEnabled: $autoTranslationEnabled, defaults: $defaults, fileUploadConfig: $fileUploadConfig, id: $id, imageUploadConfig: $imageUploadConfig, name: $name, placement: $placement)';
   }
 }
 
@@ -74,6 +77,7 @@ abstract mixin class $AppResponseFieldsCopyWith<$Res> {
   $Res call({
     bool asyncUrlEnrichEnabled,
     bool autoTranslationEnabled,
+    AppDefaults defaults,
     FileUploadConfig fileUploadConfig,
     int id,
     FileUploadConfig imageUploadConfig,
@@ -96,6 +100,7 @@ class _$AppResponseFieldsCopyWithImpl<$Res> implements $AppResponseFieldsCopyWit
   $Res call({
     Object? asyncUrlEnrichEnabled = null,
     Object? autoTranslationEnabled = null,
+    Object? defaults = null,
     Object? fileUploadConfig = null,
     Object? id = null,
     Object? imageUploadConfig = null,
@@ -112,6 +117,10 @@ class _$AppResponseFieldsCopyWithImpl<$Res> implements $AppResponseFieldsCopyWit
             ? _self.autoTranslationEnabled
             : autoTranslationEnabled // ignore: cast_nullable_to_non_nullable
                   as bool,
+        defaults: null == defaults
+            ? _self.defaults
+            : defaults // ignore: cast_nullable_to_non_nullable
+                  as AppDefaults,
         fileUploadConfig: null == fileUploadConfig
             ? _self.fileUploadConfig
             : fileUploadConfig // ignore: cast_nullable_to_non_nullable

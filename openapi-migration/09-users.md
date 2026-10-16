@@ -41,7 +41,7 @@
 
 - `User` and `OwnUser` are public, persisted, and embedded in nearly every other response. This group restructures them, last: the mappers in `user_mapper.dart` already map the generated types onto the current class for every group before it, and stay. See [01-foundation](01-foundation.md).
 - `PrivacySettings` and the push-preference sub-shapes — decide per type.
-- **`User.name` and `image` become fields** (README rule 9): `UserResponse` types them, and the constructor stops writing them into `extraData`; decide whether `name` keeps its fallback to `id`. `deleted_at`, `deactivated_at`, `revoke_tokens_issued_before` and `blocked_user_ids`, which `UserResponse` types and v1 kept in a plain user's `extraData`, become fields or are dropped, never `extraData`. `UserResponse.toModel()` then copies `custom` verbatim into the field, renamed `custom`, and `UserRequestMapper` stops reading `extraData['name']` and `['image']`.
+- **`User.name` and `image` become fields** (README rule 9): `UserResponse` types them, and the constructor stops writing them into `extraData`; decide whether `name` keeps its fallback to `id`. `deleted_at`, `deactivated_at` and `blocked_user_ids`, which `UserResponse` types and v1 kept in a plain user's `extraData`, become fields or are dropped, never `extraData`. `UserResponse.toModel()` then copies `custom` verbatim into the field, renamed `custom`, and `UserRequestMapper` stops reading `extraData['name']` and `['image']`.
 - `UserFilterField.shadowBanned` and `.bypassModeration` read `extraData`, which the generated `UserResponse` has no field to fill.
 - `updateUsers` reuses `User.toRequest()`. It is a full upsert, and v10's flattened body filed the user's client state (`online`, `banned`, `created_at` and similar) into the stored custom data on every call, as it did for guests in [04](04-roles-guest-and-app.md). Decide the same way here, for real users rather than fresh guests, and record it in the CHANGELOG.
 - The generated `UserRequest` sends explicit `null` for an unset `language` or `invisible`, where v10 left the key out. For a guest create that made no difference; for an upsert of an existing user, confirm live that a `null` does not reset a stored value differently from an omitted key.
@@ -51,7 +51,7 @@
 - Every other group depends on the `User` decision.
 - User data arrives over the WebSocket on nearly every event.
 - Landing `UserResponse` -> `User` unblocks the two fields [08](08-moderation-and-blocklists.md) had to drop from `MuteUsersResponse`: the `mutes` the call created and the `ownUser` it left behind. Adding them is additive for anyone reading the response, so revisit them here rather than leaving them dropped for good.
-- Until then, a user mapped from `UserResponse` and the same user decoded from v1 JSON carry different `extraData`: the v1 path keeps `blocked_user_ids`, `deleted_at`, `deactivated_at` and `revoke_tokens_issued_before`, the mapper drops them. Equality includes `extraData`, so a `Poll` from a REST call (its `createdBy`, its votes' `user`) and the same poll from an event compare unequal.
+- Until then, a user mapped from `UserResponse` and the same user decoded from v1 JSON carry different `extraData`: the v1 path keeps `blocked_user_ids`, `deleted_at` and `deactivated_at`, the mapper drops them. Equality includes `extraData`, so a `Poll` from a REST call (its `createdBy`, its votes' `user`) and the same poll from an event compare unequal.
 
 ## Definition of done
 

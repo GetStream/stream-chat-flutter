@@ -33,10 +33,6 @@ UserResponseCommonFields _$UserResponseCommonFieldsFromJson(
   ),
   name: json['name'] as String?,
   online: json['online'] as bool,
-  revokeTokensIssuedBefore: _$JsonConverterFromJson<Object, DateTime>(
-    json['revoke_tokens_issued_before'],
-    const StreamDateTimeConverter().fromJson,
-  ),
   role: json['role'] as String,
   teams: (json['teams'] as List<dynamic>).map((e) => e as String).toList(),
   teamsRole: (json['teams_role'] as Map<String, dynamic>?)?.map(
@@ -72,10 +68,6 @@ Map<String, dynamic> _$UserResponseCommonFieldsToJson(
   ),
   'name': instance.name,
   'online': instance.online,
-  'revoke_tokens_issued_before': _$JsonConverterToJson<Object, DateTime>(
-    instance.revokeTokensIssuedBefore,
-    const StreamDateTimeConverter().toJson,
-  ),
   'role': instance.role,
   'teams': instance.teams,
   'teams_role': instance.teamsRole,

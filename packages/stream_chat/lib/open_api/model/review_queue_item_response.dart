@@ -28,6 +28,7 @@ class ReviewQueueItemResponse with _$ReviewQueueItemResponse {
     this.completedAt,
     this.confidenceScore,
     this.configKey,
+    this.countryCode,
     required this.createdAt,
     this.entityCreator,
     this.entityCreatorId,
@@ -48,6 +49,7 @@ class ReviewQueueItemResponse with _$ReviewQueueItemResponse {
     required this.latestModeratorAction,
     this.message,
     this.moderationPayload,
+    this.poll,
     this.reaction,
     required this.recommendedAction,
     this.reviewedAt,
@@ -98,6 +100,10 @@ class ReviewQueueItemResponse with _$ReviewQueueItemResponse {
   @override
   @JsonKey(name: 'config_key')
   final String? configKey;
+
+  @override
+  @JsonKey(name: 'country_code')
+  final String? countryCode;
 
   @override
   @StreamDateTimeConverter()
@@ -180,6 +186,10 @@ class ReviewQueueItemResponse with _$ReviewQueueItemResponse {
   @override
   @JsonKey(name: 'moderation_payload')
   final ModerationPayloadResponse? moderationPayload;
+
+  @override
+  @JsonKey(name: 'poll')
+  final PollResponseData? poll;
 
   @override
   @JsonKey(name: 'reaction')

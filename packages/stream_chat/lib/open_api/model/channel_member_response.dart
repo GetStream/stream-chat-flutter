@@ -39,7 +39,7 @@ class ChannelMemberResponse with _$ChannelMemberResponse {
     this.status,
     required this.updatedAt,
     this.user,
-    this.userId,
+    required this.userId,
   });
 
   @override
@@ -137,7 +137,7 @@ class ChannelMemberResponse with _$ChannelMemberResponse {
 
   @override
   @JsonKey(name: 'user_id')
-  final String? userId;
+  final String userId;
 
   Map<String, dynamic> toJson() => _$ChannelMemberResponseToJson(this);
 

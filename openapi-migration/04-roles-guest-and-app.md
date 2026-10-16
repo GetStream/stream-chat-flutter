@@ -91,11 +91,11 @@
   in the raw `me`. None was ever applied. Verified live against the demo app and in the backend source;
   recorded as a 🐞 Fixed entry.
 - **`UserResponse.toModel()` leaves custom keys named like `OwnUser` fields (`OwnUser.topLevelFields`),
-  plus `deleted_at`, `deactivated_at` and `revoke_tokens_issued_before`, out of `extraData`.** v1's flat
+  plus `deleted_at` and `deactivated_at`, out of `extraData`.** v1's flat
   user JSON shadowed them; v2 nests custom data, and without the guard a custom `online` string crashed
   `OwnUser.fromUser`. `User.toRequest()` leaves the same keys out of the custom data it sends.
-- **The three extra names are guarded because the socket connect refuses them.** A custom
-  `deleted_at`, `deactivated_at` or `revoke_tokens_issued_before` left in `extraData` is re-sent in the
+- **The two extra names are guarded because the socket connect refuses them.** A custom
+  `deleted_at` or `deactivated_at` left in `extraData` is re-sent in the
   connect's user details, and the backend answers 400 ("reserved field", or "expected date" for a
   non-date value). v10's flat response shadowed them, so the same guest connected; confirmed live.
 - **Not a regression: a custom `ban_expires` that isn't a date** fails the connect in v10 and now alike,
