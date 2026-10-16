@@ -14,6 +14,7 @@ import '../utils/location_provider.dart';
 import '../utils/platform_support.dart';
 import '../utils/shared_location_service.dart';
 import '../widgets/channel_list.dart';
+import '../widgets/split_view.dart';
 import 'draft_list_page.dart';
 import 'reminders_page.dart';
 import 'thread_list_page.dart';
@@ -45,6 +46,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
     final colorScheme = context.streamColorScheme;
 
     final config = context.sampleAppConfig;
+    final isExpanded = AdaptiveSplitView.isExpandedOf(context);
 
     final allTabs = <_TabDef>[
       _TabDef(
@@ -89,8 +91,10 @@ class _ChannelListPageState extends State<ChannelListPage> {
       backgroundColor: colorScheme.backgroundApp,
       appBar: StreamChannelListHeader(
         title: Text(enabledTabs[_currentIndex].navItem.label, style: textTheme.headingSm),
+        // Beside the channel, the drawer slides in over both panes.
+        onUserAvatarPressed: isExpanded ? (_) => AdaptiveSplitView.openDrawerOf(context) : null,
       ),
-      drawer: LeftDrawer(user: user),
+      drawer: isExpanded ? null : const LeftDrawer(),
       // Keep the scaffold's bottom-slot layout in sync with the nav bar's own
       // surface style, so a nav-bar-only override is applied fully instead of
       // just partly (the nav bar rendering vs. the scaffold inset).
@@ -147,15 +151,13 @@ class _TabDef {
 }
 
 class LeftDrawer extends StatelessWidget {
-  const LeftDrawer({
-    super.key,
-    required this.user,
-  });
-
-  final User user;
+  const LeftDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final user = StreamChat.of(context).currentUser;
+    if (user == null) return const SizedBox.shrink();
+
     final colorScheme = context.streamColorScheme;
     final textTheme = context.streamTextTheme;
     final icons = context.streamIcons;

@@ -5,6 +5,8 @@
 - Polls are now shown translated into the current user's language, following `StreamMessageTranslationConfiguration` like the message text.
 - Added `PollTranslationX`, `PollOptionTranslationX` and `PollVoteTranslationX`, to read the translations of a poll, its options and its answers.
 - Added `MessageTranslationLanguage`, the language `StreamMessageContent` shows a message translated into, for custom attachments to show translations too.
+- Added `automaticallyImplyLeading` to `StreamChannelPage` and `StreamThreadPage`, which hides the header's back button when `false`.
+- Added a `selected` parameter to `StreamThreadListTile`, which highlights the tile, and `StreamThreadListTile.copyWith`.
 - `StreamMessageListView` now shows who is typing at the newest end of the list with `StreamMessageListTypingIndicator`, replacing the indicator above `StreamChannelPage`'s composer. Replace it with `StreamMessageListViewBuilders.typingIndicator`, or hide it with `StreamMessageListViewConfiguration.showTypingIndicator`.
 - Added `StreamTypingUsersBuilder`, to build a widget from the users typing in a channel or thread.
 
@@ -38,6 +40,8 @@
 - Fixed the attachment picker overflowing short screens, such as a phone in landscape.
 - Fixed `StreamMessageListView`'s default loading, empty and error states overflowing when the list has little room, such as in landscape with the attachment picker open.
 - Fixed the composer's autocomplete suggestions stopping short of the screen edge under a side safe-area inset.
+- Fixed `StreamThreadListTile` overflowing when narrow; its timestamp now truncates instead.
+- Fixed `StreamMessageItem`'s actions modal throwing when the message leaves the screen while the modal is open.
 
 ## 10.5.0
 
