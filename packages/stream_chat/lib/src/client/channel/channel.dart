@@ -1887,9 +1887,9 @@ class Channel {
     if (!canUseReadReceipts) {
       return const Result.failure(
         StreamClientException(
-          message: '''
-        Cannot mark as read: Channel does not support read events.
-        Enable read_events in your channel type configuration.''',
+          message:
+              'Cannot mark as read: Channel does not support read events. '
+              'Enable read_events in your channel type configuration.',
         ),
       );
     }
@@ -1924,9 +1924,8 @@ class Channel {
         return Result.failure(
           StreamClientException(
             message:
-                '''
-        Cannot mark as unread: Message "$messageId" was not found in the
-        locally-known messages for this channel.''',
+                'Cannot mark as unread: Message "$messageId" was not found in the '
+                'locally-known messages for this channel.',
           ),
         );
       }
@@ -1947,9 +1946,9 @@ class Channel {
     if (!canUseReadReceipts) {
       return const Result.failure(
         StreamClientException(
-          message: '''
-        Cannot mark as unread: Channel does not support read events.
-        Enable read_events in your channel type configuration.''',
+          message:
+              'Cannot mark as unread: Channel does not support read events. '
+              'Enable read_events in your channel type configuration.',
         ),
       );
     }
@@ -1991,9 +1990,9 @@ class Channel {
     if (!canUseReadReceipts) {
       return const Result.failure(
         StreamClientException(
-          message: '''
-        Cannot mark as unread: Channel does not support read events.
-        Enable read_events in your channel type configuration.''',
+          message:
+              'Cannot mark as unread: Channel does not support read events. '
+              'Enable read_events in your channel type configuration.',
         ),
       );
     }
@@ -2011,9 +2010,9 @@ class Channel {
     if (!canUseReadReceipts) {
       return const Result.failure(
         StreamClientException(
-          message: '''
-        Cannot mark thread as read: Channel does not support read events.
-        Enable read_events in your channel type configuration.''',
+          message:
+              'Cannot mark thread as read: Channel does not support read events. '
+              'Enable read_events in your channel type configuration.',
         ),
       );
     }
@@ -2031,9 +2030,9 @@ class Channel {
     if (!canUseReadReceipts) {
       return const Result.failure(
         StreamClientException(
-          message: '''
-        Cannot mark thread as unread: Channel does not support read events.
-        Enable read_events in your channel type configuration.''',
+          message:
+              'Cannot mark thread as unread: Channel does not support read events. '
+              'Enable read_events in your channel type configuration.',
         ),
       );
     }
