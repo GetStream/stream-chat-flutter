@@ -836,7 +836,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
       initialReactionType: initialReaction?.type,
     );
 
-    if (action is! MessageAction) return;
+    if (action is! MessageAction || !context.mounted) return;
     return _onActionTap(context, channel, action).ignore();
   }
 
@@ -903,7 +903,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
       ),
     );
 
-    if (action is! MessageAction) return;
+    if (action is! MessageAction || !context.mounted) return;
     return _onActionTap(context, channel, action).ignore();
   }
 
@@ -986,7 +986,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
       ),
     );
 
-    if (action is! MessageAction) return;
+    if (action is! MessageAction || !context.mounted) return;
     return _onActionTap(context, channel, action).ignore();
   }
 
