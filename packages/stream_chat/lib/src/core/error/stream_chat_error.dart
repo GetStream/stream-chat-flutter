@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
+import 'package:meta/meta.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../../../stream_chat.dart';
@@ -162,6 +163,15 @@ class StreamChatNetworkError extends StreamChatError {
 
   /// Whether the operation can be retried.
   bool get isRetriable => data == null;
+
+  /// Whether the server rejected a send because it already stored a message
+  /// with the same id.
+  @internal
+  bool get isMessageAlreadyExistsError {
+    if (errorCode != ChatErrorCode.inputError) return false;
+    if (!message.contains('a message with ID')) return false;
+    return message.contains('already exists');
+  }
 
   @override
   List<Object?> get props => [...super.props, code, statusCode, type];

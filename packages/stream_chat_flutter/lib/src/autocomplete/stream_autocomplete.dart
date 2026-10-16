@@ -616,7 +616,8 @@ class _TopBorderShape extends ShapeBorder {
 
 /// A helper widget used to show the options of a [StreamAutocomplete].
 ///
-/// Keeps its options clear of the safe-area insets at the sides of the screen.
+/// Its options stay clear of the display cutouts and system bars at the sides
+/// of the screen, as reported by [MediaQuery]'s padding.
 class StreamAutocompleteOptions<T extends Object> extends StatelessWidget {
   /// Creates a [StreamAutocompleteOptions] widget.
   const StreamAutocompleteOptions({

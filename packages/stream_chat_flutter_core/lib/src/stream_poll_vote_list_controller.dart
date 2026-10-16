@@ -36,6 +36,7 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
     this.sort = defaultPollVoteListSort,
     this.limit = defaultPollVotePagedLimit,
   }) : _eventHandler = eventHandler ?? StreamPollVoteEventHandler(),
+       _scope = const _AllVotesScope(),
        _activeFilter = filter,
        _activeSort = sort,
        super(const PagedValue.loading());
@@ -50,8 +51,46 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
     this.sort = defaultPollVoteListSort,
     this.limit = defaultPollVotePagedLimit,
   }) : _eventHandler = eventHandler ?? StreamPollVoteEventHandler(),
+       _scope = const _AllVotesScope(),
        _activeFilter = filter,
        _activeSort = sort;
+
+  /// Creates a Stream poll vote list controller that lists only the votes for
+  /// the poll option with `optionId`.
+  ///
+  /// Votes for other options and answers cast while the list is loaded are
+  /// ignored, and a vote changed to another option is removed. Setting [filter]
+  /// later changes only the query; incoming votes stay limited to this option.
+  StreamPollVoteListController.forOption({
+    required Channel channel,
+    required String pollId,
+    required String optionId,
+  }) : this._scoped(_OptionVotesScope(optionId), channel: channel, pollId: pollId);
+
+  /// Creates a Stream poll vote list controller that lists only the answers of
+  /// the poll.
+  ///
+  /// Option votes cast while the list is loaded are ignored. Setting [filter]
+  /// later changes only the query; incoming votes stay limited to answers.
+  StreamPollVoteListController.forAnswers({
+    required Channel channel,
+    required String pollId,
+  }) : this._scoped(const _AnswersScope(), channel: channel, pollId: pollId);
+
+  // Creates a controller that queries and keeps only the votes in [scope],
+  // with the default sort, page limit and [StreamPollVoteEventHandler].
+  StreamPollVoteListController._scoped(
+    _PollVoteListScope scope, {
+    required this.channel,
+    required this.pollId,
+  }) : _eventHandler = StreamPollVoteEventHandler(),
+       _scope = scope,
+       filter = scope.filter,
+       sort = defaultPollVoteListSort,
+       _activeFilter = scope.filter,
+       _activeSort = defaultPollVoteListSort,
+       limit = defaultPollVotePagedLimit,
+       super(const PagedValue.loading());
 
   /// The channel to use for the poll votes list.
   final Channel channel;
@@ -61,6 +100,9 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
 
   /// The poll vote event handlers to use for the poll votes list.
   final StreamPollVoteEventHandler _eventHandler;
+
+  // The votes this list is limited to.
+  final _PollVoteListScope _scope;
 
   /// The query filters to use.
   ///
@@ -215,6 +257,8 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
       // Returns early if the event is already handled by the listener.
       if (eventListener?.call(event) ?? false) return;
 
+      if (!_belongsToPoll(event)) return;
+
       final eventType = event.type;
       if (eventType == EventType.pollVoteCasted || eventType == EventType.pollAnswerCasted) {
         _eventHandler.onPollVoteCasted(event, this);
@@ -224,6 +268,14 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
         _eventHandler.onPollVoteRemoved(event, this);
       }
     });
+  }
+
+  // Whether the vote or answer carried by [event] belongs to [pollId].
+  //
+  // The subscription receives the events of every poll in [channel], not only the one this controller lists.
+  bool _belongsToPoll(Event event) {
+    final eventPollId = event.pollVote?.pollId ?? event.poll?.id;
+    return eventPollId == pollId;
   }
 
   // Unsubscribes from all poll vote list events.
@@ -261,13 +313,17 @@ mixin class StreamPollVoteEventHandler {
   ///
   /// This event is fired when a new poll vote is casted in a poll.
   ///
-  /// By default, this adds the poll vote and moves it to the top of list.
+  /// By default, this adds or updates the poll vote. A controller created with
+  /// [StreamPollVoteListController.forOption] or
+  /// [StreamPollVoteListController.forAnswers] ignores votes for other options or
+  /// votes that aren't answers, respectively.
   void onPollVoteCasted(
     Event event,
     StreamPollVoteListController controller,
   ) {
     final pollVote = event.pollVote;
     if (pollVote == null) return;
+    if (!controller._scope.includes(pollVote)) return;
 
     final updatedPollVotes = <String, PollVote>{
       for (final vote in controller.currentItems) vote.id!: vote,
@@ -281,13 +337,21 @@ mixin class StreamPollVoteEventHandler {
   ///
   /// This event is fired when a poll vote is changed in a poll.
   ///
-  /// By default, this updates the poll vote with the event poll vote.
+  /// By default, this adds or updates the poll vote. A controller created with
+  /// [StreamPollVoteListController.forOption] or
+  /// [StreamPollVoteListController.forAnswers] instead removes a vote that is no
+  /// longer for that option or isn't an answer, respectively.
   void onPollVoteChanged(
     Event event,
     StreamPollVoteListController controller,
   ) {
     final pollVote = event.pollVote;
     if (pollVote == null) return;
+
+    if (!controller._scope.includes(pollVote)) {
+      _removePollVote(pollVote, controller);
+      return;
+    }
 
     final updatedPollVotes = <String, PollVote>{
       for (final vote in controller.currentItems) vote.id!: vote,
@@ -311,10 +375,60 @@ mixin class StreamPollVoteEventHandler {
     final pollVote = event.pollVote;
     if (pollVote == null) return;
 
-    final ownVotesAndAnswers = <String, PollVote>{
-      for (final vote in controller.currentItems) vote.id!: vote,
-    }..remove(pollVote.id);
-
-    controller.pollVotes = [...ownVotesAndAnswers.values];
+    _removePollVote(pollVote, controller);
   }
+
+  // Removes [pollVote] from the list of [controller], if it's listed.
+  void _removePollVote(PollVote pollVote, StreamPollVoteListController controller) {
+    final currentPollVotes = controller.currentItems;
+    if (!currentPollVotes.any((vote) => vote.id == pollVote.id)) return;
+
+    controller.pollVotes = [...currentPollVotes.where((vote) => vote.id != pollVote.id)];
+  }
+}
+
+// The votes a [StreamPollVoteListController] is limited to.
+sealed class _PollVoteListScope {
+  const _PollVoteListScope();
+
+  // The query filter matching the votes in this scope, or null for every vote.
+  Filter? get filter;
+
+  // Whether [vote] belongs in a list with this scope.
+  bool includes(PollVote vote);
+}
+
+// Every vote of the poll, including answers.
+final class _AllVotesScope extends _PollVoteListScope {
+  const _AllVotesScope();
+
+  @override
+  Filter? get filter => null;
+
+  @override
+  bool includes(PollVote vote) => true;
+}
+
+// The votes for a single poll option.
+final class _OptionVotesScope extends _PollVoteListScope {
+  const _OptionVotesScope(this.optionId);
+
+  final String optionId;
+
+  @override
+  Filter get filter => Filter.equal('option_id', optionId);
+
+  @override
+  bool includes(PollVote vote) => vote.optionId == optionId;
+}
+
+// The answers of the poll.
+final class _AnswersScope extends _PollVoteListScope {
+  const _AnswersScope();
+
+  @override
+  Filter get filter => Filter.equal('is_answer', true);
+
+  @override
+  bool includes(PollVote vote) => vote.isAnswer;
 }

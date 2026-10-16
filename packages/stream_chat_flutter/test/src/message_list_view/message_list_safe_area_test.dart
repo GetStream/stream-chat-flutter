@@ -16,97 +16,9 @@ import '../../test_utils/data_generator.dart';
 import '../mocks.dart';
 
 void main() {
-  late StreamChatClient client;
-  late Channel channel;
-  late ChannelClientState channelClientState;
-  late ClientState clientState;
-
-  late StreamController<List<Message>> messagesController;
-
-  setUp(() {
-    client = MockClient();
-    clientState = MockClientState();
-    when(() => client.state).thenAnswer((_) => clientState);
-    final ownUser = OwnUser(id: 'ownid');
-    when(() => clientState.currentUser).thenReturn(ownUser);
-    when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(ownUser));
-
-    messagesController = StreamController<List<Message>>.broadcast();
-    addTearDown(messagesController.close);
-
-    channel = MockChannel();
-    channelClientState = MockChannelState();
-    when(() => channel.client).thenReturn(client);
-    when(() => channel.state).thenReturn(channelClientState);
-
-    when(() => channelClientState.threadsStream).thenAnswer((_) => const Stream.empty());
-    when(() => channelClientState.isUpToDate).thenReturn(true);
-    when(() => channelClientState.isUpToDateStream).thenAnswer((_) => Stream.value(true));
-    when(() => channelClientState.unreadCount).thenReturn(0);
-    when(() => channelClientState.unreadCountStream).thenAnswer((_) => Stream.value(0));
-    when(() => channelClientState.readStream).thenAnswer((_) => const Stream.empty());
-    when(() => channelClientState.read).thenReturn([]);
-    when(() => channelClientState.membersStream).thenAnswer((_) => const Stream.empty());
-    when(() => channelClientState.members).thenReturn([]);
-    when(() => channelClientState.currentUserRead).thenReturn(null);
-    when(() => channelClientState.currentUserReadStream).thenAnswer((_) => const Stream.empty());
-    when(() => channelClientState.messagesStream).thenAnswer((_) => messagesController.stream);
-
-    when(() => channel.markRead(messageId: any(named: 'messageId'))).thenAnswer((_) async => EmptyResponse());
-  });
-
-  Future<void> pumpMessageList(
-    WidgetTester tester, {
-    required EdgeInsets padding,
-    List<Message>? messages,
-    StreamMessageListViewConfiguration config = const StreamMessageListViewConfiguration(),
-    StreamChatThemeData? themeData,
-    StreamMessageListViewBuilders builders = const StreamMessageListViewBuilders(),
-    bool enableSafeArea = true,
-    Message? parentMessage,
-    bool settle = true,
-  }) async {
-    final effectiveMessages = messages ?? generateConversation(40, users: [User(id: 'otherid')]).reversed.toList();
-    when(() => channelClientState.messages).thenReturn(effectiveMessages);
-
-    await tester.runAsync(() async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Builder(
-            builder: (context) => MediaQuery(
-              data: MediaQuery.of(context).copyWith(padding: padding),
-              child: DefaultAssetBundle(
-                bundle: rootBundle,
-                child: StreamChat(
-                  client: client,
-                  themeData: themeData,
-                  child: StreamChannel(
-                    channel: channel,
-                    child: StreamMessageListView(
-                      enableSafeArea: enableSafeArea,
-                      config: config,
-                      builders: builders,
-                      parentMessage: parentMessage,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-      messagesController.add(effectiveMessages);
-      if (settle) {
-        await tester.pumpAndSettle();
-      } else {
-        await tester.pump();
-      }
-    });
-  }
-
   testWidgets('StreamMessageListView keeps the scroll-to-bottom button clear of a side inset', (tester) async {
     const rightInset = 84.0;
-    await pumpMessageList(tester, padding: const EdgeInsets.only(right: rightInset));
+    await _pumpMessageList(tester, padding: const EdgeInsets.only(left: 47, right: rightInset));
 
     await tester.drag(find.byType(StreamMessageListView), const Offset(0, 400));
     await tester.pumpAndSettle();
@@ -117,8 +29,8 @@ void main() {
   });
 
   testWidgets('StreamMessageListView centers the floating date divider over the content area', (tester) async {
-    const padding = EdgeInsets.only(right: 84);
-    await pumpMessageList(
+    const padding = EdgeInsets.only(left: 47, right: 84);
+    await _pumpMessageList(
       tester,
       padding: padding,
       messages: _messagesOverFourDays(),
@@ -136,8 +48,8 @@ void main() {
   });
 
   testWidgets('StreamMessageListView centers the empty state over the content area', (tester) async {
-    const padding = EdgeInsets.only(right: 84);
-    await pumpMessageList(tester, padding: padding, messages: []);
+    const padding = EdgeInsets.only(left: 47, right: 84);
+    await _pumpMessageList(tester, padding: padding, messages: []);
 
     expect(
       tester.getCenter(find.byType(StreamMessageListEmptyState)).dx,
@@ -147,9 +59,9 @@ void main() {
 
   testWidgets('StreamMessageListView keeps its background full width under a side inset', (tester) async {
     const backgroundColor = Color(0xFF00FF00);
-    await pumpMessageList(
+    await _pumpMessageList(
       tester,
-      padding: const EdgeInsets.only(right: 84),
+      padding: const EdgeInsets.only(left: 47, right: 84),
       themeData: StreamChatThemeData(
         messageListViewTheme: const StreamMessageListViewThemeData(backgroundColor: backgroundColor),
       ),
@@ -166,17 +78,19 @@ void main() {
   });
 
   testWidgets('StreamMessageListView insets message rows by a side inset only once', (tester) async {
-    const rightInset = 84.0;
-    await pumpMessageList(tester, padding: const EdgeInsets.only(right: rightInset));
+    const padding = EdgeInsets.only(left: 47, right: 84);
+    await _pumpMessageList(tester, padding: padding);
 
     final screenWidth = tester.view.physicalSize.width / tester.view.devicePixelRatio;
-    expect(tester.getRect(find.byType(StreamMessageItem).first).right, moreOrLessEquals(screenWidth - rightInset));
+    final row = tester.getRect(find.byType(StreamMessageItem).first);
+    expect(row.left, moreOrLessEquals(padding.left));
+    expect(row.right, moreOrLessEquals(screenWidth - padding.right));
   });
 
   testWidgets('StreamMessageListView centers a custom empty state over the content area', (tester) async {
-    const padding = EdgeInsets.only(right: 84);
+    const padding = EdgeInsets.only(left: 47, right: 84);
     const customEmptyKey = Key('custom-empty');
-    await pumpMessageList(
+    await _pumpMessageList(
       tester,
       padding: padding,
       messages: [],
@@ -187,20 +101,21 @@ void main() {
   });
 
   testWidgets('StreamMessageListView keeps the loading state clear of a side inset', (tester) async {
-    // A thread whose replies never arrive stays in its loading state.
-    when(() => channelClientState.threads).thenReturn(const {});
-    when(
-      () => channel.getReplies(
-        any(),
-        options: any(named: 'options'),
-        preferOffline: any(named: 'preferOffline'),
-      ),
-    ).thenAnswer((_) => Completer<QueryRepliesResponse>().future);
-
-    const rightInset = 84.0;
-    await pumpMessageList(
+    const padding = EdgeInsets.only(left: 47, right: 84);
+    await _pumpMessageList(
       tester,
-      padding: const EdgeInsets.only(right: rightInset),
+      padding: padding,
+      // A thread whose replies never arrive stays in its loading state.
+      stubChannel: (channel, state) {
+        when(() => state.threads).thenReturn(const {});
+        when(
+          () => channel.getReplies(
+            any(),
+            options: any(named: 'options'),
+            preferOffline: any(named: 'preferOffline'),
+          ),
+        ).thenAnswer((_) => Completer<QueryRepliesResponse>().future);
+      },
       parentMessage: Message(
         id: 'parent',
         text: 'Parent',
@@ -211,20 +126,102 @@ void main() {
     );
 
     final screenWidth = tester.view.physicalSize.width / tester.view.devicePixelRatio;
-    expect(
-      tester.getRect(find.byType(StreamMessageListSkeletonLoading)).right,
-      moreOrLessEquals(screenWidth - rightInset),
-    );
+    final skeleton = tester.getRect(find.byType(StreamMessageListSkeletonLoading));
+    expect(skeleton.left, moreOrLessEquals(padding.left));
+    expect(skeleton.right, moreOrLessEquals(screenWidth - padding.right));
   });
 
   testWidgets('StreamMessageListView leaves the empty state on the full width when enableSafeArea is off', (
     tester,
   ) async {
-    const padding = EdgeInsets.only(right: 84);
-    await pumpMessageList(tester, padding: padding, messages: [], enableSafeArea: false);
+    const padding = EdgeInsets.only(left: 47, right: 84);
+    await _pumpMessageList(tester, padding: padding, messages: [], enableSafeArea: false);
 
     final screenWidth = tester.view.physicalSize.width / tester.view.devicePixelRatio;
     expect(tester.getCenter(find.byType(StreamMessageListEmptyState)).dx, moreOrLessEquals(screenWidth / 2));
+  });
+}
+
+// Pumps a [StreamMessageListView] with [padding] as the screen's safe-area
+// insets. [stubChannel] adds stubs a test needs beyond the defaults.
+Future<void> _pumpMessageList(
+  WidgetTester tester, {
+  required EdgeInsets padding,
+  List<Message>? messages,
+  StreamMessageListViewConfiguration config = const StreamMessageListViewConfiguration(),
+  StreamChatThemeData? themeData,
+  StreamMessageListViewBuilders builders = const StreamMessageListViewBuilders(),
+  bool enableSafeArea = true,
+  Message? parentMessage,
+  bool settle = true,
+  void Function(Channel channel, ChannelClientState state)? stubChannel,
+}) async {
+  final client = MockClient();
+  final clientState = MockClientState();
+  when(() => client.state).thenAnswer((_) => clientState);
+  final ownUser = OwnUser(id: 'ownid');
+  when(() => clientState.currentUser).thenReturn(ownUser);
+  when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(ownUser));
+
+  final messagesController = StreamController<List<Message>>.broadcast();
+  addTearDown(messagesController.close);
+
+  final channel = MockChannel();
+  final channelClientState = MockChannelState();
+  when(() => channel.client).thenReturn(client);
+  when(() => channel.state).thenReturn(channelClientState);
+
+  when(() => channelClientState.threadsStream).thenAnswer((_) => const Stream.empty());
+  when(() => channelClientState.isUpToDate).thenReturn(true);
+  when(() => channelClientState.isUpToDateStream).thenAnswer((_) => Stream.value(true));
+  when(() => channelClientState.unreadCount).thenReturn(0);
+  when(() => channelClientState.unreadCountStream).thenAnswer((_) => Stream.value(0));
+  when(() => channelClientState.readStream).thenAnswer((_) => const Stream.empty());
+  when(() => channelClientState.read).thenReturn([]);
+  when(() => channelClientState.membersStream).thenAnswer((_) => const Stream.empty());
+  when(() => channelClientState.members).thenReturn([]);
+  when(() => channelClientState.currentUserRead).thenReturn(null);
+  when(() => channelClientState.currentUserReadStream).thenAnswer((_) => const Stream.empty());
+  when(() => channelClientState.messagesStream).thenAnswer((_) => messagesController.stream);
+
+  when(() => channel.markRead(messageId: any(named: 'messageId'))).thenAnswer((_) async => EmptyResponse());
+  stubChannel?.call(channel, channelClientState);
+
+  final effectiveMessages = messages ?? generateConversation(40, users: [User(id: 'otherid')]).reversed.toList();
+  when(() => channelClientState.messages).thenReturn(effectiveMessages);
+
+  await tester.runAsync(() async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(padding: padding),
+            child: DefaultAssetBundle(
+              bundle: rootBundle,
+              child: StreamChat(
+                client: client,
+                themeData: themeData,
+                child: StreamChannel(
+                  channel: channel,
+                  child: StreamMessageListView(
+                    enableSafeArea: enableSafeArea,
+                    config: config,
+                    builders: builders,
+                    parentMessage: parentMessage,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    messagesController.add(effectiveMessages);
+    if (settle) {
+      await tester.pumpAndSettle();
+    } else {
+      await tester.pump();
+    }
   });
 }
 
