@@ -20,6 +20,23 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.byKey(const Key('MessageItem')), findsOneWidget);
   });
+
+  testWidgets('StreamMessageItem drops a modal action picked after its message leaves the tree', (tester) async {
+    final client = MockClient();
+    final channel = _mockChannel(client);
+    final threadTaps = <Message>[];
+    void onThreadTap(Message parent, Message? _) => threadTaps.add(parent);
+
+    await tester.pumpWidget(_app(client: client, channel: channel, showMessage: true, onThreadTap: onThreadTap));
+    await tester.pumpAndSettle();
+    await _longPress(tester, find.byType(StreamMessageItem));
+
+    await tester.pumpWidget(_app(client: client, channel: channel, showMessage: false, onThreadTap: onThreadTap));
+    await tester.tap(find.text('Thread Reply'));
+    await tester.pumpAndSettle();
+
+    expect(threadTaps, isEmpty);
+  });
 }
 
 MockChannel _mockChannel(MockClient client) {
@@ -37,7 +54,12 @@ MockChannel _mockChannel(MockClient client) {
   return channel;
 }
 
-Widget _app({required MockClient client, required MockChannel channel, required bool showMessage}) {
+Widget _app({
+  required MockClient client,
+  required MockChannel channel,
+  required bool showMessage,
+  void Function(Message, Message?)? onThreadTap,
+}) {
   final message = Message(
     id: 'test-message',
     text: 'Long press me',
@@ -51,7 +73,7 @@ Widget _app({required MockClient client, required MockChannel channel, required 
     home: StreamChannel(
       channel: channel,
       child: Scaffold(
-        body: showMessage ? StreamMessageItem(message: message) : const SizedBox.shrink(),
+        body: showMessage ? StreamMessageItem(message: message, onThreadTap: onThreadTap) : const SizedBox.shrink(),
       ),
     ),
   );

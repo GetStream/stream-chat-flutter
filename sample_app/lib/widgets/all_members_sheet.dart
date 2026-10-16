@@ -441,7 +441,7 @@ Future<void> _openDirectChannel(BuildContext context, User user) async {
   if (StreamSheetRoute.hasParentSheet(context)) {
     StreamSheetRoute.popSheet(context);
   }
-  router.pushNamed(
+  router.goNamed(
     Routes.CHANNEL_PAGE.name,
     pathParameters: Routes.CHANNEL_PAGE.params(channel),
   );
