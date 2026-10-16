@@ -542,6 +542,23 @@ void main() {
       });
     });
 
+    test('a mark-read that throws can be retried for the same state', () {
+      when(() => channelState.unreadCount).thenReturn(3);
+      when(() => channelState.currentUserRead).thenReturn(read(unreadMessages: 3));
+      when(() => channel.markRead()).thenAnswer((_) => Future.error(StateError('disposed')));
+      messages = [message(id: 'newest')];
+
+      fakeAsync((async) {
+        final controller = buildController()..attach();
+        tick(controller, [2], isAtBottom: true);
+
+        async.elapse(const Duration(seconds: 1));
+        tick(controller, [2], isAtBottom: true);
+
+        verify(() => channel.markRead()).called(2);
+      });
+    });
+
     group('with an active manual mark-unread', () {
       setUp(() {
         when(() => channelState.isMarkedAsUnread).thenReturn(true);

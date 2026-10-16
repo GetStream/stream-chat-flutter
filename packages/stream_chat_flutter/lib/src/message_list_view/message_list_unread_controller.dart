@@ -315,7 +315,7 @@ class MessageListUnreadController {
   Future<void>? _retryableMarkRead(Future<Result<MarkReadResponse>>? request) {
     return request?.then(
       (result) => result.onFailure((_, _) => _lastMarkReadAttempt = null),
-      onError: (_, __) => _lastMarkReadAttempt = null,
+      onError: (_, _) => _lastMarkReadAttempt = null,
     );
   }
 

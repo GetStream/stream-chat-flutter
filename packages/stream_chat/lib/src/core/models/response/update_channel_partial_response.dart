@@ -5,8 +5,9 @@ import '../member.dart';
 
 part 'update_channel_partial_response.freezed.dart';
 
-/// A channel after some of its fields were set or unset, returned by [StreamChatClient.updateChannelPartial] and
-/// [Channel.updatePartial].
+/// The result of partially updating a channel, returned by
+/// [StreamChatClient.updateChannelPartial] and the calls built on it, such as
+/// [Channel.updatePartial] and [Channel.enableSlowMode].
 @freezed
 class UpdateChannelPartialResponse with _$UpdateChannelPartialResponse {
   /// Creates a new [UpdateChannelPartialResponse].

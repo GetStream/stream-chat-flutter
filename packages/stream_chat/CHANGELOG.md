@@ -79,7 +79,7 @@
 - `StreamChatApi.general.getAppSettings` is removed; call `StreamChatClient.getAppSettings` instead.
 - `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed; call `StreamChatClient.connectGuestUser` instead.
 - The poll calls on `StreamChatClient` and `Channel` return a `Result` instead of throwing.
-- `CreatePollResponse`, `GetPollResponse` and `UpdatePollResponse` are replaced by `PollResponse`; `CreatePollOptionResponse`, `GetPollOptionResponse` and `UpdatePollOptionResponse` by `PollOptionResponse`; and `CastPollVoteResponse` and `RemovePollVoteResponse` by `PollVoteResponse`.
+- The eight poll response types are replaced by `PollResponse`, `PollOptionResponse` and `PollVoteResponse`.
 - `queryPolls` and `queryPollVotes` take `limit` (10 when omitted) and `next` instead of `PaginationParams`.
 - `Channel.castPollVote` and `removePollVote` return a failure instead of throwing an `ArgumentError` for an option or vote without an id.
 - `VotingVisibility` is an extension type over its wire string instead of an enum.
@@ -96,30 +96,28 @@
 - `SendAttachmentResponse`, `SendFileResponse`, `SendImageResponse`, `UploadImageResponse` and `UploadFileResponse` are removed in favor of `UploadedFile`.
 - `AttachmentFileUploaderProvider` receives the client's `Dio` instead of a `StreamHttpClient`, and `StreamAttachmentFileUploader` is built from one.
 - `StreamChatApi.fileUploader` and `StreamChatApi`'s `attachmentFileUploaderProvider` are removed; pass `attachmentFileUploaderProvider` to `StreamChatClient` instead.
-- `updateChannelPartial`, `enableSlowMode` and `disableSlowMode` on `StreamChatClient`, and `updatePartial`, `updateName`, `updateImage`, `enableSlowMode` and `disableSlowMode` on `Channel`, return a `Result<UpdateChannelPartialResponse>` instead of throwing.
+- The partial channel updates on `StreamChatClient` and `Channel`, slow mode included, return a `Result<UpdateChannelPartialResponse>` instead of throwing.
 - `PartialUpdateChannelResponse` is renamed `UpdateChannelPartialResponse`, and `PartialUpdateMemberResponse` is renamed `UpdateMemberPartialResponse`.
 - `StreamChatClient.partialMemberUpdate` is renamed `updateMemberPartial`, and `enableSlowdown` and `disableSlowdown` are renamed `enableSlowMode` and `disableSlowMode`.
-- `updateMemberPartial`, `pinChannel`, `unpinChannel`, `archiveChannel` and `unarchiveChannel` on `StreamChatClient`, and `pin`, `unpin`, `archive` and `unarchive` on `Channel`, return a `Result<UpdateMemberPartialResponse>` instead of throwing; the `Channel` methods no longer return the bare `Member`.
+- The partial membership updates on `StreamChatClient` and `Channel`, pinning and archiving included, return a `Result<UpdateMemberPartialResponse>` instead of throwing; the `Channel` ones no longer return the bare `Member`.
 - `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse` no longer decode from JSON, are immutable, built through a const constructor, compare by value, gain `copyWith`, and their `duration` is a non-nullable `String`.
 - `UpdateChannelPartialResponse.channel` and `UpdateMemberPartialResponse.channelMember` are nullable, and `UpdateChannelPartialResponse.members` is a non-nullable list.
-- `StreamChatApi.channel.updateChannelPartial`, `enableSlowdown`, `disableSlowdown` and `updateMemberPartial` are removed; call them on `StreamChatClient` instead.
+- `StreamChatApi.channel`'s partial update and slow mode methods are removed; use the `StreamChatClient` methods instead.
 - `MemberUpdatePayload` and `MemberUpdateType` are removed; pass `set: {'pinned': true}` or `unset: ['pinned']` (and `archived`) to `updateMemberPartial`, or call `pinChannel`, `archiveChannel` and their counterparts.
-- `hideChannel`, `showChannel` and `deleteChannel` on `StreamChatClient`, and `hide`, `show` and `delete` on `Channel`, return a `Result<HideChannelResponse>`, `Result<ShowChannelResponse>` and `Result<DeleteChannelResponse>` instead of throwing.
-- `StreamChatApi.channel.hideChannel`, `showChannel` and `deleteChannel` are removed; call them on `StreamChatClient` instead.
-- `markChannelRead`, `markThreadRead` and `markAllRead` on `StreamChatClient`, and `markRead` and `markThreadRead` on `Channel`, return a `Result<MarkReadResponse>` instead of throwing.
-- `markChannelUnread`, `markChannelUnreadByTimestamp` and `markThreadUnread` on `StreamChatClient`, and `markUnread`, `markUnreadByTimestamp` and `markThreadUnread` on `Channel`, return a `Result<void>` instead of throwing.
+- The calls that hide, show and delete a channel, on `StreamChatClient` and `Channel`, return a `Result` with a `HideChannelResponse`, `ShowChannelResponse` or `DeleteChannelResponse` instead of throwing.
+- `StreamChatApi.channel`'s hide, show and delete methods are removed; use the `StreamChatClient` methods instead.
+- The calls that mark channels and threads read or unread, on `StreamChatClient` and `Channel`, return a `Result` instead of throwing, with a `MarkReadResponse` when marking read and no value when marking unread.
 - `StreamChatClient.markChannelsDelivered` returns a `Result<MarkDeliveredResponse>` instead of throwing, and `MarkChannelsDelivered`, the callback `ChannelDeliveryReporter` takes, returns a `Future<Result<void>>`.
 - `MessageDelivery` no longer encodes to JSON, compares by value and gains `copyWith`.
-- `StreamChatApi.channel.markRead`, `markUnread`, `markUnreadByTimestamp`, `markThreadRead`, `markThreadUnread`, `markAllRead` and `markChannelsDelivered` are removed; call them on `StreamChatClient` instead.
+- `StreamChatApi.channel`'s read, unread and delivery methods are removed; use the `StreamChatClient` methods instead.
 - `StreamChatClient.getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing.
 - `GetUnreadCountResponse` no longer decodes from JSON, is immutable, built through a const constructor, and its `duration` is a non-nullable `String`.
 - `UnreadCountsChannel`, `UnreadCountsThread` and `UnreadCountsChannelType` no longer decode from or encode to JSON.
 - `GetUnreadCountResponse`, `UnreadCountsChannel`, `UnreadCountsThread` and `UnreadCountsChannelType` compare by value and gain `copyWith`.
 - `StreamChatApi.user.getUnreadCount` is removed; call `StreamChatClient.getUnreadCount` instead.
 - `ChannelModel.extraData` and `Member.extraData` are renamed `custom`, and so are `Channel.extraData`, `Channel.extraDataStream` (now `customStream`), and the `extraData` argument of the `Channel` constructor and of `StreamChatClient.channel`.
-- `ChannelModel.disabled`, `hidden`, `muted`, `blocked`, `truncatedAt`, `truncatedBy` and the auto-translation settings, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires` and `deletedAt`, are fields instead of entries in the custom data, so `custom` no longer holds `hidden`, `status` and the rest, and an entry with that name in `custom` or in `copyWith(custom:)` no longer sets the field.
+- Several channel and member values the custom data used to hold, such as `ChannelModel.hidden`, `ChannelModel.truncatedAt` and `Member.status`, are fields instead: `custom` no longer holds them, `toJson` no longer writes them, and an entry with one of their names in `custom` or in `copyWith(custom:)` no longer sets the field.
 - `ChannelModel.custom` and `Member.custom` hold the custom data exactly as the API returns it, and `toJson` leaves out an entry named like one of the model's own fields.
-- `Member.custom` no longer holds `role`; read `channelRole`.
 
 🐞 Fixed
 
@@ -149,7 +147,7 @@
 - Added optional `reason` and `custom` arguments to `flagMessage` and `flagUser`, recorded with the flag.
 - Added an optional `timeout` to `StreamChatClient.moderation.muteUser` that expires the mute.
 - Added `StreamChatClient.moderation.muteUsers` and `unmuteUsers`, which mute and unmute several users in one call and report the ids that matched no user.
-- Added `ChannelModel.muted`, `blocked`, `truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires`, `deletedAt` and `topLevelFields`; the constructors and `copyWith` accept the new fields.
+- Added `ChannelModel.muted`, `blocked`, `truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires` and `deletedAt`; the constructors and `copyWith` accept the new fields.
 - Added a `prev` argument to `queryPolls` and `queryPollVotes`, and a `prev` cursor on their responses, for paging backwards.
 
 🔒 Security
