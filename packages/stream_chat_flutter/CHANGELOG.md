@@ -8,6 +8,7 @@
 🔄 Changed
 
 - The default channel error state keys its copy off the failure kind rather than a transport enum, so "slow connection" now covers every timeout and "no internet" covers every other failure to reach the server.
+- `StreamUserAvatar` shows its placeholder icon for a user with no name, instead of initials taken from their id.
 
 ## Upcoming
 

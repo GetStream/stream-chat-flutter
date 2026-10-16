@@ -12,33 +12,11 @@ part 'user.g.dart';
 @JsonSerializable(includeIfNull: false)
 class User extends Equatable {
   /// Creates a new user.
-  ///
-  /// {@template name}
-  /// If an [name] is provided it will be set on [extraData] with a `key`
-  /// of 'name'.
-  ///
-  /// For example:
-  /// ```dart
-  /// final user = User(id: 'id', name: 'Sahil Kumar');
-  /// print(user.name == user.extraData['name']); // true
-  /// ```
-  /// {@endtemplate}
-  ///
-  /// {@template image}
-  /// If an [image] is provided it will be set on [extraData] with a `key`
-  /// of 'image'.
-  ///
-  /// For example:
-  /// ```dart
-  /// final user = User(id: 'id', image: 'https://getstream.io/image.png');
-  /// print(user.image == user.extraData['image']); // true
-  /// ```
-  /// {@endtemplate}
   User({
     required this.id,
     this.role,
-    String? name,
-    String? image,
+    this.name,
+    this.image,
     this.createdAt,
     this.updatedAt,
     this.lastActive,
@@ -50,23 +28,23 @@ class User extends Equatable {
     this.invisible,
     this.teamsRole,
     this.avgResponseTime,
-    Map<String, Object?> extraData = const {},
-  }) : // For backwards compatibility, set 'name', 'image' in [extraData].
-       extraData = {
-         ...extraData,
-         if (name != null) 'name': name,
-         if (image != null) 'image': image,
-       };
+    Map<String, Object?> custom = const {},
+    this.deactivatedAt,
+    this.deletedAt,
+    this.shadowBanned,
+    this.blockedUserIds = const [],
+  }) : custom = {...custom};
 
   /// Create a new instance from json.
   factory User.fromJson(Map<String, dynamic> json) =>
       _$UserFromJson(Serializer.moveToExtraDataFromRoot(json, topLevelFields));
 
-  /// Known top level fields.
-  ///
-  /// Useful for [Serializer] methods.
+  /// The JSON keys [User.fromJson] reads into named fields, or leaves out;
+  /// every other key is kept in [custom].
   static const topLevelFields = [
     'id',
+    'name',
+    'image',
     'role',
     'created_at',
     'updated_at',
@@ -79,32 +57,34 @@ class User extends Equatable {
     'invisible',
     'teams_role',
     'avg_response_time',
+    'deactivated_at',
+    'deleted_at',
+    'shadow_banned',
+    'blocked_user_ids',
   ];
 
   /// User id.
   final String id;
 
-  /// Shortcut for user name.
+  /// The user's name.
   ///
-  /// {@macro name}
-  @JsonKey(includeToJson: false, includeFromJson: false)
-  String get name {
-    final name = extraData['name'].safeCast<String>();
-    if (name != null && name.isNotEmpty) return name;
+  /// Null when the user has none.
+  final String? name;
 
-    return id;
-  }
-
-  /// Shortcut for user image.
+  /// The user's [name], or their [id] when the name is missing or empty.
   ///
-  /// {@macro image}
+  /// Suited to naming a user by text, such as in a mention; [name] tells an
+  /// unnamed user apart.
   @JsonKey(includeToJson: false, includeFromJson: false)
-  String? get image {
-    final image = extraData['image'].safeCast<String>();
-    if (image != null && image.isNotEmpty) return image;
+  String get nameOrId => switch (name) {
+    final name? when name.isNotEmpty => name,
+    _ => id,
+  };
 
-    return null;
-  }
+  /// The URL of the user's image.
+  ///
+  /// Null when the user has none.
+  final String? image;
 
   /// User role.
   final String? role;
@@ -144,15 +124,44 @@ class User extends Equatable {
   /// The average response time of the user in seconds.
   final int? avgResponseTime;
 
-  /// Map of custom user extraData.
-  final Map<String, Object?> extraData;
+  /// This user's custom data.
+  ///
+  /// It may hold a key named like one of the user's own fields; [toJson] leaves
+  /// such an entry out so it never overwrites the field.
+  @JsonKey(name: 'extra_data')
+  final Map<String, Object?> custom;
+
+  /// The date at which the user was deactivated.
+  ///
+  /// Null while the user is active, or when not known.
+  final DateTime? deactivatedAt;
+
+  /// The date at which the user was deleted.
+  ///
+  /// Null while the user exists, or when not known.
+  final DateTime? deletedAt;
+
+  /// Whether the user is shadow banned, so that their messages reach no one
+  /// else without them being told.
+  ///
+  /// Null when not known.
+  final bool? shadowBanned;
+
+  /// The ids of the users this user blocked.
+  ///
+  /// Empty for anyone but the current user.
+  final List<String> blockedUserIds;
 
   /// List of users to list of userIds.
   static List<String>? toIds(List<User>? users) => users?.map((u) => u.id).toList();
 
   /// Serialize to json.
+  ///
+  /// Writes the entries of [custom] at the root, leaving out any named like one
+  /// of [topLevelFields].
   Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
     _$UserToJson(this),
+    topLevelFields: topLevelFields,
   );
 
   /// Creates a copy of [User] with specified attributes overridden.
@@ -165,7 +174,7 @@ class User extends Equatable {
     DateTime? updatedAt,
     DateTime? lastActive,
     bool? online,
-    Map<String, Object?>? extraData,
+    Map<String, Object?>? custom,
     bool? banned,
     DateTime? banExpires,
     List<String>? teams,
@@ -173,20 +182,20 @@ class User extends Equatable {
     bool? invisible,
     Map<String, String>? teamsRole,
     int? avgResponseTime,
+    DateTime? deactivatedAt,
+    DateTime? deletedAt,
+    bool? shadowBanned,
+    List<String>? blockedUserIds,
   }) => User(
     id: id ?? this.id,
     role: role ?? this.role,
-    name:
-        name ??
-        extraData?['name'] as String? ??
-        // Using extraData value in order to not use id as name.
-        this.extraData['name'] as String?,
-    image: image ?? extraData?['image'] as String? ?? this.image,
+    name: name ?? this.name,
+    image: image ?? this.image,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     lastActive: lastActive ?? this.lastActive,
     online: online ?? this.online,
-    extraData: extraData ?? this.extraData,
+    custom: custom ?? this.custom,
     banned: banned ?? this.banned,
     banExpires: banExpires ?? this.banExpires,
     teams: teams ?? this.teams,
@@ -194,15 +203,21 @@ class User extends Equatable {
     invisible: invisible ?? this.invisible,
     teamsRole: teamsRole ?? this.teamsRole,
     avgResponseTime: avgResponseTime ?? this.avgResponseTime,
+    deactivatedAt: deactivatedAt ?? this.deactivatedAt,
+    deletedAt: deletedAt ?? this.deletedAt,
+    shadowBanned: shadowBanned ?? this.shadowBanned,
+    blockedUserIds: blockedUserIds ?? this.blockedUserIds,
   );
 
   @override
   List<Object?> get props => [
     id,
     role,
+    name,
+    image,
     lastActive,
     online,
-    extraData,
+    custom,
     banned,
     banExpires,
     teams,
@@ -210,6 +225,10 @@ class User extends Equatable {
     invisible,
     teamsRole,
     avgResponseTime,
+    deactivatedAt,
+    deletedAt,
+    shadowBanned,
+    blockedUserIds,
   ];
 }
 
@@ -231,14 +250,14 @@ class UserFilterField extends FilterField<User> {
   /// off an instance with [value].
   UserFilterField(super.remote, super.value);
 
-  /// Creates a field the SDK does not model, read from [User.extraData].
+  /// Creates a field the SDK does not model, read from [User.custom].
   ///
   /// A user query compares a custom field for equality only. Anything else is
   /// rejected.
   ///
   /// **Supported operators:** `$eq`, `$in`
   factory UserFilterField.custom(String remote) {
-    return UserFilterField(remote, (it) => it.extraData[remote]);
+    return UserFilterField(remote, (it) => it.custom[remote]);
   }
 
   /// Filters users by their id.
@@ -262,7 +281,7 @@ class UserFilterField extends FilterField<User> {
   /// **Supported operators:** `$eq`, `$autocomplete`
   static final username = UserFilterField(
     'username',
-    (it) => it.extraData['username'].safeCast<String>(),
+    (it) => it.custom['username'].safeCast<String>(),
   );
 
   /// Filters users by their email address.
@@ -270,7 +289,7 @@ class UserFilterField extends FilterField<User> {
   /// **Supported operators:** `$eq`, `$in`
   static final email = UserFilterField(
     'email',
-    (it) => it.extraData['email'].safeCast<String>(),
+    (it) => it.custom['email'].safeCast<String>(),
   );
 
   /// Filters users by their role.
@@ -302,7 +321,7 @@ class UserFilterField extends FilterField<User> {
   /// **Supported operators:** `$eq`
   static final shadowBanned = UserFilterField(
     'shadow_banned',
-    (it) => it.extraData['shadow_banned'].safeCast<bool>(),
+    (it) => it.shadowBanned,
   );
 
   /// Filters users by whether they bypass moderation.
@@ -310,7 +329,7 @@ class UserFilterField extends FilterField<User> {
   /// **Supported operators:** `$eq`
   static final bypassModeration = UserFilterField(
     'bypass_moderation',
-    (it) => it.extraData['bypass_moderation'].safeCast<bool>(),
+    (it) => it.custom['bypass_moderation'].safeCast<bool>(),
   );
 
   /// Filters users by when they were last online.
@@ -389,11 +408,11 @@ class UserSortField extends SortField<User> {
   /// For a name the SDK has not modelled; prefer the fields declared here.
   UserSortField(super.remote, super.localValue);
 
-  /// Creates a field the SDK does not model, read from [User.extraData].
+  /// Creates a field the SDK does not model, read from [User.custom].
   ///
   /// Declared only where the API accepts a custom sort field.
   factory UserSortField.custom(String remote) {
-    return UserSortField(remote, (it) => it.extraData[remote]);
+    return UserSortField(remote, (it) => it.custom[remote]);
   }
 
   /// Sorts users by their ID.
@@ -422,10 +441,7 @@ class UserSortField extends SortField<User> {
   /// sorted locally matches the order a query returns.
   static final name = UserSortField(
     'name',
-    // Deliberately not `User.name`, which answers the id when a user has no
-    // name — sorting by that locally would scatter unnamed users among the
-    // named ones, where a query keeps them together.
-    (it) => it.extraData['name'].safeCast<String>()?.let(normalizeStringForSort),
+    (it) => it.name?.let(normalizeStringForSort),
   );
 
   /// Sorts users by their role.

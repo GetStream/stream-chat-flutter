@@ -34,9 +34,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
     if (users.isEmpty) return '';
     final first = users.first;
     if (users.length == 1) {
-      return '${first.name}が入力しています';
+      return '${first.nameOrId}が入力しています';
     }
-    return '${first.name}と${users.length - 1}人が入力しています';
+    return '${first.nameOrId}と${users.length - 1}人が入力しています';
   }
 
   @override
@@ -64,7 +64,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   }) {
     final pinnedByCurrentUser = currentUser.id == pinnedBy.id;
     if (pinnedByCurrentUser) return 'あなたのピン';
-    return '${pinnedBy.name}のピン';
+    return '${pinnedBy.nameOrId}のピン';
   }
 
   @override

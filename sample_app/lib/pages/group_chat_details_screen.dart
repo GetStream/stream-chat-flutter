@@ -193,7 +193,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                                       user: user,
                                     ),
                                     title: Text(
-                                      user.name,
+                                      user.nameOrId,
                                       style: const TextStyle(fontWeight: FontWeight.bold),
                                     ),
                                     contentPadding: const EdgeInsets.symmetric(

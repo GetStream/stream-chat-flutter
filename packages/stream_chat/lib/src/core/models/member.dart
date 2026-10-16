@@ -338,7 +338,7 @@ class MemberFilterField extends FilterField<Member> {
   /// **Supported operators:** `$eq`, `$in`, `$q`, `$autocomplete`
   static final userEmail = MemberFilterField(
     'user.email',
-    (it) => it.user?.extraData['email'].safeCast<String>(),
+    (it) => it.user?.custom['email'].safeCast<String>(),
   );
 
   /// Filters members by whether their user is deactivated.
@@ -346,7 +346,7 @@ class MemberFilterField extends FilterField<Member> {
   /// **Supported operators:** `$eq`
   static final userDeactivated = MemberFilterField(
     'user.nd_deactivated',
-    (it) => it.user?.extraData['nd_deactivated'].safeCast<bool>(),
+    (it) => it.user?.custom['nd_deactivated'].safeCast<bool>(),
   );
 
   /// Filters members by whether they muted notifications for the channel.
@@ -443,11 +443,7 @@ class MemberSortField extends SortField<Member> {
   /// Slower than the other member sorts.
   static final name = MemberSortField(
     'name',
-    // Reads the raw name rather than `User.name`, which falls back to the id.
-    (it) {
-      final name = it.user?.extraData['name'];
-      return name.safeCast<String>()?.let(normalizeStringForSort);
-    },
+    (it) => it.user?.name?.let(normalizeStringForSort),
   );
 
   /// Sorts members by the channel role.

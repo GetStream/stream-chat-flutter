@@ -115,7 +115,7 @@ class DefaultStreamMessageFooter extends StatelessWidget {
     if (message.user case final user? when channelKind == .group && user.id != currentUser?.id) {
       usernameWidget = ExcludeSemantics(
         excluding: excluding,
-        child: Text(user.name, maxLines: 1, overflow: .ellipsis),
+        child: Text(user.nameOrId, maxLines: 1, overflow: .ellipsis),
       );
     }
 

@@ -209,7 +209,7 @@ class _ReactionDetailSheetState extends State<ReactionDetailSheet> {
 
               return StreamListTile(
                 leading: StreamUserAvatar(size: .md, user: user, showOnlineIndicator: false),
-                title: Text(user.name),
+                title: Text(user.nameOrId),
                 subtitle: isOwnReaction ? Text(context.translations.tapToRemoveReactionLabel) : null,
                 trailing: StreamEmoji(size: .md, emoji: resolver.resolve(reaction.type)),
                 onTap: switch (isOwnReaction) {
