@@ -45,6 +45,7 @@
 
 ## Risks
 
+- A `try`/`catch` around `hideChannel`, `showChannel`, `deleteChannel` or their `Channel` and `StreamChannelListController` counterparts still compiles but no longer catches a failed call.
 
 ## Definition of done
 

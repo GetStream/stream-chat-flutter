@@ -42,7 +42,7 @@ class PollVote with _$PollVote {
 
   /// The unique identifier of the option this vote selects.
   ///
-  /// Empty for an answer, which selects no option.
+  /// An empty string for an answer, which selects no option.
   @override
   final String? optionId;
 
@@ -68,13 +68,13 @@ class PollVote with _$PollVote {
 
   /// The unique identifier of the user who cast this vote.
   ///
-  /// Null on someone else's vote in an anonymous poll.
+  /// May be null in an anonymous poll, even on the current user's own vote.
   @override
   final String? userId;
 
   /// The user who cast this vote.
   ///
-  /// Null on someone else's vote in an anonymous poll.
+  /// May be null in an anonymous poll, even on the current user's own vote.
   @override
   final User? user;
 

@@ -177,7 +177,7 @@ class StreamPollController extends ValueNotifier<Poll> {
     return invalidErrors;
   }
 
-  /// Adds a new option with the provided [text] and [custom].
+  /// Adds an option with [text] and the custom data [custom].
   ///
   /// The new option will be added to the end of the list of options.
   void addOption(
@@ -189,8 +189,7 @@ class StreamPollController extends ValueNotifier<Poll> {
     value = value.copyWith(options: [...options, newOption]);
   }
 
-  /// Updates the option at the provided [index] with the provided [text] and
-  /// [custom].
+  /// Updates the option at [index] to [text] and the custom data [custom].
   void updateOption(
     String text, {
     required int index,

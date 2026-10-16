@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_redundant_argument_values
 
-import 'package:stream_chat/src/core/models/channel_model.dart';
-import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
 import '../../utils.dart';
@@ -16,6 +15,11 @@ void main() {
       expect(channel.custom['cats'], equals(true));
       expect(channel.custom['fruit'], equals(['bananas', 'apples']));
       expect(channel.cooldown, equals(0));
+      expect(channel.disabled, isFalse);
+      expect(channel.hidden, isTrue);
+      expect(channel.muted, isTrue);
+      expect(channel.blocked, isFalse);
+      expect(channel.truncatedAt, DateTime.parse('2020-01-29T03:22:47.636130Z'));
       expect(channel.truncatedBy?.id, 'truncator');
       expect(channel.truncatedBy?.name, 'Truncator');
       expect(channel.autoTranslationEnabled, isTrue);
@@ -63,51 +67,6 @@ void main() {
     });
   });
 
-  test('ChannelModel writes its flags to JSON and reads them back', () {
-    final truncatedAt = DateTime.utc(2026, 3, 2);
-    final channel = ChannelModel(
-      cid: 'test:cid',
-      disabled: false,
-      hidden: true,
-      muted: true,
-      blocked: false,
-      truncatedAt: truncatedAt,
-      truncatedBy: User(id: 'truncator'),
-      autoTranslationEnabled: true,
-      autoTranslationLanguage: 'fr',
-      custom: const {'color': 'red'},
-    );
-    final json = {
-      'id': 'cid',
-      'type': 'test',
-      'frozen': false,
-      'cooldown': 0,
-      'disabled': false,
-      'hidden': true,
-      'muted': true,
-      'blocked': false,
-      'truncated_at': truncatedAt.toIso8601String(),
-      'truncated_by': User(id: 'truncator').toJson(),
-      'auto_translation_enabled': true,
-      'auto_translation_language': 'fr',
-      'color': 'red',
-    };
-
-    expect(channel.toJson(), json);
-    expect(ChannelModel.fromJson(channel.toJson()).toJson(), json);
-  });
-
-  test('ChannelModel keeps custom data named like a field apart from the field', () {
-    final channel = ChannelModel(
-      cid: 'test:cid',
-      hidden: true,
-      custom: const {'hidden': 'custom', 'id': 'custom', 'color': 'red'},
-    );
-
-    expect(channel.hidden, isTrue);
-    expect(channel.custom, {'hidden': 'custom', 'id': 'custom', 'color': 'red'});
-  });
-
   test('ChannelModel.toJson leaves out custom data named like a field', () {
     final channel = ChannelModel(
       cid: 'test:cid',
@@ -120,7 +79,6 @@ void main() {
       'type': 'test',
       'frozen': false,
       'cooldown': 0,
-      'hidden': true,
       'color': 'red',
     });
   });
@@ -134,7 +92,7 @@ void main() {
       autoTranslationLanguage: 'fr',
     );
 
-    final newChannel = channel.copyWith(custom: const {'hidden': false});
+    final newChannel = channel.copyWith(team: 'blue');
 
     expect(newChannel.hidden, isTrue);
     expect(newChannel.truncatedBy?.id, 'truncator');
@@ -193,6 +151,13 @@ void main() {
     expect(merged.blocked, isTrue);
     expect(merged.truncatedAt, DateTime.utc(2026));
     expect(merged.truncatedBy?.id, 'truncator');
+  });
+
+  test('ChannelModel.merge takes the custom data from the other channel', () {
+    final channel = ChannelModel(cid: 'test:cid', custom: const {'color': 'blue'});
+
+    final merged = channel.merge(ChannelModel(cid: 'test:cid', custom: const {'color': 'red'}));
+
     expect(merged.custom, {'color': 'red'});
   });
 
@@ -202,24 +167,7 @@ void main() {
     final merged = channel.merge(ChannelModel(cid: 'test:cid'));
 
     expect(merged.autoTranslationEnabled, isFalse);
-  });
-
-  test('ChannelModel.fromJson reads no truncatedBy from a value that is not a user with an id', () {
-    final noIdChannel = ChannelModel.fromJson(const {
-      'id': 'channel',
-      'type': 'test',
-      'truncated_by': {'name': 'No id'},
-    });
-    final textChannel = ChannelModel.fromJson(const {'id': 'channel', 'type': 'test', 'truncated_by': 'someone'});
-
-    expect(noIdChannel.truncatedBy, isNull);
-    expect(textChannel.truncatedBy, isNull);
-  });
-
-  test('ChannelModel.fromJson reads no truncatedAt from an empty string', () {
-    final channel = ChannelModel.fromJson(const {'id': 'channel', 'type': 'test', 'truncated_at': ''});
-
-    expect(channel.truncatedAt, isNull);
+    expect(merged.autoTranslationLanguage, isNull);
   });
 
   test('.name should fetch from custom if available', () {

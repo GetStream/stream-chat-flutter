@@ -78,7 +78,7 @@ class Poll with _$Poll {
   @override
   final List<PollOption> options;
 
-  /// Who can see which option each user voted for.
+  /// The rule for who can see which option each user voted for.
   ///
   /// Defaults to [VotingVisibility.public].
   @override
@@ -92,6 +92,8 @@ class Poll with _$Poll {
 
   /// The maximum number of options each user may vote for, or null for no
   /// limit.
+  ///
+  /// Applies only when [enforceUniqueVote] is false.
   @override
   final int? maxVotesAllowed;
 
@@ -101,7 +103,7 @@ class Poll with _$Poll {
   @override
   final bool allowUserSuggestedOptions;
 
-  /// Whether users may leave a free-form answer.
+  /// Whether users may add a free-form answer.
   ///
   /// Defaults to false.
   @override
@@ -111,7 +113,7 @@ class Poll with _$Poll {
   @override
   final bool isClosed;
 
-  /// The total number of answers left on this poll.
+  /// The total number of answers added to this poll.
   @override
   final int answersCount;
 
@@ -131,7 +133,7 @@ class Poll with _$Poll {
   @override
   late final List<PollVote> latestVotes = [...latestVotesByOption.values.flattened];
 
-  /// The most recent answers left on this poll.
+  /// The most recent answers added to this poll.
   @override
   final List<PollVote> latestAnswers;
 
@@ -287,7 +289,7 @@ class PollFilterField extends FilterField<Poll> {
   /// **Supported operators:** `$eq`
   static final votingVisibility = PollFilterField(
     'voting_visibility',
-    (it) => it.votingVisibility.rawType,
+    (it) => it.votingVisibility,
   );
 
   /// Filters polls by their creation date.

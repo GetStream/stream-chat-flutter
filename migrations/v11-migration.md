@@ -238,7 +238,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `Poll.custom` / `PollOption.custom` entry named like one of the model's own fields | the same entry, as custom data | `retyped` | Sent and returned as custom data; v10's request body let it overwrite the field |
 | `StreamPollController.addOption(extraData:)` / `.updateOption(extraData:)` (`stream_chat_flutter_core`) | `custom:` | `renamed` | Follows `PollOption.custom` |
 | `Poll.topLevelFields` / `PollOption.topLevelFields` | — | `removed` | They listed the JSON keys of models that no longer have JSON |
-| `VotingVisibility` (enum) | `VotingVisibility` (extension type over `String`) | `retyped` | `VotingVisibility.public` and `.anonymous` are unchanged; a `switch` needs a default arm, and `.name` / `.values` are gone — read `.rawType` |
+| `VotingVisibility` (enum) | `VotingVisibility` (extension type over `String`) | `retyped` | `VotingVisibility.public` and `.anonymous` are unchanged; a `switch` needs a default arm, and `.name` / `.values` are gone — it is a `String`, so use it directly |
 | `Poll.fromJson` / `.toJson`, `PollOption.fromJson` / `.toJson`, `PollVote.fromJson` / `.toJson` | — | `removed` | The models are plain classes; construct them directly. `Message.poll` and the poll events still decode from the same keys |
 | — | `PollOption.fromData` / `.toData` | `added` | Read and write only the format the offline database stores; not a codec for API payloads |
 | `CreatePollResponse()..poll = …` and the other response setters | `PollResponse(duration: …, poll: …)` | `retyped` | The responses are plain classes with a const constructor and final fields |
@@ -281,10 +281,9 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamChatApi.channel.markRead` / `markUnread` / `markUnreadByTimestamp` / `markThreadRead` / `markThreadUnread` / `markAllRead` / `markChannelsDelivered` | the `StreamChatClient` methods | `removed` | The endpoints moved to the generated client |
 | `ChannelModel.extraData` / `Member.extraData` | `ChannelModel.custom` / `Member.custom` | `renamed` | The wire's name for it; also the constructor and `copyWith` arguments |
 | `Channel.extraData` / `Channel.extraDataStream` / `Channel(…, extraData:)` / `StreamChatClient.channel(…, extraData:)` | `Channel.custom` / `Channel.customStream` / `custom:` | `renamed` | Follows `ChannelModel.custom`; the setter is renamed too |
-| `channel.extraData['disabled']` / `['hidden']` / `['muted']` / `['blocked']` / `['truncated_at']` / `['truncated_by']` / `['auto_translation_enabled']` / `['auto_translation_language']` | `ChannelModel.disabled` / `hidden` / `muted` / `blocked` / `truncatedAt` / `truncatedBy` / `autoTranslationEnabled` / `autoTranslationLanguage` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them |
-| `member.extraData['notifications_muted']` / `['status']` / `['ban_from_future_channels']` / `['future_channel_ban_expires']` / `['deleted_at']` | `Member.notificationsMuted` / `status` / `banFromFutureChannels` / `futureChannelBanExpires` / `deletedAt` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them |
+| `channel.extraData['disabled']` / `['hidden']` / `['muted']` / `['blocked']` / `['truncated_at']` / `['truncated_by']` / `['auto_translation_enabled']` / `['auto_translation_language']` | `ChannelModel.disabled` / `hidden` / `muted` / `blocked` / `truncatedAt` / `truncatedBy` / `autoTranslationEnabled` / `autoTranslationLanguage` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them, and `toJson` no longer writes them |
+| `member.extraData['notifications_muted']` / `['status']` / `['ban_from_future_channels']` / `['future_channel_ban_expires']` / `['deleted_at']` | `Member.notificationsMuted` / `status` / `banFromFutureChannels` / `futureChannelBanExpires` / `deletedAt` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them, and `toJson` no longer writes them |
 | `ChannelModel.custom` / `Member.custom` entry named like one of the model's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; `toJson` leaves it out so it cannot overwrite the field |
-| `member.extraData['role']` | `Member.channelRole` | `removed` | The server deprecated `role` for `channel_role` |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -772,6 +771,7 @@ result.fold(
 
 > **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call. Each write
 > answers its own envelope so a field the API adds later reaches you without another break.
+
 ### Channel and Member Custom Data
 
 **`extraData` is renamed `custom` on `ChannelModel`, `Member` and `Channel`.** That covers the fields, the
@@ -804,9 +804,11 @@ final hidden = channel.hidden;
 final shown = model.copyWith(hidden: false);
 ```
 
+**`ChannelModel.toJson` and `Member.toJson` no longer write these fields**, where v10 wrote them at the root with the
+rest of the custom data. Read them from the model rather than from its JSON.
+
 **`custom` is the custom data exactly as the API returns it.** An entry named like one of the model's own fields
 stays in `custom` and leaves the field alone; `toJson` leaves it out, so it cannot overwrite the field.
-`Member.custom` no longer holds `role`, which the server deprecated: read `channelRole`.
 
 **Filter and sort on a flag through its declared field,** such as `ChannelFilterField.hidden`, rather than
 `.custom('hidden')`, which reads `custom` locally and finds nothing there.
@@ -1050,7 +1052,7 @@ await channel.queryPollVotes(pollId, limit: 10, next: cursor);
 
 **`VotingVisibility` is an extension type over its wire string.** `VotingVisibility.public` and
 `VotingVisibility.anonymous` read the same, and a visibility the SDK does not name is kept rather than rejected.
-A `switch` over it needs a default arm, and `.name` / `.values` are gone — read `.rawType`.
+A `switch` over it needs a default arm, and `.name` / `.values` are gone — it is a `String`, so use it directly.
 
 **`Poll`, `PollOption`, `PollVote` and the responses no longer decode JSON.** Build them with their constructors —
 `PollResponse(duration: '0ms', poll: poll)` where v10 wrote `CreatePollResponse()..poll = poll`. `Message.poll` and
