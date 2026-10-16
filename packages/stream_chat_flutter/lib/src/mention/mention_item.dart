@@ -246,7 +246,7 @@ class _MentionUserItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return _MentionItem(
       leading: StreamUserAvatar(size: .md, user: user),
-      title: user.name,
+      title: user.nameOrId,
       onTap: onTap,
     );
   }

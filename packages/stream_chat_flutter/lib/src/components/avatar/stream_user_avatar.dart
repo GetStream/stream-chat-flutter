@@ -183,7 +183,7 @@ class _StreamUserAvatarPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userInitials = user.name.initials;
+    final userInitials = user.name?.initials;
     final Widget content;
     if (userInitials != null && userInitials.isNotEmpty) {
       content = switch (size) {

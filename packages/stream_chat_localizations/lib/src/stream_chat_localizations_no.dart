@@ -36,9 +36,9 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
     if (users.isEmpty) return '';
     final first = users.first;
     if (users.length == 1) {
-      return '${first.name} skriver';
+      return '${first.nameOrId} skriver';
     }
-    return '${first.name} og ${users.length - 1} flere skriver';
+    return '${first.nameOrId} og ${users.length - 1} flere skriver';
   }
 
   @override
@@ -66,7 +66,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   }) {
     final pinnedByCurrentUser = currentUser.id == pinnedBy.id;
     if (pinnedByCurrentUser) return 'Festet av deg';
-    return 'Festet av ${pinnedBy.name}';
+    return 'Festet av ${pinnedBy.nameOrId}';
   }
 
   @override

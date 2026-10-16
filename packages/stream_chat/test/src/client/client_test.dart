@@ -1875,6 +1875,49 @@ void main() {
       expect(pushPreferences?.disabledUntil, pushPreference.disabledUntil);
     });
 
+    test('a user.updated event for the current user replaces their privacy settings', () async {
+      client.state.currentUser = client.state.currentUser!.copyWith(
+        privacySettings: const PrivacySettings(typingIndicators: TypingIndicators(enabled: true)),
+      );
+
+      client.handleEvent(
+        Event.fromJson(const {
+          'type': EventType.userUpdated,
+          'user': {
+            'id': userId,
+            'privacy_settings': {
+              'typing_indicators': {'enabled': false},
+            },
+          },
+        }),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(client.state.currentUser!.privacySettings?.typingIndicators?.enabled, isFalse);
+    });
+
+    test('a user.updated event for the current user keeps the fields only an own user has', () async {
+      client.state.currentUser = client.state.currentUser!.copyWith(
+        unreadCount: 3,
+        totalUnreadCountByTeam: {'team-1': 3},
+        latestHiddenChannels: ['messaging:hidden'],
+      );
+
+      client.handleEvent(
+        Event.fromJson(const {
+          'type': EventType.userUpdated,
+          'user': {'id': userId, 'name': 'Renamed'},
+        }),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      final currentUser = client.state.currentUser!;
+      expect(currentUser.name, 'Renamed');
+      expect(currentUser.unreadCount, 3);
+      expect(currentUser.totalUnreadCountByTeam, {'team-1': 3});
+      expect(currentUser.latestHiddenChannels, ['messaging:hidden']);
+    });
+
     test('StreamChatClient.listUserGroups sends the pagination arguments and returns the listed groups', () async {
       const limit = 10;
       const idGt = 'cursor-group-id';

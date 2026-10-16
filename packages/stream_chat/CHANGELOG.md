@@ -129,17 +129,22 @@
 - `PartialUpdateUserRequest` is renamed `UpdateUserPartialRequest`.
 - `UpdateUserPartialRequest` no longer encodes to JSON or extends `Equatable`, so `props` is removed; it still compares by value and gains `copyWith`.
 - `UpdateUsersResponse` no longer decodes from JSON, is immutable, built through a const constructor, compares by value, gains `copyWith`, and its `duration` is a non-nullable `String`.
-- The users in an `UpdateUsersResponse` no longer carry their devices, mutes, channel mutes, privacy settings, unread counts, blocked user ids, hidden channels or token revocation time in `extraData`.
+- The users in an `UpdateUsersResponse` no longer carry their devices, mutes, channel mutes, privacy settings, unread counts, hidden channels or token revocation time in their custom data.
 - `updateUser` and `updateUsers` no longer send the user's `role`, `teams` and `teamsRole`.
 - `StreamChatApi.user.updateUsers` and `partialUpdateUsers` are removed; call `updateUsers` and `updateUsersPartial` on `StreamChatClient` instead.
 - `ChannelModel.extraData` and `Member.extraData` are renamed `custom`, and so are `Channel.extraData`, `Channel.extraDataStream` (now `customStream`), and the `extraData` argument of the `Channel` constructor and of `StreamChatClient.channel`.
 - `ChannelModel.disabled`, `hidden`, `muted`, `blocked`, `truncatedAt`, `truncatedBy` and the auto-translation settings, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires` and `deletedAt`, are fields instead of entries in the custom data, so `custom` no longer holds `hidden`, `status` and the rest, and an entry with that name in `custom` or in `copyWith(custom:)` no longer sets the field.
 - `ChannelModel.custom` and `Member.custom` hold the custom data exactly as the API returns it, and `toJson` leaves out an entry named like one of the model's own fields.
 - `Member.custom` no longer holds `role`; read `channelRole`.
+- `User.extraData` is renamed `custom`, and so is the `extraData` argument of the `User` and `OwnUser` constructors and `copyWith`.
+- `User.name` is nullable and no longer answers the user's id when they have no name; read `User.nameOrId` for that. A blank name or image is stored as null.
+- `User.name`, `image`, `deactivatedAt`, `deletedAt` and `shadowBanned` are fields instead of entries in the custom data, so `custom` no longer holds them or the keys only an own user carries, and an entry with one of those names in `custom` or in `copyWith(custom:)` no longer sets the field.
+- `User.custom` holds the custom data exactly as the API returns it, and `toJson` leaves out an entry named like one of the user's own fields.
+- `OwnUser.fromUser` no longer reads devices, mutes, unread counts, push preferences or privacy settings out of the user's custom data; they are left at their defaults.
 
 🐞 Fixed
 
-- `connectGuestUser` no longer copies the user's online status, ban, unread counts, devices and push preferences into the created guest's `extraData`.
+- `connectGuestUser` no longer copies the user's online status, ban, unread counts, devices and push preferences into the created guest's custom data.
 
 - `updateUser` and `updateUsers` no longer store the user's online status, ban and timestamps, or an own user's devices, mutes and unread counts, as custom data.
 
@@ -167,7 +172,7 @@
 - Added optional `reason` and `custom` arguments to `flagMessage` and `flagUser`, recorded with the flag.
 - Added an optional `timeout` to `StreamChatClient.moderation.muteUser` that expires the mute.
 - Added `StreamChatClient.moderation.muteUsers` and `unmuteUsers`, which mute and unmute several users in one call and report the ids that matched no user.
-- Added `User.deactivatedAt`, `deletedAt` and `shadowBanned`; the constructors accept the new fields.
+- Added `User.deactivatedAt`, `deletedAt`, `shadowBanned`, `blockedUserIds` and `nameOrId`, and `OwnUser.unreadCount`, `totalUnreadCountByTeam` and `latestHiddenChannels`; the constructors and `copyWith` accept the new fields.
 - Added `ChannelModel.muted`, `blocked`, `truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires`, `deletedAt` and `topLevelFields`; the constructors and `copyWith` accept the new fields.
 - Added a `prev` argument to `queryPolls` and `queryPollVotes`, and a `prev` cursor on their responses, for paging backwards.
 

@@ -48,10 +48,23 @@
   full-user type: a client-side caller can only update itself, the server blanks the private fields
   for anyone else, and the caller's own are on `currentUser`. `membership_deletion_task_id` is always
   empty and stays out.
-- **`User` gains `deactivatedAt`, `deletedAt` and `shadowBanned`** as getters over `extraData`, the
-  way `Member` promoted its fields. Each generated user mapper fills the ones its response carries
-  (`UserResponse` has no `shadowBanned`), so the values v1 left raw in `extraData` are no longer lost;
-  persistence needs no change.
+- **`User` and `OwnUser` promote the fields v10 parked in `extraData`, and rename it `custom`**
+  (README rule 9), since these calls are the first to map a user. `User.name`, `image`,
+  `deactivatedAt`, `deletedAt` and `shadowBanned` are fields with persistence columns;
+  `blockedUserIds` moves up from `OwnUser`, and `OwnUser` gains `unreadCount`,
+  `totalUnreadCountByTeam` and `latestHiddenChannels`. `revoke_tokens_issued_before` is left out.
+  Each generated user mapper fills the ones its response carries (`UserResponse` has no
+  `shadowBanned`).
+- **`User.name` is nullable and has no fallback to `id`;** `User.nameOrId` has it. A blank name or
+  image is stored as null. The UI names a user by `nameOrId` everywhere except avatar initials, which
+  show the placeholder icon for an unnamed user, and filters and sorts, which read the raw `name`.
+- **`custom` is the wire's, verbatim,** and the v1 writers leave out a custom entry named like a key,
+  including the keys only an own user carries, so it cannot overwrite the field. `OwnUser.fromUser`
+  copies the user's fields and no longer reads an own user's fields out of the custom data.
+- **`OwnUser.merge` takes the other user's fields,** as before; the `user.updated` handler also keeps
+  the three new unread fields, which the event leaves out. A `user.updated` event's user is decoded
+  again as an `OwnUser`, so the privacy settings it carries for the current user replace theirs, as in
+  v10 — a temporary adapter (README) for the WebSocket v2 move to replace.
 
 ## Risks
 

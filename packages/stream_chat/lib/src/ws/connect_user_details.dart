@@ -1,7 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import '../core/models/own_user.dart';
 import '../core/models/privacy_settings.dart';
-import '../core/util/extension.dart';
 import '../core/util/serializer.dart';
 
 part 'connect_user_details.g.dart';
@@ -36,13 +35,12 @@ class ConnectUserDetails {
   factory ConnectUserDetails.fromOwnUser(OwnUser user) {
     return ConnectUserDetails(
       id: user.id,
-      // Using extraData value in order to not use id as name.
-      name: user.extraData['name'].safeCast<String>(),
+      name: user.name,
       image: user.image,
       language: user.language,
       invisible: user.invisible,
       privacySettings: user.privacySettings,
-      extraData: user.extraData,
+      extraData: user.custom,
     );
   }
 
@@ -68,7 +66,13 @@ class ConnectUserDetails {
   final Map<String, Object?>? extraData;
 
   /// Serialize to json.
+  ///
+  /// Writes the entries of [extraData] at the root, leaving out any named like
+  /// one of [OwnUser.topLevelFields].
   Map<String, dynamic> toJson() {
-    return Serializer.moveFromExtraDataToRoot(_$ConnectUserDetailsToJson(this));
+    return Serializer.moveFromExtraDataToRoot(
+      _$ConnectUserDetailsToJson(this),
+      topLevelFields: OwnUser.topLevelFields,
+    );
   }
 }

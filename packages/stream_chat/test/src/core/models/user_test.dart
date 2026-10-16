@@ -30,11 +30,12 @@ void main() {
       expect(user.role, role);
       expect(user.name, name);
       expect(user.image, image);
-      expect(user.extraData['image'], image);
-      expect(user.extraData['extraDataStringTest'], extraDataStringTest);
-      expect(user.extraData['extraDataIntTest'], extraDataIntTest);
-      expect(user.extraData['extraDataDoubleTest'], extraDataDoubleTest);
-      expect(user.extraData['extraDataBoolTest'], extraDataBoolTest);
+      expect(user.custom, {
+        'extraDataStringTest': extraDataStringTest,
+        'extraDataIntTest': extraDataIntTest,
+        'extraDataDoubleTest': extraDataDoubleTest,
+        'extraDataBoolTest': extraDataBoolTest,
+      });
       expect(user.online, online);
       expect(user.banned, banned);
       expect(user.teams, teams);
@@ -48,43 +49,94 @@ void main() {
       expect(user.deactivatedAt, DateTime.parse('2021-08-06T10:39:21.817646Z'));
       expect(user.deletedAt, DateTime.parse('2021-08-07T10:39:21.817646Z'));
       expect(user.shadowBanned, isTrue);
+      expect(user.blockedUserIds, ['blocked-1']);
     });
 
-    test('User keeps deactivatedAt, deletedAt and shadowBanned in extraData', () {
+    test('User writes its fields to JSON and reads them back', () {
       final user = User(
         id: id,
+        name: name,
+        image: image,
         deactivatedAt: DateTime.utc(2021),
         deletedAt: DateTime.utc(2020),
         shadowBanned: true,
-        extraData: const {'color': 'red'},
+        blockedUserIds: const ['blocked-1'],
+        custom: const {'color': 'red'},
       );
 
-      expect(user.extraData, {
+      expect(User.fromJson(user.toJson()), user);
+    });
+
+    test('User.fromJson leaves the keys only an own user carries out of custom', () {
+      final user = User.fromJson(const {
+        'id': id,
+        'devices': <Object?>[],
+        'mutes': <Object?>[],
+        'channel_mutes': <Object?>[],
+        'total_unread_count': 1,
+        'unread_channels': 1,
+        'unread_threads': 1,
+        'unread_count': 1,
+        'total_unread_count_by_team': {'team-1': 1},
+        'latest_hidden_channels': ['messaging:hidden'],
+        'push_preferences': {'chat_level': 'all'},
+        'privacy_settings': <String, Object?>{},
+        'revoke_tokens_issued_before': '2021-08-06T10:39:21.817646Z',
         'color': 'red',
-        'deactivated_at': DateTime.utc(2021).toIso8601String(),
-        'deleted_at': DateTime.utc(2020).toIso8601String(),
-        'shadow_banned': true,
       });
+
+      expect(user.custom, {'color': 'red'});
     });
 
-    test('User replaces the extraData entries that deactivatedAt, deletedAt and shadowBanned read', () {
-      final user = User(
+    test('Users that differ only in a promoted field are not equal', () {
+      User user({
+        String? name,
+        String? image,
+        DateTime? deactivatedAt,
+        DateTime? deletedAt,
+        bool? shadowBanned,
+        List<String> blockedUserIds = const [],
+      }) => User(
         id: id,
-        deactivatedAt: DateTime.utc(2021),
-        deletedAt: DateTime.utc(2020),
-        shadowBanned: true,
-        extraData: const {'deactivated_at': 'stale', 'deleted_at': 'stale', 'shadow_banned': false},
+        name: name,
+        image: image,
+        deactivatedAt: deactivatedAt,
+        deletedAt: deletedAt,
+        shadowBanned: shadowBanned,
+        blockedUserIds: blockedUserIds,
       );
 
-      expect(user.deactivatedAt, DateTime.utc(2021));
-      expect(user.deletedAt, DateTime.utc(2020));
-      expect(user.shadowBanned, isTrue);
+      expect(user(name: 'a'), isNot(user(name: 'b')));
+      expect(user(image: 'a'), isNot(user(image: 'b')));
+      expect(user(deactivatedAt: DateTime.utc(2020)), isNot(user(deactivatedAt: DateTime.utc(2021))));
+      expect(user(deletedAt: DateTime.utc(2020)), isNot(user(deletedAt: DateTime.utc(2021))));
+      expect(user(shadowBanned: true), isNot(user(shadowBanned: false)));
+      expect(user(blockedUserIds: ['a']), isNot(user(blockedUserIds: ['b'])));
     });
 
-    test('User.deletedAt returns null for an extraData value that is not a date', () {
-      final user = User(id: id, extraData: const {'deleted_at': 'yesterday'});
+    test('User keeps custom data named like a field apart from the field', () {
+      final user = User(
+        id: id,
+        name: name,
+        custom: const {'name': 'custom', 'color': 'red'},
+      );
 
-      expect(user.deletedAt, isNull);
+      expect(user.name, name);
+      expect(user.custom, {'name': 'custom', 'color': 'red'});
+    });
+
+    test('User.toJson leaves out custom data named like a field', () {
+      final user = User(
+        id: id,
+        name: name,
+        custom: const {'name': 'custom', 'devices': 'custom', 'color': 'red'},
+      );
+
+      final json = user.toJson();
+
+      expect(json['name'], name);
+      expect(json.containsKey('devices'), isFalse);
+      expect(json['color'], 'red');
     });
 
     test('should serialize to json correctly', () {
@@ -93,7 +145,7 @@ void main() {
         role: role,
         name: name,
         image: image,
-        extraData: const {
+        custom: const {
           'extraDataStringTest': extraDataStringTest,
           'extraDataIntTest': extraDataIntTest,
           'extraDataDoubleTest': extraDataDoubleTest,
@@ -130,6 +182,7 @@ void main() {
         'invisible': true,
         'teams_role': teamsRole,
         'avg_response_time': avgResponseTime,
+        'blocked_user_ids': <String>[],
       });
     });
 
@@ -151,6 +204,10 @@ void main() {
       expect(newUser.invisible, user.invisible);
       expect(newUser.teamsRole, user.teamsRole);
       expect(newUser.avgResponseTime, user.avgResponseTime);
+      expect(newUser.deactivatedAt, user.deactivatedAt);
+      expect(newUser.deletedAt, user.deletedAt);
+      expect(newUser.shadowBanned, user.shadowBanned);
+      expect(newUser.blockedUserIds, user.blockedUserIds);
 
       newUser = user.copyWith(
         id: 'test',
@@ -167,13 +224,16 @@ void main() {
         invisible: true,
         teamsRole: {'new-team1': 'admin', 'new-team2': 'member'},
         avgResponseTime: 60,
+        deactivatedAt: DateTime.utc(2022),
+        deletedAt: DateTime.utc(2023),
+        shadowBanned: false,
+        blockedUserIds: ['blocked-2'],
       );
 
       expect(newUser.id, 'test');
       expect(newUser.role, 'test');
       expect(newUser.name, 'test');
       expect(newUser.image, 'https://stream.io/new-image');
-      expect(newUser.extraData['image'], 'https://stream.io/new-image');
       expect(newUser.online, false);
       expect(newUser.banned, false);
       expect(newUser.teams, ['new-team1', 'new-team2']);
@@ -184,70 +244,10 @@ void main() {
       expect(newUser.invisible, true);
       expect(newUser.teamsRole, {'new-team1': 'admin', 'new-team2': 'member'});
       expect(newUser.avgResponseTime, 60);
-    });
-
-    test('name property and extraData manipulation', () {
-      final user = User(id: id, name: name);
-
-      expect(user.name, name);
-      expect(user.extraData['name'], name);
-
-      const nameOne = 'Name One';
-      var newUser = user.copyWith(
-        extraData: {'name': nameOne},
-      );
-
-      expect(newUser.extraData['name'], nameOne);
-      expect(newUser.name, nameOne);
-
-      const nameTwo = 'Name Two';
-      newUser = user.copyWith(
-        name: nameTwo,
-      );
-
-      expect(newUser.extraData['name'], nameTwo);
-      expect(newUser.name, nameTwo);
-
-      const nameThree = 'Name Three';
-      newUser = user.copyWith(
-        name: nameThree,
-        extraData: {'name': nameThree},
-      );
-
-      expect(newUser.extraData['name'], nameThree);
-      expect(newUser.name, nameThree);
-    });
-
-    test('image property and extraData manipulation', () {
-      final user = User(id: id, image: image);
-
-      expect(user.image, image);
-      expect(user.extraData['image'], image);
-
-      const imageURLOne = 'https://stream.io/image-one';
-      var newUser = user.copyWith(
-        extraData: {'image': imageURLOne},
-      );
-
-      expect(newUser.extraData['image'], imageURLOne);
-      expect(newUser.image, imageURLOne);
-
-      const imageURLTwo = 'https://stream.io/image-two';
-      newUser = user.copyWith(
-        image: imageURLTwo,
-      );
-
-      expect(newUser.extraData['image'], imageURLTwo);
-      expect(newUser.image, imageURLTwo);
-
-      const imageURLThree = 'https://stream.io/image-three';
-      newUser = user.copyWith(
-        image: imageURLThree,
-        extraData: {'image': imageURLThree},
-      );
-
-      expect(newUser.extraData['image'], imageURLThree);
-      expect(newUser.image, imageURLThree);
+      expect(newUser.deactivatedAt, DateTime.utc(2022));
+      expect(newUser.deletedAt, DateTime.utc(2023));
+      expect(newUser.shadowBanned, isFalse);
+      expect(newUser.blockedUserIds, ['blocked-2']);
     });
 
     test('default values, constructor', () {
@@ -255,9 +255,9 @@ void main() {
 
       expect(user.id, id);
       expect(user.role, null);
-      expect(user.name, id, reason: 'if a name is not supplied, default to id');
+      expect(user.name, isNull);
       expect(user.image, null);
-      expect(user.extraData, const {});
+      expect(user.custom, const {});
       expect(user.online, false);
       expect(user.banned, false);
       expect(user.teams, []);
@@ -266,6 +266,10 @@ void main() {
       expect(user.updatedAt, null);
       expect(user.teamsRole, null);
       expect(user.avgResponseTime, null);
+      expect(user.deactivatedAt, null);
+      expect(user.deletedAt, null);
+      expect(user.shadowBanned, null);
+      expect(user.blockedUserIds, isEmpty);
     });
 
     test('default values, parse json', () {
@@ -273,9 +277,9 @@ void main() {
 
       expect(user.id, id);
       expect(user.role, null);
-      expect(user.name, id, reason: 'if a name is not supplied, default to id');
+      expect(user.name, isNull);
       expect(user.image, null);
-      expect(user.extraData, const {});
+      expect(user.custom, const {});
       expect(user.online, false);
       expect(user.banned, false);
       expect(user.teams, []);
@@ -284,6 +288,10 @@ void main() {
       expect(user.updatedAt, null);
       expect(user.teamsRole, null);
       expect(user.avgResponseTime, null);
+      expect(user.deactivatedAt, null);
+      expect(user.deletedAt, null);
+      expect(user.shadowBanned, null);
+      expect(user.blockedUserIds, isEmpty);
     });
 
     group('UserSortField', () {
@@ -306,9 +314,8 @@ void main() {
       });
 
       test('name orders nothing for a user with no name', () {
-        // `User.name` answers the id when a user has no name. Sorting by that
-        // would order unnamed users among the named ones, where the API sorts
-        // them together by an empty `name` column.
+        // Sorting unnamed users by their id would order them among the named
+        // ones, where the API sorts them together by an empty `name` column.
         expectOrdersNothing(
           UserSortField.name,
           createTestUser(id: 'alice'),
@@ -340,11 +347,11 @@ void main() {
         );
       });
 
-      test('a custom field orders by the user extra data', () {
+      test('a custom field orders by the user custom data', () {
         expectOrders(
           UserSortField.custom('score'),
-          createTestUser(id: 'a', extraData: const {'score': 10}),
-          createTestUser(id: 'b', extraData: const {'score': 90}),
+          createTestUser(id: 'a', custom: const {'score': 10}),
+          createTestUser(id: 'b', custom: const {'score': 90}),
         );
       });
 
@@ -356,75 +363,31 @@ void main() {
       });
     });
 
-    test('.name should fetch from extraData if available', () {
-      final user = User(
-        id: 'test-user',
-        extraData: const {'name': 'Test User'},
-      );
+    test('User.nameOrId returns the name', () {
+      final user = User(id: id, name: name);
 
-      expect(user.name, 'Test User');
+      expect(user.nameOrId, name);
     });
 
-    test('.name should return id if extraData value is empty', () {
-      final user = User(
-        id: 'test-user',
-        extraData: const {'name': ''},
-      );
+    test('User.nameOrId returns the id for a user with no name', () {
+      final user = User(id: id);
 
-      expect(user.name, 'test-user');
+      expect(user.nameOrId, id);
     });
 
-    test('.name should return id if not available in extraData', () {
-      final user = User(
-        id: 'test-user',
-        extraData: const {},
-      );
+    test('User stores a blank name or image as null', () {
+      for (final blank in ['', '  ']) {
+        final user = User(id: id, name: blank, image: blank);
 
-      expect(user.name, 'test-user');
+        expect(user.name, isNull, reason: 'name "$blank"');
+        expect(user.image, isNull, reason: 'image "$blank"');
+      }
     });
 
-    test('.name should return id if extraData value is not String', () {
-      final user = User(
-        id: 'test-user',
-        extraData: const {'name': true},
-      );
+    test('User.fromJson reads a blank name or image as null', () {
+      final user = User.fromJson(const {'id': id, 'name': ' ', 'image': ''});
 
-      expect(user.name, 'test-user');
-    });
-
-    test('.image should fetch from extraData if available', () {
-      final user = User(
-        id: 'test-user',
-        extraData: const {'image': 'https://example.com/image.png'},
-      );
-
-      expect(user.image, 'https://example.com/image.png');
-    });
-
-    test('.image should return null if not available in extraData', () {
-      final user = User(
-        id: 'test-user',
-        extraData: const {},
-      );
-
-      expect(user.image, isNull);
-    });
-
-    test('.image should return null if extraData value is not String', () {
-      final user = User(
-        id: 'test-user',
-        extraData: const {'image': true},
-      );
-
-      expect(user.image, isNull);
-    });
-
-    test('.image should return null if extraData value is empty', () {
-      final user = User(
-        id: 'test-user',
-        extraData: const {'image': ''},
-      );
-
+      expect(user.name, isNull);
       expect(user.image, isNull);
     });
   });
@@ -437,7 +400,7 @@ User createTestUser({
   String? role,
   bool? banned,
   DateTime? lastActive,
-  Map<String, Object?>? extraData,
+  Map<String, Object?>? custom,
   Map<String, String>? teamsRole,
   int? avgResponseTime,
 }) {
@@ -447,7 +410,7 @@ User createTestUser({
     role: role,
     banned: banned ?? false,
     lastActive: lastActive,
-    extraData: extraData ?? {},
+    custom: custom ?? {},
     teamsRole: teamsRole,
     avgResponseTime: avgResponseTime,
   );

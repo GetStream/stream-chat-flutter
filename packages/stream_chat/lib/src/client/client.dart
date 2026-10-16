@@ -2655,6 +2655,9 @@ class ClientState {
             unreadChannels: currentUser?.unreadChannels,
             unreadThreads: currentUser?.unreadThreads,
             pushPreferences: currentUser?.pushPreferences,
+            unreadCount: currentUser?.unreadCount,
+            totalUnreadCountByTeam: currentUser?.totalUnreadCountByTeam,
+            latestHiddenChannels: currentUser?.latestHiddenChannels,
           );
         }
 

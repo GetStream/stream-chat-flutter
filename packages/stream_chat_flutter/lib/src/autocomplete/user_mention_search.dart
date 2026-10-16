@@ -7,8 +7,8 @@ import '../../stream_chat_flutter.dart';
 ///
 /// Every word in the normalized [query] except the last must fully equal a
 /// word in the normalized user name. The last query word is matched as a
-/// prefix of any name word. When [User.name] is blank, [User.id] is used in
-/// its place.
+/// prefix of any name word. A user without a name is matched by [User.id]
+/// instead.
 ///
 /// Normalization strips diacritics and lowercases both sides. Results are
 /// sorted alphabetically by the normalized matchable string.
@@ -17,10 +17,7 @@ List<User> searchUsersForMention(Iterable<User> users, String query) {
   final queryTokens = _tokenize(_normalize(query));
   final entries =
       users
-          .map((user) {
-            final raw = user.name.isNotEmpty ? user.name : user.id;
-            return (user, _normalize(raw));
-          })
+          .map((user) => (user, _normalize(user.nameOrId)))
           .where((entry) => _matchesMentionQuery(queryTokens, entry.$2))
           .toList()
         ..sort((a, b) => a.$2.compareTo(b.$2));

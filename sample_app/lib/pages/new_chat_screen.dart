@@ -191,7 +191,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                               child: Padding(
                                 padding: const EdgeInsets.fromLTRB(8, 4, 12, 4),
                                 child: Text(
-                                  user.name,
+                                  user.nameOrId,
                                   maxLines: 1,
                                   style: TextStyle(
                                     color: context.streamColorScheme.textPrimary,

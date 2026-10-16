@@ -974,7 +974,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
                   _effectiveController.addMentionedUser(user);
 
                   // accepting the autocomplete option.
-                  StreamAutocomplete.of(context).acceptAutocompleteOption(user.name);
+                  StreamAutocomplete.of(context).acceptAutocompleteOption(user.nameOrId);
                 },
               );
             },

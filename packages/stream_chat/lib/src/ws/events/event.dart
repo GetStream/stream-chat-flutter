@@ -62,12 +62,19 @@ class Event extends WsEvent {
   }) : createdAt = createdAt?.toUtc() ?? DateTime.now().toUtc();
 
   /// Create a new instance from a json
-  factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(
-    Serializer.moveToExtraDataFromRoot(
-      json,
-      topLevelFields,
-    ),
-  );
+  factory Event.fromJson(Map<String, dynamic> json) {
+    final event = _$EventFromJson(
+      Serializer.moveToExtraDataFromRoot(
+        json,
+        topLevelFields,
+      ),
+    );
+
+    return switch ((event.type, json['user'])) {
+      (EventType.userUpdated, final Map<String, dynamic> user) => event.copyWith(user: OwnUser.fromJson(user)),
+      _ => event,
+    };
+  }
 
   /// The type of the event
   /// [EventType] contains some predefined constant types
@@ -98,6 +105,9 @@ class Event extends WsEvent {
   final OwnUser? me;
 
   /// User object of the current user
+  ///
+  /// An [OwnUser] on a [EventType.userUpdated] event, so it keeps the user's
+  /// privacy settings.
   final User? user;
 
   /// The message sent with the event

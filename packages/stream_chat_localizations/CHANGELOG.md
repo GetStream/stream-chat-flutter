@@ -1,3 +1,9 @@
+## Upcoming Beta
+
+🔄 Changed
+
+- The typing and pinned-by texts still name a user with no name by their id.
+
 ## 10.5.0
 
 ✅ Added

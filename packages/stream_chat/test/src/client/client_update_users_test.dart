@@ -32,7 +32,7 @@ void main() {
           invisible: true,
           teamsRole: const {'team-a': 'admin'},
           avgResponseTime: 12,
-          extraData: const {'favorite_color': 'blue'},
+          custom: const {'favorite_color': 'blue'},
           deactivatedAt: DateTime.utc(2026, 1, 5),
           deletedAt: DateTime.utc(2026, 1, 6),
           shadowBanned: true,
@@ -63,49 +63,62 @@ void main() {
     },
   );
 
-  test("StreamChatClient.updateUser sends no custom data named like one of the user's own fields", () async {
-    final defaultApi = _defaultApiAnswering(Result.success(_updateUsersResponse()));
-    final client = _client(defaultApi);
+  test(
+    'StreamChatClient.updateUser sends none of the fields an own user decodes from the connection as custom data',
+    () async {
+      final defaultApi = _defaultApiAnswering(Result.success(_updateUsersResponse()));
+      final client = _client(defaultApi);
 
-    // The fields an own user decoded from the connection keeps in its extra data.
-    await client.updateUser(
-      User(
-        id: 'user-id',
-        extraData: const {
+      await client.updateUser(
+        OwnUser.fromJson(const {
+          'id': 'user-id',
           'favorite_color': 'blue',
           'unread_count': 3,
           'total_unread_count_by_team': {'team-a': 1},
           'latest_hidden_channels': ['messaging:hidden'],
           'revoke_tokens_issued_before': '2026-01-01T00:00:00.000Z',
-        },
-      ),
-    );
+        }),
+      );
+
+      verify(
+        () => defaultApi.updateUsers(
+          updateUsersRequest: const api.UpdateUsersRequest(
+            users: {
+              'user-id': api.UserRequest(id: 'user-id', custom: {'favorite_color': 'blue'}),
+            },
+          ),
+        ),
+      ).called(1);
+    },
+  );
+
+  test('StreamChatClient.updateUser sends custom data named like a user field as custom data', () async {
+    final defaultApi = _defaultApiAnswering(Result.success(_updateUsersResponse()));
+    final client = _client(defaultApi);
+
+    await client.updateUser(User(id: 'user-id', name: 'Jane', custom: const {'name': 'custom'}));
 
     verify(
       () => defaultApi.updateUsers(
         updateUsersRequest: const api.UpdateUsersRequest(
           users: {
-            'user-id': api.UserRequest(id: 'user-id', custom: {'favorite_color': 'blue'}),
+            'user-id': api.UserRequest(id: 'user-id', name: 'Jane', custom: {'name': 'custom'}),
           },
         ),
       ),
     ).called(1);
   });
 
-  test('StreamChatClient.updateUser drops custom data named like a user field', () async {
-    final client = _client(
-      _defaultApiAnswering(
-        Result.success(
-          _updateUsersResponse(
-            custom: const {'favorite_color': 'green', 'online': false, 'shadow_banned': true, 'unread_count': 3},
-          ),
-        ),
-      ),
-    );
+  test('StreamChatClient.updateUser keeps custom data named like a user field apart from the field', () async {
+    const custom = {'favorite_color': 'green', 'online': false, 'shadow_banned': true, 'unread_count': 3};
+    final client = _client(_defaultApiAnswering(Result.success(_updateUsersResponse(custom: custom))));
 
     final res = await client.updateUser(User(id: 'user-id'));
 
-    expect(res.getOrNull()!.users['user-id'], _updatedUser());
+    final user = res.getOrNull()!.users['user-id']!;
+    expect(user.custom, custom);
+    expect(user.online, isTrue);
+    expect(user.shadowBanned, isFalse);
   });
 
   test('StreamChatClient.updateUsers sends every user keyed by id and returns the updated users', () async {
@@ -178,10 +191,11 @@ User _updatedUser() => User(
   invisible: false,
   teamsRole: const {'team-a': 'member'},
   avgResponseTime: 42,
-  extraData: const {'favorite_color': 'green'},
+  custom: const {'favorite_color': 'green'},
   deactivatedAt: DateTime.utc(2026, 9, 5),
   deletedAt: DateTime.utc(2026, 9, 6),
   shadowBanned: false,
+  blockedUserIds: const ['blocked-user'],
 );
 
 // A response whose user sets every field, including the private ones a [User] leaves out.

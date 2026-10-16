@@ -589,17 +589,7 @@ GROUPS = [
             'restructures them, last: the mappers in `users_mapper.dart` already map the generated types onto the '
             'current class for every group before it, and stay. See [01-foundation](01-foundation.md).',
             '`PrivacySettings` and the push-preference sub-shapes — decide per type.',
-            '**`User` promotes its `extraData`-backed values to fields** (README rule 9). `name` and `image`, which '
-            '`UserResponse` types, and `deactivatedAt`, `deletedAt` and `shadowBanned`, which '
-            '[20](20-user-updates.md) added as getters over `extraData`, become fields, and the constructor stops '
-            'writing them into `extraData`; decide whether `name` keeps its fallback to `id`. '
-            '`revoke_tokens_issued_before` and `blocked_user_ids`, which v1 kept in a plain user\'s `extraData`, '
-            'become fields or are dropped, never `extraData`. The user mappers then copy `custom` verbatim into the '
-            'field, renamed `custom`, with no `_shadowedCustomKeys`, and `UserRequestMapper` stops reading '
-            '`extraData[\'name\']` and `[\'image\']`. When promoting: decide each field\'s `merge` rule '
-            '(`OwnUser.merge` takes the other user\'s `extraData` whole today), make `toJson` leave out custom keys '
-            'named like a field, add persistence columns, and point `UserFilterField.shadowBanned` at the field.',
-            '`UserFilterField.bypassModeration` reads `extraData`, which no generated user has a field to fill.',
+            '`UserFilterField.bypassModeration` reads `custom`, which no generated user has a field to fill.',
             '`queryUsers` answers `FullUserResponse`, which [20](20-user-updates.md) already maps to `User`; the '
             'caller\'s own entry could map to `OwnUser` once `Mute`, `ChannelMute` and `PrivacySettings` have '
             'response mappers.',
@@ -607,18 +597,10 @@ GROUPS = [
         risks=[
             'Every other group depends on the `User` decision.',
             'User data arrives over the WebSocket on nearly every event.',
-            '`ConnectUserDetails.fromOwnUser` flattens the whole `extraData` into the connect payload, so the '
-            '`deactivated_at`, `deleted_at` and `shadow_banned` entries the [20](20-user-updates.md) getters read go '
-            'back to the server as custom data (v10 already did this for `shadow_banned`). Strip the user\'s own '
-            'keys there when the WebSocket moves to v2.',
             'Landing `UserResponse` -> `User` unblocks the two fields [08](08-moderation-and-blocklists.md) '
             'had to drop from `MuteUsersResponse`: the `mutes` the call created and the `ownUser` it left '
             'behind. Adding them is additive for anyone reading the response, so revisit them here rather '
             'than leaving them dropped for good.',
-            'Until then, a user mapped from `UserResponse` and the same user decoded from v1 JSON carry different '
-            '`extraData`: the v1 path keeps `blocked_user_ids`, `deleted_at`, `deactivated_at` and '
-            '`revoke_tokens_issued_before`, the mapper drops them. Equality includes `extraData`, so a `Poll` from a '
-            'REST call (its `createdBy`, its votes\' `user`) and the same poll from an event compare unequal.',
         ],
         done=DONE + (
             '- [ ] Temporary adapters owned by this group (`DeviceV1JsonConverter`) are deleted and removed from\n'
@@ -626,7 +608,7 @@ GROUPS = [
             '- [ ] `users_mapper.dart` maps onto the restructured `User`, and its `TODO(openapi-migration)` note is\n'
             '      gone.\n'
             '- [ ] A user mapped from `UserResponse` and the same user decoded from v1 / WebSocket JSON compare equal.\n'
-            '- [ ] `users_mapper.dart` has no `_shadowedCustomKeys`: `User.custom` is the wire\'s `custom`, verbatim, and\n'
+            '- [x] `users_mapper.dart` has no `_shadowedCustomKeys`: `User.custom` is the wire\'s `custom`, verbatim, and\n'
             '      no typed field is written into it.\n'
         ),
     ),
@@ -1086,10 +1068,23 @@ GROUPS = [
               full-user type: a client-side caller can only update itself, the server blanks the private fields
               for anyone else, and the caller's own are on `currentUser`. `membership_deletion_task_id` is always
               empty and stays out.
-            - **`User` gains `deactivatedAt`, `deletedAt` and `shadowBanned`** as getters over `extraData`, the
-              way `Member` promoted its fields. Each generated user mapper fills the ones its response carries
-              (`UserResponse` has no `shadowBanned`), so the values v1 left raw in `extraData` are no longer lost;
-              persistence needs no change.
+            - **`User` and `OwnUser` promote the fields v10 parked in `extraData`, and rename it `custom`**
+              (README rule 9), since these calls are the first to map a user. `User.name`, `image`,
+              `deactivatedAt`, `deletedAt` and `shadowBanned` are fields with persistence columns;
+              `blockedUserIds` moves up from `OwnUser`, and `OwnUser` gains `unreadCount`,
+              `totalUnreadCountByTeam` and `latestHiddenChannels`. `revoke_tokens_issued_before` is left out.
+              Each generated user mapper fills the ones its response carries (`UserResponse` has no
+              `shadowBanned`).
+            - **`User.name` is nullable and has no fallback to `id`;** `User.nameOrId` has it. A blank name or
+              image is stored as null. The UI names a user by `nameOrId` everywhere except avatar initials, which
+              show the placeholder icon for an unnamed user, and filters and sorts, which read the raw `name`.
+            - **`custom` is the wire's, verbatim,** and the v1 writers leave out a custom entry named like a key,
+              including the keys only an own user carries, so it cannot overwrite the field. `OwnUser.fromUser`
+              copies the user's fields and no longer reads an own user's fields out of the custom data.
+            - **`OwnUser.merge` takes the other user's fields,** as before; the `user.updated` handler also keeps
+              the three new unread fields, which the event leaves out. A `user.updated` event's user is decoded
+              again as an `OwnUser`, so the privacy settings it carries for the current user replace theirs, as in
+              v10 — a temporary adapter (README) for the WebSocket v2 move to replace.
             """),
         risks=[],
         done=DONE.replace('- [ ]', '- [x]'),

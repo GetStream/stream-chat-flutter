@@ -253,7 +253,7 @@ extension on DraftMessage {
     final updatedMentionedUsers = [...mentionedUsers];
     for (final user in mentionedUsers.toSet()) {
       if (messageTextToSend.contains('@${user.id}')) continue;
-      if (messageTextToSend.contains('@${user.name}')) continue;
+      if (messageTextToSend.contains('@${user.nameOrId}')) continue;
 
       updatedMentionedUsers.remove(user);
     }

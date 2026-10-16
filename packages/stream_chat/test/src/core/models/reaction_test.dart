@@ -24,6 +24,7 @@ void main() {
           'banned': false,
           'image': 'https://randomuser.me/api/portraits/women/45.jpg',
           'name': 'Daisy Morgan',
+          'blocked_user_ids': [],
         },
       );
       expect(reaction.score, 1);
@@ -77,6 +78,7 @@ void main() {
           'banned': false,
           'image': 'https://randomuser.me/api/portraits/women/45.jpg',
           'name': 'Daisy Morgan',
+          'blocked_user_ids': [],
         },
       );
       expect(newReaction.score, 1);

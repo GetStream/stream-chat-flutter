@@ -41,6 +41,7 @@ onto Stream's OpenAPI-generated API client.
     - [User Blocking](#user-blocking)
     - [User Updates](#user-updates)
     - [Channel and Member Custom Data](#channel-and-member-custom-data)
+    - [User Custom Data](#user-custom-data)
 - [Migration Checklist](#migration-checklist)
 - [For AI Agents](#for-ai-agents)
 - [Contributing to this guide](#contributing-to-this-guide)
@@ -94,6 +95,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**User Blocking**](#user-blocking) | `blockUser`, `unblockUser` and `getBlockedUsers` (was `queryBlockedUsers`) return a `Result` instead of throwing; their responses are renamed `BlockUsersResponse` and `GetBlockedUsersResponse`, `unblockUser` answers a new `UnblockUsersResponse`, and `UserBlock`'s fields are all non-nullable |
 | [**User Updates**](#user-updates) | `updateUser` and `updateUsers` return a `Result<UpdateUsersResponse>` instead of throwing; `partialUpdateUser(s)` becomes `updateUserPartial` / `updateUsersPartial` and `PartialUpdateUserRequest` becomes `UpdateUserPartialRequest`; `updateUser` no longer sends `role`, `teams` or `teamsRole`, and the returned users no longer carry their private fields in `extraData` |
 | [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`, and holds the custom data verbatim; the channel and member flags it carried are fields |
+| [**User Custom Data**](#user-custom-data) | `extraData` is `custom` on `User` and `OwnUser`, and holds the custom data verbatim; `name` is nullable and `nameOrId` falls back to the id; the user fields it carried are fields |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -142,7 +144,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `SortOption(comparator:)` | — | `removed` | Declare a field whose value projects onto something orderable, or sort the list yourself |
 | `DraftSortKey`'s `extraData` fallback | — | `removed` | The server rejects a custom sort field on drafts |
 | `PollVoteSortKey.answerText` | — | `removed` | The API rejects a sort on `answer_text` |
-| a raw-string sort on `language` | `UserSortField.language` | `added` | Declared now, so prefer it over `UserSortField.custom('language')`, which reads `extraData` and never sees a typed property |
+| a raw-string sort on `language` | `UserSortField.language` | `added` | Declared now, so prefer it over `UserSortField.custom('language')`, which reads the custom data and never sees a typed property |
 | a raw-string sort on `updated_at` for members | `MemberSortField.updatedAt` | `added` | Same: prefer the declared field over `.custom` |
 | a raw-string sort on `text` / `type` / `parent_id` / `reply_count` / `pinned` | `MessageSearchSortField.text` / `.type` / `.parentId` / `.replyCount` / `.pinned` | `added` | The fields the JS client already exposed |
 | _(new)_ | `ChannelSortField.cid` | `added` | Both iOS and Android sort channels by `cid` |
@@ -324,6 +326,15 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `member.extraData['notifications_muted']` / `['status']` / `['ban_from_future_channels']` / `['future_channel_ban_expires']` / `['deleted_at']` | `Member.notificationsMuted` / `status` / `banFromFutureChannels` / `futureChannelBanExpires` / `deletedAt` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them |
 | `ChannelModel.custom` / `Member.custom` entry named like one of the model's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; `toJson` leaves it out so it cannot overwrite the field |
 | `member.extraData['role']` | `Member.channelRole` | `removed` | The server deprecated `role` for `channel_role` |
+| `User.extraData` / `OwnUser.extraData` | `User.custom` / `OwnUser.custom` | `renamed` | The wire's name for it; also the constructor and `copyWith` arguments |
+| `User.name` (`String`, the id when the user has none) | `User.nameOrId` | `retyped` | `User.name` is a `String?` that is null when the user has none. Use `nameOrId` wherever a user is named by text, and `name` where a missing name matters, such as initials |
+| `User.name` / `User.image` blank (`''`) | `null` | `retyped` | A blank name or image is stored as null |
+| `user.extraData['name']` / `['image']` / `['deactivated_at']` / `['deleted_at']` / `['shadow_banned']` | `User.name` / `image` / `deactivatedAt` / `deletedAt` / `shadowBanned` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them |
+| `user.extraData['revoke_tokens_issued_before']` | — | `removed` | Not modelled on a user, and no longer kept in its custom data |
+| `OwnUser.blockedUserIds` | `User.blockedUserIds` | `moved` | Still on `OwnUser`. Empty for anyone but the current user |
+| `ownUser.extraData['unread_count']` / `['total_unread_count_by_team']` / `['latest_hidden_channels']` | `OwnUser.unreadCount` / `totalUnreadCountByTeam` / `latestHiddenChannels` | `added` | Fields now, not custom data |
+| `OwnUser.fromUser(user)` reading devices, mutes, unread counts, push preferences and privacy settings out of `user.extraData` | — | `removed` | A `User` no longer carries them; they are left at their defaults |
+| `User.custom` entry named like one of the user's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; `toJson` leaves it out so it cannot overwrite the field |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -516,7 +527,7 @@ counterpart: `code` is now a `StreamErrorCode` (an extension type over `int`, wi
 ## Offline Cache
 
 If you use `stream_chat_persistence`, the local database is **rebuilt from empty** the first time your app runs
-on v11. The Drift schema version moves from v10's `1000 + n` (`1035` in v10.5.0) to `1106`, and the upgrade strategy
+on v11. The Drift schema version moves from v10's `1000 + n` (`1035` in v10.5.0) to `1107`, and the upgrade strategy
 drops and recreates every table rather than migrating rows.
 
 Everything held on disk is discarded: channels, messages, members, reads, drafts, locations, polls, poll votes
@@ -853,6 +864,59 @@ stays in `custom` and leaves the field alone; `toJson` leaves it out, so it cann
 > **Why:** the API calls it `custom`, and every migrated model takes that name. The flags arrive as fields of their
 > own, so keeping them in the custom data let a custom entry with the same name overwrite them.
 
+### User Custom Data
+
+**`extraData` is renamed `custom` on `User` and `OwnUser`**, along with the constructor and `copyWith` arguments.
+
+```dart
+// v10
+final color = user.extraData['favorite_color'];
+
+// v11
+final color = user.custom['favorite_color'];
+```
+
+**`User.name` is nullable and no longer falls back to the id.** It is null when the user has no name; a blank name
+or image is stored as null. `User.nameOrId` answers the name, or the id when there is none, which is what v10's
+`name` answered. Use it wherever you name a user by text — a title, a label, a mention — and keep `name` where a
+missing name matters, such as avatar initials or a sort:
+
+```dart
+// v10
+Text(user.name);
+
+// v11
+Text(user.nameOrId);
+```
+
+A string interpolation still compiles with the nullable `name`, so check them by hand: `'${user.name} is typing'`
+prints `null is typing` for a user with no name. That includes a custom `Translations` or `StreamChatLocalizations`
+subclass overriding `typingIndicatorText` or `pinnedByUserText`.
+
+**The user fields are fields, not custom data.** `User.image` reads the same and `name` changes as described above;
+`deactivatedAt`, `deletedAt` and `shadowBanned` are new fields, `blockedUserIds` moves up from `OwnUser` to `User`,
+and `OwnUser.unreadCount`, `totalUnreadCountByTeam` and `latestHiddenChannels` are new fields. `custom` no longer holds any of their keys, nor
+the ones only an own user carries, and an entry with one of those names in `custom` or in `copyWith(custom:)` no
+longer sets the field:
+
+```dart
+// v10
+final renamed = user.copyWith(extraData: {...user.extraData, 'name': 'Jane'});
+
+// v11
+final renamed = user.copyWith(name: 'Jane');
+```
+
+**`OwnUser.fromUser` copies the user's fields and leaves the rest at their defaults.** v10 read an own user's
+devices, mutes, unread counts, push preferences and privacy settings back out of the user's `extraData`; a `User`
+no longer carries them.
+
+**`custom` is the custom data exactly as the API returns it.** An entry named like one of the user's own fields
+stays in `custom` and leaves the field alone; `toJson` leaves it out, so it cannot overwrite the field.
+
+> **Why:** the API calls it `custom`, and every migrated model takes that name. A name that answered the id could
+> not tell an unnamed user from a named one, so initials and sorts read the id as a name.
+
 ### Read Receipts
 
 **Marking a channel or thread read or unread, and sending delivery receipts, return a `Result` instead of
@@ -1008,10 +1072,10 @@ were stored as custom data on every call; that no longer happens. `role`, `teams
 sent, so these calls cannot change them.
 
 **The returned users no longer carry the fields only they can see in `extraData`.** v10 left every field `User`
-does not model in `extraData` as raw JSON; now their devices, mutes, channel mutes, privacy settings, unread counts, blocked
-user ids, hidden channels and token revocation time are left out. Read them from `currentUser`. `deactivatedAt`,
-`deletedAt` and `shadowBanned` stay in `extraData` and gain typed getters on `User`; each one is filled whenever the
-response carries it.
+does not model in `extraData` as raw JSON; now their devices, mutes, channel mutes, privacy settings, unread counts, hidden
+channels and token revocation time are left out. Read them from `currentUser`. `deactivatedAt`, `deletedAt`,
+`shadowBanned` and `blockedUserIds` are fields on `User` (see [User Custom Data](#user-custom-data)); each one is
+filled whenever the response carries it.
 
 **`UpdateUsersResponse` no longer decodes from JSON.** It is a plain class with a const constructor and final
 fields, compares by value and gains `copyWith`, and its `duration` is always present. `UpdateUserPartialRequest`

@@ -255,7 +255,7 @@ class _UserReadTile extends StatelessWidget {
           // User name
           Expanded(
             child: Text(
-              read.user.name,
+              read.user.nameOrId,
               style: context.streamTextTheme.bodyEmphasis,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

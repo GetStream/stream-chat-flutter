@@ -43,7 +43,8 @@ final voter = User(
   avgResponseTime: 12,
   deactivatedAt: DateTime.utc(2024, 1, 4),
   deletedAt: DateTime.utc(2024, 1, 5),
-  extraData: const {'favorite_color': 'blue'},
+  custom: const {'favorite_color': 'blue'},
+  blockedUserIds: const ['blocked-user'],
 );
 
 final generatedVote = api.PollVoteResponseData(

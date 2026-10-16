@@ -209,7 +209,7 @@ class _BenchmarkPageState extends State<BenchmarkPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       for (final user in _floodAuthors) {
-        final url = user.extraData['image'];
+        final url = user.image;
         if (url is String && url.isNotEmpty) {
           precacheImage(NetworkImage(url), context).ignore();
         }
@@ -452,7 +452,7 @@ class _BenchmarkPageState extends State<BenchmarkPage> {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         child: Text(
-          '${message.user?.name ?? '?'}: ${message.text ?? ''}',
+          '${message.user?.nameOrId ?? '?'}: ${message.text ?? ''}',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -1741,46 +1741,33 @@ String _formatDeltaMb(int current, int baseline) {
 final _floodAuthors = <User>[
   // User(
   //   id: 'sahil',
-  //   extraData: const {
-  //     'name': 'Sahil Kumar',
-  //     'image':
-  //         'https://avatars.githubusercontent.com/u/25670178?s=400&u=30ded3784d8d2310c5748f263fd5e6433c119aa1&v=4',
-  //   },
+  //   name: 'Sahil Kumar',
+  //   image: 'https://avatars.githubusercontent.com/u/25670178?s=400&u=30ded3784d8d2310c5748f263fd5e6433c119aa1&v=4',
   // ),
   User(
     id: 'salvatore',
-    extraData: const {
-      'name': 'Salvatore Giordano',
-      'image': 'https://avatars.githubusercontent.com/u/20601437?s=460&u=3f66c22a7483980624804054ae7f357cf102c784&v=4',
-    },
+    name: 'Salvatore Giordano',
+    image: 'https://avatars.githubusercontent.com/u/20601437?s=460&u=3f66c22a7483980624804054ae7f357cf102c784&v=4',
   ),
   User(
     id: 'thierry',
-    extraData: const {
-      'name': 'Thierry Schellenbach',
-      'image': 'https://avatars.githubusercontent.com/u/265409?s=400&u=2d0e3bb1820db992066196bff7b004f0eee8e28d&v=4',
-    },
+    name: 'Thierry Schellenbach',
+    image: 'https://avatars.githubusercontent.com/u/265409?s=400&u=2d0e3bb1820db992066196bff7b004f0eee8e28d&v=4',
   ),
   User(
     id: 'tommaso',
-    extraData: const {
-      'name': 'Tommaso Barbugli',
-      'image': 'https://avatars.githubusercontent.com/u/88735?s=400&v=4',
-    },
+    name: 'Tommaso Barbugli',
+    image: 'https://avatars.githubusercontent.com/u/88735?s=400&v=4',
   ),
   User(
     id: 'deven',
-    extraData: const {
-      'name': 'Deven Joshi',
-      'image': 'https://avatars.githubusercontent.com/u/26357843?s=400&u=0c61d890866e67bf69f58878be58915e9bfd39ee&v=4',
-    },
+    name: 'Deven Joshi',
+    image: 'https://avatars.githubusercontent.com/u/26357843?s=400&u=0c61d890866e67bf69f58878be58915e9bfd39ee&v=4',
   ),
   User(
     id: 'neevash',
-    extraData: const {
-      'name': 'Neevash Ramdial',
-      'image': 'https://avatars.githubusercontent.com/u/25674767?s=400&u=1d7333baf7dd9d143db8bfcdb31a838b89cfff9c&v=4',
-    },
+    name: 'Neevash Ramdial',
+    image: 'https://avatars.githubusercontent.com/u/25674767?s=400&u=1d7333baf7dd9d143db8bfcdb31a838b89cfff9c&v=4',
   ),
 ];
 

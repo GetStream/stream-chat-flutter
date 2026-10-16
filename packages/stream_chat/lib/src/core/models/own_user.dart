@@ -12,9 +12,6 @@ part 'own_user.g.dart';
 @JsonSerializable(includeIfNull: false)
 class OwnUser extends User {
   /// Constructor used for json serialization.
-  ///
-  /// The [deactivatedAt], [deletedAt] and [shadowBanned] arguments, when given, are stored in [extraData], replacing
-  /// the entry each one reads.
   OwnUser({
     this.devices = const [],
     this.mutes = const [],
@@ -22,9 +19,12 @@ class OwnUser extends User {
     this.unreadChannels = 0,
     this.channelMutes = const [],
     this.unreadThreads = 0,
-    this.blockedUserIds = const [],
+    super.blockedUserIds,
     this.pushPreferences,
     this.privacySettings,
+    this.unreadCount = 0,
+    this.totalUnreadCountByTeam,
+    this.latestHiddenChannels,
     required super.id,
     super.role,
     super.name,
@@ -33,7 +33,7 @@ class OwnUser extends User {
     super.updatedAt,
     super.lastActive,
     super.online,
-    super.extraData,
+    super.custom,
     super.banned,
     super.banExpires,
     super.teams,
@@ -51,8 +51,35 @@ class OwnUser extends User {
     Serializer.moveToExtraDataFromRoot(json, topLevelFields),
   );
 
-  /// Create a new instance from [User] object.
-  factory OwnUser.fromUser(User user) => OwnUser.fromJson(user.toJson());
+  /// Creates an [OwnUser] from [user].
+  ///
+  /// If [user] is already an [OwnUser], it is returned unchanged; otherwise the
+  /// fields only an own user has are left at their defaults.
+  factory OwnUser.fromUser(User user) => switch (user) {
+    final OwnUser ownUser => ownUser,
+    _ => OwnUser(
+      id: user.id,
+      role: user.role,
+      name: user.name,
+      image: user.image,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      lastActive: user.lastActive,
+      online: user.online,
+      custom: user.custom,
+      banned: user.banned,
+      banExpires: user.banExpires,
+      teams: user.teams,
+      language: user.language,
+      invisible: user.invisible,
+      teamsRole: user.teamsRole,
+      avgResponseTime: user.avgResponseTime,
+      deactivatedAt: user.deactivatedAt,
+      deletedAt: user.deletedAt,
+      shadowBanned: user.shadowBanned,
+      blockedUserIds: user.blockedUserIds,
+    ),
+  };
 
   /// Creates a copy of [OwnUser] with specified attributes overridden.
   @override
@@ -65,7 +92,7 @@ class OwnUser extends User {
     DateTime? updatedAt,
     DateTime? lastActive,
     bool? online,
-    Map<String, Object?>? extraData,
+    Map<String, Object?>? custom,
     bool? banned,
     DateTime? banExpires,
     List<String>? teams,
@@ -82,22 +109,24 @@ class OwnUser extends User {
     int? avgResponseTime,
     PushPreference? pushPreferences,
     PrivacySettings? privacySettings,
+    DateTime? deactivatedAt,
+    DateTime? deletedAt,
+    bool? shadowBanned,
+    int? unreadCount,
+    Map<String, int>? totalUnreadCountByTeam,
+    List<String>? latestHiddenChannels,
   }) => OwnUser(
     id: id ?? this.id,
     role: role ?? this.role,
-    name:
-        name ??
-        extraData?['name'] as String? ??
-        // Using extraData value in order to not use id as name.
-        this.extraData['name'] as String?,
-    image: image ?? extraData?['image'] as String? ?? this.image,
+    name: name ?? this.name,
+    image: image ?? this.image,
     banned: banned ?? this.banned,
     banExpires: banExpires ?? this.banExpires,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     lastActive: lastActive ?? this.lastActive,
     online: online ?? this.online,
-    extraData: extraData ?? this.extraData,
+    custom: custom ?? this.custom,
     teams: teams ?? this.teams,
     channelMutes: channelMutes ?? this.channelMutes,
     devices: devices ?? this.devices,
@@ -112,6 +141,12 @@ class OwnUser extends User {
     avgResponseTime: avgResponseTime ?? this.avgResponseTime,
     pushPreferences: pushPreferences ?? this.pushPreferences,
     privacySettings: privacySettings ?? this.privacySettings,
+    deactivatedAt: deactivatedAt ?? this.deactivatedAt,
+    deletedAt: deletedAt ?? this.deletedAt,
+    shadowBanned: shadowBanned ?? this.shadowBanned,
+    unreadCount: unreadCount ?? this.unreadCount,
+    totalUnreadCountByTeam: totalUnreadCountByTeam ?? this.totalUnreadCountByTeam,
+    latestHiddenChannels: latestHiddenChannels ?? this.latestHiddenChannels,
   );
 
   /// Returns a new [OwnUser] that is a combination of this ownUser
@@ -121,14 +156,13 @@ class OwnUser extends User {
     return copyWith(
       id: other.id,
       role: other.role,
-      // Using extraData value in order to not use id as name.
-      name: other.extraData['name'] as String?,
+      name: other.name,
       image: other.image,
       banned: other.banned,
       channelMutes: other.channelMutes,
       createdAt: other.createdAt,
       devices: other.devices,
-      extraData: other.extraData,
+      custom: other.custom,
       lastActive: other.lastActive,
       mutes: other.mutes,
       online: other.online,
@@ -144,6 +178,12 @@ class OwnUser extends User {
       avgResponseTime: other.avgResponseTime,
       pushPreferences: other.pushPreferences,
       privacySettings: other.privacySettings,
+      deactivatedAt: other.deactivatedAt,
+      deletedAt: other.deletedAt,
+      shadowBanned: other.shadowBanned,
+      unreadCount: other.unreadCount,
+      totalUnreadCountByTeam: other.totalUnreadCountByTeam,
+      latestHiddenChannels: other.latestHiddenChannels,
     );
   }
 
@@ -166,36 +206,37 @@ class OwnUser extends User {
   /// Total unread threads by the user.
   final int unreadThreads;
 
-  /// List of user ids that are blocked by the user.
-  final List<String> blockedUserIds;
-
   /// Push preferences for the user if set.
   final PushPreference? pushPreferences;
 
   /// Privacy settings for the user if set.
   final PrivacySettings? privacySettings;
 
+  /// The user's unread message count as of the last time the current user was
+  /// loaded.
+  ///
+  /// Unlike [totalUnreadCount], it is not updated by events that carry only a
+  /// new count; consider [totalUnreadCount] for a live value.
+  final int unreadCount;
+
+  /// Total unread messages by the user in each of their teams, keyed by team.
+  final Map<String, int>? totalUnreadCountByTeam;
+
+  /// The cids of the channels the user hid most recently.
+  final List<String>? latestHiddenChannels;
+
   /// Convert instance to json.
+  ///
+  /// Writes the entries of [custom] at the root, leaving out any named like one
+  /// of [topLevelFields].
   @override
   Map<String, dynamic> toJson() {
-    return Serializer.moveFromExtraDataToRoot(_$OwnUserToJson(this));
+    return Serializer.moveFromExtraDataToRoot(_$OwnUserToJson(this), topLevelFields: topLevelFields);
   }
 
-  /// Known top level fields.
-  ///
-  /// Useful for [Serializer] methods.
-  static const topLevelFields = [
-    'devices',
-    'mutes',
-    'total_unread_count',
-    'unread_channels',
-    'channel_mutes',
-    'unread_threads',
-    'blocked_user_ids',
-    'push_preferences',
-    'privacy_settings',
-    ...User.topLevelFields,
-  ];
+  /// The JSON keys [OwnUser.fromJson] reads into named fields, or leaves out;
+  /// every other key is kept in [custom].
+  static const topLevelFields = User.topLevelFields;
 }
 
 /// Extension methods for [OwnUser] related to privacy settings.

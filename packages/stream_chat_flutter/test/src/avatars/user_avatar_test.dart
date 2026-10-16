@@ -198,4 +198,28 @@ void main() {
       });
     }
   });
+
+  testWidgets('a user with no name shows the placeholder icon rather than initials of their id', (tester) async {
+    final user = MockUser();
+    when(() => user.id).thenReturn('ada');
+    when(() => user.name).thenReturn(null);
+    when(() => user.online).thenReturn(false);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StreamChat(
+          client: client,
+          themeData: StreamChatThemeData(),
+          child: Scaffold(
+            body: Center(
+              child: StreamUserAvatar(user: user, size: .lg),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Icon), findsOneWidget);
+    expect(find.text('A'), findsNothing);
+  });
 }

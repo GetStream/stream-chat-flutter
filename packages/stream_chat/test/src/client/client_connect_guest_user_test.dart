@@ -92,11 +92,12 @@ void main() {
   });
 
   test(
-    "StreamChatClient.connectGuestUser keeps custom fields named like the user's own fields out of the created guest",
+    "StreamChatClient.connectGuestUser keeps custom fields named like the user's own fields apart from them",
     () async {
       final response = _createGuestResponse(
         custom: const {
           'favorite_color': 'green',
+          'name': 'custom-name',
           'online': 'custom-online',
           'blocked_user_ids': 'custom-blocked-user-ids',
           'privacy_settings': 'custom-privacy-settings',
@@ -110,13 +111,22 @@ void main() {
 
       final guest = await client.connectGuestUser(_fullyPopulatedUser(), connectWebSocket: false);
 
-      expect(guest.extraData, {
+      expect(guest.custom, {
         'favorite_color': 'green',
-        'name': 'Created Name',
-        'image': 'https://example.com/created.png',
-        'deactivated_at': '2026-09-04T00:00:00.000Z',
-        'deleted_at': '2026-09-05T00:00:00.000Z',
+        'name': 'custom-name',
+        'online': 'custom-online',
+        'blocked_user_ids': 'custom-blocked-user-ids',
+        'privacy_settings': 'custom-privacy-settings',
+        'deleted_at': 'custom-deleted-at',
+        'deactivated_at': 'custom-deactivated-at',
+        'shadow_banned': 'custom-shadow-banned',
+        'revoke_tokens_issued_before': 'custom-revoke-tokens-issued-before',
       });
+      expect(guest.name, 'Created Name');
+      expect(guest.online, isTrue);
+      expect(guest.blockedUserIds, ['blocked-user']);
+      expect(guest.deactivatedAt, DateTime.utc(2026, 9, 4));
+      expect(guest.deletedAt, DateTime.utc(2026, 9, 5));
     },
   );
 
@@ -216,7 +226,7 @@ OwnUser _fullyPopulatedUser() => OwnUser(
   invisible: true,
   teamsRole: const {'team-x': 'admin'},
   avgResponseTime: 7,
-  extraData: const {'favorite_color': 'blue'},
+  custom: const {'favorite_color': 'blue'},
   devices: const [Device(id: 'device-1', pushProvider: PushProvider.firebase)],
   mutes: [
     Mute(
@@ -286,10 +296,11 @@ User _createdGuest() => User(
   teams: const ['team-a'],
   teamsRole: const {'team-a': 'member'},
   avgResponseTime: 42,
-  extraData: const {'favorite_color': 'green'},
+  custom: const {'favorite_color': 'green'},
   createdAt: DateTime.utc(2026, 9, 1),
   updatedAt: DateTime.utc(2026, 9, 2),
   lastActive: DateTime.utc(2026, 9, 3),
   deactivatedAt: DateTime.utc(2026, 9, 4),
   deletedAt: DateTime.utc(2026, 9, 5),
+  blockedUserIds: const ['blocked-user'],
 );

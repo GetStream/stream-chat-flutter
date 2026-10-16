@@ -109,7 +109,7 @@ class ChooseUserPage extends StatelessWidget {
                             user: user,
                           ),
                           title: Text(
-                            user.name,
+                            user.nameOrId,
                             style: context.streamTextTheme.bodyEmphasis,
                           ),
                           subtitle: Text(

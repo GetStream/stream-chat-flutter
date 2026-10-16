@@ -103,10 +103,11 @@ User _updatedUser() => User(
   invisible: false,
   teamsRole: const {'team-a': 'member'},
   avgResponseTime: 42,
-  extraData: const {'favorite_color': 'green'},
+  custom: const {'favorite_color': 'green'},
   deactivatedAt: DateTime.utc(2026, 9, 5),
   deletedAt: DateTime.utc(2026, 9, 6),
   shadowBanned: false,
+  blockedUserIds: const ['blocked-user'],
 );
 
 // A response whose user sets every field, including the private ones a [User] leaves out.
