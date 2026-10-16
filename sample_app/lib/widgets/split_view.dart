@@ -22,6 +22,8 @@ class SplitView extends StatefulWidget {
     required this.secondary,
     this.primaryConstraints = const SplitPaneConstraints(minWidth: 280, initialWidth: 320, maxWidth: 420),
     this.secondaryConstraints = const SplitPaneConstraints(minWidth: 360),
+    this.resizedPrimaryWidth,
+    this.onPrimaryWidthChanged,
   });
 
   /// The leading pane.
@@ -38,6 +40,16 @@ class SplitView extends StatefulWidget {
   /// Its [SplitPaneConstraints.minWidth] wins over [primaryConstraints] on a
   /// window too narrow for both.
   final SplitPaneConstraints secondaryConstraints;
+
+  /// The width people already resized [primary] to, which this split view
+  /// starts at instead of [primaryConstraints]' initial width.
+  ///
+  /// Lets the width outlive this split view, for example while the window is
+  /// too narrow for two panes.
+  final double? resizedPrimaryWidth;
+
+  /// Called with the new width of [primary] each time people resize it.
+  final ValueChanged<double>? onPrimaryWidthChanged;
 
   @override
   State<SplitView> createState() => _SplitViewState();
@@ -99,7 +111,7 @@ class _SplitViewState extends State<SplitView> {
   static const _transitionDuration = Duration(milliseconds: 200);
 
   // The width people resized [SplitView.primary] to, if they have.
-  double? _resizedPrimaryWidth;
+  late double? _resizedPrimaryWidth = widget.resizedPrimaryWidth;
 
   // Whether people are dragging the divider, which the panes follow without easing.
   var _isDragging = false;
@@ -128,7 +140,9 @@ class _SplitViewState extends State<SplitView> {
 
   void _resizeBy(double delta, double width) {
     final range = _primaryWidthRange(width);
-    setState(() => _resizedPrimaryWidth = (_primaryWidth(width) + delta).clamp(range.min, range.max));
+    final resized = (_primaryWidth(width) + delta).clamp(range.min, range.max);
+    setState(() => _resizedPrimaryWidth = resized);
+    widget.onPrimaryWidthChanged?.call(resized);
   }
 
   @override
@@ -418,6 +432,10 @@ class _AdaptiveSplitViewState extends State<AdaptiveSplitView> {
   // Opens and closes the drawer that spans both panes.
   final _drawerKey = GlobalKey<DrawerControllerState>(debugLabel: 'AdaptiveSplitView.drawer');
 
+  // The width people resized the primary pane to, kept here so it outlives the
+  // split view while the window shows one pane.
+  double? _primaryWidth;
+
   // Whether the drawer is open.
   var _isDrawerOpen = false;
 
@@ -441,6 +459,8 @@ class _AdaptiveSplitViewState extends State<AdaptiveSplitView> {
     final split = SplitView(
       primary: KeyedSubtree(key: _primaryKey, child: widget.primary),
       secondary: widget.secondary,
+      resizedPrimaryWidth: _primaryWidth,
+      onPrimaryWidthChanged: (width) => _primaryWidth = width,
     );
 
     final drawer = widget.drawer;
