@@ -171,17 +171,9 @@ class _RemindersPageState extends State<RemindersPage> {
                   'Error loading reminders',
                   style: context.streamTextTheme.metadataDefault,
                 ),
-                FilledButton(
+                StreamButton(
                   onPressed: controller.doInitialLoad,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: context.streamColorScheme.accentPrimary,
-                  ),
-                  child: Text(
-                    'Retry loading',
-                    style: context.streamTextTheme.bodyDefault.copyWith(
-                      color: Colors.white,
-                    ),
-                  ),
+                  child: const Text('Retry loading'),
                 ),
               ],
             ),

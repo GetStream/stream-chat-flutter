@@ -68,6 +68,13 @@ class SampleAppConfigScreen extends StatelessWidget {
                           ? (v) => SampleAppConfig.update(context, config.copyWith(enableDynamicColor: v))
                           : null,
                     ),
+                    _SwitchRow(
+                      icon: Icons.window_outlined,
+                      title: 'Windows XP',
+                      subtitle: 'Luna colors and xp_dart core components',
+                      value: config.enableXpTheme,
+                      onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableXpTheme: v)),
+                    ),
                     _LocaleRow(config: config),
                     _SwitchRow(
                       icon: icons.reorder,

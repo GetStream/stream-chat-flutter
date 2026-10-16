@@ -41,7 +41,6 @@ class _ChannelListPageState extends State<ChannelListPage> {
     if (user == null) return const Offstage();
 
     final icons = context.streamIcons;
-    final textTheme = context.streamTextTheme;
     final colorScheme = context.streamColorScheme;
 
     final config = context.sampleAppConfig;
@@ -88,7 +87,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
     return StreamScaffold(
       backgroundColor: colorScheme.backgroundApp,
       appBar: StreamChannelListHeader(
-        title: Text(enabledTabs[_currentIndex].navItem.label, style: textTheme.headingSm),
+        title: Text(enabledTabs[_currentIndex].navItem.label),
       ),
       drawer: LeftDrawer(user: user),
       // Keep the scaffold's bottom-slot layout in sync with the nav bar's own

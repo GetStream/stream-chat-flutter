@@ -55,7 +55,7 @@ class LocationDetailDialog extends StatelessWidget {
       body: BetterStreamBuilder(
         stream: locationStream,
         errorBuilder: (_, __) => const Center(child: LocationNotFound()),
-        noDataBuilder: (_) => const Center(child: CircularProgressIndicator()),
+        noDataBuilder: (_) => Center(child: StreamLoadingSpinner()),
         builder: (context, message) {
           final sharedLocation = message.sharedLocation;
           if (sharedLocation == null) {

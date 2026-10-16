@@ -21,6 +21,8 @@ import 'widgets/custom_message_actions.dart';
 import 'widgets/location/location_attachment.dart';
 import 'widgets/location/location_aware_message_composer.dart';
 import 'widgets/location/location_detail_dialog.dart';
+import 'xp/xp_component_builders.dart';
+import 'xp/xp_stream_theme.dart';
 
 /// Root widget of the sample app: boots prefs + notifications, runs
 /// the router, and owns the [StreamChat] ancestor.
@@ -175,20 +177,32 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                 final config = context.sampleAppConfig;
                 final surfaceStyle = config.surfaceStyle;
 
+                final xpTheme = config.enableXpTheme;
+                final chatExtensions = streamChatComponentBuilders(
+                  messageItem: customMessageItemBuilder,
+                  messageComposer: locationAwareMessageComposer,
+                );
+                final componentBuilders = xpTheme
+                    ? xpComponentBuilders(extensions: chatExtensions)
+                    : StreamComponentBuilders(extensions: chatExtensions);
+
                 return DynamicColorBuilder(
                   builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
                     return MaterialApp.router(
-                      theme: createTheme(
-                        dynamicColor: config.enableDynamicColor ? lightDynamic : null,
-                        brightness: Brightness.light,
-                        surfaceStyle: surfaceStyle,
-                      ),
+                      theme: xpTheme
+                          ? xpMaterialTheme(surfaceStyle: surfaceStyle)
+                          : createTheme(
+                              dynamicColor: config.enableDynamicColor ? lightDynamic : null,
+                              brightness: Brightness.light,
+                              surfaceStyle: surfaceStyle,
+                            ),
                       darkTheme: createTheme(
                         dynamicColor: config.enableDynamicColor ? darkDynamic : null,
                         brightness: Brightness.dark,
                         surfaceStyle: surfaceStyle,
                       ),
-                      themeMode: config.themeMode,
+                      // XP has no dark mode.
+                      themeMode: xpTheme ? ThemeMode.light : config.themeMode,
                       locale: config.locale,
                       supportedLocales: supportedLocales,
                       localizationsDelegates: const [
@@ -222,21 +236,19 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                                 // Null in production → the SDK uses the real
                                 // connectivity monitor; set only by e2e tests.
                                 connectivityStream: authController.debugConnectivityStream,
-                                componentBuilders: StreamComponentBuilders(
-                                  extensions: streamChatComponentBuilders(
-                                    messageItem: customMessageItemBuilder,
-                                    messageComposer: locationAwareMessageComposer,
-                                  ),
-                                ),
+                                componentBuilders: componentBuilders,
                                 themeData: config.toStreamChatThemeData(),
                                 configData: config.toStreamChatConfigurationData(),
                                 child: wrapped,
                               );
                             }
 
-                            return StreamChatTheme(
-                              data: StreamChatThemeData(),
-                              child: wrapped,
+                            return StreamComponentFactory(
+                              builders: componentBuilders,
+                              child: StreamChatTheme(
+                                data: StreamChatThemeData(),
+                                child: wrapped,
+                              ),
                             );
                           },
                           child: child,

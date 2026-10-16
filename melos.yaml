@@ -113,6 +113,7 @@ command:
       synchronized: ^3.4.0
       url_launcher: ^6.3.2
       uuid: ^4.5.3
+      xp_dart: ^0.1.0
       video_player: ^2.11.1
       web_socket_channel: ^3.0.3
 

@@ -70,8 +70,8 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
             ),
             height: 100,
             width: 100,
-            child: const Center(
-              child: CircularProgressIndicator(),
+            child: Center(
+              child: StreamLoadingSpinner(),
             ),
           ),
         ),
@@ -303,31 +303,10 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     ),
                   ),
                   const Spacer(),
-                  ElevatedButton(
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all<Color>(
-                        Theme.of(context).brightness == Brightness.light
-                            ? context.streamColorScheme.accentPrimary
-                            : Colors.white,
-                      ),
-                      elevation: WidgetStateProperty.all<double>(0),
-                      padding: WidgetStateProperty.all<EdgeInsets>(const EdgeInsets.symmetric(vertical: 16)),
-                      shape: WidgetStateProperty.all(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(26),
-                        ),
-                      ),
-                    ),
+                  StreamButton(
+                    size: .large,
                     onPressed: _login,
-                    child: Text(
-                      'Login',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Theme.of(context).brightness != Brightness.light
-                            ? context.streamColorScheme.accentPrimary
-                            : Colors.white,
-                      ),
-                    ),
+                    child: const Text('Login'),
                   ),
                   const StreamVersion(),
                 ],

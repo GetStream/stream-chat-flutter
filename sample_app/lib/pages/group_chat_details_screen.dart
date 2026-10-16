@@ -275,14 +275,10 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                TextButton(
+                StreamButton(
+                  type: .ghost,
                   onPressed: GoRouter.of(context).pop,
-                  child: Text(
-                    'OK',
-                    style: context.streamTextTheme.bodyEmphasis.copyWith(
-                      color: context.streamColorScheme.accentPrimary,
-                    ),
-                  ),
+                  child: const Text('OK'),
                 ),
               ],
             ),
