@@ -56,9 +56,10 @@
   user keeps it in `custom`, as a v1 member keeps `role`.
   Each generated user mapper fills the ones its response carries (`UserResponse` has no
   `shadowBanned`).
-- **`User.name` is nullable and has no fallback to `id`;** `User.nameOrId` has it. A blank name or
-  image is stored as null. The UI names a user by `nameOrId` everywhere except avatar initials, which
-  show the placeholder icon for an unnamed user, and filters and sorts, which read the raw `name`.
+- **`User.name` is nullable and has no fallback to `id`;** `User.nameOrId` has it, for a missing or
+  empty name, as v10's `name` did. Name and image are stored as given. The UI names a user by
+  `nameOrId` everywhere except avatar initials, which show the placeholder icon for an unnamed user,
+  and filters and sorts, which read the raw `name`; the avatar treats an empty image as none.
 - **`custom` is the wire's, verbatim,** and the v1 writers leave out a custom entry named like a key,
   so it cannot overwrite the field. `OwnUser.fromUser` copies the user's fields and no longer reads an
   own user's fields out of the custom data.

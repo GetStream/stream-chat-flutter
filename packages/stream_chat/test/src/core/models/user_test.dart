@@ -316,20 +316,10 @@ void main() {
       expect(user.nameOrId, id);
     });
 
-    test('User stores a blank name or image as null', () {
-      for (final blank in ['', '  ']) {
-        final user = User(id: id, name: blank, image: blank);
+    test('User.nameOrId returns the id for a user with an empty name', () {
+      final user = User(id: id, name: '');
 
-        expect(user.name, isNull, reason: 'name "$blank"');
-        expect(user.image, isNull, reason: 'image "$blank"');
-      }
-    });
-
-    test('User.fromJson reads a blank name or image as null', () {
-      final user = User.fromJson(const {'id': id, 'name': ' ', 'image': ''});
-
-      expect(user.name, isNull);
-      expect(user.image, isNull);
+      expect(user.nameOrId, id);
     });
   });
 }

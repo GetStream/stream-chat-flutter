@@ -12,13 +12,11 @@ part 'user.g.dart';
 @JsonSerializable(includeIfNull: false)
 class User extends Equatable {
   /// Creates a new user.
-  ///
-  /// A blank [name] or [image] is stored as null.
   User({
     required this.id,
     this.role,
-    String? name,
-    String? image,
+    this.name,
+    this.image,
     this.createdAt,
     this.updatedAt,
     this.lastActive,
@@ -35,9 +33,7 @@ class User extends Equatable {
     this.deletedAt,
     this.shadowBanned,
     this.blockedUserIds = const [],
-  }) : name = _nonBlank(name),
-       image = _nonBlank(image),
-       custom = {...custom};
+  }) : custom = {...custom};
 
   /// Create a new instance from json.
   factory User.fromJson(Map<String, dynamic> json) =>
@@ -75,12 +71,15 @@ class User extends Equatable {
   /// Null when the user has none.
   final String? name;
 
-  /// The user's [name], or their [id] when they have none.
+  /// The user's [name], or their [id] when the name is missing or empty.
   ///
   /// Suited to naming a user by text, such as in a mention; [name] tells an
   /// unnamed user apart.
   @JsonKey(includeToJson: false, includeFromJson: false)
-  String get nameOrId => name ?? id;
+  String get nameOrId => switch (name) {
+    final name? when name.isNotEmpty => name,
+    _ => id,
+  };
 
   /// The URL of the user's image.
   ///
@@ -152,8 +151,6 @@ class User extends Equatable {
   ///
   /// Empty for anyone but the current user.
   final List<String> blockedUserIds;
-
-  static String? _nonBlank(String? value) => (value == null || value.trim().isEmpty) ? null : value;
 
   /// List of users to list of userIds.
   static List<String>? toIds(List<User>? users) => users?.map((u) => u.id).toList();

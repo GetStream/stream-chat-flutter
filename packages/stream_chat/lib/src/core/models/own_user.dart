@@ -151,11 +151,6 @@ class OwnUser extends User {
 
   /// Returns a new [OwnUser] that is a combination of this ownUser
   /// and the given [other] ownUser.
-  ///
-  /// A nullable value [other] leaves out keeps this user's, except
-  /// [deactivatedAt], [deletedAt], [shadowBanned], [totalUnreadCountByTeam] and
-  /// [latestHiddenChannels], which are taken from [other] as they are.
-  /// [banExpires] is always this user's.
   OwnUser merge(OwnUser? other) {
     if (other == null) return this;
     return OwnUser(

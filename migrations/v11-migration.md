@@ -328,7 +328,6 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `ChannelModel.custom` / `Member.custom` entry named like one of the model's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; `toJson` leaves it out so it cannot overwrite the field |
 | `User.extraData` / `OwnUser.extraData` | `User.custom` / `OwnUser.custom` | `renamed` | The wire's name for it; also the constructor and `copyWith` arguments |
 | `User.name` (`String`, the id when the user has none) | `User.nameOrId` | `retyped` | `User.name` is a `String?` that is null when the user has none. Use `nameOrId` wherever a user is named by text, and `name` where a missing name matters, such as initials |
-| `User.name` / `User.image` blank (`''`) | `null` | `retyped` | A blank name or image is stored as null |
 | `user.extraData['name']` / `['image']` / `['deactivated_at']` / `['deleted_at']` / `['shadow_banned']` | `User.name` / `image` / `deactivatedAt` / `deletedAt` / `shadowBanned` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them |
 | `OwnUser.blockedUserIds` | `User.blockedUserIds` | `moved` | Still on `OwnUser`. Empty for anyone but the current user |
 | `ownUser.extraData['unread_count']` / `['total_unread_count_by_team']` / `['latest_hidden_channels']` | `OwnUser.unreadCount` / `totalUnreadCountByTeam` / `latestHiddenChannels` | `added` | Fields now, not custom data |
@@ -1051,9 +1050,9 @@ final color = user.extraData['favorite_color'];
 final color = user.custom['favorite_color'];
 ```
 
-**`User.name` is nullable and no longer falls back to the id.** It is null when the user has no name; a blank name
-or image is stored as null. `User.nameOrId` answers the name, or the id when there is none, which is what v10's
-`name` answered. Use it wherever you name a user by text — a title, a label, a mention — and keep `name` where a
+**`User.name` is nullable and no longer falls back to the id.** It is null when the user has no name.
+`User.nameOrId` answers the name, or the id when the name is missing or empty, which is what v10's `name`
+answered. Use it wherever you name a user by text — a title, a label, a mention — and keep `name` where a
 missing name matters, such as avatar initials or a sort:
 
 ```dart
