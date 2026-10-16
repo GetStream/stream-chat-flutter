@@ -1593,8 +1593,8 @@ class StreamChatClient {
 
   /// Marks a channel as read for the current user.
   ///
-  /// Messages up to and including the one with [messageId] are marked as read, or all of them when [messageId] is
-  /// null.
+  /// Messages up to and including the one with [messageId] are marked as read,
+  /// or all of them when [messageId] is null.
   Future<Result<MarkReadResponse>> markChannelRead(
     String channelId,
     String channelType, {
@@ -1605,9 +1605,8 @@ class StreamChatClient {
     messageId: messageId,
   );
 
-  /// Marks a channel as unread for the current user, from the message with [messageId] onwards.
-  ///
-  /// That message and every later one are marked as unread.
+  /// Marks the message with [messageId] and every later one in a channel as
+  /// unread for the current user.
   Future<Result<void>> markChannelUnread(
     String channelId,
     String channelType,
@@ -1618,7 +1617,8 @@ class StreamChatClient {
     messageId: messageId,
   );
 
-  /// Marks the messages of a channel created after [timestamp] as unread for the current user.
+  /// Marks the messages of a channel created after [timestamp] as unread for
+  /// the current user.
   ///
   /// A message created at exactly [timestamp] stays read.
   Future<Result<void>> markChannelUnreadByTimestamp(
@@ -1631,9 +1631,8 @@ class StreamChatClient {
     messageTimestamp: timestamp,
   );
 
-  /// Marks a thread in a channel as read for the current user.
-  ///
-  /// [threadId] is the id of the thread's parent message.
+  /// Marks the thread started by the message with [threadId] as read for the
+  /// current user.
   Future<Result<MarkReadResponse>> markThreadRead(
     String channelId,
     String channelType,
@@ -1644,9 +1643,8 @@ class StreamChatClient {
     threadId: threadId,
   );
 
-  /// Marks a thread in a channel as unread for the current user.
-  ///
-  /// [threadId] is the id of the thread's parent message.
+  /// Marks the thread started by the message with [threadId] as unread for the
+  /// current user.
   Future<Result<void>> markThreadUnread(
     String channelId,
     String channelType,

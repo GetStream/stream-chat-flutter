@@ -186,7 +186,8 @@ extension DeleteChannelResponseMapper on api.DeleteChannelResponse {
 
 /// Maps a generated [api.MarkReadResponse] to a [MarkReadResponse].
 extension MarkReadResponseMapper on api.MarkReadResponse {
-  // TODO(openapi-migration): map `event` in group 10; its thread carries a `MessageResponse`.
+  // TODO(openapi-migration): map `event` in group 10; its thread carries a
+  // `MessageResponse`.
 
   /// Converts this response into a [MarkReadResponse].
   MarkReadResponse toModel() => MarkReadResponse(duration: duration);

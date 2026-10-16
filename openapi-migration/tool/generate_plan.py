@@ -949,7 +949,10 @@ GROUPS = [
               fabricate a response on the local-unread path, and feed `MessageListUnreadController` and the public
               `ChannelDeliveryReporter`, which relied on a throw.
             """),
-        risks=[],
+        risks=[
+            'A `try`/`catch` around `hideChannel`, `showChannel`, `deleteChannel` or their `Channel` and '
+            '`StreamChannelListController` counterparts still compiles but no longer catches a failed call.',
+        ],
         done=DONE.replace('- [ ]', '- [x]'),
     ),
     dict(
@@ -992,8 +995,8 @@ GROUPS = [
             - **`MessageDelivery` moves to `models/request/`** as a freezed class without `toJson`.
             """),
         risks=[
-            'A `try`/`catch` around `hideChannel`, `showChannel`, `deleteChannel` or their `Channel` and '
-            '`StreamChannelListController` counterparts still compiles but no longer catches a failed call.',
+            'A `try`/`catch` around a read, unread or delivery call on `StreamChatClient` or `Channel` still '
+            'compiles but no longer catches a failed call.',
         ],
         done=DONE.replace('- [ ]', '- [x]'),
     ),
