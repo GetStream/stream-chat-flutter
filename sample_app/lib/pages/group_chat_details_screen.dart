@@ -109,7 +109,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
               child: Builder(
                 builder: (context) {
                   final topInset = MediaQuery.paddingOf(context).top;
-                  return Column(
+                  final content = Column(
                     children: [
                       if (topInset > 0) SizedBox(height: topInset),
                       Padding(
@@ -223,6 +223,8 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                       ),
                     ],
                   );
+
+                  return SafeArea(top: false, bottom: false, child: content);
                 },
               ),
             );

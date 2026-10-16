@@ -59,13 +59,17 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
 
               if (attachments.isEmpty) return const Center(child: _EmptyState());
 
-              return LazyLoadScrollView(
-                onEndOfPage: () async {
-                  if (nextPageKey != null) await _controller.loadMore(nextPageKey);
-                },
-                child: StreamMediaGallery(
-                  attachments: attachments,
-                  onItemTap: (index) => _openPreview(context, attachments, index),
+              return SafeArea(
+                top: false,
+                bottom: false,
+                child: LazyLoadScrollView(
+                  onEndOfPage: () async {
+                    if (nextPageKey != null) await _controller.loadMore(nextPageKey);
+                  },
+                  child: StreamMediaGallery(
+                    attachments: attachments,
+                    onItemTap: (index) => _openPreview(context, attachments, index),
+                  ),
                 ),
               );
             },

@@ -20,27 +20,14 @@ class MessageInfoSheet extends StatelessWidget {
     required BuildContext context,
     required Message message,
   }) {
-    final colorScheme = context.streamColorScheme;
-    return showModalBottomSheet<void>(
+    return showStreamSheet<void>(
       context: context,
-      useSafeArea: true,
-      isScrollControlled: true,
-      backgroundColor: colorScheme.backgroundApp,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(16),
-        ),
-      ),
-      builder: (_) => StreamChannel.value(
+      isDismissible: true,
+      builder: (_, scrollController) => StreamChannel.value(
         channel: StreamChannel.of(context).channel,
-        child: DraggableScrollableSheet(
-          snap: true,
-          expand: false,
-          snapSizes: const [0.5, 1],
-          builder: (context, controller) => MessageInfoSheet(
-            message: message,
-            scrollController: controller,
-          ),
+        child: MessageInfoSheet(
+          message: message,
+          scrollController: scrollController,
         ),
       ),
     );
@@ -50,14 +37,13 @@ class MessageInfoSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = context.streamColorScheme;
     final textTheme = context.streamTextTheme;
+    final spacing = context.streamSpacing;
 
     final channel = StreamChannel.of(context).channel;
 
     return Column(
       children: [
-        // Header
-        _buildHeader(context),
-
+        StreamSheetHeader(title: const Text('Message Info')),
         // Delivery and read receipts
         Expanded(
           child: BetterStreamBuilder<List<Read>>(
@@ -98,7 +84,7 @@ class MessageInfoSheet extends StatelessWidget {
 
               return ListView(
                 controller: scrollController,
-                padding: const EdgeInsets.all(16),
+                padding: .symmetric(horizontal: spacing.xxs, vertical: spacing.md),
                 children: [
                   // Read section
                   if (readBy.isNotEmpty) ...[
@@ -134,42 +120,6 @@ class MessageInfoSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    final textTheme = context.streamTextTheme;
-    final colorScheme = context.streamColorScheme;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: colorScheme.borderDefault,
-          ),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Message Info',
-            style: textTheme.headingMd,
-          ),
-          IconButton(
-            iconSize: 32,
-            icon: Icon(context.streamIcons.xmark),
-            onPressed: Navigator.of(context).maybePop,
-            color: colorScheme.textPrimary,
-            padding: const EdgeInsets.all(4),
-            style: ButtonStyle(
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              minimumSize: WidgetStateProperty.all(const Size.square(32)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildSection(
     BuildContext context, {
     required String title,
@@ -178,48 +128,22 @@ class MessageInfoSheet extends StatelessWidget {
   }) {
     final colorScheme = context.streamColorScheme;
     final textTheme = context.streamTextTheme;
+    final spacing = context.streamSpacing;
 
     return Column(
-      spacing: 12,
+      spacing: spacing.xxs,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Section title
-        Text(
-          title,
-          style: textTheme.captionDefault.copyWith(
-            color: colorScheme.textSecondary,
-          ),
-        ),
-
-        // List of items
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: colorScheme.backgroundElevation1,
-            ),
-            child: MediaQuery.removePadding(
-              context: context,
-              // Workaround for the bottom padding issue.
-              // Link: https://github.com/flutter/flutter/issues/156149
-              removeTop: true,
-              removeBottom: true,
-              child: ListView.separated(
-                shrinkWrap: true,
-                itemCount: reads.length,
-                physics: const NeverScrollableScrollPhysics(),
-                separatorBuilder: (_, __) => Divider(
-                  height: 1,
-                  color: colorScheme.borderDefault,
-                ),
-                itemBuilder: (_, index) => itemBuilder(
-                  context,
-                  reads[index],
-                ),
-              ),
+        Padding(
+          padding: .only(left: spacing.sm, right: spacing.sm, bottom: spacing.xs),
+          child: Text(
+            title,
+            style: textTheme.captionDefault.copyWith(
+              color: colorScheme.textSecondary,
             ),
           ),
         ),
+        for (final read in reads) itemBuilder(context, read),
       ],
     );
   }
@@ -237,41 +161,24 @@ class _UserReadTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 10,
+    final spacing = context.streamSpacing;
+
+    return StreamListTileTheme(
+      data: StreamListTileThemeData(
+        minTileHeight: 44, // Matches the design's tap target size
+        contentPadding: .symmetric(horizontal: spacing.sm),
       ),
-      child: Row(
-        children: [
-          // User avatar
-          StreamUserAvatar(
-            size: .lg,
-            user: read.user,
-          ),
-
-          const SizedBox(width: 12),
-
-          // User name
-          Expanded(
-            child: Text(
-              read.user.name,
-              style: context.streamTextTheme.bodyEmphasis,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-
-          // Status icon
-          Icon(
-            context.streamIcons.checks,
-            size: 18,
-            color: switch (isDelivered) {
-              true => context.streamColorScheme.textSecondary,
-              false => context.streamColorScheme.accentPrimary,
-            },
-          ),
-        ],
+      child: StreamListTile(
+        leading: StreamUserAvatar(user: read.user),
+        title: Text(read.user.name, maxLines: 1, overflow: .ellipsis),
+        trailing: Icon(
+          context.streamIcons.checks,
+          size: 18,
+          color: switch (isDelivered) {
+            true => context.streamColorScheme.textSecondary,
+            false => context.streamColorScheme.accentPrimary,
+          },
+        ),
       ),
     );
   }

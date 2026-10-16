@@ -869,7 +869,8 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
 
     final spacing = context.streamSpacing;
     final platform = Theme.of(context).platform;
-    final hasBottomInset = MediaQuery.paddingOf(context).bottom > 0;
+    final padding = MediaQuery.paddingOf(context);
+    final hasBottomInset = padding.bottom > 0;
 
     // Apple platforms rest on the bottom inset; elsewhere a margin clears it,
     // and stands in when there is none.
@@ -885,6 +886,8 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
         _ => StreamSafeArea.driven(
           top: false,
           listenable: _pickerAnimation,
+          // Only the bottom inset gives way to the picker; the side insets stay.
+          to: .only(left: padding.left, right: padding.right),
           margin: .only(bottom: bottomSafeAreaMargin),
           child: Center(heightFactor: 1, child: messageInput),
         ),
@@ -898,6 +901,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       .regular => DecoratedBox(
         decoration: BoxDecoration(
           color: colorScheme.backgroundElevation1,
+          border: Border(top: BorderSide(color: colorScheme.borderDefault)),
         ),
         child: content,
       ),
