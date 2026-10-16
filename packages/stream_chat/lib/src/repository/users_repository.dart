@@ -20,13 +20,13 @@ class UsersRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Blocks the user with the given [userId] for the current user.
+  /// Blocks [userId] for the current user.
   Future<Result<BlockUsersResponse>> blockUser(String userId) async {
     final result = await _api.blockUsers(blockUsersRequest: api.BlockUsersRequest(blockedUserId: userId));
     return result.map((response) => response.toModel());
   }
 
-  /// Unblocks the user with the given [userId] for the current user.
+  /// Unblocks [userId] for the current user.
   Future<Result<UnblockUsersResponse>> unblockUser(String userId) async {
     final result = await _api.unblockUsers(unblockUsersRequest: api.UnblockUsersRequest(blockedUserId: userId));
     return result.map((response) => response.toModel());

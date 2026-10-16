@@ -117,11 +117,10 @@
 - `StreamChatClient.blockUser` returns a `Result<BlockUsersResponse>` and `unblockUser` a `Result<UnblockUsersResponse>` instead of throwing.
 - `StreamChatClient.queryBlockedUsers` is renamed `getBlockedUsers` and returns a `Result<GetBlockedUsersResponse>` instead of throwing.
 - `UserBlockResponse` is renamed `BlockUsersResponse`, and `BlockedUsersResponse` is renamed `GetBlockedUsersResponse`.
-- `BlockUsersResponse` and `GetBlockedUsersResponse` no longer decode from JSON, are immutable, built through a const constructor, and their `duration` is a non-nullable `String`.
-- `BlockUsersResponse` and `GetBlockedUsersResponse` compare by value and gain `copyWith`.
-- `UserBlock` no longer decodes from or encodes to JSON and no longer extends `Equatable`.
+- `BlockUsersResponse` and `GetBlockedUsersResponse` no longer decode from JSON, are immutable, built through a const constructor, compare by value, gain `copyWith`, and their `duration` is a non-nullable `String`.
+- `UserBlock` no longer decodes from or encodes to JSON and no longer extends `Equatable`, so `props` is removed; it still compares by value.
 - `UserBlock.blockedUser`, `userId`, `blockedUserId` and `createdAt` are required and non-nullable, and `UserBlock.copyWith` takes every field as a non-nullable value.
-- `StreamChatApi.user.blockUser`, `unblockUser` and `queryBlockedUsers` are removed; call `blockUser`, `unblockUser` and `getBlockedUsers` on `StreamChatClient` instead.
+- `StreamChatApi.user`'s blocking methods are removed; use `blockUser`, `unblockUser` and `getBlockedUsers` on `StreamChatClient` instead.
 - `ChannelModel.extraData` and `Member.extraData` are renamed `custom`, and so are `Channel.extraData`, `Channel.extraDataStream` (now `customStream`), and the `extraData` argument of the `Channel` constructor and of `StreamChatClient.channel`.
 - Several channel and member values the custom data used to hold, such as `ChannelModel.hidden`, `ChannelModel.truncatedAt` and `Member.status`, are fields instead: `custom` no longer holds them, `toJson` no longer writes them, and an entry with one of their names in `custom` or in `copyWith(custom:)` no longer sets the field.
 - `ChannelModel.custom` and `Member.custom` hold the custom data exactly as the API returns it, and `toJson` leaves out an entry named like one of the model's own fields.

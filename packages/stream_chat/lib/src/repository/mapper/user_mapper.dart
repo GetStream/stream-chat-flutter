@@ -164,7 +164,8 @@ extension UnblockUsersResponseMapper on api.UnblockUsersResponse {
   UnblockUsersResponse toModel() => UnblockUsersResponse(duration: duration);
 }
 
-/// Maps a generated [api.GetBlockedUsersResponse] to a [GetBlockedUsersResponse].
+/// Maps a generated [api.GetBlockedUsersResponse] to a
+/// [GetBlockedUsersResponse].
 extension GetBlockedUsersResponseMapper on api.GetBlockedUsersResponse {
   /// Converts this response into a [GetBlockedUsersResponse].
   GetBlockedUsersResponse toModel() => GetBlockedUsersResponse(

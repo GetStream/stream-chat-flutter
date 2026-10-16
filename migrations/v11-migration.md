@@ -906,10 +906,10 @@ try {
 
 // v11
 final result = await client.getBlockedUsers();
-switch (result) {
-  case Success(:final data): showBlocked(data.blocks.map((block) => block.blockedUser));
-  case Failure(:final error): report(error);
-}
+result.fold(
+  onSuccess: (response) => showBlocked(response.blocks.map((block) => block.blockedUser)),
+  onFailure: (error, _) => report(error),
+);
 ```
 
 **`UserBlock.blockedUser`, `userId`, `blockedUserId` and `createdAt` are non-nullable** and required in the

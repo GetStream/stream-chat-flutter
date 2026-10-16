@@ -1060,7 +1060,10 @@ GROUPS = [
             - **`OwnUser.blockedUserIds` is updated only on success,** through `Result.onSuccess`, as v10 did by
               throwing before it reached the update. Failures are still logged, through `Result.onFailure`.
             """),
-        risks=[],
+        risks=[
+            'A `try`/`catch` around `blockUser`, `unblockUser` or `getBlockedUsers` still compiles but no longer '
+            'catches a failed call.',
+        ],
         done=DONE.replace('- [ ]', '- [x]'),
     ),
     dict(
