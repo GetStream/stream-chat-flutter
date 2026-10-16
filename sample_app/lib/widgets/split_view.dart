@@ -10,7 +10,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import '../utils/window_size_class.dart';
 
 /// A layout that places [primary] and [secondary] side by side, separated by a
-/// divider that people can drag to resize the panes.
+/// divider with a handle that people drag to resize the panes.
 ///
 /// When a fold or hinge divides the window into a left and a right side, each
 /// pane fills one side, easing into place as the fold appears or disappears,
@@ -42,11 +42,11 @@ class SplitView extends StatefulWidget {
   /// window too narrow for both.
   final SplitPaneConstraints secondaryConstraints;
 
-  /// The width people already resized [primary] to, which this split view
-  /// starts at instead of [primaryConstraints]' initial width.
+  /// The width people already resized [primary] to.
   ///
-  /// Lets the width outlive this split view, for example while the window is
-  /// too narrow for two panes.
+  /// When set, the split view starts at this width instead of either pane's
+  /// [SplitPaneConstraints.initialWidth], so the width can outlive this split
+  /// view, for example while the window is too narrow for two panes.
   final double? resizedPrimaryWidth;
 
   /// Called with the new width of [primary] each time people resize it.
