@@ -37,7 +37,8 @@
 - **`enableSlowdown` and `disableSlowdown` move with it, renamed `enableSlowMode` and
   `disableSlowMode`** to match the `Channel` helpers and `ChannelCapability.slowMode`. Both are
   `updateChannelPartial` with a fixed `cooldown`, so they call the repository's one method rather than
-  an operation of their own.
+  an operation of their own. `disableSlowMode` sets `cooldown` to 0: unsetting it is refused on v1 and
+  v2, as it is a reserved field.
 - **The v2 route is the v1 handler.** `lib/chat/routes.go` mounts `UpdateChannelPartial` in the
   shared `coreRoutes`; it is neither gated nor in beta. On v2 it also accepts `custom.<field>` paths
   in `set` and `unset`, and still takes flat keys, so `{'name': …}` updates the same field.
@@ -68,10 +69,11 @@
   `muted`, `blocked`, `truncatedAt`, `truncatedBy`, `autoTranslationEnabled` and
   `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`,
   `futureChannelBanExpires` and `deletedAt`, are fields with persistence columns; `truncatedBy` is
-  read back through the users table. `Channel.extraData`, `extraDataStream`, and the `extraData`
-  argument of the `Channel` constructor and of `StreamChatClient.channel` are renamed with it.
+  read back through the users table. `toJson` leaves them out: nothing in the SDK sends a channel
+  or member as JSON. `Channel.extraData`, `extraDataStream`, and the `extraData` argument of the
+  `Channel` constructor and of `StreamChatClient.channel` are renamed with it.
 - **`custom` is the wire's, verbatim,** and the v1 writers leave out a custom entry named like a key,
-  so it cannot overwrite the field. `Member` leaves the deprecated `role` out of `custom`.
+  so it cannot overwrite the field.
 - **`ChannelModel.merge` keeps a flag the incoming channel leaves out, and turns auto translation off
   when it is missing,** as before. Checked live on v1 and v2: queries always send `hidden` and
   `blocked`; events leave them out, except the `channel.hidden` a block sends; `muted` is never sent on
@@ -81,7 +83,7 @@
 
 ## Risks
 
-- `disableSlowMode` unsets `cooldown`, which the server rejects on both v1 and v2 as a reserved field. It fails before and after this group; the fix is tracked separately, so the request is unchanged.
+- Until [11](11-channels-and-members.md) moves `updateChannel`, the partial and full updates report failures differently: a caller using both reads a `Result` from one and catches an exception from the other.
 
 ## Definition of done
 

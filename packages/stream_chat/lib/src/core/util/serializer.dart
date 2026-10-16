@@ -42,8 +42,9 @@ class Serializer {
 
   /// A copy of [json] with the entries of `extra_data` moved to the root.
   ///
-  /// An entry in `extra_data` replaces a root entry with the same key, unless the key is one of [topLevelFields]:
-  /// such an entry is left out, so custom data cannot overwrite a field.
+  /// An entry in `extra_data` replaces a root entry with the same key, unless
+  /// the key is one of [topLevelFields]: such an entry is left out, so custom
+  /// data cannot overwrite a field.
   ///
   /// ```dart
   /// Serializer.moveFromExtraDataToRoot({

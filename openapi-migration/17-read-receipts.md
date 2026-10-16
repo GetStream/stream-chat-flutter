@@ -54,6 +54,7 @@
 
 ## Risks
 
+- A `try`/`catch` around a read, unread or delivery call on `StreamChatClient` or `Channel` still compiles but no longer catches a failed call.
 
 ## Definition of done
 

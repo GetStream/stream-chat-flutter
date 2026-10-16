@@ -71,7 +71,7 @@ class Channels extends Table {
   /// Whether messages in the channel are translated automatically.
   BoolColumn get autoTranslationEnabled => boolean().nullable()();
 
-  /// The language messages in the channel are translated into automatically.
+  /// The language the channel's messages are translated into automatically.
   TextColumn get autoTranslationLanguage => text().nullable()();
 
   /// Custom data attached to the channel.

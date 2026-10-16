@@ -14,7 +14,8 @@ class UnreadCountsChannel with _$UnreadCountsChannel {
     required this.lastRead,
   });
 
-  /// The channel's cid, in the form `type:id` (for example `messaging:general`).
+  /// The channel's cid, in the form `type:id` (for example
+  /// `messaging:general`).
   @override
   final String channelId;
 
@@ -22,7 +23,7 @@ class UnreadCountsChannel with _$UnreadCountsChannel {
   @override
   final int unreadCount;
 
-  /// The time the user last read the channel, or when they joined it if they never have.
+  /// The time the user last read the channel.
   @override
   final DateTime lastRead;
 }
