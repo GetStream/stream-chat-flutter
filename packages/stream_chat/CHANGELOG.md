@@ -168,7 +168,7 @@
 - Added optional `reason` and `custom` arguments to `flagMessage` and `flagUser`, recorded with the flag.
 - Added an optional `timeout` to `StreamChatClient.moderation.muteUser` that expires the mute.
 - Added `StreamChatClient.moderation.muteUsers` and `unmuteUsers`, which mute and unmute several users in one call and report the ids that matched no user.
-- Added `User.deactivatedAt`, `deletedAt`, `shadowBanned`, `blockedUserIds` and `nameOrId`, and `OwnUser.unreadCount`, `totalUnreadCountByTeam` and `latestHiddenChannels`; the constructors and `copyWith` accept the new fields.
+- Added `User.deactivatedAt`, `deletedAt`, `shadowBanned`, `blockedUserIds` and `nameOrId`; the constructors and `copyWith` accept the new fields.
 - Added `ChannelModel.muted`, `blocked`, `truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires` and `deletedAt`; the constructors and `copyWith` accept the new fields.
 - Added a `prev` argument to `queryPolls` and `queryPollVotes`, and a `prev` cursor on their responses, for paging backwards.
 

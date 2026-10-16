@@ -330,7 +330,6 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `User.name` (`String`, the id when the user has none) | `User.nameOrId` | `retyped` | `User.name` is a `String?` that is null when the user has none. Use `nameOrId` wherever a user is named by text, and `name` where a missing name matters, such as initials |
 | `user.extraData['name']` / `['image']` / `['deactivated_at']` / `['deleted_at']` / `['shadow_banned']` | `User.name` / `image` / `deactivatedAt` / `deletedAt` / `shadowBanned` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them |
 | `OwnUser.blockedUserIds` | `User.blockedUserIds` | `moved` | Still on `OwnUser`. Empty for anyone but the current user |
-| `ownUser.extraData['unread_count']` / `['total_unread_count_by_team']` / `['latest_hidden_channels']` | `OwnUser.unreadCount` / `totalUnreadCountByTeam` / `latestHiddenChannels` | `added` | Fields now, not custom data |
 | `OwnUser.fromUser(user)` reading devices, mutes, unread counts, push preferences and privacy settings out of `user.extraData` | — | `removed` | A `User` no longer carries them; they are left at their defaults |
 | `User.custom` entry named like one of the user's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; `toJson` leaves it out so it cannot overwrite the field |
 | _(more added per feature as PRs land)_ | | | |
@@ -1068,10 +1067,9 @@ prints `null is typing` for a user with no name. That includes a custom `Transla
 subclass overriding `userTypingText` or `pinnedByUserText`.
 
 **The user fields are fields, not custom data.** `User.image` reads the same and `name` changes as described above;
-`deactivatedAt`, `deletedAt` and `shadowBanned` are new fields, `blockedUserIds` moves up from `OwnUser` to `User`,
-and `OwnUser.unreadCount`, `totalUnreadCountByTeam` and `latestHiddenChannels` are new fields. `custom` no longer
-holds any of their keys, and an entry with one of those names in `custom` or in `copyWith(custom:)` no longer sets
-the field:
+`deactivatedAt`, `deletedAt` and `shadowBanned` are new fields, and `blockedUserIds` moves up from `OwnUser` to
+`User`. `custom` no longer holds any of their keys, and an entry with one of those names in `custom` or in
+`copyWith(custom:)` no longer sets the field:
 
 ```dart
 // v10

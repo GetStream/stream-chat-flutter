@@ -24,28 +24,6 @@ void main() {
 
     expect(client.state.currentUser!.privacySettings?.typingIndicators?.enabled, isFalse);
   });
-
-  test('a user.updated event for the current user keeps the fields only an own user has', () async {
-    final currentUser = OwnUser(
-      id: 'user-id',
-      unreadCount: 3,
-      totalUnreadCountByTeam: const {'team-1': 3},
-      latestHiddenChannels: const ['messaging:hidden'],
-    );
-    final event = Event.fromJson(const {
-      'type': EventType.userUpdated,
-      'user': {'id': 'user-id', 'name': 'Renamed'},
-    });
-
-    final client = _client(currentUser)..handleEvent(event);
-    await Future<void>.delayed(Duration.zero);
-
-    final updatedUser = client.state.currentUser!;
-    expect(updatedUser.name, 'Renamed');
-    expect(updatedUser.unreadCount, 3);
-    expect(updatedUser.totalUnreadCountByTeam, {'team-1': 3});
-    expect(updatedUser.latestHiddenChannels, ['messaging:hidden']);
-  });
 }
 
 // A client whose state follows its events for [currentUser], with no

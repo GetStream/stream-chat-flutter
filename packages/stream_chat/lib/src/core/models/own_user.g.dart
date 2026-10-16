@@ -26,11 +26,6 @@ OwnUser _$OwnUserFromJson(Map<String, dynamic> json) => OwnUser(
   privacySettings: json['privacy_settings'] == null
       ? null
       : PrivacySettings.fromJson(json['privacy_settings'] as Map<String, dynamic>),
-  unreadCount: (json['unread_count'] as num?)?.toInt() ?? 0,
-  totalUnreadCountByTeam: (json['total_unread_count_by_team'] as Map<String, dynamic>?)?.map(
-    (k, e) => MapEntry(k, (e as num).toInt()),
-  ),
-  latestHiddenChannels: (json['latest_hidden_channels'] as List<dynamic>?)?.map((e) => e as String).toList(),
   id: json['id'] as String,
   role: json['role'] as String?,
   name: json['name'] as String?,
@@ -81,7 +76,4 @@ Map<String, dynamic> _$OwnUserToJson(OwnUser instance) => <String, dynamic>{
   'unread_threads': instance.unreadThreads,
   'push_preferences': ?instance.pushPreferences?.toJson(),
   'privacy_settings': ?instance.privacySettings?.toJson(),
-  'unread_count': instance.unreadCount,
-  'total_unread_count_by_team': ?instance.totalUnreadCountByTeam,
-  'latest_hidden_channels': ?instance.latestHiddenChannels,
 };

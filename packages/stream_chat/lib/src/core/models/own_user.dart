@@ -22,9 +22,6 @@ class OwnUser extends User {
     super.blockedUserIds,
     this.pushPreferences,
     this.privacySettings,
-    this.unreadCount = 0,
-    this.totalUnreadCountByTeam,
-    this.latestHiddenChannels,
     required super.id,
     super.role,
     super.name,
@@ -112,9 +109,6 @@ class OwnUser extends User {
     DateTime? deactivatedAt,
     DateTime? deletedAt,
     bool? shadowBanned,
-    int? unreadCount,
-    Map<String, int>? totalUnreadCountByTeam,
-    List<String>? latestHiddenChannels,
   }) => OwnUser(
     id: id ?? this.id,
     role: role ?? this.role,
@@ -144,9 +138,6 @@ class OwnUser extends User {
     deactivatedAt: deactivatedAt ?? this.deactivatedAt,
     deletedAt: deletedAt ?? this.deletedAt,
     shadowBanned: shadowBanned ?? this.shadowBanned,
-    unreadCount: unreadCount ?? this.unreadCount,
-    totalUnreadCountByTeam: totalUnreadCountByTeam ?? this.totalUnreadCountByTeam,
-    latestHiddenChannels: latestHiddenChannels ?? this.latestHiddenChannels,
   );
 
   /// Returns a new [OwnUser] that is a combination of this ownUser
@@ -182,9 +173,6 @@ class OwnUser extends User {
       deactivatedAt: other.deactivatedAt,
       deletedAt: other.deletedAt,
       shadowBanned: other.shadowBanned,
-      unreadCount: other.unreadCount,
-      totalUnreadCountByTeam: other.totalUnreadCountByTeam,
-      latestHiddenChannels: other.latestHiddenChannels,
     );
   }
 
@@ -212,19 +200,6 @@ class OwnUser extends User {
 
   /// Privacy settings for the user if set.
   final PrivacySettings? privacySettings;
-
-  /// The user's unread message count as of the last time the current user was
-  /// loaded.
-  ///
-  /// Unlike [totalUnreadCount], it is not updated by events that carry only a
-  /// new count; consider [totalUnreadCount] for a live value.
-  final int unreadCount;
-
-  /// Total unread messages by the user in each of their teams, keyed by team.
-  final Map<String, int>? totalUnreadCountByTeam;
-
-  /// The cids of the channels the user hid most recently.
-  final List<String>? latestHiddenChannels;
 
   /// Convert instance to json.
   ///

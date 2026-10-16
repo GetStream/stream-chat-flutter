@@ -157,9 +157,6 @@ void main() {
         banned: true,
         teams: ['team1', 'team2'],
         language: 'fr',
-        unreadCount: 7,
-        totalUnreadCountByTeam: {'team1': 7},
-        latestHiddenChannels: ['messaging:hidden'],
         deactivatedAt: DateTime.utc(2022),
         deletedAt: DateTime.utc(2023),
         shadowBanned: true,
@@ -182,9 +179,6 @@ void main() {
       expect(newUser.banned, true);
       expect(newUser.teams, ['team1', 'team2']);
       expect(newUser.language, 'fr');
-      expect(newUser.unreadCount, 7);
-      expect(newUser.totalUnreadCountByTeam, {'team1': 7});
-      expect(newUser.latestHiddenChannels, ['messaging:hidden']);
       expect(newUser.deactivatedAt, DateTime.utc(2022));
       expect(newUser.deletedAt, DateTime.utc(2023));
       expect(newUser.shadowBanned, isTrue);
@@ -213,9 +207,6 @@ void main() {
           banned: true,
           teams: const ['team1', 'team2'],
           language: 'fr',
-          unreadCount: 7,
-          totalUnreadCountByTeam: const {'team1': 7},
-          latestHiddenChannels: const ['messaging:hidden'],
           deactivatedAt: DateTime.utc(2022),
           deletedAt: DateTime.utc(2023),
           shadowBanned: true,
@@ -239,9 +230,6 @@ void main() {
       expect(newUser.banned, true);
       expect(newUser.teams, ['team1', 'team2']);
       expect(newUser.language, 'fr');
-      expect(newUser.unreadCount, 7);
-      expect(newUser.totalUnreadCountByTeam, {'team1': 7});
-      expect(newUser.latestHiddenChannels, ['messaging:hidden']);
       expect(newUser.deactivatedAt, DateTime.utc(2022));
       expect(newUser.deletedAt, DateTime.utc(2023));
       expect(newUser.shadowBanned, isTrue);
@@ -260,8 +248,6 @@ void main() {
         deactivatedAt: DateTime.utc(2020),
         deletedAt: DateTime.utc(2021),
         shadowBanned: true,
-        totalUnreadCountByTeam: const {'team-1': 1},
-        latestHiddenChannels: const ['messaging:hidden'],
       );
 
       final merged = user.merge(OwnUser(id: 'test-user'));
@@ -269,8 +255,6 @@ void main() {
       expect(merged.deactivatedAt, isNull);
       expect(merged.deletedAt, isNull);
       expect(merged.shadowBanned, isNull);
-      expect(merged.totalUnreadCountByTeam, isNull);
-      expect(merged.latestHiddenChannels, isNull);
     });
 
     test('should parse json with privacy settings correctly', () {
@@ -361,9 +345,6 @@ void main() {
       expect(ownUser.blockedUserIds, isEmpty);
       expect(ownUser.pushPreferences, isNull);
       expect(ownUser.privacySettings, isNull);
-      expect(ownUser.unreadCount, 0);
-      expect(ownUser.totalUnreadCountByTeam, isNull);
-      expect(ownUser.latestHiddenChannels, isNull);
     });
 
     test('fromUser should work with OwnUser as input', () {
@@ -458,9 +439,6 @@ void main() {
             typingIndicators: TypingIndicators(enabled: true),
             readReceipts: ReadReceipts(enabled: false),
           ),
-          unreadCount: 25,
-          totalUnreadCountByTeam: const {'team-1': 25},
-          latestHiddenChannels: const ['messaging:hidden'],
         );
 
         final reconstructedOwnUser = OwnUser.fromJson(originalOwnUser.toJson());
@@ -490,9 +468,6 @@ void main() {
         expect(reconstructedOwnUser.blockedUserIds, contains('blocked-1'));
         expect(reconstructedOwnUser.blockedUserIds, contains('blocked-2'));
         expect(reconstructedOwnUser.blockedUserIds, contains('blocked-3'));
-        expect(reconstructedOwnUser.unreadCount, 25);
-        expect(reconstructedOwnUser.totalUnreadCountByTeam, {'team-1': 25});
-        expect(reconstructedOwnUser.latestHiddenChannels, ['messaging:hidden']);
 
         // Verify push preferences
         final pushPrefs = reconstructedOwnUser.pushPreferences;

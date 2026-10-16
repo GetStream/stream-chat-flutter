@@ -51,9 +51,9 @@
 - **`User` and `OwnUser` promote the fields v10 parked in `extraData`, and rename it `custom`**
   (README rule 9), since these calls are the first to map a user. `User.name`, `image`,
   `deactivatedAt`, `deletedAt` and `shadowBanned` are fields with persistence columns;
-  `blockedUserIds` moves up from `OwnUser`, and `OwnUser` gains `unreadCount`,
-  `totalUnreadCountByTeam` and `latestHiddenChannels`. The mappers leave `revoke_tokens_issued_before` out; a v1
-  user keeps it in `custom`, as a v1 member keeps `role`.
+  `blockedUserIds` moves up from `OwnUser`. `OwnUser` leaves out `unread_count`,
+  `total_unread_count_by_team` and `latest_hidden_channels`, which no event keeps current. The mappers
+  leave `revoke_tokens_issued_before` out; a v1 user keeps it in `custom`, as a v1 member keeps `role`.
   Each generated user mapper fills the ones its response carries (`UserResponse` has no
   `shadowBanned`).
 - **`User.name` is nullable and has no fallback to `id`;** `User.nameOrId` has it, for a missing or
@@ -63,8 +63,7 @@
 - **`custom` is the wire's, verbatim,** and the v1 writers leave out a custom entry named like a key,
   so it cannot overwrite the field. `OwnUser.fromUser` copies the user's fields and no longer reads an
   own user's fields out of the custom data.
-- **`OwnUser.merge` takes the other user's fields,** as before; the `user.updated` handler also keeps
-  the three new unread fields, which the event leaves out. A `user.updated` event's user is decoded
+- **`OwnUser.merge` takes the other user's fields,** as before. A `user.updated` event's user is decoded
   again as an `OwnUser`, so the privacy settings it carries for the current user replace theirs, as in
   v10 — a temporary adapter (README) for the WebSocket v2 move to replace.
 
