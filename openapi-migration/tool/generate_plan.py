@@ -715,13 +715,15 @@ GROUPS = [
               restructures those classes and re-points the mapper.
             - **Every field `ChannelResponse` and `ChannelMemberResponse` declare is reachable on ours,** as a
               field: [15](15-partial-updates.md) promoted the ones v10 parked in `extraData` and renamed it `custom`.
-              Three are left out: the channel's `hide_messages_before` and `mute_expires_at`, which the server
-              never fills on the channel (a mute's expiry is `ChannelMute.expires`), and the member's deprecated
-              `role`. The nested config types drop `ChatPreferences.distinctChannelMessages` and `Command`'s
-              `createdAt` / `updatedAt`, which ours do not model.
+              Three are left out: the channel's `hide_messages_before`, which the server returns on the
+              channel-state entry rather than on the channel, its `mute_expires_at`, since a mute's expiry is
+              read from `ChannelMute.expires`, and the member's `role`, which neither the iOS nor the Android
+              SDK models. The nested config types drop `ChatPreferences.distinctChannelMessages` and
+              `Command`'s `createdAt` / `updatedAt`, which ours do not model.
             - **The mapper copies `custom` verbatim** (README rule 9). A mapped channel or member still differs from
-              a v1 decode in one way, for group 09 to settle: `truncatedBy`, `createdBy` and each member's user go
-              through `users_mapper.dart`, which drops the user fields `User` does not model.
+              a v1 decode in two ways. `truncatedBy`, `createdBy` and each member's user go through
+              `users_mapper.dart`, which drops the user fields `User` does not model, for group 09 to settle. And
+              a v1 member keeps the wire's `role` in `custom`, where the mapper leaves the typed `role` out.
             - **The mapper is tested through the client,** by [15](15-partial-updates.md)'s
               `updateChannelPartial` tests: the first call that returns a channel through the generated client.
         """),
@@ -853,7 +855,8 @@ GROUPS = [
             - **`enableSlowdown` and `disableSlowdown` move with it, renamed `enableSlowMode` and
               `disableSlowMode`** to match the `Channel` helpers and `ChannelCapability.slowMode`. Both are
               `updateChannelPartial` with a fixed `cooldown`, so they call the repository's one method rather than
-              an operation of their own.
+              an operation of their own. `disableSlowMode` sets `cooldown` to 0: unsetting it is refused on v1 and
+              v2, as it is a reserved field.
             - **The v2 route is the v1 handler.** `lib/chat/routes.go` mounts `UpdateChannelPartial` in the
               shared `coreRoutes`; it is neither gated nor in beta. On v2 it also accepts `custom.<field>` paths
               in `set` and `unset`, and still takes flat keys, so `{'name': …}` updates the same field.
@@ -884,10 +887,11 @@ GROUPS = [
               `muted`, `blocked`, `truncatedAt`, `truncatedBy`, `autoTranslationEnabled` and
               `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`,
               `futureChannelBanExpires` and `deletedAt`, are fields with persistence columns; `truncatedBy` is
-              read back through the users table. `Channel.extraData`, `extraDataStream`, and the `extraData`
-              argument of the `Channel` constructor and of `StreamChatClient.channel` are renamed with it.
+              read back through the users table. `toJson` leaves them out: nothing in the SDK sends a channel
+              or member as JSON. `Channel.extraData`, `extraDataStream`, and the `extraData` argument of the
+              `Channel` constructor and of `StreamChatClient.channel` are renamed with it.
             - **`custom` is the wire's, verbatim,** and the v1 writers leave out a custom entry named like a key,
-              so it cannot overwrite the field. `Member` leaves the deprecated `role` out of `custom`.
+              so it cannot overwrite the field.
             - **`ChannelModel.merge` keeps a flag the incoming channel leaves out, and turns auto translation off
               when it is missing,** as before. Checked live on v1 and v2: queries always send `hidden` and
               `blocked`; events leave them out, except the `channel.hidden` a block sends; `muted` is never sent on
@@ -896,8 +900,9 @@ GROUPS = [
               on the backend leaving the keys out when false or empty.
             """),
         risks=[
-            '`disableSlowMode` unsets `cooldown`, which the server rejects on both v1 and v2 as a reserved field. '
-            'It fails before and after this group; the fix is tracked separately, so the request is unchanged.',
+            'Until [11](11-channels-and-members.md) moves `updateChannel`, the partial and full updates report '
+            'failures differently: a caller using both reads a `Result` from one and catches an exception from the '
+            'other.',
         ],
         done=DONE.replace('- [ ]', '- [x]'),
     ),
@@ -931,7 +936,10 @@ GROUPS = [
               fabricate a response on the local-unread path, and feed `MessageListUnreadController` and the public
               `ChannelDeliveryReporter`, which relied on a throw.
             """),
-        risks=[],
+        risks=[
+            'A `try`/`catch` around `hideChannel`, `showChannel`, `deleteChannel` or their `Channel` and '
+            '`StreamChannelListController` counterparts still compiles but no longer catches a failed call.',
+        ],
         done=DONE.replace('- [ ]', '- [x]'),
     ),
     dict(
@@ -973,7 +981,10 @@ GROUPS = [
               is a break, approved for this group.
             - **`MessageDelivery` moves to `models/request/`** as a freezed class without `toJson`.
             """),
-        risks=[],
+        risks=[
+            'A `try`/`catch` around a read, unread or delivery call on `StreamChatClient` or `Channel` still '
+            'compiles but no longer catches a failed call.',
+        ],
         done=DONE.replace('- [ ]', '- [x]'),
     ),
     dict(
@@ -993,13 +1004,16 @@ GROUPS = [
             - **Moved off `UserApi`:** `getUnreadCount`, now a `StreamChatClient` method over a new
               `UsersRepository`, mirroring `UserApi`.
             - **The v10 names stay:** `getUnreadCount` and `GetUnreadCountResponse`, rather than the spec's
-              `unreadCounts` and `WrappedUnreadCountsResponse`, which say nothing a caller needs.
+              `unreadCounts` and `WrappedUnreadCountsResponse`. The first is a noun where the client's methods
+              are verbs, and `Wrapped` names how the API packages the response, not what it holds.
             - **`GetUnreadCountResponse` and the `UnreadCounts*` models are freezed plain models,** with v10's
               fields and nullability; the generated types match them field for field. `duration` is non-null.
             - **The current user's counts are updated only on success,** through `Result.onSuccess`, as v10 did
               by throwing before it reached the update.
             """),
-        risks=[],
+        risks=[
+            'A `try`/`catch` around `getUnreadCount` still compiles but no longer catches a failed call.',
+        ],
         done=DONE.replace('- [ ]', '- [x]'),
     ),
     dict(
@@ -1032,7 +1046,10 @@ GROUPS = [
             - **`OwnUser.blockedUserIds` is updated only on success,** through `Result.onSuccess`, as v10 did by
               throwing before it reached the update. Failures are still logged, through `Result.onFailure`.
             """),
-        risks=[],
+        risks=[
+            'A `try`/`catch` around `blockUser`, `unblockUser` or `getBlockedUsers` still compiles but no longer '
+            'catches a failed call.',
+        ],
         done=DONE.replace('- [ ]', '- [x]'),
     ),
     dict(

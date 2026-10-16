@@ -1265,8 +1265,8 @@ class StreamChatClient {
     message: message,
   );
 
-  /// Partially updates a channel: sets the fields in [set] and removes the fields named in [unset], leaving every
-  /// other field as it is.
+  /// Partially updates a channel: sets the fields in [set] and removes the
+  /// fields named in [unset], leaving every other field as it is.
   ///
   /// At least one of [set] and [unset] is required.
   ///
@@ -1462,9 +1462,11 @@ class StreamChatClient {
     pagination: pagination,
   );
 
-  /// Hides a channel from the current user's channel list until a new message is added to it.
+  /// Hides a channel from the current user's channel list until a new message
+  /// is added to it.
   ///
-  /// If [clearHistory] is true, the channel's messages are also cleared for the current user.
+  /// If [clearHistory] is true, the channel's messages are also cleared for the
+  /// current user.
   Future<Result<HideChannelResponse>> hideChannel(
     String channelId,
     String channelType, {
@@ -1600,8 +1602,8 @@ class StreamChatClient {
 
   /// Marks a channel as read for the current user.
   ///
-  /// Messages up to and including the one with [messageId] are marked as read, or all of them when [messageId] is
-  /// null.
+  /// Messages up to and including the one with [messageId] are marked as read,
+  /// or all of them when [messageId] is null.
   Future<Result<MarkReadResponse>> markChannelRead(
     String channelId,
     String channelType, {
@@ -1612,9 +1614,8 @@ class StreamChatClient {
     messageId: messageId,
   );
 
-  /// Marks a channel as unread for the current user, from the message with [messageId] onwards.
-  ///
-  /// That message and every later one are marked as unread.
+  /// Marks the message with [messageId] and every later one in a channel as
+  /// unread for the current user.
   Future<Result<void>> markChannelUnread(
     String channelId,
     String channelType,
@@ -1625,7 +1626,8 @@ class StreamChatClient {
     messageId: messageId,
   );
 
-  /// Marks the messages of a channel created after [timestamp] as unread for the current user.
+  /// Marks the messages of a channel created after [timestamp] as unread for
+  /// the current user.
   ///
   /// A message created at exactly [timestamp] stays read.
   Future<Result<void>> markChannelUnreadByTimestamp(
@@ -1638,9 +1640,8 @@ class StreamChatClient {
     messageTimestamp: timestamp,
   );
 
-  /// Marks a thread in a channel as read for the current user.
-  ///
-  /// [threadId] is the id of the thread's parent message.
+  /// Marks the thread started by the message with [threadId] as read for the
+  /// current user.
   Future<Result<MarkReadResponse>> markThreadRead(
     String channelId,
     String channelType,
@@ -1651,9 +1652,8 @@ class StreamChatClient {
     threadId: threadId,
   );
 
-  /// Marks a thread in a channel as unread for the current user.
-  ///
-  /// [threadId] is the id of the thread's parent message.
+  /// Marks the thread started by the message with [threadId] as unread for the
+  /// current user.
   Future<Result<void>> markThreadUnread(
     String channelId,
     String channelType,
@@ -1666,9 +1666,11 @@ class StreamChatClient {
 
   /// Creates [poll] with its settings and options.
   ///
-  /// Any ids already set on the options are ignored; every option gets a new one, which the returned poll carries.
+  /// Any ids already set on the options are ignored; every option gets a new
+  /// one, which the returned poll carries.
   ///
-  /// A poll is shown to the members of a channel once it is sent in a message; [Channel.sendPoll] does both.
+  /// A poll is shown to the members of a channel once it is sent in a message;
+  /// [Channel.sendPoll] does both.
   Future<Result<PollResponse>> createPoll(Poll poll) => _pollsRepository.createPoll(poll);
 
   /// Fetches the poll with the id [pollId].
@@ -1676,14 +1678,23 @@ class StreamChatClient {
 
   /// Updates [poll] to match the settings and options it carries.
   ///
-  /// [Poll.options] becomes the poll's full list of options, each matched by its id, so an existing option missing
-  /// from it is deleted. New options are added through [createPollOption].
+  /// [Poll.options] becomes the poll's full list of options, each matched by
+  /// its id, so an existing option missing from it is deleted. New options are
+  /// added through [createPollOption].
+  ///
+  /// [Poll.enforceUniqueVote] is left as the poll was created.
   Future<Result<PollResponse>> updatePoll(Poll poll) => _pollsRepository.updatePoll(poll);
 
-  /// Changes some of the settings of the poll with the id [pollId], leaving the others as they are.
+  /// Changes some of the settings of the poll with the id [pollId], leaving the
+  /// others as they are.
   ///
-  /// The fields in [set] take their new values and the fields named in [unset] are cleared. A key that is not a
-  /// setting of the poll is stored in its custom data.
+  /// Only [Poll.name], [Poll.description], [Poll.votingVisibility],
+  /// [Poll.maxVotesAllowed], [Poll.allowAnswers] and [Poll.isClosed] can be
+  /// changed through [set]. Any other key, including those of the other
+  /// settings, is stored in the poll's custom data.
+  ///
+  /// The keys named in [unset] are removed from the custom data only. To remove
+  /// the vote limit, set it to null instead.
   Future<Result<PollResponse>> partialUpdatePoll(
     String pollId, {
     Map<String, Object?>? set,
@@ -1693,7 +1704,8 @@ class StreamChatClient {
   /// Deletes the poll with the id [pollId].
   Future<Result<void>> deletePoll(String pollId) => _pollsRepository.deletePoll(pollId);
 
-  /// Closes the poll with the id [pollId], so it accepts no more votes or answers.
+  /// Closes the poll with the id [pollId], so it accepts no more votes or
+  /// answers.
   Future<Result<PollResponse>> closePoll(String pollId) => partialUpdatePoll(pollId, set: {'is_closed': true});
 
   /// Adds [option] to the poll with the id [pollId].
@@ -1710,7 +1722,8 @@ class StreamChatClient {
     String optionId,
   ) => _pollsRepository.getPollOption(pollId, optionId);
 
-  /// Replaces the text and custom data of [option], an existing option of the poll with the id [pollId].
+  /// Replaces the text and custom data of [option], an existing option of the
+  /// poll with the id [pollId].
   ///
   /// The [option] is found by its id.
   Future<Result<PollOptionResponse>> updatePollOption(
@@ -1724,16 +1737,19 @@ class StreamChatClient {
     String optionId,
   ) => _pollsRepository.deletePollOption(pollId, optionId);
 
-  /// Votes for an option of a poll sent in a message, identified by [optionId], [pollId] and [messageId].
+  /// Votes for an option of a poll sent in a message, identified by [optionId],
+  /// [pollId] and [messageId].
   ///
-  /// If the poll allows only one vote per user, the vote replaces the previous one.
+  /// If the poll allows only one vote per user, the vote replaces the previous
+  /// one.
   Future<Result<PollVoteResponse>> castPollVote(
     String messageId,
     String pollId, {
     required String optionId,
   }) => _pollsRepository.castPollVote(messageId, pollId, optionId: optionId);
 
-  /// Adds [answerText] as an answer to a poll sent in a message, identified by [pollId] and [messageId].
+  /// Adds [answerText] as an answer to a poll sent in a message, identified by
+  /// [pollId] and [messageId].
   ///
   /// Each user has one answer per poll; a new one replaces the previous one.
   Future<Result<PollVoteResponse>> addPollAnswer(
@@ -1742,7 +1758,8 @@ class StreamChatClient {
     required String answerText,
   }) => _pollsRepository.addPollAnswer(messageId, pollId, answerText: answerText);
 
-  /// Removes a vote or answer from a poll sent in a message, identified by [voteId], [pollId] and [messageId].
+  /// Removes a vote or answer from a poll sent in a message, identified by
+  /// [voteId], [pollId] and [messageId].
   Future<Result<PollVoteResponse>> removePollVote(
     String messageId,
     String pollId,
@@ -1751,8 +1768,10 @@ class StreamChatClient {
 
   /// Fetches one page of the polls matching [filter], ordered by [sort].
   ///
-  /// Up to [limit] polls are returned. The next page is fetched by passing the `next` cursor of a response as [next],
-  /// and the previous page by passing its `prev` cursor as [prev]. At most one of [next] and [prev] may be given.
+  /// Up to [limit] polls are returned. The next page is fetched by passing a
+  /// response's [QueryPollsResponse.next] as [next], and the previous page by
+  /// passing its [QueryPollsResponse.prev] as [prev]. At most one of [next] and
+  /// [prev] may be given.
   Future<Result<QueryPollsResponse>> queryPolls({
     PollFilter? filter,
     List<PollSort>? sort,
@@ -1761,10 +1780,13 @@ class StreamChatClient {
     String? prev,
   }) => _pollsRepository.queryPolls(filter: filter, sort: sort, limit: limit, next: next, prev: prev);
 
-  /// Fetches one page of the votes and answers matching [filter] on the poll with the id [pollId], ordered by [sort].
+  /// Fetches one page of the votes and answers matching [filter] on the poll
+  /// with the id [pollId], ordered by [sort].
   ///
-  /// Up to [limit] votes are returned. The next page is fetched by passing the `next` cursor of a response as [next],
-  /// and the previous page by passing its `prev` cursor as [prev]. At most one of [next] and [prev] may be given.
+  /// Up to [limit] votes are returned. The next page is fetched by passing a
+  /// response's [QueryPollVotesResponse.next] as [next], and the previous page
+  /// by passing its [QueryPollVotesResponse.prev] as [prev]. At most one of
+  /// [next] and [prev] may be given.
   Future<Result<QueryPollVotesResponse>> queryPollVotes(
     String pollId, {
     PollVoteFilter? filter,
@@ -1797,10 +1819,10 @@ class StreamChatClient {
 
   final _userBlockLock = Lock();
 
-  /// Blocks the user with the given [userId] for the current user.
+  /// Blocks [userId] for the current user.
   ///
-  /// On success, the blocked user's id is added to [OwnUser.blockedUserIds] on [ClientState.currentUser]. A failure
-  /// leaves it unchanged.
+  /// On success, the blocked user's id is added to [OwnUser.blockedUserIds] on
+  /// [ClientState.currentUser]. A failure leaves it unchanged.
   Future<Result<BlockUsersResponse>> blockUser(String userId) async {
     final result = await _userBlockLock.synchronized(() => _usersRepository.blockUser(userId));
     return result
@@ -1808,10 +1830,10 @@ class StreamChatClient {
         .onFailure((e, stk) => logger.e(() => 'Error blocking user', error: e, stackTrace: stk));
   }
 
-  /// Unblocks the user with the given [userId] for the current user.
+  /// Unblocks [userId] for the current user.
   ///
-  /// On success, [userId] is removed from [OwnUser.blockedUserIds] on [ClientState.currentUser]. A failure leaves it
-  /// unchanged.
+  /// On success, [userId] is removed from [OwnUser.blockedUserIds] on
+  /// [ClientState.currentUser]. A failure leaves it unchanged.
   Future<Result<UnblockUsersResponse>> unblockUser(String userId) async {
     final result = await _userBlockLock.synchronized(() => _usersRepository.unblockUser(userId));
     return result
@@ -1821,8 +1843,9 @@ class StreamChatClient {
 
   /// Gets the users the current user has blocked.
   ///
-  /// On success, [OwnUser.blockedUserIds] on [ClientState.currentUser] is replaced with the ids of the returned
-  /// users. A failure leaves it unchanged.
+  /// On success, [OwnUser.blockedUserIds] on [ClientState.currentUser] is
+  /// replaced with the ids of the returned users. A failure leaves it
+  /// unchanged.
   Future<Result<GetBlockedUsersResponse>> getBlockedUsers() async {
     final result = await _userBlockLock.synchronized(_usersRepository.getBlockedUsers);
     return result
@@ -1844,8 +1867,10 @@ class StreamChatClient {
 
   /// Gets how many unread messages and threads the current user has.
   ///
-  /// On success, also updates [ClientState.totalUnreadCount], [ClientState.unreadChannels] and
-  /// [ClientState.unreadThreads]; a failure leaves them unchanged.
+  /// While the client is connected, a success also updates
+  /// [ClientState.totalUnreadCount], [ClientState.unreadChannels] and
+  /// [ClientState.unreadThreads], just after the returned future completes; a
+  /// failure leaves them unchanged.
   Future<Result<GetUnreadCountResponse>> getUnreadCount() async {
     final result = await _usersRepository.getUnreadCount();
     return result.onSuccess(
@@ -2135,7 +2160,8 @@ class StreamChatClient {
     );
   }
 
-  /// Enables slow mode on a channel, so members wait [cooldown] seconds between messages.
+  /// Enables slow mode on a channel, so members wait [cooldown] seconds between
+  /// messages.
   Future<Result<UpdateChannelPartialResponse>> enableSlowMode(
     String channelId,
     String channelType,
@@ -2297,8 +2323,9 @@ class StreamChatClient {
     );
   }
 
-  /// Partially updates the current user's membership of a channel: sets the fields in [set] and removes the fields
-  /// named in [unset], leaving every other field as it is.
+  /// Partially updates the current user's membership of a channel: sets the
+  /// fields in [set] and removes the fields named in [unset], leaving every
+  /// other field as it is.
   ///
   /// At least one of [set] and [unset] is required.
   Future<Result<UpdateMemberPartialResponse>> updateMemberPartial({

@@ -653,7 +653,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
   /// Whether messages in the channel are translated automatically.
   final bool? autoTranslationEnabled;
 
-  /// The language messages in the channel are translated into automatically.
+  /// The language the channel's messages are translated into automatically.
   final String? autoTranslationLanguage;
 
   /// Custom data attached to the channel.
@@ -10834,7 +10834,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
 
   /// The date at which the ban will expire.
   ///
-  /// Null when the ban has no expiry.
+  /// Null when the member is not banned or the ban has no expiry.
   final DateTime? banExpires;
 
   /// True if the member is shadow banned from the channel

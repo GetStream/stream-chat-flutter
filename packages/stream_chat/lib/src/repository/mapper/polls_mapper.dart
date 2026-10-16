@@ -116,7 +116,8 @@ extension PollVotesResponseMapper on api.PollVotesResponse {
 extension PollRequestMapper on Poll {
   /// Converts this poll into an [api.CreatePollRequest].
   ///
-  /// The ids of the [options] are left out: every option gets a new one when the poll is created.
+  /// The ids of the [options] are left out: every option gets a new one when
+  /// the poll is created.
   api.CreatePollRequest toCreatePollRequest() => api.CreatePollRequest(
     id: id,
     name: name,
@@ -149,10 +150,12 @@ extension PollRequestMapper on Poll {
 
 /// Maps a [PollOption] to the generated requests that create and update it.
 extension PollOptionRequestMapper on PollOption {
-  /// Converts this option into an [api.PollOptionInput], an option of a poll being created.
+  /// Converts this option into an [api.PollOptionInput], an option of a poll
+  /// being created.
   api.PollOptionInput toPollOptionInput() => api.PollOptionInput(text: text, custom: custom);
 
-  /// Converts this option into an [api.PollOptionRequest], an option of a poll being updated.
+  /// Converts this option into an [api.PollOptionRequest], an option of a poll
+  /// being updated.
   ///
   /// An option without an [id] is sent with an empty one.
   api.PollOptionRequest toPollOptionRequest() => api.PollOptionRequest(id: id ?? '', text: text, custom: custom);

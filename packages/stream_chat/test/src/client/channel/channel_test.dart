@@ -236,6 +236,20 @@ void main() {
       expect(() => channel.custom = {'name': 'test-channel-name'}, throwsA(isA<StateError>()));
     });
 
+    test('Channel.custom reads the current channel, even when its custom data is empty', () {
+      final channel = Channel.fromState(
+        client,
+        ChannelState(
+          channel: ChannelModel(cid: channelCid, custom: const {'name': 'Old name'}),
+        ),
+      );
+      addTearDown(channel.dispose);
+
+      channel.state!.updateChannelState(ChannelState(channel: ChannelModel(cid: channelCid)));
+
+      expect(channel.custom, isEmpty);
+    });
+
     test('should throw if trying to set `image`', () {
       expect(() => channel.image = 'https://stream.io/some-image', throwsA(isA<StateError>()));
     });
@@ -3817,7 +3831,7 @@ void main() {
       ).called(1);
     });
 
-    test("Channel.delete returns the client's deleteChannel response", () async {
+    test('Channel.delete deletes this channel and returns the deleted channel', () async {
       final response = DeleteChannelResponse(
         duration: '0.01ms',
         channel: ChannelModel(cid: channelCid),
@@ -4687,7 +4701,7 @@ void main() {
       ).called(1);
     });
 
-    test("Channel.enableSlowMode returns the client's enableSlowMode response", () async {
+    test('Channel.enableSlowMode enables slow mode on this channel and returns the updated channel', () async {
       const cooldown = 10;
 
       final channelModel = ChannelModel(
@@ -4718,7 +4732,7 @@ void main() {
       ).called(1);
     });
 
-    test("Channel.disableSlowMode returns the client's disableSlowMode response", () async {
+    test('Channel.disableSlowMode disables slow mode on this channel and returns the updated channel', () async {
       final channelModel = ChannelModel(
         cid: channelCid,
       );
@@ -4820,7 +4834,7 @@ void main() {
       verify(() => moderationClient.shadowBan(userId, channelCid: channelCid)).called(1);
     });
 
-    test("Channel.hide returns the client's hideChannel response", () async {
+    test('Channel.hide hides this channel and clears its history when asked', () async {
       const clearHistory = true;
       const response = HideChannelResponse(duration: '0.01ms');
 
@@ -4845,7 +4859,7 @@ void main() {
       ).called(1);
     });
 
-    test("Channel.show returns the client's showChannel response", () async {
+    test('Channel.show shows this channel again', () async {
       const response = ShowChannelResponse(duration: '0.01ms');
       when(() => client.showChannel(channelId, channelType)).thenAnswer((_) async => const Result.success(response));
 
@@ -4856,7 +4870,7 @@ void main() {
       verify(() => client.showChannel(channelId, channelType)).called(1);
     });
 
-    test("Channel.archive returns the client's archiveChannel response", () async {
+    test('Channel.archive archives this channel and returns the updated membership', () async {
       final response = UpdateMemberPartialResponse(
         duration: '0.01ms',
         channelMember: Member(userId: 'test-user-id'),
@@ -4872,7 +4886,7 @@ void main() {
       verify(() => client.archiveChannel(channelId: channelId, channelType: channelType)).called(1);
     });
 
-    test("Channel.unarchive returns the client's unarchiveChannel response", () async {
+    test('Channel.unarchive unarchives this channel and returns the updated membership', () async {
       final response = UpdateMemberPartialResponse(
         duration: '0.01ms',
         channelMember: Member(userId: 'test-user-id'),
@@ -4888,7 +4902,7 @@ void main() {
       verify(() => client.unarchiveChannel(channelId: channelId, channelType: channelType)).called(1);
     });
 
-    test("Channel.pin returns the client's pinChannel response", () async {
+    test('Channel.pin pins this channel and returns the updated membership', () async {
       final response = UpdateMemberPartialResponse(
         duration: '0.01ms',
         channelMember: Member(userId: 'test-user-id'),
@@ -4906,7 +4920,7 @@ void main() {
       verify(() => client.pinChannel(channelId: channelId, channelType: channelType)).called(1);
     });
 
-    test("Channel.unpin returns the client's unpinChannel response", () async {
+    test('Channel.unpin unpins this channel and returns the updated membership', () async {
       final response = UpdateMemberPartialResponse(
         duration: '0.01ms',
         channelMember: Member(userId: 'test-user-id'),
@@ -6220,7 +6234,7 @@ void main() {
       verifyNever(() => client.markChannelRead(channelId, channelType, messageId: 'message-id-123'));
     });
 
-    test("Channel.markRead returns the client's markChannelRead response", () async {
+    test('Channel.markRead marks this channel read up to the given message', () async {
       const response = MarkReadResponse(duration: '0.01ms');
       final channel = channelWith([ChannelCapability.readEvents]);
       when(
@@ -6242,7 +6256,7 @@ void main() {
       verifyNever(() => client.markChannelUnread(channelId, channelType, 'message-id-123'));
     });
 
-    test("Channel.markUnread returns the client's markChannelUnread result", () async {
+    test('Channel.markUnread marks this channel unread from the given message', () async {
       final channel = channelWith([ChannelCapability.readEvents]);
       when(
         () => client.markChannelUnread(channelId, channelType, 'message-id-123'),
@@ -6264,7 +6278,7 @@ void main() {
       verifyNever(() => client.markChannelUnreadByTimestamp(channelId, channelType, timestamp));
     });
 
-    test("Channel.markUnreadByTimestamp returns the client's markChannelUnreadByTimestamp result", () async {
+    test('Channel.markUnreadByTimestamp marks the messages after the given time unread', () async {
       final timestamp = DateTime.utc(2024);
       final channel = channelWith([ChannelCapability.readEvents]);
       when(
@@ -6286,7 +6300,7 @@ void main() {
       verifyNever(() => client.markThreadRead(channelId, channelType, 'thread-id-123'));
     });
 
-    test("Channel.markThreadRead returns the client's markThreadRead response", () async {
+    test('Channel.markThreadRead marks the given thread read', () async {
       const response = MarkReadResponse(duration: '0.01ms');
       final channel = channelWith([ChannelCapability.readEvents]);
       when(
@@ -6308,7 +6322,7 @@ void main() {
       verifyNever(() => client.markThreadUnread(channelId, channelType, 'thread-id-123'));
     });
 
-    test("Channel.markThreadUnread returns the client's markThreadUnread result", () async {
+    test('Channel.markThreadUnread marks the given thread unread', () async {
       final channel = channelWith([ChannelCapability.readEvents]);
       when(
         () => client.markThreadUnread(channelId, channelType, 'thread-id-123'),

@@ -48,6 +48,7 @@
 
 ## Risks
 
+- A `try`/`catch` around `blockUser`, `unblockUser` or `getBlockedUsers` still compiles but no longer catches a failed call.
 
 ## Definition of done
 

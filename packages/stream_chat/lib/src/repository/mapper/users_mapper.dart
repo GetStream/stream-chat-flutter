@@ -117,7 +117,8 @@ extension CreateGuestResponseMapper on api.CreateGuestResponse {
   );
 }
 
-/// Maps a generated [api.WrappedUnreadCountsResponse] to a [GetUnreadCountResponse].
+/// Maps a generated [api.WrappedUnreadCountsResponse] to a
+/// [GetUnreadCountResponse].
 extension WrappedUnreadCountsResponseMapper on api.WrappedUnreadCountsResponse {
   /// Converts this response into a [GetUnreadCountResponse].
   GetUnreadCountResponse toModel() => GetUnreadCountResponse(
@@ -152,7 +153,8 @@ extension UnreadCountsThreadMapper on api.UnreadCountsThread {
   );
 }
 
-/// Maps a generated [api.UnreadCountsChannelType] to an [UnreadCountsChannelType].
+/// Maps a generated [api.UnreadCountsChannelType] to an
+/// [UnreadCountsChannelType].
 extension UnreadCountsChannelTypeMapper on api.UnreadCountsChannelType {
   /// Converts these counts into an [UnreadCountsChannelType].
   UnreadCountsChannelType toModel() => UnreadCountsChannelType(
@@ -179,7 +181,8 @@ extension UnblockUsersResponseMapper on api.UnblockUsersResponse {
   UnblockUsersResponse toModel() => UnblockUsersResponse(duration: duration);
 }
 
-/// Maps a generated [api.GetBlockedUsersResponse] to a [GetBlockedUsersResponse].
+/// Maps a generated [api.GetBlockedUsersResponse] to a
+/// [GetBlockedUsersResponse].
 extension GetBlockedUsersResponseMapper on api.GetBlockedUsersResponse {
   /// Converts this response into a [GetBlockedUsersResponse].
   GetBlockedUsersResponse toModel() => GetBlockedUsersResponse(

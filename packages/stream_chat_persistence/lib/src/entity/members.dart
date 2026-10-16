@@ -30,7 +30,7 @@ class Members extends Table {
 
   /// The date at which the ban will expire.
   ///
-  /// Null when the ban has no expiry.
+  /// Null when the member is not banned or the ban has no expiry.
   DateTimeColumn get banExpires => dateTime().nullable()();
 
   /// True if the member is shadow banned from the channel

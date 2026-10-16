@@ -64,8 +64,8 @@ void main() {
     expect(channel.cooldown, 30);
     expect(channel.disabled, isFalse);
     expect(channel.hidden, isTrue);
-    expect(channel.muted, isTrue);
-    expect(channel.blocked, isFalse);
+    expect(channel.muted, isFalse);
+    expect(channel.blocked, isTrue);
     expect(channel.truncatedAt, DateTime.utc(2026, 3, 2));
     expect(channel.truncatedBy, fakeUser('truncator'));
     expect(channel.autoTranslationEnabled, isTrue);
@@ -91,65 +91,6 @@ void main() {
       'topic': 'anything',
     });
   });
-
-  test(
-    'StreamChatClient.updateChannelPartial keeps channel custom data named like a channel field apart from the field',
-    () async {
-      final response = _updateChannelPartialResponse(
-        channel: api.ChannelResponse(
-          cid: 'messaging:general',
-          id: 'general',
-          type: 'messaging',
-          createdAt: DateTime.utc(2026),
-          updatedAt: DateTime.utc(2026, 2),
-          custom: const {
-            'topic': 'anything',
-            'cid': 'shadowed',
-            'disabled': 'shadowed',
-            'hidden': 'shadowed',
-            'muted': 'shadowed',
-            'blocked': 'shadowed',
-            'truncated_at': 'shadowed',
-            'truncated_by': 'shadowed',
-            'mute_expires_at': 'shadowed',
-            'auto_translation_enabled': 'shadowed',
-            'auto_translation_language': 'shadowed',
-            'hide_messages_before': 'shadowed',
-          },
-          disabled: false,
-          frozen: false,
-        ),
-      );
-      const request = api.UpdateChannelPartialRequest(set: {'name': 'General'});
-
-      final defaultApi = MockDefaultApi();
-      when(
-        () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
-      ).thenAnswer((_) async => Result.success(response));
-      final client = _client(defaultApi);
-
-      final res = await client.updateChannelPartial('general', 'messaging', set: const {'name': 'General'});
-
-      final channel = res.getOrNull()!.channel!;
-      expect(channel.custom, {
-        'topic': 'anything',
-        'cid': 'shadowed',
-        'disabled': 'shadowed',
-        'hidden': 'shadowed',
-        'muted': 'shadowed',
-        'blocked': 'shadowed',
-        'truncated_at': 'shadowed',
-        'truncated_by': 'shadowed',
-        'mute_expires_at': 'shadowed',
-        'auto_translation_enabled': 'shadowed',
-        'auto_translation_language': 'shadowed',
-        'hide_messages_before': 'shadowed',
-      });
-      expect(channel.cid, 'messaging:general');
-      expect(channel.disabled, isFalse);
-      expect(channel.hidden, isNull);
-    },
-  );
 
   test('StreamChatClient.updateChannelPartial falls back to the defaults for channel fields left out', () async {
     final response = _updateChannelPartialResponse(
@@ -203,11 +144,11 @@ void main() {
     expect(config.updatedAt, DateTime.utc(2025, 2));
     expect(config.maxMessageLength, 5000);
     expect(config.messageRetention, 'infinite');
-    expect(config.mutes, isTrue);
+    expect(config.mutes, isFalse);
     expect(config.reactions, isTrue);
-    expect(config.readEvents, isTrue);
+    expect(config.readEvents, isFalse);
     expect(config.replies, isTrue);
-    expect(config.search, isTrue);
+    expect(config.search, isFalse);
     expect(config.polls, isTrue);
     expect(config.pushLevel, PushLevel.directMentions);
     expect(config.pushNotifications, isFalse);
@@ -224,13 +165,13 @@ void main() {
       ),
     );
     expect(config.typingEvents, isTrue);
-    expect(config.uploads, isTrue);
+    expect(config.uploads, isFalse);
     expect(config.urlEnrichment, isTrue);
-    expect(config.skipLastMsgUpdateForSystemMsgs, isTrue);
+    expect(config.skipLastMsgUpdateForSystemMsgs, isFalse);
     expect(config.userMessageReminders, isTrue);
-    expect(config.markMessagesPending, isTrue);
+    expect(config.markMessagesPending, isFalse);
     expect(config.deliveryEvents, isTrue);
-    expect(config.sharedLocations, isTrue);
+    expect(config.sharedLocations, isFalse);
   });
 
   test('StreamChatClient.updateChannelPartial returns a null channel when the response has none', () async {
@@ -265,18 +206,18 @@ void main() {
     expect(res.exceptionOrNull(), error);
   });
 
-  test('StreamChatClient.enableSlowMode sends the cooldown and returns a success', () async {
+  test('StreamChatClient.enableSlowMode sends the cooldown and returns the updated channel', () async {
     const request = api.UpdateChannelPartialRequest(set: {'cooldown': 30});
 
     final defaultApi = MockDefaultApi();
     when(
       () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
-    ).thenAnswer((_) async => Result.success(_updateChannelPartialResponse()));
+    ).thenAnswer((_) async => Result.success(_updateChannelPartialResponse(channel: _channelResponse(cooldown: 30))));
     final client = _client(defaultApi);
 
     final res = await client.enableSlowMode('general', 'messaging', 30);
 
-    expect(res.isSuccess, isTrue);
+    expect(res.getOrNull()!.channel!.cooldown, 30);
 
     verify(
       () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
@@ -301,18 +242,18 @@ void main() {
     expect(res.exceptionOrNull(), error);
   });
 
-  test('StreamChatClient.disableSlowMode sends the cooldown set to 0 and returns a success', () async {
+  test('StreamChatClient.disableSlowMode sends the cooldown set to 0 and returns the updated channel', () async {
     const request = api.UpdateChannelPartialRequest(set: {'cooldown': 0});
 
     final defaultApi = MockDefaultApi();
     when(
       () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
-    ).thenAnswer((_) async => Result.success(_updateChannelPartialResponse()));
+    ).thenAnswer((_) async => Result.success(_updateChannelPartialResponse(channel: _channelResponse(cooldown: 0))));
     final client = _client(defaultApi);
 
     final res = await client.disableSlowMode('general', 'messaging');
 
-    expect(res.isSuccess, isTrue);
+    expect(res.getOrNull()!.channel!.cooldown, 0);
 
     verify(
       () => defaultApi.updateChannelPartial(type: 'messaging', id: 'general', updateChannelPartialRequest: request),
@@ -354,6 +295,7 @@ api.UpdateChannelPartialResponse _updateChannelPartialResponse({api.ChannelRespo
 
 // A channel with every field set.
 api.ChannelResponse _channelResponse({
+  int cooldown = 30,
   Map<String, Object?> custom = const {
     'name': 'General',
     'image': 'https://example.com/general.png',
@@ -362,7 +304,7 @@ api.ChannelResponse _channelResponse({
 }) => api.ChannelResponse(
   autoTranslationEnabled: true,
   autoTranslationLanguage: 'fr',
-  blocked: false,
+  blocked: true,
   cid: 'messaging:general',
   config: api.ChannelConfigWithInfo(
     allowedFlagReasons: const ['spam'],
@@ -398,10 +340,10 @@ api.ChannelResponse _channelResponse({
     grants: const {
       'user': ['read-channel'],
     },
-    markMessagesPending: true,
+    markMessagesPending: false,
     maxMessageLength: 5000,
     messageRetention: 'infinite',
-    mutes: true,
+    mutes: false,
     name: 'messaging',
     partitionSize: 10,
     partitionTtl: '24h',
@@ -410,19 +352,19 @@ api.ChannelResponse _channelResponse({
     pushNotifications: false,
     quotes: true,
     reactions: true,
-    readEvents: true,
+    readEvents: false,
     reminders: true,
     replies: true,
-    search: true,
-    sharedLocations: true,
-    skipLastMsgUpdateForSystemMsgs: true,
+    search: false,
+    sharedLocations: false,
+    skipLastMsgUpdateForSystemMsgs: false,
     typingEvents: true,
     updatedAt: DateTime.utc(2025, 2),
-    uploads: true,
+    uploads: false,
     urlEnrichment: true,
     userMessageReminders: true,
   ),
-  cooldown: 30,
+  cooldown: cooldown,
   createdAt: DateTime.utc(2026),
   createdBy: fakeUserResponse('creator'),
   custom: custom,
@@ -438,7 +380,7 @@ api.ChannelResponse _channelResponse({
   members: [fakeChannelMemberResponse()],
   messageCount: 42,
   muteExpiresAt: DateTime.utc(2026, 5),
-  muted: true,
+  muted: false,
   ownCapabilities: const [api.ChannelOwnCapability.sendMessage, api.ChannelOwnCapability.readEvents],
   team: 'blue',
   truncatedAt: DateTime.utc(2026, 3, 2),

@@ -165,7 +165,8 @@ includes a named response that carries only `duration` today, such as `HideChann
    the owning group's break, or stays out. Group 15 promoted `ChannelModel`'s and `Member`'s, and group 20
    `User`'s and `OwnUser`'s. `topLevelFields` and `Serializer` serve only the v1 decoders, which
    still split flat JSON by a key list, and go with the WebSocket v2 move; a model that loses its JSON drops
-   `topLevelFields` and its converter owns the list. A v1 writer leaves a custom entry named like a key out so it cannot overwrite the key.
+   `topLevelFields` and its converter owns the list. A v1 writer leaves a custom entry named like a key out so it
+   cannot overwrite the key.
 
 ### Temporary adapters
 
