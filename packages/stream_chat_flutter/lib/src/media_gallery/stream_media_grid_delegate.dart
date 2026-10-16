@@ -1,5 +1,8 @@
 import 'package:flutter/rendering.dart';
 
+const _kMediumGridMinWidth = 600.0;
+const _kExpandedGridMinWidth = 840.0;
+
 /// A grid delegate that lays out a media grid's square tiles, with more tiles
 /// per row as the grid gets wider.
 ///
@@ -23,9 +26,9 @@ class StreamMediaGridDelegate extends SliverGridDelegate {
   SliverGridLayout getLayout(SliverConstraints constraints) {
     final crossAxisExtent = constraints.crossAxisExtent;
     final crossAxisCount = switch (crossAxisExtent) {
-      < 600 => 3, // A phone or a foldable's outer display, with the design's 3 tiles per row.
-      < 840 => 4, // A foldable or tablet in portrait. Even, so the tiles split evenly at a fold.
-      _ => 6, // A foldable or tablet in landscape. Even, so the tiles split evenly at a fold.
+      < _kMediumGridMinWidth => 3, // The design's 3 tiles per row.
+      < _kExpandedGridMinWidth => 4, // Even, so the tiles split evenly at a fold.
+      _ => 6, // Even, so the tiles split evenly at a fold.
     };
 
     final delegate = SliverGridDelegateWithFixedCrossAxisCount(
