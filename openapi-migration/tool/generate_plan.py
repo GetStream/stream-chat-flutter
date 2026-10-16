@@ -1017,13 +1017,16 @@ GROUPS = [
             - **Moved off `UserApi`:** `getUnreadCount`, now a `StreamChatClient` method over a new
               `UsersRepository`, mirroring `UserApi`.
             - **The v10 names stay:** `getUnreadCount` and `GetUnreadCountResponse`, rather than the spec's
-              `unreadCounts` and `WrappedUnreadCountsResponse`, which say nothing a caller needs.
+              `unreadCounts` and `WrappedUnreadCountsResponse`. The first is a noun where the client's methods
+              are verbs, and `Wrapped` names how the API packages the response, not what it holds.
             - **`GetUnreadCountResponse` and the `UnreadCounts*` models are freezed plain models,** with v10's
               fields and nullability; the generated types match them field for field. `duration` is non-null.
             - **The current user's counts are updated only on success,** through `Result.onSuccess`, as v10 did
               by throwing before it reached the update.
             """),
-        risks=[],
+        risks=[
+            'A `try`/`catch` around `getUnreadCount` still compiles but no longer catches a failed call.',
+        ],
         done=DONE.replace('- [ ]', '- [x]'),
     ),
     dict(

@@ -1882,8 +1882,10 @@ class StreamChatClient {
 
   /// Gets how many unread messages and threads the current user has.
   ///
-  /// On success, also updates [ClientState.totalUnreadCount], [ClientState.unreadChannels] and
-  /// [ClientState.unreadThreads]; a failure leaves them unchanged.
+  /// While the client is connected, a success also updates
+  /// [ClientState.totalUnreadCount], [ClientState.unreadChannels] and
+  /// [ClientState.unreadThreads], just after the returned future completes; a
+  /// failure leaves them unchanged.
   Future<Result<GetUnreadCountResponse>> getUnreadCount() async {
     final result = await _usersRepository.getUnreadCount();
     return result.onSuccess(

@@ -19,11 +19,12 @@ class UnreadCountsThread with _$UnreadCountsThread {
   @override
   final int unreadCount;
 
-  /// The time the user last read the thread, or when it was started if they never have.
+  /// The time the user last read the thread.
   @override
   final DateTime lastRead;
 
-  /// The id of the last reply the user read in the thread, or empty if they have not read one.
+  /// The id of the last reply the user read in the thread, or empty if they
+  /// have not read one.
   @override
   final String lastReadMessageId;
 

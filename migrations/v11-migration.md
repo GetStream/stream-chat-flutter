@@ -88,7 +88,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Partial Updates**](#partial-updates) | Channel and member partial updates — `updatePartial`, `updateName`, `updateImage`, slow mode, pin and archive — return a `Result` instead of throwing; their responses take the API's names, `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse`, and `partialMemberUpdate` becomes `updateMemberPartial` |
 | [**Channel Lifecycle**](#channel-lifecycle) | Hiding, showing and deleting a channel return a `Result` instead of throwing; stopping watching still throws |
 | [**Read Receipts**](#read-receipts) | Marking read, unread and delivered return a `Result` instead of throwing; `ChannelDeliveryReporter`'s callback returns a `Result` |
-| [**Unread Counts**](#unread-counts) | `getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing; the response and its `UnreadCounts*` models no longer decode JSON and compare by value |
+| [**Unread Counts**](#unread-counts) | `getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing; the response and its `UnreadCounts*` models lose their JSON codecs and compare by value |
 | [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`, and holds the custom data verbatim; the channel and member flags it carried are fields |
 | _(filled in per feature as PRs land)_ | |
 
@@ -854,10 +854,10 @@ try {
 
 // v11
 final result = await client.getUnreadCount();
-switch (result) {
-  case Success(:final data): showBadge(data.totalUnreadCount);
-  case Failure(:final error): report(error);
-}
+result.fold(
+  onSuccess: (counts) => showBadge(counts.totalUnreadCount),
+  onFailure: (error, _) => report(error),
+);
 ```
 
 **`UnreadCountsChannel`, `UnreadCountsThread` and `UnreadCountsChannelType` no longer decode from or encode to
@@ -868,7 +868,7 @@ always present.
 **`StreamChatApi.user.getUnreadCount` is removed.** Call `StreamChatClient.getUnreadCount`.
 
 > **Why:** the endpoint moved onto the generated client, which returns a `Result` for every call. The response
-> keeps its v10 name and fields; what changes is the error handling, the JSON codecs and value equality.
+> and its models keep their v10 names and fields.
 
 ### Channel and Member Custom Data
 

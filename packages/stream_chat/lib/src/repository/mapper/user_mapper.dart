@@ -96,7 +96,8 @@ extension CreateGuestResponseMapper on api.CreateGuestResponse {
   );
 }
 
-/// Maps a generated [api.WrappedUnreadCountsResponse] to a [GetUnreadCountResponse].
+/// Maps a generated [api.WrappedUnreadCountsResponse] to a
+/// [GetUnreadCountResponse].
 extension WrappedUnreadCountsResponseMapper on api.WrappedUnreadCountsResponse {
   /// Converts this response into a [GetUnreadCountResponse].
   GetUnreadCountResponse toModel() => GetUnreadCountResponse(
@@ -131,7 +132,8 @@ extension UnreadCountsThreadMapper on api.UnreadCountsThread {
   );
 }
 
-/// Maps a generated [api.UnreadCountsChannelType] to an [UnreadCountsChannelType].
+/// Maps a generated [api.UnreadCountsChannelType] to an
+/// [UnreadCountsChannelType].
 extension UnreadCountsChannelTypeMapper on api.UnreadCountsChannelType {
   /// Converts these counts into an [UnreadCountsChannelType].
   UnreadCountsChannelType toModel() => UnreadCountsChannelType(
