@@ -74,9 +74,11 @@ void main() {
         OwnUser.fromJson(const {
           'id': 'user-id',
           'favorite_color': 'blue',
-          'unread_count': 3,
-          'total_unread_count_by_team': {'team-a': 1},
-          'latest_hidden_channels': ['messaging:hidden'],
+          'devices': <Object?>[],
+          'mutes': <Object?>[],
+          'total_unread_count': 3,
+          'unread_channels': 1,
+          'unread_threads': 2,
         }),
       );
 

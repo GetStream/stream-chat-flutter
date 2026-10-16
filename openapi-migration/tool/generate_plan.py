@@ -1097,9 +1097,10 @@ GROUPS = [
             - **`User` and `OwnUser` promote the fields v10 parked in `extraData`, and rename it `custom`**
               (README rule 9), since these calls are the first to map a user. `User.name`, `image`,
               `deactivatedAt`, `deletedAt` and `shadowBanned` are fields with persistence columns;
-              `blockedUserIds` moves up from `OwnUser`. `OwnUser` leaves out `unread_count`,
-              `total_unread_count_by_team` and `latest_hidden_channels`, which no event keeps current. The mappers
-              leave `revoke_tokens_issued_before` out; a v1 user keeps it in `custom`, as a v1 member keeps `role`.
+              `blockedUserIds` moves up from `OwnUser`. `OwnUser` doesn't model `unread_count`,
+              `total_unread_count_by_team` or `latest_hidden_channels`, which no event keeps current. The mappers
+              leave the keys the SDK doesn't model out, such as `revoke_tokens_issued_before`; a v1 user keeps them
+              in `custom`, as a v1 member keeps `role`.
               Each generated user mapper fills the ones its response carries (`UserResponse` has no
               `shadowBanned`).
             - **`User.name` is nullable and has no fallback to `id`;** `User.nameOrId` has it, for a missing or

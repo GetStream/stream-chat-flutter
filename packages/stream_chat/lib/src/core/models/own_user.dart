@@ -221,9 +221,6 @@ class OwnUser extends User {
     'unread_threads',
     'push_preferences',
     'privacy_settings',
-    'unread_count',
-    'total_unread_count_by_team',
-    'latest_hidden_channels',
     ...User.topLevelFields,
   ];
 }
