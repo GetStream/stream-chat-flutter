@@ -230,7 +230,7 @@ class StreamMessageItemProps extends Equatable {
   ///
   /// The content uses at most this width while still respecting the parent
   /// [Flex] constraints. Use [double.infinity] to impose no cap from this
-  /// widget. Defaults to `272` when not specified.
+  /// widget. Defaults to `272`.
   final double maxWidth;
 
   /// Whether swiping the message triggers a quoted-reply action.
