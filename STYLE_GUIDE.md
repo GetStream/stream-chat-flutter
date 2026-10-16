@@ -721,7 +721,7 @@ A public constant or field that serves as a default declares the most general ty
 consumers accept, not the class that implements it today: `SliverGridDelegate`,
 `ShapeBorder`, `Widget`. The declared type is the API; the implementation behind it can
 then change without changing it. `type_annotate_public_apis` doesn't flag a top-level
-`const` whose type is inferred from its initializer, so reviewers check this one.
+`const` or `final` whose type is inferred from its initializer, so reviewers check this one.
 
 ```dart
 // BAD: the public type is whatever implementation the default uses today.
