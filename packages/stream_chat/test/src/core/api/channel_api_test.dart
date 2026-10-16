@@ -265,18 +265,6 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
-  test('markAllRead', () async {
-    const path = '/channels/read';
-    when(() => client.post(path, data: {})).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
-
-    final res = await channelApi.markAllRead();
-
-    expect(res, isNotNull);
-
-    verify(() => client.post(path, data: {})).called(1);
-    verifyNoMoreInteractions(client);
-  });
-
   test('updateChannel', () async {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
@@ -672,88 +660,6 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
-  test('markRead', () async {
-    const channelId = 'test-channel-id';
-    const channelType = 'test-channel-type';
-    const messageId = 'test-message-id';
-
-    final path = '${_getChannelUrl(channelId, channelType)}/read';
-
-    when(
-      () => client.post(
-        path,
-        data: {
-          'message_id': messageId,
-        },
-      ),
-    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
-
-    final res = await channelApi.markRead(
-      channelId,
-      channelType,
-      messageId: messageId,
-    );
-
-    expect(res, isNotNull);
-
-    verify(() => client.post(path, data: any(named: 'data'))).called(1);
-    verifyNoMoreInteractions(client);
-  });
-
-  test('markUnread', () async {
-    const channelId = 'test-channel-id';
-    const channelType = 'test-channel-type';
-    const messageId = 'test-message-id';
-
-    final path = '${_getChannelUrl(channelId, channelType)}/unread';
-
-    when(
-      () => client.post(
-        path,
-        data: {'message_id': messageId},
-      ),
-    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
-
-    final res = await channelApi.markUnread(
-      channelId,
-      channelType,
-      messageId,
-    );
-
-    expect(res, isNotNull);
-
-    verify(() => client.post(path, data: any(named: 'data'))).called(1);
-    verifyNoMoreInteractions(client);
-  });
-
-  test('markUnreadByTimestamp', () async {
-    const channelId = 'test-channel-id';
-    const channelType = 'test-channel-type';
-    final timestamp = DateTime.parse('2024-01-01T00:00:00Z');
-
-    final path = '${_getChannelUrl(channelId, channelType)}/unread';
-
-    when(
-      () => client.post(
-        path,
-        data: {
-          'message_timestamp': timestamp.toUtc().toIso8601String(),
-        },
-      ),
-    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
-
-    final res = await channelApi.markUnreadByTimestamp(
-      channelId,
-      channelType,
-      timestamp,
-    );
-
-    expect(res, isNotNull);
-
-    verify(() => client.post(path, data: any(named: 'data'))).called(1);
-    verifyNoMoreInteractions(client);
-  });
-
   test('stopWatching', () async {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
@@ -767,47 +673,6 @@ void main() {
     expect(res, isNotNull);
 
     verify(() => client.post(path, data: {})).called(1);
-    verifyNoMoreInteractions(client);
-  });
-
-  test('markChannelsDelivered', () async {
-    const path = '/channels/delivered';
-
-    final deliveries = [
-      const MessageDelivery(
-        channelCid: 'messaging:test-channel-1',
-        messageId: 'test-message-id-1',
-      ),
-      const MessageDelivery(
-        channelCid: 'messaging:test-channel-2',
-        messageId: 'test-message-id-2',
-      ),
-    ];
-
-    when(
-      () => client.post(
-        path,
-        data: any(named: 'data'),
-      ),
-    ).thenAnswer(
-      (_) async => successResponse(
-        path,
-        data: <String, dynamic>{},
-      ),
-    );
-
-    final res = await channelApi.markChannelsDelivered(deliveries);
-
-    expect(res, isNotNull);
-
-    verify(
-      () => client.post(
-        path,
-        data: jsonEncode({
-          'latest_delivered_messages': deliveries,
-        }),
-      ),
-    ).called(1);
     verifyNoMoreInteractions(client);
   });
 }

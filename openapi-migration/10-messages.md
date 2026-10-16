@@ -51,6 +51,7 @@
 - `Attachment`: the generated model defines fields our `extraData` currently absorbs. Decide the promotion rules before writing the mapper.
 - Replace the temporary `@DataSerializable` storage codec (`UserGroup`, `UserGroupMember`): decide between dedicated tables and codecs owned by `stream_chat_persistence` before `Message` and `Attachment` become plain models, then delete the typedef and every `fromData`/`toData` it generates.
 - `Action` is still the v10 json_serializable class, embedded in `Attachment.actions`, which `Attachment.toJson` writes when sending and `toData` writes to persistence. It becomes a plain model with `Attachment`; group 04 left it alone.
+- Expose `MarkReadResponse.event`. [17](17-read-receipts.md) dropped it because its thread carries a `MessageResponse`; the mapper marks it with a TODO.
 
 ## Risks
 
