@@ -110,13 +110,6 @@ void main() {
     });
 
     group('ModerationAction', () {
-      test('should create predefined constants correctly', () {
-        expect(ModerationAction.bounce, 'bounce');
-        expect(ModerationAction.flag, 'flag');
-        expect(ModerationAction.remove, 'remove');
-        expect(ModerationAction.shadow, 'shadow');
-      });
-
       test('should work with string equality', () {
         expect(ModerationAction.bounce == 'bounce', isTrue);
         expect(ModerationAction.flag == 'flag', isTrue);
