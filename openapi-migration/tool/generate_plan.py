@@ -579,9 +579,9 @@ GROUPS = [
     dict(
         num='09', slug='users', title='Users',
         hand=['user_api.dart'],
-        match=owns('/api/v2/users', '/api/v2/chat/unread'),
+        match=owns('/api/v2/users'),
         goal='`User` is the most widely referenced public model in the SDK; this is where keep-vs-adopt costs the '
-             'most.',
+             'most. [18](18-unread-counts.md) split the current user\'s unread counts out of it.',
         decisions=[
             '`User` and `OwnUser` are public, persisted, and embedded in nearly every other response. This group '
             'restructures them, last: the mappers in `user_mapper.dart` already map the generated types onto the '
@@ -997,6 +997,35 @@ GROUPS = [
         risks=[
             'A `try`/`catch` around a read, unread or delivery call on `StreamChatClient` or `Channel` still '
             'compiles but no longer catches a failed call.',
+        ],
+        done=DONE.replace('- [ ]', '- [x]'),
+    ),
+    dict(
+        num='18', slug='unread-counts', title='Unread Counts',
+        hand=[],
+        match=only_ops('GET /api/v2/chat/unread'),
+        goal='Move reading the current user\'s unread counts ahead of [09](09-users.md): it takes no parameters, '
+             'answers only counts, and needs none of the `User` restructuring.',
+        decisions=[],
+        taken=textwrap.dedent("""\
+            - **Split out of [09](09-users.md), ahead of it.** Nothing persists the response, and it embeds no
+              `User`.
+            - **The v2 route is the v1 handler.** `lib/chat/routes.go` mounts `/unread` and `/api/v2/chat/unread`
+              on the same `v1.UnreadCounts` in the shared `coreRoutes`. It is gated by
+              `ClassicUnreadCountsEnabled` on both, so the switch changes nothing about who may call it. It is
+              not in beta or deprecated.
+            - **Moved off `UserApi`:** `getUnreadCount`, now a `StreamChatClient` method over a new
+              `UsersRepository`, mirroring `UserApi`.
+            - **The v10 names stay:** `getUnreadCount` and `GetUnreadCountResponse`, rather than the spec's
+              `unreadCounts` and `WrappedUnreadCountsResponse`. The first is a noun where the client's methods
+              are verbs, and `Wrapped` names how the API packages the response, not what it holds.
+            - **`GetUnreadCountResponse` and the `UnreadCounts*` models are freezed plain models,** with v10's
+              fields and nullability; the generated types match them field for field. `duration` is non-null.
+            - **The current user's counts are updated only on success,** through `Result.onSuccess`, as v10 did
+              by throwing before it reached the update.
+            """),
+        risks=[
+            'A `try`/`catch` around `getUnreadCount` still compiles but no longer catches a failed call.',
         ],
         done=DONE.replace('- [ ]', '- [x]'),
     ),
