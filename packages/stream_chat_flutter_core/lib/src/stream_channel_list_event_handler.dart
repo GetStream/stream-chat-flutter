@@ -1,4 +1,6 @@
+import 'package:clock/clock.dart';
 import 'package:stream_chat/stream_chat.dart' show Event, Member;
+
 import 'stream_channel_list_controller.dart';
 
 /// Contains handlers that are called from [StreamChannelListController] for
@@ -6,6 +8,12 @@ import 'stream_channel_list_controller.dart';
 ///
 /// This class can be mixed in or extended to create custom overrides.
 mixin class StreamChannelListEventHandler {
+  final _missingChannelRefreshers = Expando<_MissingChannelRefresher>();
+
+  _MissingChannelRefresher _missingChannelRefresherFor(StreamChannelListController controller) {
+    return _missingChannelRefreshers[controller] ??= _MissingChannelRefresher(controller);
+  }
+
   /// Function which gets called for the event
   /// [EventType.channelDeleted].
   ///
@@ -111,6 +119,7 @@ mixin class StreamChannelListEventHandler {
     Event event,
     StreamChannelListController controller,
   ) {
+    _missingChannelRefreshers[controller]?.reset();
     controller.refresh();
   }
 
@@ -120,20 +129,27 @@ mixin class StreamChannelListEventHandler {
   /// we are currently watching.
   ///
   /// By default, this moves the channel to the top of the list.
+  ///
+  /// When the channel is not in the list, for example because it was hidden
+  /// and the new message made it visible again, this refreshes the list
+  /// without resetting it. If the refreshed list still does not contain the
+  /// channel, the list's query is assumed to exclude it, and further messages
+  /// in that channel do not refresh the list again until a backoff of 30
+  /// seconds has passed. The backoff doubles on each refresh that still leaves
+  /// the channel out, up to 10 minutes, and is cleared when the connection
+  /// recovers. At most one refresh runs at a time; messages arriving meanwhile
+  /// share a single follow-up refresh.
   void onMessageNew(Event event, StreamChannelListController controller) async {
     final channelCid = event.cid;
     if (channelCid == null) return;
 
     final channels = [...controller.currentItems];
+    final missingChannelRefresher = _missingChannelRefresherFor(controller);
 
     final channelIndex = channels.indexWhere((it) => it.cid == channelCid);
-    if (channelIndex < 0) {
-      // If the channel is not in the list, It might be hidden.
-      // So, we just refresh the list.
-      await controller.refresh(resetValue: false);
-      return;
-    }
+    if (channelIndex < 0) return missingChannelRefresher.refreshFor(channelCid);
 
+    missingChannelRefresher.forget(channelCid);
     final channel = channels.removeAt(channelIndex);
     channels.insert(0, channel);
 
@@ -237,4 +253,83 @@ mixin class StreamChannelListEventHandler {
 
     controller.channels = [...channels];
   }
+}
+
+// Refreshes a channel list on behalf of channels that received a message but
+// are not listed.
+//
+// A refresh that comes back without the channel means the list's query
+// excludes it, so the channel is backed off: further requests for it are
+// ignored until the backoff expires, and each refresh that still leaves it out
+// doubles the backoff. Requests made while a refresh runs share one trailing
+// refresh, so at most one query is in flight per controller.
+class _MissingChannelRefresher {
+  _MissingChannelRefresher(this._controller);
+
+  static const _initialBackoff = Duration(seconds: 30);
+  static const _maxBackoff = Duration(minutes: 10);
+
+  final StreamChannelListController _controller;
+  final _backoffs = <String, _Backoff>{};
+  final _pendingCids = <String>{};
+  Future<void>? _inFlight;
+  Future<void>? _trailing;
+
+  Future<void> refreshFor(String cid) async {
+    if (_pendingCids.contains(cid)) return;
+
+    final backoff = _backoffs[cid];
+    if (backoff != null && clock.now().isBefore(backoff.expiresAt)) return;
+
+    _pendingCids.add(cid);
+    try {
+      await _scheduleRefresh();
+    } finally {
+      _pendingCids.remove(cid);
+    }
+
+    if (_controller.currentItems.any((it) => it.cid == cid)) {
+      _backoffs.remove(cid);
+      return;
+    }
+
+    final duration = _nextBackoff(backoff);
+    _backoffs[cid] = _Backoff(duration: duration, expiresAt: clock.now().add(duration));
+  }
+
+  Duration _nextBackoff(_Backoff? previous) {
+    if (previous == null) return _initialBackoff;
+    final doubled = previous.duration * 2;
+    return doubled > _maxBackoff ? _maxBackoff : doubled;
+  }
+
+  // Drops the backoff for [cid], for when the channel shows up in the list.
+  void forget(String cid) => _backoffs.remove(cid);
+
+  // Drops every backoff, for when the list may have changed in ways no event
+  // reported.
+  void reset() => _backoffs.clear();
+
+  Future<void> _scheduleRefresh() {
+    if (_trailing case final trailing?) return trailing;
+
+    final inFlight = _inFlight;
+    if (inFlight == null) return _refresh();
+
+    return _trailing = inFlight.then((_) {
+      _trailing = null;
+      return _refresh();
+    });
+  }
+
+  Future<void> _refresh() {
+    return _inFlight = _controller.refresh(resetValue: false).whenComplete(() => _inFlight = null);
+  }
+}
+
+class _Backoff {
+  const _Backoff({required this.duration, required this.expiresAt});
+
+  final Duration duration;
+  final DateTime expiresAt;
 }

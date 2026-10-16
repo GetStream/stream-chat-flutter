@@ -13,6 +13,7 @@
 
 - Fixed `StreamDraftListController.deleteDraft` removing the wrong draft.
 - Fixed `StreamPollVoteListController` adding votes and comments from other polls in the same channel.
+- Fixed `StreamChannelListController` querying channels again for every new message in a watched channel its filter excludes, which could hit the API rate limit; once a refresh leaves such a channel out, further messages in it refresh the list again only after a backoff of 30 seconds that doubles up to 10 minutes.
 
 ## 10.5.0
 
