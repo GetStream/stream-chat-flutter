@@ -241,6 +241,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `SendAttachmentResponse`, `SendFileResponse`, `SendImageResponse`, `UploadImageResponse`, `UploadFileResponse` | `UploadedFile` (`stream_core`) | `removed` | `.file` becomes `.fileUrl`; `.thumbUrl` is unchanged; `duration` is gone |
 | `AttachmentFileUploaderProvider` = `AttachmentFileUploader Function(StreamHttpClient)` | `AttachmentFileUploader Function(Dio)` | `retyped` | Receives the client's `Dio`; `StreamAttachmentFileUploader(dio)` builds the default |
 | `StreamChatApi.fileUploader`, `StreamChatApi(attachmentFileUploaderProvider:)` | `StreamChatClient(attachmentFileUploaderProvider:)` | `removed` | The uploader belongs to `StreamChatClient` |
+| `MessageType.rawType` / `AttachmentType.rawType` / `PushLevel.rawType` / `ChatPreferenceLevel.rawType` / `ChatLevel.rawType` / `CallLevel.rawType` / `RoleType.rawType`, `ModerationAction.action`, `ChannelCapability.capability` | the value itself | `removed` | Each is a `String`, so use it directly: `message.type.rawType` becomes `message.type` |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -707,6 +708,11 @@ and `queryBannedUsers` — keep their place, because they are scoped to that cha
 only moderation call that answers with a model, and the `User` and `ChannelModel` shapes it embeds
 are decided by later groups in this migration; it moves when they do. See
 [Endpoints that still throw](#endpoints-that-still-throw).
+
+**`ModerationAction.action` is removed.** A `ModerationAction` is a `String`, so use it directly:
+`message.moderation?.action.action` becomes `message.moderation?.action`. The same goes for the
+`rawType` of `MessageType`, `AttachmentType`, `RoleType` and the push preference levels, and for
+`ChannelCapability.capability` — see the [Symbol Map](#symbol-map).
 
 ### App Settings
 

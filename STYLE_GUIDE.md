@@ -806,11 +806,13 @@ final label = switch (state) {
 
 A set of values the server defines — a push provider, a message type, a channel
 capability — grows over time. Model it as an extension type over its wire string, with
-a `static const` for each value the SDK knows, rather than as an enum:
+a `static const` for each value the SDK knows, rather than as an enum. Name the
+representation field `_`: the value is a `String` and is used directly as one, so a
+public field would only be a second way to read it.
 
 ```dart
 // GOOD:
-extension type const PushProvider(String rawType) implements String {
+extension type const PushProvider(String _) implements String {
   /// Google's Firebase Cloud Messaging.
   static const firebase = PushProvider('firebase');
 
@@ -820,6 +822,9 @@ extension type const PushProvider(String rawType) implements String {
 
 // BAD:
 enum PushProvider { firebase, apn }
+
+// BAD:
+extension type const PushProvider(String rawType) implements String { ... }
 ```
 
 - **Adding a value is not a breaking change.** Callers can't switch over the type

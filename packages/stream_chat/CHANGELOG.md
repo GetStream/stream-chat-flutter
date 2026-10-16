@@ -96,6 +96,7 @@
 - `SendAttachmentResponse`, `SendFileResponse`, `SendImageResponse`, `UploadImageResponse` and `UploadFileResponse` are removed in favor of `UploadedFile`.
 - `AttachmentFileUploaderProvider` receives the client's `Dio` instead of a `StreamHttpClient`, and `StreamAttachmentFileUploader` is built from one.
 - `StreamChatApi.fileUploader` and `StreamChatApi`'s `attachmentFileUploaderProvider` are removed; pass `attachmentFileUploaderProvider` to `StreamChatClient` instead.
+- `rawType` is removed from `MessageType`, `AttachmentType`, `PushLevel`, `ChatPreferenceLevel`, `ChatLevel`, `CallLevel` and `RoleType`, as are `ModerationAction.action` and `ChannelCapability.capability`; use the value itself instead.
 
 🐞 Fixed
 
