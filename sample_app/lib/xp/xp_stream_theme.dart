@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:xp_dart/xp_dart.dart';
 
+import 'xp_stream_icons.dart';
+
 /// The Luna blue used for the title bar, selection, and brand accents.
 const xpLunaBlue = Color(0xFF0055E5);
 
@@ -86,6 +88,7 @@ StreamTheme xpStreamTheme({required StreamSurfaceStyle surfaceStyle}) {
   return StreamTheme(
     brightness: Brightness.light,
     surfaceStyle: surfaceStyle,
+    icons: xpStreamIcons,
     colorScheme: colorScheme,
     textTheme: StreamTextTheme().apply(
       color: colorScheme.textPrimary,

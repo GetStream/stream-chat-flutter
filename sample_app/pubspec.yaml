@@ -49,6 +49,7 @@ dependencies:
   stream_chat_flutter: ^10.5.0
   stream_chat_localizations: ^10.5.0
   liquid_glass_widgets: ^1.13.0
+  pixelarticons: ^0.17.0
   shadcn_ui: ^0.57.2
   stream_chat_persistence: ^10.5.0
   streaming_shared_preferences: ^2.0.0
