@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:yaru/yaru.dart';
 
+import 'yaru_stream_icons.dart';
+
 /// Yaru's bundled Ubuntu font.
 const yaruFontFamily = 'packages/yaru/Ubuntu';
 
@@ -44,6 +46,7 @@ StreamTheme yaruStreamTheme({
   return StreamTheme(
     brightness: brightness,
     surfaceStyle: surfaceStyle,
+    icons: yaruStreamIcons,
     colorScheme: colorScheme,
     textTheme: StreamTextTheme().apply(color: colorScheme.textPrimary, fontFamily: yaruFontFamily),
     // Yaru controls round to 6px and cards / dialogs to 8-12px.

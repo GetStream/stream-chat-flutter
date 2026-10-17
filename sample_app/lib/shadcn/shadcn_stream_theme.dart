@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import 'shadcn_stream_icons.dart';
+
 /// shadcn's bundled Geist font.
 const shadcnFontFamily = 'packages/shadcn_ui/Geist';
 
@@ -69,6 +71,7 @@ StreamTheme shadcnStreamTheme({
   return StreamTheme(
     brightness: brightness,
     surfaceStyle: surfaceStyle,
+    icons: shadcnStreamIcons,
     colorScheme: colorScheme,
     textTheme: StreamTextTheme().apply(color: colorScheme.textPrimary, fontFamily: shadcnFontFamily),
     radius: const StreamRadius(

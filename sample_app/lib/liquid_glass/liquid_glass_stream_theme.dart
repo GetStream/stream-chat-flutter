@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import 'liquid_glass_stream_icons.dart';
+
 /// The iOS system blue, used as the brand accent in light mode.
 const liquidGlassBlueLight = Color(0xFF007AFF);
 
@@ -38,6 +40,7 @@ StreamTheme liquidGlassStreamTheme({
   return StreamTheme(
     brightness: brightness,
     surfaceStyle: surfaceStyle,
+    icons: liquidGlassStreamIcons,
     colorScheme: colorScheme,
   );
 }

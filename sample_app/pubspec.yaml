@@ -24,6 +24,8 @@ dependencies:
   avatar_glow: ^3.0.0
   collection: ^1.19.1
   fluent_ui: ^4.16.1
+  fluentui_system_icons: ^1.1.273
+  cupertino_icons: ^1.0.3
   dynamic_color: ^1.8.1
   firebase_core: ^4.0.0
   firebase_crashlytics: ">=5.2.0 <5.2.5"

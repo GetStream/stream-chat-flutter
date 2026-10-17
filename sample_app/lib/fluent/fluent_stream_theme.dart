@@ -2,6 +2,8 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import 'fluent_stream_icons.dart';
+
 /// The Windows 11 accent blue in light mode.
 const fluentAccentLight = Color(0xFF005FB8);
 
@@ -56,6 +58,7 @@ StreamTheme fluentStreamTheme({
   return StreamTheme(
     brightness: brightness,
     surfaceStyle: surfaceStyle,
+    icons: fluentStreamIcons,
     colorScheme: colorScheme,
     textTheme: StreamTextTheme().apply(
       color: colorScheme.textPrimary,

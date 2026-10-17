@@ -110,6 +110,7 @@ command:
           ref: bd6e2546fa25e2b605cefef4494e0be056d8a0dc
           path: packages/stream_core_flutter
       fluent_ui: ^4.16.1
+      fluentui_system_icons: ^1.1.273
       liquid_glass_widgets: ^1.13.0
       shadcn_ui: ^0.57.2
       stream_thumbnail: ^0.2.0
