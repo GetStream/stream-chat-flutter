@@ -17,7 +17,9 @@ const _kChannelHeaderSurfaceStyle = 'config.channelHeaderSurfaceStyle';
 const _kThreadHeaderSurfaceStyle = 'config.threadHeaderSurfaceStyle';
 const _kForceRtl = 'config.forceRtl';
 const _kEnableDynamicColor = 'config.enableDynamicColor';
+// Superseded by _kDesign; still read once so an existing XP choice carries over.
 const _kEnableXpTheme = 'config.enableXpTheme';
+const _kDesign = 'config.design';
 const _kEnableReminderActions = 'config.enableReminderActions';
 const _kEnableDeleteForMe = 'config.enableDeleteForMe';
 const _kEnableMessageInfo = 'config.enableMessageInfo';
@@ -30,6 +32,39 @@ const _kReactionPosition = 'config.reactionPosition';
 const _kLocale = 'config.locale';
 
 const _sentinel = Object();
+
+/// The look the sample app renders the SDK in.
+enum SampleAppDesign {
+  /// The SDK's own design system.
+  stream('Stream'),
+
+  /// Windows XP (Luna) colors with `xp_dart` core components.
+  windowsXp('Windows XP'),
+
+  /// iOS 26-style liquid glass on the floating chrome, via `liquid_glass_widgets`.
+  liquidGlass('Liquid Glass'),
+
+  /// Ubuntu's Yaru colors and controls.
+  yaru('Yaru'),
+
+  /// Windows 11 Fluent colors and controls, via `fluent_ui`.
+  fluent('Fluent'),
+
+  /// shadcn's zinc palette and controls, via `shadcn_ui`.
+  shadcn('shadcn');
+
+  const SampleAppDesign(this.label);
+
+  /// The name shown in the configuration screen.
+  final String label;
+}
+
+SampleAppDesign _readDesign(StreamingSharedPreferences prefs) {
+  final index = prefs.getInt(_kDesign, defaultValue: -1).getValue();
+  if (index >= 0 && index < SampleAppDesign.values.length) return SampleAppDesign.values[index];
+  final legacyXp = prefs.getBool(_kEnableXpTheme, defaultValue: true).getValue();
+  return legacyXp ? .windowsXp : .stream;
+}
 
 /// Locales supported by the sample app, derived from
 /// [kStreamChatSupportedLanguages].
@@ -57,7 +92,7 @@ class SampleAppConfigData {
     StreamSurfaceStyle? threadHeaderSurfaceStyle,
     bool forceRtl = false,
     bool enableDynamicColor = false,
-    bool enableXpTheme = true,
+    SampleAppDesign design = .windowsXp,
     bool enableReminderActions = false,
     bool enableDeleteForMe = false,
     bool enableMessageInfo = false,
@@ -80,7 +115,7 @@ class SampleAppConfigData {
       locale: locale,
       forceRtl: forceRtl,
       enableDynamicColor: enableDynamicColor,
-      enableXpTheme: enableXpTheme,
+      design: design,
       enableReminderActions: enableReminderActions,
       enableDeleteForMe: enableDeleteForMe,
       enableMessageInfo: enableMessageInfo,
@@ -106,7 +141,7 @@ class SampleAppConfigData {
     required this.locale,
     required this.forceRtl,
     required this.enableDynamicColor,
-    required this.enableXpTheme,
+    required this.design,
     required this.enableReminderActions,
     required this.enableDeleteForMe,
     required this.enableMessageInfo,
@@ -142,7 +177,7 @@ class SampleAppConfigData {
       locale: localeStr.isEmpty ? null : Locale(localeStr),
       forceRtl: prefs.getBool(_kForceRtl, defaultValue: false).getValue(),
       enableDynamicColor: prefs.getBool(_kEnableDynamicColor, defaultValue: false).getValue(),
-      enableXpTheme: prefs.getBool(_kEnableXpTheme, defaultValue: true).getValue(),
+      design: _readDesign(prefs),
       enableReminderActions: prefs.getBool(_kEnableReminderActions, defaultValue: false).getValue(),
       enableDeleteForMe: prefs.getBool(_kEnableDeleteForMe, defaultValue: false).getValue(),
       enableMessageInfo: prefs.getBool(_kEnableMessageInfo, defaultValue: false).getValue(),
@@ -208,9 +243,8 @@ class SampleAppConfigData {
   /// for theming, on platforms that support it.
   final bool enableDynamicColor;
 
-  /// Whether the Windows XP (Luna) demo theme is applied, which swaps the
-  /// SDK's core components for `xp_dart` widgets and forces light mode.
-  final bool enableXpTheme;
+  /// The look the SDK's core components are rendered in.
+  final SampleAppDesign design;
 
   /// Whether reminder actions appear in the message context menu.
   final bool enableReminderActions;
@@ -265,7 +299,7 @@ class SampleAppConfigData {
     Object? locale = _sentinel,
     bool? forceRtl,
     bool? enableDynamicColor,
-    bool? enableXpTheme,
+    SampleAppDesign? design,
     bool? enableReminderActions,
     bool? enableDeleteForMe,
     bool? enableMessageInfo,
@@ -300,7 +334,7 @@ class SampleAppConfigData {
       locale: locale == _sentinel ? this.locale : locale as Locale?,
       forceRtl: forceRtl ?? this.forceRtl,
       enableDynamicColor: enableDynamicColor ?? this.enableDynamicColor,
-      enableXpTheme: enableXpTheme ?? this.enableXpTheme,
+      design: design ?? this.design,
       enableReminderActions: enableReminderActions ?? this.enableReminderActions,
       enableDeleteForMe: enableDeleteForMe ?? this.enableDeleteForMe,
       enableMessageInfo: enableMessageInfo ?? this.enableMessageInfo,
@@ -330,7 +364,7 @@ class SampleAppConfigData {
     prefs.setString(_kLocale, locale?.languageCode ?? '');
     prefs.setBool(_kForceRtl, forceRtl);
     prefs.setBool(_kEnableDynamicColor, enableDynamicColor);
-    prefs.setBool(_kEnableXpTheme, enableXpTheme);
+    prefs.setInt(_kDesign, design.index);
     prefs.setBool(_kEnableReminderActions, enableReminderActions);
     prefs.setBool(_kEnableDeleteForMe, enableDeleteForMe);
     prefs.setBool(_kEnableMessageInfo, enableMessageInfo);

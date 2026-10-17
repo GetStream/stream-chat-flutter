@@ -109,11 +109,15 @@ command:
           url: https://github.com/GetStream/stream-core-flutter.git
           ref: bd6e2546fa25e2b605cefef4494e0be056d8a0dc
           path: packages/stream_core_flutter
+      fluent_ui: ^4.16.1
+      liquid_glass_widgets: ^1.13.0
+      shadcn_ui: ^0.57.2
       stream_thumbnail: ^0.2.0
       synchronized: ^3.4.0
       url_launcher: ^6.3.2
       uuid: ^4.5.3
       xp_dart: ^0.1.0
+      yaru: ^10.2.0
       video_player: ^2.11.1
       web_socket_channel: ^3.0.3
 

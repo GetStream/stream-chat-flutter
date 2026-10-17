@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'package:marionette_flutter/marionette_flutter.dart';
 import 'app.dart';
 import 'firebase_options.dart';
@@ -60,6 +61,9 @@ Future<void> main() async {
       };
     }
   }
+
+  // Pre-warms the liquid glass shaders so the first glass frame doesn't flash.
+  await LiquidGlassWidgets.initialize(enablePerformanceMonitor: false);
 
   runApp(const StreamChatSampleApp());
 }

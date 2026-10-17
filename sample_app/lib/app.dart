@@ -3,26 +3,37 @@
 import 'dart:async';
 
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide Message;
 import 'package:go_router/go_router.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
+import 'package:shadcn_ui/shadcn_ui.dart' show ShadTheme;
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 
 import 'auth/auth_controller.dart';
 import 'config/sample_app_config.dart';
+import 'fluent/fluent_component_builders.dart';
+import 'fluent/fluent_stream_theme.dart';
+import 'liquid_glass/liquid_glass_component_builders.dart';
+import 'liquid_glass/liquid_glass_stream_theme.dart';
 import 'notification/notification_service.dart';
 import 'pages/splash_screen.dart';
 import 'routes/app_routes.dart';
 import 'routes/routes.dart';
+import 'shadcn/shadcn_component_builders.dart';
+import 'shadcn/shadcn_stream_theme.dart';
 import 'widgets/custom_message_actions.dart';
 import 'widgets/location/location_attachment.dart';
 import 'widgets/location/location_aware_message_composer.dart';
 import 'widgets/location/location_detail_dialog.dart';
 import 'xp/xp_component_builders.dart';
 import 'xp/xp_stream_theme.dart';
+import 'yaru/yaru_component_builders.dart';
+import 'yaru/yaru_stream_theme.dart';
 
 /// Root widget of the sample app: boots prefs + notifications, runs
 /// the router, and owns the [StreamChat] ancestor.
@@ -177,81 +188,115 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                 final config = context.sampleAppConfig;
                 final surfaceStyle = config.surfaceStyle;
 
-                final xpTheme = config.enableXpTheme;
+                final design = config.design;
                 final chatExtensions = streamChatComponentBuilders(
                   messageItem: customMessageItemBuilder,
                   messageComposer: locationAwareMessageComposer,
+                  messageComposerInput: design == .liquidGlass ? liquidGlassComposerInput : null,
                 );
-                final componentBuilders = xpTheme
-                    ? xpComponentBuilders(extensions: chatExtensions)
-                    : StreamComponentBuilders(extensions: chatExtensions);
+                final componentBuilders = switch (design) {
+                  .windowsXp => xpComponentBuilders(extensions: chatExtensions),
+                  .liquidGlass => liquidGlassComponentBuilders(extensions: chatExtensions),
+                  .yaru => yaruComponentBuilders(extensions: chatExtensions),
+                  .fluent => fluentComponentBuilders(extensions: chatExtensions),
+                  .shadcn => shadcnComponentBuilders(extensions: chatExtensions),
+                  _ => StreamComponentBuilders(extensions: chatExtensions),
+                };
+
+                ThemeData themeFor(Brightness brightness, ColorScheme? dynamicColor) => switch (design) {
+                  .windowsXp => xpMaterialTheme(surfaceStyle: surfaceStyle),
+                  .liquidGlass => liquidGlassMaterialTheme(brightness: brightness, surfaceStyle: surfaceStyle),
+                  .yaru => yaruMaterialTheme(brightness: brightness, surfaceStyle: surfaceStyle),
+                  .fluent => fluentMaterialTheme(brightness: brightness, surfaceStyle: surfaceStyle),
+                  .shadcn => shadcnMaterialTheme(brightness: brightness, surfaceStyle: surfaceStyle),
+                  _ => createTheme(
+                    dynamicColor: config.enableDynamicColor ? dynamicColor : null,
+                    brightness: brightness,
+                    surfaceStyle: surfaceStyle,
+                  ),
+                };
+
+                // Design-specific scopes that must sit below MaterialApp, so
+                // they can read the resolved theme.
+                Widget wrapDesign(Widget child) => switch (design) {
+                  .liquidGlass => LiquidGlassWidgets.wrap(
+                    brightnessResolver: Theme.maybeBrightnessOf,
+                    child: child,
+                  ),
+                  .fluent => Builder(
+                    builder: (context) => fluent.FluentTheme(
+                      data: fluentThemeData(Theme.of(context).brightness),
+                      child: child,
+                    ),
+                  ),
+                  .shadcn => Builder(
+                    builder: (context) => ShadTheme(
+                      data: shadcnThemeData(Theme.of(context).brightness),
+                      child: child,
+                    ),
+                  ),
+                  _ => child,
+                };
 
                 return DynamicColorBuilder(
                   builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
                     return MaterialApp.router(
-                      theme: xpTheme
-                          ? xpMaterialTheme(surfaceStyle: surfaceStyle)
-                          : createTheme(
-                              dynamicColor: config.enableDynamicColor ? lightDynamic : null,
-                              brightness: Brightness.light,
-                              surfaceStyle: surfaceStyle,
-                            ),
-                      darkTheme: createTheme(
-                        dynamicColor: config.enableDynamicColor ? darkDynamic : null,
-                        brightness: Brightness.dark,
-                        surfaceStyle: surfaceStyle,
-                      ),
+                      theme: themeFor(Brightness.light, lightDynamic),
+                      darkTheme: themeFor(Brightness.dark, darkDynamic),
                       // XP has no dark mode.
-                      themeMode: xpTheme ? ThemeMode.light : config.themeMode,
+                      themeMode: design == .windowsXp ? ThemeMode.light : config.themeMode,
                       locale: config.locale,
                       supportedLocales: supportedLocales,
                       localizationsDelegates: const [
                         GlobalStreamChatLocalizations.delegate,
+                        fluent.FluentLocalizations.delegate,
                         GlobalMaterialLocalizations.delegate,
                         GlobalWidgetsLocalizations.delegate,
                       ],
-                      builder: (context, child) => _ComponentSurfaceStyleOverrides(
-                        config: config,
-                        child: ListenableBuilder(
-                          listenable: authController,
-                          builder: (context, cachedChild) {
-                            final wrapped = Directionality(
-                              textDirection: config.forceRtl ? .rtl : .ltr,
-                              // Above the router so any screen — and the
-                              // dialogs it pushes — can fire snackbars via
-                              // `StreamSnackbarMessenger.of(context)`. Inside
-                              // the Directionality, which its Stack needs.
-                              child: StreamSnackbarScope(
-                                child: cachedChild ?? const SizedBox.shrink(),
-                              ),
-                            );
-
-                            // StreamChat stays mounted as long as a client
-                            // exists so `StreamChat.of(context)` remains
-                            // valid across logout transitions.
-                            final client = authController.client;
-                            if (client != null) {
-                              return StreamChat(
-                                client: client,
-                                // Null in production → the SDK uses the real
-                                // connectivity monitor; set only by e2e tests.
-                                connectivityStream: authController.debugConnectivityStream,
-                                componentBuilders: componentBuilders,
-                                themeData: config.toStreamChatThemeData(),
-                                configData: config.toStreamChatConfigurationData(),
-                                child: wrapped,
+                      builder: (context, child) => wrapDesign(
+                        _ComponentSurfaceStyleOverrides(
+                          config: config,
+                          child: ListenableBuilder(
+                            listenable: authController,
+                            builder: (context, cachedChild) {
+                              final wrapped = Directionality(
+                                textDirection: config.forceRtl ? .rtl : .ltr,
+                                // Above the router so any screen — and the
+                                // dialogs it pushes — can fire snackbars via
+                                // `StreamSnackbarMessenger.of(context)`. Inside
+                                // the Directionality, which its Stack needs.
+                                child: StreamSnackbarScope(
+                                  child: cachedChild ?? const SizedBox.shrink(),
+                                ),
                               );
-                            }
 
-                            return StreamComponentFactory(
-                              builders: componentBuilders,
-                              child: StreamChatTheme(
-                                data: StreamChatThemeData(),
-                                child: wrapped,
-                              ),
-                            );
-                          },
-                          child: child,
+                              // StreamChat stays mounted as long as a client
+                              // exists so `StreamChat.of(context)` remains
+                              // valid across logout transitions.
+                              final client = authController.client;
+                              if (client != null) {
+                                return StreamChat(
+                                  client: client,
+                                  // Null in production → the SDK uses the real
+                                  // connectivity monitor; set only by e2e tests.
+                                  connectivityStream: authController.debugConnectivityStream,
+                                  componentBuilders: componentBuilders,
+                                  themeData: config.toStreamChatThemeData(),
+                                  configData: config.toStreamChatConfigurationData(),
+                                  child: wrapped,
+                                );
+                              }
+
+                              return StreamComponentFactory(
+                                builders: componentBuilders,
+                                child: StreamChatTheme(
+                                  data: StreamChatThemeData(),
+                                  child: wrapped,
+                                ),
+                              );
+                            },
+                            child: child,
+                          ),
                         ),
                       ),
                       routerConfig: _setupRouter(),

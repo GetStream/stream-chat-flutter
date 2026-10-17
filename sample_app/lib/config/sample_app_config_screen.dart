@@ -41,6 +41,7 @@ class SampleAppConfigScreen extends StatelessWidget {
                 SizedBox(height: spacing.xs),
                 _SettingsCard(
                   children: [
+                    _DesignRow(config: config),
                     _SegmentedRow<ThemeMode>(
                       title: 'Theme',
                       value: config.themeMode,
@@ -67,13 +68,6 @@ class SampleAppConfigScreen extends StatelessWidget {
                       onChanged: _dynamicColorSupported
                           ? (v) => SampleAppConfig.update(context, config.copyWith(enableDynamicColor: v))
                           : null,
-                    ),
-                    _SwitchRow(
-                      icon: Icons.window_outlined,
-                      title: 'Windows XP',
-                      subtitle: 'Luna colors and xp_dart core components',
-                      value: config.enableXpTheme,
-                      onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableXpTheme: v)),
                     ),
                     _LocaleRow(config: config),
                     _SwitchRow(
@@ -496,6 +490,92 @@ class _SegmentedRow<T> extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Design row
+// ---------------------------------------------------------------------------
+
+class _DesignRow extends StatelessWidget {
+  const _DesignRow({required this.config});
+
+  final SampleAppConfigData config;
+
+  static const _subtitles = <SampleAppDesign, String>{
+    .stream: 'The SDK design system',
+    .windowsXp: 'Luna colors and xp_dart core components',
+    .liquidGlass: 'Glass floating chrome via liquid_glass_widgets',
+    .yaru: 'Ubuntu colors and Yaru controls',
+    .fluent: 'Windows 11 colors and fluent_ui controls',
+    .shadcn: 'Zinc palette and shadcn_ui controls',
+  };
+
+  void _select(BuildContext context, SampleAppDesign design) {
+    // Liquid glass only shows on floating chrome, so picking it starts there;
+    // the surface style rows below can still switch back.
+    final surfaceStyle = design == .liquidGlass ? StreamSurfaceStyle.floating : null;
+    SampleAppConfig.update(context, config.copyWith(design: design, surfaceStyle: surfaceStyle));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final spacing = context.streamSpacing;
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
+
+    return StreamListTile(
+      leading: const Icon(Icons.style_outlined, size: 24),
+      title: const Text('Design'),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: spacing.xxs,
+        children: [
+          Text(config.design.label, style: textTheme.captionEmphasis.copyWith(color: colorScheme.textTertiary)),
+          Icon(Icons.chevron_right_outlined, size: 20, color: colorScheme.textTertiary),
+        ],
+      ),
+      onTap: () => _showDesignPicker(context),
+    );
+  }
+
+  void _showDesignPicker(BuildContext context) {
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
+    final radius = context.streamRadius;
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: colorScheme.backgroundSurfaceCard,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: radius.xxl)),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            StreamSheetHeader(title: const Text('Select Design')),
+            for (final design in SampleAppDesign.values)
+              StreamListTile(
+                title: Text(
+                  design.label,
+                  style: textTheme.bodyDefault.copyWith(
+                    color: design == config.design ? colorScheme.accentPrimary : colorScheme.textPrimary,
+                    fontWeight: design == config.design ? FontWeight.w600 : FontWeight.normal,
+                  ),
+                ),
+                subtitle: Text(
+                  _subtitles[design]!,
+                  style: textTheme.captionDefault.copyWith(color: colorScheme.textTertiary),
+                ),
+                trailing: design == config.design ? Icon(Icons.check, color: colorScheme.accentPrimary) : null,
+                onTap: () {
+                  _select(context, design);
+                  Navigator.of(sheetContext).pop();
+                },
+              ),
+          ],
+        ),
       ),
     );
   }
