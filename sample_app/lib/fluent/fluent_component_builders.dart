@@ -2,6 +2,8 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../utils/tap_target.dart';
+
 /// Component builders that render the SDK's core components with `fluent_ui`
 /// controls: buttons, toggle switches, checkboxes, text boxes, progress bars
 /// and progress rings.
@@ -122,15 +124,17 @@ class FluentStreamButton extends StatelessWidget {
       ),
     };
 
-    button = ConstrainedBox(
-      constraints: BoxConstraints(minHeight: height, minWidth: isIconOnly ? height : 0),
-      child: Center(widthFactor: 1, heightFactor: 1, child: button),
-    );
+    button = isIconOnly
+        ? SizedBox.square(dimension: height, child: button)
+        : ConstrainedBox(
+            constraints: BoxConstraints(minHeight: height),
+            child: Center(widthFactor: 1, heightFactor: 1, child: button),
+          );
 
     if (props.tooltip case final tooltip?) {
       button = fluent.Tooltip(message: tooltip, child: button);
     }
-    return Semantics(button: true, selected: props.isSelected, child: button);
+    return Semantics(button: true, selected: props.isSelected, child: padToTapTarget(context, button));
   }
 }
 

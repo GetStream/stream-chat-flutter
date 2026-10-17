@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../utils/tap_target.dart';
+
 /// Component builders that render the SDK's core components with `shadcn_ui`:
 /// buttons, icon buttons, switches, checkboxes, inputs and progress bars.
 ///
@@ -94,7 +96,7 @@ class ShadcnStreamButton extends StatelessWidget {
     if (props.tooltip case final tooltip?) {
       button = Tooltip(message: tooltip, child: button);
     }
-    return Semantics(selected: props.isSelected, child: button);
+    return Semantics(selected: props.isSelected, child: padToTapTarget(context, button));
   }
 }
 

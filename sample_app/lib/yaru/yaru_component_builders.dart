@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:yaru/yaru.dart';
 
+import '../utils/tap_target.dart';
+
 /// Component builders that render the SDK's core components with Yaru:
 /// Material buttons styled by the Yaru theme, [YaruCheckbox], [YaruSwitch] and
 /// the Yaru progress indicators.
@@ -73,8 +75,15 @@ class YaruStreamButton extends StatelessWidget {
     Widget button;
     if (props.child == null) {
       final icon = props.iconLeft ?? props.iconRight ?? const SizedBox.shrink();
+      // Yaru's icon button theme caps the size and uses a compact density, which
+      // would shrink the button below the size the SDK asks for; the tap target
+      // padding is added below instead.
       final style = IconButton.styleFrom(
         fixedSize: Size.square(height),
+        minimumSize: Size.square(height),
+        maximumSize: Size.square(height),
+        visualDensity: VisualDensity.standard,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         foregroundColor: isDestructive ? colorScheme.error : null,
       );
       button = switch ((props.type, props.isSelected ?? false)) {
@@ -155,6 +164,6 @@ class YaruStreamButton extends StatelessWidget {
     if (props.tooltip case final tooltip?) {
       button = Tooltip(message: tooltip, child: button);
     }
-    return Semantics(selected: props.isSelected, child: button);
+    return Semantics(selected: props.isSelected, child: padToTapTarget(context, button));
   }
 }

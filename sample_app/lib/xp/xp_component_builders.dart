@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:xp_dart/xp_dart.dart';
 
+import '../utils/tap_target.dart';
 import 'xp_stream_theme.dart';
 
 /// Component builders that render the SDK's core components with `xp_dart`
@@ -170,7 +171,10 @@ class XpStreamButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final enabled = props.onPressed != null;
     final isIconOnly = props.child == null;
+    // Labelled XP buttons stay compact; icon buttons take the size the SDK asks
+    // for, so they line up with the controls next to them (e.g. the composer).
     final height = switch (props.size) {
+      _ when isIconOnly => props.size.value,
       StreamButtonSize.small => 28.0,
       StreamButtonSize.medium => 32.0,
       StreamButtonSize.large => 36.0,
@@ -211,7 +215,7 @@ class XpStreamButton extends StatelessWidget {
       button = Tooltip(message: tooltip, child: button);
     }
 
-    return button;
+    return padToTapTarget(context, button);
   }
 
   Widget _content(Color foreground) {
