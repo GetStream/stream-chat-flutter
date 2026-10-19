@@ -13,6 +13,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$GroupedChannelsGroupRequest {
+  Map<String, Object?>? get filterConditions;
   int? get limit;
   String? get next;
   String? get prev;
@@ -32,17 +33,27 @@ mixin _$GroupedChannelsGroupRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is GroupedChannelsGroupRequest &&
+            const DeepCollectionEquality().equals(
+              other.filterConditions,
+              filterConditions,
+            ) &&
             (identical(other.limit, limit) || other.limit == limit) &&
             (identical(other.next, next) || other.next == next) &&
             (identical(other.prev, prev) || other.prev == prev));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, limit, next, prev);
+  int get hashCode => Object.hash(
+    runtimeType,
+    const DeepCollectionEquality().hash(filterConditions),
+    limit,
+    next,
+    prev,
+  );
 
   @override
   String toString() {
-    return 'GroupedChannelsGroupRequest(limit: $limit, next: $next, prev: $prev)';
+    return 'GroupedChannelsGroupRequest(filterConditions: $filterConditions, limit: $limit, next: $next, prev: $prev)';
   }
 }
 
@@ -53,7 +64,12 @@ abstract mixin class $GroupedChannelsGroupRequestCopyWith<$Res> {
     $Res Function(GroupedChannelsGroupRequest) _then,
   ) = _$GroupedChannelsGroupRequestCopyWithImpl;
   @useResult
-  $Res call({int? limit, String? next, String? prev});
+  $Res call({
+    Map<String, Object?>? filterConditions,
+    int? limit,
+    String? next,
+    String? prev,
+  });
 }
 
 /// @nodoc
@@ -68,12 +84,17 @@ class _$GroupedChannelsGroupRequestCopyWithImpl<$Res> implements $GroupedChannel
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? filterConditions = freezed,
     Object? limit = freezed,
     Object? next = freezed,
     Object? prev = freezed,
   }) {
     return _then(
       GroupedChannelsGroupRequest(
+        filterConditions: freezed == filterConditions
+            ? _self.filterConditions
+            : filterConditions // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>?,
         limit: freezed == limit
             ? _self.limit
             : limit // ignore: cast_nullable_to_non_nullable

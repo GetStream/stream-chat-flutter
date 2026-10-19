@@ -7,7 +7,7 @@ part 'chat_preferences.g.dart';
 ///
 /// A category left unset (omitted from the JSON payload) falls back to
 /// [ChatPreferences.defaultPreference].
-extension type const ChatPreferenceLevel(String rawType) implements String {
+extension type const ChatPreferenceLevel(String _) implements String {
   /// Always send a push notification for this category.
   static const all = ChatPreferenceLevel('all');
 

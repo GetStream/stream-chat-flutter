@@ -2,7 +2,7 @@
 ///
 /// A delete type without a constant here can still be named by wrapping its
 /// value: `DeleteType('soft')`.
-extension type const DeleteType(String rawType) implements String {
+extension type const DeleteType(String _) implements String {
   /// Marked deleted, and can be restored.
   static const soft = DeleteType('soft');
 

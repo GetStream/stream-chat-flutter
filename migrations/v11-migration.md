@@ -267,6 +267,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `channel.extraData['disabled']` / `['hidden']` / `['muted']` / `['blocked']` / `['truncated_at']` / `['truncated_by']` / `['auto_translation_enabled']` / `['auto_translation_language']` | `ChannelModel.disabled` / `hidden` / `muted` / `blocked` / `truncatedAt` / `truncatedBy` / `autoTranslationEnabled` / `autoTranslationLanguage` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them, and `toJson` no longer writes them |
 | `member.extraData['notifications_muted']` / `['status']` / `['ban_from_future_channels']` / `['future_channel_ban_expires']` / `['deleted_at']` | `Member.notificationsMuted` / `status` / `banFromFutureChannels` / `futureChannelBanExpires` / `deletedAt` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them, and `toJson` no longer writes them |
 | `ChannelModel.custom` / `Member.custom` entry named like one of the model's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; `toJson` leaves it out so it cannot overwrite the field |
+| `MessageType.rawType` / `AttachmentType.rawType` / `PushLevel.rawType` / `ChatPreferenceLevel.rawType` / `ChatLevel.rawType` / `CallLevel.rawType` / `RoleType.rawType`, `ModerationAction.action`, `ChannelCapability.capability` | the value itself | `removed` | Each is a `String`, so use it directly: `message.type.rawType` becomes `message.type` |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -843,6 +844,11 @@ and `queryBannedUsers` — keep their place, because they are scoped to that cha
 only moderation call that answers with a model, and the `User` and `ChannelModel` shapes it embeds
 are decided by later groups in this migration; it moves when they do. See
 [Endpoints that still throw](#endpoints-that-still-throw).
+
+**`ModerationAction.action` is removed.** A `ModerationAction` is a `String`, so use it directly:
+`message.moderation?.action.action` becomes `message.moderation?.action`. The same goes for the
+`rawType` of `MessageType`, `AttachmentType`, `RoleType` and the push preference levels, and for
+`ChannelCapability.capability` — see the [Symbol Map](#symbol-map).
 
 ### App Settings
 
