@@ -2353,11 +2353,13 @@ class StreamChatClient {
     );
   }
 
-  /// Fetches one page of the current user's reminders matching [filter], ordered by [sort].
+  /// Fetches one page of the current user's reminders matching [filter],
+  /// ordered by [sort].
   ///
-  /// Up to [limit] reminders are returned. The next page is fetched by passing the `next` cursor of a response as
-  /// [next], and the previous page by passing its `prev` cursor as [prev]. At most one of [next] and [prev] may be
-  /// given.
+  /// Up to [limit] reminders are returned. The next page is fetched by passing
+  /// the `next` cursor of a response as [next], and the previous page by
+  /// passing its `prev` cursor as [prev]. At most one of [next] and [prev] may
+  /// be given.
   Future<Result<QueryRemindersResponse>> queryReminders({
     MessageReminderFilter? filter,
     List<MessageReminderSort>? sort,
@@ -2368,7 +2370,8 @@ class StreamChatClient {
 
   /// Creates a reminder on the message with the id [messageId].
   ///
-  /// The reminder is due at [remindAt]. Without it, the reminder is a bookmark, which is never due.
+  /// The reminder is due at [remindAt]. Without it, the reminder is a bookmark,
+  /// which is never due.
   Future<Result<CreateReminderResponse>> createReminder(
     String messageId, {
     DateTime? remindAt,
@@ -2376,7 +2379,8 @@ class StreamChatClient {
 
   /// Updates the reminder on the message with the id [messageId].
   ///
-  /// The reminder becomes due at [remindAt]. Without it, the reminder becomes a bookmark, which is never due.
+  /// The reminder becomes due at [remindAt]. Without it, the reminder becomes a
+  /// bookmark, which is never due.
   Future<Result<UpdateReminderResponse>> updateReminder(
     String messageId, {
     DateTime? remindAt,

@@ -21,7 +21,8 @@ class ReactionGroup with _$ReactionGroup {
   }) : firstReactionAt = firstReactionAt ?? DateTime.timestamp(),
        lastReactionAt = lastReactionAt ?? DateTime.timestamp();
 
-  /// Creates a [ReactionGroup] from the offline-database format written by [toData].
+  /// Creates a [ReactionGroup] from the offline-database format written by
+  /// [toData].
   ///
   /// It is not a codec for API payloads.
   factory ReactionGroup.fromData(Map<String, dynamic> json) => _$ReactionGroupFromJson(json);

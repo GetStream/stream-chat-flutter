@@ -16,8 +16,9 @@ const _nullConst = _NullConst();
 /// {@template messageReminder}
 /// A reminder a user set on a message.
 ///
-/// A reminder with a [remindAt] is scheduled: the user is notified about the message at that time. One without it
-/// is a bookmark, which keeps the message for later without a notification.
+/// A reminder with a [remindAt] is scheduled: the user is notified about the
+/// message at that time. One without it is a bookmark, which keeps the message
+/// for later without a notification.
 /// {@endtemplate}
 @Freezed(copyWith: false)
 class MessageReminder with _$MessageReminder {
@@ -75,7 +76,8 @@ class MessageReminder with _$MessageReminder {
 
   /// Creates a copy of this reminder with the given fields replaced.
   ///
-  /// A field passed as null keeps its current value, except [remindAt], which a null clears.
+  /// A field passed as null keeps its current value, except [remindAt], which a
+  /// null clears.
   MessageReminder copyWith({
     String? channelCid,
     ChannelModel? channel,
@@ -102,8 +104,9 @@ class MessageReminder with _$MessageReminder {
 
   /// Returns this reminder with the fields [other] sets.
   ///
-  /// A field [other] leaves null keeps its current value, except [remindAt]: a null one clears it. If [other] is
-  /// null, this reminder is returned unchanged.
+  /// A field [other] leaves null keeps its current value, except [remindAt]: a
+  /// null one clears it. If [other] is null, this reminder is returned
+  /// unchanged.
   MessageReminder merge(MessageReminder? other) {
     if (other == null) return this;
     return copyWith(

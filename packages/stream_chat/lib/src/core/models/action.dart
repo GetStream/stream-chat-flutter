@@ -2,7 +2,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'action.freezed.dart';
 
-/// An interactive control attached to a message, such as the Send, Shuffle and Cancel buttons of a giphy preview.
+/// An interactive control attached to a message, such as the Send, Shuffle and
+/// Cancel buttons of a giphy preview.
 @freezed
 class Action with _$Action {
   /// Creates a new [Action].
