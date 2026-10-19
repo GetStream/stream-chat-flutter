@@ -262,7 +262,7 @@ void main() {
           type: 'voiceRecording',
           assetUrl: 'https://example.com/recording.m4a',
           uploadState: const UploadState.success(),
-          extraData: const {
+          custom: const {
             'duration': 15.0,
             'waveform_data': <double>[0.1, 0.5, 0.9, 0.4, 0.2],
           },
@@ -294,7 +294,7 @@ void main() {
             type: 'voiceRecording',
             assetUrl: 'https://example.com/recording.m4a',
             uploadState: const UploadState.success(),
-            extraData: const {
+            custom: const {
               'duration': 15.0,
               'waveform_data': <double>[0.1, 0.5, 0.9, 0.4, 0.2],
             },
@@ -328,7 +328,7 @@ void main() {
             type: 'voiceRecording',
             assetUrl: 'https://example.com/recording.m4a',
             uploadState: const UploadState.success(),
-            extraData: const {
+            custom: const {
               'duration': 15.0,
               'waveform_data': <double>[
                 0.1,
@@ -423,7 +423,7 @@ void main() {
             type: 'voiceRecording',
             assetUrl: 'https://example.com/recording.m4a',
             uploadState: const UploadState.success(),
-            extraData: const {
+            custom: const {
               'duration': 15.0,
               'waveform_data': <double>[
                 0.1,
@@ -516,7 +516,7 @@ void main() {
             type: 'voiceRecording',
             assetUrl: 'https://example.com/recording.m4a',
             uploadState: const UploadState.success(),
-            extraData: const {
+            custom: const {
               'duration': 15.0,
               'waveform_data': <double>[
                 0.1,
