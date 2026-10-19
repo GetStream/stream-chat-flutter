@@ -52,8 +52,8 @@
   `deactivatedAt`, `deletedAt` and `shadowBanned` are fields with persistence columns;
   `blockedUserIds` moves up from `OwnUser`. `OwnUser` doesn't model `unread_count`,
   `total_unread_count_by_team` or `latest_hidden_channels`, which no event keeps current. The mappers
-  leave the keys the SDK doesn't model out, such as `revoke_tokens_issued_before`; a v1 user keeps them
-  in `custom`, as a v1 member keeps `role`.
+  leave the keys the SDK doesn't model out; a v1 user keeps them in `custom`, as a v1 member keeps
+  `role`.
   Each generated user mapper fills the ones its response carries (`UserResponse` has no
   `shadowBanned`).
 - **`User.name` is nullable and has no fallback to `id`;** `User.nameOrId` has it, for a missing or

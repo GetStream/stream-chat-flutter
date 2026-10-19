@@ -28,6 +28,7 @@ class AIIndicatorUpdateEvent extends core.WsEvent with _$AIIndicatorUpdateEvent 
     required this.messageId,
     this.receivedAt,
     required this.type,
+    this.user,
   });
 
   @override
@@ -71,6 +72,10 @@ class AIIndicatorUpdateEvent extends core.WsEvent with _$AIIndicatorUpdateEvent 
   @override
   @JsonKey(name: 'type')
   final String type;
+
+  @override
+  @JsonKey(name: 'user')
+  final UserResponseCommonFields? user;
 
   Map<String, dynamic> toJson() => _$AIIndicatorUpdateEventToJson(this);
 

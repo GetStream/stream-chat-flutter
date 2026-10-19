@@ -38,7 +38,6 @@ class FullUserResponse with _$FullUserResponse {
     this.name,
     required this.online,
     this.privacySettings,
-    this.revokeTokensIssuedBefore,
     required this.role,
     required this.shadowBanned,
     required this.teams,
@@ -134,11 +133,6 @@ class FullUserResponse with _$FullUserResponse {
   @override
   @JsonKey(name: 'privacy_settings')
   final PrivacySettingsResponse? privacySettings;
-
-  @override
-  @StreamDateTimeConverter()
-  @JsonKey(name: 'revoke_tokens_issued_before')
-  final DateTime? revokeTokensIssuedBefore;
 
   @override
   @JsonKey(name: 'role')

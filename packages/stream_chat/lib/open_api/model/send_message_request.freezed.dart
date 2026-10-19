@@ -17,6 +17,7 @@ mixin _$SendMessageRequest {
   bool? get includeMentionedMembers;
   bool? get keepChannelHidden;
   MessageRequest get message;
+  DateTime? get scheduledAt;
   bool? get skipEnrichUrl;
   bool? get skipPush;
 
@@ -43,6 +44,7 @@ mixin _$SendMessageRequest {
                 other.includeMentionedMembers == includeMentionedMembers) &&
             (identical(other.keepChannelHidden, keepChannelHidden) || other.keepChannelHidden == keepChannelHidden) &&
             (identical(other.message, message) || other.message == message) &&
+            (identical(other.scheduledAt, scheduledAt) || other.scheduledAt == scheduledAt) &&
             (identical(other.skipEnrichUrl, skipEnrichUrl) || other.skipEnrichUrl == skipEnrichUrl) &&
             (identical(other.skipPush, skipPush) || other.skipPush == skipPush));
   }
@@ -54,13 +56,14 @@ mixin _$SendMessageRequest {
     includeMentionedMembers,
     keepChannelHidden,
     message,
+    scheduledAt,
     skipEnrichUrl,
     skipPush,
   );
 
   @override
   String toString() {
-    return 'SendMessageRequest(includeChannelContext: $includeChannelContext, includeMentionedMembers: $includeMentionedMembers, keepChannelHidden: $keepChannelHidden, message: $message, skipEnrichUrl: $skipEnrichUrl, skipPush: $skipPush)';
+    return 'SendMessageRequest(includeChannelContext: $includeChannelContext, includeMentionedMembers: $includeMentionedMembers, keepChannelHidden: $keepChannelHidden, message: $message, scheduledAt: $scheduledAt, skipEnrichUrl: $skipEnrichUrl, skipPush: $skipPush)';
   }
 }
 
@@ -76,6 +79,7 @@ abstract mixin class $SendMessageRequestCopyWith<$Res> {
     bool? includeMentionedMembers,
     bool? keepChannelHidden,
     MessageRequest message,
+    DateTime? scheduledAt,
     bool? skipEnrichUrl,
     bool? skipPush,
   });
@@ -97,6 +101,7 @@ class _$SendMessageRequestCopyWithImpl<$Res> implements $SendMessageRequestCopyW
     Object? includeMentionedMembers = freezed,
     Object? keepChannelHidden = freezed,
     Object? message = null,
+    Object? scheduledAt = freezed,
     Object? skipEnrichUrl = freezed,
     Object? skipPush = freezed,
   }) {
@@ -118,6 +123,10 @@ class _$SendMessageRequestCopyWithImpl<$Res> implements $SendMessageRequestCopyW
             ? _self.message
             : message // ignore: cast_nullable_to_non_nullable
                   as MessageRequest,
+        scheduledAt: freezed == scheduledAt
+            ? _self.scheduledAt
+            : scheduledAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
         skipEnrichUrl: freezed == skipEnrichUrl
             ? _self.skipEnrichUrl
             : skipEnrichUrl // ignore: cast_nullable_to_non_nullable

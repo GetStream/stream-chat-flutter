@@ -18,42 +18,17 @@ part 'intent_topic_request.freezed.dart';
 @JsonSerializable()
 class IntentTopicRequest with _$IntentTopicRequest {
   const IntentTopicRequest({
-    this.analysisCooldownSeconds,
     this.description,
-    this.enabled,
     required this.label,
-    this.maxCapturedItems,
-    this.refireCooldownSeconds,
-    this.scoreThreshold,
   });
-
-  @override
-  @JsonKey(name: 'analysis_cooldown_seconds')
-  final int? analysisCooldownSeconds;
 
   @override
   @JsonKey(name: 'description')
   final String? description;
 
   @override
-  @JsonKey(name: 'enabled')
-  final bool? enabled;
-
-  @override
   @JsonKey(name: 'label')
   final String label;
-
-  @override
-  @JsonKey(name: 'max_captured_items')
-  final int? maxCapturedItems;
-
-  @override
-  @JsonKey(name: 'refire_cooldown_seconds')
-  final int? refireCooldownSeconds;
-
-  @override
-  @JsonKey(name: 'score_threshold')
-  final double? scoreThreshold;
 
   Map<String, dynamic> toJson() => _$IntentTopicRequestToJson(this);
 

@@ -349,6 +349,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `OwnUser.blockedUserIds` | `User.blockedUserIds` | `moved` | Still on `OwnUser`. Empty for anyone but the current user |
 | `OwnUser.fromUser(user)` reading devices, mutes, unread counts, push preferences and privacy settings out of `user.extraData` | — | `removed` | A `User` no longer carries them; they are left at their defaults |
 | `User.custom` entry named like one of the user's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; `toJson` leaves it out so it cannot overwrite the field |
+| `MessageType.rawType` / `AttachmentType.rawType` / `PushLevel.rawType` / `ChatPreferenceLevel.rawType` / `ChatLevel.rawType` / `CallLevel.rawType` / `RoleType.rawType`, `ModerationAction.action`, `ChannelCapability.capability` | the value itself | `removed` | Each is a `String`, so use it directly: `message.type.rawType` becomes `message.type` |
 | `StreamChatClient.createReminder` / `.updateReminder` / `.queryReminders` → `Future<CreateReminderResponse>` and the like | `Future<Result<CreateReminderResponse>>` and the like | `retyped` | Return a `Result` instead of throwing; the same holds for `Channel.createReminder` and `.updateReminder` |
 | `StreamChatClient.deleteReminder` / `Channel.deleteReminder` → `Future<EmptyResponse>` | `Future<Result<DeleteReminderResponse>>` | `retyped` | A new response carrying `duration` |
 | `queryReminders(pagination: PaginationParams(limit: l, next: n))` | `queryReminders(limit: l, next: n)` | `retyped` | `limit` is still 10 when omitted. Pass a response's `prev` as `prev` to page backwards. The other `PaginationParams` fields never had an effect on this query |
@@ -1242,6 +1243,11 @@ and `queryBannedUsers` — keep their place, because they are scoped to that cha
 only moderation call that answers with a model, and the `User` and `ChannelModel` shapes it embeds
 are decided by later groups in this migration; it moves when they do. See
 [Endpoints that still throw](#endpoints-that-still-throw).
+
+**`ModerationAction.action` is removed.** A `ModerationAction` is a `String`, so use it directly:
+`message.moderation?.action.action` becomes `message.moderation?.action`. The same goes for the
+`rawType` of `MessageType`, `AttachmentType`, `RoleType` and the push preference levels, and for
+`ChannelCapability.capability` — see the [Symbol Map](#symbol-map).
 
 ### App Settings
 

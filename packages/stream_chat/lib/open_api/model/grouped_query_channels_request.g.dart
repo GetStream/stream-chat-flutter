@@ -17,6 +17,7 @@ GroupedQueryChannelsRequest _$GroupedQueryChannelsRequestFromJson(
   ),
   limit: (json['limit'] as num?)?.toInt(),
   presence: json['presence'] as bool?,
+  sort: (json['sort'] as List<dynamic>?)?.map((e) => SortParamRequest.fromJson(e as Map<String, dynamic>)).toList(),
   watch: json['watch'] as bool?,
 );
 
@@ -26,5 +27,6 @@ Map<String, dynamic> _$GroupedQueryChannelsRequestToJson(
   'groups': instance.groups?.map((k, e) => MapEntry(k, e.toJson())),
   'limit': instance.limit,
   'presence': instance.presence,
+  'sort': instance.sort?.map((e) => e.toJson()).toList(),
   'watch': instance.watch,
 };

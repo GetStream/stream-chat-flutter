@@ -16,6 +16,7 @@ mixin _$GroupedQueryChannelsRequest {
   Map<String, GroupedChannelsGroupRequest>? get groups;
   int? get limit;
   bool? get presence;
+  List<SortParamRequest>? get sort;
   bool? get watch;
 
   /// Create a copy of GroupedQueryChannelsRequest
@@ -36,6 +37,7 @@ mixin _$GroupedQueryChannelsRequest {
             const DeepCollectionEquality().equals(other.groups, groups) &&
             (identical(other.limit, limit) || other.limit == limit) &&
             (identical(other.presence, presence) || other.presence == presence) &&
+            const DeepCollectionEquality().equals(other.sort, sort) &&
             (identical(other.watch, watch) || other.watch == watch));
   }
 
@@ -45,12 +47,13 @@ mixin _$GroupedQueryChannelsRequest {
     const DeepCollectionEquality().hash(groups),
     limit,
     presence,
+    const DeepCollectionEquality().hash(sort),
     watch,
   );
 
   @override
   String toString() {
-    return 'GroupedQueryChannelsRequest(groups: $groups, limit: $limit, presence: $presence, watch: $watch)';
+    return 'GroupedQueryChannelsRequest(groups: $groups, limit: $limit, presence: $presence, sort: $sort, watch: $watch)';
   }
 }
 
@@ -65,6 +68,7 @@ abstract mixin class $GroupedQueryChannelsRequestCopyWith<$Res> {
     Map<String, GroupedChannelsGroupRequest>? groups,
     int? limit,
     bool? presence,
+    List<SortParamRequest>? sort,
     bool? watch,
   });
 }
@@ -84,6 +88,7 @@ class _$GroupedQueryChannelsRequestCopyWithImpl<$Res> implements $GroupedQueryCh
     Object? groups = freezed,
     Object? limit = freezed,
     Object? presence = freezed,
+    Object? sort = freezed,
     Object? watch = freezed,
   }) {
     return _then(
@@ -100,6 +105,10 @@ class _$GroupedQueryChannelsRequestCopyWithImpl<$Res> implements $GroupedQueryCh
             ? _self.presence
             : presence // ignore: cast_nullable_to_non_nullable
                   as bool?,
+        sort: freezed == sort
+            ? _self.sort
+            : sort // ignore: cast_nullable_to_non_nullable
+                  as List<SortParamRequest>?,
         watch: freezed == watch
             ? _self.watch
             : watch // ignore: cast_nullable_to_non_nullable

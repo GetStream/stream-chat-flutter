@@ -8,10 +8,11 @@ part of 'default_api.dart';
 // RetrofitGenerator
 // **************************************************************************
 
+// ignore_for_file: type=lint
 // ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element,unnecessary_string_interpolations,unused_element_parameter,avoid_unused_constructor_parameters,unreachable_from_main,avoid_redundant_argument_values
 
-class _DefaultApi implements DefaultApi {
-  _DefaultApi(this._dio, {this.baseUrl, this.errorLogger});
+class _DefaultApi extends DefaultApi {
+  _DefaultApi._(this._dio, {this.baseUrl, this.errorLogger}) : super._();
 
   final Dio _dio;
 
@@ -1984,7 +1985,7 @@ class _DefaultApi implements DefaultApi {
     );
   }
 
-  Future<GetPinnedMessagesResponse> _getPinnedMessages({
+  Future<GetPinnedMessagesResponse> __getPinnedMessages({
     required String type,
     required String id,
     int? limit,
@@ -1999,7 +2000,7 @@ class _DefaultApi implements DefaultApi {
     DateTime? pinnedAtBefore,
     String? idAround,
     DateTime? pinnedAtAround,
-    List<SortParamRequest>? sort,
+    _JsonQuery? sort,
     List<String>? memberCustomInclude,
   }) async {
     final _extra = <String, dynamic>{};
@@ -2016,7 +2017,7 @@ class _DefaultApi implements DefaultApi {
       r'pinned_at_before': pinnedAtBefore?.toIso8601String(),
       r'id_around': idAround,
       r'pinned_at_around': pinnedAtAround?.toIso8601String(),
-      r'sort': sort,
+      r'sort': sort?.toJson(),
       r'member_custom_include': memberCustomInclude,
     };
     queryParameters.removeWhere((k, v) => v == null);
@@ -2044,7 +2045,7 @@ class _DefaultApi implements DefaultApi {
   }
 
   @override
-  Future<Result<GetPinnedMessagesResponse>> getPinnedMessages({
+  Future<Result<GetPinnedMessagesResponse>> _getPinnedMessages({
     required String type,
     required String id,
     int? limit,
@@ -2059,11 +2060,11 @@ class _DefaultApi implements DefaultApi {
     DateTime? pinnedAtBefore,
     String? idAround,
     DateTime? pinnedAtAround,
-    List<SortParamRequest>? sort,
+    _JsonQuery? sort,
     List<String>? memberCustomInclude,
   }) {
     return _ResultCallAdapter<GetPinnedMessagesResponse>().adapt(
-      () => _getPinnedMessages(
+      () => __getPinnedMessages(
         type: type,
         id: id,
         limit: limit,
@@ -2232,7 +2233,7 @@ class _DefaultApi implements DefaultApi {
     );
   }
 
-  Future<GetRepliesResponse> _getReplies({
+  Future<GetRepliesResponse> __getReplies({
     required String parentId,
     int? limit,
     String? idGte,
@@ -2240,7 +2241,7 @@ class _DefaultApi implements DefaultApi {
     String? idLte,
     String? idLt,
     String? idAround,
-    List<SortParamRequest>? sort,
+    _JsonQuery? sort,
     List<String>? memberCustomInclude,
   }) async {
     final _extra = <String, dynamic>{};
@@ -2251,7 +2252,7 @@ class _DefaultApi implements DefaultApi {
       r'id_lte': idLte,
       r'id_lt': idLt,
       r'id_around': idAround,
-      r'sort': sort,
+      r'sort': sort?.toJson(),
       r'member_custom_include': memberCustomInclude,
     };
     queryParameters.removeWhere((k, v) => v == null);
@@ -2279,7 +2280,7 @@ class _DefaultApi implements DefaultApi {
   }
 
   @override
-  Future<Result<GetRepliesResponse>> getReplies({
+  Future<Result<GetRepliesResponse>> _getReplies({
     required String parentId,
     int? limit,
     String? idGte,
@@ -2287,11 +2288,11 @@ class _DefaultApi implements DefaultApi {
     String? idLte,
     String? idLt,
     String? idAround,
-    List<SortParamRequest>? sort,
+    _JsonQuery? sort,
     List<String>? memberCustomInclude,
   }) {
     return _ResultCallAdapter<GetRepliesResponse>().adapt(
-      () => _getReplies(
+      () => __getReplies(
         parentId: parentId,
         limit: limit,
         idGte: idGte,
@@ -2730,9 +2731,12 @@ class _DefaultApi implements DefaultApi {
     );
   }
 
-  Future<void> _longPoll({WSAuthMessage? json}) async {
+  Future<void> __longPoll({bool? close, _JsonQuery? json}) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'json': json?.toJson()};
+    final queryParameters = <String, dynamic>{
+      r'close': close,
+      r'json': json?.toJson(),
+    };
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
@@ -2750,8 +2754,10 @@ class _DefaultApi implements DefaultApi {
   }
 
   @override
-  Future<Result<void>> longPoll({WSAuthMessage? json}) {
-    return _ResultCallAdapter<void>().adapt(() => _longPoll(json: json));
+  Future<Result<void>> _longPoll({bool? close, _JsonQuery? json}) {
+    return _ResultCallAdapter<void>().adapt(
+      () => __longPoll(close: close, json: json),
+    );
   }
 
   Future<MarkReadResponse> _markChannelsRead({
@@ -3031,8 +3037,8 @@ class _DefaultApi implements DefaultApi {
     );
   }
 
-  Future<QueryBannedUsersResponse> _queryBannedUsers({
-    QueryBannedUsersPayload? payload,
+  Future<QueryBannedUsersResponse> __queryBannedUsers({
+    _JsonQuery? payload,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'payload': payload?.toJson()};
@@ -3061,11 +3067,58 @@ class _DefaultApi implements DefaultApi {
   }
 
   @override
-  Future<Result<QueryBannedUsersResponse>> queryBannedUsers({
-    QueryBannedUsersPayload? payload,
+  Future<Result<QueryBannedUsersResponse>> _queryBannedUsers({
+    _JsonQuery? payload,
   }) {
     return _ResultCallAdapter<QueryBannedUsersResponse>().adapt(
-      () => _queryBannedUsers(payload: payload),
+      () => __queryBannedUsers(payload: payload),
+    );
+  }
+
+  Future<QueryChannelBansResponse> _queryChannelBans({
+    required String type,
+    required String id,
+    QueryChannelBansRequest? queryChannelBansRequest,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(queryChannelBansRequest?.toJson() ?? <String, dynamic>{});
+    final _options = _setStreamType<Result<QueryChannelBansResponse>>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v2/chat/channels/${type}/${id}/bans/query',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late QueryChannelBansResponse _value;
+    try {
+      _value = QueryChannelBansResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Result<QueryChannelBansResponse>> queryChannelBans({
+    required String type,
+    required String id,
+    QueryChannelBansRequest? queryChannelBansRequest,
+  }) {
+    return _ResultCallAdapter<QueryChannelBansResponse>().adapt(
+      () => _queryChannelBans(
+        type: type,
+        id: id,
+        queryChannelBansRequest: queryChannelBansRequest,
+      ),
     );
   }
 
@@ -3147,8 +3200,8 @@ class _DefaultApi implements DefaultApi {
     );
   }
 
-  Future<QueryFutureChannelBansResponse> _queryFutureChannelBans({
-    QueryFutureChannelBansPayload? payload,
+  Future<QueryFutureChannelBansResponse> __queryFutureChannelBans({
+    _JsonQuery? payload,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'payload': payload?.toJson()};
@@ -3177,15 +3230,15 @@ class _DefaultApi implements DefaultApi {
   }
 
   @override
-  Future<Result<QueryFutureChannelBansResponse>> queryFutureChannelBans({
-    QueryFutureChannelBansPayload? payload,
+  Future<Result<QueryFutureChannelBansResponse>> _queryFutureChannelBans({
+    _JsonQuery? payload,
   }) {
     return _ResultCallAdapter<QueryFutureChannelBansResponse>().adapt(
-      () => _queryFutureChannelBans(payload: payload),
+      () => __queryFutureChannelBans(payload: payload),
     );
   }
 
-  Future<MembersResponse> _queryMembers({QueryMembersPayload? payload}) async {
+  Future<MembersResponse> __queryMembers({_JsonQuery? payload}) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'payload': payload?.toJson()};
     queryParameters.removeWhere((k, v) => v == null);
@@ -3213,14 +3266,14 @@ class _DefaultApi implements DefaultApi {
   }
 
   @override
-  Future<Result<MembersResponse>> queryMembers({QueryMembersPayload? payload}) {
+  Future<Result<MembersResponse>> _queryMembers({_JsonQuery? payload}) {
     return _ResultCallAdapter<MembersResponse>().adapt(
-      () => _queryMembers(payload: payload),
+      () => __queryMembers(payload: payload),
     );
   }
 
-  Future<QueryMessageFlagsResponse> _queryMessageFlags({
-    QueryMessageFlagsPayload? payload,
+  Future<QueryMessageFlagsResponse> __queryMessageFlags({
+    _JsonQuery? payload,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'payload': payload?.toJson()};
@@ -3249,11 +3302,11 @@ class _DefaultApi implements DefaultApi {
   }
 
   @override
-  Future<Result<QueryMessageFlagsResponse>> queryMessageFlags({
-    QueryMessageFlagsPayload? payload,
+  Future<Result<QueryMessageFlagsResponse>> _queryMessageFlags({
+    _JsonQuery? payload,
   }) {
     return _ResultCallAdapter<QueryMessageFlagsResponse>().adapt(
-      () => _queryMessageFlags(payload: payload),
+      () => __queryMessageFlags(payload: payload),
     );
   }
 
@@ -3542,7 +3595,7 @@ class _DefaultApi implements DefaultApi {
     );
   }
 
-  Future<QueryUsersResponse> _queryUsers({QueryUsersPayload? payload}) async {
+  Future<QueryUsersResponse> __queryUsers({_JsonQuery? payload}) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'payload': payload?.toJson()};
     queryParameters.removeWhere((k, v) => v == null);
@@ -3570,9 +3623,9 @@ class _DefaultApi implements DefaultApi {
   }
 
   @override
-  Future<Result<QueryUsersResponse>> queryUsers({QueryUsersPayload? payload}) {
+  Future<Result<QueryUsersResponse>> _queryUsers({_JsonQuery? payload}) {
     return _ResultCallAdapter<QueryUsersResponse>().adapt(
-      () => _queryUsers(payload: payload),
+      () => __queryUsers(payload: payload),
     );
   }
 
@@ -3660,7 +3713,7 @@ class _DefaultApi implements DefaultApi {
     );
   }
 
-  Future<SearchResponse> _search({SearchPayload? payload}) async {
+  Future<SearchResponse> __search({_JsonQuery? payload}) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'payload': payload?.toJson()};
     queryParameters.removeWhere((k, v) => v == null);
@@ -3688,9 +3741,9 @@ class _DefaultApi implements DefaultApi {
   }
 
   @override
-  Future<Result<SearchResponse>> search({SearchPayload? payload}) {
+  Future<Result<SearchResponse>> _search({_JsonQuery? payload}) {
     return _ResultCallAdapter<SearchResponse>().adapt(
-      () => _search(payload: payload),
+      () => __search(payload: payload),
     );
   }
 

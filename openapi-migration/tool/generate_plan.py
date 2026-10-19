@@ -56,11 +56,18 @@ def read_handwritten():
 
 
 def read_generated():
-    """[(verb, path, operation, responseType)] for the generated client."""
-    return re.findall(
-        r"@(GET|POST|PATCH|PUT|DELETE)\('([^']+)'\)\s*\n\s*Future<Result<(\w+)>>\s+(\w+)\(",
-        GENERATED_API.read_text(),
-    )
+    """[(verb, path, operation, responseType)] for the generated client.
+
+    An operation that sends a query parameter as JSON is annotated on a private `_name` method, which the public
+    `name` forwards to; it is listed under the public name.
+    """
+    return [
+        (verb, path, response, operation.removeprefix('_'))
+        for verb, path, response, operation in re.findall(
+            r"@(GET|POST|PATCH|PUT|DELETE)\('([^']+)'\)\s*\n\s*Future<Result<(\w+)>>\s+(\w+)\(",
+            GENERATED_API.read_text(),
+        )
+    ]
 
 
 # Every 'VERB /path' named by only_ops or unless_ops, so the report can flag one that matches no operation.
@@ -304,11 +311,11 @@ GROUPS = [
               in the raw `me`. None was ever applied. Verified live against the demo app and in the backend source;
               recorded as a 🐞 Fixed entry.
             - **`UserResponse.toModel()` leaves custom keys named like `OwnUser` fields (`OwnUser.topLevelFields`),
-              plus `deleted_at`, `deactivated_at` and `revoke_tokens_issued_before`, out of `extraData`.** v1's flat
+              plus `deleted_at` and `deactivated_at`, out of `extraData`.** v1's flat
               user JSON shadowed them; v2 nests custom data, and without the guard a custom `online` string crashed
               `OwnUser.fromUser`. `User.toRequest()` leaves the same keys out of the custom data it sends.
-            - **The three extra names are guarded because the socket connect refuses them.** A custom
-              `deleted_at`, `deactivated_at` or `revoke_tokens_issued_before` left in `extraData` is re-sent in the
+            - **The two extra names are guarded because the socket connect refuses them.** A custom
+              `deleted_at` or `deactivated_at` left in `extraData` is re-sent in the
               connect's user details, and the backend answers 400 ("reserved field", or "expected date" for a
               non-date value). v10's flat response shadowed them, so the same guest connected; confirmed live.
             - **Not a regression: a custom `ban_expires` that isn't a date** fails the connect in v10 and now alike,
@@ -1193,8 +1200,8 @@ GROUPS = [
               `deactivatedAt`, `deletedAt` and `shadowBanned` are fields with persistence columns;
               `blockedUserIds` moves up from `OwnUser`. `OwnUser` doesn't model `unread_count`,
               `total_unread_count_by_team` or `latest_hidden_channels`, which no event keeps current. The mappers
-              leave the keys the SDK doesn't model out, such as `revoke_tokens_issued_before`; a v1 user keeps them
-              in `custom`, as a v1 member keeps `role`.
+              leave the keys the SDK doesn't model out; a v1 user keeps them in `custom`, as a v1 member keeps
+              `role`.
               Each generated user mapper fills the ones its response carries (`UserResponse` has no
               `shadowBanned`).
             - **`User.name` is nullable and has no fallback to `id`;** `User.nameOrId` has it, for a missing or

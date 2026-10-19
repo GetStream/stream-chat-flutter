@@ -13,7 +13,9 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$AIAudioConfigResponse {
+  AITextConfig? get aiTextConfig;
   bool get enabled;
+  LLMConfig? get llmConfig;
   String get profile;
   List<BodyguardRule> get rules;
 
@@ -32,7 +34,9 @@ mixin _$AIAudioConfigResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is AIAudioConfigResponse &&
+            (identical(other.aiTextConfig, aiTextConfig) || other.aiTextConfig == aiTextConfig) &&
             (identical(other.enabled, enabled) || other.enabled == enabled) &&
+            (identical(other.llmConfig, llmConfig) || other.llmConfig == llmConfig) &&
             (identical(other.profile, profile) || other.profile == profile) &&
             const DeepCollectionEquality().equals(other.rules, rules));
   }
@@ -40,14 +44,16 @@ mixin _$AIAudioConfigResponse {
   @override
   int get hashCode => Object.hash(
     runtimeType,
+    aiTextConfig,
     enabled,
+    llmConfig,
     profile,
     const DeepCollectionEquality().hash(rules),
   );
 
   @override
   String toString() {
-    return 'AIAudioConfigResponse(enabled: $enabled, profile: $profile, rules: $rules)';
+    return 'AIAudioConfigResponse(aiTextConfig: $aiTextConfig, enabled: $enabled, llmConfig: $llmConfig, profile: $profile, rules: $rules)';
   }
 }
 
@@ -58,7 +64,13 @@ abstract mixin class $AIAudioConfigResponseCopyWith<$Res> {
     $Res Function(AIAudioConfigResponse) _then,
   ) = _$AIAudioConfigResponseCopyWithImpl;
   @useResult
-  $Res call({bool enabled, String profile, List<BodyguardRule> rules});
+  $Res call({
+    AITextConfig? aiTextConfig,
+    bool enabled,
+    LLMConfig? llmConfig,
+    String profile,
+    List<BodyguardRule> rules,
+  });
 }
 
 /// @nodoc
@@ -73,16 +85,26 @@ class _$AIAudioConfigResponseCopyWithImpl<$Res> implements $AIAudioConfigRespons
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? aiTextConfig = freezed,
     Object? enabled = null,
+    Object? llmConfig = freezed,
     Object? profile = null,
     Object? rules = null,
   }) {
     return _then(
       AIAudioConfigResponse(
+        aiTextConfig: freezed == aiTextConfig
+            ? _self.aiTextConfig
+            : aiTextConfig // ignore: cast_nullable_to_non_nullable
+                  as AITextConfig?,
         enabled: null == enabled
             ? _self.enabled
             : enabled // ignore: cast_nullable_to_non_nullable
                   as bool,
+        llmConfig: freezed == llmConfig
+            ? _self.llmConfig
+            : llmConfig // ignore: cast_nullable_to_non_nullable
+                  as LLMConfig?,
         profile: null == profile
             ? _self.profile
             : profile // ignore: cast_nullable_to_non_nullable

@@ -18,14 +18,24 @@ part 'ai_audio_config_response.freezed.dart';
 @JsonSerializable()
 class AIAudioConfigResponse with _$AIAudioConfigResponse {
   const AIAudioConfigResponse({
+    this.aiTextConfig,
     required this.enabled,
+    this.llmConfig,
     required this.profile,
     required this.rules,
   });
 
   @override
+  @JsonKey(name: 'ai_text_config')
+  final AITextConfig? aiTextConfig;
+
+  @override
   @JsonKey(name: 'enabled')
   final bool enabled;
+
+  @override
+  @JsonKey(name: 'llm_config')
+  final LLMConfig? llmConfig;
 
   @override
   @JsonKey(name: 'profile')
