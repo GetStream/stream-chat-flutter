@@ -9,7 +9,29 @@ import '../mocks.dart';
 void main() {
   test('StreamChatClient.getBlockedUsers returns the blocks', () async {
     final defaultApi = MockDefaultApi();
-    when(defaultApi.getBlockedUsers).thenAnswer((_) async => Result.success(_getBlockedUsersResponse()));
+    when(defaultApi.getBlockedUsers).thenAnswer(
+      (_) async => Result.success(
+        api.GetBlockedUsersResponse(
+          duration: '4.21ms',
+          blocks: [
+            api.BlockedUserResponse(
+              user: fakeUserResponse('user-id'),
+              blockedUser: fakeUserResponse('blocked-user-1'),
+              userId: 'user-id',
+              blockedUserId: 'blocked-user-1',
+              createdAt: DateTime.utc(2026, 10, 1),
+            ),
+            api.BlockedUserResponse(
+              user: fakeUserResponse('user-id'),
+              blockedUser: fakeUserResponse('blocked-user-2'),
+              userId: 'user-id',
+              blockedUserId: 'blocked-user-2',
+              createdAt: DateTime.utc(2026, 10, 2),
+            ),
+          ],
+        ),
+      ),
+    );
     final client = _client(defaultApi);
 
     final res = await client.getBlockedUsers();
@@ -42,8 +64,15 @@ void main() {
 
   test("StreamChatClient.getBlockedUsers replaces the current user's blocked user ids", () async {
     final defaultApi = MockDefaultApi();
-    when(defaultApi.getBlockedUsers).thenAnswer((_) async => Result.success(_getBlockedUsersResponse()));
-    final client = _clientWithOwnUser(defaultApi);
+    when(defaultApi.getBlockedUsers).thenAnswer(
+      (_) async => Result.success(
+        api.GetBlockedUsersResponse(
+          duration: '4.21ms',
+          blocks: [_block('blocked-user-1'), _block('blocked-user-2')],
+        ),
+      ),
+    );
+    final client = _clientWithOwnUser(defaultApi, blockedUserIds: const ['stale-blocked-user']);
 
     await client.getBlockedUsers();
 
@@ -66,7 +95,7 @@ void main() {
     when(defaultApi.getBlockedUsers).thenAnswer(
       (_) async => const Result.failure(StreamClientException(message: 'boom')),
     );
-    final client = _clientWithOwnUser(defaultApi);
+    final client = _clientWithOwnUser(defaultApi, blockedUserIds: const ['stale-blocked-user']);
 
     await client.getBlockedUsers();
 
@@ -80,29 +109,16 @@ StreamChatClient _client(api.DefaultApi defaultApi) {
   return client;
 }
 
-// A client whose current user starts with a blocked user the server no longer reports.
-StreamChatClient _clientWithOwnUser(api.DefaultApi defaultApi) {
+StreamChatClient _clientWithOwnUser(api.DefaultApi defaultApi, {required List<String> blockedUserIds}) {
   final client = _client(defaultApi);
-  client.state.currentUser = OwnUser(id: 'user-id', blockedUserIds: const ['stale-blocked-user']);
+  client.state.currentUser = OwnUser(id: 'user-id', blockedUserIds: blockedUserIds);
   return client;
 }
 
-api.GetBlockedUsersResponse _getBlockedUsersResponse() => api.GetBlockedUsersResponse(
-  duration: '4.21ms',
-  blocks: [
-    api.BlockedUserResponse(
-      user: fakeUserResponse('user-id'),
-      blockedUser: fakeUserResponse('blocked-user-1'),
-      userId: 'user-id',
-      blockedUserId: 'blocked-user-1',
-      createdAt: DateTime.utc(2026, 10, 1),
-    ),
-    api.BlockedUserResponse(
-      user: fakeUserResponse('user-id'),
-      blockedUser: fakeUserResponse('blocked-user-2'),
-      userId: 'user-id',
-      blockedUserId: 'blocked-user-2',
-      createdAt: DateTime.utc(2026, 10, 2),
-    ),
-  ],
+api.BlockedUserResponse _block(String blockedUserId) => api.BlockedUserResponse(
+  user: fakeUserResponse('user-id'),
+  blockedUser: fakeUserResponse(blockedUserId),
+  userId: 'user-id',
+  blockedUserId: blockedUserId,
+  createdAt: DateTime.utc(2026, 10, 1),
 );

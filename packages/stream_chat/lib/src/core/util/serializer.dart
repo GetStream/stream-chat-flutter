@@ -42,7 +42,9 @@ class Serializer {
 
   /// A copy of [json] with the entries of `extra_data` moved to the root.
   ///
-  /// An entry in `extra_data` replaces a root entry with the same key.
+  /// An entry in `extra_data` replaces a root entry with the same key, unless
+  /// the key is one of [topLevelFields]: such an entry is left out, so custom
+  /// data cannot overwrite a field.
   ///
   /// ```dart
   /// Serializer.moveFromExtraDataToRoot({
@@ -58,12 +60,16 @@ class Serializer {
   /// // }
   /// ```
   static Map<String, dynamic> moveFromExtraDataToRoot(
-    Map<String, dynamic> json,
-  ) {
-    final extraData = json['extra_data'];
+    Map<String, dynamic> json, {
+    List<String> topLevelFields = const [],
+  }) {
+    final knownFields = _knownFieldsCache[topLevelFields] ??= topLevelFields.toSet();
+    final extraData = json['extra_data'] as Map?;
     return {
       ...json,
-      if (extraData != null) ...extraData,
+      if (extraData != null)
+        for (final MapEntry(:key, :value) in extraData.entries)
+          if (!knownFields.contains(key)) key: value,
     }..remove('extra_data');
   }
 

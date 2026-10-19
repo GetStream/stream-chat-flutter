@@ -9,7 +9,14 @@ void main() {
   test('StreamChatClient.blockUser sends the user id and returns the block', () async {
     final defaultApi = MockDefaultApi();
     when(() => defaultApi.blockUsers(blockUsersRequest: _request)).thenAnswer(
-      (_) async => Result.success(_blockUsersResponse()),
+      (_) async => Result.success(
+        api.BlockUsersResponse(
+          duration: '4.21ms',
+          blockedByUserId: 'user-id',
+          blockedUserId: _blockedUserId,
+          createdAt: DateTime.utc(2026, 10, 7, 9, 30),
+        ),
+      ),
     );
     final client = _client(defaultApi);
 

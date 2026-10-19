@@ -216,7 +216,7 @@ class _QuotedMessageInHeader extends StatelessWidget {
 
     final translations = context.translations;
     final title = switch (isIncoming) {
-      true => translations.replyToUserLabel(quotedMessage.user?.name ?? ''),
+      true => translations.replyToUserLabel(quotedMessage.user?.nameOrId ?? ''),
       false => translations.youText,
     };
 

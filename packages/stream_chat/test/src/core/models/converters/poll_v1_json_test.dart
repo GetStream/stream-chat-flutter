@@ -14,7 +14,7 @@ void main() {
         description: 'Pick one',
         descriptionI18n: const {'it': 'Scegline uno'},
         options: const [
-          PollOption(id: 'pizza', text: 'Pizza', textI18n: {'it': 'Pizza'}, extraData: {'color': 'red'}),
+          PollOption(id: 'pizza', text: 'Pizza', textI18n: {'it': 'Pizza'}, custom: {'color': 'red'}),
           PollOption(id: 'sushi', text: 'Sushi'),
         ],
         votingVisibility: VotingVisibility.public,
@@ -35,7 +35,7 @@ void main() {
         createdBy: User.fromJson(const {'id': 'luke', 'name': 'Luke'}),
         createdAt: DateTime.utc(2024, 4, 17, 14, 46, 23),
         updatedAt: DateTime.utc(2024, 4, 18),
-        extraData: const {'topic': 'food'},
+        custom: const {'topic': 'food'},
       ),
     );
   });
@@ -72,10 +72,10 @@ void main() {
     expect(poll.voteCountsByOption, isEmpty);
     expect(poll.latestVotesByOption, isEmpty);
     expect(poll.ownVotesAndAnswers, isEmpty);
-    expect(poll.extraData, isEmpty);
+    expect(poll.custom, isEmpty);
   });
 
-  test('Message.fromJson keeps the translations of a poll and its options out of their custom data', () {
+  test('Message.fromJson keeps the translations of a poll out of its custom data', () {
     final message = Message.fromJson(const {
       'id': 'message-id',
       'poll': {
@@ -83,6 +83,20 @@ void main() {
         'name': 'Lunch?',
         'name_i18n': {'it': 'Pranzo?'},
         'description_i18n': {'it': 'Scegline uno'},
+        'options': <Object?>[],
+        'topic': 'food',
+      },
+    });
+
+    expect(message.poll!.custom, {'topic': 'food'});
+  });
+
+  test('Message.fromJson keeps the translations of a poll option out of its custom data', () {
+    final message = Message.fromJson(const {
+      'id': 'message-id',
+      'poll': {
+        'id': 'poll-id',
+        'name': 'Lunch?',
         'options': [
           {
             'id': 'pizza',
@@ -91,12 +105,10 @@ void main() {
             'color': 'red',
           },
         ],
-        'topic': 'food',
       },
     });
 
-    expect(message.poll!.extraData, {'topic': 'food'});
-    expect(message.poll!.options.single.extraData, {'color': 'red'});
+    expect(message.poll!.options.single.custom, {'color': 'red'});
   });
 
   test('Message.fromJson keeps a voting visibility the SDK does not name', () {
@@ -146,10 +158,10 @@ void main() {
         description: 'Pick one',
         descriptionI18n: const {'it': 'Scegline uno'},
         options: const [
-          PollOption(id: 'pizza', text: 'Pizza', textI18n: {'it': 'Pizza'}, extraData: {'color': 'red'}),
+          PollOption(id: 'pizza', text: 'Pizza', textI18n: {'it': 'Pizza'}, custom: {'color': 'red'}),
         ],
         voteCount: 3,
-        extraData: const {'topic': 'food'},
+        custom: const {'topic': 'food'},
       ),
     );
 
@@ -170,10 +182,40 @@ void main() {
     });
   });
 
-  test('Event.toJson writes only the id, the option and the answer of a vote', () {
-    final event = Event(type: EventType.pollVoteCasted, pollVote: _vote);
+  test('Event.toJson leaves out a poll custom entry named like a poll key', () {
+    final event = Event(
+      type: EventType.pollUpdated,
+      poll: Poll(id: 'poll-id', name: 'Lunch?', options: const [], custom: const {'name': 'Dinner?'}),
+    );
 
-    expect(event.toJson()['poll_vote'], {'id': 'vote-id', 'option_id': 'pizza'});
+    final poll = event.toJson()['poll'] as Map<String, Object?>;
+
+    expect(poll['name'], 'Lunch?');
+  });
+
+  test('Event.toJson leaves out an option custom entry named like an option key', () {
+    final event = Event(
+      type: EventType.pollUpdated,
+      poll: Poll(
+        id: 'poll-id',
+        name: 'Lunch?',
+        options: const [
+          PollOption(id: 'pizza', text: 'Pizza', custom: {'id': 'pasta'}),
+        ],
+      ),
+    );
+
+    final poll = event.toJson()['poll'] as Map<String, Object?>;
+
+    expect(poll['options'], [
+      {'id': 'pizza', 'text': 'Pizza'},
+    ]);
+  });
+
+  test('Event.toJson writes only the id, the option and the answer text of a vote', () {
+    final event = Event(type: EventType.pollAnswerCasted, pollVote: _answer);
+
+    expect(event.toJson()['poll_vote'], {'id': 'answer-id', 'option_id': '', 'answer_text': 'Anything'});
   });
 
   test('Event.fromJson reads back the poll settings written by toJson', () {
@@ -181,11 +223,11 @@ void main() {
       id: 'poll-id',
       name: 'Lunch?',
       options: const [
-        PollOption(id: 'pizza', text: 'Pizza', extraData: {'color': 'red'}),
+        PollOption(id: 'pizza', text: 'Pizza', custom: {'color': 'red'}),
       ],
       votingVisibility: VotingVisibility.anonymous,
       maxVotesAllowed: 2,
-      extraData: const {'topic': 'food'},
+      custom: const {'topic': 'food'},
     );
 
     final event = Event.fromJson(Event(type: EventType.pollUpdated, poll: poll).toJson());

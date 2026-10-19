@@ -103,7 +103,7 @@ class DefaultStreamMessageLeading extends core.NullableStatelessWidget {
       // sender.
       semanticsLabel: switch (props.onTap) {
         null => null,
-        _ => user.name,
+        _ => user.nameOrId,
       },
     );
     if (props.onTap case final onTap?) {

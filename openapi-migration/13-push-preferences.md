@@ -38,8 +38,8 @@
       hand-written, with the reason.
 - [ ] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
 - [ ] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
-- [ ] Every model that had a `copyWith` in v10 keeps that exact method, `_nullConst` sentinels
-      included ([README rule 2](README.md#domain-models)).
+- [ ] `copywith_audit.py` was run for every model that loses a v10 `copyWith`, every site it reports is
+      handled, and the semantics change is in the CHANGELOG and the guide ([README rule 2](README.md#domain-models)).
 - [ ] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
       persists anything.
 - [ ] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.

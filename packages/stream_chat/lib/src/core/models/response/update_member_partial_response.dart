@@ -4,7 +4,9 @@ import '../member.dart';
 
 part 'update_member_partial_response.freezed.dart';
 
-/// The current user's membership of a channel after some of its fields were set or unset.
+/// The result of partially updating the current user's membership of a channel,
+/// returned by [StreamChatClient.updateMemberPartial] and the calls built on
+/// it, such as [Channel.pin] and [Channel.archive].
 @freezed
 class UpdateMemberPartialResponse with _$UpdateMemberPartialResponse {
   /// Creates a new [UpdateMemberPartialResponse].

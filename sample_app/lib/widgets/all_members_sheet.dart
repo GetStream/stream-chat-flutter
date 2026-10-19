@@ -269,7 +269,7 @@ class _ContactDetailHeader extends StatelessWidget {
             spacing: spacing.xxs,
             children: [
               Text(
-                user.name,
+                user.nameOrId,
                 style: textTheme.headingSm.copyWith(color: colorScheme.textPrimary),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -353,7 +353,7 @@ class ChannelMemberTile extends StatelessWidget {
     final user = member.user;
     if (user == null) return const SizedBox.shrink();
 
-    final name = isCurrentUser ? 'You' : user.name;
+    final name = isCurrentUser ? 'You' : user.nameOrId;
     final isAdmin = const {'admin', 'channel_moderator', 'owner'}.contains(member.channelRole);
 
     return StreamListTile(
@@ -426,7 +426,7 @@ Future<void> _openDirectChannel(BuildContext context, User user) async {
   } else {
     channel = chat.client.channel(
       'messaging',
-      extraData: {
+      custom: {
         'members': [currentUser.id, user.id],
       },
     );

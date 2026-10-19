@@ -31,7 +31,8 @@
 - **Moved off `UserApi`:** `getUnreadCount`, now a `StreamChatClient` method over a new
   `UsersRepository`, mirroring `UserApi`.
 - **The v10 names stay:** `getUnreadCount` and `GetUnreadCountResponse`, rather than the spec's
-  `unreadCounts` and `WrappedUnreadCountsResponse`, which say nothing a caller needs.
+  `unreadCounts` and `WrappedUnreadCountsResponse`. The first is a noun where the client's methods
+  are verbs, and `Wrapped` names how the API packages the response, not what it holds.
 - **`GetUnreadCountResponse` and the `UnreadCounts*` models are freezed plain models,** with v10's
   fields and nullability; the generated types match them field for field. `duration` is non-null.
 - **The current user's counts are updated only on success,** through `Result.onSuccess`, as v10 did
@@ -39,6 +40,7 @@
 
 ## Risks
 
+- A `try`/`catch` around `getUnreadCount` still compiles but no longer catches a failed call.
 
 ## Definition of done
 
@@ -46,8 +48,8 @@
       hand-written, with the reason.
 - [x] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
 - [x] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
-- [x] Every model that had a `copyWith` in v10 keeps that exact method, `_nullConst` sentinels
-      included ([README rule 2](README.md#domain-models)).
+- [x] `copywith_audit.py` was run for every model that loses a v10 `copyWith`, every site it reports is
+      handled, and the semantics change is in the CHANGELOG and the guide ([README rule 2](README.md#domain-models)).
 - [x] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
       persists anything.
 - [x] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.

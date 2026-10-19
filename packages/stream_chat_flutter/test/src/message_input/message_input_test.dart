@@ -409,8 +409,8 @@ void main() {
       when(channel.getRemainingCooldown).thenReturn(0);
       when(() => channel.isMuted).thenReturn(false);
       when(() => channel.isMutedStream).thenAnswer((_) => Stream.value(false));
-      when(() => channel.extraData).thenReturn({'name': 'test'});
-      when(() => channel.extraDataStream).thenAnswer((_) => Stream.value({'name': 'test'}));
+      when(() => channel.custom).thenReturn({'name': 'test'});
+      when(() => channel.customStream).thenAnswer((_) => Stream.value({'name': 'test'}));
       when(() => channelState.isUpToDate).thenReturn(true);
       when(() => channelState.members).thenReturn([
         Member(
@@ -1385,12 +1385,12 @@ MaterialApp buildWidget(Widget input) {
   when(channel.getRemainingCooldown).thenReturn(0);
   when(() => channel.isMuted).thenReturn(false);
   when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-  when(() => channel.extraDataStream).thenAnswer(
+  when(() => channel.customStream).thenAnswer(
     (i) => Stream.value({
       'name': 'test',
     }),
   );
-  when(() => channel.extraData).thenReturn({
+  when(() => channel.custom).thenReturn({
     'name': 'test',
   });
   when(() => channelState.membersStream).thenAnswer(

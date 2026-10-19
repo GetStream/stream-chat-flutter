@@ -58,49 +58,49 @@ void main() {
       channel.dispose();
     });
 
-    test('should be able to set `extraData`', () {
-      expect(channel.extraData.isEmpty, isTrue);
+    test('should be able to set `custom`', () {
+      expect(channel.custom.isEmpty, isTrue);
 
       expect(
-        () => channel.extraData = {'name': 'test-channel-name'},
+        () => channel.custom = {'name': 'test-channel-name'},
         returnsNormally,
       );
 
-      expect(channel.extraData.isEmpty, isFalse);
-      expect(channel.extraData.containsKey('name'), isTrue);
-      expect(channel.extraData['name'], 'test-channel-name');
+      expect(channel.custom.isEmpty, isFalse);
+      expect(channel.custom.containsKey('name'), isTrue);
+      expect(channel.custom['name'], 'test-channel-name');
     });
 
     test('should be able to get and set `image`', () {
-      expect(channel.extraData.isEmpty, isTrue);
+      expect(channel.custom.isEmpty, isTrue);
 
       const imageUrl = 'https://getstream.io/some-image';
       channel.image = imageUrl;
 
       expect(channel.image, imageUrl);
-      expect(channel.extraData['image'], imageUrl);
+      expect(channel.custom['image'], imageUrl);
 
       const newImage = 'https://getstream.io/new-image';
       final newChannelInstance = Channel(client, channelType, channelId, image: newImage);
 
       expect(newChannelInstance.image, newImage);
-      expect(newChannelInstance.extraData['image'], newImage);
+      expect(newChannelInstance.custom['image'], newImage);
     });
 
     test('should be able to get and set `name`', () {
-      expect(channel.extraData.isEmpty, isTrue);
+      expect(channel.custom.isEmpty, isTrue);
 
       const name = 'Channel name';
       channel.name = name;
 
       expect(channel.name, name);
-      expect(channel.extraData['name'], name);
+      expect(channel.custom['name'], name);
 
       const newName = 'New channel name';
       final newChannelInstance = Channel(client, channelType, channelId, name: newName);
 
       expect(newChannelInstance.name, newName);
-      expect(newChannelInstance.extraData['name'], newName);
+      expect(newChannelInstance.custom['name'], newName);
     });
 
     test('setters remain usable after a failed watch()', () async {
@@ -232,8 +232,22 @@ void main() {
       clearInteractions(client);
     });
 
-    test('should throw if trying to set `extraData`', () {
-      expect(() => channel.extraData = {'name': 'test-channel-name'}, throwsA(isA<StateError>()));
+    test('should throw if trying to set `custom`', () {
+      expect(() => channel.custom = {'name': 'test-channel-name'}, throwsA(isA<StateError>()));
+    });
+
+    test('Channel.custom reads the current channel, even when its custom data is empty', () {
+      final channel = Channel.fromState(
+        client,
+        ChannelState(
+          channel: ChannelModel(cid: channelCid, custom: const {'name': 'Old name'}),
+        ),
+      );
+      addTearDown(channel.dispose);
+
+      channel.state!.updateChannelState(ChannelState(channel: ChannelModel(cid: channelCid)));
+
+      expect(channel.custom, isEmpty);
     });
 
     test('should throw if trying to set `image`', () {
@@ -3660,7 +3674,7 @@ void main() {
 
       final channelModel = ChannelModel(
         cid: channelCid,
-        extraData: channelData,
+        custom: channelData,
       );
 
       when(() => client.updateChannel(channelId, channelType, channelData, message: any(named: 'message'))).thenAnswer(
@@ -3676,7 +3690,7 @@ void main() {
 
       expect(res, isNotNull);
       expect(res.channel.cid, channelModel.cid);
-      expect(res.channel.extraData, channelData);
+      expect(res.channel.custom, channelData);
       expect(res.message?.id, updateMessage.id);
 
       verify(() => client.updateChannel(channelId, channelType, channelData, message: any(named: 'message'))).called(1);
@@ -3685,9 +3699,9 @@ void main() {
     test('Channel.updateImage sets the image through a partial update', () async {
       const image = 'https://getstream.io/new-image';
 
-      final channelModel = ChannelModel(
-        cid: channelCid,
-        extraData: {'image': image},
+      final response = UpdateChannelPartialResponse(
+        duration: '0.01ms',
+        channel: ChannelModel(cid: channelCid),
       );
 
       when(
@@ -3696,14 +3710,11 @@ void main() {
           channelType,
           set: {'image': image},
         ),
-      ).thenAnswer(
-        (_) async => Result.success(UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel)),
-      );
+      ).thenAnswer((_) async => Result.success(response));
 
       final res = await channel.updateImage(image);
 
-      expect(res.isSuccess, isTrue);
-      expect(res.getOrNull()!.channel!.extraData['image'], image);
+      expect(res.getOrNull(), response);
 
       verify(
         () => client.updateChannelPartial(
@@ -3717,9 +3728,9 @@ void main() {
     test('Channel.updateName sets the name through a partial update', () async {
       const name = 'Name';
 
-      final channelModel = ChannelModel(
-        cid: channelCid,
-        extraData: {'name': name},
+      final response = UpdateChannelPartialResponse(
+        duration: '0.01ms',
+        channel: ChannelModel(cid: channelCid),
       );
 
       when(
@@ -3728,14 +3739,11 @@ void main() {
           channelType,
           set: {'name': name},
         ),
-      ).thenAnswer(
-        (_) async => Result.success(UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel)),
-      );
+      ).thenAnswer((_) async => Result.success(response));
 
       final res = await channel.updateName(name);
 
-      expect(res.isSuccess, isTrue);
-      expect(res.getOrNull()!.channel!.extraData['name'], name);
+      expect(res.getOrNull(), response);
 
       verify(
         () => client.updateChannelPartial(
@@ -3754,12 +3762,9 @@ void main() {
 
       const unset = ['tag', 'last_name'];
 
-      final channelModel = ChannelModel(
-        cid: channelCid,
-        extraData: {
-          'coolness': 999,
-          ...set,
-        },
+      final response = UpdateChannelPartialResponse(
+        duration: '0.01ms',
+        channel: ChannelModel(cid: channelCid),
       );
 
       when(
@@ -3769,18 +3774,11 @@ void main() {
           set: set,
           unset: unset,
         ),
-      ).thenAnswer(
-        (_) async => Result.success(UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel)),
-      );
+      ).thenAnswer((_) async => Result.success(response));
 
       final res = await channel.updatePartial(set: set, unset: unset);
 
-      expect(res.isSuccess, isTrue);
-      expect(res.getOrNull()!.channel!.cid, channelModel.cid);
-      expect(
-        res.getOrNull()!.channel!.extraData,
-        {'coolness': 999, ...set},
-      );
+      expect(res.getOrNull(), response);
 
       verify(
         () => client.updateChannelPartial(
@@ -3792,7 +3790,7 @@ void main() {
       ).called(1);
     });
 
-    test("Channel.delete returns the client's deleteChannel response", () async {
+    test('Channel.delete deletes this channel and returns the deleted channel', () async {
       final response = DeleteChannelResponse(
         duration: '0.01ms',
         channel: ChannelModel(cid: channelCid),
@@ -4662,7 +4660,7 @@ void main() {
       ).called(1);
     });
 
-    test("Channel.enableSlowMode returns the client's enableSlowMode response", () async {
+    test('Channel.enableSlowMode enables slow mode on this channel and returns the updated channel', () async {
       const cooldown = 10;
 
       final channelModel = ChannelModel(
@@ -4693,7 +4691,7 @@ void main() {
       ).called(1);
     });
 
-    test("Channel.disableSlowMode returns the client's disableSlowMode response", () async {
+    test('Channel.disableSlowMode disables slow mode on this channel and returns the updated channel', () async {
       final channelModel = ChannelModel(
         cid: channelCid,
       );
@@ -4795,7 +4793,7 @@ void main() {
       verify(() => moderationClient.shadowBan(userId, channelCid: channelCid)).called(1);
     });
 
-    test("Channel.hide returns the client's hideChannel response", () async {
+    test('Channel.hide hides this channel and clears its history when asked', () async {
       const clearHistory = true;
       const response = HideChannelResponse(duration: '0.01ms');
 
@@ -4820,7 +4818,7 @@ void main() {
       ).called(1);
     });
 
-    test("Channel.show returns the client's showChannel response", () async {
+    test('Channel.show shows this channel again', () async {
       const response = ShowChannelResponse(duration: '0.01ms');
       when(() => client.showChannel(channelId, channelType)).thenAnswer((_) async => const Result.success(response));
 
@@ -4831,8 +4829,7 @@ void main() {
       verify(() => client.showChannel(channelId, channelType)).called(1);
     });
 
-    // testing archiving
-    test("Channel.archive returns the client's archiveChannel response", () async {
+    test('Channel.archive archives this channel and returns the updated membership', () async {
       final response = UpdateMemberPartialResponse(
         duration: '0.01ms',
         channelMember: Member(userId: 'test-user-id'),
@@ -4848,7 +4845,7 @@ void main() {
       verify(() => client.archiveChannel(channelId: channelId, channelType: channelType)).called(1);
     });
 
-    test("Channel.unarchive returns the client's unarchiveChannel response", () async {
+    test('Channel.unarchive unarchives this channel and returns the updated membership', () async {
       final response = UpdateMemberPartialResponse(
         duration: '0.01ms',
         channelMember: Member(userId: 'test-user-id'),
@@ -4864,7 +4861,7 @@ void main() {
       verify(() => client.unarchiveChannel(channelId: channelId, channelType: channelType)).called(1);
     });
 
-    test("Channel.pin returns the client's pinChannel response", () async {
+    test('Channel.pin pins this channel and returns the updated membership', () async {
       final response = UpdateMemberPartialResponse(
         duration: '0.01ms',
         channelMember: Member(userId: 'test-user-id'),
@@ -4882,7 +4879,7 @@ void main() {
       verify(() => client.pinChannel(channelId: channelId, channelType: channelType)).called(1);
     });
 
-    test("Channel.unpin returns the client's unpinChannel response", () async {
+    test('Channel.unpin unpins this channel and returns the updated membership', () async {
       final response = UpdateMemberPartialResponse(
         duration: '0.01ms',
         channelMember: Member(userId: 'test-user-id'),
@@ -5512,7 +5509,7 @@ void main() {
         () async {
           // Set initial channel state with some properties
           final initialChannel = channel.state?.channelState.channel?.copyWith(
-            extraData: {'name': 'Test Channel'},
+            custom: {'name': 'Test Channel'},
             memberCount: 5,
             frozen: true,
           );
@@ -5679,7 +5676,7 @@ void main() {
         () async {
           // Set initial channel state with some properties
           final initialChannel = channel.state?.channelState.channel?.copyWith(
-            extraData: {'name': 'Test Channel'},
+            custom: {'name': 'Test Channel'},
             messageCount: 7,
             frozen: true,
           );
@@ -6196,7 +6193,7 @@ void main() {
       verifyNever(() => client.markChannelRead(channelId, channelType, messageId: 'message-id-123'));
     });
 
-    test("Channel.markRead returns the client's markChannelRead response", () async {
+    test('Channel.markRead marks this channel read up to the given message', () async {
       const response = MarkReadResponse(duration: '0.01ms');
       final channel = channelWith([ChannelCapability.readEvents]);
       when(
@@ -6218,7 +6215,7 @@ void main() {
       verifyNever(() => client.markChannelUnread(channelId, channelType, 'message-id-123'));
     });
 
-    test("Channel.markUnread returns the client's markChannelUnread result", () async {
+    test('Channel.markUnread marks this channel unread from the given message', () async {
       final channel = channelWith([ChannelCapability.readEvents]);
       when(
         () => client.markChannelUnread(channelId, channelType, 'message-id-123'),
@@ -6240,7 +6237,7 @@ void main() {
       verifyNever(() => client.markChannelUnreadByTimestamp(channelId, channelType, timestamp));
     });
 
-    test("Channel.markUnreadByTimestamp returns the client's markChannelUnreadByTimestamp result", () async {
+    test('Channel.markUnreadByTimestamp marks the messages after the given time unread', () async {
       final timestamp = DateTime.utc(2024);
       final channel = channelWith([ChannelCapability.readEvents]);
       when(
@@ -6262,7 +6259,7 @@ void main() {
       verifyNever(() => client.markThreadRead(channelId, channelType, 'thread-id-123'));
     });
 
-    test("Channel.markThreadRead returns the client's markThreadRead response", () async {
+    test('Channel.markThreadRead marks the given thread read', () async {
       const response = MarkReadResponse(duration: '0.01ms');
       final channel = channelWith([ChannelCapability.readEvents]);
       when(
@@ -6284,7 +6281,7 @@ void main() {
       verifyNever(() => client.markThreadUnread(channelId, channelType, 'thread-id-123'));
     });
 
-    test("Channel.markThreadUnread returns the client's markThreadUnread result", () async {
+    test('Channel.markThreadUnread marks the given thread unread', () async {
       final channel = channelWith([ChannelCapability.readEvents]);
       when(
         () => client.markThreadUnread(channelId, channelType, 'thread-id-123'),

@@ -4,9 +4,8 @@ import '../user_block.dart';
 
 part 'get_blocked_users_response.freezed.dart';
 
-/// The users the current user has blocked.
-///
-/// Returned by [StreamChatClient.getBlockedUsers].
+/// The result of listing the users the current user has blocked, returned by
+/// [StreamChatClient.getBlockedUsers].
 @freezed
 class GetBlockedUsersResponse with _$GetBlockedUsersResponse {
   /// Creates a new [GetBlockedUsersResponse].

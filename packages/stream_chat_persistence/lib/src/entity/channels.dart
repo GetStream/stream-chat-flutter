@@ -50,8 +50,32 @@ class Channels extends Table {
   /// The team the channel belongs to
   TextColumn get team => text().nullable()();
 
-  /// Map of custom channel extraData
-  TextColumn get extraData => text().nullable().map(MapConverter())();
+  /// Whether the channel is disabled.
+  BoolColumn get disabled => boolean().nullable()();
+
+  /// Whether the channel is hidden.
+  BoolColumn get hidden => boolean().nullable()();
+
+  /// Whether the current user muted the channel.
+  BoolColumn get muted => boolean().nullable()();
+
+  /// Whether the current user blocked the channel.
+  BoolColumn get blocked => boolean().nullable()();
+
+  /// The date the channel was last truncated.
+  DateTimeColumn get truncatedAt => dateTime().nullable()();
+
+  /// The id of the user that last truncated the channel.
+  TextColumn get truncatedById => text().nullable()();
+
+  /// Whether messages in the channel are translated automatically.
+  BoolColumn get autoTranslationEnabled => boolean().nullable()();
+
+  /// The language the channel's messages are translated into automatically.
+  TextColumn get autoTranslationLanguage => text().nullable()();
+
+  /// Custom data attached to the channel.
+  TextColumn get custom => text().nullable().map(MapConverter())();
 
   @override
   Set<Column> get primaryKey => {cid};

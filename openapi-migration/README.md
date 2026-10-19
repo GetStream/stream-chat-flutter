@@ -32,7 +32,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [18](18-unread-counts.md) | Unread Counts — split out of 09 | 0 | 1 | ☑ |
 | [19](19-user-blocking.md) | User Blocking — split out of 09 | 0 | 3 | ☑ |
 | [20](20-user-updates.md) | User Updates — split out of 09 | 0 | 2 | ☑ |
-| [21](21-custom-data-rename.md) | `extraData` → `custom`, every model at once | — | — | ☐ |
+| [21](21-custom-data.md) | Custom Data Check — no model still says `extraData` | — | — | ☐ |
 
 **Coverage:** 47 hand-written methods across 8 files, and all 129 generated operations, each claimed by exactly
 one group. Verified mechanically — see [Keeping this plan honest](#keeping-this-plan-honest).
@@ -88,7 +88,8 @@ breaks against v10:
 - envelopes are immutable, built through a const constructor rather than `late` setters;
 - `duration` is a non-nullable `String` on every envelope, where v10 typed it `String?`;
 - public models and envelopes are `@freezed`, so they compare by value; one that extended `Equatable` in v10 no
-  longer does, and loses `props`.
+  longer does, and loses `props`;
+- a model's `extraData` is renamed `custom`, the wire's name for it (rule 9).
 
 Each ships the four artifacts listed under [Principles](#principles), like any other break.
 
@@ -106,9 +107,17 @@ includes a named response that carries only `duration` today, such as `HideChann
    (see the breaks above). A field the server adds is exposed later, as an additive change. The one exception to
    "no JSON" is the temporary `@DataSerializable` storage codec in rule 8.
 
-   **A model that had a `copyWith` in v10 keeps that exact method,** `_nullConst` sentinels included, under
-   `@Freezed(copyWith: false)`. freezed's own `copyWith` sets a field passed as `null`, where v10's keeps it, and
-   the SDK's state handling depends on the difference. Only a model with no v10 `copyWith` uses freezed's.
+   **A model uses freezed's `copyWith`.** It differs from a v10 hand-written one: `null` clears a nullable field
+   instead of keeping it, `null` re-runs a constructor default (`id ?? Uuid().v4()`), and a constructor parameter
+   with no field of the same name and type is not generated. Before deleting the v10 method, run the audit in
+   [`.claude/skills/openapi-migration/copywith-audit.md`](../.claude/skills/openapi-migration/copywith-audit.md)
+   and handle every site it reports: a compile break gets a local or a `?? model.field`; a "kept on null; check"
+   site is rewritten as an explicit merge (`?? this.x` at the caller, or an `@internal` merge method in the shape of
+   `Poll.withTranslationsOf`) unless the clear is the intended behaviour. When the audit's verdict says freezed
+   cannot replace the method — a parameter backed by a getter, a private field or a different type, as on
+   `Message` — keep `@Freezed(copyWith: false)` with the hand-written method, or reshape the constructor as a
+   public API change of its own. The semantics change goes in the CHANGELOG and the guide, listed per field under
+   the rows of the audit's table.
 
    **Names follow the spec's, unless the spec's name is awkward or describes something else,** and calls the
    caller sees as siblings share one scheme: `updateChannelPartial` and `updateMemberPartial` answer
@@ -149,6 +158,15 @@ includes a named response that carries only `duration` today, such as `HideChann
    parent's rule-7 converter writes it. The codec is temporary: every use is marked
    `// TODO(openapi-migration): remove in group 10` and listed below, and group 10 replaces every use and deletes
    the typedef, so no later group adds one. The cache is disposable, so the stored format is ours to choose.
+9. **A migrated model names its custom data `custom`, and it is the wire's `custom`, verbatim, in both
+   directions.** A response mapper copies the generated `custom` map into it and a request mapper sends it back as
+   `custom`; neither filters it. A model whose group has not run still says `extraData`. A field the
+   generated response types is never parked in `extraData` behind a getter: it becomes a field on the model, as
+   the owning group's break, or stays out. Group 15 promoted `ChannelModel`'s and `Member`'s, and group 20
+   `User`'s and `OwnUser`'s. `topLevelFields` and `Serializer` serve only the v1 decoders, which
+   still split flat JSON by a key list, and go with the WebSocket v2 move; a model that loses its JSON drops
+   `topLevelFields` and its converter owns the list. A v1 writer leaves a custom entry named like a key out so it
+   cannot overwrite the key.
 
 ### Temporary adapters
 
@@ -165,9 +183,16 @@ includes a named response that carries only `duration` today, such as `HideChann
 | `DataSerializable` | `UserGroup`, `UserGroupMember`, `ReactionGroup`, `PollOption` (`fromData`, `toData`) | [10](10-messages.md) |
 | `PollV1JsonConverter` | `Message.poll`, `DraftMessage.poll`, `Event.poll` | WebSocket v2 (no group) |
 | `PollVoteV1JsonConverter` | `Event.pollVote` | WebSocket v2 (no group) |
+| `Event.fromJson`'s `user.updated` re-decode | `Event.user`, decoded as a `User` and again as an `OwnUser` | WebSocket v2 (no group) |
 | `users_mapper.dart` (kept, re-pointed) | today's `User`, which still reads and writes JSON | [09](09-users.md) |
 | `channels_mapper.dart` (kept, re-pointed) | today's `ChannelModel`, `ChannelConfig` and `Member`, which still read and write JSON | [11](11-channels-and-members.md) |
 | `messages_mapper.dart`, `attachments_mapper.dart`, `reactions_mapper.dart`, `locations_mapper.dart`, `drafts_mapper.dart` (kept, re-pointed) | today's `Message`, `Attachment`, `Reaction`, `Location`, `Draft` and `DraftMessage`, which still read and write JSON | [10](10-messages.md) |
+
+The `user.updated` re-decode keeps the privacy settings the current user's copy of the event carries, which `User`
+does not model, so the handler can apply them as v10 did. When the WebSocket moves to v2, map the generated
+`UserUpdatedEvent.user` (`UserResponsePrivacyFields`) onto the current user once, and make the handler apply only
+what that type carries: it never fills `blocked_user_ids` and has no shadow ban or ban expiry, which the handler
+wipes or resets today, as v10 did.
 
 How v1 JSON decodes `User` once it becomes a plain model is decided in [01-foundation](01-foundation.md): until
 group 09 restructures it, v1 payloads keep decoding through `User.fromJson`.
@@ -186,9 +211,11 @@ surfaces before it reaches `Message` and `ChannelState`:
 - **08** is where we decide what *not* to expose: 34 generated operations against 10 hand-written methods.
 - **14** is `queryBannedUsers`, split out of 08 because it is the only moderation call that answers with a
   model. The `User` mappers it needs landed with group 04.
-- **10–11** are the core of the SDK, and carry the `custom` / `extraData` promotion problem.
+- **10–11** are the core of the SDK.
 - **15** is the partial channel and member updates, split out of 11 so `channels_mapper.dart` lands on calls that
   read nothing into `ChannelState`. It landed first; the full update waits in 11 for group 10's message mappers.
+  As the first group to map `ChannelModel` and `Member`, it promoted their parked fields and renamed their custom
+  data `custom` (rule 9).
 - **16** is hiding, showing and deleting a channel, split out of 11 after 15 because they answer nothing
   `channels_mapper.dart` cannot map.
 - **17** is the read and delivery receipts, split out of 11 after 16. They answer only a `duration` and a read
@@ -197,14 +224,16 @@ surfaces before it reaches `Message` and `ChannelState`:
 - **19** is blocking and unblocking users and listing the blocked ones, split out of 09 because it embeds `User`
   only through the existing mappers and nothing persists it.
 - **20** is creating, updating and partially updating users, split out of 09 because its response maps onto the
-  current `User` and nothing persists it. It also promotes `deactivatedAt`, `deletedAt` and `shadowBanned` onto
-  `User` as getters over `extraData`.
+  current `User`. As the first group to map a user, it promoted `User`'s and `OwnUser`'s parked fields and renamed
+  their custom data `custom` (rule 9).
 - **12** comes late because it needs its own hand-written multipart client and is the highest-traffic path in the
   SDK.
 - **09** is last. Every group before it maps users through `users_mapper.dart` onto today's `User`; 09 migrates the
   user endpoints and restructures `User` and `OwnUser` themselves, when every parent that embeds them has moved.
-- **21** renames `extraData` to `custom` on every model at once. The groups keep `extraData`, so the SDK stays
-  consistent until then; it runs after 09.
+- **21** checks the custom data once every group has run: each model's custom data is named `custom` and is the
+  wire's `custom`, with no mapper filtering it and no typed field parked in it. Each group does that for the
+  models it maps, persistence columns included (polls went first), so 21 renames nothing; a model it finds
+  still saying `extraData` goes back to the group that maps it.
 
 ## Prerequisites
 

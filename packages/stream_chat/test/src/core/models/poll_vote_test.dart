@@ -17,12 +17,18 @@ void main() {
     expect(vote.isAnswer, isFalse);
   });
 
-  test('PollVote.copyWith keeps a field passed as null', () {
-    final vote = createTestPollVote(id: 'vote-id', optionId: 'pizza', userId: 'user-id');
+  test('PollVote.copyWith clears a nullable field passed as null', () {
+    final vote = createTestPollVote(
+      id: 'vote-id',
+      optionId: 'pizza',
+      userId: 'user-id',
+      user: User(id: 'user-id'),
+    );
 
-    final copy = vote.copyWith(id: null, optionId: null, userId: null, createdAt: null);
+    final copy = vote.copyWith(userId: null, user: null);
 
-    expect(copy, vote);
+    expect(copy.userId, isNull);
+    expect(copy.user, isNull);
   });
 
   test('PollVoteSortField.id orders alphabetically', () {

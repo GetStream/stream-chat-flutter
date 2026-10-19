@@ -455,7 +455,6 @@ void main() {
     final controller = StreamChannelListController(client: client);
     final res = await controller.deleteChannel(channel);
 
-    expect(res.isFailure, isTrue);
     expect(res.exceptionOrNull(), error);
   });
 

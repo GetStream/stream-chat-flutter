@@ -172,13 +172,13 @@ class MessageSearchListTileTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = messageResponse.message.user!;
     final channel = messageResponse.channel;
-    final channelName = channel?.extraData['name'];
+    final channelName = channel?.custom['name'];
 
     return Text.rich(
       TextSpan(
         children: [
           TextSpan(
-            text: user.id == StreamChat.of(context).currentUser?.id ? context.translations.youText : user.name,
+            text: user.id == StreamChat.of(context).currentUser?.id ? context.translations.youText : user.nameOrId,
           ),
           if (channelName != null) ...[
             TextSpan(

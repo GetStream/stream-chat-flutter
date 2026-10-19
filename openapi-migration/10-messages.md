@@ -129,7 +129,7 @@ an endpoint, so the definition of done below stays open.
 
 - `message_api.dart` also holds the four draft methods, which belong to group 07 — leave them alone here.
 - Attachment `custom`/`extraData` promotion is the known hard part of the whole migration.
-- Requests that send custom data drop the keys named like one of the model's own fields, as every request mapper does until [21](21-custom-data-rename.md) revisits it.
+- The message-family request mappers still drop custom data named like one of the model's own fields; [README rule 9](README.md#domain-models) has them send it verbatim once `Message` and its leaf models name it `custom`.
 - Message send has offline and retry paths through `stream_chat_persistence` that must keep working.
 - `MessageDeleteScope` has to be reconciled with `DeleteType`, which [08](08-moderation-and-blocklists.md) added. It is named for the scope of a delete — `deleteForMe` vs `deleteForAll` — but carries a `hard` bool, which is the same axis `DeleteType` models, in the same words, minus `pruning`. `deleteMessage(hard: true)` therefore cannot express a pruning delete at all, and `softDeleteForAll` / `hardDeleteForAll` read as two spellings of `DeleteType.soft` / `DeleteType.hard`. Decide whether the scope keeps a `DeleteType` field or the two stay separate arguments; either way the public type changes, so it belongs in this group rather than a later fix.
 
@@ -139,8 +139,8 @@ an endpoint, so the definition of done below stays open.
       hand-written, with the reason.
 - [ ] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
 - [ ] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
-- [ ] Every model that had a `copyWith` in v10 keeps that exact method, `_nullConst` sentinels
-      included ([README rule 2](README.md#domain-models)).
+- [ ] `copywith_audit.py` was run for every model that loses a v10 `copyWith`, every site it reports is
+      handled, and the semantics change is in the CHANGELOG and the guide ([README rule 2](README.md#domain-models)).
 - [ ] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
       persists anything.
 - [ ] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.

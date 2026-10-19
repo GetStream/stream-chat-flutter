@@ -151,7 +151,7 @@ void main() {
     });
 
     test('`fromRemote` falls back to a field the API added and the SDK has not', () {
-      // A channel key with no typed property deserializes into extraData,
+      // A channel key with no typed property deserializes into custom,
       // which is where the custom fallback looks — so the sort still works.
       ChannelState channelWith(Object? value) => ChannelState.fromJson({
         'channel': {

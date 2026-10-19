@@ -4,6 +4,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
 import '../mocks.dart';
+import 'users_fixtures.dart';
 
 void main() {
   setUpAll(() => registerFallbackValue(const api.UpdateUsersPartialRequest(users: [])));
@@ -14,7 +15,7 @@ void main() {
         api.UpdateUserPartialRequest(id: 'user-id', set: {'favorite_color': 'green'}, unset: ['nickname']),
       ],
     );
-    final defaultApi = _defaultApiAnswering(Result.success(_updateUsersResponse()));
+    final defaultApi = _defaultApiAnswering(Result.success(updateUsersResponse()));
     final client = _client(defaultApi);
 
     final res = await client.updateUserPartial(
@@ -25,7 +26,7 @@ void main() {
 
     expect(
       res.getOrNull(),
-      UpdateUsersResponse(duration: '4.21ms', users: {'user-id': _updatedUser()}),
+      UpdateUsersResponse(duration: '4.21ms', users: {'user-id': updatedUser()}),
     );
     verify(() => defaultApi.updateUsersPartial(updateUsersPartialRequest: request)).called(1);
     verifyNoMoreInteractions(defaultApi);
@@ -38,7 +39,7 @@ void main() {
         api.UpdateUserPartialRequest(id: 'second', unset: ['b']),
       ],
     );
-    final defaultApi = _defaultApiAnswering(Result.success(_updateUsersResponse()));
+    final defaultApi = _defaultApiAnswering(Result.success(updateUsersResponse()));
     final client = _client(defaultApi);
 
     final res = await client.updateUsersPartial(const [
@@ -46,7 +47,7 @@ void main() {
       UpdateUserPartialRequest(id: 'second', unset: ['b']),
     ]);
 
-    expect(res.getOrNull(), UpdateUsersResponse(duration: '4.21ms', users: {'user-id': _updatedUser()}));
+    expect(res.getOrNull(), UpdateUsersResponse(duration: '4.21ms', users: {'user-id': updatedUser()}));
     verify(() => defaultApi.updateUsersPartial(updateUsersPartialRequest: request)).called(1);
     verifyNoMoreInteractions(defaultApi);
   });
@@ -85,67 +86,3 @@ MockDefaultApi _defaultApiAnswering(Result<api.UpdateUsersResponse> result) {
   ).thenAnswer((_) async => result);
   return defaultApi;
 }
-
-// The user [_updateUsersResponse] carries.
-User _updatedUser() => User(
-  id: 'user-id',
-  role: 'admin',
-  name: 'Updated Name',
-  image: 'https://example.com/updated.png',
-  createdAt: DateTime.utc(2026, 9, 1),
-  updatedAt: DateTime.utc(2026, 9, 2),
-  lastActive: DateTime.utc(2026, 9, 3),
-  online: true,
-  banned: true,
-  banExpires: DateTime.utc(2026, 9, 4),
-  teams: const ['team-a'],
-  language: 'de',
-  invisible: false,
-  teamsRole: const {'team-a': 'member'},
-  avgResponseTime: 42,
-  extraData: const {'favorite_color': 'green'},
-  deactivatedAt: DateTime.utc(2026, 9, 5),
-  deletedAt: DateTime.utc(2026, 9, 6),
-  shadowBanned: false,
-);
-
-// A response whose user sets every field, including the private ones a [User] leaves out.
-api.UpdateUsersResponse _updateUsersResponse({
-  Map<String, Object?> custom = const {'favorite_color': 'green'},
-}) => api.UpdateUsersResponse(
-  duration: '4.21ms',
-  membershipDeletionTaskId: '',
-  users: {
-    'user-id': api.FullUserResponse(
-      id: 'user-id',
-      role: 'admin',
-      name: 'Updated Name',
-      image: 'https://example.com/updated.png',
-      createdAt: DateTime.utc(2026, 9, 1),
-      updatedAt: DateTime.utc(2026, 9, 2),
-      lastActive: DateTime.utc(2026, 9, 3),
-      online: true,
-      banned: true,
-      banExpires: DateTime.utc(2026, 9, 4),
-      teams: const ['team-a'],
-      language: 'de',
-      invisible: false,
-      teamsRole: const {'team-a': 'member'},
-      avgResponseTime: 42,
-      custom: custom,
-      deactivatedAt: DateTime.utc(2026, 9, 5),
-      deletedAt: DateTime.utc(2026, 9, 6),
-      shadowBanned: false,
-      revokeTokensIssuedBefore: DateTime.utc(2026, 9, 7),
-      blockedUserIds: const ['blocked-user'],
-      channelMutes: const [],
-      devices: const [],
-      mutes: const [],
-      latestHiddenChannels: const ['messaging:hidden'],
-      totalUnreadCount: 5,
-      unreadChannels: 2,
-      unreadCount: 4,
-      unreadThreads: 1,
-    ),
-  },
-);

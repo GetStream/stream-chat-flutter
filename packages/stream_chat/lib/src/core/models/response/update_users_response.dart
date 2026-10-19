@@ -4,10 +4,10 @@ import '../user.dart';
 
 part 'update_users_response.freezed.dart';
 
-/// The users after an update.
-///
-/// Returned by [StreamChatClient.updateUser], [StreamChatClient.updateUsers], [StreamChatClient.updateUserPartial]
-/// and [StreamChatClient.updateUsersPartial].
+/// The result of creating, updating or partially updating users, returned by
+/// [StreamChatClient.updateUser], [StreamChatClient.updateUsers],
+/// [StreamChatClient.updateUserPartial] and
+/// [StreamChatClient.updateUsersPartial].
 @freezed
 class UpdateUsersResponse with _$UpdateUsersResponse {
   /// Creates a new [UpdateUsersResponse].

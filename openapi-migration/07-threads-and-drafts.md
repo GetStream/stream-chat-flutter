@@ -39,6 +39,7 @@
 
 ## Risks
 
+- `DraftMessage.poll` is never decoded from JSON: `poll` is not in `DraftMessage.topLevelFields`, so the key would land in `extraData`, and the draft payload carries `poll_id` only. Its `PollV1JsonConverter` exists so the generated code compiles. Decide here whether the field stays constructor-only or goes.
 - The four draft methods live in `message_api.dart`, not `threads_api.dart` — this group reaches into that file, and group 10 must leave those four alone.
 - `Draft` and `DraftMessage` are public, persisted, and read by `StreamDraftListController` in `stream_chat_flutter_core`.
 
@@ -48,8 +49,8 @@
       hand-written, with the reason.
 - [ ] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
 - [ ] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
-- [ ] Every model that had a `copyWith` in v10 keeps that exact method, `_nullConst` sentinels
-      included ([README rule 2](README.md#domain-models)).
+- [ ] `copywith_audit.py` was run for every model that loses a v10 `copyWith`, every site it reports is
+      handled, and the semantics change is in the CHANGELOG and the guide ([README rule 2](README.md#domain-models)).
 - [ ] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
       persists anything.
 - [ ] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.

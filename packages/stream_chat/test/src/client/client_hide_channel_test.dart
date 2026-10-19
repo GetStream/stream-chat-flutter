@@ -8,7 +8,7 @@ import '../mocks.dart';
 void main() {
   setUpAll(() => registerFallbackValue(const api.HideChannelRequest()));
 
-  test('StreamChatClient.hideChannel sends the history kept by default and returns the response', () async {
+  test('StreamChatClient.hideChannel keeps the history by default', () async {
     const request = api.HideChannelRequest(clearHistory: false);
 
     final defaultApi = MockDefaultApi();
@@ -24,7 +24,7 @@ void main() {
     verifyNoMoreInteractions(defaultApi);
   });
 
-  test('StreamChatClient.hideChannel sends the history cleared and returns the response', () async {
+  test('StreamChatClient.hideChannel clears the history when asked', () async {
     const request = api.HideChannelRequest(clearHistory: true);
 
     final defaultApi = MockDefaultApi();
