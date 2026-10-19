@@ -108,57 +108,55 @@ class StreamReactionListController extends PagedValueNotifier<String?, Reaction>
       this.limit * defaultInitialPagedLimitMultiplier,
       _kDefaultBackendPaginationLimit,
     );
-    try {
-      final response = await client.queryReactions(
-        messageId,
-        filter: _activeFilter,
-        sort: _activeSort,
-        pagination: PaginationParams(limit: limit),
-      );
+    final result = await client.queryReactions(
+      messageId,
+      filter: _activeFilter,
+      sort: _activeSort,
+      limit: limit,
+    );
 
-      final reactions = response.reactions;
-      final next = response.next;
-      final nextKey = next != null && next.isNotEmpty ? next : null;
-      value = PagedValue(
-        items: reactions,
-        nextPageKey: nextKey,
-      );
-    } on StreamChatException catch (error) {
-      value = PagedValue.error(error);
-    } catch (error) {
-      final chatError = StreamClientException(message: 'Failed to load reactions', cause: error);
-      value = PagedValue.error(chatError);
-    }
+    result.fold(
+      onSuccess: (response) {
+        final next = response.next;
+        value = PagedValue(
+          items: response.reactions,
+          nextPageKey: next != null && next.isNotEmpty ? next : null,
+        );
+      },
+      onFailure: (error, _) => value = PagedValue.error(_chatException(error, 'Failed to load reactions')),
+    );
   }
 
   @override
   Future<void> loadMore(String? nextPageKey) async {
     final previousValue = value.asSuccess;
 
-    try {
-      final response = await client.queryReactions(
-        messageId,
-        filter: _activeFilter,
-        sort: _activeSort,
-        pagination: PaginationParams(limit: limit, next: nextPageKey),
-      );
+    final result = await client.queryReactions(
+      messageId,
+      filter: _activeFilter,
+      sort: _activeSort,
+      limit: limit,
+      next: nextPageKey,
+    );
 
-      final reactions = response.reactions;
-      final previousItems = previousValue.items;
-      final newItems = previousItems + reactions;
-      final next = response.next;
-      final nextKey = next != null && next.isNotEmpty ? next : null;
-      value = PagedValue(
-        items: newItems,
-        nextPageKey: nextKey,
-      );
-    } on StreamChatException catch (error) {
-      value = previousValue.copyWith(error: error);
-    } catch (error) {
-      final chatError = StreamClientException(message: 'Failed to load more reactions', cause: error);
-      value = previousValue.copyWith(error: chatError);
-    }
+    result.fold(
+      onSuccess: (response) {
+        final next = response.next;
+        value = PagedValue(
+          items: previousValue.items + response.reactions,
+          nextPageKey: next != null && next.isNotEmpty ? next : null,
+        );
+      },
+      onFailure: (error, _) {
+        value = previousValue.copyWith(error: _chatException(error, 'Failed to load more reactions'));
+      },
+    );
   }
+
+  StreamChatException _chatException(Object error, String message) => switch (error) {
+    final StreamChatException error => error,
+    _ => StreamClientException(message: message, cause: error),
+  };
 
   @override
   Future<void> refresh({bool resetValue = true}) {

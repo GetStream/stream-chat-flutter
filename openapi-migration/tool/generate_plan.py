@@ -716,7 +716,8 @@ GROUPS = [
         hand=['message_api.dart', 'general_api.dart::searchMessages'],
         match=owns('/api/v2/chat/messages', '/api/v2/chat/search',
                    unless=('/api/v2/chat/messages/{message_id}/polls',
-                           '/api/v2/chat/messages/{message_id}/reminders')),
+                           '/api/v2/chat/messages/{message_id}/reminders',
+                           '/api/v2/chat/messages/{id}/reaction')),
         goal='The core of the SDK, and the group with the most customisation pressure on its models.',
         decisions=[
             '`Message` is public, persisted, WebSocket-delivered and the most customised type in the SDK. Keep '
@@ -808,6 +809,49 @@ GROUPS = [
             - **`MessageWithChannelResponse` gets its mapper with its first consumer** (getMessage, search), not
               ahead of it.
             """),
+    ),
+    dict(
+        num='10a', slug='reactions', title='Reactions',
+        hand=['message_api.dart::sendReaction', 'message_api.dart::deleteReaction',
+              'message_api.dart::getReactions', 'message_api.dart::queryReactions'],
+        match=only_ops('POST /api/v2/chat/messages/{id}/reaction',
+                       'DELETE /api/v2/chat/messages/{id}/reaction/{type}',
+                       'GET /api/v2/chat/messages/{id}/reactions',
+                       'POST /api/v2/chat/messages/{id}/reactions'),
+        goal='Split out of [10](10-messages.md): sending, removing and listing the reactions on a message, '
+             'which answer `Reaction` and `Message` through mappers that already exist.',
+        decisions=[],
+        taken=textwrap.dedent("""\
+            - **The v2 routes are the v1 handlers.** `lib/chat/routes.go` mounts all four in the shared `coreRoutes`;
+              none is gated or in beta. Only the JSON options differ: v2 reads custom data from `custom` alone and
+              silently drops flat keys, which v10 sent.
+            - **Moved off `MessageApi`:** `sendReaction`, `deleteReaction`, `getReactions` and `queryReactions`, each a
+              `StreamChatClient` method over `MessagesRepository` (it mirrors `message_api.dart`). `Channel`'s
+              reaction methods return a `Result` too: `sendReaction` and `deleteReaction` keep the optimistic update
+              and roll it back on a failure, and still throw a `StateError` on an uninitialized channel.
+            - **The emoji code travels in `custom`** (approved). The request has no field for it and the backend
+              stores it as plain custom data, which the response mapper already reads back out of `custom`; the
+              `emojiCode` field replaces a custom entry of the same name. The dates, user and message are not sent,
+              as in v10.
+            - **`deleteReaction` answers a new `DeleteReactionResponse`** (message and reaction), and **`getReactions`
+              the spec-named `GetReactionsResponse`** (approved) where v10 shared `QueryReactionsResponse` between the
+              two reads. `SendReactionResponse` and `QueryReactionsResponse` keep their names, become immutable, and
+              `SendReactionResponse` no longer extends `MessageResponse` (approved; the base class stays for the
+              message reads).
+            - **`getReactions` takes `limit` and `offset`, `queryReactions` `limit`, `next` and `prev`** instead of
+              `PaginationParams` (approved). The backend reads only those; neither sends a limit when none is given,
+              so the backend's defaults still apply. `QueryReactionsResponse` gains `prev`.
+            - **`ReactionV1JsonConverter` keeps both directions** for `Message.latestReactions` / `ownReactions` and
+              `Event.reaction`, which still decode v1 JSON and `Event.toJson` still writes; only its uses on the
+              two responses and the `sendReaction` body are gone.
+            - **`StreamReactionListController` consumes the `Result`** as `StreamDraftListController` does; its public
+              API is unchanged.
+            """),
+        done=DONE.replace('- [ ]', '- [x]'),
+        risks=[
+            'A flat reaction body sent to v2 loses its custom data with no error, so only the request mapper may '
+            'build one.',
+        ],
     ),
     dict(
         num='11', slug='channels-and-members', title='Channels, Members & Sync',

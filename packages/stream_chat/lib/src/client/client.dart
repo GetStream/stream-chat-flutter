@@ -69,9 +69,11 @@ import '../core/models/response/create_draft_response.dart';
 import '../core/models/response/create_reminder_response.dart';
 import '../core/models/response/create_user_group_response.dart';
 import '../core/models/response/delete_channel_response.dart';
+import '../core/models/response/delete_reaction_response.dart';
 import '../core/models/response/delete_reminder_response.dart';
 import '../core/models/response/get_blocked_users_response.dart';
 import '../core/models/response/get_draft_response.dart';
+import '../core/models/response/get_reactions_response.dart';
 import '../core/models/response/get_thread_response.dart';
 import '../core/models/response/get_unread_count_response.dart';
 import '../core/models/response/get_user_group_response.dart';
@@ -87,11 +89,13 @@ import '../core/models/response/poll_vote_response.dart';
 import '../core/models/response/query_drafts_response.dart';
 import '../core/models/response/query_poll_votes_response.dart';
 import '../core/models/response/query_polls_response.dart';
+import '../core/models/response/query_reactions_response.dart';
 import '../core/models/response/query_reminders_response.dart';
 import '../core/models/response/query_threads_response.dart';
 import '../core/models/response/remove_user_group_members_response.dart';
 import '../core/models/response/search_roles_response.dart';
 import '../core/models/response/search_user_groups_response.dart';
+import '../core/models/response/send_reaction_response.dart';
 import '../core/models/response/show_channel_response.dart';
 import '../core/models/response/unblock_users_response.dart';
 import '../core/models/response/update_channel_partial_response.dart';
@@ -1941,28 +1945,22 @@ class StreamChatClient {
     event,
   );
 
-  /// Send a [reactionType] for this [messageId]
-  /// Set [enforceUnique] to true to remove the existing user reaction
-  Future<SendReactionResponse> sendReaction(
+  /// Sends [reaction] to the message with the id [messageId].
+  ///
+  /// If [skipPush] is true, the reaction sends no push notification. If
+  /// [enforceUnique] is true, it replaces every reaction the current user
+  /// already has on the message.
+  Future<Result<SendReactionResponse>> sendReaction(
     String messageId,
     Reaction reaction, {
     bool skipPush = false,
     bool enforceUnique = false,
-  }) => _chatApi.message.sendReaction(
-    messageId,
-    reaction,
-    skipPush: skipPush,
-    enforceUnique: enforceUnique,
-  );
+  }) => _messagesRepository.sendReaction(messageId, reaction, skipPush: skipPush, enforceUnique: enforceUnique);
 
-  /// Delete a [reactionType] from this [messageId]
-  Future<EmptyResponse> deleteReaction(
-    String messageId,
-    String reactionType,
-  ) => _chatApi.message.deleteReaction(
-    messageId,
-    reactionType,
-  );
+  /// Removes the current user's reaction of type [reactionType] from the
+  /// message with the id [messageId].
+  Future<Result<DeleteReactionResponse>> deleteReaction(String messageId, String reactionType) =>
+      _messagesRepository.deleteReaction(messageId, reactionType);
 
   /// Sends the message to the given channel
   Future<SendMessageResponse> sendMessage(
@@ -1988,30 +1986,36 @@ class StreamChatClient {
     options: options,
   );
 
-  /// Get all the reactions for a [messageId]
-  Future<QueryReactionsResponse> getReactions(
-    String messageId, {
-    PaginationParams? pagination,
-  }) => _chatApi.message.getReactions(
-    messageId,
-    pagination: pagination,
-  );
-
-  /// Queries reactions for a [messageId] with optional [filter], [sort],
-  /// and [pagination].
+  /// Fetches one page of the reactions on the message with the id [messageId].
   ///
-  /// Unlike [getReactions], this method supports filtering by reaction type,
-  /// user ID, or creation date, sorting, and cursor-based pagination.
-  Future<QueryReactionsResponse> queryReactions(
+  /// Up to [limit] reactions are returned, after skipping the first [offset].
+  Future<Result<GetReactionsResponse>> getReactions(String messageId, {int? limit, int? offset}) =>
+      _messagesRepository.getReactions(messageId, limit: limit, offset: offset);
+
+  /// Fetches one page of the reactions on the message with the id
+  /// [messageId] that match [filter], ordered by [sort].
+  ///
+  /// Unlike [getReactions], this can filter by reaction type, user id or
+  /// creation date.
+  ///
+  /// Up to [limit] reactions are returned. The next page is fetched by passing
+  /// a response's [QueryReactionsResponse.next] as [next], and the previous
+  /// page by passing its [QueryReactionsResponse.prev] as [prev]. At most one
+  /// of [next] and [prev] may be given.
+  Future<Result<QueryReactionsResponse>> queryReactions(
     String messageId, {
     ReactionFilter? filter,
     List<ReactionSort>? sort,
-    PaginationParams? pagination,
-  }) => _chatApi.message.queryReactions(
+    int? limit,
+    String? next,
+    String? prev,
+  }) => _messagesRepository.queryReactions(
     messageId,
     filter: filter,
     sort: sort,
-    pagination: pagination,
+    limit: limit,
+    next: next,
+    prev: prev,
   );
 
   /// Update the given message

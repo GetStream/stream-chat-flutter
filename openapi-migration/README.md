@@ -21,7 +21,8 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [07](07-threads-and-drafts.md) | Threads & Drafts | 0 | 7 | ☑ |
 | [08](08-moderation-and-blocklists.md) | Moderation & Blocklists | 0 | 34 | ☑ |
 | [09](09-users.md) | Users | 3 | 3 | ☐ |
-| [10](10-messages.md) | Messages & Search | 14 | 12 | ☐ |
+| [10](10-messages.md) | Messages & Search | 10 | 8 | ☐ |
+| [10a](10a-reactions.md) | Reactions — split out of 10 | 0 | 4 | ☑ |
 | [11](11-channels-and-members.md) | Channels, Members & Sync | 13 | 15 | ☐ |
 | [12](12-uploads-cdn.md) | Uploads (CDN) | 8 | 8 | ☑ |
 | [13](13-push-preferences.md) | Push Preferences | 1 | 1 | ☐ |
@@ -179,7 +180,7 @@ includes a named response that carries only `duration` today, such as `HideChann
 | `ActionV1JsonConverter` | `Attachment.actions` | [10](10-messages.md) |
 | `LocationV1JsonConverter` | `Message.sharedLocation`, `ChannelState.activeLiveLocations`, `GetActiveLiveLocationsResponse.activeLiveLocations`, `updateLiveLocation`'s response | [10](10-messages.md) |
 | `MessageReminderV1JsonConverter` | `Message.reminder`, `Event.reminder` | WebSocket v2 (no group) |
-| `ReactionV1JsonConverter` | `Message.latestReactions` / `ownReactions`, `Event.reaction`, `QueryReactionsResponse.reactions`, `SendReactionResponse.reaction`, the `sendReaction` body | WebSocket v2 (no group) |
+| `ReactionV1JsonConverter` | `Message.latestReactions` / `ownReactions`, `Event.reaction` | WebSocket v2 (no group) |
 | `DataSerializable` | `UserGroup`, `UserGroupMember`, `ReactionGroup`, `PollOption` (`fromData`, `toData`) | [10](10-messages.md) |
 | `PollV1JsonConverter` | `Message.poll`, `DraftMessage.poll`, `Event.poll` | WebSocket v2 (no group) |
 | `PollVoteV1JsonConverter` | `Event.pollVote` | WebSocket v2 (no group) |
@@ -213,6 +214,8 @@ surfaces before it reaches `Message` and `ChannelState`:
 - **14** is `queryBannedUsers`, split out of 08 because it is the only moderation call that answers with a
   model. The `User` mappers it needs landed with group 04.
 - **10–11** are the core of the SDK.
+- **10a** is sending, removing and listing a message's reactions, split out of 10 first because it answers
+  only models the earlier groups already map.
 - **15** is the partial channel and member updates, split out of 11 so `channels_mapper.dart` lands on calls that
   read nothing into `ChannelState`. It landed first; the full update waits in 11 for group 10's message mappers.
   As the first group to map `ChannelModel` and `Member`, it promoted their parked fields and renamed their custom

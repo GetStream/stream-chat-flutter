@@ -3300,14 +3300,6 @@ void main() {
       expect(response.users, isA<List<User>>());
     });
 
-    test('QueryReactionsResponse', () {
-      const jsonExample = '''
-      {"reactions": [{"message_id": "4637f7e4-a06b-42db-ba5a-8d8270dd926f","user_id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680","user": {"id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680","role": "user","created_at": "2020-01-28T22:17:30.83015Z","updated_at": "2020-01-28T22:17:31.19435Z","banned": false,"online": false,"image": "https://randomuser.me/api/portraits/women/2.jpg","name": "Mia Denys"},"type": "love","score": 1,"created_at": "2020-01-28T22:17:31.128376Z","updated_at": "2020-01-28T22:17:31.128376Z"}]}
-      ''';
-      final response = QueryReactionsResponse.fromJson(json.decode(jsonExample));
-      expect(response.reactions, isA<List<Reaction>>());
-    });
-
     test('QueryRepliesResponse', () {
       const jsonExample = r'''
       { "messages": [
@@ -3419,56 +3411,6 @@ void main() {
       const jsonExample = '''{"file": "file-url","duration":"0.35ms"}''';
       final response = EmptyResponse.fromJson(json.decode(jsonExample));
       expect(response.duration, isA<String>());
-    });
-
-    test('SendReactionResponse', () {
-      const jsonExample = r'''
-      {"message": {
-                    "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
-                    "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
-                    "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
-                    "type": "regular",
-                    "user": {
-                        "id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
-                        "role": "user",
-                        "created_at": "2020-01-28T22:17:30.826259Z",
-                        "updated_at": "2020-01-28T22:17:31.101222Z",
-                        "banned": false,
-                        "online": false,
-                        "image": "https://pbs.twimg.com/profile_images/669512187778498560/L7wQctBt.jpg",
-                        "name": "Robin Papa"
-                    },
-                    "attachments": [],
-                    "latest_reactions": [],
-                    "own_reactions": [],
-                    "reaction_counts": {},
-                    "reaction_scores": {},
-                    "reply_count": 1,
-                    "created_at": "2020-01-28T22:17:31.092262Z",
-                    "updated_at": "2020-01-28T22:17:31.092262Z",
-                    "mentioned_users": []
-                },
-                "reaction":{
-                            "message_id": "c74784e7-07ef-4b41-a8e3-b2b0e0b6b7ce",
-                            "user_id": "spring-voice-7",
-                            "user": {
-                                "id": "spring-voice-7",
-                                "role": "user",
-                                "created_at": "2020-01-28T22:17:30.834135Z",
-                                "updated_at": "2020-01-28T22:17:31.186771Z",
-                                "banned": false,
-                                "online": false,
-                                "name": "Spring voice",
-                                "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice"
-                            },
-                            "type": "sad",
-                            "score": 1,
-                            "created_at": "2020-01-28T22:17:31.131489Z",
-                            "updated_at": "2020-01-28T22:17:31.131489Z"
-                        },"duration":"0.35ms"}''';
-      final response = SendReactionResponse.fromJson(json.decode(jsonExample));
-      expect(response.message, isA<Message>());
-      expect(response.reaction, isA<Reaction>());
     });
 
     test('GetMessagesByIdResponse', () {

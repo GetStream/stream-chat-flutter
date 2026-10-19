@@ -2985,9 +2985,7 @@ void main() {
         );
 
         when(() => client.sendReaction(message.id, reaction)).thenAnswer(
-          (_) async => SendReactionResponse()
-            ..message = message
-            ..reaction = reaction,
+          (_) async => Result.success(SendReactionResponse(duration: '0.01ms', message: message, reaction: reaction)),
         );
 
         expectLater(
@@ -3011,17 +3009,17 @@ void main() {
 
         final res = await channel.sendReaction(message, reaction);
 
-        expect(res, isNotNull);
-        expect(res.reaction.type, type);
-        expect(res.reaction.messageId, message.id);
-        expect(res.reaction.emojiCode, emojiCode);
-        expect(res.reaction.score, score);
+        final response = res.getOrNull()!;
+        expect(response.reaction.type, type);
+        expect(response.reaction.messageId, message.id);
+        expect(response.reaction.emojiCode, emojiCode);
+        expect(response.reaction.score, score);
 
         verify(() => client.sendReaction(message.id, reaction)).called(1);
       });
 
       test(
-        'should restore previous message if `client.sendReaction` throws',
+        'should restore previous message if `client.sendReaction` fails',
         () async {
           const type = 'test-reaction-type';
           final message = Message(
@@ -3037,7 +3035,7 @@ void main() {
 
           when(
             () => client.sendReaction(message.id, reaction),
-          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
+          ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.inputError, statusCode: 400)));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -3070,10 +3068,9 @@ void main() {
             ]),
           );
 
-          await expectLater(
-            channel.sendReaction(message, reaction),
-            throwsA(isA<StreamApiException>()),
-          );
+          final res = await channel.sendReaction(message, reaction);
+
+          expect(res.exceptionOrNull(), isA<StreamApiException>());
 
           verify(() => client.sendReaction(message.id, reaction)).called(1);
         },
@@ -3122,9 +3119,8 @@ void main() {
               enforceUnique: enforceUnique,
             ),
           ).thenAnswer(
-            (_) async => SendReactionResponse()
-              ..message = newMessage
-              ..reaction = newReaction,
+            (_) async =>
+                Result.success(SendReactionResponse(duration: '0.01ms', message: newMessage, reaction: newReaction)),
           );
 
           expectLater(
@@ -3147,9 +3143,9 @@ void main() {
             enforceUnique: enforceUnique,
           );
 
-          expect(res, isNotNull);
-          expect(res.reaction.type, type);
-          expect(res.reaction.messageId, messageId);
+          final response = res.getOrNull()!;
+          expect(response.reaction.type, type);
+          expect(response.reaction.messageId, messageId);
 
           verify(
             () => client.sendReaction(
@@ -3178,9 +3174,7 @@ void main() {
         );
 
         when(() => client.sendReaction(message.id, reaction)).thenAnswer(
-          (_) async => SendReactionResponse()
-            ..message = message
-            ..reaction = reaction,
+          (_) async => Result.success(SendReactionResponse(duration: '0.01ms', message: message, reaction: reaction)),
         );
 
         expectLater(
@@ -3212,15 +3206,15 @@ void main() {
 
         final res = await channel.sendReaction(message, reaction);
 
-        expect(res, isNotNull);
-        expect(res.reaction.type, type);
-        expect(res.reaction.messageId, message.id);
+        final response = res.getOrNull()!;
+        expect(response.reaction.type, type);
+        expect(response.reaction.messageId, message.id);
 
         verify(() => client.sendReaction(message.id, reaction)).called(1);
       });
 
       test(
-        '''should restore previous thread message if `client.sendReaction` throws''',
+        '''should restore previous thread message if `client.sendReaction` fails''',
         () async {
           const type = 'test-reaction-type';
           final message = Message(
@@ -3240,7 +3234,7 @@ void main() {
 
           when(
             () => client.sendReaction(message.id, reaction),
-          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
+          ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.inputError, statusCode: 400)));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -3275,10 +3269,9 @@ void main() {
             ]),
           );
 
-          await expectLater(
-            channel.sendReaction(message, reaction),
-            throwsA(isA<StreamApiException>()),
-          );
+          final res = await channel.sendReaction(message, reaction);
+
+          expect(res.exceptionOrNull(), isA<StreamApiException>());
 
           verify(() => client.sendReaction(message.id, reaction)).called(1);
         },
@@ -3329,9 +3322,8 @@ void main() {
               enforceUnique: enforceUnique,
             ),
           ).thenAnswer(
-            (_) async => SendReactionResponse()
-              ..message = newMessage
-              ..reaction = newReaction,
+            (_) async =>
+                Result.success(SendReactionResponse(duration: '0.01ms', message: newMessage, reaction: newReaction)),
           );
 
           expectLater(
@@ -3355,9 +3347,9 @@ void main() {
             enforceUnique: enforceUnique,
           );
 
-          expect(res, isNotNull);
-          expect(res.reaction.type, type);
-          expect(res.reaction.messageId, messageId);
+          final response = res.getOrNull()!;
+          expect(response.reaction.type, type);
+          expect(response.reaction.messageId, messageId);
 
           verify(
             () => client.sendReaction(
@@ -3393,7 +3385,9 @@ void main() {
           state: MessageState.sent,
         );
 
-        when(() => client.deleteReaction(messageId, type)).thenAnswer((_) async => EmptyResponse());
+        when(() => client.deleteReaction(messageId, type)).thenAnswer(
+          (_) async => Result.success(DeleteReactionResponse(duration: '0.01ms', message: message, reaction: reaction)),
+        );
 
         expectLater(
           // skipping first seed message list -> [] messages
@@ -3415,13 +3409,13 @@ void main() {
 
         final res = await channel.deleteReaction(message, reaction);
 
-        expect(res, isNotNull);
+        expect(res.getOrNull(), isNotNull);
 
         verify(() => client.deleteReaction(messageId, type)).called(1);
       });
 
       test(
-        'should restore prev message state if `client.deleteReaction` throws',
+        'should restore prev message state if `client.deleteReaction` fails',
         () async {
           const userId = 'test-user-id';
           const messageId = 'test-message-id';
@@ -3446,7 +3440,7 @@ void main() {
 
           when(
             () => client.deleteReaction(messageId, type),
-          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
+          ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.inputError, statusCode: 400)));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -3473,10 +3467,9 @@ void main() {
             ]),
           );
 
-          await expectLater(
-            channel.deleteReaction(message, reaction),
-            throwsA(isA<StreamApiException>()),
-          );
+          final res = await channel.deleteReaction(message, reaction);
+
+          expect(res.exceptionOrNull(), isA<StreamApiException>());
 
           verify(() => client.deleteReaction(messageId, type)).called(1);
         },
@@ -3512,7 +3505,9 @@ void main() {
           createdAt: DateTime.now(),
         );
 
-        when(() => client.deleteReaction(messageId, type)).thenAnswer((_) async => EmptyResponse());
+        when(() => client.deleteReaction(messageId, type)).thenAnswer(
+          (_) async => Result.success(DeleteReactionResponse(duration: '0.01ms', message: message, reaction: reaction)),
+        );
 
         expectLater(
           // skipping first seed message list -> [] messages
@@ -3535,13 +3530,13 @@ void main() {
 
         final res = await channel.deleteReaction(message, reaction);
 
-        expect(res, isNotNull);
+        expect(res.getOrNull(), isNotNull);
 
         verify(() => client.deleteReaction(messageId, type)).called(1);
       });
 
       test(
-        'should restore prev message state if `client.deleteReaction` throws',
+        'should restore prev message state if `client.deleteReaction` fails',
         () async {
           const userId = 'test-user-id';
           const messageId = 'test-message-id';
@@ -3571,7 +3566,7 @@ void main() {
 
           when(
             () => client.deleteReaction(messageId, type),
-          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
+          ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.inputError, statusCode: 400)));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -3600,10 +3595,9 @@ void main() {
             ]),
           );
 
-          await expectLater(
-            channel.deleteReaction(message, reaction),
-            throwsA(isA<StreamApiException>()),
-          );
+          final res = await channel.deleteReaction(message, reaction);
+
+          expect(res.exceptionOrNull(), isA<StreamApiException>());
 
           verify(() => client.deleteReaction(messageId, type)).called(1);
         },
@@ -4174,17 +4168,15 @@ void main() {
         ),
       );
 
-      when(() => client.getReactions(messageId)).thenAnswer(
-        (_) async => QueryReactionsResponse()..reactions = reactions,
+      when(() => client.getReactions(messageId, limit: 20, offset: 40)).thenAnswer(
+        (_) async => Result.success(GetReactionsResponse(duration: '0.01ms', reactions: reactions)),
       );
 
-      final res = await channel.getReactions(messageId);
+      final res = await channel.getReactions(messageId, limit: 20, offset: 40);
 
-      expect(res, isNotNull);
-      expect(res.reactions.length, reactions.length);
-      expect(res.reactions.every((it) => it.messageId == messageId), isTrue);
+      expect(res.getOrNull(), GetReactionsResponse(duration: '0.01ms', reactions: reactions));
 
-      verify(() => client.getReactions(messageId)).called(1);
+      verify(() => client.getReactions(messageId, limit: 20, offset: 40)).called(1);
     });
 
     test('`.getMessagesById`', () async {

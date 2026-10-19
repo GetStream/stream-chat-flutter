@@ -164,6 +164,12 @@
 - A message's channel id, HTML, markup and deleted reply count, and an attachment's Giphy renditions, are fields instead of custom data.
 - `Message.toJson` no longer writes the message's channel id, HTML, markup or deleted reply count.
 - `Reaction.topLevelFields` is removed.
+- The reaction calls on `StreamChatClient` and `Channel` return a `Result` instead of throwing.
+- `deleteReaction` returns a `DeleteReactionResponse` instead of an `EmptyResponse`.
+- `getReactions` returns a `GetReactionsResponse` instead of a `QueryReactionsResponse`, and takes `limit` and `offset` instead of `PaginationParams`.
+- `queryReactions` takes `limit`, `next` and `prev` instead of `PaginationParams`.
+- `SendReactionResponse` and `QueryReactionsResponse` are immutable, compare by value, and their `duration` is non-nullable; `SendReactionResponse` no longer extends `MessageResponse`.
+- `StreamChatApi.message` loses the reaction methods.
 
 🐞 Fixed
 
@@ -203,6 +209,7 @@
 - Added a `prev` cursor to `QueryRemindersResponse`.
 - Added a `prev` cursor to `QueryThreadsResponse` and `QueryDraftsResponse`.
 - Added a `prev` argument to `queryPolls` and `queryPollVotes`, and a `prev` cursor on their responses, for paging backwards.
+- Added a `prev` cursor to `QueryReactionsResponse`.
 
 🔒 Security
 

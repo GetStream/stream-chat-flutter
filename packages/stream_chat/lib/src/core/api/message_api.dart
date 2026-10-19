@@ -1,9 +1,5 @@
-import 'dart:convert';
-
 import '../http/stream_http_client.dart';
-import '../models/converters/v1_json_converters.dart';
 import '../models/message.dart';
-import '../models/reaction.dart';
 import 'requests.dart';
 import 'responses.dart';
 
@@ -132,72 +128,6 @@ class MessageApi {
       },
     );
     return SendActionResponse.fromJson(response.data);
-  }
-
-  /// Send a [reactionType] for this [messageId]
-  /// Set [enforceUnique] to true to remove the existing user reaction
-  Future<SendReactionResponse> sendReaction(
-    String messageId,
-    Reaction reaction, {
-    bool skipPush = false,
-    bool enforceUnique = false,
-  }) async {
-    final response = await _client.post(
-      '/messages/$messageId/reaction',
-      data: json.encode({
-        'reaction': const ReactionV1JsonConverter().toJson(reaction),
-        'skip_push': skipPush,
-        'enforce_unique': enforceUnique,
-      }),
-    );
-    return SendReactionResponse.fromJson(response.data);
-  }
-
-  /// Delete a [reactionType] from this [messageId]
-  Future<EmptyResponse> deleteReaction(
-    String messageId,
-    String reactionType,
-  ) async {
-    final response = await _client.delete(
-      '/messages/$messageId/reaction/$reactionType',
-    );
-    return EmptyResponse.fromJson(response.data);
-  }
-
-  /// Get all the reactions for a [messageId]
-  Future<QueryReactionsResponse> getReactions(
-    String messageId, {
-    PaginationParams? pagination,
-  }) async {
-    final response = await _client.get(
-      '/messages/$messageId/reactions',
-      queryParameters: {
-        if (pagination != null) ...pagination.toJson(),
-      },
-    );
-    return QueryReactionsResponse.fromJson(response.data);
-  }
-
-  /// Queries reactions for a [messageId] with optional [filter], [sort],
-  /// and [pagination].
-  ///
-  /// Unlike [getReactions], this method supports filtering by reaction type,
-  /// user ID, or creation date, sorting, and cursor-based pagination.
-  Future<QueryReactionsResponse> queryReactions(
-    String messageId, {
-    ReactionFilter? filter,
-    List<ReactionSort>? sort,
-    PaginationParams? pagination,
-  }) async {
-    final response = await _client.post(
-      '/messages/$messageId/reactions',
-      data: jsonEncode({
-        if (filter != null) 'filter': filter.toJson(),
-        if (sort != null) 'sort': sort.map((e) => e.toJson()).toList(),
-        if (pagination != null) ...pagination.toJson(),
-      }),
-    );
-    return QueryReactionsResponse.fromJson(response.data);
   }
 
   /// Translates the [messageId] in provided [language]

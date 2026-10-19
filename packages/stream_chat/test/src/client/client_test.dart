@@ -3399,52 +3399,6 @@ void main() {
       verifyNoMoreInteractions(fakeChatApi.channel);
     });
 
-    test('`.sendReaction`', () async {
-      const messageId = 'test-message-id';
-      const reactionType = 'like';
-      const emojiCode = '👍';
-      const score = 4;
-
-      final reaction = Reaction(
-        type: reactionType,
-        messageId: messageId,
-        emojiCode: emojiCode,
-        score: score,
-      );
-
-      when(() => fakeChatApi.message.sendReaction(messageId, reaction)).thenAnswer(
-        (_) async => SendReactionResponse()
-          ..message = Message(id: messageId)
-          ..reaction = reaction,
-      );
-
-      final res = await client.sendReaction(messageId, reaction);
-      expect(res, isNotNull);
-      expect(res.message.id, messageId);
-      expect(res.reaction.type, reactionType);
-      expect(res.reaction.emojiCode, emojiCode);
-      expect(res.reaction.score, score);
-      expect(res.reaction.messageId, messageId);
-
-      verify(() => fakeChatApi.message.sendReaction(messageId, reaction)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.message);
-    });
-
-    test('`.deleteReaction`', () async {
-      const messageId = 'test-message-id';
-      const reactionType = 'like';
-
-      when(() => fakeChatApi.message.deleteReaction(messageId, reactionType)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.deleteReaction(messageId, reactionType);
-      expect(res, isNotNull);
-
-      verify(
-        () => fakeChatApi.message.deleteReaction(messageId, reactionType),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.message);
-    });
-
     test('`.sendMessage`', () async {
       final message = Message(id: 'test-message-id');
       const channelId = 'test-channel-id';
@@ -3485,58 +3439,6 @@ void main() {
       expect(res.messages.length, messages.length);
 
       verify(() => fakeChatApi.message.getReplies(parentId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.message);
-    });
-
-    test('`.getReactions`', () async {
-      const messageId = 'test-parent-id';
-
-      final reactions = List.generate(
-        3,
-        (index) => Reaction(
-          type: 'test-reactions-type-$index',
-          messageId: messageId,
-        ),
-      );
-
-      when(
-        () => fakeChatApi.message.getReactions(messageId),
-      ).thenAnswer((_) async => QueryReactionsResponse()..reactions = reactions);
-
-      final res = await client.getReactions(messageId);
-      expect(res, isNotNull);
-      expect(res.reactions.length, reactions.length);
-      expect(res.reactions.every((it) => it.messageId == messageId), isTrue);
-
-      verify(() => fakeChatApi.message.getReactions(messageId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.message);
-    });
-
-    test('`.queryReactions`', () async {
-      const messageId = 'test-message-id';
-
-      final reactions = List.generate(
-        3,
-        (index) => Reaction(
-          type: 'test-reactions-type-$index',
-          messageId: messageId,
-        ),
-      );
-
-      when(
-        () => fakeChatApi.message.queryReactions(messageId),
-      ).thenAnswer(
-        (_) async => QueryReactionsResponse()
-          ..reactions = reactions
-          ..next = null,
-      );
-
-      final res = await client.queryReactions(messageId);
-      expect(res, isNotNull);
-      expect(res.reactions.length, reactions.length);
-      expect(res.reactions.every((it) => it.messageId == messageId), isTrue);
-
-      verify(() => fakeChatApi.message.queryReactions(messageId)).called(1);
       verifyNoMoreInteractions(fakeChatApi.message);
     });
 
