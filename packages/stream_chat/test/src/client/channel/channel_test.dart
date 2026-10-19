@@ -4157,7 +4157,7 @@ void main() {
       expect(threadMessages.any((it) => it.id == parentId), isFalse);
     });
 
-    test('`.getReactions`', () async {
+    test('Channel.getReactions fetches one page of the reactions on the message', () async {
       const messageId = 'test-message-id';
 
       final reactions = List.generate(

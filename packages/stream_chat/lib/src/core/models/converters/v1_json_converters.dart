@@ -99,8 +99,8 @@ class LocationV1JsonConverter implements JsonConverter<Location, Map<String, dyn
 /// Converts a [Reaction] to and from its v1 keys.
 ///
 /// Custom data sits at the root of the v1 map, beside the known keys. [toJson]
-/// writes the request shape: the type, score, emoji code and custom data,
-/// without the message, user or dates.
+/// writes the type, score, emoji code and custom data, without the message,
+/// user or dates.
 // TODO(openapi-migration): remove when WebSocket payloads decode as v2
 @internal
 class ReactionV1JsonConverter implements JsonConverter<Reaction, Map<String, dynamic>> {

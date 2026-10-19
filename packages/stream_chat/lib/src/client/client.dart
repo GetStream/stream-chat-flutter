@@ -1947,9 +1947,8 @@ class StreamChatClient {
 
   /// Sends [reaction] to the message with the id [messageId].
   ///
-  /// If [skipPush] is true, the reaction sends no push notification. If
-  /// [enforceUnique] is true, it replaces every reaction the current user
-  /// already has on the message.
+  /// If [enforceUnique] is true, it replaces the current user's other reactions
+  /// on the message. If [skipPush] is true, no push notification is sent.
   Future<Result<SendReactionResponse>> sendReaction(
     String messageId,
     Reaction reaction, {
@@ -1992,11 +1991,8 @@ class StreamChatClient {
   Future<Result<GetReactionsResponse>> getReactions(String messageId, {int? limit, int? offset}) =>
       _messagesRepository.getReactions(messageId, limit: limit, offset: offset);
 
-  /// Fetches one page of the reactions on the message with the id
-  /// [messageId] that match [filter], ordered by [sort].
-  ///
-  /// Unlike [getReactions], this can filter by reaction type, user id or
-  /// creation date.
+  /// Fetches one page of the reactions on the message with the id [messageId]
+  /// that match [filter], ordered by [sort].
   ///
   /// Up to [limit] reactions are returned. The next page is fetched by passing
   /// a response's [QueryReactionsResponse.next] as [next], and the previous

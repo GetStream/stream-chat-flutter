@@ -1646,12 +1646,8 @@ class Channel {
 
   /// Sends [reaction] to [message] in this channel.
   ///
-  /// The reaction shows on the message straight away. If sending it fails, the
-  /// message goes back to how it was and the failure is returned.
-  ///
-  /// If [skipPush] is true, the reaction sends no push notification. If
-  /// [enforceUnique] is true, it replaces every reaction the current user
-  /// already has on the message.
+  /// If [enforceUnique] is true, it replaces the current user's other reactions
+  /// on the message. If [skipPush] is true, no push notification is sent.
   ///
   /// Throws a [StateError] if this channel is not initialized.
   Future<Result<SendReactionResponse>> sendReaction(
@@ -1693,9 +1689,6 @@ class Channel {
   }
 
   /// Removes [reaction] from [message] in this channel.
-  ///
-  /// The reaction disappears from the message straight away. If removing it
-  /// fails, the message goes back to how it was and the failure is returned.
   ///
   /// Throws a [StateError] if this channel is not initialized.
   Future<Result<DeleteReactionResponse>> deleteReaction(

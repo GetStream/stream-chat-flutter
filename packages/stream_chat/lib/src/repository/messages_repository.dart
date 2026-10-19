@@ -83,9 +83,8 @@ class MessagesRepository {
 
   /// Sends [reaction] to the message with the id [messageId].
   ///
-  /// If [skipPush] is true, the reaction sends no push notification. If
-  /// [enforceUnique] is true, it replaces every reaction the current user
-  /// already has on the message.
+  /// If [enforceUnique] is true, it replaces the current user's other reactions
+  /// on the message. If [skipPush] is true, no push notification is sent.
   Future<Result<SendReactionResponse>> sendReaction(
     String messageId,
     Reaction reaction, {
@@ -121,16 +120,11 @@ class MessagesRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Fetches one page of the reactions on the message with the id
-  /// [messageId] that match [filter], ordered by [sort].
+  /// Fetches one page of the reactions on the message with the id [messageId]
+  /// that match [filter], ordered by [sort].
   ///
-  /// Unlike [getReactions], this can filter by reaction type, user id or
-  /// creation date.
-  ///
-  /// Up to [limit] reactions are returned. The next page is fetched by passing
-  /// a response's [QueryReactionsResponse.next] as [next], and the previous
-  /// page by passing its [QueryReactionsResponse.prev] as [prev]. At most one
-  /// of [next] and [prev] may be given.
+  /// [next] and [prev] are the cursors a previous page returned; at most one of
+  /// them may be given.
   Future<Result<QueryReactionsResponse>> queryReactions(
     String messageId, {
     ReactionFilter? filter,
