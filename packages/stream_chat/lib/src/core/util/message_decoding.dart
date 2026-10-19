@@ -13,7 +13,8 @@ extension MessageDecoding on Message {
   /// updated after it was created, and [MessageState.sent] before either.
   Message withDerivedState() {
     final isDeletedForMe = deletedForMe ?? false;
-    // TODO: Remove this override once type is properly enriched on the backend.
+    // TODO: Remove this override once a message deleted only for the current
+    // user arrives with the deleted type.
     final type = isDeletedForMe ? MessageType.deleted : this.type;
     final state = switch (this) {
       _ when isDeletedForMe => MessageState.deletedForMe,

@@ -26,35 +26,35 @@ class Reaction with _$Reaction {
        createdAt = createdAt ?? DateTime.timestamp(),
        updatedAt = updatedAt ?? DateTime.timestamp();
 
-  /// The messageId to which the reaction belongs
+  /// The id of the message the reaction is on.
   @override
   final String? messageId;
 
-  /// The type of the reaction
+  /// The kind of reaction, such as `like` or `love`.
   @override
   final String type;
 
-  /// The score of the reaction (ie. number of reactions sent)
+  /// How many times the user sent this reaction.
   @override
   final int score;
 
-  /// The emoji code of the reaction (used for notifications)
+  /// The emoji that stands for the reaction, such as `❤️`.
   @override
   final String? emojiCode;
 
-  /// The user that sent the reaction
+  /// The user who sent the reaction.
   @override
   final User? user;
 
-  /// The userId that sent the reaction
+  /// The id of the user who sent the reaction.
   @override
   final String? userId;
 
-  /// The date of the reaction
+  /// The date at which the reaction was sent.
   @override
   final DateTime createdAt;
 
-  /// The date of the reaction update
+  /// The date at which the reaction was last updated.
   @override
   final DateTime updatedAt;
 

@@ -154,7 +154,7 @@
 - A message's channel id, HTML, markup and deleted reply count, and an attachment's Giphy renditions, are fields instead of custom data: `custom` no longer holds them, and an entry with one of their names in `custom` no longer sets the field.
 - `Message.toJson` no longer writes the message's channel id, HTML, markup or deleted reply count, so a message can no longer be sent with markup.
 - A message's image labels and mentioned channel members, and a draft message's HTML and markup, are no longer kept in their custom data.
-- A reaction's emoji code read from the API stays in its custom data, as well as in `Reaction.emojiCode`.
+- A reaction on a reminder's message keeps its emoji code in its custom data, as well as in `Reaction.emojiCode`.
 
 🐞 Fixed
 

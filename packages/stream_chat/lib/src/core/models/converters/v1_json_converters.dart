@@ -40,8 +40,8 @@ class ActionV1JsonConverter implements JsonConverter<Action, Map<String, dynamic
     value: json['value'] as String?,
   );
 
-  // Writes `value` even when it is null, as v10 did, so sent attachments and
-  // the stored ones keep their format.
+  // Writes `value` even when it is null, so sent and stored attachments always
+  // carry the key.
   @override
   Map<String, dynamic> toJson(Action action) => {
     'name': action.name,

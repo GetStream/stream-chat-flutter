@@ -238,7 +238,7 @@ class Attachment extends Equatable {
         ..removeWhere((key, value) => dbSpecificTopLevelFields.contains(key));
 
   // The fields toData leaves custom data out of. A custom `id`, the id the
-  // attachment was sent with, still replaces the local one, as it did before.
+  // attachment was sent with, replaces the local one.
   static const _storedFields = [...topLevelFields, 'file', 'upload_state'];
 
   /// Serialize to db data

@@ -54,6 +54,11 @@ void main() {
       expect(message.i18n, null);
       expect(message.restrictedVisibility, isA<List<String>>());
       expect(message.channelRole, 'channel_member');
+      expect(message.cid, 'messaging:general');
+      expect(message.html, '<p>Hi</p>');
+      expect(message.mml, '<mml>Hi</mml>');
+      expect(message.deletedReplyCount, 2);
+      expect(message.custom, {'status': 'SENT'});
     });
 
     test('should serialize to json correctly', () {
@@ -502,36 +507,6 @@ void main() {
         });
       });
     });
-  });
-
-  test('Message.fromJson reads the channel id, HTML, markup and deleted reply count into their fields', () {
-    final message = Message.fromJson(const {
-      'id': 'message-id',
-      'cid': 'messaging:general',
-      'html': '<p>Hi</p>',
-      'mml': '<mml>Hi</mml>',
-      'deleted_reply_count': 2,
-      'priority': 'high',
-    });
-
-    expect(message.cid, 'messaging:general');
-    expect(message.html, '<p>Hi</p>');
-    expect(message.mml, '<mml>Hi</mml>');
-    expect(message.deletedReplyCount, 2);
-    expect(message.custom, {'priority': 'high'});
-  });
-
-  test('Message.fromJson leaves image labels and mentioned channel members out of custom data', () {
-    final message = Message.fromJson(const {
-      'id': 'message-id',
-      'image_labels': {
-        'cat.png': ['cat'],
-      },
-      'mentioned_channel_members': <String, Object?>{},
-      'priority': 'high',
-    });
-
-    expect(message.custom, {'priority': 'high'});
   });
 
   test('Message.toJson leaves out custom data named like a field', () {

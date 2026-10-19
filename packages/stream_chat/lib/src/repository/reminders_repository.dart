@@ -6,6 +6,7 @@ import '../core/models/response/create_reminder_response.dart';
 import '../core/models/response/delete_reminder_response.dart';
 import '../core/models/response/query_reminders_response.dart';
 import '../core/models/response/update_reminder_response.dart';
+import 'mapper/filter_mapper.dart';
 import 'mapper/reminders_mapper.dart';
 import 'mapper/sort_mapper.dart';
 
@@ -30,7 +31,7 @@ class RemindersRepository {
   }) async {
     final result = await _api.queryReminders(
       queryRemindersRequest: api.QueryRemindersRequest(
-        filter: filter?.toJson(),
+        filter: filter?.toRequest(),
         sort: sort?.map((it) => it.toRequest()).toList(),
         limit: limit,
         next: next,

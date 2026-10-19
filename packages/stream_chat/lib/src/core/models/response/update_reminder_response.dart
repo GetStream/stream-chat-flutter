@@ -4,7 +4,8 @@ import '../message_reminder.dart';
 
 part 'update_reminder_response.freezed.dart';
 
-/// The outcome of updating the reminder on a message.
+/// The result of updating the reminder on a message, returned by
+/// [StreamChatClient.updateReminder] and [Channel.updateReminder].
 @freezed
 class UpdateReminderResponse with _$UpdateReminderResponse {
   /// Creates a new [UpdateReminderResponse].

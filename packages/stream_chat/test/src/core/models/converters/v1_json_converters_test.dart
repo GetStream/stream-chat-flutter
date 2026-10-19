@@ -307,24 +307,34 @@ void main() {
     expect(event.reaction!.score, 1);
   });
 
-  test(
-    'Event.toJson writes the reaction in the request shape, with custom data not named like a field at the root',
-    () {
-      final event = Event(
-        type: 'reaction.new',
-        reaction: Reaction(
-          messageId: 'message-id',
-          type: 'wow',
-          user: User(id: 'user-id'),
-          score: 2,
-          emojiCode: '😮',
-          custom: const {'bananas': 'yes', 'emoji_code': 'custom', 'type': 'custom'},
-        ),
-      );
+  test('Event.toJson writes the reaction in the request shape, with its custom data at the root', () {
+    final event = Event(
+      type: 'reaction.new',
+      reaction: Reaction(
+        messageId: 'message-id',
+        type: 'wow',
+        user: User(id: 'user-id'),
+        score: 2,
+        emojiCode: '😮',
+        custom: const {'bananas': 'yes'},
+      ),
+    );
 
-      expect(event.toJson()['reaction'], {'type': 'wow', 'score': 2, 'emoji_code': '😮', 'bananas': 'yes'});
-    },
-  );
+    expect(event.toJson()['reaction'], {'type': 'wow', 'score': 2, 'emoji_code': '😮', 'bananas': 'yes'});
+  });
+
+  test('Event.toJson leaves out a reaction custom entry named like a reaction key', () {
+    final event = Event(
+      type: 'reaction.new',
+      reaction: Reaction(
+        type: 'wow',
+        emojiCode: '😮',
+        custom: const {'emoji_code': 'custom', 'type': 'custom'},
+      ),
+    );
+
+    expect(event.toJson()['reaction'], {'type': 'wow', 'score': 1, 'emoji_code': '😮'});
+  });
 
   test('Message.fromJson reads the latest and own reactions', () {
     final message = Message.fromJson(const {

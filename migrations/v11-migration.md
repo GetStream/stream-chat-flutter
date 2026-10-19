@@ -1161,7 +1161,7 @@ kept.** v10 left them in `extraData`.
 
 **`custom` is the custom data exactly as the API returns it.** An entry named like one of the model's own fields
 stays in `custom` and leaves the field alone; it is left out when the model is sent, so it cannot overwrite the
-field. A reaction's emoji code read from the API stays in its `custom` as well as in `Reaction.emojiCode`.
+field. A reaction on a reminder's message keeps its emoji code in its `custom` as well as in `Reaction.emojiCode`.
 
 > **Why:** the API calls it `custom`, and every migrated model takes that name.
 
