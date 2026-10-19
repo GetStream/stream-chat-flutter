@@ -21,6 +21,7 @@ AIIndicatorClearEvent _$AIIndicatorClearEventFromJson(
     const StreamDateTimeConverter().fromJson,
   ),
   type: json['type'] as String,
+  user: json['user'] == null ? null : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$AIIndicatorClearEventToJson(
@@ -36,6 +37,7 @@ Map<String, dynamic> _$AIIndicatorClearEventToJson(
     const StreamDateTimeConverter().toJson,
   ),
   'type': instance.type,
+  'user': instance.user?.toJson(),
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(

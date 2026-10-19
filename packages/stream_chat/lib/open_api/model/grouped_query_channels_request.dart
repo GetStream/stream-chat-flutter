@@ -21,6 +21,7 @@ class GroupedQueryChannelsRequest with _$GroupedQueryChannelsRequest {
     this.groups,
     this.limit,
     this.presence,
+    this.sort,
     this.watch,
   });
 
@@ -35,6 +36,10 @@ class GroupedQueryChannelsRequest with _$GroupedQueryChannelsRequest {
   @override
   @JsonKey(name: 'presence')
   final bool? presence;
+
+  @override
+  @JsonKey(name: 'sort')
+  final List<SortParamRequest>? sort;
 
   @override
   @JsonKey(name: 'watch')

@@ -17,6 +17,11 @@ SendMessageResponse _$SendMessageResponseFromJson(Map<String, dynamic> json) => 
   message: MessageResponse.fromJson(
     json['message'] as Map<String, dynamic>,
   ),
+  scheduledMessage: json['scheduled_message'] == null
+      ? null
+      : ScheduledMessageResponse.fromJson(
+          json['scheduled_message'] as Map<String, dynamic>,
+        ),
 );
 
 Map<String, dynamic> _$SendMessageResponseToJson(
@@ -26,4 +31,5 @@ Map<String, dynamic> _$SendMessageResponseToJson(
   'duration': instance.duration,
   'mentioned_members': instance.mentionedMembers,
   'message': instance.message.toJson(),
+  'scheduled_message': instance.scheduledMessage?.toJson(),
 };

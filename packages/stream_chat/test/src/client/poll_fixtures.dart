@@ -21,7 +21,6 @@ final generatedVoter = api.UserResponse(
   lastActive: DateTime.utc(2024, 1, 3),
   name: 'Luke',
   online: true,
-  revokeTokensIssuedBefore: DateTime.utc(2024, 1, 6),
   role: 'user',
   teams: const ['jedi'],
   teamsRole: const {'jedi': 'admin'},

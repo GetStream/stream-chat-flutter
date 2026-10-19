@@ -160,6 +160,15 @@ class FakeDefaultApi extends Fake implements api.DefaultApi {
   Future<Result<api.GetApplicationResponse>> getApp() async => Result.success(fakeGetApplicationResponse());
 }
 
+/// The query-limit defaults a generated application response carries.
+const fakeAppDefaults = api.AppDefaults(
+  getOrCreateChannel: api.GetOrCreateChannelDefaults(
+    members: api.PagerDefaults(limit: 100),
+    messages: api.PagerDefaults(limit: 25),
+  ),
+  queryChannels: api.QueryChannelsDefaults(limit: 10, maxLimit: 30, memberLimit: 100, messageLimit: 25),
+);
+
 /// A generated application response, for tests that need `getApp` to answer.
 api.GetApplicationResponse fakeGetApplicationResponse({String name = 'test-app'}) {
   const unrestricted = api.FileUploadConfig(
@@ -178,6 +187,7 @@ api.GetApplicationResponse fakeGetApplicationResponse({String name = 'test-app'}
       placement: 'us-east',
       asyncUrlEnrichEnabled: false,
       autoTranslationEnabled: false,
+      defaults: fakeAppDefaults,
       fileUploadConfig: unrestricted,
       imageUploadConfig: unrestricted,
     ),

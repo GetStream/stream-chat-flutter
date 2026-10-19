@@ -28,6 +28,7 @@ FeedsV3CommentResponse _$FeedsV3CommentResponseFromJson(
     json['edited_at'],
     const StreamDateTimeConverter().fromJson,
   ),
+  hidden: json['hidden'] as bool,
   i18n: (json['i18n'] as Map<String, dynamic>?)?.map(
     (k, e) => MapEntry(k, e as String),
   ),
@@ -85,6 +86,7 @@ Map<String, dynamic> _$FeedsV3CommentResponseToJson(
     instance.editedAt,
     const StreamDateTimeConverter().toJson,
   ),
+  'hidden': instance.hidden,
   'i18n': instance.i18n,
   'id': instance.id,
   'latest_reactions': instance.latestReactions?.map((e) => e.toJson()).toList(),
