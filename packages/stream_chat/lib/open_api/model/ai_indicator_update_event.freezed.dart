@@ -23,6 +23,7 @@ mixin _$AIIndicatorUpdateEvent {
   String get messageId;
   DateTime? get receivedAt;
   String get type;
+  UserResponseCommonFields? get user;
 
   /// Create a copy of AIIndicatorUpdateEvent
   /// with the given fields replaced by the non-null parameter values.
@@ -48,7 +49,8 @@ mixin _$AIIndicatorUpdateEvent {
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.messageId, messageId) || other.messageId == messageId) &&
             (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
-            (identical(other.type, type) || other.type == type));
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.user, user) || other.user == user));
   }
 
   @override
@@ -64,11 +66,12 @@ mixin _$AIIndicatorUpdateEvent {
     messageId,
     receivedAt,
     type,
+    user,
   );
 
   @override
   String toString() {
-    return 'AIIndicatorUpdateEvent(aiMessage: $aiMessage, aiState: $aiState, channelId: $channelId, channelType: $channelType, cid: $cid, createdAt: $createdAt, custom: $custom, messageId: $messageId, receivedAt: $receivedAt, type: $type)';
+    return 'AIIndicatorUpdateEvent(aiMessage: $aiMessage, aiState: $aiState, channelId: $channelId, channelType: $channelType, cid: $cid, createdAt: $createdAt, custom: $custom, messageId: $messageId, receivedAt: $receivedAt, type: $type, user: $user)';
   }
 }
 
@@ -90,6 +93,7 @@ abstract mixin class $AIIndicatorUpdateEventCopyWith<$Res> {
     String messageId,
     DateTime? receivedAt,
     String type,
+    UserResponseCommonFields? user,
   });
 }
 
@@ -115,6 +119,7 @@ class _$AIIndicatorUpdateEventCopyWithImpl<$Res> implements $AIIndicatorUpdateEv
     Object? messageId = null,
     Object? receivedAt = freezed,
     Object? type = null,
+    Object? user = freezed,
   }) {
     return _then(
       AIIndicatorUpdateEvent(
@@ -158,6 +163,10 @@ class _$AIIndicatorUpdateEventCopyWithImpl<$Res> implements $AIIndicatorUpdateEv
             ? _self.type
             : type // ignore: cast_nullable_to_non_nullable
                   as String,
+        user: freezed == user
+            ? _self.user
+            : user // ignore: cast_nullable_to_non_nullable
+                  as UserResponseCommonFields?,
       ),
     );
   }

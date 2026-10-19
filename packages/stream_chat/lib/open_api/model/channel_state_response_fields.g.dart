@@ -15,6 +15,7 @@ ChannelStateResponseFields _$ChannelStateResponseFieldsFromJson(
       )
       .toList(),
   channel: json['channel'] == null ? null : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
+  cooldownRemainingMs: (json['cooldown_remaining_ms'] as num?)?.toInt(),
   draft: json['draft'] == null ? null : DraftResponse.fromJson(json['draft'] as Map<String, dynamic>),
   hidden: json['hidden'] as bool?,
   hideMessagesBefore: _$JsonConverterFromJson<Object, DateTime>(
@@ -56,6 +57,7 @@ Map<String, dynamic> _$ChannelStateResponseFieldsToJson(
 ) => <String, dynamic>{
   'active_live_locations': instance.activeLiveLocations?.map((e) => e.toJson()).toList(),
   'channel': instance.channel?.toJson(),
+  'cooldown_remaining_ms': instance.cooldownRemainingMs,
   'draft': instance.draft?.toJson(),
   'hidden': instance.hidden,
   'hide_messages_before': _$JsonConverterToJson<Object, DateTime>(

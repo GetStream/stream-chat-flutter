@@ -5,7 +5,7 @@ import 'chat_preferences.dart';
 part 'push_preference.g.dart';
 
 /// Chat level push preference type
-extension type const ChatLevel(String rawType) implements String {
+extension type const ChatLevel(String _) implements String {
   /// All messages
   static const all = ChatLevel('all');
 
@@ -29,7 +29,7 @@ extension type const ChatLevel(String rawType) implements String {
 }
 
 /// Call level push preference type
-extension type const CallLevel(String rawType) implements String {
+extension type const CallLevel(String _) implements String {
   /// All calls
   static const all = CallLevel('all');
 

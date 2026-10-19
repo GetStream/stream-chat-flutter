@@ -22,7 +22,6 @@ extension UserResponseMapper on api.UserResponse {
     ...OwnUser.topLevelFields,
     'deleted_at',
     'deactivated_at',
-    'revoke_tokens_issued_before',
   };
 
   /// Converts this response into a [User].

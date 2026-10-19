@@ -22,6 +22,9 @@ mixin _$SubmitActionRequest {
   DeleteActivityRequestPayload? get deleteActivity;
   DeleteCommentRequestPayload? get deleteComment;
   DeleteMessageRequestPayload? get deleteMessage;
+  DeletePollRequestPayload? get deletePoll;
+  DeletePollAnswerRequestPayload? get deletePollAnswer;
+  DeletePollOptionRequestPayload? get deletePollOption;
   DeleteReactionRequestPayload? get deleteReaction;
   DeleteUserRequestPayload? get deleteUser;
   DeleteUserMessagesRequestPayload? get deleteUserMessages;
@@ -59,6 +62,9 @@ mixin _$SubmitActionRequest {
             (identical(other.deleteActivity, deleteActivity) || other.deleteActivity == deleteActivity) &&
             (identical(other.deleteComment, deleteComment) || other.deleteComment == deleteComment) &&
             (identical(other.deleteMessage, deleteMessage) || other.deleteMessage == deleteMessage) &&
+            (identical(other.deletePoll, deletePoll) || other.deletePoll == deletePoll) &&
+            (identical(other.deletePollAnswer, deletePollAnswer) || other.deletePollAnswer == deletePollAnswer) &&
+            (identical(other.deletePollOption, deletePollOption) || other.deletePollOption == deletePollOption) &&
             (identical(other.deleteReaction, deleteReaction) || other.deleteReaction == deleteReaction) &&
             (identical(other.deleteUser, deleteUser) || other.deleteUser == deleteUser) &&
             (identical(other.deleteUserMessages, deleteUserMessages) ||
@@ -86,6 +92,9 @@ mixin _$SubmitActionRequest {
     deleteActivity,
     deleteComment,
     deleteMessage,
+    deletePoll,
+    deletePollAnswer,
+    deletePollOption,
     deleteReaction,
     deleteUser,
     deleteUserMessages,
@@ -102,7 +111,7 @@ mixin _$SubmitActionRequest {
 
   @override
   String toString() {
-    return 'SubmitActionRequest(actionType: $actionType, appealId: $appealId, ban: $ban, block: $block, bypass: $bypass, custom: $custom, deleteActivity: $deleteActivity, deleteComment: $deleteComment, deleteMessage: $deleteMessage, deleteReaction: $deleteReaction, deleteUser: $deleteUser, deleteUserMessages: $deleteUserMessages, escalate: $escalate, flag: $flag, itemId: $itemId, markReviewed: $markReviewed, rejectAppeal: $rejectAppeal, restore: $restore, shadowBlock: $shadowBlock, unban: $unban, unblock: $unblock)';
+    return 'SubmitActionRequest(actionType: $actionType, appealId: $appealId, ban: $ban, block: $block, bypass: $bypass, custom: $custom, deleteActivity: $deleteActivity, deleteComment: $deleteComment, deleteMessage: $deleteMessage, deletePoll: $deletePoll, deletePollAnswer: $deletePollAnswer, deletePollOption: $deletePollOption, deleteReaction: $deleteReaction, deleteUser: $deleteUser, deleteUserMessages: $deleteUserMessages, escalate: $escalate, flag: $flag, itemId: $itemId, markReviewed: $markReviewed, rejectAppeal: $rejectAppeal, restore: $restore, shadowBlock: $shadowBlock, unban: $unban, unblock: $unblock)';
   }
 }
 
@@ -123,6 +132,9 @@ abstract mixin class $SubmitActionRequestCopyWith<$Res> {
     DeleteActivityRequestPayload? deleteActivity,
     DeleteCommentRequestPayload? deleteComment,
     DeleteMessageRequestPayload? deleteMessage,
+    DeletePollRequestPayload? deletePoll,
+    DeletePollAnswerRequestPayload? deletePollAnswer,
+    DeletePollOptionRequestPayload? deletePollOption,
     DeleteReactionRequestPayload? deleteReaction,
     DeleteUserRequestPayload? deleteUser,
     DeleteUserMessagesRequestPayload? deleteUserMessages,
@@ -159,6 +171,9 @@ class _$SubmitActionRequestCopyWithImpl<$Res> implements $SubmitActionRequestCop
     Object? deleteActivity = freezed,
     Object? deleteComment = freezed,
     Object? deleteMessage = freezed,
+    Object? deletePoll = freezed,
+    Object? deletePollAnswer = freezed,
+    Object? deletePollOption = freezed,
     Object? deleteReaction = freezed,
     Object? deleteUser = freezed,
     Object? deleteUserMessages = freezed,
@@ -210,6 +225,18 @@ class _$SubmitActionRequestCopyWithImpl<$Res> implements $SubmitActionRequestCop
             ? _self.deleteMessage
             : deleteMessage // ignore: cast_nullable_to_non_nullable
                   as DeleteMessageRequestPayload?,
+        deletePoll: freezed == deletePoll
+            ? _self.deletePoll
+            : deletePoll // ignore: cast_nullable_to_non_nullable
+                  as DeletePollRequestPayload?,
+        deletePollAnswer: freezed == deletePollAnswer
+            ? _self.deletePollAnswer
+            : deletePollAnswer // ignore: cast_nullable_to_non_nullable
+                  as DeletePollAnswerRequestPayload?,
+        deletePollOption: freezed == deletePollOption
+            ? _self.deletePollOption
+            : deletePollOption // ignore: cast_nullable_to_non_nullable
+                  as DeletePollOptionRequestPayload?,
         deleteReaction: freezed == deleteReaction
             ? _self.deleteReaction
             : deleteReaction // ignore: cast_nullable_to_non_nullable

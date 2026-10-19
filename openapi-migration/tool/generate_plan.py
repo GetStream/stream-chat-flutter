@@ -56,11 +56,18 @@ def read_handwritten():
 
 
 def read_generated():
-    """[(verb, path, operation, responseType)] for the generated client."""
-    return re.findall(
-        r"@(GET|POST|PATCH|PUT|DELETE)\('([^']+)'\)\s*\n\s*Future<Result<(\w+)>>\s+(\w+)\(",
-        GENERATED_API.read_text(),
-    )
+    """[(verb, path, operation, responseType)] for the generated client.
+
+    An operation that sends a query parameter as JSON is annotated on a private `_name` method, which the public
+    `name` forwards to; it is listed under the public name.
+    """
+    return [
+        (verb, path, response, operation.removeprefix('_'))
+        for verb, path, response, operation in re.findall(
+            r"@(GET|POST|PATCH|PUT|DELETE)\('([^']+)'\)\s*\n\s*Future<Result<(\w+)>>\s+(\w+)\(",
+            GENERATED_API.read_text(),
+        )
+    ]
 
 
 # Every 'VERB /path' named by only_ops or unless_ops, so the report can flag one that matches no operation.
@@ -304,11 +311,11 @@ GROUPS = [
               in the raw `me`. None was ever applied. Verified live against the demo app and in the backend source;
               recorded as a 🐞 Fixed entry.
             - **`UserResponse.toModel()` leaves custom keys named like `OwnUser` fields (`OwnUser.topLevelFields`),
-              plus `deleted_at`, `deactivated_at` and `revoke_tokens_issued_before`, out of `extraData`.** v1's flat
+              plus `deleted_at` and `deactivated_at`, out of `extraData`.** v1's flat
               user JSON shadowed them; v2 nests custom data, and without the guard a custom `online` string crashed
               `OwnUser.fromUser`. `User.toRequest()` leaves the same keys out of the custom data it sends.
-            - **The three extra names are guarded because the socket connect refuses them.** A custom
-              `deleted_at`, `deactivated_at` or `revoke_tokens_issued_before` left in `extraData` is re-sent in the
+            - **The two extra names are guarded because the socket connect refuses them.** A custom
+              `deleted_at` or `deactivated_at` left in `extraData` is re-sent in the
               connect's user details, and the backend answers 400 ("reserved field", or "expected date" for a
               non-date value). v10's flat response shadowed them, so the same guest connected; confirmed live.
             - **Not a regression: a custom `ban_expires` that isn't a date** fails the connect in v10 and now alike,
@@ -590,8 +597,8 @@ GROUPS = [
             '`PrivacySettings` and the push-preference sub-shapes — decide per type.',
             '**`User.name` and `image` become fields** (README rule 9): `UserResponse` types them, and the constructor '
             'stops writing them into `extraData`; decide whether `name` keeps its fallback to `id`. `deleted_at`, '
-            '`deactivated_at`, `revoke_tokens_issued_before` and `blocked_user_ids`, which `UserResponse` types and v1 '
-            'kept in a plain user\'s `extraData`, become fields or are dropped, never `extraData`. '
+            '`deactivated_at` and `blocked_user_ids`, which `UserResponse` types and v1 kept in a plain user\'s '
+            '`extraData`, become fields or are dropped, never `extraData`. '
             '`UserResponse.toModel()` then copies `custom` verbatim into the field, renamed `custom`, and '
             '`UserRequestMapper` stops reading `extraData[\'name\']` and `[\'image\']`.',
             '`UserFilterField.shadowBanned` and `.bypassModeration` read `extraData`, which the generated '
@@ -612,8 +619,8 @@ GROUPS = [
             'behind. Adding them is additive for anyone reading the response, so revisit them here rather '
             'than leaving them dropped for good.',
             'Until then, a user mapped from `UserResponse` and the same user decoded from v1 JSON carry different '
-            '`extraData`: the v1 path keeps `blocked_user_ids`, `deleted_at`, `deactivated_at` and '
-            '`revoke_tokens_issued_before`, the mapper drops them. Equality includes `extraData`, so a `Poll` from a '
+            '`extraData`: the v1 path keeps `blocked_user_ids`, `deleted_at` and `deactivated_at`, '
+            'the mapper drops them. Equality includes `extraData`, so a `Poll` from a '
             'REST call (its `createdBy`, its votes\' `user`) and the same poll from an event compare unequal.',
         ],
         done=DONE + (

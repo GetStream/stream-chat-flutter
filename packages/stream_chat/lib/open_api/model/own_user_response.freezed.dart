@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$OwnUserResponse {
   int? get avgResponseTime;
   bool get banned;
-  List<String>? get blockedUserIds;
+  List<String> get blockedUserIds;
   List<ChannelMute> get channelMutes;
   DateTime get createdAt;
   Map<String, Object?> get custom;
@@ -33,7 +33,6 @@ mixin _$OwnUserResponse {
   bool get online;
   PrivacySettingsResponse? get privacySettings;
   PushPreferencesResponse? get pushPreferences;
-  DateTime? get revokeTokensIssuedBefore;
   String get role;
   List<String> get teams;
   Map<String, String>? get teamsRole;
@@ -87,11 +86,6 @@ mixin _$OwnUserResponse {
             (identical(other.online, online) || other.online == online) &&
             (identical(other.privacySettings, privacySettings) || other.privacySettings == privacySettings) &&
             (identical(other.pushPreferences, pushPreferences) || other.pushPreferences == pushPreferences) &&
-            (identical(
-                  other.revokeTokensIssuedBefore,
-                  revokeTokensIssuedBefore,
-                ) ||
-                other.revokeTokensIssuedBefore == revokeTokensIssuedBefore) &&
             (identical(other.role, role) || other.role == role) &&
             const DeepCollectionEquality().equals(other.teams, teams) &&
             const DeepCollectionEquality().equals(other.teamsRole, teamsRole) &&
@@ -129,7 +123,6 @@ mixin _$OwnUserResponse {
     online,
     privacySettings,
     pushPreferences,
-    revokeTokensIssuedBefore,
     role,
     const DeepCollectionEquality().hash(teams),
     const DeepCollectionEquality().hash(teamsRole),
@@ -143,7 +136,7 @@ mixin _$OwnUserResponse {
 
   @override
   String toString() {
-    return 'OwnUserResponse(avgResponseTime: $avgResponseTime, banned: $banned, blockedUserIds: $blockedUserIds, channelMutes: $channelMutes, createdAt: $createdAt, custom: $custom, deactivatedAt: $deactivatedAt, deletedAt: $deletedAt, devices: $devices, id: $id, image: $image, invisible: $invisible, language: $language, lastActive: $lastActive, latestHiddenChannels: $latestHiddenChannels, mutes: $mutes, name: $name, online: $online, privacySettings: $privacySettings, pushPreferences: $pushPreferences, revokeTokensIssuedBefore: $revokeTokensIssuedBefore, role: $role, teams: $teams, teamsRole: $teamsRole, totalUnreadCount: $totalUnreadCount, totalUnreadCountByTeam: $totalUnreadCountByTeam, unreadChannels: $unreadChannels, unreadCount: $unreadCount, unreadThreads: $unreadThreads, updatedAt: $updatedAt)';
+    return 'OwnUserResponse(avgResponseTime: $avgResponseTime, banned: $banned, blockedUserIds: $blockedUserIds, channelMutes: $channelMutes, createdAt: $createdAt, custom: $custom, deactivatedAt: $deactivatedAt, deletedAt: $deletedAt, devices: $devices, id: $id, image: $image, invisible: $invisible, language: $language, lastActive: $lastActive, latestHiddenChannels: $latestHiddenChannels, mutes: $mutes, name: $name, online: $online, privacySettings: $privacySettings, pushPreferences: $pushPreferences, role: $role, teams: $teams, teamsRole: $teamsRole, totalUnreadCount: $totalUnreadCount, totalUnreadCountByTeam: $totalUnreadCountByTeam, unreadChannels: $unreadChannels, unreadCount: $unreadCount, unreadThreads: $unreadThreads, updatedAt: $updatedAt)';
   }
 }
 
@@ -157,7 +150,7 @@ abstract mixin class $OwnUserResponseCopyWith<$Res> {
   $Res call({
     int? avgResponseTime,
     bool banned,
-    List<String>? blockedUserIds,
+    List<String> blockedUserIds,
     List<ChannelMute> channelMutes,
     DateTime createdAt,
     Map<String, Object?> custom,
@@ -175,7 +168,6 @@ abstract mixin class $OwnUserResponseCopyWith<$Res> {
     bool online,
     PrivacySettingsResponse? privacySettings,
     PushPreferencesResponse? pushPreferences,
-    DateTime? revokeTokensIssuedBefore,
     String role,
     List<String> teams,
     Map<String, String>? teamsRole,
@@ -202,7 +194,7 @@ class _$OwnUserResponseCopyWithImpl<$Res> implements $OwnUserResponseCopyWith<$R
   $Res call({
     Object? avgResponseTime = freezed,
     Object? banned = null,
-    Object? blockedUserIds = freezed,
+    Object? blockedUserIds = null,
     Object? channelMutes = null,
     Object? createdAt = null,
     Object? custom = null,
@@ -220,7 +212,6 @@ class _$OwnUserResponseCopyWithImpl<$Res> implements $OwnUserResponseCopyWith<$R
     Object? online = null,
     Object? privacySettings = freezed,
     Object? pushPreferences = freezed,
-    Object? revokeTokensIssuedBefore = freezed,
     Object? role = null,
     Object? teams = null,
     Object? teamsRole = freezed,
@@ -241,10 +232,10 @@ class _$OwnUserResponseCopyWithImpl<$Res> implements $OwnUserResponseCopyWith<$R
             ? _self.banned
             : banned // ignore: cast_nullable_to_non_nullable
                   as bool,
-        blockedUserIds: freezed == blockedUserIds
+        blockedUserIds: null == blockedUserIds
             ? _self.blockedUserIds
             : blockedUserIds // ignore: cast_nullable_to_non_nullable
-                  as List<String>?,
+                  as List<String>,
         channelMutes: null == channelMutes
             ? _self.channelMutes
             : channelMutes // ignore: cast_nullable_to_non_nullable
@@ -313,10 +304,6 @@ class _$OwnUserResponseCopyWithImpl<$Res> implements $OwnUserResponseCopyWith<$R
             ? _self.pushPreferences
             : pushPreferences // ignore: cast_nullable_to_non_nullable
                   as PushPreferencesResponse?,
-        revokeTokensIssuedBefore: freezed == revokeTokensIssuedBefore
-            ? _self.revokeTokensIssuedBefore
-            : revokeTokensIssuedBefore // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
         role: null == role
             ? _self.role
             : role // ignore: cast_nullable_to_non_nullable
