@@ -20,6 +20,7 @@ class AppResponseFields with _$AppResponseFields {
   const AppResponseFields({
     required this.asyncUrlEnrichEnabled,
     required this.autoTranslationEnabled,
+    required this.defaults,
     required this.fileUploadConfig,
     required this.id,
     required this.imageUploadConfig,
@@ -34,6 +35,10 @@ class AppResponseFields with _$AppResponseFields {
   @override
   @JsonKey(name: 'auto_translation_enabled')
   final bool autoTranslationEnabled;
+
+  @override
+  @JsonKey(name: 'defaults')
+  final AppDefaults defaults;
 
   @override
   @JsonKey(name: 'file_upload_config')

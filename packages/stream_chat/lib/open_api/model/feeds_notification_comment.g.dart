@@ -14,6 +14,7 @@ FeedsNotificationComment _$FeedsNotificationCommentFromJson(
       .toList(),
   comment: json['comment'] as String,
   id: json['id'] as String,
+  parentId: json['parent_id'] as String?,
   userId: json['user_id'] as String,
 );
 
@@ -23,5 +24,6 @@ Map<String, dynamic> _$FeedsNotificationCommentToJson(
   'attachments': instance.attachments?.map((e) => e.toJson()).toList(),
   'comment': instance.comment,
   'id': instance.id,
+  'parent_id': instance.parentId,
   'user_id': instance.userId,
 };

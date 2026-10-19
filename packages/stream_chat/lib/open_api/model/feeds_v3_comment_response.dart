@@ -27,6 +27,7 @@ class FeedsV3CommentResponse with _$FeedsV3CommentResponse {
     this.deletedAt,
     required this.downvoteCount,
     this.editedAt,
+    required this.hidden,
     this.i18n,
     required this.id,
     this.latestReactions,
@@ -85,6 +86,10 @@ class FeedsV3CommentResponse with _$FeedsV3CommentResponse {
   @StreamDateTimeConverter()
   @JsonKey(name: 'edited_at')
   final DateTime? editedAt;
+
+  @override
+  @JsonKey(name: 'hidden')
+  final bool hidden;
 
   @override
   @JsonKey(name: 'i18n')

@@ -3,6 +3,8 @@
 // coverage:ignore-file
 // ignore_for_file: unused_import, unnecessary_import, prefer_single_quotes, require_trailing_commas, unnecessary_raw_strings, public_member_api_docs
 
+import 'dart:convert' show jsonEncode;
+
 import 'package:retrofit/retrofit.dart';
 import 'package:stream_core/stream_core.dart';
 
@@ -10,49 +12,66 @@ import '../models.dart';
 
 part 'default_api.g.dart';
 
-@RestApi(callAdapter: _ResultCallAdapter)
+// Call adapters are set per operation: retrofit_generator applies a
+// class-level adapter to every method, concrete ones included, so its overrides
+// would replace the typed methods declared here.
+@RestApi()
 abstract interface class DefaultApi {
   factory DefaultApi(
     Dio dio, {
     String? baseUrl,
-  }) = _DefaultApi;
+  }) = _DefaultApi._;
 
+  // A named non-factory constructor makes retrofit_generator extend this class
+  // instead of implementing it, so concrete methods declared here are
+  // inherited. The generated class mirrors it as `_DefaultApi._`, which is why
+  // the factory redirects there.
+  const DefaultApi._();
+
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/usergroups/{id}/members')
   Future<Result<AddUserGroupMembersResponse>> addUserGroupMembers({
     @Path('id') required String id,
     @Body() required AddUserGroupMembersRequest addUserGroupMembersRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/appeal')
   Future<Result<AppealResponse>> appeal({
     @Body() required AppealRequest appealRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/ban')
   Future<Result<ModerationBanResponse>> ban({
     @Body() required BanRequest banRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/users/block')
   Future<Result<BlockUsersResponse>> blockUsers({
     @Body() required BlockUsersRequest blockUsersRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/appeals/bulk_action')
   Future<Result<BulkActionAppealsResponse>> bulkActionAppeals({
     @Body() required BulkActionAppealsRequest bulkActionAppealsRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/action_config/bulk_delete')
   Future<Result<BulkDeleteActionConfigResponse>> bulkDeleteActionConfig({
     @Body() required BulkDeleteActionConfigRequest bulkDeleteActionConfigRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/action_config/bulk')
   Future<Result<BulkUpsertActionConfigResponse>> bulkUpsertActionConfig({
     @Body() required BulkUpsertActionConfigRequest bulkUpsertActionConfigRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/messages/{message_id}/polls/{poll_id}/vote')
   Future<Result<PollVoteResponse>> castPollVote({
     @Path('message_id') required String messageId,
@@ -60,16 +79,19 @@ abstract interface class DefaultApi {
     @Body() CastPollVoteRequest? castPollVoteRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/blocklists')
   Future<Result<CreateBlockListResponse>> createBlockList({
     @Body() required CreateBlockListRequest createBlockListRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/devices')
   Future<Result<DurationResponse>> createDevice({
     @Body() required CreateDeviceRequest createDeviceRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/channels/{type}/{id}/draft')
   Future<Result<CreateDraftResponse>> createDraft({
     @Path('type') required String type,
@@ -77,49 +99,58 @@ abstract interface class DefaultApi {
     @Body() required CreateDraftRequest createDraftRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/guest')
   Future<Result<CreateGuestResponse>> createGuest({
     @Body() required CreateGuestRequest createGuestRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/polls')
   Future<Result<PollResponse>> createPoll({
     @Body() required CreatePollRequest createPollRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/polls/{poll_id}/options')
   Future<Result<PollOptionResponse>> createPollOption({
     @Path('poll_id') required String pollId,
     @Body() required CreatePollOptionRequest createPollOptionRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/queues')
   Future<Result<QueueResponse>> createQueue({
     @Body() required CreateQueueRequest createQueueRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/messages/{message_id}/reminders')
   Future<Result<CreateReminderResponse>> createReminder({
     @Path('message_id') required String messageId,
     @Body() CreateReminderRequest? createReminderRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/usergroups')
   Future<Result<CreateUserGroupResponse>> createUserGroup({
     @Body() required CreateUserGroupRequest createUserGroupRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/moderation/action_config/{id}')
   Future<Result<DeleteActionConfigResponse>> deleteActionConfig({
     @Path('id') required String id,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/blocklists/{name}')
   Future<Result<DurationResponse>> deleteBlockList({
     @Path('name') required String name,
     @Query('team') String? team,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/chat/channels/{type}/{id}')
   Future<Result<DeleteChannelResponse>> deleteChannel({
     @Path('type') required String type,
@@ -127,6 +158,7 @@ abstract interface class DefaultApi {
     @Query('hard_delete') bool? hardDelete,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/chat/channels/{type}/{id}/file')
   Future<Result<DurationResponse>> deleteChannelFile({
     @Path('type') required String type,
@@ -134,6 +166,7 @@ abstract interface class DefaultApi {
     @Query('url') String? url,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/chat/channels/{type}/{id}/image')
   Future<Result<DurationResponse>> deleteChannelImage({
     @Path('type') required String type,
@@ -141,22 +174,26 @@ abstract interface class DefaultApi {
     @Query('url') String? url,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/channels/delete')
   Future<Result<DeleteChannelsResponse>> deleteChannels({
     @Body() required DeleteChannelsRequest deleteChannelsRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/moderation/config/{key}')
   Future<Result<DeleteModerationConfigResponse>> deleteConfig({
     @Path('key') required String key,
     @Query('team') String? team,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/devices')
   Future<Result<DurationResponse>> deleteDevice({
     @Query('id') required String id,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/chat/channels/{type}/{id}/draft')
   Future<Result<DurationResponse>> deleteDraft({
     @Path('type') required String type,
@@ -164,16 +201,19 @@ abstract interface class DefaultApi {
     @Query('parent_id') String? parentId,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/uploads/file')
   Future<Result<DurationResponse>> deleteFile({
     @Query('url') String? url,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/uploads/image')
   Future<Result<DurationResponse>> deleteImage({
     @Query('url') String? url,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/chat/messages/{id}')
   Future<Result<DeleteMessageResponse>> deleteMessage({
     @Path('id') required String id,
@@ -181,17 +221,20 @@ abstract interface class DefaultApi {
     @Query('delete_for_me') bool? deleteForMe,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/polls/{poll_id}')
   Future<Result<DurationResponse>> deletePoll({
     @Path('poll_id') required String pollId,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/polls/{poll_id}/options/{option_id}')
   Future<Result<DurationResponse>> deletePollOption({
     @Path('poll_id') required String pollId,
     @Path('option_id') required String optionId,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/chat/messages/{message_id}/polls/{poll_id}/vote/{vote_id}')
   Future<Result<PollVoteResponse>> deletePollVote({
     @Path('message_id') required String messageId,
@@ -199,33 +242,39 @@ abstract interface class DefaultApi {
     @Path('vote_id') required String voteId,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/queues/{id}/delete')
   Future<Result<QueueResponse>> deleteQueue({
     @Path('id') required String id,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/chat/messages/{id}/reaction/{type}')
   Future<Result<DeleteReactionResponse>> deleteReaction({
     @Path('id') required String id,
     @Path('type') required String type,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/chat/messages/{message_id}/reminders')
   Future<Result<DeleteReminderResponse>> deleteReminder({
     @Path('message_id') required String messageId,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/usergroups/{id}')
   Future<Result<DurationResponse>> deleteUserGroup({
     @Path('id') required String id,
     @Query('team_id') String? teamId,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/flag')
   Future<Result<FlagItemResponse>> flag({
     @Body() required FlagRequest flagRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/moderation/action_config')
   Future<Result<GetActionConfigResponse>> getActionConfig({
     @Query('queue_type') String? queueType,
@@ -234,17 +283,21 @@ abstract interface class DefaultApi {
     @Query('only_defaults') bool? onlyDefaults,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/app')
   Future<Result<GetApplicationResponse>> getApp();
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/moderation/appeal/{id}')
   Future<Result<GetAppealResponse>> getAppeal({
     @Path('id') required String id,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/users/block')
   Future<Result<GetBlockedUsersResponse>> getBlockedUsers();
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/chat/channels/{type}/{id}')
   Future<Result<ChannelStateResponse>> getChannel({
     @Path('type') required String type,
@@ -260,12 +313,14 @@ abstract interface class DefaultApi {
     @Query('messages_id_around') String? messagesIdAround,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/moderation/config/{key}')
   Future<Result<GetConfigResponse>> getConfig({
     @Path('key') required String key,
     @Query('team') String? team,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/chat/channels/{type}/{id}/draft')
   Future<Result<GetDraftResponse>> getDraft({
     @Path('type') required String type,
@@ -273,6 +328,7 @@ abstract interface class DefaultApi {
     @Query('parent_id') String? parentId,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/chat/channels/{type}/{id}/messages')
   Future<Result<GetManyMessagesResponse>> getManyMessages({
     @Path('type') required String type,
@@ -281,16 +337,19 @@ abstract interface class DefaultApi {
     @Query('member_custom_include') List<String>? memberCustomInclude,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/chat/messages/{id}')
   Future<Result<GetMessageResponse>> getMessage({
     @Path('id') required String id,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/og')
   Future<Result<GetOGResponse>> getOG({
     @Query('url') required String url,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/channels/{type}/{id}/query')
   Future<Result<ChannelStateResponse>> getOrCreateChannel({
     @Path('type') required String type,
@@ -298,14 +357,52 @@ abstract interface class DefaultApi {
     @Body() ChannelGetOrCreateRequest? channelGetOrCreateRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/channels/{type}/query')
   Future<Result<ChannelStateResponse>> getOrCreateDistinctChannel({
     @Path('type') required String type,
     @Body() ChannelGetOrCreateRequest? channelGetOrCreateRequest,
   });
 
-  @GET('/api/v2/chat/channels/{type}/{id}/pinned_messages')
   Future<Result<GetPinnedMessagesResponse>> getPinnedMessages({
+    required String type,
+    required String id,
+    int? limit,
+    int? offset,
+    String? idGte,
+    String? idGt,
+    String? idLte,
+    String? idLt,
+    DateTime? pinnedAtAfterOrEqual,
+    DateTime? pinnedAtAfter,
+    DateTime? pinnedAtBeforeOrEqual,
+    DateTime? pinnedAtBefore,
+    String? idAround,
+    DateTime? pinnedAtAround,
+    List<SortParamRequest>? sort,
+    List<String>? memberCustomInclude,
+  }) => _getPinnedMessages(
+    type: type,
+    id: id,
+    limit: limit,
+    offset: offset,
+    idGte: idGte,
+    idGt: idGt,
+    idLte: idLte,
+    idLt: idLt,
+    pinnedAtAfterOrEqual: pinnedAtAfterOrEqual,
+    pinnedAtAfter: pinnedAtAfter,
+    pinnedAtBeforeOrEqual: pinnedAtBeforeOrEqual,
+    pinnedAtBefore: pinnedAtBefore,
+    idAround: idAround,
+    pinnedAtAround: pinnedAtAround,
+    sort: _JsonQuery.of(sort),
+    memberCustomInclude: memberCustomInclude,
+  );
+
+  @UseCallAdapter(_ResultCallAdapter)
+  @GET('/api/v2/chat/channels/{type}/{id}/pinned_messages')
+  Future<Result<GetPinnedMessagesResponse>> _getPinnedMessages({
     @Path('type') required String type,
     @Path('id') required String id,
     @Query('limit') int? limit,
@@ -320,26 +417,30 @@ abstract interface class DefaultApi {
     @Query('pinned_at_before') DateTime? pinnedAtBefore,
     @Query('id_around') String? idAround,
     @Query('pinned_at_around') DateTime? pinnedAtAround,
-    @Query('sort') List<SortParamRequest>? sort,
+    @Query('sort') _JsonQuery? sort,
     @Query('member_custom_include') List<String>? memberCustomInclude,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/polls/{poll_id}')
   Future<Result<PollResponse>> getPoll({
     @Path('poll_id') required String pollId,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/polls/{poll_id}/options/{option_id}')
   Future<Result<PollOptionResponse>> getPollOption({
     @Path('poll_id') required String pollId,
     @Path('option_id') required String optionId,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/moderation/queues/{id}')
   Future<Result<QueueResponse>> getQueue({
     @Path('id') required String id,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/chat/messages/{id}/reactions')
   Future<Result<GetReactionsResponse>> getReactions({
     @Path('id') required String id,
@@ -347,8 +448,31 @@ abstract interface class DefaultApi {
     @Query('offset') int? offset,
   });
 
-  @GET('/api/v2/chat/messages/{parent_id}/replies')
   Future<Result<GetRepliesResponse>> getReplies({
+    required String parentId,
+    int? limit,
+    String? idGte,
+    String? idGt,
+    String? idLte,
+    String? idLt,
+    String? idAround,
+    List<SortParamRequest>? sort,
+    List<String>? memberCustomInclude,
+  }) => _getReplies(
+    parentId: parentId,
+    limit: limit,
+    idGte: idGte,
+    idGt: idGt,
+    idLte: idLte,
+    idLt: idLt,
+    idAround: idAround,
+    sort: _JsonQuery.of(sort),
+    memberCustomInclude: memberCustomInclude,
+  );
+
+  @UseCallAdapter(_ResultCallAdapter)
+  @GET('/api/v2/chat/messages/{parent_id}/replies')
+  Future<Result<GetRepliesResponse>> _getReplies({
     @Path('parent_id') required String parentId,
     @Query('limit') int? limit,
     @Query('id_gte') String? idGte,
@@ -356,10 +480,11 @@ abstract interface class DefaultApi {
     @Query('id_lte') String? idLte,
     @Query('id_lt') String? idLt,
     @Query('id_around') String? idAround,
-    @Query('sort') List<SortParamRequest>? sort,
+    @Query('sort') _JsonQuery? sort,
     @Query('member_custom_include') List<String>? memberCustomInclude,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/chat/threads/{message_id}')
   Future<Result<GetThreadResponse>> getThread({
     @Path('message_id') required String messageId,
@@ -369,20 +494,24 @@ abstract interface class DefaultApi {
     @Query('member_limit') int? memberLimit,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/usergroups/{id}')
   Future<Result<GetUserGroupResponse>> getUserGroup({
     @Path('id') required String id,
     @Query('team_id') String? teamId,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/users/live_locations')
   Future<Result<SharedLocationsResponse>> getUserLiveLocations();
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/channels/grouped')
   Future<Result<GroupedQueryChannelsResponse>> groupedQueryChannels({
     @Body() GroupedQueryChannelsRequest? groupedQueryChannelsRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/channels/{type}/{id}/hide')
   Future<Result<HideChannelResponse>> hideChannel({
     @Path('type') required String type,
@@ -390,12 +519,14 @@ abstract interface class DefaultApi {
     @Body() HideChannelRequest? hideChannelRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/blocklists/{id}/import')
   Future<Result<ImportBlockListResponse>> importBlockList({
     @Path('id') required String id,
     @Body() required ImportBlockListRequest importBlockListRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/blocklists')
   Future<Result<ListBlockListResponse>> listBlockLists({
     @Query('team') String? team,
@@ -403,12 +534,15 @@ abstract interface class DefaultApi {
     @Query('limit') int? limit,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/devices')
   Future<Result<ListDevicesResponse>> listDevices();
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/moderation/queues')
   Future<Result<ListQueuesResponse>> listQueues();
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/usergroups')
   Future<Result<ListUserGroupsResponse>> listUserGroups({
     @Query('limit') int? limit,
@@ -417,21 +551,34 @@ abstract interface class DefaultApi {
     @Query('team_id') String? teamId,
   });
 
-  @GET('/api/v2/longpoll')
   Future<Result<void>> longPoll({
-    @Query('json') WSAuthMessage? json,
+    bool? close,
+    WSAuthMessage? json,
+  }) => _longPoll(
+    close: close,
+    json: _JsonQuery.of(json),
+  );
+
+  @UseCallAdapter(_ResultCallAdapter)
+  @GET('/api/v2/longpoll')
+  Future<Result<void>> _longPoll({
+    @Query('close') bool? close,
+    @Query('json') _JsonQuery? json,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/channels/read')
   Future<Result<MarkReadResponse>> markChannelsRead({
     @Body() MarkChannelsReadRequest? markChannelsReadRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/channels/delivered')
   Future<Result<MarkDeliveredResponse>> markDelivered({
     @Body() MarkDeliveredRequest? markDeliveredRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/channels/{type}/{id}/read')
   Future<Result<MarkReadResponse>> markRead({
     @Path('type') required String type,
@@ -439,6 +586,7 @@ abstract interface class DefaultApi {
     @Body() MarkReadRequest? markReadRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/channels/{type}/{id}/unread')
   Future<Result<DurationResponse>> markUnread({
     @Path('type') required String type,
@@ -446,110 +594,175 @@ abstract interface class DefaultApi {
     @Body() MarkUnreadRequest? markUnreadRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/mute')
   Future<Result<MuteResponse>> mute({
     @Body() required MuteRequest muteRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/moderation/mute/channel')
   Future<Result<MuteChannelResponse>> muteChannel({
     @Body() MuteChannelRequest? muteChannelRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/appeals')
   Future<Result<QueryAppealsResponse>> queryAppeals({
     @Body() QueryAppealsRequest? queryAppealsRequest,
   });
 
-  @GET('/api/v2/chat/query_banned_users')
   Future<Result<QueryBannedUsersResponse>> queryBannedUsers({
-    @Query('payload') QueryBannedUsersPayload? payload,
+    QueryBannedUsersPayload? payload,
+  }) => _queryBannedUsers(
+    payload: _JsonQuery.of(payload),
+  );
+
+  @UseCallAdapter(_ResultCallAdapter)
+  @GET('/api/v2/chat/query_banned_users')
+  Future<Result<QueryBannedUsersResponse>> _queryBannedUsers({
+    @Query('payload') _JsonQuery? payload,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
+  @POST('/api/v2/chat/channels/{type}/{id}/bans/query')
+  Future<Result<QueryChannelBansResponse>> queryChannelBans({
+    @Path('type') required String type,
+    @Path('id') required String id,
+    @Body() QueryChannelBansRequest? queryChannelBansRequest,
+  });
+
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/channels')
   Future<Result<QueryChannelsResponse>> queryChannels({
     @Body() QueryChannelsRequest? queryChannelsRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/drafts/query')
   Future<Result<QueryDraftsResponse>> queryDrafts({
     @Body() QueryDraftsRequest? queryDraftsRequest,
   });
 
-  @GET('/api/v2/chat/query_future_channel_bans')
   Future<Result<QueryFutureChannelBansResponse>> queryFutureChannelBans({
-    @Query('payload') QueryFutureChannelBansPayload? payload,
+    QueryFutureChannelBansPayload? payload,
+  }) => _queryFutureChannelBans(
+    payload: _JsonQuery.of(payload),
+  );
+
+  @UseCallAdapter(_ResultCallAdapter)
+  @GET('/api/v2/chat/query_future_channel_bans')
+  Future<Result<QueryFutureChannelBansResponse>> _queryFutureChannelBans({
+    @Query('payload') _JsonQuery? payload,
   });
 
-  @GET('/api/v2/chat/members')
   Future<Result<MembersResponse>> queryMembers({
-    @Query('payload') QueryMembersPayload? payload,
+    QueryMembersPayload? payload,
+  }) => _queryMembers(
+    payload: _JsonQuery.of(payload),
+  );
+
+  @UseCallAdapter(_ResultCallAdapter)
+  @GET('/api/v2/chat/members')
+  Future<Result<MembersResponse>> _queryMembers({
+    @Query('payload') _JsonQuery? payload,
   });
 
-  @GET('/api/v2/chat/moderation/flags/message')
   Future<Result<QueryMessageFlagsResponse>> queryMessageFlags({
-    @Query('payload') QueryMessageFlagsPayload? payload,
+    QueryMessageFlagsPayload? payload,
+  }) => _queryMessageFlags(
+    payload: _JsonQuery.of(payload),
+  );
+
+  @UseCallAdapter(_ResultCallAdapter)
+  @GET('/api/v2/chat/moderation/flags/message')
+  Future<Result<QueryMessageFlagsResponse>> _queryMessageFlags({
+    @Query('payload') _JsonQuery? payload,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/configs')
   Future<Result<QueryModerationConfigsResponse>> queryModerationConfigs({
     @Body() QueryModerationConfigsRequest? queryModerationConfigsRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/polls/{poll_id}/votes')
   Future<Result<PollVotesResponse>> queryPollVotes({
     @Path('poll_id') required String pollId,
     @Body() QueryPollVotesRequest? queryPollVotesRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/polls/query')
   Future<Result<QueryPollsResponse>> queryPolls({
     @Body() QueryPollsRequest? queryPollsRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/messages/{id}/reactions')
   Future<Result<QueryReactionsResponse>> queryReactions({
     @Path('id') required String id,
     @Body() QueryReactionsRequest? queryReactionsRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/reminders/query')
   Future<Result<QueryRemindersResponse>> queryReminders({
     @Body() QueryRemindersRequest? queryRemindersRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/review_queue')
   Future<Result<QueryReviewQueueResponse>> queryReviewQueue({
     @Body() QueryReviewQueueRequest? queryReviewQueueRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/threads')
   Future<Result<QueryThreadsResponse>> queryThreads({
     @Body() QueryThreadsRequest? queryThreadsRequest,
   });
 
-  @GET('/api/v2/users')
   Future<Result<QueryUsersResponse>> queryUsers({
-    @Query('payload') QueryUsersPayload? payload,
+    QueryUsersPayload? payload,
+  }) => _queryUsers(
+    payload: _JsonQuery.of(payload),
+  );
+
+  @UseCallAdapter(_ResultCallAdapter)
+  @GET('/api/v2/users')
+  Future<Result<QueryUsersResponse>> _queryUsers({
+    @Query('payload') _JsonQuery? payload,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/usergroups/{id}/members/delete')
   Future<Result<RemoveUserGroupMembersResponse>> removeUserGroupMembers({
     @Path('id') required String id,
     @Body() required RemoveUserGroupMembersRequest removeUserGroupMembersRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/messages/{id}/action')
   Future<Result<MessageActionResponse>> runMessageAction({
     @Path('id') required String id,
     @Body() required MessageActionRequest messageActionRequest,
   });
 
-  @GET('/api/v2/chat/search')
   Future<Result<SearchResponse>> search({
-    @Query('payload') SearchPayload? payload,
+    SearchPayload? payload,
+  }) => _search(
+    payload: _JsonQuery.of(payload),
+  );
+
+  @UseCallAdapter(_ResultCallAdapter)
+  @GET('/api/v2/chat/search')
+  Future<Result<SearchResponse>> _search({
+    @Query('payload') _JsonQuery? payload,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/roles/search')
   Future<Result<SearchRolesResponse>> searchRoles({
     @Query('query') required String query,
@@ -559,6 +772,7 @@ abstract interface class DefaultApi {
     @Query('include_global_roles') bool? includeGlobalRoles,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/usergroups/search')
   Future<Result<SearchUserGroupsResponse>> searchUserGroups({
     @Query('query') required String query,
@@ -568,6 +782,7 @@ abstract interface class DefaultApi {
     @Query('team_id') String? teamId,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/channels/{type}/{id}/event')
   Future<Result<EventResponse>> sendEvent({
     @Path('type') required String type,
@@ -575,6 +790,7 @@ abstract interface class DefaultApi {
     @Body() required SendEventRequest sendEventRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/channels/{type}/{id}/message')
   Future<Result<SendMessageResponse>> sendMessage({
     @Path('type') required String type,
@@ -582,29 +798,34 @@ abstract interface class DefaultApi {
     @Body() required SendMessageRequest sendMessageRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/messages/{id}/reaction')
   Future<Result<SendReactionResponse>> sendReaction({
     @Path('id') required String id,
     @Body() required SendReactionRequest sendReactionRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/channels/{type}/{id}/show')
   Future<Result<ShowChannelResponse>> showChannel({
     @Path('type') required String type,
     @Path('id') required String id,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/channels/{type}/{id}/stop-watching')
   Future<Result<DurationResponse>> stopWatchingChannel({
     @Path('type') required String type,
     @Path('id') required String id,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/submit_action')
   Future<Result<SubmitActionResponse>> submitAction({
     @Body() required SubmitActionRequest submitActionRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/sync')
   Future<Result<SyncResponse>> sync({
     @Query('with_inaccessible_cids') bool? withInaccessibleCids,
@@ -612,12 +833,14 @@ abstract interface class DefaultApi {
     @Body() required SyncRequest syncRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/messages/{id}/translate')
   Future<Result<TranslateMessageResponse>> translateMessage({
     @Path('id') required String id,
     @Body() required TranslateMessageRequest translateMessageRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/channels/{type}/{id}/truncate')
   Future<Result<TruncateChannelResponse>> truncateChannel({
     @Path('type') required String type,
@@ -625,36 +848,43 @@ abstract interface class DefaultApi {
     @Body() TruncateChannelRequest? truncateChannelRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/unban')
   Future<Result<UnbanResponse>> unban({
     @Query('target_user_id') required String targetUserId,
     @Query('channel_cid') String? channelCid,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/users/unblock')
   Future<Result<UnblockUsersResponse>> unblockUsers({
     @Body() required UnblockUsersRequest unblockUsersRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/unmute')
   Future<Result<UnmuteResponse>> unmute({
     @Body() required UnmuteRequest unmuteRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/moderation/unmute/channel')
   Future<Result<UnmuteResponse>> unmuteChannel({
     @Body() UnmuteChannelRequest? unmuteChannelRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/chat/unread')
   Future<Result<WrappedUnreadCountsResponse>> unreadCounts();
 
+  @UseCallAdapter(_ResultCallAdapter)
   @PUT('/api/v2/blocklists/{name}')
   Future<Result<UpdateBlockListResponse>> updateBlockList({
     @Path('name') required String name,
     @Body() UpdateBlockListRequest? updateBlockListRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/channels/{type}/{id}')
   Future<Result<UpdateChannelResponse>> updateChannel({
     @Path('type') required String type,
@@ -662,6 +892,7 @@ abstract interface class DefaultApi {
     @Body() UpdateChannelRequest? updateChannelRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @PATCH('/api/v2/chat/channels/{type}/{id}')
   Future<Result<UpdateChannelPartialResponse>> updateChannelPartial({
     @Path('type') required String type,
@@ -669,11 +900,13 @@ abstract interface class DefaultApi {
     @Body() UpdateChannelPartialRequest? updateChannelPartialRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @PUT('/api/v2/users/live_locations')
   Future<Result<SharedLocationResponse>> updateLiveLocation({
     @Body() required UpdateLiveLocationRequest updateLiveLocationRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @PATCH('/api/v2/chat/channels/{type}/{id}/member')
   Future<Result<UpdateMemberPartialResponse>> updateMemberPartial({
     @Path('type') required String type,
@@ -681,74 +914,87 @@ abstract interface class DefaultApi {
     @Body() UpdateMemberPartialRequest? updateMemberPartialRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/messages/{id}')
   Future<Result<UpdateMessageResponse>> updateMessage({
     @Path('id') required String id,
     @Body() required UpdateMessageRequest updateMessageRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @PUT('/api/v2/chat/messages/{id}')
   Future<Result<UpdateMessagePartialResponse>> updateMessagePartial({
     @Path('id') required String id,
     @Body() UpdateMessagePartialRequest? updateMessagePartialRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @PUT('/api/v2/polls')
   Future<Result<PollResponse>> updatePoll({
     @Body() required UpdatePollRequest updatePollRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @PUT('/api/v2/polls/{poll_id}/options')
   Future<Result<PollOptionResponse>> updatePollOption({
     @Path('poll_id') required String pollId,
     @Body() required UpdatePollOptionRequest updatePollOptionRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @PATCH('/api/v2/polls/{poll_id}')
   Future<Result<PollResponse>> updatePollPartial({
     @Path('poll_id') required String pollId,
     @Body() UpdatePollPartialRequest? updatePollPartialRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/push_preferences')
   Future<Result<UpsertPushPreferencesResponse>> updatePushNotificationPreferences({
     @Body() required UpsertPushPreferencesRequest upsertPushPreferencesRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @PATCH('/api/v2/moderation/queues/{id}')
   Future<Result<QueueResponse>> updateQueue({
     @Path('id') required String id,
     @Body() UpdateQueueRequest? updateQueueRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @PATCH('/api/v2/chat/messages/{message_id}/reminders')
   Future<Result<UpdateReminderResponse>> updateReminder({
     @Path('message_id') required String messageId,
     @Body() UpdateReminderRequest? updateReminderRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @PATCH('/api/v2/chat/threads/{message_id}')
   Future<Result<UpdateThreadPartialResponse>> updateThreadPartial({
     @Path('message_id') required String messageId,
     @Body() UpdateThreadPartialRequest? updateThreadPartialRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @PUT('/api/v2/usergroups/{id}')
   Future<Result<UpdateUserGroupResponse>> updateUserGroup({
     @Path('id') required String id,
     @Body() UpdateUserGroupRequest? updateUserGroupRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/users')
   Future<Result<UpdateUsersResponse>> updateUsers({
     @Body() required UpdateUsersRequest updateUsersRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @PATCH('/api/v2/users')
   Future<Result<UpdateUsersResponse>> updateUsersPartial({
     @Body() required UpdateUsersPartialRequest updateUsersPartialRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/channels/{type}/{id}/file')
   Future<Result<UploadChannelFileResponse>> uploadChannelFile({
     @Path('type') required String type,
@@ -756,6 +1002,7 @@ abstract interface class DefaultApi {
     @Body() UploadChannelFileRequest? uploadChannelFileRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/channels/{type}/{id}/image')
   Future<Result<UploadChannelResponse>> uploadChannelImage({
     @Path('type') required String type,
@@ -763,21 +1010,25 @@ abstract interface class DefaultApi {
     @Body() UploadChannelRequest? uploadChannelRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/uploads/file')
   Future<Result<FileUploadResponse>> uploadFile({
     @Body() FileUploadRequest? fileUploadRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/uploads/image')
   Future<Result<ImageUploadResponse>> uploadImage({
     @Body() ImageUploadRequest? imageUploadRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/action_config')
   Future<Result<UpsertActionConfigResponse>> upsertActionConfig({
     @Body() required UpsertActionConfigRequest upsertActionConfigRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/config')
   Future<Result<UpsertConfigResponse>> upsertConfig({
     @Body() required UpsertConfigRequest upsertConfigRequest,
@@ -787,4 +1038,26 @@ abstract interface class DefaultApi {
 class _ResultCallAdapter<T> extends CallAdapter<Future<T>, Future<Result<T>>> {
   @override
   Future<Result<T>> adapt(Future<T> Function() call) => runApiSafely(call);
+}
+
+// A query parameter sent as one JSON string, such as a query payload or a sort
+// list. The generated retrofit code calls toJson() inside the call adapter, so a
+// value that cannot be encoded fails the call instead of throwing. Dates are
+// encoded as RFC3339 in UTC, like the models' date fields, and any other
+// iterable, such as a Set, as a list.
+final class _JsonQuery {
+  const _JsonQuery(this.value);
+
+  static _JsonQuery? of(Object? value) => value == null ? null : _JsonQuery(value);
+
+  final Object value;
+
+  String toJson() => jsonEncode(value, toEncodable: _toEncodable);
+
+  static Object? _toEncodable(Object? object) => switch (object) {
+    final DateTime date => date.toUtc().toIso8601String(),
+    final Iterable<Object?> iterable => iterable.toList(),
+    // ignore: avoid_dynamic_calls
+    _ => (object as dynamic).toJson(),
+  };
 }

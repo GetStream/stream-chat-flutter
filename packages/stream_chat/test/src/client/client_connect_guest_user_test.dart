@@ -102,7 +102,6 @@ void main() {
           'privacy_settings': 'custom-privacy-settings',
           'deleted_at': 'custom-deleted-at',
           'deactivated_at': 'custom-deactivated-at',
-          'revoke_tokens_issued_before': 'custom-revoke-tokens-issued-before',
         },
       );
       final client = _client(_defaultApiAnswering(Result.success(response)));
@@ -267,7 +266,6 @@ api.CreateGuestResponse _createGuestResponse({
     lastActive: DateTime.utc(2026, 9, 3),
     deactivatedAt: DateTime.utc(2026, 9, 4),
     deletedAt: DateTime.utc(2026, 9, 5),
-    revokeTokensIssuedBefore: DateTime.utc(2026, 9, 6),
   ),
 );
 

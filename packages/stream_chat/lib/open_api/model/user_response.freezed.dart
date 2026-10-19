@@ -26,7 +26,6 @@ mixin _$UserResponse {
   DateTime? get lastActive;
   String? get name;
   bool get online;
-  DateTime? get revokeTokensIssuedBefore;
   String get role;
   List<String> get teams;
   Map<String, String>? get teamsRole;
@@ -62,11 +61,6 @@ mixin _$UserResponse {
             (identical(other.lastActive, lastActive) || other.lastActive == lastActive) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.online, online) || other.online == online) &&
-            (identical(
-                  other.revokeTokensIssuedBefore,
-                  revokeTokensIssuedBefore,
-                ) ||
-                other.revokeTokensIssuedBefore == revokeTokensIssuedBefore) &&
             (identical(other.role, role) || other.role == role) &&
             const DeepCollectionEquality().equals(other.teams, teams) &&
             const DeepCollectionEquality().equals(other.teamsRole, teamsRole) &&
@@ -89,7 +83,6 @@ mixin _$UserResponse {
     lastActive,
     name,
     online,
-    revokeTokensIssuedBefore,
     role,
     const DeepCollectionEquality().hash(teams),
     const DeepCollectionEquality().hash(teamsRole),
@@ -98,7 +91,7 @@ mixin _$UserResponse {
 
   @override
   String toString() {
-    return 'UserResponse(avgResponseTime: $avgResponseTime, banned: $banned, blockedUserIds: $blockedUserIds, createdAt: $createdAt, custom: $custom, deactivatedAt: $deactivatedAt, deletedAt: $deletedAt, id: $id, image: $image, language: $language, lastActive: $lastActive, name: $name, online: $online, revokeTokensIssuedBefore: $revokeTokensIssuedBefore, role: $role, teams: $teams, teamsRole: $teamsRole, updatedAt: $updatedAt)';
+    return 'UserResponse(avgResponseTime: $avgResponseTime, banned: $banned, blockedUserIds: $blockedUserIds, createdAt: $createdAt, custom: $custom, deactivatedAt: $deactivatedAt, deletedAt: $deletedAt, id: $id, image: $image, language: $language, lastActive: $lastActive, name: $name, online: $online, role: $role, teams: $teams, teamsRole: $teamsRole, updatedAt: $updatedAt)';
   }
 }
 
@@ -123,7 +116,6 @@ abstract mixin class $UserResponseCopyWith<$Res> {
     DateTime? lastActive,
     String? name,
     bool online,
-    DateTime? revokeTokensIssuedBefore,
     String role,
     List<String> teams,
     Map<String, String>? teamsRole,
@@ -156,7 +148,6 @@ class _$UserResponseCopyWithImpl<$Res> implements $UserResponseCopyWith<$Res> {
     Object? lastActive = freezed,
     Object? name = freezed,
     Object? online = null,
-    Object? revokeTokensIssuedBefore = freezed,
     Object? role = null,
     Object? teams = null,
     Object? teamsRole = freezed,
@@ -216,10 +207,6 @@ class _$UserResponseCopyWithImpl<$Res> implements $UserResponseCopyWith<$Res> {
             ? _self.online
             : online // ignore: cast_nullable_to_non_nullable
                   as bool,
-        revokeTokensIssuedBefore: freezed == revokeTokensIssuedBefore
-            ? _self.revokeTokensIssuedBefore
-            : revokeTokensIssuedBefore // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
         role: null == role
             ? _self.role
             : role // ignore: cast_nullable_to_non_nullable

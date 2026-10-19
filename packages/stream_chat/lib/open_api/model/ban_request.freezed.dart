@@ -13,8 +13,10 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$BanRequest {
+  bool? get banFromFutureChannels;
   String? get channelCid;
   BanRequestDeleteMessages? get deleteMessages;
+  bool? get deleteReactions;
   bool? get ipBan;
   String? get reason;
   bool? get shadow;
@@ -32,8 +34,11 @@ mixin _$BanRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is BanRequest &&
+            (identical(other.banFromFutureChannels, banFromFutureChannels) ||
+                other.banFromFutureChannels == banFromFutureChannels) &&
             (identical(other.channelCid, channelCid) || other.channelCid == channelCid) &&
             (identical(other.deleteMessages, deleteMessages) || other.deleteMessages == deleteMessages) &&
+            (identical(other.deleteReactions, deleteReactions) || other.deleteReactions == deleteReactions) &&
             (identical(other.ipBan, ipBan) || other.ipBan == ipBan) &&
             (identical(other.reason, reason) || other.reason == reason) &&
             (identical(other.shadow, shadow) || other.shadow == shadow) &&
@@ -44,8 +49,10 @@ mixin _$BanRequest {
   @override
   int get hashCode => Object.hash(
     runtimeType,
+    banFromFutureChannels,
     channelCid,
     deleteMessages,
+    deleteReactions,
     ipBan,
     reason,
     shadow,
@@ -55,7 +62,7 @@ mixin _$BanRequest {
 
   @override
   String toString() {
-    return 'BanRequest(channelCid: $channelCid, deleteMessages: $deleteMessages, ipBan: $ipBan, reason: $reason, shadow: $shadow, targetUserId: $targetUserId, timeout: $timeout)';
+    return 'BanRequest(banFromFutureChannels: $banFromFutureChannels, channelCid: $channelCid, deleteMessages: $deleteMessages, deleteReactions: $deleteReactions, ipBan: $ipBan, reason: $reason, shadow: $shadow, targetUserId: $targetUserId, timeout: $timeout)';
   }
 }
 
@@ -67,8 +74,10 @@ abstract mixin class $BanRequestCopyWith<$Res> {
   ) = _$BanRequestCopyWithImpl;
   @useResult
   $Res call({
+    bool? banFromFutureChannels,
     String? channelCid,
     BanRequestDeleteMessages? deleteMessages,
+    bool? deleteReactions,
     bool? ipBan,
     String? reason,
     bool? shadow,
@@ -89,8 +98,10 @@ class _$BanRequestCopyWithImpl<$Res> implements $BanRequestCopyWith<$Res> {
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? banFromFutureChannels = freezed,
     Object? channelCid = freezed,
     Object? deleteMessages = freezed,
+    Object? deleteReactions = freezed,
     Object? ipBan = freezed,
     Object? reason = freezed,
     Object? shadow = freezed,
@@ -99,6 +110,10 @@ class _$BanRequestCopyWithImpl<$Res> implements $BanRequestCopyWith<$Res> {
   }) {
     return _then(
       BanRequest(
+        banFromFutureChannels: freezed == banFromFutureChannels
+            ? _self.banFromFutureChannels
+            : banFromFutureChannels // ignore: cast_nullable_to_non_nullable
+                  as bool?,
         channelCid: freezed == channelCid
             ? _self.channelCid
             : channelCid // ignore: cast_nullable_to_non_nullable
@@ -107,6 +122,10 @@ class _$BanRequestCopyWithImpl<$Res> implements $BanRequestCopyWith<$Res> {
             ? _self.deleteMessages
             : deleteMessages // ignore: cast_nullable_to_non_nullable
                   as BanRequestDeleteMessages?,
+        deleteReactions: freezed == deleteReactions
+            ? _self.deleteReactions
+            : deleteReactions // ignore: cast_nullable_to_non_nullable
+                  as bool?,
         ipBan: freezed == ipBan
             ? _self.ipBan
             : ipBan // ignore: cast_nullable_to_non_nullable

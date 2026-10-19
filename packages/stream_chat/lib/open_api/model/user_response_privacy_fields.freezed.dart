@@ -28,7 +28,6 @@ mixin _$UserResponsePrivacyFields {
   String? get name;
   bool get online;
   PrivacySettingsResponse? get privacySettings;
-  DateTime? get revokeTokensIssuedBefore;
   String get role;
   List<String> get teams;
   Map<String, String>? get teamsRole;
@@ -67,11 +66,6 @@ mixin _$UserResponsePrivacyFields {
             (identical(other.name, name) || other.name == name) &&
             (identical(other.online, online) || other.online == online) &&
             (identical(other.privacySettings, privacySettings) || other.privacySettings == privacySettings) &&
-            (identical(
-                  other.revokeTokensIssuedBefore,
-                  revokeTokensIssuedBefore,
-                ) ||
-                other.revokeTokensIssuedBefore == revokeTokensIssuedBefore) &&
             (identical(other.role, role) || other.role == role) &&
             const DeepCollectionEquality().equals(other.teams, teams) &&
             const DeepCollectionEquality().equals(other.teamsRole, teamsRole) &&
@@ -96,7 +90,6 @@ mixin _$UserResponsePrivacyFields {
     name,
     online,
     privacySettings,
-    revokeTokensIssuedBefore,
     role,
     const DeepCollectionEquality().hash(teams),
     const DeepCollectionEquality().hash(teamsRole),
@@ -105,7 +98,7 @@ mixin _$UserResponsePrivacyFields {
 
   @override
   String toString() {
-    return 'UserResponsePrivacyFields(avgResponseTime: $avgResponseTime, banned: $banned, blockedUserIds: $blockedUserIds, createdAt: $createdAt, custom: $custom, deactivatedAt: $deactivatedAt, deletedAt: $deletedAt, id: $id, image: $image, invisible: $invisible, language: $language, lastActive: $lastActive, name: $name, online: $online, privacySettings: $privacySettings, revokeTokensIssuedBefore: $revokeTokensIssuedBefore, role: $role, teams: $teams, teamsRole: $teamsRole, updatedAt: $updatedAt)';
+    return 'UserResponsePrivacyFields(avgResponseTime: $avgResponseTime, banned: $banned, blockedUserIds: $blockedUserIds, createdAt: $createdAt, custom: $custom, deactivatedAt: $deactivatedAt, deletedAt: $deletedAt, id: $id, image: $image, invisible: $invisible, language: $language, lastActive: $lastActive, name: $name, online: $online, privacySettings: $privacySettings, role: $role, teams: $teams, teamsRole: $teamsRole, updatedAt: $updatedAt)';
   }
 }
 
@@ -132,7 +125,6 @@ abstract mixin class $UserResponsePrivacyFieldsCopyWith<$Res> {
     String? name,
     bool online,
     PrivacySettingsResponse? privacySettings,
-    DateTime? revokeTokensIssuedBefore,
     String role,
     List<String> teams,
     Map<String, String>? teamsRole,
@@ -167,7 +159,6 @@ class _$UserResponsePrivacyFieldsCopyWithImpl<$Res> implements $UserResponsePriv
     Object? name = freezed,
     Object? online = null,
     Object? privacySettings = freezed,
-    Object? revokeTokensIssuedBefore = freezed,
     Object? role = null,
     Object? teams = null,
     Object? teamsRole = freezed,
@@ -235,10 +226,6 @@ class _$UserResponsePrivacyFieldsCopyWithImpl<$Res> implements $UserResponsePriv
             ? _self.privacySettings
             : privacySettings // ignore: cast_nullable_to_non_nullable
                   as PrivacySettingsResponse?,
-        revokeTokensIssuedBefore: freezed == revokeTokensIssuedBefore
-            ? _self.revokeTokensIssuedBefore
-            : revokeTokensIssuedBefore // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
         role: null == role
             ? _self.role
             : role // ignore: cast_nullable_to_non_nullable
