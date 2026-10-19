@@ -29,10 +29,12 @@
 - `StreamMediaGallery` and `StreamPhotoGallery`, including `defaultStreamPhotoGalleryDelegate`, now show more tiles per row in wider grids instead of always 3. Pass a `SliverGridDelegateWithFixedCrossAxisCount` as `gridDelegate` to keep a fixed count.
 - `defaultStreamPhotoGalleryDelegate` is now declared as a `SliverGridDelegate`.
 - `StreamMessageItem`'s `maxWidth` now defaults to `272`, the same as `StreamMessageItemProps`.
+- The floating date divider in `StreamMessageListView` now passes its builder the start of the day it labels, instead of the time of the message at the top.
 
 🐞 Fixed
 
 - Fixed `StreamMessageListView` dropping frames on each new message in busy channels.
+- Fixed `StreamMessageListView`'s floating date divider rebuilding after each new message when its date hasn't changed.
 - Fixed `StreamMessageComposer` polling the audio recorder ten times a second while no recording is in progress, including when voice recording is disabled.
 - Fixed `StreamMessageComposer` and its attachment picker running under the left and right safe-area insets while the picker is open.
 - Fixed the default empty, loading and error states of `StreamChannelListView`, `StreamThreadListView` and the other paged list views running under the safe-area insets.

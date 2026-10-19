@@ -732,17 +732,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                   reverse: _config.reverse,
                   shrinkWrap: _config.shrinkWrap,
                   itemCount: itemCount,
-                  itemKeyBuilder: (index) {
-                    // Layout (see comment block below): indices 0/1 and the
-                    // top 3 indices are fixed slots (footer, loaders,
-                    // header, parent message). Anything in between is a
-                    // message at `messages[index - 2]`.
-                    if (index < 2) return null;
-                    if (index >= itemCount - 3) return null;
-                    final messageIndex = index - 2;
-                    if (messageIndex >= messages.length) return null;
-                    return messages[messageIndex].id;
-                  },
+                  itemKeyBuilder: (index) => _messageAtItem(index)?.id,
 
                   // Item Count -> 8 (1 parent, 2 header+footer, 2 top+bottom, 3 messages)
                   // eg:     |Type|         rev(|Index(item)|)     rev(|Index(separator)|)    |Index(item)|    |Index(separator)|
@@ -881,11 +871,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           Positioned(
             top: math.max(_scaffoldInsets.top, context.streamSpacing.sm),
             child: FloatingDateDivider(
-              itemCount: itemCount,
               reverse: _config.reverse,
               fadeNearInlineDivider: _config.fadeFloatingDateDividerNearInline,
               itemPositionListener: _itemPositionListener.itemPositions,
-              messages: messages,
+              messageAt: _messageAtItem,
               dateDividerBuilder: switch (widget.builders.floatingDateDivider) {
                 final builder? => builder,
                 _ => widget.builders.dateDivider,
@@ -1120,6 +1109,17 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     ];
 
     return rules.isEmpty ? [SpacingType.defaultSpacing] : rules;
+  }
+
+  // The message shown by the list item at [index], or null for a fixed slot.
+  Message? _messageAtItem(int index) {
+    // Layout (see the comment block in [_buildListView]): indices 0/1 and the
+    // top 3 indices are fixed slots (footer, loaders, header, parent message).
+    // Anything in between is a message at `messages[index - 2]`.
+    final messageIndex = index - 2;
+    if (messageIndex < 0) return null;
+    if (messageIndex >= messages.length) return null;
+    return messages[messageIndex];
   }
 
   Widget _buildDateDivider(Message message) {
