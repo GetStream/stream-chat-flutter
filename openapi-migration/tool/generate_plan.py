@@ -1077,11 +1077,10 @@ GROUPS = [
             - **The upsert sends `User.toRequest()`.** v10 sent the whole user flattened, and v1 stored every key
               its request does not declare as custom data: the user's `online`, `banned` and timestamps, and an own
               user's devices, mutes and unread counts. v2 drops unknown keys, so that stops, as it did for guests
-              in [04](04-roles-guest-and-app.md). An `OwnUser` decoded from the connection reads `unread_count`,
-              `total_unread_count_by_team` and `latest_hidden_channels` into fields, so they no longer reach the
-              request as custom data. `role`, `teams` and
-              `teams_role` are no longer sent: a client-side token never stores them, and a different role was
-              refused.
+              in [04](04-roles-guest-and-app.md). An `OwnUser` decoded from the connection keeps `unread_count`,
+              `total_unread_count_by_team` and `latest_hidden_channels` in `custom`, so an upsert of it still
+              stores them as custom data, as v10 did. `role`, `teams` and `teams_role` are no longer sent: a
+              client-side token never stores them, and a different role was refused.
             - **Moved off `UserApi`:** `updateUsers` and `partialUpdateUsers`, now `StreamChatClient` methods over
               `UsersRepository`.
             - **Explicit `null`s are not a regression.** The generated request sends `language: null` and

@@ -141,15 +141,12 @@ class User extends Equatable {
   /// Null while the user exists, or when not known.
   final DateTime? deletedAt;
 
-  /// Whether the user is shadow banned, so that their messages reach no one
-  /// else without them being told.
+  /// Whether the user is shadow banned.
   ///
   /// Null when not known.
   final bool? shadowBanned;
 
   /// The ids of the users this user blocked.
-  ///
-  /// Empty for anyone but the current user.
   final List<String> blockedUserIds;
 
   /// List of users to list of userIds.

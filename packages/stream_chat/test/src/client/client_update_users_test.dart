@@ -65,7 +65,8 @@ void main() {
   );
 
   test(
-    'StreamChatClient.updateUser sends none of the fields an own user decodes from the connection as custom data',
+    "StreamChatClient.updateUser sends none of an own user's devices, mutes, total unread count, unread channels or "
+    'unread threads as custom data',
     () async {
       final defaultApi = _defaultApiAnswering(Result.success(updateUsersResponse()));
       final client = _client(defaultApi);

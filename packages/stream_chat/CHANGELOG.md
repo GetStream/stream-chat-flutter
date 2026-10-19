@@ -134,6 +134,7 @@
 - `ChannelModel.custom` and `Member.custom` hold the custom data exactly as the API returns it, and `toJson` leaves out an entry named like one of the model's own fields.
 - `User.extraData` is renamed `custom`, and so is the `extraData` argument of the `User` and `OwnUser` constructors and `copyWith`.
 - `User.name` is nullable and no longer answers the user's id when they have no name; read `User.nameOrId` for that.
+- `User.image` returns an empty image URL as `''` instead of `null`.
 - Several user values the custom data used to hold, such as `User.name`, `User.image` and `User.deactivatedAt`, are fields instead: `custom` no longer holds them, and an entry with one of their names in `custom` or in `copyWith(custom:)` no longer sets the field.
 - `User.custom` holds the custom data exactly as the API returns it, and `toJson` leaves out an entry named like one of the user's own fields.
 - `OwnUser.fromUser` no longer reads devices, mutes, unread counts, push preferences or privacy settings out of the user's custom data; they are left at their defaults.
@@ -142,7 +143,7 @@
 
 - `connectGuestUser` no longer copies the user's online status, ban, unread counts, devices and push preferences into the created guest's custom data.
 
-- `updateUser` and `updateUsers` no longer store the user's online status, ban and timestamps, or an own user's devices, mutes and unread counts, as custom data.
+- `updateUser` and `updateUsers` no longer store the user's online status, ban, timestamps and blocked users, or an own user's devices, mutes, total unread count and unread channel and thread counts, as custom data, and no longer fail for an own user with many devices.
 
 - `queryChannels` no longer gives up watching the channels it loads when it is called before the connection is open. Whether they can be watched is read when the request is sent, which is after the query has waited for the connection.
 

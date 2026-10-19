@@ -257,6 +257,41 @@ void main() {
       expect(merged.shadowBanned, isNull);
     });
 
+    test('merge keeps the values the other user leaves out', () {
+      final user = OwnUser(
+        id: 'test-user',
+        role: 'admin',
+        name: 'Jane',
+        image: 'https://example.com/jane.png',
+        createdAt: createdAt,
+        updatedAt: updatedAt,
+        lastActive: lastActive,
+        banExpires: DateTime.utc(2030),
+        language: 'fr',
+        invisible: true,
+        teamsRole: const {'team-a': 'admin'},
+        avgResponseTime: 12,
+        pushPreferences: const PushPreference(chatLevel: ChatLevel.mentions),
+        privacySettings: const PrivacySettings(typingIndicators: TypingIndicators(enabled: false)),
+      );
+
+      final merged = user.merge(OwnUser(id: 'test-user'));
+
+      expect(merged.role, 'admin');
+      expect(merged.name, 'Jane');
+      expect(merged.image, 'https://example.com/jane.png');
+      expect(merged.createdAt, createdAt);
+      expect(merged.updatedAt, updatedAt);
+      expect(merged.lastActive, lastActive);
+      expect(merged.banExpires, DateTime.utc(2030));
+      expect(merged.language, 'fr');
+      expect(merged.invisible, isTrue);
+      expect(merged.teamsRole, {'team-a': 'admin'});
+      expect(merged.avgResponseTime, 12);
+      expect(merged.pushPreferences, const PushPreference(chatLevel: ChatLevel.mentions));
+      expect(merged.privacySettings, const PrivacySettings(typingIndicators: TypingIndicators(enabled: false)));
+    });
+
     test('should parse json with privacy settings correctly', () {
       final json = {
         'id': 'test-user',

@@ -328,6 +328,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `ChannelModel.custom` / `Member.custom` entry named like one of the model's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; `toJson` leaves it out so it cannot overwrite the field |
 | `User.extraData` / `OwnUser.extraData` | `User.custom` / `OwnUser.custom` | `renamed` | The wire's name for it; also the constructor and `copyWith` arguments |
 | `User.name` (`String`, the id when the user has none) | `User.nameOrId` | `retyped` | `User.name` is a `String?` that is null when the user has none. Use `nameOrId` wherever a user is named by text, and `name` where a missing name matters, such as initials |
+| `User.image` (`null` for an empty image URL) | `User.image` | `retyped` | Returns `''` as given; check `image?.isNotEmpty` where an empty URL means no image |
 | `user.extraData['name']` / `['image']` / `['deactivated_at']` / `['deleted_at']` / `['shadow_banned']` | `User.name` / `image` / `deactivatedAt` / `deletedAt` / `shadowBanned` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them |
 | `OwnUser.blockedUserIds` | `User.blockedUserIds` | `moved` | Still on `OwnUser`. Empty for anyone but the current user |
 | `OwnUser.fromUser(user)` reading devices, mutes, unread counts, push preferences and privacy settings out of `user.extraData` | — | `removed` | A `User` no longer carries them; they are left at their defaults |
@@ -973,8 +974,11 @@ if (result case Failure(:final error)) report(error);
 
 **`updateUser` sends the user's name, image, language, visibility and custom data, and for an own user their privacy
 settings, and nothing else.** v10 sent the whole user, so the user's online status, ban and timestamps, and an own
-user's devices, mutes and unread counts, were stored as custom data on every call; that no longer happens. `role`,
-`teams` and `teamsRole` are no longer sent, so these calls cannot change them.
+user's devices, mutes and unread counts, were stored as custom data on every call, and an own user with many devices
+went over the custom data size limit and failed; that no longer happens. An own user decoded from the connection
+still keeps `unread_count`, `total_unread_count_by_team` and `latest_hidden_channels` in `custom`, so passing
+`currentUser` back stores them as custom data, as v10 did; remove them from `custom` first if you don't want them
+stored. `role`, `teams` and `teamsRole` are no longer sent, so these calls cannot change them.
 
 **The returned users no longer carry the fields only they can see in `extraData`.** v10 left every field `User`
 does not model in `extraData` as raw JSON; now their devices, mutes, channel mutes, privacy settings, unread counts, hidden
@@ -991,7 +995,7 @@ no longer encodes to JSON or extends `Equatable`; it still compares by value and
 
 > **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call. The partial
 > updates take the API's names, as the channel and member partial updates already do. The request carries only
-> what the user can change, so nothing of the client's state ends up stored as custom data.
+> what the user can change and their custom data as it is.
 
 ### Channel and Member Custom Data
 
@@ -1066,10 +1070,10 @@ A string interpolation still compiles with the nullable `name`, so check them by
 prints `null is typing` for a user with no name. That includes a custom `Translations` or `StreamChatLocalizations`
 subclass overriding `userTypingText` or `pinnedByUserText`.
 
-**The user fields are fields, not custom data.** `User.image` reads the same and `name` changes as described above;
-`deactivatedAt`, `deletedAt` and `shadowBanned` are new fields, and `blockedUserIds` moves up from `OwnUser` to
-`User`. `custom` no longer holds any of their keys, and an entry with one of those names in `custom` or in
-`copyWith(custom:)` no longer sets the field:
+**The user fields are fields, not custom data.** `name` changes as described above, and `User.image` returns an
+empty image URL as `''` instead of `null`; `deactivatedAt`, `deletedAt` and `shadowBanned` are new fields, and
+`blockedUserIds` moves up from `OwnUser` to `User`. `custom` no longer holds any of their keys, and an entry with
+one of those names in `custom` or in `copyWith(custom:)` no longer sets the field:
 
 ```dart
 // v10

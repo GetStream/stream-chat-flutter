@@ -38,6 +38,7 @@ void main() {
       });
       expect(user.online, online);
       expect(user.banned, banned);
+      expect(user.banExpires, DateTime.parse('2021-08-08T10:39:21.817646Z'));
       expect(user.teams, teams);
       expect(user.createdAt, DateTime.parse(createdAtString));
       expect(user.updatedAt, DateTime.parse(updatedAtString));
