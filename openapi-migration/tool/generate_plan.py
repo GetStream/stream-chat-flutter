@@ -56,11 +56,18 @@ def read_handwritten():
 
 
 def read_generated():
-    """[(verb, path, operation, responseType)] for the generated client."""
-    return re.findall(
-        r"@(GET|POST|PATCH|PUT|DELETE)\('([^']+)'\)\s*\n\s*Future<Result<(\w+)>>\s+(\w+)\(",
-        GENERATED_API.read_text(),
-    )
+    """[(verb, path, operation, responseType)] for the generated client.
+
+    An operation that sends a query parameter as JSON is annotated on a private `_name` method, which the public
+    `name` forwards to; it is listed under the public name.
+    """
+    return [
+        (verb, path, response, operation.removeprefix('_'))
+        for verb, path, response, operation in re.findall(
+            r"@(GET|POST|PATCH|PUT|DELETE)\('([^']+)'\)\s*\n\s*Future<Result<(\w+)>>\s+(\w+)\(",
+            GENERATED_API.read_text(),
+        )
+    ]
 
 
 # Every 'VERB /path' named by only_ops or unless_ops, so the report can flag one that matches no operation.
@@ -304,11 +311,11 @@ GROUPS = [
               in the raw `me`. None was ever applied. Verified live against the demo app and in the backend source;
               recorded as a 🐞 Fixed entry.
             - **`UserResponse.toModel()` leaves custom keys named like `OwnUser` fields (`OwnUser.topLevelFields`),
-              plus `deleted_at`, `deactivated_at` and `revoke_tokens_issued_before`, out of `extraData`.** v1's flat
+              plus `deleted_at` and `deactivated_at`, out of `extraData`.** v1's flat
               user JSON shadowed them; v2 nests custom data, and without the guard a custom `online` string crashed
               `OwnUser.fromUser`. `User.toRequest()` leaves the same keys out of the custom data it sends.
-            - **The three extra names are guarded because the socket connect refuses them.** A custom
-              `deleted_at`, `deactivated_at` or `revoke_tokens_issued_before` left in `extraData` is re-sent in the
+            - **The two extra names are guarded because the socket connect refuses them.** A custom
+              `deleted_at` or `deactivated_at` left in `extraData` is re-sent in the
               connect's user details, and the backend answers 400 ("reserved field", or "expected date" for a
               non-date value). v10's flat response shadowed them, so the same guest connected; confirmed live.
             - **Not a regression: a custom `ban_expires` that isn't a date** fails the connect in v10 and now alike,
@@ -414,8 +421,9 @@ GROUPS = [
         decisions=[],
         taken=textwrap.dedent("""\
             - **`MessageReminder` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`;
-              equality is unchanged. Its constructor stays non-const (dates default to now) and it keeps v10's
-              hand-written `copyWith` and `merge` (`@Freezed(copyWith: false)`). `expiresAt` stays out; adding it
+              equality is unchanged. Its constructor stays non-const (dates default to now). It takes freezed's
+              `copyWith` (audited: only `merge` needed `?? channel`, `?? message` and `?? user` to keep what an
+              event leaves out) and keeps v10's `merge`. `expiresAt` stays out; adding it
               is additive. It is not persisted after all: `Message.reminder` is never written to JSON and
               `stream_chat_persistence` has no reminder column, so no codec is needed.
             - **v1 JSON keeps decoding through `MessageReminderV1JsonConverter`** on `Message.reminder` and
@@ -497,7 +505,8 @@ GROUPS = [
               verbatim on the message and on each attachment (README rule 9), `file_size` and `mime_type` included,
               so an entry named like one of the model's own fields — an attachment's received `id` among them — is
               saved as custom data, where v10's flattened body set the field or dropped it. The draft message's HTML
-              and markup are not modelled ([06](06-reminders.md) dropped them), so neither is sent.
+              and markup are not modelled ([06](06-reminders.md) dropped them): a draft read from v1 JSON keeps them
+              in `custom`, which is sent as is, and one read from the generated response does not carry them.
             - **Verified live** against the demo app, each call against v10's v1 request decoded the v10 way: query
               threads with defaults and with a filter, sort, `next` and `prev` (both cursors rejected), get a thread,
               set and unset a custom field on one, and create, get, query and delete three drafts (one with every
@@ -735,13 +744,13 @@ GROUPS = [
               `moderation_details` fallback and the legacy `MESSAGE_RESPONSE_ACTION_*` names, and reads a missing
               `platform_circumvented` as `false`. `stream_chat_persistence` does not store moderation, so no codec
               is needed. `ModerationAction` keeps its `fromJson`/`toJson` statics, as `MessageType` does, until
-              `Message` stops decoding v1 JSON. The `ModerationV2Response` mapper waits for the first endpoint
-              that answers a message.
+              `Message` stops decoding v1 JSON. `ModerationV2Response` maps beside the message, in
+              `messages_mapper.dart`.
             - **`ReactionGroup` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`;
-              equality is unchanged. Its constructor stays non-const, defaulting both dates to now, and it keeps
-              v10's hand-written `copyWith` (`@Freezed(copyWith: false)`): freezed's would read a `null` date as
-              "now" instead of "keep". `Message.reactionGroups` decodes through `reactionGroupsFromV1Json`,
-              decode-only; `_reactionGroupsReadValue` still builds the groups from `reaction_counts` and
+              equality is unchanged. Its constructor stays non-const, defaulting both dates to now, and it takes
+              freezed's `copyWith` (audited: no site passes a `null` date). `Message.reactionGroups` decodes through
+              `reactionGroupsFromV1Json`,
+              decode-only; `reactionGroupsFromCounts` builds the groups from `reaction_counts` and
               `reaction_scores` when `reaction_groups` is missing. Dates go through `StreamDateTimeConverter`.
               `messages.reaction_groups` and `pinned_messages.reaction_groups` store the groups through the
               temporary `@DataSerializable` codec, whose output is byte-identical to v10's `toJson`, so no
@@ -754,14 +763,16 @@ GROUPS = [
               the stored `attachments` columns are unchanged. `Action` needs no codec of its own.
             - **`Reaction` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`; equality
               is unchanged. Its constructor stays non-const (`userId` from `user`, dates default to now) and it
-              keeps v10's hand-written `copyWith` and `merge` (`@Freezed(copyWith: false)`). `Reaction.topLevelFields`
-              stays public. `ReactionV1JsonConverter` reads and writes it everywhere v1 JSON carries one: the
-              message's latest and own reactions, `Event.reaction`, the two hand-written reaction responses, and
-              the `sendReaction` body, which keeps v10's request shape (type, score, emoji code, custom data at the
-              root). `stream_chat_persistence` stores reactions as table rows, so no codec is needed.
+              takes freezed's `copyWith` (audited: `merge` keeps a `null` message id, user, user id and emoji code
+              with `??`, and `sendReaction` keeps the reaction's user when there is no current user).
+              `Reaction.topLevelFields` is removed; the converter owns the key list. `ReactionV1JsonConverter` reads
+              and writes a reaction everywhere v1 JSON carries one: the message's latest and own reactions,
+              `Event.reaction`, the two hand-written reaction responses, and the `sendReaction` body, which keeps
+              v10's request shape (type, score, emoji code, custom data at the root). `stream_chat_persistence`
+              stores reactions as table rows, so no codec is needed.
             - **`Location` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`; equality
               is unchanged. Its constructor stays non-const (`endAt` normalised to UTC, dates default to now) and
-              it keeps v10's hand-written `copyWith` (`@Freezed(copyWith: false)`). Its `channel` and `message`
+              it takes freezed's `copyWith` (audited: no site changes). Its `channel` and `message`
               stay json_serializable `ChannelModel` and `Message`, which `LocationV1JsonConverter` decodes through
               their own `fromJson`; the API nests them only in active live locations, one level deep, so the
               message-location cycle ends there. The converter reads and writes `Message.sharedLocation` (the write
@@ -786,8 +797,9 @@ GROUPS = [
               `Attachment.giphy`, stored through the attachment's `toData`. `Message.toJson` writes none of the
               message's; `Attachment.toJson` writes `giphy`, so an edited Giphy message keeps its renditions.
             - **What the SDK has no feature for stays out:** `image_labels` and `mentioned_channel_members` on a
-              message, and `html` and `mml` on a draft message, which iOS and Android drop too. The v1 decoders
-              list them in `topLevelFields`, so they no longer land in `custom` on either path.
+              message, and `html` and `mml` on a draft message, which iOS and Android drop too. The mappers leave
+              them out; the v1 decoders split flat JSON by `topLevelFields` alone, so they keep them in `custom`,
+              as v10 did.
             - **A reaction's emoji code arrives in `custom`,** which keeps it, and also maps to `Reaction.emojiCode`.
             - **Moderation actions go through `ModerationAction.fromJson`,** so legacy names read as current ones.
             - **Attachments map at parity with `Attachment.fromJson`:** each gets a new local `id`, and the id the
@@ -1247,8 +1259,8 @@ GROUPS = [
               `deactivatedAt`, `deletedAt` and `shadowBanned` are fields with persistence columns;
               `blockedUserIds` moves up from `OwnUser`. `OwnUser` doesn't model `unread_count`,
               `total_unread_count_by_team` or `latest_hidden_channels`, which no event keeps current. The mappers
-              leave the keys the SDK doesn't model out, such as `revoke_tokens_issued_before`; a v1 user keeps them
-              in `custom`, as a v1 member keeps `role`.
+              leave the keys the SDK doesn't model out; a v1 user keeps them in `custom`, as a v1 member keeps
+              `role`.
               Each generated user mapper fills the ones its response carries (`UserResponse` has no
               `shadowBanned`).
             - **`User.name` is nullable and has no fallback to `id`;** `User.nameOrId` has it, for a missing or

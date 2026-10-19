@@ -115,9 +115,6 @@ class DraftMessage extends Equatable {
     'command',
     'poll_id',
     'extra_data',
-    // Not modelled on a draft message; listed so they never land in [custom].
-    'html',
-    'mml',
   ];
 
   /// Serialize to json.

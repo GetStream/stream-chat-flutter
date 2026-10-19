@@ -55,7 +55,7 @@ ChannelMemberResponse _$ChannelMemberResponseFromJson(
     json['updated_at'] as Object,
   ),
   user: json['user'] == null ? null : UserResponse.fromJson(json['user'] as Map<String, dynamic>),
-  userId: json['user_id'] as String?,
+  userId: json['user_id'] as String,
 );
 
 Map<String, dynamic> _$ChannelMemberResponseToJson(

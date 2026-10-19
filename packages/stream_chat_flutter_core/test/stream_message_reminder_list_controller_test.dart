@@ -172,6 +172,29 @@ void main() {
       expect(controller.value, isA<Error>());
       expect((controller.value as Error).error, equals(chatError));
     });
+
+    test(
+      'StreamMessageReminderListController.doInitialLoad wraps a failure that is not a chat exception',
+      () async {
+        final cause = StateError('boom');
+        when(
+          () => client.queryReminders(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            limit: any(named: 'limit'),
+            next: any(named: 'next'),
+          ),
+        ).thenAnswer((_) async => Result.failure(cause));
+
+        final controller = StreamMessageReminderListController(client: client);
+
+        await controller.doInitialLoad();
+        await pumpEventQueue();
+
+        final error = controller.value.mapOrNull(null, error: (it) => it.error);
+        expect(error, isA<StreamClientException>().having((it) => it.cause, 'cause', cause));
+      },
+    );
   });
 
   group('Pagination', () {

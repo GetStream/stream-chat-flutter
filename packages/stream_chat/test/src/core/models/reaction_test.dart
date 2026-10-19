@@ -99,6 +99,17 @@ void main() {
       });
     });
 
+    test('Reaction.merge keeps the message id, user and emoji code the other reaction lacks', () {
+      final reaction = _fixtureReaction();
+
+      final merged = reaction.merge(Reaction(type: 'lol'));
+
+      expect(
+        (merged.messageId, merged.user, merged.userId, merged.emojiCode),
+        (reaction.messageId, reaction.user, reaction.userId, reaction.emojiCode),
+      );
+    });
+
     test('merge', () {
       final reaction = _fixtureReaction();
       final newUserCreateTime = DateTime.now();

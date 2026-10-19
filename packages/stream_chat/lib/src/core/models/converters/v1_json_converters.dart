@@ -44,8 +44,8 @@ class ActionV1JsonConverter implements JsonConverter<Action, Map<String, dynamic
     value: json['value'] as String?,
   );
 
-  // Writes `value` even when it is null, as v10 did, so sent attachments and
-  // the stored ones keep their format.
+  // Writes `value` even when it is null, so sent and stored attachments always
+  // carry the key.
   @override
   Map<String, dynamic> toJson(Action action) => {
     'name': action.name,
@@ -362,8 +362,8 @@ Moderation? moderationFromV1Json(Map<String, dynamic>? json) {
   return Moderation(
     action: ModerationAction.fromJson(json['action'] as String),
     originalText: json['original_text'] as String,
-    textHarms: (json['text_harms'] as List<dynamic>?)?.cast<String>(),
-    imageHarms: (json['image_harms'] as List<dynamic>?)?.cast<String>(),
+    textHarms: (json['text_harms'] as List<dynamic>?)?.map((e) => e as String).toList(),
+    imageHarms: (json['image_harms'] as List<dynamic>?)?.map((e) => e as String).toList(),
     blocklistMatched: json['blocklist_matched'] as String?,
     semanticFilterMatched: json['semantic_filter_matched'] as String?,
     platformCircumvented: json['platform_circumvented'] as bool? ?? false,

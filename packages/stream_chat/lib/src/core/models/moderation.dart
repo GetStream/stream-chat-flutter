@@ -46,7 +46,7 @@ class Moderation with _$Moderation {
 }
 
 /// The moderation action performed over the message.
-extension type const ModerationAction(String action) implements String {
+extension type const ModerationAction(String _) implements String {
   /// Action 'bounce' - the message needs to be rephrased and sent again.
   static const ModerationAction bounce = ModerationAction('bounce');
 
@@ -73,5 +73,5 @@ extension type const ModerationAction(String action) implements String {
   }
 
   /// Serialize to json string.
-  static String toJson(ModerationAction action) => action.action;
+  static String toJson(ModerationAction action) => action;
 }

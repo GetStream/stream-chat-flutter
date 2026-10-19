@@ -6,7 +6,7 @@ part 'reaction_group.freezed.dart';
 part 'reaction_group.g.dart';
 
 /// The reactions of one type on a message, counted and scored together.
-@Freezed(copyWith: false)
+@freezed
 // TODO(openapi-migration): remove in group 10
 @DataSerializable()
 class ReactionGroup with _$ReactionGroup {
@@ -47,23 +47,6 @@ class ReactionGroup with _$ReactionGroup {
   ///
   /// It is not a codec for API payloads.
   Map<String, dynamic> toData() => _$ReactionGroupToJson(this);
-
-  /// Creates a copy of this group with the given fields replaced.
-  ///
-  /// A field passed as null keeps its current value.
-  ReactionGroup copyWith({
-    int? count,
-    int? sumScores,
-    DateTime? firstReactionAt,
-    DateTime? lastReactionAt,
-  }) {
-    return ReactionGroup(
-      count: count ?? this.count,
-      sumScores: sumScores ?? this.sumScores,
-      firstReactionAt: firstReactionAt ?? this.firstReactionAt,
-      lastReactionAt: lastReactionAt ?? this.lastReactionAt,
-    );
-  }
 }
 
 /// A group of comparators for sorting [ReactionGroup]s.

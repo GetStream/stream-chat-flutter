@@ -23,6 +23,13 @@ mixin _$MessageReminder {
   DateTime get createdAt;
   DateTime get updatedAt;
 
+  /// Create a copy of MessageReminder
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $MessageReminderCopyWith<MessageReminder> get copyWith =>
+      _$MessageReminderCopyWithImpl<MessageReminder>(this as MessageReminder, _$identity);
+
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
@@ -46,5 +53,88 @@ mixin _$MessageReminder {
   @override
   String toString() {
     return 'MessageReminder(channelCid: $channelCid, channel: $channel, messageId: $messageId, message: $message, userId: $userId, user: $user, remindAt: $remindAt, createdAt: $createdAt, updatedAt: $updatedAt)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $MessageReminderCopyWith<$Res> {
+  factory $MessageReminderCopyWith(MessageReminder value, $Res Function(MessageReminder) _then) =
+      _$MessageReminderCopyWithImpl;
+  @useResult
+  $Res call({
+    String channelCid,
+    ChannelModel? channel,
+    String messageId,
+    Message? message,
+    String userId,
+    User? user,
+    DateTime? remindAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  });
+}
+
+/// @nodoc
+class _$MessageReminderCopyWithImpl<$Res> implements $MessageReminderCopyWith<$Res> {
+  _$MessageReminderCopyWithImpl(this._self, this._then);
+
+  final MessageReminder _self;
+  final $Res Function(MessageReminder) _then;
+
+  /// Create a copy of MessageReminder
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? channelCid = null,
+    Object? channel = freezed,
+    Object? messageId = null,
+    Object? message = freezed,
+    Object? userId = null,
+    Object? user = freezed,
+    Object? remindAt = freezed,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
+  }) {
+    return _then(
+      MessageReminder(
+        channelCid: null == channelCid
+            ? _self.channelCid
+            : channelCid // ignore: cast_nullable_to_non_nullable
+                  as String,
+        channel: freezed == channel
+            ? _self.channel
+            : channel // ignore: cast_nullable_to_non_nullable
+                  as ChannelModel?,
+        messageId: null == messageId
+            ? _self.messageId
+            : messageId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        message: freezed == message
+            ? _self.message
+            : message // ignore: cast_nullable_to_non_nullable
+                  as Message?,
+        userId: null == userId
+            ? _self.userId
+            : userId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        user: freezed == user
+            ? _self.user
+            : user // ignore: cast_nullable_to_non_nullable
+                  as User?,
+        remindAt: freezed == remindAt
+            ? _self.remindAt
+            : remindAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        createdAt: freezed == createdAt
+            ? _self.createdAt!
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        updatedAt: freezed == updatedAt
+            ? _self.updatedAt!
+            : updatedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+      ),
+    );
   }
 }

@@ -242,8 +242,7 @@ void main() {
 
       expect(deserializedMessage.id, equals(id));
       expect(deserializedMessage.text, equals(text));
-      expect(deserializedMessage.custom['custom_field'], equals('custom_value'));
-      expect(deserializedMessage.custom['priority'], equals(5));
+      expect(deserializedMessage.custom, {'custom_field': 'custom_value', 'priority': 5});
     });
 
     test('should deserialize poll_id correctly', () {
@@ -447,17 +446,6 @@ void main() {
         expect(message.pollId, equals(draftMessage.pollId));
         expect(message.custom, equals(draftMessage.custom));
       });
-    });
-
-    test('DraftMessage.fromJson leaves the HTML and markup out of custom data', () {
-      final draft = DraftMessage.fromJson(const {
-        'id': 'draft-id',
-        'html': '<p>Hi</p>',
-        'mml': '<mml>Hi</mml>',
-        'mood': 'busy',
-      });
-
-      expect(draft.custom, {'mood': 'busy'});
     });
 
     test('DraftMessage.toJson leaves out custom data named like a field', () {

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:stream_chat/src/core/models/action.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
@@ -25,6 +23,10 @@ void main() {
       expect(attachment.actions, isNotEmpty);
       expect(attachment.actions, hasLength(3));
       expect(attachment.actions![0], isA<Action>());
+      expect(attachment.giphy, {
+        'original': {'url': 'https://media0.giphy.com/media/3o7TKnCdBx5cMg0qti/giphy.gif'},
+      });
+      expect(attachment.custom, isEmpty);
     });
 
     test('should serialize to json correctly', () {
@@ -164,19 +166,6 @@ void main() {
         expect(autoUrlAttachment.isUrlPreview, isTrue);
       });
     });
-  });
-
-  test('Attachment.fromJson reads the Giphy renditions into giphy, not custom data', () {
-    // Decoded JSON, as events and the offline cache deliver it.
-    final attachment = Attachment.fromJson(
-      jsonDecode('{"type": "giphy", "giphy": {"original": {"url": "https://example.com/original.gif"}}}')
-          as Map<String, dynamic>,
-    );
-
-    expect(attachment.giphy, {
-      'original': {'url': 'https://example.com/original.gif'},
-    });
-    expect(attachment.custom, isEmpty);
   });
 
   test('Attachment.toJson writes the Giphy renditions, so an edited message keeps them', () {

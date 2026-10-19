@@ -6,7 +6,7 @@ import 'user.dart';
 part 'reaction.freezed.dart';
 
 /// A reaction a user added to a message.
-@Freezed(copyWith: false)
+@freezed
 class Reaction with _$Reaction {
   /// Creates a new [Reaction].
   ///
@@ -26,35 +26,35 @@ class Reaction with _$Reaction {
        createdAt = createdAt ?? DateTime.timestamp(),
        updatedAt = updatedAt ?? DateTime.timestamp();
 
-  /// The messageId to which the reaction belongs
+  /// The id of the message the reaction is on.
   @override
   final String? messageId;
 
-  /// The type of the reaction
+  /// The kind of reaction, such as `like` or `love`.
   @override
   final String type;
 
-  /// The score of the reaction (ie. number of reactions sent)
+  /// How many times the user sent this reaction.
   @override
   final int score;
 
-  /// The emoji code of the reaction (used for notifications)
+  /// The emoji that stands for the reaction, such as `❤️`.
   @override
   final String? emojiCode;
 
-  /// The user that sent the reaction
+  /// The user who sent the reaction.
   @override
   final User? user;
 
-  /// The userId that sent the reaction
+  /// The id of the user who sent the reaction.
   @override
   final String? userId;
 
-  /// The date of the reaction
+  /// The date at which the reaction was sent.
   @override
   final DateTime createdAt;
 
-  /// The date of the reaction update
+  /// The date at which the reaction was last updated.
   @override
   final DateTime updatedAt;
 
@@ -62,38 +62,17 @@ class Reaction with _$Reaction {
   @override
   final Map<String, Object?> custom;
 
-  /// Creates a copy of [Reaction] with specified attributes overridden.
-  Reaction copyWith({
-    String? messageId,
-    String? type,
-    User? user,
-    String? userId,
-    int? score,
-    String? emojiCode,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    Map<String, Object?>? custom,
-  }) => Reaction(
-    messageId: messageId ?? this.messageId,
-    type: type ?? this.type,
-    user: user ?? this.user,
-    userId: userId ?? this.userId,
-    score: score ?? this.score,
-    emojiCode: emojiCode ?? this.emojiCode,
-    createdAt: createdAt ?? this.createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
-    custom: custom ?? this.custom,
-  );
-
   /// Returns a new [Reaction] that is a combination of this reaction and the
   /// given [other] reaction.
+  ///
+  /// A field [other] leaves null keeps its current value.
   Reaction merge(Reaction other) => copyWith(
-    messageId: other.messageId,
+    messageId: other.messageId ?? messageId,
     type: other.type,
-    user: other.user,
-    userId: other.userId,
+    user: other.user ?? user,
+    userId: other.userId ?? userId,
     score: other.score,
-    emojiCode: other.emojiCode,
+    emojiCode: other.emojiCode ?? emojiCode,
     createdAt: other.createdAt,
     updatedAt: other.updatedAt,
     custom: other.custom,

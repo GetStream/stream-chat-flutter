@@ -40,6 +40,11 @@ RuleBuilderCondition _$RuleBuilderConditionFromJson(
       : ContentCountRuleParameters.fromJson(
           json['content_count_rule_params'] as Map<String, dynamic>,
         ),
+  contentCountryCodeParams: json['content_country_code_params'] == null
+      ? null
+      : ContentCountryCodeParameters.fromJson(
+          json['content_country_code_params'] as Map<String, dynamic>,
+        ),
   contentCustomPropertyCountParams: json['content_custom_property_count_params'] == null
       ? null
       : ContentCustomPropertyCountParameters.fromJson(
@@ -74,6 +79,11 @@ RuleBuilderCondition _$RuleBuilderConditionFromJson(
       ? null
       : ImageRuleParameters.fromJson(
           json['image_rule_params'] as Map<String, dynamic>,
+        ),
+  intentRuleParams: json['intent_rule_params'] == null
+      ? null
+      : IntentRuleParameters.fromJson(
+          json['intent_rule_params'] as Map<String, dynamic>,
         ),
   ipContentCountRuleParams: json['ip_content_count_rule_params'] == null
       ? null
@@ -111,6 +121,11 @@ RuleBuilderCondition _$RuleBuilderConditionFromJson(
           json['text_rule_params'] as Map<String, dynamic>,
         ),
   type: json['type'] as String?,
+  userChannelBanCountParams: json['user_channel_ban_count_params'] == null
+      ? null
+      : UserChannelBanCountRuleParameters.fromJson(
+          json['user_channel_ban_count_params'] as Map<String, dynamic>,
+        ),
   userChannelCountParams: json['user_channel_count_params'] == null
       ? null
       : UserChannelCountRuleParameters.fromJson(
@@ -178,6 +193,7 @@ Map<String, dynamic> _$RuleBuilderConditionToJson(
   'closed_caption_rule_params': instance.closedCaptionRuleParams?.toJson(),
   'confidence': instance.confidence,
   'content_count_rule_params': instance.contentCountRuleParams?.toJson(),
+  'content_country_code_params': instance.contentCountryCodeParams?.toJson(),
   'content_custom_property_count_params': instance.contentCustomPropertyCountParams?.toJson(),
   'content_custom_property_params': instance.contentCustomPropertyParams?.toJson(),
   'content_flag_count_rule_params': instance.contentFlagCountRuleParams?.toJson(),
@@ -185,6 +201,7 @@ Map<String, dynamic> _$RuleBuilderConditionToJson(
   'flood_similar_params': instance.floodSimilarParams?.toJson(),
   'image_content_params': instance.imageContentParams?.toJson(),
   'image_rule_params': instance.imageRuleParams?.toJson(),
+  'intent_rule_params': instance.intentRuleParams?.toJson(),
   'ip_content_count_rule_params': instance.ipContentCountRuleParams?.toJson(),
   'ip_flag_count_rule_params': instance.ipFlagCountRuleParams?.toJson(),
   'keyframe_ocr_rule_params': instance.keyframeOcrRuleParams?.toJson(),
@@ -193,6 +210,7 @@ Map<String, dynamic> _$RuleBuilderConditionToJson(
   'text_content_params': instance.textContentParams?.toJson(),
   'text_rule_params': instance.textRuleParams?.toJson(),
   'type': instance.type,
+  'user_channel_ban_count_params': instance.userChannelBanCountParams?.toJson(),
   'user_channel_count_params': instance.userChannelCountParams?.toJson(),
   'user_created_within_params': instance.userCreatedWithinParams?.toJson(),
   'user_custom_property_params': instance.userCustomPropertyParams?.toJson(),

@@ -238,7 +238,7 @@ class Attachment extends Equatable {
         ..removeWhere((key, value) => dbSpecificTopLevelFields.contains(key));
 
   // The fields toData leaves custom data out of. A custom `id`, the id the
-  // attachment was sent with, still replaces the local one, as it did before.
+  // attachment was sent with, replaces the local one.
   static const _storedFields = [...topLevelFields, 'file', 'upload_state'];
 
   /// Serialize to db data
@@ -366,7 +366,7 @@ class Attachment extends Equatable {
 /// It can be one of the built-in types (image, file, giphy, video,
 /// audio, voiceRecording) or application custom types like urlPreview.
 /// {@endtemplate}
-extension type const AttachmentType(String rawType) implements String {
+extension type const AttachmentType(String _) implements String {
   /// Built-in types.
   static const image = AttachmentType('image');
   static const file = AttachmentType('file');
@@ -379,9 +379,9 @@ extension type const AttachmentType(String rawType) implements String {
   static const urlPreview = AttachmentType('url_preview');
 
   /// Create a new instance from a json string.
-  static AttachmentType? fromJson(String? rawType) {
-    if (rawType == null) return null;
-    return AttachmentType(rawType);
+  static AttachmentType? fromJson(String? type) {
+    if (type == null) return null;
+    return AttachmentType(type);
   }
 
   /// Serialize to json string.

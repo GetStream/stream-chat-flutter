@@ -20,7 +20,7 @@ class OwnUserResponse with _$OwnUserResponse {
   const OwnUserResponse({
     this.avgResponseTime,
     required this.banned,
-    this.blockedUserIds,
+    required this.blockedUserIds,
     required this.channelMutes,
     required this.createdAt,
     required this.custom,
@@ -38,7 +38,6 @@ class OwnUserResponse with _$OwnUserResponse {
     required this.online,
     this.privacySettings,
     this.pushPreferences,
-    this.revokeTokensIssuedBefore,
     required this.role,
     required this.teams,
     this.teamsRole,
@@ -60,7 +59,7 @@ class OwnUserResponse with _$OwnUserResponse {
 
   @override
   @JsonKey(name: 'blocked_user_ids')
-  final List<String>? blockedUserIds;
+  final List<String> blockedUserIds;
 
   @override
   @JsonKey(name: 'channel_mutes')
@@ -133,11 +132,6 @@ class OwnUserResponse with _$OwnUserResponse {
   @override
   @JsonKey(name: 'push_preferences')
   final PushPreferencesResponse? pushPreferences;
-
-  @override
-  @StreamDateTimeConverter()
-  @JsonKey(name: 'revoke_tokens_issued_before')
-  final DateTime? revokeTokensIssuedBefore;
 
   @override
   @JsonKey(name: 'role')

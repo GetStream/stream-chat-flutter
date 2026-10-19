@@ -7,12 +7,6 @@ import 'user.dart';
 
 part 'message_reminder.freezed.dart';
 
-class _NullConst {
-  const _NullConst();
-}
-
-const _nullConst = _NullConst();
-
 /// {@template messageReminder}
 /// A reminder a user set on a message.
 ///
@@ -20,7 +14,7 @@ const _nullConst = _NullConst();
 /// message at that time. One without it is a bookmark, which keeps the message
 /// for later without a notification.
 /// {@endtemplate}
-@Freezed(copyWith: false)
+@freezed
 class MessageReminder with _$MessageReminder {
   /// {@macro messageReminder}
   MessageReminder({
@@ -74,34 +68,6 @@ class MessageReminder with _$MessageReminder {
   @override
   final DateTime updatedAt;
 
-  /// Creates a copy of this reminder with the given fields replaced.
-  ///
-  /// A field passed as null keeps its current value, except [remindAt], which a
-  /// null clears.
-  MessageReminder copyWith({
-    String? channelCid,
-    ChannelModel? channel,
-    String? messageId,
-    Message? message,
-    String? userId,
-    User? user,
-    Object? remindAt = _nullConst,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  }) {
-    return MessageReminder(
-      channelCid: channelCid ?? this.channelCid,
-      channel: channel ?? this.channel,
-      messageId: messageId ?? this.messageId,
-      message: message ?? this.message,
-      userId: userId ?? this.userId,
-      user: user ?? this.user,
-      remindAt: remindAt == _nullConst ? this.remindAt : remindAt as DateTime?,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-    );
-  }
-
   /// Returns this reminder with the fields [other] sets.
   ///
   /// A field [other] leaves null keeps its current value, except [remindAt]: a
@@ -111,11 +77,11 @@ class MessageReminder with _$MessageReminder {
     if (other == null) return this;
     return copyWith(
       channelCid: other.channelCid,
-      channel: other.channel,
+      channel: other.channel ?? channel,
       messageId: other.messageId,
-      message: other.message,
+      message: other.message ?? message,
       userId: other.userId,
-      user: other.user,
+      user: other.user ?? user,
       remindAt: other.remindAt,
       createdAt: other.createdAt,
       updatedAt: other.updatedAt,

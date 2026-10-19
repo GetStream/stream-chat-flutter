@@ -1280,7 +1280,7 @@ class Channel {
 
   /// Sends a static location to this channel.
   ///
-  /// A `messageText` and `custom` data, when given, are sent in the message
+  /// A [messageText] and [custom] data, when given, are sent in the message
   /// with the location.
   Future<SendMessageResponse> sendStaticLocation({
     String? id,
@@ -1312,7 +1312,7 @@ class Channel {
 
   /// Sends a live location sharing message to this channel.
   ///
-  /// A `messageText` and `custom` data, when given, are sent in the message
+  /// A [messageText] and [custom] data, when given, are sent in the message
   /// with the location.
   Future<SendMessageResponse> startLiveLocationSharing({
     String? id,
@@ -1659,7 +1659,7 @@ class Channel {
     // ignore: parameter_assignments
     reaction = reaction.copyWith(
       messageId: messageId,
-      user: _client.state.currentUser,
+      user: _client.state.currentUser ?? reaction.user,
     );
 
     final updatedMessage = message.addMyReaction(

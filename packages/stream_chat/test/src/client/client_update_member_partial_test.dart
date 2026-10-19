@@ -75,6 +75,7 @@ void main() {
         custom: const {},
         notificationsMuted: false,
         shadowBanned: false,
+        userId: 'user-id',
       ),
     );
     const request = api.UpdateMemberPartialRequest(set: {'a': 1});

@@ -13,6 +13,8 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$AIAudioConfigRequest {
+  AITextConfig? get aiTextConfig;
+  LLMConfig? get llmConfig;
   String? get profile;
   List<BodyguardRule>? get rules;
 
@@ -31,6 +33,8 @@ mixin _$AIAudioConfigRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is AIAudioConfigRequest &&
+            (identical(other.aiTextConfig, aiTextConfig) || other.aiTextConfig == aiTextConfig) &&
+            (identical(other.llmConfig, llmConfig) || other.llmConfig == llmConfig) &&
             (identical(other.profile, profile) || other.profile == profile) &&
             const DeepCollectionEquality().equals(other.rules, rules));
   }
@@ -38,13 +42,15 @@ mixin _$AIAudioConfigRequest {
   @override
   int get hashCode => Object.hash(
     runtimeType,
+    aiTextConfig,
+    llmConfig,
     profile,
     const DeepCollectionEquality().hash(rules),
   );
 
   @override
   String toString() {
-    return 'AIAudioConfigRequest(profile: $profile, rules: $rules)';
+    return 'AIAudioConfigRequest(aiTextConfig: $aiTextConfig, llmConfig: $llmConfig, profile: $profile, rules: $rules)';
   }
 }
 
@@ -55,7 +61,12 @@ abstract mixin class $AIAudioConfigRequestCopyWith<$Res> {
     $Res Function(AIAudioConfigRequest) _then,
   ) = _$AIAudioConfigRequestCopyWithImpl;
   @useResult
-  $Res call({String? profile, List<BodyguardRule>? rules});
+  $Res call({
+    AITextConfig? aiTextConfig,
+    LLMConfig? llmConfig,
+    String? profile,
+    List<BodyguardRule>? rules,
+  });
 }
 
 /// @nodoc
@@ -69,9 +80,22 @@ class _$AIAudioConfigRequestCopyWithImpl<$Res> implements $AIAudioConfigRequestC
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? profile = freezed, Object? rules = freezed}) {
+  $Res call({
+    Object? aiTextConfig = freezed,
+    Object? llmConfig = freezed,
+    Object? profile = freezed,
+    Object? rules = freezed,
+  }) {
     return _then(
       AIAudioConfigRequest(
+        aiTextConfig: freezed == aiTextConfig
+            ? _self.aiTextConfig
+            : aiTextConfig // ignore: cast_nullable_to_non_nullable
+                  as AITextConfig?,
+        llmConfig: freezed == llmConfig
+            ? _self.llmConfig
+            : llmConfig // ignore: cast_nullable_to_non_nullable
+                  as LLMConfig?,
         profile: freezed == profile
             ? _self.profile
             : profile // ignore: cast_nullable_to_non_nullable

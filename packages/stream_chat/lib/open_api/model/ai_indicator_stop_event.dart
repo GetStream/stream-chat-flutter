@@ -25,6 +25,7 @@ class AIIndicatorStopEvent extends core.WsEvent with _$AIIndicatorStopEvent {
     required this.custom,
     this.receivedAt,
     required this.type,
+    this.user,
   });
 
   @override
@@ -56,6 +57,10 @@ class AIIndicatorStopEvent extends core.WsEvent with _$AIIndicatorStopEvent {
   @override
   @JsonKey(name: 'type')
   final String type;
+
+  @override
+  @JsonKey(name: 'user')
+  final UserResponseCommonFields? user;
 
   Map<String, dynamic> toJson() => _$AIIndicatorStopEventToJson(this);
 

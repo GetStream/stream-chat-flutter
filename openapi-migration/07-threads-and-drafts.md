@@ -73,7 +73,8 @@
   verbatim on the message and on each attachment (README rule 9), `file_size` and `mime_type` included,
   so an entry named like one of the model's own fields — an attachment's received `id` among them — is
   saved as custom data, where v10's flattened body set the field or dropped it. The draft message's HTML
-  and markup are not modelled ([06](06-reminders.md) dropped them), so neither is sent.
+  and markup are not modelled ([06](06-reminders.md) dropped them): a draft read from v1 JSON keeps them
+  in `custom`, which is sent as is, and one read from the generated response does not carry them.
 - **Verified live** against the demo app, each call against v10's v1 request decoded the v10 way: query
   threads with defaults and with a filter, sort, `next` and `prev` (both cursors rejected), get a thread,
   set and unset a custom field on one, and create, get, query and delete three drafts (one with every

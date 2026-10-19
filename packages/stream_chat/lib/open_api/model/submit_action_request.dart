@@ -22,6 +22,9 @@ extension type const SubmitActionRequestActionType._(String _) implements String
   static const deleteActivity = SubmitActionRequestActionType._('delete_activity');
   static const deleteComment = SubmitActionRequestActionType._('delete_comment');
   static const deleteMessage = SubmitActionRequestActionType._('delete_message');
+  static const deletePoll = SubmitActionRequestActionType._('delete_poll');
+  static const deletePollAnswer = SubmitActionRequestActionType._('delete_poll_answer');
+  static const deletePollOption = SubmitActionRequestActionType._('delete_poll_option');
   static const deleteReaction = SubmitActionRequestActionType._('delete_reaction');
   static const deleteUser = SubmitActionRequestActionType._('delete_user');
   static const deleteUserMessages = SubmitActionRequestActionType._('delete_user_messages');
@@ -56,6 +59,9 @@ class SubmitActionRequest with _$SubmitActionRequest {
     this.deleteActivity,
     this.deleteComment,
     this.deleteMessage,
+    this.deletePoll,
+    this.deletePollAnswer,
+    this.deletePollOption,
     this.deleteReaction,
     this.deleteUser,
     this.deleteUserMessages,
@@ -105,6 +111,18 @@ class SubmitActionRequest with _$SubmitActionRequest {
   @override
   @JsonKey(name: 'delete_message')
   final DeleteMessageRequestPayload? deleteMessage;
+
+  @override
+  @JsonKey(name: 'delete_poll')
+  final DeletePollRequestPayload? deletePoll;
+
+  @override
+  @JsonKey(name: 'delete_poll_answer')
+  final DeletePollAnswerRequestPayload? deletePollAnswer;
+
+  @override
+  @JsonKey(name: 'delete_poll_option')
+  final DeletePollOptionRequestPayload? deletePollOption;
 
   @override
   @JsonKey(name: 'delete_reaction')

@@ -16,7 +16,7 @@ part 'location.freezed.dart';
 /// 2. **Live Location**: A location that updates in real-time and has an
 /// end time.
 /// {@endtemplate}
-@Freezed(copyWith: false)
+@freezed
 class Location with _$Location {
   /// {@macro location}
   Location({
@@ -101,33 +101,4 @@ class Location with _$Location {
 
   /// Returns the coordinates of the shared location.
   LocationCoordinate get coordinates => .new(latitude: latitude, longitude: longitude);
-
-  /// Creates a copy of [Location] with specified attributes overridden.
-  Location copyWith({
-    String? channelCid,
-    ChannelModel? channel,
-    String? messageId,
-    Message? message,
-    String? userId,
-    double? latitude,
-    double? longitude,
-    String? createdByDeviceId,
-    DateTime? endAt,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  }) {
-    return Location(
-      channelCid: channelCid ?? this.channelCid,
-      channel: channel ?? this.channel,
-      messageId: messageId ?? this.messageId,
-      message: message ?? this.message,
-      userId: userId ?? this.userId,
-      latitude: latitude ?? this.latitude,
-      longitude: longitude ?? this.longitude,
-      createdByDeviceId: createdByDeviceId ?? this.createdByDeviceId,
-      endAt: endAt ?? this.endAt,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-    );
-  }
 }
