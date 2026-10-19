@@ -576,7 +576,7 @@ final generatedThread = api.ThreadStateResponse(
   createdAt: DateTime.utc(2026, 2, 1),
   createdBy: fakeUserResponse('creator'),
   createdByUserId: 'creator',
-  custom: const {'topic': 'travel', 'title': 'shadowed'},
+  custom: const {'topic': 'travel'},
   deletedAt: DateTime.utc(2026, 2, 3),
   draft: generatedDraft,
   lastMessageAt: DateTime.utc(2026, 2, 4),
@@ -660,7 +660,7 @@ Thread expectedThreadLike(Thread actual) => Thread(
   ],
   title: 'Trip',
   updatedAt: DateTime.utc(2026, 2, 2),
-  custom: const {'topic': 'travel', 'title': 'shadowed'},
+  custom: const {'topic': 'travel'},
 );
 
 /// A generated message with the id [id] and only the fields the API always

@@ -140,17 +140,15 @@
 - `queryReminders` takes `limit`, `next` and `prev` instead of `PaginationParams`.
 - `CreateReminderResponse`, `UpdateReminderResponse` and `QueryRemindersResponse` are immutable, compare by value, and their `duration` is non-nullable.
 - `MessageReminderResponse` and `StreamChatApi.reminders` are removed.
-- The thread and draft calls on `StreamChatClient` and `Channel` return a `Result` instead of throwing, and `deleteDraft` returns a `Result<void>` instead of an `EmptyResponse`; a `Channel` that is not initialized still throws a `StateError`.
+- The thread and draft calls on `StreamChatClient` and `Channel` return a `Result` instead of throwing.
+- `deleteDraft` returns a `Result<void>` instead of an `EmptyResponse`.
 - `partialUpdateThread` is renamed `updateThreadPartial`, and `UpdateThreadResponse` is renamed `UpdateThreadPartialResponse`.
-- `queryThreads` and `queryDrafts` take `limit`, `next` and `prev` instead of `PaginationParams`, and their responses carry a `prev` cursor; `queryThreads` still pages by 10 when `limit` is omitted.
-- `QueryThreadsResponse`, `GetThreadResponse`, `UpdateThreadPartialResponse`, `CreateDraftResponse`, `GetDraftResponse` and `QueryDraftsResponse` no longer decode from JSON, are immutable, built through a const constructor, compare by value, gain `copyWith`, and their `duration` is a non-nullable `String`; `DraftResponse` is removed.
-- `Thread` and `ThreadParticipant` no longer decode from or encode to JSON and no longer extend `Equatable`, so `props` is removed; they still compare by value, and two threads now differ when their `custom` does.
-- `Thread.extraData` is renamed `custom`, and so is the `extraData` argument of its constructor and `copyWith`; it holds the custom data exactly as the API returns it.
-- `Thread.topLevelFields` is removed.
-- `Thread.copyWith` and `ThreadParticipant.copyWith` set a nullable field passed as `null` to `null` instead of keeping its value, and give `Thread.createdAt` and `updatedAt` a fresh default when passed `null`; `Thread.copyWith` takes `channelCid`, `parentMessageId`, `createdByUserId`, `replyCount`, `participantCount`, `threadParticipants` and `latestReplies`, and `ThreadParticipant.copyWith` takes `channelCid`, `createdAt` and `lastReadAt`, as non-nullable values.
-- `ThreadOptions` no longer encodes to JSON or extends `Equatable`, so `props` is removed; it still compares by value and gains `copyWith`.
-- `createDraft` sends the custom data of the draft message and its attachments as given, so an entry named like one of their own fields is saved as custom data instead of replacing the field or being dropped.
-- `StreamChatApi.threads` is removed, and `StreamChatApi.message` loses the draft methods; their endpoints are reached through `StreamChatClient`.
+- `queryThreads` and `queryDrafts` take `limit`, `next` and `prev` instead of `PaginationParams`.
+- `QueryThreadsResponse`, `GetThreadResponse`, `UpdateThreadPartialResponse`, `CreateDraftResponse`, `GetDraftResponse` and `QueryDraftsResponse` are immutable, compare by value, and their `duration` is non-nullable.
+- `Thread`, `ThreadParticipant` and `ThreadOptions` no longer extend `Equatable`, so `props` is removed; they still compare by value, and `Thread` now compares `custom` too.
+- `Thread.extraData` is renamed `custom`, and `Thread.topLevelFields` is removed.
+- `copyWith` on `Thread` and `ThreadParticipant` clears a nullable field passed as `null`, resets a date passed as `null` to now, and no longer accepts `null` for a field that is never null.
+- `DraftResponse` and `StreamChatApi.threads` are removed, and `StreamChatApi.message` loses the draft methods.
 - `ChannelModel.extraData` and `Member.extraData` are renamed `custom`, and so are `Channel.extraData`, `Channel.extraDataStream` (now `customStream`), and the `extraData` argument of the `Channel` constructor and of `StreamChatClient.channel`.
 - Several channel and member values the custom data used to hold, such as `ChannelModel.hidden`, `ChannelModel.truncatedAt` and `Member.status`, are fields instead: `custom` no longer holds them, `toJson` no longer writes them, and an entry with one of their names in `custom` or in `copyWith(custom:)` no longer sets the field.
 - `ChannelModel.custom` and `Member.custom` hold the custom data exactly as the API returns it, and `toJson` leaves out an entry named like one of the model's own fields.
@@ -162,7 +160,7 @@
 - `OwnUser.fromUser` no longer reads devices, mutes, unread counts, push preferences or privacy settings out of the user's custom data; they are left at their defaults.
 - `rawType` is removed from `MessageType`, `AttachmentType`, `PushLevel`, `ChatPreferenceLevel`, `ChatLevel`, `CallLevel` and `RoleType`, as are `ModerationAction.action` and `ChannelCapability.capability`; use the value itself instead.
 - `extraData` is renamed `custom` on `Message`, `Attachment`, `Reaction` and `DraftMessage`, and on `Channel.sendStaticLocation` and `startLiveLocationSharing`.
-- A custom entry named like one of the model's own fields is no longer sent, except by `createDraft`.
+- A custom entry named like one of the model's own fields is no longer sent.
 - A message's channel id, HTML, markup and deleted reply count, and an attachment's Giphy renditions, are fields instead of custom data.
 - `Message.toJson` no longer writes the message's channel id, HTML, markup or deleted reply count.
 - `Reaction.topLevelFields` is removed.
@@ -203,6 +201,7 @@
 - Added `ChannelModel.muted`, `blocked`, `truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires` and `deletedAt`; the constructors and `copyWith` accept the new fields.
 - Added `Message.cid`, `html`, `mml` and `deletedReplyCount`, and `Attachment.giphy`.
 - Added a `prev` cursor to `QueryRemindersResponse`.
+- Added a `prev` cursor to `QueryThreadsResponse` and `QueryDraftsResponse`.
 - Added a `prev` argument to `queryPolls` and `queryPollVotes`, and a `prev` cursor on their responses, for paging backwards.
 
 🔒 Security

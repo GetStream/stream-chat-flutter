@@ -4,7 +4,8 @@ import '../draft.dart';
 
 part 'create_draft_response.freezed.dart';
 
-/// The outcome of creating or replacing a draft.
+/// The result of saving a draft, returned by [StreamChatClient.createDraft] and
+/// [Channel.createDraft].
 @freezed
 class CreateDraftResponse with _$CreateDraftResponse {
   /// Creates a new [CreateDraftResponse].

@@ -6,6 +6,7 @@ import '../core/models/response/get_thread_response.dart';
 import '../core/models/response/query_threads_response.dart';
 import '../core/models/response/update_thread_partial_response.dart';
 import '../core/models/thread.dart';
+import 'mapper/filter_mapper.dart';
 import 'mapper/sort_mapper.dart';
 import 'mapper/threads_mapper.dart';
 
@@ -31,7 +32,7 @@ class ThreadsRepository {
   }) async {
     final result = await _api.queryThreads(
       queryThreadsRequest: api.QueryThreadsRequest(
-        filter: filter?.toJson(),
+        filter: filter?.toRequest(),
         sort: sort?.map((it) => it.toRequest()).toList(),
         watch: options.watch,
         replyLimit: options.replyLimit,
@@ -60,8 +61,9 @@ class ThreadsRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Sets the fields in [set] and removes the fields in [unset] on the thread
-  /// of the message with the id [messageId].
+  /// Sets the fields in [set] and removes the fields named in [unset] on the
+  /// thread of the message with the id [messageId], leaving every other field
+  /// as it is.
   Future<Result<UpdateThreadPartialResponse>> updateThreadPartial(
     String messageId, {
     Map<String, Object?>? set,

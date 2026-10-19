@@ -496,17 +496,15 @@ GROUPS = [
             - **`Draft` and `DraftMessage` stay json_serializable** until group [10](10-messages.md), as the adapters
               table records. Persistence stores drafts as rows in `draft_messages`, column by column, so nothing
               about the stored format changes.
-            - **`createDraft` stores what v10 stored, except custom data named like a field.** The backend stores a
-              draft alike from either route, so the request mapper (`DraftMessageRequestMapper`,
-              `AttachmentRequestMapper`) reproduces what v1 bound from v10's flattened body: mentions the text no
-              longer has are dropped, a command is written into the text, and the local id, upload state and file of
-              an attachment are left out. The Giphy renditions and the fields and actions map to their typed fields;
-              a key missing from them is sent empty, which the backend stores the same as absent. `custom` is sent
-              verbatim on the message and on each attachment (README rule 9), `file_size` and `mime_type` included,
-              so an entry named like one of the model's own fields — an attachment's received `id` among them — is
-              saved as custom data, where v10's flattened body set the field or dropped it. The draft message's HTML
-              and markup are not modelled ([06](06-reminders.md) dropped them): a draft read from v1 JSON keeps them
-              in `custom`, which is sent as is, and one read from the generated response does not carry them.
+            - **`createDraft` stores what v10 stored.** The backend stores a draft alike from either route, so the
+              request mapper (`DraftMessageRequestMapper`, `AttachmentRequestMapper`) reproduces what v1 bound from
+              v10's flattened body: mentions the text no longer has are dropped, a command is written into the text,
+              and the local id, upload state and file of an attachment are left out. The Giphy renditions and the
+              fields and actions map to their typed fields; a key missing from them is sent empty, which the backend
+              stores the same as absent. `custom` is sent verbatim on the message and on each attachment (README
+              rule 9), `file_size` and `mime_type` included. The draft message's HTML and markup are not modelled
+              ([06](06-reminders.md) dropped them): a draft read from v1 JSON keeps them in `custom`, which is sent
+              as is, and one read from the generated response does not carry them.
             - **Verified live** against the demo app, each call against v10's v1 request decoded the v10 way: query
               threads with defaults and with a filter, sort, `next` and `prev` (both cursors rejected), get a thread,
               set and unset a custom field on one, and create, get, query and delete three drafts (one with every
@@ -523,8 +521,8 @@ GROUPS = [
             """),
         done=DONE.replace('- [ ]', '- [x]'),
         risks=[
-            '`createDraft` must keep storing what v10 stored, apart from custom data named like a field, so v1 '
-            'readers of the draft — channel queries, WebSocket events, the offline cache — see no change.',
+            '`createDraft` must keep storing what v10 stored, so v1 readers of the draft — channel queries, '
+            'WebSocket events, the offline cache — see no change.',
         ],
     ),
     dict(

@@ -4,7 +4,8 @@ import '../draft.dart';
 
 part 'query_drafts_response.freezed.dart';
 
-/// One page of the current user's drafts matching a query.
+/// One page of the current user's drafts matching a query, returned by
+/// [StreamChatClient.queryDrafts].
 @freezed
 class QueryDraftsResponse with _$QueryDraftsResponse {
   /// Creates a new [QueryDraftsResponse].

@@ -1343,7 +1343,7 @@ void main() {
       );
     });
 
-    test("Channel.createDraft sends the draft message and returns the client's createDraft response", () async {
+    test('Channel.createDraft saves the draft in this channel and returns the saved draft', () async {
       final draftMessage = DraftMessage(id: 'draft-id', text: 'Draft message text');
       final response = CreateDraftResponse(
         duration: '0.01ms',
@@ -1359,7 +1359,7 @@ void main() {
       verify(() => client.createDraft(draftMessage, channelId, channelType)).called(1);
     });
 
-    test("Channel.getDraft sends no parent id and returns the client's getDraft response", () async {
+    test('Channel.getDraft fetches the draft of this channel', () async {
       final response = GetDraftResponse(
         duration: '0.01ms',
         draft: Draft(
@@ -1376,7 +1376,7 @@ void main() {
       verify(() => client.getDraft(channelId, channelType)).called(1);
     });
 
-    test("Channel.getDraft sends the parent id and returns the client's getDraft response", () async {
+    test('Channel.getDraft with a parent id fetches the draft of that thread', () async {
       const parentId = 'parent-123';
       final response = GetDraftResponse(
         duration: '0.01ms',
@@ -1397,7 +1397,7 @@ void main() {
       verify(() => client.getDraft(channelId, channelType, parentId: parentId)).called(1);
     });
 
-    test("Channel.deleteDraft sends no parent id and returns the client's deleteDraft result", () async {
+    test('Channel.deleteDraft deletes the draft of this channel and returns a success', () async {
       when(() => client.deleteDraft(channelId, channelType)).thenAnswer((_) async => const Result.success(null));
 
       final res = await channel.deleteDraft();
@@ -1406,7 +1406,7 @@ void main() {
       verify(() => client.deleteDraft(channelId, channelType)).called(1);
     });
 
-    test("Channel.deleteDraft sends the parent id and returns the client's deleteDraft result", () async {
+    test('Channel.deleteDraft with a parent id deletes the draft of that thread and returns a success', () async {
       const parentId = 'parent-123';
       when(
         () => client.deleteDraft(channelId, channelType, parentId: parentId),

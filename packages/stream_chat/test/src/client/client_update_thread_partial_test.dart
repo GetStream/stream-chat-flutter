@@ -73,7 +73,7 @@ final _generatedThread = api.ThreadResponse(
   createdAt: DateTime.utc(2026, 2, 1),
   createdBy: fakeUserResponse('creator'),
   createdByUserId: 'creator',
-  custom: const {'topic': 'travel', 'reply_count': 'shadowed'},
+  custom: const {'topic': 'travel'},
   deletedAt: DateTime.utc(2026, 2, 3),
   lastMessageAt: DateTime.utc(2026, 2, 4),
   parentMessage: generatedLeafMessage('parent-id'),
@@ -124,7 +124,7 @@ Thread _expectedThread({required ChannelModel? channel}) => Thread(
   ],
   title: 'Trip',
   updatedAt: DateTime.utc(2026, 2, 2),
-  custom: const {'topic': 'travel', 'reply_count': 'shadowed'},
+  custom: const {'topic': 'travel'},
 );
 
 StreamChatClient _client(api.DefaultApi defaultApi) {

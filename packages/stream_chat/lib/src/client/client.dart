@@ -2093,9 +2093,7 @@ class StreamChatClient {
   /// [channelId] and type [channelType].
   ///
   /// It replaces the draft the user already has there, or in the thread of the
-  /// message [DraftMessage.parentId] names. Mentioned users the text no longer
-  /// mentions are left out, and a [DraftMessage.command] is kept as
-  /// `/command text`.
+  /// message [DraftMessage.parentId] names.
   Future<Result<CreateDraftResponse>> createDraft(
     DraftMessage draft,
     String channelId,
@@ -2127,8 +2125,10 @@ class StreamChatClient {
   /// Fetches one page of the current user's drafts matching [filter], ordered
   /// by [sort].
   ///
-  /// A page holds up to [limit] drafts. [next] and [prev] are the cursors a
-  /// previous page returned; at most one of them may be given.
+  /// Up to [limit] drafts are returned. The next page is fetched by passing a
+  /// response's [QueryDraftsResponse.next] as [next], and the previous page by
+  /// passing its [QueryDraftsResponse.prev] as [prev]. At most one of [next]
+  /// and [prev] may be given.
   Future<Result<QueryDraftsResponse>> queryDrafts({
     DraftFilter? filter,
     List<DraftSort>? sort,
@@ -2260,10 +2260,12 @@ class StreamChatClient {
   /// Fetches one page of the current user's threads matching [filter], ordered
   /// by [sort].
   ///
-  /// A page holds up to [limit] threads, and [options] decides how much of each
-  /// thread it carries and whether the current user starts watching them.
-  /// [next] and [prev] are the cursors a previous page returned; at most one of
-  /// them may be given.
+  /// Up to [limit] threads are returned, and [options] decides how much of each
+  /// thread they carry and whether the current user starts watching them. The
+  /// next page is fetched by passing a response's [QueryThreadsResponse.next]
+  /// as [next], and the previous page by passing its
+  /// [QueryThreadsResponse.prev] as [prev]. At most one of [next] and [prev]
+  /// may be given.
   Future<Result<QueryThreadsResponse>> queryThreads({
     ThreadFilter? filter,
     List<ThreadSort>? sort,
@@ -2289,10 +2291,9 @@ class StreamChatClient {
     ThreadOptions options = const ThreadOptions(),
   }) => _threadsRepository.getThread(messageId, options: options);
 
-  /// Partially updates the thread of the message with the id [messageId].
-  ///
-  /// The fields in [set] are given their new values and the fields in [unset]
-  /// are removed; fields in neither keep their current values.
+  /// Partially updates the thread of the message with the id [messageId]: sets
+  /// the fields in [set] and removes the fields named in [unset], leaving every
+  /// other field as it is.
   Future<Result<UpdateThreadPartialResponse>> updateThreadPartial(
     String messageId, {
     Map<String, Object?>? set,

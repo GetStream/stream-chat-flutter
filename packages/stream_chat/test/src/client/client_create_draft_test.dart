@@ -31,7 +31,7 @@ void main() {
         quotedMessageId: 'quoted-id',
         silent: true,
         pollId: 'poll-id',
-        custom: {'mood': 'busy', 'quoted_message_id': 'other-id', 'text': 'Other text'},
+        custom: {'mood': 'busy'},
       ),
     );
 
@@ -57,9 +57,7 @@ void main() {
         quotedMessageId: 'quoted-id',
         silent: true,
         pollId: 'poll-id',
-        // Custom data named like one of the draft message's own fields is sent
-        // as custom data.
-        custom: const {'mood': 'busy', 'quoted_message_id': 'other-id', 'text': 'Other text'},
+        custom: const {'mood': 'busy'},
       ),
       'general',
       'messaging',

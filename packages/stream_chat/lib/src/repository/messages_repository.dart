@@ -7,6 +7,7 @@ import '../core/models/response/create_draft_response.dart';
 import '../core/models/response/get_draft_response.dart';
 import '../core/models/response/query_drafts_response.dart';
 import 'mapper/drafts_mapper.dart';
+import 'mapper/filter_mapper.dart';
 import 'mapper/result_mapper.dart';
 import 'mapper/sort_mapper.dart';
 
@@ -62,7 +63,7 @@ class MessagesRepository {
   }) async {
     final result = await _api.queryDrafts(
       queryDraftsRequest: api.QueryDraftsRequest(
-        filter: filter?.toJson(),
+        filter: filter?.toRequest(),
         sort: sort?.map((it) => it.toRequest()).toList(),
         limit: limit,
         next: next,

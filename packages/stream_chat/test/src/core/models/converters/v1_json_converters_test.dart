@@ -727,7 +727,7 @@ void main() {
         ],
         lastMessageAt: DateTime.utc(2024, 6, 2, 9),
         // A custom entry named like one of the thread's keys is not written.
-        custom: const {'priority': 'high', 'title': 'shadowed'},
+        custom: const {'priority': 'high', 'title': 'custom'},
       ),
     );
 

@@ -4,7 +4,8 @@ import '../thread.dart';
 
 part 'get_thread_response.freezed.dart';
 
-/// The thread fetched by its parent message.
+/// The result of fetching a thread by its parent message, returned by
+/// [StreamChatClient.getThread].
 @freezed
 class GetThreadResponse with _$GetThreadResponse {
   /// Creates a new [GetThreadResponse].
