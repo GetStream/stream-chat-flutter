@@ -18,6 +18,13 @@ mixin _$ReactionGroup {
   DateTime get firstReactionAt;
   DateTime get lastReactionAt;
 
+  /// Create a copy of ReactionGroup
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $ReactionGroupCopyWith<ReactionGroup> get copyWith =>
+      _$ReactionGroupCopyWithImpl<ReactionGroup>(this as ReactionGroup, _$identity);
+
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
@@ -35,5 +42,52 @@ mixin _$ReactionGroup {
   @override
   String toString() {
     return 'ReactionGroup(count: $count, sumScores: $sumScores, firstReactionAt: $firstReactionAt, lastReactionAt: $lastReactionAt)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $ReactionGroupCopyWith<$Res> {
+  factory $ReactionGroupCopyWith(ReactionGroup value, $Res Function(ReactionGroup) _then) = _$ReactionGroupCopyWithImpl;
+  @useResult
+  $Res call({int count, int sumScores, DateTime? firstReactionAt, DateTime? lastReactionAt});
+}
+
+/// @nodoc
+class _$ReactionGroupCopyWithImpl<$Res> implements $ReactionGroupCopyWith<$Res> {
+  _$ReactionGroupCopyWithImpl(this._self, this._then);
+
+  final ReactionGroup _self;
+  final $Res Function(ReactionGroup) _then;
+
+  /// Create a copy of ReactionGroup
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? count = null,
+    Object? sumScores = null,
+    Object? firstReactionAt = freezed,
+    Object? lastReactionAt = freezed,
+  }) {
+    return _then(
+      ReactionGroup(
+        count: null == count
+            ? _self.count
+            : count // ignore: cast_nullable_to_non_nullable
+                  as int,
+        sumScores: null == sumScores
+            ? _self.sumScores
+            : sumScores // ignore: cast_nullable_to_non_nullable
+                  as int,
+        firstReactionAt: freezed == firstReactionAt
+            ? _self.firstReactionAt!
+            : firstReactionAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        lastReactionAt: freezed == lastReactionAt
+            ? _self.lastReactionAt!
+            : lastReactionAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+      ),
+    );
   }
 }

@@ -8,10 +8,6 @@
   "html": "<p>Hi</p>",
   "mml": "<mml>Hi</mml>",
   "deleted_reply_count": 2,
-  "image_labels": {
-    "cat.png": ["cat"]
-  },
-  "mentioned_channel_members": {},
   "user": {
     "id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
     "role": "user",

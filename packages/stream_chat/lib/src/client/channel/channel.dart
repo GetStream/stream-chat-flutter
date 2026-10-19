@@ -1649,7 +1649,7 @@ class Channel {
     // ignore: parameter_assignments
     reaction = reaction.copyWith(
       messageId: messageId,
-      user: _client.state.currentUser,
+      user: _client.state.currentUser ?? reaction.user,
     );
 
     final updatedMessage = message.addMyReaction(

@@ -317,13 +317,13 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `Moderation.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. `Message.fromJson` still reads a message's moderation |
 | `Moderation extends Equatable`, `Moderation.props` | `Moderation` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and `Moderation` is no longer an `Equatable` |
 | `ReactionGroup.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. `Message.fromJson` still reads a message's reaction groups. `fromData` / `toData` are the offline database's format, not API JSON |
-| `ReactionGroup extends Equatable`, `ReactionGroup.props` | `ReactionGroup` (value `==`) | `removed` | Equality and `copyWith` are unchanged; `props` is gone and `ReactionGroup` is no longer an `Equatable` |
+| `ReactionGroup extends Equatable`, `ReactionGroup.props` | `ReactionGroup` (value `==`) | `removed` | Equality is unchanged; `props` is gone and `ReactionGroup` is no longer an `Equatable` |
 | `Action.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. `Attachment.fromJson` and `toJson` still read and write an attachment's actions |
 | `Action` identity `==` | value `==`, plus `copyWith` | `retyped` | Two actions with the same fields are now equal, and so are attachments that differ only in holding separate copies of them |
 | `Reaction.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. Messages, events and `sendReaction` still read and write reactions |
-| `Reaction extends Equatable`, `Reaction.props` | `Reaction` (value `==`) | `removed` | Equality, `copyWith` and `merge` are unchanged; `props` is gone and `Reaction` is no longer an `Equatable` |
+| `Reaction extends Equatable`, `Reaction.props` | `Reaction` (value `==`) | `removed` | Equality and `merge` are unchanged; `props` is gone and `Reaction` is no longer an `Equatable` |
 | `Location.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. Messages, channel states and the live location calls still read and write locations |
-| `Location extends Equatable`, `Location.props` | `Location` (value `==`) | `removed` | Equality and `copyWith` are unchanged; `props` is gone and `Location` is no longer an `Equatable` |
+| `Location extends Equatable`, `Location.props` | `Location` (value `==`) | `removed` | Equality is unchanged; `props` is gone and `Location` is no longer an `Equatable` |
 | `StreamChatClient.updateUser` / `updateUsers` → `Future<UpdateUsersResponse>` | `Future<Result<UpdateUsersResponse>>` | `retyped` | Returns a `Result` instead of throwing |
 | `StreamChatClient.partialUpdateUser` | `StreamChatClient.updateUserPartial` | `renamed` | Same arguments |
 | `StreamChatClient.partialUpdateUser` → `Future<UpdateUsersResponse>` | `updateUserPartial` → `Future<Result<UpdateUsersResponse>>` | `retyped` | Returns a `Result` instead of throwing |
@@ -359,13 +359,13 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | reminder responses' identity `==` | value `==`, plus `copyWith` | `retyped` | Two responses with the same fields are now equal |
 | `MessageReminderResponse` | — | `removed` | The shared base class of the create and update responses |
 | `MessageReminder.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. Messages and events still read reminders |
-| `MessageReminder extends Equatable`, `MessageReminder.props` | `MessageReminder` (value `==`) | `removed` | Equality, `copyWith` and `merge` are unchanged; `props` is gone and `MessageReminder` is no longer an `Equatable` |
+| `MessageReminder extends Equatable`, `MessageReminder.props` | `MessageReminder` (value `==`) | `removed` | Equality and `merge` are unchanged; `props` is gone and `MessageReminder` is no longer an `Equatable` |
+| `Location.copyWith` / `MessageReminder.copyWith` / `Reaction.copyWith` / `ReactionGroup.copyWith` keeping a field passed as `null` | freezed's `copyWith` | `retyped` | `null` clears a nullable field and resets `createdAt`, `updatedAt`, `firstReactionAt` and `lastReactionAt` to now; `MessageReminder.remindAt` already cleared |
 | `StreamChatApi.reminders` (`RemindersApi`) | `StreamChatClient` reminder methods | `removed` | The endpoints moved to the generated client |
 | `Message.extraData` / `Attachment.extraData` / `Reaction.extraData` / `DraftMessage.extraData` | `Message.custom` / `Attachment.custom` / `Reaction.custom` / `DraftMessage.custom` | `renamed` | The wire's name for it; also the constructor and `copyWith` arguments |
 | `Channel.sendStaticLocation(extraData: …)` / `startLiveLocationSharing(extraData: …)` | `sendStaticLocation(custom: …)` / `startLiveLocationSharing(custom: …)` | `renamed` | The message's custom data |
 | `message.extraData['cid']` / `['html']` / `['mml']` / `['deleted_reply_count']` | `Message.cid` / `html` / `mml` / `deletedReplyCount` | `retyped` | Fields now, not custom data; `toJson` does not write them, so a message can no longer be sent with markup |
 | `attachment.extraData['giphy']` | `Attachment.giphy` | `retyped` | A field now, not custom data |
-| `message.extraData['image_labels']` / `['mentioned_channel_members']`, `draftMessage.extraData['html']` / `['mml']` | — | `removed` | No longer kept |
 | `Message.custom` / `Attachment.custom` / `Reaction.custom` / `DraftMessage.custom` entry named like one of the model's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; left out when the model is sent, so it cannot overwrite the field |
 | `Reaction.topLevelFields` | — | `removed` | It listed the JSON keys of a model that no longer has JSON |
 | _(more added per feature as PRs land)_ | | | |
@@ -1157,9 +1157,6 @@ final html = message.extraData['html'] as String?;
 final html = message.html;
 ```
 
-**A message's image labels and mentioned channel members, and a draft message's HTML and markup, are no longer
-kept.** v10 left them in `extraData`.
-
 **`custom` is the custom data exactly as the API returns it.** An entry named like one of the model's own fields
 stays in `custom` and leaves the field alone; it is left out when the model is sent, so it cannot overwrite the
 field. A reaction on a reminder's message keeps its emoji code in its `custom` as well as in `Reaction.emojiCode`.
@@ -1441,8 +1438,8 @@ await client.queryReminders(limit: 10, next: cursor);
 **`MessageReminder` and the reminder responses no longer decode JSON.** Build them with their constructors —
 `CreateReminderResponse(duration: '0ms', reminder: reminder)` where v10 wrote
 `CreateReminderResponse()..reminder = reminder`. `Message.reminder` and the reminder events still decode from the
-same keys. `MessageReminder` is no longer an `Equatable`: equality, `copyWith` and `merge` are unchanged, and
-`props` is gone.
+same keys. `MessageReminder` is no longer an `Equatable`: equality and `merge` are unchanged, and `props` is
+gone. Its `copyWith` is freezed's: `null` clears a nullable field and resets a date to now.
 
 **`StreamChatApi.reminders` is removed.** Call the reminder methods on `StreamChatClient` or `Channel` instead.
 
@@ -1502,8 +1499,9 @@ JSON.
 holding them follows suit.
 
 **`Reaction` and `Location` are plain classes.** Neither decodes from or encodes to JSON any more, and neither is an
-`Equatable`; equality and `copyWith` are unchanged, as is `Reaction.merge`. Messages, events, channel states,
-`sendReaction` and the live location calls still carry them as before.
+`Equatable`; equality is unchanged, as is `Reaction.merge`. Messages, events, channel states, `sendReaction` and
+the live location calls still carry them as before. `copyWith` on `Reaction`, `Location` and `ReactionGroup` is
+freezed's: `null` clears a nullable field and resets a date to now.
 
 ```dart
 // v10

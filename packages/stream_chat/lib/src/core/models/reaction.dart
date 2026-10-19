@@ -6,7 +6,7 @@ import 'user.dart';
 part 'reaction.freezed.dart';
 
 /// A reaction a user added to a message.
-@Freezed(copyWith: false)
+@freezed
 class Reaction with _$Reaction {
   /// Creates a new [Reaction].
   ///
@@ -62,38 +62,17 @@ class Reaction with _$Reaction {
   @override
   final Map<String, Object?> custom;
 
-  /// Creates a copy of [Reaction] with specified attributes overridden.
-  Reaction copyWith({
-    String? messageId,
-    String? type,
-    User? user,
-    String? userId,
-    int? score,
-    String? emojiCode,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    Map<String, Object?>? custom,
-  }) => Reaction(
-    messageId: messageId ?? this.messageId,
-    type: type ?? this.type,
-    user: user ?? this.user,
-    userId: userId ?? this.userId,
-    score: score ?? this.score,
-    emojiCode: emojiCode ?? this.emojiCode,
-    createdAt: createdAt ?? this.createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
-    custom: custom ?? this.custom,
-  );
-
   /// Returns a new [Reaction] that is a combination of this reaction and the
   /// given [other] reaction.
+  ///
+  /// A field [other] leaves null keeps its current value.
   Reaction merge(Reaction other) => copyWith(
-    messageId: other.messageId,
+    messageId: other.messageId ?? messageId,
     type: other.type,
-    user: other.user,
-    userId: other.userId,
+    user: other.user ?? user,
+    userId: other.userId ?? userId,
     score: other.score,
-    emojiCode: other.emojiCode,
+    emojiCode: other.emojiCode ?? emojiCode,
     createdAt: other.createdAt,
     updatedAt: other.updatedAt,
     custom: other.custom,

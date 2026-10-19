@@ -26,8 +26,9 @@
 ## Decisions taken
 
 - **`MessageReminder` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`;
-  equality is unchanged. Its constructor stays non-const (dates default to now) and it keeps v10's
-  hand-written `copyWith` and `merge` (`@Freezed(copyWith: false)`). `expiresAt` stays out; adding it
+  equality is unchanged. Its constructor stays non-const (dates default to now). It takes freezed's
+  `copyWith` (audited: only `merge` needed `?? channel`, `?? message` and `?? user` to keep what an
+  event leaves out) and keeps v10's `merge`. `expiresAt` stays out; adding it
   is additive. It is not persisted after all: `Message.reminder` is never written to JSON and
   `stream_chat_persistence` has no reminder column, so no codec is needed.
 - **v1 JSON keeps decoding through `MessageReminderV1JsonConverter`** on `Message.reminder` and

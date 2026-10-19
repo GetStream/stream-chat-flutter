@@ -236,8 +236,6 @@ void main() {
         'text': text,
         'custom_field': 'custom_value',
         'priority': 5,
-        'html': '<p>Hi</p>',
-        'mml': '<mml>Hi</mml>',
       };
 
       final deserializedMessage = DraftMessage.fromJson(json);

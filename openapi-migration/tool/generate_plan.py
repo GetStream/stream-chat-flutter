@@ -421,8 +421,9 @@ GROUPS = [
         decisions=[],
         taken=textwrap.dedent("""\
             - **`MessageReminder` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`;
-              equality is unchanged. Its constructor stays non-const (dates default to now) and it keeps v10's
-              hand-written `copyWith` and `merge` (`@Freezed(copyWith: false)`). `expiresAt` stays out; adding it
+              equality is unchanged. Its constructor stays non-const (dates default to now). It takes freezed's
+              `copyWith` (audited: only `merge` needed `?? channel`, `?? message` and `?? user` to keep what an
+              event leaves out) and keeps v10's `merge`. `expiresAt` stays out; adding it
               is additive. It is not persisted after all: `Message.reminder` is never written to JSON and
               `stream_chat_persistence` has no reminder column, so no codec is needed.
             - **v1 JSON keeps decoding through `MessageReminderV1JsonConverter`** on `Message.reminder` and
@@ -690,9 +691,9 @@ GROUPS = [
               `Message` stops decoding v1 JSON. `ModerationV2Response` maps beside the message, in
               `messages_mapper.dart`.
             - **`ReactionGroup` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`;
-              equality is unchanged. Its constructor stays non-const, defaulting both dates to now, and it keeps
-              v10's hand-written `copyWith` (`@Freezed(copyWith: false)`): freezed's would read a `null` date as
-              "now" instead of "keep". `Message.reactionGroups` decodes through `reactionGroupsFromV1Json`,
+              equality is unchanged. Its constructor stays non-const, defaulting both dates to now, and it takes
+              freezed's `copyWith` (audited: no site passes a `null` date). `Message.reactionGroups` decodes through
+              `reactionGroupsFromV1Json`,
               decode-only; `reactionGroupsFromCounts` builds the groups from `reaction_counts` and
               `reaction_scores` when `reaction_groups` is missing. Dates go through `StreamDateTimeConverter`.
               `messages.reaction_groups` and `pinned_messages.reaction_groups` store the groups through the
@@ -706,15 +707,16 @@ GROUPS = [
               the stored `attachments` columns are unchanged. `Action` needs no codec of its own.
             - **`Reaction` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`; equality
               is unchanged. Its constructor stays non-const (`userId` from `user`, dates default to now) and it
-              keeps v10's hand-written `copyWith` and `merge` (`@Freezed(copyWith: false)`). `Reaction.topLevelFields`
-              is removed; the converter owns the key list. `ReactionV1JsonConverter` reads and writes a reaction
-              everywhere v1 JSON carries one: the message's latest and own reactions, `Event.reaction`, the two
-              hand-written reaction responses, and the `sendReaction` body, which keeps v10's request shape (type,
-              score, emoji code, custom data at the root). `stream_chat_persistence` stores reactions as table
-              rows, so no codec is needed.
+              takes freezed's `copyWith` (audited: `merge` keeps a `null` message id, user, user id and emoji code
+              with `??`, and `sendReaction` keeps the reaction's user when there is no current user).
+              `Reaction.topLevelFields` is removed; the converter owns the key list. `ReactionV1JsonConverter` reads
+              and writes a reaction everywhere v1 JSON carries one: the message's latest and own reactions,
+              `Event.reaction`, the two hand-written reaction responses, and the `sendReaction` body, which keeps
+              v10's request shape (type, score, emoji code, custom data at the root). `stream_chat_persistence`
+              stores reactions as table rows, so no codec is needed.
             - **`Location` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`; equality
               is unchanged. Its constructor stays non-const (`endAt` normalised to UTC, dates default to now) and
-              it keeps v10's hand-written `copyWith` (`@Freezed(copyWith: false)`). Its `channel` and `message`
+              it takes freezed's `copyWith` (audited: no site changes). Its `channel` and `message`
               stay json_serializable `ChannelModel` and `Message`, which `LocationV1JsonConverter` decodes through
               their own `fromJson`; the API nests them only in active live locations, one level deep, so the
               message-location cycle ends there. The converter reads and writes `Message.sharedLocation` (the write
@@ -739,8 +741,9 @@ GROUPS = [
               `Attachment.giphy`, stored through the attachment's `toData`. `Message.toJson` writes none of the
               message's; `Attachment.toJson` writes `giphy`, so an edited Giphy message keeps its renditions.
             - **What the SDK has no feature for stays out:** `image_labels` and `mentioned_channel_members` on a
-              message, and `html` and `mml` on a draft message, which iOS and Android drop too. The v1 decoders
-              list them in `topLevelFields`, so they no longer land in `custom` on either path.
+              message, and `html` and `mml` on a draft message, which iOS and Android drop too. The mappers leave
+              them out; the v1 decoders split flat JSON by `topLevelFields` alone, so they keep them in `custom`,
+              as v10 did.
             - **A reaction's emoji code arrives in `custom`,** which keeps it, and also maps to `Reaction.emojiCode`.
             - **Moderation actions go through `ModerationAction.fromJson`,** so legacy names read as current ones.
             - **Attachments map at parity with `Attachment.fromJson`:** each gets a new local `id`, and the id the

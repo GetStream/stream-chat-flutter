@@ -426,9 +426,6 @@ class Message extends Equatable {
     'html',
     'mml',
     'deleted_reply_count',
-    // Not modelled on a message; listed so they never land in [custom].
-    'image_labels',
-    'mentioned_channel_members',
   ];
 
   /// Serialize to json.
