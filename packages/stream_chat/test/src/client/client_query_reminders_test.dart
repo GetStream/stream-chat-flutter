@@ -155,8 +155,9 @@ final _generatedChannel = api.ChannelResponse(
   updatedAt: DateTime.utc(2026),
 );
 
-// The reminder [_generatedReminder] maps to. Its channel compares by identity, and its message's attachment ids are
-// created locally, so both are read off [actual].
+// The reminder [_generatedReminder] maps to. Its channel compares by identity,
+// and its message's attachment ids are created locally, so both are read off
+// [actual].
 MessageReminder _expectedReminder(MessageReminder actual) => MessageReminder(
   channelCid: 'messaging:general',
   channel: actual.channel,
@@ -169,7 +170,8 @@ MessageReminder _expectedReminder(MessageReminder actual) => MessageReminder(
   updatedAt: DateTime.utc(2026, 1, 8),
 );
 
-// The reminder [_generatedBookmark] maps to, with its channel read off [actual].
+// The reminder [_generatedBookmark] maps to, with its channel read off
+// [actual].
 MessageReminder _expectedBookmark(MessageReminder actual) => MessageReminder(
   channelCid: 'messaging:general',
   channel: actual.channel,

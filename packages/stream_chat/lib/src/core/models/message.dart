@@ -32,9 +32,6 @@ const _nullConst = _NullConst();
 @JsonSerializable()
 class Message extends Equatable {
   /// Constructor used for json serialization.
-  ///
-  /// The [html], [mml], [imageLabels] and [deletedReplyCount] arguments, when given, are stored in [extraData],
-  /// replacing the entry each one reads.
   Message({
     String? id,
     this.text,
@@ -73,7 +70,7 @@ class Message extends Equatable {
     this.pinnedBy,
     this.poll,
     this._pollId,
-    Map<String, Object?> extraData = const {},
+    this.custom = const {},
     this.state = const MessageState.initial(),
     this.i18n,
     this.restrictedVisibility,
@@ -82,27 +79,16 @@ class Message extends Equatable {
     this.reminder,
     this.channelRole,
     this.sharedLocation,
-    String? html,
-    String? mml,
-    Map<String, List<String>>? imageLabels,
-    int? deletedReplyCount,
+    this.cid,
+    this.html,
+    this.mml,
+    this.deletedReplyCount,
   }) : id = id ?? const Uuid().v4(),
        type = MessageType(type),
        pinExpires = pinExpires?.toUtc(),
        remoteCreatedAt = createdAt,
        remoteUpdatedAt = updatedAt,
-       remoteDeletedAt = deletedAt,
-       // For backwards compatibility, set 'html', 'mml', 'image_labels' and 'deleted_reply_count' in [extraData].
-       // Only copied when one is given, as messages are rebuilt on every change.
-       extraData = html == null && mml == null && imageLabels == null && deletedReplyCount == null
-           ? extraData
-           : {
-               ...extraData,
-               'html': ?html,
-               'mml': ?mml,
-               'image_labels': ?imageLabels,
-               'deleted_reply_count': ?deletedReplyCount,
-             };
+       remoteDeletedAt = deletedAt;
 
   /// Create a new instance from JSON.
   factory Message.fromJson(Map<String, dynamic> json) {
@@ -121,7 +107,8 @@ class Message extends Equatable {
         .withDerivedState();
   }
 
-  // Reads a map of reaction type to count or score, whatever kind of number each value is.
+  // Reads a map of reaction type to count or score, whatever kind of number
+  // each value is.
   static Map<String, int>? _countsFromJson(Object? json) => switch (json) {
     final Map<String, dynamic> counts => {
       for (final MapEntry(:key, :value) in counts.entries)
@@ -359,38 +346,36 @@ class Message extends Equatable {
   @JsonKey(includeToJson: false)
   final bool? deletedForMe;
 
-  /// Message custom extraData.
-  final Map<String, Object?> extraData;
+  /// This message's custom data.
+  ///
+  /// It may hold a key named like one of the message's own fields; [toJson]
+  /// leaves such an entry out so it never overwrites the field.
+  @JsonKey(name: 'extra_data')
+  final Map<String, Object?> custom;
+
+  /// The id of the channel this message belongs to, such as
+  /// `messaging:general`.
+  @JsonKey(includeToJson: false)
+  final String? cid;
 
   /// The text of this message rendered as HTML.
-  @JsonKey(includeToJson: false, includeFromJson: false)
-  String? get html => extraData['html'].safeCast<String>();
+  @JsonKey(includeToJson: false)
+  final String? html;
 
   /// The message markup language (MML) source of this message.
-  @JsonKey(includeToJson: false, includeFromJson: false)
-  String? get mml => extraData['mml'].safeCast<String>();
-
-  /// The labels image moderation assigned to the images attached to this message, grouped by image.
-  @JsonKey(includeToJson: false, includeFromJson: false)
-  Map<String, List<String>>? get imageLabels => switch (extraData['image_labels']) {
-    final Map<String, Object?> labels => {
-      for (final MapEntry(:key, :value) in labels.entries)
-        if (value case final List<Object?> imageLabels) key: imageLabels.whereType<String>().toList(),
-    },
-    _ => null,
-  };
+  @JsonKey(includeToJson: false)
+  final String? mml;
 
   /// The number of replies to this message that were deleted.
-  @JsonKey(includeToJson: false, includeFromJson: false)
-  int? get deletedReplyCount => extraData['deleted_reply_count'].safeCast<int>();
+  @JsonKey(includeToJson: false)
+  final int? deletedReplyCount;
 
   /// A Map of translations.
   @JsonKey(includeToJson: false)
   final Map<String, String>? i18n;
 
-  /// Known top level fields.
-  ///
-  /// Useful for [Serializer] methods.
+  /// The JSON keys [Message.fromJson] reads into named fields, or leaves out;
+  /// every other key is kept in [custom].
   static const topLevelFields = [
     'id',
     'text',
@@ -437,13 +422,24 @@ class Message extends Equatable {
     'member',
     'shared_location',
     'deleted_for_me',
+    'cid',
+    'html',
+    'mml',
+    'deleted_reply_count',
+    // Not modelled on a message; listed so they never land in [custom].
+    'image_labels',
+    'mentioned_channel_members',
   ];
 
   /// Serialize to json.
+  ///
+  /// Writes the entries of [custom] at the root, leaving out any named like one
+  /// of [topLevelFields].
   Map<String, dynamic> toJson() {
     final message = removeMentionsIfNotIncluded();
     final json = Serializer.moveFromExtraDataToRoot(
       _$MessageToJson(message),
+      topLevelFields: topLevelFields,
     );
 
     // If the message contains command we should append it to the text
@@ -493,7 +489,7 @@ class Message extends Equatable {
     User? pinnedBy,
     Poll? poll,
     String? pollId,
-    Map<String, Object?>? extraData,
+    Map<String, Object?>? custom,
     MessageState? state,
     Map<String, String>? i18n,
     List<String>? restrictedVisibility,
@@ -503,6 +499,10 @@ class Message extends Equatable {
     String? channelRole,
     Location? sharedLocation,
     bool? deletedForMe,
+    String? cid,
+    String? html,
+    String? mml,
+    int? deletedReplyCount,
   }) {
     assert(() {
       if (pinExpires is! DateTime && pinExpires != null && pinExpires is! _NullConst) {
@@ -566,7 +566,7 @@ class Message extends Equatable {
       pinnedBy: pinnedBy ?? this.pinnedBy,
       poll: poll ?? this.poll,
       pollId: pollId ?? _pollId,
-      extraData: extraData ?? this.extraData,
+      custom: custom ?? this.custom,
       state: state ?? this.state,
       i18n: i18n ?? this.i18n,
       restrictedVisibility: restrictedVisibility ?? this.restrictedVisibility,
@@ -576,6 +576,10 @@ class Message extends Equatable {
       channelRole: channelRole ?? this.channelRole,
       sharedLocation: sharedLocation ?? this.sharedLocation,
       deletedForMe: deletedForMe ?? this.deletedForMe,
+      cid: cid ?? this.cid,
+      html: html ?? this.html,
+      mml: mml ?? this.mml,
+      deletedReplyCount: deletedReplyCount ?? this.deletedReplyCount,
     );
   }
 
@@ -619,7 +623,7 @@ class Message extends Equatable {
       pinnedBy: other.pinnedBy,
       poll: other.poll,
       pollId: other.pollId,
-      extraData: other.extraData,
+      custom: other.custom,
       state: other.state,
       i18n: other.i18n,
       restrictedVisibility: other.restrictedVisibility,
@@ -629,6 +633,10 @@ class Message extends Equatable {
       channelRole: other.channelRole,
       sharedLocation: other.sharedLocation,
       deletedForMe: other.deletedForMe,
+      cid: other.cid,
+      html: other.html,
+      mml: other.mml,
+      deletedReplyCount: other.deletedReplyCount,
     );
   }
 
@@ -732,7 +740,7 @@ class Message extends Equatable {
     pinnedBy,
     poll,
     pollId,
-    extraData,
+    custom,
     state,
     i18n,
     restrictedVisibility,
@@ -742,6 +750,10 @@ class Message extends Equatable {
     channelRole,
     sharedLocation,
     deletedForMe,
+    cid,
+    html,
+    mml,
+    deletedReplyCount,
   ];
 }
 
@@ -763,11 +775,11 @@ class MessageSearchFilterField extends FilterField<Message> {
   /// value off an instance with [value].
   MessageSearchFilterField(super.remote, super.value);
 
-  /// Creates a field the SDK does not model, read from [Message.extraData].
+  /// Creates a field the SDK does not model, read from [Message.custom].
   ///
   /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`
   factory MessageSearchFilterField.custom(String remote) {
-    return MessageSearchFilterField(remote, (it) => it.extraData[remote]);
+    return MessageSearchFilterField(remote, (it) => it.custom[remote]);
   }
 
   /// Filters messages by their id.
@@ -906,11 +918,11 @@ class MessageSearchSortField extends SortField<Message> {
   /// For a name the SDK has not modelled; prefer the fields declared here.
   MessageSearchSortField(super.remote, super.localValue);
 
-  /// Creates a field the SDK does not model, read from [Message.extraData].
+  /// Creates a field the SDK does not model, read from [Message.custom].
   ///
   /// Declared only where the API accepts a custom sort field.
   factory MessageSearchSortField.custom(String remote) {
-    return MessageSearchSortField(remote, (it) => it.extraData[remote]);
+    return MessageSearchSortField(remote, (it) => it.custom[remote]);
   }
 
   /// Sorts messages by their unique ID.
@@ -1140,7 +1152,7 @@ extension on Message {
     final updatedMentionedUsers = [...mentionedUsers];
     for (final user in mentionedUsers.toSet()) {
       if (mentionsToken(user.id)) continue;
-      if (mentionsToken(user.name)) continue;
+      if (mentionsToken(user.nameOrId)) continue;
 
       updatedMentionedUsers.remove(user);
     }

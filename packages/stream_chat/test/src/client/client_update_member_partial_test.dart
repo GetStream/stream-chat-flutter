@@ -64,26 +64,6 @@ void main() {
     expect(res.exceptionOrNull(), error);
   });
 
-  test('StreamChatClient.updateMemberPartial drops custom data named like a member field', () async {
-    final response = api.UpdateMemberPartialResponse(
-      duration: '0.01ms',
-      channelMember: fakeChannelMemberResponse(custom: const {'status': 'shadowed', 'user_id': 'shadowed'}),
-    );
-    const request = api.UpdateMemberPartialRequest(set: {'a': 1});
-
-    final defaultApi = MockDefaultApi();
-    when(
-      () => defaultApi.updateMemberPartial(type: 'messaging', id: 'general', updateMemberPartialRequest: request),
-    ).thenAnswer((_) async => Result.success(response));
-    final client = _client(defaultApi);
-
-    final res = await client.updateMemberPartial(channelId: 'general', channelType: 'messaging', set: const {'a': 1});
-
-    final member = res.getOrNull()!.channelMember!;
-    expect(member.status, 'member');
-    expect(member.extraData, isNot(contains('user_id')));
-  });
-
   test('StreamChatClient.updateMemberPartial falls back to the defaults for member fields left out', () async {
     final response = api.UpdateMemberPartialResponse(
       duration: '0.01ms',

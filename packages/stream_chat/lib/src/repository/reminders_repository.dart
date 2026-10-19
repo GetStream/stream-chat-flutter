@@ -16,9 +16,11 @@ class RemindersRepository {
 
   final api.DefaultApi _api;
 
-  /// Fetches one page of the current user's reminders matching [filter], ordered by [sort].
+  /// Fetches one page of the current user's reminders matching [filter],
+  /// ordered by [sort].
   ///
-  /// [next] and [prev] are the cursors a previous page returned; at most one of them may be given.
+  /// [next] and [prev] are the cursors a previous page returned; at most one of
+  /// them may be given.
   Future<Result<QueryRemindersResponse>> queryReminders({
     MessageReminderFilter? filter,
     List<MessageReminderSort>? sort,
@@ -39,7 +41,8 @@ class RemindersRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Creates a reminder on the message with the id [messageId], due at [remindAt], or a bookmark without it.
+  /// Creates a reminder on the message with the id [messageId], due at
+  /// [remindAt], or a bookmark without it.
   Future<Result<CreateReminderResponse>> createReminder(String messageId, {DateTime? remindAt}) async {
     final result = await _api.createReminder(
       messageId: messageId,
@@ -49,8 +52,8 @@ class RemindersRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Sets the reminder on the message with the id [messageId] to be due at [remindAt], or turns it into a bookmark
-  /// without it.
+  /// Sets the reminder on the message with the id [messageId] to be due at
+  /// [remindAt], or turns it into a bookmark without it.
   Future<Result<UpdateReminderResponse>> updateReminder(String messageId, {DateTime? remindAt}) async {
     final result = await _api.updateReminder(
       messageId: messageId,

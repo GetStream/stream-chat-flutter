@@ -77,7 +77,7 @@
   It unwraps `GeneralRepository.createGuest`'s `Result` with `getOrElse`, the one sanctioned unwrap
   inside the SDK: a `Result` on a connect call could be ignored and hide a failed sign-in.
 - **`createGuest` lives in `GeneralRepository`**, next to `enrichUrl`. Its mappers are in
-  `lib/src/repository/mapper/user_mapper.dart`, with the `User` mappers they use.
+  `lib/src/repository/mapper/users_mapper.dart`, with the `User` mappers they use.
 - **The envelope is the internal `CreateGuestUserResponse`:** a freezed envelope that only
   `createGuest` returns. It replaces v10's public `ConnectGuestUserResponse`, whose only public reach was
   `StreamChatApi.guest`, removed together with `GuestApi`.
@@ -113,8 +113,8 @@
       hand-written, with the reason.
 - [x] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
 - [x] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
-- [x] Every model that had a `copyWith` in v10 keeps that exact method, `_nullConst` sentinels
-      included ([README rule 2](README.md#domain-models)).
+- [x] `copywith_audit.py` was run for every model that loses a v10 `copyWith`, every site it reports is
+      handled, and the semantics change is in the CHANGELOG and the guide ([README rule 2](README.md#domain-models)).
 - [x] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
       persists anything.
 - [x] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.

@@ -4,7 +4,6 @@ import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:uuid/uuid.dart';
 
-import '../util/extension.dart';
 import '../util/serializer.dart';
 import 'action.dart';
 import 'attachment_file.dart';
@@ -17,8 +16,6 @@ part 'attachment.g.dart';
 @JsonSerializable(includeIfNull: false)
 class Attachment extends Equatable {
   /// Constructor used for json serialization
-  ///
-  /// The [giphy] argument, when given, is stored in [extraData], replacing the entry it reads.
   Attachment({
     String? id,
     String? type,
@@ -41,10 +38,10 @@ class Attachment extends Equatable {
     this.actions = const [],
     this.originalWidth,
     this.originalHeight,
-    Map<String, Object?> extraData = const {},
+    Map<String, Object?> custom = const {},
     this.file,
     this.uploadState = const UploadState.preparing(),
-    Map<String, Object?>? giphy,
+    this.giphy,
   }) : id = id ?? const Uuid().v4(),
        _type = switch (type) {
          String() => AttachmentType(type),
@@ -52,13 +49,11 @@ class Attachment extends Equatable {
        },
        title = title ?? file?.name,
        localUri = file?.path != null ? Uri.parse(file!.path!) : null,
-       // For backwards compatibility,
-       // set 'file_size', 'mime_type' in [extraData].
-       extraData = {
-         ...extraData,
+       // For backwards compatibility, set 'file_size', 'mime_type' in [custom].
+       custom = {
+         ...custom,
          if (file?.size != null) 'file_size': file?.size,
          if (file?.mediaType != null) 'mime_type': file?.mediaType?.mimeType,
-         'giphy': ?giphy,
        };
 
   /// Create a new instance from a json
@@ -164,8 +159,12 @@ class Attachment extends Equatable {
   @JsonKey(defaultValue: UploadState.success)
   final UploadState uploadState;
 
-  /// Map of custom channel extraData
-  final Map<String, Object?> extraData;
+  /// This attachment's custom data.
+  ///
+  /// It may hold a key named like one of the attachment's own fields; [toJson]
+  /// leaves such an entry out so it never overwrites the field.
+  @JsonKey(name: 'extra_data')
+  final Map<String, Object?> custom;
 
   /// The attachment ID.
   ///
@@ -176,19 +175,20 @@ class Attachment extends Equatable {
   ///
   /// {@macro fileSize}
   @JsonKey(includeToJson: false, includeFromJson: false)
-  int? get fileSize => extraData['file_size'] as int?;
+  int? get fileSize => custom['file_size'] as int?;
 
   /// Shortcut for file mimeType.
   ///
   /// {@macro mimeType}
   @JsonKey(includeToJson: false, includeFromJson: false)
-  String? get mimeType => extraData['mime_type'] as String?;
+  String? get mimeType => custom['mime_type'] as String?;
 
-  /// The renditions of this Giphy attachment, keyed by name, such as `original` or `fixed_height`.
+  /// The renditions of this Giphy attachment, keyed by name, such as `original`
+  /// or `fixed_height`.
   ///
-  /// Each rendition holds its `url`, `width`, `height`, `size` and `frames`, as strings.
-  @JsonKey(includeToJson: false, includeFromJson: false)
-  Map<String, Object?>? get giphy => extraData['giphy'].safeCast<Map<String, Object?>>();
+  /// Each rendition holds its `url`, `width`, `height`, `size` and `frames`, as
+  /// strings.
+  final Map<String, Object?>? giphy;
 
   /// Known top level fields.
   /// Useful for [Serializer] methods.
@@ -213,6 +213,7 @@ class Attachment extends Equatable {
     'actions',
     'original_width',
     'original_height',
+    'giphy',
   ];
 
   /// Known db specific top level fields.
@@ -229,12 +230,20 @@ class Attachment extends Equatable {
   ];
 
   /// Serialize to json
+  ///
+  /// Writes the entries of [custom] at the root, leaving out any named like one
+  /// of [topLevelFields].
   Map<String, dynamic> toJson() =>
-      Serializer.moveFromExtraDataToRoot(_$AttachmentToJson(this))
+      Serializer.moveFromExtraDataToRoot(_$AttachmentToJson(this), topLevelFields: topLevelFields)
         ..removeWhere((key, value) => dbSpecificTopLevelFields.contains(key));
 
+  // The fields toData leaves custom data out of. A custom `id`, the id the
+  // attachment was sent with, still replaces the local one, as it did before.
+  static const _storedFields = [...topLevelFields, 'file', 'upload_state'];
+
   /// Serialize to db data
-  Map<String, dynamic> toData() => Serializer.moveFromExtraDataToRoot(_$AttachmentToJson(this));
+  Map<String, dynamic> toData() =>
+      Serializer.moveFromExtraDataToRoot(_$AttachmentToJson(this), topLevelFields: _storedFields);
 
   Attachment copyWith({
     String? id,
@@ -260,7 +269,8 @@ class Attachment extends Equatable {
     int? originalHeight,
     AttachmentFile? file,
     UploadState? uploadState,
-    Map<String, Object?>? extraData,
+    Map<String, Object?>? custom,
+    Map<String, Object?>? giphy,
   }) => Attachment(
     id: id ?? this.id,
     type: type ?? this.type,
@@ -285,7 +295,8 @@ class Attachment extends Equatable {
     originalHeight: originalHeight ?? this.originalHeight,
     file: file ?? this.file,
     uploadState: uploadState ?? this.uploadState,
-    extraData: extraData ?? this.extraData,
+    custom: custom ?? this.custom,
+    giphy: giphy ?? this.giphy,
   );
 
   Attachment merge(Attachment? other) {
@@ -313,7 +324,8 @@ class Attachment extends Equatable {
       originalHeight: other.originalHeight,
       file: other.file,
       uploadState: other.uploadState,
-      extraData: other.extraData,
+      custom: other.custom,
+      giphy: other.giphy,
     );
   }
 
@@ -342,7 +354,8 @@ class Attachment extends Equatable {
     originalHeight,
     file,
     uploadState,
-    extraData,
+    custom,
+    giphy,
   ];
 }
 

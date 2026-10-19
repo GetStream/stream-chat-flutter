@@ -11,18 +11,12 @@ import 'voting_visibility.dart';
 
 part 'poll.freezed.dart';
 
-class _NullConst {
-  const _NullConst();
-}
-
-const _nullConst = _NullConst();
-
 /// A question with a set of options that the members of a channel vote on.
 ///
 /// A poll is sent in a message. Besides its settings it carries a summary of
 /// the votes so far: the counts per option, the latest votes and answers, and
 /// the votes of the current user.
-@Freezed(copyWith: false)
+@freezed
 class Poll with _$Poll {
   /// Creates a new [Poll].
   ///
@@ -51,7 +45,7 @@ class Poll with _$Poll {
     this.createdById,
     this.createdBy,
     this.ownVotesAndAnswers = const [],
-    this.extraData = const {},
+    this.custom = const {},
   }) : id = id ?? const Uuid().v4(),
        createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
@@ -84,7 +78,7 @@ class Poll with _$Poll {
   @override
   final List<PollOption> options;
 
-  /// Who can see which option each user voted for.
+  /// The rule for who can see which option each user voted for.
   ///
   /// Defaults to [VotingVisibility.public].
   @override
@@ -98,6 +92,8 @@ class Poll with _$Poll {
 
   /// The maximum number of options each user may vote for, or null for no
   /// limit.
+  ///
+  /// Applies only when [enforceUniqueVote] is false.
   @override
   final int? maxVotesAllowed;
 
@@ -107,17 +103,17 @@ class Poll with _$Poll {
   @override
   final bool allowUserSuggestedOptions;
 
-  /// Whether users may leave a free-form answer.
+  /// Whether users may add a free-form answer.
   ///
   /// Defaults to false.
   @override
   final bool allowAnswers;
 
-  /// Whether this poll no longer accepts votes.
+  /// Whether this poll no longer accepts votes or answers.
   @override
   final bool isClosed;
 
-  /// The total number of answers left on this poll.
+  /// The total number of answers added to this poll.
   @override
   final int answersCount;
 
@@ -137,7 +133,7 @@ class Poll with _$Poll {
   @override
   late final List<PollVote> latestVotes = [...latestVotesByOption.values.flattened];
 
-  /// The most recent answers left on this poll.
+  /// The most recent answers added to this poll.
   @override
   final List<PollVote> latestAnswers;
 
@@ -179,58 +175,7 @@ class Poll with _$Poll {
 
   /// Custom data attached to this poll.
   @override
-  final Map<String, Object?> extraData;
-
-  /// Creates a copy of [Poll] with specified attributes overridden.
-  Poll copyWith({
-    String? id,
-    String? name,
-    Map<String, String>? nameI18n,
-    String? description,
-    Map<String, String>? descriptionI18n,
-    List<PollOption>? options,
-    VotingVisibility? votingVisibility,
-    bool? enforceUniqueVote,
-    Object? maxVotesAllowed = _nullConst,
-    bool? allowUserSuggestedOptions,
-    bool? allowAnswers,
-    bool? isClosed,
-    Map<String, int>? voteCountsByOption,
-    List<PollVote>? ownVotesAndAnswers,
-    int? voteCount,
-    int? answersCount,
-    Map<String, List<PollVote>>? latestVotesByOption,
-    List<PollVote>? latestAnswers,
-    String? createdById,
-    User? createdBy,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    Map<String, Object?>? extraData,
-  }) => Poll(
-    id: id ?? this.id,
-    name: name ?? this.name,
-    nameI18n: nameI18n ?? this.nameI18n,
-    description: description ?? this.description,
-    descriptionI18n: descriptionI18n ?? this.descriptionI18n,
-    options: options ?? this.options,
-    votingVisibility: votingVisibility ?? this.votingVisibility,
-    enforceUniqueVote: enforceUniqueVote ?? this.enforceUniqueVote,
-    maxVotesAllowed: maxVotesAllowed == _nullConst ? this.maxVotesAllowed : maxVotesAllowed as int?,
-    allowUserSuggestedOptions: allowUserSuggestedOptions ?? this.allowUserSuggestedOptions,
-    allowAnswers: allowAnswers ?? this.allowAnswers,
-    isClosed: isClosed ?? this.isClosed,
-    voteCountsByOption: voteCountsByOption ?? this.voteCountsByOption,
-    ownVotesAndAnswers: ownVotesAndAnswers ?? this.ownVotesAndAnswers,
-    voteCount: voteCount ?? this.voteCount,
-    answersCount: answersCount ?? this.answersCount,
-    latestVotesByOption: latestVotesByOption ?? this.latestVotesByOption,
-    latestAnswers: latestAnswers ?? this.latestAnswers,
-    createdById: createdById ?? this.createdById,
-    createdBy: createdBy ?? this.createdBy,
-    createdAt: createdAt ?? this.createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
-    extraData: extraData ?? this.extraData,
-  );
+  final Map<String, Object?> custom;
 
   /// This poll with the translations of [oldPoll] filled in where this one
   /// has none.
@@ -258,33 +203,6 @@ class Poll with _$Poll {
       ],
     );
   }
-
-  /// The keys a poll carries besides its custom data.
-  static const topLevelFields = [
-    'id',
-    'name',
-    'name_i18n',
-    'description',
-    'description_i18n',
-    'options',
-    'voting_visibility',
-    'enforce_unique_vote',
-    'max_votes_allowed',
-    'allow_user_suggested_options',
-    'allow_answers',
-    'is_closed',
-    'created_at',
-    'updated_at',
-    'vote_counts_by_option',
-    'votes',
-    'own_votes',
-    'vote_count',
-    'answers_count',
-    'latest_votes_by_option',
-    'latest_answers',
-    'created_by_id',
-    'created_by',
-  ];
 }
 
 /// A filter for a poll query.
@@ -302,12 +220,12 @@ class PollFilterField extends FilterField<Poll> {
   /// off an instance with [value].
   PollFilterField(super.remote, super.value);
 
-  /// Creates a field the SDK does not model, read from [Poll.extraData].
+  /// Creates a field the SDK does not model, read from [Poll.custom].
   ///
   /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
   /// `$exists`, `$contains`, `$q`, `$autocomplete`
   factory PollFilterField.custom(String remote) {
-    return PollFilterField(remote, (it) => it.extraData[remote]);
+    return PollFilterField(remote, (it) => it.custom[remote]);
   }
 
   /// Filters polls by their id.
@@ -371,7 +289,7 @@ class PollFilterField extends FilterField<Poll> {
   /// **Supported operators:** `$eq`
   static final votingVisibility = PollFilterField(
     'voting_visibility',
-    (it) => it.votingVisibility.rawType,
+    (it) => it.votingVisibility,
   );
 
   /// Filters polls by their creation date.

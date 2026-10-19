@@ -6,9 +6,9 @@ import '../unread_counts_thread.dart';
 
 part 'get_unread_count_response.freezed.dart';
 
-/// How many unread messages and threads the current user has, in total and by channel, channel type and thread.
-///
-/// Returned by [StreamChatClient.getUnreadCount].
+/// The result of counting the current user's unread messages and threads, in
+/// total and by channel, channel type and thread, returned by
+/// [StreamChatClient.getUnreadCount].
 @freezed
 class GetUnreadCountResponse with _$GetUnreadCountResponse {
   /// Creates a new [GetUnreadCountResponse].
@@ -36,7 +36,7 @@ class GetUnreadCountResponse with _$GetUnreadCountResponse {
 
   /// The number of unread messages in each of the user's teams, keyed by team.
   ///
-  /// Null when unread messages are not counted per team, or the user belongs to no team. Otherwise each of the
+  /// Null when the counts are not broken down by team. Otherwise each of the
   /// user's teams has an entry, `0` when nothing in it is unread.
   @override
   final Map<String, int>? totalUnreadCountByTeam;
@@ -45,7 +45,7 @@ class GetUnreadCountResponse with _$GetUnreadCountResponse {
   @override
   final List<UnreadCountsChannel> channels;
 
-  /// The unread messages of each channel type that has any.
+  /// The channel types that have unread messages.
   @override
   final List<UnreadCountsChannelType> channelType;
 

@@ -1,5 +1,4 @@
-import 'package:stream_chat/src/core/models/member.dart';
-import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
 import '../../utils.dart';
@@ -13,7 +12,7 @@ void main() {
       expect(member.createdAt, DateTime.parse('2020-01-28T22:17:30.95443Z'));
       expect(member.updatedAt, DateTime.parse('2020-01-28T22:17:30.95443Z'));
       expect(member.deletedMessages, ['msg-1', 'msg-2', 'msg-3']);
-      expect(member.extraData['some_custom_field'], 'with_custom_data');
+      expect(member.custom['some_custom_field'], 'with_custom_data');
       expect(member.notificationsMuted, isTrue);
       expect(member.status, 'member');
       expect(member.banFromFutureChannels, isTrue);
@@ -21,40 +20,85 @@ void main() {
       expect(member.deletedAt, DateTime.parse('2020-01-29T22:17:30.95443Z'));
     });
 
-    test(
-      'Member keeps notificationsMuted, status, banFromFutureChannels, futureChannelBanExpires and deletedAt in extraData',
-      () {
-        final member = Member(
-          userId: 'user',
-          notificationsMuted: true,
-          status: 'member',
-          banFromFutureChannels: true,
-          futureChannelBanExpires: DateTime.utc(2021),
-          deletedAt: DateTime.utc(2020),
-          extraData: const {'color': 'red'},
-        );
+    test('Member.toJson leaves out custom data named like a field', () {
+      final member = Member(
+        userId: 'user',
+        channelRole: 'channel_member',
+        custom: const {'channel_role': 'custom', 'color': 'red'},
+      );
 
-        expect(member.extraData, {
-          'color': 'red',
-          'notifications_muted': true,
-          'status': 'member',
-          'ban_from_future_channels': true,
-          'future_channel_ban_expires': DateTime.utc(2021).toIso8601String(),
-          'deleted_at': DateTime.utc(2020).toIso8601String(),
-        });
-      },
-    );
-
-    test('Member.deletedAt returns null for an extraData value that is not a date', () {
-      final member = Member(userId: 'user', extraData: const {'deleted_at': 'yesterday'});
-
-      expect(member.deletedAt, isNull);
+      expect(member.toJson()['channel_role'], 'channel_member');
+      expect(member.toJson()['color'], 'red');
     });
 
-    test('Member.futureChannelBanExpires returns null for an empty extraData value', () {
-      final member = Member(userId: 'user', extraData: const {'future_channel_ban_expires': ''});
+    test('Member.copyWith replaces the fields it is given', () {
+      final member = Member(
+        userId: 'user',
+        notificationsMuted: false,
+        status: 'pending',
+        banFromFutureChannels: false,
+        futureChannelBanExpires: DateTime.utc(2021),
+        deletedAt: DateTime.utc(2020),
+      );
 
-      expect(member.futureChannelBanExpires, isNull);
+      final newMember = member.copyWith(
+        notificationsMuted: true,
+        status: 'member',
+        banFromFutureChannels: true,
+        futureChannelBanExpires: DateTime.utc(2022),
+        deletedAt: DateTime.utc(2023),
+      );
+
+      expect(newMember.notificationsMuted, isTrue);
+      expect(newMember.status, 'member');
+      expect(newMember.banFromFutureChannels, isTrue);
+      expect(newMember.futureChannelBanExpires, DateTime.utc(2022));
+      expect(newMember.deletedAt, DateTime.utc(2023));
+    });
+
+    test('Member equality includes notificationsMuted, status, the future channel ban and deletedAt', () {
+      final createdAt = DateTime.utc(2020);
+      Member member({
+        bool? notificationsMuted,
+        String? status,
+        bool? banFromFutureChannels,
+        DateTime? expires,
+        DateTime? deletedAt,
+      }) => Member(
+        userId: 'user',
+        createdAt: createdAt,
+        updatedAt: createdAt,
+        notificationsMuted: notificationsMuted,
+        status: status,
+        banFromFutureChannels: banFromFutureChannels,
+        futureChannelBanExpires: expires,
+        deletedAt: deletedAt,
+      );
+
+      expect(member(notificationsMuted: true), isNot(member(notificationsMuted: false)));
+      expect(member(status: 'member'), isNot(member(status: 'pending')));
+      expect(member(banFromFutureChannels: true), isNot(member(banFromFutureChannels: false)));
+      expect(member(expires: DateTime.utc(2021)), isNot(member(expires: DateTime.utc(2022))));
+      expect(member(deletedAt: DateTime.utc(2021)), isNot(member(deletedAt: DateTime.utc(2022))));
+    });
+
+    test('Member.copyWith keeps the fields it is not given', () {
+      final member = Member(
+        userId: 'user',
+        notificationsMuted: true,
+        status: 'member',
+        banFromFutureChannels: true,
+        futureChannelBanExpires: DateTime.utc(2021),
+        deletedAt: DateTime.utc(2020),
+      );
+
+      final newMember = member.copyWith(custom: const {'color': 'red'});
+
+      expect(newMember.notificationsMuted, isTrue);
+      expect(newMember.status, 'member');
+      expect(newMember.banFromFutureChannels, isTrue);
+      expect(newMember.futureChannelBanExpires, DateTime.utc(2021));
+      expect(newMember.deletedAt, DateTime.utc(2020));
     });
 
     group('MemberSortField', () {
@@ -118,11 +162,11 @@ void main() {
         );
       });
 
-      test('a custom field orders by the member extra data', () {
+      test('a custom field orders by the member custom data', () {
         expectOrders(
           MemberSortField.custom('activityScore'),
-          createTestMember(userId: 'a', extraData: const {'activityScore': 10}),
-          createTestMember(userId: 'b', extraData: const {'activityScore': 75}),
+          createTestMember(userId: 'a', custom: const {'activityScore': 10}),
+          createTestMember(userId: 'b', custom: const {'activityScore': 75}),
         );
       });
 
@@ -145,7 +189,7 @@ Member createTestMember({
   DateTime? updatedAt,
   DateTime? userLastActive,
   bool includeUser = true,
-  Map<String, Object?>? extraData,
+  Map<String, Object?>? custom,
 }) {
   return Member(
     userId: userId,
@@ -159,6 +203,6 @@ Member createTestMember({
     channelRole: channelRole,
     createdAt: createdAt ?? DateTime(2023),
     updatedAt: updatedAt ?? DateTime(2023),
-    extraData: extraData ?? {},
+    custom: custom ?? {},
   );
 }

@@ -79,48 +79,48 @@
 - `StreamChatApi.general.getAppSettings` is removed; call `StreamChatClient.getAppSettings` instead.
 - `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed; call `StreamChatClient.connectGuestUser` instead.
 - The poll calls on `StreamChatClient` and `Channel` return a `Result` instead of throwing.
-- `CreatePollResponse`, `GetPollResponse` and `UpdatePollResponse` are replaced by `PollResponse`; `CreatePollOptionResponse`, `GetPollOptionResponse` and `UpdatePollOptionResponse` by `PollOptionResponse`; and `CastPollVoteResponse` and `RemovePollVoteResponse` by `PollVoteResponse`.
-- `queryPolls` and `queryPollVotes` take `limit` (10 when omitted), `next` and `prev` instead of `PaginationParams`, and their responses carry a `prev` cursor.
+- The eight poll response types are replaced by `PollResponse`, `PollOptionResponse` and `PollVoteResponse`.
+- `queryPolls` and `queryPollVotes` take `limit` (10 when omitted) and `next` instead of `PaginationParams`.
 - `Channel.castPollVote` and `removePollVote` return a failure instead of throwing an `ArgumentError` for an option or vote without an id.
 - `VotingVisibility` is an extension type over its wire string instead of an enum.
 - `Poll`, `PollOption`, `PollVote` and the poll responses no longer decode from or encode to JSON; `PollOption` gains `fromData` and `toData`, which read and write only the format `stream_chat_persistence` stores it in.
 - The poll responses are immutable, built through a const constructor, and their `duration` is a non-nullable `String`; `PollVoteResponse.vote` is nullable.
-- `Poll`, `PollOption` and `PollVote` no longer extend `Equatable`, so `props` is removed; they still compare by value, now including `extraData`.
+- `Poll`, `PollOption` and `PollVote` no longer extend `Equatable`, so `props` is removed; they still compare by value, now including `custom`.
+- `Poll.copyWith`, `PollOption.copyWith` and `PollVote.copyWith` set a nullable field passed as `null` to `null` instead of keeping its value, and give `Poll.id` and the `createdAt` and `updatedAt` timestamps a fresh default when passed `null`.
 - `StreamChatApi.polls` is removed; its endpoints are reached through `StreamChatClient`.
-- The poll and poll option requests no longer send `extraData` entries named like one of the poll's or option's own fields.
+- `Poll.topLevelFields` and `PollOption.topLevelFields` are removed.
+- `Poll.extraData` and `PollOption.extraData` are renamed `custom`.
+- `Poll.custom` and `PollOption.custom` hold the custom data exactly as the API returns it, and the poll and poll option requests send it back as custom data, so an entry named like one of the poll's or option's own fields no longer sets that field.
 - `sendImage`, `sendFile`, `uploadImage` and `uploadFile`, on `StreamChatClient`, `Channel` and `AttachmentFileUploader`, return a `Result<UploadedFile>` instead of throwing; read the URL from `fileUrl` and a video's thumbnail from `thumbUrl`.
 - `deleteImage`, `deleteFile`, `removeImage` and `removeFile` return a `Result<void>` instead of throwing, and carry no value on success.
 - `SendAttachmentResponse`, `SendFileResponse`, `SendImageResponse`, `UploadImageResponse` and `UploadFileResponse` are removed in favor of `UploadedFile`.
 - `AttachmentFileUploaderProvider` receives the client's `Dio` instead of a `StreamHttpClient`, and `StreamAttachmentFileUploader` is built from one.
 - `StreamChatApi.fileUploader` and `StreamChatApi`'s `attachmentFileUploaderProvider` are removed; pass `attachmentFileUploaderProvider` to `StreamChatClient` instead.
-- `updateChannelPartial`, `enableSlowMode` and `disableSlowMode` on `StreamChatClient`, and `updatePartial`, `updateName`, `updateImage`, `enableSlowMode` and `disableSlowMode` on `Channel`, return a `Result<UpdateChannelPartialResponse>` instead of throwing.
+- The partial channel updates on `StreamChatClient` and `Channel`, slow mode included, return a `Result<UpdateChannelPartialResponse>` instead of throwing.
 - `PartialUpdateChannelResponse` is renamed `UpdateChannelPartialResponse`, and `PartialUpdateMemberResponse` is renamed `UpdateMemberPartialResponse`.
 - `StreamChatClient.partialMemberUpdate` is renamed `updateMemberPartial`, and `enableSlowdown` and `disableSlowdown` are renamed `enableSlowMode` and `disableSlowMode`.
-- `updateMemberPartial`, `pinChannel`, `unpinChannel`, `archiveChannel` and `unarchiveChannel` on `StreamChatClient`, and `pin`, `unpin`, `archive` and `unarchive` on `Channel`, return a `Result<UpdateMemberPartialResponse>` instead of throwing; the `Channel` methods no longer return the bare `Member`.
+- The partial membership updates on `StreamChatClient` and `Channel`, pinning and archiving included, return a `Result<UpdateMemberPartialResponse>` instead of throwing; the `Channel` ones no longer return the bare `Member`.
 - `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse` no longer decode from JSON, are immutable, built through a const constructor, compare by value, gain `copyWith`, and their `duration` is a non-nullable `String`.
 - `UpdateChannelPartialResponse.channel` and `UpdateMemberPartialResponse.channelMember` are nullable, and `UpdateChannelPartialResponse.members` is a non-nullable list.
-- `StreamChatApi.channel.updateChannelPartial`, `enableSlowdown`, `disableSlowdown` and `updateMemberPartial` are removed; call them on `StreamChatClient` instead.
+- `StreamChatApi.channel`'s partial update and slow mode methods are removed; use the `StreamChatClient` methods instead.
 - `MemberUpdatePayload` and `MemberUpdateType` are removed; pass `set: {'pinned': true}` or `unset: ['pinned']` (and `archived`) to `updateMemberPartial`, or call `pinChannel`, `archiveChannel` and their counterparts.
-- `hideChannel`, `showChannel` and `deleteChannel` on `StreamChatClient`, and `hide`, `show` and `delete` on `Channel`, return a `Result<HideChannelResponse>`, `Result<ShowChannelResponse>` and `Result<DeleteChannelResponse>` instead of throwing.
-- `StreamChatApi.channel.hideChannel`, `showChannel` and `deleteChannel` are removed; call them on `StreamChatClient` instead.
-- `markChannelRead`, `markThreadRead` and `markAllRead` on `StreamChatClient`, and `markRead` and `markThreadRead` on `Channel`, return a `Result<MarkReadResponse>` instead of throwing.
-- `markChannelUnread`, `markChannelUnreadByTimestamp` and `markThreadUnread` on `StreamChatClient`, and `markUnread`, `markUnreadByTimestamp` and `markThreadUnread` on `Channel`, return a `Result<void>` instead of throwing.
+- The calls that hide, show and delete a channel, on `StreamChatClient` and `Channel`, return a `Result` with a `HideChannelResponse`, `ShowChannelResponse` or `DeleteChannelResponse` instead of throwing.
+- `StreamChatApi.channel`'s hide, show and delete methods are removed; use the `StreamChatClient` methods instead.
+- The calls that mark channels and threads read or unread, on `StreamChatClient` and `Channel`, return a `Result` instead of throwing, with a `MarkReadResponse` when marking read and no value when marking unread.
 - `StreamChatClient.markChannelsDelivered` returns a `Result<MarkDeliveredResponse>` instead of throwing, and `MarkChannelsDelivered`, the callback `ChannelDeliveryReporter` takes, returns a `Future<Result<void>>`.
 - `MessageDelivery` no longer encodes to JSON, compares by value and gains `copyWith`.
-- `StreamChatApi.channel.markRead`, `markUnread`, `markUnreadByTimestamp`, `markThreadRead`, `markThreadUnread`, `markAllRead` and `markChannelsDelivered` are removed; call them on `StreamChatClient` instead.
+- `StreamChatApi.channel`'s read, unread and delivery methods are removed; use the `StreamChatClient` methods instead.
 - `StreamChatClient.getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing.
-- `GetUnreadCountResponse` no longer decodes from JSON, is immutable, built through a const constructor, and its `duration` is a non-nullable `String`.
-- `UnreadCountsChannel`, `UnreadCountsThread` and `UnreadCountsChannelType` no longer decode from or encode to JSON.
-- `GetUnreadCountResponse`, `UnreadCountsChannel`, `UnreadCountsThread` and `UnreadCountsChannelType` compare by value and gain `copyWith`.
+- `GetUnreadCountResponse` no longer decodes from JSON, is immutable, built through a const constructor, compares by value, gains `copyWith`, and its `duration` is a non-nullable `String`.
+- `UnreadCountsChannel`, `UnreadCountsThread` and `UnreadCountsChannelType` no longer decode from or encode to JSON, compare by value and gain `copyWith`.
 - `StreamChatApi.user.getUnreadCount` is removed; call `StreamChatClient.getUnreadCount` instead.
 - `StreamChatClient.blockUser` returns a `Result<BlockUsersResponse>` and `unblockUser` a `Result<UnblockUsersResponse>` instead of throwing.
 - `StreamChatClient.queryBlockedUsers` is renamed `getBlockedUsers` and returns a `Result<GetBlockedUsersResponse>` instead of throwing.
 - `UserBlockResponse` is renamed `BlockUsersResponse`, and `BlockedUsersResponse` is renamed `GetBlockedUsersResponse`.
-- `BlockUsersResponse` and `GetBlockedUsersResponse` no longer decode from JSON, are immutable, built through a const constructor, and their `duration` is a non-nullable `String`.
-- `BlockUsersResponse` and `GetBlockedUsersResponse` compare by value and gain `copyWith`.
-- `UserBlock` no longer decodes from or encodes to JSON and no longer extends `Equatable`.
-- `UserBlock.blockedUser`, `userId`, `blockedUserId` and `createdAt` are required and non-nullable.
-- `StreamChatApi.user.blockUser`, `unblockUser` and `queryBlockedUsers` are removed; call `blockUser`, `unblockUser` and `getBlockedUsers` on `StreamChatClient` instead.
+- `BlockUsersResponse` and `GetBlockedUsersResponse` no longer decode from JSON, are immutable, built through a const constructor, compare by value, gain `copyWith`, and their `duration` is a non-nullable `String`.
+- `UserBlock` no longer decodes from or encodes to JSON and no longer extends `Equatable`, so `props` is removed; it still compares by value.
+- `UserBlock.blockedUser`, `userId`, `blockedUserId` and `createdAt` are required and non-nullable, and `UserBlock.copyWith` takes every field as a non-nullable value.
+- `StreamChatApi.user`'s blocking methods are removed; use `blockUser`, `unblockUser` and `getBlockedUsers` on `StreamChatClient` instead.
 - `Moderation` no longer decodes from or encodes to JSON and no longer extends `Equatable`, so `props` is removed; it still compares by value and gains `copyWith`.
 - `ReactionGroup` no longer decodes from or encodes to JSON and no longer extends `Equatable`, so `props` is removed; it still compares by value. It gains `fromData` and `toData`, which read and write only the format `stream_chat_persistence` stores it in.
 - `Action` no longer decodes from or encodes to JSON, compares by value instead of by identity, and gains `copyWith`.
@@ -131,7 +131,7 @@
 - `PartialUpdateUserRequest` is renamed `UpdateUserPartialRequest`.
 - `UpdateUserPartialRequest` no longer encodes to JSON or extends `Equatable`, so `props` is removed; it still compares by value and gains `copyWith`.
 - `UpdateUsersResponse` no longer decodes from JSON, is immutable, built through a const constructor, compares by value, gains `copyWith`, and its `duration` is a non-nullable `String`.
-- The users in an `UpdateUsersResponse` no longer carry their devices, mutes, channel mutes, privacy settings, unread counts, blocked user ids, hidden channels or token revocation time in `extraData`.
+- The users in an `UpdateUsersResponse` no longer carry their devices, mutes, channel mutes, privacy settings, unread counts, hidden channels or token revocation time in their custom data.
 - `updateUser` and `updateUsers` no longer send the user's `role`, `teams` and `teamsRole`.
 - `StreamChatApi.user.updateUsers` and `partialUpdateUsers` are removed; call `updateUsers` and `updateUsersPartial` on `StreamChatClient` instead.
 - The reminder calls on `StreamChatClient` and `Channel` return a `Result` instead of throwing, and `deleteReminder` returns a `Result<DeleteReminderResponse>` instead of an `EmptyResponse`; a `Channel` that is not initialized still throws a `StateError`.
@@ -145,15 +145,30 @@
 - `QueryThreadsResponse`, `GetThreadResponse`, `UpdateThreadPartialResponse`, `CreateDraftResponse`, `GetDraftResponse` and `QueryDraftsResponse` no longer decode from JSON, are immutable, built through a const constructor, compare by value, gain `copyWith`, and their `duration` is a non-nullable `String`; `DraftResponse` is removed.
 - `Thread` and `ThreadParticipant` no longer decode from or encode to JSON and no longer extend `Equatable`, so `props` is removed; they still compare by value, and two threads now differ when their `extraData` does.
 - `ThreadOptions` no longer encodes to JSON or extends `Equatable`, so `props` is removed; it still compares by value and gains `copyWith`.
-- `createDraft` no longer saves the message fields a draft made from a received message carries in its extra data, such as `image_labels` or `cid`, as custom data of the draft.
-- `createDraft` no longer sends `extraData` entries named like one of the draft message's or an attachment's own fields.
+- `createDraft` no longer sends `custom` entries named like one of the draft message's or an attachment's own fields.
 - `StreamChatApi.threads` is removed, and `StreamChatApi.message` loses the draft methods; their endpoints are reached through `StreamChatClient`.
+- `ChannelModel.extraData` and `Member.extraData` are renamed `custom`, and so are `Channel.extraData`, `Channel.extraDataStream` (now `customStream`), and the `extraData` argument of the `Channel` constructor and of `StreamChatClient.channel`.
+- Several channel and member values the custom data used to hold, such as `ChannelModel.hidden`, `ChannelModel.truncatedAt` and `Member.status`, are fields instead: `custom` no longer holds them, `toJson` no longer writes them, and an entry with one of their names in `custom` or in `copyWith(custom:)` no longer sets the field.
+- `ChannelModel.custom` and `Member.custom` hold the custom data exactly as the API returns it, and `toJson` leaves out an entry named like one of the model's own fields.
+- `User.extraData` is renamed `custom`, and so is the `extraData` argument of the `User` and `OwnUser` constructors and `copyWith`.
+- `User.name` is nullable and no longer answers the user's id when they have no name; read `User.nameOrId` for that.
+- `User.image` returns an empty image URL as `''` instead of `null`.
+- Several user values the custom data used to hold, such as `User.name`, `User.image` and `User.deactivatedAt`, are fields instead: `custom` no longer holds them, and an entry with one of their names in `custom` or in `copyWith(custom:)` no longer sets the field.
+- `User.custom` holds the custom data exactly as the API returns it, and `toJson` leaves out an entry named like one of the user's own fields.
+- `OwnUser.fromUser` no longer reads devices, mutes, unread counts, push preferences or privacy settings out of the user's custom data; they are left at their defaults.
+- `Message.extraData`, `Attachment.extraData`, `Reaction.extraData` and `DraftMessage.extraData` are renamed `custom`, and so is the `extraData` argument of their constructors and `copyWith` and of `Channel.sendStaticLocation` and `startLiveLocationSharing`.
+- `Message.custom`, `Attachment.custom`, `Reaction.custom` and `DraftMessage.custom` hold the custom data exactly as the API returns it, and an entry named like one of the model's own fields is left out when the model is sent.
+- `Reaction.topLevelFields` is removed.
+- A message's channel id, HTML, markup and deleted reply count, and an attachment's Giphy renditions, are fields instead of custom data: `custom` no longer holds them, and an entry with one of their names in `custom` no longer sets the field.
+- `Message.toJson` no longer writes the message's channel id, HTML, markup or deleted reply count, so a message can no longer be sent with markup.
+- A message's image labels and mentioned channel members, and a draft message's HTML and markup, are no longer kept in their custom data.
+- A reaction's emoji code read from the API stays in its custom data, as well as in `Reaction.emojiCode`.
 
 🐞 Fixed
 
-- `connectGuestUser` no longer copies the user's online status, ban, unread counts, devices and push preferences into the created guest's `extraData`.
+- `connectGuestUser` no longer copies the user's online status, ban, unread counts, devices and push preferences into the created guest's custom data.
 
-- `updateUser` and `updateUsers` no longer store the user's online status, ban and timestamps, or an own user's devices, mutes and unread counts, as custom data.
+- `updateUser` and `updateUsers` no longer store the user's online status, ban, timestamps and blocked users, or an own user's devices, mutes, total unread count and unread channel and thread counts, as custom data, and no longer fail for an own user with many devices.
 
 - `queryChannels` no longer gives up watching the channels it loads when it is called before the connection is open. Whether they can be watched is read when the request is sent, which is after the query has waited for the connection.
 
@@ -179,11 +194,10 @@
 - Added optional `reason` and `custom` arguments to `flagMessage` and `flagUser`, recorded with the flag.
 - Added an optional `timeout` to `StreamChatClient.moderation.muteUser` that expires the mute.
 - Added `StreamChatClient.moderation.muteUsers` and `unmuteUsers`, which mute and unmute several users in one call and report the ids that matched no user.
-- Added `ChannelModel.truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires`, `deletedAt` and `topLevelFields`; the constructors accept the new fields.
-- Added `User.deactivatedAt`, `deletedAt` and `shadowBanned`; the constructors accept the new fields.
-- Added `Message.html`, `mml`, `imageLabels` and `deletedReplyCount`, read from the message's `extraData`; the constructor accepts them.
-- Added `Attachment.giphy`, the Giphy renditions read from the attachment's `extraData`; the constructor accepts them.
-- Added `DraftMessage.html` and `mml`, read from the draft message's `extraData`; the constructor accepts them.
+- Added `User.deactivatedAt`, `deletedAt`, `shadowBanned`, `blockedUserIds` and `nameOrId`; the constructors and `copyWith` accept the new fields.
+- Added `ChannelModel.muted`, `blocked`, `truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires` and `deletedAt`; the constructors and `copyWith` accept the new fields.
+- Added `Message.cid`, `html`, `mml` and `deletedReplyCount`, and `Attachment.giphy`; the constructors and `copyWith` accept them.
+- Added a `prev` argument to `queryPolls` and `queryPollVotes`, and a `prev` cursor on their responses, for paging backwards.
 
 🔒 Security
 

@@ -19,11 +19,11 @@ const incomingTypingStartEventTimeout = 7;
 ///
 /// {@template name}
 /// If an optional [name] argument is provided in the constructor then it
-/// will be set on [extraData] with a key of 'name'.
+/// will be set on [custom] with a key of 'name'.
 ///
 /// ```dart
 /// final channel = Channel(client, type, id, name: 'Channel name');
-/// print(channel.name == channel.extraData['name']); // true
+/// print(channel.name == channel.custom['name']); // true
 /// ```
 ///
 /// Before the channel is initialized the name can be set directly:
@@ -43,11 +43,11 @@ const incomingTypingStartEventTimeout = 7;
 ///
 /// {@template image}
 /// If an optional [image] argument is provided in the constructor then it
-/// will be set on [extraData] with a key of 'image'.
+/// will be set on [custom] with a key of 'image'.
 ///
 /// ```dart
 /// final channel = Channel(client, type, id, image: 'https://getstream.io/image.png');
-/// print(channel.image == channel.extraData['image']); // true
+/// print(channel.image == channel.custom['image']); // true
 /// ```
 ///
 /// Before the channel is initialized the image can be set directly:
@@ -65,18 +65,19 @@ const incomingTypingStartEventTimeout = 7;
 class Channel {
   /// Class that manages a specific channel.
   ///
-  /// Optional [extraData] and [image] properties can be provided. The [image]
-  /// is exposed to easily set a key of 'image' on [extraData].
+  /// The channel starts with the custom data [custom]; a [name] or [image] is
+  /// stored in it under the `name` or `image` key, replacing any entry [custom]
+  /// has for that key.
   Channel(
     this._client,
     this._type,
     this._id, {
     String? name,
     String? image,
-    Map<String, Object?>? extraData,
+    Map<String, Object?>? custom,
   }) : _cid = _id != null ? '$_type:$_id' : null,
-       _extraData = {
-         ...?extraData,
+       _custom = {
+         ...?custom,
          if (name != null) 'name': name,
          if (image != null) 'image': image,
        } {
@@ -92,7 +93,7 @@ class Channel {
       _id = channelState.channel!.id,
       _type = channelState.channel!.type,
       _cid = channelState.channel!.cid,
-      _extraData = channelState.channel!.extraData {
+      _custom = channelState.channel!.custom {
     _initState(channelState); // Initialize the state immediately.
   }
 
@@ -106,7 +107,7 @@ class Channel {
 
   String? _id;
   String? _cid;
-  final Map<String, Object?> _extraData;
+  final Map<String, Object?> _custom;
 
   /// Shortcut to set channel name.
   ///
@@ -118,7 +119,7 @@ class Channel {
         'to update the channel name',
       );
     }
-    _extraData.addAll({'name': name});
+    _custom.addAll({'name': name});
   }
 
   /// Shortcut to set channel image.
@@ -131,17 +132,17 @@ class Channel {
         'to update the channel image',
       );
     }
-    _extraData.addAll({'image': image});
+    _custom.addAll({'image': image});
   }
 
-  set extraData(Map<String, Object?> extraData) {
+  set custom(Map<String, Object?> custom) {
     if (_isInitialized) {
       throw StateError(
         'Once the channel is initialized you should use `channel.update` '
         'to update channel data',
       );
     }
-    _extraData.addAll(extraData);
+    _custom.addAll(custom);
   }
 
   /// Whether this channel is identified by its member set rather than an
@@ -524,14 +525,11 @@ class Channel {
     return state!.channelState.channel?.team;
   }
 
-  /// Channel extra data.
-  Map<String, Object?> get extraData {
-    var data = state?.channelState.channel?.extraData;
-    if (data == null || data.isEmpty) {
-      data = _extraData;
-    }
-    return data;
-  }
+  /// This channel's custom data.
+  ///
+  /// Before the channel is initialized, this is the custom data it was created
+  /// with, updated by any assignment to [name], [image] or [custom].
+  Map<String, Object?> get custom => state?.channelState.channel?.custom ?? _custom;
 
   /// List of user permissions on this channel
   List<ChannelCapability> get ownCapabilities => state?.channelState.channel?.ownCapabilities ?? [];
@@ -542,18 +540,18 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.ownCapabilities ?? []).distinct();
   }
 
-  /// Channel extra data as a stream.
-  Stream<Map<String, Object?>> get extraDataStream {
+  /// Channel custom data as a stream.
+  Stream<Map<String, Object?>> get customStream {
     _checkInitialized();
     return state!.channelStateStream.map(
-      (cs) => cs.channel?.extraData ?? _extraData,
+      (cs) => cs.channel?.custom ?? _custom,
     );
   }
 
   /// Shortcut to get channel name.
   ///
   /// {@macro name}
-  String? get name => extraData['name'] as String?;
+  String? get name => custom['name'] as String?;
 
   /// Channel [name] as a stream.
   ///
@@ -562,13 +560,13 @@ class Channel {
   /// {@macro name}
   Stream<String?> get nameStream {
     _checkInitialized();
-    return extraDataStream.map((it) => it['name'] as String?).distinct();
+    return customStream.map((it) => it['name'] as String?).distinct();
   }
 
   /// Shortcut to get channel image.
   ///
   /// {@macro image}
-  String? get image => extraData['image'] as String?;
+  String? get image => custom['image'] as String?;
 
   /// Channel [image] as a stream.
   ///
@@ -577,7 +575,7 @@ class Channel {
   /// {@macro image}
   Stream<String?> get imageStream {
     _checkInitialized();
-    return extraDataStream.map((it) => it['image'] as String?).distinct();
+    return customStream.map((it) => it['image'] as String?).distinct();
   }
 
   /// The main Stream chat client.
@@ -696,7 +694,7 @@ class Channel {
           it.file!,
           onSendProgress: onSendProgress,
           cancelToken: cancelToken,
-          extraData: it.extraData,
+          extraData: it.custom,
         );
 
         throttledUpdateAttachment.cancel();
@@ -1280,19 +1278,19 @@ class Channel {
 
   /// Sends a static location to this channel.
   ///
-  /// Optionally, provide a [messageText] and [extraData] to send along with
-  /// the location.
+  /// A `messageText` and `custom` data, when given, are sent in the message
+  /// with the location.
   Future<SendMessageResponse> sendStaticLocation({
     String? id,
     String? messageText,
     String? createdByDeviceId,
     required LocationCoordinate location,
-    Map<String, Object?> extraData = const {},
+    Map<String, Object?> custom = const {},
   }) {
     final message = Message(
       id: id,
       text: messageText,
-      extraData: extraData,
+      custom: custom,
     );
 
     final currentUserId = _client.state.currentUser?.id;
@@ -1312,20 +1310,20 @@ class Channel {
 
   /// Sends a live location sharing message to this channel.
   ///
-  /// Optionally, provide a [messageText] and [extraData] to send along with
-  /// the location.
+  /// A `messageText` and `custom` data, when given, are sent in the message
+  /// with the location.
   Future<SendMessageResponse> startLiveLocationSharing({
     String? id,
     String? messageText,
     String? createdByDeviceId,
     required DateTime endSharingAt,
     required LocationCoordinate location,
-    Map<String, Object?> extraData = const {},
+    Map<String, Object?> custom = const {},
   }) {
     final message = Message(
       id: id,
       text: messageText,
-      extraData: extraData,
+      custom: custom,
     );
 
     final currentUserId = _client.state.currentUser?.id;
@@ -1439,8 +1437,11 @@ class Channel {
 
   /// Creates [poll] and sends it to this channel in a new message.
   ///
-  /// The message carries [messageText] as its text, if given. If the poll cannot be created, no message is sent and
-  /// the failure is returned; if the message cannot be sent, the poll stays created and the failure is returned.
+  /// The message carries [messageText] as its text, if given.
+  ///
+  /// If the poll cannot be created, no message is sent and the failure is
+  /// returned. If the message cannot be sent, the poll stays created and the
+  /// failure is returned.
   Future<Result<SendMessageResponse>> sendPoll(
     Poll poll, {
     String? messageText,
@@ -1450,6 +1451,7 @@ class Channel {
     return created.flatMapAsync((response) => _sendPollMessage(response.poll, messageText));
   }
 
+  // TODO(openapi-migration): remove once sendMessage returns a Result
   Future<Result<SendMessageResponse>> _sendPollMessage(Poll poll, String? messageText) async {
     try {
       final message = Message(text: messageText, poll: poll, pollId: poll.id);
@@ -1464,8 +1466,11 @@ class Channel {
 
   /// Updates [poll] to match the settings and options it carries.
   ///
-  /// [Poll.options] becomes the poll's full list of options, each matched by its id, so an existing option missing
-  /// from it is deleted. New options are added through [createPollOption].
+  /// [Poll.options] becomes the poll's full list of options, each matched by
+  /// its id, so an existing option missing from it is deleted. New options are
+  /// added through [createPollOption].
+  ///
+  /// [Poll.enforceUniqueVote] is left as the poll was created.
   Future<Result<PollResponse>> updatePoll(Poll poll) {
     _checkInitialized();
     return _pollLock.synchronized(() => _client.updatePoll(poll));
@@ -1500,8 +1505,9 @@ class Channel {
 
   /// Votes for [option] of [poll], which was sent in [message].
   ///
-  /// If the poll allows only one vote per user, the vote replaces the previous one. The [option] must carry its id;
-  /// if it does not, the call returns a failure without voting.
+  /// If the poll allows only one vote per user, the vote replaces the previous
+  /// one. The [option] must carry its id; if it does not, the call returns a
+  /// failure without voting.
   Future<Result<PollVoteResponse>> castPollVote(
     Message message,
     Poll poll,
@@ -1545,7 +1551,8 @@ class Channel {
 
   /// Removes [vote], a vote or answer on [poll], which was sent in [message].
   ///
-  /// The [vote] must carry its id; if it does not, the call returns a failure without removing anything.
+  /// The [vote] must carry its id; if it does not, the call returns a failure
+  /// without removing anything.
   Future<Result<PollVoteResponse>> removePollVote(
     Message message,
     Poll poll,
@@ -1567,10 +1574,13 @@ class Channel {
     );
   }
 
-  /// Fetches one page of the votes and answers matching [filter] on the poll with the id [pollId], ordered by [sort].
+  /// Fetches one page of the votes and answers matching [filter] on the poll
+  /// with the id [pollId], ordered by [sort].
   ///
-  /// Up to [limit] votes are returned. The next page is fetched by passing the `next` cursor of a response as [next],
-  /// and the previous page by passing its `prev` cursor as [prev]. At most one of [next] and [prev] may be given.
+  /// Up to [limit] votes are returned. The next page is fetched by passing a
+  /// response's [QueryPollVotesResponse.next] as [next], and the previous page
+  /// by passing its [QueryPollVotesResponse.prev] as [prev]. At most one of
+  /// [next] and [prev] may be given.
   Future<Result<QueryPollVotesResponse>> queryPollVotes(
     String pollId, {
     PollVoteFilter? filter,
@@ -1592,7 +1602,8 @@ class Channel {
 
   /// Creates a reminder on the message with the id [messageId].
   ///
-  /// The reminder is due at [remindAt]. Without it, the reminder is a bookmark, which is never due.
+  /// The reminder is due at [remindAt]. Without it, the reminder is a bookmark,
+  /// which is never due.
   ///
   /// Throws a [StateError] if this channel is not initialized.
   Future<Result<CreateReminderResponse>> createReminder(
@@ -1608,7 +1619,8 @@ class Channel {
 
   /// Updates the reminder on the message with the id [messageId].
   ///
-  /// The reminder becomes due at [remindAt]. Without it, the reminder becomes a bookmark, which is never due.
+  /// The reminder becomes due at [remindAt]. Without it, the reminder becomes a
+  /// bookmark, which is never due.
   ///
   /// Throws a [StateError] if this channel is not initialized.
   Future<Result<UpdateReminderResponse>> updateReminder(
@@ -1740,12 +1752,12 @@ class Channel {
     );
   }
 
-  /// Sets the fields in [set] and removes the fields named in [unset] on this channel, leaving every other field
-  /// as it is.
+  /// Sets the fields in [set] and removes the fields named in [unset] on this
+  /// channel, leaving every other field as it is.
   ///
   /// At least one of [set] and [unset] is required.
   ///
-  /// Use [update] to replace every field.
+  /// To replace every field, consider [update].
   Future<Result<UpdateChannelPartialResponse>> updatePartial({
     Map<String, Object?>? set,
     List<String>? unset,
@@ -1754,7 +1766,8 @@ class Channel {
     return _client.updateChannelPartial(id!, type, set: set, unset: unset);
   }
 
-  /// Enables slow mode on this channel, so members wait [cooldownInterval] seconds between messages.
+  /// Enables slow mode on this channel, so members wait [cooldownInterval]
+  /// seconds between messages.
   Future<Result<UpdateChannelPartialResponse>> enableSlowMode({
     required int cooldownInterval,
   }) async {
@@ -1863,17 +1876,18 @@ class Channel {
 
   /// Marks this channel as read for the current user.
   ///
-  /// Messages up to and including the one with [messageId] are marked as
-  /// read, or all of them when [messageId] is null.
+  /// Messages up to and including the one with [messageId] are marked as read,
+  /// or all of them when [messageId] is null.
   ///
   /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
   /// unread count locally, on-device, without making a network request, and
-  /// returns a [MarkReadResponse] whose `duration` is `0ms`. In that case
-  /// [messageId] is recorded as the read boundary but does **not** narrow the
-  /// count: the channel is always treated as fully read and the count drops
-  /// to zero. See [ChannelClientState.markReadLocally].
+  /// returns a [MarkReadResponse] whose [MarkReadResponse.duration] is `0ms`.
+  /// In that case [messageId] is recorded as the read boundary but does
+  /// **not** narrow the count: the channel is always treated as fully read and
+  /// the count drops to zero. See [ChannelClientState.markReadLocally].
   ///
-  /// Returns a failure if [canUseReadReceipts] is `false`, unless [usesLocalUnreadCount] is `true`.
+  /// Returns a failure if [canUseReadReceipts] is `false`, unless
+  /// [usesLocalUnreadCount] is `true`.
   Future<Result<MarkReadResponse>> markRead({String? messageId}) async {
     _checkInitialized();
 
@@ -1885,9 +1899,9 @@ class Channel {
     if (!canUseReadReceipts) {
       return const Result.failure(
         StreamClientException(
-          message: '''
-        Cannot mark as read: Channel does not support read events.
-        Enable read_events in your channel type configuration.''',
+          message:
+              'Cannot mark as read: Channel does not support read events. '
+              'Enable read_events in your channel type configuration.',
         ),
       );
     }
@@ -1895,8 +1909,8 @@ class Channel {
     return _client.markChannelRead(id!, type, messageId: messageId);
   }
 
-  /// Marks this channel as unread for the current user, from the message
-  /// with [messageId] onwards.
+  /// Marks this channel as unread for the current user, from the message with
+  /// [messageId] onwards.
   ///
   /// All messages from the provided message onwards will be marked as unread,
   /// **including** the message itself. Contrast with
@@ -1908,7 +1922,8 @@ class Channel {
   /// message must be part of the locally-known messages ([Channel.messages])
   /// for the count to be recomputed; otherwise this returns a failure.
   ///
-  /// Returns a failure if [canUseReadReceipts] is `false`, unless [usesLocalUnreadCount] is `true`.
+  /// Returns a failure if [canUseReadReceipts] is `false`, unless
+  /// [usesLocalUnreadCount] is `true`.
   Future<Result<void>> markUnread(String messageId) async {
     _checkInitialized();
 
@@ -1921,9 +1936,8 @@ class Channel {
         return Result.failure(
           StreamClientException(
             message:
-                '''
-        Cannot mark as unread: Message "$messageId" was not found in the
-        locally-known messages for this channel.''',
+                'Cannot mark as unread: Message "$messageId" was not found in the '
+                'locally-known messages for this channel.',
           ),
         );
       }
@@ -1944,9 +1958,9 @@ class Channel {
     if (!canUseReadReceipts) {
       return const Result.failure(
         StreamClientException(
-          message: '''
-        Cannot mark as unread: Channel does not support read events.
-        Enable read_events in your channel type configuration.''',
+          message:
+              'Cannot mark as unread: Channel does not support read events. '
+              'Enable read_events in your channel type configuration.',
         ),
       );
     }
@@ -1954,8 +1968,8 @@ class Channel {
     return _client.markChannelUnread(id!, type, messageId);
   }
 
-  /// Marks the messages of this channel created after [timestamp] as unread
-  /// for the current user.
+  /// Marks the messages of this channel created after [timestamp] as unread for
+  /// the current user.
   ///
   /// The boundary is **exclusive**: a message created at exactly [timestamp]
   /// stays read. Contrast with [markUnread], which is inclusive of the message
@@ -1966,7 +1980,8 @@ class Channel {
   /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
   /// unread count locally, on-device, without making a network request.
   ///
-  /// Returns a failure if [canUseReadReceipts] is `false`, unless [usesLocalUnreadCount] is `true`.
+  /// Returns a failure if [canUseReadReceipts] is `false`, unless
+  /// [usesLocalUnreadCount] is `true`.
   Future<Result<void>> markUnreadByTimestamp(DateTime timestamp) async {
     _checkInitialized();
 
@@ -1987,9 +2002,9 @@ class Channel {
     if (!canUseReadReceipts) {
       return const Result.failure(
         StreamClientException(
-          message: '''
-        Cannot mark as unread: Channel does not support read events.
-        Enable read_events in your channel type configuration.''',
+          message:
+              'Cannot mark as unread: Channel does not support read events. '
+              'Enable read_events in your channel type configuration.',
         ),
       );
     }
@@ -1997,19 +2012,19 @@ class Channel {
     return _client.markChannelUnreadByTimestamp(id!, type, timestamp);
   }
 
-  /// Marks a thread in this channel as read for the current user.
+  /// Marks the thread started by the message with [threadId] as read for the
+  /// current user.
   ///
-  /// [threadId] is the id of the thread's parent message. Returns a failure
-  /// if [canUseReadReceipts] is `false`.
+  /// Returns a failure if [canUseReadReceipts] is `false`.
   Future<Result<MarkReadResponse>> markThreadRead(String threadId) async {
     _checkInitialized();
 
     if (!canUseReadReceipts) {
       return const Result.failure(
         StreamClientException(
-          message: '''
-        Cannot mark thread as read: Channel does not support read events.
-        Enable read_events in your channel type configuration.''',
+          message:
+              'Cannot mark thread as read: Channel does not support read events. '
+              'Enable read_events in your channel type configuration.',
         ),
       );
     }
@@ -2017,19 +2032,19 @@ class Channel {
     return _client.markThreadRead(id!, type, threadId);
   }
 
-  /// Marks a thread in this channel as unread for the current user.
+  /// Marks the thread started by the message with [threadId] as unread for the
+  /// current user.
   ///
-  /// [threadId] is the id of the thread's parent message. Returns a failure
-  /// if [canUseReadReceipts] is `false`.
+  /// Returns a failure if [canUseReadReceipts] is `false`.
   Future<Result<void>> markThreadUnread(String threadId) async {
     _checkInitialized();
 
     if (!canUseReadReceipts) {
       return const Result.failure(
         StreamClientException(
-          message: '''
-        Cannot mark thread as unread: Channel does not support read events.
-        Enable read_events in your channel type configuration.''',
+          message:
+              'Cannot mark thread as unread: Channel does not support read events. '
+              'Enable read_events in your channel type configuration.',
         ),
       );
     }
@@ -2191,7 +2206,7 @@ class Channel {
       channelState ??= await _client.queryChannel(
         type,
         channelId: id,
-        channelData: _extraData,
+        channelData: _custom,
         state: state,
         watch: watch,
         presence: presence,
@@ -2377,9 +2392,11 @@ class Channel {
     );
   }
 
-  /// Hides this channel from the current user's channel list until a new message is added to it.
+  /// Hides this channel from the current user's channel list until a new
+  /// message is added to it.
   ///
-  /// If [clearHistory] is true, the channel's messages are also cleared for the current user.
+  /// If [clearHistory] is true, the channel's messages are also cleared for the
+  /// current user.
   Future<Result<HideChannelResponse>> hide({bool clearHistory = false}) async {
     _checkInitialized();
     return _client.hideChannel(

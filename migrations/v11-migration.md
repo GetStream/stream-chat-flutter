@@ -43,6 +43,9 @@ onto Stream's OpenAPI-generated API client.
     - [Unread Counts](#unread-counts)
     - [User Blocking](#user-blocking)
     - [User Updates](#user-updates)
+    - [Channel and Member Custom Data](#channel-and-member-custom-data)
+    - [User Custom Data](#user-custom-data)
+    - [Message Custom Data](#message-custom-data)
 - [Migration Checklist](#migration-checklist)
 - [For AI Agents](#for-ai-agents)
 - [Contributing to this guide](#contributing-to-this-guide)
@@ -87,17 +90,20 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Moderation**](#moderation) | Muting, banning and flagging return a `Result` and call the moderation v2 API; `banUser`'s options map becomes named parameters; `unflagMessage`, `unflagUser` and `removeShadowBan` are removed |
 | [**App Settings**](#app-settings) | `getAppSettings` returns a `Result<AppSettingsResponse>` instead of throwing; `GetAppSettingsResponse` is renamed `AppSettingsResponse` |
 | [**Guest Users**](#guest-users) | `connectGuestUser` is unchanged; `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed |
-| [**Polls**](#polls) | Poll calls return a `Result`; eight responses become `PollResponse`, `PollOptionResponse` and `PollVoteResponse`; queries take `limit`/`next`/`prev`; `VotingVisibility` is an extension type |
+| [**Polls**](#polls) | Poll calls return a `Result`; eight responses become `PollResponse`, `PollOptionResponse` and `PollVoteResponse`; queries take `limit`/`next`/`prev`; `VotingVisibility` is an extension type; `extraData` is `custom` |
 | [**Message Reminders**](#message-reminders) | Reminder calls return a `Result`; `deleteReminder` answers a new `DeleteReminderResponse`; `queryReminders` takes `limit`/`next`/`prev`; `MessageReminder` no longer decodes JSON |
 | [**Threads & Drafts**](#threads--drafts) | Thread and draft calls return a `Result`; `partialUpdateThread` becomes `updateThreadPartial`; `deleteDraft` returns `Result<void>`; queries take `limit`/`next`/`prev`; `Thread` no longer decodes JSON |
 | [**File Upload**](#file-upload) | Uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
 | [**Partial Updates**](#partial-updates) | Channel and member partial updates — `updatePartial`, `updateName`, `updateImage`, slow mode, pin and archive — return a `Result` instead of throwing; their responses take the API's names, `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse`, and `partialMemberUpdate` becomes `updateMemberPartial` |
 | [**Channel Lifecycle**](#channel-lifecycle) | Hiding, showing and deleting a channel return a `Result` instead of throwing; stopping watching still throws |
 | [**Read Receipts**](#read-receipts) | Marking read, unread and delivered return a `Result` instead of throwing; `ChannelDeliveryReporter`'s callback returns a `Result` |
-| [**Unread Counts**](#unread-counts) | `getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing; the response and its `UnreadCounts*` models no longer decode JSON and compare by value |
+| [**Unread Counts**](#unread-counts) | `getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing; the response and its `UnreadCounts*` models lose their JSON codecs and compare by value |
 | [**User Blocking**](#user-blocking) | `blockUser`, `unblockUser` and `getBlockedUsers` (was `queryBlockedUsers`) return a `Result` instead of throwing; their responses are renamed `BlockUsersResponse` and `GetBlockedUsersResponse`, `unblockUser` answers a new `UnblockUsersResponse`, and `UserBlock`'s fields are all non-nullable |
 | [**Messages**](#messages) | `Moderation`, `ReactionGroup`, `Action`, `Reaction` and `Location` no longer decode from or encode to JSON; `Action` compares by value |
 | [**User Updates**](#user-updates) | `updateUser` and `updateUsers` return a `Result<UpdateUsersResponse>` instead of throwing; `partialUpdateUser(s)` becomes `updateUserPartial` / `updateUsersPartial` and `PartialUpdateUserRequest` becomes `UpdateUserPartialRequest`; `updateUser` no longer sends `role`, `teams` or `teamsRole`, and the returned users no longer carry their private fields in `extraData` |
+| [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`, and holds the custom data verbatim; the channel and member flags it carried are fields |
+| [**User Custom Data**](#user-custom-data) | `extraData` is `custom` on `User` and `OwnUser`, and holds the custom data verbatim; `name` is nullable and `nameOrId` falls back to the id; the user fields it carried are fields |
+| [**Message Custom Data**](#message-custom-data) | `extraData` is `custom` on `Message`, `Attachment`, `Reaction` and `DraftMessage`, and holds the custom data verbatim; a message's channel id, HTML, markup and deleted reply count, and an attachment's Giphy renditions, are fields |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -140,13 +146,13 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `SortOption.ASC` / `.DESC` | `SortDirection.asc` / `.desc` | `retyped` | An enum carrying `value` (`1` / `-1`) rather than a bare `int` |
 | `const [SortOption.desc(f)]` | `[ChannelSort.desc(f)]` | `retyped` | **Drop the `const`.** A sort list can no longer be `const`: a `SortField` holds a closure that reads the value off the model, which is not a constant expression. Every v10 example wrote `const`, so expect this on the first line you touch |
 | `ChannelSortKey` / `MessageSortKey` / `UserSortKey` / … (extension types over `String`) | `ChannelSortField` / `MessageSearchSortField` / `UserSortField` / … | `retyped` | Same member names. A field is no longer a `String`: read `field.remote` for the wire name. `MessageSortKey` is named for its one endpoint: searching |
-| `SortOption.desc('my_custom_field')` | `ChannelSort.desc(ChannelSortField.custom('my_custom_field'))` | `retyped` | Only for a field the model does not declare, and only on channel, member, user and message-search sorts — the other queries pin their sort to declared fields and reject a custom one. `custom` reads `extraData`, so pointing it at a declared field sends the right wire name but reads `null` locally — an offline or re-sorted list comes back unordered |
+| `SortOption.desc('my_custom_field')` | `ChannelSort.desc(ChannelSortField.custom('my_custom_field'))` | `retyped` | Only for a field the model does not declare, and only on channel, member, user and message-search sorts — the other queries pin their sort to declared fields and reject a custom one. `custom` reads the model's custom data, so pointing it at a declared field sends the right wire name but reads `null` locally — an offline or re-sorted list comes back unordered |
 | `SortOrder<T extends ComparableFieldProvider>` | `List<ChannelSort>`, `List<MemberSort>`, … | `removed` | The typedef is gone; signatures name the model's sort type |
 | `SortOption.fromJson` | `ChannelSort.fromJson` | `moved` | `Sort` has no `fromJson`: the remote name has to resolve back to a declared field |
 | `SortOption(comparator:)` | — | `removed` | Declare a field whose value projects onto something orderable, or sort the list yourself |
 | `DraftSortKey`'s `extraData` fallback | — | `removed` | The server rejects a custom sort field on drafts |
 | `PollVoteSortKey.answerText` | — | `removed` | The API rejects a sort on `answer_text` |
-| a raw-string sort on `language` | `UserSortField.language` | `added` | Declared now, so prefer it over `UserSortField.custom('language')`, which reads `extraData` and never sees a typed property |
+| a raw-string sort on `language` | `UserSortField.language` | `added` | Declared now, so prefer it over `UserSortField.custom('language')`, which reads the custom data and never sees a typed property |
 | a raw-string sort on `updated_at` for members | `MemberSortField.updatedAt` | `added` | Same: prefer the declared field over `.custom` |
 | a raw-string sort on `text` / `type` / `parent_id` / `reply_count` / `pinned` | `MessageSearchSortField.text` / `.type` / `.parentId` / `.replyCount` / `.pinned` | `added` | The fields the JS client already exposed |
 | _(new)_ | `ChannelSortField.cid` | `added` | Both iOS and Android sort channels by `cid` |
@@ -243,13 +249,17 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `CastPollVoteResponse` / `RemovePollVoteResponse` | `PollVoteResponse` | `renamed` | `vote` is nullable |
 | `queryPolls(pagination: PaginationParams(limit: l, next: n))` / `queryPollVotes(…)` | `queryPolls(limit: l, next: n)` / `queryPollVotes(…)` | `retyped` | `limit` is still 10 when omitted. Pass a response's `prev` as `prev` to page backwards. The other `PaginationParams` fields never had an effect on these queries |
 | `Channel.castPollVote` / `.removePollVote` throwing `ArgumentError` | a `Failure` carrying a `StreamClientException` | `retyped` | For an option or vote without an id |
-| `VotingVisibility` (enum) | `VotingVisibility` (extension type over `String`) | `retyped` | `VotingVisibility.public` and `.anonymous` are unchanged; a `switch` needs a default arm, and `.name` / `.values` are gone — read `.rawType` |
+| `Poll.copyWith` / `PollOption.copyWith` / `PollVote.copyWith` keeping a field passed as `null` | freezed's `copyWith` | `retyped` | `null` clears a nullable field and re-applies the constructor default of `Poll.id`, `createdAt` and `updatedAt`; `Poll.maxVotesAllowed` and `PollOption.id` already cleared |
+| `Poll.extraData` / `PollOption.extraData` | `Poll.custom` / `PollOption.custom` | `renamed` | The wire's name for it; the first models to take it |
+| `Poll.custom` / `PollOption.custom` entry named like one of the model's own fields | the same entry, as custom data | `retyped` | Sent and returned as custom data; v10's request body let it overwrite the field |
+| `StreamPollController.addOption(extraData:)` / `.updateOption(extraData:)` (`stream_chat_flutter_core`) | `custom:` | `renamed` | Follows `PollOption.custom` |
+| `Poll.topLevelFields` / `PollOption.topLevelFields` | — | `removed` | They listed the JSON keys of models that no longer have JSON |
+| `VotingVisibility` (enum) | `VotingVisibility` (extension type over `String`) | `retyped` | `VotingVisibility.public` and `.anonymous` are unchanged; a `switch` needs a default arm, and `.name` / `.values` are gone — it is a `String`, so use it directly |
 | `Poll.fromJson` / `.toJson`, `PollOption.fromJson` / `.toJson`, `PollVote.fromJson` / `.toJson` | — | `removed` | The models are plain classes; construct them directly. `Message.poll` and the poll events still decode from the same keys |
 | — | `PollOption.fromData` / `.toData` | `added` | Read and write only the format the offline database stores; not a codec for API payloads |
 | `CreatePollResponse()..poll = …` and the other response setters | `PollResponse(duration: …, poll: …)` | `retyped` | The responses are plain classes with a const constructor and final fields |
 | poll responses' `duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
-| `Poll` / `PollOption` / `PollVote extends Equatable`, `props` | value `==` | `removed` | `Poll` and `PollOption` now compare `extraData` too |
-| `PollVote.isAnswer` (a field set in the constructor) | the same name, as a getter | `retyped` | Computed from `answerText` on each read |
+| `Poll` / `PollOption` / `PollVote extends Equatable`, `props` | value `==` | `removed` | `Poll` and `PollOption` now compare `custom` too |
 | `StreamChatApi.polls` (`PollsApi`) | `StreamChatClient`'s poll methods | `removed` | The endpoints moved to the generated client |
 | `sendImage` / `sendFile` / `uploadImage` / `uploadFile` → `Future<SendImageResponse>` and siblings | `Future<Result<UploadedFile>>` | `retyped` | On `StreamChatClient`, `Channel` and `AttachmentFileUploader`. Returns a `Result` instead of throwing |
 | `deleteImage` / `deleteFile` / `removeImage` / `removeFile` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | On `StreamChatClient`, `Channel` and `AttachmentFileUploader`. Returns a `Result` instead of throwing |
@@ -284,7 +294,8 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `MarkChannelsDelivered` = `Future<void> Function(Iterable<MessageDelivery>)` | `Future<Result<void>> Function(Iterable<MessageDelivery>)` | `retyped` | The callback `ChannelDeliveryReporter` takes. Return a failure rather than throwing; the reporter keeps the receipts for a later batch |
 | `MessageDelivery.toJson` | — | `removed` | `MessageDelivery` is a plain class |
 | `MessageDelivery` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
-| `StreamChatApi.channel.markRead` / `markUnread` / `markUnreadByTimestamp` / `markThreadRead` / `markThreadUnread` / `markAllRead` / `markChannelsDelivered` | the `StreamChatClient` methods | `removed` | The endpoints moved to the generated client |
+| `StreamChatApi.channel.markRead` / `markUnread` / `markUnreadByTimestamp` | `StreamChatClient.markChannelRead` / `markChannelUnread` / `markChannelUnreadByTimestamp` | `removed` | The endpoints moved to the generated client |
+| `StreamChatApi.channel.markThreadRead` / `markThreadUnread` / `markAllRead` / `markChannelsDelivered` | the `StreamChatClient` methods of the same name | `removed` | The endpoints moved to the generated client |
 | `StreamChatClient.getUnreadCount` → `Future<GetUnreadCountResponse>` | `Future<Result<GetUnreadCountResponse>>` | `retyped` | Returns a `Result` instead of throwing. The current user's unread counts are still updated on success |
 | `GetUnreadCountResponse.fromJson`, `UnreadCountsChannel.fromJson` / `toJson`, `UnreadCountsThread.fromJson` / `toJson`, `UnreadCountsChannelType.fromJson` / `toJson` | — | `removed` | The response and models are plain classes; construct them directly |
 | `GetUnreadCountResponse()..totalUnreadCount = …` and its other setters | `GetUnreadCountResponse(duration: …, totalUnreadCount: …, …)` | `retyped` | A plain class with a const constructor and final fields |
@@ -303,6 +314,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `UserBlockResponse.duration`, `BlockedUsersResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
 | `UserBlock extends Equatable`, `UserBlock.props` | `UserBlock` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and `UserBlock` is no longer an `Equatable` |
 | `UserBlock.blockedUser` (`User?`), `.userId` / `.blockedUserId` (`String?`), `.createdAt` (`DateTime?`) | `User`, `String`, `DateTime` — required in the constructor | `retyped` | The server always sends them; drop any `!`, `?.` or `?? …` |
+| `UserBlock.copyWith(user: User?, …)`, keeping a field when passed `null` | `copyWith(user: User, …)` | `retyped` | Every argument is non-nullable, so a call that passed a nullable value no longer compiles; pass the value or leave the argument out |
 | `StreamChatApi.user.blockUser` / `unblockUser` / `queryBlockedUsers` | `StreamChatClient.blockUser` / `unblockUser` / `getBlockedUsers` | `removed` | The endpoints moved to the generated client |
 | `Moderation.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. `Message.fromJson` still reads a message's moderation |
 | `Moderation extends Equatable`, `Moderation.props` | `Moderation` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and `Moderation` is no longer an `Equatable` |
@@ -327,6 +339,18 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `UpdateUsersResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
 | `UpdateUsersResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
 | `StreamChatApi.user.updateUsers` / `partialUpdateUsers` | `StreamChatClient.updateUsers` / `updateUsersPartial` | `removed` | The endpoints moved to the generated client |
+| `ChannelModel.extraData` / `Member.extraData` | `ChannelModel.custom` / `Member.custom` | `renamed` | The wire's name for it; also the constructor and `copyWith` arguments |
+| `Channel.extraData` / `Channel.extraDataStream` / `Channel(…, extraData:)` / `StreamChatClient.channel(…, extraData:)` | `Channel.custom` / `Channel.customStream` / `custom:` | `renamed` | Follows `ChannelModel.custom`; the setter is renamed too |
+| `channel.extraData['disabled']` / `['hidden']` / `['muted']` / `['blocked']` / `['truncated_at']` / `['truncated_by']` / `['auto_translation_enabled']` / `['auto_translation_language']` | `ChannelModel.disabled` / `hidden` / `muted` / `blocked` / `truncatedAt` / `truncatedBy` / `autoTranslationEnabled` / `autoTranslationLanguage` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them, and `toJson` no longer writes them |
+| `member.extraData['notifications_muted']` / `['status']` / `['ban_from_future_channels']` / `['future_channel_ban_expires']` / `['deleted_at']` | `Member.notificationsMuted` / `status` / `banFromFutureChannels` / `futureChannelBanExpires` / `deletedAt` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them, and `toJson` no longer writes them |
+| `ChannelModel.custom` / `Member.custom` entry named like one of the model's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; `toJson` leaves it out so it cannot overwrite the field |
+| `User.extraData` / `OwnUser.extraData` | `User.custom` / `OwnUser.custom` | `renamed` | The wire's name for it; also the constructor and `copyWith` arguments |
+| `User.name` (`String`, the id when the user has none) | `User.nameOrId` | `retyped` | `User.name` is a `String?` that is null when the user has none. Use `nameOrId` wherever a user is named by text, and `name` where a missing name matters, such as initials |
+| `User.image` (`null` for an empty image URL) | `User.image` | `retyped` | Returns `''` as given; check `image?.isNotEmpty` where an empty URL means no image |
+| `user.extraData['name']` / `['image']` / `['deactivated_at']` / `['deleted_at']` / `['shadow_banned']` | `User.name` / `image` / `deactivatedAt` / `deletedAt` / `shadowBanned` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them |
+| `OwnUser.blockedUserIds` | `User.blockedUserIds` | `moved` | Still on `OwnUser`. Empty for anyone but the current user |
+| `OwnUser.fromUser(user)` reading devices, mutes, unread counts, push preferences and privacy settings out of `user.extraData` | — | `removed` | A `User` no longer carries them; they are left at their defaults |
+| `User.custom` entry named like one of the user's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; `toJson` leaves it out so it cannot overwrite the field |
 | `StreamChatClient.createReminder` / `.updateReminder` / `.queryReminders` → `Future<CreateReminderResponse>` and the like | `Future<Result<CreateReminderResponse>>` and the like | `retyped` | Return a `Result` instead of throwing; the same holds for `Channel.createReminder` and `.updateReminder` |
 | `StreamChatClient.deleteReminder` / `Channel.deleteReminder` → `Future<EmptyResponse>` | `Future<Result<DeleteReminderResponse>>` | `retyped` | A new response carrying `duration` |
 | `queryReminders(pagination: PaginationParams(limit: l, next: n))` | `queryReminders(limit: l, next: n)` | `retyped` | `limit` is still 10 when omitted. Pass a response's `prev` as `prev` to page backwards. The other `PaginationParams` fields never had an effect on this query |
@@ -338,6 +362,13 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `MessageReminder.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. Messages and events still read reminders |
 | `MessageReminder extends Equatable`, `MessageReminder.props` | `MessageReminder` (value `==`) | `removed` | Equality, `copyWith` and `merge` are unchanged; `props` is gone and `MessageReminder` is no longer an `Equatable` |
 | `StreamChatApi.reminders` (`RemindersApi`) | `StreamChatClient` reminder methods | `removed` | The endpoints moved to the generated client |
+| `Message.extraData` / `Attachment.extraData` / `Reaction.extraData` / `DraftMessage.extraData` | `Message.custom` / `Attachment.custom` / `Reaction.custom` / `DraftMessage.custom` | `renamed` | The wire's name for it; also the constructor and `copyWith` arguments |
+| `Channel.sendStaticLocation(extraData: …)` / `startLiveLocationSharing(extraData: …)` | `sendStaticLocation(custom: …)` / `startLiveLocationSharing(custom: …)` | `renamed` | The message's custom data |
+| `message.extraData['cid']` / `['html']` / `['mml']` / `['deleted_reply_count']` | `Message.cid` / `html` / `mml` / `deletedReplyCount` | `retyped` | Fields now, not custom data; `toJson` does not write them, so a message can no longer be sent with markup |
+| `attachment.extraData['giphy']` | `Attachment.giphy` | `retyped` | A field now, not custom data |
+| `message.extraData['image_labels']` / `['mentioned_channel_members']`, `draftMessage.extraData['html']` / `['mml']` | — | `removed` | No longer kept |
+| `Message.custom` / `Attachment.custom` / `Reaction.custom` / `DraftMessage.custom` entry named like one of the model's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; left out when the model is sent, so it cannot overwrite the field |
+| `Reaction.topLevelFields` | — | `removed` | It listed the JSON keys of a model that no longer has JSON |
 | `StreamChatClient.queryThreads` / `.getThread` / `.createDraft` / `.getDraft` / `.queryDrafts` → `Future<QueryThreadsResponse>` and the like | `Future<Result<QueryThreadsResponse>>` and the like | `retyped` | Return a `Result` instead of throwing; the same holds for `Channel.createDraft` and `.getDraft` |
 | `StreamChatClient.partialUpdateThread` → `Future<UpdateThreadResponse>` | `StreamChatClient.updateThreadPartial` → `Future<Result<UpdateThreadPartialResponse>>` | `renamed` | Named after the API's operation, like `updateChannelPartial` and `updateMemberPartial` |
 | `UpdateThreadResponse` | `UpdateThreadPartialResponse` | `renamed` | The response of `updateThreadPartial` |
@@ -545,8 +576,8 @@ counterpart: `code` is now a `StreamErrorCode` (an extension type over `int`, wi
 ## Offline Cache
 
 If you use `stream_chat_persistence`, the local database is **rebuilt from empty** the first time your app runs
-on v11. The Drift schema version moves from `1036` to `1104`, and the upgrade strategy drops and recreates every
-table rather than migrating rows.
+on v11. The Drift schema version moves from v10's `1000 + n` (`1035` in v10.5.0) to `1107`, and the upgrade strategy
+drops and recreates every table rather than migrating rows.
 
 Everything held on disk is discarded: channels, messages, members, reads, drafts, locations, polls, poll votes
 and reactions. **Messages that failed or were queued while offline are stored in the same table**, so they go
@@ -888,7 +919,9 @@ ChannelDeliveryReporter(
 **`MessageDelivery` no longer encodes to JSON.** It is a plain class that compares by value and gains `copyWith`.
 
 **`StreamChatApi.channel.markRead`, `markUnread`, `markUnreadByTimestamp`, `markThreadRead`, `markThreadUnread`,
-`markAllRead` and `markChannelsDelivered` are removed.** Call them on `StreamChatClient`.
+`markAllRead` and `markChannelsDelivered` are removed.** Call `StreamChatClient.markChannelRead`,
+`markChannelUnread` and `markChannelUnreadByTimestamp` for the first three, and the `StreamChatClient` methods of
+the same name for the rest.
 
 > **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call. Marking read
 > and sending receipts answer their own envelope, so a field the API adds later reaches you without another
@@ -912,10 +945,10 @@ try {
 
 // v11
 final result = await client.getUnreadCount();
-switch (result) {
-  case Success(:final data): showBadge(data.totalUnreadCount);
-  case Failure(:final error): report(error);
-}
+result.fold(
+  onSuccess: (counts) => showBadge(counts.totalUnreadCount),
+  onFailure: (error, _) => report(error),
+);
 ```
 
 **`UnreadCountsChannel`, `UnreadCountsThread` and `UnreadCountsChannelType` no longer decode from or encode to
@@ -926,7 +959,7 @@ always present.
 **`StreamChatApi.user.getUnreadCount` is removed.** Call `StreamChatClient.getUnreadCount`.
 
 > **Why:** the endpoint moved onto the generated client, which returns a `Result` for every call. The response
-> keeps its v10 name and fields; what changes is the error handling, the JSON codecs and value equality.
+> and its models keep their v10 names and fields.
 
 ### User Blocking
 
@@ -948,10 +981,10 @@ try {
 
 // v11
 final result = await client.getBlockedUsers();
-switch (result) {
-  case Success(:final data): showBlocked(data.blocks.map((block) => block.blockedUser));
-  case Failure(:final error): report(error);
-}
+result.fold(
+  onSuccess: (response) => showBlocked(response.blocks.map((block) => block.blockedUser)),
+  onFailure: (error, _) => report(error),
+);
 ```
 
 **`UserBlock.blockedUser`, `userId`, `blockedUserId` and `createdAt` are non-nullable** and required in the
@@ -990,16 +1023,19 @@ final result = await client.updateUserPartial(userId, set: {'favorite_color': 'g
 if (result case Failure(:final error)) report(error);
 ```
 
-**`updateUser` sends the user's name, image, language, visibility and custom data, and nothing else.** v10 sent
-the whole user, so the user's online status, ban and timestamps, and an own user's devices, mutes and unread counts,
-were stored as custom data on every call; that no longer happens. `role`, `teams` and `teamsRole` are no longer
-sent, so these calls cannot change them.
+**`updateUser` sends the user's name, image, language, visibility and custom data, and for an own user their privacy
+settings, and nothing else.** v10 sent the whole user, so the user's online status, ban and timestamps, and an own
+user's devices, mutes and unread counts, were stored as custom data on every call, and an own user with many devices
+went over the custom data size limit and failed; that no longer happens. An own user decoded from the connection
+still keeps `unread_count`, `total_unread_count_by_team` and `latest_hidden_channels` in `custom`, so passing
+`currentUser` back stores them as custom data, as v10 did; remove them from `custom` first if you don't want them
+stored. `role`, `teams` and `teamsRole` are no longer sent, so these calls cannot change them.
 
 **The returned users no longer carry the fields only they can see in `extraData`.** v10 left every field `User`
-does not model in `extraData` as raw JSON; now their devices, mutes, channel mutes, privacy settings, unread counts, blocked
-user ids, hidden channels and token revocation time are left out. Read them from `currentUser`. `deactivatedAt`,
-`deletedAt` and `shadowBanned` stay in `extraData` and gain typed getters on `User`; each one is filled whenever the
-response carries it.
+does not model in `extraData` as raw JSON; now their devices, mutes, channel mutes, privacy settings, unread counts, hidden
+channels and token revocation time are left out. Read them from `currentUser`. `deactivatedAt`, `deletedAt`,
+`shadowBanned` and `blockedUserIds` are fields on `User` (see [User Custom Data](#user-custom-data)); each one is
+filled whenever the response carries it.
 
 **`UpdateUsersResponse` no longer decodes from JSON.** It is a plain class with a const constructor and final
 fields, compares by value and gains `copyWith`, and its `duration` is always present. `UpdateUserPartialRequest`
@@ -1010,7 +1046,141 @@ no longer encodes to JSON or extends `Equatable`; it still compares by value and
 
 > **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call. The partial
 > updates take the API's names, as the channel and member partial updates already do. The request carries only
-> what the user can change, so nothing of the client's state ends up stored as custom data.
+> what the user can change and their custom data as it is.
+
+### Channel and Member Custom Data
+
+**`extraData` is renamed `custom` on `ChannelModel`, `Member` and `Channel`.** That covers the fields, the
+constructor and `copyWith` arguments, `Channel.extraData`, `Channel.extraDataStream` (now `customStream`), and the
+`extraData` argument of `StreamChatClient.channel`.
+
+```dart
+// v10
+final channel = client.channel('messaging', id: 'general', extraData: {'topic': 'support'});
+final topic = channel.extraData['topic'];
+
+// v11
+final channel = client.channel('messaging', id: 'general', custom: {'topic': 'support'});
+final topic = channel.custom['topic'];
+```
+
+**The channel and member flags are fields, not custom data.** `ChannelModel.disabled`, `hidden` and `truncatedAt`
+read the same, and `muted`, `blocked`, `truncatedBy`, the auto-translation settings and `Member.notificationsMuted`,
+`status`, `banFromFutureChannels`, `futureChannelBanExpires` and `deletedAt` are new fields. `custom` no longer holds
+any of their keys, and an entry with one of those names in `custom` or in `copyWith(custom:)` no longer sets the
+field:
+
+```dart
+// v10
+final hidden = channel.extraData['hidden'] == true;
+final shown = model.copyWith(extraData: {...model.extraData, 'hidden': false});
+
+// v11
+final hidden = channel.hidden;
+final shown = model.copyWith(hidden: false);
+```
+
+**`ChannelModel.toJson` and `Member.toJson` no longer write these fields**, where v10 wrote them at the root with the
+rest of the custom data. Read them from the model rather than from its JSON.
+
+**`custom` is the custom data exactly as the API returns it.** An entry named like one of the model's own fields
+stays in `custom` and leaves the field alone; `toJson` leaves it out, so it cannot overwrite the field.
+
+**Filter and sort on a flag through its declared field,** such as `ChannelFilterField.hidden`, rather than
+`.custom('hidden')`, which reads `custom` locally and finds nothing there.
+
+> **Why:** the API calls it `custom`, and every migrated model takes that name. The flags arrive as fields of their
+> own, so keeping them in the custom data let a custom entry with the same name overwrite them.
+
+### User Custom Data
+
+**`extraData` is renamed `custom` on `User` and `OwnUser`**, along with the constructor and `copyWith` arguments.
+
+```dart
+// v10
+final color = user.extraData['favorite_color'];
+
+// v11
+final color = user.custom['favorite_color'];
+```
+
+**`User.name` is nullable and no longer falls back to the id.** It is null when the user has no name.
+`User.nameOrId` answers the name, or the id when the name is missing or empty, which is what v10's `name`
+answered. Use it wherever you name a user by text — a title, a label, a mention — and keep `name` where a
+missing name matters, such as avatar initials or a sort:
+
+```dart
+// v10
+Text(user.name);
+
+// v11
+Text(user.nameOrId);
+```
+
+A string interpolation still compiles with the nullable `name`, so check them by hand: `'${user.name} is typing'`
+prints `null is typing` for a user with no name. That includes a custom `Translations` or `StreamChatLocalizations`
+subclass overriding `userTypingText` or `pinnedByUserText`.
+
+**The user fields are fields, not custom data.** `name` changes as described above, and `User.image` returns an
+empty image URL as `''` instead of `null`; `deactivatedAt`, `deletedAt` and `shadowBanned` are new fields, and
+`blockedUserIds` moves up from `OwnUser` to `User`. `custom` no longer holds any of their keys, and an entry with
+one of those names in `custom` or in `copyWith(custom:)` no longer sets the field:
+
+```dart
+// v10
+final renamed = user.copyWith(extraData: {...user.extraData, 'name': 'Jane'});
+
+// v11
+final renamed = user.copyWith(name: 'Jane');
+```
+
+**`OwnUser.fromUser` copies the user's fields and leaves the rest at their defaults.** v10 read an own user's
+devices, mutes, unread counts, push preferences and privacy settings back out of the user's `extraData`; a `User`
+no longer carries them.
+
+**`custom` is the custom data exactly as the API returns it.** An entry named like one of the user's own fields
+stays in `custom` and leaves the field alone; `toJson` leaves it out, so it cannot overwrite the field.
+
+> **Why:** the API calls it `custom`, and every migrated model takes that name. A name that answered the id could
+> not tell an unnamed user from a named one, so initials and sorts read the id as a name.
+
+### Message Custom Data
+
+**`extraData` is renamed `custom` on `Message`, `Attachment`, `Reaction` and `DraftMessage`**, along with the
+constructor and `copyWith` arguments and the `extraData` argument of `Channel.sendStaticLocation` and
+`startLiveLocationSharing`.
+
+```dart
+// v10
+final priority = message.extraData['priority'];
+final duration = attachment.extraData['duration'];
+
+// v11
+final priority = message.custom['priority'];
+final duration = attachment.custom['duration'];
+```
+
+**A message's channel id, HTML, markup and deleted reply count are fields**, `Message.cid`, `html`, `mml` and
+`deletedReplyCount`, and so are an attachment's Giphy renditions, `Attachment.giphy`. `custom` no longer holds
+their keys, and an entry with one of those names in `custom` no longer sets the field. `Message.toJson` does not
+write any of them, so a message can no longer be sent with markup.
+
+```dart
+// v10
+final html = message.extraData['html'] as String?;
+
+// v11
+final html = message.html;
+```
+
+**A message's image labels and mentioned channel members, and a draft message's HTML and markup, are no longer
+kept.** v10 left them in `extraData`.
+
+**`custom` is the custom data exactly as the API returns it.** An entry named like one of the model's own fields
+stays in `custom` and leaves the field alone; it is left out when the model is sent, so it cannot overwrite the
+field. A reaction's emoji code read from the API stays in its `custom` as well as in `Reaction.emojiCode`.
+
+> **Why:** the API calls it `custom`, and every migrated model takes that name.
 
 ### Moderation
 
@@ -1195,17 +1365,50 @@ await channel.queryPollVotes(pollId, limit: 10, next: cursor);
 
 **`VotingVisibility` is an extension type over its wire string.** `VotingVisibility.public` and
 `VotingVisibility.anonymous` read the same, and a visibility the SDK does not name is kept rather than rejected.
-A `switch` over it needs a default arm, and `.name` / `.values` are gone — read `.rawType`.
+A `switch` over it needs a default arm, and `.name` / `.values` are gone — it is a `String`, so use it directly.
 
 **`Poll`, `PollOption`, `PollVote` and the responses no longer decode JSON.** Build them with their constructors —
 `PollResponse(duration: '0ms', poll: poll)` where v10 wrote `CreatePollResponse()..poll = poll`. `Message.poll` and
 the poll events still decode from the same keys. `PollOption.fromData` and `toData` read and write the format the
-offline database stores; they are not a way to decode API responses.
+offline database stores; they are not a way to decode API responses. `Poll.topLevelFields` and
+`PollOption.topLevelFields`, which listed their JSON keys, are gone with the JSON.
 
 **`Poll`, `PollOption` and `PollVote` no longer extend `Equatable`.** They still compare by value and `props` is gone.
-`Poll` and `PollOption` now include `extraData` in `==`: two polls that differ only in custom data are no longer
-equal, so neither are the messages that carry them, and a widget comparing them rebuilds when only custom data
-changes.
+`Poll` and `PollOption` now include their custom data in `==`: two polls that differ only in custom data are no
+longer equal, so neither are the messages that carry them, and a widget comparing them rebuilds when only custom
+data changes.
+
+**`extraData` is renamed `custom`, and holds the poll's custom data verbatim.** `Poll.custom` and
+`PollOption.custom` hold what the API returns as custom data, and the requests send it back as custom data; the
+same rename applies to `StreamPollController.addOption` and `updateOption`. In v10 an entry named like one of the
+poll's own fields — `name`, `is_closed`, an option's `text` — overwrote that field in the request body; it is now
+stored as custom data under that name.
+
+```dart
+// v10
+final topic = poll.extraData['topic'];
+Poll(name: 'Lunch?', options: options, extraData: {'topic': 'food'});
+
+// v11
+final topic = poll.custom['topic'];
+Poll(name: 'Lunch?', options: options, custom: {'topic': 'food'});
+```
+
+**`copyWith` on `Poll`, `PollOption` and `PollVote` is freezed's.** Passing `null` for a nullable field clears it,
+where v10 kept the value: `description`, `nameI18n`, `descriptionI18n`, `createdById` and `createdBy` on `Poll`,
+`textI18n` on `PollOption`, and every nullable field of `PollVote`. `Poll.maxVotesAllowed` and `PollOption.id`
+already cleared. Passing `null` for `Poll.id`, `createdAt` or `updatedAt`, or a vote's `createdAt` or
+`updatedAt`, applies the constructor default — a new id or the current time — instead of keeping the value. Omit
+the argument to keep a value.
+
+```dart
+// v10: description stays 'Pick one'
+poll.copyWith(description: null);
+
+// v11: description is null; omit it to keep it
+poll.copyWith(description: null);
+poll.copyWith(name: 'Dinner?');
+```
 
 **`StreamChatApi.polls` is removed.** Call the poll methods on `StreamChatClient` or `Channel` instead.
 
@@ -1395,7 +1598,9 @@ Work top to bottom; each item is independently verifiable.
 - [ ] Replace `ChatErrorCode` comparisons with `StreamErrorCode` constants
 - [ ] Apply every row of the [Symbol Map](#symbol-map)
 - [ ] Re-check custom data access: fields that used to arrive in `extraData` may now be typed properties
-- [ ] If you implement `AttachmentFileUploader`, review its section under [Feature Areas](#feature-areas)
+- [ ] If you implement `AttachmentFileUploader`, return a `Result` from it — see [File Upload](#file-upload)
+- [ ] If you pass a custom `onMarkChannelsDelivered` to `ChannelDeliveryReporter`, return a `Result` from it — see
+      [Read Receipts](#read-receipts)
 - [ ] If you persist models yourself, re-check nullability as endpoints move to the generated types, which are nullable wherever the API allows it
 - [ ] Replace `sort: null` on any list controller with `XSort.empty` if you relied on server ordering — see
       [Sorting](#sorting)

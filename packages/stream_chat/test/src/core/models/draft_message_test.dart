@@ -32,7 +32,7 @@ void main() {
       expect(draftMessage.silent, false);
       expect(draftMessage.poll, isNull);
       expect(draftMessage.pollId, isNull);
-      expect(draftMessage.extraData, isEmpty);
+      expect(draftMessage.custom, isEmpty);
     });
 
     test('should create a valid instance with UUID when id is not provided', () {
@@ -52,7 +52,7 @@ void main() {
       ];
       const parentId = 'parent-123';
       final quotedMessage = Message(id: 'quote-123');
-      const extraData = {'key1': 'value1', 'key2': 42};
+      const custom = {'key1': 'value1', 'key2': 42};
 
       final poll = Poll(
         id: 'poll-123',
@@ -73,7 +73,7 @@ void main() {
         quotedMessage: quotedMessage,
         silent: true,
         poll: poll,
-        extraData: extraData,
+        custom: custom,
       );
 
       expect(fullDraftMessage.id, equals(id));
@@ -88,7 +88,7 @@ void main() {
       expect(fullDraftMessage.silent, isTrue);
       expect(fullDraftMessage.poll, equals(poll));
       expect(fullDraftMessage.pollId, equals(poll.id));
-      expect(fullDraftMessage.extraData, equals(extraData));
+      expect(fullDraftMessage.custom, equals(custom));
     });
 
     test('should handle quotedMessageId parameter', () {
@@ -125,15 +125,15 @@ void main() {
       expect(json['silent'], equals(false));
     });
 
-    test('should serialize extraData correctly', () {
-      const extraData = {'custom_field': 'custom_value', 'priority': 5};
-      final messageWithExtraData = DraftMessage(
+    test('should serialize custom data correctly', () {
+      const custom = {'custom_field': 'custom_value', 'priority': 5};
+      final messageWithCustom = DraftMessage(
         id: id,
         text: text,
-        extraData: extraData,
+        custom: custom,
       );
 
-      final json = messageWithExtraData.toJson();
+      final json = messageWithCustom.toJson();
 
       expect(json['id'], equals(id));
       expect(json['text'], equals(text));
@@ -230,7 +230,7 @@ void main() {
       expect(deserializedMessage.silent, isFalse);
     });
 
-    test('should deserialize extraData correctly', () {
+    test('should deserialize custom data correctly', () {
       final json = {
         'id': id,
         'text': text,
@@ -242,8 +242,8 @@ void main() {
 
       expect(deserializedMessage.id, equals(id));
       expect(deserializedMessage.text, equals(text));
-      expect(deserializedMessage.extraData['custom_field'], equals('custom_value'));
-      expect(deserializedMessage.extraData['priority'], equals(5));
+      expect(deserializedMessage.custom['custom_field'], equals('custom_value'));
+      expect(deserializedMessage.custom['priority'], equals(5));
     });
 
     test('should deserialize poll_id correctly', () {
@@ -310,7 +310,7 @@ void main() {
         ];
         const parentId = 'parent-123';
         final quotedMessage = Message(id: 'quote-123');
-        const extraData = {'key1': 'value1', 'key2': 42};
+        const custom = {'key1': 'value1', 'key2': 42};
 
         final message = Message(
           id: 'message-123',
@@ -331,7 +331,7 @@ void main() {
               PollOption(id: 'option-2', text: 'Option 2'),
             ],
           ),
-          extraData: extraData,
+          custom: custom,
         );
 
         final draftMessage = message.toDraftMessage();
@@ -350,7 +350,7 @@ void main() {
         expect(draftMessage.command, equals(message.command));
         expect(draftMessage.poll, equals(message.poll));
         expect(draftMessage.pollId, equals(message.pollId));
-        expect(draftMessage.extraData, equals(message.extraData));
+        expect(draftMessage.custom, equals(message.custom));
       });
 
       test('should only include successfully uploaded attachments', () {
@@ -405,7 +405,7 @@ void main() {
         ];
         const parentId = 'parent-123';
         final quotedMessage = Message(id: 'quote-123');
-        const extraData = {'key1': 'value1', 'key2': 42};
+        const custom = {'key1': 'value1', 'key2': 42};
 
         final draftMessage = DraftMessage(
           id: 'draft-123',
@@ -426,7 +426,7 @@ void main() {
               PollOption(id: 'option-2', text: 'Option 2'),
             ],
           ),
-          extraData: extraData,
+          custom: custom,
         );
 
         final message = draftMessage.toMessage();
@@ -445,44 +445,28 @@ void main() {
         expect(message.command, equals(draftMessage.command));
         expect(message.poll, equals(draftMessage.poll));
         expect(message.pollId, equals(draftMessage.pollId));
-        expect(message.extraData, equals(draftMessage.extraData));
+        expect(message.custom, equals(draftMessage.custom));
       });
     });
-  });
 
-  test('DraftMessage stores in extraData only the HTML and markup it is given', () {
-    const extraData = {'mood': 'busy'};
+    test('DraftMessage.fromJson leaves the HTML and markup out of custom data', () {
+      final draft = DraftMessage.fromJson(const {
+        'id': 'draft-id',
+        'html': '<p>Hi</p>',
+        'mml': '<mml>Hi</mml>',
+        'mood': 'busy',
+      });
 
-    final messages = [
-      DraftMessage(extraData: extraData, html: '<p>Hi</p>'),
-      DraftMessage(extraData: extraData, mml: '<mml>Hi</mml>'),
-    ];
+      expect(draft.custom, {'mood': 'busy'});
+    });
 
-    expect(messages.map((message) => message.extraData), [
-      {'mood': 'busy', 'html': '<p>Hi</p>'},
-      {'mood': 'busy', 'mml': '<mml>Hi</mml>'},
-    ]);
-  });
+    test('DraftMessage.toJson leaves out custom data named like a field', () {
+      final draft = DraftMessage(text: 'Hi', custom: const {'text': 'custom', 'mood': 'busy'});
 
-  test('DraftMessage replaces the extraData entries of the HTML and markup it is given', () {
-    final message = DraftMessage(
-      extraData: const {'mood': 'busy', 'html': '<p>Old</p>', 'mml': '<mml>Old</mml>'},
-      html: '<p>Hi</p>',
-      mml: '<mml>Hi</mml>',
-    );
+      final json = draft.toJson();
 
-    expect(message.extraData, {'mood': 'busy', 'html': '<p>Hi</p>', 'mml': '<mml>Hi</mml>'});
-  });
-
-  test('DraftMessage.fromJson reads the HTML and markup from extraData', () {
-    final message = DraftMessage.fromJson(const {'id': 'draft-id', 'html': '<p>Hi</p>', 'mml': '<mml>Hi</mml>'});
-
-    expect((message.html, message.mml), ('<p>Hi</p>', '<mml>Hi</mml>'));
-  });
-
-  test('DraftMessage reads no HTML or markup when extraData has none', () {
-    final message = DraftMessage();
-
-    expect((message.html, message.mml), (null, null));
+      expect(json['text'], 'Hi');
+      expect(json['mood'], 'busy');
+    });
   });
 }

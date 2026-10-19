@@ -37,8 +37,8 @@
 - **`Poll`, `PollOption` and `PollVote` keep their v10 names, fields and defaults,** as `@freezed`
   classes with no JSON, mapped from `PollResponseData`, `PollOptionResponseData` and
   `PollVoteResponseData` in `lib/src/repository/mapper/polls_mapper.dart`. The uuid default `id` and the
-  `DateTime.now()` timestamps stay; `latestVotes`, `ownVotes`, `ownAnswers` and `PollVote.isAnswer`
-  become getters.
+  `DateTime.now()` timestamps stay; `PollVote.isAnswer` becomes a getter, and `latestVotes`, `ownVotes` and
+  `ownAnswers` stay `late final` caches.
 - **Equality now includes `extraData`.** v10's `Equatable` props left it out of `Poll` and `PollOption`;
   freezed compares every field, and so does `Message`, whose props include its poll. Accepted as a
   behavioural break and flagged for review.
@@ -57,7 +57,8 @@
   for review.
 - **Option ids are not sent on create.** `PollOptionInput` has none; the server assigns them and
   rejects a client id as reserved (confirmed live: v10 answered 400). **`updatePoll` and
-  `updatePollOption` fail without a request when an option has no id,** since the server requires one.
+  `updatePollOption` send an option without an id with an empty one** and return the server's failure;
+  the SDK does not pre-check a rule the backend owns.
 - **`queryPolls` and `queryPollVotes` take `limit`, `next` and `prev`** instead of `PaginationParams`.
   The generated requests carry only those, and the backend never read the offset or id/date cursors on
   these queries. `limit` defaults to 10, `PaginationParams`' default, so an omitted limit pages as in
@@ -65,10 +66,12 @@
 - **`VotingVisibility` becomes an extension type over its wire string,** following `PushProvider`. An
   unknown value is kept rather than rejected, in the mapper, the v1 decoder and persistence.
 - **An answer's `optionId` stays `""`,** as the server sends it and v10 decoded it.
-- **`custom` becomes `extraData` without the keys named after the model's own fields**
-  (`Poll.topLevelFields`, `PollOption.topLevelFields`), matching v1's flat JSON, which shadowed them.
-  The requests leave the same keys out of `custom`, as every request mapper does: v2 stores them as
-  custom data, or drops them on update, where v10's flattened body set the field.
+- **`custom` is `extraData`, verbatim, in both directions** (README rule 9). The response mappers copy the
+  generated `custom` map as is and the request mappers send `extraData` as `custom`; an entry named like
+  one of the model's own fields is custom data on v2, where v10's flattened body let it set the field.
+  The v1 converters own the key lists that split the flat JSON on read (`Poll.topLevelFields` and
+  `PollOption.topLevelFields` are removed), and leave such an entry out on write so it cannot overwrite
+  a key.
 - **Every public poll method returns a `Result`,** on `StreamChatClient` and `Channel`. `deletePoll` and
   `deletePollOption` answer `DurationResponse` and return `Result<void>`. `closePoll` stays a
   `partialUpdatePoll` that sets `is_closed`.
@@ -84,8 +87,15 @@
   `Event` writes these fields too, so its converters run both ways.
 - **`PollOption` gets the `@DataSerializable` codec** for `polls.options`. The stored format nests
   custom data under `extra_data` where v10 flattened it, so `schemaVersion` is bumped.
-- **`extraData` keeps its name.** Renaming it to `custom` is a migration-wide step for every model at
-  once — [group 21](21-custom-data-rename.md).
+- **`Poll`, `PollOption` and `PollVote` use freezed's `copyWith`.** The audit found one lib site
+  (`stream_message_preview_text.dart`, a `String?` passed for `name`) and one test per model; the
+  merging of poll events in `channel_state_mutations.dart` and `Poll.withTranslationsOf` passes no
+  argument that is null while the field is set, so it is unchanged. `null` now clears a nullable field
+  and re-applies the `id` and timestamp defaults, recorded as a break.
+- **`extraData` is renamed `custom` on `Poll` and `PollOption`,** the wire's name, with no deprecated
+  alias; `StreamPollController.addOption` and `updateOption` and the `polls.custom` column follow.
+  Every migrated model takes the name from here on (README rule 9); [group 21](21-custom-data.md)
+  checks that none was missed.
 - **Verified live** against the demo app with a before/after harness covering every endpoint, the
   error cases and the WebSocket events, and in the sample app on web.
 
@@ -101,8 +111,8 @@
       hand-written, with the reason.
 - [x] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
 - [x] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
-- [x] Every model that had a `copyWith` in v10 keeps that exact method, `_nullConst` sentinels
-      included ([README rule 2](README.md#domain-models)).
+- [x] `copywith_audit.py` was run for every model that loses a v10 `copyWith`, every site it reports is
+      handled, and the semantics change is in the CHANGELOG and the guide ([README rule 2](README.md#domain-models)).
 - [x] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
       persists anything.
 - [x] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.

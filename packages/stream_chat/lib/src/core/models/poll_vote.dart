@@ -9,7 +9,7 @@ part 'poll_vote.freezed.dart';
 ///
 /// A vote carries an [optionId] and an answer carries [answerText]; [isAnswer]
 /// tells the two apart.
-@Freezed(copyWith: false)
+@freezed
 class PollVote with _$PollVote {
   /// Creates a new [PollVote].
   ///
@@ -42,7 +42,7 @@ class PollVote with _$PollVote {
 
   /// The unique identifier of the option this vote selects.
   ///
-  /// An answer selects no option.
+  /// An empty string for an answer, which selects no option.
   @override
   final String? optionId;
 
@@ -68,38 +68,15 @@ class PollVote with _$PollVote {
 
   /// The unique identifier of the user who cast this vote.
   ///
-  /// Null on someone else's vote in an anonymous poll.
+  /// May be null in an anonymous poll, even on the current user's own vote.
   @override
   final String? userId;
 
   /// The user who cast this vote.
   ///
-  /// Null on someone else's vote in an anonymous poll.
+  /// May be null in an anonymous poll, even on the current user's own vote.
   @override
   final User? user;
-
-  /// Creates a copy of [PollVote] with specified attributes overridden.
-  PollVote copyWith({
-    String? id,
-    String? pollId,
-    String? optionId,
-    String? answerText,
-    Map<String, String>? answerTextI18n,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    String? userId,
-    User? user,
-  }) => PollVote(
-    id: id ?? this.id,
-    pollId: pollId ?? this.pollId,
-    optionId: optionId ?? this.optionId,
-    answerText: answerText ?? this.answerText,
-    answerTextI18n: answerTextI18n ?? this.answerTextI18n,
-    createdAt: createdAt ?? this.createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
-    userId: userId ?? this.userId,
-    user: user ?? this.user,
-  );
 
   /// Whether this is a free-form answer rather than a vote for an option.
   bool get isAnswer => answerText != null;

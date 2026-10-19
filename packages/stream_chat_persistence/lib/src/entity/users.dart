@@ -1,6 +1,6 @@
 // coverage:ignore-file
 import 'package:drift/drift.dart';
-import '../converter/map_converter.dart';
+import '../converter/converter.dart';
 
 /// Represents a [Users] table in [DriftChatDatabase].
 @DataClassName('UserEntity')
@@ -37,8 +37,26 @@ class Users extends Table {
   /// The average response time for the user in seconds.
   IntColumn get avgResponseTime => integer().nullable()();
 
-  /// Map of custom user extraData
-  TextColumn get extraData => text().map(MapConverter())();
+  /// The user's name.
+  TextColumn get name => text().nullable()();
+
+  /// The URL of the user's image.
+  TextColumn get image => text().nullable()();
+
+  /// The date at which the user was deactivated.
+  DateTimeColumn get deactivatedAt => dateTime().nullable()();
+
+  /// The date at which the user was deleted.
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+
+  /// Whether the user is shadow banned.
+  BoolColumn get shadowBanned => boolean().nullable()();
+
+  /// The ids of the users this user blocked.
+  TextColumn get blockedUserIds => text().map(ListConverter<String>())();
+
+  /// Custom data attached to the user.
+  TextColumn get custom => text().map(MapConverter())();
 
   @override
   Set<Column> get primaryKey => {id};

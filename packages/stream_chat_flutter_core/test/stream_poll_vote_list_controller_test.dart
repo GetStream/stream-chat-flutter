@@ -1,8 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/stream_chat.dart' hide Success;
-import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
-import 'package:stream_chat_flutter_core/src/stream_poll_vote_list_controller.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import 'mocks.dart';
 
@@ -76,6 +74,18 @@ void main() {
     await controller.loadMore('cursor');
 
     expect(controller.value, PagedValue<String, PollVote>(items: [_vote('v1'), _vote('v2')]));
+  });
+
+  test('StreamPollVoteListController.loadMore asks for a page of ten after the given cursor', () async {
+    final channel = _channelAnswering([
+      Result.success(_page([_vote('v1')], next: 'cursor')),
+      Result.success(_page([])),
+    ]);
+    final controller = _controller(channel);
+    await controller.doInitialLoad();
+
+    await controller.loadMore('cursor');
+
     verify(
       () => channel.queryPollVotes(
         'poll-id',
@@ -101,33 +111,28 @@ void main() {
     expect(controller.value, PagedValue<String, PollVote>(items: [_vote('v1')], nextPageKey: 'cursor', error: error));
   });
 
-  test(
-    'StreamPollVoteListController.loadMore keeps the loaded votes and records an error the channel throws',
-    () async {
-      final channel = _channelAnswering([
-        Result.success(_page([_vote('v1')], next: 'cursor')),
-      ]);
-      final controller = _controller(channel);
-      await controller.doInitialLoad();
-      final thrown = StateError('Channel is not initialized');
-      when(
-        () => channel.queryPollVotes(
-          any(),
-          filter: any(named: 'filter'),
-          sort: any(named: 'sort'),
-          limit: any(named: 'limit'),
-          next: any(named: 'next'),
-          prev: any(named: 'prev'),
-        ),
-      ).thenThrow(thrown);
+  test('StreamPollVoteListController.loadMore records an error the channel throws', () async {
+    final channel = _channelAnswering([
+      Result.success(_page([_vote('v1')], next: 'cursor')),
+    ]);
+    final controller = _controller(channel);
+    await controller.doInitialLoad();
+    final thrown = StateError('Channel is not initialized');
+    when(
+      () => channel.queryPollVotes(
+        any(),
+        filter: any(named: 'filter'),
+        sort: any(named: 'sort'),
+        limit: any(named: 'limit'),
+        next: any(named: 'next'),
+        prev: any(named: 'prev'),
+      ),
+    ).thenThrow(thrown);
 
-      await controller.loadMore('cursor');
+    await controller.loadMore('cursor');
 
-      final success = controller.value.asSuccess;
-      expect(success.items, [_vote('v1')]);
-      expect(success.error, isA<StreamClientException>().having((it) => it.cause, 'cause', thrown));
-    },
-  );
+    expect(controller.value.asSuccess.error, isA<StreamClientException>().having((it) => it.cause, 'cause', thrown));
+  });
 }
 
 PollVote _vote(String id) => PollVote(

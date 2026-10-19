@@ -1,7 +1,4 @@
-import 'package:stream_chat/src/core/models/poll.dart';
-import 'package:stream_chat/src/core/models/poll_option.dart';
-import 'package:stream_chat/src/core/models/poll_vote.dart';
-import 'package:stream_chat/src/core/models/voting_visibility.dart';
+import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
 import '../../utils.dart';
@@ -16,10 +13,10 @@ void main() {
   });
 
   test('Poll compares its custom data for equality', () {
-    final poll = createTestPoll(id: 'poll-id', name: 'Lunch?', extraData: const {'topic': 'food'});
+    final poll = createTestPoll(id: 'poll-id', name: 'Lunch?', custom: const {'topic': 'food'});
 
-    expect(poll, poll.copyWith(extraData: const {'topic': 'food'}));
-    expect(poll, isNot(poll.copyWith(extraData: const {'topic': 'drinks'})));
+    expect(poll, poll.copyWith(custom: const {'topic': 'food'}));
+    expect(poll, isNot(poll.copyWith(custom: const {'topic': 'drinks'})));
   });
 
   test('Poll.copyWith can clear the vote limit', () {
@@ -28,18 +25,13 @@ void main() {
     expect(poll.copyWith(maxVotesAllowed: null).maxVotesAllowed, isNull);
   });
 
-  test('Poll.copyWith keeps a field passed as null', () {
-    final poll = createTestPoll(
-      id: 'poll-id',
-      name: 'Lunch?',
-      description: 'Pick one',
-      createdAt: DateTime.utc(2023),
-      updatedAt: DateTime.utc(2023),
-    );
+  test('Poll.copyWith clears a nullable field passed as null', () {
+    final poll = createTestPoll(name: 'Lunch?', description: 'Pick one').copyWith(createdBy: User(id: 'user-id'));
 
-    final copy = poll.copyWith(id: null, description: null, createdAt: null, updatedAt: null);
+    final copy = poll.copyWith(description: null, createdBy: null);
 
-    expect(copy, poll);
+    expect(copy.description, isNull);
+    expect(copy.createdBy, isNull);
   });
 
   test('Poll.latestVotes holds the latest votes of every option', () {
@@ -140,7 +132,7 @@ Poll createTestPoll({
   bool isClosed = false,
   DateTime? createdAt,
   DateTime? updatedAt,
-  Map<String, Object?>? extraData,
+  Map<String, Object?>? custom,
 }) {
   return Poll(
     id: id,
@@ -155,6 +147,6 @@ Poll createTestPoll({
     isClosed: isClosed,
     createdAt: createdAt ?? DateTime(2023),
     updatedAt: updatedAt ?? DateTime(2023),
-    extraData: extraData ?? {},
+    custom: custom ?? {},
   );
 }

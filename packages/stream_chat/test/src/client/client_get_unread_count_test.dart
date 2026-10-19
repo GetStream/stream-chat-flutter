@@ -8,7 +8,34 @@ import '../mocks.dart';
 void main() {
   test('StreamChatClient.getUnreadCount returns the unread counts', () async {
     final defaultApi = MockDefaultApi();
-    when(defaultApi.unreadCounts).thenAnswer((_) async => Result.success(_unreadCountsResponse()));
+    when(defaultApi.unreadCounts).thenAnswer(
+      (_) async => Result.success(
+        api.WrappedUnreadCountsResponse(
+          duration: '4.21ms',
+          totalUnreadCount: 42,
+          totalUnreadThreadsCount: 8,
+          totalUnreadCountByTeam: const {'team-1': 15, 'team-2': 27},
+          channels: [
+            api.UnreadCountsChannel(
+              channelId: 'messaging:general',
+              lastRead: DateTime.utc(2024, 1, 15, 10, 30),
+              unreadCount: 5,
+            ),
+          ],
+          channelType: const [
+            api.UnreadCountsChannelType(channelCount: 3, channelType: 'messaging', unreadCount: 25),
+          ],
+          threads: [
+            api.UnreadCountsThread(
+              lastRead: DateTime.utc(2024, 1, 15, 9, 45),
+              lastReadMessageId: 'last-read-message-id',
+              parentMessageId: 'parent-message-id',
+              unreadCount: 7,
+            ),
+          ],
+        ),
+      ),
+    );
     final client = _client(defaultApi);
 
     final res = await client.getUnreadCount();
@@ -65,7 +92,10 @@ void main() {
         ),
       ),
     );
-    final client = _clientWithOwnUser(defaultApi);
+    final client = _clientWithCurrentUser(
+      defaultApi,
+      OwnUser(id: 'user-id', totalUnreadCount: 4, unreadChannels: 3, unreadThreads: 2),
+    );
 
     await client.getUnreadCount();
     await pumpEventQueue();
@@ -91,7 +121,10 @@ void main() {
     const error = StreamClientException(message: 'boom');
     final defaultApi = MockDefaultApi();
     when(defaultApi.unreadCounts).thenAnswer((_) async => const Result.failure(error));
-    final client = _clientWithOwnUser(defaultApi);
+    final client = _clientWithCurrentUser(
+      defaultApi,
+      OwnUser(id: 'user-id', totalUnreadCount: 4, unreadChannels: 3, unreadThreads: 2),
+    );
 
     await client.getUnreadCount();
     await pumpEventQueue();
@@ -109,46 +142,25 @@ StreamChatClient _client(api.DefaultApi defaultApi) {
   return client;
 }
 
-// A client whose current user starts with 4 unread messages in 3 channels and 2 unread threads.
-StreamChatClient _clientWithOwnUser(api.DefaultApi defaultApi) {
+StreamChatClient _clientWithCurrentUser(api.DefaultApi defaultApi, OwnUser currentUser) {
   final client = _client(defaultApi);
   client.state
-    ..currentUser = OwnUser(id: 'user-id', totalUnreadCount: 4, unreadChannels: 3, unreadThreads: 2)
+    ..currentUser = currentUser
     ..subscribeToEvents();
   return client;
 }
 
 api.WrappedUnreadCountsResponse _unreadCountsResponse({
-  int totalUnreadCount = 42,
-  List<api.UnreadCountsChannel>? channels,
-  List<api.UnreadCountsThread>? threads,
+  required int totalUnreadCount,
+  required List<api.UnreadCountsChannel> channels,
+  required List<api.UnreadCountsThread> threads,
 }) {
   return api.WrappedUnreadCountsResponse(
     duration: '4.21ms',
     totalUnreadCount: totalUnreadCount,
-    totalUnreadThreadsCount: 8,
-    totalUnreadCountByTeam: const {'team-1': 15, 'team-2': 27},
-    channels:
-        channels ??
-        [
-          api.UnreadCountsChannel(
-            channelId: 'messaging:general',
-            lastRead: DateTime.utc(2024, 1, 15, 10, 30),
-            unreadCount: 5,
-          ),
-        ],
-    channelType: const [
-      api.UnreadCountsChannelType(channelCount: 3, channelType: 'messaging', unreadCount: 25),
-    ],
-    threads:
-        threads ??
-        [
-          api.UnreadCountsThread(
-            lastRead: DateTime.utc(2024, 1, 15, 9, 45),
-            lastReadMessageId: 'last-read-message-id',
-            parentMessageId: 'parent-message-id',
-            unreadCount: 7,
-          ),
-        ],
+    totalUnreadThreadsCount: threads.length,
+    channels: channels,
+    channelType: const [],
+    threads: threads,
   );
 }

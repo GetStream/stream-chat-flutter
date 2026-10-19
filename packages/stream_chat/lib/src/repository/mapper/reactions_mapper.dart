@@ -8,12 +8,10 @@ import 'users_mapper.dart';
 
 /// Maps a generated [api.ReactionResponse] to a [Reaction].
 extension ReactionResponseMapper on api.ReactionResponse {
-  // Custom keys named like one of the reaction's own fields.
-  static const _shadowedCustomKeys = {...Reaction.topLevelFields};
-
   /// Converts this response into a [Reaction].
   ///
-  /// Custom data named like one of the reaction's own fields is left out of [Reaction.extraData].
+  /// [Reaction.emojiCode] is read from [custom], and [Reaction.custom] still
+  /// holds it.
   Reaction toModel() => Reaction(
     messageId: messageId,
     type: type,
@@ -23,7 +21,7 @@ extension ReactionResponseMapper on api.ReactionResponse {
     emojiCode: custom['emoji_code'].safeCast<String>(),
     createdAt: createdAt,
     updatedAt: updatedAt,
-    extraData: {...custom}..removeWhere((key, _) => _shadowedCustomKeys.contains(key)),
+    custom: custom,
   );
 }
 

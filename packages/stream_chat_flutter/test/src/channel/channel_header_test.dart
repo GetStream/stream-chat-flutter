@@ -234,12 +234,12 @@ void main() {
       when(() => channel.client).thenReturn(client);
       when(() => channel.isMuted).thenReturn(false);
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(() => channel.extraDataStream).thenAnswer(
+      when(() => channel.customStream).thenAnswer(
         (i) => Stream.value({
           'name': 'test',
         }),
       );
-      when(() => channel.extraData).thenReturn({
+      when(() => channel.custom).thenReturn({
         'name': 'test',
       });
       when(() => channelState.unreadCount).thenReturn(1);

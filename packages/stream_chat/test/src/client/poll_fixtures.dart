@@ -13,12 +13,15 @@ final generatedVoter = api.UserResponse(
   blockedUserIds: const ['blocked-user'],
   createdAt: DateTime.utc(2024, 1, 1),
   custom: const {'favorite_color': 'blue'},
+  deactivatedAt: DateTime.utc(2024, 1, 4),
+  deletedAt: DateTime.utc(2024, 1, 5),
   id: 'luke',
   image: 'https://example.com/luke.png',
   language: 'en',
   lastActive: DateTime.utc(2024, 1, 3),
   name: 'Luke',
   online: true,
+  revokeTokensIssuedBefore: DateTime.utc(2024, 1, 6),
   role: 'user',
   teams: const ['jedi'],
   teamsRole: const {'jedi': 'admin'},
@@ -38,7 +41,10 @@ final voter = User(
   language: 'en',
   teamsRole: const {'jedi': 'admin'},
   avgResponseTime: 12,
-  extraData: const {'favorite_color': 'blue'},
+  deactivatedAt: DateTime.utc(2024, 1, 4),
+  deletedAt: DateTime.utc(2024, 1, 5),
+  custom: const {'favorite_color': 'blue'},
+  blockedUserIds: const ['blocked-user'],
 );
 
 final generatedVote = api.PollVoteResponseData(
@@ -97,7 +103,7 @@ const generatedPizza = api.PollOptionResponseData(
   textI18n: {'it': 'Pizza'},
 );
 
-const pizza = PollOption(id: 'pizza', text: 'Pizza', textI18n: {'it': 'Pizza'}, extraData: {'color': 'red'});
+const pizza = PollOption(id: 'pizza', text: 'Pizza', textI18n: {'it': 'Pizza'}, custom: {'color': 'red'});
 
 final generatedPoll = api.PollResponseData(
   allowAnswers: true,
@@ -152,7 +158,7 @@ final poll = Poll(
   createdById: 'luke',
   createdBy: voter,
   ownVotesAndAnswers: [vote, answer],
-  extraData: const {'topic': 'food'},
+  custom: const {'topic': 'food'},
 );
 
 final generatedPollResponse = api.PollResponse(duration: '4.21ms', poll: generatedPoll);

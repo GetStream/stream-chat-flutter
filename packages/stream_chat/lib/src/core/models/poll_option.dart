@@ -5,14 +5,8 @@ import '../../db/data_serializable.dart';
 part 'poll_option.freezed.dart';
 part 'poll_option.g.dart';
 
-class _NullConst {
-  const _NullConst();
-}
-
-const _nullConst = _NullConst();
-
 /// One of the choices a poll offers to vote on.
-@Freezed(copyWith: false)
+@freezed
 // TODO(openapi-migration): remove in group 10
 @DataSerializable(includeIfNull: false)
 class PollOption with _$PollOption {
@@ -24,10 +18,11 @@ class PollOption with _$PollOption {
     this.id,
     required this.text,
     this.textI18n,
-    this.extraData = const {},
+    this.custom = const {},
   });
 
-  /// Creates a [PollOption] from the offline-database format written by [toData].
+  /// Creates a [PollOption] from the offline-database format written by
+  /// [toData].
   ///
   /// It is not a codec for API payloads.
   factory PollOption.fromData(Map<String, dynamic> json) => _$PollOptionFromJson(json);
@@ -50,27 +45,7 @@ class PollOption with _$PollOption {
 
   /// Custom data attached to this option.
   @override
-  final Map<String, Object?> extraData;
-
-  /// Creates a copy of [PollOption] with specified attributes overridden.
-  PollOption copyWith({
-    Object? id = _nullConst,
-    String? text,
-    Map<String, String>? textI18n,
-    Map<String, Object?>? extraData,
-  }) => PollOption(
-    id: id == _nullConst ? this.id : id as String?,
-    text: text ?? this.text,
-    textI18n: textI18n ?? this.textI18n,
-    extraData: extraData ?? this.extraData,
-  );
-
-  /// The keys an option carries besides its custom data.
-  static const topLevelFields = [
-    'id',
-    'text',
-    'text_i18n',
-  ];
+  final Map<String, Object?> custom;
 
   /// Serializes this option to the format `stream_chat_persistence` stores.
   ///

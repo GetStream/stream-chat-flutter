@@ -15,26 +15,11 @@ import 'users_mapper.dart';
 
 /// Maps a generated [api.MessageResponse] to a [Message].
 extension MessageResponseMapper on api.MessageResponse {
-  /// The fields a received [Message] keeps in its extra data, which are not custom data.
-  static const extraDataFields = {
-    'cid',
-    'html',
-    'mml',
-    'image_labels',
-    'deleted_reply_count',
-    'mentioned_channel_members',
-  };
-
-  // Custom keys named like one of the message's own fields, including the ones it keeps in its extra data.
-  static final _shadowedCustomKeys = {...Message.topLevelFields, ...extraDataFields};
-
   /// Converts this response into a [Message].
   ///
-  /// The message's type and state follow from whether and when it was deleted or updated. Without reaction groups,
-  /// they are built from the reaction counts and scores.
-  ///
-  /// The channel id is kept in [Message.extraData], beside the custom data, with custom data named like one of the
-  /// message's own fields left out.
+  /// The message's type and state follow from whether and when it was deleted
+  /// or updated. Without reaction groups, they are built from the reaction
+  /// counts and scores.
   Message toModel() => Message(
     id: id,
     text: text,
@@ -72,10 +57,7 @@ extension MessageResponseMapper on api.MessageResponse {
     pinnedBy: pinnedBy?.toModel(),
     poll: poll?.toModel(),
     pollId: pollId,
-    extraData: {
-      ...{...custom}..removeWhere((key, _) => _shadowedCustomKeys.contains(key)),
-      'cid': cid,
-    },
+    custom: custom,
     i18n: i18n,
     restrictedVisibility: restrictedVisibility,
     moderation: moderation?.toModel(),
@@ -83,9 +65,9 @@ extension MessageResponseMapper on api.MessageResponse {
     reminder: reminder?.toModel(),
     channelRole: member?.channelRole,
     sharedLocation: sharedLocation?.toModel(),
+    cid: cid,
     html: html,
     mml: mml,
-    imageLabels: imageLabels,
     deletedReplyCount: deletedReplyCount,
   ).withDerivedState();
 }

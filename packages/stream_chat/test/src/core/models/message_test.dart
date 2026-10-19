@@ -1,7 +1,5 @@
 // ignore_for_file: avoid_redundant_argument_values, lines_longer_than_80_chars, deprecated_member_use_from_same_package
 
-import 'dart:convert';
-
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/message_state.dart';
@@ -84,7 +82,7 @@ void main() {
         showInChannel: true,
         parentId: 'parentId',
         restrictedVisibility: const ['user-id-3'],
-        extraData: const {'hey': 'test'},
+        custom: const {'hey': 'test'},
       );
 
       expect(
@@ -379,11 +377,11 @@ void main() {
         );
       });
 
-      test('a custom field orders by the message extra data', () {
+      test('a custom field orders by the message custom data', () {
         expectOrders(
           MessageSearchSortField.custom('priority'),
-          createTestMessage(id: 'a', extraData: const {'priority': 1}),
-          createTestMessage(id: 'b', extraData: const {'priority': 10}),
+          createTestMessage(id: 'a', custom: const {'priority': 1}),
+          createTestMessage(id: 'b', custom: const {'priority': 10}),
         );
       });
 
@@ -506,88 +504,59 @@ void main() {
     });
   });
 
-  test('Message stores in extraData only the HTML, markup, image labels and deleted reply count it is given', () {
-    const extraData = {'priority': 'high'};
+  test('Message.fromJson reads the channel id, HTML, markup and deleted reply count into their fields', () {
+    final message = Message.fromJson(const {
+      'id': 'message-id',
+      'cid': 'messaging:general',
+      'html': '<p>Hi</p>',
+      'mml': '<mml>Hi</mml>',
+      'deleted_reply_count': 2,
+      'priority': 'high',
+    });
 
-    final messages = [
-      Message(extraData: extraData, html: '<p>Hi</p>'),
-      Message(extraData: extraData, mml: '<mml>Hi</mml>'),
-      Message(
-        extraData: extraData,
-        imageLabels: const {
-          'cat.png': ['cat'],
-        },
-      ),
-      Message(extraData: extraData, deletedReplyCount: 2),
-    ];
-
-    expect(messages.map((message) => message.extraData), [
-      {'priority': 'high', 'html': '<p>Hi</p>'},
-      {'priority': 'high', 'mml': '<mml>Hi</mml>'},
-      {
-        'priority': 'high',
-        'image_labels': {
-          'cat.png': ['cat'],
-        },
-      },
-      {'priority': 'high', 'deleted_reply_count': 2},
-    ]);
-  });
-
-  test(
-    'Message replaces the extraData entries of the HTML, markup, image labels and deleted reply count it is given',
-    () {
-      final message = Message(
-        extraData: const {
-          'priority': 'high',
-          'html': '<p>Old</p>',
-          'mml': '<mml>Old</mml>',
-          'image_labels': {
-            'dog.png': ['dog'],
-          },
-          'deleted_reply_count': 1,
-        },
-        html: '<p>Hi</p>',
-        mml: '<mml>Hi</mml>',
-        imageLabels: const {
-          'cat.png': ['cat'],
-        },
-        deletedReplyCount: 2,
-      );
-
-      expect(message.extraData, {
-        'priority': 'high',
-        'html': '<p>Hi</p>',
-        'mml': '<mml>Hi</mml>',
-        'image_labels': {
-          'cat.png': ['cat'],
-        },
-        'deleted_reply_count': 2,
-      });
-    },
-  );
-
-  test('Message.fromJson reads the HTML, markup, image labels and deleted reply count from extraData', () {
-    // Decoded JSON, as events and the offline cache deliver it, so the labels arrive as a List<dynamic>.
-    final message = Message.fromJson(
-      jsonDecode('''
-        {
-          "id": "message-id",
-          "html": "<p>Hi</p>",
-          "mml": "<mml>Hi</mml>",
-          "image_labels": {"cat.png": ["cat", "animal"]},
-          "deleted_reply_count": 2
-        }
-      ''')
-          as Map<String, dynamic>,
-    );
-
+    expect(message.cid, 'messaging:general');
     expect(message.html, '<p>Hi</p>');
     expect(message.mml, '<mml>Hi</mml>');
-    expect(message.imageLabels, {
-      'cat.png': ['cat', 'animal'],
-    });
     expect(message.deletedReplyCount, 2);
+    expect(message.custom, {'priority': 'high'});
+  });
+
+  test('Message.fromJson leaves image labels and mentioned channel members out of custom data', () {
+    final message = Message.fromJson(const {
+      'id': 'message-id',
+      'image_labels': {
+        'cat.png': ['cat'],
+      },
+      'mentioned_channel_members': <String, Object?>{},
+      'priority': 'high',
+    });
+
+    expect(message.custom, {'priority': 'high'});
+  });
+
+  test('Message.toJson leaves out custom data named like a field', () {
+    final message = Message(text: 'Hi', custom: const {'text': 'custom', 'priority': 'high'});
+
+    final json = message.toJson();
+
+    expect(json['text'], 'Hi');
+    expect(json['priority'], 'high');
+  });
+
+  test('Message.copyWith keeps the channel id, HTML, markup and deleted reply count', () {
+    final message = Message(cid: 'messaging:general', html: '<p>Hi</p>', mml: '<mml>Hi</mml>', deletedReplyCount: 2);
+
+    expect(
+      message.copyWith(text: 'Hi'),
+      Message(
+        id: message.id,
+        text: 'Hi',
+        cid: 'messaging:general',
+        html: '<p>Hi</p>',
+        mml: '<mml>Hi</mml>',
+        deletedReplyCount: 2,
+      ),
+    );
   });
 
   test(
@@ -638,15 +607,6 @@ void main() {
     });
 
     expect((message.type, message.state), (MessageType.regular, MessageState.sent));
-  });
-
-  test('Message reads no HTML, markup, image labels or deleted reply count when extraData has none', () {
-    final message = Message();
-
-    expect(message.html, isNull);
-    expect(message.mml, isNull);
-    expect(message.imageLabels, isNull);
-    expect(message.deletedReplyCount, isNull);
   });
 
   group('MessageVisibility Extension Tests', () {
@@ -1197,7 +1157,7 @@ Message createTestMessage({
   DateTime? createdAt,
   DateTime? updatedAt,
   User? user,
-  Map<String, Object?>? extraData,
+  Map<String, Object?>? custom,
   List<String>? restrictedVisibility,
   Poll? poll,
   String? pollId,
@@ -1215,7 +1175,7 @@ Message createTestMessage({
     localCreatedAt: createdAt,
     localUpdatedAt: updatedAt,
     user: user,
-    extraData: extraData ?? {},
+    custom: custom ?? {},
     restrictedVisibility: restrictedVisibility,
     poll: poll,
     pollId: pollId,

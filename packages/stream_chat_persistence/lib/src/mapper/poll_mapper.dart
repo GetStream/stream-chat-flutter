@@ -35,7 +35,7 @@ extension PollEntityX on PollEntity {
       createdById: createdById,
       createdBy: createdBy,
       ownVotesAndAnswers: ownVotesAndAnswers,
-      extraData: extraData ?? <String, Object>{},
+      custom: custom ?? <String, Object>{},
     );
   }
 }
@@ -62,6 +62,6 @@ extension PollX on Poll {
     voteCountsByOption: voteCountsByOption,
     voteCount: voteCount,
     createdById: createdById,
-    extraData: extraData,
+    custom: custom,
   );
 }

@@ -125,7 +125,7 @@ void main() {
             'unread_threads': 0,
             'blocked_user_ids': [],
           },
-          'user': {'id': 'id', 'teams': [], 'online': false, 'banned': false},
+          'user': {'id': 'id', 'teams': [], 'online': false, 'banned': false, 'blocked_user_ids': []},
           'total_unread_count': 1,
           'unread_channels': 1,
           'online': true,

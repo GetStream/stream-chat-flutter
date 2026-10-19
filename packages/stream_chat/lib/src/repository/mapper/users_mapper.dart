@@ -13,27 +13,12 @@ import '../../core/models/unread_counts_channel_type.dart';
 import '../../core/models/unread_counts_thread.dart';
 import '../../core/models/user.dart';
 import '../../core/models/user_block.dart';
-import '../../core/util/extension.dart';
 
 // TODO(openapi-migration): re-point these mappers in group 09.
 
 /// Maps a generated [api.UserResponse] to a [User].
 extension UserResponseMapper on api.UserResponse {
-  // Custom keys named like one of the user's own fields, including the ones [User] does not model.
-  static const _shadowedCustomKeys = {
-    ...OwnUser.topLevelFields,
-    'deleted_at',
-    'deactivated_at',
-    'shadow_banned',
-    'revoke_tokens_issued_before',
-    'unread_count',
-    'total_unread_count_by_team',
-    'latest_hidden_channels',
-  };
-
   /// Converts this response into a [User].
-  ///
-  /// Custom data named like one of the user's own fields is left out of [User.extraData].
   User toModel() => User(
     id: id,
     role: role,
@@ -48,17 +33,16 @@ extension UserResponseMapper on api.UserResponse {
     language: language,
     teamsRole: teamsRole,
     avgResponseTime: avgResponseTime,
-    extraData: {...custom}..removeWhere((key, _) => _shadowedCustomKeys.contains(key)),
+    custom: custom,
     deactivatedAt: deactivatedAt,
     deletedAt: deletedAt,
+    blockedUserIds: blockedUserIds,
   );
 }
 
 /// Maps a generated [api.FullUserResponse] to a [User].
 extension FullUserResponseMapper on api.FullUserResponse {
   /// Converts this response into a [User].
-  ///
-  /// Custom data named like one of the user's own fields is left out of [User.extraData].
   User toModel() => User(
     id: id,
     role: role,
@@ -75,10 +59,11 @@ extension FullUserResponseMapper on api.FullUserResponse {
     invisible: invisible,
     teamsRole: teamsRole,
     avgResponseTime: avgResponseTime,
-    extraData: {...custom}..removeWhere((key, _) => UserResponseMapper._shadowedCustomKeys.contains(key)),
+    custom: custom,
     deactivatedAt: deactivatedAt,
     deletedAt: deletedAt,
     shadowBanned: shadowBanned,
+    blockedUserIds: blockedUserIds,
   );
 }
 
@@ -86,30 +71,25 @@ extension FullUserResponseMapper on api.FullUserResponse {
 extension UserRequestMapper on User {
   /// Converts this user into an [api.UserRequest].
   ///
-  /// A user without a name or image converts to a request without one, rather than one named after [id]. The
-  /// privacy settings of an [OwnUser] are carried over.
-  ///
-  /// Custom data named like one of the user's own fields is left out.
+  /// The privacy settings of an [OwnUser] are carried over.
   api.UserRequest toRequest() => api.UserRequest(
     id: id,
-    name: extraData['name'].safeCast<String>(),
-    image: extraData['image'].safeCast<String>(),
+    name: name,
+    image: image,
     language: language,
     invisible: invisible,
     privacySettings: switch (this) {
       OwnUser(:final privacySettings?) => privacySettings.toRequest(),
       _ => null,
     },
-    custom: {...extraData}
-      ..remove('name')
-      ..remove('image')
-      ..removeWhere((key, _) => UserResponseMapper._shadowedCustomKeys.contains(key)),
+    custom: custom,
   );
 }
 
 /// Maps [PrivacySettings] to the generated [api.PrivacySettingsResponse].
 ///
-/// The generated client names the settings a request sends [api.PrivacySettingsResponse], too.
+/// The generated client names the settings a request sends
+/// [api.PrivacySettingsResponse], too.
 extension PrivacySettingsRequestMapper on PrivacySettings {
   /// Converts these settings into an [api.PrivacySettingsResponse].
   api.PrivacySettingsResponse toRequest() => api.PrivacySettingsResponse(
@@ -138,7 +118,8 @@ extension CreateGuestResponseMapper on api.CreateGuestResponse {
   );
 }
 
-/// Maps a generated [api.WrappedUnreadCountsResponse] to a [GetUnreadCountResponse].
+/// Maps a generated [api.WrappedUnreadCountsResponse] to a
+/// [GetUnreadCountResponse].
 extension WrappedUnreadCountsResponseMapper on api.WrappedUnreadCountsResponse {
   /// Converts this response into a [GetUnreadCountResponse].
   GetUnreadCountResponse toModel() => GetUnreadCountResponse(
@@ -173,7 +154,8 @@ extension UnreadCountsThreadMapper on api.UnreadCountsThread {
   );
 }
 
-/// Maps a generated [api.UnreadCountsChannelType] to an [UnreadCountsChannelType].
+/// Maps a generated [api.UnreadCountsChannelType] to an
+/// [UnreadCountsChannelType].
 extension UnreadCountsChannelTypeMapper on api.UnreadCountsChannelType {
   /// Converts these counts into an [UnreadCountsChannelType].
   UnreadCountsChannelType toModel() => UnreadCountsChannelType(
@@ -200,7 +182,8 @@ extension UnblockUsersResponseMapper on api.UnblockUsersResponse {
   UnblockUsersResponse toModel() => UnblockUsersResponse(duration: duration);
 }
 
-/// Maps a generated [api.GetBlockedUsersResponse] to a [GetBlockedUsersResponse].
+/// Maps a generated [api.GetBlockedUsersResponse] to a
+/// [GetBlockedUsersResponse].
 extension GetBlockedUsersResponseMapper on api.GetBlockedUsersResponse {
   /// Converts this response into a [GetBlockedUsersResponse].
   GetBlockedUsersResponse toModel() => GetBlockedUsersResponse(
@@ -230,7 +213,8 @@ extension UpdateUsersResponseMapper on api.UpdateUsersResponse {
   );
 }
 
-/// Maps an [UpdateUserPartialRequest] to the generated [api.UpdateUserPartialRequest].
+/// Maps an [UpdateUserPartialRequest] to the generated
+/// [api.UpdateUserPartialRequest].
 extension UpdateUserPartialRequestMapper on UpdateUserPartialRequest {
   /// Converts this update into an [api.UpdateUserPartialRequest].
   api.UpdateUserPartialRequest toRequest() => api.UpdateUserPartialRequest(id: id, set: set, unset: unset);

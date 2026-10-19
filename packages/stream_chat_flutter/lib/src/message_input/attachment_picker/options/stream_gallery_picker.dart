@@ -297,25 +297,25 @@ extension StreamImagePickerX on StreamAttachmentPickerController {
       bytes: cachedFile.readAsBytesSync(),
     );
 
-    final extraDataMap = <String, Object>{};
+    final customMap = <String, Object>{};
 
     final mimeType = file.mediaType?.mimeType;
 
     if (mimeType != null) {
-      extraDataMap['mime_type'] = mimeType;
+      customMap['mime_type'] = mimeType;
     }
 
-    extraDataMap['file_size'] = file.size!;
+    customMap['file_size'] = file.size!;
 
     if (type == AssetType.video) {
-      extraDataMap['duration'] = asset.videoDuration.inSeconds;
+      customMap['duration'] = asset.videoDuration.inSeconds;
     }
 
     final attachment = Attachment(
       id: asset.id,
       file: file,
       type: asset.type.toAttachmentType(),
-      extraData: extraDataMap,
+      custom: customMap,
     );
 
     return addAttachment(attachment);

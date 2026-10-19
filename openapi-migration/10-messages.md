@@ -48,7 +48,6 @@
 ## Decisions to make
 
 - `Message` is public, persisted, WebSocket-delivered and the most customised type in the SDK. Keep ours; treat the generated `MessageResponse` as a mapping source only.
-- `Attachment`: the generated model defines fields our `extraData` currently absorbs. Decide the promotion rules before writing the mapper.
 - Replace the temporary `@DataSerializable` storage codec (`UserGroup`, `UserGroupMember`, `ReactionGroup`): decide between dedicated tables and codecs owned by `stream_chat_persistence` before `Message` and `Attachment` become plain models, then delete the typedef and every `fromData`/`toData` it generates.
 - Type the Giphy renditions, and decide whether they are all required. `Attachment.giphy` still reads them as an untyped map, which `AttachmentRequestMapper` fills out with empty values ([07](07-threads-and-drafts.md)).
 
@@ -104,31 +103,30 @@ an endpoint, so the definition of done below stays open.
   consumer is [06](06-reminders.md). `Message.fromJson` and the mapper share the type and state
   derivation and the reaction groups built from counts and scores when a payload has none
   (`lib/src/core/util/message_decoding.dart`, internal).
-- **The keys v1 lands in `Message.extraData` stay there:** `cid` as a plain entry, and `html`, `mml`,
-  `image_labels` and `deleted_reply_count` behind new constructor parameters and typed getters
-  (`Message.html`, `mml`, `imageLabels`, `deletedReplyCount`), the pattern `ChannelModel.disabled` uses.
-  Dropping them would be a silent behavioural break. `DraftMessage` keeps the `html` and `mml` it is
-  sent in `extraData` too, read through getters since [07](07-threads-and-drafts.md).
-- **`mentioned_channel_members` is dropped:** the SDK has no feature built on it, so the mapper leaves
-  it out of `extraData`, and drops a custom key of that name. `Message.fromJson` still lands it there
-  from v1 JSON.
-- **`custom` becomes `extraData` without the keys named like the model's own fields,** for messages,
-  attachments, reactions and draft messages. A reaction's emoji code arrives in `custom` and maps to
-  `Reaction.emojiCode`.
+- **`Message`, `Attachment`, `Reaction` and `DraftMessage` rename `extraData` to `custom`** (README
+  rule 9), since these mappers are the first to map them. The response mappers copy the generated
+  `custom` as is; the v1 decoders keep splitting flat JSON by `topLevelFields` (the reaction converter
+  owns its key list, as `Reaction` has no JSON), and the v1 writers leave out a custom entry named like
+  a key. Persistence renames the `extra_data` columns `custom`.
+- **The values v10 parked in `extraData` that the spec types are fields:** `Message.cid`, `html`, `mml`
+  and `deletedReplyCount`, with persistence columns (`cid` reads the message's channel), and
+  `Attachment.giphy`, stored through the attachment's `toData`. `Message.toJson` writes none of the
+  message's; `Attachment.toJson` writes `giphy`, so an edited Giphy message keeps its renditions.
+- **What the SDK has no feature for stays out:** `image_labels` and `mentioned_channel_members` on a
+  message, and `html` and `mml` on a draft message, which iOS and Android drop too. The v1 decoders
+  list them in `topLevelFields`, so they no longer land in `custom` on either path.
+- **A reaction's emoji code arrives in `custom`,** which keeps it, and also maps to `Reaction.emojiCode`.
 - **Moderation actions go through `ModerationAction.fromJson`,** so legacy names read as current ones.
 - **Attachments map at parity with `Attachment.fromJson`:** each gets a new local `id`, and the id the
-  attachment was sent with stays in `extraData`; `giphy` and `fields` are written in their v1 JSON
-  shape, which `GiphyInfo` and the UI read. The Giphy renditions are promoted like `Message.html`: a
-  `giphy` constructor argument stored in `extraData`, read back through `Attachment.giphy`, a map in
-  that shape. Making `Attachment` plain, and typing the renditions and `fields`, is left to this group.
+  attachment was sent with stays in `custom`; `giphy` and `fields` are written in their v1 JSON shape,
+  which `GiphyInfo` and the UI read. Making `Attachment` plain, and typing the renditions and
+  `fields`, is left to this group.
 - **A reminder or location nests its message one level deep,** so the recursion ends there.
 - **`MessageWithChannelResponse` gets its mapper with its first consumer** (getMessage, search), not
   ahead of it.
 
 ## Risks
 
-- Attachment `custom`/`extraData` promotion is the known hard part of the whole migration.
-- Requests that send custom data drop the keys named like one of the model's own fields, as every request mapper does until [21](21-custom-data-rename.md) revisits it.
 - Message send has offline and retry paths through `stream_chat_persistence` that must keep working.
 - `MessageDeleteScope` has to be reconciled with `DeleteType`, which [08](08-moderation-and-blocklists.md) added. It is named for the scope of a delete — `deleteForMe` vs `deleteForAll` — but carries a `hard` bool, which is the same axis `DeleteType` models, in the same words, minus `pruning`. `deleteMessage(hard: true)` therefore cannot express a pruning delete at all, and `softDeleteForAll` / `hardDeleteForAll` read as two spellings of `DeleteType.soft` / `DeleteType.hard`. Decide whether the scope keeps a `DeleteType` field or the two stay separate arguments; either way the public type changes, so it belongs in this group rather than a later fix.
 
@@ -138,8 +136,8 @@ an endpoint, so the definition of done below stays open.
       hand-written, with the reason.
 - [ ] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
 - [ ] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
-- [ ] Every model that had a `copyWith` in v10 keeps that exact method, `_nullConst` sentinels
-      included ([README rule 2](README.md#domain-models)).
+- [ ] `copywith_audit.py` was run for every model that loses a v10 `copyWith`, every site it reports is
+      handled, and the semantics change is in the CHANGELOG and the guide ([README rule 2](README.md#domain-models)).
 - [ ] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
       persists anything.
 - [ ] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.

@@ -31,11 +31,10 @@
 - **The upsert sends `User.toRequest()`.** v10 sent the whole user flattened, and v1 stored every key
   its request does not declare as custom data: the user's `online`, `banned` and timestamps, and an own
   user's devices, mutes and unread counts. v2 drops unknown keys, so that stops, as it did for guests
-  in [04](04-roles-guest-and-app.md). `User.toRequest()` also leaves out the own-user keys an `OwnUser`
-  decoded from the connection keeps in `extraData` (`unread_count`, `total_unread_count_by_team`,
-  `latest_hidden_channels`), which v2 would otherwise store as custom data. `role`, `teams` and
-  `teams_role` are no longer sent: a client-side token never stores them, and a different role was
-  refused.
+  in [04](04-roles-guest-and-app.md). An `OwnUser` decoded from the connection keeps `unread_count`,
+  `total_unread_count_by_team` and `latest_hidden_channels` in `custom`, so an upsert of it still
+  stores them as custom data, as v10 did. `role`, `teams` and `teams_role` are no longer sent: a
+  client-side token never stores them, and a different role was refused.
 - **Moved off `UserApi`:** `updateUsers` and `partialUpdateUsers`, now `StreamChatClient` methods over
   `UsersRepository`.
 - **Explicit `null`s are not a regression.** The generated request sends `language: null` and
@@ -48,13 +47,30 @@
   full-user type: a client-side caller can only update itself, the server blanks the private fields
   for anyone else, and the caller's own are on `currentUser`. `membership_deletion_task_id` is always
   empty and stays out.
-- **`User` gains `deactivatedAt`, `deletedAt` and `shadowBanned`** as getters over `extraData`, the
-  way `Member` promoted its fields. Each generated user mapper fills the ones its response carries
-  (`UserResponse` has no `shadowBanned`), so the values v1 left raw in `extraData` are no longer lost;
-  persistence needs no change.
+- **`User` and `OwnUser` promote the fields v10 parked in `extraData`, and rename it `custom`**
+  (README rule 9), since these calls are the first to map a user. `User.name`, `image`,
+  `deactivatedAt`, `deletedAt` and `shadowBanned` are fields with persistence columns;
+  `blockedUserIds` moves up from `OwnUser`. `OwnUser` doesn't model `unread_count`,
+  `total_unread_count_by_team` or `latest_hidden_channels`, which no event keeps current. The mappers
+  leave the keys the SDK doesn't model out, such as `revoke_tokens_issued_before`; a v1 user keeps them
+  in `custom`, as a v1 member keeps `role`.
+  Each generated user mapper fills the ones its response carries (`UserResponse` has no
+  `shadowBanned`).
+- **`User.name` is nullable and has no fallback to `id`;** `User.nameOrId` has it, for a missing or
+  empty name, as v10's `name` did. Name and image are stored as given. The UI names a user by
+  `nameOrId` everywhere except avatar initials, which show the placeholder icon for an unnamed user,
+  and filters and sorts, which read the raw `name`; the avatar treats an empty image as none.
+- **`custom` is the wire's, verbatim,** and the v1 writers leave out a custom entry named like a key,
+  so it cannot overwrite the field. `OwnUser.fromUser` copies the user's fields and no longer reads an
+  own user's fields out of the custom data.
+- **`OwnUser.merge` takes the other user's fields,** as before. A `user.updated` event's user is decoded
+  again as an `OwnUser`, so the privacy settings it carries for the current user replace theirs, as in
+  v10 — a temporary adapter (README) for the WebSocket v2 move to replace.
 
 ## Risks
 
+- A `try`/`catch` around `updateUser`, `updateUsers`, `updateUserPartial` or `updateUsersPartial` still compiles but no longer catches a failed call.
+- A string interpolation of `User.name` still compiles now that it is nullable, and prints `null` for a user with no name; `nameOrId` gives the old output.
 
 ## Definition of done
 
@@ -62,8 +78,8 @@
       hand-written, with the reason.
 - [x] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
 - [x] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
-- [x] Every model that had a `copyWith` in v10 keeps that exact method, `_nullConst` sentinels
-      included ([README rule 2](README.md#domain-models)).
+- [x] `copywith_audit.py` was run for every model that loses a v10 `copyWith`, every site it reports is
+      handled, and the semantics change is in the CHANGELOG and the guide ([README rule 2](README.md#domain-models)).
 - [x] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
       persists anything.
 - [x] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.

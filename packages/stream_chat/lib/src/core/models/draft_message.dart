@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:uuid/uuid.dart';
 
-import '../util/extension.dart';
 import '../util/serializer.dart';
 import 'attachment.dart';
 import 'converters/v1_json_converters.dart';
@@ -16,8 +15,6 @@ part 'draft_message.g.dart';
 @JsonSerializable(includeIfNull: false)
 class DraftMessage extends Equatable {
   /// Creates a new draft message.
-  ///
-  /// The [html] and [mml] arguments, when given, are stored in [extraData], replacing the entry each one reads.
   DraftMessage({
     String? id,
     this.text,
@@ -32,12 +29,9 @@ class DraftMessage extends Equatable {
     this.command,
     this.poll,
     this._pollId,
-    Map<String, Object?> extraData = const {},
-    String? html,
-    String? mml,
+    this.custom = const {},
   }) : id = id ?? const Uuid().v4(),
-       type = MessageType(type),
-       extraData = html == null && mml == null ? extraData : {...extraData, 'html': ?html, 'mml': ?mml};
+       type = MessageType(type);
 
   /// Create a new instance from JSON.
   factory DraftMessage.fromJson(Map<String, dynamic> json) => _$DraftMessageFromJson(
@@ -98,20 +92,15 @@ class DraftMessage extends Equatable {
   String? get pollId => _pollId ?? poll?.id;
   final String? _pollId;
 
-  /// Message custom extraData.
-  final Map<String, Object?> extraData;
-
-  /// The text of this draft message rendered as HTML.
-  @JsonKey(includeToJson: false, includeFromJson: false)
-  String? get html => extraData['html'].safeCast<String>();
-
-  /// The message markup language (MML) source of this draft message.
-  @JsonKey(includeToJson: false, includeFromJson: false)
-  String? get mml => extraData['mml'].safeCast<String>();
-
-  /// Known top level fields.
+  /// This draft message's custom data.
   ///
-  /// Useful for [Serializer] methods.
+  /// It may hold a key named like one of the draft message's own fields;
+  /// [toJson] leaves such an entry out so it never overwrites the field.
+  @JsonKey(name: 'extra_data')
+  final Map<String, Object?> custom;
+
+  /// The JSON keys [DraftMessage.fromJson] reads into named fields, or leaves
+  /// out; every other key is kept in [custom].
   static const topLevelFields = [
     'id',
     'text',
@@ -126,13 +115,20 @@ class DraftMessage extends Equatable {
     'command',
     'poll_id',
     'extra_data',
+    // Not modelled on a draft message; listed so they never land in [custom].
+    'html',
+    'mml',
   ];
 
   /// Serialize to json.
+  ///
+  /// Writes the entries of [custom] at the root, leaving out any named like one
+  /// of [topLevelFields].
   Map<String, dynamic> toJson() {
     final message = removeMentionsIfNotIncluded();
     final json = Serializer.moveFromExtraDataToRoot(
       _$DraftMessageToJson(message),
+      topLevelFields: topLevelFields,
     );
 
     // If the message contains command we should append it to the text
@@ -159,7 +155,7 @@ class DraftMessage extends Equatable {
     String? command,
     Poll? poll,
     String? pollId,
-    Map<String, Object?>? extraData,
+    Map<String, Object?>? custom,
   }) {
     return DraftMessage(
       id: id ?? this.id,
@@ -175,7 +171,7 @@ class DraftMessage extends Equatable {
       command: command ?? this.command,
       poll: poll ?? this.poll,
       pollId: pollId ?? this.pollId,
-      extraData: extraData ?? this.extraData,
+      custom: custom ?? this.custom,
     );
   }
 
@@ -192,7 +188,7 @@ class DraftMessage extends Equatable {
     silent,
     command,
     pollId,
-    extraData,
+    custom,
   ];
 }
 
@@ -219,7 +215,7 @@ extension MessageToDraftMessage on Message {
       command: command,
       poll: poll,
       pollId: pollId,
-      extraData: extraData,
+      custom: custom,
     );
   }
 }
@@ -248,7 +244,7 @@ extension DraftMessageToMessage on DraftMessage {
       command: command,
       poll: poll,
       pollId: pollId,
-      extraData: extraData,
+      custom: custom,
     );
   }
 }
@@ -267,7 +263,7 @@ extension on DraftMessage {
     final updatedMentionedUsers = [...mentionedUsers];
     for (final user in mentionedUsers.toSet()) {
       if (messageTextToSend.contains('@${user.id}')) continue;
-      if (messageTextToSend.contains('@${user.name}')) continue;
+      if (messageTextToSend.contains('@${user.nameOrId}')) continue;
 
       updatedMentionedUsers.remove(user);
     }

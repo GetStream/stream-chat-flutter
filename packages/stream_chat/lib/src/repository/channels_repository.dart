@@ -19,8 +19,8 @@ class ChannelsRepository {
 
   final api.DefaultApi _api;
 
-  /// Partially updates a channel: sets the fields in [set] and removes the fields named in [unset], leaving every
-  /// other field as it is.
+  /// Partially updates a channel: sets the fields in [set] and removes the
+  /// fields named in [unset], leaving every other field as it is.
   ///
   /// At least one of [set] and [unset] is required.
   Future<Result<UpdateChannelPartialResponse>> updateChannelPartial(
@@ -38,8 +38,9 @@ class ChannelsRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Partially updates the current user's membership of a channel: sets the fields in [set] and removes the fields
-  /// named in [unset], leaving every other field as it is.
+  /// Partially updates the current user's membership of a channel: sets the
+  /// fields in [set] and removes the fields named in [unset], leaving every
+  /// other field as it is.
   ///
   /// At least one of [set] and [unset] is required.
   Future<Result<UpdateMemberPartialResponse>> updateMemberPartial(
@@ -57,9 +58,11 @@ class ChannelsRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Hides a channel from the current user's channel list until a new message is added to it.
+  /// Hides a channel from the current user's channel list until a new message
+  /// is added to it.
   ///
-  /// If [clearHistory] is true, the channel's messages are also cleared for the current user.
+  /// If [clearHistory] is true, the channel's messages are also cleared for the
+  /// current user.
   Future<Result<HideChannelResponse>> hideChannel(
     String channelId,
     String channelType, {
@@ -96,8 +99,9 @@ class ChannelsRepository {
 
   /// Marks a channel, or one of its threads, as read for the current user.
   ///
-  /// With [threadId], the id of a thread's parent message, marks that thread as read. Otherwise marks the channel's
-  /// messages as read up to and including the one with [messageId], or all of them when [messageId] is null.
+  /// With [threadId], the id of a thread's parent message, marks that thread as
+  /// read. Otherwise marks the channel's messages as read up to and including
+  /// the one with [messageId], or all of them when [messageId] is null.
   Future<Result<MarkReadResponse>> markRead(
     String channelId,
     String channelType, {
@@ -115,9 +119,11 @@ class ChannelsRepository {
 
   /// Marks a channel, or one of its threads, as unread for the current user.
   ///
-  /// Takes exactly one of [messageId], [messageTimestamp] and [threadId]. [messageId] marks that message and every
-  /// later one as unread, [messageTimestamp] every message created after it, and [threadId], the id of a thread's
-  /// parent message, that thread.
+  /// Takes exactly one of [messageId], [messageTimestamp] and [threadId]. With
+  /// [messageId], marks that message and every later one as unread. With
+  /// [messageTimestamp], marks every message created after it as unread. With
+  /// [threadId], the id of a thread's parent message, marks that thread as
+  /// unread.
   Future<Result<void>> markUnread(
     String channelId,
     String channelType, {
@@ -139,14 +145,14 @@ class ChannelsRepository {
   }
 
   /// Marks all of the current user's channels as read.
-  Future<Result<MarkReadResponse>> markChannelsRead() async {
+  Future<Result<MarkReadResponse>> markAllRead() async {
     final result = await _api.markChannelsRead(markChannelsReadRequest: const api.MarkChannelsReadRequest());
 
     return result.map((response) => response.toModel());
   }
 
   /// Sends delivery receipts for the messages in [deliveries].
-  Future<Result<MarkDeliveredResponse>> markDelivered(Iterable<MessageDelivery> deliveries) async {
+  Future<Result<MarkDeliveredResponse>> markChannelsDelivered(Iterable<MessageDelivery> deliveries) async {
     final result = await _api.markDelivered(
       markDeliveredRequest: api.MarkDeliveredRequest(
         latestDeliveredMessages: [...deliveries.map((it) => it.toRequest())],

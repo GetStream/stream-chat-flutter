@@ -57,8 +57,8 @@ void main() {
         quotedMessageId: 'quoted-id',
         silent: true,
         pollId: 'poll-id',
-        // Extra data named like one of the draft message's own fields is not sent.
-        extraData: const {'mood': 'busy', 'quoted_message_id': 'other-id', 'text': 'Other text'},
+        // Custom data named like one of the draft message's own fields is not sent.
+        custom: const {'mood': 'busy', 'quoted_message_id': 'other-id', 'text': 'Other text'},
       ),
       'general',
       'messaging',
@@ -253,8 +253,8 @@ void main() {
                 {'short': true, 'title': 'Size', 'value': 'L'},
               ],
               actions: const [Action(name: 'answer', style: 'primary', text: 'Send', type: 'button', value: 'yes')],
-              // The id it was received with stays in the extra data, beside the custom data.
-              extraData: const {
+              // The id it was received with stays in the custom data.
+              custom: const {
                 'id': 'received-id',
                 'caption': 'A cat',
                 'custom': {'mood': 'happy'},
@@ -282,8 +282,7 @@ void main() {
   );
 
   test(
-    'StreamChatClient.createDraft sends a draft made from a received reply without its type or message fields, and its '
-    'markup as a field of its own',
+    'StreamChatClient.createDraft sends a draft made from a received reply without its type',
     () async {
       const request = api.CreateDraftRequest(
         message: api.MessageRequest(
@@ -292,7 +291,6 @@ void main() {
           attachments: [],
           mentionedUsers: [],
           silent: false,
-          mml: '<mml>Draft</mml>',
           custom: {'mood': 'busy'},
         ),
       );
@@ -300,22 +298,13 @@ void main() {
       final defaultApi = _defaultApiAnswering(request);
       final client = _client(defaultApi);
 
-      // The type and extra data a draft message carries when it is made from a received reply.
+      // The type a draft message carries when it is made from a received reply.
       await client.createDraft(
         DraftMessage(
           id: 'draft-id',
           text: 'Draft',
           type: MessageType.reply,
-          extraData: const {
-            'mood': 'busy',
-            'cid': 'messaging:general',
-            'html': '<p>Draft</p>',
-            'mml': '<mml>Draft</mml>',
-            'image_labels': {
-              'cat.png': ['cat'],
-            },
-            'deleted_reply_count': 2,
-          },
+          custom: const {'mood': 'busy'},
         ),
         'general',
         'messaging',

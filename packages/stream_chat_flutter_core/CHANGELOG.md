@@ -9,15 +9,11 @@
 - `defaultChannelListSort`, `defaultMemberListSort`, `defaultUserListSort`, `defaultDraftListSort`, `defaultMessageReminderListSort` and `defaultPollVoteListSort` are removed. Use `ChannelSort.defaultSort`, `MemberSort.defaultSort` and so on from `stream_chat`. Leaving a controller's sort unset still applies the same ordering.
 - `StreamChannelListController.muteChannel` and `unmuteChannel` return a `Result` instead of throwing.
 - `StreamChannelListController.deleteChannel` returns a `Result<DeleteChannelResponse>` instead of throwing.
+- `StreamPollController.addOption` and `updateOption` take the option's custom data as `custom` instead of `extraData`.
 
 🐞 Fixed
 
 - A list controller sorted each loaded page with an unstable sort, so rows it called equal — members sharing a `created_at`, say — were reordered on every page append. They keep the order they arrived in now.
-
-🔄 Changed
-
-- `StreamPollVoteListController` pages with the poll vote query's `limit` and `next` cursor rather than `PaginationParams`.
-- `StreamThreadListController` and `StreamDraftListController` page with the query's `limit` and `next` cursor rather than `PaginationParams`.
 
 ## Upcoming
 

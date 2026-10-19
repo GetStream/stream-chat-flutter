@@ -262,18 +262,19 @@ api.ChannelMemberResponse fakeChannelMemberResponse({Map<String, Object?> custom
       inviteAcceptedAt: DateTime.utc(2026, 1, 2),
       inviteRejectedAt: DateTime.utc(2026, 1, 3),
       invited: true,
-      isModerator: true,
-      notificationsMuted: true,
+      isModerator: false,
+      notificationsMuted: false,
       pinnedAt: DateTime.utc(2026, 1, 4),
       role: 'user',
-      shadowBanned: true,
+      shadowBanned: false,
       status: 'member',
       updatedAt: DateTime.utc(2026, 2),
       user: fakeUserResponse('member'),
       userId: 'member',
     );
 
-/// A generated [api.UserResponse] with the id [id] and only the fields it requires.
+/// A generated [api.UserResponse] with the id [id] and only the fields it
+/// requires.
 api.UserResponse fakeUserResponse(String id) => api.UserResponse(
   banned: false,
   blockedUserIds: const [],
@@ -287,7 +288,8 @@ api.UserResponse fakeUserResponse(String id) => api.UserResponse(
   updatedAt: DateTime.utc(2025),
 );
 
-/// The [Member] that [fakeChannelMemberResponse] maps to, with its default custom data.
+/// The [Member] that [fakeChannelMemberResponse] maps to, with its default
+/// custom data.
 Member fakeChannelMember() => Member(
   user: fakeUser('member'),
   userId: 'member',
@@ -295,17 +297,17 @@ Member fakeChannelMember() => Member(
   inviteRejectedAt: DateTime.utc(2026, 1, 3),
   invited: true,
   channelRole: 'channel_moderator',
-  isModerator: true,
+  isModerator: false,
   createdAt: DateTime.utc(2026),
   updatedAt: DateTime.utc(2026, 2),
   banned: true,
   banExpires: DateTime.utc(2026, 6),
-  shadowBanned: true,
+  shadowBanned: false,
   pinnedAt: DateTime.utc(2026, 1, 4),
   archivedAt: DateTime.utc(2026, 1, 5),
   deletedMessages: const ['message-1'],
-  extraData: const {'nickname': 'Mo', 'role': 'user'},
-  notificationsMuted: true,
+  custom: const {'nickname': 'Mo'},
+  notificationsMuted: false,
   status: 'member',
   banFromFutureChannels: true,
   futureChannelBanExpires: DateTime.utc(2026, 7),

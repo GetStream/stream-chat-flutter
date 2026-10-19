@@ -140,20 +140,20 @@ extension XFileX on XFile {
   Future<Attachment> toAttachment({required String type}) async {
     final file = await toAttachmentFile;
 
-    final extraDataMap = <String, Object>{};
+    final customMap = <String, Object>{};
 
     final mimeType = this.mimeType ?? file.mediaType?.mimeType;
 
     if (mimeType != null) {
-      extraDataMap['mime_type'] = mimeType;
+      customMap['mime_type'] = mimeType;
     }
 
-    extraDataMap['file_size'] = file.size!;
+    customMap['file_size'] = file.size!;
 
     final attachment = Attachment(
       file: file,
       type: type,
-      extraData: extraDataMap,
+      custom: customMap,
     );
 
     return attachment;
@@ -306,7 +306,7 @@ extension UserListX on List<User> {
 
     for (final user in this) {
       final normalizedId = normalize(user.id);
-      final normalizedUserName = normalize(user.name);
+      final normalizedUserName = normalize(user.nameOrId);
       final lDistance = normalizedUserName.levenshteinDistance(normalizedQuery);
       final containsId = normalizedId.contains(normalizedQuery);
       final containsName = normalizedUserName.contains(normalizedQuery);
@@ -318,7 +318,7 @@ extension UserListX on List<User> {
     final entries = matchingUsers.entries.toList(growable: false)
       ..sort((prev, curr) {
         bool containsQuery(User user) =>
-            normalize(user.id).contains(normalizedQuery) || normalize(user.name).contains(normalizedQuery);
+            normalize(user.id).contains(normalizedQuery) || normalize(user.nameOrId).contains(normalizedQuery);
 
         final containsInPrev = containsQuery(prev.key);
         final containsInCurr = containsQuery(curr.key);
@@ -397,10 +397,10 @@ extension MessageX on Message {
     // before enhanced mentions existed) so existing consumer code stays
     // compatible.
     for (final user in mentionedUsers.toSet()) {
-      final replacement = wrap(user.name, .user, user.id);
+      final replacement = wrap(user.nameOrId, .user, user.id);
       current = applyReplace(current, user.id, replacement);
-      if (user.name != user.id) {
-        current = applyReplace(current, user.name, replacement);
+      if (user.nameOrId != user.id) {
+        current = applyReplace(current, user.nameOrId, replacement);
       }
     }
 
@@ -483,7 +483,7 @@ extension MessageX on Message {
     if (messageTextToSend == null) return this;
 
     for (final user in mentionedUsers.toSet()) {
-      final userName = user.name;
+      final userName = user.nameOrId;
       messageTextToSend = messageTextToSend!.replaceAll(
         '@$userName',
         '@${user.id}',
@@ -696,12 +696,12 @@ extension ChannelModelX on ChannelModel {
     final otherMembers = members.where((it) => it.userId != currentUser?.id);
 
     // If there are no other members, we return the name of the current user.
-    if (otherMembers.isEmpty) return currentUser?.name;
+    if (otherMembers.isEmpty) return currentUser?.nameOrId;
 
     // Otherwise, we return the names of the first `maxMembers` members sorted
     // alphabetically, followed by the number of remaining members if there are
     // more than `maxMembers` members.
-    final memberNames = otherMembers.map((it) => it.user?.name).whereType<String>().take(maxMembers).sorted();
+    final memberNames = otherMembers.map((it) => it.user?.nameOrId).whereType<String>().take(maxMembers).sorted();
 
     return switch (otherMembers.length <= maxMembers) {
       true => memberNames.join(', '),
@@ -718,7 +718,7 @@ extension VoiceRecordingAttachmentExtension on Attachment {
   /// Returns the duration of the voice recording attachment if available else
   /// returns [Duration.zero].
   Duration get duration {
-    final duration = extraData['duration'] as num?;
+    final duration = custom['duration'] as num?;
     if (duration == null) return Duration.zero;
 
     return Duration(milliseconds: (duration * 1000).round());
@@ -727,7 +727,7 @@ extension VoiceRecordingAttachmentExtension on Attachment {
   /// Returns the waveform data of the voice recording attachment if available
   /// else returns an empty list.
   List<double> get waveform {
-    final waveform = extraData['waveform_data'] as List<dynamic>?;
+    final waveform = custom['waveform_data'] as List<dynamic>?;
     if (waveform == null) return [];
 
     return [...waveform.map((e) => double.tryParse(e.toString())).nonNulls];

@@ -228,7 +228,7 @@ void main() {
       final message = Message(id: messageId, text: 'Remember me');
       final user = User(id: userId);
       final listedReminder = messageReminder.copyWith(channel: channel, message: message, user: user);
-      // The server fills in a reminder's channel, message and user only on some paths, so an update can lack them.
+      // An updated reminder can lack its channel, message and user.
       final eventReminder = messageReminder.copyWith(updatedAt: now.add(const Duration(hours: 1)));
 
       final mergedReminder = listedReminder.merge(eventReminder);

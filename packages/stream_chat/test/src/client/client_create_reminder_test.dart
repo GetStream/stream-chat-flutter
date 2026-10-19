@@ -121,7 +121,8 @@ void main() {
   });
 }
 
-// A reminder as a write answers it: with the message and the user, but no channel.
+// A reminder as a write answers it: with the message and the user, but no
+// channel.
 api.ReminderResponseData _generatedReminder({required DateTime? remindAt}) => api.ReminderResponseData(
   channelCid: 'messaging:general',
   createdAt: DateTime.utc(2026, 1, 7),
@@ -134,7 +135,8 @@ api.ReminderResponseData _generatedReminder({required DateTime? remindAt}) => ap
   userId: 'sender',
 );
 
-// A message without reaction groups, only the counts and scores they are built from.
+// A message without reaction groups, only the counts and scores they are built
+// from.
 final _generatedMessageWithCounts = api.MessageResponse(
   attachments: const [],
   cid: 'messaging:general',
@@ -161,7 +163,8 @@ final _generatedMessageWithCounts = api.MessageResponse(
   user: fakeUserResponse('sender'),
 );
 
-// The message [_generatedMessageWithCounts] maps to, with the date its reaction groups share.
+// The message [_generatedMessageWithCounts] maps to, with the date its reaction
+// groups share.
 Message _expectedMessageWithCounts({required DateTime reactionDate}) => Message(
   id: 'message-id',
   text: 'Hello',
@@ -176,9 +179,9 @@ Message _expectedMessageWithCounts({required DateTime reactionDate}) => Message(
   createdAt: DateTime.utc(2026),
   updatedAt: DateTime.utc(2026),
   user: fakeUser('sender'),
-  extraData: const {'cid': 'messaging:general'},
   state: MessageState.sent,
   restrictedVisibility: const [],
+  cid: 'messaging:general',
   html: '',
   deletedReplyCount: 0,
 );

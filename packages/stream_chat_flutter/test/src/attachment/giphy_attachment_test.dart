@@ -33,7 +33,7 @@ void main() {
                     type: 'giphy',
                     title: 'example.gif',
                     imageUrl: 'https://media.giphy.com/media/35H0pwQNaO2iLTnnBf/giphy.gif',
-                    extraData: const {
+                    custom: const {
                       'mime_type': 'gif',
                     },
                     uploadState: const UploadState.success(),

@@ -55,7 +55,7 @@ class StreamChannelName extends StatelessWidget {
         if (otherMembers.length == 1) {
           final user = otherMembers.first.user;
           if (user != null) {
-            channelName = user.name;
+            channelName = user.nameOrId;
           }
         } else {
           final maxWidth = constraints.maxWidth;
@@ -81,7 +81,7 @@ class StreamChannelName extends StatelessWidget {
 
   String _getChannelName({required List<Member> currentMembers, required List<Member> members}) {
     final exceedingMembers = members.length - currentMembers.length;
-    return '${currentMembers.map((e) => e.user?.name).join(', ')} '
+    return '${currentMembers.map((e) => e.user?.nameOrId).join(', ')} '
         '${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';
   }
 

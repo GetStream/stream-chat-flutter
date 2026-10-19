@@ -91,6 +91,7 @@
 ## Risks
 
 - `createDraft` must keep storing exactly what v10 stored, so v1 readers of the draft — channel queries, WebSocket events, the offline cache — see no change.
+- `DraftMessage.poll` is never decoded from JSON: `poll` is not in `DraftMessage.topLevelFields`, so the key would land in `custom`, and the draft payload carries `poll_id` only. Its `PollV1JsonConverter` exists so the generated code compiles. Decide here whether the field stays constructor-only or goes.
 
 ## Definition of done
 
@@ -98,8 +99,8 @@
       hand-written, with the reason.
 - [x] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
 - [x] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
-- [x] Every model that had a `copyWith` in v10 keeps that exact method, `_nullConst` sentinels
-      included ([README rule 2](README.md#domain-models)).
+- [x] `copywith_audit.py` was run for every model that loses a v10 `copyWith`, every site it reports is
+      handled, and the semantics change is in the CHANGELOG and the guide ([README rule 2](README.md#domain-models)).
 - [x] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
       persists anything.
 - [x] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.

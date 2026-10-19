@@ -87,7 +87,8 @@ void main() {
   });
 }
 
-// A reminder as an update answers it: with the message and the user, but no channel.
+// A reminder as an update answers it: with the message and the user, but no
+// channel.
 api.ReminderResponseData _generatedReminder({required DateTime? remindAt}) => api.ReminderResponseData(
   channelCid: 'messaging:general',
   createdAt: DateTime.utc(2026, 1, 7),

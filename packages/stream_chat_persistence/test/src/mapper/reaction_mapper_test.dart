@@ -18,7 +18,7 @@ void main() {
       emojiCode: '😂',
       createdAt: now,
       updatedAt: now.add(const Duration(minutes: 5)),
-      extraData: {'extra_test_data': 'extraData'},
+      custom: {'extra_test_data': 'custom'},
     );
 
     final reaction = entity.toReaction(user: user);
@@ -30,7 +30,7 @@ void main() {
     expect(reaction.emojiCode, entity.emojiCode);
     expect(reaction.createdAt, isSameDateAs(entity.createdAt));
     expect(reaction.updatedAt, isSameDateAs(entity.updatedAt));
-    expect(reaction.extraData, entity.extraData);
+    expect(reaction.custom, entity.custom);
   });
 
   test('toEntity should map reaction into ReactionEntity', () {
@@ -45,7 +45,7 @@ void main() {
       emojiCode: '😂',
       createdAt: now,
       updatedAt: now.add(const Duration(minutes: 5)),
-      extraData: const {'extra_test_data': 'extraData'},
+      custom: const {'extra_test_data': 'custom'},
     );
 
     final entity = reaction.toEntity();
@@ -57,6 +57,6 @@ void main() {
     expect(entity.emojiCode, reaction.emojiCode);
     expect(entity.createdAt, isSameDateAs(reaction.createdAt));
     expect(entity.updatedAt, isSameDateAs(reaction.updatedAt));
-    expect(entity.extraData, reaction.extraData);
+    expect(entity.custom, reaction.custom);
   });
 }

@@ -4,12 +4,14 @@ import 'package:stream_chat/stream_chat.dart';
 import '../fakes.dart';
 import 'poll_fixtures.dart';
 
-// Fixtures shared by the client tests whose responses carry messages. The generated message carries a value in every
-// field, including the ones the SDK models leave out, so a field the mapping drops changes the compared object; its
-// users are the minimal ones from fakes.dart. No two fields of a type hold the same value in all three messages (the
-// message, the one it quotes and the leaf ones nested deeper), so a field mapped into the wrong slot changes it too.
-// The quoted message carries minimal nested payloads that leave out their optional fields, to compare the defaults.
-// Custom data includes keys named like the model's own fields, which the mapping leaves out.
+// Fixtures shared by the client tests whose responses carry messages. The
+// generated message carries a value in every field, including the ones the SDK
+// models leave out, so a field the mapping drops changes the compared object;
+// its users are the minimal ones from fakes.dart. No two fields of a type hold
+// the same value in all three messages (the message, the one it quotes and the
+// leaf ones nested deeper), so a field mapped into the wrong slot changes it
+// too. The quoted message carries minimal nested payloads that leave out their
+// optional fields, to compare the defaults.
 
 /// A generated message with every field set, nesting one level of messages.
 final generatedMessage = api.MessageResponse(
@@ -17,7 +19,7 @@ final generatedMessage = api.MessageResponse(
   cid: 'messaging:general',
   command: 'giphy',
   createdAt: DateTime.utc(2026, 1, 1),
-  custom: const {'priority': 'high', 'text': 'shadowed', 'html': 'shadowed'},
+  custom: const {'priority': 'high'},
   deletedAt: DateTime.utc(2026, 1, 3),
   deletedForMe: false,
   deletedReplyCount: 2,
@@ -84,7 +86,8 @@ final generatedMessage = api.MessageResponse(
   pollId: 'poll-id',
   quotedMessage: _generatedQuotedMessage,
   quotedMessageId: 'quoted-id',
-  // The counts and scores the groups were built from; the groups take precedence.
+  // The counts and scores the groups were built from; the groups take
+  // precedence.
   reactionCounts: const {'love': 1},
   reactionGroups: {
     'love': api.ReactionGroupResponse(
@@ -132,10 +135,12 @@ final generatedMessage = api.MessageResponse(
   user: fakeUserResponse('sender'),
 );
 
-/// The [Message] that [generatedMessage] maps to, with the values the mapping creates read off [actual].
+/// The [Message] that [generatedMessage] maps to, with the values the mapping
+/// creates read off [actual].
 ///
-/// Every received attachment gets a new local id, and a channel compares by identity, so the attachment ids and the
-/// channels of the shared location and the draft are taken from [actual]; check those channels' `cid` on their own.
+/// Every received attachment gets a new local id, and a channel compares by
+/// identity, so the attachment ids and the channels of the shared location and
+/// the draft are taken from [actual]; check those channels' `cid` on their own.
 Message expectedMessageLike(Message actual) => Message(
   id: 'message-id',
   text: 'Hello',
@@ -194,10 +199,7 @@ Message expectedMessageLike(Message actual) => Message(
   pinnedBy: fakeUser('pinner'),
   poll: poll,
   pollId: 'poll-id',
-  extraData: const {
-    'priority': 'high',
-    'cid': 'messaging:general',
-  },
+  custom: const {'priority': 'high'},
   // Deleted, but not only for the current user.
   state: MessageState.softDeleted,
   i18n: const {'fr_text': 'Bonjour', 'language': 'en'},
@@ -237,11 +239,9 @@ Message expectedMessageLike(Message actual) => Message(
     createdAt: DateTime.utc(2026, 1, 9),
     updatedAt: DateTime.utc(2026, 1, 9, 12),
   ),
+  cid: 'messaging:general',
   html: '<p>Hello</p>',
   mml: '<mml>Hello</mml>',
-  imageLabels: const {
-    'cat.png': ['cat'],
-  },
   deletedReplyCount: 2,
 );
 
@@ -264,7 +264,7 @@ final _generatedAttachment = api.Attachment(
   authorLink: 'https://example.com/author',
   authorName: 'Author',
   color: '#ff0000',
-  custom: const {'id': 'attachment-id', 'caption': 'A cat', 'title': 'shadowed'},
+  custom: const {'id': 'attachment-id', 'caption': 'A cat'},
   fallback: 'A cat gif',
   fields: const [api.Field(short: true, title: 'Size', value: 'L')],
   footer: 'Footer',
@@ -314,7 +314,7 @@ Attachment _expectedAttachment(String id) => Attachment(
   actions: const [Action(name: 'answer', style: 'primary', text: 'Send', type: 'button', value: 'yes')],
   originalWidth: 400,
   originalHeight: 300,
-  extraData: const {'id': 'attachment-id', 'caption': 'A cat'},
+  custom: const {'id': 'attachment-id', 'caption': 'A cat'},
   giphy: {
     for (final rendition in const [
       'fixed_height',
@@ -359,7 +359,7 @@ Attachment _expectedImageAttachment(String id) => Attachment(
 
 final _generatedReaction = api.ReactionResponse(
   createdAt: DateTime.utc(2026, 1, 5),
-  custom: const {'emoji_code': '❤️', 'mood': 'happy', 'type': 'shadowed'},
+  custom: const {'emoji_code': '❤️', 'mood': 'happy'},
   messageId: 'message-id',
   score: 2,
   type: 'love',
@@ -377,7 +377,7 @@ final _expectedReaction = Reaction(
   emojiCode: '❤️',
   createdAt: DateTime.utc(2026, 1, 5),
   updatedAt: DateTime.utc(2026, 1, 6),
-  extraData: const {'mood': 'happy'},
+  custom: const {'emoji_code': '❤️', 'mood': 'happy'},
 );
 
 final _generatedOwnReaction = api.ReactionResponse(
@@ -410,7 +410,7 @@ final generatedDraft = api.DraftResponse(
     attachments: const [
       api.Attachment(custom: {'caption': 'Notes'}, title: 'notes.pdf', type: 'file'),
     ],
-    custom: const {'mood': 'busy', 'text': 'shadowed'},
+    custom: const {'mood': 'busy'},
     html: '<p>Draft</p>',
     id: 'draft-id',
     mentionedUsers: [fakeUserResponse('mentioned')],
@@ -445,7 +445,7 @@ Draft expectedDraft({required String attachmentId, required ChannelModel? channe
         id: attachmentId,
         type: 'file',
         title: 'notes.pdf',
-        extraData: const {'caption': 'Notes'},
+        custom: const {'caption': 'Notes'},
         uploadState: const UploadState.success(),
       ),
     ],
@@ -455,40 +455,33 @@ Draft expectedDraft({required String attachmentId, required ChannelModel? channe
     quotedMessageId: 'draft-quoted-id',
     silent: false,
     pollId: 'draft-poll-id',
-    extraData: const {'mood': 'busy'},
-    html: '<p>Draft</p>',
-    mml: '<mml>Draft</mml>',
+    custom: const {'mood': 'busy'},
   ),
   parentId: 'message-id',
   parentMessage: expectedLeafMessage('message-id'),
   quotedMessage: expectedLeafMessage('draft-quoted-id'),
 );
 
-// A message with the fields the API always sends, a quoted message and poll id without the objects they point to, and
-// minimal attachment, moderation, draft and shared location payloads that leave out their optional fields. Its custom data, and that of
-// its attachment and draft, has keys named like fields left out.
+// A message with the fields the API always sends, a quoted message and poll id
+// without the objects they point to, and minimal attachment, moderation, draft
+// and shared location payloads that leave out their optional fields.
 final _generatedQuotedMessage = api.MessageResponse(
   attachments: const [
     api.Attachment(
       actions: [api.Action(name: 'reply', text: 'Reply', type: 'button')],
-      custom: {'note': 'kept', 'giphy': 'shadowed', 'file': 'shadowed', 'upload_state': 'shadowed'},
+      custom: {'note': 'kept'},
       type: 'file',
     ),
   ],
   cid: 'messaging:general',
   createdAt: DateTime.utc(2025, 12, 2),
-  custom: const {
-    'tag': 'kept',
-    'mml': 'shadowed',
-    'image_labels': 'shadowed',
-    'mentioned_channel_members': 'shadowed',
-  },
+  custom: const {'tag': 'kept'},
   deletedReplyCount: 1,
   draft: api.DraftResponse(
     channelCid: 'messaging:general',
     createdAt: DateTime.utc(2025, 12, 3),
     message: const api.DraftPayloadResponse(
-      custom: {'mood': 'calm', 'html': 'shadowed', 'mml': 'shadowed'},
+      custom: {'mood': 'calm'},
       id: 'quoted-draft-id',
       text: 'Later',
     ),
@@ -534,7 +527,7 @@ Message _expectedQuotedMessage(String attachmentId) => Message(
       id: attachmentId,
       type: 'file',
       actions: const [Action(name: 'reply', style: 'default', text: 'Reply', type: 'button')],
-      extraData: const {'note': 'kept'},
+      custom: const {'note': 'kept'},
       uploadState: const UploadState.success(),
     ),
   ],
@@ -549,7 +542,7 @@ Message _expectedQuotedMessage(String attachmentId) => Message(
   updatedAt: DateTime.utc(2025, 12, 2),
   user: fakeUser('sender'),
   pollId: 'quoted-poll-id',
-  extraData: const {'tag': 'kept', 'cid': 'messaging:general'},
+  custom: const {'tag': 'kept'},
   state: MessageState.sent,
   restrictedVisibility: const [],
   moderation: const Moderation(action: ModerationAction.shadow, originalText: 'Quote'),
@@ -566,8 +559,9 @@ Message _expectedQuotedMessage(String attachmentId) => Message(
   draft: Draft(
     channelCid: 'messaging:general',
     createdAt: DateTime.utc(2025, 12, 3),
-    message: DraftMessage(id: 'quoted-draft-id', text: 'Later', extraData: const {'mood': 'calm'}),
+    message: DraftMessage(id: 'quoted-draft-id', text: 'Later', custom: const {'mood': 'calm'}),
   ),
+  cid: 'messaging:general',
   html: '<p>Quoted</p>',
   deletedReplyCount: 1,
 );
@@ -665,7 +659,8 @@ Thread expectedThreadLike(Thread actual) => Thread(
   extraData: const {'topic': 'travel'},
 );
 
-/// A generated message with the id [id] and only the fields the API always sends.
+/// A generated message with the id [id] and only the fields the API always
+/// sends.
 api.MessageResponse generatedLeafMessage(String id) => api.MessageResponse(
   attachments: const [],
   cid: 'messaging:general',
@@ -705,9 +700,9 @@ Message expectedLeafMessage(String id) => Message(
   createdAt: DateTime.utc(2025, 12, 1),
   updatedAt: DateTime.utc(2025, 12, 1),
   user: fakeUser('sender'),
-  extraData: const {'cid': 'messaging:general'},
   state: MessageState.sent,
   restrictedVisibility: const [],
+  cid: 'messaging:general',
   html: '<p>Earlier</p>',
   deletedReplyCount: 0,
 );

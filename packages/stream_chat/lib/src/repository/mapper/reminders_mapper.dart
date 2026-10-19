@@ -14,7 +14,8 @@ extension CreateReminderResponseMapper on api.CreateReminderResponse {
   CreateReminderResponse toModel() => CreateReminderResponse(duration: duration, reminder: reminder.toModel());
 }
 
-/// Maps a generated [api.UpdateReminderResponse] to an [UpdateReminderResponse].
+/// Maps a generated [api.UpdateReminderResponse] to an
+/// [UpdateReminderResponse].
 extension UpdateReminderResponseMapper on api.UpdateReminderResponse {
   /// Converts this response into an [UpdateReminderResponse].
   UpdateReminderResponse toModel() => UpdateReminderResponse(duration: duration, reminder: reminder.toModel());

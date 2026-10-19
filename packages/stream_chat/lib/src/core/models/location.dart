@@ -89,7 +89,8 @@ class Location with _$Location {
     return endAt.isAfter(DateTime.now());
   }
 
-  /// Whether this location is not [isActive]: a static location, or a live one whose [endAt] has passed.
+  /// Whether this location is not [isActive]: a static location, or a live one
+  /// whose [endAt] has passed.
   bool get isExpired => !isActive;
 
   /// Whether this is a live location, one with an [endAt].

@@ -37,7 +37,8 @@
 - **`enableSlowdown` and `disableSlowdown` move with it, renamed `enableSlowMode` and
   `disableSlowMode`** to match the `Channel` helpers and `ChannelCapability.slowMode`. Both are
   `updateChannelPartial` with a fixed `cooldown`, so they call the repository's one method rather than
-  an operation of their own.
+  an operation of their own. `disableSlowMode` sets `cooldown` to 0: unsetting it is refused on v1 and
+  v2, as it is a reserved field.
 - **The v2 route is the v1 handler.** `lib/chat/routes.go` mounts `UpdateChannelPartial` in the
   shared `coreRoutes`; it is neither gated nor in beta. On v2 it also accepts `custom.<field>` paths
   in `set` and `unset`, and still takes flat keys, so `{'name': …}` updates the same field.
@@ -63,10 +64,26 @@
   `toJson` and an enum the model rules retire. The client writes `{'pinned': true}` / `['pinned']`.
 - **The request always sends `set` and `unset`, `null` when not given,** where v1 left the key out.
   The server reads both the same, and still rejects a call with neither.
+- **`ChannelModel` and `Member` promote the fields v10 parked in `extraData`, and rename it `custom`**
+  (README rule 9), since these calls are the first to map them. `ChannelModel.disabled`, `hidden`,
+  `muted`, `blocked`, `truncatedAt`, `truncatedBy`, `autoTranslationEnabled` and
+  `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`,
+  `futureChannelBanExpires` and `deletedAt`, are fields with persistence columns; `truncatedBy` is
+  read back through the users table. `toJson` leaves them out: nothing in the SDK sends a channel
+  or member as JSON. `Channel.extraData`, `extraDataStream`, and the `extraData` argument of the
+  `Channel` constructor and of `StreamChatClient.channel` are renamed with it.
+- **`custom` is the wire's, verbatim,** and the v1 writers leave out a custom entry named like a key,
+  so it cannot overwrite the field.
+- **`ChannelModel.merge` keeps a flag the incoming channel leaves out, and turns auto translation off
+  when it is missing,** as before. Checked live on v1 and v2: queries always send `hidden` and
+  `blocked`; events leave them out, except the `channel.hidden` a block sends; `muted` is never sent on
+  a channel; `truncated_at` and `truncated_by` come on every event once the channel is truncated;
+  `disabled` and `frozen` always. A client token cannot set `auto_translation_*`, so that rule rests
+  on the backend leaving the keys out when false or empty.
 
 ## Risks
 
-- `disableSlowMode` unsets `cooldown`, which the server rejects on both v1 and v2 as a reserved field. It fails before and after this group; the fix is tracked separately, so the request is unchanged.
+- Until [11](11-channels-and-members.md) moves `updateChannel`, the partial and full updates report failures differently: a caller using both reads a `Result` from one and catches an exception from the other.
 
 ## Definition of done
 
@@ -74,8 +91,8 @@
       hand-written, with the reason.
 - [x] Public methods return `Future<Result<T>>`; no `getOrThrow()` inside the SDK.
 - [x] Hand-written request/response DTOs for this group are deleted, or their retention is justified.
-- [x] Every model that had a `copyWith` in v10 keeps that exact method, `_nullConst` sentinels
-      included ([README rule 2](README.md#domain-models)).
+- [x] `copywith_audit.py` was run for every model that loses a v10 `copyWith`, every site it reports is
+      handled, and the semantics change is in the CHANGELOG and the guide ([README rule 2](README.md#domain-models)).
 - [x] `melos run analyze` clean, `melos run test:dart` green, persistence tests green if this group
       persists anything.
 - [x] `migrations/v11-migration.md`: Symbol Map rows plus a feature section for every break.

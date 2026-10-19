@@ -103,7 +103,7 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
                     final attachment = voiceRecordings.elementAtOrNull(index);
                     if (attachment == null) return child;
 
-                    final durationSecs = attachment.extraData['duration'] as num?;
+                    final durationSecs = attachment.custom['duration'] as num?;
                     final duration = durationSecs != null ? Duration(seconds: durationSecs.round()) : null;
 
                     final a11y = context.translations.accessibility;
@@ -216,7 +216,7 @@ class _QuotedMessageInHeader extends StatelessWidget {
 
     final translations = context.translations;
     final title = switch (isIncoming) {
-      true => translations.replyToUserLabel(quotedMessage.user?.name ?? ''),
+      true => translations.replyToUserLabel(quotedMessage.user?.nameOrId ?? ''),
       false => translations.youText,
     };
 

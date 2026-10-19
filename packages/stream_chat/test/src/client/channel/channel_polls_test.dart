@@ -174,13 +174,15 @@ void main() {
     expect(result, Result.success(response));
   });
 
-  test('Channel.queryPollVotes asks for ten votes when no limit is given', () async {
+  test('Channel.queryPollVotes forwards the previous-page cursor and ten as the default limit', () async {
     final client = _client();
     final channel = _initializedChannel(client);
     const response = QueryPollVotesResponse(duration: '4.21ms', votes: []);
-    when(() => client.queryPollVotes(_poll.id, limit: 10)).thenAnswer((_) async => const Result.success(response));
+    when(
+      () => client.queryPollVotes(_poll.id, limit: 10, prev: 'cursor'),
+    ).thenAnswer((_) async => const Result.success(response));
 
-    final result = await channel.queryPollVotes(_poll.id);
+    final result = await channel.queryPollVotes(_poll.id, prev: 'cursor');
 
     expect(result, const Result.success(response));
   });

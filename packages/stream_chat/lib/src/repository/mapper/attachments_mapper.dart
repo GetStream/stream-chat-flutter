@@ -7,20 +7,10 @@ import '../../core/models/attachment_file.dart';
 
 /// Maps a generated [api.Attachment] to an [Attachment].
 extension AttachmentMapper on api.Attachment {
-  // Custom keys named like one of the attachment's own fields, including the ones it keeps in its extra data or only
-  // stores offline.
-  static const _shadowedCustomKeys = {
-    ...Attachment.topLevelFields,
-    'giphy',
-    'file',
-    'upload_state',
-  };
-
   /// Converts this attachment into an [Attachment].
   ///
-  /// The attachment gets a new local [Attachment.id]; an id it was sent with is kept in [Attachment.extraData], beside
-  /// the custom data and the [Attachment.giphy] renditions, with custom data named like one of the attachment's own
-  /// fields left out.
+  /// The attachment gets a new local [Attachment.id]; an id it was sent with
+  /// stays in [Attachment.custom].
   Attachment toModel() => Attachment(
     type: type,
     titleLink: titleLink,
@@ -42,7 +32,7 @@ extension AttachmentMapper on api.Attachment {
     actions: actions?.map((action) => action.toModel()).toList() ?? const [],
     originalWidth: originalWidth,
     originalHeight: originalHeight,
-    extraData: {...custom}..removeWhere((key, _) => _shadowedCustomKeys.contains(key)),
+    custom: custom,
     giphy: giphy?.toJson(),
     uploadState: const UploadState.success(),
   );
@@ -62,14 +52,13 @@ extension ActionMapper on api.Action {
 
 /// Maps an [Attachment] to the generated [api.Attachment] a request sends.
 extension AttachmentRequestMapper on Attachment {
-  // Extra data keys that never become custom data: the keys named like one of the attachment's own fields, including
-  // the Giphy renditions, which the request carries in a field of their own, and the local id.
-  static const _nonCustomKeys = {...AttachmentMapper._shadowedCustomKeys, 'id'};
+  // Custom keys named like one of the attachment's own fields, including the local ones.
+  static const _shadowedCustomKeys = {...Attachment.topLevelFields, ...Attachment.dbSpecificTopLevelFields};
 
   /// Converts this attachment into the shape a request sends.
   ///
-  /// The extra data becomes the custom data, except the [giphy] renditions and keys named like one of the
-  /// attachment's own fields. The local [id], [uploadState] and [file] are left out.
+  /// The custom data is sent without the keys named like one of the attachment's own fields. The local [id],
+  /// [uploadState] and [file] are left out.
   api.Attachment toRequest() => api.Attachment(
     type: type,
     titleLink: titleLink,
@@ -95,7 +84,7 @@ extension AttachmentRequestMapper on Attachment {
       final giphy? => _imagesToRequest(giphy),
       null => null,
     },
-    custom: {...extraData}..removeWhere((key, _) => _nonCustomKeys.contains(key)),
+    custom: {...custom}..removeWhere((key, _) => _shadowedCustomKeys.contains(key)),
   );
 }
 

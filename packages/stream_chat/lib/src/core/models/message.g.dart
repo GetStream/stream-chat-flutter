@@ -55,7 +55,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
   pinnedBy: json['pinned_by'] == null ? null : User.fromJson(json['pinned_by'] as Map<String, dynamic>),
   poll: _$JsonConverterFromJson<Map<String, dynamic>, Poll>(json['poll'], const PollV1JsonConverter().fromJson),
   pollId: json['poll_id'] as String?,
-  extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
+  custom: json['extra_data'] as Map<String, dynamic>? ?? const {},
   i18n: (json['i18n'] as Map<String, dynamic>?)?.map((k, e) => MapEntry(k, e as String)),
   restrictedVisibility: (json['restricted_visibility'] as List<dynamic>?)?.map((e) => e as String).toList(),
   moderation: moderationFromV1Json(Message._moderationReadValue(json, 'moderation') as Map<String, dynamic>?),
@@ -69,6 +69,10 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
     json['shared_location'],
     const LocationV1JsonConverter().fromJson,
   ),
+  cid: json['cid'] as String?,
+  html: json['html'] as String?,
+  mml: json['mml'] as String?,
+  deletedReplyCount: (json['deleted_reply_count'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
@@ -93,7 +97,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
     instance.sharedLocation,
     const LocationV1JsonConverter().toJson,
   ),
-  'extra_data': instance.extraData,
+  'extra_data': instance.custom,
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(Object? json, Value? Function(Json json) fromJson) =>

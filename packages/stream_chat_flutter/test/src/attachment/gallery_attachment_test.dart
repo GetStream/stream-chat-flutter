@@ -19,7 +19,7 @@ void main() {
           type: 'image',
           title: 'example.png',
           imageUrl: 'https://logowik.com/content/uploads/images/flutter5786.jpg',
-          extraData: const {
+          custom: const {
             'mime_type': 'png',
           },
         ),
@@ -27,7 +27,7 @@ void main() {
           type: 'image',
           title: 'example.png',
           imageUrl: 'https://logowik.com/content/uploads/images/flutter5786.jpg',
-          extraData: const {
+          custom: const {
             'mime_type': 'png',
           },
         ),

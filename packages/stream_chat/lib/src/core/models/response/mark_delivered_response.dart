@@ -2,7 +2,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'mark_delivered_response.freezed.dart';
 
-/// The outcome of sending delivery receipts.
+/// The result of sending delivery receipts, returned by
+/// [StreamChatClient.markChannelsDelivered].
 @freezed
 class MarkDeliveredResponse with _$MarkDeliveredResponse {
   /// Creates a new [MarkDeliveredResponse].

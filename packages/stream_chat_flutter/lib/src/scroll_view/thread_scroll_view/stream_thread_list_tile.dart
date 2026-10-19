@@ -102,7 +102,7 @@ class _DefaultStreamThreadListTile extends StatelessWidget {
     final latestActivityAt = thread.lastMessageAt ?? latestReply?.createdAt ?? thread.updatedAt;
     final avatarUser = parentMessage?.user ?? latestReply?.user ?? thread.createdBy;
     final channelName =
-        channel?.formatName(currentUser: currentUser) ?? avatarUser?.name ?? context.translations.noTitleText;
+        channel?.formatName(currentUser: currentUser) ?? avatarUser?.nameOrId ?? context.translations.noTitleText;
     final participantUsers = thread.threadParticipants.map((it) => it.user).nonNulls.toList(growable: false);
 
     final listItem = Padding(

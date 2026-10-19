@@ -52,16 +52,7 @@ extension DraftResponseMapper on api.DraftResponse {
 
 /// Maps a generated [api.DraftPayloadResponse] to a [DraftMessage].
 extension DraftPayloadResponseMapper on api.DraftPayloadResponse {
-  // Custom keys named like one of the draft message's own fields, including the ones it keeps in its extra data.
-  static const _shadowedCustomKeys = {
-    ...DraftMessage.topLevelFields,
-    'html',
-    'mml',
-  };
-
   /// Converts this response into a [DraftMessage].
-  ///
-  /// Custom data named like one of the draft message's own fields is left out of [DraftMessage.extraData].
   DraftMessage toModel() => DraftMessage(
     id: id,
     text: text,
@@ -73,29 +64,21 @@ extension DraftPayloadResponseMapper on api.DraftPayloadResponse {
     quotedMessageId: quotedMessageId,
     silent: silent ?? false,
     pollId: pollId,
-    extraData: {...custom}..removeWhere((key, _) => _shadowedCustomKeys.contains(key)),
-    html: html,
-    mml: mml,
+    custom: custom,
   );
 }
 
 /// Maps a [DraftMessage] to the generated [api.MessageRequest] that saves it.
 extension DraftMessageRequestMapper on DraftMessage {
-  // Extra data keys that never become custom data: the draft message's own fields and the ones a received message
-  // keeps in its extra data.
-  static final _nonCustomKeys = {
-    ...DraftPayloadResponseMapper._shadowedCustomKeys,
-    ...MessageResponseMapper.extraDataFields,
-  };
+  // Custom keys named like one of the draft message's own fields.
+  static const _shadowedCustomKeys = {...DraftMessage.topLevelFields};
 
   /// Converts this draft message into the request that saves it.
   ///
   /// Mentioned users the text no longer mentions are left out, and a [command] is written into the text as
-  /// `/command text`. The extra data becomes the custom data, except keys named like one of the draft message's own
-  /// fields and the fields a received message keeps there, such as [DraftMessage.html] and [DraftMessage.mml]; the
-  /// markup is sent as a field of its own.
+  /// `/command text`. The custom data is sent without the keys named like one of the draft message's own fields.
   api.MessageRequest toRequest() {
-    final custom = {...extraData}..removeWhere((key, _) => _nonCustomKeys.contains(key));
+    final custom = {...this.custom}..removeWhere((key, _) => _shadowedCustomKeys.contains(key));
 
     return api.MessageRequest(
       id: id,
@@ -114,7 +97,6 @@ extension DraftMessageRequestMapper on DraftMessage {
       quotedMessageId: quotedMessageId,
       silent: silent,
       pollId: pollId,
-      mml: mml,
       custom: custom.isEmpty ? null : custom,
     );
   }
@@ -126,7 +108,7 @@ extension DraftMessageRequestMapper on DraftMessage {
 
     final mentioned = [...mentionedUsers];
     for (final user in mentionedUsers.toSet()) {
-      if (text.contains('@${user.id}') || text.contains('@${user.name}')) continue;
+      if (text.contains('@${user.id}') || text.contains('@${user.nameOrId}')) continue;
       mentioned.remove(user);
     }
 

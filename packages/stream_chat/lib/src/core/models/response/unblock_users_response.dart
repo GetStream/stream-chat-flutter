@@ -2,9 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'unblock_users_response.freezed.dart';
 
-/// The outcome of the current user unblocking another user.
-///
-/// Returned by [StreamChatClient.unblockUser].
+/// The result of unblocking a user, returned by [StreamChatClient.unblockUser].
 @freezed
 class UnblockUsersResponse with _$UnblockUsersResponse {
   /// Creates a new [UnblockUsersResponse].
