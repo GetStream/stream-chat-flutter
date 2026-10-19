@@ -31,7 +31,6 @@ class UserResponseCommonFields with _$UserResponseCommonFields {
     this.lastActive,
     this.name,
     required this.online,
-    this.revokeTokensIssuedBefore,
     required this.role,
     required this.teams,
     this.teamsRole,
@@ -93,11 +92,6 @@ class UserResponseCommonFields with _$UserResponseCommonFields {
   @override
   @JsonKey(name: 'online')
   final bool online;
-
-  @override
-  @StreamDateTimeConverter()
-  @JsonKey(name: 'revoke_tokens_issued_before')
-  final DateTime? revokeTokensIssuedBefore;
 
   @override
   @JsonKey(name: 'role')

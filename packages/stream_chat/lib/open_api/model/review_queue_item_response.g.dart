@@ -24,6 +24,7 @@ ReviewQueueItemResponse _$ReviewQueueItemResponseFromJson(
   ),
   confidenceScore: (json['confidence_score'] as num?)?.toDouble(),
   configKey: json['config_key'] as String?,
+  countryCode: json['country_code'] as String?,
   createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
@@ -77,6 +78,7 @@ ReviewQueueItemResponse _$ReviewQueueItemResponseFromJson(
       : ModerationPayloadResponse.fromJson(
           json['moderation_payload'] as Map<String, dynamic>,
         ),
+  poll: json['poll'] == null ? null : PollResponseData.fromJson(json['poll'] as Map<String, dynamic>),
   reaction: json['reaction'] == null ? null : Reaction.fromJson(json['reaction'] as Map<String, dynamic>),
   recommendedAction: json['recommended_action'] as String,
   reviewedAt: _$JsonConverterFromJson<Object, DateTime>(
@@ -108,6 +110,7 @@ Map<String, dynamic> _$ReviewQueueItemResponseToJson(
   ),
   'confidence_score': instance.confidenceScore,
   'config_key': instance.configKey,
+  'country_code': instance.countryCode,
   'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'entity_creator': instance.entityCreator?.toJson(),
   'entity_creator_id': instance.entityCreatorId,
@@ -131,6 +134,7 @@ Map<String, dynamic> _$ReviewQueueItemResponseToJson(
   'latest_moderator_action': instance.latestModeratorAction,
   'message': instance.message?.toJson(),
   'moderation_payload': instance.moderationPayload?.toJson(),
+  'poll': instance.poll?.toJson(),
   'reaction': instance.reaction?.toJson(),
   'recommended_action': instance.recommendedAction,
   'reviewed_at': _$JsonConverterToJson<Object, DateTime>(

@@ -33,7 +33,6 @@ class UserResponsePrivacyFields with _$UserResponsePrivacyFields {
     this.name,
     required this.online,
     this.privacySettings,
-    this.revokeTokensIssuedBefore,
     required this.role,
     required this.teams,
     this.teamsRole,
@@ -103,11 +102,6 @@ class UserResponsePrivacyFields with _$UserResponsePrivacyFields {
   @override
   @JsonKey(name: 'privacy_settings')
   final PrivacySettingsResponse? privacySettings;
-
-  @override
-  @StreamDateTimeConverter()
-  @JsonKey(name: 'revoke_tokens_issued_before')
-  final DateTime? revokeTokensIssuedBefore;
 
   @override
   @JsonKey(name: 'role')

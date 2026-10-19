@@ -22,10 +22,14 @@ mixin _$NotificationAddedToChannelEvent {
   String? get cid;
   DateTime get createdAt;
   Map<String, Object?> get custom;
+  Map<String, int>? get groupedUnreadChannels;
   ChannelMemberResponse get member;
   DateTime? get receivedAt;
   String? get team;
+  int? get totalUnreadCount;
   String get type;
+  int? get unreadChannels;
+  int? get unreadCount;
 
   /// Create a copy of NotificationAddedToChannelEvent
   /// with the given fields replaced by the non-null parameter values.
@@ -56,10 +60,17 @@ mixin _$NotificationAddedToChannelEvent {
             (identical(other.cid, cid) || other.cid == cid) &&
             (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
+            const DeepCollectionEquality().equals(
+              other.groupedUnreadChannels,
+              groupedUnreadChannels,
+            ) &&
             (identical(other.member, member) || other.member == member) &&
             (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
             (identical(other.team, team) || other.team == team) &&
-            (identical(other.type, type) || other.type == type));
+            (identical(other.totalUnreadCount, totalUnreadCount) || other.totalUnreadCount == totalUnreadCount) &&
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.unreadChannels, unreadChannels) || other.unreadChannels == unreadChannels) &&
+            (identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount));
   }
 
   @override
@@ -74,15 +85,19 @@ mixin _$NotificationAddedToChannelEvent {
     cid,
     createdAt,
     const DeepCollectionEquality().hash(custom),
+    const DeepCollectionEquality().hash(groupedUnreadChannels),
     member,
     receivedAt,
     team,
+    totalUnreadCount,
     type,
+    unreadChannels,
+    unreadCount,
   );
 
   @override
   String toString() {
-    return 'NotificationAddedToChannelEvent(channel: $channel, channelCustom: $channelCustom, channelId: $channelId, channelMemberCount: $channelMemberCount, channelMessageCount: $channelMessageCount, channelType: $channelType, cid: $cid, createdAt: $createdAt, custom: $custom, member: $member, receivedAt: $receivedAt, team: $team, type: $type)';
+    return 'NotificationAddedToChannelEvent(channel: $channel, channelCustom: $channelCustom, channelId: $channelId, channelMemberCount: $channelMemberCount, channelMessageCount: $channelMessageCount, channelType: $channelType, cid: $cid, createdAt: $createdAt, custom: $custom, groupedUnreadChannels: $groupedUnreadChannels, member: $member, receivedAt: $receivedAt, team: $team, totalUnreadCount: $totalUnreadCount, type: $type, unreadChannels: $unreadChannels, unreadCount: $unreadCount)';
   }
 }
 
@@ -103,10 +118,14 @@ abstract mixin class $NotificationAddedToChannelEventCopyWith<$Res> {
     String? cid,
     DateTime createdAt,
     Map<String, Object?> custom,
+    Map<String, int>? groupedUnreadChannels,
     ChannelMemberResponse member,
     DateTime? receivedAt,
     String? team,
+    int? totalUnreadCount,
     String type,
+    int? unreadChannels,
+    int? unreadCount,
   });
 }
 
@@ -131,10 +150,14 @@ class _$NotificationAddedToChannelEventCopyWithImpl<$Res> implements $Notificati
     Object? cid = freezed,
     Object? createdAt = null,
     Object? custom = null,
+    Object? groupedUnreadChannels = freezed,
     Object? member = null,
     Object? receivedAt = freezed,
     Object? team = freezed,
+    Object? totalUnreadCount = freezed,
     Object? type = null,
+    Object? unreadChannels = freezed,
+    Object? unreadCount = freezed,
   }) {
     return _then(
       NotificationAddedToChannelEvent(
@@ -174,6 +197,10 @@ class _$NotificationAddedToChannelEventCopyWithImpl<$Res> implements $Notificati
             ? _self.custom
             : custom // ignore: cast_nullable_to_non_nullable
                   as Map<String, Object?>,
+        groupedUnreadChannels: freezed == groupedUnreadChannels
+            ? _self.groupedUnreadChannels
+            : groupedUnreadChannels // ignore: cast_nullable_to_non_nullable
+                  as Map<String, int>?,
         member: null == member
             ? _self.member
             : member // ignore: cast_nullable_to_non_nullable
@@ -186,10 +213,22 @@ class _$NotificationAddedToChannelEventCopyWithImpl<$Res> implements $Notificati
             ? _self.team
             : team // ignore: cast_nullable_to_non_nullable
                   as String?,
+        totalUnreadCount: freezed == totalUnreadCount
+            ? _self.totalUnreadCount
+            : totalUnreadCount // ignore: cast_nullable_to_non_nullable
+                  as int?,
         type: null == type
             ? _self.type
             : type // ignore: cast_nullable_to_non_nullable
                   as String,
+        unreadChannels: freezed == unreadChannels
+            ? _self.unreadChannels
+            : unreadChannels // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        unreadCount: freezed == unreadCount
+            ? _self.unreadCount
+            : unreadCount // ignore: cast_nullable_to_non_nullable
+                  as int?,
       ),
     );
   }
