@@ -93,6 +93,11 @@ abstract class WSEvent<T extends core.WsEvent> {
       "reminder.created" => _ReminderCreatedEvent(ReminderCreatedEvent.fromJson(json)),
       "reminder.deleted" => _ReminderDeletedEvent(ReminderDeletedEvent.fromJson(json)),
       "reminder.updated" => _ReminderUpdatedEvent(ReminderUpdatedEvent.fromJson(json)),
+      "scheduled_message.created" => _ScheduledMessageCreatedEvent(ScheduledMessageCreatedEvent.fromJson(json)),
+      "scheduled_message.deleted" => _ScheduledMessageDeletedEvent(ScheduledMessageDeletedEvent.fromJson(json)),
+      "scheduled_message.failed" => _ScheduledMessageFailedEvent(ScheduledMessageFailedEvent.fromJson(json)),
+      "scheduled_message.sent" => _ScheduledMessageSentEvent(ScheduledMessageSentEvent.fromJson(json)),
+      "scheduled_message.updated" => _ScheduledMessageUpdatedEvent(ScheduledMessageUpdatedEvent.fromJson(json)),
       "thread.updated" => _ThreadUpdatedEvent(ThreadUpdatedEvent.fromJson(json)),
       "typing.start" => _TypingStartEvent(TypingStartEvent.fromJson(json)),
       "typing.stop" => _TypingStopEvent(TypingStopEvent.fromJson(json)),
@@ -504,6 +509,41 @@ class _ReminderDeletedEvent extends WSEvent<ReminderDeletedEvent> {
 
 class _ReminderUpdatedEvent extends WSEvent<ReminderUpdatedEvent> {
   const _ReminderUpdatedEvent(super.wrapped);
+
+  @override
+  String get type => wrapped.type;
+}
+
+class _ScheduledMessageCreatedEvent extends WSEvent<ScheduledMessageCreatedEvent> {
+  const _ScheduledMessageCreatedEvent(super.wrapped);
+
+  @override
+  String get type => wrapped.type;
+}
+
+class _ScheduledMessageDeletedEvent extends WSEvent<ScheduledMessageDeletedEvent> {
+  const _ScheduledMessageDeletedEvent(super.wrapped);
+
+  @override
+  String get type => wrapped.type;
+}
+
+class _ScheduledMessageFailedEvent extends WSEvent<ScheduledMessageFailedEvent> {
+  const _ScheduledMessageFailedEvent(super.wrapped);
+
+  @override
+  String get type => wrapped.type;
+}
+
+class _ScheduledMessageSentEvent extends WSEvent<ScheduledMessageSentEvent> {
+  const _ScheduledMessageSentEvent(super.wrapped);
+
+  @override
+  String get type => wrapped.type;
+}
+
+class _ScheduledMessageUpdatedEvent extends WSEvent<ScheduledMessageUpdatedEvent> {
+  const _ScheduledMessageUpdatedEvent(super.wrapped);
 
   @override
   String get type => wrapped.type;

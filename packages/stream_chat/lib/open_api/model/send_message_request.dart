@@ -22,6 +22,7 @@ class SendMessageRequest with _$SendMessageRequest {
     this.includeMentionedMembers,
     this.keepChannelHidden,
     required this.message,
+    this.scheduledAt,
     this.skipEnrichUrl,
     this.skipPush,
   });
@@ -41,6 +42,11 @@ class SendMessageRequest with _$SendMessageRequest {
   @override
   @JsonKey(name: 'message')
   final MessageRequest message;
+
+  @override
+  @StreamDateTimeConverter()
+  @JsonKey(name: 'scheduled_at')
+  final DateTime? scheduledAt;
 
   @override
   @JsonKey(name: 'skip_enrich_url')

@@ -28,10 +28,15 @@ extension type const WSAuthMessageProducts._(String _) implements String {
 @JsonSerializable()
 class WSAuthMessage with _$WSAuthMessage {
   const WSAuthMessage({
+    this.eventProtocol,
     this.memberCustomInclude,
     this.products,
     required this.token,
   });
+
+  @override
+  @JsonKey(name: 'event_protocol')
+  final int? eventProtocol;
 
   @override
   @JsonKey(name: 'member_custom_include')

@@ -24,6 +24,7 @@ AIIndicatorUpdateEvent _$AIIndicatorUpdateEventFromJson(
     const StreamDateTimeConverter().fromJson,
   ),
   type: json['type'] as String,
+  user: json['user'] == null ? null : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$AIIndicatorUpdateEventToJson(
@@ -42,6 +43,7 @@ Map<String, dynamic> _$AIIndicatorUpdateEventToJson(
     const StreamDateTimeConverter().toJson,
   ),
   'type': instance.type,
+  'user': instance.user?.toJson(),
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(

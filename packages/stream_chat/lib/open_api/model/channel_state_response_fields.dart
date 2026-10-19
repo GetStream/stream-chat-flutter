@@ -20,6 +20,7 @@ class ChannelStateResponseFields with _$ChannelStateResponseFields {
   const ChannelStateResponseFields({
     this.activeLiveLocations,
     this.channel,
+    this.cooldownRemainingMs,
     this.draft,
     this.hidden,
     this.hideMessagesBefore,
@@ -42,6 +43,10 @@ class ChannelStateResponseFields with _$ChannelStateResponseFields {
   @override
   @JsonKey(name: 'channel')
   final ChannelResponse? channel;
+
+  @override
+  @JsonKey(name: 'cooldown_remaining_ms')
+  final int? cooldownRemainingMs;
 
   @override
   @JsonKey(name: 'draft')

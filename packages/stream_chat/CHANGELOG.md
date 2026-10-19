@@ -117,6 +117,7 @@
 - `ChannelModel.extraData` and `Member.extraData` are renamed `custom`, and so are `Channel.extraData`, `Channel.extraDataStream` (now `customStream`), and the `extraData` argument of the `Channel` constructor and of `StreamChatClient.channel`.
 - Several channel and member values the custom data used to hold, such as `ChannelModel.hidden`, `ChannelModel.truncatedAt` and `Member.status`, are fields instead: `custom` no longer holds them, `toJson` no longer writes them, and an entry with one of their names in `custom` or in `copyWith(custom:)` no longer sets the field.
 - `ChannelModel.custom` and `Member.custom` hold the custom data exactly as the API returns it, and `toJson` leaves out an entry named like one of the model's own fields.
+- `rawType` is removed from `MessageType`, `AttachmentType`, `PushLevel`, `ChatPreferenceLevel`, `ChatLevel`, `CallLevel` and `RoleType`, as are `ModerationAction.action` and `ChannelCapability.capability`; use the value itself instead.
 
 🐞 Fixed
 
@@ -127,6 +128,8 @@
 - A message that fails because its attachments did not upload now says which ones and what each reported, instead of `Failed to upload one or more attachments`.
 
 - `connectGuestUser` no longer leaves the signed-in user unauthenticated when it refuses to connect a guest over them.
+
+- The OpenAPI-generated client's methods that take a `payload` or `sort` argument no longer fail with `invalid json data`.
 
 🔄 Changed
 

@@ -11,7 +11,6 @@ void main() {
     const raw = 'user';
 
     expect(RoleType.user, raw);
-    expect(RoleType.user.rawType, raw);
     expect(<String>[RoleType.user, RoleType.channel], ['user', 'channel']);
   });
 

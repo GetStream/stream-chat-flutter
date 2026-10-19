@@ -9,6 +9,7 @@ part of 'app_response_fields.dart';
 AppResponseFields _$AppResponseFieldsFromJson(Map<String, dynamic> json) => AppResponseFields(
   asyncUrlEnrichEnabled: json['async_url_enrich_enabled'] as bool,
   autoTranslationEnabled: json['auto_translation_enabled'] as bool,
+  defaults: AppDefaults.fromJson(json['defaults'] as Map<String, dynamic>),
   fileUploadConfig: FileUploadConfig.fromJson(
     json['file_upload_config'] as Map<String, dynamic>,
   ),
@@ -23,6 +24,7 @@ AppResponseFields _$AppResponseFieldsFromJson(Map<String, dynamic> json) => AppR
 Map<String, dynamic> _$AppResponseFieldsToJson(AppResponseFields instance) => <String, dynamic>{
   'async_url_enrich_enabled': instance.asyncUrlEnrichEnabled,
   'auto_translation_enabled': instance.autoTranslationEnabled,
+  'defaults': instance.defaults.toJson(),
   'file_upload_config': instance.fileUploadConfig.toJson(),
   'id': instance.id,
   'image_upload_config': instance.imageUploadConfig.toJson(),

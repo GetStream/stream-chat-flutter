@@ -13,6 +13,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$WSAuthMessage {
+  int? get eventProtocol;
   List<String>? get memberCustomInclude;
   List<WSAuthMessageProducts>? get products;
   String get token;
@@ -31,6 +32,7 @@ mixin _$WSAuthMessage {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is WSAuthMessage &&
+            (identical(other.eventProtocol, eventProtocol) || other.eventProtocol == eventProtocol) &&
             const DeepCollectionEquality().equals(
               other.memberCustomInclude,
               memberCustomInclude,
@@ -42,6 +44,7 @@ mixin _$WSAuthMessage {
   @override
   int get hashCode => Object.hash(
     runtimeType,
+    eventProtocol,
     const DeepCollectionEquality().hash(memberCustomInclude),
     const DeepCollectionEquality().hash(products),
     token,
@@ -49,7 +52,7 @@ mixin _$WSAuthMessage {
 
   @override
   String toString() {
-    return 'WSAuthMessage(memberCustomInclude: $memberCustomInclude, products: $products, token: $token)';
+    return 'WSAuthMessage(eventProtocol: $eventProtocol, memberCustomInclude: $memberCustomInclude, products: $products, token: $token)';
   }
 }
 
@@ -61,6 +64,7 @@ abstract mixin class $WSAuthMessageCopyWith<$Res> {
   ) = _$WSAuthMessageCopyWithImpl;
   @useResult
   $Res call({
+    int? eventProtocol,
     List<String>? memberCustomInclude,
     List<WSAuthMessageProducts>? products,
     String token,
@@ -79,12 +83,17 @@ class _$WSAuthMessageCopyWithImpl<$Res> implements $WSAuthMessageCopyWith<$Res> 
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? eventProtocol = freezed,
     Object? memberCustomInclude = freezed,
     Object? products = freezed,
     Object? token = null,
   }) {
     return _then(
       WSAuthMessage(
+        eventProtocol: freezed == eventProtocol
+            ? _self.eventProtocol
+            : eventProtocol // ignore: cast_nullable_to_non_nullable
+                  as int?,
         memberCustomInclude: freezed == memberCustomInclude
             ? _self.memberCustomInclude
             : memberCustomInclude // ignore: cast_nullable_to_non_nullable

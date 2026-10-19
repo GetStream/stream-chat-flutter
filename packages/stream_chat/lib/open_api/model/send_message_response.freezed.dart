@@ -17,6 +17,7 @@ mixin _$SendMessageResponse {
   String get duration;
   Map<String, bool>? get mentionedMembers;
   MessageResponse get message;
+  ScheduledMessageResponse? get scheduledMessage;
 
   /// Create a copy of SendMessageResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -39,7 +40,8 @@ mixin _$SendMessageResponse {
               other.mentionedMembers,
               mentionedMembers,
             ) &&
-            (identical(other.message, message) || other.message == message));
+            (identical(other.message, message) || other.message == message) &&
+            (identical(other.scheduledMessage, scheduledMessage) || other.scheduledMessage == scheduledMessage));
   }
 
   @override
@@ -49,11 +51,12 @@ mixin _$SendMessageResponse {
     duration,
     const DeepCollectionEquality().hash(mentionedMembers),
     message,
+    scheduledMessage,
   );
 
   @override
   String toString() {
-    return 'SendMessageResponse(channelContext: $channelContext, duration: $duration, mentionedMembers: $mentionedMembers, message: $message)';
+    return 'SendMessageResponse(channelContext: $channelContext, duration: $duration, mentionedMembers: $mentionedMembers, message: $message, scheduledMessage: $scheduledMessage)';
   }
 }
 
@@ -69,6 +72,7 @@ abstract mixin class $SendMessageResponseCopyWith<$Res> {
     String duration,
     Map<String, bool>? mentionedMembers,
     MessageResponse message,
+    ScheduledMessageResponse? scheduledMessage,
   });
 }
 
@@ -88,6 +92,7 @@ class _$SendMessageResponseCopyWithImpl<$Res> implements $SendMessageResponseCop
     Object? duration = null,
     Object? mentionedMembers = freezed,
     Object? message = null,
+    Object? scheduledMessage = freezed,
   }) {
     return _then(
       SendMessageResponse(
@@ -107,6 +112,10 @@ class _$SendMessageResponseCopyWithImpl<$Res> implements $SendMessageResponseCop
             ? _self.message
             : message // ignore: cast_nullable_to_non_nullable
                   as MessageResponse,
+        scheduledMessage: freezed == scheduledMessage
+            ? _self.scheduledMessage
+            : scheduledMessage // ignore: cast_nullable_to_non_nullable
+                  as ScheduledMessageResponse?,
       ),
     );
   }
