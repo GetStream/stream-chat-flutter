@@ -188,7 +188,7 @@ class GetMessageResponse extends MessageResponse {
   /// Create a new instance from a json
   static GetMessageResponse fromJson(Map<String, dynamic> json) {
     final res = _$GetMessageResponseFromJson(json);
-    final jsonChannel = res.message.extraData.remove('channel');
+    final jsonChannel = res.message.custom.remove('channel');
     if (jsonChannel != null) {
       res.channel = ChannelModel.fromJson(jsonChannel as Map<String, dynamic>);
     }

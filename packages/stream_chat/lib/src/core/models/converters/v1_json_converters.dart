@@ -40,7 +40,8 @@ class ActionV1JsonConverter implements JsonConverter<Action, Map<String, dynamic
     value: json['value'] as String?,
   );
 
-  // Writes `value` even when it is null, as v10 did, so sent attachments and the stored ones keep their format.
+  // Writes `value` even when it is null, as v10 did, so sent attachments and
+  // the stored ones keep their format.
   @override
   Map<String, dynamic> toJson(Action action) => {
     'name': action.name,
@@ -53,8 +54,8 @@ class ActionV1JsonConverter implements JsonConverter<Action, Map<String, dynamic
 
 /// Converts a [Location] to and from its v1 keys.
 ///
-/// [toJson] writes the request shape: the coordinates, the device and the end date, without the channel, message,
-/// user or the other dates.
+/// [toJson] writes the request shape: the coordinates, the device and the end
+/// date, without the channel, message, user or the other dates.
 // TODO(openapi-migration): remove in group 10
 @internal
 class LocationV1JsonConverter implements JsonConverter<Location, Map<String, dynamic>> {
@@ -93,9 +94,10 @@ class LocationV1JsonConverter implements JsonConverter<Location, Map<String, dyn
 
 /// Converts a [Reaction] to and from its v1 keys.
 ///
-/// Custom data sits at the root of the v1 map, beside the known keys. [toJson] writes the request shape: the type,
-/// score, emoji code and custom data, without the message, user or dates.
-// TODO(openapi-migration): remove once WebSocket events and messages decode v2 payloads
+/// Custom data sits at the root of the v1 map, beside the known keys. [toJson]
+/// writes the request shape: the type, score, emoji code and custom data,
+/// without the message, user or dates.
+// TODO(openapi-migration): remove when WebSocket payloads decode as v2
 @internal
 class ReactionV1JsonConverter implements JsonConverter<Reaction, Map<String, dynamic>> {
   /// Creates a new [ReactionV1JsonConverter].
@@ -103,7 +105,7 @@ class ReactionV1JsonConverter implements JsonConverter<Reaction, Map<String, dyn
 
   @override
   Reaction fromJson(Map<String, dynamic> json) {
-    final data = Serializer.moveToExtraDataFromRoot(json, Reaction.topLevelFields);
+    final data = Serializer.moveToExtraDataFromRoot(json, _reactionV1Keys);
     return Reaction(
       messageId: data['message_id'] as String?,
       type: data['type'] as String,
@@ -122,7 +124,7 @@ class ReactionV1JsonConverter implements JsonConverter<Reaction, Map<String, dyn
         final Object it => _dateTime.fromJson(it),
         null => null,
       },
-      extraData: data['extra_data'] as Map<String, dynamic>,
+      custom: data['extra_data'] as Map<String, dynamic>,
     );
   }
 
@@ -131,14 +133,26 @@ class ReactionV1JsonConverter implements JsonConverter<Reaction, Map<String, dyn
     'type': reaction.type,
     'score': reaction.score,
     if (reaction.emojiCode case final emojiCode?) 'emoji_code': emojiCode,
-    'extra_data': reaction.extraData,
-  });
+    'extra_data': reaction.custom,
+  }, topLevelFields: _reactionV1Keys);
 }
+
+// The v1 keys a reaction reads into its fields; every other key is custom data.
+const _reactionV1Keys = [
+  'message_id',
+  'type',
+  'user',
+  'user_id',
+  'score',
+  'emoji_code',
+  'created_at',
+  'updated_at',
+];
 
 /// Converts a [MessageReminder] to and from its v1 keys.
 ///
 /// [toJson] writes the ids and the dates, without the channel, message or user.
-// TODO(openapi-migration): remove once WebSocket events and messages decode v2 payloads
+// TODO(openapi-migration): remove when WebSocket payloads decode as v2
 @internal
 class MessageReminderV1JsonConverter implements JsonConverter<MessageReminder, Map<String, dynamic>> {
   /// Creates a new [MessageReminderV1JsonConverter].

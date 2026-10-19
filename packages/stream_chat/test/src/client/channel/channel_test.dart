@@ -1256,7 +1256,7 @@ void main() {
             ..message = Message(
               id: locationId,
               text: 'Location shared',
-              extraData: const {'custom': 'data'},
+              custom: const {'custom': 'data'},
               sharedLocation: Location(
                 channelCid: channel.cid,
                 messageId: locationId,
@@ -1273,13 +1273,13 @@ void main() {
           messageText: 'Location shared',
           createdByDeviceId: deviceId,
           location: coordinates,
-          extraData: {'custom': 'data'},
+          custom: {'custom': 'data'},
         );
 
         expect(response, isNotNull);
         expect(response.message.id, locationId);
         expect(response.message.text, 'Location shared');
-        expect(response.message.extraData['custom'], 'data');
+        expect(response.message.custom['custom'], 'data');
         expect(response.message.sharedLocation, isNotNull);
 
         verify(
@@ -1307,7 +1307,7 @@ void main() {
               ..message = Message(
                 id: locationId,
                 text: 'Location shared',
-                extraData: const {'custom': 'data'},
+                custom: const {'custom': 'data'},
                 sharedLocation: Location(
                   channelCid: channel.cid,
                   messageId: locationId,
@@ -1326,13 +1326,13 @@ void main() {
             createdByDeviceId: deviceId,
             location: coordinates,
             endSharingAt: endSharingAt,
-            extraData: {'custom': 'data'},
+            custom: {'custom': 'data'},
           );
 
           expect(response, isNotNull);
           expect(response.message.id, locationId);
           expect(response.message.text, 'Location shared');
-          expect(response.message.extraData['custom'], 'data');
+          expect(response.message.custom['custom'], 'data');
           expect(response.message.sharedLocation, isNotNull);
           expect(response.message.sharedLocation?.endAt, endSharingAt);
 

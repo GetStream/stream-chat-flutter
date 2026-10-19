@@ -148,6 +148,13 @@
 - Several user values the custom data used to hold, such as `User.name`, `User.image` and `User.deactivatedAt`, are fields instead: `custom` no longer holds them, and an entry with one of their names in `custom` or in `copyWith(custom:)` no longer sets the field.
 - `User.custom` holds the custom data exactly as the API returns it, and `toJson` leaves out an entry named like one of the user's own fields.
 - `OwnUser.fromUser` no longer reads devices, mutes, unread counts, push preferences or privacy settings out of the user's custom data; they are left at their defaults.
+- `Message.extraData`, `Attachment.extraData`, `Reaction.extraData` and `DraftMessage.extraData` are renamed `custom`, and so is the `extraData` argument of their constructors and `copyWith` and of `Channel.sendStaticLocation` and `startLiveLocationSharing`.
+- `Message.custom`, `Attachment.custom`, `Reaction.custom` and `DraftMessage.custom` hold the custom data exactly as the API returns it, and an entry named like one of the model's own fields is left out when the model is sent.
+- `Reaction.topLevelFields` is removed.
+- A message's channel id, HTML, markup and deleted reply count, and an attachment's Giphy renditions, are fields instead of custom data: `custom` no longer holds them, and an entry with one of their names in `custom` no longer sets the field.
+- `Message.toJson` no longer writes the message's channel id, HTML, markup or deleted reply count, so a message can no longer be sent with markup.
+- A message's image labels and mentioned channel members, and a draft message's HTML and markup, are no longer kept in their custom data.
+- A reaction's emoji code read from the API stays in its custom data, as well as in `Reaction.emojiCode`.
 
 🐞 Fixed
 
@@ -181,8 +188,7 @@
 - Added `StreamChatClient.moderation.muteUsers` and `unmuteUsers`, which mute and unmute several users in one call and report the ids that matched no user.
 - Added `User.deactivatedAt`, `deletedAt`, `shadowBanned`, `blockedUserIds` and `nameOrId`; the constructors and `copyWith` accept the new fields.
 - Added `ChannelModel.muted`, `blocked`, `truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires` and `deletedAt`; the constructors and `copyWith` accept the new fields.
-- Added `Message.html`, `mml`, `imageLabels` and `deletedReplyCount`, read from the message's `extraData`; the constructor accepts them.
-- Added `Attachment.giphy`, the Giphy renditions read from the attachment's `extraData`; the constructor accepts them.
+- Added `Message.cid`, `html`, `mml` and `deletedReplyCount`, and `Attachment.giphy`; the constructors and `copyWith` accept them.
 - Added a `prev` argument to `queryPolls` and `queryPollVotes`, and a `prev` cursor on their responses, for paging backwards.
 
 🔒 Security

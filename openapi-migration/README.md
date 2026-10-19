@@ -162,11 +162,11 @@ includes a named response that carries only `duration` today, such as `HideChann
    directions.** A response mapper copies the generated `custom` map into it and a request mapper sends it back as
    `custom`; neither filters it. A model whose group has not run still says `extraData`. A field the
    generated response types is never parked in `extraData` behind a getter: it becomes a field on the model, as
-   the owning group's break, or stays out. Group 15 promoted `ChannelModel`'s and `Member`'s, and group 20
-   `User`'s and `OwnUser`'s. `topLevelFields` and `Serializer` serve only the v1 decoders, which
-   still split flat JSON by a key list, and go with the WebSocket v2 move; a model that loses its JSON drops
-   `topLevelFields` and its converter owns the list. A v1 writer leaves a custom entry named like a key out so it
-   cannot overwrite the key.
+   the owning group's break, or stays out. Group 15 promoted `ChannelModel`'s and `Member`'s, group 20
+   `User`'s and `OwnUser`'s, and group 06 `Message`'s, `Attachment`'s, `Reaction`'s and `DraftMessage`'s.
+   `topLevelFields` and `Serializer` serve only the v1 decoders, which still split flat JSON by a key list, and go
+   with the WebSocket v2 move; a model that loses its JSON drops `topLevelFields` and its converter owns the list. A
+   v1 writer leaves a custom entry named like a key out so it cannot overwrite the key.
 
 ### Temporary adapters
 

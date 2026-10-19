@@ -21,7 +21,7 @@ mixin _$Reaction {
   String? get userId;
   DateTime get createdAt;
   DateTime get updatedAt;
-  Map<String, Object?> get extraData;
+  Map<String, Object?> get custom;
 
   @override
   bool operator ==(Object other) {
@@ -36,7 +36,7 @@ mixin _$Reaction {
             (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt) &&
-            const DeepCollectionEquality().equals(other.extraData, extraData));
+            const DeepCollectionEquality().equals(other.custom, custom));
   }
 
   @override
@@ -50,11 +50,11 @@ mixin _$Reaction {
     userId,
     createdAt,
     updatedAt,
-    const DeepCollectionEquality().hash(extraData),
+    const DeepCollectionEquality().hash(custom),
   );
 
   @override
   String toString() {
-    return 'Reaction(messageId: $messageId, type: $type, score: $score, emojiCode: $emojiCode, user: $user, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt, extraData: $extraData)';
+    return 'Reaction(messageId: $messageId, type: $type, score: $score, emojiCode: $emojiCode, user: $user, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt, custom: $custom)';
   }
 }

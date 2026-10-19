@@ -54,7 +54,7 @@ void main() {
         emojiCode: '😂',
         createdAt: DateTime.parse('2021-01-28T22:17:31.108742Z'),
         updatedAt: DateTime.parse('2021-01-28T22:17:31.108742Z'),
-        extraData: {},
+        custom: {},
         messageId: 'test',
         score: 2,
         user: User(
@@ -75,7 +75,7 @@ void main() {
         newReaction.updatedAt,
         DateTime.parse('2021-01-28T22:17:31.108742Z'),
       );
-      expect(newReaction.extraData, {});
+      expect(newReaction.custom, {});
       expect(newReaction.messageId, 'test');
       expect(newReaction.score, 2);
       expect(
@@ -130,7 +130,7 @@ void main() {
         newReaction.updatedAt,
         DateTime.parse('2021-01-28T22:17:31.108742Z'),
       );
-      expect(newReaction.extraData, {});
+      expect(newReaction.custom, {});
       expect(newReaction.messageId, 'test');
       expect(newReaction.score, 2);
       expect(

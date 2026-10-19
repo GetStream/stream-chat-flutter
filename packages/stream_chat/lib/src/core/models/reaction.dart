@@ -10,7 +10,8 @@ part 'reaction.freezed.dart';
 class Reaction with _$Reaction {
   /// Creates a new [Reaction].
   ///
-  /// [userId] defaults to the id of [user], and [createdAt] and [updatedAt] default to now.
+  /// [userId] defaults to the id of [user], and [createdAt] and [updatedAt]
+  /// default to now.
   Reaction({
     this.messageId,
     required this.type,
@@ -20,7 +21,7 @@ class Reaction with _$Reaction {
     this.emojiCode,
     DateTime? createdAt,
     DateTime? updatedAt,
-    this.extraData = const {},
+    this.custom = const {},
   }) : userId = userId ?? user?.id,
        createdAt = createdAt ?? DateTime.timestamp(),
        updatedAt = updatedAt ?? DateTime.timestamp();
@@ -57,21 +58,9 @@ class Reaction with _$Reaction {
   @override
   final DateTime updatedAt;
 
-  /// Reaction custom extraData
+  /// This reaction's custom data.
   @override
-  final Map<String, Object?> extraData;
-
-  /// Map of custom user extraData
-  static const topLevelFields = [
-    'message_id',
-    'type',
-    'user',
-    'user_id',
-    'score',
-    'emoji_code',
-    'created_at',
-    'updated_at',
-  ];
+  final Map<String, Object?> custom;
 
   /// Creates a copy of [Reaction] with specified attributes overridden.
   Reaction copyWith({
@@ -83,7 +72,7 @@ class Reaction with _$Reaction {
     String? emojiCode,
     DateTime? createdAt,
     DateTime? updatedAt,
-    Map<String, Object?>? extraData,
+    Map<String, Object?>? custom,
   }) => Reaction(
     messageId: messageId ?? this.messageId,
     type: type ?? this.type,
@@ -93,7 +82,7 @@ class Reaction with _$Reaction {
     emojiCode: emojiCode ?? this.emojiCode,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
-    extraData: extraData ?? this.extraData,
+    custom: custom ?? this.custom,
   );
 
   /// Returns a new [Reaction] that is a combination of this reaction and the
@@ -107,7 +96,7 @@ class Reaction with _$Reaction {
     emojiCode: other.emojiCode,
     createdAt: other.createdAt,
     updatedAt: other.updatedAt,
-    extraData: other.extraData,
+    custom: other.custom,
   );
 }
 

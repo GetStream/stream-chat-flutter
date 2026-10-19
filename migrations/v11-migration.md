@@ -44,6 +44,7 @@ onto Stream's OpenAPI-generated API client.
     - [User Updates](#user-updates)
     - [Channel and Member Custom Data](#channel-and-member-custom-data)
     - [User Custom Data](#user-custom-data)
+    - [Message Custom Data](#message-custom-data)
 - [Migration Checklist](#migration-checklist)
 - [For AI Agents](#for-ai-agents)
 - [Contributing to this guide](#contributing-to-this-guide)
@@ -100,6 +101,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**User Updates**](#user-updates) | `updateUser` and `updateUsers` return a `Result<UpdateUsersResponse>` instead of throwing; `partialUpdateUser(s)` becomes `updateUserPartial` / `updateUsersPartial` and `PartialUpdateUserRequest` becomes `UpdateUserPartialRequest`; `updateUser` no longer sends `role`, `teams` or `teamsRole`, and the returned users no longer carry their private fields in `extraData` |
 | [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`, and holds the custom data verbatim; the channel and member flags it carried are fields |
 | [**User Custom Data**](#user-custom-data) | `extraData` is `custom` on `User` and `OwnUser`, and holds the custom data verbatim; `name` is nullable and `nameOrId` falls back to the id; the user fields it carried are fields |
+| [**Message Custom Data**](#message-custom-data) | `extraData` is `custom` on `Message`, `Attachment`, `Reaction` and `DraftMessage`, and holds the custom data verbatim; a message's channel id, HTML, markup and deleted reply count, and an attachment's Giphy renditions, are fields |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -358,6 +360,13 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `MessageReminder.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. Messages and events still read reminders |
 | `MessageReminder extends Equatable`, `MessageReminder.props` | `MessageReminder` (value `==`) | `removed` | Equality, `copyWith` and `merge` are unchanged; `props` is gone and `MessageReminder` is no longer an `Equatable` |
 | `StreamChatApi.reminders` (`RemindersApi`) | `StreamChatClient` reminder methods | `removed` | The endpoints moved to the generated client |
+| `Message.extraData` / `Attachment.extraData` / `Reaction.extraData` / `DraftMessage.extraData` | `Message.custom` / `Attachment.custom` / `Reaction.custom` / `DraftMessage.custom` | `renamed` | The wire's name for it; also the constructor and `copyWith` arguments |
+| `Channel.sendStaticLocation(extraData: …)` / `startLiveLocationSharing(extraData: …)` | `sendStaticLocation(custom: …)` / `startLiveLocationSharing(custom: …)` | `renamed` | The message's custom data |
+| `message.extraData['cid']` / `['html']` / `['mml']` / `['deleted_reply_count']` | `Message.cid` / `html` / `mml` / `deletedReplyCount` | `retyped` | Fields now, not custom data; `toJson` does not write them, so a message can no longer be sent with markup |
+| `attachment.extraData['giphy']` | `Attachment.giphy` | `retyped` | A field now, not custom data |
+| `message.extraData['image_labels']` / `['mentioned_channel_members']`, `draftMessage.extraData['html']` / `['mml']` | — | `removed` | No longer kept |
+| `Message.custom` / `Attachment.custom` / `Reaction.custom` / `DraftMessage.custom` entry named like one of the model's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; left out when the model is sent, so it cannot overwrite the field |
+| `Reaction.topLevelFields` | — | `removed` | It listed the JSON keys of a model that no longer has JSON |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -1117,6 +1126,44 @@ stays in `custom` and leaves the field alone; `toJson` leaves it out, so it cann
 
 > **Why:** the API calls it `custom`, and every migrated model takes that name. A name that answered the id could
 > not tell an unnamed user from a named one, so initials and sorts read the id as a name.
+
+### Message Custom Data
+
+**`extraData` is renamed `custom` on `Message`, `Attachment`, `Reaction` and `DraftMessage`**, along with the
+constructor and `copyWith` arguments and the `extraData` argument of `Channel.sendStaticLocation` and
+`startLiveLocationSharing`.
+
+```dart
+// v10
+final priority = message.extraData['priority'];
+final duration = attachment.extraData['duration'];
+
+// v11
+final priority = message.custom['priority'];
+final duration = attachment.custom['duration'];
+```
+
+**A message's channel id, HTML, markup and deleted reply count are fields**, `Message.cid`, `html`, `mml` and
+`deletedReplyCount`, and so are an attachment's Giphy renditions, `Attachment.giphy`. `custom` no longer holds
+their keys, and an entry with one of those names in `custom` no longer sets the field. `Message.toJson` does not
+write any of them, so a message can no longer be sent with markup.
+
+```dart
+// v10
+final html = message.extraData['html'] as String?;
+
+// v11
+final html = message.html;
+```
+
+**A message's image labels and mentioned channel members, and a draft message's HTML and markup, are no longer
+kept.** v10 left them in `extraData`.
+
+**`custom` is the custom data exactly as the API returns it.** An entry named like one of the model's own fields
+stays in `custom` and leaves the field alone; it is left out when the model is sent, so it cannot overwrite the
+field. A reaction's emoji code read from the API stays in its `custom` as well as in `Reaction.emojiCode`.
+
+> **Why:** the API calls it `custom`, and every migrated model takes that name.
 
 ### Moderation
 

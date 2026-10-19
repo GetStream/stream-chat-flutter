@@ -271,7 +271,7 @@ void main() {
     expect(Attachment.fromJson(attachment.toJson()).actions, attachment.actions);
   });
 
-  test('Event.fromJson reads every reaction field from its v1 keys, with custom data in extraData', () {
+  test('Event.fromJson reads every reaction field from its v1 keys, with the rest in custom data', () {
     final json = jsonFixture('reaction.json');
 
     final event = Event.fromJson({
@@ -289,7 +289,7 @@ void main() {
         emojiCode: '😮',
         createdAt: DateTime.parse('2020-01-28T22:17:31.108742Z'),
         updatedAt: DateTime.parse('2020-01-28T22:17:31.108742Z'),
-        extraData: const {'bananas': 'yes'},
+        custom: const {'bananas': 'yes'},
       ),
     );
   });
@@ -307,21 +307,24 @@ void main() {
     expect(event.reaction!.score, 1);
   });
 
-  test('Event.toJson writes the reaction in the request shape, with custom data at the root', () {
-    final event = Event(
-      type: 'reaction.new',
-      reaction: Reaction(
-        messageId: 'message-id',
-        type: 'wow',
-        user: User(id: 'user-id'),
-        score: 2,
-        emojiCode: '😮',
-        extraData: const {'bananas': 'yes'},
-      ),
-    );
+  test(
+    'Event.toJson writes the reaction in the request shape, with custom data not named like a field at the root',
+    () {
+      final event = Event(
+        type: 'reaction.new',
+        reaction: Reaction(
+          messageId: 'message-id',
+          type: 'wow',
+          user: User(id: 'user-id'),
+          score: 2,
+          emojiCode: '😮',
+          custom: const {'bananas': 'yes', 'emoji_code': 'custom', 'type': 'custom'},
+        ),
+      );
 
-    expect(event.toJson()['reaction'], {'type': 'wow', 'score': 2, 'emoji_code': '😮', 'bananas': 'yes'});
-  });
+      expect(event.toJson()['reaction'], {'type': 'wow', 'score': 2, 'emoji_code': '😮', 'bananas': 'yes'});
+    },
+  );
 
   test('Message.fromJson reads the latest and own reactions', () {
     final message = Message.fromJson(const {

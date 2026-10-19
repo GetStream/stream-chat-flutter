@@ -25,17 +25,7 @@ extension DraftResponseMapper on api.DraftResponse {
 
 /// Maps a generated [api.DraftPayloadResponse] to a [DraftMessage].
 extension DraftPayloadResponseMapper on api.DraftPayloadResponse {
-  // Custom keys named like one of the draft message's own fields, including the ones it keeps in its extra data.
-  static const _shadowedCustomKeys = {
-    ...DraftMessage.topLevelFields,
-    'html',
-    'mml',
-  };
-
   /// Converts this response into a [DraftMessage].
-  ///
-  /// The rendered HTML and the message markup are kept in [DraftMessage.extraData], beside the custom data, with
-  /// custom data named like one of the draft message's own fields left out.
   DraftMessage toModel() => DraftMessage(
     id: id,
     text: text,
@@ -47,10 +37,6 @@ extension DraftPayloadResponseMapper on api.DraftPayloadResponse {
     quotedMessageId: quotedMessageId,
     silent: silent ?? false,
     pollId: pollId,
-    extraData: {
-      ...{...custom}..removeWhere((key, _) => _shadowedCustomKeys.contains(key)),
-      'html': ?html,
-      'mml': ?mml,
-    },
+    custom: custom,
   );
 }

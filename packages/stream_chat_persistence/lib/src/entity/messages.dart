@@ -148,8 +148,17 @@ class Messages extends Table {
   /// The list of user ids that should be able to see the message.
   TextColumn get restrictedVisibility => text().nullable().map(ListConverter<String>())();
 
-  /// Message custom extraData
-  TextColumn get extraData => text().nullable().map(MapConverter())();
+  /// The message rendered as HTML.
+  TextColumn get html => text().nullable()();
+
+  /// The message markup language (MML) source of the message.
+  TextColumn get mml => text().nullable()();
+
+  /// The number of replies to the message that were deleted.
+  IntColumn get deletedReplyCount => integer().nullable()();
+
+  /// Custom data attached to the message.
+  TextColumn get custom => text().nullable().map(MapConverter())();
 
   @override
   Set<Column> get primaryKey => {id};

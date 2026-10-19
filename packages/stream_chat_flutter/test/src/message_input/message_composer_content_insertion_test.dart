@@ -126,7 +126,7 @@ void main() {
       expect(attachment.type, AttachmentType.image);
       expect(attachment.file?.name, 'cat.gif');
       expect(attachment.file?.size, _gifBytes.length);
-      expect(attachment.extraData['mime_type'], 'image/gif');
+      expect(attachment.custom['mime_type'], 'image/gif');
     });
 
     testWidgets('names the file from the MIME type when the URI has no extension', (tester) async {
@@ -137,7 +137,7 @@ void main() {
 
       final attachment = controller.attachments.single;
       expect(attachment.file?.name, endsWith('.webp'));
-      expect(attachment.extraData['mime_type'], 'image/webp');
+      expect(attachment.custom['mime_type'], 'image/webp');
     });
 
     testWidgets('ignores content the keyboard handed over without data', (tester) async {
@@ -214,7 +214,7 @@ void main() {
 
       final attachment = controller.attachments.single;
       expect(attachment.file?.name, endsWith('.gif'));
-      expect(attachment.extraData['mime_type'], 'image/gif');
+      expect(attachment.custom['mime_type'], 'image/gif');
     });
   });
 }

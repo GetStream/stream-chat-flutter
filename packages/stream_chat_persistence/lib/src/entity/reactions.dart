@@ -28,8 +28,8 @@ class Reactions extends Table {
   /// The score of the reaction (ie. number of reactions sent)
   IntColumn get score => integer().withDefault(const Constant(0))();
 
-  /// Reaction custom extraData
-  TextColumn get extraData => text().nullable().map(MapConverter())();
+  /// Custom data attached to the reaction.
+  TextColumn get custom => text().nullable().map(MapConverter())();
 
   @override
   Set<Column> get primaryKey => {
