@@ -52,13 +52,9 @@ extension ActionMapper on api.Action {
 
 /// Maps an [Attachment] to the generated [api.Attachment] a request sends.
 extension AttachmentRequestMapper on Attachment {
-  // Custom keys named like one of the attachment's own fields, including the local ones.
-  static const _shadowedCustomKeys = {...Attachment.topLevelFields, ...Attachment.dbSpecificTopLevelFields};
-
   /// Converts this attachment into the shape a request sends.
   ///
-  /// The custom data is sent without the keys named like one of the attachment's own fields. The local [id],
-  /// [uploadState] and [file] are left out.
+  /// The local [id], [uploadState] and [file] are left out.
   api.Attachment toRequest() => api.Attachment(
     type: type,
     titleLink: titleLink,
@@ -84,7 +80,7 @@ extension AttachmentRequestMapper on Attachment {
       final giphy? => _imagesToRequest(giphy),
       null => null,
     },
-    custom: {...custom}..removeWhere((key, _) => _shadowedCustomKeys.contains(key)),
+    custom: custom,
   );
 }
 
@@ -111,7 +107,8 @@ List<api.Field>? _fieldsToRequest(Object? fields) => switch (fields) {
   _ => null,
 };
 
-// A rendition, or a key of one, missing from the Giphy data reads as its empty value.
+// A rendition, or a key of one, missing from the Giphy data reads as its empty
+// value.
 api.Images _imagesToRequest(Map<String, Object?> giphy) {
   api.ImageData rendition(String name) {
     final data = switch (giphy[name]) {

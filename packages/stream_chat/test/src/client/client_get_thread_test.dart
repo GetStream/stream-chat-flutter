@@ -115,7 +115,8 @@ void main() {
   });
 }
 
-// A thread whose reads, participants and replies are all empty: the empty lists the API may leave out are left out.
+// A thread whose reads, participants and replies are all empty: the empty lists
+// the API may leave out are left out.
 final _generatedNewThread = api.ThreadStateResponse(
   activeParticipantCount: 0,
   channelCid: 'messaging:general',

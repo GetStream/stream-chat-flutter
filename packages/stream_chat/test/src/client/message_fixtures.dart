@@ -401,7 +401,8 @@ final _expectedOwnReaction = Reaction(
   updatedAt: DateTime.utc(2026, 1, 4, 13),
 );
 
-/// A generated draft with every field set, as creating or querying drafts answers it.
+/// A generated draft with every field set, as creating or querying drafts
+/// answers it.
 final generatedDraft = api.DraftResponse(
   channel: _generatedChannel,
   channelCid: 'messaging:general',
@@ -430,8 +431,8 @@ final generatedDraft = api.DraftResponse(
 
 /// The [Draft] that [generatedDraft] maps to.
 ///
-/// The attachment gets a new local id and a channel compares by identity, so both are passed in; check the channel's
-/// `cid` on its own.
+/// The attachment gets a new local id and a channel compares by identity, so
+/// both are passed in; check the channel's `cid` on its own.
 Draft expectedDraft({required String attachmentId, required ChannelModel? channel}) => Draft(
   channelCid: 'messaging:general',
   channel: channel,
@@ -566,7 +567,8 @@ Message _expectedQuotedMessage(String attachmentId) => Message(
   deletedReplyCount: 1,
 );
 
-/// A generated thread with every field set, as querying or fetching threads answers it.
+/// A generated thread with every field set, as querying or fetching threads
+/// answers it.
 final generatedThread = api.ThreadStateResponse(
   activeParticipantCount: 2,
   channel: _generatedChannel,
@@ -610,10 +612,12 @@ final generatedThread = api.ThreadStateResponse(
   updatedAt: DateTime.utc(2026, 2, 2),
 );
 
-/// The [Thread] that [generatedThread] maps to, with the values the mapping creates read off [actual].
+/// The [Thread] that [generatedThread] maps to, with the values the mapping
+/// creates read off [actual].
 ///
-/// A channel compares by identity, so the thread's and its draft's channels are taken from [actual], as is the local
-/// id of the draft's attachment; check those channels' `cid` on their own.
+/// A channel compares by identity, so the thread's and its draft's channels are
+/// taken from [actual], as is the local id of the draft's attachment; check
+/// those channels' `cid` on their own.
 Thread expectedThreadLike(Thread actual) => Thread(
   activeParticipantCount: 2,
   channel: actual.channel,
@@ -656,7 +660,7 @@ Thread expectedThreadLike(Thread actual) => Thread(
   ],
   title: 'Trip',
   updatedAt: DateTime.utc(2026, 2, 2),
-  extraData: const {'topic': 'travel'},
+  custom: const {'topic': 'travel', 'title': 'shadowed'},
 );
 
 /// A generated message with the id [id] and only the fields the API always

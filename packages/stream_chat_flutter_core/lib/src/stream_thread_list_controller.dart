@@ -392,7 +392,7 @@ extension ThreadExtension on Thread {
 
     return copyWith(
       parentMessage: parent,
-      deletedAt: parent.deletedAt,
+      deletedAt: parent.deletedAt ?? deletedAt,
       updatedAt: parent.updatedAt,
     );
   }
@@ -435,9 +435,10 @@ extension ThreadExtension on Thread {
     final lastMessage = sortedUpdatedReplies.lastOrNull;
     final lastMessageAt = lastMessage?.localCreatedAt ?? lastMessage?.createdAt;
 
+    // copyWith clears a date passed as null; with no reply left, keep them.
     return copyWith(
-      updatedAt: lastMessageAt,
-      lastMessageAt: lastMessageAt,
+      updatedAt: lastMessageAt ?? updatedAt,
+      lastMessageAt: lastMessageAt ?? this.lastMessageAt,
       latestReplies: sortedUpdatedReplies,
     );
   }

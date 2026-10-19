@@ -17,8 +17,9 @@ class MessagesRepository {
 
   final api.DefaultApi _api;
 
-  /// Saves [message] as the current user's draft in the channel with the id [channelId] and type [channelType],
-  /// replacing the draft it already has there.
+  /// Saves [message] as the current user's draft in the channel with the id
+  /// [channelId] and type [channelType], replacing the draft it already has
+  /// there.
   Future<Result<CreateDraftResponse>> createDraft(String channelId, String channelType, DraftMessage message) async {
     final result = await _api.createDraft(
       type: channelType,
@@ -29,25 +30,29 @@ class MessagesRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Fetches the current user's draft in the channel with the id [channelId] and type [channelType], or in the
-  /// thread of the message with the id [parentId].
+  /// Fetches the current user's draft in the channel with the id [channelId]
+  /// and type [channelType], or in the thread of the message with the id
+  /// [parentId].
   Future<Result<GetDraftResponse>> getDraft(String channelId, String channelType, {String? parentId}) async {
     final result = await _api.getDraft(type: channelType, id: channelId, parentId: parentId);
 
     return result.map((response) => response.toModel());
   }
 
-  /// Deletes the current user's draft in the channel with the id [channelId] and type [channelType], or in the
-  /// thread of the message with the id [parentId].
+  /// Deletes the current user's draft in the channel with the id [channelId]
+  /// and type [channelType], or in the thread of the message with the id
+  /// [parentId].
   Future<Result<void>> deleteDraft(String channelId, String channelType, {String? parentId}) async {
     final result = await _api.deleteDraft(type: channelType, id: channelId, parentId: parentId);
 
     return result.ignoreValue();
   }
 
-  /// Fetches one page of the current user's drafts matching [filter], ordered by [sort].
+  /// Fetches one page of the current user's drafts matching [filter], ordered
+  /// by [sort].
   ///
-  /// [next] and [prev] are the cursors a previous page returned; at most one of them may be given.
+  /// [next] and [prev] are the cursors a previous page returned; at most one of
+  /// them may be given.
   Future<Result<QueryDraftsResponse>> queryDrafts({
     DraftFilter? filter,
     List<DraftSort>? sort,

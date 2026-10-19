@@ -553,7 +553,7 @@ void main() {
     expect(event.reminder, reminder);
   });
 
-  test('Event.fromJson reads every thread field from its v1 keys, with custom data in extraData', () {
+  test('Event.fromJson reads every thread field from its v1 keys, with custom data in custom', () {
     const channelJson = {'id': 'general', 'type': 'messaging', 'cid': 'messaging:general'};
     const parentJson = {'id': 'parent-id', 'text': 'Where do we meet?'};
     const replyJson = {'id': 'reply-id', 'text': 'At the station', 'parent_id': 'parent-id'};
@@ -654,7 +654,7 @@ void main() {
           ),
         ],
         draft: Draft.fromJson(const {...draftJson}),
-        extraData: const {'priority': 'high'},
+        custom: const {'priority': 'high'},
       ),
     );
   });
@@ -693,7 +693,7 @@ void main() {
     );
   });
 
-  test('Event.toJson writes the thread under its v1 keys, with custom data at the root', () {
+  test('Event.toJson writes the thread under its v1 keys, with custom data not named like a key at the root', () {
     final event = Event(
       type: 'thread.updated',
       thread: Thread(
@@ -716,7 +716,8 @@ void main() {
           ),
         ],
         lastMessageAt: DateTime.utc(2024, 6, 2, 9),
-        extraData: const {'priority': 'high'},
+        // A custom entry named like one of the thread's keys is not written.
+        custom: const {'priority': 'high', 'title': 'shadowed'},
       ),
     );
 
@@ -778,7 +779,7 @@ void main() {
         createdAt: DateTime.utc(2024, 6, 5, 10),
         message: DraftMessage(id: 'draft-id', text: 'Maybe at noon'),
       ),
-      extraData: const {'priority': 'high'},
+      custom: const {'priority': 'high'},
     );
 
     final event = Event.fromJson(Event(type: 'thread.updated', thread: thread).toJson());

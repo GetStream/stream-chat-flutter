@@ -26,7 +26,8 @@ extension GetThreadResponseMapper on api.GetThreadResponse {
   GetThreadResponse toModel() => GetThreadResponse(duration: duration, thread: thread.toModel());
 }
 
-/// Maps a generated [api.UpdateThreadPartialResponse] to an [UpdateThreadPartialResponse].
+/// Maps a generated [api.UpdateThreadPartialResponse] to an
+/// [UpdateThreadPartialResponse].
 extension UpdateThreadPartialResponseMapper on api.UpdateThreadPartialResponse {
   /// Converts this response into an [UpdateThreadPartialResponse].
   UpdateThreadPartialResponse toModel() => UpdateThreadPartialResponse(duration: duration, thread: thread.toModel());
@@ -34,12 +35,7 @@ extension UpdateThreadPartialResponseMapper on api.UpdateThreadPartialResponse {
 
 /// Maps a generated [api.ThreadStateResponse] to a [Thread].
 extension ThreadStateResponseMapper on api.ThreadStateResponse {
-  // Custom keys named like one of the thread's own fields.
-  static const _shadowedCustomKeys = {...Thread.topLevelFields};
-
   /// Converts this response into a [Thread].
-  ///
-  /// Custom data named like one of the thread's own fields is left out of [Thread.extraData].
   Thread toModel() => Thread(
     activeParticipantCount: activeParticipantCount,
     channel: channel?.toModel(),
@@ -59,15 +55,14 @@ extension ThreadStateResponseMapper on api.ThreadStateResponse {
     latestReplies: [for (final reply in latestReplies) reply.toModel()],
     read: read?.map((read) => read.toModel()).toList() ?? const [],
     draft: draft?.toModel(),
-    extraData: {...custom}..removeWhere((key, _) => _shadowedCustomKeys.contains(key)),
+    custom: custom,
   );
 }
 
 /// Maps a generated [api.ThreadResponse] to a [Thread].
 extension ThreadResponseMapper on api.ThreadResponse {
-  /// Converts this response into a [Thread] with no latest replies, reads or draft.
-  ///
-  /// Custom data named like one of the thread's own fields is left out of [Thread.extraData].
+  /// Converts this response into a [Thread] with no latest replies, reads or
+  /// draft.
   Thread toModel() => Thread(
     activeParticipantCount: activeParticipantCount,
     channel: channel?.toModel(),
@@ -84,7 +79,7 @@ extension ThreadResponseMapper on api.ThreadResponse {
     updatedAt: updatedAt,
     deletedAt: deletedAt,
     title: title,
-    extraData: {...custom}..removeWhere((key, _) => ThreadStateResponseMapper._shadowedCustomKeys.contains(key)),
+    custom: custom,
   );
 }
 

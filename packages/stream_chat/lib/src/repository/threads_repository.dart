@@ -16,9 +16,11 @@ class ThreadsRepository {
 
   final api.DefaultApi _api;
 
-  /// Fetches one page of the current user's threads matching [filter], ordered by [sort], each shaped by [options].
+  /// Fetches one page of the current user's threads matching [filter], ordered
+  /// by [sort], each shaped by [options].
   ///
-  /// [next] and [prev] are the cursors a previous page returned; at most one of them may be given.
+  /// [next] and [prev] are the cursors a previous page returned; at most one of
+  /// them may be given.
   Future<Result<QueryThreadsResponse>> queryThreads({
     ThreadFilter? filter,
     List<ThreadSort>? sort,
@@ -44,7 +46,8 @@ class ThreadsRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Fetches the thread of the message with the id [messageId], shaped by [options].
+  /// Fetches the thread of the message with the id [messageId], shaped by
+  /// [options].
   Future<Result<GetThreadResponse>> getThread(String messageId, {ThreadOptions options = const ThreadOptions()}) async {
     final result = await _api.getThread(
       messageId: messageId,
@@ -57,8 +60,8 @@ class ThreadsRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Sets the fields in [set] and removes the fields in [unset] on the thread of the message with the id
-  /// [messageId].
+  /// Sets the fields in [set] and removes the fields in [unset] on the thread
+  /// of the message with the id [messageId].
   Future<Result<UpdateThreadPartialResponse>> updateThreadPartial(
     String messageId, {
     Map<String, Object?>? set,

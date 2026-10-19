@@ -10,16 +10,10 @@ import 'user.dart';
 
 part 'thread.freezed.dart';
 
-class _NullConst {
-  const _NullConst();
-}
-
-const _nullConst = _NullConst();
-
 /// {@template streamThread}
 /// A thread of replies to a message in a channel.
 /// {@endtemplate}
-@Freezed(copyWith: false)
+@freezed
 class Thread with _$Thread {
   /// {@macro streamThread}
   Thread({
@@ -41,7 +35,7 @@ class Thread with _$Thread {
     this.latestReplies = const [],
     this.read = const [],
     this.draft,
-    this.extraData = const {},
+    this.custom = const {},
   }) : createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
@@ -117,103 +111,39 @@ class Thread with _$Thread {
   @override
   final Draft? draft;
 
-  /// The custom data of this thread.
+  /// This thread's custom data.
   @override
-  final Map<String, Object?> extraData;
-
-  /// Creates a copy of [Thread] with specified attributes overridden.
-  Thread copyWith({
-    int? activeParticipantCount,
-    ChannelModel? channel,
-    String? channelCid,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    DateTime? deletedAt,
-    String? createdByUserId,
-    User? createdBy,
-    String? title,
-    String? parentMessageId,
-    Message? parentMessage,
-    int? replyCount,
-    int? participantCount,
-    List<ThreadParticipant>? threadParticipants,
-    DateTime? lastMessageAt,
-    List<Message>? latestReplies,
-    List<Read>? read,
-    Object? draft = _nullConst,
-    Map<String, Object?>? extraData,
-  }) => Thread(
-    activeParticipantCount: activeParticipantCount ?? this.activeParticipantCount,
-    channel: channel ?? this.channel,
-    channelCid: channelCid ?? this.channelCid,
-    createdAt: createdAt ?? this.createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
-    deletedAt: deletedAt ?? this.deletedAt,
-    createdByUserId: createdByUserId ?? this.createdByUserId,
-    createdBy: createdBy ?? this.createdBy,
-    title: title ?? this.title,
-    parentMessageId: parentMessageId ?? this.parentMessageId,
-    parentMessage: parentMessage ?? this.parentMessage,
-    replyCount: replyCount ?? this.replyCount,
-    participantCount: participantCount ?? this.participantCount,
-    threadParticipants: threadParticipants ?? this.threadParticipants,
-    lastMessageAt: lastMessageAt ?? this.lastMessageAt,
-    latestReplies: latestReplies ?? this.latestReplies,
-    read: read ?? this.read,
-    draft: draft == _nullConst ? this.draft : draft as Draft?,
-    extraData: extraData ?? this.extraData,
-  );
+  final Map<String, Object?> custom;
 
   /// Returns a copy of this thread updated with the fields of [other].
   ///
-  /// A field [other] leaves null keeps this thread's value, except [draft], which is always taken from [other].
-  /// Returns this thread when [other] is null.
+  /// A field [other] leaves null keeps this thread's value, except [draft],
+  /// which is always taken from [other]. Returns this thread when [other] is
+  /// null.
   Thread merge(Thread? other) {
     if (other == null) return this;
-    return copyWith(
-      activeParticipantCount: other.activeParticipantCount,
-      channel: other.channel,
+    return Thread(
+      activeParticipantCount: other.activeParticipantCount ?? activeParticipantCount,
+      channel: other.channel ?? channel,
       channelCid: other.channelCid,
-      createdAt: other.createdAt,
-      updatedAt: other.updatedAt,
-      deletedAt: other.deletedAt,
-      createdByUserId: other.createdByUserId,
-      createdBy: other.createdBy,
-      title: other.title,
       parentMessageId: other.parentMessageId,
-      parentMessage: other.parentMessage,
+      parentMessage: other.parentMessage ?? parentMessage,
+      createdByUserId: other.createdByUserId,
+      createdBy: other.createdBy ?? createdBy,
       replyCount: other.replyCount,
       participantCount: other.participantCount,
       threadParticipants: other.threadParticipants,
-      lastMessageAt: other.lastMessageAt,
+      lastMessageAt: other.lastMessageAt ?? lastMessageAt,
+      createdAt: other.createdAt,
+      updatedAt: other.updatedAt,
+      deletedAt: other.deletedAt ?? deletedAt,
+      title: other.title ?? title,
       latestReplies: other.latestReplies,
-      read: other.read,
+      read: other.read ?? read,
       draft: other.draft,
-      extraData: other.extraData,
+      custom: other.custom,
     );
   }
-
-  /// The keys of a thread's own fields, which are left out of [extraData] when a thread is read.
-  static const topLevelFields = [
-    'active_participant_count',
-    'channel_cid',
-    'channel',
-    'created_at',
-    'updated_at',
-    'deleted_at',
-    'created_by_user_id',
-    'created_by',
-    'title',
-    'parent_message_id',
-    'parent_message',
-    'reply_count',
-    'participant_count',
-    'thread_participants',
-    'last_message_at',
-    'latest_replies',
-    'read',
-    'draft',
-  ];
 }
 
 /// A filter for a thread query.
@@ -234,7 +164,7 @@ class ThreadFilterField extends FilterField<Thread> {
   /// value off an instance with [value].
   ThreadFilterField(super.remote, super.value);
 
-  /// Creates a field the SDK does not model, read from [Thread.extraData].
+  /// Creates a field the SDK does not model, read from [Thread.custom].
   ///
   /// `has_unread` is reached this way. It depends on the caller's read state,
   /// so a local match cannot reproduce it.
@@ -242,7 +172,7 @@ class ThreadFilterField extends FilterField<Thread> {
   /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
   /// `$exists`, `$contains`, `$q`, `$autocomplete`
   factory ThreadFilterField.custom(String remote) {
-    return ThreadFilterField(remote, (it) => it.extraData[remote]);
+    return ThreadFilterField(remote, (it) => it.custom[remote]);
   }
 
   /// Filters threads by the full id of the channel they belong to, in the form

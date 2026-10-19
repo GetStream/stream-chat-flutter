@@ -3,7 +3,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'thread_options.freezed.dart';
 
 /// {@template threadOptions}
-/// How much of each thread a thread query or fetch returns, and whether the current user starts watching it.
+/// How much of each thread a thread query or fetch returns, and whether the
+/// current user starts watching it.
 /// {@endtemplate}
 @freezed
 class ThreadOptions with _$ThreadOptions {
@@ -15,7 +16,8 @@ class ThreadOptions with _$ThreadOptions {
     this.memberLimit = 10,
   });
 
-  /// Whether the current user starts watching the threads returned, receiving their updates as events.
+  /// Whether the current user starts watching the threads returned, receiving
+  /// their updates as events.
   ///
   /// Defaults to true.
   @override

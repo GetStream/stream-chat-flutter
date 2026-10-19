@@ -143,9 +143,12 @@
 - `partialUpdateThread` is renamed `updateThreadPartial`, and `UpdateThreadResponse` is renamed `UpdateThreadPartialResponse`.
 - `queryThreads` and `queryDrafts` take `limit`, `next` and `prev` instead of `PaginationParams`, and their responses carry a `prev` cursor; `queryThreads` still pages by 10 when `limit` is omitted.
 - `QueryThreadsResponse`, `GetThreadResponse`, `UpdateThreadPartialResponse`, `CreateDraftResponse`, `GetDraftResponse` and `QueryDraftsResponse` no longer decode from JSON, are immutable, built through a const constructor, compare by value, gain `copyWith`, and their `duration` is a non-nullable `String`; `DraftResponse` is removed.
-- `Thread` and `ThreadParticipant` no longer decode from or encode to JSON and no longer extend `Equatable`, so `props` is removed; they still compare by value, and two threads now differ when their `extraData` does.
+- `Thread` and `ThreadParticipant` no longer decode from or encode to JSON and no longer extend `Equatable`, so `props` is removed; they still compare by value, and two threads now differ when their `custom` does.
+- `Thread.extraData` is renamed `custom`, and so is the `extraData` argument of its constructor and `copyWith`; it holds the custom data exactly as the API returns it.
+- `Thread.topLevelFields` is removed.
+- `Thread.copyWith` and `ThreadParticipant.copyWith` set a nullable field passed as `null` to `null` instead of keeping its value, and give `Thread.createdAt` and `updatedAt` a fresh default when passed `null`; `Thread.copyWith` takes `channelCid`, `parentMessageId`, `createdByUserId`, `replyCount`, `participantCount`, `threadParticipants` and `latestReplies`, and `ThreadParticipant.copyWith` takes `channelCid`, `createdAt` and `lastReadAt`, as non-nullable values.
 - `ThreadOptions` no longer encodes to JSON or extends `Equatable`, so `props` is removed; it still compares by value and gains `copyWith`.
-- `createDraft` no longer sends `custom` entries named like one of the draft message's or an attachment's own fields.
+- `createDraft` sends the custom data of the draft message and its attachments as given, so an entry named like one of their own fields is saved as custom data instead of replacing the field or being dropped.
 - `StreamChatApi.threads` is removed, and `StreamChatApi.message` loses the draft methods; their endpoints are reached through `StreamChatClient`.
 - `ChannelModel.extraData` and `Member.extraData` are renamed `custom`, and so are `Channel.extraData`, `Channel.extraDataStream` (now `customStream`), and the `extraData` argument of the `Channel` constructor and of `StreamChatClient.channel`.
 - Several channel and member values the custom data used to hold, such as `ChannelModel.hidden`, `ChannelModel.truncatedAt` and `Member.status`, are fields instead: `custom` no longer holds them, `toJson` no longer writes them, and an entry with one of their names in `custom` or in `copyWith(custom:)` no longer sets the field.
@@ -157,7 +160,7 @@
 - `User.custom` holds the custom data exactly as the API returns it, and `toJson` leaves out an entry named like one of the user's own fields.
 - `OwnUser.fromUser` no longer reads devices, mutes, unread counts, push preferences or privacy settings out of the user's custom data; they are left at their defaults.
 - `Message.extraData`, `Attachment.extraData`, `Reaction.extraData` and `DraftMessage.extraData` are renamed `custom`, and so is the `extraData` argument of their constructors and `copyWith` and of `Channel.sendStaticLocation` and `startLiveLocationSharing`.
-- `Message.custom`, `Attachment.custom`, `Reaction.custom` and `DraftMessage.custom` hold the custom data exactly as the API returns it, and an entry named like one of the model's own fields is left out when the model is sent.
+- `Message.custom`, `Attachment.custom`, `Reaction.custom` and `DraftMessage.custom` hold the custom data exactly as the API returns it, and an entry named like one of the model's own fields is left out when the model is sent, except by `createDraft`.
 - `Reaction.topLevelFields` is removed.
 - A message's channel id, HTML, markup and deleted reply count, and an attachment's Giphy renditions, are fields instead of custom data: `custom` no longer holds them, and an entry with one of their names in `custom` no longer sets the field.
 - `Message.toJson` no longer writes the message's channel id, HTML, markup or deleted reply count, so a message can no longer be sent with markup.

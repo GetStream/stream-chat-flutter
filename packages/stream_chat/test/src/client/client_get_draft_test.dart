@@ -60,7 +60,8 @@ void main() {
   });
 }
 
-// A fetched draft carries the message it quotes, but not its channel or parent message.
+// A fetched draft carries the message it quotes, but not its channel or parent
+// message.
 final _generatedFetchedDraft = generatedDraft.copyWith(channel: null, parentMessage: null);
 
 Draft _expectedFetchedDraft({required String attachmentId}) {

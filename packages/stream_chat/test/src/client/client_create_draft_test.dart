@@ -31,7 +31,7 @@ void main() {
         quotedMessageId: 'quoted-id',
         silent: true,
         pollId: 'poll-id',
-        custom: {'mood': 'busy'},
+        custom: {'mood': 'busy', 'quoted_message_id': 'other-id', 'text': 'Other text'},
       ),
     );
 
@@ -57,7 +57,8 @@ void main() {
         quotedMessageId: 'quoted-id',
         silent: true,
         pollId: 'poll-id',
-        // Custom data named like one of the draft message's own fields is not sent.
+        // Custom data named like one of the draft message's own fields is sent
+        // as custom data.
         custom: const {'mood': 'busy', 'quoted_message_id': 'other-id', 'text': 'Other text'},
       ),
       'general',
@@ -88,6 +89,7 @@ void main() {
         attachments: [],
         mentionedUsers: [],
         silent: false,
+        custom: {},
       ),
     );
 
@@ -108,6 +110,7 @@ void main() {
         attachments: [],
         mentionedUsers: ['leia'],
         silent: false,
+        custom: {},
       ),
     );
 
@@ -149,6 +152,7 @@ void main() {
           ],
           mentionedUsers: [],
           silent: false,
+          custom: {},
         ),
       );
 
@@ -214,6 +218,7 @@ void main() {
                 fixedWidthDownsampled: _imageData('fixed_width_downsampled'),
               ),
               custom: const {
+                'id': 'received-id',
                 'caption': 'A cat',
                 'custom': {'mood': 'happy'},
               },
@@ -221,6 +226,7 @@ void main() {
           ],
           mentionedUsers: const [],
           silent: false,
+          custom: const {},
         ),
       );
 
@@ -253,7 +259,7 @@ void main() {
                 {'short': true, 'title': 'Size', 'value': 'L'},
               ],
               actions: const [Action(name: 'answer', style: 'primary', text: 'Send', type: 'button', value: 'yes')],
-              // The id it was received with stays in the custom data.
+              // The id it was received with is sent as custom data.
               custom: const {
                 'id': 'received-id',
                 'caption': 'A cat',

@@ -2089,10 +2089,12 @@ class StreamChatClient {
     language,
   );
 
-  /// Saves [draft] as the current user's draft in the channel with the id [channelId] and type [channelType].
+  /// Saves [draft] as the current user's draft in the channel with the id
+  /// [channelId] and type [channelType].
   ///
-  /// It replaces the draft the user already has there, or in the thread of the message [DraftMessage.parentId]
-  /// names. Mentioned users the text no longer mentions are left out, and a [DraftMessage.command] is kept as
+  /// It replaces the draft the user already has there, or in the thread of the
+  /// message [DraftMessage.parentId] names. Mentioned users the text no longer
+  /// mentions are left out, and a [DraftMessage.command] is kept as
   /// `/command text`.
   Future<Result<CreateDraftResponse>> createDraft(
     DraftMessage draft,
@@ -2100,30 +2102,33 @@ class StreamChatClient {
     String channelType,
   ) => _messagesRepository.createDraft(channelId, channelType, draft);
 
-  /// Fetches the current user's draft in the channel with the id [channelId] and type [channelType].
+  /// Fetches the current user's draft in the channel with the id [channelId]
+  /// and type [channelType].
   ///
-  /// With a [parentId], it fetches the draft in the thread of that message instead. A channel or thread without a
-  /// draft comes back as a failure.
+  /// With a [parentId], it fetches the draft in the thread of that message
+  /// instead. A channel or thread without a draft comes back as a failure.
   Future<Result<GetDraftResponse>> getDraft(
     String channelId,
     String channelType, {
     String? parentId,
   }) => _messagesRepository.getDraft(channelId, channelType, parentId: parentId);
 
-  /// Deletes the current user's draft in the channel with the id [channelId] and type [channelType].
+  /// Deletes the current user's draft in the channel with the id [channelId]
+  /// and type [channelType].
   ///
-  /// With a [parentId], it deletes the draft in the thread of that message instead. A channel or thread without a
-  /// draft comes back as a failure.
+  /// With a [parentId], it deletes the draft in the thread of that message
+  /// instead. A channel or thread without a draft comes back as a failure.
   Future<Result<void>> deleteDraft(
     String channelId,
     String channelType, {
     String? parentId,
   }) => _messagesRepository.deleteDraft(channelId, channelType, parentId: parentId);
 
-  /// Fetches one page of the current user's drafts matching [filter], ordered by [sort].
+  /// Fetches one page of the current user's drafts matching [filter], ordered
+  /// by [sort].
   ///
-  /// A page holds up to [limit] drafts. [next] and [prev] are the cursors a previous page returned; at most one of
-  /// them may be given.
+  /// A page holds up to [limit] drafts. [next] and [prev] are the cursors a
+  /// previous page returned; at most one of them may be given.
   Future<Result<QueryDraftsResponse>> queryDrafts({
     DraftFilter? filter,
     List<DraftSort>? sort,
@@ -2252,10 +2257,12 @@ class StreamChatClient {
   /// only needed to pick up changes made during an active session.
   Future<Result<AppSettingsResponse>> getAppSettings() => _appSettingsManager.refresh();
 
-  /// Fetches one page of the current user's threads matching [filter], ordered by [sort].
+  /// Fetches one page of the current user's threads matching [filter], ordered
+  /// by [sort].
   ///
-  /// A page holds up to [limit] threads, and [options] decides how much of each thread it carries and whether the
-  /// current user starts watching them. [next] and [prev] are the cursors a previous page returned; at most one of
+  /// A page holds up to [limit] threads, and [options] decides how much of each
+  /// thread it carries and whether the current user starts watching them.
+  /// [next] and [prev] are the cursors a previous page returned; at most one of
   /// them may be given.
   Future<Result<QueryThreadsResponse>> queryThreads({
     ThreadFilter? filter,
@@ -2275,7 +2282,8 @@ class StreamChatClient {
 
   /// Fetches the thread of the message with the id [messageId].
   ///
-  /// [options] decides how much of the thread it carries and whether the current user starts watching it.
+  /// [options] decides how much of the thread it carries and whether the
+  /// current user starts watching it.
   Future<Result<GetThreadResponse>> getThread(
     String messageId, {
     ThreadOptions options = const ThreadOptions(),
@@ -2283,8 +2291,8 @@ class StreamChatClient {
 
   /// Partially updates the thread of the message with the id [messageId].
   ///
-  /// The fields in [set] are given their new values and the fields in [unset] are removed; fields in neither keep
-  /// their current values.
+  /// The fields in [set] are given their new values and the fields in [unset]
+  /// are removed; fields in neither keep their current values.
   Future<Result<UpdateThreadPartialResponse>> updateThreadPartial(
     String messageId, {
     Map<String, Object?>? set,

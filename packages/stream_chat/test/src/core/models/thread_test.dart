@@ -233,4 +233,61 @@ void main() {
       });
     });
   });
+
+  test("Thread.merge keeps this thread's value for a field the other thread leaves null", () {
+    final channel = ChannelModel(cid: 'messaging:general');
+    final parentMessage = Message(id: 'parent-id');
+    final creator = User(id: 'creator');
+    final reader = User(id: 'reader');
+    final thread = Thread(
+      activeParticipantCount: 2,
+      channel: channel,
+      channelCid: 'messaging:general',
+      parentMessageId: 'parent-id',
+      parentMessage: parentMessage,
+      createdByUserId: 'creator',
+      createdBy: creator,
+      replyCount: 4,
+      participantCount: 3,
+      lastMessageAt: DateTime.utc(2026, 1, 4),
+      createdAt: DateTime.utc(2026),
+      updatedAt: DateTime.utc(2026, 1, 4),
+      deletedAt: DateTime.utc(2026, 1, 5),
+      title: 'Trip',
+      read: [Read(user: reader, lastRead: DateTime.utc(2026, 1, 3))],
+      custom: const {'topic': 'travel'},
+    );
+    final other = Thread(
+      channelCid: 'messaging:general',
+      parentMessageId: 'parent-id',
+      createdByUserId: 'creator',
+      replyCount: 5,
+      participantCount: 4,
+      createdAt: DateTime.utc(2026),
+      updatedAt: DateTime.utc(2026, 1, 6),
+      custom: const {'topic': 'food'},
+    ).copyWith(read: null);
+
+    expect(
+      thread.merge(other),
+      Thread(
+        activeParticipantCount: 2,
+        channel: channel,
+        channelCid: 'messaging:general',
+        parentMessageId: 'parent-id',
+        parentMessage: parentMessage,
+        createdByUserId: 'creator',
+        createdBy: creator,
+        replyCount: 5,
+        participantCount: 4,
+        lastMessageAt: DateTime.utc(2026, 1, 4),
+        createdAt: DateTime.utc(2026),
+        updatedAt: DateTime.utc(2026, 1, 6),
+        deletedAt: DateTime.utc(2026, 1, 5),
+        title: 'Trip',
+        read: [Read(user: reader, lastRead: DateTime.utc(2026, 1, 3))],
+        custom: const {'topic': 'food'},
+      ),
+    );
+  });
 }

@@ -7,7 +7,7 @@ part 'thread_participant.freezed.dart';
 /// {@template streamThreadParticipant}
 /// A model class representing a user that is participating in a thread.
 /// {@endtemplate}
-@Freezed(copyWith: false)
+@freezed
 class ThreadParticipant with _$ThreadParticipant {
   /// {@macro streamThreadParticipant}
   const ThreadParticipant({
@@ -52,26 +52,4 @@ class ThreadParticipant with _$ThreadParticipant {
   /// The user participating in the thread.
   @override
   final User? user;
-
-  /// Creates a copy of this [ThreadParticipant] with specified attributes
-  /// overridden.
-  ThreadParticipant copyWith({
-    String? channelCid,
-    DateTime? createdAt,
-    DateTime? lastReadAt,
-    DateTime? lastThreadMessageAt,
-    DateTime? leftThreadAt,
-    String? threadId,
-    String? userId,
-    User? user,
-  }) => ThreadParticipant(
-    channelCid: channelCid ?? this.channelCid,
-    createdAt: createdAt ?? this.createdAt,
-    lastReadAt: lastReadAt ?? this.lastReadAt,
-    lastThreadMessageAt: lastThreadMessageAt ?? this.lastThreadMessageAt,
-    leftThreadAt: leftThreadAt ?? this.leftThreadAt,
-    threadId: threadId ?? this.threadId,
-    userId: userId ?? this.userId,
-    user: user ?? this.user,
-  );
 }

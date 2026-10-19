@@ -19,8 +19,9 @@ class UpdateThreadPartialResponse with _$UpdateThreadPartialResponse {
 
   /// The thread after the update.
   ///
-  /// Its [Thread.latestReplies] and [Thread.read] are empty and it has no [Thread.draft], so merging it into a loaded
-  /// thread with [Thread.merge] clears them.
+  /// Its [Thread.latestReplies] and [Thread.read] are empty and it has no
+  /// [Thread.draft], so merging it into a loaded thread with [Thread.merge]
+  /// clears them.
   @override
   final Thread thread;
 }

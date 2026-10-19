@@ -124,7 +124,7 @@ Thread _expectedThread({required ChannelModel? channel}) => Thread(
   ],
   title: 'Trip',
   updatedAt: DateTime.utc(2026, 2, 2),
-  extraData: const {'topic': 'travel'},
+  custom: const {'topic': 'travel', 'reply_count': 'shadowed'},
 );
 
 StreamChatClient _client(api.DefaultApi defaultApi) {

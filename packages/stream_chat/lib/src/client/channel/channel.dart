@@ -1241,8 +1241,8 @@ class Channel {
 
   /// Saves [draft] as the current user's draft in this channel.
   ///
-  /// It replaces the draft the user already has here, or in the thread of the message [DraftMessage.parentId]
-  /// names.
+  /// It replaces the draft the user already has here, or in the thread of the
+  /// message [DraftMessage.parentId] names.
   ///
   /// Throws a [StateError] if the channel is not initialized.
   Future<Result<CreateDraftResponse>> createDraft(
@@ -1252,7 +1252,8 @@ class Channel {
     return _client.createDraft(draft, id!, type);
   }
 
-  /// Fetches the current user's draft in this channel, or in the thread of the message with the id [parentId].
+  /// Fetches the current user's draft in this channel, or in the thread of the
+  /// message with the id [parentId].
   ///
   /// A channel or thread without a draft comes back as a failure.
   ///
@@ -1264,7 +1265,8 @@ class Channel {
     return _client.getDraft(id!, type, parentId: parentId);
   }
 
-  /// Deletes the current user's draft in this channel, or in the thread of the message with the id [parentId].
+  /// Deletes the current user's draft in this channel, or in the thread of the
+  /// message with the id [parentId].
   ///
   /// A channel or thread without a draft comes back as a failure.
   ///

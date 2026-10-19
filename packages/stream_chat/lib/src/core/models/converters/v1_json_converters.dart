@@ -195,7 +195,8 @@ class MessageReminderV1JsonConverter implements JsonConverter<MessageReminder, M
   };
 }
 
-/// Converts a [Thread] to and from its v1 keys, with its custom data at the root.
+/// Converts a [Thread] to and from its v1 keys, with its custom data at the
+/// root.
 // TODO(openapi-migration): remove once WebSocket events decode v2 payloads
 @internal
 class ThreadV1JsonConverter implements JsonConverter<Thread, Map<String, dynamic>> {
@@ -242,14 +243,14 @@ class ThreadV1JsonConverter implements JsonConverter<Thread, Map<String, dynamic
       final Map<String, dynamic> draft => Draft.fromJson(draft),
       _ => null,
     },
-    extraData: {
-      for (final MapEntry(:key, :value) in json.entries)
-        if (!Thread.topLevelFields.contains(key)) key: value,
-    },
+    custom: _customData(json, _threadV1Keys),
   );
 
+  // Writes the thread's v1 keys, with custom data at the root; a custom entry
+  // named like one of the keys is not written.
   @override
   Map<String, dynamic> toJson(Thread thread) => {
+    ..._customDataAtRoot(thread.custom, _threadV1Keys),
     'active_participant_count': thread.activeParticipantCount,
     'channel_cid': thread.channelCid,
     'channel': thread.channel?.toJson(),
@@ -270,9 +271,30 @@ class ThreadV1JsonConverter implements JsonConverter<Thread, Map<String, dynamic
     'latest_replies': [for (final reply in thread.latestReplies) reply.toJson()],
     'read': thread.read?.map((read) => read.toJson()).toList(),
     'draft': thread.draft?.toJson(),
-    ...thread.extraData,
   };
 }
+
+// The keys a v1 thread carries besides its custom data.
+const _threadV1Keys = [
+  'active_participant_count',
+  'channel_cid',
+  'channel',
+  'created_at',
+  'updated_at',
+  'deleted_at',
+  'created_by_user_id',
+  'created_by',
+  'title',
+  'parent_message_id',
+  'parent_message',
+  'reply_count',
+  'participant_count',
+  'thread_participants',
+  'last_message_at',
+  'latest_replies',
+  'read',
+  'draft',
+];
 
 ThreadParticipant _threadParticipantFromV1Json(Map<String, dynamic> json) => ThreadParticipant(
   channelCid: json['channel_cid'] as String,

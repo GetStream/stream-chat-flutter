@@ -70,16 +70,11 @@ extension DraftPayloadResponseMapper on api.DraftPayloadResponse {
 
 /// Maps a [DraftMessage] to the generated [api.MessageRequest] that saves it.
 extension DraftMessageRequestMapper on DraftMessage {
-  // Custom keys named like one of the draft message's own fields.
-  static const _shadowedCustomKeys = {...DraftMessage.topLevelFields};
-
   /// Converts this draft message into the request that saves it.
   ///
-  /// Mentioned users the text no longer mentions are left out, and a [command] is written into the text as
-  /// `/command text`. The custom data is sent without the keys named like one of the draft message's own fields.
+  /// Mentioned users the text no longer mentions are left out, and a [command]
+  /// is written into the text as `/command text`.
   api.MessageRequest toRequest() {
-    final custom = {...this.custom}..removeWhere((key, _) => _shadowedCustomKeys.contains(key));
-
     return api.MessageRequest(
       id: id,
       text: switch ((text, command)) {
@@ -97,11 +92,12 @@ extension DraftMessageRequestMapper on DraftMessage {
       quotedMessageId: quotedMessageId,
       silent: silent,
       pollId: pollId,
-      custom: custom.isEmpty ? null : custom,
+      custom: custom,
     );
   }
 
-  // The mentioned users the text still mentions by id or name; all of them when there is no text.
+  // The mentioned users the text still mentions by id or name; all of them when
+  // there is no text.
   List<User> _mentionedUsersInText() {
     final text = this.text;
     if (text == null) return mentionedUsers;

@@ -96,7 +96,8 @@ void main() {
       await controller.doInitialLoad();
       await pumpEventQueue();
 
-      // The first page is three pages of the controller's limit, and has no cursor.
+      // The first page is three pages of the controller's limit, and has no
+      // cursor.
       verify(
         () => client.queryDrafts(
           filter: any(named: 'filter'),

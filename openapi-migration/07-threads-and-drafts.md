@@ -45,38 +45,35 @@
   limit of 10, `queryDrafts` sends none, so the backend's 25 still applies. Both responses gain `prev`.
 - **`ThreadOptions` moves to `models/request/`** as a freezed class without `toJson`. All four values are
   always sent: `getThread` has no backend defaults (an absent `reply_limit` returns no replies).
-- **`Thread` and `ThreadParticipant` are plain `@freezed` models,** keeping v10's hand-written `copyWith`
-  and `merge` (`@Freezed(copyWith: false)`). They lose `fromJson`, `toJson` and `Equatable`; `Thread`
-  equality now includes `extraData`, which v10's `props` left out. One `Thread` serves both the full
-  (`ThreadStateResponse`) and the partial (`ThreadResponse`) shape, as in v10: the partial one maps
-  without latest replies, reads or a draft. `ThreadParticipant` drops the generated `custom`, which v10
-  never read.
+- **`Thread` and `ThreadParticipant` are plain `@freezed` models with freezed's `copyWith`.** They lose
+  `fromJson`, `toJson` and `Equatable`; `Thread` equality now includes `custom`, which v10's `props` left
+  out. The copyWith audit found no parameter freezed cannot generate; inside `stream_chat` only
+  `Thread.merge` relied on `null` keeping a value, so it builds through the constructor with v10's rules.
+  Reading the core call sites found two more the audit did not list: `ThreadExtension.deleteReply` and
+  `updateParent` (`stream_thread_list_controller.dart`) keep the thread's dates and deletion date with
+  `??` fallbacks, as v10 did. One `Thread` serves both the full (`ThreadStateResponse`) and the partial
+  (`ThreadResponse`) shape, as in v10: the partial one maps without latest replies, reads or a draft.
+  `ThreadParticipant` drops the generated `custom`, which v10 never read.
+- **`Thread.extraData` is renamed `custom`** (README rule 9) and holds the generated `custom` verbatim.
+  `Thread.topLevelFields` is removed with the JSON; `ThreadV1JsonConverter` owns the key list.
 - **v1 JSON keeps decoding through `ThreadV1JsonConverter`** on `Event.thread`, both ways, with custom
-  data at the root and v10's keys.
+  data at the root and v10's keys; the writer leaves out a custom entry named like a key.
 - **The channel inside a thread maps through `channels_mapper.dart` now,** onto today's `ChannelModel`, as
   the draft's channel already did; group [11](11-channels-and-members.md) re-points both. A thread's
   reads map through a new `ReadStateResponseMapper` in the same file.
 - **`Draft` and `DraftMessage` stay json_serializable** until group [10](10-messages.md), as the adapters
   table records. Persistence stores drafts as rows in `draft_messages`, column by column, so nothing
   about the stored format changes.
-- **`createDraft` stores exactly what v10 stored.** The backend stores a draft alike from either route,
-  so the request mapper (`DraftMessageRequestMapper`, `AttachmentRequestMapper`) reproduces what v1 bound
-  from v10's flattened body: extra data becomes `custom` on the message and on each attachment
-  (`file_size` and `mime_type` included, the local id, upload state and file dropped), mentions the text
-  no longer has are dropped, a command is written into the text, and the markup is sent as its own
-  field. The Giphy renditions and the fields and actions map to their typed fields; a key missing from
-  them is sent empty, which the backend stores the same as absent. An entry named `custom` is sent as
-  custom data like any other, as v1 stored it. Two divergences, approved: the fields a received message
-  keeps in its extra data (`cid`, `html`, `image_labels`, `deleted_reply_count`,
-  `mentioned_channel_members`) are no longer stored as draft custom data; and extra data named like one of
-  the draft message's or an attachment's own fields is left out, as every request mapper does until
-  [21](21-custom-data-rename.md) revisits it, where v10's flattened body set the field or stored it as
-  custom data.
-- **`DraftMessage.html` and `mml` are promoted** as constructor arguments stored in `extraData` and read
-  back through getters, as `Message.html` and `mml` are; `DraftMessageRequestMapper` sends `mml` as the
-  request's own field, so re-saving a draft keeps it. The keys a received message keeps in its extra data
-  are one internal set, `MessageResponseMapper.extraDataFields` in `messages_mapper.dart`, shared by the
-  message and draft mappers.
+- **`createDraft` stores what v10 stored, except custom data named like a field.** The backend stores a
+  draft alike from either route, so the request mapper (`DraftMessageRequestMapper`,
+  `AttachmentRequestMapper`) reproduces what v1 bound from v10's flattened body: mentions the text no
+  longer has are dropped, a command is written into the text, and the local id, upload state and file of
+  an attachment are left out. The Giphy renditions and the fields and actions map to their typed fields;
+  a key missing from them is sent empty, which the backend stores the same as absent. `custom` is sent
+  verbatim on the message and on each attachment (README rule 9), `file_size` and `mime_type` included,
+  so an entry named like one of the model's own fields — an attachment's received `id` among them — is
+  saved as custom data, where v10's flattened body set the field or dropped it. The draft message's HTML
+  and markup are not modelled ([06](06-reminders.md) dropped them), so neither is sent.
 - **Verified live** against the demo app, each call against v10's v1 request decoded the v10 way: query
   threads with defaults and with a filter, sort, `next` and `prev` (both cursors rejected), get a thread,
   set and unset a custom field on one, and create, get, query and delete three drafts (one with every
@@ -85,13 +82,15 @@
   drops for every migrated endpoint (decided in [09](09-users.md)). Every draft v2 saves is stored byte for
   byte as v10's, except the received message's `image_labels`. Deleting or fetching a missing draft
   returns a 404 failure.
+- **`DraftMessage.poll` keeps v10's behaviour.** The draft payload carries `poll_id` only, so the mappers
+  leave the field null; the offline cache and `Message.toDraftMessage` still fill it, and a v1 `poll` key
+  still lands in `custom`, as in v10, since `poll` is not in `DraftMessage.topLevelFields`.
 - **`MarkReadResponse.event` stays unexposed,** now waiting on group [09](09-users.md): its `user` is a
   `UserResponseCommonFields`, which `users_mapper.dart` has no mapper for.
 
 ## Risks
 
-- `createDraft` must keep storing exactly what v10 stored, so v1 readers of the draft — channel queries, WebSocket events, the offline cache — see no change.
-- `DraftMessage.poll` is never decoded from JSON: `poll` is not in `DraftMessage.topLevelFields`, so the key would land in `custom`, and the draft payload carries `poll_id` only. Its `PollV1JsonConverter` exists so the generated code compiles. Decide here whether the field stays constructor-only or goes.
+- `createDraft` must keep storing what v10 stored, apart from custom data named like a field, so v1 readers of the draft — channel queries, WebSocket events, the offline cache — see no change.
 
 ## Definition of done
 
