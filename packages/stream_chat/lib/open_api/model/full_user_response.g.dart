@@ -47,10 +47,6 @@ FullUserResponse _$FullUserResponseFromJson(Map<String, dynamic> json) => FullUs
       : PrivacySettingsResponse.fromJson(
           json['privacy_settings'] as Map<String, dynamic>,
         ),
-  revokeTokensIssuedBefore: _$JsonConverterFromJson<Object, DateTime>(
-    json['revoke_tokens_issued_before'],
-    const StreamDateTimeConverter().fromJson,
-  ),
   role: json['role'] as String,
   shadowBanned: json['shadow_banned'] as bool,
   teams: (json['teams'] as List<dynamic>).map((e) => e as String).toList(),
@@ -99,10 +95,6 @@ Map<String, dynamic> _$FullUserResponseToJson(FullUserResponse instance) => <Str
   'name': instance.name,
   'online': instance.online,
   'privacy_settings': instance.privacySettings?.toJson(),
-  'revoke_tokens_issued_before': _$JsonConverterToJson<Object, DateTime>(
-    instance.revokeTokensIssuedBefore,
-    const StreamDateTimeConverter().toJson,
-  ),
   'role': instance.role,
   'shadow_banned': instance.shadowBanned,
   'teams': instance.teams,

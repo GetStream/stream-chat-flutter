@@ -20,6 +20,7 @@ mixin _$AIIndicatorStopEvent {
   Map<String, Object?> get custom;
   DateTime? get receivedAt;
   String get type;
+  UserResponseCommonFields? get user;
 
   /// Create a copy of AIIndicatorStopEvent
   /// with the given fields replaced by the non-null parameter values.
@@ -42,7 +43,8 @@ mixin _$AIIndicatorStopEvent {
             (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
-            (identical(other.type, type) || other.type == type));
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.user, user) || other.user == user));
   }
 
   @override
@@ -55,11 +57,12 @@ mixin _$AIIndicatorStopEvent {
     const DeepCollectionEquality().hash(custom),
     receivedAt,
     type,
+    user,
   );
 
   @override
   String toString() {
-    return 'AIIndicatorStopEvent(channelId: $channelId, channelType: $channelType, cid: $cid, createdAt: $createdAt, custom: $custom, receivedAt: $receivedAt, type: $type)';
+    return 'AIIndicatorStopEvent(channelId: $channelId, channelType: $channelType, cid: $cid, createdAt: $createdAt, custom: $custom, receivedAt: $receivedAt, type: $type, user: $user)';
   }
 }
 
@@ -78,6 +81,7 @@ abstract mixin class $AIIndicatorStopEventCopyWith<$Res> {
     Map<String, Object?> custom,
     DateTime? receivedAt,
     String type,
+    UserResponseCommonFields? user,
   });
 }
 
@@ -100,6 +104,7 @@ class _$AIIndicatorStopEventCopyWithImpl<$Res> implements $AIIndicatorStopEventC
     Object? custom = null,
     Object? receivedAt = freezed,
     Object? type = null,
+    Object? user = freezed,
   }) {
     return _then(
       AIIndicatorStopEvent(
@@ -131,6 +136,10 @@ class _$AIIndicatorStopEventCopyWithImpl<$Res> implements $AIIndicatorStopEventC
             ? _self.type
             : type // ignore: cast_nullable_to_non_nullable
                   as String,
+        user: freezed == user
+            ? _self.user
+            : user // ignore: cast_nullable_to_non_nullable
+                  as UserResponseCommonFields?,
       ),
     );
   }

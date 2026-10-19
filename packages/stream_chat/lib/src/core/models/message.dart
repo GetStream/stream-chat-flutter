@@ -962,7 +962,7 @@ class MessageSearchSortField extends SortField<Message> {
 /// A type of the message that determines how the message is displayed and
 /// handled by the system.
 /// {@endtemplate}
-extension type const MessageType(String rawType) implements String {
+extension type const MessageType(String _) implements String {
   /// A regular message created in the channel.
   static const regular = MessageType('regular');
 
@@ -986,7 +986,7 @@ extension type const MessageType(String rawType) implements String {
   static const deleted = MessageType('deleted');
 
   /// Create a new instance from a json string.
-  static MessageType fromJson(String rawType) => MessageType(rawType);
+  static MessageType fromJson(String type) => MessageType(type);
 
   /// Serialize to json string.
   static String? toJson(String type) {

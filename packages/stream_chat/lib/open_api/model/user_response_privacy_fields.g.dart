@@ -39,10 +39,6 @@ UserResponsePrivacyFields _$UserResponsePrivacyFieldsFromJson(
       : PrivacySettingsResponse.fromJson(
           json['privacy_settings'] as Map<String, dynamic>,
         ),
-  revokeTokensIssuedBefore: _$JsonConverterFromJson<Object, DateTime>(
-    json['revoke_tokens_issued_before'],
-    const StreamDateTimeConverter().fromJson,
-  ),
   role: json['role'] as String,
   teams: (json['teams'] as List<dynamic>).map((e) => e as String).toList(),
   teamsRole: (json['teams_role'] as Map<String, dynamic>?)?.map(
@@ -80,10 +76,6 @@ Map<String, dynamic> _$UserResponsePrivacyFieldsToJson(
   'name': instance.name,
   'online': instance.online,
   'privacy_settings': instance.privacySettings?.toJson(),
-  'revoke_tokens_issued_before': _$JsonConverterToJson<Object, DateTime>(
-    instance.revokeTokensIssuedBefore,
-    const StreamDateTimeConverter().toJson,
-  ),
   'role': instance.role,
   'teams': instance.teams,
   'teams_role': instance.teamsRole,

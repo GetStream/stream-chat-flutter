@@ -22,5 +22,5 @@ extension ListDevicesResponseMapper on api.ListDevicesResponse {
 /// [api.CreateDeviceRequestPushProvider].
 extension PushProviderRequestMapper on PushProvider {
   /// Converts this provider into an [api.CreateDeviceRequestPushProvider].
-  api.CreateDeviceRequestPushProvider toRequest() => api.CreateDeviceRequestPushProvider.fromJson(rawType);
+  api.CreateDeviceRequestPushProvider toRequest() => api.CreateDeviceRequestPushProvider.fromJson(this);
 }

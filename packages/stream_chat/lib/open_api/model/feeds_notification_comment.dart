@@ -21,6 +21,7 @@ class FeedsNotificationComment with _$FeedsNotificationComment {
     this.attachments,
     required this.comment,
     required this.id,
+    this.parentId,
     required this.userId,
   });
 
@@ -35,6 +36,10 @@ class FeedsNotificationComment with _$FeedsNotificationComment {
   @override
   @JsonKey(name: 'id')
   final String id;
+
+  @override
+  @JsonKey(name: 'parent_id')
+  final String? parentId;
 
   @override
   @JsonKey(name: 'user_id')

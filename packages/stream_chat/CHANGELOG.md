@@ -138,6 +138,7 @@
 - Several user values the custom data used to hold, such as `User.name`, `User.image` and `User.deactivatedAt`, are fields instead: `custom` no longer holds them, and an entry with one of their names in `custom` or in `copyWith(custom:)` no longer sets the field.
 - `User.custom` holds the custom data exactly as the API returns it, and `toJson` leaves out an entry named like one of the user's own fields.
 - `OwnUser.fromUser` no longer reads devices, mutes, unread counts, push preferences or privacy settings out of the user's custom data; they are left at their defaults.
+- `rawType` is removed from `MessageType`, `AttachmentType`, `PushLevel`, `ChatPreferenceLevel`, `ChatLevel`, `CallLevel` and `RoleType`, as are `ModerationAction.action` and `ChannelCapability.capability`; use the value itself instead.
 
 🐞 Fixed
 
@@ -150,6 +151,8 @@
 - A message that fails because its attachments did not upload now says which ones and what each reported, instead of `Failed to upload one or more attachments`.
 
 - `connectGuestUser` no longer leaves the signed-in user unauthenticated when it refuses to connect a guest over them.
+
+- The OpenAPI-generated client's methods that take a `payload` or `sort` argument no longer fail with `invalid json data`.
 
 🔄 Changed
 

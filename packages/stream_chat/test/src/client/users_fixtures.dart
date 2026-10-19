@@ -54,7 +54,6 @@ api.UpdateUsersResponse updateUsersResponse() => api.UpdateUsersResponse(
       deactivatedAt: DateTime.utc(2026, 9, 5),
       deletedAt: DateTime.utc(2026, 9, 6),
       shadowBanned: false,
-      revokeTokensIssuedBefore: DateTime.utc(2026, 9, 7),
       blockedUserIds: const ['blocked-user'],
       channelMutes: const [],
       devices: const [],

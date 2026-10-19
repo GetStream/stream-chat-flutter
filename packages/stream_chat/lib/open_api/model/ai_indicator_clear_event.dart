@@ -25,6 +25,7 @@ class AIIndicatorClearEvent extends core.WsEvent with _$AIIndicatorClearEvent {
     required this.custom,
     this.receivedAt,
     required this.type,
+    this.user,
   });
 
   @override
@@ -56,6 +57,10 @@ class AIIndicatorClearEvent extends core.WsEvent with _$AIIndicatorClearEvent {
   @override
   @JsonKey(name: 'type')
   final String type;
+
+  @override
+  @JsonKey(name: 'user')
+  final UserResponseCommonFields? user;
 
   Map<String, dynamic> toJson() => _$AIIndicatorClearEventToJson(this);
 

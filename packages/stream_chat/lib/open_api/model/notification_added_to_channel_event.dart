@@ -27,10 +27,14 @@ class NotificationAddedToChannelEvent extends core.WsEvent with _$NotificationAd
     this.cid,
     required this.createdAt,
     required this.custom,
+    this.groupedUnreadChannels,
     required this.member,
     this.receivedAt,
     this.team,
+    this.totalUnreadCount,
     required this.type,
+    this.unreadChannels,
+    this.unreadCount,
   });
 
   @override
@@ -71,6 +75,10 @@ class NotificationAddedToChannelEvent extends core.WsEvent with _$NotificationAd
   final Map<String, Object?> custom;
 
   @override
+  @JsonKey(name: 'grouped_unread_channels')
+  final Map<String, int>? groupedUnreadChannels;
+
+  @override
   @JsonKey(name: 'member')
   final ChannelMemberResponse member;
 
@@ -84,8 +92,20 @@ class NotificationAddedToChannelEvent extends core.WsEvent with _$NotificationAd
   final String? team;
 
   @override
+  @JsonKey(name: 'total_unread_count')
+  final int? totalUnreadCount;
+
+  @override
   @JsonKey(name: 'type')
   final String type;
+
+  @override
+  @JsonKey(name: 'unread_channels')
+  final int? unreadChannels;
+
+  @override
+  @JsonKey(name: 'unread_count')
+  final int? unreadCount;
 
   Map<String, dynamic> toJson() => _$NotificationAddedToChannelEventToJson(this);
 
