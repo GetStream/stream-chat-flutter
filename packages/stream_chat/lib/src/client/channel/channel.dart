@@ -63,11 +63,11 @@ const incomingTypingStartEventTimeout = 7;
 /// This will do a partial update to update the image.
 /// {@endtemplate}
 class Channel {
-  /// Class that manages a specific channel.
+  /// Creates a channel of [type] with the id [id].
   ///
-  /// The channel starts with the custom data [custom]; a [name] or [image] is
-  /// stored in it under the `name` or `image` key, replacing any entry [custom]
-  /// has for that key.
+  /// The channel starts with [custom] as its custom data. A [name] or [image]
+  /// is stored in it under the `name` or `image` key, replacing any entry
+  /// [custom] has for that key.
   Channel(
     this._client,
     this._type,
@@ -540,7 +540,7 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.ownCapabilities ?? []).distinct();
   }
 
-  /// Channel custom data as a stream.
+  /// This channel's custom data as a stream.
   Stream<Map<String, Object?>> get customStream {
     _checkInitialized();
     return state!.channelStateStream.map(
@@ -1740,8 +1740,10 @@ class Channel {
     );
   }
 
-  /// Sets the fields in [set] and removes the fields named in [unset] on this
-  /// channel, leaving every other field as it is.
+  /// Partially updates this channel.
+  ///
+  /// Sets the fields in [set] and removes the custom fields named in [unset],
+  /// leaving every other field as it is.
   ///
   /// At least one of [set] and [unset] is required.
   ///
@@ -1754,8 +1756,11 @@ class Channel {
     return _client.updateChannelPartial(id!, type, set: set, unset: unset);
   }
 
-  /// Enables slow mode on this channel, so members wait [cooldownInterval]
-  /// seconds between messages.
+  /// Enables slow mode on this channel.
+  ///
+  /// Members then wait [cooldownInterval] seconds between messages.
+  ///
+  /// The [cooldownInterval] must be between 1 and 100.
   Future<Result<UpdateChannelPartialResponse>> enableSlowMode({
     required int cooldownInterval,
   }) async {

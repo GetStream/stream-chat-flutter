@@ -797,8 +797,8 @@ final shown = model.copyWith(hidden: false);
 **`ChannelModel.toJson` and `Member.toJson` no longer write these fields**, where v10 wrote them at the root with the
 rest of the custom data. Read them from the model rather than from its JSON.
 
-**`custom` is the custom data exactly as the API returns it.** An entry named like one of the model's own fields
-stays in `custom` and leaves the field alone; `toJson` leaves it out, so it cannot overwrite the field.
+**An entry of `custom` named like one of the model's own fields stays in `custom`** and leaves the field alone;
+`toJson` leaves it out, so it cannot overwrite the field.
 
 **Filter and sort on a flag through its declared field,** such as `ChannelFilterField.hidden`, rather than
 `.custom('hidden')`, which reads `custom` locally and finds nothing there.
