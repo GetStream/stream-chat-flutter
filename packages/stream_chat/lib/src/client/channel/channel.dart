@@ -63,11 +63,11 @@ const incomingTypingStartEventTimeout = 7;
 /// This will do a partial update to update the image.
 /// {@endtemplate}
 class Channel {
-  /// Class that manages a specific channel.
+  /// Creates a channel of [type] with the id [id].
   ///
-  /// The channel starts with the custom data [custom]; a [name] or [image] is
-  /// stored in it under the `name` or `image` key, replacing any entry [custom]
-  /// has for that key.
+  /// The channel starts with [custom] as its custom data. A [name] or [image]
+  /// is stored in it under the `name` or `image` key, replacing any entry
+  /// [custom] has for that key.
   Channel(
     this._client,
     this._type,
@@ -540,7 +540,7 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.ownCapabilities ?? []).distinct();
   }
 
-  /// Channel custom data as a stream.
+  /// This channel's custom data as a stream.
   Stream<Map<String, Object?>> get customStream {
     _checkInitialized();
     return state!.channelStateStream.map(
@@ -1744,8 +1744,10 @@ class Channel {
     );
   }
 
-  /// Sets the fields in [set] and removes the fields named in [unset] on this
-  /// channel, leaving every other field as it is.
+  /// Partially updates this channel.
+  ///
+  /// Sets the fields in [set] and removes the custom fields named in [unset],
+  /// leaving every other field as it is.
   ///
   /// At least one of [set] and [unset] is required.
   ///
@@ -1758,8 +1760,11 @@ class Channel {
     return _client.updateChannelPartial(id!, type, set: set, unset: unset);
   }
 
-  /// Enables slow mode on this channel, so members wait [cooldownInterval]
-  /// seconds between messages.
+  /// Enables slow mode on this channel.
+  ///
+  /// Members then wait [cooldownInterval] seconds between messages.
+  ///
+  /// The [cooldownInterval] must be between 1 and 100.
   Future<Result<UpdateChannelPartialResponse>> enableSlowMode({
     required int cooldownInterval,
   }) async {
@@ -1901,13 +1906,14 @@ class Channel {
     return _client.markChannelRead(id!, type, messageId: messageId);
   }
 
-  /// Marks this channel as unread for the current user, from the message with
-  /// [messageId] onwards.
+  /// Marks this channel as unread for the current user.
   ///
-  /// All messages from the provided message onwards will be marked as unread,
-  /// **including** the message itself. Contrast with
-  /// [markUnreadByTimestamp], which is exclusive: a message created at
-  /// exactly the given timestamp stays read.
+  /// The message with [messageId] and every later one are marked as unread.
+  /// Contrast with [markUnreadByTimestamp], which is exclusive: a message
+  /// created at exactly the given timestamp stays read.
+  ///
+  /// The message must be one of the channel's latest 100 messages; an older one
+  /// returns a failure.
   ///
   /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
   /// unread count locally, on-device, without making a network request. The
@@ -2384,11 +2390,15 @@ class Channel {
     );
   }
 
-  /// Hides this channel from the current user's channel list until a new
-  /// message is added to it.
+  /// Hides this channel for the current user.
   ///
-  /// If [clearHistory] is true, the channel's messages are also cleared for the
-  /// current user.
+  /// It stays out of the current user's channel list until a new message is
+  /// added to it.
+  ///
+  /// Hiding also marks it read for the current user.
+  ///
+  /// If [clearHistory] is true, this channel's messages are also cleared
+  /// for the current user.
   Future<Result<HideChannelResponse>> hide({bool clearHistory = false}) async {
     _checkInitialized();
     return _client.hideChannel(

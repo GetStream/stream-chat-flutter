@@ -81,6 +81,14 @@ void main() {
       expect(json['color'], 'red');
     });
 
+    test('User.copyWith does not set a field from custom data named like it', () {
+      final user = User(id: id, name: name);
+
+      final newUser = user.copyWith(custom: const {'name': 'custom'});
+
+      expect(newUser.name, name);
+    });
+
     test('should serialize to json correctly', () {
       final user = User(
         id: id,

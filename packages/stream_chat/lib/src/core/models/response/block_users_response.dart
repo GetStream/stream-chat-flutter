@@ -2,7 +2,11 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'block_users_response.freezed.dart';
 
-/// The result of blocking a user, returned by [StreamChatClient.blockUser].
+/// The result of blocking a user.
+///
+/// See also:
+///
+///  * [StreamChatClient.blockUser], which returns it.
 @freezed
 class BlockUsersResponse with _$BlockUsersResponse {
   /// Creates a new [BlockUsersResponse].

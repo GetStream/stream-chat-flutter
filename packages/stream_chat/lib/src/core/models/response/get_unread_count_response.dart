@@ -6,9 +6,13 @@ import '../unread_counts_thread.dart';
 
 part 'get_unread_count_response.freezed.dart';
 
-/// The result of counting the current user's unread messages and threads, in
-/// total and by channel, channel type and thread, returned by
-/// [StreamChatClient.getUnreadCount].
+/// The result of counting the current user's unread messages and threads.
+///
+/// The counts come in total and by channel, channel type and thread.
+///
+/// See also:
+///
+///  * [StreamChatClient.getUnreadCount], which returns it.
 @freezed
 class GetUnreadCountResponse with _$GetUnreadCountResponse {
   /// Creates a new [GetUnreadCountResponse].

@@ -93,14 +93,14 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Message Reminders**](#message-reminders) | Reminder calls return a `Result`; `deleteReminder` answers a new `DeleteReminderResponse`; `queryReminders` takes `limit`/`next`/`prev`; `MessageReminder` no longer decodes JSON |
 | [**File Upload**](#file-upload) | Uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
 | [**Partial Updates**](#partial-updates) | Channel and member partial updates — `updatePartial`, `updateName`, `updateImage`, slow mode, pin and archive — return a `Result` instead of throwing; their responses take the API's names, `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse`, and `partialMemberUpdate` becomes `updateMemberPartial` |
-| [**Channel Lifecycle**](#channel-lifecycle) | Hiding, showing and deleting a channel return a `Result` instead of throwing; stopping watching still throws |
+| [**Channel Lifecycle**](#channel-lifecycle) | Hiding, showing and deleting a channel return a `Result` instead of throwing |
 | [**Read Receipts**](#read-receipts) | Marking read, unread and delivered return a `Result` instead of throwing; `ChannelDeliveryReporter`'s callback returns a `Result` |
 | [**Unread Counts**](#unread-counts) | `getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing; the response and its `UnreadCounts*` models lose their JSON codecs and compare by value |
 | [**User Blocking**](#user-blocking) | `blockUser`, `unblockUser` and `getBlockedUsers` (was `queryBlockedUsers`) return a `Result` instead of throwing; their responses are renamed `BlockUsersResponse` and `GetBlockedUsersResponse`, `unblockUser` answers a new `UnblockUsersResponse`, and `UserBlock`'s fields are all non-nullable |
 | [**Messages**](#messages) | `Moderation`, `ReactionGroup`, `Action`, `Reaction` and `Location` no longer decode from or encode to JSON; `Action` compares by value |
 | [**User Updates**](#user-updates) | `updateUser` and `updateUsers` return a `Result<UpdateUsersResponse>` instead of throwing; `partialUpdateUser(s)` becomes `updateUserPartial` / `updateUsersPartial` and `PartialUpdateUserRequest` becomes `UpdateUserPartialRequest`; `updateUser` no longer sends `role`, `teams` or `teamsRole`, and the returned users no longer carry their private fields in `extraData` |
-| [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`, and holds the custom data verbatim; the channel and member flags it carried are fields |
-| [**User Custom Data**](#user-custom-data) | `extraData` is `custom` on `User` and `OwnUser`, and holds the custom data verbatim; `name` is nullable and `nameOrId` falls back to the id; the user fields it carried are fields |
+| [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`; the channel and member flags it carried are fields |
+| [**User Custom Data**](#user-custom-data) | `extraData` is `custom` on `User` and `OwnUser`; `name` is nullable and `nameOrId` falls back to the id; the user fields it carried are fields |
 | [**Message Custom Data**](#message-custom-data) | `extraData` is `custom` on `Message`, `Attachment`, `Reaction` and `DraftMessage`, and holds the custom data verbatim; a message's channel id, HTML, markup and deleted reply count, and an attachment's Giphy renditions, are fields |
 | _(filled in per feature as PRs land)_ | |
 
@@ -1067,8 +1067,8 @@ final shown = model.copyWith(hidden: false);
 **`ChannelModel.toJson` and `Member.toJson` no longer write these fields**, where v10 wrote them at the root with the
 rest of the custom data. Read them from the model rather than from its JSON.
 
-**`custom` is the custom data exactly as the API returns it.** An entry named like one of the model's own fields
-stays in `custom` and leaves the field alone; `toJson` leaves it out, so it cannot overwrite the field.
+**An entry of `custom` named like one of the model's own fields stays in `custom`** and leaves the field alone;
+`toJson` leaves it out, so it cannot overwrite the field.
 
 **Filter and sort on a flag through its declared field,** such as `ChannelFilterField.hidden`, rather than
 `.custom('hidden')`, which reads `custom` locally and finds nothing there.
@@ -1122,8 +1122,8 @@ final renamed = user.copyWith(name: 'Jane');
 devices, mutes, unread counts, push preferences and privacy settings back out of the user's `extraData`; a `User`
 no longer carries them.
 
-**`custom` is the custom data exactly as the API returns it.** An entry named like one of the user's own fields
-stays in `custom` and leaves the field alone; `toJson` leaves it out, so it cannot overwrite the field.
+**An entry of `custom` named like one of the user's own fields stays in `custom`** and leaves the field alone;
+`toJson` leaves it out, so it cannot overwrite the field.
 
 > **Why:** the API calls it `custom`, and every migrated model takes that name. A name that answered the id could
 > not tell an unnamed user from a named one, so initials and sorts read the id as a name.

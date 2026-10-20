@@ -2,8 +2,10 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'update_user_partial_request.freezed.dart';
 
-/// A partial update of one user: the fields in [set] are set and the fields
-/// named in [unset] are removed, leaving every other field as it is.
+/// A partial update of one user.
+///
+/// The fields in [set] are set and the fields named in [unset] are removed,
+/// leaving every other field as it is.
 ///
 /// Passed to [StreamChatClient.updateUsersPartial].
 @freezed

@@ -2,10 +2,13 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'mark_read_response.freezed.dart';
 
-/// The result of marking channels or a thread as read, returned by
-/// [StreamChatClient.markChannelRead], [StreamChatClient.markThreadRead] and
-/// [StreamChatClient.markAllRead], and the calls built on them, such as
-/// [Channel.markRead].
+/// The result of marking channels or a thread as read.
+///
+/// See also:
+///
+///  * [StreamChatClient.markChannelRead], [StreamChatClient.markThreadRead]
+///    and [StreamChatClient.markAllRead], which return it.
+///  * [Channel.markRead] and [Channel.markThreadRead], which return it too.
 @freezed
 class MarkReadResponse with _$MarkReadResponse {
   /// Creates a new [MarkReadResponse].
