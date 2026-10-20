@@ -79,13 +79,6 @@ class QueryChannelsResponse extends _BaseResponse {
 
 /// Model response for [StreamChatClient.queryChannels] api call
 @JsonSerializable(createToJson: false)
-class TranslateMessageResponse extends MessageResponse {
-  /// Create a new instance from a json
-  static TranslateMessageResponse fromJson(Map<String, dynamic> json) => _$TranslateMessageResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.queryChannels] api call
-@JsonSerializable(createToJson: false)
 class QueryMembersResponse extends _BaseResponse {
   /// List of channels state returned by the query
   @JsonKey(defaultValue: [])
@@ -117,17 +110,6 @@ class QueryBannedUsersResponse extends _BaseResponse {
   static QueryBannedUsersResponse fromJson(Map<String, dynamic> json) => _$QueryBannedUsersResponseFromJson(json);
 }
 
-/// Model response for [Channel.getReplies] api call
-@JsonSerializable(createToJson: false)
-class QueryRepliesResponse extends _BaseResponse {
-  /// List of messages returned by the api call
-  @JsonKey(defaultValue: [])
-  late List<Message> messages;
-
-  /// Create a new instance from a json
-  static QueryRepliesResponse fromJson(Map<String, dynamic> json) => _$QueryRepliesResponseFromJson(json);
-}
-
 /// Base Model response for message based api calls.
 class MessageResponse extends _BaseResponse {
   /// Message returned by the api call
@@ -146,51 +128,6 @@ class UpdateMessageResponse extends MessageResponse {
 class SendMessageResponse extends MessageResponse {
   /// Create a new instance from a json
   static SendMessageResponse fromJson(Map<String, dynamic> json) => _$SendMessageResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.getMessage] api call
-@JsonSerializable(createToJson: false)
-class GetMessageResponse extends MessageResponse {
-  /// Channel of the message
-  ChannelModel? channel;
-
-  /// Create a new instance from a json
-  static GetMessageResponse fromJson(Map<String, dynamic> json) {
-    final res = _$GetMessageResponseFromJson(json);
-    final jsonChannel = res.message.custom.remove('channel');
-    if (jsonChannel != null) {
-      res.channel = ChannelModel.fromJson(jsonChannel as Map<String, dynamic>);
-    }
-    return res;
-  }
-}
-
-/// Model response for [StreamChatClient.search] api call
-@JsonSerializable(createToJson: false)
-class SearchMessagesResponse extends _BaseResponse {
-  /// List of messages returned by the api call
-  @JsonKey(defaultValue: [])
-  late List<GetMessageResponse> results;
-
-  /// Message id of where to start searching from for next [results]
-  late String? next;
-
-  /// Message id of where to start searching from for previous [results]
-  late String? previous;
-
-  /// Create a new instance from a json
-  static SearchMessagesResponse fromJson(Map<String, dynamic> json) => _$SearchMessagesResponseFromJson(json);
-}
-
-/// Model response for [Channel.getMessagesById] api call
-@JsonSerializable(createToJson: false)
-class GetMessagesByIdResponse extends _BaseResponse {
-  /// Message returned by the api call
-  @JsonKey(defaultValue: [])
-  late List<Message> messages;
-
-  /// Create a new instance from a json
-  static GetMessagesByIdResponse fromJson(Map<String, dynamic> json) => _$GetMessagesByIdResponseFromJson(json);
 }
 
 /// Model response for [Channel.update] api call

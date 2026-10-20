@@ -98,10 +98,10 @@ void main() {
     when(
       () => channel.getReplies(
         any(),
-        options: any(named: 'options'),
+        limit: any(named: 'limit'),
         preferOffline: any(named: 'preferOffline'),
       ),
-    ).thenAnswer((_) async => QueryRepliesResponse()..messages = []);
+    ).thenAnswer((_) async => const Result.success(GetRepliesResponse(duration: '0ms', messages: [])));
   });
 
   // Default: opened with nothing pre-existing unread, so the

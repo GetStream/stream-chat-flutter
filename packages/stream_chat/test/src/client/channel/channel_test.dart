@@ -183,6 +183,63 @@ void main() {
     tearDown(() {
       channel.dispose();
     });
+
+    test('Channel.getReplies returns the stored replies and adds them to the thread state without fetching them when '
+        'preferOffline is true', () async {
+      const parentId = 'test-parent-id';
+      final storedReplies = [Message(id: 'stored-reply-id', parentId: parentId)];
+      when(
+        () => client.chatPersistenceClient.getReplies(
+          parentId,
+          options: const PaginationParams(limit: 30, lessThan: 'older-id'),
+        ),
+      ).thenAnswer((_) async => storedReplies);
+
+      final res = await channel.getReplies(parentId, limit: 30, idLt: 'older-id', preferOffline: true);
+
+      expect(res.getOrNull(), GetRepliesResponse(duration: '0ms', messages: storedReplies));
+      expect(channel.state!.threads[parentId]?.map((it) => it.id), ['stored-reply-id']);
+      verifyNever(
+        () => client.getReplies(
+          any(),
+          limit: any(named: 'limit'),
+          idLt: any(named: 'idLt'),
+        ),
+      );
+    });
+
+    test('Channel.getReplies fetches the replies when preferOffline is true but the storage cannot be read', () async {
+      const parentId = 'test-parent-id';
+      when(
+        () => client.chatPersistenceClient.getReplies(parentId, options: const PaginationParams(limit: 20)),
+      ).thenThrow(StateError('database closed'));
+      final response = GetRepliesResponse(
+        duration: '0.01ms',
+        messages: [Message(id: 'fetched-reply-id', parentId: parentId)],
+      );
+      when(() => client.getReplies(parentId, limit: 20)).thenAnswer((_) async => Result.success(response));
+
+      final res = await channel.getReplies(parentId, limit: 20, preferOffline: true);
+
+      expect(res.getOrNull(), response);
+    });
+
+    test('Channel.getReplies fetches the replies when preferOffline is true but none are stored', () async {
+      const parentId = 'test-parent-id';
+      when(
+        () => client.chatPersistenceClient.getReplies(parentId, options: const PaginationParams(limit: 30)),
+      ).thenAnswer((_) async => []);
+      final response = GetRepliesResponse(
+        duration: '0.01ms',
+        messages: [Message(id: 'fetched-reply-id', parentId: parentId)],
+      );
+      when(() => client.getReplies(parentId, limit: 30)).thenAnswer((_) async => Result.success(response));
+
+      final res = await channel.getReplies(parentId, limit: 30, preferOffline: true);
+
+      expect(res.getOrNull(), response);
+      verify(() => client.getReplies(parentId, limit: 30)).called(1);
+    });
   });
 
   group('Initialized Channel', () {
@@ -2819,82 +2876,50 @@ void main() {
       ).called(1);
     });
 
-    group('`.search`', () {
+    test('Channel.search searches this channel for the query', () async {
       final filter = ChannelFilter.in_(ChannelFilterField.cid, const [channelCid]);
+      final sort = [MessageSearchSort.asc(MessageSearchSortField.custom('test-sort-field'))];
+      const response = SearchMessagesResponse(duration: '0.01ms', results: [], next: 'later-cursor');
 
-      test('should work fine with `query`', () async {
-        const query = 'test-search-query';
-        final sort = [MessageSearchSort.asc(MessageSearchSortField.custom('test-sort-field'))];
-        const pagination = PaginationParams();
-
-        final results = List.generate(3, (index) => GetMessageResponse());
-
-        when(
-          () => client.search(
-            any(that: isSameFilterAs(filter)),
-            query: query,
-            sort: any(named: 'sort'),
-            paginationParams: any(named: 'paginationParams'),
-          ),
-        ).thenAnswer(
-          (_) async => SearchMessagesResponse()..results = results,
-        );
-
-        final res = await channel.search(
-          query: query,
+      when(
+        () => client.search(
+          any(that: isSameFilterAs(filter)),
+          query: 'test-search-query',
           sort: sort,
-          paginationParams: pagination,
-        );
+          limit: 20,
+          next: 'next-cursor',
+        ),
+      ).thenAnswer((_) async => const Result.success(response));
 
-        expect(res, isNotNull);
-        expect(res.results.length, results.length);
+      final res = await channel.search(query: 'test-search-query', sort: sort, limit: 20, next: 'next-cursor');
 
-        verify(
-          () => client.search(
-            any(that: isSameFilterAs(filter)),
-            query: query,
-            sort: any(named: 'sort'),
-            paginationParams: any(named: 'paginationParams'),
-          ),
-        ).called(1);
-      });
-
-      test('should work fine with `messageFilters`', () async {
-        final messageFilters = MessageSearchFilter.query(MessageSearchFilterField.text, 'text');
-        final sort = [MessageSearchSort.desc(MessageSearchSortField.custom('test-sort-field'))];
-        const pagination = PaginationParams();
-
-        final results = List.generate(3, (index) => GetMessageResponse());
-
-        when(
-          () => client.search(
-            any(that: isSameFilterAs(filter)),
-            messageFilters: messageFilters,
-            sort: any(named: 'sort'),
-            paginationParams: any(named: 'paginationParams'),
-          ),
-        ).thenAnswer(
-          (_) async => SearchMessagesResponse()..results = results,
-        );
-
-        final res = await channel.search(
+      expect(res.getOrNull(), response);
+      verify(
+        () => client.search(
+          any(that: isSameFilterAs(filter)),
+          query: 'test-search-query',
           sort: sort,
-          paginationParams: pagination,
-          messageFilters: messageFilters,
-        );
+          limit: 20,
+          next: 'next-cursor',
+        ),
+      ).called(1);
+    });
 
-        expect(res, isNotNull);
-        expect(res.results.length, results.length);
+    test('Channel.search searches this channel for the message filters', () async {
+      final filter = ChannelFilter.in_(ChannelFilterField.cid, const [channelCid]);
+      final messageFilters = MessageSearchFilter.query(MessageSearchFilterField.text, 'text');
+      const response = SearchMessagesResponse(duration: '0.01ms', results: []);
 
-        verify(
-          () => client.search(
-            any(that: isSameFilterAs(filter)),
-            messageFilters: messageFilters,
-            sort: any(named: 'sort'),
-            paginationParams: any(named: 'paginationParams'),
-          ),
-        ).called(1);
-      });
+      when(
+        () => client.search(any(that: isSameFilterAs(filter)), messageFilters: messageFilters, offset: 40),
+      ).thenAnswer((_) async => const Result.success(response));
+
+      final res = await channel.search(messageFilters: messageFilters, offset: 40);
+
+      expect(res.getOrNull(), response);
+      verify(
+        () => client.search(any(that: isSameFilterAs(filter)), messageFilters: messageFilters, offset: 40),
+      ).called(1);
     });
 
     test('`.deleteFile`', () async {
@@ -4107,7 +4132,7 @@ void main() {
       verify(() => client.stopChannelWatching(channelId, channelType)).called(1);
     });
 
-    test('`.getReplies`', () async {
+    test('Channel.getReplies adds the fetched replies to the thread state', () async {
       const parentId = 'test-parent-id';
 
       final messages = List.generate(
@@ -4117,21 +4142,34 @@ void main() {
           parentId: parentId,
         ),
       );
+      final response = GetRepliesResponse(duration: '0.01ms', messages: messages);
 
-      when(() => client.getReplies(parentId)).thenAnswer(
-        (_) async => QueryRepliesResponse()..messages = messages,
-      );
+      when(
+        () => client.getReplies(parentId, limit: 30, idLt: 'older-id'),
+      ).thenAnswer((_) async => Result.success(response));
 
-      final res = await channel.getReplies(parentId);
+      final res = await channel.getReplies(parentId, limit: 30, idLt: 'older-id');
 
-      expect(res, isNotNull);
-      expect(res.messages.length, messages.length);
-      expect(res.messages.every((it) => it.parentId == parentId), isTrue);
-
-      verify(() => client.getReplies(parentId)).called(1);
+      expect(res.getOrNull(), response);
+      expect(channel.state!.threads[parentId]?.map((it) => it.id), messages.map((it) => it.id));
+      verify(() => client.getReplies(parentId, limit: 30, idLt: 'older-id')).called(1);
     });
 
-    test('`.getReplies` keeps the parent message out of the thread', () async {
+    test('Channel.getReplies fetches the replies when preferOffline is true but there is no offline storage', () async {
+      const parentId = 'test-parent-id';
+      final response = GetRepliesResponse(
+        duration: '0.01ms',
+        messages: [Message(id: 'fetched-reply-id', parentId: parentId)],
+      );
+      when(() => client.getReplies(parentId, limit: 30)).thenAnswer((_) async => Result.success(response));
+
+      final res = await channel.getReplies(parentId, limit: 30, preferOffline: true);
+
+      expect(res.getOrNull(), response);
+      verify(() => client.getReplies(parentId, limit: 30)).called(1);
+    });
+
+    test('Channel.getReplies keeps the parent message out of the thread', () async {
       const parentId = 'test-parent-id';
 
       // Some backends return the parent as the first message of the oldest
@@ -4145,16 +4183,45 @@ void main() {
         ),
       ];
 
-      when(() => client.getReplies(parentId)).thenAnswer(
-        (_) async => QueryRepliesResponse()..messages = messages,
+      when(() => client.getReplies(parentId, limit: 30)).thenAnswer(
+        (_) async => Result.success(GetRepliesResponse(duration: '0.01ms', messages: messages)),
       );
 
-      await channel.getReplies(parentId);
+      await channel.getReplies(parentId, limit: 30);
 
       final threadMessages = channel.state!.threads[parentId];
       expect(threadMessages, isNotNull);
       expect(threadMessages!.length, messages.length - 1);
       expect(threadMessages.any((it) => it.id == parentId), isFalse);
+    });
+
+    test('Channel.getReplies replaces the thread state with a page around a reply', () async {
+      const parentId = 'test-parent-id';
+      channel.state!.updateThreadInfo(parentId, [Message(id: 'stale-reply-id', parentId: parentId)]);
+
+      final messages = [Message(id: 'around-reply-id', parentId: parentId)];
+      when(() => client.getReplies(parentId, limit: 30, idAround: 'around-reply-id')).thenAnswer(
+        (_) async => Result.success(GetRepliesResponse(duration: '0.01ms', messages: messages)),
+      );
+
+      await channel.getReplies(parentId, limit: 30, idAround: 'around-reply-id');
+
+      expect(channel.state!.threads[parentId]?.map((it) => it.id), ['around-reply-id']);
+    });
+
+    test('Channel.getReplies leaves the thread state untouched on a failure', () async {
+      const parentId = 'test-parent-id';
+      channel.state!.updateThreadInfo(parentId, [Message(id: 'existing-reply-id', parentId: parentId)]);
+
+      const error = StreamClientException(message: 'boom');
+      when(
+        () => client.getReplies(parentId, limit: 30, idAround: 'around-reply-id'),
+      ).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await channel.getReplies(parentId, limit: 30, idAround: 'around-reply-id');
+
+      expect(res.exceptionOrNull(), error);
+      expect(channel.state!.threads[parentId]?.map((it) => it.id), ['existing-reply-id']);
     });
 
     test('Channel.getReactions fetches one page of the reactions on the message', () async {
@@ -4179,55 +4246,62 @@ void main() {
       verify(() => client.getReactions(messageId, limit: 20, offset: 40)).called(1);
     });
 
-    test('`.getMessagesById`', () async {
+    test('Channel.getManyMessages fetches the messages of this channel', () async {
       final messages = List.generate(
         3,
         (index) => Message(id: 'test-message-id-$index'),
       );
-
       final messageIds = messages.map((it) => it.id).toList(growable: false);
+      final response = GetManyMessagesResponse(duration: '0.01ms', messages: messages);
 
-      when(() => client.getMessagesById(channelId, channelType, messageIds)).thenAnswer(
-        (_) async => GetMessagesByIdResponse()..messages = messages,
-      );
+      when(
+        () => client.getManyMessages(channelId, channelType, messageIds),
+      ).thenAnswer((_) async => Result.success(response));
 
-      final res = await channel.getMessagesById(messageIds);
+      final res = await channel.getManyMessages(messageIds);
 
-      expect(res, isNotNull);
-      expect(res.messages.length, messageIds.length);
-
-      verify(
-        () => client.getMessagesById(channelId, channelType, messageIds),
-      ).called(1);
+      expect(res.getOrNull(), response);
+      verify(() => client.getManyMessages(channelId, channelType, messageIds)).called(1);
     });
 
-    test('`.translateMessage`', () async {
+    test('Channel.translateMessage merges the translated message into the channel state', () async {
       const messageId = 'test-message-id';
-      const language = 'hi'; // Hindi
       const translatedMessageText = 'नमस्ते';
 
       final message = Message(id: messageId, text: 'Hello');
       channel.state!.updateMessage(message);
 
       final translatedMessage = message.copyWith(
-        i18n: {'language': 'en', '${language}_text': translatedMessageText},
+        i18n: {'language': 'en', 'hi_text': translatedMessageText},
       );
+      final response = TranslateMessageResponse(duration: '0.01ms', message: translatedMessage);
 
-      when(() => client.translateMessage(messageId, language)).thenAnswer(
-        (_) async => TranslateMessageResponse()..message = translatedMessage,
-      );
+      when(
+        () => client.translateMessage(messageId, TranslationLanguage.hi),
+      ).thenAnswer((_) async => Result.success(response));
 
-      final res = await channel.translateMessage(messageId, language);
+      final res = await channel.translateMessage(messageId, TranslationLanguage.hi);
 
-      expect(res, isNotNull);
-      expect(res.message.i18n, translatedMessage.i18n);
-
-      // The translation is merged into the channel state, so callers don't
-      // have to apply the response themselves.
+      expect(res.getOrNull(), response);
       final stateMessage = channel.state!.messages.firstWhere((it) => it.id == messageId);
       expect(stateMessage.i18n, translatedMessage.i18n);
+      verify(() => client.translateMessage(messageId, TranslationLanguage.hi)).called(1);
+    });
 
-      verify(() => client.translateMessage(messageId, language)).called(1);
+    test('Channel.translateMessage leaves the channel state untouched on a failure', () async {
+      const messageId = 'test-message-id';
+      channel.state!.updateMessage(Message(id: messageId, text: 'Hello'));
+
+      const error = StreamClientException(message: 'boom');
+      when(
+        () => client.translateMessage(messageId, TranslationLanguage.hi),
+      ).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await channel.translateMessage(messageId, TranslationLanguage.hi);
+
+      expect(res.exceptionOrNull(), error);
+      final stateMessage = channel.state!.messages.firstWhere((it) => it.id == messageId);
+      expect(stateMessage.i18n, isNull);
     });
 
     group('`.query`', () {

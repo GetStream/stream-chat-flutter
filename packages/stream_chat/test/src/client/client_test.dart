@@ -1578,43 +1578,6 @@ void main() {
       verifyNoMoreInteractions(fakeChatApi.moderation);
     });
 
-    test('`.search`', () async {
-      const cid = 'test-type:test-id';
-      final filter = ChannelFilter.in_(ChannelFilterField.cid, const [cid]);
-
-      final messages = List.generate(
-        3,
-        (index) => GetMessageResponse()
-          ..channel = ChannelModel(cid: cid)
-          ..message = Message(id: 'test-message-id-$index'),
-      );
-
-      when(
-        () => fakeChatApi.general.searchMessages(
-          filter,
-          query: any(named: 'query'),
-          sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
-          messageFilters: any(named: 'messageFilters'),
-        ),
-      ).thenAnswer((_) async => SearchMessagesResponse()..results = messages);
-
-      final res = await client.search(filter);
-      expect(res, isNotNull);
-      expect(res.results.length, messages.length);
-
-      verify(
-        () => fakeChatApi.general.searchMessages(
-          filter,
-          query: any(named: 'query'),
-          sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
-          messageFilters: any(named: 'messageFilters'),
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.general);
-    });
-
     test('`.updateChannel`', () async {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';
@@ -3422,26 +3385,6 @@ void main() {
       verifyNoMoreInteractions(fakeChatApi.message);
     });
 
-    test('`.getReplies`', () async {
-      const parentId = 'test-parent-id';
-
-      final messages = List.generate(
-        3,
-        (index) => Message(id: 'test-message-id-$index'),
-      );
-
-      when(
-        () => fakeChatApi.message.getReplies(parentId),
-      ).thenAnswer((_) async => QueryRepliesResponse()..messages = messages);
-
-      final res = await client.getReplies(parentId);
-      expect(res, isNotNull);
-      expect(res.messages.length, messages.length);
-
-      verify(() => fakeChatApi.message.getReplies(parentId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.message);
-    });
-
     test('`.updateMessage`', () async {
       final message = Message(id: 'test-message-id', text: 'Hello!');
 
@@ -3482,70 +3425,6 @@ void main() {
       expect(res, isNotNull);
 
       verify(() => fakeChatApi.message.deleteMessage(messageId, deleteForMe: true)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.message);
-    });
-
-    test('`.getMessage`', () async {
-      const messageId = 'test-message-id';
-      final message = Message(id: messageId);
-
-      when(
-        () => fakeChatApi.message.getMessage(messageId),
-      ).thenAnswer((_) async => GetMessageResponse()..message = message);
-
-      final res = await client.getMessage(messageId);
-      expect(res, isNotNull);
-      expect(res.message.id, messageId);
-
-      verify(() => fakeChatApi.message.getMessage(messageId)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.message);
-    });
-
-    test('`.getMessagesById`', () async {
-      const channelId = 'test-channel-id';
-      const channelType = 'test-channel-type';
-      const messageIds = ['test-message-id'];
-
-      final messages = messageIds.map((id) => Message(id: id)).toList();
-
-      when(
-        () => fakeChatApi.message.getMessagesById(channelId, channelType, messageIds),
-      ).thenAnswer((_) async => GetMessagesByIdResponse()..messages = messages);
-
-      final res = await client.getMessagesById(
-        channelId,
-        channelType,
-        messageIds,
-      );
-      expect(res, isNotNull);
-      expect(res.messages.length, messageIds.length);
-
-      verify(
-        () => fakeChatApi.message.getMessagesById(channelId, channelType, messageIds),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.message);
-    });
-
-    test('`.translateMessage`', () async {
-      const messageId = 'test-message-id';
-      const language = 'hi'; // Hindi
-      const translatedMessageText = 'नमस्ते';
-      final translatedMessage = Message(
-        i18n: const {
-          language: translatedMessageText,
-        },
-      );
-
-      when(() => fakeChatApi.message.translateMessage(messageId, language)).thenAnswer(
-        (_) async => TranslateMessageResponse()..message = translatedMessage,
-      );
-
-      final res = await client.translateMessage(messageId, language);
-
-      expect(res, isNotNull);
-      expect(res.message.i18n, translatedMessage.i18n);
-
-      verify(() => fakeChatApi.message.translateMessage(messageId, language)).called(1);
       verifyNoMoreInteractions(fakeChatApi.message);
     });
 

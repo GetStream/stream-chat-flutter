@@ -114,7 +114,7 @@ final generatedMessage = api.MessageResponse(
   restrictedVisibility: const ['luke'],
   shadowed: false,
   sharedLocation: api.SharedLocationResponseData(
-    channel: _generatedChannel,
+    channel: generatedChannel,
     channelCid: 'messaging:general',
     createdAt: DateTime.utc(2026, 1, 9),
     createdByDeviceId: 'device-id',
@@ -245,7 +245,21 @@ Message expectedMessageLike(Message actual) => Message(
   deletedReplyCount: 2,
 );
 
-final _generatedChannel = api.ChannelResponse(
+/// [generatedMessage] with its channel, as fetching a single message returns
+/// it.
+final generatedMessageWithChannel = api.MessageWithChannelResponse.fromJson({
+  ...generatedMessage.toJson(),
+  'channel': generatedChannel.toJson(),
+});
+
+/// [generatedMessage] with its channel, as a search returns it.
+final generatedSearchResultMessage = api.SearchResultMessage.fromJson({
+  ...generatedMessage.toJson(),
+  'channel': generatedChannel.toJson(),
+});
+
+/// The generated channel every fixture message belongs to.
+final generatedChannel = api.ChannelResponse(
   cid: 'messaging:general',
   createdAt: DateTime.utc(2026),
   custom: const {},
@@ -407,7 +421,7 @@ final _expectedOwnReaction = Reaction(
 /// A generated draft with every field set, as creating or querying drafts
 /// answers it.
 final generatedDraft = api.DraftResponse(
-  channel: _generatedChannel,
+  channel: generatedChannel,
   channelCid: 'messaging:general',
   createdAt: DateTime.utc(2026, 1, 11),
   message: api.DraftPayloadResponse(
@@ -574,7 +588,7 @@ Message _expectedQuotedMessage(String attachmentId) => Message(
 /// answers it.
 final generatedThread = api.ThreadStateResponse(
   activeParticipantCount: 2,
-  channel: _generatedChannel,
+  channel: generatedChannel,
   channelCid: 'messaging:general',
   createdAt: DateTime.utc(2026, 2, 1),
   createdBy: fakeUserResponse('creator'),

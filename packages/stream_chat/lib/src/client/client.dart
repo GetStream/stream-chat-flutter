@@ -73,7 +73,10 @@ import '../core/models/response/delete_reaction_response.dart';
 import '../core/models/response/delete_reminder_response.dart';
 import '../core/models/response/get_blocked_users_response.dart';
 import '../core/models/response/get_draft_response.dart';
+import '../core/models/response/get_many_messages_response.dart';
+import '../core/models/response/get_message_response.dart';
 import '../core/models/response/get_reactions_response.dart';
+import '../core/models/response/get_replies_response.dart';
 import '../core/models/response/get_thread_response.dart';
 import '../core/models/response/get_unread_count_response.dart';
 import '../core/models/response/get_user_group_response.dart';
@@ -93,10 +96,12 @@ import '../core/models/response/query_reactions_response.dart';
 import '../core/models/response/query_reminders_response.dart';
 import '../core/models/response/query_threads_response.dart';
 import '../core/models/response/remove_user_group_members_response.dart';
+import '../core/models/response/search_messages_response.dart';
 import '../core/models/response/search_roles_response.dart';
 import '../core/models/response/search_user_groups_response.dart';
 import '../core/models/response/send_reaction_response.dart';
 import '../core/models/response/show_channel_response.dart';
+import '../core/models/response/translate_message_response.dart';
 import '../core/models/response/unblock_users_response.dart';
 import '../core/models/response/update_channel_partial_response.dart';
 import '../core/models/response/update_member_partial_response.dart';
@@ -106,6 +111,7 @@ import '../core/models/response/update_user_group_response.dart';
 import '../core/models/response/update_users_response.dart';
 import '../core/models/role_type.dart';
 import '../core/models/thread.dart';
+import '../core/models/translation_language.dart';
 import '../core/models/user.dart';
 import '../core/util/event_controller.dart';
 import '../core/util/extension.dart';
@@ -1147,19 +1153,33 @@ class StreamChatClient {
     pagination: pagination,
   );
 
-  /// A message search.
-  Future<SearchMessagesResponse> search(
+  /// Searches the messages of the channels that match [filter].
+  ///
+  /// It looks for the messages that contain the text [query], or for those that
+  /// match [messageFilters]. Exactly one of the two must be given.
+  ///
+  /// The results are ordered by [sort]. A page holds up to [limit] results, and
+  /// never more than 100.
+  ///
+  /// The next page is fetched by passing a response's
+  /// [SearchMessagesResponse.next] as [next], or by skipping the first [offset]
+  /// results. A non-zero [offset] cannot be combined with [sort] or [next].
+  Future<Result<SearchMessagesResponse>> search(
     ChannelFilter filter, {
     String? query,
     List<MessageSearchSort>? sort,
-    PaginationParams? paginationParams,
     MessageSearchFilter? messageFilters,
-  }) => _chatApi.general.searchMessages(
+    int? limit,
+    int? offset,
+    String? next,
+  }) => _messagesRepository.search(
     filter,
     query: query,
-    sort: sort,
-    pagination: paginationParams,
     messageFilters: messageFilters,
+    sort: sort,
+    limit: limit,
+    offset: offset,
+    next: next,
   );
 
   /// Uploads [file] to the channel [channelId] of type [channelType].
@@ -1991,13 +2011,30 @@ class StreamChatClient {
     skipEnrichUrl: skipEnrichUrl,
   );
 
-  /// Lists all the message replies for the [parentId]
-  Future<QueryRepliesResponse> getReplies(
+  /// Fetches one page of the replies to the message with the id [parentId].
+  ///
+  /// Up to [limit] replies are returned, oldest first, and never more than 300.
+  /// The [limit] must be positive for the reply ids below to take effect.
+  ///
+  /// The reply ids [idLt] and [idLte] bound the page to the replies before that
+  /// reply, [idGt] and [idGte] to the replies after it, and [idAround] to the
+  /// replies around it. [idLte] and [idGte] include the reply itself.
+  Future<Result<GetRepliesResponse>> getReplies(
     String parentId, {
-    PaginationParams? options,
-  }) => _chatApi.message.getReplies(
+    required int limit,
+    String? idLt,
+    String? idLte,
+    String? idGt,
+    String? idGte,
+    String? idAround,
+  }) => _messagesRepository.getReplies(
     parentId,
-    options: options,
+    limit: limit,
+    idLt: idLt,
+    idLte: idLte,
+    idGt: idGt,
+    idGte: idGte,
+    idAround: idAround,
   );
 
   /// Fetches one page of the reactions on the message with the id [messageId].
@@ -2080,29 +2117,29 @@ class StreamChatClient {
     );
   }
 
-  /// Get a message by [messageId]
-  Future<GetMessageResponse> getMessage(String messageId) => _chatApi.message.getMessage(messageId);
+  /// Fetches the message with the id [messageId].
+  ///
+  /// The response carries the channel the message belongs to as well.
+  Future<Result<GetMessageResponse>> getMessage(String messageId) => _messagesRepository.getMessage(messageId);
 
-  /// Retrieves a list of messages by [messageIDs]
-  /// from the given [channelId] of type [channelType]
-  Future<GetMessagesByIdResponse> getMessagesById(
+  /// Fetches messages of the channel with the id [channelId] and type
+  /// [channelType] by their ids.
+  ///
+  /// It takes up to 50 [messageIds]; more return a failure. A message that does
+  /// not exist or cannot be shown is left out of the response.
+  Future<Result<GetManyMessagesResponse>> getManyMessages(
     String channelId,
     String channelType,
-    List<String> messageIDs,
-  ) => _chatApi.message.getMessagesById(
-    channelId,
-    channelType,
-    messageIDs,
-  );
+    List<String> messageIds,
+  ) => _messagesRepository.getManyMessages(channelId, channelType, messageIds);
 
-  /// Translates the [messageId] in provided [language]
-  Future<TranslateMessageResponse> translateMessage(
-    String messageId,
-    String language,
-  ) => _chatApi.message.translateMessage(
-    messageId,
-    language,
-  );
+  /// Translates the message with the id [messageId] into [language].
+  ///
+  /// The response's message carries the translation in its [Message.i18n]. The
+  /// translation is kept on the message, so it reaches the channel's other
+  /// members as well.
+  Future<Result<TranslateMessageResponse>> translateMessage(String messageId, TranslationLanguage language) =>
+      _messagesRepository.translateMessage(messageId, language);
 
   /// Saves [draft] as the current user's draft in the channel with the id
   /// [channelId] and type [channelType].

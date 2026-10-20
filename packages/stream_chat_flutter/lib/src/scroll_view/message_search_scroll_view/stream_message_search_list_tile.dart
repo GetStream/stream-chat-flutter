@@ -15,7 +15,7 @@ class StreamMessageSearchListTile extends StatelessWidget {
   /// Creates a new instance of [StreamMessageSearchListTile].
   const StreamMessageSearchListTile({
     super.key,
-    required this.messageResponse,
+    required this.searchResult,
     this.leading,
     this.title,
     this.subtitle,
@@ -27,8 +27,8 @@ class StreamMessageSearchListTile extends StatelessWidget {
     this.contentPadding = const EdgeInsets.symmetric(horizontal: 8),
   });
 
-  /// The message response to display.
-  final GetMessageResponse messageResponse;
+  /// The search result to display.
+  final SearchMessageResult searchResult;
 
   /// A widget to display before the title.
   final Widget? leading;
@@ -79,7 +79,7 @@ class StreamMessageSearchListTile extends StatelessWidget {
   /// the new values.
   StreamMessageSearchListTile copyWith({
     Key? key,
-    GetMessageResponse? messageResponse,
+    SearchMessageResult? searchResult,
     Widget? leading,
     Widget? title,
     Widget? subtitle,
@@ -91,7 +91,7 @@ class StreamMessageSearchListTile extends StatelessWidget {
     EdgeInsetsGeometry? contentPadding,
   }) => StreamMessageSearchListTile(
     key: key ?? this.key,
-    messageResponse: messageResponse ?? this.messageResponse,
+    searchResult: searchResult ?? this.searchResult,
     leading: leading ?? this.leading,
     title: title ?? this.title,
     subtitle: subtitle ?? this.subtitle,
@@ -105,7 +105,7 @@ class StreamMessageSearchListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final message = messageResponse.message;
+    final message = searchResult.message;
     final user = message.user!;
 
     final leading = this.leading ?? StreamUserAvatar(size: .lg, user: user);
@@ -113,7 +113,7 @@ class StreamMessageSearchListTile extends StatelessWidget {
     final title =
         this.title ??
         MessageSearchListTileTitle(
-          messageResponse: messageResponse,
+          searchResult: searchResult,
           textStyle: context.streamTextTheme.metadataEmphasis.copyWith(overflow: TextOverflow.ellipsis),
         );
 
@@ -158,20 +158,20 @@ class MessageSearchListTileTitle extends StatelessWidget {
   /// Creates a new [MessageSearchListTileTitle] instance.
   const MessageSearchListTileTitle({
     super.key,
-    required this.messageResponse,
+    required this.searchResult,
     this.textStyle,
   });
 
-  /// The message response for the tile.
-  final GetMessageResponse messageResponse;
+  /// The search result to display the title of.
+  final SearchMessageResult searchResult;
 
   /// The style to use for the title.
   final TextStyle? textStyle;
 
   @override
   Widget build(BuildContext context) {
-    final user = messageResponse.message.user!;
-    final channel = messageResponse.channel;
+    final user = searchResult.message.user!;
+    final channel = searchResult.channel;
     final channelName = channel?.custom['name'];
 
     return Text.rich(

@@ -7,25 +7,25 @@ import '../src/golden_theme.dart';
 import '../src/mocks.dart';
 import '../src/sample_users.dart';
 
-GetMessageResponse _makeSearchResult({
+SearchMessageResult _makeSearchResult({
   required String messageId,
   required String text,
   required User user,
   required String channelName,
 }) {
-  final response = GetMessageResponse()
-    ..message = Message(
+  return SearchMessageResult(
+    message: Message(
       id: messageId,
       text: text,
       user: user,
       createdAt: DateTime(2024, 6, 1, 10, 0),
-    )
-    ..channel = ChannelModel(
+    ),
+    channel: ChannelModel(
       id: 'ch-$messageId',
       type: 'messaging',
       custom: {'name': channelName},
-    );
-  return response;
+    ),
+  );
 }
 
 void main() {

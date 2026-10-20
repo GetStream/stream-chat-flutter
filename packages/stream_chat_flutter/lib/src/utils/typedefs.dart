@@ -249,7 +249,7 @@ typedef OnReactionsHover = void Function(bool isHovering);
 /// The action to perform when tapping or clicking on a user in a
 /// [MessageSearchListView].
 /// {@endtemplate}
-typedef MessageSearchItemTapCallback = void Function(GetMessageResponse);
+typedef MessageSearchItemTapCallback = void Function(SearchMessageResult);
 
 /// {@template messageSearchItemBuilder}
 /// A widget builder used to create a custom [ListUserItem] from a [User].
@@ -257,7 +257,7 @@ typedef MessageSearchItemTapCallback = void Function(GetMessageResponse);
 typedef MessageSearchItemBuilder =
     Widget Function(
       BuildContext,
-      GetMessageResponse,
+      SearchMessageResult,
     );
 
 // Legacy MessageBuilder and ParentMessageBuilder typedefs removed.

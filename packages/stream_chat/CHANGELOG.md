@@ -170,6 +170,14 @@
 - `queryReactions` takes `limit`, `next` and `prev` instead of `PaginationParams`.
 - `SendReactionResponse` and `QueryReactionsResponse` are immutable, compare by value, and their `duration` is non-nullable; `SendReactionResponse` no longer extends `MessageResponse`.
 - `StreamChatApi.message` loses the reaction methods.
+- `getMessage`, `getManyMessages`, `getReplies`, `translateMessage` and `search` return a `Result` instead of throwing, on `StreamChatClient` and, except `getMessage`, on `Channel`.
+- `getMessagesById` is renamed `getManyMessages` and returns a `GetManyMessagesResponse` instead of a `GetMessagesByIdResponse`.
+- `getReplies` returns a `GetRepliesResponse` instead of a `QueryRepliesResponse`, and takes a required `limit` and the reply ids directly instead of `PaginationParams`.
+- `translateMessage` takes a `TranslationLanguage` instead of a `String`.
+- `search` takes `limit`, `offset` and `next` instead of `PaginationParams`, and its results are `SearchMessageResult`s instead of `GetMessageResponse`s.
+- `GetMessageResponse.channel` is non-nullable.
+- `GetMessageResponse`, `TranslateMessageResponse` and `SearchMessagesResponse` are immutable, compare by value, and their `duration` is non-nullable; `GetMessageResponse` and `TranslateMessageResponse` no longer extend `MessageResponse`.
+- `StreamChatApi.message` and `StreamChatApi.general` lose the message read and search methods.
 
 🐞 Fixed
 

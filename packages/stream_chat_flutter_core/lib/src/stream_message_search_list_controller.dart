@@ -18,7 +18,7 @@ const _kDefaultBackendPaginationLimit = 30;
 /// * Load more data using [loadMore].
 /// * Search with a query-length-aware debounce using [search].
 /// * Replace the previously loaded results.
-class StreamMessageSearchListController extends PagedValueNotifier<String, GetMessageResponse>
+class StreamMessageSearchListController extends PagedValueNotifier<String, SearchMessageResult>
     with SearchDebounceMixin {
   /// Creates a Stream message search list controller.
   ///
@@ -186,30 +186,21 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
       this.limit * defaultInitialPagedLimitMultiplier,
       _kDefaultBackendPaginationLimit,
     );
-    try {
-      final response = await client.search(
-        _activeFilter,
-        sort: _activeSort,
-        query: _activeSearchQuery,
-        messageFilters: _activeMessageFilter,
-        paginationParams: PaginationParams(limit: limit),
-      );
+    final result = await client.search(
+      _activeFilter,
+      sort: _activeSort,
+      query: _activeSearchQuery,
+      messageFilters: _activeMessageFilter,
+      limit: limit,
+    );
 
-      if (isStale(generation)) return;
-      final results = response.results;
-      final nextKey = response.next;
-      value = PagedValue(
-        items: results,
-        nextPageKey: nextKey,
-      );
-    } on StreamChatException catch (error) {
-      if (isStale(generation)) return;
-      value = PagedValue.error(error);
-    } catch (error) {
-      if (isStale(generation)) return;
-      final chatError = StreamClientException(message: 'Failed to load message search results', cause: error);
-      value = PagedValue.error(chatError);
-    }
+    if (isStale(generation)) return;
+    result.fold(
+      onSuccess: (response) => value = PagedValue(items: response.results, nextPageKey: response.next),
+      onFailure: (error, _) {
+        value = PagedValue.error(_chatException(error, 'Failed to load message search results'));
+      },
+    );
   }
 
   @override
@@ -217,36 +208,36 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
     final generation = loadGeneration;
     final previousValue = value.asSuccess;
 
-    try {
-      final response = await client.search(
-        _activeFilter,
-        sort: _activeSort,
-        query: _activeSearchQuery,
-        messageFilters: _activeMessageFilter,
-        paginationParams: PaginationParams(limit: limit, next: nextPageKey),
-      );
+    final result = await client.search(
+      _activeFilter,
+      sort: _activeSort,
+      query: _activeSearchQuery,
+      messageFilters: _activeMessageFilter,
+      limit: limit,
+      next: nextPageKey,
+    );
 
-      // Drop the page if a newer search or clearResults() superseded it, so a
-      // stale page cannot repopulate the results.
-      if (isStale(generation)) return;
-      final results = response.results;
-      final previousItems = previousValue.items;
-      final newItems = previousItems + results;
-      final next = response.next;
-      final nextKey = next != null && next.isNotEmpty ? next : null;
-      value = PagedValue(
-        items: newItems,
-        nextPageKey: nextKey,
-      );
-    } on StreamChatException catch (error) {
-      if (isStale(generation)) return;
-      value = previousValue.copyWith(error: error);
-    } catch (error) {
-      if (isStale(generation)) return;
-      final chatError = StreamClientException(message: 'Failed to load more message search results', cause: error);
-      value = previousValue.copyWith(error: chatError);
-    }
+    // Drop the page if a newer search or clearResults() superseded it, so a
+    // stale page cannot repopulate the results.
+    if (isStale(generation)) return;
+    result.fold(
+      onSuccess: (response) {
+        final next = response.next;
+        value = PagedValue(
+          items: previousValue.items + response.results,
+          nextPageKey: next != null && next.isNotEmpty ? next : null,
+        );
+      },
+      onFailure: (error, _) {
+        value = previousValue.copyWith(error: _chatException(error, 'Failed to load more message search results'));
+      },
+    );
   }
+
+  StreamChatException _chatException(Object error, String message) => switch (error) {
+    final StreamChatException error => error,
+    _ => StreamClientException(message: message, cause: error),
+  };
 
   @override
   Future<void> refresh({bool resetValue = true}) {

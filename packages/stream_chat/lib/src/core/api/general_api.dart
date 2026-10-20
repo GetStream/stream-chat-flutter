@@ -1,9 +1,7 @@
 import 'dart:convert';
 
 import '../http/stream_http_client.dart';
-import '../models/channel_state.dart';
 import '../models/member.dart';
-import '../models/message.dart';
 import 'requests.dart';
 import 'responses.dart';
 
@@ -27,46 +25,6 @@ class GeneralApi {
       },
     );
     return SyncResponse.fromJson(response.data);
-  }
-
-  /// A message search.
-  Future<SearchMessagesResponse> searchMessages(
-    ChannelFilter filter, {
-    String? query,
-    List<MessageSearchSort>? sort,
-    PaginationParams? pagination,
-    MessageSearchFilter? messageFilters,
-  }) async {
-    assert(
-      pagination?.offset == null || pagination?.offset == 0 || sort == null,
-      'Cannot specify `offset` with `sort` parameter',
-    );
-    assert(() {
-      if (query == null && messageFilters == null) {
-        throw ArgumentError('Provide at least `query` or `messageFilters`');
-      }
-      if (query != null && messageFilters != null) {
-        throw ArgumentError(
-          "Can't provide both `query` and `messageFilters` at the same time",
-        );
-      }
-      return true;
-    }(), 'Check incoming params.');
-
-    final response = await _client.get(
-      '/search',
-      queryParameters: {
-        'payload': jsonEncode({
-          'filter_conditions': filter,
-          if (sort != null) 'sort': sort,
-          if (query != null) 'query': query,
-          if (messageFilters != null) 'message_filter_conditions': messageFilters,
-          if (pagination != null) ...pagination.toJson(),
-        }),
-      },
-    );
-
-    return SearchMessagesResponse.fromJson(response.data);
   }
 
   /// Query channel members

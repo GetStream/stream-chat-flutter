@@ -102,19 +102,17 @@ void stubQueryMembersForGoldens(MockChannel channel, List<Member> members) {
 }
 
 /// Stubs search for [StreamMessageSearchListController] goldens using [StreamMessageSearchListController.fromValue].
-void stubSearchMessagesForGoldens(MockClient client, List<GetMessageResponse> results) {
+void stubSearchMessagesForGoldens(MockClient client, List<SearchMessageResult> results) {
   _ensureGoldenMocktailFallbacks();
   when(
     () => client.search(
       any(),
       query: any(named: 'query'),
       sort: any(named: 'sort'),
-      paginationParams: any(named: 'paginationParams'),
       messageFilters: any(named: 'messageFilters'),
+      limit: any(named: 'limit'),
+      offset: any(named: 'offset'),
+      next: any(named: 'next'),
     ),
-  ).thenAnswer(
-    (_) async => SearchMessagesResponse()
-      ..results = results
-      ..next = null,
-  );
+  ).thenAnswer((_) async => Result.success(SearchMessagesResponse(duration: '0ms', results: results)));
 }

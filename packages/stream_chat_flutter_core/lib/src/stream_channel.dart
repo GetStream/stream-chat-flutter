@@ -337,29 +337,22 @@ class StreamChannelState extends State<StreamChannel> {
 
     final oldestReply = threadReplies.first;
 
-    try {
-      final pagination = PaginationParams(
-        limit: limit,
-        lessThan: oldestReply.id,
-      );
+    final result = await channel.getReplies(
+      parentId,
+      limit: limit,
+      idLt: oldestReply.id,
+      preferOffline: preferOffline,
+    );
 
-      final response = await channel.getReplies(
-        parentId,
-        options: pagination,
-        preferOffline: preferOffline,
-      );
-
-      final messages = response.messages;
-      final limitNotMatched = messages.length < pagination.limit;
-
-      // If we didn't get enough messages in the response, that means there are
-      // no more messages before the oldest reply.
-      if (limitNotMatched) _topPaginationEnded = true;
-
-      _queryTopMessagesController.safeAdd(false);
-    } catch (e, stk) {
-      _queryTopMessagesController.safeAddError(e, stk);
-    }
+    result.fold(
+      onSuccess: (response) {
+        // If we didn't get enough messages in the response, that means there
+        // are no more messages before the oldest reply.
+        if (response.messages.length < limit) _topPaginationEnded = true;
+        _queryTopMessagesController.safeAdd(false);
+      },
+      onFailure: _queryTopMessagesController.safeAddError,
+    );
   }
 
   Future<void> _queryBottomReplies(
@@ -380,29 +373,22 @@ class StreamChannelState extends State<StreamChannel> {
 
     final recentReply = threadReplies.last;
 
-    try {
-      final pagination = PaginationParams(
-        limit: limit,
-        greaterThan: recentReply.id,
-      );
+    final result = await channel.getReplies(
+      parentId,
+      limit: limit,
+      idGt: recentReply.id,
+      preferOffline: preferOffline,
+    );
 
-      final response = await channel.getReplies(
-        parentId,
-        options: pagination,
-        preferOffline: preferOffline,
-      );
-
-      final messages = response.messages;
-      final limitNotMatched = messages.length < pagination.limit;
-
-      // If we didn't get enough messages in the response, that means there are
-      // no more messages after the recent reply.
-      if (limitNotMatched) _bottomPaginationEnded = true;
-
-      _queryBottomMessagesController.safeAdd(false);
-    } catch (e, stk) {
-      _queryBottomMessagesController.safeAddError(e, stk);
-    }
+    result.fold(
+      onSuccess: (response) {
+        // If we didn't get enough messages in the response, that means there
+        // are no more messages after the recent reply.
+        if (response.messages.length < limit) _bottomPaginationEnded = true;
+        _queryBottomMessagesController.safeAdd(false);
+      },
+      onFailure: _queryBottomMessagesController.safeAddError,
+    );
   }
 
   /// Calls [channel.getReplies] updating [queryMessage] stream
@@ -417,30 +403,36 @@ class StreamChannelState extends State<StreamChannel> {
     return _queryBottomReplies(parentId, limit: limit);
   }
 
-  /// Calls [channel.getReplies] updating [queryMessage] stream
-  Future<void> getReplies(
+  /// Fetches the latest replies to the message with the id [parentId].
+  ///
+  /// Up to [limit] replies are fetched, and the thread's pagination restarts
+  /// from them.
+  ///
+  /// If [preferOffline] is true and the offline storage holds the replies,
+  /// those are used instead of fetching them.
+  ///
+  /// A failure is returned and leaves the pagination as it was. If the channel
+  /// is not initialized, nothing is fetched and the result is a success.
+  Future<Result<void>> getReplies(
     String parentId, {
     int limit = 30,
     bool preferOffline = false,
   }) async {
-    if (channel.state == null) return;
+    if (channel.state == null) return const Result.success(null);
 
-    final pagination = PaginationParams(limit: limit);
-
-    final response = await channel.getReplies(
+    final result = await channel.getReplies(
       parentId,
-      options: pagination,
+      limit: limit,
       preferOffline: preferOffline,
     );
 
-    final messages = response.messages;
-    final limitNotMatched = messages.length < pagination.limit;
-
-    // We can assume that the bottom pagination is ended as we are querying
-    // latest replies, and if we didn't get enough messages, that means
-    // there are no more messages to load in the top direction.
-    _bottomPaginationEnded = true;
-    _topPaginationEnded = limitNotMatched;
+    return result.onSuccess((response) {
+      // We can assume that the bottom pagination is ended as we are querying
+      // latest replies, and if we didn't get enough messages, that means there
+      // are no more messages to load in the top direction.
+      _bottomPaginationEnded = true;
+      _topPaginationEnded = response.messages.length < limit;
+    });
   }
 
   /// Query the channel members and watchers
@@ -700,14 +692,20 @@ class StreamChannelState extends State<StreamChannel> {
     );
   }
 
-  /// Returns the message with the given [messageId].
-  Future<Message> getMessage(String messageId) async {
-    if (_findCachedMessage(messageId) case final cached?) return cached;
+  /// Returns the message with the id [messageId].
+  ///
+  /// It comes from the channel state when it is loaded there, and is fetched
+  /// otherwise. The result is a failure if fetching it fails or the message
+  /// does not exist.
+  Future<Result<Message>> getMessage(String messageId) async {
+    if (_findCachedMessage(messageId) case final cached?) return Result.success(cached);
 
-    final response = await channel.getMessagesById([messageId]);
-    return response.messages.firstWhere(
-      (m) => m.id == messageId,
-      orElse: () => throw StateError('Message "$messageId" not found'),
+    final result = await channel.getManyMessages([messageId]);
+    return result.flatMap(
+      (response) => switch (response.messages.firstWhereOrNull((it) => it.id == messageId)) {
+        final message? => Result.success(message),
+        null => Result.failure(StreamClientException(message: 'Message "$messageId" not found')),
+      },
     );
   }
 

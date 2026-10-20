@@ -4,6 +4,7 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
+import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
 import 'package:stream_chat_flutter_core/src/stream_message_search_list_controller.dart';
 
 import 'mocks.dart';
@@ -19,10 +20,8 @@ void main() {
     reset(client);
   });
 
-  SearchMessagesResponse searchResponse({String? next}) {
-    return SearchMessagesResponse()
-      ..results = []
-      ..next = next;
+  Result<SearchMessagesResponse> searchResponse({String? next}) {
+    return Result.success(SearchMessagesResponse(duration: '0ms', results: const [], next: next));
   }
 
   StreamMessageSearchListController buildController() {
@@ -42,7 +41,8 @@ void main() {
           sort: any(named: 'sort'),
           query: any(named: 'query'),
           messageFilters: any(named: 'messageFilters'),
-          paginationParams: any(named: 'paginationParams'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer((invocation) async {
         usedFilter ??= invocation.namedArguments[#messageFilters] as Filter?;
@@ -72,7 +72,8 @@ void main() {
           sort: any(named: 'sort'),
           query: any(named: 'query'),
           messageFilters: any(named: 'messageFilters'),
-          paginationParams: any(named: 'paginationParams'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer((_) async {
         queried = true;
@@ -104,7 +105,8 @@ void main() {
           sort: any(named: 'sort'),
           query: any(named: 'query'),
           messageFilters: any(named: 'messageFilters'),
-          paginationParams: any(named: 'paginationParams'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer((invocation) async {
         if (!captured) {
@@ -133,9 +135,9 @@ void main() {
 
   group('superseded results', () {
     test('a slower earlier load does not overwrite a newer load', () async {
-      final responses = <Completer<SearchMessagesResponse>>[
-        Completer<SearchMessagesResponse>(),
-        Completer<SearchMessagesResponse>(),
+      final responses = <Completer<Result<SearchMessagesResponse>>>[
+        Completer<Result<SearchMessagesResponse>>(),
+        Completer<Result<SearchMessagesResponse>>(),
       ];
       var call = 0;
       when(
@@ -144,7 +146,8 @@ void main() {
           sort: any(named: 'sort'),
           query: any(named: 'query'),
           messageFilters: any(named: 'messageFilters'),
-          paginationParams: any(named: 'paginationParams'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer((_) => responses[call++].future);
 
@@ -161,5 +164,80 @@ void main() {
 
       expect(controller.value.asSuccess.nextPageKey, 'newer');
     });
+  });
+
+  void stubSearch(Result<SearchMessagesResponse> result) {
+    when(
+      () => client.search(
+        any(),
+        sort: any(named: 'sort'),
+        query: any(named: 'query'),
+        messageFilters: any(named: 'messageFilters'),
+        limit: any(named: 'limit'),
+        next: any(named: 'next'),
+      ),
+    ).thenAnswer((_) async => result);
+  }
+
+  StreamMessageSearchListController controllerWith(List<SearchMessageResult> items) {
+    final controller = StreamMessageSearchListController.fromValue(
+      PagedValue(items: items, nextPageKey: 'next-cursor'),
+      client: client,
+      filter: ChannelFilter.in_(ChannelFilterField.members, const ['user-id']),
+      searchQuery: 'abc',
+    );
+    addTearDown(controller.dispose);
+    return controller;
+  }
+
+  test('an initial load failure moves to the error state', () async {
+    const error = StreamNetworkException(message: 'Network error');
+    stubSearch(const Result.failure(error));
+    final controller = buildController();
+    addTearDown(controller.dispose);
+
+    await controller.doInitialLoad();
+
+    expect((controller.value as Error).error, error);
+  });
+
+  test('an initial load failure that is not a Stream error is wrapped', () async {
+    final exception = Exception('boom');
+    stubSearch(Result.failure(exception));
+    final controller = buildController();
+    addTearDown(controller.dispose);
+
+    await controller.doInitialLoad();
+
+    final error = (controller.value as Error).error;
+    expect(error, isA<StreamClientException>());
+    expect(error.message, 'Failed to load message search results');
+    expect(error.cause, same(exception));
+  });
+
+  test('loadMore appends the page and ends at an empty next cursor', () async {
+    final existingResult = SearchMessageResult(message: Message(id: 'existing-id'));
+    final newResult = SearchMessageResult(message: Message(id: 'new-id'));
+    stubSearch(Result.success(SearchMessagesResponse(duration: '0ms', results: [newResult], next: '')));
+    final controller = controllerWith([existingResult]);
+
+    await controller.loadMore('next-cursor');
+
+    expect(controller.value.asSuccess.items, [existingResult, newResult]);
+    expect(controller.value.asSuccess.nextPageKey, isNull);
+  });
+
+  test('a loadMore failure keeps the loaded results and records the error', () async {
+    final existingResult = SearchMessageResult(message: Message(id: 'existing-id'));
+    final exception = Exception('boom');
+    stubSearch(Result.failure(exception));
+    final controller = controllerWith([existingResult]);
+
+    await controller.loadMore('next-cursor');
+
+    expect(controller.value.asSuccess.items, [existingResult]);
+    final error = controller.value.asSuccess.error;
+    expect(error?.message, 'Failed to load more message search results');
+    expect(error?.cause, same(exception));
   });
 }

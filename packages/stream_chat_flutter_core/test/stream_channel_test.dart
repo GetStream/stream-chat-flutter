@@ -1500,4 +1500,155 @@ void main() {
       },
     );
   });
+
+  group('with nothing loaded in the channel state', () {
+    testWidgets('StreamChannel.getMessage fetches the message when it is not loaded', (tester) async {
+      final mockChannel = _channelWithNothingLoaded();
+      final message = Message(id: 'message-id');
+      when(() => mockChannel.getManyMessages(['message-id'])).thenAnswer(
+        (_) async => Result.success(GetManyMessagesResponse(duration: '0ms', messages: [message])),
+      );
+      final streamChannel = await _pumpStreamChannel(tester, mockChannel);
+
+      final result = await streamChannel.getMessage('message-id');
+
+      expect(result.getOrNull(), message);
+    });
+
+    testWidgets('StreamChannel.getMessage returns a failure when the message does not exist', (tester) async {
+      final mockChannel = _channelWithNothingLoaded();
+      when(() => mockChannel.getManyMessages(['message-id'])).thenAnswer(
+        (_) async => const Result.success(GetManyMessagesResponse(duration: '0ms', messages: [])),
+      );
+      final streamChannel = await _pumpStreamChannel(tester, mockChannel);
+
+      final result = await streamChannel.getMessage('message-id');
+
+      expect(result.exceptionOrNull(), isA<StreamClientException>());
+    });
+
+    testWidgets('StreamChannel.getMessage returns the failure of the fetch', (tester) async {
+      final mockChannel = _channelWithNothingLoaded();
+      const error = StreamClientException(message: 'boom');
+      when(() => mockChannel.getManyMessages(['message-id'])).thenAnswer((_) async => const Result.failure(error));
+      final streamChannel = await _pumpStreamChannel(tester, mockChannel);
+
+      final result = await streamChannel.getMessage('message-id');
+
+      expect(result.exceptionOrNull(), error);
+    });
+
+    testWidgets('StreamChannel.getReplies returns the failure of the fetch', (tester) async {
+      final mockChannel = _channelWithNothingLoaded();
+      const error = StreamClientException(message: 'boom');
+      when(
+        () => mockChannel.getReplies('parent-id', limit: 30),
+      ).thenAnswer((_) async => const Result.failure(error));
+      final streamChannel = await _pumpStreamChannel(tester, mockChannel);
+
+      final result = await streamChannel.getReplies('parent-id');
+
+      expect(result.exceptionOrNull(), error);
+    });
+  });
+
+  group('with one reply loaded in a thread', () {
+    final reply = Message(id: 'reply-id', parentId: 'parent-id');
+    const error = StreamClientException(message: 'boom');
+
+    testWidgets('StreamChannel.queryReplies reports a failed page of older replies', (tester) async {
+      final mockChannel = _channelWithThreads({
+        'parent-id': [reply],
+      });
+      when(
+        () => mockChannel.getReplies('parent-id', limit: 30, idLt: 'reply-id', preferOffline: false),
+      ).thenAnswer((_) async => const Result.failure(error));
+      final streamChannel = await _pumpStreamChannel(tester, mockChannel);
+
+      final errors = <Object>[];
+      final subscription = streamChannel.queryTopMessages.listen(null, onError: errors.add);
+      await streamChannel.queryReplies('parent-id');
+      await tester.pump();
+      unawaited(subscription.cancel());
+
+      expect(errors, [error]);
+    });
+
+    testWidgets('StreamChannel.queryReplies stops paging older replies after a short page', (tester) async {
+      final mockChannel = _channelWithThreads({
+        'parent-id': [reply],
+      });
+      when(
+        () => mockChannel.getReplies('parent-id', limit: 30, idLt: 'reply-id', preferOffline: false),
+      ).thenAnswer((_) async => Result.success(GetRepliesResponse(duration: '0ms', messages: [reply])));
+      final streamChannel = await _pumpStreamChannel(tester, mockChannel);
+
+      await streamChannel.queryReplies('parent-id');
+      await streamChannel.queryReplies('parent-id');
+
+      verify(
+        () => mockChannel.getReplies('parent-id', limit: 30, idLt: 'reply-id', preferOffline: false),
+      ).called(1);
+    });
+
+    testWidgets('StreamChannel.getReplies ends the paging of older replies after a short page', (tester) async {
+      final mockChannel = _channelWithThreads({
+        'parent-id': [reply],
+      });
+      when(
+        () => mockChannel.getReplies('parent-id', limit: 30, preferOffline: false),
+      ).thenAnswer((_) async => Result.success(GetRepliesResponse(duration: '0ms', messages: [reply])));
+      final streamChannel = await _pumpStreamChannel(tester, mockChannel);
+
+      await streamChannel.getReplies('parent-id');
+      await streamChannel.queryReplies('parent-id');
+
+      verifyNever(
+        () => mockChannel.getReplies('parent-id', limit: 30, idLt: 'reply-id', preferOffline: false),
+      );
+    });
+
+    testWidgets('StreamChannel.getReplies leaves the paging as it was after a failure', (tester) async {
+      final mockChannel = _channelWithThreads({
+        'parent-id': [reply],
+      });
+      when(
+        () => mockChannel.getReplies('parent-id', limit: 30, preferOffline: false),
+      ).thenAnswer((_) async => const Result.failure(error));
+      when(
+        () => mockChannel.getReplies('parent-id', limit: 30, idLt: 'reply-id', preferOffline: false),
+      ).thenAnswer((_) async => const Result.success(GetRepliesResponse(duration: '0ms', messages: [])));
+      final streamChannel = await _pumpStreamChannel(tester, mockChannel);
+
+      await streamChannel.getReplies('parent-id');
+      await streamChannel.queryReplies('parent-id');
+
+      verify(
+        () => mockChannel.getReplies('parent-id', limit: 30, idLt: 'reply-id', preferOffline: false),
+      ).called(1);
+    });
+  });
+}
+
+// A channel whose state holds no messages, threads or pinned messages, so every
+// lookup has to fetch.
+MockChannel _channelWithNothingLoaded() => _channelWithThreads({});
+
+// A channel whose state holds only the thread replies in [threads].
+MockChannel _channelWithThreads(Map<String, List<Message>> threads) {
+  final channel = MockChannel();
+  addTearDown(channel.dispose);
+  when(() => channel.cid).thenReturn('test:channel1');
+  when(
+    () => channel.query(
+      preferOffline: any(named: 'preferOffline'),
+      messagesPagination: any(named: 'messagesPagination'),
+    ),
+  ).thenAnswer((_) async => const ChannelState());
+  when(() => channel.state.messages).thenReturn([]);
+  when(() => channel.state.threads).thenReturn(threads);
+  when(() => channel.state.pinnedMessages).thenReturn([]);
+  when(() => channel.state.unreadCount).thenReturn(0);
+  when(() => channel.state.isUpToDate).thenReturn(true);
+  return channel;
 }
