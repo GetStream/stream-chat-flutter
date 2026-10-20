@@ -221,6 +221,7 @@ class _ActionsSection extends StatelessWidget {
 
   Future<void> _confirmDelete(BuildContext context) async {
     final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
     final channel = StreamChannel.of(context).channel;
 
     final confirmed = await _showConfirmationDialog(
@@ -231,7 +232,12 @@ class _ActionsSection extends StatelessWidget {
     );
     if (confirmed != true) return;
 
-    await channel.delete();
+    final result = await channel.delete();
+    if (result case Failure(:final error)) {
+      messenger.showSnackBar(SnackBar(content: Text('Failed to delete: $error')));
+      return;
+    }
+
     // Pop every screen until we land on the channel list — going back to
     // the channel page would crash trying to read state from the now
     // deleted channel.
