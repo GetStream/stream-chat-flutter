@@ -2,10 +2,37 @@ import '../../../open_api/api.dart' as api;
 import '../../core/models/draft.dart';
 import '../../core/models/draft_message.dart';
 import '../../core/models/message.dart';
+import '../../core/models/response/create_draft_response.dart';
+import '../../core/models/response/get_draft_response.dart';
+import '../../core/models/response/query_drafts_response.dart';
+import '../../core/models/user.dart';
 import 'attachments_mapper.dart';
 import 'channels_mapper.dart';
 import 'messages_mapper.dart';
 import 'users_mapper.dart';
+
+/// Maps a generated [api.CreateDraftResponse] to a [CreateDraftResponse].
+extension CreateDraftResponseMapper on api.CreateDraftResponse {
+  /// Converts this response into a [CreateDraftResponse].
+  CreateDraftResponse toModel() => CreateDraftResponse(duration: duration, draft: draft.toModel());
+}
+
+/// Maps a generated [api.GetDraftResponse] to a [GetDraftResponse].
+extension GetDraftResponseMapper on api.GetDraftResponse {
+  /// Converts this response into a [GetDraftResponse].
+  GetDraftResponse toModel() => GetDraftResponse(duration: duration, draft: draft.toModel());
+}
+
+/// Maps a generated [api.QueryDraftsResponse] to a [QueryDraftsResponse].
+extension QueryDraftsResponseMapper on api.QueryDraftsResponse {
+  /// Converts this response into a [QueryDraftsResponse].
+  QueryDraftsResponse toModel() => QueryDraftsResponse(
+    duration: duration,
+    drafts: [for (final draft in drafts) draft.toModel()],
+    next: next,
+    prev: prev,
+  );
+}
 
 // TODO(openapi-migration): re-point these mappers in group 10.
 
@@ -39,4 +66,48 @@ extension DraftPayloadResponseMapper on api.DraftPayloadResponse {
     pollId: pollId,
     custom: custom,
   );
+}
+
+/// Maps a [DraftMessage] to the generated [api.MessageRequest] that saves it.
+extension DraftMessageRequestMapper on DraftMessage {
+  /// Converts this draft message into the request that saves it.
+  ///
+  /// Mentioned users the text no longer mentions are left out, and a [command]
+  /// is written into the text as `/command text`.
+  api.MessageRequest toRequest() {
+    return api.MessageRequest(
+      id: id,
+      text: switch ((text, command)) {
+        (final text?, final command?) when command.isNotEmpty => '/$command $text',
+        (final text, _) => text,
+      },
+      type: switch (MessageType.toJson(type)) {
+        final type? => api.MessageRequestType.fromJson(type),
+        null => null,
+      },
+      attachments: [for (final attachment in attachments) attachment.toRequest()],
+      parentId: parentId,
+      showInChannel: showInChannel,
+      mentionedUsers: [for (final user in _mentionedUsersInText()) user.id],
+      quotedMessageId: quotedMessageId,
+      silent: silent,
+      pollId: pollId,
+      custom: custom,
+    );
+  }
+
+  // The mentioned users the text still mentions by id or name; all of them when
+  // there is no text.
+  List<User> _mentionedUsersInText() {
+    final text = this.text;
+    if (text == null) return mentionedUsers;
+
+    final mentioned = [...mentionedUsers];
+    for (final user in mentionedUsers.toSet()) {
+      if (text.contains('@${user.id}') || text.contains('@${user.nameOrId}')) continue;
+      mentioned.remove(user);
+    }
+
+    return mentioned;
+  }
 }

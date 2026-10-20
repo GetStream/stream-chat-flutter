@@ -170,8 +170,21 @@ void setupMockChannel({
   // Composer auto-saves the draft on deactivate via createDraft/deleteDraft;
   // stub both so widget teardown doesn't leak an unresolved Future as a
   // pending timer.
-  when(() => channel.createDraft(any())).thenAnswer((_) async => CreateDraftResponse());
-  when(() => channel.deleteDraft(parentId: any(named: 'parentId'))).thenAnswer((_) async => EmptyResponse());
+  when(() => channel.createDraft(any())).thenAnswer(
+    (invocation) async => Result.success(
+      CreateDraftResponse(
+        duration: '0ms',
+        draft: Draft(
+          channelCid: 'messaging:test',
+          createdAt: DateTime.utc(2020),
+          message: invocation.positionalArguments.first as DraftMessage,
+        ),
+      ),
+    ),
+  );
+  when(
+    () => channel.deleteDraft(parentId: any(named: 'parentId')),
+  ).thenAnswer((_) async => const Result.success(null));
 }
 
 /// The most recent [Message.createdAt] in [messages], or `null` when there

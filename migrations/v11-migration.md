@@ -32,6 +32,7 @@ onto Stream's OpenAPI-generated API client.
     - [Guest Users](#guest-users)
     - [Polls](#polls)
     - [Message Reminders](#message-reminders)
+    - [Threads & Drafts](#threads--drafts)
     - [File Upload](#file-upload)
     - [Messages](#messages)
     - [User Groups](#user-groups)
@@ -91,6 +92,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Guest Users**](#guest-users) | `connectGuestUser` is unchanged; `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed |
 | [**Polls**](#polls) | Poll calls return a `Result`; eight responses become `PollResponse`, `PollOptionResponse` and `PollVoteResponse`; queries take `limit`/`next`/`prev`; `VotingVisibility` is an extension type; `extraData` is `custom` |
 | [**Message Reminders**](#message-reminders) | Reminder calls return a `Result`; `deleteReminder` answers a new `DeleteReminderResponse`; `queryReminders` takes `limit`/`next`/`prev`; `MessageReminder` no longer decodes JSON |
+| [**Threads & Drafts**](#threads--drafts) | Thread and draft calls return a `Result`; `partialUpdateThread` becomes `updateThreadPartial`; `deleteDraft` returns `Result<void>`; queries take `limit`/`next`/`prev`; `Thread` no longer decodes JSON, and its `extraData` is `custom` |
 | [**File Upload**](#file-upload) | Uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
 | [**Partial Updates**](#partial-updates) | Channel and member partial updates — `updatePartial`, `updateName`, `updateImage`, slow mode, pin and archive — return a `Result` instead of throwing; their responses take the API's names, `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse`, and `partialMemberUpdate` becomes `updateMemberPartial` |
 | [**Channel Lifecycle**](#channel-lifecycle) | Hiding, showing and deleting a channel return a `Result` instead of throwing |
@@ -368,6 +370,26 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `attachment.extraData['giphy']` | `Attachment.giphy` | `retyped` | A field now, not custom data |
 | `Message.custom` / `Attachment.custom` / `Reaction.custom` / `DraftMessage.custom` entry named like one of the model's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; left out when the model is sent, so it cannot overwrite the field |
 | `Reaction.topLevelFields` | — | `removed` | It listed the JSON keys of a model that no longer has JSON |
+| `StreamChatClient.queryThreads` / `.getThread` / `.createDraft` / `.getDraft` / `.queryDrafts` → `Future<QueryThreadsResponse>` and the like | `Future<Result<QueryThreadsResponse>>` and the like | `retyped` | Return a `Result` instead of throwing; the same holds for `Channel.createDraft` and `.getDraft` |
+| `StreamChatClient.partialUpdateThread` → `Future<UpdateThreadResponse>` | `StreamChatClient.updateThreadPartial` → `Future<Result<UpdateThreadPartialResponse>>` | `renamed` | Named after the API's operation, like `updateChannelPartial` and `updateMemberPartial` |
+| `UpdateThreadResponse` | `UpdateThreadPartialResponse` | `renamed` | The response of `updateThreadPartial` |
+| `StreamChatClient.deleteDraft` / `Channel.deleteDraft` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Carries no value on success |
+| `queryThreads(pagination: PaginationParams(limit: l, next: n))` | `queryThreads(limit: l, next: n)` | `retyped` | `limit` is still 10 when omitted. Pass a response's `prev` as `prev` to page backwards. The other `PaginationParams` fields never had an effect on this query |
+| `queryDrafts(pagination: PaginationParams(limit: l, next: n))` | `queryDrafts(limit: l, next: n)` | `retyped` | Pass a response's `prev` as `prev` to page backwards. The other `PaginationParams` fields never had an effect on this query |
+| `QueryThreadsResponse()..threads = …`, `GetThreadResponse()..thread = …`, `CreateDraftResponse()..draft = …`, `GetDraftResponse()..draft = …`, `QueryDraftsResponse()..drafts = …` and their other setters | `QueryThreadsResponse(duration: …, threads: …)` and the like | `retyped` | The responses are plain classes with a const constructor and final fields |
+| `QueryThreadsResponse.fromJson`, `GetThreadResponse.fromJson`, `UpdateThreadResponse.fromJson`, `CreateDraftResponse.fromJson`, `GetDraftResponse.fromJson`, `QueryDraftsResponse.fromJson` | — | `removed` | Construct the responses directly |
+| thread and draft responses' `duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| thread and draft responses' identity `==` | value `==`, plus `copyWith` | `retyped` | Two responses with the same fields are now equal |
+| `DraftResponse` | — | `removed` | The shared base class of the create and get draft responses |
+| `Thread.fromJson` / `toJson`, `ThreadParticipant.fromJson` / `toJson` | — | `removed` | Plain classes; construct them directly. Events still read threads |
+| `Thread extends Equatable`, `ThreadParticipant extends Equatable`, their `props` | `Thread`, `ThreadParticipant` (value `==`) | `removed` | `Thread.merge` is unchanged; `Thread` equality now includes `custom` |
+| `Thread.copyWith` / `ThreadParticipant.copyWith` keeping a field passed as `null` | freezed's `copyWith` | `retyped` | `null` clears a nullable field and re-applies the constructor default of `Thread.createdAt` and `updatedAt`; `Thread.draft` already cleared |
+| `Thread.copyWith(channelCid: String?, …)` / `ThreadParticipant.copyWith(channelCid: String?, …)` | `copyWith(channelCid: String, …)` | `retyped` | `Thread`'s `channelCid`, `parentMessageId`, `createdByUserId`, `replyCount`, `participantCount`, `threadParticipants`, `latestReplies` and `custom`, and `ThreadParticipant`'s `channelCid`, `createdAt` and `lastReadAt`, are non-nullable, so a call that passed a nullable value no longer compiles; pass the value or leave the argument out |
+| `Thread.extraData` | `Thread.custom` | `renamed` | The wire's name for it; also the constructor and `copyWith` arguments |
+| `Thread.custom` entry named like one of the thread's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it |
+| `Thread.topLevelFields` | — | `removed` | It listed the JSON keys of a model that no longer has JSON |
+| `ThreadOptions.toJson`, `ThreadOptions extends Equatable`, `ThreadOptions.props` | `ThreadOptions` (value `==`, plus `copyWith`) | `removed` | Only the client reads the options |
+| `StreamChatApi.threads` (`ThreadsApi`), `StreamChatApi.message.createDraft` / `.getDraft` / `.deleteDraft` / `.queryDrafts` | `StreamChatClient` thread and draft methods | `removed` | The endpoints moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -1441,6 +1463,84 @@ same keys. `MessageReminder` is no longer an `Equatable`: equality and `merge` a
 gone. Its `copyWith` is freezed's: `null` clears a nullable field and resets a date to now.
 
 **`StreamChatApi.reminders` is removed.** Call the reminder methods on `StreamChatClient` or `Channel` instead.
+
+> **Why:** a failure is a value the caller handles where it happens, and the public models stop being wire shapes,
+> so the API payload can change without changing the type a caller holds.
+
+### Threads & Drafts
+
+**Every thread and draft call returns a `Result` instead of throwing,** on `StreamChatClient` and on `Channel`.
+Calling a `Channel` method on a channel that is not initialized still throws a `StateError`, as in v10.
+
+```dart
+// v10
+try {
+  final response = await client.queryThreads();
+  showThreads(response.threads);
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await client.queryThreads();
+result.fold(
+  onSuccess: (response) => showThreads(response.threads),
+  onFailure: (error, _) => report(error),
+);
+```
+
+**`partialUpdateThread` is renamed `updateThreadPartial`,** and answers an `UpdateThreadPartialResponse` where v10
+answered an `UpdateThreadResponse`. The thread it carries has no latest replies, reads or draft, as before.
+
+**`deleteDraft` returns a `Result<void>`** where v10 returned an `EmptyResponse`.
+
+**`queryThreads` and `queryDrafts` take `limit`, `next` and `prev`** instead of a `PaginationParams`.
+`queryThreads` still pages by 10 when `limit` is omitted. The offset and id-based fields of `PaginationParams` never
+had an effect on these queries. The responses now carry a `prev` cursor next to `next`; pass it as `prev` to fetch
+the page before.
+
+```dart
+// v10
+await client.queryDrafts(pagination: PaginationParams(limit: 20, next: cursor));
+
+// v11
+await client.queryDrafts(limit: 20, next: cursor);
+```
+
+**`Thread`, `ThreadParticipant` and the thread and draft responses no longer decode JSON.** Build them with their
+constructors — `GetDraftResponse(duration: '0ms', draft: draft)` where v10 wrote `GetDraftResponse()..draft = draft`.
+Thread events still decode from the same keys. `Thread` and `ThreadParticipant` are no longer `Equatable`s:
+`Thread.merge` is unchanged and `props` is gone, and two threads that differ only in `custom` are no longer equal.
+`Thread.topLevelFields`, which listed its JSON keys, is gone with the JSON. `ThreadOptions` loses `toJson` and
+`props` and gains `copyWith`. `DraftResponse`, the base class of the create and get draft responses, is removed.
+
+**`Thread.copyWith` and `ThreadParticipant.copyWith` clear a field passed as `null`.** v10 kept the current value;
+now a nullable field is set to `null`, and `Thread.createdAt` and `updatedAt` get a fresh default. Leave an argument
+out to keep its value. The arguments for the fields that are never null — `Thread.channelCid`, `replyCount` and the
+like, and `ThreadParticipant.channelCid`, `createdAt` and `lastReadAt` — are non-nullable, so a call that passed a
+nullable value no longer compiles.
+
+```dart
+// v10: keeps the title when newTitle is null
+thread.copyWith(title: newTitle);
+
+// v11
+thread.copyWith(title: newTitle ?? thread.title);
+```
+
+**`Thread.extraData` is renamed `custom`,** and holds the custom data exactly as the API returns it, including an
+entry named like one of the thread's own fields.
+
+```dart
+// v10
+final topic = thread.extraData['topic'];
+
+// v11
+final topic = thread.custom['topic'];
+```
+
+**`StreamChatApi.threads` is removed, and `StreamChatApi.message` loses the draft methods.** Call them on
+`StreamChatClient` or `Channel` instead.
 
 > **Why:** a failure is a value the caller handles where it happens, and the public models stop being wire shapes,
 > so the API payload can change without changing the type a caller holds.

@@ -23,9 +23,20 @@ class MockChannel extends Mock implements Channel {
     Stream<Event>? eventStream,
   }) : _eventStream = eventStream ?? const Stream.empty() {
     registerFallbackValue(DraftMessage());
-    when(() => createDraft(any())).thenAnswer((_) async => CreateDraftResponse());
-    when(deleteDraft).thenAnswer((_) async => EmptyResponse());
-    when(() => deleteDraft(parentId: any(named: 'parentId'))).thenAnswer((_) async => EmptyResponse());
+    when(() => createDraft(any())).thenAnswer(
+      (invocation) async => Result.success(
+        CreateDraftResponse(
+          duration: '0ms',
+          draft: Draft(
+            channelCid: 'messaging:test',
+            createdAt: DateTime.utc(2020),
+            message: invocation.positionalArguments.first as DraftMessage,
+          ),
+        ),
+      ),
+    );
+    when(deleteDraft).thenAnswer((_) async => const Result.success(null));
+    when(() => deleteDraft(parentId: any(named: 'parentId'))).thenAnswer((_) async => const Result.success(null));
     when(() => currentUserLastMessageAtStream).thenAnswer((_) => Stream.value(null));
     when(() => isGroup).thenReturn(false);
     when(() => isOneToOne).thenReturn(false);

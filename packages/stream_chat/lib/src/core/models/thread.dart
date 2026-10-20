@@ -1,8 +1,6 @@
-import 'package:equatable/equatable.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:stream_core/stream_core.dart' show Filter, FilterField, NullOrdering, Sort, SortField;
 
-import '../util/serializer.dart';
 import 'channel_model.dart';
 import 'draft.dart';
 import 'message.dart';
@@ -10,20 +8,13 @@ import 'read.dart';
 import 'thread_participant.dart';
 import 'user.dart';
 
-part 'thread.g.dart';
-
-class _NullConst {
-  const _NullConst();
-}
-
-const _nullConst = _NullConst();
+part 'thread.freezed.dart';
 
 /// {@template streamThread}
-/// A model class representing a thread. Threads are a way to group replies
-/// to a message in a channel.
+/// A thread of replies to a message in a channel.
 /// {@endtemplate}
-@JsonSerializable()
-class Thread extends Equatable {
+@freezed
+class Thread with _$Thread {
   /// {@macro streamThread}
   Thread({
     this.activeParticipantCount,
@@ -44,188 +35,117 @@ class Thread extends Equatable {
     this.latestReplies = const [],
     this.read = const [],
     this.draft,
-    this.extraData = const {},
+    this.custom = const {},
   }) : createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
-  /// Create a new instance from a json
-  factory Thread.fromJson(Map<String, dynamic> json) =>
-      _$ThreadFromJson(Serializer.moveToExtraDataFromRoot(json, topLevelFields));
-
   /// The active participant count in the thread.
+  @override
   final int? activeParticipantCount;
 
   /// The channel cid this thread belongs to.
+  @override
   final String channelCid;
 
   /// The channel this thread belongs to.
+  @override
   final ChannelModel? channel;
 
   /// The date at which the thread was created.
+  @override
   final DateTime createdAt;
 
   /// The date at which the thread was last updated.
+  @override
   final DateTime updatedAt;
 
   /// The date at which the thread was deleted.
+  @override
   final DateTime? deletedAt;
 
   /// The id of the user who created the thread.
+  @override
   final String createdByUserId;
 
   /// The user who created the thread.
+  @override
   final User? createdBy;
 
   /// An optional title for the thread.
+  @override
   final String? title;
 
   /// The id of the parent message of the thread.
+  @override
   final String parentMessageId;
 
   /// The parent message of the thread.
+  @override
   final Message? parentMessage;
 
   /// The number of replies in the thread.
+  @override
   final int replyCount;
 
   /// The number of users participating in the thread.
+  @override
   final int participantCount;
 
   /// The list of participants in the thread.
+  @override
   final List<ThreadParticipant> threadParticipants;
 
   /// The date of the last message in the thread.
+  @override
   final DateTime? lastMessageAt;
 
   /// The list of latest replies in the thread.
+  @override
   final List<Message> latestReplies;
 
   /// The list of reads in the thread.
+  @override
   final List<Read>? read;
 
   /// The draft message in the thread.
+  @override
   final Draft? draft;
 
-  /// Map of custom thread extraData
-  final Map<String, Object?> extraData;
+  /// This thread's custom data.
+  @override
+  final Map<String, Object?> custom;
 
-  /// Serialize to json
-  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(_$ThreadToJson(this));
-
-  /// Creates a copy of [Thread] with specified attributes overridden.
-  Thread copyWith({
-    int? activeParticipantCount,
-    ChannelModel? channel,
-    String? channelCid,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    DateTime? deletedAt,
-    String? createdByUserId,
-    User? createdBy,
-    String? title,
-    String? parentMessageId,
-    Message? parentMessage,
-    int? replyCount,
-    int? participantCount,
-    List<ThreadParticipant>? threadParticipants,
-    DateTime? lastMessageAt,
-    List<Message>? latestReplies,
-    List<Read>? read,
-    Object? draft = _nullConst,
-    Map<String, Object?>? extraData,
-  }) => Thread(
-    activeParticipantCount: activeParticipantCount ?? this.activeParticipantCount,
-    channel: channel ?? this.channel,
-    channelCid: channelCid ?? this.channelCid,
-    createdAt: createdAt ?? this.createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
-    deletedAt: deletedAt ?? this.deletedAt,
-    createdByUserId: createdByUserId ?? this.createdByUserId,
-    createdBy: createdBy ?? this.createdBy,
-    title: title ?? this.title,
-    parentMessageId: parentMessageId ?? this.parentMessageId,
-    parentMessage: parentMessage ?? this.parentMessage,
-    replyCount: replyCount ?? this.replyCount,
-    participantCount: participantCount ?? this.participantCount,
-    threadParticipants: threadParticipants ?? this.threadParticipants,
-    lastMessageAt: lastMessageAt ?? this.lastMessageAt,
-    latestReplies: latestReplies ?? this.latestReplies,
-    read: read ?? this.read,
-    draft: draft == _nullConst ? this.draft : draft as Draft?,
-    extraData: extraData ?? this.extraData,
-  );
-
-  /// Merge this thread with the [other] thread.
+  /// A copy of this thread updated with the fields [other] carries.
+  ///
+  /// A nullable field [other] leaves null keeps this thread's value, except
+  /// [draft], which is always taken from [other].
+  ///
+  /// Every other field, [custom] included, takes the value of [other]. Returns
+  /// this thread when [other] is null.
   Thread merge(Thread? other) {
     if (other == null) return this;
-    return copyWith(
-      activeParticipantCount: other.activeParticipantCount,
-      channel: other.channel,
+    return Thread(
+      activeParticipantCount: other.activeParticipantCount ?? activeParticipantCount,
+      channel: other.channel ?? channel,
       channelCid: other.channelCid,
-      createdAt: other.createdAt,
-      updatedAt: other.updatedAt,
-      deletedAt: other.deletedAt,
-      createdByUserId: other.createdByUserId,
-      createdBy: other.createdBy,
-      title: other.title,
       parentMessageId: other.parentMessageId,
-      parentMessage: other.parentMessage,
+      parentMessage: other.parentMessage ?? parentMessage,
+      createdByUserId: other.createdByUserId,
+      createdBy: other.createdBy ?? createdBy,
       replyCount: other.replyCount,
       participantCount: other.participantCount,
       threadParticipants: other.threadParticipants,
-      lastMessageAt: other.lastMessageAt,
+      lastMessageAt: other.lastMessageAt ?? lastMessageAt,
+      createdAt: other.createdAt,
+      updatedAt: other.updatedAt,
+      deletedAt: other.deletedAt ?? deletedAt,
+      title: other.title ?? title,
       latestReplies: other.latestReplies,
-      read: other.read,
+      read: other.read ?? read,
       draft: other.draft,
-      extraData: other.extraData,
+      custom: other.custom,
     );
   }
-
-  /// Known top level fields.
-  ///
-  /// Useful for [Serializer] methods.
-  static const topLevelFields = [
-    'active_participant_count',
-    'channel_cid',
-    'channel',
-    'created_at',
-    'updated_at',
-    'deleted_at',
-    'created_by_user_id',
-    'created_by',
-    'title',
-    'parent_message_id',
-    'parent_message',
-    'reply_count',
-    'participant_count',
-    'thread_participants',
-    'last_message_at',
-    'latest_replies',
-    'read',
-    'draft',
-  ];
-
-  @override
-  List<Object?> get props => [
-    activeParticipantCount,
-    channelCid,
-    channel,
-    createdAt,
-    updatedAt,
-    deletedAt,
-    createdByUserId,
-    createdBy,
-    title,
-    parentMessageId,
-    parentMessage,
-    replyCount,
-    participantCount,
-    threadParticipants,
-    lastMessageAt,
-    latestReplies,
-    read,
-    draft,
-  ];
 }
 
 /// A filter for a thread query.
@@ -246,7 +166,7 @@ class ThreadFilterField extends FilterField<Thread> {
   /// value off an instance with [value].
   ThreadFilterField(super.remote, super.value);
 
-  /// Creates a field the SDK does not model, read from [Thread.extraData].
+  /// Creates a field the SDK does not model, read from [Thread.custom].
   ///
   /// `has_unread` is reached this way. It depends on the caller's read state,
   /// so a local match cannot reproduce it.
@@ -254,7 +174,7 @@ class ThreadFilterField extends FilterField<Thread> {
   /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
   /// `$exists`, `$contains`, `$q`, `$autocomplete`
   factory ThreadFilterField.custom(String remote) {
-    return ThreadFilterField(remote, (it) => it.extraData[remote]);
+    return ThreadFilterField(remote, (it) => it.custom[remote]);
   }
 
   /// Filters threads by the full id of the channel they belong to, in the form

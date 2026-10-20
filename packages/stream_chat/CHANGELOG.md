@@ -140,6 +140,15 @@
 - `queryReminders` takes `limit`, `next` and `prev` instead of `PaginationParams`.
 - `CreateReminderResponse`, `UpdateReminderResponse` and `QueryRemindersResponse` are immutable, compare by value, and their `duration` is non-nullable.
 - `MessageReminderResponse` and `StreamChatApi.reminders` are removed.
+- The thread and draft calls on `StreamChatClient` and `Channel` return a `Result` instead of throwing.
+- `deleteDraft` returns a `Result<void>` instead of an `EmptyResponse`.
+- `partialUpdateThread` is renamed `updateThreadPartial`, and `UpdateThreadResponse` is renamed `UpdateThreadPartialResponse`.
+- `queryThreads` and `queryDrafts` take `limit`, `next` and `prev` instead of `PaginationParams`.
+- `QueryThreadsResponse`, `GetThreadResponse`, `UpdateThreadPartialResponse`, `CreateDraftResponse`, `GetDraftResponse` and `QueryDraftsResponse` are immutable, compare by value, and their `duration` is non-nullable.
+- `Thread`, `ThreadParticipant` and `ThreadOptions` no longer extend `Equatable`, so `props` is removed; they still compare by value, and `Thread` now compares `custom` too.
+- `Thread.extraData` is renamed `custom`, and `Thread.topLevelFields` is removed.
+- `copyWith` on `Thread` and `ThreadParticipant` clears a nullable field passed as `null`, resets a date passed as `null` to now, and no longer accepts `null` for a field that is never null.
+- `DraftResponse` and `StreamChatApi.threads` are removed, and `StreamChatApi.message` loses the draft methods.
 - `ChannelModel.extraData` and `Member.extraData` are renamed `custom`, and so are `Channel.extraData`, `Channel.extraDataStream` (now `customStream`), and the `extraData` argument of the `Channel` constructor and of `StreamChatClient.channel`.
 - The channel and member values `custom` used to hold, such as `ChannelModel.hidden` and `Member.status`, are fields now: `custom` and `toJson` leave them out, and setting one through `custom` has no effect.
 - An entry of `ChannelModel.custom` or `Member.custom` named like one of the model's own fields stays in `custom` and leaves the field alone, and `toJson` leaves it out.
@@ -193,6 +202,7 @@
 - Added `ChannelModel.muted`, `blocked`, `truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires` and `deletedAt`; the constructors and `copyWith` accept the new fields.
 - Added `Message.cid`, `html`, `mml` and `deletedReplyCount`, and `Attachment.giphy`.
 - Added a `prev` cursor to `QueryRemindersResponse`.
+- Added a `prev` cursor to `QueryThreadsResponse` and `QueryDraftsResponse`.
 - Added a `prev` argument to `queryPolls` and `queryPollVotes`, and a `prev` cursor on their responses, for paging backwards.
 
 🔒 Security

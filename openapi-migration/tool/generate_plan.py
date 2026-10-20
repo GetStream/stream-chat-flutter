@@ -458,19 +458,71 @@ GROUPS = [
               'message_api.dart::getDraft', 'message_api.dart::queryDrafts'],
         match=owns('/api/v2/chat/threads', '/api/v2/chat/drafts', '/api/v2/chat/channels/{type}/{id}/draft'),
         goal='Two related families that share the `Draft` model and the list controllers above them.',
-        decisions=[
-            'The generated thread response embeds a full `ChannelResponse`. Decide whether the channel inside a '
-            'thread adopts the generated shape now, or waits for the channels group — and write the answer down, '
-            'because the two groups can otherwise disagree.',
-        ],
+        decisions=[],
+        taken=textwrap.dedent("""\
+            - **The v2 routes are the v1 handlers.** `lib/chat/routes.go` mounts all seven in the shared `coreRoutes`;
+              none is gated or deprecated. `queryDrafts` is in beta on both routes, so the switch changes nothing
+              about who may call it.
+            - **Moved off `ThreadsApi` and `MessageApi`:** `queryThreads`, `getThread`, `partialUpdateThread`,
+              `createDraft`, `getDraft`, `deleteDraft` and `queryDrafts`, each a `StreamChatClient` method over a new
+              `ThreadsRepository` or `MessagesRepository` (named after `message_api.dart`, which group 10 empties
+              into it). `threads_api.dart` and `StreamChatApi.threads` are deleted; `Channel`'s three draft methods
+              return a `Result` too, and still throw a `StateError` on an uninitialized channel.
+            - **`partialUpdateThread` becomes `updateThreadPartial`, answering `UpdateThreadPartialResponse`**
+              (approved), after the spec and `updateChannelPartial`. The other envelopes keep their v10 names;
+              `deleteDraft` answers `DurationResponse`, so it returns `Result<void>`. The shared base class
+              `DraftResponse` is removed (approved).
+            - **`queryThreads` and `queryDrafts` take `limit`, `next` and `prev`** instead of `PaginationParams`
+              (approved). The backend reads only those (both cursors together rejected); `queryThreads` keeps v10's
+              limit of 10, `queryDrafts` sends none, so the backend's 25 still applies. Both responses gain `prev`.
+            - **`ThreadOptions` moves to `models/request/`** as a freezed class without `toJson`. All four values are
+              always sent: `getThread` has no backend defaults (an absent `reply_limit` returns no replies).
+            - **`Thread` and `ThreadParticipant` are plain `@freezed` models with freezed's `copyWith`.** They lose
+              `fromJson`, `toJson` and `Equatable`; `Thread` equality now includes `custom`, which v10's `props` left
+              out. The copyWith audit found no parameter freezed cannot generate; inside `stream_chat` only
+              `Thread.merge` relied on `null` keeping a value, so it builds through the constructor with v10's rules.
+              Reading the core call sites found two more the audit did not list: `ThreadExtension.deleteReply` and
+              `updateParent` (`stream_thread_list_controller.dart`) keep the thread's dates and deletion date with
+              `??` fallbacks, as v10 did. One `Thread` serves both the full (`ThreadStateResponse`) and the partial
+              (`ThreadResponse`) shape, as in v10: the partial one maps without latest replies, reads or a draft.
+              `ThreadParticipant` drops the generated `custom`, which v10 never read.
+            - **`Thread.extraData` is renamed `custom`** (README rule 9) and holds the generated `custom` verbatim.
+              `Thread.topLevelFields` is removed with the JSON; `ThreadV1JsonConverter` owns the key list.
+            - **v1 JSON keeps decoding through `ThreadV1JsonConverter`** on `Event.thread`, both ways, with custom
+              data at the root and v10's keys; the writer leaves out a custom entry named like a key.
+            - **The channel inside a thread maps through `channels_mapper.dart` now,** onto today's `ChannelModel`, as
+              the draft's channel already did; group [11](11-channels-and-members.md) re-points both. A thread's
+              reads map through a new `ReadStateResponseMapper` in the same file.
+            - **`Draft` and `DraftMessage` stay json_serializable** until group [10](10-messages.md), as the adapters
+              table records. Persistence stores drafts as rows in `draft_messages`, column by column, so nothing
+              about the stored format changes.
+            - **`createDraft` stores what v10 stored.** The backend stores a draft alike from either route, so the
+              request mapper (`DraftMessageRequestMapper`, `AttachmentRequestMapper`) reproduces what v1 bound from
+              v10's flattened body: mentions the text no longer has are dropped, a command is written into the text,
+              and the local id, upload state and file of an attachment are left out. The Giphy renditions and the
+              fields and actions map to their typed fields; a key missing from them is sent empty, which the backend
+              stores the same as absent. `custom` is sent verbatim on the message and on each attachment (README
+              rule 9), `file_size` and `mime_type` included. The draft message's HTML and markup are not modelled
+              ([06](06-reminders.md) dropped them): a draft read from v1 JSON keeps them in `custom`, which is sent
+              as is, and one read from the generated response does not carry them.
+            - **Verified live** against the demo app, each call against v10's v1 request decoded the v10 way: query
+              threads with defaults and with a filter, sort, `next` and `prev` (both cursors rejected), get a thread,
+              set and unset a custom field on one, and create, get, query and delete three drafts (one with every
+              field and attachment kind, one with a command, one carrying a received message's extra data). Every
+              thread maps as v10 decoded it, except the nested users' `blocked_user_ids`, which `users_mapper.dart`
+              drops for every migrated endpoint (decided in [09](09-users.md)). Every draft v2 saves is stored byte for
+              byte as v10's, except the received message's `image_labels`. Deleting or fetching a missing draft
+              returns a 404 failure.
+            - **`DraftMessage.poll` keeps v10's behaviour.** The draft payload carries `poll_id` only, so the mappers
+              leave the field null; the offline cache and `Message.toDraftMessage` still fill it, and a v1 `poll` key
+              still lands in `custom`, as in v10, since `poll` is not in `DraftMessage.topLevelFields`.
+            - **`MarkReadResponse.event` stays unexposed,** now waiting on group [09](09-users.md): its `user` is a
+              `UserResponseCommonFields`, which `users_mapper.dart` has no mapper for.
+            """),
+        done=DONE.replace('- [ ]', '- [x]'),
         risks=[
-            '`DraftMessage.poll` is never decoded from JSON: `poll` is not in `DraftMessage.topLevelFields`, so the key '
-            'would land in `custom`, and the draft payload carries `poll_id` only. Its `PollV1JsonConverter` exists so '
-            'the generated code compiles. Decide here whether the field stays constructor-only or goes.',
-            'The four draft methods live in `message_api.dart`, not `threads_api.dart` — this group reaches into '
-            'that file, and group 10 must leave those four alone.',
-            '`Draft` and `DraftMessage` are public, persisted, and read by `StreamDraftListController` in '
-            '`stream_chat_flutter_core`.',
+            '`createDraft` must keep storing what v10 stored, so v1 readers of the draft — channel queries, '
+            'WebSocket events, the offline cache — see no change.',
         ],
     ),
     dict(
@@ -624,6 +676,9 @@ GROUPS = [
             'restructures them, last: the mappers in `users_mapper.dart` already map the generated types onto the '
             'current class for every group before it, and stay. See [01-foundation](01-foundation.md).',
             '`PrivacySettings` and the push-preference sub-shapes — decide per type.',
+            'Expose `MarkReadResponse.event`, and decide its public type. [17](17-read-receipts.md) dropped it, and '
+            'since [07](07-threads-and-drafts.md) maps threads the only missing piece is its `user`, a '
+            '`UserResponseCommonFields` that `users_mapper.dart` has no mapper for; the mapper marks it with a TODO.',
             '`UserFilterField.bypassModeration` reads `custom`, which no generated user has a field to fill.',
             '**`User` and `OwnUser` move to freezed without changing the current user\'s merge rules.** freezed\'s '
             '`copyWith` clears a field passed `null` where today\'s keeps it, and it can\'t generate one for '
@@ -669,12 +724,11 @@ GROUPS = [
             'Replace the temporary `@DataSerializable` storage codec (`UserGroup`, `UserGroupMember`, `ReactionGroup`): decide '
             'between dedicated tables and codecs owned by `stream_chat_persistence` before `Message` and '
             '`Attachment` become plain models, then delete the typedef and every `fromData`/`toData` it generates.',
-            'Expose `MarkReadResponse.event`. [17](17-read-receipts.md) dropped it because its thread carries a '
-            '`MessageResponse`; the mapper marks it with a TODO.',
+            'Type the Giphy renditions, and decide whether they are all required. `Attachment.giphy` still reads them '
+            'as an untyped map, which `AttachmentRequestMapper` fills out with empty values '
+            '([07](07-threads-and-drafts.md)).',
         ],
         risks=[
-            '`message_api.dart` also holds the four draft methods, which belong to group 07 — leave them alone '
-            'here.',
             'Message send has offline and retry paths through `stream_chat_persistence` that must keep working.',
             '`MessageDeleteScope` has to be reconciled with `DeleteType`, which [08](08-moderation-and-blocklists.md) added. It is named for the scope of a delete — `deleteForMe` vs `deleteForAll` — but carries a `hard` bool, which is the same axis `DeleteType` models, in the same words, minus `pruning`. `deleteMessage(hard: true)` therefore cannot express a pruning delete at all, and `softDeleteForAll` / `hardDeleteForAll` read as two spellings of `DeleteType.soft` / `DeleteType.hard`. Decide whether the scope keeps a `DeleteType` field or the two stay separate arguments; either way the public type changes, so it belongs in this group rather than a later fix.',
         ],

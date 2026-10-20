@@ -31,33 +31,6 @@ void main() {
       expect(thread.draft, isNull);
     });
 
-    test('should serialize to and deserialize from JSON correctly', () {
-      final now = DateTime.now();
-      const channelCid = 'messaging:123';
-      const parentId = 'parent-message-id';
-      const userIdCreator = 'creator-user-id';
-
-      final thread = Thread(
-        channelCid: channelCid,
-        parentMessageId: parentId,
-        createdByUserId: userIdCreator,
-        replyCount: 5,
-        participantCount: 3,
-        createdAt: now,
-        updatedAt: now,
-      );
-
-      final json = thread.toJson();
-      final threadFromJson = Thread.fromJson(json);
-
-      expect(threadFromJson.channelCid, equals(thread.channelCid));
-      expect(threadFromJson.parentMessageId, equals(thread.parentMessageId));
-      expect(threadFromJson.createdByUserId, equals(thread.createdByUserId));
-      expect(threadFromJson.replyCount, equals(thread.replyCount));
-      expect(threadFromJson.participantCount, equals(thread.participantCount));
-      expect(threadFromJson.draft, isNull);
-    });
-
     test('should handle draft field correctly', () {
       final now = DateTime.now();
       const channelCid = 'messaging:123';
@@ -259,5 +232,62 @@ void main() {
         expect(asc.compare(silent, active), greaterThan(0));
       });
     });
+  });
+
+  test("Thread.merge keeps this thread's value for a field the other thread leaves null", () {
+    final channel = ChannelModel(cid: 'messaging:general');
+    final parentMessage = Message(id: 'parent-id');
+    final creator = User(id: 'creator');
+    final reader = User(id: 'reader');
+    final thread = Thread(
+      activeParticipantCount: 2,
+      channel: channel,
+      channelCid: 'messaging:general',
+      parentMessageId: 'parent-id',
+      parentMessage: parentMessage,
+      createdByUserId: 'creator',
+      createdBy: creator,
+      replyCount: 4,
+      participantCount: 3,
+      lastMessageAt: DateTime.utc(2026, 1, 4),
+      createdAt: DateTime.utc(2026),
+      updatedAt: DateTime.utc(2026, 1, 4),
+      deletedAt: DateTime.utc(2026, 1, 5),
+      title: 'Trip',
+      read: [Read(user: reader, lastRead: DateTime.utc(2026, 1, 3))],
+      custom: const {'topic': 'travel'},
+    );
+    final other = Thread(
+      channelCid: 'messaging:general',
+      parentMessageId: 'parent-id',
+      createdByUserId: 'creator',
+      replyCount: 5,
+      participantCount: 4,
+      createdAt: DateTime.utc(2026),
+      updatedAt: DateTime.utc(2026, 1, 6),
+      custom: const {'topic': 'food'},
+    ).copyWith(read: null);
+
+    expect(
+      thread.merge(other),
+      Thread(
+        activeParticipantCount: 2,
+        channel: channel,
+        channelCid: 'messaging:general',
+        parentMessageId: 'parent-id',
+        parentMessage: parentMessage,
+        createdByUserId: 'creator',
+        createdBy: creator,
+        replyCount: 5,
+        participantCount: 4,
+        lastMessageAt: DateTime.utc(2026, 1, 4),
+        createdAt: DateTime.utc(2026),
+        updatedAt: DateTime.utc(2026, 1, 6),
+        deletedAt: DateTime.utc(2026, 1, 5),
+        title: 'Trip',
+        read: [Read(user: reader, lastRead: DateTime.utc(2026, 1, 3))],
+        custom: const {'topic': 'food'},
+      ),
+    );
   });
 }

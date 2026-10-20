@@ -54,13 +54,11 @@ void stubQueryThreadsForGoldens(MockClient client, List<Thread> threads) {
       filter: any(named: 'filter'),
       sort: any(named: 'sort'),
       options: any(named: 'options'),
-      pagination: any(named: 'pagination'),
+      limit: any(named: 'limit'),
+      next: any(named: 'next'),
+      prev: any(named: 'prev'),
     ),
-  ).thenAnswer(
-    (_) async => QueryThreadsResponse()
-      ..threads = threads
-      ..next = null,
-  );
+  ).thenAnswer((_) async => Result.success(QueryThreadsResponse(duration: '0ms', threads: threads)));
 }
 
 /// Stubs user queries for [StreamUserListController] goldens using [StreamUserListController.fromValue].
@@ -84,13 +82,11 @@ void stubQueryDraftsForGoldens(MockClient client, List<Draft> drafts) {
     () => client.queryDrafts(
       filter: any(named: 'filter'),
       sort: any(named: 'sort'),
-      pagination: any(named: 'pagination'),
+      limit: any(named: 'limit'),
+      next: any(named: 'next'),
+      prev: any(named: 'prev'),
     ),
-  ).thenAnswer(
-    (_) async => QueryDraftsResponse()
-      ..drafts = drafts
-      ..next = null,
-  );
+  ).thenAnswer((_) async => Result.success(QueryDraftsResponse(duration: '0ms', drafts: drafts)));
 }
 
 /// Stubs member queries for [StreamMemberListController] goldens using [StreamMemberListController.fromValue].
