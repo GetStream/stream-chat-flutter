@@ -104,5 +104,9 @@
 			</array>
 		</dict>
 	</dict>
+	<!-- Flutter GPU (preview) powers the full liquid glass renderer; without it
+	     the Liquid Glass design falls back to its non-refracting FakeGlass. -->
+	<key>FLTEnableFlutterGPU</key>
+	<true/>
 </dict>
 </plist>

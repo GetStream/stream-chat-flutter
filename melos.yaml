@@ -111,7 +111,7 @@ command:
           path: packages/stream_core_flutter
       fluent_ui: ^4.16.1
       fluentui_system_icons: ^1.1.273
-      liquid_glass_widgets: ^1.13.0
+      liquid_glass_renderer: 1.0.0-dev.0
       pixelarticons: ^0.17.0
       shadcn_ui: ^0.57.2
       stream_thumbnail: ^0.2.0

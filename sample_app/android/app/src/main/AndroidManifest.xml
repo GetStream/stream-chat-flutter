@@ -75,5 +75,10 @@
         <meta-data
             android:name="firebase_crashlytics_collection_enabled"
             android:value="false" />
+        <!-- Flutter GPU (preview) powers the full liquid glass renderer; without
+             it the Liquid Glass design falls back to its non-refracting FakeGlass. -->
+        <meta-data
+            android:name="io.flutter.embedding.android.EnableFlutterGPU"
+            android:value="true" />
     </application>
 </manifest>

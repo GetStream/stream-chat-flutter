@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide Message;
 import 'package:go_router/go_router.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'package:shadcn_ui/shadcn_ui.dart' show ShadTheme;
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
@@ -219,10 +218,6 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                 // Design-specific scopes that must sit below MaterialApp, so
                 // they can read the resolved theme.
                 Widget wrapDesign(Widget child) => switch (design) {
-                  .liquidGlass => LiquidGlassWidgets.wrap(
-                    brightnessResolver: Theme.maybeBrightnessOf,
-                    child: child,
-                  ),
                   .fluent => Builder(
                     builder: (context) => fluent.FluentTheme(
                       data: fluentThemeData(Theme.of(context).brightness),

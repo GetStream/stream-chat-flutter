@@ -32,5 +32,9 @@
 	<string>NSApplication</string>
 	<key>NSLocationUsageDescription</key>
 	<string>We need access to your location to share it in the chat.</string>
+	<!-- Flutter GPU (preview) powers the full liquid glass renderer; without it
+	     the Liquid Glass design falls back to its non-refracting FakeGlass. -->
+	<key>FLTEnableFlutterGPU</key>
+	<true/>
 </dict>
 </plist>

@@ -48,7 +48,7 @@ dependencies:
   rxdart: ^0.28.0
   stream_chat_flutter: ^10.5.0
   stream_chat_localizations: ^10.5.0
-  liquid_glass_widgets: ^1.13.0
+  liquid_glass_renderer: 1.0.0-dev.0
   pixelarticons: ^0.17.0
   shadcn_ui: ^0.57.2
   stream_chat_persistence: ^10.5.0
