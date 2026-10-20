@@ -1099,8 +1099,11 @@ class Channel {
     }
   }
 
-  // Deletes a [message] that exists only on this device: one not yet sent,
-  // one that failed to send, or one moderation bounced.
+  // Deletes a local [message] that is not yet sent.
+  //
+  // This is typically called when a user wants to delete a message that they
+  // have composed but not yet sent, or if a message failed to send and the user
+  // wants to remove it from their local view.
   void _deleteLocalMessage(Message message) {
     final deleted = message.copyWith(
       type: MessageType.deleted,
