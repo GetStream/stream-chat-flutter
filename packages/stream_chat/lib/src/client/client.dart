@@ -1615,8 +1615,9 @@ class StreamChatClient {
     messageId: messageId,
   );
 
-  /// Marks the message with [messageId] and every later one in a channel as
-  /// unread for the current user.
+  /// Marks a channel unread from [messageId] for the current user.
+  ///
+  /// The message with [messageId] and every later one are marked as unread.
   ///
   /// The message must be one of the channel's latest 100 messages; an older one
   /// returns a failure.
@@ -1630,8 +1631,10 @@ class StreamChatClient {
     messageId: messageId,
   );
 
-  /// Marks the messages of a channel created after [timestamp] as unread for
-  /// the current user.
+  /// Marks a channel unread after [timestamp] for the current user.
+  ///
+  /// The first message after [timestamp] must exist and be one of the
+  /// channel's latest 100 messages; otherwise this returns a failure.
   Future<Result<void>> markChannelUnreadByTimestamp(
     String channelId,
     String channelType,
@@ -1642,8 +1645,9 @@ class StreamChatClient {
     messageTimestamp: timestamp,
   );
 
-  /// Marks the thread started by the message with [threadId] as read for the
-  /// current user.
+  /// Marks the thread of [threadId] as read for the current user.
+  ///
+  /// The [threadId] is the id of the thread's parent message.
   Future<Result<MarkReadResponse>> markThreadRead(
     String channelId,
     String channelType,
@@ -1654,8 +1658,9 @@ class StreamChatClient {
     threadId: threadId,
   );
 
-  /// Marks the thread started by the message with [threadId] as unread for the
-  /// current user.
+  /// Marks the thread of [threadId] as unread for the current user.
+  ///
+  /// The [threadId] is the id of the thread's parent message.
   Future<Result<void>> markThreadUnread(
     String channelId,
     String channelType,
@@ -1923,7 +1928,8 @@ class StreamChatClient {
   /// await client.markChannelsDelivered([receipt]);
   /// ```
   ///
-  /// Takes up to 100 receipts per call; more return a failure.
+  /// Takes between 1 and 100 receipts per call; any other number returns a
+  /// failure.
   Future<Result<MarkDeliveredResponse>> markChannelsDelivered(
     Iterable<MessageDelivery> deliveries,
   ) => _channelsRepository.markChannelsDelivered(deliveries);

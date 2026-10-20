@@ -1872,15 +1872,12 @@ class Channel {
   /// Messages up to and including the one with [messageId] are marked as read,
   /// or all of them when [messageId] is null.
   ///
-  /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
-  /// unread count locally, on-device, without making a network request, and
-  /// returns a [MarkReadResponse] whose [MarkReadResponse.duration] is `0ms`.
-  /// In that case [messageId] is recorded as the read boundary but does
-  /// **not** narrow the count: the channel is always treated as fully read and
-  /// the count drops to zero. See [ChannelClientState.markReadLocally].
+  /// If [usesLocalUnreadCount] is true, only the local unread count changes,
+  /// and it drops to zero whatever [messageId] is. See
+  /// [ChannelClientState.markReadLocally].
   ///
-  /// Returns a failure if [canUseReadReceipts] is `false`, unless
-  /// [usesLocalUnreadCount] is `true`.
+  /// Returns a failure if [canUseReadReceipts] is false, unless
+  /// [usesLocalUnreadCount] is true.
   Future<Result<MarkReadResponse>> markRead({String? messageId}) async {
     _checkInitialized();
 
@@ -1905,19 +1902,17 @@ class Channel {
   /// Marks this channel as unread for the current user.
   ///
   /// The message with [messageId] and every later one are marked as unread.
-  /// Contrast with [markUnreadByTimestamp], which is exclusive: a message
-  /// created at exactly the given timestamp stays read.
+  /// Unlike [markUnreadByTimestamp], the boundary is inclusive.
   ///
   /// The message must be one of the channel's latest 100 messages; an older one
   /// returns a failure.
   ///
-  /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
-  /// unread count locally, on-device, without making a network request. The
-  /// message must be part of the locally-known messages ([Channel.messages])
-  /// for the count to be recomputed; otherwise this returns a failure.
+  /// If [usesLocalUnreadCount] is true, only the local unread count changes,
+  /// and a message missing from [ChannelClientState.messages] returns a
+  /// failure.
   ///
-  /// Returns a failure if [canUseReadReceipts] is `false`, unless
-  /// [usesLocalUnreadCount] is `true`.
+  /// Returns a failure if [canUseReadReceipts] is false, unless
+  /// [usesLocalUnreadCount] is true.
   Future<Result<void>> markUnread(String messageId) async {
     _checkInitialized();
 
@@ -1962,8 +1957,7 @@ class Channel {
     return _client.markChannelUnread(id!, type, messageId);
   }
 
-  /// Marks the messages of this channel created after [timestamp] as unread for
-  /// the current user.
+  /// Marks this channel unread after [timestamp] for the current user.
   ///
   /// The boundary is **exclusive**: a message created at exactly [timestamp]
   /// stays read. Contrast with [markUnread], which is inclusive of the message
@@ -1971,11 +1965,13 @@ class Channel {
   /// `markUnreadByTimestamp(m.createdAt - 1µs)`, not to
   /// `markUnreadByTimestamp(m.createdAt)`.
   ///
-  /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
-  /// unread count locally, on-device, without making a network request.
+  /// The first message after [timestamp] must exist and be one of the
+  /// channel's latest 100 messages; otherwise this returns a failure.
   ///
-  /// Returns a failure if [canUseReadReceipts] is `false`, unless
-  /// [usesLocalUnreadCount] is `true`.
+  /// If [usesLocalUnreadCount] is true, only the local unread count changes.
+  ///
+  /// Returns a failure if [canUseReadReceipts] is false, unless
+  /// [usesLocalUnreadCount] is true.
   Future<Result<void>> markUnreadByTimestamp(DateTime timestamp) async {
     _checkInitialized();
 
@@ -2006,10 +2002,11 @@ class Channel {
     return _client.markChannelUnreadByTimestamp(id!, type, timestamp);
   }
 
-  /// Marks the thread started by the message with [threadId] as read for the
-  /// current user.
+  /// Marks the thread of [threadId] as read for the current user.
   ///
-  /// Returns a failure if [canUseReadReceipts] is `false`.
+  /// The [threadId] is the id of the thread's parent message.
+  ///
+  /// Returns a failure if [canUseReadReceipts] is false.
   Future<Result<MarkReadResponse>> markThreadRead(String threadId) async {
     _checkInitialized();
 
@@ -2026,10 +2023,11 @@ class Channel {
     return _client.markThreadRead(id!, type, threadId);
   }
 
-  /// Marks the thread started by the message with [threadId] as unread for the
-  /// current user.
+  /// Marks the thread of [threadId] as unread for the current user.
   ///
-  /// Returns a failure if [canUseReadReceipts] is `false`.
+  /// The [threadId] is the id of the thread's parent message.
+  ///
+  /// Returns a failure if [canUseReadReceipts] is false.
   Future<Result<void>> markThreadUnread(String threadId) async {
     _checkInitialized();
 
