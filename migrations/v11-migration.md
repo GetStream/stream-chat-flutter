@@ -99,7 +99,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Read Receipts**](#read-receipts) | Marking read, unread and delivered return a `Result` instead of throwing; `ChannelDeliveryReporter`'s callback returns a `Result` |
 | [**Unread Counts**](#unread-counts) | `getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing; the response and its `UnreadCounts*` models lose their JSON codecs and compare by value |
 | [**User Blocking**](#user-blocking) | `blockUser`, `unblockUser` and `getBlockedUsers` (was `queryBlockedUsers`) return a `Result` instead of throwing; their responses are renamed `BlockUsersResponse` and `GetBlockedUsersResponse`, `unblockUser` answers a new `UnblockUsersResponse`, and `UserBlock`'s fields are all non-nullable |
-| [**Messages**](#messages) | `Moderation`, `ReactionGroup`, `Action`, `Reaction` and `Location` no longer decode from or encode to JSON; `Action` compares by value; reaction calls return a `Result`, `getReactions` answers a new `GetReactionsResponse`, and the reaction queries take `limit`/`offset` or `limit`/`next`/`prev`; message reads and search return a `Result`, `getMessagesById` is `getManyMessages`, `getReplies` takes a required `limit` and reply ids, `translateMessage` takes a `TranslationLanguage`, and search results are `SearchMessageResult`s |
+| [**Messages**](#messages) | `Moderation`, `ReactionGroup`, `Action`, `Reaction` and `Location` no longer decode from or encode to JSON; `Action` compares by value; reaction calls return a `Result`, `getReactions` answers a new `GetReactionsResponse`, and the reaction queries take `limit`/`offset` or `limit`/`next`/`prev`; message reads and search return a `Result`, `getMessagesById` is `getManyMessages`, `getReplies` takes a required `limit` and reply ids, `translateMessage` takes a `TranslationLanguage`, search results are `SearchMessageResult`s, `sendAction` returns a `Result`, takes `Map<String, String>` form data and, on the client, no channel id or type; sending, updating, pinning and deleting messages return a `Result`, `partialUpdateMessage` is `updateMessagePartial` and deletes answer a `DeleteMessageResponse` |
 | [**User Updates**](#user-updates) | `updateUser` and `updateUsers` return a `Result<UpdateUsersResponse>` instead of throwing; `partialUpdateUser(s)` becomes `updateUserPartial` / `updateUsersPartial` and `PartialUpdateUserRequest` becomes `UpdateUserPartialRequest`; `updateUser` no longer sends `role`, `teams` or `teamsRole`, and the returned users no longer carry their private fields in `extraData` |
 | [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`; the channel and member flags it carried are fields |
 | [**User Custom Data**](#user-custom-data) | `extraData` is `custom` on `User` and `OwnUser`; `name` is nullable and `nameOrId` falls back to the id; the user fields it carried are fields |
@@ -414,6 +414,25 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamMessageSearchListController` (`PagedValueNotifier<String, GetMessageResponse>`), `StreamMessageSearchListView`, `StreamMessageSearchListViewIndexedWidgetBuilder`, `defaultMessageSearchListViewSeparatorBuilder`, `MessageSearchItemTapCallback`, `MessageSearchItemBuilder` | the same, over `SearchMessageResult` | `retyped` | |
 | `StreamMessageSearchListTile.messageResponse`, `MessageSearchListTileTitle.messageResponse` | `searchResult` | `renamed` | Also in `StreamMessageSearchListTile.copyWith` |
 | `StreamChatApi.message.getMessage` / `.getMessagesById` / `.getReplies` / `.translateMessage`, `StreamChatApi.general.searchMessages` | the `StreamChatClient` methods | `removed` | The endpoints moved to the generated client |
+| `client.sendAction(channelId, channelType, messageId, formData)` → `Future<SendActionResponse>` | `client.sendAction(messageId, formData)` → `Future<Result<SendActionResponse>>` | `retyped` | Drop the channel id and type. `formData` is a `Map<String, String>` |
+| `channel.sendAction(message, formData)` → `Future<SendActionResponse>` | `Future<Result<SendActionResponse>>` | `retyped` | `formData` is a `Map<String, String>` |
+| `SendActionResponse()..message = …` and its other setters | `SendActionResponse(duration: …, message: …)` | `retyped` | A plain class with a const constructor and final fields |
+| `SendActionResponse.fromJson` | — | `removed` | Construct the response directly |
+| `SendActionResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| `SendActionResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two responses with the same fields are now equal |
+| `StreamChatApi.message.sendAction` | `StreamChatClient.sendAction` | `removed` | The endpoint moved to the generated client |
+| `sendMessage(…)` → `Future<SendMessageResponse>` | `Future<Result<SendMessageResponse>>` | `retyped` | On `StreamChatClient` and `Channel`, same arguments. `Channel.sendMessage` keeps the optimistic update and the retry of a failed message; a failure is returned instead of thrown |
+| `updateMessage(…)` → `Future<UpdateMessageResponse>` | `Future<Result<UpdateMessageResponse>>` | `retyped` | On `StreamChatClient` and `Channel`, same arguments |
+| `partialUpdateMessage(…)` → `Future<UpdateMessageResponse>` | `updateMessagePartial(…)` → `Future<Result<UpdateMessagePartialResponse>>` | `renamed` | On `StreamChatClient` and `Channel`, same arguments. `UpdateMessagePartialResponse.message` is nullable |
+| `pinMessage(…)` / `unpinMessage(…)` → `Future<UpdateMessageResponse>` | `Future<Result<UpdateMessagePartialResponse>>` | `retyped` | On `StreamChatClient` and `Channel`, same arguments. `UpdateMessagePartialResponse.message` is nullable |
+| `deleteMessage(…)` / `deleteMessageForMe(…)` → `Future<EmptyResponse>` | `Future<Result<DeleteMessageResponse>>` | `retyped` | On `StreamChatClient` and `Channel`. A new response carrying the message the delete applied to; `Channel` deleting a message that was never sent answers one with a `0ms` duration |
+| `Channel.sendStaticLocation` / `startLiveLocationSharing` → `Future<SendMessageResponse>` | `Future<Result<SendMessageResponse>>` | `retyped` | Same arguments |
+| `Channel.retryMessage` → `Future<Object>` | `Future<Result<Object>>` | `retyped` | The retried call's `Result`. A message that is neither failed nor bounced still throws a `StateError` |
+| `SendMessageResponse()..message = …`, `UpdateMessageResponse()..message = …` | `SendMessageResponse(duration: …, message: …)` and the like | `retyped` | Plain classes with a const constructor and final fields |
+| `SendMessageResponse.fromJson`, `UpdateMessageResponse.fromJson`, `MessageResponse` | — | `removed` | Construct the responses directly; they no longer share a base class |
+| `SendMessageResponse.duration` / `UpdateMessageResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| `SendMessageResponse` / `UpdateMessageResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two responses with the same fields are now equal |
+| `StreamChatApi.message`, `MessageApi` | the `StreamChatClient` methods | `removed` | Every message endpoint moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -468,7 +487,7 @@ final result = await client.someMigratedCall();
 
 // One that has not migrated still throws — the type is what changed.
 try {
-  await channel.sendMessage(message);
+  await channel.addMembers([userId]);
 } on StreamChatException catch (error) {
   print(error.message);
 }
@@ -1563,8 +1582,7 @@ final topic = thread.extraData['topic'];
 final topic = thread.custom['topic'];
 ```
 
-**`StreamChatApi.threads` is removed, and `StreamChatApi.message` loses the draft methods.** Call them on
-`StreamChatClient` or `Channel` instead.
+**`StreamChatApi.threads` is removed.** Call the thread methods on `StreamChatClient` or `Channel` instead.
 
 > **Why:** a failure is a value the caller handles where it happens, and the public models stop being wire shapes,
 > so the API payload can change without changing the type a caller holds.
@@ -1671,8 +1689,6 @@ await client.queryReactions(messageId, limit: 20, next: cursor);
 `QueryReactionsResponse(duration: '0ms', reactions: reactions)` where v10 wrote
 `QueryReactionsResponse()..reactions = reactions`. `SendReactionResponse` no longer extends `MessageResponse`.
 
-**`StreamChatApi.message` loses the reaction methods.** Call them on `StreamChatClient` or `Channel` instead.
-
 **Reading, translating and searching messages returns a `Result` too:** `getMessage`, `getManyMessages`,
 `getReplies`, `translateMessage` and `search` on `StreamChatClient`, and all but `getMessage` on `Channel`.
 `Channel.getReplies` still adds the replies to the thread state and `Channel.translateMessage` still merges the
@@ -1711,6 +1727,44 @@ message and its channel, where v10 reused `GetMessageResponse`. The search list 
 
 **`GetMessageResponse.channel` is non-nullable,** and the read responses no longer decode JSON: build them with their
 constructors.
+
+**`sendAction` returns a `Result` too, and takes its form data as a `Map<String, String>`.** On `StreamChatClient`
+it no longer takes the channel id and type. `Channel.sendAction` still replaces the message with the one the action
+left, or removes it when the action leaves none, as canceling a Giphy command does; a failure leaves the channel
+as it was. `SendActionResponse` no longer decodes JSON: build it with its constructor.
+
+```dart
+// v10
+await client.sendAction(channel.id!, channel.type, message.id, {'image_action': 'shuffle'});
+
+// v11
+await client.sendAction(message.id, {'image_action': 'shuffle'});
+```
+
+**Sending, updating, pinning and deleting a message return a `Result` too,** on `StreamChatClient` and `Channel`.
+`Channel` still shows the change straight away, keeps a message that fails in a failed state, and retries it later
+when the failure is one a retry can fix; the failure is returned rather than thrown. `Channel.retryMessage`,
+`sendStaticLocation` and `startLiveLocationSharing` return a `Result` as well, and `sendPoll` is unchanged.
+
+```dart
+// v10
+try {
+  await channel.sendMessage(Message(text: 'Hello'));
+} on StreamChatException catch (error) {
+  showError(error);
+}
+
+// v11
+final result = await channel.sendMessage(Message(text: 'Hello'));
+if (result case Failure(:final error)) showError(error);
+```
+
+**`partialUpdateMessage` is renamed `updateMessagePartial`** and answers an `UpdateMessagePartialResponse`, as
+`pinMessage` and `unpinMessage` do. **Deleting a message answers a `DeleteMessageResponse`** instead of an
+`EmptyResponse`, also when `Channel` deletes a message that was never sent: that one has a `0ms` duration.
+
+**`SendMessageResponse` and `UpdateMessageResponse` no longer decode JSON** and no longer extend `MessageResponse`,
+which is removed: build them with their constructors. `StreamChatApi.message` and `MessageApi` are removed.
 
 > **Why:** a failure is a value the caller handles where it happens, and the public models stop being wire shapes,
 > so the API payload can change without changing the type a caller holds.

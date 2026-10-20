@@ -717,10 +717,14 @@ GROUPS = [
         match=owns('/api/v2/chat/messages',
                    unless=('/api/v2/chat/messages/{message_id}/polls',
                            '/api/v2/chat/messages/{message_id}/reminders',
-                           '/api/v2/chat/messages/{id}/reaction'),
+                           '/api/v2/chat/messages/{id}/reaction',
+                           '/api/v2/chat/messages/{id}/action'),
                    unless_ops=('GET /api/v2/chat/messages/{id}',
                                'GET /api/v2/chat/messages/{parent_id}/replies',
-                               'POST /api/v2/chat/messages/{id}/translate')),
+                               'POST /api/v2/chat/messages/{id}/translate',
+                               'POST /api/v2/chat/messages/{id}',
+                               'PUT /api/v2/chat/messages/{id}',
+                               'DELETE /api/v2/chat/messages/{id}')),
         goal='The core of the SDK, and the group with the most customisation pressure on its models.',
         decisions=[
             '`Message` is public, persisted, WebSocket-delivered and the most customised type in the SDK. Keep '
@@ -732,10 +736,7 @@ GROUPS = [
             'as an untyped map, which `AttachmentRequestMapper` fills out with empty values '
             '([07](07-threads-and-drafts.md)).',
         ],
-        risks=[
-            'Message send has offline and retry paths through `stream_chat_persistence` that must keep working.',
-            '`MessageDeleteScope` has to be reconciled with `DeleteType`, which [08](08-moderation-and-blocklists.md) added. It is named for the scope of a delete — `deleteForMe` vs `deleteForAll` — but carries a `hard` bool, which is the same axis `DeleteType` models, in the same words, minus `pruning`. `deleteMessage(hard: true)` therefore cannot express a pruning delete at all, and `softDeleteForAll` / `hardDeleteForAll` read as two spellings of `DeleteType.soft` / `DeleteType.hard`. Decide whether the scope keeps a `DeleteType` field or the two stay separate arguments; either way the public type changes, so it belongs in this group rather than a later fix.',
-        ],
+        risks=[],
         taken=textwrap.dedent("""\
             The models `Message` embeds become plain ahead of the endpoints, one PR each, leaves first. None routes
             an endpoint, so the definition of done below stays open.
@@ -905,6 +906,66 @@ GROUPS = [
         ],
     ),
     dict(
+        num='10c', slug='message-writes', title='Message Writes',
+        hand=['message_api.dart::sendMessage', 'message_api.dart::updateMessage',
+              'message_api.dart::partialUpdateMessage', 'message_api.dart::deleteMessage',
+              'message_api.dart::sendAction'],
+        match=only_ops('POST /api/v2/chat/channels/{type}/{id}/message',
+                       'POST /api/v2/chat/messages/{id}',
+                       'PUT /api/v2/chat/messages/{id}',
+                       'DELETE /api/v2/chat/messages/{id}',
+                       'POST /api/v2/chat/messages/{id}/action'),
+        goal='Split out of [10](10-messages.md): sending, updating and deleting messages and running their '
+             'actions, with the optimistic state and the offline retry queue around them.',
+        decisions=[],
+        taken=textwrap.dedent("""\
+            - **The v2 routes are the v1 handlers.** `lib/chat/routes.go` mounts all five in the shared
+              `coreRoutes`; none is gated or in beta. Only the JSON options differ: v2 reads custom data from
+              `custom` alone and silently drops flat keys, which v10 sent.
+            - **`sendMessage` belongs here, not in [11](11-channels-and-members.md),** although its path is under
+              `/channels`: its hand-written method is `MessageApi.sendMessage`, and it answers a message.
+            - **Moved off `MessageApi`:** `sendMessage`, `updateMessage`, `updateMessagePartial`, `deleteMessage`
+              (and `deleteMessageForMe`) and `sendAction`, each a `StreamChatClient` method over
+              `MessagesRepository`; `pinMessage` and `unpinMessage` go through `updateMessagePartial`. `Channel`'s
+              versions, `sendStaticLocation` and `startLiveLocationSharing` return a `Result` too and keep the
+              optimistic update, the failed states and the retry scheduling; they still throw a `StateError` on an
+              uninitialized channel. In `sendMessage` and `updateMessage`, which still signal an upload failure, an
+              invalid message or a cancelled upload by throwing internally, a private `_runCatching` turns what is
+              thrown into a failure, so the failed state is applied as v10's `catch` did; a non-Stream error comes
+              back in a `StreamClientException` carrying it. `MessageApi`, `StreamChatApi.message` and the `MessageResponse`
+              base class are deleted, and `sendPoll` calls `sendMessage` directly.
+            - **`partialUpdateMessage` is renamed `updateMessagePartial`** (spec name, approved) and answers
+              `UpdateMessagePartialResponse`, as `pinMessage` and `unpinMessage` do.
+            - **`sendAction` keeps its name and `SendActionResponse`** (approved over the spec's
+              `runMessageAction` and `MessageActionResponse`). `formData` becomes `Map<String, String>`, and the
+              client's `channelId` and `channelType` go, since the request carries only the form data (approved).
+            - **A delete answers `DeleteMessageResponse`**, and a local or bounced message deleted without a call
+              answers one with a `'0ms'` duration (approved).
+            - **`retryMessage` returns `Future<Result<Object>>`** (approved): the retried call's envelope.
+              `RetryQueue` keeps `rate_limiter`'s `backOff`, which retries only a call that throws: inside its
+              closure a failure is thrown as its error, so attempts, stop conditions and delays are v10's.
+            - **`MessageDeleteScope` stays** (approved), closing group 10's `DeleteType` risk: the endpoint takes a
+              `hard` and a `delete_for_me` flag and has no pruning delete, so `DeleteType` would let a caller ask
+              for a delete it cannot perform, and would change the persisted `deletingFailed` state for nothing.
+            - **The request carries what v10's `Message.toJson` sent** (`MessageRequestMapper`, with
+              `LocationRequestMapper` and the existing `AttachmentRequestMapper`): custom data verbatim in `custom`, a
+              command written into the text (`/giphy null` when there is no text, as v10), mentions pruned by the same
+              `removeMentionsIfNotIncluded` (moved to the internal `message_mentions.dart` so both share it), and only
+              a regular or system type. `mml` and `pinnedAt` go out as null: v10 never sent them, and the backend
+              stamps the pin time itself. One difference: a custom entry named like a message field, which v10
+              dropped, is now sent inside `custom`.
+            - **`StreamMessageComposer` maps the send or update `Result` to the sent message** and no longer wraps
+              the integrator's `onMessageSent` in its `try`, so an exception from it propagates.
+            - **The plain models and the storage codec replacement are planned separately,** not here.
+            """),
+        risks=[
+            'Message send has offline and retry paths through `stream_chat_persistence` that must keep working.',
+            'A flat message body sent to v2 loses its custom data with no error, so only the request mapper may '
+            'build one.',
+        ],
+        done=DONE.replace('- [ ]', '- [x]'),
+    ),
+    dict(
         num='11', slug='channels-and-members', title='Channels, Members & Sync',
         hand=['channel_api.dart', 'general_api.dart::sync', 'general_api.dart::queryMembers'],
         match=owns('/api/v2/chat/channels', '/api/v2/chat/members', '/api/v2/chat/sync',
@@ -920,7 +981,8 @@ GROUPS = [
                                'POST /api/v2/chat/channels/{type}/{id}/unread',
                                'POST /api/v2/chat/channels/read',
                                'POST /api/v2/chat/channels/delivered',
-                               'GET /api/v2/chat/channels/{type}/{id}/messages')),
+                               'GET /api/v2/chat/channels/{type}/{id}/messages',
+                               'POST /api/v2/chat/channels/{type}/{id}/message')),
         goal='The biggest group, and the one every controller above it reads through `ChannelState`. '
              '[15](15-partial-updates.md) split the partial channel and member updates out of it, '
              '[16](16-channel-lifecycle.md) hiding, showing and deleting a channel, and '

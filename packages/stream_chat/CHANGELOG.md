@@ -148,7 +148,7 @@
 - `Thread`, `ThreadParticipant` and `ThreadOptions` no longer extend `Equatable`, so `props` is removed; they still compare by value, and `Thread` now compares `custom` too.
 - `Thread.extraData` is renamed `custom`, and `Thread.topLevelFields` is removed.
 - `copyWith` on `Thread` and `ThreadParticipant` clears a nullable field passed as `null`, resets a date passed as `null` to now, and no longer accepts `null` for a field that is never null.
-- `DraftResponse` and `StreamChatApi.threads` are removed, and `StreamChatApi.message` loses the draft methods.
+- `DraftResponse` and `StreamChatApi.threads` are removed.
 - `ChannelModel.extraData` and `Member.extraData` are renamed `custom`, and so are `Channel.extraData`, `Channel.extraDataStream` (now `customStream`), and the `extraData` argument of the `Channel` constructor and of `StreamChatClient.channel`.
 - The channel and member values `custom` used to hold, such as `ChannelModel.hidden` and `Member.status`, are fields now: `custom` and `toJson` leave them out, and setting one through `custom` has no effect.
 - An entry of `ChannelModel.custom` or `Member.custom` named like one of the model's own fields stays in `custom` and leaves the field alone, and `toJson` leaves it out.
@@ -169,7 +169,6 @@
 - `getReactions` returns a `GetReactionsResponse` instead of a `QueryReactionsResponse`, and takes `limit` and `offset` instead of `PaginationParams`.
 - `queryReactions` takes `limit`, `next` and `prev` instead of `PaginationParams`.
 - `SendReactionResponse` and `QueryReactionsResponse` are immutable, compare by value, and their `duration` is non-nullable; `SendReactionResponse` no longer extends `MessageResponse`.
-- `StreamChatApi.message` loses the reaction methods.
 - `getMessage`, `getManyMessages`, `getReplies`, `translateMessage` and `search` return a `Result` instead of throwing, on `StreamChatClient` and, except `getMessage`, on `Channel`.
 - `getMessagesById` is renamed `getManyMessages` and returns a `GetManyMessagesResponse` instead of a `GetMessagesByIdResponse`.
 - `getReplies` returns a `GetRepliesResponse` instead of a `QueryRepliesResponse`, and takes a required `limit` and the reply ids directly instead of `PaginationParams`.
@@ -177,7 +176,16 @@
 - `search` takes `limit`, `offset` and `next` instead of `PaginationParams`, and its results are `SearchMessageResult`s instead of `GetMessageResponse`s.
 - `GetMessageResponse.channel` is non-nullable.
 - `GetMessageResponse`, `TranslateMessageResponse` and `SearchMessagesResponse` are immutable, compare by value, and their `duration` is non-nullable; `GetMessageResponse` and `TranslateMessageResponse` no longer extend `MessageResponse`.
-- `StreamChatApi.message` and `StreamChatApi.general` lose the message read and search methods.
+- `StreamChatApi.general` loses the message search method.
+- `sendAction` returns a `Result` instead of throwing, on `StreamChatClient` and `Channel`, and takes its form data as a `Map<String, String>`.
+- `StreamChatClient.sendAction` no longer takes the channel id and type.
+- `SendActionResponse` is immutable, compares by value, and its `duration` is non-nullable.
+- The message send, update, pin and delete calls on `StreamChatClient` and `Channel` return a `Result` instead of throwing, as do `Channel.sendStaticLocation`, `startLiveLocationSharing` and `retryMessage`.
+- `partialUpdateMessage` is renamed `updateMessagePartial` and returns a `Result<UpdateMessagePartialResponse>` instead of an `UpdateMessageResponse`, as `pinMessage` and `unpinMessage` do.
+- `UpdateMessagePartialResponse.message` is nullable, where `UpdateMessageResponse.message` was not.
+- `deleteMessage` and `deleteMessageForMe` return a `DeleteMessageResponse` instead of an `EmptyResponse`, also when `Channel` deletes a message that was never sent.
+- `SendMessageResponse` and `UpdateMessageResponse` are immutable, compare by value, and their `duration` is non-nullable; `MessageResponse` is removed.
+- `MessageApi` and `StreamChatApi.message` are removed.
 
 🐞 Fixed
 

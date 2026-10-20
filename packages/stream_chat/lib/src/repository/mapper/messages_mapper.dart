@@ -1,14 +1,20 @@
 import '../../../open_api/api.dart' as api;
 import '../../core/models/message.dart';
 import '../../core/models/moderation.dart';
+import '../../core/models/response/delete_message_response.dart';
 import '../../core/models/response/get_many_messages_response.dart';
 import '../../core/models/response/get_message_response.dart';
 import '../../core/models/response/get_replies_response.dart';
 import '../../core/models/response/search_messages_response.dart';
+import '../../core/models/response/send_action_response.dart';
+import '../../core/models/response/send_message_response.dart';
 import '../../core/models/response/translate_message_response.dart';
+import '../../core/models/response/update_message_partial_response.dart';
+import '../../core/models/response/update_message_response.dart';
 import '../../core/models/search_message_result.dart';
 import '../../core/models/translation_language.dart';
 import '../../core/util/message_decoding.dart';
+import '../../core/util/message_mentions.dart';
 import 'attachments_mapper.dart';
 import 'channels_mapper.dart';
 import 'drafts_mapper.dart';
@@ -53,6 +59,52 @@ extension GetRepliesResponseMapper on api.GetRepliesResponse {
 extension TranslateMessageResponseMapper on api.TranslateMessageResponse {
   /// Converts this response into a [TranslateMessageResponse].
   TranslateMessageResponse toModel() => TranslateMessageResponse(
+    duration: duration,
+    message: message.toModel(),
+  );
+}
+
+/// Maps a generated [api.MessageActionResponse] to a [SendActionResponse].
+extension MessageActionResponseMapper on api.MessageActionResponse {
+  /// Converts this response into a [SendActionResponse].
+  SendActionResponse toModel() => SendActionResponse(
+    duration: duration,
+    message: message?.toModel(),
+  );
+}
+
+/// Maps a generated [api.SendMessageResponse] to a [SendMessageResponse].
+extension SendMessageResponseMapper on api.SendMessageResponse {
+  /// Converts this response into a [SendMessageResponse].
+  SendMessageResponse toModel() => SendMessageResponse(
+    duration: duration,
+    message: message.toModel(),
+  );
+}
+
+/// Maps a generated [api.UpdateMessageResponse] to an [UpdateMessageResponse].
+extension UpdateMessageResponseMapper on api.UpdateMessageResponse {
+  /// Converts this response into an [UpdateMessageResponse].
+  UpdateMessageResponse toModel() => UpdateMessageResponse(
+    duration: duration,
+    message: message.toModel(),
+  );
+}
+
+/// Maps a generated [api.UpdateMessagePartialResponse] to an
+/// [UpdateMessagePartialResponse].
+extension UpdateMessagePartialResponseMapper on api.UpdateMessagePartialResponse {
+  /// Converts this response into an [UpdateMessagePartialResponse].
+  UpdateMessagePartialResponse toModel() => UpdateMessagePartialResponse(
+    duration: duration,
+    message: message?.toModel(),
+  );
+}
+
+/// Maps a generated [api.DeleteMessageResponse] to a [DeleteMessageResponse].
+extension DeleteMessageResponseMapper on api.DeleteMessageResponse {
+  /// Converts this response into a [DeleteMessageResponse].
+  DeleteMessageResponse toModel() => DeleteMessageResponse(
     duration: duration,
     message: message.toModel(),
   );
@@ -256,6 +308,50 @@ extension SearchResultMessageMapper on api.SearchResultMessage {
     updatedAt: updatedAt,
     user: user,
   );
+}
+
+/// Maps a [Message] to the generated [api.MessageRequest] that sends or updates
+/// it.
+extension MessageRequestMapper on Message {
+  /// Converts this message into the request that sends or updates it.
+  ///
+  /// The mentions the text no longer contains are left out.
+  ///
+  /// A [command] is written into the text as `/command text`. A message without
+  /// text sends `/command null`.
+  ///
+  /// Only a regular or system [type] is sent.
+  api.MessageRequest toRequest() {
+    final message = removeMentionsIfNotIncluded();
+
+    return api.MessageRequest(
+      id: message.id,
+      text: switch (message.command) {
+        final command? when command.isNotEmpty => '/$command ${message.text}',
+        _ => message.text,
+      },
+      type: switch (MessageType.toJson(message.type)) {
+        final type? => api.MessageRequestType.fromJson(type),
+        null => null,
+      },
+      attachments: [for (final attachment in message.attachments) attachment.toRequest()],
+      mentionedChannel: message.mentionedChannel,
+      mentionedGroupIds: message.mentionedGroupIds,
+      mentionedHere: message.mentionedHere,
+      mentionedRoles: message.mentionedRoles,
+      mentionedUsers: [for (final user in message.mentionedUsers) user.id],
+      parentId: message.parentId,
+      quotedMessageId: message.quotedMessageId,
+      showInChannel: message.showInChannel,
+      silent: message.silent,
+      pinned: message.pinned,
+      pinExpires: message.pinExpires,
+      pollId: message.pollId,
+      restrictedVisibility: message.restrictedVisibility,
+      sharedLocation: message.sharedLocation?.toRequest(),
+      custom: message.custom,
+    );
+  }
 }
 
 /// Maps a [TranslationLanguage] to the generated

@@ -4,7 +4,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/open_api/api.dart' as api;
 import 'package:stream_chat/src/core/api/channel_api.dart';
 import 'package:stream_chat/src/core/api/general_api.dart';
-import 'package:stream_chat/src/core/api/message_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
 import 'package:stream_chat/src/core/api/push_preferences_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
@@ -127,11 +126,6 @@ class FakeChatApi extends Fake implements StreamChatApi {
 
   @override
   UserApi get user => _user ??= MockUserApi();
-
-  MessageApi? _message;
-
-  @override
-  MessageApi get message => _message ??= MockMessageApi();
 
   ChannelApi? _channel;
 
