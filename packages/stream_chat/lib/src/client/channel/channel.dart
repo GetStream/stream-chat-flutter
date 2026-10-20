@@ -1105,12 +1105,25 @@ class Channel {
   // have composed but not yet sent, or if a message failed to send and the user
   // wants to remove it from their local view.
   void _deleteLocalMessage(Message message) {
-    state?.deleteMessage(
-      hardDelete: true, // Local messages are always hard deleted.
-      message.copyWith(
-        type: MessageType.deleted,
-        localDeletedAt: DateTime.now(),
-        state: MessageState.hardDeleted,
+    final deleted = message.copyWith(
+      type: MessageType.deleted,
+      localDeletedAt: DateTime.now(),
+      state: MessageState.hardDeleted,
+    );
+    // Local messages are always hard deleted.
+    state?.deleteMessage(deleted, hardDelete: true);
+
+    // The server never had this message, so it sends no `message.deleted`.
+    // Announce the deletion here, so whoever follows the message, such as a
+    // composer editing or quoting it, hears of it as for any other.
+    _client.handleEvent(
+      Event(
+        type: EventType.messageDeleted,
+        cid: cid,
+        channelId: id,
+        channelType: type,
+        message: deleted,
+        hardDelete: true,
       ),
     );
 
