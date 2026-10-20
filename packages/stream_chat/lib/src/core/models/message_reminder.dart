@@ -68,11 +68,13 @@ class MessageReminder with _$MessageReminder {
   @override
   final DateTime updatedAt;
 
-  /// Returns this reminder with the fields [other] sets.
+  /// A copy of this reminder updated with the fields [other] carries.
   ///
-  /// A field [other] leaves null keeps its current value, except [remindAt]: a
-  /// null one clears it. If [other] is null, this reminder is returned
-  /// unchanged.
+  /// A nullable field [other] leaves null keeps its value here, except
+  /// [remindAt]: a null one clears it.
+  ///
+  /// Every other field takes the value of [other]. If [other] is null, this
+  /// reminder is returned unchanged.
   MessageReminder merge(MessageReminder? other) {
     if (other == null) return this;
     return copyWith(

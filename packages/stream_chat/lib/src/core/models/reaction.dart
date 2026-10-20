@@ -62,10 +62,11 @@ class Reaction with _$Reaction {
   @override
   final Map<String, Object?> custom;
 
-  /// Returns a new [Reaction] that is a combination of this reaction and the
-  /// given [other] reaction.
+  /// A copy of this reaction updated with the fields [other] carries.
   ///
-  /// A field [other] leaves null keeps its current value.
+  /// A nullable field [other] leaves null keeps its value here.
+  ///
+  /// Every other field, [custom] included, takes the value of [other].
   Reaction merge(Reaction other) => copyWith(
     messageId: other.messageId ?? messageId,
     type: other.type,

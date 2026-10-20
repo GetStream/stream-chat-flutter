@@ -201,7 +201,7 @@ class OwnUser extends User {
   /// Privacy settings for the user if set.
   final PrivacySettings? privacySettings;
 
-  /// Convert instance to json.
+  /// Serializes this user to JSON.
   ///
   /// Writes the entries of [custom] at the root, leaving out any named like one
   /// of [topLevelFields].
@@ -210,8 +210,9 @@ class OwnUser extends User {
     return Serializer.moveFromExtraDataToRoot(_$OwnUserToJson(this), topLevelFields: topLevelFields);
   }
 
-  /// The JSON keys [OwnUser.fromJson] reads into named fields, or leaves out;
-  /// every other key is kept in [custom].
+  /// The JSON keys [OwnUser.fromJson] reads into named fields, or leaves out.
+  ///
+  /// Every other key is kept in [custom].
   static const topLevelFields = [
     'devices',
     'mutes',

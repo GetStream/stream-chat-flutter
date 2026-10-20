@@ -20,7 +20,7 @@ import 'mapper/sort_mapper.dart';
 /// Repository dedicated to messages: the current user's drafts and the
 /// reactions on a message.
 class MessagesRepository {
-  /// Initialize a new messages repository.
+  /// Creates a new messages repository.
   const MessagesRepository(this._api);
 
   final api.DefaultApi _api;

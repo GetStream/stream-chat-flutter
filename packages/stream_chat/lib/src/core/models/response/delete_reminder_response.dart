@@ -2,8 +2,12 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'delete_reminder_response.freezed.dart';
 
-/// The result of deleting the reminder on a message, returned by
-/// [StreamChatClient.deleteReminder] and [Channel.deleteReminder].
+/// The result of deleting the reminder on a message.
+///
+/// See also:
+///
+///  * [StreamChatClient.deleteReminder] and [Channel.deleteReminder], which
+///    return it.
 @freezed
 class DeleteReminderResponse with _$DeleteReminderResponse {
   /// Creates a new [DeleteReminderResponse].

@@ -12,7 +12,7 @@ import 'mapper/sort_mapper.dart';
 
 /// Repository dedicated to message reminder operations.
 class RemindersRepository {
-  /// Initialize a new reminders repository.
+  /// Creates a new reminders repository.
   const RemindersRepository(this._api);
 
   final api.DefaultApi _api;

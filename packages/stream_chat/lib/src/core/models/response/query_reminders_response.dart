@@ -4,8 +4,11 @@ import '../message_reminder.dart';
 
 part 'query_reminders_response.freezed.dart';
 
-/// One page of the current user's reminders matching a query, returned by
-/// [StreamChatClient.queryReminders].
+/// One page of the current user's reminders matching a query.
+///
+/// See also:
+///
+///  * [StreamChatClient.queryReminders], which returns it.
 @freezed
 class QueryRemindersResponse with _$QueryRemindersResponse {
   /// Creates a new [QueryRemindersResponse].

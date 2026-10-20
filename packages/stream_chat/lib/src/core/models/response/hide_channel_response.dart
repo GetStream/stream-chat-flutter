@@ -2,8 +2,11 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'hide_channel_response.freezed.dart';
 
-/// The result of hiding a channel for the current user, returned by
-/// [StreamChatClient.hideChannel] and [Channel.hide].
+/// The result of hiding a channel for the current user.
+///
+/// See also:
+///
+///  * [StreamChatClient.hideChannel] and [Channel.hide], which return it.
 @freezed
 class HideChannelResponse with _$HideChannelResponse {
   /// Creates a new [HideChannelResponse].

@@ -12,7 +12,7 @@ import 'mapper/threads_mapper.dart';
 
 /// Repository dedicated to thread operations.
 class ThreadsRepository {
-  /// Initialize a new threads repository.
+  /// Creates a new threads repository.
   const ThreadsRepository(this._api);
 
   final api.DefaultApi _api;
@@ -61,9 +61,10 @@ class ThreadsRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Sets the fields in [set] and removes the fields named in [unset] on the
-  /// thread of the message with the id [messageId], leaving every other field
-  /// as it is.
+  /// Partially updates the thread of the message with the id [messageId].
+  ///
+  /// Sets the fields in [set] and removes the fields named in [unset], leaving
+  /// every other field as it is.
   Future<Result<UpdateThreadPartialResponse>> updateThreadPartial(
     String messageId, {
     Map<String, Object?>? set,

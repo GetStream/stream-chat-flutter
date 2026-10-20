@@ -4,8 +4,11 @@ import '../thread.dart';
 
 part 'query_threads_response.freezed.dart';
 
-/// One page of the current user's threads matching a query, returned by
-/// [StreamChatClient.queryThreads].
+/// One page of the current user's threads matching a query.
+///
+/// See also:
+///
+///  * [StreamChatClient.queryThreads], which returns it.
 @freezed
 class QueryThreadsResponse with _$QueryThreadsResponse {
   /// Creates a new [QueryThreadsResponse].

@@ -518,6 +518,15 @@ void main() {
     expect(json['priority'], 'high');
   });
 
+  test('Message.toJson leaves out the fields only fromJson reads', () {
+    final message = Message(cid: 'messaging:general', html: '<p>Hi</p>', mml: '<mml>Hi</mml>', deletedReplyCount: 2);
+
+    expect(
+      message.toJson().keys,
+      isNot(anyOf(contains('cid'), contains('html'), contains('mml'), contains('deleted_reply_count'))),
+    );
+  });
+
   test('Message.copyWith keeps the channel id, HTML, markup and deleted reply count', () {
     final message = Message(cid: 'messaging:general', html: '<p>Hi</p>', mml: '<mml>Hi</mml>', deletedReplyCount: 2);
 

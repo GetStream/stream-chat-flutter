@@ -4,8 +4,12 @@ import '../message_reminder.dart';
 
 part 'create_reminder_response.freezed.dart';
 
-/// The result of creating a reminder on a message, returned by
-/// [StreamChatClient.createReminder] and [Channel.createReminder].
+/// The result of creating a reminder on a message.
+///
+/// See also:
+///
+///  * [StreamChatClient.createReminder] and [Channel.createReminder], which
+///    return it.
 @freezed
 class CreateReminderResponse with _$CreateReminderResponse {
   /// Creates a new [CreateReminderResponse].

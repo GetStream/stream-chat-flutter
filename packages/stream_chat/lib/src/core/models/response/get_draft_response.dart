@@ -4,8 +4,11 @@ import '../draft.dart';
 
 part 'get_draft_response.freezed.dart';
 
-/// The result of fetching the draft of a channel or a thread, returned by
-/// [StreamChatClient.getDraft] and [Channel.getDraft].
+/// The result of fetching the draft of a channel or a thread.
+///
+/// See also:
+///
+///  * [StreamChatClient.getDraft] and [Channel.getDraft], which return it.
 @freezed
 class GetDraftResponse with _$GetDraftResponse {
   /// Creates a new [GetDraftResponse].

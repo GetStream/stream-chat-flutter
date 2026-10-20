@@ -93,14 +93,13 @@ class DraftMessage extends Equatable {
   final String? _pollId;
 
   /// This draft message's custom data.
-  ///
-  /// It may hold a key named like one of the draft message's own fields;
-  /// [toJson] leaves such an entry out so it never overwrites the field.
   @JsonKey(name: 'extra_data')
   final Map<String, Object?> custom;
 
   /// The JSON keys [DraftMessage.fromJson] reads into named fields, or leaves
-  /// out; every other key is kept in [custom].
+  /// out.
+  ///
+  /// Every other key is kept in [custom].
   static const topLevelFields = [
     'id',
     'text',
@@ -117,7 +116,7 @@ class DraftMessage extends Equatable {
     'extra_data',
   ];
 
-  /// Serialize to json.
+  /// Serializes this draft message to JSON.
   ///
   /// Writes the entries of [custom] at the root, leaving out any named like one
   /// of [topLevelFields].
