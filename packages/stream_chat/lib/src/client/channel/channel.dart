@@ -1647,7 +1647,9 @@ class Channel {
   /// Sends [reaction] to [message] in this channel.
   ///
   /// If [enforceUnique] is true, it replaces the current user's other reactions
-  /// on the message. If [skipPush] is true, no push notification is sent.
+  /// on the message.
+  ///
+  /// If [skipPush] is true, no push notification is sent.
   ///
   /// Throws a [StateError] if this channel is not initialized.
   Future<Result<SendReactionResponse>> sendReaction(

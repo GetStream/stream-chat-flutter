@@ -4,8 +4,12 @@ import '../reaction.dart';
 
 part 'get_reactions_response.freezed.dart';
 
-/// One page of the reactions on a message, returned by
-/// [StreamChatClient.getReactions] and [Channel.getReactions].
+/// One page of the reactions on a message.
+///
+/// See also:
+///
+///  * [StreamChatClient.getReactions] and [Channel.getReactions], which return
+///    it.
 @freezed
 class GetReactionsResponse with _$GetReactionsResponse {
   /// Creates a new [GetReactionsResponse].

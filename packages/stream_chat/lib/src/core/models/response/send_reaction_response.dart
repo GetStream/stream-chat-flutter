@@ -5,8 +5,12 @@ import '../reaction.dart';
 
 part 'send_reaction_response.freezed.dart';
 
-/// The result of sending a reaction to a message, returned by
-/// [StreamChatClient.sendReaction] and [Channel.sendReaction].
+/// The result of sending a reaction to a message.
+///
+/// See also:
+///
+///  * [StreamChatClient.sendReaction] and [Channel.sendReaction], which return
+///    it.
 @freezed
 class SendReactionResponse with _$SendReactionResponse {
   /// Creates a new [SendReactionResponse].

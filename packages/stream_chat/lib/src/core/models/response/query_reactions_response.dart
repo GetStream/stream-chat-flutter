@@ -4,8 +4,11 @@ import '../reaction.dart';
 
 part 'query_reactions_response.freezed.dart';
 
-/// One page of the reactions on a message matching a query, returned by
-/// [StreamChatClient.queryReactions].
+/// One page of the reactions on a message matching a query.
+///
+/// See also:
+///
+///  * [StreamChatClient.queryReactions], which returns it.
 @freezed
 class QueryReactionsResponse with _$QueryReactionsResponse {
   /// Creates a new [QueryReactionsResponse].

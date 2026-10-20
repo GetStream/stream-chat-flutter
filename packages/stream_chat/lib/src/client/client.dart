@@ -1961,7 +1961,9 @@ class StreamChatClient {
   /// Sends [reaction] to the message with the id [messageId].
   ///
   /// If [enforceUnique] is true, it replaces the current user's other reactions
-  /// on the message. If [skipPush] is true, no push notification is sent.
+  /// on the message.
+  ///
+  /// If [skipPush] is true, no push notification is sent.
   Future<Result<SendReactionResponse>> sendReaction(
     String messageId,
     Reaction reaction, {

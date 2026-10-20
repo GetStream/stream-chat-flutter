@@ -5,8 +5,12 @@ import '../reaction.dart';
 
 part 'delete_reaction_response.freezed.dart';
 
-/// The result of removing a reaction from a message, returned by
-/// [StreamChatClient.deleteReaction] and [Channel.deleteReaction].
+/// The result of removing a reaction from a message.
+///
+/// See also:
+///
+///  * [StreamChatClient.deleteReaction] and [Channel.deleteReaction], which
+///    return it.
 @freezed
 class DeleteReactionResponse with _$DeleteReactionResponse {
   /// Creates a new [DeleteReactionResponse].
