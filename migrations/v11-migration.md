@@ -401,7 +401,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamChatApi.message.sendReaction` / `.deleteReaction` / `.getReactions` / `.queryReactions` | the `StreamChatClient` methods | `removed` | The endpoints moved to the generated client |
 | `StreamChatClient.getMessage` → `Future<GetMessageResponse>` | `Future<Result<GetMessageResponse>>` | `retyped` | Returns a `Result` instead of throwing. `GetMessageResponse.channel` is non-nullable; drop any `?.` or `!` on it |
 | `getMessagesById(…)` → `Future<GetMessagesByIdResponse>` | `getManyMessages(…)` → `Future<Result<GetManyMessagesResponse>>` | `renamed` | On `StreamChatClient` and `Channel`, same arguments. A message that does not exist or cannot be shown is left out of the response |
-| `getReplies(parentId, options: PaginationParams(limit: l, lessThan: id))` → `Future<QueryRepliesResponse>` | `getReplies(parentId, limit: l, lessThan: id)` → `Future<Result<GetRepliesResponse>>` | `retyped` | On `StreamChatClient` and `Channel`. `limit` is required: a call that passed no `PaginationParams` got up to 100 replies and now has to pick a limit. The reply ids `lessThan`, `lessThanOrEqual`, `greaterThan`, `greaterThanOrEqual` and `idAround` keep their names. The date and offset fields of `PaginationParams` never changed which replies came back; `Channel.getReplies` with `createdAtAround` only cleared the thread before adding the page |
+| `getReplies(parentId, options: PaginationParams(limit: l, lessThan: id))` → `Future<QueryRepliesResponse>` | `getReplies(parentId, limit: l, idLt: id)` → `Future<Result<GetRepliesResponse>>` | `retyped` | On `StreamChatClient` and `Channel`. `limit` is required: a call that passed no `PaginationParams` got up to 100 replies and now has to pick a limit. The reply ids are `idLt`, `idLte`, `idGt`, `idGte` and `idAround`, for `PaginationParams`' `lessThan`, `lessThanOrEqual`, `greaterThan`, `greaterThanOrEqual` and `idAround`. The date and offset fields of `PaginationParams` never changed which replies came back; `Channel.getReplies` with `createdAtAround` only cleared the thread before adding the page |
 | `translateMessage(id, 'fr')` → `Future<TranslateMessageResponse>` | `translateMessage(id, TranslationLanguage.fr)` → `Future<Result<TranslateMessageResponse>>` | `retyped` | On `StreamChatClient` and `Channel`. Wrap a language code held as a string: `TranslationLanguage(code)` |
 | `search(filter, paginationParams: PaginationParams(limit: l, next: n))` → `Future<SearchMessagesResponse>` | `search(filter, limit: l, next: n)` → `Future<Result<SearchMessagesResponse>>` | `retyped` | On `StreamChatClient` and `Channel`; `offset` is an argument too. The other `PaginationParams` fields never had an effect on search |
 | `SearchMessagesResponse.results` (`List<GetMessageResponse>`) | `List<SearchMessageResult>` | `retyped` | Each result carries `message` and `channel`, as before |
@@ -412,7 +412,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamChannel.getMessage(id)` → `Future<Message>` | `Future<Result<Message>>` | `retyped` | A message that does not exist is a `Failure` carrying a `StreamClientException`, where v10 threw a `StateError` |
 | `StreamChannel.getReplies(parentId)` → `Future<void>` | `Future<Result<void>>` | `retyped` | Returns the failure instead of throwing |
 | `StreamMessageSearchListController` (`PagedValueNotifier<String, GetMessageResponse>`), `StreamMessageSearchListView`, `StreamMessageSearchListViewIndexedWidgetBuilder`, `defaultMessageSearchListViewSeparatorBuilder`, `MessageSearchItemTapCallback`, `MessageSearchItemBuilder` | the same, over `SearchMessageResult` | `retyped` | |
-| `StreamMessageSearchListTile.messageResponse`, `MessageSearchListTileTitle.messageResponse` | `result` | `renamed` | Also in `StreamMessageSearchListTile.copyWith` |
+| `StreamMessageSearchListTile.messageResponse`, `MessageSearchListTileTitle.messageResponse` | `searchResult` | `renamed` | Also in `StreamMessageSearchListTile.copyWith` |
 | `StreamChatApi.message.getMessage` / `.getMessagesById` / `.getReplies` / `.translateMessage`, `StreamChatApi.general.searchMessages` | the `StreamChatClient` methods | `removed` | The endpoints moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
 
@@ -1690,7 +1690,7 @@ that passed none got up to 100 replies; it now picks its page size. The response
 await channel.getReplies(parentId, options: PaginationParams(limit: 30, lessThan: oldestReplyId));
 
 // v11
-await channel.getReplies(parentId, limit: 30, lessThan: oldestReplyId);
+await channel.getReplies(parentId, limit: 30, idLt: oldestReplyId);
 ```
 
 **`translateMessage` takes a `TranslationLanguage`,** with a constant for every language translation supports.
@@ -1707,7 +1707,7 @@ await channel.translateMessage(message.id, TranslationLanguage(user.language!));
 **`search` takes `limit`, `offset` and `next`,** and each of its results is a `SearchMessageResult` carrying the
 message and its channel, where v10 reused `GetMessageResponse`. The search list widgets follow:
 `StreamMessageSearchListView`'s callbacks and builders receive a `SearchMessageResult`, and
-`StreamMessageSearchListTile.messageResponse` is `result`.
+`StreamMessageSearchListTile.messageResponse` is `searchResult`.
 
 **`GetMessageResponse.channel` is non-nullable,** and the read responses no longer decode JSON: build them with their
 constructors.

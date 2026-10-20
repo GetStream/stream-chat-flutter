@@ -296,14 +296,14 @@ class StreamMessageSearchListView extends StatelessWidget {
       loadMoreTriggerIndex: loadMoreTriggerIndex,
       separatorBuilder: separatorBuilder,
       itemBuilder: (context, results, index) {
-        final result = results[index];
+        final searchResult = results[index];
         final onTap = onMessageTap;
         final onLongPress = onMessageLongPress;
 
         final streamMessageSearchListTile = StreamMessageSearchListTile(
-          result: result,
-          onTap: onTap == null ? null : () => onTap(result),
-          onLongPress: onLongPress == null ? null : () => onLongPress(result),
+          searchResult: searchResult,
+          onTap: onTap == null ? null : () => onTap(searchResult),
+          onLongPress: onLongPress == null ? null : () => onLongPress(searchResult),
         );
 
         return itemBuilder?.call(

@@ -340,7 +340,7 @@ class StreamChannelState extends State<StreamChannel> {
     final result = await channel.getReplies(
       parentId,
       limit: limit,
-      lessThan: oldestReply.id,
+      idLt: oldestReply.id,
       preferOffline: preferOffline,
     );
 
@@ -376,7 +376,7 @@ class StreamChannelState extends State<StreamChannel> {
     final result = await channel.getReplies(
       parentId,
       limit: limit,
-      greaterThan: recentReply.id,
+      idGt: recentReply.id,
       preferOffline: preferOffline,
     );
 

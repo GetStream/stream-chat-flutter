@@ -184,25 +184,25 @@ class MessagesRepository {
   /// Up to [limit] replies are returned, oldest first, and never more than 300.
   /// The [limit] must be positive for the reply ids below to take effect.
   ///
-  /// The reply ids [lessThan] and [lessThanOrEqual] bound the page to the
-  /// replies before that reply, [greaterThan] and [greaterThanOrEqual] to the
-  /// replies after it, and [idAround] to the replies around it.
+  /// The reply ids [idLt] and [idLte] bound the page to the replies before that
+  /// reply, [idGt] and [idGte] to the replies after it, and [idAround] to the
+  /// replies around it. [idLte] and [idGte] include the reply itself.
   Future<Result<GetRepliesResponse>> getReplies(
     String parentId, {
     required int limit,
-    String? lessThan,
-    String? lessThanOrEqual,
-    String? greaterThan,
-    String? greaterThanOrEqual,
+    String? idLt,
+    String? idLte,
+    String? idGt,
+    String? idGte,
     String? idAround,
   }) async {
     final result = await _api.getReplies(
       parentId: parentId,
       limit: limit,
-      idLt: lessThan,
-      idLte: lessThanOrEqual,
-      idGt: greaterThan,
-      idGte: greaterThanOrEqual,
+      idLt: idLt,
+      idLte: idLte,
+      idGt: idGt,
+      idGte: idGte,
       idAround: idAround,
     );
 
@@ -235,6 +235,22 @@ class MessagesRepository {
     int? offset,
     String? next,
   }) async {
+    assert(
+      offset == null || offset == 0 || sort == null,
+      'Cannot specify `offset` with `sort` parameter',
+    );
+    assert(() {
+      if (query == null && messageFilters == null) {
+        throw ArgumentError('Provide at least `query` or `messageFilters`');
+      }
+      if (query != null && messageFilters != null) {
+        throw ArgumentError(
+          "Can't provide both `query` and `messageFilters` at the same time",
+        );
+      }
+      return true;
+    }(), 'Check incoming params.');
+
     final result = await _api.search(
       payload: api.SearchPayload(
         filterConditions: filter.toRequest(),

@@ -2116,9 +2116,9 @@ class Channel {
   /// Up to [limit] replies are returned, oldest first, and never more than 300.
   /// The [limit] must be positive for the reply ids below to take effect.
   ///
-  /// The reply ids [lessThan] and [lessThanOrEqual] bound the page to the
-  /// replies before that reply, [greaterThan] and [greaterThanOrEqual] to the
-  /// replies after it, and [idAround] to the replies around it.
+  /// The reply ids [idLt] and [idLte] bound the page to the replies before that
+  /// reply, [idGt] and [idGte] to the replies after it, and [idAround] to the
+  /// replies around it. [idLte] and [idGte] include the reply itself.
   ///
   /// If [preferOffline] is true and the offline storage holds replies for the
   /// page, those are returned instead of fetching them. The page is still
@@ -2126,10 +2126,10 @@ class Channel {
   Future<Result<GetRepliesResponse>> getReplies(
     String parentId, {
     required int limit,
-    String? lessThan,
-    String? lessThanOrEqual,
-    String? greaterThan,
-    String? greaterThanOrEqual,
+    String? idLt,
+    String? idLte,
+    String? idGt,
+    String? idGte,
     String? idAround,
     bool preferOffline = false,
   }) async {
@@ -2138,10 +2138,10 @@ class Channel {
             parentId,
             PaginationParams(
               limit: limit,
-              lessThan: lessThan,
-              lessThanOrEqual: lessThanOrEqual,
-              greaterThan: greaterThan,
-              greaterThanOrEqual: greaterThanOrEqual,
+              lessThan: idLt,
+              lessThanOrEqual: idLte,
+              greaterThan: idGt,
+              greaterThanOrEqual: idGte,
               idAround: idAround,
             ),
           )
@@ -2152,10 +2152,10 @@ class Channel {
       null => await _client.getReplies(
         parentId,
         limit: limit,
-        lessThan: lessThan,
-        lessThanOrEqual: lessThanOrEqual,
-        greaterThan: greaterThan,
-        greaterThanOrEqual: greaterThanOrEqual,
+        idLt: idLt,
+        idLte: idLte,
+        idGt: idGt,
+        idGte: idGte,
         idAround: idAround,
       ),
     };

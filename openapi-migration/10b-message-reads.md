@@ -39,14 +39,15 @@
   `Channel`'s versions return a `Result` too; `getReplies` and `translateMessage` apply the response
   to the channel state on success only, and the offline replies come back in a `'0ms'` envelope.
   `StreamChannel.getMessage` and `getReplies` return a `Result` (approved).
-- **`getReplies` takes a required `limit` and v10's reply-id names** (`lessThan`, …, `idAround`)
-  instead of `PaginationParams` (approved). The backend ignores a cursor sent without a limit, and
+- **`getReplies` takes a required `limit` and the reply ids `idLt`, `idLte`, `idGt`, `idGte` and
+  `idAround`** (the spec's names, as the user group cursors use) instead of `PaginationParams`
+  (approved). The backend ignores a cursor sent without a limit, and
   never read the date or offset fields. `ChatPersistenceClient.getReplies` keeps its
   `PaginationParams`.
 - **`search` takes `limit`, `offset` and `next`** instead of `PaginationParams`, and keeps v10's
   `SearchMessagesResponse` (approved). Its results are a new `SearchMessageResult` (message and
   channel), since a result has no `duration`; a result without a message is left out. The search
-  controller and widgets follow, and the tile's `messageResponse` is renamed `result` (approved).
+  controller and widgets follow, and the tile's `messageResponse` is renamed `searchResult` (approved).
 - **`translateMessage` takes a hand-written `TranslationLanguage`** (README rule 6, approved).
 - **`GetMessageResponse.channel` is non-nullable** (approved): the spec requires it and the backend
   always sends it.

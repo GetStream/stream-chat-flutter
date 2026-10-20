@@ -1,5 +1,5 @@
-/// A language a message can be translated into, named by its language code
-/// such as `fr` or `zh-TW`.
+/// A language a message can be translated into, named by its language code such
+/// as `fr` or `zh-TW`.
 ///
 /// The constants are the languages translation supports; translating into any
 /// other code fails.

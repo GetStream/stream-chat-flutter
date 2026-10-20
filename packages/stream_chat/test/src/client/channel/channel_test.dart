@@ -195,7 +195,7 @@ void main() {
         ),
       ).thenAnswer((_) async => storedReplies);
 
-      final res = await channel.getReplies(parentId, limit: 30, lessThan: 'older-id', preferOffline: true);
+      final res = await channel.getReplies(parentId, limit: 30, idLt: 'older-id', preferOffline: true);
 
       expect(res.getOrNull(), GetRepliesResponse(duration: '0ms', messages: storedReplies));
       expect(channel.state!.threads[parentId]?.map((it) => it.id), ['stored-reply-id']);
@@ -203,7 +203,7 @@ void main() {
         () => client.getReplies(
           any(),
           limit: any(named: 'limit'),
-          lessThan: any(named: 'lessThan'),
+          idLt: any(named: 'idLt'),
         ),
       );
     });
@@ -4145,14 +4145,14 @@ void main() {
       final response = GetRepliesResponse(duration: '0.01ms', messages: messages);
 
       when(
-        () => client.getReplies(parentId, limit: 30, lessThan: 'older-id'),
+        () => client.getReplies(parentId, limit: 30, idLt: 'older-id'),
       ).thenAnswer((_) async => Result.success(response));
 
-      final res = await channel.getReplies(parentId, limit: 30, lessThan: 'older-id');
+      final res = await channel.getReplies(parentId, limit: 30, idLt: 'older-id');
 
       expect(res.getOrNull(), response);
       expect(channel.state!.threads[parentId]?.map((it) => it.id), messages.map((it) => it.id));
-      verify(() => client.getReplies(parentId, limit: 30, lessThan: 'older-id')).called(1);
+      verify(() => client.getReplies(parentId, limit: 30, idLt: 'older-id')).called(1);
     });
 
     test('Channel.getReplies fetches the replies when preferOffline is true but there is no offline storage', () async {

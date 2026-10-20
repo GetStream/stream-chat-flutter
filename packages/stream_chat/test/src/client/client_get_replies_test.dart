@@ -27,10 +27,10 @@ void main() {
     final res = await client.getReplies(
       'parent-id',
       limit: 20,
-      lessThan: 'lt-id',
-      lessThanOrEqual: 'lte-id',
-      greaterThan: 'gt-id',
-      greaterThanOrEqual: 'gte-id',
+      idLt: 'lt-id',
+      idLte: 'lte-id',
+      idGt: 'gt-id',
+      idGte: 'gte-id',
       idAround: 'around-id',
     );
 

@@ -1561,7 +1561,7 @@ void main() {
         'parent-id': [reply],
       });
       when(
-        () => mockChannel.getReplies('parent-id', limit: 30, lessThan: 'reply-id', preferOffline: false),
+        () => mockChannel.getReplies('parent-id', limit: 30, idLt: 'reply-id', preferOffline: false),
       ).thenAnswer((_) async => const Result.failure(error));
       final streamChannel = await _pumpStreamChannel(tester, mockChannel);
 
@@ -1579,7 +1579,7 @@ void main() {
         'parent-id': [reply],
       });
       when(
-        () => mockChannel.getReplies('parent-id', limit: 30, lessThan: 'reply-id', preferOffline: false),
+        () => mockChannel.getReplies('parent-id', limit: 30, idLt: 'reply-id', preferOffline: false),
       ).thenAnswer((_) async => Result.success(GetRepliesResponse(duration: '0ms', messages: [reply])));
       final streamChannel = await _pumpStreamChannel(tester, mockChannel);
 
@@ -1587,7 +1587,7 @@ void main() {
       await streamChannel.queryReplies('parent-id');
 
       verify(
-        () => mockChannel.getReplies('parent-id', limit: 30, lessThan: 'reply-id', preferOffline: false),
+        () => mockChannel.getReplies('parent-id', limit: 30, idLt: 'reply-id', preferOffline: false),
       ).called(1);
     });
 
@@ -1604,7 +1604,7 @@ void main() {
       await streamChannel.queryReplies('parent-id');
 
       verifyNever(
-        () => mockChannel.getReplies('parent-id', limit: 30, lessThan: 'reply-id', preferOffline: false),
+        () => mockChannel.getReplies('parent-id', limit: 30, idLt: 'reply-id', preferOffline: false),
       );
     });
 
@@ -1616,7 +1616,7 @@ void main() {
         () => mockChannel.getReplies('parent-id', limit: 30, preferOffline: false),
       ).thenAnswer((_) async => const Result.failure(error));
       when(
-        () => mockChannel.getReplies('parent-id', limit: 30, lessThan: 'reply-id', preferOffline: false),
+        () => mockChannel.getReplies('parent-id', limit: 30, idLt: 'reply-id', preferOffline: false),
       ).thenAnswer((_) async => const Result.success(GetRepliesResponse(duration: '0ms', messages: [])));
       final streamChannel = await _pumpStreamChannel(tester, mockChannel);
 
@@ -1624,7 +1624,7 @@ void main() {
       await streamChannel.queryReplies('parent-id');
 
       verify(
-        () => mockChannel.getReplies('parent-id', limit: 30, lessThan: 'reply-id', preferOffline: false),
+        () => mockChannel.getReplies('parent-id', limit: 30, idLt: 'reply-id', preferOffline: false),
       ).called(1);
     });
   });

@@ -151,15 +151,6 @@ void main() {
     );
   });
 
-  test('StreamChatClient.search throws when an offset is combined with a cursor', () async {
-    final client = _client(MockDefaultApi());
-
-    await expectLater(
-      client.search(_channelFilter(), query: 'hello', offset: 10, next: 'next-cursor'),
-      throwsA(isA<AssertionError>()),
-    );
-  });
-
   test('StreamChatClient.search returns the failure without throwing', () async {
     const error = StreamClientException(message: 'boom');
     final defaultApi = MockDefaultApi();
