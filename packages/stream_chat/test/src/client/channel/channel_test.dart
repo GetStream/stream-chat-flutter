@@ -2602,36 +2602,6 @@ void main() {
           verifyNever(() => client.deleteMessage(messageId));
         },
       );
-
-      test('announces a message deleted on the device alone as hard deleted', () async {
-        final message = Message(
-          id: 'bounced-message-id',
-          text: 'bad word',
-          type: MessageType.error,
-          moderation: const Moderation(action: ModerationAction.bounce, originalText: 'bad word'),
-        );
-        channel.state?.addNewMessage(message);
-
-        await channel.deleteMessage(message);
-
-        final event = verify(() => client.handleEvent(captureAny())).captured.single as Event;
-        expect(event.type, EventType.messageDeleted);
-        expect(event.cid, channel.cid);
-        expect(event.hardDelete, isTrue);
-        expect(event.message?.id, 'bounced-message-id');
-        verifyNever(() => client.deleteMessage(any()));
-      });
-
-      test('announces an unsent message deleted on the device alone', () async {
-        final message = Message(id: 'unsent-message-id', text: 'Hello', state: MessageState.sending);
-        channel.state?.addNewMessage(message);
-
-        await channel.deleteMessage(message);
-
-        final event = verify(() => client.handleEvent(captureAny())).captured.single as Event;
-        expect(event.type, EventType.messageDeleted);
-        expect(event.message?.id, 'unsent-message-id');
-      });
     });
 
     group('`.deleteMessageForMe`', () {

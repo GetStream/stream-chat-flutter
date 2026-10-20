@@ -1099,23 +1099,17 @@ class Channel {
     }
   }
 
-  // Deletes a local [message] that is not yet sent.
-  //
-  // This is typically called when a user wants to delete a message that they
-  // have composed but not yet sent, or if a message failed to send and the user
-  // wants to remove it from their local view.
+  // Deletes a [message] that exists only on this device: one not yet sent,
+  // one that failed to send, or one moderation bounced.
   void _deleteLocalMessage(Message message) {
     final deleted = message.copyWith(
       type: MessageType.deleted,
       localDeletedAt: DateTime.now(),
       state: MessageState.hardDeleted,
     );
-    // Local messages are always hard deleted.
     state?.deleteMessage(deleted, hardDelete: true);
 
-    // The server never had this message, so it sends no `message.deleted`.
-    // Announce the deletion here, so whoever follows the message, such as a
-    // composer editing or quoting it, hears of it as for any other.
+    // No `message.deleted` arrives for such a message, so one is emitted here.
     _client.handleEvent(
       Event(
         type: EventType.messageDeleted,
