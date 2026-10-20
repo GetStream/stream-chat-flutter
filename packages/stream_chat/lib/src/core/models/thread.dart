@@ -115,11 +115,13 @@ class Thread with _$Thread {
   @override
   final Map<String, Object?> custom;
 
-  /// Returns a copy of this thread updated with the fields of [other].
+  /// A copy of this thread updated with the fields [other] carries.
   ///
-  /// A field [other] leaves null keeps this thread's value, except [draft],
-  /// which is always taken from [other]. Returns this thread when [other] is
-  /// null.
+  /// A nullable field [other] leaves null keeps this thread's value, except
+  /// [draft], which is always taken from [other].
+  ///
+  /// Every other field, [custom] included, takes the value of [other]. Returns
+  /// this thread when [other] is null.
   Thread merge(Thread? other) {
     if (other == null) return this;
     return Thread(

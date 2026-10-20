@@ -4,8 +4,11 @@ import '../thread.dart';
 
 part 'update_thread_partial_response.freezed.dart';
 
-/// The result of partially updating a thread, returned by
-/// [StreamChatClient.updateThreadPartial].
+/// The result of partially updating a thread.
+///
+/// See also:
+///
+///  * [StreamChatClient.updateThreadPartial], which returns it.
 @freezed
 class UpdateThreadPartialResponse with _$UpdateThreadPartialResponse {
   /// Creates a new [UpdateThreadPartialResponse].

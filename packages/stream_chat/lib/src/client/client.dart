@@ -2307,9 +2307,10 @@ class StreamChatClient {
     ThreadOptions options = const ThreadOptions(),
   }) => _threadsRepository.getThread(messageId, options: options);
 
-  /// Partially updates the thread of the message with the id [messageId]: sets
-  /// the fields in [set] and removes the fields named in [unset], leaving every
-  /// other field as it is.
+  /// Partially updates the thread of the message with the id [messageId].
+  ///
+  /// Sets the fields in [set] and removes the fields named in [unset], leaving
+  /// every other field as it is.
   Future<Result<UpdateThreadPartialResponse>> updateThreadPartial(
     String messageId, {
     Map<String, Object?>? set,
