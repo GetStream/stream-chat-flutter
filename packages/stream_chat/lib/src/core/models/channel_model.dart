@@ -126,6 +126,9 @@ class ChannelModel {
   final int cooldown;
 
   /// Whether this channel is disabled.
+  ///
+  /// Loading a disabled channel fails, and channel queries leave it out for
+  /// users who lack the permission to see it.
   @JsonKey(includeToJson: false)
   final bool? disabled;
 
@@ -154,13 +157,12 @@ class ChannelModel {
   final bool? autoTranslationEnabled;
 
   /// The language this channel's messages are translated into automatically.
+  ///
+  /// It can name several languages, separated by commas.
   @JsonKey(includeToJson: false)
   final String? autoTranslationLanguage;
 
   /// This channel's custom data.
-  ///
-  /// It may hold a key that is also in [topLevelFields]; [toJson] leaves such
-  /// an entry out so it never overwrites the field.
   @JsonKey(name: 'extra_data')
   final Map<String, Object?> custom;
 
@@ -189,8 +191,9 @@ class ChannelModel {
   @JsonKey(includeToJson: false)
   final List<String>? filterTags;
 
-  /// The JSON keys [ChannelModel.fromJson] reads into named fields; every other
-  /// key is kept in [custom].
+  /// The JSON keys [ChannelModel.fromJson] reads into named fields.
+  ///
+  /// Every other key is kept in [custom].
   static const topLevelFields = [
     'id',
     'type',
@@ -219,7 +222,11 @@ class ChannelModel {
     'auto_translation_language',
   ];
 
-  /// Serialize to json
+  /// Serializes this channel to JSON.
+  ///
+  /// Leaves out [disabled], [hidden], [muted], [blocked], [truncatedAt],
+  /// [truncatedBy] and the auto-translation settings, which only
+  /// [ChannelModel.fromJson] reads.
   ///
   /// Writes the entries of [custom] at the root, leaving out any named like one
   /// of [topLevelFields].
@@ -285,11 +292,13 @@ class ChannelModel {
     autoTranslationLanguage: autoTranslationLanguage ?? this.autoTranslationLanguage,
   );
 
-  /// Returns a copy of this channel updated with the fields [other] carries.
+  /// A copy of this channel updated with the fields [other] carries.
   ///
-  /// A field [other] leaves out keeps its value here, except the
+  /// A nullable field [other] leaves out keeps its value here, except the
   /// auto-translation settings: when [other] leaves them out, auto translation
   /// is off.
+  ///
+  /// Every other field, [custom] included, takes the value of [other].
   ChannelModel merge(ChannelModel? other) {
     if (other == null) return this;
     return ChannelModel(
