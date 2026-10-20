@@ -347,9 +347,6 @@ class Message extends Equatable {
   final bool? deletedForMe;
 
   /// This message's custom data.
-  ///
-  /// It may hold a key named like one of the message's own fields; [toJson]
-  /// leaves such an entry out so it never overwrites the field.
   @JsonKey(name: 'extra_data')
   final Map<String, Object?> custom;
 
@@ -374,8 +371,9 @@ class Message extends Equatable {
   @JsonKey(includeToJson: false)
   final Map<String, String>? i18n;
 
-  /// The JSON keys [Message.fromJson] reads into named fields, or leaves out;
-  /// every other key is kept in [custom].
+  /// The JSON keys [Message.fromJson] reads into named fields, or leaves out.
+  ///
+  /// Every other key is kept in [custom].
   static const topLevelFields = [
     'id',
     'text',
@@ -428,7 +426,7 @@ class Message extends Equatable {
     'deleted_reply_count',
   ];
 
-  /// Serialize to json.
+  /// Serializes this message to JSON.
   ///
   /// Writes the entries of [custom] at the root, leaving out any named like one
   /// of [topLevelFields].

@@ -101,7 +101,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**User Updates**](#user-updates) | `updateUser` and `updateUsers` return a `Result<UpdateUsersResponse>` instead of throwing; `partialUpdateUser(s)` becomes `updateUserPartial` / `updateUsersPartial` and `PartialUpdateUserRequest` becomes `UpdateUserPartialRequest`; `updateUser` no longer sends `role`, `teams` or `teamsRole`, and the returned users no longer carry their private fields in `extraData` |
 | [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`; the channel and member flags it carried are fields |
 | [**User Custom Data**](#user-custom-data) | `extraData` is `custom` on `User` and `OwnUser`; `name` is nullable and `nameOrId` falls back to the id; the user fields it carried are fields |
-| [**Message Custom Data**](#message-custom-data) | `extraData` is `custom` on `Message`, `Attachment`, `Reaction` and `DraftMessage`, and holds the custom data verbatim; a message's channel id, HTML, markup and deleted reply count, and an attachment's Giphy renditions, are fields |
+| [**Message Custom Data**](#message-custom-data) | `extraData` is `custom` on `Message`, `Attachment`, `Reaction` and `DraftMessage`; a message's channel id, HTML, markup and deleted reply count, and an attachment's Giphy renditions, are fields |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -1157,9 +1157,8 @@ final html = message.extraData['html'] as String?;
 final html = message.html;
 ```
 
-**`custom` is the custom data exactly as the API returns it.** An entry named like one of the model's own fields
-stays in `custom` and leaves the field alone; it is left out when the model is sent, so it cannot overwrite the
-field. A reaction on a reminder's message keeps its emoji code in its `custom` as well as in `Reaction.emojiCode`.
+**An entry of `custom` named like one of the model's own fields stays in `custom`** and leaves the field alone; it
+is left out when the model is sent, so it cannot overwrite the field. A reaction on a reminder's message keeps its emoji code in its `custom` as well as in `Reaction.emojiCode`.
 
 > **Why:** the API calls it `custom`, and every migrated model takes that name.
 
