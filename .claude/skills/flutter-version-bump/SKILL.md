@@ -563,7 +563,8 @@ The `flutter create` template for the new floor is the source of truth for the s
 files: it is what Flutter generates and tests against for that release, and it already encodes the version
 pins and workarounds the release needs. Comparing against it on every floor raise replaces hand-tracking each
 tool's versions, and it stays correct as Flutter changes. Keep it as its own commit in the Track B PR; it
-touches only `sample_app/`.
+touches only `sample_app/`. It also works outside a floor raise: run it against the current `.fvmrc` to catch
+drift that built up since the last one.
 
 Generate a reference app with the **floor's** SDK — never the new stable — using the sample app's org and name,
 for the platforms `sample_app/` has:
@@ -586,33 +587,51 @@ Then compare, platform by platform:
 - **Web:** `web/index.html` and `manifest.json` bootstrap changes.
 
 Take the template's value wherever the sample app merely lags. Keep the sample app's value only where it differs
-on purpose — on Android that is the FlutterFire plugins, core library desugaring, the debug signing config,
-`compileSdk` floored at 36, `minSdk` floored at 24 and the APK output name. A difference not on that list is
-drift: adopt the template, or add it to the list here with the reason.
+on purpose:
 
-Verify with `(cd sample_app && flutter build apk --release)` on the floor, plus an iOS build if Xcode is
-available.
+- **Android:** the FlutterFire plugins, core library desugaring, the debug signing config, `compileSdk` floored
+  at 36 (also in the root `build.gradle`), `minSdk` floored at 24, the APK output name, the Gradle daemon
+  settings in `gradle.properties` (`jvmargs`, caching, parallel) and the `-bin` Gradle distribution.
+- **iOS / macOS:** deployment targets above the template's (iOS 15.0, macOS 12.0), required by the plugins.
+- **Web:** `sql-wasm.js` (loaded for `drift`), the `.ico` favicon, and the title and description.
 
-Worked example — the 3.47 template, and what it would have moved the sample app off (verified on 3.47.5):
+A difference not on that list is drift: adopt the template, or add it to the list here with the reason.
 
-| | 3.47 template | `sample_app` on a 3.44 floor |
+Verify on the floor, with the floor's SDK rather than whatever `flutter` is on `PATH`:
+
+```bash
+(cd sample_app && $FLOOR/bin/flutter build apk --release && $FLOOR/bin/flutter build web)
+```
+
+Load the web build in a browser and check that the app starts, and add an iOS build if Xcode is available.
+
+Worked example — the 3.44 template against the sample app, run on 2026-10-20. Every change was verified with a
+release APK on 3.44.0 and on 3.47.5, and the web build in headless Chrome:
+
+| | 3.44 template | `sample_app` before |
 |---|---|---|
-| AGP / Gradle | 9.1.0 / 9.3.1 | 8.12.2 / 9.1.0 |
-| KGP | 2.4.0, `apply false` in `settings.gradle` | 2.2.20 |
+| AGP / KGP | 9.0.1 / 2.3.20, `apply false` in `settings.gradle` | 8.12.2 / 2.2.20 |
 | `kotlin-android` in the app module | not applied | applied |
 | Kotlin target | top-level `kotlin { compilerOptions { } }` | `kotlinOptions` inside `android {}` |
-| `android.builtInKotlin` / `android.newDsl` | `false` / `false` | `false` / `false` |
+| `ndkVersion` | `flutter.ndkVersion` | hard-coded, same value |
+| `android.enableJetifier` | not set | `true` |
+| Root `build.gradle` | no `namespace` workaround | sets `android.namespace` on plugins that lack one |
+| `web/index.html` | `mobile-web-app-capable`; loads only `flutter_bootstrap.js` | deprecated `apple-mobile-web-app-capable`; also loads `flutter.js` |
 
-Two of those template values look removable and are not. The `apply false` KGP line has to stay: AGP 9.1.0
-bundles KGP 2.2.10, below Flutter 3.47's 2.2.20 minimum, and removing the line fails the build with "Your
-project's Kotlin version (2.2.10) is lower than Flutter's minimum". And `android.newDsl` has to stay `false`:
-flipping it on 3.47.5 fails inside the Flutter Gradle plugin itself (`ApplicationExtensionImpl … cannot be cast
-to … AbstractAppExtension`). This is why the template, not a hand-written version list, is the reference.
+The template keeps `android.builtInKotlin=false` and `android.newDsl=false`; the sample app already matched.
+
+Two template values look removable and are not; both verified on 3.47.5. The `apply false` KGP line has to stay:
+with `android.builtInKotlin=true`, AGP 9.1.0 compiles with its bundled KGP 2.2.10, below Flutter 3.47's 2.2.20
+minimum, and the build fails with "Your project's Kotlin version (2.2.10) is lower than Flutter's minimum". And
+`android.newDsl` has to stay `false`: flipping it fails inside the Flutter Gradle plugin itself
+(`ApplicationExtensionImpl … cannot be cast to … AbstractAppExtension`). This is why the template, not a
+hand-written version list, is the reference.
 
 Flutter may warn that some plugins "apply KGP". Check each plugin's `android/build.gradle*` before acting: a
 plugin that reads `android.builtInKotlin` is fine (on 3.47.5 the warning fired for `app_badge_plus`,
 `desktop_drop` and `photo_manager`, all of which do). Only a plugin that applies `kotlin-android`
-unconditionally will break, and that needs a dependency floor raise in `melos.yaml`, not a sample-app change.
+unconditionally will break. That is not a sample-app change: raise the plugin's floor in `melos.yaml` to a
+release that reads the flag, and run `melos bootstrap` to carry it into the package pubspecs.
 
 ## Step 7 — Changelog and PR
 
