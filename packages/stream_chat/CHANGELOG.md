@@ -18,6 +18,8 @@
 - Fixed `Channel.disableSlowMode` and `StreamChatClient.disableSlowdown` always failing.
 - Fixed users still showing as typing after sending or editing a message, or after switching between a thread and the channel.
 - Fixed a message the server had already stored being shown as failed after a lost response or a retried send.
+- Fixed deleting a bounced or unsent message not emitting `message.deleted`.
+- Fixed a message deleted while its attachments upload coming back as failed.
 
 ## 10.5.0
 

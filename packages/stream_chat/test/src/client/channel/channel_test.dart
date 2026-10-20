@@ -2400,7 +2400,7 @@ void main() {
             state: MessageState.sending,
           );
 
-          expectLater(
+          final removed = expectLater(
             // skipping first seed message list -> [] messages
             channel.state?.messagesStream.skip(1),
             emitsInOrder([
@@ -2414,11 +2414,17 @@ void main() {
             ]),
           );
 
+          // The deletion reaches the state through the event it emits.
+          when(() => client.handleEvent(any())).thenAnswer(
+            (invocation) => client.addEvent(invocation.positionalArguments.first as Event),
+          );
+
           // Add message to channel state first
           channel.state?.addNewMessage(message);
 
           final res = await channel.deleteMessage(message);
 
+          await removed;
           expect(res, isNotNull);
           verifyNever(() => client.deleteMessage(messageId));
         },
@@ -2476,7 +2482,7 @@ void main() {
             state: MessageState.sending,
           );
 
-          expectLater(
+          final removed = expectLater(
             // skipping first seed message list -> [] messages
             channel.state?.messagesStream.skip(1),
             emitsInOrder([
@@ -2490,11 +2496,17 @@ void main() {
             ]),
           );
 
+          // The deletion reaches the state through the event it emits.
+          when(() => client.handleEvent(any())).thenAnswer(
+            (invocation) => client.addEvent(invocation.positionalArguments.first as Event),
+          );
+
           // Add message to channel state first
           channel.state?.addNewMessage(message);
 
           final res = await channel.deleteMessageForMe(message);
 
+          await removed;
           expect(res, isNotNull);
           verifyNever(() => client.deleteMessageForMe(messageId));
         },
