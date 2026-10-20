@@ -26,7 +26,7 @@ dependencies:
   chewie: ^1.13.1
   clock: ^1.1.2
   collection: ^1.19.1
-  desktop_drop: ^0.7.1
+  desktop_drop: ">=0.8.4 <0.9.0"
   diacritic: ^0.1.6
   dio: ^5.11.0
   equatable: ">=2.0.8 <4.0.0"
@@ -48,10 +48,10 @@ dependencies:
   markdown: ^7.3.0
   meta: ^1.9.1
   path_provider: ^2.1.5
-  photo_manager: ^3.9.0
+  photo_manager: ">=3.11.0 <4.0.0"
   photo_view: ^0.15.0
   rate_limiter: ^1.1.0
-  record: ^6.2.0
+  record: ">=6.2.0 <8.0.0"
   rxdart: ^0.28.0
   share_plus: ">=12.0.2 <14.0.0"
   stream_chat_flutter_core: ^10.5.0
