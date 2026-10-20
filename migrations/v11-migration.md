@@ -99,7 +99,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Read Receipts**](#read-receipts) | Marking read, unread and delivered return a `Result` instead of throwing; `ChannelDeliveryReporter`'s callback returns a `Result` |
 | [**Unread Counts**](#unread-counts) | `getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing; the response and its `UnreadCounts*` models lose their JSON codecs and compare by value |
 | [**User Blocking**](#user-blocking) | `blockUser`, `unblockUser` and `getBlockedUsers` (was `queryBlockedUsers`) return a `Result` instead of throwing; their responses are renamed `BlockUsersResponse` and `GetBlockedUsersResponse`, `unblockUser` answers a new `UnblockUsersResponse`, and `UserBlock`'s fields are all non-nullable |
-| [**Messages**](#messages) | `Moderation`, `ReactionGroup`, `Action`, `Reaction` and `Location` no longer decode from or encode to JSON; `Action` compares by value; reaction calls return a `Result`, `getReactions` answers a new `GetReactionsResponse`, and the reaction queries take `limit`/`offset` or `limit`/`next`/`prev` |
+| [**Messages**](#messages) | `Moderation`, `ReactionGroup`, `Action`, `Reaction` and `Location` no longer decode from or encode to JSON; `Action` compares by value; reaction calls return a `Result`, `getReactions` answers a new `GetReactionsResponse`, and the reaction queries take `limit`/`offset` or `limit`/`next`/`prev`; message reads and search return a `Result`, `getMessagesById` is `getManyMessages`, `getReplies` takes a required `limit` and reply ids, `translateMessage` takes a `TranslationLanguage`, and search results are `SearchMessageResult`s |
 | [**User Updates**](#user-updates) | `updateUser` and `updateUsers` return a `Result<UpdateUsersResponse>` instead of throwing; `partialUpdateUser(s)` becomes `updateUserPartial` / `updateUsersPartial` and `PartialUpdateUserRequest` becomes `UpdateUserPartialRequest`; `updateUser` no longer sends `role`, `teams` or `teamsRole`, and the returned users no longer carry their private fields in `extraData` |
 | [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`; the channel and member flags it carried are fields |
 | [**User Custom Data**](#user-custom-data) | `extraData` is `custom` on `User` and `OwnUser`; `name` is nullable and `nameOrId` falls back to the id; the user fields it carried are fields |
@@ -399,6 +399,21 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `SendReactionResponse.duration` / `QueryReactionsResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
 | `SendReactionResponse` / `QueryReactionsResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two responses with the same fields are now equal |
 | `StreamChatApi.message.sendReaction` / `.deleteReaction` / `.getReactions` / `.queryReactions` | the `StreamChatClient` methods | `removed` | The endpoints moved to the generated client |
+| `StreamChatClient.getMessage` → `Future<GetMessageResponse>` | `Future<Result<GetMessageResponse>>` | `retyped` | Returns a `Result` instead of throwing. `GetMessageResponse.channel` is non-nullable; drop any `?.` or `!` on it |
+| `getMessagesById(…)` → `Future<GetMessagesByIdResponse>` | `getManyMessages(…)` → `Future<Result<GetManyMessagesResponse>>` | `renamed` | On `StreamChatClient` and `Channel`, same arguments. A message that does not exist or cannot be shown is left out of the response |
+| `getReplies(parentId, options: PaginationParams(limit: l, lessThan: id))` → `Future<QueryRepliesResponse>` | `getReplies(parentId, limit: l, lessThan: id)` → `Future<Result<GetRepliesResponse>>` | `retyped` | On `StreamChatClient` and `Channel`. `limit` is required: a call that passed no `PaginationParams` got up to 100 replies and now has to pick a limit. The reply ids `lessThan`, `lessThanOrEqual`, `greaterThan`, `greaterThanOrEqual` and `idAround` keep their names. The date and offset fields of `PaginationParams` never changed which replies came back; `Channel.getReplies` with `createdAtAround` only cleared the thread before adding the page |
+| `translateMessage(id, 'fr')` → `Future<TranslateMessageResponse>` | `translateMessage(id, TranslationLanguage.fr)` → `Future<Result<TranslateMessageResponse>>` | `retyped` | On `StreamChatClient` and `Channel`. Wrap a language code held as a string: `TranslationLanguage(code)` |
+| `search(filter, paginationParams: PaginationParams(limit: l, next: n))` → `Future<SearchMessagesResponse>` | `search(filter, limit: l, next: n)` → `Future<Result<SearchMessagesResponse>>` | `retyped` | On `StreamChatClient` and `Channel`; `offset` is an argument too. The other `PaginationParams` fields never had an effect on search |
+| `SearchMessagesResponse.results` (`List<GetMessageResponse>`) | `List<SearchMessageResult>` | `retyped` | Each result carries `message` and `channel`, as before |
+| `GetMessageResponse()..message = …`, `TranslateMessageResponse()..message = …`, `SearchMessagesResponse()..results = …` and their other setters | `GetMessageResponse(duration: …, message: …, channel: …)` and the like | `retyped` | The responses are plain classes with a const constructor and final fields; `GetMessageResponse` and `TranslateMessageResponse` no longer extend `MessageResponse` |
+| `GetMessageResponse.fromJson`, `TranslateMessageResponse.fromJson`, `SearchMessagesResponse.fromJson`, `QueryRepliesResponse`, `GetMessagesByIdResponse` | — | `removed` | Construct the new responses directly |
+| `GetMessageResponse.duration` / `TranslateMessageResponse.duration` / `SearchMessagesResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| `GetMessageResponse` / `TranslateMessageResponse` / `SearchMessagesResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two responses with the same fields are now equal |
+| `StreamChannel.getMessage(id)` → `Future<Message>` | `Future<Result<Message>>` | `retyped` | A message that does not exist is a `Failure` carrying a `StreamClientException`, where v10 threw a `StateError` |
+| `StreamChannel.getReplies(parentId)` → `Future<void>` | `Future<Result<void>>` | `retyped` | Returns the failure instead of throwing |
+| `StreamMessageSearchListController` (`PagedValueNotifier<String, GetMessageResponse>`), `StreamMessageSearchListView`, `StreamMessageSearchListViewIndexedWidgetBuilder`, `defaultMessageSearchListViewSeparatorBuilder`, `MessageSearchItemTapCallback`, `MessageSearchItemBuilder` | the same, over `SearchMessageResult` | `retyped` | |
+| `StreamMessageSearchListTile.messageResponse`, `MessageSearchListTileTitle.messageResponse` | `result` | `renamed` | Also in `StreamMessageSearchListTile.copyWith` |
+| `StreamChatApi.message.getMessage` / `.getMessagesById` / `.getReplies` / `.translateMessage`, `StreamChatApi.general.searchMessages` | the `StreamChatClient` methods | `removed` | The endpoints moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -1657,6 +1672,45 @@ await client.queryReactions(messageId, limit: 20, next: cursor);
 `QueryReactionsResponse()..reactions = reactions`. `SendReactionResponse` no longer extends `MessageResponse`.
 
 **`StreamChatApi.message` loses the reaction methods.** Call them on `StreamChatClient` or `Channel` instead.
+
+**Reading, translating and searching messages returns a `Result` too:** `getMessage`, `getManyMessages`,
+`getReplies`, `translateMessage` and `search` on `StreamChatClient`, and all but `getMessage` on `Channel`.
+`Channel.getReplies` still adds the replies to the thread state and `Channel.translateMessage` still merges the
+translation into the channel state, only on success. `Channel.search` and `getManyMessages` still throw a
+`StateError` on a channel that is not initialized, as in v10. `StreamChannel.getMessage` and `getReplies` return a
+`Result` as well.
+
+**`getMessagesById` is renamed `getManyMessages`** and answers a `GetManyMessagesResponse`.
+
+**`getReplies` takes a required `limit` and the reply ids directly,** where v10 took a `PaginationParams`. A call
+that passed none got up to 100 replies; it now picks its page size. The response is a `GetRepliesResponse`.
+
+```dart
+// v10
+await channel.getReplies(parentId, options: PaginationParams(limit: 30, lessThan: oldestReplyId));
+
+// v11
+await channel.getReplies(parentId, limit: 30, lessThan: oldestReplyId);
+```
+
+**`translateMessage` takes a `TranslationLanguage`,** with a constant for every language translation supports.
+
+```dart
+// v10
+await channel.translateMessage(message.id, 'fr');
+
+// v11
+await channel.translateMessage(message.id, TranslationLanguage.fr);
+await channel.translateMessage(message.id, TranslationLanguage(user.language!)); // a code held as a string
+```
+
+**`search` takes `limit`, `offset` and `next`,** and each of its results is a `SearchMessageResult` carrying the
+message and its channel, where v10 reused `GetMessageResponse`. The search list widgets follow:
+`StreamMessageSearchListView`'s callbacks and builders receive a `SearchMessageResult`, and
+`StreamMessageSearchListTile.messageResponse` is `result`.
+
+**`GetMessageResponse.channel` is non-nullable,** and the read responses no longer decode JSON: build them with their
+constructors.
 
 > **Why:** a failure is a value the caller handles where it happens, and the public models stop being wire shapes,
 > so the API payload can change without changing the type a caller holds.

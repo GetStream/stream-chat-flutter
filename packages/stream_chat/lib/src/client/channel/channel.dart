@@ -5,6 +5,7 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_core/stream_core.dart' show runSafely;
 import 'package:synchronized/synchronized.dart';
 
 import '../../../stream_chat.dart';
@@ -1380,20 +1381,36 @@ class Channel {
     );
   }
 
-  /// Search for a message with the given options.
-  Future<SearchMessagesResponse> search({
+  /// Searches the messages of this channel.
+  ///
+  /// It looks for the messages that contain the text [query], or for those that
+  /// match [messageFilters]. Exactly one of the two must be given.
+  ///
+  /// The results are ordered by [sort]. A page holds up to [limit] results, and
+  /// never more than 100.
+  ///
+  /// The next page is fetched by passing a response's
+  /// [SearchMessagesResponse.next] as [next], or by skipping the first [offset]
+  /// results. A non-zero [offset] cannot be combined with [sort] or [next].
+  ///
+  /// Throws a [StateError] if this channel is not initialized.
+  Future<Result<SearchMessagesResponse>> search({
     String? query,
     MessageSearchFilter? messageFilters,
     List<MessageSearchSort>? sort,
-    PaginationParams? paginationParams,
+    int? limit,
+    int? offset,
+    String? next,
   }) {
     _checkInitialized();
     return _client.search(
       .in_(ChannelFilterField.cid, [cid]),
-      sort: sort,
       query: query,
-      paginationParams: paginationParams,
       messageFilters: messageFilters,
+      sort: sort,
+      limit: limit,
+      offset: offset,
+      next: next,
     );
   }
 
@@ -2090,49 +2107,78 @@ class Channel {
     return _client.stopChannelWatching(id!, type);
   }
 
-  /// List the message replies for a parent message.
+  /// Fetches one page of the replies to the message with the id [parentId].
   ///
-  /// Set [preferOffline] to true to avoid the api call if the data is already
-  /// in the offline storage.
-  Future<QueryRepliesResponse> getReplies(
+  /// On success, the replies are added to this channel's thread state. A page
+  /// fetched with [idAround] replaces the thread state rather than adding to
+  /// it, so it has no gaps. A failure leaves the state as it was.
+  ///
+  /// Up to [limit] replies are returned, oldest first, and never more than 300.
+  /// The [limit] must be positive for the reply ids below to take effect.
+  ///
+  /// The reply ids [lessThan] and [lessThanOrEqual] bound the page to the
+  /// replies before that reply, [greaterThan] and [greaterThanOrEqual] to the
+  /// replies after it, and [idAround] to the replies around it.
+  ///
+  /// If [preferOffline] is true and the offline storage holds replies for the
+  /// page, those are returned instead of fetching them. The page is still
+  /// fetched when the storage holds none or cannot be read.
+  Future<Result<GetRepliesResponse>> getReplies(
     String parentId, {
-    PaginationParams? options,
+    required int limit,
+    String? lessThan,
+    String? lessThanOrEqual,
+    String? greaterThan,
+    String? greaterThanOrEqual,
+    String? idAround,
     bool preferOffline = false,
   }) async {
-    QueryRepliesResponse? response;
+    final offlineReplies = preferOffline
+        ? await _offlineReplies(
+            parentId,
+            PaginationParams(
+              limit: limit,
+              lessThan: lessThan,
+              lessThanOrEqual: lessThanOrEqual,
+              greaterThan: greaterThan,
+              greaterThanOrEqual: greaterThanOrEqual,
+              idAround: idAround,
+            ),
+          )
+        : null;
 
-    // If we prefer offline, we first try to get the replies from the
-    // offline storage.
-    if (preferOffline) {
-      if (_client.chatPersistenceClient case final persistenceClient?) {
-        final cachedReplies = await persistenceClient.getReplies(
-          parentId,
-          options: options,
-        );
-
-        // If the cached replies are not empty, we can use them.
-        if (cachedReplies.isNotEmpty) {
-          response = QueryRepliesResponse()..messages = cachedReplies;
-        }
-      }
-    }
-
-    // If we still don't have the replies, we try to get them from the API.
-    response ??= await _client.getReplies(parentId, options: options);
-
-    // Before updating the state, we check if we are querying around a
-    // reply, If we are, we have to clear the state to avoid potential
-    // gaps in the message sequence.
-    final isQueryingAround = switch (options) {
-      PaginationParams(idAround: _?) => true,
-      PaginationParams(createdAtAround: _?) => true,
-      _ => false,
+    final result = switch (offlineReplies) {
+      final response? => Result.success(response),
+      null => await _client.getReplies(
+        parentId,
+        limit: limit,
+        lessThan: lessThan,
+        lessThanOrEqual: lessThanOrEqual,
+        greaterThan: greaterThan,
+        greaterThanOrEqual: greaterThanOrEqual,
+        idAround: idAround,
+      ),
     };
 
-    if (isQueryingAround) state?.clearThread(parentId);
-    state?.updateThreadInfo(parentId, response.messages);
+    return result.onSuccess((response) {
+      // A page around a reply can leave a gap with the replies already in the
+      // state, so it replaces them.
+      if (idAround != null) state?.clearThread(parentId);
+      state?.updateThreadInfo(parentId, response.messages);
+    });
+  }
 
-    return response;
+  // The replies the offline storage holds for the page described by [options],
+  // or null when it holds none or cannot be read, so the page is fetched.
+  Future<GetRepliesResponse?> _offlineReplies(String parentId, PaginationParams options) async {
+    final persistenceClient = _client.chatPersistenceClient;
+    if (persistenceClient == null) return null;
+
+    final result = await runSafely(() => persistenceClient.getReplies(parentId, options: options));
+    final replies = result.getOrNull();
+    if (replies == null || replies.isEmpty) return null;
+
+    return GetRepliesResponse(duration: '0ms', messages: replies);
   }
 
   /// Fetches one page of the reactions on the message with the id [messageId].
@@ -2141,26 +2187,25 @@ class Channel {
   Future<Result<GetReactionsResponse>> getReactions(String messageId, {int? limit, int? offset}) =>
       _client.getReactions(messageId, limit: limit, offset: offset);
 
-  /// Retrieves a list of messages by given [messageIDs].
-  Future<GetMessagesByIdResponse> getMessagesById(
-    List<String> messageIDs,
-  ) async {
+  /// Fetches messages of this channel by their ids.
+  ///
+  /// It takes up to 50 [messageIds]; more return a failure. A message that does
+  /// not exist or cannot be shown is left out of the response.
+  ///
+  /// Throws a [StateError] if this channel is not initialized.
+  Future<Result<GetManyMessagesResponse>> getManyMessages(List<String> messageIds) async {
     _checkInitialized();
-    return _client.getMessagesById(id!, type, messageIDs);
+    return _client.getManyMessages(id!, type, messageIds);
   }
 
-  /// Translate a message by given [messageId] and [language].
+  /// Translates the message with the id [messageId] into [language].
   ///
-  /// The translated message is merged into the channel state, so its
-  /// translations are available to everything listening to it without the
-  /// caller having to apply the response itself.
-  Future<TranslateMessageResponse> translateMessage(
-    String messageId,
-    String language,
-  ) async {
-    final response = await _client.translateMessage(messageId, language);
-    state?.updateMessage(response.message);
-    return response;
+  /// On success, the translated message is merged into the channel state, so
+  /// its translations reach everything listening to it. A failure leaves the
+  /// state as it was.
+  Future<Result<TranslateMessageResponse>> translateMessage(String messageId, TranslationLanguage language) async {
+    final result = await _client.translateMessage(messageId, language);
+    return result.onSuccess((response) => state?.updateMessage(response.message));
   }
 
   /// Creates a new channel.

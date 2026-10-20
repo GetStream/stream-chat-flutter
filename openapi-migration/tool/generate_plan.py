@@ -713,11 +713,14 @@ GROUPS = [
     ),
     dict(
         num='10', slug='messages', title='Messages & Search',
-        hand=['message_api.dart', 'general_api.dart::searchMessages'],
-        match=owns('/api/v2/chat/messages', '/api/v2/chat/search',
+        hand=['message_api.dart'],
+        match=owns('/api/v2/chat/messages',
                    unless=('/api/v2/chat/messages/{message_id}/polls',
                            '/api/v2/chat/messages/{message_id}/reminders',
-                           '/api/v2/chat/messages/{id}/reaction')),
+                           '/api/v2/chat/messages/{id}/reaction'),
+                   unless_ops=('GET /api/v2/chat/messages/{id}',
+                               'GET /api/v2/chat/messages/{parent_id}/replies',
+                               'POST /api/v2/chat/messages/{id}/translate')),
         goal='The core of the SDK, and the group with the most customisation pressure on its models.',
         decisions=[
             '`Message` is public, persisted, WebSocket-delivered and the most customised type in the SDK. Keep '
@@ -854,6 +857,53 @@ GROUPS = [
         ],
     ),
     dict(
+        num='10b', slug='message-reads', title='Message Reads & Search',
+        hand=['message_api.dart::getMessage', 'message_api.dart::getMessagesById',
+              'message_api.dart::getReplies', 'message_api.dart::translateMessage',
+              'general_api.dart::searchMessages'],
+        match=only_ops('GET /api/v2/chat/messages/{id}',
+                       'GET /api/v2/chat/channels/{type}/{id}/messages',
+                       'GET /api/v2/chat/messages/{parent_id}/replies',
+                       'POST /api/v2/chat/messages/{id}/translate',
+                       'GET /api/v2/chat/search'),
+        goal='Split out of [10](10-messages.md): fetching, translating and searching messages, which answer '
+             '`Message` through the mappers group 06 added, and `ChannelModel` through group 15\'s.',
+        decisions=[],
+        taken=textwrap.dedent("""\
+            - **The v2 routes are the v1 handlers.** `lib/chat/routes.go` mounts all five in the shared
+              `coreRoutes`; none is gated or in beta. Only the JSON options differ: v2 nests custom data and
+              writes dates as integers.
+            - **`getManyMessages` belongs here, not in [11](11-channels-and-members.md),** although its path is
+              under `/channels`: its hand-written method is `MessageApi.getMessagesById`, and it answers messages
+              only. It is renamed after the spec (`getMessagesById` → `getManyMessages`, approved). The server
+              puts each message's channel into its custom data, which the mapper keeps, as v10 did, in its v2
+              shape.
+            - **Moved off `MessageApi` and `GeneralApi`:** `getMessage`, `getManyMessages`, `getReplies`,
+              `translateMessage` and `search`, each a `StreamChatClient` method over `MessagesRepository`.
+              `Channel`'s versions return a `Result` too; `getReplies` and `translateMessage` apply the response
+              to the channel state on success only, and the offline replies come back in a `'0ms'` envelope.
+              `StreamChannel.getMessage` and `getReplies` return a `Result` (approved).
+            - **`getReplies` takes a required `limit` and v10's reply-id names** (`lessThan`, …, `idAround`)
+              instead of `PaginationParams` (approved). The backend ignores a cursor sent without a limit, and
+              never read the date or offset fields. `ChatPersistenceClient.getReplies` keeps its
+              `PaginationParams`.
+            - **`search` takes `limit`, `offset` and `next`** instead of `PaginationParams`, and keeps v10's
+              `SearchMessagesResponse` (approved). Its results are a new `SearchMessageResult` (message and
+              channel), since a result has no `duration`; a result without a message is left out. The search
+              controller and widgets follow, and the tile's `messageResponse` is renamed `result` (approved).
+            - **`translateMessage` takes a hand-written `TranslationLanguage`** (README rule 6, approved).
+            - **`GetMessageResponse.channel` is non-nullable** (approved): the spec requires it and the backend
+              always sends it.
+            - **`MessageWithChannelResponse` and `SearchResultMessage` copy their fields into a generated
+              `MessageResponse`** and reuse its mapper, since the three share no type. To re-evaluate if the
+              generator gives them a common interface.
+            """),
+        done=DONE.replace('- [ ]', '- [x]'),
+        risks=[
+            'A reply cursor sent without a limit is ignored by the backend, so `getReplies` requires one.',
+        ],
+    ),
+    dict(
         num='11', slug='channels-and-members', title='Channels, Members & Sync',
         hand=['channel_api.dart', 'general_api.dart::sync', 'general_api.dart::queryMembers'],
         match=owns('/api/v2/chat/channels', '/api/v2/chat/members', '/api/v2/chat/sync',
@@ -868,7 +918,8 @@ GROUPS = [
                                'POST /api/v2/chat/channels/{type}/{id}/read',
                                'POST /api/v2/chat/channels/{type}/{id}/unread',
                                'POST /api/v2/chat/channels/read',
-                               'POST /api/v2/chat/channels/delivered')),
+                               'POST /api/v2/chat/channels/delivered',
+                               'GET /api/v2/chat/channels/{type}/{id}/messages')),
         goal='The biggest group, and the one every controller above it reads through `ChannelState`. '
              '[15](15-partial-updates.md) split the partial channel and member updates out of it, '
              '[16](16-channel-lifecycle.md) hiding, showing and deleting a channel, and '

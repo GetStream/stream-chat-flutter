@@ -846,16 +846,15 @@ class DefaultStreamMessageItem extends StatelessWidget {
     BuildContext context,
     Message message,
   ) async {
-    try {
-      if (message.showInChannel case true) {
-        final streamChannel = StreamChannel.of(context);
-        final parentMessage = await streamChannel.getMessage(message.parentId!);
-        return props.onThreadTap?.call(parentMessage, message);
-      }
-      return props.onThreadTap?.call(message, null);
-    } catch (e, stk) {
-      debugPrint('Error while fetching message: $e, $stk');
+    if (message.showInChannel case true) {
+      final streamChannel = StreamChannel.of(context);
+      final result = await streamChannel.getMessage(message.parentId!);
+      return result.fold(
+        onSuccess: (parentMessage) => props.onThreadTap?.call(parentMessage, message),
+        onFailure: (error, stackTrace) => debugPrint('Error while fetching message: $error, $stackTrace'),
+      );
     }
+    return props.onThreadTap?.call(message, null);
   }
 
   // Routes a long-press to bounced-error or normal actions handler.

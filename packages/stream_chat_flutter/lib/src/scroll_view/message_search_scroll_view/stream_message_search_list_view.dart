@@ -7,16 +7,16 @@ import '../../utils/network_error_text.dart';
 /// Default separator builder for [StreamMessageSearchListView].
 Widget defaultMessageSearchListViewSeparatorBuilder(
   BuildContext context,
-  List<GetMessageResponse> responses,
+  List<SearchMessageResult> results,
   int index,
 ) => const StreamMessageSearchListSeparator();
 
 /// Signature for the item builder that creates the children of the
 /// [StreamMessageSearchListView].
 typedef StreamMessageSearchListViewIndexedWidgetBuilder =
-    StreamScrollViewIndexedWidgetBuilder<GetMessageResponse, StreamMessageSearchListTile>;
+    StreamScrollViewIndexedWidgetBuilder<SearchMessageResult, StreamMessageSearchListTile>;
 
-/// A [ListView] that shows a list of [GetMessageResponse]s,
+/// A [ListView] that shows a list of [SearchMessageResult]s,
 /// it uses [StreamMessageSearchListTile] as a default item.
 ///
 /// This is the new version of [MessageSearchListView] that uses
@@ -77,7 +77,7 @@ class StreamMessageSearchListView extends StatelessWidget {
   final StreamMessageSearchListViewIndexedWidgetBuilder? itemBuilder;
 
   /// A builder that is called to build the list separator.
-  final PagedValueScrollViewIndexedWidgetBuilder<GetMessageResponse> separatorBuilder;
+  final PagedValueScrollViewIndexedWidgetBuilder<SearchMessageResult> separatorBuilder;
 
   /// A builder that is called to build the empty state of the list.
   final WidgetBuilder? emptyBuilder;
@@ -89,10 +89,10 @@ class StreamMessageSearchListView extends StatelessWidget {
   final Widget Function(BuildContext, StreamChatException)? errorBuilder;
 
   /// Called when the user taps this list tile.
-  final void Function(GetMessageResponse)? onMessageTap;
+  final void Function(SearchMessageResult)? onMessageTap;
 
   /// Called when the user long-presses on this list tile.
-  final void Function(GetMessageResponse)? onMessageLongPress;
+  final void Function(SearchMessageResult)? onMessageLongPress;
 
   /// The index to take into account when triggering [controller.loadMore].
   final int loadMoreTriggerIndex;
@@ -276,7 +276,7 @@ class StreamMessageSearchListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PagedValueListView<String, GetMessageResponse>(
+    return PagedValueListView<String, SearchMessageResult>(
       scrollDirection: scrollDirection,
       padding: padding,
       physics: physics,
@@ -295,20 +295,20 @@ class StreamMessageSearchListView extends StatelessWidget {
       clipBehavior: clipBehavior,
       loadMoreTriggerIndex: loadMoreTriggerIndex,
       separatorBuilder: separatorBuilder,
-      itemBuilder: (context, messageResponses, index) {
-        final messageResponse = messageResponses[index];
+      itemBuilder: (context, results, index) {
+        final result = results[index];
         final onTap = onMessageTap;
         final onLongPress = onMessageLongPress;
 
         final streamMessageSearchListTile = StreamMessageSearchListTile(
-          messageResponse: messageResponse,
-          onTap: onTap == null ? null : () => onTap(messageResponse),
-          onLongPress: onLongPress == null ? null : () => onLongPress(messageResponse),
+          result: result,
+          onTap: onTap == null ? null : () => onTap(result),
+          onLongPress: onLongPress == null ? null : () => onLongPress(result),
         );
 
         return itemBuilder?.call(
               context,
-              messageResponses,
+              results,
               index,
               streamMessageSearchListTile,
             ) ??

@@ -263,15 +263,16 @@ abstract final class _TranslateMessageAction {
     String language,
   ) async {
     final channel = StreamChannel.of(context).channel;
-    try {
-      // The SDK merges the translation into the channel state itself, which
-      // is all the message widgets need to pick it up.
-      await channel.translateMessage(message.id, language);
-    } catch (e) {
-      if (!context.mounted) return;
-      StreamSnackbarMessenger.of(context).show(
+    // Captured before the await, so a failure still shows once the menu that
+    // started the translation has closed.
+    final messenger = StreamSnackbarMessenger.of(context);
+    // The SDK merges the translation into the channel state itself, which is
+    // all the message widgets need to pick it up.
+    final result = await channel.translateMessage(message.id, TranslationLanguage(language));
+    if (result case Failure(:final error)) {
+      messenger.show(
         StreamSnackbar(
-          message: Text('Failed to translate message: $e'),
+          message: Text('Failed to translate message: $error'),
           variant: .error,
         ),
       );

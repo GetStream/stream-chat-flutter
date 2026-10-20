@@ -33,10 +33,6 @@ QueryChannelsResponse _$QueryChannelsResponseFromJson(Map<String, dynamic> json)
       ? null
       : PredefinedFilter.fromJson(json['predefined_filter'] as Map<String, dynamic>);
 
-TranslateMessageResponse _$TranslateMessageResponseFromJson(Map<String, dynamic> json) => TranslateMessageResponse()
-  ..duration = json['duration'] as String?
-  ..message = Message.fromJson(json['message'] as Map<String, dynamic>);
-
 QueryMembersResponse _$QueryMembersResponseFromJson(Map<String, dynamic> json) => QueryMembersResponse()
   ..duration = json['duration'] as String?
   ..members =
@@ -50,11 +46,6 @@ QueryBannedUsersResponse _$QueryBannedUsersResponseFromJson(Map<String, dynamic>
   ..duration = json['duration'] as String?
   ..bans = (json['bans'] as List<dynamic>?)?.map((e) => BannedUser.fromJson(e as Map<String, dynamic>)).toList() ?? [];
 
-QueryRepliesResponse _$QueryRepliesResponseFromJson(Map<String, dynamic> json) => QueryRepliesResponse()
-  ..duration = json['duration'] as String?
-  ..messages =
-      (json['messages'] as List<dynamic>?)?.map((e) => Message.fromJson(e as Map<String, dynamic>)).toList() ?? [];
-
 UpdateMessageResponse _$UpdateMessageResponseFromJson(Map<String, dynamic> json) => UpdateMessageResponse()
   ..duration = json['duration'] as String?
   ..message = Message.fromJson(json['message'] as Map<String, dynamic>);
@@ -62,26 +53,6 @@ UpdateMessageResponse _$UpdateMessageResponseFromJson(Map<String, dynamic> json)
 SendMessageResponse _$SendMessageResponseFromJson(Map<String, dynamic> json) => SendMessageResponse()
   ..duration = json['duration'] as String?
   ..message = Message.fromJson(json['message'] as Map<String, dynamic>);
-
-GetMessageResponse _$GetMessageResponseFromJson(Map<String, dynamic> json) => GetMessageResponse()
-  ..duration = json['duration'] as String?
-  ..message = Message.fromJson(json['message'] as Map<String, dynamic>)
-  ..channel = json['channel'] == null ? null : ChannelModel.fromJson(json['channel'] as Map<String, dynamic>);
-
-SearchMessagesResponse _$SearchMessagesResponseFromJson(Map<String, dynamic> json) => SearchMessagesResponse()
-  ..duration = json['duration'] as String?
-  ..results =
-      (json['results'] as List<dynamic>?)
-          ?.map((e) => GetMessageResponse.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      []
-  ..next = json['next'] as String?
-  ..previous = json['previous'] as String?;
-
-GetMessagesByIdResponse _$GetMessagesByIdResponseFromJson(Map<String, dynamic> json) => GetMessagesByIdResponse()
-  ..duration = json['duration'] as String?
-  ..messages =
-      (json['messages'] as List<dynamic>?)?.map((e) => Message.fromJson(e as Map<String, dynamic>)).toList() ?? [];
 
 UpdateChannelResponse _$UpdateChannelResponseFromJson(Map<String, dynamic> json) => UpdateChannelResponse()
   ..duration = json['duration'] as String?

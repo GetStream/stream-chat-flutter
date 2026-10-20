@@ -254,10 +254,10 @@ Future<void> _pumpThreadPage(
   when(
     () => channel.getReplies(
       any(),
-      options: any(named: 'options'),
+      limit: any(named: 'limit'),
       preferOffline: any(named: 'preferOffline'),
     ),
-  ).thenAnswer((_) async => QueryRepliesResponse()..messages = []);
+  ).thenAnswer((_) async => const Result.success(GetRepliesResponse(duration: '0ms', messages: [])));
 
   when(() => channelState.members).thenReturn([]);
   when(() => channelState.membersStream).thenAnswer((_) => Stream.value([]));

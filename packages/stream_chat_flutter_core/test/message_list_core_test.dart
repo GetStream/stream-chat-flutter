@@ -786,9 +786,9 @@ void main() {
       when(
         () => mockChannel.getReplies(
           parentMessage.id,
-          options: any(named: 'options'),
+          limit: any(named: 'limit'),
         ),
-      ).thenAnswer((_) async => QueryRepliesResponse()..messages = []);
+      ).thenAnswer((_) async => const Result.success(GetRepliesResponse(duration: '0ms', messages: [])));
 
       await tester.pumpWidget(
         Directionality(
@@ -840,9 +840,9 @@ void main() {
       when(
         () => mockChannel.getReplies(
           parentMessage.id,
-          options: any(named: 'options'),
+          limit: any(named: 'limit'),
         ),
-      ).thenAnswer((_) async => QueryRepliesResponse()..messages = []);
+      ).thenAnswer((_) async => const Result.success(GetRepliesResponse(duration: '0ms', messages: [])));
 
       await tester.pumpWidget(
         Directionality(
@@ -1097,9 +1097,9 @@ void main() {
         when(
           () => mockChannel.getReplies(
             parent.id,
-            options: any(named: 'options'),
+            limit: any(named: 'limit'),
           ),
-        ).thenAnswer((_) async => QueryRepliesResponse()..messages = []);
+        ).thenAnswer((_) async => const Result.success(GetRepliesResponse(duration: '0ms', messages: [])));
 
         // Start on main channel — first emission is compared against the
         // seeded tail and does not prune.
