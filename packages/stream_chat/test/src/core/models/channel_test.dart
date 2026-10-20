@@ -100,6 +100,14 @@ void main() {
     expect(newChannel.autoTranslationLanguage, 'fr');
   });
 
+  test('ChannelModel.copyWith does not set a field from custom data named like it', () {
+    final channel = ChannelModel(cid: 'test:cid', hidden: true);
+
+    final newChannel = channel.copyWith(custom: const {'hidden': false});
+
+    expect(newChannel.hidden, isTrue);
+  });
+
   test('ChannelModel.copyWith replaces the flags it is given', () {
     final channel = ChannelModel(
       cid: 'test:cid',

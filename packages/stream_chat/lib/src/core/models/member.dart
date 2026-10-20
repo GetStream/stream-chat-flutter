@@ -120,9 +120,6 @@ class Member extends Equatable {
   final List<String> deletedMessages;
 
   /// This member's custom data.
-  ///
-  /// It may hold a key named like one of the member's own fields; [toJson]
-  /// leaves such an entry out so it never overwrites the field.
   @JsonKey(name: 'extra_data')
   final Map<String, Object?> custom;
 
@@ -136,6 +133,8 @@ class Member extends Equatable {
   final String? status;
 
   /// Whether this member is banned from future channels.
+  ///
+  /// The ban covers the channels the channel's creator creates later.
   @JsonKey(includeToJson: false)
   final bool? banFromFutureChannels;
 
@@ -199,7 +198,11 @@ class Member extends Equatable {
     deletedAt: deletedAt ?? this.deletedAt,
   );
 
-  /// Serialize to json
+  /// Serializes this member to JSON.
+  ///
+  /// Leaves out [notificationsMuted], [status], [banFromFutureChannels],
+  /// [futureChannelBanExpires] and [deletedAt], which only [Member.fromJson]
+  /// reads.
   ///
   /// Writes the entries of [custom] at the root, leaving out any named like one
   /// of the member's own fields.

@@ -160,9 +160,6 @@ class Attachment extends Equatable {
   final UploadState uploadState;
 
   /// This attachment's custom data.
-  ///
-  /// It may hold a key named like one of the attachment's own fields; [toJson]
-  /// leaves such an entry out so it never overwrites the field.
   @JsonKey(name: 'extra_data')
   final Map<String, Object?> custom;
 
@@ -229,7 +226,7 @@ class Attachment extends Equatable {
     ...dbSpecificTopLevelFields,
   ];
 
-  /// Serialize to json
+  /// Serializes this attachment to JSON.
   ///
   /// Writes the entries of [custom] at the root, leaving out any named like one
   /// of [topLevelFields].
