@@ -22,8 +22,7 @@ class SendActionResponse with _$SendActionResponse {
   @override
   final String duration;
 
-  /// The message as the action left it, or null when the action removed it,
-  /// as canceling a Giphy command does.
+  /// The message as the action left it, or null when the action removed it.
   @override
   final Message? message;
 }

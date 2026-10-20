@@ -36,10 +36,10 @@
   `MessagesRepository`; `pinMessage` and `unpinMessage` go through `updateMessagePartial`. `Channel`'s
   versions, `sendStaticLocation` and `startLiveLocationSharing` return a `Result` too and keep the
   optimistic update, the failed states and the retry scheduling; they still throw a `StateError` on an
-  uninitialized channel. A private `_runCatching` turns anything thrown inside a write (an upload
-  failure, an invalid message, a cancelled upload, an unexpected error) into a failure, so the failed
-  state is applied for any error, as v10's `catch` did; a non-Stream error comes back in a
-  `StreamClientException` carrying it. `MessageApi`, `StreamChatApi.message` and the `MessageResponse`
+  uninitialized channel. In `sendMessage` and `updateMessage`, which still signal an upload failure, an
+  invalid message or a cancelled upload by throwing internally, a private `_runCatching` turns what is
+  thrown into a failure, so the failed state is applied as v10's `catch` did; a non-Stream error comes
+  back in a `StreamClientException` carrying it. `MessageApi`, `StreamChatApi.message` and the `MessageResponse`
   base class are deleted, and `sendPoll` calls `sendMessage` directly.
 - **`partialUpdateMessage` is renamed `updateMessagePartial`** (spec name, approved) and answers
   `UpdateMessagePartialResponse`, as `pinMessage` and `unpinMessage` do.
@@ -49,8 +49,8 @@
 - **A delete answers `DeleteMessageResponse`**, and a local or bounced message deleted without a call
   answers one with a `'0ms'` duration (approved).
 - **`retryMessage` returns `Future<Result<Object>>`** (approved): the retried call's envelope.
-  `RetryQueue` loops on the `Result` (approved) rather than relying on a throw: same attempt count,
-  same stop conditions and the same delay formula as `rate_limiter`'s `backOff`, which it replaces.
+  `RetryQueue` keeps `rate_limiter`'s `backOff`, which retries only a call that throws: inside its
+  closure a failure is thrown as its error, so attempts, stop conditions and delays are v10's.
 - **`MessageDeleteScope` stays** (approved), closing group 10's `DeleteType` risk: the endpoint takes a
   `hard` and a `delete_for_me` flag and has no pruning delete, so `DeleteType` would let a caller ask
   for a delete it cannot perform, and would change the persisted `deletingFailed` state for nothing.

@@ -24,7 +24,7 @@ class UpdateMessagePartialResponse with _$UpdateMessagePartialResponse {
   @override
   final String duration;
 
-  /// The message with the update applied.
+  /// The updated message.
   @override
   final Message? message;
 }

@@ -2228,66 +2228,6 @@ void main() {
     });
 
     group('`.updateMessagePartial` error handling', () {
-      test('should update message state even when the error is not a StreamChatException', () async {
-        final message = Message(
-          id: 'test-message-id-error-partial-1',
-          state: MessageState.sent,
-        );
-
-        // Add message to channel state first
-        channel.state?.updateMessage(message);
-
-        const set = {'text': 'Update Message text'};
-        const unset = ['pinExpires'];
-
-        when(
-          () => client.updateMessagePartial(
-            message.id,
-            set: set,
-            unset: unset,
-          ),
-        ).thenThrow(ArgumentError('Invalid argument'));
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.updating,
-                ),
-                matchText: true,
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.partialUpdatingFailed(
-                    set: set,
-                    unset: unset,
-                    skipEnrichUrl: false,
-                  ),
-                ),
-                matchText: true,
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        final result = await channel.updateMessagePartial(
-          message,
-          set: set,
-          unset: unset,
-        );
-        expect(
-          result.exceptionOrNull(),
-          isA<StreamClientException>().having((e) => e.cause, 'cause', isA<ArgumentError>()),
-        );
-      });
-
       test(
         'should mark the message failed and report the failure as retriable with skipEnrichUrl: true',
         () async {
@@ -2750,19 +2690,6 @@ void main() {
         await pumpEventQueue();
 
         verify(() => client.deleteMessage(message.id)).called(1);
-      });
-
-      test('Channel.deleteMessage returns a thrown error as a client failure', () async {
-        final message = Message(id: 'test-message-id', createdAt: DateTime.now(), state: MessageState.sent);
-        final error = StateError('boom');
-        when(() => client.deleteMessage(message.id)).thenThrow(error);
-
-        final result = await channel.deleteMessage(message);
-
-        expect(
-          result.exceptionOrNull(),
-          isA<StreamClientException>().having((e) => e.cause, 'cause', same(error)),
-        );
       });
     });
 

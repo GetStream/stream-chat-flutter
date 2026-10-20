@@ -22,8 +22,7 @@ class SendMessageResponse with _$SendMessageResponse {
   @override
   final String duration;
 
-  /// The message as it was sent, with its creation date set and, unless the
-  /// send skipped them, previews for the links in its text.
+  /// The sent message.
   @override
   final Message message;
 }

@@ -739,23 +739,12 @@ class Channel {
 
   final _sendMessageLock = Lock();
 
-  /// Sends [message] to this channel.
+  /// Send a [message] to this channel.
   ///
-  /// The message shows in the channel state straight away, in the sending
-  /// state, and its attachments are uploaded first. On success it takes the
-  /// sent message's fields. On a failure it is kept in a failed state, and is
-  /// retried later when the failure is one a retry can fix.
+  /// If [skipPush] is true the message will not send a push notification.
   ///
-  /// The message fails without being sent when an attachment fails to upload
-  /// or it has nothing left to send. Sending, updating or deleting the message
-  /// again while its attachments upload cancels this call, which then returns
-  /// a failure.
-  ///
-  /// If [skipPush] is true, no push notification is sent.
-  ///
-  /// If [skipEnrichUrl] is true, the links in the text get no preview.
-  ///
-  /// Throws a [StateError] if this channel is not initialized.
+  /// Waits for a [_messageAttachmentsUploadCompleter] to complete
+  /// before actually sending the message.
   Future<Result<SendMessageResponse>> sendMessage(
     Message message, {
     bool skipPush = false,
@@ -862,22 +851,10 @@ class Channel {
 
   final _updateMessageLock = Lock();
 
-  /// Replaces the message in this channel that has [message]'s id with
-  /// [message].
+  /// Updates the [message] in this channel.
   ///
-  /// The change shows in the channel state straight away, in the updating
-  /// state, and new attachments are uploaded first. On success the message
-  /// takes the updated message's fields. On a failure it is kept in a failed
-  /// state, and is retried later when the failure is one a retry can fix.
-  ///
-  /// Fields left empty on [message], its custom data included, are cleared on
-  /// the stored message. The update fails when an attachment fails to upload.
-  ///
-  /// If [skipPush] is true, no push notification is sent.
-  ///
-  /// If [skipEnrichUrl] is true, the links in the text get no preview.
-  ///
-  /// Throws a [StateError] if this channel is not initialized.
+  /// Waits for a [_messageAttachmentsUploadCompleter] to complete
+  /// before actually updating the message.
   Future<Result<UpdateMessageResponse>> updateMessage(
     Message message, {
     bool skipPush = false,
@@ -963,20 +940,11 @@ class Channel {
     return result;
   }
 
-  /// Sets the fields in [set] and removes the fields named in [unset] on
-  /// [message], leaving every other field as it is.
+  /// Partially updates the [message] in this channel.
   ///
-  /// The message shows in the updating state straight away. On success it
-  /// takes the updated message's fields. On a failure it is kept in a failed
-  /// state, and is retried later, with the same [set] and [unset], when the
-  /// failure is one a retry can fix.
+  /// Use [set] to define values to be set.
   ///
-  /// A key in [set] that is not a message field is stored in the message's
-  /// custom data.
-  ///
-  /// If [skipEnrichUrl] is true, the links in the text get no preview.
-  ///
-  /// Throws a [StateError] if this channel is not initialized.
+  /// Use [unset] to define values to be unset.
   Future<Result<UpdateMessagePartialResponse>> updateMessagePartial(
     Message message, {
     Map<String, Object?>? set,
@@ -1000,15 +968,12 @@ class Channel {
 
     // Wait for the previous update call to finish. Otherwise, the order of
     // messages will not be maintained.
-    final result = await _runCatching(
-      failureMessage: 'Failed to update the message',
-      () => _updateMessageLock.synchronized(
-        () => _client.updateMessagePartial(
-          message.id,
-          set: set,
-          unset: unset,
-          skipEnrichUrl: skipEnrichUrl,
-        ),
+    final result = await _updateMessageLock.synchronized(
+      () => _client.updateMessagePartial(
+        message.id,
+        set: set,
+        unset: unset,
+        skipEnrichUrl: skipEnrichUrl,
       ),
     );
 
@@ -1044,37 +1009,21 @@ class Channel {
 
   final _deleteMessageLock = Lock();
 
-  /// Deletes [message] for everyone.
-  ///
-  /// The message shows as deleted straight away. On a failure it is kept in a
-  /// failed state, and the delete is retried later when the failure is one a
-  /// retry can fix.
-  ///
-  /// A message that was never sent, or that moderation bounced, is only
-  /// removed from the channel state; the response then carries it marked
-  /// deleted, with a `0ms` duration.
+  /// Deletes the [message] for everyone.
   ///
   /// If [hard] is true, the message is permanently deleted and cannot be
-  /// recovered, and its uploaded attachments are deleted as well.
-  ///
-  /// Throws a [StateError] if this channel is not initialized.
+  /// recovered. In this case, any attachments associated with the message are
+  /// deleted as well.
   Future<Result<DeleteMessageResponse>> deleteMessage(Message message, {bool hard = false}) {
     final deletionScope = MessageDeleteScope.deleteForAll(hard: hard);
 
     return _deleteMessage(message, scope: deletionScope);
   }
 
-  /// Deletes [message] for the current user only.
+  /// Deletes the [message] only for the current user.
   ///
-  /// The other members of the channel still see the message. It shows as
-  /// deleted straight away; on a failure it is kept in a failed state, and the
-  /// delete is retried later when the failure is one a retry can fix.
-  ///
-  /// A message that was never sent, or that moderation bounced, is only
-  /// removed from the channel state; the response then carries it marked
-  /// deleted, with a `0ms` duration.
-  ///
-  /// Throws a [StateError] if this channel is not initialized.
+  /// Note: This does not delete the message for other channel members and
+  /// they can still see the message.
   Future<Result<DeleteMessageResponse>> deleteMessageForMe(Message message) {
     const deletionScope = MessageDeleteScope.deleteForMe();
 
@@ -1117,14 +1066,11 @@ class Channel {
 
     // Wait for the previous delete call to finish. Otherwise, the order of
     // messages will not be maintained.
-    final result = await _runCatching(
-      failureMessage: 'Failed to delete the message',
-      () => _deleteMessageLock.synchronized(
-        () => switch (scope) {
-          DeleteForMe() => _client.deleteMessageForMe(message.id),
-          DeleteForAll() => _client.deleteMessage(message.id, hard: scope.hard),
-        },
-      ),
+    final result = await _deleteMessageLock.synchronized(
+      () => switch (scope) {
+        DeleteForMe() => _client.deleteMessageForMe(message.id),
+        DeleteForAll() => _client.deleteMessage(message.id, hard: scope.hard),
+      },
     );
 
     switch (result) {
@@ -1262,14 +1208,7 @@ class Channel {
     );
   }
 
-  /// Pins [message].
-  ///
-  /// The pin lasts until the message is unpinned. A [timeoutOrExpirationDate]
-  /// ends it: either the [DateTime] it expires at, or a number of seconds from
-  /// now.
-  ///
-  /// The message is updated as [updateMessagePartial] updates it, so the change
-  /// shows once the update succeeds.
+  /// Pins provided message
   Future<Result<UpdateMessagePartialResponse>> pinMessage(
     Message message, {
     Object? /*num|DateTime*/ timeoutOrExpirationDate,
@@ -1298,10 +1237,7 @@ class Channel {
     );
   }
 
-  /// Unpins [message].
-  ///
-  /// The message is updated as [updateMessagePartial] updates it, so the change
-  /// shows once the update succeeds.
+  /// Unpins provided message.
   Future<Result<UpdateMessagePartialResponse>> unpinMessage(Message message) => updateMessagePartial(
     message,
     set: {
@@ -1352,8 +1288,6 @@ class Channel {
   ///
   /// A [messageText] and [custom] data, when given, are sent in the message
   /// with the location.
-  ///
-  /// The message is sent as [sendMessage] sends one.
   Future<Result<SendMessageResponse>> sendStaticLocation({
     String? id,
     String? messageText,
@@ -1386,8 +1320,6 @@ class Channel {
   ///
   /// A [messageText] and [custom] data, when given, are sent in the message
   /// with the location.
-  ///
-  /// The message is sent as [sendMessage] sends one.
   Future<Result<SendMessageResponse>> startLiveLocationSharing({
     String? id,
     String? messageText,
@@ -1941,14 +1873,7 @@ class Channel {
     return _client.removeChannelMembers(id!, type, memberIds, message: message);
   }
 
-  /// Runs the action [formData] describes on [message], such as sending,
-  /// shuffling or canceling a Giphy command.
-  ///
-  /// On success, the message the action left replaces [message] in the channel
-  /// state, or [message] is removed when the action removed it. A failure
-  /// leaves the state as it was.
-  ///
-  /// Throws a [StateError] if this channel is not initialized.
+  /// Send action for a specific message of this channel.
   Future<Result<SendActionResponse>> sendAction(Message message, Map<String, String> formData) async {
     _checkInitialized();
     final result = await _client.sendAction(message.id, formData);

@@ -24,11 +24,7 @@ class DeleteMessageResponse with _$DeleteMessageResponse {
   @override
   final String duration;
 
-  /// The message the delete applied to.
-  ///
-  /// A message deleted only for the current user comes back as the other
-  /// members still see it. One that [Channel] only removed locally, because
-  /// it was never sent, comes back marked deleted.
+  /// The message the delete was applied to.
   @override
   final Message message;
 }

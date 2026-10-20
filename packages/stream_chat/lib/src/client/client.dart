@@ -1649,9 +1649,6 @@ class StreamChatClient {
 
   /// Runs the action [formData] describes on the message with the id
   /// [messageId], such as sending, shuffling or canceling a Giphy command.
-  ///
-  /// The response's message is the message as the action left it, or null when
-  /// the action removed it.
   Future<Result<SendActionResponse>> sendAction(String messageId, Map<String, String> formData) =>
       _messagesRepository.sendAction(messageId, formData);
 
@@ -2000,9 +1997,6 @@ class StreamChatClient {
   /// Sends [message] to the channel with the id [channelId] and type
   /// [channelType].
   ///
-  /// Mentions the text no longer contains are left out, and a message with a
-  /// [Message.command] runs that command on its text.
-  ///
   /// If [skipPush] is true, no push notification is sent.
   ///
   /// If [skipEnrichUrl] is true, the links in the text get no preview.
@@ -2075,12 +2069,7 @@ class StreamChatClient {
     prev: prev,
   );
 
-  /// Replaces the message that has [message]'s id with [message].
-  ///
-  /// Mentions the text no longer contains are left out.
-  ///
-  /// Fields left empty on [message], its custom data included, are cleared on
-  /// the stored message.
+  /// Updates the message that has [message]'s id to [message].
   ///
   /// If [skipPush] is true, no push notification is sent.
   ///
@@ -2097,9 +2086,6 @@ class StreamChatClient {
 
   /// Sets the fields in [set] and removes the fields named in [unset] on the
   /// message with the id [messageId], leaving every other field as it is.
-  ///
-  /// A key in [set] that is not a message field is stored in the message's
-  /// custom data.
   ///
   /// If [skipEnrichUrl] is true, the links in the text get no preview.
   Future<Result<UpdateMessagePartialResponse>> updateMessagePartial(
@@ -2273,9 +2259,8 @@ class StreamChatClient {
 
   /// Pins the message with the id [messageId].
   ///
-  /// The pin lasts until the message is unpinned. A [timeoutOrExpirationDate]
-  /// ends it: either the [DateTime] it expires at, or a number of seconds from
-  /// now.
+  /// The pin expires at [timeoutOrExpirationDate], a [DateTime] or a number of
+  /// seconds from now; without it, it lasts until the message is unpinned.
   Future<Result<UpdateMessagePartialResponse>> pinMessage(
     String messageId, {
     Object? /*num|DateTime*/ timeoutOrExpirationDate,
