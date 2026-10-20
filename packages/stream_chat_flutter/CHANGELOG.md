@@ -19,6 +19,9 @@
 🔄 Changed
 
 - Allowed `equatable` 3.x alongside 2.x.
+- Allowed `record` 7.x alongside 6.x.
+- Raised `desktop_drop` to 0.8.4, which builds with AGP 9's built-in Kotlin. Android apps still on AGP 8 need Kotlin Gradle Plugin 2.0 or later.
+- Raised `photo_manager` to 3.11.0, which builds with AGP 9's built-in Kotlin.
 - `StreamMessageComposer`'s send button now follows the message validator, so a custom validator can enable or disable it, including when editing or with a command.
 - `StreamMessageListView` now rebuilds only the message rows that changed; a custom row builder should read changing outside state through an inherited widget.
 - `StreamMessageComposer`'s top border now spans the full width, including under the side safe-area insets, and also shows above the no-permission message; the composer is 1px shorter as a result.
