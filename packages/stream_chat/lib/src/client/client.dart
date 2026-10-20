@@ -2810,15 +2810,18 @@ class ClientState {
     _currentUserController.safeAdd(user);
   }
 
-  /// Update all the [users] with the provided [userList]
+  /// Updates [users] with the users in [userList] that are new or changed.
+  ///
+  /// When a user is listed more than once, the last copy is kept.
   @internal
   void updateUsers(List<User?> userList) {
-    final newUsers = {
-      ...users,
+    final changedUsers = {
       for (final user in userList)
         if (user != null) user.id: user,
-    };
-    _usersController.safeAdd(newUsers);
+    }..removeWhere((id, user) => users[id] == user);
+
+    if (changedUsers.isEmpty) return;
+    _usersController.safeAdd({...users, ...changedUsers});
   }
 
   /// Update the passed [user] in state

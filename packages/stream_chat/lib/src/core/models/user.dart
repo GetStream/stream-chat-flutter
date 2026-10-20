@@ -199,6 +199,7 @@ class User extends Equatable implements ComparableFieldProvider {
   List<Object?> get props => [
     id,
     role,
+    createdAt,
     lastActive,
     online,
     extraData,
