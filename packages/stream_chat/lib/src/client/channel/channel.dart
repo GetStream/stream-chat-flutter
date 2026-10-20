@@ -1113,16 +1113,16 @@ class Channel {
     state?.deleteMessage(deleted, hardDelete: true);
 
     // No `message.deleted` arrives for such a message, so one is emitted here.
-    _client.handleEvent(
-      Event(
-        type: EventType.messageDeleted,
-        cid: cid,
-        channelId: id,
-        channelType: type,
-        message: deleted,
-        hardDelete: true,
-      ),
+    final messageDeletedEvent = Event(
+      type: EventType.messageDeleted,
+      cid: cid,
+      channelId: id,
+      channelType: type,
+      message: deleted,
+      hardDelete: true,
     );
+
+    _client.handleEvent(messageDeletedEvent);
 
     // Removing the attachments upload completer to stop the `sendMessage`
     // waiting for attachments to complete.
