@@ -1590,39 +1590,46 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     required Message message,
     required Channel channel,
   }) async {
+    Result<Message> result;
     try {
       // A message is considered fresh if it doesn't have a remoteCreatedAt.
       final isFreshMessage = message.remoteCreatedAt == null;
 
       // Note: edited messages which are bounced back with an error needs to be
       // sent as new messages as the backend doesn't store them.
-      final resp = await switch (!isFreshMessage && !message.isBouncedWithError) {
-        true => channel.updateMessage(message),
-        false => channel.sendMessage(message),
+      result = switch (!isFreshMessage && !message.isBouncedWithError) {
+        true => (await channel.updateMessage(message)).map((it) => it.message),
+        false => (await channel.sendMessage(message)).map((it) => it.message),
       };
-
-      widget.props.onMessageSent?.call(resp.message);
     } catch (error, stackTrace) {
-      if (widget.props.onError case final onError?) {
-        return onError(error, stackTrace);
-      }
+      // The channel throws when it is not initialized.
+      result = Result.failure(error, stackTrace);
+    }
 
-      // The send button drops this future, so rethrowing would escape as an
-      // unhandled async error. Forward it through Flutter's error plumbing
-      // instead, so host apps (Crashlytics / Sentry / console) still see it.
-      // A refusal from the server or a failed connection is marked silent: the
-      // message is left in a failed state and retried on reconnect, so both are
-      // expected in release. A `StreamClientException` is not — that one means
-      // the SDK itself failed, and it has to stay loud.
-      FlutterError.reportError(
-        FlutterErrorDetails(
-          exception: error,
-          stack: stackTrace,
-          library: 'stream_chat_flutter',
-          context: ErrorDescription('while sending a message'),
-          silent: error is StreamApiException || error is StreamNetworkException,
-        ),
-      );
+    switch (result) {
+      case Success(data: final sent):
+        widget.props.onMessageSent?.call(sent);
+      case Failure(:final error, :final stackTrace):
+        if (widget.props.onError case final onError?) {
+          return onError(error, stackTrace);
+        }
+
+        // The send button drops this future, so rethrowing would escape as an
+        // unhandled async error. Forward it through Flutter's error plumbing
+        // instead, so host apps (Crashlytics / Sentry / console) still see it.
+        // A refusal from the server or a failed connection is marked silent:
+        // the message is left in a failed state and retried on reconnect, so
+        // both are expected in release. A `StreamClientException` is not — that
+        // one means the SDK itself failed, and it has to stay loud.
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: error,
+            stack: stackTrace,
+            library: 'stream_chat_flutter',
+            context: ErrorDescription('while sending a message'),
+            silent: error is StreamApiException || error is StreamNetworkException,
+          ),
+        );
     }
   }
 

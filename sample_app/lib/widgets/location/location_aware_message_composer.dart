@@ -82,7 +82,7 @@ bool _onCustomAttachmentPickerResult(
   return false; // Notify that the result was not handled.
 }
 
-Future<SendMessageResponse> _onShareLocationPicked(
+Future<Result<SendMessageResponse>> _onShareLocationPicked(
   Channel channel,
   LocationPickerResult result,
 ) async {

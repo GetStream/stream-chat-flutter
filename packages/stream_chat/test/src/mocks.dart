@@ -8,7 +8,6 @@ import 'package:stream_chat/src/client/moderation_client.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/api/channel_api.dart';
 import 'package:stream_chat/src/core/api/general_api.dart';
-import 'package:stream_chat/src/core/api/message_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
 import 'package:stream_chat/src/core/api/push_preferences_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
@@ -43,7 +42,6 @@ class MockTokenManager extends Mock implements TokenManager {}
 
 class MockUserApi extends Mock implements UserApi {}
 
-class MockMessageApi extends Mock implements MessageApi {}
 
 class MockChannelApi extends Mock implements ChannelApi {}
 

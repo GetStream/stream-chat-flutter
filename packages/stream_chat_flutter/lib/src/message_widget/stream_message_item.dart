@@ -1025,7 +1025,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
   }
 
   // Shows a confirmation dialog before deleting the message.
-  Future<EmptyResponse?> _maybeDeleteMessage(
+  Future<Result<DeleteMessageResponse>?> _maybeDeleteMessage(
     BuildContext context,
     Message message,
     Channel channel,

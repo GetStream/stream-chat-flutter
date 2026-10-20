@@ -18,7 +18,9 @@ void main() {
     when(
       () => client.sendMessage(any(), _channelId, _channelType),
     ).thenAnswer(
-      (invocation) async => SendMessageResponse()..message = invocation.positionalArguments.first as Message,
+      (invocation) async => Result.success(
+        SendMessageResponse(duration: '0.01ms', message: invocation.positionalArguments.first as Message),
+      ),
     );
 
     final result = await channel.sendPoll(_poll, messageText: 'Vote please');
@@ -47,7 +49,7 @@ void main() {
     final channel = _initializedChannel(client);
     final error = apiException(code: StreamErrorCode.notAllowed, statusCode: 403);
     when(() => client.createPoll(_poll)).thenAnswer((_) async => Result.success(_pollResponse(_poll)));
-    when(() => client.sendMessage(any(), _channelId, _channelType)).thenThrow(error);
+    when(() => client.sendMessage(any(), _channelId, _channelType)).thenAnswer((_) async => Result.failure(error));
 
     final result = await channel.sendPoll(_poll);
 

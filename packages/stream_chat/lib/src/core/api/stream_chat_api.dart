@@ -4,7 +4,6 @@ import 'package:stream_core/stream_core.dart' show ConnectionIdGetter, SystemEnv
 import '../http/stream_http_client.dart';
 import 'channel_api.dart';
 import 'general_api.dart';
-import 'message_api.dart';
 import 'moderation_api.dart';
 import 'push_preferences_api.dart';
 import 'user_api.dart';
@@ -38,10 +37,6 @@ class StreamChatApi {
   /// Api dedicated to users operations
   UserApi get user => _user ??= UserApi(_client);
   UserApi? _user;
-
-  /// Api dedicated to message operations
-  MessageApi get message => _message ??= MessageApi(_client);
-  MessageApi? _message;
 
   /// Api dedicated to channel operations
   ChannelApi get channel => _channel ??= ChannelApi(_client);

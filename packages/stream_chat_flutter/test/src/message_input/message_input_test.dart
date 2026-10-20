@@ -210,10 +210,12 @@ void main() {
       'should send message when Enter key is pressed on desktop',
       (tester) async {
         when(() => channel.sendMessage(any())).thenAnswer(
-          (i) async => SendMessageResponse()
-            ..message = Message(
-              text: 'Hello world',
+          (i) async => Result.success(
+            SendMessageResponse(
+              duration: '0.01ms',
+              message: Message(text: 'Hello world'),
             ),
+          ),
         );
 
         await tester.pumpWidget(
@@ -251,10 +253,12 @@ void main() {
       'should not send message when Shift+Enter key is pressed on desktop',
       (tester) async {
         when(() => channel.sendMessage(any())).thenAnswer(
-          (_) async => SendMessageResponse()
-            ..message = Message(
-              text: 'Hello world',
+          (_) async => Result.success(
+            SendMessageResponse(
+              duration: '0.01ms',
+              message: Message(text: 'Hello world'),
             ),
+          ),
         );
 
         await tester.pumpWidget(
@@ -434,7 +438,12 @@ void main() {
       'calls updateMessage when controller is in edit state',
       (tester) async {
         when(() => channel.updateMessage(any())).thenAnswer(
-          (_) async => UpdateMessageResponse()..message = Message(id: 'msg-1', text: 'Edited text'),
+          (_) async => Result.success(
+            UpdateMessageResponse(
+              duration: '0.01ms',
+              message: Message(id: 'msg-1', text: 'Edited text'),
+            ),
+          ),
         );
 
         final existingMessage = Message(
@@ -482,7 +491,12 @@ void main() {
       'calls sendMessage when controller is in normal (non-edit) state',
       (tester) async {
         when(() => channel.sendMessage(any())).thenAnswer(
-          (_) async => SendMessageResponse()..message = Message(text: 'Hello'),
+          (_) async => Result.success(
+            SendMessageResponse(
+              duration: '0.01ms',
+              message: Message(text: 'Hello'),
+            ),
+          ),
         );
 
         final messageInputController = StreamMessageComposerController(
@@ -521,6 +535,66 @@ void main() {
         verifyNever(() => channel.updateMessage(any()));
       },
     );
+
+    testWidgets('DefaultStreamMessageComposer passes the sent message to onMessageSent', (tester) async {
+      final sent = Message(id: 'msg-1', text: 'Hello');
+      when(
+        () => channel.sendMessage(any()),
+      ).thenAnswer((_) async => Result.success(SendMessageResponse(duration: '0.01ms', message: sent)));
+
+      final messages = <Message>[];
+      final key = await _pumpComposer(tester, client, channel, onMessageSent: messages.add);
+
+      await key.currentState!.sendMessage();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(messages, [sent]);
+    });
+
+    testWidgets('DefaultStreamMessageComposer reports a failed send to onError', (tester) async {
+      const error = StreamApiException(message: 'refused', statusCode: 403);
+      when(() => channel.sendMessage(any())).thenAnswer((_) async => const Result.failure(error));
+
+      final errors = <Object>[];
+      final key = await _pumpComposer(tester, client, channel, onError: (error, _) => errors.add(error));
+
+      await key.currentState!.sendMessage();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(errors, [error]);
+    });
+
+    testWidgets('DefaultStreamMessageComposer does not call onMessageSent when the send fails', (tester) async {
+      const error = StreamApiException(message: 'refused', statusCode: 403);
+      when(() => channel.sendMessage(any())).thenAnswer((_) async => const Result.failure(error));
+
+      final messages = <Message>[];
+      final key = await _pumpComposer(
+        tester,
+        client,
+        channel,
+        onMessageSent: messages.add,
+        onError: (_, __) {},
+      );
+
+      await key.currentState!.sendMessage();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(messages, isEmpty);
+    });
+
+    testWidgets('DefaultStreamMessageComposer reports a send the channel throws on to onError', (tester) async {
+      final error = StateError('not initialized');
+      when(() => channel.sendMessage(any())).thenThrow(error);
+
+      final errors = <Object>[];
+      final key = await _pumpComposer(tester, client, channel, onError: (error, _) => errors.add(error));
+
+      await key.currentState!.sendMessage();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(errors, [same(error)]);
+    });
   });
 
   group('DmCheckboxListTile integration in MessageInput', () {
@@ -1451,4 +1525,41 @@ Future<void> simulateKeyDownEvent(
   if (isShiftPressed) {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
   }
+}
+
+// Pumps a composer holding the text "Hello" over [channel], and returns its key.
+Future<GlobalKey<DefaultStreamMessageComposerState>> _pumpComposer(
+  WidgetTester tester,
+  StreamChatClient client,
+  Channel channel, {
+  void Function(Message)? onMessageSent,
+  ErrorListener? onError,
+}) async {
+  final controller = StreamMessageComposerController(message: Message(text: 'Hello'));
+  addTearDown(controller.dispose);
+
+  final key = GlobalKey<DefaultStreamMessageComposerState>();
+  await tester.pumpWidget(
+    MaterialApp(
+      home: StreamChat(
+        client: client,
+        child: StreamChannel(
+          channel: channel,
+          child: Scaffold(
+            bottomNavigationBar: DefaultStreamMessageComposer(
+              key: key,
+              props: MessageComposerProps(
+                messageComposerController: controller,
+                onMessageSent: onMessageSent,
+                onError: onError,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+
+  return key;
 }

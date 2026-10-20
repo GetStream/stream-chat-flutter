@@ -21,10 +21,11 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [07](07-threads-and-drafts.md) | Threads & Drafts | 0 | 7 | ☑ |
 | [08](08-moderation-and-blocklists.md) | Moderation & Blocklists | 0 | 34 | ☑ |
 | [09](09-users.md) | Users | 3 | 3 | ☐ |
-| [10](10-messages.md) | Messages & Search | 5 | 4 | ☐ |
+| [10](10-messages.md) | Messages & Search | 0 | 0 | ☐ |
 | [10a](10a-reactions.md) | Reactions — split out of 10 | 0 | 4 | ☑ |
 | [10b](10b-message-reads.md) | Message Reads & Search — split out of 10 | 0 | 5 | ☑ |
-| [11](11-channels-and-members.md) | Channels, Members & Sync | 13 | 15 | ☐ |
+| [10c](10c-message-writes.md) | Message Writes — split out of 10 | 0 | 5 | ☑ |
+| [11](11-channels-and-members.md) | Channels, Members & Sync | 13 | 14 | ☐ |
 | [12](12-uploads-cdn.md) | Uploads (CDN) | 8 | 8 | ☑ |
 | [13](13-push-preferences.md) | Push Preferences | 1 | 1 | ☐ |
 | [14](14-banned-users.md) | Banned Users — split out of 08 | 1 | 1 | ☐ |
@@ -218,7 +219,10 @@ surfaces before it reaches `Message` and `ChannelState`:
 - **10a** is sending, removing and listing a message's reactions, split out of 10 first because it answers
   only models the earlier groups already map.
 - **10b** is fetching, translating and searching messages, split out of 10 after 10a because it only reads:
-  it answers models the earlier groups already map, and leaves the writes and their offline paths to 10.
+  it answers models the earlier groups already map, and leaves the writes and their offline paths to 10c.
+- **10c** is sending, updating and deleting messages and running their actions, split out of 10 last because
+  it carries the optimistic state and the offline retry queue. Group 10 keeps no endpoint: what is left is
+  making `Message`, `Attachment`, `Draft` and `DraftMessage` plain and replacing the storage codec.
 - **15** is the partial channel and member updates, split out of 11 so `channels_mapper.dart` lands on calls that
   read nothing into `ChannelState`. It landed first; the full update waits in 11 for group 10's message mappers.
   As the first group to map `ChannelModel` and `Member`, it promoted their parked fields and renamed their custom

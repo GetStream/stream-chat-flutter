@@ -532,9 +532,13 @@ void main() {
             // Mock the network send to return the message unchanged so the
             // optimistic insert + sent-state update both land on the same
             // `createdAt`. The bug fires later, on the WS echo.
-            final sendMessageResponse = SendMessageResponse()
-              ..message = localMessage.copyWith(state: MessageState.sent);
-            when(() => client.sendMessage(any(), channelId, channelType)).thenAnswer((_) async => sendMessageResponse);
+            final sendMessageResponse = SendMessageResponse(
+              duration: '0.01ms',
+              message: localMessage.copyWith(state: MessageState.sent),
+            );
+            when(
+              () => client.sendMessage(any(), channelId, channelType),
+            ).thenAnswer((_) async => Result.success(sendMessageResponse));
 
             await channel.sendMessage(localMessage);
 
@@ -576,9 +580,13 @@ void main() {
               createdAt: localCreatedAt,
             );
 
-            final sendMessageResponse = SendMessageResponse()
-              ..message = localMessage.copyWith(state: MessageState.sent);
-            when(() => client.sendMessage(any(), channelId, channelType)).thenAnswer((_) async => sendMessageResponse);
+            final sendMessageResponse = SendMessageResponse(
+              duration: '0.01ms',
+              message: localMessage.copyWith(state: MessageState.sent),
+            );
+            when(
+              () => client.sendMessage(any(), channelId, channelType),
+            ).thenAnswer((_) async => Result.success(sendMessageResponse));
 
             await channel.sendMessage(localMessage);
 

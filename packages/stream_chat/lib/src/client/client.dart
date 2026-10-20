@@ -51,6 +51,7 @@ import '../core/models/draft_message.dart';
 import '../core/models/location.dart';
 import '../core/models/member.dart';
 import '../core/models/message.dart';
+import '../core/models/message_delete_scope.dart';
 import '../core/models/message_reminder.dart';
 import '../core/models/own_user.dart';
 import '../core/models/poll.dart';
@@ -69,6 +70,7 @@ import '../core/models/response/create_draft_response.dart';
 import '../core/models/response/create_reminder_response.dart';
 import '../core/models/response/create_user_group_response.dart';
 import '../core/models/response/delete_channel_response.dart';
+import '../core/models/response/delete_message_response.dart';
 import '../core/models/response/delete_reaction_response.dart';
 import '../core/models/response/delete_reminder_response.dart';
 import '../core/models/response/get_blocked_users_response.dart';
@@ -99,12 +101,16 @@ import '../core/models/response/remove_user_group_members_response.dart';
 import '../core/models/response/search_messages_response.dart';
 import '../core/models/response/search_roles_response.dart';
 import '../core/models/response/search_user_groups_response.dart';
+import '../core/models/response/send_action_response.dart';
+import '../core/models/response/send_message_response.dart';
 import '../core/models/response/send_reaction_response.dart';
 import '../core/models/response/show_channel_response.dart';
 import '../core/models/response/translate_message_response.dart';
 import '../core/models/response/unblock_users_response.dart';
 import '../core/models/response/update_channel_partial_response.dart';
 import '../core/models/response/update_member_partial_response.dart';
+import '../core/models/response/update_message_partial_response.dart';
+import '../core/models/response/update_message_response.dart';
 import '../core/models/response/update_reminder_response.dart';
 import '../core/models/response/update_thread_partial_response.dart';
 import '../core/models/response/update_user_group_response.dart';
@@ -1641,18 +1647,13 @@ class StreamChatClient {
     channelType,
   );
 
-  /// Send action for a specific message of this channel
-  Future<SendActionResponse> sendAction(
-    String channelId,
-    String channelType,
-    String messageId,
-    Map<String, Object?> formData,
-  ) => _chatApi.message.sendAction(
-    channelId,
-    channelType,
-    messageId,
-    formData,
-  );
+  /// Runs the action [formData] describes on the message with the id
+  /// [messageId], such as sending, shuffling or canceling a Giphy command.
+  ///
+  /// The response's message is the message as the action left it, or null when
+  /// the action removed it.
+  Future<Result<SendActionResponse>> sendAction(String messageId, Map<String, String> formData) =>
+      _messagesRepository.sendAction(messageId, formData);
 
   /// Marks a channel as read for the current user.
   ///
@@ -1996,14 +1997,22 @@ class StreamChatClient {
   Future<Result<DeleteReactionResponse>> deleteReaction(String messageId, String reactionType) =>
       _messagesRepository.deleteReaction(messageId, reactionType);
 
-  /// Sends the message to the given channel
-  Future<SendMessageResponse> sendMessage(
+  /// Sends [message] to the channel with the id [channelId] and type
+  /// [channelType].
+  ///
+  /// Mentions the text no longer contains are left out, and a message with a
+  /// [Message.command] runs that command on its text.
+  ///
+  /// If [skipPush] is true, no push notification is sent.
+  ///
+  /// If [skipEnrichUrl] is true, the links in the text get no preview.
+  Future<Result<SendMessageResponse>> sendMessage(
     Message message,
     String channelId,
     String channelType, {
     bool skipPush = false,
     bool skipEnrichUrl = false,
-  }) => _chatApi.message.sendMessage(
+  }) => _messagesRepository.sendMessage(
     channelId,
     channelType,
     message,
@@ -2066,56 +2075,59 @@ class StreamChatClient {
     prev: prev,
   );
 
-  /// Update the given message
-  Future<UpdateMessageResponse> updateMessage(
+  /// Replaces the message that has [message]'s id with [message].
+  ///
+  /// Mentions the text no longer contains are left out.
+  ///
+  /// Fields left empty on [message], its custom data included, are cleared on
+  /// the stored message.
+  ///
+  /// If [skipPush] is true, no push notification is sent.
+  ///
+  /// If [skipEnrichUrl] is true, the links in the text get no preview.
+  Future<Result<UpdateMessageResponse>> updateMessage(
     Message message, {
     bool skipPush = false,
     bool skipEnrichUrl = false,
-  }) => _chatApi.message.updateMessage(
+  }) => _messagesRepository.updateMessage(
     message,
     skipPush: skipPush,
     skipEnrichUrl: skipEnrichUrl,
   );
 
-  /// Partially update the given [messageId]
-  /// Use [set] to define values to be set
-  /// Use [unset] to define values to be unset
-  Future<UpdateMessageResponse> partialUpdateMessage(
+  /// Sets the fields in [set] and removes the fields named in [unset] on the
+  /// message with the id [messageId], leaving every other field as it is.
+  ///
+  /// A key in [set] that is not a message field is stored in the message's
+  /// custom data.
+  ///
+  /// If [skipEnrichUrl] is true, the links in the text get no preview.
+  Future<Result<UpdateMessagePartialResponse>> updateMessagePartial(
     String messageId, {
     Map<String, Object?>? set,
     List<String>? unset,
     bool skipEnrichUrl = false,
-  }) => _chatApi.message.partialUpdateMessage(
+  }) => _messagesRepository.updateMessagePartial(
     messageId,
     set: set,
     unset: unset,
     skipEnrichUrl: skipEnrichUrl,
   );
 
-  /// Deletes the given message.
+  /// Deletes the message with the id [messageId] for everyone.
   ///
-  /// If [hard] is true, the message is permanently deleted.
-  Future<EmptyResponse> deleteMessage(
+  /// If [hard] is true, the message is permanently deleted and cannot be
+  /// recovered.
+  Future<Result<DeleteMessageResponse>> deleteMessage(
     String messageId, {
     bool hard = false,
-  }) {
-    return _chatApi.message.deleteMessage(
-      messageId,
-      hard: hard,
-    );
-  }
+  }) => _messagesRepository.deleteMessage(messageId, MessageDeleteScope.deleteForAll(hard: hard));
 
-  /// Deletes the given message for the current user only.
+  /// Deletes the message with the id [messageId] for the current user only.
   ///
-  /// Note: This does not delete the message for other users in the channel.
-  Future<EmptyResponse> deleteMessageForMe(
-    String messageId,
-  ) {
-    return _chatApi.message.deleteMessage(
-      messageId,
-      deleteForMe: true,
-    );
-  }
+  /// The other members of the channel still see the message.
+  Future<Result<DeleteMessageResponse>> deleteMessageForMe(String messageId) =>
+      _messagesRepository.deleteMessage(messageId, const MessageDeleteScope.deleteForMe());
 
   /// Fetches the message with the id [messageId].
   ///
@@ -2259,10 +2271,12 @@ class StreamChatClient {
     set: const {'cooldown': 0},
   );
 
-  /// Pins provided message
-  /// [timeoutOrExpirationDate] can either be a [DateTime] or a value in seconds
-  /// to be added to [DateTime.now]
-  Future<UpdateMessageResponse> pinMessage(
+  /// Pins the message with the id [messageId].
+  ///
+  /// The pin lasts until the message is unpinned. A [timeoutOrExpirationDate]
+  /// ends it: either the [DateTime] it expires at, or a number of seconds from
+  /// now.
+  Future<Result<UpdateMessagePartialResponse>> pinMessage(
     String messageId, {
     Object? /*num|DateTime*/ timeoutOrExpirationDate,
   }) {
@@ -2281,7 +2295,7 @@ class StreamChatClient {
         Duration(seconds: timeoutOrExpirationDate.toInt()),
       );
     }
-    return partialUpdateMessage(
+    return updateMessagePartial(
       messageId,
       set: {
         'pinned': true,
@@ -2290,8 +2304,8 @@ class StreamChatClient {
     );
   }
 
-  /// Unpins provided message
-  Future<UpdateMessageResponse> unpinMessage(String messageId) => partialUpdateMessage(
+  /// Unpins the message with the id [messageId].
+  Future<Result<UpdateMessagePartialResponse>> unpinMessage(String messageId) => updateMessagePartial(
     messageId,
     set: {
       'pinned': false,

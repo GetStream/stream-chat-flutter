@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
@@ -65,6 +66,8 @@ class RetryQueue {
 
   bool _isProcessing = false;
 
+  final _random = math.Random();
+
   Future<void> _processQueue() async {
     if (_isProcessing) return;
     _isProcessing = true;
@@ -76,22 +79,10 @@ class RetryQueue {
       final message = _messageQueue.first;
       final retryPolicy = _retryPolicy;
       try {
-        await backOff(
-          () => channel.retryMessage(message),
-          delayFactor: retryPolicy.delayFactor,
-          randomizationFactor: retryPolicy.randomizationFactor,
-          maxDelay: retryPolicy.maxDelay,
-          maxAttempts: retryPolicy.maxRetryAttempts,
-          retryIf: (error, attempt) {
-            if (error is! StreamChatException) return false;
-            return retryPolicy.shouldRetry(client, attempt, error);
-          },
-        );
+        final result = await _retry(message, retryPolicy);
+        if (result case Failure(:final error)) _restoreFailedMessage(message, error);
       } catch (error) {
-        logger.e(() => 'Error while retrying message ${message.id}', error: error);
-        // If we are unable to successfully retry the message, update the state
-        // with the failed state.
-        channel.state?.updateMessage(message);
+        _restoreFailedMessage(message, error);
       } finally {
         // remove the message from the queue after it's handled.
         _messageQueue.removeMessage(message);
@@ -99,6 +90,38 @@ class RetryQueue {
     }
 
     _isProcessing = false;
+  }
+
+  // Logs that [message] could not be retried, and puts it back in the channel
+  // state in its failed state.
+  void _restoreFailedMessage(Message message, Object error) {
+    logger.e(() => 'Error while retrying message ${message.id}', error: error);
+    channel.state?.updateMessage(message);
+  }
+
+  // Retries [message] until it succeeds, fails in a way [policy] does not
+  // retry, or runs out of attempts, waiting longer before each new attempt.
+  Future<Result<Object>> _retry(Message message, RetryPolicy policy) async {
+    for (var attempt = 1; ; attempt += 1) {
+      final result = await channel.retryMessage(message);
+      if (result is! Failure) return result;
+
+      final error = result.error;
+      if (attempt >= policy.maxRetryAttempts) return result;
+      if (error is! StreamChatException) return result;
+      if (!await policy.shouldRetry(client, attempt, error)) return result;
+
+      await Future<void>.delayed(_backOffDelay(policy, attempt));
+    }
+  }
+
+  // The wait after the failed [attempt]: the policy's delay factor, doubled
+  // for every attempt up to 2^31 so it cannot overflow, randomized by its
+  // randomization factor and capped at its maximum delay.
+  Duration _backOffDelay(RetryPolicy policy, int attempt) {
+    final randomization = policy.randomizationFactor * (_random.nextDouble() * 2 - 1) + 1;
+    final delay = policy.delayFactor * math.pow(2, math.min(attempt, 31)) * randomization;
+    return delay < policy.maxDelay ? delay : policy.maxDelay;
   }
 
   /// Whether our [_messageQueue] has messages or not.
