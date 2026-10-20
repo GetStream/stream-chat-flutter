@@ -557,6 +557,38 @@ mechanism, and the row. If the fix slipped, re-date the row instead — do not s
 
 Keep this in the Track B commit: it is only correct because the floor moved.
 
+### Move `sample_app` to built-in Kotlin once the floor reaches 3.47
+
+Check `sample_app/android/gradle.properties`. If it still says `android.builtInKotlin=false` and the new floor is
+**3.47 or later**, migrate the sample app now. Built-in Kotlin needs Flutter 3.47, so it could not move while
+`.fvmrc` pinned 3.44 — this is the release that unblocks it (FLU-813). Do it as its own commit in the Track B PR;
+it touches only the sample app.
+
+- `settings.gradle`: AGP and KGP to the verified matrix of the **new floor** (3.47: AGP 9.1.0, KGP 2.4.0). Keep
+  `id "org.jetbrains.kotlin.android" version "<KGP>" apply false` — built-in Kotlin compiles with the KGP on the
+  classpath, and the one AGP 9.1.0 bundles (2.2.10) is below Flutter 3.47's 2.2.20 floor, so removing the line
+  fails the build with "Your project's Kotlin version (2.2.10) is lower than Flutter's minimum".
+- `gradle/wrapper/gradle-wrapper.properties`: Gradle to the matrix (3.47: 9.3.1).
+- `gradle.properties`: `android.builtInKotlin=true`. Leave `android.newDsl=false`: on 3.47.5, flipping it fails
+  before any of our code runs, because the Flutter Gradle plugin itself cannot apply (`ApplicationExtensionImpl …
+  cannot be cast to … AbstractAppExtension`). Re-test it on each new floor rather than assuming.
+- `app/build.gradle`: drop `id "kotlin-android"`, and replace the `kotlinOptions { jvmTarget = … }` block inside
+  `android {}` with a top-level block:
+
+  ```groovy
+  kotlin {
+      compilerOptions {
+          jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+      }
+  }
+  ```
+
+Verify with `(cd sample_app && flutter build apk --release)` on the new floor. Flutter may still warn that some
+plugins "apply KGP" — check each plugin's `android/build.gradle*` before acting on it: a plugin that reads
+`android.builtInKotlin` and skips KGP when it is `true` is fine, and the warning is a false positive (seen on
+3.47.5 for `app_badge_plus`, `desktop_drop` and `photo_manager`). Only a plugin that applies `kotlin-android`
+unconditionally will break, and that needs a dependency floor raise in `melos.yaml`, not a sample-app change.
+
 ## Step 7 — Changelog and PR
 
 Track A changes that are user-visible (a widget swapped, a deprecation migrated) get a CHANGELOG bullet in the
