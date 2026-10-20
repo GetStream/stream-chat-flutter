@@ -4,8 +4,11 @@ import '../channel_model.dart';
 
 part 'delete_channel_response.freezed.dart';
 
-/// The result of deleting a channel, returned by
-/// [StreamChatClient.deleteChannel] and [Channel.delete].
+/// The result of deleting a channel.
+///
+/// See also:
+///
+///  * [StreamChatClient.deleteChannel] and [Channel.delete], which return it.
 @freezed
 class DeleteChannelResponse with _$DeleteChannelResponse {
   /// Creates a new [DeleteChannelResponse].

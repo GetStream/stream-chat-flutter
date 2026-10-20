@@ -86,10 +86,10 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Polls**](#polls) | Poll calls return a `Result`; eight responses become `PollResponse`, `PollOptionResponse` and `PollVoteResponse`; queries take `limit`/`next`/`prev`; `VotingVisibility` is an extension type; `extraData` is `custom` |
 | [**File Upload**](#file-upload) | Uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
 | [**Partial Updates**](#partial-updates) | Channel and member partial updates — `updatePartial`, `updateName`, `updateImage`, slow mode, pin and archive — return a `Result` instead of throwing; their responses take the API's names, `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse`, and `partialMemberUpdate` becomes `updateMemberPartial` |
-| [**Channel Lifecycle**](#channel-lifecycle) | Hiding, showing and deleting a channel return a `Result` instead of throwing; stopping watching still throws |
+| [**Channel Lifecycle**](#channel-lifecycle) | Hiding, showing and deleting a channel return a `Result` instead of throwing |
 | [**Read Receipts**](#read-receipts) | Marking read, unread and delivered return a `Result` instead of throwing; `ChannelDeliveryReporter`'s callback returns a `Result` |
 | [**Unread Counts**](#unread-counts) | `getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing; the response and its `UnreadCounts*` models lose their JSON codecs and compare by value |
-| [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`, and holds the custom data verbatim; the channel and member flags it carried are fields |
+| [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`; the channel and member flags it carried are fields |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -906,8 +906,8 @@ final shown = model.copyWith(hidden: false);
 **`ChannelModel.toJson` and `Member.toJson` no longer write these fields**, where v10 wrote them at the root with the
 rest of the custom data. Read them from the model rather than from its JSON.
 
-**`custom` is the custom data exactly as the API returns it.** An entry named like one of the model's own fields
-stays in `custom` and leaves the field alone; `toJson` leaves it out, so it cannot overwrite the field.
+**An entry of `custom` named like one of the model's own fields stays in `custom`** and leaves the field alone;
+`toJson` leaves it out, so it cannot overwrite the field.
 
 **Filter and sort on a flag through its declared field,** such as `ChannelFilterField.hidden`, rather than
 `.custom('hidden')`, which reads `custom` locally and finds nothing there.

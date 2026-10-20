@@ -31,6 +31,30 @@ void main() {
       expect(member.toJson()['color'], 'red');
     });
 
+    test('Member.toJson leaves out the fields only fromJson reads', () {
+      final member = Member(
+        userId: 'user',
+        notificationsMuted: true,
+        status: 'member',
+        banFromFutureChannels: true,
+        futureChannelBanExpires: DateTime.utc(2021),
+        deletedAt: DateTime.utc(2020),
+      );
+
+      expect(
+        member.toJson().keys,
+        isNot(
+          anyOf(
+            contains('notifications_muted'),
+            contains('status'),
+            contains('ban_from_future_channels'),
+            contains('future_channel_ban_expires'),
+            contains('deleted_at'),
+          ),
+        ),
+      );
+    });
+
     test('Member.copyWith replaces the fields it is given', () {
       final member = Member(
         userId: 'user',

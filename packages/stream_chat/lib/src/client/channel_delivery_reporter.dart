@@ -10,8 +10,9 @@ import 'channel/channel.dart';
 /// Signature for a callback that sends delivery receipts for multiple channels.
 ///
 /// Each [MessageDelivery] represents an acknowledgment that the current user
-/// has received a message. The returned [Result] reports whether the receipts
-/// were sent.
+/// has received a message.
+///
+/// The returned [Result] reports whether the receipts were sent.
 typedef MarkChannelsDelivered =
     Future<Result<void>> Function(
       Iterable<MessageDelivery> deliveries,
