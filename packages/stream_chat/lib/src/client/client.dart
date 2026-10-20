@@ -1451,11 +1451,15 @@ class StreamChatClient {
     pagination: pagination,
   );
 
-  /// Hides a channel from the current user's channel list until a new message
-  /// is added to it.
+  /// Hides a channel for the current user.
   ///
-  /// If [clearHistory] is true, the channel's messages are also cleared for the
-  /// current user.
+  /// It stays out of the current user's channel list until a new message is
+  /// added to it.
+  ///
+  /// Hiding also marks it read for the current user.
+  ///
+  /// If [clearHistory] is true, the channel's messages are also cleared
+  /// for the current user.
   Future<Result<HideChannelResponse>> hideChannel(
     String channelId,
     String channelType, {

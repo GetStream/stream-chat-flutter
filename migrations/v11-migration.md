@@ -84,7 +84,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Polls**](#polls) | Poll calls return a `Result`; eight responses become `PollResponse`, `PollOptionResponse` and `PollVoteResponse`; queries take `limit`/`next`/`prev`; `VotingVisibility` is an extension type; `extraData` is `custom` |
 | [**File Upload**](#file-upload) | Uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
 | [**Partial Updates**](#partial-updates) | Channel and member partial updates — `updatePartial`, `updateName`, `updateImage`, slow mode, pin and archive — return a `Result` instead of throwing; their responses take the API's names, `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse`, and `partialMemberUpdate` becomes `updateMemberPartial` |
-| [**Channel Lifecycle**](#channel-lifecycle) | Hiding, showing and deleting a channel return a `Result` instead of throwing; stopping watching still throws |
+| [**Channel Lifecycle**](#channel-lifecycle) | Hiding, showing and deleting a channel return a `Result` instead of throwing |
 | [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`, and holds the custom data verbatim; the channel and member flags it carried are fields |
 | _(filled in per feature as PRs land)_ | |
 
