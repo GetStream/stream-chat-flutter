@@ -1263,23 +1263,29 @@ class StreamChatClient {
     message: message,
   );
 
-  /// Partially updates a channel: sets the fields in [set] and removes the
-  /// fields named in [unset], leaving every other field as it is.
+  /// Partially updates a channel.
+  ///
+  /// Sets the fields in [set] and removes the custom fields named in [unset],
+  /// leaving every other field as it is.
   ///
   /// At least one of [set] and [unset] is required.
   ///
-  /// Use [updateChannel] for a full update.
+  /// To replace every field, consider [updateChannel].
   Future<Result<UpdateChannelPartialResponse>> updateChannelPartial(
     String channelId,
     String channelType, {
     Map<String, Object?>? set,
     List<String>? unset,
-  }) => _channelsRepository.updateChannelPartial(
-    channelId,
-    channelType,
-    set: set,
-    unset: unset,
-  );
+  }) {
+    assert(set != null || unset != null, 'Set or unset must be provided.');
+
+    return _channelsRepository.updateChannelPartial(
+      channelId,
+      channelType,
+      set: set,
+      unset: unset,
+    );
+  }
 
   /// Registers a device to receive push notifications.
   ///
@@ -1460,11 +1466,15 @@ class StreamChatClient {
     pagination: pagination,
   );
 
-  /// Hides a channel from the current user's channel list until a new message
-  /// is added to it.
+  /// Hides a channel for the current user.
   ///
-  /// If [clearHistory] is true, the channel's messages are also cleared for the
-  /// current user.
+  /// It stays out of the current user's channel list until a new message is
+  /// added to it.
+  ///
+  /// Hiding also marks it read for the current user.
+  ///
+  /// If [clearHistory] is true, the channel's messages are also cleared
+  /// for the current user.
   Future<Result<HideChannelResponse>> hideChannel(
     String channelId,
     String channelType, {
@@ -1614,6 +1624,9 @@ class StreamChatClient {
 
   /// Marks the message with [messageId] and every later one in a channel as
   /// unread for the current user.
+  ///
+  /// The message must be one of the channel's latest 100 messages; an older one
+  /// returns a failure.
   Future<Result<void>> markChannelUnread(
     String channelId,
     String channelType,
@@ -1626,8 +1639,6 @@ class StreamChatClient {
 
   /// Marks the messages of a channel created after [timestamp] as unread for
   /// the current user.
-  ///
-  /// A message created at exactly [timestamp] stays read.
   Future<Result<void>> markChannelUnreadByTimestamp(
     String channelId,
     String channelType,
@@ -1895,7 +1906,7 @@ class StreamChatClient {
   ///
   /// Useful when receiving messages through push notifications where only
   /// channel IDs and message IDs are available, without full channel/message
-  /// objects. For in-app message delivery, use [channelDeliveryReporter]
+  /// objects. For in-app message delivery, consider [channelDeliveryReporter],
   /// which handles this automatically.
   ///
   /// ```dart
@@ -1907,7 +1918,7 @@ class StreamChatClient {
   /// await client.markChannelsDelivered([receipt]);
   /// ```
   ///
-  /// Accepts up to 100 channels per call.
+  /// Takes up to 100 receipts per call; more return a failure.
   Future<Result<MarkDeliveredResponse>> markChannelsDelivered(
     Iterable<MessageDelivery> deliveries,
   ) => _channelsRepository.markChannelsDelivered(deliveries);
@@ -2164,8 +2175,11 @@ class StreamChatClient {
     );
   }
 
-  /// Enables slow mode on a channel, so members wait [cooldown] seconds between
-  /// messages.
+  /// Enables slow mode on a channel.
+  ///
+  /// Members then wait [cooldown] seconds between messages.
+  ///
+  /// The [cooldown] must be between 1 and 100.
   Future<Result<UpdateChannelPartialResponse>> enableSlowMode(
     String channelId,
     String channelType,
@@ -2327,9 +2341,10 @@ class StreamChatClient {
     );
   }
 
-  /// Partially updates the current user's membership of a channel: sets the
-  /// fields in [set] and removes the fields named in [unset], leaving every
-  /// other field as it is.
+  /// Partially updates the current user's membership of a channel.
+  ///
+  /// Sets the fields in [set] and removes the fields named in [unset], leaving
+  /// every other field as it is.
   ///
   /// At least one of [set] and [unset] is required.
   Future<Result<UpdateMemberPartialResponse>> updateMemberPartial({
