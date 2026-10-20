@@ -1110,9 +1110,8 @@ class Channel {
       localDeletedAt: DateTime.now(),
       state: MessageState.hardDeleted,
     );
-    state?.deleteMessage(deleted, hardDelete: true);
-
-    // No `message.deleted` arrives for such a message, so one is emitted here.
+    // No `message.deleted` arrives for such a message, so one is emitted here,
+    // which also removes it from the state.
     final messageDeletedEvent = Event(
       type: EventType.messageDeleted,
       cid: cid,

@@ -6,10 +6,8 @@ import '../../fakes.dart';
 import '../../mocks.dart';
 
 void main() {
-  setUpAll(() => registerFallbackValue(FakeEvent()));
-
   test('deleting a bounced message emits a hard-deleted message.deleted', () async {
-    final (:client, :channel) = _channel();
+    final channel = _channel();
     final bounced = Message(
       id: 'bounced',
       text: 'bad word',
@@ -17,39 +15,50 @@ void main() {
       moderation: const Moderation(action: ModerationAction.bounce, originalText: 'bad word'),
     );
     channel.state!.addNewMessage(bounced);
+    final deleted = channel.on(EventType.messageDeleted).first;
 
     await channel.deleteMessage(bounced);
 
     expect(
-      _emittedEvent(client),
+      await deleted,
       isA<Event>()
-          .having((it) => it.type, 'type', EventType.messageDeleted)
-          .having((it) => it.cid, 'cid', channel.cid)
           .having((it) => it.hardDelete, 'hardDelete', isTrue)
           .having((it) => it.message?.id, 'message id', 'bounced'),
     );
   });
 
   test('deleting an unsent message emits message.deleted', () async {
-    final (:client, :channel) = _channel();
+    final channel = _channel();
+    final unsent = Message(id: 'unsent', text: 'Hello', state: MessageState.sending);
+    channel.state!.addNewMessage(unsent);
+    final deleted = channel.on(EventType.messageDeleted).first;
+
+    await channel.deleteMessage(unsent);
+
+    expect(await deleted, isA<Event>().having((it) => it.message?.id, 'message id', 'unsent'));
+  });
+
+  test('deleting an unsent message removes it from the state', () async {
+    final channel = _channel();
     final unsent = Message(id: 'unsent', text: 'Hello', state: MessageState.sending);
     channel.state!.addNewMessage(unsent);
 
     await channel.deleteMessage(unsent);
+    await pumpEventQueue();
 
-    expect(
-      _emittedEvent(client),
-      isA<Event>()
-          .having((it) => it.type, 'type', EventType.messageDeleted)
-          .having((it) => it.message?.id, 'message id', 'unsent'),
-    );
+    expect(channel.state!.messages, isEmpty);
   });
 }
 
-// A channel created from a state, on a client that records the events it is
-// given.
-({MockStreamChatClient client, Channel channel}) _channel() {
-  final client = MockStreamChatClient();
+// A client that delivers the events the SDK raises, as the real one does.
+class _DeliveringClient extends MockStreamChatClient {
+  @override
+  void handleEvent(Event event) => addEvent(event);
+}
+
+// A channel created from a state, on a [_DeliveringClient].
+Channel _channel() {
+  final client = _DeliveringClient();
   when(() => client.state).thenReturn(FakeClientState());
   when(() => client.channelDeliveryReporter.submitForDelivery(any())).thenAnswer((_) async {});
   when(() => client.retryPolicy).thenReturn(
@@ -62,9 +71,5 @@ void main() {
     ),
   );
   addTearDown(channel.dispose);
-  return (client: client, channel: channel);
-}
-
-Event _emittedEvent(MockStreamChatClient client) {
-  return verify(() => client.handleEvent(captureAny())).captured.single as Event;
+  return channel;
 }
