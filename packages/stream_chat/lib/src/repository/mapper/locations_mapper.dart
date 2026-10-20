@@ -25,8 +25,10 @@ extension SharedLocationResponseDataMapper on api.SharedLocationResponseData {
 
 /// Maps a [Location] to the generated [api.SharedLocation] a message sends.
 extension LocationRequestMapper on Location {
-  /// Converts this location into the shape a message sends: its coordinates,
-  /// the device sharing it and, for a live location, when it ends.
+  /// Converts this location into the shape a message sends.
+  ///
+  /// It carries the coordinates, the device sharing them and, for a live
+  /// location, when the sharing ends.
   api.SharedLocation toRequest() => api.SharedLocation(
     latitude: latitude,
     longitude: longitude,

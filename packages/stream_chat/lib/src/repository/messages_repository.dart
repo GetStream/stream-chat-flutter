@@ -295,8 +295,10 @@ class MessagesRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Deletes the message with the id [messageId] within [scope]: for the
-  /// current user only, or for everyone, softly or permanently.
+  /// Deletes the message with the id [messageId] within [scope].
+  ///
+  /// The [scope] deletes it for the current user only, or for everyone, softly
+  /// or permanently.
   Future<Result<DeleteMessageResponse>> deleteMessage(String messageId, MessageDeleteScope scope) async {
     final result = await _api.deleteMessage(
       id: messageId,

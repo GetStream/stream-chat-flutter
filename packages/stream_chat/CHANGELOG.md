@@ -182,6 +182,7 @@
 - `SendActionResponse` is immutable, compares by value, and its `duration` is non-nullable.
 - The message send, update, pin and delete calls on `StreamChatClient` and `Channel` return a `Result` instead of throwing, as do `Channel.sendStaticLocation`, `startLiveLocationSharing` and `retryMessage`.
 - `partialUpdateMessage` is renamed `updateMessagePartial` and returns a `Result<UpdateMessagePartialResponse>` instead of an `UpdateMessageResponse`, as `pinMessage` and `unpinMessage` do.
+- `UpdateMessagePartialResponse.message` is nullable, where `UpdateMessageResponse.message` was not.
 - `deleteMessage` and `deleteMessageForMe` return a `DeleteMessageResponse` instead of an `EmptyResponse`, also when `Channel` deletes a message that was never sent.
 - `SendMessageResponse` and `UpdateMessageResponse` are immutable, compare by value, and their `duration` is non-nullable; `MessageResponse` is removed.
 - `MessageApi` and `StreamChatApi.message` are removed.

@@ -940,11 +940,8 @@ class Channel {
     return result;
   }
 
-  /// Partially updates the [message] in this channel.
-  ///
-  /// Use [set] to define values to be set.
-  ///
-  /// Use [unset] to define values to be unset.
+  /// Sets the fields in [set] and removes the fields named in [unset] on
+  /// [message].
   Future<Result<UpdateMessagePartialResponse>> updateMessagePartial(
     Message message, {
     Map<String, Object?>? set,
@@ -1208,7 +1205,7 @@ class Channel {
     );
   }
 
-  /// Pins provided message
+  /// Pins [message].
   Future<Result<UpdateMessagePartialResponse>> pinMessage(
     Message message, {
     Object? /*num|DateTime*/ timeoutOrExpirationDate,
@@ -1237,7 +1234,7 @@ class Channel {
     );
   }
 
-  /// Unpins provided message.
+  /// Unpins [message].
   Future<Result<UpdateMessagePartialResponse>> unpinMessage(Message message) => updateMessagePartial(
     message,
     set: {
@@ -1873,7 +1870,7 @@ class Channel {
     return _client.removeChannelMembers(id!, type, memberIds, message: message);
   }
 
-  /// Send action for a specific message of this channel.
+  /// Runs the action [formData] describes on [message].
   Future<Result<SendActionResponse>> sendAction(Message message, Map<String, String> formData) async {
     _checkInitialized();
     final result = await _client.sendAction(message.id, formData);

@@ -1527,7 +1527,8 @@ Future<void> simulateKeyDownEvent(
   }
 }
 
-// Pumps a composer holding the text "Hello" over [channel], and returns its key.
+// Pumps a composer holding the text "Hello" over [channel], and returns its
+// key.
 Future<GlobalKey<DefaultStreamMessageComposerState>> _pumpComposer(
   WidgetTester tester,
   StreamChatClient client,

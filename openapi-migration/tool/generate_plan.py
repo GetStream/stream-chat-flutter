@@ -947,12 +947,13 @@ GROUPS = [
             - **`MessageDeleteScope` stays** (approved), closing group 10's `DeleteType` risk: the endpoint takes a
               `hard` and a `delete_for_me` flag and has no pruning delete, so `DeleteType` would let a caller ask
               for a delete it cannot perform, and would change the persisted `deletingFailed` state for nothing.
-            - **The request matches v10's `Message.toJson`** (`MessageRequestMapper`, with `LocationRequestMapper`
-              and the existing `AttachmentRequestMapper`): custom data verbatim in `custom`, a command written into
-              the text (`/giphy null` when there is no text, as v10), mentions pruned by the same
-              `removeMentionsIfNotIncluded` (moved to the internal `message_mentions.dart` so both share it), only
-              a regular or system type, and no `mml` or `pinnedAt`: v10 never sent them, and the backend stamps the
-              pin time itself.
+            - **The request carries what v10's `Message.toJson` sent** (`MessageRequestMapper`, with
+              `LocationRequestMapper` and the existing `AttachmentRequestMapper`): custom data verbatim in `custom`, a
+              command written into the text (`/giphy null` when there is no text, as v10), mentions pruned by the same
+              `removeMentionsIfNotIncluded` (moved to the internal `message_mentions.dart` so both share it), and only
+              a regular or system type. `mml` and `pinnedAt` go out as null: v10 never sent them, and the backend
+              stamps the pin time itself. One difference: a custom entry named like a message field, which v10
+              dropped, is now sent inside `custom`.
             - **`StreamMessageComposer` maps the send or update `Result` to the sent message** and no longer wraps
               the integrator's `onMessageSent` in its `try`, so an exception from it propagates.
             - **The plain models and the storage codec replacement are planned separately,** not here.

@@ -2260,7 +2260,7 @@ class StreamChatClient {
   /// Pins the message with the id [messageId].
   ///
   /// The pin expires at [timeoutOrExpirationDate], a [DateTime] or a number of
-  /// seconds from now; without it, it lasts until the message is unpinned.
+  /// seconds from now. Without it, the pin lasts until the message is unpinned.
   Future<Result<UpdateMessagePartialResponse>> pinMessage(
     String messageId, {
     Object? /*num|DateTime*/ timeoutOrExpirationDate,

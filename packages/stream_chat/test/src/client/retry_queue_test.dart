@@ -176,8 +176,8 @@ RetryQueue _retryQueue(Channel channel) {
   return queue;
 }
 
-// A message whose send failed. It carries the local creation time a real
-// send stamps, which the queue orders its messages by.
+// A message whose send failed. It carries the local creation time a real send
+// stamps, which the queue orders its messages by.
 Message _failedMessage() => Message(
   id: 'failed-message-id',
   text: 'Sample message test',

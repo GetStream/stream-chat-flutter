@@ -750,7 +750,8 @@ void main() {
         await channel.sendMessage(message);
         await pumpEventQueue();
 
-        // A retry would send it again, so a single call means it was not queued.
+        // A retry would send it again, so a single call means it was not
+        // queued.
         verify(
           () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
         ).called(1);

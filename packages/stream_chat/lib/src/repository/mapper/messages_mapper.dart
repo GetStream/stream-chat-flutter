@@ -310,14 +310,17 @@ extension SearchResultMessageMapper on api.SearchResultMessage {
   );
 }
 
-/// Maps a [Message] to the generated [api.MessageRequest] that sends or
-/// updates it.
+/// Maps a [Message] to the generated [api.MessageRequest] that sends or updates
+/// it.
 extension MessageRequestMapper on Message {
   /// Converts this message into the request that sends or updates it.
   ///
-  /// The mentions the text no longer contains are left out, and a [command]
-  /// is written into the text as `/command text`, or `/command null` when the
-  /// message has no text. Only a regular or system [type] is sent.
+  /// The mentions the text no longer contains are left out.
+  ///
+  /// A [command] is written into the text as `/command text`. A message without
+  /// text sends `/command null`.
+  ///
+  /// Only a regular or system [type] is sent.
   api.MessageRequest toRequest() {
     final message = removeMentionsIfNotIncluded();
 

@@ -4,11 +4,12 @@ import '../models/message.dart';
 extension MessageMentions on Message {
   /// Returns this message without the mentions its text no longer contains.
   ///
-  /// A mentioned user stays while the text mentions their id or name, and a
-  /// role or group while it mentions its name, each as a standalone `@` word;
-  /// `@channel` and `@here` are cleared once the text drops them. Mentions
-  /// that were never set stay as they are, and a message without text is
-  /// returned unchanged.
+  /// A mentioned user stays while the text mentions their id or name as a
+  /// standalone `@` word, and a role or group while it mentions its name.
+  /// `@channel` and `@here` are cleared once the text drops them.
+  ///
+  /// Mentions that were never set stay as they are, and a message without text
+  /// is returned unchanged.
   Message removeMentionsIfNotIncluded() {
     final text = this.text;
     if (text == null) return this;

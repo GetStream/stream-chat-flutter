@@ -9,7 +9,7 @@ import 'message_fixtures.dart';
 void main() {
   setUpAll(() => registerFallbackValue(const api.UpdateMessagePartialRequest()));
 
-  test('StreamChatClient.pinMessage sends a pin without expiry and returns a success', () async {
+  test('StreamChatClient.pinMessage sends a pin without expiry and returns the pinned message', () async {
     const request = api.UpdateMessagePartialRequest(set: {'pinned': true, 'pin_expires': null}, skipEnrichUrl: false);
     final defaultApi = MockDefaultApi();
     when(() => defaultApi.updateMessagePartial(id: 'message-id', updateMessagePartialRequest: request)).thenAnswer(
@@ -19,7 +19,7 @@ void main() {
 
     final res = await client.pinMessage('message-id');
 
-    expect(res.isSuccess, isTrue);
+    expect(res.getOrNull()?.message?.id, generatedMessage.id);
     verify(() => defaultApi.updateMessagePartial(id: 'message-id', updateMessagePartialRequest: request)).called(1);
     verifyNoMoreInteractions(defaultApi);
   });
@@ -53,7 +53,7 @@ void main() {
     );
   });
 
-  test('StreamChatClient.unpinMessage sends an unpin and returns a success', () async {
+  test('StreamChatClient.unpinMessage sends an unpin and returns the unpinned message', () async {
     const request = api.UpdateMessagePartialRequest(set: {'pinned': false}, skipEnrichUrl: false);
     final defaultApi = MockDefaultApi();
     when(() => defaultApi.updateMessagePartial(id: 'message-id', updateMessagePartialRequest: request)).thenAnswer(
@@ -63,7 +63,7 @@ void main() {
 
     final res = await client.unpinMessage('message-id');
 
-    expect(res.isSuccess, isTrue);
+    expect(res.getOrNull()?.message?.id, generatedMessage.id);
     verify(() => defaultApi.updateMessagePartial(id: 'message-id', updateMessagePartialRequest: request)).called(1);
     verifyNoMoreInteractions(defaultApi);
   });

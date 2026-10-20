@@ -42,7 +42,6 @@ class MockTokenManager extends Mock implements TokenManager {}
 
 class MockUserApi extends Mock implements UserApi {}
 
-
 class MockChannelApi extends Mock implements ChannelApi {}
 
 class MockPushPreferencesApi extends Mock implements PushPreferencesApi {}

@@ -19,7 +19,7 @@ void main() {
       ],
       mentionedUsers: [User(id: 'mo')],
       mentionedChannel: true,
-      mentionedHere: true,
+      mentionedHere: false,
       mentionedRoles: const ['admins'],
       mentionedGroups: [
         UserGroup(id: 'group-id', name: 'Group', createdAt: DateTime.utc(2025), updatedAt: DateTime.utc(2025)),
@@ -27,7 +27,7 @@ void main() {
       parentId: 'parent-id',
       quotedMessageId: 'quoted-id',
       showInChannel: true,
-      silent: true,
+      silent: false,
       pinned: true,
       pinExpires: DateTime.utc(2026, 1, 1),
       pollId: 'poll-id',
@@ -55,13 +55,13 @@ void main() {
         ],
         mentionedUsers: const ['mo'],
         mentionedChannel: true,
-        mentionedHere: true,
+        mentionedHere: false,
         mentionedRoles: const ['admins'],
         mentionedGroupIds: const ['group-id'],
         parentId: 'parent-id',
         quotedMessageId: 'quoted-id',
         showInChannel: true,
-        silent: true,
+        silent: false,
         pinned: true,
         pinExpires: DateTime.utc(2026, 1, 1),
         pollId: 'poll-id',
@@ -75,7 +75,7 @@ void main() {
         custom: const {'priority': 'high'},
       ),
       skipPush: true,
-      skipEnrichUrl: true,
+      skipEnrichUrl: false,
     );
 
     final defaultApi = MockDefaultApi();
@@ -84,7 +84,7 @@ void main() {
     );
     final client = _client(defaultApi);
 
-    final res = await client.sendMessage(message, 'general', 'messaging', skipPush: true, skipEnrichUrl: true);
+    final res = await client.sendMessage(message, 'general', 'messaging', skipPush: true, skipEnrichUrl: false);
 
     final response = res.getOrNull()!;
     final sent = response.message;

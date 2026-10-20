@@ -26,7 +26,7 @@ void main() {
     verifyNoMoreInteractions(defaultApi);
   });
 
-  test('StreamChatClient.deleteMessage sends a hard delete and returns a success', () async {
+  test('StreamChatClient.deleteMessage sends a hard delete and returns the deleted message', () async {
     final defaultApi = MockDefaultApi();
     when(() => defaultApi.deleteMessage(id: 'message-id', hard: true)).thenAnswer(
       (_) async => Result.success(api.DeleteMessageResponse(duration: '0.01ms', message: generatedMessage)),
@@ -35,24 +35,27 @@ void main() {
 
     final res = await client.deleteMessage('message-id', hard: true);
 
-    expect(res.isSuccess, isTrue);
+    expect(res.getOrNull()?.message.id, generatedMessage.id);
     verify(() => defaultApi.deleteMessage(id: 'message-id', hard: true)).called(1);
     verifyNoMoreInteractions(defaultApi);
   });
 
-  test('StreamChatClient.deleteMessageForMe sends a delete for the current user and returns a success', () async {
-    final defaultApi = MockDefaultApi();
-    when(() => defaultApi.deleteMessage(id: 'message-id', deleteForMe: true)).thenAnswer(
-      (_) async => Result.success(api.DeleteMessageResponse(duration: '0.01ms', message: generatedMessage)),
-    );
-    final client = _client(defaultApi);
+  test(
+    'StreamChatClient.deleteMessageForMe sends a delete for the current user and returns the deleted message',
+    () async {
+      final defaultApi = MockDefaultApi();
+      when(() => defaultApi.deleteMessage(id: 'message-id', deleteForMe: true)).thenAnswer(
+        (_) async => Result.success(api.DeleteMessageResponse(duration: '0.01ms', message: generatedMessage)),
+      );
+      final client = _client(defaultApi);
 
-    final res = await client.deleteMessageForMe('message-id');
+      final res = await client.deleteMessageForMe('message-id');
 
-    expect(res.isSuccess, isTrue);
-    verify(() => defaultApi.deleteMessage(id: 'message-id', deleteForMe: true)).called(1);
-    verifyNoMoreInteractions(defaultApi);
-  });
+      expect(res.getOrNull()?.message.id, generatedMessage.id);
+      verify(() => defaultApi.deleteMessage(id: 'message-id', deleteForMe: true)).called(1);
+      verifyNoMoreInteractions(defaultApi);
+    },
+  );
 
   test('StreamChatClient.deleteMessage returns the failure without throwing', () async {
     const error = StreamClientException(message: 'boom');

@@ -10,7 +10,7 @@ void main() {
   setUpAll(() => registerFallbackValue(const api.UpdateMessageRequest(message: api.MessageRequest())));
 
   test('StreamChatClient.updateMessage sends the message and returns the updated message', () async {
-    final message = Message(id: 'message-id', text: 'Edited', custom: const {'priority': 'low'});
+    final message = Message(id: 'message-id', text: 'Edited', pinned: true, custom: const {'priority': 'low'});
     const request = api.UpdateMessageRequest(
       message: api.MessageRequest(
         id: 'message-id',
@@ -19,11 +19,11 @@ void main() {
         attachments: [],
         mentionedUsers: [],
         silent: false,
-        pinned: false,
+        pinned: true,
         custom: {'priority': 'low'},
       ),
       skipPush: true,
-      skipEnrichUrl: true,
+      skipEnrichUrl: false,
     );
 
     final defaultApi = MockDefaultApi();
@@ -32,7 +32,7 @@ void main() {
     );
     final client = _client(defaultApi);
 
-    final res = await client.updateMessage(message, skipPush: true, skipEnrichUrl: true);
+    final res = await client.updateMessage(message, skipPush: true, skipEnrichUrl: false);
 
     final response = res.getOrNull()!;
     final updated = response.message;
