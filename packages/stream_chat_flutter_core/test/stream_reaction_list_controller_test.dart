@@ -51,7 +51,6 @@ void main() {
   final client = MockClient();
 
   setUpAll(() {
-    registerFallbackValue(const PaginationParams());
     registerFallbackValue(ReactionFilter.equal(ReactionFilterField.type, 'like'));
   });
 
@@ -89,18 +88,17 @@ void main() {
   group('Initial loading', () {
     test('successfully loads reactions from API', () async {
       final reactions = generateReactions();
-      final response = QueryReactionsResponse()
-        ..reactions = reactions
-        ..next = null;
+      final response = QueryReactionsResponse(duration: '0.01ms', reactions: reactions);
 
       when(
         () => client.queryReactions(
           any(),
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
-      ).thenAnswer((_) async => response);
+      ).thenAnswer((_) async => Result.success(response));
 
       final controller = StreamReactionListController(
         client: client,
@@ -115,7 +113,8 @@ void main() {
           messageId,
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).called(1);
 
@@ -126,18 +125,17 @@ void main() {
     test('sets next page key when API returns next cursor', () async {
       const nextCursor = 'next_cursor_token';
       final reactions = generateReactions();
-      final response = QueryReactionsResponse()
-        ..reactions = reactions
-        ..next = nextCursor;
+      final response = QueryReactionsResponse(duration: '0.01ms', reactions: reactions, next: nextCursor);
 
       when(
         () => client.queryReactions(
           any(),
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
-      ).thenAnswer((_) async => response);
+      ).thenAnswer((_) async => Result.success(response));
 
       final controller = StreamReactionListController(
         client: client,
@@ -152,18 +150,17 @@ void main() {
 
     test('sets null next page key when API returns empty next cursor', () async {
       final reactions = generateReactions();
-      final response = QueryReactionsResponse()
-        ..reactions = reactions
-        ..next = '';
+      final response = QueryReactionsResponse(duration: '0.01ms', reactions: reactions, next: '');
 
       when(
         () => client.queryReactions(
           any(),
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
-      ).thenAnswer((_) async => response);
+      ).thenAnswer((_) async => Result.success(response));
 
       final controller = StreamReactionListController(
         client: client,
@@ -184,9 +181,10 @@ void main() {
           any(),
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
-      ).thenThrow(chatError);
+      ).thenAnswer((_) async => const Result.failure(chatError));
 
       final controller = StreamReactionListController(
         client: client,
@@ -208,9 +206,10 @@ void main() {
           any(),
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
-      ).thenThrow(exception);
+      ).thenAnswer((_) async => Result.failure(exception));
 
       final controller = StreamReactionListController(
         client: client,
@@ -241,18 +240,17 @@ void main() {
         startId: 999,
       );
 
-      final response = QueryReactionsResponse()
-        ..reactions = additionalReactions
-        ..next = null;
+      final response = QueryReactionsResponse(duration: '0.01ms', reactions: additionalReactions);
 
       when(
         () => client.queryReactions(
           any(),
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
-      ).thenAnswer((_) async => response);
+      ).thenAnswer((_) async => Result.success(response));
 
       final controller = StreamReactionListController.fromValue(
         PagedValue<String?, Reaction>(
@@ -275,25 +273,26 @@ void main() {
       expect(controller.value.asSuccess.nextPageKey, isNull);
     });
 
-    test('loadMore passes next cursor to API', () async {
+    test('loadMore passes the page limit and next cursor to API', () async {
       const nextKey = 'cursor_page_2';
       final existingReactions = generateReactions();
 
-      final response = QueryReactionsResponse()
-        ..reactions = []
-        ..next = null;
+      const response = QueryReactionsResponse(duration: '0.01ms', reactions: []);
 
-      PaginationParams? capturedPagination;
+      int? capturedLimit;
+      String? capturedNext;
       when(
         () => client.queryReactions(
           any(),
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer((invocation) async {
-        capturedPagination = invocation.namedArguments[const Symbol('pagination')] as PaginationParams?;
-        return response;
+        capturedLimit = invocation.namedArguments[const Symbol('limit')] as int?;
+        capturedNext = invocation.namedArguments[const Symbol('next')] as String?;
+        return const Result.success(response);
       });
 
       final controller = StreamReactionListController.fromValue(
@@ -308,7 +307,8 @@ void main() {
       await controller.loadMore(nextKey);
       await pumpEventQueue();
 
-      expect(capturedPagination?.next, equals(nextKey));
+      expect(capturedLimit, equals(controller.limit));
+      expect(capturedNext, equals(nextKey));
     });
 
     test('loadMore preserves existing items on a Stream failure', () async {
@@ -321,9 +321,10 @@ void main() {
           any(),
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
-      ).thenThrow(chatError);
+      ).thenAnswer((_) async => const Result.failure(chatError));
 
       final controller = StreamReactionListController.fromValue(
         PagedValue<String?, Reaction>(
@@ -352,9 +353,10 @@ void main() {
           any(),
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
-      ).thenThrow(exception);
+      ).thenAnswer((_) async => Result.failure(exception));
 
       final controller = StreamReactionListController.fromValue(
         PagedValue<String?, Reaction>(
@@ -446,12 +448,11 @@ void main() {
           any(),
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer(
-        (_) async => QueryReactionsResponse()
-          ..reactions = oldestFirst
-          ..next = null,
+        (_) async => Result.success(QueryReactionsResponse(duration: '0.01ms', reactions: oldestFirst)),
       );
 
       final controller = StreamReactionListController(
@@ -478,16 +479,15 @@ void main() {
           any(),
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer((invocation) async {
         apiCalls.add({
           'filter': invocation.namedArguments[const Symbol('filter')],
           'sort': invocation.namedArguments[const Symbol('sort')],
         });
-        return QueryReactionsResponse()
-          ..reactions = reactions
-          ..next = null;
+        return Result.success(QueryReactionsResponse(duration: '0.01ms', reactions: reactions));
       });
 
       final controller = StreamReactionListController(
@@ -529,16 +529,15 @@ void main() {
           any(),
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer((invocation) async {
         apiCalls.add({
           'filter': invocation.namedArguments[const Symbol('filter')],
           'sort': invocation.namedArguments[const Symbol('sort')],
         });
-        return QueryReactionsResponse()
-          ..reactions = reactions
-          ..next = null;
+        return Result.success(QueryReactionsResponse(duration: '0.01ms', reactions: reactions));
       });
 
       final controller = StreamReactionListController(
@@ -573,18 +572,17 @@ void main() {
       );
       final newer = generateReaction(userId: 'user_2', createdAt: now);
 
-      final response = QueryReactionsResponse()
-        ..reactions = [older, newer]
-        ..next = null;
+      final response = QueryReactionsResponse(duration: '0.01ms', reactions: [older, newer]);
 
       when(
         () => client.queryReactions(
           any(),
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
-      ).thenAnswer((_) async => response);
+      ).thenAnswer((_) async => Result.success(response));
 
       final controller = StreamReactionListController(
         client: client,
@@ -603,6 +601,15 @@ void main() {
 
   group('Disposal', () {
     test('dispose completes without errors', () {
+      when(
+        () => client.queryReactions(
+          any(),
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
+        ),
+      ).thenAnswer((_) async => const Result.success(QueryReactionsResponse(duration: '0.01ms', reactions: [])));
       final controller = StreamReactionListController(
         client: client,
         messageId: messageId,

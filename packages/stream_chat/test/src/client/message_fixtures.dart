@@ -30,7 +30,7 @@ final generatedMessage = api.MessageResponse(
   imageLabels: const {
     'cat.png': ['cat'],
   },
-  latestReactions: [_generatedReaction],
+  latestReactions: [generatedReaction],
   member: const api.ChannelMemberPartialResponse(channelRole: 'channel_moderator', notificationsMuted: true),
   mentionedChannel: true,
   mentionedChannelMembers: const {
@@ -178,7 +178,7 @@ Message expectedMessageLike(Message actual) => Message(
       lastReactionAt: DateTime.utc(2026, 1, 6),
     ),
   },
-  latestReactions: [_expectedReaction],
+  latestReactions: [expectedReaction],
   ownReactions: [_expectedOwnReaction],
   parentId: 'parent-id',
   quotedMessage: _expectedQuotedMessage(actual.quotedMessage!.attachments.single.id),
@@ -357,7 +357,9 @@ Attachment _expectedImageAttachment(String id) => Attachment(
   uploadState: const UploadState.success(),
 );
 
-final _generatedReaction = api.ReactionResponse(
+/// A generated reaction with every field set, its emoji code in the custom
+/// data.
+final generatedReaction = api.ReactionResponse(
   createdAt: DateTime.utc(2026, 1, 5),
   custom: const {'emoji_code': '❤️', 'mood': 'happy'},
   messageId: 'message-id',
@@ -368,7 +370,8 @@ final _generatedReaction = api.ReactionResponse(
   userId: 'reactor-id',
 );
 
-final _expectedReaction = Reaction(
+/// The reaction [generatedReaction] maps to.
+final expectedReaction = Reaction(
   messageId: 'message-id',
   type: 'love',
   user: fakeUser('reactor'),

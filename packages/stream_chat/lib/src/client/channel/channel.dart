@@ -1644,10 +1644,15 @@ class Channel {
     return _client.deleteReminder(messageId);
   }
 
-  /// Send a reaction to this channel.
+  /// Sends [reaction] to [message] in this channel.
   ///
-  /// Set [enforceUnique] to true to remove the existing user reaction.
-  Future<SendReactionResponse> sendReaction(
+  /// If [enforceUnique] is true, it replaces the current user's other reactions
+  /// on the message.
+  ///
+  /// If [skipPush] is true, no push notification is sent.
+  ///
+  /// Throws a [StateError] if this channel is not initialized.
+  Future<Result<SendReactionResponse>> sendReaction(
     Message message,
     Reaction reaction, {
     bool skipPush = false,
@@ -1669,26 +1674,26 @@ class Channel {
 
     state?.updateMessage(updatedMessage);
 
-    try {
-      final reactionResp = await _client.sendReaction(
-        messageId,
-        reaction,
-        skipPush: skipPush,
-        enforceUnique: enforceUnique,
-      );
-      return reactionResp;
-    } catch (_) {
-      // Reset the message if the update fails. Use replace (not merge)
-      // so the rollback wins over the optimistic local state — otherwise
-      // `Message.updateWith`'s enrichment preservation would keep the
-      // optimistic `ownReactions` for messages that previously had none.
-      state?.replaceMessage(message);
-      rethrow;
-    }
+    final result = await _client.sendReaction(
+      messageId,
+      reaction,
+      skipPush: skipPush,
+      enforceUnique: enforceUnique,
+    );
+
+    // Reset the message if the update fails. Use replace (not merge) so the
+    // rollback wins over the optimistic local state — otherwise
+    // `Message.updateWith`'s enrichment preservation would keep the optimistic
+    // `ownReactions` for messages that previously had none.
+    if (result case Failure()) state?.replaceMessage(message);
+
+    return result;
   }
 
-  /// Delete a reaction from this channel.
-  Future<EmptyResponse> deleteReaction(
+  /// Removes [reaction] from [message] in this channel.
+  ///
+  /// Throws a [StateError] if this channel is not initialized.
+  Future<Result<DeleteReactionResponse>> deleteReaction(
     Message message,
     Reaction reaction,
   ) async {
@@ -1700,18 +1705,13 @@ class Channel {
 
     state?.updateMessage(updatedMessage);
 
-    try {
-      final deleteResponse = await _client.deleteReaction(
-        message.id,
-        reaction.type,
-      );
-      return deleteResponse;
-    } catch (_) {
-      // Reset the message if the update fails. Use replace (not merge)
-      // for symmetry with `sendReaction` — see that method for context.
-      state?.replaceMessage(message);
-      rethrow;
-    }
+    final result = await _client.deleteReaction(message.id, reaction.type);
+
+    // Reset the message if the update fails. Use replace (not merge) for
+    // symmetry with `sendReaction` — see that method for context.
+    if (result case Failure()) state?.replaceMessage(message);
+
+    return result;
   }
 
   /// Sends an event to stop AI response generation, leaving the message in
@@ -2135,14 +2135,11 @@ class Channel {
     return response;
   }
 
-  /// List the reactions for a message in the channel.
-  Future<QueryReactionsResponse> getReactions(
-    String messageId, {
-    PaginationParams? pagination,
-  }) => _client.getReactions(
-    messageId,
-    pagination: pagination,
-  );
+  /// Fetches one page of the reactions on the message with the id [messageId].
+  ///
+  /// Up to [limit] reactions are returned, after skipping the first [offset].
+  Future<Result<GetReactionsResponse>> getReactions(String messageId, {int? limit, int? offset}) =>
+      _client.getReactions(messageId, limit: limit, offset: offset);
 
   /// Retrieves a list of messages by given [messageIDs].
   Future<GetMessagesByIdResponse> getMessagesById(

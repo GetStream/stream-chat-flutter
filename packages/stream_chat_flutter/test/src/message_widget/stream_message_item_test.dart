@@ -122,6 +122,15 @@ void main() {
       when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
       when(() => channel.client).thenReturn(client);
       when(() => channel.state).thenReturn(channelState);
+      when(
+        () => client.queryReactions(
+          any(),
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
+        ),
+      ).thenAnswer((_) async => const Result.success(QueryReactionsResponse(duration: '0ms', reactions: [])));
 
       final message = Message(
         id: 'test-message',

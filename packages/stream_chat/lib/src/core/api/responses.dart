@@ -10,7 +10,6 @@ import '../models/member.dart';
 import '../models/message.dart';
 import '../models/predefined_filter.dart';
 import '../models/push_preference.dart';
-import '../models/reaction.dart';
 import '../models/read.dart';
 import '../models/user.dart';
 
@@ -118,23 +117,6 @@ class QueryBannedUsersResponse extends _BaseResponse {
   static QueryBannedUsersResponse fromJson(Map<String, dynamic> json) => _$QueryBannedUsersResponseFromJson(json);
 }
 
-/// Model response for [channel.getReactions] or [channel.queryReactions] api call
-@JsonSerializable(createToJson: false)
-class QueryReactionsResponse extends _BaseResponse {
-  /// List of reactions returned by the query
-  @JsonKey(defaultValue: [])
-  @ReactionV1JsonConverter()
-  late List<Reaction> reactions;
-
-  /// The cursor for the next page of results.
-  ///
-  /// Will be `null` if there are no more results.
-  late String? next;
-
-  /// Create a new instance from a json
-  static QueryReactionsResponse fromJson(Map<String, dynamic> json) => _$QueryReactionsResponseFromJson(json);
-}
-
 /// Model response for [Channel.getReplies] api call
 @JsonSerializable(createToJson: false)
 class QueryRepliesResponse extends _BaseResponse {
@@ -144,17 +126,6 @@ class QueryRepliesResponse extends _BaseResponse {
 
   /// Create a new instance from a json
   static QueryRepliesResponse fromJson(Map<String, dynamic> json) => _$QueryRepliesResponseFromJson(json);
-}
-
-/// Model response for [Channel.sendReaction] api call
-@JsonSerializable(createToJson: false)
-class SendReactionResponse extends MessageResponse {
-  /// The reaction created by the api call
-  @ReactionV1JsonConverter()
-  late Reaction reaction;
-
-  /// Create a new instance from a json
-  static SendReactionResponse fromJson(Map<String, dynamic> json) => _$SendReactionResponseFromJson(json);
 }
 
 /// Base Model response for message based api calls.

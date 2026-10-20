@@ -99,7 +99,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Read Receipts**](#read-receipts) | Marking read, unread and delivered return a `Result` instead of throwing; `ChannelDeliveryReporter`'s callback returns a `Result` |
 | [**Unread Counts**](#unread-counts) | `getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing; the response and its `UnreadCounts*` models lose their JSON codecs and compare by value |
 | [**User Blocking**](#user-blocking) | `blockUser`, `unblockUser` and `getBlockedUsers` (was `queryBlockedUsers`) return a `Result` instead of throwing; their responses are renamed `BlockUsersResponse` and `GetBlockedUsersResponse`, `unblockUser` answers a new `UnblockUsersResponse`, and `UserBlock`'s fields are all non-nullable |
-| [**Messages**](#messages) | `Moderation`, `ReactionGroup`, `Action`, `Reaction` and `Location` no longer decode from or encode to JSON; `Action` compares by value |
+| [**Messages**](#messages) | `Moderation`, `ReactionGroup`, `Action`, `Reaction` and `Location` no longer decode from or encode to JSON; `Action` compares by value; reaction calls return a `Result`, `getReactions` answers a new `GetReactionsResponse`, and the reaction queries take `limit`/`offset` or `limit`/`next`/`prev` |
 | [**User Updates**](#user-updates) | `updateUser` and `updateUsers` return a `Result<UpdateUsersResponse>` instead of throwing; `partialUpdateUser(s)` becomes `updateUserPartial` / `updateUsersPartial` and `PartialUpdateUserRequest` becomes `UpdateUserPartialRequest`; `updateUser` no longer sends `role`, `teams` or `teamsRole`, and the returned users no longer carry their private fields in `extraData` |
 | [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`; the channel and member flags it carried are fields |
 | [**User Custom Data**](#user-custom-data) | `extraData` is `custom` on `User` and `OwnUser`; `name` is nullable and `nameOrId` falls back to the id; the user fields it carried are fields |
@@ -390,6 +390,15 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `Thread.topLevelFields` | — | `removed` | It listed the JSON keys of a model that no longer has JSON |
 | `ThreadOptions.toJson`, `ThreadOptions extends Equatable`, `ThreadOptions.props` | `ThreadOptions` (value `==`, plus `copyWith`) | `removed` | Only the client reads the options |
 | `StreamChatApi.threads` (`ThreadsApi`), `StreamChatApi.message.createDraft` / `.getDraft` / `.deleteDraft` / `.queryDrafts` | `StreamChatClient` thread and draft methods | `removed` | The endpoints moved to the generated client |
+| `StreamChatClient.sendReaction` / `Channel.sendReaction` → `Future<SendReactionResponse>` | `Future<Result<SendReactionResponse>>` | `retyped` | Returns a `Result` instead of throwing. `Channel.sendReaction` still takes the reaction back off the message when sending fails |
+| `StreamChatClient.deleteReaction` / `Channel.deleteReaction` → `Future<EmptyResponse>` | `Future<Result<DeleteReactionResponse>>` | `retyped` | A new response carrying the message and the removed reaction |
+| `getReactions(id, pagination: PaginationParams(limit: l, offset: o))` → `Future<QueryReactionsResponse>` | `getReactions(id, limit: l, offset: o)` → `Future<Result<GetReactionsResponse>>` | `retyped` | On `StreamChatClient` and `Channel`. A new response carrying the reactions. The other `PaginationParams` fields never had an effect on this call |
+| `queryReactions(id, pagination: PaginationParams(limit: l, next: n))` | `queryReactions(id, limit: l, next: n)` | `retyped` | Returns a `Result`. Pass a response's `prev` as `prev` to page backwards. The other `PaginationParams` fields never had an effect on this query |
+| `SendReactionResponse()..reaction = …`, `QueryReactionsResponse()..reactions = …` and their other setters | `SendReactionResponse(duration: …, message: …, reaction: …)` and the like | `retyped` | The responses are plain classes with a const constructor and final fields; `SendReactionResponse` no longer extends `MessageResponse` |
+| `SendReactionResponse.fromJson`, `QueryReactionsResponse.fromJson` | — | `removed` | Construct the responses directly |
+| `SendReactionResponse.duration` / `QueryReactionsResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| `SendReactionResponse` / `QueryReactionsResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two responses with the same fields are now equal |
+| `StreamChatApi.message.sendReaction` / `.deleteReaction` / `.getReactions` / `.queryReactions` | the `StreamChatClient` methods | `removed` | The endpoints moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -1610,8 +1619,47 @@ final moderation = Moderation.fromJson(json);
 const moderation = Moderation(action: ModerationAction.flag, originalText: 'original text');
 ```
 
-> **Why:** the public models stop being wire shapes, so the API payload can change without changing the type a
-> caller holds.
+**Every reaction call returns a `Result` instead of throwing,** on `StreamChatClient` and on `Channel`. Calling a
+`Channel` method on a channel that is not initialized still throws a `StateError`, as in v10. `Channel.sendReaction`
+and `deleteReaction` still show the change on the message straight away, and still undo it when the call fails.
+
+```dart
+// v10
+try {
+  await channel.sendReaction(message, Reaction(type: 'like'));
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await channel.sendReaction(message, Reaction(type: 'like'));
+if (result case Failure(:final error)) report(error);
+```
+
+**`deleteReaction` answers a `DeleteReactionResponse`** where v10 answered an `EmptyResponse`, carrying the message
+and the reaction that was removed.
+
+**`getReactions` answers a `GetReactionsResponse` and takes `limit` and `offset`,** where v10 answered a
+`QueryReactionsResponse` and took a `PaginationParams`. **`queryReactions` takes `limit`, `next` and `prev`.** The
+other fields of `PaginationParams` never had an effect on either call. A `QueryReactionsResponse` now carries a
+`prev` cursor next to `next`; pass it as `prev` to fetch the page before.
+
+```dart
+// v10
+await client.queryReactions(messageId, pagination: PaginationParams(limit: 20, next: cursor));
+
+// v11
+await client.queryReactions(messageId, limit: 20, next: cursor);
+```
+
+**The reaction responses no longer decode JSON.** Build them with their constructors —
+`QueryReactionsResponse(duration: '0ms', reactions: reactions)` where v10 wrote
+`QueryReactionsResponse()..reactions = reactions`. `SendReactionResponse` no longer extends `MessageResponse`.
+
+**`StreamChatApi.message` loses the reaction methods.** Call them on `StreamChatClient` or `Channel` instead.
+
+> **Why:** a failure is a value the caller handles where it happens, and the public models stop being wire shapes,
+> so the API payload can change without changing the type a caller holds.
 
 ---
 

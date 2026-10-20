@@ -50,24 +50,10 @@ QueryBannedUsersResponse _$QueryBannedUsersResponseFromJson(Map<String, dynamic>
   ..duration = json['duration'] as String?
   ..bans = (json['bans'] as List<dynamic>?)?.map((e) => BannedUser.fromJson(e as Map<String, dynamic>)).toList() ?? [];
 
-QueryReactionsResponse _$QueryReactionsResponseFromJson(Map<String, dynamic> json) => QueryReactionsResponse()
-  ..duration = json['duration'] as String?
-  ..reactions =
-      (json['reactions'] as List<dynamic>?)
-          ?.map((e) => const ReactionV1JsonConverter().fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      []
-  ..next = json['next'] as String?;
-
 QueryRepliesResponse _$QueryRepliesResponseFromJson(Map<String, dynamic> json) => QueryRepliesResponse()
   ..duration = json['duration'] as String?
   ..messages =
       (json['messages'] as List<dynamic>?)?.map((e) => Message.fromJson(e as Map<String, dynamic>)).toList() ?? [];
-
-SendReactionResponse _$SendReactionResponseFromJson(Map<String, dynamic> json) => SendReactionResponse()
-  ..duration = json['duration'] as String?
-  ..message = Message.fromJson(json['message'] as Map<String, dynamic>)
-  ..reaction = const ReactionV1JsonConverter().fromJson(json['reaction'] as Map<String, dynamic>);
 
 UpdateMessageResponse _$UpdateMessageResponseFromJson(Map<String, dynamic> json) => UpdateMessageResponse()
   ..duration = json['duration'] as String?
