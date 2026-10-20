@@ -19,8 +19,10 @@ class ChannelsRepository {
 
   final api.DefaultApi _api;
 
-  /// Partially updates a channel: sets the fields in [set] and removes the
-  /// fields named in [unset], leaving every other field as it is.
+  /// Partially updates a channel.
+  ///
+  /// Sets the fields in [set] and removes the custom fields named in [unset],
+  /// leaving every other field as it is.
   ///
   /// At least one of [set] and [unset] is required.
   Future<Result<UpdateChannelPartialResponse>> updateChannelPartial(
@@ -38,9 +40,10 @@ class ChannelsRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Partially updates the current user's membership of a channel: sets the
-  /// fields in [set] and removes the fields named in [unset], leaving every
-  /// other field as it is.
+  /// Partially updates the current user's membership of a channel.
+  ///
+  /// Sets the fields in [set] and removes the fields named in [unset], leaving
+  /// every other field as it is.
   ///
   /// At least one of [set] and [unset] is required.
   Future<Result<UpdateMemberPartialResponse>> updateMemberPartial(
@@ -58,11 +61,15 @@ class ChannelsRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Hides a channel from the current user's channel list until a new message
-  /// is added to it.
+  /// Hides a channel for the current user.
   ///
-  /// If [clearHistory] is true, the channel's messages are also cleared for the
-  /// current user.
+  /// It stays out of the current user's channel list until a new message is
+  /// added to it.
+  ///
+  /// Hiding also marks it read for the current user.
+  ///
+  /// If [clearHistory] is true, the channel's messages are also cleared
+  /// for the current user.
   Future<Result<HideChannelResponse>> hideChannel(
     String channelId,
     String channelType, {
