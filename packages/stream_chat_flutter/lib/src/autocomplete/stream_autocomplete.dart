@@ -615,6 +615,9 @@ class _TopBorderShape extends ShapeBorder {
 }
 
 /// A helper widget used to show the options of a [StreamAutocomplete].
+///
+/// Its options stay clear of the display cutouts and system bars at the sides
+/// of the screen, as reported by [MediaQuery]'s padding.
 class StreamAutocompleteOptions<T extends Object> extends StatelessWidget {
   /// Creates a [StreamAutocompleteOptions] widget.
   const StreamAutocompleteOptions({
@@ -669,31 +672,33 @@ class StreamAutocompleteOptions<T extends Object> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = MediaQuery.of(context).size.height;
+    final height = MediaQuery.sizeOf(context).height;
+    final content = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (headerBuilder != null) headerBuilder!(context),
+        LimitedBox(
+          maxHeight: maxHeight ?? height * 0.5,
+          child: ListView.builder(
+            shrinkWrap: true,
+            padding: EdgeInsets.zero,
+            itemCount: options.length,
+            itemBuilder: (context, index) {
+              final option = options.elementAt(index);
+              return optionBuilder(context, option);
+            },
+          ),
+        ),
+      ],
+    );
+
     return Card(
       margin: margin,
       elevation: elevation,
       color: color ?? context.streamColorScheme.backgroundElevation1,
       shape: shape,
       clipBehavior: clipBehavior,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (headerBuilder != null) headerBuilder!(context),
-          LimitedBox(
-            maxHeight: maxHeight ?? height * 0.5,
-            child: ListView.builder(
-              shrinkWrap: true,
-              padding: EdgeInsets.zero,
-              itemCount: options.length,
-              itemBuilder: (context, index) {
-                final option = options.elementAt(index);
-                return optionBuilder(context, option);
-              },
-            ),
-          ),
-        ],
-      ),
+      child: StreamSafeArea(top: false, bottom: false, child: content),
     );
   }
 }

@@ -17,9 +17,19 @@
 
 ## Upcoming
 
+✅ Added
+
+- Added `StreamMessageComposerController.validator` and `canSend`, which decide whether the message being composed can be sent, and `StreamMessageComposerController.defaultValidator`.
+- Added `StreamPollVoteListController.forOption` and `StreamPollVoteListController.forAnswers`, which list only a poll's votes for one option or only its answers.
+
+🔄 Changed
+
+- A mocked `StreamMessageComposerController` passed to the composer must now stub `canSend`.
+
 🐞 Fixed
 
 - Fixed `StreamDraftListController.deleteDraft` removing the wrong draft.
+- Fixed `StreamPollVoteListController` adding votes and comments from other polls in the same channel.
 
 ## 10.5.0
 

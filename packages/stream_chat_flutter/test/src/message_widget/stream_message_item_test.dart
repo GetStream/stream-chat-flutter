@@ -214,6 +214,14 @@ void main() {
     });
   });
 
+  test('StreamMessageItem defaults to the same maxWidth as StreamMessageItemProps', () {
+    final message = Message(text: 'Hello');
+
+    final item = StreamMessageItem(message: message);
+
+    expect(item.props.maxWidth, StreamMessageItemProps(message: message).maxWidth);
+  });
+
   // The widget tests above deliberately never see the shipped strings, so pin
   // the default table's pluralization here.
   test('DefaultTranslations pluralizes the thread reply count', () {

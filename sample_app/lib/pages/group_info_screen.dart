@@ -42,7 +42,7 @@ class GroupInfoScreen extends StatelessWidget {
       body: Builder(
         builder: (context) {
           final topInset = MediaQuery.paddingOf(context).top;
-          return IconTheme.merge(
+          final content = IconTheme.merge(
             data: const IconThemeData(size: 20),
             child: SingleChildScrollView(
               padding: .directional(
@@ -65,6 +65,8 @@ class GroupInfoScreen extends StatelessWidget {
               ),
             ),
           );
+
+          return SafeArea(top: false, bottom: false, child: content);
         },
       ),
     );

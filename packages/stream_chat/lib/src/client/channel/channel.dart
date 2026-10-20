@@ -8,6 +8,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../../stream_chat.dart';
+import '../../core/error/stream_chat_exception.dart';
 
 /// The maximum time the incoming [Event.typingStart] event is valid before a
 /// [Event.typingStop] event is emitted automatically.
@@ -624,10 +625,7 @@ class Channel {
     String messageId,
     Iterable<String> attachmentIds,
   ) {
-    var message = [
-      ...state!.messages,
-      ...state!.threads.values.expand((messages) => messages),
-    ].firstWhereOrNull((it) => it.id == messageId);
+    var message = _findMessageInLocalState(messageId);
 
     if (message == null) {
       throw const StreamClientException(message: 'Error, Message not found');
@@ -736,9 +734,16 @@ class Channel {
     });
   }
 
+  Message? _findMessageInLocalState(String messageId) {
+    final threadMessages = state!.threads.values.expand((messages) => messages);
+    return state!.messages.followedBy(threadMessages).firstWhereOrNull((it) => it.id == messageId);
+  }
+
   final _sendMessageLock = Lock();
 
   /// Send a [message] to this channel.
+  ///
+  /// Also stops the current user's typing.
   ///
   /// If [skipPush] is true the message will not send a push notification.
   ///
@@ -750,6 +755,8 @@ class Channel {
     bool skipEnrichUrl = false,
   }) async {
     _checkInitialized();
+
+    _keyStrokeHandler.cancel();
 
     // Clean up stale error messages before sending a new message.
     state?.cleanUpStaleErrorMessages();
@@ -829,6 +836,9 @@ class Channel {
 
       return response;
     } catch (e) {
+      if (e is StreamChatException && e.isMessageAlreadyExistsError) {
+        return SendMessageResponse()..message = _markMessageAsSent(message);
+      }
       final failedMessage = message.copyWith(
         // Update the message state to failed.
         state: MessageState.sendingFailed(
@@ -847,9 +857,24 @@ class Channel {
     }
   }
 
+  Message _markMessageAsSent(Message message) {
+    if (state == null) return message.copyWith(state: MessageState.sent);
+
+    final localStateMessage = _findMessageInLocalState(message.id) ?? message;
+    final sentMessage = localStateMessage.copyWith(
+      createdAt: localStateMessage.remoteCreatedAt ?? localStateMessage.localCreatedAt,
+      state: MessageState.sent,
+    );
+
+    state!.updateMessage(sentMessage);
+    return sentMessage;
+  }
+
   final _updateMessageLock = Lock();
 
   /// Updates the [message] in this channel.
+  ///
+  /// Also stops the current user's typing.
   ///
   /// Waits for a [_messageAttachmentsUploadCompleter] to complete
   /// before actually updating the message.
@@ -859,6 +884,8 @@ class Channel {
     bool skipEnrichUrl = false,
   }) async {
     _checkInitialized();
+
+    _keyStrokeHandler.cancel();
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
