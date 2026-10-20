@@ -3,5 +3,9 @@ targets:
     builders:
       freezed:
         options:
+          format: true
           map: false
           when: false
+          equal: true
+          copy_with: true
+          to_string_override: true
