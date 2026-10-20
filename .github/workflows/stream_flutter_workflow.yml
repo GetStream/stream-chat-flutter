@@ -50,6 +50,7 @@ jobs:
               - 'packages/**'
               - 'sample_app/**'
               - '.github/workflows/stream_flutter_workflow.yml'
+              - '.github/workflows/scripts/migrate-sample-app-to-agp9.sh'
 
   analyze:
     needs: gate
@@ -166,6 +167,14 @@ jobs:
             os: ubuntu-latest
             working-directory: sample_app/android
             build-command: bundle exec fastlane build_apk
+          # The committed sample app is on AGP 8; this builds it again on AGP 9
+          # with built-in Kotlin, so a plugin that only supports one of them
+          # fails here.
+          - platform: android-agp9
+            os: ubuntu-latest
+            working-directory: sample_app/android
+            build-command: bundle exec fastlane build_apk
+            setup-command: ./.github/workflows/scripts/migrate-sample-app-to-agp9.sh
           # - platform: ios
           #   os: xcode-27
           #   working-directory: sample_app/ios
@@ -179,8 +188,11 @@ jobs:
       - uses: ./.github/actions/setup-flutter
       - uses: ./.github/actions/setup-xcode
         if: matrix.platform == 'ios'
+      - name: "Set Up ${{ matrix.platform }} Project"
+        if: matrix.setup-command
+        run: ${{ matrix.setup-command }}
       - uses: ./.github/actions/cache-gradle
-        if: matrix.platform == 'android'
+        if: startsWith(matrix.platform, 'android')
       - name: "Install Tools"
         run: flutter pub global activate melos
       - name: "Bootstrap Workspace"
