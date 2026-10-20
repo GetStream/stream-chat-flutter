@@ -39,8 +39,9 @@ class User extends Equatable {
   factory User.fromJson(Map<String, dynamic> json) =>
       _$UserFromJson(Serializer.moveToExtraDataFromRoot(json, topLevelFields));
 
-  /// The JSON keys [User.fromJson] reads into named fields, or leaves out;
-  /// every other key is kept in [custom].
+  /// The JSON keys [User.fromJson] reads into named fields, or leaves out.
+  ///
+  /// Every other key is kept in [custom].
   static const topLevelFields = [
     'id',
     'name',
@@ -125,9 +126,6 @@ class User extends Equatable {
   final int? avgResponseTime;
 
   /// This user's custom data.
-  ///
-  /// It may hold a key named like one of the user's own fields; [toJson] leaves
-  /// such an entry out so it never overwrites the field.
   @JsonKey(name: 'extra_data')
   final Map<String, Object?> custom;
 
@@ -152,7 +150,7 @@ class User extends Equatable {
   /// List of users to list of userIds.
   static List<String>? toIds(List<User>? users) => users?.map((u) => u.id).toList();
 
-  /// Serialize to json.
+  /// Serializes this user to JSON.
   ///
   /// Writes the entries of [custom] at the root, leaving out any named like one
   /// of [topLevelFields].

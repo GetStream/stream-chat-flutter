@@ -95,7 +95,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**User Blocking**](#user-blocking) | `blockUser`, `unblockUser` and `getBlockedUsers` (was `queryBlockedUsers`) return a `Result` instead of throwing; their responses are renamed `BlockUsersResponse` and `GetBlockedUsersResponse`, `unblockUser` answers a new `UnblockUsersResponse`, and `UserBlock`'s fields are all non-nullable |
 | [**User Updates**](#user-updates) | `updateUser` and `updateUsers` return a `Result<UpdateUsersResponse>` instead of throwing; `partialUpdateUser(s)` becomes `updateUserPartial` / `updateUsersPartial` and `PartialUpdateUserRequest` becomes `UpdateUserPartialRequest`; `updateUser` no longer sends `role`, `teams` or `teamsRole`, and the returned users no longer carry their private fields in `extraData` |
 | [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`; the channel and member flags it carried are fields |
-| [**User Custom Data**](#user-custom-data) | `extraData` is `custom` on `User` and `OwnUser`, and holds the custom data verbatim; `name` is nullable and `nameOrId` falls back to the id; the user fields it carried are fields |
+| [**User Custom Data**](#user-custom-data) | `extraData` is `custom` on `User` and `OwnUser`; `name` is nullable and `nameOrId` falls back to the id; the user fields it carried are fields |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -1088,8 +1088,8 @@ final renamed = user.copyWith(name: 'Jane');
 devices, mutes, unread counts, push preferences and privacy settings back out of the user's `extraData`; a `User`
 no longer carries them.
 
-**`custom` is the custom data exactly as the API returns it.** An entry named like one of the user's own fields
-stays in `custom` and leaves the field alone; `toJson` leaves it out, so it cannot overwrite the field.
+**An entry of `custom` named like one of the user's own fields stays in `custom`** and leaves the field alone;
+`toJson` leaves it out, so it cannot overwrite the field.
 
 > **Why:** the API calls it `custom`, and every migrated model takes that name. A name that answered the id could
 > not tell an unnamed user from a named one, so initials and sorts read the id as a name.

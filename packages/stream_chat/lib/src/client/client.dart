@@ -1817,8 +1817,10 @@ class StreamChatClient {
   /// Creates or replaces each of [users], as [updateUser] does for one.
   Future<Result<UpdateUsersResponse>> updateUsers(List<User> users) => _usersRepository.updateUsers(users);
 
-  /// Partially updates the user with [id]: sets the fields in [set] and removes
-  /// the fields named in [unset], leaving every other field as it is.
+  /// Partially updates the user with [id].
+  ///
+  /// Sets the fields in [set] and removes the fields named in [unset], leaving
+  /// every other field as it is.
   Future<Result<UpdateUsersResponse>> updateUserPartial(
     String id, {
     Map<String, Object?>? set,
