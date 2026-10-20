@@ -1617,6 +1617,9 @@ class StreamChatClient {
 
   /// Marks the message with [messageId] and every later one in a channel as
   /// unread for the current user.
+  ///
+  /// The message must be one of the channel's latest 100 messages; an older one
+  /// returns a failure.
   Future<Result<void>> markChannelUnread(
     String channelId,
     String channelType,
@@ -1629,8 +1632,6 @@ class StreamChatClient {
 
   /// Marks the messages of a channel created after [timestamp] as unread for
   /// the current user.
-  ///
-  /// A message created at exactly [timestamp] stays read.
   Future<Result<void>> markChannelUnreadByTimestamp(
     String channelId,
     String channelType,
@@ -1910,7 +1911,7 @@ class StreamChatClient {
   ///
   /// Useful when receiving messages through push notifications where only
   /// channel IDs and message IDs are available, without full channel/message
-  /// objects. For in-app message delivery, use [channelDeliveryReporter]
+  /// objects. For in-app message delivery, consider [channelDeliveryReporter],
   /// which handles this automatically.
   ///
   /// ```dart
@@ -1922,7 +1923,7 @@ class StreamChatClient {
   /// await client.markChannelsDelivered([receipt]);
   /// ```
   ///
-  /// Accepts up to 100 channels per call.
+  /// Takes up to 100 receipts per call; more return a failure.
   Future<Result<MarkDeliveredResponse>> markChannelsDelivered(
     Iterable<MessageDelivery> deliveries,
   ) => _channelsRepository.markChannelsDelivered(deliveries);

@@ -138,6 +138,11 @@ class ChannelsRepository {
     DateTime? messageTimestamp,
     String? threadId,
   }) async {
+    assert(
+      [messageId, messageTimestamp, threadId].nonNulls.length == 1,
+      'Exactly one of messageId, messageTimestamp and threadId must be provided.',
+    );
+
     final result = await _api.markUnread(
       type: channelType,
       id: channelId,

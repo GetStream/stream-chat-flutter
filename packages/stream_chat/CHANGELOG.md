@@ -106,7 +106,7 @@
 - `MemberUpdatePayload` and `MemberUpdateType` are removed; pass `set: {'pinned': true}` or `unset: ['pinned']` (and `archived`) to `updateMemberPartial`, or call `pinChannel`, `archiveChannel` and their counterparts.
 - The calls that hide, show and delete a channel, on `StreamChatClient` and `Channel`, return a `Result` with a `HideChannelResponse`, `ShowChannelResponse` or `DeleteChannelResponse` instead of throwing.
 - `StreamChatApi.channel`'s hide, show and delete methods are removed; use the `StreamChatClient` methods instead.
-- The calls that mark channels and threads read or unread, on `StreamChatClient` and `Channel`, return a `Result` instead of throwing, with a `MarkReadResponse` when marking read and no value when marking unread.
+- The calls that mark channels and threads read or unread, on `StreamChatClient` and `Channel`, return a `Result` instead of throwing, with a `MarkReadResponse` when marking read.
 - `StreamChatClient.markChannelsDelivered` returns a `Result<MarkDeliveredResponse>` instead of throwing, and `MarkChannelsDelivered`, the callback `ChannelDeliveryReporter` takes, returns a `Future<Result<void>>`.
 - `MessageDelivery` no longer encodes to JSON, compares by value and gains `copyWith`.
 - `StreamChatApi.channel`'s read, unread and delivery methods are removed; use the `StreamChatClient` methods instead.

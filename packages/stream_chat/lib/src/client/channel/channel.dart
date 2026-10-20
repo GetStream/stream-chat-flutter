@@ -1902,13 +1902,14 @@ class Channel {
     return _client.markChannelRead(id!, type, messageId: messageId);
   }
 
-  /// Marks this channel as unread for the current user, from the message with
-  /// [messageId] onwards.
+  /// Marks this channel as unread for the current user.
   ///
-  /// All messages from the provided message onwards will be marked as unread,
-  /// **including** the message itself. Contrast with
-  /// [markUnreadByTimestamp], which is exclusive: a message created at
-  /// exactly the given timestamp stays read.
+  /// The message with [messageId] and every later one are marked as unread.
+  /// Contrast with [markUnreadByTimestamp], which is exclusive: a message
+  /// created at exactly the given timestamp stays read.
+  ///
+  /// The message must be one of the channel's latest 100 messages; an older one
+  /// returns a failure.
   ///
   /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
   /// unread count locally, on-device, without making a network request. The
