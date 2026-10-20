@@ -22,13 +22,14 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [08](08-moderation-and-blocklists.md) | Moderation & Blocklists | 0 | 34 | ☑ |
 | [09](09-users.md) | Users | 9 | 9 | ☐ |
 | [10](10-messages.md) | Messages & Search | 14 | 12 | ☐ |
-| [11](11-channels-and-members.md) | Channels, Members & Sync | 27 | 24 | ☐ |
+| [11](11-channels-and-members.md) | Channels, Members & Sync | 23 | 22 | ☐ |
 | [12](12-uploads-cdn.md) | Uploads (CDN) | 8 | 8 | ☑ |
 | [13](13-push-preferences.md) | Push Preferences | 1 | 1 | ☐ |
 | [14](14-banned-users.md) | Banned Users — split out of 08 | 1 | 1 | ☐ |
-| [15](15-custom-data.md) | Custom Data — `extraData` is the wire's `custom`, then renamed | — | — | ☐ |
+| [15](15-partial-updates.md) | Partial Updates — split out of 11 | 0 | 2 | ☑ |
+| [21](21-custom-data.md) | Custom Data Check — no model still says `extraData` | — | — | ☐ |
 
-**Coverage:** 71 hand-written methods across 9 files, and all 129 generated operations, each claimed by exactly
+**Coverage:** 67 hand-written methods across 9 files, and all 129 generated operations, each claimed by exactly
 one group. Verified mechanically — see [Keeping this plan honest](#keeping-this-plan-honest).
 
 
@@ -113,10 +114,13 @@ includes a named response that carries only `duration` today, such as `HideChann
    public API change of its own. The semantics change goes in the CHANGELOG and the guide, listed per field under
    the rows of the audit's table.
 
-   **Names default to v10's,** even where the generated name differs: `OGAttachmentResponse` rather than
-   `GetOGResponse`, `AppSettings` rather than `AppResponseFields`, `UploadConfig` rather than `FileUploadConfig`.
-   That is a default, not a requirement. The user may ask for another name, or a migration may propose one that
-   fits clearly better; renaming a v10 type is a break, so it needs approval and a Symbol Map row.
+   **Names follow the spec's, unless the spec's name is awkward or describes something else,** and calls the
+   caller sees as siblings share one scheme: `updateChannelPartial` and `updateMemberPartial` answer
+   `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse`, where v10 had `PartialUpdateChannelResponse`,
+   `partialMemberUpdate` and `PartialUpdateMemberResponse`. v10's name stays where the generated one does not fit:
+   `OGAttachmentResponse` rather than `GetOGResponse`, `AppSettings` rather than `AppResponseFields`. Names an
+   earlier group settled stand, such as group 04's `getAppSettings` and `UploadConfig`. Renaming a v10 type or
+   method is a break, so it needs approval, a Symbol Map row, and a line in the PR description.
 3. **Responses keep their v10 envelopes,** as `@freezed` classes carrying a non-nullable `duration` and the
    payload. Every envelope lives in `lib/src/core/models/response/`, and every public type a caller passes in to
    shape a request — a `*Request` class, or a parameter type such as `PaginationParams` or `ThreadOptions` — in
@@ -153,10 +157,11 @@ includes a named response that carries only `duration` today, such as `HideChann
    directions.** A response mapper copies the generated `custom` map into it and a request mapper sends it back as
    `custom`; neither filters it. A model whose group has not run still says `extraData`. A field the
    generated response types is never parked in `extraData` behind a getter: it becomes a field on the model, as
-   the owning group's break, or stays out. `ChannelModel.hidden` and `User.name` are parked today, and groups 11
-   and 09 promote them. `topLevelFields` and `Serializer` serve only the v1 decoders, which still split flat JSON
-   by a key list, and go with the WebSocket v2 move; a model that loses its JSON drops `topLevelFields` and its
-   converter owns the list. A v1 writer leaves a custom entry named like a key out so it cannot overwrite the key.
+   the owning group's break, or stays out. `User.name` is parked today, and group 09 promotes it; group 15
+   promoted `ChannelModel`'s and `Member`'s. `topLevelFields` and `Serializer` serve only the v1 decoders, which
+   still split flat JSON by a key list, and go with the WebSocket v2 move; a model that loses its JSON drops
+   `topLevelFields` and its converter owns the list. A v1 writer leaves a custom entry named like a key out so it
+   cannot overwrite the key.
 
 ### Temporary adapters
 
@@ -168,6 +173,7 @@ includes a named response that carries only `duration` today, such as `HideChann
 | `PollV1JsonConverter` | `Message.poll`, `DraftMessage.poll`, `Event.poll` | WebSocket v2 (no group) |
 | `PollVoteV1JsonConverter` | `Event.pollVote` | WebSocket v2 (no group) |
 | `user_mapper.dart` (kept, re-pointed) | today's `User`, which still reads and writes JSON | [09](09-users.md) |
+| `channels_mapper.dart` (kept, re-pointed) | today's `ChannelModel`, `ChannelConfig` and `Member`, which still read and write JSON | [11](11-channels-and-members.md) |
 
 How v1 JSON decodes `User` once it becomes a plain model is decided in [01-foundation](01-foundation.md): until
 group 09 restructures it, v1 payloads keep decoding through `User.fromJson`.
@@ -186,15 +192,19 @@ surfaces before it reaches `Message` and `ChannelState`:
 - **08** is where we decide what *not* to expose: 34 generated operations against 10 hand-written methods.
 - **14** is `queryBannedUsers`, split out of 08 because it is the only moderation call that answers with a
   model. The `User` mappers it needs landed with group 04.
-- **10–11** are the core of the SDK; 11 promotes the channel flags parked in `extraData` (rule 9).
+- **10–11** are the core of the SDK.
+- **15** is the partial channel and member updates, split out of 11 so `channels_mapper.dart` lands on calls that
+  read nothing into `ChannelState`. It landed first; the full update waits in 11 for group 10's message mappers.
+  As the first group to map `ChannelModel` and `Member`, it promoted their parked fields and renamed their custom
+  data `custom` (rule 9).
 - **12** comes late because it needs its own hand-written multipart client and is the highest-traffic path in the
   SDK.
 - **09** is last. Every group before it maps users through `user_mapper.dart` onto today's `User`; 09 migrates the
   user endpoints and restructures `User` and `OwnUser` themselves, when every parent that embeds them has moved.
-- **15** is the custom-data pass: every model's custom data is named `custom` and is the wire's `custom`, with no
-  mapper filtering it and no typed field parked in it. Each group renames the models it migrates (polls went
-  first); 15 renames whatever is left and the persistence columns, and runs after 09 and 11, which promote their
-  parked fields.
+- **21** checks the custom data once every group has run: each model's custom data is named `custom` and is the
+  wire's `custom`, with no mapper filtering it and no typed field parked in it. Each group does that for the
+  models it maps, persistence columns included (polls went first), so 21 renames nothing; a model it finds
+  still saying `extraData` goes back to the group that maps it.
 
 ## Prerequisites
 

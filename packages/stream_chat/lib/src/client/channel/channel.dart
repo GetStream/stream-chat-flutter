@@ -19,11 +19,11 @@ const incomingTypingStartEventTimeout = 7;
 ///
 /// {@template name}
 /// If an optional [name] argument is provided in the constructor then it
-/// will be set on [extraData] with a key of 'name'.
+/// will be set on [custom] with a key of 'name'.
 ///
 /// ```dart
 /// final channel = Channel(client, type, id, name: 'Channel name');
-/// print(channel.name == channel.extraData['name']); // true
+/// print(channel.name == channel.custom['name']); // true
 /// ```
 ///
 /// Before the channel is initialized the name can be set directly:
@@ -43,11 +43,11 @@ const incomingTypingStartEventTimeout = 7;
 ///
 /// {@template image}
 /// If an optional [image] argument is provided in the constructor then it
-/// will be set on [extraData] with a key of 'image'.
+/// will be set on [custom] with a key of 'image'.
 ///
 /// ```dart
 /// final channel = Channel(client, type, id, image: 'https://getstream.io/image.png');
-/// print(channel.image == channel.extraData['image']); // true
+/// print(channel.image == channel.custom['image']); // true
 /// ```
 ///
 /// Before the channel is initialized the image can be set directly:
@@ -63,20 +63,21 @@ const incomingTypingStartEventTimeout = 7;
 /// This will do a partial update to update the image.
 /// {@endtemplate}
 class Channel {
-  /// Class that manages a specific channel.
+  /// Creates a channel of [type] with the id [id].
   ///
-  /// Optional [extraData] and [image] properties can be provided. The [image]
-  /// is exposed to easily set a key of 'image' on [extraData].
+  /// The channel starts with [custom] as its custom data. A [name] or [image]
+  /// is stored in it under the `name` or `image` key, replacing any entry
+  /// [custom] has for that key.
   Channel(
     this._client,
     this._type,
     this._id, {
     String? name,
     String? image,
-    Map<String, Object?>? extraData,
+    Map<String, Object?>? custom,
   }) : _cid = _id != null ? '$_type:$_id' : null,
-       _extraData = {
-         ...?extraData,
+       _custom = {
+         ...?custom,
          if (name != null) 'name': name,
          if (image != null) 'image': image,
        } {
@@ -92,7 +93,7 @@ class Channel {
       _id = channelState.channel!.id,
       _type = channelState.channel!.type,
       _cid = channelState.channel!.cid,
-      _extraData = channelState.channel!.extraData {
+      _custom = channelState.channel!.custom {
     _initState(channelState); // Initialize the state immediately.
   }
 
@@ -106,7 +107,7 @@ class Channel {
 
   String? _id;
   String? _cid;
-  final Map<String, Object?> _extraData;
+  final Map<String, Object?> _custom;
 
   /// Shortcut to set channel name.
   ///
@@ -118,7 +119,7 @@ class Channel {
         'to update the channel name',
       );
     }
-    _extraData.addAll({'name': name});
+    _custom.addAll({'name': name});
   }
 
   /// Shortcut to set channel image.
@@ -131,17 +132,17 @@ class Channel {
         'to update the channel image',
       );
     }
-    _extraData.addAll({'image': image});
+    _custom.addAll({'image': image});
   }
 
-  set extraData(Map<String, Object?> extraData) {
+  set custom(Map<String, Object?> custom) {
     if (_isInitialized) {
       throw StateError(
         'Once the channel is initialized you should use `channel.update` '
         'to update channel data',
       );
     }
-    _extraData.addAll(extraData);
+    _custom.addAll(custom);
   }
 
   /// Whether this channel is identified by its member set rather than an
@@ -524,14 +525,11 @@ class Channel {
     return state!.channelState.channel?.team;
   }
 
-  /// Channel extra data.
-  Map<String, Object?> get extraData {
-    var data = state?.channelState.channel?.extraData;
-    if (data == null || data.isEmpty) {
-      data = _extraData;
-    }
-    return data;
-  }
+  /// This channel's custom data.
+  ///
+  /// Before the channel is initialized, this is the custom data it was created
+  /// with, updated by any assignment to [name], [image] or [custom].
+  Map<String, Object?> get custom => state?.channelState.channel?.custom ?? _custom;
 
   /// List of user permissions on this channel
   List<ChannelCapability> get ownCapabilities => state?.channelState.channel?.ownCapabilities ?? [];
@@ -542,18 +540,18 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.ownCapabilities ?? []).distinct();
   }
 
-  /// Channel extra data as a stream.
-  Stream<Map<String, Object?>> get extraDataStream {
+  /// This channel's custom data as a stream.
+  Stream<Map<String, Object?>> get customStream {
     _checkInitialized();
     return state!.channelStateStream.map(
-      (cs) => cs.channel?.extraData ?? _extraData,
+      (cs) => cs.channel?.custom ?? _custom,
     );
   }
 
   /// Shortcut to get channel name.
   ///
   /// {@macro name}
-  String? get name => extraData['name'] as String?;
+  String? get name => custom['name'] as String?;
 
   /// Channel [name] as a stream.
   ///
@@ -562,13 +560,13 @@ class Channel {
   /// {@macro name}
   Stream<String?> get nameStream {
     _checkInitialized();
-    return extraDataStream.map((it) => it['name'] as String?).distinct();
+    return customStream.map((it) => it['name'] as String?).distinct();
   }
 
   /// Shortcut to get channel image.
   ///
   /// {@macro image}
-  String? get image => extraData['image'] as String?;
+  String? get image => custom['image'] as String?;
 
   /// Channel [image] as a stream.
   ///
@@ -577,7 +575,7 @@ class Channel {
   /// {@macro image}
   Stream<String?> get imageStream {
     _checkInitialized();
-    return extraDataStream.map((it) => it['image'] as String?).distinct();
+    return customStream.map((it) => it['image'] as String?).distinct();
   }
 
   /// The main Stream chat client.
@@ -1712,39 +1710,15 @@ class Channel {
     );
   }
 
-  /// Update the channel's [name].
+  /// Sets this channel's [name], leaving every other field as it is.
   ///
-  /// This is the same as calling [updatePartial] and providing a map with a
-  /// 'name' key:
-  ///
-  /// ```dart
-  /// channel.updatePartial(
-  ///   set: {'name': 'Updated channel name'}
-  /// );
-  /// ```
-  ///
-  /// Instead do:
-  /// ```dart
-  /// channel.updateName('Updated channel name');
-  /// ```
-  Future<PartialUpdateChannelResponse> updateName(String name) => updatePartial(set: {'name': name});
+  /// The same as [updatePartial] with `set: {'name': name}`.
+  Future<Result<UpdateChannelPartialResponse>> updateName(String name) => updatePartial(set: {'name': name});
 
-  /// Update the channel's [image].
+  /// Sets this channel's [image] URL, leaving every other field as it is.
   ///
-  /// This is the same as calling [updatePartial] and providing a map with an
-  /// 'image' key:
-  ///
-  /// ```dart
-  /// channel.updatePartial(
-  ///   set: {'image': 'https://getstream.io/new-image'}
-  /// );
-  /// ```
-  ///
-  /// Instead do:
-  /// ```dart
-  /// channel.updateImage('https://getstream.io/new-image');
-  /// ```
-  Future<PartialUpdateChannelResponse> updateImage(String image) => updatePartial(set: {'image': image});
+  /// The same as [updatePartial] with `set: {'image': image}`.
+  Future<Result<UpdateChannelPartialResponse>> updateImage(String image) => updatePartial(set: {'image': image});
 
   /// Update the channel custom data. This replaces all of the channel data
   /// with the given [channelData].
@@ -1766,19 +1740,15 @@ class Channel {
     );
   }
 
-  /// A partial update can be used to set and unset specific custom data fields
-  /// when it is necessary to retain additional custom data fields on the
-  /// object.
+  /// Partially updates this channel.
   ///
-  /// - [set] will add, or update existing attributes.
-  /// - [unset] will remove the attributes with the provided list of
-  /// values (keys).
+  /// Sets the fields in [set] and removes the custom fields named in [unset],
+  /// leaving every other field as it is.
   ///
-  /// If you want to do a full update/replacement, use [update] instead.
+  /// At least one of [set] and [unset] is required.
   ///
-  /// See, https://getstream.io/chat/docs/other-rest/channel_update/?language=dart
-  /// for more information.
-  Future<PartialUpdateChannelResponse> updatePartial({
+  /// To replace every field, consider [update].
+  Future<Result<UpdateChannelPartialResponse>> updatePartial({
     Map<String, Object?>? set,
     List<String>? unset,
   }) async {
@@ -1786,18 +1756,22 @@ class Channel {
     return _client.updateChannelPartial(id!, type, set: set, unset: unset);
   }
 
-  /// Enable slow mode
-  Future<PartialUpdateChannelResponse> enableSlowMode({
+  /// Enables slow mode on this channel.
+  ///
+  /// Members then wait [cooldownInterval] seconds between messages.
+  ///
+  /// The [cooldownInterval] must be between 1 and 100.
+  Future<Result<UpdateChannelPartialResponse>> enableSlowMode({
     required int cooldownInterval,
   }) async {
     _checkInitialized();
-    return _client.enableSlowdown(id!, type, cooldownInterval);
+    return _client.enableSlowMode(id!, type, cooldownInterval);
   }
 
-  /// Disable slow mode
-  Future<PartialUpdateChannelResponse> disableSlowMode() async {
+  /// Disables slow mode on this channel.
+  Future<Result<UpdateChannelPartialResponse>> disableSlowMode() async {
     _checkInitialized();
-    return _client.disableSlowdown(id!, type);
+    return _client.disableSlowMode(id!, type);
   }
 
   /// Delete this channel. Messages are permanently removed.
@@ -2197,7 +2171,7 @@ class Channel {
       channelState ??= await _client.queryChannel(
         type,
         channelId: id,
-        channelData: _extraData,
+        channelData: _custom,
         state: state,
         watch: watch,
         presence: presence,
@@ -2403,52 +2377,28 @@ class Channel {
     return _client.showChannel(id!, type);
   }
 
-  /// Pins the channel for the current user.
-  Future<Member> pin() async {
+  /// Pins this channel for the current user.
+  Future<Result<UpdateMemberPartialResponse>> pin() async {
     _checkInitialized();
-
-    final response = await _client.pinChannel(
-      channelId: id!,
-      channelType: type,
-    );
-
-    return response.channelMember;
+    return _client.pinChannel(channelId: id!, channelType: type);
   }
 
-  /// Unpins the channel.
-  Future<Member?> unpin() async {
+  /// Unpins this channel for the current user.
+  Future<Result<UpdateMemberPartialResponse>> unpin() async {
     _checkInitialized();
-
-    final response = await _client.unpinChannel(
-      channelId: id!,
-      channelType: type,
-    );
-
-    return response.channelMember;
+    return _client.unpinChannel(channelId: id!, channelType: type);
   }
 
-  /// Archives the channel.
-  Future<Member?> archive() async {
+  /// Archives this channel for the current user.
+  Future<Result<UpdateMemberPartialResponse>> archive() async {
     _checkInitialized();
-
-    final response = await _client.archiveChannel(
-      channelId: id!,
-      channelType: type,
-    );
-
-    return response.channelMember;
+    return _client.archiveChannel(channelId: id!, channelType: type);
   }
 
-  /// Unarchives the channel for the current user.
-  Future<Member?> unarchive() async {
+  /// Unarchives this channel for the current user.
+  Future<Result<UpdateMemberPartialResponse>> unarchive() async {
     _checkInitialized();
-
-    final response = await _client.unarchiveChannel(
-      channelId: id!,
-      channelType: type,
-    );
-
-    return response.channelMember;
+    return _client.unarchiveChannel(channelId: id!, channelType: type);
   }
 
   /// Stream of [Event] coming from websocket connection specific for the

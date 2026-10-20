@@ -13,7 +13,7 @@ part 'member.g.dart';
 /// in a channel
 @JsonSerializable()
 class Member extends Equatable {
-  /// Constructor used for json serialization
+  /// Creates a member.
   Member({
     this.user,
     this.inviteAcceptedAt,
@@ -30,19 +30,24 @@ class Member extends Equatable {
     this.pinnedAt,
     this.archivedAt,
     this.deletedMessages = const [],
-    this.extraData = const {},
+    Map<String, Object?> custom = const {},
+    this.notificationsMuted,
+    this.status,
+    this.banFromFutureChannels,
+    this.futureChannelBanExpires,
+    this.deletedAt,
   }) : userId = userId ?? user?.id,
        createdAt = createdAt ?? DateTime.now(),
-       updatedAt = updatedAt ?? DateTime.now();
+       updatedAt = updatedAt ?? DateTime.now(),
+       custom = {...custom};
 
   /// Create a new instance from a json
   factory Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(
     Serializer.moveToExtraDataFromRoot(json, _topLevelFields),
   );
 
-  /// Known top level fields.
-  ///
-  /// Useful for [Serializer] methods.
+  // The JSON keys [Member.fromJson] reads into named fields; every other key is
+  // kept in [custom].
   static const _topLevelFields = [
     'user',
     'invite_accepted_at',
@@ -59,6 +64,11 @@ class Member extends Equatable {
     'pinned_at',
     'archived_at',
     'deleted_messages',
+    'notifications_muted',
+    'status',
+    'ban_from_future_channels',
+    'future_channel_ban_expires',
+    'deleted_at',
   ];
 
   /// The interested user
@@ -109,8 +119,36 @@ class Member extends Equatable {
   /// visible to other channel members.
   final List<String> deletedMessages;
 
-  /// Map of custom member extraData.
-  final Map<String, Object?> extraData;
+  /// This member's custom data.
+  @JsonKey(name: 'extra_data')
+  final Map<String, Object?> custom;
+
+  /// Whether this member muted notifications for the channel.
+  @JsonKey(includeToJson: false)
+  final bool? notificationsMuted;
+
+  /// The status of this membership, such as `member`, or `pending` while an
+  /// invite is outstanding.
+  @JsonKey(includeToJson: false)
+  final String? status;
+
+  /// Whether this member is banned from future channels.
+  ///
+  /// The ban covers the channels the channel's creator creates later.
+  @JsonKey(includeToJson: false)
+  final bool? banFromFutureChannels;
+
+  /// The date at which this member's ban from future channels expires.
+  ///
+  /// Null when there is no such ban or it has no expiry.
+  @JsonKey(includeToJson: false)
+  final DateTime? futureChannelBanExpires;
+
+  /// The date at which this membership was deleted.
+  ///
+  /// Null while the member belongs to the channel.
+  @JsonKey(includeToJson: false)
+  final DateTime? deletedAt;
 
   /// Creates a copy of [Member] with specified attributes overridden.
   Member copyWith({
@@ -130,7 +168,12 @@ class Member extends Equatable {
     DateTime? banExpires,
     bool? shadowBanned,
     List<String>? deletedMessages,
-    Map<String, Object?>? extraData,
+    Map<String, Object?>? custom,
+    bool? notificationsMuted,
+    String? status,
+    bool? banFromFutureChannels,
+    DateTime? futureChannelBanExpires,
+    DateTime? deletedAt,
   }) => Member(
     user: user ?? this.user,
     inviteAcceptedAt: inviteAcceptedAt ?? this.inviteAcceptedAt,
@@ -147,12 +190,25 @@ class Member extends Equatable {
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedMessages: deletedMessages ?? this.deletedMessages,
-    extraData: extraData ?? this.extraData,
+    custom: custom ?? this.custom,
+    notificationsMuted: notificationsMuted ?? this.notificationsMuted,
+    status: status ?? this.status,
+    banFromFutureChannels: banFromFutureChannels ?? this.banFromFutureChannels,
+    futureChannelBanExpires: futureChannelBanExpires ?? this.futureChannelBanExpires,
+    deletedAt: deletedAt ?? this.deletedAt,
   );
 
-  /// Serialize to json
+  /// Serializes this member to JSON.
+  ///
+  /// Leaves out [notificationsMuted], [status], [banFromFutureChannels],
+  /// [futureChannelBanExpires] and [deletedAt], which only [Member.fromJson]
+  /// reads.
+  ///
+  /// Writes the entries of [custom] at the root, leaving out any named like one
+  /// of the member's own fields.
   Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
     _$MemberToJson(this),
+    topLevelFields: _topLevelFields,
   );
 
   @override
@@ -172,7 +228,12 @@ class Member extends Equatable {
     createdAt,
     updatedAt,
     deletedMessages,
-    extraData,
+    custom,
+    notificationsMuted,
+    status,
+    banFromFutureChannels,
+    futureChannelBanExpires,
+    deletedAt,
   ];
 }
 
@@ -191,12 +252,12 @@ class MemberFilterField extends FilterField<Member> {
   /// value off an instance with [value].
   MemberFilterField(super.remote, super.value);
 
-  /// Creates a field the SDK does not model, read from [Member.extraData].
+  /// Creates a field the SDK does not model, read from [Member.custom].
   ///
   /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
   /// `$exists`, `$contains`, `$q`, `$autocomplete`
   factory MemberFilterField.custom(String remote) {
-    return MemberFilterField(remote, (it) => it.extraData[remote]);
+    return MemberFilterField(remote, (it) => it.custom[remote]);
   }
 
   /// Filters members by their user id.
@@ -296,7 +357,7 @@ class MemberFilterField extends FilterField<Member> {
   /// **Supported operators:** `$eq`
   static final notificationsMuted = MemberFilterField(
     'notifications_muted',
-    (it) => it.extraData['notifications_muted'].safeCast<bool>(),
+    (it) => it.notificationsMuted,
   );
 
   /// Filters members by when they joined the channel.
@@ -358,11 +419,11 @@ class MemberSortField extends SortField<Member> {
   /// For a name the SDK has not modelled; prefer the fields declared here.
   MemberSortField(super.remote, super.localValue);
 
-  /// Creates a field the SDK does not model, read from [Member.extraData].
+  /// Creates a field the SDK does not model, read from [Member.custom].
   ///
   /// Declared only where the API accepts a custom sort field.
   factory MemberSortField.custom(String remote) {
-    return MemberSortField(remote, (it) => it.extraData[remote]);
+    return MemberSortField(remote, (it) => it.custom[remote]);
   }
 
   /// Sorts members by their creation date in the channel.

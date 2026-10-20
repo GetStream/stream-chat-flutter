@@ -1625,48 +1625,16 @@ void main() {
           ..channel = ChannelModel(
             id: channelId,
             type: channelType,
-            extraData: {...data},
+            custom: {...data},
           ),
       );
 
       final res = await client.updateChannel(channelId, channelType, data);
       expect(res, isNotNull);
       expect(res.channel.cid, '$channelType:$channelId');
-      expect(res.channel.extraData['name'], 'test-channel');
+      expect(res.channel.custom['name'], 'test-channel');
 
       verify(() => fakeChatApi.channel.updateChannel(channelId, channelType, data)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.updateChannelPartial`', () async {
-      const channelId = 'test-channel-id';
-      const channelType = 'test-channel-type';
-      const set = {
-        'name': 'Stream Team',
-        'profile_image': 'test-profile-image',
-      };
-      const unset = ['tag', 'last_name'];
-
-      when(() => fakeChatApi.channel.updateChannelPartial(channelId, channelType, set: set, unset: unset)).thenAnswer(
-        (invocation) async => PartialUpdateChannelResponse()
-          ..channel = ChannelModel(
-            id: channelId,
-            type: channelType,
-            extraData: {...set},
-          ),
-      );
-
-      final res = await client.updateChannelPartial(
-        channelId,
-        channelType,
-        set: set,
-        unset: unset,
-      );
-      expect(res, isNotNull);
-      expect(res.channel.cid, '$channelType:$channelId');
-      expect(res.channel.extraData, set);
-
-      verify(() => fakeChatApi.channel.updateChannelPartial(channelId, channelType, set: set, unset: unset)).called(1);
       verifyNoMoreInteractions(fakeChatApi.channel);
     });
 
@@ -2531,14 +2499,14 @@ void main() {
         final channel = client.channel(
           channelType,
           id: channelId,
-          extraData: channelData,
+          custom: channelData,
         );
 
         expect(channel, isNotNull);
         expect(channel.type, channelType);
         expect(channel.id, channelId);
         expect(channel.cid, '$channelType:$channelId');
-        expect(channel.extraData, channelData);
+        expect(channel.custom, channelData);
       });
 
       test('should return back in memory channel instance if available', () async {
@@ -2550,7 +2518,7 @@ void main() {
         final channel = client.channel(
           channelType,
           id: channelId,
-          extraData: channelData,
+          custom: channelData,
         );
 
         final channelState = ChannelState(
@@ -2606,7 +2574,7 @@ void main() {
       const channelCid = '$channelType:$channelId';
 
       final channelState = ChannelState(
-        channel: ChannelModel(cid: channelCid, extraData: channelData),
+        channel: ChannelModel(cid: channelCid, custom: channelData),
       );
 
       when(
@@ -2635,7 +2603,7 @@ void main() {
       expect(channel.type, channelType);
       expect(channel.id, channelId);
       expect(channel.cid, '$channelType:$channelId');
-      expect(channel.extraData, channelData);
+      expect(channel.custom, channelData);
 
       verify(
         () => fakeChatApi.channel.queryChannel(
@@ -2660,7 +2628,7 @@ void main() {
       const channelCid = '$channelType:$channelId';
 
       final channelState = ChannelState(
-        channel: ChannelModel(cid: channelCid, extraData: channelData),
+        channel: ChannelModel(cid: channelCid, custom: channelData),
       );
 
       when(
@@ -2689,7 +2657,7 @@ void main() {
       expect(channel.type, channelType);
       expect(channel.id, channelId);
       expect(channel.cid, '$channelType:$channelId');
-      expect(channel.extraData, channelData);
+      expect(channel.custom, channelData);
 
       verify(
         () => fakeChatApi.channel.queryChannel(
@@ -2714,7 +2682,7 @@ void main() {
       const channelCid = '$channelType:$channelId';
 
       final channelState = ChannelState(
-        channel: ChannelModel(cid: channelCid, extraData: channelData),
+        channel: ChannelModel(cid: channelCid, custom: channelData),
       );
 
       when(
@@ -2743,7 +2711,7 @@ void main() {
       expect(channel.type, channelType);
       expect(channel.id, channelId);
       expect(channel.cid, '$channelType:$channelId');
-      expect(channel.extraData, channelData);
+      expect(channel.custom, channelData);
 
       verify(
         () => fakeChatApi.channel.queryChannel(
@@ -2835,218 +2803,6 @@ void main() {
 
       verify(
         () => fakeChatApi.channel.truncateChannel(channelId, channelType),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.partialMemberUpdate with userId`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const otherUserId = 'test-other-user-id';
-      const set = {'pinned': true};
-      const unset = ['pinned'];
-
-      when(
-        () => fakeChatApi.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          set: set,
-          unset: unset,
-        ),
-      ).thenAnswer(
-        (_) async => FakePartialUpdateMemberResponse(
-          channelMember: Member(userId: otherUserId),
-        ),
-      );
-
-      final res = await client.partialMemberUpdate(
-        channelId: channelId,
-        channelType: channelType,
-        set: set,
-        unset: unset,
-      );
-
-      expect(res, isNotNull);
-      expect(res.channelMember.userId, otherUserId);
-
-      verify(
-        () => fakeChatApi.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          set: set,
-          unset: unset,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.partialMemberUpdate with current user`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const set = {'pinned': true};
-      const unset = ['pinned'];
-
-      when(
-        () => fakeChatApi.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          set: set,
-          unset: unset,
-        ),
-      ).thenAnswer(
-        (_) async => FakePartialUpdateMemberResponse(
-          channelMember: Member(userId: userId),
-        ),
-      );
-
-      final res = await client.partialMemberUpdate(
-        channelId: channelId,
-        channelType: channelType,
-        set: set,
-        unset: unset,
-      );
-
-      expect(res, isNotNull);
-      expect(res.channelMember.userId, userId);
-      verify(
-        () => fakeChatApi.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          set: set,
-          unset: unset,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.pinChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-
-      when(
-        () => fakeChatApi.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          set: const MemberUpdatePayload(pinned: true).toJson(),
-        ),
-      ).thenAnswer(
-        (_) async => FakePartialUpdateMemberResponse(
-          channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
-        ),
-      );
-
-      final res = await client.pinChannel(
-        channelId: channelId,
-        channelType: channelType,
-      );
-
-      expect(res, isNotNull);
-
-      verify(
-        () => fakeChatApi.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          set: const MemberUpdatePayload(pinned: true).toJson(),
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.unpinChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-
-      when(
-        () => fakeChatApi.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          unset: [MemberUpdateType.pinned.name],
-        ),
-      ).thenAnswer(
-        (_) async => FakePartialUpdateMemberResponse(
-          channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
-        ),
-      );
-
-      final res = await client.unpinChannel(
-        channelId: channelId,
-        channelType: channelType,
-      );
-
-      expect(res, isNotNull);
-
-      verify(
-        () => fakeChatApi.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          unset: [MemberUpdateType.pinned.name],
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.archiveChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-
-      when(
-        () => fakeChatApi.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          set: const MemberUpdatePayload(archived: true).toJson(),
-        ),
-      ).thenAnswer(
-        (_) async => FakePartialUpdateMemberResponse(
-          channelMember: Member(userId: userId, archivedAt: DateTime.now()),
-        ),
-      );
-
-      final res = await client.archiveChannel(
-        channelId: channelId,
-        channelType: channelType,
-      );
-
-      expect(res, isNotNull);
-
-      verify(
-        () => fakeChatApi.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          set: const MemberUpdatePayload(archived: true).toJson(),
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.unarchiveChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-
-      when(
-        () => fakeChatApi.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          unset: [MemberUpdateType.archived.name],
-        ),
-      ).thenAnswer(
-        (_) async => FakePartialUpdateMemberResponse(
-          channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
-        ),
-      );
-
-      final res = await client.unarchiveChannel(
-        channelId: channelId,
-        channelType: channelType,
-      );
-
-      expect(res, isNotNull);
-
-      verify(
-        () => fakeChatApi.channel.updateMemberPartial(
-          channelId: channelId,
-          channelType: channelType,
-          unset: [MemberUpdateType.archived.name],
-        ),
       ).called(1);
       verifyNoMoreInteractions(fakeChatApi.channel);
     });
