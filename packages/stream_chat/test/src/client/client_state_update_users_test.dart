@@ -81,6 +81,22 @@ void main() {
 
     expect(emitted, isEmpty);
   });
+
+  test('ClientState.updateUsers keeps the order of stored users and adds new ones in the order listed', () {
+    final client = _client();
+    final alice = User(id: 'u1', name: 'Alice');
+    final bob = User(id: 'u2', name: 'Bob');
+    client.state.updateUsers([alice, bob]);
+
+    client.state.updateUsers([
+      User(id: 'u3', name: 'Carol'),
+      bob.copyWith(name: 'Robert'),
+      User(id: 'u4', name: 'Dave'),
+      alice.copyWith(name: 'Alicia'),
+    ]);
+
+    expect(client.state.users.keys, ['u1', 'u2', 'u3', 'u4']);
+  });
 }
 
 StreamChatClient _client() {

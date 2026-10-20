@@ -18,6 +18,7 @@ import 'mlv_utils.dart';
 ///
 /// Not intended for use outside of [StreamMessageListView].
 /// {@endtemplate}
+@internal
 class FloatingDateDivider extends StatefulWidget {
   /// {@macro floatingDateDivider}
   const FloatingDateDivider({
