@@ -116,6 +116,7 @@
 - `connectGuestUser` no longer copies the user's online status, ban, unread counts, devices and push preferences into the created guest's `extraData`.
 - `Channel.custom` no longer returns the data the channel was created with once the channel's custom data is empty.
 - Deleting a bounced or unsent message now emits `message.deleted`.
+- A message deleted while its attachments upload no longer comes back as failed.
 
 - `queryChannels` no longer gives up watching the channels it loads when it is called before the connection is open. Whether they can be watched is read when the request is sent, which is after the query has waited for the connection.
 

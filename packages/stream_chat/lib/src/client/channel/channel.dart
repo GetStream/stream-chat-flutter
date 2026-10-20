@@ -829,6 +829,10 @@ class Channel {
 
       return response;
     } catch (e) {
+      // Cancelled by a deletion or by a newer call for the same message, which
+      // now owns its state.
+      if (e case StreamNetworkException(isCancelled: true)) rethrow;
+
       final failedMessage = message.copyWith(
         // Update the message state to failed.
         state: MessageState.sendingFailed(
@@ -919,6 +923,10 @@ class Channel {
 
       return response;
     } catch (e) {
+      // Cancelled by a deletion or by a newer call for the same message, which
+      // now owns its state.
+      if (e case StreamNetworkException(isCancelled: true)) rethrow;
+
       final failedMessage = message.copyWith(
         // Update the message state to failed.
         state: MessageState.updatingFailed(
