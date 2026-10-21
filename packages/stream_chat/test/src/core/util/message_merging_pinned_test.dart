@@ -68,7 +68,7 @@ void main() {
       message('m2', pinned: true, pinnedAt: DateTime(2024, 1, 2)),
     ];
 
-    final result = MessageMerging.replacePinnedMessages(existing: null, updated: updated);
+    final result = MessageMerging.replacePinnedMessages(updated: updated);
 
     expect(ids(result!), ['m2', 'm1']);
   });
@@ -79,7 +79,7 @@ void main() {
       message('m2', pinned: true, pinnedAt: DateTime(2024, 1, 1)),
     ];
 
-    final result = MessageMerging.replacePinnedMessages(existing: null, updated: updated);
+    final result = MessageMerging.replacePinnedMessages(updated: updated);
 
     expect(result, same(updated));
   });

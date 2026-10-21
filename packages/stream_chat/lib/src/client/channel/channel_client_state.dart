@@ -29,7 +29,6 @@ class ChannelClientState {
 
     final seededState = channelState.copyWith(
       pinnedMessages: MessageMerging.replacePinnedMessages(
-        existing: null,
         updated: channelState.pinnedMessages,
       ),
     );

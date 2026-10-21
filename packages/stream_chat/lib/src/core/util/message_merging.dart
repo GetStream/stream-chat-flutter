@@ -100,7 +100,7 @@ class MessageMerging {
   /// Returns [updated] unchanged (same reference) when it is null, when it is
   /// [existing], or when it is already in pin order.
   static List<Message>? replacePinnedMessages({
-    required List<Message>? existing,
+    List<Message>? existing,
     required List<Message>? updated,
   }) {
     if (updated == null) return null;
