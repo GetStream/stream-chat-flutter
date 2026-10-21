@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../stream_chat_flutter.dart';
+import 'stream_media_grid_delegate.dart';
 
 /// A scrollable grid of [StreamMediaGalleryAttachment]s — the thumbnail
 /// companion to [StreamMediaGalleryPreview].
@@ -40,7 +41,8 @@ class StreamMediaGallery extends StatelessWidget {
   StreamMediaGallery({
     super.key,
     required List<StreamMediaGalleryAttachment> attachments,
-    int crossAxisCount = 3,
+    @Deprecated('Use gridDelegate instead.') int? crossAxisCount,
+    SliverGridDelegate? gridDelegate,
     EdgeInsetsGeometry? padding,
     ScrollController? scrollController,
     ValueChanged<int>? onItemTap,
@@ -48,6 +50,7 @@ class StreamMediaGallery extends StatelessWidget {
   }) : props = .new(
          attachments: attachments,
          crossAxisCount: crossAxisCount,
+         gridDelegate: gridDelegate,
          padding: padding,
          scrollController: scrollController,
          onItemTap: onItemTap,
@@ -79,18 +82,36 @@ class StreamMediaGalleryProps {
   /// Creates properties for a media gallery.
   const StreamMediaGalleryProps({
     required this.attachments,
-    this.crossAxisCount = 3,
+    @Deprecated('Use gridDelegate instead.') int? crossAxisCount,
+    this.gridDelegate,
     this.padding,
     this.scrollController,
     this.onItemTap,
     this.onItemLongPress,
-  });
+  }) : assert(
+         crossAxisCount == null || gridDelegate == null,
+         'Only one of crossAxisCount or gridDelegate can be provided. '
+         'Prefer gridDelegate; crossAxisCount is deprecated.',
+       ),
+       _crossAxisCount = crossAxisCount;
 
   /// The attachments to display, in render order.
   final List<StreamMediaGalleryAttachment> attachments;
 
-  /// Number of tiles per row. Defaults to 3.
-  final int crossAxisCount;
+  /// The fixed number of tiles per row given to the constructor, or 3 when none
+  /// was.
+  ///
+  /// Without a fixed number, the grid lays out its tiles with [gridDelegate] or,
+  /// when that is null, picks the number of tiles per row from its width.
+  @Deprecated('Use gridDelegate instead. The number of tiles per row now depends on the grid width.')
+  int get crossAxisCount => _crossAxisCount ?? 3;
+  final int? _crossAxisCount;
+
+  /// The delegate that lays out the grid's tiles.
+  ///
+  /// When null, the grid shows square tiles, with more tiles per row as it gets
+  /// wider.
+  final SliverGridDelegate? gridDelegate;
 
   /// The padding around this grid.
   ///
@@ -123,17 +144,11 @@ class DefaultStreamMediaGallery extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final spacing = context.streamSpacing;
-
     return GridView.builder(
       padding: props.padding,
       controller: props.scrollController,
       itemCount: props.attachments.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: props.crossAxisCount,
-        crossAxisSpacing: spacing.xxxs,
-        mainAxisSpacing: spacing.xxxs,
-      ),
+      gridDelegate: _gridDelegate(context),
       itemBuilder: (context, index) {
         final ga = props.attachments[index];
         return StreamMediaGalleryItem(
@@ -143,6 +158,25 @@ class DefaultStreamMediaGallery extends StatelessWidget {
           onLongPress: props.onItemLongPress == null ? null : () => props.onItemLongPress!(index),
         );
       },
+    );
+  }
+
+  SliverGridDelegate _gridDelegate(BuildContext context) {
+    if (props.gridDelegate case final gridDelegate?) return gridDelegate;
+
+    final spacing = context.streamSpacing;
+
+    if (props._crossAxisCount case final crossAxisCount?) {
+      return SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: spacing.xxxs,
+        mainAxisSpacing: spacing.xxxs,
+      );
+    }
+
+    return StreamMediaGridDelegate(
+      crossAxisSpacing: spacing.xxxs,
+      mainAxisSpacing: spacing.xxxs,
     );
   }
 }

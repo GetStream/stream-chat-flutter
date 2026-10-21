@@ -80,7 +80,7 @@ export 'src/core/api/attachment_file_uploader.dart';
 export 'src/core/api/requests.dart';
 export 'src/core/api/responses.dart';
 export 'src/core/api/stream_chat_api.dart';
-export 'src/core/error/stream_chat_exception.dart';
+export 'src/core/error/stream_chat_exception.dart' hide StreamChatExceptionDuplicateMessage;
 export 'src/core/http/stream_http_client.dart';
 export 'src/core/models/action.dart';
 export 'src/core/models/app_settings.dart';

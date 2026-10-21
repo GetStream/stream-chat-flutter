@@ -10,7 +10,7 @@ on:
       ios:
         description: "Run iOS e2e tests"
         type: boolean
-        default: true
+        default: false
   pull_request:
 
 permissions:

@@ -142,4 +142,37 @@ void main() {
       expect(error.isRetriable, isFalse);
     });
   });
+
+  group('isMessageAlreadyExistsError', () {
+    test('is true for a duplicate message id rejection', () {
+      const error = StreamApiException(
+        message: 'SendMessage failed with error: "a message with ID abc already exists"',
+        statusCode: 400,
+        code: StreamErrorCode.inputError,
+      );
+
+      expect(error.isMessageAlreadyExistsError, isTrue);
+    });
+
+    test('is false for a poll option that already exists', () {
+      const error = StreamApiException(
+        message: 'poll option with text A already exists',
+        statusCode: 400,
+        code: StreamErrorCode.inputError,
+      );
+
+      expect(error.isMessageAlreadyExistsError, isFalse);
+    });
+
+    test('is false for the same text with another error code', () {
+      const error = StreamApiException(
+        message: 'SendMessage failed with error: "a message with ID abc already exists"',
+        statusCode: 403,
+        code: StreamErrorCode.notAllowed,
+      );
+
+      expect(error.isMessageAlreadyExistsError, isFalse);
+    });
+  });
+
 }

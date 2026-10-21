@@ -31,6 +31,7 @@ class StreamThreadPage extends StatefulWidget {
     this.initialScrollIndex,
     this.initialAlignment,
     this.onViewInChannelTap,
+    this.automaticallyImplyLeading = true,
     this.onBackPressed,
   });
 
@@ -45,6 +46,11 @@ class StreamThreadPage extends StatefulWidget {
 
   /// Called when the user taps "View in channel".
   final void Function(Message message)? onViewInChannelTap;
+
+  /// Whether the header shows a back button.
+  ///
+  /// When `false`, [onBackPressed] is never called. Defaults to `true`.
+  final bool automaticallyImplyLeading;
 
   /// Called when the header's back button is pressed.
   ///
@@ -89,6 +95,7 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
   Widget build(BuildContext context) {
     final appBar = StreamThreadHeader(
       parent: widget.parent,
+      automaticallyImplyLeading: widget.automaticallyImplyLeading,
       // Leaving this null keeps the header's default back button, which pops
       // the route.
       onBackPressed: widget.onBackPressed,

@@ -167,13 +167,18 @@
 
 🔄 Changed
 
+- Allowed `equatable` 3.x alongside 2.x.
 - `name_i18n`, `description_i18n` and `text_i18n` are no longer kept in `Poll.extraData` and `PollOption.extraData`; read the new `*I18n` fields instead.
 - Reduced the channel state updates emitted for message updates in channels without active live locations.
+- `StreamChatClient.state.usersStream` no longer emits when an update brings no new or changed users, such as an event without a user.
+- `User` equality now also compares `createdAt`.
 
 🐞 Fixed
 
 - Fixed `Event.aiState` reading `AI_STATE_EXTERNAL_SOURCES` as `idle` instead of `checkingSources`.
 - Fixed `Channel.disableSlowMode` and `StreamChatClient.disableSlowdown` always failing.
+- Fixed users still showing as typing after sending or editing a message, or after switching between a thread and the channel.
+- Fixed a message the server had already stored being shown as failed after a lost response or a retried send.
 
 ## 10.5.0
 

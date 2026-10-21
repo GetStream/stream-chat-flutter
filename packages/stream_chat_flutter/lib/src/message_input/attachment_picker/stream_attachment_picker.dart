@@ -77,6 +77,13 @@ class StreamSystemAttachmentPicker extends StatelessWidget {
 // The height of the attachment picker when using the tabbed interface.
 const _kTabbedAttachmentPickerHeight = 260.0;
 
+// The height of the attachment picker when using the tabbed interface on
+// compact-height screens.
+const _kCompactTabbedAttachmentPickerHeight = 158.0;
+
+// Screens shorter than this have a compact height, such as a phone in landscape.
+const _kCompactHeightBreakpoint = 480.0;
+
 /// Inline widget for the tabbed attachment picker interface.
 ///
 /// Displays a tabbed interface with horizontal tabs for different attachment
@@ -97,7 +104,10 @@ class StreamTabbedAttachmentPicker extends StatefulWidget {
   /// The list of options.
   final Set<TabbedAttachmentPickerOption> options;
 
-  /// The initial option to be selected.
+  /// The option selected when the picker opens.
+  ///
+  /// Ignored when it isn't one of the [options]; the first enabled option is
+  /// selected instead.
   final TabbedAttachmentPickerOption? initialOption;
 
   /// The controller of the attachment picker.
@@ -110,9 +120,9 @@ class StreamTabbedAttachmentPicker extends StatefulWidget {
 class _StreamTabbedAttachmentPickerState extends State<StreamTabbedAttachmentPicker> {
   late var _currentOption = _calculateInitialOption();
   TabbedAttachmentPickerOption _calculateInitialOption() {
-    if (widget.initialOption case final option?) return option;
-
     final options = widget.options;
+    if (widget.initialOption case final option? when options.contains(option)) return option;
+
     final currentValue = widget.controller.value;
     final enabledTypes = currentValue.filterEnabledTypes(options: options);
 
@@ -124,10 +134,27 @@ class _StreamTabbedAttachmentPickerState extends State<StreamTabbedAttachmentPic
   }
 
   @override
+  void didUpdateWidget(StreamTabbedAttachmentPicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // The selected option can disappear from the options, for example when
+    // the user loses a permission while the picker is open.
+    if (widget.options.isEmpty || widget.options.contains(_currentOption)) return;
+    _currentOption = _calculateInitialOption();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (widget.options.isEmpty) return const Empty();
+
     return ValueListenableBuilder<AttachmentPickerValue>(
       valueListenable: widget.controller,
       builder: (context, value, _) {
+        final pickerHeight = switch (MediaQuery.sizeOf(context)) {
+          Size(height: < _kCompactHeightBreakpoint) => _kCompactTabbedAttachmentPickerHeight,
+          _ => _kTabbedAttachmentPickerHeight,
+        };
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -143,7 +170,7 @@ class _StreamTabbedAttachmentPickerState extends State<StreamTabbedAttachmentPic
             Semantics(
               role: SemanticsRole.tabPanel,
               child: SizedBox(
-                height: _kTabbedAttachmentPickerHeight,
+                height: pickerHeight,
                 child: _currentOption.optionViewBuilder(
                   context,
                   widget.controller,

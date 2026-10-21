@@ -66,10 +66,12 @@ class ChooseUserPage extends StatelessWidget {
                         return ListTile(
                           visualDensity: VisualDensity.compact,
                           onTap: () async {
-                            showDialog(
+                            final navigator = Navigator.of(context, rootNavigator: true);
+                            final progress = DialogRoute<void>(
                               barrierDismissible: false,
                               context: context,
                               barrierColor: context.streamColorScheme.backgroundOverlayLight,
+                              themes: InheritedTheme.capture(from: context, to: navigator.context),
                               builder: (context) => Center(
                                 child: Container(
                                   decoration: BoxDecoration(
@@ -84,6 +86,7 @@ class ChooseUserPage extends StatelessWidget {
                                 ),
                               ),
                             );
+                            navigator.push(progress);
 
                             final router = GoRouter.of(context);
 
@@ -95,8 +98,9 @@ class ChooseUserPage extends StatelessWidget {
                                 baseUrl: kStreamBaseUrl.isEmpty ? null : kStreamBaseUrl,
                               );
                             } finally {
-                              // Pop the progress dialog regardless of outcome.
-                              router.pop();
+                              // Remove the progress dialog regardless of outcome, unless the
+                              // redirect to the channel list already took it with this page.
+                              if (progress.isActive) navigator.removeRoute(progress);
                             }
 
                             // The router's redirect will forward an

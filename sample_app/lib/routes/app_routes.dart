@@ -5,6 +5,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../pages/advanced_options_page.dart';
 import '../pages/channel_list_page.dart';
+import '../pages/channel_placeholder_page.dart';
 import '../pages/chat_info_screen.dart';
 import '../pages/choose_user_page.dart';
 import '../pages/group_chat_details_screen.dart';
@@ -12,93 +13,147 @@ import '../pages/group_info_screen.dart';
 import '../pages/new_chat_screen.dart';
 import '../pages/new_group_chat_screen.dart';
 import '../state/new_group_chat_state.dart';
+import '../widgets/split_view.dart';
 import 'routes.dart';
 
 final appRoutes = [
-  GoRoute(
-    name: Routes.CHANNEL_LIST_PAGE.name,
-    path: Routes.CHANNEL_LIST_PAGE.path,
-    builder: (BuildContext context, GoRouterState state) => const ChannelListPage(),
+  ShellRoute(
+    builder: (BuildContext context, GoRouterState state, Widget child) {
+      return AdaptiveSplitView(
+        primary: const ChannelListPage(),
+        secondary: child,
+        drawer: const LeftDrawer(),
+      );
+    },
     routes: [
       GoRoute(
-        name: Routes.CHANNEL_PAGE.name,
-        path: Routes.CHANNEL_PAGE.path,
-        builder: (context, state) {
-          final channel = _resolveChannel(context, state);
-          final messageId = state.uri.queryParameters['mid'];
-          final parentId = state.uri.queryParameters['pid'];
-
-          // Thread deep-links require the parent message to already be in
-          // channel state. On cold cids (e.g. notification-tap into an
-          // unwatched channel) the state is null and we fall through to
-          // ChannelPage; the user lands on the channel rather than the
-          // thread, which is a degraded but functional UX.
-          Message? parentMessage;
-          if (parentId != null) {
-            parentMessage = channel.state?.messages.firstWhereOrNull((it) => it.id == parentId);
-          }
-
-          return StreamChannel(
-            channel: channel,
-            initialMessageId: messageId,
-            openAtFirstUnread: false,
-            child: Builder(
-              builder: (context) {
-                return (parentMessage != null)
-                    ? StreamThreadPage(parent: parentMessage)
-                    : StreamChannelPage(
-                        onChannelAvatarPressed: (context, channel) {
-                          final isOneToOne = channel.isOneToOne;
-                          final currentUserId = StreamChat.of(context).currentUser?.id;
-
-                          final channelMembers = channel.state?.members ?? [];
-                          final otherUser = (isOneToOne && currentUserId != null)
-                              ? channelMembers.firstWhereOrNull((m) => m.userId != currentUserId)?.user
-                              : null;
-
-                          final router = GoRouter.of(context);
-
-                          if (otherUser != null) {
-                            router.pushNamed(
-                              Routes.CHAT_INFO_SCREEN.name,
-                              pathParameters: Routes.CHAT_INFO_SCREEN.params(channel),
-                              extra: otherUser,
-                            );
-                            return;
-                          }
-
-                          router.pushNamed(
-                            Routes.GROUP_INFO_SCREEN.name,
-                            pathParameters: Routes.GROUP_INFO_SCREEN.params(channel),
-                          );
-                        },
-                      );
-              },
-            ),
+        name: Routes.CHANNEL_LIST_PAGE.name,
+        path: Routes.CHANNEL_LIST_PAGE.path,
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          return AdaptiveSplitViewPage<void>(
+            key: state.pageKey,
+            name: state.name,
+            child: const AdaptiveSplitViewRoot(placeholder: ChannelPlaceholderPage()),
           );
         },
         routes: [
           GoRoute(
-            name: Routes.CHAT_INFO_SCREEN.name,
-            path: Routes.CHAT_INFO_SCREEN.path,
-            builder: (BuildContext context, GoRouterState state) {
-              return StreamChannel.value(
-                channel: _resolveChannel(context, state),
-                child: ChatInfoScreen(
-                  user: state.extra as User?,
+            name: Routes.CHANNEL_PAGE.name,
+            path: Routes.CHANNEL_PAGE.path,
+            pageBuilder: (context, state) {
+              final channel = _resolveChannel(context, state);
+              final messageId = state.uri.queryParameters['mid'];
+              final parentId = state.uri.queryParameters['pid'];
+
+              // Thread deep-links require the parent message to already be in
+              // channel state, unless the caller passes it as `extra`. On cold
+              // cids (e.g. notification-tap into an unwatched channel) the
+              // state is null and we fall through to ChannelPage; the user
+              // lands on the channel rather than the thread, which is a
+              // degraded but functional UX.
+              Message? parentMessage;
+              if (parentId != null) {
+                parentMessage = switch (state.extra) {
+                  final Message parent when parent.id == parentId => parent,
+                  _ => channel.state?.messages.firstWhereOrNull((it) => it.id == parentId),
+                };
+              }
+
+              final page = StreamChannel(
+                channel: channel,
+                initialMessageId: messageId,
+                openAtFirstUnread: false,
+                child: Builder(
+                  builder: (context) {
+                    // Both panes are visible in a split, so there is nothing to go back to.
+                    final showBackButton = !AdaptiveSplitView.isExpandedOf(context);
+
+                    if (parentMessage case final parent?) {
+                      return BetterStreamBuilder<Message>(
+                        initialData: parent,
+                        // Keeps the last known parent while it is not among the loaded messages.
+                        stream: channel.state?.messagesStream
+                            .map((messages) => messages.firstWhereOrNull((it) => it.id == parent.id))
+                            .where((it) => it != null),
+                        builder: (context, parent) => StreamThreadPage(
+                          parent: parent,
+                          automaticallyImplyLeading: showBackButton,
+                          onViewInChannelTap: (message) {
+                            GoRouter.of(context).goNamed(
+                              Routes.CHANNEL_PAGE.name,
+                              pathParameters: Routes.CHANNEL_PAGE.params(channel),
+                              queryParameters: {'mid': message.id},
+                            );
+                          },
+                        ),
+                      );
+                    }
+
+                    return StreamChannelPage(
+                      automaticallyImplyLeading: showBackButton,
+                      onChannelAvatarPressed: (context, channel) {
+                        final isOneToOne = channel.isOneToOne;
+                        final currentUserId = StreamChat.of(context).currentUser?.id;
+
+                        final channelMembers = channel.state?.members ?? [];
+                        final otherUser = (isOneToOne && currentUserId != null)
+                            ? channelMembers.firstWhereOrNull((m) => m.userId != currentUserId)?.user
+                            : null;
+
+                        final router = GoRouter.of(context);
+
+                        if (otherUser != null) {
+                          router.pushNamed(
+                            Routes.CHAT_INFO_SCREEN.name,
+                            pathParameters: Routes.CHAT_INFO_SCREEN.params(channel),
+                            extra: otherUser,
+                          );
+                          return;
+                        }
+
+                        router.pushNamed(
+                          Routes.GROUP_INFO_SCREEN.name,
+                          pathParameters: Routes.GROUP_INFO_SCREEN.params(channel),
+                        );
+                      },
+                    );
+                  },
                 ),
               );
-            },
-          ),
-          GoRoute(
-            name: Routes.GROUP_INFO_SCREEN.name,
-            path: Routes.GROUP_INFO_SCREEN.path,
-            builder: (BuildContext context, GoRouterState state) {
-              return StreamChannel.value(
-                channel: _resolveChannel(context, state),
-                child: const GroupInfoScreen(),
+
+              // Opening another channel or thread in place replaces the page, so
+              // nothing carries over from the last one: neither its state, such
+              // as the composer's text, nor the menus open on it.
+              return AdaptiveSplitViewPage<void>(
+                key: ValueKey((channel.cid, parentMessage?.id)),
+                name: state.name,
+                child: page,
               );
             },
+            routes: [
+              GoRoute(
+                name: Routes.CHAT_INFO_SCREEN.name,
+                path: Routes.CHAT_INFO_SCREEN.path,
+                builder: (BuildContext context, GoRouterState state) {
+                  return StreamChannel.value(
+                    channel: _resolveChannel(context, state),
+                    child: ChatInfoScreen(
+                      user: state.extra as User?,
+                    ),
+                  );
+                },
+              ),
+              GoRoute(
+                name: Routes.GROUP_INFO_SCREEN.name,
+                path: Routes.GROUP_INFO_SCREEN.path,
+                builder: (BuildContext context, GoRouterState state) {
+                  return StreamChannel.value(
+                    channel: _resolveChannel(context, state),
+                    child: const GroupInfoScreen(),
+                  );
+                },
+              ),
+            ],
           ),
         ],
       ),
