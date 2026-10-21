@@ -43,7 +43,7 @@ void main() {
     expect(messages.map((it) => it.id), ['older', 'newer']);
   });
 
-  test('MessageDao.getMessagesByCid orders messages in the same millisecond by id', () async {
+  test('MessageDao.getMessagesByCid keeps messages in the same millisecond in a stable order', () async {
     await _insertChannel(database);
     await database.messageDao.bulkUpdateMessages({
       _cid: [
@@ -96,7 +96,7 @@ void main() {
     expect(replies.map((it) => it.id), ['older', 'newer']);
   });
 
-  test('MessageDao.getThreadMessagesByParentId orders replies in the same millisecond by id', () async {
+  test('MessageDao.getThreadMessagesByParentId keeps replies in the same millisecond in a stable order', () async {
     await _insertChannel(database);
     await database.messageDao.bulkUpdateMessages({
       _cid: [
@@ -134,7 +134,7 @@ void main() {
     expect(messages.map((it) => it.id), ['older', 'newer']);
   });
 
-  test('PinnedMessageDao.getMessagesByCid orders pinned messages in the same millisecond by id', () async {
+  test('PinnedMessageDao.getMessagesByCid keeps pinned messages in the same millisecond in a stable order', () async {
     await _insertChannel(database);
     await database.pinnedMessageDao.bulkUpdateMessages({
       _cid: [
