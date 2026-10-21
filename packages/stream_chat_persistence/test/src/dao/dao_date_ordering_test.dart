@@ -43,6 +43,19 @@ void main() {
     expect(messages.map((it) => it.id), ['older', 'newer']);
   });
 
+  test('MessageDao.getMessagesByCid compares a cursor stored with an offset by time', () async {
+    await _insertChannel(database);
+    await database.messageDao.bulkUpdateMessages({_cid: _messages()});
+    await _storeAsLocalMessage(database, 'messages', 'older');
+
+    final messages = await database.messageDao.getMessagesByCid(
+      _cid,
+      messagePagination: const PaginationParams(limit: 10, lessThan: 'older'),
+    );
+
+    expect(messages.map((it) => it.id), ['oldest']);
+  });
+
   test('MessageDao.getMessagesByCid keeps messages in the same millisecond in a stable order', () async {
     await _insertChannel(database);
     await database.messageDao.bulkUpdateMessages({
@@ -96,6 +109,21 @@ void main() {
     expect(replies.map((it) => it.id), ['older', 'newer']);
   });
 
+  test('MessageDao.getThreadMessagesByParentId compares a cursor stored with an offset by time', () async {
+    await _insertChannel(database);
+    await database.messageDao.bulkUpdateMessages({
+      _cid: [_parent(), ..._messages(parentId: 'parent')],
+    });
+    await _storeAsLocalMessage(database, 'messages', 'older');
+
+    final replies = await database.messageDao.getThreadMessagesByParentId(
+      'parent',
+      options: const PaginationParams(limit: 10, lessThan: 'older'),
+    );
+
+    expect(replies.map((it) => it.id), ['oldest']);
+  });
+
   test('MessageDao.getThreadMessagesByParentId keeps replies in the same millisecond in a stable order', () async {
     await _insertChannel(database);
     await database.messageDao.bulkUpdateMessages({
@@ -132,6 +160,19 @@ void main() {
     );
 
     expect(messages.map((it) => it.id), ['older', 'newer']);
+  });
+
+  test('PinnedMessageDao.getMessagesByCid compares a cursor stored with an offset by time', () async {
+    await _insertChannel(database);
+    await database.pinnedMessageDao.bulkUpdateMessages({_cid: _messages()});
+    await _storeAsLocalMessage(database, 'pinned_messages', 'older');
+
+    final messages = await database.pinnedMessageDao.getMessagesByCid(
+      _cid,
+      messagePagination: const PaginationParams(limit: 10, lessThan: 'older'),
+    );
+
+    expect(messages.map((it) => it.id), ['oldest']);
   });
 
   test('PinnedMessageDao.getMessagesByCid keeps pinned messages in the same millisecond in a stable order', () async {
