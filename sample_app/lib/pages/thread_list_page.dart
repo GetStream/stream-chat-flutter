@@ -1,9 +1,9 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../routes/routes.dart';
+import '../widgets/split_view.dart';
 
 class ThreadListPage extends StatefulWidget {
   const ThreadListPage({super.key});
@@ -25,6 +25,11 @@ class _ThreadListPageState extends State<ThreadListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final openThreadId = switch (AdaptiveSplitView.isExpandedOf(context)) {
+      true => GoRouterState.of(context).uri.queryParameters['pid'],
+      false => null,
+    };
+
     return ValueListenableBuilder<Set<String>>(
       valueListenable: controller.unseenThreadIds,
       builder: (context, unseenThreadIds, child) => StreamUnreadThreadsBanner(
@@ -38,46 +43,19 @@ class _ThreadListPageState extends State<ThreadListPage> {
       ),
       child: StreamThreadListView(
         controller: controller,
-        onThreadTap: (thread) async {
-          final channelCid = thread.channelCid;
+        itemBuilder: (context, threads, index, defaultWidget) {
+          return defaultWidget.copyWith(selected: threads[index].parentMessageId == openThreadId);
+        },
+        onThreadTap: (thread) {
+          final [type, id] = thread.channelCid.split(':');
+          final channel = StreamChat.of(context).client.channel(type, id: id);
 
-          final channel = StreamChat.of(context).client.channel(
-            channelCid.split(':')[0],
-            id: channelCid.split(':')[1],
-          );
-
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) {
-                return StreamChannel(
-                  channel: channel,
-                  initialMessageId: thread.draft?.parentId,
-                  child: BetterStreamBuilder<Message>(
-                    initialData: thread.parentMessage,
-                    stream: channel.state?.messagesStream
-                        .map(
-                          (messages) => messages.firstWhereOrNull(
-                            (m) => m.id == thread.parentMessage?.id,
-                          ),
-                        )
-                        .where((msg) => msg != null)
-                        .cast<Message>(),
-                    builder: (_, parentMessage) {
-                      return StreamThreadPage(
-                        parent: parentMessage,
-                        onViewInChannelTap: (message) {
-                          GoRouter.of(context).goNamed(
-                            Routes.CHANNEL_PAGE.name,
-                            pathParameters: Routes.CHANNEL_PAGE.params(channel),
-                            queryParameters: {'mid': message.id},
-                          );
-                        },
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
+          GoRouter.of(context).goNamed(
+            Routes.CHANNEL_PAGE.name,
+            pathParameters: Routes.CHANNEL_PAGE.params(channel),
+            queryParameters: {'mid': thread.parentMessageId, 'pid': thread.parentMessageId},
+            // The thread's parent may not be loaded in the channel yet.
+            extra: thread.parentMessage,
           );
         },
       ),

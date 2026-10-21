@@ -43,8 +43,10 @@ class _StreamChannelListItemSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
 
-    return Padding(
-      padding: EdgeInsets.all(spacing.md),
+    return StreamSafeArea(
+      top: false,
+      bottom: false,
+      minimum: EdgeInsets.all(spacing.md),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         spacing: spacing.md,
