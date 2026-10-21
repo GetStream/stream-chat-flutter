@@ -75,10 +75,7 @@ class MockChannel extends Mock implements Channel {
   }
 
   @override
-  // ignore: prefer_expression_function_bodies
-  Future<void> keyStroke([String? parentId]) async {
-    return;
-  }
+  Future<Result<void>> keyStroke([String? parentId]) async => const Result.success(null);
 
   @override
   Stream<Event> on([

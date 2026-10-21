@@ -3313,32 +3313,6 @@ void main() {
       });
     });
 
-    test('`.sendEvent`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      final event = Event(type: EventType.any);
-
-      when(
-        () => fakeChatApi.channel.sendEvent(
-          channelId,
-          channelType,
-          any(that: isSameEventAs(event)),
-        ),
-      ).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.sendEvent(channelId, channelType, event);
-      expect(res, isNotNull);
-
-      verify(
-        () => fakeChatApi.channel.sendEvent(
-          channelId,
-          channelType,
-          any(that: isSameEventAs(event)),
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
     test('StreamChatClient.enrichUrl sends the url and returns the scraped metadata', () async {
       const url = 'https://getstream.io/chat';
 

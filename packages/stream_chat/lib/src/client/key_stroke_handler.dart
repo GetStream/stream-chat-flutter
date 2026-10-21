@@ -1,7 +1,9 @@
 import 'dart:async';
 
-/// A class that manages buffering typing events and call [onTypingStarted] and
-/// [onTypingStopped] accordingly in a timed manner.
+import 'package:stream_core/stream_core.dart' show Failure, Result;
+
+/// A buffer that turns key strokes into timed [onStartTyping] and
+/// [onStopTyping] calls.
 ///
 /// This class is used by [Channel] to manage typing events.
 class KeyStrokeHandler {
@@ -21,40 +23,46 @@ class KeyStrokeHandler {
   /// the [onStartTyping] callback is automatically invoked again.
   final int startTypingResendInterval;
 
-  /// Called when a `typingStart` event needs to be send.
-  final Future<void> Function([String? parentId]) onStartTyping;
+  /// Called when a typing start event is due.
+  ///
+  /// A failure it returns cancels the stop its [call] scheduled and completes
+  /// that call with it, unless a later key stroke has taken over.
+  final Future<Result<void>> Function([String? parentId]) onStartTyping;
 
-  /// Called when a `typingStop` event needs to be send.
-  final Future<void> Function([String? parentId]) onStopTyping;
+  /// Called when a typing stop event is due.
+  ///
+  /// A failure it returns completes the pending [call] with it.
+  final Future<Result<void>> Function([String? parentId]) onStopTyping;
 
   Timer? _keyStrokeTimer;
   String? _currentParentId;
   DateTime? _lastTypingEvent;
-  Completer<void>? _keyStrokeCompleter;
+  Completer<Result<void>>? _keyStrokeCompleter;
 
-  Future<void> _startTyping(String? parentId) {
+  Future<Result<void>> _startTyping(String? parentId) {
     _currentParentId = parentId;
     _lastTypingEvent = DateTime.now();
     return onStartTyping(parentId);
   }
 
-  Future<void> _stopTyping(String? parentId) {
+  Future<Result<void>> _stopTyping(String? parentId) {
     _currentParentId = null;
     _lastTypingEvent = null;
     return onStopTyping(parentId);
   }
 
-  // Completes the key stroke completer if it is not yet completed.
+  // Completes the key stroke completer with a success if it is not yet
+  // completed.
   void _completeKeyStrokeCompleterIfRequired() {
     final completer = _keyStrokeCompleter;
-    if (completer != null && !completer.isCompleted) completer.complete();
+    if (completer != null && !completer.isCompleted) completer.complete(const Result.success(null));
   }
 
   // Completes the completer if available and not yet completed then creates a
   // new completer and returns it.
-  Completer<void> _resetKeyStrokeCompleter() {
+  Completer<Result<void>> _resetKeyStrokeCompleter() {
     _completeKeyStrokeCompleterIfRequired();
-    return _keyStrokeCompleter = Completer<void>();
+    return _keyStrokeCompleter = Completer<Result<void>>();
   }
 
   // Cancels the key stroke timer if it is running.
@@ -67,11 +75,7 @@ class KeyStrokeHandler {
   void cancel() {
     // If the user is typing, stop typing.
     // This is needed to prevent the user from being stuck in typing mode.
-    if (_lastTypingEvent != null) {
-      // We don't need to handle the error here
-      // ignore: no-empty-block
-      _stopTyping(_currentParentId).catchError((_) {});
-    }
+    if (_lastTypingEvent != null) _stopTyping(_currentParentId).ignore();
     _cancelKeyStrokeTimer();
     _completeKeyStrokeCompleterIfRequired();
   }
@@ -81,21 +85,26 @@ class KeyStrokeHandler {
   ///
   /// This is meant to be called every time the user presses a key. The method
   /// will manage requests and timer as needed.
-  Future<void> call([String? parentId]) async {
+  ///
+  /// Completes with the result of the [onStopTyping] call this schedules, or
+  /// with a success when a later key stroke or [cancel] takes over first.
+  /// Completes early with the failure of [onStartTyping], which also cancels
+  /// the scheduled stop. An error either callback throws completes this with
+  /// that error.
+  Future<Result<void>> call([String? parentId]) async {
     final completer = _resetKeyStrokeCompleter();
 
     _cancelKeyStrokeTimer();
 
-    _keyStrokeTimer = Timer(Duration(seconds: startTypingEventTimeout), () {
-      _stopTyping(parentId)
-          .then((_) {
-            if (completer.isCompleted) return;
-            completer.complete();
-          })
-          .onError((error, stackTrace) {
-            if (completer.isCompleted) return;
-            completer.completeError(error!, stackTrace);
-          });
+    final keyStrokeTimer = _keyStrokeTimer = Timer(Duration(seconds: startTypingEventTimeout), () {
+      _stopTyping(parentId).then(
+        (result) {
+          if (!completer.isCompleted) completer.complete(result);
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          if (!completer.isCompleted) completer.completeError(error, stackTrace);
+        },
+      );
     });
 
     // If the user is typing too long, it should call [onStartTyping] again.
@@ -105,11 +114,23 @@ class KeyStrokeHandler {
         now.difference(lastTypingEvent).inMilliseconds >
             // startTypingResendInterval in milliseconds
             startTypingResendInterval * 1000) {
-      _startTyping(parentId).onError((error, stackTrace) {
-        _cancelKeyStrokeTimer();
-        if (completer.isCompleted) return;
-        completer.completeError(error!, stackTrace);
-      });
+      // A start that fails cancels the stop it scheduled, but not one a later
+      // key stroke scheduled since.
+      void cancelOwnStop() {
+        if (identical(_keyStrokeTimer, keyStrokeTimer)) _cancelKeyStrokeTimer();
+      }
+
+      _startTyping(parentId).then(
+        (result) {
+          if (result is! Failure) return;
+          cancelOwnStop();
+          if (!completer.isCompleted) completer.complete(result);
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          cancelOwnStop();
+          if (!completer.isCompleted) completer.completeError(error, stackTrace);
+        },
+      );
     }
 
     return completer.future;

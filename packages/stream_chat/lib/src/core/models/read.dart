@@ -7,7 +7,7 @@ import 'user.dart';
 part 'read.g.dart';
 
 /// The class that defines a read event
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class Read extends Equatable {
   /// Constructor used for json serialization
   const Read({
@@ -39,9 +39,6 @@ class Read extends Equatable {
 
   /// The id of the last delivered message
   final String? lastDeliveredMessageId;
-
-  /// Serialize to json
-  Map<String, dynamic> toJson() => _$ReadToJson(this);
 
   /// Creates a copy of [Read] with specified attributes overridden.
   Read copyWith({

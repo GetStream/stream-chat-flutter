@@ -982,11 +982,13 @@ GROUPS = [
                                'POST /api/v2/chat/channels/read',
                                'POST /api/v2/chat/channels/delivered',
                                'GET /api/v2/chat/channels/{type}/{id}/messages',
-                               'POST /api/v2/chat/channels/{type}/{id}/message')),
+                               'POST /api/v2/chat/channels/{type}/{id}/message',
+                               'POST /api/v2/chat/channels/{type}/{id}/event')),
         goal='The biggest group, and the one every controller above it reads through `ChannelState`. '
              '[15](15-partial-updates.md) split the partial channel and member updates out of it, '
-             '[16](16-channel-lifecycle.md) hiding, showing and deleting a channel, and '
-             '[17](17-read-receipts.md) the read and delivery receipts.',
+             '[16](16-channel-lifecycle.md) hiding, showing and deleting a channel, '
+             '[17](17-read-receipts.md) the read and delivery receipts, and '
+             '[22](22-sending-events.md) sending events.',
         decisions=[
             '`ChannelState`, `ChannelModel` and `Member` are public, persisted, and rebuilt from WebSocket '
             'events. Keep ours and map.',
@@ -1467,6 +1469,48 @@ GROUPS = [
             'concept too.',
             'Runs last, after every group that maps a model.',
         ],
+    ),
+    dict(
+        num='22', slug='sending-events', title='Sending Events',
+        hand=[],
+        match=only_ops('POST /api/v2/chat/channels/{type}/{id}/event'),
+        goal='Move sending events — typing indicators, the AI stop event and custom events — ahead of '
+             '[11](11-channels-and-members.md): the call reads nothing into client state and answers only a '
+             '`duration` and an echo of the event.',
+        decisions=[],
+        taken=textwrap.dedent("""\
+            - **Split out of [11](11-channels-and-members.md), ahead of it.** Watchers learn of an event through the
+              WebSocket; the call itself reads nothing into client state.
+            - **The v2 route is the v1 handler.** `lib/chat/routes.go` mounts `SendEvent` in the shared `coreRoutes`;
+              it is not gated, in beta or deprecated. A live run delivered the same events to another user on v1 and
+              v2 for every SDK path that sends one.
+            - **`sendEvent` takes the request's fields instead of an `Event`:** `type`, `parentId` and `custom`, on
+              `StreamChatClient` and `Channel`. v2 reads custom data only from `custom`; watchers still receive it at
+              the root of the event.
+            - **`sendEvent` answers `EventResponse`, carrying only `duration`.** The spec's `event` is the whole
+              `WSEvent` union, with no list of what this endpoint echoes; mapping it onto `Event` belongs with the
+              WebSocket's move to v2. Exposing it later is additive; the mapper marks it with a TODO.
+            - **The convenience calls answer `Result<void>`:** `startTyping`, `stopTyping`, `keyStroke` and
+              `stopAIResponse`. The echo carries nothing the caller does not already have. With typing events
+              disabled the typing calls send nothing and return a success.
+            - **`KeyStrokeHandler`'s callbacks and its call return `Result<void>`,** so `keyStroke` and the composer's
+              `onError` still see a failed typing event. Changing the public types is a break, approved for this
+              group.
+            - **`Channel.dispose` sends the typing stop before dropping its state.** It used to drop the state first,
+              which disabled the typing check, so the stop was never sent.
+            - **A failed typing start cancels only its own scheduled stop,** not one a later key stroke scheduled
+              since; that later key stroke's `keyStroke` used to hang and its stop was never sent. An error a
+              `KeyStrokeHandler` callback throws completes the handler's call with it, as before.
+            - **Serializers left without a caller are removed:** `toJson` on `Event`, `ChannelState`, `Read`, `Draft`,
+              `DraftMessage` and `ChannelPushPreference`, and the encoding half of the poll, poll vote, reaction,
+              reminder and thread v1 converters, which become decode-only functions. `Member.toJson` stays: the
+              hand-written `queryMembers` still encodes members.
+            """),
+        risks=[
+            'A `try`/`catch` around `sendEvent`, a typing call or `stopAIResponse` still compiles but no longer '
+            'catches a failed call.',
+        ],
+        done=DONE.replace('- [ ]', '- [x]'),
     ),
 ]
 

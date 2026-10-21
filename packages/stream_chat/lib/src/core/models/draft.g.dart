@@ -19,13 +19,3 @@ Draft _$DraftFromJson(Map<String, dynamic> json) => Draft(
       ? null
       : Message.fromJson(json['quoted_message'] as Map<String, dynamic>),
 );
-
-Map<String, dynamic> _$DraftToJson(Draft instance) => <String, dynamic>{
-  'channel_cid': instance.channelCid,
-  'created_at': instance.createdAt.toIso8601String(),
-  'message': instance.message.toJson(),
-  'channel': ?instance.channel?.toJson(),
-  'parent_id': ?instance.parentId,
-  'parent_message': ?instance.parentMessage?.toJson(),
-  'quoted_message': ?instance.quotedMessage?.toJson(),
-};

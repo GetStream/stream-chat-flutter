@@ -13,7 +13,7 @@ const _kAiStateCheckingSources = 'AI_STATE_CHECKING_SOURCES';
 const _kAiStateExternalSources = 'AI_STATE_EXTERNAL_SOURCES';
 
 /// The class that contains the information about an event
-@JsonSerializable(includeIfNull: false)
+@JsonSerializable(createToJson: false)
 class Event extends WsEvent {
   /// Constructor used for json serialization
   Event({
@@ -115,11 +115,11 @@ class Event extends WsEvent {
   final Message? message;
 
   /// The poll sent with the event
-  @PollV1JsonConverter()
+  @JsonKey(fromJson: pollFromV1Json)
   final Poll? poll;
 
   /// The poll vote sent with the event
-  @PollVoteV1JsonConverter()
+  @JsonKey(fromJson: pollVoteFromV1Json)
   final PollVote? pollVote;
 
   /// The channel sent with the event
@@ -129,7 +129,7 @@ class Event extends WsEvent {
   final Member? member;
 
   /// The reaction sent with the event
-  @ReactionV1JsonConverter()
+  @JsonKey(fromJson: reactionFromV1Json)
   final Reaction? reaction;
 
   /// The number of unread messages for current user
@@ -172,7 +172,7 @@ class Event extends WsEvent {
   final String? messageId;
 
   /// The thread object sent with the event.
-  @ThreadV1JsonConverter()
+  @JsonKey(fromJson: threadFromV1Json)
   final Thread? thread;
 
   /// The number of unread thread messages.
@@ -194,7 +194,7 @@ class Event extends WsEvent {
   final Draft? draft;
 
   /// The message reminder sent with the event.
-  @MessageReminderV1JsonConverter()
+  @JsonKey(fromJson: messageReminderFromV1Json)
   final MessageReminder? reminder;
 
   /// Push notification preferences for the current user.
@@ -273,11 +273,6 @@ class Event extends WsEvent {
     'last_delivered_at',
     'last_delivered_message_id',
   ];
-
-  /// Serialize to json
-  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
-    _$EventToJson(this),
-  );
 
   /// Creates a copy of [Event] with specified attributes overridden.
   Event copyWith({

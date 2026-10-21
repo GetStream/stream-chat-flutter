@@ -9,6 +9,7 @@ import 'package:stream_core/stream_core.dart' show runSafely;
 import 'package:synchronized/synchronized.dart';
 
 import '../../../stream_chat.dart';
+import '../../repository/mapper/result_mapper.dart';
 
 /// The maximum time the incoming [Event.typingStart] event is valid before a
 /// [Event.typingStop] event is emitted automatically.
@@ -1448,10 +1449,22 @@ class Channel {
     );
   }
 
-  /// Send an event on this channel.
-  Future<EmptyResponse> sendEvent(Event event) {
+  /// Sends an event of the given [type] to this channel's watchers.
+  ///
+  /// The [type] names the event, such as [EventType.typingStart] or a custom
+  /// event's name.
+  ///
+  /// A [parentId] ties the event to the thread of that message, and the
+  /// [custom] data reaches the watchers alongside the event.
+  ///
+  /// Throws a [StateError] if this channel is not initialized.
+  Future<Result<EventResponse>> sendEvent({
+    required String type,
+    String? parentId,
+    Map<String, Object?>? custom,
+  }) {
     _checkInitialized();
-    return _client.sendEvent(id!, type, event);
+    return _client.sendEvent(id!, this.type, type: type, parentId: parentId, custom: custom);
   }
 
   final _pollLock = Lock();
@@ -1725,12 +1738,11 @@ class Channel {
 
   /// Sends an event to stop AI response generation, leaving the message in
   /// its current state.
-  Future<EmptyResponse> stopAIResponse() async {
-    return sendEvent(
-      Event(
-        type: EventType.aiIndicatorStop,
-      ),
-    );
+  ///
+  /// Throws a [StateError] if this channel is not initialized.
+  Future<Result<void>> stopAIResponse() async {
+    final result = await sendEvent(type: EventType.aiIndicatorStop);
+    return result.ignoreValue();
   }
 
   /// Sets this channel's [name], leaving every other field as it is.
@@ -2508,50 +2520,55 @@ class Channel {
     return canUseTypingEvents && currentUser.isTypingIndicatorsEnabled;
   }
 
-  /// Sends the [Event.typingStart] event and schedules a timer to invoke the
-  /// [Event.typingStop] event.
+  /// Sends a typing start event, and a typing stop once the user stops typing.
   ///
-  /// This is meant to be called every time the user presses a key.
-  Future<void> keyStroke([String? parentId]) async {
-    if (!_canSendTypingEvents) return;
+  /// Call this on every key press. A [parentId] ties the events to the thread
+  /// of that message.
+  ///
+  /// If typing events are disabled for this channel or by the current user's
+  /// privacy settings, nothing is sent and this returns a success.
+  Future<Result<void>> keyStroke([String? parentId]) async {
+    if (!_canSendTypingEvents) return const Result.success(null);
 
     _logger.v(() => 'KeyStroke received');
     return _keyStrokeHandler(parentId);
   }
 
   /// Sends the [EventType.typingStart] event.
-  Future<void> startTyping([String? parentId]) async {
-    if (!_canSendTypingEvents) return;
+  ///
+  /// A [parentId] ties the event to the thread of that message.
+  ///
+  /// If typing events are disabled for this channel or by the current user's
+  /// privacy settings, nothing is sent and this returns a success.
+  Future<Result<void>> startTyping([String? parentId]) async {
+    if (!_canSendTypingEvents) return const Result.success(null);
 
     _logger.d(() => 'start typing');
-    await sendEvent(
-      Event(
-        type: EventType.typingStart,
-        parentId: parentId,
-      ),
-    );
+    final result = await sendEvent(type: EventType.typingStart, parentId: parentId);
+    return result.ignoreValue();
   }
 
   /// Sends the [EventType.typingStop] event.
-  Future<void> stopTyping([String? parentId]) async {
-    if (!_canSendTypingEvents) return;
+  ///
+  /// A [parentId] ties the event to the thread of that message.
+  ///
+  /// If typing events are disabled for this channel or by the current user's
+  /// privacy settings, nothing is sent and this returns a success.
+  Future<Result<void>> stopTyping([String? parentId]) async {
+    if (!_canSendTypingEvents) return const Result.success(null);
 
     _logger.d(() => 'stop typing');
-    await sendEvent(
-      Event(
-        type: EventType.typingStop,
-        parentId: parentId,
-      ),
-    );
+    final result = await sendEvent(type: EventType.typingStop, parentId: parentId);
+    return result.ignoreValue();
   }
 
   /// Call this method to dispose the channel client.
   void dispose() {
+    _keyStrokeHandler.cancel();
     client.state.removeChannel('$cid');
     state?.dispose();
     state = null;
     _muteExpirationTimer?.cancel();
-    _keyStrokeHandler.cancel();
   }
 
   // Runs [block] and returns its result, or what it throws as a failure: a
