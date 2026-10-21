@@ -1,4 +1,4 @@
-## Upcoming
+## 9.32.0
 
 ✅ Added
 
