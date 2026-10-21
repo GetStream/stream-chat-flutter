@@ -78,7 +78,7 @@ class PinnedMessageReactionDao extends DatabaseAccessor<DriftChatDatabase>
       leftOuterJoin(users, pinnedMessageReactions.userId.equalsExp(users.id)),
     ])
       ..where(where)
-      ..orderBy([OrderingTerm.asc(pinnedMessageReactions.createdAt)]);
+      ..orderBy([OrderingTerm.asc(pinnedMessageReactions.createdAt.julianday)]);
     return rows.map((row) {
       final reactionEntity = row.readTable(pinnedMessageReactions);
       final userEntity = row.readTableOrNull(users);

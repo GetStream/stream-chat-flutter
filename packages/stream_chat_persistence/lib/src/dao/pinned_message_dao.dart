@@ -205,11 +205,11 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
 
     final orderBy = isForwardPagination
         ? [
-            OrderingTerm.asc(pinnedMessages.createdAt),
+            OrderingTerm.asc(pinnedMessages.createdAt.julianday),
             OrderingTerm.asc(pinnedMessages.id),
           ]
         : [
-            OrderingTerm.desc(pinnedMessages.createdAt),
+            OrderingTerm.desc(pinnedMessages.createdAt.julianday),
             OrderingTerm.desc(pinnedMessages.id),
           ];
 
