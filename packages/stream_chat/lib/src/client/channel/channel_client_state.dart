@@ -27,9 +27,13 @@ class ChannelClientState {
       ),
     );
 
-    _channelStateController = BehaviorSubject.seeded(channelState);
+    final seededState = channelState.copyWith(
+      pinnedMessages: MessageMerging.sortPinnedMessages(channelState.pinnedMessages),
+    );
+
+    _channelStateController = BehaviorSubject.seeded(seededState);
     // Update the persistence storage with the seeded channel state.
-    _debouncedUpdatePersistenceChannelState.call([channelState]);
+    _debouncedUpdatePersistenceChannelState.call([seededState]);
 
     final mutations = ChannelStateMutations(
       channel: _channel,
@@ -282,10 +286,10 @@ class ChannelClientState {
   Stream<List<Message>> get messagesStream =>
       channelStateStream.map((cs) => cs.messages ?? <Message>[]).distinct(const ListEquality().equals);
 
-  /// Channel pinned message list.
+  /// Channel pinned message list, newest pin first.
   List<Message> get pinnedMessages => _channelState.pinnedMessages ?? <Message>[];
 
-  /// Channel pinned message list as a stream.
+  /// Channel pinned message list as a stream, newest pin first.
   Stream<List<Message>> get pinnedMessagesStream =>
       channelStateStream.map((cs) => cs.pinnedMessages ?? <Message>[]).distinct(const ListEquality().equals);
 
@@ -568,6 +572,12 @@ class ChannelClientState {
       key: (read) => read.user.id,
     );
 
+    final newPinnedMessages = switch (updatedState.pinnedMessages) {
+      // The stored list is already in pin order.
+      final pinned when identical(pinned, _channelState.pinnedMessages) => pinned,
+      final pinned => MessageMerging.sortPinnedMessages(pinned),
+    };
+
     _channelState = _channelState.copyWith(
       messages: newMessages,
       channel: _channelState.channel?.merge(updatedState.channel),
@@ -577,7 +587,7 @@ class ChannelClientState {
       membership: updatedState.membership,
       read: newReads.toList(),
       draft: updatedState.draft,
-      pinnedMessages: updatedState.pinnedMessages,
+      pinnedMessages: newPinnedMessages,
       pendingMessages: updatedState.pendingMessages,
       pushPreferences: updatedState.pushPreferences,
       activeLiveLocations: updatedState.activeLiveLocations,

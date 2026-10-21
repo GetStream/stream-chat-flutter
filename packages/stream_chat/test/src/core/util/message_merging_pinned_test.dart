@@ -61,4 +61,74 @@ void main() {
 
     expect(ids(result), ['m3']);
   });
+
+  test('mergePinnedMessages merges a batch of pins by pin time', () {
+    final existing = [
+      message('t3', pinned: true, pinnedAt: DateTime(2024, 1, 3)),
+      message('t1', pinned: true, pinnedAt: DateTime(2024, 1, 1)),
+    ];
+    final incoming = [
+      message('t4', pinned: true, pinnedAt: DateTime(2024, 1, 4)),
+      message('t2', pinned: true, pinnedAt: DateTime(2024, 1, 2)),
+    ];
+
+    final result = MessageMerging.mergePinnedMessages(existing: existing, toMerge: incoming);
+
+    expect(ids(result), ['t4', 't3', 't2', 't1']);
+  });
+
+  test('sortPinnedMessages orders the pinned messages newest pin first', () {
+    final pinnedMessages = [
+      message('m1', pinned: true, pinnedAt: DateTime(2024, 1, 1)),
+      message('m2', pinned: true, pinnedAt: DateTime(2024, 1, 2)),
+    ];
+
+    final result = MessageMerging.sortPinnedMessages(pinnedMessages);
+
+    expect(ids(result!), ['m2', 'm1']);
+  });
+
+  test('sortPinnedMessages returns pinned messages already newest pin first as the same list', () {
+    final pinnedMessages = [
+      message('m1', pinned: true, pinnedAt: DateTime(2024, 1, 2)),
+      message('m2', pinned: true, pinnedAt: DateTime(2024, 1, 1)),
+    ];
+
+    final result = MessageMerging.sortPinnedMessages(pinnedMessages);
+
+    expect(result, same(pinnedMessages));
+  });
+
+  group('sortByPinnedAt', () {
+    for (final (description, a, b, matcher) in [
+      (
+        'orders a later pin before an earlier one',
+        message('later', pinned: true, pinnedAt: DateTime(2024, 1, 2)),
+        message('earlier', pinned: true, pinnedAt: DateTime(2024, 1, 1)),
+        isNegative,
+      ),
+      (
+        'orders a pinned message before one without a pin date',
+        message('pinned', pinned: true, pinnedAt: DateTime(2024, 1, 1)),
+        message('unpinned'),
+        isNegative,
+      ),
+      (
+        'orders a message without a pin date after a pinned one',
+        message('unpinned'),
+        message('pinned', pinned: true, pinnedAt: DateTime(2024, 1, 1)),
+        isPositive,
+      ),
+      (
+        'treats two messages without a pin date as equal',
+        message('unpinned-a'),
+        message('unpinned-b'),
+        isZero,
+      ),
+    ]) {
+      test(description, () {
+        expect(MessageMerging.sortByPinnedAt(a, b), matcher);
+      });
+    }
+  });
 }
