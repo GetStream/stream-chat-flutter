@@ -988,7 +988,7 @@ GROUPS = [
              '[15](15-partial-updates.md) split the partial channel and member updates out of it, '
              '[16](16-channel-lifecycle.md) hiding, showing and deleting a channel, '
              '[17](17-read-receipts.md) the read and delivery receipts, and '
-             '[22](22-channel-events.md) sending channel events.',
+             '[22](22-sending-events.md) sending events.',
         decisions=[
             '`ChannelState`, `ChannelModel` and `Member` are public, persisted, and rebuilt from WebSocket '
             'events. Keep ours and map.',
@@ -1471,10 +1471,10 @@ GROUPS = [
         ],
     ),
     dict(
-        num='22', slug='channel-events', title='Channel Events',
+        num='22', slug='sending-events', title='Sending Events',
         hand=[],
         match=only_ops('POST /api/v2/chat/channels/{type}/{id}/event'),
-        goal='Move sending channel events — typing indicators, the AI stop event and custom events — ahead of '
+        goal='Move sending events — typing indicators, the AI stop event and custom events — ahead of '
              '[11](11-channels-and-members.md): the call reads nothing into client state and answers only a '
              '`duration` and an echo of the event.',
         decisions=[],

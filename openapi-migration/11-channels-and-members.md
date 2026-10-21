@@ -1,6 +1,6 @@
 # 11 — Channels, Members & Sync
 
-**Goal:** The biggest group, and the one every controller above it reads through `ChannelState`. [15](15-partial-updates.md) split the partial channel and member updates out of it, [16](16-channel-lifecycle.md) hiding, showing and deleting a channel, [17](17-read-receipts.md) the read and delivery receipts, and [22](22-channel-events.md) sending channel events.
+**Goal:** The biggest group, and the one every controller above it reads through `ChannelState`. [15](15-partial-updates.md) split the partial channel and member updates out of it, [16](16-channel-lifecycle.md) hiding, showing and deleting a channel, [17](17-read-receipts.md) the read and delivery receipts, and [22](22-sending-events.md) sending events.
 
 **Size:** 12 hand-written method(s) across 2 file(s) → 13 generated operation(s).
 

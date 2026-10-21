@@ -1,6 +1,6 @@
-# 22 — Channel Events
+# 22 — Sending Events
 
-**Goal:** Move sending channel events — typing indicators, the AI stop event and custom events — ahead of [11](11-channels-and-members.md): the call reads nothing into client state and answers only a `duration` and an echo of the event.
+**Goal:** Move sending events — typing indicators, the AI stop event and custom events — ahead of [11](11-channels-and-members.md): the call reads nothing into client state and answers only a `duration` and an echo of the event.
 
 **Size:** 0 hand-written method(s) across 0 file(s) → 1 generated operation(s).
 

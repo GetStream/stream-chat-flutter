@@ -36,7 +36,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [19](19-user-blocking.md) | User Blocking — split out of 09 | 0 | 3 | ☑ |
 | [20](20-user-updates.md) | User Updates — split out of 09 | 0 | 2 | ☑ |
 | [21](21-custom-data.md) | Custom Data Check — no model still says `extraData` | — | — | ☐ |
-| [22](22-channel-events.md) | Channel Events — split out of 11 | 0 | 1 | ☑ |
+| [22](22-sending-events.md) | Sending Events — split out of 11 | 0 | 1 | ☑ |
 
 **Coverage:** 47 hand-written methods across 8 files, and all 129 generated operations, each claimed by exactly
 one group. Verified mechanically — see [Keeping this plan honest](#keeping-this-plan-honest).
@@ -232,7 +232,7 @@ surfaces before it reaches `Message` and `ChannelState`:
   `channels_mapper.dart` cannot map.
 - **17** is the read and delivery receipts, split out of 11 after 16. They answer only a `duration` and a read
   event, which waits for group 10's message mappers.
-- **22** is sending channel events, split out of 11 after 17. The call reads nothing into client state and its
+- **22** is sending events, split out of 11 after 17. The call reads nothing into client state and its
   echo waits for the WebSocket's move to v2.
 - **18** is the current user's unread counts, split out of 09 because it embeds no `User` and nothing persists it.
 - **19** is blocking and unblocking users and listing the blocked ones, split out of 09 because it embeds `User`

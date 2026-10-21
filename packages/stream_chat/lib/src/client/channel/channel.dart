@@ -2520,17 +2520,10 @@ class Channel {
     return canUseTypingEvents && currentUser.isTypingIndicatorsEnabled;
   }
 
-  /// Sends the [EventType.typingStart] event and schedules a timer to send the
-  /// [EventType.typingStop] event.
+  /// Sends a typing start event, and a typing stop once the user stops typing.
   ///
-  /// This is meant to be called every time the user presses a key. A [parentId]
-  /// ties the events to the thread of that message.
-  ///
-  /// Completes once the scheduled typing stop is sent, or a later key stroke
-  /// takes over, with the first failure among the events sent.
-  ///
-  /// If typing events are disabled for this channel or by the current user's
-  /// privacy settings, nothing is sent and this returns a success.
+  /// Call this on every key press. A [parentId] ties the events to the thread
+  /// of that message. Nothing is sent if typing events are disabled.
   Future<Result<void>> keyStroke([String? parentId]) async {
     if (!_canSendTypingEvents) return const Result.success(null);
 
@@ -2567,11 +2560,7 @@ class Channel {
   }
 
   /// Call this method to dispose the channel client.
-  ///
-  /// If the current user is typing, this sends the typing stop event first.
   void dispose() {
-    // Runs first, so the stop it sends for an ongoing typing indicator still
-    // sees this channel's state.
     _keyStrokeHandler.cancel();
     client.state.removeChannel('$cid');
     state?.dispose();

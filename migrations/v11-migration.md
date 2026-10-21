@@ -40,7 +40,7 @@ onto Stream's OpenAPI-generated API client.
     - [Partial Updates](#partial-updates)
     - [Channel Lifecycle](#channel-lifecycle)
     - [Read Receipts](#read-receipts)
-    - [Channel Events](#channel-events)
+    - [Sending Events](#sending-events)
     - [Unread Counts](#unread-counts)
     - [User Blocking](#user-blocking)
     - [User Updates](#user-updates)
@@ -105,7 +105,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`; the channel and member flags it carried are fields |
 | [**User Custom Data**](#user-custom-data) | `extraData` is `custom` on `User` and `OwnUser`; `name` is nullable and `nameOrId` falls back to the id; the user fields it carried are fields |
 | [**Message Custom Data**](#message-custom-data) | `extraData` is `custom` on `Message`, `Attachment`, `Reaction` and `DraftMessage`; a message's channel id, HTML, markup and deleted reply count, and an attachment's Giphy renditions, are fields |
-| [**Channel Events**](#channel-events) | `sendEvent` takes `type`, `parentId` and `custom` instead of an `Event` and returns a `Result<EventResponse>`; the typing calls, `stopAIResponse` and `KeyStrokeHandler` return a `Result<void>` instead of throwing |
+| [**Sending Events**](#sending-events) | `sendEvent` takes `type`, `parentId` and `custom` instead of an `Event` and returns a `Result<EventResponse>`; the typing calls, `stopAIResponse` and `KeyStrokeHandler` return a `Result<void>` instead of throwing |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -985,7 +985,7 @@ the same name for the rest.
 > and sending receipts answer their own envelope, so a field the API adds later reaches you without another
 > break. Marking unread answers nothing the API could extend, so it carries no value.
 
-### Channel Events
+### Sending Events
 
 **`sendEvent` takes the event's parts instead of an `Event`.** On `StreamChatClient` and `Channel`, pass the
 event's `type`, the `parentId` of the thread it belongs to and its `custom` data as arguments. A field you set
@@ -1828,7 +1828,7 @@ Work top to bottom; each item is independently verifiable.
 - [ ] If you pass a custom `onMarkChannelsDelivered` to `ChannelDeliveryReporter`, return a `Result` from it — see
       [Read Receipts](#read-receipts)
 - [ ] If you build a `KeyStrokeHandler` with your own callbacks, return a `Result` from them — see
-      [Channel Events](#channel-events)
+      [Sending Events](#sending-events)
 - [ ] If you persist models yourself, re-check nullability as endpoints move to the generated types, which are nullable wherever the API allows it
 - [ ] Replace `sort: null` on any list controller with `XSort.empty` if you relied on server ordering — see
       [Sorting](#sorting)
