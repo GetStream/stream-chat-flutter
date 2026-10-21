@@ -282,10 +282,10 @@ class ChannelClientState {
   Stream<List<Message>> get messagesStream =>
       channelStateStream.map((cs) => cs.messages ?? <Message>[]).distinct(const ListEquality().equals);
 
-  /// Channel pinned message list.
+  /// Channel pinned message list, oldest pin first.
   List<Message> get pinnedMessages => _channelState.pinnedMessages ?? <Message>[];
 
-  /// Channel pinned message list as a stream.
+  /// Channel pinned message list as a stream, oldest pin first.
   Stream<List<Message>> get pinnedMessagesStream =>
       channelStateStream.map((cs) => cs.pinnedMessages ?? <Message>[]).distinct(const ListEquality().equals);
 
@@ -568,6 +568,11 @@ class ChannelClientState {
       key: (read) => read.user.id,
     );
 
+    final newPinnedMessages = MessageMerging.replacePinnedMessages(
+      existing: _channelState.pinnedMessages,
+      updated: updatedState.pinnedMessages,
+    );
+
     _channelState = _channelState.copyWith(
       messages: newMessages,
       channel: _channelState.channel?.merge(updatedState.channel),
@@ -577,7 +582,7 @@ class ChannelClientState {
       membership: updatedState.membership,
       read: newReads.toList(),
       draft: updatedState.draft,
-      pinnedMessages: updatedState.pinnedMessages,
+      pinnedMessages: newPinnedMessages,
       pendingMessages: updatedState.pendingMessages,
       pushPreferences: updatedState.pushPreferences,
       activeLiveLocations: updatedState.activeLiveLocations,

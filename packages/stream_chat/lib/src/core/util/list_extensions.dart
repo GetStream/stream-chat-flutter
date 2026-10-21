@@ -9,6 +9,26 @@ import 'package:collection/collection.dart';
 
 /// Useful extension functions for sorted [List]s.
 extension SortedListX<T extends Object> on List<T> {
+  /// Creates a list sorted by [compare].
+  ///
+  /// Stable: elements [compare] calls equal keep the order they arrived in,
+  /// where `sorted` reorders them once the list is longer than 32.
+  ///
+  /// Returns the receiver when there is nothing to order, so a listener
+  /// comparing references can skip a pass that changed nothing.
+  /// Time complexity: O(n log n), in extra space the size of the list.
+  ///
+  /// ```dart
+  /// final byScore = users.sortedWith((a, b) => b.score.compareTo(a.score));
+  /// ```
+  List<T> sortedWith(Comparator<T> compare) {
+    if (length < 2) return this;
+
+    final sorted = [...this];
+    mergeSort(sorted, compare: compare);
+    return sorted;
+  }
+
   /// Inserts [element] into this sorted list at the correct position.
   ///
   /// Stable: equal elements land after existing ones. O(1) append/prepend

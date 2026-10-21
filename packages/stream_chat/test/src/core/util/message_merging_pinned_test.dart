@@ -61,4 +61,37 @@ void main() {
 
     expect(ids(result), ['m3']);
   });
+
+  test('replacePinnedMessages orders the updated pinned messages by pin time', () {
+    final updated = [
+      message('m1', pinned: true, pinnedAt: DateTime(2024, 1, 2)),
+      message('m2', pinned: true, pinnedAt: DateTime(2024, 1, 1)),
+    ];
+
+    final result = MessageMerging.replacePinnedMessages(existing: null, updated: updated);
+
+    expect(ids(result!), ['m2', 'm1']);
+  });
+
+  test('replacePinnedMessages returns updated pinned messages already in pin order as the same list', () {
+    final updated = [
+      message('m1', pinned: true, pinnedAt: DateTime(2024, 1, 1)),
+      message('m2', pinned: true, pinnedAt: DateTime(2024, 1, 2)),
+    ];
+
+    final result = MessageMerging.replacePinnedMessages(existing: null, updated: updated);
+
+    expect(result, same(updated));
+  });
+
+  test('replacePinnedMessages returns the existing pinned messages as they are', () {
+    final existing = [
+      message('m1', pinned: true, pinnedAt: DateTime(2024, 1, 2)),
+      message('m2', pinned: true, pinnedAt: DateTime(2024, 1, 1)),
+    ];
+
+    final result = MessageMerging.replacePinnedMessages(existing: existing, updated: existing);
+
+    expect(result, same(existing));
+  });
 }

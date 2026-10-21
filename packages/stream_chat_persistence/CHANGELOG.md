@@ -4,6 +4,10 @@
 
 - Poll translations are now stored in the offline cache.
 
+🔄 Changed
+
+- `getPinnedMessagesByCid` now returns pinned messages oldest pin first, and its pagination cursors compare pin time instead of creation time.
+
 ## 10.5.0
 
 🐞 Fixed

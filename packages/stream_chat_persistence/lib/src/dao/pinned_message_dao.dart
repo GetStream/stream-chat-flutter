@@ -263,8 +263,10 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
     return hydrated.firstOrNull;
   }
 
-  /// Returns all the messages of a channel by matching
-  /// [PinnedMessages.channelCid] with [parentId]
+  /// Returns the pinned messages of the channel [cid], oldest pin first.
+  ///
+  /// The cursors in [messagePagination] are compared by pin time, so
+  /// `lessThan` returns the messages pinned before that message.
   Future<List<Message>> getMessagesByCid(
     String cid, {
     bool fetchDraft = true,
@@ -295,11 +297,11 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
 
     final orderBy = isForwardPagination
         ? [
-            OrderingTerm.asc(pinnedMessages.createdAt),
+            OrderingTerm.asc(pinnedMessages.pinnedAt, nulls: NullsOrder.last),
             OrderingTerm.asc(pinnedMessages.id),
           ]
         : [
-            OrderingTerm.desc(pinnedMessages.createdAt),
+            OrderingTerm.desc(pinnedMessages.pinnedAt, nulls: NullsOrder.first),
             OrderingTerm.desc(pinnedMessages.id),
           ];
 
@@ -315,32 +317,34 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
           ..where(pinnedMessages.parentId.isNull() | pinnedMessages.showInChannel.equals(true))
           ..orderBy(orderBy);
 
-    // Cursor predicates compare the full `(createdAt, id)` tuple — the same
-    // key used in ORDER BY — so messages sharing a `createdAt` with the cursor
-    // fall on the correct side of the boundary. Filtering on `createdAt` alone
-    // would skip or repeat those siblings across pages.
+    // Cursor predicates compare the full `(pinnedAt, id)` tuple — the same
+    // key used in ORDER BY — so messages sharing a `pinnedAt` with the cursor
+    // fall on the correct side of the boundary. Messages without a `pinnedAt`
+    // sort after every other message.
     if (lessThanCursor case final c?) {
       query.where(
-        pinnedMessages.createdAt.isSmallerThanValue(c.createdAt) |
-            (pinnedMessages.createdAt.equals(c.createdAt) & pinnedMessages.id.isSmallerThanValue(c.id)),
+        pinnedMessages.pinnedAt.isSmallerThanValue(c.pinnedAt) |
+            (pinnedMessages.pinnedAt.equals(c.pinnedAt) & pinnedMessages.id.isSmallerThanValue(c.id)),
       );
     }
     if (lessThanOrEqualCursor case final c?) {
       query.where(
-        pinnedMessages.createdAt.isSmallerThanValue(c.createdAt) |
-            (pinnedMessages.createdAt.equals(c.createdAt) & pinnedMessages.id.isSmallerOrEqualValue(c.id)),
+        pinnedMessages.pinnedAt.isSmallerThanValue(c.pinnedAt) |
+            (pinnedMessages.pinnedAt.equals(c.pinnedAt) & pinnedMessages.id.isSmallerOrEqualValue(c.id)),
       );
     }
     if (greaterThanCursor case final c?) {
       query.where(
-        pinnedMessages.createdAt.isBiggerThanValue(c.createdAt) |
-            (pinnedMessages.createdAt.equals(c.createdAt) & pinnedMessages.id.isBiggerThanValue(c.id)),
+        pinnedMessages.pinnedAt.isNull() |
+            pinnedMessages.pinnedAt.isBiggerThanValue(c.pinnedAt) |
+            (pinnedMessages.pinnedAt.equals(c.pinnedAt) & pinnedMessages.id.isBiggerThanValue(c.id)),
       );
     }
     if (greaterThanOrEqualCursor case final c?) {
       query.where(
-        pinnedMessages.createdAt.isBiggerThanValue(c.createdAt) |
-            (pinnedMessages.createdAt.equals(c.createdAt) & pinnedMessages.id.isBiggerOrEqualValue(c.id)),
+        pinnedMessages.pinnedAt.isNull() |
+            pinnedMessages.pinnedAt.isBiggerThanValue(c.pinnedAt) |
+            (pinnedMessages.pinnedAt.equals(c.pinnedAt) & pinnedMessages.id.isBiggerOrEqualValue(c.id)),
       );
     }
 
@@ -422,22 +426,22 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
     );
   }
 
-  /// Returns the `(createdAt, id)` cursor for the pinned message with [id] in
-  /// the local cache, or `null` if [id] is null, the message isn't cached, or
-  /// isn't visible in the channel (i.e. a thread reply with
-  /// `showInChannel = false`).
-  Future<({DateTime createdAt, String id})?> _lookupCursor(String? id) async {
+  // Returns the `(pinnedAt, id)` cursor for the pinned message with [id] in
+  // the local cache, or `null` if [id] is null, the message isn't cached or
+  // has no pin date, or isn't visible in the channel (i.e. a thread reply with
+  // `showInChannel = false`).
+  Future<({DateTime pinnedAt, String id})?> _lookupCursor(String? id) async {
     if (id == null) return null;
-    final createdAt =
+    final pinnedAt =
         await (selectOnly(pinnedMessages)
-              ..addColumns([pinnedMessages.createdAt])
+              ..addColumns([pinnedMessages.pinnedAt])
               ..where(pinnedMessages.id.equals(id))
               ..where(
                 pinnedMessages.parentId.isNull() | pinnedMessages.showInChannel.equals(true),
               ))
-            .map((row) => row.read(pinnedMessages.createdAt))
+            .map((row) => row.read(pinnedMessages.pinnedAt))
             .getSingleOrNull();
-    if (createdAt == null) return null;
-    return (createdAt: createdAt, id: id);
+    if (pinnedAt == null) return null;
+    return (pinnedAt: pinnedAt, id: id);
   }
 }
