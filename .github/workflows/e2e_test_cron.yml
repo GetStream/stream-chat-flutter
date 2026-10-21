@@ -26,11 +26,20 @@ env:
 jobs:
   android:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    # The coverage entry starts the app once per test, which takes well over an hour.
+    timeout-minutes: 180
+    permissions:
+      contents: read
+      actions: read # downloads the previous map, for the coverage of failed tests
     strategy:
       fail-fast: false
       matrix:
-        api-level: [34, 31, 28]
+        include:
+          - api-level: 36
+            coverage: true # builds the map that selects e2e tests on pull requests
+          - api-level: 34
+          - api-level: 31
+          - api-level: 28
     steps:
       - uses: actions/checkout@v7
 
@@ -63,7 +72,19 @@ jobs:
           arch: x86_64
           profile: pixel_6
           emulator-options: -no-snapshot-save -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect
-          script: cd sample_app/android && bundle exec fastlane run_e2e_test device:emulator-5554 mock_server_branch:${{ env.mock_server_branch }}
+          script: cd sample_app/android && bundle exec fastlane run_e2e_test device:emulator-5554 coverage:${{ matrix.coverage == true }} mock_server_branch:${{ env.mock_server_branch }}
+
+      - name: Build the coverage map
+        if: matrix.coverage && !cancelled()
+        working-directory: sample_app/android
+        run: bundle exec fastlane build_e2e_coverage_map
+
+      - uses: actions/upload-artifact@v7
+        if: matrix.coverage && !cancelled()
+        with:
+          name: e2e-coverage-map
+          path: sample_app/build/e2e_coverage_map.json
+          retention-days: 14
 
       - name: Attach videos to failed tests
         if: failure()

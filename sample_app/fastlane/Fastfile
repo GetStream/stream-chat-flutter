@@ -6,35 +6,62 @@ require 'json'
 require 'securerandom'
 require 'fileutils'
 require File.expand_path('e2e_log', __dir__)
+require File.expand_path('e2e_tests', __dir__)
 import File.expand_path('Allurefile', __dir__)
 
 mock_server_repo_name = 'stream-chat-test-mock-server'
 mock_server_driver_port = ENV['MOCK_DRIVER_PORT'] || '4568'
 github_repo = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-chat-flutter'
+e2e_coverage_map_artifact = 'e2e-coverage-map'
 @force_check = false
+@impact = nil
 
 def root_path
   Dir.pwd.sub(/.*\Kfastlane/, '').sub(/.*\Kandroid/, '').sub(/.*\Kios/, '').sub(/.*\K\/\//, '')
+end
+
+def repo_root
+  File.expand_path('..', root_path)
+end
+
+def e2e_selection_path
+  "#{root_path}/build/e2e_selection.json"
+end
+
+def e2e_coverage_path
+  "#{root_path}/build/e2e-coverage"
 end
 
 def ios_device?(device)
   device.to_s.match?(/\A[0-9A-F]{8}-[0-9A-F]{4}-/i)
 end
 
-def batch_targets(targets, batch:, batch_count:)
-  return targets if batch.nil? || batch_count.to_i <= 1
-  # `each_slice(0)` raises, and a zero slice size is exactly what an empty list computes.
-  return [] if targets.empty?
+# `runs` are `[test file, test names or nil for the whole file]` pairs.
+def batch_targets(runs, batch:, batch_count:)
+  return runs if batch.nil? || batch_count.to_i <= 1
+  return [] if runs.empty?
 
   count = batch_count.to_i
   index = batch.to_i
-  slice = targets.each_slice((targets.size / count.to_f).ceil).to_a[index] || []
+  # Balanced by test count, as the files differ a lot in size: the biggest run goes to the
+  # lightest batch. Every batch job computes the same split, as ties keep the run order.
+  tests_per_file = E2ETests.list('integration_test').group_by { |id| E2ETests.file(id, 'integration_test') }.transform_values(&:size)
+  loads = Array.new(count, 0)
+  batch_of = {}
+  runs.each_with_index
+      .sort_by { |(target, names), i| [-(names&.size || tests_per_file.fetch(target, 1)), i] }
+      .each do |(target, names), i|
+        lightest = loads.index(loads.min)
+        batch_of[i] = lightest
+        loads[lightest] += names&.size || tests_per_file.fetch(target, 1)
+      end
+  slice = runs.select.with_index { |_, i| batch_of[i] == index }
 
   if slice.empty?
-    UI.important("Batch #{index + 1}/#{count}: no test files fell into this batch — nothing to run")
+    UI.important("Batch #{index + 1}/#{count}: no runs fell into this batch — nothing to run")
   else
-    UI.important("Batch #{index + 1}/#{count}: running #{slice.size} of #{targets.size} test files " \
-                 "(#{slice.map { |t| File.basename(t) }.join(', ')})")
+    UI.important("Batch #{index + 1}/#{count}: #{slice.size} of #{runs.size} runs " \
+                 "(#{slice.map { |target, names| names ? "#{File.basename(target)}: #{names.join(', ')}" : File.basename(target) }.join('; ')})")
   end
 
   slice
@@ -150,11 +177,18 @@ lane :stop_mock_server do
   Net::HTTP.get_response(URI("http://localhost:#{mock_server_driver_port}/stop")) rescue nil
 end
 
+# Options: `selection` runs the tests select_e2e_tests chose (the file it wrote);
+# `coverage` runs every test in its own app process and writes its lcov report
+# to build/e2e-coverage/<test file>/<test>/, for build_e2e_coverage_map.
 lane :run_e2e_test do |options|
-  next unless is_check_required(sources: sources_matrix[:e2e], force_check: @force_check)
+  selection = options[:selection] && JSON.parse(File.read(File.expand_path(options[:selection], root_path)))
+  next if selection && selection['tests'].empty?
+  next unless selection || options[:coverage] || is_check_required(sources: @impact[:e2e][:sources], force_check: @force_check, required_checks: @impact[:e2e][:checks])
 
   ios = options[:platform] == 'ios' || ios_device?(options[:device])
   device = options[:device]
+  coverage = options[:coverage]
+  FileUtils.rm_rf(e2e_coverage_path) if coverage
 
   start_mock_server(local_server: options[:local_server], branch: options[:mock_server_branch])
 
@@ -173,27 +207,39 @@ lane :run_e2e_test do |options|
   FileUtils.rm_rf(videos_dir)
   FileUtils.mkdir_p(videos_dir)
   videos = {} # test-file basename => [ { path:, started_at_ms:, ended_at_ms: }, ... ] (one per attempt)
+  failed = []
 
   begin
     Dir.chdir(root_path) do
-      targets = options[:target] ? [options[:target]] : Dir['integration_test/*_test.dart'].sort
-      UI.user_error!('No e2e test files found') if targets.empty?
+      runs =
+        if coverage
+          # The VM reports coverage per app process, so every test needs its own `flutter test`.
+          E2ETests.list('integration_test', platform: ios ? 'ios' : 'android').map do |id|
+            [E2ETests.file(id, 'integration_test'), [E2ETests.name(id)]]
+          end
+        elsif selection && !selection['run_all']
+          selection['tests'].group_by { |id| E2ETests.file(id, 'integration_test') }
+                            .map { |target, ids| [target, ids.map { |id| E2ETests.name(id) }] }
+        else
+          (options[:target] ? [options[:target]] : Dir['integration_test/*_test.dart'].sort).map { |target| [target, nil] }
+        end
+      UI.user_error!('No e2e test files found') if runs.empty?
 
-      targets = batch_targets(targets, batch: options[:batch], batch_count: options[:batch_count])
-      next if targets.empty?
+      runs = batch_targets(runs, batch: options[:batch], batch_count: options[:batch_count])
+      next if runs.empty?
 
       retries = (options[:retries] || 2).to_i
 
-      failed = []
       first_attempt = true
-      targets.each do |target|
+      runs.each_with_index do |(target, selected), run_index|
         test_name = File.basename(target, '.dart')
 
         attempt_log = "#{videos_dir}/#{test_name}.attempt.log"
+        coverage_dir = "#{e2e_coverage_path}/#{test_name}/#{selected.first}" if coverage
 
         # nil => run the whole file (first attempt);
-        # an array => re-run only those test descriptions.
-        only = nil
+        # an array => run only those test descriptions.
+        only = selected
 
         ok = false
         attempt = 0
@@ -213,8 +259,13 @@ lane :run_e2e_test do |options|
           end
 
           flags << "--name #{Shellwords.escape(E2ELog.name_alternation(only))}" if only
-          # Per-attempt path so retries don't overwrite earlier recordings.
-          rec = start_screen_recording(ios: ios, device: device, path: "#{videos_dir}/#{test_name}.attempt#{attempt}.mp4")
+          if coverage
+            flags << "--coverage --coverage-path #{Shellwords.escape("#{coverage_dir}/lcov.info")}"
+            flags << "--coverage-package #{Shellwords.escape('^(sample_app|stream_chat\w*)$')}"
+          end
+          # Per-run and per-attempt path so neither the next run of the same file
+          # (one per test in coverage mode) nor a retry overwrites a recording.
+          rec = start_screen_recording(ios: ios, device: device, path: "#{videos_dir}/#{test_name}.run#{run_index}.attempt#{attempt}.mp4")
 
           File.write(attempt_log, '')
           cmd = "flutter test #{flags.join(' ')} 2>&1 | tee -a #{Shellwords.escape(log_file)} | " \
@@ -269,20 +320,32 @@ lane :run_e2e_test do |options|
           # green retry of that one test would bury the tests still owed a result.
           only = (E2ELog.failed_test_names(attempt_log) + phantom).uniq
           if only.empty?
-            only = nil
-            UI.important("#{target} failed (attempt #{attempt}/#{retries + 1}); retrying whole file…")
+            only = selected
+            UI.important("#{target} failed (attempt #{attempt}/#{retries + 1}); " \
+                         "retrying #{selected ? 'the selected tests' : 'whole file'}…")
           else
             UI.important("#{target} failed (attempt #{attempt}/#{retries + 1}); " \
                          "retrying #{only.size} failed test(s): #{only.join(', ')}")
           end
         end
 
-        failed << target unless ok
+        if coverage
+          # A test that never reported a result (skipped, or the app died first) ran no test code.
+          FileUtils.rm_rf(coverage_dir) unless E2ELog.reported_test_names(attempt_log).include?(selected.first)
+          failed << "#{test_name}/#{selected.first}" unless ok
+        else
+          failed << target unless ok
+        end
       end
 
       UI.user_error!("E2E failed after retries: #{failed.join(', ')}") unless failed.empty?
     end
   ensure
+    # build_e2e_coverage_map keeps the previous coverage of these, as a failed test stops early.
+    if coverage
+      FileUtils.mkdir_p(e2e_coverage_path)
+      File.write("#{e2e_coverage_path}/failed_tests_#{options[:batch] || 0}.json", JSON.generate(failed))
+    end
     collect_allure_results(log_file: log_file) rescue nil
     File.write("#{videos_dir}/manifest.json", JSON.generate(videos)) unless videos.empty?
     stop_mock_server
@@ -304,9 +367,84 @@ lane :attach_videos do
   attach_videos_to_failed_results(results_dir: allure_results_path, videos: videos)
 end
 
-private_lane :sources_matrix do
+# Picks the e2e tests a pull request can affect from the nightly coverage map and
+# writes them to build/e2e_selection.json for `run_e2e_test selection:`. Outputs
+# `e2e_batches`, the batch matrix of the e2e jobs (empty when nothing runs).
+lane :select_e2e_tests do |options|
+  # A manual run's tip may be a merge commit, which the selection would mistake for a pull request merge.
+  run_all_reason = 'not a pull request' if is_ci && ENV['GITHUB_EVENT_NAME'] != 'pull_request'
+  required = run_all_reason || is_check_required(sources: @impact[:e2e][:sources], force_check: @force_check, required_checks: @impact[:e2e][:checks])
+  all_tests = required ? E2ETests.list("#{root_path}/integration_test") : []
+
+  if run_all_reason
+    UI.important("Running all #{all_tests.size} tests: #{run_all_reason}")
+    selection = { 'run_all' => true, 'tests' => all_tests, 'reasons' => [run_all_reason] }
+  elsif required
+    selection = select_impacted_tests(
+      all_tests: all_tests,
+      # Relative to sample_app, like `run_e2e_test selection:`; the action itself reads from the repository root.
+      coverage_map: options[:coverage_map] && File.expand_path(options[:coverage_map], root_path),
+      coverage_map_artifact: e2e_coverage_map_artifact,
+      coverage_map_branch: 'master',
+      diff_base: options[:diff_base],
+      changed_files: options[:changed_files]&.split(','),
+      source_root: repo_root,
+      source_paths: ['sample_app/lib', 'packages/*/lib/**/*'],
+      test_paths: ['sample_app/integration_test/*_test.dart'],
+      ignore_paths: ['**/*.md'],
+      run_all_paths: [
+        'sample_app/integration_test/allure',
+        'sample_app/integration_test/mock_server',
+        'sample_app/integration_test/pages',
+        'sample_app/integration_test/robots',
+        'sample_app/integration_test/support',
+        'sample_app/android',
+        'sample_app/ios',
+        'sample_app/assets',
+        'sample_app/e2e_stubs',
+        'sample_app/pubspec.yaml',
+        'sample_app/pubspec_overrides.e2e.yaml'
+      ],
+      # Changes to code nearly every test runs (launch, login, channel list) take one test per file; the nightly run covers the rest.
+      hot_test_ratio: 0.9
+    )
+  else
+    selection = { 'run_all' => false, 'tests' => [], 'reasons' => ['no e2e sources changed'] }
+  end
+  FileUtils.mkdir_p(File.dirname(e2e_selection_path))
+  File.write(e2e_selection_path, JSON.pretty_generate(selection))
+
+  # run_e2e_test batches by test file, so there are no more batches than files.
+  files = selection['tests'].map { |id| E2ETests.file(id, 'integration_test') }.uniq
+  batches = (0...[files.size, 3].min).to_a
+  UI.important("E2E batches: #{batches.size}")
+  File.write(ENV['GITHUB_OUTPUT'], "e2e_batches=#{batches.to_json}\n", mode: 'a') if ENV['GITHUB_OUTPUT']
+  batches
+end
+
+# Builds the coverage map select_e2e_tests reads from the lcov reports of
+# `run_e2e_test coverage:true` (every batch's, merged into one folder on CI).
+lane :build_e2e_coverage_map do |options|
+  coverage_dir = options[:coverage_dir] ? File.expand_path(options[:coverage_dir], root_path) : e2e_coverage_path
+  failed_tests = Dir["#{coverage_dir}/failed_tests_*.json"].flat_map { |file| JSON.parse(File.read(file)) }
+  build_test_coverage_map(
+    coverage_dir: coverage_dir,
+    lcov_base_dir: root_path,
+    source_root: repo_root,
+    output_path: "#{root_path}/build/e2e_coverage_map.json",
+    failed_tests: failed_tests,
+    previous_map_artifact: e2e_coverage_map_artifact,
+    previous_map_branch: 'master'
+  )
+end
+
+# What each gated check runs on: a pull request runs it when `sources` changed, or
+# when its `checks` have not passed yet on a commit with the current sources.
+lane :impact_analysis do
   {
-    e2e: ['sample_app', 'packages'],
-    ruby: ['sample_app/fastlane', 'sample_app/android/fastlane', 'sample_app/ios/fastlane'],
+    e2e: {
+      sources: ['sample_app', 'packages'],
+      checks: ['E2E result']
+    }
   }
 end

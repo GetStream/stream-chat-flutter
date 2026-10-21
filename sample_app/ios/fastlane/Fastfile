@@ -6,6 +6,7 @@ default_platform(:ios)
 
 # Xcode selection is the workflows' job, via .github/actions/setup-xcode.
 before_all do |lane|
+  @impact = impact_analysis
   if is_ci
     setup_ci
     setup_git_config
