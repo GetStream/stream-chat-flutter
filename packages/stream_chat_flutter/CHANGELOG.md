@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed a voice recording sent as a reply without text showing inside a filled container instead of directly on the message bubble.
+
 ## 10.6.0
 
 ✅ Added
