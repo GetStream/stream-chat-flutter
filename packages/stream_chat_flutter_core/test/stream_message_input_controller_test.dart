@@ -491,6 +491,28 @@ void main() {
         expect(find.text(text), findsOneWidget);
       },
     );
+
+    testWidgets('restores the mentioned users', (tester) async {
+      final stateKey = GlobalKey<_RestorableWidgetState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          restorationScopeId: 'app',
+          home: _RestorableWidget(key: stateKey),
+        ),
+      );
+
+      stateKey.currentState!.controller.value
+        ..text = 'Hi @Bob'
+        ..addMentionedUser(User(id: 'bob', name: 'Bob'));
+      await tester.pumpAndSettle();
+
+      await tester.restartAndRestore();
+
+      final mentionedUsers =
+          stateKey.currentState!.controller.value.mentionedUsers;
+      expect(mentionedUsers.single.id, 'bob');
+      expect(mentionedUsers.single.name, 'Bob');
+    });
   });
 }
 

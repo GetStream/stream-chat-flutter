@@ -8,6 +8,7 @@
 
 - Fixed `StreamDraftListController.deleteDraft` removing the wrong draft.
 - Fixed `StreamPollVoteListController` adding votes and comments from other polls in the same channel.
+- Fixed `StreamRestorableMessageInputController` failing to restore a message that mentions users.
 
 ## 9.31.0
 

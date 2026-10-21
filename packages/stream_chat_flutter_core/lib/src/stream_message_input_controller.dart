@@ -374,7 +374,16 @@ class StreamRestorableMessageInputController
   }
 
   @override
-  String toPrimitives() => json.encode(value.message);
+  String toPrimitives() => json.encode(_messageToJson(value.message));
+
+  // Message.toJson keeps only the ids of the mentioned users, which
+  // Message.fromJson cannot read back, so the full users are kept instead.
+  Map<String, dynamic> _messageToJson(Message message) => {
+        ...message.toJson(),
+        'mentioned_users': [
+          ...message.mentionedUsers.map((it) => it.toJson()),
+        ],
+      };
 }
 
 Timer _setPeriodicTimer(
