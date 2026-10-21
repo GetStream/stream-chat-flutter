@@ -796,6 +796,10 @@ class Channel {
 
       return response;
     } catch (e) {
+      if (e is StreamChatNetworkError && e.isMessageAlreadyExistsError) {
+        return SendMessageResponse()..message = _markMessageAsSent(message);
+      }
+
       if (e is StreamChatNetworkError && e.isRetriable) {
         state!._retryQueue.add([
           message.copyWith(
@@ -807,6 +811,27 @@ class Channel {
 
       rethrow;
     }
+  }
+
+  Message _markMessageAsSent(Message message) {
+    if (state == null) return message.copyWith(state: MessageState.sent);
+
+    final localStateMessage = _findMessageInLocalState(message.id) ?? message;
+    final sentMessage = localStateMessage.copyWith(
+      createdAt:
+          localStateMessage.remoteCreatedAt ?? localStateMessage.localCreatedAt,
+      state: MessageState.sent,
+    );
+
+    state!.updateMessage(sentMessage);
+    return sentMessage;
+  }
+
+  Message? _findMessageInLocalState(String messageId) {
+    final threadMessages = state!.threads.values.expand((messages) => messages);
+    return state!.messages
+        .followedBy(threadMessages)
+        .firstWhereOrNull((it) => it.id == messageId);
   }
 
   final _updateMessageLock = Lock();

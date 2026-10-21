@@ -1,6 +1,8 @@
 ## 9.32.0
 
-- Updated `stream_chat` dependency to [`9.32.0`](https://pub.dev/packages/stream_chat/changelog).
+🐞 Fixed
+
+- Fixed messages, reactions, members, reads, poll votes and channels loaded from the offline cache coming back out of order when some of them were created on the device.
 
 ## 9.31.0
 
