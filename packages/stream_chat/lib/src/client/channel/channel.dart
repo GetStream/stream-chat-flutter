@@ -662,7 +662,8 @@ class Channel {
         }
 
         final updatedMessage = message!.copyWith(attachments: newAttachments);
-        state?.updateMessage(updatedMessage);
+        // A message deleted mid-upload is left out of the state.
+        state?.updateMessage(updatedMessage, upsert: false);
         // updating original message for next iteration
         message = message!.merge(updatedMessage);
       }
@@ -923,8 +924,8 @@ class Channel {
 
       return response;
     } catch (e) {
-      // Cancelled by a deletion or by a newer call for the same message, which
-      // now owns its state.
+      // Cancelled by a newer call for the same message, which now owns its
+      // state.
       if (e case StreamNetworkException(isCancelled: true)) rethrow;
 
       final failedMessage = message.copyWith(
@@ -1118,24 +1119,31 @@ class Channel {
       localDeletedAt: DateTime.now(),
       state: MessageState.hardDeleted,
     );
-    // No `message.deleted` arrives for such a message, so one is emitted here,
-    // which also removes it from the state.
-    final messageDeletedEvent = Event(
-      type: EventType.messageDeleted,
-      cid: cid,
-      channelId: id,
-      channelType: type,
-      message: deleted,
-      hardDelete: true,
-    );
 
-    _client.handleEvent(messageDeletedEvent);
+    state?.deleteMessage(deleted, hardDelete: true);
 
-    // Removing the attachments upload completer to stop the `sendMessage`
-    // waiting for attachments to complete.
+    // Stopping the attachment uploads still running for the message, and the
+    // `sendMessage` or `updateMessage` waiting for them to complete.
+    for (final attachment in message.attachments) {
+      final cancelToken = _cancelableAttachmentUploadRequest[attachment.id];
+      if (cancelToken == null || cancelToken.isCancelled) continue;
+      cancelToken.cancel();
+    }
     final completer = _messageAttachmentsUploadCompleter.remove(message.id);
     completer?.completeError(
       const StreamNetworkException(message: 'Message deleted', isCancelled: true),
+    );
+
+    // Nothing else reports the deletion of a message that only exists locally.
+    _client.handleEvent(
+      Event(
+        type: EventType.messageDeleted,
+        cid: cid,
+        channelId: id,
+        channelType: type,
+        message: deleted,
+        hardDelete: true,
+      ),
     );
   }
 
