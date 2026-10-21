@@ -1,18 +1,12 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'paged_value_notifier.dart';
 import 'stream_draft_list_event_handler.dart';
 
 /// The default channel page limit to load.
 const defaultDraftPagedLimit = 10;
-
-/// The default sort used for the draft list.
-const defaultDraftListSort = [
-  SortOption<Draft>.desc(DraftSortKey.createdAt),
-];
 
 const _kDefaultBackendPaginationLimit = 30;
 
@@ -32,10 +26,10 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
     required this.client,
     StreamDraftListEventHandler? eventHandler,
     this.filter,
-    this.sort = defaultDraftListSort,
+    List<DraftSort>? sort,
     this.limit = defaultDraftPagedLimit,
   }) : _activeFilter = filter,
-       _activeSort = sort,
+       sort = sort ?? DraftSort.defaultSort,
        _eventHandler = eventHandler ?? StreamDraftListEventHandler(),
        super(const PagedValue.loading());
 
@@ -45,10 +39,10 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
     required this.client,
     StreamDraftListEventHandler? eventHandler,
     this.filter,
-    this.sort = defaultDraftListSort,
+    List<DraftSort>? sort,
     this.limit = defaultDraftPagedLimit,
   }) : _activeFilter = filter,
-       _activeSort = sort,
+       sort = sort ?? DraftSort.defaultSort,
        _eventHandler = eventHandler ?? StreamDraftListEventHandler();
 
   /// The Stream client used to perform the queries.
@@ -61,8 +55,8 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
   ///
   /// You can query on any of the custom fields you've defined on the
   /// [Draft].
-  final Filter? filter;
-  Filter? _activeFilter;
+  final DraftFilter? filter;
+  DraftFilter? _activeFilter;
 
   /// The sorting used for the drafts matching the filters.
   ///
@@ -70,8 +64,11 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final SortOrder<Draft>? sort;
-  SortOrder<Draft>? _activeSort;
+  ///
+  /// Defaults to [DraftSort.defaultSort]; pass [DraftSort.empty] to leave the ordering
+  /// to the API.
+  final List<DraftSort> sort;
+  late List<DraftSort> _activeSort = sort;
 
   /// The limit to apply to the poll vote list. The default is set to
   /// [defaultPollVotePagedLimit].
@@ -81,25 +78,22 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
   ///
   /// Use this if you need to support runtime filter changes,
   /// through custom filters UI.
-  set filter(Filter? value) => _activeFilter = value;
+  set filter(DraftFilter? value) => _activeFilter = value;
 
   /// Allows for the change of the query sort used for poll vote queries.
   ///
   /// Use this if you need to support runtime sort changes,
   /// through custom sort UI.
-  set sort(SortOrder<Draft>? value) => _activeSort = value;
+  set sort(List<DraftSort> value) => _activeSort = value;
 
   @override
   set value(PagedValue<String, Draft> newValue) {
-    super.value = switch (_activeSort) {
-      null => newValue,
-      final draftSort => newValue.maybeMap(
-        orElse: () => newValue,
-        (success) => success.copyWith(
-          items: success.items.sorted(draftSort.compare),
-        ),
+    super.value = newValue.maybeMap(
+      orElse: () => newValue,
+      (success) => success.copyWith(
+        items: success.items.sortedWith(_activeSort.compare),
       ),
-    };
+    );
   }
 
   @override
@@ -124,10 +118,10 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
       // Start listening to events
       if (disposed) return;
       _subscribeToDraftListEvents();
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       value = PagedValue.error(error);
     } catch (error) {
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load drafts', cause: error);
       value = PagedValue.error(chatError);
     }
   }
@@ -152,10 +146,10 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
         items: newItems,
         nextPageKey: nextKey,
       );
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       value = previousValue.copyWith(error: error);
     } catch (error) {
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load more drafts', cause: error);
       value = previousValue.copyWith(error: chatError);
     }
   }

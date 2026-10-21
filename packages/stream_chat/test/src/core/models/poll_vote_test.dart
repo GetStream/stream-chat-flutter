@@ -2,134 +2,57 @@ import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:test/test.dart';
 
+import '../../utils.dart';
+
 void main() {
-  group('src/models/poll_vote', () {
-    test('does not send the server translation of the answer back when serialized', () {
-      final pollVote = PollVote(
-        answerText: 'great',
-        answerTextI18n: const {'language': 'en', 'nl_text': 'geweldig'},
-      );
+  test('PollVote.isAnswer is true for a vote that carries answer text', () {
+    final answer = createTestPollVote(answerText: 'Anything');
 
-      expect(pollVote.toJson(), isNot(contains('answer_text_i18n')));
-    });
+    expect(answer.isAnswer, isTrue);
+  });
 
-    group('ComparableFieldProvider', () {
-      test('should return ComparableField for poll_vote.id', () {
-        final pollVote = createTestPollVote(
-          id: 'test-vote-id',
-          optionId: 'option-1',
-        );
+  test('PollVote.isAnswer is false for a vote for an option', () {
+    final vote = createTestPollVote(optionId: 'pizza');
 
-        final field = pollVote.getComparableField(PollVoteSortKey.id);
-        expect(field, isNotNull);
-        expect(field!.value, equals('test-vote-id'));
-      });
+    expect(vote.isAnswer, isFalse);
+  });
 
-      test('should return ComparableField for poll_vote.createdAt', () {
-        final createdAt = DateTime(2023, 6, 15);
-        final pollVote = createTestPollVote(
-          id: 'test-vote-id',
-          optionId: 'option-1',
-          createdAt: createdAt,
-        );
+  test('PollVote.copyWith clears a nullable field passed as null', () {
+    final vote = createTestPollVote(
+      id: 'vote-id',
+      optionId: 'pizza',
+      userId: 'user-id',
+      user: User(id: 'user-id'),
+    );
 
-        final field = pollVote.getComparableField(PollVoteSortKey.createdAt);
-        expect(field, isNotNull);
-        expect(field!.value, equals(createdAt));
-      });
+    final copy = vote.copyWith(userId: null, user: null);
 
-      test('should return ComparableField for poll_vote.updatedAt', () {
-        final updatedAt = DateTime(2023, 6, 20);
-        final pollVote = createTestPollVote(
-          id: 'test-vote-id',
-          optionId: 'option-1',
-          updatedAt: updatedAt,
-        );
+    expect(copy.userId, isNull);
+    expect(copy.user, isNull);
+  });
 
-        final field = pollVote.getComparableField(PollVoteSortKey.updatedAt);
-        expect(field, isNotNull);
-        expect(field!.value, equals(updatedAt));
-      });
+  test('PollVoteSortField.id orders alphabetically', () {
+    expectOrders(
+      PollVoteSortField.id,
+      createTestPollVote(id: 'a-vote', optionId: 'o'),
+      createTestPollVote(id: 'b-vote', optionId: 'o'),
+    );
+  });
 
-      test('should return ComparableField for poll_vote.answerText', () {
-        final pollVote = createTestPollVote(
-          id: 'test-vote-id',
-          answerText: 'This is my answer',
-        );
+  test('PollVoteSortField.createdAt orders older votes first', () {
+    expectOrders(
+      PollVoteSortField.createdAt,
+      createTestPollVote(optionId: 'o', createdAt: DateTime(2023, 6, 10)),
+      createTestPollVote(optionId: 'o', createdAt: DateTime(2023, 6, 15)),
+    );
+  });
 
-        final field = pollVote.getComparableField(PollVoteSortKey.answerText);
-        expect(field, isNotNull);
-        expect(field!.value, equals('This is my answer'));
-      });
-
-      test('should return null for non-existent field keys', () {
-        final pollVote = createTestPollVote(
-          id: 'test-vote-id',
-          optionId: 'option-1',
-        );
-
-        final field = pollVote.getComparableField('non_existent_key');
-        expect(field, isNull);
-      });
-
-      test('should compare two poll votes correctly using createdAt', () {
-        final recentVote = createTestPollVote(
-          id: 'recent',
-          optionId: 'option-1',
-          createdAt: DateTime(2023, 6, 15),
-        );
-
-        final olderVote = createTestPollVote(
-          id: 'older',
-          optionId: 'option-1',
-          createdAt: DateTime(2023, 6, 10),
-        );
-
-        final field1 = recentVote.getComparableField(PollVoteSortKey.createdAt);
-        final field2 = olderVote.getComparableField(PollVoteSortKey.createdAt);
-
-        // More recent > Less recent
-        expect(field1!.compareTo(field2!), greaterThan(0));
-        // Less recent < More recent
-        expect(field2.compareTo(field1), lessThan(0));
-      });
-
-      test('should compare two poll votes correctly using id', () {
-        final vote1 = createTestPollVote(
-          id: 'abc',
-          optionId: 'option-1',
-        );
-
-        final vote2 = createTestPollVote(
-          id: 'xyz',
-          optionId: 'option-1',
-        );
-
-        final field1 = vote1.getComparableField(PollVoteSortKey.id);
-        final field2 = vote2.getComparableField(PollVoteSortKey.id);
-
-        expect(field1!.compareTo(field2!), lessThan(0)); // abc < xyz
-        expect(field2.compareTo(field1), greaterThan(0)); // xyz > abc
-      });
-
-      test('should compare two poll votes correctly using answerText', () {
-        final vote1 = createTestPollVote(
-          id: 'answer1',
-          answerText: 'Answer A',
-        );
-
-        final vote2 = createTestPollVote(
-          id: 'answer2',
-          answerText: 'Answer B',
-        );
-
-        final field1 = vote1.getComparableField(PollVoteSortKey.answerText);
-        final field2 = vote2.getComparableField(PollVoteSortKey.answerText);
-
-        expect(field1!.compareTo(field2!), lessThan(0)); // Answer A < Answer B
-        expect(field2.compareTo(field1), greaterThan(0)); // Answer B > Answer A
-      });
-    });
+  test('PollVoteSortField.updatedAt orders older votes first', () {
+    expectOrders(
+      PollVoteSortField.updatedAt,
+      createTestPollVote(optionId: 'o', updatedAt: DateTime(2023, 6, 10)),
+      createTestPollVote(optionId: 'o', updatedAt: DateTime(2023, 6, 15)),
+    );
   });
 }
 

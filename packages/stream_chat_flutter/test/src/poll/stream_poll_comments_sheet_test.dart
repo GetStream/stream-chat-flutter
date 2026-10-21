@@ -64,15 +64,13 @@ Future<void Function(Event event)> _pumpCommentsSheet(WidgetTester tester) async
   when(
     () => channel.queryPollVotes(
       _pollId,
-      sort: any(named: 'sort'),
       filter: any(named: 'filter'),
-      pagination: any(named: 'pagination'),
+      sort: any(named: 'sort'),
+      limit: any(named: 'limit'),
+      next: any(named: 'next'),
+      prev: any(named: 'prev'),
     ),
-  ).thenAnswer(
-    (_) async => QueryPollVotesResponse()
-      ..votes = []
-      ..next = null,
-  );
+  ).thenAnswer((_) async => const Result.success(QueryPollVotesResponse(duration: '1ms', votes: [])));
 
   await tester.pumpWidget(
     MaterialApp(

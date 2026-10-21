@@ -23,8 +23,8 @@ class _ChannelListPageState extends State<ChannelListPage> {
   /// The controller owns pagination and live updates.
   late final _listController = StreamChannelListController(
     client: StreamChat.of(context).client,
-    filter: Filter.in_('members', [StreamChat.of(context).currentUser!.id]),
-    channelStateSort: const [SortOption.desc('last_message_at')],
+    filter: .in_(ChannelFilterField.members, [StreamChat.of(context).currentUser!.id]),
+    channelStateSort: [ChannelSort.desc(ChannelSortField.lastMessageAt)],
     limit: 20,
   );
 

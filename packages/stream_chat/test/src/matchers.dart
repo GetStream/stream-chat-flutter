@@ -4,10 +4,22 @@ import 'package:stream_chat/src/client/channel/channel.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/draft_message.dart';
-import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/ws/events/event.dart';
+import 'package:stream_core/stream_core.dart' show Filter;
 import 'package:test/test.dart';
+
+/// Matches a filter that serializes the same way as [target].
+///
+/// A filter compares by identity, so two filters built from the same field
+/// and value are not equal. Comparing what they send is what callers mean.
+Matcher isSameFilterAs(Filter<Object> target) {
+  return predicate<Filter<Object>>(
+    (it) => const DeepCollectionEquality().equals(it.toJson(), target.toJson()),
+    'a filter serializing to ${target.toJson()}',
+  );
+}
 
 Matcher isSameMultipartFileAs(MultipartFile targetFile) => _IsSameMultipartFileAs(targetFile: targetFile);
 

@@ -14,16 +14,21 @@ class ChannelDao extends DatabaseAccessor<DriftChatDatabase> with _$ChannelDaoMi
   ChannelDao(super.db);
 
   /// Get channel by cid
-  Future<ChannelModel?> getChannelByCid(String cid) async => (select(channels)..where((c) => c.cid.equals(cid)))
-      .join([
-        leftOuterJoin(users, channels.createdById.equalsExp(users.id)),
-      ])
-      .map((rows) {
-        final channel = rows.readTable(channels);
-        final createdBy = rows.readTableOrNull(users);
-        return channel.toChannelModel(createdBy: createdBy?.toUser());
-      })
-      .getSingleOrNull();
+  Future<ChannelModel?> getChannelByCid(String cid) async {
+    final truncatedByUsers = alias(users, 'truncated_by_users');
+    return (select(channels)..where((c) => c.cid.equals(cid)))
+        .join([
+          leftOuterJoin(users, channels.createdById.equalsExp(users.id)),
+          leftOuterJoin(truncatedByUsers, channels.truncatedById.equalsExp(truncatedByUsers.id)),
+        ])
+        .map((rows) {
+          final channel = rows.readTable(channels);
+          final createdBy = rows.readTableOrNull(users);
+          final truncatedBy = rows.readTableOrNull(truncatedByUsers);
+          return channel.toChannelModel(createdBy: createdBy?.toUser(), truncatedBy: truncatedBy?.toUser());
+        })
+        .getSingleOrNull();
+  }
 
   /// Delete all channels by matching cid in [cids]
   ///

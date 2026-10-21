@@ -17,12 +17,6 @@ void main() {
       registerFallbackValue(FakeAttachmentFile());
       registerFallbackValue(FakeEvent());
 
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
         delayFactor: Duration.zero,
@@ -34,7 +28,6 @@ void main() {
       when(() => client.state).thenReturn(clientState);
 
       // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
 
       // mock channel delivery reporter
       when(
@@ -1925,14 +1918,14 @@ void main() {
               id: channelId,
               type: channelType,
               memberCount: 42,
-              extraData: const {'name': 'updated-name'},
+              custom: const {'name': 'updated-name'},
             ),
           ),
         );
         await Future.delayed(Duration.zero);
 
         expect(channel.memberCount, 42);
-        expect(channel.extraData['name'], 'updated-name');
+        expect(channel.custom['name'], 'updated-name');
       });
 
       test('replaces the member list with the event members', () async {
@@ -2281,7 +2274,7 @@ void main() {
             () => client.queryMembers(
               channelType,
               channelId: channelId,
-              filter: Filter.equal('id', 'bad-user'),
+              filter: any(named: 'filter'),
               members: any(named: 'members'),
               sort: any(named: 'sort'),
               pagination: any(named: 'pagination'),
@@ -5275,15 +5268,10 @@ void main() {
     late final client = MockStreamChatClient();
 
     setUpAll(() {
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
       when(() => client.retryPolicy).thenReturn(
         RetryPolicy(shouldRetry: (_, __, ___) => false, delayFactor: Duration.zero),
       );
       when(() => client.state).thenReturn(FakeClientState(currentUser: currentUser));
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
       when(
         () => client.channelDeliveryReporter.submitForDelivery(any()),
       ).thenAnswer((_) async {});
@@ -5344,15 +5332,10 @@ void main() {
       'disabled',
       () async {
         final disabledClient = MockStreamChatClient();
-        when(() => disabledClient.detachedLogger(any())).thenAnswer((invocation) {
-          final name = invocation.positionalArguments.first;
-          return _createLogger(name);
-        });
         when(() => disabledClient.retryPolicy).thenReturn(
           RetryPolicy(shouldRetry: (_, __, ___) => false),
         );
         when(() => disabledClient.state).thenReturn(FakeClientState(currentUser: currentUser));
-        when(() => disabledClient.logger).thenReturn(_createLogger('mock-client-logger'));
         when(
           () => disabledClient.channelDeliveryReporter.submitForDelivery(any()),
         ).thenAnswer((_) async {});
@@ -5446,7 +5429,7 @@ void main() {
         channel.state!.unreadCount = 3;
         expect(channel.state?.unreadCount, equals(3));
 
-        await expectLater(channel.markRead(), completes);
+        await expectLater(channel.markRead(), completion(isA<Success<MarkReadResponse>>()));
 
         expect(channel.state?.unreadCount, equals(0));
         verifyNever(
@@ -5456,6 +5439,17 @@ void main() {
             messageId: any(named: 'messageId'),
           ),
         );
+      },
+    );
+
+    test(
+      'markRead answers a 0ms response when counting unread messages locally',
+      () async {
+        final channel = _createLivestreamChannel();
+
+        final res = await channel.markRead();
+
+        expect(res.getOrNull(), const MarkReadResponse(duration: '0ms'));
       },
     );
 
@@ -5494,7 +5488,7 @@ void main() {
 
         await expectLater(
           channel.markUnreadByTimestamp(now.add(const Duration(seconds: 30))),
-          completes,
+          completion(const Result<void>.success(null)),
         );
 
         // Only m2 and m3 were created after the given timestamp.
@@ -5506,14 +5500,13 @@ void main() {
     );
 
     test(
-      'markUnread throws when the message is not locally known',
+      'markUnread returns a failure when the message is not locally known',
       () async {
         final channel = _createLivestreamChannel();
 
-        await expectLater(
-          channel.markUnread('unknown-message-id'),
-          throwsA(isA<StreamChatError>()),
-        );
+        final res = await channel.markUnread('unknown-message-id');
+
+        expect(res.exceptionOrNull(), isA<StreamClientException>());
         verifyNever(
           () => client.markChannelUnread(any(), any(), any()),
         );
@@ -5526,7 +5519,7 @@ void main() {
         final channel = _createLivestreamChannel();
         channel.state!.unreadCount = 2;
 
-        await expectLater(channel.markRead(), completes);
+        await expectLater(channel.markRead(), completion(isA<Success<MarkReadResponse>>()));
 
         verify(
           () => client.channelDeliveryReporter.reconcileDelivery([channel]),
@@ -5542,7 +5535,7 @@ void main() {
 
         await expectLater(
           channel.markUnreadByTimestamp(DateTime(2024, 1, 1)),
-          completes,
+          completion(const Result<void>.success(null)),
         );
 
         expect(channel.state?.isMarkedAsUnread, isTrue);
@@ -5556,7 +5549,7 @@ void main() {
         await channel.markUnreadByTimestamp(DateTime(2024, 1, 1));
         expect(channel.state?.isMarkedAsUnread, isTrue);
 
-        await expectLater(channel.markRead(), completes);
+        await expectLater(channel.markRead(), completion(isA<Success<MarkReadResponse>>()));
 
         expect(channel.state?.isMarkedAsUnread, isFalse);
       },
@@ -5596,7 +5589,7 @@ void main() {
             ],
           );
 
-          await expectLater(channel.markUnread('m2'), completes);
+          await expectLater(channel.markUnread('m2'), completion(const Result<void>.success(null)));
 
           // m2 (the anchor) and m3 are unread; m1 stays read.
           expect(channel.state?.unreadCount, equals(2));
@@ -5616,7 +5609,7 @@ void main() {
             ],
           );
 
-          await expectLater(channel.markUnread('m1'), completes);
+          await expectLater(channel.markUnread('m1'), completion(const Result<void>.success(null)));
 
           expect(channel.state?.unreadCount, equals(3));
           expect(channel.state?.currentUserRead?.lastReadMessageId, isNull);
@@ -5635,7 +5628,10 @@ void main() {
           );
 
           // Exactly m2's createdAt: m2 stays read, only m3 becomes unread.
-          await expectLater(channel.markUnreadByTimestamp(messages[1].createdAt), completes);
+          await expectLater(
+            channel.markUnreadByTimestamp(messages[1].createdAt),
+            completion(const Result<void>.success(null)),
+          );
 
           expect(channel.state?.unreadCount, equals(1));
           expect(channel.state?.currentUserRead?.lastReadMessageId, equals('m2'));
@@ -5706,7 +5702,7 @@ void main() {
         // A plain local mutation (via updateChannelState, not
         // updateChannelStateFromServer) should still be able to change the
         // locally-tracked read state.
-        await expectLater(channel.markRead(), completes);
+        await expectLater(channel.markRead(), completion(isA<Success<MarkReadResponse>>()));
 
         expect(channel.state?.unreadCount, equals(0));
       },
@@ -5719,10 +5715,6 @@ void main() {
     late final client = MockStreamChatClient();
 
     setUpAll(() {
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
       when(() => client.retryPolicy).thenReturn(
         RetryPolicy(
           shouldRetry: (_, __, ___) => false,
@@ -5730,7 +5722,6 @@ void main() {
         ),
       );
       when(() => client.state).thenReturn(FakeClientState());
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
       when(
         () => client.channelDeliveryReporter.submitForDelivery(any()),
       ).thenAnswer((_) async {});
@@ -5890,10 +5881,6 @@ void main() {
     late final client = MockStreamChatClient();
 
     setUpAll(() {
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
       when(() => client.retryPolicy).thenReturn(
         RetryPolicy(
           shouldRetry: (_, __, ___) => false,
@@ -5901,7 +5888,6 @@ void main() {
         ),
       );
       when(() => client.state).thenReturn(FakeClientState());
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
       when(
         () => client.channelDeliveryReporter.submitForDelivery(any()),
       ).thenAnswer((_) async {});
@@ -5982,7 +5968,7 @@ void main() {
         );
         channel.state!.updateMessage(deleted);
 
-        // No message quotes `target`, so `updateIf` short-circuits and the
+        // No message quotes `target`, so `updateWhere` short-circuits and the
         // remaining messages keep their identities (only `target` itself was
         // replaced by `sortedUpsert`).
         final unrelatedAfter = channel.state!.messages.firstWhere((m) => m.id == 'u1');
@@ -6013,7 +5999,7 @@ void main() {
         channel.state!.updateMessage(target.copyWith(text: 'edited'));
 
         final quoterAfter = channel.state!.messages.firstWhere((m) => m.id == 'q1');
-        // `updateIf` is gated on `message.isDeleted`, so the quoter must keep
+        // `updateWhere` is gated on `message.isDeleted`, so the quoter must keep
         // its identity (no allocation, no quoted-message overwrite).
         expect(identical(quoterAfter, quoterBefore), isTrue);
       },
@@ -6029,13 +6015,6 @@ void main() {
     setUpAll(() {
       registerFallbackValue(FakeMessage());
       registerFallbackValue(<Message>[]);
-
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
 
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
@@ -6426,12 +6405,6 @@ ChannelState _generateChannelState(
     lastMessageAt: lastMessageAt,
   );
   return ChannelState(channel: channel);
-}
-
-Logger _createLogger(String name) {
-  final logger = Logger.detached(name)..level = Level.ALL;
-  logger.onRecord.listen(print);
-  return logger;
 }
 
 // endregion

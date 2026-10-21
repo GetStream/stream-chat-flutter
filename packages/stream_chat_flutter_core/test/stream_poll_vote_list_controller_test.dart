@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter_core/src/stream_poll_vote_list_controller.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import 'mocks.dart';
 
@@ -13,8 +12,133 @@ const _pizza = 'option-pizza';
 const _sushi = 'option-sushi';
 
 void main() {
-  setUpAll(() {
-    registerFallbackValue(const PaginationParams());
+  test('StreamPollVoteListController.doInitialLoad loads the first page of votes', () async {
+    final channel = _channelAnswering([
+      Result.success(_page([_vote('v1'), _vote('v2')], next: 'cursor')),
+    ]);
+    final controller = _controller(channel);
+
+    await controller.doInitialLoad();
+
+    expect(controller.value, PagedValue<String, PollVote>(items: [_vote('v1'), _vote('v2')], nextPageKey: 'cursor'));
+  });
+
+  test('StreamPollVoteListController.doInitialLoad asks for three pages at once', () async {
+    final channel = _channelAnswering([Result.success(_page([]))]);
+    final controller = _controller(channel);
+
+    await controller.doInitialLoad();
+
+    verify(
+      () => channel.queryPollVotes(
+        'poll-id',
+        filter: any(named: 'filter'),
+        sort: any(named: 'sort'),
+        limit: 30,
+      ),
+    );
+  });
+
+  test('StreamPollVoteListController.doInitialLoad turns a failure into the error state', () async {
+    const error = StreamClientException(message: 'boom');
+    final channel = _channelAnswering([const Result.failure(error)]);
+    final controller = _controller(channel);
+
+    await controller.doInitialLoad();
+
+    expect(controller.value, const PagedValue<String, PollVote>.error(error));
+  });
+
+  test('StreamPollVoteListController.doInitialLoad turns an error the channel throws into the error state', () async {
+    final channel = MockChannel();
+    final thrown = StateError('Channel is not initialized');
+    when(
+      () => channel.queryPollVotes(
+        any(),
+        filter: any(named: 'filter'),
+        sort: any(named: 'sort'),
+        limit: any(named: 'limit'),
+        next: any(named: 'next'),
+        prev: any(named: 'prev'),
+      ),
+    ).thenThrow(thrown);
+    final controller = _controller(channel);
+
+    await controller.doInitialLoad();
+
+    final error = controller.value.mapOrNull(null, error: (it) => it.error);
+    expect(error, isA<StreamClientException>().having((it) => it.cause, 'cause', thrown));
+  });
+
+  test('StreamPollVoteListController.loadMore appends the next page of votes', () async {
+    final channel = _channelAnswering([
+      Result.success(_page([_vote('v1')], next: 'cursor')),
+      Result.success(_page([_vote('v2')])),
+    ]);
+    final controller = _controller(channel);
+    await controller.doInitialLoad();
+
+    await controller.loadMore('cursor');
+
+    expect(controller.value, PagedValue<String, PollVote>(items: [_vote('v1'), _vote('v2')]));
+  });
+
+  test('StreamPollVoteListController.loadMore asks for a page of ten after the given cursor', () async {
+    final channel = _channelAnswering([
+      Result.success(_page([_vote('v1')], next: 'cursor')),
+      Result.success(_page([])),
+    ]);
+    final controller = _controller(channel);
+    await controller.doInitialLoad();
+
+    await controller.loadMore('cursor');
+
+    verify(
+      () => channel.queryPollVotes(
+        'poll-id',
+        filter: any(named: 'filter'),
+        sort: any(named: 'sort'),
+        limit: 10,
+        next: 'cursor',
+      ),
+    );
+  });
+
+  test('StreamPollVoteListController.loadMore keeps the loaded votes and records a failure', () async {
+    const error = StreamClientException(message: 'boom');
+    final channel = _channelAnswering([
+      Result.success(_page([_vote('v1')], next: 'cursor')),
+      const Result.failure(error),
+    ]);
+    final controller = _controller(channel);
+    await controller.doInitialLoad();
+
+    await controller.loadMore('cursor');
+
+    expect(controller.value, PagedValue<String, PollVote>(items: [_vote('v1')], nextPageKey: 'cursor', error: error));
+  });
+
+  test('StreamPollVoteListController.loadMore records an error the channel throws', () async {
+    final channel = _channelAnswering([
+      Result.success(_page([_vote('v1')], next: 'cursor')),
+    ]);
+    final controller = _controller(channel);
+    await controller.doInitialLoad();
+    final thrown = StateError('Channel is not initialized');
+    when(
+      () => channel.queryPollVotes(
+        any(),
+        filter: any(named: 'filter'),
+        sort: any(named: 'sort'),
+        limit: any(named: 'limit'),
+        next: any(named: 'next'),
+        prev: any(named: 'prev'),
+      ),
+    ).thenThrow(thrown);
+
+    await controller.loadMore('cursor');
+
+    expect(controller.value.asSuccess.error, isA<StreamClientException>().having((it) => it.cause, 'cause', thrown));
   });
 
   test('a vote-casted event for another poll leaves the list unchanged', () async {
@@ -106,7 +230,7 @@ void main() {
         (channel) => StreamPollVoteListController.forOption(channel: channel, pollId: _pollId, optionId: _pizza),
       );
 
-      expect(filter, Filter.equal('option_id', _pizza));
+      expect(filter?.toJson(), PollVoteFilter.equal(PollVoteFilterField.optionId, _pizza).toJson());
     });
 
     test('a vote cast for another option leaves the list unchanged', () async {
@@ -180,7 +304,7 @@ void main() {
         (channel) => StreamPollVoteListController.forAnswers(channel: channel, pollId: _pollId),
       );
 
-      expect(filter, Filter.equal('is_answer', true));
+      expect(filter?.toJson(), PollVoteFilter.equal(PollVoteFilterField.isAnswer, true).toJson());
     });
 
     test('a vote cast for an option leaves the list unchanged', () async {
@@ -244,6 +368,41 @@ void main() {
   });
 }
 
+PollVote _vote(String id) => PollVote(
+  id: id,
+  pollId: 'poll-id',
+  optionId: 'pizza',
+  createdAt: DateTime.utc(2024),
+  updatedAt: DateTime.utc(2024),
+);
+
+QueryPollVotesResponse _page(List<PollVote> votes, {String? next}) =>
+    QueryPollVotesResponse(duration: '4.21ms', votes: votes, next: next);
+
+// A channel whose vote queries answer [results] in order.
+MockChannel _channelAnswering(List<Result<QueryPollVotesResponse>> results) {
+  final channel = MockChannel();
+  final pending = [...results];
+  when(
+    () => channel.queryPollVotes(
+      any(),
+      filter: any(named: 'filter'),
+      sort: any(named: 'sort'),
+      limit: any(named: 'limit'),
+      next: any(named: 'next'),
+      prev: any(named: 'prev'),
+    ),
+  ).thenAnswer((_) async => pending.removeAt(0));
+  when(channel.on).thenAnswer((_) => const Stream.empty());
+  return channel;
+}
+
+StreamPollVoteListController _controller(Channel channel) {
+  final controller = StreamPollVoteListController(channel: channel, pollId: 'poll-id');
+  addTearDown(controller.dispose);
+  return controller;
+}
+
 // Returns a controller for [_pollId] that has loaded [votes] and listens to the returned channel events.
 //
 // The controller is built by [create], or with the default constructor when [create] is omitted.
@@ -251,23 +410,10 @@ Future<({StreamPollVoteListController controller, StreamController<Event> events
   List<PollVote> votes = const [],
   StreamPollVoteListController Function(Channel channel)? create,
 }) async {
-  final channel = MockChannel();
+  final channel = _channelAnswering([Result.success(_page(votes))]);
   final events = StreamController<Event>.broadcast();
   addTearDown(events.close);
-
   when(channel.on).thenAnswer((_) => events.stream);
-  when(
-    () => channel.queryPollVotes(
-      _pollId,
-      sort: any(named: 'sort'),
-      filter: any(named: 'filter'),
-      pagination: any(named: 'pagination'),
-    ),
-  ).thenAnswer(
-    (_) async => QueryPollVotesResponse()
-      ..votes = votes
-      ..next = null,
-  );
 
   final controller = create?.call(channel) ?? StreamPollVoteListController(channel: channel, pollId: _pollId);
   addTearDown(controller.dispose);
@@ -302,17 +448,8 @@ Future<({StreamPollVoteListController controller, StreamController<Event> events
 }
 
 // Returns the filter the controller built by [create] queries its first page with.
-Future<Filter?> _queriedFilter(StreamPollVoteListController Function(Channel channel) create) async {
-  final channel = MockChannel();
-  when(channel.on).thenAnswer((_) => const Stream.empty());
-  when(
-    () => channel.queryPollVotes(
-      _pollId,
-      sort: any(named: 'sort'),
-      filter: any(named: 'filter'),
-      pagination: any(named: 'pagination'),
-    ),
-  ).thenAnswer((_) async => QueryPollVotesResponse()..votes = []);
+Future<PollVoteFilter?> _queriedFilter(StreamPollVoteListController Function(Channel channel) create) async {
+  final channel = _channelAnswering([Result.success(_page([]))]);
 
   final controller = create(channel);
   addTearDown(controller.dispose);
@@ -321,10 +458,12 @@ Future<Filter?> _queriedFilter(StreamPollVoteListController Function(Channel cha
   return verify(
         () => channel.queryPollVotes(
           _pollId,
-          sort: any(named: 'sort'),
           filter: captureAny(named: 'filter'),
-          pagination: any(named: 'pagination'),
+          sort: any(named: 'sort'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
+          prev: any(named: 'prev'),
         ),
       ).captured.single
-      as Filter?;
+      as PollVoteFilter?;
 }

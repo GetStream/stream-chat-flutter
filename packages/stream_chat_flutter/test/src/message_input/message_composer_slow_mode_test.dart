@@ -42,8 +42,8 @@ void main() {
       when(() => channel.isPinned).thenReturn(false);
       when(() => channel.isPinnedStream).thenAnswer((_) => Stream.value(false));
       when(() => channel.isDistinct).thenReturn(false);
-      when(() => channel.extraDataStream).thenAnswer((_) => Stream.value({'name': 'test'}));
-      when(() => channel.extraData).thenReturn({'name': 'test'});
+      when(() => channel.customStream).thenAnswer((_) => Stream.value({'name': 'test'}));
+      when(() => channel.custom).thenReturn({'name': 'test'});
       when(() => channel.name).thenReturn('test');
       when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
       when(() => channel.image).thenReturn(null);

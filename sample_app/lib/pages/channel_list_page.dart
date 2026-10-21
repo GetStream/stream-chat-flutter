@@ -90,6 +90,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
     return StreamScaffold(
       backgroundColor: colorScheme.backgroundApp,
       appBar: StreamChannelListHeader(
+        showConnectionStateTile: true,
         title: Text(enabledTabs[_currentIndex].navItem.label, style: textTheme.headingSm),
         // Beside the channel, the drawer slides in over both panes.
         onUserAvatarPressed: isExpanded ? (_) => AdaptiveSplitView.openDrawerOf(context) : null,

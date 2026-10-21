@@ -201,7 +201,9 @@ class _FakeChat {
 
     when(() => channel.client).thenReturn(client);
     when(() => channel.state).thenReturn(channelState);
-    when(() => channel.markRead(messageId: any(named: 'messageId'))).thenAnswer((_) async => EmptyResponse());
+    when(
+      () => channel.markRead(messageId: any(named: 'messageId')),
+    ).thenAnswer((_) async => const Result.success(MarkReadResponse(duration: '0ms')));
 
     when(() => channelState.threadsStream).thenAnswer((_) => const Stream.empty());
     when(() => channelState.isUpToDate).thenReturn(true);

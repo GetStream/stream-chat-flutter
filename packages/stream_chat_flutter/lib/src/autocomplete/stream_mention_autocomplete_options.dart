@@ -221,25 +221,14 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
 
   Future<List<Role>> _fetchRoles(String query) async {
     if (query.isEmpty || !widget.channel.canNotifyRole) return const [];
-    try {
-      final response = await widget.channel.client.searchRoles(query);
-      return response.roles;
-    } catch (_) {
-      return const [];
-    }
+    final result = await widget.channel.client.searchRoles(query);
+    return result.map((it) => it.roles).getOrDefault(const []);
   }
 
   Future<List<UserGroup>> _fetchUserGroups(String query) async {
     if (query.isEmpty || !widget.channel.canNotifyGroup) return const [];
-    try {
-      final response = await widget.channel.client.searchUserGroups(
-        query,
-        teamId: widget.channel.team,
-      );
-      return response.userGroups;
-    } catch (_) {
-      return const [];
-    }
+    final result = await widget.channel.client.searchUserGroups(query, teamId: widget.channel.team);
+    return result.map((it) => it.userGroups).getOrDefault(const []);
   }
 
   Future<List<User>> _fetchUsers(String query) async {
@@ -269,7 +258,7 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
   Future<List<Member>> _queryMembers(String query) async {
     final response = await widget.channel.queryMembers(
       pagination: PaginationParams(limit: widget.limit),
-      filter: query.isEmpty ? const Filter.empty() : Filter.autoComplete('name', query),
+      filter: query.isEmpty ? null : MemberFilter.autoComplete(MemberFilterField.name, query),
     );
     return response.members;
   }
@@ -282,12 +271,12 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
     final response = await widget.client!.queryUsers(
       pagination: PaginationParams(limit: widget.limit),
       filter: query.isEmpty
-          ? const Filter.empty()
-          : Filter.or([
-              Filter.autoComplete('id', query),
-              Filter.autoComplete('name', query),
+          ? null
+          : UserFilter.or([
+              UserFilter.autoComplete(UserFilterField.id, query),
+              UserFilter.autoComplete(UserFilterField.name, query),
             ]),
-      sort: [const SortOption.asc('id')],
+      sort: [UserSort.asc(UserSortField.id)],
     );
     return response.users;
   }

@@ -28,8 +28,11 @@ class DebugShadowBan extends StatelessWidget {
           final userId = value.trim();
           try {
             debugPrint('[shadowBan] userId: $userId');
-            final result = await client.shadowBan(userId);
+            final result = await client.moderation.shadowBan(userId);
             debugPrint('[shadowBan] completed: $result');
+            if (result.exceptionOrNull() case final error?) {
+              showErrorDialog(context, error, 'Shadow Ban');
+            }
           } catch (e) {
             debugPrint('[shadowBan] failed: $e');
             showErrorDialog(context, e, 'Shadow Ban');

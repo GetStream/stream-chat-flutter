@@ -5,56 +5,17 @@ import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:test/test.dart';
 
+import '../../utils.dart';
+
 void main() {
   group('src/models/banned_user', () {
-    group('ComparableFieldProvider', () {
-      test('should return ComparableField for banned_user.createdAt', () {
-        final createdAt = DateTime(2023, 6, 15);
-        final bannedUser = createTestBannedUser(
-          userId: 'banned-user-id',
-          createdAt: createdAt,
+    group('BannedUserSortField', () {
+      test('createdAt orders older bans first', () {
+        expectOrders(
+          BannedUserSortField.createdAt,
+          createTestBannedUser(userId: 'older-ban', createdAt: DateTime(2023, 6, 10)),
+          createTestBannedUser(userId: 'recent-ban', createdAt: DateTime(2023, 6, 15)),
         );
-
-        final field = bannedUser.getComparableField(
-          BannedUserSortKey.createdAt,
-        );
-
-        expect(field, isNotNull);
-        expect(field!.value, equals(createdAt));
-      });
-
-      test('should return null for non-existent field keys', () {
-        final bannedUser = createTestBannedUser(
-          userId: 'banned-user-id',
-        );
-
-        final field = bannedUser.getComparableField('non_existent_key');
-        expect(field, isNull);
-      });
-
-      test('should compare two banned users correctly using createdAt', () {
-        final recentBan = createTestBannedUser(
-          userId: 'recent-ban',
-          createdAt: DateTime(2023, 6, 15),
-        );
-
-        final olderBan = createTestBannedUser(
-          userId: 'older-ban',
-          createdAt: DateTime(2023, 6, 10),
-        );
-
-        final field1 = recentBan.getComparableField(
-          BannedUserSortKey.createdAt,
-        );
-
-        final field2 = olderBan.getComparableField(
-          BannedUserSortKey.createdAt,
-        );
-
-        // More recent > Less recent
-        expect(field1!.compareTo(field2!), greaterThan(0));
-        // Less recent < More recent
-        expect(field2.compareTo(field1), lessThan(0));
       });
     });
   });

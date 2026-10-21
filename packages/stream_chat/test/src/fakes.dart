@@ -1,42 +1,38 @@
 import 'dart:async';
 
 import 'package:mocktail/mocktail.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:stream_chat/open_api/api.dart' as api;
 import 'package:stream_chat/src/core/api/channel_api.dart';
-import 'package:stream_chat/src/core/api/device_api.dart';
 import 'package:stream_chat/src/core/api/general_api.dart';
-import 'package:stream_chat/src/core/api/guest_api.dart';
 import 'package:stream_chat/src/core/api/message_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
-import 'package:stream_chat/src/core/api/polls_api.dart';
-import 'package:stream_chat/src/core/api/roles_api.dart';
+import 'package:stream_chat/src/core/api/push_preferences_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
-import 'package:stream_chat/src/core/api/user_groups_api.dart';
-import 'package:stream_chat/src/core/http/token.dart';
-import 'package:stream_chat/src/core/http/token_manager.dart';
-import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import 'mocks.dart';
+import 'utils.dart';
 
 class FakeTokenManager extends Fake implements TokenManager {
-  final token = Token.development('test-user-id');
+  final token = testUserToken('test-user-id');
 
   @override
-  bool get isStatic => true;
+  bool get usesStaticProvider => true;
 
   @override
   String? get userId => token.userId;
 
   @override
-  Future<Token> loadToken({bool refresh = false}) async => token;
+  UserToken? peekToken() => token;
 
   @override
-  Future<Token> setTokenOrProvider(
-    String userId, {
-    Token? token,
-    TokenProvider? provider,
-  }) async => this.token;
+  Future<UserToken> getToken() async => token;
+
+  @override
+  void setTokenProvider(String userId, {required TokenProvider tokenProvider}) {}
+
+  @override
+  void expireToken() {}
 
   @override
   void reset() {}
@@ -60,6 +56,9 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
   int connectCallCount = 0;
   int disconnectCallCount = 0;
   int flushCallCount = 0;
+
+  /// The health check last persisted, and `null` until one is.
+  Event? connectionInfo;
 
   @override
   bool get isConnected => _isConnected;
@@ -104,11 +103,11 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
   @override
   Future<void> saveChannelQueries({
     required List<String> cids,
-    Filter? filter,
-    SortOrder<ChannelState>? sort,
+    ChannelFilter? filter,
+    List<ChannelSort>? sort,
     String? predefinedFilter,
-    Filter? resolvedFilter,
-    SortOrder<ChannelState>? resolvedSort,
+    ChannelFilter? resolvedFilter,
+    List<ChannelSort>? resolvedSort,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
     bool clearQueryCache = false,
@@ -116,6 +115,11 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
 
   @override
   Future<void> updateChannelStates(List<ChannelState> channelStates) async {}
+
+  @override
+  Future<void> updateConnectionInfo(Event event) async {
+    connectionInfo = event;
+  }
 }
 
 class FakeChatApi extends Fake implements StreamChatApi {
@@ -124,55 +128,70 @@ class FakeChatApi extends Fake implements StreamChatApi {
   @override
   UserApi get user => _user ??= MockUserApi();
 
-  GuestApi? _guest;
-
-  @override
-  GuestApi get guest => _guest ??= MockGuestApi();
-
   MessageApi? _message;
 
   @override
   MessageApi get message => _message ??= MockMessageApi();
-
-  @override
-  PollsApi get polls => _polls ??= MockPollsApi();
-
-  PollsApi? _polls;
 
   ChannelApi? _channel;
 
   @override
   ChannelApi get channel => _channel ??= MockChannelApi();
 
-  DeviceApi? _device;
+  PushPreferencesApi? _pushPreferences;
 
   @override
-  DeviceApi get device => _device ??= MockDeviceApi();
+  PushPreferencesApi get pushPreferences => _pushPreferences ??= MockPushPreferencesApi();
 
   ModerationApi? _moderation;
 
   @override
   ModerationApi get moderation => _moderation ??= MockModerationApi();
 
-  UserGroupsApi? _userGroups;
-
-  @override
-  UserGroupsApi get userGroups => _userGroups ??= MockUserGroupsApi();
-
-  RolesApi? _roles;
-
-  @override
-  RolesApi get roles => _roles ??= MockRolesApi();
-
   GeneralApi? _general;
 
   @override
   GeneralApi get general => _general ??= MockGeneralApi();
+}
 
-  AttachmentFileUploader? _fileUploader;
-
+/// Answers the `getApp` call `connectUser` makes on the generated client.
+class FakeDefaultApi extends Fake implements api.DefaultApi {
   @override
-  AttachmentFileUploader get fileUploader => _fileUploader ??= MockAttachmentFileUploader();
+  Future<Result<api.GetApplicationResponse>> getApp() async => Result.success(fakeGetApplicationResponse());
+}
+
+/// The query-limit defaults a generated application response carries.
+const fakeAppDefaults = api.AppDefaults(
+  getOrCreateChannel: api.GetOrCreateChannelDefaults(
+    members: api.PagerDefaults(limit: 100),
+    messages: api.PagerDefaults(limit: 25),
+  ),
+  queryChannels: api.QueryChannelsDefaults(limit: 10, maxLimit: 30, memberLimit: 100, messageLimit: 25),
+);
+
+/// A generated application response, for tests that need `getApp` to answer.
+api.GetApplicationResponse fakeGetApplicationResponse({String name = 'test-app'}) {
+  const unrestricted = api.FileUploadConfig(
+    allowedFileExtensions: [],
+    allowedMimeTypes: [],
+    blockedFileExtensions: [],
+    blockedMimeTypes: [],
+    sizeLimit: 0,
+  );
+
+  return api.GetApplicationResponse(
+    duration: '0.01ms',
+    app: api.AppResponseFields(
+      id: 42,
+      name: name,
+      placement: 'us-east',
+      asyncUrlEnrichEnabled: false,
+      autoTranslationEnabled: false,
+      defaults: fakeAppDefaults,
+      fileUploadConfig: unrestricted,
+      imageUploadConfig: unrestricted,
+    ),
+  );
 }
 
 class FakeClientState extends Fake implements ClientState {
@@ -235,101 +254,84 @@ class FakeUser extends Fake implements User {}
 
 class FakePollVote extends Fake implements PollVote {}
 
-class FakeWebSocket extends Fake implements WebSocket {
-  late final _connectionStatusController = BehaviorSubject.seeded(
-    ConnectionStatus.disconnected,
-  );
-
-  set connectionStatus(ConnectionStatus value) {
-    _connectionStatusController.add(value);
-  }
-
-  @override
-  ConnectionStatus get connectionStatus => _connectionStatusController.value;
-
-  @override
-  Stream<ConnectionStatus> get connectionStatusStream => _connectionStatusController.stream;
-
-  @override
-  Completer<Event>? connectionCompleter;
-
-  @override
-  Future<Event> connect(
-    User user, {
-    bool? includeUserDetails = true,
-  }) async {
-    connectionStatus = ConnectionStatus.connecting;
-    final event = Event(
-      type: EventType.healthCheck,
-      connectionId: 'fake-connection-id',
-      me: OwnUser.fromUser(user),
-    );
-    connectionCompleter = Completer()..complete(event);
-    connectionStatus = ConnectionStatus.connected;
-    return connectionCompleter!.future;
-  }
-
-  @override
-  void disconnect() {
-    connectionStatus = ConnectionStatus.disconnected;
-    connectionCompleter = null;
-  }
-
-  @override
-  Future<void> dispose() async {
-    await _connectionStatusController.close();
-  }
-}
-
-class FakeWebSocketWithConnectionError extends Fake implements WebSocket {
-  late final _connectionStatusController = BehaviorSubject.seeded(
-    ConnectionStatus.disconnected,
-  );
-
-  set connectionStatus(ConnectionStatus value) {
-    _connectionStatusController.add(value);
-  }
-
-  @override
-  ConnectionStatus get connectionStatus => _connectionStatusController.value;
-
-  @override
-  Stream<ConnectionStatus> get connectionStatusStream => _connectionStatusController.stream;
-
-  @override
-  Completer<Event>? connectionCompleter;
-
-  @override
-  Future<Event> connect(
-    User user, {
-    bool? includeUserDetails = true,
-  }) async {
-    connectionStatus = ConnectionStatus.connecting;
-    const error = StreamWebSocketError('Error Connecting');
-    connectionCompleter = Completer()..completeError(error);
-    return connectionCompleter!.future;
-  }
-
-  @override
-  void disconnect() {
-    connectionStatus = ConnectionStatus.disconnected;
-    connectionCompleter = null;
-  }
-
-  @override
-  Future<void> dispose() async {
-    await _connectionStatusController.close();
-  }
-}
-
 class FakeChannelState extends Fake implements ChannelState {}
 
-class FakePartialUpdateMemberResponse extends Fake implements PartialUpdateMemberResponse {
-  FakePartialUpdateMemberResponse({
-    Member? channelMember,
-  }) : _channelMember = channelMember ?? Member();
+/// A generated channel member with every field set.
+api.ChannelMemberResponse fakeChannelMemberResponse({Map<String, Object?> custom = const {'nickname': 'Mo'}}) =>
+    api.ChannelMemberResponse(
+      archivedAt: DateTime.utc(2026, 1, 5),
+      banExpires: DateTime.utc(2026, 6),
+      banFromFutureChannels: true,
+      banned: true,
+      channelRole: 'channel_moderator',
+      createdAt: DateTime.utc(2026),
+      custom: custom,
+      deletedAt: DateTime.utc(2026, 8),
+      deletedMessages: const ['message-1'],
+      futureChannelBanExpires: DateTime.utc(2026, 7),
+      inviteAcceptedAt: DateTime.utc(2026, 1, 2),
+      inviteRejectedAt: DateTime.utc(2026, 1, 3),
+      invited: true,
+      isModerator: false,
+      notificationsMuted: false,
+      pinnedAt: DateTime.utc(2026, 1, 4),
+      role: 'user',
+      shadowBanned: false,
+      status: 'member',
+      updatedAt: DateTime.utc(2026, 2),
+      user: fakeUserResponse('member'),
+      userId: 'member',
+    );
 
-  final Member _channelMember;
-  @override
-  Member get channelMember => _channelMember;
-}
+/// A generated [api.UserResponse] with the id [id] and only the fields it
+/// requires.
+api.UserResponse fakeUserResponse(String id) => api.UserResponse(
+  banned: false,
+  blockedUserIds: const [],
+  createdAt: DateTime.utc(2025),
+  custom: const {},
+  id: id,
+  language: 'en',
+  online: false,
+  role: 'user',
+  teams: const [],
+  updatedAt: DateTime.utc(2025),
+);
+
+/// The [Member] that [fakeChannelMemberResponse] maps to, with its default
+/// custom data.
+Member fakeChannelMember() => Member(
+  user: fakeUser('member'),
+  userId: 'member',
+  inviteAcceptedAt: DateTime.utc(2026, 1, 2),
+  inviteRejectedAt: DateTime.utc(2026, 1, 3),
+  invited: true,
+  channelRole: 'channel_moderator',
+  isModerator: false,
+  createdAt: DateTime.utc(2026),
+  updatedAt: DateTime.utc(2026, 2),
+  banned: true,
+  banExpires: DateTime.utc(2026, 6),
+  shadowBanned: false,
+  pinnedAt: DateTime.utc(2026, 1, 4),
+  archivedAt: DateTime.utc(2026, 1, 5),
+  deletedMessages: const ['message-1'],
+  custom: const {'nickname': 'Mo'},
+  notificationsMuted: false,
+  status: 'member',
+  banFromFutureChannels: true,
+  futureChannelBanExpires: DateTime.utc(2026, 7),
+  deletedAt: DateTime.utc(2026, 8),
+);
+
+/// The [User] that [fakeUserResponse] maps to.
+User fakeUser(String id) => User(
+  id: id,
+  role: 'user',
+  createdAt: DateTime.utc(2025),
+  updatedAt: DateTime.utc(2025),
+  online: false,
+  banned: false,
+  teams: const [],
+  language: 'en',
+);

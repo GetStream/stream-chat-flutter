@@ -1,34 +1,21 @@
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:rate_limiter/rate_limiter.dart';
-import 'package:stream_chat/stream_chat.dart' show Filter, FilterOperator;
+import 'package:stream_chat/stream_chat.dart' show EvaluationOperator, Filter, LogicalOperator;
 
 /// The length of the search text in [filter], or `null` when it holds none.
 ///
-/// Only the text-search operators ([FilterOperator.autoComplete] and
-/// [FilterOperator.query]) count; a filter built around them is debounced by
-/// the longest such text, even when nested inside a compound filter. Anything
-/// else returns `null`, meaning "not a text search" — an exact-match lookup,
-/// for example, should reload immediately rather than wait for the debounce.
+/// Only the text-search operators ([Filter.autoComplete] and [Filter.query])
+/// count; a filter built around them is debounced by the longest such text,
+/// even when nested inside a compound filter. Anything else returns `null`,
+/// meaning "not a text search" — an exact-match lookup, for example, should
+/// reload immediately rather than wait for the debounce.
 @internal
-int? searchQueryLength(Filter? filter) {
-  if (filter == null) return null;
-
-  final value = filter.value;
-  var isTextSearch = filter.operator == '${FilterOperator.query}';
-  isTextSearch |= filter.operator == '${FilterOperator.autoComplete}';
-  if (isTextSearch && value is String) return value.length;
-
-  if (value is Iterable<Filter>) {
-    int? longest;
-    for (final nested in value) {
-      final length = searchQueryLength(nested);
-      if (length != null && (longest == null || length > longest)) longest = length;
-    }
-    return longest;
-  }
-
-  return null;
-}
+int? searchQueryLength(Filter? filter) => switch (filter) {
+  EvaluationOperator(:final query) => query.length,
+  LogicalOperator(:final filters) => filters.map(searchQueryLength).nonNulls.maxOrNull,
+  _ => null,
+};
 
 /// A query-length-aware debounce policy for search input.
 ///

@@ -9,7 +9,6 @@ part of 'stream_poll_controller.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
 
 /// @nodoc
@@ -30,7 +29,10 @@ mixin _$PollValidationError {
 
 /// @nodoc
 class $PollValidationErrorCopyWith<$Res> {
-  $PollValidationErrorCopyWith(PollValidationError _, $Res Function(PollValidationError) __);
+  $PollValidationErrorCopyWith(
+    PollValidationError _,
+    $Res Function(PollValidationError) __,
+  );
 }
 
 /// @nodoc
@@ -72,8 +74,9 @@ class _PollValidationErrorDuplicateOptions implements PollValidationError {
 /// @nodoc
 abstract mixin class _$PollValidationErrorDuplicateOptionsCopyWith<$Res> implements $PollValidationErrorCopyWith<$Res> {
   factory _$PollValidationErrorDuplicateOptionsCopyWith(
-          _PollValidationErrorDuplicateOptions value, $Res Function(_PollValidationErrorDuplicateOptions) _then) =
-      __$PollValidationErrorDuplicateOptionsCopyWithImpl;
+    _PollValidationErrorDuplicateOptions value,
+    $Res Function(_PollValidationErrorDuplicateOptions) _then,
+  ) = __$PollValidationErrorDuplicateOptionsCopyWithImpl;
   @useResult
   $Res call({List<PollOption> options});
 }
@@ -89,15 +92,15 @@ class __$PollValidationErrorDuplicateOptionsCopyWithImpl<$Res>
   /// Create a copy of PollValidationError
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? options = null,
-  }) {
-    return _then(_PollValidationErrorDuplicateOptions(
-      null == options
-          ? _self._options
-          : options // ignore: cast_nullable_to_non_nullable
-              as List<PollOption>,
-    ));
+  $Res call({Object? options = null}) {
+    return _then(
+      _PollValidationErrorDuplicateOptions(
+        null == options
+            ? _self._options
+            : options // ignore: cast_nullable_to_non_nullable
+                  as List<PollOption>,
+      ),
+    );
   }
 }
 
@@ -137,8 +140,9 @@ class _PollValidationErrorNameRange implements PollValidationError {
 /// @nodoc
 abstract mixin class _$PollValidationErrorNameRangeCopyWith<$Res> implements $PollValidationErrorCopyWith<$Res> {
   factory _$PollValidationErrorNameRangeCopyWith(
-          _PollValidationErrorNameRange value, $Res Function(_PollValidationErrorNameRange) _then) =
-      __$PollValidationErrorNameRangeCopyWithImpl;
+    _PollValidationErrorNameRange value,
+    $Res Function(_PollValidationErrorNameRange) _then,
+  ) = __$PollValidationErrorNameRangeCopyWithImpl;
   @useResult
   $Res call({String name, Range<int> range});
 }
@@ -153,27 +157,29 @@ class __$PollValidationErrorNameRangeCopyWithImpl<$Res> implements _$PollValidat
   /// Create a copy of PollValidationError
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? name = null,
-    Object? range = null,
-  }) {
-    return _then(_PollValidationErrorNameRange(
-      null == name
-          ? _self.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      range: null == range
-          ? _self.range
-          : range // ignore: cast_nullable_to_non_nullable
-              as Range<int>,
-    ));
+  $Res call({Object? name = null, Object? range = null}) {
+    return _then(
+      _PollValidationErrorNameRange(
+        null == name
+            ? _self.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+        range: null == range
+            ? _self.range
+            : range // ignore: cast_nullable_to_non_nullable
+                  as Range<int>,
+      ),
+    );
   }
 }
 
 /// @nodoc
 
 class _PollValidationErrorOptionsRange implements PollValidationError {
-  const _PollValidationErrorOptionsRange(final List<PollOption> options, {required this.range}) : _options = options;
+  const _PollValidationErrorOptionsRange(
+    final List<PollOption> options, {
+    required this.range,
+  }) : _options = options;
 
   final List<PollOption> _options;
   List<PollOption> get options {
@@ -201,7 +207,11 @@ class _PollValidationErrorOptionsRange implements PollValidationError {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, const DeepCollectionEquality().hash(_options), range);
+  int get hashCode => Object.hash(
+    runtimeType,
+    const DeepCollectionEquality().hash(_options),
+    range,
+  );
 
   @override
   String toString() {
@@ -212,8 +222,9 @@ class _PollValidationErrorOptionsRange implements PollValidationError {
 /// @nodoc
 abstract mixin class _$PollValidationErrorOptionsRangeCopyWith<$Res> implements $PollValidationErrorCopyWith<$Res> {
   factory _$PollValidationErrorOptionsRangeCopyWith(
-          _PollValidationErrorOptionsRange value, $Res Function(_PollValidationErrorOptionsRange) _then) =
-      __$PollValidationErrorOptionsRangeCopyWithImpl;
+    _PollValidationErrorOptionsRange value,
+    $Res Function(_PollValidationErrorOptionsRange) _then,
+  ) = __$PollValidationErrorOptionsRangeCopyWithImpl;
   @useResult
   $Res call({List<PollOption> options, Range<int> range});
 }
@@ -228,27 +239,29 @@ class __$PollValidationErrorOptionsRangeCopyWithImpl<$Res> implements _$PollVali
   /// Create a copy of PollValidationError
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? options = null,
-    Object? range = null,
-  }) {
-    return _then(_PollValidationErrorOptionsRange(
-      null == options
-          ? _self._options
-          : options // ignore: cast_nullable_to_non_nullable
-              as List<PollOption>,
-      range: null == range
-          ? _self.range
-          : range // ignore: cast_nullable_to_non_nullable
-              as Range<int>,
-    ));
+  $Res call({Object? options = null, Object? range = null}) {
+    return _then(
+      _PollValidationErrorOptionsRange(
+        null == options
+            ? _self._options
+            : options // ignore: cast_nullable_to_non_nullable
+                  as List<PollOption>,
+        range: null == range
+            ? _self.range
+            : range // ignore: cast_nullable_to_non_nullable
+                  as Range<int>,
+      ),
+    );
   }
 }
 
 /// @nodoc
 
 class _PollValidationErrorMaxVotesAllowed implements PollValidationError {
-  const _PollValidationErrorMaxVotesAllowed(this.maxVotesAllowed, {required this.range});
+  const _PollValidationErrorMaxVotesAllowed(
+    this.maxVotesAllowed, {
+    required this.range,
+  });
 
   final int maxVotesAllowed;
   final Range<int> range;
@@ -281,8 +294,9 @@ class _PollValidationErrorMaxVotesAllowed implements PollValidationError {
 /// @nodoc
 abstract mixin class _$PollValidationErrorMaxVotesAllowedCopyWith<$Res> implements $PollValidationErrorCopyWith<$Res> {
   factory _$PollValidationErrorMaxVotesAllowedCopyWith(
-          _PollValidationErrorMaxVotesAllowed value, $Res Function(_PollValidationErrorMaxVotesAllowed) _then) =
-      __$PollValidationErrorMaxVotesAllowedCopyWithImpl;
+    _PollValidationErrorMaxVotesAllowed value,
+    $Res Function(_PollValidationErrorMaxVotesAllowed) _then,
+  ) = __$PollValidationErrorMaxVotesAllowedCopyWithImpl;
   @useResult
   $Res call({int maxVotesAllowed, Range<int> range});
 }
@@ -298,21 +312,18 @@ class __$PollValidationErrorMaxVotesAllowedCopyWithImpl<$Res>
   /// Create a copy of PollValidationError
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? maxVotesAllowed = null,
-    Object? range = null,
-  }) {
-    return _then(_PollValidationErrorMaxVotesAllowed(
-      null == maxVotesAllowed
-          ? _self.maxVotesAllowed
-          : maxVotesAllowed // ignore: cast_nullable_to_non_nullable
-              as int,
-      range: null == range
-          ? _self.range
-          : range // ignore: cast_nullable_to_non_nullable
-              as Range<int>,
-    ));
+  $Res call({Object? maxVotesAllowed = null, Object? range = null}) {
+    return _then(
+      _PollValidationErrorMaxVotesAllowed(
+        null == maxVotesAllowed
+            ? _self.maxVotesAllowed
+            : maxVotesAllowed // ignore: cast_nullable_to_non_nullable
+                  as int,
+        range: null == range
+            ? _self.range
+            : range // ignore: cast_nullable_to_non_nullable
+                  as Range<int>,
+      ),
+    );
   }
 }
-
-// dart format on

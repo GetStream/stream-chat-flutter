@@ -29,7 +29,10 @@ void main() {
             alignment: Alignment.topCenter,
             child: SizedBox(
               height: _listHeight,
-              child: StreamMessageListErrorState(error: const StreamChatError('error'), onRetryPressed: () {}),
+              child: StreamMessageListErrorState(
+                error: const StreamClientException(message: 'error'),
+                onRetryPressed: () {},
+              ),
             ),
           ),
         ),

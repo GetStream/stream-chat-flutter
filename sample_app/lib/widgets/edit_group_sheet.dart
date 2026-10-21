@@ -74,7 +74,7 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
   final List<String> _trackedUploads = [];
 
   String get _name => _nameController.text.trim();
-  String get _initialName => (_channel.extraData['name'] as String?) ?? '';
+  String get _initialName => (_channel.custom['name'] as String?) ?? '';
 
   bool get _isDirty {
     if (_name != _initialName) return true;
@@ -218,19 +218,23 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
           });
         },
       );
-      final url = response.file;
-      if (url == null || !mounted) return;
-      _trackedUploads.add(url);
-      setState(() => _imageOverride = url);
-    } catch (e) {
-      if (mounted) {
+      if (!mounted) return;
+
+      if (response case Failure(:final error)) {
         // Drop the local preview so the user sees the channel revert —
         // the snackbar tells them why and they can re-pick.
         setState(() => _pickedPath = null);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload failed: $e')),
+          SnackBar(content: Text('Upload failed: $error')),
         );
+        return;
       }
+
+      final url = response.getOrNull()?.fileUrl;
+      if (url == null) return;
+
+      _trackedUploads.add(url);
+      setState(() => _imageOverride = url);
     } finally {
       if (mounted) setState(() => _uploadProgress = null);
     }
@@ -264,7 +268,12 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
       }
 
       if (set.isNotEmpty || unset.isNotEmpty) {
-        await _channel.updatePartial(set: set, unset: unset);
+        final result = await _channel.updatePartial(set: set, unset: unset);
+        if (result case Failure(:final error)) {
+          messenger.showSnackBar(SnackBar(content: Text('Failed to save: $error')));
+          if (mounted) setState(() => _saving = false);
+          return;
+        }
       }
 
       // Strip the saved URL from the orphan list so dispose() doesn't

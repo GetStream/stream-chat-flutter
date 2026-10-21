@@ -184,7 +184,9 @@ Future<void> _pumpMessageList(
   when(() => channelClientState.currentUserReadStream).thenAnswer((_) => const Stream.empty());
   when(() => channelClientState.messagesStream).thenAnswer((_) => messagesController.stream);
 
-  when(() => channel.markRead(messageId: any(named: 'messageId'))).thenAnswer((_) async => EmptyResponse());
+  when(
+    () => channel.markRead(messageId: any(named: 'messageId')),
+  ).thenAnswer((_) async => const Result.success(MarkReadResponse(duration: '0ms')));
   stubChannel?.call(channel, channelClientState);
 
   final effectiveMessages = messages ?? generateConversation(40, users: [User(id: 'otherid')]).reversed.toList();

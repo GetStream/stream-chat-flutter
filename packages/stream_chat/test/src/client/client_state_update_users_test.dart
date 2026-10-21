@@ -100,7 +100,7 @@ void main() {
 }
 
 StreamChatClient _client() {
-  final client = StreamChatClient('test-api-key', ws: FakeWebSocket(), chatApi: FakeChatApi());
+  final client = StreamChatClient('test-api-key', chatApi: FakeChatApi(), defaultApi: FakeDefaultApi());
   addTearDown(client.dispose);
   return client;
 }

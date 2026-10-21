@@ -19,24 +19,16 @@ void main() {
     expect(streamChatApi.user, isNotNull);
   });
 
-  test('`.guest`', () {
-    expect(streamChatApi.guest, isNotNull);
-  });
-
   test('`.message`', () {
     expect(streamChatApi.message, isNotNull);
-  });
-
-  test('`.polls`', () {
-    expect(streamChatApi.polls, isNotNull);
   });
 
   test('`.channel`', () {
     expect(streamChatApi.channel, isNotNull);
   });
 
-  test('`.device`', () {
-    expect(streamChatApi.device, isNotNull);
+  test('`.pushPreferences`', () {
+    expect(streamChatApi.pushPreferences, isNotNull);
   });
 
   test('`.moderation`', () {
@@ -45,9 +37,5 @@ void main() {
 
   test('`.general`', () {
     expect(streamChatApi.general, isNotNull);
-  });
-
-  test('`.fileUploader`', () {
-    expect(streamChatApi.fileUploader, isNotNull);
   });
 }

@@ -97,8 +97,8 @@ Future<void> _pumpComposer(
   when(() => channel.client).thenReturn(client);
   when(channel.getRemainingCooldown).thenReturn(0);
   when(() => channel.lastMessageAt).thenReturn(null);
-  when(() => channel.extraData).thenReturn({'name': 'test'});
-  when(() => channel.extraDataStream).thenAnswer((_) => Stream.value({'name': 'test'}));
+  when(() => channel.custom).thenReturn({'name': 'test'});
+  when(() => channel.customStream).thenAnswer((_) => Stream.value({'name': 'test'}));
   when(() => channelState.members).thenReturn([]);
   when(() => channelState.membersStream).thenAnswer((_) => Stream.value([]));
   when(() => channelState.messages).thenReturn([]);

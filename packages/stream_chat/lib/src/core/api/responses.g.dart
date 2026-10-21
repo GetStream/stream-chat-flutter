@@ -50,14 +50,6 @@ QueryMembersResponse _$QueryMembersResponseFromJson(
   ..members =
       (json['members'] as List<dynamic>?)?.map((e) => Member.fromJson(e as Map<String, dynamic>)).toList() ?? [];
 
-PartialUpdateMemberResponse _$PartialUpdateMemberResponseFromJson(
-  Map<String, dynamic> json,
-) => PartialUpdateMemberResponse()
-  ..duration = json['duration'] as String?
-  ..channelMember = Member.fromJson(
-    json['channel_member'] as Map<String, dynamic>,
-  );
-
 QueryUsersResponse _$QueryUsersResponseFromJson(Map<String, dynamic> json) => QueryUsersResponse()
   ..duration = json['duration'] as String?
   ..users = (json['users'] as List<dynamic>?)?.map((e) => User.fromJson(e as Map<String, dynamic>)).toList() ?? [];
@@ -83,35 +75,12 @@ QueryRepliesResponse _$QueryRepliesResponseFromJson(
   ..messages =
       (json['messages'] as List<dynamic>?)?.map((e) => Message.fromJson(e as Map<String, dynamic>)).toList() ?? [];
 
-ListDevicesResponse _$ListDevicesResponseFromJson(Map<String, dynamic> json) => ListDevicesResponse()
-  ..duration = json['duration'] as String?
-  ..devices =
-      (json['devices'] as List<dynamic>?)?.map((e) => Device.fromJson(e as Map<String, dynamic>)).toList() ?? [];
-
-SendAttachmentResponse _$SendAttachmentResponseFromJson(
-  Map<String, dynamic> json,
-) => SendAttachmentResponse()
-  ..duration = json['duration'] as String?
-  ..file = json['file'] as String?;
-
-SendFileResponse _$SendFileResponseFromJson(Map<String, dynamic> json) => SendFileResponse()
-  ..duration = json['duration'] as String?
-  ..file = json['file'] as String?
-  ..thumbUrl = json['thumb_url'] as String?;
-
 SendReactionResponse _$SendReactionResponseFromJson(
   Map<String, dynamic> json,
 ) => SendReactionResponse()
   ..duration = json['duration'] as String?
   ..message = Message.fromJson(json['message'] as Map<String, dynamic>)
   ..reaction = Reaction.fromJson(json['reaction'] as Map<String, dynamic>);
-
-ConnectGuestUserResponse _$ConnectGuestUserResponseFromJson(
-  Map<String, dynamic> json,
-) => ConnectGuestUserResponse()
-  ..duration = json['duration'] as String?
-  ..accessToken = json['access_token'] as String
-  ..user = User.fromJson(json['user'] as Map<String, dynamic>);
 
 UpdateUsersResponse _$UpdateUsersResponseFromJson(Map<String, dynamic> json) => UpdateUsersResponse()
   ..duration = json['duration'] as String?
@@ -162,13 +131,6 @@ UpdateChannelResponse _$UpdateChannelResponseFromJson(
   ..channel = ChannelModel.fromJson(json['channel'] as Map<String, dynamic>)
   ..members = (json['members'] as List<dynamic>?)?.map((e) => Member.fromJson(e as Map<String, dynamic>)).toList()
   ..message = json['message'] == null ? null : Message.fromJson(json['message'] as Map<String, dynamic>);
-
-PartialUpdateChannelResponse _$PartialUpdateChannelResponseFromJson(
-  Map<String, dynamic> json,
-) => PartialUpdateChannelResponse()
-  ..duration = json['duration'] as String?
-  ..channel = ChannelModel.fromJson(json['channel'] as Map<String, dynamic>)
-  ..members = (json['members'] as List<dynamic>?)?.map((e) => Member.fromJson(e as Map<String, dynamic>)).toList();
 
 InviteMembersResponse _$InviteMembersResponseFromJson(
   Map<String, dynamic> json,
@@ -226,21 +188,6 @@ ChannelStateResponse _$ChannelStateResponseFromJson(
   ..watcherCount = (json['watcher_count'] as num?)?.toInt() ?? 0
   ..read = (json['read'] as List<dynamic>?)?.map((e) => Read.fromJson(e as Map<String, dynamic>)).toList() ?? [];
 
-OGAttachmentResponse _$OGAttachmentResponseFromJson(
-  Map<String, dynamic> json,
-) => OGAttachmentResponse()
-  ..duration = json['duration'] as String?
-  ..ogScrapeUrl = json['og_scrape_url'] as String
-  ..assetUrl = json['asset_url'] as String?
-  ..authorLink = json['author_link'] as String?
-  ..authorName = json['author_name'] as String?
-  ..imageUrl = json['image_url'] as String?
-  ..text = json['text'] as String?
-  ..thumbUrl = json['thumb_url'] as String?
-  ..title = json['title'] as String?
-  ..titleLink = json['title_link'] as String?
-  ..type = json['type'] as String?;
-
 UserBlockResponse _$UserBlockResponseFromJson(Map<String, dynamic> json) => UserBlockResponse()
   ..duration = json['duration'] as String?
   ..blockedByUserId = json['blocked_by_user_id'] as String? ?? ''
@@ -253,66 +200,6 @@ BlockedUsersResponse _$BlockedUsersResponseFromJson(
   ..duration = json['duration'] as String?
   ..blocks =
       (json['blocks'] as List<dynamic>?)?.map((e) => UserBlock.fromJson(e as Map<String, dynamic>)).toList() ?? [];
-
-CreatePollResponse _$CreatePollResponseFromJson(Map<String, dynamic> json) => CreatePollResponse()
-  ..duration = json['duration'] as String?
-  ..poll = Poll.fromJson(json['poll'] as Map<String, dynamic>);
-
-GetPollResponse _$GetPollResponseFromJson(Map<String, dynamic> json) => GetPollResponse()
-  ..duration = json['duration'] as String?
-  ..poll = Poll.fromJson(json['poll'] as Map<String, dynamic>);
-
-UpdatePollResponse _$UpdatePollResponseFromJson(Map<String, dynamic> json) => UpdatePollResponse()
-  ..duration = json['duration'] as String?
-  ..poll = Poll.fromJson(json['poll'] as Map<String, dynamic>);
-
-CreatePollOptionResponse _$CreatePollOptionResponseFromJson(
-  Map<String, dynamic> json,
-) => CreatePollOptionResponse()
-  ..duration = json['duration'] as String?
-  ..pollOption = PollOption.fromJson(
-    json['poll_option'] as Map<String, dynamic>,
-  );
-
-GetPollOptionResponse _$GetPollOptionResponseFromJson(
-  Map<String, dynamic> json,
-) => GetPollOptionResponse()
-  ..duration = json['duration'] as String?
-  ..pollOption = PollOption.fromJson(
-    json['poll_option'] as Map<String, dynamic>,
-  );
-
-UpdatePollOptionResponse _$UpdatePollOptionResponseFromJson(
-  Map<String, dynamic> json,
-) => UpdatePollOptionResponse()
-  ..duration = json['duration'] as String?
-  ..pollOption = PollOption.fromJson(
-    json['poll_option'] as Map<String, dynamic>,
-  );
-
-CastPollVoteResponse _$CastPollVoteResponseFromJson(
-  Map<String, dynamic> json,
-) => CastPollVoteResponse()
-  ..duration = json['duration'] as String?
-  ..vote = PollVote.fromJson(json['vote'] as Map<String, dynamic>);
-
-RemovePollVoteResponse _$RemovePollVoteResponseFromJson(
-  Map<String, dynamic> json,
-) => RemovePollVoteResponse()
-  ..duration = json['duration'] as String?
-  ..vote = PollVote.fromJson(json['vote'] as Map<String, dynamic>);
-
-QueryPollsResponse _$QueryPollsResponseFromJson(Map<String, dynamic> json) => QueryPollsResponse()
-  ..duration = json['duration'] as String?
-  ..polls = (json['polls'] as List<dynamic>?)?.map((e) => Poll.fromJson(e as Map<String, dynamic>)).toList() ?? []
-  ..next = json['next'] as String?;
-
-QueryPollVotesResponse _$QueryPollVotesResponseFromJson(
-  Map<String, dynamic> json,
-) => QueryPollVotesResponse()
-  ..duration = json['duration'] as String?
-  ..votes = (json['votes'] as List<dynamic>?)?.map((e) => PollVote.fromJson(e as Map<String, dynamic>)).toList() ?? []
-  ..next = json['next'] as String?;
 
 GetThreadResponse _$GetThreadResponseFromJson(Map<String, dynamic> json) => GetThreadResponse()
   ..duration = json['duration'] as String?
@@ -416,57 +303,3 @@ GetActiveLiveLocationsResponse _$GetActiveLiveLocationsResponseFromJson(
   ..activeLiveLocations = (json['active_live_locations'] as List<dynamic>)
       .map((e) => Location.fromJson(e as Map<String, dynamic>))
       .toList();
-
-ListUserGroupsResponse _$ListUserGroupsResponseFromJson(
-  Map<String, dynamic> json,
-) => ListUserGroupsResponse()
-  ..duration = json['duration'] as String?
-  ..userGroups =
-      (json['user_groups'] as List<dynamic>?)?.map((e) => UserGroup.fromJson(e as Map<String, dynamic>)).toList() ?? [];
-
-SearchUserGroupsResponse _$SearchUserGroupsResponseFromJson(
-  Map<String, dynamic> json,
-) => SearchUserGroupsResponse()
-  ..duration = json['duration'] as String?
-  ..userGroups =
-      (json['user_groups'] as List<dynamic>?)?.map((e) => UserGroup.fromJson(e as Map<String, dynamic>)).toList() ?? [];
-
-CreateUserGroupResponse _$CreateUserGroupResponseFromJson(
-  Map<String, dynamic> json,
-) => CreateUserGroupResponse()
-  ..duration = json['duration'] as String?
-  ..userGroup = UserGroup.fromJson(json['user_group'] as Map<String, dynamic>);
-
-GetUserGroupResponse _$GetUserGroupResponseFromJson(
-  Map<String, dynamic> json,
-) => GetUserGroupResponse()
-  ..duration = json['duration'] as String?
-  ..userGroup = UserGroup.fromJson(json['user_group'] as Map<String, dynamic>);
-
-UpdateUserGroupResponse _$UpdateUserGroupResponseFromJson(
-  Map<String, dynamic> json,
-) => UpdateUserGroupResponse()
-  ..duration = json['duration'] as String?
-  ..userGroup = UserGroup.fromJson(json['user_group'] as Map<String, dynamic>);
-
-AddUserGroupMembersResponse _$AddUserGroupMembersResponseFromJson(
-  Map<String, dynamic> json,
-) => AddUserGroupMembersResponse()
-  ..duration = json['duration'] as String?
-  ..userGroup = UserGroup.fromJson(json['user_group'] as Map<String, dynamic>);
-
-RemoveUserGroupMembersResponse _$RemoveUserGroupMembersResponseFromJson(
-  Map<String, dynamic> json,
-) => RemoveUserGroupMembersResponse()
-  ..duration = json['duration'] as String?
-  ..userGroup = UserGroup.fromJson(json['user_group'] as Map<String, dynamic>);
-
-SearchRolesResponse _$SearchRolesResponseFromJson(Map<String, dynamic> json) => SearchRolesResponse()
-  ..duration = json['duration'] as String?
-  ..roles = (json['roles'] as List<dynamic>?)?.map((e) => Role.fromJson(e as Map<String, dynamic>)).toList() ?? [];
-
-GetAppSettingsResponse _$GetAppSettingsResponseFromJson(
-  Map<String, dynamic> json,
-) => GetAppSettingsResponse()
-  ..duration = json['duration'] as String?
-  ..app = AppSettings.fromJson(json['app'] as Map<String, dynamic>);

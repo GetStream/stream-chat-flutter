@@ -193,7 +193,7 @@ class StreamTestEnv {
     final end = DateTime.now().add(timeout);
     while (DateTime.now().isBefore(end)) {
       await _tester.pump(const Duration(milliseconds: 200));
-      if (authController.client?.wsConnectionStatus == status) return;
+      if (authController.client?.connectionStatus == status) return;
     }
     throw TestFailure('Timed out waiting for connection status: $status');
   }

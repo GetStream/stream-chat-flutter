@@ -7,7 +7,7 @@ import '../mocks.dart';
 
 void main() {
   testWidgets(
-    'it should show the image in channel.extraData',
+    'StreamChannelAvatar shows the channel image',
     (tester) async {
       final client = MockClient();
       final clientState = MockClientState();
@@ -98,7 +98,7 @@ void main() {
           ),
         }),
       );
-      when(() => channel.extraData).thenReturn({
+      when(() => channel.custom).thenReturn({
         'name': 'test',
       });
 

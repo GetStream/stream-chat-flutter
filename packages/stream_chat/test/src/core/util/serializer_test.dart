@@ -49,4 +49,16 @@ void main() {
 
     expect(json, {'name': 'extra'});
   });
+
+  test('moveFromExtraDataToRoot leaves out an extra_data entry named like one of the top level fields', () {
+    final json = Serializer.moveFromExtraDataToRoot(
+      {
+        'name': 'root',
+        'extra_data': {'name': 'extra', 'role': 'extra', 'color': 'red'},
+      },
+      topLevelFields: ['name', 'role'],
+    );
+
+    expect(json, {'name': 'root', 'color': 'red'});
+  });
 }

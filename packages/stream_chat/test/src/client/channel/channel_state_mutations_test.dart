@@ -37,7 +37,6 @@ void main() {
     client = MockStreamChatClient();
     state = MockChannelClientState();
 
-    when(() => client.logger).thenReturn(MockLogger());
     when(() => state.typingEvents).thenReturn({});
     when(() => client.state).thenReturn(FakeClientState());
 

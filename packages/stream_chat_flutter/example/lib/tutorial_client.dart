@@ -29,11 +29,10 @@ Future<StreamChatClient> connectTutorialUser() async {
   /// opens with content even without a connection. Attach the persistence
   /// client *before* `connectUser` - attaching it afterwards does nothing for
   /// the current session.
-  final client = StreamChatClient(apiKey, logLevel: Level.INFO)
-    ..chatPersistenceClient = StreamChatPersistenceClient(
-      logLevel: Level.INFO,
-      connectionMode: ConnectionMode.regular,
-    );
+  final client = StreamChatClient(
+    apiKey,
+    logConfig: const StreamLogConfig(priority: StreamLogPriority.info),
+  )..chatPersistenceClient = StreamChatPersistenceClient();
 
   /// Development token from `getstream token`. In production, fetch the
   /// token from your backend after login - never hardcode secrets.

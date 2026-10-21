@@ -70,15 +70,13 @@ Future<void Function(Event event)> _pumpOptionVotesSheet(
   when(
     () => channel.queryPollVotes(
       _pollId,
-      sort: any(named: 'sort'),
       filter: any(named: 'filter'),
-      pagination: any(named: 'pagination'),
+      sort: any(named: 'sort'),
+      limit: any(named: 'limit'),
+      next: any(named: 'next'),
+      prev: any(named: 'prev'),
     ),
-  ).thenAnswer(
-    (_) async => QueryPollVotesResponse()
-      ..votes = votes
-      ..next = null,
-  );
+  ).thenAnswer((_) async => Result.success(QueryPollVotesResponse(duration: '1ms', votes: votes)));
 
   await tester.pumpWidget(
     MaterialApp(

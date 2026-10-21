@@ -1,42 +1,27 @@
 import 'package:collection/collection.dart';
-import 'package:equatable/equatable.dart';
-import 'package:json_annotation/json_annotation.dart';
-import 'package:meta/meta.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:stream_core/stream_core.dart'
+    show Filter, FilterField, Standard, Sort, SortField, normalizeStringForSort;
 import 'package:uuid/uuid.dart';
 
-import '../util/serializer.dart';
-import 'comparable_field.dart';
 import 'poll_option.dart';
 import 'poll_vote.dart';
 import 'user.dart';
+import 'voting_visibility.dart';
 
-part 'poll.g.dart';
+part 'poll.freezed.dart';
 
-class _NullConst {
-  const _NullConst();
-}
-
-const _nullConst = _NullConst();
-
-/// {@template streamVotingVisibility}
-/// Represents the visibility of the voting process.
-/// {@endtemplate}
-enum VotingVisibility {
-  /// The voting process is anonymous.
-  @JsonValue('anonymous')
-  anonymous,
-
-  /// The voting process is public.
-  @JsonValue('public')
-  public,
-}
-
-/// {@template streamPoll}
-/// A model class representing a poll.
-/// {@endtemplate}
-@JsonSerializable()
-class Poll extends Equatable implements ComparableFieldProvider {
-  /// {@macro streamPoll}
+/// A question with a set of options that the members of a channel vote on.
+///
+/// A poll is sent in a message. Besides its settings it carries a summary of
+/// the votes so far: the counts per option, the latest votes and answers, and
+/// the votes of the current user.
+@freezed
+class Poll with _$Poll {
+  /// Creates a new [Poll].
+  ///
+  /// An [id] is generated when omitted, and [createdAt] and [updatedAt]
+  /// default to the current time.
   Poll({
     String? id,
     required this.name,
@@ -60,19 +45,17 @@ class Poll extends Equatable implements ComparableFieldProvider {
     this.createdById,
     this.createdBy,
     this.ownVotesAndAnswers = const [],
-    this.extraData = const {},
+    this.custom = const {},
   }) : id = id ?? const Uuid().v4(),
        createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
-  /// Create a new instance from a json
-  factory Poll.fromJson(Map<String, dynamic> json) =>
-      _$PollFromJson(Serializer.moveToExtraDataFromRoot(json, topLevelFields));
-
-  /// The unique identifier of the poll.
+  /// The unique identifier of this poll.
+  @override
   final String id;
 
-  /// The name of the poll.
+  /// The question this poll asks.
+  @override
   final String name;
 
   /// The translations of [name], keyed as `<language>_text`, plus the
@@ -80,161 +63,119 @@ class Poll extends Equatable implements ComparableFieldProvider {
   ///
   /// Filled in by the server when the poll is sent to a channel with
   /// automatic translation enabled.
-  @JsonKey(includeToJson: false)
+  @override
   final Map<String, String>? nameI18n;
 
-  /// The description of the poll.
+  /// A longer explanation of the question.
+  @override
   final String? description;
 
   /// The translations of [description], in the same shape as [nameI18n].
-  @JsonKey(includeToJson: false)
+  @override
   final Map<String, String>? descriptionI18n;
 
-  /// The list of options available for the poll.
+  /// The options that can be voted for.
+  @override
   final List<PollOption> options;
 
-  /// Represents the visibility of the voting process.
+  /// The rule for who can see which option each user voted for.
   ///
   /// Defaults to [VotingVisibility.public].
+  @override
   final VotingVisibility votingVisibility;
 
-  /// If true, only unique votes are allowed.
+  /// Whether each user may vote for one option only.
   ///
-  /// Defaults to false.
+  /// Voting for another option replaces the previous vote. Defaults to true.
+  @override
   final bool enforceUniqueVote;
 
-  /// The maximum number of votes allowed per user.
+  /// The maximum number of options each user may vote for, or null for no
+  /// limit.
+  ///
+  /// Applies only when [enforceUniqueVote] is false.
+  @override
   final int? maxVotesAllowed;
 
-  /// If true, users can suggest their own options.
+  /// Whether users may add their own options to this poll.
   ///
   /// Defaults to false.
+  @override
   final bool allowUserSuggestedOptions;
 
-  /// If true, users can provide their own answers/comments.
+  /// Whether users may add a free-form answer.
   ///
   /// Defaults to false.
+  @override
   final bool allowAnswers;
 
-  /// Indicates if the poll is closed.
+  /// Whether this poll no longer accepts votes or answers.
+  @override
   final bool isClosed;
 
-  /// The total number of answers received by the poll.
-  @JsonKey(includeToJson: false)
+  /// The total number of answers added to this poll.
+  @override
   final int answersCount;
 
-  /// Map of vote counts by option.
-  @JsonKey(includeToJson: false)
+  /// The number of votes each option received, keyed by option id.
+  @override
   final Map<String, int> voteCountsByOption;
 
-  /// Map of latest votes by option.
-  @JsonKey(includeToJson: false)
+  /// The most recent votes for each option, keyed by option id.
+  ///
+  /// Empty for an anonymous poll.
+  @override
   final Map<String, List<PollVote>> latestVotesByOption;
 
-  /// List of votes received by the poll.
+  /// The most recent votes across all options.
   ///
-  /// Note: This does not include the answers provided by the users,
-  /// see [latestAnswers] for that.
-  late final latestVotes = [...latestVotesByOption.values.flattened];
+  /// Answers are not included; see [latestAnswers] for those.
+  @override
+  late final List<PollVote> latestVotes = [...latestVotesByOption.values.flattened];
 
-  /// List of latest answers received by the poll.
-  @JsonKey(includeToJson: false)
+  /// The most recent answers added to this poll.
+  @override
   final List<PollVote> latestAnswers;
 
-  /// List of votes casted by the current user.
-  ///
-  /// Contains both votes and answers.
-  @JsonKey(name: 'own_votes', includeToJson: false)
+  /// The votes and answers of the current user.
+  @override
   final List<PollVote> ownVotesAndAnswers;
 
-  /// The total number of votes received by the poll.
-  @JsonKey(includeToJson: false)
+  /// The total number of votes cast on this poll.
+  @override
   final int voteCount;
 
-  /// List of votes casted by the current user.
+  /// The votes of the current user.
   ///
-  /// Note: This does not include the answers provided by the user,
-  /// see [ownAnswers] for that.
-  late final ownVotes = [...ownVotesAndAnswers.where((it) => !it.isAnswer)];
+  /// Answers are not included; see [ownAnswers] for those.
+  @override
+  late final List<PollVote> ownVotes = [...ownVotesAndAnswers.where((it) => !it.isAnswer)];
 
-  /// List of answers provided by the current user.
+  /// The answers of the current user.
   ///
-  /// Note: This does not include the votes casted by the user,
-  /// see [ownVotes] for that.
-  late final ownAnswers = [...ownVotesAndAnswers.where((it) => it.isAnswer)];
+  /// Votes are not included; see [ownVotes] for those.
+  @override
+  late final List<PollVote> ownAnswers = [...ownVotesAndAnswers.where((it) => it.isAnswer)];
 
-  /// The id of the user who created the poll.
-  @JsonKey(includeToJson: false)
+  /// The unique identifier of the user who created this poll.
+  @override
   final String? createdById;
 
-  /// The user who created the poll.
-  @JsonKey(includeToJson: false)
+  /// The user who created this poll.
+  @override
   final User? createdBy;
 
-  /// The date when the poll was created.
-  @JsonKey(includeToJson: false)
+  /// The date this poll was created.
+  @override
   final DateTime createdAt;
 
-  /// The date when the poll was last updated.
-  @JsonKey(includeToJson: false)
+  /// The date this poll was last changed.
+  @override
   final DateTime updatedAt;
 
-  /// Map of custom poll extraData
-  final Map<String, Object?> extraData;
-
-  /// Serialize to json
-  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(_$PollToJson(this));
-
-  /// Creates a copy of [Poll] with specified attributes overridden.
-  Poll copyWith({
-    String? id,
-    String? name,
-    Map<String, String>? nameI18n,
-    String? description,
-    Map<String, String>? descriptionI18n,
-    List<PollOption>? options,
-    VotingVisibility? votingVisibility,
-    bool? enforceUniqueVote,
-    Object? maxVotesAllowed = _nullConst,
-    bool? allowUserSuggestedOptions,
-    bool? allowAnswers,
-    bool? isClosed,
-    Map<String, int>? voteCountsByOption,
-    List<PollVote>? ownVotesAndAnswers,
-    int? voteCount,
-    int? answersCount,
-    Map<String, List<PollVote>>? latestVotesByOption,
-    List<PollVote>? latestAnswers,
-    String? createdById,
-    User? createdBy,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    Map<String, Object?>? extraData,
-  }) => Poll(
-    id: id ?? this.id,
-    name: name ?? this.name,
-    nameI18n: nameI18n ?? this.nameI18n,
-    description: description ?? this.description,
-    descriptionI18n: descriptionI18n ?? this.descriptionI18n,
-    options: options ?? this.options,
-    votingVisibility: votingVisibility ?? this.votingVisibility,
-    enforceUniqueVote: enforceUniqueVote ?? this.enforceUniqueVote,
-    maxVotesAllowed: maxVotesAllowed == _nullConst ? this.maxVotesAllowed : maxVotesAllowed as int?,
-    allowUserSuggestedOptions: allowUserSuggestedOptions ?? this.allowUserSuggestedOptions,
-    allowAnswers: allowAnswers ?? this.allowAnswers,
-    isClosed: isClosed ?? this.isClosed,
-    voteCountsByOption: voteCountsByOption ?? this.voteCountsByOption,
-    ownVotesAndAnswers: ownVotesAndAnswers ?? this.ownVotesAndAnswers,
-    voteCount: voteCount ?? this.voteCount,
-    answersCount: answersCount ?? this.answersCount,
-    latestVotesByOption: latestVotesByOption ?? this.latestVotesByOption,
-    latestAnswers: latestAnswers ?? this.latestAnswers,
-    createdById: createdById ?? this.createdById,
-    createdBy: createdBy ?? this.createdBy,
-    createdAt: createdAt ?? this.createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
-    extraData: extraData ?? this.extraData,
-  );
+  /// Custom data attached to this poll.
+  @override
+  final Map<String, Object?> custom;
 
   /// This poll with the translations of [oldPoll] filled in where this one
   /// has none.
@@ -262,100 +203,191 @@ class Poll extends Equatable implements ComparableFieldProvider {
       ],
     );
   }
-
-  /// Known top level fields.
-  ///
-  /// Useful for [Serializer] methods.
-  static const topLevelFields = [
-    'id',
-    'name',
-    'name_i18n',
-    'description',
-    'description_i18n',
-    'options',
-    'voting_visibility',
-    'enforce_unique_vote',
-    'max_votes_allowed',
-    'allow_user_suggested_options',
-    'allow_answers',
-    'is_closed',
-    'created_at',
-    'updated_at',
-    'vote_counts_by_option',
-    'votes',
-    'own_votes',
-    'vote_count',
-    'answers_count',
-    'latest_votes_by_option',
-    'latest_answers',
-    'created_by_id',
-    'created_by',
-  ];
-
-  @override
-  List<Object?> get props => [
-    id,
-    name,
-    nameI18n,
-    description,
-    descriptionI18n,
-    options,
-    votingVisibility,
-    enforceUniqueVote,
-    maxVotesAllowed,
-    allowUserSuggestedOptions,
-    allowAnswers,
-    isClosed,
-    voteCountsByOption,
-    ownVotesAndAnswers,
-    voteCount,
-    answersCount,
-    latestVotesByOption,
-    latestAnswers,
-    createdById,
-    createdBy,
-    createdAt,
-    updatedAt,
-  ];
-
-  @override
-  ComparableField? getComparableField(String sortKey) {
-    final value = switch (sortKey) {
-      PollSortKey.id => id,
-      PollSortKey.name => name,
-      PollSortKey.createdAt => createdAt,
-      PollSortKey.updatedAt => updatedAt,
-      PollSortKey.isClosed => isClosed,
-      _ => extraData[sortKey],
-    };
-
-    return ComparableField.fromValue(value);
-  }
 }
 
-/// Extension type representing sortable fields for [Poll].
+/// A filter for a poll query.
 ///
-/// This type provides type-safe keys that can be used for sorting polls
-/// in queries. Each constant represents a field that can be sorted on.
-extension type const PollSortKey(String key) implements String {
-  /// Sort polls by their unique ID.
-  static const id = PollSortKey('id');
+/// See [PollFilterField] for the fields that can be filtered on.
+///
+/// ```dart
+/// final filter = PollFilter.equal(PollFilterField.isClosed, false);
+/// ```
+typedef PollFilter = Filter<Poll>;
 
-  /// Sort polls by their name.
-  static const name = PollSortKey('name');
+/// Represents a field that poll queries can be filtered on.
+class PollFilterField extends FilterField<Poll> {
+  /// Creates a poll filter field named [remote] in queries, reading its value
+  /// off an instance with [value].
+  PollFilterField(super.remote, super.value);
 
-  /// Sort polls by their creation date.
+  /// Creates a field the SDK does not model, read from [Poll.custom].
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`, `$contains`, `$q`, `$autocomplete`
+  factory PollFilterField.custom(String remote) {
+    return PollFilterField(remote, (it) => it.custom[remote]);
+  }
+
+  /// Filters polls by their id.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final id = PollFilterField(
+    'id',
+    (it) => it.id,
+  );
+
+  /// Filters polls by their name.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final name = PollFilterField(
+    'name',
+    (it) => it.name,
+  );
+
+  /// Filters polls by the id of the user who created them.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final createdById = PollFilterField(
+    'created_by_id',
+    (it) => it.createdById,
+  );
+
+  /// Filters polls by whether they are closed to further voting.
+  ///
+  /// **Supported operators:** `$eq`
+  static final isClosed = PollFilterField(
+    'is_closed',
+    (it) => it.isClosed,
+  );
+
+  /// Filters polls by how many votes each user may cast.
+  ///
+  /// **Supported operators:** `$eq`, `$gt`, `$gte`, `$lt`, `$lte`
+  static final maxVotesAllowed = PollFilterField(
+    'max_votes_allowed',
+    (it) => it.maxVotesAllowed,
+  );
+
+  /// Filters polls by whether they accept free-form answers.
+  ///
+  /// **Supported operators:** `$eq`
+  static final allowAnswers = PollFilterField(
+    'allow_answers',
+    (it) => it.allowAnswers,
+  );
+
+  /// Filters polls by whether users may add their own options.
+  ///
+  /// **Supported operators:** `$eq`
+  static final allowUserSuggestedOptions = PollFilterField(
+    'allow_user_suggested_options',
+    (it) => it.allowUserSuggestedOptions,
+  );
+
+  /// Filters polls by whether their votes are public or anonymous.
+  ///
+  /// **Supported operators:** `$eq`
+  static final votingVisibility = PollFilterField(
+    'voting_visibility',
+    (it) => it.votingVisibility,
+  );
+
+  /// Filters polls by their creation date.
+  ///
+  /// **Supported operators:** `$eq`, `$gt`, `$gte`, `$lt`, `$lte`
+  static final createdAt = PollFilterField(
+    'created_at',
+    (it) => it.createdAt,
+  );
+
+  /// Filters polls by their last update date.
+  ///
+  /// **Supported operators:** `$eq`, `$gt`, `$gte`, `$lt`, `$lte`
+  static final updatedAt = PollFilterField(
+    'updated_at',
+    (it) => it.updatedAt,
+  );
+}
+
+/// Represents a sorting operation for polls.
+///
+/// The API sorts on one field at a time: `id`, `name`, `createdAt`,
+/// `updatedAt` or `isClosed`. Anything else is rejected.
+///
+/// See [PollSortField] for the fields that can be sorted on.
+///
+/// ```dart
+/// final sort = [PollSort.desc(PollSortField.createdAt)];
+/// ```
+class PollSort extends Sort<Poll> {
+  /// Sorts by [field], smallest first.
+  const PollSort.asc(
+    PollSortField super.field, {
+    super.nullOrdering,
+  }) : super.asc();
+
+  /// Sorts by [field], largest first.
+  const PollSort.desc(
+    PollSortField super.field, {
+    super.nullOrdering,
+  }) : super.desc();
+
+  /// An empty sort: the query carries no sort term, and a list keeps the
+  /// order it arrived in.
+  static const List<PollSort> empty = [];
+
+  /// The ordering the API applies to a poll query when none is given.
+  ///
+  /// Sorts by when the poll was created, oldest first.
+  static final List<PollSort> defaultSort = [
+    PollSort.asc(PollSortField.createdAt),
+  ];
+}
+
+/// Represents a field that poll queries can be sorted on.
+class PollSortField extends SortField<Poll> {
+  /// Creates a field named [remote] in queries, reading its value off an
+  /// instance with `localValue`.
+  ///
+  /// For a name the SDK has not modelled; prefer the fields declared here.
+  PollSortField(super.remote, super.localValue);
+
+  /// Sorts polls by their unique ID.
+  static final id = PollSortField(
+    'id',
+    (it) => it.id,
+  );
+
+  /// Sorts polls by their name.
+  ///
+  /// Compared with case, diacritics and ligatures folded away, so a list
+  /// sorted locally matches the order a query returns.
+  static final name = PollSortField(
+    'name',
+    (it) => it.name.let(normalizeStringForSort),
+  );
+
+  /// Sorts polls by their creation date.
   ///
   /// This is the default sort field (in ascending order).
-  static const createdAt = PollSortKey('created_at');
+  static final createdAt = PollSortField(
+    'created_at',
+    (it) => it.createdAt,
+  );
 
-  /// Sort polls by their last update date.
-  static const updatedAt = PollSortKey('updated_at');
+  /// Sorts polls by their last update date.
+  static final updatedAt = PollSortField(
+    'updated_at',
+    (it) => it.updatedAt,
+  );
 
-  /// Sort polls by whether they are closed or not.
+  /// Sorts polls by whether they are closed or not.
   ///
   /// Closed polls will appear first when sorting in ascending order.
-  static const isClosed = PollSortKey('is_closed');
+  static final isClosed = PollSortField(
+    'is_closed',
+    (it) => it.isClosed,
+  );
 }
 
 /// Helper extension for [Poll] model.

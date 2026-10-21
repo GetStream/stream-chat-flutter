@@ -41,7 +41,7 @@ Thread _makeThread({
     channel: ChannelModel(
       id: id,
       type: 'messaging',
-      extraData: {'name': channelName},
+      custom: {'name': channelName},
     ),
     parentMessage: parentMessage,
     latestReplies: [latestReply],

@@ -1,5 +1,4 @@
-import 'package:stream_chat/src/core/models/member.dart';
-import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
 import '../../utils.dart';
@@ -13,170 +12,193 @@ void main() {
       expect(member.createdAt, DateTime.parse('2020-01-28T22:17:30.95443Z'));
       expect(member.updatedAt, DateTime.parse('2020-01-28T22:17:30.95443Z'));
       expect(member.deletedMessages, ['msg-1', 'msg-2', 'msg-3']);
-      expect(member.extraData['some_custom_field'], 'with_custom_data');
+      expect(member.custom['some_custom_field'], 'with_custom_data');
+      expect(member.notificationsMuted, isTrue);
+      expect(member.status, 'member');
+      expect(member.banFromFutureChannels, isTrue);
+      expect(member.futureChannelBanExpires, DateTime.parse('2020-02-28T22:17:30.95443Z'));
+      expect(member.deletedAt, DateTime.parse('2020-01-29T22:17:30.95443Z'));
     });
 
-    group('ComparableFieldProvider', () {
-      test('should return ComparableField for member.createdAt', () {
-        final createdAt = DateTime(2023, 6, 15);
-        final member = createTestMember(
-          userId: 'test-user',
-          createdAt: createdAt,
-        );
+    test('Member.toJson leaves out custom data named like a field', () {
+      final member = Member(
+        userId: 'user',
+        channelRole: 'channel_member',
+        custom: const {'channel_role': 'custom', 'color': 'red'},
+      );
 
-        final field = member.getComparableField(MemberSortKey.createdAt);
-        expect(field, isNotNull);
-        expect(field!.value, equals(createdAt));
+      expect(member.toJson()['channel_role'], 'channel_member');
+      expect(member.toJson()['color'], 'red');
+    });
+
+    test('Member.toJson leaves out the fields only fromJson reads', () {
+      final member = Member(
+        userId: 'user',
+        notificationsMuted: true,
+        status: 'member',
+        banFromFutureChannels: true,
+        futureChannelBanExpires: DateTime.utc(2021),
+        deletedAt: DateTime.utc(2020),
+      );
+
+      expect(
+        member.toJson().keys,
+        isNot(
+          anyOf(
+            contains('notifications_muted'),
+            contains('status'),
+            contains('ban_from_future_channels'),
+            contains('future_channel_ban_expires'),
+            contains('deleted_at'),
+          ),
+        ),
+      );
+    });
+
+    test('Member.copyWith replaces the fields it is given', () {
+      final member = Member(
+        userId: 'user',
+        notificationsMuted: false,
+        status: 'pending',
+        banFromFutureChannels: false,
+        futureChannelBanExpires: DateTime.utc(2021),
+        deletedAt: DateTime.utc(2020),
+      );
+
+      final newMember = member.copyWith(
+        notificationsMuted: true,
+        status: 'member',
+        banFromFutureChannels: true,
+        futureChannelBanExpires: DateTime.utc(2022),
+        deletedAt: DateTime.utc(2023),
+      );
+
+      expect(newMember.notificationsMuted, isTrue);
+      expect(newMember.status, 'member');
+      expect(newMember.banFromFutureChannels, isTrue);
+      expect(newMember.futureChannelBanExpires, DateTime.utc(2022));
+      expect(newMember.deletedAt, DateTime.utc(2023));
+    });
+
+    test('Member equality includes notificationsMuted, status, the future channel ban and deletedAt', () {
+      final createdAt = DateTime.utc(2020);
+      Member member({
+        bool? notificationsMuted,
+        String? status,
+        bool? banFromFutureChannels,
+        DateTime? expires,
+        DateTime? deletedAt,
+      }) => Member(
+        userId: 'user',
+        createdAt: createdAt,
+        updatedAt: createdAt,
+        notificationsMuted: notificationsMuted,
+        status: status,
+        banFromFutureChannels: banFromFutureChannels,
+        futureChannelBanExpires: expires,
+        deletedAt: deletedAt,
+      );
+
+      expect(member(notificationsMuted: true), isNot(member(notificationsMuted: false)));
+      expect(member(status: 'member'), isNot(member(status: 'pending')));
+      expect(member(banFromFutureChannels: true), isNot(member(banFromFutureChannels: false)));
+      expect(member(expires: DateTime.utc(2021)), isNot(member(expires: DateTime.utc(2022))));
+      expect(member(deletedAt: DateTime.utc(2021)), isNot(member(deletedAt: DateTime.utc(2022))));
+    });
+
+    test('Member.copyWith keeps the fields it is not given', () {
+      final member = Member(
+        userId: 'user',
+        notificationsMuted: true,
+        status: 'member',
+        banFromFutureChannels: true,
+        futureChannelBanExpires: DateTime.utc(2021),
+        deletedAt: DateTime.utc(2020),
+      );
+
+      final newMember = member.copyWith(custom: const {'color': 'red'});
+
+      expect(newMember.notificationsMuted, isTrue);
+      expect(newMember.status, 'member');
+      expect(newMember.banFromFutureChannels, isTrue);
+      expect(newMember.futureChannelBanExpires, DateTime.utc(2021));
+      expect(newMember.deletedAt, DateTime.utc(2020));
+    });
+
+    group('MemberSortField', () {
+      test('createdAt orders older memberships first', () {
+        expectOrders(
+          MemberSortField.createdAt,
+          createTestMember(userId: 'older', createdAt: DateTime(2023, 6, 10)),
+          createTestMember(userId: 'newer', createdAt: DateTime(2023, 6, 15)),
+        );
       });
 
-      test('should return ComparableField for member.userId', () {
-        final member = createTestMember(
-          userId: 'test-user',
+      test('updatedAt orders older memberships first', () {
+        expectOrders(
+          MemberSortField.updatedAt,
+          createTestMember(userId: 'older', updatedAt: DateTime(2023, 6, 10)),
+          createTestMember(userId: 'newer', updatedAt: DateTime(2023, 6, 15)),
         );
-
-        final field = member.getComparableField(MemberSortKey.userId);
-        expect(field, isNotNull);
-        expect(field!.value, equals('test-user'));
       });
 
-      test('should return ComparableField for member user.name', () {
-        final member = createTestMember(
-          userId: 'test-user',
-          userName: 'Test User',
+      test('userId orders alphabetically', () {
+        expectOrders(
+          MemberSortField.userId,
+          createTestMember(userId: 'alice'),
+          createTestMember(userId: 'bob'),
         );
-
-        final field = member.getComparableField(MemberSortKey.name);
-        expect(field, isNotNull);
-        expect(field!.value, equals('Test User'));
       });
 
-      test('should return ComparableField for member.channelRole', () {
-        final member = createTestMember(
-          userId: 'test-user',
-          channelRole: 'owner',
+      test('name orders by the user name, folded', () {
+        // Folding is what makes a local sort agree with the server: `Zara`
+        // would otherwise sort before `alice`.
+        expectOrders(
+          MemberSortField.name,
+          createTestMember(userId: 'a', userName: 'alice'),
+          createTestMember(userId: 'z', userName: 'Zara'),
         );
-
-        final field = member.getComparableField(MemberSortKey.channelRole);
-        expect(field, isNotNull);
-        expect(field!.value, equals('owner'));
       });
 
-      test('should return ComparableField for member.extraData', () {
-        final member = createTestMember(
-          userId: 'test-user',
-          extraData: {'activityScore': 75},
+      test('name orders nothing for a member with no user', () {
+        expectOrdersNothing(
+          MemberSortField.name,
+          createTestMember(userId: 'no-user', includeUser: false),
         );
-
-        final field = member.getComparableField('activityScore');
-        expect(field, isNotNull);
-        expect(field!.value, equals(75));
       });
 
-      test('should return null for non-existent extraData keys', () {
-        final member = createTestMember(
-          userId: 'test-user',
+      test('name orders nothing for a member whose user has no name', () {
+        // `User.name` answers the id when a user has no name. Sorting by that
+        // would order unnamed members among the named ones, where the API
+        // sorts them together by an empty `name` column.
+        expectOrdersNothing(
+          MemberSortField.name,
+          createTestMember(userId: 'alice'),
+          createTestMember(userId: 'zara'),
         );
-
-        final field = member.getComparableField('non_existent_key');
-        expect(field, isNull);
       });
 
-      test('should return null when user is null for name field', () {
-        final member = createTestMember(
-          userId: 'test-user',
-          includeUser: false,
+      test('channelRole orders alphabetically', () {
+        expectOrders(
+          MemberSortField.channelRole,
+          createTestMember(userId: 'a', channelRole: 'channel_member'),
+          createTestMember(userId: 'b', channelRole: 'owner'),
         );
-
-        final field = member.getComparableField(MemberSortKey.name);
-        expect(field, isNull);
       });
 
-      test('should compare two members correctly using createdAt', () {
-        final recentMember = createTestMember(
-          userId: 'recent',
-          createdAt: DateTime(2023, 6, 15),
+      test('a custom field orders by the member custom data', () {
+        expectOrders(
+          MemberSortField.custom('activityScore'),
+          createTestMember(userId: 'a', custom: const {'activityScore': 10}),
+          createTestMember(userId: 'b', custom: const {'activityScore': 75}),
         );
-
-        final olderMember = createTestMember(
-          userId: 'older',
-          createdAt: DateTime(2023, 6, 10),
-        );
-
-        final field1 = recentMember.getComparableField(MemberSortKey.createdAt);
-        final field2 = olderMember.getComparableField(MemberSortKey.createdAt);
-
-        expect(field1!.compareTo(field2!), greaterThan(0)); // More recent > Less recent
-        expect(field2.compareTo(field1), lessThan(0)); // Less recent < More recent
       });
 
-      test('should compare two members correctly using userId', () {
-        final member1 = createTestMember(
-          userId: 'alice',
+      test('a custom field the member does not carry orders nothing', () {
+        expectOrdersNothing(
+          MemberSortField.custom('non_existent_key'),
+          createTestMember(userId: 'plain'),
         );
-
-        final member2 = createTestMember(
-          userId: 'bob',
-        );
-
-        final field1 = member1.getComparableField(MemberSortKey.userId);
-        final field2 = member2.getComparableField(MemberSortKey.userId);
-
-        expect(field1!.compareTo(field2!), lessThan(0)); // alice < bob
-        expect(field2.compareTo(field1), greaterThan(0)); // bob > alice
-      });
-
-      test('should compare two members correctly using user name', () {
-        final member1 = createTestMember(
-          userId: 'user1',
-          userName: 'Alice',
-        );
-
-        final member2 = createTestMember(
-          userId: 'user2',
-          userName: 'Bob',
-        );
-
-        final field1 = member1.getComparableField(MemberSortKey.name);
-        final field2 = member2.getComparableField(MemberSortKey.name);
-
-        expect(field1!.compareTo(field2!), lessThan(0)); // Alice < Bob
-        expect(field2.compareTo(field1), greaterThan(0)); // Bob > Alice
-      });
-
-      test('should compare two members correctly using channelRole', () {
-        final owner = createTestMember(
-          userId: 'owner',
-          channelRole: 'owner',
-        );
-
-        final moderator = createTestMember(
-          userId: 'moderator',
-          channelRole: 'moderator',
-        );
-
-        final field1 = owner.getComparableField(MemberSortKey.channelRole);
-        final field2 = moderator.getComparableField(MemberSortKey.channelRole);
-
-        expect(field1!.compareTo(field2!), greaterThan(0)); // 'owner' > 'moderator' alphabetically
-        expect(field2.compareTo(field1), lessThan(0)); // 'moderator' < 'owner' alphabetically
-      });
-
-      test('should compare two members correctly using extraData', () {
-        final highScore = createTestMember(
-          userId: 'high',
-          extraData: {'score': 100},
-        );
-
-        final lowScore = createTestMember(
-          userId: 'low',
-          extraData: {'score': 50},
-        );
-
-        final field1 = highScore.getComparableField('score');
-        final field2 = lowScore.getComparableField('score');
-
-        expect(field1!.compareTo(field2!), greaterThan(0)); // 100 > 50
-        expect(field2.compareTo(field1), lessThan(0)); // 50 < 100
       });
     });
   });
@@ -189,8 +211,9 @@ Member createTestMember({
   String? channelRole,
   DateTime? createdAt,
   DateTime? updatedAt,
+  DateTime? userLastActive,
   bool includeUser = true,
-  Map<String, Object?>? extraData,
+  Map<String, Object?>? custom,
 }) {
   return Member(
     userId: userId,
@@ -198,11 +221,12 @@ Member createTestMember({
         ? User(
             id: userId,
             name: userName,
+            lastActive: userLastActive,
           )
         : null,
     channelRole: channelRole,
     createdAt: createdAt ?? DateTime(2023),
     updatedAt: updatedAt ?? DateTime(2023),
-    extraData: extraData ?? {},
+    custom: custom ?? {},
   );
 }

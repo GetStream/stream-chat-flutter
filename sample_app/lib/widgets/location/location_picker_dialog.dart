@@ -14,7 +14,7 @@ class LocationPickerResult {
   });
 
   final DateTime? endSharingAt;
-  final LocationCoordinates coordinates;
+  final LocationCoordinate coordinates;
 
   @override
   bool operator ==(Object other) {
@@ -59,7 +59,7 @@ class LocationPickerDialog extends StatefulWidget {
 }
 
 class _LocationPickerDialogState extends State<LocationPickerDialog> with WidgetsBindingObserver {
-  LocationCoordinates? _currentLocation;
+  LocationCoordinate? _currentLocation;
 
   /// After opening app settings, reload location when the user returns.
   bool _retryLocationAfterResume = false;
@@ -115,7 +115,7 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> with Widget
                 return Center(child: LocationNotFound(onOpenAppSettings: _openAppSettingsForPermission));
               }
 
-              final coordinates = _currentLocation = LocationCoordinates(
+              final coordinates = _currentLocation = LocationCoordinate(
                 latitude: position.latitude,
                 longitude: position.longitude,
               );

@@ -25,6 +25,7 @@ void main() {
       (index) => Member(
         user: users[index],
         banned: math.Random().nextBool(),
+        banExpires: DateTime.now(),
         shadowBanned: math.Random().nextBool(),
         createdAt: DateTime.now(),
         pinnedAt: DateTime.now(),
@@ -34,7 +35,7 @@ void main() {
         inviteAcceptedAt: DateTime.now(),
         channelRole: 'testRole',
         updatedAt: DateTime.now(),
-        extraData: const {'extra_test_field': 'extraTestData'},
+        custom: const {'extra_test_field': 'extraTestData'},
       ),
     );
     await database.userDao.updateUsers(users);
@@ -61,6 +62,7 @@ void main() {
       final fetchedMember = fetchedMembers[i];
       expect(fetchedMember.user!.id, member.user!.id);
       expect(fetchedMember.banned, member.banned);
+      expect(fetchedMember.banExpires, isSameDateAs(member.banExpires));
       expect(fetchedMember.shadowBanned, member.shadowBanned);
       expect(fetchedMember.createdAt, isSameDateAs(member.createdAt));
       expect(fetchedMember.pinnedAt, isSameDateAs(member.pinnedAt));
@@ -73,7 +75,7 @@ void main() {
         fetchedMember.inviteAcceptedAt,
         isSameDateAs(member.inviteAcceptedAt),
       );
-      expect(fetchedMember.extraData, member.extraData);
+      expect(fetchedMember.custom, member.custom);
     }
   });
 
@@ -162,7 +164,7 @@ void main() {
         fetchedMember.inviteAcceptedAt,
         isSameDateAs(member.inviteAcceptedAt),
       );
-      expect(fetchedMember.extraData, member.extraData);
+      expect(fetchedMember.custom, member.custom);
     }
 
     // Modifying one of the member and also adding one new

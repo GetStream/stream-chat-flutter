@@ -16,7 +16,7 @@ void main() {
   });
 
   test('updateChannelQueries', () async {
-    final filter = Filter.in_('members', const ['testUserId']);
+    final filter = ChannelFilter.in_(ChannelFilterField.members, const ['testUserId']);
 
     const cids = ['testCid1', 'testCid2', 'testCid3'];
 
@@ -31,7 +31,7 @@ void main() {
   });
 
   test('clear queryCache before updateChannelQueries', () async {
-    final filter = Filter.in_('members', const ['testUserId']);
+    final filter = ChannelFilter.in_(ChannelFilterField.members, const ['testUserId']);
 
     const cids = ['testCid1', 'testCid2', 'testCid3'];
 
@@ -50,7 +50,7 @@ void main() {
   });
 
   test('getCachedChannelCids', () async {
-    final filter = Filter.in_('members', const ['testUserId']);
+    final filter = ChannelFilter.in_(ChannelFilterField.members, const ['testUserId']);
 
     const cids = ['testCid1', 'testCid2', 'testCid3'];
 
@@ -65,7 +65,7 @@ void main() {
   });
 
   Future<List<ChannelModel>> _insertTestDataForGetChannel(
-    Filter filter, {
+    ChannelFilter filter, {
     int count = 3,
   }) async {
     final now = DateTime.now();
@@ -74,6 +74,7 @@ void main() {
 
     final cids = List.generate(count, (index) => 'testCid$index');
     final users = List.generate(count, (index) => User(id: 'testId$index'));
+    final truncators = List.generate(count, (index) => User(id: 'truncatorId$index'));
     final channels = List.generate(
       count,
       (index) => ChannelModel(
@@ -81,9 +82,10 @@ void main() {
         type: 'testType$index',
         cid: cids[index],
         createdBy: users[index],
+        truncatedBy: truncators[index],
         config: ChannelConfig(),
         filterTags: ['tag$index'],
-        extraData: {'test_custom_field': index + 3},
+        custom: {'test_custom_field': index + 3},
         createdAt: now,
         memberCount: index + 3,
         lastMessageAt: now.add(Duration(hours: index)),
@@ -91,7 +93,7 @@ void main() {
       ),
     ).toList(growable: false);
 
-    await userDao.updateUsers(users);
+    await userDao.updateUsers([...users, ...truncators]);
     await channelDao.updateChannels(channels);
     await channelQueryDao.updateChannelQueries(filter, cids);
 
@@ -101,7 +103,7 @@ void main() {
   group('getChannels', () {
     tearDown(() async => database.flush());
 
-    final filter = Filter.in_('members', const ['testUserId']);
+    final filter = ChannelFilter.in_(ChannelFilterField.members, const ['testUserId']);
 
     test('should return empty list of channels', () async {
       final channels = await channelQueryDao.getChannels(filter: filter);
@@ -126,6 +128,8 @@ void main() {
         expect(updatedChannel.memberCount, insertedChannel.memberCount);
         expect(updatedChannel.filterTags, insertedChannel.filterTags);
         expect(updatedChannel.team, insertedChannel.team);
+        expect(updatedChannel.createdBy?.id, insertedChannel.createdBy?.id);
+        expect(updatedChannel.truncatedBy?.id, insertedChannel.truncatedBy?.id);
 
         // Should match createdAt date
         expect(
@@ -163,10 +167,10 @@ void main() {
     const filterValues = {'user_id': 'testUserId'};
     const sortValues = {'pinned_at': true};
     const cids = ['testCid1', 'testCid2', 'testCid3'];
-    final filter = Filter.equal('type', 'messaging');
-    const sort = <SortOption<ChannelState>>[
-      SortOption<ChannelState>.desc(ChannelSortKey.pinnedAt),
-      SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt),
+    final filter = ChannelFilter.equal(ChannelFilterField.type, 'messaging');
+    final sort = [
+      ChannelSort.desc(ChannelSortField.pinnedAt),
+      ChannelSort.desc(ChannelSortField.lastMessageAt),
     ];
 
     await _insertChannelsForCids(cids);
@@ -190,10 +194,10 @@ void main() {
     expect(storedFilter!.toJson(), filter.toJson());
     expect(storedSort, isNotNull);
     expect(storedSort!.length, 2);
-    expect(storedSort.first.field, ChannelSortKey.pinnedAt);
-    expect(storedSort.first.direction, SortOption.DESC);
-    expect(storedSort.last.field, ChannelSortKey.lastMessageAt);
-    expect(storedSort.last.direction, SortOption.DESC);
+    expect(storedSort.first.field.remote, ChannelSortField.pinnedAt.remote);
+    expect(storedSort.first.direction, SortDirection.desc);
+    expect(storedSort.last.field.remote, ChannelSortField.lastMessageAt.remote);
+    expect(storedSort.last.direction, SortDirection.desc);
   });
 
   test('clear queryCache before updateChannelQueriesByPredefinedFilter', () async {
@@ -202,10 +206,10 @@ void main() {
     const sortValues = {'pinned_at': true};
     const oldCids = ['oldCid1', 'oldCid2'];
     const newCids = ['newCid1'];
-    final filter = Filter.equal('type', 'messaging');
-    const sort = <SortOption<ChannelState>>[
-      SortOption<ChannelState>.desc(ChannelSortKey.pinnedAt),
-      SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt),
+    final filter = ChannelFilter.equal(ChannelFilterField.type, 'messaging');
+    final sort = [
+      ChannelSort.desc(ChannelSortField.pinnedAt),
+      ChannelSort.desc(ChannelSortField.lastMessageAt),
     ];
 
     await _insertChannelsForCids([...oldCids, ...newCids]);
@@ -238,10 +242,10 @@ void main() {
     expect(storedFilter!.toJson(), filter.toJson());
     expect(storedSort, isNotNull);
     expect(storedSort!.length, 2);
-    expect(storedSort.first.field, ChannelSortKey.pinnedAt);
-    expect(storedSort.first.direction, SortOption.DESC);
-    expect(storedSort.last.field, ChannelSortKey.lastMessageAt);
-    expect(storedSort.last.direction, SortOption.DESC);
+    expect(storedSort.first.field.remote, ChannelSortField.pinnedAt.remote);
+    expect(storedSort.first.direction, SortDirection.desc);
+    expect(storedSort.last.field.remote, ChannelSortField.lastMessageAt.remote);
+    expect(storedSort.last.direction, SortDirection.desc);
   });
 
   tearDown(() async {

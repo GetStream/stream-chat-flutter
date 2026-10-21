@@ -118,8 +118,6 @@ void main() {
 
 Channel _channel({List<Message>? pinnedMessages}) {
   final client = MockStreamChatClient();
-  when(() => client.detachedLogger(any())).thenAnswer((_) => Logger.detached('test'));
-  when(() => client.logger).thenReturn(Logger.detached('test'));
   when(() => client.retryPolicy).thenReturn(
     RetryPolicy(shouldRetry: (_, __, ___) => false, delayFactor: Duration.zero),
   );

@@ -15,7 +15,7 @@ void main() {
     channelCid: 'channel-type:channel-id',
     channel: ChannelModel(
       cid: 'channel-type:channel-id',
-      extraData: const {'name': 'Group ride'},
+      custom: const {'name': 'Group ride'},
     ),
     parentMessageId: 'parent-message-id',
     parentMessage: Message(

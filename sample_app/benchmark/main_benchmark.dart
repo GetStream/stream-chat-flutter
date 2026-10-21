@@ -21,7 +21,7 @@ const _benchmarkChannelId = 'perf-test-5k';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final client = StreamChatClient(_apiKey, logLevel: Level.OFF);
+  final client = StreamChatClient(_apiKey, logConfig: const StreamLogConfig(priority: StreamLogPriority.none));
   await client.connectUser(User(id: _userId), _userToken);
 
   runApp(_BenchmarkApp(client: client));
@@ -64,7 +64,7 @@ class _BenchmarkLauncherState extends State<_BenchmarkLauncher> {
     final channel = client.channel(
       _benchmarkChannelType,
       id: _benchmarkChannelId,
-      extraData: const {'name': 'Perf benchmark'},
+      custom: const {'name': 'Perf benchmark'},
     );
     await channel.watch(
       messagesPagination: const PaginationParams(limit: 25),

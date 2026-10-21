@@ -21,7 +21,7 @@ void main() {
   });
 
   testWidgets('StreamThreadListView centers its default error state between the side insets', (tester) async {
-    final controller = _FakeThreadListController(const PagedValue.error(StreamChatError('error')));
+    final controller = _FakeThreadListController(const PagedValue.error(StreamClientException(message: 'error')));
 
     await _pumpWithInsets(tester, StreamThreadListView(controller: controller));
 
