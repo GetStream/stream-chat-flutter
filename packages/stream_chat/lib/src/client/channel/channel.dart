@@ -14,6 +14,11 @@ import '../../core/error/stream_chat_exception.dart';
 /// [Event.typingStop] event is emitted automatically.
 const incomingTypingStartEventTimeout = 7;
 
+// Ends a send or an update waiting on its attachments: one for the same
+// message started after it, or a deletion of the message.
+const _messageCancelled = StreamNetworkException(message: 'Message cancelled', isCancelled: true);
+const _messageDeleted = StreamNetworkException(message: 'Message deleted', isCancelled: true);
+
 /// Class that manages a specific channel.
 ///
 /// #### Channel name
@@ -764,8 +769,7 @@ class Channel {
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
-    const cancelled = StreamNetworkException(message: 'Message cancelled', isCancelled: true);
-    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(cancelled);
+    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(_messageCancelled);
 
     final quotedMessage = state!.messages.firstWhereOrNull(
       (m) => m.id == message.quotedMessageId,
@@ -894,8 +898,7 @@ class Channel {
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
-    const cancelled = StreamNetworkException(message: 'Message cancelled', isCancelled: true);
-    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(cancelled);
+    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(_messageCancelled);
 
     // ignore: parameter_assignments
     message = message.copyWith(
@@ -988,8 +991,7 @@ class Channel {
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
-    const cancelled = StreamNetworkException(message: 'Message cancelled', isCancelled: true);
-    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(cancelled);
+    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(_messageCancelled);
 
     // ignore: parameter_assignments
     message = message.copyWith(
@@ -1141,13 +1143,13 @@ class Channel {
   // have composed but not yet sent, or if a message failed to send and the user
   // wants to remove it from their local view.
   void _deleteLocalMessage(Message message) {
-    final deleted = message.copyWith(
+    final deletedMessage = message.copyWith(
       type: MessageType.deleted,
       localDeletedAt: DateTime.now(),
       state: MessageState.hardDeleted,
     );
 
-    state?.deleteMessage(deleted, hardDelete: true);
+    state?.deleteMessage(deletedMessage, hardDelete: true);
 
     // Stopping the attachment uploads still running for the message, and the
     // `sendMessage` or `updateMessage` waiting for them to complete.
@@ -1157,9 +1159,7 @@ class Channel {
       cancelToken.cancel();
     }
     final completer = _messageAttachmentsUploadCompleter.remove(message.id);
-    completer?.completeError(
-      const StreamNetworkException(message: 'Message deleted', isCancelled: true),
-    );
+    completer?.completeError(_messageDeleted);
 
     // Nothing else reports the deletion of a message that only exists locally.
     _client.handleEvent(
@@ -1168,7 +1168,7 @@ class Channel {
         cid: cid,
         channelId: id,
         channelType: type,
-        message: deleted,
+        message: deletedMessage,
         hardDelete: true,
       ),
     );
