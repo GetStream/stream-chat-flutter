@@ -36,7 +36,7 @@ class ChannelDao extends DatabaseAccessor<DriftChatDatabase>
   /// Get the channel cids saved in the storage, capped at the 250 most
   /// recently active channels.
   Future<List<String>> get cids => (select(channels)
-        ..orderBy([(c) => OrderingTerm.desc(_lastUpdatedAt(c))])
+        ..orderBy([(c) => OrderingTerm.desc(_lastUpdatedAt(c).julianday)])
         ..limit(250))
       .map((c) => c.cid)
       .get();

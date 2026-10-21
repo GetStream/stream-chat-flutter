@@ -191,7 +191,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
     ])
           ..where(messages.channelCid.equals(cid))
           ..where(messages.parentId.isNotNull())
-          ..orderBy([OrderingTerm.asc(messages.createdAt)]))
+          ..orderBy([OrderingTerm.asc(messages.createdAt.julianday)]))
         .get();
     return _messagesFromJoinRows(rows);
   }
@@ -226,11 +226,11 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
 
     final orderBy = isForwardPagination
         ? [
-            OrderingTerm.asc(messages.createdAt),
+            OrderingTerm.asc(messages.createdAt.julianday),
             OrderingTerm.asc(messages.id),
           ]
         : [
-            OrderingTerm.desc(messages.createdAt),
+            OrderingTerm.desc(messages.createdAt.julianday),
             OrderingTerm.desc(messages.id),
           ];
 
@@ -318,11 +318,11 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
 
     final orderBy = isForwardPagination
         ? [
-            OrderingTerm.asc(messages.createdAt),
+            OrderingTerm.asc(messages.createdAt.julianday),
             OrderingTerm.asc(messages.id),
           ]
         : [
-            OrderingTerm.desc(messages.createdAt),
+            OrderingTerm.desc(messages.createdAt.julianday),
             OrderingTerm.desc(messages.id),
           ];
 
