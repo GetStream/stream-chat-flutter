@@ -28,9 +28,7 @@ class ChannelClientState {
     );
 
     final seededState = channelState.copyWith(
-      pinnedMessages: MessageMerging.replacePinnedMessages(
-        updated: channelState.pinnedMessages,
-      ),
+      pinnedMessages: MessageMerging.sortPinnedMessages(channelState.pinnedMessages),
     );
 
     _channelStateController = BehaviorSubject.seeded(seededState);
@@ -574,10 +572,11 @@ class ChannelClientState {
       key: (read) => read.user.id,
     );
 
-    final newPinnedMessages = MessageMerging.replacePinnedMessages(
-      existing: _channelState.pinnedMessages,
-      updated: updatedState.pinnedMessages,
-    );
+    final newPinnedMessages = switch (updatedState.pinnedMessages) {
+      // The stored list is already in pin order.
+      final pinned when identical(pinned, _channelState.pinnedMessages) => pinned,
+      final pinned => MessageMerging.sortPinnedMessages(pinned),
+    };
 
     _channelState = _channelState.copyWith(
       messages: newMessages,

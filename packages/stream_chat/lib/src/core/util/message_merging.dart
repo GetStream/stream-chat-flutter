@@ -94,19 +94,14 @@ class MessageMerging {
     ).where((it) => it.hasValidPin);
   }
 
-  /// Replaces the [existing] pinned messages with [updated], ordered by
-  /// [sortByPinnedAt].
+  /// Returns [pinnedMessages] ordered by [sortByPinnedAt].
   ///
-  /// Returns [updated] unchanged (same reference) when it is null, when it is
-  /// [existing], or when it is already in pin order.
-  static List<Message>? replacePinnedMessages({
-    List<Message>? existing,
-    required List<Message>? updated,
-  }) {
-    if (updated == null) return null;
-    if (identical(updated, existing)) return updated;
-    if (updated.isSorted(sortByPinnedAt)) return updated;
-    return updated.sortedWith(sortByPinnedAt);
+  /// Returns [pinnedMessages] unchanged (same reference) when it is null or
+  /// already in pin order.
+  static List<Message>? sortPinnedMessages(List<Message>? pinnedMessages) {
+    if (pinnedMessages == null) return null;
+    if (pinnedMessages.isSorted(sortByPinnedAt)) return pinnedMessages;
+    return pinnedMessages.sortedWith(sortByPinnedAt);
   }
 
   /// Merges [toMerge] into [existing].

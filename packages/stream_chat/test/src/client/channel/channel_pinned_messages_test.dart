@@ -72,6 +72,35 @@ void main() {
     expect(channel.state!.pinnedMessages.map((m) => m.id), ['pinned-third', 'pinned-second', 'pinned-first']);
   });
 
+  test('re-pinning a pinned message moves it to the front', () {
+    final channel = _channel(
+      pinnedMessages: [
+        _pin('pinned-second', createdAtSecond: 3, pinnedAtSecond: 4),
+        _pin('pinned-first', createdAtSecond: 1, pinnedAtSecond: 0),
+      ],
+    );
+    addTearDown(channel.dispose);
+
+    channel.state!.updateMessage(_pin('pinned-first', createdAtSecond: 1, pinnedAtSecond: 9));
+
+    expect(channel.state!.pinnedMessages.map((m) => m.id), ['pinned-first', 'pinned-second']);
+  });
+
+  test('unpinning the middle pin keeps the others in pin time order', () {
+    final channel = _channel(
+      pinnedMessages: [
+        _pin('pinned-third', createdAtSecond: 2, pinnedAtSecond: 8),
+        _pin('pinned-second', createdAtSecond: 3, pinnedAtSecond: 4),
+        _pin('pinned-first', createdAtSecond: 1, pinnedAtSecond: 0),
+      ],
+    );
+    addTearDown(channel.dispose);
+
+    channel.state!.updateMessage(Message(id: 'pinned-second', text: 'pinned-second', createdAt: _createdAt(3)));
+
+    expect(channel.state!.pinnedMessages.map((m) => m.id), ['pinned-third', 'pinned-first']);
+  });
+
   test('updating an unpinned message leaves the pinned messages in pin time order', () {
     final channel = _channel(
       pinnedMessages: [
