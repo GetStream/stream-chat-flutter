@@ -626,14 +626,21 @@ class StreamRestorableMessageComposerController extends RestorableChangeNotifier
   String toPrimitives() {
     final controller = value;
     final data = <String, dynamic>{
-      'message': controller.message.toJson(),
+      'message': _messageToJson(controller.message),
     };
     if (controller.isEditing) {
-      data['message_being_edited'] = controller.messageBeingEdited!.toJson();
-      data['message_before_edit'] = controller._messageBeforeEdit!.toJson();
+      data['message_being_edited'] = _messageToJson(controller.messageBeingEdited!);
+      data['message_before_edit'] = _messageToJson(controller._messageBeforeEdit!);
     }
     return json.encode(data);
   }
+
+  // Message.toJson keeps only the ids of the mentioned users, which
+  // Message.fromJson cannot read back, so the full users are kept instead.
+  Map<String, dynamic> _messageToJson(Message message) => {
+    ...message.toJson(),
+    'mentioned_users': [...message.mentionedUsers.map((it) => it.toJson())],
+  };
 }
 
 /// Why a [Command] cannot be activated on a
