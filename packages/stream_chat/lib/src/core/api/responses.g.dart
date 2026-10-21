@@ -188,19 +188,6 @@ ChannelStateResponse _$ChannelStateResponseFromJson(
   ..watcherCount = (json['watcher_count'] as num?)?.toInt() ?? 0
   ..read = (json['read'] as List<dynamic>?)?.map((e) => Read.fromJson(e as Map<String, dynamic>)).toList() ?? [];
 
-UserBlockResponse _$UserBlockResponseFromJson(Map<String, dynamic> json) => UserBlockResponse()
-  ..duration = json['duration'] as String?
-  ..blockedByUserId = json['blocked_by_user_id'] as String? ?? ''
-  ..blockedUserId = json['blocked_user_id'] as String? ?? ''
-  ..createdAt = DateTime.parse(json['created_at'] as String);
-
-BlockedUsersResponse _$BlockedUsersResponseFromJson(
-  Map<String, dynamic> json,
-) => BlockedUsersResponse()
-  ..duration = json['duration'] as String?
-  ..blocks =
-      (json['blocks'] as List<dynamic>?)?.map((e) => UserBlock.fromJson(e as Map<String, dynamic>)).toList() ?? [];
-
 GetThreadResponse _$GetThreadResponseFromJson(Map<String, dynamic> json) => GetThreadResponse()
   ..duration = json['duration'] as String?
   ..thread = Thread.fromJson(json['thread'] as Map<String, dynamic>);

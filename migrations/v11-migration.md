@@ -38,6 +38,7 @@ onto Stream's OpenAPI-generated API client.
     - [Channel Lifecycle](#channel-lifecycle)
     - [Read Receipts](#read-receipts)
     - [Unread Counts](#unread-counts)
+    - [User Blocking](#user-blocking)
     - [Channel and Member Custom Data](#channel-and-member-custom-data)
 - [Migration Checklist](#migration-checklist)
 - [For AI Agents](#for-ai-agents)
@@ -89,6 +90,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Channel Lifecycle**](#channel-lifecycle) | Hiding, showing and deleting a channel return a `Result` instead of throwing |
 | [**Read Receipts**](#read-receipts) | Marking read, unread and delivered return a `Result` instead of throwing; `ChannelDeliveryReporter`'s callback returns a `Result` |
 | [**Unread Counts**](#unread-counts) | `getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing; the response and its `UnreadCounts*` models lose their JSON codecs and compare by value |
+| [**User Blocking**](#user-blocking) | `blockUser`, `unblockUser` and `getBlockedUsers` (was `queryBlockedUsers`) return a `Result` instead of throwing; their responses are renamed `BlockUserResponse` and `GetBlockedUsersResponse`, `unblockUser` answers a new `UnblockUserResponse`, and `UserBlock`'s fields are all non-nullable |
 | [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`; the channel and member flags it carried are fields |
 | _(filled in per feature as PRs land)_ | |
 
@@ -288,6 +290,20 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `GetUnreadCountResponse`, `UnreadCountsChannel`, `UnreadCountsThread`, `UnreadCountsChannelType` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
 | `GetUnreadCountResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
 | `StreamChatApi.user.getUnreadCount` | `StreamChatClient.getUnreadCount` | `removed` | The endpoint moved to the generated client |
+| `StreamChatClient.blockUser` → `Future<UserBlockResponse>` | `Future<Result<BlockUserResponse>>` | `retyped` | Returns a `Result` instead of throwing. The blocked user is still added to `OwnUser.blockedUserIds` on success |
+| `StreamChatClient.unblockUser` → `Future<EmptyResponse>` | `Future<Result<UnblockUserResponse>>` | `retyped` | Returns a `Result` instead of throwing. The user is still removed from `OwnUser.blockedUserIds` on success |
+| `StreamChatClient.queryBlockedUsers` | `StreamChatClient.getBlockedUsers` | `renamed` | Same call; the name of the API's operation |
+| `StreamChatClient.queryBlockedUsers` → `Future<BlockedUsersResponse>` | `Future<Result<GetBlockedUsersResponse>>` | `retyped` | Returns a `Result` instead of throwing. `OwnUser.blockedUserIds` is still replaced on success |
+| `UserBlockResponse` | `BlockUserResponse` | `renamed` | Same fields: `duration`, `blockedByUserId`, `blockedUserId` and `createdAt` |
+| `BlockedUsersResponse` | `GetBlockedUsersResponse` | `renamed` | The name of the API's response. Same fields: `duration` and `blocks` |
+| `UserBlockResponse.fromJson`, `BlockedUsersResponse.fromJson`, `UserBlock.fromJson` / `toJson` | — | `removed` | The responses and model are plain classes; construct them directly |
+| `UserBlockResponse()..blockedUserId = …`, `BlockedUsersResponse()..blocks = …` and their other setters | `BlockUserResponse(duration: …, blockedUserId: …, …)`, `GetBlockedUsersResponse(duration: …, blocks: …)` | `retyped` | Plain classes with a const constructor and final fields |
+| `UserBlockResponse`, `BlockedUsersResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
+| `UserBlockResponse.duration`, `BlockedUsersResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| `UserBlock extends Equatable`, `UserBlock.props` | `UserBlock` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and `UserBlock` is no longer an `Equatable` |
+| `UserBlock.blockedUser` (`User?`), `.userId` / `.blockedUserId` (`String?`), `.createdAt` (`DateTime?`) | `User`, `String`, `DateTime` — required in the constructor | `retyped` | The server always sends them; drop any `!`, `?.` or `?? …` |
+| `UserBlock.copyWith(user: User?, …)`, keeping a field when passed `null` | `copyWith(user: User, …)` | `retyped` | Every argument is non-nullable, so a call that passed a nullable value no longer compiles; pass the value or leave the argument out |
+| `StreamChatApi.user.blockUser` / `unblockUser` / `queryBlockedUsers` | `StreamChatClient.blockUser` / `unblockUser` / `getBlockedUsers` | `removed` | The endpoints moved to the generated client |
 | `ChannelModel.extraData` / `Member.extraData` | `ChannelModel.custom` / `Member.custom` | `renamed` | The wire's name for it; also the constructor and `copyWith` arguments |
 | `Channel.extraData` / `Channel.extraDataStream` / `Channel(…, extraData:)` / `StreamChatClient.channel(…, extraData:)` | `Channel.custom` / `Channel.customStream` / `custom:` | `renamed` | Follows `ChannelModel.custom`; the setter is renamed too |
 | `channel.extraData['disabled']` / `['hidden']` / `['muted']` / `['blocked']` / `['truncated_at']` / `['truncated_by']` / `['auto_translation_enabled']` / `['auto_translation_language']` | `ChannelModel.disabled` / `hidden` / `muted` / `blocked` / `truncatedAt` / `truncatedBy` / `autoTranslationEnabled` / `autoTranslationLanguage` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them, and `toJson` no longer writes them |
@@ -870,6 +886,47 @@ always present.
 
 > **Why:** the endpoint moved onto the generated client, which returns a `Result` for every call. The response
 > and its models keep their v10 names and fields.
+
+### User Blocking
+
+**`blockUser`, `unblockUser` and `getBlockedUsers` return a `Result` instead of throwing, and `queryBlockedUsers`
+is renamed `getBlockedUsers`.** They answer `BlockUserResponse` (renamed from `UserBlockResponse`),
+`UnblockUserResponse` (new; `unblockUser` returned an `EmptyResponse`) and `GetBlockedUsersResponse` (renamed from
+`BlockedUsersResponse`). A `try`/`catch` around them still compiles, but no longer catches a failed call: read the
+returned `Result` instead. On success they still update the current user's `blockedUserIds`; a failure leaves it as
+it was.
+
+```dart
+// v10
+try {
+  final response = await client.queryBlockedUsers();
+  showBlocked(response.blocks.map((block) => block.blockedUser!));
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await client.getBlockedUsers();
+result.fold(
+  onSuccess: (response) => showBlocked(response.blocks.map((block) => block.blockedUser)),
+  onFailure: (error, _) => report(error),
+);
+```
+
+**`UserBlock.blockedUser`, `userId`, `blockedUserId` and `createdAt` are non-nullable** and required in the
+constructor; drop any `!`, `?.` or `?? …` on them. `UserBlock` no longer decodes from or encodes to JSON and no
+longer extends `Equatable`; it still compares by value and keeps `copyWith`. `BlockUserResponse` and
+`GetBlockedUsersResponse` no longer decode from JSON, are plain classes with a const constructor, compare by value
+and gain `copyWith`, and their `duration` is always present.
+
+**`StreamChatApi.user.blockUser`, `unblockUser` and `queryBlockedUsers` are removed.** Call `blockUser`,
+`unblockUser` and `getBlockedUsers` on `StreamChatClient`.
+
+> **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call. `blockUser` and
+> `unblockUser` keep their names, and their responses take singular ones, because each takes one user id.
+> `queryBlockedUsers` becomes `getBlockedUsers`, the API's name, because the call takes no filter, sort or pagination.
+> The server always sends every `UserBlock` field, so the model no longer makes callers handle nulls that never
+> arrive.
 
 ### Channel and Member Custom Data
 

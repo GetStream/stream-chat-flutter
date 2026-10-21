@@ -114,6 +114,13 @@
 - `GetUnreadCountResponse` no longer decodes from JSON, is immutable, built through a const constructor, compares by value, gains `copyWith`, and its `duration` is a non-nullable `String`.
 - `UnreadCountsChannel`, `UnreadCountsThread` and `UnreadCountsChannelType` no longer decode from or encode to JSON, compare by value and gain `copyWith`.
 - `StreamChatApi.user.getUnreadCount` is removed; call `StreamChatClient.getUnreadCount` instead.
+- `StreamChatClient.blockUser` returns a `Result<BlockUserResponse>` and `unblockUser` a `Result<UnblockUserResponse>` instead of throwing.
+- `StreamChatClient.queryBlockedUsers` is renamed `getBlockedUsers` and returns a `Result<GetBlockedUsersResponse>` instead of throwing.
+- `UserBlockResponse` is renamed `BlockUserResponse`, and `BlockedUsersResponse` is renamed `GetBlockedUsersResponse`.
+- `BlockUserResponse` and `GetBlockedUsersResponse` no longer decode from JSON, are immutable, built through a const constructor, compare by value, gain `copyWith`, and their `duration` is a non-nullable `String`.
+- `UserBlock` no longer decodes from or encodes to JSON and no longer extends `Equatable`, so `props` is removed; it still compares by value.
+- `UserBlock.blockedUser`, `userId`, `blockedUserId` and `createdAt` are required and non-nullable, and `UserBlock.copyWith` takes every field as a non-nullable value.
+- `StreamChatApi.user`'s blocking methods are removed; use `blockUser`, `unblockUser` and `getBlockedUsers` on `StreamChatClient` instead.
 - `ChannelModel.extraData` and `Member.extraData` are renamed `custom`, and so are `Channel.extraData`, `Channel.extraDataStream` (now `customStream`), and the `extraData` argument of the `Channel` constructor and of `StreamChatClient.channel`.
 - The channel and member values `custom` used to hold, such as `ChannelModel.hidden` and `Member.status`, are fields now: `custom` and `toJson` leave them out, and setting one through `custom` has no effect.
 - An entry of `ChannelModel.custom` or `Member.custom` named like one of the model's own fields stays in `custom` and leaves the field alone, and `toJson` leaves it out.
