@@ -1,5 +1,7 @@
 // ignore_for_file: lines_longer_than_80_chars, cascade_invocations, deprecated_member_use_from_same_package, avoid_redundant_argument_values
 
+import 'dart:async';
+
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
@@ -1051,6 +1053,38 @@ void main() {
           );
         },
       );
+
+      test('superseded by a newer send leaves the newer one sending', () async {
+        final message = Message(
+          id: 'test-message-id',
+          attachments: [
+            Attachment(
+              id: 'test-attachment-id',
+              type: AttachmentType.image,
+              file: AttachmentFile(size: 100, path: 'test-file-path'),
+            ),
+          ],
+        );
+
+        when(
+          () => client.sendImage(
+            any(),
+            channelId,
+            channelType,
+            onSendProgress: any(named: 'onSendProgress'),
+            cancelToken: any(named: 'cancelToken'),
+            extraData: any(named: 'extraData'),
+          ),
+        ).thenAnswer((_) => Completer<SendImageResponse>().future);
+
+        final first = channel.sendMessage(message).then<void>((_) {}, onError: (_) {});
+        await pumpEventQueue();
+
+        channel.sendMessage(message).ignore();
+        await first;
+
+        expect(channel.state!.messages.single.state, MessageState.sending);
+      });
     });
 
     group('`.sendStaticLocation`', () {
@@ -1861,6 +1895,39 @@ void main() {
           ),
         );
       });
+
+      test('superseded by a newer update leaves the newer one updating', () async {
+        final message = Message(
+          id: 'test-message-id',
+          state: MessageState.sent,
+          attachments: [
+            Attachment(
+              id: 'test-attachment-id',
+              type: AttachmentType.image,
+              file: AttachmentFile(size: 100, path: 'test-file-path'),
+            ),
+          ],
+        );
+
+        when(
+          () => client.sendImage(
+            any(),
+            channelId,
+            channelType,
+            onSendProgress: any(named: 'onSendProgress'),
+            cancelToken: any(named: 'cancelToken'),
+            extraData: any(named: 'extraData'),
+          ),
+        ).thenAnswer((_) => Completer<SendImageResponse>().future);
+
+        final first = channel.updateMessage(message).then<void>((_) {}, onError: (_) {});
+        await pumpEventQueue();
+
+        channel.updateMessage(message).ignore();
+        await first;
+
+        expect(channel.state!.messages.single.state, MessageState.updating);
+      });
     });
 
     group('`ChannelClientState.updateMessage`', () {
@@ -2400,7 +2467,7 @@ void main() {
             state: MessageState.sending,
           );
 
-          final removed = expectLater(
+          expectLater(
             // skipping first seed message list -> [] messages
             channel.state?.messagesStream.skip(1),
             emitsInOrder([
@@ -2414,17 +2481,11 @@ void main() {
             ]),
           );
 
-          // The deletion reaches the state through the event it emits.
-          when(() => client.handleEvent(any())).thenAnswer(
-            (invocation) => client.addEvent(invocation.positionalArguments.first as Event),
-          );
-
           // Add message to channel state first
           channel.state?.addNewMessage(message);
 
           final res = await channel.deleteMessage(message);
 
-          await removed;
           expect(res, isNotNull);
           verifyNever(() => client.deleteMessage(messageId));
         },
@@ -2482,7 +2543,7 @@ void main() {
             state: MessageState.sending,
           );
 
-          final removed = expectLater(
+          expectLater(
             // skipping first seed message list -> [] messages
             channel.state?.messagesStream.skip(1),
             emitsInOrder([
@@ -2496,17 +2557,11 @@ void main() {
             ]),
           );
 
-          // The deletion reaches the state through the event it emits.
-          when(() => client.handleEvent(any())).thenAnswer(
-            (invocation) => client.addEvent(invocation.positionalArguments.first as Event),
-          );
-
           // Add message to channel state first
           channel.state?.addNewMessage(message);
 
           final res = await channel.deleteMessageForMe(message);
 
-          await removed;
           expect(res, isNotNull);
           verifyNever(() => client.deleteMessageForMe(messageId));
         },
