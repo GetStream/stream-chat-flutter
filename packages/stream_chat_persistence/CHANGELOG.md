@@ -1,8 +1,12 @@
-## Upcoming
+## 10.6.0
 
 ✅ Added
 
 - Poll translations are now stored in the offline cache.
+
+🐞 Fixed
+
+- Fixed messages, reactions, members, reads, poll votes and channels loaded from the offline cache coming back out of order when some of them were created on the device.
 
 ## 10.5.0
 

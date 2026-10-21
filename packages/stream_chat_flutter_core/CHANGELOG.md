@@ -1,4 +1,4 @@
-## Upcoming
+## 10.6.0
 
 ✅ Added
 
@@ -13,6 +13,8 @@
 
 - Fixed `StreamDraftListController.deleteDraft` removing the wrong draft.
 - Fixed `StreamPollVoteListController` adding votes and comments from other polls in the same channel.
+- Fixed `StreamThreadListController` reordering a thread when a reply it does not hold is deleted.
+- Fixed `StreamRestorableMessageComposerController` failing to restore a message that mentions users.
 
 ## 10.5.0
 

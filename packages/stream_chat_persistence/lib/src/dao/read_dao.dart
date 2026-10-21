@@ -20,7 +20,7 @@ class ReadDao extends DatabaseAccessor<DriftChatDatabase> with _$ReadDaoMixin {
             ])
             ..where(reads.channelCid.equals(cid))
             ..orderBy([
-              OrderingTerm.asc(reads.lastRead),
+              OrderingTerm.asc(reads.lastRead.julianday),
             ]))
           .map((row) {
             final userEntity = row.readTable(users);

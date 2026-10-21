@@ -13,6 +13,11 @@ import '../../../stream_chat.dart';
 /// [Event.typingStop] event is emitted automatically.
 const incomingTypingStartEventTimeout = 7;
 
+// Ends a send or an update waiting on its attachments: one for the same
+// message started after it, or a deletion of the message.
+const _messageCancelled = StreamChatError('Message cancelled');
+const _messageDeleted = StreamChatError('Message deleted');
+
 /// Class that manages a specific channel.
 ///
 /// #### Channel name
@@ -646,7 +651,8 @@ class Channel {
         }
 
         final updatedMessage = message!.copyWith(attachments: newAttachments);
-        state?.updateMessage(updatedMessage);
+        // A message deleted mid-upload is left out of the state.
+        state?.updateMessage(updatedMessage, upsert: false);
         // updating original message for next iteration
         message = message!.merge(updatedMessage);
       }
@@ -771,7 +777,7 @@ class Channel {
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
-    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(const StreamChatError('Message cancelled'));
+    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(_messageCancelled);
 
     final quotedMessage = state!.messages.firstWhereOrNull(
       (m) => m.id == message.quotedMessageId,
@@ -843,6 +849,10 @@ class Channel {
 
       return response;
     } catch (e) {
+      // Cancelled by a deletion or by a newer call for the same message, which
+      // now owns its state.
+      if (e == _messageCancelled || e == _messageDeleted) rethrow;
+
       if (e is StreamChatNetworkError && e.isMessageAlreadyExistsError) {
         return SendMessageResponse()..message = _markMessageAsSent(message);
       }
@@ -896,7 +906,7 @@ class Channel {
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
-    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(const StreamChatError('Message cancelled'));
+    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(_messageCancelled);
 
     // ignore: parameter_assignments
     message = message.copyWith(
@@ -952,6 +962,10 @@ class Channel {
 
       return response;
     } catch (e) {
+      // Cancelled by a newer call for the same message, which now owns its
+      // state.
+      if (e == _messageCancelled || e == _messageDeleted) rethrow;
+
       final failedMessage = message.copyWith(
         // Update the message state to failed.
         state: MessageState.updatingFailed(
@@ -985,7 +999,7 @@ class Channel {
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
-    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(const StreamChatError('Message cancelled'));
+    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(_messageCancelled);
 
     // ignore: parameter_assignments
     message = message.copyWith(
@@ -1138,19 +1152,35 @@ class Channel {
   // have composed but not yet sent, or if a message failed to send and the user
   // wants to remove it from their local view.
   void _deleteLocalMessage(Message message) {
-    state?.deleteMessage(
-      hardDelete: true, // Local messages are always hard deleted.
-      message.copyWith(
-        type: MessageType.deleted,
-        localDeletedAt: DateTime.now(),
-        state: MessageState.hardDeleted,
-      ),
+    final deletedMessage = message.copyWith(
+      type: MessageType.deleted,
+      localDeletedAt: DateTime.now(),
+      state: MessageState.hardDeleted,
     );
 
-    // Removing the attachments upload completer to stop the `sendMessage`
-    // waiting for attachments to complete.
+    state?.deleteMessage(deletedMessage, hardDelete: true);
+
+    // Stopping the attachment uploads still running for the message, and the
+    // `sendMessage` or `updateMessage` waiting for them to complete.
+    for (final attachment in message.attachments) {
+      final cancelToken = _cancelableAttachmentUploadRequest[attachment.id];
+      if (cancelToken == null || cancelToken.isCancelled) continue;
+      cancelToken.cancel();
+    }
     final completer = _messageAttachmentsUploadCompleter.remove(message.id);
-    completer?.completeError(const StreamChatError('Message deleted'));
+    completer?.completeError(_messageDeleted);
+
+    // Nothing else reports the deletion of a message that only exists locally.
+    _client.handleEvent(
+      Event(
+        type: EventType.messageDeleted,
+        cid: cid,
+        channelId: id,
+        channelType: type,
+        message: deletedMessage,
+        hardDelete: true,
+      ),
+    );
   }
 
   // Deletes all the attachments associated with the given [message]

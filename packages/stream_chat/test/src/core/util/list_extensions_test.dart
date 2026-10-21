@@ -18,6 +18,38 @@ int _itemCompare(_Item a, _Item b) => a.value.compareTo(b.value);
 String _itemKey(_Item it) => it.id;
 
 void main() {
+  group('SortedListX.sortedWith', () {
+    test('sorts the elements by the comparator', () {
+      expect([3, 1, 4, 1, 5].sortedWith(_intCompare), [1, 1, 3, 4, 5]);
+    });
+
+    test('leaves the receiver unchanged', () {
+      final numbers = [3, 1, 2];
+
+      // ignore: cascade_invocations
+      numbers.sortedWith(_intCompare);
+
+      expect(numbers, [3, 1, 2]);
+    });
+
+    test('keeps elements the comparator calls equal in arrival order', () {
+      // Above 32 elements `sorted` reaches an unstable quicksort, which
+      // reorders a run the comparator says nothing about.
+      final items = [for (var i = 0; i < 50; i++) _Item('$i', i % 2)];
+
+      final result = items.sortedWith(_itemCompare);
+
+      final zeros = result.takeWhile((it) => it.value == 0);
+      expect(zeros.map((it) => it.id), items.where((it) => it.value == 0).map((it) => it.id));
+    });
+
+    test('hands back the receiver when there is nothing to order', () {
+      final single = [const _Item('1', 1)];
+
+      expect(single.sortedWith(_itemCompare), same(single));
+    });
+  });
+
   group('SortedListX.sortedInsert', () {
     test('inserts into the middle of a sorted list', () {
       expect(
