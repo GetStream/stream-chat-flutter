@@ -1,11 +1,11 @@
 import '../../../open_api/api.dart' as api;
 import '../../core/models/own_user.dart';
 import '../../core/models/privacy_settings.dart';
-import '../../core/models/response/block_users_response.dart';
+import '../../core/models/response/block_user_response.dart';
 import '../../core/models/response/create_guest_user_response.dart';
 import '../../core/models/response/get_blocked_users_response.dart';
 import '../../core/models/response/get_unread_count_response.dart';
-import '../../core/models/response/unblock_users_response.dart';
+import '../../core/models/response/unblock_user_response.dart';
 import '../../core/models/unread_counts_channel.dart';
 import '../../core/models/unread_counts_channel_type.dart';
 import '../../core/models/unread_counts_thread.dart';
@@ -146,10 +146,10 @@ extension UnreadCountsChannelTypeMapper on api.UnreadCountsChannelType {
   );
 }
 
-/// Maps a generated [api.BlockUsersResponse] to a [BlockUsersResponse].
+/// Maps a generated [api.BlockUsersResponse] to a [BlockUserResponse].
 extension BlockUsersResponseMapper on api.BlockUsersResponse {
-  /// Converts this response into a [BlockUsersResponse].
-  BlockUsersResponse toModel() => BlockUsersResponse(
+  /// Converts this response into a [BlockUserResponse].
+  BlockUserResponse toModel() => BlockUserResponse(
     duration: duration,
     blockedByUserId: blockedByUserId,
     blockedUserId: blockedUserId,
@@ -157,10 +157,10 @@ extension BlockUsersResponseMapper on api.BlockUsersResponse {
   );
 }
 
-/// Maps a generated [api.UnblockUsersResponse] to an [UnblockUsersResponse].
+/// Maps a generated [api.UnblockUsersResponse] to an [UnblockUserResponse].
 extension UnblockUsersResponseMapper on api.UnblockUsersResponse {
-  /// Converts this response into an [UnblockUsersResponse].
-  UnblockUsersResponse toModel() => UnblockUsersResponse(duration: duration);
+  /// Converts this response into an [UnblockUserResponse].
+  UnblockUserResponse toModel() => UnblockUserResponse(duration: duration);
 }
 
 /// Maps a generated [api.GetBlockedUsersResponse] to a

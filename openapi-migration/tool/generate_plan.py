@@ -1055,10 +1055,10 @@ GROUPS = [
               methods over `UsersRepository`.
             - **`blockUser` and `unblockUser` keep their names,** rather than the spec's `blockUsers` and
               `unblockUsers`: each takes one user id, and a method that takes several would be added beside them.
-            - **Their envelopes take the spec's plural names,** `BlockUsersResponse` (renamed from
-              `UserBlockResponse`) and `UnblockUsersResponse` (new; v10 returned `EmptyResponse`, but the generated
-              response is a named one). If the API starts blocking several users in one call, these responses gain
-              fields without a rename, and a batch method can return the same envelope.
+            - **Their envelopes take singular names,** `BlockUserResponse` (renamed from `UserBlockResponse`) and
+              `UnblockUserResponse` (new; v10 returned `EmptyResponse`, but the generated response is a named one),
+              rather than the spec's `BlockUsersResponse` and `UnblockUsersResponse`: each call takes one user id and
+              answers one block in flat fields, so a call that blocks several users would need its own type anyway.
             - **`queryBlockedUsers` is renamed `getBlockedUsers`,** answering `GetBlockedUsersResponse` (renamed
               from `BlockedUsersResponse`), as the spec names them: the call takes no filter, sort or pagination.
             - **`UserBlock` is a freezed plain model with every field non-nullable,** following the wire rather

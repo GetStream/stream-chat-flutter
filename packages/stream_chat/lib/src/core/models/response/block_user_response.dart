@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'block_users_response.freezed.dart';
+part 'block_user_response.freezed.dart';
 
 /// The result of blocking a user.
 ///
@@ -8,9 +8,9 @@ part 'block_users_response.freezed.dart';
 ///
 ///  * [StreamChatClient.blockUser], which returns it.
 @freezed
-class BlockUsersResponse with _$BlockUsersResponse {
-  /// Creates a new [BlockUsersResponse].
-  const BlockUsersResponse({
+class BlockUserResponse with _$BlockUserResponse {
+  /// Creates a new [BlockUserResponse].
+  const BlockUserResponse({
     required this.duration,
     required this.blockedByUserId,
     required this.blockedUserId,

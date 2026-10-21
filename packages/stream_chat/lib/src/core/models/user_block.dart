@@ -6,7 +6,9 @@ part 'user_block.freezed.dart';
 
 /// A block one [User] placed on another.
 ///
-/// Listed in [GetBlockedUsersResponse.blocks].
+/// See also:
+///
+///  * [GetBlockedUsersResponse.blocks], which lists them.
 @freezed
 class UserBlock with _$UserBlock {
   /// Creates a new [UserBlock].
@@ -23,6 +25,9 @@ class UserBlock with _$UserBlock {
   final User user;
 
   /// The user [user] blocked.
+  ///
+  /// A placeholder named `Deleted User` when that user no longer exists; then
+  /// only [blockedUserId] carries their id.
   @override
   final User blockedUser;
 
