@@ -93,7 +93,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
         return;
       }
       debugPrint('[notif-tap] navigating to channel=$cid');
-      GoRouter.of(ctx).pushNamed(
+      GoRouter.of(ctx).goNamed(
         Routes.CHANNEL_PAGE.name,
         pathParameters: Routes.CHANNEL_PAGE.params(channel),
       );

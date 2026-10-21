@@ -8,6 +8,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../../stream_chat.dart';
+import '../../core/error/stream_chat_exception.dart';
 
 /// The maximum time the incoming [Event.typingStart] event is valid before a
 /// [Event.typingStop] event is emitted automatically.
@@ -624,10 +625,7 @@ class Channel {
     String messageId,
     Iterable<String> attachmentIds,
   ) {
-    var message = [
-      ...state!.messages,
-      ...state!.threads.values.expand((messages) => messages),
-    ].firstWhereOrNull((it) => it.id == messageId);
+    var message = _findMessageInLocalState(messageId);
 
     if (message == null) {
       throw const StreamClientException(message: 'Error, Message not found');
@@ -662,7 +660,8 @@ class Channel {
         }
 
         final updatedMessage = message!.copyWith(attachments: newAttachments);
-        state?.updateMessage(updatedMessage);
+        // A message deleted mid-upload is left out of the state.
+        state?.updateMessage(updatedMessage, upsert: false);
         // updating original message for next iteration
         message = message!.merge(updatedMessage);
       }
@@ -736,9 +735,16 @@ class Channel {
     });
   }
 
+  Message? _findMessageInLocalState(String messageId) {
+    final threadMessages = state!.threads.values.expand((messages) => messages);
+    return state!.messages.followedBy(threadMessages).firstWhereOrNull((it) => it.id == messageId);
+  }
+
   final _sendMessageLock = Lock();
 
   /// Send a [message] to this channel.
+  ///
+  /// Also stops the current user's typing.
   ///
   /// If [skipPush] is true the message will not send a push notification.
   ///
@@ -750,6 +756,8 @@ class Channel {
     bool skipEnrichUrl = false,
   }) async {
     _checkInitialized();
+
+    _keyStrokeHandler.cancel();
 
     // Clean up stale error messages before sending a new message.
     state?.cleanUpStaleErrorMessages();
@@ -829,6 +837,13 @@ class Channel {
 
       return response;
     } catch (e) {
+      // Cancelled by a deletion or by a newer call for the same message, which
+      // now owns its state.
+      if (e case StreamNetworkException(isCancelled: true)) rethrow;
+
+      if (e is StreamChatException && e.isMessageAlreadyExistsError) {
+        return SendMessageResponse()..message = _markMessageAsSent(message);
+      }
       final failedMessage = message.copyWith(
         // Update the message state to failed.
         state: MessageState.sendingFailed(
@@ -847,9 +862,24 @@ class Channel {
     }
   }
 
+  Message _markMessageAsSent(Message message) {
+    if (state == null) return message.copyWith(state: MessageState.sent);
+
+    final localStateMessage = _findMessageInLocalState(message.id) ?? message;
+    final sentMessage = localStateMessage.copyWith(
+      createdAt: localStateMessage.remoteCreatedAt ?? localStateMessage.localCreatedAt,
+      state: MessageState.sent,
+    );
+
+    state!.updateMessage(sentMessage);
+    return sentMessage;
+  }
+
   final _updateMessageLock = Lock();
 
   /// Updates the [message] in this channel.
+  ///
+  /// Also stops the current user's typing.
   ///
   /// Waits for a [_messageAttachmentsUploadCompleter] to complete
   /// before actually updating the message.
@@ -859,6 +889,8 @@ class Channel {
     bool skipEnrichUrl = false,
   }) async {
     _checkInitialized();
+
+    _keyStrokeHandler.cancel();
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
@@ -919,6 +951,10 @@ class Channel {
 
       return response;
     } catch (e) {
+      // Cancelled by a newer call for the same message, which now owns its
+      // state.
+      if (e case StreamNetworkException(isCancelled: true)) rethrow;
+
       final failedMessage = message.copyWith(
         // Update the message state to failed.
         state: MessageState.updatingFailed(
@@ -1105,20 +1141,36 @@ class Channel {
   // have composed but not yet sent, or if a message failed to send and the user
   // wants to remove it from their local view.
   void _deleteLocalMessage(Message message) {
-    state?.deleteMessage(
-      hardDelete: true, // Local messages are always hard deleted.
-      message.copyWith(
-        type: MessageType.deleted,
-        localDeletedAt: DateTime.now(),
-        state: MessageState.hardDeleted,
-      ),
+    final deleted = message.copyWith(
+      type: MessageType.deleted,
+      localDeletedAt: DateTime.now(),
+      state: MessageState.hardDeleted,
     );
 
-    // Removing the attachments upload completer to stop the `sendMessage`
-    // waiting for attachments to complete.
+    state?.deleteMessage(deleted, hardDelete: true);
+
+    // Stopping the attachment uploads still running for the message, and the
+    // `sendMessage` or `updateMessage` waiting for them to complete.
+    for (final attachment in message.attachments) {
+      final cancelToken = _cancelableAttachmentUploadRequest[attachment.id];
+      if (cancelToken == null || cancelToken.isCancelled) continue;
+      cancelToken.cancel();
+    }
     final completer = _messageAttachmentsUploadCompleter.remove(message.id);
     completer?.completeError(
       const StreamNetworkException(message: 'Message deleted', isCancelled: true),
+    );
+
+    // Nothing else reports the deletion of a message that only exists locally.
+    _client.handleEvent(
+      Event(
+        type: EventType.messageDeleted,
+        cid: cid,
+        channelId: id,
+        channelType: type,
+        message: deleted,
+        hardDelete: true,
+      ),
     );
   }
 

@@ -37,6 +37,7 @@ void main() {
     client = MockStreamChatClient();
     state = MockChannelClientState();
 
+    when(() => state.typingEvents).thenReturn({});
     when(() => client.state).thenReturn(FakeClientState());
 
     // A real channel (without an attached state) so that the capability and
@@ -99,6 +100,53 @@ void main() {
       verifyNever(() => state.updateChannelState(any()));
     });
 
+    test("onMessageNew clears its author's typing in the same channel", () {
+      final sentAt = DateTime.utc(2026, 10, 13, 12);
+      final typing = Event(
+        type: EventType.typingStart,
+        user: otherUser,
+        createdAt: sentAt.subtract(const Duration(seconds: 2)),
+      );
+      when(() => state.typingEvents).thenReturn({otherUser: typing});
+
+      mutations.onMessageNew(message.copyWith(createdAt: sentAt));
+
+      expect(removeTypingEventCalls, [otherUser]);
+    });
+
+    test("onMessageNew keeps its author's typing in a thread", () {
+      final threadTyping = Event(type: EventType.typingStart, user: otherUser, parentId: 'parent-id');
+      when(() => state.typingEvents).thenReturn({otherUser: threadTyping});
+
+      mutations.onMessageNew(message);
+
+      expect(removeTypingEventCalls, isEmpty);
+    });
+
+    test("onMessageNew keeps its author's typing that started after the message", () {
+      final sentAt = DateTime.utc(2026, 10, 13, 12);
+      final sentMessage = message.copyWith(createdAt: sentAt);
+      final nextTyping = Event(
+        type: EventType.typingStart,
+        user: otherUser,
+        createdAt: sentAt.add(const Duration(milliseconds: 200)),
+      );
+      when(() => state.typingEvents).thenReturn({otherUser: nextTyping});
+
+      mutations.onMessageNew(sentMessage);
+
+      expect(removeTypingEventCalls, isEmpty);
+    });
+
+    test('onMessageNew keeps other users typing', () {
+      final someoneElse = User(id: 'someone-else');
+      when(() => state.typingEvents).thenReturn({someoneElse: Event(type: EventType.typingStart, user: someoneElse)});
+
+      mutations.onMessageNew(message);
+
+      expect(removeTypingEventCalls, isEmpty);
+    });
+
     test('onMessageNew also applies the watcher count when provided', () {
       stubChannelState(ChannelState(channel: ChannelModel(cid: 'messaging:test')));
 
@@ -141,6 +189,48 @@ void main() {
 
       verifyNever(() => state.unreadCount = any());
       verify(() => state.deleteMessage(message, hardDelete: true)).called(1);
+    });
+
+    test("onMessageUpdated clears the editor's typing in the same channel", () {
+      final editedAt = DateTime.utc(2026, 10, 13, 12);
+      final typing = Event(
+        type: EventType.typingStart,
+        user: otherUser,
+        createdAt: editedAt.subtract(const Duration(seconds: 2)),
+      );
+      when(() => state.typingEvents).thenReturn({otherUser: typing});
+
+      mutations.onMessageUpdated(message.copyWith(messageTextUpdatedAt: editedAt), editor: otherUser);
+
+      expect(removeTypingEventCalls, [otherUser]);
+    });
+
+    test("onMessageUpdated keeps the editor's typing when the text was not edited", () {
+      final updatedAt = DateTime.utc(2026, 10, 13, 12);
+      final typing = Event(
+        type: EventType.typingStart,
+        user: otherUser,
+        createdAt: updatedAt.subtract(const Duration(seconds: 2)),
+      );
+      when(() => state.typingEvents).thenReturn({otherUser: typing});
+
+      mutations.onMessageUpdated(message.copyWith(updatedAt: updatedAt), editor: otherUser);
+
+      expect(removeTypingEventCalls, isEmpty);
+    });
+
+    test("onMessageUpdated keeps the editor's typing that started after the edit", () {
+      final editedAt = DateTime.utc(2026, 10, 13, 12);
+      final nextTyping = Event(
+        type: EventType.typingStart,
+        user: otherUser,
+        createdAt: editedAt.add(const Duration(milliseconds: 200)),
+      );
+      when(() => state.typingEvents).thenReturn({otherUser: nextTyping});
+
+      mutations.onMessageUpdated(message.copyWith(messageTextUpdatedAt: editedAt), editor: otherUser);
+
+      expect(removeTypingEventCalls, isEmpty);
     });
 
     test('onMessageUpdated applies the message without upserting', () {
