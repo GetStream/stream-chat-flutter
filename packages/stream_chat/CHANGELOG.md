@@ -106,6 +106,10 @@
 - `MemberUpdatePayload` and `MemberUpdateType` are removed; pass `set: {'pinned': true}` or `unset: ['pinned']` (and `archived`) to `updateMemberPartial`, or call `pinChannel`, `archiveChannel` and their counterparts.
 - The calls that hide, show and delete a channel, on `StreamChatClient` and `Channel`, return a `Result` with a `HideChannelResponse`, `ShowChannelResponse` or `DeleteChannelResponse` instead of throwing.
 - `StreamChatApi.channel`'s hide, show and delete methods are removed; use the `StreamChatClient` methods instead.
+- The calls that mark channels and threads read or unread, on `StreamChatClient` and `Channel`, return a `Result` instead of throwing, with a `MarkReadResponse` when marking read.
+- `StreamChatClient.markChannelsDelivered` returns a `Result<MarkDeliveredResponse>` instead of throwing, and `MarkChannelsDelivered`, the callback `ChannelDeliveryReporter` takes, returns a `Future<Result<void>>`.
+- `MessageDelivery` no longer encodes to JSON, compares by value and gains `copyWith`.
+- `StreamChatApi.channel`'s read, unread and delivery methods are removed; use the `StreamChatClient` methods instead.
 - `ChannelModel.extraData` and `Member.extraData` are renamed `custom`, and so are `Channel.extraData`, `Channel.extraDataStream` (now `customStream`), and the `extraData` argument of the `Channel` constructor and of `StreamChatClient.channel`.
 - The channel and member values `custom` used to hold, such as `ChannelModel.hidden` and `Member.status`, are fields now: `custom` and `toJson` leave them out, and setting one through `custom` has no effect.
 - An entry of `ChannelModel.custom` or `Member.custom` named like one of the model's own fields stays in `custom` and leaves the field alone, and `toJson` leaves it out.

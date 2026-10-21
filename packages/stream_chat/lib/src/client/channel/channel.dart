@@ -1919,47 +1919,53 @@ class Channel {
     return res;
   }
 
-  /// Mark all messages as read.
+  /// Marks this channel as read for the current user.
   ///
-  /// Optionally provide a [messageId] if you want to mark channel as
-  /// read from a particular message onwards.
+  /// Messages up to and including the one with [messageId] are marked as read,
+  /// or all of them when [messageId] is null.
   ///
-  /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
-  /// unread count locally, on-device, without making a network request. In
-  /// that case [messageId] is recorded as the read boundary but does **not**
-  /// narrow the count: the channel is always treated as fully read and the
-  /// count drops to zero. See [ChannelClientState.markReadLocally].
-  Future<EmptyResponse> markRead({String? messageId}) async {
+  /// If [usesLocalUnreadCount] is true, only the local unread count changes,
+  /// and it drops to zero whatever [messageId] is. See
+  /// [ChannelClientState.markReadLocally].
+  ///
+  /// Returns a failure if [canUseReadReceipts] is false, unless
+  /// [usesLocalUnreadCount] is true.
+  Future<Result<MarkReadResponse>> markRead({String? messageId}) async {
     _checkInitialized();
 
     if (usesLocalUnreadCount) {
       state!.markReadLocally(messageId: messageId);
-      return EmptyResponse();
+      return const Result.success(MarkReadResponse(duration: '0ms'));
     }
 
     if (!canUseReadReceipts) {
-      throw const StreamClientException(
-        message: '''
-        Cannot mark as read: Channel does not support read events.
-        Enable read_events in your channel type configuration.''',
+      return const Result.failure(
+        StreamClientException(
+          message:
+              'Cannot mark as read: Channel does not support read events. '
+              'Enable read_events in your channel type configuration.',
+        ),
       );
     }
 
     return _client.markChannelRead(id!, type, messageId: messageId);
   }
 
-  /// Marks the channel as unread by a given [messageId].
+  /// Marks this channel as unread for the current user.
   ///
-  /// All messages from the provided message onwards will be marked as unread,
-  /// **including** the message itself. Contrast with
-  /// [markUnreadByTimestamp], which is exclusive: a message created at
-  /// exactly the given timestamp stays read.
+  /// The message with [messageId] and every later one are marked as unread.
+  /// Unlike [markUnreadByTimestamp], the boundary is inclusive.
   ///
-  /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
-  /// unread count locally, on-device, without making a network request. The
-  /// message must be part of the locally-known messages ([Channel.messages])
-  /// for the count to be recomputed.
-  Future<EmptyResponse> markUnread(String messageId) async {
+  /// The message must be one of the channel's latest 100 messages; an older one
+  /// returns a failure.
+  ///
+  /// If [usesLocalUnreadCount] is true, only the local unread count changes,
+  /// and a message missing from [ChannelClientState.messages] returns a
+  /// failure.
+  ///
+  /// Returns a failure if [canUseReadReceipts] is false, unless
+  /// [usesLocalUnreadCount] is true.
+  Future<Result<void>> markUnread(String messageId) async {
     _checkInitialized();
 
     if (usesLocalUnreadCount) {
@@ -1968,11 +1974,12 @@ class Channel {
       final messages = state!.messages;
       final anchorIndex = messages.indexWhere((it) => it.id == messageId);
       if (anchorIndex < 0) {
-        throw StreamClientException(
-          message:
-              '''
-        Cannot mark as unread: Message "$messageId" was not found in the
-        locally-known messages for this channel.''',
+        return Result.failure(
+          StreamClientException(
+            message:
+                'Cannot mark as unread: Message "$messageId" was not found in the '
+                'locally-known messages for this channel.',
+          ),
         );
       }
 
@@ -1986,32 +1993,38 @@ class Channel {
       // back into the read set if the two share an identical `createdAt`.
       final lastRead = anchor.createdAt.subtract(const Duration(microseconds: 1));
       state!.markUnreadLocally(lastRead: lastRead, lastReadMessageId: previous?.id);
-      return EmptyResponse();
+      return const Result.success(null);
     }
 
     if (!canUseReadReceipts) {
-      throw const StreamClientException(
-        message: '''
-        Cannot mark as unread: Channel does not support read events.
-        Enable read_events in your channel type configuration.''',
+      return const Result.failure(
+        StreamClientException(
+          message:
+              'Cannot mark as unread: Channel does not support read events. '
+              'Enable read_events in your channel type configuration.',
+        ),
       );
     }
 
     return _client.markChannelUnread(id!, type, messageId);
   }
 
-  /// Marks the channel as unread by a given [timestamp].
+  /// Marks this channel unread after [timestamp] for the current user.
   ///
-  /// All messages after the provided timestamp will be marked as unread. This
-  /// boundary is **exclusive**: a message created at exactly [timestamp] stays
-  /// read. Contrast with [markUnread], which is inclusive of the message it is
-  /// given — `markUnread(m.id)` is equivalent to
+  /// The boundary is **exclusive**: a message created at exactly [timestamp]
+  /// stays read. Contrast with [markUnread], which is inclusive of the message
+  /// it is given — `markUnread(m.id)` is equivalent to
   /// `markUnreadByTimestamp(m.createdAt - 1µs)`, not to
   /// `markUnreadByTimestamp(m.createdAt)`.
   ///
-  /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
-  /// unread count locally, on-device, without making a network request.
-  Future<EmptyResponse> markUnreadByTimestamp(DateTime timestamp) async {
+  /// The first message after [timestamp] must exist and be one of the
+  /// channel's latest 100 messages; otherwise this returns a failure.
+  ///
+  /// If [usesLocalUnreadCount] is true, only the local unread count changes.
+  ///
+  /// Returns a failure if [canUseReadReceipts] is false, unless
+  /// [usesLocalUnreadCount] is true.
+  Future<Result<void>> markUnreadByTimestamp(DateTime timestamp) async {
     _checkInitialized();
 
     if (usesLocalUnreadCount) {
@@ -2025,44 +2038,58 @@ class Channel {
         lastRead: timestamp,
         lastReadMessageId: lastReadMessage?.id,
       );
-      return EmptyResponse();
+      return const Result.success(null);
     }
 
     if (!canUseReadReceipts) {
-      throw const StreamClientException(
-        message: '''
-        Cannot mark as unread: Channel does not support read events.
-        Enable read_events in your channel type configuration.''',
+      return const Result.failure(
+        StreamClientException(
+          message:
+              'Cannot mark as unread: Channel does not support read events. '
+              'Enable read_events in your channel type configuration.',
+        ),
       );
     }
 
     return _client.markChannelUnreadByTimestamp(id!, type, timestamp);
   }
 
-  /// Mark the thread with [threadId] in the channel as read.
-  Future<EmptyResponse> markThreadRead(String threadId) async {
+  /// Marks the thread of [threadId] as read for the current user.
+  ///
+  /// The [threadId] is the id of the thread's parent message.
+  ///
+  /// Returns a failure if [canUseReadReceipts] is false.
+  Future<Result<MarkReadResponse>> markThreadRead(String threadId) async {
     _checkInitialized();
 
     if (!canUseReadReceipts) {
-      throw const StreamClientException(
-        message: '''
-        Cannot mark thread as read: Channel does not support read events.
-        Enable read_events in your channel type configuration.''',
+      return const Result.failure(
+        StreamClientException(
+          message:
+              'Cannot mark thread as read: Channel does not support read events. '
+              'Enable read_events in your channel type configuration.',
+        ),
       );
     }
 
     return _client.markThreadRead(id!, type, threadId);
   }
 
-  /// Mark the thread with [threadId] in the channel as unread.
-  Future<EmptyResponse> markThreadUnread(String threadId) async {
+  /// Marks the thread of [threadId] as unread for the current user.
+  ///
+  /// The [threadId] is the id of the thread's parent message.
+  ///
+  /// Returns a failure if [canUseReadReceipts] is false.
+  Future<Result<void>> markThreadUnread(String threadId) async {
     _checkInitialized();
 
     if (!canUseReadReceipts) {
-      throw const StreamClientException(
-        message: '''
-        Cannot mark thread as unread: Channel does not support read events.
-        Enable read_events in your channel type configuration.''',
+      return const Result.failure(
+        StreamClientException(
+          message:
+              'Cannot mark thread as unread: Channel does not support read events. '
+              'Enable read_events in your channel type configuration.',
+        ),
       );
     }
 

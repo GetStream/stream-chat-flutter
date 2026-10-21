@@ -308,15 +308,15 @@ class MessageListUnreadController {
   // transient failure (offline, a 5xx) would block every later attempt for
   // that state until a new message arrived or the channel was reopened.
   //
-  // The error itself is swallowed rather than rethrown: the request is a
-  // best-effort background action with no user-facing surface, and the future
-  // is discarded by the debouncer, so rethrowing would only raise an
-  // unhandled async error.
-  Future<EmptyResponse>? _retryableMarkRead(Future<EmptyResponse>? request) {
-    return request?.onError((_, __) {
-      _lastMarkReadAttempt = null;
-      return EmptyResponse();
-    });
+  // The failure itself is swallowed: the request is a best-effort background
+  // action with no user-facing surface, and the future is discarded by the
+  // debouncer, so an error escaping it would only raise an unhandled async
+  // error.
+  Future<void>? _retryableMarkRead(Future<Result<MarkReadResponse>>? request) {
+    return request?.then(
+      (result) => result.onFailure((_, _) => _lastMarkReadAttempt = null),
+      onError: (_, _) => _lastMarkReadAttempt = null,
+    );
   }
 
   /// Resets every piece of unread state for a newly attached channel.
@@ -564,9 +564,9 @@ class MessageListUnreadController {
   /// Handles a tap on the pill's dismiss affordance.
   Future<void> onPillDismissTapped() async {
     _hasSeenFirstUnread.value = true;
-    // Dismissing is a local decision; if the request behind it fails there
-    // is nothing to show the user, and letting it escape here would surface
-    // as an unhandled async error instead.
+    // Dismissing is a local decision, so a failed request is not shown. Only
+    // the StateError for an uninitialized channel can still escape, and
+    // ignoring it keeps it from surfacing as an unhandled async error.
     markAsRead().ignore();
   }
 
