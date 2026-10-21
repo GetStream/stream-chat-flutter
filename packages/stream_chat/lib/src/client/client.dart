@@ -73,6 +73,7 @@ import '../core/models/response/delete_channel_response.dart';
 import '../core/models/response/delete_message_response.dart';
 import '../core/models/response/delete_reaction_response.dart';
 import '../core/models/response/delete_reminder_response.dart';
+import '../core/models/response/event_response.dart';
 import '../core/models/response/get_blocked_users_response.dart';
 import '../core/models/response/get_draft_response.dart';
 import '../core/models/response/get_many_messages_response.dart';
@@ -1965,15 +1966,26 @@ class StreamChatClient {
     Iterable<MessageDelivery> deliveries,
   ) => _channelsRepository.markChannelsDelivered(deliveries);
 
-  /// Send an event to a particular channel
-  Future<EmptyResponse> sendEvent(
+  /// Sends an event of the given [type] to the watchers of the channel with the
+  /// id [channelId] and the type [channelType].
+  ///
+  /// A [parentId] ties the event to the thread of that message. The [custom]
+  /// data reaches the watchers alongside the event.
+  ///
+  /// The [type] names the event, such as [EventType.typingStart] or a custom
+  /// event's name.
+  Future<Result<EventResponse>> sendEvent(
     String channelId,
-    String channelType,
-    Event event,
-  ) => _chatApi.channel.sendEvent(
+    String channelType, {
+    required String type,
+    String? parentId,
+    Map<String, Object?>? custom,
+  }) => _channelsRepository.sendEvent(
     channelId,
     channelType,
-    event,
+    type: type,
+    parentId: parentId,
+    custom: custom,
   );
 
   /// Sends [reaction] to the message with the id [messageId].

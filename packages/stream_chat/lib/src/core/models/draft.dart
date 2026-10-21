@@ -11,7 +11,7 @@ part 'draft.g.dart';
 /// A model class representing a draft message.
 ///
 /// This class is used to store the draft message and its metadata.
-@JsonSerializable(includeIfNull: false)
+@JsonSerializable(createToJson: false)
 class Draft extends Equatable {
   /// Creates a new instance of [Draft].
   const Draft({
@@ -47,9 +47,6 @@ class Draft extends Equatable {
 
   /// The quoted message, if the message is a quoted reply.
   final Message? quotedMessage;
-
-  /// Convert the object to JSON
-  Map<String, dynamic> toJson() => _$DraftToJson(this);
 
   /// Creates a copy of this [Draft] with specified attributes overridden.
   Draft copyWith({

@@ -46,11 +46,3 @@ ChannelPushPreference _$ChannelPushPreferenceFromJson(
         ),
   disabledUntil: json['disabled_until'] == null ? null : DateTime.parse(json['disabled_until'] as String),
 );
-
-Map<String, dynamic> _$ChannelPushPreferenceToJson(
-  ChannelPushPreference instance,
-) => <String, dynamic>{
-  'chat_level': ?instance.chatLevel,
-  'chat_preferences': ?instance.chatPreferences?.toJson(),
-  'disabled_until': ?instance.disabledUntil?.toIso8601String(),
-};

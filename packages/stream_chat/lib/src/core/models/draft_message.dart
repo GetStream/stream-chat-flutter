@@ -12,7 +12,7 @@ import 'user.dart';
 part 'draft_message.g.dart';
 
 /// The class that contains the information about a draft message.
-@JsonSerializable(includeIfNull: false)
+@JsonSerializable(createToJson: false)
 class DraftMessage extends Equatable {
   /// Creates a new draft message.
   DraftMessage({
@@ -84,8 +84,7 @@ class DraftMessage extends Equatable {
   final String? command;
 
   /// The poll associated with the message.
-  @JsonKey(includeToJson: false)
-  @PollV1JsonConverter()
+  @JsonKey(fromJson: pollFromV1Json)
   final Poll? poll;
 
   /// The ID of the poll, if a poll is associated with the message.
@@ -115,26 +114,6 @@ class DraftMessage extends Equatable {
     'poll_id',
     'extra_data',
   ];
-
-  /// Serializes this draft message to JSON.
-  ///
-  /// Writes the entries of [custom] at the root, leaving out any named like one
-  /// of [topLevelFields].
-  Map<String, dynamic> toJson() {
-    final message = removeMentionsIfNotIncluded();
-    final json = Serializer.moveFromExtraDataToRoot(
-      _$DraftMessageToJson(message),
-      topLevelFields: topLevelFields,
-    );
-
-    // If the message contains command we should append it to the text
-    // before sending it.
-    if (command case final command? when command.isNotEmpty) {
-      json.update('text', (text) => '/$command $text', ifAbsent: () => null);
-    }
-
-    return json;
-  }
 
   /// Create a copy of this message with the provided values.
   DraftMessage copyWith({
@@ -242,28 +221,5 @@ extension DraftMessageToMessage on DraftMessage {
       pollId: pollId,
       custom: custom,
     );
-  }
-}
-
-extension on DraftMessage {
-  /// Removes mentions from the message if they are not included in the text.
-  ///
-  /// This is useful for cleaning up the list of mentioned users before
-  /// sending the message.
-  DraftMessage removeMentionsIfNotIncluded() {
-    if (mentionedUsers.isEmpty) return this;
-
-    final messageTextToSend = text;
-    if (messageTextToSend == null) return this;
-
-    final updatedMentionedUsers = [...mentionedUsers];
-    for (final user in mentionedUsers.toSet()) {
-      if (messageTextToSend.contains('@${user.id}')) continue;
-      if (messageTextToSend.contains('@${user.nameOrId}')) continue;
-
-      updatedMentionedUsers.remove(user);
-    }
-
-    return copyWith(mentionedUsers: updatedMentionedUsers);
   }
 }

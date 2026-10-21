@@ -10,6 +10,7 @@ import '../../core/models/push_level.dart';
 import '../../core/models/read.dart';
 import '../../core/models/request/message_delivery.dart';
 import '../../core/models/response/delete_channel_response.dart';
+import '../../core/models/response/event_response.dart';
 import '../../core/models/response/hide_channel_response.dart';
 import '../../core/models/response/mark_delivered_response.dart';
 import '../../core/models/response/mark_read_response.dart';
@@ -217,4 +218,13 @@ extension MarkDeliveredResponseMapper on api.MarkDeliveredResponse {
 extension MessageDeliveryRequestMapper on MessageDelivery {
   /// Converts this receipt into an [api.DeliveredMessagePayload].
   api.DeliveredMessagePayload toRequest() => api.DeliveredMessagePayload(cid: channelCid, id: messageId);
+}
+
+/// Maps a generated [api.EventResponse] to an [EventResponse].
+extension EventResponseMapper on api.EventResponse {
+  // TODO(openapi-migration): map `event` once `Event` and the WebSocket move to
+  // v2.
+
+  /// Converts this response into an [EventResponse].
+  EventResponse toModel() => EventResponse(duration: duration);
 }

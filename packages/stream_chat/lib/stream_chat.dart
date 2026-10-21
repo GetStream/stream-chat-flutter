@@ -132,6 +132,7 @@ export 'src/core/models/response/delete_channel_response.dart';
 export 'src/core/models/response/delete_message_response.dart';
 export 'src/core/models/response/delete_reaction_response.dart';
 export 'src/core/models/response/delete_reminder_response.dart';
+export 'src/core/models/response/event_response.dart';
 export 'src/core/models/response/flag_response.dart';
 export 'src/core/models/response/get_blocked_users_response.dart';
 export 'src/core/models/response/get_draft_response.dart';

@@ -40,6 +40,7 @@ onto Stream's OpenAPI-generated API client.
     - [Partial Updates](#partial-updates)
     - [Channel Lifecycle](#channel-lifecycle)
     - [Read Receipts](#read-receipts)
+    - [Channel Events](#channel-events)
     - [Unread Counts](#unread-counts)
     - [User Blocking](#user-blocking)
     - [User Updates](#user-updates)
@@ -104,6 +105,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`; the channel and member flags it carried are fields |
 | [**User Custom Data**](#user-custom-data) | `extraData` is `custom` on `User` and `OwnUser`; `name` is nullable and `nameOrId` falls back to the id; the user fields it carried are fields |
 | [**Message Custom Data**](#message-custom-data) | `extraData` is `custom` on `Message`, `Attachment`, `Reaction` and `DraftMessage`; a message's channel id, HTML, markup and deleted reply count, and an attachment's Giphy renditions, are fields |
+| [**Channel Events**](#channel-events) | `sendEvent` takes `type`, `parentId` and `custom` instead of an `Event` and returns a `Result<EventResponse>`; the typing calls, `stopAIResponse` and `KeyStrokeHandler` return a `Result<void>` instead of throwing |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -433,6 +435,13 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `SendMessageResponse.duration` / `UpdateMessageResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
 | `SendMessageResponse` / `UpdateMessageResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two responses with the same fields are now equal |
 | `StreamChatApi.message`, `MessageApi` | the `StreamChatClient` methods | `removed` | Every message endpoint moved to the generated client |
+| `StreamChatClient.sendEvent(channelId, channelType, Event)` → `Future<EmptyResponse>` | `sendEvent(channelId, channelType, type: …, parentId: …, custom: …)` → `Future<Result<EventResponse>>` | `retyped` | Returns a `Result` instead of throwing. The event's `type`, `parentId` and `extraData` become arguments; `extraData` is passed as `custom` |
+| `Channel.sendEvent(Event)` → `Future<EmptyResponse>` | `sendEvent(type: …, parentId: …, custom: …)` → `Future<Result<EventResponse>>` | `retyped` | Returns a `Result` instead of throwing. Calling it before the channel is initialized still throws a `StateError`. The event's `type`, `parentId` and `extraData` become arguments; `extraData` is passed as `custom` |
+| `Channel.startTyping` / `stopTyping` / `keyStroke` → `Future<void>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing. Same arguments. A success when typing events are disabled and nothing is sent |
+| `Channel.stopAIResponse` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing. Calling it before the channel is initialized still throws a `StateError` |
+| `KeyStrokeHandler.onStartTyping` / `onStopTyping` → `Future<void> Function([String?])` | `Future<Result<void>> Function([String?])` | `retyped` | Return a failure rather than throwing; calling the handler returns `Future<Result<void>>` with the first failure |
+| `Event.toJson`, `ChannelState.toJson`, `Read.toJson`, `Draft.toJson`, `DraftMessage.toJson`, `ChannelPushPreference.toJson` | — | `removed` | These models only decode; `fromJson` stays |
+| `StreamChatApi.channel.sendEvent` | `StreamChatClient.sendEvent` | `removed` | The endpoint moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -975,6 +984,38 @@ the same name for the rest.
 > **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call. Marking read
 > and sending receipts answer their own envelope, so a field the API adds later reaches you without another
 > break. Marking unread answers nothing the API could extend, so it carries no value.
+
+### Channel Events
+
+**`sendEvent` takes the event's parts instead of an `Event`.** On `StreamChatClient` and `Channel`, pass the
+event's `type`, the `parentId` of the thread it belongs to and its `custom` data as arguments. A field you set
+on the `Event` besides those, such as `aiState`, goes into `custom` under its JSON key; other users receive it
+as before.
+
+```dart
+// v10
+await channel.sendEvent(Event(type: 'party_started', parentId: message.id, extraData: {'theme': 'disco'}));
+
+// v11
+final result = await channel.sendEvent(type: 'party_started', parentId: message.id, custom: {'theme': 'disco'});
+```
+
+**Sending an event returns a `Result` instead of throwing.** `sendEvent` answers an `EventResponse`;
+`Channel.startTyping`, `stopTyping`, `keyStroke` and `stopAIResponse` answer a `Result<void>`. A `try`/`catch`
+around one still compiles, but no longer catches a failed call: read the returned `Result` instead. When
+typing events are disabled, the typing calls send nothing and return a success.
+
+**A custom `KeyStrokeHandler` callback returns a `Result`.** `onStartTyping` and `onStopTyping` are
+`Future<Result<void>> Function([String?])`, and calling the handler returns a `Result<void>` carrying the first
+failure.
+
+**`Event`, `ChannelState`, `Read`, `Draft`, `DraftMessage` and `ChannelPushPreference` no longer encode to
+JSON.** They still decode with `fromJson`. Serialize the fields you need yourself if you stored them.
+
+**`StreamChatApi.channel.sendEvent` is removed.** Call `StreamChatClient.sendEvent`.
+
+> **Why:** the endpoint moved onto the generated client, which returns a `Result` for every call and takes the
+> event as its own request rather than as a received event. The `toJson` methods had no caller left in the SDK.
 
 ### Unread Counts
 
@@ -1786,6 +1827,8 @@ Work top to bottom; each item is independently verifiable.
 - [ ] If you implement `AttachmentFileUploader`, return a `Result` from it — see [File Upload](#file-upload)
 - [ ] If you pass a custom `onMarkChannelsDelivered` to `ChannelDeliveryReporter`, return a `Result` from it — see
       [Read Receipts](#read-receipts)
+- [ ] If you build a `KeyStrokeHandler` with your own callbacks, return a `Result` from them — see
+      [Channel Events](#channel-events)
 - [ ] If you persist models yourself, re-check nullability as endpoints move to the generated types, which are nullable wherever the API allows it
 - [ ] Replace `sort: null` on any list controller with `XSort.empty` if you relied on server ordering — see
       [Sorting](#sorting)

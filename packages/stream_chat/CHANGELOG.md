@@ -186,6 +186,11 @@
 - `deleteMessage` and `deleteMessageForMe` return a `DeleteMessageResponse` instead of an `EmptyResponse`, also when `Channel` deletes a message that was never sent.
 - `SendMessageResponse` and `UpdateMessageResponse` are immutable, compare by value, and their `duration` is non-nullable; `MessageResponse` is removed.
 - `MessageApi` and `StreamChatApi.message` are removed.
+- `sendEvent` takes the event's `type`, `parentId` and `custom` data instead of an `Event`, on `StreamChatClient` and `Channel`, and returns a `Result<EventResponse>` instead of throwing.
+- `Channel.startTyping`, `stopTyping`, `keyStroke` and `stopAIResponse` return a `Result<void>` instead of throwing.
+- `KeyStrokeHandler`'s `onStartTyping` and `onStopTyping` callbacks return a `Result<void>`, and calling the handler returns one instead of throwing.
+- `toJson` is removed from `Event`, `ChannelState`, `Read`, `Draft`, `DraftMessage` and `ChannelPushPreference`.
+- `StreamChatApi.channel`'s `sendEvent` is removed; use `StreamChatClient.sendEvent` instead.
 
 🐞 Fixed
 
@@ -201,6 +206,9 @@
 - `connectGuestUser` no longer leaves the signed-in user unauthenticated when it refuses to connect a guest over them.
 
 - The OpenAPI-generated client's methods that take a `payload` or `sort` argument no longer fail with `invalid json data`.
+
+- Disposing a `Channel` while the user is typing now sends the typing stop event.
+- A typing start that fails after a later key stroke no longer keeps that key stroke's typing stop from being sent.
 
 🔄 Changed
 

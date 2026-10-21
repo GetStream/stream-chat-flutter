@@ -36,6 +36,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [19](19-user-blocking.md) | User Blocking — split out of 09 | 0 | 3 | ☑ |
 | [20](20-user-updates.md) | User Updates — split out of 09 | 0 | 2 | ☑ |
 | [21](21-custom-data.md) | Custom Data Check — no model still says `extraData` | — | — | ☐ |
+| [22](22-channel-events.md) | Channel Events — split out of 11 | 0 | 1 | ☑ |
 
 **Coverage:** 47 hand-written methods across 8 files, and all 129 generated operations, each claimed by exactly
 one group. Verified mechanically — see [Keeping this plan honest](#keeping-this-plan-honest).
@@ -181,12 +182,12 @@ includes a named response that carries only `duration` today, such as `HideChann
 | `reactionGroupsFromV1Json` | `Message.reactionGroups` | [10](10-messages.md) |
 | `ActionV1JsonConverter` | `Attachment.actions` | [10](10-messages.md) |
 | `LocationV1JsonConverter` | `Message.sharedLocation`, `ChannelState.activeLiveLocations`, `GetActiveLiveLocationsResponse.activeLiveLocations`, `updateLiveLocation`'s response | [10](10-messages.md) |
-| `MessageReminderV1JsonConverter` | `Message.reminder`, `Event.reminder` | WebSocket v2 (no group) |
-| `ReactionV1JsonConverter` | `Message.latestReactions` / `ownReactions`, `Event.reaction` | WebSocket v2 (no group) |
+| `messageReminderFromV1Json` | `Message.reminder`, `Event.reminder` | WebSocket v2 (no group) |
+| `reactionFromV1Json` / `reactionsFromV1Json` | `Message.latestReactions` / `ownReactions`, `Event.reaction` | WebSocket v2 (no group) |
 | `DataSerializable` | `UserGroup`, `UserGroupMember`, `ReactionGroup`, `PollOption` (`fromData`, `toData`) | [10](10-messages.md) |
-| `PollV1JsonConverter` | `Message.poll`, `DraftMessage.poll`, `Event.poll` | WebSocket v2 (no group) |
-| `PollVoteV1JsonConverter` | `Event.pollVote` | WebSocket v2 (no group) |
-| `ThreadV1JsonConverter` | `Event.thread` | WebSocket v2 (no group) |
+| `pollFromV1Json` | `Message.poll`, `DraftMessage.poll`, `Event.poll` | WebSocket v2 (no group) |
+| `pollVoteFromV1Json` | `Event.pollVote` | WebSocket v2 (no group) |
+| `threadFromV1Json` | `Event.thread` | WebSocket v2 (no group) |
 | `Event.fromJson`'s `user.updated` re-decode | `Event.user`, decoded as a `User` and again as an `OwnUser` | WebSocket v2 (no group) |
 | `users_mapper.dart` (kept, re-pointed) | today's `User`, which still reads and writes JSON | [09](09-users.md) |
 | `channels_mapper.dart` (kept, re-pointed) | today's `ChannelModel`, `ChannelConfig` and `Member`, which still read and write JSON | [11](11-channels-and-members.md) |
@@ -231,6 +232,8 @@ surfaces before it reaches `Message` and `ChannelState`:
   `channels_mapper.dart` cannot map.
 - **17** is the read and delivery receipts, split out of 11 after 16. They answer only a `duration` and a read
   event, which waits for group 10's message mappers.
+- **22** is sending channel events, split out of 11 after 17. The call reads nothing into client state and its
+  echo waits for the WebSocket's move to v2.
 - **18** is the current user's unread counts, split out of 09 because it embeds no `User` and nothing persists it.
 - **19** is blocking and unblocking users and listing the blocked ones, split out of 09 because it embeds `User`
   only through the existing mappers and nothing persists it.

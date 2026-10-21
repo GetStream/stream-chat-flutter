@@ -28,7 +28,9 @@ void main() {
 
     const path = '/sync';
 
-    final events = List.generate(3, (index) => Event(type: 'test-event-type-$index'));
+    final events = [
+      for (var index = 0; index < 3; index++) {'type': 'test-event-type-$index'},
+    ];
 
     final data = {
       'channel_cids': cids,
@@ -44,7 +46,7 @@ void main() {
       (_) async => successResponse(
         path,
         data: {
-          'events': [...events.map((it) => it.toJson())],
+          'events': events,
         },
       ),
     );

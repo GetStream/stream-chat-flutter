@@ -96,49 +96,42 @@ class LocationV1JsonConverter implements JsonConverter<Location, Map<String, dyn
   };
 }
 
-/// Converts a [Reaction] to and from its v1 keys.
+/// Reads a [Reaction] from its v1 keys.
 ///
-/// Custom data sits at the root of the v1 map, beside the known keys. [toJson]
-/// writes the type, score, emoji code and custom data, without the message,
-/// user or dates.
+/// Custom data sits at the root of the v1 map, beside the known keys.
 // TODO(openapi-migration): remove when WebSocket payloads decode as v2
 @internal
-class ReactionV1JsonConverter implements JsonConverter<Reaction, Map<String, dynamic>> {
-  /// Creates a new [ReactionV1JsonConverter].
-  const ReactionV1JsonConverter();
+Reaction? reactionFromV1Json(Map<String, dynamic>? json) => json == null ? null : _reactionFromV1Json(json);
 
-  @override
-  Reaction fromJson(Map<String, dynamic> json) {
-    final data = Serializer.moveToExtraDataFromRoot(json, _reactionV1Keys);
-    return Reaction(
-      messageId: data['message_id'] as String?,
-      type: data['type'] as String,
-      user: switch (data['user']) {
-        final Map<String, dynamic> user => User.fromJson(user),
-        _ => null,
-      },
-      userId: data['user_id'] as String?,
-      score: (data['score'] as num?)?.toInt() ?? 1,
-      emojiCode: data['emoji_code'] as String?,
-      createdAt: switch (data['created_at']) {
-        final Object it => _dateTime.fromJson(it),
-        null => null,
-      },
-      updatedAt: switch (data['updated_at']) {
-        final Object it => _dateTime.fromJson(it),
-        null => null,
-      },
-      custom: data['extra_data'] as Map<String, dynamic>,
-    );
-  }
+/// Reads a list of [Reaction]s from their v1 keys, as [reactionFromV1Json]
+/// reads each one.
+// TODO(openapi-migration): remove when WebSocket payloads decode as v2
+@internal
+List<Reaction>? reactionsFromV1Json(List<dynamic>? json) =>
+    json?.map((reaction) => _reactionFromV1Json(reaction as Map<String, dynamic>)).toList();
 
-  @override
-  Map<String, dynamic> toJson(Reaction reaction) => Serializer.moveFromExtraDataToRoot({
-    'type': reaction.type,
-    'score': reaction.score,
-    if (reaction.emojiCode case final emojiCode?) 'emoji_code': emojiCode,
-    'extra_data': reaction.custom,
-  }, topLevelFields: _reactionV1Keys);
+Reaction _reactionFromV1Json(Map<String, dynamic> json) {
+  final data = Serializer.moveToExtraDataFromRoot(json, _reactionV1Keys);
+  return Reaction(
+    messageId: data['message_id'] as String?,
+    type: data['type'] as String,
+    user: switch (data['user']) {
+      final Map<String, dynamic> user => User.fromJson(user),
+      _ => null,
+    },
+    userId: data['user_id'] as String?,
+    score: (data['score'] as num?)?.toInt() ?? 1,
+    emojiCode: data['emoji_code'] as String?,
+    createdAt: switch (data['created_at']) {
+      final Object it => _dateTime.fromJson(it),
+      null => null,
+    },
+    updatedAt: switch (data['updated_at']) {
+      final Object it => _dateTime.fromJson(it),
+      null => null,
+    },
+    custom: data['extra_data'] as Map<String, dynamic>,
+  );
 }
 
 // The v1 keys a reaction reads into its fields; every other key is custom data.
@@ -153,17 +146,12 @@ const _reactionV1Keys = [
   'updated_at',
 ];
 
-/// Converts a [MessageReminder] to and from its v1 keys.
-///
-/// [toJson] writes the ids and the dates, without the channel, message or user.
+/// Reads a [MessageReminder] from its v1 keys.
 // TODO(openapi-migration): remove when WebSocket payloads decode as v2
 @internal
-class MessageReminderV1JsonConverter implements JsonConverter<MessageReminder, Map<String, dynamic>> {
-  /// Creates a new [MessageReminderV1JsonConverter].
-  const MessageReminderV1JsonConverter();
-
-  @override
-  MessageReminder fromJson(Map<String, dynamic> json) => MessageReminder(
+MessageReminder? messageReminderFromV1Json(Map<String, dynamic>? json) {
+  if (json == null) return null;
+  return MessageReminder(
     channelCid: json['channel_cid'] as String,
     channel: switch (json['channel']) {
       final Map<String, dynamic> channel => ChannelModel.fromJson(channel),
@@ -183,28 +171,14 @@ class MessageReminderV1JsonConverter implements JsonConverter<MessageReminder, M
     createdAt: _dateTimeOrNull(json['created_at']),
     updatedAt: _dateTimeOrNull(json['updated_at']),
   );
-
-  @override
-  Map<String, dynamic> toJson(MessageReminder reminder) => {
-    'channel_cid': reminder.channelCid,
-    'message_id': reminder.messageId,
-    'user_id': reminder.userId,
-    'remind_at': reminder.remindAt?.toIso8601String(),
-    'created_at': reminder.createdAt.toIso8601String(),
-    'updated_at': reminder.updatedAt.toIso8601String(),
-  };
 }
 
-/// Converts a [Thread] to and from its v1 keys, with its custom data at the
-/// root.
+/// Reads a [Thread] from its v1 keys, with its custom data at the root.
 // TODO(openapi-migration): remove once WebSocket events decode v2 payloads
 @internal
-class ThreadV1JsonConverter implements JsonConverter<Thread, Map<String, dynamic>> {
-  /// Creates a new [ThreadV1JsonConverter].
-  const ThreadV1JsonConverter();
-
-  @override
-  Thread fromJson(Map<String, dynamic> json) => Thread(
+Thread? threadFromV1Json(Map<String, dynamic>? json) {
+  if (json == null) return null;
+  return Thread(
     activeParticipantCount: (json['active_participant_count'] as num?)?.toInt(),
     channel: switch (json['channel']) {
       final Map<String, dynamic> channel => ChannelModel.fromJson(channel),
@@ -245,33 +219,6 @@ class ThreadV1JsonConverter implements JsonConverter<Thread, Map<String, dynamic
     },
     custom: _customData(json, _threadV1Keys),
   );
-
-  // Writes the thread's v1 keys, with custom data at the root; a custom entry
-  // named like one of the keys is not written.
-  @override
-  Map<String, dynamic> toJson(Thread thread) => {
-    ..._customDataAtRoot(thread.custom, _threadV1Keys),
-    'active_participant_count': thread.activeParticipantCount,
-    'channel_cid': thread.channelCid,
-    'channel': thread.channel?.toJson(),
-    'created_at': thread.createdAt.toIso8601String(),
-    'updated_at': thread.updatedAt.toIso8601String(),
-    'deleted_at': thread.deletedAt?.toIso8601String(),
-    'created_by_user_id': thread.createdByUserId,
-    'created_by': thread.createdBy?.toJson(),
-    'title': thread.title,
-    'parent_message_id': thread.parentMessageId,
-    'parent_message': thread.parentMessage?.toJson(),
-    'reply_count': thread.replyCount,
-    'participant_count': thread.participantCount,
-    'thread_participants': [
-      for (final participant in thread.threadParticipants) _threadParticipantToV1Json(participant),
-    ],
-    'last_message_at': thread.lastMessageAt?.toIso8601String(),
-    'latest_replies': [for (final reply in thread.latestReplies) reply.toJson()],
-    'read': thread.read?.map((read) => read.toJson()).toList(),
-    'draft': thread.draft?.toJson(),
-  };
 }
 
 // The keys a v1 thread carries besides its custom data.
@@ -309,17 +256,6 @@ ThreadParticipant _threadParticipantFromV1Json(Map<String, dynamic> json) => Thr
     _ => null,
   },
 );
-
-Map<String, dynamic> _threadParticipantToV1Json(ThreadParticipant participant) => {
-  'channel_cid': participant.channelCid,
-  'created_at': participant.createdAt.toIso8601String(),
-  'last_read_at': participant.lastReadAt.toIso8601String(),
-  'last_thread_message_at': participant.lastThreadMessageAt?.toIso8601String(),
-  'left_thread_at': participant.leftThreadAt?.toIso8601String(),
-  'thread_id': participant.threadId,
-  'user_id': participant.userId,
-  'user': participant.user?.toJson(),
-};
 
 /// Converts a [Device] to and from its v1 `id` and `push_provider` keys.
 // TODO(openapi-migration): remove in group 09
@@ -419,17 +355,14 @@ UserGroupMember _userGroupMemberFromV1Json(Map<String, dynamic> json) => UserGro
   userId: json['user_id'] as String,
 );
 
-/// Converts a [Poll] to and from its v1 keys.
+/// Reads a [Poll] from its v1 keys.
 ///
 /// Custom data sits at the root of the v1 map, beside the known keys.
 // TODO(openapi-migration): remove once events and messages decode v2 payloads
 @internal
-class PollV1JsonConverter implements JsonConverter<Poll, Map<String, dynamic>> {
-  /// Creates a new [PollV1JsonConverter].
-  const PollV1JsonConverter();
-
-  @override
-  Poll fromJson(Map<String, dynamic> json) => Poll(
+Poll? pollFromV1Json(Map<String, dynamic>? json) {
+  if (json == null) return null;
+  return Poll(
     id: json['id'] as String?,
     name: json['name'] as String,
     nameI18n: _translations(json['name_i18n']),
@@ -470,44 +403,12 @@ class PollV1JsonConverter implements JsonConverter<Poll, Map<String, dynamic>> {
     ownVotesAndAnswers: _pollVotesFromV1Json(json['own_votes']) ?? const [],
     custom: _customData(json, _pollV1Keys),
   );
-
-  // Writes the keys the poll settings use, with custom data at the root; the
-  // vote summary, the translations and a custom entry named like one of the
-  // keys are not written.
-  @override
-  Map<String, dynamic> toJson(Poll poll) => {
-    ..._customDataAtRoot(poll.custom, _pollV1Keys),
-    'id': poll.id,
-    'name': poll.name,
-    'description': poll.description,
-    'options': poll.options.map(_pollOptionToV1Json).toList(),
-    'voting_visibility': poll.votingVisibility,
-    'enforce_unique_vote': poll.enforceUniqueVote,
-    'max_votes_allowed': poll.maxVotesAllowed,
-    'allow_user_suggested_options': poll.allowUserSuggestedOptions,
-    'allow_answers': poll.allowAnswers,
-    'is_closed': poll.isClosed,
-  };
 }
 
-/// Converts a [PollVote] to and from its v1 keys.
+/// Reads a [PollVote] from its v1 keys.
 // TODO(openapi-migration): remove once WebSocket events decode v2 payloads
 @internal
-class PollVoteV1JsonConverter implements JsonConverter<PollVote, Map<String, dynamic>> {
-  /// Creates a new [PollVoteV1JsonConverter].
-  const PollVoteV1JsonConverter();
-
-  @override
-  PollVote fromJson(Map<String, dynamic> json) => _pollVoteFromV1Json(json);
-
-  // Writes only the keys that identify the vote and what it selects.
-  @override
-  Map<String, dynamic> toJson(PollVote vote) => {
-    'id': ?vote.id,
-    'option_id': ?vote.optionId,
-    'answer_text': ?vote.answerText,
-  };
-}
+PollVote? pollVoteFromV1Json(Map<String, dynamic>? json) => json == null ? null : _pollVoteFromV1Json(json);
 
 PollOption _pollOptionFromV1Json(Map<String, dynamic> json) => PollOption(
   id: json['id'] as String?,
@@ -515,12 +416,6 @@ PollOption _pollOptionFromV1Json(Map<String, dynamic> json) => PollOption(
   textI18n: _translations(json['text_i18n']),
   custom: _customData(json, _pollOptionV1Keys),
 );
-
-Map<String, dynamic> _pollOptionToV1Json(PollOption option) => {
-  ..._customDataAtRoot(option.custom, _pollOptionV1Keys),
-  'id': ?option.id,
-  'text': option.text,
-};
 
 List<PollVote>? _pollVotesFromV1Json(Object? json) =>
     (json as List<dynamic>?)?.map((vote) => _pollVoteFromV1Json(vote as Map<String, dynamic>)).toList();
@@ -583,8 +478,3 @@ const _pollOptionV1Keys = [
 
 Map<String, Object?> _customData(Map<String, dynamic> json, List<String> knownKeys) =>
     Serializer.moveToExtraDataFromRoot(json, knownKeys)['extra_data'] as Map<String, Object?>;
-
-// The custom data a v1 map carries at its root: an entry named like one of the
-// known keys would overwrite the key, so it is left out.
-Map<String, Object?> _customDataAtRoot(Map<String, Object?> custom, List<String> knownKeys) =>
-    {...custom}..removeWhere((key, _) => knownKeys.contains(key));

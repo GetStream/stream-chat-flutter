@@ -20,7 +20,7 @@ class _NullConst {
 const _nullConst = _NullConst();
 
 /// The class that contains the information about a channel
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class ChannelState {
   /// Constructor used for json serialization
   const ChannelState({
@@ -96,9 +96,6 @@ class ChannelState {
 
   /// Create a new instance from a json
   static ChannelState fromJson(Map<String, dynamic> json) => _$ChannelStateFromJson(json);
-
-  /// Serialize to json
-  Map<String, dynamic> toJson() => _$ChannelStateToJson(this);
 
   /// Creates a copy of [ChannelState] with specified attributes overridden.
   ChannelState copyWith({

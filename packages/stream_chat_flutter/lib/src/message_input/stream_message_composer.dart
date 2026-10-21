@@ -1328,11 +1328,11 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
 
       final value = _effectiveController.text.trim();
       if (value.isNotEmpty && channel.canUseTypingEvents) {
-        channel.keyStroke(_effectiveController.message.parentId).onError(
-          (error, stackTrace) {
-            widget.props.onError?.call(error!, stackTrace);
-          },
-        );
+        channel.keyStroke(_effectiveController.message.parentId).then((result) {
+          if (result case Failure(:final error, :final stackTrace)) {
+            widget.props.onError?.call(error, stackTrace);
+          }
+        });
       }
     },
     const Duration(milliseconds: 350),

@@ -36,6 +36,7 @@ class MockChannel extends Mock implements Channel {
       ),
     );
     when(deleteDraft).thenAnswer((_) async => const Result.success(null));
+    when(() => keyStroke(any())).thenAnswer((_) async => const Result.success(null));
     when(() => deleteDraft(parentId: any(named: 'parentId'))).thenAnswer((_) async => const Result.success(null));
     when(() => currentUserLastMessageAtStream).thenAnswer((_) => Stream.value(null));
     when(() => isGroup).thenReturn(false);
@@ -73,12 +74,6 @@ class MockChannel extends Mock implements Channel {
     PaginationParams? watchersPagination,
   }) {
     return Future.value(const ChannelState());
-  }
-
-  @override
-  // ignore: prefer_expression_function_bodies
-  Future<void> keyStroke([String? parentId]) async {
-    return;
   }
 
   final Stream<Event> _eventStream;

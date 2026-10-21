@@ -11,44 +11,33 @@ import '../../mocks.dart';
 void main() {
   String _getChannelUrl(String channelId, String channelType) => '/channels/$channelType/$channelId';
 
-  ChannelState _generateChannelState(
+  // A channel state with three messages, pinned messages, members, reads and
+  // watchers.
+  Map<String, Object?> _generateChannelStateJson(
     String channelId,
     String channelType,
   ) {
-    final channel = ChannelModel(id: channelId, type: channelType);
-    final messages = List.generate(
-      3,
-      (index) => Message(
-        id: 'test-message-id-$index',
-        text: 'test-message-text-$index',
-      ),
-    );
-    final members = List.generate(
-      3,
-      (index) => Member(userId: 'test-user-id-$index'),
-    );
-    final reads = List.generate(
-      3,
-      (index) => Read(
-        lastRead: DateTime.now(),
-        user: User(id: 'test-user-id-$index'),
-        lastReadMessageId: 'last-message-id-$index',
-      ),
-    );
-    final watchers = List.generate(
-      3,
-      (index) => User(id: 'test-user-id-$index'),
-    );
-    final state = ChannelState(
-      channel: channel,
-      messages: messages,
-      pinnedMessages: messages,
-      members: members,
-      read: reads,
-      watchers: watchers,
-      watcherCount: watchers.length,
-    );
-    return state;
+    final users = [for (var index = 0; index < 3; index++) User(id: 'test-user-id-$index').toJson()];
+    final messages = [
+      for (var index = 0; index < 3; index++)
+        Message(id: 'test-message-id-$index', text: 'test-message-text-$index').toJson(),
+    ];
+    return {
+      'channel': ChannelModel(id: channelId, type: channelType).toJson(),
+      'messages': messages,
+      'pinned_messages': messages,
+      'members': [for (final user in users) Member(userId: user['id']! as String).toJson()],
+      'read': [
+        for (final (index, user) in users.indexed)
+          {
+            'user': user,
+            'last_read': DateTime.now().toIso8601String(),
+            'last_read_message_id': 'last-message-id-$index',
+          },
+      ],
+      'watchers': users,
+      'watcher_count': users.length,
+    };
   }
 
   Response successResponse(String path, {Object? data}) => Response(
@@ -75,7 +64,7 @@ void main() {
     const channelPath = '/channels/$channelType/$channelId';
     const path = '$channelPath/query';
 
-    final channelState = _generateChannelState(channelId, channelType);
+    final channelState = _generateChannelStateJson(channelId, channelType);
 
     final data = {
       'state': true,
@@ -95,7 +84,7 @@ void main() {
     ).thenAnswer(
       (_) async => successResponse(
         path,
-        data: channelState.toJson(),
+        data: channelState,
       ),
     );
 
@@ -109,12 +98,12 @@ void main() {
     );
 
     expect(res, isNotNull);
-    expect(res.messages?.length, channelState.messages?.length);
-    expect(res.pinnedMessages?.length, channelState.pinnedMessages?.length);
-    expect(res.members?.length, channelState.members?.length);
-    expect(res.read?.length, channelState.read?.length);
-    expect(res.watchers?.length, channelState.watchers?.length);
-    expect(res.watcherCount, channelState.watcherCount);
+    expect(res.messages, hasLength(3));
+    expect(res.pinnedMessages, hasLength(3));
+    expect(res.members, hasLength(3));
+    expect(res.read, hasLength(3));
+    expect(res.watchers, hasLength(3));
+    expect(res.watcherCount, 3);
 
     verify(() => client.post(path, data: any(named: 'data'))).called(1);
     verifyNoMoreInteractions(client);
@@ -131,7 +120,7 @@ void main() {
 
     const path = '/channels';
 
-    final channelState = _generateChannelState(channelId, channelType);
+    final channelState = _generateChannelStateJson(channelId, channelType);
 
     final payload = jsonEncode({
       // default options
@@ -160,7 +149,7 @@ void main() {
       (_) async => successResponse(
         path,
         data: {
-          'channels': [channelState.toJson()],
+          'channels': [channelState],
         },
       ),
     );
@@ -191,7 +180,7 @@ void main() {
 
     const path = '/channels';
 
-    final channelState = _generateChannelState(channelId, channelType);
+    final channelState = _generateChannelStateJson(channelId, channelType);
 
     final payload = jsonEncode({
       // default options
@@ -223,7 +212,7 @@ void main() {
       (_) async => successResponse(
         path,
         data: {
-          'channels': [channelState.toJson()],
+          'channels': [channelState],
           'predefined_filter': {
             'name': predefinedFilter,
             'filter': {
@@ -610,25 +599,6 @@ void main() {
     expect(res, isNotNull);
     expect(res.channel.cid, channelModel.cid);
     expect(res.message?.id, message.id);
-
-    verify(() => client.post(path, data: any(named: 'data'))).called(1);
-    verifyNoMoreInteractions(client);
-  });
-
-  test('sendEvent', () async {
-    const channelId = 'test-channel-id';
-    const channelType = 'test-channel-type';
-    final event = Event(type: 'event.test');
-
-    final path = '${_getChannelUrl(channelId, channelType)}/event';
-
-    when(
-      () => client.post(path, data: {'event': event}),
-    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
-
-    final res = await channelApi.sendEvent(channelId, channelType, event);
-
-    expect(res, isNotNull);
 
     verify(() => client.post(path, data: any(named: 'data'))).called(1);
     verifyNoMoreInteractions(client);

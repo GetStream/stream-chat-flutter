@@ -24,12 +24,8 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
   silent: json['silent'] as bool? ?? false,
   shadowed: json['shadowed'] as bool? ?? false,
   reactionGroups: reactionGroupsFromV1Json(json['reaction_groups'] as Map<String, dynamic>?),
-  latestReactions: (json['latest_reactions'] as List<dynamic>?)
-      ?.map((e) => const ReactionV1JsonConverter().fromJson(e as Map<String, dynamic>))
-      .toList(),
-  ownReactions: (json['own_reactions'] as List<dynamic>?)
-      ?.map((e) => const ReactionV1JsonConverter().fromJson(e as Map<String, dynamic>))
-      .toList(),
+  latestReactions: reactionsFromV1Json(json['latest_reactions'] as List?),
+  ownReactions: reactionsFromV1Json(json['own_reactions'] as List?),
   parentId: json['parent_id'] as String?,
   quotedMessage: json['quoted_message'] == null
       ? null
@@ -53,17 +49,14 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
   pinnedAt: json['pinned_at'] == null ? null : DateTime.parse(json['pinned_at'] as String),
   pinExpires: json['pin_expires'] == null ? null : DateTime.parse(json['pin_expires'] as String),
   pinnedBy: json['pinned_by'] == null ? null : User.fromJson(json['pinned_by'] as Map<String, dynamic>),
-  poll: _$JsonConverterFromJson<Map<String, dynamic>, Poll>(json['poll'], const PollV1JsonConverter().fromJson),
+  poll: pollFromV1Json(json['poll'] as Map<String, dynamic>?),
   pollId: json['poll_id'] as String?,
   custom: json['extra_data'] as Map<String, dynamic>? ?? const {},
   i18n: (json['i18n'] as Map<String, dynamic>?)?.map((k, e) => MapEntry(k, e as String)),
   restrictedVisibility: (json['restricted_visibility'] as List<dynamic>?)?.map((e) => e as String).toList(),
   moderation: moderationFromV1Json(Message._moderationReadValue(json, 'moderation') as Map<String, dynamic>?),
   draft: json['draft'] == null ? null : Draft.fromJson(json['draft'] as Map<String, dynamic>),
-  reminder: _$JsonConverterFromJson<Map<String, dynamic>, MessageReminder>(
-    json['reminder'],
-    const MessageReminderV1JsonConverter().fromJson,
-  ),
+  reminder: messageReminderFromV1Json(json['reminder'] as Map<String, dynamic>?),
   channelRole: Message._channelRoleReadValue(json, 'channel_role') as String?,
   sharedLocation: _$JsonConverterFromJson<Map<String, dynamic>, Location>(
     json['shared_location'],
