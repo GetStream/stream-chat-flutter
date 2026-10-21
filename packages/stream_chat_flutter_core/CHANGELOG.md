@@ -15,6 +15,8 @@
 
 - A list controller sorted each loaded page with an unstable sort, so rows it called equal — members sharing a `created_at`, say — were reordered on every page append. They keep the order they arrived in now.
 
+- `StreamThreadListController` no longer reorders a thread when a reply it does not hold is deleted.
+
 ## Upcoming
 
 🐞 Fixed
