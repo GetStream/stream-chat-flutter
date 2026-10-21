@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:stream_core/stream_core.dart' show Failure, Result;
 
-/// A class that manages buffering typing events and call [onStartTyping] and
-/// [onStopTyping] accordingly in a timed manner.
+/// A buffer that turns key strokes into timed [onStartTyping] and
+/// [onStopTyping] calls.
 ///
 /// This class is used by [Channel] to manage typing events.
 class KeyStrokeHandler {
@@ -25,8 +25,8 @@ class KeyStrokeHandler {
 
   /// Called when a typing start event is due.
   ///
-  /// A failure it returns cancels the scheduled stop and completes [call] with
-  /// it.
+  /// A failure it returns cancels the stop its [call] scheduled and completes
+  /// that call with it, unless a later key stroke has taken over.
   final Future<Result<void>> Function([String? parentId]) onStartTyping;
 
   /// Called when a typing stop event is due.

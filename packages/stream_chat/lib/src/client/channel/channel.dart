@@ -1451,11 +1451,11 @@ class Channel {
 
   /// Sends an event of the given [type] to this channel's watchers.
   ///
-  /// A [parentId] ties the event to the thread of that message. The [custom]
-  /// data reaches the watchers alongside the event.
-  ///
   /// The [type] names the event, such as [EventType.typingStart] or a custom
   /// event's name.
+  ///
+  /// A [parentId] ties the event to the thread of that message, and the
+  /// [custom] data reaches the watchers alongside the event.
   ///
   /// Throws a [StateError] if this channel is not initialized.
   Future<Result<EventResponse>> sendEvent({
@@ -2523,7 +2523,10 @@ class Channel {
   /// Sends a typing start event, and a typing stop once the user stops typing.
   ///
   /// Call this on every key press. A [parentId] ties the events to the thread
-  /// of that message. Nothing is sent if typing events are disabled.
+  /// of that message.
+  ///
+  /// If typing events are disabled for this channel or by the current user's
+  /// privacy settings, nothing is sent and this returns a success.
   Future<Result<void>> keyStroke([String? parentId]) async {
     if (!_canSendTypingEvents) return const Result.success(null);
 

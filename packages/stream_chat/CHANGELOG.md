@@ -190,7 +190,7 @@
 - `Channel.startTyping`, `stopTyping`, `keyStroke` and `stopAIResponse` return a `Result<void>` instead of throwing.
 - `KeyStrokeHandler`'s `onStartTyping` and `onStopTyping` callbacks return a `Result<void>`, and calling the handler returns one instead of throwing.
 - `toJson` is removed from `Event`, `ChannelState`, `Read`, `Draft`, `DraftMessage` and `ChannelPushPreference`.
-- `StreamChatApi.channel`'s `sendEvent` is removed; use `StreamChatClient.sendEvent` instead.
+- `StreamChatApi.channel.sendEvent` is removed.
 
 🐞 Fixed
 

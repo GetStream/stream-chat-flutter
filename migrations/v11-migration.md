@@ -439,7 +439,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `Channel.sendEvent(Event)` → `Future<EmptyResponse>` | `sendEvent(type: …, parentId: …, custom: …)` → `Future<Result<EventResponse>>` | `retyped` | Returns a `Result` instead of throwing. Calling it before the channel is initialized still throws a `StateError`. The event's `type`, `parentId` and `extraData` become arguments; `extraData` is passed as `custom` |
 | `Channel.startTyping` / `stopTyping` / `keyStroke` → `Future<void>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing. Same arguments. A success when typing events are disabled and nothing is sent |
 | `Channel.stopAIResponse` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing. Calling it before the channel is initialized still throws a `StateError` |
-| `KeyStrokeHandler.onStartTyping` / `onStopTyping` → `Future<void> Function([String?])` | `Future<Result<void>> Function([String?])` | `retyped` | Return a failure rather than throwing; calling the handler returns `Future<Result<void>>` with the first failure |
+| `KeyStrokeHandler.onStartTyping` / `onStopTyping` → `Future<void> Function([String?])` | `Future<Result<void>> Function([String?])` | `retyped` | Return a failure rather than throwing; calling the handler returns `Future<Result<void>>` with the failure of its typing start or stop |
 | `Event.toJson`, `ChannelState.toJson`, `Read.toJson`, `Draft.toJson`, `DraftMessage.toJson`, `ChannelPushPreference.toJson` | — | `removed` | These models only decode; `fromJson` stays |
 | `StreamChatApi.channel.sendEvent` | `StreamChatClient.sendEvent` | `removed` | The endpoint moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
@@ -989,8 +989,7 @@ the same name for the rest.
 
 **`sendEvent` takes the event's parts instead of an `Event`.** On `StreamChatClient` and `Channel`, pass the
 event's `type`, the `parentId` of the thread it belongs to and its `custom` data as arguments. A field you set
-on the `Event` besides those, such as `aiState`, goes into `custom` under its JSON key; other users receive it
-as before.
+on the `Event` besides those goes into `custom` under its JSON key; other users receive it as before.
 
 ```dart
 // v10
@@ -1006,8 +1005,8 @@ around one still compiles, but no longer catches a failed call: read the returne
 typing events are disabled, the typing calls send nothing and return a success.
 
 **A custom `KeyStrokeHandler` callback returns a `Result`.** `onStartTyping` and `onStopTyping` are
-`Future<Result<void>> Function([String?])`, and calling the handler returns a `Result<void>` carrying the first
-failure.
+`Future<Result<void>> Function([String?])`, and calling the handler returns a `Result<void>` carrying the failure
+of its typing start or stop.
 
 **`Event`, `ChannelState`, `Read`, `Draft`, `DraftMessage` and `ChannelPushPreference` no longer encode to
 JSON.** They still decode with `fromJson`. Serialize the fields you need yourself if you stored them.

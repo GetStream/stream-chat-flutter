@@ -24,7 +24,7 @@ void main() {
     final defaultApi = MockDefaultApi();
     when(
       () => defaultApi.sendEvent(type: 'messaging', id: 'general', sendEventRequest: request),
-    ).thenAnswer((_) async => Result.success(_response('party_started')));
+    ).thenAnswer((_) async => Result.success(_response('party_started', duration: '4.21ms')));
     final client = _client(defaultApi);
 
     final res = await client.sendEvent(
@@ -39,23 +39,23 @@ void main() {
       },
     );
 
-    expect(res.getOrNull(), const EventResponse(duration: '0.01ms'));
+    expect(res.getOrNull(), const EventResponse(duration: '4.21ms'));
     verify(() => defaultApi.sendEvent(type: 'messaging', id: 'general', sendEventRequest: request)).called(1);
     verifyNoMoreInteractions(defaultApi);
   });
 
-  test('StreamChatClient.sendEvent sends only the type when nothing else is given', () async {
+  test('StreamChatClient.sendEvent sends only the type when nothing else is given and returns the response', () async {
     const request = api.SendEventRequest(event: api.EventRequest(type: EventType.typingStart));
 
     final defaultApi = MockDefaultApi();
     when(
       () => defaultApi.sendEvent(type: 'messaging', id: 'general', sendEventRequest: request),
-    ).thenAnswer((_) async => Result.success(_response(EventType.typingStart)));
+    ).thenAnswer((_) async => Result.success(_response(EventType.typingStart, duration: '0.53ms')));
     final client = _client(defaultApi);
 
     final res = await client.sendEvent('general', 'messaging', type: EventType.typingStart);
 
-    expect(res.getOrNull(), const EventResponse(duration: '0.01ms'));
+    expect(res.getOrNull(), const EventResponse(duration: '0.53ms'));
     verify(() => defaultApi.sendEvent(type: 'messaging', id: 'general', sendEventRequest: request)).called(1);
   });
 
@@ -77,8 +77,8 @@ void main() {
   });
 }
 
-api.EventResponse _response(String type) => api.EventResponse(
-  duration: '0.01ms',
+api.EventResponse _response(String type, {required String duration}) => api.EventResponse(
+  duration: duration,
   event: api.WSEvent.fromJson({
     'type': type,
     'created_at': '2024-06-01T10:00:00Z',

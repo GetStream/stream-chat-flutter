@@ -1966,14 +1966,13 @@ class StreamChatClient {
     Iterable<MessageDelivery> deliveries,
   ) => _channelsRepository.markChannelsDelivered(deliveries);
 
-  /// Sends an event of the given [type] to the watchers of the channel with the
-  /// id [channelId] and the type [channelType].
-  ///
-  /// A [parentId] ties the event to the thread of that message. The [custom]
-  /// data reaches the watchers alongside the event.
+  /// Sends an event of the given [type] to a channel's watchers.
   ///
   /// The [type] names the event, such as [EventType.typingStart] or a custom
   /// event's name.
+  ///
+  /// A [parentId] ties the event to the thread of that message, and the
+  /// [custom] data reaches the watchers alongside the event.
   Future<Result<EventResponse>> sendEvent(
     String channelId,
     String channelType, {

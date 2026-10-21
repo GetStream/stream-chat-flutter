@@ -177,8 +177,11 @@ class ChannelsRepository {
 
   /// Sends an event of the given [type] to the channel's watchers.
   ///
-  /// A [parentId] ties the event to the thread of that message. The [custom]
-  /// data reaches the watchers alongside the event.
+  /// The [type] names the event, such as [EventType.typingStart] or a custom
+  /// event's name.
+  ///
+  /// A [parentId] ties the event to the thread of that message, and the
+  /// [custom] data reaches the watchers alongside the event.
   Future<Result<EventResponse>> sendEvent(
     String channelId,
     String channelType, {

@@ -1492,7 +1492,7 @@ GROUPS = [
               WebSocket's move to v2. Exposing it later is additive; the mapper marks it with a TODO.
             - **The convenience calls answer `Result<void>`:** `startTyping`, `stopTyping`, `keyStroke` and
               `stopAIResponse`. The echo carries nothing the caller does not already have. With typing events
-              disabled they send nothing and return a success.
+              disabled the typing calls send nothing and return a success.
             - **`KeyStrokeHandler`'s callbacks and its call return `Result<void>`,** so `keyStroke` and the composer's
               `onError` still see a failed typing event. Changing the public types is a break, approved for this
               group.
