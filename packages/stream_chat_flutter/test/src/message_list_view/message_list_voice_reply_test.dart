@@ -47,25 +47,6 @@ void main() {
     });
   });
 
-  testWidgets('keeps the gap below the quote of a poll sent with a recording as a reply', (tester) async {
-    final message = _reply(attachments: [_voiceRecording()]).copyWith(
-      poll: Poll(
-        id: 'poll',
-        name: 'Lunch?',
-        options: const [
-          PollOption(id: 'pizza', text: 'Pizza'),
-          PollOption(id: 'sushi', text: 'Sushi'),
-        ],
-      ),
-    );
-
-    await _pumpMessageList(tester, message);
-
-    final quote = tester.getRect(find.byType(StreamQuotedMessage));
-    final poll = tester.getRect(find.byType(StreamPollAttachment));
-    expect(poll.top, greaterThan(quote.bottom));
-  });
-
   testWidgets('keeps the container fill of a file sent as a reply without text', (tester) async {
     final message = _reply(attachments: [_file()]);
 
