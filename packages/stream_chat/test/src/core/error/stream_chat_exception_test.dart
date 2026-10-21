@@ -174,5 +174,4 @@ void main() {
       expect(error.isMessageAlreadyExistsError, isFalse);
     });
   });
-
 }

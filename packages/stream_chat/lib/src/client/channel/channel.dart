@@ -660,7 +660,8 @@ class Channel {
         }
 
         final updatedMessage = message!.copyWith(attachments: newAttachments);
-        state?.updateMessage(updatedMessage);
+        // A message deleted mid-upload is left out of the state.
+        state?.updateMessage(updatedMessage, upsert: false);
         // updating original message for next iteration
         message = message!.merge(updatedMessage);
       }
@@ -836,6 +837,10 @@ class Channel {
 
       return response;
     } catch (e) {
+      // Cancelled by a deletion or by a newer call for the same message, which
+      // now owns its state.
+      if (e case StreamNetworkException(isCancelled: true)) rethrow;
+
       if (e is StreamChatException && e.isMessageAlreadyExistsError) {
         return SendMessageResponse()..message = _markMessageAsSent(message);
       }
@@ -946,6 +951,10 @@ class Channel {
 
       return response;
     } catch (e) {
+      // Cancelled by a newer call for the same message, which now owns its
+      // state.
+      if (e case StreamNetworkException(isCancelled: true)) rethrow;
+
       final failedMessage = message.copyWith(
         // Update the message state to failed.
         state: MessageState.updatingFailed(
@@ -1132,20 +1141,36 @@ class Channel {
   // have composed but not yet sent, or if a message failed to send and the user
   // wants to remove it from their local view.
   void _deleteLocalMessage(Message message) {
-    state?.deleteMessage(
-      hardDelete: true, // Local messages are always hard deleted.
-      message.copyWith(
-        type: MessageType.deleted,
-        localDeletedAt: DateTime.now(),
-        state: MessageState.hardDeleted,
-      ),
+    final deleted = message.copyWith(
+      type: MessageType.deleted,
+      localDeletedAt: DateTime.now(),
+      state: MessageState.hardDeleted,
     );
 
-    // Removing the attachments upload completer to stop the `sendMessage`
-    // waiting for attachments to complete.
+    state?.deleteMessage(deleted, hardDelete: true);
+
+    // Stopping the attachment uploads still running for the message, and the
+    // `sendMessage` or `updateMessage` waiting for them to complete.
+    for (final attachment in message.attachments) {
+      final cancelToken = _cancelableAttachmentUploadRequest[attachment.id];
+      if (cancelToken == null || cancelToken.isCancelled) continue;
+      cancelToken.cancel();
+    }
     final completer = _messageAttachmentsUploadCompleter.remove(message.id);
     completer?.completeError(
       const StreamNetworkException(message: 'Message deleted', isCancelled: true),
+    );
+
+    // Nothing else reports the deletion of a message that only exists locally.
+    _client.handleEvent(
+      Event(
+        type: EventType.messageDeleted,
+        cid: cid,
+        channelId: id,
+        channelType: type,
+        message: deleted,
+        hardDelete: true,
+      ),
     );
   }
 

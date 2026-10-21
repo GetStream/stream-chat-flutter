@@ -116,6 +116,8 @@
 - `connectGuestUser` no longer copies the user's online status, ban, unread counts, devices and push preferences into the created guest's `extraData`.
 - `Channel.custom` no longer returns the data the channel was created with once the channel's custom data is empty.
 
+- A message deleted while its attachments upload no longer comes back.
+
 - `queryChannels` no longer gives up watching the channels it loads when it is called before the connection is open. Whether they can be watched is read when the request is sent, which is after the query has waited for the connection.
 
 - A message that fails because its attachments did not upload now says which ones and what each reported, instead of `Failed to upload one or more attachments`.
@@ -129,6 +131,7 @@
 - Failed messages now retry on server errors. The retry policy is now explicit: retry a request that never reached the server, a 5xx, a 429 and a 408; never another 4xx, a cancelled request, broken credentials, or anything the server marked unrecoverable. Previously only failures without a parseable error body retried, so a 500 or a 429 did not.
 - `SystemEnvironment` is a different type with the same constructor and fields, so existing usage keeps working.
 - Most SDK logging moved off `info`. It now carries only client and connection lifecycle — client created and disposed, user set and disconnected, connection opening, established and closing — and per-operation, per-event and per-timer records are `debug` or `verbose`. Raising the priority to `info` to debug a problem no longer buries it under a health check every 20 seconds and a line per WebSocket frame.
+- Deleting a bounced or unsent message now emits a local `message.deleted` with `hardDelete: true`. The server never stored these messages.
 
 ✅ Added
 
