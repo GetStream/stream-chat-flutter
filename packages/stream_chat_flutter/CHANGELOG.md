@@ -36,6 +36,7 @@
 
 🐞 Fixed
 
+- Fixed a voice recording sent as a reply without text showing inside a filled container instead of directly on the message bubble.
 - Fixed `StreamMessageListView` dropping frames on each new message in busy channels.
 - Fixed `StreamMessageListView`'s floating date divider rebuilding after each new message when its date hasn't changed.
 - Fixed `StreamMessageComposer` polling the audio recorder ten times a second while no recording is in progress, including when voice recording is disabled.

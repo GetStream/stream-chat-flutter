@@ -147,9 +147,11 @@ bool _isGroupBoundary(Message message, Message? neighbor) {
 /// Returns the [StreamMessageContentKind] for [message] based on its text,
 /// attachments, poll, and quoted reply.
 ///
-/// The result is [StreamMessageContentKind.singleAttachment] when:
-/// - There is no text and no quoted reply
-/// - There is exactly one attachment or a poll
+/// The result is [StreamMessageContentKind.singleAttachment] when there is no
+/// text and either:
+/// - There is no quoted reply, and exactly one attachment, a poll, or a shared
+///   location
+/// - There is a quoted reply and a single voice recording
 ///
 /// The result is [StreamMessageContentKind.jumbomoji] when:
 /// - There is no quoted reply, no poll, and no attachments
@@ -161,9 +163,11 @@ StreamMessageContentKind resolveContentKind(Message message) {
   final hasSharedLocation = message.sharedLocation != null;
   final attachmentCount = message.attachments.length;
 
-  if (!hasText && !hasQuote && (hasPoll || hasSharedLocation || attachmentCount == 1)) {
-    return .singleAttachment;
-  }
+  final hasSingleContent = !hasText && (hasPoll || hasSharedLocation || attachmentCount == 1);
+  final isVoiceRecording = message.attachments.singleOrNull?.type == AttachmentType.voiceRecording;
+
+  if (hasSingleContent && !hasQuote) return .singleAttachment;
+  if (hasSingleContent && isVoiceRecording) return .singleAttachment;
 
   if (!hasQuote && attachmentCount == 0) {
     final emojiCount = core.StreamMessageText.emojiCount(message.text);

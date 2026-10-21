@@ -192,6 +192,7 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
     final crossAxisAlignment = core.StreamMessageLayout.crossAxisAlignmentOf(context);
+    final contentKind = core.StreamMessageLayout.contentKindOf(context);
 
     // Only a row that speaks its own composed label has already said what the
     // bubble contains; without one the bubble is all a reader has.
@@ -229,7 +230,11 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                     showTranslatedText: widget.showTranslatedText,
                     child: core.StreamColumn(
                       mainAxisSize: .min,
-                      spacing: spacing.xs,
+                      // A lone attachment brings its own padding.
+                      spacing: switch (contentKind) {
+                        .singleAttachment => 0,
+                        .standard || .jumbomoji => spacing.xs,
+                      },
                       crossAxisAlignment: .start,
                       children: [
                         if (widget.message.quotedMessage case final quotedMessage?)

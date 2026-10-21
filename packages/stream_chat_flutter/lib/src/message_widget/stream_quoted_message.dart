@@ -319,6 +319,7 @@ class _StreamQuotedMessageDefaults extends StreamQuotedMessageThemeData {
   final BuildContext _context;
 
   late final _alignment = StreamMessageLayout.messageAlignmentOf(_context);
+  late final _contentKind = StreamMessageLayout.contentKindOf(_context);
 
   late final StreamSpacing _spacing = _context.streamSpacing;
   late final StreamRadius _radius = _context.streamRadius;
@@ -355,7 +356,11 @@ class _StreamQuotedMessageDefaults extends StreamQuotedMessageThemeData {
   BorderSide get side => BorderSide.none;
 
   @override
-  EdgeInsetsGeometry get margin => EdgeInsets.symmetric(horizontal: _spacing.xs);
+  EdgeInsetsGeometry get margin => switch (_contentKind) {
+    // A lone attachment leaves the bubble unpadded, so the quote keeps its own top gap.
+    .singleAttachment => EdgeInsets.fromLTRB(_spacing.xs, _spacing.xs, _spacing.xs, 0),
+    .standard || .jumbomoji => EdgeInsets.symmetric(horizontal: _spacing.xs),
+  };
 
   @override
   EdgeInsetsGeometry get padding => EdgeInsetsDirectional.only(

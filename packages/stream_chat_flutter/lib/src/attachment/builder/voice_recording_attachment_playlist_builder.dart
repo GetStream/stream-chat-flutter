@@ -17,13 +17,10 @@ class VoiceRecordingAttachmentPlaylistBuilder extends StreamAttachmentWidgetBuil
     this.onAttachmentTap,
   });
 
-  /// The style of the voice recording attachment container.
-  ///
-  /// When null, a default style with a rounded rectangle shape and border
-  /// is used.
+  /// The style of the container around each voice recording.
   final StreamMessageAttachmentStyle? style;
 
-  /// The constraints to apply to the video attachment widget.
+  /// The constraints for each voice recording.
   final BoxConstraints? constraints;
 
   /// The callback to call when the attachment is tapped.
