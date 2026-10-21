@@ -6,29 +6,52 @@ import '../../fakes.dart';
 import '../../mocks.dart';
 
 void main() {
-  test('pinned messages of an updated channel state are sorted by pin time', () {
+  test('pinned messages seeded oldest pin first are sorted newest pin first', () {
+    final channel = _channel(
+      pinnedMessages: [
+        _pin('pinned-first', createdAtSecond: 1, pinnedAtSecond: 0),
+        _pin('pinned-second', createdAtSecond: 3, pinnedAtSecond: 4),
+      ],
+    );
+    addTearDown(channel.dispose);
+
+    expect(channel.state!.pinnedMessages.map((m) => m.id), ['pinned-second', 'pinned-first']);
+  });
+
+  test('pinned messages seeded newest pin first are kept as the same list', () {
+    final pinnedMessages = [
+      _pin('pinned-second', createdAtSecond: 3, pinnedAtSecond: 4),
+      _pin('pinned-first', createdAtSecond: 1, pinnedAtSecond: 0),
+    ];
+    final channel = _channel(pinnedMessages: pinnedMessages);
+    addTearDown(channel.dispose);
+
+    expect(channel.state!.pinnedMessages, same(pinnedMessages));
+  });
+
+  test('pinned messages of an updated channel state are sorted newest pin first', () {
     final channel = _channel();
     addTearDown(channel.dispose);
 
     channel.state!.updateChannelState(
       ChannelState(
         pinnedMessages: [
-          _pin('pinned-second', createdAtSecond: 1, pinnedAtSecond: 4),
-          _pin('pinned-first', createdAtSecond: 3, pinnedAtSecond: 0),
+          _pin('pinned-first', createdAtSecond: 1, pinnedAtSecond: 0),
+          _pin('pinned-second', createdAtSecond: 3, pinnedAtSecond: 4),
         ],
       ),
     );
 
-    expect(channel.state!.pinnedMessages.map((m) => m.id), ['pinned-first', 'pinned-second']);
+    expect(channel.state!.pinnedMessages.map((m) => m.id), ['pinned-second', 'pinned-first']);
   });
 
-  test('pinned messages already in pin time order are kept as the same list', () {
+  test('pinned messages of an updated channel state already newest pin first are kept as the same list', () {
     final channel = _channel();
     addTearDown(channel.dispose);
 
     final pinnedMessages = [
-      _pin('pinned-first', createdAtSecond: 3, pinnedAtSecond: 0),
-      _pin('pinned-second', createdAtSecond: 1, pinnedAtSecond: 4),
+      _pin('pinned-second', createdAtSecond: 3, pinnedAtSecond: 4),
+      _pin('pinned-first', createdAtSecond: 1, pinnedAtSecond: 0),
     ];
     channel.state!.updateChannelState(ChannelState(pinnedMessages: pinnedMessages));
 
@@ -38,29 +61,29 @@ void main() {
   test('a newly pinned message is placed by pin time, not creation time', () {
     final channel = _channel(
       pinnedMessages: [
-        _pin('pinned-first', createdAtSecond: 3, pinnedAtSecond: 0),
-        _pin('pinned-second', createdAtSecond: 1, pinnedAtSecond: 4),
+        _pin('pinned-second', createdAtSecond: 3, pinnedAtSecond: 4),
+        _pin('pinned-first', createdAtSecond: 1, pinnedAtSecond: 0),
       ],
     );
     addTearDown(channel.dispose);
 
-    channel.state!.updateMessage(_pin('pinned-last', createdAtSecond: 0, pinnedAtSecond: 8));
+    channel.state!.updateMessage(_pin('pinned-third', createdAtSecond: 2, pinnedAtSecond: 8));
 
-    expect(channel.state!.pinnedMessages.map((m) => m.id), ['pinned-first', 'pinned-second', 'pinned-last']);
+    expect(channel.state!.pinnedMessages.map((m) => m.id), ['pinned-third', 'pinned-second', 'pinned-first']);
   });
 
   test('updating an unpinned message leaves the pinned messages in pin time order', () {
     final channel = _channel(
       pinnedMessages: [
-        _pin('pinned-first', createdAtSecond: 3, pinnedAtSecond: 0),
-        _pin('pinned-second', createdAtSecond: 1, pinnedAtSecond: 4),
+        _pin('pinned-second', createdAtSecond: 3, pinnedAtSecond: 4),
+        _pin('pinned-first', createdAtSecond: 1, pinnedAtSecond: 0),
       ],
     );
     addTearDown(channel.dispose);
 
     channel.state!.updateMessage(Message(id: 'unpinned', text: 'unpinned', createdAt: _createdAt(59)));
 
-    expect(channel.state!.pinnedMessages.map((m) => m.id), ['pinned-first', 'pinned-second']);
+    expect(channel.state!.pinnedMessages.map((m) => m.id), ['pinned-second', 'pinned-first']);
   });
 }
 

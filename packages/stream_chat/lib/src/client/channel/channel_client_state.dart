@@ -27,9 +27,16 @@ class ChannelClientState {
       ),
     );
 
-    _channelStateController = BehaviorSubject.seeded(channelState);
+    final seededState = channelState.copyWith(
+      pinnedMessages: MessageMerging.replacePinnedMessages(
+        existing: null,
+        updated: channelState.pinnedMessages,
+      ),
+    );
+
+    _channelStateController = BehaviorSubject.seeded(seededState);
     // Update the persistence storage with the seeded channel state.
-    _debouncedUpdatePersistenceChannelState.call([channelState]);
+    _debouncedUpdatePersistenceChannelState.call([seededState]);
 
     final mutations = ChannelStateMutations(
       channel: _channel,
@@ -282,10 +289,10 @@ class ChannelClientState {
   Stream<List<Message>> get messagesStream =>
       channelStateStream.map((cs) => cs.messages ?? <Message>[]).distinct(const ListEquality().equals);
 
-  /// Channel pinned message list, oldest pin first.
+  /// Channel pinned message list, newest pin first.
   List<Message> get pinnedMessages => _channelState.pinnedMessages ?? <Message>[];
 
-  /// Channel pinned message list as a stream, oldest pin first.
+  /// Channel pinned message list as a stream, newest pin first.
   Stream<List<Message>> get pinnedMessagesStream =>
       channelStateStream.map((cs) => cs.pinnedMessages ?? <Message>[]).distinct(const ListEquality().equals);
 

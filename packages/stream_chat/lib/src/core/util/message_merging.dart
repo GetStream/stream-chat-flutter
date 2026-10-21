@@ -28,7 +28,7 @@ class MessageMerging {
   /// results.
   static int sortByCreatedAt(Message a, Message b) => a.createdAt.compareTo(b.createdAt);
 
-  /// Orders messages by [Message.pinnedAt], oldest pin first, the order of the
+  /// Orders messages by [Message.pinnedAt], newest pin first, the order of the
   /// pinned merge results.
   ///
   /// Messages without a pin date sort last.
@@ -40,7 +40,7 @@ class MessageMerging {
     if (aPinnedAt == null) return 1;
     if (bPinnedAt == null) return -1;
 
-    return aPinnedAt.compareTo(bPinnedAt);
+    return bPinnedAt.compareTo(aPinnedAt);
   }
 
   /// Merges the live locations carried by [toMerge] into [existing].

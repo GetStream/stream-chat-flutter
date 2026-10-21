@@ -27,11 +27,11 @@ void main() {
   }) async {
     final channels = [ChannelModel(cid: cid)];
     final users = List.generate(count, (index) => User(id: 'testUserId$index'));
-    // Strictly monotonic `createdAt` and `pinnedAt` per message so SQL-side
-    // pagination filters (`WHERE pinnedAt < cutoff`, `ORDER BY pinnedAt ASC`)
-    // can't be confused by ties. Drift stores `DateTime` as integer Unix
-    // seconds by default, so the offset must be at least 1 second per row —
-    // otherwise sub-second offsets all round-trip onto the same second.
+    // Strictly monotonic `createdAt` per message so SQL-side pagination
+    // filters (`WHERE createdAt < cutoff`, `ORDER BY createdAt ASC`) can't be
+    // confused by ties. Drift stores `DateTime` as integer Unix seconds by
+    // default, so the offset must be at least 1 second per row — otherwise
+    // sub-second offsets all round-trip onto the same second.
     final baseTime = DateTime.now();
     final messages = List.generate(
       count,
@@ -47,7 +47,7 @@ void main() {
         extraData: const {'extra_test_field': 'extraTestData'},
         text: 'Dummy text #$index',
         pinned: math.Random().nextBool(),
-        pinnedAt: baseTime.add(Duration(seconds: index)),
+        pinnedAt: DateTime.now(),
         pinnedBy: User(id: 'testUserId$index'),
         reactionGroups: {
           'testType': ReactionGroup(count: 3, sumScores: 10),
@@ -70,7 +70,7 @@ void main() {
         text: 'Dummy text #$index',
         quotedMessageId: messages[index].id,
         pinned: math.Random().nextBool(),
-        pinnedAt: baseTime.add(Duration(seconds: index)),
+        pinnedAt: DateTime.now(),
         pinnedBy: User(id: 'testUserId$index'),
       ),
     );
@@ -89,7 +89,7 @@ void main() {
         extraData: const {'extra_test_field': 'extraTestData'},
         text: 'Dummy text #$index',
         pinned: math.Random().nextBool(),
-        pinnedAt: baseTime.add(Duration(seconds: index)),
+        pinnedAt: DateTime.now(),
         pinnedBy: User(id: 'testUserId$index'),
       ),
     );
@@ -523,69 +523,12 @@ void main() {
       expect(fetchedMessages.last.id, 'testMessageId${cid}14');
     });
 
-    test('returns messages oldest pin first, not by creation time', () async {
-      final users = [User(id: 'pinUser')];
-      await database.userDao.updateUsers(users);
-      await database.channelDao.updateChannels([ChannelModel(cid: cid)]);
-
-      final base = DateTime.utc(2026, 7, 16, 8, 30);
-      Message m(String id, {required int createdAtSecond, required int pinnedAtSecond}) => Message(
-        id: id,
-        user: users.first,
-        createdAt: base.add(Duration(seconds: createdAtSecond)),
-        text: id,
-        pinned: true,
-        pinnedAt: base.add(Duration(days: 1, seconds: pinnedAtSecond)),
-      );
-
-      await pinnedMessageDao.bulkUpdateMessages({
-        cid: [
-          m('created-first', createdAtSecond: 0, pinnedAtSecond: 2),
-          m('created-second', createdAtSecond: 1, pinnedAtSecond: 0),
-          m('created-third', createdAtSecond: 2, pinnedAtSecond: 1),
-        ],
-      });
-
-      final fetched = await pinnedMessageDao.getMessagesByCid(cid);
-      expect(fetched.map((m) => m.id), ['created-second', 'created-third', 'created-first']);
-    });
-
-    test('lessThan returns the messages pinned before the cursor', () async {
-      final users = [User(id: 'pinUser')];
-      await database.userDao.updateUsers(users);
-      await database.channelDao.updateChannels([ChannelModel(cid: cid)]);
-
-      final base = DateTime.utc(2026, 7, 16, 8, 30);
-      Message m(String id, {required int createdAtSecond, required int pinnedAtSecond}) => Message(
-        id: id,
-        user: users.first,
-        createdAt: base.add(Duration(seconds: createdAtSecond)),
-        text: id,
-        pinned: true,
-        pinnedAt: base.add(Duration(days: 1, seconds: pinnedAtSecond)),
-      );
-
-      await pinnedMessageDao.bulkUpdateMessages({
-        cid: [
-          m('created-first', createdAtSecond: 0, pinnedAtSecond: 2),
-          m('created-second', createdAtSecond: 1, pinnedAtSecond: 0),
-          m('created-third', createdAtSecond: 2, pinnedAtSecond: 1),
-        ],
-      });
-
-      final fetched = await pinnedMessageDao.getMessagesByCid(
-        cid,
-        messagePagination: const PaginationParams(limit: 100, lessThan: 'created-first'),
-      );
-      expect(fetched.map((m) => m.id), ['created-second', 'created-third']);
-    });
-
-    test('cursor with tied pinnedAt does not skip or duplicate siblings', () async {
-      // Three messages share an identical `pinnedAt`. The SQL ORDER BY uses
-      // the `(pinnedAt, id)` tuple, so within the trio the relative order is
+    test('cursor with tied createdAt does not skip or duplicate siblings', () async {
+      // Three messages share an identical `createdAt`. The SQL ORDER BY uses
+      // the `(createdAt, id)` tuple, so within the trio the relative order is
       // by id (lexicographic). A cursor at `msg_tieB` must split the trio
       // cleanly: `msg_tieA` lands on the "before" side, `msg_tieC` on the
-      // "after" side. A `pinnedAt`-only WHERE predicate would collapse all
+      // "after" side. A `createdAt`-only WHERE predicate would collapse all
       // three into the cursor's bucket and drop or keep them together.
       final users = [User(id: 'tieUser')];
       await database.userDao.updateUsers(users);
@@ -601,8 +544,6 @@ void main() {
         createdAt: t,
         updatedAt: t,
         text: id,
-        pinned: true,
-        pinnedAt: t,
       );
 
       await pinnedMessageDao.bulkUpdateMessages({

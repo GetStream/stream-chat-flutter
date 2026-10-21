@@ -82,8 +82,7 @@ abstract class ChatPersistenceClient {
     PaginationParams? messagePagination,
   });
 
-  /// Returns the stored pinned messages of the channel [cid], oldest pin
-  /// first.
+  /// Get stored pinned [Message]s by providing channel [cid]
   Future<List<Message>> getPinnedMessagesByCid(
     String cid, {
     PaginationParams? messagePagination,
