@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:stream_core/stream_core.dart';
 
 import '../models/location.dart';
@@ -23,9 +24,24 @@ class MessageMerging {
   /// ignoring the locally-known message.
   static Message replaceUpdate(Message _, Message updated) => updated;
 
-  /// Orders messages by [Message.createdAt], the order every merge result is
-  /// returned in.
+  /// Orders messages by [Message.createdAt], the default order of the merge
+  /// results.
   static int sortByCreatedAt(Message a, Message b) => a.createdAt.compareTo(b.createdAt);
+
+  /// Orders messages by [Message.pinnedAt], newest pin first, the order of the
+  /// pinned merge results.
+  ///
+  /// Messages without a pin date sort last.
+  static int sortByPinnedAt(Message a, Message b) {
+    final aPinnedAt = a.pinnedAt;
+    final bPinnedAt = b.pinnedAt;
+
+    if (aPinnedAt == null && bPinnedAt == null) return 0;
+    if (aPinnedAt == null) return 1;
+    if (bPinnedAt == null) return -1;
+
+    return bPinnedAt.compareTo(aPinnedAt);
+  }
 
   /// Merges the live locations carried by [toMerge] into [existing].
   ///
@@ -62,6 +78,8 @@ class MessageMerging {
 
   /// Merges [toMerge] into the [existing] pinned messages, keeping only
   /// messages that are still valid pins (see [MessagePredicates.hasValidPin]).
+  ///
+  /// The result is ordered by [sortByPinnedAt].
   static Iterable<Message> mergePinnedMessages({
     required Iterable<Message> existing,
     required Iterable<Message> toMerge,
@@ -71,12 +89,24 @@ class MessageMerging {
       existing: existing,
       toMerge: toMerge,
       update: update,
+      compare: sortByPinnedAt,
     ).where((it) => it.hasValidPin);
+  }
+
+  /// Returns [pinnedMessages] ordered by [sortByPinnedAt].
+  ///
+  /// Returns [pinnedMessages] unchanged (same reference) when it is null or
+  /// already in pin order.
+  static List<Message>? sortPinnedMessages(List<Message>? pinnedMessages) {
+    if (pinnedMessages == null) return null;
+    if (pinnedMessages.isSorted(sortByPinnedAt)) return pinnedMessages;
+    return pinnedMessages.sortedWith(sortByPinnedAt);
   }
 
   /// Merges [toMerge] into [existing].
   ///
-  /// The result is ordered by [Message.createdAt]. Returns [existing]
+  /// The result is ordered by [compare], which [existing] must already be
+  /// sorted by; defaults to [sortByCreatedAt]. Returns [existing]
   /// unchanged (same reference) when [toMerge] is empty, or when [upsert] is
   /// `false` and no id in [toMerge] is present in [existing].
   ///
@@ -88,6 +118,7 @@ class MessageMerging {
     required Iterable<Message> existing,
     required Iterable<Message> toMerge,
     Message Function(Message original, Message updated) update = mergeUpdate,
+    Comparator<Message> compare = sortByCreatedAt,
     bool upsert = true,
   }) {
     if (toMerge.isEmpty) return existing;
@@ -112,7 +143,7 @@ class MessageMerging {
         oldIndex,
         resolved,
         update: update,
-        compare: sortByCreatedAt,
+        compare: compare,
       );
 
       // Non-delete updates can't change what embedded quotedMessage copies
@@ -139,7 +170,7 @@ class MessageMerging {
       toMergeList,
       key: (message) => message.id,
       update: update,
-      compare: sortByCreatedAt,
+      compare: compare,
     );
 
     // Refresh embedded `quotedMessage` refs only for messages quoting an
