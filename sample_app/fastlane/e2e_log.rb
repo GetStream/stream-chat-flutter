@@ -53,6 +53,11 @@ module E2ELog
       accounted - results(log).map(&:last).uniq
     end
 
+    # The tests that ran far enough to report a result, whatever its status.
+    def reported_test_names(log)
+      results(log).map(&:last).uniq
+    end
+
     # A leaked async error fails the run but is NOT attributable to a test.
     def post_completion_failure?(log)
       read(log).include?(POST_COMPLETION)
@@ -68,10 +73,11 @@ module E2ELog
     # A single Dart-regex alternation matching any of `names`, for one
     # `flutter test --name`. Multiple `--name` flags are ANDed together, so an
     # alternation is the only way to OR them; each name is escaped so the test
-    # descriptions match literally.
+    # descriptions match literally, and anchored so a name does not also match the
+    # longer tests that contain it.
     def name_alternation(names)
       escaped = names.map { |name| name.gsub(%r{[.*+?^${}()|\[\]\\/]}) { |char| "\\#{char}" } }
-      "(#{escaped.join('|')})"
+      "^(#{escaped.join('|')})$"
     end
 
     private
