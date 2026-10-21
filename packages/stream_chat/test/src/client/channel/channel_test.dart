@@ -981,6 +981,42 @@ void main() {
         );
       });
 
+      test('superseded by a newer send leaves the newer one sending', () async {
+        final message = Message(
+          id: 'test-message-id',
+          attachments: [
+            Attachment(
+              id: 'test-attachment-id',
+              type: AttachmentType.image,
+              file: AttachmentFile(size: 100, path: 'test-file-path'),
+            ),
+          ],
+        );
+
+        final upload = Completer<Result<UploadedFile>>();
+        when(
+          () => client.sendImage(
+            any(),
+            channelId,
+            channelType,
+            onSendProgress: any(named: 'onSendProgress'),
+            cancelToken: any(named: 'cancelToken'),
+            extraData: any(named: 'extraData'),
+          ),
+        ).thenAnswer((_) => upload.future);
+        addTearDown(
+          () => upload.complete(const Result<UploadedFile>.success(UploadedFile(fileUrl: 'url'))),
+        );
+
+        final first = channel.sendMessage(message).then<void>((_) {}, onError: (_) {});
+        await pumpEventQueue();
+
+        channel.sendMessage(message).ignore();
+        await first;
+
+        expect(channel.state!.messages.single.state, MessageState.sending);
+      });
+
       test(
         'should not send empty message when all attachments are cancelled',
         () async {
@@ -2045,6 +2081,43 @@ void main() {
             isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
           ),
         );
+      });
+
+      test('superseded by a newer update leaves the newer one updating', () async {
+        final message = Message(
+          id: 'test-message-id',
+          state: MessageState.sent,
+          attachments: [
+            Attachment(
+              id: 'test-attachment-id',
+              type: AttachmentType.image,
+              file: AttachmentFile(size: 100, path: 'test-file-path'),
+            ),
+          ],
+        );
+
+        final upload = Completer<Result<UploadedFile>>();
+        when(
+          () => client.sendImage(
+            any(),
+            channelId,
+            channelType,
+            onSendProgress: any(named: 'onSendProgress'),
+            cancelToken: any(named: 'cancelToken'),
+            extraData: any(named: 'extraData'),
+          ),
+        ).thenAnswer((_) => upload.future);
+        addTearDown(
+          () => upload.complete(const Result<UploadedFile>.success(UploadedFile(fileUrl: 'url'))),
+        );
+
+        final first = channel.updateMessage(message).then<void>((_) {}, onError: (_) {});
+        await pumpEventQueue();
+
+        channel.updateMessage(message).ignore();
+        await first;
+
+        expect(channel.state!.messages.single.state, MessageState.updating);
       });
     });
 
@@ -6014,6 +6087,103 @@ void main() {
         ).called(1);
       },
     );
+
+    test('.sendMessage stops typing when the user is typing', () async {
+      // The group shares one client mock.
+      addTearDown(() => clearInteractions(client));
+
+      final channelState = _generateChannelState(
+        channelId,
+        channelType,
+        ownCapabilities: [ChannelCapability.typingEvents, ChannelCapability.sendMessage],
+      );
+
+      final channel = Channel.fromState(client, channelState);
+      addTearDown(channel.dispose);
+
+      final startTypingEvent = Event(type: EventType.typingStart);
+      final stopTypingEvent = Event(type: EventType.typingStop);
+      final message = Message(id: 'test-message-id', text: 'Hello world!');
+
+      when(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(startTypingEvent))),
+      ).thenAnswer((_) async => EmptyResponse());
+      when(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+      ).thenAnswer((_) async => EmptyResponse());
+      when(
+        () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
+      ).thenAnswer((_) async => SendMessageResponse()..message = message);
+
+      channel.keyStroke().ignore();
+      await channel.sendMessage(message);
+
+      verify(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+      ).called(1);
+    });
+
+    test('.updateMessage stops typing when the user is typing', () async {
+      // The group shares one client mock.
+      addTearDown(() => clearInteractions(client));
+
+      final channelState = _generateChannelState(
+        channelId,
+        channelType,
+        ownCapabilities: [ChannelCapability.typingEvents, ChannelCapability.updateOwnMessage],
+      );
+
+      final channel = Channel.fromState(client, channelState);
+      addTearDown(channel.dispose);
+
+      final startTypingEvent = Event(type: EventType.typingStart);
+      final stopTypingEvent = Event(type: EventType.typingStop);
+      final message = Message(id: 'test-message-id', text: 'Edited');
+
+      when(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(startTypingEvent))),
+      ).thenAnswer((_) async => EmptyResponse());
+      when(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+      ).thenAnswer((_) async => EmptyResponse());
+      when(
+        () => client.updateMessage(any(that: isSameMessageAs(message))),
+      ).thenAnswer((_) async => UpdateMessageResponse()..message = message);
+
+      channel.keyStroke().ignore();
+      await channel.updateMessage(message);
+
+      verify(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+      ).called(1);
+    });
+
+    test('.sendMessage does not send a typing stop when the user is not typing', () async {
+      // The group shares one client mock.
+      addTearDown(() => clearInteractions(client));
+
+      final channelState = _generateChannelState(
+        channelId,
+        channelType,
+        ownCapabilities: [ChannelCapability.typingEvents, ChannelCapability.sendMessage],
+      );
+
+      final channel = Channel.fromState(client, channelState);
+      addTearDown(channel.dispose);
+
+      final stopTypingEvent = Event(type: EventType.typingStop);
+      final message = Message(id: 'test-message-id', text: 'Hello world!');
+
+      when(
+        () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
+      ).thenAnswer((_) async => SendMessageResponse()..message = message);
+
+      await channel.sendMessage(message);
+
+      verifyNever(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+      );
+    });
 
     test(
       ".startTyping should return if we don't have the capability",

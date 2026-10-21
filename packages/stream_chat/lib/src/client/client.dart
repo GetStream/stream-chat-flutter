@@ -1622,8 +1622,9 @@ class StreamChatClient {
     messageId: messageId,
   );
 
-  /// Marks the message with [messageId] and every later one in a channel as
-  /// unread for the current user.
+  /// Marks a channel unread from [messageId] for the current user.
+  ///
+  /// The message with [messageId] and every later one are marked as unread.
   ///
   /// The message must be one of the channel's latest 100 messages; an older one
   /// returns a failure.
@@ -1637,8 +1638,10 @@ class StreamChatClient {
     messageId: messageId,
   );
 
-  /// Marks the messages of a channel created after [timestamp] as unread for
-  /// the current user.
+  /// Marks a channel unread after [timestamp] for the current user.
+  ///
+  /// The first message after [timestamp] must exist and be one of the
+  /// channel's latest 100 messages; otherwise this returns a failure.
   Future<Result<void>> markChannelUnreadByTimestamp(
     String channelId,
     String channelType,
@@ -1649,8 +1652,9 @@ class StreamChatClient {
     messageTimestamp: timestamp,
   );
 
-  /// Marks the thread started by the message with [threadId] as read for the
-  /// current user.
+  /// Marks the thread of [threadId] as read for the current user.
+  ///
+  /// The [threadId] is the id of the thread's parent message.
   Future<Result<MarkReadResponse>> markThreadRead(
     String channelId,
     String channelType,
@@ -1661,8 +1665,9 @@ class StreamChatClient {
     threadId: threadId,
   );
 
-  /// Marks the thread started by the message with [threadId] as unread for the
-  /// current user.
+  /// Marks the thread of [threadId] as unread for the current user.
+  ///
+  /// The [threadId] is the id of the thread's parent message.
   Future<Result<void>> markThreadUnread(
     String channelId,
     String channelType,
@@ -1918,7 +1923,8 @@ class StreamChatClient {
   /// await client.markChannelsDelivered([receipt]);
   /// ```
   ///
-  /// Takes up to 100 receipts per call; more return a failure.
+  /// Takes between 1 and 100 receipts per call; any other number returns a
+  /// failure.
   Future<Result<MarkDeliveredResponse>> markChannelsDelivered(
     Iterable<MessageDelivery> deliveries,
   ) => _channelsRepository.markChannelsDelivered(deliveries);
@@ -2872,15 +2878,18 @@ class ClientState {
     _currentUserController.safeAdd(user);
   }
 
-  /// Update all the [users] with the provided [userList]
+  /// Updates [users] with the users in [userList] that are new or changed.
+  ///
+  /// When a user is listed more than once, the last copy is kept.
   @internal
   void updateUsers(List<User?> userList) {
-    final newUsers = {
-      ...users,
+    final changedUsers = {
       for (final user in userList)
         if (user != null) user.id: user,
-    };
-    _usersController.safeAdd(newUsers);
+    }..removeWhere((id, user) => users[id] == user);
+
+    if (changedUsers.isEmpty) return;
+    _usersController.safeAdd({...users, ...changedUsers});
   }
 
   /// Update the passed [user] in state

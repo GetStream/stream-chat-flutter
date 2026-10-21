@@ -564,9 +564,9 @@ class MessageListUnreadController {
   /// Handles a tap on the pill's dismiss affordance.
   Future<void> onPillDismissTapped() async {
     _hasSeenFirstUnread.value = true;
-    // Dismissing is a local decision; if the request behind it fails there
-    // is nothing to show the user, and letting it escape here would surface
-    // as an unhandled async error instead.
+    // Dismissing is a local decision, so a failed request is not shown. Only
+    // the StateError for an uninitialized channel can still escape, and
+    // ignoring it keeps it from surfacing as an unhandled async error.
     markAsRead().ignore();
   }
 

@@ -64,6 +64,39 @@ void main() {
       verify(() => onStartTyping(any())).called(2);
     });
 
+    test('moving from the channel to a thread stops typing in the channel and starts it in the thread', () {
+      keyStrokeHandler
+        ..call()
+        ..call('parent-id');
+
+      verifyInOrder([
+        () => onStartTyping(null),
+        () => onStopTyping(null),
+        () => onStartTyping('parent-id'),
+      ]);
+    });
+
+    test('moving from a thread to the channel stops typing in the thread and starts it in the channel', () {
+      keyStrokeHandler
+        ..call('parent-id')
+        ..call();
+
+      verifyInOrder([
+        () => onStartTyping('parent-id'),
+        () => onStopTyping('parent-id'),
+        () => onStartTyping(null),
+      ]);
+    });
+
+    test('typing again in the same context does not restart typing', () {
+      keyStrokeHandler
+        ..call('parent-id')
+        ..call('parent-id');
+
+      verify(() => onStartTyping('parent-id')).called(1);
+      verifyNever(() => onStopTyping(any()));
+    });
+
     test('should call onStopTyping after startTypingEventTimeout', () async {
       keyStrokeHandler.call();
       await Future.delayed(const Duration(seconds: startTypingEventTimeout));

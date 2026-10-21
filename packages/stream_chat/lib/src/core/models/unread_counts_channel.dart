@@ -4,7 +4,9 @@ part 'unread_counts_channel.freezed.dart';
 
 /// The current user's unread count in one channel.
 ///
-/// Listed in [GetUnreadCountResponse.channels].
+/// See also:
+///
+///  * [GetUnreadCountResponse.channels], which lists them.
 @freezed
 class UnreadCountsChannel with _$UnreadCountsChannel {
   /// Creates a new [UnreadCountsChannel].
@@ -14,8 +16,7 @@ class UnreadCountsChannel with _$UnreadCountsChannel {
     required this.lastRead,
   });
 
-  /// The channel's cid, in the form `type:id` (for example
-  /// `messaging:general`).
+  /// The channel's cid, such as `messaging:general`.
   @override
   final String channelId;
 

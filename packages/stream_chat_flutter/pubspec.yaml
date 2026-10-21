@@ -26,10 +26,10 @@ dependencies:
   chewie: ^1.13.1
   clock: ^1.1.2
   collection: ^1.19.1
-  desktop_drop: ^0.7.1
+  desktop_drop: ">=0.8.4 <0.9.0"
   diacritic: ^0.1.6
   dio: ^5.11.0
-  equatable: ^2.0.8
+  equatable: ">=2.0.8 <4.0.0"
   ezanimation: ^0.6.0
   file_picker: '>=12.0.0 <14.0.0'
   file_selector: ^1.1.0
@@ -45,27 +45,22 @@ dependencies:
   intl: ^0.20.2
   jiffy: ^6.4.5
   just_audio: ^0.10.5
-  lottie: ^3.3.3
   markdown: ^7.3.0
   meta: ^1.9.1
   path_provider: ^2.1.5
-  photo_manager: ^3.9.0
+  photo_manager: ">=3.11.0 <4.0.0"
   photo_view: ^0.15.0
   rate_limiter: ^1.1.0
-  record: ^6.2.0
+  record: ">=6.2.0 <8.0.0"
   rxdart: ^0.28.0
   share_plus: ">=12.0.2 <14.0.0"
   stream_chat_flutter_core: ^10.5.0
   stream_core_flutter:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
-      ref: 1546087d1a3dac29e824853fb2a9f05dcd2d41e6
+      ref: bd6e2546fa25e2b605cefef4494e0be056d8a0dc
       path: packages/stream_core_flutter
-  stream_thumbnail:
-    git:
-      url: https://github.com/GetStream/stream-core-flutter.git
-      ref: 2aea1413997af886ee951921d71e6b8cb8c5cfbb
-      path: packages/stream_thumbnail
+  stream_thumbnail: ^0.2.0
   svg_icon_widget: ^0.0.1
   synchronized: ^3.4.0
   theme_extensions_builder_annotation: ^7.1.0
@@ -88,7 +83,6 @@ dev_dependencies:
 
 flutter:
   assets:
-    - lib/assets/animations/
     - lib/assets/icons/
     - lib/assets/icons/colored/
     - lib/assets/images/
