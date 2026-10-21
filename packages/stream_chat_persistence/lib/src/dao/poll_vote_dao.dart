@@ -23,7 +23,7 @@ class PollVoteDao extends DatabaseAccessor<DriftChatDatabase> with _$PollVoteDao
               leftOuterJoin(users, pollVotes.userId.equalsExp(users.id)),
             ])
             ..where(pollVotes.pollId.equals(pollId))
-            ..orderBy([OrderingTerm.asc(pollVotes.createdAt)]))
+            ..orderBy([OrderingTerm.asc(pollVotes.createdAt.julianday)]))
           .map((rows) {
             final userEntity = rows.readTableOrNull(users);
             final pollVoteEntity = rows.readTable(pollVotes);
@@ -46,7 +46,7 @@ class PollVoteDao extends DatabaseAccessor<DriftChatDatabase> with _$PollVoteDao
                   leftOuterJoin(users, pollVotes.userId.equalsExp(users.id)),
                 ])
                 ..where(where)
-                ..orderBy([OrderingTerm.asc(pollVotes.createdAt)]))
+                ..orderBy([OrderingTerm.asc(pollVotes.createdAt.julianday)]))
               .map((row) {
                 final userEntity = row.readTableOrNull(users);
                 final pollVoteEntity = row.readTable(pollVotes);
