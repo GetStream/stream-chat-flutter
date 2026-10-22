@@ -3,6 +3,7 @@
 🐞 Fixed
 
 - Fixed a voice recording sent as a reply without text showing inside a filled container instead of directly on the message bubble.
+- Fixed the poll creator showing the reorder handle and remove button when there is only one option.
 
 ## 10.6.0
 

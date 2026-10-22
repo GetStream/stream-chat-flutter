@@ -59,6 +59,7 @@ class PollOptionListItem extends StatelessWidget {
     required PollOptionItem this.option,
     this.hintText,
     this.focusNode,
+    this.showControls = true,
     this.onRemove,
     this.onChanged,
   }) : onAddOptionPressed = null,
@@ -71,6 +72,7 @@ class PollOptionListItem extends StatelessWidget {
     VoidCallback? onPressed,
   }) : option = null,
        focusNode = null,
+       showControls = false,
        onRemove = null,
        onChanged = null,
        onAddOptionPressed = onPressed,
@@ -88,6 +90,9 @@ class PollOptionListItem extends StatelessWidget {
 
   /// The focus node for the text field.
   final FocusNode? focusNode;
+
+  /// Whether to show the reorder handle and the remove button.
+  final bool showControls;
 
   /// Callback called when the poll option item is removed.
   final ValueSetter<PollOptionItem>? onRemove;
@@ -122,24 +127,28 @@ class PollOptionListItem extends StatelessWidget {
       textCapitalization: TextCapitalization.sentences,
       helperText: option!.error,
       helperState: option!.error != null ? StreamHelperState.error : null,
-      leading: MouseRegion(
-        cursor: SystemMouseCursors.grab,
-        child: Icon(icons.reorder),
-      ),
-      trailing: StreamButton.icon(
-        type: .ghost,
-        style: .secondary,
-        icon: Icon(icons.minusCircle),
-        tooltip: a11y.removePollOptionTooltip(optionText: option!.text),
-        themeStyle: .from(
-          fixedSize: const .square(20),
-          tapTargetSize: .shrinkWrap,
-        ),
-        onPressed: switch (onRemove) {
-          final onRemove? => () => onRemove.call(option!),
-          _ => null,
-        },
-      ),
+      leading: showControls
+          ? MouseRegion(
+              cursor: SystemMouseCursors.grab,
+              child: Icon(icons.reorder),
+            )
+          : null,
+      trailing: showControls
+          ? StreamButton.icon(
+              type: .ghost,
+              style: .secondary,
+              icon: Icon(icons.minusCircle),
+              tooltip: a11y.removePollOptionTooltip(optionText: option!.text),
+              themeStyle: .from(
+                fixedSize: const .square(20),
+                tapTargetSize: .shrinkWrap,
+              ),
+              onPressed: switch (onRemove) {
+                final onRemove? => () => onRemove.call(option!),
+                _ => null,
+              },
+            )
+          : null,
       onChanged: switch (onChanged) {
         final onChanged? => (text) {
           final updated = option!.copyWith(text: text);
@@ -492,6 +501,7 @@ class _PollOptionReorderableListViewState extends State<PollOptionReorderableLis
                   option: option,
                   hintText: widget.itemHintText,
                   focusNode: _focusNodes[option.id],
+                  showControls: _options.length > 1,
                   onRemove: _onOptionRemoved,
                   onChanged: _onOptionChanged,
                 );
