@@ -426,6 +426,7 @@ class _StreamThreadListTileThemeDefaults extends StreamThreadListTileThemeData {
 
   @override
   StreamMessagePreviewTextThemeData get messagePreviewTextTheme => StreamMessagePreviewTextThemeData(
+    senderPrefixStyle: TextStyle(color: _colorScheme.textSecondary),
     deletedContentStyle: TextStyle(color: _colorScheme.textSecondary),
   );
 

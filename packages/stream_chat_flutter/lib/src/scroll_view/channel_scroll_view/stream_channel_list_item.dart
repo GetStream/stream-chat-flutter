@@ -456,6 +456,7 @@ class _StreamChannelListItemThemeDefaults extends StreamChannelListItemThemeData
 
   @override
   StreamMessagePreviewTextThemeData get messagePreviewTextTheme => StreamMessagePreviewTextThemeData(
+    senderPrefixStyle: TextStyle(color: _colorScheme.textTertiary),
     deletedContentStyle: TextStyle(color: _colorScheme.textTertiary),
   );
 

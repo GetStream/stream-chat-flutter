@@ -790,7 +790,7 @@ void main() {
   });
 
   group('Channel context', () {
-    testWidgets('group channel prepends bold "You:" for current user', (tester) async {
+    testWidgets('group channel prepends a semibold "You:" for current user', (tester) async {
       final channel = ChannelModel(
         id: 'test-channel',
         type: 'messaging',
@@ -808,7 +808,10 @@ void main() {
 
       final span = _getPreviewSpan(tester);
       final youSpan = _findTextSpans(span).firstWhere((s) => s.text == 'You: ');
-      expect(youSpan.style?.fontWeight, FontWeight.bold);
+      expect(
+        youSpan.style?.fontWeight,
+        tester.element(find.byType(StreamMessagePreviewText)).streamTypography.fontWeight.semibold,
+      );
     });
 
     testWidgets('group channel prepends the sender name in the themed sender style', (tester) async {
@@ -840,7 +843,7 @@ void main() {
       expect(nameSpan.style?.fontWeight, FontWeight.w500);
     });
 
-    testWidgets('group channel keeps the bold sender name under a color-only sender style', (tester) async {
+    testWidgets('group channel keeps the semibold sender name under a color-only sender style', (tester) async {
       final channel = ChannelModel(
         id: 'test-channel',
         type: 'messaging',
@@ -866,10 +869,13 @@ void main() {
       final span = _getPreviewSpan(tester);
       final nameSpan = _findTextSpans(span).firstWhere((s) => s.text == 'Jane: ');
       expect(nameSpan.style?.color, Colors.indigo);
-      expect(nameSpan.style?.fontWeight, FontWeight.bold);
+      expect(
+        nameSpan.style?.fontWeight,
+        tester.element(find.byType(StreamMessagePreviewText)).streamTypography.fontWeight.semibold,
+      );
     });
 
-    testWidgets('group channel prepends bold first name for other users', (tester) async {
+    testWidgets('group channel prepends a semibold first name for other users', (tester) async {
       final channel = ChannelModel(
         id: 'test-channel',
         type: 'messaging',
@@ -887,7 +893,10 @@ void main() {
 
       final span = _getPreviewSpan(tester);
       final nameSpan = _findTextSpans(span).firstWhere((s) => s.text == 'Jane: ');
-      expect(nameSpan.style?.fontWeight, FontWeight.bold);
+      expect(
+        nameSpan.style?.fontWeight,
+        tester.element(find.byType(StreamMessagePreviewText)).streamTypography.fontWeight.semibold,
+      );
     });
 
     testWidgets('group channel skips prefix when message has no user', (tester) async {

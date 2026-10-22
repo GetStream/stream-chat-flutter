@@ -70,13 +70,13 @@ class StreamMessagePreviewTextThemeData with _$StreamMessagePreviewTextThemeData
   /// The text style for the "Draft:" prefix that starts a
   /// [StreamDraftMessagePreviewText].
   ///
-  /// Defaults to bold in the primary accent color.
+  /// Defaults to semibold in the primary accent color.
   final TextStyle? draftPrefixStyle;
 
   /// The text style for the sender prefix, such as "You:" or "Ann:", that
   /// starts a preview in a channel or thread list.
   ///
-  /// Defaults to bold.
+  /// Defaults to semibold.
   final TextStyle? senderPrefixStyle;
 
   /// The text style for the "Message deleted" text and its icon.

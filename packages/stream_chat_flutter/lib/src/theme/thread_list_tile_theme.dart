@@ -97,7 +97,7 @@ class StreamThreadListTileThemeData with _$StreamThreadListTileThemeData {
   /// from the rest.
   ///
   /// Takes precedence over an enclosing [StreamMessagePreviewTextTheme] and
-  /// the app-wide one. A deleted message defaults to
+  /// the app-wide one. The sender prefix and a deleted message default to
   /// [StreamColorScheme.textSecondary]. A thread list shows no draft prefix.
   final StreamMessagePreviewTextThemeData? messagePreviewTextTheme;
 

@@ -22,6 +22,8 @@
 - Fixed icons in message previews showing in a different color from the text beside them.
 - Fixed a quoted reply to your own message showing your name instead of "You".
 - Fixed a deleted message in a thread list preview showing in the tertiary text color instead of the secondary one.
+- Fixed the "You:" and sender name prefix in channel and thread list previews showing bold in the text color instead of semibold in the muted one.
+- Fixed the "Draft:" prefix in channel list previews showing bold instead of semibold.
 
 ## 10.6.0
 

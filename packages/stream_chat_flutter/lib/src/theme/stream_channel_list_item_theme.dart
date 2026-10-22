@@ -130,7 +130,7 @@ class StreamChannelListItemThemeData with _$StreamChannelListItemThemeData {
   /// from the rest.
   ///
   /// Takes precedence over an enclosing [StreamMessagePreviewTextTheme] and
-  /// the app-wide one. A deleted message defaults to
+  /// the app-wide one. The sender prefix and a deleted message default to
   /// [StreamColorScheme.textTertiary].
   final StreamMessagePreviewTextThemeData? messagePreviewTextTheme;
 

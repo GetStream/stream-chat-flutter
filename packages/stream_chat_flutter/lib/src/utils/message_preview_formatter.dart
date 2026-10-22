@@ -735,12 +735,13 @@ class _StreamMessagePreviewTextDefaults extends StreamMessagePreviewTextThemeDat
   final BuildContext _context;
 
   late final StreamColorScheme _colorScheme = _context.streamColorScheme;
+  late final StreamFontWeight _fontWeight = _context.streamTypography.fontWeight;
 
   @override
-  TextStyle get draftPrefixStyle => TextStyle(color: _colorScheme.accentPrimary, fontWeight: FontWeight.bold);
+  TextStyle get draftPrefixStyle => TextStyle(color: _colorScheme.accentPrimary, fontWeight: _fontWeight.semibold);
 
   @override
-  TextStyle get senderPrefixStyle => const TextStyle(fontWeight: FontWeight.bold);
+  TextStyle get senderPrefixStyle => TextStyle(fontWeight: _fontWeight.semibold);
 }
 
 // ---------------------------------------------------------------------------
