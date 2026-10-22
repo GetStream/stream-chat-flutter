@@ -26,6 +26,7 @@
 - Fixed the "Draft:" prefix in channel list previews showing bold instead of semibold.
 - Fixed icons in a quoted reply preview showing at 16 pixels instead of 12.
 - Fixed "No messages yet" in the channel list showing in the secondary text color instead of the tertiary one.
+- Fixed the root message in a thread list preview showing in the app's default text color instead of the primary one.
 
 ## 10.6.0
 

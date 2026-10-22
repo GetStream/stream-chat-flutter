@@ -363,6 +363,13 @@ void main() {
 
     expect(_deletedMessageColor(tester), Colors.orange);
   });
+
+  testWidgets('shows the root message in the primary text color', (tester) async {
+    await tester.pumpWidget(_wrapWithMaterialApp(StreamThreadListTile(thread: thread, currentUser: user2)));
+
+    final colorScheme = tester.element(find.byType(StreamThreadListTile)).streamColorScheme;
+    expect(_paintedStyle(tester, thread.parentMessage!.text!)?.color, colorScheme.textPrimary);
+  });
 }
 
 // The background color the tile paints behind its content.
