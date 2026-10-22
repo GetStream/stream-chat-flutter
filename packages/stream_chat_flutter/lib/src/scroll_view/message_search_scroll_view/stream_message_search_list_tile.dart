@@ -117,9 +117,9 @@ class StreamMessageSearchListTile extends StatelessWidget {
           textStyle: context.streamTextTheme.metadataEmphasis.copyWith(overflow: TextOverflow.ellipsis),
         );
 
-    final effectiveMessagePreviewTextTheme = StreamMessagePreviewTextThemeData(
-      deletedContentStyle: TextStyle(color: context.streamColorScheme.textTertiary),
-    ).merge(StreamMessagePreviewTextTheme.of(context));
+    final deletedContentStyle = TextStyle(color: context.streamColorScheme.textTertiary);
+    final basePreviewTextTheme = StreamMessagePreviewTextThemeData(deletedContentStyle: deletedContentStyle);
+    final effectiveMessagePreviewTextTheme = basePreviewTextTheme.merge(StreamMessagePreviewTextTheme.of(context));
 
     final subtitle =
         this.subtitle ??

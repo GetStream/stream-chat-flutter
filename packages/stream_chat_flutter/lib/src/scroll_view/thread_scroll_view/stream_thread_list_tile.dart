@@ -111,15 +111,8 @@ class _DefaultStreamThreadListTile extends StatelessWidget {
     final effectivePadding = theme.padding ?? defaults.padding;
     final effectiveChannelNameStyle = theme.threadChannelNameStyle ?? defaults.threadChannelNameStyle;
     final effectiveReplyToMessageStyle = theme.threadReplyToMessageStyle ?? defaults.threadReplyToMessageStyle;
-    final previewTextTheme = theme.messagePreviewTextTheme;
-    final outerPreviewTextTheme = StreamMessagePreviewTextTheme.of(context);
-    final effectiveMessagePreviewTextTheme = defaults.messagePreviewTextTheme.merge(
-      StreamMessagePreviewTextThemeData(
-        draftPrefixStyle: previewTextTheme?.draftPrefixStyle ?? outerPreviewTextTheme.draftPrefixStyle,
-        senderPrefixStyle: previewTextTheme?.senderPrefixStyle ?? outerPreviewTextTheme.senderPrefixStyle,
-        deletedContentStyle: previewTextTheme?.deletedContentStyle ?? outerPreviewTextTheme.deletedContentStyle,
-      ),
-    );
+    final basePreviewTextTheme = defaults.messagePreviewTextTheme.merge(StreamMessagePreviewTextTheme.of(context));
+    final effectiveMessagePreviewTextTheme = basePreviewTextTheme.merge(theme.messagePreviewTextTheme);
     final effectiveLatestReplyMessageStyle =
         theme.threadLatestReplyMessageStyle ?? defaults.threadLatestReplyMessageStyle;
     final effectiveReplyCountStyle = theme.threadReplyCountStyle ?? defaults.threadReplyCountStyle;
