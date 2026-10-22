@@ -105,7 +105,7 @@ class Event extends WsEvent {
   /// User object of the health check user
   final OwnUser? me;
 
-  /// User object of the current user
+  /// The user this event concerns, such as the sender of a new message.
   ///
   /// An [OwnUser] on a [EventType.userUpdated] event, so it keeps the user's
   /// privacy settings.
